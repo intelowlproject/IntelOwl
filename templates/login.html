@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block content %}
+{# enctype="multipart/form-data" #}
+
+<div class="inner cover">
+    {% if login_failed %}
+        {{ login_failed }}
+    {% endif %}
+  <form action="/gui/verify_login" method="post">
+    {% csrf_token %}
+      <input type="hidden" class="form-control" id="uri" name="uri" placeholder="uri" value="{{ next }}">
+      <label for="username" class="col-md-1 col-form-label">Username</label>
+    <div class="col-sm-2 offset-md-5">
+        <input type="text" class="form-control" id="username" name="username" placeholder="username">
+    </div>
+      <label for="password" class="col-md-1 col-form-label">Password</label>
+    <div class="col-sm-2 offset-md-5">
+        <input type="password" class="form-control" id="password" name="password" placeholder="password">
+    </div>
+    <button class="btn btn-secondary" type="submit">Login</button>
+  </form>
+</div>
+{% endblock %}

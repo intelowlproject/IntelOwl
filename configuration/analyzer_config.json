@@ -1,0 +1,343 @@
+{
+    "MISPFIRST": {
+        "type": "observable",
+        "observable_supported": ["ip", "domain", "url", "hash"],
+        "external_service": true,
+        "python_module": "misp_run",
+        "additional_config_params": {
+            "api_key_name": "FIRST_MISP_API",
+            "url_key_name": "FIRST_MISP_URL"
+        }
+    },
+    "MISP": {
+        "type": "observable",
+        "observable_supported": ["ip", "domain", "url", "hash"],
+        "external_service": true,
+        "python_module": "misp_run"
+    },
+    "TorProject": {
+        "type": "observable",
+        "observable_supported": ["ip"],
+        "external_service": true,
+        "python_module": "tor_run"
+    },
+    "Fortiguard": {
+        "type": "observable",
+        "observable_supported": ["domain", "url"],
+        "external_service": true,
+        "python_module": "fortiguard_run"
+    },
+    "AbuseIPDB": {
+        "type": "observable",
+        "observable_supported": ["ip"],
+        "external_service": true,
+        "python_module": "abuseipdb_run"
+    },
+    "MaxMindGeoIP": {
+        "type": "observable",
+        "observable_supported": ["ip"],
+        "python_module": "maxmind_run"
+    },
+    "CIRCLPassiveSSL": {
+        "type": "observable",
+        "observable_supported": ["ip"],
+        "external_service": true,
+        "python_module": "circlpssl_run"
+    },
+    "CIRCLPassiveDNS": {
+        "type": "observable",
+        "observable_supported": ["domain", "url"],
+        "external_service": true,
+        "python_module": "circlpdns_run"
+    },
+    "GreyNoiseAlpha": {
+        "type": "observable",
+        "observable_supported": ["ip"],
+        "external_service": true,
+        "python_module": "greynoise_run"
+    },
+    "GoogleSafebrowsing": {
+        "type": "observable",
+        "observable_supported": ["domain", "url", "ip"],
+        "external_service": true,
+        "python_module": "googlesf_run"
+    },
+    "Robtex_IP_Query": {
+        "type": "observable",
+        "observable_supported": ["ip"],
+        "external_service": true,
+        "python_module": "robtexip_run"
+    },
+    "Robtex_Reverse_PDNS_Query": {
+        "type": "observable",
+        "observable_supported": ["ip"],
+        "external_service": true,
+        "python_module": "robtexrdns_run"
+    },
+    "Robtex_Forward_PDNS_Query": {
+        "type": "observable",
+        "observable_supported": ["domain", "url"],
+        "external_service": true,
+        "python_module": "robtexfdns_run"
+    },
+    "TalosReputation": {
+        "type": "observable",
+        "observable_supported": ["ip"],
+        "external_service": true,
+        "python_module": "talos_run"
+    },
+    "Shodan_Search": {
+        "type": "observable",
+        "observable_supported": ["ip"],
+        "external_service": true
+    },
+    "OTXQuery": {
+        "type": "observable",
+        "observable_supported": ["ip", "domain", "url", "hash"],
+        "external_service": true,
+        "python_module": "otx_run"
+    },
+    "VirusTotal_v2_Get_Observable": {
+        "type": "observable",
+        "observable_supported": ["ip", "domain", "url", "hash"],
+        "external_service": true,
+        "python_module": "vt2get_run",
+        "additional_config_params": {
+            "api_key_name": "VT_KEY"
+        }
+    },
+    "VirusTotal_v2_Get_Observable_Alternative": {
+        "type": "observable",
+        "observable_supported": ["ip", "domain", "url", "hash"],
+        "external_service": true,
+        "python_module": "vt2get_run",
+        "additional_config_params": {
+            "api_key_name": "VT_ALTERNATIVE_KEY"
+        }
+    },
+    "VirusTotal_v3_Get_Observable": {
+        "type": "observable",
+        "observable_supported": ["ip", "domain", "url", "hash"],
+        "external_service": true,
+        "python_module": "vt3get_run",
+        "additional_config_params": {
+            "api_key_name": "VT_KEY"
+        }
+    },
+    "VirusTotal_v3_Get_Observable_Alternative": {
+        "type": "observable",
+        "observable_supported": ["ip", "domain", "url", "hash"],
+        "external_service": true,
+        "python_module": "vt3get_run",
+        "additional_config_params": {
+            "api_key_name": "VT_ALTERNATIVE_KEY"
+        }
+    },
+    "HybridAnalysis_Get_Observable": {
+        "type": "observable",
+        "observable_supported": ["ip", "domain", "url", "hash"],
+        "external_service": true,
+        "python_module": "haget_run"
+    },
+    "Yara_Scan_Community": {
+        "type": "file",
+        "python_module": "yara_run",
+        "additional_config_params": {
+            "directories_with_rules": ["/opt/deploy/yara/rules"]
+        }
+    },
+    "Yara_Scan_Florian": {
+        "type": "file",
+        "python_module": "yara_run",
+        "additional_config_params": {
+            "directories_with_rules": ["/opt/deploy/yara/signature-base/yara"],
+            "git_repo_main_dir": ["/opt/deploy/yara/signature-base"]
+        }
+    },
+    "Yara_Scan_Intezer": {
+        "type": "file",
+        "python_module": "yara_run",
+        "additional_config_params": {
+            "directories_with_rules": ["/opt/deploy/yara/yara-rules"]
+        }
+    },
+    "Yara_Scan_Custom_Signatures": {
+        "type": "file",
+        "python_module": "yara_run",
+        "additional_config_params": {
+            "directories_with_rules": ["/opt/deploy/yara/custom_signatures"]
+        }
+    },
+    "HybridAnalysis_Get_File": {
+        "type": "file",
+        "external_service": true,
+        "run_hash": true,
+        "python_module": "haget_run"
+    },
+    "OTX_Check_Hash": {
+        "type": "file",
+        "external_service": true,
+        "run_hash": true,
+        "python_module": "otx_run"
+    },
+    "MISPFIRST_Check_Hash": {
+        "type": "file",
+        "run_hash": true,
+        "python_module": "misp_run",
+        "additional_config_params": {
+            "api_key_name": "FIRST_MISP_API",
+            "url_key_name": "FIRST_MISP_URL"
+        }
+    },
+    "MISP_Check_Hash": {
+        "type": "file",
+        "python_module": "misp_run"
+    },
+    "Cuckoo_Scan": {
+        "type": "file",
+        "disabled": false,
+        "python_module": "cuckoo_run"
+    },
+    "Intezer_Scan": {
+        "type": "file",
+        "external_service": true,
+        "supported_filetypes": ["application/x-dosexec"],
+        "leaks_info": true,
+        "python_module": "intezer_run"
+    },
+    "VirusTotal_v2_Get_File_Alternative": {
+        "type": "file",
+        "external_service": true,
+        "run_hash": true,
+        "python_module": "vt2get_run",
+        "additional_config_params": {
+            "api_key_name": "VT_ALTERNATIVE_KEY"
+        }
+    },
+    "VirusTotal_v2_Scan_File_Alternative": {
+        "type": "file",
+        "external_service": true,
+        "leaks_info": true,
+        "python_module": "vt2scan_run",
+        "additional_config_params": {
+            "api_key_name": "VT_ALTERNATIVE_KEY"
+        }
+    },
+    "VirusTotal_v3_Get_File_Alternative": {
+        "type": "file",
+        "external_service": true,
+        "run_hash": true,
+        "python_module": "vt3get_run",
+        "additional_config_params": {
+            "api_key_name": "VT_ALTERNATIVE_KEY"
+        }
+    },
+    "VirusTotal_v3_Scan_File_Alternative": {
+        "type": "file",
+        "external_service": true,
+        "leaks_info": true,
+        "python_module": "vt3scan_run",
+        "additional_config_params": {
+            "api_key_name": "VT_ALTERNATIVE_KEY"
+        }
+    },
+    "VirusTotal_v2_Get_File": {
+        "type": "file",
+        "external_service": true,
+        "run_hash": true,
+        "python_module": "vt2get_run",
+        "additional_config_params": {
+            "api_key_name": "VT_KEY"
+        }
+    },
+    "VirusTotal_v2_Scan_File": {
+        "type": "file",
+        "external_service": true,
+        "leaks_info": true,
+        "python_module": "vt2scan_run",
+        "additional_config_params": {
+            "api_key_name": "VT_KEY"
+        }
+    },
+    "VirusTotal_v3_Get_File": {
+        "type": "file",
+        "external_service": true,
+        "run_hash": true,
+        "python_module": "vt3get_run",
+        "additional_config_params": {
+            "api_key_name": "VT_KEY"
+        }
+    },
+    "VirusTotal_v3_Get_File_And_Scan": {
+        "type": "file",
+        "external_service": true,
+        "run_hash": true,
+        "python_module": "vt3get_scan_run",
+        "additional_config_params": {
+            "api_key_name": "VT_KEY",
+            "force_active_scan": true
+        }
+    },
+    "VirusTotal_v3_Scan_File": {
+        "type": "file",
+        "external_service": true,
+        "leaks_info": true,
+        "python_module": "vt3scan_run",
+        "additional_config_params": {
+            "api_key_name": "VT_KEY"
+        }
+    },
+    "File_Info": {
+        "type": "file",
+        "python_module": "fileinfo_run"
+    },
+    "Strings_Info_ML": {
+        "type": "file",
+        "python_module": "stringsinfo_run",
+        "additional_config_params": {
+            "max_number_of_strings": 200,
+            "rank_strings": true
+        }
+    },
+    "Strings_Info_Classic": {
+        "type": "file",
+        "python_module": "stringsinfo_run",
+        "additional_config_params": {
+            "max_number_of_strings": 300,
+            "rank_strings": false
+        }
+    },
+    "PE_Info": {
+        "type": "file",
+        "supported_filetypes": ["application/x-dosexec"],
+        "python_module": "peinfo_run"
+    },
+    "Signature_Info": {
+        "type": "file",
+        "supported_filetypes": ["application/x-dosexec"],
+        "python_module": "signatureinfo_run"
+    },
+    "Doc_Info": {
+        "type": "file",
+        "supported_filetypes": ["application/msword", "application/vnd.ms-office",
+                                 "application/vnd.ms-excel.addin.macroEnabled", "application/x-mspublisher",
+                                 "application/vnd.ms-powerpoint", "application/vnd.ms-excel",
+                                 "application/vnd.ms-excel.sheet.macroEnabled.12",
+                                 "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                                 "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+                                 "text/x-ms-iqy", "application/excel",
+                                 "text/xml", "application/xml"],
+        "python_module": "docinfo_run"
+    },
+    "Rtf_Info": {
+        "type": "file",
+        "supported_filetypes": ["text/rtf", "application/rtf"],
+        "python_module": "rtfinfo_run"
+    },
+    "PDF_Info": {
+        "type": "file",
+        "supported_filetypes": ["application/pdf"],
+        "python_module": "pdfinfo_run"
+    }
+}

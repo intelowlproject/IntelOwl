@@ -1,0 +1,38 @@
+# Required Secrets
+DJANGO_SECRET=
+DB_HOST=postgres
+DB_PORT=5432
+DB_USER=user
+DB_PASSWORD=password
+
+# Required API keys
+ABUSEIPDB_KEY=
+GSF_KEY=
+OTX_KEY=
+CIRCL_CREDENTIALS=user|pass
+VT_KEY=
+HA_KEY=
+INTEZER_KEY=
+FIRST_MISP_API=
+
+# Test tokens
+TEST_TOKEN=
+TEST_JOB_ID=1
+TEST_IP=8.8.8.8
+TEST_DOMAIN=www.google.com
+TEST_URL=https://www.google.com/search?test
+TEST_MD5=446c5fbb11b9ce058450555c1c27153c
+
+# URLs
+CUCKOO_URL=
+FIRST_MISP_URL=
+VT_NOTIFY_URL=
+
+# other variables
+DEBUG=False
+CELERY_BROKER_URL=amqp://localhost
+DB_NAME=intel_owl_db
+HTTPS_ENABLED=not_enabled
+AWS_SECRETS=False
+AWS_SQS=False
+AWS_REGION=eu-central-1

@@ -1,0 +1,5 @@
+.idea
+__pycache__
+test_files
+env_file_app
+env_file_postgres

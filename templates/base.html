@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="shortcut icon" href="/static/intel_owl_favicon.png"/>
+    <title>Intel Owl</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+
+    <link href="/static/cover.css" rel="stylesheet">
+    <link href="https://use.fontawesome.com/releases/v5.11.2/css/all.css" rel="stylesheet">
+</head>
+<body>
+
+    <div class="site-wrapper">
+
+      <div class="site-wrapper-inner">
+
+        <div class="cover-container">
+
+          <div class="masthead clearfix">
+            <div class="inner" style="padding-bottom:100px;">
+                <img align="left" src="/static/intel_owl.png" width="188" height="75">
+                {% if debug %}
+                <h10 class="masthead-brand" style="text-align:center; padding-left:20px; padding-top:25px;">
+                    DEVELOPMENT INSTANCE
+                </h10>
+                {% endif %}
+                {% if user.is_authenticated %}
+                <h10 class="masthead-brand" style="text-align:center; padding-left:20px; padding-top:25px;">
+                    You are logged in as {{ user }}
+                    <a id="logout_link" href="logout">(<b>Logout</b>)</a>
+                </h10>
+                {% else %}
+                <h10 class="masthead-brand" style="text-align:center; padding-left:20px;">You are not logged in</h10>
+                {% endif %}
+                {% block nav %}
+                {% endblock %}
+
+            </div>
+              {% block content %}
+            {% endblock %}
+          </div>
+
+
+        </div>
+
+      </div>
+
+    </div>
+</body>
+</html>
+
+

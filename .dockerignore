@@ -1,0 +1,4 @@
+.gitignore
+__pycache__
+env_file_app
+env_file_postgres

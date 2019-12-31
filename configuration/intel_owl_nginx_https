@@ -1,0 +1,61 @@
+# the upstream component nginx needs to connect to
+upstream django {
+    server uwsgi:8001 fail_timeout=30s;
+}
+
+server {
+    listen 80;
+    server_name intel_owl.com;
+    return 301 https://intel_owl.com$request_uri;
+}
+
+
+server {
+    listen 443 ssl;
+
+    ssl on;
+      ssl_protocols TLSv1.2;
+      ssl_certificate certificate_chain.chain.crt;
+      ssl_certificate_key private_key.key;
+
+    server_name intel_owl.com;
+
+    location = /favicon.ico { access_log off; log_not_found off; }
+
+    location /static/ {
+        alias /var/www/static/;
+   }
+
+    location / {
+        uwsgi_pass                  django;
+        uwsgi_pass_header           Authorization;
+        uwsgi_pass_request_headers  on;
+        uwsgi_read_timeout          600;
+        include                     uwsgi_params;
+        client_max_body_size        50m;
+
+   }
+
+}
+
+#server {
+#    listen 4443 ssl;
+#    ssl on;
+#    ssl_protocols TLSv1.2;
+#    ssl_certificate certificate_chain.chain.crt;
+#    ssl_certificate_key private_key.key;
+#
+#    server_name intel_owl.test.com;
+#
+#    charset utf-8;
+#     location / {
+#        proxy_pass http://127.0.0.1:5555;
+#        proxy_set_header Host $host;
+#        proxy_redirect off;
+#        proxy_http_version 1.1;
+#        proxy_set_header Upgrade $http_upgrade;
+#        proxy_set_header Connection "upgrade";
+#    }
+#
+#}
+

@@ -45,11 +45,11 @@ Main features:
 * GoogleSafeBrowsing
 * AbuseIPDB
 * AlienVault OTX
+* MaxMind
 #### needed access request
 * CIRCL PassiveDNS + PassiveSSL
 #### without api key
 * Fortiguard URL Analyzer
-* MaxMind
 * GreyNoise Alpha API
 * Talos Reputation
 * Tor Project

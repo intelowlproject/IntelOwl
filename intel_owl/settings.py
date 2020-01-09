@@ -172,7 +172,7 @@ LOGGING = {
     },
     'handlers': {
         'api_app': {
-            'level': 'INFO',
+            'level': 'DEBUG' if DEBUG else 'INFO',
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': '{}/api_app.log'.format(DJANGO_LOG_DIRECTORY),
             'formatter': 'stdfmt',

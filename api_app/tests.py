@@ -117,7 +117,7 @@ class CronTests(TestCase):
         self.assertTrue(True)
 
     def test_maxmind_updater(self):
-        db_file_path = maxmind.updater()
+        db_file_path = maxmind.updater({})
         self.assertTrue(os.path.exists(db_file_path))
 
     def test_talos_updater(self):

@@ -45,7 +45,7 @@ oletools==0.55
 OTXv2==1.5.3
 peepdf==0.4.2
 pefile==2019.4.18
-Pillow==3.2.0
+Pillow==6.2.0
 pluggy==0.13.0
 psycopg2-binary==2.8.4
 py==1.8.0

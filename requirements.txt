@@ -34,7 +34,7 @@ jsbeautifier==1.6.2
 jsonschema==3.1.1
 kombu==4.6.5
 lightgbm==2.1.2
-maxminddb==1.4.1
+maxminddb==1.5.2
 more-itertools==7.2.0
 msoffcrypto-tool==4.10.1
 numpy==1.17.1

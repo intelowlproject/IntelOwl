@@ -9,7 +9,7 @@ from celery.utils.log import get_task_logger
 
 from api_app.exceptions import AnalyzerRunException
 from api_app.script_analyzers import general
-from intel_owl import settings
+from intel_owl import settings, secrets
 
 logger = get_task_logger(__name__)
 
@@ -22,10 +22,9 @@ def run(analyzer_name, job_id, observable_name, observable_classification, addit
                 "".format(analyzer_name, job_id, observable_name))
     report = general.get_basic_report_template(analyzer_name)
     try:
-
         try:
             if not os.path.isfile(database_location):
-                updater()
+                updater(additional_config_params)
             reader = maxminddb.open_database(database_location)
             maxmind_result = reader.get(observable_name)
             reader.close()
@@ -62,11 +61,19 @@ def run(analyzer_name, job_id, observable_name, observable_classification, addit
     return report
 
 
-def updater():
+def updater(additional_config_params):
 
     try:
+        api_key_name = additional_config_params.get('api_key_name', '')
+        if not api_key_name:
+            api_key_name = "MAXMIND_KEY"
+        api_key = secrets.get_secret(api_key_name)
+        if not api_key:
+            raise AnalyzerRunException("no api key retrieved")
+
         logger.info("starting download of db from maxmind")
-        url = "http://geolite.maxmind.com/download/geoip/database/GeoLite2-Country.tar.gz"
+        url = "https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-Country&license_key={}" \
+              "&suffix=tar.gz".format(api_key)
         r = requests.get(url)
         if r.status_code >= 300:
             raise AnalyzerRunException("failed request for new maxmind db. Status code: {}".format(r.status_code))
@@ -82,6 +89,7 @@ def updater():
         today = datetime.datetime.now().date()
         counter = 0
         directory_found = False
+        downloaded_db_path = ""
         # this is because we do not know the exact date of the db we downloaded
         while counter < 10 or not directory_found:
             date_to_check = today - datetime.timedelta(days=counter)
@@ -96,14 +104,16 @@ def updater():
             else:
                 directory_found = True
 
-        if not directory_found:
+        if directory_found:
+            logger.info("maxmind directory found {}".format(downloaded_db_path))
+        else:
             raise AnalyzerRunException("failed extraction of maxmind db, reached max number of attempts")
 
         logger.info("ended download of db from maxmind")
 
     except Exception as e:
         traceback.print_exc()
-        logger.exception(e)
+        logger.exception(str(e))
 
     return database_location
 

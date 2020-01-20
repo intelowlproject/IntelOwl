@@ -61,6 +61,7 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * TorProject: check if an IP is a Tor Exit Node
 * MISP: scan an observable on a MISP instance
 * MISPFIRST: scan an observable on the FIRST MISP instance
+* DNSDB: scan an observable against the Passive DNS Farsight Database
 * Shodan_Search: _not_already_available_
 
 ## Analyzers customization

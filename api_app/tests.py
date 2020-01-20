@@ -9,7 +9,7 @@ from api_app.script_analyzers import general
 from api_app.script_analyzers.file_analyzers import file_info, pe_info, doc_info, pdf_info, vt2_scan, intezer_scan, \
     cuckoo_scan, yara_scan, vt3_scan, strings_info, rtf_info
 from api_app.script_analyzers.observable_analyzers import abuseipdb, fortiguard, maxmind, greynoise, googlesf, otx, \
-    talos, tor, circl_pssl, circl_pdns, robtex_ip, robtex_fdns, robtex_rdns, vt2_get, ha_get, vt3_get, misp
+    talos, tor, circl_pssl, circl_pdns, robtex_ip, robtex_fdns, robtex_rdns, vt2_get, ha_get, vt3_get, misp, dnsdb
 
 from api_app import crons
 from api_app.models import Job
@@ -199,6 +199,10 @@ class IPAnalyzersTests(TestCase):
         report = robtex_rdns.run("Robtex_RDNS", self.job_id, self.observable_name, self.observable_classification, {})
         self.assertEqual(report.get('success', False), True)
 
+    def test_dnsdb(self):
+        report = dnsdb.run("DNSDB", self.job_id, self.observable_name, self.observable_classification, {})
+        self.assertEqual(report.get('success', False), True)
+
     def test_vt_get(self):
         report = vt2_get.run("VT_v2_Get", self.job_id, self.observable_name, self.observable_classification, {})
         self.assertEqual(report.get('success', False), True)
@@ -253,6 +257,10 @@ class DomainAnalyzersTests(TestCase):
 
     def test_robtex_fdns(self):
         report = robtex_fdns.run("Robtex_FDNS", self.job_id, self.observable_name, self.observable_classification, {})
+        self.assertEqual(report.get('success', False), True)
+
+    def test_dnsdb(self):
+        report = dnsdb.run("DNSDB", self.job_id, self.observable_name, self.observable_classification, {})
         self.assertEqual(report.get('success', False), True)
 
     def test_vt_get(self):

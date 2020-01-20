@@ -80,6 +80,12 @@
         "external_service": true,
         "python_module": "robtexfdns_run"
     },
+    "DNSDB": {
+        "type": "observable",
+        "observable_supported": ["domain", "url", "ip"],
+        "external_service": true,
+        "python_module": "dnsdb_run"
+    },
     "TalosReputation": {
         "type": "observable",
         "observable_supported": ["ip"],

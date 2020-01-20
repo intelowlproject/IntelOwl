@@ -41,6 +41,7 @@ Main features:
 * VirusTotal v2 + v3
 * HybridAnalysis
 * Intezer
+* Farsight DNSDB
 #### required free api key
 * GoogleSafeBrowsing
 * AbuseIPDB

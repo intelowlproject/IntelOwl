@@ -1,6 +1,7 @@
 ![Intel Owl](static_intel/intel_owl.jpeg)
 
 
+[![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/certego/IntelOwl.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/certego/IntelOwl/context:python)
 # Intel Owl
 
 Do you want to get **threat intelligence data** about a file, an IP or a domain?

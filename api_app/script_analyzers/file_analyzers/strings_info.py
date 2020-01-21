@@ -1,5 +1,5 @@
 import traceback
-from subprocess import Popen, DEVNULL, STDOUT, PIPE
+from subprocess import Popen, DEVNULL, PIPE
 
 from celery.exceptions import SoftTimeLimitExceeded
 from celery.utils.log import get_task_logger

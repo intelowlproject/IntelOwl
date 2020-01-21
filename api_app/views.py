@@ -1,5 +1,3 @@
-import datetime
-import json
 import logging
 
 from django.contrib.auth import authenticate, login, logout
@@ -39,13 +37,11 @@ def ask_analysis_availability(request):
     :parameter: md5: string, md5 of the sample or observable to look for
     :parameter: analyzers_needed: list, specify analyzers needed
     :parameter: [running_only]: check only for running analysis, default False, any value is True
-    :parameter: [debug]: boolean, default False, enable more output
 
     :return: 200 if ok with list of all analysis related to that md5, 500 if failed
     '''
     source = str(request.user)
     analyzers_needed_list = []
-    debug = False
     try:
         data_received = request.query_params
         logger.info("received request from {}. Data:{}".format(source, dict(data_received)))
@@ -57,9 +53,6 @@ def ask_analysis_availability(request):
         if 'analyzers_needed' not in data_received:
             return Response({"error": "801"},
                             status=status.HTTP_400_BAD_REQUEST)
-
-        if 'debug' in data_received:
-            debug = True
 
         if 'analyzers_needed' in data_received:
             analyzers_needed_list = data_received['analyzers_needed'].split(',')
@@ -112,12 +105,10 @@ def send_analysis_request(request):
     :parameter: analyzers_requested: list of requested analyzer to run, before filters
     :parameter: [force_privacy]: boolean, default False, enable it if you want to avoid to run analyzers with privacy issues
     :parameter: [disable_external_analyzers]: boolean, default False, enable it if you want to exclude external analyzers
-    :parameter: [debug]: boolean, default False, enable more output
 
     :return: 202 if accepted, 500 if failed
     '''
     source = str(request.user)
-    debug = False
     warnings = []
     try:
         data_received = request.data
@@ -197,12 +188,10 @@ def ask_analysis_result(request):
     This API allows to retrieve the status and results of a specific Job based on its ID
 
     :parameter: job_id: integer, Job ID
-    :parameter: [debug]: boolean, default False, enable more output
 
     :return: 200 if ok, 500 if failed
     '''
     source = str(request.user)
-    debug = False
     try:
         data_received = request.query_params
         logger.info("received request from {}. Data:{}".format(source, dict(data_received)))

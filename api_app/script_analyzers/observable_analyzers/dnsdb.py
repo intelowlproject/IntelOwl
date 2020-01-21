@@ -1,4 +1,3 @@
-import pprint
 import json
 import traceback
 from urllib.parse import urlparse
@@ -59,7 +58,6 @@ def run(analyzer_name, job_id, observable_name, observable_classification, addit
             if item:
                 json_extracted_results.append(json.loads(item))
 
-        # pprint.pprint(json_extracted_results)
         report['report'] = json_extracted_results
     except AnalyzerRunException as e:
         error_message = "job_id:{} analyzer:{} observable_name:{} Analyzer error {}" \

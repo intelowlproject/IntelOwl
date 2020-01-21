@@ -1,4 +1,3 @@
-import pprint
 import traceback
 
 from celery.utils.log import get_task_logger
@@ -51,7 +50,6 @@ def run(analyzer_name, job_id, filepath, filename, md5, additional_config_params
 
         results['rtfobj'] = rtfobj_results
 
-        # pprint.pprint(results)
         report['report'] = results
     except AnalyzerRunException as e:
         error_message = "job_id:{} analyzer:{} md5:{} filename: {} Analyzer Error {}" \

@@ -1,7 +1,6 @@
 import datetime
 import traceback
 import pypdns
-import pprint
 
 from urllib.parse import urlparse
 
@@ -45,7 +44,6 @@ def run(analyzer_name, job_id, observable_name, observable_classification, addit
                 if time_extracted and isinstance(time_extracted, datetime.datetime):
                     result_item[key_to_decode] = time_extracted.strftime("%Y-%m-%d %H:%M:%S")
 
-        # pprint.pprint(result)
         report['report'] = result
     except AnalyzerRunException as e:
         error_message = "job_id:{} analyzer:{} observable_name:{} Analyzer error {}" \

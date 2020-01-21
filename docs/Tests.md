@@ -23,7 +23,7 @@ So, if you want to test files, you should add the following files to the folder 
 `docker-compose -f docker-compose-test.yml up`
 
 - Rebuild the local image:
-`docker-compose -f docker-compose-test.yml build --no-cache`
+`docker-compose -f docker-compose-for-tests.yml build --no-cache`
 
 - Run tests:
 `docker exec -ti intel_owl_uwsgi python3 manage.py test`

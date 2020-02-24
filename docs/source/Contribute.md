@@ -36,9 +36,9 @@ After having written the new python module, you have to remember to:
 
 * If possible, add a new basic unit test in [tests.py](https://github.com/certego/IntelOwl/blob/master/api_app/tests.py)
  
-  Then follow the [Test](https://github.com/certego/IntelOwl/blob/master/docs/source/Tests.md) guide to start testing.
+  Then follow the [Test](./Tests.md) guide to start testing.
 
-* Ultimately, add the new analyzer/s in the list in the docs: [Usage](https://github.com/certego/IntelOwl/blob/master/docs/source/Usage.md) and [ReadMe](https://github.com/certego/IntelOwl/blob/master/README.md)
+* Ultimately, add the new analyzer/s in the list in the docs: [Usage](./Usage.md) and [ReadMe](https://github.com/certego/IntelOwl/blob/master/README.md)
 
 If everything is working, you can submit your pull request!
 

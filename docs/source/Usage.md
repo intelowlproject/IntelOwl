@@ -78,7 +78,7 @@ Also, you can change the name of every available analyzer based on your wishes.
 
 Changing other keys will break the analyzer. In that case, you should think about create a new python module or to modify an existing one.
 
-To contribute to the project, see [Contribute](https://github.com/certego/IntelOwl/blob/master/docs/source/Contribute.md)
+To contribute to the project, see [Contribute](./Contribute.md)
 
 
 

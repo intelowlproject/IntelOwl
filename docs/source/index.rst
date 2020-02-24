@@ -9,6 +9,7 @@ Welcome to IntelOwl's documentation!
 .. toctree::
    :maxdepth: 2
 
+   Introduction
    Installation
    Usage
    Contribute

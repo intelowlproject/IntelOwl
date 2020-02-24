@@ -60,7 +60,7 @@ Main features:
 ### Documentation
 [![Documentation Status](https://readthedocs.org/projects/intelowl/badge/?version=latest)](https://intelowl.readthedocs.io/en/latest/?badge=latest)
 
-Documentation about IntelOwl installation and usage can be found at http://intelowl.readthedocs.io/.
+Documentation about IntelOwl installation and usage can be found at https://intelowl.readthedocs.io/.
 
 
 ### Legal notice

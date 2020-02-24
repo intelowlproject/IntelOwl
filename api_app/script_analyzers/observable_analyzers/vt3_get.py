@@ -129,7 +129,7 @@ def vt_get_report(api_key, observable_name, observable_classification, additiona
                     if extra_polling_times == max_tries:
                         logger.info("{} reached max tries: {}".format(base_log, max_tries))
                     else:
-                        logger.info("{} performing another request...".format(base_log, observable_name))
+                        logger.info("{} performing another request...".format(base_log))
                         result['extra_polling_times'] = extra_polling_times
                         time.sleep(poll_distance)
         else:

@@ -11,19 +11,19 @@ After having written the new python module, you have to remember to:
 * Add the new module as a celery task in [tasks.py](https://github.com/certego/IntelOwl/blob/master/intel_owl/tasks.py)
 * Add a new entry in the [analyzer configuration](https://github.com/certego/IntelOwl/blob/master/configuration/analyzer_config.json):
   
-  Example 
+  Example:
   ```
-    "Analyzer_Name": {
-        "type": "file",
-        "external_service": true,
-        "leaks_info": true,
-        "run_hash": true,
-        "supported_filetypes": ["application/javascript"],
-        "python_module": "haget_run",
-        "additional_config_params": {
-            "custom_required_param": "ANALYZER_SPECIAL_KEY"
-        }
-    },
+  "Analyzer_Name": {
+      "type": "file",
+      "external_service": true,
+      "leaks_info": true,
+      "run_hash": true,
+      "supported_filetypes": ["application/javascript"],
+      "python_module": "haget_run",
+      "additional_config_params": {
+           "custom_required_param": "ANALYZER_SPECIAL_KEY"
+      }
+  },
   ```
   
   Remember to set at least:
@@ -36,9 +36,9 @@ After having written the new python module, you have to remember to:
 
 * If possible, add a new basic unit test in [tests.py](https://github.com/certego/IntelOwl/blob/master/api_app/tests.py)
  
-  Then follow the [Test](https://github.com/certego/IntelOwl/blob/master/docs/Tests.md) guide to start testing.
+  Then follow the [Test](https://github.com/certego/IntelOwl/blob/master/docs/source/Tests.md) guide to start testing.
 
-* Ultimately, add the new analyzer/s in the list in the docs: [Usage](https://github.com/certego/IntelOwl/blob/master/docs/Usage.md) and [ReadMe](https://github.com/certego/IntelOwl/blob/master/README.md)
+* Ultimately, add the new analyzer/s in the list in the docs: [Usage](https://github.com/certego/IntelOwl/blob/master/docs/source/Usage.md) and [ReadMe](https://github.com/certego/IntelOwl/blob/master/README.md)
 
 If everything is working, you can submit your pull request!
 

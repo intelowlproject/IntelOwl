@@ -57,13 +57,10 @@ Main features:
 * Tor Project
 * Robtex
 
+### Documentation
+[![Documentation Status](https://readthedocs.org/projects/intelowl/badge/?version=latest)](https://intelowl.readthedocs.io/en/latest/?badge=latest)
 
-### Installation
-[Link](https://github.com/certego/IntelOwl/blob/master/docs/Installation.md)
-### Usage 
-[Link](https://github.com/certego/IntelOwl/blob/master/docs/Usage.md)
-### Contribute 
-[Link](https://github.com/certego/IntelOwl/blob/master/docs/Contribute.md)
+Documentation about IntelOwl installation and usage can be found at http://intelowl.readthedocs.io/.
 
 
 ### Legal notice

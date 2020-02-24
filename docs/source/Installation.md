@@ -1,12 +1,12 @@
 # Installation
 
-## Deployment options:
+## Deployment options
 * Docker-compose for classic server deployment
 * (Future) Docker for serverless deployment (ex: AWS Fargate)
 
 We suggest you to clone the project, configure the required environment variables and run `docker-compose up` using the docker-compose file that is embedded in the project.
 
-That file leverages a public docker image that is available in Docker Hub: certego/intelowl
+That file leverages a public docker image that is available in [Docker Hub](https://hub.docker.com/repository/docker/certego/intelowl)
 
 ## Deployment Info
 Main components of the web application:
@@ -70,7 +70,7 @@ In case you enable HTTPS, remember to set the environment variable `HTTPS_ENABLE
 
 ### Analyzers configuration
 In the file `analyzers_config.json` there is the configuration for all the available analyzers you can run.
-For a complete list of all current available analyzer please look at: [Usage](https://github.com/certego/IntelOwl/blob/master/docs/Usage.md)
+For a complete list of all current available analyzer please look at: [Usage](https://github.com/certego/IntelOwl/blob/master/docs/source/Usage.md)
 
 You may want to change this configuration to add new analyzers or to change the configuration of some of them.
 
@@ -79,7 +79,7 @@ You just need to remember that it's important that you keep at least the followi
 * `type`: can be `file` or `observable`. It specifies what the analyzer should analyze
 * `python_module`: name of the task that the analyzer must launch
 
-For a full description of the available keys, check the [Usage](https://github.com/certego/IntelOwl/blob/master/docs/Usage.md) page
+For a full description of the available keys, check the [Usage](https://github.com/certego/IntelOwl/blob/master/docs/source/Usage.md) page
 
 ### Rebuilding the project
 If you make some code changes and you like to rebuild the project, launch the following command from the project directory:

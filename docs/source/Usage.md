@@ -3,7 +3,7 @@
 ## Client
 Intel Owl main objective is to provide a single API interface to query in order to retrieve threat intelligence at scale.
 
-So, in order to interact with the Intel Owl APIs, you may want to use the specific client that is available at: https://github.com/mlodic/pyintelowl
+So, in order to interact with the Intel Owl APIs, you may want to use the specific client that is available at: [PyIntelOwl](https://github.com/mlodic/pyintelowl)
 
 We suggest to download the client, read the instructions and use it as a library for your own python projects or directly from the command line.
 
@@ -78,7 +78,7 @@ Also, you can change the name of every available analyzer based on your wishes.
 
 Changing other keys will break the analyzer. In that case, you should think about create a new python module or to modify an existing one.
 
-To contribute to the project, see [Contribute](https://github.com/certego/IntelOwl/blob/master/docs/Contribute.md)
+To contribute to the project, see [Contribute](https://github.com/certego/IntelOwl/blob/master/docs/source/Contribute.md)
 
 
 

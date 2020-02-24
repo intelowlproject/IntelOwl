@@ -38,6 +38,10 @@ After having written the new python module, you have to remember to:
  
   Then follow the [Test](https://github.com/certego/IntelOwl/blob/master/docs/Tests.md) guide to start testing.
 
-* Finally, add the new analyzer/s in the list in the doc: [Usage](https://github.com/certego/IntelOwl/blob/master/docs/Usage.md)
+* Ultimately, add the new analyzer/s in the list in the docs: [Usage](https://github.com/certego/IntelOwl/blob/master/docs/Usage.md) and [ReadMe](https://github.com/certego/IntelOwl/blob/master/README.md)
 
 If everything is working, you can submit your pull request!
+
+
+## Code Style
+Keeping to a consistent code style throughout the project makes it easier to contribute and collaborate. Please stick to the guidelines in [PEP8](https://www.python.org/dev/peps/pep-0008/) and the [Google Style Guide](https://google.github.io/styleguide/pyguide.html) unless there's a very good reason not to.

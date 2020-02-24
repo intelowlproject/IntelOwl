@@ -89,7 +89,7 @@ def vt_get_report(api_key, observable_name, observable_classification, additiona
     if relationships_requested:
         params['relationships'] = ','.join(relationships_requested)
 
-    max_tries = 4
+    max_tries = 6
     poll_distance = 30
     result = {}
     for chance in range(max_tries):
@@ -109,8 +109,10 @@ def vt_get_report(api_key, observable_name, observable_classification, additiona
             # this is an option to force active scan in the case the file is not in the VT DB
             # you need the binary too for this case, otherwise it would fail if it's not available
             if response.status_code == 404:
+                logger.info("hash {} not found on VT".format(observable_name))
                 force_active_file_scan = additional_config_params.get('force_active_scan', False)
                 if force_active_file_scan:
+                    logger.info("forcing VT active scan for hash {}".format(observable_name))
                     result = vt3_scan.vt_scan_file(api_key, observable_name, job_id)
                     result['performed_active_scan'] = True
                 break
@@ -119,10 +121,17 @@ def vt_get_report(api_key, observable_name, observable_classification, additiona
                 # ...VT is already analyzing it. In this case, just perform a little poll for the result
                 last_analysis_results = result.get('data', {}).get('attributes', {}).get('last_analysis_results', {})
                 if last_analysis_results:
-                    result['extra_polling_times'] = chance
+                    logger.info("hash {} found on VT with AV reports".format(observable_name))
                     break
                 else:
-                    time.sleep(poll_distance)
+                    extra_polling_times = chance + 1
+                    base_log = "hash {} found on VT withOUT AV reports,".format(observable_name)
+                    if extra_polling_times == max_tries:
+                        logger.info("{} reached max tries: {}".format(base_log, max_tries))
+                    else:
+                        logger.info("{} performing another request...".format(base_log, observable_name))
+                        result['extra_polling_times'] = extra_polling_times
+                        time.sleep(poll_distance)
         else:
             break
 

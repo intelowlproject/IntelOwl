@@ -1,5 +1,4 @@
 import traceback
-import json
 
 import requests
 from celery.utils.log import get_task_logger

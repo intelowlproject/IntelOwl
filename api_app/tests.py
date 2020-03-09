@@ -8,7 +8,7 @@ from django.test import TestCase
 from api_app.script_analyzers import general
 from api_app.script_analyzers.file_analyzers import file_info, pe_info, doc_info, pdf_info, vt2_scan, intezer_scan, \
     cuckoo_scan, yara_scan, vt3_scan, strings_info, rtf_info
-from api_app.script_analyzers.observable_analyzers import abuseipdb, fortiguard, maxmind, greynoise, googlesf, otx, \
+from api_app.script_analyzers.observable_analyzers import abuseipdb, shodan, fortiguard, maxmind, greynoise, googlesf, otx, \
     talos, tor, circl_pssl, circl_pdns, robtex_ip, robtex_fdns, robtex_rdns, vt2_get, ha_get, vt3_get, misp, dnsdb
 
 from api_app import crons
@@ -81,7 +81,7 @@ class ApiTests(TestCase):
         self.assertFalse(errors)
 
     def test_send_analysis_request_ip(self):
-        analyzers_requested = ["TorProject", "AbuseIPDB", "MaxMindGeoIP", "CIRCLPassiveSSL",
+        analyzers_requested = ["TorProject", "AbuseIPDB", "Shodan", "MaxMindGeoIP", "CIRCLPassiveSSL",
                                "GreyNoiseAlpha", "GoogleSafebrowsing", "Robtex_IP_Query",
                                "Robtex_Reverse_PDNS_Query", "TalosReputation", "OTXQuery",
                                "VirusTotal_Get_v2_Observable", "HybridAnalysis_Get_Observable"]
@@ -161,6 +161,10 @@ class IPAnalyzersTests(TestCase):
 
     def test_abuseipdb(self):
         report = abuseipdb.run("AbuseIPDB", self.job_id, self.observable_name, self.observable_classification, {})
+        self.assertEqual(report.get('success', False), True)
+
+    def test_shodan(self):
+        report = shodan.run("Shodan", self.job_id, self.observable_name, self.observable_classification, {})
         self.assertEqual(report.get('success', False), True)
 
     def test_maxmind(self):

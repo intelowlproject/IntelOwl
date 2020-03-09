@@ -66,6 +66,11 @@ def robtexip_run(analyzer_name, job_id, observable_name, observable_classificati
 
 
 @shared_task(soft_time_limit=30)
+def shodan_run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params):
+    shodan.run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params)
+
+
+@shared_task(soft_time_limit=30)
 def robtexfdns_run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params):
     robtex_fdns.run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params)
 

@@ -6,6 +6,7 @@ DB_USER=user
 DB_PASSWORD=password
 
 # Required API keys
+SHODAN_KEY=
 ABUSEIPDB_KEY=
 GSF_KEY=
 OTX_KEY=

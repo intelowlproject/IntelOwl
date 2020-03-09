@@ -68,6 +68,12 @@
         "external_service": true,
         "python_module": "robtexip_run"
     },
+    "Shodan": {
+        "type": "observable",
+        "observable_supported": ["ip"],
+        "external_service": true,
+        "python_module": "shodan_run"
+    },
     "Robtex_Reverse_PDNS_Query": {
         "type": "observable",
         "observable_supported": ["ip"],

@@ -46,6 +46,7 @@ Main features:
 #### required free api key
 * GoogleSafeBrowsing
 * AbuseIPDB
+* Shodan
 * AlienVault OTX
 * MaxMind
 #### needed access request

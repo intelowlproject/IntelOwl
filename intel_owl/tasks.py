@@ -4,7 +4,7 @@ from celery import shared_task
 from api_app.script_analyzers.file_analyzers import doc_info, file_info, pe_info, pdf_info, vt2_scan, intezer_scan, \
     cuckoo_scan, yara_scan, vt3_scan, strings_info, rtf_info
 from api_app.script_analyzers.observable_analyzers import abuseipdb, fortiguard, maxmind, greynoise, googlesf, otx, \
-    talos, tor, circl_pdns, circl_pssl, robtex_fdns, robtex_ip, robtex_rdns, vt2_get, ha_get, vt3_get, misp, dnsdb
+    talos, tor, circl_pdns, circl_pssl, robtex_fdns, robtex_ip, robtex_rdns, vt2_get, ha_get, vt3_get, misp, dnsdb, shodan
 
 from api_app import crons
 from api_app.script_analyzers.file_analyzers import signature_info

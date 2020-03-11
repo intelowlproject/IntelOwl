@@ -151,6 +151,15 @@
         "external_service": true,
         "python_module": "haget_run"
     },
+    "Hunter": {
+        "type": "observable",
+        "observable_supported": ["domain"],
+        "external_service": true,
+        "python_module": "hunter_run",
+        "additional_config_params": {
+            "api_key_name": "HUNTER_API_KEY"
+        }
+    },
     "Yara_Scan_Community": {
         "type": "file",
         "python_module": "yara_run",

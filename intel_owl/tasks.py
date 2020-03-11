@@ -4,7 +4,8 @@ from celery import shared_task
 from api_app.script_analyzers.file_analyzers import doc_info, file_info, pe_info, pdf_info, vt2_scan, intezer_scan, \
     cuckoo_scan, yara_scan, vt3_scan, strings_info, rtf_info
 from api_app.script_analyzers.observable_analyzers import abuseipdb, fortiguard, maxmind, greynoise, googlesf, otx, \
-    talos, tor, circl_pdns, circl_pssl, robtex_fdns, robtex_ip, robtex_rdns, vt2_get, ha_get, vt3_get, misp, dnsdb, shodan
+    talos, tor, circl_pdns, circl_pssl, robtex_fdns, robtex_ip, robtex_rdns, vt2_get, ha_get, vt3_get, misp, dnsdb, \
+    shodan, hunter
 
 from api_app import crons
 from api_app.script_analyzers.file_analyzers import signature_info
@@ -68,6 +69,11 @@ def robtexip_run(analyzer_name, job_id, observable_name, observable_classificati
 @shared_task(soft_time_limit=30)
 def shodan_run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params):
     shodan.run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params)
+
+
+@shared_task(soft_time_limit=30)
+def hunter_run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params):
+    hunter.run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params)
 
 
 @shared_task(soft_time_limit=30)

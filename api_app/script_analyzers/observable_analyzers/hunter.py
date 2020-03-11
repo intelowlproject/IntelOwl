@@ -20,7 +20,7 @@ def run(analyzer_name, job_id, observable_name, observable_classification, addit
         if not api_key:
             raise AnalyzerRunException("no Hunter.io API Key retrieved")
 
-        url = f'GET https://api.hunter.io/v2/domain-search?domain={observable_name}&api_key={api_key}'
+        url = f'https://api.hunter.io/v2/domain-search?domain={observable_name}&api_key={api_key}'
         response = requests.get(url)
         response.raise_for_status()
 

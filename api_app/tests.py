@@ -9,7 +9,8 @@ from api_app.script_analyzers import general
 from api_app.script_analyzers.file_analyzers import file_info, pe_info, doc_info, pdf_info, vt2_scan, intezer_scan, \
     cuckoo_scan, yara_scan, vt3_scan, strings_info, rtf_info
 from api_app.script_analyzers.observable_analyzers import abuseipdb, shodan, fortiguard, maxmind, greynoise, googlesf, otx, \
-    talos, tor, circl_pssl, circl_pdns, robtex_ip, robtex_fdns, robtex_rdns, vt2_get, ha_get, vt3_get, misp, dnsdb, honeydb_twitter_scan
+    talos, tor, circl_pssl, circl_pdns, robtex_ip, robtex_fdns, robtex_rdns, vt2_get, ha_get, vt3_get, misp, dnsdb, \
+    honeydb_twitter_scan, honeydb_nodes_scan
 
 from api_app import crons
 from api_app.models import Job
@@ -84,7 +85,7 @@ class ApiTests(TestCase):
         analyzers_requested = ["TorProject", "AbuseIPDB", "Shodan", "MaxMindGeoIP", "CIRCLPassiveSSL",
                                "GreyNoiseAlpha", "GoogleSafebrowsing", "Robtex_IP_Query",
                                "Robtex_Reverse_PDNS_Query", "TalosReputation", "OTXQuery",
-                               "VirusTotal_Get_v2_Observable", "HybridAnalysis_Get_Observable", "HoneyDB"]
+                               "VirusTotal_Get_v2_Observable", "HybridAnalysis_Get_Observable", "HoneyDB_Get_Twitter", "HoneyDB_Get_Nodes"]
         observable_name = os.environ.get("TEST_IP", "")
         md5 = hashlib.md5(observable_name.encode('utf-8')).hexdigest()
         api_request_result = self.client.send_observable_analysis_request(md5, analyzers_requested,
@@ -167,10 +168,14 @@ class IPAnalyzersTests(TestCase):
         report = shodan.run("Shodan", self.job_id, self.observable_name, self.observable_classification, {})
         self.assertEqual(report.get('success', False), True)
         
-    def test_honeydb(self):
-        report = honeydb_twitter_scan.run("HoneyDB", self.job_id, self.observable_name, self.observable_classification, {})
+    def test_honeydb_twitter(self):
+        report = honeydb_twitter_scan.run("HoneyDB_Get_Twitter", self.job_id, self.observable_name, self.observable_classification, {})
         self.assertEqual(report.get('success', False), True)
-    
+
+    def test_honeydb_nodes(self):
+        report = honeydb_nodes_scan.run("HoneyDB_Get_Nodes", self.job_id, self.observable_name, self.observable_classification, {})
+        self.assertEqual(report.get('success', False), True)
+
     def test_maxmind(self):
         report = maxmind.run("MaxMindDB", self.job_id, self.observable_name, self.observable_classification, {})
         self.assertEqual(report.get('success', False), True)

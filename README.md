@@ -43,6 +43,7 @@ Main features:
 * HybridAnalysis
 * Intezer
 * Farsight DNSDB
+* Hunter.io - Email Hunting
 #### required free api key
 * GoogleSafeBrowsing
 * AbuseIPDB

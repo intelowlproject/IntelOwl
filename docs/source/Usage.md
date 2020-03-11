@@ -63,6 +63,7 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * MISPFIRST: scan an observable on the FIRST MISP instance
 * DNSDB: scan an observable against the Passive DNS Farsight Database
 * Shodan: scan an IP against Shodan IP API. 
+* Hunter: Scans a domain name and returns set of data about the organisation, the email address found and additional information about the people owning those email addresses. 
 
 ## Analyzers customization
 You can create new analyzers based on already existing modules by changing the configuration values (`analyzer_config.json`).

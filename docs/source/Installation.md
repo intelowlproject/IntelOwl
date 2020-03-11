@@ -34,6 +34,7 @@ Required variables to run the image:
 Optional variables needed to enable specific analyzers:
 * ABUSEIPDB_KEY: AbuseIPDB API key
 * SHODAN_KEY: Shodan API key
+* HUNTER_API_KEY: Hunter.io API key
 * GSF_KEY: Google Safe Browsing API key
 * OTX_KEY: Alienvault OTX API key
 * CIRCL_CREDENTIALS: CIRCL PDNS credentials in the format: `user|pass`

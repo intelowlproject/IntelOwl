@@ -5,7 +5,7 @@ DB_PORT=5432
 DB_USER=user
 DB_PASSWORD=password
 
-# Required API keys (Optional)
+# Optional API keys
 SHODAN_KEY=
 ABUSEIPDB_KEY=
 GSF_KEY=
@@ -20,6 +20,7 @@ DNSDB_KEY=
 # HoneyDB Threat Info Creds
 HONEYDB_API_ID=
 HONEYDB_API_KEY=
+HUNTER_API_KEY=
 
 # Test tokens
 TEST_TOKEN=

@@ -10,7 +10,7 @@ from api_app.script_analyzers.file_analyzers import file_info, pe_info, doc_info
     cuckoo_scan, yara_scan, vt3_scan, strings_info, rtf_info
 from api_app.script_analyzers.observable_analyzers import abuseipdb, shodan, fortiguard, maxmind, greynoise, googlesf, otx, \
     talos, tor, circl_pssl, circl_pdns, robtex_ip, robtex_fdns, robtex_rdns, vt2_get, ha_get, vt3_get, misp, dnsdb, \
-    honeydb_twitter_scan, honeydb_nodes_scan
+    hunter, honeydb_twitter_scan, honeydb_nodes_scan
 
 from api_app import crons
 from api_app.models import Job
@@ -32,7 +32,7 @@ class ApiTests(TestCase):
 
     def test_ask_analysis_availability(self):
         md5 = os.environ.get("TEST_MD5", "")
-        analyzers_needed = ["Fortiguard", "CIRCLPassiveDNS"]
+        analyzers_needed = ["Fortiguard", "CIRCLPassiveDNS", "HoneyDB_Get_Nodes"]
         api_request_result = self.client.ask_analysis_availability(md5, analyzers_needed)
         answer = api_request_result.get('answer', {})
         print(answer)
@@ -71,7 +71,7 @@ class ApiTests(TestCase):
 
     def test_send_analysis_request_domain(self):
         analyzers_requested = ["Fortiguard", "CIRCLPassiveDNS", "GoogleSafebrowsing", "Robtex_Forward_PDNS_Query",
-                               "OTXQuery", "VirusTotal_v3_Get_Observable", "HybridAnalysis_Get_Observable"]
+                               "OTXQuery", "VirusTotal_v3_Get_Observable", "HybridAnalysis_Get_Observable", "Hunter"]
         observable_name = os.environ.get("TEST_DOMAIN", "")
         md5 = hashlib.md5(observable_name.encode('utf-8')).hexdigest()
         api_request_result = self.client.send_observable_analysis_request(md5, analyzers_requested,
@@ -85,7 +85,7 @@ class ApiTests(TestCase):
         analyzers_requested = ["TorProject", "AbuseIPDB", "Shodan", "MaxMindGeoIP", "CIRCLPassiveSSL",
                                "GreyNoiseAlpha", "GoogleSafebrowsing", "Robtex_IP_Query",
                                "Robtex_Reverse_PDNS_Query", "TalosReputation", "OTXQuery",
-                               "VirusTotal_Get_v2_Observable", "HybridAnalysis_Get_Observable", "HoneyDB_Get_Twitter", "HoneyDB_Get_Nodes"]
+                               "VirusTotal_Get_v2_Observable", "HybridAnalysis_Get_Observable", "HoneyDB_Get_Twitter"]
         observable_name = os.environ.get("TEST_IP", "")
         md5 = hashlib.md5(observable_name.encode('utf-8')).hexdigest()
         api_request_result = self.client.send_observable_analysis_request(md5, analyzers_requested,
@@ -185,7 +185,8 @@ class IPAnalyzersTests(TestCase):
         self.assertEqual(report.get('success', False), True)
 
     def test_gsf(self):
-        report = googlesf.run("GoogleSafeBrowsing", self.job_id, self.observable_name, self.observable_classification, {})
+        report = googlesf.run("GoogleSafeBrowsing", self.job_id, self.observable_name, self.observable_classification,
+                              {})
         self.assertEqual(report.get('success', False), True)
 
     def test_otx(self):
@@ -254,6 +255,10 @@ class DomainAnalyzersTests(TestCase):
 
     def test_fortiguard(self):
         report = fortiguard.run("Fortiguard", self.job_id, self.observable_name, self.observable_classification, {})
+        self.assertEqual(report.get('success', False), True)
+
+    def test_hunter(self):
+        report = hunter.run("Hunter", self.job_id, self.observable_name, self.observable_classification, {})
         self.assertEqual(report.get('success', False), True)
 
     def test_gsf(self):

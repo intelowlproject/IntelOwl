@@ -64,8 +64,8 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * DNSDB: scan an observable against the Passive DNS Farsight Database
 * Shodan: scan an IP against Shodan IP API
 * HoneyDB_Get_Twitter: scan an IP against HoneyDB.io's Twitter Threat Feed
-* HoneyDB_Get_Nodes: Nodes are deployed honeydb-agent sensors. This returns all nodes that have been seen within the last 3 days.
-
+* HoneyDB_Get_Nodes: Nodes are deployed honeydb-agent sensors. This returns all nodes that have been seen within the last 3 days
+* Hunter: Scans a domain name and returns set of data about the organisation, the email address found and additional information about the people owning those email addresses
 
 ## Analyzers customization
 You can create new analyzers based on already existing modules by changing the configuration values (`analyzer_config.json`).

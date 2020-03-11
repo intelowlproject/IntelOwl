@@ -43,6 +43,7 @@ Optional variables needed to enable specific analyzers:
 * FIRST_MISP_API: FIRST MISP API key
 * FIRST_MISP_URL: FIRST MISP URL
 * CUCKOO_URL: your cuckoo instance URL
+* HONEYDB_API_ID & HONEYDB_API_KEY: HoneyDB credentials
 
 ### Database configuration
 Before running the project, you must populate the basic configuration for PostgreSQL.

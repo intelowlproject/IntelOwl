@@ -151,6 +151,16 @@
         "external_service": true,
         "python_module": "haget_run"
     },
+    "HoneyDB": {
+        "type": "observable",
+        "observable_supported": ["ip"],
+        "external_service": true,
+        "python_module": "honeydb_twitter_scan_run",
+        "additional_config_params": {
+            "api_key_name": "HONEYDB_API_KEY",
+            "api_id_name": "HONEYDB_API_ID"
+        }
+    },
     "Yara_Scan_Community": {
         "type": "file",
         "python_module": "yara_run",

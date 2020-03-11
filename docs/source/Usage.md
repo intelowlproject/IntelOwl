@@ -62,7 +62,8 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * MISP: scan an observable on a MISP instance
 * MISPFIRST: scan an observable on the FIRST MISP instance
 * DNSDB: scan an observable against the Passive DNS Farsight Database
-* Shodan: scan an IP against Shodan IP API. 
+* Shodan: scan an IP against Shodan IP API
+* HoneyDB: scan an IP against HoneyDB.io's Twitter Threat Feed
 
 ## Analyzers customization
 You can create new analyzers based on already existing modules by changing the configuration values (`analyzer_config.json`).

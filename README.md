@@ -47,7 +47,7 @@ Main features:
 * GoogleSafeBrowsing
 * AbuseIPDB
 * Shodan
-* HoneyDB - Twitter Threat Feed Scan
+* HoneyDB - Twitter Threat Feed Scan and Nodes scan
 * AlienVault OTX
 * MaxMind
 #### needed access request

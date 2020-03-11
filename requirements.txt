@@ -15,7 +15,7 @@ colorclass==2.2.0
 configparser==3.8.1
 cryptography==2.7
 dataclasses==0.6
-Deprecated==1.2.6
+Deprecated==1.2.7
 Django==2.2.9
 djangorestframework==3.9.4
 dnspython==1.16.0
@@ -31,7 +31,7 @@ importlib-metadata==0.19
 jmespath==0.9.4
 joblib==0.13.2
 jsbeautifier==1.6.2
-jsonschema==3.1.1
+jsonschema==3.2.0
 kombu==4.6.5
 lightgbm==2.1.2
 maxminddb==1.5.2
@@ -55,7 +55,7 @@ pycurl==7.43.0.3
 pydeep==0.4
 pyexifinfo==0.4.0
 pyintelowl==0.1.2
-pymisp==2.4.119
+pymisp==2.4.122
 pyparsing==2.4.2
 pypdns==1.4.1
 pypssl==2.1
@@ -63,7 +63,7 @@ pyrsistent==0.15.4
 pysafebrowsing==0.1.1
 PySocks==1.7.1
 pytest==3.10.1
-python-dateutil==2.8.0
+python-dateutil==2.8.1
 python-magic==0.4.15
 pythonaes==1.0
 pytz==2019.2

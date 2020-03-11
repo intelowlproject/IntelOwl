@@ -20,7 +20,7 @@ So, if you want to test files, you should add the following files to the folder 
     * non_valid_pe.exe (to test non-valid PE)
     
 - Start the app using the docker-compose test file. In this way, you would launch the code in your environment and not the last official image in Docker Hub:
-`docker-compose -f docker-compose-test.yml up`
+`docker-compose -f docker-compose-for-tests.yml up`
 
 - Rebuild the local image:
 `docker-compose -f docker-compose-for-tests.yml build --no-cache`

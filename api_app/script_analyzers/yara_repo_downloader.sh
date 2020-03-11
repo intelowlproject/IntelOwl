@@ -14,7 +14,6 @@ git clone https://github.com/intezer/yara-rules
 # Yara community rules
 git clone https://github.com/Yara-Rules/rules.git
 community_yara_index="/opt/deploy/yara/rules/index.yar"
-sed -i 's|"./|"/opt/deploy/yara/rules/|g' $community_yara_index
 
 # remove broken or unwanted rules in Yara community rules
 sed -i "/ELF/d" $community_yara_index

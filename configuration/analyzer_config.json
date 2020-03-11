@@ -173,13 +173,6 @@
             "directories_with_rules": ["/opt/deploy/yara/yara-rules"]
         }
     },
-    "Yara_Scan_Custom_Signatures": {
-        "type": "file",
-        "python_module": "yara_run",
-        "additional_config_params": {
-            "directories_with_rules": ["/opt/deploy/yara/custom_signatures"]
-        }
-    },
     "HybridAnalysis_Get_File": {
         "type": "file",
         "external_service": true,

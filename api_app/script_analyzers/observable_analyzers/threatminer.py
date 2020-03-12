@@ -5,7 +5,6 @@ from celery.utils.log import get_task_logger
 
 from api_app.exceptions import AnalyzerRunException
 from api_app.script_analyzers import general
-from intel_owl import secrets
 
 logger = get_task_logger(__name__)
 

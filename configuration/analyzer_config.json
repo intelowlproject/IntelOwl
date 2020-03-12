@@ -74,6 +74,15 @@
         "external_service": true,
         "python_module": "shodan_run"
     },
+    "Threatminer": {
+        "type": "observable",
+        "observable_supported": ["ip","domain", "hash"],
+        "external_service": true,
+        "python_module": "threatminer_run",
+        "additional_config_params": {
+            "rt_value": "rt"
+        }
+    },
     "Robtex_Reverse_PDNS_Query": {
         "type": "observable",
         "observable_supported": ["ip"],

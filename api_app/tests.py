@@ -10,7 +10,7 @@ from api_app.script_analyzers.file_analyzers import file_info, pe_info, doc_info
     cuckoo_scan, yara_scan, vt3_scan, strings_info, rtf_info
 from api_app.script_analyzers.observable_analyzers import abuseipdb, shodan, fortiguard, maxmind, greynoise, googlesf, otx, \
     talos, tor, circl_pssl, circl_pdns, robtex_ip, robtex_fdns, robtex_rdns, vt2_get, ha_get, vt3_get, misp, dnsdb,\
-    honeydb_twitter_scan, hunter
+    honeydb_twitter_scan, hunter, threatminer
 
 from api_app import crons
 from api_app.models import Job
@@ -71,7 +71,7 @@ class ApiTests(TestCase):
 
     def test_send_analysis_request_domain(self):
         analyzers_requested = ["Fortiguard", "CIRCLPassiveDNS", "GoogleSafebrowsing", "Robtex_Forward_PDNS_Query",
-                               "OTXQuery", "VirusTotal_v3_Get_Observable", "HybridAnalysis_Get_Observable"]
+                               "OTXQuery", "VirusTotal_v3_Get_Observable", "HybridAnalysis_Get_Observable", "Threatminer"]
         observable_name = os.environ.get("TEST_DOMAIN", "")
         md5 = hashlib.md5(observable_name.encode('utf-8')).hexdigest()
         api_request_result = self.client.send_observable_analysis_request(md5, analyzers_requested,
@@ -86,7 +86,7 @@ class ApiTests(TestCase):
                                "GreyNoiseAlpha", "GoogleSafebrowsing", "Robtex_IP_Query",
                                "Robtex_Reverse_PDNS_Query", "TalosReputation", "OTXQuery",
                                "VirusTotal_Get_v2_Observable", "HybridAnalysis_Get_Observable", "Hunter",
-                               "HoneyDB"]
+                               "HoneyDB", "Threatminer"]
         observable_name = os.environ.get("TEST_IP", "")
         md5 = hashlib.md5(observable_name.encode('utf-8')).hexdigest()
         api_request_result = self.client.send_observable_analysis_request(md5, analyzers_requested,
@@ -232,6 +232,10 @@ class IPAnalyzersTests(TestCase):
                           {'api_key_name': "FIRST_MISP_API", "url_key_name": "FIRST_MISP_URL"})
         self.assertEqual(report.get('success', False), True)
 
+    def test_threatminer(self):
+        report = threatminer.run("Threatminer", self.job_id, self.observable_name, self.observable_classification, {'rt_value': "rt"})
+        self.assertEqual(report.get('success', False), True)
+
 
 class DomainAnalyzersTests(TestCase):
 
@@ -294,6 +298,10 @@ class DomainAnalyzersTests(TestCase):
     def test_misp_first(self):
         report = misp.run("MISP_FIRST", self.job_id, self.observable_name, self.observable_classification,
                           {'api_key_name': "FIRST_MISP_API", "url_key_name": "FIRST_MISP_URL"})
+        self.assertEqual(report.get('success', False), True)
+
+    def test_threatminer(self):
+        report = threatminer.run("Threatminer", self.job_id, self.observable_name, self.observable_classification, {'rt_value': "rt"})
         self.assertEqual(report.get('success', False), True)
 
 

@@ -3,7 +3,12 @@
 Intel Owl was designed to ease the addition of new analyzers. With a simple python script you can integrate your own engine or integrate an external service in a short time.
 
 ## Code Style
-Keeping to a consistent code style throughout the project makes it easier to contribute and collaborate. Please stick to the guidelines in [PEP8](https://www.python.org/dev/peps/pep-0008/) and the [Google Style Guide](https://google.github.io/styleguide/pyguide.html) unless there's a very good reason not to.
+Keeping to a consistent code style throughout the project makes it easier to contribute and collaborate. Please stick to the guidelines in [PEP8](https://www.python.org/dev/peps/pep-0008/) and the [Google Style Guide](https://google.github.io/styleguide/pyguide.html) unless there's a very good reason not to. 
+
+## How to start
+Please create a new branch based on the **develop** branch that contains the most recent changes.
+
+`git checkout -b myfeature develop`
 
 ## How to add a new analyzer
 You may want to look at the following analyzer example to start to build a new one: [Example](https://github.com/certego/IntelOwl/blob/master/api_app/script_analyzers/analyzer_template.py)
@@ -36,15 +41,30 @@ After having written the new python module, you have to remember to:
   In that way you can create more than one analyzer for a specific python module, each one based on different configurations.
   MISP and Yara Analyzers are a good example of this use case: for instance, you can use different analyzers for different MISP instances.
 
-* Add a new basic unit test in [tests.py](https://github.com/certego/IntelOwl/blob/master/api_app/tests.py)
+* Add required unit tests in the [tests](https://github.com/certego/IntelOwl/blob/master/tests) folder
  
   Then follow the [Test](./Tests.md) guide to start testing.
 
 * Ultimately, add the new analyzer/s in the list in the docs: [Usage](./Usage.md), [Installation](./Installation.md), and [ReadMe](https://github.com/certego/IntelOwl/blob/master/README.md)
 
-If everything is working, you can submit your pull request!
+If everything is working, before submitting your pull request, please squash your commits into a single one!
 
-#### Example: add an analyzer for your own Yara signatures
+#### How to squash commits to a single one
+
+* Run `git rebase -i HEAD~[NUMBER OF COMMITS]`
+* You should see a list of commits, each commit starting with the word "pick".
+* Make sure the first commit says "pick" and change the rest from "pick" to "squash". -- This will squash each commit into the previous commit, which will continue until every commit is squashed into the first commit.
+* Save and close the editor.
+* It will give you the opportunity to change the commit message.
+* Save and close the editor again.
+* Then you have to force push the final, squashed commit: `git push --force-with-lease origin`.
+
+Squashing commits can be a tricky process but once you figure it out, it's really helpful and keeps our repo concise and clean.
+
+#### Create a pull request
+Please create pull requests only for the branch **develop**. That code will be pushed to master only on a new release.
+
+### Example: add an analyzer configuration for your own Yara signatures
 ```
     "Yara_Scan_Custom_Signatures": {
         "type": "file",

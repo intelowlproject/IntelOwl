@@ -10,7 +10,7 @@ from api_app.script_analyzers.file_analyzers import file_info, pe_info, doc_info
     cuckoo_scan, yara_scan, vt3_scan, strings_info, rtf_info
 from api_app.script_analyzers.observable_analyzers import abuseipdb, shodan, fortiguard, maxmind, greynoise, googlesf, otx, \
     talos, tor, circl_pssl, circl_pdns, robtex_ip, robtex_fdns, robtex_rdns, vt2_get, ha_get, vt3_get, misp, dnsdb,\
-    honeydb_twitter_scan, hunter
+    honeydb, hunter
 
 from api_app import crons
 from api_app.models import Job
@@ -170,7 +170,7 @@ class IPAnalyzersTests(TestCase):
         self.assertEqual(report.get('success', False), True)
 
     def test_honeydb(self):
-        report = honeydb_twitter_scan.run("HoneyDB", self.job_id, self.observable_name, self.observable_classification,
+        report = honeydb.run("HoneyDB", self.job_id, self.observable_name, self.observable_classification,
                                           {})
         self.assertEqual(report.get('success', False), True)
 

@@ -15,10 +15,12 @@ def run(analyzer_name, job_id, observable_name, observable_classification, addit
                 "".format(analyzer_name, job_id, observable_name))
     report = general.get_basic_report_template(analyzer_name)
     try:
-        api_key_name = additional_config_params.get('api_key_name', 'HONEYDB_API_KEY')
-        api_id_name = additional_config_params.get('api_id_name', 'HONEYDB_API_ID')
+        api_key_name = additional_config_params.get("api_key_name", "HONEYDB_API_KEY")
+        api_id_name = additional_config_params.get("api_id_name", "HONEYDB_API_ID")
+        api_endpoint_name = additional_config_params.get("api_endpoint_name", "HONEYDB_API_ENDPOINT")
         api_key = secrets.get_secret(api_key_name)
         api_id = secrets.get_secret(api_id_name)
+        api_endpoint = secrets.get_secret(api_endpoint_name) or "nodes" # specifying `/nodes` as the default endpoint.
         if not api_key:
             raise AnalyzerRunException("no HoneyDB API Key retrieved")
         if not api_id:
@@ -28,7 +30,12 @@ def run(analyzer_name, job_id, observable_name, observable_classification, addit
             'X-HoneyDb-ApiKey': api_key,
             'X-HoneyDb-ApiId': api_id
         }
-        url = f'https://honeydb.io/api/twitter-threat-feed/{observable_name}'
+      
+        if api_endpoint=="twitter-threat-feed":
+            url = f"https://honeydb.io/api/twitter-threat-feed/{observable_name}"
+        else:
+            url = f"https://honeydb.io/api/{api_endpoint}"
+
         response = requests.get(url, headers=headers)
         response.raise_for_status()
 

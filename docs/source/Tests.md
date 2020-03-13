@@ -2,7 +2,7 @@
 
 If you want to run tests, you should:
 
-- Change the following environment variables in the environment file based on the data you would like to test
+- Change the following environment variables in the environment file based on the data you would like to test:
     * TEST_TOKEN -> API key for testing purposes
     * TEST_JOB_ID
     * TEST_MD5
@@ -12,9 +12,9 @@ If you want to run tests, you should:
     
 - I didn't add to the project my test files because they are malware samples and I do not want people to use them in a wrong way. 
 So, if you want to test files, you should add the following files to the folder `test_files`:
-    * documento.pdf (to test PDF engines)
-    * documento.rtf (to test RTF engines)
-    * documento.doc (to test DOC engines)
+    * document.pdf (to test PDF engines)
+    * document.rtf (to test RTF engines)
+    * document.doc (to test DOC engines)
     * file.exe (to test PE engines)
     * file.dll (to test DLL engines)
     * non_valid_pe.exe (to test non-valid PE)
@@ -25,6 +25,6 @@ So, if you want to test files, you should add the following files to the folder 
 - Rebuild the local image:
 `docker-compose -f docker-compose-for-tests.yml build --no-cache`
 
-- Run tests:
-`docker exec -ti intel_owl_uwsgi python3 manage.py test`
+- Run tests from the project directory:
+`docker exec -ti intel_owl_uwsgi python3 manage.py test tests`
     

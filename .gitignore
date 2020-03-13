@@ -2,4 +2,5 @@
 __pycache__
 test_files
 env_file_app
+env_file_app_travis
 env_file_postgres

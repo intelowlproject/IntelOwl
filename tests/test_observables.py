@@ -3,14 +3,19 @@ import logging
 import os
 
 from django.test import TestCase
+from unittest import skipIf
 
 from api_app.script_analyzers.observable_analyzers import abuseipdb, shodan, fortiguard, maxmind, greynoise, googlesf, otx, \
     talos, tor, circl_pssl, circl_pdns, robtex_ip, robtex_fdns, robtex_rdns, vt2_get, ha_get, vt3_get, misp, dnsdb,\
     honeydb_twitter_scan, hunter
 
 from api_app.models import Job
+from intel_owl import settings
 
 logger = logging.getLogger(__name__)
+# disable logging library for travis
+if settings.TRAVIS_TEST:
+    logging.disable(logging.CRITICAL)
 
 
 class IPAnalyzersTests(TestCase):
@@ -81,6 +86,7 @@ class IPAnalyzersTests(TestCase):
         report = robtex_rdns.run("Robtex_RDNS", self.job_id, self.observable_name, self.observable_classification, {})
         self.assertEqual(report.get('success', False), True)
 
+    @skipIf(settings.TRAVIS_TEST, "dnsdb account missing")
     def test_dnsdb(self):
         report = dnsdb.run("DNSDB", self.job_id, self.observable_name, self.observable_classification, {})
         self.assertEqual(report.get('success', False), True)
@@ -145,6 +151,7 @@ class DomainAnalyzersTests(TestCase):
         report = robtex_fdns.run("Robtex_FDNS", self.job_id, self.observable_name, self.observable_classification, {})
         self.assertEqual(report.get('success', False), True)
 
+    @skipIf(settings.TRAVIS_TEST, "dnsdb account missing")
     def test_dnsdb(self):
         report = dnsdb.run("DNSDB", self.job_id, self.observable_name, self.observable_classification, {})
         self.assertEqual(report.get('success', False), True)

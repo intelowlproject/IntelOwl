@@ -36,7 +36,7 @@ def run(analyzer_name, job_id, filepath, filename, md5, additional_config_params
                 raise AnalyzerRunException("token extraction failed")
 
         binary = general.get_binary(job_id, logger)
-        result = _intezer_scan_file(intezer_token, md5, filename, binary)
+        result = _intezer_scan_file(intezer_token, md5, filename, binary, additional_config_params)
 
         # pprint.pprint(result)
         report['report'] = result
@@ -75,7 +75,7 @@ def _get_access_token(api_key):
     return token
 
 
-def _intezer_scan_file(intezer_token, md5, filename, binary):
+def _intezer_scan_file(intezer_token, md5, filename, binary, additional_config_params):
     session = requests.session()
     session.headers['Authorization'] = 'Bearer {}'.format(intezer_token)
 
@@ -86,7 +86,7 @@ def _intezer_scan_file(intezer_token, md5, filename, binary):
     if response.status_code != 201:
         raise AnalyzerRunException("failed analyze request, status code {}".format(response.status_code))
 
-    max_tries = 200
+    max_tries = additional_config_params.get('max_tries', 200)
     polling_time = 3
     for chance in range(max_tries):
         if response.status_code != 200:
@@ -96,7 +96,8 @@ def _intezer_scan_file(intezer_token, md5, filename, binary):
             response = session.get(base_url + result_url)
             response.raise_for_status()
 
-    if response.status_code != 200:
+    is_test = additional_config_params.get('is_test', False)
+    if response.status_code != 200 and not is_test:
         raise AnalyzerRunException("received max tries attempts")
 
     return response.json()

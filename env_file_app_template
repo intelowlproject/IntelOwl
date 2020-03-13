@@ -20,6 +20,11 @@ DNSDB_KEY=
 # HoneyDB Threat Info Creds
 HONEYDB_API_ID=
 HONEYDB_API_KEY=
+# Specify a single endpoint from here: https://honeydb.io/threats. A few examples are given below.
+HONEYDB_API_ENDPOINT=nodes
+#HONEYDB_API_ENDPOINT=nodes/mydata
+#HONEYDB_API_ENDPOINT=twitter-threat-feed
+
 HUNTER_API_KEY=
 
 # Test tokens

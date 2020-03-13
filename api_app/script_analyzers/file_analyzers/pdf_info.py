@@ -1,12 +1,11 @@
 import traceback
 import peepdf
-
-from celery.utils.log import get_task_logger
+import logging
 
 from api_app.exceptions import AnalyzerRunException
 from api_app.script_analyzers import general
 
-logger = get_task_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 def run(analyzer_name, job_id, filepath, filename, md5, additional_config_params):
@@ -55,7 +54,7 @@ def run(analyzer_name, job_id, filepath, filename, md5, additional_config_params
     else:
         report['success'] = True
 
-    general.set_report_and_cleanup(job_id, report, logger)
+    general.set_report_and_cleanup(job_id, report)
 
     logger.info("ended analyzer {} job_id {}"
                 "".format(analyzer_name, job_id))

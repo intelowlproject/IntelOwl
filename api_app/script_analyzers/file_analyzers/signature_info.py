@@ -1,14 +1,14 @@
 import traceback
+import logging
 
 from subprocess import Popen, DEVNULL, PIPE
 
 from celery.exceptions import SoftTimeLimitExceeded
-from celery.utils.log import get_task_logger
 
 from api_app.exceptions import AnalyzerRunException
 from api_app.script_analyzers import general
 
-logger = get_task_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 def run(analyzer_name, job_id, filepath, filename, md5, additional_config_params):
@@ -71,7 +71,7 @@ def run(analyzer_name, job_id, filepath, filename, md5, additional_config_params
     else:
         report['success'] = True
 
-    general.set_report_and_cleanup(job_id, report, logger)
+    general.set_report_and_cleanup(job_id, report)
 
     # pprint.pprint(report)
 

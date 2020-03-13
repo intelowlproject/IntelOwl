@@ -1,0 +1,16 @@
+sudo: required
+language: python
+dist: bionic
+python:
+- '3.6'
+services:
+- docker
+before_install:
+- sudo apt-get update
+- unzip -P infected tests/test_files.zip -d .
+install:
+- sudo docker-compose -f docker-compose-for-travis.yml build
+- sudo docker-compose -f docker-compose-for-travis.yml up -d
+script:
+- sudo docker exec -ti intel_owl_uwsgi python manage.py test tests
+

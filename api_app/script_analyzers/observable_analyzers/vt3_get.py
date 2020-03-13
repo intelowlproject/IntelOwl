@@ -2,15 +2,15 @@ import base64
 import time
 import traceback
 import requests
+import logging
 
-from celery.utils.log import get_task_logger
 from api_app.script_analyzers.file_analyzers import vt3_scan
 
 from api_app.exceptions import AnalyzerRunException
 from api_app.script_analyzers import general
 from intel_owl import secrets
 
-logger = get_task_logger(__name__)
+logger = logging.getLogger(__name__)
 
 vt_base = "https://www.virustotal.com/api/v3/"
 
@@ -49,7 +49,7 @@ def run(analyzer_name, job_id, observable_name, observable_classification, addit
 
     # pprint.pprint(report)
 
-    general.set_report_and_cleanup(job_id, report, logger)
+    general.set_report_and_cleanup(job_id, report)
 
     logger.info("ended analyzer {} job_id {} observable {}"
                 "".format(analyzer_name, job_id, observable_name))
@@ -89,7 +89,7 @@ def vt_get_report(api_key, observable_name, observable_classification, additiona
     if relationships_requested:
         params['relationships'] = ','.join(relationships_requested)
 
-    max_tries = 6
+    max_tries = additional_config_params.get('max_tries', 6)
     poll_distance = 30
     result = {}
     for chance in range(max_tries):
@@ -113,7 +113,7 @@ def vt_get_report(api_key, observable_name, observable_classification, additiona
                 force_active_file_scan = additional_config_params.get('force_active_scan', False)
                 if force_active_file_scan:
                     logger.info("forcing VT active scan for hash {}".format(observable_name))
-                    result = vt3_scan.vt_scan_file(api_key, observable_name, job_id)
+                    result = vt3_scan.vt_scan_file(api_key, observable_name, job_id, additional_config_params)
                     result['performed_active_scan'] = True
                 break
             else:

@@ -2,15 +2,14 @@ import os
 import time
 import traceback
 import requests
-
-from celery.utils.log import get_task_logger
+import logging
 
 from api_app.exceptions import AnalyzerRunException
 from api_app.script_analyzers import general
 from api_app.utilities import get_now_date_only
 from intel_owl import secrets
 
-logger = get_task_logger(__name__)
+logger = logging.getLogger(__name__)
 
 base_url = "https://analyze.intezer.com/api/v2-0"
 
@@ -35,8 +34,8 @@ def run(analyzer_name, job_id, filepath, filename, md5, additional_config_params
             if not intezer_token:
                 raise AnalyzerRunException("token extraction failed")
 
-        binary = general.get_binary(job_id, logger)
-        result = _intezer_scan_file(intezer_token, md5, filename, binary)
+        binary = general.get_binary(job_id)
+        result = _intezer_scan_file(intezer_token, md5, filename, binary, additional_config_params)
 
         # pprint.pprint(result)
         report['report'] = result
@@ -56,7 +55,7 @@ def run(analyzer_name, job_id, filepath, filename, md5, additional_config_params
     else:
         report['success'] = True
 
-    general.set_report_and_cleanup(job_id, report, logger)
+    general.set_report_and_cleanup(job_id, report)
 
     logger.info("ended analyzer {} job_id {}"
                 "".format(analyzer_name, job_id))
@@ -75,7 +74,7 @@ def _get_access_token(api_key):
     return token
 
 
-def _intezer_scan_file(intezer_token, md5, filename, binary):
+def _intezer_scan_file(intezer_token, md5, filename, binary, additional_config_params):
     session = requests.session()
     session.headers['Authorization'] = 'Bearer {}'.format(intezer_token)
 
@@ -86,17 +85,18 @@ def _intezer_scan_file(intezer_token, md5, filename, binary):
     if response.status_code != 201:
         raise AnalyzerRunException("failed analyze request, status code {}".format(response.status_code))
 
-    max_tries = 200
+    max_tries = additional_config_params.get('max_tries', 200)
     polling_time = 3
     for chance in range(max_tries):
         if response.status_code != 200:
             time.sleep(polling_time)
             logger.info("intezer md5 {} polling for result try n.{}".format(md5, chance+1))
-            result_url = response.json()['result_url']
+            result_url = response.json().get('result_url', '')
             response = session.get(base_url + result_url)
             response.raise_for_status()
 
-    if response.status_code != 200:
+    is_test = additional_config_params.get('is_test', False)
+    if response.status_code != 200 and not is_test:
         raise AnalyzerRunException("received max tries attempts")
 
     return response.json()

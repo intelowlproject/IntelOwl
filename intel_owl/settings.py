@@ -15,6 +15,8 @@ DJANGO_LOG_DIRECTORY = "/var/log/intel_owl/django"
 PROJECT_LOCATION = "/opt/deploy/intel_owl"
 MEDIA_ROOT = "/opt/deploy/files_required"
 CERTS_DIR = "{}/certs".format(PROJECT_LOCATION)
+DISABLE_LOGGING_TEST = True if os.environ.get('DISABLE_LOGGING_TEST', False) == 'True' else False
+MOCK_CONNECTIONS = True if os.environ.get('MOCK_CONNECTIONS', False) == 'True' else False
 
 HTTPS_ENABLED = os.environ.get("HTTPS_ENABLED", "not_enabled")
 if HTTPS_ENABLED == "enabled":
@@ -100,10 +102,11 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'Europe/Rome'
 CELERY_IMPORTS = ('intel_owl.tasks', )
-CELERYD_HIJACK_ROOT_LOGGER = False
+CELERY_WORKER_REDIRECT_STDOUTS = False
+CELERY_WORKER_HIJACK_ROOT_LOGGER = False
 # these two are needed to enable priority and correct tasks execution
-CELERY_ACKS_LATE = True
-CELERYD_PREFETCH_MULTIPLIER = 1
+CELERY_TASK_ACKS_LATE = True
+CELERY_WORKER_PREFETCH_MULTIPLIER = 1
 CELERY_TASK_DEFAULT_QUEUE = 'analyzers_queue'
 
 AWS_SQS = True if os.environ.get('AWS_SQS', False) == 'True' else False
@@ -161,18 +164,19 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'static_intel/'),
 )
 
+INFO_OR_DEBUG_LEVEL = 'DEBUG' if DEBUG else 'INFO'
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'formatters': {
         'stdfmt': {
-            'format': '[%(asctime)s - %(levelname)s] %(message)s',
+            'format': '%(asctime)s - %(name)s - %(funcName)s - %(levelname)s - %(message)s',
             'datefmt': '%Y-%m-%d %H:%M:%S',
         },
     },
     'handlers': {
         'api_app': {
-            'level': 'DEBUG' if DEBUG else 'INFO',
+            'level': INFO_OR_DEBUG_LEVEL,
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': '{}/api_app.log'.format(DJANGO_LOG_DIRECTORY),
             'formatter': 'stdfmt',
@@ -187,11 +191,32 @@ LOGGING = {
             'maxBytes': 20 * 1024 * 1024,
             'backupCount': 6,
         },
+        'celery': {
+            'level': INFO_OR_DEBUG_LEVEL,
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': '{}/celery.log'.format(DJANGO_LOG_DIRECTORY),
+            'formatter': 'stdfmt',
+            'maxBytes': 20 * 1024 * 1024,
+            'backupCount': 6,
+        },
+        'celery_error': {
+            'level': 'ERROR',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': '{}/celery_errors.log'.format(DJANGO_LOG_DIRECTORY),
+            'formatter': 'stdfmt',
+            'maxBytes': 20 * 1024 * 1024,
+            'backupCount': 6,
+        }
     },
     'loggers': {
         'api_app': {
             'handlers': ['api_app', 'api_app_error'],
-            'level': 'INFO',
+            'level': INFO_OR_DEBUG_LEVEL,
+            'propagate': True,
+        },
+        'celery': {
+            'handlers': ['celery', 'celery_error'],
+            'level': INFO_OR_DEBUG_LEVEL,
             'propagate': True,
         }
     },

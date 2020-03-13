@@ -23,7 +23,6 @@ HONEYDB_API_KEY=
 HUNTER_API_KEY=
 
 # Test tokens
-TEST_TOKEN=
 TEST_JOB_ID=1
 TEST_IP=8.8.8.8
 TEST_DOMAIN=www.google.com
@@ -37,6 +36,8 @@ VT_NOTIFY_URL=
 
 # other variables
 DEBUG=False
+DISABLE_LOGGING_TEST=False
+MOCK_CONNECTIONS = False
 CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672
 DB_NAME=intel_owl_db
 HTTPS_ENABLED=not_enabled

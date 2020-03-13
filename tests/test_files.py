@@ -3,6 +3,7 @@ import logging
 
 from django.core.files import File
 from django.test import TestCase
+from unittest.mock import patch, MagicMock
 
 from api_app.script_analyzers import general
 from api_app.script_analyzers.file_analyzers import file_info, pe_info, doc_info, pdf_info, vt2_scan, intezer_scan, \
@@ -15,6 +16,104 @@ from api_app.script_analyzers.file_analyzers import signature_info
 from intel_owl import settings
 
 logger = logging.getLogger(__name__)
+# disable logging library for travis
+if settings.DISABLE_LOGGING_TEST:
+    logging.disable(logging.CRITICAL)
+
+
+# it is optional to mock requests
+def mock_connections(decorator):
+    return decorator if settings.MOCK_CONNECTIONS else lambda x: x
+
+
+def mocked_requests(*args, **kwargs):
+
+    class MockResponse:
+        def __init__(self, json_data, status_code):
+            self.json_data = json_data
+            self.status_code = status_code
+            self.text = u''
+            self.content = b''
+
+        def json(self):
+            return self.json_data
+
+        def raise_for_status(self):
+            pass
+
+    return MockResponse({}, 200)
+
+
+def mocked_vt_get(*args, **kwargs):
+
+    class MockResponse:
+        def __init__(self, json_data, status_code):
+            self.json_data = json_data
+            self.status_code = status_code
+            self.text = u''
+            self.content = b''
+
+        def json(self):
+            return self.json_data
+
+        def raise_for_status(self):
+            pass
+
+    return MockResponse({"data": {"attributes": {"status": "completed"}}}, 200)
+
+
+def mocked_vt_post(*args, **kwargs):
+
+    class MockResponse:
+        def __init__(self, json_data, status_code):
+            self.json_data = json_data
+            self.status_code = status_code
+            self.text = u''
+            self.content = b''
+
+        def json(self):
+            return self.json_data
+
+        def raise_for_status(self):
+            pass
+
+    return MockResponse({"scan_id": "scan_id_test", "data": {"id": "id_test"}}, 200)
+
+
+def mocked_intezer(*args, **kwargs):
+
+    class MockResponse:
+        def __init__(self, json_data, status_code):
+            self.json_data = json_data
+            self.status_code = status_code
+            self.text = u''
+            self.content = b''
+
+        def json(self):
+            return self.json_data
+
+        def raise_for_status(self):
+            pass
+
+    return MockResponse({}, 201)
+
+
+def mocked_cuckoo_get(*args, **kwargs):
+
+    class MockResponse:
+        def __init__(self, json_data, status_code):
+            self.json_data = json_data
+            self.status_code = status_code
+            self.text = u''
+            self.content = b''
+
+        def json(self):
+            return self.json_data
+
+        def raise_for_status(self):
+            pass
+
+    return MockResponse({'task': {'status': 'reported'}}, 200)
 
 
 class FileAnalyzersEXETests(TestCase):
@@ -30,7 +129,7 @@ class FileAnalyzersEXETests(TestCase):
         filename = "file.exe"
         test_job = _generate_test_job_with_file(params, filename)
         self.job_id = test_job.id
-        self.filepath, self.filename = general.get_filepath_filename(self.job_id, logger)
+        self.filepath, self.filename = general.get_filepath_filename(self.job_id)
         self.md5 = test_job.md5
 
     def test_fileinfo_exe(self):
@@ -54,17 +153,30 @@ class FileAnalyzersEXETests(TestCase):
         report = signature_info.run("Signature_Info", self.job_id, self.filepath, self.filename, self.md5, {})
         self.assertEqual(report.get('success', False), True)
 
-    def test_vtscan_exe(self):
-        additional_params = {'wait_for_scan_anyway': True}
+    @mock_connections(patch('requests.get', side_effect=mocked_vt_get))
+    @mock_connections(patch('requests.post', side_effect=mocked_vt_post))
+    def test_vtscan_exe(self, mock_get=None, mock_post=None):
+        additional_params = {'wait_for_scan_anyway': True, 'max_tries': 1}
         report = vt2_scan.run("VT_v2_Scan", self.job_id, self.filepath, self.filename, self.md5, additional_params)
+        print(report)
         self.assertEqual(report.get('success', False), True)
 
-    def test_intezer_exe(self):
-        report = intezer_scan.run("Intezer_Scan", self.job_id, self.filepath, self.filename, self.md5, {})
+    @mock_connections(patch('requests.Session.get', side_effect=mocked_requests))
+    @mock_connections(patch('requests.Session.post', side_effect=mocked_intezer))
+    @mock_connections(patch('api_app.script_analyzers.file_analyzers.intezer_scan._get_access_token',
+                            MagicMock(return_value="tokentest")))
+    def test_intezer_exe(self, mock_get=None, mock_post=None, mock_token=None):
+        additional_params = {'max_tries': 1, 'is_test': True}
+        report = intezer_scan.run("Intezer_Scan", self.job_id, self.filepath, self.filename, self.md5, additional_params)
+        print(report)
         self.assertEqual(report.get('success', False), True)
 
-    def test_cuckoo_exe(self):
-        report = cuckoo_scan.run("Cuckoo_Scan", self.job_id, self.filepath, self.filename, self.md5, {})
+    @mock_connections(patch('requests.Session.get', side_effect=mocked_cuckoo_get))
+    @mock_connections(patch('requests.Session.post', side_effect=mocked_requests))
+    def test_cuckoo_exe(self, mock_get=None, mock_post=None):
+        additional_params = {'max_poll_tries': 1, 'max_post_tries': 1}
+        report = cuckoo_scan.run("Cuckoo_Scan", self.job_id, self.filepath, self.filename, self.md5, additional_params)
+        print(report)
         self.assertEqual(report.get('success', False), True)
 
     def test_yara_exe(self):
@@ -74,12 +186,19 @@ class FileAnalyzersEXETests(TestCase):
         report = yara_scan.run("Yara_Scan", self.job_id, self.filepath, self.filename, self.md5, additional_params)
         self.assertEqual(report.get('success', False), True)
 
-    def test_vt3_scan_exe(self):
-        report = vt3_scan.run("VT_v3_Scan", self.job_id, self.filepath, self.filename, self.md5, {})
+    @mock_connections(patch('requests.get', side_effect=mocked_vt_get))
+    @mock_connections(patch('requests.post', side_effect=mocked_vt_post))
+    def test_vt3_scan_exe(self, mock_get=None, mock_post=None):
+        additional_params = {'max_tries': 1}
+        report = vt3_scan.run("VT_v3_Scan", self.job_id, self.filepath, self.filename, self.md5, additional_params)
+        print(report)
         self.assertEqual(report.get('success', False), True)
 
-    def test_vt3_get_and_scan_exe(self):
-        report = vt3_get.run("VT_v3_Get_And_Scan", self.job_id, self.md5, "hash", {'force_active_scan': True})
+    @mock_connections(patch('requests.get', side_effect=mocked_requests))
+    @mock_connections(patch('requests.post', side_effect=mocked_requests))
+    def test_vt3_get_and_scan_exe(self, mock_get=None, mock_post=None):
+        additional_params = {'max_tries': 1, 'force_active_scan': True}
+        report = vt3_get.run("VT_v3_Get_And_Scan", self.job_id, self.md5, "hash", additional_params)
         self.assertEqual(report.get('success', False), True)
 
 
@@ -96,7 +215,7 @@ class FileAnalyzersDLLTests(TestCase):
         filename = "file.dll"
         test_job = _generate_test_job_with_file(params, filename)
         self.job_id = test_job.id
-        self.filepath, self.filename = general.get_filepath_filename(self.job_id, logger)
+        self.filepath, self.filename = general.get_filepath_filename(self.job_id)
         self.md5 = test_job.md5
 
     def test_fileinfo_dll(self):
@@ -121,7 +240,7 @@ class FileAnalyzersDocTests(TestCase):
         filename = "document.doc"
         test_job = _generate_test_job_with_file(params, filename)
         self.job_id = test_job.id
-        self.filepath, self.filename = general.get_filepath_filename(self.job_id, logger)
+        self.filepath, self.filename = general.get_filepath_filename(self.job_id)
         self.md5 = test_job.md5
 
     def test_docinfo(self):
@@ -142,7 +261,7 @@ class FileAnalyzersRtfTests(TestCase):
         filename = "document.rtf"
         test_job = _generate_test_job_with_file(params, filename)
         self.job_id = test_job.id
-        self.filepath, self.filename = general.get_filepath_filename(self.job_id, logger)
+        self.filepath, self.filename = general.get_filepath_filename(self.job_id)
         self.md5 = test_job.md5
 
     def test_rtfinfo(self):
@@ -163,7 +282,7 @@ class FileAnalyzersPDFTests(TestCase):
         filename = "document.pdf"
         test_job = _generate_test_job_with_file(params, filename)
         self.job_id = test_job.id
-        self.filepath, self.filename = general.get_filepath_filename(self.job_id, logger)
+        self.filepath, self.filename = general.get_filepath_filename(self.job_id)
         self.md5 = test_job.md5
 
     def test_pdfinfo(self):

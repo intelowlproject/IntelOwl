@@ -3,13 +3,12 @@ import pydeep
 import traceback
 import magic
 import pyexifinfo
-
-from celery.utils.log import get_task_logger
+import logging
 
 from api_app.exceptions import AnalyzerRunException
 from api_app.script_analyzers import general
 
-logger = get_task_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 def run(analyzer_name, job_id, filepath, filename, md5, additional_config_params):
@@ -28,7 +27,7 @@ def run(analyzer_name, job_id, filepath, filename, md5, additional_config_params
                                    if not (key.startswith("File") or key.startswith("SourceFile"))}
             results['exiftool'] = exif_report_cleaned
 
-        binary = general.get_binary(job_id, logger)
+        binary = general.get_binary(job_id)
         results['md5'] = hashlib.md5(binary).hexdigest()
         results['sha1'] = hashlib.sha1(binary).hexdigest()
         results['sha256'] = hashlib.sha256(binary).hexdigest()
@@ -51,7 +50,7 @@ def run(analyzer_name, job_id, filepath, filename, md5, additional_config_params
     else:
         report['success'] = True
 
-    general.set_report_and_cleanup(job_id, report, logger)
+    general.set_report_and_cleanup(job_id, report)
 
     logger.info("ended analyzer {} job_id {}"
                 "".format(analyzer_name, job_id))

@@ -54,7 +54,6 @@ pycparser==2.19
 pycurl==7.43.0.3
 pydeep==0.4
 pyexifinfo==0.4.0
-pyintelowl==0.1.2
 pymisp==2.4.122
 pyparsing==2.4.2
 pypdns==1.4.1

@@ -1,5 +1,5 @@
-# these methods are used almost everywhere, the logging is set to inherit the caller logger
 import time
+import logging
 import hashlib
 
 from api_app.exceptions import AnalyzerConfigurationException, AnalyzerRunException, AlreadyFailedJobException
@@ -9,11 +9,13 @@ from intel_owl import tasks, settings
 
 from django.utils import timezone
 
+logger = logging.getLogger(__name__)
 
-def start_analyzers(analyzers_to_execute, analyzers_config, job_id, md5, is_sample, logger):
-    set_job_status(job_id, "running", logger)
+
+def start_analyzers(analyzers_to_execute, analyzers_config, job_id, md5, is_sample):
+    set_job_status(job_id, "running")
     if is_sample:
-        file_path, filename = get_filepath_filename(job_id, logger)
+        file_path, filename = get_filepath_filename(job_id)
     else:
         observable_name, observable_classification = get_observable_data(job_id)
 
@@ -36,7 +38,7 @@ def start_analyzers(analyzers_to_execute, analyzers_config, job_id, md5, is_samp
                     if run_hash_type == 'md5':
                         hash_value = md5
                     elif run_hash_type == 'sha256':
-                        hash_value = generate_sha256(job_id, logger)
+                        hash_value = generate_sha256(job_id)
                     else:
                         error_message = "only md5 and sha256 are supported but you asked {}. job_id {}" \
                                         "".format(run_hash_type, job_id)
@@ -56,7 +58,7 @@ def start_analyzers(analyzers_to_execute, analyzers_config, job_id, md5, is_samp
         except (AnalyzerConfigurationException, AnalyzerRunException) as e:
             error_message = "job_id {}. analyzer: {}. error: {}".format(job_id, analyzer, e)
             logger.error(error_message)
-            set_failed_analyzer(analyzer, job_id, error_message, logger)
+            set_failed_analyzer(analyzer, job_id, error_message)
 
 
 def object_by_job_id(job_id):
@@ -68,7 +70,7 @@ def object_by_job_id(job_id):
     return job_object
 
 
-def get_binary(job_id, logger, job_object=None):
+def get_binary(job_id, job_object=None):
     if not job_object:
         job_object = object_by_job_id(job_id)
     logger.info("getting binary for job_id {}".format(job_id))
@@ -79,12 +81,12 @@ def get_binary(job_id, logger, job_object=None):
     return binary
 
 
-def generate_sha256(job_id, logger):
-    binary = get_binary(job_id, logger)
+def generate_sha256(job_id):
+    binary = get_binary(job_id)
     return hashlib.sha256(binary).hexdigest()
 
 
-def get_filepath_filename(job_id, logger):
+def get_filepath_filename(job_id):
     # this function allows to minimize access to the database
     # in this way the analyzers could not touch the DB until the end of the analysis
     job_object = object_by_job_id(job_id)
@@ -117,7 +119,7 @@ def get_basic_report_template(analyzer_name):
     }
 
 
-def set_report_and_cleanup(job_id, report, logger):
+def set_report_and_cleanup(job_id, report):
     logger.info("start set_report_and_cleanup for job_id:{}, analyzer:{}"
                 "".format(job_id, report.get('name', '')))
     job_object = None
@@ -151,7 +153,7 @@ def set_report_and_cleanup(job_id, report, logger):
                 status_to_set = "failed"
             elif failed_analyzers >= 1:
                 status_to_set = "reported_with_fails"
-            set_job_status(job_id, status_to_set, logger)
+            set_job_status(job_id, status_to_set)
             job_object.finished_analysis_time = get_now()
             job_object.save(update_fields=['finished_analysis_time'])
 
@@ -161,12 +163,12 @@ def set_report_and_cleanup(job_id, report, logger):
 
     except Exception as e:
         logger.exception("job_id: {}, Error: {}".format(job_id, e))
-        set_job_status(job_id, "failed", logger, errors=[str(e)])
+        set_job_status(job_id, "failed", errors=[str(e)])
         job_object.finished_analysis_time = get_now()
         job_object.save(update_fields=['finished_analysis_time'])
 
 
-def set_job_status(job_id, status, logger, errors=None):
+def set_job_status(job_id, status, errors=None):
     message = "setting job_id {} to status {}".format(job_id, status)
     if status == 'failed':
         logger.error(message)
@@ -179,11 +181,11 @@ def set_job_status(job_id, status, logger, errors=None):
     job_object.save()
 
 
-def set_failed_analyzer(analyzer_name, job_id, error_message, logger):
+def set_failed_analyzer(analyzer_name, job_id, error_message):
     logger.info("setting analyzer {} of job_id {} as failed. Error message:{}"
                 "".format(analyzer_name, job_id, error_message))
     report = get_basic_report_template(analyzer_name)
     report['errors'].append(error_message)
-    set_report_and_cleanup(job_id, report, logger)
+    set_report_and_cleanup(job_id, report)
 
 

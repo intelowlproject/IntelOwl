@@ -6,7 +6,7 @@ from django.test import TestCase
 
 from api_app.script_analyzers.observable_analyzers import abuseipdb, shodan, fortiguard, maxmind, greynoise, googlesf, otx, \
     talos, tor, circl_pssl, circl_pdns, robtex_ip, robtex_fdns, robtex_rdns, vt2_get, ha_get, vt3_get, misp, dnsdb,\
-    honeydb_twitter_scan, hunter
+    honeydb_twitter_scan, hunter, threatminer_pdns_and_reports_tagging, threatminer_subdomains
 
 from api_app.models import Job
 
@@ -37,6 +37,14 @@ class IPAnalyzersTests(TestCase):
 
     def test_shodan(self):
         report = shodan.run("Shodan", self.job_id, self.observable_name, self.observable_classification, {})
+        self.assertEqual(report.get('success', False), True)
+
+    def test_threatminer_pdns(self):
+        report = threatminer_pdns_and_reports_tagging.run("Threatminer_PDNS", self.job_id, self.observable_name, self.observable_classification, {})
+        self.assertEqual(report.get('success', False), True)
+
+    def test_threatminer_reports_tagging(self):
+        report = threatminer_pdns_and_reports_tagging.run("Threatminer_Reports_Tagging", self.job_id, self.observable_name, self.observable_classification, {})
         self.assertEqual(report.get('success', False), True)
 
     def test_honeydb(self):
@@ -144,6 +152,19 @@ class DomainAnalyzersTests(TestCase):
     def test_robtex_fdns(self):
         report = robtex_fdns.run("Robtex_FDNS", self.job_id, self.observable_name, self.observable_classification, {})
         self.assertEqual(report.get('success', False), True)
+
+    def test_threatminer_pdns(self):
+        report = threatminer_pdns_and_reports_tagging.run("Threatminer_PDNS", self.job_id, self.observable_name, self.observable_classification, {})
+        self.assertEqual(report.get('success', False), True)
+
+    def test_threatminer_reports_tagging(self):
+        report = threatminer_pdns_and_reports_tagging.run("Threatminer_Reports_Tagging", self.job_id, self.observable_name, self.observable_classification, {})
+        self.assertEqual(report.get('success', False), True)
+
+    def test_threatminer_subomains(self):
+        report = threatminer_subdomains.run("Threatminer_Subdomains", self.job_id, self.observable_name, self.observable_classification, {})
+        self.assertEqual(report.get('success', False), True)
+    
 
     def test_dnsdb(self):
         report = dnsdb.run("DNSDB", self.job_id, self.observable_name, self.observable_classification, {})

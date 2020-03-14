@@ -9,6 +9,8 @@ from intel_owl import secrets
 
 logger = get_task_logger(__name__)
 
+base_url = "https://api.shodan.io/"
+
 
 def run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params):
     logger.info("started analyzer {} job_id {} observable {}"
@@ -22,17 +24,10 @@ def run(analyzer_name, job_id, observable_name, observable_classification, addit
         if not api_key:
             raise AnalyzerRunException("no api key retrieved")
 
-        params = {
-            'key': api_key,
-            'minify': True
-        }
-        url = 'https://api.shodan.io/shodan/host/{}'.format(observable_name)
-        response = requests.get(url, params=params)
-        response.raise_for_status()
+        result = _shodan_get_report(api_key, observable_name, analyzer_name, observable_classification)
 
-        json_response = response.json()
-        # pprint.pprint(json_response)
-        report['report'] = json_response
+        # pprint.pprint(result)
+        report['report'] = result
     except AnalyzerRunException as e:
         error_message = "job_id:{} analyzer:{} observable_name:{} Analyzer error {}" \
                         "".format(job_id, analyzer_name, observable_name, e)
@@ -55,3 +50,29 @@ def run(analyzer_name, job_id, observable_name, observable_classification, addit
                 "".format(analyzer_name, job_id, observable_name))
 
     return report
+
+
+def _shodan_get_report(api_key, observable_name, analyzer_name, observable_classification):
+    
+    if analyzer_name == 'Shodan_Search':
+        params = {
+            'key': api_key,
+            'minify': True
+        }
+        uri = 'shodan/host/{}'.format(observable_name)
+    elif analyzer_name == 'Shodan_Honeyscore':
+        params = {
+            'key': api_key,
+        }
+        uri = 'labs/honeyscore/{}'.format(observable_name)
+    else:
+        raise AnalyzerRunException("not supported observable type {}. Supported is ip"
+                                   "".format(observable_classification))
+
+    try:
+        response = requests.get(base_url + uri, params=params)
+        response.raise_for_status()
+    except requests.RequestException as e:
+        raise AnalyzerRunException(e)
+    result = response.json()
+    return result

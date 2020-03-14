@@ -68,7 +68,7 @@
         "external_service": true,
         "python_module": "robtexip_run"
     },
-    "Shodan": {
+    "Shodan_Search": {
         "type": "observable",
         "observable_supported": ["ip"],
         "external_service": true,
@@ -98,10 +98,11 @@
         "external_service": true,
         "python_module": "talos_run"
     },
-    "Shodan_Search": {
+    "Shodan_Honeyscore": {
         "type": "observable",
         "observable_supported": ["ip"],
-        "external_service": true
+        "external_service": true,
+        "python_module": "shodan_run"
     },
     "OTXQuery": {
         "type": "observable",

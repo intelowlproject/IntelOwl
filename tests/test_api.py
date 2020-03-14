@@ -69,7 +69,7 @@ class ApiTests(TestCase):
         self.assertFalse(errors)
 
     def test_send_analysis_request_ip(self):
-        analyzers_requested = ["TorProject", "AbuseIPDB", "Shodan", "MaxMindGeoIP", "CIRCLPassiveSSL",
+        analyzers_requested = ["TorProject", "AbuseIPDB", "Shodan_Search", "Shodan_Honeyscore", "MaxMindGeoIP", "CIRCLPassiveSSL",
                                "GreyNoiseAlpha", "GoogleSafebrowsing", "Robtex_IP_Query",
                                "Robtex_Reverse_PDNS_Query", "TalosReputation", "OTXQuery",
                                "VirusTotal_Get_v2_Observable", "HybridAnalysis_Get_Observable", "Hunter",

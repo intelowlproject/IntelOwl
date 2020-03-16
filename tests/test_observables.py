@@ -35,8 +35,12 @@ class IPAnalyzersTests(TestCase):
         report = abuseipdb.run("AbuseIPDB", self.job_id, self.observable_name, self.observable_classification, {})
         self.assertEqual(report.get('success', False), True)
 
-    def test_shodan(self):
-        report = shodan.run("Shodan", self.job_id, self.observable_name, self.observable_classification, {})
+    def test_shodan_search(self):
+        report = shodan.run("Shodan_Search", self.job_id, self.observable_name, self.observable_classification, {})
+        self.assertEqual(report.get('success', False), True)
+
+    def test_shodan_honeyscore(self):
+        report = shodan.run("Shodan_Honeyscore", self.job_id, self.observable_name, self.observable_classification, {})
         self.assertEqual(report.get('success', False), True)
 
     def test_honeydb(self):

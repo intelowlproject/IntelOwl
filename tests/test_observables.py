@@ -7,7 +7,7 @@ from unittest import skipIf
 
 from api_app.script_analyzers.observable_analyzers import abuseipdb, shodan, fortiguard, maxmind, greynoise, googlesf, otx, \
     talos, tor, circl_pssl, circl_pdns, robtex_ip, robtex_fdns, robtex_rdns, vt2_get, ha_get, vt3_get, misp, dnsdb,\
-    honeydb_twitter_scan, hunter
+    honeydb_twitter_scan, hunter, mb_get
 
 from api_app.models import Job
 from intel_owl import settings
@@ -262,4 +262,8 @@ class HashAnalyzersTests(TestCase):
     def test_misp_first(self):
         report = misp.run("MISP_FIRST", self.job_id, self.observable_name, self.observable_classification,
                           {'api_key_name': "FIRST_MISP_API", "url_key_name": "FIRST_MISP_URL"})
+        self.assertEqual(report.get('success', False), True)
+    
+    def test_mb_get(self):
+        report = mb_get.run("MalwareBazaar_Get_Observable", self.job_id, self.observable_name, self.observable_classification, {})
         self.assertEqual(report.get('success', False), True)

@@ -58,7 +58,7 @@ class ApiTests(TestCase):
 
     def test_send_analysis_request_domain(self):
         analyzers_requested = ["Fortiguard", "CIRCLPassiveDNS", "GoogleSafebrowsing", "Robtex_Forward_PDNS_Query",
-                               "OTXQuery", "VirusTotal_v3_Get_Observable", "HybridAnalysis_Get_Observable"]
+                               "OTXQuery", "VirusTotal_v3_Get_Observable", "HybridAnalysis_Get_Observable", "Threatminer_Subdomains", "Threatminer_Reports_Tagging", "Threatminer_PDNS"]
         observable_name = os.environ.get("TEST_DOMAIN", "")
         md5 = hashlib.md5(observable_name.encode('utf-8')).hexdigest()
         api_request_result = self.client.send_observable_analysis_request(md5, analyzers_requested,
@@ -73,7 +73,7 @@ class ApiTests(TestCase):
                                "GreyNoiseAlpha", "GoogleSafebrowsing", "Robtex_IP_Query",
                                "Robtex_Reverse_PDNS_Query", "TalosReputation", "OTXQuery",
                                "VirusTotal_Get_v2_Observable", "HybridAnalysis_Get_Observable", "Hunter",
-                               "HoneyDB"]
+                               "HoneyDB", "Threatminer_PDNS", "Threatminer_Reports_Tagging"]
         observable_name = os.environ.get("TEST_IP", "")
         md5 = hashlib.md5(observable_name.encode('utf-8')).hexdigest()
         api_request_result = self.client.send_observable_analysis_request(md5, analyzers_requested,

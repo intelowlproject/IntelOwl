@@ -5,7 +5,7 @@ from api_app.script_analyzers.file_analyzers import doc_info, file_info, pe_info
     cuckoo_scan, yara_scan, vt3_scan, strings_info, rtf_info
 from api_app.script_analyzers.observable_analyzers import abuseipdb, fortiguard, maxmind, greynoise, googlesf, otx, \
     talos, tor, circl_pdns, circl_pssl, robtex_fdns, robtex_ip, robtex_rdns, vt2_get, ha_get, vt3_get, misp, dnsdb, \
-    shodan, honeydb_twitter_scan, hunter
+    shodan, honeydb_twitter_scan, hunter, threatminer
 
 from api_app import crons
 from api_app.script_analyzers.file_analyzers import signature_info
@@ -70,6 +70,9 @@ def robtexip_run(analyzer_name, job_id, observable_name, observable_classificati
 def shodan_run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params):
     shodan.run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params)
 
+@shared_task(soft_time_limit=30)
+def threatminer_run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params):
+    threatminer.run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params)
 
 @shared_task(soft_time_limit=30)
 def hunter_run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params):

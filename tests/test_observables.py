@@ -6,7 +6,7 @@ from django.test import TestCase
 
 from api_app.script_analyzers.observable_analyzers import abuseipdb, shodan, fortiguard, maxmind, greynoise, googlesf, otx, \
     talos, tor, circl_pssl, circl_pdns, robtex_ip, robtex_fdns, robtex_rdns, vt2_get, ha_get, vt3_get, misp, dnsdb,\
-    honeydb_twitter_scan, hunter
+    honeydb_twitter_scan, hunter, threatminer
 
 from api_app.models import Job
 
@@ -43,6 +43,14 @@ class IPAnalyzersTests(TestCase):
         report = shodan.run("Shodan_Honeyscore", self.job_id, self.observable_name, self.observable_classification, {})
         self.assertEqual(report.get('success', False), True)
 
+    def test_threatminer_pdns(self):
+        report = threatminer.run("Threatminer_PDNS", self.job_id, self.observable_name, self.observable_classification, {})
+        self.assertEqual(report.get('success', False), True)
+    
+    def test_threatminer_reports_tagging(self):
+        report = threatminer.run("Threatminer_Reports_Tagging", self.job_id, self.observable_name, self.observable_classification, {})
+        self.assertEqual(report.get('success', False), True)
+    
     def test_honeydb(self):
         report = honeydb_twitter_scan.run("HoneyDB", self.job_id, self.observable_name, self.observable_classification,
                                           {})
@@ -135,6 +143,18 @@ class DomainAnalyzersTests(TestCase):
 
     def test_gsf(self):
         report = googlesf.run("GoogleSafeBrowsing", self.job_id, self.observable_name, self.observable_classification, {})
+        self.assertEqual(report.get('success', False), True)
+
+    def test_threatminer_subdomains(self):
+        report = threatminer.run("Threatminer_Subdomains", self.job_id, self.observable_name, self.observable_classification, {})
+        self.assertEqual(report.get('success', False), True)
+    
+    def test_threatminer_pdns(self):
+        report = threatminer.run("Threatminer_PDNS", self.job_id, self.observable_name, self.observable_classification, {})
+        self.assertEqual(report.get('success', False), True)
+    
+    def test_threatminer_reports_tagging(self):
+        report = threatminer.run("Threatminer_Reports_Tagging", self.job_id, self.observable_name, self.observable_classification, {})
         self.assertEqual(report.get('success', False), True)
 
     def test_otx(self):

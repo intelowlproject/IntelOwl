@@ -86,6 +86,24 @@
         "external_service": true,
         "python_module": "robtexfdns_run"
     },
+    "Threatminer_PDNS": {
+        "type": "observable",
+        "observable_supported": ["domain", "ip"],
+        "external_service": true,
+        "python_module": "threatminer_run"
+    },
+    "Threatminer_Reports_Tagging": {
+        "type": "observable",
+        "observable_supported": ["domain", "ip"],
+        "external_service": true,
+        "python_module": "threatminer_run"
+    },
+    "Threatminer_Subdomains": {
+        "type": "observable",
+        "observable_supported": ["domain"],
+        "external_service": true,
+        "python_module": "threatminer_run"
+    },
     "DNSDB": {
         "type": "observable",
         "observable_supported": ["domain", "url", "ip"],

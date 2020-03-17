@@ -15,6 +15,7 @@ DJANGO_LOG_DIRECTORY = "/var/log/intel_owl/django"
 PROJECT_LOCATION = "/opt/deploy/intel_owl"
 MEDIA_ROOT = "/opt/deploy/files_required"
 CERTS_DIR = "{}/certs".format(PROJECT_LOCATION)
+TRAVIS_TEST = True if os.environ.get('TRAVIS_TEST', False) == 'True' else False
 
 HTTPS_ENABLED = os.environ.get("HTTPS_ENABLED", "not_enabled")
 if HTTPS_ENABLED == "enabled":

@@ -3,6 +3,7 @@ import logging
 
 from django.core.files import File
 from django.test import TestCase
+from unittest import skipIf
 
 from api_app.script_analyzers import general
 from api_app.script_analyzers.file_analyzers import file_info, pe_info, doc_info, pdf_info, vt2_scan, intezer_scan, \
@@ -15,6 +16,9 @@ from api_app.script_analyzers.file_analyzers import signature_info
 from intel_owl import settings
 
 logger = logging.getLogger(__name__)
+# disable logging library for travis
+if settings.TRAVIS_TEST:
+    logging.disable(logging.CRITICAL)
 
 
 class FileAnalyzersEXETests(TestCase):
@@ -60,9 +64,11 @@ class FileAnalyzersEXETests(TestCase):
         self.assertEqual(report.get('success', False), True)
 
     def test_intezer_exe(self):
-        report = intezer_scan.run("Intezer_Scan", self.job_id, self.filepath, self.filename, self.md5, {})
+        additional_params = {'max_tries': 1, 'is_test': True}
+        report = intezer_scan.run("Intezer_Scan", self.job_id, self.filepath, self.filename, self.md5, additional_params)
         self.assertEqual(report.get('success', False), True)
 
+    @skipIf(settings.TRAVIS_TEST, "cuckoo instance missing")
     def test_cuckoo_exe(self):
         report = cuckoo_scan.run("Cuckoo_Scan", self.job_id, self.filepath, self.filename, self.md5, {})
         self.assertEqual(report.get('success', False), True)
@@ -99,10 +105,12 @@ class FileAnalyzersDLLTests(TestCase):
         self.filepath, self.filename = general.get_filepath_filename(self.job_id, logger)
         self.md5 = test_job.md5
 
+    @skipIf(settings.TRAVIS_TEST, "dll check not required for travis")
     def test_fileinfo_dll(self):
         report = file_info.run("File_Info", self.job_id, self.filepath, self.filename, self.md5, {})
         self.assertEqual(report.get('success', False), True)
 
+    @skipIf(settings.TRAVIS_TEST, "dll check not required for travis")
     def test_peinfo_dll(self):
         report = pe_info.run("PE_Info", self.job_id, self.filepath, self.filename, self.md5, {})
         self.assertEqual(report.get('success', False), True)

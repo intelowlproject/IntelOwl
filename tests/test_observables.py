@@ -161,7 +161,7 @@ class IPAnalyzersTests(TestCase):
         self.assertEqual(report.get('success', False), True)
 
     def test_ha_get(self, mock_get=None, mock_post=None):
-        report = ha_get.run("HA_Get", self.job_id, self.observable_name, self.observable_classification, {})
+        report = ha_get.run("HybridAnalysis_Get_Observable", self.job_id, self.observable_name, self.observable_classification, {})
         self.assertEqual(report.get('success', False), True)
 
     def test_vt3_get(self, mock_get=None, mock_post=None):
@@ -217,7 +217,7 @@ class DomainAnalyzersTests(TestCase):
         self.assertEqual(report.get('success', False), True)
 
     def test_robtex_fdns(self, mock_get=None, mock_post=None):
-        report = robtex_fdns.run("Robtex_FDNS", self.job_id, self.observable_name, self.observable_classification, {})
+        report = robtex_fdns.run("Robtex_Forward_PDNS_Query", self.job_id, self.observable_name, self.observable_classification, {})
         self.assertEqual(report.get('success', False), True)
 
     def test_dnsdb(self, mock_get=None, mock_post=None):
@@ -229,7 +229,7 @@ class DomainAnalyzersTests(TestCase):
         self.assertEqual(report.get('success', False), True)
 
     def test_ha_get(self, mock_get=None, mock_post=None):
-        report = ha_get.run("HA_Get", self.job_id, self.observable_name, self.observable_classification, {})
+        report = ha_get.run("HybridAnalysis_Get_Observable", self.job_id, self.observable_name, self.observable_classification, {})
         self.assertEqual(report.get('success', False), True)
 
     def test_vt3_get(self, mock_get=None, mock_post=None):
@@ -281,7 +281,7 @@ class URLAnalyzersTests(TestCase):
         self.assertEqual(report.get('success', False), True)
 
     def test_robtex_fdns(self, mock_get=None, mock_post=None):
-        report = robtex_fdns.run("Robtex_FDNS", self.job_id, self.observable_name, self.observable_classification, {})
+        report = robtex_fdns.run("Robtex_Forward_PDNS_Query", self.job_id, self.observable_name, self.observable_classification, {})
         self.assertEqual(report.get('success', False), True)
 
     def test_vt_get(self, mock_get=None, mock_post=None):
@@ -322,7 +322,7 @@ class HashAnalyzersTests(TestCase):
         self.assertEqual(report.get('success', False), True)
 
     def test_ha_get(self, mock_get=None, mock_post=None):
-        report = ha_get.run("HA_Get", self.job_id, self.observable_name, self.observable_classification, {})
+        report = ha_get.run("HybridAnalysis_Get_Observable", self.job_id, self.observable_name, self.observable_classification, {})
         self.assertEqual(report.get('success', False), True)
 
     def test_vt3_get(self, mock_get=None, mock_post=None):

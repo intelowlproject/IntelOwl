@@ -83,11 +83,11 @@ class IPAnalyzersTests(TestCase):
         self.assertEqual(report.get('success', False), True)
 
     def test_robtex_ip(self):
-        report = robtex_ip.run("Robtex_IP", self.job_id, self.observable_name, self.observable_classification, {})
+        report = robtex_ip.run("Robtex_IP_Query", self.job_id, self.observable_name, self.observable_classification, {})
         self.assertEqual(report.get('success', False), True)
 
     def test_robtex_rdns(self):
-        report = robtex_rdns.run("Robtex_RDNS", self.job_id, self.observable_name, self.observable_classification, {})
+        report = robtex_rdns.run("Robtex_Reverse_PDNS_Query", self.job_id, self.observable_name, self.observable_classification, {})
         self.assertEqual(report.get('success', False), True)
 
     @skipIf(settings.TRAVIS_TEST, "dnsdb account missing")
@@ -100,7 +100,7 @@ class IPAnalyzersTests(TestCase):
         self.assertEqual(report.get('success', False), True)
 
     def test_ha_get(self):
-        report = ha_get.run("HA_Get", self.job_id, self.observable_name, self.observable_classification, {})
+        report = ha_get.run("HybridAnalysis_Get_Observable", self.job_id, self.observable_name, self.observable_classification, {})
         self.assertEqual(report.get('success', False), True)
 
     def test_vt3_get(self):
@@ -152,7 +152,7 @@ class DomainAnalyzersTests(TestCase):
         self.assertEqual(report.get('success', False), True)
 
     def test_robtex_fdns(self):
-        report = robtex_fdns.run("Robtex_FDNS", self.job_id, self.observable_name, self.observable_classification, {})
+        report = robtex_fdns.run("Robtex_Forward_PDNS_Query", self.job_id, self.observable_name, self.observable_classification, {})
         self.assertEqual(report.get('success', False), True)
 
     @skipIf(settings.TRAVIS_TEST, "dnsdb account missing")
@@ -165,7 +165,7 @@ class DomainAnalyzersTests(TestCase):
         self.assertEqual(report.get('success', False), True)
 
     def test_ha_get(self):
-        report = ha_get.run("HA_Get", self.job_id, self.observable_name, self.observable_classification, {})
+        report = ha_get.run("HybridAnalysis_Get_Observable", self.job_id, self.observable_name, self.observable_classification, {})
         self.assertEqual(report.get('success', False), True)
 
     def test_vt3_get(self):
@@ -213,7 +213,7 @@ class URLAnalyzersTests(TestCase):
         self.assertEqual(report.get('success', False), True)
 
     def test_robtex_fdns(self):
-        report = robtex_fdns.run("Robtex_FDNS", self.job_id, self.observable_name, self.observable_classification, {})
+        report = robtex_fdns.run("Robtex_Forward_PDNS_Query", self.job_id, self.observable_name, self.observable_classification, {})
         self.assertEqual(report.get('success', False), True)
 
     def test_vt_get(self):
@@ -252,7 +252,7 @@ class HashAnalyzersTests(TestCase):
         self.assertEqual(report.get('success', False), True)
 
     def test_ha_get(self):
-        report = ha_get.run("HA_Get", self.job_id, self.observable_name, self.observable_classification, {})
+        report = ha_get.run("HybridAnalysis_Get_Observable", self.job_id, self.observable_name, self.observable_classification, {})
         self.assertEqual(report.get('success', False), True)
 
     def test_vt3_get(self):

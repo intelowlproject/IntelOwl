@@ -1,13 +1,12 @@
 import traceback
-
+import logging
 import requests
-from celery.utils.log import get_task_logger
 
 from api_app.exceptions import AnalyzerRunException
 from api_app.script_analyzers import general
 from intel_owl import secrets
 
-logger = get_task_logger(__name__)
+logger = logging.getLogger(__name__)
 
 base_url = "https://api.shodan.io/"
 
@@ -24,7 +23,8 @@ def run(analyzer_name, job_id, observable_name, observable_classification, addit
         if not api_key:
             raise AnalyzerRunException("no api key retrieved")
 
-        result = _shodan_get_report(api_key, observable_name, analyzer_name, observable_classification)
+        result = _shodan_get_report(api_key, observable_name, observable_classification,
+                                    additional_config_params)
 
         # pprint.pprint(result)
         report['report'] = result
@@ -44,7 +44,7 @@ def run(analyzer_name, job_id, observable_name, observable_classification, addit
     else:
         report['success'] = True
 
-    general.set_report_and_cleanup(job_id, report, logger)
+    general.set_report_and_cleanup(job_id, report)
 
     logger.info("ended analyzer {} job_id {} observable {}"
                 "".format(analyzer_name, job_id, observable_name))
@@ -52,21 +52,22 @@ def run(analyzer_name, job_id, observable_name, observable_classification, addit
     return report
 
 
-def _shodan_get_report(api_key, observable_name, analyzer_name, observable_classification):
-    
-    if analyzer_name == 'Shodan_Search':
+def _shodan_get_report(api_key, observable_name, observable_classification, additional_config_params):
+    shodan_analysis = additional_config_params.get('shodan_analysis', 'search')
+
+    if shodan_analysis == 'search':
         params = {
             'key': api_key,
             'minify': True
         }
         uri = 'shodan/host/{}'.format(observable_name)
-    elif analyzer_name == 'Shodan_Honeyscore':
+    elif shodan_analysis == 'honeyscore':
         params = {
             'key': api_key,
         }
         uri = 'labs/honeyscore/{}'.format(observable_name)
     else:
-        raise AnalyzerRunException("not supported observable type {}. Supported is ip"
+        raise AnalyzerRunException("not supported observable type {}. Supported is IP"
                                    "".format(observable_classification))
 
     try:

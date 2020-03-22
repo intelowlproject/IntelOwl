@@ -2,6 +2,7 @@ import logging
 import os
 
 from django.test import TestCase
+from unittest import skipIf
 
 from api_app.script_analyzers.file_analyzers import yara_scan
 from api_app.script_analyzers.observable_analyzers import maxmind,  \
@@ -13,7 +14,7 @@ from intel_owl import settings
 
 logger = logging.getLogger(__name__)
 # disable logging library for travis
-if settings.TRAVIS_TEST:
+if settings.DISABLE_LOGGING_TEST:
     logging.disable(logging.CRITICAL)
 
 
@@ -29,6 +30,7 @@ class CronTests(TestCase):
         logger.info("old jobs deleted: {}".format(num_jobs_to_delete))
         self.assertTrue(True)
 
+    @skipIf(settings.MOCK_CONNECTIONS, "not working without connection")
     def test_maxmind_updater(self):
         db_file_path = maxmind.updater({})
         self.assertTrue(os.path.exists(db_file_path))

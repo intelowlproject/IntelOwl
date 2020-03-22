@@ -2,15 +2,14 @@ import os
 import time
 import traceback
 import requests
-
-from celery.utils.log import get_task_logger
+import logging
 
 from api_app.exceptions import AnalyzerRunException
 from api_app.script_analyzers import general
 from api_app.utilities import get_now_date_only
 from intel_owl import secrets
 
-logger = get_task_logger(__name__)
+logger = logging.getLogger(__name__)
 
 base_url = "https://analyze.intezer.com/api/v2-0"
 
@@ -35,7 +34,7 @@ def run(analyzer_name, job_id, filepath, filename, md5, additional_config_params
             if not intezer_token:
                 raise AnalyzerRunException("token extraction failed")
 
-        binary = general.get_binary(job_id, logger)
+        binary = general.get_binary(job_id)
         result = _intezer_scan_file(intezer_token, md5, filename, binary, additional_config_params)
 
         # pprint.pprint(result)
@@ -56,7 +55,7 @@ def run(analyzer_name, job_id, filepath, filename, md5, additional_config_params
     else:
         report['success'] = True
 
-    general.set_report_and_cleanup(job_id, report, logger)
+    general.set_report_and_cleanup(job_id, report)
 
     logger.info("ended analyzer {} job_id {}"
                 "".format(analyzer_name, job_id))
@@ -92,7 +91,7 @@ def _intezer_scan_file(intezer_token, md5, filename, binary, additional_config_p
         if response.status_code != 200:
             time.sleep(polling_time)
             logger.info("intezer md5 {} polling for result try n.{}".format(md5, chance+1))
-            result_url = response.json()['result_url']
+            result_url = response.json().get('result_url', '')
             response = session.get(base_url + result_url)
             response.raise_for_status()
 

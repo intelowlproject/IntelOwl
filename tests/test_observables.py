@@ -144,11 +144,12 @@ class IPAnalyzersTests(TestCase):
         self.assertEqual(report.get('success', False), True)
 
     def test_robtex_ip(self, mock_get=None, mock_post=None):
-        report = robtex_ip.run("Robtex_IP", self.job_id, self.observable_name, self.observable_classification, {})
+        report = robtex_ip.run("Robtex_IP_Query", self.job_id, self.observable_name, self.observable_classification, {})
         self.assertEqual(report.get('success', False), True)
 
     def test_robtex_rdns(self, mock_get=None, mock_post=None):
-        report = robtex_rdns.run("Robtex_RDNS", self.job_id, self.observable_name, self.observable_classification, {})
+        report = robtex_rdns.run("Robtex_Reverse_PDNS_Query", self.job_id, self.observable_name,
+                                 self.observable_classification, {})
         self.assertEqual(report.get('success', False), True)
 
     def test_dnsdb(self, mock_get=None, mock_post=None):

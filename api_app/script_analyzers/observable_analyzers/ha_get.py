@@ -1,13 +1,13 @@
 import traceback
+import logging
 
 import requests
-from celery.utils.log import get_task_logger
 
 from api_app.exceptions import AnalyzerRunException
 from api_app.script_analyzers import general
 from intel_owl import secrets
 
-logger = get_task_logger(__name__)
+logger = logging.getLogger(__name__)
 
 ha_base = "https://www.hybrid-analysis.com/api/v2/"
 
@@ -44,7 +44,7 @@ def run(analyzer_name, job_id, observable_name, observable_classification, addit
     else:
         report['success'] = True
 
-    general.set_report_and_cleanup(job_id, report, logger)
+    general.set_report_and_cleanup(job_id, report)
 
     logger.info("ended analyzer {} job_id {} observable {}"
                 "".format(analyzer_name, job_id, observable_name))

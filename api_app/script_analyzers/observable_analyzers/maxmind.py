@@ -1,17 +1,17 @@
 import datetime
 import os
+import logging
 import tarfile
 import traceback
 
 import maxminddb
 import requests
-from celery.utils.log import get_task_logger
 
 from api_app.exceptions import AnalyzerRunException
 from api_app.script_analyzers import general
 from intel_owl import settings, secrets
 
-logger = get_task_logger(__name__)
+logger = logging.getLogger(__name__)
 
 db_name = "GeoLite2-Country.mmdb"
 database_location = "{}/{}".format(settings.MEDIA_ROOT, db_name)
@@ -53,7 +53,7 @@ def run(analyzer_name, job_id, observable_name, observable_classification, addit
     else:
         report['success'] = True
 
-    general.set_report_and_cleanup(job_id, report, logger)
+    general.set_report_and_cleanup(job_id, report)
 
     logger.info("finished analyzer {} job_id {} observable {}"
                 "".format(analyzer_name, job_id, observable_name))

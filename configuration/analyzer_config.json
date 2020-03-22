@@ -68,11 +68,23 @@
         "external_service": true,
         "python_module": "robtexip_run"
     },
-    "Shodan": {
+    "Shodan_Search": {
         "type": "observable",
         "observable_supported": ["ip"],
         "external_service": true,
-        "python_module": "shodan_run"
+        "python_module": "shodan_run",
+        "additional_config_params": {
+            "shodan_analysis": "search"
+        }
+    },
+    "Shodan_Honeyscore": {
+        "type": "observable",
+        "observable_supported": ["ip"],
+        "external_service": true,
+        "python_module": "shodan_run",
+        "additional_config_params": {
+            "shodan_analysis": "honeyscore"
+        }
     },
     "Robtex_Reverse_PDNS_Query": {
         "type": "observable",
@@ -97,11 +109,6 @@
         "observable_supported": ["ip"],
         "external_service": true,
         "python_module": "talos_run"
-    },
-    "Shodan_Search": {
-        "type": "observable",
-        "observable_supported": ["ip"],
-        "external_service": true
     },
     "OTXQuery": {
         "type": "observable",

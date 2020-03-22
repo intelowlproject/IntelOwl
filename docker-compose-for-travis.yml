@@ -7,10 +7,10 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     env_file:
-      - ./env_file_postgres
+      - ./env_file_postgres_template
 
   uwsgi:
-    image: certego/intelowl:latest
+    build: .
     container_name: intel_owl_uwsgi
     volumes:
       - ./configuration/intel_owl.ini:/etc/uwsgi/sites/intel_owl.ini
@@ -23,7 +23,7 @@ services:
     expose:
       - "8001"
     env_file:
-      - env_file_app
+      - env_file_app_travis
     depends_on:
       - postgres
 
@@ -47,7 +47,7 @@ services:
     container_name: intel_owl_rabbitmq
 
   celery_beat:
-    image: certego/intelowl:latest
+    build: .
     container_name: intel_owl_celery_beat
     restart: unless-stopped
     command: /usr/local/bin/celery -A intel_owl.celery beat --uid www-data --gid www-data --pidfile=/tmp/celerybeat.pid --schedule=/tmp/celerybeat-schedule
@@ -56,13 +56,13 @@ services:
       - generic_logs:/var/log/intel_owl
       - shared_files:/opt/deploy/files_required
     env_file:
-      - env_file_app
+      - env_file_app_travis
     depends_on:
       - rabbitmq
       - postgres
 
   celery_worker:
-    image: certego/intelowl:latest
+    build: .
     container_name: intel_owl_celery_worker
     restart: unless-stopped
     stop_grace_period: 3m
@@ -72,7 +72,7 @@ services:
       - generic_logs:/var/log/intel_owl
       - shared_files:/opt/deploy/files_required
     env_file:
-      - env_file_app
+      - env_file_app_travis
     depends_on:
       - rabbitmq
       - postgres

@@ -1,15 +1,15 @@
 import time
+import logging
 import traceback
 
 import requests
-from celery.utils.log import get_task_logger
 from api_app.script_analyzers import general
 
 from api_app.exceptions import AnalyzerRunException
 from api_app.script_analyzers.observable_analyzers import vt2_get
 from intel_owl import secrets
 
-logger = get_task_logger(__name__)
+logger = logging.getLogger(__name__)
 
 vt_base = "https://www.virustotal.com/vtapi/v2/"
 
@@ -31,7 +31,7 @@ def run(analyzer_name, job_id, filepath, filename, md5, additional_config_params
 
         notify_url = secrets.get_secret("VT_NOTIFY_URL")
 
-        binary = general.get_binary(job_id, logger)
+        binary = general.get_binary(job_id)
         result = _vt_scan_file(api_key, notify_url, binary)
 
         # in case we didn't use the webhook to get the result of the scan, start a poll for the result
@@ -41,7 +41,7 @@ def run(analyzer_name, job_id, filepath, filename, md5, additional_config_params
             if not scan_id:
                 raise(AnalyzerRunException("no scan_id given by VirusTotal to retrieve the results"))
             # max 5 minutes waiting
-            max_tries = 10
+            max_tries = additional_config_params.get('max_tries', 10)
             poll_distance = 30
             got_result = False
             for chance in range(max_tries):
@@ -77,7 +77,7 @@ def run(analyzer_name, job_id, filepath, filename, md5, additional_config_params
     else:
         report['success'] = True
 
-    general.set_report_and_cleanup(job_id, report, logger)
+    general.set_report_and_cleanup(job_id, report)
 
     logger.info("ended analyzer {} job_id {}"
                 "".format(analyzer_name, job_id))

@@ -27,7 +27,7 @@ def redirect_to_login(request):
 @authentication_classes((TokenAuthentication,))
 @permission_classes((IsAuthenticated,))
 def ask_analysis_availability(request):
-    '''
+    """
     This is useful to avoid to repeat the same analysis multiple times.
     By default this API checks if there are already analysis related to the md5 in status "running"...
     ...or "reported_without_fails"
@@ -39,7 +39,7 @@ def ask_analysis_availability(request):
     :parameter: [running_only]: check only for running analysis, default False, any value is True
 
     :return: 200 if ok with list of all analysis related to that md5, 500 if failed
-    '''
+    """
     source = str(request.user)
     analyzers_needed_list = []
     try:
@@ -91,7 +91,7 @@ def ask_analysis_availability(request):
 @authentication_classes((TokenAuthentication,))
 @permission_classes((IsAuthenticated,))
 def send_analysis_request(request):
-    '''
+    """
     This API allows to start a Job related to a file or an observable
 
     data_received parameters:
@@ -105,14 +105,17 @@ def send_analysis_request(request):
     :parameter: analyzers_requested: list of requested analyzer to run, before filters
     :parameter: [force_privacy]: boolean, default False, enable it if you want to avoid to run analyzers with privacy issues
     :parameter: [disable_external_analyzers]: boolean, default False, enable it if you want to exclude external analyzers
+    :parameter: [test]: disable analysis for API testing
 
     :return: 202 if accepted, 500 if failed
-    '''
+    """
     source = str(request.user)
     warnings = []
     try:
         data_received = request.data
         logger.info("received request from {}. Data:{}".format(source, dict(data_received)))
+
+        test = data_received.get('test', False)
 
         params = {
             'source': source
@@ -164,7 +167,8 @@ def send_analysis_request(request):
                             status=status.HTTP_400_BAD_REQUEST)
 
         is_sample = serializer.data.get('is_sample', '')
-        general.start_analyzers(params['analyzers_to_execute'], analyzers_config, job_id, md5, is_sample, logger)
+        if not test:
+            general.start_analyzers(params['analyzers_to_execute'], analyzers_config, job_id, md5, is_sample)
 
         response_dict = {"status": "accepted", "job_id": job_id, "warnings": warnings,
                          "analyzers_running": cleaned_analyzer_list}
@@ -184,13 +188,13 @@ def send_analysis_request(request):
 @authentication_classes((TokenAuthentication,))
 @permission_classes((IsAuthenticated,))
 def ask_analysis_result(request):
-    '''
+    """
     This API allows to retrieve the status and results of a specific Job based on its ID
 
     :parameter: job_id: integer, Job ID
 
     :return: 200 if ok, 500 if failed
-    '''
+    """
     source = str(request.user)
     try:
         data_received = request.query_params

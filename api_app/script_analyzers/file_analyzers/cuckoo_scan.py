@@ -2,14 +2,13 @@ import re
 import time
 import traceback
 import requests
-
-from celery.utils.log import get_task_logger
+import logging
 
 from api_app.exceptions import AnalyzerRunException
 from api_app.script_analyzers import general
 from intel_owl import secrets
 
-logger = get_task_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class CuckooAnalysis:
@@ -43,7 +42,7 @@ def run(analyzer_name, job_id, filepath, filename, md5, additional_config_params
 
         cuckoo_analysis = CuckooAnalysis(api_key, cuckoo_url)
 
-        binary = general.get_binary(job_id, logger)
+        binary = general.get_binary(job_id)
         if not binary:
             raise AnalyzerRunException("is the binary empty?!")
         _cuckoo_scan_file(cuckoo_analysis, additional_config_params, filename, md5, binary)
@@ -67,7 +66,7 @@ def run(analyzer_name, job_id, filepath, filename, md5, additional_config_params
     else:
         report['success'] = True
 
-    general.set_report_and_cleanup(job_id, report, logger)
+    general.set_report_and_cleanup(job_id, report)
 
     logger.info("ended analyzer {} job_id {}"
                 "".format(analyzer_name, job_id))
@@ -79,7 +78,7 @@ def _cuckoo_scan_file(cuckoo_analysis, additional_config_params, filename, md5, 
 
     _cuckoo_request_scan(cuckoo_analysis, additional_config_params, filename, md5, binary)
 
-    _cuckoo_poll_result(cuckoo_analysis, filename, md5)
+    _cuckoo_poll_result(cuckoo_analysis, filename, md5, additional_config_params)
 
     _cuckoo_retrieve_and_create_report(cuckoo_analysis, filename, md5)
 
@@ -90,7 +89,7 @@ def _cuckoo_request_scan(cuckoo_analysis, additional_config_params, filename, md
     # send the file for analysis
     name_to_send = filename if filename else md5
     files = {"file": (name_to_send, binary)}
-    max_post_tries = 5
+    max_post_tries = additional_config_params.get('max_post_tries', 5)
     post_success = False
     response = None
     for chance in range(max_post_tries):
@@ -108,16 +107,17 @@ def _cuckoo_request_scan(cuckoo_analysis, additional_config_params, filename, md
 
     if post_success:
         json_response = response.json()
-        cuckoo_analysis.task_id = json_response['task_ids'][0] if 'task_ids' in json_response.keys() else json_response['task_id']
+        cuckoo_analysis.task_id = json_response['task_ids'][0] if 'task_ids' in json_response.keys()\
+            else json_response.get('task_id', 1)
     else:
         raise AnalyzerRunException("failed max tries to post file to cuckoo for analysis")
 
 
-def _cuckoo_poll_result(cuckoo_analysis, filename, md5):
+def _cuckoo_poll_result(cuckoo_analysis, filename, md5, additional_config_params):
     logger.info("polling result for {} {}, task_id {}".format(filename, md5, cuckoo_analysis.task_id))
 
     # poll for the result
-    max_get_tries = 60
+    max_get_tries = additional_config_params.get('max_poll_tries', 50)
     poll_time = 15
     get_success = False
     for chance in range(max_get_tries):

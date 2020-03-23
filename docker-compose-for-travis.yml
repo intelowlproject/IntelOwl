@@ -50,7 +50,7 @@ services:
     build: .
     container_name: intel_owl_celery_beat
     restart: unless-stopped
-    command: /usr/local/bin/celery -A intel_owl.celery beat --uid www-data --gid www-data -l info -f "/var/log/intel_owl/celery/beat.log" --pidfile=/tmp/celerybeat.pid --schedule=/tmp/celerybeat-schedule
+    command: /usr/local/bin/celery -A intel_owl.celery beat --uid www-data --gid www-data --pidfile=/tmp/celerybeat.pid --schedule=/tmp/celerybeat-schedule
     volumes:
       - ./configuration/analyzer_config.json:/opt/deploy/configuration/analyzer_config.json
       - generic_logs:/var/log/intel_owl
@@ -66,7 +66,7 @@ services:
     container_name: intel_owl_celery_worker
     restart: unless-stopped
     stop_grace_period: 3m
-    command: /usr/local/bin/celery -A intel_owl.celery worker --uid www-data --gid www-data -l info --logfile="/var/log/intel_owl/celery/%n.log" --pidfile="/tmp/%n.pid" --time-limit=1000
+    command: /usr/local/bin/celery -A intel_owl.celery worker --uid www-data --gid www-data --pidfile="/tmp/%n.pid" --time-limit=1000
     volumes:
       - ./configuration/analyzer_config.json:/opt/deploy/configuration/analyzer_config.json
       - generic_logs:/var/log/intel_owl

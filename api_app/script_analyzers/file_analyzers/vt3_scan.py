@@ -1,15 +1,15 @@
+import logging
 import time
 import traceback
 
 import requests
-from celery.utils.log import get_task_logger
 from api_app.script_analyzers import general
 
 from api_app.exceptions import AnalyzerRunException
 from api_app.script_analyzers.observable_analyzers import vt3_get
 from intel_owl import secrets
 
-logger = get_task_logger(__name__)
+logger = logging.getLogger(__name__)
 
 vt_base = "https://www.virustotal.com/api/v3/"
 
@@ -26,7 +26,7 @@ def run(analyzer_name, job_id, filepath, filename, md5, additional_config_params
         if not api_key:
             raise AnalyzerRunException("no api key retrieved")
 
-        result = vt_scan_file(api_key, md5, job_id)
+        result = vt_scan_file(api_key, md5, job_id, additional_config_params)
 
         report['report'] = result
     except AnalyzerRunException as e:
@@ -47,7 +47,7 @@ def run(analyzer_name, job_id, filepath, filename, md5, additional_config_params
 
     # pprint.pprint(report)
 
-    general.set_report_and_cleanup(job_id, report, logger)
+    general.set_report_and_cleanup(job_id, report)
 
     logger.info("ended analyzer {} job_id {}"
                 "".format(analyzer_name, job_id))
@@ -55,9 +55,9 @@ def run(analyzer_name, job_id, filepath, filename, md5, additional_config_params
     return report
 
 
-def vt_scan_file(api_key, md5, job_id):
+def vt_scan_file(api_key, md5, job_id, additional_config_params):
     try:
-        binary = general.get_binary(job_id, logger)
+        binary = general.get_binary(job_id)
     except Exception:
         raise AnalyzerRunException("couldn't retrieve the binary to perform a scan")
 
@@ -78,7 +78,7 @@ def vt_scan_file(api_key, md5, job_id):
     if not scan_id:
         raise AnalyzerRunException("no scan_id given by VirusTotal to retrieve the results")
     # max 5 minutes waiting
-    max_tries = 100
+    max_tries = additional_config_params.get('max_tries', 100)
     poll_distance = 5
     got_result = False
     uri = "analyses/{}".format(scan_id)

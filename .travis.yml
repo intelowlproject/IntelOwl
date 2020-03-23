@@ -7,21 +7,10 @@ services:
 - docker
 before_install:
 - sudo apt-get update
-- mkdir test_files
-- openssl aes-256-cbc -K $encrypted_bad86597f941_key -iv $encrypted_bad86597f941_iv
-  -in env_file_app_travis.enc -out env_file_app_travis -d
-- openssl aes-256-cbc -K $encrypted_bad86597f941_key -iv $encrypted_bad86597f941_iv
-  -in test_files_for_travis/file.exe.enc -out test_files/file.exe -d
-- openssl aes-256-cbc -K $encrypted_bad86597f941_key -iv $encrypted_bad86597f941_iv
-  -in test_files_for_travis/document.doc.enc -out test_files/document.doc -d
-- openssl aes-256-cbc -K $encrypted_bad86597f941_key -iv $encrypted_bad86597f941_iv
-  -in test_files_for_travis/document.pdf.enc -out test_files/document.pdf -d
-- openssl aes-256-cbc -K $encrypted_bad86597f941_key -iv $encrypted_bad86597f941_iv
-  -in test_files_for_travis/document.rtf.enc -out test_files/document.rtf -d
+- unzip -P infected tests/test_files.zip -d .
 install:
 - sudo docker-compose -f docker-compose-for-travis.yml build
 - sudo docker-compose -f docker-compose-for-travis.yml up -d
 script:
-- sudo docker exec -ti intel_owl_uwsgi python manage.py test tests.test_generic
-- sudo docker exec -ti intel_owl_uwsgi python manage.py test tests.test_observables
-- sudo docker exec -ti intel_owl_uwsgi python manage.py test tests.test_files
+- sudo docker exec -ti intel_owl_uwsgi python manage.py test tests
+

@@ -104,7 +104,7 @@ class IPAnalyzersTests(TestCase):
         self.assertEqual(report.get('success', False), True)
 
     def test_censys(self, mock_get=None, mock_post=None):
-        report = censys.run("Censys", self.job_id, self.observative_name, self.observable_classification, {})
+        report = censys.run("Censys", self.job_id, self.observable_name, self.observable_classification, {})
         self.assertEqual(report.get('success', False), True)
 
     def test_shodan(self, mock_get=None, mock_post=None):

@@ -45,7 +45,9 @@ After having written the new python module, you have to remember to:
  
   Then follow the [Test](./Tests.md) guide to start testing.
 
-* Ultimately, add the new analyzer/s in the list in the docs: [Usage](./Usage.md), [Installation](./Installation.md), and [ReadMe](https://github.com/certego/IntelOwl/blob/master/README.md)
+* Add the new analyzer/s in the lists in the docs: [Usage](./Usage.md) and [ReadMe](https://github.com/certego/IntelOwl/blob/master/README.md)
+
+* Ultimately, add the required secrets in the file [env_file_app_template](https://github.com/certego/IntelOwl/blob/master/env_file_app_template) and in the docs: [Installation](./Installation.md)
 
 If everything is working, before submitting your pull request, please squash your commits into a single one!
 

@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 
 base_url = 'https://www.censys.io/api/v1'
 
+
 def run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params):
     logger.info("started analyzer {} job_id {} observable {}"
                 "".format(analyzer_name, job_id, observable_name))
@@ -57,7 +58,7 @@ def run(analyzer_name, job_id, observable_name, observable_classification, addit
 def _censys_get_report(api_creds, observable_name, observable_classification, additional_config_params):
     censys_analysis = additional_config_params.get('censys_analysis', 'search')
     if censys_analysis == 'search':
-        uri = 'view/ipv4/{}'.format(observable_name)
+        uri = '/view/ipv4/{}'.format(observable_name)
     else:
         raise AnalyzerRunException("not supported observable type {}. Supported is IP"
                                    "".format(observable_classification))        

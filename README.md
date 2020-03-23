@@ -45,6 +45,7 @@ Main features:
 * Intezer
 * Farsight DNSDB
 * Hunter.io - Email Hunting
+* Censys.io
 #### required free api key
 * GoogleSafeBrowsing
 * AbuseIPDB

@@ -9,7 +9,7 @@ from django.test import TestCase
 from unittest.mock import patch
 from unittest import skipIf
 
-from api_app.script_analyzers.observable_analyzers import abuseipdb, shodan, fortiguard, maxmind,\
+from api_app.script_analyzers.observable_analyzers import abuseipdb, censys, shodan, fortiguard, maxmind,\
     greynoise, googlesf, otx, talos, tor, circl_pssl, circl_pdns,\
     robtex_ip, robtex_fdns, robtex_rdns, vt2_get, ha_get, vt3_get, misp, dnsdb,\
     honeydb_twitter_scan, hunter
@@ -101,6 +101,10 @@ class IPAnalyzersTests(TestCase):
 
     def test_abuseipdb(self, mock_get=None, mock_post=None):
         report = abuseipdb.run("AbuseIPDB", self.job_id, self.observable_name, self.observable_classification, {})
+        self.assertEqual(report.get('success', False), True)
+
+    def test_censys(self, mock_get=None, mock_post=None):
+        report = censys.run("Censys", self.job_id, self.observative_name, self.observable_classification, {})
         self.assertEqual(report.get('success', False), True)
 
     def test_shodan(self, mock_get=None, mock_post=None):

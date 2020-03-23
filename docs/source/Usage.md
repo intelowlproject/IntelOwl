@@ -40,6 +40,7 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * Yara_Scan_Florian: scan a file with Neo23x0 yara rules
 * Yara_Scan_Intezer: scan a file with Intezer yara rules
 * Yara_Scan_Custom_Signatures: scan a file with your own added signatures
+* MalwareBazaar_Get_File: Check if a particular malware sample is known to MalwareBazaar
 
 
 ### Observable analyzers (ip, domain, url, hash)
@@ -65,6 +66,8 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * Shodan: scan an IP against Shodan API
 * HoneyDB: scan an IP against HoneyDB.io's Twitter Threat Feed
 * Hunter: Scans a domain name and returns set of data about the organisation, the email address found and additional information about the people owning those email addresses. 
+* MalwareBazaar_Get_Observable: Check if a particular malware hash is known to MalwareBazaar
+* ONYPHE: search an observable in the ONYPHE DB
 
 ## Analyzers customization
 You can create new analyzers based on already existing modules by changing the configuration values (`analyzer_config.json`).

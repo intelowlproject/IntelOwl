@@ -173,6 +173,11 @@ class IPAnalyzersTests(TestCase):
         report = misp.run("MISP_FIRST", self.job_id, self.observable_name, self.observable_classification,
                           {'api_key_name': "FIRST_MISP_API", "url_key_name": "FIRST_MISP_URL"})
         self.assertEqual(report.get('success', False), True)
+    
+    def test_onyphe(self):
+        report = onyphe.run("ONYPHE", self.job_id, self.observable_name, self.observable_classification, {})
+        self.assertEqual(report.get('success', False), True)
+
 
 
 @mock_connections(patch('requests.get', side_effect=mocked_requests))
@@ -242,6 +247,10 @@ class DomainAnalyzersTests(TestCase):
                           {'api_key_name': "FIRST_MISP_API", "url_key_name": "FIRST_MISP_URL"})
         self.assertEqual(report.get('success', False), True)
 
+    def test_onyphe(self):
+        report = onyphe.run("ONYPHE", self.job_id, self.observable_name, self.observable_classification, {})
+        self.assertEqual(report.get('success', False), True)
+
 
 @mock_connections(patch('requests.get', side_effect=mocked_requests))
 @mock_connections(patch('requests.post', side_effect=mocked_requests))
@@ -292,6 +301,9 @@ class URLAnalyzersTests(TestCase):
         report = vt3_get.run("VT_v3_Get", self.job_id, self.observable_name, self.observable_classification, {})
         self.assertEqual(report.get('success', False), True)
 
+    def test_onyphe(self):
+        report = onyphe.run("ONYPHE", self.job_id, self.observable_name, self.observable_classification, {})
+        self.assertEqual(report.get('success', False), True)
 
 @mock_connections(patch('requests.get', side_effect=mocked_requests))
 @mock_connections(patch('requests.post', side_effect=mocked_requests))
@@ -333,4 +345,8 @@ class HashAnalyzersTests(TestCase):
     def test_misp_first(self, mock_get=None, mock_post=None, mock_pymisp=None):
         report = misp.run("MISP_FIRST", self.job_id, self.observable_name, self.observable_classification,
                           {'api_key_name': "FIRST_MISP_API", "url_key_name": "FIRST_MISP_URL"})
+        self.assertEqual(report.get('success', False), True)
+    
+    def test_mb_get(self):
+        report = mb_get.run("MalwareBazaar_Get_Observable", self.job_id, self.observable_name, self.observable_classification, {})
         self.assertEqual(report.get('success', False), True)

@@ -45,6 +45,7 @@ Main features:
 * Intezer
 * Farsight DNSDB
 * Hunter.io - Email Hunting
+* ONYPHE
 #### required free api key
 * GoogleSafeBrowsing
 * AbuseIPDB
@@ -60,6 +61,7 @@ Main features:
 * Talos Reputation
 * Tor Project
 * Robtex
+* Malware Bazaar
 
 ### Documentation
 [![Documentation Status](https://readthedocs.org/projects/intelowl/badge/?version=latest)](https://intelowl.readthedocs.io/en/latest/?badge=latest)

@@ -177,6 +177,15 @@
             "api_key_name": "HUNTER_API_KEY"
         }
     },
+    "ONYPHE": {
+        "type": "observable",
+        "observable_supported": ["ip", "domain", "url"],
+        "external_service": true,
+        "python_module": "onyphe_run",
+        "additional_config_params": {
+            "api_key_name": "ONYPHE_KEY"
+        }
+    },
     "Yara_Scan_Community": {
         "type": "file",
         "python_module": "yara_run",
@@ -370,5 +379,17 @@
         "type": "file",
         "supported_filetypes": ["application/pdf"],
         "python_module": "pdfinfo_run"
+    },
+    "MalwareBazaar_Get_File": {
+        "type": "file",
+        "run_hash": true,
+        "external_service": true,
+        "python_module": "mbget_run"
+    },
+    "MalwareBazaar_Get_Observable": {
+        "type": "observable",
+        "observable_supported": ["hash"],
+        "external_service": true,
+        "python_module": "mbget_run"
     }
 }

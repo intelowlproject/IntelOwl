@@ -65,7 +65,7 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * Shodan: scan an IP against Shodan API
 * HoneyDB: scan an IP against HoneyDB.io's Twitter Threat Feed
 * Hunter: Scans a domain name and returns set of data about the organisation, the email address found and additional information about the people owning those email addresses. 
-
+* ONYPHE: search an observable in the ONYPHE DB
 ## Analyzers customization
 You can create new analyzers based on already existing modules by changing the configuration values (`analyzer_config.json`).
 

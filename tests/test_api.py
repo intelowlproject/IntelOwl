@@ -62,7 +62,7 @@ class ApiTests(TestCase):
         md5 = hashlib.md5(binary).hexdigest()
         analyzers_requested = ["Yara_Scan", "HybridAnalysis_Get_File", "Cuckoo_ScanClassic", "Intezer_Scan",
                                "VirusTotal_v3_Get_File", "VirusTotal_v3_Scan_File", "File_Info", "PE_Info",
-                               "Doc_Info", "PDF_Info", "Strings_Info_Classic", "Strings_Info_ML"]
+                               "Doc_Info", "PDF_Info", "Strings_Info_Classic", "Strings_Info_ML", "MalwareBazaar_Get_File"]
         uploaded_file = SimpleUploadedFile(filename, binary,
                                            content_type='multipart/form-data')
         data = {

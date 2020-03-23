@@ -218,10 +218,12 @@ class FileAnalyzersDLLTests(TestCase):
         self.filepath, self.filename = general.get_filepath_filename(self.job_id)
         self.md5 = test_job.md5
 
+    @skipIf(settings.TRAVIS_TEST, "dll check not required for travis")
     def test_fileinfo_dll(self):
         report = file_info.run("File_Info", self.job_id, self.filepath, self.filename, self.md5, {})
         self.assertEqual(report.get('success', False), True)
 
+    @skipIf(settings.TRAVIS_TEST, "dll check not required for travis")
     def test_peinfo_dll(self):
         report = pe_info.run("PE_Info", self.job_id, self.filepath, self.filename, self.md5, {})
         self.assertEqual(report.get('success', False), True)

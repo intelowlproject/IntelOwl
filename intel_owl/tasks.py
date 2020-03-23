@@ -5,7 +5,7 @@ from api_app.script_analyzers.file_analyzers import doc_info, file_info, pe_info
     cuckoo_scan, yara_scan, vt3_scan, strings_info, rtf_info
 from api_app.script_analyzers.observable_analyzers import abuseipdb, fortiguard, maxmind, greynoise, googlesf, otx, \
     talos, tor, circl_pdns, circl_pssl, robtex_fdns, robtex_ip, robtex_rdns, vt2_get, ha_get, vt3_get, misp, dnsdb, \
-    shodan, honeydb_twitter_scan, hunter
+    shodan, honeydb_twitter_scan, hunter, mb_get
 
 from api_app import crons
 from api_app.script_analyzers.file_analyzers import signature_info
@@ -209,3 +209,6 @@ def yara_run(analyzer_name, job_id, filepath, filename, md5, additional_config_p
 def yara_updater():
     yara_scan.yara_update_repos()
 
+@shared_task(soft_time_limit=50)
+def mbget_run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params):
+    mb_get.run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params)

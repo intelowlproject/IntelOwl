@@ -38,6 +38,15 @@
         "observable_supported": ["ip"],
         "python_module": "maxmind_run"
     },
+    "Censys_Search": {
+        "type": "observable",
+        "observable_supported": ["ip"],
+        "external_service": true,
+        "python_module": "censys_run",
+        "additional_config_params": {
+            "censys_analysis": "search"
+        }
+    },
     "CIRCLPassiveSSL": {
         "type": "observable",
         "observable_supported": ["ip"],

@@ -45,7 +45,9 @@ Optional variables needed to enable specific analyzers:
 * FIRST_MISP_URL: FIRST MISP URL
 * CUCKOO_URL: your cuckoo instance URL
 * HONEYDB_API_ID & HONEYDB_API_KEY: HoneyDB credentials
+* CENSYS_API_ID & CENSYS_API_SECRET: Censys credentials
 * ONYPHE_KEY: Onyphe.io's API Key 
+
 ### Database configuration
 Before running the project, you must populate the basic configuration for PostgreSQL.
 In the project you can find a template file named `env_file_postgres_template`.

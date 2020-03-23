@@ -46,6 +46,7 @@ Main features:
 * Farsight DNSDB
 * Hunter.io - Email Hunting
 * ONYPHE 
+* Censys.io
 #### required free api key
 * GoogleSafeBrowsing
 * AbuseIPDB

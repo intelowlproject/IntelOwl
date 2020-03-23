@@ -318,6 +318,18 @@
             "api_key_name": "VT_KEY"
         }
     },
+    "MalwareBazaar_Get_File": {
+        "type": "file",
+        "run_hash": true,
+        "external_service": true,
+        "python_module": "mbget_run"
+    },
+    "MalwareBazaar_Get_Observable": {
+        "type": "observable",
+        "observable_supported": ["hash"],
+        "external_service": true,
+        "python_module": "mbget_run"
+    },
     "File_Info": {
         "type": "file",
         "python_module": "fileinfo_run"

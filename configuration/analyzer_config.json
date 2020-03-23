@@ -177,6 +177,15 @@
             "api_key_name": "HUNTER_API_KEY"
         }
     },
+    "ONYPHE": {
+        "type": "observable",
+        "observable_supported": ["ip", "domain", "url"],
+        "external_service": true,
+        "python_module": "onyphe_run",
+        "additional_config_params": {
+            "api_key_name": "ONYPHE_KEY"
+        }
+    },
     "Yara_Scan_Community": {
         "type": "file",
         "python_module": "yara_run",

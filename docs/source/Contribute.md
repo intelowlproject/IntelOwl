@@ -49,6 +49,7 @@ After having written the new python module, you have to remember to:
 
 * Ultimately, add the required secrets in the file [env_file_app_template](https://github.com/certego/IntelOwl/blob/master/env_file_app_template) and in the docs: [Installation](./Installation.md)
 
+### Create a pull request
 If everything is working, before submitting your pull request, please squash your commits into a single one!
 
 #### How to squash commits to a single one
@@ -63,8 +64,10 @@ If everything is working, before submitting your pull request, please squash you
 
 Squashing commits can be a tricky process but once you figure it out, it's really helpful and keeps our repo concise and clean.
 
-#### Create a pull request
+#### Remember!!!
 Please create pull requests only for the branch **develop**. That code will be pushed to master only on a new release.
+
+Also remember to pull the most recent changes available in the **develop** branch before submitting your PR. If your PR has merge conflicts caused by this behavior, it won't be accepted.
 
 ### Example: add an analyzer configuration for your own Yara signatures
 ```

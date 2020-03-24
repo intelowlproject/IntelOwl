@@ -2,13 +2,12 @@ from __future__ import absolute_import, unicode_literals
 
 from celery import shared_task
 from api_app.script_analyzers.file_analyzers import doc_info, file_info, pe_info, pdf_info, vt2_scan, intezer_scan, \
-    cuckoo_scan, yara_scan, vt3_scan, strings_info, rtf_info
+    cuckoo_scan, yara_scan, vt3_scan, strings_info, rtf_info, signature_info
 from api_app.script_analyzers.observable_analyzers import abuseipdb, fortiguard, maxmind, greynoise, googlesf, otx, \
     talos, tor, circl_pdns, circl_pssl, robtex_fdns, robtex_ip, robtex_rdns, vt2_get, ha_get, vt3_get, misp, dnsdb, \
-    shodan, honeydb_twitter_scan, hunter
+    shodan, honeydb_twitter_scan, hunter, mb_get, onyphe, censys, threatminer
 
 from api_app import crons
-from api_app.script_analyzers.file_analyzers import signature_info
 
 
 @shared_task(soft_time_limit=500)
@@ -72,8 +71,18 @@ def shodan_run(analyzer_name, job_id, observable_name, observable_classification
 
 
 @shared_task(soft_time_limit=30)
+def threatminer_run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params):
+    threatminer.run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params)
+
+
+@shared_task(soft_time_limit=30)
 def hunter_run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params):
     hunter.run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params)
+
+
+@shared_task(soft_time_limit=30)
+def censys_run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params):
+    censys.run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params)
 
 
 @shared_task(soft_time_limit=30)
@@ -145,6 +154,12 @@ def vt3get_scan_run(analyzer_name, job_id, observable_name, observable_classific
 def honeydb_twitter_scan_run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params):
     honeydb_twitter_scan.run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params)
 
+
+@shared_task(soft_time_limit=50)
+def onyphe_run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params):
+    onyphe.run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params)
+
+
 @shared_task(soft_time_limit=30)
 def fileinfo_run(analyzer_name, job_id, filepath, filename, md5, additional_config_params):
     file_info.run(analyzer_name, job_id, filepath, filename, md5, additional_config_params)
@@ -209,3 +224,7 @@ def yara_run(analyzer_name, job_id, filepath, filename, md5, additional_config_p
 def yara_updater():
     yara_scan.yara_update_repos()
 
+
+@shared_task(soft_time_limit=50)
+def mbget_run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params):
+    mb_get.run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params)

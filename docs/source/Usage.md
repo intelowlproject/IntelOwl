@@ -11,12 +11,16 @@ We suggest to download the client, read the instructions and use it as a library
 The server authentication is managed by API keys. So, if you want to interact with Intel Owl, you have to create one or more unprivileged users from the Django Admin Interface and then generate a token for those users.
 Afterwards you can leverage the created tokens with the Intel Owl Client.
 
-
 ## Available Analyzers
+
+### Get all available analyzers
+You can programmatically retrieve all the available analyzers with the official client [PyIntelOwl](https://github.com/mlodic/pyintelowl).
+
+### Analyzers list
 
 The following is the list of the available analyzers you can run out-of-the-box:
 
-### File analyzers:
+#### File analyzers:
 * File_Info: static generic File analysis
 * PDF_Info: static PDF analysis
 * Rtf_Info: static RTF analysis
@@ -40,9 +44,9 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * Yara_Scan_Florian: scan a file with Neo23x0 yara rules
 * Yara_Scan_Intezer: scan a file with Intezer yara rules
 * Yara_Scan_Custom_Signatures: scan a file with your own added signatures
+* MalwareBazaar_Get_File: Check if a particular malware sample is known to MalwareBazaar 
 
-
-### Observable analyzers (ip, domain, url, hash)
+#### Observable analyzers (ip, domain, url, hash)
 * VirusTotal_v3_Get_Observable: search an observable in the VirusTotal DB
 * VirusTotal_v2_Get_Observable: search an observable in the VirusTotal DB using the old API endpoints
 * HybridAnalysis_Get_Observable: search an observable in the HybridAnalysis DB
@@ -65,6 +69,12 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * Shodan: scan an IP against Shodan API
 * HoneyDB: scan an IP against HoneyDB.io's Twitter Threat Feed
 * Hunter: Scans a domain name and returns set of data about the organisation, the email address found and additional information about the people owning those email addresses. 
+* Censys_Search: scan an IP address against Censys View API
+* MalwareBazaar_Get_Observable: Check if a particular malware hash is known to MalwareBazaar
+* ONYPHE: search an observable in the ONYPHE
+* Threatminer_PDNS: retrieve PDNS data from Threatminer API
+* Threatminer_Reports_Tagging: retrieve reports from Threatminer API
+* Threatminer_Subdomains: retrieve subdomains from Threatminer API
 
 ## Analyzers customization
 You can create new analyzers based on already existing modules by changing the configuration values (`analyzer_config.json`).

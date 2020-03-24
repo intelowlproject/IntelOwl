@@ -43,8 +43,12 @@ Optional variables needed to enable specific analyzers:
 * INTEZER_KEY: Intezer API key
 * FIRST_MISP_API: FIRST MISP API key
 * FIRST_MISP_URL: FIRST MISP URL
+* MISP_KEY: your own MISP instance key
+* MISP_URL your own MISP instance URL
 * CUCKOO_URL: your cuckoo instance URL
 * HONEYDB_API_ID & HONEYDB_API_KEY: HoneyDB credentials
+* CENSYS_API_ID & CENSYS_API_SECRET: Censys credentials
+* ONYPHE_KEY: Onyphe.io's API Key 
 
 ### Database configuration
 Before running the project, you must populate the basic configuration for PostgreSQL.

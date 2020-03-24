@@ -10,7 +10,6 @@ queries:
   - include: py/unused-global-variable
   - include: py/hardcoded-credentials
   - include: py/import-of-mutable-attribute
-  - include: py/cyclic-import
   - include: py/empty-except
   - include: py/unnecessary-lambda
   - include: py/print-during-import

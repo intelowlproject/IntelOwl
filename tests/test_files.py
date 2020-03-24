@@ -158,7 +158,6 @@ class FileAnalyzersEXETests(TestCase):
     def test_vtscan_exe(self, mock_get=None, mock_post=None):
         additional_params = {'wait_for_scan_anyway': True, 'max_tries': 1}
         report = vt2_scan.run("VT_v2_Scan", self.job_id, self.filepath, self.filename, self.md5, additional_params)
-        print(report)
         self.assertEqual(report.get('success', False), True)
 
     @mock_connections(patch('requests.Session.get', side_effect=mocked_requests))
@@ -168,7 +167,6 @@ class FileAnalyzersEXETests(TestCase):
     def test_intezer_exe(self, mock_get=None, mock_post=None, mock_token=None):
         additional_params = {'max_tries': 1, 'is_test': True}
         report = intezer_scan.run("Intezer_Scan", self.job_id, self.filepath, self.filename, self.md5, additional_params)
-        print(report)
         self.assertEqual(report.get('success', False), True)
 
     @mock_connections(patch('requests.Session.get', side_effect=mocked_cuckoo_get))
@@ -176,7 +174,6 @@ class FileAnalyzersEXETests(TestCase):
     def test_cuckoo_exe(self, mock_get=None, mock_post=None):
         additional_params = {'max_poll_tries': 1, 'max_post_tries': 1}
         report = cuckoo_scan.run("Cuckoo_Scan", self.job_id, self.filepath, self.filename, self.md5, additional_params)
-        print(report)
         self.assertEqual(report.get('success', False), True)
 
     def test_yara_exe(self):
@@ -191,7 +188,6 @@ class FileAnalyzersEXETests(TestCase):
     def test_vt3_scan_exe(self, mock_get=None, mock_post=None):
         additional_params = {'max_tries': 1}
         report = vt3_scan.run("VT_v3_Scan", self.job_id, self.filepath, self.filename, self.md5, additional_params)
-        print(report)
         self.assertEqual(report.get('success', False), True)
 
     @mock_connections(patch('requests.get', side_effect=mocked_requests))

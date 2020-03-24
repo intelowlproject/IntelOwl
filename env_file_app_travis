@@ -15,11 +15,15 @@ VT_KEY=test
 HA_KEY=test
 INTEZER_KEY=test
 FIRST_MISP_API=test
+MISP_KEY=test
 MAXMIND_KEY=test
 DNSDB_KEY=test
 HONEYDB_API_ID=test
 HONEYDB_API_KEY=test
 HUNTER_API_KEY=test
+CENSYS_API_ID=test
+CENSYS_API_SECRET=test
+ONYPHE_KEY=test
 
 # Test tokens
 TEST_JOB_ID=1
@@ -30,6 +34,7 @@ TEST_MD5=446c5fbb11b9ce058450555c1c27153c
 
 # URLs
 CUCKOO_URL=http://fake_url.com
+MISP_URL=http://fake_url.com
 FIRST_MISP_URL=http://fake_url.com
 VT_NOTIFY_URL=http://fake_url.com
 

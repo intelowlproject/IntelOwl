@@ -38,6 +38,15 @@
         "observable_supported": ["ip"],
         "python_module": "maxmind_run"
     },
+    "Censys_Search": {
+        "type": "observable",
+        "observable_supported": ["ip"],
+        "external_service": true,
+        "python_module": "censys_run",
+        "additional_config_params": {
+            "censys_analysis": "search"
+        }
+    },
     "CIRCLPassiveSSL": {
         "type": "observable",
         "observable_supported": ["ip"],
@@ -86,6 +95,33 @@
             "shodan_analysis": "honeyscore"
         }
     },
+    "Threatminer_PDNS": {
+        "type": "observable",
+        "observable_supported": ["ip","domain"],
+        "external_service": true,
+        "python_module": "threatminer_run",
+        "additional_config_params": {
+            "rt_value": 2
+        }
+    },
+    "Threatminer_Reports_Tagging": {
+        "type": "observable",
+        "observable_supported": ["ip", "domain"],
+        "external_service": true,
+        "python_module": "threatminer_run",
+        "additional_config_params": {
+            "rt_value": 6
+        }
+    },
+    "Threatminer_Subdomains": {
+        "type": "observable",
+        "observable_supported": ["domain"],
+        "external_service": true,
+        "python_module": "threatminer_run",
+        "additional_config_params": {
+            "rt_value": 5
+        }
+    },
     "Robtex_Reverse_PDNS_Query": {
         "type": "observable",
         "observable_supported": ["ip"],
@@ -129,6 +165,7 @@
         "type": "observable",
         "observable_supported": ["ip", "domain", "url", "hash"],
         "external_service": true,
+        "disabled": true,
         "python_module": "vt2get_run",
         "additional_config_params": {
             "api_key_name": "VT_ALTERNATIVE_KEY"
@@ -147,6 +184,7 @@
         "type": "observable",
         "observable_supported": ["ip", "domain", "url", "hash"],
         "external_service": true,
+        "disabled": true,
         "python_module": "vt3get_run",
         "additional_config_params": {
             "api_key_name": "VT_ALTERNATIVE_KEY"
@@ -175,6 +213,15 @@
         "python_module": "hunter_run",
         "additional_config_params": {
             "api_key_name": "HUNTER_API_KEY"
+        }
+    },
+    "ONYPHE": {
+        "type": "observable",
+        "observable_supported": ["ip", "domain", "url"],
+        "external_service": true,
+        "python_module": "onyphe_run",
+        "additional_config_params": {
+            "api_key_name": "ONYPHE_KEY"
         }
     },
     "Yara_Scan_Community": {
@@ -222,6 +269,7 @@
     },
     "MISP_Check_Hash": {
         "type": "file",
+        "run_hash": true,
         "python_module": "misp_run"
     },
     "Cuckoo_Scan": {
@@ -240,6 +288,7 @@
         "type": "file",
         "external_service": true,
         "run_hash": true,
+        "disabled": true,
         "python_module": "vt2get_run",
         "additional_config_params": {
             "api_key_name": "VT_ALTERNATIVE_KEY"
@@ -249,6 +298,7 @@
         "type": "file",
         "external_service": true,
         "leaks_info": true,
+        "disabled": true,
         "python_module": "vt2scan_run",
         "additional_config_params": {
             "api_key_name": "VT_ALTERNATIVE_KEY"
@@ -258,6 +308,7 @@
         "type": "file",
         "external_service": true,
         "run_hash": true,
+        "disabled": true,
         "python_module": "vt3get_run",
         "additional_config_params": {
             "api_key_name": "VT_ALTERNATIVE_KEY"
@@ -267,6 +318,7 @@
         "type": "file",
         "external_service": true,
         "leaks_info": true,
+        "disabled": true,
         "python_module": "vt3scan_run",
         "additional_config_params": {
             "api_key_name": "VT_ALTERNATIVE_KEY"
@@ -317,6 +369,18 @@
         "additional_config_params": {
             "api_key_name": "VT_KEY"
         }
+    },
+    "MalwareBazaar_Get_File": {
+        "type": "file",
+        "run_hash": true,
+        "external_service": true,
+        "python_module": "mbget_run"
+    },
+    "MalwareBazaar_Get_Observable": {
+        "type": "observable",
+        "observable_supported": ["hash"],
+        "external_service": true,
+        "python_module": "mbget_run"
     },
     "File_Info": {
         "type": "file",

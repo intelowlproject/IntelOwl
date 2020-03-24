@@ -32,9 +32,9 @@ def file_directory_path(instance, filename):
     return 'job_{}_{}'.format(get_now_str(), filename)
 
 
-def filter_analyzers(serialized_data, analyzers_config, warnings):
+def filter_analyzers(serialized_data, analyzers_requested, analyzers_config, warnings, run_all=False):
     cleaned_analyzer_list = []
-    for analyzer in serialized_data['analyzers_requested']:
+    for analyzer in analyzers_requested:
         try:
             if analyzer not in analyzers_config:
                 raise NotRunnableAnalyzer("{} not available in configuration".format(analyzer))
@@ -65,8 +65,12 @@ def filter_analyzers(serialized_data, analyzers_config, warnings):
             if serialized_data['disable_external_analyzers'] and analyzers_config[analyzer].get('external_service', ''):
                 raise NotRunnableAnalyzer("{} won't be run because you filtered external analyzers".format(analyzer))
         except NotRunnableAnalyzer as e:
-            logger.warning(e)
-            warnings.append(str(e))
+            if run_all:
+                # in this case, they are not warnings but excepted and wanted behavior
+                logger.debug(e)
+            else:
+                logger.warning(e)
+                warnings.append(str(e))
         else:
             cleaned_analyzer_list.append(analyzer)
 

@@ -45,11 +45,13 @@ Main features:
 * Intezer
 * Farsight DNSDB
 * Hunter.io - Email Hunting
+* ONYPHE 
+* Censys.io
 #### required free api key
 * GoogleSafeBrowsing
 * AbuseIPDB
 * Shodan
-* HoneyDB - Twitter Threat Feed Scan
+* HoneyDB
 * AlienVault OTX
 * MaxMind
 #### needed access request
@@ -60,6 +62,8 @@ Main features:
 * Talos Reputation
 * Tor Project
 * Robtex
+* Threatminer
+* Abuse.ch MalwareBazaar
 
 ### Documentation
 [![Documentation Status](https://readthedocs.org/projects/intelowl/badge/?version=latest)](https://intelowl.readthedocs.io/en/latest/?badge=latest)

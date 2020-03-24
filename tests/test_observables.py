@@ -9,10 +9,10 @@ from django.test import TestCase
 from unittest.mock import patch
 from unittest import skipIf
 
-from api_app.script_analyzers.observable_analyzers import abuseipdb, shodan, fortiguard, maxmind,\
+from api_app.script_analyzers.observable_analyzers import abuseipdb, censys, shodan, fortiguard, maxmind,\
     greynoise, googlesf, otx, talos, tor, circl_pssl, circl_pdns,\
     robtex_ip, robtex_fdns, robtex_rdns, vt2_get, ha_get, vt3_get, misp, dnsdb,\
-    honeydb_twitter_scan, hunter
+    honeydb_twitter_scan, hunter, mb_get, onyphe, threatminer
 
 from api_app.models import Job
 from intel_owl import settings
@@ -103,8 +103,16 @@ class IPAnalyzersTests(TestCase):
         report = abuseipdb.run("AbuseIPDB", self.job_id, self.observable_name, self.observable_classification, {})
         self.assertEqual(report.get('success', False), True)
 
+    def test_censys(self, mock_get=None, mock_post=None):
+        report = censys.run("Censys", self.job_id, self.observable_name, self.observable_classification, {})
+        self.assertEqual(report.get('success', False), True)
+
     def test_shodan(self, mock_get=None, mock_post=None):
         report = shodan.run("Shodan", self.job_id, self.observable_name, self.observable_classification, {})
+        self.assertEqual(report.get('success', False), True)
+
+    def test_threatminer_ip(self, mock_get=None, mock_post=None):
+        report = threatminer.run("Threatminer", self.job_id, self.observable_name, self.observable_classification, {})
         self.assertEqual(report.get('success', False), True)
 
     def test_honeydb(self, mock_get=None, mock_post=None):
@@ -174,6 +182,10 @@ class IPAnalyzersTests(TestCase):
                           {'api_key_name': "FIRST_MISP_API", "url_key_name": "FIRST_MISP_URL"})
         self.assertEqual(report.get('success', False), True)
 
+    def test_onyphe(self, mock_get=None, mock_post=None):
+        report = onyphe.run("ONYPHE", self.job_id, self.observable_name, self.observable_classification, {})
+        self.assertEqual(report.get('success', False), True)
+
 
 @mock_connections(patch('requests.get', side_effect=mocked_requests))
 @mock_connections(patch('requests.post', side_effect=mocked_requests))
@@ -201,6 +213,10 @@ class DomainAnalyzersTests(TestCase):
 
     def test_hunter(self, mock_get=None, mock_post=None):
         report = hunter.run("Hunter", self.job_id, self.observable_name, self.observable_classification, {})
+        self.assertEqual(report.get('success', False), True)
+
+    def test_threatminer_domain(self, mock_get=None, mock_post=None):
+        report = threatminer.run("Threatminer", self.job_id, self.observable_name, self.observable_classification, {})
         self.assertEqual(report.get('success', False), True)
 
     def test_gsf(self, mock_get=None, mock_post=None):
@@ -240,6 +256,10 @@ class DomainAnalyzersTests(TestCase):
     def test_misp_first(self, mock_get=None, mock_post=None, mock_pymisp=None):
         report = misp.run("MISP_FIRST", self.job_id, self.observable_name, self.observable_classification,
                           {'api_key_name': "FIRST_MISP_API", "url_key_name": "FIRST_MISP_URL"})
+        self.assertEqual(report.get('success', False), True)
+
+    def test_onyphe(self, mock_get=None, mock_post=None):
+        report = onyphe.run("ONYPHE", self.job_id, self.observable_name, self.observable_classification, {})
         self.assertEqual(report.get('success', False), True)
 
 
@@ -292,6 +312,10 @@ class URLAnalyzersTests(TestCase):
         report = vt3_get.run("VT_v3_Get", self.job_id, self.observable_name, self.observable_classification, {})
         self.assertEqual(report.get('success', False), True)
 
+    def test_onyphe(self, mock_get=None, mock_post=None):
+        report = onyphe.run("ONYPHE", self.job_id, self.observable_name, self.observable_classification, {})
+        self.assertEqual(report.get('success', False), True)
+
 
 @mock_connections(patch('requests.get', side_effect=mocked_requests))
 @mock_connections(patch('requests.post', side_effect=mocked_requests))
@@ -333,4 +357,8 @@ class HashAnalyzersTests(TestCase):
     def test_misp_first(self, mock_get=None, mock_post=None, mock_pymisp=None):
         report = misp.run("MISP_FIRST", self.job_id, self.observable_name, self.observable_classification,
                           {'api_key_name': "FIRST_MISP_API", "url_key_name": "FIRST_MISP_URL"})
+        self.assertEqual(report.get('success', False), True)
+
+    def test_mb_get(self, mock_get=None, mock_post=None):
+        report = mb_get.run("MalwareBazaar_Get_Observable", self.job_id, self.observable_name, self.observable_classification, {})
         self.assertEqual(report.get('success', False), True)

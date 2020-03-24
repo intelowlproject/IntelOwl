@@ -62,7 +62,7 @@ class ApiTests(TestCase):
         md5 = hashlib.md5(binary).hexdigest()
         analyzers_requested = ["Yara_Scan", "HybridAnalysis_Get_File", "Cuckoo_ScanClassic", "Intezer_Scan",
                                "VirusTotal_v3_Get_File", "VirusTotal_v3_Scan_File", "File_Info", "PE_Info",
-                               "Doc_Info", "PDF_Info", "Strings_Info_Classic", "Strings_Info_ML"]
+                               "Doc_Info", "PDF_Info", "Strings_Info_Classic", "Strings_Info_ML", "MalwareBazaar_Get_File"]
         uploaded_file = SimpleUploadedFile(filename, binary,
                                            content_type='multipart/form-data')
         data = {
@@ -79,7 +79,8 @@ class ApiTests(TestCase):
 
     def test_send_analysis_request_domain(self):
         analyzers_requested = ["Fortiguard", "CIRCLPassiveDNS", "GoogleSafebrowsing", "Robtex_Forward_PDNS_Query",
-                               "OTXQuery", "VirusTotal_v3_Get_Observable", "HybridAnalysis_Get_Observable"]
+                               "OTXQuery", "VirusTotal_v3_Get_Observable", "HybridAnalysis_Get_Observable",
+                               "Threatminer_PDNS", "Threatminer_Reports_Tagging", "Threatminer_Subdomains", "ONYPHE"]
         observable_name = os.environ.get("TEST_DOMAIN", "google.com")
         md5 = hashlib.md5(observable_name.encode('utf-8')).hexdigest()
         data = {
@@ -98,7 +99,7 @@ class ApiTests(TestCase):
                                "GreyNoiseAlpha", "GoogleSafebrowsing", "Robtex_IP_Query",
                                "Robtex_Reverse_PDNS_Query", "TalosReputation", "OTXQuery",
                                "VirusTotal_Get_v2_Observable", "HybridAnalysis_Get_Observable", "Hunter",
-                               "HoneyDB"]
+                               "HoneyDB", "Threatminer_Reports_Tagging", "Threatminer_PDNS", "ONYPHE"]
         observable_name = os.environ.get("TEST_IP", "8.8.8.8")
         md5 = hashlib.md5(observable_name.encode('utf-8')).hexdigest()
         data = {

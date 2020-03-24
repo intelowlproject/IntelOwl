@@ -117,7 +117,7 @@ def _cuckoo_poll_result(cuckoo_analysis, filename, md5, additional_config_params
     logger.info("polling result for {} {}, task_id {}".format(filename, md5, cuckoo_analysis.task_id))
 
     # poll for the result
-    max_get_tries = additional_config_params.get('max_poll_tries', 50)
+    max_get_tries = additional_config_params.get('max_poll_tries', 20)
     poll_time = 15
     get_success = False
     for chance in range(max_get_tries):

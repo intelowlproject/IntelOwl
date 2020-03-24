@@ -44,7 +44,7 @@ def ask_analysis_availability(request):
     analyzers_needed_list = []
     try:
         data_received = request.query_params
-        logger.info("received request from {}. Data:{}".format(source, dict(data_received)))
+        logger.info("ask_analysis_availability received request from {}. Data:{}".format(source, dict(data_received)))
 
         if 'md5' not in data_received:
             return Response({"error": "800"},
@@ -102,7 +102,8 @@ def send_analysis_request(request):
     :parameter: [file_name]: string, optional if is_sample=True, the binary name
     :parameter: [observable_name]: string, required if is_sample=False, the observable value
     :parameter: [observable_classification]: string, required if is_sample=False, (domain, ip, ...)
-    :parameter: analyzers_requested: list of requested analyzer to run, before filters
+    :parameter: [analyzers_requested]: list of requested analyzer to run, before filters
+    :parameter: [run_all_available_analyzers]: bool, default False
     :parameter: [force_privacy]: boolean, default False, enable it if you want to avoid to run analyzers with privacy issues
     :parameter: [disable_external_analyzers]: boolean, default False, enable it if you want to exclude external analyzers
     :parameter: [test]: disable analysis for API testing
@@ -113,7 +114,7 @@ def send_analysis_request(request):
     warnings = []
     try:
         data_received = request.data
-        logger.info("received request from {}. Data:{}".format(source, dict(data_received)))
+        logger.info("send_analysis_request received request from {}. Data:{}".format(source, dict(data_received)))
 
         test = data_received.get('test', False)
 
@@ -142,9 +143,20 @@ def send_analysis_request(request):
                     return Response({"error": "813"},
                                     status=status.HTTP_400_BAD_REQUEST)
 
-            # we need to clean the list of request analyzers, based on configuration data
+            # we need to clean the list of requested analyzers, based on configuration data
             analyzers_config = utilities.get_analyzer_config()
-            cleaned_analyzer_list = utilities.filter_analyzers(serialized_data, analyzers_config, warnings)
+            run_all_available_analyzers = serialized_data['run_all_available_analyzers']
+            analyzers_requested = serialized_data.get('analyzers_requested', [])
+            if run_all_available_analyzers:
+                if analyzers_requested:
+                    logger.info("either you specify a list of requested analyzers or the"
+                                " 'run_all_available_analyzers' parameter, not both")
+                    return Response({"error": "816"},
+                                    status=status.HTTP_400_BAD_REQUEST)
+                # just pick all available analyzers
+                analyzers_requested = [analyzer_name for analyzer_name in analyzers_config]
+            cleaned_analyzer_list = utilities.filter_analyzers(serialized_data, analyzers_requested, analyzers_config,
+                                                               warnings, run_all=run_all_available_analyzers)
             params['analyzers_to_execute'] = cleaned_analyzer_list
             if len(cleaned_analyzer_list) < 1:
                 logger.info("after the filter, no analyzers can be run. Try with other analyzers")
@@ -198,7 +210,7 @@ def ask_analysis_result(request):
     source = str(request.user)
     try:
         data_received = request.query_params
-        logger.info("received request from {}. Data:{}".format(source, dict(data_received)))
+        logger.info("ask_analysis_result received request from {}. Data:{}".format(source, dict(data_received)))
 
         if 'job_id' not in data_received:
             return Response({"error": "820"},
@@ -227,6 +239,30 @@ def ask_analysis_result(request):
     except Exception as e:
         logger.exception("ask_analysis_result requester:{} error:{}".format(source, e))
         return Response({"error": "error in ask_analysis_result. Check logs"},
+                        status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['GET'])
+@authentication_classes((TokenAuthentication,))
+@permission_classes((IsAuthenticated,))
+def get_analyzer_configs(request):
+    """
+    get the uploaded analyzer configuration, can be useful if you want to choose the analyzers programmatically
+
+    :return: 200 if ok, 500 if failed
+    """
+    source = str(request.user)
+    try:
+        logger.info("get_analyzer_configs received request from {}".format(source))
+
+        analyzers_config = utilities.get_analyzer_config()
+
+        return Response(analyzers_config,
+                        status=status.HTTP_200_OK)
+
+    except Exception as e:
+        logger.exception("get_analyzer_configs requester:{} error:{}".format(source, e))
+        return Response({"error": "error in get_analyzer_configs. Check logs"},
                         status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 

@@ -95,6 +95,33 @@
             "shodan_analysis": "honeyscore"
         }
     },
+    "Threatminer_PDNS": {
+        "type": "observable",
+        "observable_supported": ["ip","domain"],
+        "external_service": true,
+        "python_module": "threatminer_run",
+        "additional_config_params": {
+            "rt_value": 2
+        }
+    },
+    "Threatminer_Reports_Tagging": {
+        "type": "observable",
+        "observable_supported": ["ip", "domain"],
+        "external_service": true,
+        "python_module": "threatminer_run",
+        "additional_config_params": {
+            "rt_value": 6
+        }
+    },
+    "Threatminer_Subdomains": {
+        "type": "observable",
+        "observable_supported": ["domain"],
+        "external_service": true,
+        "python_module": "threatminer_run",
+        "additional_config_params": {
+            "rt_value": 5
+        }
+    },
     "Robtex_Reverse_PDNS_Query": {
         "type": "observable",
         "observable_supported": ["ip"],

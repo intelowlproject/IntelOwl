@@ -62,6 +62,7 @@ Main features:
 * Talos Reputation
 * Tor Project
 * Robtex
+* Threatminer
 
 ### Documentation
 [![Documentation Status](https://readthedocs.org/projects/intelowl/badge/?version=latest)](https://intelowl.readthedocs.io/en/latest/?badge=latest)

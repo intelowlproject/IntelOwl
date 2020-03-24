@@ -2,7 +2,8 @@ from django.contrib import admin
 from django.urls import re_path
 from django.contrib.auth import views as auth_views
 
-from api_app.views import *
+from api_app.views import redirect_to_login, ask_analysis_availability, send_analysis_request, ask_analysis_result,\
+                    get_analyzer_configs, query_database, query_database_json, verify_login, logout_request
 
 urlpatterns = [
     re_path('^$', redirect_to_login),

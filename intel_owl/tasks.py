@@ -4,7 +4,7 @@ from celery import shared_task
 from api_app.script_analyzers.file_analyzers import doc_info, file_info, pe_info, pdf_info, vt2_scan, intezer_scan, \
     cuckoo_scan, yara_scan, vt3_scan, strings_info, rtf_info
 from api_app.script_analyzers.observable_analyzers import abuseipdb, fortiguard, maxmind, greynoise, googlesf, otx, \
-    talos, tor, circl_pdns, circl_pssl, robtex_fdns, robtex_ip, robtex_rdns, vt2_get, ha_get, vt3_get, misp, dnsdb, \
+    talos, tor, circl_pdns, circl_pssl, robtex, vt2_get, ha_get, vt3_get, misp, dnsdb, \
     shodan, honeydb_twitter_scan, hunter, mb_get, onyphe, censys, threatminer
 
 from api_app import crons
@@ -62,8 +62,8 @@ def circlpssl_run(analyzer_name, job_id, observable_name, observable_classificat
 
 
 @shared_task(soft_time_limit=30)
-def robtexip_run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params):
-    robtex_ip.run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params)
+def robtex_run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params):
+    robtex.run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params)
 
 
 @shared_task(soft_time_limit=30)
@@ -84,16 +84,6 @@ def hunter_run(analyzer_name, job_id, observable_name, observable_classification
 @shared_task(soft_time_limit=30)
 def censys_run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params):
     censys.run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params)
-
-
-@shared_task(soft_time_limit=30)
-def robtexfdns_run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params):
-    robtex_fdns.run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params)
-
-
-@shared_task(soft_time_limit=30)
-def robtexrdns_run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params):
-    robtex_rdns.run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params)
 
 
 @shared_task(soft_time_limit=30)

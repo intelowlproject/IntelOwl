@@ -11,7 +11,7 @@ from unittest import skipIf
 
 from api_app.script_analyzers.observable_analyzers import abuseipdb, censys, shodan, fortiguard, maxmind,\
     greynoise, googlesf, otx, talos, tor, circl_pssl, circl_pdns,\
-    robtex_ip, robtex_fdns, robtex_rdns, vt2_get, ha_get, vt3_get, misp, dnsdb,\
+    robtex, vt2_get, ha_get, vt3_get, misp, dnsdb,\
     honeydb_twitter_scan, hunter, mb_get, onyphe, threatminer
 
 from api_app.models import Job
@@ -152,12 +152,11 @@ class IPAnalyzersTests(TestCase):
         self.assertEqual(report.get('success', False), True)
 
     def test_robtex_ip(self, mock_get=None, mock_post=None):
-        report = robtex_ip.run("Robtex_IP_Query", self.job_id, self.observable_name, self.observable_classification, {})
+        report = robtex.run("Robtex_IP_Query", self.job_id, self.observable_name, self.observable_classification, {})
         self.assertEqual(report.get('success', False), True)
 
     def test_robtex_rdns(self, mock_get=None, mock_post=None):
-        report = robtex_rdns.run("Robtex_Reverse_PDNS_Query", self.job_id, self.observable_name,
-                                 self.observable_classification, {})
+        report = robtex.run("Robtex_Reverse_PDNS_Query", self.job_id, self.observable_name, self.observable_classification, {})
         self.assertEqual(report.get('success', False), True)
 
     def test_dnsdb(self, mock_get=None, mock_post=None):
@@ -233,7 +232,7 @@ class DomainAnalyzersTests(TestCase):
         self.assertEqual(report.get('success', False), True)
 
     def test_robtex_fdns(self, mock_get=None, mock_post=None):
-        report = robtex_fdns.run("Robtex_Forward_PDNS_Query", self.job_id, self.observable_name, self.observable_classification, {})
+        report = robtex.run("Robtex_Forward_PDNS_Query", self.job_id, self.observable_name, self.observable_classification, {})
         self.assertEqual(report.get('success', False), True)
 
     def test_dnsdb(self, mock_get=None, mock_post=None):
@@ -301,7 +300,7 @@ class URLAnalyzersTests(TestCase):
         self.assertEqual(report.get('success', False), True)
 
     def test_robtex_fdns(self, mock_get=None, mock_post=None):
-        report = robtex_fdns.run("Robtex_Forward_PDNS_Query", self.job_id, self.observable_name, self.observable_classification, {})
+        report = robtex.run("Robtex_Forward_PDNS_Query", self.job_id, self.observable_name, self.observable_classification, {})
         self.assertEqual(report.get('success', False), True)
 
     def test_vt_get(self, mock_get=None, mock_post=None):

@@ -75,7 +75,10 @@
         "type": "observable",
         "observable_supported": ["ip"],
         "external_service": true,
-        "python_module": "robtexip_run"
+        "python_module": "robtex_run",
+        "additional_config_params": {
+            "robtex_analysis": "ip_query"
+        }
     },
     "Shodan_Search": {
         "type": "observable",
@@ -126,13 +129,19 @@
         "type": "observable",
         "observable_supported": ["ip"],
         "external_service": true,
-        "python_module": "robtexrdns_run"
+        "python_module": "robtex_run",
+        "additional_config_params": {
+            "robtex_analysis": "reverse_pdns"
+        }
     },
     "Robtex_Forward_PDNS_Query": {
         "type": "observable",
         "observable_supported": ["domain", "url"],
         "external_service": true,
-        "python_module": "robtexfdns_run"
+        "python_module": "robtex_run",
+        "additional_config_params": {
+            "robtex_analysis": "forward_pdns"
+        }
     },
     "DNSDB": {
         "type": "observable",

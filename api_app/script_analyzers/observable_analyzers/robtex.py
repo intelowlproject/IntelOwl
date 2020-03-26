@@ -12,6 +12,7 @@ logger = logging.getLogger(__name__)
 
 base_url = 'https://freeapi.robtex.com/'
 
+
 def run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params):
     logger.info("started analyzer {} job_id {} observable {}"
                 "".format(analyzer_name, job_id, observable_name))

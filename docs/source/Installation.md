@@ -46,7 +46,7 @@ Optional variables needed to enable specific analyzers:
 * MISP_KEY: your own MISP instance key
 * MISP_URL your own MISP instance URL
 * CUCKOO_URL: your cuckoo instance URL
-* HONEYDB_API_ID & HONEYDB_API_KEY: HoneyDB credentials
+* HONEYDB_API_ID & HONEYDB_API_KEY: HoneyDB API credentials
 * CENSYS_API_ID & CENSYS_API_SECRET: Censys credentials
 * ONYPHE_KEY: Onyphe.io's API Key 
 

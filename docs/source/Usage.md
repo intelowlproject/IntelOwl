@@ -56,7 +56,8 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * Robtex_Reverse_PDNS_Query: scan an IP against the Robtex Passive DNS DB
 * Robtex_IP_Query: get IP info from Robtex
 * GoogleSafebrowsing: scan an observable against GoogleSafeBrowsing DB
-* GreyNoiseAlpha: scan an IP against the Alpha Greynoise API
+* GreyNoiseAlpha: scan an IP against the Alpha Greynoise API (no API key required)
+* GreyNoise: scan an IP against the Greynoise API (requires API key)
 * CIRCLPassiveDNS: scan an observable against the CIRCL Passive DNS DB
 * CIRCLPassiveSSL: scan an observable against the CIRCL Passive SSL DB
 * MaxMindGeoIP: extract GeoIP info for an observable

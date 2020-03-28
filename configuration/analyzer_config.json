@@ -63,7 +63,20 @@
         "type": "observable",
         "observable_supported": ["ip"],
         "external_service": true,
-        "python_module": "greynoise_run"
+        "python_module": "greynoise_run",
+        "additional_config_params": {
+            "greynoise_api_version": "v1"
+        }
+    },
+    "GreyNoise": {
+        "type": "observable",
+        "observable_supported": ["ip"],
+        "external_service": true,
+        "python_module": "greynoise_run",
+        "additional_config_params": {
+            "greynoise_api_version": "v2",
+            "api_key_name": "GreyNoise_API_KEY"
+        }
     },
     "GoogleSafebrowsing": {
         "type": "observable",

@@ -125,10 +125,14 @@ class IPAnalyzersTests(TestCase):
         report = maxmind.run("MaxMindDB", self.job_id, self.observable_name, self.observable_classification, {})
         self.assertEqual(report.get('success', False), True)
 
-    def test_greynoise(self, mock_get=None, mock_post=None):
-        report = greynoise.run("Greynoise", self.job_id, self.observable_name, self.observable_classification, {})
+    def test_greynoisealpha(self, mock_get=None, mock_post=None):
+        report = greynoise.run("GreyNoiseAlpha", self.job_id, self.observable_name, self.observable_classification, {})
         self.assertEqual(report.get('success', False), True)
 
+    def test_greynoise(self, mock_get=None, mock_post=None):
+        report = greynoise.run("GreyNoise", self.job_id, self.observable_name, self.observable_classification, {})
+        self.assertEqual(report.get('success', False), True)
+    
     def test_gsf(self, mock_get=None, mock_post=None):
         report = googlesf.run("GoogleSafeBrowsing", self.job_id, self.observable_name, self.observable_classification,
                               {})

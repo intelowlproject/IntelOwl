@@ -12,7 +12,7 @@ from unittest import skipIf
 from api_app.script_analyzers.observable_analyzers import abuseipdb, censys, shodan, fortiguard, maxmind,\
     greynoise, googlesf, otx, talos, tor, circl_pssl, circl_pdns,\
     robtex, vt2_get, ha_get, vt3_get, misp, dnsdb,\
-    honeydb_twitter_scan, hunter, mb_get, onyphe, threatminer
+    honeydb, hunter, mb_get, onyphe, threatminer
 
 from api_app.models import Job
 from intel_owl import settings
@@ -115,9 +115,14 @@ class IPAnalyzersTests(TestCase):
         report = threatminer.run("Threatminer", self.job_id, self.observable_name, self.observable_classification, {})
         self.assertEqual(report.get('success', False), True)
 
-    def test_honeydb(self, mock_get=None, mock_post=None):
-        report = honeydb_twitter_scan.run("HoneyDB", self.job_id, self.observable_name, self.observable_classification,
+    def test_honeydb_get(self, mock_get=None, mock_post=None):
+        report = honeydb.run("HoneyDB_Get", self.job_id, self.observable_name, self.observable_classification,
                                           {})
+        self.assertEqual(report.get('success', False), True)
+
+    def test_honeydb_scan_twitter(self, mock_get=None, mock_post=None):
+        report = honeydb.run("HoneyDB_Scan_Twitter", self.job_id, self.observable_name, self.observable_classification,
+                                        {})
         self.assertEqual(report.get('success', False), True)
 
     @skipIf(settings.MOCK_CONNECTIONS, "not working without connection")
@@ -125,10 +130,14 @@ class IPAnalyzersTests(TestCase):
         report = maxmind.run("MaxMindDB", self.job_id, self.observable_name, self.observable_classification, {})
         self.assertEqual(report.get('success', False), True)
 
-    def test_greynoise(self, mock_get=None, mock_post=None):
-        report = greynoise.run("Greynoise", self.job_id, self.observable_name, self.observable_classification, {})
+    def test_greynoisealpha(self, mock_get=None, mock_post=None):
+        report = greynoise.run("GreyNoiseAlpha", self.job_id, self.observable_name, self.observable_classification, {})
         self.assertEqual(report.get('success', False), True)
 
+    def test_greynoise(self, mock_get=None, mock_post=None):
+        report = greynoise.run("GreyNoise", self.job_id, self.observable_name, self.observable_classification, {})
+        self.assertEqual(report.get('success', False), True)
+    
     def test_gsf(self, mock_get=None, mock_post=None):
         report = googlesf.run("GoogleSafeBrowsing", self.job_id, self.observable_name, self.observable_classification,
                               {})

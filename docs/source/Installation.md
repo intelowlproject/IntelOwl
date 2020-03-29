@@ -46,9 +46,10 @@ Optional variables needed to enable specific analyzers:
 * MISP_KEY: your own MISP instance key
 * MISP_URL your own MISP instance URL
 * CUCKOO_URL: your cuckoo instance URL
-* HONEYDB_API_ID & HONEYDB_API_KEY: HoneyDB credentials
+* HONEYDB_API_ID & HONEYDB_API_KEY: HoneyDB API credentials
 * CENSYS_API_ID & CENSYS_API_SECRET: Censys credentials
 * ONYPHE_KEY: Onyphe.io's API Key 
+* GREYNOISE_API_KEY: GreyNoise API ([docs](https://docs.greynoise.io))
 
 ### Database configuration
 Before running the project, you must populate the basic configuration for PostgreSQL.

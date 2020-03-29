@@ -99,7 +99,8 @@ class ApiTests(TestCase):
                                "GreyNoiseAlpha", "GreyNoise","GoogleSafebrowsing", "Robtex_IP_Query",
                                "Robtex_Reverse_PDNS_Query", "TalosReputation", "OTXQuery",
                                "VirusTotal_Get_v2_Observable", "HybridAnalysis_Get_Observable", "Hunter",
-                               "HoneyDB", "Threatminer_Reports_Tagging", "Threatminer_PDNS", "ONYPHE"]
+                               "Threatminer_Reports_Tagging", "Threatminer_PDNS", "ONYPHE",
+                               "HoneyDB_Scan_Twitter", "HoneyDB_Get"]
         observable_name = os.environ.get("TEST_IP", "8.8.8.8")
         md5 = hashlib.md5(observable_name.encode('utf-8')).hexdigest()
         data = {

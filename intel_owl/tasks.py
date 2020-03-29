@@ -5,7 +5,7 @@ from api_app.script_analyzers.file_analyzers import doc_info, file_info, pe_info
     cuckoo_scan, yara_scan, vt3_scan, strings_info, rtf_info, signature_info
 from api_app.script_analyzers.observable_analyzers import abuseipdb, fortiguard, maxmind, greynoise, googlesf, otx, \
     talos, tor, circl_pdns, circl_pssl, robtex, vt2_get, ha_get, vt3_get, misp, dnsdb, \
-    shodan, honeydb_twitter_scan, hunter, mb_get, onyphe, censys, threatminer
+    shodan, honeydb, hunter, mb_get, onyphe, censys, threatminer
 
 from api_app import crons
 
@@ -140,9 +140,9 @@ def vt3get_scan_run(analyzer_name, job_id, observable_name, observable_classific
     vt3_get.run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params)
 
 
-@shared_task(soft_time_limit=500)
-def honeydb_twitter_scan_run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params):
-    honeydb_twitter_scan.run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params)
+@shared_task(soft_time_limit=200)
+def honeydb_run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params):
+    honeydb.run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params)
 
 
 @shared_task(soft_time_limit=50)

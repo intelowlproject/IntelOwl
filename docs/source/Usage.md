@@ -68,7 +68,8 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * MISPFIRST: scan an observable on the FIRST MISP instance
 * DNSDB: scan an observable against the Passive DNS Farsight Database
 * Shodan: scan an IP against Shodan API
-* HoneyDB: scan an IP against HoneyDB.io's Twitter Threat Feed
+* HoneyDB_Scan_Twitter: scan an IP against HoneyDB.io's Twitter Threat Feed
+* HoneyDB_Get: IP lookup service
 * Hunter: Scans a domain name and returns set of data about the organisation, the email address found and additional information about the people owning those email addresses. 
 * Censys_Search: scan an IP address against Censys View API
 * MalwareBazaar_Get_Observable: Check if a particular malware hash is known to MalwareBazaar
@@ -92,12 +93,3 @@ Also, you can change the name of every available analyzer based on your wishes.
 Changing other keys will break the analyzer. In that case, you should think about create a new python module or to modify an existing one.
 
 To contribute to the project, see [Contribute](./Contribute.md)
-
-
-
-
-
-
-
-
-

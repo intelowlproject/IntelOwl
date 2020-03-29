@@ -16,19 +16,19 @@ def run(analyzer_name, job_id, observable_name, observable_classification, addit
     report = general.get_basic_report_template(analyzer_name)
     try:
         api_version = additional_config_params.get("greynoise_api_version", "v1")
-        if api_version=="v1":
+        if api_version == "v1":
             url = 'https://api.greynoise.io/v1/query/ip'
             headers = {'Content-Type': 'application/x-www-form-urlencoded'}
             data = {'ip': observable_name}
 
             response = requests.post(url, data=data, headers=headers)
             response.raise_for_status()
-        elif api_version=="v2":
+        elif api_version == "v2":
             url = f"https://api.greynoise.io/v2/noise/context/{observable_name}"
-            api_key_name = additional_config_params.get("api_key_name", "GreyNoise_API_KEY")
+            api_key_name = additional_config_params.get("api_key_name", "GREYNOISE_API_KEY")
             api_key = secrets.get_secret(api_key_name)
             if not api_key:
-                raise AnalyzerRunException("GreyNoise_API_KEY not specified.")
+                raise AnalyzerRunException("GREYNOISE_API_KEY not specified.")
             headers = {
                 "Accept": "application/json",
                 "key": api_key

@@ -39,6 +39,8 @@ Main features:
 * Yara (Community, Neo23x0 and Intezer rules are already available. There's the chance to add your own rules)
 
 ### External services available
+#### required paid or trial api key
+* GreyNoise v2
 #### required paid or free api key
 * VirusTotal v2 + v3
 * HybridAnalysis
@@ -58,7 +60,7 @@ Main features:
 * CIRCL PassiveDNS + PassiveSSL
 #### without api key
 * Fortiguard URL Analyzer
-* GreyNoise Alpha API
+* GreyNoise Alpha API v1
 * Talos Reputation
 * Tor Project
 * Robtex

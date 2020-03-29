@@ -75,7 +75,7 @@
         "python_module": "greynoise_run",
         "additional_config_params": {
             "greynoise_api_version": "v2",
-            "api_key_name": "GreyNoise_API_KEY"
+            "api_key_name": "GREYNOISE_API_KEY"
         }
     },
     "GoogleSafebrowsing": {

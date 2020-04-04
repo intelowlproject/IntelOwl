@@ -12,7 +12,7 @@ from unittest import skipIf
 from api_app.script_analyzers.observable_analyzers import abuseipdb, censys, shodan, fortiguard, maxmind,\
     greynoise, googlesf, otx, talos, tor, circl_pssl, circl_pdns,\
     robtex, vt2_get, ha_get, vt3_get, misp, dnsdb,\
-    honeydb, hunter, mb_get, onyphe, threatminer
+    honeydb, hunter, mb_get, onyphe, threatminer, urlhaus
 
 from api_app.models import Job
 from intel_owl import settings
@@ -270,6 +270,10 @@ class DomainAnalyzersTests(TestCase):
         report = onyphe.run("ONYPHE", self.job_id, self.observable_name, self.observable_classification, {})
         self.assertEqual(report.get('success', False), True)
 
+    def test_urlhaus(self, mock_get=None, mock_post=None):
+        report = urlhaus.run("URLhaus", self.job_id, self.observable_name, self.observable_classification, {})
+        self.assertEqual(report.get('success', False), True)
+
 
 @mock_connections(patch('requests.get', side_effect=mocked_requests))
 @mock_connections(patch('requests.post', side_effect=mocked_requests))
@@ -322,6 +326,10 @@ class URLAnalyzersTests(TestCase):
 
     def test_onyphe(self, mock_get=None, mock_post=None):
         report = onyphe.run("ONYPHE", self.job_id, self.observable_name, self.observable_classification, {})
+        self.assertEqual(report.get('success', False), True)
+
+    def test_urlhaus(self, mock_get=None, mock_post=None):
+        report = urlhaus.run("URLhaus", self.job_id, self.observable_name, self.observable_classification, {})
         self.assertEqual(report.get('success', False), True)
 
 

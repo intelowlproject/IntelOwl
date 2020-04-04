@@ -5,7 +5,7 @@ from api_app.script_analyzers.file_analyzers import doc_info, file_info, pe_info
     cuckoo_scan, yara_scan, vt3_scan, strings_info, rtf_info, signature_info
 from api_app.script_analyzers.observable_analyzers import abuseipdb, fortiguard, maxmind, greynoise, googlesf, otx, \
     talos, tor, circl_pdns, circl_pssl, robtex, vt2_get, ha_get, vt3_get, misp, dnsdb, \
-    shodan, honeydb, hunter, mb_get, onyphe, censys, threatminer
+    shodan, honeydb, hunter, mb_get, onyphe, censys, threatminer, urlhaus
 
 from api_app import crons
 
@@ -148,6 +148,11 @@ def honeydb_run(analyzer_name, job_id, observable_name, observable_classificatio
 @shared_task(soft_time_limit=50)
 def onyphe_run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params):
     onyphe.run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params)
+
+
+@shared_task(soft_time_limit=50)
+def urlhaus_run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params):
+    urlhaus.run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params)
 
 
 @shared_task(soft_time_limit=30)

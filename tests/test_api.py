@@ -80,7 +80,8 @@ class ApiTests(TestCase):
     def test_send_analysis_request_domain(self):
         analyzers_requested = ["Fortiguard", "CIRCLPassiveDNS", "GoogleSafebrowsing", "Robtex_Forward_PDNS_Query",
                                "OTXQuery", "VirusTotal_v3_Get_Observable", "HybridAnalysis_Get_Observable",
-                               "Threatminer_PDNS", "Threatminer_Reports_Tagging", "Threatminer_Subdomains", "ONYPHE"]
+                               "Threatminer_PDNS", "Threatminer_Reports_Tagging", "Threatminer_Subdomains", "ONYPHE"
+                               "URLhaus"]
         observable_name = os.environ.get("TEST_DOMAIN", "google.com")
         md5 = hashlib.md5(observable_name.encode('utf-8')).hexdigest()
         data = {

@@ -77,6 +77,7 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * Threatminer_PDNS: retrieve PDNS data from Threatminer API
 * Threatminer_Reports_Tagging: retrieve reports from Threatminer API
 * Threatminer_Subdomains: retrieve subdomains from Threatminer API
+* URLhaus: Query a domain or URL against URLhaus API.
 
 ## Analyzers customization
 You can create new analyzers based on already existing modules by changing the configuration values (`analyzer_config.json`).

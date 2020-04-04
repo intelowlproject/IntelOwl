@@ -258,6 +258,12 @@
             "api_key_name": "ONYPHE_KEY"
         }
     },
+    "URLhaus": {
+        "type": "observable",
+        "observable_supported": ["domain", "url"],
+        "external_service": true,
+        "python_module": "urlhaus_run"
+    },
     "Yara_Scan_Community": {
         "type": "file",
         "python_module": "yara_run",

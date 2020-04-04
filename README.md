@@ -66,6 +66,7 @@ Main features:
 * Robtex
 * Threatminer
 * Abuse.ch MalwareBazaar
+* Abuse.ch URLhaus
 
 ### Documentation
 [![Documentation Status](https://readthedocs.org/projects/intelowl/badge/?version=latest)](https://intelowl.readthedocs.io/en/latest/?badge=latest)

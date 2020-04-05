@@ -33,6 +33,12 @@
         "external_service": true,
         "python_module": "abuseipdb_run"
     },
+    "Auth0": {
+        "type": "observable",
+        "observable_supported": ["ip"],
+        "external_service": true,
+        "python_module": "auth0_run"
+    },
     "MaxMindGeoIP": {
         "type": "observable",
         "observable_supported": ["ip"],

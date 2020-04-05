@@ -56,6 +56,7 @@ Main features:
 * HoneyDB
 * AlienVault OTX
 * MaxMind
+* Auth0
 #### needed access request
 * CIRCL PassiveDNS + PassiveSSL
 #### without api key

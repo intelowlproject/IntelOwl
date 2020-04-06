@@ -4,17 +4,16 @@
 import hashlib
 import logging
 import os
+from unittest import skipIf, skip
+from unittest.mock import patch
 
 from django.test import TestCase
-from unittest.mock import patch
-from unittest import skipIf
-
-from api_app.script_analyzers.observable_analyzers import abuseipdb, censys, shodan, fortiguard, maxmind,\
-    greynoise, googlesf, otx, talos, tor, circl_pssl, circl_pdns,\
-    robtex, vt2_get, ha_get, vt3_get, misp, dnsdb,\
-    honeydb, hunter, mb_get, onyphe, threatminer, urlhaus
 
 from api_app.models import Job
+from api_app.script_analyzers.observable_analyzers import abuseipdb, censys, shodan, fortiguard, maxmind, \
+    greynoise, googlesf, otx, talos, tor, circl_pssl, circl_pdns, \
+    robtex, vt2_get, ha_get, vt3_get, misp, dnsdb, \
+    honeydb, hunter, mb_get, onyphe, threatminer, urlhaus, active_dns, cloudflare_malware
 from intel_owl import settings
 
 logger = logging.getLogger(__name__)
@@ -194,6 +193,13 @@ class IPAnalyzersTests(TestCase):
         report = onyphe.run("ONYPHE", self.job_id, self.observable_name, self.observable_classification, {})
         self.assertEqual(report.get('success', False), True)
 
+    def active_dns_classic_reverse(self, mock_get=None, mock_post=None):
+        report = active_dns.run("ActiveDNS_Classic_reverse", self.job_id, self.observable_name,
+                                self.observable_classification, {"service": "classic"})
+
+        self.assertEqual(report.get('success', False), True,
+                         f'report: {report}')
+
 
 @mock_connections(patch('requests.get', side_effect=mocked_requests))
 @mock_connections(patch('requests.post', side_effect=mocked_requests))
@@ -273,6 +279,34 @@ class DomainAnalyzersTests(TestCase):
     def test_urlhaus(self, mock_get=None, mock_post=None):
         report = urlhaus.run("URLhaus", self.job_id, self.observable_name, self.observable_classification, {})
         self.assertEqual(report.get('success', False), True)
+
+    def test_active_dns(self, mock_get=None, mock_post=None):
+        # Google
+        google_report = active_dns.run("ActiveDNS_Google", self.job_id, self.observable_name,
+                                       self.observable_classification, {"service": "google"})
+
+        self.assertEqual(google_report.get('success', False), True,
+                         f'google_report: {google_report}')
+
+        # CloudFlare
+        cloudflare_report = active_dns.run("ActiveDNS_CloudFlare", self.job_id, self.observable_name,
+                                           self.observable_classification, {"service": "cloudflare"})
+
+        self.assertEqual(cloudflare_report.get('success', False), True,
+                         f'cloudflare_report: {cloudflare_report}')
+        # Classic
+        classic_report = active_dns.run("ActiveDNS_Classic", self.job_id, self.observable_name,
+                                        self.observable_classification, {"service": "classic"})
+
+        self.assertEqual(classic_report.get('success', False), True,
+                         f'classic_report: {classic_report}')
+
+    @skip('not implemented')
+    def test_cloudFlare_malware(self, mock_get=None, mock_post=None):
+        report = cloudflare_malware.run("CloudFlare_Malware", self.job_id, self.observable_name,
+                                        self.observable_classification, {})
+
+        self.assertEqual(report.get('success', False), True, f'report: {report}')
 
 
 @mock_connections(patch('requests.get', side_effect=mocked_requests))

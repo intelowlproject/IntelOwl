@@ -33,6 +33,39 @@
         "external_service": true,
         "python_module": "abuseipdb_run"
     },
+    "ActiveDNS_Google": {
+        "type": "observable",
+        "observable_supported": ["domain"],
+        "external_service": true,
+        "python_module": "activedns_run",
+        "additional_config_params": {
+            "service": "google"
+        }
+    },
+    "ActiveDNS_CloudFlare": {
+        "type": "observable",
+        "observable_supported": ["domain"],
+        "external_service": true,
+        "python_module": "activedns_run",
+        "additional_config_params": {
+            "service": "cloudflare"
+        }
+    },
+    "ActiveDNS_Classic": {
+        "type": "observable",
+        "observable_supported": ["ip", "domain"],
+        "external_service": true,
+        "python_module": "activedns_run",
+        "additional_config_params": {
+            "service": "classic"
+        }
+    },
+    "CloudFlare_Malware": {
+        "type": "observable",
+        "observable_supported": ["domain"],
+        "external_service": true,
+        "python_module": "cloudflare_malware_run"
+    },
     "MaxMindGeoIP": {
         "type": "observable",
         "observable_supported": ["ip"],

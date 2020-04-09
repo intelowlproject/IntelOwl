@@ -79,6 +79,7 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * Threatminer_Subdomains: retrieve subdomains from Threatminer API
 * URLhaus: Query a domain or URL against URLhaus API.
 * ActiveDNS: Retrieve current domain resolution. Support Google DoH (DNS over HTTPS), CloudFlare DoH and resolution with default DNS
+* Auth0: scan an IP against the Auth0 API
 
 ## Analyzers customization
 You can create new analyzers based on already existing modules by changing the configuration values (`analyzer_config.json`).

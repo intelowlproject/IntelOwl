@@ -13,7 +13,7 @@ from api_app.models import Job
 from api_app.script_analyzers.observable_analyzers import abuseipdb, censys, shodan, fortiguard, maxmind, \
     greynoise, googlesf, otx, talos, tor, circl_pssl, circl_pdns, \
     robtex, vt2_get, ha_get, vt3_get, misp, dnsdb, \
-    honeydb, hunter, mb_get, onyphe, threatminer, urlhaus, active_dns, cloudflare_malware
+    honeydb, hunter, mb_get, onyphe, threatminer, urlhaus, active_dns, cloudflare_malware, auth0
 from intel_owl import settings
 
 logger = logging.getLogger(__name__)
@@ -100,6 +100,10 @@ class IPAnalyzersTests(TestCase):
 
     def test_abuseipdb(self, mock_get=None, mock_post=None):
         report = abuseipdb.run("AbuseIPDB", self.job_id, self.observable_name, self.observable_classification, {})
+        self.assertEqual(report.get('success', False), True)
+
+    def test_auth0(self, mock_get=None, mock_post=None):
+        report = auth0.run("Auth0", self.job_id, self.observable_name, self.observable_classification, {})
         self.assertEqual(report.get('success', False), True)
 
     def test_censys(self, mock_get=None, mock_post=None):

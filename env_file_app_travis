@@ -8,6 +8,7 @@ DB_PASSWORD=password
 
 SHODAN_KEY=test
 ABUSEIPDB_KEY=test
+AUTH0_KEY=test
 GSF_KEY=test
 OTX_KEY=test
 CIRCL_CREDENTIALS=user|pass

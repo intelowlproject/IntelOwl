@@ -33,6 +33,7 @@ Required variables to run the image:
 
 Optional variables needed to enable specific analyzers:
 * ABUSEIPDB_KEY: AbuseIPDB API key
+* AUTH0_KEY: Auth0 API Key
 * SHODAN_KEY: Shodan API key
 * HUNTER_API_KEY: Hunter.io API key
 * GSF_KEY: Google Safe Browsing API key

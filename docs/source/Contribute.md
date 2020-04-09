@@ -47,7 +47,7 @@ After having written the new python module, you have to remember to:
 
 * Add the new analyzer/s in the lists in the docs: [Usage](./Usage.md) and [ReadMe](https://github.com/certego/IntelOwl/blob/master/README.md)
 
-* Ultimately, add the required secrets in the file [env_file_app_template](https://github.com/certego/IntelOwl/blob/master/env_file_app_template) and in the docs: [Installation](./Installation.md)
+* Ultimately, add the required secrets in the files [env_file_app_template](https://github.com/certego/IntelOwl/blob/master/env_file_app_template), [env_file_app_travis](https://github.com/certego/IntelOwl/blob/master/env_file_app_travis) and in the docs: [Installation](./Installation.md)
 
 ### Create a pull request
 If everything is working, before submitting your pull request, please squash your commits into a single one!

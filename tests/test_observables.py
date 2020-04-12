@@ -13,7 +13,7 @@ from api_app.models import Job
 from api_app.script_analyzers.observable_analyzers import abuseipdb, censys, shodan, fortiguard, maxmind, \
     greynoise, googlesf, otx, talos, tor, circl_pssl, circl_pdns, \
     robtex, vt2_get, ha_get, vt3_get, misp, dnsdb, \
-    honeydb, hunter, mb_get, onyphe, threatminer, urlhaus, active_dns, cloudflare_malware, auth0
+    honeydb, hunter, mb_get, onyphe, threatminer, urlhaus, active_dns, cloudflare_malware, auth0, securitytrails
 from intel_owl import settings
 
 logger = logging.getLogger(__name__)
@@ -104,6 +104,10 @@ class IPAnalyzersTests(TestCase):
 
     def test_auth0(self, mock_get=None, mock_post=None):
         report = auth0.run("Auth0", self.job_id, self.observable_name, self.observable_classification, {})
+        self.assertEqual(report.get('success', False), True)
+
+    def test_securitytrails_ip(self, mock_get=None, mock_post=None):
+        report = securitytrails.run("Securitytrails_IP_Neighbours", self.job_id, self.observable_name, self.observable_classification, {})
         self.assertEqual(report.get('success', False), True)
 
     def test_censys(self, mock_get=None, mock_post=None):
@@ -227,6 +231,10 @@ class DomainAnalyzersTests(TestCase):
 
     def test_fortiguard(self, mock_get=None, mock_post=None):
         report = fortiguard.run("Fortiguard", self.job_id, self.observable_name, self.observable_classification, {})
+        self.assertEqual(report.get('success', False), True)
+
+    def test_securitytrails_domain(self, mock_get=None, mock_post=None):
+        report = securitytrails.run("Securitytrails_Details", self.job_id, self.observable_name, self.observable_classification, {})
         self.assertEqual(report.get('success', False), True)
 
     def test_hunter(self, mock_get=None, mock_post=None):

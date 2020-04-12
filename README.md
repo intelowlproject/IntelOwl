@@ -49,6 +49,7 @@ Main features:
 * Hunter.io - Email Hunting
 * ONYPHE 
 * Censys.io
+* SecurityTrails
 #### required free api key
 * GoogleSafeBrowsing
 * AbuseIPDB

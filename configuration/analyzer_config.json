@@ -39,6 +39,51 @@
         "external_service": true,
         "python_module": "auth0_run"
     },
+    "Securitytrails_IP_Neighbours": {
+        "type": "observable",
+        "observable_supported": ["ip"],
+        "external_service": true,
+        "python_module": "securitytrails_run"
+    },
+    "Securitytrails_Details": {
+        "type": "observable",
+        "observable_supported": ["domain"],
+        "external_service": true,
+        "python_module": "securitytrails_run",
+        "additional_config_params": {
+            "securitytrails_analysis": "current",
+            "securitytrails_current_type": "details"
+        }
+    },
+    "Securitytrails_Subdomains": {
+        "type": "observable",
+        "observable_supported": ["domain"],
+        "external_service": true,
+        "python_module": "securitytrails_run",
+        "additional_config_params": {
+            "securitytrails_analysis": "current",
+            "securitytrails_current_type": "subdomains"
+        }
+    },
+    "Securitytrails_Tags": {
+        "type": "observable",
+        "observable_supported": ["domain"],
+        "external_service": true,
+        "python_module": "securitytrails_run",
+        "additional_config_params": {
+            "securitytrails_analysis": "current",
+            "securitytrails_current_type": "tags"
+        }
+    },
+    "Securitytrails_History_WHOIS": {
+        "type": "observable",
+        "observable_supported": ["domain"],
+        "external_service": true,
+        "python_module": "securitytrails_run",
+        "additional_config_params": {
+            "securitytrails_analysis": "history"
+        }
+    },
     "ActiveDNS_Google": {
         "type": "observable",
         "observable_supported": ["domain"],

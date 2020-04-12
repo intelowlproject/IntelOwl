@@ -80,6 +80,12 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * URLhaus: Query a domain or URL against URLhaus API.
 * ActiveDNS: Retrieve current domain resolution. Support Google DoH (DNS over HTTPS), CloudFlare DoH and resolution with default DNS
 * Auth0: scan an IP against the Auth0 API
+* Securitytrails_IP_Neighbours: scan an IP against securitytrails API for neighbour IPs
+* Securitytrails_Details: scan a domain against securitytrails API for general details
+* Securitytrails_Subdomains: scan a domain against securitytrails API for subdomains
+* Securitytrails_Tags: scan a domain against securitytrails API for tags
+* Securitytrails_History_WHOIS: scan a domain against securitytrails API for historical WHOIS
+* Securitytrails_History_DNS: scan a domain against securitytrails API for historical DNS
 
 ## Analyzers customization
 You can create new analyzers based on already existing modules by changing the configuration values (`analyzer_config.json`).

@@ -2,7 +2,7 @@ from __future__ import absolute_import, unicode_literals
 
 from celery import shared_task
 from api_app.script_analyzers.file_analyzers import doc_info, file_info, pe_info, pdf_info, vt2_scan, intezer_scan, \
-    cuckoo_scan, yara_scan, vt3_scan, strings_info, rtf_info, signature_info
+    cuckoo_scan, yara_scan, vt3_scan, strings_info, rtf_info, signature_info, peframe
 from api_app.script_analyzers.observable_analyzers import abuseipdb, fortiguard, maxmind, greynoise, googlesf, otx, \
     talos, tor, circl_pdns, circl_pssl, robtex, vt2_get, ha_get, vt3_get, misp, dnsdb, \
     shodan, honeydb, hunter, mb_get, onyphe, censys, threatminer, urlhaus, active_dns, auth0
@@ -233,3 +233,8 @@ def yara_updater():
 @shared_task(soft_time_limit=50)
 def mbget_run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params):
     mb_get.run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params)
+
+
+@shared_task(soft_time_limit=500)
+def peframe_run(analyzer_name, job_id, filepath, filename, md5, additional_config_params):
+    peframe.run(analyzer_name, job_id, filepath, filename, md5, additional_config_params)

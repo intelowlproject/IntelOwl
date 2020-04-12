@@ -513,5 +513,12 @@
         "type": "file",
         "supported_filetypes": ["application/pdf"],
         "python_module": "pdfinfo_run"
+    },
+    "PEframe_Scan_File": {
+        "type": "file",
+        "python_module": "peframe_run",
+        "additional_config_params": {
+            "max_tries": 20
+        }
     }
 }

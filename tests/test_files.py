@@ -7,7 +7,7 @@ from unittest.mock import patch, MagicMock
 
 from api_app.script_analyzers import general
 from api_app.script_analyzers.file_analyzers import file_info, pe_info, doc_info, pdf_info, vt2_scan, intezer_scan, \
-    cuckoo_scan, yara_scan, vt3_scan, strings_info, rtf_info
+    cuckoo_scan, yara_scan, vt3_scan, strings_info, rtf_info, peframe
 from api_app.script_analyzers.observable_analyzers import vt3_get
 
 from api_app.models import Job
@@ -115,6 +115,40 @@ def mocked_cuckoo_get(*args, **kwargs):
 
     return MockResponse({'task': {'status': 'reported'}}, 200)
 
+def mocked_peframe_get(*args, **kwargs):
+
+    class MockResponse:
+        def __init__(self, json_data, status_code):
+            self.json_data = json_data
+            self.status_code = status_code
+            self.text = u''
+            self.content = b''
+
+        def json(self):
+            return self.json_data
+
+        def raise_for_status(self):
+            pass
+
+    return MockResponse({"error": None, "md5": "test", "status": "success"}, 200)
+
+
+def mocked_peframe_post(*args, **kwargs):
+
+    class MockResponse:
+        def __init__(self, json_data, status_code):
+            self.json_data = json_data
+            self.status_code = status_code
+            self.text = u''
+            self.content = b''
+
+        def json(self):
+            return self.json_data
+
+        def raise_for_status(self):
+            pass
+
+    return MockResponse({"md5":"test", "status":"running"}, 200)
 
 class FileAnalyzersEXETests(TestCase):
 
@@ -196,6 +230,14 @@ class FileAnalyzersEXETests(TestCase):
         additional_params = {'max_tries': 1, 'force_active_scan': True}
         report = vt3_get.run("VT_v3_Get_And_Scan", self.job_id, self.md5, "hash", additional_params)
         self.assertEqual(report.get('success', False), True)
+    
+    @mock_connections(patch('requests.get', side_effect=mocked_peframe_get))
+    @mock_connections(patch('requests.post', side_effect=mocked_peframe_post))
+    def test_peframe_scan_file(self, mock_get=None, mock_post=None):
+        additional_params = { 'max_tries': 10 }
+        report = peframe.run("PEframe_Scan_File", self.job_id, self.filepath, self.filename, self.md5, additional_params)
+        self.assertEqual(report.get('success', False), True)
+
 
 
 class FileAnalyzersDLLTests(TestCase):
@@ -241,6 +283,13 @@ class FileAnalyzersDocTests(TestCase):
 
     def test_docinfo(self):
         report = doc_info.run("Doc_Info", self.job_id, self.filepath, self.filename, self.md5, {})
+        self.assertEqual(report.get('success', False), True)
+
+    @mock_connections(patch('requests.get', side_effect=mocked_peframe_get))
+    @mock_connections(patch('requests.post', side_effect=mocked_peframe_post))
+    def test_peframe_scan_file(self, mock_get=None, mock_post=None):
+        additional_params = { 'max_tries': 10 }
+        report = peframe.run("PEframe_Scan_File", self.job_id, self.filepath, self.filename, self.md5, additional_params)
         self.assertEqual(report.get('success', False), True)
 
 

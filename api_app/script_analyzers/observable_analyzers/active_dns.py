@@ -78,12 +78,20 @@ def _doh_google(job_id, analyzer_name, observable_classification, observable_nam
         try:
             params = {
                 "name": observable_name,
-                "type": "A"
+                # this filter should work but it is not
+                "type": 1
             }
             response = requests.get('https://dns.google.com/resolve', params=params)
             response.raise_for_status()
             data = response.json()
-            ip = data.get("Answer", [{}])[0].get('data', 'NXDOMAIN')
+            ip = ''
+            answers = data.get("Answer", [])
+            for answer in answers:
+                if answer.get('type', 1) == 1:
+                    ip = answer.get('data', 'NXDOMAIN')
+                    break
+            if not ip:
+                logger.error(f"observable {observable_name} active_dns query retrieved no valid A answer: {answers}")
             report['report'] = {'name': observable_name, 'resolution': ip}
             report['success'] = True
         except requests.exceptions.RequestException as error:

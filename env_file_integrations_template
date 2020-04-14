@@ -1,0 +1,9 @@
+### ---- Environment variables for additional integrations ---
+### All env variables for docker based integrations should be added here
+### IMPORTANT: don't change these values unless you know what you are doing. It can have breaking changes!
+
+# PEframe
+FLASK_DEBUG=False
+FLASK_SECRET_KEY=someveryrandomsecretkey
+WORKERS=1
+LOG_LEVEL=INFO

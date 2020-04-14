@@ -1,5 +1,8 @@
 .idea
+.vscode
 __pycache__
 test_files
 env_file_app
 env_file_postgres
+env_file_integrations
+.env

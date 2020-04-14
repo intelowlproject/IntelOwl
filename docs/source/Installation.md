@@ -90,6 +90,14 @@ You just need to remember that it's important that you keep at least the followi
 
 For a full description of the available keys, check the [Usage](./Usage.md) page
 
+#### Optional Analyzers
+Some analyzers which run in their own Docker containers are kept disabled by default. They are disabled by default to prevent accidentally starting too many containers and making your computer unresponsive.
+
+In the project, you can find template files named `.env_template` and `.env_file_integrations_template`.
+You have to create new files named `.env` and `env_file_integrations` from these two templates.
+Services from all the compose files specified in `COMPOSE_FILE` variable present in the `.env` file are ran on `docker-compose up`. So, modify it to include only the analyzers you wish to use.
+Such compose files are available under `integrations/`.
+
 ### Rebuilding the project
 If you make some code changes and you like to rebuild the project, launch the following command from the project directory:
 

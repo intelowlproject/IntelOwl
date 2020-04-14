@@ -76,7 +76,11 @@ def run(analyzer_name, job_id, observable_name, observable_classification, addit
 def _doh_google(job_id, analyzer_name, observable_classification, observable_name, report):
     if observable_classification == 'domain':
         try:
-            response = requests.get('https://dns.google.com/resolve?name=' + observable_name)
+            params = {
+                "name": observable_name,
+                "type": "A"
+            }
+            response = requests.get('https://dns.google.com/resolve', params=params)
             response.raise_for_status()
             data = response.json()
             ip = data.get("Answer", [{}])[0].get('data', 'NXDOMAIN')

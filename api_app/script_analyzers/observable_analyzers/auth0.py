@@ -26,7 +26,7 @@ def run(analyzer_name, job_id, observable_name, observable_classification, addit
             'X-Auth-Token': api_key
         }
         url = 'https://signals.api.auth0.com/v2.0/ip/{}'.format(observable_name)
-        response = requests.get(url, headers = headers)
+        response = requests.get(url, headers=headers)
         response.raise_for_status()
 
         json_response = response.json()

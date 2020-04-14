@@ -47,15 +47,15 @@ def _urlhaus_get_report(observable_name, observable_classification):
     headers = {
         'Accept': 'application/json'
     }
-    post_data = {}
     if observable_classification == 'domain':
         uri = 'host/'
-        post_data = { 'host': observable_name }
+        post_data = {'host': observable_name}
     elif observable_classification == 'url':
         uri = 'url/'
-        post_data = { 'url': observable_name }
+        post_data = {'url': observable_name}
     else:
-        raise AnalyzerRunException(f"not supported observable type {observable_classification}. Supported are: domain and url.")
+        raise AnalyzerRunException(f"not supported observable type {observable_classification}."
+                                   f" Supported are: domain and url.")
 
     try:
         response = requests.post(base_url + uri, data=post_data, headers=headers)

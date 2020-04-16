@@ -18,7 +18,7 @@ RUN pip3 install --compile -r requirements.txt
 COPY . $PYTHONPATH
 
 RUN touch /var/log/intel_owl/django/api_app.log /var/log/intel_owl/django/api_app_errors.log \
-    touch /var/log/intel_owl/django/celery.log /var/log/intel_owl/django/celery_errors.log \
+    && touch /var/log/intel_owl/django/celery.log /var/log/intel_owl/django/celery_errors.log \
     && chown -R www-data:www-data /var/log/intel_owl /opt/deploy/ \
 # this is cause stringstifer creates this directory during the build and cause celery to crash
     && rm -rf /root/.local

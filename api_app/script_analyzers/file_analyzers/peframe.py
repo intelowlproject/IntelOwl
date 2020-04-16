@@ -28,6 +28,10 @@ def run(analyzer_name, job_id, filepath, filename, md5, additional_config_params
         else:
             raise AnalyzerRunException(r_data['error'])
 
+        # limit the length of the strings dump
+        if 'strings' in res and 'dump' in res['strings']:
+            res['strings']['dump'] = res['strings']['dump'][:100]
+
         report['report'] = res
     except AnalyzerRunException as e:
         error_message = f"job_id:{job_id} analyzer:{analyzer_name} md5:{md5} filename:{filename} Analyzer Error: {e}"

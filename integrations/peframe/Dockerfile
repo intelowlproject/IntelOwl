@@ -3,8 +3,8 @@ FROM python:3.8.2-alpine3.11
 MAINTAINER eshaan7bansal@gmail.com
 
 # VOLUME /var/log/intel_owl
-ENV PROJECT_PATH /opt/deploy/integrations/peframe
-ENV LOG_PATH /var/log/intel_owl/integrations
+ENV PROJECT_PATH /opt/deploy
+ENV LOG_PATH /var/log/intel_owl
 
 # update and install packages
 RUN apk update && apk upgrade
@@ -20,23 +20,23 @@ RUN rm -rf .git && pip install -r requirements.txt --no-cache-dir \
 RUN adduser --shell /sbin/login www-data -DH
 
 # Create log files
+RUN mkdir -p ${LOG_PATH}
 WORKDIR ${LOG_PATH}
-RUN touch peframe.log peframe_errors.log \
-    && chown -R www-data ./
+RUN touch peframe.log peframe_errors.log gunicorn_access.log gunicorn_errors.log \
+    && chown -R www-data:www-data ./
 
 # Build Flask REST API
 WORKDIR ${PROJECT_PATH}
 COPY app.py requirements.txt ./
 RUN pip install -r requirements.txt --no-cache-dir \
-    && chown -R www-data ./
-
-USER www-data
+    && chown -R www-data:www-data ./
 
 EXPOSE 4000
 CMD echo "****Starting PEframe-REST-Server****"
 ENTRYPOINT gunicorn 'app:app' \
             --bind '0.0.0.0:4000' \
+            --user www-data \
             --workers ${WORKERS} \
-            --log-level ${LOG_LEVEL} 
-            # --log-file ${LOG_PATH}/peframe.log \
-            # --error-logfile ${LOG_PATH}/peframe_errors.log
+            --log-level ${LOG_LEVEL} \
+            --access-logfile ${LOG_PATH}/gunicorn_access.log \
+            --error-logfile ${LOG_PATH}/gunicorn_errors.log

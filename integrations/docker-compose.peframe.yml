@@ -14,9 +14,9 @@ services:
     env_file:
       - env_file_integrations
     volumes:
-      - generic_logs:/var/log/intel_owl
+      - peframe_logs:/var/log/intel_owl
     depends_on:
       - uwsgi
 
 volumes:
-  generic_logs:
+  peframe_logs:

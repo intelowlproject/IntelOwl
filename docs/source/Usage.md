@@ -79,7 +79,9 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * Threatminer_Reports_Tagging: retrieve reports from Threatminer API
 * Threatminer_Subdomains: retrieve subdomains from Threatminer API
 * URLhaus: Query a domain or URL against URLhaus API.
-* ActiveDNS: Retrieve current domain resolution. Support Google DoH (DNS over HTTPS), CloudFlare DoH and resolution with default DNS
+* ActiveDNS_Google: Retrieve current domain resolution with Google DoH (DNS over HTTPS)
+* ActiveDNS_CloudFlare: Retrieve current domain resolution with CloudFlare DoH (DNS over HTTPS)
+* ActiveDNS_Classic: Retrieve current domain resolution with default DNS
 * Auth0: scan an IP against the Auth0 API
 * Securitytrails_IP_Neighbours: scan an IP against securitytrails API for neighbour IPs
 * Securitytrails_Details: scan a domain against securitytrails API for general details

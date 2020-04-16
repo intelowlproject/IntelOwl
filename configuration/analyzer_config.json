@@ -33,6 +33,101 @@
         "external_service": true,
         "python_module": "abuseipdb_run"
     },
+    "Auth0": {
+        "type": "observable",
+        "observable_supported": ["ip"],
+        "external_service": true,
+        "python_module": "auth0_run"
+    },
+    "Securitytrails_IP_Neighbours": {
+        "type": "observable",
+        "observable_supported": ["ip"],
+        "external_service": true,
+        "python_module": "securitytrails_run"
+    },
+    "Securitytrails_Details": {
+        "type": "observable",
+        "observable_supported": ["domain"],
+        "external_service": true,
+        "python_module": "securitytrails_run",
+        "additional_config_params": {
+            "securitytrails_analysis": "current",
+            "securitytrails_current_type": "details"
+        }
+    },
+    "Securitytrails_Subdomains": {
+        "type": "observable",
+        "observable_supported": ["domain"],
+        "external_service": true,
+        "python_module": "securitytrails_run",
+        "additional_config_params": {
+            "securitytrails_analysis": "current",
+            "securitytrails_current_type": "subdomains"
+        }
+    },
+    "Securitytrails_Tags": {
+        "type": "observable",
+        "observable_supported": ["domain"],
+        "external_service": true,
+        "python_module": "securitytrails_run",
+        "additional_config_params": {
+            "securitytrails_analysis": "current",
+            "securitytrails_current_type": "tags"
+        }
+    },
+    "Securitytrails_History_WHOIS": {
+        "type": "observable",
+        "observable_supported": ["domain"],
+        "external_service": true,
+        "python_module": "securitytrails_run",
+        "additional_config_params": {
+            "securitytrails_analysis": "history",
+            "securitytrails_history_analysis": "whois"
+        }
+    },
+    "Securitytrails_History_DNS": {
+        "type": "observable",
+        "observable_supported": ["domain"],
+        "external_service": true,
+        "python_module": "securitytrails_run",
+        "additional_config_params": {
+            "securitytrails_analysis": "history",
+            "securitytrails_history_analysis": "dns"
+        }
+    },
+    "ActiveDNS_Google": {
+        "type": "observable",
+        "observable_supported": ["domain"],
+        "external_service": true,
+        "python_module": "activedns_run",
+        "additional_config_params": {
+            "service": "google"
+        }
+    },
+    "ActiveDNS_CloudFlare": {
+        "type": "observable",
+        "observable_supported": ["domain"],
+        "external_service": true,
+        "python_module": "activedns_run",
+        "additional_config_params": {
+            "service": "cloudflare"
+        }
+    },
+    "ActiveDNS_Classic": {
+        "type": "observable",
+        "observable_supported": ["ip", "domain"],
+        "external_service": true,
+        "python_module": "activedns_run",
+        "additional_config_params": {
+            "service": "classic"
+        }
+    },
+    "CloudFlare_Malware": {
+        "type": "observable",
+        "observable_supported": ["domain"],
+        "external_service": true,
+        "python_module": "cloudflare_malware_run"
+    },
     "MaxMindGeoIP": {
         "type": "observable",
         "observable_supported": ["ip"],
@@ -63,7 +158,20 @@
         "type": "observable",
         "observable_supported": ["ip"],
         "external_service": true,
-        "python_module": "greynoise_run"
+        "python_module": "greynoise_run",
+        "additional_config_params": {
+            "greynoise_api_version": "v1"
+        }
+    },
+    "GreyNoise": {
+        "type": "observable",
+        "observable_supported": ["ip"],
+        "external_service": true,
+        "python_module": "greynoise_run",
+        "additional_config_params": {
+            "greynoise_api_version": "v2",
+            "api_key_name": "GREYNOISE_API_KEY"
+        }
     },
     "GoogleSafebrowsing": {
         "type": "observable",
@@ -75,7 +183,10 @@
         "type": "observable",
         "observable_supported": ["ip"],
         "external_service": true,
-        "python_module": "robtexip_run"
+        "python_module": "robtex_run",
+        "additional_config_params": {
+            "robtex_analysis": "ip_query"
+        }
     },
     "Shodan_Search": {
         "type": "observable",
@@ -126,13 +237,19 @@
         "type": "observable",
         "observable_supported": ["ip"],
         "external_service": true,
-        "python_module": "robtexrdns_run"
+        "python_module": "robtex_run",
+        "additional_config_params": {
+            "robtex_analysis": "reverse_pdns"
+        }
     },
     "Robtex_Forward_PDNS_Query": {
         "type": "observable",
         "observable_supported": ["domain", "url"],
         "external_service": true,
-        "python_module": "robtexfdns_run"
+        "python_module": "robtex_run",
+        "additional_config_params": {
+            "robtex_analysis": "forward_pdns"
+        }
     },
     "DNSDB": {
         "type": "observable",
@@ -196,14 +313,26 @@
         "external_service": true,
         "python_module": "haget_run"
     },
-    "HoneyDB": {
+    "HoneyDB_Scan_Twitter": {
         "type": "observable",
         "observable_supported": ["ip"],
         "external_service": true,
-        "python_module": "honeydb_twitter_scan_run",
+        "python_module": "honeydb_run",
         "additional_config_params": {
             "api_key_name": "HONEYDB_API_KEY",
-            "api_id_name": "HONEYDB_API_ID"
+            "api_id_name": "HONEYDB_API_ID",
+            "honeydb_analysis": "scan_twitter"
+        }
+    },
+    "HoneyDB_Get": {
+        "type": "observable",
+        "observable_supported": ["ip"],
+        "external_service": true,
+        "python_module": "honeydb_run",
+        "additional_config_params": {
+            "api_key_name": "HONEYDB_API_KEY",
+            "api_id_name": "HONEYDB_API_ID",
+            "honeydb_analysis": "ip_query"
         }
     },
     "Hunter": {
@@ -223,6 +352,12 @@
         "additional_config_params": {
             "api_key_name": "ONYPHE_KEY"
         }
+    },
+    "URLhaus": {
+        "type": "observable",
+        "observable_supported": ["domain", "url"],
+        "external_service": true,
+        "python_module": "urlhaus_run"
     },
     "Yara_Scan_Community": {
         "type": "file",
@@ -434,5 +569,12 @@
         "type": "file",
         "supported_filetypes": ["application/pdf"],
         "python_module": "pdfinfo_run"
+    },
+    "PEframe_Scan_File": {
+        "type": "file",
+        "python_module": "peframe_run",
+        "additional_config_params": {
+            "max_tries": 20
+        }
     }
 }

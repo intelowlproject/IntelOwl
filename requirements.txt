@@ -6,7 +6,7 @@ Babel==2.7.0
 billiard==3.6.3.0
 boto3==1.9.216
 botocore==1.12.216
-celery==4.4.1
+celery==4.4.2
 certifi==2019.6.16
 cffi==1.12.3
 chardet==3.0.4

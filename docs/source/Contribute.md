@@ -47,7 +47,19 @@ After having written the new python module, you have to remember to:
 
 * Add the new analyzer/s in the lists in the docs: [Usage](./Usage.md) and [ReadMe](https://github.com/certego/IntelOwl/blob/master/README.md)
 
-* Ultimately, add the required secrets in the file [env_file_app_template](https://github.com/certego/IntelOwl/blob/master/env_file_app_template) and in the docs: [Installation](./Installation.md)
+* Ultimately, add the required secrets in the files [env_file_app_template](https://github.com/certego/IntelOwl/blob/master/env_file_app_template), [env_file_app_travis](https://github.com/certego/IntelOwl/blob/master/env_file_app_travis) and in the docs: [Installation](./Installation.md)
+
+### Integrating a docker based analyzer
+If the analyzer you wish to integrate doesn't exist as a callable API online or python package, it should be integrated with its own docker image
+which can be queried from the main Django API.
+
+* The dockerfile should be placed under `./integrations/<analyzer_name>` with the name `Dockerfile`.
+* A docker-compose file should be placed under `./integrations` with the name `docker-compose.<analyzer_name>.yml`
+* If your docker-image uses any environment variables, add them in the [`env_file_integrations_template`](https://github.com/certego/IntelOwl/blob/develop/env_file_integrations_template)
+* Ultimately, append the name of your docker-compose file in the `COMPOSE_FILE` variables specified in [`.env_template`](https://github.com/certego/IntelOwl/blob/develop/env_file_integrations_template). The reason for doing this is so that this service remains optional to the end-user.
+* Rest of the steps remain same as given under "How to add a new analyzer".
+
+For an example and proof of concept, see PEframe's integration: (https://github.com/certego/IntelOwl/tree/develop/integrations)
 
 ### Create a pull request
 If everything is working, before submitting your pull request, please squash your commits into a single one!

@@ -2,10 +2,10 @@ from __future__ import absolute_import, unicode_literals
 
 from celery import shared_task
 from api_app.script_analyzers.file_analyzers import doc_info, file_info, pe_info, pdf_info, vt2_scan, intezer_scan, \
-    cuckoo_scan, yara_scan, vt3_scan, strings_info, rtf_info, signature_info
+    cuckoo_scan, yara_scan, vt3_scan, strings_info, rtf_info, signature_info, peframe
 from api_app.script_analyzers.observable_analyzers import abuseipdb, fortiguard, maxmind, greynoise, googlesf, otx, \
-    talos, tor, circl_pdns, circl_pssl, robtex_fdns, robtex_ip, robtex_rdns, vt2_get, ha_get, vt3_get, misp, dnsdb, \
-    shodan, honeydb_twitter_scan, hunter, mb_get, onyphe, censys, threatminer
+    talos, tor, circl_pdns, circl_pssl, robtex, vt2_get, ha_get, vt3_get, misp, dnsdb, \
+    shodan, honeydb, hunter, mb_get, onyphe, censys, threatminer, urlhaus, active_dns, auth0, securitytrails
 
 from api_app import crons
 
@@ -23,6 +23,20 @@ def check_stuck_analysis():
 @shared_task(soft_time_limit=30)
 def abuseipdb_run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params):
     abuseipdb.run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params)
+
+
+@shared_task(soft_time_limit=30)
+def auth0_run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params):
+    auth0.run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params)
+
+@shared_task(soft_time_limit=30)
+def securitytrails_run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params):
+    securitytrails.run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params)
+
+
+@shared_task(soft_time_limit=30)
+def activedns_run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params):
+    active_dns.run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params)
 
 
 @shared_task(soft_time_limit=30)
@@ -61,8 +75,8 @@ def circlpssl_run(analyzer_name, job_id, observable_name, observable_classificat
 
 
 @shared_task(soft_time_limit=30)
-def robtexip_run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params):
-    robtex_ip.run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params)
+def robtex_run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params):
+    robtex.run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params)
 
 
 @shared_task(soft_time_limit=30)
@@ -83,16 +97,6 @@ def hunter_run(analyzer_name, job_id, observable_name, observable_classification
 @shared_task(soft_time_limit=30)
 def censys_run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params):
     censys.run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params)
-
-
-@shared_task(soft_time_limit=30)
-def robtexfdns_run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params):
-    robtex_fdns.run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params)
-
-
-@shared_task(soft_time_limit=30)
-def robtexrdns_run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params):
-    robtex_rdns.run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params)
 
 
 @shared_task(soft_time_limit=30)
@@ -150,14 +154,19 @@ def vt3get_scan_run(analyzer_name, job_id, observable_name, observable_classific
     vt3_get.run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params)
 
 
-@shared_task(soft_time_limit=500)
-def honeydb_twitter_scan_run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params):
-    honeydb_twitter_scan.run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params)
+@shared_task(soft_time_limit=200)
+def honeydb_run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params):
+    honeydb.run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params)
 
 
 @shared_task(soft_time_limit=50)
 def onyphe_run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params):
     onyphe.run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params)
+
+
+@shared_task(soft_time_limit=50)
+def urlhaus_run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params):
+    urlhaus.run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params)
 
 
 @shared_task(soft_time_limit=30)
@@ -228,3 +237,8 @@ def yara_updater():
 @shared_task(soft_time_limit=50)
 def mbget_run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params):
     mb_get.run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params)
+
+
+@shared_task(soft_time_limit=500)
+def peframe_run(analyzer_name, job_id, filepath, filename, md5, additional_config_params):
+    peframe.run(analyzer_name, job_id, filepath, filename, md5, additional_config_params)

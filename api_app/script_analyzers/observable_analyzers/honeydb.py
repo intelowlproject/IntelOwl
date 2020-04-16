@@ -1,13 +1,11 @@
-import json
-import logging
 import traceback
-
-from urllib.parse import urlparse
+import logging
 
 import requests
 
 from api_app.exceptions import AnalyzerRunException
 from api_app.script_analyzers import general
+from intel_owl import secrets
 
 logger = logging.getLogger(__name__)
 
@@ -17,26 +15,33 @@ def run(analyzer_name, job_id, observable_name, observable_classification, addit
                 "".format(analyzer_name, job_id, observable_name))
     report = general.get_basic_report_template(analyzer_name)
     try:
+        api_key_name = additional_config_params.get("api_key_name", "HONEYDB_API_KEY")
+        api_id_name = additional_config_params.get("api_id_name", "HONEYDB_API_ID")
+        honeydb_analysis = additional_config_params.get("honeydb_analysis", "ip_query")
+        api_key = secrets.get_secret(api_key_name)
+        api_id = secrets.get_secret(api_id_name)
+        if not api_key:
+            raise AnalyzerRunException("no HoneyDB API Key retrieved")
+        if not api_id:
+            raise AnalyzerRunException("no HoneyDB API ID retrieved")
 
-        domain = observable_name
-        if observable_classification == 'url':
-            domain = urlparse(observable_name).hostname
-
-        try:
-            url = 'https://freeapi.robtex.com/pdns/forward/{}'.format(domain)
-            response = requests.get(url)
-            response.raise_for_status()
-            result = response.text.split('\r\n')
-        except requests.ConnectionError as e:
-            raise AnalyzerRunException("connection error: {}".format(e))
+        headers = {
+            'X-HoneyDb-ApiKey': api_key,
+            'X-HoneyDb-ApiId': api_id
+        }
+      
+        if honeydb_analysis=="scan_twitter":
+            url = f"https://honeydb.io/api/twitter-threat-feed/{observable_name}"
+        elif honeydb_analysis=="ip_query":
+            url = f"https://honeydb.io/api/netinfo/lookup/{observable_name}"
         else:
-            loaded_results = []
-            for item in result:
-                if len(item) > 0:
-                    loaded_results.append(json.loads(item))
+            raise AnalyzerRunException("invalid analyzer name specified. Supported: HONEYDB_Scan_Twitter, HONEYDB_Get")
 
-        # pprint.pprint(loaded_results)
-        report['report'] = loaded_results
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()
+
+        json_response = response.json()
+        report['report'] = json_response
     except AnalyzerRunException as e:
         error_message = "job_id:{} analyzer:{} observable_name:{} Analyzer error {}" \
                         "".format(job_id, analyzer_name, observable_name, e)
@@ -59,4 +64,3 @@ def run(analyzer_name, job_id, observable_name, observable_classification, addit
                 "".format(analyzer_name, job_id, observable_name))
 
     return report
-

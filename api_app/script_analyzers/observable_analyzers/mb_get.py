@@ -14,7 +14,7 @@ def run(analyzer_name, job_id, observable_name, observable_classification, addit
                 "".format(analyzer_name, job_id, observable_name))
     report = general.get_basic_report_template(analyzer_name)
     try:
-        if observable_classification=="hash":
+        if observable_classification == "hash":
             filehash = observable_name
         else: 
             raise AnalyzerRunException(f"not supported observable type {observable_classification}. Supported: hash only")

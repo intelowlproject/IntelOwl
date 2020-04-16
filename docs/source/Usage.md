@@ -45,6 +45,7 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * Yara_Scan_Intezer: scan a file with Intezer yara rules
 * Yara_Scan_Custom_Signatures: scan a file with your own added signatures
 * MalwareBazaar_Get_File: Check if a particular malware sample is known to MalwareBazaar 
+* PEframe_Scan_File: Perform static analysis on Portable Executable malware and malicious MS Office documents.
 
 #### Observable analyzers (ip, domain, url, hash)
 * VirusTotal_v3_Get_Observable: search an observable in the VirusTotal DB
@@ -56,7 +57,8 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * Robtex_Reverse_PDNS_Query: scan an IP against the Robtex Passive DNS DB
 * Robtex_IP_Query: get IP info from Robtex
 * GoogleSafebrowsing: scan an observable against GoogleSafeBrowsing DB
-* GreyNoiseAlpha: scan an IP against the Alpha Greynoise API
+* GreyNoiseAlpha: scan an IP against the Alpha Greynoise API (no API key required)
+* GreyNoise: scan an IP against the Greynoise API (requires API key)
 * CIRCLPassiveDNS: scan an observable against the CIRCL Passive DNS DB
 * CIRCLPassiveSSL: scan an observable against the CIRCL Passive SSL DB
 * MaxMindGeoIP: extract GeoIP info for an observable
@@ -67,7 +69,8 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * MISPFIRST: scan an observable on the FIRST MISP instance
 * DNSDB: scan an observable against the Passive DNS Farsight Database
 * Shodan: scan an IP against Shodan API
-* HoneyDB: scan an IP against HoneyDB.io's Twitter Threat Feed
+* HoneyDB_Scan_Twitter: scan an IP against HoneyDB.io's Twitter Threat Feed
+* HoneyDB_Get: IP lookup service
 * Hunter: Scans a domain name and returns set of data about the organisation, the email address found and additional information about the people owning those email addresses. 
 * Censys_Search: scan an IP address against Censys View API
 * MalwareBazaar_Get_Observable: Check if a particular malware hash is known to MalwareBazaar
@@ -75,6 +78,17 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * Threatminer_PDNS: retrieve PDNS data from Threatminer API
 * Threatminer_Reports_Tagging: retrieve reports from Threatminer API
 * Threatminer_Subdomains: retrieve subdomains from Threatminer API
+* URLhaus: Query a domain or URL against URLhaus API.
+* ActiveDNS_Google: Retrieve current domain resolution with Google DoH (DNS over HTTPS)
+* ActiveDNS_CloudFlare: Retrieve current domain resolution with CloudFlare DoH (DNS over HTTPS)
+* ActiveDNS_Classic: Retrieve current domain resolution with default DNS
+* Auth0: scan an IP against the Auth0 API
+* Securitytrails_IP_Neighbours: scan an IP against securitytrails API for neighbour IPs
+* Securitytrails_Details: scan a domain against securitytrails API for general details
+* Securitytrails_Subdomains: scan a domain against securitytrails API for subdomains
+* Securitytrails_Tags: scan a domain against securitytrails API for tags
+* Securitytrails_History_WHOIS: scan a domain against securitytrails API for historical WHOIS
+* Securitytrails_History_DNS: scan a domain against securitytrails API for historical DNS
 
 ## Analyzers customization
 You can create new analyzers based on already existing modules by changing the configuration values (`analyzer_config.json`).
@@ -91,12 +105,3 @@ Also, you can change the name of every available analyzer based on your wishes.
 Changing other keys will break the analyzer. In that case, you should think about create a new python module or to modify an existing one.
 
 To contribute to the project, see [Contribute](./Contribute.md)
-
-
-
-
-
-
-
-
-

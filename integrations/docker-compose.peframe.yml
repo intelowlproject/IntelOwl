@@ -6,7 +6,7 @@ version: '3'
 
 services:
   peframe:
-    image: eshaan7/peframe-rest-server
+    image: certego/intel_owl_peframe
     container_name: intel_owl_peframe
     restart: unless-stopped
     expose:

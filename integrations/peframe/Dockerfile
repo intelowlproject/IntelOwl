@@ -26,10 +26,13 @@ RUN touch peframe.log peframe_errors.log gunicorn_access.log gunicorn_errors.log
     && chown -R www-data:www-data ./
 
 # Build Flask REST API
-WORKDIR ${PROJECT_PATH}
-COPY app.py requirements.txt ./
-RUN pip install -r requirements.txt --no-cache-dir \
-    && chown -R www-data:www-data ./
+WORKDIR ${PROJECT_PATH}/flask
+COPY requirements.txt ./requirements.txt
+RUN pip3 install -r requirements.txt --no-cache-dir
+
+COPY app.py .
+
+RUN chown -R www-data:www-data .
 
 EXPOSE 4000
 CMD echo "****Starting PEframe-REST-Server****"

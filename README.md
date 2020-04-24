@@ -69,7 +69,9 @@ Main features:
 * Threatminer
 * Abuse.ch MalwareBazaar
 * Abuse.ch URLhaus
-* Active DNS
+* Google DoH
+* CloudFlare DoH
+* Classic DNS resolution
 
 ### Documentation
 [![Documentation Status](https://readthedocs.org/projects/intelowl/badge/?version=latest)](https://intelowl.readthedocs.io/en/latest/?badge=latest)

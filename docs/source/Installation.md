@@ -6,7 +6,7 @@
 
 We suggest you to clone the project, configure the required environment variables and run `docker-compose up` using the docker-compose file that is embedded in the project.
 
-That file leverages a public docker image that is available in [Docker Hub](https://hub.docker.com/repository/docker/certego/intelowl)
+That file leverages a public docker image that is available in [Docker Hub](https://hub.docker.com/repository/docker/intelowlproject/intelowl)
 
 ## Deployment Info
 Main components of the web application:

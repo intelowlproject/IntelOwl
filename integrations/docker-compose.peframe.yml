@@ -6,8 +6,8 @@ version: '3'
 
 services:
   peframe:
-    image: certego/intel_owl_peframe
-    container_name: intel_owl_peframe
+    image: intelowlproject/intelowl_peframe
+    container_name: intelowl_peframe
     restart: unless-stopped
     expose:
       - "4000"

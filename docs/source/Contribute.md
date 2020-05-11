@@ -11,12 +11,12 @@ Please create a new branch based on the **develop** branch that contains the mos
 `git checkout -b myfeature develop`
 
 ## How to add a new analyzer
-You may want to look at the following analyzer example to start to build a new one: [Example](https://github.com/certego/IntelOwl/blob/master/api_app/script_analyzers/analyzer_template.py)
+You may want to look at the following analyzer example to start to build a new one: [Example](https://github.com/intelowlproject/IntelOwl/blob/master/api_app/script_analyzers/analyzer_template.py)
 
 After having written the new python module, you have to remember to:
 * Put the module in the `file_analyzers` or `observable_analyzers` directory based on what it can analyze
-* Add the new module as a celery task in [tasks.py](https://github.com/certego/IntelOwl/blob/master/intel_owl/tasks.py)
-* Add a new entry in the [analyzer configuration](https://github.com/certego/IntelOwl/blob/master/configuration/analyzer_config.json):
+* Add the new module as a celery task in [tasks.py](https://github.com/intelowlproject/IntelOwl/blob/master/intel_owl/tasks.py)
+* Add a new entry in the [analyzer configuration](https://github.com/intelowlproject/IntelOwl/blob/master/configuration/analyzer_config.json):
   
   Example:
   ```
@@ -41,13 +41,13 @@ After having written the new python module, you have to remember to:
   In that way you can create more than one analyzer for a specific python module, each one based on different configurations.
   MISP and Yara Analyzers are a good example of this use case: for instance, you can use different analyzers for different MISP instances.
 
-* Add required unit tests in the [tests](https://github.com/certego/IntelOwl/blob/master/tests) folder
+* Add required unit tests in the [tests](https://github.com/intelowlproject/IntelOwl/blob/master/tests) folder
  
   Then follow the [Test](./Tests.md) guide to start testing.
 
-* Add the new analyzer/s in the lists in the docs: [Usage](./Usage.md) and [ReadMe](https://github.com/certego/IntelOwl/blob/master/README.md)
+* Add the new analyzer/s in the lists in the docs: [Usage](./Usage.md) and [ReadMe](https://github.com/intelowlproject/IntelOwl/blob/master/README.md)
 
-* Ultimately, add the required secrets in the files [env_file_app_template](https://github.com/certego/IntelOwl/blob/master/env_file_app_template), [env_file_app_travis](https://github.com/certego/IntelOwl/blob/master/env_file_app_travis) and in the docs: [Installation](./Installation.md)
+* Ultimately, add the required secrets in the files [env_file_app_template](https://github.com/intelowlproject/IntelOwl/blob/master/env_file_app_template), [env_file_app_travis](https://github.com/certego/IntelOwl/blob/master/env_file_app_travis) and in the docs: [Installation](./Installation.md)
 
 ### Integrating a docker based analyzer
 If the analyzer you wish to integrate doesn't exist as a callable API online or python package, it should be integrated with its own docker image
@@ -55,11 +55,11 @@ which can be queried from the main Django API.
 
 * The dockerfile should be placed under `./integrations/<analyzer_name>` with the name `Dockerfile`.
 * A docker-compose file should be placed under `./integrations` with the name `docker-compose.<analyzer_name>.yml`
-* If your docker-image uses any environment variables, add them in the [`env_file_integrations_template`](https://github.com/certego/IntelOwl/blob/develop/env_file_integrations_template)
-* Ultimately, append the name of your docker-compose file in the `COMPOSE_FILE` variables specified in [`.env_template`](https://github.com/certego/IntelOwl/blob/develop/env_file_integrations_template). The reason for doing this is so that this service remains optional to the end-user.
+* If your docker-image uses any environment variables, add them in the [`env_file_integrations_template`](https://github.com/intelowlproject/IntelOwl/blob/develop/env_file_integrations_template)
+* Ultimately, append the name of your docker-compose file in the `COMPOSE_FILE` variables specified in [`.env_template`](https://github.com/intelowlproject/IntelOwl/blob/develop/env_file_integrations_template). The reason for doing this is so that this service remains optional to the end-user.
 * Rest of the steps remain same as given under "How to add a new analyzer".
 
-For an example and proof of concept, see PEframe's integration: (https://github.com/certego/IntelOwl/tree/develop/integrations)
+For an example and proof of concept, see PEframe's integration: (https://github.com/intelowlproject/IntelOwl/tree/develop/integrations)
 
 ### Create a pull request
 If everything is working, before submitting your pull request, please squash your commits into a single one!

@@ -1,8 +1,8 @@
 ![Intel Owl](static_intel/intel_owl.jpeg)
 
 
-[![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/certego/IntelOwl.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/certego/IntelOwl/context:python)
-[![Build Status](https://travis-ci.org/certego/IntelOwl.svg?branch=master)](https://travis-ci.org/certego/IntelOwl)
+[![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/intelowlproject/IntelOwl.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/intelowlproject/IntelOwl/context:python)
+[![Build Status](https://travis-ci.com/intelowlproject/IntelOwl.svg?branch=master)](https://travis-ci.org/intelowlproject/IntelOwl)
 # Intel Owl
 
 Do you want to get **threat intelligence data** about a file, an IP or a domain?
@@ -69,7 +69,9 @@ Main features:
 * Threatminer
 * Abuse.ch MalwareBazaar
 * Abuse.ch URLhaus
-* Active DNS
+* Google DoH
+* CloudFlare DoH
+* Classic DNS resolution
 
 ### Documentation
 [![Documentation Status](https://readthedocs.org/projects/intelowl/badge/?version=latest)](https://intelowl.readthedocs.io/en/latest/?badge=latest)
@@ -84,33 +86,33 @@ installation, you are accepting the license terms of each package, and
 acknowledging that your use of each package will be subject to its respective
 license terms.
 
-osslsigncode: https://github.com/develar/osslsigncode
+[osslsigncode](https://github.com/develar/osslsigncode), 
+[stringsifter](https://github.com/fireeye/stringsifter),
+[peepdf](https://github.com/jesparza/peepdf),
+[oletools](https://github.com/decalage2/oletools),
+[MaxMind-DB-Reader-python](https://github.com/maxmind/MaxMind-DB-Reader-python),
+[pysafebrowsing](https://github.com/Te-k/pysafebrowsing),
+[PyMISP](https://github.com/MISP/PyMISP),
+[OTX-Python-SDK](https://github.com/AlienVault-OTX/OTX-Python-SDK),
+[yara-python](https://github.com/VirusTotal/yara-python),
+[GitPython](https://github.com/gitpython-developers/GitPython),
+[Yara community rules](https://github.com/Yara-Rules),
+[Neo23x0 Yara sigs](https://github.com/Neo23x0/signature-base),
+[Intezer Yara sigs](https://github.com/intezer/yara-rules)
 
-stringsifter: https://github.com/fireeye/stringsifter
+### Acknowledgments
+This project was created and will be upgraded thanks to the following organizations:
 
-peepdf: https://github.com/jesparza/peepdf
+![Certego](static_intel/Certego.png)
 
-oletools: https://github.com/decalage2/oletools
+![Honeynet](static_intel/logo-thp-100.png)
 
-MaxMind-DB-Reader-python: https://github.com/maxmind/MaxMind-DB-Reader-python
+#### Google Summer Of Code
+The project was accepted to the GSoC 2020 under the Honeynet Project!! 
 
-pysafebrowsing: https://github.com/Te-k/pysafebrowsing
+Stay tuned for upcoming [new features](https://www.honeynet.org/gsoc/gsoc-2020/google-summer-of-code-2020-project-ideas/#intel-owl-improvements) developed by Eshann Bansal [Twitter](https://twitter.com/mask0fmydisguis)
 
-PyMISP: https://github.com/MISP/PyMISP
-
-OTX-Python-SDK: https://github.com/AlienVault-OTX/OTX-Python-SDK
-
-yara-python: https://github.com/VirusTotal/yara-python
-
-GitPython: https://github.com/gitpython-developers/GitPython
-
-Yara community rules: https://github.com/Yara-Rules
-
-Neo23x0 Yara sigs: https://github.com/Neo23x0/signature-base
-
-Intezer Yara sigs: https://github.com/intezer/yara-rules
 
 ### About the author 
 Feel free to contact the author at any time:
 Matteo Lodi [Twitter](https://twitter.com/matte_lodi)
-

@@ -3,7 +3,7 @@
 ## Client
 Intel Owl main objective is to provide a single API interface to query in order to retrieve threat intelligence at scale.
 
-So, in order to interact with the Intel Owl APIs, you may want to use the specific client that is available at: [PyIntelOwl](https://github.com/mlodic/pyintelowl)
+So, in order to interact with the Intel Owl APIs, you may want to use the specific client that is available at: [PyIntelOwl](https://github.com/intelowlproject/pyintelowl)
 
 We suggest to download the client, read the instructions and use it as a library for your own python projects or directly from the command line.
 
@@ -14,7 +14,7 @@ Afterwards you can leverage the created tokens with the Intel Owl Client.
 ## Available Analyzers
 
 ### Get all available analyzers
-You can programmatically retrieve all the available analyzers with the official client [PyIntelOwl](https://github.com/mlodic/pyintelowl).
+You can programmatically retrieve all the available analyzers with the official client [PyIntelOwl](https://github.com/intelowlproject/pyintelowl).
 
 ### Analyzers list
 

@@ -27,13 +27,13 @@ def run(analyzer_name, job_id, filepath, filename, md5, additional_config_params
                 if os.path.isfile(rulepath + '/index.yas'):
                     ruleset.append(yara.load(rulepath + '/index.yas'))
                 elif os.path.isfile(rulepath + '/index.yar'):
-                    ruleset.append(yara.compile(rulepath + '/index.yar'))
+                    ruleset.append(yara.compile(rulepath + '/index.yar', externals={'filename': filename}))
                 else:  # if you do not have an index file, just extract all the rules in the yar files
                     for f in os.listdir(rulepath):
                         full_path = "{}/{}".format(rulepath, f)
                         if os.path.isfile(full_path):
                             if full_path.endswith('.yar'):
-                                ruleset.append(yara.compile(full_path))
+                                ruleset.append(yara.compile(full_path, externals={'filename': filename}))
                             elif full_path.endswith('.yas'):
                                 ruleset.append(yara.load(full_path))
 

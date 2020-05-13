@@ -1,3 +1,7 @@
+branches:
+  only:
+  - master
+  - develop
 sudo: required
 language: python
 dist: bionic

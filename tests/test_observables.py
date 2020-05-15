@@ -13,7 +13,7 @@ from api_app.models import Job
 from api_app.script_analyzers.observable_analyzers import abuseipdb, censys, shodan, fortiguard, maxmind, \
     greynoise, googlesf, otx, talos, tor, circl_pssl, circl_pdns, \
     robtex, vt2_get, ha_get, vt3_get, misp, dnsdb, \
-    honeydb, hunter, mb_get, onyphe, threatminer, urlhaus, active_dns, cloudflare_malware, auth0, securitytrails
+    honeydb, hunter, mb_get, onyphe, threatminer, urlhaus, active_dns, auth0, securitytrails
 from intel_owl import settings
 
 logger = logging.getLogger(__name__)
@@ -313,10 +313,9 @@ class DomainAnalyzersTests(TestCase):
         self.assertEqual(classic_report.get('success', False), True,
                          f'classic_report: {classic_report}')
 
-    @skip('not implemented')
     def test_cloudFlare_malware(self, mock_get=None, mock_post=None):
-        report = cloudflare_malware.run("CloudFlare_Malware", self.job_id, self.observable_name,
-                                        self.observable_classification, {})
+        report = active_dns.run("ActiveDNS_CloudFlare_Malware", self.job_id, self.observable_name,
+                                self.observable_classification, {"service": "cloudflare_malware"})
 
         self.assertEqual(report.get('success', False), True, f'report: {report}')
 

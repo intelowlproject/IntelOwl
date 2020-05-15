@@ -122,11 +122,14 @@
             "service": "classic"
         }
     },
-    "CloudFlare_Malware": {
+    "ActiveDNS_CloudFlare_Malware": {
         "type": "observable",
         "observable_supported": ["domain"],
         "external_service": true,
-        "python_module": "cloudflare_malware_run"
+        "python_module": "activedns_run",
+        "additional_config_params": {
+            "service": "cloudflare_malware"
+        }
     },
     "MaxMindGeoIP": {
         "type": "observable",

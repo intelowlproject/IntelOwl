@@ -19,6 +19,8 @@ def run(analyzer_name, job_id, observable_name, observable_classification, addit
     Admit:
     * additional_config_params[service]: google - Google DoH (DNS over HTTPS)
     * additional_config_params[service]: cloudflare - CloudFlare DoH (DNS over HTTPS)
+    * additional_config_params[service]: cloudflare_malware -
+        CloudFlare DoH (DNS over HTTPS) with Malware filtering
     * additional_config_params[service]: classic - classic DNS query
 
     Google and CloudFlare return an IP (or NXDOMAIN) from a domain.
@@ -47,6 +49,9 @@ def run(analyzer_name, job_id, observable_name, observable_classification, addit
         elif dns_type == 'cloudflare':
             _doh_cloudflare(job_id, analyzer_name, observable_classification, observable_name,
                             report)
+        elif dns_type == 'cloudflare_malware':
+            _doh_cloudflare_malware(job_id, analyzer_name, observable_classification, observable_name,
+                                    report)
         elif dns_type == 'classic':
             _classic_dns(job_id, analyzer_name, observable_classification, observable_name, report)
         else:
@@ -65,6 +70,8 @@ def run(analyzer_name, job_id, observable_name, observable_classification, addit
         logger.exception(error_message)
         report['errors'].append(str(e))
         report['success'] = False
+    else:
+        report['success'] = True
 
     general.set_report_and_cleanup(job_id, report)
 
@@ -76,6 +83,7 @@ def run(analyzer_name, job_id, observable_name, observable_classification, addit
 def _doh_google(job_id, analyzer_name, observable_classification, observable_name, report):
     if observable_classification == 'domain':
         try:
+            authority_answer = ''
             params = {
                 "name": observable_name,
                 # this filter should work but it is not
@@ -91,9 +99,12 @@ def _doh_google(job_id, analyzer_name, observable_classification, observable_nam
                     ip = answer.get('data', 'NXDOMAIN')
                     break
             if not ip:
-                logger.error(f"observable {observable_name} active_dns query retrieved no valid A answer: {answers}")
-            report['report'] = {'name': observable_name, 'resolution': ip}
-            report['success'] = True
+                authority = data.get("Authority", [])
+                if authority:
+                    authority_answer = authority[0].get('data', '')
+                else:
+                    logger.error(f"observable {observable_name} active_dns query retrieved no valid A answer: {answers}")
+            report['report'] = {'name': observable_name, 'resolution': ip, 'authoritative_answer': authority_answer}
         except requests.exceptions.RequestException as error:
             error_message = f"job_id:{job_id}, analyzer:{analyzer_name}, " \
                             f"observable_classification:{observable_classification}, " \
@@ -123,11 +134,57 @@ def _doh_cloudflare(job_id, analyzer_name, observable_classification, observable
             response = client.get('https://cloudflare-dns.com/dns-query', params=params)
             response.raise_for_status()
             response_dict = response.json()
+
             response_answer = response_dict.get('Answer', [])
             # first resolution or NXDOMAIN if domain does not exist
             result_data = response_answer[0].get('data', 'NXDOMAIN') if response_answer else 'NXDOMAIN'
+
             report['report'] = {'name': observable_name, 'resolution': result_data}
-            report['success'] = True
+        except requests.exceptions.RequestException as error:
+            error_message = f"job_id:{job_id}, analyzer:{analyzer_name}, " \
+                            f"observable_classification:{observable_classification}, " \
+                            f"observable_name:{observable_name}, RequestException {error}"
+            logger.error(error_message)
+            report['errors'].append(error_message)
+            report['success'] = False
+    else:
+        error_message = f"job_id:{job_id}, analyzer:{analyzer_name}, " \
+                        f"observable_classification:{observable_classification}, " \
+                        f"observable_name:{observable_name}, " \
+                        f"cannot analyze something different from domain"
+        logger.error(error_message)
+        report['errors'].append(error_message)
+        report['success'] = False
+
+
+def _doh_cloudflare_malware(job_id, analyzer_name, observable_classification, observable_name, report):
+    if observable_classification == 'domain':
+        try:
+            result = {'name': observable_name}
+
+            client = requests.session()
+            params = {
+                'name': observable_name,
+                'type': 'A',
+                'ct': 'application/dns-json',
+            }
+            response = client.get('https://security.cloudflare-dns.com/dns-query', params=params)
+            response.raise_for_status()
+            response_dict = response.json()
+
+            response_answer = response_dict.get('Answer', [])
+            if response_answer:
+                resolution = response_answer[0].get('data', '')
+                result['resolution'] = resolution
+                # CloudFlare answers like this in case the domain is known as malicious
+                if resolution == '0.0.0.0':
+                    result['is_malicious'] = True
+            else:
+                logger.warning(f"no Answer key retrieved for {observable_name} DNS request coming"
+                               f" from {analyzer_name} analyzer")
+                result['no_answer'] = True
+
+            report['report'] = result
         except requests.exceptions.RequestException as error:
             error_message = f"job_id:{job_id}, analyzer:{analyzer_name}, " \
                             f"observable_classification:{observable_classification}, " \
@@ -151,10 +208,7 @@ def _classic_dns(job_id, analyzer_name, observable_classification, observable_na
         ipaddress.ip_address(observable_name)
         try:
             domains = socket.gethostbyaddr(observable_name)
-            # return a tuple (hostname, aliaslist, ipaddrlist), select hostname
-            # if does not exist return socket.herror
-            if domains:
-                resolution = domains[0]
+            resolution = domains[0]
         except socket.herror:
             resolution = ''
         result = {'name': observable_name, 'resolution': resolution}
@@ -173,4 +227,3 @@ def _classic_dns(job_id, analyzer_name, observable_classification, observable_na
         report['success'] = False
 
     report['report'] = result
-    report['success'] = True

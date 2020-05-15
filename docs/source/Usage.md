@@ -81,6 +81,7 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * URLhaus: Query a domain or URL against URLhaus API.
 * ActiveDNS_Google: Retrieve current domain resolution with Google DoH (DNS over HTTPS)
 * ActiveDNS_CloudFlare: Retrieve current domain resolution with CloudFlare DoH (DNS over HTTPS)
+* ActiveDNS_CloudFlare_Malware: Detect malicious domains thanks to CloudFlare DoH Malware Filter
 * ActiveDNS_Classic: Retrieve current domain resolution with default DNS
 * Auth0: scan an IP against the Auth0 API
 * Securitytrails_IP_Neighbours: scan an IP against securitytrails API for neighbour IPs

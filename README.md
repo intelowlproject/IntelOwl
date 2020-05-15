@@ -71,7 +71,8 @@ Main features:
 * Abuse.ch MalwareBazaar
 * Abuse.ch URLhaus
 * Google DoH
-* CloudFlare DoH
+* CloudFlare DoH Classic
+* CloudFlare DoH Malware
 * Classic DNS resolution
 
 ### Documentation

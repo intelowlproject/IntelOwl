@@ -81,8 +81,8 @@ def run(analyzer_name, job_id, filepath, filename, md5, additional_config_params
                 # in case it is a dictionary, we do not mind it
                 try:
                     export_table.append(symbol_name.decode())
-                except (UnicodeDecodeError, AttributeError):
-                    pass
+                except (UnicodeDecodeError, AttributeError) as e:
+                    logger.debug(f"PE info error while decoding export table symbols: {e}")
             results['export_table'] = export_table
 
             results['flags'] = full_dump.get('Flags', [])

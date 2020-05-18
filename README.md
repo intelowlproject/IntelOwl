@@ -37,7 +37,7 @@ Main features:
 ### Free modules that require additional configuration
 * Cuckoo (requires at least one working Cuckoo instance)
 * MISP (requires at least one working MISP instance)
-* Yara (Community, Neo23x0 and Intezer rules are already available. There's the chance to add your own rules)
+* Yara (Community, Neo23x0, Intezer and McAfee rules are already available. There's the chance to add your own rules)
 
 ### External services available
 #### required paid or trial api key
@@ -99,7 +99,8 @@ license terms.
 [GitPython](https://github.com/gitpython-developers/GitPython),
 [Yara community rules](https://github.com/Yara-Rules),
 [Neo23x0 Yara sigs](https://github.com/Neo23x0/signature-base),
-[Intezer Yara sigs](https://github.com/intezer/yara-rules)
+[Intezer Yara sigs](https://github.com/intezer/yara-rules),
+[McAfee Yara sigs](https://github.com/advanced-threat-research/Yara-Rules)
 
 ### Acknowledgments
 This project was created and will be upgraded thanks to the following organizations:

@@ -187,5 +187,3 @@ def set_failed_analyzer(analyzer_name, job_id, error_message):
     report = get_basic_report_template(analyzer_name)
     report['errors'].append(error_message)
     set_report_and_cleanup(job_id, report)
-
-

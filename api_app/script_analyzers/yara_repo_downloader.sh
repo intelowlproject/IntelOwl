@@ -9,7 +9,10 @@
 cd /opt/deploy/yara
 
 # Intezer rules
-git clone https://github.com/intezer/yara-rules
+git clone https://github.com/intezer/yara-rules intezer_rules
+
+# McAfee rules
+git clone https://github.com/advanced-threat-research/Yara-Rules mcafee_rules
 
 # Yara community rules
 git clone https://github.com/Yara-Rules/rules.git

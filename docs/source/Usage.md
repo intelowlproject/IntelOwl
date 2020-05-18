@@ -43,6 +43,7 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * Yara_Scan_Community: scan a file with community yara rules
 * Yara_Scan_Florian: scan a file with Neo23x0 yara rules
 * Yara_Scan_Intezer: scan a file with Intezer yara rules
+* Yara_Scan_McAfee: scan a file with McAfee yara rules
 * Yara_Scan_Custom_Signatures: scan a file with your own added signatures
 * MalwareBazaar_Get_File: Check if a particular malware sample is known to MalwareBazaar 
 * PEframe_Scan_File: Perform static analysis on Portable Executable malware and malicious MS Office documents.

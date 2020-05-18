@@ -378,7 +378,14 @@
         "type": "file",
         "python_module": "yara_run",
         "additional_config_params": {
-            "directories_with_rules": ["/opt/deploy/yara/yara-rules"]
+            "directories_with_rules": ["/opt/deploy/yara/intezer_rules"]
+        }
+    },
+    "Yara_Scan_McAfee": {
+        "type": "file",
+        "python_module": "yara_run",
+        "additional_config_params": {
+            "directories_with_rules": ["/opt/deploy/yara/mcafee_rules"]
         }
     },
     "HybridAnalysis_Get_File": {

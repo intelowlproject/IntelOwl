@@ -62,4 +62,3 @@ def run(analyzer_name, job_id, observable_name, observable_classification, addit
                 "".format(analyzer_name, job_id, observable_name))
 
     return report
-

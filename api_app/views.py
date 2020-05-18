@@ -269,21 +269,18 @@ def get_analyzer_configs(request):
 def verify_login(request):
     username = request.POST['username']
     password = request.POST['password']
-    uri = request.POST['uri']
-    if not uri:
-        uri = "/gui/query_database"
+    uri = "/gui/query_database"
     user = authenticate(request, username=username, password=password)
     if user is not None:
         login(request, user)
         # Redirect to a success page.
         return redirect(uri)
-    else:
-        # Return an 'invalid login' error message.
-        context = dict()
-        context['next'] = uri
-        context['login_failed'] = "login failed"
-        context['debug'] = settings.DEBUG
-        return render(request, 'login.html', context)
+    # Return an 'invalid login' error message.
+    context = dict()
+    context['next'] = uri
+    context['login_failed'] = "login failed"
+    context['debug'] = settings.DEBUG
+    return render(request, 'login.html', context)
 
 
 @login_required
@@ -351,9 +348,8 @@ def query_database_json(request, job_id):
         job = models.Job.objects.filter(id=job_id).values()
         if job:
             return JsonResponse(job[0])
-        else:
-            return Response({"error": "not found job with id {}".format(job_id)},
-                            status=status.HTTP_404_NOT_FOUND)
+        return Response({"error": "not found job with id {}".format(job_id)},
+                        status=status.HTTP_404_NOT_FOUND)
 
     except Exception as e:
         str_err = str(e)

@@ -268,5 +268,3 @@ def _cuckoo_retrieve_and_create_report(cuckoo_analysis, filename, md5):
     logger.info("report generated for {} {}".format(filename, md5))
 
     cuckoo_analysis.report = result
-
-

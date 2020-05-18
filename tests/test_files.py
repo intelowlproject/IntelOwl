@@ -115,6 +115,7 @@ def mocked_cuckoo_get(*args, **kwargs):
 
     return MockResponse({'task': {'status': 'reported'}}, 200)
 
+
 def mocked_peframe_get(*args, **kwargs):
 
     class MockResponse:
@@ -149,6 +150,7 @@ def mocked_peframe_post(*args, **kwargs):
             pass
 
     return MockResponse({"md5":"test", "status":"running"}, 200)
+
 
 class FileAnalyzersEXETests(TestCase):
 
@@ -212,7 +214,8 @@ class FileAnalyzersEXETests(TestCase):
 
     def test_yara_exe(self):
         additional_params = {"directories_with_rules": ["/opt/deploy/yara/rules",
-                                                        "/opt/deploy/yara/yara-rules",
+                                                        "/opt/deploy/yara/intezer_rules",
+                                                        "/opt/deploy/yara/mcafee_rules",
                                                         "/opt/deploy/yara/signature-base/yara"]}
         report = yara_scan.run("Yara_Scan", self.job_id, self.filepath, self.filename, self.md5, additional_params)
         self.assertEqual(report.get('success', False), True)
@@ -237,7 +240,6 @@ class FileAnalyzersEXETests(TestCase):
         additional_params = { 'max_tries': 10 }
         report = peframe.run("PEframe_Scan_File", self.job_id, self.filepath, self.filename, self.md5, additional_params)
         self.assertEqual(report.get('success', False), True)
-
 
 
 class FileAnalyzersDLLTests(TestCase):

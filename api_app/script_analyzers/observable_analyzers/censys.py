@@ -16,11 +16,8 @@ def run(analyzer_name, job_id, observable_name, observable_classification, addit
                 "".format(analyzer_name, job_id, observable_name))
     report = general.get_basic_report_template(analyzer_name)
     try:
-        api_id_name = additional_config_params.get('api_id_name', '')
-        api_secret_name = additional_config_params.get('api_secret_name', '')
-        if not api_id_name:
-            api_id_name = "CENSYS_API_ID"
-            api_secret_name = "CENSYS_API_SECRET"
+        api_id_name = additional_config_params.get('api_id_name', 'CENSYS_API_ID')
+        api_secret_name = additional_config_params.get('api_secret_name', 'CENSYS_API_SECRET')
         api_id = secrets.get_secret(api_id_name)
         api_secret = secrets.get_secret(api_secret_name)
         if not (api_id and api_secret):

@@ -385,7 +385,15 @@
         "type": "file",
         "python_module": "yara_run",
         "additional_config_params": {
-            "directories_with_rules": ["/opt/deploy/yara/mcafee_rules"]
+            "git_repo_main_dir": ["/opt/deploy/yara/mcafee_rules"],
+            "directories_with_rules": ["/opt/deploy/yara/mcafee_rules/APT",
+            "/opt/deploy/yara/mcafee_rules/RAT",
+            "/opt/deploy/yara/mcafee_rules/malware",
+            "/opt/deploy/yara/mcafee_rules/miners",
+            "/opt/deploy/yara/mcafee_rules/mobile",
+            "/opt/deploy/yara/mcafee_rules/ransomware",
+            "/opt/deploy/yara/mcafee_rules/stealer"
+            ]
         }
     },
     "HybridAnalysis_Get_File": {

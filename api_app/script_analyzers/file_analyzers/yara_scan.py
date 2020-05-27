@@ -88,14 +88,14 @@ def yara_update_repos():
                 # fall back to required key
                 yara_dirs = analyzer_config.get('additional_config_params', {}).get('directories_with_rules', [])
                 found_yara_dirs.extend(yara_dirs)
-                # customize it as you wish
-                for yara_dir in yara_dirs:
-                    if os.path.isdir(yara_dir):
-                        repo = Repo(yara_dir)
-                        o = repo.remotes.origin
-                        o.pull()
-                        logger.info("pull repo on {} dir".format(yara_dir))
-                    else:
-                        logger.warning("yara dir {} does not exist".format(yara_dir))
+            # customize it as you wish
+            for yara_dir in yara_dirs:
+                if os.path.isdir(yara_dir):
+                    repo = Repo(yara_dir)
+                    o = repo.remotes.origin
+                    o.pull()
+                    logger.info("pull repo on {} dir".format(yara_dir))
+                else:
+                    logger.warning("yara dir {} does not exist".format(yara_dir))
 
     return found_yara_dirs

@@ -13,8 +13,8 @@ STATUS = [
 
 
 class Tag(models.Model):
-    label = models.CharField(max_length=50, blank=False, default="none")
-    color = models.CharField(max_length=7, blank=False, default="#222222")
+    label = models.CharField(max_length=50, blank=False, null=False, unique=True)
+    color = models.CharField(max_length=7, blank=False, null=False, unique=True)
 
     def __str__(self):
         return f'Tag(label="{self.label}")'

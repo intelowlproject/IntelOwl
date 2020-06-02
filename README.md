@@ -4,6 +4,8 @@
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/intelowlproject/IntelOwl.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/intelowlproject/IntelOwl/context:python)
 [![CodeFactor](https://www.codefactor.io/repository/github/intelowlproject/intelowl/badge)](https://www.codefactor.io/repository/github/intelowlproject/intelowl)
 [![Build Status](https://travis-ci.com/intelowlproject/IntelOwl.svg?branch=master)](https://travis-ci.org/intelowlproject/IntelOwl)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
 # Intel Owl
 
 Do you want to get **threat intelligence data** about a file, an IP or a domain?
@@ -24,6 +26,7 @@ Main features:
 - full django-python application
 - easily and completely customizable, both the APIs and the analyzers
 - clone the project, set up the configuration and you are ready to run
+- Official frontend client: **[IntelOwl-ng](https://github.com/intelowlproject/IntelOwl-ng)** provides features such as dashboard, visualizations of analysis data, easy to use forms for requesting new analysis, etc.
 
 ### Free internal modules available
 * Static Doc Analysis
@@ -113,9 +116,9 @@ This project was created and will be upgraded thanks to the following organizati
 #### Google Summer Of Code
 The project was accepted to the GSoC 2020 under the Honeynet Project!! 
 
-Stay tuned for upcoming [new features](https://www.honeynet.org/gsoc/gsoc-2020/google-summer-of-code-2020-project-ideas/#intel-owl-improvements) developed by Eshann Bansal [Twitter](https://twitter.com/mask0fmydisguis)
+Stay tuned for upcoming [new features](https://www.honeynet.org/gsoc/gsoc-2020/google-summer-of-code-2020-project-ideas/#intel-owl-improvements) developed by Eshaan Bansal ([Twitter](https://twitter.com/mask0fmydisguis)).
 
 
 ### About the author 
 Feel free to contact the author at any time:
-Matteo Lodi [Twitter](https://twitter.com/matte_lodi)
+Matteo Lodi ([Twitter](https://twitter.com/matte_lodi))

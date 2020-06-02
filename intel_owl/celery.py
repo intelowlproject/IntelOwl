@@ -5,43 +5,43 @@ import os
 from celery import Celery
 from celery.schedules import crontab
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'intel_owl.settings')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "intel_owl.settings")
 
-app = Celery('intel_owl')
+app = Celery("intel_owl")
 
-app.config_from_object('django.conf:settings', namespace='CELERY')
+app.config_from_object("django.conf:settings", namespace="CELERY")
 
 app.autodiscover_tasks()
 
 app.conf.beat_schedule = {
     # execute sometimes to cleanup old jobs
-    'remove_old_jobs': {
-        'task': 'intel_owl.tasks.remove_old_jobs',
-        'schedule': crontab(minute=10, hour=2),
+    "remove_old_jobs": {
+        "task": "intel_owl.tasks.remove_old_jobs",
+        "schedule": crontab(minute=10, hour=2),
     },
     # execute sometimes to cleanup stuck analysis
-    'check_stuck_analysis': {
-        'task': 'intel_owl.tasks.check_stuck_analysis',
-        'schedule': crontab(minute="*/5"),
+    "check_stuck_analysis": {
+        "task": "intel_owl.tasks.check_stuck_analysis",
+        "schedule": crontab(minute="*/5"),
     },
     # Executes only on Wed because on Tue it's updated
-    'maxmind_updater': {
-        'task': 'intel_owl.tasks.maxmind_updater',
-        'schedule': crontab(minute=0, hour=1, day_of_week=3),
+    "maxmind_updater": {
+        "task": "intel_owl.tasks.maxmind_updater",
+        "schedule": crontab(minute=0, hour=1, day_of_week=3),
     },
     # execute every 6 hours
-    'talos_updater': {
-        'task': 'intel_owl.tasks.talos_updater',
-        'schedule': crontab(minute=5, hour="*/6"),
+    "talos_updater": {
+        "task": "intel_owl.tasks.talos_updater",
+        "schedule": crontab(minute=5, hour="*/6"),
     },
     # execute every 10 minutes
-    'tor_updater': {
-        'task': 'intel_owl.tasks.tor_updater',
-        'schedule': crontab(minute="*/10"),
+    "tor_updater": {
+        "task": "intel_owl.tasks.tor_updater",
+        "schedule": crontab(minute="*/10"),
     },
     # yara repo updater 1 time a day
-    'yara_updater': {
-        'task': 'intel_owl.tasks.yara_updater',
-        'schedule': crontab(minute=0, hour=0),
-    }
+    "yara_updater": {
+        "task": "intel_owl.tasks.yara_updater",
+        "schedule": crontab(minute=0, hour=0),
+    },
 }

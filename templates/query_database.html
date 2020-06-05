@@ -76,7 +76,7 @@
         {% if not only_count %}
             {% for job in jobs %}
             <div>
-                <a class="btn btn-primary" href="/gui/query_database/{{ job.id }}" role="button">
+                <a class="my-2 btn btn-primary" href="/api/jobs/{{ job.id }}" role="button">
                     ID: {{ job.id }}
                 </a>
             </div>

@@ -17,9 +17,17 @@ db_name = "GeoLite2-Country.mmdb"
 database_location = "{}/{}".format(settings.MEDIA_ROOT, db_name)
 
 
-def run(analyzer_name, job_id, observable_name, observable_classification, additional_config_params):
-    logger.info("started analyzer {} job_id {} observable {}"
-                "".format(analyzer_name, job_id, observable_name))
+def run(
+    analyzer_name,
+    job_id,
+    observable_name,
+    observable_classification,
+    additional_config_params,
+):
+    logger.info(
+        "started analyzer {} job_id {} observable {}"
+        "".format(analyzer_name, job_id, observable_name)
+    )
     report = general.get_basic_report_template(analyzer_name)
     try:
         try:
@@ -36,27 +44,33 @@ def run(analyzer_name, job_id, observable_name, observable_classification, addit
         if not maxmind_result:
             maxmind_result = {}
         # pprint.pprint(maxmind_result)
-        report['report'] = maxmind_result
+        report["report"] = maxmind_result
     except AnalyzerRunException as e:
-        error_message = "job_id:{} analyzer:{} observable_name:{} Analyzer error {}" \
-                        "".format(job_id, analyzer_name, observable_name, e)
+        error_message = (
+            "job_id:{} analyzer:{} observable_name:{} Analyzer error {}"
+            "".format(job_id, analyzer_name, observable_name, e)
+        )
         logger.error(error_message)
-        report['errors'].append(error_message)
-        report['success'] = False
+        report["errors"].append(error_message)
+        report["success"] = False
     except Exception as e:
         traceback.print_exc()
-        error_message = "job_id:{} analyzer:{} observable_name:{} Unexpected error {}" \
-                        "".format(job_id, analyzer_name, observable_name, e)
+        error_message = (
+            "job_id:{} analyzer:{} observable_name:{} Unexpected error {}"
+            "".format(job_id, analyzer_name, observable_name, e)
+        )
         logger.exception(error_message)
-        report['errors'].append(str(e))
-        report['success'] = False
+        report["errors"].append(str(e))
+        report["success"] = False
     else:
-        report['success'] = True
+        report["success"] = True
 
     general.set_report_and_cleanup(job_id, report)
 
-    logger.info("finished analyzer {} job_id {} observable {}"
-                "".format(analyzer_name, job_id, observable_name))
+    logger.info(
+        "finished analyzer {} job_id {} observable {}"
+        "".format(analyzer_name, job_id, observable_name)
+    )
 
     return report
 
@@ -64,19 +78,21 @@ def run(analyzer_name, job_id, observable_name, observable_classification, addit
 def updater(additional_config_params):
 
     try:
-        api_key_name = additional_config_params.get('api_key_name', '')
-        if not api_key_name:
-            api_key_name = "MAXMIND_KEY"
+        api_key_name = additional_config_params.get("api_key_name", "MAXMIND_KEY")
         api_key = secrets.get_secret(api_key_name)
         if not api_key:
             raise AnalyzerRunException("no api key retrieved")
 
         logger.info("starting download of db from maxmind")
-        url = "https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-Country&license_key={}" \
-              "&suffix=tar.gz".format(api_key)
+        url = (
+            "https://download.maxmind.com/app/geoip_download?edition_id="
+            f"GeoLite2-Country&license_key={api_key}&suffix=tar.gz"
+        )
         r = requests.get(url)
         if r.status_code >= 300:
-            raise AnalyzerRunException("failed request for new maxmind db. Status code: {}".format(r.status_code))
+            raise AnalyzerRunException(
+                f"failed request for new maxmind db. Status code: {r.status_code}"
+            )
 
         tar_db_path = "/tmp/GeoLite2-Country.tar.gz"
         with open(tar_db_path, "wb") as f:
@@ -94,12 +110,16 @@ def updater(additional_config_params):
         while counter < 10 or not directory_found:
             date_to_check = today - datetime.timedelta(days=counter)
             formatted_date = date_to_check.strftime("%Y%m%d")
-            downloaded_db_path = "{}/GeoLite2-Country_{}/GeoLite2-Country.mmdb" \
-                                 "".format(directory_to_extract_files, formatted_date)
+            downloaded_db_path = (
+                "{}/GeoLite2-Country_{}/GeoLite2-Country.mmdb"
+                "".format(directory_to_extract_files, formatted_date)
+            )
             try:
                 os.rename(downloaded_db_path, database_location)
             except FileNotFoundError:
-                logger.debug("{} not found move to the day before".format(downloaded_db_path))
+                logger.debug(
+                    "{} not found move to the day before".format(downloaded_db_path)
+                )
                 counter += 1
             else:
                 directory_found = True
@@ -107,7 +127,9 @@ def updater(additional_config_params):
         if directory_found:
             logger.info("maxmind directory found {}".format(downloaded_db_path))
         else:
-            raise AnalyzerRunException("failed extraction of maxmind db, reached max number of attempts")
+            raise AnalyzerRunException(
+                "failed extraction of maxmind db, reached max number of attempts"
+            )
 
         logger.info("ended download of db from maxmind")
 
@@ -116,4 +138,3 @@ def updater(additional_config_params):
         logger.exception(str(e))
 
     return database_location
-

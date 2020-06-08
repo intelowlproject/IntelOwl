@@ -362,6 +362,18 @@
         "external_service": true,
         "python_module": "urlhaus_run"
     },
+    "Cymru_Hash_Registry_Get_Observable": {
+        "type": "observable",
+        "observable_supported": ["hash"],
+        "external_service": true,
+        "python_module": "cymru_run"
+    },
+    "Cymru_Hash_Registry_Get_File": {
+        "type": "file",
+        "run_hash": true,
+        "external_service": true,
+        "python_module": "cymru_run"
+    },
     "Yara_Scan_Community": {
         "type": "file",
         "python_module": "yara_run",

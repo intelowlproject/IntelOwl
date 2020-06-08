@@ -166,16 +166,15 @@ def set_report_and_cleanup(job_id, report):
     job_object = None
 
     try:
-        job_object = object_by_job_id(job_id)
-        if job_object.status == "failed":
-            raise AlreadyFailedJobException()
-
         # add process time
         finished_time = time.time()
         report["process_time"] = finished_time - report["started_time"]
 
+        job_object = object_by_job_id(job_id)
         job_object.analysis_reports.append(report)
         job_object.save(update_fields=["analysis_reports"])
+        if job_object.status == "failed":
+            raise AlreadyFailedJobException()
 
         num_analysis_reports = len(job_object.analysis_reports)
         num_analyzers_to_execute = len(job_object.analyzers_to_execute)

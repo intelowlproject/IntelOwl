@@ -32,6 +32,14 @@ class ApiTests(TestCase):
         )
         self.assertEqual(response.status_code, 200)
 
+    def test_ask_analysis_availability_run_all_analyzers(self):
+        md5 = os.environ.get("TEST_MD5", "446c5fbb11b9ce058450555c1c27153c")
+        params = {"md5": md5, "run_all_available_analyzers": True}
+        response = self.client.get(
+            "/api/ask_analysis_availability", params, format="json"
+        )
+        self.assertEqual(response.status_code, 200)
+
     def test_send_corrupted_sample_pe(self):
         filename = "non_valid_pe.exe"
         test_file = f"{settings.PROJECT_LOCATION}/test_files/{filename}"

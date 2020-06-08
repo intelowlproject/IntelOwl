@@ -1,9 +1,9 @@
+import socket
 import traceback
 import logging
 
 from api_app.exceptions import AnalyzerRunException
 from api_app.script_analyzers import general
-from intel_owl import secrets
 
 logger = logging.getLogger(__name__)
 
@@ -20,16 +20,28 @@ def run(
     )
     report = general.get_basic_report_template(analyzer_name)
     try:
-        api_key_name = additional_config_params.get("api_key_name", "KEY_NAME")
-        api_key = secrets.get_secret(api_key_name)
-        if not api_key:
-            raise AnalyzerRunException("no api key retrieved")
+        results = {}
+        if observable_classification != "hash":
+            raise AnalyzerRunException(
+                f"observable type {observable_classification} not supported"
+            )
 
-        result = {}
-        # do something here
+        results["found"] = False
+        # reference: https://team-cymru.com/community-services/mhr/
+        # if the resolution works, this means that the file is reported
+        # as malware by Cymru
+        resolutions = []
+        try:
+            query_to_perform = f"{observable_name}.malware.hash.cymru.com"
+            domains = socket.gethostbyaddr(query_to_perform)
+            resolutions = domains[2]
+        except (socket.gaierror, socket.herror):
+            logger.info(f"observable {observable_name} not found in HMR DB")
+        if resolutions:
+            results["found"] = True
+        results["resolution_data"] = resolutions
+        report["report"] = results
 
-        # pprint.pprint(result)
-        report["report"] = result
     except AnalyzerRunException as e:
         error_message = (
             f"job_id:{job_id} analyzer:{analyzer_name}"
@@ -53,7 +65,7 @@ def run(
     general.set_report_and_cleanup(job_id, report)
 
     logger.info(
-        "ended analyzer {analyzer_name} job_id {job_id} observable {observable_name}"
+        f"ended analyzer {analyzer_name} job_id {job_id} observable {observable_name}"
     )
 
     return report

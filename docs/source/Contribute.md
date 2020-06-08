@@ -73,9 +73,10 @@ $ flake8 . --show-source --statistics
 
   if flake8 shows any errors, fix them.
 
-2. Start the app using the docker-compose test file. In this way, you would launch the code in your environment and not the last official image in Docker Hub:
+2. Run the build and start the app using the docker-compose test file. In this way, you would launch the code in your environment and not the last official image in Docker Hub:
 
 ```bash
+$ docker-compose -f docker-compose-for-tests.yml build
 $ docker-compose -f docker-compose-for-tests.yml up`
 ```
 

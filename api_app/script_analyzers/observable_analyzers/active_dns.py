@@ -280,12 +280,13 @@ def _classic_dns(
     result = {}
     if observable_classification == "ip":
         ipaddress.ip_address(observable_name)
+        resolutions = []
         try:
             domains = socket.gethostbyaddr(observable_name)
-            resolution = domains[0]
-        except socket.herror:
-            resolution = ""
-        result = {"name": observable_name, "resolution": resolution}
+            resolutions = domains[2]
+        except (socket.gaierror, socket.herror):
+            logger.info(f"no resolution found for observable {observable_name}")
+        result = {"name": observable_name, "resolutions": resolutions}
     elif observable_classification == "domain":
         try:
             resolution = socket.gethostbyname(observable_name)

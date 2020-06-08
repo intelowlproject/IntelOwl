@@ -73,6 +73,7 @@ Main features:
 * Threatminer
 * Abuse.ch MalwareBazaar
 * Abuse.ch URLhaus
+* Team Cymru Malware Hash Registry
 * Google DoH
 * CloudFlare DoH Classic
 * CloudFlare DoH Malware

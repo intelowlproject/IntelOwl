@@ -38,6 +38,7 @@ from api_app.script_analyzers.observable_analyzers import (
     active_dns,
     auth0,
     securitytrails,
+    cymru,
 )
 from intel_owl import settings
 
@@ -782,6 +783,16 @@ class HashAnalyzersTests(TestCase):
     def test_mb_get(self, mock_get=None, mock_post=None):
         report = mb_get.run(
             "MalwareBazaar_Get_Observable",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {},
+        )
+        self.assertEqual(report.get("success", False), True)
+
+    def test_cymru_get(self, mock_get=None, mock_post=None):
+        report = cymru.run(
+            "Cymru_Hash_Registry_Get_Observable",
             self.job_id,
             self.observable_name,
             self.observable_classification,

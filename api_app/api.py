@@ -32,13 +32,15 @@ def ask_analysis_availability(request):
     This is useful to avoid repeating the same analysis multiple times.
     By default this API checks if there are existing analysis related to the md5 in
     status "running" or "reported_without_fails"
-    Also, you need to specify the analyzers needed because, otherwise, it's
+    Also, you need to specify the analyzers needed because, otherwise, it is
     highly probable that you won't get all the results that you expect
 
     :param md5: string
         md5 of the sample or observable to look for
-    :param analyzers_needed: list
-        specify analyzers needed
+    :param [analyzers_needed]: list
+        specify analyzers needed. It is requires this or run_all_available_analyzers
+    :param [run_all_available_analyzers]: bool
+        if we are looking for an analysis executed with this flag set
     :param [running_only]: bool
         check only for running analysis, default False, any value is True
 
@@ -49,6 +51,7 @@ def ask_analysis_availability(request):
     """
     source = str(request.user)
     analyzers_needed_list = []
+    run_all_available_analyzers = False
     try:
         data_received = request.query_params
         logger.info(
@@ -59,11 +62,22 @@ def ask_analysis_availability(request):
         if "md5" not in data_received:
             return JsonResponse({"error": "800"}, status=status.HTTP_400_BAD_REQUEST)
 
-        if "analyzers_needed" not in data_received:
+        if (
+            "analyzers_needed" not in data_received
+            and "run_all_available_analyzers" not in data_received
+        ):
             return JsonResponse({"error": "801"}, status=status.HTTP_400_BAD_REQUEST)
 
-        if "analyzers_needed" in data_received:
-            analyzers_needed_list = data_received["analyzers_needed"].split(",")
+        if "run_all_available_analyzers" in data_received:
+            if data_received["run_all_available_analyzers"]:
+                run_all_available_analyzers = True
+        if not run_all_available_analyzers:
+            if "analyzers_needed" not in data_received:
+                return JsonResponse(
+                    {"error": "802"}, status=status.HTTP_400_BAD_REQUEST
+                )
+            if isinstance(data_received["analyzers_needed"], list):
+                analyzers_needed_list = data_received["analyzers_needed"].split(",")
 
         running_only = False
         if "running_only" in data_received:
@@ -75,11 +89,20 @@ def ask_analysis_availability(request):
             statuses_to_check = ["running"]
         else:
             statuses_to_check = ["running", "reported_without_fails"]
-        query = (
-            Q(md5=md5)
-            & Q(status__in=statuses_to_check)
-            & Q(analyzers_to_execute__contains=analyzers_needed_list)
-        )
+
+        if run_all_available_analyzers:
+            query = (
+                Q(md5=md5)
+                & Q(status__in=statuses_to_check)
+                & Q(run_all_available_analyzers=True)
+            )
+        else:
+            query = (
+                Q(md5=md5)
+                & Q(status__in=statuses_to_check)
+                & Q(analyzers_to_execute__contains=analyzers_needed_list)
+            )
+
         last_job_for_md5_set = models.Job.objects.filter(query).order_by(
             "-received_request_time"
         )

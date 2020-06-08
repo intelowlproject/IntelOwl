@@ -44,6 +44,7 @@ from api_app.script_analyzers.observable_analyzers import (
     active_dns,
     auth0,
     securitytrails,
+    cymru,
 )
 
 from api_app import crons
@@ -653,6 +654,23 @@ def mbget_run(
     additional_config_params,
 ):
     mb_get.run(
+        analyzer_name,
+        job_id,
+        observable_name,
+        observable_classification,
+        additional_config_params,
+    )
+
+
+@shared_task(soft_time_limit=50)
+def cymru_run(
+    analyzer_name,
+    job_id,
+    observable_name,
+    observable_classification,
+    additional_config_params,
+):
+    cymru.run(
         analyzer_name,
         job_id,
         observable_name,

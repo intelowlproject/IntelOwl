@@ -35,7 +35,7 @@ def run(
             query_to_perform = f"{observable_name}.malware.hash.cymru.com"
             domains = socket.gethostbyaddr(query_to_perform)
             resolutions = domains[2]
-        except socket.herror:
+        except (socket.gaierror, socket.herror):
             logger.info(f"observable {observable_name} not found in HMR DB")
         if resolutions:
             results["found"] = True

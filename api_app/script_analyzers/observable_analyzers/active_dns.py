@@ -284,7 +284,7 @@ def _classic_dns(
         try:
             domains = socket.gethostbyaddr(observable_name)
             resolutions = domains[2]
-        except socket.herror:
+        except (socket.gaierror, socket.herror):
             logger.info(f"no resolution found for observable {observable_name}")
         result = {"name": observable_name, "resolutions": resolutions}
     elif observable_classification == "domain":

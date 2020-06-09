@@ -15,7 +15,7 @@ server {
         alias /var/www/static/;
    }
 
-    location / {
+   location ~^/(admin|api) {
         uwsgi_pass                  django;
         uwsgi_pass_header           Authorization;
         uwsgi_pass_request_headers  on;
@@ -24,5 +24,10 @@ server {
         client_max_body_size        50m;
 
    }
+
+    location / {
+        root /var/www/angular_build/;
+        try_files $uri $uri/ /index.html;
+    }
 
 }

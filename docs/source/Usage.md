@@ -3,9 +3,19 @@
 ## Client
 Intel Owl main objective is to provide a single API interface to query in order to retrieve threat intelligence at scale.
 
-So, in order to interact with the Intel Owl APIs, you may want to use the specific client that is available at: [PyIntelOwl](https://github.com/intelowlproject/pyintelowl)
+There are multiple ways to interact with the Intel Owl APIs, 
 
-We suggest to download the client, read the instructions and use it as a library for your own python projects or directly from the command line.
+1. IntelOwl-ng (Web Interface)
+
+- Inbuilt Web interface with dashboard, visualizations of analysis data, easy to use forms for requesting 
+new analysis, tags management and more features. 
+- Built with Angular 9 and available on [Github](https://github.com/intelowlproject/intelowl-ng).
+
+2. pyIntelOwl (CLI/Library)
+
+- Official client that is available at: [PyIntelOwl](https://github.com/intelowlproject/pyintelowl).
+- Can be used as a library for your own python projects or,
+- directly via the command line interface
 
 ### Tokens creation
 The server authentication is managed by API keys. So, if you want to interact with Intel Owl, you have to create one or more unprivileged users from the Django Admin Interface and then generate a token for those users.

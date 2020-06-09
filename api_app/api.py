@@ -4,12 +4,14 @@ from api_app import models, serializers, utilities
 from .script_analyzers import general
 
 from django.http import JsonResponse
+from rest_framework.response import Response
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
+from django.views.decorators.csrf import ensure_csrf_cookie
 from django.db.models import Q
 from rest_framework import status, viewsets
 from rest_framework.authtoken.models import Token
-from rest_framework.authentication import TokenAuthentication, SessionAuthentication
+from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import (
     api_view,
     authentication_classes,
@@ -319,6 +321,7 @@ def ask_analysis_result(request):
 
 
 @api_view(["POST"])
+@ensure_csrf_cookie
 def obtain_user_token(request):
     """
     REST endpoint to obtain user auth token via authentication
@@ -378,6 +381,7 @@ def perform_logout(request):
 @api_view(["GET"])
 @authentication_classes((TokenAuthentication,))
 @permission_classes((IsAuthenticated,))
+@ensure_csrf_cookie
 def get_user_info(request):
     """
     To fetch user detail like username and user ID.
@@ -443,10 +447,19 @@ class JobViewSet(viewsets.ReadOnlyModelViewSet):
         if wrong HTTP method
     """
 
-    authentication_classes = (TokenAuthentication, SessionAuthentication)
+    authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
-    queryset = models.Job.objects.order_by("-received_request_time").all()
+    queryset = models.Job.objects.all()
     serializer_class = serializers.JobSerializer
+
+    def list(self, request):
+        queryset = (
+            models.Job.objects.order_by("-received_request_time")
+            .defer("analysis_reports", "errors")
+            .all()
+        )
+        serializer = serializers.JobListSerializer(queryset, many=True)
+        return Response(serializer.data)
 
 
 class TagViewSet(viewsets.ModelViewSet):
@@ -465,7 +478,7 @@ class TagViewSet(viewsets.ModelViewSet):
         if wrong HTTP method
     """
 
-    authentication_classes = (TokenAuthentication, SessionAuthentication)
+    authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
     queryset = models.Tag.objects.all()
     serializer_class = serializers.TagSerializer

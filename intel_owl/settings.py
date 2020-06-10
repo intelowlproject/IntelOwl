@@ -28,13 +28,7 @@ if HTTPS_ENABLED == "enabled":
     CSRF_COOKIE_SECURE = True
     SESSION_COOKIE_SECURE = True
 
-
-# CORS
 ALLOWED_HOSTS = ["*"]
-CORS_ORIGIN_WHITELIST = [
-    "http://localhost",
-    "http://localhost:4200",
-]
 
 # Application definition
 INSTALLED_APPS = [
@@ -46,14 +40,12 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "rest_framework.authtoken",
-    "corsheaders",
     "api_app.apps.ApiAppConfig",
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
-    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -66,7 +58,7 @@ ROOT_URLCONF = "intel_owl.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [os.path.join(BASE_DIR, "templates"),],
+        "DIRS": [],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [

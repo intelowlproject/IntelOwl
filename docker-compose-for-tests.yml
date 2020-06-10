@@ -28,7 +28,9 @@ services:
       - postgres
 
   nginx:
-    image: library/nginx:1.16.1-alpine
+    build:
+      context: .
+      dockerfile: ./Dockerfile_nginx
     container_name: intel_owl_nginx
     restart: unless-stopped
     hostname: nginx
@@ -83,4 +85,3 @@ volumes:
   generic_logs:
   static_content:
   shared_files:
-

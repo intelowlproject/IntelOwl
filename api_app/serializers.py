@@ -9,6 +9,11 @@ class TagSerializer(serializers.ModelSerializer):
 
 
 class JobSerializer(serializers.ModelSerializer):
+    """
+    Job model's serializer.
+    Used for create(), retrieve()
+    """
+
     tags = TagSerializer(many=True, read_only=True)
     tags_id = serializers.PrimaryKeyRelatedField(
         many=True, write_only=True, queryset=Tag.objects.all()
@@ -26,3 +31,16 @@ class JobSerializer(serializers.ModelSerializer):
             job.tags.set(tags)
 
         return job
+
+
+class JobListSerializer(serializers.ModelSerializer):
+    """
+    Job model's list serializer.
+    Used for list()
+    """
+
+    tags = TagSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Job
+        exclude = ("analysis_reports", "errors")

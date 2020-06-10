@@ -3,6 +3,8 @@
 import json
 import logging
 
+from magic import from_buffer as magic_from_buffer
+
 from django.utils import timezone
 
 from api_app.exceptions import NotRunnableAnalyzer
@@ -31,6 +33,19 @@ def get_analyzer_config():
 
 def file_directory_path(instance, filename):
     return f"job_{get_now_str()}_{filename}"
+
+
+def calculate_mimetype(file_buffer, file_name):
+    read_file_buffer = file_buffer.read()
+    calculated_mimetype = magic_from_buffer(read_file_buffer, mime=True)
+    if file_name:
+        if file_name[-3:] in ['.js', '.jse']:
+            calculated_mimetype = 'application/javascript'
+        elif file_name[-3:] in ['.vbs', '.vbe']:
+            calculated_mimetype = 'application/x-vbscript'
+        elif file_name == '.iqy':
+            calculated_mimetype = 'text/x-ms-iqy'
+    return calculated_mimetype
 
 
 def filter_analyzers(

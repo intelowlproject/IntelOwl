@@ -144,7 +144,7 @@ def send_analysis_request(request):
     :param [file]: binary
         required if is_sample=True, the binary
     :param [file_mimetype]: string
-        required if is_sample=True, the binary mimetype
+        optional, the binary mimetype, calculated by default
     :param [file_name]: string
         optional if is_sample=True, the binary name
     :param [observable_name]: string
@@ -196,9 +196,9 @@ def send_analysis_request(request):
                         {"error": "810"}, status=status.HTTP_400_BAD_REQUEST
                     )
                 if "file_mimetype" not in data_received:
-                    return JsonResponse(
-                        {"error": "811"}, status=status.HTTP_400_BAD_REQUEST
-                    )
+                    serialized_data["file_mimetype"] = \
+                        utilities.calculate_mimetype(data_received["file"],
+                                                     data_received.get("file_name", ""))
             else:
                 if "observable_name" not in data_received:
                     return JsonResponse(

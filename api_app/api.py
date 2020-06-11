@@ -196,9 +196,9 @@ def send_analysis_request(request):
                         {"error": "810"}, status=status.HTTP_400_BAD_REQUEST
                     )
                 if "file_mimetype" not in data_received:
-                    serialized_data["file_mimetype"] = \
-                        utilities.calculate_mimetype(data_received["file"],
-                                                     data_received.get("file_name", ""))
+                    serialized_data["file_mimetype"] = utilities.calculate_mimetype(
+                        data_received["file"], data_received.get("file_name", "")
+                    )
             else:
                 if "observable_name" not in data_received:
                     return JsonResponse(

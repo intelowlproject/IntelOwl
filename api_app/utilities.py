@@ -39,12 +39,12 @@ def calculate_mimetype(file_buffer, file_name):
     read_file_buffer = file_buffer.read()
     calculated_mimetype = magic_from_buffer(read_file_buffer, mime=True)
     if file_name:
-        if file_name[-3:] in ['.js', '.jse']:
-            calculated_mimetype = 'application/javascript'
-        elif file_name[-3:] in ['.vbs', '.vbe']:
-            calculated_mimetype = 'application/x-vbscript'
-        elif file_name == '.iqy':
-            calculated_mimetype = 'text/x-ms-iqy'
+        if file_name.endswith(".js") or file_name.endswith(".jse"):
+            calculated_mimetype = "application/javascript"
+        elif file_name.endswith(".vbs") or file_name.endswith(".vbe"):
+            calculated_mimetype = "application/x-vbscript"
+        elif file_name.endswith(".iqy"):
+            calculated_mimetype = "text/x-ms-iqy"
     return calculated_mimetype
 
 

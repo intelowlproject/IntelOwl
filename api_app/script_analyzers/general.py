@@ -12,6 +12,7 @@ from api_app.utilities import get_now
 from intel_owl import tasks, settings
 
 from django.utils import timezone
+from django.db import transaction
 
 logger = logging.getLogger(__name__)
 
@@ -100,9 +101,12 @@ def start_analyzers(analyzers_to_execute, analyzers_config, job_id, md5, is_samp
             set_failed_analyzer(analyzer, job_id, error_message)
 
 
-def object_by_job_id(job_id):
+def object_by_job_id(job_id, transaction=False):
     try:
-        job_object = Job.objects.get(id=job_id)
+        if transaction:
+            job_object = Job.objects.select_for_update().get(id=job_id)
+        else:
+            job_object = Job.objects.get(id=job_id)
     except Job.DoesNotExist:
         raise AnalyzerRunException(f"no job_id {job_id} retrieved")
 
@@ -159,9 +163,10 @@ def get_basic_report_template(analyzer_name):
 
 
 def set_report_and_cleanup(job_id, report):
+    analyzer_name = report.get("name", "")
     logger.info(
-        "start set_report_and_cleanup for job_id:{}, analyzer:{}"
-        "".format(job_id, report.get("name", ""))
+        f"start set_report_and_cleanup for job_id:{job_id},"
+        f" analyzer:{analyzer_name}"
     )
     job_object = None
 
@@ -170,16 +175,18 @@ def set_report_and_cleanup(job_id, report):
         finished_time = time.time()
         report["process_time"] = finished_time - report["started_time"]
 
-        job_object = object_by_job_id(job_id)
-        job_object.analysis_reports.append(report)
-        job_object.save(update_fields=["analysis_reports"])
-        if job_object.status == "failed":
-            raise AlreadyFailedJobException()
+        with transaction.atomic():
+            job_object = object_by_job_id(job_id, transaction=True)
+            job_object.analysis_reports.append(report)
+            job_object.save(update_fields=["analysis_reports"])
+            if job_object.status == "failed":
+                raise AlreadyFailedJobException()
 
         num_analysis_reports = len(job_object.analysis_reports)
         num_analyzers_to_execute = len(job_object.analyzers_to_execute)
         logger.info(
-            f"job_id:{job_id}, num analysis reports:{num_analysis_reports},"
+            f"job_id:{job_id}, analyzer {analyzer_name}, "
+            f"num analysis reports:{num_analysis_reports}, "
             f"num analyzer to execute:{num_analyzers_to_execute}"
         )
 
@@ -202,8 +209,7 @@ def set_report_and_cleanup(job_id, report):
 
     except AlreadyFailedJobException:
         logger.error(
-            "job_id {} status failed. Do not process the report {}"
-            "".format(job_id, report)
+            f"job_id {job_id} status failed. Do not process the report {report}"
         )
 
     except Exception as e:
@@ -228,8 +234,8 @@ def set_job_status(job_id, status, errors=None):
 
 def set_failed_analyzer(analyzer_name, job_id, error_message):
     logger.info(
-        "setting analyzer {} of job_id {} as failed. Error message:{}"
-        "".format(analyzer_name, job_id, error_message)
+        f"setting analyzer {analyzer_name} of job_id {job_id} as failed."
+        f" Error message:{error_message}"
     )
     report = get_basic_report_template(analyzer_name)
     report["errors"].append(error_message)

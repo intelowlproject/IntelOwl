@@ -9,6 +9,7 @@ from .api import (
     perform_logout,
     get_user_info,
     get_analyzer_configs,
+    download_sample,
     TagViewSet,
     JobViewSet,
 )
@@ -28,5 +29,6 @@ urlpatterns = [
     path("auth/logout", perform_logout),
     path("auth/user", get_user_info),
     path("get_analyzer_configs", get_analyzer_configs),
+    path("download_sample", download_sample),
     path(r"", include(router.urls)),
 ]

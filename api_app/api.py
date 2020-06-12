@@ -3,8 +3,10 @@ import logging
 from api_app import models, serializers, utilities
 from .script_analyzers import general
 
-from django.http import JsonResponse
+from wsgiref.util import FileWrapper
+
 from rest_framework.response import Response
+from django.http import JsonResponse, HttpResponse
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.views.decorators.csrf import ensure_csrf_cookie
@@ -450,6 +452,43 @@ def get_analyzer_configs(request):
         )
         return JsonResponse(
             {"error": "error in get_analyzer_configs. Check logs."},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+@api_view(["GET"])
+@authentication_classes((TokenAuthentication,))
+@permission_classes((IsAuthenticated,))
+def download_sample(request):
+    """
+    this method is used to download a sample from a Job ID
+    :param request: job_id
+    :return 200 found, 404 not found
+    """
+    try:
+        data_received = request.query_params
+        logger.info(f"Get binary by Job ID. Data received {data_received}")
+        if "job_id" not in data_received:
+            return Response({"error": "821"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            job = models.Job.objects.get(id=data_received["job_id"])
+        except models.Job.DoesNotExist:
+            return Response({"answer": "not found"}, status=status.HTTP_200_OK)
+        if not job.is_sample:
+            return Response(
+                {"answer": "job without sample"}, status=status.HTTP_400_BAD_REQUEST
+            )
+        file_mimetype = job.file_mimetype
+        response = HttpResponse(FileWrapper(job.file), content_type=file_mimetype)
+        response["Content-Disposition"] = "attachment; filename={}".format(
+            job.file_name
+        )
+        return response
+
+    except Exception as e:
+        logger.exception(f"download_sample requester:{str(request.user)} error:{e}.")
+        return JsonResponse(
+            {"error": "error in download_sample. Check logs."},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
 

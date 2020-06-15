@@ -7,7 +7,7 @@ from wsgiref.util import FileWrapper
 
 from rest_framework.response import Response
 from django.http import JsonResponse, HttpResponse
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.db.models import Q
@@ -261,7 +261,9 @@ def send_analysis_request(request):
         else:
             error_message = f"serializer validation failed: {serializer.errors}"
             logger.info(error_message)
-            return JsonResponse(error_message, status=status.HTTP_400_BAD_REQUEST)
+            return JsonResponse(
+                {"error": error_message}, status=status.HTTP_400_BAD_REQUEST
+            )
 
         is_sample = serializer.data.get("is_sample", "")
         if not test:
@@ -368,6 +370,7 @@ def obtain_user_token(request):
         u = User.objects.get(email=email)
         user = authenticate(username=u.username, password=password)
         if user:
+            login(request, user)
             logger.debug(f"obtain_user_token token created for {email}.")
             token, _created = Token.objects.get_or_create(user=user)
             return JsonResponse(
@@ -395,7 +398,7 @@ def perform_logout(request):
     """
     try:
         logger.info(f"perform_logout received request from {str(request.user)}")
-        request.auth.delete()  # remove/invalidate the token on logout
+        logout(request)
         return JsonResponse({"status": "You've been logged out."})
     except Exception as e:
         str_err = str(e)

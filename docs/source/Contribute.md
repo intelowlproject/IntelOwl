@@ -38,6 +38,8 @@ After having written the new python module, you have to remember to:
   Remember to set at least:
   * `type`: can be `file` or `observable`. It specifies what the analyzer should analyze
   * `python_module`: name of the task that the analyzer must launch
+  * `description`: little description of the analyzer
+  * `requires_configuration`: if the analyzer requires a configuration made by the user (for example setting an API key)
   
   The `additional_config_params` can be used in case the new analyzer requires additional configuration.
   In that way you can create more than one analyzer for a specific python module, each one based on different configurations.

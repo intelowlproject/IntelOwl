@@ -46,7 +46,7 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * VirusTotal_v2_Scan_File: scan a file on VirusTotal using old API endpoints
 * Intezer Scan: scan a file on Intezer
 * Cuckoo_Scan: scan a file on Cuckoo
-* HybridAnalysis_Get_File: check file hash on HybridAnalysis
+* HybridAnalysis_Get_File: check file hash on HybridAnalysis sandbox reports
 * OTX_Check_Hash: check file hash on OTX Alienvault
 * MISP_Check_Hash: check a file hash on a MISP instance
 * MISPFIRST_Check_Hash: check a file hash on the FIRST MISP instance
@@ -62,7 +62,7 @@ The following is the list of the available analyzers you can run out-of-the-box:
 #### Observable analyzers (ip, domain, url, hash)
 * VirusTotal_v3_Get_Observable: search an observable in the VirusTotal DB
 * VirusTotal_v2_Get_Observable: search an observable in the VirusTotal DB using the old API endpoints
-* HybridAnalysis_Get_Observable: search an observable in the HybridAnalysis DB
+* HybridAnalysis_Get_Observable: search an observable in the HybridAnalysis sandbox reports
 * OTXQuery: scan an observable on Alienvault OTX
 * TalosReputation: check an IP reputation from Talos
 * Robtex_Forward_PDNS_Query: scan a domain against the Robtex Passive DNS DB
@@ -74,19 +74,20 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * CIRCLPassiveDNS: scan an observable against the CIRCL Passive DNS DB
 * CIRCLPassiveSSL: scan an observable against the CIRCL Passive SSL DB
 * MaxMindGeoIP: extract GeoIP info for an observable
-* AbuseIPDB: scan an IP against the AbuseIPDB
+* AbuseIPDB: check if an ip was reported on AbuseIPDB
 * Fortiguard: scan an observable with the Fortiguard URL Analyzer
 * TorProject: check if an IP is a Tor Exit Node
 * MISP: scan an observable on a MISP instance
 * MISPFIRST: scan an observable on the FIRST MISP instance
 * DNSDB: scan an observable against the Passive DNS Farsight Database
-* Shodan: scan an IP against Shodan API
+* Shodan_Search: scan an IP against Shodan Search API
+* Shodan_Honeyscore: scan an IP against Shodan Honeyscore API
 * HoneyDB_Scan_Twitter: scan an IP against HoneyDB.io's Twitter Threat Feed
-* HoneyDB_Get: IP lookup service
+* HoneyDB_Get: HoneyDB IP lookup service
 * Hunter: Scans a domain name and returns set of data about the organisation, the email address found and additional information about the people owning those email addresses. 
 * Censys_Search: scan an IP address against Censys View API
 * MalwareBazaar_Get_Observable: Check if a particular malware hash is known to MalwareBazaar
-* ONYPHE: search an observable in the ONYPHE
+* ONYPHE: search an observable in ONYPHE
 * Threatminer_PDNS: retrieve PDNS data from Threatminer API
 * Threatminer_Reports_Tagging: retrieve reports from Threatminer API
 * Threatminer_Subdomains: retrieve subdomains from Threatminer API

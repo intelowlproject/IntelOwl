@@ -24,18 +24,14 @@ def run(
     )
     report = general.get_basic_report_template(analyzer_name)
     try:
-        api_key_name = additional_config_params.get("api_key_name", "")
-        if not api_key_name:
-            api_key_name = "MISP_KEY"
+        api_key_name = additional_config_params.get("api_key_name", "MISP_KEY")
         api_key = secrets.get_secret(api_key_name)
         if not api_key:
             raise AnalyzerRunException(
                 "no MISP API key retrieved, key value: {}".format(api_key_name)
             )
 
-        url_key_name = additional_config_params.get("url_key_name", "")
-        if not url_key_name:
-            url_key_name = "MISP_URL"
+        url_key_name = additional_config_params.get("url_key_name", "MISP_URL")
         url_name = secrets.get_secret(url_key_name)
         if not url_name:
             raise AnalyzerRunException(

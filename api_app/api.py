@@ -13,7 +13,7 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 from django.db.models import Q
 from rest_framework import status, viewsets
 from rest_framework.authtoken.models import Token
-from rest_framework.authentication import TokenAuthentication
+from rest_framework.authentication import TokenAuthentication, SessionAuthentication
 from rest_framework.decorators import (
     api_view,
     authentication_classes,
@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 
 
 @api_view(["GET"])
-@authentication_classes((TokenAuthentication,))
+@authentication_classes((TokenAuthentication, SessionAuthentication))
 @permission_classes((IsAuthenticated,))
 def ask_analysis_availability(request):
     """
@@ -42,7 +42,8 @@ def ask_analysis_availability(request):
     :param md5: string
         md5 of the sample or observable to look for
     :param [analyzers_needed]: list
-        specify analyzers needed. It is requires this or run_all_available_analyzers
+        specify analyzers needed. It is requires either this
+        or run_all_available_analyzers
     :param [run_all_available_analyzers]: bool
         if we are looking for an analysis executed with this flag set
     :param [running_only]: bool
@@ -72,16 +73,17 @@ def ask_analysis_availability(request):
         ):
             return JsonResponse({"error": "801"}, status=status.HTTP_400_BAD_REQUEST)
 
-        if "run_all_available_analyzers" in data_received:
-            if data_received["run_all_available_analyzers"]:
-                run_all_available_analyzers = True
+        if (
+            "run_all_available_analyzers" in data_received
+            and data_received["run_all_available_analyzers"]
+        ):
+            run_all_available_analyzers = True
         if not run_all_available_analyzers:
             if "analyzers_needed" not in data_received:
                 return JsonResponse(
                     {"error": "802"}, status=status.HTTP_400_BAD_REQUEST
                 )
-            if isinstance(data_received["analyzers_needed"], list):
-                analyzers_needed_list = data_received["analyzers_needed"].split(",")
+            analyzers_needed_list = data_received["analyzers_needed"].split(",")
 
         running_only = False
         if "running_only" in data_received:
@@ -133,7 +135,7 @@ def ask_analysis_availability(request):
 
 
 @api_view(["POST"])
-@authentication_classes((TokenAuthentication,))
+@authentication_classes((TokenAuthentication, SessionAuthentication))
 @permission_classes((IsAuthenticated,))
 def send_analysis_request(request):
     """
@@ -252,7 +254,7 @@ def send_analysis_request(request):
             serializer.save(**params)
             job_id = serializer.data.get("id", "")
             md5 = serializer.data.get("md5", "")
-            logger.info("new job_id {job_id} for md5 {md5}")
+            logger.info(f"new job_id {job_id} for md5 {md5}")
             if not job_id:
                 return JsonResponse(
                     {"error": "815"}, status=status.HTTP_400_BAD_REQUEST
@@ -291,7 +293,7 @@ def send_analysis_request(request):
 
 
 @api_view(["GET"])
-@authentication_classes((TokenAuthentication,))
+@authentication_classes((TokenAuthentication, SessionAuthentication))
 @permission_classes((IsAuthenticated,))
 def ask_analysis_result(request):
     """
@@ -384,7 +386,7 @@ def obtain_user_token(request):
 
 
 @api_view(["POST"])
-@authentication_classes((TokenAuthentication,))
+@authentication_classes((TokenAuthentication, SessionAuthentication))
 @permission_classes((IsAuthenticated,))
 def perform_logout(request):
     """
@@ -407,7 +409,7 @@ def perform_logout(request):
 
 
 @api_view(["GET"])
-@authentication_classes((TokenAuthentication,))
+@authentication_classes((TokenAuthentication, SessionAuthentication))
 @permission_classes((IsAuthenticated,))
 @ensure_csrf_cookie
 def get_user_info(request):
@@ -430,7 +432,7 @@ def get_user_info(request):
 
 
 @api_view(["GET"])
-@authentication_classes((TokenAuthentication,))
+@authentication_classes((TokenAuthentication, SessionAuthentication))
 @permission_classes((IsAuthenticated,))
 def get_analyzer_configs(request):
     """
@@ -460,7 +462,7 @@ def get_analyzer_configs(request):
 
 
 @api_view(["GET"])
-@authentication_classes((TokenAuthentication,))
+@authentication_classes((TokenAuthentication, SessionAuthentication))
 @permission_classes((IsAuthenticated,))
 def download_sample(request):
     """
@@ -512,7 +514,7 @@ class JobViewSet(viewsets.ReadOnlyModelViewSet):
         if wrong HTTP method
     """
 
-    authentication_classes = (TokenAuthentication,)
+    authentication_classes = (TokenAuthentication, SessionAuthentication)
     permission_classes = (IsAuthenticated,)
     queryset = models.Job.objects.all()
     serializer_class = serializers.JobSerializer
@@ -543,7 +545,7 @@ class TagViewSet(viewsets.ModelViewSet):
         if wrong HTTP method
     """
 
-    authentication_classes = (TokenAuthentication,)
+    authentication_classes = (TokenAuthentication, SessionAuthentication)
     permission_classes = (IsAuthenticated,)
     queryset = models.Tag.objects.all()
     serializer_class = serializers.TagSerializer

@@ -24,6 +24,11 @@ app.conf.beat_schedule = {
         "task": "intel_owl.tasks.check_stuck_analysis",
         "schedule": crontab(minute="*/5"),
     },
+    # execute every 6 hours to cleanup expired tokens
+    "flush_expired_tokens": {
+        "task": "intel_owl.tasks.flush_expired_tokens",
+        "schedule": crontab(hour="*/6"),
+    },
     # Executes only on Wed because on Tue it's updated
     "maxmind_updater": {
         "task": "intel_owl.tasks.maxmind_updater",

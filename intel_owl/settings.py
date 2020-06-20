@@ -12,7 +12,6 @@ SECRET_KEY = secrets.get_secret("DJANGO_SECRET")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True if os.environ.get("DEBUG", False) == "True" else False
 
-LOGIN_URL = "/gui/login"
 DJANGO_LOG_DIRECTORY = "/var/log/intel_owl/django"
 PROJECT_LOCATION = "/opt/deploy/intel_owl"
 MEDIA_ROOT = "/opt/deploy/files_required"
@@ -24,11 +23,15 @@ MOCK_CONNECTIONS = (
     True if os.environ.get("MOCK_CONNECTIONS", False) == "True" else False
 )
 
+# Security Stuff
 HTTPS_ENABLED = os.environ.get("HTTPS_ENABLED", "not_enabled")
 if HTTPS_ENABLED == "enabled":
     CSRF_COOKIE_SECURE = True
     SESSION_COOKIE_SECURE = True
 
+SESSION_COOKIE_SAMESITE = "Strict"
+CSRF_COOKIE_SAMESITE = "Strict"
+CSRF_COOKIE_HTTPONLY = True
 ALLOWED_HOSTS = ["*"]
 
 # Application definition
@@ -101,6 +104,9 @@ DATABASES = {
 }
 
 # Simple JWT Stuff
+
+CLIENT_TOKEN_LIFETIME_DAYS = int(os.environ.get("PYINTELOWL_TOKEN_LIFETIME", 7))
+
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
     "REFRESH_TOKEN_LIFETIME": timedelta(hours=12),
@@ -114,7 +120,7 @@ SIMPLE_JWT = {
     "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),
     "TOKEN_TYPE_CLAIM": "token_type",
     "JTI_CLAIM": "jti",
-    "PYINTELOWL_TOKEN_LIFETIME": timedelta(days=7),
+    "PYINTELOWL_TOKEN_LIFETIME": timedelta(days=CLIENT_TOKEN_LIFETIME_DAYS),
 }
 
 

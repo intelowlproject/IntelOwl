@@ -5,6 +5,7 @@ from django.core import management
 from api_app.models import Job
 from api_app.script_analyzers import general
 from api_app.utilities import get_now
+from intel_owl import secrets
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +47,10 @@ def remove_old_jobs():
     """
     logger.info("started remove_old_jobs")
 
-    retention_days = 3
+    retention_days = secrets.get_secret("OLD_JOBS_RETENTION_DAYS")
+    if not retention_days:
+        retention_days = 3
+    retention_days = int(retention_days)
     now = get_now()
     date_to_check = now - datetime.timedelta(days=retention_days)
     old_jobs = Job.objects.filter(finished_analysis_time__lt=date_to_check)

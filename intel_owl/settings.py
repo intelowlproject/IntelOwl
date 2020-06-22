@@ -1,5 +1,6 @@
 # flake8: noqa
 import os
+from datetime import timedelta
 
 from intel_owl import secrets
 
@@ -11,7 +12,6 @@ SECRET_KEY = secrets.get_secret("DJANGO_SECRET")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True if os.environ.get("DEBUG", False) == "True" else False
 
-LOGIN_URL = "/gui/login"
 DJANGO_LOG_DIRECTORY = "/var/log/intel_owl/django"
 PROJECT_LOCATION = "/opt/deploy/intel_owl"
 MEDIA_ROOT = "/opt/deploy/files_required"
@@ -23,11 +23,15 @@ MOCK_CONNECTIONS = (
     True if os.environ.get("MOCK_CONNECTIONS", False) == "True" else False
 )
 
+# Security Stuff
 HTTPS_ENABLED = os.environ.get("HTTPS_ENABLED", "not_enabled")
 if HTTPS_ENABLED == "enabled":
     CSRF_COOKIE_SECURE = True
     SESSION_COOKIE_SECURE = True
 
+SESSION_COOKIE_SAMESITE = "Strict"
+CSRF_COOKIE_SAMESITE = "Strict"
+CSRF_COOKIE_HTTPONLY = True
 ALLOWED_HOSTS = ["*"]
 
 # Application definition
@@ -39,7 +43,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
-    "rest_framework.authtoken",
+    "rest_framework_simplejwt.token_blacklist",
     "api_app.apps.ApiAppConfig",
 ]
 
@@ -74,7 +78,12 @@ TEMPLATES = [
 WSGI_APPLICATION = "intel_owl.wsgi.application"
 
 REST_FRAMEWORK = {
-    "DEFAULT_RENDERER_CLASSES": ["rest_framework.renderers.JSONRenderer",]
+    "DEFAULT_RENDERER_CLASSES": ["rest_framework.renderers.JSONRenderer",],
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ],
+    "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
+    "EXCEPTION_HANDLER": "rest_framework.views.exception_handler",
 }
 
 DB_HOST = secrets.get_secret("DB_HOST")
@@ -92,6 +101,26 @@ DATABASES = {
         "USER": DB_USER,
         "PASSWORD": DB_PASSWORD,
     },
+}
+
+# Simple JWT Stuff
+
+CLIENT_TOKEN_LIFETIME_DAYS = int(os.environ.get("PYINTELOWL_TOKEN_LIFETIME", 7))
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
+    "REFRESH_TOKEN_LIFETIME": timedelta(hours=12),
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
+    "ALGORITHM": "HS512",
+    "SIGNING_KEY": SECRET_KEY,
+    "AUTH_HEADER_TYPES": ("Token",),
+    "USER_ID_FIELD": "id",
+    "USER_ID_CLAIM": "user_id",
+    "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),
+    "TOKEN_TYPE_CLAIM": "token_type",
+    "JTI_CLAIM": "jti",
+    "PYINTELOWL_TOKEN_LIFETIME": timedelta(days=CLIENT_TOKEN_LIFETIME_DAYS),
 }
 
 

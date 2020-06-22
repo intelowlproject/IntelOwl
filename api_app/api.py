@@ -5,21 +5,11 @@ from .script_analyzers import general
 
 from wsgiref.util import FileWrapper
 
-from rest_framework.response import Response
-from django.http import JsonResponse, HttpResponse
-from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.models import User
-from django.views.decorators.csrf import ensure_csrf_cookie
+from django.http import HttpResponse
 from django.db.models import Q
+from rest_framework.response import Response
 from rest_framework import status, viewsets
-from rest_framework.authtoken.models import Token
-from rest_framework.authentication import TokenAuthentication, SessionAuthentication
-from rest_framework.decorators import (
-    api_view,
-    authentication_classes,
-    permission_classes,
-)
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import api_view
 
 
 logger = logging.getLogger(__name__)
@@ -29,8 +19,6 @@ logger = logging.getLogger(__name__)
 
 
 @api_view(["GET"])
-@authentication_classes((TokenAuthentication, SessionAuthentication))
-@permission_classes((IsAuthenticated,))
 def ask_analysis_availability(request):
     """
     This is useful to avoid repeating the same analysis multiple times.
@@ -42,7 +30,7 @@ def ask_analysis_availability(request):
     :param md5: string
         md5 of the sample or observable to look for
     :param [analyzers_needed]: list
-        specify analyzers needed. It is requires either this
+        specify analyzers needed. It requires either this
         or run_all_available_analyzers
     :param [run_all_available_analyzers]: bool
         if we are looking for an analysis executed with this flag set
@@ -65,13 +53,13 @@ def ask_analysis_availability(request):
         )
 
         if "md5" not in data_received:
-            return JsonResponse({"error": "800"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "800"}, status=status.HTTP_400_BAD_REQUEST)
 
         if (
             "analyzers_needed" not in data_received
             and "run_all_available_analyzers" not in data_received
         ):
-            return JsonResponse({"error": "801"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "801"}, status=status.HTTP_400_BAD_REQUEST)
 
         if (
             "run_all_available_analyzers" in data_received
@@ -80,9 +68,7 @@ def ask_analysis_availability(request):
             run_all_available_analyzers = True
         if not run_all_available_analyzers:
             if "analyzers_needed" not in data_received:
-                return JsonResponse(
-                    {"error": "802"}, status=status.HTTP_400_BAD_REQUEST
-                )
+                return Response({"error": "802"}, status=status.HTTP_400_BAD_REQUEST)
             analyzers_needed_list = data_received["analyzers_needed"].split(",")
 
         running_only = False
@@ -124,19 +110,17 @@ def ask_analysis_availability(request):
 
         logger.debug(response_dict)
 
-        return JsonResponse(response_dict, status=status.HTTP_200_OK)
+        return Response(response_dict, status=status.HTTP_200_OK)
 
     except Exception as e:
         logger.exception(f"ask_analysis_availability requester:{source} error:{e}.")
-        return JsonResponse(
+        return Response(
             {"error": "error in ask_analysis_availability. Check logs."},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
 
 
 @api_view(["POST"])
-@authentication_classes((TokenAuthentication, SessionAuthentication))
-@permission_classes((IsAuthenticated,))
 def send_analysis_request(request):
     """
     This endpoint allows to start a Job related to a file or an observable
@@ -196,7 +180,7 @@ def send_analysis_request(request):
             # some values are mandatory only in certain cases
             if serialized_data["is_sample"]:
                 if "file" not in data_received:
-                    return JsonResponse(
+                    return Response(
                         {"error": "810"}, status=status.HTTP_400_BAD_REQUEST
                     )
                 if "file_mimetype" not in data_received:
@@ -205,11 +189,11 @@ def send_analysis_request(request):
                     )
             else:
                 if "observable_name" not in data_received:
-                    return JsonResponse(
+                    return Response(
                         {"error": "812"}, status=status.HTTP_400_BAD_REQUEST
                     )
                 if "observable_classification" not in data_received:
-                    return JsonResponse(
+                    return Response(
                         {"error": "813"}, status=status.HTTP_400_BAD_REQUEST
                     )
 
@@ -226,7 +210,7 @@ def send_analysis_request(request):
                         """either you specify a list of requested analyzers or the
                          'run_all_available_analyzers' parameter, not both"""
                     )
-                    return JsonResponse(
+                    return Response(
                         {"error": "816"}, status=status.HTTP_400_BAD_REQUEST
                     )
                 # just pick all available analyzers
@@ -246,9 +230,7 @@ def send_analysis_request(request):
                     """after the filter, no analyzers can be run.
                      Try with other analyzers"""
                 )
-                return JsonResponse(
-                    {"error": "814"}, status=status.HTTP_400_BAD_REQUEST
-                )
+                return Response({"error": "814"}, status=status.HTTP_400_BAD_REQUEST)
 
             # save the arrived data plus new params into a new job object
             serializer.save(**params)
@@ -256,14 +238,12 @@ def send_analysis_request(request):
             md5 = serializer.data.get("md5", "")
             logger.info(f"new job_id {job_id} for md5 {md5}")
             if not job_id:
-                return JsonResponse(
-                    {"error": "815"}, status=status.HTTP_400_BAD_REQUEST
-                )
+                return Response({"error": "815"}, status=status.HTTP_400_BAD_REQUEST)
 
         else:
             error_message = f"serializer validation failed: {serializer.errors}"
             logger.info(error_message)
-            return JsonResponse(
+            return Response(
                 {"error": error_message}, status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -282,19 +262,17 @@ def send_analysis_request(request):
 
         logger.debug(response_dict)
 
-        return JsonResponse(response_dict, status=status.HTTP_200_OK)
+        return Response(response_dict, status=status.HTTP_200_OK)
 
     except Exception as e:
         logger.exception(f"receive_analysis_request requester:{source} error:{e}.")
-        return JsonResponse(
+        return Response(
             {"error": "error in send_analysis_request. Check logs"},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
 
 
 @api_view(["GET"])
-@authentication_classes((TokenAuthentication, SessionAuthentication))
-@permission_classes((IsAuthenticated,))
 def ask_analysis_result(request):
     """
     Endpoint to retrieve the status and results of a specific Job based on its ID
@@ -316,7 +294,7 @@ def ask_analysis_result(request):
             """
         )
         if "job_id" not in data_received:
-            return JsonResponse({"error": "820"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "820"}, status=status.HTTP_400_BAD_REQUEST)
 
         job_id = data_received["job_id"]
         try:
@@ -339,101 +317,17 @@ def ask_analysis_result(request):
 
         logger.debug(response_dict)
 
-        return JsonResponse(response_dict, status=status.HTTP_200_OK)
+        return Response(response_dict, status=status.HTTP_200_OK)
 
     except Exception as e:
         logger.exception(f"ask_analysis_result requester:{source} error:{e}")
-        return JsonResponse(
+        return Response(
             {"error": "error in ask_analysis_result. Check logs"},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
 
 
-@api_view(["POST"])
-@ensure_csrf_cookie
-def obtain_user_token(request):
-    """
-    REST endpoint to obtain user auth token via authentication
-
-    :param email: string
-        email address of registered user\n
-    :param password: string
-        password of registered user
-
-    :return 202:
-        if accepted
-    :return 404:
-        if failed
-    """
-    try:
-        email = request.data["email"]
-        logger.info(f"obtain_user_token received request for {email}.")
-        password = request.data["password"]
-        u = User.objects.get(email=email)
-        user = authenticate(username=u.username, password=password)
-        if user:
-            login(request, user)
-            logger.debug(f"obtain_user_token token created for {email}.")
-            token, _created = Token.objects.get_or_create(user=user)
-            return JsonResponse(
-                {"token": str(token.key)}, status=status.HTTP_202_ACCEPTED
-            )
-        raise Exception("No such user exists.")
-
-    except Exception as e:
-        logger.exception(f"obtain_user_token exception: {e}.")
-        return JsonResponse({"error": e}, status=status.HTTP_404_NOT_FOUND)
-
-
-@api_view(["POST"])
-@authentication_classes((TokenAuthentication, SessionAuthentication))
-@permission_classes((IsAuthenticated,))
-def perform_logout(request):
-    """
-    REST endpoint to delete/invalidate user auth token and logout user.
-    Requires authentication.
-
-    :return 200:
-        if ok
-    :return 400:
-        if failed
-    """
-    try:
-        logger.info(f"perform_logout received request from {str(request.user)}")
-        logout(request)
-        return JsonResponse({"status": "You've been logged out."})
-    except Exception as e:
-        str_err = str(e)
-        logger.exception(f"perform_logout exception: {str_err}")
-        return JsonResponse({"error": str_err}, status=status.HTTP_400_BAD_REQUEST)
-
-
 @api_view(["GET"])
-@authentication_classes((TokenAuthentication, SessionAuthentication))
-@permission_classes((IsAuthenticated,))
-@ensure_csrf_cookie
-def get_user_info(request):
-    """
-    To fetch user detail like username and user ID.
-    Requires authentication.
-
-    :return 200:
-        if ok
-    :return 400:
-        if failed
-    """
-    try:
-        logger.info(f"get_user_info received request from {str(request.user)}.")
-        return JsonResponse({"id": request.user.id, "username": request.user.username,})
-    except Exception as e:
-        str_err = str(e)
-        logger.exception(f"get_user_info exception: {str_err}.")
-        return JsonResponse({"error": str_err}, status=status.HTTP_400_BAD_REQUEST)
-
-
-@api_view(["GET"])
-@authentication_classes((TokenAuthentication, SessionAuthentication))
-@permission_classes((IsAuthenticated,))
 def get_analyzer_configs(request):
     """
     get the uploaded analyzer configuration,
@@ -449,21 +343,19 @@ def get_analyzer_configs(request):
 
         analyzers_config = utilities.get_analyzer_config()
 
-        return JsonResponse(analyzers_config)
+        return Response(analyzers_config)
 
     except Exception as e:
         logger.exception(
             f"get_analyzer_configs requester:{str(request.user)} error:{e}."
         )
-        return JsonResponse(
+        return Response(
             {"error": "error in get_analyzer_configs. Check logs."},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
 
 
 @api_view(["GET"])
-@authentication_classes((TokenAuthentication, SessionAuthentication))
-@permission_classes((IsAuthenticated,))
 def download_sample(request):
     """
     this method is used to download a sample from a Job ID
@@ -492,7 +384,7 @@ def download_sample(request):
 
     except Exception as e:
         logger.exception(f"download_sample requester:{str(request.user)} error:{e}.")
-        return JsonResponse(
+        return Response(
             {"error": "error in download_sample. Check logs."},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
@@ -514,8 +406,6 @@ class JobViewSet(viewsets.ReadOnlyModelViewSet):
         if wrong HTTP method
     """
 
-    authentication_classes = (TokenAuthentication, SessionAuthentication)
-    permission_classes = (IsAuthenticated,)
     queryset = models.Job.objects.all()
     serializer_class = serializers.JobSerializer
 
@@ -545,7 +435,5 @@ class TagViewSet(viewsets.ModelViewSet):
         if wrong HTTP method
     """
 
-    authentication_classes = (TokenAuthentication, SessionAuthentication)
-    permission_classes = (IsAuthenticated,)
     queryset = models.Tag.objects.all()
     serializer_class = serializers.TagSerializer

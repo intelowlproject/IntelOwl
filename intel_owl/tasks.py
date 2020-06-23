@@ -45,6 +45,7 @@ from api_app.script_analyzers.observable_analyzers import (
     auth0,
     securitytrails,
     cymru,
+    tranco,
 )
 
 from api_app import crons
@@ -676,6 +677,23 @@ def cymru_run(
     additional_config_params,
 ):
     cymru.run(
+        analyzer_name,
+        job_id,
+        observable_name,
+        observable_classification,
+        additional_config_params,
+    )
+
+
+@shared_task(soft_time_limit=30)
+def tranco_run(
+    analyzer_name,
+    job_id,
+    observable_name,
+    observable_classification,
+    additional_config_params,
+):
+    tranco.run(
         analyzer_name,
         job_id,
         observable_name,

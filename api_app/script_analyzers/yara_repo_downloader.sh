@@ -28,6 +28,8 @@ sed -i "/MALW_Naspyupdate.yar/d" $community_yara_index
 sed -i "/APT_FIN7.yar/d" $community_yara_index
 sed -i "/MalConfScan.yar/d" $community_yara_index
 sed -i "/RAT_PoetRATPython.yar/d" $community_yara_index
+sed -i "/Email_fake_it_maintenance_bulletin.yar/d" $community_yara_index
+sed -i "/Email_quota_limit_warning.yar/d" $community_yara_index
 
 # Florian Roth rules
 git clone https://github.com/Neo23x0/signature-base.git

@@ -104,6 +104,7 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * Securitytrails_History_WHOIS: scan a domain against securitytrails API for historical WHOIS
 * Securitytrails_History_DNS: scan a domain against securitytrails API for historical DNS
 * Cymru_Hash_Registry_Get_Observable: Check if a particular hash is available in the malware hash registry of Team Cymru
+* Tranco: Check if a domain is in the latest Tranco ranking top sites list
 
 ## Analyzers customization
 You can create new analyzers based on already existing modules by changing the configuration values (`analyzer_config.json`).

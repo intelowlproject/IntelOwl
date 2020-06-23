@@ -39,6 +39,7 @@ from api_app.script_analyzers.observable_analyzers import (
     auth0,
     securitytrails,
     cymru,
+    tranco,
 )
 from intel_owl import settings
 
@@ -399,6 +400,16 @@ class DomainAnalyzersTests(TestCase):
     def test_fortiguard(self, mock_get=None, mock_post=None):
         report = fortiguard.run(
             "Fortiguard",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {},
+        )
+        self.assertEqual(report.get("success", False), True)
+
+    def test_tranco(self, mock_get=None, mock_post=None):
+        report = tranco.run(
+            "Tranco",
             self.job_id,
             self.observable_name,
             self.observable_classification,

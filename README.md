@@ -74,6 +74,7 @@ Main features:
 * Abuse.ch MalwareBazaar
 * Abuse.ch URLhaus
 * Team Cymru Malware Hash Registry
+* Tranco Rank
 * Google DoH
 * CloudFlare DoH Classic
 * CloudFlare DoH Malware

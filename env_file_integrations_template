@@ -3,7 +3,7 @@
 ### IMPORTANT: don't change these values unless you know what you are doing. It can have breaking changes!
 
 # PEframe
+FLASK_SECRET_KEY=
 FLASK_DEBUG=False
-FLASK_SECRET_KEY=someveryrandomsecretkey
 WORKERS=1
 LOG_LEVEL=INFO

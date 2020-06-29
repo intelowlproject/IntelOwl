@@ -9,7 +9,7 @@ from intel_owl import secrets
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('DJANGO_SECRET', '') or get_random_secret_key()
+SECRET_KEY = os.environ.get("DJANGO_SECRET", "") or get_random_secret_key()
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True if os.environ.get("DEBUG", False) == "True" else False

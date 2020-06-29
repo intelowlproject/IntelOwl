@@ -71,17 +71,36 @@ Required variables (we need to insert some of the values we have put in the prev
 If you prefer to use an external PostgreSQL instance, you should just remove the relative image from the `docker-compose.yml` file and provide the configuration to connect to your controlled instance/s.
 
 ### Web server configuration (optional)
-By default Intel Owl provides basic configuration for:
-* Nginx (`intel_owl_nginx_http` or `intel_owl_nginx_https`)
+Intel Owl provides basic configuration for:
+* Nginx (`intel_owl_nginx_http`)
 * Uwsgi (`intel_owl.ini`)
 
 You can find them in the `configuration` directory.
 
-By default, the project would use the default deployment configuration and HTTP only.
-
-I suggest you to change these configuration files based on your needs and mount them as volumes by changing the `docker-compose.yml` file.
-
 In case you enable HTTPS, remember to set the environment variable `HTTPS_ENABLED` as "enabled" to increment the security of the application.
+
+There are 3 options to execute the web server:
+#####HTTP only (default)
+The project would use the default deployment configuration and HTTP only.
+
+#####HTTPS with your own certificate
+The project provides a template file to configure Nginx to serve HTTPS: `intel_owl_nginx_https`.
+
+You should change `ssl_certificate`, `ssl_certificate_key` and `server_name` in that file.
+
+Then you should modify the `nginx` service configuration in `docker-compose.yml`:
+* change `intel_owl_nginx_http` with `intel_owl_nginx_https`
+* in `volumes` add the option for mounting the directory that hosts your certificate and your certificate key.
+
+
+##### HTTPS with Let's Encrypt
+We provide a specific docker-compose file that leverages [Traefik](https://docs.traefik.io/) to allow fast deployments of public-faced and HTTPS-enabled applications.
+
+Before using it, you should configure the configuration file `docker-compose-with-traefik.yml` by changing the email address and the hostname where the application is served. For a detailed explanation follow the official documentation: [Traefix doc](https://docs.traefik.io/user-guides/docker-compose/acme-http/).
+ 
+After the configuration is done, you should run docker-compose in this way:
+`docker-compose -f docker-compose-with-traefik.yml up`
+
 
 ### Analyzers configuration (optional)
 In the file `analyzers_config.json` there is the configuration for all the available analyzers you can run.

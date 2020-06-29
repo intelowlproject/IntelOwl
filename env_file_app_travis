@@ -1,6 +1,5 @@
 # !!!! This file is used only to give required variables to the Travis Build
 # Required Secrets
-DJANGO_SECRET=w+)7%=iw^&qmz&w3n15j%@b=c_relh6ejio$=54)i%h%i0h22^
 DB_HOST=postgres
 DB_PORT=5432
 DB_USER=user

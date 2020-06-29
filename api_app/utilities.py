@@ -3,9 +3,12 @@
 import json
 import logging
 
+from magic import from_buffer as magic_from_buffer
+
 from django.utils import timezone
 
 from api_app.exceptions import NotRunnableAnalyzer
+
 
 logger = logging.getLogger(__name__)
 
@@ -29,41 +32,89 @@ def get_analyzer_config():
 
 
 def file_directory_path(instance, filename):
-    return 'job_{}_{}'.format(get_now_str(), filename)
+    return f"job_{get_now_str()}_{filename}"
 
 
-def filter_analyzers(serialized_data, analyzers_requested, analyzers_config, warnings, run_all=False):
+def calculate_mimetype(file_buffer, file_name):
+    read_file_buffer = file_buffer.read()
+    calculated_mimetype = magic_from_buffer(read_file_buffer, mime=True)
+    if file_name:
+        if file_name.endswith(".js") or file_name.endswith(".jse"):
+            calculated_mimetype = "application/javascript"
+        elif file_name.endswith(".vbs") or file_name.endswith(".vbe"):
+            calculated_mimetype = "application/x-vbscript"
+        elif file_name.endswith(".iqy"):
+            calculated_mimetype = "text/x-ms-iqy"
+    return calculated_mimetype
+
+
+def filter_analyzers(
+    serialized_data, analyzers_requested, analyzers_config, warnings, run_all=False
+):
     cleaned_analyzer_list = []
     for analyzer in analyzers_requested:
         try:
             if analyzer not in analyzers_config:
-                raise NotRunnableAnalyzer("{} not available in configuration".format(analyzer))
-            if serialized_data['is_sample']:
-                if not analyzers_config[analyzer].get('type', '') == 'file':
-                    raise NotRunnableAnalyzer("{} won't be run because does not support files".format(analyzer))
-                if analyzers_config[analyzer].get('supported_filetypes', []) and \
-                        serialized_data['file_mimetype'] not in analyzers_config[analyzer]['supported_filetypes']:
-                    raise_message = "{} won't be run because mimetype {} is not supported. Supported are:{}" \
-                                    "".format(analyzer, serialized_data['file_mimetype'], analyzers_config[analyzer]['supported_filetypes'])
+                raise NotRunnableAnalyzer(f"{analyzer} not available in configuration.")
+
+            analyzer_config = analyzers_config[analyzer]
+
+            if serialized_data["is_sample"]:
+                if not analyzer_config.get("type", "") == "file":
+                    raise NotRunnableAnalyzer(
+                        f"{analyzer} won't be run because does not support files."
+                    )
+                if (
+                    analyzer_config.get("supported_filetypes", [])
+                    and serialized_data["file_mimetype"]
+                    not in analyzer_config["supported_filetypes"]
+                ):
+                    raise_message = (
+                        f"{analyzer} won't be run because mimetype."
+                        f"{serialized_data['file_mimetype']} is not supported."
+                        f"Supported are:"
+                        f"{analyzer_config['supported_filetypes']}."
+                    )
                     raise NotRunnableAnalyzer(raise_message)
-                if analyzers_config[analyzer].get('not_supported_filetypes', '') and \
-                        serialized_data['file_mimetype'] in analyzers_config[analyzer]['not_supported_filetypes']:
-                    raise_message = "{} won't be run because mimetype {} is not supported. Not supported are:{}" \
-                                    "".format(analyzer, serialized_data['file_mimetype'], analyzers_config[analyzer]['not_supported_filetypes'])
+                if (
+                    analyzer_config.get("not_supported_filetypes", "")
+                    and serialized_data["file_mimetype"]
+                    in analyzer_config["not_supported_filetypes"]
+                ):
+                    raise_message = f"""
+                        {analyzer} won't be run because mimetype
+                        {serialized_data['file_mimetype']} is not supported.
+                        Not supported are:{analyzer_config['not_supported_filetypes']}.
+                    """
                     raise NotRunnableAnalyzer(raise_message)
             else:
-                if not analyzers_config[analyzer].get('type', '') == 'observable':
-                    raise NotRunnableAnalyzer("{} won't be run because does not support observable".format(analyzer))
-                if serialized_data['observable_classification'] not in \
-                        analyzers_config[analyzer].get('observable_supported', []):
-                    raise NotRunnableAnalyzer("{} won't be run because does not support observable type {}"
-                                              "".format(analyzer, serialized_data['observable_classification']))
-            if analyzers_config[analyzer].get('disabled', ''):
-                raise NotRunnableAnalyzer("{} is disabled, won't be run".format(analyzer))
-            if serialized_data['force_privacy'] and analyzers_config[analyzer].get('leaks_info', ''):
-                raise NotRunnableAnalyzer("{} won't be run because it leaks info externally".format(analyzer))
-            if serialized_data['disable_external_analyzers'] and analyzers_config[analyzer].get('external_service', ''):
-                raise NotRunnableAnalyzer("{} won't be run because you filtered external analyzers".format(analyzer))
+                if not analyzer_config.get("type", "") == "observable":
+                    raise NotRunnableAnalyzer(
+                        f"{analyzer} won't be run because does not support observable."
+                    )
+                if serialized_data[
+                    "observable_classification"
+                ] not in analyzer_config.get("observable_supported", []):
+                    raise NotRunnableAnalyzer(
+                        f"""
+                        {analyzer} won't be run because does not support
+                         observable type {serialized_data['observable_classification']}.
+                        """
+                    )
+            if analyzer_config.get("disabled", ""):
+                raise NotRunnableAnalyzer(f"{analyzer} is disabled, won't be run.")
+            if serialized_data["force_privacy"] and analyzer_config.get(
+                "leaks_info", ""
+            ):
+                raise NotRunnableAnalyzer(
+                    f"{analyzer} won't be run because it leaks info externally."
+                )
+            if serialized_data["disable_external_analyzers"] and analyzer_config.get(
+                "external_service", ""
+            ):
+                raise NotRunnableAnalyzer(
+                    f"{analyzer} won't be run because you filtered external analyzers."
+                )
         except NotRunnableAnalyzer as e:
             if run_all:
                 # in this case, they are not warnings but excepted and wanted behavior

@@ -1,13 +1,15 @@
+import requests
 import traceback
 import logging
 
-import requests
+from urllib.parse import urlparse
 
 from api_app.exceptions import AnalyzerRunException
 from api_app.script_analyzers import general
-from intel_owl import secrets
 
 logger = logging.getLogger(__name__)
+
+base_url = "https://tranco-list.eu/api/ranks/domain/"
 
 
 def run(
@@ -23,21 +25,16 @@ def run(
     )
     report = general.get_basic_report_template(analyzer_name)
     try:
-        api_key_name = additional_config_params.get("api_key_name", "")
-        if not api_key_name:
-            api_key_name = "AUTH0_KEY"
-        api_key = secrets.get_secret(api_key_name)
-        if not api_key:
-            raise AnalyzerRunException("no api key retrieved")
+        observable_to_analyze = observable_name
+        if observable_classification == "url":
+            observable_to_analyze = urlparse(observable_name).hostname
 
-        headers = {"X-Auth-Token": api_key}
-        url = "https://signals.api.auth0.com/v2.0/ip/{}".format(observable_name)
-        response = requests.get(url, headers=headers)
+        url = base_url + observable_to_analyze
+        response = requests.get(url)
         response.raise_for_status()
+        result = response.json()
 
-        json_response = response.json()
-        # pprint.pprint(json_response)
-        report["report"] = json_response
+        report["report"] = result
     except AnalyzerRunException as e:
         error_message = (
             "job_id:{} analyzer:{} observable_name:{} Analyzer error {}"

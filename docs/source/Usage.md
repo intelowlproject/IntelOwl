@@ -3,9 +3,19 @@
 ## Client
 Intel Owl main objective is to provide a single API interface to query in order to retrieve threat intelligence at scale.
 
-So, in order to interact with the Intel Owl APIs, you may want to use the specific client that is available at: [PyIntelOwl](https://github.com/intelowlproject/pyintelowl)
+There are multiple ways to interact with the Intel Owl APIs, 
 
-We suggest to download the client, read the instructions and use it as a library for your own python projects or directly from the command line.
+1. IntelOwl-ng (Web Interface)
+
+- Inbuilt Web interface with dashboard, visualizations of analysis data, easy to use forms for requesting 
+new analysis, tags management and more features. 
+- Built with Angular 9 and available on [Github](https://github.com/intelowlproject/intelowl-ng).
+
+2. pyIntelOwl (CLI/Library)
+
+- Official client that is available at: [PyIntelOwl](https://github.com/intelowlproject/pyintelowl).
+- Can be used as a library for your own python projects or,
+- directly via the command line interface
 
 ### Tokens creation
 The server authentication is managed by API keys. So, if you want to interact with Intel Owl, you have to create one or more unprivileged users from the Django Admin Interface and then generate a token for those users.
@@ -36,21 +46,23 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * VirusTotal_v2_Scan_File: scan a file on VirusTotal using old API endpoints
 * Intezer Scan: scan a file on Intezer
 * Cuckoo_Scan: scan a file on Cuckoo
-* HybridAnalysis_Get_File: check file hash on HybridAnalysis
+* HybridAnalysis_Get_File: check file hash on HybridAnalysis sandbox reports
 * OTX_Check_Hash: check file hash on OTX Alienvault
 * MISP_Check_Hash: check a file hash on a MISP instance
 * MISPFIRST_Check_Hash: check a file hash on the FIRST MISP instance
 * Yara_Scan_Community: scan a file with community yara rules
 * Yara_Scan_Florian: scan a file with Neo23x0 yara rules
 * Yara_Scan_Intezer: scan a file with Intezer yara rules
+* Yara_Scan_McAfee: scan a file with McAfee yara rules
 * Yara_Scan_Custom_Signatures: scan a file with your own added signatures
 * MalwareBazaar_Get_File: Check if a particular malware sample is known to MalwareBazaar 
 * PEframe_Scan_File: Perform static analysis on Portable Executable malware and malicious MS Office documents.
+* Cymru_Hash_Registry_Get_File: Check if a particular file is known to be malware by Team Cymru
 
 #### Observable analyzers (ip, domain, url, hash)
 * VirusTotal_v3_Get_Observable: search an observable in the VirusTotal DB
 * VirusTotal_v2_Get_Observable: search an observable in the VirusTotal DB using the old API endpoints
-* HybridAnalysis_Get_Observable: search an observable in the HybridAnalysis DB
+* HybridAnalysis_Get_Observable: search an observable in the HybridAnalysis sandbox reports
 * OTXQuery: scan an observable on Alienvault OTX
 * TalosReputation: check an IP reputation from Talos
 * Robtex_Forward_PDNS_Query: scan a domain against the Robtex Passive DNS DB
@@ -62,25 +74,27 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * CIRCLPassiveDNS: scan an observable against the CIRCL Passive DNS DB
 * CIRCLPassiveSSL: scan an observable against the CIRCL Passive SSL DB
 * MaxMindGeoIP: extract GeoIP info for an observable
-* AbuseIPDB: scan an IP against the AbuseIPDB
+* AbuseIPDB: check if an ip was reported on AbuseIPDB
 * Fortiguard: scan an observable with the Fortiguard URL Analyzer
 * TorProject: check if an IP is a Tor Exit Node
 * MISP: scan an observable on a MISP instance
 * MISPFIRST: scan an observable on the FIRST MISP instance
 * DNSDB: scan an observable against the Passive DNS Farsight Database
-* Shodan: scan an IP against Shodan API
+* Shodan_Search: scan an IP against Shodan Search API
+* Shodan_Honeyscore: scan an IP against Shodan Honeyscore API
 * HoneyDB_Scan_Twitter: scan an IP against HoneyDB.io's Twitter Threat Feed
-* HoneyDB_Get: IP lookup service
+* HoneyDB_Get: HoneyDB IP lookup service
 * Hunter: Scans a domain name and returns set of data about the organisation, the email address found and additional information about the people owning those email addresses. 
 * Censys_Search: scan an IP address against Censys View API
 * MalwareBazaar_Get_Observable: Check if a particular malware hash is known to MalwareBazaar
-* ONYPHE: search an observable in the ONYPHE
+* ONYPHE: search an observable in ONYPHE
 * Threatminer_PDNS: retrieve PDNS data from Threatminer API
 * Threatminer_Reports_Tagging: retrieve reports from Threatminer API
 * Threatminer_Subdomains: retrieve subdomains from Threatminer API
 * URLhaus: Query a domain or URL against URLhaus API.
 * ActiveDNS_Google: Retrieve current domain resolution with Google DoH (DNS over HTTPS)
 * ActiveDNS_CloudFlare: Retrieve current domain resolution with CloudFlare DoH (DNS over HTTPS)
+* ActiveDNS_CloudFlare_Malware: Detect malicious domains thanks to CloudFlare DoH Malware Filter
 * ActiveDNS_Classic: Retrieve current domain resolution with default DNS
 * Auth0: scan an IP against the Auth0 API
 * Securitytrails_IP_Neighbours: scan an IP against securitytrails API for neighbour IPs
@@ -89,6 +103,8 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * Securitytrails_Tags: scan a domain against securitytrails API for tags
 * Securitytrails_History_WHOIS: scan a domain against securitytrails API for historical WHOIS
 * Securitytrails_History_DNS: scan a domain against securitytrails API for historical DNS
+* Cymru_Hash_Registry_Get_Observable: Check if a particular hash is available in the malware hash registry of Team Cymru
+* Tranco: Check if a domain is in the latest Tranco ranking top sites list
 
 ## Analyzers customization
 You can create new analyzers based on already existing modules by changing the configuration values (`analyzer_config.json`).

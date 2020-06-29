@@ -30,7 +30,7 @@ services:
   nginx:
     build:
       context: .
-      dockerfile: ./Dockerfile_nginx
+      dockerfile: ./Dockerfile_nginx_no_angular
     container_name: intel_owl_nginx
     restart: unless-stopped
     hostname: nginx

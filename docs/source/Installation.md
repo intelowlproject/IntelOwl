@@ -1,35 +1,36 @@
 # Installation
 
-## Deployment options
-* Docker-compose for classic server deployment
-* (Future) Docker for serverless deployment (ex: AWS Fargate)
+## Deployment
+The project leverages docker-compose for a classic server deployment. So, you need [docker](https://docs.docker.com/get-docker/) and [docker-compose](https://docs.docker.com/compose/install/) installed in your machine.
 
-We suggest you to clone the project, configure the required environment variables and run `docker-compose up` using the docker-compose file that is embedded in the project.
+Then, we suggest you to clone the project, configure the required environment variables and run `docker-compose up` using the docker-compose file that is embedded in the project.
 
 That file leverages a public docker image that is available in [Docker Hub](https://hub.docker.com/repository/docker/intelowlproject/intelowl)
 
 ## Deployment Info
 Main components of the web application:
-* Django
-* Rabbit-MQ
-* Celery (for async calls and crons)
-* Nginx
-* Uwsgi
-* Flower (optional)
+* Angular: Frontend ([IntelOwl-ng](https://github.com/intelowlproject/IntelOwl-ng))
+* Django: Backend
+* PostgreSQL: Database
+* Rabbit-MQ: Message Broker
+* Celery: Task Queue
+* Nginx: Web Server
+* Uwsgi: Application Server
+* Flower (optional): Celery Management Web Interface
 
 All these components are managed by docker-compose
 
-Database: PostgreSQL
-
 ## Deployment preparation
-### Environment configuration
+### Environment configuration (required)
 Before running the project, you must populate some environment variables in a file to provide the required configuration.
 In the project you can find a template file named `env_file_app_template`.
 You have to create a new file named `env_file_app` from that template and modify it with your own configuration.
 
-Required variables to run the image:
-* DJANGO_SECRET: random 50 chars key, must be unique, generate it randomly
+REQUIRED variables to run the image:
 * DB_HOST, DB_PORT, DB_USER, DB_PASSWORD: PostgreSQL configuration
+
+Strongly recommended variable to set:
+* DJANGO_SECRET: random 50 chars key, must be unique. If you do not provide one, Intel Owl will automatically set a new secret on every run.
 
 Optional variables needed to enable specific analyzers:
 * ABUSEIPDB_KEY: AbuseIPDB API key
@@ -53,7 +54,11 @@ Optional variables needed to enable specific analyzers:
 * ONYPHE_KEY: Onyphe.io's API Key 
 * GREYNOISE_API_KEY: GreyNoise API ([docs](https://docs.greynoise.io))
 
-### Database configuration
+Advanced additional configuration:
+* OLD_JOBS_RETENTION_DAYS: Database retention, default 3 days. Change this if you want to keep your old analysis longer in the database.
+* PYINTELOWL_TOKEN_LIFETIME: Token Lifetime for requests coming from the [PyIntelOwl](https://github.com/intelowlproject/pyintelowl) library, default to 7 days. It will expire only if unused. Increment this if you plan to use these tokens rarely.
+
+### Database configuration (required)
 Before running the project, you must populate the basic configuration for PostgreSQL.
 In the project you can find a template file named `env_file_postgres_template`.
 You have to create a new file named `env_file_postgres` from that template and modify it with your own configuration.
@@ -65,20 +70,39 @@ Required variables (we need to insert some of the values we have put in the prev
 
 If you prefer to use an external PostgreSQL instance, you should just remove the relative image from the `docker-compose.yml` file and provide the configuration to connect to your controlled instance/s.
 
-### Web server configuration
-By default Intel Owl provides basic configuration for:
-* Nginx (`intel_owl_nginx_http` or `intel_owl_nginx_https`)
+### Web server configuration (optional)
+Intel Owl provides basic configuration for:
+* Nginx (`intel_owl_nginx_http`)
 * Uwsgi (`intel_owl.ini`)
 
 You can find them in the `configuration` directory.
 
-By default, the project would use the default deployment configuration and HTTP only.
-
-I suggest you to change these configuration files based on your needs and mount them as volumes by changing the `docker-compose.yml` file.
-
 In case you enable HTTPS, remember to set the environment variable `HTTPS_ENABLED` as "enabled" to increment the security of the application.
 
-### Analyzers configuration
+There are 3 options to execute the web server:
+#####HTTP only (default)
+The project would use the default deployment configuration and HTTP only.
+
+#####HTTPS with your own certificate
+The project provides a template file to configure Nginx to serve HTTPS: `intel_owl_nginx_https`.
+
+You should change `ssl_certificate`, `ssl_certificate_key` and `server_name` in that file.
+
+Then you should modify the `nginx` service configuration in `docker-compose.yml`:
+* change `intel_owl_nginx_http` with `intel_owl_nginx_https`
+* in `volumes` add the option for mounting the directory that hosts your certificate and your certificate key.
+
+
+##### HTTPS with Let's Encrypt
+We provide a specific docker-compose file that leverages [Traefik](https://docs.traefik.io/) to allow fast deployments of public-faced and HTTPS-enabled applications.
+
+Before using it, you should configure the configuration file `docker-compose-with-traefik.yml` by changing the email address and the hostname where the application is served. For a detailed explanation follow the official documentation: [Traefix doc](https://docs.traefik.io/user-guides/docker-compose/acme-http/).
+ 
+After the configuration is done, you should run docker-compose in this way:
+`docker-compose -f docker-compose-with-traefik.yml up`
+
+
+### Analyzers configuration (optional)
 In the file `analyzers_config.json` there is the configuration for all the available analyzers you can run.
 For a complete list of all current available analyzer please look at: [Usage](./Usage.md)
 

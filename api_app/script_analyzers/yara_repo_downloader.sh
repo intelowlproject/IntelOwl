@@ -9,7 +9,10 @@
 cd /opt/deploy/yara
 
 # Intezer rules
-git clone https://github.com/intezer/yara-rules
+git clone https://github.com/intezer/yara-rules intezer_rules
+
+# McAfee rules
+git clone https://github.com/advanced-threat-research/Yara-Rules mcafee_rules
 
 # Yara community rules
 git clone https://github.com/Yara-Rules/rules.git
@@ -25,6 +28,8 @@ sed -i "/MALW_Naspyupdate.yar/d" $community_yara_index
 sed -i "/APT_FIN7.yar/d" $community_yara_index
 sed -i "/MalConfScan.yar/d" $community_yara_index
 sed -i "/RAT_PoetRATPython.yar/d" $community_yara_index
+sed -i "/Email_fake_it_maintenance_bulletin.yar/d" $community_yara_index
+sed -i "/Email_quota_limit_warning.yar/d" $community_yara_index
 
 # Florian Roth rules
 git clone https://github.com/Neo23x0/signature-base.git

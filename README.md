@@ -4,6 +4,8 @@
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/intelowlproject/IntelOwl.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/intelowlproject/IntelOwl/context:python)
 [![CodeFactor](https://www.codefactor.io/repository/github/intelowlproject/intelowl/badge)](https://www.codefactor.io/repository/github/intelowlproject/intelowl)
 [![Build Status](https://travis-ci.com/intelowlproject/IntelOwl.svg?branch=master)](https://travis-ci.org/intelowlproject/IntelOwl)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
 # Intel Owl
 
 Do you want to get **threat intelligence data** about a file, an IP or a domain?
@@ -24,6 +26,7 @@ Main features:
 - full django-python application
 - easily and completely customizable, both the APIs and the analyzers
 - clone the project, set up the configuration and you are ready to run
+- Official frontend client: **[IntelOwl-ng](https://github.com/intelowlproject/IntelOwl-ng)** provides features such as dashboard, visualizations of analysis data, easy to use forms for requesting new analysis, etc.
 
 ### Free internal modules available
 * Static Doc Analysis
@@ -37,7 +40,7 @@ Main features:
 ### Free modules that require additional configuration
 * Cuckoo (requires at least one working Cuckoo instance)
 * MISP (requires at least one working MISP instance)
-* Yara (Community, Neo23x0 and Intezer rules are already available. There's the chance to add your own rules)
+* Yara (Community, Neo23x0, Intezer and McAfee rules are already available. There's the chance to add your own rules)
 
 ### External services available
 #### required paid or trial api key
@@ -70,8 +73,11 @@ Main features:
 * Threatminer
 * Abuse.ch MalwareBazaar
 * Abuse.ch URLhaus
+* Team Cymru Malware Hash Registry
+* Tranco Rank
 * Google DoH
-* CloudFlare DoH
+* CloudFlare DoH Classic
+* CloudFlare DoH Malware
 * Classic DNS resolution
 
 ### Documentation
@@ -99,7 +105,8 @@ license terms.
 [GitPython](https://github.com/gitpython-developers/GitPython),
 [Yara community rules](https://github.com/Yara-Rules),
 [Neo23x0 Yara sigs](https://github.com/Neo23x0/signature-base),
-[Intezer Yara sigs](https://github.com/intezer/yara-rules)
+[Intezer Yara sigs](https://github.com/intezer/yara-rules),
+[McAfee Yara sigs](https://github.com/advanced-threat-research/Yara-Rules)
 
 ### Acknowledgments
 This project was created and will be upgraded thanks to the following organizations:
@@ -111,9 +118,9 @@ This project was created and will be upgraded thanks to the following organizati
 #### Google Summer Of Code
 The project was accepted to the GSoC 2020 under the Honeynet Project!! 
 
-Stay tuned for upcoming [new features](https://www.honeynet.org/gsoc/gsoc-2020/google-summer-of-code-2020-project-ideas/#intel-owl-improvements) developed by Eshann Bansal [Twitter](https://twitter.com/mask0fmydisguis)
+Stay tuned for upcoming [new features](https://www.honeynet.org/gsoc/gsoc-2020/google-summer-of-code-2020-project-ideas/#intel-owl-improvements) developed by Eshaan Bansal ([Twitter](https://twitter.com/mask0fmydisguis)).
 
 
 ### About the author 
 Feel free to contact the author at any time:
-Matteo Lodi [Twitter](https://twitter.com/matte_lodi)
+Matteo Lodi ([Twitter](https://twitter.com/matte_lodi))

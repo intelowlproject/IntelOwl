@@ -5,6 +5,12 @@ DB_PORT=5432
 DB_USER=user
 DB_PASSWORD=password
 
+# Additional Config variables
+# jobs older than this would be flushed from the database periodically. Default: 3 days
+OLD_JOBS_RETENTION_DAYS=3
+# IntelOwl's API token will expire if unused for how many days ? Default: 7 days
+PYINTELOWL_TOKEN_LIFETIME=7
+
 # Optional API keys
 SHODAN_KEY=
 ABUSEIPDB_KEY=

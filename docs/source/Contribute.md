@@ -2,8 +2,10 @@
 
 Intel Owl was designed to ease the addition of new analyzers. With a simple python script you can integrate your own engine or integrate an external service in a short time.
 
+> Wish to contribute to the web interface ? See [IntelOwl-ng](https://github.com/intelowlproject/IntelOwl-ng).
+
 ## Code Style
-Keeping to a consistent code style throughout the project makes it easier to contribute and collaborate. Please stick to the guidelines in [PEP8](https://www.python.org/dev/peps/pep-0008/) and the [Google Style Guide](https://google.github.io/styleguide/pyguide.html) unless there's a very good reason not to. 
+Keeping to a consistent code style throughout the project makes it easier to contribute and collaborate. We make use of [`psf/black`](https://github.com/psf/black) for code formatting and [`flake8`](https://flake8.pycqa.org) for style guides.
 
 ## How to start
 Please create a new branch based on the **develop** branch that contains the most recent changes.
@@ -36,6 +38,8 @@ After having written the new python module, you have to remember to:
   Remember to set at least:
   * `type`: can be `file` or `observable`. It specifies what the analyzer should analyze
   * `python_module`: name of the task that the analyzer must launch
+  * `description`: little description of the analyzer
+  * `requires_configuration`: if the analyzer requires a configuration made by the user (for example setting an API key)
   
   The `additional_config_params` can be used in case the new analyzer requires additional configuration.
   In that way you can create more than one analyzer for a specific python module, each one based on different configurations.
@@ -62,6 +66,34 @@ which can be queried from the main Django API.
 For an example and proof of concept, see PEframe's integration: (https://github.com/intelowlproject/IntelOwl/tree/develop/integrations)
 
 ### Create a pull request
+
+#### Pass linting and tests
+1. Run `psf/black` to lint the files automatically and then `flake8` to check,
+
+```bash
+$ black . --exclude "migrations|venv"
+$ flake8 . --show-source --statistics
+```
+
+  if flake8 shows any errors, fix them.
+
+2. Run the build and start the app using the docker-compose test file. In this way, you would launch the code in your environment and not the last official image in Docker Hub:
+
+```bash
+$ docker-compose -f docker-compose-for-tests.yml build
+$ docker-compose -f docker-compose-for-tests.yml up`
+```
+
+3. Here, we simulate the travis CI tests locally by running the following 3 tests,
+
+```bash
+$ docker exec -ti intel_owl_uwsgi black . --check --exclude "migrations|venv"
+$ docker exec -ti intel_owl_uwsgi flake8 . --count
+$ docker exec -ti intel_owl_uwsgi python manage.py test tests
+```
+
+Please make sure all 3 of these tests return positively.
+
 If everything is working, before submitting your pull request, please squash your commits into a single one!
 
 #### How to squash commits to a single one

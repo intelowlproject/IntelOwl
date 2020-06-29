@@ -5,8 +5,7 @@ from django.test import TestCase
 from unittest import skipIf
 
 from api_app.script_analyzers.file_analyzers import yara_scan
-from api_app.script_analyzers.observable_analyzers import maxmind,  \
-    talos, tor
+from api_app.script_analyzers.observable_analyzers import maxmind, talos, tor
 
 from api_app import crons
 from api_app.utilities import get_analyzer_config
@@ -19,15 +18,14 @@ if settings.DISABLE_LOGGING_TEST:
 
 
 class CronTests(TestCase):
-
     def test_check_stuck_analysis(self):
         jobs_id_stuck = crons.check_stuck_analysis()
-        logger.info("jobs_id_stuck: {}".format(jobs_id_stuck))
+        logger.info(f"jobs_id_stuck: {jobs_id_stuck}")
         self.assertTrue(True)
 
     def test_remove_old_jobs(self):
         num_jobs_to_delete = crons.remove_old_jobs()
-        logger.info("old jobs deleted: {}".format(num_jobs_to_delete))
+        logger.info(f"old jobs deleted: {num_jobs_to_delete}")
         self.assertTrue(True)
 
     @skipIf(settings.MOCK_CONNECTIONS, "not working without connection")
@@ -50,7 +48,6 @@ class CronTests(TestCase):
 
 
 class ConfigTests(TestCase):
-
     def test_config(self):
         config = get_analyzer_config()
         self.assertNotEqual(config, {})

@@ -24,6 +24,7 @@ from api_app.script_analyzers.observable_analyzers import vt3_get
 
 from api_app.models import Job
 from api_app.script_analyzers.file_analyzers import signature_info
+from .test_api import MockResponse
 
 from intel_owl import settings
 
@@ -39,122 +40,31 @@ def mock_connections(decorator):
 
 
 def mocked_requests(*args, **kwargs):
-    class MockResponse:
-        def __init__(self, json_data, status_code):
-            self.json_data = json_data
-            self.status_code = status_code
-            self.text = ""
-            self.content = b""
-
-        def json(self):
-            return self.json_data
-
-        def raise_for_status(self):
-            pass
-
     return MockResponse({}, 200)
 
 
 def mocked_vt_get(*args, **kwargs):
-    class MockResponse:
-        def __init__(self, json_data, status_code):
-            self.json_data = json_data
-            self.status_code = status_code
-            self.text = ""
-            self.content = b""
-
-        def json(self):
-            return self.json_data
-
-        def raise_for_status(self):
-            pass
-
     return MockResponse({"data": {"attributes": {"status": "completed"}}}, 200)
 
 
 def mocked_vt_post(*args, **kwargs):
-    class MockResponse:
-        def __init__(self, json_data, status_code):
-            self.json_data = json_data
-            self.status_code = status_code
-            self.text = ""
-            self.content = b""
-
-        def json(self):
-            return self.json_data
-
-        def raise_for_status(self):
-            pass
-
     return MockResponse({"scan_id": "scan_id_test", "data": {"id": "id_test"}}, 200)
 
 
 def mocked_intezer(*args, **kwargs):
-    class MockResponse:
-        def __init__(self, json_data, status_code):
-            self.json_data = json_data
-            self.status_code = status_code
-            self.text = ""
-            self.content = b""
-
-        def json(self):
-            return self.json_data
-
-        def raise_for_status(self):
-            pass
-
     return MockResponse({}, 201)
 
 
 def mocked_cuckoo_get(*args, **kwargs):
-    class MockResponse:
-        def __init__(self, json_data, status_code):
-            self.json_data = json_data
-            self.status_code = status_code
-            self.text = ""
-            self.content = b""
-
-        def json(self):
-            return self.json_data
-
-        def raise_for_status(self):
-            pass
-
     return MockResponse({"task": {"status": "reported"}}, 200)
 
 
 def mocked_peframe_get(*args, **kwargs):
-    class MockResponse:
-        def __init__(self, json_data, status_code):
-            self.json_data = json_data
-            self.status_code = status_code
-            self.text = ""
-            self.content = b""
-
-        def json(self):
-            return self.json_data
-
-        def raise_for_status(self):
-            pass
-
-    return MockResponse({"error": None, "key": "test", "status": "success"}, 200)
+    return MockResponse({"key": "test", "status": "success", "report": {}}, 200,)
 
 
 def mocked_peframe_post(*args, **kwargs):
-    class MockResponse:
-        def __init__(self, json_data, status_code):
-            self.json_data = json_data
-            self.status_code = status_code
-            self.text = ""
-            self.content = b""
-
-        def json(self):
-            return self.json_data
-
-        def raise_for_status(self):
-            pass
-
-    return MockResponse({"key": "test", "status": "running"}, 200)
+    return MockResponse({"key": "test", "status": "running"}, 202)
 
 
 class FileAnalyzersEXETests(TestCase):
@@ -369,7 +279,7 @@ class FileAnalyzersDocTests(TestCase):
     @mock_connections(patch("requests.get", side_effect=mocked_peframe_get))
     @mock_connections(patch("requests.post", side_effect=mocked_peframe_post))
     def test_peframe_scan_file(self, mock_get=None, mock_post=None):
-        additional_params = {"max_tries": 10}
+        additional_params = {"max_tries": 1}
         report = peframe.run(
             "PEframe_Scan_File",
             self.job_id,

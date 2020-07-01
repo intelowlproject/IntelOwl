@@ -137,7 +137,7 @@ def mocked_peframe_get(*args, **kwargs):
         def raise_for_status(self):
             pass
 
-    return MockResponse({"error": None, "md5": "test", "status": "success"}, 200)
+    return MockResponse({"error": None, "key": "test", "status": "success"}, 200)
 
 
 def mocked_peframe_post(*args, **kwargs):
@@ -154,7 +154,7 @@ def mocked_peframe_post(*args, **kwargs):
         def raise_for_status(self):
             pass
 
-    return MockResponse({"md5": "test", "status": "running"}, 200)
+    return MockResponse({"key": "test", "status": "running"}, 200)
 
 
 class FileAnalyzersEXETests(TestCase):

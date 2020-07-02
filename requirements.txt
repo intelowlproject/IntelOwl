@@ -15,7 +15,7 @@ configparser==3.8.1
 cryptography==2.7
 dataclasses==0.6
 Deprecated==1.2.7
-Django==2.2.9
+Django==2.2.14
 djangorestframework==3.9.4
 dnspython==1.16.0
 docutils==0.15.2

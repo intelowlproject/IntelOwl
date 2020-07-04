@@ -20,13 +20,22 @@ def run(analyzer_name, job_id, filepath, filename, md5, additional_config_params
         req_data = {"args": ["-j", "@filetoscan"]}
         req_files = {"filetoscan": binary}
         r = requests.post("http://peframe:4000/peframe", files=req_files, data=req_data)
-        r_data = r.json()
-        if r.status_code in (200, 202):
-            max_tries = additional_config_params.get("max_tries", 15)
-            resp = _poll_for_result(job_id, r_data["key"], max_tries)
-        else:
-            raise AnalyzerRunException(r_data["error"])
+        # handle cases in case of error
+        if r.status_code == 404:
+            raise AnalyzerRunException("PEframe docker container is not running.")
+        if r.status_code == 400:
+            err = r.json()["error"]
+            raise AnalyzerRunException(err)
+        if r.status_code == 500:
+            raise AnalyzerRunException(
+                "Internal Server Error in PEframe docker container"
+            )
+        # just in case error is something else
+        r.raise_for_status()
 
+        max_tries = additional_config_params.get("max_tries", 15)
+        r_data = r.json()
+        resp = _poll_for_result(job_id, r_data["key"], max_tries)
         # limit the length of the strings dump
         result = resp.get("report", None)
         if result:

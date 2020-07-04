@@ -8,6 +8,7 @@ from unittest.mock import patch, MagicMock
 from api_app.script_analyzers import general
 from api_app.script_analyzers.file_analyzers import (
     file_info,
+    signature_info,
     pe_info,
     doc_info,
     pdf_info,
@@ -23,7 +24,6 @@ from api_app.script_analyzers.file_analyzers import (
 from api_app.script_analyzers.observable_analyzers import vt3_get
 
 from api_app.models import Job
-from api_app.script_analyzers.file_analyzers import signature_info
 from .test_api import MockResponse
 
 from intel_owl import settings
@@ -83,91 +83,93 @@ class FileAnalyzersEXETests(TestCase):
         self.md5 = test_job.md5
 
     def test_fileinfo_exe(self):
-        report = file_info.run(
+        report = file_info.FileInfo(
             "File_Info", self.job_id, self.filepath, self.filename, self.md5, {}
-        )
+        ).start()
         self.assertEqual(report.get("success", False), True)
 
     def test_stringsinfo_ml_exe(self):
-        report = strings_info.run(
+        report = strings_info.StringsInfo(
             "Strings_Info_ML",
             self.job_id,
             self.filepath,
             self.filename,
             self.md5,
             {"rank_strings": True},
-        )
+        ).start()
         self.assertEqual(report.get("success", False), True)
 
     def test_stringsinfo_classic_exe(self):
-        report = strings_info.run(
+        report = strings_info.StringsInfo(
             "Strings_Info_Classic",
             self.job_id,
             self.filepath,
             self.filename,
             self.md5,
             {},
-        )
+        ).start()
         self.assertEqual(report.get("success", False), True)
 
     def test_peinfo_exe(self):
-        report = pe_info.run(
+        report = pe_info.PEInfo(
             "PE_Info", self.job_id, self.filepath, self.filename, self.md5, {}
-        )
+        ).start()
         self.assertEqual(report.get("success", False), True)
 
     def test_signatureinfo_exe(self):
-        report = signature_info.run(
+        report = signature_info.SignatureInfo(
             "Signature_Info", self.job_id, self.filepath, self.filename, self.md5, {}
-        )
+        ).start()
         self.assertEqual(report.get("success", False), True)
 
     @mock_connections(patch("requests.get", side_effect=mocked_vt_get))
     @mock_connections(patch("requests.post", side_effect=mocked_vt_post))
     def test_vtscan_exe(self, mock_get=None, mock_post=None):
         additional_params = {"wait_for_scan_anyway": True, "max_tries": 1}
-        report = vt2_scan.run(
+        report = vt2_scan.VirusTotalv2ScanFile(
             "VT_v2_Scan",
             self.job_id,
             self.filepath,
             self.filename,
             self.md5,
             additional_params,
-        )
+        ).start()
         self.assertEqual(report.get("success", False), True)
 
     @mock_connections(patch("requests.Session.get", side_effect=mocked_requests))
     @mock_connections(patch("requests.Session.post", side_effect=mocked_intezer))
     @mock_connections(
         patch(
-            "api_app.script_analyzers.file_analyzers.intezer_scan._get_access_token",
+            """
+            api_app.script_analyzers.file_analyzers.intezer_scan._get_access_token"
+            """,
             MagicMock(return_value="tokentest"),
         )
     )
     def test_intezer_exe(self, mock_get=None, mock_post=None, mock_token=None):
         additional_params = {"max_tries": 1, "is_test": True}
-        report = intezer_scan.run(
+        report = intezer_scan.IntezerScan(
             "Intezer_Scan",
             self.job_id,
             self.filepath,
             self.filename,
             self.md5,
             additional_params,
-        )
+        ).start()
         self.assertEqual(report.get("success", False), True)
 
     @mock_connections(patch("requests.Session.get", side_effect=mocked_cuckoo_get))
     @mock_connections(patch("requests.Session.post", side_effect=mocked_requests))
     def test_cuckoo_exe(self, mock_get=None, mock_post=None):
         additional_params = {"max_poll_tries": 1, "max_post_tries": 1}
-        report = cuckoo_scan.run(
+        report = cuckoo_scan.CuckooAnalysis(
             "Cuckoo_Scan",
             self.job_id,
             self.filepath,
             self.filename,
             self.md5,
             additional_params,
-        )
+        ).start()
         self.assertEqual(report.get("success", False), True)
 
     def test_yara_exe(self):
@@ -179,51 +181,51 @@ class FileAnalyzersEXETests(TestCase):
                 "/opt/deploy/yara/signature-base/yara",
             ]
         }
-        report = yara_scan.run(
+        report = yara_scan.YaraScan(
             "Yara_Scan",
             self.job_id,
             self.filepath,
             self.filename,
             self.md5,
             additional_params,
-        )
+        ).start()
         self.assertEqual(report.get("success", False), True)
 
     @mock_connections(patch("requests.get", side_effect=mocked_vt_get))
     @mock_connections(patch("requests.post", side_effect=mocked_vt_post))
     def test_vt3_scan_exe(self, mock_get=None, mock_post=None):
         additional_params = {"max_tries": 1}
-        report = vt3_scan.run(
+        report = vt3_scan.VirusTotalv3ScanFile(
             "VT_v3_Scan",
             self.job_id,
             self.filepath,
             self.filename,
             self.md5,
             additional_params,
-        )
+        ).start()
         self.assertEqual(report.get("success", False), True)
 
     @mock_connections(patch("requests.get", side_effect=mocked_requests))
     @mock_connections(patch("requests.post", side_effect=mocked_requests))
     def test_vt3_get_and_scan_exe(self, mock_get=None, mock_post=None):
         additional_params = {"max_tries": 1, "force_active_scan": True}
-        report = vt3_get.run(
+        report = vt3_get.VirusTotalv3(
             "VT_v3_Get_And_Scan", self.job_id, self.md5, "hash", additional_params
-        )
+        ).start()
         self.assertEqual(report.get("success", False), True)
 
     @mock_connections(patch("requests.get", side_effect=mocked_peframe_get))
     @mock_connections(patch("requests.post", side_effect=mocked_peframe_post))
     def test_peframe_scan_file(self, mock_get=None, mock_post=None):
-        additional_params = {"max_tries": 10}
-        report = peframe.run(
+        additional_params = {"max_tries": 1}
+        report = peframe.PEframe(
             "PEframe_Scan_File",
             self.job_id,
             self.filepath,
             self.filename,
             self.md5,
             additional_params,
-        )
+        ).start()
         self.assertEqual(report.get("success", False), True)
 
 
@@ -243,15 +245,15 @@ class FileAnalyzersDLLTests(TestCase):
         self.md5 = test_job.md5
 
     def test_fileinfo_dll(self):
-        report = file_info.run(
+        report = file_info.FileInfo(
             "File_Info", self.job_id, self.filepath, self.filename, self.md5, {}
-        )
+        ).start()
         self.assertEqual(report.get("success", False), True)
 
     def test_peinfo_dll(self):
-        report = pe_info.run(
+        report = pe_info.PEInfo(
             "PE_Info", self.job_id, self.filepath, self.filename, self.md5, {}
-        )
+        ).start()
         self.assertEqual(report.get("success", False), True)
 
 
@@ -271,23 +273,23 @@ class FileAnalyzersDocTests(TestCase):
         self.md5 = test_job.md5
 
     def test_docinfo(self):
-        report = doc_info.run(
+        report = doc_info.DocInfo(
             "Doc_Info", self.job_id, self.filepath, self.filename, self.md5, {}
-        )
+        ).start()
         self.assertEqual(report.get("success", False), True)
 
     @mock_connections(patch("requests.get", side_effect=mocked_peframe_get))
     @mock_connections(patch("requests.post", side_effect=mocked_peframe_post))
     def test_peframe_scan_file(self, mock_get=None, mock_post=None):
         additional_params = {"max_tries": 1}
-        report = peframe.run(
+        report = peframe.PEframe(
             "PEframe_Scan_File",
             self.job_id,
             self.filepath,
             self.filename,
             self.md5,
             additional_params,
-        )
+        ).start()
         self.assertEqual(report.get("success", False), True)
 
 
@@ -307,9 +309,9 @@ class FileAnalyzersRtfTests(TestCase):
         self.md5 = test_job.md5
 
     def test_rtfinfo(self):
-        report = rtf_info.run(
+        report = rtf_info.RTFInfo(
             "Rtf_Info", self.job_id, self.filepath, self.filename, self.md5, {}
-        )
+        ).start()
         self.assertEqual(report.get("success", False), True)
 
 
@@ -329,9 +331,9 @@ class FileAnalyzersPDFTests(TestCase):
         self.md5 = test_job.md5
 
     def test_pdfinfo(self):
-        report = pdf_info.run(
+        report = pdf_info.PDFInfo(
             "PDF_Info", self.job_id, self.filepath, self.filename, self.md5, {}
-        )
+        ).start()
         self.assertEqual(report.get("success", False), True)
 
 

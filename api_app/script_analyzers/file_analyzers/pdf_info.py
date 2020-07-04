@@ -1,22 +1,14 @@
-import traceback
 import peepdf
-import logging
 
-from api_app.exceptions import AnalyzerRunException
-from api_app.script_analyzers import general
-
-logger = logging.getLogger(__name__)
+from api_app.script_analyzers import classes
 
 
-def run(analyzer_name, job_id, filepath, filename, md5, additional_config_params):
-    logger.info("started analyzer {} job_id {}" "".format(analyzer_name, job_id))
-    report = general.get_basic_report_template(analyzer_name)
-    try:
+class PDFInfo(classes.FileAnalyzer):
+    def run(self):
         results = {}
-
         peepdf_analysis = []
         pdf_parser = peepdf.PDFCore.PDFParser()
-        ret, pdf = pdf_parser.parse(filepath, True)
+        ret, pdf = pdf_parser.parse(self.filepath, True)
         if ret:
             peepdf_analysis["status_code"] = ret
         else:
@@ -35,30 +27,4 @@ def run(analyzer_name, job_id, filepath, filename, md5, additional_config_params
 
         results["peepdf"] = peepdf_analysis
 
-        # pprint.pprint(results)
-        report["report"] = results
-    except AnalyzerRunException as e:
-        error_message = (
-            "job_id:{} analyzer:{} md5:{} filename: {} Analyzer Error {}"
-            "".format(job_id, analyzer_name, md5, filename, e)
-        )
-        logger.error(error_message)
-        report["errors"].append(error_message)
-        report["success"] = False
-    except Exception as e:
-        traceback.print_exc()
-        error_message = (
-            "job_id:{} analyzer:{} md5:{} filename: {} Unexpected Error {}"
-            "".format(job_id, analyzer_name, md5, filename, e)
-        )
-        logger.exception(error_message)
-        report["errors"].append(str(e))
-        report["success"] = False
-    else:
-        report["success"] = True
-
-    general.set_report_and_cleanup(job_id, report)
-
-    logger.info("ended analyzer {} job_id {}" "".format(analyzer_name, job_id))
-
-    return report
+        return results

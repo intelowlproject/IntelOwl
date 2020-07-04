@@ -1,99 +1,52 @@
-import traceback
-import logging
-
 import requests
 
 from api_app.exceptions import AnalyzerRunException
-from api_app.script_analyzers import general
+from api_app.script_analyzers import classes
 from intel_owl import secrets
 
-logger = logging.getLogger(__name__)
 
-ha_base = "https://www.hybrid-analysis.com/api/v2/"
+class HybridAnalysisGet(classes.ObservableAnalyzer):
+    base_url: str = "https://www.hybrid-analysis.com/api/v2/"
 
+    def set_config(self, additional_config_params):
+        api_key_name = additional_config_params.get("api_key_name", "HA_KEY")
+        self.__api_key = secrets.get_secret(api_key_name)
 
-def run(
-    analyzer_name,
-    job_id,
-    observable_name,
-    observable_classification,
-    additional_config_params,
-):
-    logger.info(
-        "started analyzer {} job_id {} observable {}"
-        "".format(analyzer_name, job_id, observable_name)
-    )
-    report = general.get_basic_report_template(analyzer_name)
-    try:
-        api_key_name = additional_config_params.get("api_key_name", "")
-        if not api_key_name:
-            api_key_name = "HA_KEY"
-        api_key = secrets.get_secret(api_key_name)
-        if not api_key:
-            raise AnalyzerRunException("no api key retrieved")
+    def run(self):
+        if not self.__api_key:
+            raise AnalyzerRunException(
+                f"No API key retrieved with name {self.api_key_name}"
+            )
 
-        result = _ha_get_report(api_key, observable_name, observable_classification)
+        headers = {
+            "api-key": self.__api_key,
+            "user-agent": "Falcon Sandbox",
+            "accept": "application/json",
+        }
+        obs_clsfn = self.observable_classification
 
-        # pprint.pprint(result)
-        report["report"] = result
-    except AnalyzerRunException as e:
-        error_message = (
-            "job_id:{} analyzer:{} observable_name:{} Analyzer error {}"
-            "".format(job_id, analyzer_name, observable_name, e)
-        )
-        logger.error(error_message)
-        report["errors"].append(error_message)
-        report["success"] = False
-    except Exception as e:
-        traceback.print_exc()
-        error_message = (
-            "job_id:{} analyzer:{} observable_name:{} Unexpected error {}"
-            "".format(job_id, analyzer_name, observable_name, e)
-        )
-        logger.exception(error_message)
-        report["errors"].append(str(e))
-        report["success"] = False
-    else:
-        report["success"] = True
+        if obs_clsfn == "domain":
+            data = {"domain": self.observable_name}
+            uri = "search/terms"
+        elif obs_clsfn == "ip":
+            data = {"host": self.observable_name}
+            uri = "search/terms"
+        elif obs_clsfn == "url":
+            data = {"url": self.observable_name}
+            uri = "search/terms"
+        elif obs_clsfn == "hash":
+            data = {"hash": self.observable_name}
+            uri = "search/hash"
+        else:
+            raise AnalyzerRunException(
+                f"not supported observable type {obs_clsfn}. "
+                "Supported are: hash, ip, domain and url"
+            )
 
-    general.set_report_and_cleanup(job_id, report)
+        try:
+            response = requests.post(self.base_url + uri, data=data, headers=headers)
+            response.raise_for_status()
+        except requests.RequestException as e:
+            raise AnalyzerRunException(e)
 
-    logger.info(
-        "ended analyzer {} job_id {} observable {}"
-        "".format(analyzer_name, job_id, observable_name)
-    )
-
-    return report
-
-
-def _ha_get_report(api_key, observable_name, observable_classification):
-    headers = {
-        "api-key": api_key,
-        "user-agent": "Falcon Sandbox",
-        "accept": "application/json",
-    }
-    if observable_classification == "domain":
-        data = {"domain": observable_name}
-        uri = "search/terms"
-    elif observable_classification == "ip":
-        data = {"host": observable_name}
-        uri = "search/terms"
-    elif observable_classification == "url":
-        data = {"url": observable_name}
-        uri = "search/terms"
-    elif observable_classification == "hash":
-        data = {"hash": observable_name}
-        uri = "search/hash"
-    else:
-        raise AnalyzerRunException(
-            "not supported observable type {}. Supported are: hash, ip, domain and url"
-            "".format(observable_classification)
-        )
-
-    try:
-        response = requests.post(ha_base + uri, data=data, headers=headers)
-        response.raise_for_status()
-    except requests.RequestException as e:
-        raise AnalyzerRunException(e)
-    result = response.json()
-    return result
+        return response.json()

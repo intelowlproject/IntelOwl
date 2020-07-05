@@ -1,5 +1,6 @@
 import requests
 import traceback
+import json
 import logging
 import time
 
@@ -10,26 +11,40 @@ logger = logging.getLogger(__name__)
 
 
 def run(analyzer_name, job_id, filepath, filename, md5, additional_config_params):
-    logger.info("started analyzer {} job_id {}" "".format(analyzer_name, job_id))
+    logger.info(f"started analyzer {analyzer_name} job_id {job_id}")
     report = general.get_basic_report_template(analyzer_name)
     try:
         # get binary
         binary = general.get_binary(job_id)
-        # run analysis
-        files = {"file": binary}
-        r = requests.post("http://peframe:4000/run_analysis", files=files)
+        # request new analysis
+        req_data = {"args": ["-j", "@filetoscan"]}
+        req_files = {"filetoscan": binary}
+        r = requests.post("http://peframe:4000/peframe", files=req_files, data=req_data)
+        # handle cases in case of error
+        if r.status_code == 404:
+            raise AnalyzerRunException("PEframe docker container is not running.")
+        if r.status_code == 400:
+            err = r.json()["error"]
+            raise AnalyzerRunException(err)
+        if r.status_code == 500:
+            raise AnalyzerRunException(
+                "Internal Server Error in PEframe docker container"
+            )
+        # just in case error is something else
+        r.raise_for_status()
+
+        max_tries = additional_config_params.get("max_tries", 15)
         r_data = r.json()
-        if r.status_code == 200:
-            max_tries = additional_config_params.get("max_tries", 15)
-            res = _poll_for_result(job_id, r_data["md5"], max_tries)
-        else:
-            raise AnalyzerRunException(r_data["error"])
-
+        resp = _poll_for_result(job_id, r_data["key"], max_tries)
         # limit the length of the strings dump
-        if "strings" in res and "dump" in res["strings"]:
-            res["strings"]["dump"] = res["strings"]["dump"][:100]
+        result = resp.get("report", None)
+        if result:
+            result = json.loads(result)
+            if "strings" in result and "dump" in result["strings"]:
+                result["strings"]["dump"] = result["strings"]["dump"][:100]
 
-        report["report"] = res
+        # set final report
+        report["report"] = result
     except AnalyzerRunException as e:
         error_message = (
             f"job_id:{job_id} analyzer:{analyzer_name}"
@@ -89,8 +104,8 @@ def _poll_for_result(job_id, hash, max_tries):
         )
 
 
-def _query_for_result(hash):
+def _query_for_result(key):
     headers = {"Accept": "application/json"}
-    resp = requests.get(f"http://peframe:4000/get_report/{hash}", headers=headers)
+    resp = requests.get(f"http://peframe:4000/peframe?key={key}", headers=headers)
     data = resp.json()
     return resp.status_code, data

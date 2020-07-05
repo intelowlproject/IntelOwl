@@ -41,6 +41,7 @@ from api_app.script_analyzers.observable_analyzers import (
     cymru,
     tranco,
 )
+from .test_api import MockResponse, MockResponseNoOp
 from intel_owl import settings
 
 logger = logging.getLogger(__name__)
@@ -55,53 +56,19 @@ def mock_connections(decorator):
 
 
 def mocked_requests(*args, **kwargs):
-    class MockResponse:
-        def __init__(self, json_data, status_code):
-            self.json_data = json_data
-            self.status_code = status_code
-            self.text = ""
-            self.content = b""
-
-        def json(self):
-            return self.json_data
-
-        def raise_for_status(self):
-            pass
-
     return MockResponse({}, 200)
 
 
 def mocked_pymisp(*args, **kwargs):
-    class MockResponse:
-        def __init__(self, json_data, status_code):
-            pass
-
-        def search(self, **kwargs):
-            return {}
-
-    return MockResponse({}, 200)
+    return MockResponseNoOp({}, 200)
 
 
 def mocked_pypssl(*args, **kwargs):
-    class MockResponse:
-        def __init__(self, json_data, status_code):
-            pass
-
-        def query(self, ip):
-            return {}
-
-    return MockResponse({}, 200)
+    return MockResponseNoOp({}, 200)
 
 
 def mocked_pypdns(*args, **kwargs):
-    class MockResponse:
-        def __init__(self, json_data, status_code):
-            pass
-
-        def query(self, domain):
-            return []
-
-    return MockResponse({}, 200)
+    return MockResponseNoOp({}, 200)
 
 
 @mock_connections(patch("requests.get", side_effect=mocked_requests))

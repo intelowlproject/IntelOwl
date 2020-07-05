@@ -80,12 +80,6 @@ Main features:
 * CloudFlare DoH Malware
 * Classic DNS resolution
 
-### Documentation
-[![Documentation Status](https://readthedocs.org/projects/intelowl/badge/?version=latest)](https://intelowl.readthedocs.io/en/latest/?badge=latest)
-
-Documentation about IntelOwl installation and usage can be found at https://intelowl.readthedocs.io/.
-
-
 ### Legal notice
 You as a user of this project must review, accept and comply with the license
 terms of each downloaded/installed package listed below. By proceeding with the
@@ -108,6 +102,16 @@ license terms.
 [Intezer Yara sigs](https://github.com/intezer/yara-rules),
 [McAfee Yara sigs](https://github.com/advanced-threat-research/Yara-Rules)
 
+### Documentation
+[![Documentation Status](https://readthedocs.org/projects/intelowl/badge/?version=latest)](https://intelowl.readthedocs.io/en/latest/?badge=latest)
+
+Documentation about IntelOwl installation and usage can be found at https://intelowl.readthedocs.io/.
+
+### Blog posts
+[v. 1.0.0 Announcement](https://www.honeynet.org/?p=7558)
+
+[First announcement](https://www.certego.net/en/news/new-year-new-tool-intel-owl/)
+
 ### Acknowledgments
 This project was created and will be upgraded thanks to the following organizations:
 
@@ -119,7 +123,6 @@ This project was created and will be upgraded thanks to the following organizati
 The project was accepted to the GSoC 2020 under the Honeynet Project!! 
 
 Stay tuned for upcoming [new features](https://www.honeynet.org/gsoc/gsoc-2020/google-summer-of-code-2020-project-ideas/#intel-owl-improvements) developed by Eshaan Bansal ([Twitter](https://twitter.com/mask0fmydisguis)).
-
 
 ### About the author 
 Feel free to contact the author at any time:

@@ -1,11 +1,11 @@
 import requests
 import json
 
-from api_app.utilities import get_binary
-from api_app.script_analyzers import classes
+from api_app.helpers import get_binary
+from api_app.script_analyzers.classes import FileAnalyzer, DockerBasedAnalyzer
 
 
-class PEframe(classes.FileAnalyzer, classes.DockerBasedAnalyzer):
+class PEframe(FileAnalyzer, DockerBasedAnalyzer):
     name: str = "PEframe"
     url: str = "http://peframe:4000/peframe"
     # interval between http request polling

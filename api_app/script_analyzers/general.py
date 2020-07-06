@@ -4,9 +4,13 @@ from api_app.exceptions import (
     AnalyzerConfigurationException,
     AnalyzerRunException,
 )
-from api_app.utilities import generate_sha256
-from api_app.models import Job
-from .classes import set_job_status
+from api_app.helpers import generate_sha256
+from .utils import (
+    set_job_status,
+    set_failed_analyzer,
+    get_filepath_filename,
+    get_observable_data,
+)
 from intel_owl import tasks, settings
 
 logger = logging.getLogger(__name__)
@@ -94,34 +98,3 @@ def start_analyzers(analyzers_to_execute, analyzers_config, job_id, md5, is_samp
             )
             logger.error(error_message)
             set_failed_analyzer(analyzer, job_id, error_message)
-
-
-def get_filepath_filename(job_id):
-    # this function allows to minimize access to the database
-    # in this way the analyzers could not touch the DB until the end of the analysis
-    job_object = Job.object_by_job_id(job_id)
-
-    filename = job_object.file_name
-
-    file_path = job_object.file.path
-
-    return file_path, filename
-
-
-def get_observable_data(job_id):
-    job_object = Job.object_by_job_id(job_id)
-
-    observable_name = job_object.observable_name
-    observable_classification = job_object.observable_classification
-
-    return observable_name, observable_classification
-
-
-def set_failed_analyzer(analyzer_name, job_id, error_message):
-    logger.info(
-        f"setting analyzer {analyzer_name} of job_id {job_id} as failed."
-        f" Error message:{error_message}"
-    )
-    report = get_basic_report_template(analyzer_name)
-    report["errors"].append(error_message)
-    set_report_and_cleanup(job_id, report)

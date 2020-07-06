@@ -6,7 +6,7 @@ from git import Repo
 
 from api_app.exceptions import AnalyzerRunException
 from api_app.script_analyzers.classes import FileAnalyzer
-from api_app.utilities import get_analyzer_config
+from api_app.helpers import get_analyzer_config
 
 logger = logging.getLogger(__name__)
 

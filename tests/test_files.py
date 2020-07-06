@@ -140,9 +140,7 @@ class FileAnalyzersEXETests(TestCase):
     @mock_connections(patch("requests.Session.post", side_effect=mocked_intezer))
     @mock_connections(
         patch(
-            """
-            api_app.script_analyzers.file_analyzers.intezer_scan._get_access_token"
-            """,
+            "api_app.script_analyzers.file_analyzers.intezer_scan._get_access_token",
             MagicMock(return_value="tokentest"),
         )
     )

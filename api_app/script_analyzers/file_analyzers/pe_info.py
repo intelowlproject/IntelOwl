@@ -3,12 +3,12 @@ import pefile
 
 from datetime import datetime
 
-from api_app.script_analyzers import classes
+from api_app.script_analyzers.classes import FileAnalyzer
 
 logger = logging.getLogger(__name__)
 
 
-class PEInfo(classes.FileAnalyzer):
+class PEInfo(FileAnalyzer):
     def run(self):
         results = {}
         try:

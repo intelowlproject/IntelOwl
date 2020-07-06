@@ -3,11 +3,11 @@ import pydeep
 import magic
 import pyexifinfo
 
-from api_app.utilities import get_binary
-from api_app.script_analyzers import classes
+from api_app.helpers import get_binary
+from api_app.script_analyzers.classes import FileAnalyzer
 
 
-class FileInfo(classes.FileAnalyzer):
+class FileInfo(FileAnalyzer):
     def run(self):
         results = {}
         results["magic"] = magic.from_file(self.filepath)

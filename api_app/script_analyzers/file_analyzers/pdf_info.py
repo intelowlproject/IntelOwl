@@ -1,9 +1,9 @@
 import peepdf
 
-from api_app.script_analyzers import classes
+from api_app.script_analyzers.classes import FileAnalyzer
 
 
-class PDFInfo(classes.FileAnalyzer):
+class PDFInfo(FileAnalyzer):
     def run(self):
         results = {}
         peepdf_analysis = []

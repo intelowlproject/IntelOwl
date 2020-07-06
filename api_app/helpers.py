@@ -1,4 +1,4 @@
-# general utilities used by the Django App
+# general helper functions used by the Django API
 
 import json
 import logging

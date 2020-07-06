@@ -1,10 +1,10 @@
 from oletools.rtfobj import RtfObjParser
 
-from api_app.utilities import get_binary
-from api_app.script_analyzers import classes
+from api_app.helpers import get_binary
+from api_app.script_analyzers.classes import FileAnalyzer
 
 
-class RTFInfo(classes.FileAnalyzer):
+class RTFInfo(FileAnalyzer):
     def run(self):
         results = {}
 

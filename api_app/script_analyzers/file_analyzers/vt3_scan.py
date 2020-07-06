@@ -3,7 +3,7 @@ import time
 import requests
 
 from api_app.exceptions import AnalyzerRunException
-from api_app.utilities import get_binary
+from api_app.helpers import get_binary
 from api_app.script_analyzers.observable_analyzers import vt3_get
 from api_app.script_analyzers.classes import FileAnalyzer
 from intel_owl import secrets

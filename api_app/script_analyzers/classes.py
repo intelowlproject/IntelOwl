@@ -4,32 +4,14 @@ import logging
 import requests
 from abc import ABC, abstractmethod
 
-from django.utils import timezone
-from django.db import transaction
-
-from api_app import models
-from api_app.utilities import get_now
 from api_app.exceptions import (
+    AnalyzerRunNotImplemented,
     AnalyzerRunException,
     AnalyzerConfigurationException,
-    AnalyzerRunNotImplemented,
-    AlreadyFailedJobException,
 )
+from .utils import get_basic_report_template, set_report_and_cleanup
 
 logger = logging.getLogger(__name__)
-
-
-def set_job_status(job_id, status, errors=None):
-    message = f"setting job_id {job_id} to status {status}"
-    if status == "failed":
-        logger.error(message)
-    else:
-        logger.info(message)
-    job_object = models.Job.object_by_job_id(job_id)
-    if errors:
-        job_object.errors.extend(errors)
-    job_object.status = status
-    job_object.save()
 
 
 class BaseAnalyzerMixin(ABC):
@@ -79,7 +61,7 @@ class BaseAnalyzerMixin(ABC):
         """
         self.before_run()
         try:
-            self.report = self.get_basic_report_template(self.analyzer_name)
+            self.report = get_basic_report_template(self.analyzer_name)
             result = self.run()
             self.report["report"] = result
         except (AnalyzerConfigurationException, AnalyzerRunException) as e:
@@ -91,7 +73,7 @@ class BaseAnalyzerMixin(ABC):
 
         # add process time
         self.report["process_time"] = time.time() - self.report["started_time"]
-        self.set_report_and_cleanup(self.job_id, self.report)
+        set_report_and_cleanup(self.job_id, self.report)
 
         self.after_run()
 
@@ -115,71 +97,6 @@ class BaseAnalyzerMixin(ABC):
         logger.exception(error_message)
         self.report["errors"].append(str(err))
         self.report["success"] = False
-
-    @staticmethod
-    def get_basic_report_template(analyzer_name):
-        return {
-            "name": analyzer_name,
-            "success": False,
-            "report": {},
-            "errors": [],
-            "process_time": 0,
-            "started_time": time.time(),
-            "started_time_str": timezone.now().strftime("%Y-%m-%d %H:%M:%S"),
-        }
-
-    @staticmethod
-    def set_report_and_cleanup(job_id, report):
-        analyzer_name = report.get("name", "")
-        logger.info(
-            f"start set_report_and_cleanup for job_id:{job_id},"
-            f" analyzer:{analyzer_name}"
-        )
-        job_object = None
-
-        try:
-            with transaction.atomic():
-                job_object = models.Job.object_by_job_id(job_id, transaction=True)
-                job_object.analysis_reports.append(report)
-                job_object.save(update_fields=["analysis_reports"])
-                if job_object.status == "failed":
-                    raise AlreadyFailedJobException()
-
-            num_analysis_reports = len(job_object.analysis_reports)
-            num_analyzers_to_execute = len(job_object.analyzers_to_execute)
-            logger.info(
-                f"job_id:{job_id}, analyzer {analyzer_name}, "
-                f"num analysis reports:{num_analysis_reports}, "
-                f"num analyzer to execute:{num_analyzers_to_execute}"
-            )
-
-            # check if it was the last analysis...
-            # ..In case, set the analysis as "reported" or "failed"
-            if num_analysis_reports == num_analyzers_to_execute:
-                status_to_set = "reported_without_fails"
-                # set status "failed" in case all analyzers failed
-                failed_analyzers = 0
-                for analysis_report in job_object.analysis_reports:
-                    if not analysis_report.get("success", False):
-                        failed_analyzers += 1
-                if failed_analyzers == num_analysis_reports:
-                    status_to_set = "failed"
-                elif failed_analyzers >= 1:
-                    status_to_set = "reported_with_fails"
-                set_job_status(job_id, status_to_set)
-                job_object.finished_analysis_time = get_now()
-                job_object.save(update_fields=["finished_analysis_time"])
-
-        except AlreadyFailedJobException:
-            logger.error(
-                f"job_id {job_id} status failed. Do not process the report {report}"
-            )
-
-        except Exception as e:
-            logger.exception(f"job_id: {job_id}, Error: {e}")
-            set_job_status(job_id, "failed", errors=[str(e)])
-            job_object.finished_analysis_time = get_now()
-            job_object.save(update_fields=["finished_analysis_time"])
 
     def __init__(self, analyzer_name, job_id, additional_config_params):
         self.analyzer_name = analyzer_name

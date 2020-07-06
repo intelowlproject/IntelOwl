@@ -4,12 +4,12 @@ import logging
 from oletools import mraptor
 from oletools.olevba import VBA_Parser
 
-from api_app.script_analyzers import classes
+from api_app.script_analyzers.classes import FileAnalyzer
 
 logger = logging.getLogger(__name__)
 
 
-class DocInfo(classes.FileAnalyzer):
+class DocInfo(FileAnalyzer):
     def run(self):
         results = {}
         # olevba

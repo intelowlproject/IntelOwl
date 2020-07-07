@@ -1,65 +1,39 @@
 import logging
 import time
-import traceback
-
 import requests
-from api_app.script_analyzers import general
 
 from api_app.exceptions import AnalyzerRunException
+from api_app.helpers import get_binary
 from api_app.script_analyzers.observable_analyzers import vt3_get
+from api_app.script_analyzers.classes import FileAnalyzer
 from intel_owl import secrets
 
 logger = logging.getLogger(__name__)
 
+
 vt_base = "https://www.virustotal.com/api/v3/"
 
 
-def run(analyzer_name, job_id, filepath, filename, md5, additional_config_params):
-    logger.info(f"started analyzer {analyzer_name} job_id {job_id}")
-    report = general.get_basic_report_template(analyzer_name)
-    try:
-        api_key_name = additional_config_params.get("api_key_name", "")
-        if not api_key_name:
-            api_key_name = "VT_KEY"
-        api_key = secrets.get_secret(api_key_name)
-        if not api_key:
-            raise AnalyzerRunException("no api key retrieved")
+class VirusTotalv3ScanFile(FileAnalyzer):
+    def set_config(self, additional_config_params):
+        self.api_key_name = additional_config_params.get("api_key_name", "VT_KEY")
+        self.__api_key = secrets.get_secret(self.api_key_name)
+        self.additional_config_params = additional_config_params
 
-        result = vt_scan_file(api_key, md5, job_id, additional_config_params)
+    def run(self):
+        if not self.__api_key:
+            raise AnalyzerRunException(
+                f"No API key retrieved with name: {self.api_key_name}"
+            )
 
-        report["report"] = result
-    except AnalyzerRunException as e:
-        error_message = (
-            "job_id:{} analyzer:{} md5:{} filename: {} Analyzer Error {}"
-            "".format(job_id, analyzer_name, md5, filename, e)
+        return vt_scan_file(
+            self.__api_key, self.md5, self.job_id, self.additional_config_params
         )
-        logger.error(error_message)
-        report["errors"].append(error_message)
-        report["success"] = False
-    except Exception as e:
-        traceback.print_exc()
-        error_message = (
-            "job_id:{} analyzer:{} md5:{} filename: {} Unexpected Error {}"
-            "".format(job_id, analyzer_name, md5, filename, e)
-        )
-        logger.exception(error_message)
-        report["errors"].append(str(e))
-        report["success"] = False
-    else:
-        report["success"] = True
-
-    # pprint.pprint(report)
-
-    general.set_report_and_cleanup(job_id, report)
-
-    logger.info(f"ended analyzer {analyzer_name} job_id {job_id}")
-
-    return report
 
 
 def vt_scan_file(api_key, md5, job_id, additional_config_params):
     try:
-        binary = general.get_binary(job_id)
+        binary = get_binary(job_id)
     except Exception:
         raise AnalyzerRunException("couldn't retrieve the binary to perform a scan")
 
@@ -73,7 +47,6 @@ def vt_scan_file(api_key, md5, job_id, additional_config_params):
     except requests.RequestException as e:
         raise AnalyzerRunException(e)
     result = response.json()
-    # pprint.pprint(result)
 
     result_data = result.get("data", {})
     scan_id = result_data.get("id", "")
@@ -106,7 +79,7 @@ def vt_scan_file(api_key, md5, job_id, additional_config_params):
             break
         else:
             logger.info(
-                "vt polling, try n.{}. job_id {}. status:{}".format(
+                "vt polling: try #{}. job_id: #{}. status:{}".format(
                     chance + 1, job_id, analysis_status
                 )
             )
@@ -118,6 +91,4 @@ def vt_scan_file(api_key, md5, job_id, additional_config_params):
 
     # retrieve the FULL report, not only scans results.
     # If it's a new sample, it's free of charge.
-    result = vt3_get.vt_get_report(api_key, md5, "hash", {}, job_id)
-    # pprint.pprint(result)
-    return result
+    return vt3_get.vt_get_report(api_key, md5, "hash", {}, job_id)

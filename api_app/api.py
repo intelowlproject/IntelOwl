@@ -1,6 +1,6 @@
 import logging
 
-from api_app import models, serializers, utilities
+from api_app import models, serializers, helpers
 from .script_analyzers import general
 
 from wsgiref.util import FileWrapper
@@ -184,7 +184,7 @@ def send_analysis_request(request):
                         {"error": "810"}, status=status.HTTP_400_BAD_REQUEST
                     )
                 if "file_mimetype" not in data_received:
-                    serialized_data["file_mimetype"] = utilities.calculate_mimetype(
+                    serialized_data["file_mimetype"] = helpers.calculate_mimetype(
                         data_received["file"], data_received.get("file_name", "")
                     )
             else:
@@ -199,7 +199,7 @@ def send_analysis_request(request):
 
             # we need to clean the list of requested analyzers,
             # ... based on configuration data
-            analyzers_config = utilities.get_analyzer_config()
+            analyzers_config = helpers.get_analyzer_config()
             run_all_available_analyzers = serialized_data.get(
                 "run_all_available_analyzers", False
             )
@@ -217,7 +217,7 @@ def send_analysis_request(request):
                 analyzers_requested = [
                     analyzer_name for analyzer_name in analyzers_config
                 ]
-            cleaned_analyzer_list = utilities.filter_analyzers(
+            cleaned_analyzer_list = helpers.filter_analyzers(
                 serialized_data,
                 analyzers_requested,
                 analyzers_config,
@@ -310,7 +310,7 @@ def ask_analysis_result(request):
             # adding elapsed time
             finished_analysis_time = getattr(job, "finished_analysis_time", "")
             if not finished_analysis_time:
-                finished_analysis_time = utilities.get_now()
+                finished_analysis_time = helpers.get_now()
             elapsed_time = finished_analysis_time - job.received_request_time
             seconds = elapsed_time.total_seconds()
             response_dict["elapsed_time_in_seconds"] = seconds
@@ -341,7 +341,7 @@ def get_analyzer_configs(request):
     try:
         logger.info(f"get_analyzer_configs received request from {str(request.user)}.")
 
-        analyzers_config = utilities.get_analyzer_config()
+        analyzers_config = helpers.get_analyzer_config()
 
         return Response(analyzers_config)
 

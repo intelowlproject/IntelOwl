@@ -30,19 +30,19 @@ class CronTests(TestCase):
 
     @skipIf(settings.MOCK_CONNECTIONS, "not working without connection")
     def test_maxmind_updater(self):
-        db_file_path = maxmind.updater({})
+        db_file_path = maxmind.Maxmind.updater({})
         self.assertTrue(os.path.exists(db_file_path))
 
     def test_talos_updater(self):
-        db_file_path = talos.updater()
+        db_file_path = talos.Talos.updater()
         self.assertTrue(os.path.exists(db_file_path))
 
     def test_tor_updater(self):
-        db_file_path = tor.updater()
+        db_file_path = tor.Tor.updater()
         self.assertTrue(os.path.exists(db_file_path))
 
     def test_yara_updater(self):
-        file_paths = yara_scan.yara_update_repos()
+        file_paths = yara_scan.YaraScan.yara_update_repos()
         for file_path in file_paths:
             self.assertTrue(os.path.exists(file_path))
 

@@ -8,7 +8,7 @@ from api_app.script_analyzers.file_analyzers import yara_scan
 from api_app.script_analyzers.observable_analyzers import maxmind, talos, tor
 
 from api_app import crons
-from api_app.utilities import get_analyzer_config
+from api_app.helpers import get_analyzer_config
 from intel_owl import settings
 
 logger = logging.getLogger(__name__)

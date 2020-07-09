@@ -40,8 +40,12 @@ from api_app.script_analyzers.observable_analyzers import (
     securitytrails,
     cymru,
     tranco,
+    thug_url,
 )
-from .test_api import MockResponse, MockResponseNoOp
+from .utils import (
+    MockResponseNoOp,
+    mocked_requests,
+)
 from intel_owl import settings
 
 logger = logging.getLogger(__name__)
@@ -53,10 +57,6 @@ if settings.DISABLE_LOGGING_TEST:
 # it is optional to mock requests
 def mock_connections(decorator):
     return decorator if settings.MOCK_CONNECTIONS else lambda x: x
-
-
-def mocked_requests(*args, **kwargs):
-    return MockResponse({}, 200)
 
 
 def mocked_pymisp(*args, **kwargs):
@@ -576,6 +576,17 @@ class DomainAnalyzersTests(TestCase):
 
         self.assertEqual(report.get("success", False), True, f"report: {report}")
 
+    def test_thug_url(self, mock_get=None, mock_post=None):
+        additional_params = {"test": True}
+        report = thug_url.ThugUrl(
+            "Thug_URL_Info",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            additional_params,
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
 
 @mock_connections(patch("requests.get", side_effect=mocked_requests))
 @mock_connections(patch("requests.post", side_effect=mocked_requests))
@@ -684,6 +695,17 @@ class URLAnalyzersTests(TestCase):
             self.observable_name,
             self.observable_classification,
             {},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    def test_thug_url(self, mock_get=None, mock_post=None):
+        additional_params = {"test": True}
+        report = thug_url.ThugUrl(
+            "Thug_URL_Info",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            additional_params,
         ).start()
         self.assertEqual(report.get("success", False), True)
 

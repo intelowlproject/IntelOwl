@@ -15,33 +15,6 @@ if settings.DISABLE_LOGGING_TEST:
     logging.disable(logging.CRITICAL)
 
 
-# class for mocking responses
-class MockResponse:
-    def __init__(self, json_data, status_code):
-        self.json_data = json_data
-        self.status_code = status_code
-        self.text = ""
-        self.content = b""
-
-    def json(self):
-        return self.json_data
-
-    def raise_for_status(self):
-        pass
-
-
-# a mock response class that has no operation
-class MockResponseNoOp:
-    def __init__(self, json_data, status_code):
-        pass
-
-    def search(self, **kwargs):
-        return {}
-
-    def query(self, val):
-        return {}
-
-
 class ApiTests(TestCase):
     def setUp(self):
         self.client = APIClient()

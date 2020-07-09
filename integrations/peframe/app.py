@@ -33,7 +33,7 @@ else:
         "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     )
     log_level = os.getenv("LOG_LEVEL", logging.INFO)
-    log_path = "/var/log/intel_owl"
+    log_path = os.getenv("LOG_PATH", "/var/log/intel_owl/peframe")
     # create new file handlers
     fh = logging.FileHandler(f"{log_path}/peframe.log")
     fh.setFormatter(formatter)

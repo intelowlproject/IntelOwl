@@ -2,6 +2,7 @@ import traceback
 import time
 import logging
 import requests
+import json
 from abc import ABC, abstractmethod
 
 from api_app.exceptions import (
@@ -161,12 +162,15 @@ class FileAnalyzer(BaseAnalyzerMixin):
         super().__init__(analyzer_name, job_id, additional_config_params)
 
     def before_run(self):
-        logger.info(f"started analyzer: {self.analyzer_name}, job_id: {self.job_id}")
+        logger.info(
+            f"STARTED analyzer: {self.analyzer_name}, job_id: #{self.job_id}"
+            f" ({self.filename}, md5: {self.md5})"
+        )
 
     def after_run(self):
         logger.info(
-            f"ended analyzer: {self.analyzer_name}, job_id: {self.job_id},"
-            f"md5: {self.md5} ,filename: {self.filename}"
+            f"ENDED analyzer: {self.analyzer_name}, job_id: #{self.job_id},"
+            f" ({self.filename}, md5: {self.md5})"
         )
 
 
@@ -207,20 +211,19 @@ class DockerBasedAnalyzer(ABC):
     def _query_for_result(url, key):
         headers = {"Accept": "application/json"}
         resp = requests.get(f"{url}?key={key}", headers=headers)
-        data = resp.json()
-        return resp.status_code, data
+        return resp.status_code, resp.json()
 
     def _poll_for_result(self, req_key):
         got_result = False
         for chance in range(self.max_tries):
             time.sleep(self.poll_distance)
             logger.info(
-                f"{self.analyzer_name} polling. Try n:{chance+1}, job_id:{self.job_id}."
-                "Starting the query"
+                f"({self.analyzer_name}, job_id: #{self.job_id}) polling."
+                f"Try #{chance+1}. Starting the query..."
             )
             try:
                 status_code, json_data = self._query_for_result(self.url, req_key)
-            except requests.RequestException as e:
+            except (requests.RequestException, json.JSONDecodeError) as e:
                 raise AnalyzerRunException(e)
             analysis_status = json_data.get("status", None)
             if analysis_status in ["success", "reported_with_fails", "failed"]:
@@ -230,13 +233,10 @@ class DockerBasedAnalyzer(ABC):
                 pass
             else:
                 logger.info(
-                    f"{self.analyzer_name} polling."
-                    f" Try n:{chance+1}, job_id:{self.job_id}, status:{analysis_status}"
+                    f"Result Polling. Try n:{chance+1}, status: {analysis_status}"
+                    f" ({self.analyzer_name}, job_id: #{self.job_id})"
                 )
 
         if not got_result:
-            raise AnalyzerRunException(
-                f"max {self.analyzer_name} polls tried without getting any result."
-                f"job_id:{self.job_id}"
-            )
+            raise AnalyzerRunException("max polls tried without getting any result.")
         return json_data

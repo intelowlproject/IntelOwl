@@ -15,6 +15,7 @@ from api_app.script_analyzers.file_analyzers import (
     rtf_info,
     signature_info,
     peframe,
+    thug_file,
 )
 from api_app.script_analyzers.observable_analyzers import (
     abuseipdb,
@@ -40,6 +41,7 @@ from api_app.script_analyzers.observable_analyzers import (
     onyphe,
     censys,
     threatminer,
+    thug_url,
     urlhaus,
     active_dns,
     auth0,
@@ -708,4 +710,30 @@ def peframe_run(
 ):
     peframe.PEframe(
         analyzer_name, job_id, filepath, filename, md5, additional_config_params
+    ).start()
+
+
+@shared_task(soft_time_limit=600)
+def thug_file_run(
+    analyzer_name, job_id, filepath, filename, md5, additional_config_params
+):
+    thug_file.ThugFile(
+        analyzer_name, job_id, filepath, filename, md5, additional_config_params
+    ).start()
+
+
+@shared_task(soft_time_limit=600)
+def thug_url_run(
+    analyzer_name,
+    job_id,
+    observable_name,
+    observable_classification,
+    additional_config_params,
+):
+    thug_url.ThugUrl(
+        analyzer_name,
+        job_id,
+        observable_name,
+        observable_classification,
+        additional_config_params,
     ).start()

@@ -20,11 +20,17 @@ from api_app.script_analyzers.file_analyzers import (
     strings_info,
     rtf_info,
     peframe,
+    thug_file,
 )
 from api_app.script_analyzers.observable_analyzers import vt3_get
 
 from api_app.models import Job
-from .test_api import MockResponse
+from .utils import (
+    MockResponse,
+    mocked_requests,
+    mocked_docker_analyzer_get,
+    mocked_docker_analyzer_post,
+)
 
 from intel_owl import settings
 
@@ -37,10 +43,6 @@ if settings.DISABLE_LOGGING_TEST:
 # it is optional to mock requests
 def mock_connections(decorator):
     return decorator if settings.MOCK_CONNECTIONS else lambda x: x
-
-
-def mocked_requests(*args, **kwargs):
-    return MockResponse({}, 200)
 
 
 def mocked_vt_get(*args, **kwargs):
@@ -57,14 +59,6 @@ def mocked_intezer(*args, **kwargs):
 
 def mocked_cuckoo_get(*args, **kwargs):
     return MockResponse({"task": {"status": "reported"}}, 200)
-
-
-def mocked_peframe_get(*args, **kwargs):
-    return MockResponse({"key": "test", "status": "success", "report": {}}, 200,)
-
-
-def mocked_peframe_post(*args, **kwargs):
-    return MockResponse({"key": "test", "status": "running"}, 202)
 
 
 class FileAnalyzersEXETests(TestCase):
@@ -212,8 +206,8 @@ class FileAnalyzersEXETests(TestCase):
         ).start()
         self.assertEqual(report.get("success", False), True)
 
-    @mock_connections(patch("requests.get", side_effect=mocked_peframe_get))
-    @mock_connections(patch("requests.post", side_effect=mocked_peframe_post))
+    @mock_connections(patch("requests.get", side_effect=mocked_docker_analyzer_get))
+    @mock_connections(patch("requests.post", side_effect=mocked_docker_analyzer_post))
     def test_peframe_scan_file(self, mock_get=None, mock_post=None):
         additional_params = {"max_tries": 1}
         report = peframe.PEframe(
@@ -276,8 +270,8 @@ class FileAnalyzersDocTests(TestCase):
         ).start()
         self.assertEqual(report.get("success", False), True)
 
-    @mock_connections(patch("requests.get", side_effect=mocked_peframe_get))
-    @mock_connections(patch("requests.post", side_effect=mocked_peframe_post))
+    @mock_connections(patch("requests.get", side_effect=mocked_docker_analyzer_get))
+    @mock_connections(patch("requests.post", side_effect=mocked_docker_analyzer_post))
     def test_peframe_scan_file(self, mock_get=None, mock_post=None):
         additional_params = {"max_tries": 1}
         report = peframe.PEframe(
@@ -331,6 +325,30 @@ class FileAnalyzersPDFTests(TestCase):
     def test_pdfinfo(self):
         report = pdf_info.PDFInfo(
             "PDF_Info", self.job_id, self.filepath, self.filename, self.md5, {}
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+
+class FileAnalyzersHTMLTests(TestCase):
+    def setUp(self):
+        params = {
+            "source": "test",
+            "is_sample": True,
+            "file_mimetype": "text/html",
+            "force_privacy": False,
+            "analyzers_requested": ["test"],
+        }
+        filename = "page.html"
+        test_job = _generate_test_job_with_file(params, filename)
+        self.job_id = test_job.id
+        self.filepath, self.filename = general.get_filepath_filename(self.job_id)
+        self.md5 = test_job.md5
+
+    @mock_connections(patch("requests.get", side_effect=mocked_docker_analyzer_get))
+    @mock_connections(patch("requests.post", side_effect=mocked_docker_analyzer_post))
+    def test_thug_html(self, mock_get=None, mock_post=None):
+        report = thug_file.ThugFile(
+            "Thug_HTML_Info", self.job_id, self.filepath, self.filename, self.md5, {},
         ).start()
         self.assertEqual(report.get("success", False), True)
 

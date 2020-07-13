@@ -73,7 +73,7 @@ def _get_access_token(api_key):
     """
     this should be done just once in a day
     """
-    base_url: str = "https://analyze.intezer.com/api/v2-0"
+    base_url = "https://analyze.intezer.com/api/v2-0"
     response = requests.post(
         base_url + "/get-access-token", json={"api_key": api_key}
     )  # lgtm [py/uninitialized-local-variable]

@@ -4,7 +4,7 @@ import logging
 from django.core import management
 from api_app.models import Job
 from api_app.script_analyzers import general
-from api_app.helpers import get_now
+from api_app.utilities import get_now
 from intel_owl import secrets
 
 logger = logging.getLogger(__name__)

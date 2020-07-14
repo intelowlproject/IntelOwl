@@ -1,8 +1,7 @@
 from django.db import models
 from django.contrib.postgres import fields as postgres_fields
 
-from api_app import helpers
-from .exceptions import AnalyzerRunException
+from api_app import utilities
 
 STATUS = [
     ("pending", "pending"),
@@ -47,22 +46,11 @@ class Job(models.Model):
     errors = postgres_fields.ArrayField(
         models.CharField(max_length=900), blank=True, default=list, null=True
     )
-    file = models.FileField(blank=True, upload_to=helpers.file_directory_path)
+    file = models.FileField(blank=True, upload_to=utilities.file_directory_path)
     tags = models.ManyToManyField(Tag, related_name="jobs", blank=True)
 
-    @classmethod
-    def object_by_job_id(cls, job_id, transaction=False):
-        try:
-            if transaction:
-                job_object = cls.objects.select_for_update().get(id=job_id)
-            else:
-                job_object = cls.objects.get(id=job_id)
-        except cls.DoesNotExist:
-            raise AnalyzerRunException(f"no job_id {job_id} retrieved")
-
-        return job_object
-
     def __str__(self):
-        if self.is_sample:
+        if self.observable_name:
+            return f'Job("{self.observable_name}")'
+        else:
             return f'Job("{self.file_name}")'
-        return f'Job("{self.observable_name}")'

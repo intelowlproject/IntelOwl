@@ -13,10 +13,7 @@ Please create a new branch based on the **develop** branch that contains the mos
 `git checkout -b myfeature develop`
 
 ## How to add a new analyzer
-You may want to look at a few existing examples to start to build a new one, such as:
-- [shodan.py](https://github.com/intelowlproject/IntelOwl/blob/develop/api_app/script_analyzers/observable_analyzers/shodan.py), if you are creating an observable analyzer
-- [intezer_scan.py](https://github.com/intelowlproject/IntelOwl/blob/develop/api_app/script_analyzers/file_analyzers/intezer_scan.py), if you are creating a file analyzer
-- [peframe.py](https://github.com/intelowlproject/IntelOwl/blob/develop/api_app/script_analyzers/file_analyzers/peframe.py), if you creating a [docker based analyzer](#integrating-a-docker-based-analyzer)
+You may want to look at the following analyzer example to start to build a new one: [Example](https://github.com/intelowlproject/IntelOwl/blob/master/api_app/script_analyzers/analyzer_template.py)
 
 After having written the new python module, you have to remember to:
 * Put the module in the `file_analyzers` or `observable_analyzers` directory based on what it can analyze
@@ -60,12 +57,13 @@ After having written the new python module, you have to remember to:
 If the analyzer you wish to integrate doesn't exist as a callable API online or python package, it should be integrated with its own docker image
 which can be queried from the main Django API.
 
-* It should follow the same design principle as the [PEframe's integration](https://github.com/intelowlproject/IntelOwl/tree/develop/integrations), unless there's very good reason not to.
-* The dockerfile should be placed at `./integrations/<analyzer_name>/Dockerfile`.
+* The dockerfile should be placed under `./integrations/<analyzer_name>` with the name `Dockerfile`.
 * A docker-compose file should be placed under `./integrations` with the name `docker-compose.<analyzer_name>.yml`
 * If your docker-image uses any environment variables, add them in the [`env_file_integrations_template`](https://github.com/intelowlproject/IntelOwl/blob/develop/env_file_integrations_template)
 * Ultimately, append the name of your docker-compose file in the `COMPOSE_FILE` variables specified in [`.env_template`](https://github.com/intelowlproject/IntelOwl/blob/develop/env_file_integrations_template). The reason for doing this is so that this service remains optional to the end-user.
 * Rest of the steps remain same as given under "How to add a new analyzer".
+
+For an example and proof of concept, see PEframe's integration: (https://github.com/intelowlproject/IntelOwl/tree/develop/integrations)
 
 ### Create a pull request
 

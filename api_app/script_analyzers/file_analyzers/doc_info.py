@@ -4,18 +4,23 @@ import logging
 from oletools import mraptor
 from oletools.olevba import VBA_Parser
 
-from api_app.script_analyzers.classes import FileAnalyzer
+from api_app.exceptions import AnalyzerRunException
+from api_app.script_analyzers import general
 
 logger = logging.getLogger(__name__)
 
 
-class DocInfo(FileAnalyzer):
-    def run(self):
+def run(analyzer_name, job_id, filepath, filename, md5, additional_config_params):
+    logger.info("started analyzer {} job_id {}" "".format(analyzer_name, job_id))
+    report = general.get_basic_report_template(analyzer_name)
+    try:
         results = {}
+
         # olevba
         olevba_results = {}
         try:
-            vbaparser = VBA_Parser(self.filepath)
+
+            vbaparser = VBA_Parser(filepath)
 
             olevba_results["macro_found"] = (
                 True if vbaparser.detect_vba_macros() else False
@@ -77,16 +82,42 @@ class DocInfo(FileAnalyzer):
 
         except Exception as e:
             traceback.print_exc()
-            error_message = f"job_id {self.job_id} vba parser failed. Error: {e}"
+            error_message = "job_id {} vba parser failed. Error: {}".format(job_id, e)
             logger.exception(error_message)
-            self.report["errors"].append(error_message)
+            report["errors"].append(error_message)
 
         results["olevba"] = olevba_results
 
         # mraptor
-        macro_raptor = mraptor.MacroRaptor(olevba_results.get("reveal", None))
+        macro_raptor = mraptor.MacroRaptor(olevba_results.get("reveal", ""))
         if macro_raptor:
             macro_raptor.scan()
             results["mraptor"] = "suspicious" if macro_raptor.suspicious else "ok"
 
-        return results
+        # pprint.pprint(results)
+        report["report"] = results
+    except AnalyzerRunException as e:
+        error_message = (
+            "job_id:{} analyzer:{} md5:{} filename: {} Analyzer Error {}"
+            "".format(job_id, analyzer_name, md5, filename, e)
+        )
+        logger.error(error_message)
+        report["errors"].append(error_message)
+        report["success"] = False
+    except Exception as e:
+        traceback.print_exc()
+        error_message = (
+            "job_id:{} analyzer:{} md5:{} filename: {} Unexpected Error {}"
+            "".format(job_id, analyzer_name, md5, filename, e)
+        )
+        logger.exception(error_message)
+        report["errors"].append(str(e))
+        report["success"] = False
+    else:
+        report["success"] = True
+
+    general.set_report_and_cleanup(job_id, report)
+
+    logger.info("ended analyzer {} job_id {}" "".format(analyzer_name, job_id))
+
+    return report

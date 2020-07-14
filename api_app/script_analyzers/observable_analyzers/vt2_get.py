@@ -1,26 +1,68 @@
+import logging
+import traceback
 import requests
 
 from api_app.exceptions import AnalyzerRunException
-from api_app.script_analyzers import classes
+from api_app.script_analyzers import general
 from intel_owl import secrets
+
+logger = logging.getLogger(__name__)
 
 vt_base = "https://www.virustotal.com/vtapi/v2/"
 
 
-class VirusTotalv2(classes.ObservableAnalyzer):
-    def set_config(self, additional_config_params):
-        self.api_key_name = additional_config_params.get("api_key_name", "VT_KEY")
-        self.__api_key = secrets.get_secret(self.api_key_name)
+def run(
+    analyzer_name,
+    job_id,
+    observable_name,
+    observable_classification,
+    additional_config_params,
+):
+    logger.info(
+        "started analyzer {} job_id {} observable {}"
+        "".format(analyzer_name, job_id, observable_name)
+    )
+    report = general.get_basic_report_template(analyzer_name)
+    try:
+        api_key_name = additional_config_params.get("api_key_name", "")
+        if not api_key_name:
+            api_key_name = "VT_KEY"
+        api_key = secrets.get_secret(api_key_name)
+        if not api_key:
+            raise AnalyzerRunException("no api key retrieved")
 
-    def run(self):
-        if not self.__api_key:
-            raise AnalyzerRunException(
-                f"No API key retrieved with name: {self.api_key_name}"
-            )
+        result = vt_get_report(api_key, observable_name, observable_classification)
 
-        return vt_get_report(
-            self.__api_key, self.observable_name, self.observable_classification
+        # pprint.pprint(result)
+        report["report"] = result
+    except AnalyzerRunException as e:
+        error_message = (
+            "job_id:{} analyzer:{} observable_name:{} Analyzer error {}"
+            "".format(job_id, analyzer_name, observable_name, e)
         )
+        logger.error(error_message)
+        report["errors"].append(error_message)
+        report["success"] = False
+    except Exception as e:
+        traceback.print_exc()
+        error_message = (
+            "job_id:{} analyzer:{} observable_name:{} Unexpected error {}"
+            "".format(job_id, analyzer_name, observable_name, e)
+        )
+        logger.exception(error_message)
+        report["errors"].append(str(e))
+        report["success"] = False
+    else:
+        report["success"] = True
+
+    general.set_report_and_cleanup(job_id, report)
+
+    logger.info(
+        "ended analyzer {} job_id {} observable {}"
+        "".format(analyzer_name, job_id, observable_name)
+    )
+
+    return report
 
 
 def vt_get_report(api_key, observable_name, observable_classification):
@@ -52,5 +94,5 @@ def vt_get_report(api_key, observable_name, observable_classification):
     result = response.json()
     response_code = result.get("response_code", 1)
     if response_code == -1:
-        raise AnalyzerRunException(f"response code -1. result:{result}")
+        raise AnalyzerRunException("response code -1. result:{}".format(result))
     return result

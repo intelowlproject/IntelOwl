@@ -1,5 +1,6 @@
 ![Intel Owl](static_intel/intel_owl.jpeg)
 
+
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/intelowlproject/IntelOwl.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/intelowlproject/IntelOwl/context:python)
 [![CodeFactor](https://www.codefactor.io/repository/github/intelowlproject/intelowl/badge)](https://www.codefactor.io/repository/github/intelowlproject/intelowl)
 [![Build Status](https://travis-ci.com/intelowlproject/IntelOwl.svg?branch=master)](https://travis-ci.org/intelowlproject/IntelOwl)
@@ -22,97 +23,71 @@ Intel Owl is composed of **analyzers** that can be run to retrieve data from ext
 This solution is for everyone who needs a single point to query for info about a specific file or observable (domain, IP, URL, hash).
 
 Main features:
-
 - full django-python application
 - easily and completely customizable, both the APIs and the analyzers
 - clone the project, set up the configuration and you are ready to run
 - Official frontend client: **[IntelOwl-ng](https://github.com/intelowlproject/IntelOwl-ng)** provides features such as dashboard, visualizations of analysis data, easy to use forms for requesting new analysis, etc.
 
-### Documentation
+### Free internal modules available
+* Static Doc Analysis
+* Static RTF Analysis
+* Static PDF Analysis
+* Static PE Analysis
+* Static Generic File Analysis
+* Strings analysis
+* PE Signature verification
 
-[![Documentation Status](https://readthedocs.org/projects/intelowl/badge/?version=latest)](https://intelowl.readthedocs.io/en/latest/?badge=latest)
+### Free modules that require additional configuration
+* Cuckoo (requires at least one working Cuckoo instance)
+* MISP (requires at least one working MISP instance)
+* Yara (Community, Neo23x0, Intezer and McAfee rules are already available. There's the chance to add your own rules)
 
-Documentation about IntelOwl installation, usage, contribution can be found at https://intelowl.readthedocs.io/.
-
-### Blog posts
-
-[v1.0.0 Announcement](https://www.honeynet.org/?p=7558)
-
-[First announcement](https://www.certego.net/en/news/new-year-new-tool-intel-owl/)
-
-### Free Internal Modules Available
-
-- Static Doc Analysis
-- Static RTF Analysis
-- Static PDF Analysis
-- Static PE Analysis
-- Static Generic File Analysis
-- Strings analysis
-- PE Signature verification
-
-**Free modules that require additional configuration**:
-
-- Cuckoo (requires at least one working Cuckoo instance)
-- MISP (requires at least one working MISP instance)
-- Yara (Community, Neo23x0, Intezer and McAfee rules are already available. There's the chance to add your own rules)
-
-### External Services Available
-
-##### required paid or trial API key
-
-- GreyNoise v2
-
-##### required paid or free API key
-
-- VirusTotal v2 + v3
-- HybridAnalysis
-- Intezer
-- Farsight DNSDB
-- Hunter.io - Email Hunting
-- ONYPHE
-- Censys.io
-- SecurityTrails
-
-##### required free API key
-
-- GoogleSafeBrowsing
-- AbuseIPDB
-- Shodan
-- HoneyDB
-- AlienVault OTX
-- MaxMind
-- Auth0
-
-##### needed access request
-
-- CIRCL PassiveDNS + PassiveSSL
-
-##### without api key
-
-- Fortiguard URL Analyzer
-- GreyNoise Alpha API v1
-- Talos Reputation
-- Tor Project
-- Robtex
-- Threatminer
-- Abuse.ch MalwareBazaar
-- Abuse.ch URLhaus
-- Team Cymru Malware Hash Registry
-- Tranco Rank
-- Google DoH
-- CloudFlare DoH Classic
-- CloudFlare DoH Malware
-- Classic DNS resolution
+### External services available
+#### required paid or trial api key
+* GreyNoise v2
+#### required paid or free api key
+* VirusTotal v2 + v3
+* HybridAnalysis
+* Intezer
+* Farsight DNSDB
+* Hunter.io - Email Hunting
+* ONYPHE 
+* Censys.io
+* SecurityTrails
+#### required free api key
+* GoogleSafeBrowsing
+* AbuseIPDB
+* Shodan
+* HoneyDB
+* AlienVault OTX
+* MaxMind
+* Auth0
+#### needed access request
+* CIRCL PassiveDNS + PassiveSSL
+#### without api key
+* Fortiguard URL Analyzer
+* GreyNoise Alpha API v1
+* Talos Reputation
+* Tor Project
+* Robtex
+* Threatminer
+* Abuse.ch MalwareBazaar
+* Abuse.ch URLhaus
+* Team Cymru Malware Hash Registry
+* Tranco Rank
+* Google DoH
+* CloudFlare DoH Classic
+* CloudFlare DoH Malware
+* Classic DNS resolution
 
 ### Legal notice
-
 You as a user of this project must review, accept and comply with the license
 terms of each downloaded/installed package listed below. By proceeding with the
 installation, you are accepting the license terms of each package, and
 acknowledging that your use of each package will be subject to its respective
 license terms.
 
-[osslsigncode](https://github.com/develar/osslsigncode),
+[osslsigncode](https://github.com/develar/osslsigncode), 
 [stringsifter](https://github.com/fireeye/stringsifter),
 [peepdf](https://github.com/jesparza/peepdf),
 [oletools](https://github.com/decalage2/oletools),
@@ -127,24 +102,28 @@ license terms.
 [Intezer Yara sigs](https://github.com/intezer/yara-rules),
 [McAfee Yara sigs](https://github.com/advanced-threat-research/Yara-Rules)
 
-### Acknowledgments
+### Documentation
+[![Documentation Status](https://readthedocs.org/projects/intelowl/badge/?version=latest)](https://intelowl.readthedocs.io/en/latest/?badge=latest)
 
+Documentation about IntelOwl installation and usage can be found at https://intelowl.readthedocs.io/.
+
+### Blog posts
+[v. 1.0.0 Announcement](https://www.honeynet.org/?p=7558)
+
+[First announcement](https://www.certego.net/en/news/new-year-new-tool-intel-owl/)
+
+### Acknowledgments
 This project was created and will be upgraded thanks to the following organizations:
 
-<img style="margin-right: 2px" src="static_intel/Certego.png" alt="Certego Logo"/>
-<img style="border: 0.2px solid black" src="static_intel/logo-thp-100.png" alt="Honeynet.org logo">
+![Certego](static_intel/Certego.png)
 
+![Honeynet](static_intel/logo-thp-100.png)
 
-### Google Summer Of Code
-
-The project was accepted to the GSoC 2020 under the Honeynet Project!!
+#### Google Summer Of Code
+The project was accepted to the GSoC 2020 under the Honeynet Project!! 
 
 Stay tuned for upcoming [new features](https://www.honeynet.org/gsoc/gsoc-2020/google-summer-of-code-2020-project-ideas/#intel-owl-improvements) developed by Eshaan Bansal ([Twitter](https://twitter.com/mask0fmydisguis)).
 
-### About the author
-
+### About the author 
 Feel free to contact the author at any time:
 Matteo Lodi ([Twitter](https://twitter.com/matte_lodi))
-
-
-We also have a dedicated twitter account for the project: [@intel_owl](https://twitter.com/intel_owl).

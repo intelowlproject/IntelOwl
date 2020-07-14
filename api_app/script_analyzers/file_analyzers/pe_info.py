@@ -1,20 +1,21 @@
+import traceback
 import logging
 import pefile
 
 from datetime import datetime
 
-from api_app.script_analyzers.classes import FileAnalyzer
+from api_app.script_analyzers import general
 
 logger = logging.getLogger(__name__)
 
 
-class PEInfo(FileAnalyzer):
-    def run(self):
+def run(analyzer_name, job_id, filepath, filename, md5, additional_config_params):
+    logger.info("started analyzer {} job_id {}" "".format(analyzer_name, job_id))
+    report = general.get_basic_report_template(analyzer_name)
+    try:
         results = {}
-        try:
-            pe = pefile.PE(self.filepath)
-            if not pe:
-                raise pefile.PEFormatError("Empty file?")
+        pe = pefile.PE(filepath)
+        if pe:
             full_dump = pe.dump_dict()
 
             results["imphash"] = pe.get_imphash()
@@ -91,13 +92,31 @@ class PEInfo(FileAnalyzer):
 
             results["flags"] = full_dump.get("Flags", [])
 
-        except pefile.PEFormatError as e:
-            warning_message = (
-                "job_id:{} analyzer:{} md5:{} filename: {} PEFormatError {}"
-                "".format(self.job_id, self.analyzer_name, self.md5, self.filename, e)
-            )
-            logger.warning(warning_message)
-            self.report["errors"].append(warning_message)
-            self.report["success"] = False
+        report["report"] = results
+    except pefile.PEFormatError as e:
+        warning_message = (
+            "job_id:{} analyzer:{} md5:{} filename: {} PEFormatError {}"
+            "".format(job_id, analyzer_name, md5, filename, e)
+        )
+        logger.warning(warning_message)
+        report["errors"].append(warning_message)
+        report["success"] = False
+    except Exception as e:
+        traceback.print_exc()
+        error_message = (
+            "job_id:{} analyzer:{} md5:{} filename: {} Unexpected Error {}"
+            "".format(job_id, analyzer_name, md5, filename, e)
+        )
+        logger.exception(error_message)
+        report["errors"].append(str(e))
+        report["success"] = False
+    else:
+        report["success"] = True
 
-        return results
+    general.set_report_and_cleanup(job_id, report)
+
+    # pprint.pprint(report)
+
+    logger.info("ended analyzer {} job_id {}" "".format(analyzer_name, job_id))
+
+    return report

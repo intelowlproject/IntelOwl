@@ -8,7 +8,7 @@ from api_app.script_analyzers.file_analyzers import yara_scan
 from api_app.script_analyzers.observable_analyzers import maxmind, talos, tor
 
 from api_app import crons
-from api_app.helpers import get_analyzer_config
+from api_app.utilities import get_analyzer_config
 from intel_owl import settings
 
 logger = logging.getLogger(__name__)
@@ -30,19 +30,19 @@ class CronTests(TestCase):
 
     @skipIf(settings.MOCK_CONNECTIONS, "not working without connection")
     def test_maxmind_updater(self):
-        db_file_path = maxmind.Maxmind.updater({})
+        db_file_path = maxmind.updater({})
         self.assertTrue(os.path.exists(db_file_path))
 
     def test_talos_updater(self):
-        db_file_path = talos.Talos.updater()
+        db_file_path = talos.updater()
         self.assertTrue(os.path.exists(db_file_path))
 
     def test_tor_updater(self):
-        db_file_path = tor.Tor.updater()
+        db_file_path = tor.updater()
         self.assertTrue(os.path.exists(db_file_path))
 
     def test_yara_updater(self):
-        file_paths = yara_scan.YaraScan.yara_update_repos()
+        file_paths = yara_scan.yara_update_repos()
         for file_path in file_paths:
             self.assertTrue(os.path.exists(file_path))
 

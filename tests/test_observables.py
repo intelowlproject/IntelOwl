@@ -40,12 +40,8 @@ from api_app.script_analyzers.observable_analyzers import (
     securitytrails,
     cymru,
     tranco,
-    thug_url,
 )
-from .utils import (
-    MockResponseNoOp,
-    mocked_requests,
-)
+from .test_api import MockResponse, MockResponseNoOp
 from intel_owl import settings
 
 logger = logging.getLogger(__name__)
@@ -57,6 +53,10 @@ if settings.DISABLE_LOGGING_TEST:
 # it is optional to mock requests
 def mock_connections(decorator):
     return decorator if settings.MOCK_CONNECTIONS else lambda x: x
+
+
+def mocked_requests(*args, **kwargs):
+    return MockResponse({}, 200)
 
 
 def mocked_pymisp(*args, **kwargs):
@@ -93,252 +93,252 @@ class IPAnalyzersTests(TestCase):
         self.observable_classification = test_job.observable_classification
 
     def test_abuseipdb(self, mock_get=None, mock_post=None):
-        report = abuseipdb.AbuseIPDB(
+        report = abuseipdb.run(
             "AbuseIPDB",
             self.job_id,
             self.observable_name,
             self.observable_classification,
             {},
-        ).start()
+        )
         self.assertEqual(report.get("success", False), True)
 
     def test_auth0(self, mock_get=None, mock_post=None):
-        report = auth0.Auth0(
+        report = auth0.run(
             "Auth0",
             self.job_id,
             self.observable_name,
             self.observable_classification,
             {},
-        ).start()
+        )
         self.assertEqual(report.get("success", False), True)
 
     def test_securitytrails_ip(self, mock_get=None, mock_post=None):
-        report = securitytrails.SecurityTrails(
+        report = securitytrails.run(
             "Securitytrails_IP_Neighbours",
             self.job_id,
             self.observable_name,
             self.observable_classification,
             {},
-        ).start()
+        )
         self.assertEqual(report.get("success", False), True)
 
     def test_censys(self, mock_get=None, mock_post=None):
-        report = censys.Censys(
+        report = censys.run(
             "Censys",
             self.job_id,
             self.observable_name,
             self.observable_classification,
             {},
-        ).start()
+        )
         self.assertEqual(report.get("success", False), True)
 
     def test_shodan(self, mock_get=None, mock_post=None):
-        report = shodan.Shodan(
+        report = shodan.run(
             "Shodan",
             self.job_id,
             self.observable_name,
             self.observable_classification,
             {},
-        ).start()
+        )
         self.assertEqual(report.get("success", False), True)
 
     def test_threatminer_ip(self, mock_get=None, mock_post=None):
-        report = threatminer.Threatminer(
+        report = threatminer.run(
             "Threatminer",
             self.job_id,
             self.observable_name,
             self.observable_classification,
             {},
-        ).start()
+        )
         self.assertEqual(report.get("success", False), True)
 
     def test_honeydb_get(self, mock_get=None, mock_post=None):
-        report = honeydb.HoneyDB(
+        report = honeydb.run(
             "HoneyDB_Get",
             self.job_id,
             self.observable_name,
             self.observable_classification,
             {},
-        ).start()
+        )
         self.assertEqual(report.get("success", False), True)
 
     def test_honeydb_scan_twitter(self, mock_get=None, mock_post=None):
-        report = honeydb.HoneyDB(
+        report = honeydb.run(
             "HoneyDB_Scan_Twitter",
             self.job_id,
             self.observable_name,
             self.observable_classification,
             {},
-        ).start()
+        )
         self.assertEqual(report.get("success", False), True)
 
     @skipIf(settings.MOCK_CONNECTIONS, "not working without connection")
     def test_maxmind(self, mock_get=None, mock_post=None):
-        report = maxmind.Maxmind(
+        report = maxmind.run(
             "MaxMindDB",
             self.job_id,
             self.observable_name,
             self.observable_classification,
             {},
-        ).start()
+        )
         self.assertEqual(report.get("success", False), True)
 
     def test_greynoisealpha(self, mock_get=None, mock_post=None):
-        report = greynoise.GreyNoise(
+        report = greynoise.run(
             "GreyNoiseAlpha",
             self.job_id,
             self.observable_name,
             self.observable_classification,
             {},
-        ).start()
+        )
         self.assertEqual(report.get("success", False), True)
 
     def test_greynoise(self, mock_get=None, mock_post=None):
-        report = greynoise.GreyNoise(
+        report = greynoise.run(
             "GreyNoise",
             self.job_id,
             self.observable_name,
             self.observable_classification,
             {},
-        ).start()
+        )
         self.assertEqual(report.get("success", False), True)
 
     def test_gsf(self, mock_get=None, mock_post=None):
-        report = googlesf.GoogleSF(
+        report = googlesf.run(
             "GoogleSafeBrowsing",
             self.job_id,
             self.observable_name,
             self.observable_classification,
             {},
-        ).start()
+        )
         self.assertEqual(report.get("success", False), True)
 
     def test_otx(self, mock_get=None, mock_post=None):
-        report = otx.OTX(
+        report = otx.run(
             "OTX", self.job_id, self.observable_name, self.observable_classification, {}
-        ).start()
+        )
         self.assertEqual(report.get("success", False), True)
 
     def test_talos(self, mock_get=None, mock_post=None):
-        report = talos.Talos(
+        report = talos.run(
             "TalosReputation",
             self.job_id,
             self.observable_name,
             self.observable_classification,
             {},
-        ).start()
+        )
         self.assertEqual(report.get("success", False), True)
 
     def test_tor(self, mock_get=None, mock_post=None):
-        report = tor.Tor(
+        report = tor.run(
             "TorProject",
             self.job_id,
             self.observable_name,
             self.observable_classification,
             {},
-        ).start()
+        )
         self.assertEqual(report.get("success", False), True)
 
     @mock_connections(patch("pypssl.PyPSSL", side_effect=mocked_pypssl))
     def test_circl_pssl(self, mock_get=None, mock_post=None, sessions_get=None):
-        report = circl_pssl.CIRCL_PSSL(
+        report = circl_pssl.run(
             "CIRCL_PSSL",
             self.job_id,
             self.observable_name,
             self.observable_classification,
             {},
-        ).start()
+        )
         self.assertEqual(report.get("success", False), True)
 
     def test_robtex_ip(self, mock_get=None, mock_post=None):
-        report = robtex.Robtex(
+        report = robtex.run(
             "Robtex_IP_Query",
             self.job_id,
             self.observable_name,
             self.observable_classification,
             {},
-        ).start()
+        )
         self.assertEqual(report.get("success", False), True)
 
     def test_robtex_rdns(self, mock_get=None, mock_post=None):
-        report = robtex.Robtex(
+        report = robtex.run(
             "Robtex_Reverse_PDNS_Query",
             self.job_id,
             self.observable_name,
             self.observable_classification,
             {},
-        ).start()
+        )
         self.assertEqual(report.get("success", False), True)
 
     def test_dnsdb(self, mock_get=None, mock_post=None):
-        report = dnsdb.DNSdb(
+        report = dnsdb.run(
             "DNSDB",
             self.job_id,
             self.observable_name,
             self.observable_classification,
             {},
-        ).start()
+        )
         self.assertEqual(report.get("success", False), True)
 
     def test_vt_get(self, mock_get=None, mock_post=None):
-        report = vt2_get.VirusTotalv2(
+        report = vt2_get.run(
             "VT_v2_Get",
             self.job_id,
             self.observable_name,
             self.observable_classification,
             {},
-        ).start()
+        )
         self.assertEqual(report.get("success", False), True)
 
     def test_ha_get(self, mock_get=None, mock_post=None):
-        report = ha_get.HybridAnalysisGet(
+        report = ha_get.run(
             "HybridAnalysis_Get_Observable",
             self.job_id,
             self.observable_name,
             self.observable_classification,
             {},
-        ).start()
+        )
         self.assertEqual(report.get("success", False), True)
 
     def test_vt3_get(self, mock_get=None, mock_post=None):
-        report = vt3_get.VirusTotalv3(
+        report = vt3_get.run(
             "VT_v3_Get",
             self.job_id,
             self.observable_name,
             self.observable_classification,
             {},
-        ).start()
+        )
         self.assertEqual(report.get("success", False), True)
 
     @mock_connections(patch("pymisp.ExpandedPyMISP", side_effect=mocked_pymisp))
     def test_misp_first(self, mock_get=None, mock_post=None, mock_pymisp=None):
-        report = misp.MISP(
+        report = misp.run(
             "MISP_FIRST",
             self.job_id,
             self.observable_name,
             self.observable_classification,
             {"api_key_name": "FIRST_MISP_API", "url_key_name": "FIRST_MISP_URL"},
-        ).start()
+        )
         self.assertEqual(report.get("success", False), True)
 
     def test_onyphe(self, mock_get=None, mock_post=None):
-        report = onyphe.Onyphe(
+        report = onyphe.run(
             "ONYPHE",
             self.job_id,
             self.observable_name,
             self.observable_classification,
             {},
-        ).start()
+        )
         self.assertEqual(report.get("success", False), True)
 
     def active_dns_classic_reverse(self, mock_get=None, mock_post=None):
-        report = active_dns.active_dns.ActiveDNS(
+        report = active_dns.run(
             "ActiveDNS_Classic_reverse",
             self.job_id,
             self.observable_name,
             self.observable_classification,
             {"service": "classic"},
-        ).start()
+        )
 
         self.assertEqual(report.get("success", False), True, f"report: {report}")
 
@@ -365,185 +365,185 @@ class DomainAnalyzersTests(TestCase):
         self.observable_classification = test_job.observable_classification
 
     def test_fortiguard(self, mock_get=None, mock_post=None):
-        report = fortiguard.Fortiguard(
+        report = fortiguard.run(
             "Fortiguard",
             self.job_id,
             self.observable_name,
             self.observable_classification,
             {},
-        ).start()
+        )
         self.assertEqual(report.get("success", False), True)
 
     def test_tranco(self, mock_get=None, mock_post=None):
-        report = tranco.Tranco(
+        report = tranco.run(
             "Tranco",
             self.job_id,
             self.observable_name,
             self.observable_classification,
             {},
-        ).start()
+        )
         self.assertEqual(report.get("success", False), True)
 
     def test_securitytrails_domain(self, mock_get=None, mock_post=None):
-        report = securitytrails.SecurityTrails(
+        report = securitytrails.run(
             "Securitytrails_Details",
             self.job_id,
             self.observable_name,
             self.observable_classification,
             {},
-        ).start()
+        )
         self.assertEqual(report.get("success", False), True)
 
     def test_hunter(self, mock_get=None, mock_post=None):
-        report = hunter.Hunter(
+        report = hunter.run(
             "Hunter",
             self.job_id,
             self.observable_name,
             self.observable_classification,
             {},
-        ).start()
+        )
         self.assertEqual(report.get("success", False), True)
 
     def test_threatminer_domain(self, mock_get=None, mock_post=None):
-        report = threatminer.Threatminer(
+        report = threatminer.run(
             "Threatminer",
             self.job_id,
             self.observable_name,
             self.observable_classification,
             {},
-        ).start()
+        )
         self.assertEqual(report.get("success", False), True)
 
     def test_gsf(self, mock_get=None, mock_post=None):
-        report = googlesf.GoogleSF(
+        report = googlesf.run(
             "GoogleSafeBrowsing",
             self.job_id,
             self.observable_name,
             self.observable_classification,
             {},
-        ).start()
+        )
         self.assertEqual(report.get("success", False), True)
 
     def test_otx(self, mock_get=None, mock_post=None):
-        report = otx.OTX(
+        report = otx.run(
             "OTX", self.job_id, self.observable_name, self.observable_classification, {}
-        ).start()
+        )
         self.assertEqual(report.get("success", False), True)
 
     @mock_connections(patch("pypdns.PyPDNS", side_effect=mocked_pypdns))
     def test_circl_pdns(self, mock_get=None, mock_post=None, sessions_get=None):
-        report = circl_pdns.CIRCL_PDNS(
+        report = circl_pdns.run(
             "CIRCL_PDNS",
             self.job_id,
             self.observable_name,
             self.observable_classification,
             {},
-        ).start()
+        )
         self.assertEqual(report.get("success", False), True)
 
     def test_robtex_fdns(self, mock_get=None, mock_post=None):
-        report = robtex.Robtex(
+        report = robtex.run(
             "Robtex_Forward_PDNS_Query",
             self.job_id,
             self.observable_name,
             self.observable_classification,
             {},
-        ).start()
+        )
         self.assertEqual(report.get("success", False), True)
 
     def test_dnsdb(self, mock_get=None, mock_post=None):
-        report = dnsdb.DNSdb(
+        report = dnsdb.run(
             "DNSDB",
             self.job_id,
             self.observable_name,
             self.observable_classification,
             {},
-        ).start()
+        )
         self.assertEqual(report.get("success", False), True)
 
     def test_vt_get(self, mock_get=None, mock_post=None):
-        report = vt2_get.VirusTotalv2(
+        report = vt2_get.run(
             "VT_v2_Get",
             self.job_id,
             self.observable_name,
             self.observable_classification,
             {},
-        ).start()
+        )
         self.assertEqual(report.get("success", False), True)
 
     def test_ha_get(self, mock_get=None, mock_post=None):
-        report = ha_get.HybridAnalysisGet(
+        report = ha_get.run(
             "HybridAnalysis_Get_Observable",
             self.job_id,
             self.observable_name,
             self.observable_classification,
             {},
-        ).start()
+        )
         self.assertEqual(report.get("success", False), True)
 
     def test_vt3_get(self, mock_get=None, mock_post=None):
-        report = vt3_get.VirusTotalv3(
+        report = vt3_get.run(
             "VT_v3_Get",
             self.job_id,
             self.observable_name,
             self.observable_classification,
             {},
-        ).start()
+        )
         self.assertEqual(report.get("success", False), True)
 
     @mock_connections(patch("pymisp.ExpandedPyMISP", side_effect=mocked_pymisp))
     def test_misp_first(self, mock_get=None, mock_post=None, mock_pymisp=None):
-        report = misp.MISP(
+        report = misp.run(
             "MISP_FIRST",
             self.job_id,
             self.observable_name,
             self.observable_classification,
             {"api_key_name": "FIRST_MISP_API", "url_key_name": "FIRST_MISP_URL"},
-        ).start()
+        )
         self.assertEqual(report.get("success", False), True)
 
     def test_onyphe(self, mock_get=None, mock_post=None):
-        report = onyphe.Onyphe(
+        report = onyphe.run(
             "ONYPHE",
             self.job_id,
             self.observable_name,
             self.observable_classification,
             {},
-        ).start()
+        )
         self.assertEqual(report.get("success", False), True)
 
     def test_urlhaus(self, mock_get=None, mock_post=None):
-        report = urlhaus.URLHaus(
+        report = urlhaus.run(
             "URLhaus",
             self.job_id,
             self.observable_name,
             self.observable_classification,
             {},
-        ).start()
+        )
         self.assertEqual(report.get("success", False), True)
 
     def test_active_dns(self, mock_get=None, mock_post=None):
         # Google
-        google_report = active_dns.ActiveDNS(
+        google_report = active_dns.run(
             "ActiveDNS_Google",
             self.job_id,
             self.observable_name,
             self.observable_classification,
             {"service": "google"},
-        ).start()
+        )
 
         self.assertEqual(
             google_report.get("success", False), True, f"google_report: {google_report}"
         )
 
         # CloudFlare
-        cloudflare_report = active_dns.ActiveDNS(
+        cloudflare_report = active_dns.run(
             "ActiveDNS_CloudFlare",
             self.job_id,
             self.observable_name,
             self.observable_classification,
             {"service": "cloudflare"},
-        ).start()
+        )
 
         self.assertEqual(
             cloudflare_report.get("success", False),
@@ -551,13 +551,13 @@ class DomainAnalyzersTests(TestCase):
             f"cloudflare_report: {cloudflare_report}",
         )
         # Classic
-        classic_report = active_dns.ActiveDNS(
+        classic_report = active_dns.run(
             "ActiveDNS_Classic",
             self.job_id,
             self.observable_name,
             self.observable_classification,
             {"service": "classic"},
-        ).start()
+        )
 
         self.assertEqual(
             classic_report.get("success", False),
@@ -566,26 +566,15 @@ class DomainAnalyzersTests(TestCase):
         )
 
     def test_cloudFlare_malware(self, mock_get=None, mock_post=None):
-        report = active_dns.ActiveDNS(
+        report = active_dns.run(
             "ActiveDNS_CloudFlare_Malware",
             self.job_id,
             self.observable_name,
             self.observable_classification,
             {"service": "cloudflare_malware"},
-        ).start()
+        )
 
         self.assertEqual(report.get("success", False), True, f"report: {report}")
-
-    def test_thug_url(self, mock_get=None, mock_post=None):
-        additional_params = {"test": True}
-        report = thug_url.ThugUrl(
-            "Thug_URL_Info",
-            self.job_id,
-            self.observable_name,
-            self.observable_classification,
-            additional_params,
-        ).start()
-        self.assertEqual(report.get("success", False), True)
 
 
 @mock_connections(patch("requests.get", side_effect=mocked_requests))
@@ -612,101 +601,90 @@ class URLAnalyzersTests(TestCase):
         self.observable_classification = test_job.observable_classification
 
     def test_fortiguard(self, mock_get=None, mock_post=None):
-        report = fortiguard.Fortiguard(
+        report = fortiguard.run(
             "Fortiguard",
             self.job_id,
             self.observable_name,
             self.observable_classification,
             {},
-        ).start()
+        )
         self.assertEqual(report.get("success", False), True)
 
     def test_gsf(self, mock_get=None, mock_post=None):
-        report = googlesf.GoogleSF(
+        report = googlesf.run(
             "GoogleSafeBrowsing",
             self.job_id,
             self.observable_name,
             self.observable_classification,
             {},
-        ).start()
+        )
         self.assertEqual(report.get("success", False), True)
 
     def test_otx(self, mock_get=None, mock_post=None):
-        report = otx.OTX(
+        report = otx.run(
             "OTX", self.job_id, self.observable_name, self.observable_classification, {}
-        ).start()
+        )
         self.assertEqual(report.get("success", False), True)
 
     @mock_connections(patch("pypdns.PyPDNS", side_effect=mocked_pypdns))
     def test_circl_pdns(self, mock_get=None, mock_post=None, sessions_get=None):
-        report = circl_pdns.CIRCL_PDNS(
+        report = circl_pdns.run(
             "CIRCL_PDNS",
             self.job_id,
             self.observable_name,
             self.observable_classification,
             {},
-        ).start()
+        )
         self.assertEqual(report.get("success", False), True)
 
     def test_robtex_fdns(self, mock_get=None, mock_post=None):
-        report = robtex.Robtex(
+        report = robtex.run(
             "Robtex_Forward_PDNS_Query",
             self.job_id,
             self.observable_name,
             self.observable_classification,
             {},
-        ).start()
+        )
         self.assertEqual(report.get("success", False), True)
 
     def test_vt_get(self, mock_get=None, mock_post=None):
-        report = vt3_get.VirusTotalv3(
+        report = vt2_get.run(
             "VT_v2_Get",
             self.job_id,
             self.observable_name,
             self.observable_classification,
             {},
-        ).start()
+        )
         self.assertEqual(report.get("success", False), True)
 
     def test_vt3_get(self, mock_get=None, mock_post=None):
-        report = vt3_get.VirusTotalv3(
+        report = vt3_get.run(
             "VT_v3_Get",
             self.job_id,
             self.observable_name,
             self.observable_classification,
             {},
-        ).start()
+        )
         self.assertEqual(report.get("success", False), True)
 
     def test_onyphe(self, mock_get=None, mock_post=None):
-        report = onyphe.Onyphe(
+        report = onyphe.run(
             "ONYPHE",
             self.job_id,
             self.observable_name,
             self.observable_classification,
             {},
-        ).start()
+        )
         self.assertEqual(report.get("success", False), True)
 
     def test_urlhaus(self, mock_get=None, mock_post=None):
-        report = urlhaus.URLHaus(
+        report = urlhaus.run(
             "URLhaus",
             self.job_id,
             self.observable_name,
             self.observable_classification,
             {},
-        ).start()
-        self.assertEqual(report.get("success", False), True)
-
-    def test_thug_url(self, mock_get=None, mock_post=None):
-        additional_params = {"test": True}
-        report = thug_url.ThugUrl(
-            "Thug_URL_Info",
-            self.job_id,
-            self.observable_name,
-            self.observable_classification,
-            additional_params,
-        ).start()
+        )
         self.assertEqual(report.get("success", False), True)
 
 
@@ -734,68 +712,68 @@ class HashAnalyzersTests(TestCase):
         self.observable_classification = test_job.observable_classification
 
     def test_otx(self, mock_get=None, mock_post=None):
-        report = otx.OTX(
+        report = otx.run(
             "OTX", self.job_id, self.observable_name, self.observable_classification, {}
-        ).start()
+        )
         self.assertEqual(report.get("success", False), True)
 
     def test_vt_get(self, mock_get=None, mock_post=None):
-        report = vt3_get.VirusTotalv3(
+        report = vt2_get.run(
             "VT_v2_Get",
             self.job_id,
             self.observable_name,
             self.observable_classification,
             {},
-        ).start()
+        )
         self.assertEqual(report.get("success", False), True)
 
     def test_ha_get(self, mock_get=None, mock_post=None):
-        report = ha_get.HybridAnalysisGet(
+        report = ha_get.run(
             "HybridAnalysis_Get_Observable",
             self.job_id,
             self.observable_name,
             self.observable_classification,
             {},
-        ).start()
+        )
         self.assertEqual(report.get("success", False), True)
 
     def test_vt3_get(self, mock_get=None, mock_post=None):
-        report = vt3_get.VirusTotalv3(
+        report = vt3_get.run(
             "VT_v3_Get",
             self.job_id,
             self.observable_name,
             self.observable_classification,
             {},
-        ).start()
+        )
         self.assertEqual(report.get("success", False), True)
 
     @mock_connections(patch("pymisp.ExpandedPyMISP", side_effect=mocked_pymisp))
     def test_misp_first(self, mock_get=None, mock_post=None, mock_pymisp=None):
-        report = misp.MISP(
+        report = misp.run(
             "MISP_FIRST",
             self.job_id,
             self.observable_name,
             self.observable_classification,
             {"api_key_name": "FIRST_MISP_API", "url_key_name": "FIRST_MISP_URL"},
-        ).start()
+        )
         self.assertEqual(report.get("success", False), True)
 
     def test_mb_get(self, mock_get=None, mock_post=None):
-        report = mb_get.MB_GET(
+        report = mb_get.run(
             "MalwareBazaar_Get_Observable",
             self.job_id,
             self.observable_name,
             self.observable_classification,
             {},
-        ).start()
+        )
         self.assertEqual(report.get("success", False), True)
 
     def test_cymru_get(self, mock_get=None, mock_post=None):
-        report = cymru.Cymru(
+        report = cymru.run(
             "Cymru_Hash_Registry_Get_Observable",
             self.job_id,
             self.observable_name,
             self.observable_classification,
             {},
-        ).start()
+        )
         self.assertEqual(report.get("success", False), True)

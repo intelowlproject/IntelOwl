@@ -1,15 +1,22 @@
+import traceback
+import logging
+
 from oletools.rtfobj import RtfObjParser
 
-from api_app.helpers import get_binary
-from api_app.script_analyzers.classes import FileAnalyzer
+from api_app.exceptions import AnalyzerRunException
+from api_app.script_analyzers import general
+
+logger = logging.getLogger(__name__)
 
 
-class RTFInfo(FileAnalyzer):
-    def run(self):
+def run(analyzer_name, job_id, filepath, filename, md5, additional_config_params):
+    logger.info("started analyzer {} job_id {}" "".format(analyzer_name, job_id))
+    report = general.get_basic_report_template(analyzer_name)
+    try:
         results = {}
 
         rtfobj_results = {}
-        binary = get_binary(self.job_id)
+        binary = general.get_binary(job_id)
         rtfp = RtfObjParser(binary)
         rtfp.parse()
         rtfobj_results["ole_objects"] = []
@@ -42,4 +49,29 @@ class RTFInfo(FileAnalyzer):
 
         results["rtfobj"] = rtfobj_results
 
-        return results
+        report["report"] = results
+    except AnalyzerRunException as e:
+        error_message = (
+            "job_id:{} analyzer:{} md5:{} filename: {} Analyzer Error {}"
+            "".format(job_id, analyzer_name, md5, filename, e)
+        )
+        logger.error(error_message)
+        report["errors"].append(error_message)
+        report["success"] = False
+    except Exception as e:
+        traceback.print_exc()
+        error_message = (
+            "job_id:{} analyzer:{} md5:{} filename: {} Unexpected Error {}"
+            "".format(job_id, analyzer_name, md5, filename, e)
+        )
+        logger.exception(error_message)
+        report["errors"].append(str(e))
+        report["success"] = False
+    else:
+        report["success"] = True
+
+    general.set_report_and_cleanup(job_id, report)
+
+    logger.info("ended analyzer {} job_id {}" "".format(analyzer_name, job_id))
+
+    return report

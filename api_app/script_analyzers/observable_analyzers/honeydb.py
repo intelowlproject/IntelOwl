@@ -1,44 +1,33 @@
-import traceback
-import logging
-
 import requests
 
 from api_app.exceptions import AnalyzerRunException
-from api_app.script_analyzers import general
+from api_app.script_analyzers import classes
 from intel_owl import secrets
 
-logger = logging.getLogger(__name__)
 
+class HoneyDB(classes.ObservableAnalyzer):
+    base_url = "https://honeydb.io/api"
 
-def run(
-    analyzer_name,
-    job_id,
-    observable_name,
-    observable_classification,
-    additional_config_params,
-):
-    logger.info(
-        "started analyzer {} job_id {} observable {}"
-        "".format(analyzer_name, job_id, observable_name)
-    )
-    report = general.get_basic_report_template(analyzer_name)
-    try:
+    def set_config(self, additional_config_params):
         api_key_name = additional_config_params.get("api_key_name", "HONEYDB_API_KEY")
         api_id_name = additional_config_params.get("api_id_name", "HONEYDB_API_ID")
-        honeydb_analysis = additional_config_params.get("honeydb_analysis", "ip_query")
-        api_key = secrets.get_secret(api_key_name)
-        api_id = secrets.get_secret(api_id_name)
-        if not api_key:
-            raise AnalyzerRunException("no HoneyDB API Key retrieved")
-        if not api_id:
-            raise AnalyzerRunException("no HoneyDB API ID retrieved")
+        self.analysis_type = additional_config_params.get(
+            "honeydb_analysis", "ip_query"
+        )
+        self.__api_key = secrets.get_secret(api_key_name)
+        self.__api_id = secrets.get_secret(api_id_name)
 
-        headers = {"X-HoneyDb-ApiKey": api_key, "X-HoneyDb-ApiId": api_id}
+    def run(self):
+        if not self.__api_key:
+            raise AnalyzerRunException("No HoneyDB API Key retrieved")
+        if not self.__api_id:
+            raise AnalyzerRunException("No HoneyDB API ID retrieved")
+        headers = {"X-HoneyDb-ApiKey": self.__api_key, "X-HoneyDb-ApiId": self.__api_id}
 
-        if honeydb_analysis == "scan_twitter":
-            url = f"https://honeydb.io/api/twitter-threat-feed/{observable_name}"
-        elif honeydb_analysis == "ip_query":
-            url = f"https://honeydb.io/api/netinfo/lookup/{observable_name}"
+        if self.analysis_type == "scan_twitter":
+            url = f"{self.base_url}/twitter-threat-feed/{self.observable_name}"
+        elif self.analysis_type == "ip_query":
+            url = f"{self.base_url}/netinfo/lookup/{self.observable_name}"
         else:
             raise AnalyzerRunException(
                 """invalid analyzer name specified.
@@ -48,33 +37,5 @@ def run(
         response = requests.get(url, headers=headers)
         response.raise_for_status()
 
-        json_response = response.json()
-        report["report"] = json_response
-    except AnalyzerRunException as e:
-        error_message = (
-            "job_id:{} analyzer:{} observable_name:{} Analyzer error {}"
-            "".format(job_id, analyzer_name, observable_name, e)
-        )
-        logger.error(error_message)
-        report["errors"].append(error_message)
-        report["success"] = False
-    except Exception as e:
-        traceback.print_exc()
-        error_message = (
-            "job_id:{} analyzer:{} observable_name:{} Unexpected error {}"
-            "".format(job_id, analyzer_name, observable_name, e)
-        )
-        logger.exception(error_message)
-        report["errors"].append(str(e))
-        report["success"] = False
-    else:
-        report["success"] = True
-
-    general.set_report_and_cleanup(job_id, report)
-
-    logger.info(
-        "ended analyzer {} job_id {} observable {}"
-        "".format(analyzer_name, job_id, observable_name)
-    )
-
-    return report
+        result = response.json()
+        return result

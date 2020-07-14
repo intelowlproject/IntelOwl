@@ -15,6 +15,7 @@ from api_app.script_analyzers.file_analyzers import (
     rtf_info,
     signature_info,
     peframe,
+    thug_file,
 )
 from api_app.script_analyzers.observable_analyzers import (
     abuseipdb,
@@ -40,6 +41,7 @@ from api_app.script_analyzers.observable_analyzers import (
     onyphe,
     censys,
     threatminer,
+    thug_url,
     urlhaus,
     active_dns,
     auth0,
@@ -74,13 +76,13 @@ def abuseipdb_run(
     observable_classification,
     additional_config_params,
 ):
-    abuseipdb.run(
+    abuseipdb.AbuseIPDB(
         analyzer_name,
         job_id,
         observable_name,
         observable_classification,
         additional_config_params,
-    )
+    ).start()
 
 
 @shared_task(soft_time_limit=30)
@@ -91,13 +93,13 @@ def auth0_run(
     observable_classification,
     additional_config_params,
 ):
-    auth0.run(
+    auth0.Auth0(
         analyzer_name,
         job_id,
         observable_name,
         observable_classification,
         additional_config_params,
-    )
+    ).start()
 
 
 @shared_task(soft_time_limit=30)
@@ -108,13 +110,13 @@ def securitytrails_run(
     observable_classification,
     additional_config_params,
 ):
-    securitytrails.run(
+    securitytrails.SecurityTrails(
         analyzer_name,
         job_id,
         observable_name,
         observable_classification,
         additional_config_params,
-    )
+    ).start()
 
 
 @shared_task(soft_time_limit=30)
@@ -125,13 +127,13 @@ def activedns_run(
     observable_classification,
     additional_config_params,
 ):
-    active_dns.run(
+    active_dns.ActiveDNS(
         analyzer_name,
         job_id,
         observable_name,
         observable_classification,
         additional_config_params,
-    )
+    ).start()
 
 
 @shared_task(soft_time_limit=30)
@@ -142,13 +144,13 @@ def fortiguard_run(
     observable_classification,
     additional_config_params,
 ):
-    fortiguard.run(
+    fortiguard.Fortiguard(
         analyzer_name,
         job_id,
         observable_name,
         observable_classification,
         additional_config_params,
-    )
+    ).start()
 
 
 @shared_task(soft_time_limit=30)
@@ -159,13 +161,13 @@ def greynoise_run(
     observable_classification,
     additional_config_params,
 ):
-    greynoise.run(
+    greynoise.GreyNoise(
         analyzer_name,
         job_id,
         observable_name,
         observable_classification,
         additional_config_params,
-    )
+    ).start()
 
 
 @shared_task(soft_time_limit=30)
@@ -176,13 +178,13 @@ def googlesf_run(
     observable_classification,
     additional_config_params,
 ):
-    googlesf.run(
+    googlesf.GoogleSF(
         analyzer_name,
         job_id,
         observable_name,
         observable_classification,
         additional_config_params,
-    )
+    ).start()
 
 
 @shared_task(soft_time_limit=30)
@@ -193,13 +195,13 @@ def otx_run(
     observable_classification,
     additional_config_params,
 ):
-    otx.run(
+    otx.OTX(
         analyzer_name,
         job_id,
         observable_name,
         observable_classification,
         additional_config_params,
-    )
+    ).start()
 
 
 @shared_task(soft_time_limit=30)
@@ -210,13 +212,13 @@ def misp_run(
     observable_classification,
     additional_config_params,
 ):
-    misp.run(
+    misp.MISP(
         analyzer_name,
         job_id,
         observable_name,
         observable_classification,
         additional_config_params,
-    )
+    ).start()
 
 
 @shared_task(soft_time_limit=30)
@@ -227,13 +229,13 @@ def circlpdns_run(
     observable_classification,
     additional_config_params,
 ):
-    circl_pdns.run(
+    circl_pdns.CIRCL_PDNS(
         analyzer_name,
         job_id,
         observable_name,
         observable_classification,
         additional_config_params,
-    )
+    ).start()
 
 
 @shared_task(soft_time_limit=30)
@@ -244,13 +246,13 @@ def circlpssl_run(
     observable_classification,
     additional_config_params,
 ):
-    circl_pssl.run(
+    circl_pssl.CIRCL_PSSL(
         analyzer_name,
         job_id,
         observable_name,
         observable_classification,
         additional_config_params,
-    )
+    ).start()
 
 
 @shared_task(soft_time_limit=30)
@@ -261,13 +263,13 @@ def robtex_run(
     observable_classification,
     additional_config_params,
 ):
-    robtex.run(
+    robtex.Robtex(
         analyzer_name,
         job_id,
         observable_name,
         observable_classification,
         additional_config_params,
-    )
+    ).start()
 
 
 @shared_task(soft_time_limit=30)
@@ -278,13 +280,13 @@ def shodan_run(
     observable_classification,
     additional_config_params,
 ):
-    shodan.run(
+    shodan.Shodan(
         analyzer_name,
         job_id,
         observable_name,
         observable_classification,
         additional_config_params,
-    )
+    ).start()
 
 
 @shared_task(soft_time_limit=30)
@@ -295,13 +297,13 @@ def threatminer_run(
     observable_classification,
     additional_config_params,
 ):
-    threatminer.run(
+    threatminer.Threatminer(
         analyzer_name,
         job_id,
         observable_name,
         observable_classification,
         additional_config_params,
-    )
+    ).start()
 
 
 @shared_task(soft_time_limit=30)
@@ -312,13 +314,13 @@ def hunter_run(
     observable_classification,
     additional_config_params,
 ):
-    hunter.run(
+    hunter.Hunter(
         analyzer_name,
         job_id,
         observable_name,
         observable_classification,
         additional_config_params,
-    )
+    ).start()
 
 
 @shared_task(soft_time_limit=30)
@@ -329,13 +331,13 @@ def censys_run(
     observable_classification,
     additional_config_params,
 ):
-    censys.run(
+    censys.Censys(
         analyzer_name,
         job_id,
         observable_name,
         observable_classification,
         additional_config_params,
-    )
+    ).start()
 
 
 @shared_task(soft_time_limit=30)
@@ -346,13 +348,13 @@ def dnsdb_run(
     observable_classification,
     additional_config_params,
 ):
-    dnsdb.run(
+    dnsdb.DNSdb(
         analyzer_name,
         job_id,
         observable_name,
         observable_classification,
         additional_config_params,
-    )
+    ).start()
 
 
 @shared_task(soft_time_limit=30)
@@ -363,18 +365,18 @@ def maxmind_run(
     observable_classification,
     additional_config_params,
 ):
-    maxmind.run(
+    maxmind.Maxmind(
         analyzer_name,
         job_id,
         observable_name,
         observable_classification,
         additional_config_params,
-    )
+    ).start()
 
 
 @shared_task(soft_time_limit=20)
 def maxmind_updater():
-    maxmind.updater({})
+    maxmind.Maxmind.updater({})
 
 
 @shared_task(soft_time_limit=30)
@@ -385,18 +387,18 @@ def talos_run(
     observable_classification,
     additional_config_params,
 ):
-    talos.run(
+    talos.Talos(
         analyzer_name,
         job_id,
         observable_name,
         observable_classification,
         additional_config_params,
-    )
+    ).start()
 
 
 @shared_task(soft_time_limit=60)
 def talos_updater():
-    talos.updater()
+    talos.Talos.updater()
 
 
 @shared_task(soft_time_limit=30)
@@ -407,18 +409,18 @@ def tor_run(
     observable_classification,
     additional_config_params,
 ):
-    tor.run(
+    tor.Tor(
         analyzer_name,
         job_id,
         observable_name,
         observable_classification,
         additional_config_params,
-    )
+    ).start()
 
 
 @shared_task(soft_time_limit=60)
 def tor_updater():
-    tor.updater()
+    tor.Tor.updater()
 
 
 @shared_task(soft_time_limit=30)
@@ -429,13 +431,13 @@ def vt2get_run(
     observable_classification,
     additional_config_params,
 ):
-    vt2_get.run(
+    vt2_get.VirusTotalv2(
         analyzer_name,
         job_id,
         observable_name,
         observable_classification,
         additional_config_params,
-    )
+    ).start()
 
 
 @shared_task(soft_time_limit=30)
@@ -446,13 +448,13 @@ def haget_run(
     observable_classification,
     additional_config_params,
 ):
-    ha_get.run(
+    ha_get.HybridAnalysisGet(
         analyzer_name,
         job_id,
         observable_name,
         observable_classification,
         additional_config_params,
-    )
+    ).start()
 
 
 @shared_task(soft_time_limit=40)
@@ -463,13 +465,13 @@ def vt3get_run(
     observable_classification,
     additional_config_params,
 ):
-    vt3_get.run(
+    vt3_get.VirusTotalv3(
         analyzer_name,
         job_id,
         observable_name,
         observable_classification,
         additional_config_params,
-    )
+    ).start()
 
 
 @shared_task(soft_time_limit=500)
@@ -480,13 +482,13 @@ def vt3get_scan_run(
     observable_classification,
     additional_config_params,
 ):
-    vt3_get.run(
+    vt3_get.VirusTotalv3(
         analyzer_name,
         job_id,
         observable_name,
         observable_classification,
         additional_config_params,
-    )
+    ).start()
 
 
 @shared_task(soft_time_limit=200)
@@ -497,13 +499,13 @@ def honeydb_run(
     observable_classification,
     additional_config_params,
 ):
-    honeydb.run(
+    honeydb.HoneyDB(
         analyzer_name,
         job_id,
         observable_name,
         observable_classification,
         additional_config_params,
-    )
+    ).start()
 
 
 @shared_task(soft_time_limit=50)
@@ -514,13 +516,13 @@ def onyphe_run(
     observable_classification,
     additional_config_params,
 ):
-    onyphe.run(
+    onyphe.Onyphe(
         analyzer_name,
         job_id,
         observable_name,
         observable_classification,
         additional_config_params,
-    )
+    ).start()
 
 
 @shared_task(soft_time_limit=50)
@@ -531,124 +533,124 @@ def urlhaus_run(
     observable_classification,
     additional_config_params,
 ):
-    urlhaus.run(
+    urlhaus.URLHaus(
         analyzer_name,
         job_id,
         observable_name,
         observable_classification,
         additional_config_params,
-    )
+    ).start()
 
 
 @shared_task(soft_time_limit=30)
 def fileinfo_run(
     analyzer_name, job_id, filepath, filename, md5, additional_config_params
 ):
-    file_info.run(
+    file_info.FileInfo(
         analyzer_name, job_id, filepath, filename, md5, additional_config_params
-    )
+    ).start()
 
 
 @shared_task(soft_time_limit=70)
 def stringsinfo_run(
     analyzer_name, job_id, filepath, filename, md5, additional_config_params
 ):
-    strings_info.run(
+    strings_info.StringsInfo(
         analyzer_name, job_id, filepath, filename, md5, additional_config_params
-    )
+    ).start()
 
 
 @shared_task(soft_time_limit=30)
 def signatureinfo_run(
     analyzer_name, job_id, filepath, filename, md5, additional_config_params
 ):
-    signature_info.run(
+    signature_info.SignatureInfo(
         analyzer_name, job_id, filepath, filename, md5, additional_config_params
-    )
+    ).start()
 
 
 @shared_task(soft_time_limit=30)
 def peinfo_run(
     analyzer_name, job_id, filepath, filename, md5, additional_config_params
 ):
-    pe_info.run(
+    pe_info.PEInfo(
         analyzer_name, job_id, filepath, filename, md5, additional_config_params
-    )
+    ).start()
 
 
 @shared_task(soft_time_limit=30)
 def docinfo_run(
     analyzer_name, job_id, filepath, filename, md5, additional_config_params
 ):
-    doc_info.run(
+    doc_info.DocInfo(
         analyzer_name, job_id, filepath, filename, md5, additional_config_params
-    )
+    ).start()
 
 
 @shared_task(soft_time_limit=30)
 def rtfinfo_run(
     analyzer_name, job_id, filepath, filename, md5, additional_config_params
 ):
-    rtf_info.run(
+    rtf_info.RTFInfo(
         analyzer_name, job_id, filepath, filename, md5, additional_config_params
-    )
+    ).start()
 
 
 @shared_task(soft_time_limit=30)
 def pdfinfo_run(
     analyzer_name, job_id, filepath, filename, md5, additional_config_params
 ):
-    pdf_info.run(
+    pdf_info.PDFInfo(
         analyzer_name, job_id, filepath, filename, md5, additional_config_params
-    )
+    ).start()
 
 
 @shared_task(soft_time_limit=400)
 def vt2scan_run(
     analyzer_name, job_id, filepath, filename, md5, additional_config_params
 ):
-    vt2_scan.run(
+    vt2_scan.VirusTotalv2ScanFile(
         analyzer_name, job_id, filepath, filename, md5, additional_config_params
-    )
+    ).start()
 
 
 @shared_task(soft_time_limit=500)
 def vt3scan_run(
     analyzer_name, job_id, filepath, filename, md5, additional_config_params
 ):
-    vt3_scan.run(
+    vt3_scan.VirusTotalv3ScanFile(
         analyzer_name, job_id, filepath, filename, md5, additional_config_params
-    )
+    ).start()
 
 
 @shared_task(soft_time_limit=180)
 def intezer_run(
     analyzer_name, job_id, filepath, filename, md5, additional_config_params
 ):
-    intezer_scan.run(
+    intezer_scan.IntezerScan(
         analyzer_name, job_id, filepath, filename, md5, additional_config_params
-    )
+    ).start()
 
 
 @shared_task(soft_time_limit=500)
 def cuckoo_run(
     analyzer_name, job_id, filepath, filename, md5, additional_config_params
 ):
-    cuckoo_scan.run(
+    cuckoo_scan.CuckooAnalysis(
         analyzer_name, job_id, filepath, filename, md5, additional_config_params
-    )
+    ).start()
 
 
 @shared_task(soft_time_limit=60)
 def yara_run(analyzer_name, job_id, filepath, filename, md5, additional_config_params):
-    yara_scan.run(
+    yara_scan.YaraScan(
         analyzer_name, job_id, filepath, filename, md5, additional_config_params
-    )
+    ).start()
 
 
 @shared_task(soft_time_limit=60)
 def yara_updater():
-    yara_scan.yara_update_repos()
+    yara_scan.YaraScan.yara_update_repos()
 
 
 @shared_task(soft_time_limit=50)
@@ -659,13 +661,13 @@ def mbget_run(
     observable_classification,
     additional_config_params,
 ):
-    mb_get.run(
+    mb_get.MB_GET(
         analyzer_name,
         job_id,
         observable_name,
         observable_classification,
         additional_config_params,
-    )
+    ).start()
 
 
 @shared_task(soft_time_limit=50)
@@ -676,13 +678,13 @@ def cymru_run(
     observable_classification,
     additional_config_params,
 ):
-    cymru.run(
+    cymru.Cymru(
         analyzer_name,
         job_id,
         observable_name,
         observable_classification,
         additional_config_params,
-    )
+    ).start()
 
 
 @shared_task(soft_time_limit=30)
@@ -693,19 +695,45 @@ def tranco_run(
     observable_classification,
     additional_config_params,
 ):
-    tranco.run(
+    tranco.Tranco(
         analyzer_name,
         job_id,
         observable_name,
         observable_classification,
         additional_config_params,
-    )
+    ).start()
 
 
 @shared_task(soft_time_limit=500)
 def peframe_run(
     analyzer_name, job_id, filepath, filename, md5, additional_config_params
 ):
-    peframe.run(
+    peframe.PEframe(
         analyzer_name, job_id, filepath, filename, md5, additional_config_params
-    )
+    ).start()
+
+
+@shared_task(soft_time_limit=600)
+def thug_file_run(
+    analyzer_name, job_id, filepath, filename, md5, additional_config_params
+):
+    thug_file.ThugFile(
+        analyzer_name, job_id, filepath, filename, md5, additional_config_params
+    ).start()
+
+
+@shared_task(soft_time_limit=600)
+def thug_url_run(
+    analyzer_name,
+    job_id,
+    observable_name,
+    observable_classification,
+    additional_config_params,
+):
+    thug_url.ThugUrl(
+        analyzer_name,
+        job_id,
+        observable_name,
+        observable_classification,
+        additional_config_params,
+    ).start()

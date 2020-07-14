@@ -2,6 +2,5 @@
 ### All env variables for docker based integrations should be added here
 ### IMPORTANT: don't change these values unless you know what you are doing. It can have breaking changes!
 
-# PEframe
-WORKERS=1
+# Applies to all integrations
 LOG_LEVEL=INFO

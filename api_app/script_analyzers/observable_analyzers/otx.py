@@ -1,45 +1,32 @@
-import traceback
-import logging
-
 import OTXv2
 
 from ipaddress import AddressValueError, IPv4Address
 from urllib.parse import urlparse
 
 from api_app.exceptions import AnalyzerRunException
-from api_app.script_analyzers import general
+from api_app.script_analyzers import classes
 from intel_owl import secrets
 
-logger = logging.getLogger(__name__)
 
+class OTX(classes.ObservableAnalyzer):
+    def set_config(self, additional_config_params):
+        self.api_key_name = additional_config_params.get("api_key_name", "OTX_KEY")
+        self.__api_key = secrets.get_secret(self.api_key_name)
 
-def run(
-    analyzer_name,
-    job_id,
-    observable_name,
-    observable_classification,
-    additional_config_params,
-):
-    logger.info(
-        "started analyzer {} job_id {} observable {}"
-        "".format(analyzer_name, job_id, observable_name)
-    )
-    report = general.get_basic_report_template(analyzer_name)
-    try:
-        api_key_name = additional_config_params.get("api_key_name", "")
-        if not api_key_name:
-            api_key_name = "OTX_KEY"
-        api_key = secrets.get_secret(api_key_name)
-        if not api_key:
-            raise AnalyzerRunException("no api key retrieved")
+    def run(self):
+        if not self.__api_key:
+            raise AnalyzerRunException(
+                f"No API key retrieved with name: {self.api_key_name}"
+            )
 
-        otx = OTXv2.OTXv2(api_key)
+        otx = OTXv2.OTXv2(self.__api_key)
 
-        to_analyze_observable = observable_name
-        if observable_classification == "ip":
+        obs_clsf = self.observable_classification
+        to_analyze_observable = self.observable_name
+        if obs_clsf == "ip":
             otx_type = OTXv2.IndicatorTypes.IPv4
-        elif observable_classification == "url":
-            to_analyze_observable = urlparse(observable_name).hostname
+        elif obs_clsf == "url":
+            to_analyze_observable = urlparse(self.observable_name).hostname
             try:
                 to_analyze_observable = IPv4Address(to_analyze_observable)
             except AddressValueError:
@@ -48,20 +35,17 @@ def run(
                 otx_type = OTXv2.IndicatorTypes.IPv4
             if not to_analyze_observable:
                 raise AnalyzerRunException("extracted observable is None")
-        elif observable_classification == "domain":
+        elif obs_clsf == "domain":
             otx_type = OTXv2.IndicatorTypes.DOMAIN
-        elif observable_classification == "hash":
+        elif obs_clsf == "hash":
             otx_type = OTXv2.IndicatorTypes.FILE_HASH_MD5
         else:
             raise AnalyzerRunException(
-                "not supported observable classification {}".format(
-                    observable_classification
-                )
+                f"not supported observable classification {obs_clsf}"
             )
 
         result = {}
         details = otx.get_indicator_details_full(otx_type, to_analyze_observable)
-        # pprint.pprint(details)
 
         result["pulses"] = (
             details.get("general", {}).get("pulse_info", {}).get("pulses", [])
@@ -75,37 +59,4 @@ def run(
         result["url_list"] = details.get("url_list", {}).get("url_list", [])
         result["analysis"] = details.get("analysis", {}).get("analysis", {})
 
-        # pprint.pprint(result)
-        report["report"] = result
-    except AnalyzerRunException as e:
-        error_message = (
-            "job_id:{} analyzer:{} observable_name:{} Analyzer error {}"
-            "".format(job_id, analyzer_name, observable_name, e)
-        )
-        logger.error(error_message)
-        report["errors"].append(error_message)
-        report["success"] = False
-    except Exception as e:
-        traceback.print_exc()
-        string_error = str(e)
-        error_message = (
-            "job_id:{} analyzer:{} observable_name:{} Unexpected error {}"
-            "".format(job_id, analyzer_name, observable_name, e)
-        )
-        if "IP is private" in string_error:
-            logger.warning(error_message)
-        else:
-            logger.exception(error_message)
-        report["errors"].append(string_error)
-        report["success"] = False
-    else:
-        report["success"] = True
-
-    general.set_report_and_cleanup(job_id, report)
-
-    logger.info(
-        "ended analyzer {} job_id {} observable {}"
-        "".format(analyzer_name, job_id, observable_name)
-    )
-
-    return report
+        return result

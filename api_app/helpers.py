@@ -1,14 +1,14 @@
-# general utilities used by the Django App
+# general helper functions used by the Django API
 
 import json
 import logging
-
+import hashlib
 from magic import from_buffer as magic_from_buffer
 
 from django.utils import timezone
 
-from api_app.exceptions import NotRunnableAnalyzer
-
+from .exceptions import NotRunnableAnalyzer
+from api_app import models
 
 logger = logging.getLogger(__name__)
 
@@ -126,3 +126,19 @@ def filter_analyzers(
             cleaned_analyzer_list.append(analyzer)
 
     return cleaned_analyzer_list
+
+
+def get_binary(job_id, job_object=None):
+    if not job_object:
+        job_object = models.Job.object_by_job_id(job_id)
+    logger.info(f"getting binary for job_id {job_id}")
+    job_file = job_object.file
+    logger.info(f"got job_file {job_file} for job_id {job_id}")
+
+    binary = job_file.read()
+    return binary
+
+
+def generate_sha256(job_id):
+    binary = get_binary(job_id)
+    return hashlib.sha256(binary).hexdigest()

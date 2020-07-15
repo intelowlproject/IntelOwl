@@ -118,16 +118,35 @@ For a full description of the available keys, check the [Usage](./Usage.md) page
 #### Optional Analyzers
 Some analyzers which run in their own Docker containers are kept disabled by default. They are disabled by default to prevent accidentally starting too many containers and making your computer unresponsive.
 
-<details><summary>Table - Optional Analyzers<summary>
-| Name    | Port | Analyzers                         |
-|---------|------|-----------------------------------|
-| PEframe | 4000 | `PEframe_Scan_File`               |
-| Thug    | 4001 | `Thug_URL_Info`, `Thug_HTML_Info` |
-</details>
+<style>
+table, th, td {
+  padding: 5px;
+  border: 1px solid black;
+  border-collapse: collapse;
+}
+</style>
+<table style="width:100%">
+  <tr>
+    <th>Name</th>
+    <th>Port</th>
+    <th>Analyzers</th>
+  </tr>
+  <tr>
+    <td>PEframe</td>
+    <td>4000</td>
+    <td><code>PEframe_Scan_File</code></td>
+  </tr>
+  <tr>
+    <td>Thug</td>
+    <td>4001</td>
+    <td><code>Thug_URL_Info_*</code>, <code>Thug_HTML_Info_*</code></td>
+  </tr>
+</table>
 
 In the project, you can find template files named `.env_template` and `.env_file_integrations_template`.
 You have to create new files named `.env` and `env_file_integrations` from these two templates.
-Services from all the compose files specified in `COMPOSE_FILE` variable present in the `.env` file are ran on `docker-compose up`. So, modify it to include only the analyzers you wish to use.
+
+Docker services defined in the compose files added in `COMPOSE_FILE` variable present in the `.env` file are ran on `docker-compose up`. So, modify it to include only the analyzers you wish to use.
 Such compose files are available under `integrations/`.
 
 ### Rebuilding the project

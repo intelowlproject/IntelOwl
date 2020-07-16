@@ -3,42 +3,21 @@ FROM ubuntu:18.04
 # Step 1: Build and install thug
 
 USER root
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    build-essential \
-    sudo \
-    python \
-    python3 \
-    python3-dev \
-    python3-setuptools \
-    python3-wheel \ 
-    libboost-dev \
-    libboost-python-dev \
-    libboost-system-dev \
-    python3-pip \
-    libxml2-dev \
-    libxslt-dev \
-    tesseract-ocr \
-    git \
-    libtool \
-    graphviz-dev \
-    automake \
-    libffi-dev \
-    graphviz \
-    libfuzzy-dev \
-    libfuzzy2 \
-    libjpeg-dev \
-    libffi-dev \
-    pkg-config \
-    autoconf && \
-  rm -rf /var/lib/apt/lists/*
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+      build-essential sudo python python3 python3-dev python3-setuptools \
+      python3-wheel python3-pip libboost-dev libboost-python-dev libboost-system-dev \
+      libxml2-dev libxslt-dev tesseract-ocr git libtool graphviz-dev \
+      automake libffi-dev graphviz libfuzzy-dev libfuzzy2 libjpeg-dev libffi-dev \
+      pkg-config autoconf \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 RUN pip3 install --upgrade pip
-RUN pip3 install --upgrade setuptools
-RUN pip3 install --upgrade pytesseract
+RUN pip3 install --upgrade setuptools pytesseract
 WORKDIR /home/thug
 
-RUN pip3 install https://github.com/area1/stpyv8/releases/download/v8.3.110.9/stpyv8-8.3.110.9-cp36-cp36m-linux_x86_64.whl
+RUN pip3 --no-cache-dir install https://github.com/area1/stpyv8/releases/download/v8.3.110.9/stpyv8-8.3.110.9-cp36-cp36m-linux_x86_64.whl
 
 RUN git clone https://github.com/buffer/libemu.git && \
   cd libemu && \

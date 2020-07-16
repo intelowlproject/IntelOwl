@@ -5,7 +5,7 @@ version: '3'
 # All additional integrations should be added following this format only.
 
 services:
-  peframe:
+  thug:
     image: intelowlproject/intelowl_thug
     container_name: intelowl_thug
     restart: unless-stopped

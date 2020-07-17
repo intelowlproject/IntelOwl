@@ -57,26 +57,13 @@ RUN groupadd -r thug && \
 ENV PROJECT_PATH /opt/deploy/thug-flask
 ENV LOG_PATH /var/log/intel_owl/thug
 
-# Create log files
-RUN mkdir -p ${LOG_PATH}
-WORKDIR ${LOG_PATH}
-VOLUME ${LOG_PATH}
-RUN touch thug.log thug_errors.log gunicorn_access.log gunicorn_errors.log \
-    && chown -R thug:thug  ./
-
 # install flask dependencies
 WORKDIR ${PROJECT_PATH}
-COPY app.py requirements.txt ./
-RUN pip3 install -r requirements.txt --no-cache-dir
+COPY app.py requirements.txt entrypoint.sh ./
+RUN pip3 install -r requirements.txt --no-cache-dir \
+    && chmod +x entrypoint.sh
 
 # Step 3: Run the gunicorn server to serve the flask application
 
 EXPOSE 4001
-
-USER thug
-ENTRYPOINT gunicorn 'app:app' \
-            --bind '0.0.0.0:4001' \
-            --user thug \
-            --log-level ${LOG_LEVEL} \
-            --access-logfile ${LOG_PATH}/gunicorn_access.log \
-            --error-logfile ${LOG_PATH}/gunicorn_errors.log
+ENTRYPOINT ["./entrypoint.sh"]

@@ -104,6 +104,9 @@ class BaseAnalyzerMixin(ABC):
         self.__job_id = job_id
         self.set_config(additional_config_params)  # lgtm [py/init-calls-subclass]
 
+    def __repr__(self):
+        return f"({self.analyzer_name}, job_id: #{self.job_id})"
+
 
 class ObservableAnalyzer(BaseAnalyzerMixin):
     """
@@ -130,13 +133,13 @@ class ObservableAnalyzer(BaseAnalyzerMixin):
 
     def before_run(self):
         logger.info(
-            "started analyzer: {}, job_id: {}, observable: {}"
+            "STARTED analyzer: {}, job_id: {}, observable: {}"
             "".format(self.analyzer_name, self.job_id, self.observable_name)
         )
 
     def after_run(self):
         logger.info(
-            f"ended analyzer: {self.analyzer_name}, job_id: {self.job_id},"
+            f"ENDED analyzer: {self.analyzer_name}, job_id: {self.job_id},"
             f"observable: {self.observable_name}"
         )
 
@@ -219,8 +222,8 @@ class DockerBasedAnalyzer(ABC):
         for chance in range(self.max_tries):
             time.sleep(self.poll_distance)
             logger.info(
-                f"({self.analyzer_name}, job_id: #{self.job_id}) polling."
-                f"Try #{chance+1}. Starting the query..."
+                f"Result Polling. Try #{chance+1}. Starting the query..."
+                f"<-- {self.__repr__()}"
             )
             try:
                 status_code, json_data = self._query_for_result(self.url, req_key)
@@ -230,12 +233,9 @@ class DockerBasedAnalyzer(ABC):
             if analysis_status in ["success", "reported_with_fails", "failed"]:
                 got_result = True
                 break
-            elif status_code == 404:
-                pass
             else:
                 logger.info(
-                    f"Result Polling. Try n:{chance+1}, status: {analysis_status}"
-                    f" ({self.analyzer_name}, job_id: #{self.job_id})"
+                    f"Poll number #{chance+1}, status: 'running' <-- {self.__repr__()}"
                 )
 
         if not got_result:

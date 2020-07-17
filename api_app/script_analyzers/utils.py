@@ -14,10 +14,8 @@ logger = logging.getLogger(__name__)
 
 def set_report_and_cleanup(job_id, report):
     analyzer_name = report.get("name", "")
-    logger.info(
-        f"start set_report_and_cleanup for job_id:{job_id},"
-        f" analyzer:{analyzer_name}"
-    )
+    job_repr = f"({analyzer_name}, job_id: #{job_id})"
+    logger.info(f"STARTING set_report_and_cleanup for <-- {job_repr}.")
     job_object = None
 
     try:
@@ -31,9 +29,9 @@ def set_report_and_cleanup(job_id, report):
         num_analysis_reports = len(job_object.analysis_reports)
         num_analyzers_to_execute = len(job_object.analyzers_to_execute)
         logger.info(
-            f"job_id:{job_id}, analyzer {analyzer_name}, "
-            f"num analysis reports:{num_analysis_reports}, "
+            f"REPORT: num analysis reports:{num_analysis_reports}, "
             f"num analyzer to execute:{num_analyzers_to_execute}"
+            f" <-- {job_repr}."
         )
 
         # check if it was the last analysis...

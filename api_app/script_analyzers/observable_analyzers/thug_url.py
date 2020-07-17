@@ -56,36 +56,36 @@ class ThugUrl(ObservableAnalyzer, DockerBasedAnalyzer):
         self.args.extend(["-n", "/tmp/thug/" + tmp_dir, self.observable_name])
         logger.debug(
             f"Making request with arguments: {self.args}"
-            f" for analyzer: {self.analyzer_name}, job_id: #{self.job_id}."
+            f" for analyzer: {self.__repr__()}."
         )
-        # request new analysis
-        r = requests.post(self.url, json={"args": self.args,})
+        # step #1: request new analysis
+        resp1 = requests.post(self.url, json={"args": self.args,})
         # handle cases in case of error
-        if self._check_status_code(self.name, r):
+        if self._check_status_code(self.name, resp1):
             # if no error, continue..
             errors = []
-            # this is to check whether analysis completed or not..
-            key = r.json().get("key", None)
+            # step #2: this is to check whether analysis completed or not..
+            key = resp1.json().get("key", None)
             if not key:
                 if self.is_test:
                     # if this is a test, then just return here..
                     return {}
                 # else raise exception
                 raise AnalyzerRunException(
-                    f"Unexpected Error. Please check {self.name} container's log files."
+                    "Unexpected Error. "
+                    "Please check log files under /var/log/intel_owl/thug/"
                 )
-            resp = self._poll_for_result(key)
-            err = resp.get("error", None)
+            resp2 = self._poll_for_result(key)
+            err = resp2.get("error", None)
             if err:
+                # this may return error, but we can still try to fetch report
                 errors.append(err)
-                raise AnalyzerRunException(", ".join(errors))
-            logger.info(
-                f"Fetching final report ({self.analyzer_name}, job_id: #{self.job_id})"
-            )
-            # if no error, we fetch the final report..
+
+            logger.info(f"Fetching final report <-- {self.__repr__()}")
+            # step #3: try to fetch the final report..
             result_resp = requests.get(f"{self.base_url}/get-result?name={tmp_dir}")
             if not result_resp.status_code == 200:
-                e = resp.json().get("error", "")
+                e = result_resp.json().get("error", "")
                 errors.append(e)
                 raise AnalyzerRunException(", ".join(errors))
 

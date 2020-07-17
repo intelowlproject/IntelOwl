@@ -196,7 +196,7 @@ class DockerBasedAnalyzer(ABC):
         if req.status_code == 404:
             raise AnalyzerRunException(f"{name} docker container is not running.")
         if req.status_code == 400:
-            err = req.json()["error"]
+            err = req.json().get("error", "")
             raise AnalyzerRunException(err)
         if req.status_code == 500:
             raise AnalyzerRunException(
@@ -215,6 +215,7 @@ class DockerBasedAnalyzer(ABC):
 
     def _poll_for_result(self, req_key):
         got_result = False
+        json_data = {}
         for chance in range(self.max_tries):
             time.sleep(self.poll_distance)
             logger.info(

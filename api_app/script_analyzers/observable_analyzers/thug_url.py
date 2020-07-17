@@ -78,13 +78,14 @@ class ThugUrl(ObservableAnalyzer, DockerBasedAnalyzer):
             err = resp.get("error", None)
             if err:
                 errors.append(err)
+                raise AnalyzerRunException(", ".join(errors))
             logger.info(
                 f"Fetching final report ({self.analyzer_name}, job_id: #{self.job_id})"
             )
             # if no error, we fetch the final report..
             result_resp = requests.get(f"{self.base_url}/get-result?name={tmp_dir}")
             if not result_resp.status_code == 200:
-                e = resp.json()["error"]
+                e = resp.json().get("error", "")
                 errors.append(e)
                 raise AnalyzerRunException(", ".join(errors))
 

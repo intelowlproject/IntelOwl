@@ -3,7 +3,7 @@ import logging
 from urllib.parse import urlparse
 
 from api_app.script_analyzers.classes import ObservableAnalyzer, DockerBasedAnalyzer
-from api_app.exceptions import AnalyzerRunException
+from api_app.exceptions import AnalyzerConfigurationException, AnalyzerRunException
 
 logger = logging.getLogger(__name__)
 
@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 class ThugUrl(ObservableAnalyzer, DockerBasedAnalyzer):
     name: str = "Thug"
     base_url: str = "http://thug:4001"
-    url: str = "http://thug:4001/thug"
+    url: str = f"{base_url}/thug"
     # http request polling max number of tries
     max_tries: int = 7
     # interval between http request polling (in seconds)
@@ -44,6 +44,7 @@ class ThugUrl(ObservableAnalyzer, DockerBasedAnalyzer):
         return args
 
     def run(self):
+        # make request data
         if self.observable_classification == "url":
             tmp_dir = str(urlparse(self.observable_name).netloc)
         elif self.observable_classification == "domain":
@@ -54,39 +55,25 @@ class ThugUrl(ObservableAnalyzer, DockerBasedAnalyzer):
                 f"Supported are: URL, Domain."
             )
         self.args.extend(["-n", "/tmp/thug/" + tmp_dir, self.observable_name])
-        logger.debug(
-            f"Making request with arguments: {self.args}"
-            f" for analyzer: {self.__repr__()}."
-        )
+
         # step #1: request new analysis
-        resp1 = requests.post(self.url, json={"args": self.args,})
-        # handle cases in case of error
-        if self._check_status_code(self.name, resp1):
-            # if no error, continue..
-            errors = []
-            # step #2: this is to check whether analysis completed or not..
-            key = resp1.json().get("key", None)
-            if not key:
-                if self.is_test:
-                    # if this is a test, then just return here..
-                    return {}
-                # else raise exception
-                raise AnalyzerRunException(
-                    "Unexpected Error. "
-                    "Please check log files under /var/log/intel_owl/thug/"
-                )
-            resp2 = self._poll_for_result(key)
-            err = resp2.get("error", None)
-            if err:
-                # this may return error, but we can still try to fetch report
-                errors.append(err)
+        logger.debug(
+            f"Making request with arguments: {self.args} <-- {self.__repr__()}."
+        )
+        try:
+            resp1 = requests.post(self.url, json={"args": self.args,})
+        except requests.exceptions.ConnectionError:
+            raise AnalyzerConfigurationException(
+                f"{self.name} docker container is not running."
+            )
 
-            logger.info(f"Fetching final report <-- {self.__repr__()}")
-            # step #3: try to fetch the final report..
-            result_resp = requests.get(f"{self.base_url}/get-result?name={tmp_dir}")
-            if not result_resp.status_code == 200:
-                e = result_resp.json().get("error", "")
-                errors.append(e)
-                raise AnalyzerRunException(", ".join(errors))
+        # step #2: if this is a test, then just return here..
+        if self.is_test:
+            return {}
 
-            return result_resp.json()
+        # step #3: raise AnalyzerRunException in case of error
+        assert self._raise_in_case_bad_request(self.name, resp1)
+
+        # otherwise, continue/ try to fetch result
+        key = resp1.json().get("key", None)
+        return self._get_result_from_a_dir(key, tmp_dir)

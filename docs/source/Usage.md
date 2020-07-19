@@ -58,6 +58,7 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * MalwareBazaar_Get_File: Check if a particular malware sample is known to MalwareBazaar 
 * PEframe_Scan_File: Perform static analysis on Portable Executable malware and malicious MS Office documents.
 * Cymru_Hash_Registry_Get_File: Check if a particular file is known to be malware by Team Cymru
+* Thug_HTML_Info_*: Perform hybrid dynamic/static analysis on a HTML file using [Thug low-interaction honeyclient](https://thug-honeyclient.readthedocs.io/)
 
 #### Observable analyzers (ip, domain, url, hash)
 * VirusTotal_v3_Get_Observable: search an observable in the VirusTotal DB
@@ -105,6 +106,7 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * Securitytrails_History_DNS: scan a domain against securitytrails API for historical DNS
 * Cymru_Hash_Registry_Get_Observable: Check if a particular hash is available in the malware hash registry of Team Cymru
 * Tranco: Check if a domain is in the latest Tranco ranking top sites list
+* Thug_URL_Info_*: Perform hybrid dynamic/static analysis on a URL using [Thug low-interaction honeyclient](https://thug-honeyclient.readthedocs.io/)
 
 ## Analyzers customization
 You can create new analyzers based on already existing modules by changing the configuration values (`analyzer_config.json`).

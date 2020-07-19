@@ -184,29 +184,46 @@ class DockerBasedAnalyzer(ABC):
     when defining a docker based analyzer.
     See `peframe.py` for example.
 
+    :param name: str
+        The name of the analyzer service as defined in compose file
+        and log directory
     :param max_tries: int
         maximum no. of tries when HTTP polling for result.
     :param poll_distance: int
         interval between HTTP polling.
     """
 
+    name: str
     max_tries: int
     poll_distance: int
 
     @staticmethod
-    def _check_status_code(name, req):
-        # handle errors manually
-        if req.status_code == 404:
-            raise AnalyzerRunException(f"{name} docker container is not running.")
-        if req.status_code == 400:
-            err = req.json().get("error", "")
+    def _raise_in_case_bad_request(name, resp):
+        """
+        Raises:
+            :class: `AnalyzerRunException`, if bad status code or no key in response
+        """
+        # different error messages for different cases
+        if resp.status_code == 404:
+            raise AnalyzerConfigurationException(
+                f"{name} docker container is not running."
+            )
+        if resp.status_code == 400:
+            err = resp.json().get("error", "")
             raise AnalyzerRunException(err)
-        if req.status_code == 500:
+        if resp.status_code == 500:
             raise AnalyzerRunException(
                 f"Internal Server Error in {name} docker container"
             )
+        # check to make sure there was a valid key in response
+        key = resp.json().get("key", None)
+        if not key:
+            raise AnalyzerRunException(
+                "Unexpected Error. "
+                f"Please check log files under /var/log/intel_owl/{name.lower()}/"
+            )
         # just in case couldn't catch the error manually
-        req.raise_for_status()
+        resp.raise_for_status()
 
         return True
 
@@ -217,6 +234,7 @@ class DockerBasedAnalyzer(ABC):
         return resp.status_code, resp.json()
 
     def _poll_for_result(self, req_key):
+        allowed_statuses = ("success", "reported_with_fails", "failed")
         got_result = False
         json_data = {}
         for chance in range(self.max_tries):
@@ -230,7 +248,7 @@ class DockerBasedAnalyzer(ABC):
             except (requests.RequestException, json.JSONDecodeError) as e:
                 raise AnalyzerRunException(e)
             analysis_status = json_data.get("status", None)
-            if analysis_status in ["success", "reported_with_fails", "failed"]:
+            if analysis_status in allowed_statuses:
                 got_result = True
                 break
             else:
@@ -241,3 +259,38 @@ class DockerBasedAnalyzer(ABC):
         if not got_result:
             raise AnalyzerRunException("max polls tried without getting any result.")
         return json_data
+
+    def _get_result_from_a_dir(self, key, dir_file_name):
+        """
+        In case the analyzer does not output result to stdout,
+        we define a `/get-result` route to fetch the final result
+        from a given directory/file.
+
+        :param key: str
+            Unique key for the particular analysis
+        :param name: str
+            File/directory name to read result from
+
+        :raises AnalyzerRunException:
+            analysis was requested but get-result failed
+
+        :returns: dict()
+            Final Report
+        """
+        errors = []
+        # step #1: this is to check whether analysis completed or not..
+        poll_resp = self._poll_for_result(key)
+        err = poll_resp.get("error", None)
+        if err:
+            # this may return error, but we can still try to fetch report
+            errors.append(err)
+
+        # step #2: try to fetch the final report..
+        logger.info(f"Fetching final report <-- {self.__repr__()}")
+        result_resp = requests.get(f"{self.base_url}/get-result?name={dir_file_name}")
+        if not result_resp.status_code == 200:
+            e = result_resp.json().get("error", "")
+            errors.append(e)
+            raise AnalyzerRunException(", ".join(errors))
+
+        return result_resp.json()

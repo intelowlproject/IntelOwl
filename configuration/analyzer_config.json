@@ -723,7 +723,8 @@
         "description": "Perform static analysis on Portable Executable malware and malicious MS Office documents",
         "requires_configuration": true,
         "additional_config_params": {
-            "max_tries": 20
+            "max_tries": 15,
+            "poll_distance": 5
         }
     },
     "Thug_URL_Info_winxpie60_SIMPLE_SCAN": {

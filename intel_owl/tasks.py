@@ -16,6 +16,7 @@ from api_app.script_analyzers.file_analyzers import (
     signature_info,
     peframe,
     thug_file,
+    capa_info,
 )
 from api_app.script_analyzers.observable_analyzers import (
     abuseipdb,
@@ -709,6 +710,15 @@ def peframe_run(
     analyzer_name, job_id, filepath, filename, md5, additional_config_params
 ):
     peframe.PEframe(
+        analyzer_name, job_id, filepath, filename, md5, additional_config_params
+    ).start()
+
+
+@shared_task(soft_time_limit=500)
+def capa_info_run(
+    analyzer_name, job_id, filepath, filename, md5, additional_config_params
+):
+    capa_info.CapaInfo(
         analyzer_name, job_id, filepath, filename, md5, additional_config_params
     ).start()
 

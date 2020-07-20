@@ -21,6 +21,7 @@ from api_app.script_analyzers.file_analyzers import (
     rtf_info,
     peframe,
     thug_file,
+    capa_info,
 )
 from api_app.script_analyzers.observable_analyzers import vt3_get
 
@@ -34,7 +35,6 @@ from .utils import (
 
 from intel_owl import settings
 
-logger = logging.getLogger(__name__)
 # disable logging library for travis
 if settings.DISABLE_LOGGING_TEST:
     logging.disable(logging.CRITICAL)
@@ -211,12 +211,20 @@ class FileAnalyzersEXETests(TestCase):
     def test_peframe_scan_file(self, mock_get=None, mock_post=None):
         additional_params = {"max_tries": 1}
         report = peframe.PEframe(
-            "PEframe_Scan_File",
+            "PEframe_Scan",
             self.job_id,
             self.filepath,
             self.filename,
             self.md5,
             additional_params,
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    @mock_connections(patch("requests.get", side_effect=mocked_docker_analyzer_get))
+    @mock_connections(patch("requests.post", side_effect=mocked_docker_analyzer_post))
+    def test_capa_scan_file(self, mock_get=None, mock_post=None):
+        report = capa_info.CapaInfo(
+            "Capa_Info", self.job_id, self.filepath, self.filename, self.md5, {},
         ).start()
         self.assertEqual(report.get("success", False), True)
 
@@ -275,7 +283,7 @@ class FileAnalyzersDocTests(TestCase):
     def test_peframe_scan_file(self, mock_get=None, mock_post=None):
         additional_params = {"max_tries": 1}
         report = peframe.PEframe(
-            "PEframe_Scan_File",
+            "PEframe_Scan",
             self.job_id,
             self.filepath,
             self.filename,

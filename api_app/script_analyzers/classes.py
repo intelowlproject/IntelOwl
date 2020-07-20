@@ -196,6 +196,8 @@ class DockerBasedAnalyzer(ABC):
     name: str
     max_tries: int
     poll_distance: int
+    base_url: str
+    url: str
 
     @staticmethod
     def _raise_in_case_bad_request(name, resp):

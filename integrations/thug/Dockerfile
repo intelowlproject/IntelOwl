@@ -2,7 +2,6 @@ FROM ubuntu:18.04
 
 # Step 1: Build and install thug
 
-USER root
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
       build-essential sudo python python3 python3-dev python3-setuptools \

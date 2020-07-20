@@ -9,12 +9,10 @@ from api_app.exceptions import AnalyzerConfigurationException
 class PEframe(FileAnalyzer, DockerBasedAnalyzer):
     name: str = "PEframe"
     url: str = "http://peframe:4000/peframe"
-
-    def set_config(self, additional_config_params):
-        # http request polling max number of tries
-        self.max_tries: int = additional_config_params.get("max_tries", 15)
-        # interval between http request polling
-        self.poll_distance: int = additional_config_params.get("poll_distance", 5)
+    # http request polling max number of tries
+    max_tries: int = 25
+    # interval between http request polling
+    poll_distance: int = 5
 
     def run(self):
         # get binary

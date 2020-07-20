@@ -59,7 +59,8 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * PEframe_Scan: Perform static analysis on Portable Executable malware and malicious MS Office documents.
 * Cymru_Hash_Registry_Get_File: Check if a particular file is known to be malware by Team Cymru
 * Thug_HTML_Info_*: Perform hybrid dynamic/static analysis on a HTML file using [Thug low-interaction honeyclient](https://thug-honeyclient.readthedocs.io/)
-* Capa_Info: [Capa](https://github.com/fireeye/capa) detects capabilities in executable files
+* `Capa_Info`: [Capa](https://github.com/fireeye/capa) detects capabilities in executable files
+* `BoxJS_Scan_Javascript`: [Box-JS](https://github.com/CapacitorSet/box-js) is a tool for studying JavaScript malware. 
 
 #### Observable analyzers (ip, domain, url, hash)
 * VirusTotal_v3_Get_Observable: search an observable in the VirusTotal DB

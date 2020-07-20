@@ -146,6 +146,11 @@ table, th, td {
     <td>4002</td>
     <td><code>Capa_Info</code></td>
   </tr>
+  <tr>
+    <td>Box-JS</td>
+    <td>4003</td>
+    <td><code>BoxJS_Scan_JavaScript</code></td>
+  </tr>
 </table>
 
 In the project, you can find template files named `.env_template` and `.env_file_integrations_template`.

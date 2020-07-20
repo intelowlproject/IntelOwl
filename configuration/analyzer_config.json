@@ -717,7 +717,7 @@
         "description": "static PDF analysis",
         "python_module": "pdfinfo_run"
     },
-    "PEframe_Scan_File": {
+    "PEframe_Scan": {
         "type": "file",
         "python_module": "peframe_run",
         "description": "Perform static analysis on Portable Executable malware and malicious MS Office documents",
@@ -726,6 +726,11 @@
             "max_tries": 15,
             "poll_distance": 5
         }
+    },
+    "Capa_Info": {
+        "type": "file",
+        "python_module": "capa_info_run",
+        "description": "capa detects capabilities in executable files"
     },
     "Thug_URL_Info_winxpie60_SIMPLE_SCAN": {
         "type": "observable",

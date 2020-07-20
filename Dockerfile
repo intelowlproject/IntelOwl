@@ -6,7 +6,7 @@ ENV PYTHONPATH /opt/deploy/intel_owl
 ENV LOG_PATH /var/log/intel_owl
 
 RUN mkdir -p ${LOG_PATH} \
-    ${LOG_PATH}/django ${LOG_PATH}/uwsgi ${LOG_PATH}/peframe ${LOG_PATH}/thug \
+    ${LOG_PATH}/django ${LOG_PATH}/uwsgi ${LOG_PATH}/peframe ${LOG_PATH}/thug ${LOG_PATH}/capa \
     /opt/deploy/files_required /opt/deploy/yara /opt/deploy/configuration
 
 RUN apt-get update \

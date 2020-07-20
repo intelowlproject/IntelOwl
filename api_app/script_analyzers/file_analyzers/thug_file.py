@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 class ThugFile(FileAnalyzer, DockerBasedAnalyzer):
     name: str = "Thug"
     base_url: str = "http://thug:4001"
-    url: str = "http://thug:4001/thug"
+    url: str = f"{base_url}/thug"
     # http request polling max number of tries
     max_tries: int = 7
     # interval between http request polling (in secs)
@@ -35,7 +35,7 @@ class ThugFile(FileAnalyzer, DockerBasedAnalyzer):
         logger.debug(f"Making request with arguments: {self.args} <- {repr(self)}")
         try:
             resp1 = requests.post(
-                self.url, files={fname: binary}, data={"args": self.args,},
+                self.url, files={fname: binary}, data={"args": self.args},
             )
         except requests.exceptions.ConnectionError:
             raise AnalyzerConfigurationException(

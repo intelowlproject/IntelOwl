@@ -42,7 +42,6 @@ shell2http.register_command(endpoint="thug", command_name="thug -qZF")
 
 @app.route("/get-result")
 def get_result():
-    result = {}
     dir_name = request.args.get("name", None)
     try:
         f_loc = safe_join("/tmp/thug", dir_name) + "/analysis/json/analysis.json"

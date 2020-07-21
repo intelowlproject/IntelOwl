@@ -719,6 +719,7 @@
     },
     "PEframe_Scan": {
         "type": "file",
+        "supported_filetypes": ["application/x-dosexec"],
         "python_module": "peframe_run",
         "description": "Perform static analysis on Portable Executable malware and malicious MS Office documents"
     },
@@ -730,6 +731,7 @@
     },
     "Capa_Info": {
         "type": "file",
+        "supported_filetypes": ["application/x-dosexec"],
         "python_module": "capa_info_run",
         "description": "capa detects capabilities in executable files"
     },

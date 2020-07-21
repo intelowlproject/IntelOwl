@@ -280,7 +280,7 @@ class IPAnalyzersTests(TestCase):
         ).start()
         self.assertEqual(report.get("success", False), True)
 
-    def test_vt_get(self, mock_get=None, mock_post=None):
+    def test_vt2_get(self, mock_get=None, mock_post=None):
         report = vt2_get.VirusTotalv2(
             "VT_v2_Get",
             self.job_id,
@@ -461,7 +461,7 @@ class DomainAnalyzersTests(TestCase):
         ).start()
         self.assertEqual(report.get("success", False), True)
 
-    def test_vt_get(self, mock_get=None, mock_post=None):
+    def test_vt2_get(self, mock_get=None, mock_post=None):
         report = vt2_get.VirusTotalv2(
             "VT_v2_Get",
             self.job_id,
@@ -658,8 +658,8 @@ class URLAnalyzersTests(TestCase):
         ).start()
         self.assertEqual(report.get("success", False), True)
 
-    def test_vt_get(self, mock_get=None, mock_post=None):
-        report = vt3_get.VirusTotalv3(
+    def test_vt2_get(self, mock_get=None, mock_post=None):
+        report = vt2_get.VirusTotalv2(
             "VT_v2_Get",
             self.job_id,
             self.observable_name,
@@ -739,8 +739,8 @@ class HashAnalyzersTests(TestCase):
         ).start()
         self.assertEqual(report.get("success", False), True)
 
-    def test_vt_get(self, mock_get=None, mock_post=None):
-        report = vt3_get.VirusTotalv3(
+    def test_vt2_get(self, mock_get=None, mock_post=None):
+        report = vt2_get.VirusTotalv2(
             "VT_v2_Get",
             self.job_id,
             self.observable_name,

@@ -720,12 +720,13 @@
     "PEframe_Scan": {
         "type": "file",
         "python_module": "peframe_run",
-        "description": "Perform static analysis on Portable Executable malware and malicious MS Office documents",
-        "requires_configuration": true,
-        "additional_config_params": {
-            "max_tries": 15,
-            "poll_distance": 5
-        }
+        "description": "Perform static analysis on Portable Executable malware and malicious MS Office documents"
+    },
+    "BoxJS_Scan_JavaScript": {
+        "type": "file",
+        "supported_filetypes": ["application/x-javascript", "application/javascript", "text/javascript"],
+        "python_module": "boxjs_run",
+        "description": "A tool for studying JavaScript malware"
     },
     "Capa_Info": {
         "type": "file",

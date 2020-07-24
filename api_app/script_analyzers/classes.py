@@ -194,13 +194,12 @@ class DockerBasedAnalyzer(ABC):
     """
 
     name: str
+    url: str
     max_tries: int
     poll_distance: int
-    base_url: str
-    url: str
 
     @staticmethod
-    def _raise_in_case_bad_request(name, resp):
+    def __raise_in_case_bad_request(name, resp):
         """
         Raises:
             :class: `AnalyzerRunException`, if bad status code or no key in response
@@ -230,13 +229,12 @@ class DockerBasedAnalyzer(ABC):
         return True
 
     @staticmethod
-    def _query_for_result(url, key):
+    def __query_for_result(url, key):
         headers = {"Accept": "application/json"}
         resp = requests.get(f"{url}?key={key}", headers=headers)
         return resp.status_code, resp.json()
 
-    def _poll_for_result(self, req_key):
-        allowed_statuses = ("success", "reported_with_fails", "failed")
+    def __poll_for_result(self, req_key):
         got_result = False
         json_data = {}
         for chance in range(self.max_tries):
@@ -246,53 +244,78 @@ class DockerBasedAnalyzer(ABC):
                 f"<-- {self.__repr__()}"
             )
             try:
-                status_code, json_data = self._query_for_result(self.url, req_key)
+                status_code, json_data = self.__query_for_result(self.url, req_key)
             except (requests.RequestException, json.JSONDecodeError) as e:
                 raise AnalyzerRunException(e)
-            analysis_status = json_data.get("status", None)
-            if analysis_status in allowed_statuses:
-                got_result = True
-                break
-            else:
+            status = json_data.get("status", None)
+            if status and status == "running":
                 logger.info(
                     f"Poll number #{chance+1}, status: 'running' <-- {self.__repr__()}"
                 )
+            else:
+                got_result = True
+                break
 
         if not got_result:
             raise AnalyzerRunException("max polls tried without getting any result.")
         return json_data
 
-    def _get_result_from_a_dir(self, key, dir_file_name):
+    def _docker_run(self, req_data, req_files=None):
         """
-        In case the analyzer does not output result to stdout,
-        we define a `/get-result` route to fetch the final result
-        from a given directory/file.
+        Helper function that takes of care of requesting new analysis,
+        reading response, polling for result and exception handling for a
+        docker based analyzer.
 
-        :param key: str
-            Unique key for the particular analysis
-        :param name: str
-            File/directory name to read result from
+        Args:
+            req_data (Dict): Dict of request JSON.
+            req_files (Dict, optional): Dict of files to send. Defaults to None.
 
-        :raises AnalyzerRunException:
-            analysis was requested but get-result failed
+        Raises:
+            AnalyzerConfigurationException: In case docker service is not running
+            AnalyzerRunException: Any other error
 
-        :returns: dict()
-            Final Report
+        Returns:
+            Dict: Final analysis results
         """
-        errors = []
-        # step #1: this is to check whether analysis completed or not..
-        poll_resp = self._poll_for_result(key)
-        err = poll_resp.get("error", None)
-        if err:
-            # this may return error, but we can still try to fetch report
-            errors.append(err)
 
-        # step #2: try to fetch the final report..
-        logger.info(f"Fetching final report <-- {self.__repr__()}")
-        result_resp = requests.get(f"{self.base_url}/get-result?name={dir_file_name}")
-        if not result_resp.status_code == 200:
-            e = result_resp.json().get("error", "")
-            errors.append(e)
-            raise AnalyzerRunException(", ".join(errors))
+        # handle in case this is a test
+        if hasattr(self, "is_test"):
+            # only happens in case of testing
+            self.report["success"] = True
+            return {}
 
-        return result_resp.json()
+        # step #1: request new analysis
+        args = req_data.get("args", [])
+        logger.debug(f"Making request with arguments: {args} <- {self.__repr__()}")
+        try:
+            if req_files:
+                form_data = {"request_json": json.dumps(req_data)}
+                resp1 = requests.post(self.url, files=req_files, data=form_data)
+            else:
+                resp1 = requests.post(self.url, json=req_data)
+        except requests.exceptions.ConnectionError:
+            raise AnalyzerConfigurationException(
+                f"{self.name} docker container is not running."
+            )
+
+        # step #2: raise AnalyzerRunException in case of error
+        assert self.__raise_in_case_bad_request(self.name, resp1)
+
+        # step #3: if no error, continue and try to fetch result
+        key = resp1.json().get("key")
+        final_resp = self.__poll_for_result(key)
+        err = final_resp.get("error", None)
+        report = final_resp.get("report", None)
+
+        if not report:
+            raise AnalyzerRunException(f"Report is empty. Reason: {err}")
+
+        if isinstance(report, dict):
+            return report
+
+        try:
+            report = json.loads(report)
+        except json.JSONDecodeError:
+            raise AnalyzerRunException(str(err))
+
+        return report

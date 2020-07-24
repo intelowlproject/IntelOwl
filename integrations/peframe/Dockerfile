@@ -4,8 +4,9 @@ ENV PROJECT_PATH /opt/deploy
 ENV LOG_PATH /var/log/intel_owl/peframe
 
 # update and install packages
-RUN apk update && apk upgrade
-RUN apk add --no-cache git libssl1.1 swig g++ make openssl-dev libffi-dev libmagic
+RUN apk --no-cache update \ 
+    && apk add --no-cache git libssl1.1 swig g++ make openssl-dev libffi-dev libmagic \
+    && pip3 install --upgrade pip
 
 # Build and install PEframe
 RUN git clone https://github.com/guelfoweb/peframe.git ${PROJECT_PATH}/peframe

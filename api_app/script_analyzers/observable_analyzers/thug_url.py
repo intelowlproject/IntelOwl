@@ -1,21 +1,15 @@
-import requests
-import logging
-from urllib.parse import urlparse
+import secrets
 
 from api_app.script_analyzers.classes import ObservableAnalyzer, DockerBasedAnalyzer
-from api_app.exceptions import AnalyzerConfigurationException, AnalyzerRunException
-
-logger = logging.getLogger(__name__)
 
 
 class ThugUrl(ObservableAnalyzer, DockerBasedAnalyzer):
     name: str = "Thug"
-    base_url: str = "http://thug:4001"
-    url: str = f"{base_url}/thug"
+    url: str = "http://thug:4001/thug"
     # http request polling max number of tries
-    max_tries: int = 7
+    max_tries: int = 15
     # interval between http request polling (in seconds)
-    poll_distance: int = 60
+    poll_distance: int = 30
 
     def set_config(self, additional_config_params):
         self.args = self._thug_args_builder(additional_config_params)
@@ -44,36 +38,14 @@ class ThugUrl(ObservableAnalyzer, DockerBasedAnalyzer):
         return args
 
     def run(self):
+        # construct a valid directory name into which thug will save the result
+        tmp_dir = secrets.token_hex(4)
         # make request data
-        if self.observable_classification == "url":
-            tmp_dir = str(urlparse(self.observable_name).netloc)
-        elif self.observable_classification == "domain":
-            tmp_dir = self.observable_name
-        else:
-            raise AnalyzerRunException(
-                f"Requested type: '{self.observable_classification}' is not supported'"
-                f"Supported are: URL, Domain."
-            )
-        self.args.extend(["-n", "/tmp/thug/" + tmp_dir, self.observable_name])
+        self.args.extend(["-n", "/home/thug/" + tmp_dir, self.observable_name])
 
-        # step #1: request new analysis
-        logger.debug(
-            f"Making request with arguments: {self.args} <-- {self.__repr__()}."
-        )
-        try:
-            resp1 = requests.post(self.url, json={"args": self.args,})
-        except requests.exceptions.ConnectionError:
-            raise AnalyzerConfigurationException(
-                f"{self.name} docker container is not running."
-            )
+        req_data = {
+            "args": self.args,
+            "callback_context": {"read_result_from": tmp_dir},
+        }
 
-        # step #2: if this is a test, then just return here..
-        if self.is_test:
-            return {}
-
-        # step #3: raise AnalyzerRunException in case of error
-        assert self._raise_in_case_bad_request(self.name, resp1)
-
-        # otherwise, continue/ try to fetch result
-        key = resp1.json().get("key", None)
-        return self._get_result_from_a_dir(key, tmp_dir)
+        return self._docker_run(req_data=req_data, req_files=None)

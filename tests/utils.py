@@ -32,7 +32,9 @@ def mocked_requests(*args, **kwargs):
 
 
 def mocked_docker_analyzer_get(*args, **kwargs):
-    return MockResponse({"key": "test", "status": "success", "report": {}}, 200)
+    return MockResponse(
+        {"key": "test", "returncode": 0, "report": {"test": "This is a test."}}, 200
+    )
 
 
 def mocked_docker_analyzer_post(*args, **kwargs):

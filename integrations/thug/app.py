@@ -2,10 +2,12 @@
 import os
 import logging
 import json
+import shutil
 
 # web imports
-from flask import Flask, jsonify, make_response, safe_join, request
+from flask import Flask, safe_join
 from flask_executor import Executor
+from flask_executor.futures import Future
 from flask_shell2http import Shell2HTTP
 
 # get flask-shell2http logger instance
@@ -36,19 +38,47 @@ app.config.update(CONFIG)
 executor = Executor(app)
 shell2http = Shell2HTTP(app, executor)
 
-# with this, we can make http calls to the endpoint: /thug
-shell2http.register_command(endpoint="thug", command_name="thug -qZF")
 
-
-@app.route("/get-result")
-def get_result():
-    dir_name = request.args.get("name", None)
-    try:
-        f_loc = safe_join("/tmp/thug", dir_name) + "/analysis/json/analysis.json"
+# Functions
+def intercept_result(context, future: Future) -> None:
+    """
+    Thug doesn't output result to standard output but to a file,
+    using this callback function,
+    we intercept the future object and update it's result attribute
+    by reading the final analysis result from the saved result file
+    before it is ready to be consumed.
+    """
+    # 1. get current result object
+    res = future.result()
+    # 2. dir from which we will read final analysis result
+    dir_name = context.get("read_result_from", None)
+    if not dir_name:
+        res["error"] += ", No specified file to read result from"
+        if res.get("returncode", -1) == 0:
+            res["returncode"] = -1
+    else:
+        # 3. read saved result file, if it exists
+        dir_loc = safe_join("/home/thug", dir_name)
+        f_loc = dir_loc + "/analysis/json/analysis.json"
         if not os.path.exists(f_loc):
-            raise Exception(f"File {f_loc} does not exists.")
-        with open(f_loc, "r") as fp:
-            result = json.load(fp)
-        return make_response(jsonify(result), 200)
-    except Exception as e:
-        return make_response(jsonify(error=str(e)), 400)
+            res["error"] += f", result file {f_loc} does not exists."
+            if res.get("returncode", -1) == 0:
+                res["returncode"] = -1
+        else:
+            with open(f_loc, "r") as fp:
+                try:
+                    res["report"] = json.load(fp)
+                except json.JSONDecodeError:
+                    res["report"] = fp.read()
+
+    # 4. set final result after modifications
+    future._result = res
+
+    # 5. directory can be removed now
+    shutil.rmtree(dir_loc, ignore_errors=True)
+
+
+# with this, we can make http calls to the endpoint: /thug
+shell2http.register_command(
+    endpoint="thug", command_name="thug -qZF", callback_fn=intercept_result
+)

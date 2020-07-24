@@ -6,8 +6,9 @@ import shutil
 import secrets
 
 # web imports
-from flask import Flask, jsonify, make_response, safe_join, request
+from flask import Flask, safe_join
 from flask_executor import Executor
+from flask_executor.futures import Future
 from flask_shell2http import Shell2HTTP
 
 # Logging configuration
@@ -35,27 +36,10 @@ app.config["SECRET_KEY"] = secrets.token_hex(16)
 executor = Executor(app)
 shell2http = Shell2HTTP(app, executor)
 
-# with this, we can make http calls to the endpoint: /boxjs
-shell2http.register_command(endpoint="boxjs", command_name="box-js")
 
-
-@app.route("/get-result")
-def get_result():
-    # user provides us with dir_name i.e {filename}.results
-    fname = request.args.get("name", None)
-    try:
-        if not fname:
-            raise Exception("No name in GET request's query params.")
-        dir_loc = safe_join("/tmp/boxjs", fname + ".results")
-        result = read_files_and_make_result(dir_loc)
-
-        return make_response(jsonify(result), 200)
-    except Exception as e:
-        return make_response(jsonify(error=str(e)), 400)
-
-
-def read_files_and_make_result(dir_loc):
-    result = {}
+# Functions
+def read_files_and_make_report(dir_loc):
+    report = {}
     files_to_read = [
         "IOC.json",
         "snippets.json",
@@ -68,14 +52,44 @@ def read_files_and_make_result(dir_loc):
     for fname in files_to_read:
         try:
             with open(safe_join(dir_loc, fname)) as fp:
-                if fname.endswith(".json"):
-                    result[fname] = json.load(fp)
-                else:
-                    result[fname] = fp.readlines()
+                try:
+                    report[fname] = json.load(fp)
+                except json.JSONDecodeError:
+                    report[fname] = fp.readlines()
         except FileNotFoundError:
-            result[fname] = f"FileNotFoundError: {fname}"
+            report[fname] = f"FileNotFoundError: {fname}"
 
-    # Remove the directory
-    shutil.rmtree(dir_loc, ignore_errors=True)
+    return report
 
-    return result
+
+def intercept_result(context, future: Future) -> None:
+    """
+    Box-JS doesn't output result to standard output but to a file,
+    using this callback function,
+    we intercept the future object and update it's result attribute
+    by reading the final analysis result from the saved result file
+    before it is ready to be consumed.
+    """
+    # get current result
+    res = future.result()
+    fname = context.get("read_result_from", "")
+    dir_loc = safe_join("/tmp/boxjs", fname + ".results")
+    if not fname:
+        if res.get("returncode", -1) == 0:
+            res["returncode"] = -1
+        raise Exception("No file specified to read result from")
+    try:
+        res["report"] = read_files_and_make_report(dir_loc)
+    except Exception as e:
+        res["error"] += str(e)
+    finally:
+        # set final result
+        future._result = res
+        # Remove the directory
+        shutil.rmtree(dir_loc, ignore_errors=True)
+
+
+# with this, we can make http calls to the endpoint: /boxjs
+shell2http.register_command(
+    endpoint="boxjs", command_name="box-js", callback_fn=intercept_result
+)

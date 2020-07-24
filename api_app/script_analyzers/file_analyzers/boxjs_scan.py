@@ -1,21 +1,14 @@
-import requests
-import logging
-
 from api_app.helpers import get_binary
 from api_app.script_analyzers.classes import FileAnalyzer, DockerBasedAnalyzer
-from api_app.exceptions import AnalyzerConfigurationException
-
-logger = logging.getLogger(__name__)
 
 
 class BoxJS(FileAnalyzer, DockerBasedAnalyzer):
     name: str = "box-js"
-    base_url: str = "http://boxjs:4003"
-    url: str = f"{base_url}/boxjs"
+    url: str = "http://boxjs:4003/boxjs"
     # http request polling max number of tries
-    max_tries: int = 20
+    max_tries: int = 5
     # interval between http request polling (in secs)
-    poll_distance: int = 10
+    poll_distance: int = 12
 
     def run(self):
         # construct a valid filename into which thug will save the result
@@ -23,30 +16,23 @@ class BoxJS(FileAnalyzer, DockerBasedAnalyzer):
         # get the file to send
         binary = get_binary(self.job_id)
         # construct arguments, For example this corresponds to,
-        # box-js sample.js --output-dir=result --timeout 200 --no-kill --no-shell-error
+        # box-js sample.js --output-dir=/tmp/boxjs --no-kill ...
         args = [
             f"@{fname}",
             "--output-dir=/tmp/boxjs",
-            "--timeout 200",
             "--no-kill",
             "--no-shell-error",
             "--no-echo",
         ]
+        # Box-js by default has a timeout of 10 seconds,
+        # but subprocess is not able to catch that
+        # that's why it's necessary to provide a custom timeout of
+        # 10 seconds only to the subprocess itself.
+        req_data = {
+            "args": args,
+            "timeout": 10,
+            "callback_context": {"read_result_from": fname},
+        }
+        req_files = {fname: binary}
 
-        # step #1: request new analysis
-        logger.debug(f"Making request with arguments: {args} <- {self.__repr__()}")
-        try:
-            resp1 = requests.post(
-                self.url, files={fname: binary}, data={"args": args,},
-            )
-        except requests.exceptions.ConnectionError:
-            raise AnalyzerConfigurationException(
-                f"{self.name} docker container is not running."
-            )
-
-        # step #2: raise AnalyzerRunException in case of error
-        assert self._raise_in_case_bad_request(self.name, resp1)
-
-        # step #3: if no error, continue try to fetch result
-        key = resp1.json().get("key", None)
-        return self._get_result_from_a_dir(key, fname)
+        return self._docker_run(req_data, req_files)

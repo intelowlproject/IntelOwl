@@ -2,15 +2,15 @@
 ---
 version: '3'
 
+# All additional integrations should be added following this format only.
+
 services:
-  thug:
-    build:
-      context: ./integrations/thug
-      dockerfile: Dockerfile
-    container_name: intelowl_thug
+  boxjs:
+    image: intelowlproject/intelowl_boxjs
+    container_name: intelowl_boxjs
     restart: unless-stopped
     expose:
-      - "4001"
+      - "4003"
     env_file:
       - env_file_integrations
     volumes:

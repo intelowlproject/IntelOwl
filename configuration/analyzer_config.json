@@ -717,14 +717,23 @@
         "description": "static PDF analysis",
         "python_module": "pdfinfo_run"
     },
-    "PEframe_Scan_File": {
+    "PEframe_Scan": {
         "type": "file",
+        "supported_filetypes": ["application/x-dosexec"],
         "python_module": "peframe_run",
-        "description": "Perform static analysis on Portable Executable malware and malicious MS Office documents",
-        "requires_configuration": true,
-        "additional_config_params": {
-            "max_tries": 20
-        }
+        "description": "Perform static analysis on Portable Executable malware and malicious MS Office documents"
+    },
+    "BoxJS_Scan_JavaScript": {
+        "type": "file",
+        "supported_filetypes": ["application/x-javascript", "application/javascript", "text/javascript"],
+        "python_module": "boxjs_run",
+        "description": "A tool for studying JavaScript malware"
+    },
+    "Capa_Info": {
+        "type": "file",
+        "supported_filetypes": ["application/x-dosexec"],
+        "python_module": "capa_info_run",
+        "description": "capa detects capabilities in executable files"
     },
     "Thug_URL_Info_winxpie60_SIMPLE_SCAN": {
         "type": "observable",

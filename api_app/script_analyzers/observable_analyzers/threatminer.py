@@ -21,7 +21,7 @@ class Threatminer(classes.ObservableAnalyzer):
             uri = "host.php"
         else:
             raise AnalyzerRunException(
-                f"not supported observable type {self.observable_classificatio}. "
+                f"not supported observable type {self.observable_classification}. "
                 "Supported are IP and Domain"
             )
 

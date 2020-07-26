@@ -16,6 +16,8 @@ from api_app.script_analyzers.file_analyzers import (
     signature_info,
     peframe,
     thug_file,
+    capa_info,
+    boxjs_scan,
 )
 from api_app.script_analyzers.observable_analyzers import (
     abuseipdb,
@@ -713,6 +715,15 @@ def peframe_run(
     ).start()
 
 
+@shared_task(soft_time_limit=500)
+def capa_info_run(
+    analyzer_name, job_id, filepath, filename, md5, additional_config_params
+):
+    capa_info.CapaInfo(
+        analyzer_name, job_id, filepath, filename, md5, additional_config_params
+    ).start()
+
+
 @shared_task(soft_time_limit=600)
 def thug_file_run(
     analyzer_name, job_id, filepath, filename, md5, additional_config_params
@@ -736,4 +747,11 @@ def thug_url_run(
         observable_name,
         observable_classification,
         additional_config_params,
+    ).start()
+
+
+@shared_task(soft_time_limit=400)
+def boxjs_run(analyzer_name, job_id, filepath, filename, md5, additional_config_params):
+    boxjs_scan.BoxJS(
+        analyzer_name, job_id, filepath, filename, md5, additional_config_params
     ).start()

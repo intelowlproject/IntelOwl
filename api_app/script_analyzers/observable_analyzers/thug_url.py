@@ -1,21 +1,15 @@
-import requests
-import logging
-from urllib.parse import urlparse
+import secrets
 
 from api_app.script_analyzers.classes import ObservableAnalyzer, DockerBasedAnalyzer
-from api_app.exceptions import AnalyzerRunException
-
-logger = logging.getLogger(__name__)
 
 
 class ThugUrl(ObservableAnalyzer, DockerBasedAnalyzer):
     name: str = "Thug"
-    base_url: str = "http://thug:4001"
     url: str = "http://thug:4001/thug"
     # http request polling max number of tries
-    max_tries: int = 7
+    max_tries: int = 15
     # interval between http request polling (in seconds)
-    poll_distance: int = 60
+    poll_distance: int = 30
 
     def set_config(self, additional_config_params):
         self.args = self._thug_args_builder(additional_config_params)
@@ -44,48 +38,14 @@ class ThugUrl(ObservableAnalyzer, DockerBasedAnalyzer):
         return args
 
     def run(self):
-        if self.observable_classification == "url":
-            tmp_dir = str(urlparse(self.observable_name).netloc)
-        elif self.observable_classification == "domain":
-            tmp_dir = self.observable_name
-        else:
-            raise AnalyzerRunException(
-                f"Requested type: '{self.observable_classification}' is not supported'"
-                f"Supported are: URL, Domain."
-            )
-        self.args.extend(["-n", "/tmp/thug/" + tmp_dir, self.observable_name])
-        logger.debug(
-            f"Making request with arguments: {self.args}"
-            f" for analyzer: {self.analyzer_name}, job_id: #{self.job_id}."
-        )
-        # request new analysis
-        r = requests.post(self.url, json={"args": self.args,})
-        # handle cases in case of error
-        if self._check_status_code(self.name, r):
-            # if no error, continue..
-            errors = []
-            # this is to check whether analysis completed or not..
-            key = r.json().get("key", None)
-            if not key:
-                if self.is_test:
-                    # if this is a test, then just return here..
-                    return {}
-                # else raise exception
-                raise AnalyzerRunException(
-                    f"Unexpected Error. Please check {self.name} container's log files."
-                )
-            resp = self._poll_for_result(key)
-            err = resp.get("error", None)
-            if err:
-                errors.append(err)
-            logger.info(
-                f"Fetching final report ({self.analyzer_name}, job_id: #{self.job_id})"
-            )
-            # if no error, we fetch the final report..
-            result_resp = requests.get(f"{self.base_url}/get-result?name={tmp_dir}")
-            if not result_resp.status_code == 200:
-                e = resp.json()["error"]
-                errors.append(e)
-                raise AnalyzerRunException(", ".join(errors))
+        # construct a valid directory name into which thug will save the result
+        tmp_dir = secrets.token_hex(4)
+        # make request data
+        self.args.extend(["-n", "/home/thug/" + tmp_dir, self.observable_name])
 
-            return result_resp.json()
+        req_data = {
+            "args": self.args,
+            "callback_context": {"read_result_from": tmp_dir},
+        }
+
+        return self._docker_run(req_data=req_data, req_files=None)

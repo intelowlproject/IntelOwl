@@ -3,8 +3,12 @@ FROM python:3.6
 ENV PYTHONUNBUFFERED 1
 ENV DJANGO_SETTINGS_MODULE intel_owl.settings
 ENV PYTHONPATH /opt/deploy/intel_owl
+ENV LOG_PATH /var/log/intel_owl
 
-RUN mkdir -p /var/log/intel_owl /var/log/intel_owl/django /var/log/intel_owl/uwsgi /opt/deploy/files_required /opt/deploy/yara /opt/deploy/configuration
+RUN mkdir -p ${LOG_PATH} \
+    ${LOG_PATH}/django ${LOG_PATH}/uwsgi \
+    ${LOG_PATH}/peframe ${LOG_PATH}/thug ${LOG_PATH}/capa ${LOG_PATH}/box-js \
+    /opt/deploy/files_required /opt/deploy/yara /opt/deploy/configuration
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends apt-utils libsasl2-dev libssl-dev \
@@ -20,9 +24,9 @@ RUN pip3 install --compile -r requirements.txt
 
 COPY . $PYTHONPATH
 
-RUN touch /var/log/intel_owl/django/api_app.log /var/log/intel_owl/django/api_app_errors.log \
-    && touch /var/log/intel_owl/django/celery.log /var/log/intel_owl/django/celery_errors.log \
-    && chown -R www-data:www-data /var/log/intel_owl /opt/deploy/ \
+RUN touch ${LOG_PATH}/django/api_app.log ${LOG_PATH}/django/api_app_errors.log \
+    && touch ${LOG_PATH}/django/celery.log ${LOG_PATH}/django/celery_errors.log \
+    && chown -R www-data:www-data ${LOG_PATH} /opt/deploy/ \
 # this is cause stringstifer creates this directory during the build and cause celery to crash
     && rm -rf /root/.local
 

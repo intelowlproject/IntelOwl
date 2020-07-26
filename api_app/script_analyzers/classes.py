@@ -104,6 +104,9 @@ class BaseAnalyzerMixin(ABC):
         self.__job_id = job_id
         self.set_config(additional_config_params)  # lgtm [py/init-calls-subclass]
 
+    def __repr__(self):
+        return f"({self.analyzer_name}, job_id: #{self.job_id})"
+
 
 class ObservableAnalyzer(BaseAnalyzerMixin):
     """
@@ -130,13 +133,13 @@ class ObservableAnalyzer(BaseAnalyzerMixin):
 
     def before_run(self):
         logger.info(
-            "started analyzer: {}, job_id: {}, observable: {}"
+            "STARTED analyzer: {}, job_id: {}, observable: {}"
             "".format(self.analyzer_name, self.job_id, self.observable_name)
         )
 
     def after_run(self):
         logger.info(
-            f"ended analyzer: {self.analyzer_name}, job_id: {self.job_id},"
+            f"ENDED analyzer: {self.analyzer_name}, job_id: {self.job_id},"
             f"observable: {self.observable_name}"
         )
 
@@ -181,62 +184,138 @@ class DockerBasedAnalyzer(ABC):
     when defining a docker based analyzer.
     See `peframe.py` for example.
 
+    :param name: str
+        The name of the analyzer service as defined in compose file
+        and log directory
     :param max_tries: int
         maximum no. of tries when HTTP polling for result.
     :param poll_distance: int
         interval between HTTP polling.
     """
 
+    name: str
+    url: str
     max_tries: int
     poll_distance: int
 
     @staticmethod
-    def _check_status_code(name, req):
-        # handle errors manually
-        if req.status_code == 404:
-            raise AnalyzerRunException(f"{name} docker container is not running.")
-        if req.status_code == 400:
-            err = req.json()["error"]
+    def __raise_in_case_bad_request(name, resp):
+        """
+        Raises:
+            :class: `AnalyzerRunException`, if bad status code or no key in response
+        """
+        # different error messages for different cases
+        if resp.status_code == 404:
+            raise AnalyzerConfigurationException(
+                f"{name} docker container is not running."
+            )
+        if resp.status_code == 400:
+            err = resp.json().get("error", "")
             raise AnalyzerRunException(err)
-        if req.status_code == 500:
+        if resp.status_code == 500:
             raise AnalyzerRunException(
                 f"Internal Server Error in {name} docker container"
             )
+        # check to make sure there was a valid key in response
+        key = resp.json().get("key", None)
+        if not key:
+            raise AnalyzerRunException(
+                "Unexpected Error. "
+                f"Please check log files under /var/log/intel_owl/{name.lower()}/"
+            )
         # just in case couldn't catch the error manually
-        req.raise_for_status()
+        resp.raise_for_status()
 
         return True
 
     @staticmethod
-    def _query_for_result(url, key):
+    def __query_for_result(url, key):
         headers = {"Accept": "application/json"}
         resp = requests.get(f"{url}?key={key}", headers=headers)
         return resp.status_code, resp.json()
 
-    def _poll_for_result(self, req_key):
+    def __poll_for_result(self, req_key):
         got_result = False
+        json_data = {}
         for chance in range(self.max_tries):
             time.sleep(self.poll_distance)
             logger.info(
-                f"({self.analyzer_name}, job_id: #{self.job_id}) polling."
-                f"Try #{chance+1}. Starting the query..."
+                f"Result Polling. Try #{chance+1}. Starting the query..."
+                f"<-- {self.__repr__()}"
             )
             try:
-                status_code, json_data = self._query_for_result(self.url, req_key)
+                status_code, json_data = self.__query_for_result(self.url, req_key)
             except (requests.RequestException, json.JSONDecodeError) as e:
                 raise AnalyzerRunException(e)
-            analysis_status = json_data.get("status", None)
-            if analysis_status in ["success", "reported_with_fails", "failed"]:
+            status = json_data.get("status", None)
+            if status and status == "running":
+                logger.info(
+                    f"Poll number #{chance+1}, status: 'running' <-- {self.__repr__()}"
+                )
+            else:
                 got_result = True
                 break
-            elif status_code == 404:
-                pass
-            else:
-                logger.info(
-                    f"Result Polling. Try n:{chance+1}, status: {analysis_status}"
-                    f" ({self.analyzer_name}, job_id: #{self.job_id})"
-                )
 
         if not got_result:
             raise AnalyzerRunException("max polls tried without getting any result.")
         return json_data
+
+    def _docker_run(self, req_data, req_files=None):
+        """
+        Helper function that takes of care of requesting new analysis,
+        reading response, polling for result and exception handling for a
+        docker based analyzer.
+
+        Args:
+            req_data (Dict): Dict of request JSON.
+            req_files (Dict, optional): Dict of files to send. Defaults to None.
+
+        Raises:
+            AnalyzerConfigurationException: In case docker service is not running
+            AnalyzerRunException: Any other error
+
+        Returns:
+            Dict: Final analysis results
+        """
+
+        # handle in case this is a test
+        if hasattr(self, "is_test"):
+            # only happens in case of testing
+            self.report["success"] = True
+            return {}
+
+        # step #1: request new analysis
+        args = req_data.get("args", [])
+        logger.debug(f"Making request with arguments: {args} <- {self.__repr__()}")
+        try:
+            if req_files:
+                form_data = {"request_json": json.dumps(req_data)}
+                resp1 = requests.post(self.url, files=req_files, data=form_data)
+            else:
+                resp1 = requests.post(self.url, json=req_data)
+        except requests.exceptions.ConnectionError:
+            raise AnalyzerConfigurationException(
+                f"{self.name} docker container is not running."
+            )
+
+        # step #2: raise AnalyzerRunException in case of error
+        assert self.__raise_in_case_bad_request(self.name, resp1)
+
+        # step #3: if no error, continue and try to fetch result
+        key = resp1.json().get("key")
+        final_resp = self.__poll_for_result(key)
+        err = final_resp.get("error", None)
+        report = final_resp.get("report", None)
+
+        if not report:
+            raise AnalyzerRunException(f"Report is empty. Reason: {err}")
+
+        if isinstance(report, dict):
+            return report
+
+        try:
+            report = json.loads(report)
+        except json.JSONDecodeError:
+            raise AnalyzerRunException(str(err))
+
+        return report

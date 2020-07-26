@@ -134,12 +134,22 @@ table, th, td {
   <tr>
     <td>PEframe</td>
     <td>4000</td>
-    <td><code>PEframe_Scan_File</code></td>
+    <td><code>PEframe_Scan</code></td>
   </tr>
   <tr>
     <td>Thug</td>
     <td>4001</td>
     <td><code>Thug_URL_Info_*</code>, <code>Thug_HTML_Info_*</code></td>
+  </tr>
+  <tr>
+    <td>FireEye Capa</td>
+    <td>4002</td>
+    <td><code>Capa_Info</code></td>
+  </tr>
+  <tr>
+    <td>Box-JS</td>
+    <td>4003</td>
+    <td><code>BoxJS_Scan_JavaScript</code></td>
   </tr>
 </table>
 

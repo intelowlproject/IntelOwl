@@ -23,6 +23,7 @@ from api_app.script_analyzers.file_analyzers import (
     thug_file,
     capa_info,
     boxjs_scan,
+    apkid,
 )
 from api_app.script_analyzers.observable_analyzers import vt3_get
 
@@ -382,6 +383,35 @@ class FileAnalyzersJSTests(TestCase):
     def test_boxjs(self, mock_get=None, mock_post=None):
         report = boxjs_scan.BoxJS(
             "BoxJS_Scan_JavaScript",
+            self.job_id,
+            self.filepath,
+            self.filename,
+            self.md5,
+            {},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+
+class FileAnalyzersAPKTests(TestCase):
+    def setUp(self):
+        params = {
+            "source": "test",
+            "is_sample": True,
+            "file_mimetype": "application/vnd.android.package-archive",
+            "force_privacy": False,
+            "analyzers_requested": ["test"],
+        }
+        filename = "sample.apk"
+        test_job = _generate_test_job_with_file(params, filename)
+        self.job_id = test_job.id
+        self.filepath, self.filename = general.get_filepath_filename(self.job_id)
+        self.md5 = test_job.md5
+
+    @mock_connections(patch("requests.get", side_effect=mocked_docker_analyzer_get))
+    @mock_connections(patch("requests.post", side_effect=mocked_docker_analyzer_post))
+    def test_apkid(self, mock_get=None, mock_post=None):
+        report = apkid.APKiD(
+            "APKiD_Scan_APK_DEX_JAR",
             self.job_id,
             self.filepath,
             self.filename,

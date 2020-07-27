@@ -45,6 +45,11 @@ def calculate_mimetype(file_buffer, file_name):
             calculated_mimetype = "application/x-vbscript"
         elif file_name.endswith(".iqy"):
             calculated_mimetype = "text/x-ms-iqy"
+        elif file_name.endswith(".apk"):
+            calculated_mimetype = "application/vnd.android.package-archive"
+        elif file_name.endswith(".dex"):
+            calculated_mimetype = "application/x-dex"
+
     return calculated_mimetype
 
 

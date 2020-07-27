@@ -151,6 +151,11 @@ table, th, td {
     <td>4003</td>
     <td><code>BoxJS_Scan_JavaScript</code></td>
   </tr>
+  <tr>
+    <td>APK Analyzers</td>
+    <td>4004</td>
+    <td><code>APKiD_Scan_APK_DEX_JAR</code></td>
+  </tr>
 </table>
 
 In the project, you can find template files named `.env_template` and `.env_file_integrations_template`.

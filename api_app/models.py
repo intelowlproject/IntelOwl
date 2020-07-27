@@ -25,7 +25,7 @@ class Job(models.Model):
     source = models.CharField(max_length=50, blank=False, default="none")
     is_sample = models.BooleanField(blank=False, default=False)
     md5 = models.CharField(max_length=50, blank=False)
-    observable_name = models.CharField(max_length=50, blank=True)
+    observable_name = models.CharField(max_length=128, blank=True)
     observable_classification = models.CharField(max_length=50, blank=True)
     file_name = models.CharField(max_length=50, blank=True)
     file_mimetype = models.CharField(max_length=50, blank=True)

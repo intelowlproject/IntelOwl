@@ -717,6 +717,12 @@
         "description": "static PDF analysis",
         "python_module": "pdfinfo_run"
     },
+    "APKiD_Scan_APK_DEX_JAR": {
+        "type": "file",
+        "supported_filetypes": ["application/zip", "application/java-archive", "application/vnd.android.package-archive", "application/x-dex"],
+        "python_module": "apkid_run",
+        "description": "APKiD identifies many compilers, packers, obfuscators, and other weird stuff from an APK or DEX file."
+    },
     "PEframe_Scan": {
         "type": "file",
         "supported_filetypes": ["application/x-dosexec"],

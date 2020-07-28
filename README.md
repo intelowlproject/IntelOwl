@@ -125,7 +125,10 @@ license terms.
 [Yara community rules](https://github.com/Yara-Rules),
 [Neo23x0 Yara sigs](https://github.com/Neo23x0/signature-base),
 [Intezer Yara sigs](https://github.com/intezer/yara-rules),
-[McAfee Yara sigs](https://github.com/advanced-threat-research/Yara-Rules)
+[McAfee Yara sigs](https://github.com/advanced-threat-research/Yara-Rules),
+[APKiD](https://github.com/rednaga/APKiD/blob/master/LICENSE.COMMERCIAL),
+[Box-JS](https://github.com/CapacitorSet/box-js/blob/master/LICENSE),
+[Capa](https://github.com/fireeye/capa/blob/master/LICENSE.txt)
 
 ### Acknowledgments
 

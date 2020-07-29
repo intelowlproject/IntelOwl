@@ -1,5 +1,6 @@
 # utils.py: useful utils for mocking requests and responses for testing
 
+
 # class for mocking responses
 class MockResponse:
     def __init__(self, json_data, status_code):

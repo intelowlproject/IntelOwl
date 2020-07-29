@@ -46,9 +46,12 @@ Documentation about IntelOwl installation, usage, contribution can be found at h
 - Static RTF Analysis
 - Static PDF Analysis
 - Static PE Analysis
+- Static APK Analysis
 - Static Generic File Analysis
 - Strings analysis
 - PE Signature verification
+- PE Capabilities Extraction
+- Emulated Javascript Analysis
 
 **Free modules that require additional configuration**:
 

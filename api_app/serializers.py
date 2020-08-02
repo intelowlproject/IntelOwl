@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework_guardian.serializers import ObjectPermissionsAssignmentMixin
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.token_blacklist.models import OutstandingToken
 from rest_framework_simplejwt.utils import datetime_from_epoch
@@ -13,7 +14,47 @@ class TagSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class JobSerializer(serializers.ModelSerializer):
+class JobListSerializer(serializers.ModelSerializer):
+    """
+    Job model's list serializer.
+    Used for list()
+    """
+
+    class Meta:
+        model = Job
+        exclude = ("analysis_reports", "errors", "md5", "source")
+        """fields = (
+            "id",
+            "is_sample",
+            "observable_name",
+            "observable_classification",
+            "file_name",
+            "file_mimetype",
+            "status",
+            "tags",
+            "process_time",
+            "no_of_analyzers_executed"
+        )"""
+
+    tags = TagSerializer(many=True, read_only=True)
+    process_time = serializers.SerializerMethodField()
+    no_of_analyzers_executed = serializers.SerializerMethodField()
+
+    def get_process_time(self, obj: Job):
+        if not obj.finished_analysis_time:
+            return None
+        t = obj.finished_analysis_time - obj.received_request_time
+        return round(t.total_seconds(), 2)
+
+    def get_no_of_analyzers_executed(self, obj: Job):
+        if obj.run_all_available_analyzers:
+            return "all_available_analyzers"
+        n1 = len(obj.analyzers_to_execute)
+        n2 = len(obj.analyzers_requested)
+        return f"{n1}/{n2}"
+
+
+class JobSerializer(ObjectPermissionsAssignmentMixin, serializers.ModelSerializer):
     """
     Job model's serializer.
     Used for create(), retrieve()
@@ -27,7 +68,17 @@ class JobSerializer(serializers.ModelSerializer):
     class Meta:
         model = Job
         fields = "__all__"
-        extra_kwargs = {"tags": {"required": False}}
+
+    def get_permissions_map(self, created):
+        """
+        'view' permission is applied to all the groups the requesting user belongs to.
+        """
+        current_user = self.context["request"].user
+        grps = current_user.groups.all()
+
+        return {
+            "view_job": [*grps],
+        }
 
     def create(self, validated_data):
         tags = validated_data.pop("tags_id", None)
@@ -36,19 +87,6 @@ class JobSerializer(serializers.ModelSerializer):
             job.tags.set(tags)
 
         return job
-
-
-class JobListSerializer(serializers.ModelSerializer):
-    """
-    Job model's list serializer.
-    Used for list()
-    """
-
-    tags = TagSerializer(many=True, read_only=True)
-
-    class Meta:
-        model = Job
-        exclude = ("analysis_reports", "errors")
 
 
 class TokenRefreshPatchedSerializer(serializers.Serializer):

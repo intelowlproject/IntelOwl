@@ -30,7 +30,7 @@ class Job(models.Model):
     file_name = models.CharField(max_length=50, blank=True)
     file_mimetype = models.CharField(max_length=50, blank=True)
     status = models.CharField(
-        max_length=50, blank=False, choices=STATUS, default="pending"
+        max_length=32, blank=False, choices=STATUS, default="pending"
     )
     analyzers_requested = postgres_fields.ArrayField(
         models.CharField(max_length=900), blank=True, default=list

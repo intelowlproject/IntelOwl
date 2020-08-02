@@ -1,6 +1,7 @@
 import logging
 
 from api_app import models, serializers, helpers
+from api_app.permissions import CustomModelPermissions
 from .script_analyzers import general
 
 from wsgiref.util import FileWrapper
@@ -10,6 +11,7 @@ from django.db.models import Q
 from rest_framework.response import Response
 from rest_framework import status, viewsets
 from rest_framework.decorators import api_view
+from rest_framework_guardian.filters import ObjectPermissionsFilter
 
 
 logger = logging.getLogger(__name__)
@@ -172,7 +174,9 @@ def send_analysis_request(request):
 
         params = {"source": source}
 
-        serializer = serializers.JobSerializer(data=data_received)
+        serializer = serializers.JobSerializer(
+            data=data_received, context={"request": request}
+        )
         if serializer.is_valid():
             serialized_data = serializer.validated_data
             logger.info(f"serialized_data: {serialized_data}")
@@ -242,7 +246,7 @@ def send_analysis_request(request):
 
         else:
             error_message = f"serializer validation failed: {serializer.errors}"
-            logger.info(error_message)
+            logger.error(error_message)
             return Response(
                 {"error": error_message}, status=status.HTTP_400_BAD_REQUEST
             )
@@ -406,17 +410,24 @@ class JobViewSet(viewsets.ReadOnlyModelViewSet):
         if wrong HTTP method
     """
 
-    queryset = models.Job.objects.all()
+    queryset = models.Job.objects.order_by("-received_request_time").all()
     serializer_class = serializers.JobSerializer
+    serializer_action_classes = {
+        "list": serializers.JobListSerializer,
+    }
+    permission_classes = (CustomModelPermissions,)
+    filter_backends = (ObjectPermissionsFilter,)
 
-    def list(self, request):
-        queryset = (
-            models.Job.objects.order_by("-received_request_time")
-            .defer("analysis_reports", "errors")
-            .all()
-        )
-        serializer = serializers.JobListSerializer(queryset, many=True)
-        return Response(serializer.data)
+    def get_serializer_class(self, *args, **kwargs):
+        """
+        Instantiate the list of serializers per action from class attribute
+        (must be defined).
+        """
+        kwargs["partial"] = True
+        try:
+            return self.serializer_action_classes[self.action]
+        except (KeyError, AttributeError):
+            return super(JobViewSet, self).get_serializer_class()
 
 
 class TagViewSet(viewsets.ModelViewSet):

@@ -364,6 +364,7 @@ def get_analyzer_configs(request):
         )
 
 
+# ToDo: filtering + permissions
 @api_view(["GET"])
 def download_sample(request):
     """

@@ -13,10 +13,11 @@ from intel_owl.settings import CLIENT_TOKEN_LIFETIME_DAYS, SIMPLE_JWT as jwt_set
 class JobAdminView(GuardedModelAdmin):
     list_display = (
         "id",
+        "status",
         "source",
         "observable_name",
-        "status",
         "observable_classification",
+        "file_name",
         "file_mimetype",
         "received_request_time",
     )

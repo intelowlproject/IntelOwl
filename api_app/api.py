@@ -1,7 +1,7 @@
 import logging
 
 from api_app import models, serializers, helpers
-from api_app.permissions import CustomModelPermissions
+from api_app.permissions import ExtendedObjectPermissions
 from .script_analyzers import general
 
 from wsgiref.util import FileWrapper
@@ -11,6 +11,8 @@ from django.db.models import Q
 from rest_framework.response import Response
 from rest_framework import status, viewsets
 from rest_framework.decorators import api_view
+from rest_framework.permissions import DjangoObjectPermissions
+from guardian.decorators import permission_required_or_403
 from rest_framework_guardian.filters import ObjectPermissionsFilter
 
 
@@ -21,6 +23,7 @@ logger = logging.getLogger(__name__)
 
 
 @api_view(["GET"])
+@permission_required_or_403("api_app.view_job")
 def ask_analysis_availability(request):
     """
     This is useful to avoid repeating the same analysis multiple times.
@@ -117,12 +120,13 @@ def ask_analysis_availability(request):
     except Exception as e:
         logger.exception(f"ask_analysis_availability requester:{source} error:{e}.")
         return Response(
-            {"error": "error in ask_analysis_availability. Check logs."},
+            {"detail": "error in ask_analysis_availability. Check logs."},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
 
 
 @api_view(["POST"])
+@permission_required_or_403("api_app.add_job")
 def send_analysis_request(request):
     """
     This endpoint allows to start a Job related to a file or an observable
@@ -271,11 +275,12 @@ def send_analysis_request(request):
     except Exception as e:
         logger.exception(f"receive_analysis_request requester:{source} error:{e}.")
         return Response(
-            {"error": "error in send_analysis_request. Check logs"},
+            {"detail": "error in send_analysis_request. Check logs"},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
 
 
+# We should delete this route as it is same as GET jobs/{id}
 @api_view(["GET"])
 def ask_analysis_result(request):
     """
@@ -359,6 +364,7 @@ def get_analyzer_configs(request):
         )
 
 
+# ToDo: filtering + permissions
 @api_view(["GET"])
 def download_sample(request):
     """
@@ -374,22 +380,19 @@ def download_sample(request):
         try:
             job = models.Job.objects.get(id=data_received["job_id"])
         except models.Job.DoesNotExist:
-            return Response({"answer": "not found"}, status=status.HTTP_200_OK)
+            return Response({"detail": "not found"}, status=status.HTTP_404_NOT_FOUND)
         if not job.is_sample:
             return Response(
-                {"answer": "job without sample"}, status=status.HTTP_400_BAD_REQUEST
+                {"detail": "job without sample"}, status=status.HTTP_400_BAD_REQUEST
             )
-        file_mimetype = job.file_mimetype
-        response = HttpResponse(FileWrapper(job.file), content_type=file_mimetype)
-        response["Content-Disposition"] = "attachment; filename={}".format(
-            job.file_name
-        )
+        response = HttpResponse(FileWrapper(job.file), content_type=job.file_mimetype)
+        response["Content-Disposition"] = f"attachment; filename={job.file_name}"
         return response
 
     except Exception as e:
         logger.exception(f"download_sample requester:{str(request.user)} error:{e}.")
         return Response(
-            {"error": "error in download_sample. Check logs."},
+            {"detail": "error in download_sample. Check logs."},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
 
@@ -415,7 +418,7 @@ class JobViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_action_classes = {
         "list": serializers.JobListSerializer,
     }
-    permission_classes = (CustomModelPermissions,)
+    permission_classes = (ExtendedObjectPermissions,)
     filter_backends = (ObjectPermissionsFilter,)
 
     def get_serializer_class(self, *args, **kwargs):
@@ -434,6 +437,7 @@ class TagViewSet(viewsets.ModelViewSet):
     """
     REST endpoint to pefrom CRUD operations on Job tags.
     Requires authentication.
+    POST/PUT/DELETE requires model/object level permission.
 
     :methods_allowed:
         GET, POST, PUT, DELETE, OPTIONS
@@ -448,3 +452,4 @@ class TagViewSet(viewsets.ModelViewSet):
 
     queryset = models.Tag.objects.all()
     serializer_class = serializers.TagSerializer
+    permission_classes = (DjangoObjectPermissions,)

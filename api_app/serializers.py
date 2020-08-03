@@ -8,10 +8,24 @@ from api_app.models import Job, Tag
 from intel_owl.settings import SIMPLE_JWT as jwt_settings
 
 
-class TagSerializer(serializers.ModelSerializer):
+class TagSerializer(ObjectPermissionsAssignmentMixin, serializers.ModelSerializer):
     class Meta:
         model = Tag
         fields = "__all__"
+
+    def get_permissions_map(self, created):
+        """
+        'change' and 'delete' permission
+        is applied to all the groups the requesting user belongs to.
+        But everyone has 'view' permission.
+        """
+        current_user = self.context["request"].user
+        user_grps = [*current_user.groups.all()]
+
+        return {
+            "change_tag": user_grps,
+            "delete_tag": user_grps,
+        }
 
 
 class JobListSerializer(serializers.ModelSerializer):
@@ -22,8 +36,7 @@ class JobListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Job
-        exclude = ("analysis_reports", "errors", "md5", "source")
-        """fields = (
+        fields = (
             "id",
             "is_sample",
             "observable_name",
@@ -33,8 +46,8 @@ class JobListSerializer(serializers.ModelSerializer):
             "status",
             "tags",
             "process_time",
-            "no_of_analyzers_executed"
-        )"""
+            "no_of_analyzers_executed",
+        )
 
     tags = TagSerializer(many=True, read_only=True)
     process_time = serializers.SerializerMethodField()
@@ -48,7 +61,7 @@ class JobListSerializer(serializers.ModelSerializer):
 
     def get_no_of_analyzers_executed(self, obj: Job):
         if obj.run_all_available_analyzers:
-            return "all_available_analyzers"
+            return "all available analyzers"
         n1 = len(obj.analyzers_to_execute)
         n2 = len(obj.analyzers_requested)
         return f"{n1}/{n2}"

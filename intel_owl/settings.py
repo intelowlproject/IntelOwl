@@ -151,8 +151,14 @@ if AWS_SQS:
         "wait_time_seconds": 20,
     }
 
+# Django Guardian
+GUARDIAN_RAISE_403 = True
+
 # Auth backends
-AUTHENTICATION_BACKENDS = ("django.contrib.auth.backends.ModelBackend",)
+AUTHENTICATION_BACKENDS = (
+    "django.contrib.auth.backends.ModelBackend",
+    "guardian.backends.ObjectPermissionBackend",
+)
 
 # Password validation
 

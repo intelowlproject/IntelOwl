@@ -1,7 +1,7 @@
-from rest_framework.permissions import DjangoModelPermissions
+from rest_framework.permissions import DjangoObjectPermissions
 
 
-class CustomModelPermissions(DjangoModelPermissions):
+class ExtendedObjectPermissions(DjangoObjectPermissions):
     """
     Similar to `DjangoObjectPermissions`, but adding 'view' permissions.
     GitHub:

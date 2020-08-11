@@ -10,7 +10,7 @@ def save_profile(sender, instance, created, **kwargs):
     """
     Everytime a new user is created, add it to the DefaultGlobal group.
     """
-    if instance.username in ["test", "AnonymousUser"]:
+    if instance.username == "AnonymousUser":
         # NoOp during testing
         return
 

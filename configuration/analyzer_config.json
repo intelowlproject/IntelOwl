@@ -535,7 +535,12 @@
         "disabled": false,
         "decription": "scan a file on a Cuckoo instance",
         "requires_configuration": true,
-        "python_module": "cuckoo_run"
+        "python_module": "cuckoo_run",
+        "additional_config_params": {
+            "api_key_name": "CUCKOO_API_KEY",
+            "max_post_tries": 5,
+            "max_poll_tries": 20
+        }
     },
     "Intezer_Scan": {
         "type": "file",

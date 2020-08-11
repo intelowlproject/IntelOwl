@@ -111,10 +111,11 @@ You can find them in the `configuration` directory.
 In case you enable HTTPS, remember to set the environment variable `HTTPS_ENABLED` as "enabled" to increment the security of the application.
 
 There are 3 options to execute the web server:
-#####HTTP only (default)
+
+##### HTTP only (default)
 The project would use the default deployment configuration and HTTP only.
 
-#####HTTPS with your own certificate
+##### HTTPS with your own certificate
 The project provides a template file to configure Nginx to serve HTTPS: `intel_owl_nginx_https`.
 
 You should change `ssl_certificate`, `ssl_certificate_key` and `server_name` in that file.
@@ -234,10 +235,32 @@ The project uses `docker-compose`. You have to move to the project main director
 
 
 ## After deployment
+
 ### Users creation
 You may want to run `docker exec -ti intel_owl_uwsgi python3 manage.py createsuperuser` after first run to create a superuser.
 Then you can add other users directly from the Django Admin Interface after having logged with the superuser account.
 
+### Django Groups & Permissions (Optional, Advanced Usage)
+The application makes use of [Django's built-in permissions system](https://docs.djangoproject.com/en/3.0/topics/auth/default/#permissions-and-authorization). It provides a way to assign permissions to specific users and groups of users.
+
+As an administrator here's what you need to know,
+- Each user should belong to atleast a single group and permissions should be assigned to these groups. Please refrain from assigning user level permissions.
+- When you create a first normal user, a group with name `DefaultGlobal` is created with all permissions granted. Every new user automatically gets added to this group.
+   - This is done because most admins won't need to deal with user permissions and this way, they don't have to.
+   - If you don't want a global group (with all permissions) but custom groups with custom permissions,
+   just strip `DefaultGlobal` of all permissions but do *not* delete it.
+
+The permissions work the way one would expect,
+- `api_app | Job | view job` allows users to fetch list of all jobs he/she has permission for or a particular job with it's ID.
+- `api_app | Job | create job` allows users to request new analysis. When user creates a job (requests new analysis),
+    - the object level `view` permission is applied to all groups the requesting user belongs to or to all groups (depending on the parameters passed). 
+    - the object level `change` and `delete` permission is restricted to superusers/admin.
+- `api_app | Tag | create tag` allows users to create new tags. When user creates a new tag,
+    - this new tag is visible (object level `view` permission) to each and every group but,
+    - the object level `change` and `delete` permission is given to only those groups the requesting user belongs to. 
+    - This is done because tag labels and colors are unique columns and the admin in most cases would want to define tags that are usable (but not modifiable) by users of all groups.
+- `api_app | Tag | view tag` allows users to fetch list of all tags or a particular tag with it's ID.
+- `api_app | Tag | change tag` allows users to edit a tag granted that user has the object level permission for the particular tag.
 
 ## Update to the most recent version
 To update the project with the most recent available code you have to follow these steps:

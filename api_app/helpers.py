@@ -57,7 +57,7 @@ def filter_analyzers(
             analyzer_config = analyzers_config[analyzer]
 
             if serialized_data["is_sample"]:
-                if not analyzer_config.get("type", "") == "file":
+                if not analyzer_config.get("type", None) == "file":
                     raise NotRunnableAnalyzer(
                         f"{analyzer} won't be run because does not support files."
                     )
@@ -85,7 +85,7 @@ def filter_analyzers(
                     """
                     raise NotRunnableAnalyzer(raise_message)
             else:
-                if not analyzer_config.get("type", "") == "observable":
+                if not analyzer_config.get("type", None) == "observable":
                     raise NotRunnableAnalyzer(
                         f"{analyzer} won't be run because does not support observable."
                     )
@@ -98,16 +98,16 @@ def filter_analyzers(
                          observable type {serialized_data['observable_classification']}.
                         """
                     )
-            if analyzer_config.get("disabled", ""):
+            if analyzer_config.get("disabled", False):
                 raise NotRunnableAnalyzer(f"{analyzer} is disabled, won't be run.")
             if serialized_data["force_privacy"] and analyzer_config.get(
-                "leaks_info", ""
+                "leaks_info", False
             ):
                 raise NotRunnableAnalyzer(
                     f"{analyzer} won't be run because it leaks info externally."
                 )
             if serialized_data["disable_external_analyzers"] and analyzer_config.get(
-                "external_service", ""
+                "external_service", False
             ):
                 raise NotRunnableAnalyzer(
                     f"{analyzer} won't be run because you filtered external analyzers."

@@ -1,6 +1,7 @@
 import logging
 
 from api_app import models, serializers, helpers
+from api_app.permissions import ExtendedObjectPermissions
 from .script_analyzers import general
 
 from wsgiref.util import FileWrapper
@@ -10,6 +11,9 @@ from django.db.models import Q
 from rest_framework.response import Response
 from rest_framework import status, viewsets
 from rest_framework.decorators import api_view
+from rest_framework.permissions import DjangoObjectPermissions
+from guardian.decorators import permission_required_or_403
+from rest_framework_guardian.filters import ObjectPermissionsFilter
 
 
 logger = logging.getLogger(__name__)
@@ -19,6 +23,7 @@ logger = logging.getLogger(__name__)
 
 
 @api_view(["GET"])
+@permission_required_or_403("api_app.view_job")
 def ask_analysis_availability(request):
     """
     This is useful to avoid repeating the same analysis multiple times.
@@ -115,12 +120,13 @@ def ask_analysis_availability(request):
     except Exception as e:
         logger.exception(f"ask_analysis_availability requester:{source} error:{e}.")
         return Response(
-            {"error": "error in ask_analysis_availability. Check logs."},
+            {"detail": "error in ask_analysis_availability. Check logs."},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
 
 
 @api_view(["POST"])
+@permission_required_or_403("api_app.add_job")
 def send_analysis_request(request):
     """
     This endpoint allows to start a Job related to a file or an observable
@@ -145,6 +151,9 @@ def send_analysis_request(request):
         list of id's of tags to apply to job
     :param [run_all_available_analyzers]: bool
         default False
+    :param [private]: bool
+        default False,
+        enable it to allow view permissions to only requesting user's groups.
     :param [force_privacy]: bool
         default False,
         enable it if you want to avoid to run analyzers with privacy issues
@@ -172,7 +181,9 @@ def send_analysis_request(request):
 
         params = {"source": source}
 
-        serializer = serializers.JobSerializer(data=data_received)
+        serializer = serializers.JobSerializer(
+            data=data_received, context={"request": request}
+        )
         if serializer.is_valid():
             serialized_data = serializer.validated_data
             logger.info(f"serialized_data: {serialized_data}")
@@ -242,7 +253,7 @@ def send_analysis_request(request):
 
         else:
             error_message = f"serializer validation failed: {serializer.errors}"
-            logger.info(error_message)
+            logger.error(error_message)
             return Response(
                 {"error": error_message}, status=status.HTTP_400_BAD_REQUEST
             )
@@ -267,12 +278,13 @@ def send_analysis_request(request):
     except Exception as e:
         logger.exception(f"receive_analysis_request requester:{source} error:{e}.")
         return Response(
-            {"error": "error in send_analysis_request. Check logs"},
+            {"detail": "error in send_analysis_request. Check logs"},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
 
 
 @api_view(["GET"])
+@permission_required_or_403("api_app.view_job")
 def ask_analysis_result(request):
     """
     Endpoint to retrieve the status and results of a specific Job based on its ID
@@ -299,6 +311,12 @@ def ask_analysis_result(request):
         job_id = data_received["job_id"]
         try:
             job = models.Job.objects.get(id=job_id)
+            # check permission
+            if not request.user.has_perm("api_app.view_job", job):
+                return Response(
+                    {"detail": "You don't have permission to perform this operation."},
+                    status=status.HTTP_403_FORBIDDEN,
+                )
         except models.Job.DoesNotExist:
             response_dict = {"status": "not_available"}
         else:
@@ -308,7 +326,7 @@ def ask_analysis_result(request):
                 "job_id": str(job.id),
             }
             # adding elapsed time
-            finished_analysis_time = getattr(job, "finished_analysis_time", "")
+            finished_analysis_time = getattr(job, "finished_analysis_time", None)
             if not finished_analysis_time:
                 finished_analysis_time = helpers.get_now()
             elapsed_time = finished_analysis_time - job.received_request_time
@@ -360,32 +378,37 @@ def download_sample(request):
     """
     this method is used to download a sample from a Job ID
     :param request: job_id
-    :return 200 found, 404 not found
+    :returns: 200 if found, 404 not found, 403 forbidden
     """
     try:
         data_received = request.query_params
         logger.info(f"Get binary by Job ID. Data received {data_received}")
         if "job_id" not in data_received:
             return Response({"error": "821"}, status=status.HTTP_400_BAD_REQUEST)
+        # get job object
         try:
             job = models.Job.objects.get(id=data_received["job_id"])
         except models.Job.DoesNotExist:
-            return Response({"answer": "not found"}, status=status.HTTP_200_OK)
+            return Response({"detail": "not found"}, status=status.HTTP_404_NOT_FOUND)
+        # check permission
+        if not request.user.has_perm("api_app.view_job", job):
+            return Response(
+                {"detail": "You don't have permission to perform this operation."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        # make sure it is a sample
         if not job.is_sample:
             return Response(
-                {"answer": "job without sample"}, status=status.HTTP_400_BAD_REQUEST
+                {"detail": "job without sample"}, status=status.HTTP_400_BAD_REQUEST
             )
-        file_mimetype = job.file_mimetype
-        response = HttpResponse(FileWrapper(job.file), content_type=file_mimetype)
-        response["Content-Disposition"] = "attachment; filename={}".format(
-            job.file_name
-        )
+        response = HttpResponse(FileWrapper(job.file), content_type=job.file_mimetype)
+        response["Content-Disposition"] = f"attachment; filename={job.file_name}"
         return response
 
     except Exception as e:
         logger.exception(f"download_sample requester:{str(request.user)} error:{e}.")
         return Response(
-            {"error": "error in download_sample. Check logs."},
+            {"detail": "error in download_sample. Check logs."},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
 
@@ -406,23 +429,31 @@ class JobViewSet(viewsets.ReadOnlyModelViewSet):
         if wrong HTTP method
     """
 
-    queryset = models.Job.objects.all()
+    queryset = models.Job.objects.order_by("-received_request_time").all()
     serializer_class = serializers.JobSerializer
+    serializer_action_classes = {
+        "list": serializers.JobListSerializer,
+    }
+    permission_classes = (ExtendedObjectPermissions,)
+    filter_backends = (ObjectPermissionsFilter,)
 
-    def list(self, request):
-        queryset = (
-            models.Job.objects.order_by("-received_request_time")
-            .defer("analysis_reports", "errors")
-            .all()
-        )
-        serializer = serializers.JobListSerializer(queryset, many=True)
-        return Response(serializer.data)
+    def get_serializer_class(self, *args, **kwargs):
+        """
+        Instantiate the list of serializers per action from class attribute
+        (must be defined).
+        """
+        kwargs["partial"] = True
+        try:
+            return self.serializer_action_classes[self.action]
+        except (KeyError, AttributeError):
+            return super(JobViewSet, self).get_serializer_class()
 
 
 class TagViewSet(viewsets.ModelViewSet):
     """
     REST endpoint to pefrom CRUD operations on Job tags.
     Requires authentication.
+    POST/PUT/DELETE requires model/object level permission.
 
     :methods_allowed:
         GET, POST, PUT, DELETE, OPTIONS
@@ -437,3 +468,4 @@ class TagViewSet(viewsets.ModelViewSet):
 
     queryset = models.Tag.objects.all()
     serializer_class = serializers.TagSerializer
+    permission_classes = (DjangoObjectPermissions,)

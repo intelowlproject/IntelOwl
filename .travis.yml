@@ -4,6 +4,7 @@ branches:
   - develop
 sudo: required
 language: python
+cache: pip
 dist: bionic
 python:
 - '3.6'

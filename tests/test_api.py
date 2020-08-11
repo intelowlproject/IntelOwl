@@ -124,7 +124,8 @@ class ApiTests(TestCase):
             "Threatminer_PDNS",
             "Threatminer_Reports_Tagging",
             "Threatminer_Subdomains",
-            "ONYPHE" "URLhaus",
+            "ONYPHE",
+            "URLhaus",
         ]
         observable_name = os.environ.get("TEST_DOMAIN", "google.com")
         md5 = hashlib.md5(observable_name.encode("utf-8")).hexdigest()

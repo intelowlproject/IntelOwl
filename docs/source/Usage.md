@@ -3,7 +3,7 @@
 ## Client
 Intel Owl main objective is to provide a single API interface to query in order to retrieve threat intelligence at scale.
 
-There are multiple ways to interact with the Intel Owl APIs, 
+There are multiple ways to interact with the Intel Owl APIs,
 
 1. IntelOwl-ng (Web Interface)
 

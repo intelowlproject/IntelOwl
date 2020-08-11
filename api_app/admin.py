@@ -25,7 +25,7 @@ class JobAdminView(GuardedModelAdmin):
     search_fields = ("source", "md5", "observable_name")
 
 
-class TagAdminView(admin.ModelAdmin):
+class TagAdminView(GuardedModelAdmin):
     list_display = ("id", "label", "color")
     search_fields = ("label", "color")
 

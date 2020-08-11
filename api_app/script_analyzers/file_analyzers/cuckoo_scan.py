@@ -3,7 +3,7 @@ import time
 import requests
 import logging
 
-from api_app.exceptions import AnalyzerRunException
+from api_app.exceptions import AnalyzerRunException, AnalyzerConfigurationException
 from api_app.helpers import get_binary
 from api_app.script_analyzers.classes import FileAnalyzer
 from intel_owl import secrets
@@ -22,8 +22,7 @@ class CuckooAnalysis(FileAnalyzer):
             self.session.headers["Authorization"] = f"Bearer {api_key}"
         else:
             logger.info(
-                "job_id {} md5 {} analyzer {} no API key set."
-                "".format(self.job_id, self.md5, self.analyzer_name)
+                f"{self.__repr__()}, (md5: {self.md5}) -> Continuing w/o API key.."
             )
         self.cuckoo_url = secrets.get_secret("CUCKOO_URL")
         self.task_id = 0
@@ -35,7 +34,7 @@ class CuckooAnalysis(FileAnalyzer):
 
     def run(self):
         if not self.cuckoo_url:
-            raise AnalyzerRunException("cuckoo URL missing")
+            raise AnalyzerConfigurationException("cuckoo URL missing")
 
         binary = get_binary(self.job_id)
         if not binary:

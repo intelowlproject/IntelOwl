@@ -151,6 +151,9 @@ def send_analysis_request(request):
         list of id's of tags to apply to job
     :param [run_all_available_analyzers]: bool
         default False
+    :param [private]: bool
+        default False,
+        enable it to allow view permissions to only requesting user's groups.
     :param [force_privacy]: bool
         default False,
         enable it if you want to avoid to run analyzers with privacy issues
@@ -280,8 +283,8 @@ def send_analysis_request(request):
         )
 
 
-# We should delete this route as it is same as GET jobs/{id}
 @api_view(["GET"])
+@permission_required_or_403("api_app.view_job")
 def ask_analysis_result(request):
     """
     Endpoint to retrieve the status and results of a specific Job based on its ID
@@ -308,6 +311,12 @@ def ask_analysis_result(request):
         job_id = data_received["job_id"]
         try:
             job = models.Job.objects.get(id=job_id)
+            # check permission
+            if not request.user.has_perm("api_app.view_job", job):
+                return Response(
+                    {"detail": "You don't have permission to perform this operation."},
+                    status=status.HTTP_403_FORBIDDEN,
+                )
         except models.Job.DoesNotExist:
             response_dict = {"status": "not_available"}
         else:
@@ -317,7 +326,7 @@ def ask_analysis_result(request):
                 "job_id": str(job.id),
             }
             # adding elapsed time
-            finished_analysis_time = getattr(job, "finished_analysis_time", "")
+            finished_analysis_time = getattr(job, "finished_analysis_time", None)
             if not finished_analysis_time:
                 finished_analysis_time = helpers.get_now()
             elapsed_time = finished_analysis_time - job.received_request_time
@@ -364,13 +373,12 @@ def get_analyzer_configs(request):
         )
 
 
-# ToDo: filtering + permissions
 @api_view(["GET"])
 def download_sample(request):
     """
     this method is used to download a sample from a Job ID
     :param request: job_id
-    :return 200 found, 404 not found
+    :returns: 200 if found, 404 not found, 403 forbidden
     """
     try:
         data_received = request.query_params

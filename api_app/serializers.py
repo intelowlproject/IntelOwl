@@ -1,3 +1,4 @@
+from django.contrib.auth.models import Group
 from rest_framework import serializers
 from rest_framework_guardian.serializers import ObjectPermissionsAssignmentMixin
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -6,6 +7,10 @@ from rest_framework_simplejwt.utils import datetime_from_epoch
 
 from api_app.models import Job, Tag
 from intel_owl.settings import SIMPLE_JWT as jwt_settings
+
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class TagSerializer(ObjectPermissionsAssignmentMixin, serializers.ModelSerializer):
@@ -77,24 +82,21 @@ class JobSerializer(ObjectPermissionsAssignmentMixin, serializers.ModelSerialize
     tags_id = serializers.PrimaryKeyRelatedField(
         many=True, write_only=True, queryset=Tag.objects.all()
     )
-    file = serializers.SerializerMethodField()
-
-    def get_file(self, obj):
-        if not obj.is_sample:
-            return None
-        uri = f"/api/download_sample?job_id={obj.id}"
-        return self.context["request"].build_absolute_uri(uri)
 
     class Meta:
         model = Job
-        fields = "__all__"
+        exclude = ("file",)
 
     def get_permissions_map(self, created):
         """
-        'view' permission is applied to all the groups the requesting user belongs to.
+        'view' permission is applied to all the groups the requesting user belongs to
+        if private is True.
         """
-        current_user = self.context["request"].user
-        grps = current_user.groups.all()
+        rqst = self.context["request"]
+        if rqst.data.get("private", False):
+            grps = rqst.user.groups.all()
+        else:
+            grps = Group.objects.all()
 
         return {
             "view_job": [*grps],

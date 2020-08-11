@@ -8,10 +8,6 @@ from rest_framework_simplejwt.utils import datetime_from_epoch
 from api_app.models import Job, Tag
 from intel_owl.settings import SIMPLE_JWT as jwt_settings
 
-import logging
-
-logger = logging.getLogger(__name__)
-
 
 class TagSerializer(ObjectPermissionsAssignmentMixin, serializers.ModelSerializer):
     class Meta:

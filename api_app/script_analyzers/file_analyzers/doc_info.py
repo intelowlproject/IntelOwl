@@ -39,24 +39,24 @@ class DocInfo(FileAnalyzer):
                 olevba_results["macro_data"] = macro_data
 
                 # example output
-                """
-                {'description': 'Runs when the Word document is opened',
-                 'keyword': 'AutoOpen',
-                 'type': 'AutoExec'},
-                {'description': 'May run an executable file or a system command',
-                 'keyword': 'Shell',
-                 'type': 'Suspicious'},
-                {'description': 'May run an executable file or a system command',
-                 'keyword': 'WScript.Shell',
-                 'type': 'Suspicious'},
-                {'description': 'May run an executable file or a system command',
-                 'keyword': 'Run',
-                 'type': 'Suspicious'},
-                {'description': 'May run PowerShell commands',
-                 'keyword': 'powershell',
-                 'type': 'Suspicious'},
-                {'description': '9BA55BE5', 'keyword': 'xxx', 'type': 'Hex String'},
-                 """
+                #
+                # {'description': 'Runs when the Word document is opened',
+                #  'keyword': 'AutoOpen',
+                #  'type': 'AutoExec'},
+                # {'description': 'May run an executable file or a system command',
+                #  'keyword': 'Shell',
+                #  'type': 'Suspicious'},
+                # {'description': 'May run an executable file or a system command',
+                #  'keyword': 'WScript.Shell',
+                #  'type': 'Suspicious'},
+                # {'description': 'May run an executable file or a system command',
+                #  'keyword': 'Run',
+                #  'type': 'Suspicious'},
+                # {'description': 'May run PowerShell commands',
+                #  'keyword': 'powershell',
+                #  'type': 'Suspicious'},
+                # {'description': '9BA55BE5', 'keyword': 'xxx', 'type': 'Hex String'},
+
                 analyzer_results = vbaparser.analyze_macros(show_decoded_strings=True)
                 # it gives None if it does not find anything
                 if analyzer_results:

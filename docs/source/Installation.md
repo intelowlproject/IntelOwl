@@ -1,5 +1,36 @@
 # Installation
 
+## TL;DR
+Obviously we strongly suggest to read through all the page to configure IntelOwl in the most appropriate way.
+
+However, if you feel lazy, you could just install and test IntelOwl with the following steps.
+
+
+```
+git clone https://github.com/intelowlproject/IntelOwl
+cd IntelOwl
+
+# copy env files
+cp env_file_postgres_template env_file_postgres
+cp env_file_app_template env_file_app
+
+# (optional) edit env files before starting the app to configure some analyzers
+# see "Deployment preparation" paragraph below
+
+# (optional) enable all docker-based analyzers
+cp env_file_app_integrations_template env_file_app_integrations
+cp .env_template .env
+# in .env file comment line 10 and uncomment line 13
+
+# start the app
+docker-compose up -d
+
+# create a super user 
+docker exec -ti intel_owl_uwsgi python3 manage.py createsuperuser
+
+# now the app is running on localhost:80
+```
+
 ## Deployment
 The project leverages docker-compose for a classic server deployment. So, you need [docker](https://docs.docker.com/get-docker/) and [docker-compose](https://docs.docker.com/compose/install/) installed in your machine.
 
@@ -200,7 +231,7 @@ Also, you need to set the environment variable `AWS_SQS` to `True` to activate t
 After having properly configured the environment files as suggested previously, you can run the image.
 The project uses `docker-compose`. You have to move to the project main directory to properly run it.
 
-`docker-compose up`
+`docker-compose up -d`
 
 
 ## After deployment
@@ -230,3 +261,11 @@ The permissions work the way one would expect,
     - This is done because tag labels and colors are unique columns and the admin in most cases would want to define tags that are usable (but not modifiable) by users of all groups.
 - `api_app | Tag | view tag` allows users to fetch list of all tags or a particular tag with it's ID.
 - `api_app | Tag | change tag` allows users to edit a tag granted that user has the object level permission for the particular tag.
+
+## Update to the most recent version
+To update the project with the most recent available code you have to follow these steps:
+```
+docker pull intelowlproject/intelowl_ng:latest  -> updates the webclient
+cd <your_intel_owl_directory> && git pull   -> updates the project
+docker-compose down && docker-compose up -d   -> restart the IntelOwl application
+```

@@ -1,8 +1,13 @@
 from django.db import models
 from django.contrib.postgres import fields as postgres_fields
+from django.utils import timezone
 
-from api_app import helpers
 from .exceptions import AnalyzerRunException
+
+
+def file_directory_path(instance, filename):
+    return f"job_{timezone.now().strftime('%Y_%m_%d_%H_%M_%S')}_{filename}"
+
 
 STATUS = [
     ("pending", "pending"),
@@ -47,7 +52,7 @@ class Job(models.Model):
     errors = postgres_fields.ArrayField(
         models.CharField(max_length=900), blank=True, default=list, null=True
     )
-    file = models.FileField(blank=True, upload_to=helpers.file_directory_path)
+    file = models.FileField(blank=True, upload_to=file_directory_path)
     tags = models.ManyToManyField(Tag, related_name="jobs", blank=True)
 
     @classmethod

@@ -31,20 +31,20 @@ def aws_get_secret(secret_name):
             # ... using the provided KMS key.
             # Deal with the exception here, and/or rethrow at your discretion.
             raise RetrieveSecretException(e)
-        elif e.response["Error"]["Code"] == "InternalServiceErrorException":
+        if e.response["Error"]["Code"] == "InternalServiceErrorException":
             # An error occurred on the server side.
             # Deal with the exception here, and/or rethrow at your discretion.
             raise RetrieveSecretException(e)
-        elif e.response["Error"]["Code"] == "InvalidParameterException":
+        if e.response["Error"]["Code"] == "InvalidParameterException":
             # You provided an invalid value for a parameter.
             # Deal with the exception here, and/or rethrow at your discretion.
             raise RetrieveSecretException(e)
-        elif e.response["Error"]["Code"] == "InvalidRequestException":
+        if e.response["Error"]["Code"] == "InvalidRequestException":
             # You provided a parameter value that is not valid for the..
             # ... current state of the resource.
             # Deal with the exception here, and/or rethrow at your discretion.
             raise RetrieveSecretException(e)
-        elif e.response["Error"]["Code"] == "ResourceNotFoundException":
+        if e.response["Error"]["Code"] == "ResourceNotFoundException":
             # We can't find the resource that you asked for.
             # Deal with the exception here, and/or rethrow at your discretion.
             raise RetrieveSecretException(e)

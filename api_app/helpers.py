@@ -21,18 +21,10 @@ def get_now():
     return timezone.now()
 
 
-def get_now_str():
-    return timezone.now().strftime("%Y_%m_%d_%H_%M_%S")
-
-
 def get_analyzer_config():
     with open("/opt/deploy/configuration/analyzer_config.json") as f:
         analyzers_config = json.load(f)
     return analyzers_config
-
-
-def file_directory_path(instance, filename):
-    return f"job_{get_now_str()}_{filename}"
 
 
 def calculate_mimetype(file_buffer, file_name):

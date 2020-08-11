@@ -7,3 +7,5 @@ env_file_postgres
 env_file_integrations
 .env
 venv/
+settings/ldap_config.py
+docker-compose-override.yml

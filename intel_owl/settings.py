@@ -17,13 +17,13 @@ DEBUG = True if os.environ.get("DEBUG", False) == "True" else False
 DJANGO_LOG_DIRECTORY = "/var/log/intel_owl/django"
 PROJECT_LOCATION = "/opt/deploy/intel_owl"
 MEDIA_ROOT = "/opt/deploy/files_required"
-CERTS_DIR = f"{PROJECT_LOCATION}/certs"
 DISABLE_LOGGING_TEST = (
     True if os.environ.get("DISABLE_LOGGING_TEST", False) == "True" else False
 )
 MOCK_CONNECTIONS = (
     True if os.environ.get("MOCK_CONNECTIONS", False) == "True" else False
 )
+LDAP_ENABLED = True if os.environ.get("LDAP_ENABLED", False) == "True" else False
 
 # Security Stuff
 HTTPS_ENABLED = os.environ.get("HTTPS_ENABLED", "not_enabled")
@@ -151,7 +151,12 @@ if AWS_SQS:
     }
 
 # Auth backends
-AUTHENTICATION_BACKENDS = ("django.contrib.auth.backends.ModelBackend",)
+AUTHENTICATION_BACKENDS = []
+AUTHENTICATION_BACKENDS.append("django.contrib.auth.backends.ModelBackend")
+if LDAP_ENABLED:
+    from intel_owl.ldap_config import *  # lgtm [py/polluting-import]
+
+    AUTHENTICATION_BACKENDS.append("django_auth_ldap.backend.LDAPBackend")
 
 # Password validation
 
@@ -228,6 +233,14 @@ LOGGING = {
             "maxBytes": 20 * 1024 * 1024,
             "backupCount": 6,
         },
+        "django_auth_ldap": {
+            "level": INFO_OR_DEBUG_LEVEL,
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": f"{DJANGO_LOG_DIRECTORY}/django_auth_ldap.log",
+            "formatter": "stdfmt",
+            "maxBytes": 20 * 1024 * 1024,
+            "backupCount": 6,
+        },
     },
     "loggers": {
         "api_app": {
@@ -239,6 +252,11 @@ LOGGING = {
             "handlers": ["celery", "celery_error"],
             "level": INFO_OR_DEBUG_LEVEL,
             "propagate": True,
+        },
+        'django_auth_ldap': {
+            'handlers': ['django_auth_ldap'],
+            'level': INFO_OR_DEBUG_LEVEL,
+            'propagate': True,
         },
     },
 }

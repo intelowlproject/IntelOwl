@@ -56,7 +56,7 @@ from api_app.script_analyzers.observable_analyzers import (
 from api_app import crons
 
 
-@shared_task(soft_time_limit=500)
+@shared_task(soft_time_limit=10000)
 def remove_old_jobs():
     crons.remove_old_jobs()
 

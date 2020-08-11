@@ -12,6 +12,7 @@ class OTX(classes.ObservableAnalyzer):
     def set_config(self, additional_config_params):
         self.api_key_name = additional_config_params.get("api_key_name", "OTX_KEY")
         self.__api_key = secrets.get_secret(self.api_key_name)
+        self.verbose = additional_config_params.get("verbose", False)
 
     def run(self):
         if not self.__api_key:
@@ -58,5 +59,8 @@ class OTX(classes.ObservableAnalyzer):
         result["reputation"] = details.get("reputation", {}).get("reputation", None)
         result["url_list"] = details.get("url_list", {}).get("url_list", [])
         result["analysis"] = details.get("analysis", {}).get("analysis", {})
+        if not self.verbose:
+            if result["analysis"] and "plugins" in result["analysis"]:
+                result["analysis"]["plugins"] = "removed because too long"
 
         return result

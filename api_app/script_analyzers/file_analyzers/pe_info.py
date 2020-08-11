@@ -87,6 +87,8 @@ class PEInfo(FileAnalyzer):
                     logger.debug(
                         f"PE info error while decoding export table symbols: {e}"
                     )
+            # this is to reduce the output
+            export_table = export_table[:100]
             results["export_table"] = export_table
 
             results["flags"] = full_dump.get("Flags", [])

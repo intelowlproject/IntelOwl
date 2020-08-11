@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 class StringsInfo(classes.FileAnalyzer):
     def set_config(self, additional_config_params):
         self.max_no_of_strings = int(
-            additional_config_params.get("max_number_of_strings", 500)
+            additional_config_params.get("max_number_of_strings", 300)
         )
         self.max_chars_for_string = int(
             additional_config_params.get("max_characters_for_string", 1000)

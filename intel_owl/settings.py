@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt.token_blacklist",
     "guardian",
     "api_app.apps.ApiAppConfig",
+    "django_elasticsearch_dsl",
 ]
 
 MIDDLEWARE = [
@@ -126,6 +127,20 @@ SIMPLE_JWT = {
     "PYINTELOWL_TOKEN_LIFETIME": timedelta(days=CLIENT_TOKEN_LIFETIME_DAYS),
 }
 
+# Elastic Search Configuration
+if os.environ.get("ELASTICSEARCH_ENABLED") == "True":
+    ELASTICSEARCH_DSL = {
+        "default": {"hosts": os.environ.get("ELASTICSEARCH_HOST")},
+    }
+    ELASTICSEARCH_DSL_INDEX_SETTINGS = {
+        "number_of_shards": int(os.environ.get("ELASTICSEARCH_NO_OF_SHARDS")),
+        "number_of_replicas": int(os.environ.get("ELASTICSEARCH_NO_OF_REPLICAS")),
+    }
+else:
+    ELASTICSEARCH_DSL_AUTOSYNC = False
+    ELASTICSEARCH_DSL = {
+        "default": {"hosts": ""},
+    }
 
 # CELERY STUFF
 CELERY_BROKER_URL = secrets.get_secret("CELERY_BROKER_URL")

@@ -81,7 +81,8 @@ class JobSerializer(ObjectPermissionsAssignmentMixin, serializers.ModelSerialize
 
     class Meta:
         model = Job
-        exclude = ("file",)
+        fields = "__all__"
+        extra_kwargs = {"file": {"write_only": True}}
 
     def get_permissions_map(self, created):
         """

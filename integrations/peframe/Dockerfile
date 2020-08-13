@@ -9,7 +9,7 @@ RUN apk --no-cache update \
     && pip3 install --upgrade pip
 
 # Build and install PEframe
-RUN git clone https://github.com/guelfoweb/peframe.git ${PROJECT_PATH}/peframe
+RUN git clone --depth 1 https://github.com/guelfoweb/peframe.git ${PROJECT_PATH}/peframe
 WORKDIR ${PROJECT_PATH}/peframe
 RUN rm -rf .git && pip install -r requirements.txt --no-cache-dir \
     && python3 setup.py install \

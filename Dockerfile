@@ -4,6 +4,7 @@ ENV PYTHONUNBUFFERED 1
 ENV DJANGO_SETTINGS_MODULE intel_owl.settings
 ENV PYTHONPATH /opt/deploy/intel_owl
 ENV LOG_PATH /var/log/intel_owl
+ENV ELASTICSEARCH_DSL_VERSION 7.1.4
 
 RUN mkdir -p ${LOG_PATH} \
     ${LOG_PATH}/django ${LOG_PATH}/uwsgi \
@@ -21,7 +22,9 @@ RUN pip3 install --upgrade pip
 COPY requirements.txt $PYTHONPATH/requirements.txt
 WORKDIR $PYTHONPATH
 
-RUN pip3 install --compile -r requirements.txt
+RUN pip3 install --no-cache-dir --compile -r requirements.txt
+# install elasticsearch-dsl's appropriate version as specified by user
+RUN pip3 install --no-cache-dir django-elasticsearch-dsl==${ELASTICSEARCH_DSL_VERSION}
 
 COPY . $PYTHONPATH
 

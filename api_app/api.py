@@ -245,9 +245,9 @@ def send_analysis_request(request):
 
             # save the arrived data plus new params into a new job object
             serializer.save(**params)
-            job_id = serializer.data.get("id", "")
+            job_id = serializer.data.get("id", None)
             md5 = serializer.data.get("md5", "")
-            logger.info(f"new job_id {job_id} for md5 {md5}")
+            logger.info(f"New Job added with ID: #{job_id} and md5: {md5}.")
             if not job_id:
                 return Response({"error": "815"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -258,7 +258,7 @@ def send_analysis_request(request):
                 {"error": error_message}, status=status.HTTP_400_BAD_REQUEST
             )
 
-        is_sample = serializer.data.get("is_sample", "")
+        is_sample = serializer.data.get("is_sample", False)
         if not test:
             general.start_analyzers(
                 params["analyzers_to_execute"], analyzers_config, job_id, md5, is_sample

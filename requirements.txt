@@ -74,6 +74,6 @@ wrapt==1.11.2
 yara-python==3.11.0
 zipp==0.6.0
 djangorestframework-simplejwt==4.4.0
-djangorestframework-guardian==0.3.0 
+djangorestframework-guardian==0.3.0
 flake8==3.8.2 
 black==19.10b0

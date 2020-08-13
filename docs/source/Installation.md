@@ -47,6 +47,8 @@ Main components of the web application:
 * Celery: Task Queue
 * Nginx: Web Server
 * Uwsgi: Application Server
+* Elastic Search (optional): Auto-sync indexing of analysis' results.
+* Kibana (optional): GUI for Elastic Search. We provide a saved configuration with dashboards and visualizations.
 * Flower (optional): Celery Management Web Interface
 
 All these components are managed by docker-compose
@@ -147,54 +149,7 @@ You just need to remember that it's important that you keep at least the followi
 
 For a full description of the available keys, check the [Usage](./Usage.md) page
 
-#### Optional Analyzers
-Some analyzers which run in their own Docker containers are kept disabled by default. They are disabled by default to prevent accidentally starting too many containers and making your computer unresponsive.
-
-<style>
-table, th, td {
-  padding: 5px;
-  border: 1px solid black;
-  border-collapse: collapse;
-}
-</style>
-<table style="width:100%">
-  <tr>
-    <th>Name</th>
-    <th>Port</th>
-    <th>Analyzers</th>
-  </tr>
-  <tr>
-    <td>PEframe</td>
-    <td>4000</td>
-    <td><code>PEframe_Scan</code></td>
-  </tr>
-  <tr>
-    <td>Thug</td>
-    <td>4001</td>
-    <td><code>Thug_URL_Info_*</code>, <code>Thug_HTML_Info_*</code></td>
-  </tr>
-  <tr>
-    <td>FireEye Capa</td>
-    <td>4002</td>
-    <td><code>Capa_Info</code></td>
-  </tr>
-  <tr>
-    <td>Box-JS</td>
-    <td>4003</td>
-    <td><code>BoxJS_Scan_JavaScript</code></td>
-  </tr>
-  <tr>
-    <td>APK Analyzers</td>
-    <td>4004</td>
-    <td><code>APKiD_Scan_APK_DEX_JAR</code></td>
-  </tr>
-</table>
-
-In the project, you can find template files named `.env_template` and `.env_file_integrations_template`.
-You have to create new files named `.env` and `env_file_integrations` from these two templates.
-
-Docker services defined in the compose files added in `COMPOSE_FILE` variable present in the `.env` file are ran on `docker-compose up`. So, modify it to include only the analyzers you wish to use.
-Such compose files are available under `integrations/`.
+> Some analyzers are kept optional and can easily be enabled. Refer to [this](https://intelowl.readthedocs.io/en/stable/Advanced-Usage.html#optional-analyzers) part of the docs.
 
 ### Rebuilding the project
 If you make some code changes and you like to rebuild the project, launch the following command from the project directory:
@@ -240,31 +195,12 @@ The project uses `docker-compose`. You have to move to the project main director
 You may want to run `docker exec -ti intel_owl_uwsgi python3 manage.py createsuperuser` after first run to create a superuser.
 Then you can add other users directly from the Django Admin Interface after having logged with the superuser account.
 
-### Django Groups & Permissions (Optional, Advanced Usage)
-The application makes use of [Django's built-in permissions system](https://docs.djangoproject.com/en/3.0/topics/auth/default/#permissions-and-authorization). It provides a way to assign permissions to specific users and groups of users.
-
-As an administrator here's what you need to know,
-- Each user should belong to atleast a single group and permissions should be assigned to these groups. Please refrain from assigning user level permissions.
-- When you create a first normal user, a group with name `DefaultGlobal` is created with all permissions granted. Every new user automatically gets added to this group.
-   - This is done because most admins won't need to deal with user permissions and this way, they don't have to.
-   - If you don't want a global group (with all permissions) but custom groups with custom permissions,
-   just strip `DefaultGlobal` of all permissions but do *not* delete it.
-
-The permissions work the way one would expect,
-- `api_app | Job | view job` allows users to fetch list of all jobs he/she has permission for or a particular job with it's ID.
-- `api_app | Job | create job` allows users to request new analysis. When user creates a job (requests new analysis),
-    - the object level `view` permission is applied to all groups the requesting user belongs to or to all groups (depending on the parameters passed). 
-    - the object level `change` and `delete` permission is restricted to superusers/admin.
-- `api_app | Tag | create tag` allows users to create new tags. When user creates a new tag,
-    - this new tag is visible (object level `view` permission) to each and every group but,
-    - the object level `change` and `delete` permission is given to only those groups the requesting user belongs to. 
-    - This is done because tag labels and colors are unique columns and the admin in most cases would want to define tags that are usable (but not modifiable) by users of all groups.
-- `api_app | Tag | view tag` allows users to fetch list of all tags or a particular tag with it's ID.
-- `api_app | Tag | change tag` allows users to edit a tag granted that user has the object level permission for the particular tag.
+> For Django Groups & Permissions settings, refer [here](https://intelowl.readthedocs.io/en/stable/Advanced-Usage.html#django-groups-&-permissions).
 
 ## Update to the most recent version
 To update the project with the most recent available code you have to follow these steps:
-```
+
+```bash
 docker pull intelowlproject/intelowl_ng:latest  -> updates the webclient
 cd <your_intel_owl_directory> && git pull   -> updates the project
 docker-compose down && docker-compose up -d   -> restart the IntelOwl application

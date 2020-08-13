@@ -18,7 +18,7 @@ WORKDIR /home/thug
 
 RUN pip3 --no-cache-dir install https://github.com/area1/stpyv8/releases/download/v8.3.110.9/stpyv8-8.3.110.9-cp36-cp36m-linux_x86_64.whl
 
-RUN git clone https://github.com/buffer/libemu.git && \
+RUN git clone --depth 1 https://github.com/buffer/libemu.git && \
   cd libemu && \
   autoreconf -v -i && \
   ./configure && \
@@ -29,7 +29,7 @@ RUN git clone https://github.com/buffer/libemu.git && \
 RUN ldconfig
 RUN pip3 install --no-cache-dir thug
 
-RUN git clone https://github.com/buffer/thug.git && \
+RUN git clone --depth 1 https://github.com/buffer/thug.git && \
   mkdir /etc/thug && \
   mkdir /etc/thug/rules && \
   mkdir /etc/thug/personalities && \

@@ -9,7 +9,7 @@ Main features:
 * modern Django-Python application: easy to understand and write code upon it
 * it can get data from multiple sources with a single API request
 * more than 80 available analyzers that you can use to generate or retrieve data about a suspicious file or observable (IP, domain, …)
-* official frontend client: **[IntelOwl-ng](https://github.com/intelowlproject/IntelOwl-ng)** provides features such as dashboard, visualizations of analysis data, easy to use forms for requesting new analysis, etc..
+* Built-in Web Interface: **[IntelOwl-ng](https://github.com/intelowlproject/IntelOwl-ng)** provides features such as dashboard, visualizations of analysis data, easy to use forms for requesting new analysis and more.
 * official library and CLI client available on Github: [PyIntelOwl](https://github.com/intelowlproject/pyintelowl)
 * easily integrable with other tools thanks to the REST API framework and to the PyIntelOwl library.
 * easily and completely customizable, both the APIs and the analyzers
@@ -19,3 +19,5 @@ Main features:
 
 Feel free to ask everything it comes to your mind about the project to the author:
 Matteo Lodi ([Twitter](https://twitter.com/matte_lodi)).
+
+We also have a dedicated twitter account for the project: [@intel_owl](https://twitter.com/intel_owl).

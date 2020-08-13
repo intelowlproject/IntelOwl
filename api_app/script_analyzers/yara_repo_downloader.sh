@@ -9,13 +9,13 @@
 cd /opt/deploy/yara
 
 # Intezer rules
-git clone https://github.com/intezer/yara-rules intezer_rules
+git clone --depth 1 https://github.com/intezer/yara-rules intezer_rules
 
 # McAfee rules
-git clone https://github.com/advanced-threat-research/Yara-Rules mcafee_rules
+git clone --depth 1 https://github.com/advanced-threat-research/Yara-Rules mcafee_rules
 
 # Yara community rules
-git clone https://github.com/Yara-Rules/rules.git
+git clone --depth 1 https://github.com/Yara-Rules/rules.git
 community_yara_index="/opt/deploy/yara/rules/index.yar"
 
 # remove broken or unwanted rules in Yara community rules
@@ -34,7 +34,7 @@ sed -i "/RANSOM_acroware.yar/d" $community_yara_index
 sed -i "/TOOLKIT_THOR_HackTools.yar/d" $community_yara_index
 
 # Florian Roth rules
-git clone https://github.com/Neo23x0/signature-base.git
+git clone --depth 1 https://github.com/Neo23x0/signature-base.git
 
 # removed signatures that use external variables
 cd /opt/deploy/yara/signature-base/yara

@@ -14,6 +14,11 @@ app.config_from_object("django.conf:settings", namespace="CELERY")
 app.autodiscover_tasks()
 
 app.conf.beat_schedule = {
+    # execute daily at midnight to cleanup orphaned obj permissions
+    "clean_orphan_obj_perms": {
+        "task": "intel_owl.tasks.clean_orphan_obj_perms",
+        "schedule": crontab(minute=0, hour=0),
+    },
     # execute sometimes to cleanup old jobs
     "remove_old_jobs": {
         "task": "intel_owl.tasks.remove_old_jobs",

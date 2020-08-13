@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "rest_framework_simplejwt.token_blacklist",
+    "guardian",
     "api_app.apps.ApiAppConfig",
 ]
 
@@ -150,9 +151,14 @@ if AWS_SQS:
         "wait_time_seconds": 20,
     }
 
+# Django Guardian
+GUARDIAN_RAISE_403 = True
+
 # Auth backends
-AUTHENTICATION_BACKENDS = []
-AUTHENTICATION_BACKENDS.append("django.contrib.auth.backends.ModelBackend")
+AUTHENTICATION_BACKENDS = [
+    "django.contrib.auth.backends.ModelBackend",
+    "guardian.backends.ObjectPermissionBackend",
+]
 if LDAP_ENABLED:
     from intel_owl.ldap_config import *  # lgtm [py/polluting-import]
 

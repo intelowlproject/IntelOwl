@@ -3,7 +3,7 @@
 This page includes details about some advanced features that Intel Owl provides which can be optionally enabled. Namely,
 
 - [Elastic Search (with Kibana)](#elastic-search)
-- [Django Groups & Permissions](#django-groups-&-permissions)
+- [Django Groups & Permissions](#django-groups-permissions)
 - [Optional Analyzers](#optional-analyzers)
 
 ## Elastic Search

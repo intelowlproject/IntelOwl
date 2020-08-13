@@ -215,7 +215,7 @@ The project uses `docker-compose`. You have to move to the project main director
 You may want to run `docker exec -ti intel_owl_uwsgi python3 manage.py createsuperuser` after first run to create a superuser.
 Then you can add other users directly from the Django Admin Interface after having logged with the superuser account.
 
-> For Django Groups & Permissions settings, refer [here](https://intelowl.readthedocs.io/en/stable/Advanced-Usage.html#django-groups-&-permissions).
+> For Django Groups & Permissions settings, refer [here](https://intelowl.readthedocs.io/en/stable/Advanced-Usage.html#django-groups-permissions).
 
 ## Update to the most recent version
 To update the project with the most recent available code you have to follow these steps:

@@ -62,7 +62,7 @@ def clean_orphan_obj_perms():
     utils.clean_orphan_obj_perms()
 
 
-@shared_task(soft_time_limit=500)
+@shared_task(soft_time_limit=10000)
 def remove_old_jobs():
     crons.remove_old_jobs()
 

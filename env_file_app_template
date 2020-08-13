@@ -50,6 +50,7 @@ VT_NOTIFY_URL=
 
 # other variables
 DEBUG=False
+LDAP_ENABLED=False
 DISABLE_LOGGING_TEST=False
 MOCK_CONNECTIONS=False
 CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672

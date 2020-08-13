@@ -332,6 +332,7 @@
         "type": "observable",
         "observable_supported": ["ip", "domain", "url", "hash"],
         "external_service": true,
+        "verbose": false,
         "description": "scan an observable on Alienvault OTX",
         "requires_configuration": true,
         "python_module": "otx_run"
@@ -508,6 +509,7 @@
         "type": "file",
         "external_service": true,
         "run_hash": true,
+        "verbose": false,
         "decsription": "check file hash on OTX Alienvault",
         "requires_configuration": true,
         "python_module": "otx_run"

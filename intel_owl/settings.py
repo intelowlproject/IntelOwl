@@ -259,10 +259,10 @@ LOGGING = {
             "level": INFO_OR_DEBUG_LEVEL,
             "propagate": True,
         },
-        'django_auth_ldap': {
-            'handlers': ['django_auth_ldap'],
-            'level': INFO_OR_DEBUG_LEVEL,
-            'propagate': True,
+        "django_auth_ldap": {
+            "handlers": ["django_auth_ldap"],
+            "level": INFO_OR_DEBUG_LEVEL,
+            "propagate": True,
         },
     },
 }

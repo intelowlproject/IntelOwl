@@ -225,3 +225,23 @@ docker pull intelowlproject/intelowl_ng:latest  -> updates the webclient
 cd <your_intel_owl_directory> && git pull   -> updates the project
 docker-compose down && docker-compose up -d   -> restart the IntelOwl application
 ```
+
+#### Updating to v1.3.0 from any prior version
+
+If you are updating to [v1.3.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v1.3.0) from any prior version, you need to execute a helper script so that the old data present in the database doesn't break.
+
+1. Follow the above updation steps, once the docker containers are up and running execute the following in a new terminal
+
+    ```bash
+    docker exec -ti intel_owl_uwsgi bash
+    ```
+
+    to get a shell session inside the IntelOwl's container.
+
+2. Now just copy and paste the below command into this new session,
+
+    ```bash
+    curl https://gist.githubusercontent.com/Eshaan7/b111f887fa8b860c762aa38d99ec5482/raw/758517acf87f9b45bd22f06aee57251b1f3b1bbf/update_to_v1.3.0.py | python -
+    ```
+
+3. If you see "Update successful!", everything went fine and now you can enjoy the new features!

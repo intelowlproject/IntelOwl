@@ -4,18 +4,20 @@ from rest_framework_simplejwt.token_blacklist.admin import OutstandingTokenAdmin
 from rest_framework_simplejwt.token_blacklist.models import OutstandingToken
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.utils import datetime_from_epoch
+from guardian.admin import GuardedModelAdmin
 
 from .models import Job, Tag
 from intel_owl.settings import CLIENT_TOKEN_LIFETIME_DAYS, SIMPLE_JWT as jwt_settings
 
 
-class JobAdminView(admin.ModelAdmin):
+class JobAdminView(GuardedModelAdmin):
     list_display = (
         "id",
+        "status",
         "source",
         "observable_name",
-        "status",
         "observable_classification",
+        "file_name",
         "file_mimetype",
         "received_request_time",
     )
@@ -23,7 +25,7 @@ class JobAdminView(admin.ModelAdmin):
     search_fields = ("source", "md5", "observable_name")
 
 
-class TagAdminView(admin.ModelAdmin):
+class TagAdminView(GuardedModelAdmin):
     list_display = ("id", "label", "color")
     search_fields = ("label", "color")
 

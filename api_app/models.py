@@ -1,8 +1,14 @@
 from django.db import models
 from django.contrib.postgres import fields as postgres_fields
+from django.utils import timezone
 
-from api_app import helpers
 from .exceptions import AnalyzerRunException
+
+
+def file_directory_path(instance, filename):
+    now = timezone.now().strftime("%Y_%m_%d_%H_%M_%S")
+    return f"job_{now}_{filename}"
+
 
 STATUS = [
     ("pending", "pending"),
@@ -24,20 +30,20 @@ class Tag(models.Model):
 class Job(models.Model):
     source = models.CharField(max_length=50, blank=False, default="none")
     is_sample = models.BooleanField(blank=False, default=False)
-    md5 = models.CharField(max_length=50, blank=False)
-    observable_name = models.CharField(max_length=128, blank=True)
-    observable_classification = models.CharField(max_length=50, blank=True)
+    md5 = models.CharField(max_length=32, blank=False)
+    observable_name = models.CharField(max_length=512, blank=True)
+    observable_classification = models.CharField(max_length=12, blank=True)
     file_name = models.CharField(max_length=50, blank=True)
     file_mimetype = models.CharField(max_length=50, blank=True)
     status = models.CharField(
-        max_length=50, blank=False, choices=STATUS, default="pending"
+        max_length=32, blank=False, choices=STATUS, default="pending"
     )
     analyzers_requested = postgres_fields.ArrayField(
-        models.CharField(max_length=900), blank=True, default=list
+        models.CharField(max_length=128), blank=True, default=list
     )
     run_all_available_analyzers = models.BooleanField(blank=False, default=False)
     analyzers_to_execute = postgres_fields.ArrayField(
-        models.CharField(max_length=900), blank=True, default=list
+        models.CharField(max_length=128), blank=True, default=list
     )
     analysis_reports = postgres_fields.JSONField(default=list, null=True, blank=True)
     received_request_time = models.DateTimeField(auto_now_add=True)
@@ -47,7 +53,7 @@ class Job(models.Model):
     errors = postgres_fields.ArrayField(
         models.CharField(max_length=900), blank=True, default=list, null=True
     )
-    file = models.FileField(blank=True, upload_to=helpers.file_directory_path)
+    file = models.FileField(blank=True, upload_to=file_directory_path)
     tags = models.ManyToManyField(Tag, related_name="jobs", blank=True)
 
     @classmethod
@@ -58,7 +64,7 @@ class Job(models.Model):
             else:
                 job_object = cls.objects.get(id=job_id)
         except cls.DoesNotExist:
-            raise AnalyzerRunException(f"no job_id {job_id} retrieved")
+            raise AnalyzerRunException(f"No Job with ID:{job_id} retrieved")
 
         return job_object
 

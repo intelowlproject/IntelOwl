@@ -12,6 +12,7 @@ Welcome to IntelOwl's documentation!
    Introduction
    Installation
    Usage
+   Advanced-Usage
    Contribute
    Tests
 

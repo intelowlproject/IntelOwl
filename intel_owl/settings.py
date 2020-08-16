@@ -17,13 +17,13 @@ DEBUG = True if os.environ.get("DEBUG", False) == "True" else False
 DJANGO_LOG_DIRECTORY = "/var/log/intel_owl/django"
 PROJECT_LOCATION = "/opt/deploy/intel_owl"
 MEDIA_ROOT = "/opt/deploy/files_required"
-CERTS_DIR = f"{PROJECT_LOCATION}/certs"
 DISABLE_LOGGING_TEST = (
     True if os.environ.get("DISABLE_LOGGING_TEST", False) == "True" else False
 )
 MOCK_CONNECTIONS = (
     True if os.environ.get("MOCK_CONNECTIONS", False) == "True" else False
 )
+LDAP_ENABLED = True if os.environ.get("LDAP_ENABLED", False) == "True" else False
 
 # Security Stuff
 HTTPS_ENABLED = os.environ.get("HTTPS_ENABLED", "not_enabled")
@@ -46,7 +46,9 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "rest_framework_simplejwt.token_blacklist",
+    "guardian",
     "api_app.apps.ApiAppConfig",
+    "django_elasticsearch_dsl",
 ]
 
 MIDDLEWARE = [
@@ -125,6 +127,20 @@ SIMPLE_JWT = {
     "PYINTELOWL_TOKEN_LIFETIME": timedelta(days=CLIENT_TOKEN_LIFETIME_DAYS),
 }
 
+# Elastic Search Configuration
+if os.environ.get("ELASTICSEARCH_ENABLED") == "True":
+    ELASTICSEARCH_DSL = {
+        "default": {"hosts": os.environ.get("ELASTICSEARCH_HOST")},
+    }
+    ELASTICSEARCH_DSL_INDEX_SETTINGS = {
+        "number_of_shards": int(os.environ.get("ELASTICSEARCH_NO_OF_SHARDS")),
+        "number_of_replicas": int(os.environ.get("ELASTICSEARCH_NO_OF_REPLICAS")),
+    }
+else:
+    ELASTICSEARCH_DSL_AUTOSYNC = False
+    ELASTICSEARCH_DSL = {
+        "default": {"hosts": ""},
+    }
 
 # CELERY STUFF
 CELERY_BROKER_URL = secrets.get_secret("CELERY_BROKER_URL")
@@ -150,8 +166,18 @@ if AWS_SQS:
         "wait_time_seconds": 20,
     }
 
+# Django Guardian
+GUARDIAN_RAISE_403 = True
+
 # Auth backends
-AUTHENTICATION_BACKENDS = ("django.contrib.auth.backends.ModelBackend",)
+AUTHENTICATION_BACKENDS = [
+    "django.contrib.auth.backends.ModelBackend",
+    "guardian.backends.ObjectPermissionBackend",
+]
+if LDAP_ENABLED:
+    from intel_owl.ldap_config import *  # lgtm [py/polluting-import]
+
+    AUTHENTICATION_BACKENDS.append("django_auth_ldap.backend.LDAPBackend")
 
 # Password validation
 
@@ -228,6 +254,14 @@ LOGGING = {
             "maxBytes": 20 * 1024 * 1024,
             "backupCount": 6,
         },
+        "django_auth_ldap": {
+            "level": INFO_OR_DEBUG_LEVEL,
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": f"{DJANGO_LOG_DIRECTORY}/django_auth_ldap.log",
+            "formatter": "stdfmt",
+            "maxBytes": 20 * 1024 * 1024,
+            "backupCount": 6,
+        },
     },
     "loggers": {
         "api_app": {
@@ -237,6 +271,11 @@ LOGGING = {
         },
         "celery": {
             "handlers": ["celery", "celery_error"],
+            "level": INFO_OR_DEBUG_LEVEL,
+            "propagate": True,
+        },
+        "django_auth_ldap": {
+            "handlers": ["django_auth_ldap"],
             "level": INFO_OR_DEBUG_LEVEL,
             "propagate": True,
         },

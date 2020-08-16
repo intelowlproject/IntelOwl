@@ -11,7 +11,15 @@ OLD_JOBS_RETENTION_DAYS=3
 # IntelOwl's API token will expire if unused for how many days ? Default: 7 days
 PYINTELOWL_TOKEN_LIFETIME=7
 
+# Elastic Search Configuration
+ELASTICSEARCH_ENABLED=False
+ELASTICSEARCH_HOST=
+# consult to: https://django-elasticsearch-dsl.readthedocs.io/en/latest/settings.html
+ELASTICSEARCH_NO_OF_SHARDS=1
+ELASTICSEARCH_NO_OF_REPLICAS=0
+
 # Optional API keys
+CUCKOO_API_KEY=
 SHODAN_KEY=
 ABUSEIPDB_KEY=
 AUTH0_KEY=
@@ -49,6 +57,7 @@ VT_NOTIFY_URL=
 
 # other variables
 DEBUG=False
+LDAP_ENABLED=False
 DISABLE_LOGGING_TEST=False
 MOCK_CONNECTIONS=False
 CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672

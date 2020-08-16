@@ -46,9 +46,12 @@ Documentation about IntelOwl installation, usage, contribution can be found at h
 - Static RTF Analysis
 - Static PDF Analysis
 - Static PE Analysis
+- Static APK Analysis
 - Static Generic File Analysis
 - Strings analysis
 - PE Signature verification
+- PE Capabilities Extraction
+- Emulated Javascript Analysis
 
 **Free modules that require additional configuration**:
 
@@ -125,7 +128,10 @@ license terms.
 [Yara community rules](https://github.com/Yara-Rules),
 [Neo23x0 Yara sigs](https://github.com/Neo23x0/signature-base),
 [Intezer Yara sigs](https://github.com/intezer/yara-rules),
-[McAfee Yara sigs](https://github.com/advanced-threat-research/Yara-Rules)
+[McAfee Yara sigs](https://github.com/advanced-threat-research/Yara-Rules),
+[APKiD](https://github.com/rednaga/APKiD/blob/master/LICENSE.COMMERCIAL),
+[Box-JS](https://github.com/CapacitorSet/box-js/blob/master/LICENSE),
+[Capa](https://github.com/fireeye/capa/blob/master/LICENSE.txt)
 
 ### Acknowledgments
 

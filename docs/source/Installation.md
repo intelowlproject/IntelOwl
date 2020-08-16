@@ -1,5 +1,36 @@
 # Installation
 
+## TL;DR
+Obviously we strongly suggest to read through all the page to configure IntelOwl in the most appropriate way.
+
+However, if you feel lazy, you could just install and test IntelOwl with the following steps.
+
+
+```
+git clone https://github.com/intelowlproject/IntelOwl
+cd IntelOwl
+
+# copy env files
+cp env_file_postgres_template env_file_postgres
+cp env_file_app_template env_file_app
+
+# (optional) edit env files before starting the app to configure some analyzers
+# see "Deployment preparation" paragraph below
+
+# (optional) enable all docker-based analyzers
+cp env_file_app_integrations_template env_file_app_integrations
+cp .env_template .env
+# in .env file comment line 10 and uncomment line 13
+
+# start the app
+docker-compose up -d
+
+# create a super user 
+docker exec -ti intel_owl_uwsgi python3 manage.py createsuperuser
+
+# now the app is running on localhost:80
+```
+
 ## Deployment
 The project leverages docker-compose for a classic server deployment. So, you need [docker](https://docs.docker.com/get-docker/) and [docker-compose](https://docs.docker.com/compose/install/) installed in your machine.
 
@@ -16,6 +47,8 @@ Main components of the web application:
 * Celery: Task Queue
 * Nginx: Web Server
 * Uwsgi: Application Server
+* Elastic Search (optional): Auto-sync indexing of analysis' results.
+* Kibana (optional): GUI for Elastic Search. We provide a saved configuration with dashboards and visualizations.
 * Flower (optional): Celery Management Web Interface
 
 All these components are managed by docker-compose
@@ -80,10 +113,11 @@ You can find them in the `configuration` directory.
 In case you enable HTTPS, remember to set the environment variable `HTTPS_ENABLED` as "enabled" to increment the security of the application.
 
 There are 3 options to execute the web server:
-#####HTTP only (default)
+
+##### HTTP only (default)
 The project would use the default deployment configuration and HTTP only.
 
-#####HTTPS with your own certificate
+##### HTTPS with your own certificate
 The project provides a template file to configure Nginx to serve HTTPS: `intel_owl_nginx_https`.
 
 You should change `ssl_certificate`, `ssl_certificate_key` and `server_name` in that file.
@@ -115,54 +149,27 @@ You just need to remember that it's important that you keep at least the followi
 
 For a full description of the available keys, check the [Usage](./Usage.md) page
 
-#### Optional Analyzers
-Some analyzers which run in their own Docker containers are kept disabled by default. They are disabled by default to prevent accidentally starting too many containers and making your computer unresponsive.
+> Some analyzers are kept optional and can easily be enabled. Refer to [this](https://intelowl.readthedocs.io/en/stable/Advanced-Usage.html#optional-analyzers) part of the docs.
 
-<style>
-table, th, td {
-  padding: 5px;
-  border: 1px solid black;
-  border-collapse: collapse;
-}
-</style>
-<table style="width:100%">
-  <tr>
-    <th>Name</th>
-    <th>Port</th>
-    <th>Analyzers</th>
-  </tr>
-  <tr>
-    <td>PEframe</td>
-    <td>4000</td>
-    <td><code>PEframe_Scan</code></td>
-  </tr>
-  <tr>
-    <td>Thug</td>
-    <td>4001</td>
-    <td><code>Thug_URL_Info_*</code>, <code>Thug_HTML_Info_*</code></td>
-  </tr>
-  <tr>
-    <td>FireEye Capa</td>
-    <td>4002</td>
-    <td><code>Capa_Info</code></td>
-  </tr>
-  <tr>
-    <td>Box-JS</td>
-    <td>4003</td>
-    <td><code>BoxJS_Scan_JavaScript</code></td>
-  </tr>
-  <tr>
-    <td>APK Analyzers</td>
-    <td>4004</td>
-    <td><code>APKiD_Scan_APK_DEX_JAR</code></td>
-  </tr>
-</table>
+#### Authentication options
+IntelOwl provides support for some of the most common authentication methods:
+* LDAP
+* GSuite (work in progress)
+##### LDAP
+IntelOwl leverages [Django-auth-ldap](https://github.com/django-auth-ldap/django-auth-ldap
+) to perform authentication via LDAP.
 
-In the project, you can find template files named `.env_template` and `.env_file_integrations_template`.
-You have to create new files named `.env` and `env_file_integrations` from these two templates.
+How to configure and enable LDAP on Intel Owl?
 
-Docker services defined in the compose files added in `COMPOSE_FILE` variable present in the `.env` file are ran on `docker-compose up`. So, modify it to include only the analyzers you wish to use.
-Such compose files are available under `integrations/`.
+Inside the `settings` directory you can find a file called `ldap_config_template.py`. This file provides an example of configuration.
+Copy that file into the same directory with the name `ldap_config.py`.
+Then change the values with your LDAP configuration.
+
+For more details on how to configure this file, check the [official documentation](https://django-auth-ldap.readthedocs.io/en/latest/) of the django-auth-ldap library.
+
+Once you have done that, you have to set the environment variable `LDAP_ENABLED` as `True` in the environment configuration file `env_file_app`.
+Finally, you can restart the application. 
+
 
 ### Rebuilding the project
 If you make some code changes and you like to rebuild the project, launch the following command from the project directory:
@@ -199,10 +206,42 @@ Also, you need to set the environment variable `AWS_SQS` to `True` to activate t
 After having properly configured the environment files as suggested previously, you can run the image.
 The project uses `docker-compose`. You have to move to the project main directory to properly run it.
 
-`docker-compose up`
+`docker-compose up -d`
 
 
 ## After deployment
+
 ### Users creation
 You may want to run `docker exec -ti intel_owl_uwsgi python3 manage.py createsuperuser` after first run to create a superuser.
 Then you can add other users directly from the Django Admin Interface after having logged with the superuser account.
+
+> For Django Groups & Permissions settings, refer [here](https://intelowl.readthedocs.io/en/stable/Advanced-Usage.html#django-groups-permissions).
+
+## Update to the most recent version
+To update the project with the most recent available code you have to follow these steps:
+
+```bash
+docker pull intelowlproject/intelowl_ng:latest  -> updates the webclient
+cd <your_intel_owl_directory> && git pull   -> updates the project
+docker-compose down && docker-compose up -d   -> restart the IntelOwl application
+```
+
+#### Updating to v1.3.0 from any prior version
+
+If you are updating to [v1.3.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v1.3.0) from any prior version, you need to execute a helper script so that the old data present in the database doesn't break.
+
+1. Follow the above updation steps, once the docker containers are up and running execute the following in a new terminal
+
+    ```bash
+    docker exec -ti intel_owl_uwsgi bash
+    ```
+
+    to get a shell session inside the IntelOwl's container.
+
+2. Now just copy and paste the below command into this new session,
+
+    ```bash
+    curl https://gist.githubusercontent.com/Eshaan7/b111f887fa8b860c762aa38d99ec5482/raw/758517acf87f9b45bd22f06aee57251b1f3b1bbf/update_to_v1.3.0.py | python -
+    ```
+
+3. If you see "Update successful!", everything went fine and now you can enjoy the new features!

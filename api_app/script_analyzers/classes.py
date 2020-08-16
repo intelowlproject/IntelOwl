@@ -133,14 +133,14 @@ class ObservableAnalyzer(BaseAnalyzerMixin):
 
     def before_run(self):
         logger.info(
-            "STARTED analyzer: {}, job_id: {}, observable: {}"
-            "".format(self.analyzer_name, self.job_id, self.observable_name)
+            f"STARTED analyzer: {self.__repr__()} -> "
+            f"Observable: {self.observable_name}."
         )
 
     def after_run(self):
         logger.info(
-            f"ENDED analyzer: {self.analyzer_name}, job_id: {self.job_id},"
-            f"observable: {self.observable_name}"
+            f"FINISHED analyzer: {self.__repr__()} -> "
+            f"Observable: {self.observable_name}."
         )
 
 
@@ -166,14 +166,14 @@ class FileAnalyzer(BaseAnalyzerMixin):
 
     def before_run(self):
         logger.info(
-            f"STARTED analyzer: {self.analyzer_name}, job_id: #{self.job_id}"
-            f" ({self.filename}, md5: {self.md5})"
+            f"STARTED analyzer: {self.__repr__()} -> "
+            f"File: ({self.filename}, md5: {self.md5})"
         )
 
     def after_run(self):
         logger.info(
-            f"ENDED analyzer: {self.analyzer_name}, job_id: #{self.job_id},"
-            f" ({self.filename}, md5: {self.md5})"
+            f"FINISHED analyzer: {self.__repr__()} -> "
+            f"File: ({self.filename}, md5: {self.md5})"
         )
 
 

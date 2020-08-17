@@ -6,7 +6,7 @@ version: '3'
 
 services:
   peframe:
-    image: intelowlproject/intelowl_peframe
+    image: intelowlproject/intelowl_peframe:${INTELOWL_TAG_VERSION}
     container_name: intelowl_peframe
     restart: unless-stopped
     expose:

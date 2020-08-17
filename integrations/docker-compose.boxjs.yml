@@ -6,7 +6,7 @@ version: '3'
 
 services:
   boxjs:
-    image: intelowlproject/intelowl_boxjs
+    image: intelowlproject/intelowl_boxjs:${INTELOWL_TAG_VERSION}
     container_name: intelowl_boxjs
     restart: unless-stopped
     expose:

@@ -32,7 +32,7 @@ services:
       - ./env_file_postgres
 
   uwsgi:
-    image: intelowlproject/intelowl:latest
+    image: intelowlproject/intelowl:${INTELOWL_TAG_VERSION}
     container_name: intel_owl_uwsgi
     volumes:
       - ./configuration/intel_owl.ini:/etc/uwsgi/sites/intel_owl.ini
@@ -74,7 +74,7 @@ services:
     container_name: intel_owl_rabbitmq
 
   celery_beat:
-    image: intelowlproject/intelowl:latest
+    image: intelowlproject/intelowl:${INTELOWL_TAG_VERSION}
     container_name: intel_owl_celery_beat
     restart: unless-stopped
     command: /usr/local/bin/celery -A intel_owl.celery beat --uid www-data --gid www-data --pidfile=/tmp/celerybeat.pid --schedule=/tmp/celerybeat-schedule
@@ -89,7 +89,7 @@ services:
       - postgres
 
   celery_worker:
-    image: intelowlproject/intelowl:latest
+    image: intelowlproject/intelowl:${INTELOWL_TAG_VERSION}
     container_name: intel_owl_celery_worker
     restart: unless-stopped
     stop_grace_period: 3m

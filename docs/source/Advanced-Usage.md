@@ -90,8 +90,7 @@ table, th, td {
   </tr>
 </table>
 
-In the project, you can find template files named `.env_template` and `.env_file_integrations_template`.
-You have to create new files named `.env` and `env_file_integrations` from these two templates.
+In the project, you can find template file `.env_file_integrations_template`. You have to create new file named `env_file_integrations` from this.
 
 Docker services defined in the compose files added in `COMPOSE_FILE` variable present in the `.env` file are ran on `docker-compose up`. So, modify it to include only the analyzers you wish to use.
 Such compose files are available under `integrations/`.

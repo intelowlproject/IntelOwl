@@ -64,7 +64,7 @@ which can be queried from the main Django API.
 * The dockerfile should be placed at `./integrations/<analyzer_name>/Dockerfile`.
 * A docker-compose file should be placed under `./integrations` with the name `docker-compose.<analyzer_name>.yml`
 * If your docker-image uses any environment variables, add them in the [`env_file_integrations_template`](https://github.com/intelowlproject/IntelOwl/blob/develop/env_file_integrations_template)
-* Ultimately, append the name of your docker-compose file in the `COMPOSE_FILE` variables specified in [`.env_template`](https://github.com/intelowlproject/IntelOwl/blob/develop/env_file_integrations_template). The reason for doing this is so that this service remains optional to the end-user.
+* Ultimately, append the name of your docker-compose file in the `COMPOSE_FILE` variables specified in [`.env`](https://github.com/intelowlproject/IntelOwl/blob/develop/.env). The reason for doing this is so that this service remains optional to the end-user.
 * Rest of the steps remain same as given under "How to add a new analyzer".
 
 ### Create a pull request

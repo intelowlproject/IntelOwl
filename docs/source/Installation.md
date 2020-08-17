@@ -19,8 +19,7 @@ cp env_file_app_template env_file_app
 
 # (optional) enable all docker-based analyzers
 cp env_file_app_integrations_template env_file_app_integrations
-cp .env_template .env
-# in .env file comment line 10 and uncomment line 13
+# in `.env` file comment line 12 and uncomment line 15
 
 # start the app
 docker-compose up -d
@@ -221,14 +220,13 @@ Then you can add other users directly from the Django Admin Interface after havi
 To update the project with the most recent available code you have to follow these steps:
 
 ```bash
-docker pull intelowlproject/intelowl_ng:latest  -> updates the webclient
-cd <your_intel_owl_directory> && git pull   -> updates the project
-docker-compose down && docker-compose up -d   -> restart the IntelOwl application
+cd <your_intel_owl_directory> && git pull -> updates the project
+docker-compose down && docker-compose up --build -d   -> restart the IntelOwl application
 ```
 
-#### Updating to v1.3.0 from any prior version
+#### Updating to >v1.3.x from any prior version
 
-If you are updating to [v1.3.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v1.3.0) from any prior version, you need to execute a helper script so that the old data present in the database doesn't break.
+If you are updating to >[v1.3.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v1.3.0) from any prior version, you need to execute a helper script so that the old data present in the database doesn't break.
 
 1. Follow the above updation steps, once the docker containers are up and running execute the following in a new terminal
 

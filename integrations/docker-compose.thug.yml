@@ -6,7 +6,7 @@ version: '3'
 
 services:
   thug:
-    image: intelowlproject/intelowl_thug
+    image: intelowlproject/intelowl_thug:${INTELOWL_TAG_VERSION}
     container_name: intelowl_thug
     restart: unless-stopped
     expose:

@@ -6,7 +6,7 @@ version: '3'
 
 services:
   apk_analyzers:
-    image: intelowlproject/intelowl_apk_analyzers
+    image: intelowlproject/intelowl_apk_analyzers:${INTELOWL_TAG_VERSION}
     container_name: intelowl_apk_analyzers
     restart: unless-stopped
     expose:

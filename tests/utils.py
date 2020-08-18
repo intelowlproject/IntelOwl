@@ -1,4 +1,5 @@
 # utils.py: useful utils for mocking requests and responses for testing
+from api_app.script_analyzers.observable_analyzers import pulsedive
 
 
 # class for mocking responses
@@ -40,3 +41,19 @@ def mocked_docker_analyzer_get(*args, **kwargs):
 
 def mocked_docker_analyzer_post(*args, **kwargs):
     return MockResponse({"key": "test", "status": "running"}, 202)
+
+
+class CommonTestCases:
+    """
+    Tests which are common for all types of observables.
+    """
+
+    def test_pulsevide(self, mock_get=None, mock_post=None):
+        report = pulsedive.Pulsedive(
+            "Pulsedive_Active_IOC",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {},
+        ).start()
+        self.assertEqual(report.get("success", False), True)

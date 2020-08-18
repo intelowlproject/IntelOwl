@@ -897,5 +897,15 @@
             "enable_awis": true,
             "user_agent": "nexuschrome18"
         }
+    },
+    "Pulsedive_Active_IOC": {
+        "type": "observable",
+        "observable_supported": ["ip", "domain", "url", "hash"],
+        "description": "Scan indicators and retrieve results from Pulsedive's API",
+        "python_module": "pulsedive_run",
+        "additional_config_params": {
+            "api_key_name": "PULSEDIVE_API_KEY",
+            "active_scan": true
+        }
     }
 }

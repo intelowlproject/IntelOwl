@@ -28,7 +28,7 @@ from api_app.script_analyzers.file_analyzers import (
 from api_app.script_analyzers.observable_analyzers import vt3_get
 
 from api_app.models import Job
-from .utils import (
+from .mock_utils import (
     MockResponse,
     mocked_requests,
     mocked_docker_analyzer_get,

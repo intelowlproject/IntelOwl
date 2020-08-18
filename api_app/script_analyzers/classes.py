@@ -3,7 +3,7 @@ import time
 import logging
 import requests
 import json
-from abc import ABC, abstractmethod
+from abc import ABCMeta, abstractmethod
 
 from api_app.exceptions import (
     AnalyzerRunNotImplemented,
@@ -15,7 +15,7 @@ from .utils import get_basic_report_template, set_report_and_cleanup
 logger = logging.getLogger(__name__)
 
 
-class BaseAnalyzerMixin(ABC):
+class BaseAnalyzerMixin(metaclass=ABCMeta):
     """
     Abstract Base class for Analyzers.
     Never inherit from this branch,
@@ -177,7 +177,7 @@ class FileAnalyzer(BaseAnalyzerMixin):
         )
 
 
-class DockerBasedAnalyzer(ABC):
+class DockerBasedAnalyzer(metaclass=ABCMeta):
     """
     Abstract class for a docker based analyzer (integration).
     Inherit this branch along with either one of ObservableAnalyzer or FileAnalyzer

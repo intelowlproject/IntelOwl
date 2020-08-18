@@ -1,6 +1,6 @@
 import requests
 
-from api_app.exceptions import AnalyzerRunException
+from api_app.exceptions import AnalyzerRunException, AnalyzerConfigurationException
 from api_app.script_analyzers import classes
 from intel_owl import secrets
 
@@ -10,12 +10,14 @@ class Shodan(classes.ObservableAnalyzer):
 
     def set_config(self, additional_config_params):
         self.analysis_type = additional_config_params.get("shodan_analysis", "search")
-        api_key_name = additional_config_params.get("api_key_name", "SHODAN_KEY")
-        self.__api_key = secrets.get_secret(api_key_name)
+        self.api_key_name = additional_config_params.get("api_key_name", "SHODAN_KEY")
+        self.__api_key = secrets.get_secret(self.api_key_name)
 
     def run(self):
         if not self.__api_key:
-            raise AnalyzerRunException("no api key retrieved")
+            raise AnalyzerConfigurationException(
+                f"No API key retrieved with name: {self.api_key_name}."
+            )
 
         if self.analysis_type == "search":
             params = {"key": self.__api_key, "minify": True}
@@ -26,9 +28,9 @@ class Shodan(classes.ObservableAnalyzer):
             }
             uri = f"labs/honeyscore/{self.observable_name}"
         else:
-            raise AnalyzerRunException(
-                f"not supported observable type {self.observable_classification}."
-                "Supported is IP"
+            raise AnalyzerConfigurationException(
+                f"analysis type: '{self.analysis_type}' not suported."
+                "Supported are: 'search', 'honeyscore'."
             )
 
         try:

@@ -43,6 +43,7 @@ from api_app.script_analyzers.observable_analyzers import (
     thug_url,
 )
 from .utils import (
+    CommonTestCases,
     MockResponseNoOp,
     mocked_requests,
 )
@@ -73,7 +74,7 @@ def mocked_pypdns(*args, **kwargs):
 
 @mock_connections(patch("requests.get", side_effect=mocked_requests))
 @mock_connections(patch("requests.post", side_effect=mocked_requests))
-class IPAnalyzersTests(TestCase):
+class IPAnalyzersTests(CommonTestCases, TestCase):
     def setUp(self):
         params = {
             "source": "test",
@@ -345,7 +346,7 @@ class IPAnalyzersTests(TestCase):
 
 @mock_connections(patch("requests.get", side_effect=mocked_requests))
 @mock_connections(patch("requests.post", side_effect=mocked_requests))
-class DomainAnalyzersTests(TestCase):
+class DomainAnalyzersTests(CommonTestCases, TestCase):
     def setUp(self):
         params = {
             "source": "test",
@@ -590,7 +591,7 @@ class DomainAnalyzersTests(TestCase):
 
 @mock_connections(patch("requests.get", side_effect=mocked_requests))
 @mock_connections(patch("requests.post", side_effect=mocked_requests))
-class URLAnalyzersTests(TestCase):
+class URLAnalyzersTests(CommonTestCases, TestCase):
     def setUp(self):
         params = {
             "source": "test",
@@ -712,7 +713,7 @@ class URLAnalyzersTests(TestCase):
 
 @mock_connections(patch("requests.get", side_effect=mocked_requests))
 @mock_connections(patch("requests.post", side_effect=mocked_requests))
-class HashAnalyzersTests(TestCase):
+class HashAnalyzersTests(CommonTestCases, TestCase):
     def setUp(self):
         params = {
             "source": "test",

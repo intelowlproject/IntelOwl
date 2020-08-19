@@ -40,5 +40,9 @@ git clone --depth 1 https://github.com/Neo23x0/signature-base.git
 cd /opt/deploy/yara/signature-base/yara
 rm generic_anomalies.yar general_cloaking.yar thor_inverse_matches.yar yara_mixed_ext_vars.yar thor-webshells.yar
 
+# Download rules for quark-engine analyzer
+cd /opt/deploy
+svn export https://github.com/quark-engine/quark-engine/tags/v20.08/quark/rules quark-rules
+
 # chown directories
-chown -R www-data:www-data /opt/deploy/yara
+chown -R www-data:www-data /opt/deploy/yara /opt/deploy/quark-rules

@@ -24,6 +24,7 @@ from api_app.script_analyzers.file_analyzers import (
     capa_info,
     boxjs_scan,
     apkid,
+    quark_engine,
 )
 from api_app.script_analyzers.observable_analyzers import vt3_get
 
@@ -417,6 +418,12 @@ class FileAnalyzersAPKTests(TestCase):
             self.filename,
             self.md5,
             {},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    def test_quark_engine(self, mock_get=None, mock_post=None):
+        report = quark_engine.QuarkEngine(
+            "Quark_Engine_APK", self.job_id, self.filepath, self.filename, self.md5, {},
         ).start()
         self.assertEqual(report.get("success", False), True)
 

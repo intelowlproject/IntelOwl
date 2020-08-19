@@ -1,4 +1,4 @@
-FROM python:3.6
+FROM python:3.7
 
 ENV PYTHONUNBUFFERED 1
 ENV DJANGO_SETTINGS_MODULE intel_owl.settings
@@ -35,6 +35,7 @@ RUN touch ${LOG_PATH}/django/api_app.log ${LOG_PATH}/django/api_app_errors.log \
 # this is cause stringstifer creates this directory during the build and cause celery to crash
     && rm -rf /root/.local
 
+# download yara rules and quark engine rules
 RUN api_app/script_analyzers/yara_repo_downloader.sh
 
 # this is because botocore points to legacy endpoints

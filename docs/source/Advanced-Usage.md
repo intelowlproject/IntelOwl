@@ -69,26 +69,32 @@ table, th, td {
   <tr>
     <th>Name</th>
     <th>Analyzers</th>
+    <th>Description</th>
   </tr>
   <tr>
     <td>PEframe</td>
     <td><code>PEframe_Scan</code></td>
+    <td>performs static analysis on Portable Executable malware and generic suspicious file</td>
   </tr>
   <tr>
     <td>Thug</td>
     <td><code>Thug_URL_Info_*</code>, <code>Thug_HTML_Info_*</code></td>
+    <td>performs hybrid dynamic/static analysis on a URL or HTML page.</td>
   </tr>
   <tr>
     <td>FireEye Capa</td>
     <td><code>Capa_Info</code></td>
+    <td>detects capabilities in executable files</td>
   </tr>
   <tr>
     <td>Box-JS</td>
     <td><code>BoxJS_Scan_JavaScript</code></td>
+    <td>tool for studying JavaScript malware</td>
   </tr>
   <tr>
     <td>APK Analyzers</td>
     <td><code>APKiD_Scan_APK_DEX_JAR</code></td>
+    <td>identifies many compilers, packers, obfuscators, and other weird stuff from an APK or DEX file</td>
   </tr>
 </table>
 

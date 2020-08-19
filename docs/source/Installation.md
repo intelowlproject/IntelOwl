@@ -30,6 +30,8 @@ docker exec -ti intel_owl_uwsgi python3 manage.py createsuperuser
 # now the app is running on localhost:80
 ```
 
+Also, there is a [youtube video](https://www.youtube.com/watch?v=GuEhqQJSQAs) that may help in the installation process.
+
 ## Deployment
 The project leverages docker-compose for a classic server deployment. So, you need [docker](https://docs.docker.com/get-docker/) and [docker-compose](https://docs.docker.com/compose/install/) installed in your machine.
 
@@ -150,25 +152,8 @@ For a full description of the available keys, check the [Usage](./Usage.md) page
 
 > Some analyzers are kept optional and can easily be enabled. Refer to [this](https://intelowl.readthedocs.io/en/stable/Advanced-Usage.html#optional-analyzers) part of the docs.
 
-#### Authentication options
-IntelOwl provides support for some of the most common authentication methods:
-* LDAP
-* GSuite (work in progress)
-##### LDAP
-IntelOwl leverages [Django-auth-ldap](https://github.com/django-auth-ldap/django-auth-ldap
-) to perform authentication via LDAP.
-
-How to configure and enable LDAP on Intel Owl?
-
-Inside the `settings` directory you can find a file called `ldap_config_template.py`. This file provides an example of configuration.
-Copy that file into the same directory with the name `ldap_config.py`.
-Then change the values with your LDAP configuration.
-
-For more details on how to configure this file, check the [official documentation](https://django-auth-ldap.readthedocs.io/en/latest/) of the django-auth-ldap library.
-
-Once you have done that, you have to set the environment variable `LDAP_ENABLED` as `True` in the environment configuration file `env_file_app`.
-Finally, you can restart the application. 
-
+### Authentication options (optional)
+> Refer to [this](https://intelowl.readthedocs.io/en/stable/Advanced-Usage.html#authentication-options) part of the docs.
 
 ### Rebuilding the project
 If you make some code changes and you like to rebuild the project, launch the following command from the project directory:

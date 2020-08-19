@@ -5,6 +5,8 @@ This page includes details about some advanced features that Intel Owl provides 
 - [Elastic Search (with Kibana)](#elastic-search)
 - [Django Groups & Permissions](#django-groups-permissions)
 - [Optional Analyzers](#optional-analyzers)
+- [Authentication options](#authentication-options)
+- [GKE deployment](#google-kubernetes-engine-deployment)
 
 ## Elastic Search
 
@@ -94,3 +96,30 @@ In the project, you can find template file `.env_file_integrations_template`. Yo
 
 Docker services defined in the compose files added in `COMPOSE_FILE` variable present in the `.env` file are ran on `docker-compose up`. So, modify it to include only the analyzers you wish to use.
 Such compose files are available under `integrations/`.
+
+
+## Authentication options
+IntelOwl provides support for some of the most common authentication methods:
+* LDAP
+* GSuite (work in progress)
+#### LDAP
+IntelOwl leverages [Django-auth-ldap](https://github.com/django-auth-ldap/django-auth-ldap
+) to perform authentication via LDAP.
+
+How to configure and enable LDAP on Intel Owl?
+
+Inside the `settings` directory you can find a file called `ldap_config_template.py`. This file provides an example of configuration.
+Copy that file into the same directory with the name `ldap_config.py`.
+Then change the values with your LDAP configuration.
+
+For more details on how to configure this file, check the [official documentation](https://django-auth-ldap.readthedocs.io/en/latest/) of the django-auth-ldap library.
+
+Once you have done that, you have to set the environment variable `LDAP_ENABLED` as `True` in the environment configuration file `env_file_app`.
+Finally, you can restart the application. 
+
+
+
+## Google Kubernetes Engine deployment
+Refer to the following blog post for an example on how to deploy IntelOwl on Google Kubernetes Engine:
+
+https://mostwanted002.cf/post/intel-owl-gke/

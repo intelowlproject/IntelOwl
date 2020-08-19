@@ -115,7 +115,10 @@ Then change the values with your LDAP configuration.
 For more details on how to configure this file, check the [official documentation](https://django-auth-ldap.readthedocs.io/en/latest/) of the django-auth-ldap library.
 
 Once you have done that, you have to set the environment variable `LDAP_ENABLED` as `True` in the environment configuration file `env_file_app`.
-Finally, you can restart the application. 
+Finally, you can rebuild and restart the application by specifying the testing docker-compose file:
+```
+docker-compose -f docker-compose-for-tests.yml up --build`
+```
 
 
 

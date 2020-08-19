@@ -279,7 +279,7 @@ class DockerBasedAnalyzer(ABC):
         """
 
         # handle in case this is a test
-        if hasattr(self, "is_test"):
+        if hasattr(self, "is_test") and getattr(self, "is_test"):
             # only happens in case of testing
             self.report["success"] = True
             return {}

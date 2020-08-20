@@ -19,7 +19,6 @@ from api_app.script_analyzers.file_analyzers import (
     capa_info,
     boxjs_scan,
     apkid,
-    quark_engine,
 )
 from api_app.script_analyzers.observable_analyzers import (
     abuseipdb,
@@ -52,7 +51,7 @@ from api_app.script_analyzers.observable_analyzers import (
     securitytrails,
     cymru,
     tranco,
-    pulsedive,
+    intelx,
 )
 
 from api_app import crons
@@ -292,6 +291,22 @@ def shodan_run(
     additional_config_params,
 ):
     shodan.Shodan(
+        analyzer_name,
+        job_id,
+        observable_name,
+        observable_classification,
+        additional_config_params,
+    ).start()
+    
+@shared_task(soft_time_limit=30)
+def intelx_run(
+    analyzer_name,
+    job_id,
+    observable_name,
+    observable_classification,
+    additional_config_params,
+):
+    intelx.IntelX(
         analyzer_name,
         job_id,
         observable_name,
@@ -715,23 +730,6 @@ def tranco_run(
     ).start()
 
 
-@shared_task(soft_time_limit=100)
-def pulsedive_run(
-    analyzer_name,
-    job_id,
-    observable_name,
-    observable_classification,
-    additional_config_params,
-):
-    pulsedive.Pulsedive(
-        analyzer_name,
-        job_id,
-        observable_name,
-        observable_classification,
-        additional_config_params,
-    ).start()
-
-
 @shared_task(soft_time_limit=500)
 def peframe_run(
     analyzer_name, job_id, filepath, filename, md5, additional_config_params
@@ -786,14 +784,5 @@ def boxjs_run(analyzer_name, job_id, filepath, filename, md5, additional_config_
 @shared_task(soft_time_limit=400)
 def apkid_run(analyzer_name, job_id, filepath, filename, md5, additional_config_params):
     apkid.APKiD(
-        analyzer_name, job_id, filepath, filename, md5, additional_config_params
-    ).start()
-
-
-@shared_task(soft_time_limit=120)
-def quark_engine_run(
-    analyzer_name, job_id, filepath, filename, md5, additional_config_params
-):
-    quark_engine.QuarkEngine(
         analyzer_name, job_id, filepath, filename, md5, additional_config_params
     ).start()

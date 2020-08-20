@@ -68,6 +68,7 @@ class ActiveDNS(classes.ObservableAnalyzer):
         self.report["success"] = False
 
     def __doh_google(self):
+        result = {}
         if self.observable_classification == "domain":
             try:
                 authority_answer = ""
@@ -94,7 +95,7 @@ class ActiveDNS(classes.ObservableAnalyzer):
                             f"observable: {self.observable_name} active_dns query"
                             f" retrieved no valid A answer: {answers}"
                         )
-                self.report["report"] = {
+                result = {
                     "name": self.observable_name,
                     "resolution": ip,
                     "authoritative_answer": authority_answer,
@@ -107,8 +108,10 @@ class ActiveDNS(classes.ObservableAnalyzer):
             self.__handle_activedns_error(
                 "cannot analyze something different from type: domain"
             )
+        return result
 
     def __doh_cloudflare(self):
+        result = {}
         if self.observable_classification == "domain":
             try:
                 client = requests.session()
@@ -131,7 +134,7 @@ class ActiveDNS(classes.ObservableAnalyzer):
                     else "NXDOMAIN"
                 )
 
-                self.report["report"] = {
+                result = {
                     "name": self.observable_name,
                     "resolution": result_data,
                 }
@@ -143,8 +146,10 @@ class ActiveDNS(classes.ObservableAnalyzer):
             self.__handle_activedns_error(
                 "cannot analyze something different from type: domain"
             )
+        return result
 
     def __doh_cloudflare_malware(self):
+        result = {}
         if self.observable_classification == "domain":
             try:
                 result = {"name": self.observable_name}
@@ -169,6 +174,8 @@ class ActiveDNS(classes.ObservableAnalyzer):
                     # known as malicious
                     if resolution == "0.0.0.0":
                         result["is_malicious"] = True
+                    else:
+                        result["is_malicious"] = False
                 else:
                     logger.warning(
                         f"no Answer key retrieved for {self.observable_name}"
@@ -176,7 +183,6 @@ class ActiveDNS(classes.ObservableAnalyzer):
                     )
                     result["no_answer"] = True
 
-                self.report["report"] = result
             except requests.exceptions.RequestException as err:
                 self.__handle_activedns_error(
                     f"observable_name:{self.observable_name}, RequestException {err}"
@@ -185,6 +191,7 @@ class ActiveDNS(classes.ObservableAnalyzer):
             self.__handle_activedns_error(
                 "cannot analyze something different from type: domain"
             )
+        return result
 
     def __classic_dns(self):
         result = {}
@@ -193,11 +200,14 @@ class ActiveDNS(classes.ObservableAnalyzer):
             resolutions = []
             try:
                 domains = socket.gethostbyaddr(self.observable_name)
-                resolutions = domains[2]
+                resolutions = domains[0]
             except (socket.gaierror, socket.herror):
                 logger.info(
                     f"no resolution found for observable {self.observable_name}"
                 )
+            logger.info(
+                f"resolution {resolutions} found for observable {self.observable_name}"
+            )
             result = {"name": self.observable_name, "resolutions": resolutions}
         elif self.observable_classification == "domain":
             try:
@@ -208,4 +218,4 @@ class ActiveDNS(classes.ObservableAnalyzer):
         else:
             self.__handle_activedns_error("not analyzable")
 
-        self.report["report"] = result
+        return result

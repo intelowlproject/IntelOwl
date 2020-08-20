@@ -9,21 +9,17 @@ from intel_owl import secrets
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get("DJANGO_SECRET", "") or get_random_secret_key()
+SECRET_KEY = os.environ.get("DJANGO_SECRET", None) or get_random_secret_key()
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True if os.environ.get("DEBUG", False) == "True" else False
+DEBUG = os.environ.get("DEBUG", False) == "True"
 
 DJANGO_LOG_DIRECTORY = "/var/log/intel_owl/django"
 PROJECT_LOCATION = "/opt/deploy/intel_owl"
 MEDIA_ROOT = "/opt/deploy/files_required"
-DISABLE_LOGGING_TEST = (
-    True if os.environ.get("DISABLE_LOGGING_TEST", False) == "True" else False
-)
-MOCK_CONNECTIONS = (
-    True if os.environ.get("MOCK_CONNECTIONS", False) == "True" else False
-)
-LDAP_ENABLED = True if os.environ.get("LDAP_ENABLED", False) == "True" else False
+DISABLE_LOGGING_TEST = os.environ.get("DISABLE_LOGGING_TEST", False) == "True"
+MOCK_CONNECTIONS = os.environ.get("MOCK_CONNECTIONS", False) == "True"
+LDAP_ENABLED = os.environ.get("LDAP_ENABLED", False) == "True"
 
 # Security Stuff
 HTTPS_ENABLED = os.environ.get("HTTPS_ENABLED", "not_enabled")
@@ -128,7 +124,7 @@ SIMPLE_JWT = {
 }
 
 # Elastic Search Configuration
-if os.environ.get("ELASTICSEARCH_ENABLED") == "True":
+if os.environ.get("ELASTICSEARCH_ENABLED", False) == "True":
     ELASTICSEARCH_DSL = {
         "default": {"hosts": os.environ.get("ELASTICSEARCH_HOST")},
     }
@@ -156,7 +152,7 @@ CELERY_TASK_ACKS_LATE = True
 CELERY_WORKER_PREFETCH_MULTIPLIER = 1
 CELERY_TASK_DEFAULT_QUEUE = "analyzers_queue"
 
-AWS_SQS = True if os.environ.get("AWS_SQS", False) == "True" else False
+AWS_SQS = os.environ.get("AWS_SQS", False) == "True"
 if AWS_SQS:
     # this is for AWS SQS support
     CELERY_BROKER_TRANSPORT_OPTIONS = {
@@ -175,7 +171,7 @@ AUTHENTICATION_BACKENDS = [
     "guardian.backends.ObjectPermissionBackend",
 ]
 if LDAP_ENABLED:
-    from intel_owl.ldap_config import *  # lgtm [py/polluting-import]
+    from configuration.ldap_config import *  # lgtm [py/polluting-import]
 
     AUTHENTICATION_BACKENDS.append("django_auth_ldap.backend.LDAPBackend")
 

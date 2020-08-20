@@ -15,6 +15,7 @@ services:
     volumes:
       - ./configuration/intel_owl.ini:/etc/uwsgi/sites/intel_owl.ini
       - ./configuration/analyzer_config.json:/opt/deploy/configuration/analyzer_config.json
+      - ./configuration/ldap_config.py:/opt/deploy/configuration/ldap_config.py
       - generic_logs:/var/log/intel_owl
       - static_content:/opt/deploy/intel_owl/static
       - shared_files:/opt/deploy/files_required

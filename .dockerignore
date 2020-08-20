@@ -15,6 +15,5 @@ env_file_integrations_template
 env_file_app_travis
 docs/
 integrations/
-settings/ldap_config.py
 docker-compose*
 *.quark.log

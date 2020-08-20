@@ -116,7 +116,7 @@ The following is the list of the available analyzers you can run out-of-the-box:
 #### [Additional analyzers](https://intelowl.readthedocs.io/en/develop/Advanced-Usage.html#optional-analyzers) that can be enabled per your wish.
 
 ## Analyzers customization
-You can create new analyzers based on already existing modules by changing the configuration values (`analyzer_config.json`).
+You can create new analyzers based on already existing modules by changing the configuration values inside `configuration/analyzer_config.json`. This file is mounted as a docker volume, so you won't need to rebuild the image.
 
 The following are all the keys that you can change without touching the source code:
 * `disabled`: you can choose to disable certain analyzers, then they won't appear in the dropdown list and won't run if requested.

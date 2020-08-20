@@ -77,6 +77,8 @@ Documentation about IntelOwl installation, usage, contribution can be found at h
 - ONYPHE
 - Censys.io
 - SecurityTrails
+- Intelligence X
+- Pulsedive API (works w/o API key as well)
 
 ##### required free API key
 
@@ -133,7 +135,8 @@ license terms.
 [McAfee Yara sigs](https://github.com/advanced-threat-research/Yara-Rules),
 [APKiD](https://github.com/rednaga/APKiD/blob/master/LICENSE.COMMERCIAL),
 [Box-JS](https://github.com/CapacitorSet/box-js/blob/master/LICENSE),
-[Capa](https://github.com/fireeye/capa/blob/master/LICENSE.txt)
+[Capa](https://github.com/fireeye/capa/blob/master/LICENSE.txt),
+[IntelX](https://intelx.io/terms-of-service)
 
 ### Acknowledgments
 

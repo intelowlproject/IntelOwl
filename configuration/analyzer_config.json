@@ -904,6 +904,17 @@
             "user_agent": "nexuschrome18"
         }
     },
+    "IntelX_Search": {
+        "type": "observable",
+        "observable_supported": ["ip","domain","url"],
+        "external_service": true,
+        "description": "scan emails against IntelX Search API",
+        "requires_configuration": true,
+        "python_module": "intelx_run",
+        "additional_config_params": {
+            "intelx_analysis": "search"
+        }
+    },
     "Pulsedive_Active_IOC": {
         "type": "observable",
         "observable_supported": ["ip", "domain", "url", "hash"],

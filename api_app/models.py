@@ -28,13 +28,18 @@ class Tag(models.Model):
 
 
 class Job(models.Model):
+    class Meta:
+        indexes = [
+            models.Index(fields=["md5", "status",]),
+        ]
+
     source = models.CharField(max_length=50, blank=False, default="none")
     is_sample = models.BooleanField(blank=False, default=False)
     md5 = models.CharField(max_length=32, blank=False)
     observable_name = models.CharField(max_length=512, blank=True)
     observable_classification = models.CharField(max_length=12, blank=True)
     file_name = models.CharField(max_length=50, blank=True)
-    file_mimetype = models.CharField(max_length=50, blank=True)
+    file_mimetype = models.CharField(max_length=80, blank=True)
     status = models.CharField(
         max_length=32, blank=False, choices=STATUS, default="pending"
     )

@@ -7,15 +7,15 @@ There are multiple ways to interact with the Intel Owl APIs,
 
 1. IntelOwl-ng (Web Interface)
 
-- Inbuilt Web interface with dashboard, visualizations of analysis data, easy to use forms for requesting 
-new analysis, tags management and more features. 
-- Built with Angular 9 and available on [Github](https://github.com/intelowlproject/intelowl-ng).
+    - Inbuilt Web interface with dashboard, visualizations of analysis data, easy to use forms for requesting 
+    new analysis, tags management and more features 
+    - Built with Angular 9 and available on [Github](https://github.com/intelowlproject/intelowl-ng).
 
 2. pyIntelOwl (CLI/Library)
 
-- Official client that is available at: [PyIntelOwl](https://github.com/intelowlproject/pyintelowl).
-- Can be used as a library for your own python projects or,
-- directly via the command line interface
+    - Official client that is available at: [PyIntelOwl](https://github.com/intelowlproject/pyintelowl),
+    - Can be used as a library for your own python projects or,
+    - directly via the command line interface.
 
 ### Tokens creation
 The server authentication is managed by API keys. So, if you want to interact with Intel Owl, you have to create one or more unprivileged users from the Django Admin Interface and then generate a token for those users.
@@ -62,6 +62,7 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * `Capa_Info`: [Capa](https://github.com/fireeye/capa) detects capabilities in executable files
 * `BoxJS_Scan_Javascript`: [Box-JS](https://github.com/CapacitorSet/box-js) is a tool for studying JavaScript malware. 
 * `APKiD_Scan_APK_DEX_JAR`: [APKiD](https://github.com/rednaga/APKiD) identifies many compilers, packers, obfuscators, and other weird stuff from an APK or DEX file.
+* `Quark_Engine_APK`: [Quark Engine](https://github.com/quark-engine/quark-engine) is an Obfuscation-Neglect Android Malware Scoring System.
 
 #### Observable analyzers (ip, domain, url, hash)
 * `VirusTotal_v3_Get_Observable`: search an observable in the VirusTotal DB
@@ -110,11 +111,15 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * `Cymru_Hash_Registry_Get_Observable`: Check if a particular hash is available in the malware hash registry of Team Cymru
 * `Tranco`: Check if a domain is in the latest Tranco ranking top sites list
 * `Thug_URL_Info_*`: Perform hybrid dynamic/static analysis on a URL using [Thug low-interaction honeyclient](https://thug-honeyclient.readthedocs.io/)
+* `Pulsedive_Active_IOC`: Scan indicators and retrieve results from [Pulsedive's API](https://pulsedive.com/api/).
+
+#### [Additional analyzers](https://intelowl.readthedocs.io/en/develop/Advanced-Usage.html#optional-analyzers) that can be enabled per your wish.
 
 ## Analyzers customization
 You can create new analyzers based on already existing modules by changing the configuration values (`analyzer_config.json`).
 
 The following are all the keys that you can change without touching the source code:
+* `disabled`: you can choose to disable certain analyzers, then they won't appear in the dropdown list and won't run if requested.
 * `leaks_info`: if set, in the case you specify via the API that a resource is sensitive, the specific analyzer won't be executed
 * `external_service`: if set, in the case you specify via the API to exclude external services, the specific analyzer won't be executed
 * `supported_filetypes`: can be populated as a list. If set, if you ask to analyze a file with a different mimetype from the ones you specified, it won't be executed

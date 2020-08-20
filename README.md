@@ -40,6 +40,8 @@ Documentation about IntelOwl installation, usage, contribution can be found at h
 
 [First announcement](https://www.certego.net/en/news/new-year-new-tool-intel-owl/)
 
+[Daily Swig Article](https://portswigger.net/daily-swig/intel-owl-osint-tool-automates-the-intel-gathering-process-using-a-single-api)
+
 ### Free Internal Modules Available
 
 - Static Doc Analysis
@@ -143,14 +145,14 @@ This project was created and will be upgraded thanks to the following organizati
 
 ### Google Summer Of Code
 
-The project was accepted to the GSoC 2020 under the Honeynet Project!!
+The project was accepted to the GSoC 2020 under the Honeynet Project!! A lot of [new features](https://www.honeynet.org/gsoc/gsoc-2020/google-summer-of-code-2020-project-ideas/#intel-owl-improvements) were developed by Eshaan Bansal ([Twitter](https://twitter.com/mask0fmydisguis)).
 
-Stay tuned for upcoming [new features](https://www.honeynet.org/gsoc/gsoc-2020/google-summer-of-code-2020-project-ideas/#intel-owl-improvements) developed by Eshaan Bansal ([Twitter](https://twitter.com/mask0fmydisguis)).
+Stay tuned for the upcoming GSoC 2021! Join the [Honeynet Slack chat](https://gsoc-slack.honeynet.org/) for more info.
 
-### About the author
+### About the author and maintainers
 
-Feel free to contact the author at any time:
-Matteo Lodi ([Twitter](https://twitter.com/matte_lodi))
-
+Feel free to contact the main developers at any time:
+- Matteo Lodi ([Twitter](https://twitter.com/matte_lodi)): Author and creator
+- Eshaan Bansal ([Twitter](https://twitter.com/mask0fmydisguis)): Principal maintainer
 
 We also have a dedicated twitter account for the project: [@intel_owl](https://twitter.com/intel_owl).

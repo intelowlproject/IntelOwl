@@ -730,6 +730,12 @@
         "python_module": "apkid_run",
         "description": "APKiD identifies many compilers, packers, obfuscators, and other weird stuff from an APK or DEX file."
     },
+    "Quark_Engine_APK": {
+        "type": "file",
+        "supported_filetypes": ["application/zip", "application/java-archive", "application/vnd.android.package-archive", "application/x-dex"],
+        "python_module": "quark_engine_run",
+        "description": "An Obfuscation-Neglect Android Malware Scoring System"
+    },
     "PEframe_Scan": {
         "type": "file",
         "supported_filetypes": ["application/x-dosexec"],
@@ -896,6 +902,16 @@
             "enable_image_processing_analysis": true,
             "enable_awis": true,
             "user_agent": "nexuschrome18"
+        }
+    },
+    "Pulsedive_Active_IOC": {
+        "type": "observable",
+        "observable_supported": ["ip", "domain", "url", "hash"],
+        "description": "Scan indicators and retrieve results from Pulsedive's API",
+        "python_module": "pulsedive_run",
+        "additional_config_params": {
+            "api_key_name": "PULSEDIVE_API_KEY",
+            "active_scan": true
         }
     }
 }

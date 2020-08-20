@@ -114,7 +114,7 @@ IntelOwl leverages [Django-auth-ldap](https://github.com/django-auth-ldap/django
 
 How to configure and enable LDAP on Intel Owl?
 
-Inside the `settings` directory you can find a file called `ldap_config_template.py`. This file provides an example of configuration.
+Inside the `intel_owl` directory you can find a file called `ldap_config_template.py`. This file provides an example of configuration.
 Copy that file into the same directory with the name `ldap_config.py`.
 Then change the values with your LDAP configuration.
 

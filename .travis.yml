@@ -7,7 +7,7 @@ language: python
 cache: pip
 dist: bionic
 python:
-- '3.6'
+- '3.7'
 services:
 - docker
 before_install:

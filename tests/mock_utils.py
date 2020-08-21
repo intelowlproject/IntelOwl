@@ -13,7 +13,8 @@ class MockResponse:
     def json(self):
         return self.json_data
 
-    def raise_for_status(self):
+    @staticmethod
+    def raise_for_status():
         pass
 
 

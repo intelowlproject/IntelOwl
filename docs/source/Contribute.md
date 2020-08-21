@@ -21,7 +21,7 @@ You may want to look at a few existing examples to start to build a new one, suc
 After having written the new python module, you have to remember to:
 * Put the module in the `file_analyzers` or `observable_analyzers` directory based on what it can analyze
 * Add the new module as a celery task in [tasks.py](https://github.com/intelowlproject/IntelOwl/blob/master/intel_owl/tasks.py)
-* Add a new entry in the [analyzer configuration](https://github.com/intelowlproject/IntelOwl/blob/master/configuration/analyzer_config.json):
+* Add a new entry in the [analyzer configuration](https://github.com/intelowlproject/IntelOwl/blob/master/configuration/analyzer_config.json) following alphabetical order:
   
   Example:
   ```

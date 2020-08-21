@@ -54,6 +54,7 @@ from api_app.script_analyzers.observable_analyzers import (
     tranco,
     pulsedive,
     intelx,
+    urlscan
 )
 
 from api_app import crons

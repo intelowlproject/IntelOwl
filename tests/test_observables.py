@@ -29,6 +29,7 @@ from api_app.script_analyzers.observable_analyzers import (
     securitytrails,
     cymru,
     tranco,
+    urlscan
 )
 from .mock_utils import (
     MockResponseNoOp,

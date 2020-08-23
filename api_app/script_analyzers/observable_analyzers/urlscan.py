@@ -1,6 +1,5 @@
 import requests
 import time
-import json
 from api_app.exceptions import AnalyzerRunException
 from api_app.script_analyzers import classes
 from intel_owl import secrets
@@ -12,7 +11,6 @@ class UrlScan(classes.ObservableAnalyzer):
     def set_config(self, additional_config_params):
         self.analysis_type = additional_config_params.get("urlscan_analysis", "search")
         api_key_name = additional_config_params.get("api_key_name", "URLSCAN_KEY")
-        self.input_type = additional_config_params.get("mode", "url")
         self.visibility = additional_config_params.get("visibility", "public")
         self.__api_key = secrets.get_secret(api_key_name)
 
@@ -21,7 +19,7 @@ class UrlScan(classes.ObservableAnalyzer):
         uri = "api/v1/scan/"
         try:
             response = requests.post(
-                self.base_url + uri, headers=self.headers, data=json.dumps(data)
+                self.base_url + uri, headers=self.headers, json=data
             )
             response.raise_for_status()
         except requests.RequestException as e:
@@ -45,10 +43,6 @@ class UrlScan(classes.ObservableAnalyzer):
             else:
                 err = resp_json.get("error", "Report not found.")
                 raise AnalyzerRunException(err)
-            break
-        if not result:
-            err = result.get("error", "Report not found.")
-            raise AnalyzerRunException(err)
         return result
 
     def run(self):
@@ -61,7 +55,7 @@ class UrlScan(classes.ObservableAnalyzer):
             }
 
         if self.analysis_type == "search":
-            params = {"q": f"{self.input_type}:{self.observable_name}", "size": 100}
+            params = {"q": f"{self.observable_classification}:{self.observable_name}", "size": 100}
             uri = "api/v1/search/"
             try:
                 response = requests.get(

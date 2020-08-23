@@ -84,7 +84,7 @@ class IPAnalyzersTests(
             self.job_id,
             self.observable_name,
             self.observable_classification,
-            {"mode": "ip"},
+            {},
         ).start()
         self.assertEqual(report.get("success", False), True)
 
@@ -298,7 +298,7 @@ class DomainAnalyzersTests(
             self.job_id,
             self.observable_name,
             self.observable_classification,
-            {"mode": "domain"},
+            {},
         ).start()
         self.assertEqual(report.get("success", False), True)
 
@@ -466,7 +466,7 @@ class URLAnalyzersTests(
             self.job_id,
             self.observable_name,
             self.observable_classification,
-            {"mode": "url"},
+            {},
         ).start()
         self.assertEqual(report.get("success", False), True)
 
@@ -515,7 +515,7 @@ class HashAnalyzersTests(
             self.job_id,
             self.observable_name,
             self.observable_classification,
-            {"mode": "hash"},
+            {},
         ).start()
         self.assertEqual(report.get("success", False), True)
 

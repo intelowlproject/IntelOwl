@@ -537,28 +537,6 @@
       "shodan_analysis": "search"
     }
   },
-  "UrlScan_Submit_Result": {
-    "type": "observable",
-    "observable_supported": ["url"],
-    "external_service": true,
-    "description": "Submit & retrieve result of a URL against URLScan API",
-    "requires_configuration": true,
-    "python_module": "urlscan_run",
-    "additional_config_params": {
-      "urlscan_analysis": "submit_result"
-    }
-  },
-  "UrlScan_Search": {
-    "type": "observable",
-    "observable_supported": ["ip", "domain", "url", "hash"],
-    "external_service": true,
-    "description": "Search an IP/domain/url/hash against URLScan API",
-    "requires_configuration": true,
-    "python_module": "urlscan_run",
-    "additional_config_params": {
-      "urlscan_analysis": "search",
-    }
-  },
   "Signature_Info": {
     "type": "file",
     "supported_filetypes": ["application/x-dosexec"],
@@ -790,6 +768,28 @@
     "external_service": true,
     "description": "Query a domain or URL against URLhaus API",
     "python_module": "urlhaus_run"
+  },
+  "UrlScan_Submit_Result": {
+    "type": "observable",
+    "observable_supported": ["url"],
+    "external_service": true,
+    "description": "Submit & retrieve result of a URL against URLScan API",
+    "requires_configuration": true,
+    "python_module": "urlscan_run",
+    "additional_config_params": {
+      "urlscan_analysis": "submit_result"
+    }
+  },
+  "UrlScan_Search": {
+    "type": "observable",
+    "observable_supported": ["ip", "domain", "url", "hash"],
+    "external_service": true,
+    "description": "Search an IP/domain/url/hash against URLScan API",
+    "requires_configuration": true,
+    "python_module": "urlscan_run",
+    "additional_config_params": {
+      "urlscan_analysis": "search",
+    }
   },
   "VirusTotal_v2_Get_File": {
     "type": "file",

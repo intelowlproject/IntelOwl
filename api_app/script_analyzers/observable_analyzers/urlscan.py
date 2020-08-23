@@ -12,7 +12,6 @@ class UrlScan(classes.ObservableAnalyzer):
     def set_config(self, additional_config_params):
         self.analysis_type = additional_config_params.get("urlscan_analysis", "search")
         api_key_name = additional_config_params.get("api_key_name", "URLSCAN_KEY")
-        self.input_type = additional_config_params.get("mode", "url")
         self.visibility = additional_config_params.get("visibility", "public")
         self.__api_key = secrets.get_secret(api_key_name)
 
@@ -61,7 +60,7 @@ class UrlScan(classes.ObservableAnalyzer):
             }
 
         if self.analysis_type == "search":
-            params = {"q": f"{self.input_type}:{self.observable_name}", "size": 100}
+            params = {"q": f"{self.observable_classification}:{self.observable_name}", "size": 100}
             uri = "api/v1/search/"
             try:
                 response = requests.get(

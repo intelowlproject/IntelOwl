@@ -44,10 +44,6 @@ class UrlScan(classes.ObservableAnalyzer):
             else:
                 err = resp_json.get("error", "Report not found.")
                 raise AnalyzerRunException(err)
-            break
-        if not result:
-            err = result.get("error", "Report not found.")
-            raise AnalyzerRunException(err)
         return result
 
     def run(self):

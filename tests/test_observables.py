@@ -29,6 +29,7 @@ from api_app.script_analyzers.observable_analyzers import (
     securitytrails,
     cymru,
     tranco,
+    urlscan,
 )
 from .mock_utils import (
     MockResponseNoOp,
@@ -76,6 +77,16 @@ class IPAnalyzersTests(
             "force_privacy": False,
             "analyzers_requested": ["test"],
         }
+
+    def test_urlscan_ip(self, mock_get=None, mock_post=None):
+        report = urlscan.UrlScan(
+            "Urlscan",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {"mode": "ip"},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
 
     def test_abuseipdb(self, mock_get=None, mock_post=None):
         report = abuseipdb.AbuseIPDB(
@@ -281,6 +292,16 @@ class DomainAnalyzersTests(
             "analyzers_requested": ["test"],
         }
 
+    def test_urlscan_domain(self, mock_get=None, mock_post=None):
+        report = urlscan.UrlScan(
+            "Urlscan",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {"mode": "domain"},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
     def test_tranco(self, mock_get=None, mock_post=None):
         report = tranco.Tranco(
             "Tranco",
@@ -439,6 +460,16 @@ class URLAnalyzersTests(
         ).start()
         self.assertEqual(report.get("success", False), True)
 
+    def test_urlscan_url(self, mock_get=None, mock_post=None):
+        report = urlscan.UrlScan(
+            "Urlscan",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {"mode": "url"},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
     def test_robtex_fdns(self, mock_get=None, mock_post=None):
         report = robtex.Robtex(
             "Robtex_Forward_PDNS_Query",
@@ -475,6 +506,16 @@ class HashAnalyzersTests(
             self.observable_name,
             self.observable_classification,
             {},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    def test_urlscan_hash(self, mock_get=None, mock_post=None):
+        report = urlscan.UrlScan(
+            "Urlscan",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {"mode": "hash"},
         ).start()
         self.assertEqual(report.get("success", False), True)
 

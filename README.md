@@ -89,6 +89,7 @@ Documentation about IntelOwl installation, usage, contribution can be found at h
 - AlienVault OTX
 - MaxMind
 - Auth0
+- Urlscan
 
 ##### needed access request
 

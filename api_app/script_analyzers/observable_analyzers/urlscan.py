@@ -39,6 +39,7 @@ class UrlScan(classes.ObservableAnalyzer):
                 continue
             else:
                 result = resp_json
+                result["success"] = True
                 break
         return result
 
@@ -63,6 +64,7 @@ class UrlScan(classes.ObservableAnalyzer):
                 )
                 response.raise_for_status()
                 result = response.json()
+                result["success"] = True
             except requests.RequestException as e:
                 raise AnalyzerRunException(e)
 

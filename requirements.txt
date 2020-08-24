@@ -37,10 +37,10 @@ more-itertools==7.2.0
 msoffcrypto-tool==4.10.1
 numpy==1.17.1
 olefile==0.46
-oletools==0.55
+git+git://github.com/mlodic/oletools.git
 OTXv2==1.5.9
 peepdf==0.4.2
-pefile==2019.4.18
+git+git://github.com/mlodic/pefile.git
 pluggy==0.13.0
 psycopg2-binary==2.8.4
 py==1.8.0
@@ -79,3 +79,4 @@ djangorestframework-guardian==0.3.0
 flake8==3.8.2 
 black==19.10b0
 quark-engine==20.8
+git+git://github.com/DissectMalware/XLMMacroDeobfuscator.git@c78b9e443e2667399470462fd863ebe4e2b8c978

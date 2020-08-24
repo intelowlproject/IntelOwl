@@ -19,6 +19,10 @@ class VirusTotalv3ScanFile(FileAnalyzer):
         self.api_key_name = additional_config_params.get("api_key_name", "VT_KEY")
         self.__api_key = secrets.get_secret(self.api_key_name)
         self.additional_config_params = additional_config_params
+        # max no. of tries when polling for result
+        self.max_tries = additional_config_params.get("max_tries", 100)
+        # interval b/w HTTP requests when polling
+        self.poll_distance = 5
 
     def run(self):
         if not self.__api_key:
@@ -27,19 +31,31 @@ class VirusTotalv3ScanFile(FileAnalyzer):
             )
 
         return vt_scan_file(
-            self.__api_key, self.md5, self.job_id, self.additional_config_params
+            self.__api_key,
+            self.md5,
+            self.job_id,
+            max_tries=self.max_tries,
+            poll_distance=self.poll_distance,
         )
 
 
-def vt_scan_file(api_key, md5, job_id, additional_config_params):
+def vt_scan_file(
+    api_key, md5, job_id, rescan_instead=False, max_tries=100, poll_distance=5,
+):
     try:
         binary = get_binary(job_id)
     except Exception:
         raise AnalyzerRunException("couldn't retrieve the binary to perform a scan")
 
     headers = {"x-apikey": api_key}
-    files = {"file": binary}
-    uri = "files"
+    if rescan_instead:
+        logger.info(f"md5 {md5} job {job_id} VT analyzer requested rescan")
+        files = {}
+        uri = f"files/{md5}/analyse"
+    else:
+        logger.info(f"md5 {md5} job {job_id} VT analyzer requested scan")
+        files = {"file": binary}
+        uri = "files"
 
     try:
         response = requests.post(vt_base + uri, files=files, headers=headers)
@@ -55,8 +71,6 @@ def vt_scan_file(api_key, md5, job_id, additional_config_params):
             "no scan_id given by VirusTotal to retrieve the results"
         )
     # max 5 minutes waiting
-    max_tries = additional_config_params.get("max_tries", 100)
-    poll_distance = 5
     got_result = False
     uri = f"analyses/{scan_id}"
     for chance in range(max_tries):
@@ -79,12 +93,11 @@ def vt_scan_file(api_key, md5, job_id, additional_config_params):
             break
         else:
             logger.info(
-                "vt polling: try #{}. job_id: #{}. status:{}".format(
-                    chance + 1, job_id, analysis_status
-                )
+                f"vt polling: try #{chance + 1}. job_id: #{job_id}."
+                f" status:{analysis_status}"
             )
 
-    if not got_result:
+    if not got_result and not rescan_instead:
         raise AnalyzerRunException(
             f"max VT polls tried without getting any result. job_id {job_id}"
         )

@@ -67,7 +67,7 @@ which can be queried from the main Django API.
 * Ultimately, append the name of your docker-compose file in the `COMPOSE_FILE` variables specified in [`.env`](https://github.com/intelowlproject/IntelOwl/blob/develop/.env). The reason for doing this is so that this service remains optional to the end-user.
 * Rest of the steps remain same as given under "How to add a new analyzer".
 
-### Create a pull request
+## Create a pull request
 
 #### Pass linting and tests
 1. Run `psf/black` to lint the files automatically and then `flake8` to check,
@@ -120,6 +120,8 @@ Also remember to pull the most recent changes available in the **develop** branc
     "Yara_Scan_Custom_Signatures": {
         "type": "file",
         "python_module": "yara_run",
+        "requires_configuration": true,
+        "description": "Executes Yara with custom signatures",
         "additional_config_params": {
             "directories_with_rules": ["/opt/deploy/yara/custom_signatures"]
         }

@@ -268,6 +268,11 @@ class FileAnalyzersDocTests(TestCase):
             "file_mimetype": "application/msword",
             "force_privacy": False,
             "analyzers_requested": ["test"],
+            "additional_optional_configuration": {
+                "Doc_Info_Experimental": {
+                    "additional_passwords_to_check": ["testpassword"]
+                }
+            },
         }
         filename = "document.doc"
         test_job = _generate_test_job_with_file(params, filename)
@@ -278,6 +283,18 @@ class FileAnalyzersDocTests(TestCase):
     def test_docinfo(self):
         report = doc_info.DocInfo(
             "Doc_Info", self.job_id, self.filepath, self.filename, self.md5, {}
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    def test_docinfo_experimental(self):
+        additional_params = {"experimental": True}
+        report = doc_info.DocInfo(
+            "Doc_Info",
+            self.job_id,
+            self.filepath,
+            self.filename,
+            self.md5,
+            additional_params,
         ).start()
         self.assertEqual(report.get("success", False), True)
 

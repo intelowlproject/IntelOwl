@@ -35,14 +35,11 @@ class UrlScan(classes.ObservableAnalyzer):
             resp = requests.get(url, headers=headers)
             resp_json = resp.json()
             status = resp_json.get("status", None)
-            if status == "done":
-                result = resp_json
-                break
-            elif status == "processing":
+            if status == 404:
                 continue
             else:
-                err = resp_json.get("error", "Report not found.")
-                raise AnalyzerRunException(err)
+                result = resp_json
+                break
         return result
 
     def run(self):
@@ -55,7 +52,10 @@ class UrlScan(classes.ObservableAnalyzer):
             }
 
         if self.analysis_type == "search":
-            params = {"q": f"{self.observable_classification}:{self.observable_name}", "size": 100}
+            params = {
+                "q": f"{self.observable_classification}:{self.observable_name}",
+                "size": 100,
+            }
             uri = "api/v1/search/"
             try:
                 response = requests.get(
@@ -72,9 +72,9 @@ class UrlScan(classes.ObservableAnalyzer):
             result = self.__poll_for_result(token, self.headers)
         else:
             raise AnalyzerRunException(
-                "not supported observable"
-                f" type {self.observable_classification}."
-                "Supported is IP"
+                "not supported analysis_type"
+                f" {self.analysis_type}."
+                "Supported is 'search' and 'submit_result'."
             )
 
         return result

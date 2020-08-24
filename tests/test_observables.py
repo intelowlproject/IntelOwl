@@ -78,16 +78,6 @@ class IPAnalyzersTests(
             "analyzers_requested": ["test"],
         }
 
-    def test_urlscan_ip(self, mock_get=None, mock_post=None):
-        report = urlscan.UrlScan(
-            "Urlscan",
-            self.job_id,
-            self.observable_name,
-            self.observable_classification,
-            {},
-        ).start()
-        self.assertEqual(report.get("success", False), True)
-
     def test_abuseipdb(self, mock_get=None, mock_post=None):
         report = abuseipdb.AbuseIPDB(
             "AbuseIPDB",
@@ -292,16 +282,6 @@ class DomainAnalyzersTests(
             "analyzers_requested": ["test"],
         }
 
-    def test_urlscan_domain(self, mock_get=None, mock_post=None):
-        report = urlscan.UrlScan(
-            "Urlscan",
-            self.job_id,
-            self.observable_name,
-            self.observable_classification,
-            {},
-        ).start()
-        self.assertEqual(report.get("success", False), True)
-
     def test_tranco(self, mock_get=None, mock_post=None):
         report = tranco.Tranco(
             "Tranco",
@@ -460,13 +440,13 @@ class URLAnalyzersTests(
         ).start()
         self.assertEqual(report.get("success", False), True)
 
-    def test_urlscan_url(self, mock_get=None, mock_post=None):
+    def test_urlscan_submit_result(self, mock_get=None, mock_post=None):
         report = urlscan.UrlScan(
-            "Urlscan",
+            "UrlScan_Submit_Result",
             self.job_id,
             self.observable_name,
             self.observable_classification,
-            {},
+            {"urlscan_analysis": "submit_result"},
         ).start()
         self.assertEqual(report.get("success", False), True)
 
@@ -502,16 +482,6 @@ class HashAnalyzersTests(
     def test_mb_get(self, mock_get=None, mock_post=None):
         report = mb_get.MB_GET(
             "MalwareBazaar_Get_Observable",
-            self.job_id,
-            self.observable_name,
-            self.observable_classification,
-            {},
-        ).start()
-        self.assertEqual(report.get("success", False), True)
-
-    def test_urlscan_hash(self, mock_get=None, mock_post=None):
-        report = urlscan.UrlScan(
-            "Urlscan",
             self.job_id,
             self.observable_name,
             self.observable_classification,

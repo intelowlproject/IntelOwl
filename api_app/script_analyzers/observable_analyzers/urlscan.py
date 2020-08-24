@@ -72,9 +72,9 @@ class UrlScan(classes.ObservableAnalyzer):
             result = self.__poll_for_result(token, self.headers)
         else:
             raise AnalyzerRunException(
-                "not supported observable"
-                f" type {self.observable_classification}."
-                "Supported is IP"
+                "not supported analysis_type"
+                f" {self.analysis_type}."
+                "Supported is 'search' and 'submit_result'."
             )
 
         return result

@@ -77,6 +77,8 @@ Documentation about IntelOwl installation, usage, contribution can be found at h
 - ONYPHE
 - Censys.io
 - SecurityTrails
+- Intelligence X
+- Pulsedive API (works w/o API key as well)
 
 ##### required free API key
 
@@ -137,6 +139,7 @@ license terms.
 [Box-JS](https://github.com/CapacitorSet/box-js/blob/master/LICENSE),
 [Capa](https://github.com/fireeye/capa/blob/master/LICENSE.txt),
 [Quark-Engine](https://github.com/quark-engine/quark-engine)
+[IntelX](https://intelx.io/terms-of-service)
 
 ### Acknowledgments
 

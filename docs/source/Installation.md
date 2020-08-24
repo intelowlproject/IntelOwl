@@ -18,7 +18,7 @@ cp env_file_app_template env_file_app
 # see "Deployment preparation" paragraph below
 
 # (optional) enable all docker-based analyzers
-cp env_file_app_integrations_template env_file_app_integrations
+cp env_file_integrations_template env_file_integrations
 # in `.env` file comment line 12 and uncomment line 15
 
 # start the app
@@ -87,10 +87,11 @@ Optional variables needed to enable specific analyzers:
 * `CENSYS_API_ID` & `CENSYS_API_SECRET`: Censys credentials
 * `ONYPHE_KEY`: Onyphe.io's API Key 
 * `GREYNOISE_API_KEY`: GreyNoise API ([docs](https://docs.greynoise.io))
+* `INTELX_API_KEY`: IntelligenceX API ([docs](https://intelx.io/product))
 
 Advanced additional configuration:
 * `OLD_JOBS_RETENTION_DAYS`: Database retention, default 3 days. Change this if you want to keep your old analysis longer in the database.
-* `PYINTELOWL_TOKEN_LIFETIME`: Token Lifetime for requests coming from the [PyIntelOwl](https://github.com/intelowlproject/pyintelowl) library, default to 7 days. It will expire only if unused. Increment this if you plan to use these tokens rarely.
+* `PYINTELOWL_TOKEN_LIFETIME`: Token Lifetime for requests coming from the [PyIntelOwl](https://github.com/intelowlproject/pyintelowl) library, defaults to 7 days. It will expire only if unused. Increment this if you plan to use these tokens rarely.
 
 ### Database configuration (required)
 Before running the project, you must populate the basic configuration for PostgreSQL.

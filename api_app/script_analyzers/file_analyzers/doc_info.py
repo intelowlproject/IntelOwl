@@ -11,7 +11,6 @@ from oletools import mraptor
 from oletools.olevba import VBA_Parser
 
 from api_app.script_analyzers.classes import FileAnalyzer
-from api_app import models
 
 logger = logging.getLogger(__name__)
 
@@ -41,14 +40,7 @@ class DocInfo(FileAnalyzer):
             #                     "additional_passwords_to_check": ["testpassword"]
             #                 }
             #             },
-            job_object = models.Job.object_by_job_id(self.job_id)
-            optional_general_configuration = getattr(
-                job_object, "additional_optional_configuration", {}
-            )
-            optional_analyzer_configuration = optional_general_configuration.get(
-                self.analyzer_name, {}
-            )
-            additional_passwords_to_check = optional_analyzer_configuration.get(
+            additional_passwords_to_check = additional_config_params.get(
                 "additional_passwords_to_check", []
             )
             if isinstance(additional_passwords_to_check, list):

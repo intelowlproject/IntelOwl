@@ -13,7 +13,7 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddField(
             model_name='job',
-            name='additional_optional_configuration',
+            name='runtime_configuration',
             field=jsonb.JSONField(default=dict, null=False, blank=True)
         ),
     ]

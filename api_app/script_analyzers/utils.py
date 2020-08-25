@@ -117,3 +117,14 @@ def set_failed_analyzer(analyzer_name, job_id, error_message):
     report = get_basic_report_template(analyzer_name)
     report["errors"].append(error_message)
     set_report_and_cleanup(job_id, report)
+
+
+def adjust_analyzer_config(runtime_conf, additional_config_params, analyzer):
+    if runtime_conf:
+        if analyzer in runtime_conf:
+            analyzer_runtime_conf = runtime_conf[analyzer]
+            additional_config_params.update(analyzer_runtime_conf)
+            logger.info(
+                f"adjusted analyzer config for analyzer {analyzer}."
+                f" New config: {additional_config_params}"
+            )

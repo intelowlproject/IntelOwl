@@ -5,7 +5,6 @@ from api_app.permissions import ExtendedObjectPermissions
 from .script_analyzers import general
 
 from wsgiref.util import FileWrapper
-from json import loads as json_loads
 
 from django.http import HttpResponse
 from django.db.models import Q
@@ -161,7 +160,7 @@ def send_analysis_request(request):
     :param [disable_external_analyzers]: bool
         default False,
         enable it if you want to exclude external analyzers
-    :param: [additional_configuration]: dict
+    :param: [runtime_configuration]: dict
         default {},
         contains additional parameters for particular analyzers
     :param [test]: bool
@@ -212,18 +211,13 @@ def send_analysis_request(request):
                         {"error": "813"}, status=status.HTTP_400_BAD_REQUEST
                     )
 
-            additional_optional_configuration = {}
-            if "additional_configuration" in data_received:
-                additional_optional_configuration = json_loads(
-                    data_received["additional_configuration"]
-                )
-                if not isinstance(additional_optional_configuration, dict):
+            runtime_conf = data_received.get("runtime_configuration", None)
+            if runtime_conf:
+                if not isinstance(runtime_conf, dict):
                     return Response(
                         {"error": "817"}, status=status.HTTP_400_BAD_REQUEST
                     )
-                params[
-                    "additional_optional_configuration"
-                ] = additional_optional_configuration
+                params["runtime_configuration"] = runtime_conf
 
             # we need to clean the list of requested analyzers,
             # ... based on configuration data
@@ -280,7 +274,7 @@ def send_analysis_request(request):
             general.start_analyzers(
                 params["analyzers_to_execute"],
                 analyzers_config,
-                additional_optional_configuration,
+                runtime_conf,
                 job_id,
                 md5,
                 is_sample,

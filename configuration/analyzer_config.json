@@ -164,6 +164,30 @@
     "decription": "static generic document analysis",
     "python_module": "docinfo_run"
   },
+  "Doc_Info_Experimental": {
+    "type": "file",
+    "supported_filetypes": [
+      "application/msword",
+      "application/vnd.ms-office",
+      "application/vnd.ms-excel.addin.macroEnabled",
+      "application/x-mspublisher",
+      "application/vnd.ms-powerpoint",
+      "application/vnd.ms-excel",
+      "application/vnd.ms-excel.sheet.macroEnabled.12",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+      "text/x-ms-iqy",
+      "application/excel",
+      "text/xml",
+      "application/xml"
+    ],
+    "decription": "static document analysis with new features to analyze XLM macros, encrypted macros and more",
+    "python_module": "docinfo_run",
+    "additional_config_params": {
+        "experimental": true
+    }
+  },
   "File_Info": {
     "type": "file",
     "description": "basic static analysis, extracts metadata and hashes",
@@ -780,16 +804,6 @@
       "api_key_name": "VT_KEY"
     }
   },
-  "VirusTotal_v2_Get_File_Alternative": {
-    "type": "file",
-    "external_service": true,
-    "run_hash": true,
-    "disabled": true,
-    "python_module": "vt2get_run",
-    "additional_config_params": {
-      "api_key_name": "VT_ALTERNATIVE_KEY"
-    }
-  },
   "VirusTotal_v2_Get_Observable": {
     "type": "observable",
     "observable_supported": ["ip", "domain", "url", "hash"],
@@ -799,16 +813,6 @@
     "python_module": "vt2get_run",
     "additional_config_params": {
       "api_key_name": "VT_KEY"
-    }
-  },
-  "VirusTotal_v2_Get_Observable_Alternative": {
-    "type": "observable",
-    "observable_supported": ["ip", "domain", "url", "hash"],
-    "external_service": true,
-    "disabled": true,
-    "python_module": "vt2get_run",
-    "additional_config_params": {
-      "api_key_name": "VT_ALTERNATIVE_KEY"
     }
   },
   "VirusTotal_v2_Scan_File": {
@@ -822,16 +826,6 @@
       "api_key_name": "VT_KEY"
     }
   },
-  "VirusTotal_v2_Scan_File_Alternative": {
-    "type": "file",
-    "external_service": true,
-    "leaks_info": true,
-    "disabled": true,
-    "python_module": "vt2scan_run",
-    "additional_config_params": {
-      "api_key_name": "VT_ALTERNATIVE_KEY"
-    }
-  },
   "VirusTotal_v3_Get_File": {
     "type": "file",
     "external_service": true,
@@ -843,26 +837,41 @@
       "api_key_name": "VT_KEY"
     }
   },
-  "VirusTotal_v3_Get_File_Alternative": {
+  "VirusTotal_v3_Get_File_And_Rescan_If_Old": {
     "type": "file",
     "external_service": true,
     "run_hash": true,
-    "disabled": true,
-    "python_module": "vt3get_run",
+    "description": "check file hash on VirusTotal and rescan it if it is old",
+    "requires_configuration": true,
+    "python_module": "vt3get_scan_run",
     "additional_config_params": {
-      "api_key_name": "VT_ALTERNATIVE_KEY"
+        "api_key_name": "VT_KEY",
+        "force_active_scan_if_old": true
     }
   },
   "VirusTotal_v3_Get_File_And_Scan": {
     "type": "file",
     "external_service": true,
     "run_hash": true,
-    "description": "check file hash on VirusTotal. If not already available, perform a scan",
+    "description": "check file hash on VirusTotal. If not already available, send the sample and perform a new scan",
     "requires_configuration": true,
     "python_module": "vt3get_scan_run",
     "additional_config_params": {
       "api_key_name": "VT_KEY",
       "force_active_scan": true
+    }
+  },
+  "VirusTotal_v3_Get_File_And_Scan_Or_Rescan_If_Old": {
+    "type": "file",
+    "external_service": true,
+    "run_hash": true,
+    "description": "check file hash on VirusTotal. If it is already available, rescan if it is old. If it is not available, send the sample and perform a new scan",
+    "requires_configuration": true,
+    "python_module": "vt3get_scan_run",
+    "additional_config_params": {
+        "api_key_name": "VT_KEY",
+        "force_active_scan": true,
+        "force_active_scan_if_old": true
     }
   },
   "VirusTotal_v3_Get_Observable": {
@@ -876,16 +885,6 @@
       "api_key_name": "VT_KEY"
     }
   },
-  "VirusTotal_v3_Get_Observable_Alternative": {
-    "type": "observable",
-    "observable_supported": ["ip", "domain", "url", "hash"],
-    "external_service": true,
-    "disabled": true,
-    "python_module": "vt3get_run",
-    "additional_config_params": {
-      "api_key_name": "VT_ALTERNATIVE_KEY"
-    }
-  },
   "VirusTotal_v3_Scan_File": {
     "type": "file",
     "external_service": true,
@@ -895,16 +894,6 @@
     "python_module": "vt3scan_run",
     "additional_config_params": {
       "api_key_name": "VT_KEY"
-    }
-  },
-  "VirusTotal_v3_Scan_File_Alternative": {
-    "type": "file",
-    "external_service": true,
-    "leaks_info": true,
-    "disabled": true,
-    "python_module": "vt3scan_run",
-    "additional_config_params": {
-      "api_key_name": "VT_ALTERNATIVE_KEY"
     }
   },
   "Yara_Scan_Community": {
@@ -943,7 +932,6 @@
         "/opt/deploy/yara/mcafee_rules/RAT",
         "/opt/deploy/yara/mcafee_rules/malware",
         "/opt/deploy/yara/mcafee_rules/miners",
-        "/opt/deploy/yara/mcafee_rules/mobile",
         "/opt/deploy/yara/mcafee_rules/ransomware",
         "/opt/deploy/yara/mcafee_rules/stealer"
       ]

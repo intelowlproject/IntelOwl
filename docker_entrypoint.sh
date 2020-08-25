@@ -1,6 +1,8 @@
 #!/bin/bash
 
-python manage.py makemigrations api_app
+# migrations are available in the "migrations" folder
+# you must add a new migrate file each time you make a change to the database
+# python manage.py makemigrations api_app
 python manage.py migrate                  # Apply database migrations
 python manage.py collectstatic --noinput  # Collect static files
 

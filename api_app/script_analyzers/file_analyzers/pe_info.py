@@ -1,3 +1,8 @@
+# this analyzer leverage a forked version of PEfile ...
+# ... that fixes one common problem encountered in a lot of analysis
+# original repository: https://github.com/erocarrera/pefile
+# forked repository: https://github.com/mlodic/pefile
+
 import logging
 import pefile
 

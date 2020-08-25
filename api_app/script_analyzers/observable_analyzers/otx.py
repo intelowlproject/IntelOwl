@@ -51,6 +51,9 @@ class OTX(classes.ObservableAnalyzer):
         result["pulses"] = (
             details.get("general", {}).get("pulse_info", {}).get("pulses", [])
         )
+        # for some observables the output could really be overwhelming
+        if not self.verbose and result["pulses"]:
+            result["pulses"] = result["pulses"][:20]
         result["geo"] = details.get("geo", {})
         result["malware_samples"] = [
             d.get("hash", "") for d in details.get("malware", {}).get("data", [])

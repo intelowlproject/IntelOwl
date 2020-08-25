@@ -268,16 +268,40 @@ class FileAnalyzersDocTests(TestCase):
             "file_mimetype": "application/msword",
             "force_privacy": False,
             "analyzers_requested": ["test"],
+            "additional_optional_configuration": {
+                "Doc_Info_Experimental": {
+                    "additional_passwords_to_check": ["testpassword"]
+                }
+            },
         }
         filename = "document.doc"
         test_job = _generate_test_job_with_file(params, filename)
         self.job_id = test_job.id
         self.filepath, self.filename = general.get_filepath_filename(self.job_id)
+        self.additional_optional_configuration = (
+            test_job.additional_optional_configuration
+        )
         self.md5 = test_job.md5
 
     def test_docinfo(self):
         report = doc_info.DocInfo(
             "Doc_Info", self.job_id, self.filepath, self.filename, self.md5, {}
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    def test_docinfo_experimental(self):
+        analyzer_name = "Doc_Info_Experimental"
+        additional_params = {"experimental": True}
+        general.adjust_analyzer_config(
+            self.additional_optional_configuration, additional_params, analyzer_name
+        )
+        report = doc_info.DocInfo(
+            analyzer_name,
+            self.job_id,
+            self.filepath,
+            self.filename,
+            self.md5,
+            additional_params,
         ).start()
         self.assertEqual(report.get("success", False), True)
 

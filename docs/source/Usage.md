@@ -35,12 +35,15 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * `PDF_Info`: static PDF analysis
 * `Rtf_Info`: static RTF analysis
 * `Doc_Info`: static generic document analysis
+* `Doc_Info_Experimental`: static document analysis with new features to analyze XLM macros, encrypted macros and more
 * `PE_Info`: static PE analysis
 * `Signature_Info`: PE signature extractor
 * `Strings_Info_Classic`: strings extraction
 * `Strings_Info_ML`: strings extraction plus strings ranking based on Machine Learning
 * `VirusTotal_v3_Get_File`: check file hash on VirusTotal
-* `VirusTotal_v3_Get_File_And_Scan`: check file hash on VirusTotal. If not already available, perform a scan
+* `VirusTotal_v3_Get_File_And_Rescan_If_Old`: check file hash on VirusTotal and rescan it if it is old
+* `VirusTotal_v3_Get_File_And_Scan`: check file hash on VirusTotal. If not already available, send the sample and perform a scan
+* `VirusTotal_v3_Get_File_And_Scan_And_Rescan_If_Old`: check file hash on VirusTotal. If it is already available, rescan it if it is old. If it is not available, send the sample and perform a scan.
 * `VirusTotal_v3_Scan_File`: scan a file on VirusTotal
 * `VirusTotal_v2_Get_File`: check file hash on VirusTotal using old API endpoints
 * `VirusTotal_v2_Scan_File`: scan a file on VirusTotal using old API endpoints

@@ -13,6 +13,9 @@ class GreyNoise(classes.ObservableAnalyzer):
         self.api_key_name = additional_config_params.get(
             "api_key_name", "GREYNOISE_API_KEY"
         )
+        self.max_records_to_retrieve = int(
+            additional_config_params.get("max_records_to_retrieve", 500)
+        )
 
     def run(self):
         if self.api_version == "v1":
@@ -36,4 +39,8 @@ class GreyNoise(classes.ObservableAnalyzer):
                 "Invalid API Version. Supported are: v1 (free) & v2 (paid)."
             )
 
-        return response.json()
+        result = response.json()
+        if "records" in result:
+            result["records"] = result["records"][: self.max_records_to_retrieve]
+
+        return result

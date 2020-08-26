@@ -5,7 +5,7 @@ from django.core.files import File
 from django.test import TestCase
 from unittest.mock import patch, MagicMock
 
-from api_app.script_analyzers import general
+from api_app.script_analyzers import utils
 from api_app.script_analyzers.file_analyzers import (
     file_info,
     signature_info,
@@ -76,7 +76,7 @@ class FileAnalyzersEXETests(TestCase):
         filename = "file.exe"
         test_job = _generate_test_job_with_file(params, filename)
         self.job_id = test_job.id
-        self.filepath, self.filename = general.get_filepath_filename(self.job_id)
+        self.filepath, self.filename = utils.get_filepath_filename(self.job_id)
         self.md5 = test_job.md5
 
     def test_fileinfo_exe(self):
@@ -244,7 +244,7 @@ class FileAnalyzersDLLTests(TestCase):
         filename = "file.dll"
         test_job = _generate_test_job_with_file(params, filename)
         self.job_id = test_job.id
-        self.filepath, self.filename = general.get_filepath_filename(self.job_id)
+        self.filepath, self.filename = utils.get_filepath_filename(self.job_id)
         self.md5 = test_job.md5
 
     def test_fileinfo_dll(self):
@@ -268,16 +268,38 @@ class FileAnalyzersDocTests(TestCase):
             "file_mimetype": "application/msword",
             "force_privacy": False,
             "analyzers_requested": ["test"],
+            "runtime_configuration": {
+                "Doc_Info_Experimental": {
+                    "additional_passwords_to_check": ["testpassword"]
+                }
+            },
         }
         filename = "document.doc"
         test_job = _generate_test_job_with_file(params, filename)
         self.job_id = test_job.id
-        self.filepath, self.filename = general.get_filepath_filename(self.job_id)
+        self.filepath, self.filename = utils.get_filepath_filename(self.job_id)
+        self.runtime_configuration = test_job.runtime_configuration
         self.md5 = test_job.md5
 
     def test_docinfo(self):
         report = doc_info.DocInfo(
             "Doc_Info", self.job_id, self.filepath, self.filename, self.md5, {}
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    def test_docinfo_experimental(self):
+        analyzer_name = "Doc_Info_Experimental"
+        additional_params = {"experimental": True}
+        utils.adjust_analyzer_config(
+            self.runtime_configuration, additional_params, analyzer_name
+        )
+        report = doc_info.DocInfo(
+            analyzer_name,
+            self.job_id,
+            self.filepath,
+            self.filename,
+            self.md5,
+            additional_params,
         ).start()
         self.assertEqual(report.get("success", False), True)
 
@@ -308,7 +330,7 @@ class FileAnalyzersRtfTests(TestCase):
         filename = "document.rtf"
         test_job = _generate_test_job_with_file(params, filename)
         self.job_id = test_job.id
-        self.filepath, self.filename = general.get_filepath_filename(self.job_id)
+        self.filepath, self.filename = utils.get_filepath_filename(self.job_id)
         self.md5 = test_job.md5
 
     def test_rtfinfo(self):
@@ -330,7 +352,7 @@ class FileAnalyzersPDFTests(TestCase):
         filename = "document.pdf"
         test_job = _generate_test_job_with_file(params, filename)
         self.job_id = test_job.id
-        self.filepath, self.filename = general.get_filepath_filename(self.job_id)
+        self.filepath, self.filename = utils.get_filepath_filename(self.job_id)
         self.md5 = test_job.md5
 
     def test_pdfinfo(self):
@@ -352,7 +374,7 @@ class FileAnalyzersHTMLTests(TestCase):
         filename = "page.html"
         test_job = _generate_test_job_with_file(params, filename)
         self.job_id = test_job.id
-        self.filepath, self.filename = general.get_filepath_filename(self.job_id)
+        self.filepath, self.filename = utils.get_filepath_filename(self.job_id)
         self.md5 = test_job.md5
 
     @mock_connections(patch("requests.get", side_effect=mocked_docker_analyzer_get))
@@ -376,7 +398,7 @@ class FileAnalyzersJSTests(TestCase):
         filename = "file.jse"
         test_job = _generate_test_job_with_file(params, filename)
         self.job_id = test_job.id
-        self.filepath, self.filename = general.get_filepath_filename(self.job_id)
+        self.filepath, self.filename = utils.get_filepath_filename(self.job_id)
         self.md5 = test_job.md5
 
     @mock_connections(patch("requests.get", side_effect=mocked_docker_analyzer_get))
@@ -405,7 +427,7 @@ class FileAnalyzersAPKTests(TestCase):
         filename = "sample.apk"
         test_job = _generate_test_job_with_file(params, filename)
         self.job_id = test_job.id
-        self.filepath, self.filename = general.get_filepath_filename(self.job_id)
+        self.filepath, self.filename = utils.get_filepath_filename(self.job_id)
         self.md5 = test_job.md5
 
     @mock_connections(patch("requests.get", side_effect=mocked_docker_analyzer_get))

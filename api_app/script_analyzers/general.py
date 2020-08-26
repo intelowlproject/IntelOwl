@@ -10,13 +10,21 @@ from .utils import (
     set_failed_analyzer,
     get_filepath_filename,
     get_observable_data,
+    adjust_analyzer_config,
 )
 from intel_owl import tasks, settings
 
 logger = logging.getLogger(__name__)
 
 
-def start_analyzers(analyzers_to_execute, analyzers_config, job_id, md5, is_sample):
+def start_analyzers(
+    analyzers_to_execute,
+    analyzers_config,
+    runtime_configuration,
+    job_id,
+    md5,
+    is_sample,
+):
     set_job_status(job_id, "running")
     if is_sample:
         file_path, filename = get_filepath_filename(job_id)
@@ -34,6 +42,10 @@ def start_analyzers(analyzers_to_execute, analyzers_config, job_id, md5, is_samp
 
             additional_config_params = analyzers_config[analyzer].get(
                 "additional_config_params", {}
+            )
+
+            adjust_analyzer_config(
+                runtime_configuration, additional_config_params, analyzer
             )
 
             # run analyzer with a celery task asynchronously
@@ -93,8 +105,6 @@ def start_analyzers(analyzers_to_execute, analyzers_config, job_id, md5, is_samp
                 )
 
         except (AnalyzerConfigurationException, AnalyzerRunException) as e:
-            error_message = "job_id {}. analyzer: {}. error: {}".format(
-                job_id, analyzer, e
-            )
+            error_message = f"job_id {job_id}. analyzer: {analyzer}. error: {e}"
             logger.error(error_message)
             set_failed_analyzer(analyzer, job_id, error_message)

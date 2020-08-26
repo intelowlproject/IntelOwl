@@ -39,4 +39,7 @@ class Shodan(classes.ObservableAnalyzer):
         except requests.RequestException as e:
             raise AnalyzerRunException(e)
 
-        return response.json()
+        result = response.json()
+        if self.analysis_type == "honeyscore":
+            return {"honeyscore": result}
+        return result

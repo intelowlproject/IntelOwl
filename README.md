@@ -36,24 +36,24 @@ Documentation about IntelOwl installation, usage, contribution can be found at h
 
 ### Blog posts
 
-[v1.0.0 Announcement](https://www.honeynet.org/?p=7558)
-
-[First announcement](https://www.certego.net/en/news/new-year-new-tool-intel-owl/)
-
 [Daily Swig Article](https://portswigger.net/daily-swig/intel-owl-osint-tool-automates-the-intel-gathering-process-using-a-single-api)
+
+[Honeynet Blog: v1.0.0 Announcement](https://www.honeynet.org/?p=7558)
+
+[Certego Blog: First announcement](https://www.certego.net/en/news/new-year-new-tool-intel-owl/)
 
 ### Free Internal Modules Available
 
-- Static Doc Analysis
+- Static Document Analysis
 - Static RTF Analysis
 - Static PDF Analysis
 - Static PE Analysis
-- Static APK Analysis
 - Static Generic File Analysis
-- Strings analysis
+- Strings analysis with ML
 - PE Signature verification
 - PE Capabilities Extraction
 - Emulated Javascript Analysis
+- Android Malware Analysis
 
 **Free modules that require additional configuration**:
 
@@ -77,6 +77,8 @@ Documentation about IntelOwl installation, usage, contribution can be found at h
 - ONYPHE
 - Censys.io
 - SecurityTrails
+- Intelligence X
+- Pulsedive API (works w/o API key as well)
 
 ##### required free API key
 
@@ -120,7 +122,9 @@ license terms.
 [osslsigncode](https://github.com/develar/osslsigncode),
 [stringsifter](https://github.com/fireeye/stringsifter),
 [peepdf](https://github.com/jesparza/peepdf),
+[pefile](https://github.com/erocarrera/pefile),
 [oletools](https://github.com/decalage2/oletools),
+[XLMMacroDeobfuscator](https://github.com/DissectMalware/XLMMacroDeobfuscator),
 [MaxMind-DB-Reader-python](https://github.com/maxmind/MaxMind-DB-Reader-python),
 [pysafebrowsing](https://github.com/Te-k/pysafebrowsing),
 [PyMISP](https://github.com/MISP/PyMISP),
@@ -133,7 +137,9 @@ license terms.
 [McAfee Yara sigs](https://github.com/advanced-threat-research/Yara-Rules),
 [APKiD](https://github.com/rednaga/APKiD/blob/master/LICENSE.COMMERCIAL),
 [Box-JS](https://github.com/CapacitorSet/box-js/blob/master/LICENSE),
-[Capa](https://github.com/fireeye/capa/blob/master/LICENSE.txt)
+[Capa](https://github.com/fireeye/capa/blob/master/LICENSE.txt),
+[Quark-Engine](https://github.com/quark-engine/quark-engine)
+[IntelX](https://intelx.io/terms-of-service)
 
 ### Acknowledgments
 

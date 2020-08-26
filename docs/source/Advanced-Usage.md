@@ -108,27 +108,21 @@ Such compose files are available under `integrations/`.
 IntelOwl provides support for some of the most common authentication methods:
 * LDAP
 * GSuite (work in progress)
+
 #### LDAP
-IntelOwl leverages [Django-auth-ldap](https://github.com/django-auth-ldap/django-auth-ldap
-) to perform authentication via LDAP.
+IntelOwl leverages [Django-auth-ldap](https://github.com/django-auth-ldap/django-auth-ldap) to perform authentication via LDAP.
 
 How to configure and enable LDAP on Intel Owl?
 
-Inside the `intel_owl` directory you can find a file called `ldap_config_template.py`. This file provides an example of configuration.
-Copy that file into the same directory with the name `ldap_config.py`.
-Then change the values with your LDAP configuration.
+1. Change the values with your LDAP configuration inside `configuration/ldap_config.py`. This file is mounted as a docker volume, so you won't need to rebuild the image.
 
-For more details on how to configure this file, check the [official documentation](https://django-auth-ldap.readthedocs.io/en/latest/) of the django-auth-ldap library.
+>  For more details on how to configure this file, check the [official documentation](https://django-auth-ldap.readthedocs.io/en/latest/) of the django-auth-ldap library.
 
-Once you have done that, you have to set the environment variable `LDAP_ENABLED` as `True` in the environment configuration file `env_file_app`.
-Finally, you can rebuild and restart the application by specifying the testing docker-compose file:
-```
-docker-compose -f docker-compose-for-tests.yml up --build`
-```
-
+2. Once you have done that, you have to set the environment variable `LDAP_ENABLED` as `True` in the environment configuration file `env_file_app`.
+  Finally, you can restart the application with `docker-compose up`
 
 
 ## Google Kubernetes Engine deployment
 Refer to the following blog post for an example on how to deploy IntelOwl on Google Kubernetes Engine:
 
-https://mostwanted002.cf/post/intel-owl-gke/
+[Deploying Intel-Owl on GKE](https://mostwanted002.cf/post/intel-owl-gke/) by [Mayank Malik](https://twitter.com/_mostwanted002_).

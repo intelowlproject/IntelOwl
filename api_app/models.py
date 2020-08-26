@@ -60,6 +60,9 @@ class Job(models.Model):
     )
     file = models.FileField(blank=True, upload_to=file_directory_path)
     tags = models.ManyToManyField(Tag, related_name="jobs", blank=True)
+    runtime_configuration = postgres_fields.JSONField(
+        default=dict, null=True, blank=True
+    )
 
     @classmethod
     def object_by_job_id(cls, job_id, transaction=False):

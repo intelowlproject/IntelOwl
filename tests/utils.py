@@ -15,9 +15,10 @@ from api_app.script_analyzers.observable_analyzers import (
     urlhaus,
     googlesf,
     fortiguard,
+    intelx,
 )
 
-from .mock_utils import mock_connections, mocked_requests_noop
+from .mock_utils import mock_connections, mocked_requests_noop, MockResponse
 
 
 # Abstract Base classes constructed for most common occuring combinations
@@ -67,6 +68,28 @@ class CommonTestCases_observables(metaclass=ABCMeta):
     def test_pulsevide(self, mock_get=None, mock_post=None):
         report = pulsedive.Pulsedive(
             "Pulsedive_Active_IOC",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    @mock_connections(
+        patch(
+            "requests.Session.post",
+            side_effect=lambda *args, **kwargs: MockResponse({"id": 1}, 200),
+        )
+    )
+    @mock_connections(
+        patch(
+            "requests.Session.get",
+            side_effect=lambda *args, **kwargs: MockResponse({"selectors": []}, 200),
+        )
+    )
+    def test_intelx(self, *args):
+        report = intelx.IntelX(
+            "IntelX_Phonebook",
             self.job_id,
             self.observable_name,
             self.observable_classification,

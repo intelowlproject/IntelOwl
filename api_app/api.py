@@ -160,6 +160,9 @@ def send_analysis_request(request):
     :param [disable_external_analyzers]: bool
         default False,
         enable it if you want to exclude external analyzers
+    :param: [runtime_configuration]: dict
+        default {},
+        contains additional parameters for particular analyzers
     :param [test]: bool
         disable analysis for API testing
 
@@ -207,6 +210,14 @@ def send_analysis_request(request):
                     return Response(
                         {"error": "813"}, status=status.HTTP_400_BAD_REQUEST
                     )
+
+            runtime_conf = data_received.get("runtime_configuration", None)
+            if runtime_conf:
+                if not isinstance(runtime_conf, dict):
+                    return Response(
+                        {"error": "817"}, status=status.HTTP_400_BAD_REQUEST
+                    )
+                params["runtime_configuration"] = runtime_conf
 
             # we need to clean the list of requested analyzers,
             # ... based on configuration data
@@ -261,7 +272,12 @@ def send_analysis_request(request):
         is_sample = serializer.data.get("is_sample", False)
         if not test:
             general.start_analyzers(
-                params["analyzers_to_execute"], analyzers_config, job_id, md5, is_sample
+                params["analyzers_to_execute"],
+                analyzers_config,
+                runtime_conf,
+                job_id,
+                md5,
+                is_sample,
             )
 
         response_dict = {

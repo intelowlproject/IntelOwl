@@ -11,6 +11,7 @@ class JobDocument(Document):
     analysis_reports = fields.ObjectField()
     # Normal fields
     errors = fields.TextField()
+    runtime_configuration = fields.ObjectField()
     # Keyword fields to allow aggregations/vizualizations
     source = fields.KeywordField()
     md5 = fields.KeywordField()
@@ -23,6 +24,9 @@ class JobDocument(Document):
     tags = fields.NestedField(
         properties={"label": fields.KeywordField(), "color": fields.TextField()}
     )
+
+    def prepare_runtime_configuration(self, instance):
+        return instance.runtime_configuration
 
     def prepare_analysis_reports(self, instance):
         """

@@ -35,12 +35,15 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * `PDF_Info`: static PDF analysis
 * `Rtf_Info`: static RTF analysis
 * `Doc_Info`: static generic document analysis
+* `Doc_Info_Experimental`: static document analysis with new features to analyze XLM macros, encrypted macros and more
 * `PE_Info`: static PE analysis
 * `Signature_Info`: PE signature extractor
 * `Strings_Info_Classic`: strings extraction
 * `Strings_Info_ML`: strings extraction plus strings ranking based on Machine Learning
 * `VirusTotal_v3_Get_File`: check file hash on VirusTotal
-* `VirusTotal_v3_Get_File_And_Scan`: check file hash on VirusTotal. If not already available, perform a scan
+* `VirusTotal_v3_Get_File_And_Rescan_If_Old`: check file hash on VirusTotal and rescan it if it is old
+* `VirusTotal_v3_Get_File_And_Scan`: check file hash on VirusTotal. If not already available, send the sample and perform a scan
+* `VirusTotal_v3_Get_File_And_Scan_And_Rescan_If_Old`: check file hash on VirusTotal. If it is already available, rescan it if it is old. If it is not available, send the sample and perform a scan.
 * `VirusTotal_v3_Scan_File`: scan a file on VirusTotal
 * `VirusTotal_v2_Get_File`: check file hash on VirusTotal using old API endpoints
 * `VirusTotal_v2_Scan_File`: scan a file on VirusTotal using old API endpoints
@@ -63,6 +66,7 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * `BoxJS_Scan_Javascript`: [Box-JS](https://github.com/CapacitorSet/box-js) is a tool for studying JavaScript malware. 
 * `APKiD_Scan_APK_DEX_JAR`: [APKiD](https://github.com/rednaga/APKiD) identifies many compilers, packers, obfuscators, and other weird stuff from an APK or DEX file.
 * `Quark_Engine_APK`: [Quark Engine](https://github.com/quark-engine/quark-engine) is an Obfuscation-Neglect Android Malware Scoring System.
+* `IntelX_Phonebook`: [IntelligenceX](https://intelx.io/) is a search engine and data archive. Fetches emails, urls, domains associated with an observable.
 
 #### Observable analyzers (ip, domain, url, hash)
 * `VirusTotal_v3_Get_Observable`: search an observable in the VirusTotal DB
@@ -116,7 +120,7 @@ The following is the list of the available analyzers you can run out-of-the-box:
 #### [Additional analyzers](https://intelowl.readthedocs.io/en/develop/Advanced-Usage.html#optional-analyzers) that can be enabled per your wish.
 
 ## Analyzers customization
-You can create new analyzers based on already existing modules by changing the configuration values (`analyzer_config.json`).
+You can create new analyzers based on already existing modules by changing the configuration values inside `configuration/analyzer_config.json`. This file is mounted as a docker volume, so you won't need to rebuild the image.
 
 The following are all the keys that you can change without touching the source code:
 * `disabled`: you can choose to disable certain analyzers, then they won't appear in the dropdown list and won't run if requested.

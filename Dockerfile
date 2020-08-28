@@ -5,6 +5,7 @@ ENV DJANGO_SETTINGS_MODULE intel_owl.settings
 ENV PYTHONPATH /opt/deploy/intel_owl
 ENV LOG_PATH /var/log/intel_owl
 ENV ELASTICSEARCH_DSL_VERSION 7.1.4
+ENV watch_logs_cmd "watch -n1 tail -n10 /var/log/intel_owl/django/api_app.log"
 
 RUN mkdir -p ${LOG_PATH} \
     ${LOG_PATH}/django ${LOG_PATH}/uwsgi \

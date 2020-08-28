@@ -1,3 +1,5 @@
+import json
+
 from django.contrib.auth.models import Group
 from rest_framework import serializers
 from rest_framework_guardian.serializers import ObjectPermissionsAssignmentMixin
@@ -98,6 +100,14 @@ class JobSerializer(ObjectPermissionsAssignmentMixin, serializers.ModelSerialize
         return {
             "view_job": [*grps],
         }
+
+    def validate(self, data):
+        # check and validate runtime_configuration
+        runtime_conf = data.get("runtime_configuration", {})
+        if runtime_conf and isinstance(runtime_conf, list):
+            runtime_conf = json.loads(runtime_conf[0])
+        data["runtime_configuration"] = runtime_conf
+        return data
 
     def create(self, validated_data):
         tags = validated_data.pop("tags_id", None)

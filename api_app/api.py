@@ -211,14 +211,6 @@ def send_analysis_request(request):
                         {"error": "813"}, status=status.HTTP_400_BAD_REQUEST
                     )
 
-            runtime_conf = data_received.get("runtime_configuration", None)
-            if runtime_conf:
-                if not isinstance(runtime_conf, dict):
-                    return Response(
-                        {"error": "817"}, status=status.HTTP_400_BAD_REQUEST
-                    )
-                params["runtime_configuration"] = runtime_conf
-
             # we need to clean the list of requested analyzers,
             # ... based on configuration data
             analyzers_config = helpers.get_analyzer_config()
@@ -274,7 +266,7 @@ def send_analysis_request(request):
             general.start_analyzers(
                 params["analyzers_to_execute"],
                 analyzers_config,
-                runtime_conf,
+                serialized_data["runtime_configuration"],
                 job_id,
                 md5,
                 is_sample,

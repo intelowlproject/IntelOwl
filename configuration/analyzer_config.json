@@ -576,6 +576,12 @@
       "rank_strings": false
     }
   },
+  "SpeakEasy": {
+    "type": "file",
+    "supported_filetypes": ["application/x-dosexec"],
+    "description": "speakeasy emulation report",
+    "python_module": "speakeasy_run"
+  },
   "Strings_Info_ML": {
     "type": "file",
     "description": "strings extraction plus strings ranking based on Machine Learning",

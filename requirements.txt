@@ -80,3 +80,4 @@ flake8==3.8.2
 black==19.10b0
 quark-engine==20.8
 git+git://github.com/DissectMalware/XLMMacroDeobfuscator.git@c78b9e443e2667399470462fd863ebe4e2b8c978
+speakeasy-emulator==1.4.4

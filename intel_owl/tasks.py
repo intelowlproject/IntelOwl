@@ -14,6 +14,7 @@ from api_app.script_analyzers.file_analyzers import (
     strings_info,
     rtf_info,
     signature_info,
+    speakeasy_emulation,
     peframe,
     thug_file,
     capa_info,
@@ -577,6 +578,15 @@ def signatureinfo_run(
     analyzer_name, job_id, filepath, filename, md5, additional_config_params
 ):
     signature_info.SignatureInfo(
+        analyzer_name, job_id, filepath, filename, md5, additional_config_params
+    ).start()
+
+
+@shared_task(soft_time_limit=120)
+def speakeasy_run(
+    analyzer_name, job_id, filepath, filename, md5, additional_config_params
+):
+    speakeasy_emulation.SpeakEasy(
         analyzer_name, job_id, filepath, filename, md5, additional_config_params
     ).start()
 

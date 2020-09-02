@@ -163,6 +163,9 @@ class DocInfo(FileAnalyzer):
                 decrypted_file_name = self.vbaparser.decrypt_file(
                     self.passwords_to_check
                 )
+                self.olevba_results[
+                    "additional_passwords_tried"
+                ] = self.passwords_to_check
                 if decrypted_file_name:
                     self.vbaparser = VBA_Parser(decrypted_file_name)
                 else:

@@ -11,10 +11,10 @@ There are multiple ways to interact with the Intel Owl APIs,
     new analysis, tags management and more features 
     - Built with Angular 9 and available on [Github](https://github.com/intelowlproject/intelowl-ng).
 
-2. pyIntelOwl (CLI/Library)
+2. pyIntelOwl (CLI/Library) ["How to use" Youtube video](https://www.youtube.com/watch?v=fpd6Kt9EZdI)
 
     - Official client that is available at: [PyIntelOwl](https://github.com/intelowlproject/pyintelowl),
-    - Can be used as a library for your own python projects or,
+    - Can be used as a library for your own python projects or...
     - directly via the command line interface.
 
 ### Tokens creation
@@ -38,6 +38,7 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * `Doc_Info_Experimental`: static document analysis with new features to analyze XLM macros, encrypted macros and more
 * `PE_Info`: static PE analysis
 * `Signature_Info`: PE signature extractor
+* `Speakeasy`: Speakeasy binary emulation
 * `Strings_Info_Classic`: strings extraction
 * `Strings_Info_ML`: strings extraction plus strings ranking based on Machine Learning
 * `VirusTotal_v3_Get_File`: check file hash on VirusTotal

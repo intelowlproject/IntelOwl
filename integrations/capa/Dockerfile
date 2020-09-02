@@ -13,9 +13,9 @@ RUN useradd -ms /bin/bash capa-user
 
 # Install capa standalone binary
 WORKDIR ${PROJECT_PATH}
-RUN wget -q https://github.com/fireeye/capa/releases/download/v1.0.0/capa-v1.0.0-linux.zip \
-    && unzip capa-v1.0.0-linux.zip && rm -f capa-v1.0.0-linux.zip \
-    && ln -s ${PROJECT_PATH}/capa-v1.0.0-linux /usr/local/bin/capa \
+RUN wget -q -O capa-v1.1.0-linux https://github.com/fireeye/capa/releases/download/v1.1.0/capa-linux \
+    && chmod +x capa-v1.1.0-linux \
+    && ln -s ${PROJECT_PATH}/capa-v1.1.0-linux /usr/local/bin/capa \
     && chown -R capa-user:capa-user .
 
 # Build Flask REST API

@@ -76,6 +76,12 @@
     "python_module": "boxjs_run",
     "description": "A tool for studying JavaScript malware"
   },
+  "CheckDMARC": {
+    "type": "observable",
+    "observable_supported": ["domain"],
+    "description": "An SPF and DMARC DNS records validator",
+    "python_module": "checkdmarc_run"
+  },
   "CIRCLPassiveDNS": {
     "type": "observable",
     "observable_supported": ["domain", "url"],

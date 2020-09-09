@@ -55,6 +55,7 @@ Documentation about IntelOwl installation, usage, contribution can be found at h
 - PE Capabilities Extraction
 - Emulated Javascript Analysis
 - Android Malware Analysis
+- SPF and DMARC Validator
 
 **Free modules that require additional configuration**:
 

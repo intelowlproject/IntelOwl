@@ -29,6 +29,7 @@ from api_app.script_analyzers.observable_analyzers import (
     securitytrails,
     cymru,
     tranco,
+    checkdmarc,
 )
 from .mock_utils import (
     MockResponseNoOp,
@@ -405,6 +406,17 @@ class DomainAnalyzersTests(
         ).start()
 
         self.assertEqual(report.get("success", False), True, f"report: {report}")
+
+    def test_checkdmarc(self, mock_get=None, mock_post=None):
+        report = checkdmarc.CheckDMARC(
+            "CheckDMARC",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {},
+        ).start()
+
+        self.assertEqual(report.get("success", False), True)
 
 
 @mock_connections(patch("requests.get", side_effect=mocked_requests))

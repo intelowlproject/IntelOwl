@@ -40,7 +40,12 @@ class VirusTotalv3ScanFile(FileAnalyzer):
 
 
 def vt_scan_file(
-    api_key, md5, job_id, rescan_instead=False, max_tries=100, poll_distance=5,
+    api_key,
+    md5,
+    job_id,
+    rescan_instead=False,
+    max_tries=100,
+    poll_distance=5,
 ):
     try:
         binary = get_binary(job_id)

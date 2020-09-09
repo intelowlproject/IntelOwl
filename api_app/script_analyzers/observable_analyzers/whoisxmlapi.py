@@ -4,6 +4,7 @@ from api_app.exceptions import AnalyzerRunException
 from api_app.script_analyzers import classes
 from intel_owl import secrets
 
+
 class Whoisxmlapi(classes.ObservableAnalyzer):
     url: str = "https://www.whoisxmlapi.com/whoisserver/WhoisService"
 

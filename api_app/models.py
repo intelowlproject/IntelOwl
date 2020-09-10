@@ -30,12 +30,7 @@ class Tag(models.Model):
 class Job(models.Model):
     class Meta:
         indexes = [
-            models.Index(
-                fields=[
-                    "md5",
-                    "status",
-                ]
-            ),
+            models.Index(fields=["md5", "status",]),
         ]
 
     source = models.CharField(max_length=50, blank=False, default="none")

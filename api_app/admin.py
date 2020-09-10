@@ -51,10 +51,7 @@ class CustomOutstandingTokenAdmin(OutstandingTokenAdmin):
         (
             "Create API Token For",
             {
-                "fields": (
-                    "user",
-                    "token",
-                ),
+                "fields": ("user", "token",),
                 "description": f"""
                     <h3>Token will be auto-generated on save.</h3>
                     <h5>Please note that this token,</h5>

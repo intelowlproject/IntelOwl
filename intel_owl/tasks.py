@@ -844,8 +844,8 @@ def whoisxmlapi_run(
         observable_classification,
         additional_config_params,
     ).start()
-    
-    
+
+
 @shared_task(soft_time_limit=30)
 def checkdmarc_run(
     analyzer_name,

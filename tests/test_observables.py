@@ -427,7 +427,7 @@ class DomainAnalyzersTests(
             {},
         ).start()
         self.assertEqual(report.get("success", False), True)
-        
+
     def test_checkdmarc(self, mock_get=None, mock_post=None):
         report = checkdmarc.CheckDMARC(
             "CheckDMARC",

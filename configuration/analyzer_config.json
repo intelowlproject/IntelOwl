@@ -908,6 +908,17 @@
       "api_key_name": "VT_KEY"
     }
   },
+  "Whoisxmlapi": {
+    "type": "observable",
+    "observable_supported": ["ip", "domain"],
+    "external_service": true,
+    "description": "the WHOIS record data, of a domain name, an IP address, or an email address",
+    "requires_configuration": true,
+    "python_module": "whoisxmlapi_run",
+    "additional_config_params": {
+      "api_key_name": "WHOISXMLAPI_KEY"
+    }
+  },
   "Yara_Scan_Community": {
     "type": "file",
     "description": "scan a file with community yara rules",

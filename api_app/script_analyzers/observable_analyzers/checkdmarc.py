@@ -14,19 +14,18 @@ class CheckDMARC(classes.ObservableAnalyzer):
             self.report["success"] = False
             raise AnalyzerRunException("checkdmarc not installed!")
 
-        else:
-            process = subprocess.Popen(
-                [self.check_command, self.observable_name],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-            )
-            process.wait()
-            stdout, stderr = process.communicate()
+        process = subprocess.Popen(
+            [self.check_command, self.observable_name],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        process.wait()
+        stdout, stderr = process.communicate()
 
-            dmarc_info = stdout.decode("utf-8"), stderr
+        dmarc_info = stdout.decode("utf-8"), stderr
 
-            dmarc_str = dmarc_info[0]
+        dmarc_str = dmarc_info[0]
 
-            dmarc_json = json.loads(dmarc_str)
+        dmarc_json = json.loads(dmarc_str)
 
-            return dmarc_json
+        return dmarc_json

@@ -1,17 +1,20 @@
 import subprocess
-import logging
 import json
+from shutil import which
 
 from api_app.script_analyzers import classes
-
-logger = logging.getLogger(__name__)
+from api_app.exceptions import AnalyzerRunException
 
 
 class CheckDMARC(classes.ObservableAnalyzer):
     check_command: str = "checkdmarc"
 
     def run(self):
-        try:
+        if not which(self.check_command):
+            self.report["success"] = False
+            raise AnalyzerRunException("checkdmarc not installed!")
+
+        else:
             process = subprocess.Popen(
                 [self.check_command, self.observable_name],
                 stdout=subprocess.PIPE,
@@ -27,11 +30,3 @@ class CheckDMARC(classes.ObservableAnalyzer):
             dmarc_json = json.loads(dmarc_str)
 
             return dmarc_json
-
-        except OSError as e:
-            error_message = (
-                f"job_id:{self.job_id} analyzer:{self.analyzer_name} Error: {e}"
-            )
-            logger.error(error_message)
-            self.report["errors"].append(error_message)
-            self.report["success"] = False

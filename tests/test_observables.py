@@ -30,6 +30,7 @@ from api_app.script_analyzers.observable_analyzers import (
     cymru,
     tranco,
     whoisxmlapi,
+    checkdmarc,
 )
 from .mock_utils import (
     MockResponseNoOp,
@@ -425,6 +426,17 @@ class DomainAnalyzersTests(
             self.observable_classification,
             {},
         ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    def test_checkdmarc(self, mock_get=None, mock_post=None):
+        report = checkdmarc.CheckDMARC(
+            "CheckDMARC",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {},
+        ).start()
+
         self.assertEqual(report.get("success", False), True)
 
 

@@ -18,30 +18,37 @@ class VirusTotalv2(classes.ObservableAnalyzer):
                 f"No API key retrieved with name: {self.api_key_name}"
             )
 
-        return vt_get_report(
+        resp = vt_get_report(
             self.__api_key, self.observable_name, self.observable_classification
         )
 
+        resp_code = resp.get("response_code", 1)
+        verbose_msg = resp.get("verbose_msg", "")
+        if resp_code == -1 or "Invalid resource" in verbose_msg:
+            self.report["errors"].append(verbose_msg)
+            raise AnalyzerRunException(f"response code {resp_code}. response: {resp}")
+        return resp
 
-def vt_get_report(api_key, observable_name, observable_classification):
+
+def vt_get_report(api_key, observable_name, obs_clsfn):
     params = {"apikey": api_key}
-    if observable_classification == "domain":
+    if obs_clsfn == "domain":
         params["domain"] = observable_name
         uri = "domain/report"
-    elif observable_classification == "ip":
+    elif obs_clsfn == "ip":
         params["ip"] = observable_name
         uri = "ip-address/report"
-    elif observable_classification == "url":
+    elif obs_clsfn == "url":
         params["resource"] = observable_name
         uri = "url/report"
-    elif observable_classification == "hash":
+    elif obs_clsfn == "hash":
         params["resource"] = observable_name
         params["allinfo"] = 1
         uri = "file/report"
     else:
         raise AnalyzerRunException(
-            "not supported observable type {}. Supported are: hash, ip, domain and url"
-            "".format(observable_classification)
+            f"not supported observable type {obs_clsfn}. "
+            "Supported are: hash, ip, domain and url."
         )
 
     try:
@@ -49,8 +56,5 @@ def vt_get_report(api_key, observable_name, observable_classification):
         response.raise_for_status()
     except requests.RequestException as e:
         raise AnalyzerRunException(e)
-    result = response.json()
-    response_code = result.get("response_code", 1)
-    if response_code == -1:
-        raise AnalyzerRunException(f"response code -1. result:{result}")
-    return result
+
+    return response.json()

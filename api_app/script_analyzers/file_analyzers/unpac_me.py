@@ -19,7 +19,7 @@ class UnpacMe(FileAnalyzer):
         self.private = "private" if private else "public"
         self.__api_key = secrets.get_secret(self.api_key_name)
         # max no. of tries when polling for result
-        self.max_tries = additional_config_params.get("max_tries", 100)
+        self.max_tries = additional_config_params.get("max_tries", 30)
         # interval b/w HTTP requests when polling
         self.poll_distance = 5
 
@@ -28,8 +28,7 @@ class UnpacMe(FileAnalyzer):
             raise AnalyzerRunException(
                 f"No API key retrieved with name: {self.api_key_name}"
             )
-        API_KEY_STRING = "Key %s" % self.__api_key
-        self.headers = {"Authorization": API_KEY_STRING}
+        self.headers = {"Authorization": "Key %s" % self.__api_key}
         unpac_id = self._upload()
         logger.info(f"md5 {self.md5} job {self.job_id} uploaded id {unpac_id}")
         for chance in range(self.max_tries):
@@ -79,9 +78,8 @@ class UnpacMe(FileAnalyzer):
         return r
 
     def _upload(self) -> str:
-        f = open(self.filepath, "rb")
-        file_data = f.read()
-        f.close()
+        with open(self.filepath, "rb") as f:
+            file_data = f.read()
         files = {"file": (self.filename, file_data)}
         r = self._req_with_checks("private/upload", files=files, post=True)
         response = r.json()

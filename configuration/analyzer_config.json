@@ -792,7 +792,7 @@
     "description": "UnpacMe unpacker",
     "python_module": "unpac_me_run",
     "additional_config_params": {
-      "api_key_name": "UNPAC_ME_KEY",
+      "api_key_name": "UNPAC_ME_API_KEY",
       "private": false,
       "max_tries": 30
     }

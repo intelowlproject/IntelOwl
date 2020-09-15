@@ -4,6 +4,7 @@ from api_app.script_analyzers.classes import FileAnalyzer
 from api_app.exceptions import AnalyzerRunException
 import time
 from intel_owl import secrets
+from typing import Dict
 
 logger = logging.getLogger(__name__)
 
@@ -93,6 +94,6 @@ class UnpacMe(FileAnalyzer):
         response = self._req_with_checks(f"{self.private}/status/{unpac_me_id}")
         return response.json().get("status", False)
 
-    def _get_report(self, unpac_me_id) -> dict:
+    def _get_report(self, unpac_me_id) -> Dict:
         response = self._req_with_checks(f"{self.private}/results/{unpac_me_id}")
         return response.json()

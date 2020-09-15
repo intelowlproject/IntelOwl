@@ -14,6 +14,7 @@ from api_app.script_analyzers.file_analyzers import (
     strings_info,
     rtf_info,
     signature_info,
+    speakeasy_emulation,
     peframe,
     thug_file,
     capa_info,
@@ -55,6 +56,8 @@ from api_app.script_analyzers.observable_analyzers import (
     tranco,
     pulsedive,
     intelx,
+    whoisxmlapi,
+    checkdmarc,
 )
 
 from api_app import crons
@@ -582,6 +585,15 @@ def signatureinfo_run(
     ).start()
 
 
+@shared_task(soft_time_limit=120)
+def speakeasy_run(
+    analyzer_name, job_id, filepath, filename, md5, additional_config_params
+):
+    speakeasy_emulation.SpeakEasy(
+        analyzer_name, job_id, filepath, filename, md5, additional_config_params
+    ).start()
+
+
 @shared_task(soft_time_limit=30)
 def peinfo_run(
     analyzer_name, job_id, filepath, filename, md5, additional_config_params
@@ -824,4 +836,37 @@ def unpac_me_run(
 ):
     unpac_me.UnpacMe(
         analyzer_name, job_id, filepath, filename, md5, additional_config_params
+    ).start()
+
+@shared_task(soft_time_limit=30)
+def whoisxmlapi_run(
+    analyzer_name,
+    job_id,
+    observable_name,
+    observable_classification,
+    additional_config_params,
+):
+    whoisxmlapi.Whoisxmlapi(
+        analyzer_name,
+        job_id,
+        observable_name,
+        observable_classification,
+        additional_config_params,
+    ).start()
+
+
+@shared_task(soft_time_limit=30)
+def checkdmarc_run(
+    analyzer_name,
+    job_id,
+    observable_name,
+    observable_classification,
+    additional_config_params,
+):
+    checkdmarc.CheckDMARC(
+        analyzer_name,
+        job_id,
+        observable_name,
+        observable_classification,
+        additional_config_params,
     ).start()

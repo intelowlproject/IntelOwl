@@ -50,10 +50,12 @@ Documentation about IntelOwl installation, usage, contribution can be found at h
 - Static PE Analysis
 - Static Generic File Analysis
 - Strings analysis with ML
+- PE Emulation with Speakeasy
 - PE Signature verification
 - PE Capabilities Extraction
 - Emulated Javascript Analysis
 - Android Malware Analysis
+- SPF and DMARC Validator
 
 **Free modules that require additional configuration**:
 

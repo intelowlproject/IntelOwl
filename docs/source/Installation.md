@@ -39,7 +39,9 @@ Then, we suggest you to clone the project, configure the required environment va
 
 That file leverages a public docker image that is available in [Docker Hub](https://hub.docker.com/repository/docker/intelowlproject/intelowl)
 
-## Deployment Info
+IntelOwl is tested and supported to work in a Linux-based OS. We do not provide support for deployments in Windows.
+
+## Deployment components
 Main components of the web application:
 * Angular: Frontend ([IntelOwl-ng](https://github.com/intelowlproject/IntelOwl-ng))
 * Django: Backend
@@ -164,6 +166,14 @@ If you make some code changes and you like to rebuild the project, launch the fo
 
 Then, you should provide your own image in the `docker-compose.yml` file.
 
+## Deploy on Remnux
+[Remnux](https://remnux.org/) is a Linux Toolkit for Malware Analysis.
+
+IntelOwl and Remnux have the same goal: save the time of people who need to perform malware analysis or info gathering.
+
+Therefore we suggest [Remnux](https://docs.remnux.org/) users to install IntelOwl to leverage all the tools provided by both projects in a unique environment.
+
+To do that, you can follow the same steps detailed [above](https://intelowl.readthedocs.io/en/latest/Installation.html#tl-dr) for the installation of IntelOwl.
 
 ## AWS support
 At the moment there's a basic support for some of the AWS services. More is coming in the future. 

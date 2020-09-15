@@ -9,6 +9,7 @@ from api_app.script_analyzers import utils
 from api_app.script_analyzers.file_analyzers import (
     file_info,
     signature_info,
+    speakeasy_emulation,
     pe_info,
     doc_info,
     pdf_info,
@@ -117,6 +118,12 @@ class FileAnalyzersEXETests(TestCase):
     def test_signatureinfo_exe(self):
         report = signature_info.SignatureInfo(
             "Signature_Info", self.job_id, self.filepath, self.filename, self.md5, {}
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    def test_speakeasy_exe(self):
+        report = speakeasy_emulation.SpeakEasy(
+            "Speakeasy", self.job_id, self.filepath, self.filename, self.md5, {}
         ).start()
         self.assertEqual(report.get("success", False), True)
 
@@ -269,6 +276,12 @@ class FileAnalyzersDLLTests(TestCase):
     def test_peinfo_dll(self):
         report = pe_info.PEInfo(
             "PE_Info", self.job_id, self.filepath, self.filename, self.md5, {}
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    def test_speakeasy_dll(self):
+        report = speakeasy_emulation.SpeakEasy(
+            "Speakeasy", self.job_id, self.filepath, self.filename, self.md5, {}
         ).start()
         self.assertEqual(report.get("success", False), True)
 

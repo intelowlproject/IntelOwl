@@ -76,6 +76,12 @@
     "python_module": "boxjs_run",
     "description": "A tool for studying JavaScript malware"
   },
+  "CheckDMARC": {
+    "type": "observable",
+    "observable_supported": ["domain"],
+    "description": "An SPF and DMARC DNS records validator",
+    "python_module": "checkdmarc_run"
+  },
   "CIRCLPassiveDNS": {
     "type": "observable",
     "observable_supported": ["domain", "url"],
@@ -576,6 +582,12 @@
       "rank_strings": false
     }
   },
+  "SpeakEasy": {
+    "type": "file",
+    "supported_filetypes": ["application/x-dosexec"],
+    "description": "speakeasy emulation report",
+    "python_module": "speakeasy_run"
+  },
   "Strings_Info_ML": {
     "type": "file",
     "description": "strings extraction plus strings ranking based on Machine Learning",
@@ -905,6 +917,17 @@
     "python_module": "vt3scan_run",
     "additional_config_params": {
       "api_key_name": "VT_KEY"
+    }
+  },
+  "Whoisxmlapi": {
+    "type": "observable",
+    "observable_supported": ["ip", "domain"],
+    "external_service": true,
+    "description": "the WHOIS record data, of a domain name, an IP address, or an email address",
+    "requires_configuration": true,
+    "python_module": "whoisxmlapi_run",
+    "additional_config_params": {
+      "api_key_name": "WHOISXMLAPI_KEY"
     }
   },
   "Yara_Scan_Community": {

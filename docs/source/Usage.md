@@ -38,6 +38,7 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * `Doc_Info_Experimental`: static document analysis with new features to analyze XLM macros, encrypted macros and more
 * `PE_Info`: static PE analysis
 * `Signature_Info`: PE signature extractor
+* `Speakeasy`: Speakeasy binary emulation
 * `Strings_Info_Classic`: strings extraction
 * `Strings_Info_ML`: strings extraction plus strings ranking based on Machine Learning
 * `VirusTotal_v3_Get_File`: check file hash on VirusTotal

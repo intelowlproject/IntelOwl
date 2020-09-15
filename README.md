@@ -79,6 +79,7 @@ Documentation about IntelOwl installation, usage, contribution can be found at h
 - SecurityTrails
 - Intelligence X
 - Pulsedive API (works w/o API key as well)
+- UnpacMe
 
 ##### required free API key
 

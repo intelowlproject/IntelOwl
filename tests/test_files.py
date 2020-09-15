@@ -25,6 +25,7 @@ from api_app.script_analyzers.file_analyzers import (
     boxjs_scan,
     apkid,
     quark_engine,
+    unpac_me,
 )
 from api_app.script_analyzers.observable_analyzers import vt3_get
 
@@ -185,6 +186,25 @@ class FileAnalyzersEXETests(TestCase):
             additional_params,
         ).start()
         self.assertEqual(report.get("success", False), True)
+
+        def test_unpackme_exe(self):
+            additional_params = {
+                "directories_with_rules": [
+                    "/opt/deploy/yara/rules",
+                    "/opt/deploy/yara/intezer_rules",
+                    "/opt/deploy/yara/mcafee_rules",
+                    "/opt/deploy/yara/signature-base/yara",
+                ]
+            }
+            report = unpac_me.UnpacMe(
+                "Yara_Scan",
+                self.job_id,
+                self.filepath,
+                self.filename,
+                self.md5,
+                additional_params,
+            ).start()
+            self.assertEqual(report.get("success", False), True)
 
     @mock_connections(patch("requests.get", side_effect=mocked_vt_get))
     @mock_connections(patch("requests.post", side_effect=mocked_vt_post))

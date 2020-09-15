@@ -50,6 +50,14 @@ def mock_connections(decorator):
     return decorator if settings.MOCK_CONNECTIONS else lambda x: x
 
 
+def mocked_unpacme_post(*args, **kwargs):
+    return MockResponse({"id": "test"}, 200)
+
+
+def mocked_unpacme_get(*args, **kwargs):
+    return MockResponse({"id": "test", "status": "complete"}, 200)
+
+
 def mocked_vt_get(*args, **kwargs):
     return MockResponse({"data": {"attributes": {"status": "completed"}}}, 200)
 
@@ -194,15 +202,11 @@ class FileAnalyzersEXETests(TestCase):
         ).start()
         self.assertEqual(report.get("success", False), True)
 
-    def test_unpackme_exe(self):
-
+    @mock_connections(patch("requests.get", side_effect=mocked_unpacme_get))
+    @mock_connections(patch("requests.post", side_effect=mocked_unpacme_post))
+    def test_unpacme_exe(self, mock_get=None, mock_post=None):
         report = unpac_me.UnpacMe(
-            "Unpac_Me",
-            self.job_id,
-            self.filepath,
-            self.filename,
-            self.md5,
-            {}
+            "UnpacMe", self.job_id, self.filepath, self.filename, self.md5, {}
         ).start()
         self.assertEqual(report.get("success", False), True)
 

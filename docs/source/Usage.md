@@ -68,6 +68,7 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * `APKiD_Scan_APK_DEX_JAR`: [APKiD](https://github.com/rednaga/APKiD) identifies many compilers, packers, obfuscators, and other weird stuff from an APK or DEX file.
 * `Quark_Engine_APK`: [Quark Engine](https://github.com/quark-engine/quark-engine) is an Obfuscation-Neglect Android Malware Scoring System.
 * `IntelX_Phonebook`: [IntelligenceX](https://intelx.io/) is a search engine and data archive. Fetches emails, urls, domains associated with an observable.
+* `UnpacMe_EXE_Unpacker`: [UnpacMe](https://www.unpac.me/) is an automated malware unpacking service
 
 #### Observable analyzers (ip, domain, url, hash)
 * `VirusTotal_v3_Get_Observable`: search an observable in the VirusTotal DB

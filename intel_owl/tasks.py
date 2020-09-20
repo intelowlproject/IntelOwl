@@ -21,6 +21,7 @@ from api_app.script_analyzers.file_analyzers import (
     boxjs_scan,
     apkid,
     quark_engine,
+    unpac_me,
 )
 from api_app.script_analyzers.observable_analyzers import (
     abuseipdb,
@@ -825,6 +826,15 @@ def quark_engine_run(
     analyzer_name, job_id, filepath, filename, md5, additional_config_params
 ):
     quark_engine.QuarkEngine(
+        analyzer_name, job_id, filepath, filename, md5, additional_config_params
+    ).start()
+
+
+@shared_task(soft_time_limit=400)
+def unpac_me_run(
+    analyzer_name, job_id, filepath, filename, md5, additional_config_params
+):
+    unpac_me.UnpacMe(
         analyzer_name, job_id, filepath, filename, md5, additional_config_params
     ).start()
 

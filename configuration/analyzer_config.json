@@ -798,6 +798,17 @@
     "description": "check if a domain is in the last Tranco ranking top sites list",
     "python_module": "tor_run"
   },
+  "UnpacMe_EXE_Unpacker": {
+    "type": "file",
+    "supported_filetypes": ["application/x-dosexec"],
+    "description": "UnpacMe unpacker",
+    "python_module": "unpac_me_run",
+    "additional_config_params": {
+      "api_key_name": "UNPAC_ME_API_KEY",
+      "private": false,
+      "max_tries": 30
+    }
+  },
   "URLhaus": {
     "type": "observable",
     "observable_supported": ["domain", "url"],

@@ -26,6 +26,7 @@ from api_app.script_analyzers.file_analyzers import (
     boxjs_scan,
     apkid,
     quark_engine,
+    unpac_me,
 )
 from api_app.script_analyzers.observable_analyzers import vt3_get
 
@@ -47,6 +48,14 @@ if settings.DISABLE_LOGGING_TEST:
 # it is optional to mock requests
 def mock_connections(decorator):
     return decorator if settings.MOCK_CONNECTIONS else lambda x: x
+
+
+def mocked_unpacme_post(*args, **kwargs):
+    return MockResponse({"id": "test"}, 200)
+
+
+def mocked_unpacme_get(*args, **kwargs):
+    return MockResponse({"id": "test", "status": "complete"}, 200)
 
 
 def mocked_vt_get(*args, **kwargs):
@@ -190,6 +199,19 @@ class FileAnalyzersEXETests(TestCase):
             self.filename,
             self.md5,
             additional_params,
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    @mock_connections(patch("requests.get", side_effect=mocked_unpacme_get))
+    @mock_connections(patch("requests.post", side_effect=mocked_unpacme_post))
+    def test_unpacme_exe(self, mock_get=None, mock_post=None):
+        report = unpac_me.UnpacMe(
+            "UnpacMe_EXE_Unpacker",
+            self.job_id,
+            self.filepath,
+            self.filename,
+            self.md5,
+            {},
         ).start()
         self.assertEqual(report.get("success", False), True)
 

@@ -90,6 +90,7 @@ Optional variables needed to enable specific analyzers:
 * `ONYPHE_KEY`: Onyphe.io's API Key 
 * `GREYNOISE_API_KEY`: GreyNoise API ([docs](https://docs.greynoise.io))
 * `INTELX_API_KEY`: IntelligenceX API ([docs](https://intelx.io/product))
+* `UNPAC_ME_API_KEY`: UnpacMe API ([docs](https://api.unpac.me/))
 
 Advanced additional configuration:
 * `OLD_JOBS_RETENTION_DAYS`: Database retention, default 3 days. Change this if you want to keep your old analysis longer in the database.

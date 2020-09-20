@@ -206,7 +206,12 @@ class FileAnalyzersEXETests(TestCase):
     @mock_connections(patch("requests.post", side_effect=mocked_unpacme_post))
     def test_unpacme_exe(self, mock_get=None, mock_post=None):
         report = unpac_me.UnpacMe(
-            "UnpacMe", self.job_id, self.filepath, self.filename, self.md5, {}
+            "UnpacMe_EXE_Unpacker",
+            self.job_id,
+            self.filepath,
+            self.filename,
+            self.md5,
+            {},
         ).start()
         self.assertEqual(report.get("success", False), True)
 

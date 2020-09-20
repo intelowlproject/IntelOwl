@@ -798,7 +798,7 @@
     "description": "check if a domain is in the last Tranco ranking top sites list",
     "python_module": "tor_run"
   },
-  "Unpac_Me": {
+  "UnpacMe_EXE_Unpacker": {
     "type": "file",
     "supported_filetypes": ["application/x-dosexec"],
     "description": "UnpacMe unpacker",

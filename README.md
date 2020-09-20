@@ -23,7 +23,7 @@ Intel Owl is an Open Source Intelligence, or OSINT solution to get threat intell
 - It can be integrated easily in your stack of security tools ([pyintelowl](https://github.com/intelowlproject/pyintelowl)) to automate common jobs usually performed, for instance, by SOC analysts manually.
 - Intel Owl is composed of **analyzers** that can be run to retrieve data from external sources (like VirusTotal or AbuseIPDB) or to generate intel from internal analyzers (like Yara or Oletools)
 - API written in Django and Python 3.7.
-- Inbuilt frontend client: **[IntelOwl-ng](https://github.com/intelowlproject/IntelOwl-ng)** provides features such as dashboard, visualizations of analysis data, easy to use forms for requesting new analysis, etc.
+- Inbuilt frontend client: **[IntelOwl-ng](https://github.com/intelowlproject/IntelOwl-ng)** provides features such as dashboard, visualizations of analysis data, easy to use forms for requesting new analysis, etc. [Live Demo](https://intelowlclient.firebaseapp.com/).
 
 ## Documentation
 
@@ -43,23 +43,9 @@ To know more about the project and it's growth over time, you may be interested 
 
 You can see the full list of all available analyzers, [here](https://intelowl.readthedocs.io/en/latest/Usage.html#available-analyzers).
 
-**Inbuilt modules**
-
-- Static Document, RTF, PDF, PE, Generic File Analysis
-- Strings analysis with ML
-- PE Emulation with Speakeasy
-- PE Signature verification
-- PE Capabilities Extraction
-- Emulated Javascript Analysis
-- Android Malware Analysis
-- SPF and DMARC Validator
-- more...
-
-**Free modules that require additional configuration**:
-
-- Cuckoo (requires at least one working Cuckoo instance)
-- MISP (requires at least one working MISP instance)
-- Yara (Community, Neo23x0, Intezer and McAfee rules are already available. There's the chance to add your own rules)
+| Inbuilt modules 	| External Services 	| Free modules that require additional configuration 	|
+|-	|-	|-	|
+| - Static Document, RTF, PDF, PE, Generic File Analysis<br>- Strings analysis with ML<br>- PE Emulation with Speakeasy<br>- PE Signature verification<br>- PE Capabilities Extraction<br>- Emulated Javascript Analysis<br>- Android Malware Analysis<br>- SPF and DMARC Validator<br>- more... 	| - GreyNoise v2<br>- Intezer Scan<br>- VirusTotal v2+v3<br>- HybridAnalysis<br>- Censys.io<br>- Shodan<br>- AlienVault OTX<br>- Threatminer<br>- Abuse.ch<br>- many more.. 	| - Cuckoo (requires at least one working Cuckoo instance)<br>- MISP (requires at least one working MISP instance)<br>- Yara (Community, Neo23x0, Intezer and McAfee rules are already available. There's the chance to add your own rules) 	|
 
 ## Legal notice
 

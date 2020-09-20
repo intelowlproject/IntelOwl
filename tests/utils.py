@@ -45,7 +45,7 @@ class CommonTestCases_observables(metaclass=ABCMeta):
             self.job_id,
             self.observable_name,
             self.observable_classification,
-            {},
+            {"max_tries": 1},
         ).start()
         self.assertEqual(report.get("success", False), True)
 

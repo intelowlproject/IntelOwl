@@ -32,7 +32,7 @@ class Talos(classes.ObservableAnalyzer):
     def updater():
         try:
             logger.info("starting download of db from talos")
-            url = "https://www.talosintelligence.com/documents/ip-blacklist"
+            url = "https://snort.org/downloads/ip-block-list"
             r = requests.get(url)
             r.raise_for_status()
 

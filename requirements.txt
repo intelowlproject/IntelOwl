@@ -8,6 +8,7 @@ celery==4.4.7
 certifi==2019.6.16
 cffi==1.12.3
 chardet==3.0.4
+checkdmarc==4.3.1
 colorama==0.3.7
 colorclass==2.2.0
 configparser==3.8.1
@@ -37,10 +38,10 @@ more-itertools==7.2.0
 msoffcrypto-tool==4.10.1
 numpy==1.17.1
 olefile==0.46
-git+git://github.com/mlodic/oletools.git
+git+git://github.com/mlodic/oletools.git@aef91b95cc9e870da2dd4205f9fc8a933e2ea2dd
 OTXv2==1.5.9
 peepdf==0.4.2
-git+git://github.com/mlodic/pefile.git
+https://github.com/mlodic/pefile/archive/master.tar.gz
 pluggy==0.13.0
 psycopg2-binary==2.8.4
 py==1.8.0

@@ -20,15 +20,14 @@ class Cymru(classes.ObservableAnalyzer):
         # reference: https://team-cymru.com/community-services/mhr/
         # if the resolution works, this means that the file is reported
         # as malware by Cymru
-        resolutions = []
+        domains = None
         try:
             query_to_perform = f"{self.observable_name}.malware.hash.cymru.com"
             domains = socket.gethostbyaddr(query_to_perform)
-            resolutions = domains[2]
         except (socket.gaierror, socket.herror):
             logger.info(f"observable {self.observable_name} not found in HMR DB")
-        if resolutions:
+        if domains:
             results["found"] = True
-        results["resolution_data"] = resolutions
+            results["resolution_data"] = domains[2]
 
         return results

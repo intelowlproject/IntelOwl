@@ -1,118 +1,53 @@
-![Intel Owl](static_intel/intel_owl.jpeg)
+<img src="static_intel/intel_owl.jpeg" width=500 height=200 alt="Intel Owl"/>
 
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/intelowlproject/IntelOwl.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/intelowlproject/IntelOwl/context:python)
 [![CodeFactor](https://www.codefactor.io/repository/github/intelowlproject/intelowl/badge)](https://www.codefactor.io/repository/github/intelowlproject/intelowl)
 [![Build Status](https://travis-ci.com/intelowlproject/IntelOwl.svg?branch=master)](https://travis-ci.org/intelowlproject/IntelOwl)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
+<img src="static_intel/xscode-banner.png" width=600 height=125 alt="Get Support"/><br/>
+_For urgent issues and priority support, visit [https://xscode.com/intelowlproject/IntelOwl](https://xscode.com/intelowlproject/IntelOwl)._
+
 # Intel Owl
 
-Do you want to get **threat intelligence data** about a file, an IP or a domain?
-
-Do you want to get this kind of data from multiple sources at the same time using **a single API request**?
+Do you want to get **threat intelligence data** about a malware, an IP or a domain? Do you want to get this kind of data from multiple sources at the same time using **a single API request**?
 
 You are in the right place!
 
-This application is built to **scale out** and to **speed up the retrieval of threat info**.
+Intel Owl is an Open Source Intelligence, or OSINT solution to get threat intelligence data about a specific file, an IP or a domain from a single API at scale. It integrates a number of analyzers available online and is for everyone who needs a single point to query for info about a specific file or observable.
 
-It can be integrated easily in your stack of security tools to automate common jobs usually performed, for instance, by SOC analysts manually.
+### Features
 
-Intel Owl is composed of **analyzers** that can be run to retrieve data from external sources (like VirusTotal or AbuseIPDB) or to generate intel from internal analyzers (like Yara or Oletools)
+- Provides enrichment of threat intel for malware as well as observables (IP, Domain, URL and hash).
+- This application is built to **scale out** and to **speed up the retrieval of threat info**.
+- It can be integrated easily in your stack of security tools ([pyintelowl](https://github.com/intelowlproject/pyintelowl)) to automate common jobs usually performed, for instance, by SOC analysts manually.
+- Intel Owl is composed of **analyzers** that can be run to retrieve data from external sources (like VirusTotal or AbuseIPDB) or to generate intel from internal analyzers (like Yara or Oletools)
+- API written in Django and Python 3.7.
+- Inbuilt frontend client: **[IntelOwl-ng](https://github.com/intelowlproject/IntelOwl-ng)** provides features such as dashboard, visualizations of analysis data, easy to use forms for requesting new analysis, etc. [Live Demo](https://intelowlclient.firebaseapp.com/).
 
-This solution is for everyone who needs a single point to query for info about a specific file or observable (domain, IP, URL, hash).
-
-Main features:
-
-- full django-python application
-- easily and completely customizable, both the APIs and the analyzers
-- clone the project, set up the configuration and you are ready to run
-- Official frontend client: **[IntelOwl-ng](https://github.com/intelowlproject/IntelOwl-ng)** provides features such as dashboard, visualizations of analysis data, easy to use forms for requesting new analysis, etc.
-
-### Documentation
+## Documentation
 
 [![Documentation Status](https://readthedocs.org/projects/intelowl/badge/?version=latest)](https://intelowl.readthedocs.io/en/latest/?badge=latest)
 
-Documentation about IntelOwl installation, usage, contribution can be found at https://intelowl.readthedocs.io/.
+Documentation about IntelOwl installation, usage, configuration and contribution can be found at https://intelowl.readthedocs.io/.
 
-### Blog posts
+## Blog posts
 
-[Daily Swig Article](https://portswigger.net/daily-swig/intel-owl-osint-tool-automates-the-intel-gathering-process-using-a-single-api)
+To know more about the project and it's growth over time, you may be interested in reading the following:
 
-[Honeynet Blog: v1.0.0 Announcement](https://www.honeynet.org/?p=7558)
+- [Intel Owl on Daily Swig](https://portswigger.net/daily-swig/intel-owl-osint-tool-automates-the-intel-gathering-process-using-a-single-api)
+- [Honeynet: v1.0.0 Announcement](https://www.honeynet.org/?p=7558)
+- [Certego Blog: First announcement](https://www.certego.net/en/news/new-year-new-tool-intel-owl/)
 
-[Certego Blog: First announcement](https://www.certego.net/en/news/new-year-new-tool-intel-owl/)
+## Available services or analyzers
 
-### Free Internal Modules Available
+You can see the full list of all available analyzers, [here](https://intelowl.readthedocs.io/en/latest/Usage.html#available-analyzers).
 
-- Static Document Analysis
-- Static RTF Analysis
-- Static PDF Analysis
-- Static PE Analysis
-- Static Generic File Analysis
-- Strings analysis with ML
-- PE Emulation with Speakeasy
-- PE Signature verification
-- PE Capabilities Extraction
-- Emulated Javascript Analysis
-- Android Malware Analysis
+| Inbuilt modules 	| External Services 	| Free modules that require additional configuration 	|
+|-	|-	|-	|
+| - Static Document, RTF, PDF, PE, Generic File Analysis<br>- Strings analysis with ML<br>- PE Emulation with Speakeasy<br>- PE Signature verification<br>- PE Capabilities Extraction<br>- Emulated Javascript Analysis<br>- Android Malware Analysis<br>- SPF and DMARC Validator<br>- more... 	| - GreyNoise v2<br>- Intezer Scan<br>- VirusTotal v2+v3<br>- HybridAnalysis<br>- Censys.io<br>- Shodan<br>- AlienVault OTX<br>- Threatminer<br>- Abuse.ch<br>- many more.. 	| - Cuckoo (requires at least one working Cuckoo instance)<br>- MISP (requires at least one working MISP instance)<br>- Yara (Community, Neo23x0, Intezer and McAfee rules are already available. There's the chance to add your own rules) 	|
 
-**Free modules that require additional configuration**:
-
-- Cuckoo (requires at least one working Cuckoo instance)
-- MISP (requires at least one working MISP instance)
-- Yara (Community, Neo23x0, Intezer and McAfee rules are already available. There's the chance to add your own rules)
-
-### External Services Available
-
-##### required paid or trial API key
-
-- GreyNoise v2
-
-##### required paid or free API key
-
-- VirusTotal v2 + v3
-- HybridAnalysis
-- Intezer
-- Farsight DNSDB
-- Hunter.io - Email Hunting
-- ONYPHE
-- Censys.io
-- SecurityTrails
-- Intelligence X
-- Pulsedive API (works w/o API key as well)
-
-##### required free API key
-
-- GoogleSafeBrowsing
-- AbuseIPDB
-- Shodan
-- HoneyDB
-- AlienVault OTX
-- MaxMind
-- Auth0
-
-##### needed access request
-
-- CIRCL PassiveDNS + PassiveSSL
-
-##### without api key
-
-- Fortiguard URL Analyzer
-- GreyNoise Alpha API v1
-- Talos Reputation
-- Tor Project
-- Robtex
-- Threatminer
-- Abuse.ch MalwareBazaar
-- Abuse.ch URLhaus
-- Team Cymru Malware Hash Registry
-- Tranco Rank
-- Google DoH
-- CloudFlare DoH Classic
-- CloudFlare DoH Malware
-- Classic DNS resolution
-
-### Legal notice
+## Legal notice
 
 You as a user of this project must review, accept and comply with the license
 terms of each downloaded/installed package listed below. By proceeding with the
@@ -142,21 +77,20 @@ license terms.
 [Quark-Engine](https://github.com/quark-engine/quark-engine)
 [IntelX](https://intelx.io/terms-of-service)
 
-### Acknowledgments
+## Acknowledgments
 
 This project was created and will be upgraded thanks to the following organizations:
 
 <img style="margin-right: 2px" src="static_intel/Certego.png" alt="Certego Logo"/>
 <img style="border: 0.2px solid black" src="static_intel/logo-thp-100.png" alt="Honeynet.org logo">
 
-
-### Google Summer Of Code
+#### Google Summer Of Code
 
 The project was accepted to the GSoC 2020 under the Honeynet Project!! A lot of [new features](https://www.honeynet.org/gsoc/gsoc-2020/google-summer-of-code-2020-project-ideas/#intel-owl-improvements) were developed by Eshaan Bansal ([Twitter](https://twitter.com/mask0fmydisguis)).
 
 Stay tuned for the upcoming GSoC 2021! Join the [Honeynet Slack chat](https://gsoc-slack.honeynet.org/) for more info.
 
-### About the author and maintainers
+## About the author and maintainers
 
 Feel free to contact the main developers at any time:
 - Matteo Lodi ([Twitter](https://twitter.com/matte_lodi)): Author and creator

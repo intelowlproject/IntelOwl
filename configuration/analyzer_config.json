@@ -76,6 +76,12 @@
     "python_module": "boxjs_run",
     "description": "A tool for studying JavaScript malware"
   },
+  "CheckDMARC": {
+    "type": "observable",
+    "observable_supported": ["domain"],
+    "description": "An SPF and DMARC DNS records validator",
+    "python_module": "checkdmarc_run"
+  },
   "CIRCLPassiveDNS": {
     "type": "observable",
     "observable_supported": ["domain", "url"],
@@ -792,6 +798,17 @@
     "description": "check if a domain is in the last Tranco ranking top sites list",
     "python_module": "tor_run"
   },
+  "UnpacMe_EXE_Unpacker": {
+    "type": "file",
+    "supported_filetypes": ["application/x-dosexec"],
+    "description": "UnpacMe unpacker",
+    "python_module": "unpac_me_run",
+    "additional_config_params": {
+      "api_key_name": "UNPAC_ME_API_KEY",
+      "private": false,
+      "max_tries": 30
+    }
+  },
   "URLhaus": {
     "type": "observable",
     "observable_supported": ["domain", "url"],
@@ -900,6 +917,17 @@
     "python_module": "vt3scan_run",
     "additional_config_params": {
       "api_key_name": "VT_KEY"
+    }
+  },
+  "Whoisxmlapi": {
+    "type": "observable",
+    "observable_supported": ["ip", "domain"],
+    "external_service": true,
+    "description": "the WHOIS record data, of a domain name, an IP address, or an email address",
+    "requires_configuration": true,
+    "python_module": "whoisxmlapi_run",
+    "additional_config_params": {
+      "api_key_name": "WHOISXMLAPI_KEY"
     }
   },
   "Yara_Scan_Community": {

@@ -41,7 +41,7 @@ To know more about the project and it's growth over time, you may be interested 
 
 ## Available services or analyzers
 
-You can see the full list of all available analyzers, [here](https://intelowl.readthedocs.io/en/latest/Usage.html#available-analyzers).
+You can see the full list of all available analyzers in the [documentation](https://intelowl.readthedocs.io/en/latest/Usage.html#available-analyzers) or [live demo](https://intelowlclient.firebaseapp.com/pages/analyzers/table).
 
 | Inbuilt modules 	| External Services 	| Free modules that require additional configuration 	|
 |-	|-	|-	|

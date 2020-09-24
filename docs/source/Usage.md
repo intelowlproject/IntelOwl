@@ -37,6 +37,7 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * `Rtf_Info`: static RTF analysis
 * `Doc_Info`: static generic document analysis
 * `Doc_Info_Experimental`: static document analysis with new features to analyze XLM macros, encrypted macros and more
+* `Xlm_Macro_Deobfuscator`:  [XlmMacroDeobfuscator](https://github.com/DissectMalware/XLMMacroDeobfuscator) deobfuscate xlm macros
 * `PE_Info`: static PE analysis
 * `Signature_Info`: PE signature extractor
 * `Speakeasy`: Speakeasy binary emulation

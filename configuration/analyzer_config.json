@@ -165,7 +165,8 @@
       "text/x-ms-iqy",
       "application/excel",
       "text/xml",
-      "application/xml"
+      "application/xml",
+      "application/zip"
     ],
     "decription": "static generic document analysis",
     "python_module": "docinfo_run"
@@ -936,6 +937,23 @@
     "python_module": "yara_run",
     "additional_config_params": {
       "directories_with_rules": ["/opt/deploy/yara/rules"]
+    }
+  },
+  "Xlm_Macro_Deobfuscator": {
+    "type": "file",
+    "supported_filetypes": [
+      "application/vnd.ms-excel.addin.macroEnabled",
+      "application/x-mspublisher",
+      "application/vnd.ms-excel",
+      "application/vnd.ms-excel.sheet.macroEnabled.12",
+      "application/excel",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "application/zip"
+    ],
+    "decription": "Xlm macro deobfuscator",
+    "python_module": "xlm_deobfuscator_run",
+    "additional_config_params": {
+        "passwords_to_check": ["agenzia", "inps", "coronavirus"]
     }
   },
   "Yara_Scan_Florian": {

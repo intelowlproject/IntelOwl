@@ -27,6 +27,7 @@ from api_app.script_analyzers.file_analyzers import (
     apkid,
     quark_engine,
     unpac_me,
+    xlm_macro_deobfuscator,
 )
 from api_app.script_analyzers.observable_analyzers import vt3_get
 
@@ -291,6 +292,34 @@ class FileAnalyzersDLLTests(TestCase):
     def test_speakeasy_dll(self):
         report = speakeasy_emulation.SpeakEasy(
             "Speakeasy", self.job_id, self.filepath, self.filename, self.md5, {}
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+
+class FileAnalyzersExcelTests(TestCase):
+    def setUp(self):
+        params = {
+            "source": "test",
+            "is_sample": True,
+            "file_mimetype": "application/vnd.ms-excel",
+            "force_privacy": False,
+            "analyzers_requested": ["test"],
+        }
+        filename = "document.xls"
+        test_job = _generate_test_job_with_file(params, filename)
+        self.job_id = test_job.id
+        self.filepath, self.filename = utils.get_filepath_filename(self.job_id)
+        self.runtime_configuration = test_job.runtime_configuration
+        self.md5 = test_job.md5
+
+    def test_xlm_macro_deobfuscator_excel(self):
+        report = xlm_macro_deobfuscator.XlmMacroDeobfuscator(
+            "Xlm_Macro_Deobfuscator",
+            self.job_id,
+            self.filepath,
+            self.filename,
+            self.md5,
+            {},
         ).start()
         self.assertEqual(report.get("success", False), True)
 

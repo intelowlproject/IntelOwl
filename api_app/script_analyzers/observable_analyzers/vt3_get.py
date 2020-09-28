@@ -39,7 +39,11 @@ class VirusTotalv3(classes.ObservableAnalyzer):
 
 
 def vt_get_report(
-    api_key, observable_name, obs_clfn, additional_config_params, job_id,
+    api_key,
+    observable_name,
+    obs_clfn,
+    additional_config_params,
+    job_id,
 ):
     headers = {"x-apikey": api_key}
 

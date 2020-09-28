@@ -83,7 +83,7 @@ $ flake8 . --show-source --statistics
 
 ```bash
 $ docker-compose -f docker-compose-for-tests.yml build
-$ docker-compose -f docker-compose-for-tests.yml up`
+$ docker-compose -f docker-compose-for-tests.yml up
 ```
 
 3. Here, we simulate the travis CI tests locally by running the following 3 tests,

@@ -38,7 +38,7 @@ more-itertools==7.2.0
 msoffcrypto-tool==4.10.1
 numpy==1.17.1
 olefile==0.46
-git+git://github.com/mlodic/oletools.git@aef91b95cc9e870da2dd4205f9fc8a933e2ea2dd
+git+git://github.com/mlodic/oletools.git@4274e151bf9697b7f001e6e22007c0641ef2cb19
 OTXv2==1.5.9
 peepdf==0.4.2
 https://github.com/mlodic/pefile/archive/master.tar.gz
@@ -78,7 +78,7 @@ zipp==0.6.0
 djangorestframework-simplejwt==4.4.0
 djangorestframework-guardian==0.3.0
 flake8==3.8.2 
-black==19.10b0
+black==20.8b1
 quark-engine==20.8
-git+git://github.com/DissectMalware/XLMMacroDeobfuscator.git@c78b9e443e2667399470462fd863ebe4e2b8c978
+git+git://github.com/DissectMalware/XLMMacroDeobfuscator.git@89fbce0c87014a4b5a22c1aef09c8b3ea9bf16c0
 speakeasy-emulator==1.4.4

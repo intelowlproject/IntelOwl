@@ -22,6 +22,7 @@ from api_app.script_analyzers.file_analyzers import (
     apkid,
     quark_engine,
     unpac_me,
+    xlm_macro_deobfuscator,
 )
 from api_app.script_analyzers.observable_analyzers import (
     abuseipdb,
@@ -608,6 +609,15 @@ def docinfo_run(
     analyzer_name, job_id, filepath, filename, md5, additional_config_params
 ):
     doc_info.DocInfo(
+        analyzer_name, job_id, filepath, filename, md5, additional_config_params
+    ).start()
+
+
+@shared_task(soft_time_limit=30)
+def xlm_deobfuscator_run(
+    analyzer_name, job_id, filepath, filename, md5, additional_config_params
+):
+    xlm_macro_deobfuscator.XlmMacroDeobfuscator(
         analyzer_name, job_id, filepath, filename, md5, additional_config_params
     ).start()
 

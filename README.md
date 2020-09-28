@@ -74,7 +74,7 @@ license terms.
 [APKiD](https://github.com/rednaga/APKiD/blob/master/LICENSE.COMMERCIAL),
 [Box-JS](https://github.com/CapacitorSet/box-js/blob/master/LICENSE),
 [Capa](https://github.com/fireeye/capa/blob/master/LICENSE.txt),
-[Quark-Engine](https://github.com/quark-engine/quark-engine)
+[Quark-Engine](https://github.com/quark-engine/quark-engine),
 [IntelX](https://intelx.io/terms-of-service)
 
 ## Acknowledgments

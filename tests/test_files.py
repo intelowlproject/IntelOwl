@@ -257,7 +257,12 @@ class FileAnalyzersEXETests(TestCase):
     @mock_connections(patch("requests.post", side_effect=mocked_docker_analyzer_post))
     def test_capa_scan_file(self, mock_get=None, mock_post=None):
         report = capa_info.CapaInfo(
-            "Capa_Info", self.job_id, self.filepath, self.filename, self.md5, {},
+            "Capa_Info",
+            self.job_id,
+            self.filepath,
+            self.filename,
+            self.md5,
+            {},
         ).start()
         self.assertEqual(report.get("success", False), True)
 
@@ -445,7 +450,12 @@ class FileAnalyzersHTMLTests(TestCase):
     @mock_connections(patch("requests.post", side_effect=mocked_docker_analyzer_post))
     def test_thug_html(self, mock_get=None, mock_post=None):
         report = thug_file.ThugFile(
-            "Thug_HTML_Info", self.job_id, self.filepath, self.filename, self.md5, {},
+            "Thug_HTML_Info",
+            self.job_id,
+            self.filepath,
+            self.filename,
+            self.md5,
+            {},
         ).start()
         self.assertEqual(report.get("success", False), True)
 
@@ -509,7 +519,12 @@ class FileAnalyzersAPKTests(TestCase):
 
     def test_quark_engine(self, mock_get=None, mock_post=None):
         report = quark_engine.QuarkEngine(
-            "Quark_Engine_APK", self.job_id, self.filepath, self.filename, self.md5, {},
+            "Quark_Engine_APK",
+            self.job_id,
+            self.filepath,
+            self.filename,
+            self.md5,
+            {},
         ).start()
         self.assertEqual(report.get("success", False), True)
 

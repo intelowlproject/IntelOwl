@@ -38,7 +38,7 @@ more-itertools==7.2.0
 msoffcrypto-tool==4.10.1
 numpy==1.17.1
 olefile==0.46
-git+git://github.com/mlodic/oletools.git@4274e151bf9697b7f001e6e22007c0641ef2cb19
+oletools==0.56
 OTXv2==1.5.9
 peepdf==0.4.2
 https://github.com/mlodic/pefile/archive/master.tar.gz

@@ -31,6 +31,7 @@ from api_app.script_analyzers.observable_analyzers import (
     tranco,
     whoisxmlapi,
     checkdmarc,
+    urlscan,
 )
 from .mock_utils import (
     MockResponseNoOp,
@@ -469,6 +470,26 @@ class URLAnalyzersTests(
             self.observable_name,
             self.observable_classification,
             {},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    def test_urlscan_submit_result(self, mock_get=None, mock_post=None):
+        report = urlscan.UrlScan(
+            "UrlScan_Submit_Result",
+            self.job_id,
+            "https://www.honeynet.org/",
+            self.observable_classification,
+            {"urlscan_analysis": "submit_result"},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    def test_urlscan_search(self, mock_get=None, mock_post=None):
+        report = urlscan.UrlScan(
+            "UrlScan_Search",
+            self.job_id,
+            "https://www.honeynet.org/",
+            self.observable_classification,
+            {"urlscan_analysis": "search"},
         ).start()
         self.assertEqual(report.get("success", False), True)
 

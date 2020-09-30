@@ -145,6 +145,7 @@ else:
 CELERY_BROKER_URL = secrets.get_secret("CELERY_BROKER_URL")
 CELERY_ACCEPT_CONTENT = ["application/json"]
 CELERY_TASK_SERIALIZER = "json"
+CELERY_IGNORE_RESULT = True
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_TIMEZONE = "Europe/Rome"
 CELERY_IMPORTS = ("intel_owl.tasks",)

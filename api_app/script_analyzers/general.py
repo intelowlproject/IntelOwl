@@ -32,31 +32,26 @@ def start_analyzers(
         observable_name, observable_classification = get_observable_data(job_id)
 
     for analyzer in analyzers_to_execute:
+        ac = analyzers_config[analyzer]
         try:
-            analyzer_module = analyzers_config[analyzer].get("python_module", None)
-            if not analyzer_module:
-                message = (
+            module = ac.get("python_module", None)
+            if not module:
+                raise AnalyzerConfigurationException(
                     f"no python_module available in config for {analyzer} analyzer?!"
                 )
-                raise AnalyzerConfigurationException(message)
 
-            additional_config_params = analyzers_config[analyzer].get(
-                "additional_config_params", {}
-            )
+            additional_config_params = ac.get("additional_config_params", {})
 
             adjust_analyzer_config(
                 runtime_configuration, additional_config_params, analyzer
             )
-
-            # run analyzer with a celery task asynchronously
+            # construct arguments
             if is_sample:
                 # check if we should run the hash instead of the binary
-                run_hash = analyzers_config[analyzer].get("run_hash", False)
+                run_hash = ac.get("run_hash", False)
                 if run_hash:
                     # check which kind of hash the analyzer needs
-                    run_hash_type = analyzers_config[analyzer].get(
-                        "run_hash_type", "md5"
-                    )
+                    run_hash_type = ac.get("run_hash_type", "md5")
                     if run_hash_type == "md5":
                         hash_value = md5
                     elif run_hash_type == "sha256":
@@ -75,9 +70,6 @@ def start_analyzers(
                         "hash",
                         additional_config_params,
                     ]
-                    getattr(tasks, analyzer_module).apply_async(
-                        args=args, queue=settings.CELERY_TASK_DEFAULT_QUEUE
-                    )
                 else:
                     # run the analyzer with the binary
                     args = [
@@ -88,9 +80,6 @@ def start_analyzers(
                         md5,
                         additional_config_params,
                     ]
-                    getattr(tasks, analyzer_module).apply_async(
-                        args=args, queue=settings.CELERY_TASK_DEFAULT_QUEUE
-                    )
             else:
                 # observables analyzer case
                 args = [
@@ -100,9 +89,11 @@ def start_analyzers(
                     observable_classification,
                     additional_config_params,
                 ]
-                getattr(tasks, analyzer_module).apply_async(
-                    args=args, queue=settings.CELERY_TASK_DEFAULT_QUEUE
-                )
+            # run analyzer with a celery task asynchronously
+            getattr(tasks, module).apply_async(
+                args=args,
+                queue=settings.CELERY_TASK_DEFAULT_QUEUE,
+            )
 
         except (AnalyzerConfigurationException, AnalyzerRunException) as e:
             error_message = f"job_id {job_id}. analyzer: {analyzer}. error: {e}"

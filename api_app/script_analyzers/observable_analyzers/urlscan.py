@@ -1,25 +1,56 @@
 import requests
 import time
+import logging
 from api_app.exceptions import AnalyzerRunException
-from api_app.script_analyzers import classes
+from api_app.script_analyzers.classes import ObservableAnalyzer
 from intel_owl import secrets
 
-max_tries: int = 10
-poll_distance: int = 2
+
+logger = logging.getLogger(__name__)
 
 
-class UrlScan(classes.ObservableAnalyzer):
-    base_url: str = "https://urlscan.io/"
+class UrlScan(ObservableAnalyzer):
+    base_url: str = "https://urlscan.io/api/v1"
 
     def set_config(self, additional_config_params):
         self.analysis_type = additional_config_params.get("urlscan_analysis", "search")
-        api_key_name = additional_config_params.get("api_key_name", "URLSCAN_API_KEY")
-        self.visibility = additional_config_params.get("visibility", "public")
-        self.__api_key = secrets.get_secret(api_key_name)
+        self.visibility = additional_config_params.get("visibility", "private")
+        self.api_key_name = additional_config_params.get(
+            "api_key_name", "URLSCAN_API_KEY"
+        )
 
-    def __submit_query(self):
+    def run(self):
+        result = {}
+        headers = {
+            "Content-Type": "application/json",
+        }
+        api_key = secrets.get_secret(self.api_key_name)
+        if not api_key:
+            if self.analysis_type == "search":
+                logger.warning(f"{self.__repr__()} -> Continuing w/o API key..")
+            else:
+                raise AnalyzerRunException(
+                    f"No API key retrieved for name {self.api_key_name}."
+                )
+        else:
+            headers["API-Key"] = api_key
+        self.session = requests.Session()
+        self.session.headers = headers
+        if self.analysis_type == "search":
+            result = self.__urlscan_search()
+        elif self.analysis_type == "submit_result":
+            req_api_token = self.__urlscan_submit()
+            result = self.__poll_for_result(req_api_token)
+        else:
+            raise AnalyzerRunException(
+                f"not supported analysis_type {self.analysis_type}."
+                " Supported is 'search' and 'submit_result'."
+            )
+        return result
+
+    def __urlscan_submit(self) -> str:
         data = {"url": self.observable_name, "visibility": self.visibility}
-        uri = "api/v1/scan/"
+        uri = "/scan/"
         try:
             response = self.session.post(self.base_url + uri, json=data)
             response.raise_for_status()
@@ -28,6 +59,8 @@ class UrlScan(classes.ObservableAnalyzer):
         return response.json()["api"]
 
     def __poll_for_result(self, url):
+        max_tries = 10
+        poll_distance = 2
         result = {}
         for chance in range(max_tries):
             time.sleep(poll_distance)
@@ -39,38 +72,18 @@ class UrlScan(classes.ObservableAnalyzer):
                 break
         return result
 
-    def run(self):
-        if not self.__api_key:
-            raise AnalyzerRunException("no api key retrieved")
-        headers = {
-            "Content-Type": "application/json",
-            "API-Key": self.__api_key,
+    def __urlscan_search(self):
+        result = {}
+        params = {
+            "q": f'{self.observable_classification}:"{self.observable_name}"',
+            "size": 100,
         }
-        self.session = requests.Session()
-        self.session.headers = headers
-        if self.analysis_type == "search":
-            params = {
-                "q": f'{self.observable_classification}:"{self.observable_name}"',
-                "size": 100,
-            }
-            if self.observable_classification == "url":
-                params["q"] = "page." + params["q"]
-
-            uri = "api/v1/search/"
-            try:
-                response = self.session.get(self.base_url + uri, params=params)
-                response.raise_for_status()
-                result = response.json()
-            except requests.RequestException as e:
-                raise AnalyzerRunException(e)
-
-        elif self.analysis_type == "submit_result":
-            token = self.__submit_query()
-            result = self.__poll_for_result(token)
-        else:
-            raise AnalyzerRunException(
-                "not supported analysis_type"
-                f" {self.analysis_type}."
-                "Supported is 'search' and 'submit_result'."
-            )
+        if self.observable_classification == "url":
+            params["q"] = "page." + params["q"]
+        try:
+            resp = self.session.get(self.base_url + "/search/", params=params)
+            resp.raise_for_status()
+            result = resp.json()
+        except requests.RequestException as e:
+            raise AnalyzerRunException(e)
         return result

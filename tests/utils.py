@@ -109,6 +109,18 @@ class CommonTestCases_observables(metaclass=ABCMeta):
         ).start()
         self.assertEqual(report.get("success", False), True)
 
+    def test_urlscan_search(self, mock_get=None, mock_post=None):
+        if self.observable_classification == "url":
+            self.observable_name = "https://www.honeynet.org/"
+        report = urlscan.UrlScan(
+            "UrlScan_Search",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {"urlscan_analysis": "search"},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
 
 class CommonTestCases_ip_url_domain(metaclass=ABCMeta):
     """
@@ -148,16 +160,6 @@ class CommonTestCases_ip_domain_hash(metaclass=ABCMeta):
             self.observable_name,
             self.observable_classification,
             {},
-        ).start()
-        self.assertEqual(report.get("success", False), True)
-
-    def test_urlscan_search(self, mock_get=None, mock_post=None):
-        report = urlscan.UrlScan(
-            "UrlScan_Search",
-            self.job_id,
-            self.observable_name,
-            self.observable_classification,
-            {"urlscan_analysis": "search"},
         ).start()
         self.assertEqual(report.get("success", False), True)
 

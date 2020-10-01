@@ -39,7 +39,7 @@ GREYNOISE_API_KEY=test
 INTELX_API_KEY=test
 WHOISXMLAPI_KEY=test
 UNPAC_ME_API_KEY=test
-URLSCAN_API_KEY=test
+URLSCAN_API_KEY=
 
 # Test tokens
 TEST_JOB_ID=1
@@ -56,7 +56,7 @@ VT_NOTIFY_URL=http://fake_url.com
 
 # other variables
 DEBUG=True
-DISABLE_LOGGING_TEST=True
+DISABLE_LOGGING_TEST=False
 MOCK_CONNECTIONS=True
 CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672
 DB_NAME=intel_owl_db

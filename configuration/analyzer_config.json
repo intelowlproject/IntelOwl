@@ -825,6 +825,7 @@
     "python_module": "urlscan_run",
     "additional_config_params": {
       "api_key_name": "URLSCAN_API_KEY",
+      "visibility": "private",
       "urlscan_analysis": "submit_result"
     }
   },
@@ -836,6 +837,7 @@
     "requires_configuration": true,
     "python_module": "urlscan_run",
     "additional_config_params": {
+      "api_key_name": "URLSCAN_API_KEY",
       "urlscan_analysis": "search"
     }
   },

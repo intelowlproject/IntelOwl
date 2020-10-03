@@ -20,16 +20,16 @@ class IntelX(ObservableAnalyzer):
         self._api_key_name = additional_config_params.get(
             "api_key_name", "INTELX_API_KEY"
         )
-        self.__api_key = secrets.get_secret(self._api_key_name)
 
     def run(self):
-        if not self.__api_key:
+        api_key = secrets.get_secret(self._api_key_name)
+        if not api_key:
             raise AnalyzerConfigurationException(
                 f"No API key retrieved with name: '{self._api_key_name}'"
             )
 
         session = requests.Session()
-        session.headers.update({"x-key": self.__api_key, "User-Agent": "IntelOwl/v1.x"})
+        session.headers.update({"x-key": api_key, "User-Agent": "IntelOwl/v1.x"})
         params = {
             "term": self.observable_name,
             "buckets": [],

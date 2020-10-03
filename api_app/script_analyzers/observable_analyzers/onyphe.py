@@ -10,16 +10,16 @@ class Onyphe(classes.ObservableAnalyzer):
 
     def set_config(self, additional_config_params):
         self.api_key_name = additional_config_params.get("api_key_name", "ONYPHE_KEY")
-        self.__api_key = secrets.get_secret(self.api_key_name)
 
     def run(self):
-        if not self.__api_key:
+        api_key = secrets.get_secret(self.api_key_name)
+        if not api_key:
             raise AnalyzerRunException(
                 f"no API key retrieved with name: '{self.api_key_name}'"
             )
 
         headers = {
-            "Authorization": f"apikey {self.__api_key}",
+            "Authorization": f"apikey {api_key}",
             "Content-Type": "application/json",
         }
         obs_clsfn = self.observable_classification

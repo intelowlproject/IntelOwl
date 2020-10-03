@@ -21,15 +21,15 @@ class SecurityTrails(classes.ObservableAnalyzer):
         self.api_key_name = additional_config_params.get(
             "api_key_name", "SECURITYTRAILS_KEY"
         )
-        self.__api_key = secrets.get_secret(self.api_key_name)
 
     def run(self):
-        if not self.__api_key:
+        api_key = secrets.get_secret(self.api_key_name)
+        if not api_key:
             raise AnalyzerRunException(
                 f"No API key retrieved with name: '{self.api_key_name}'"
             )
 
-        headers = {"apikey": self.__api_key, "Content-Type": "application/json"}
+        headers = {"apikey": api_key, "Content-Type": "application/json"}
 
         if self.observable_classification == "ip":
             uri = f"ips/nearby/{self.observable_name}"

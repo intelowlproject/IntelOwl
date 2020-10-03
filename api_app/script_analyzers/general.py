@@ -64,6 +64,7 @@ def start_analyzers(
                         raise AnalyzerConfigurationException(error_message)
                     # run the analyzer with the hash
                     args = [
+                        f"observable_analyzers.{module}",
                         analyzer,
                         job_id,
                         hash_value,
@@ -73,6 +74,7 @@ def start_analyzers(
                 else:
                     # run the analyzer with the binary
                     args = [
+                        f"file_analyzers.{module}",
                         analyzer,
                         job_id,
                         file_path,
@@ -83,6 +85,7 @@ def start_analyzers(
             else:
                 # observables analyzer case
                 args = [
+                    f"observable_analyzers.{module}",
                     analyzer,
                     job_id,
                     observable_name,
@@ -90,12 +93,12 @@ def start_analyzers(
                     additional_config_params,
                 ]
             # run analyzer with a celery task asynchronously
-            getattr(tasks, module).apply_async(
+            tasks.analyzer_run.apply_async(
                 args=args,
                 queue=settings.CELERY_TASK_DEFAULT_QUEUE,
             )
 
         except (AnalyzerConfigurationException, AnalyzerRunException) as e:
-            error_message = f"job_id {job_id}. analyzer: {analyzer}. error: {e}"
-            logger.error(error_message)
-            set_failed_analyzer(analyzer, job_id, error_message)
+            err_msg = f"({analyzer}, job_id #{job_id}) -> Error: {e}"
+            logger.error(err_msg)
+            set_failed_analyzer(analyzer, job_id, err_msg)

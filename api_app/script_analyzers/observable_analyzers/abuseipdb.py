@@ -1,11 +1,11 @@
 import requests
 
 from api_app.exceptions import AnalyzerRunException
-from api_app.script_analyzers import classes
+from api_app.script_analyzers.classes import ObservableAnalyzer
 from intel_owl import secrets
 
 
-class AbuseIPDB(classes.ObservableAnalyzer):
+class AbuseIPDB(ObservableAnalyzer):
     url: str = "https://api.abuseipdb.com/api/v2/check"
 
     def set_config(self, additional_config_params):

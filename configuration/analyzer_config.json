@@ -7,7 +7,7 @@
       "application/vnd.android.package-archive",
       "application/x-dex"
     ],
-    "python_module": "apkid_run",
+    "python_module": "apkid.APKiD",
     "description": "APKiD identifies many compilers, packers, obfuscators, and other weird stuff from an APK or DEX file."
   },
   "AbuseIPDB": {
@@ -16,14 +16,14 @@
     "external_service": true,
     "description": "check if an ip was reported on AbuseIPDB",
     "requires_configuration": true,
-    "python_module": "abuseipdb_run"
+    "python_module": "abuseipdb.AbuseIPDB"
   },
   "ActiveDNS_Classic": {
     "type": "observable",
     "observable_supported": ["ip", "domain"],
     "external_service": true,
     "description": "Retrieve current domain resolution with default DNS",
-    "python_module": "activedns_run",
+    "python_module": "active_dns.ActiveDNS",
     "additional_config_params": {
       "service": "classic"
     }
@@ -33,7 +33,7 @@
     "observable_supported": ["domain"],
     "external_service": true,
     "description": "Retrieve current domain resolution with CloudFlare DoH (DNS over HTTPS)",
-    "python_module": "activedns_run",
+    "python_module": "active_dns.ActiveDNS",
     "additional_config_params": {
       "service": "cloudflare"
     }
@@ -43,7 +43,7 @@
     "observable_supported": ["domain"],
     "external_service": true,
     "description": "Detect malicious domains thanks to CloudFlare DoH Malware Filter",
-    "python_module": "activedns_run",
+    "python_module": "active_dns.ActiveDNS",
     "additional_config_params": {
       "service": "cloudflare_malware"
     }
@@ -53,7 +53,7 @@
     "observable_supported": ["domain"],
     "external_service": true,
     "description": "Retrieve current domain resolution with Google DoH (DNS over HTTPS)",
-    "python_module": "activedns_run",
+    "python_module": "active_dns.ActiveDNS",
     "additional_config_params": {
       "service": "google"
     }
@@ -64,7 +64,7 @@
     "external_service": true,
     "description": "scan an IP against the Auth0 API",
     "requires_configuration": true,
-    "python_module": "auth0_run"
+    "python_module": "auth0.Auth0"
   },
   "BoxJS_Scan_JavaScript": {
     "type": "file",
@@ -73,14 +73,14 @@
       "application/javascript",
       "text/javascript"
     ],
-    "python_module": "boxjs_run",
+    "python_module": "boxjs_scan.BoxJS",
     "description": "A tool for studying JavaScript malware"
   },
   "CheckDMARC": {
     "type": "observable",
     "observable_supported": ["domain"],
     "description": "An SPF and DMARC DNS records validator",
-    "python_module": "checkdmarc_run"
+    "python_module": "checkdmarc.CheckDMARC"
   },
   "CIRCLPassiveDNS": {
     "type": "observable",
@@ -88,7 +88,7 @@
     "external_service": true,
     "description": "scan an observable against the CIRCL Passive DNS DB",
     "requires_configuration": true,
-    "python_module": "circlpdns_run"
+    "python_module": "circl_pdns.CIRCL_PDNS"
   },
   "CIRCLPassiveSSL": {
     "type": "observable",
@@ -96,12 +96,12 @@
     "external_service": true,
     "description": "scan an observable against the CIRCL Passive SSL DB",
     "requires_configuration": true,
-    "python_module": "circlpssl_run"
+    "python_module": "circl_pssl.CIRCL_PSSL"
   },
   "Capa_Info": {
     "type": "file",
     "supported_filetypes": ["application/x-dosexec"],
-    "python_module": "capa_info_run",
+    "python_module": "capa_info.CapaInfo",
     "description": "capa detects capabilities in executable files"
   },
   "Censys_Search": {
@@ -110,7 +110,7 @@
     "external_service": true,
     "description": "scan an IP address against Censys View API",
     "requires_configuration": true,
-    "python_module": "censys_run",
+    "python_module": "censys.Censys",
     "additional_config_params": {
       "censys_analysis": "search"
     }
@@ -120,7 +120,7 @@
     "disabled": false,
     "decription": "scan a file on a Cuckoo instance",
     "requires_configuration": true,
-    "python_module": "cuckoo_run",
+    "python_module": "cuckoo_scan.CuckooAnalysis",
     "additional_config_params": {
       "api_key_name": "CUCKOO_API_KEY",
       "max_post_tries": 5,
@@ -132,14 +132,14 @@
     "run_hash": true,
     "external_service": true,
     "description": "Check if a particular file is known to be malware by Team Cymru",
-    "python_module": "cymru_run"
+    "python_module": "cymru.Cymru"
   },
   "Cymru_Hash_Registry_Get_Observable": {
     "type": "observable",
     "observable_supported": ["hash"],
     "external_service": true,
     "description": "Check if a particular hash is available in the malware hash registry of Team Cymru",
-    "python_module": "cymru_run"
+    "python_module": "cymru.Cymru"
   },
   "DNSDB": {
     "type": "observable",
@@ -147,7 +147,7 @@
     "external_service": true,
     "description": "scan an observable against the Passive DNS Farsight Database",
     "requires_configuration": true,
-    "python_module": "dnsdb_run"
+    "python_module": "dnsdb.DNSdb"
   },
   "Doc_Info": {
     "type": "file",
@@ -169,7 +169,7 @@
       "application/zip"
     ],
     "decription": "static generic document analysis",
-    "python_module": "docinfo_run"
+    "python_module": "doc_info.DocInfo"
   },
   "Doc_Info_Experimental": {
     "type": "file",
@@ -190,7 +190,7 @@
       "application/xml"
     ],
     "decription": "static document analysis with new features to analyze XLM macros, encrypted macros and more",
-    "python_module": "docinfo_run",
+    "python_module": "doc_info.DocInfo",
     "additional_config_params": {
         "experimental": true
     }
@@ -198,14 +198,14 @@
   "File_Info": {
     "type": "file",
     "description": "basic static analysis, extracts metadata and hashes",
-    "python_module": "fileinfo_run"
+    "python_module": "file_info.FileInfo"
   },
   "Fortiguard": {
     "type": "observable",
     "observable_supported": ["domain", "url"],
     "external_service": true,
     "description": "scan an observable with the Fortiguard URL Analyzer",
-    "python_module": "fortiguard_run"
+    "python_module": "fortiguard.Fortiguard"
   },
   "GoogleSafebrowsing": {
     "type": "observable",
@@ -213,7 +213,7 @@
     "external_service": true,
     "description": "scan an observable against GoogleSafeBrowsing DB",
     "requires_configuration": true,
-    "python_module": "googlesf_run"
+    "python_module": "googlesf.GoogleSF"
   },
   "GreyNoise": {
     "type": "observable",
@@ -221,7 +221,7 @@
     "external_service": true,
     "description": "scan an IP against the Greynoise API (requires API key)",
     "requires_configuration": true,
-    "python_module": "greynoise_run",
+    "python_module": "greynoise.GreyNoise",
     "additional_config_params": {
       "greynoise_api_version": "v2",
       "api_key_name": "GREYNOISE_API_KEY"
@@ -232,7 +232,7 @@
     "observable_supported": ["ip"],
     "external_service": true,
     "description": "scan an IP against the Alpha Greynoise API (no API key required)",
-    "python_module": "greynoise_run",
+    "python_module": "greynoise.GreyNoise",
     "additional_config_params": {
       "greynoise_api_version": "v1"
     }
@@ -243,7 +243,7 @@
     "external_service": true,
     "description": "HoneyDB IP lookup service",
     "requires_configuration": true,
-    "python_module": "honeydb_run",
+    "python_module": "honeydb.HoneyDB",
     "additional_config_params": {
       "api_key_name": "HONEYDB_API_KEY",
       "api_id_name": "HONEYDB_API_ID",
@@ -256,7 +256,7 @@
     "external_service": true,
     "description": "scan an IP against HoneyDB.io’s Twitter Threat Feed",
     "requires_configuration": true,
-    "python_module": "honeydb_run",
+    "python_module": "honeydb.HoneyDB",
     "additional_config_params": {
       "api_key_name": "HONEYDB_API_KEY",
       "api_id_name": "HONEYDB_API_ID",
@@ -269,7 +269,7 @@
     "external_service": true,
     "description": "Scans a domain name and returns set of data about the organisation, the email address found and additional information about the people owning those email addresses",
     "requires_configuration": true,
-    "python_module": "hunter_run",
+    "python_module": "hunter.Hunter",
     "additional_config_params": {
       "api_key_name": "HUNTER_API_KEY"
     }
@@ -280,7 +280,7 @@
     "run_hash": true,
     "description": "check file hash on HybridAnalysis sandbox reports",
     "requires_configuration": true,
-    "python_module": "haget_run"
+    "python_module": "ha_get.HybridAnalysisGet"
   },
   "HybridAnalysis_Get_Observable": {
     "type": "observable",
@@ -288,7 +288,7 @@
     "external_service": true,
     "description": "search an observable in the HybridAnalysis sandbox reports",
     "requires_configuration": true,
-    "python_module": "haget_run"
+    "python_module": "ha_get.HybridAnalysisGet"
   },
   "IntelX_Phonebook": {
     "type": "observable",
@@ -296,7 +296,7 @@
     "description": "Phonebook alike search against IntelX API",
     "external_service": true,
     "requires_configuration": true,
-    "python_module": "intelx_run",
+    "python_module": "intelx.IntelX",
     "additional_config_params": {
       "api_key_name": "INTELX_API_KEY",
       "rows_limit": 100
@@ -309,7 +309,7 @@
     "leaks_info": true,
     "description": "scan a file on Intezer",
     "requires_configuration": true,
-    "python_module": "intezer_run"
+    "python_module": "intezer_scan.IntezerScan"
   },
   "MISP": {
     "type": "observable",
@@ -317,7 +317,7 @@
     "external_service": true,
     "description": "scan an observable on a custom MISP instance",
     "requires_configuration": true,
-    "python_module": "misp_run",
+    "python_module": "misp.MISP",
     "additional_config_params": {
       "api_key_name": "MISP_KEY",
       "url_key_name": "MISP_URL"
@@ -329,7 +329,7 @@
     "external_service": true,
     "description": "scan an observable on the FIRST MISP instance",
     "requires_configuration": true,
-    "python_module": "misp_run",
+    "python_module": "misp.MISP",
     "additional_config_params": {
       "api_key_name": "FIRST_MISP_API",
       "url_key_name": "FIRST_MISP_URL"
@@ -340,7 +340,7 @@
     "run_hash": true,
     "description": "check a file hash on the FIRST MISP instance",
     "requires_configuration": true,
-    "python_module": "misp_run",
+    "python_module": "misp.MISP",
     "additional_config_params": {
       "api_key_name": "FIRST_MISP_API",
       "url_key_name": "FIRST_MISP_URL"
@@ -351,27 +351,27 @@
     "run_hash": true,
     "description": "check a file hash on a MISP instance",
     "requires_configuration": true,
-    "python_module": "misp_run"
+    "python_module": "misp.MISP"
   },
   "MalwareBazaar_Get_File": {
     "type": "file",
     "run_hash": true,
     "external_service": true,
     "description": "Check if a particular malware sample is known to MalwareBazaar",
-    "python_module": "mbget_run"
+    "python_module": "mb_get.MB_GET"
   },
   "MalwareBazaar_Get_Observable": {
     "type": "observable",
     "observable_supported": ["hash"],
     "external_service": true,
     "description": "Check if a particular malware hash is known to MalwareBazaar",
-    "python_module": "mbget_run"
+    "python_module": "mb_get.MB_GET"
   },
   "MaxMindGeoIP": {
     "type": "observable",
     "observable_supported": ["ip"],
     "description": "extract GeoIP info for an IP",
-    "python_module": "maxmind_run"
+    "python_module": "maxmind.Maxmind"
   },
   "ONYPHE": {
     "type": "observable",
@@ -379,7 +379,7 @@
     "external_service": true,
     "description": "search an observable in the ONYPHE",
     "requires_configuration": true,
-    "python_module": "onyphe_run",
+    "python_module": "onyphe.Onyphe",
     "additional_config_params": {
       "api_key_name": "ONYPHE_KEY"
     }
@@ -388,36 +388,40 @@
     "type": "observable",
     "observable_supported": ["ip", "domain", "url", "hash"],
     "external_service": true,
-    "verbose": false,
     "description": "scan an observable on Alienvault OTX",
     "requires_configuration": true,
-    "python_module": "otx_run"
+    "python_module": "otx.OTX",
+    "additional_config_params": {
+      "verbose": false
+    }
   },
   "OTX_Check_Hash": {
     "type": "file",
     "external_service": true,
     "run_hash": true,
-    "verbose": false,
     "decsription": "check file hash on OTX Alienvault",
     "requires_configuration": true,
-    "python_module": "otx_run"
+    "python_module": "otx.OTX",
+    "additional_config_params": {
+      "verbose": false
+    }
   },
   "PDF_Info": {
     "type": "file",
     "supported_filetypes": ["application/pdf"],
     "description": "static PDF analysis",
-    "python_module": "pdfinfo_run"
+    "python_module": "pdf_info.PDFInfo"
   },
   "PE_Info": {
     "type": "file",
     "supported_filetypes": ["application/x-dosexec"],
     "description": "static PE analysis",
-    "python_module": "peinfo_run"
+    "python_module": "pe_info.PEInfo"
   },
   "PEframe_Scan": {
     "type": "file",
     "supported_filetypes": ["application/x-dosexec"],
-    "python_module": "peframe_run",
+    "python_module": "peframe.PEframe",
     "description": "Perform static analysis on Portable Executable malware and malicious MS Office documents"
   },
   "Pulsedive_Active_IOC": {
@@ -425,7 +429,7 @@
     "observable_supported": ["ip", "domain", "url", "hash"],
     "external_service": true,
     "description": "Scan indicators and retrieve results from Pulsedive's API",
-    "python_module": "pulsedive_run",
+    "python_module": "pulsedive.Pulsedive",
     "additional_config_params": {
       "api_key_name": "PULSEDIVE_API_KEY",
       "active_scan": true
@@ -439,7 +443,7 @@
       "application/vnd.android.package-archive",
       "application/x-dex"
     ],
-    "python_module": "quark_engine_run",
+    "python_module": "quark_engine.QuarkEngine",
     "description": "An Obfuscation-Neglect Android Malware Scoring System"
   },
   "Robtex_Forward_PDNS_Query": {
@@ -447,7 +451,7 @@
     "observable_supported": ["domain", "url"],
     "external_service": true,
     "description": "scan a domain against the Robtex Passive DNS DB",
-    "python_module": "robtex_run",
+    "python_module": "robtex.Robtex",
     "additional_config_params": {
       "robtex_analysis": "forward_pdns"
     }
@@ -457,7 +461,7 @@
     "observable_supported": ["ip"],
     "external_service": true,
     "description": "get IP info from Robtex",
-    "python_module": "robtex_run",
+    "python_module": "robtex.Robtex",
     "additional_config_params": {
       "robtex_analysis": "ip_query"
     }
@@ -467,7 +471,7 @@
     "observable_supported": ["ip"],
     "external_service": true,
     "description": "scan an IP against the Robtex Passive DNS DB",
-    "python_module": "robtex_run",
+    "python_module": "robtex.Robtex",
     "additional_config_params": {
       "robtex_analysis": "reverse_pdns"
     }
@@ -476,7 +480,7 @@
     "type": "file",
     "supported_filetypes": ["text/rtf", "application/rtf"],
     "description": "static RTF analysis",
-    "python_module": "rtfinfo_run"
+    "python_module": "rtf_info.RTFInfo"
   },
   "Securitytrails_Details": {
     "type": "observable",
@@ -484,7 +488,7 @@
     "external_service": true,
     "description": "scan a domain against securitytrails API for general details",
     "requires_configuration": true,
-    "python_module": "securitytrails_run",
+    "python_module": "securitytrails.SecurityTrails",
     "additional_config_params": {
       "securitytrails_analysis": "current",
       "securitytrails_current_type": "details"
@@ -496,7 +500,7 @@
     "external_service": true,
     "description": "scan a domain against securitytrails API for historical DNS",
     "requires_configuration": true,
-    "python_module": "securitytrails_run",
+    "python_module": "securitytrails.SecurityTrails",
     "additional_config_params": {
       "securitytrails_analysis": "history",
       "securitytrails_history_analysis": "dns"
@@ -508,7 +512,7 @@
     "external_service": true,
     "description": "scan a domain against securitytrails API for historical WHOIS",
     "requires_configuration": true,
-    "python_module": "securitytrails_run",
+    "python_module": "securitytrails.SecurityTrails",
     "additional_config_params": {
       "securitytrails_analysis": "history",
       "securitytrails_history_analysis": "whois"
@@ -520,7 +524,7 @@
     "external_service": true,
     "description": "scan an IP against securitytrails API for neighbour IPs",
     "requires_configuration": true,
-    "python_module": "securitytrails_run"
+    "python_module": "securitytrails.SecurityTrails"
   },
   "Securitytrails_Subdomains": {
     "type": "observable",
@@ -528,7 +532,7 @@
     "external_service": true,
     "description": "scan a domain against securitytrails API for subdomains",
     "requires_configuration": true,
-    "python_module": "securitytrails_run",
+    "python_module": "securitytrails.SecurityTrails",
     "additional_config_params": {
       "securitytrails_analysis": "current",
       "securitytrails_current_type": "subdomains"
@@ -540,7 +544,7 @@
     "external_service": true,
     "description": "scan a domain against securitytrails API for tags",
     "requires_configuration": true,
-    "python_module": "securitytrails_run",
+    "python_module": "securitytrails.SecurityTrails",
     "additional_config_params": {
       "securitytrails_analysis": "current",
       "securitytrails_current_type": "tags"
@@ -552,7 +556,7 @@
     "external_service": true,
     "description": "scan an IP against Shodan Honeyscore API",
     "requires_configuration": true,
-    "python_module": "shodan_run",
+    "python_module": "shodan.Shodan",
     "additional_config_params": {
       "shodan_analysis": "honeyscore"
     }
@@ -563,7 +567,7 @@
     "external_service": true,
     "description": "scan an IP against Shodan Search API",
     "requires_configuration": true,
-    "python_module": "shodan_run",
+    "python_module": "shodan.Shodan",
     "additional_config_params": {
       "shodan_analysis": "search"
     }
@@ -572,12 +576,12 @@
     "type": "file",
     "supported_filetypes": ["application/x-dosexec"],
     "description": "PE signature extractor",
-    "python_module": "signatureinfo_run"
+    "python_module": "signature_info.SignatureInfo"
   },
   "Strings_Info_Classic": {
     "type": "file",
     "description": "strings extraction",
-    "python_module": "stringsinfo_run",
+    "python_module": "strings_info.StringsInfo",
     "additional_config_params": {
       "max_number_of_strings": 300,
       "rank_strings": false
@@ -587,12 +591,12 @@
     "type": "file",
     "supported_filetypes": ["application/x-dosexec"],
     "description": "speakeasy emulation report",
-    "python_module": "speakeasy_run"
+    "python_module": "speakeasy_emulation.SpeakEasy"
   },
   "Strings_Info_ML": {
     "type": "file",
     "description": "strings extraction plus strings ranking based on Machine Learning",
-    "python_module": "stringsinfo_run",
+    "python_module": "strings_info.StringsInfo",
     "additional_config_params": {
       "max_number_of_strings": 200,
       "rank_strings": true
@@ -603,14 +607,14 @@
     "observable_supported": ["ip"],
     "external_service": true,
     "description": "check an IP reputation from Talos downloaded IP list",
-    "python_module": "talos_run"
+    "python_module": "talos.Talos"
   },
   "Threatminer_PDNS": {
     "type": "observable",
     "observable_supported": ["ip", "domain"],
     "external_service": true,
     "description": "retrieve PDNS data from Threatminer API",
-    "python_module": "threatminer_run",
+    "python_module": "threatminer.Threatminer",
     "additional_config_params": {
       "rt_value": 2
     }
@@ -620,7 +624,7 @@
     "observable_supported": ["ip", "domain"],
     "external_service": true,
     "description": "retrieve reports from Threatminer API",
-    "python_module": "threatminer_run",
+    "python_module": "threatminer.Threatminer",
     "additional_config_params": {
       "rt_value": 6
     }
@@ -630,7 +634,7 @@
     "observable_supported": ["domain"],
     "external_service": true,
     "description": "retrieve subdomains from Threatminer API",
-    "python_module": "threatminer_run",
+    "python_module": "threatminer.Threatminer",
     "additional_config_params": {
       "rt_value": 5
     }
@@ -639,7 +643,7 @@
     "type": "file",
     "supported_filetypes": ["text/html"],
     "description": "Perform hybrid dynamic/static analysis on a saved HTML page",
-    "python_module": "thug_file_run",
+    "python_module": "thug_file.ThugFile",
     "requires_configuration": true,
     "additional_config_params": {
       "dom_events": "click,mouseover",
@@ -654,7 +658,7 @@
     "type": "file",
     "supported_filetypes": ["text/html"],
     "description": "Perform hybrid dynamic/static analysis on a saved HTML page",
-    "python_module": "thug_file_run",
+    "python_module": "thug_file.ThugFile",
     "requires_configuration": true,
     "additional_config_params": {
       "dom_events": "click,mouseover",
@@ -669,7 +673,7 @@
     "type": "file",
     "supported_filetypes": ["text/html"],
     "description": "Perform hybrid dynamic/static analysis on a saved HTML page",
-    "python_module": "thug_file_run",
+    "python_module": "thug_file.ThugFile",
     "requires_configuration": true,
     "additional_config_params": {
       "dom_events": "click,mouseover",
@@ -684,7 +688,7 @@
     "type": "file",
     "supported_filetypes": ["text/html"],
     "description": "Perform hybrid dynamic/static analysis on a saved HTML page",
-    "python_module": "thug_file_run",
+    "python_module": "thug_file.ThugFile",
     "requires_configuration": true,
     "additional_config_params": {
       "dom_events": "click,mouseover",
@@ -699,7 +703,7 @@
     "type": "file",
     "supported_filetypes": ["text/html"],
     "description": "Perform hybrid dynamic/static analysis on a saved HTML page",
-    "python_module": "thug_file_run",
+    "python_module": "thug_file.ThugFile",
     "requires_configuration": true,
     "additional_config_params": {
       "dom_events": "click,mouseover",
@@ -714,7 +718,7 @@
     "type": "observable",
     "observable_supported": ["domain", "url"],
     "description": "Perform hybrid dynamic/static analysis on a URL",
-    "python_module": "thug_url_run",
+    "python_module": "thug_url.ThugUrl",
     "requires_configuration": true,
     "additional_config_params": {
       "dom_events": "click,mouseover",
@@ -729,7 +733,7 @@
     "type": "observable",
     "observable_supported": ["domain", "url"],
     "description": "Perform hybrid dynamic/static analysis on a URL",
-    "python_module": "thug_url_run",
+    "python_module": "thug_url.ThugUrl",
     "requires_configuration": true,
     "additional_config_params": {
       "dom_events": "click,mouseover",
@@ -744,7 +748,7 @@
     "type": "observable",
     "observable_supported": ["domain", "url"],
     "description": "Perform hybrid dynamic/static analysis on a URL",
-    "python_module": "thug_url_run",
+    "python_module": "thug_url.ThugUrl",
     "requires_configuration": true,
     "additional_config_params": {
       "dom_events": "click,mouseover",
@@ -759,7 +763,7 @@
     "type": "observable",
     "observable_supported": ["domain", "url"],
     "description": "Perform hybrid dynamic/static analysis on a URL",
-    "python_module": "thug_url_run",
+    "python_module": "thug_url.ThugUrl",
     "requires_configuration": true,
     "additional_config_params": {
       "dom_events": "click,mouseover",
@@ -774,7 +778,7 @@
     "type": "observable",
     "observable_supported": ["domain", "url"],
     "description": "Perform hybrid dynamic/static analysis on a URL",
-    "python_module": "thug_url_run",
+    "python_module": "thug_url.ThugUrl",
     "requires_configuration": true,
     "additional_config_params": {
       "dom_events": "click,mouseover",
@@ -790,20 +794,20 @@
     "observable_supported": ["ip"],
     "external_service": true,
     "description": "check if an IP is a Tor Exit Node",
-    "python_module": "tor_run"
+    "python_module": "tor.Tor"
   },
   "Tranco": {
     "type": "observable",
     "observable_supported": ["domain", "url"],
     "external_service": true,
     "description": "check if a domain is in the last Tranco ranking top sites list",
-    "python_module": "tor_run"
+    "python_module": "tor.Tor"
   },
   "UnpacMe_EXE_Unpacker": {
     "type": "file",
     "supported_filetypes": ["application/x-dosexec"],
     "description": "UnpacMe unpacker",
-    "python_module": "unpac_me_run",
+    "python_module": "unpac_me.UnpacMe",
     "additional_config_params": {
       "api_key_name": "UNPAC_ME_API_KEY",
       "private": false,
@@ -815,7 +819,32 @@
     "observable_supported": ["domain", "url"],
     "external_service": true,
     "description": "Query a domain or URL against URLhaus API",
-    "python_module": "urlhaus_run"
+    "python_module": "urlhaus.URLHaus"
+  },
+  "UrlScan_Submit_Result": {
+    "type": "observable",
+    "observable_supported": ["url"],
+    "external_service": true,
+    "description": "Submit & retrieve result of a URL against URLScan API",
+    "requires_configuration": true,
+    "python_module": "urlscan.UrlScan",
+    "additional_config_params": {
+      "api_key_name": "URLSCAN_API_KEY",
+      "visibility": "private",
+      "urlscan_analysis": "submit_result"
+    }
+  },
+  "UrlScan_Search": {
+    "type": "observable",
+    "observable_supported": ["ip", "domain", "url", "hash"],
+    "external_service": true,
+    "description": "Search an IP/domain/url/hash against URLScan API",
+    "requires_configuration": true,
+    "python_module": "urlscan.UrlScan",
+    "additional_config_params": {
+      "api_key_name": "URLSCAN_API_KEY",
+      "urlscan_analysis": "search"
+    }
   },
   "VirusTotal_v2_Get_File": {
     "type": "file",
@@ -823,7 +852,7 @@
     "run_hash": true,
     "description": "check file hash on VirusTotal using old API endpoints",
     "requires_configuration": true,
-    "python_module": "vt2get_run",
+    "python_module": "vt2_get.VirusTotalv2",
     "additional_config_params": {
       "api_key_name": "VT_KEY"
     }
@@ -834,7 +863,7 @@
     "external_service": true,
     "description": "search an observable in the VirusTotal DB using the old API endpoints",
     "requires_configuration": true,
-    "python_module": "vt2get_run",
+    "python_module": "vt2_get.VirusTotalv2",
     "additional_config_params": {
       "api_key_name": "VT_KEY"
     }
@@ -845,7 +874,7 @@
     "leaks_info": true,
     "description": "scan a file on VirusTotal using old API endpoints",
     "requires_configuration": true,
-    "python_module": "vt2scan_run",
+    "python_module": "vt2_scan.VirusTotalv2ScanFile",
     "additional_config_params": {
       "api_key_name": "VT_KEY"
     }
@@ -856,7 +885,7 @@
     "run_hash": true,
     "description": "check file hash on VirusTotal",
     "requires_configuration": true,
-    "python_module": "vt3get_run",
+    "python_module": "vt3_get.VirusTotalv3",
     "additional_config_params": {
       "api_key_name": "VT_KEY"
     }
@@ -867,7 +896,7 @@
     "run_hash": true,
     "description": "check file hash on VirusTotal and rescan it if it is old",
     "requires_configuration": true,
-    "python_module": "vt3get_scan_run",
+    "python_module": "vt3_get.VirusTotalv3",
     "additional_config_params": {
         "api_key_name": "VT_KEY",
         "force_active_scan_if_old": true
@@ -879,7 +908,7 @@
     "run_hash": true,
     "description": "check file hash on VirusTotal. If not already available, send the sample and perform a new scan",
     "requires_configuration": true,
-    "python_module": "vt3get_scan_run",
+    "python_module": "vt3_get.VirusTotalv3",
     "additional_config_params": {
       "api_key_name": "VT_KEY",
       "force_active_scan": true
@@ -891,7 +920,7 @@
     "run_hash": true,
     "description": "check file hash on VirusTotal. If it is already available, rescan if it is old. If it is not available, send the sample and perform a new scan",
     "requires_configuration": true,
-    "python_module": "vt3get_scan_run",
+    "python_module": "vt3_get.VirusTotalv3",
     "additional_config_params": {
         "api_key_name": "VT_KEY",
         "force_active_scan": true,
@@ -904,7 +933,7 @@
     "external_service": true,
     "description": "search an observable in the VirusTotal DB",
     "requires_configuration": true,
-    "python_module": "vt3get_run",
+    "python_module": "vt3_get.VirusTotalv3",
     "additional_config_params": {
       "api_key_name": "VT_KEY"
     }
@@ -915,7 +944,7 @@
     "leaks_info": true,
     "description": "scan a file on VirusTotal",
     "requires_configuration": true,
-    "python_module": "vt3scan_run",
+    "python_module": "vt3_scan.VirusTotalv3ScanFile",
     "additional_config_params": {
       "api_key_name": "VT_KEY"
     }
@@ -926,7 +955,7 @@
     "external_service": true,
     "description": "the WHOIS record data, of a domain name, an IP address, or an email address",
     "requires_configuration": true,
-    "python_module": "whoisxmlapi_run",
+    "python_module": "whoisxmlapi.Whoisxmlapi",
     "additional_config_params": {
       "api_key_name": "WHOISXMLAPI_KEY"
     }
@@ -934,7 +963,7 @@
   "Yara_Scan_Community": {
     "type": "file",
     "description": "scan a file with community yara rules",
-    "python_module": "yara_run",
+    "python_module": "yara_scan.YaraScan",
     "additional_config_params": {
       "directories_with_rules": ["/opt/deploy/yara/rules"]
     }
@@ -951,7 +980,7 @@
       "application/zip"
     ],
     "decription": "Xlm macro deobfuscator",
-    "python_module": "xlm_deobfuscator_run",
+    "python_module": "xlm_macro_deobfuscator.XlmMacroDeobfuscator",
     "additional_config_params": {
         "passwords_to_check": ["agenzia", "inps", "coronavirus"]
     }
@@ -959,7 +988,7 @@
   "Yara_Scan_Florian": {
     "type": "file",
     "description": "scan a file with Neo23x0 yara rules",
-    "python_module": "yara_run",
+    "python_module": "yara_scan.YaraScan",
     "additional_config_params": {
       "directories_with_rules": ["/opt/deploy/yara/signature-base/yara"],
       "git_repo_main_dir": ["/opt/deploy/yara/signature-base"]
@@ -968,7 +997,7 @@
   "Yara_Scan_Intezer": {
     "type": "file",
     "description": "scan a file with Intezer yara rules",
-    "python_module": "yara_run",
+    "python_module": "yara_scan.YaraScan",
     "additional_config_params": {
       "directories_with_rules": ["/opt/deploy/yara/intezer_rules"]
     }
@@ -976,7 +1005,7 @@
   "Yara_Scan_McAfee": {
     "type": "file",
     "description": "scan a file with McAfee yara rules",
-    "python_module": "yara_run",
+    "python_module": "yara_scan.YaraScan",
     "additional_config_params": {
       "git_repo_main_dir": ["/opt/deploy/yara/mcafee_rules"],
       "directories_with_rules": [

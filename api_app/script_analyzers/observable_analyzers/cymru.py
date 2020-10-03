@@ -2,13 +2,13 @@ import socket
 import logging
 
 from api_app.exceptions import AnalyzerRunException
-from api_app.script_analyzers import classes
+from api_app.script_analyzers.classes import ObservableAnalyzer
 
 
 logger = logging.getLogger(__name__)
 
 
-class Cymru(classes.ObservableAnalyzer):
+class Cymru(ObservableAnalyzer):
     def run(self):
         results = {}
         if self.observable_classification != "hash":

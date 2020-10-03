@@ -90,8 +90,8 @@ def start_analyzers(
                     additional_config_params,
                 ]
             # run analyzer with a celery task asynchronously
-            getattr(tasks, module).apply_async(
-                args=args,
+            tasks.analyzer_run.apply_async(
+                args=[ac["type"], module, *args],
                 queue=settings.CELERY_TASK_DEFAULT_QUEUE,
             )
 

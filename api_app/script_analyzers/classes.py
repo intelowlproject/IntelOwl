@@ -10,7 +10,7 @@ from api_app.exceptions import (
     AnalyzerRunException,
     AnalyzerConfigurationException,
 )
-from .utils import get_basic_report_template, set_report_and_cleanup
+from .utils import get_basic_report_template
 
 logger = logging.getLogger(__name__)
 
@@ -74,7 +74,6 @@ class BaseAnalyzerMixin(metaclass=ABCMeta):
 
         # add process time
         self.report["process_time"] = time.time() - self.report["started_time"]
-        set_report_and_cleanup(self.job_id, self.report)
 
         self.after_run()
 

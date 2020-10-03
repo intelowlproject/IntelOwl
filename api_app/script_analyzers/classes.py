@@ -37,8 +37,11 @@ class BaseAnalyzerMixin(metaclass=ABCMeta):
 
     @abstractmethod
     def run(self):
-        # this should be overwritten in
-        # child class
+        """
+        Called from *start* fn and wrapped in a try-catch block.
+        Should be overwritten in child class
+        :returns report: JSON
+        """
         raise AnalyzerRunNotImplemented(self.analyzer_name)
 
     @abstractmethod
@@ -60,8 +63,8 @@ class BaseAnalyzerMixin(metaclass=ABCMeta):
         calls `before_run`, `run`, `after_run`
         in that order with exception handling.
         """
-        self.before_run()
         try:
+            self.before_run()
             self.report = get_basic_report_template(self.analyzer_name)
             result = self.run()
             self.report["report"] = result

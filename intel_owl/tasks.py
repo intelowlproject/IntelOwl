@@ -59,6 +59,7 @@ from api_app.script_analyzers.observable_analyzers import (
     intelx,
     whoisxmlapi,
     checkdmarc,
+    urlscan,
 )
 
 from api_app import crons
@@ -748,6 +749,23 @@ def pulsedive_run(
     additional_config_params,
 ):
     pulsedive.Pulsedive(
+        analyzer_name,
+        job_id,
+        observable_name,
+        observable_classification,
+        additional_config_params,
+    ).start()
+
+
+@shared_task(soft_time_limit=100)
+def urlscan_run(
+    analyzer_name,
+    job_id,
+    observable_name,
+    observable_classification,
+    additional_config_params,
+):
+    urlscan.UrlScan(
         analyzer_name,
         job_id,
         observable_name,

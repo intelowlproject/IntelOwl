@@ -16,6 +16,7 @@ from api_app.script_analyzers.observable_analyzers import (
     googlesf,
     fortiguard,
     intelx,
+    urlscan,
 )
 
 from .mock_utils import mock_connections, mocked_requests_noop, MockResponse
@@ -105,6 +106,18 @@ class CommonTestCases_observables(metaclass=ABCMeta):
             self.observable_name,
             self.observable_classification,
             {"api_key_name": "FIRST_MISP_API", "url_key_name": "FIRST_MISP_URL"},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    def test_urlscan_search(self, mock_get=None, mock_post=None):
+        if self.observable_classification == "url":
+            self.observable_name = "https://www.honeynet.org/"
+        report = urlscan.UrlScan(
+            "UrlScan_Search",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {"urlscan_analysis": "search"},
         ).start()
         self.assertEqual(report.get("success", False), True)
 

@@ -88,7 +88,7 @@ class BaseAnalyzerMixin(metaclass=ABCMeta):
             f" Analyzer error: '{err}'"
         )
         logger.error(error_message)
-        self.report["errors"].append(error_message)
+        self.report["errors"].append(str(err))
         self.report["success"] = False
 
     def _handle_base_exception(self, err):

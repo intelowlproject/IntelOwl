@@ -12,15 +12,15 @@ class Hunter(classes.ObservableAnalyzer):
         self.api_key_name = additional_config_params.get(
             "api_key_name", "HUNTER_API_KEY"
         )
-        self.__api_key = secrets.get_secret(self.api_key_name)
 
     def run(self):
-        if not self.__api_key:
+        api_key = secrets.get_secret(self.api_key_name)
+        if not api_key:
             raise AnalyzerRunException(
                 f"no API Key retrieved with name: {self.api_key_name}"
             )
 
-        url = f"{self.base_url}domain={self.observable_name}&api_key={self.__api_key}"
+        url = f"{self.base_url}domain={self.observable_name}&api_key={api_key}"
         response = requests.get(url)
         response.raise_for_status()
 

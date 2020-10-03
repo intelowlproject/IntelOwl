@@ -12,8 +12,7 @@ from api_app.exceptions import AlreadyFailedJobException
 logger = logging.getLogger(__name__)
 
 
-def set_report_and_cleanup(job_id, report):
-    analyzer_name = report.get("name", "")
+def set_report_and_cleanup(analyzer_name, job_id, report):
     job_repr = f"({analyzer_name}, job_id: #{job_id})"
     logger.info(f"STARTING set_report_and_cleanup for <-- {job_repr}.")
     job_object = None
@@ -79,20 +78,15 @@ def get_filepath_filename(job_id):
     # this function allows to minimize access to the database
     # in this way the analyzers could not touch the DB until the end of the analysis
     job_object = Job.object_by_job_id(job_id)
-
     filename = job_object.file_name
-
     file_path = job_object.file.path
-
     return file_path, filename
 
 
 def get_observable_data(job_id):
     job_object = Job.object_by_job_id(job_id)
-
     observable_name = job_object.observable_name
     observable_classification = job_object.observable_classification
-
     return observable_name, observable_classification
 
 
@@ -109,14 +103,14 @@ def set_job_status(job_id, status, errors=None):
     job_object.save()
 
 
-def set_failed_analyzer(analyzer_name, job_id, error_message):
-    logger.info(
-        f"setting analyzer {analyzer_name} of job_id {job_id} as failed."
-        f" Error message:{error_message}"
+def set_failed_analyzer(analyzer_name, job_id, err_msg):
+    logger.warning(
+        f"({analyzer_name}, job_id #{job_id}) -> set as FAILED. "
+        f" Error message: {err_msg}"
     )
     report = get_basic_report_template(analyzer_name)
-    report["errors"].append(error_message)
-    set_report_and_cleanup(job_id, report)
+    report["errors"].append(err_msg)
+    set_report_and_cleanup(analyzer_name, job_id, report)
 
 
 def adjust_analyzer_config(runtime_conf, additional_config_params, analyzer):

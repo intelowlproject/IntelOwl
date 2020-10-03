@@ -7,7 +7,7 @@ There are multiple ways to interact with the Intel Owl APIs,
 
 1. IntelOwl-ng (Web Interface)
 
-    - Inbuilt Web interface with dashboard, visualizations of analysis data, easy to use forms for requesting 
+    - Inbuilt Web interface with dashboard, visualizations of analysis data, easy to use forms for requesting
     new analysis, tags management and more features
     - [Live Demo](https://intelowlclient.firebaseapp.com/)
     - Built with Angular 9 and available on [Github](https://github.com/intelowlproject/intelowl-ng).
@@ -61,12 +61,12 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * `Yara_Scan_Intezer`: scan a file with Intezer yara rules
 * `Yara_Scan_McAfee`: scan a file with McAfee yara rules
 * `Yara_Scan_Custom_Signatures`: scan a file with your own added signatures
-* `MalwareBazaar_Get_File`: Check if a particular malware sample is known to MalwareBazaar 
+* `MalwareBazaar_Get_File`: Check if a particular malware sample is known to MalwareBazaar
 * `PEframe_Scan`: Perform static analysis on Portable Executable malware and malicious MS Office documents.
 * `Cymru_Hash_Registry_Get_File`: Check if a particular file is known to be malware by Team Cymru
 * `Thug_HTML_Info_*`: Perform hybrid dynamic/static analysis on a HTML file using [Thug low-interaction honeyclient](https://thug-honeyclient.readthedocs.io/)
 * `Capa_Info`: [Capa](https://github.com/fireeye/capa) detects capabilities in executable files
-* `BoxJS_Scan_Javascript`: [Box-JS](https://github.com/CapacitorSet/box-js) is a tool for studying JavaScript malware. 
+* `BoxJS_Scan_Javascript`: [Box-JS](https://github.com/CapacitorSet/box-js) is a tool for studying JavaScript malware.
 * `APKiD_Scan_APK_DEX_JAR`: [APKiD](https://github.com/rednaga/APKiD) identifies many compilers, packers, obfuscators, and other weird stuff from an APK or DEX file.
 * `Quark_Engine_APK`: [Quark Engine](https://github.com/quark-engine/quark-engine) is an Obfuscation-Neglect Android Malware Scoring System.
 * `IntelX_Phonebook`: [IntelligenceX](https://intelx.io/) is a search engine and data archive. Fetches emails, urls, domains associated with an observable.
@@ -97,7 +97,7 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * `Shodan_Honeyscore`: scan an IP against Shodan Honeyscore API
 * `HoneyDB_Scan_Twitter`: scan an IP against HoneyDB.io's Twitter Threat Feed
 * `HoneyDB_Get`: HoneyDB IP lookup service
-* `Hunter`: Scans a domain name and returns set of data about the organisation, the email address found and additional information about the people owning those email addresses. 
+* `Hunter`: Scans a domain name and returns set of data about the organisation, the email address found and additional information about the people owning those email addresses.
 * `Censys_Search`: scan an IP address against Censys View API
 * `MalwareBazaar_Get_Observable`: Check if a particular malware hash is known to MalwareBazaar
 * `ONYPHE`: search an observable in ONYPHE
@@ -122,6 +122,8 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * `Pulsedive_Active_IOC`: Scan indicators and retrieve results from [Pulsedive's API](https://pulsedive.com/api/).
 * `CheckDMARC`: An SPF and DMARC DNS records validator for domains.
 * `Whoisxmlapi`: Fetch WHOIS record data, of a domain name, an IP address, or an email address.
+* `UrlScan_Search`: Search an IP/domain/url/hash against URLScan API
+* `UrlScan_Submit_Result`: Submit & retrieve result of an URL against URLScan API
 
 #### [Additional analyzers](https://intelowl.readthedocs.io/en/develop/Advanced-Usage.html#optional-analyzers) that can be enabled per your wish.
 

@@ -472,6 +472,26 @@ class URLAnalyzersTests(
         ).start()
         self.assertEqual(report.get("success", False), True)
 
+    """
+    # Adds no real value since it is heavily mocked
+    @mock_connections(
+        patch(
+            "requests.Session.post",
+            side_effect=lambda *args, **kwargs: MockResponse({"api": "test"}, 200),
+        )
+    )
+    @mock_connections(patch("requests.Session.get", side_effect=mocked_requests))
+    def test_urlscan_submit_result(self, *args):
+        report = urlscan.UrlScan(
+            "UrlScan_Submit_Result",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {"urlscan_analysis": "submit_result"},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+    """
+
     def test_robtex_fdns(self, mock_get=None, mock_post=None):
         report = robtex.Robtex(
             "Robtex_Forward_PDNS_Query",

@@ -11,16 +11,16 @@ from intel_owl import secrets
 class OTX(classes.ObservableAnalyzer):
     def set_config(self, additional_config_params):
         self.api_key_name = additional_config_params.get("api_key_name", "OTX_KEY")
-        self.__api_key = secrets.get_secret(self.api_key_name)
         self.verbose = additional_config_params.get("verbose", False)
 
     def run(self):
-        if not self.__api_key:
+        api_key = secrets.get_secret(self.api_key_name)
+        if not api_key:
             raise AnalyzerRunException(
                 f"No API key retrieved with name: {self.api_key_name}"
             )
 
-        otx = OTXv2.OTXv2(self.__api_key)
+        otx = OTXv2.OTXv2(api_key)
 
         obs_clsf = self.observable_classification
         to_analyze_observable = self.observable_name

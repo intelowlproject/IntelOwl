@@ -3,6 +3,7 @@ import importlib
 from celery import shared_task
 from guardian import utils
 
+from intel_owl.celery import app
 from api_app import crons
 from api_app.script_analyzers.classes import BaseAnalyzerMixin
 from api_app.script_analyzers.utils import set_report_and_cleanup, set_failed_analyzer
@@ -55,8 +56,8 @@ def yara_updater():
     yara_scan.YaraScan.yara_update_repos()
 
 
-@shared_task(soft_time_limit=500)
-def analyzer_run(cls_path, *args):
+@app.task(name="run_analyzer", soft_time_limit=500)
+def run_analyzer(cls_path, *args):
     try:
         typ, modname, clsname = cls_path.split(".")
         modpath = f"api_app.script_analyzers.{typ}.{modname}"

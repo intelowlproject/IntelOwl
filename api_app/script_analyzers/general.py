@@ -1,5 +1,7 @@
 import logging
+from celery.execute import send_task
 
+from intel_owl import settings
 from api_app.exceptions import (
     AnalyzerConfigurationException,
     AnalyzerRunException,
@@ -12,7 +14,6 @@ from .utils import (
     get_observable_data,
     adjust_analyzer_config,
 )
-from intel_owl import tasks, settings
 
 logger = logging.getLogger(__name__)
 
@@ -93,7 +94,8 @@ def start_analyzers(
                     additional_config_params,
                 ]
             # run analyzer with a celery task asynchronously
-            tasks.analyzer_run.apply_async(
+            send_task(
+                "run_analyzer",
                 args=args,
                 queue=settings.CELERY_TASK_DEFAULT_QUEUE,
             )

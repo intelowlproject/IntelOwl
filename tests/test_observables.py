@@ -31,8 +31,10 @@ from api_app.script_analyzers.observable_analyzers import (
     tranco,
     whoisxmlapi,
     checkdmarc,
+    urlscan,
 )
 from .mock_utils import (
+    MockResponse,
     MockResponseNoOp,
     mock_connections,
     mocked_requests,
@@ -454,7 +456,7 @@ class URLAnalyzersTests(
             "source": "test",
             "is_sample": False,
             "observable_name": os.environ.get(
-                "TEST_URL", "https://www.google.com/search?test"
+                "TEST_URL", "https://www.honeynet.org/projects/active/intel-owl/"
             ),
             "observable_classification": "url",
             "force_privacy": False,
@@ -472,8 +474,6 @@ class URLAnalyzersTests(
         ).start()
         self.assertEqual(report.get("success", False), True)
 
-    """
-    # Adds no real value since it is heavily mocked
     @mock_connections(
         patch(
             "requests.Session.post",
@@ -490,7 +490,6 @@ class URLAnalyzersTests(
             {"urlscan_analysis": "submit_result"},
         ).start()
         self.assertEqual(report.get("success", False), True)
-    """
 
     def test_robtex_fdns(self, mock_get=None, mock_post=None):
         report = robtex.Robtex(

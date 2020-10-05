@@ -20,7 +20,6 @@ You may want to look at a few existing examples to start to build a new one, suc
 
 After having written the new python module, you have to remember to:
 * Put the module in the `file_analyzers` or `observable_analyzers` directory based on what it can analyze
-* Add the new module as a celery task in [tasks.py](https://github.com/intelowlproject/IntelOwl/blob/master/intel_owl/tasks.py)
 * Add a new entry in the [analyzer configuration](https://github.com/intelowlproject/IntelOwl/blob/master/configuration/analyzer_config.json) following alphabetical order:
   
   Example:
@@ -31,7 +30,7 @@ After having written the new python module, you have to remember to:
       "leaks_info": true,
       "run_hash": true,
       "supported_filetypes": ["application/javascript"],
-      "python_module": "haget_run",
+      "python_module": "<module_name>.<class_name>",
       "additional_config_params": {
            "custom_required_param": "ANALYZER_SPECIAL_KEY"
       }
@@ -119,7 +118,7 @@ Also remember to pull the most recent changes available in the **develop** branc
 ```
     "Yara_Scan_Custom_Signatures": {
         "type": "file",
-        "python_module": "yara_run",
+        "python_module": "yara.Yara",
         "requires_configuration": true,
         "description": "Executes Yara with custom signatures",
         "additional_config_params": {

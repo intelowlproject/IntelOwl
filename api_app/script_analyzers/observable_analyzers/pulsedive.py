@@ -24,6 +24,7 @@ class Pulsedive(ObservableAnalyzer):
 
     def run(self):
         result = {}
+        default_param = ""
         api_key = secrets.get_secret(self.api_key_name)
         if not api_key:
             warning = f"No API key retrieved with name: {self.api_key_name}"

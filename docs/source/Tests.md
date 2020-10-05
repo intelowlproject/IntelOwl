@@ -24,6 +24,9 @@
 - Run tests from the project directory:
 `docker exec -ti intel_owl_uwsgi python3 manage.py test tests`
 
+- Run only a specific test: (example "test_checkdmarc")
+`docker exec -ti intel_owl_uwsgi python3 manage.py test tests.test_observables.DomainAnalyzersTests.test_checkdmarc`
+
 - Rebuild the local image after changes were made:
 `docker-compose -f docker-compose-for-tests.yml build`
     

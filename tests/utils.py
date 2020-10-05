@@ -19,7 +19,12 @@ from api_app.script_analyzers.observable_analyzers import (
     urlscan,
 )
 
-from .mock_utils import mock_connections, mocked_requests_noop, MockResponse
+from .mock_utils import (
+    mock_connections,
+    mocked_requests_noop,
+    MockResponse,
+    mocked_requests,
+)
 
 
 # Abstract Base classes constructed for most common occuring combinations
@@ -109,7 +114,8 @@ class CommonTestCases_observables(metaclass=ABCMeta):
         ).start()
         self.assertEqual(report.get("success", False), True)
 
-    def test_urlscan_search(self, mock_get=None, mock_post=None):
+    @mock_connections(patch("requests.Session.get", side_effect=mocked_requests))
+    def test_urlscan_search(self, *args):
         if self.observable_classification == "url":
             self.observable_name = "https://www.honeynet.org/"
         report = urlscan.UrlScan(

@@ -71,11 +71,14 @@ license terms.
 [Neo23x0 Yara sigs](https://github.com/Neo23x0/signature-base),
 [Intezer Yara sigs](https://github.com/intezer/yara-rules),
 [McAfee Yara sigs](https://github.com/advanced-threat-research/Yara-Rules),
+[Stratosphere Yara sigs](https://github.com/stratosphereips/yara-rules),
 [APKiD](https://github.com/rednaga/APKiD/blob/master/LICENSE.COMMERCIAL),
 [Box-JS](https://github.com/CapacitorSet/box-js/blob/master/LICENSE),
 [Capa](https://github.com/fireeye/capa/blob/master/LICENSE.txt),
 [Quark-Engine](https://github.com/quark-engine/quark-engine),
-[IntelX](https://intelx.io/terms-of-service)
+[IntelX](https://intelx.io/terms-of-service),
+[Speakeasy](https://github.com/fireeye/speakeasy),
+[Checkdmarc](https://github.com/domainaware/checkdmarc)
 
 ## Acknowledgments
 

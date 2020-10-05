@@ -956,14 +956,6 @@
       "api_key_name": "WHOISXMLAPI_KEY"
     }
   },
-  "Yara_Scan_Community": {
-    "type": "file",
-    "description": "scan a file with community yara rules",
-    "python_module": "yara_run",
-    "additional_config_params": {
-      "directories_with_rules": ["/opt/deploy/yara/rules"]
-    }
-  },
   "Xlm_Macro_Deobfuscator": {
     "type": "file",
     "supported_filetypes": [
@@ -981,13 +973,21 @@
         "passwords_to_check": ["agenzia", "inps", "coronavirus"]
     }
   },
+  "Yara_Scan_Community": {
+    "type": "file",
+    "description": "scan a file with community yara rules",
+    "python_module": "yara_run",
+    "additional_config_params": {
+      "directories_with_rules": ["/opt/deploy/yara/rules"]
+    }
+  },
   "Yara_Scan_Florian": {
     "type": "file",
     "description": "scan a file with Neo23x0 yara rules",
     "python_module": "yara_run",
     "additional_config_params": {
-      "directories_with_rules": ["/opt/deploy/yara/signature-base/yara"],
-      "git_repo_main_dir": ["/opt/deploy/yara/signature-base"]
+      "git_repo_main_dir": ["/opt/deploy/yara/signature-base"],
+      "directories_with_rules": ["/opt/deploy/yara/signature-base/yara"]
     }
   },
   "Yara_Scan_Intezer": {
@@ -1011,6 +1011,18 @@
         "/opt/deploy/yara/mcafee_rules/miners",
         "/opt/deploy/yara/mcafee_rules/ransomware",
         "/opt/deploy/yara/mcafee_rules/stealer"
+      ]
+    }
+  },
+  "Yara_Scan_Stratosphere": {
+    "type": "file",
+    "description": "scan a file with Stratosphere yara rules",
+    "python_module": "yara_run",
+    "additional_config_params": {
+      "git_repo_main_dir": ["/opt/deploy/yara/stratosphere_rules"],
+      "directories_with_rules": [
+        "/opt/deploy/yara/stratosphere_rules/malware",
+        "/opt/deploy/yara/stratosphere_rules/protocols"
       ]
     }
   }

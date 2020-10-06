@@ -33,6 +33,7 @@ from api_app.script_analyzers.observable_analyzers import (
     checkdmarc,
 )
 from .mock_utils import (
+    MockResponse,
     MockResponseNoOp,
     mock_connections,
     mocked_requests,
@@ -58,6 +59,19 @@ def mocked_pypssl(*args, **kwargs):
 
 def mocked_pypdns(*args, **kwargs):
     return MockResponseNoOp({}, 200)
+
+
+def mocked_dnsdb_v2_request(*args, **kwargs):
+    return MockResponse(
+        json_data={},
+        status_code=200,
+        text='{"cond":"begin"}\n'
+        '{"obj":{"count":1,"zone_time_first":1349367341,'
+        '"zone_time_last":1440606099,"rrname":"mocked.data.net.",'
+        '"rrtype":"A","bailiwick":"net.",'
+        '"rdata":"0.0.0.0"}}\n'
+        '{"cond":"limited","msg":"Result limit reached"}\n',
+    )
 
 
 @mock_connections(patch("requests.get", side_effect=mocked_requests))
@@ -241,7 +255,8 @@ class IPAnalyzersTests(
         ).start()
         self.assertEqual(report.get("success", False), True)
 
-    def test_dnsdb(self, mock_get=None, mock_post=None):
+    @mock_connections(patch("requests.get", side_effect=mocked_dnsdb_v2_request))
+    def test_dnsdb(self, mock_get=None, mock_post=None, mock_text_response=None):
         report = dnsdb.DNSdb(
             "DNSDB",
             self.job_id,
@@ -354,7 +369,8 @@ class DomainAnalyzersTests(
         ).start()
         self.assertEqual(report.get("success", False), True)
 
-    def test_dnsdb(self, mock_get=None, mock_post=None):
+    @mock_connections(patch("requests.get", side_effect=mocked_dnsdb_v2_request))
+    def test_dnsdb(self, mock_get=None, mock_post=None, mock_text_response=None):
         report = dnsdb.DNSdb(
             "DNSDB",
             self.job_id,

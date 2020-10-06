@@ -82,3 +82,4 @@ black==20.8b1
 quark-engine==20.8
 git+git://github.com/DissectMalware/XLMMacroDeobfuscator.git@89fbce0c87014a4b5a22c1aef09c8b3ea9bf16c0
 speakeasy-emulator==1.4.7
+sphinx_rtd_theme==0.5.0

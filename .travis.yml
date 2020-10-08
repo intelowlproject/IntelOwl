@@ -17,8 +17,6 @@ install:
 - sudo docker-compose -f docker-compose-for-travis.yml build
 - sudo docker-compose -f docker-compose-for-travis.yml up -d
 script:
-- sudo docker exec -ti intel_owl_uwsgi black . --check --exclude "migrations|venv"
+- sudo docker exec -ti intel_owl_uwsgi black . --check
 - sudo docker exec -ti intel_owl_uwsgi flake8 . --count
 - sudo docker exec -ti intel_owl_uwsgi python manage.py test tests
-after_success:
-- bash <(curl -s https://codecov.io/bash)

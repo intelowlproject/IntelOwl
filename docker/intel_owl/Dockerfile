@@ -29,6 +29,13 @@ RUN pip3 install --no-cache-dir django-elasticsearch-dsl==${ELASTICSEARCH_DSL_VE
 
 COPY . $PYTHONPATH
 
+# download yara rules and quark engine rules
+RUN api_app/script_analyzers/yara_repo_downloader.sh
+
+# this is because botocore points to legacy endpoints
+# more info: https://stackoverflow.com/questions/41062055/celery-4-0-0-amazon-sqs-credential-should-be-scoped-to-a-valid-region-not
+RUN sed -i "s/{region}.queue/sqs.{region}/g" $(find / -name endpoints.json 2>/dev/null | head -n 1)
+
 RUN touch ${LOG_PATH}/django/api_app.log ${LOG_PATH}/django/api_app_errors.log \
     && touch ${LOG_PATH}/django/celery.log ${LOG_PATH}/django/celery_errors.log \
     && touch ${LOG_PATH}/django/django_auth_ldap.log \
@@ -36,9 +43,4 @@ RUN touch ${LOG_PATH}/django/api_app.log ${LOG_PATH}/django/api_app_errors.log \
 # this is cause stringstifer creates this directory during the build and cause celery to crash
     && rm -rf /root/.local
 
-# download yara rules and quark engine rules
-RUN api_app/script_analyzers/yara_repo_downloader.sh
-
-# this is because botocore points to legacy endpoints
-# more info: https://stackoverflow.com/questions/41062055/celery-4-0-0-amazon-sqs-credential-should-be-scoped-to-a-valid-region-not
-RUN sed -i "s/{region}.queue/sqs.{region}/g" $(find / -name endpoints.json 2>/dev/null | head -n 1)
+USER www-data:www-data

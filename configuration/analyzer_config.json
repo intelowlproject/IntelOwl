@@ -145,9 +145,13 @@
     "type": "observable",
     "observable_supported": ["domain", "url", "ip"],
     "external_service": true,
-    "description": "scan an observable against the Passive DNS Farsight Database",
+    "description": "scan an observable against the Passive DNS Farsight Database (support both v1 and v2 versions)",
     "requires_configuration": true,
-    "python_module": "dnsdb_run"
+    "python_module": "dnsdb_run",
+    "additional_config_params": {
+      "server": "api.dnsdb.info",
+      "api_version": 2
+    }
   },
   "Doc_Info": {
     "type": "file",

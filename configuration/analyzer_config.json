@@ -435,6 +435,13 @@
       "active_scan": true
     }
   },
+  "Quad9": {
+    "type": "observable",
+    "observable_supported": ["domain", "url"],
+    "external_service": true,
+    "description": "Check if a domain or an url is marked as malicious in Quad9 database",
+    "python_module": "quad9_run"
+  },
   "Quark_Engine_APK": {
     "type": "file",
     "supported_filetypes": [

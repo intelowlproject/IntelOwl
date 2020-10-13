@@ -56,6 +56,7 @@ from api_app.script_analyzers.observable_analyzers import (
     cymru,
     tranco,
     pulsedive,
+    quad9,
     intelx,
     whoisxmlapi,
     checkdmarc,
@@ -766,6 +767,23 @@ def urlscan_run(
     additional_config_params,
 ):
     urlscan.UrlScan(
+        analyzer_name,
+        job_id,
+        observable_name,
+        observable_classification,
+        additional_config_params,
+    ).start()
+
+
+@shared_task(soft_time_limit=30)
+def quad9_run(
+    analyzer_name,
+    job_id,
+    observable_name,
+    observable_classification,
+    additional_config_params,
+):
+    quad9.Quad9(
         analyzer_name,
         job_id,
         observable_name,

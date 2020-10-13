@@ -431,6 +431,13 @@
       "active_scan": true
     }
   },
+  "Quad9": {
+    "type": "observable",
+    "observable_supported": ["domain", "url"],
+    "external_service": true,
+    "description": "Scan an observable against Quad9 DB",
+    "python_module": "quad9_run"
+  },
   "Quark_Engine_APK": {
     "type": "file",
     "supported_filetypes": [

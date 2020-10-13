@@ -553,6 +553,14 @@
     },
     "soft_time_limit": 100
   },
+  "Quad9": {
+    "type": "observable",
+    "observable_supported": ["domain", "url"],
+    "external_service": true,
+    "description": "Check if a domain or an url is marked as malicious in Quad9 database",
+    "soft_time_limit": 30,
+    "python_module": "quad9.Quad9"
+  },
   "Quark_Engine_APK": {
     "type": "file",
     "supported_filetypes": [

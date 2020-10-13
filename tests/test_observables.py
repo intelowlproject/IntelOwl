@@ -32,6 +32,7 @@ from api_app.script_analyzers.observable_analyzers import (
     whoisxmlapi,
     checkdmarc,
     urlscan,
+    quad9,
 )
 from .mock_utils import (
     MockResponse,
@@ -456,6 +457,16 @@ class DomainAnalyzersTests(
 
         self.assertEqual(report.get("success", False), True)
 
+    def test_quad9(self, mock_get=None, mock_post=None):
+        report = quad9.Quad9(
+            "Quad9",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
 
 @mock_connections(patch("requests.get", side_effect=mocked_requests))
 @mock_connections(patch("requests.post", side_effect=mocked_requests))
@@ -509,6 +520,16 @@ class URLAnalyzersTests(
     def test_robtex_fdns(self, mock_get=None, mock_post=None):
         report = robtex.Robtex(
             "Robtex_Forward_PDNS_Query",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    def test_quad9(self, mock_get=None, mock_post=None):
+        report = quad9.Quad9(
+            "Quad9",
             self.job_id,
             self.observable_name,
             self.observable_classification,

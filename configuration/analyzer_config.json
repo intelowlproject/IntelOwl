@@ -20,54 +20,6 @@
     "python_module": "abuseipdb.AbuseIPDB",
     "soft_time_limit": 30
   },
-  "ActiveDNS_Classic": {
-    "type": "observable",
-    "observable_supported": ["ip", "domain"],
-    "external_service": true,
-    "description": "Retrieve current domain resolution with default DNS",
-    "python_module": "active_dns.ActiveDNS",
-    "additional_config_params": {
-      "service": "classic"
-    },
-    "soft_time_limit": 30
-  },
-  "ActiveDNS_CloudFlare": {
-    "type": "observable",
-    "observable_supported": ["domain"],
-    "external_service": true,
-    "description": "Retrieve current domain resolution with CloudFlare DoH (DNS over HTTPS)",
-    "python_module": "active_dns.ActiveDNS",
-    "additional_config_params": {
-      "service": "cloudflare"
-    },
-    "soft_time_limit": 30
-  },
-  "ActiveDNS_CloudFlare_Malware": {
-    "type": "observable",
-    "observable_supported": [
-      "domain"
-    ],
-    "external_service": true,
-    "description": "Detect malicious domains thanks to CloudFlare DoH Malware Filter",
-    "python_module": "active_dns.ActiveDNS",
-    "additional_config_params": {
-      "service": "cloudflare_malware"
-    },
-    "soft_time_limit": 30
-  },
-  "ActiveDNS_Google": {
-    "type": "observable",
-    "observable_supported": [
-      "domain"
-    ],
-    "external_service": true,
-    "description": "Retrieve current domain resolution with Google DoH (DNS over HTTPS)",
-    "python_module": "active_dns.ActiveDNS",
-    "additional_config_params": {
-      "service": "google"
-    },
-    "soft_time_limit": 30
-  },
   "Auth0": {
     "type": "observable",
     "observable_supported": [
@@ -114,6 +66,36 @@
     "requires_configuration": true,
     "python_module": "circl_pssl.CIRCL_PSSL",
     "soft_time_limit": 30
+  },
+  "Classic_DNS": {
+    "type": "observable",
+    "observable_supported": ["ip", "domain", "url"],
+    "external_service": true,
+    "description": "Retrieve current domain resolution with default DNS",
+    "soft_time_limit": 30,
+    "python_module": "dns.dns_resolvers.classic_dns_resolver.ClassicDNSResolver",
+    "additional_config_params": {
+      "query_type": "A"
+    }
+  },
+  "CloudFlare_DNS": {
+    "type": "observable",
+    "observable_supported": ["domain", "url"],
+    "external_service": true,
+    "description": "Retrieve current domain resolution with CloudFlare DoH (DNS over HTTPS)",
+    "soft_time_limit": 30,
+    "python_module": "dns.dns_resolvers.cloudflare_dns_resolver.CloudFlareDNSResolver",
+    "additional_config_params": {
+      "query_type": "A"
+    }
+  },
+  "CloudFlare_Malicious_Detector": {
+    "type": "observable",
+    "observable_supported": ["domain", "url"],
+    "external_service": true,
+    "description": "Scan an observable against CloudFlare DB",
+    "soft_time_limit": 30,
+    "python_module": "dns.dns_malicious_detectors.cloudflare_malicious_detector.CloudFlareMaliciousDetector"
   },
   "Capa_Info": {
     "type": "file",
@@ -245,18 +227,25 @@
     "python_module": "fortiguard.Fortiguard",
     "soft_time_limit": 30
   },
+  "Google_DNS": {
+    "type": "observable",
+    "observable_supported": ["domain", "url"],
+    "external_service": true,
+    "description": "Retrieve current domain resolution with Google DoH (DNS over HTTPS)",
+    "soft_time_limit": 30,
+    "python_module": "dns.dns_resolvers.google_dns_resolver.GoogleDNSResolver",
+    "additional_config_params": {
+      "query_type": "A"
+    }
+  },
   "GoogleSafebrowsing": {
     "type": "observable",
-    "observable_supported": [
-      "domain",
-      "url",
-      "ip"
-    ],
+    "observable_supported": ["ip", "domain", "url"],
     "external_service": true,
-    "description": "scan an observable against GoogleSafeBrowsing DB",
+    "description": "Scan an observable against GoogleSafeBrowsing DB",
     "requires_configuration": true,
-    "python_module": "googlesf.GoogleSF",
-    "soft_time_limit": 30
+    "soft_time_limit": 30,
+    "python_module": "dns.dns_malicious_detectors.googlesf.GoogleSF"
   },
   "GreyNoise": {
     "type": "observable",
@@ -553,13 +542,24 @@
     },
     "soft_time_limit": 100
   },
-  "Quad9": {
+  "Quad9_DNS": {
+    "type": "observable",
+    "observable_supported": ["domain", "url"],
+    "external_service": true,
+    "description": "Retrieve current domain resolution with Quad9 DoH (DNS over HTTPS)",
+    "soft_time_limit": 30,
+    "python_module": "dns.dns_resolvers.quad9_dns_resolver.Quad9DNSResolver",
+    "additional_config_params": {
+      "query_type": "A"
+    }
+  },
+  "Quad9_Malicious_Detector": {
     "type": "observable",
     "observable_supported": ["domain", "url"],
     "external_service": true,
     "description": "Check if a domain or an url is marked as malicious in Quad9 database",
     "soft_time_limit": 30,
-    "python_module": "quad9.Quad9"
+    "python_module": "dns.dns_malicious_detectors.quad9_malicious_detector.Quad9MaliciousDetector"
   },
   "Quark_Engine_APK": {
     "type": "file",

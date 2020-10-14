@@ -13,10 +13,22 @@ from api_app.script_analyzers.observable_analyzers import (
     ha_get,
     thug_url,
     urlhaus,
-    googlesf,
     fortiguard,
     intelx,
     urlscan,
+)
+
+from api_app.script_analyzers.observable_analyzers.dns.dns_resolvers import (
+    classic_dns_resolver,
+    cloudflare_dns_resolver,
+    google_dns_resolver,
+    quad9_dns_resolver,
+)
+
+from api_app.script_analyzers.observable_analyzers.dns.dns_malicious_detectors import (
+    cloudflare_malicious_detector,
+    googlesf,
+    quad9_malicious_detector,
 )
 
 from .mock_utils import (
@@ -133,6 +145,16 @@ class CommonTestCases_ip_url_domain(metaclass=ABCMeta):
     Tests which are common for IP, URL, domain types.
     """
 
+    def test_classic_dns_resolver(self, mock_get=None, mock_post=None):
+        report = classic_dns_resolver.ClassicDNSResolver(
+            "ClassicDNSResolver",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
     def test_gsf(self, mock_get=None, mock_post=None):
         report = googlesf.GoogleSF(
             "GoogleSafeBrowsing",
@@ -175,9 +197,59 @@ class CommonTestCases_url_domain(metaclass=ABCMeta):
     Tests which are common for URL and Domain types.
     """
 
+    def test_cloudflare_dns_resolver(self, mock_get=None, mock_post=None):
+        report = cloudflare_dns_resolver.CloudFlareDNSResolver(
+            "CloudFlareDNSResolver",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    def test_cloudflare_malicious_detector(self, mock_get=None, mock_post=None):
+        report = cloudflare_malicious_detector.CloudFlareMaliciousDetector(
+            "CloudFlareMaliciousDetector",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
     def test_fortiguard(self, mock_get=None, mock_post=None):
         report = fortiguard.Fortiguard(
             "Fortiguard",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    def test_google_dns_resolver(self, mock_get=None, mock_post=None):
+        report = google_dns_resolver.GoogleDNSResolver(
+            "GoogleDNSResolver",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    def test_quad9_dns_resolver(self, mock_get=None, mock_post=None):
+        report = quad9_dns_resolver.Quad9DNSResolver(
+            "Quad9DNSResolver",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    def test_quad9_malicious_detector(self, mock_get=None, mock_post=None):
+        report = quad9_malicious_detector.Quad9MaliciousDetector(
+            "GoogleDNSResolver",
             self.job_id,
             self.observable_name,
             self.observable_classification,

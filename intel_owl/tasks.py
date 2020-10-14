@@ -54,7 +54,10 @@ def yara_updater():
 @app.task(name="run_analyzer", soft_time_limit=500)
 def run_analyzer(cls_path, *args):
     try:
-        typ, modname, clsname = cls_path.split(".")
+        path_parts = cls_path.split(".")
+        typ = path_parts[0]
+        modname = ".".join(path_parts[1:-1])
+        clsname = path_parts[-1]
         modpath = f"api_app.script_analyzers.{typ}.{modname}"
         mod = importlib.import_module(modpath)
         if not mod:

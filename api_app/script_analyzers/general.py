@@ -94,10 +94,12 @@ def start_analyzers(
                     additional_config_params,
                 ]
             # run analyzer with a celery task asynchronously
+            stl = ac.get("soft_time_limit", 300)
             send_task(
                 "run_analyzer",
                 args=args,
                 queue=settings.CELERY_TASK_DEFAULT_QUEUE,
+                soft_time_limit=stl,
             )
 
         except (AnalyzerConfigurationException, AnalyzerRunException) as e:

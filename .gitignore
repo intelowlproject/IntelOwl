@@ -7,3 +7,4 @@ env_file_postgres
 env_file_integrations
 venv/
 docker-compose-override.yml
+compose-elk.yml

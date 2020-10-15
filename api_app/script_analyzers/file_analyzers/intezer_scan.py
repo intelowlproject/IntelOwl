@@ -16,7 +16,6 @@ class IntezerScan(FileAnalyzer):
 
     def set_config(self, additional_config_params):
         self.api_key_name = additional_config_params.get("api_key_name", "INTEZER_KEY")
-        self.__api_key = secrets.get_secret(self.api_key_name)
         # max no. of tries when polling for result
         self.max_tries = additional_config_params.get("max_tries", 200)
         # interval b/w HTTP requests when polling
@@ -24,7 +23,8 @@ class IntezerScan(FileAnalyzer):
         self.is_test = additional_config_params.get("is_test", False)
 
     def run(self):
-        if not self.__api_key:
+        api_key = secrets.get_secret(self.api_key_name)
+        if not api_key:
             raise AnalyzerRunException(
                 f"No API key retrieved with name: '{self.api_key_name}'"
             )
@@ -33,7 +33,7 @@ class IntezerScan(FileAnalyzer):
         intezer_token_date = os.environ.get("INTEZER_TOKEN_DATE", None)
         today = get_now_date_only()
         if not intezer_token or intezer_token_date != today:
-            intezer_token = _get_access_token(self.__api_key)
+            intezer_token = _get_access_token(api_key)
             if not intezer_token:
                 raise AnalyzerRunException("token extraction failed")
 

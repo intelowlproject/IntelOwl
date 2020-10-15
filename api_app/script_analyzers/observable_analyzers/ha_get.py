@@ -9,17 +9,17 @@ class HybridAnalysisGet(classes.ObservableAnalyzer):
     base_url: str = "https://www.hybrid-analysis.com/api/v2/"
 
     def set_config(self, additional_config_params):
-        api_key_name = additional_config_params.get("api_key_name", "HA_KEY")
-        self.__api_key = secrets.get_secret(api_key_name)
+        self.api_key_name = additional_config_params.get("api_key_name", "HA_KEY")
 
     def run(self):
-        if not self.__api_key:
+        api_key = secrets.get_secret(self.api_key_name)
+        if not api_key:
             raise AnalyzerRunException(
                 f"No API key retrieved with name {self.api_key_name}"
             )
 
         headers = {
-            "api-key": self.__api_key,
+            "api-key": api_key,
             "user-agent": "Falcon Sandbox",
             "accept": "application/json",
         }

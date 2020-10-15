@@ -13,9 +13,7 @@
   },
   "AbuseIPDB": {
     "type": "observable",
-    "observable_supported": [
-      "ip"
-    ],
+    "observable_supported": ["ip"],
     "external_service": true,
     "description": "check if an ip was reported on AbuseIPDB",
     "requires_configuration": true,
@@ -24,10 +22,7 @@
   },
   "ActiveDNS_Classic": {
     "type": "observable",
-    "observable_supported": [
-      "ip",
-      "domain"
-    ],
+    "observable_supported": ["ip", "domain"],
     "external_service": true,
     "description": "Retrieve current domain resolution with default DNS",
     "python_module": "active_dns.ActiveDNS",
@@ -38,9 +33,7 @@
   },
   "ActiveDNS_CloudFlare": {
     "type": "observable",
-    "observable_supported": [
-      "domain"
-    ],
+    "observable_supported": ["domain"],
     "external_service": true,
     "description": "Retrieve current domain resolution with CloudFlare DoH (DNS over HTTPS)",
     "python_module": "active_dns.ActiveDNS",
@@ -99,19 +92,14 @@
   },
   "CheckDMARC": {
     "type": "observable",
-    "observable_supported": [
-      "domain"
-    ],
+    "observable_supported": ["domain"],
     "description": "An SPF and DMARC DNS records validator",
     "python_module": "checkdmarc.CheckDMARC",
     "soft_time_limit": 30
   },
   "CIRCLPassiveDNS": {
     "type": "observable",
-    "observable_supported": [
-      "domain",
-      "url"
-    ],
+    "observable_supported": ["domain","url"],
     "external_service": true,
     "description": "scan an observable against the CIRCL Passive DNS DB",
     "requires_configuration": true,
@@ -120,9 +108,7 @@
   },
   "CIRCLPassiveSSL": {
     "type": "observable",
-    "observable_supported": [
-      "ip"
-    ],
+    "observable_supported": ["ip"],
     "external_service": true,
     "description": "scan an observable against the CIRCL Passive SSL DB",
     "requires_configuration": true,
@@ -131,18 +117,14 @@
   },
   "Capa_Info": {
     "type": "file",
-    "supported_filetypes": [
-      "application/x-dosexec"
-    ],
+    "supported_filetypes": ["application/x-dosexec"],
     "python_module": "capa_info.CapaInfo",
     "description": "capa detects capabilities in executable files",
     "soft_time_limit": 500
   },
   "Censys_Search": {
     "type": "observable",
-    "observable_supported": [
-      "ip"
-    ],
+    "observable_supported": ["ip"],
     "external_service": true,
     "description": "scan an IP address against Censys View API",
     "requires_configuration": true,
@@ -175,9 +157,7 @@
   },
   "Cymru_Hash_Registry_Get_Observable": {
     "type": "observable",
-    "observable_supported": [
-      "hash"
-    ],
+    "observable_supported": ["hash"],
     "external_service": true,
     "description": "Check if a particular hash is available in the malware hash registry of Team Cymru",
     "python_module": "cymru.Cymru",
@@ -276,9 +256,7 @@
   },
   "GreyNoise": {
     "type": "observable",
-    "observable_supported": [
-      "ip"
-    ],
+    "observable_supported": ["ip"],
     "external_service": true,
     "description": "scan an IP against the Greynoise API (requires API key)",
     "requires_configuration": true,
@@ -477,9 +455,7 @@
   },
   "MaxMindGeoIP": {
     "type": "observable",
-    "observable_supported": [
-      "ip"
-    ],
+    "observable_supported": ["ip"],
     "description": "extract GeoIP info for an IP",
     "python_module": "maxmind.Maxmind",
     "soft_time_limit": 30

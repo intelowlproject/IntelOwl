@@ -174,7 +174,7 @@
     "description": "scan an observable against the Passive DNS Farsight Database (support both v1 and v2 versions)",
     "requires_configuration": true,
     "python_module": "dnsdb.DNSdb",
-    "soft_time_limit": 30
+    "soft_time_limit": 30,
     "additional_config_params": {
       "server": "api.dnsdb.info",
       "api_version": 2

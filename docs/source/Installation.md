@@ -95,7 +95,6 @@ Optional variables needed to enable specific analyzers:
 
 Advanced additional configuration:
 * `OLD_JOBS_RETENTION_DAYS`: Database retention, default 3 days. Change this if you want to keep your old analysis longer in the database.
-* `PYINTELOWL_TOKEN_LIFETIME`: Token Lifetime for requests coming from the [PyIntelOwl](https://github.com/intelowlproject/pyintelowl) library, defaults to 7 days. It will expire only if unused. Increment this if you plan to use these tokens rarely.
 
 ### Database configuration (required)
 Before running the project, you must populate the basic configuration for PostgreSQL.

@@ -7,7 +7,6 @@ DB_PASSWORD=password
 
 # Config variables
 OLD_JOBS_RETENTION_DAYS=2
-PYINTELOWL_TOKEN_LIFETIME=7
 
 # Elastic Search Configuration
 ELASTICSEARCH_ENABLED=False

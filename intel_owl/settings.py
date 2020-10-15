@@ -1,6 +1,5 @@
 # flake8: noqa
 import os
-from datetime import timedelta
 
 from django.core.management.utils import get_random_secret_key
 
@@ -42,7 +41,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django.contrib.postgres",
     "rest_framework",
-    "rest_framework_simplejwt.token_blacklist",
+    "rest_framework.authtoken",
     "guardian",
     "api_app.apps.ApiAppConfig",
     "django_elasticsearch_dsl",
@@ -83,7 +82,7 @@ REST_FRAMEWORK = {
         "rest_framework.renderers.JSONRenderer",
     ],
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework_simplejwt.authentication.JWTAuthentication",
+        "rest_framework.authentication.TokenAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
     "EXCEPTION_HANDLER": "rest_framework.views.exception_handler",
@@ -104,26 +103,6 @@ DATABASES = {
         "USER": DB_USER,
         "PASSWORD": DB_PASSWORD,
     },
-}
-
-# Simple JWT Stuff
-
-CLIENT_TOKEN_LIFETIME_DAYS = int(os.environ.get("PYINTELOWL_TOKEN_LIFETIME", 7))
-
-SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(hours=1),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
-    "ROTATE_REFRESH_TOKENS": True,
-    "BLACKLIST_AFTER_ROTATION": True,
-    "ALGORITHM": "HS512",
-    "SIGNING_KEY": SECRET_KEY,
-    "AUTH_HEADER_TYPES": ("Token",),
-    "USER_ID_FIELD": "id",
-    "USER_ID_CLAIM": "user_id",
-    "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),
-    "TOKEN_TYPE_CLAIM": "token_type",
-    "JTI_CLAIM": "jti",
-    "PYINTELOWL_TOKEN_LIFETIME": timedelta(days=CLIENT_TOKEN_LIFETIME_DAYS),
 }
 
 # Elastic Search Configuration

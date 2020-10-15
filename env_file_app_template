@@ -8,8 +8,6 @@ DB_PASSWORD=password
 # Additional Config variables
 # jobs older than this would be flushed from the database periodically. Default: 3 days
 OLD_JOBS_RETENTION_DAYS=3
-# IntelOwl's API token will expire if unused for how many days ? Default: 7 days
-PYINTELOWL_TOKEN_LIFETIME=7
 
 # Elastic Search Configuration
 ELASTICSEARCH_ENABLED=False

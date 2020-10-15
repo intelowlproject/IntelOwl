@@ -31,11 +31,6 @@ def check_stuck_analysis():
     crons.check_stuck_analysis()
 
 
-@shared_task(soft_time_limit=120)
-def flush_expired_tokens():
-    crons.flush_expired_tokens()
-
-
 @shared_task(soft_time_limit=60)
 def talos_updater():
     talos.Talos.updater()

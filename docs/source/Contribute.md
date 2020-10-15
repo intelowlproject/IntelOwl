@@ -39,6 +39,7 @@ After having written the new python module, you have to remember to:
       "external_service": true,
       "leaks_info": true,
       "run_hash": true,
+      "soft_time_limit": 100,
       "supported_filetypes": ["application/javascript"],
       "python_module": "<module_name>.<class_name>",
       "additional_config_params": {
@@ -93,8 +94,8 @@ $ flake8 . --show-source --statistics
 2. Run the build and start the app using the docker-compose test file. In this way, you would launch the code in your environment and not the last official image in Docker Hub:
 
 ```bash
-$ docker-compose -f docker-compose-for-tests.yml build
-$ docker-compose -f docker-compose-for-tests.yml up
+$ docker-compose -f docker-compose-for-travis.yml build
+$ docker-compose -f docker-compose-for-travis.yml up
 ```
 
 3. Here, we simulate the travis CI tests locally by running the following 3 tests:
@@ -104,8 +105,11 @@ $ docker-compose -f docker-compose-for-tests.yml up
 ```bash
 $ docker exec -ti intel_owl_uwsgi black . --check --exclude "migrations|venv"
 $ docker exec -ti intel_owl_uwsgi flake8 . --count
+$ docker exec -ti intel_owl_uwsgi unzip -P infected tests/test_files.zip
 $ docker exec -ti intel_owl_uwsgi python manage.py test tests
 ```
+
+> Note: To run a particular test case, you want to set it's full path. For example, `docker exec -ti intel_owl_uwsgi python manage.py test tests.test_observables.<test_case_class_name>.<func_name>`
 
 Please make sure all 3 of these tests return positively.
 

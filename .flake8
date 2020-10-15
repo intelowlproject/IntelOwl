@@ -10,4 +10,5 @@ exclude =
     venv,
     migrations,
     virtualenv,
-    ldap_config.py
+    ldap_config.py,
+    docs

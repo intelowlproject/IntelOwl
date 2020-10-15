@@ -4,11 +4,11 @@ from intel_owl import settings
 
 # class for mocking responses
 class MockResponse:
-    def __init__(self, json_data, status_code):
+    def __init__(self, json_data, status_code, text="", content=b""):
         self.json_data = json_data
         self.status_code = status_code
-        self.text = ""
-        self.content = b""
+        self.text = text
+        self.content = content
 
     def json(self):
         return self.json_data

@@ -60,6 +60,7 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * `Yara_Scan_Florian`: scan a file with Neo23x0 yara rules
 * `Yara_Scan_Intezer`: scan a file with Intezer yara rules
 * `Yara_Scan_McAfee`: scan a file with McAfee yara rules
+* `Yara_Scan_Stratosphere`: scan a file with Stratosphere yara rules
 * `Yara_Scan_Custom_Signatures`: scan a file with your own added signatures
 * `MalwareBazaar_Get_File`: Check if a particular malware sample is known to MalwareBazaar
 * `PEframe_Scan`: Perform static analysis on Portable Executable malware and malicious MS Office documents.
@@ -92,7 +93,7 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * `TorProject`: check if an IP is a Tor Exit Node
 * `MISP`: scan an observable on a MISP instance
 * `MISPFIRST`: scan an observable on the FIRST MISP instance
-* `DNSDB`: scan an observable against the Passive DNS Farsight Database
+* `DNSDB`: scan an observable against the Passive DNS Farsight Database (support both v1 and v2 versions)
 * `Shodan_Search`: scan an IP against Shodan Search API
 * `Shodan_Honeyscore`: scan an IP against Shodan Honeyscore API
 * `HoneyDB_Scan_Twitter`: scan an IP against HoneyDB.io's Twitter Threat Feed
@@ -122,8 +123,8 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * `Pulsedive_Active_IOC`: Scan indicators and retrieve results from [Pulsedive's API](https://pulsedive.com/api/).
 * `CheckDMARC`: An SPF and DMARC DNS records validator for domains.
 * `Whoisxmlapi`: Fetch WHOIS record data, of a domain name, an IP address, or an email address.
-* `UrlScan_Search`: Search an IP/domain/url/hash against URLScan API
-* `UrlScan_Submit_Result`: Submit & retrieve result of an URL against URLScan API
+* `UrlScan_Search`: Search an IP/domain/url/hash against [URLScan](https://urlscan.io) API
+* `UrlScan_Submit_Result`: Submit & retrieve result of an URL against [URLScan](https://urlscan.io) API
 
 #### [Additional analyzers](https://intelowl.readthedocs.io/en/develop/Advanced-Usage.html#optional-analyzers) that can be enabled per your wish.
 

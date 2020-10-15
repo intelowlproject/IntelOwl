@@ -57,6 +57,20 @@ class BaseAnalyzerMixin(metaclass=ABCMeta):
         In most cases, this would be overwritten.
         """
 
+    def _validate_result(self, result):
+        """
+        function to validate result, allowing to store inside postgres without errors
+        """
+        if isinstance(result, dict):
+            for key, values in result.items():
+                result[key] = self._validate_result(values)
+        elif isinstance(result, list):
+            for i, _ in enumerate(result):
+                result[i] = self._validate_result(result[i])
+        elif isinstance(result, str):
+            return result.replace("\u0000", "")
+        return result
+
     def start(self):
         """
         Entrypoint function to execute the analyzer.
@@ -67,6 +81,7 @@ class BaseAnalyzerMixin(metaclass=ABCMeta):
             self.before_run()
             self.report = get_basic_report_template(self.analyzer_name)
             result = self.run()
+            result = self._validate_result(result)
             self.report["report"] = result
         except (AnalyzerConfigurationException, AnalyzerRunException) as e:
             self._handle_analyzer_exception(e)

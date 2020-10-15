@@ -171,10 +171,14 @@
       "ip"
     ],
     "external_service": true,
-    "description": "scan an observable against the Passive DNS Farsight Database",
+    "description": "scan an observable against the Passive DNS Farsight Database (support both v1 and v2 versions)",
     "requires_configuration": true,
     "python_module": "dnsdb.DNSdb",
     "soft_time_limit": 30
+    "additional_config_params": {
+      "server": "api.dnsdb.info",
+      "api_version": 2
+    }
   },
   "Doc_Info": {
     "type": "file",
@@ -1216,17 +1220,6 @@
     },
     "soft_time_limit": 30
   },
-  "Yara_Scan_Community": {
-    "type": "file",
-    "description": "scan a file with community yara rules",
-    "python_module": "yara_scan.YaraScan",
-    "additional_config_params": {
-      "directories_with_rules": [
-        "/opt/deploy/yara/rules"
-      ]
-    },
-    "soft_time_limit": 60
-  },
   "Xlm_Macro_Deobfuscator": {
     "type": "file",
     "supported_filetypes": [
@@ -1249,19 +1242,24 @@
     },
     "soft_time_limit": 30
   },
+  "Yara_Scan_Community": {
+    "type": "file",
+    "description": "scan a file with community yara rules",
+    "python_module": "yara_scan.YaraScan,
+    "soft_time_limit": 60,
+    "additional_config_params": {
+      "directories_with_rules": ["/opt/deploy/yara/rules"]
+    }
+  },
   "Yara_Scan_Florian": {
     "type": "file",
     "description": "scan a file with Neo23x0 yara rules",
     "python_module": "yara_scan.YaraScan",
+    "soft_time_limit": 60,
     "additional_config_params": {
-      "directories_with_rules": [
-        "/opt/deploy/yara/signature-base/yara"
-      ],
-      "git_repo_main_dir": [
-        "/opt/deploy/yara/signature-base"
-      ]
-    },
-    "soft_time_limit": 60
+      "git_repo_main_dir": ["/opt/deploy/yara/signature-base"],
+      "directories_with_rules": ["/opt/deploy/yara/signature-base/yara"]
+    }
   },
   "Yara_Scan_Intezer": {
     "type": "file",
@@ -1278,6 +1276,7 @@
     "type": "file",
     "description": "scan a file with McAfee yara rules",
     "python_module": "yara_scan.YaraScan",
+    "soft_time_limit": 60,
     "additional_config_params": {
       "git_repo_main_dir": [
         "/opt/deploy/yara/mcafee_rules"
@@ -1290,7 +1289,19 @@
         "/opt/deploy/yara/mcafee_rules/ransomware",
         "/opt/deploy/yara/mcafee_rules/stealer"
       ]
-    },
-    "soft_time_limit": 60
+    }
+  },
+  "Yara_Scan_Stratosphere": {
+    "type": "file",
+    "description": "scan a file with Stratosphere yara rules",
+    "python_module": "yara_scan.YaraScan",
+    "soft_time_limit": 60,
+    "additional_config_params": {
+      "git_repo_main_dir": ["/opt/deploy/yara/stratosphere_rules"],
+      "directories_with_rules": [
+        "/opt/deploy/yara/stratosphere_rules/malware",
+        "/opt/deploy/yara/stratosphere_rules/protocols"
+      ]
+    }
   }
 }

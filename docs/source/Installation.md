@@ -84,6 +84,7 @@ Optional variables needed to enable specific analyzers:
 * `FIRST_MISP_URL`: FIRST MISP URL
 * `MISP_KEY`: your own MISP instance key
 * `MISP_URL`: your own MISP instance URL
+* `DNSDB_KEY`: DNSDB API key
 * `CUCKOO_URL`: your cuckoo instance URL
 * `HONEYDB_API_ID` & `HONEYDB_API_KEY`: HoneyDB API credentials
 * `CENSYS_API_ID` & `CENSYS_API_SECRET`: Censys credentials

@@ -189,8 +189,15 @@ class FileAnalyzersEXETests(TestCase):
             "directories_with_rules": [
                 "/opt/deploy/yara/rules",
                 "/opt/deploy/yara/intezer_rules",
-                "/opt/deploy/yara/mcafee_rules",
+                "/opt/deploy/yara/mcafee_rules/APT",
+                "/opt/deploy/yara/mcafee_rules/RAT",
+                "/opt/deploy/yara/mcafee_rules/malware",
+                "/opt/deploy/yara/mcafee_rules/miners",
+                "/opt/deploy/yara/mcafee_rules/ransomware",
+                "/opt/deploy/yara/mcafee_rules/stealer",
                 "/opt/deploy/yara/signature-base/yara",
+                "/opt/deploy/yara/stratosphere_rules/malware",
+                "/opt/deploy/yara/stratosphere_rules/protocols",
             ]
         }
         report = yara_scan.YaraScan(

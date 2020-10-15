@@ -36,7 +36,7 @@ class PEInfo(FileAnalyzer):
             sections = []
             for section in pe.sections:
                 section_item = {
-                    "name": section.Name.decode().replace("\u0000", ""),
+                    "name": section.Name.decode(),
                     "address": hex(section.VirtualAddress),
                     "virtual_size": hex(section.Misc_VirtualSize),
                     "size": section.SizeOfRawData,

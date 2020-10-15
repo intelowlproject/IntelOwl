@@ -1245,7 +1245,7 @@
   "Yara_Scan_Community": {
     "type": "file",
     "description": "scan a file with community yara rules",
-    "python_module": "yara_scan.YaraScan,
+    "python_module": "yara_scan.YaraScan",
     "soft_time_limit": 60,
     "additional_config_params": {
       "directories_with_rules": ["/opt/deploy/yara/rules"]
@@ -1265,12 +1265,12 @@
     "type": "file",
     "description": "scan a file with Intezer yara rules",
     "python_module": "yara_scan.YaraScan",
+    "soft_time_limit": 60,
     "additional_config_params": {
       "directories_with_rules": [
         "/opt/deploy/yara/intezer_rules"
       ]
-    },
-    "soft_time_limit": 60
+    }
   },
   "Yara_Scan_McAfee": {
     "type": "file",

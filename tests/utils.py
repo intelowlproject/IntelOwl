@@ -249,7 +249,7 @@ class CommonTestCases_url_domain(metaclass=ABCMeta):
 
     def test_quad9_malicious_detector(self, mock_get=None, mock_post=None):
         report = quad9_malicious_detector.Quad9MaliciousDetector(
-            "GoogleDNSResolver",
+            "Quad9MaliciousDetector",
             self.job_id,
             self.observable_name,
             self.observable_classification,

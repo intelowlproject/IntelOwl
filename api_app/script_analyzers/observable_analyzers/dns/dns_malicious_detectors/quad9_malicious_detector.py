@@ -11,11 +11,13 @@ from api_app.exceptions import AnalyzerRunException
 
 
 class Quad9MaliciousDetector(classes.ObservableAnalyzer):
-    """Retrieve malicious domain in Quad9 DB.
-    Quad9 does not answer in case of DNS query for malicious domains.
-    Perform one request to Quad9 and another to Google.
-    In case of no response from Quad9 and response from Google,
-    the domain in DNS query is malicious.
+    """Check if a domain is malicious by Quad9 public resolver.
+    Quad9 does not answer in the case a malicious domain is queried.
+    However, we need to perform another check to understand if that domain was blocked
+    by the resolver or if it just does not exist.
+    So we perform one request to Quad9 and another one to Google.
+    In the case of empty response from Quad9 and a non-empty response from Google,
+    we can guess that the domain was in the Quad9 blacklist.
     """
 
     def run(self):
@@ -38,7 +40,7 @@ class Quad9MaliciousDetector(classes.ObservableAnalyzer):
 
     def _quad9_dns_query(self, observable):
         """Perform a DNS query with Quad9 service, return True if Quad9 answer the
-        DNS query.
+        DNS query with a non-empty response.
 
         :param observable: domain to resolve
         :type observable: str

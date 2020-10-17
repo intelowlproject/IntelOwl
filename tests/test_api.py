@@ -127,6 +127,9 @@ class ApiTests(TestCase):
             "ONYPHE",
             "URLhaus",
             "Pulsedive_Active_IOC",
+            "Inquest_IOCdb",
+            "Inquest_REPdb",
+            "Inquest_DFI",
         ]
         observable_name = os.environ.get("TEST_DOMAIN", "google.com")
         md5 = hashlib.md5(observable_name.encode("utf-8")).hexdigest()
@@ -167,6 +170,9 @@ class ApiTests(TestCase):
             "HoneyDB_Scan_Twitter",
             "HoneyDB_Get",
             "Pulsedive_Active_IOC",
+            "Inquest_IOCdb",
+            "Inquest_REPdb",
+            "Inquest_DFI",
         ]
         observable_name = os.environ.get("TEST_IP", "8.8.8.8")
         md5 = hashlib.md5(observable_name.encode("utf-8")).hexdigest()

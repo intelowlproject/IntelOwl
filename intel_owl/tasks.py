@@ -60,6 +60,7 @@ from api_app.script_analyzers.observable_analyzers import (
     whoisxmlapi,
     checkdmarc,
     urlscan,
+    inquest
 )
 
 from api_app import crons

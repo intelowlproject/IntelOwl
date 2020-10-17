@@ -290,6 +290,18 @@
     "requires_configuration": true,
     "python_module": "haget_run"
   },
+  "Inquest_Details": {
+    "type": "observable",
+    "observable_supported": ["ip","url"],
+    "external_service": true,
+    "description": "Deep File Inspection - details",
+    "requires_configuration": true,
+    "python_module": "inquest_run",
+    "additional_config_params": {
+      "api_key_name": "INQUEST_API_KEY",
+      "inquest_analysis": "details"
+    }
+  },
   "IntelX_Phonebook": {
     "type": "observable",
     "observable_supported": ["ip", "url", "domain", "hash"],

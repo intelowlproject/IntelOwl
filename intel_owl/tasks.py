@@ -59,6 +59,7 @@ from api_app.script_analyzers.observable_analyzers import (
     intelx,
     whoisxmlapi,
     checkdmarc,
+    inquest
 )
 
 from api_app import crons

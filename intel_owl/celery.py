@@ -10,6 +10,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "intel_owl.settings")
 app = Celery("intel_owl")
 
 app.config_from_object("django.conf:settings", namespace="CELERY")
+app.conf.update(task_time_limit=1800)  # half hour
 
 app.autodiscover_tasks()
 

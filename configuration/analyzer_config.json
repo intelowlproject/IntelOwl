@@ -818,79 +818,7 @@
     },
     "soft_time_limit": 30
   },
-  "Thug_HTML_Info_linuxchrome26": {
-    "type": "file",
-    "supported_filetypes": [
-      "text/html"
-    ],
-    "description": "Perform hybrid dynamic/static analysis on a saved HTML page",
-    "python_module": "thug_file.ThugFile",
-    "requires_configuration": true,
-    "additional_config_params": {
-      "dom_events": "click,mouseover",
-      "use_proxy": false,
-      "proxy": "",
-      "enable_image_processing_analysis": true,
-      "enable_awis": true,
-      "user_agent": "linuxchrome26"
-    },
-    "soft_time_limit": 600
-  },
-  "Thug_HTML_Info_nexuschrome18": {
-    "type": "file",
-    "supported_filetypes": [
-      "text/html"
-    ],
-    "description": "Perform hybrid dynamic/static analysis on a saved HTML page",
-    "python_module": "thug_file.ThugFile",
-    "requires_configuration": true,
-    "additional_config_params": {
-      "dom_events": "click,mouseover",
-      "use_proxy": false,
-      "proxy": "",
-      "enable_image_processing_analysis": true,
-      "enable_awis": true,
-      "user_agent": "nexuschrome18"
-    },
-    "soft_time_limit": 600
-  },
-  "Thug_HTML_Info_osx10chrome19": {
-    "type": "file",
-    "supported_filetypes": [
-      "text/html"
-    ],
-    "description": "Perform hybrid dynamic/static analysis on a saved HTML page",
-    "python_module": "thug_file.ThugFile",
-    "requires_configuration": true,
-    "additional_config_params": {
-      "dom_events": "click,mouseover",
-      "use_proxy": false,
-      "proxy": "",
-      "enable_image_processing_analysis": true,
-      "enable_awis": true,
-      "user_agent": "osx10chrome19"
-    },
-    "soft_time_limit": 600
-  },
-  "Thug_HTML_Info_winxpie60_FULL_SCAN": {
-    "type": "file",
-    "supported_filetypes": [
-      "text/html"
-    ],
-    "description": "Perform hybrid dynamic/static analysis on a saved HTML page",
-    "python_module": "thug_file.ThugFile",
-    "requires_configuration": true,
-    "additional_config_params": {
-      "dom_events": "click,mouseover",
-      "use_proxy": false,
-      "proxy": "",
-      "enable_image_processing_analysis": true,
-      "enable_awis": true,
-      "user_agent": "winxpie60"
-    },
-    "soft_time_limit": 600
-  },
-  "Thug_HTML_Info_winxpie60_SIMPLE_SCAN": {
+  "Thug_HTML_Info": {
     "type": "file",
     "supported_filetypes": [
       "text/html"
@@ -908,7 +836,7 @@
     },
     "soft_time_limit": 600
   },
-  "Thug_URL_Info_linuxchrome26": {
+  "Thug_URL_Info": {
     "type": "observable",
     "observable_supported": [
       "domain",
@@ -923,82 +851,6 @@
       "proxy": "",
       "enable_image_processing_analysis": true,
       "enable_awis": true,
-      "user_agent": "linuxchrome26"
-    },
-    "soft_time_limit": 600
-  },
-  "Thug_URL_Info_nexuschrome18": {
-    "type": "observable",
-    "observable_supported": [
-      "domain",
-      "url"
-    ],
-    "description": "Perform hybrid dynamic/static analysis on a URL",
-    "python_module": "thug_url.ThugUrl",
-    "requires_configuration": true,
-    "additional_config_params": {
-      "dom_events": "click,mouseover",
-      "use_proxy": false,
-      "proxy": "",
-      "enable_image_processing_analysis": true,
-      "enable_awis": true,
-      "user_agent": "nexuschrome18"
-    },
-    "soft_time_limit": 600
-  },
-  "Thug_URL_Info_osx10chrome19": {
-    "type": "observable",
-    "observable_supported": [
-      "domain",
-      "url"
-    ],
-    "description": "Perform hybrid dynamic/static analysis on a URL",
-    "python_module": "thug_url.ThugUrl",
-    "requires_configuration": true,
-    "additional_config_params": {
-      "dom_events": "click,mouseover",
-      "use_proxy": false,
-      "proxy": "",
-      "enable_image_processing_analysis": true,
-      "enable_awis": true,
-      "user_agent": "osx10chrome19"
-    },
-    "soft_time_limit": 600
-  },
-  "Thug_URL_Info_winxpie60_FULL_SCAN": {
-    "type": "observable",
-    "observable_supported": [
-      "domain",
-      "url"
-    ],
-    "description": "Perform hybrid dynamic/static analysis on a URL",
-    "python_module": "thug_url.ThugUrl",
-    "requires_configuration": true,
-    "additional_config_params": {
-      "dom_events": "click,mouseover",
-      "use_proxy": false,
-      "proxy": "",
-      "enable_image_processing_analysis": true,
-      "enable_awis": true,
-      "user_agent": "winxpie60"
-    },
-    "soft_time_limit": 600
-  },
-  "Thug_URL_Info_winxpie60_SIMPLE_SCAN": {
-    "type": "observable",
-    "observable_supported": [
-      "domain",
-      "url"
-    ],
-    "description": "Perform hybrid dynamic/static analysis on a URL",
-    "python_module": "thug_url.ThugUrl",
-    "requires_configuration": true,
-    "additional_config_params": {
-      "dom_events": "click,mouseover",
-      "use_proxy": false,
-      "proxy": "",
-      "enable_image_processing_analysis": false,
-      "enable_awis": false,
       "user_agent": "winxpie60"
     },
     "soft_time_limit": 600

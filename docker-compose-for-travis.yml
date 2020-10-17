@@ -65,7 +65,7 @@ services:
     container_name: intel_owl_celery_worker
     restart: unless-stopped
     stop_grace_period: 3m
-    command: /usr/local/bin/celery -A intel_owl.celery worker --uid www-data --gid www-data --pidfile="/tmp/%n.pid" --time-limit=1000
+    command: /usr/local/bin/celery -A intel_owl.celery worker --uid www-data --gid www-data --pidfile="/tmp/%n.pid"
     volumes:
       - ./configuration/analyzer_config.json:/opt/deploy/configuration/analyzer_config.json
       - generic_logs:/var/log/intel_owl

@@ -78,7 +78,7 @@ table, th, td {
   </tr>
   <tr>
     <td>Thug</td>
-    <td><code>Thug_URL_Info_*</code>, <code>Thug_HTML_Info_*</code></td>
+    <td><code>Thug_URL_Info</code>, <code>Thug_HTML_Info</code></td>
     <td>performs hybrid dynamic/static analysis on a URL or HTML page.</td>
   </tr>
   <tr>

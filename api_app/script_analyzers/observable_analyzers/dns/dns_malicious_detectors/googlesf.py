@@ -1,11 +1,18 @@
+"""Check if the domains is reported as malicious for GoogleSafeBrowsing"""
+
 from pysafebrowsing import SafeBrowsing
 
 from api_app.exceptions import AnalyzerRunException
 from api_app.script_analyzers import classes
+from api_app.script_analyzers.observable_analyzers.dns.dns_responses import (
+    malicious_detector_response,
+)
 from intel_owl import secrets
 
 
 class GoogleSF(classes.ObservableAnalyzer):
+    """Check if observable analyzed is marked as malicious for Google SafeBrowsing"""
+
     def run(self):
         api_key_name = "GSF_KEY"
         api_key = secrets.get_secret(api_key_name)
@@ -19,8 +26,8 @@ class GoogleSF(classes.ObservableAnalyzer):
         if self.observable_name in response and isinstance(
             response[self.observable_name], dict
         ):
-            result = response[self.observable_name]
+            malicious = response[self.observable_name]["malicious"]
         else:
             raise AnalyzerRunException(f"result not expected: {response}")
 
-        return result
+        return malicious_detector_response(self.observable_name, malicious)

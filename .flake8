@@ -8,6 +8,7 @@ exclude =
     Dockerfile,
     docker-compose*,
     venv,
+    docs,
     migrations,
     virtualenv,
     ldap_config.py

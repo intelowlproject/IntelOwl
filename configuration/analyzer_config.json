@@ -525,6 +525,17 @@
     "description": "Perform static analysis on Portable Executable malware and malicious MS Office documents",
     "soft_time_limit": 500
   },
+  "Phistank": {
+    "type": "observable",
+    "observable_supported": ["url"],
+    "external_service": true,
+    "soft_time_limit": 100,
+    "description": "Check if url is verified in Phishtank API",
+    "python_module": "phishtank.Phishtank",
+    "additional_config_params": {
+      "api_key_name": "PHISHTANK_API_KEY"
+    }
+  },
   "Pulsedive_Active_IOC": {
     "type": "observable",
     "observable_supported": [

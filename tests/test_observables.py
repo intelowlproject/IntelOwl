@@ -31,6 +31,7 @@ from api_app.script_analyzers.observable_analyzers import (
     whoisxmlapi,
     checkdmarc,
     urlscan,
+    phishtank,
 )
 from .mock_utils import (
     MockResponse,
@@ -416,6 +417,16 @@ class URLAnalyzersTests(
     def test_circl_pdns(self, mock_get=None, mock_post=None, sessions_get=None):
         report = circl_pdns.CIRCL_PDNS(
             "CIRCL_PDNS",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    def test_phishtank(self, *args):
+        report = phishtank.Phishtank(
+            "Phishtank",
             self.job_id,
             self.observable_name,
             self.observable_classification,

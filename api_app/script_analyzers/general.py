@@ -1,5 +1,7 @@
 import logging
+from celery.execute import send_task
 
+from intel_owl import settings
 from api_app.exceptions import (
     AnalyzerConfigurationException,
     AnalyzerRunException,
@@ -12,7 +14,6 @@ from .utils import (
     get_observable_data,
     adjust_analyzer_config,
 )
-from intel_owl import tasks, settings
 
 logger = logging.getLogger(__name__)
 
@@ -64,6 +65,7 @@ def start_analyzers(
                         raise AnalyzerConfigurationException(error_message)
                     # run the analyzer with the hash
                     args = [
+                        f"observable_analyzers.{module}",
                         analyzer,
                         job_id,
                         hash_value,
@@ -73,6 +75,7 @@ def start_analyzers(
                 else:
                     # run the analyzer with the binary
                     args = [
+                        f"file_analyzers.{module}",
                         analyzer,
                         job_id,
                         file_path,
@@ -83,6 +86,7 @@ def start_analyzers(
             else:
                 # observables analyzer case
                 args = [
+                    f"observable_analyzers.{module}",
                     analyzer,
                     job_id,
                     observable_name,
@@ -90,12 +94,15 @@ def start_analyzers(
                     additional_config_params,
                 ]
             # run analyzer with a celery task asynchronously
-            getattr(tasks, module).apply_async(
+            stl = ac.get("soft_time_limit", 300)
+            send_task(
+                "run_analyzer",
                 args=args,
                 queue=settings.CELERY_TASK_DEFAULT_QUEUE,
+                soft_time_limit=stl,
             )
 
         except (AnalyzerConfigurationException, AnalyzerRunException) as e:
-            error_message = f"job_id {job_id}. analyzer: {analyzer}. error: {e}"
-            logger.error(error_message)
-            set_failed_analyzer(analyzer, job_id, error_message)
+            err_msg = f"({analyzer}, job_id #{job_id}) -> Error: {e}"
+            logger.error(err_msg)
+            set_failed_analyzer(analyzer, job_id, err_msg)

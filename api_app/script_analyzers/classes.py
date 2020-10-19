@@ -10,7 +10,7 @@ from api_app.exceptions import (
     AnalyzerRunException,
     AnalyzerConfigurationException,
 )
-from .utils import get_basic_report_template, set_report_and_cleanup
+from .utils import get_basic_report_template
 
 logger = logging.getLogger(__name__)
 
@@ -57,6 +57,20 @@ class BaseAnalyzerMixin(metaclass=ABCMeta):
         In most cases, this would be overwritten.
         """
 
+    def _validate_result(self, result):
+        """
+        function to validate result, allowing to store inside postgres without errors
+        """
+        if isinstance(result, dict):
+            for key, values in result.items():
+                result[key] = self._validate_result(values)
+        elif isinstance(result, list):
+            for i, _ in enumerate(result):
+                result[i] = self._validate_result(result[i])
+        elif isinstance(result, str):
+            return result.replace("\u0000", "")
+        return result
+
     def start(self):
         """
         Entrypoint function to execute the analyzer.
@@ -67,6 +81,7 @@ class BaseAnalyzerMixin(metaclass=ABCMeta):
             self.before_run()
             self.report = get_basic_report_template(self.analyzer_name)
             result = self.run()
+            result = self._validate_result(result)
             self.report["report"] = result
         except (AnalyzerConfigurationException, AnalyzerRunException) as e:
             self._handle_analyzer_exception(e)
@@ -77,7 +92,6 @@ class BaseAnalyzerMixin(metaclass=ABCMeta):
 
         # add process time
         self.report["process_time"] = time.time() - self.report["started_time"]
-        set_report_and_cleanup(self.job_id, self.report)
 
         self.after_run()
 
@@ -89,7 +103,7 @@ class BaseAnalyzerMixin(metaclass=ABCMeta):
             f" Analyzer error: '{err}'"
         )
         logger.error(error_message)
-        self.report["errors"].append(error_message)
+        self.report["errors"].append(str(err))
         self.report["success"] = False
 
     def _handle_base_exception(self, err):

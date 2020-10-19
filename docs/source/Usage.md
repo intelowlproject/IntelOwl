@@ -82,7 +82,7 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * `Robtex_Forward_PDNS_Query`: scan a domain against the Robtex Passive DNS DB
 * `Robtex_Reverse_PDNS_Query`: scan an IP against the Robtex Passive DNS DB
 * `Robtex_IP_Query`: get IP info from Robtex
-* `GoogleSafebrowsing`: scan an observable against GoogleSafeBrowsing DB
+* `GoogleSafebrowsing`: Scan an observable against GoogleSafeBrowsing DB
 * `GreyNoiseAlpha`: scan an IP against the Alpha Greynoise API (no API key required)
 * `GreyNoise`: scan an IP against the Greynoise API (requires API key)
 * `CIRCLPassiveDNS`: scan an observable against the CIRCL Passive DNS DB
@@ -93,7 +93,7 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * `TorProject`: check if an IP is a Tor Exit Node
 * `MISP`: scan an observable on a MISP instance
 * `MISPFIRST`: scan an observable on the FIRST MISP instance
-* `DNSDB`: scan an observable against the Passive DNS Farsight Database
+* `DNSDB`: scan an observable against the Passive DNS Farsight Database (support both v1 and v2 versions)
 * `Shodan_Search`: scan an IP against Shodan Search API
 * `Shodan_Honeyscore`: scan an IP against Shodan Honeyscore API
 * `HoneyDB_Scan_Twitter`: scan an IP against HoneyDB.io's Twitter Threat Feed
@@ -106,10 +106,10 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * `Threatminer_Reports_Tagging`: retrieve reports from Threatminer API
 * `Threatminer_Subdomains`: retrieve subdomains from Threatminer API
 * `URLhaus`: Query a domain or URL against URLhaus API.
-* `ActiveDNS_Google`: Retrieve current domain resolution with Google DoH (DNS over HTTPS)
-* `ActiveDNS_CloudFlare`: Retrieve current domain resolution with CloudFlare DoH (DNS over HTTPS)
-* `ActiveDNS_CloudFlare_Malware`: Detect malicious domains thanks to CloudFlare DoH Malware Filter
-* `ActiveDNS_Classic`: Retrieve current domain resolution with default DNS
+* `Google_DNS`: Retrieve current domain resolution with Google DoH (DNS over HTTPS)
+* `CloudFlare_DNS`: Retrieve current domain resolution with CloudFlare DoH (DNS over HTTPS)
+* `CloudFlare_Malicious_Detector`: Scan an observable against CloudFlare DB
+* `Classic_DNS`: Retrieve current domain resolution with default DNS
 * `Auth0`: scan an IP against the Auth0 API
 * `Securitytrails_IP_Neighbours`: scan an IP against securitytrails API for neighbour IPs
 * `Securitytrails_Details`: scan a domain against securitytrails API for general details
@@ -126,6 +126,8 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * `UrlScan_Search`: Search an IP/domain/url/hash against [URLScan](https://urlscan.io) API
 * `UrlScan_Submit_Result`: Submit & retrieve result of an URL against [URLScan](https://urlscan.io) API
 * `Phishtank`: Search an url against [Phishtank](https://phishtank.org/api_info.php) API
+* `Quad9_DNS`: Retrieve current domain resolution with Quad9 DoH (DNS over HTTPS)
+* `Quad9`: Scan an observable against Quad9 DB
 
 #### [Additional analyzers](https://intelowl.readthedocs.io/en/develop/Advanced-Usage.html#optional-analyzers) that can be enabled per your wish.
 

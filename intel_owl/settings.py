@@ -3,7 +3,6 @@ import os
 from datetime import timedelta
 
 from django.core.management.utils import get_random_secret_key
-from rest_framework.settings import api_settings
 
 from intel_owl import secrets
 
@@ -98,6 +97,7 @@ REST_DURIN = {
     "USER_SERIALIZER": "durin.serializers.UserSerializer",
     "AUTH_HEADER_PREFIX": "Token",
     "TOKEN_CACHE_TIMEOUT": 300,  # 5 minutes
+    "REFRESH_TOKEN_ON_LOGIN": True,
 }
 
 DB_HOST = secrets.get_secret("DB_HOST")

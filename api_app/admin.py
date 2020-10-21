@@ -35,6 +35,7 @@ class CustomAuthTokenAdmin(AuthTokenAdmin):
 
     fieldsets = []
     exclude = []
+    raw_id_fields = ("user",)
     readonly_fields = ("token", "expiry", "client")
     __fieldsets_custom = [
         (
@@ -43,7 +44,7 @@ class CustomAuthTokenAdmin(AuthTokenAdmin):
                 "fields": ("user",),
                 "description": """
                     <h3>Token will be auto-generated on save.</h3>
-                    <h3>This token will be valid for 1 year.</h3>
+                    <h3>This token will be valid for 10 years.</h3>
                 """,
             },
         ),
@@ -58,7 +59,8 @@ class CustomAuthTokenAdmin(AuthTokenAdmin):
 
     def save_model(self, request, obj, form, change):
         client = Client.objects.get(name="pyintelowl")
-        return AuthToken.objects.get_or_create(user=obj.user, client=client)
+        # lgtm [py/unused-local-variable]
+        obj = AuthToken.objects.create(user=obj.user, client=client)
 
 
 admin.site.register(Job, JobAdminView)

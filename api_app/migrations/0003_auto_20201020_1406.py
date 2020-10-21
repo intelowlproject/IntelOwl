@@ -5,11 +5,13 @@ from datetime import timedelta
 
 
 def create_default_clients(apps, schema_editor):
-    # We can't import the Person model directly as it may be a newer
+    # We can't import the Client model directly as it may be a newer
     # version than this migration expects. We use the historical version.
     Client = apps.get_model("durin", "Client")
     # for pyintelowl, custom token_ttl
-    Client.objects.update_or_create(name="pyintelowl", token_ttl=timedelta(days=365))
+    Client.objects.update_or_create(
+        name="pyintelowl", token_ttl=timedelta(weeks=4 * 12 * 10)
+    )
     # others, default token_ttl
     Client.objects.update_or_create(name="web-browser")
 

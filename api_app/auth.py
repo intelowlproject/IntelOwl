@@ -12,11 +12,11 @@ logger = logging.getLogger(__name__)
 
 class LoginView(durin_views.LoginView):
     @staticmethod
-    def get_token_client(request):
+    def get_client_obj(request):
         return Client.objects.get(name="web-browser")
 
-    def post(self, request, format=None):
-        response = super(LoginView, self).post(request, format=None)
+    def post(self, request, *args, **kwargs):
+        response = super(LoginView, self).post(request, *args, **kwargs)
         uname = request.user.username
         logger.info(f"LoginView: received request from '{uname}'.")
         if request.user.is_superuser:
@@ -30,15 +30,7 @@ class LoginView(durin_views.LoginView):
 
 
 class LogoutView(durin_views.LogoutView):
-    """
-    To delete auth token and logout user.
-    Requires authentication.
-
-    :return 204:
-        if ok
-    """
-
-    def post(self, request, format=None):
+    def post(self, request, *args, **kwargs):
         uname = request.user.username
         logger.info(f"perform_logout received request from '{uname}''.")
         if request.user.is_superuser:

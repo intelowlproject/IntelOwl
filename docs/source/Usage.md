@@ -43,15 +43,12 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * `Speakeasy`: Speakeasy binary emulation
 * `Strings_Info_Classic`: strings extraction
 * `Strings_Info_ML`: strings extraction plus strings ranking based on Machine Learning
-* `VirusTotal_v3_Get_File`: check file hash on VirusTotal
-* `VirusTotal_v3_Get_File_And_Rescan_If_Old`: check file hash on VirusTotal and rescan it if it is old
 * `VirusTotal_v3_Get_File_And_Scan`: check file hash on VirusTotal. If not already available, send the sample and perform a scan
-* `VirusTotal_v3_Get_File_And_Scan_And_Rescan_If_Old`: check file hash on VirusTotal. If it is already available, rescan it if it is old. If it is not available, send the sample and perform a scan.
-* `VirusTotal_v3_Scan_File`: scan a file on VirusTotal
-* `VirusTotal_v2_Get_File`: check file hash on VirusTotal using old API endpoints
-* `VirusTotal_v2_Scan_File`: scan a file on VirusTotal using old API endpoints
+* `VirusTotal_v3_Get_File`: check only the file hash on VirusTotal (this analyzer is disabled by default to avoid multiple unwanted queries. You have to change that flag [in the config]((https://github.com/intelowlproject/IntelOwl/blob/master/configuration/analyzer_config.json)) to use it)
+* `VirusTotal_v2_Get_File`: check file hash on VirusTotal using old API endpoints (this analyzer is disabled by default. You have to change that flag [in the config]((https://github.com/intelowlproject/IntelOwl/blob/master/configuration/analyzer_config.json)) to use it)
+* `VirusTotal_v2_Scan_File`: scan a file on VirusTotal using old API endpoints (this analyzer is disabled by default. You have to change that flag [in the config]((https://github.com/intelowlproject/IntelOwl/blob/master/configuration/analyzer_config.json)) to use it)
 * `Intezer Scan`: scan a file on Intezer
-* `Cuckoo_Scan`: scan a file on Cuckoo
+* `Cuckoo_Scan`: scan a file on Cuckoo (this analyzer is disabled by default. You have to change that flag [in the config]((https://github.com/intelowlproject/IntelOwl/blob/master/configuration/analyzer_config.json)) to use it)
 * `HybridAnalysis_Get_File`: check file hash on HybridAnalysis sandbox reports
 * `OTX_Check_Hash`: check file hash on OTX Alienvault
 * `MISP_Check_Hash`: check a file hash on a MISP instance
@@ -65,7 +62,7 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * `MalwareBazaar_Get_File`: Check if a particular malware sample is known to MalwareBazaar
 * `PEframe_Scan`: Perform static analysis on Portable Executable malware and malicious MS Office documents.
 * `Cymru_Hash_Registry_Get_File`: Check if a particular file is known to be malware by Team Cymru
-* `Thug_HTML_Info_*`: Perform hybrid dynamic/static analysis on a HTML file using [Thug low-interaction honeyclient](https://thug-honeyclient.readthedocs.io/)
+* `Thug_HTML_Info`: Perform hybrid dynamic/static analysis on a HTML file using [Thug low-interaction honeyclient](https://thug-honeyclient.readthedocs.io/)
 * `Capa_Info`: [Capa](https://github.com/fireeye/capa) detects capabilities in executable files
 * `BoxJS_Scan_Javascript`: [Box-JS](https://github.com/CapacitorSet/box-js) is a tool for studying JavaScript malware.
 * `APKiD_Scan_APK_DEX_JAR`: [APKiD](https://github.com/rednaga/APKiD) identifies many compilers, packers, obfuscators, and other weird stuff from an APK or DEX file.
@@ -75,7 +72,7 @@ The following is the list of the available analyzers you can run out-of-the-box:
 
 #### Observable analyzers (ip, domain, url, hash)
 * `VirusTotal_v3_Get_Observable`: search an observable in the VirusTotal DB
-* `VirusTotal_v2_Get_Observable`: search an observable in the VirusTotal DB using the old API endpoints
+* `VirusTotal_v2_Get_Observable`: search an observable in the VirusTotal DB using the old API endpoints (this analyzer is disabled by default. You have to change that flag [in the config]((https://github.com/intelowlproject/IntelOwl/blob/master/configuration/analyzer_config.json)) to use it)
 * `HybridAnalysis_Get_Observable`: search an observable in the HybridAnalysis sandbox reports
 * `OTXQuery`: scan an observable on Alienvault OTX
 * `TalosReputation`: check an IP reputation from Talos
@@ -119,7 +116,7 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * `Securitytrails_History_DNS`: scan a domain against securitytrails API for historical DNS
 * `Cymru_Hash_Registry_Get_Observable`: Check if a particular hash is available in the malware hash registry of Team Cymru
 * `Tranco`: Check if a domain is in the latest Tranco ranking top sites list
-* `Thug_URL_Info_*`: Perform hybrid dynamic/static analysis on a URL using [Thug low-interaction honeyclient](https://thug-honeyclient.readthedocs.io/)
+* `Thug_URL_Info`: Perform hybrid dynamic/static analysis on a URL using [Thug low-interaction honeyclient](https://thug-honeyclient.readthedocs.io/)
 * `Pulsedive_Active_IOC`: Scan indicators and retrieve results from [Pulsedive's API](https://pulsedive.com/api/).
 * `CheckDMARC`: An SPF and DMARC DNS records validator for domains.
 * `Whoisxmlapi`: Fetch WHOIS record data, of a domain name, an IP address, or an email address.
@@ -141,6 +138,7 @@ The following are all the keys that you can change without touching the source c
 * `supported_filetypes`: can be populated as a list. If set, if you ask to analyze a file with a different mimetype from the ones you specified, it won't be executed
 * `not_supported_filetypes`: can be populated as a list. If set, if you ask to analyze a file with a mimetype from the ones you specified, it won't be executed
 * `observable_supported`: can be populated as a list. If set, if you ask to analyze an observable that is not in this list, it won't be executed. Valid values are: `ip`, `domain`, `url`, `hash`
+* `soft_time_limit`: this is the maximum time (in seconds) of execution for an analyzer. Once reached, the task will be killed (or managed in the code by a custom Exception). Default 300s
 
 Also, you can change the name of every available analyzer based on your wishes.
 

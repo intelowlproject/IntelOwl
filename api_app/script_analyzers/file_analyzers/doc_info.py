@@ -31,20 +31,19 @@ class DocInfo(FileAnalyzer):
         self.vbaparser = None
         self.experimental = additional_config_params.get("experimental", False)
         self.passwords_to_check = []
-        if self.experimental:
-            # this is to extract the passwords for encryption requested by the client
-            # you can use pyintelowl to send additional passwords to check for
-            # example:
-            #             "additional_configuration": {
-            #                 "Doc_Info_Experimental": {
-            #                     "additional_passwords_to_check": ["testpassword"]
-            #                 }
-            #             },
-            additional_passwords_to_check = additional_config_params.get(
-                "additional_passwords_to_check", []
-            )
-            if isinstance(additional_passwords_to_check, list):
-                self.passwords_to_check.extend(additional_passwords_to_check)
+        # this is to extract the passwords for encryption requested by the client
+        # you can use pyintelowl to send additional passwords to check for
+        # example:
+        #             "additional_configuration": {
+        #                 "Doc_Info_Experimental": {
+        #                     "additional_passwords_to_check": ["testpassword"]
+        #                 }
+        #             },
+        additional_passwords_to_check = additional_config_params.get(
+            "additional_passwords_to_check", []
+        )
+        if isinstance(additional_passwords_to_check, list):
+            self.passwords_to_check.extend(additional_passwords_to_check)
 
     def run(self):
         results = {}
@@ -52,6 +51,8 @@ class DocInfo(FileAnalyzer):
         # olevba
         try:
             self.vbaparser = VBA_Parser(self.filepath)
+
+            self.manage_encrypted_doc()
 
             if self.experimental:
                 self.experimental_analysis()
@@ -134,10 +135,6 @@ class DocInfo(FileAnalyzer):
 
         return results
 
-    def experimental_analysis(self):
-        self.manage_encrypted_doc()
-        self.manage_xlm_macros()
-
     def manage_encrypted_doc(self):
         self.olevba_results["is_encrypted"] = False
         # checks if it is an OLE file. That could be encrypted
@@ -173,6 +170,9 @@ class DocInfo(FileAnalyzer):
                     raise CannotDecryptException(
                         "cannot decrypt the file with the default password"
                     )
+
+    def experimental_analysis(self):
+        self.manage_xlm_macros()
 
     def manage_xlm_macros(self):
         self.olevba_results["xlm_macro"] = False

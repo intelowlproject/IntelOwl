@@ -2,11 +2,107 @@
 
 This page includes details about some advanced features that Intel Owl provides which can be optionally enabled. Namely,
 
+- [Optional Analyzers](#optional-analyzers)
+- [Customize analyzer execution at time of request](#customize-analyzer-execution-at-time-of-request)
 - [Elastic Search (with Kibana)](#elastic-search)
 - [Django Groups & Permissions](#django-groups-permissions)
-- [Optional Analyzers](#optional-analyzers)
 - [Authentication options](#authentication-options)
 - [GKE deployment](#google-kubernetes-engine-deployment)
+
+## Optional Analyzers
+Some analyzers which run in their own Docker containers are kept disabled by default. They are disabled by default to prevent accidentally starting too many containers and making your computer unresponsive.
+
+<style>
+table, th, td {
+  padding: 5px;
+  border: 1px solid black;
+  border-collapse: collapse;
+}
+</style>
+<table style="width:100%">
+  <tr>
+    <th>Name</th>
+    <th>Analyzers</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>PEframe</td>
+    <td><code>PEframe_Scan</code></td>
+    <td>performs static analysis on Portable Executable malware and generic suspicious file</td>
+  </tr>
+  <tr>
+    <td>Thug</td>
+    <td><code>Thug_URL_Info</code>, <code>Thug_HTML_Info</code></td>
+    <td>performs hybrid dynamic/static analysis on a URL or HTML page.</td>
+  </tr>
+  <tr>
+    <td>FireEye Capa</td>
+    <td><code>Capa_Info</code></td>
+    <td>detects capabilities in executable files</td>
+  </tr>
+  <tr>
+    <td>Box-JS</td>
+    <td><code>BoxJS_Scan_JavaScript</code></td>
+    <td>tool for studying JavaScript malware</td>
+  </tr>
+  <tr>
+    <td>APK Analyzers</td>
+    <td><code>APKiD_Scan_APK_DEX_JAR</code></td>
+    <td>identifies many compilers, packers, obfuscators, and other weird stuff from an APK or DEX file</td>
+  </tr>
+</table>
+
+In the project, you can find template file `.env_file_integrations_template`. You have to create new file named `env_file_integrations` from this.
+
+Docker services defined in the compose files added in `COMPOSE_FILE` variable present in the `.env` file are ran on `docker-compose up`. So, modify it to include only the analyzers you wish to use.
+Such compose files are available under `integrations/`.
+
+
+## Customize analyzer execution at time of request
+Some analyzers provide the chance to customize the performed analysis based on options that are different for each analyzer.
+
+List of some of the analyzers with optional configuration:
+* `VirusTotal_v3_Get_File*`:
+    * `force_active_scan` (default False): if the sample is not already in VT, send the sample and perform a scan
+    * `force_active_scan_if_old` (default False): if the sample is old, it would be rescanned
+* `Doc_Info*`:
+    * `additional_passwords_to_check`: list of passwords to try when decrypting the document
+* `Thug_URL_Info` and `Thug_HTML_Info` ((defaults can be seen here [analyzer_config.json](https://github.com/intelowlproject/IntelOwl/blob/master/configuration/analyzer_config.json)):
+    * `dom_events`: see [Thug doc: dom events handling](https://buffer.github.io/thug/doc/usage.html#dom-events-handling)
+    * `use_proxy` and `proxy`: see [Thug doc: option -p](https://buffer.github.io/thug/doc/usage.html#basic-usage)
+    * `enable_image_processing_analysis`: see [Thug doc: option -a](https://buffer.github.io/thug/doc/usage.html#basic-usage)
+    * `enable_awis`: see [Thug doc: option -E](https://buffer.github.io/thug/doc/usage.html#basic-usage)
+    * `user_agent`: see [Thug doc: browser personality](https://buffer.github.io/thug/doc/usage.html#browser-personality)
+* `DNSDB` (defaults can be seen here [dnsdb.py](https://github.com/intelowlproject/IntelOwl/blob/master/api_app/script_analyzers/observable_analyzers/dnsdb.py)), Official [API docs](https://docs.dnsdb.info/dnsdb-apiv2/):
+    * `server`: DNSDB server
+    * `api_version`: API version of DNSDB
+    * `rrtype`: DNS query type
+    * `limit`: maximum number of results to retrieve
+    * `time_first_before`, `time_first_after`, `time_last_before`, `time_last_after`
+
+There are two ways to do this:
+
+#### from the GUI
+You can click on "**Custom analyzer configuration**" button and add the runtime configuration in the form of a dictionary.
+Example:
+```
+"VirusTotal_v3_Get_File": {
+    "force_active_scan_if_old": true
+}
+```
+
+#### from [Pyintelowl](https://github.com/intelowlproject/pyintelowl)
+While using `send_observable_analysis_request` or `send_file_analysis_request` endpoints, you can pass the parameter `runtime_configuration` with the optional values.
+Example:
+```
+runtime_configuration = {
+    "Doc_Info": {
+        "additional_passwords_to_check": ["passwd", "2020"]
+    }
+}
+pyintelowl_client.send_file_analysis_request(..., runtime_configuration=runtime_configuration)
+```
+
 
 ## Elastic Search
 
@@ -54,55 +150,6 @@ The permissions work the way one would expect,
     - This is done because tag labels and colors are unique columns and the admin in most cases would want to define tags that are usable (but not modifiable) by users of all groups.
 - `api_app | tag | Can view tag` allows users to fetch list of all tags or a particular tag with it's ID.
 - `api_app | tag | Can change tag` allows users to edit a tag granted that user has the object level permission for the particular tag.
-
-## Optional Analyzers
-Some analyzers which run in their own Docker containers are kept disabled by default. They are disabled by default to prevent accidentally starting too many containers and making your computer unresponsive.
-
-<style>
-table, th, td {
-  padding: 5px;
-  border: 1px solid black;
-  border-collapse: collapse;
-}
-</style>
-<table style="width:100%">
-  <tr>
-    <th>Name</th>
-    <th>Analyzers</th>
-    <th>Description</th>
-  </tr>
-  <tr>
-    <td>PEframe</td>
-    <td><code>PEframe_Scan</code></td>
-    <td>performs static analysis on Portable Executable malware and generic suspicious file</td>
-  </tr>
-  <tr>
-    <td>Thug</td>
-    <td><code>Thug_URL_Info_*</code>, <code>Thug_HTML_Info_*</code></td>
-    <td>performs hybrid dynamic/static analysis on a URL or HTML page.</td>
-  </tr>
-  <tr>
-    <td>FireEye Capa</td>
-    <td><code>Capa_Info</code></td>
-    <td>detects capabilities in executable files</td>
-  </tr>
-  <tr>
-    <td>Box-JS</td>
-    <td><code>BoxJS_Scan_JavaScript</code></td>
-    <td>tool for studying JavaScript malware</td>
-  </tr>
-  <tr>
-    <td>APK Analyzers</td>
-    <td><code>APKiD_Scan_APK_DEX_JAR</code></td>
-    <td>identifies many compilers, packers, obfuscators, and other weird stuff from an APK or DEX file</td>
-  </tr>
-</table>
-
-In the project, you can find template file `.env_file_integrations_template`. You have to create new file named `env_file_integrations` from this.
-
-Docker services defined in the compose files added in `COMPOSE_FILE` variable present in the `.env` file are ran on `docker-compose up`. So, modify it to include only the analyzers you wish to use.
-Such compose files are available under `integrations/`.
-
 
 ## Authentication options
 IntelOwl provides support for some of the most common authentication methods:

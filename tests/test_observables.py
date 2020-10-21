@@ -24,7 +24,6 @@ from api_app.script_analyzers.observable_analyzers import (
     hunter,
     mb_get,
     threatminer,
-    active_dns,
     auth0,
     securitytrails,
     cymru,
@@ -32,6 +31,7 @@ from api_app.script_analyzers.observable_analyzers import (
     whoisxmlapi,
     checkdmarc,
     urlscan,
+    phishtank,
 )
 from .mock_utils import (
     MockResponse,
@@ -267,17 +267,6 @@ class IPAnalyzersTests(
         ).start()
         self.assertEqual(report.get("success", False), True)
 
-    def active_dns_classic_reverse(self, mock_get=None, mock_post=None):
-        report = active_dns.active_dns.ActiveDNS(
-            "ActiveDNS_Classic_reverse",
-            self.job_id,
-            self.observable_name,
-            self.observable_classification,
-            {"service": "classic"},
-        ).start()
-
-        self.assertEqual(report.get("success", False), True, f"report: {report}")
-
     def test_whoisxmlapi_ip(self, mock_get=None, mock_post=None):
         report = whoisxmlapi.Whoisxmlapi(
             "Whoisxmlapi_ip",
@@ -381,60 +370,6 @@ class DomainAnalyzersTests(
         ).start()
         self.assertEqual(report.get("success", False), True)
 
-    def test_active_dns(self, mock_get=None, mock_post=None):
-        # Google
-        google_report = active_dns.ActiveDNS(
-            "ActiveDNS_Google",
-            self.job_id,
-            self.observable_name,
-            self.observable_classification,
-            {"service": "google"},
-        ).start()
-
-        self.assertEqual(
-            google_report.get("success", False), True, f"google_report: {google_report}"
-        )
-
-        # CloudFlare
-        cloudflare_report = active_dns.ActiveDNS(
-            "ActiveDNS_CloudFlare",
-            self.job_id,
-            self.observable_name,
-            self.observable_classification,
-            {"service": "cloudflare"},
-        ).start()
-
-        self.assertEqual(
-            cloudflare_report.get("success", False),
-            True,
-            f"cloudflare_report: {cloudflare_report}",
-        )
-        # Classic
-        classic_report = active_dns.ActiveDNS(
-            "ActiveDNS_Classic",
-            self.job_id,
-            self.observable_name,
-            self.observable_classification,
-            {"service": "classic"},
-        ).start()
-
-        self.assertEqual(
-            classic_report.get("success", False),
-            True,
-            f"classic_report: {classic_report}",
-        )
-
-    def test_cloudFlare_malware(self, mock_get=None, mock_post=None):
-        report = active_dns.ActiveDNS(
-            "ActiveDNS_CloudFlare_Malware",
-            self.job_id,
-            self.observable_name,
-            self.observable_classification,
-            {"service": "cloudflare_malware"},
-        ).start()
-
-        self.assertEqual(report.get("success", False), True, f"report: {report}")
-
     def test_whoisxmlapi_domain(self, mock_get=None, mock_post=None):
         report = whoisxmlapi.Whoisxmlapi(
             "Whoisxmlapi_domain",
@@ -482,6 +417,16 @@ class URLAnalyzersTests(
     def test_circl_pdns(self, mock_get=None, mock_post=None, sessions_get=None):
         report = circl_pdns.CIRCL_PDNS(
             "CIRCL_PDNS",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    def test_phishtank(self, *args):
+        report = phishtank.Phishtank(
+            "Phishtank",
             self.job_id,
             self.observable_name,
             self.observable_classification,

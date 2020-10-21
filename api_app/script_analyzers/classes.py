@@ -312,7 +312,8 @@ class DockerBasedAnalyzer(metaclass=ABCMeta):
                 resp1 = requests.post(self.url, json=req_data)
         except requests.exceptions.ConnectionError:
             raise AnalyzerConfigurationException(
-                f"{self.name} docker container is not running."
+                f"{self.name} docker container is not running.\n"
+                f"You have to enable it in the .env file before starting IntelOwl."
             )
 
         # step #2: raise AnalyzerRunException in case of error

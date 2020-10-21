@@ -525,7 +525,7 @@
     "description": "Perform static analysis on Portable Executable malware and malicious MS Office documents",
     "soft_time_limit": 500
   },
-  "Phistank": {
+  "Phishtank": {
     "type": "observable",
     "observable_supported": ["url"],
     "external_service": true,
@@ -837,61 +837,7 @@
     },
     "soft_time_limit": 30
   },
-  "Thug_HTML_Info_linuxchrome26": {
-    "type": "file",
-    "supported_filetypes": [
-      "text/html"
-    ],
-    "description": "Perform hybrid dynamic/static analysis on a saved HTML page",
-    "python_module": "thug_file.ThugFile",
-    "requires_configuration": true,
-    "additional_config_params": {
-      "dom_events": "click,mouseover",
-      "use_proxy": false,
-      "proxy": "",
-      "enable_image_processing_analysis": true,
-      "enable_awis": true,
-      "user_agent": "linuxchrome26"
-    },
-    "soft_time_limit": 600
-  },
-  "Thug_HTML_Info_nexuschrome18": {
-    "type": "file",
-    "supported_filetypes": [
-      "text/html"
-    ],
-    "description": "Perform hybrid dynamic/static analysis on a saved HTML page",
-    "python_module": "thug_file.ThugFile",
-    "requires_configuration": true,
-    "additional_config_params": {
-      "dom_events": "click,mouseover",
-      "use_proxy": false,
-      "proxy": "",
-      "enable_image_processing_analysis": true,
-      "enable_awis": true,
-      "user_agent": "nexuschrome18"
-    },
-    "soft_time_limit": 600
-  },
-  "Thug_HTML_Info_osx10chrome19": {
-    "type": "file",
-    "supported_filetypes": [
-      "text/html"
-    ],
-    "description": "Perform hybrid dynamic/static analysis on a saved HTML page",
-    "python_module": "thug_file.ThugFile",
-    "requires_configuration": true,
-    "additional_config_params": {
-      "dom_events": "click,mouseover",
-      "use_proxy": false,
-      "proxy": "",
-      "enable_image_processing_analysis": true,
-      "enable_awis": true,
-      "user_agent": "osx10chrome19"
-    },
-    "soft_time_limit": 600
-  },
-  "Thug_HTML_Info_winxpie60_FULL_SCAN": {
+  "Thug_HTML_Info": {
     "type": "file",
     "supported_filetypes": [
       "text/html"
@@ -909,25 +855,7 @@
     },
     "soft_time_limit": 600
   },
-  "Thug_HTML_Info_winxpie60_SIMPLE_SCAN": {
-    "type": "file",
-    "supported_filetypes": [
-      "text/html"
-    ],
-    "description": "Perform hybrid dynamic/static analysis on a saved HTML page",
-    "python_module": "thug_file.ThugFile",
-    "requires_configuration": true,
-    "additional_config_params": {
-      "dom_events": "click,mouseover",
-      "use_proxy": false,
-      "proxy": "",
-      "enable_image_processing_analysis": false,
-      "enable_awis": false,
-      "user_agent": "winxpie60"
-    },
-    "soft_time_limit": 600
-  },
-  "Thug_URL_Info_linuxchrome26": {
+  "Thug_URL_Info": {
     "type": "observable",
     "observable_supported": [
       "domain",
@@ -942,82 +870,6 @@
       "proxy": "",
       "enable_image_processing_analysis": true,
       "enable_awis": true,
-      "user_agent": "linuxchrome26"
-    },
-    "soft_time_limit": 600
-  },
-  "Thug_URL_Info_nexuschrome18": {
-    "type": "observable",
-    "observable_supported": [
-      "domain",
-      "url"
-    ],
-    "description": "Perform hybrid dynamic/static analysis on a URL",
-    "python_module": "thug_url.ThugUrl",
-    "requires_configuration": true,
-    "additional_config_params": {
-      "dom_events": "click,mouseover",
-      "use_proxy": false,
-      "proxy": "",
-      "enable_image_processing_analysis": true,
-      "enable_awis": true,
-      "user_agent": "nexuschrome18"
-    },
-    "soft_time_limit": 600
-  },
-  "Thug_URL_Info_osx10chrome19": {
-    "type": "observable",
-    "observable_supported": [
-      "domain",
-      "url"
-    ],
-    "description": "Perform hybrid dynamic/static analysis on a URL",
-    "python_module": "thug_url.ThugUrl",
-    "requires_configuration": true,
-    "additional_config_params": {
-      "dom_events": "click,mouseover",
-      "use_proxy": false,
-      "proxy": "",
-      "enable_image_processing_analysis": true,
-      "enable_awis": true,
-      "user_agent": "osx10chrome19"
-    },
-    "soft_time_limit": 600
-  },
-  "Thug_URL_Info_winxpie60_FULL_SCAN": {
-    "type": "observable",
-    "observable_supported": [
-      "domain",
-      "url"
-    ],
-    "description": "Perform hybrid dynamic/static analysis on a URL",
-    "python_module": "thug_url.ThugUrl",
-    "requires_configuration": true,
-    "additional_config_params": {
-      "dom_events": "click,mouseover",
-      "use_proxy": false,
-      "proxy": "",
-      "enable_image_processing_analysis": true,
-      "enable_awis": true,
-      "user_agent": "winxpie60"
-    },
-    "soft_time_limit": 600
-  },
-  "Thug_URL_Info_winxpie60_SIMPLE_SCAN": {
-    "type": "observable",
-    "observable_supported": [
-      "domain",
-      "url"
-    ],
-    "description": "Perform hybrid dynamic/static analysis on a URL",
-    "python_module": "thug_url.ThugUrl",
-    "requires_configuration": true,
-    "additional_config_params": {
-      "dom_events": "click,mouseover",
-      "use_proxy": false,
-      "proxy": "",
-      "enable_image_processing_analysis": false,
-      "enable_awis": false,
       "user_agent": "winxpie60"
     },
     "soft_time_limit": 600
@@ -1105,6 +957,7 @@
   "VirusTotal_v2_Get_File": {
     "type": "file",
     "external_service": true,
+    "disabled": true,
     "run_hash": true,
     "description": "check file hash on VirusTotal using old API endpoints",
     "requires_configuration": true,
@@ -1123,6 +976,7 @@
       "hash"
     ],
     "external_service": true,
+    "disabled": true,
     "description": "search an observable in the VirusTotal DB using the old API endpoints",
     "requires_configuration": true,
     "python_module": "vt2_get.VirusTotalv2",
@@ -1134,6 +988,7 @@
   "VirusTotal_v2_Scan_File": {
     "type": "file",
     "external_service": true,
+    "disabled": true,
     "leaks_info": true,
     "description": "scan a file on VirusTotal using old API endpoints",
     "requires_configuration": true,
@@ -1146,6 +1001,7 @@
   "VirusTotal_v3_Get_File": {
     "type": "file",
     "external_service": true,
+    "disabled": true,
     "run_hash": true,
     "description": "check file hash on VirusTotal",
     "requires_configuration": true,
@@ -1155,22 +1011,10 @@
     },
     "soft_time_limit": 40
   },
-  "VirusTotal_v3_Get_File_And_Rescan_If_Old": {
-    "type": "file",
-    "external_service": true,
-    "run_hash": true,
-    "description": "check file hash on VirusTotal and rescan it if it is old",
-    "requires_configuration": true,
-    "python_module": "vt3_get.VirusTotalv3",
-    "additional_config_params": {
-      "api_key_name": "VT_KEY",
-      "force_active_scan_if_old": true
-    },
-    "soft_time_limit": 500
-  },
   "VirusTotal_v3_Get_File_And_Scan": {
     "type": "file",
     "external_service": true,
+    "leaks_info": true,
     "run_hash": true,
     "description": "check file hash on VirusTotal. If not already available, send the sample and perform a new scan",
     "requires_configuration": true,
@@ -1178,20 +1022,6 @@
     "additional_config_params": {
       "api_key_name": "VT_KEY",
       "force_active_scan": true
-    },
-    "soft_time_limit": 500
-  },
-  "VirusTotal_v3_Get_File_And_Scan_Or_Rescan_If_Old": {
-    "type": "file",
-    "external_service": true,
-    "run_hash": true,
-    "description": "check file hash on VirusTotal. If it is already available, rescan if it is old. If it is not available, send the sample and perform a new scan",
-    "requires_configuration": true,
-    "python_module": "vt3_get.VirusTotalv3",
-    "additional_config_params": {
-      "api_key_name": "VT_KEY",
-      "force_active_scan": true,
-      "force_active_scan_if_old": true
     },
     "soft_time_limit": 500
   },
@@ -1211,18 +1041,6 @@
       "api_key_name": "VT_KEY"
     },
     "soft_time_limit": 40
-  },
-  "VirusTotal_v3_Scan_File": {
-    "type": "file",
-    "external_service": true,
-    "leaks_info": true,
-    "description": "scan a file on VirusTotal",
-    "requires_configuration": true,
-    "python_module": "vt3_scan.VirusTotalv3ScanFile",
-    "additional_config_params": {
-      "api_key_name": "VT_KEY"
-    },
-    "soft_time_limit": 500
   },
   "Whoisxmlapi": {
     "type": "observable",

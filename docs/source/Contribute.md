@@ -62,7 +62,7 @@ After having written the new python module, you have to remember to:
  
   Then follow the [Test](./Tests.md) guide to start testing.
 
-* Add the new analyzer/s in the lists in the docs: [ReadMe](https://github.com/intelowlproject/IntelOwl/blob/master/README.md) and [Usage](./Usage.md)
+* Add the new analyzer/s in the lists in the docs: [Usage](./Usage.md). Also, if the analyzer provides additional optional configuration, add the available options here: [Advanced-Usage](./Advanced-Usage.md)
 
 * Ultimately, add the required secrets in the files [env_file_app_template](https://github.com/intelowlproject/IntelOwl/blob/master/env_file_app_template), [env_file_app_travis](https://github.com/certego/IntelOwl/blob/master/env_file_app_travis) and in the docs: [Installation](./Installation.md)
 

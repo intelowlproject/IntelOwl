@@ -26,8 +26,15 @@ class GoogleSF(classes.ObservableAnalyzer):
         if self.observable_name in response and isinstance(
             response[self.observable_name], dict
         ):
-            malicious = response[self.observable_name]["malicious"]
+            result = response[self.observable_name]
         else:
             raise AnalyzerRunException(f"result not expected: {response}")
 
-        return malicious_detector_response(self.observable_name, malicious)
+        malicious = result["malicious"]
+        googlesb_result = malicious_detector_response(self.observable_name, malicious)
+        # append google extra data
+        if malicious:
+            googlesb_result["cache"] = result["cache"]
+            googlesb_result["threats"] = result["threats"]
+            googlesb_result["platforms"] = result["platforms"]
+        return googlesb_result

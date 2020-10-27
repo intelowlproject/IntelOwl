@@ -24,7 +24,7 @@ services:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
 
   postgres:
-    image: library/postgres:12.1-alpine
+    image: library/postgres:12-alpine
     container_name: intel_owl_postgres
     volumes:
       - postgres_data:/var/lib/postgresql/data/
@@ -71,7 +71,7 @@ services:
       - "traefik.http.routers.nginx.tls.certresolver=myresolver"
 
   rabbitmq:
-    image: library/rabbitmq:3.8.2-alpine
+    image: library/rabbitmq:3.8-alpine
     container_name: intel_owl_rabbitmq
 
   celery_beat:

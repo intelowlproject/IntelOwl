@@ -2,7 +2,7 @@ version: '3'
 
 services:
   postgres:
-    image: library/postgres:12.1-alpine
+    image: library/postgres:12-alpine
     container_name: intel_owl_postgres
     volumes:
       - postgres_data:/var/lib/postgresql/data/
@@ -28,7 +28,7 @@ services:
       - postgres
 
   nginx:
-    image: library/nginx:1.16.1-alpine
+    image: library/nginx:1.19-alpine
     container_name: intel_owl_nginx
     restart: unless-stopped
     hostname: nginx
@@ -42,7 +42,7 @@ services:
       - uwsgi
 
   rabbitmq:
-    image: library/rabbitmq:3.8.2-alpine
+    image: library/rabbitmq:3.8-alpine
     container_name: intel_owl_rabbitmq
 
   celery_beat:

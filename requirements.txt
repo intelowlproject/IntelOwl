@@ -83,3 +83,5 @@ sphinx_rtd_theme==0.5.0
 flake8==3.8.4
 black==20.8b1
 pre-commit==2.7.1
+django-memoize==2.3.1
+django-rest-durin==0.1.0

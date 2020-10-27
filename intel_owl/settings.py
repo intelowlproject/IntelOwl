@@ -1,5 +1,6 @@
 # flake8: noqa
 import os
+from datetime import timedelta
 
 from django.core.management.utils import get_random_secret_key
 
@@ -40,8 +41,9 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.postgres",
+    "memoize",
     "rest_framework",
-    "rest_framework.authtoken",
+    "durin",
     "guardian",
     "api_app.apps.ApiAppConfig",
     "django_elasticsearch_dsl",
@@ -82,10 +84,20 @@ REST_FRAMEWORK = {
         "rest_framework.renderers.JSONRenderer",
     ],
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework.authentication.TokenAuthentication",
+        "durin.auth.CachedTokenAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
     "EXCEPTION_HANDLER": "rest_framework.views.exception_handler",
+}
+
+# Django-Rest-Durin
+REST_DURIN = {
+    "DEFAULT_TOKEN_TTL": timedelta(days=14),
+    "TOKEN_CHARACTER_LENGTH": 32,
+    "USER_SERIALIZER": "durin.serializers.UserSerializer",
+    "AUTH_HEADER_PREFIX": "Token",
+    "TOKEN_CACHE_TIMEOUT": 300,  # 5 minutes
+    "REFRESH_TOKEN_ON_LOGIN": True,
 }
 
 DB_HOST = secrets.get_secret("DB_HOST")

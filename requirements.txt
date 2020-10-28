@@ -17,7 +17,7 @@ dataclasses==0.6
 Deprecated==1.2.7
 Django==2.2.16
 django-auth-ldap==2.2.0
-djangorestframework==3.9.4
+djangorestframework==3.12.1
 dnspython==1.16.0
 docutils==0.15.2
 easygui==0.98.1

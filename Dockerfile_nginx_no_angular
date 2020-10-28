@@ -1,2 +1,2 @@
-FROM library/nginx:1.16.1-alpine
+FROM library/nginx:1.19-alpine
 VOLUME /var/log/nginx

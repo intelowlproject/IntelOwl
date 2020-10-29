@@ -79,6 +79,8 @@ List of some of the analyzers with optional configuration:
     * `rrtype`: DNS query type
     * `limit`: maximum number of results to retrieve
     * `time_first_before`, `time_first_after`, `time_last_before`, `time_last_after`
+* `*_DNS` (all DNS resolvers analyzers):
+    * `query_type`: query type against the chosen DNS resolver, default is "A"
 
 There are two ways to do this:
 

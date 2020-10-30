@@ -41,6 +41,7 @@ olefile==0.46
 oletools==0.56
 OTXv2==1.5.9
 peepdf==0.4.2
+pdfid==1.0.2
 https://github.com/mlodic/pefile/archive/master.tar.gz
 pluggy==0.13.0
 psycopg2-binary==2.8.4
@@ -76,7 +77,7 @@ wrapt==1.11.2
 yara-python==3.11.0
 zipp==0.6.0
 djangorestframework-guardian==0.3.0
-quark-engine==20.10
+quark-engine==20.8
 git+git://github.com/DissectMalware/XLMMacroDeobfuscator.git@89fbce0c87014a4b5a22c1aef09c8b3ea9bf16c0
 speakeasy-emulator==1.4.7
 sphinx_rtd_theme==0.5.0

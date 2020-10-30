@@ -19,7 +19,7 @@ cp env_file_app_template env_file_app
 
 # (optional) enable all docker-based analyzers
 cp env_file_integrations_template env_file_integrations
-# in `.env` file comment line 12 and uncomment line 15
+# in `.env` file comment line 13 and uncomment line 15
 
 # start the app
 docker-compose up -d

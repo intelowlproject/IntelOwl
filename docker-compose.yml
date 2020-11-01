@@ -2,7 +2,7 @@ version: '3'
 
 services:
   postgres:
-    image: library/postgres:12.1-alpine
+    image: library/postgres:12-alpine
     container_name: intel_owl_postgres
     volumes:
       - postgres_data:/var/lib/postgresql/data/
@@ -46,7 +46,7 @@ services:
       - uwsgi
 
   rabbitmq:
-    image: library/rabbitmq:3.8.2-alpine
+    image: library/rabbitmq:3.8-alpine
     container_name: intel_owl_rabbitmq
 
   celery_beat:
@@ -69,7 +69,7 @@ services:
     container_name: intel_owl_celery_worker
     restart: unless-stopped
     stop_grace_period: 3m
-    command: /usr/local/bin/celery -A intel_owl.celery worker --uid www-data --gid www-data --pidfile="/tmp/%n.pid" --time-limit=10000
+    command: /usr/local/bin/celery -A intel_owl.celery worker --uid www-data --gid www-data --pidfile="/tmp/%n.pid"
     volumes:
       - ./configuration/analyzer_config.json:/opt/deploy/configuration/analyzer_config.json
       - generic_logs:/var/log/intel_owl

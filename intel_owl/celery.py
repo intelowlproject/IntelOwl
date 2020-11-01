@@ -10,6 +10,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "intel_owl.settings")
 app = Celery("intel_owl")
 
 app.config_from_object("django.conf:settings", namespace="CELERY")
+app.conf.update(task_time_limit=1800)  # half hour
 
 app.autodiscover_tasks()
 
@@ -28,11 +29,6 @@ app.conf.beat_schedule = {
     "check_stuck_analysis": {
         "task": "intel_owl.tasks.check_stuck_analysis",
         "schedule": crontab(minute="*/5"),
-    },
-    # execute every 3 hours to cleanup expired tokens
-    "flush_expired_tokens": {
-        "task": "intel_owl.tasks.flush_expired_tokens",
-        "schedule": crontab(hour="*/3"),
     },
     # Executes only on Wed because on Tue it's updated
     "maxmind_updater": {

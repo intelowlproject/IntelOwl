@@ -19,27 +19,30 @@ class Pulsedive(ObservableAnalyzer):
         self.api_key_name = additional_config_params.get(
             "api_key_name", "PULSEDIVE_API_KEY"
         )
-        self.__api_key = secrets.get_secret(self.api_key_name)
         active_scan = additional_config_params.get("active_scan", True)
         self.probe = 1 if active_scan else 0
 
     def run(self):
         result = {}
-        if not self.__api_key:
+        default_param = ""
+        api_key = secrets.get_secret(self.api_key_name)
+        if not api_key:
             warning = f"No API key retrieved with name: {self.api_key_name}"
             logger.info(
                 f"{warning}. Continuing without API key..." f" <- {self.__repr__()}"
             )
             self.report["errors"].append(warning)
         else:
-            default_param = f"&key={self.__api_key}"
+            default_param = f"&key={api_key}"
 
-        # headers = {"Key": self.__api_key, "Accept": "application/json"}
+        # headers = {"Key": api_key, "Accept": "application/json"}
         # 1. query to info.php to check if the indicator is already in the database
         params = f"indicator={self.observable_name}"
-        if self.__api_key:
+        if api_key:
             params += default_param
         resp = requests.get(f"{self.base_url}/info.php?{params}")
+        if resp.status_code == 404:
+            raise AnalyzerRunException("Indicator not found")
         resp.raise_for_status()
         result = resp.json()
         e = result.get("error", None)

@@ -10,7 +10,7 @@ from api_app.exceptions import (
     AnalyzerRunException,
     AnalyzerConfigurationException,
 )
-from .utils import get_basic_report_template, set_report_and_cleanup
+from .utils import get_basic_report_template
 
 logger = logging.getLogger(__name__)
 
@@ -37,8 +37,11 @@ class BaseAnalyzerMixin(metaclass=ABCMeta):
 
     @abstractmethod
     def run(self):
-        # this should be overwritten in
-        # child class
+        """
+        Called from *start* fn and wrapped in a try-catch block.
+        Should be overwritten in child class
+        :returns report: JSON
+        """
         raise AnalyzerRunNotImplemented(self.analyzer_name)
 
     @abstractmethod
@@ -54,16 +57,31 @@ class BaseAnalyzerMixin(metaclass=ABCMeta):
         In most cases, this would be overwritten.
         """
 
+    def _validate_result(self, result):
+        """
+        function to validate result, allowing to store inside postgres without errors
+        """
+        if isinstance(result, dict):
+            for key, values in result.items():
+                result[key] = self._validate_result(values)
+        elif isinstance(result, list):
+            for i, _ in enumerate(result):
+                result[i] = self._validate_result(result[i])
+        elif isinstance(result, str):
+            return result.replace("\u0000", "")
+        return result
+
     def start(self):
         """
         Entrypoint function to execute the analyzer.
         calls `before_run`, `run`, `after_run`
         in that order with exception handling.
         """
-        self.before_run()
         try:
+            self.before_run()
             self.report = get_basic_report_template(self.analyzer_name)
             result = self.run()
+            result = self._validate_result(result)
             self.report["report"] = result
         except (AnalyzerConfigurationException, AnalyzerRunException) as e:
             self._handle_analyzer_exception(e)
@@ -74,7 +92,6 @@ class BaseAnalyzerMixin(metaclass=ABCMeta):
 
         # add process time
         self.report["process_time"] = time.time() - self.report["started_time"]
-        set_report_and_cleanup(self.job_id, self.report)
 
         self.after_run()
 
@@ -86,7 +103,7 @@ class BaseAnalyzerMixin(metaclass=ABCMeta):
             f" Analyzer error: '{err}'"
         )
         logger.error(error_message)
-        self.report["errors"].append(error_message)
+        self.report["errors"].append(str(err))
         self.report["success"] = False
 
     def _handle_base_exception(self, err):
@@ -295,7 +312,8 @@ class DockerBasedAnalyzer(metaclass=ABCMeta):
                 resp1 = requests.post(self.url, json=req_data)
         except requests.exceptions.ConnectionError:
             raise AnalyzerConfigurationException(
-                f"{self.name} docker container is not running."
+                f"{self.name} docker container is not running.\n"
+                f"You have to enable it in the .env file before starting IntelOwl."
             )
 
         # step #2: raise AnalyzerRunException in case of error

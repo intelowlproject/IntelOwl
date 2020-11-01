@@ -1,7 +1,6 @@
 import datetime
 import logging
 
-from django.core import management
 from api_app.models import Job
 from api_app.script_analyzers import general
 from api_app.helpers import get_now
@@ -60,12 +59,3 @@ def remove_old_jobs():
 
     logger.info("finished remove_old_jobs")
     return num_jobs_to_delete
-
-
-def flush_expired_tokens():
-    """
-    flushes all expired tokens from OutstandingToken and BlacklistedToken models.
-    """
-    logger.info("started flush_expired_tokens")
-    management.call_command("flushexpiredtokens")
-    logger.info("finished flush_expired_tokens")

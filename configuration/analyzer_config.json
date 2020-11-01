@@ -7,8 +7,10 @@
       "application/vnd.android.package-archive",
       "application/x-dex"
     ],
-    "python_module": "apkid_run",
-    "description": "APKiD identifies many compilers, packers, obfuscators, and other weird stuff from an APK or DEX file."
+    "python_module": "apkid.APKiD",
+    "disabled": true,
+    "description": "APKiD identifies many compilers, packers, obfuscators, and other weird stuff from an APK or DEX file.",
+    "soft_time_limit": 400
   },
   "AbuseIPDB": {
     "type": "observable",
@@ -16,55 +18,19 @@
     "external_service": true,
     "description": "check if an ip was reported on AbuseIPDB",
     "requires_configuration": true,
-    "python_module": "abuseipdb_run"
-  },
-  "ActiveDNS_Classic": {
-    "type": "observable",
-    "observable_supported": ["ip", "domain"],
-    "external_service": true,
-    "description": "Retrieve current domain resolution with default DNS",
-    "python_module": "activedns_run",
-    "additional_config_params": {
-      "service": "classic"
-    }
-  },
-  "ActiveDNS_CloudFlare": {
-    "type": "observable",
-    "observable_supported": ["domain"],
-    "external_service": true,
-    "description": "Retrieve current domain resolution with CloudFlare DoH (DNS over HTTPS)",
-    "python_module": "activedns_run",
-    "additional_config_params": {
-      "service": "cloudflare"
-    }
-  },
-  "ActiveDNS_CloudFlare_Malware": {
-    "type": "observable",
-    "observable_supported": ["domain"],
-    "external_service": true,
-    "description": "Detect malicious domains thanks to CloudFlare DoH Malware Filter",
-    "python_module": "activedns_run",
-    "additional_config_params": {
-      "service": "cloudflare_malware"
-    }
-  },
-  "ActiveDNS_Google": {
-    "type": "observable",
-    "observable_supported": ["domain"],
-    "external_service": true,
-    "description": "Retrieve current domain resolution with Google DoH (DNS over HTTPS)",
-    "python_module": "activedns_run",
-    "additional_config_params": {
-      "service": "google"
-    }
+    "python_module": "abuseipdb.AbuseIPDB",
+    "soft_time_limit": 30
   },
   "Auth0": {
     "type": "observable",
-    "observable_supported": ["ip"],
+    "observable_supported": [
+      "ip"
+    ],
     "external_service": true,
     "description": "scan an IP against the Auth0 API",
     "requires_configuration": true,
-    "python_module": "auth0_run"
+    "python_module": "auth0.Auth0",
+    "soft_time_limit": 30
   },
   "BoxJS_Scan_JavaScript": {
     "type": "file",
@@ -73,22 +39,25 @@
       "application/javascript",
       "text/javascript"
     ],
-    "python_module": "boxjs_run",
-    "description": "A tool for studying JavaScript malware"
+    "python_module": "boxjs_scan.BoxJS",
+    "description": "A tool for studying JavaScript malware",
+    "soft_time_limit": 400
   },
   "CheckDMARC": {
     "type": "observable",
     "observable_supported": ["domain"],
     "description": "An SPF and DMARC DNS records validator",
-    "python_module": "checkdmarc_run"
+    "python_module": "checkdmarc.CheckDMARC",
+    "soft_time_limit": 30
   },
   "CIRCLPassiveDNS": {
     "type": "observable",
-    "observable_supported": ["domain", "url"],
+    "observable_supported": ["domain","url"],
     "external_service": true,
     "description": "scan an observable against the CIRCL Passive DNS DB",
     "requires_configuration": true,
-    "python_module": "circlpdns_run"
+    "python_module": "circl_pdns.CIRCL_PDNS",
+    "soft_time_limit": 30
   },
   "CIRCLPassiveSSL": {
     "type": "observable",
@@ -96,13 +65,45 @@
     "external_service": true,
     "description": "scan an observable against the CIRCL Passive SSL DB",
     "requires_configuration": true,
-    "python_module": "circlpssl_run"
+    "python_module": "circl_pssl.CIRCL_PSSL",
+    "soft_time_limit": 30
+  },
+  "Classic_DNS": {
+    "type": "observable",
+    "observable_supported": ["ip", "domain", "url"],
+    "external_service": true,
+    "description": "Retrieve current domain resolution with default DNS",
+    "soft_time_limit": 30,
+    "python_module": "dns.dns_resolvers.classic_dns_resolver.ClassicDNSResolver",
+    "additional_config_params": {
+      "query_type": "A"
+    }
+  },
+  "CloudFlare_DNS": {
+    "type": "observable",
+    "observable_supported": ["domain", "url"],
+    "external_service": true,
+    "description": "Retrieve current domain resolution with CloudFlare DoH (DNS over HTTPS)",
+    "soft_time_limit": 30,
+    "python_module": "dns.dns_resolvers.cloudflare_dns_resolver.CloudFlareDNSResolver",
+    "additional_config_params": {
+      "query_type": "A"
+    }
+  },
+  "CloudFlare_Malicious_Detector": {
+    "type": "observable",
+    "observable_supported": ["domain", "url"],
+    "external_service": true,
+    "description": "Scan an observable against CloudFlare DB",
+    "soft_time_limit": 30,
+    "python_module": "dns.dns_malicious_detectors.cloudflare_malicious_detector.CloudFlareMaliciousDetector"
   },
   "Capa_Info": {
     "type": "file",
     "supported_filetypes": ["application/x-dosexec"],
-    "python_module": "capa_info_run",
-    "description": "capa detects capabilities in executable files"
+    "python_module": "capa_info.CapaInfo",
+    "description": "capa detects capabilities in executable files",
+    "soft_time_limit": 500
   },
   "Censys_Search": {
     "type": "observable",
@@ -110,44 +111,57 @@
     "external_service": true,
     "description": "scan an IP address against Censys View API",
     "requires_configuration": true,
-    "python_module": "censys_run",
+    "python_module": "censys.Censys",
     "additional_config_params": {
       "censys_analysis": "search"
-    }
+    },
+    "soft_time_limit": 30
   },
   "Cuckoo_Scan": {
     "type": "file",
     "disabled": false,
     "decription": "scan a file on a Cuckoo instance",
     "requires_configuration": true,
-    "python_module": "cuckoo_run",
+    "python_module": "cuckoo_scan.CuckooAnalysis",
     "additional_config_params": {
       "api_key_name": "CUCKOO_API_KEY",
       "max_post_tries": 5,
       "max_poll_tries": 20
-    }
+    },
+    "soft_time_limit": 500
   },
   "Cymru_Hash_Registry_Get_File": {
     "type": "file",
     "run_hash": true,
     "external_service": true,
     "description": "Check if a particular file is known to be malware by Team Cymru",
-    "python_module": "cymru_run"
+    "python_module": "cymru.Cymru",
+    "soft_time_limit": 50
   },
   "Cymru_Hash_Registry_Get_Observable": {
     "type": "observable",
     "observable_supported": ["hash"],
     "external_service": true,
     "description": "Check if a particular hash is available in the malware hash registry of Team Cymru",
-    "python_module": "cymru_run"
+    "python_module": "cymru.Cymru",
+    "soft_time_limit": 50
   },
   "DNSDB": {
     "type": "observable",
-    "observable_supported": ["domain", "url", "ip"],
+    "observable_supported": [
+      "domain",
+      "url",
+      "ip"
+    ],
     "external_service": true,
-    "description": "scan an observable against the Passive DNS Farsight Database",
+    "description": "scan an observable against the Passive DNS Farsight Database (support both v1 and v2 versions)",
     "requires_configuration": true,
-    "python_module": "dnsdb_run"
+    "python_module": "dnsdb.DNSdb",
+    "soft_time_limit": 30,
+    "additional_config_params": {
+      "server": "api.dnsdb.info",
+      "api_version": 2
+    }
   },
   "Doc_Info": {
     "type": "file",
@@ -169,7 +183,8 @@
       "application/zip"
     ],
     "decription": "static generic document analysis",
-    "python_module": "docinfo_run"
+    "python_module": "doc_info.DocInfo",
+    "soft_time_limit": 30
   },
   "Doc_Info_Experimental": {
     "type": "file",
@@ -190,30 +205,48 @@
       "application/xml"
     ],
     "decription": "static document analysis with new features to analyze XLM macros, encrypted macros and more",
-    "python_module": "docinfo_run",
+    "python_module": "doc_info.DocInfo",
     "additional_config_params": {
-        "experimental": true
-    }
+      "experimental": true
+    },
+    "soft_time_limit": 30
   },
   "File_Info": {
     "type": "file",
     "description": "basic static analysis, extracts metadata and hashes",
-    "python_module": "fileinfo_run"
+    "python_module": "file_info.FileInfo",
+    "soft_time_limit": 30
   },
   "Fortiguard": {
     "type": "observable",
-    "observable_supported": ["domain", "url"],
+    "observable_supported": [
+      "domain",
+      "url"
+    ],
     "external_service": true,
     "description": "scan an observable with the Fortiguard URL Analyzer",
-    "python_module": "fortiguard_run"
+    "python_module": "fortiguard.Fortiguard",
+    "soft_time_limit": 30
+  },
+  "Google_DNS": {
+    "type": "observable",
+    "observable_supported": ["domain", "url"],
+    "external_service": true,
+    "description": "Retrieve current domain resolution with Google DoH (DNS over HTTPS)",
+    "soft_time_limit": 30,
+    "python_module": "dns.dns_resolvers.google_dns_resolver.GoogleDNSResolver",
+    "additional_config_params": {
+      "query_type": "A"
+    }
   },
   "GoogleSafebrowsing": {
     "type": "observable",
-    "observable_supported": ["domain", "url", "ip"],
+    "observable_supported": ["ip", "domain", "url"],
     "external_service": true,
-    "description": "scan an observable against GoogleSafeBrowsing DB",
+    "description": "Scan an observable against GoogleSafeBrowsing DB",
     "requires_configuration": true,
-    "python_module": "googlesf_run"
+    "soft_time_limit": 30,
+    "python_module": "dns.dns_malicious_detectors.googlesf.GoogleSF"
   },
   "GreyNoise": {
     "type": "observable",
@@ -221,58 +254,71 @@
     "external_service": true,
     "description": "scan an IP against the Greynoise API (requires API key)",
     "requires_configuration": true,
-    "python_module": "greynoise_run",
+    "python_module": "greynoise.GreyNoise",
     "additional_config_params": {
       "greynoise_api_version": "v2",
       "api_key_name": "GREYNOISE_API_KEY"
-    }
+    },
+    "soft_time_limit": 30
   },
   "GreyNoiseAlpha": {
     "type": "observable",
-    "observable_supported": ["ip"],
+    "observable_supported": [
+      "ip"
+    ],
     "external_service": true,
     "description": "scan an IP against the Alpha Greynoise API (no API key required)",
-    "python_module": "greynoise_run",
+    "python_module": "greynoise.GreyNoise",
     "additional_config_params": {
       "greynoise_api_version": "v1"
-    }
+    },
+    "soft_time_limit": 30
   },
   "HoneyDB_Get": {
     "type": "observable",
-    "observable_supported": ["ip"],
+    "observable_supported": [
+      "ip"
+    ],
     "external_service": true,
     "description": "HoneyDB IP lookup service",
     "requires_configuration": true,
-    "python_module": "honeydb_run",
+    "python_module": "honeydb.HoneyDB",
     "additional_config_params": {
       "api_key_name": "HONEYDB_API_KEY",
       "api_id_name": "HONEYDB_API_ID",
       "honeydb_analysis": "ip_query"
-    }
+    },
+    "soft_time_limit": 200
   },
   "HoneyDB_Scan_Twitter": {
     "type": "observable",
-    "observable_supported": ["ip"],
+    "observable_supported": [
+      "ip"
+    ],
     "external_service": true,
-    "description": "scan an IP against HoneyDB.io’s Twitter Threat Feed",
+    "description": "scan an IP against HoneyDB.ioâ€™s Twitter Threat Feed",
     "requires_configuration": true,
-    "python_module": "honeydb_run",
+    "python_module": "honeydb.HoneyDB",
     "additional_config_params": {
       "api_key_name": "HONEYDB_API_KEY",
       "api_id_name": "HONEYDB_API_ID",
       "honeydb_analysis": "scan_twitter"
-    }
+    },
+    "soft_time_limit": 200
   },
   "Hunter": {
     "type": "observable",
-    "observable_supported": ["domain"],
+    "observable_supported": [
+      "domain"
+    ],
     "external_service": true,
     "description": "Scans a domain name and returns set of data about the organisation, the email address found and additional information about the people owning those email addresses",
     "requires_configuration": true,
-    "python_module": "hunter_run",
+    "python_module": "hunter.Hunter",
     "additional_config_params": {
       "api_key_name": "HUNTER_API_KEY"
-    }
+    },
+    "soft_time_limit": 30
   },
   "HybridAnalysis_Get_File": {
     "type": "file",
@@ -280,156 +326,252 @@
     "run_hash": true,
     "description": "check file hash on HybridAnalysis sandbox reports",
     "requires_configuration": true,
-    "python_module": "haget_run"
+    "python_module": "ha_get.HybridAnalysisGet",
+    "soft_time_limit": 30
   },
   "HybridAnalysis_Get_Observable": {
     "type": "observable",
-    "observable_supported": ["ip", "domain", "url", "hash"],
+    "observable_supported": [
+      "ip",
+      "domain",
+      "url",
+      "hash"
+    ],
     "external_service": true,
     "description": "search an observable in the HybridAnalysis sandbox reports",
     "requires_configuration": true,
-    "python_module": "haget_run"
+    "python_module": "ha_get.HybridAnalysisGet",
+    "soft_time_limit": 30
   },
   "IntelX_Phonebook": {
     "type": "observable",
-    "observable_supported": ["ip", "url", "domain", "hash"],
+    "observable_supported": [
+      "ip",
+      "url",
+      "domain",
+      "hash"
+    ],
     "description": "Phonebook alike search against IntelX API",
     "external_service": true,
     "requires_configuration": true,
-    "python_module": "intelx_run",
+    "python_module": "intelx.IntelX",
     "additional_config_params": {
       "api_key_name": "INTELX_API_KEY",
       "rows_limit": 100
-    }
+    },
+    "soft_time_limit": 45
   },
   "Intezer_Scan": {
     "type": "file",
     "external_service": true,
-    "supported_filetypes": ["application/x-dosexec"],
+    "supported_filetypes": [
+      "application/x-dosexec"
+    ],
     "leaks_info": true,
     "description": "scan a file on Intezer",
     "requires_configuration": true,
-    "python_module": "intezer_run"
+    "python_module": "intezer_scan.IntezerScan",
+    "soft_time_limit": 180
   },
   "MISP": {
     "type": "observable",
-    "observable_supported": ["ip", "domain", "url", "hash"],
+    "observable_supported": [
+      "ip",
+      "domain",
+      "url",
+      "hash"
+    ],
     "external_service": true,
     "description": "scan an observable on a custom MISP instance",
     "requires_configuration": true,
-    "python_module": "misp_run",
+    "python_module": "misp.MISP",
     "additional_config_params": {
       "api_key_name": "MISP_KEY",
       "url_key_name": "MISP_URL"
-    }
+    },
+    "soft_time_limit": 30
   },
   "MISPFIRST": {
     "type": "observable",
-    "observable_supported": ["ip", "domain", "url", "hash"],
+    "observable_supported": [
+      "ip",
+      "domain",
+      "url",
+      "hash"
+    ],
     "external_service": true,
     "description": "scan an observable on the FIRST MISP instance",
     "requires_configuration": true,
-    "python_module": "misp_run",
+    "python_module": "misp.MISP",
     "additional_config_params": {
       "api_key_name": "FIRST_MISP_API",
       "url_key_name": "FIRST_MISP_URL"
-    }
+    },
+    "soft_time_limit": 30
   },
   "MISPFIRST_Check_Hash": {
     "type": "file",
     "run_hash": true,
     "description": "check a file hash on the FIRST MISP instance",
     "requires_configuration": true,
-    "python_module": "misp_run",
+    "python_module": "misp.MISP",
     "additional_config_params": {
       "api_key_name": "FIRST_MISP_API",
       "url_key_name": "FIRST_MISP_URL"
-    }
+    },
+    "soft_time_limit": 30
   },
   "MISP_Check_Hash": {
     "type": "file",
     "run_hash": true,
     "description": "check a file hash on a MISP instance",
     "requires_configuration": true,
-    "python_module": "misp_run"
+    "python_module": "misp.MISP",
+    "soft_time_limit": 30
   },
   "MalwareBazaar_Get_File": {
     "type": "file",
     "run_hash": true,
     "external_service": true,
     "description": "Check if a particular malware sample is known to MalwareBazaar",
-    "python_module": "mbget_run"
+    "python_module": "mb_get.MB_GET",
+    "soft_time_limit": 50
   },
   "MalwareBazaar_Get_Observable": {
     "type": "observable",
-    "observable_supported": ["hash"],
+    "observable_supported": [
+      "hash"
+    ],
     "external_service": true,
     "description": "Check if a particular malware hash is known to MalwareBazaar",
-    "python_module": "mbget_run"
+    "python_module": "mb_get.MB_GET",
+    "soft_time_limit": 50
   },
   "MaxMindGeoIP": {
     "type": "observable",
     "observable_supported": ["ip"],
     "description": "extract GeoIP info for an IP",
-    "python_module": "maxmind_run"
+    "python_module": "maxmind.Maxmind",
+    "soft_time_limit": 30
   },
   "ONYPHE": {
     "type": "observable",
-    "observable_supported": ["ip", "domain", "url"],
+    "observable_supported": [
+      "ip",
+      "domain",
+      "url"
+    ],
     "external_service": true,
     "description": "search an observable in the ONYPHE",
     "requires_configuration": true,
-    "python_module": "onyphe_run",
+    "python_module": "onyphe.Onyphe",
     "additional_config_params": {
       "api_key_name": "ONYPHE_KEY"
-    }
+    },
+    "soft_time_limit": 50
   },
   "OTXQuery": {
     "type": "observable",
-    "observable_supported": ["ip", "domain", "url", "hash"],
+    "observable_supported": [
+      "ip",
+      "domain",
+      "url",
+      "hash"
+    ],
     "external_service": true,
-    "verbose": false,
     "description": "scan an observable on Alienvault OTX",
     "requires_configuration": true,
-    "python_module": "otx_run"
+    "python_module": "otx.OTX",
+    "additional_config_params": {
+      "verbose": false
+    },
+    "soft_time_limit": 30
   },
   "OTX_Check_Hash": {
     "type": "file",
     "external_service": true,
     "run_hash": true,
-    "verbose": false,
     "decsription": "check file hash on OTX Alienvault",
     "requires_configuration": true,
-    "python_module": "otx_run"
+    "python_module": "otx.OTX",
+    "additional_config_params": {
+      "verbose": false
+    },
+    "soft_time_limit": 30
   },
   "PDF_Info": {
     "type": "file",
-    "supported_filetypes": ["application/pdf"],
+    "supported_filetypes": [
+      "application/pdf"
+    ],
     "description": "static PDF analysis",
-    "python_module": "pdfinfo_run"
+    "python_module": "pdf_info.PDFInfo",
+    "soft_time_limit": 30
   },
   "PE_Info": {
     "type": "file",
-    "supported_filetypes": ["application/x-dosexec"],
+    "supported_filetypes": [
+      "application/x-dosexec"
+    ],
     "description": "static PE analysis",
-    "python_module": "peinfo_run"
+    "python_module": "pe_info.PEInfo",
+    "soft_time_limit": 30
   },
   "PEframe_Scan": {
     "type": "file",
-    "supported_filetypes": ["application/x-dosexec"],
-    "python_module": "peframe_run",
-    "description": "Perform static analysis on Portable Executable malware and malicious MS Office documents"
+    "supported_filetypes": [
+      "application/x-dosexec"
+    ],
+    "python_module": "peframe.PEframe",
+    "description": "Perform static analysis on Portable Executable malware and malicious MS Office documents",
+    "soft_time_limit": 500
+  },
+  "Phishtank": {
+    "type": "observable",
+    "observable_supported": ["url"],
+    "external_service": true,
+    "soft_time_limit": 100,
+    "description": "Check if url is verified in Phishtank API",
+    "python_module": "phishtank.Phishtank",
+    "additional_config_params": {
+      "api_key_name": "PHISHTANK_API_KEY"
+    }
   },
   "Pulsedive_Active_IOC": {
     "type": "observable",
-    "observable_supported": ["ip", "domain", "url", "hash"],
+    "observable_supported": [
+      "ip",
+      "domain",
+      "url",
+      "hash"
+    ],
     "external_service": true,
     "description": "Scan indicators and retrieve results from Pulsedive's API",
-    "python_module": "pulsedive_run",
+    "python_module": "pulsedive.Pulsedive",
     "additional_config_params": {
       "api_key_name": "PULSEDIVE_API_KEY",
       "active_scan": true
+    },
+    "soft_time_limit": 100
+  },
+  "Quad9_DNS": {
+    "type": "observable",
+    "observable_supported": ["domain", "url"],
+    "external_service": true,
+    "description": "Retrieve current domain resolution with Quad9 DoH (DNS over HTTPS)",
+    "soft_time_limit": 30,
+    "python_module": "dns.dns_resolvers.quad9_dns_resolver.Quad9DNSResolver",
+    "additional_config_params": {
+      "query_type": "A"
     }
+  },
+  "Quad9_Malicious_Detector": {
+    "type": "observable",
+    "observable_supported": ["domain", "url"],
+    "external_service": true,
+    "description": "Check if a domain or an url is marked as malicious in Quad9 database",
+    "soft_time_limit": 30,
+    "python_module": "dns.dns_malicious_detectors.quad9_malicious_detector.Quad9MaliciousDetector"
   },
   "Quark_Engine_APK": {
     "type": "file",
@@ -439,252 +581,270 @@
       "application/vnd.android.package-archive",
       "application/x-dex"
     ],
-    "python_module": "quark_engine_run",
-    "description": "An Obfuscation-Neglect Android Malware Scoring System"
+    "python_module": "quark_engine.QuarkEngine",
+    "description": "An Obfuscation-Neglect Android Malware Scoring System",
+    "soft_time_limit": 120
   },
   "Robtex_Forward_PDNS_Query": {
     "type": "observable",
-    "observable_supported": ["domain", "url"],
+    "observable_supported": [
+      "domain",
+      "url"
+    ],
     "external_service": true,
     "description": "scan a domain against the Robtex Passive DNS DB",
-    "python_module": "robtex_run",
+    "python_module": "robtex.Robtex",
     "additional_config_params": {
       "robtex_analysis": "forward_pdns"
-    }
+    },
+    "soft_time_limit": 30
   },
   "Robtex_IP_Query": {
     "type": "observable",
-    "observable_supported": ["ip"],
+    "observable_supported": [
+      "ip"
+    ],
     "external_service": true,
     "description": "get IP info from Robtex",
-    "python_module": "robtex_run",
+    "python_module": "robtex.Robtex",
     "additional_config_params": {
       "robtex_analysis": "ip_query"
-    }
+    },
+    "soft_time_limit": 30
   },
   "Robtex_Reverse_PDNS_Query": {
     "type": "observable",
-    "observable_supported": ["ip"],
+    "observable_supported": [
+      "ip"
+    ],
     "external_service": true,
     "description": "scan an IP against the Robtex Passive DNS DB",
-    "python_module": "robtex_run",
+    "python_module": "robtex.Robtex",
     "additional_config_params": {
       "robtex_analysis": "reverse_pdns"
-    }
+    },
+    "soft_time_limit": 30
   },
   "Rtf_Info": {
     "type": "file",
-    "supported_filetypes": ["text/rtf", "application/rtf"],
+    "supported_filetypes": [
+      "text/rtf",
+      "application/rtf"
+    ],
     "description": "static RTF analysis",
-    "python_module": "rtfinfo_run"
+    "python_module": "rtf_info.RTFInfo",
+    "soft_time_limit": 30
   },
   "Securitytrails_Details": {
     "type": "observable",
-    "observable_supported": ["domain"],
+    "observable_supported": [
+      "domain"
+    ],
     "external_service": true,
     "description": "scan a domain against securitytrails API for general details",
     "requires_configuration": true,
-    "python_module": "securitytrails_run",
+    "python_module": "securitytrails.SecurityTrails",
     "additional_config_params": {
       "securitytrails_analysis": "current",
       "securitytrails_current_type": "details"
-    }
+    },
+    "soft_time_limit": 30
   },
   "Securitytrails_History_DNS": {
     "type": "observable",
-    "observable_supported": ["domain"],
+    "observable_supported": [
+      "domain"
+    ],
     "external_service": true,
     "description": "scan a domain against securitytrails API for historical DNS",
     "requires_configuration": true,
-    "python_module": "securitytrails_run",
+    "python_module": "securitytrails.SecurityTrails",
     "additional_config_params": {
       "securitytrails_analysis": "history",
       "securitytrails_history_analysis": "dns"
-    }
+    },
+    "soft_time_limit": 30
   },
   "Securitytrails_History_WHOIS": {
     "type": "observable",
-    "observable_supported": ["domain"],
+    "observable_supported": [
+      "domain"
+    ],
     "external_service": true,
     "description": "scan a domain against securitytrails API for historical WHOIS",
     "requires_configuration": true,
-    "python_module": "securitytrails_run",
+    "python_module": "securitytrails.SecurityTrails",
     "additional_config_params": {
       "securitytrails_analysis": "history",
       "securitytrails_history_analysis": "whois"
-    }
+    },
+    "soft_time_limit": 30
   },
   "Securitytrails_IP_Neighbours": {
     "type": "observable",
-    "observable_supported": ["ip"],
+    "observable_supported": [
+      "ip"
+    ],
     "external_service": true,
     "description": "scan an IP against securitytrails API for neighbour IPs",
     "requires_configuration": true,
-    "python_module": "securitytrails_run"
+    "python_module": "securitytrails.SecurityTrails",
+    "soft_time_limit": 30
   },
   "Securitytrails_Subdomains": {
     "type": "observable",
-    "observable_supported": ["domain"],
+    "observable_supported": [
+      "domain"
+    ],
     "external_service": true,
     "description": "scan a domain against securitytrails API for subdomains",
     "requires_configuration": true,
-    "python_module": "securitytrails_run",
+    "python_module": "securitytrails.SecurityTrails",
     "additional_config_params": {
       "securitytrails_analysis": "current",
       "securitytrails_current_type": "subdomains"
-    }
+    },
+    "soft_time_limit": 30
   },
   "Securitytrails_Tags": {
     "type": "observable",
-    "observable_supported": ["domain"],
+    "observable_supported": [
+      "domain"
+    ],
     "external_service": true,
     "description": "scan a domain against securitytrails API for tags",
     "requires_configuration": true,
-    "python_module": "securitytrails_run",
+    "python_module": "securitytrails.SecurityTrails",
     "additional_config_params": {
       "securitytrails_analysis": "current",
       "securitytrails_current_type": "tags"
-    }
+    },
+    "soft_time_limit": 30
   },
   "Shodan_Honeyscore": {
     "type": "observable",
-    "observable_supported": ["ip"],
+    "observable_supported": [
+      "ip"
+    ],
     "external_service": true,
     "description": "scan an IP against Shodan Honeyscore API",
     "requires_configuration": true,
-    "python_module": "shodan_run",
+    "python_module": "shodan.Shodan",
     "additional_config_params": {
       "shodan_analysis": "honeyscore"
-    }
+    },
+    "soft_time_limit": 30
   },
   "Shodan_Search": {
     "type": "observable",
-    "observable_supported": ["ip"],
+    "observable_supported": [
+      "ip"
+    ],
     "external_service": true,
     "description": "scan an IP against Shodan Search API",
     "requires_configuration": true,
-    "python_module": "shodan_run",
+    "python_module": "shodan.Shodan",
     "additional_config_params": {
       "shodan_analysis": "search"
-    }
+    },
+    "soft_time_limit": 30
   },
   "Signature_Info": {
     "type": "file",
-    "supported_filetypes": ["application/x-dosexec"],
+    "supported_filetypes": [
+      "application/x-dosexec"
+    ],
     "description": "PE signature extractor",
-    "python_module": "signatureinfo_run"
+    "python_module": "signature_info.SignatureInfo",
+    "soft_time_limit": 30
   },
   "Strings_Info_Classic": {
     "type": "file",
     "description": "strings extraction",
-    "python_module": "stringsinfo_run",
+    "python_module": "strings_info.StringsInfo",
     "additional_config_params": {
       "max_number_of_strings": 300,
       "rank_strings": false
-    }
+    },
+    "soft_time_limit": 70
   },
   "SpeakEasy": {
     "type": "file",
-    "supported_filetypes": ["application/x-dosexec"],
+    "supported_filetypes": [
+      "application/x-dosexec"
+    ],
     "description": "speakeasy emulation report",
-    "python_module": "speakeasy_run"
+    "python_module": "speakeasy_emulation.SpeakEasy",
+    "soft_time_limit": 120
   },
   "Strings_Info_ML": {
     "type": "file",
     "description": "strings extraction plus strings ranking based on Machine Learning",
-    "python_module": "stringsinfo_run",
+    "python_module": "strings_info.StringsInfo",
     "additional_config_params": {
       "max_number_of_strings": 200,
       "rank_strings": true
-    }
+    },
+    "soft_time_limit": 70
   },
   "TalosReputation": {
     "type": "observable",
-    "observable_supported": ["ip"],
+    "observable_supported": [
+      "ip"
+    ],
     "external_service": true,
     "description": "check an IP reputation from Talos downloaded IP list",
-    "python_module": "talos_run"
+    "python_module": "talos.Talos",
+    "soft_time_limit": 30
   },
   "Threatminer_PDNS": {
     "type": "observable",
-    "observable_supported": ["ip", "domain"],
+    "observable_supported": [
+      "ip",
+      "domain"
+    ],
     "external_service": true,
     "description": "retrieve PDNS data from Threatminer API",
-    "python_module": "threatminer_run",
+    "python_module": "threatminer.Threatminer",
     "additional_config_params": {
       "rt_value": 2
-    }
+    },
+    "soft_time_limit": 30
   },
   "Threatminer_Reports_Tagging": {
     "type": "observable",
-    "observable_supported": ["ip", "domain"],
+    "observable_supported": [
+      "ip",
+      "domain"
+    ],
     "external_service": true,
     "description": "retrieve reports from Threatminer API",
-    "python_module": "threatminer_run",
+    "python_module": "threatminer.Threatminer",
     "additional_config_params": {
       "rt_value": 6
-    }
+    },
+    "soft_time_limit": 30
   },
   "Threatminer_Subdomains": {
     "type": "observable",
-    "observable_supported": ["domain"],
+    "observable_supported": [
+      "domain"
+    ],
     "external_service": true,
     "description": "retrieve subdomains from Threatminer API",
-    "python_module": "threatminer_run",
+    "python_module": "threatminer.Threatminer",
     "additional_config_params": {
       "rt_value": 5
-    }
+    },
+    "soft_time_limit": 30
   },
-  "Thug_HTML_Info_linuxchrome26": {
+  "Thug_HTML_Info": {
     "type": "file",
-    "supported_filetypes": ["text/html"],
+    "supported_filetypes": [
+      "text/html"
+    ],
     "description": "Perform hybrid dynamic/static analysis on a saved HTML page",
-    "python_module": "thug_file_run",
-    "requires_configuration": true,
-    "additional_config_params": {
-      "dom_events": "click,mouseover",
-      "use_proxy": false,
-      "proxy": "",
-      "enable_image_processing_analysis": true,
-      "enable_awis": true,
-      "user_agent": "linuxchrome26"
-    }
-  },
-  "Thug_HTML_Info_nexuschrome18": {
-    "type": "file",
-    "supported_filetypes": ["text/html"],
-    "description": "Perform hybrid dynamic/static analysis on a saved HTML page",
-    "python_module": "thug_file_run",
-    "requires_configuration": true,
-    "additional_config_params": {
-      "dom_events": "click,mouseover",
-      "use_proxy": false,
-      "proxy": "",
-      "enable_image_processing_analysis": true,
-      "enable_awis": true,
-      "user_agent": "nexuschrome18"
-    }
-  },
-  "Thug_HTML_Info_osx10chrome19": {
-    "type": "file",
-    "supported_filetypes": ["text/html"],
-    "description": "Perform hybrid dynamic/static analysis on a saved HTML page",
-    "python_module": "thug_file_run",
-    "requires_configuration": true,
-    "additional_config_params": {
-      "dom_events": "click,mouseover",
-      "use_proxy": false,
-      "proxy": "",
-      "enable_image_processing_analysis": true,
-      "enable_awis": true,
-      "user_agent": "osx10chrome19"
-    }
-  },
-  "Thug_HTML_Info_winxpie60_FULL_SCAN": {
-    "type": "file",
-    "supported_filetypes": ["text/html"],
-    "description": "Perform hybrid dynamic/static analysis on a saved HTML page",
-    "python_module": "thug_file_run",
+    "python_module": "thug_file.ThugFile",
     "requires_configuration": true,
     "additional_config_params": {
       "dom_events": "click,mouseover",
@@ -693,73 +853,17 @@
       "enable_image_processing_analysis": true,
       "enable_awis": true,
       "user_agent": "winxpie60"
-    }
+    },
+    "soft_time_limit": 600
   },
-  "Thug_HTML_Info_winxpie60_SIMPLE_SCAN": {
-    "type": "file",
-    "supported_filetypes": ["text/html"],
-    "description": "Perform hybrid dynamic/static analysis on a saved HTML page",
-    "python_module": "thug_file_run",
-    "requires_configuration": true,
-    "additional_config_params": {
-      "dom_events": "click,mouseover",
-      "use_proxy": false,
-      "proxy": "",
-      "enable_image_processing_analysis": false,
-      "enable_awis": false,
-      "user_agent": "winxpie60"
-    }
-  },
-  "Thug_URL_Info_linuxchrome26": {
+  "Thug_URL_Info": {
     "type": "observable",
-    "observable_supported": ["domain", "url"],
+    "observable_supported": [
+      "domain",
+      "url"
+    ],
     "description": "Perform hybrid dynamic/static analysis on a URL",
-    "python_module": "thug_url_run",
-    "requires_configuration": true,
-    "additional_config_params": {
-      "dom_events": "click,mouseover",
-      "use_proxy": false,
-      "proxy": "",
-      "enable_image_processing_analysis": true,
-      "enable_awis": true,
-      "user_agent": "linuxchrome26"
-    }
-  },
-  "Thug_URL_Info_nexuschrome18": {
-    "type": "observable",
-    "observable_supported": ["domain", "url"],
-    "description": "Perform hybrid dynamic/static analysis on a URL",
-    "python_module": "thug_url_run",
-    "requires_configuration": true,
-    "additional_config_params": {
-      "dom_events": "click,mouseover",
-      "use_proxy": false,
-      "proxy": "",
-      "enable_image_processing_analysis": true,
-      "enable_awis": true,
-      "user_agent": "nexuschrome18"
-    }
-  },
-  "Thug_URL_Info_osx10chrome19": {
-    "type": "observable",
-    "observable_supported": ["domain", "url"],
-    "description": "Perform hybrid dynamic/static analysis on a URL",
-    "python_module": "thug_url_run",
-    "requires_configuration": true,
-    "additional_config_params": {
-      "dom_events": "click,mouseover",
-      "use_proxy": false,
-      "proxy": "",
-      "enable_image_processing_analysis": true,
-      "enable_awis": true,
-      "user_agent": "osx10chrome19"
-    }
-  },
-  "Thug_URL_Info_winxpie60_FULL_SCAN": {
-    "type": "observable",
-    "observable_supported": ["domain", "url"],
-    "description": "Perform hybrid dynamic/static analysis on a URL",
-    "python_module": "thug_url_run",
+    "python_module": "thug_url.ThugUrl",
     "requires_configuration": true,
     "additional_config_params": {
       "dom_events": "click,mouseover",
@@ -768,176 +872,191 @@
       "enable_image_processing_analysis": true,
       "enable_awis": true,
       "user_agent": "winxpie60"
-    }
-  },
-  "Thug_URL_Info_winxpie60_SIMPLE_SCAN": {
-    "type": "observable",
-    "observable_supported": ["domain", "url"],
-    "description": "Perform hybrid dynamic/static analysis on a URL",
-    "python_module": "thug_url_run",
-    "requires_configuration": true,
-    "additional_config_params": {
-      "dom_events": "click,mouseover",
-      "use_proxy": false,
-      "proxy": "",
-      "enable_image_processing_analysis": false,
-      "enable_awis": false,
-      "user_agent": "winxpie60"
-    }
+    },
+    "soft_time_limit": 600
   },
   "TorProject": {
     "type": "observable",
-    "observable_supported": ["ip"],
+    "observable_supported": [
+      "ip"
+    ],
     "external_service": true,
     "description": "check if an IP is a Tor Exit Node",
-    "python_module": "tor_run"
+    "python_module": "tor.Tor",
+    "soft_time_limit": 30
   },
   "Tranco": {
     "type": "observable",
-    "observable_supported": ["domain", "url"],
+    "observable_supported": [
+      "domain",
+      "url"
+    ],
     "external_service": true,
     "description": "check if a domain is in the last Tranco ranking top sites list",
-    "python_module": "tor_run"
+    "python_module": "tor.Tor",
+    "soft_time_limit": 30
   },
   "UnpacMe_EXE_Unpacker": {
     "type": "file",
-    "supported_filetypes": ["application/x-dosexec"],
+    "supported_filetypes": [
+      "application/x-dosexec"
+    ],
     "description": "UnpacMe unpacker",
-    "python_module": "unpac_me_run",
+    "python_module": "unpac_me.UnpacMe",
     "additional_config_params": {
       "api_key_name": "UNPAC_ME_API_KEY",
       "private": false,
       "max_tries": 30
-    }
+    },
+    "soft_time_limit": 400
   },
   "URLhaus": {
     "type": "observable",
-    "observable_supported": ["domain", "url"],
+    "observable_supported": [
+      "domain",
+      "url"
+    ],
     "external_service": true,
     "description": "Query a domain or URL against URLhaus API",
-    "python_module": "urlhaus_run"
+    "python_module": "urlhaus.URLHaus",
+    "soft_time_limit": 50
+  },
+  "UrlScan_Submit_Result": {
+    "type": "observable",
+    "observable_supported": [
+      "url"
+    ],
+    "external_service": true,
+    "description": "Submit & retrieve result of a URL against URLScan API",
+    "requires_configuration": true,
+    "python_module": "urlscan.UrlScan",
+    "additional_config_params": {
+      "api_key_name": "URLSCAN_API_KEY",
+      "visibility": "private",
+      "urlscan_analysis": "submit_result"
+    },
+    "soft_time_limit": 100
+  },
+  "UrlScan_Search": {
+    "type": "observable",
+    "observable_supported": [
+      "ip",
+      "domain",
+      "url",
+      "hash"
+    ],
+    "external_service": true,
+    "description": "Search an IP/domain/url/hash against URLScan API",
+    "requires_configuration": true,
+    "python_module": "urlscan.UrlScan",
+    "additional_config_params": {
+      "api_key_name": "URLSCAN_API_KEY",
+      "urlscan_analysis": "search"
+    },
+    "soft_time_limit": 100
   },
   "VirusTotal_v2_Get_File": {
     "type": "file",
     "external_service": true,
+    "disabled": true,
     "run_hash": true,
     "description": "check file hash on VirusTotal using old API endpoints",
     "requires_configuration": true,
-    "python_module": "vt2get_run",
+    "python_module": "vt2_get.VirusTotalv2",
     "additional_config_params": {
       "api_key_name": "VT_KEY"
-    }
+    },
+    "soft_time_limit": 30
   },
   "VirusTotal_v2_Get_Observable": {
     "type": "observable",
-    "observable_supported": ["ip", "domain", "url", "hash"],
+    "observable_supported": [
+      "ip",
+      "domain",
+      "url",
+      "hash"
+    ],
     "external_service": true,
+    "disabled": true,
     "description": "search an observable in the VirusTotal DB using the old API endpoints",
     "requires_configuration": true,
-    "python_module": "vt2get_run",
+    "python_module": "vt2_get.VirusTotalv2",
     "additional_config_params": {
       "api_key_name": "VT_KEY"
-    }
+    },
+    "soft_time_limit": 30
   },
   "VirusTotal_v2_Scan_File": {
     "type": "file",
     "external_service": true,
+    "disabled": true,
     "leaks_info": true,
     "description": "scan a file on VirusTotal using old API endpoints",
     "requires_configuration": true,
-    "python_module": "vt2scan_run",
+    "python_module": "vt2_scan.VirusTotalv2ScanFile",
     "additional_config_params": {
       "api_key_name": "VT_KEY"
-    }
+    },
+    "soft_time_limit": 400
   },
   "VirusTotal_v3_Get_File": {
     "type": "file",
     "external_service": true,
+    "disabled": true,
     "run_hash": true,
     "description": "check file hash on VirusTotal",
     "requires_configuration": true,
-    "python_module": "vt3get_run",
+    "python_module": "vt3_get.VirusTotalv3",
     "additional_config_params": {
       "api_key_name": "VT_KEY"
-    }
-  },
-  "VirusTotal_v3_Get_File_And_Rescan_If_Old": {
-    "type": "file",
-    "external_service": true,
-    "run_hash": true,
-    "description": "check file hash on VirusTotal and rescan it if it is old",
-    "requires_configuration": true,
-    "python_module": "vt3get_scan_run",
-    "additional_config_params": {
-        "api_key_name": "VT_KEY",
-        "force_active_scan_if_old": true
-    }
+    },
+    "soft_time_limit": 40
   },
   "VirusTotal_v3_Get_File_And_Scan": {
     "type": "file",
     "external_service": true,
+    "leaks_info": true,
     "run_hash": true,
     "description": "check file hash on VirusTotal. If not already available, send the sample and perform a new scan",
     "requires_configuration": true,
-    "python_module": "vt3get_scan_run",
+    "python_module": "vt3_get.VirusTotalv3",
     "additional_config_params": {
       "api_key_name": "VT_KEY",
       "force_active_scan": true
-    }
-  },
-  "VirusTotal_v3_Get_File_And_Scan_Or_Rescan_If_Old": {
-    "type": "file",
-    "external_service": true,
-    "run_hash": true,
-    "description": "check file hash on VirusTotal. If it is already available, rescan if it is old. If it is not available, send the sample and perform a new scan",
-    "requires_configuration": true,
-    "python_module": "vt3get_scan_run",
-    "additional_config_params": {
-        "api_key_name": "VT_KEY",
-        "force_active_scan": true,
-        "force_active_scan_if_old": true
-    }
+    },
+    "soft_time_limit": 500
   },
   "VirusTotal_v3_Get_Observable": {
     "type": "observable",
-    "observable_supported": ["ip", "domain", "url", "hash"],
+    "observable_supported": [
+      "ip",
+      "domain",
+      "url",
+      "hash"
+    ],
     "external_service": true,
     "description": "search an observable in the VirusTotal DB",
     "requires_configuration": true,
-    "python_module": "vt3get_run",
+    "python_module": "vt3_get.VirusTotalv3",
     "additional_config_params": {
       "api_key_name": "VT_KEY"
-    }
-  },
-  "VirusTotal_v3_Scan_File": {
-    "type": "file",
-    "external_service": true,
-    "leaks_info": true,
-    "description": "scan a file on VirusTotal",
-    "requires_configuration": true,
-    "python_module": "vt3scan_run",
-    "additional_config_params": {
-      "api_key_name": "VT_KEY"
-    }
+    },
+    "soft_time_limit": 40
   },
   "Whoisxmlapi": {
     "type": "observable",
-    "observable_supported": ["ip", "domain"],
+    "observable_supported": [
+      "ip",
+      "domain"
+    ],
     "external_service": true,
     "description": "the WHOIS record data, of a domain name, an IP address, or an email address",
     "requires_configuration": true,
-    "python_module": "whoisxmlapi_run",
+    "python_module": "whoisxmlapi.Whoisxmlapi",
     "additional_config_params": {
       "api_key_name": "WHOISXMLAPI_KEY"
-    }
-  },
-  "Yara_Scan_Community": {
-    "type": "file",
-    "description": "scan a file with community yara rules",
-    "python_module": "yara_run",
-    "additional_config_params": {
-      "directories_with_rules": ["/opt/deploy/yara/rules"]
-    }
+    },
+    "soft_time_limit": 30
   },
   "Xlm_Macro_Deobfuscator": {
     "type": "file",
@@ -951,34 +1070,55 @@
       "application/zip"
     ],
     "decription": "Xlm macro deobfuscator",
-    "python_module": "xlm_deobfuscator_run",
+    "python_module": "xlm_macro_deobfuscator.XlmMacroDeobfuscator",
     "additional_config_params": {
-        "passwords_to_check": ["agenzia", "inps", "coronavirus"]
+      "passwords_to_check": [
+        "agenzia",
+        "inps",
+        "coronavirus"
+      ]
+    },
+    "soft_time_limit": 30
+  },
+  "Yara_Scan_Community": {
+    "type": "file",
+    "description": "scan a file with community yara rules",
+    "python_module": "yara_scan.YaraScan",
+    "soft_time_limit": 60,
+    "additional_config_params": {
+      "directories_with_rules": ["/opt/deploy/yara/rules"]
     }
   },
   "Yara_Scan_Florian": {
     "type": "file",
     "description": "scan a file with Neo23x0 yara rules",
-    "python_module": "yara_run",
+    "python_module": "yara_scan.YaraScan",
+    "soft_time_limit": 60,
     "additional_config_params": {
-      "directories_with_rules": ["/opt/deploy/yara/signature-base/yara"],
-      "git_repo_main_dir": ["/opt/deploy/yara/signature-base"]
+      "git_repo_main_dir": ["/opt/deploy/yara/signature-base"],
+      "directories_with_rules": ["/opt/deploy/yara/signature-base/yara"]
     }
   },
   "Yara_Scan_Intezer": {
     "type": "file",
     "description": "scan a file with Intezer yara rules",
-    "python_module": "yara_run",
+    "python_module": "yara_scan.YaraScan",
+    "soft_time_limit": 60,
     "additional_config_params": {
-      "directories_with_rules": ["/opt/deploy/yara/intezer_rules"]
+      "directories_with_rules": [
+        "/opt/deploy/yara/intezer_rules"
+      ]
     }
   },
   "Yara_Scan_McAfee": {
     "type": "file",
     "description": "scan a file with McAfee yara rules",
-    "python_module": "yara_run",
+    "python_module": "yara_scan.YaraScan",
+    "soft_time_limit": 60,
     "additional_config_params": {
-      "git_repo_main_dir": ["/opt/deploy/yara/mcafee_rules"],
+      "git_repo_main_dir": [
+        "/opt/deploy/yara/mcafee_rules"
+      ],
       "directories_with_rules": [
         "/opt/deploy/yara/mcafee_rules/APT",
         "/opt/deploy/yara/mcafee_rules/RAT",
@@ -986,6 +1126,19 @@
         "/opt/deploy/yara/mcafee_rules/miners",
         "/opt/deploy/yara/mcafee_rules/ransomware",
         "/opt/deploy/yara/mcafee_rules/stealer"
+      ]
+    }
+  },
+  "Yara_Scan_Stratosphere": {
+    "type": "file",
+    "description": "scan a file with Stratosphere yara rules",
+    "python_module": "yara_scan.YaraScan",
+    "soft_time_limit": 60,
+    "additional_config_params": {
+      "git_repo_main_dir": ["/opt/deploy/yara/stratosphere_rules"],
+      "directories_with_rules": [
+        "/opt/deploy/yara/stratosphere_rules/malware",
+        "/opt/deploy/yara/stratosphere_rules/protocols"
       ]
     }
   }

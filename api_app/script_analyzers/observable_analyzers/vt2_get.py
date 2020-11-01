@@ -10,16 +10,16 @@ vt_base = "https://www.virustotal.com/vtapi/v2/"
 class VirusTotalv2(classes.ObservableAnalyzer):
     def set_config(self, additional_config_params):
         self.api_key_name = additional_config_params.get("api_key_name", "VT_KEY")
-        self.__api_key = secrets.get_secret(self.api_key_name)
 
     def run(self):
-        if not self.__api_key:
+        api_key = secrets.get_secret(self.api_key_name)
+        if not api_key:
             raise AnalyzerRunException(
                 f"No API key retrieved with name: {self.api_key_name}"
             )
 
         resp = vt_get_report(
-            self.__api_key, self.observable_name, self.observable_classification
+            api_key, self.observable_name, self.observable_classification
         )
 
         resp_code = resp.get("response_code", 1)

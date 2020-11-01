@@ -41,8 +41,9 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.postgres",
+    "memoize",
     "rest_framework",
-    "rest_framework_simplejwt.token_blacklist",
+    "durin",
     "guardian",
     "api_app.apps.ApiAppConfig",
     "django_elasticsearch_dsl",
@@ -83,10 +84,20 @@ REST_FRAMEWORK = {
         "rest_framework.renderers.JSONRenderer",
     ],
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework_simplejwt.authentication.JWTAuthentication",
+        "durin.auth.CachedTokenAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
     "EXCEPTION_HANDLER": "rest_framework.views.exception_handler",
+}
+
+# Django-Rest-Durin
+REST_DURIN = {
+    "DEFAULT_TOKEN_TTL": timedelta(days=14),
+    "TOKEN_CHARACTER_LENGTH": 32,
+    "USER_SERIALIZER": "durin.serializers.UserSerializer",
+    "AUTH_HEADER_PREFIX": "Token",
+    "TOKEN_CACHE_TIMEOUT": 300,  # 5 minutes
+    "REFRESH_TOKEN_ON_LOGIN": True,
 }
 
 DB_HOST = secrets.get_secret("DB_HOST")
@@ -104,26 +115,6 @@ DATABASES = {
         "USER": DB_USER,
         "PASSWORD": DB_PASSWORD,
     },
-}
-
-# Simple JWT Stuff
-
-CLIENT_TOKEN_LIFETIME_DAYS = int(os.environ.get("PYINTELOWL_TOKEN_LIFETIME", 7))
-
-SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(hours=1),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
-    "ROTATE_REFRESH_TOKENS": True,
-    "BLACKLIST_AFTER_ROTATION": True,
-    "ALGORITHM": "HS512",
-    "SIGNING_KEY": SECRET_KEY,
-    "AUTH_HEADER_TYPES": ("Token",),
-    "USER_ID_FIELD": "id",
-    "USER_ID_CLAIM": "user_id",
-    "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),
-    "TOKEN_TYPE_CLAIM": "token_type",
-    "JTI_CLAIM": "jti",
-    "PYINTELOWL_TOKEN_LIFETIME": timedelta(days=CLIENT_TOKEN_LIFETIME_DAYS),
 }
 
 # Elastic Search Configuration
@@ -145,6 +136,7 @@ else:
 CELERY_BROKER_URL = secrets.get_secret("CELERY_BROKER_URL")
 CELERY_ACCEPT_CONTENT = ["application/json"]
 CELERY_TASK_SERIALIZER = "json"
+CELERY_IGNORE_RESULT = True
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_TIMEZONE = "Europe/Rome"
 CELERY_IMPORTS = ("intel_owl.tasks",)

@@ -14,6 +14,9 @@ git clone --depth 1 https://github.com/intezer/yara-rules intezer_rules
 # McAfee rules
 git clone --depth 1 https://github.com/advanced-threat-research/Yara-Rules mcafee_rules
 
+# Stratosphere rules
+git clone --depth 1 https://github.com/stratosphereips/yara-rules stratosphere_rules
+
 # Yara community rules
 git clone --depth 1 https://github.com/Yara-Rules/rules.git
 community_yara_index="/opt/deploy/yara/rules/index.yar"

@@ -17,7 +17,6 @@ vt_base = "https://www.virustotal.com/api/v3/"
 class VirusTotalv3ScanFile(FileAnalyzer):
     def set_config(self, additional_config_params):
         self.api_key_name = additional_config_params.get("api_key_name", "VT_KEY")
-        self.__api_key = secrets.get_secret(self.api_key_name)
         self.additional_config_params = additional_config_params
         # max no. of tries when polling for result
         self.max_tries = additional_config_params.get("max_tries", 100)
@@ -25,13 +24,14 @@ class VirusTotalv3ScanFile(FileAnalyzer):
         self.poll_distance = 5
 
     def run(self):
-        if not self.__api_key:
+        api_key = secrets.get_secret(self.api_key_name)
+        if not api_key:
             raise AnalyzerRunException(
                 f"No API key retrieved with name: {self.api_key_name}"
             )
 
         return vt_scan_file(
-            self.__api_key,
+            api_key,
             self.md5,
             self.job_id,
             max_tries=self.max_tries,

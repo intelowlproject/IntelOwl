@@ -59,8 +59,9 @@ class CustomAuthTokenAdmin(AuthTokenAdmin):
 
     def save_model(self, request, obj, form, change):
         client = Client.objects.get(name="pyintelowl")
-        # lgtm [py/unused-local-variable]
-        obj = AuthToken.objects.create(user=obj.user, client=client)
+        obj = AuthToken.objects.create(
+            user=obj.user, client=client
+        )  # lgtm [py/unused-local-variable]
 
 
 admin.site.register(Job, JobAdminView)

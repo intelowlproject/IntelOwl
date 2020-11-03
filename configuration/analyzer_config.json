@@ -485,7 +485,7 @@
     "additional_config_params": {
       "verbose": false
     },
-    "soft_time_limit": 30
+    "soft_time_limit": 40
   },
   "OTX_Check_Hash": {
     "type": "file",
@@ -497,7 +497,7 @@
     "additional_config_params": {
       "verbose": false
     },
-    "soft_time_limit": 30
+    "soft_time_limit": 40
   },
   "PDF_Info": {
     "type": "file",

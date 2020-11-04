@@ -163,6 +163,18 @@
       "api_version": 2
     }
   },
+  "DNStwist": {
+    "type": "observable",
+    "observable_supported": [
+      "domain",
+      "url"
+    ],
+    "external_service": true,
+    "description": "scans for potentially malicious permutations of a domain name",
+    "python_module": "dnstwist.DNStwist",
+    "additional_config_params": {
+    }
+  },
   "Doc_Info": {
     "type": "file",
     "supported_filetypes": [

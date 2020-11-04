@@ -32,6 +32,7 @@ from api_app.script_analyzers.observable_analyzers import (
     checkdmarc,
     urlscan,
     phishtank,
+    dnstwist,
 )
 from .mock_utils import (
     MockResponse,
@@ -387,6 +388,17 @@ class DomainAnalyzersTests(
             self.observable_name,
             self.observable_classification,
             {},
+        ).start()
+
+        self.assertEqual(report.get("success", False), True)
+
+    def test_dnstwist(self, mock_get=None, mock_post=None):
+        report = dnstwist.DNStwist(
+            "DNStwist",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {"tld": True, "mxcheck": True, "ssdeep": True},
         ).start()
 
         self.assertEqual(report.get("success", False), True)

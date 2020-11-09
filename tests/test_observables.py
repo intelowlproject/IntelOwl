@@ -12,6 +12,7 @@ from api_app.script_analyzers.observable_analyzers import (
     abuseipdb,
     censys,
     shodan,
+    ipinfo,
     maxmind,
     greynoise,
     talos,
@@ -138,6 +139,16 @@ class IPAnalyzersTests(
     def test_shodan(self, mock_get=None, mock_post=None):
         report = shodan.Shodan(
             "Shodan",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    def test_ipinfo(self, mock_get=None, mock_post=None):
+        report = ipinfo.IPInfo(
+            "IPInfo",
             self.job_id,
             self.observable_name,
             self.observable_classification,

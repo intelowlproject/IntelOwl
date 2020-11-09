@@ -5,7 +5,6 @@ import socket
 import dns.resolver
 
 from urllib.parse import urlparse
-from api_app.exceptions import AnalyzerRunException
 from api_app.script_analyzers import classes
 from api_app.script_analyzers.observable_analyzers.dns.dns_responses import (
     dns_resolver_response,
@@ -27,12 +26,14 @@ class ClassicDNSResolver(classes.ObservableAnalyzer):
         if self.observable_classification == "ip":
             try:
                 ipaddress.ip_address(self.observable_name)
-                domains = socket.gethostbyaddr(self.observable_name)
-                resolutions = domains
+                hostname, alias, ip = socket.gethostbyaddr(self.observable_name)
+                if alias:
+                    resolutions.extend(alias)
+                if hostname:
+                    resolutions.append(hostname)
             except (socket.gaierror, socket.herror):
-                raise AnalyzerRunException(
-                    f"no resolution found for observable {self.observable_name}"
-                )
+                logger.warning(f"No resolution for ip {self.observable_name}")
+                resolutions = []
         elif self.observable_classification in ["domain", "url"]:
             observable = self.observable_name
             # for URLs we are checking the relative domain
@@ -50,6 +51,10 @@ class ClassicDNSResolver(classes.ObservableAnalyzer):
                     }
                     resolutions.append(element)
             except dns.resolver.NXDOMAIN:
+                logger.warning(
+                    f"No resolution for "
+                    f"{self.observable_classification} {self.observable_name}"
+                )
                 resolutions = []
 
         return dns_resolver_response(self.observable_name, resolutions)

@@ -126,6 +126,7 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * `Quad9_DNS`: Retrieve current domain resolution with Quad9 DoH (DNS over HTTPS)
 * `Quad9`: Scan an observable against Quad9 DB
 * `DNStwist`: Scan a url/domain to find potentially malicious permutations via dns fuzzing. 
+* `IPInfo`: Location Information about an IP
 
 #### [Additional analyzers](https://intelowl.readthedocs.io/en/develop/Advanced-Usage.html#optional-analyzers) that can be enabled per your wish.
 

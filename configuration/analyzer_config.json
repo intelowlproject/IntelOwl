@@ -385,6 +385,18 @@
     "python_module": "intezer_scan.IntezerScan",
     "soft_time_limit": 180
   },
+  "IPInfo": {
+    "type": "observable",
+    "observable_supported": ["ip"],
+    "external_service": true,
+    "description": "Brief Information regarding given IP",
+    "requires_configuration": true,
+    "python_module": "ipinfo.IPInfo",
+    "additional_config_params": {
+      "api_key_name": "IPINFO_KEY"
+    },
+    "soft_time_limit": 30
+  },
   "MISP": {
     "type": "observable",
     "observable_supported": [

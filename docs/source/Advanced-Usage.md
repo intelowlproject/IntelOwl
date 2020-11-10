@@ -81,6 +81,11 @@ List of some of the analyzers with optional configuration:
     * `time_first_before`, `time_first_after`, `time_last_before`, `time_last_after`
 * `*_DNS` (all DNS resolvers analyzers):
     * `query_type`: query type against the chosen DNS resolver, default is "A"
+* `DNStwist`:
+    * `ssdeep` (default False): enable fuzzy hashing - compare HTML content of original domain with a potentially malicious one and determine similarity.
+    * `mxcheck` (default False): find suspicious mail servers and flag them with SPYING-MX string.
+    * `tld` (default False): check for domains with different TLDs by supplying a dictionary file.
+    * `tld_dict` (default abused_tlds.dict): dictionary to use with tld argument. (common_tlds.dict/abused_tlds.dict)
 
 There are two ways to do this:
 

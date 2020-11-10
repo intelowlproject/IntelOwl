@@ -49,3 +49,6 @@ svn export https://github.com/quark-engine/quark-engine/tags/v20.08/quark/rules 
 
 # chown directories
 chown -R www-data:www-data /opt/deploy/yara /opt/deploy/quark-rules
+
+# Clone dictionaries for dnstwist analyzer
+svn export https://github.com/elceef/dnstwist/tags/20201022/dictionaries dnstwist-dictionaries

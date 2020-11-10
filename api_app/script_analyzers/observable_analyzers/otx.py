@@ -46,24 +46,29 @@ class OTX(classes.ObservableAnalyzer):
             )
 
         result = {}
-        details = otx.get_indicator_details_full(otx_type, to_analyze_observable)
-
-        result["pulses"] = (
-            details.get("general", {}).get("pulse_info", {}).get("pulses", [])
-        )
-        # for some observables the output could really be overwhelming
-        if not self.verbose and result["pulses"]:
-            result["pulses"] = result["pulses"][:20]
-        result["geo"] = details.get("geo", {})
-        result["malware_samples"] = [
-            d.get("hash", "") for d in details.get("malware", {}).get("data", [])
-        ]
-        result["passive_dns"] = details.get("passive_dns", {}).get("passive_dns", [])
-        result["reputation"] = details.get("reputation", {}).get("reputation", None)
-        result["url_list"] = details.get("url_list", {}).get("url_list", [])
-        result["analysis"] = details.get("analysis", {}).get("analysis", {})
-        if not self.verbose:
-            if result["analysis"] and "plugins" in result["analysis"]:
-                result["analysis"]["plugins"] = "removed because too long"
+        try:
+            details = otx.get_indicator_details_full(otx_type, to_analyze_observable)
+        except (OTXv2.BadRequest, OTXv2.NotFound) as e:
+            result["error"] = str(e)
+        else:
+            result["pulses"] = (
+                details.get("general", {}).get("pulse_info", {}).get("pulses", [])
+            )
+            # for some observables the output could really be overwhelming
+            if not self.verbose and result["pulses"]:
+                result["pulses"] = result["pulses"][:20]
+            result["geo"] = details.get("geo", {})
+            result["malware_samples"] = [
+                d.get("hash", "") for d in details.get("malware", {}).get("data", [])
+            ]
+            result["passive_dns"] = details.get("passive_dns", {}).get(
+                "passive_dns", []
+            )
+            result["reputation"] = details.get("reputation", {}).get("reputation", None)
+            result["url_list"] = details.get("url_list", {}).get("url_list", [])
+            result["analysis"] = details.get("analysis", {}).get("analysis", {})
+            if not self.verbose:
+                if result["analysis"] and "plugins" in result["analysis"]:
+                    result["analysis"]["plugins"] = "removed because too long"
 
         return result

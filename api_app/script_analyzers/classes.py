@@ -69,6 +69,8 @@ class BaseAnalyzerMixin(metaclass=ABCMeta):
                 result[i] = self._validate_result(result[i])
         elif isinstance(result, str):
             return result.replace("\u0000", "")
+        elif isinstance(result, int) and result > 9223372036854775807:  # max int 8bytes
+            result = 9223372036854775807
         return result
 
     def start(self):

@@ -34,6 +34,7 @@ from api_app.script_analyzers.observable_analyzers import (
     urlscan,
     phishtank,
     dnstwist,
+    zoomeye,
 )
 from .mock_utils import (
     MockResponse,
@@ -289,6 +290,16 @@ class IPAnalyzersTests(
         ).start()
         self.assertEqual(report.get("success", False), True)
 
+    def test_zoomeye(self, mock_get=None, mock_post=None):
+        report = zoomeye.ZoomEye(
+            "ZoomEye",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
 
 @mock_connections(patch("requests.get", side_effect=mocked_requests))
 @mock_connections(patch("requests.post", side_effect=mocked_requests))
@@ -412,6 +423,16 @@ class DomainAnalyzersTests(
             {"tld": True, "mxcheck": True, "ssdeep": True},
         ).start()
 
+        self.assertEqual(report.get("success", False), True)
+
+    def test_zoomeye(self, mock_get=None, mock_post=None):
+        report = zoomeye.ZoomEye(
+            "ZoomEye",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {},
+        ).start()
         self.assertEqual(report.get("success", False), True)
 
 

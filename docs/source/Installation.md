@@ -93,6 +93,7 @@ Optional variables needed to enable specific analyzers:
 * `INTELX_API_KEY`: IntelligenceX API ([docs](https://intelx.io/product))
 * `UNPAC_ME_API_KEY`: UnpacMe API ([docs](https://api.unpac.me/))
 * `IPINFO_KEY`: ipinfo API key
+* `ZOOMEYE_KEY`: ZoomEye API Key([docs](https://www.zoomeye.org/doc))
 
 Advanced additional configuration:
 * `OLD_JOBS_RETENTION_DAYS`: Database retention, default 3 days. Change this if you want to keep your old analysis longer in the database.

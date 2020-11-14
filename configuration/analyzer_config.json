@@ -1165,5 +1165,22 @@
         "/opt/deploy/yara/stratosphere_rules/protocols"
       ]
     }
+  },
+  "ZoomEye": {
+    "type": "observable",
+    "observable_supported": ["ip", "domain"],
+    "requires_configuration": true,
+    "external_service": true,
+    "description": "Cyberspace Search Engine recording information of devices, websites, services and components etc..",
+    "python_module": "zoomeye.ZoomEye",
+    "additional_config_params": {
+      "api_key_name": "ZOOMEYE_KEY",
+      "search_type": "host",
+      "query": "",
+      "page": 1,
+      "facets": "",
+      "history": true
+    },
+    "soft_time_limit": 60
   }
 }

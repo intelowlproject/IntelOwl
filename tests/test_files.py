@@ -28,6 +28,7 @@ from api_app.script_analyzers.file_analyzers import (
     quark_engine,
     unpac_me,
     xlm_macro_deobfuscator,
+    triage_scan,
 )
 from api_app.script_analyzers.observable_analyzers import vt3_get
 
@@ -274,6 +275,17 @@ class FileAnalyzersEXETests(TestCase):
     def test_capa_scan_file(self, mock_get=None, mock_post=None):
         report = capa_info.CapaInfo(
             "Capa_Info",
+            self.job_id,
+            self.filepath,
+            self.filename,
+            self.md5,
+            {},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    def test_triage_scan(self):
+        report = triage_scan.TriageScanFile(
+            "Triage_Scan",
             self.job_id,
             self.filepath,
             self.filename,

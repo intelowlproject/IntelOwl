@@ -98,6 +98,7 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * `Hunter`: Scans a domain name and returns set of data about the organisation, the email address found and additional information about the people owning those email addresses.
 * `Censys_Search`: scan an IP address against Censys View API
 * `MalwareBazaar_Get_Observable`: Check if a particular malware hash is known to MalwareBazaar
+* `MalwareBazaar_Google_Observable`: Check if a particular IP, domain or url is known to MalwareBazaar using google search
 * `ONYPHE`: search an observable in ONYPHE
 * `Threatminer_PDNS`: retrieve PDNS data from Threatminer API
 * `Threatminer_Reports_Tagging`: retrieve reports from Threatminer API

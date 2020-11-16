@@ -355,6 +355,18 @@
     "python_module": "ha_get.HybridAnalysisGet",
     "soft_time_limit": 30
   },
+  "IPInfo": {
+    "type": "observable",
+    "observable_supported": ["ip"],
+    "external_service": true,
+    "description": "Brief Information regarding given IP",
+    "requires_configuration": true,
+    "python_module": "ipinfo.IPInfo",
+    "additional_config_params": {
+      "api_key_name": "IPINFO_KEY"
+    },
+    "soft_time_limit": 30
+  },
   "IntelX_Phonebook": {
     "type": "observable",
     "observable_supported": [
@@ -384,18 +396,6 @@
     "requires_configuration": true,
     "python_module": "intezer_scan.IntezerScan",
     "soft_time_limit": 180
-  },
-  "IPInfo": {
-    "type": "observable",
-    "observable_supported": ["ip"],
-    "external_service": true,
-    "description": "Brief Information regarding given IP",
-    "requires_configuration": true,
-    "python_module": "ipinfo.IPInfo",
-    "additional_config_params": {
-      "api_key_name": "IPINFO_KEY"
-    },
-    "soft_time_limit": 30
   },
   "MISP": {
     "type": "observable",
@@ -469,6 +469,18 @@
     "external_service": true,
     "description": "Check if a particular malware hash is known to MalwareBazaar",
     "python_module": "mb_get.MB_GET",
+    "soft_time_limit": 50
+  },
+  "MalwareBazaar_Google_Observable": {
+    "type": "observable",
+    "observable_supported": [
+      "ip",
+      "domain",
+      "url"
+    ],
+    "external_service": true,
+    "description": "Check if a particular IP, domain or url is known to MalwareBazaar using google search",
+    "python_module": "mb_google.MB_GOOGLE",
     "soft_time_limit": 50
   },
   "MaxMindGeoIP": {
@@ -1165,7 +1177,7 @@
         "/opt/deploy/yara/stratosphere_rules/protocols"
       ]
     }
-  },
+  }
   "ZoomEye": {
     "type": "observable",
     "observable_supported": ["ip", "domain"],

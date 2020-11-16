@@ -24,6 +24,7 @@ from api_app.script_analyzers.observable_analyzers import (
     honeydb,
     hunter,
     mb_get,
+    mb_google,
     threatminer,
     auth0,
     securitytrails,
@@ -527,6 +528,16 @@ class HashAnalyzersTests(
     def test_mb_get(self, mock_get=None, mock_post=None):
         report = mb_get.MB_GET(
             "MalwareBazaar_Get_Observable",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    def test_mb_google(self, mock_get=None, mock_post=None):
+        report = mb_google.MB_GOOGLE(
+            "MalwareBazaar_Google_Observable",
             self.job_id,
             self.observable_name,
             self.observable_classification,

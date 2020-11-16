@@ -26,6 +26,8 @@ WORKDIR $PYTHONPATH
 RUN pip3 install --no-cache-dir --compile -r requirements.txt
 # install elasticsearch-dsl's appropriate version as specified by user
 RUN pip3 install --no-cache-dir django-elasticsearch-dsl==${ELASTICSEARCH_DSL_VERSION}
+# install google for mb_google
+RUN pip3 install --no-cache-dir google
 
 COPY . $PYTHONPATH
 

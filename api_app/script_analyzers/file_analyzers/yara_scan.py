@@ -16,6 +16,20 @@ class YaraScan(FileAnalyzer):
         self.directories_with_rules = additional_config_params.get(
             "directories_with_rules", []
         )
+        self.result = []
+
+    def _validated_matches(self, rules: yara.Rules) -> []:
+        try:
+            return rules.match(self.filepath)
+        except yara.Error as e:
+            if "internal error" in str(e):
+                _, code = str(e).split(":")
+                if int(code.strip()) == 30:
+                    message = f"Too many matches for {self.filename}"
+                    self.result.append({"match": message})
+                    logger.warning(message)
+                    return []
+            raise e
 
     def run(self):
         ruleset = []
@@ -50,12 +64,11 @@ class YaraScan(FileAnalyzer):
         if not ruleset:
             raise AnalyzerRunException("there are no yara rules installed")
 
-        result = []
         for rule in ruleset:
-            matches = rule.match(self.filepath)
+            matches = self._validated_matches(rule)
             for match in matches:
                 # limited to 20 strings reasons because it could be a very long list
-                result.append(
+                self.result.append(
                     {
                         "match": str(match),
                         "strings": str(match.strings[:20]) if match else "",
@@ -64,7 +77,7 @@ class YaraScan(FileAnalyzer):
                     }
                 )
 
-        return result
+        return self.result
 
     @staticmethod
     def yara_update_repos():

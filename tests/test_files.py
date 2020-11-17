@@ -76,6 +76,14 @@ def mocked_cuckoo_get(*args, **kwargs):
     return MockResponse({"task": {"status": "reported"}}, 200)
 
 
+def mocked_triage_get(*args, **kwargs):
+    return MockResponse({}, 200)
+
+
+def mocked_triage_post(*args, **kwargs):
+    return MockResponse({}, 200)
+
+
 class FileAnalyzersEXETests(TestCase):
     def setUp(self):
         params = {
@@ -274,7 +282,9 @@ class FileAnalyzersEXETests(TestCase):
         ).start()
         self.assertEqual(report.get("success", False), True)
 
-    def test_triage_scan(self):
+    @mock_connections(patch("requests.get", side_effect=mocked_triage_get))
+    @mock_connections(patch("requests.post", side_effect=mocked_triage_post))
+    def test_triage_scan(self, mock_get=None, mock_post=None):
         report = triage_scan.TriageScanFile(
             "Triage_Scan",
             self.job_id,

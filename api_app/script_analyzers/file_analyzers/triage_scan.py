@@ -46,31 +46,28 @@ class TriageScanFile(classes.FileAnalyzer):
         response = requests.post(
             self.base_url + "samples", headers=headers, files=files
         )
-        sample_id = response.json()["id"]
 
-        for _try in range(self.max_tries):
-            if response.status_code != 200:
-                time.sleep(self.poll_distance)
-                logger.info(f"triage md5 {self.md5} polling for result try #{_try + 1}")
-                result_url = response.json().get("result_url", "")
-                response = requests.get(self.base_url + result_url)
-                response.raise_for_status()
+        _try = 0
+        while _try < self.max_tries and response.status_code != 200:
+            time.sleep(self.poll_distance)
+            logger.info(f"triage md5 {self.md5} polling for result try #{_try + 1}")
+            response = requests.post(
+                self.base_url + "samples", headers=headers, files=files
+            )
+            response.raise_for_status()
+            _try += 1
 
         if response.status_code != 200:
             raise AnalyzerRunException("max retry attempts exceeded")
 
+        sample_id = response.json().get("id", None)
+        if sample_id is None:
+            raise AnalyzerRunException("error sending sample")
+
         # Event stream is opened. Updates till the task is completed
         requests.get(self.base_url + f"samples/{sample_id}/events", headers=headers)
 
-        # Get short summary of sample
-        summary = requests.get(
-            self.base_url + f"samples/{sample_id}/summary",
-            headers=headers,
-        )
-        summary_json = summary.json()
-        final_report["summary"] = summary_json
-
-        # Get overview report of sample
+        # Get overview report
         overview = requests.get(
             self.base_url + f"samples/{sample_id}/overview.json",
             headers=headers,
@@ -78,12 +75,23 @@ class TriageScanFile(classes.FileAnalyzer):
         overview_json = overview.json()
         final_report["overview"] = overview_json
 
-        # Get static report of sample
+        # Get static report
         static_report = requests.get(
             self.base_url + f"samples/{sample_id}/reports/static",
             headers=headers,
         )
         static_report_json = static_report.json()
         final_report["static_report"] = static_report_json
+
+        # Get task-wise detailed report
+        final_report["task_report"] = {}
+        for task in final_report["overview"]["tasks"].keys():
+            task_report = requests.get(
+                self.base_url + f"samples/{sample_id}/{task}/report_triage.json",
+                headers=headers,
+            )
+            if task_report.status_code == 200:
+                task_report_json = task_report.json()
+                final_report["task_report"][f"{task}"] = task_report_json
 
         return final_report

@@ -922,35 +922,13 @@
   },
   "Triage_Scan": {
     "type": "file",
-    "supported_filetypes":[
-      "application/x-dosexec",
-      "application/x-msdownload",
-      "application/x-msi",
-      "application/zip",
-      "application/x-7z-compressed",
-      "application/x-compressed",
-      "application/bzip2",
-      "application/x-iso9660-image",
-      "application/gzip",
-      "application/vnd.rar",
-      "application/x-tar",
-      "application/msword",
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-      "application/vnd.oasis.opendocument.text",
-      "application/pdf",
-      "application/bat",
-      "application/x-javascript",
-      "application/java-archive",
-      "application/x-ms-shortcut",
-      "application/internet-shortcut"
-
-    ],
     "description": "leverage triage sandbox environment to scan various files",
     "python_module": "triage_scan.TriageScanFile",
     "requires_configuration": true,
     "additional_config_params": {
       "api_key_name": "TRIAGE_KEY",
-      "endpoint": "public"
+      "endpoint": "public",
+      "soft_time_limit": 300
     }
   },
   "UnpacMe_EXE_Unpacker": {

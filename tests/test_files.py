@@ -77,11 +77,11 @@ def mocked_cuckoo_get(*args, **kwargs):
 
 
 def mocked_triage_get(*args, **kwargs):
-    return MockResponse({}, 200)
+    return MockResponse({"tasks": {"task_1": {}, "task_2": {}}}, 200)
 
 
 def mocked_triage_post(*args, **kwargs):
-    return MockResponse({}, 200)
+    return MockResponse({"id": "sample_id", "status": "pending"}, 200)
 
 
 class FileAnalyzersEXETests(TestCase):

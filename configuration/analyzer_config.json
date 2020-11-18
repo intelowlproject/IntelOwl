@@ -928,6 +928,7 @@
     "additional_config_params": {
       "api_key_name": "TRIAGE_KEY",
       "endpoint": "public",
+      "report_type": "overview",
       "soft_time_limit": 300
     }
   },

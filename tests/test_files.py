@@ -198,6 +198,15 @@ class FileAnalyzersEXETests(TestCase):
                 "/opt/deploy/yara/signature-base/yara",
                 "/opt/deploy/yara/stratosphere_rules/malware",
                 "/opt/deploy/yara/stratosphere_rules/protocols",
+                "/opt/deploy/yara/samir_rules",
+                "/opt/deploy/yara/reversinglabs_rules/yara/certificate",
+                "/opt/deploy/yara/reversinglabs_rules/yara/downloader",
+                "/opt/deploy/yara/reversinglabs_rules/yara/exploit",
+                "/opt/deploy/yara/reversinglabs_rules/yara/infostealer",
+                "/opt/deploy/yara/reversinglabs_rules/yara/pua",
+                "/opt/deploy/yara/reversinglabs_rules/yara/ransomware",
+                "/opt/deploy/yara/reversinglabs_rules/yara/trojan",
+                "/opt/deploy/yara/reversinglabs_rules/yara/virus",
             ]
         }
         report = yara_scan.YaraScan(

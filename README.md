@@ -72,6 +72,8 @@ license terms.
 [Intezer Yara sigs](https://github.com/intezer/yara-rules),
 [McAfee Yara sigs](https://github.com/advanced-threat-research/Yara-Rules),
 [Stratosphere Yara sigs](https://github.com/stratosphereips/yara-rules),
+[ReversingLabs Yara sigs](https://github.com/reversinglabs/reversinglabs-yara-rules),
+[Samir Yara sigs](https://github.com/sbousseaden/YaraHunts),
 [APKiD](https://github.com/rednaga/APKiD/blob/master/LICENSE.COMMERCIAL),
 [Box-JS](https://github.com/CapacitorSet/box-js/blob/master/LICENSE),
 [Capa](https://github.com/fireeye/capa/blob/master/LICENSE.txt),

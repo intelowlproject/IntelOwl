@@ -28,6 +28,7 @@ from api_app.script_analyzers.file_analyzers import (
     quark_engine,
     unpac_me,
     xlm_macro_deobfuscator,
+    triage_scan,
 )
 from api_app.script_analyzers.observable_analyzers import vt3_get
 
@@ -73,6 +74,14 @@ def mocked_intezer(*args, **kwargs):
 
 def mocked_cuckoo_get(*args, **kwargs):
     return MockResponse({"task": {"status": "reported"}}, 200)
+
+
+def mocked_triage_get(*args, **kwargs):
+    return MockResponse({"tasks": {"task_1": {}, "task_2": {}}}, 200)
+
+
+def mocked_triage_post(*args, **kwargs):
+    return MockResponse({"id": "sample_id", "status": "pending"}, 200)
 
 
 class FileAnalyzersEXETests(TestCase):
@@ -265,6 +274,19 @@ class FileAnalyzersEXETests(TestCase):
     def test_capa_scan_file(self, mock_get=None, mock_post=None):
         report = capa_info.CapaInfo(
             "Capa_Info",
+            self.job_id,
+            self.filepath,
+            self.filename,
+            self.md5,
+            {},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    @mock_connections(patch("requests.get", side_effect=mocked_triage_get))
+    @mock_connections(patch("requests.post", side_effect=mocked_triage_post))
+    def test_triage_scan(self, mock_get=None, mock_post=None):
+        report = triage_scan.TriageScanFile(
+            "Triage_Scan",
             self.job_id,
             self.filepath,
             self.filename,

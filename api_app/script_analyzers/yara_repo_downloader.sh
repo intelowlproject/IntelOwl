@@ -17,6 +17,13 @@ git clone --depth 1 https://github.com/advanced-threat-research/Yara-Rules mcafe
 # Stratosphere rules
 git clone --depth 1 https://github.com/stratosphereips/yara-rules stratosphere_rules
 
+# ReversingLabs rules
+git clone --depth 1 https://github.com/reversinglabs/reversinglabs-yara-rules reversinglabs_rules
+
+# YaraHunts rules
+git clone --depth 1 https://github.com/sbousseaden/YaraHunts samir_rules
+
+
 # Yara community rules
 git clone --depth 1 https://github.com/Yara-Rules/rules.git
 community_yara_index="/opt/deploy/yara/rules/index.yar"

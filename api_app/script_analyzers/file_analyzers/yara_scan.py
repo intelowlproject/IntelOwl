@@ -1,5 +1,7 @@
 import os
 import logging
+from typing import Tuple, List
+
 import yara
 
 from git import Repo
@@ -32,18 +34,21 @@ class YaraScan(FileAnalyzer):
             raise e
 
     def run(self):
-        ruleset = []
+        ruleset: List[Tuple[str, yara.Rules]] = []
         for rulepath in self.directories_with_rules:
             # you should add a "index.yar" or "index.yas" file
             # and select only the rules you would like to run
             if os.path.isdir(rulepath):
                 if os.path.isfile(rulepath + "/index.yas"):
-                    ruleset.append(yara.load(rulepath + "/index.yas"))
+                    ruleset.append((rulepath, yara.load(rulepath + "/index.yas")))
                 elif os.path.isfile(rulepath + "/index.yar"):
                     ruleset.append(
-                        yara.compile(
-                            rulepath + "/index.yar",
-                            externals={"filename": self.filename},
+                        (
+                            rulepath,
+                            yara.compile(
+                                rulepath + "/index.yar",
+                                externals={"filename": self.filename},
+                            ),
                         )
                     )
                 else:
@@ -52,19 +57,25 @@ class YaraScan(FileAnalyzer):
                     for f in os.listdir(rulepath):
                         full_path = f"{rulepath}/{f}"
                         if os.path.isfile(full_path):
-                            if full_path.endswith(".yar"):
+                            if full_path.endswith(".yar") or full_path.endswith(
+                                ".yara"
+                            ):
                                 ruleset.append(
-                                    yara.compile(
-                                        full_path, externals={"filename": self.filename}
+                                    (
+                                        full_path,
+                                        yara.compile(
+                                            full_path,
+                                            externals={"filename": self.filename},
+                                        ),
                                     )
                                 )
                             elif full_path.endswith(".yas"):
-                                ruleset.append(yara.load(full_path))
+                                ruleset.append((full_path, yara.load(full_path)))
 
         if not ruleset:
             raise AnalyzerRunException("there are no yara rules installed")
 
-        for rule in ruleset:
+        for path, rule in ruleset:
             matches = self._validated_matches(rule)
             for match in matches:
                 # limited to 20 strings reasons because it could be a very long list
@@ -74,6 +85,7 @@ class YaraScan(FileAnalyzer):
                         "strings": str(match.strings[:20]) if match else "",
                         "tags": match.tags,
                         "meta": match.meta,
+                        "path": path,
                     }
                 )
 

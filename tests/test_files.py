@@ -193,20 +193,119 @@ class FileAnalyzersEXETests(TestCase):
         ).start()
         self.assertEqual(report.get("success", False), True)
 
-    def test_yara_exe(self):
+    def test_yara_mcafee(self):
         additional_params = {
             "directories_with_rules": [
-                "/opt/deploy/yara/rules",
-                "/opt/deploy/yara/intezer_rules",
                 "/opt/deploy/yara/mcafee_rules/APT",
                 "/opt/deploy/yara/mcafee_rules/RAT",
                 "/opt/deploy/yara/mcafee_rules/malware",
                 "/opt/deploy/yara/mcafee_rules/miners",
                 "/opt/deploy/yara/mcafee_rules/ransomware",
                 "/opt/deploy/yara/mcafee_rules/stealer",
-                "/opt/deploy/yara/signature-base/yara",
+            ]
+        }
+        report = yara_scan.YaraScan(
+            "Yara_Scan",
+            self.job_id,
+            self.filepath,
+            self.filename,
+            self.md5,
+            additional_params,
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    def test_yara_stratosphere(self):
+        additional_params = {
+            "directories_with_rules": [
                 "/opt/deploy/yara/stratosphere_rules/malware",
                 "/opt/deploy/yara/stratosphere_rules/protocols",
+            ]
+        }
+        report = yara_scan.YaraScan(
+            "Yara_Scan",
+            self.job_id,
+            self.filepath,
+            self.filename,
+            self.md5,
+            additional_params,
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    def test_yara_intezer(self):
+        additional_params = {
+            "directories_with_rules": [
+                "/opt/deploy/yara/intezer_rules",
+            ]
+        }
+        report = yara_scan.YaraScan(
+            "Yara_Scan",
+            self.job_id,
+            self.filepath,
+            self.filename,
+            self.md5,
+            additional_params,
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    def test_yara_reversinglabs(self):
+        additional_params = {
+            "directories_with_rules": [
+                "/opt/deploy/yara/reversinglabs_rules/yara/certificate",
+                "/opt/deploy/yara/reversinglabs_rules/yara/downloader",
+                "/opt/deploy/yara/reversinglabs_rules/yara/exploit",
+                "/opt/deploy/yara/reversinglabs_rules/yara/infostealer",
+                "/opt/deploy/yara/reversinglabs_rules/yara/pua",
+                "/opt/deploy/yara/reversinglabs_rules/yara/ransomware",
+                "/opt/deploy/yara/reversinglabs_rules/yara/trojan",
+                "/opt/deploy/yara/reversinglabs_rules/yara/virus",
+            ]
+        }
+        report = yara_scan.YaraScan(
+            "Yara_Scan",
+            self.job_id,
+            self.filepath,
+            self.filename,
+            self.md5,
+            additional_params,
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    def test_yara_samir(self):
+        additional_params = {
+            "directories_with_rules": [
+                "/opt/deploy/yara/samir_rules",
+            ]
+        }
+        report = yara_scan.YaraScan(
+            "Yara_Scan",
+            self.job_id,
+            self.filepath,
+            self.filename,
+            self.md5,
+            additional_params,
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    def test_yara_florian(self):
+        additional_params = {
+            "directories_with_rules": [
+                "/opt/deploy/yara/signature-base/yara",
+            ]
+        }
+        report = yara_scan.YaraScan(
+            "Yara_Scan",
+            self.job_id,
+            self.filepath,
+            self.filename,
+            self.md5,
+            additional_params,
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    def test_yara_community(self):
+        additional_params = {
+            "directories_with_rules": [
+                "/opt/deploy/yara/rules",
             ]
         }
         report = yara_scan.YaraScan(

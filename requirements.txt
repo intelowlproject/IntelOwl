@@ -78,7 +78,7 @@ yara-python==4.0.2
 zipp==0.6.0
 djangorestframework-guardian==0.3.0
 quark-engine==20.8
-git+git://github.com/DissectMalware/XLMMacroDeobfuscator.git@89fbce0c87014a4b5a22c1aef09c8b3ea9bf16c0
+git+https://github.com/DissectMalware/XLMMacroDeobfuscator.git@89fbce0c87014a4b5a22c1aef09c8b3ea9bf16c0
 speakeasy-emulator==1.4.7
 sphinx_rtd_theme==0.5.0
 flake8==3.8.4

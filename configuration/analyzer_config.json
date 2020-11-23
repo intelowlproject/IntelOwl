@@ -194,7 +194,7 @@
       "application/xml",
       "application/zip"
     ],
-    "decription": "static generic document analysis",
+    "decription": "static generic document analysis (Oletools)",
     "python_module": "doc_info.DocInfo",
     "soft_time_limit": 30
   },
@@ -540,7 +540,7 @@
     "supported_filetypes": [
       "application/pdf"
     ],
-    "description": "static PDF analysis",
+    "description": "static PDF analysis (peepdf + pdfid)",
     "python_module": "pdf_info.PDFInfo",
     "soft_time_limit": 30
   },
@@ -549,7 +549,7 @@
     "supported_filetypes": [
       "application/x-dosexec"
     ],
-    "description": "static PE analysis",
+    "description": "static PE analysis (pefile)",
     "python_module": "pe_info.PEInfo",
     "soft_time_limit": 30
   },
@@ -667,7 +667,7 @@
       "text/rtf",
       "application/rtf"
     ],
-    "description": "static RTF analysis",
+    "description": "static RTF analysis (Oletools)",
     "python_module": "rtf_info.RTFInfo",
     "soft_time_limit": 30
   },
@@ -815,7 +815,7 @@
   },
   "Strings_Info_ML": {
     "type": "file",
-    "description": "strings extraction plus strings ranking based on Machine Learning",
+    "description": "strings extraction plus strings ranking based on Machine Learning. Leverages Fireeye's Stringsifter",
     "python_module": "strings_info.StringsInfo",
     "additional_config_params": {
       "max_number_of_strings": 200,
@@ -934,7 +934,7 @@
   },
   "Triage_Scan": {
     "type": "file",
-    "description": "leverage triage sandbox environment to scan various files",
+    "description": "leverage Triage sandbox environment to scan various files",
     "python_module": "triage_scan.TriageScanFile",
     "requires_configuration": true,
     "additional_config_params": {

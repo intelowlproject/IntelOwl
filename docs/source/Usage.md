@@ -33,16 +33,16 @@ The following is the list of the available analyzers you can run out-of-the-box:
 
 #### File analyzers:
 * `File_Info`: static generic File analysis
-* `PDF_Info`: static PDF analysis
-* `Rtf_Info`: static RTF analysis
-* `Doc_Info`: static generic document analysis
+* `PDF_Info`: static PDF analysis (peepdf + pdfid)
+* `Rtf_Info`: static RTF analysis (Oletools)
+* `Doc_Info`: static generic document analysis (Oletools)
 * `Doc_Info_Experimental`: static document analysis with new features to analyze XLM macros, encrypted macros and more
-* `Xlm_Macro_Deobfuscator`:  [XlmMacroDeobfuscator](https://github.com/DissectMalware/XLMMacroDeobfuscator) deobfuscate xlm macros
-* `PE_Info`: static PE analysis
+* `Xlm_Macro_Deobfuscator`: [XlmMacroDeobfuscator](https://github.com/DissectMalware/XLMMacroDeobfuscator) deobfuscate xlm macros
+* `PE_Info`: static PE analysis (pefile)
 * `Signature_Info`: PE signature extractor
 * `Speakeasy`: Speakeasy binary emulation
 * `Strings_Info_Classic`: strings extraction
-* `Strings_Info_ML`: strings extraction plus strings ranking based on Machine Learning
+* `Strings_Info_ML`: strings extraction plus strings ranking based on Machine Learning. Leverages [Stringsifter](https://github.com/fireeye/stringsifter)
 * `VirusTotal_v3_Get_File_And_Scan`: check file hash on VirusTotal. If not already available, send the sample and perform a scan
 * `VirusTotal_v3_Get_File`: check only the file hash on VirusTotal (this analyzer is disabled by default to avoid multiple unwanted queries. You have to change that flag [in the config]((https://github.com/intelowlproject/IntelOwl/blob/master/configuration/analyzer_config.json)) to use it)
 * `VirusTotal_v2_Get_File`: check file hash on VirusTotal using old API endpoints (this analyzer is disabled by default. You have to change that flag [in the config]((https://github.com/intelowlproject/IntelOwl/blob/master/configuration/analyzer_config.json)) to use it)
@@ -50,7 +50,7 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * `Intezer Scan`: scan a file on Intezer
 * `Cuckoo_Scan`: scan a file on Cuckoo (this analyzer is disabled by default. You have to change that flag [in the config]((https://github.com/intelowlproject/IntelOwl/blob/master/configuration/analyzer_config.json)) to use it)
 * `HybridAnalysis_Get_File`: check file hash on HybridAnalysis sandbox reports
-* `OTX_Check_Hash`: check file hash on OTX Alienvault
+* `OTX_Check_Hash`: check file hash on [Alienvault OTX](https://otx.alienvault.com/)
 * `MISP_Check_Hash`: check a file hash on a MISP instance
 * `MISPFIRST_Check_Hash`: check a file hash on the FIRST MISP instance
 * `Yara_Scan_Community`: scan a file with community yara rules
@@ -71,12 +71,13 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * `Quark_Engine_APK`: [Quark Engine](https://github.com/quark-engine/quark-engine) is an Obfuscation-Neglect Android Malware Scoring System.
 * `IntelX_Phonebook`: [IntelligenceX](https://intelx.io/) is a search engine and data archive. Fetches emails, urls, domains associated with an observable.
 * `UnpacMe_EXE_Unpacker`: [UnpacMe](https://www.unpac.me/) is an automated malware unpacking service
+* `Triage_Scan`: leverage [Triage](https://tria.ge) sandbox environment to scan various files
 
 #### Observable analyzers (ip, domain, url, hash)
 * `VirusTotal_v3_Get_Observable`: search an observable in the VirusTotal DB
 * `VirusTotal_v2_Get_Observable`: search an observable in the VirusTotal DB using the old API endpoints (this analyzer is disabled by default. You have to change that flag [in the config]((https://github.com/intelowlproject/IntelOwl/blob/master/configuration/analyzer_config.json)) to use it)
 * `HybridAnalysis_Get_Observable`: search an observable in the HybridAnalysis sandbox reports
-* `OTXQuery`: scan an observable on Alienvault OTX
+* `OTXQuery`: scan an observable on [Alienvault OTX](https://otx.alienvault.com/)
 * `TalosReputation`: check an IP reputation from Talos
 * `Robtex_Forward_PDNS_Query`: scan a domain against the Robtex Passive DNS DB
 * `Robtex_Reverse_PDNS_Query`: scan an IP against the Robtex Passive DNS DB
@@ -108,7 +109,7 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * `URLhaus`: Query a domain or URL against URLhaus API.
 * `Google_DNS`: Retrieve current domain resolution with Google DoH (DNS over HTTPS)
 * `CloudFlare_DNS`: Retrieve current domain resolution with CloudFlare DoH (DNS over HTTPS)
-* `CloudFlare_Malicious_Detector`: Scan an observable against CloudFlare DB
+* `CloudFlare_Malicious_Detector`: Leverages CloudFlare DoH to check if a domain is related to malware
 * `Classic_DNS`: Retrieve current domain resolution with default DNS
 * `Auth0`: scan an IP against the Auth0 API
 * `Securitytrails_IP_Neighbours`: scan an IP against securitytrails API for neighbour IPs
@@ -127,9 +128,10 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * `UrlScan_Submit_Result`: Submit & retrieve result of an URL against [URLScan](https://urlscan.io) API
 * `Phishtank`: Search an url against [Phishtank](https://phishtank.org/api_info.php) API
 * `Quad9_DNS`: Retrieve current domain resolution with Quad9 DoH (DNS over HTTPS)
-* `Quad9`: Scan an observable against Quad9 DB
-* `DNStwist`: Scan a url/domain to find potentially malicious permutations via dns fuzzing. 
+* `Quad9_Malicious_Detector`: Leverages Quad9 DoH to check if a domain is related to malware
+* `DNStwist`: Scan a url/domain to find potentially malicious permutations via dns fuzzing. [dnstwist repo](https://github.com/elceef/dnstwist) 
 * `IPInfo`: Location Information about an IP
+* `Zoomeye`: [Zoomeye](https://www.zoomeye.org) Cyberspace Search Engine recording information of devices, websites, services and components etc..
 
 #### [Additional analyzers](https://intelowl.readthedocs.io/en/develop/Advanced-Usage.html#optional-analyzers) that can be enabled per your wish.
 

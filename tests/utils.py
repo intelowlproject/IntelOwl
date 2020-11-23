@@ -174,9 +174,8 @@ class CommonTestCases_ip_url_domain(metaclass=ABCMeta):
             self.observable_classification,
             {},
         ).start()
-
         self.assertEqual(report.get("success", False), True)
-        
+
     def test_mb_google(self, mock_get=None, mock_post=None):
         report = mb_google.MB_GOOGLE(
             "MalwareBazaar_Google_Observable",

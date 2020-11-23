@@ -34,15 +34,19 @@ class XlmMacroDeobfuscator(FileAnalyzer):
         args = {
             "file": self.filepath,
             "noindent": True,
-            "nointeractive": True,
+            "noninteractive": True,
             "return_deobfuscated": True,
             "output_level": 3,
         }
         if xlmpassword:
             args["password"] = xlmpassword
         try:
-            results = {"output": process_file(**args), "correct_password": xlmpassword}
-
+            results = {"output": process_file(**args)}
+            if xlmpassword:
+                results["correct_password"] = xlmpassword
+                results["decrypted"] = True
+            else:
+                results["was_unencrypted"] = True
             return results
         except Exception as e:
             if "Failed to decrypt" in str(e):

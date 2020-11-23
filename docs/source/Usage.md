@@ -57,7 +57,9 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * `Yara_Scan_Florian`: scan a file with Neo23x0 yara rules
 * `Yara_Scan_Intezer`: scan a file with Intezer yara rules
 * `Yara_Scan_McAfee`: scan a file with McAfee yara rules
+* `Yara_Scan_Samir`: scan a file with Samir Threat Hunting yara rules
 * `Yara_Scan_Stratosphere`: scan a file with Stratosphere yara rules
+* `Yara_Scan_ReversingLabs`: scan a file with ReversingLabs yara rules
 * `Yara_Scan_Custom_Signatures`: scan a file with your own added signatures
 * `MalwareBazaar_Get_File`: Check if a particular malware sample is known to MalwareBazaar
 * `PEframe_Scan`: Perform static analysis on Portable Executable malware and malicious MS Office documents.
@@ -125,6 +127,8 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * `Phishtank`: Search an url against [Phishtank](https://phishtank.org/api_info.php) API
 * `Quad9_DNS`: Retrieve current domain resolution with Quad9 DoH (DNS over HTTPS)
 * `Quad9`: Scan an observable against Quad9 DB
+* `DNStwist`: Scan a url/domain to find potentially malicious permutations via dns fuzzing. 
+* `IPInfo`: Location Information about an IP
 
 #### [Additional analyzers](https://intelowl.readthedocs.io/en/develop/Advanced-Usage.html#optional-analyzers) that can be enabled per your wish.
 

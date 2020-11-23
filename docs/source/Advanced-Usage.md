@@ -59,7 +59,7 @@ Such compose files are available under `integrations/`.
 
 
 ## Customize analyzer execution at time of request
-Some analyzers provide the chance to customize the performed analysis based on options that are different for each analyzer.
+Some analyzers provide the chance to customize the performed analysis based on options that are different for each analyzer. This is configurable via the `CUSTOM ANALYZERS CONFIGURATION` button on the scan form or you can pass these values as a dictionary when using the pyintelowl client.
 
 List of some of the analyzers with optional configuration:
 * `VirusTotal_v3_Get_File*`:
@@ -81,6 +81,17 @@ List of some of the analyzers with optional configuration:
     * `time_first_before`, `time_first_after`, `time_last_before`, `time_last_after`
 * `*_DNS` (all DNS resolvers analyzers):
     * `query_type`: query type against the chosen DNS resolver, default is "A"
+* `DNStwist`:
+    * `ssdeep` (default False): enable fuzzy hashing - compare HTML content of original domain with a potentially malicious one and determine similarity.
+    * `mxcheck` (default False): find suspicious mail servers and flag them with SPYING-MX string.
+    * `tld` (default False): check for domains with different TLDs by supplying a dictionary file.
+    * `tld_dict` (default abused_tlds.dict): dictionary to use with tld argument. (common_tlds.dict/abused_tlds.dict)
+* `ZoomEye`:
+  * `search_type` (defualt host) Choose among `host`, `web`, `both` (both is only available to ZoomEye VIP users)
+  * `query`: Follow according to [docs](https://www.zoomeye.org/doc#host-search), but omit `ip`, `hostname`. Eg: `"query": "city:biejing port:21"`
+  * `facets`(default: Empty string): A comma-separated list of properties to get summary information on query. Eg: `"facets:app,os"`
+  * `page`(default 1): The page number to paging
+  * `history`(default True):  	To query the history data. 
 
 There are two ways to do this:
 

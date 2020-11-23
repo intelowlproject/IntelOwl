@@ -58,6 +58,7 @@ class DNSdb(classes.ObservableAnalyzer):
         self._time_first_after = additional_config_params.get("time_first_after", "")
         self._time_last_before = additional_config_params.get("time_last_before", "")
         self._time_last_after = additional_config_params.get("time_last_after", "")
+        self.no_results_found = False
 
     def run(self):
         # validate params
@@ -70,7 +71,11 @@ class DNSdb(classes.ObservableAnalyzer):
 
         # perform request
         response = requests.get(url, params=params, headers=headers)
-        response.raise_for_status()
+        # for API v1, 404 means no results found
+        if self._api_version == 1 and response.status_code == 404:
+            self.no_results_found = True
+        else:
+            response.raise_for_status()
 
         # validate output
         return self._parse_result(response.text)
@@ -261,11 +266,12 @@ class DNSdb(classes.ObservableAnalyzer):
                     )
         elif self._api_version == 1:
             json_extracted_results["query_successful"] = "not supported for v1"
-            for item in result_text.split("\n"):
-                if item:
-                    # in case of no results or error
-                    if "Error" not in item:
-                        json_extracted_results["data"].append(json.loads(item))
+            if not self.no_results_found:
+                for item in result_text.split("\n"):
+                    if item:
+                        # in case of no results or error
+                        if "Error" not in item:
+                            json_extracted_results["data"].append(json.loads(item))
         else:
             raise AnalyzerRunException(
                 f"{self._api_version} not supported version, "

@@ -57,18 +57,34 @@ class BaseAnalyzerMixin(metaclass=ABCMeta):
         In most cases, this would be overwritten.
         """
 
-    def _validate_result(self, result):
+    def _validate_result(self, result, level=0, max_recursion=190):
         """
-        function to validate result, allowing to store inside postgres without errors
+        function to validate result, allowing to store inside postgres without errors.
+
+        If the character \u0000 is present in the string, postgres will throw an error
+
+        If an integer is bigger than max_int,
+        Mongodb is not capable to store and will throw an error.
+
+        If we have more than 200 recursion levels, every encoding
+        will throw a maximum_nested_object exception
         """
+        if level == max_recursion:
+            logger.info(
+                f"We have reached max_recursion {max_recursion} level. "
+                f"The following object will be pruned {result} "
+            )
+            return None
         if isinstance(result, dict):
             for key, values in result.items():
-                result[key] = self._validate_result(values)
+                result[key] = self._validate_result(values, level=level + 1)
         elif isinstance(result, list):
             for i, _ in enumerate(result):
-                result[i] = self._validate_result(result[i])
+                result[i] = self._validate_result(result[i], level=level + 1)
         elif isinstance(result, str):
             return result.replace("\u0000", "")
+        elif isinstance(result, int) and result > 9223372036854775807:  # max int 8bytes
+            result = 9223372036854775807
         return result
 
     def start(self):
@@ -257,7 +273,7 @@ class DockerBasedAnalyzer(metaclass=ABCMeta):
         for chance in range(self.max_tries):
             time.sleep(self.poll_distance)
             logger.info(
-                f"Result Polling. Try #{chance+1}. Starting the query..."
+                f"Result Polling. Try #{chance + 1}. Starting the query..."
                 f"<-- {self.__repr__()}"
             )
             try:
@@ -267,7 +283,8 @@ class DockerBasedAnalyzer(metaclass=ABCMeta):
             status = json_data.get("status", None)
             if status and status == "running":
                 logger.info(
-                    f"Poll number #{chance+1}, status: 'running' <-- {self.__repr__()}"
+                    f"Poll number #{chance + 1}, "
+                    f"status: 'running' <-- {self.__repr__()}"
                 )
             else:
                 got_result = True

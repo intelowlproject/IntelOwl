@@ -2,6 +2,23 @@
 
 [**Upgrade Guide**](https://intelowl.readthedocs.io/en/latest/Installation.html#update-to-the-most-recent-version)
 
+## [v1.9.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v1.9.0)
+**NEW INBUILT ANALYZERS:**
+- Added [Triage](https://tria.ge) file analyzer.
+- Added [Zoomeye](https://www.zoomeye.org) analyzer.
+- Added [Dnstwist](https://github.com/elceef/dnstwist) analyzers.
+- Added [Ipinfo](https://ipinfo.io) analyzer.
+- Added [ReversingLabs YARA rules](https://github.com/reversinglabs/reversinglabs-yara-rules) analyzer.
+- Added [Samir YARA rules](https://github.com/sbousseaden/YaraHunts) analyzer.
+
+**FIXES/IMPROVEMENTS/Dependency upgrades:**
+
+- several little fixes on some analyzers (`OTXQuery`, `DNSDB`, `Classic_DNS`, `Fortiguard`, `XLMDeobfuscator`)
+- increased filename `max_length` to `512`
+- added validation checks to avoid DB problems
+- upgraded Yara to v4.0.2
+- added Yara rule location to the analyzer output
+
 ## [v1.8.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v1.8.0)
 
 **BREAKING CHANGE:**

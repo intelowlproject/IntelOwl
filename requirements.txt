@@ -88,3 +88,4 @@ django-memoize==2.3.1
 django-rest-durin==0.1.0
 dnstwist==20201022
 ppdeep>=20200505
+google>=3.0.0

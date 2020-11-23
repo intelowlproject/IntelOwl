@@ -16,6 +16,7 @@ from api_app.script_analyzers.observable_analyzers import (
     fortiguard,
     intelx,
     urlscan,
+    mb_google,
 )
 
 from api_app.script_analyzers.observable_analyzers.dns.dns_resolvers import (
@@ -168,6 +169,16 @@ class CommonTestCases_ip_url_domain(metaclass=ABCMeta):
     def test_onyphe(self, mock_get=None, mock_post=None):
         report = onyphe.Onyphe(
             "ONYPHE",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    def test_mb_google(self, mock_get=None, mock_post=None):
+        report = mb_google.MB_GOOGLE(
+            "MalwareBazaar_Google_Observable",
             self.job_id,
             self.observable_name,
             self.observable_classification,

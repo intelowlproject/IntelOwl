@@ -471,6 +471,18 @@
     "python_module": "mb_get.MB_GET",
     "soft_time_limit": 50
   },
+  "MalwareBazaar_Google_Observable": {
+    "type": "observable",
+    "observable_supported": [
+      "ip",
+      "domain",
+      "url"
+    ],
+    "external_service": true,
+    "description": "Check if a particular IP, domain or url is known to MalwareBazaar using google search",
+    "python_module": "mb_google.MB_GOOGLE",
+    "soft_time_limit": 50
+  },
   "MaxMindGeoIP": {
     "type": "observable",
     "observable_supported": ["ip"],

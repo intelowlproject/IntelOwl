@@ -35,14 +35,22 @@ class PEInfo(FileAnalyzer):
 
             sections = []
             for section in pe.sections:
+                try:
+                    name = section.Name.decode()
+                except UnicodeDecodeError as e:
+                    name = "UnableToDecode"
+                    logger.warning(
+                        f"Unable to decode section {section.Name} exception {e}"
+                    )
                 section_item = {
-                    "name": section.Name.decode(),
+                    "name": name,
                     "address": hex(section.VirtualAddress),
                     "virtual_size": hex(section.Misc_VirtualSize),
                     "size": section.SizeOfRawData,
                     "entropy": section.get_entropy(),
                 }
                 sections.append(section_item)
+
             results["sections"] = sections
 
             machine_value = pe.FILE_HEADER.Machine

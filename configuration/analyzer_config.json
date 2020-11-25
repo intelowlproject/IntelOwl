@@ -1157,6 +1157,21 @@
       "directories_with_rules": ["/opt/deploy/yara/samir_rules"]
     }
   },
+  "Yara_Scan_Inquest": {
+    "type": "file",
+    "description": "scan a file with Inquest yara rules",
+    "python_module": "yara_scan.YaraScan",
+    "soft_time_limit": 60,
+    "additional_config_params": {
+      "git_repo_main_dir": [
+        "/opt/deploy/yara/inquest_rules"
+      ],
+      "directories_with_rules": [
+        "/opt/deploy/yara/inquest_rules",
+        "/opt/deploy/yara/inquest_rules/labs.inquest.net"
+      ]
+    }
+  },
   "Yara_Scan_Intezer": {
     "type": "file",
     "description": "scan a file with Intezer yara rules",

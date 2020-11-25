@@ -231,6 +231,23 @@ class FileAnalyzersEXETests(TestCase):
         ).start()
         self.assertEqual(report.get("success", False), True)
 
+    def test_yara_inquest(self):
+        additional_params = {
+            "directories_with_rules": [
+                "/opt/deploy/yara/inquest_rules",
+                "/opt/deploy/yara/inquest_rules/labs.inquest.net",
+            ]
+        }
+        report = yara_scan.YaraScan(
+            "Yara_Scan",
+            self.job_id,
+            self.filepath,
+            self.filename,
+            self.md5,
+            additional_params,
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
     def test_yara_intezer(self):
         additional_params = {
             "directories_with_rules": [

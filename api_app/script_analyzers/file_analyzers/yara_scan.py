@@ -57,20 +57,28 @@ class YaraScan(FileAnalyzer):
                     for f in os.listdir(rulepath):
                         full_path = f"{rulepath}/{f}"
                         if os.path.isfile(full_path):
-                            if full_path.endswith(".yar") or full_path.endswith(
-                                ".yara"
-                            ):
-                                ruleset.append(
-                                    (
-                                        full_path,
-                                        yara.compile(
+                            try:
+                                if (
+                                    full_path.endswith(".yar")
+                                    or full_path.endswith(".yara")
+                                    or full_path.endswith(".rule")
+                                ):
+                                    ruleset.append(
+                                        (
                                             full_path,
-                                            externals={"filename": self.filename},
-                                        ),
+                                            yara.compile(
+                                                full_path,
+                                                externals={"filename": self.filename},
+                                            ),
+                                        )
                                     )
+                                elif full_path.endswith(".yas"):
+                                    ruleset.append((full_path, yara.load(full_path)))
+                            except yara.SyntaxError as e:
+                                logger.exception(
+                                    f"Rule {full_path} " f"has a syntax error {e}"
                                 )
-                            elif full_path.endswith(".yas"):
-                                ruleset.append((full_path, yara.load(full_path)))
+                                continue
 
         if not ruleset:
             raise AnalyzerRunException("there are no yara rules installed")

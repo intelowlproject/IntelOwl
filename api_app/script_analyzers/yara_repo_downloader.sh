@@ -23,6 +23,8 @@ git clone --depth 1 https://github.com/reversinglabs/reversinglabs-yara-rules re
 # YaraHunts rules
 git clone --depth 1 https://github.com/sbousseaden/YaraHunts samir_rules
 
+# Inquest rules
+git clone --depth 1 https://github.com/InQuest/yara-rules inquest_rules
 
 # Yara community rules
 git clone --depth 1 https://github.com/Yara-Rules/rules.git

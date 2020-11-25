@@ -950,6 +950,8 @@
       "application/x-dosexec"
     ],
     "description": "UnpacMe unpacker",
+    "external_service": true,
+    "leaks_info": true,
     "python_module": "unpac_me.UnpacMe",
     "additional_config_params": {
       "api_key_name": "UNPAC_ME_API_KEY",

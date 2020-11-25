@@ -937,6 +937,7 @@
     "description": "leverage Triage sandbox environment to scan various files",
     "python_module": "triage_scan.TriageScanFile",
     "requires_configuration": true,
+    "external_service": true,
     "additional_config_params": {
       "api_key_name": "TRIAGE_KEY",
       "endpoint": "public",

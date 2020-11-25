@@ -45,7 +45,7 @@ You can see the full list of all available analyzers in the [documentation](http
 
 | Inbuilt modules 	| External Services 	| Free modules that require additional configuration 	|
 |-	|-	|-	|
-| - Static Document, RTF, PDF, PE, Generic File Analysis<br>- Strings analysis with ML<br>- PE Emulation with Speakeasy<br>- PE Signature verification<br>- PE Capabilities Extraction<br>- Emulated Javascript Analysis<br>- Android Malware Analysis<br>- SPF and DMARC Validator<br>- more... 	| - GreyNoise v2<br>- Intezer Scan<br>- VirusTotal v2+v3<br>- HybridAnalysis<br>- Censys.io<br>- Shodan<br>- AlienVault OTX<br>- Threatminer<br>- Abuse.ch<br>- many more.. 	| - Cuckoo (requires at least one working Cuckoo instance)<br>- MISP (requires at least one working MISP instance)<br>- Yara (Community, Neo23x0, Intezer and McAfee rules are already available. There's the chance to add your own rules) 	|
+| - Static Document, RTF, PDF, PE, Generic File Analysis<br>- Strings analysis with ML<br>- PE Emulation with Speakeasy<br>- PE Signature verification<br>- PE Capabilities Extraction<br>- Emulated Javascript Analysis<br>- Android Malware Analysis<br>- SPF and DMARC Validator<br>- more... 	| - GreyNoise v2<br>- Intezer Scan<br>- VirusTotal v2+v3<br>- HybridAnalysis<br>- Censys.io<br>- Shodan<br>- AlienVault OTX<br>- Threatminer<br>- Abuse.ch<br>- many more.. 	| - Cuckoo (requires at least one working Cuckoo instance)<br>- MISP (requires at least one working MISP instance)<br>- Yara (Community, Neo23x0, Intezer, McAfee rules are already available. There's the chance to add your own rules) 	|
 
 ## Legal notice
 
@@ -68,12 +68,13 @@ license terms.
 [yara-python](https://github.com/VirusTotal/yara-python),
 [GitPython](https://github.com/gitpython-developers/GitPython),
 [Yara community rules](https://github.com/Yara-Rules),
-[Neo23x0 Yara sigs](https://github.com/Neo23x0/signature-base),
-[Intezer Yara sigs](https://github.com/intezer/yara-rules),
-[McAfee Yara sigs](https://github.com/advanced-threat-research/Yara-Rules),
-[Stratosphere Yara sigs](https://github.com/stratosphereips/yara-rules),
-[ReversingLabs Yara sigs](https://github.com/reversinglabs/reversinglabs-yara-rules),
-[Samir Yara sigs](https://github.com/sbousseaden/YaraHunts),
+[Neo23x0 Yara rules](https://github.com/Neo23x0/signature-base),
+[Intezer Yara rules](https://github.com/intezer/yara-rules),
+[McAfee Yara rules](https://github.com/advanced-threat-research/Yara-Rules),
+[Stratosphere Yara rules](https://github.com/stratosphereips/yara-rules),
+[ReversingLabs Yara rules](https://github.com/reversinglabs/reversinglabs-yara-rules),
+[Samir Yara rules](https://github.com/sbousseaden/YaraHunts),
+[InQuest Yara rules](https://github.com/InQuest/yara-rules),
 [APKiD](https://github.com/rednaga/APKiD/blob/master/LICENSE.COMMERCIAL),
 [Box-JS](https://github.com/CapacitorSet/box-js/blob/master/LICENSE),
 [Capa](https://github.com/fireeye/capa/blob/master/LICENSE.txt),
@@ -86,8 +87,8 @@ license terms.
 
 This project was created and will be upgraded thanks to the following organizations:
 
-<img style="margin-right: 2px" src="static_intel/Certego.png" alt="Certego Logo"/>
-<img style="border: 0.2px solid black" src="static_intel/logo-thp-100.png" alt="Honeynet.org logo">
+<a href="https://www.certego.net"> <img style="margin-right: 2px" src="static_intel/Certego.png" alt="Certego Logo"/> </a>
+<a href="https://www.honeynet.org"> <img style="border: 0.2px solid black" src="static_intel/logo-thp-100.png" alt="Honeynet.org logo"> </a>
 
 #### Google Summer Of Code
 

@@ -42,6 +42,8 @@ After having written the new python module, you have to remember to:
       "soft_time_limit": 100,
       "supported_filetypes": ["application/javascript"],
       "python_module": "<module_name>.<class_name>",
+      "description": "very cool analyzer",
+      "requires_configuration": true,
       "additional_config_params": {
            "custom_required_param": "ANALYZER_SPECIAL_KEY"
       }
@@ -65,6 +67,8 @@ After having written the new python module, you have to remember to:
 * Add the new analyzer/s in the lists in the docs: [Usage](./Usage.md). Also, if the analyzer provides additional optional configuration, add the available options here: [Advanced-Usage](./Advanced-Usage.md)
 
 * Ultimately, add the required secrets in the files [env_file_app_template](https://github.com/intelowlproject/IntelOwl/blob/master/env_file_app_template), [env_file_app_travis](https://github.com/certego/IntelOwl/blob/master/env_file_app_travis) and in the docs: [Installation](./Installation.md)
+
+* In the Pull Request remember to provide some real world examples (screenshots and raw JSON results) of some successful executions of the analyzer to let us understand how it would work.
 
 ### Integrating a docker based analyzer
 If the analyzer you wish to integrate doesn't exist as a callable API online or python package, it should be integrated with its own docker image

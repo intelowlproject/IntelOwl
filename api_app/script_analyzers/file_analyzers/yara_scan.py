@@ -19,6 +19,36 @@ class YaraScan(FileAnalyzer):
             "directories_with_rules", []
         )
         self.result = []
+        self.ruleset: List[Tuple[str, yara.Rules]] = []
+
+    def load_directory(self, rulepath):
+        # if you do not have an index file,...
+        # .. just extract all the rules in the .yar files
+        for f in os.listdir(rulepath):
+            full_path = f"{rulepath}/{f}"
+            if os.path.isfile(full_path):
+                try:
+                    if (
+                        full_path.endswith(".yar")
+                        or full_path.endswith(".yara")
+                        or full_path.endswith(".rule")
+                    ):
+                        self.ruleset.append(
+                            (
+                                full_path,
+                                yara.compile(
+                                    full_path,
+                                    externals={"filename": self.filename},
+                                ),
+                            )
+                        )
+                    elif full_path.endswith(".yas"):
+                        self.ruleset.append((full_path, yara.load(full_path)))
+                except yara.SyntaxError as e:
+                    logger.exception(f"Rule {full_path} " f"has a syntax error {e}")
+                    continue
+            else:
+                self.load_directory(full_path)
 
     def _validated_matches(self, rules: yara.Rules) -> []:
         try:
@@ -34,15 +64,14 @@ class YaraScan(FileAnalyzer):
             raise e
 
     def run(self):
-        ruleset: List[Tuple[str, yara.Rules]] = []
         for rulepath in self.directories_with_rules:
             # you should add a "index.yar" or "index.yas" file
             # and select only the rules you would like to run
             if os.path.isdir(rulepath):
                 if os.path.isfile(rulepath + "/index.yas"):
-                    ruleset.append((rulepath, yara.load(rulepath + "/index.yas")))
+                    self.ruleset.append((rulepath, yara.load(rulepath + "/index.yas")))
                 elif os.path.isfile(rulepath + "/index.yar"):
-                    ruleset.append(
+                    self.ruleset.append(
                         (
                             rulepath,
                             yara.compile(
@@ -52,38 +81,12 @@ class YaraScan(FileAnalyzer):
                         )
                     )
                 else:
-                    # if you do not have an index file,...
-                    # .. just extract all the rules in the .yar files
-                    for f in os.listdir(rulepath):
-                        full_path = f"{rulepath}/{f}"
-                        if os.path.isfile(full_path):
-                            try:
-                                if (
-                                    full_path.endswith(".yar")
-                                    or full_path.endswith(".yara")
-                                    or full_path.endswith(".rule")
-                                ):
-                                    ruleset.append(
-                                        (
-                                            full_path,
-                                            yara.compile(
-                                                full_path,
-                                                externals={"filename": self.filename},
-                                            ),
-                                        )
-                                    )
-                                elif full_path.endswith(".yas"):
-                                    ruleset.append((full_path, yara.load(full_path)))
-                            except yara.SyntaxError as e:
-                                logger.exception(
-                                    f"Rule {full_path} " f"has a syntax error {e}"
-                                )
-                                continue
+                    self.load_directory(rulepath)
 
-        if not ruleset:
+        if not self.ruleset:
             raise AnalyzerRunException("there are no yara rules installed")
 
-        for path, rule in ruleset:
+        for path, rule in self.ruleset:
             matches = self._validated_matches(rule)
             for match in matches:
                 # limited to 20 strings reasons because it could be a very long list

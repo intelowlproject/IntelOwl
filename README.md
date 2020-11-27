@@ -68,6 +68,7 @@ license terms.
 [yara-python](https://github.com/VirusTotal/yara-python),
 [GitPython](https://github.com/gitpython-developers/GitPython),
 [Yara community rules](https://github.com/Yara-Rules),
+[StrangerealIntel Daily Ioc Yara rules](https://github.com/StrangerealIntel/DailyIOC),
 [Neo23x0 Yara rules](https://github.com/Neo23x0/signature-base),
 [Intezer Yara rules](https://github.com/intezer/yara-rules),
 [McAfee Yara rules](https://github.com/advanced-threat-research/Yara-Rules),

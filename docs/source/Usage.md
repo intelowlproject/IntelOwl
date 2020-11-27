@@ -54,8 +54,10 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * `MISP_Check_Hash`: check a file hash on a MISP instance
 * `MISPFIRST_Check_Hash`: check a file hash on the FIRST MISP instance
 * `Yara_Scan_Community`: scan a file with community yara rules
+* `Yara_Scan_Dail_Ioc`: scan a file with StrangerealIntel Daily IOC yara rules
 * `Yara_Scan_Florian`: scan a file with Neo23x0 yara rules
 * `Yara_Scan_Intezer`: scan a file with Intezer yara rules
+* `Yara_Scan_Inquest`: scan a file with Inquest yara rules
 * `Yara_Scan_McAfee`: scan a file with McAfee yara rules
 * `Yara_Scan_Samir`: scan a file with Samir Threat Hunting yara rules
 * `Yara_Scan_Stratosphere`: scan a file with Stratosphere yara rules

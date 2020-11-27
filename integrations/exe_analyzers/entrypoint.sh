@@ -1,8 +1,8 @@
 #!/bin/sh
 
 touch ${LOG_PATH}/gunicorn_access.log ${LOG_PATH}/gunicorn_errors.log
-chown -R capa-user:capa-user ${LOG_PATH}
-su capa-user -s /bin/bash
+chown -R exe_analyzers-user:exe_analyzers-user ${LOG_PATH}
+su exe_analyzers-user -s /bin/bash
 exec gunicorn 'app:app' \
     --bind '0.0.0.0:4002' \
     --log-level ${LOG_LEVEL} \

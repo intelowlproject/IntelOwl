@@ -2,6 +2,24 @@
 
 [**Upgrade Guide**](https://intelowl.readthedocs.io/en/latest/Installation.html#update-to-the-most-recent-version)
 
+## [v1.9.1](https://github.com/intelowlproject/IntelOwl/releases/tag/v1.9.1)
+This version was released earlier to fix installation problems triggered by the new version of `pip` (`peepdf`package was incompatible and had to be changed).
+
+**NEW INBUILT ANALYZERS:**
+- Added **MalwareBazaar_Google_Observable** analyzer: Check if a particular IP, domain or url is known to [MalwareBazaar](https://bazaar.abuse.ch) using google search
+- Added [InQuest YARA rules](https://github.com/InQuest/yara-rules) analyzer.
+- Added [StrangerealIntel Daily Ioc Yara rules](https://github.com/StrangerealIntel/DailyIOC) analyzer.
+
+**FIXES/IMPROVEMENTS/Dependency upgrades:**
+
+- changed `peepdf` pip repo to `peepdf-fork` to fix broken installation
+- adjustments to documentation
+- upgraded `quark-engine` to v20.11
+- fixes to `UnpacMe_EXE_Unpacker` and `PE_Info` analyzers
+- managed RAM utilization by celery to avoid issues when using IntelOwl for a lot of analysis.
+- added PR template
+- removed nginx banner
+
 ## [v1.9.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v1.9.0)
 **NEW INBUILT ANALYZERS:**
 - Added [Triage](https://tria.ge) file analyzer.

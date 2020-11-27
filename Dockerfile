@@ -9,7 +9,7 @@ ENV watch_logs_cmd "watch -n1 tail -n10 /var/log/intel_owl/django/api_app.log"
 
 RUN mkdir -p ${LOG_PATH} \
     ${LOG_PATH}/django ${LOG_PATH}/uwsgi \
-    ${LOG_PATH}/peframe ${LOG_PATH}/thug ${LOG_PATH}/capa ${LOG_PATH}/box-js \
+    ${LOG_PATH}/thug ${LOG_PATH}/exe_analyzers ${LOG_PATH}/box-js \
     ${LOG_PATH}/apk_analyzers \
     /opt/deploy/files_required /opt/deploy/yara /opt/deploy/configuration
 

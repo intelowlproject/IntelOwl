@@ -29,6 +29,7 @@ from api_app.script_analyzers.file_analyzers import (
     unpac_me,
     xlm_macro_deobfuscator,
     triage_scan,
+    floss,
 )
 from api_app.script_analyzers.observable_analyzers import vt3_get
 
@@ -419,6 +420,19 @@ class FileAnalyzersEXETests(TestCase):
     def test_triage_scan(self, mock_get=None, mock_post=None):
         report = triage_scan.TriageScanFile(
             "Triage_Scan",
+            self.job_id,
+            self.filepath,
+            self.filename,
+            self.md5,
+            {},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    @mock_connections(patch("requests.get", side_effect=mocked_docker_analyzer_get))
+    @mock_connections(patch("requests.post", side_effect=mocked_docker_analyzer_post))
+    def test_floss(self, mock_get=None, mock_post=None):
+        report = floss.Floss(
+            "Floss",
             self.job_id,
             self.filepath,
             self.filename,

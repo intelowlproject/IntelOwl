@@ -5,11 +5,9 @@ version: '3'
 # All additional integrations should be added following this format only.
 
 services:
-  capa:
-    build:
-      context: ./integrations/capa
-      dockerfile: Dockerfile
-    container_name: intelowl_capa
+  exe_analyzers:
+    image: intelowlproject/intelowl_exe_analyzers:${INTELOWL_TAG_VERSION}
+    container_name: intelowl_exe_analyzers
     restart: unless-stopped
     expose:
       - "4002"

@@ -229,6 +229,13 @@
     "python_module": "file_info.FileInfo",
     "soft_time_limit": 30
   },
+  "Floss": {
+    "type": "file",
+    "supported_filetypes": ["application/x-dosexec"],
+    "python_module": "floss.Floss",
+    "description": "Advanced String Extraction by FireEye",
+    "soft_time_limit": 500
+  },
   "Fortiguard": {
     "type": "observable",
     "observable_supported": [

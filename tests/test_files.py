@@ -214,6 +214,22 @@ class FileAnalyzersEXETests(TestCase):
         ).start()
         self.assertEqual(report.get("success", False), True)
 
+    def test_yara_daily_ioc(self):
+        additional_params = {
+            "directories_with_rules": [
+                "/opt/deploy/yara/daily_ioc_rules",
+            ]
+        }
+        report = yara_scan.YaraScan(
+            "Yara_Scan",
+            self.job_id,
+            self.filepath,
+            self.filename,
+            self.md5,
+            additional_params,
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
     def test_yara_stratosphere(self):
         additional_params = {
             "directories_with_rules": [

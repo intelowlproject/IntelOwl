@@ -1140,6 +1140,16 @@
       "directories_with_rules": ["/opt/deploy/yara/rules"]
     }
   },
+  "Yara_Scan_Daily_Ioc": {
+    "type": "file",
+    "description": "scan a file with StrangerealIntel daily IOC yara rules",
+    "python_module": "yara_scan.YaraScan",
+    "soft_time_limit": 60,
+    "additional_config_params": {
+      "git_repo_main_dir": ["/opt/deploy/yara/daily_ioc_rules"],
+      "directories_with_rules": ["/opt/deploy/yara/daily_ioc_rules"]
+    }
+  },
   "Yara_Scan_Florian": {
     "type": "file",
     "description": "scan a file with Neo23x0 yara rules",

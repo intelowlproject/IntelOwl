@@ -9,6 +9,8 @@ server {
 
     server_name intel_owl.com;
 
+    server_tokens off;
+
     location = /favicon.ico { access_log off; log_not_found off; }
 
     location /static/ {

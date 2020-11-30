@@ -145,7 +145,7 @@ CELERY_WORKER_HIJACK_ROOT_LOGGER = False
 # these two are needed to enable priority and correct tasks execution
 CELERY_TASK_ACKS_LATE = True
 CELERY_WORKER_PREFETCH_MULTIPLIER = 1
-CELERY_TASK_DEFAULT_QUEUE = "analyzers_queue"
+CELERY_QUEUES = os.environ.get("CELERY_QUEUES", "default").split(",")
 # this is to avoid RAM issues caused by long usage of this tool
 CELERY_WORKER_MAX_TASKS_PER_CHILD = 200
 # value is in kilobytes

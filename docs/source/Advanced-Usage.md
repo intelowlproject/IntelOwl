@@ -186,3 +186,13 @@ How to configure and enable LDAP on Intel Owl?
 Refer to the following blog post for an example on how to deploy IntelOwl on Google Kubernetes Engine:
 
 [Deploying Intel-Owl on GKE](https://mostwanted002.cf/post/intel-owl-gke/) by [Mayank Malik](https://twitter.com/_mostwanted002_).
+
+## Multi Queue
+IntelOwl provides a [docker-compose-multi-queue](https://github.com/intelowlproject/IntelOwl/blob/master/docker-compose-multi-queue.yml), allowing IntelOwl users to better scale with the performance of their own architecture.
+
+It is possible to define new celery worker, adding a new container in the dockerfile, as shown in the `docker-compose-multi-queue`. 
+
+IntelOwl moreover requires that the name of the workers are provided in the `docker-compose` file. This is done through the environment variable `CELERY_QUEUES` inside the `uwsgi` container. Each queue must be separated using the character `,`, as shown in the [example](https://github.com/intelowlproject/IntelOwl/blob/master/docker-compose-multi-queue.yml#L29).
+
+Now it is possible to specify for each configuration inside [analyzer_config](https://github.com/intelowlproject/IntelOwl/blob/master/configuration/analyzer_config.json) the desired queue. If no queue are provided, the `default` queue will be selected.
+ 

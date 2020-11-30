@@ -103,7 +103,8 @@
     "supported_filetypes": ["application/x-dosexec"],
     "python_module": "capa_info.CapaInfo",
     "description": "capa detects capabilities in executable files",
-    "soft_time_limit": 500
+    "soft_time_limit": 500,
+    "queue": "long"
   },
   "Censys_Search": {
     "type": "observable",
@@ -128,7 +129,8 @@
       "max_post_tries": 5,
       "max_poll_tries": 20
     },
-    "soft_time_limit": 500
+    "soft_time_limit": 500,
+    "queue": "long"
   },
   "Cymru_Hash_Registry_Get_File": {
     "type": "file",
@@ -196,7 +198,8 @@
     ],
     "decription": "static generic document analysis (Oletools)",
     "python_module": "doc_info.DocInfo",
-    "soft_time_limit": 30
+    "soft_time_limit": 30,
+    "queue": "local"
   },
   "Doc_Info_Experimental": {
     "type": "file",
@@ -221,13 +224,15 @@
     "additional_config_params": {
       "experimental": true
     },
-    "soft_time_limit": 30
+    "soft_time_limit": 30,
+    "queue": "local"
   },
   "File_Info": {
     "type": "file",
     "description": "basic static analysis, extracts metadata and hashes",
     "python_module": "file_info.FileInfo",
-    "soft_time_limit": 30
+    "soft_time_limit": 30,
+    "queue": "local"
   },
   "Fortiguard": {
     "type": "observable",
@@ -383,7 +388,8 @@
     "description": "scan a file on Intezer",
     "requires_configuration": true,
     "python_module": "intezer_scan.IntezerScan",
-    "soft_time_limit": 180
+    "soft_time_limit": 180,
+    "queue": "long"
   },
   "IPInfo": {
     "type": "observable",
@@ -542,7 +548,8 @@
     ],
     "description": "static PDF analysis (peepdf + pdfid)",
     "python_module": "pdf_info.PDFInfo",
-    "soft_time_limit": 30
+    "soft_time_limit": 30,
+    "queue": "local"
   },
   "PE_Info": {
     "type": "file",
@@ -551,7 +558,8 @@
     ],
     "description": "static PE analysis (pefile)",
     "python_module": "pe_info.PEInfo",
-    "soft_time_limit": 30
+    "soft_time_limit": 30,
+    "queue": "local"
   },
   "PEframe_Scan": {
     "type": "file",
@@ -560,7 +568,8 @@
     ],
     "python_module": "peframe.PEframe",
     "description": "Perform static analysis on Portable Executable malware and malicious MS Office documents",
-    "soft_time_limit": 500
+    "soft_time_limit": 500,
+    "queue": "local"
   },
   "Phishtank": {
     "type": "observable",
@@ -619,7 +628,8 @@
     ],
     "python_module": "quark_engine.QuarkEngine",
     "description": "An Obfuscation-Neglect Android Malware Scoring System",
-    "soft_time_limit": 120
+    "soft_time_limit": 120,
+    "queue": "long"
   },
   "Robtex_Forward_PDNS_Query": {
     "type": "observable",
@@ -792,7 +802,8 @@
     ],
     "description": "PE signature extractor",
     "python_module": "signature_info.SignatureInfo",
-    "soft_time_limit": 30
+    "soft_time_limit": 30,
+    "queue": "local"
   },
   "Strings_Info_Classic": {
     "type": "file",
@@ -802,7 +813,8 @@
       "max_number_of_strings": 300,
       "rank_strings": false
     },
-    "soft_time_limit": 70
+    "soft_time_limit": 70,
+    "queue": "local"
   },
   "SpeakEasy": {
     "type": "file",
@@ -811,7 +823,8 @@
     ],
     "description": "speakeasy emulation report",
     "python_module": "speakeasy_emulation.SpeakEasy",
-    "soft_time_limit": 120
+    "soft_time_limit": 120,
+    "queue": "long"
   },
   "Strings_Info_ML": {
     "type": "file",
@@ -821,7 +834,8 @@
       "max_number_of_strings": 200,
       "rank_strings": true
     },
-    "soft_time_limit": 70
+    "soft_time_limit": 70,
+    "queue": "local"
   },
   "TalosReputation": {
     "type": "observable",
@@ -890,7 +904,8 @@
       "enable_awis": true,
       "user_agent": "winxpie60"
     },
-    "soft_time_limit": 600
+    "soft_time_limit": 600,
+    "queue": "long"
   },
   "Thug_URL_Info": {
     "type": "observable",
@@ -909,7 +924,8 @@
       "enable_awis": true,
       "user_agent": "winxpie60"
     },
-    "soft_time_limit": 600
+    "soft_time_limit": 600,
+    "queue": "local"
   },
   "TorProject": {
     "type": "observable",
@@ -943,7 +959,8 @@
       "endpoint": "public",
       "report_type": "overview",
       "soft_time_limit": 300
-    }
+    },
+    "queue": "long"
   },
   "UnpacMe_EXE_Unpacker": {
     "type": "file",
@@ -959,7 +976,8 @@
       "private": false,
       "max_tries": 30
     },
-    "soft_time_limit": 400
+    "soft_time_limit": 400,
+    "queue": "long"
   },
   "URLhaus": {
     "type": "observable",
@@ -1138,13 +1156,15 @@
     "soft_time_limit": 60,
     "additional_config_params": {
       "directories_with_rules": ["/opt/deploy/yara/rules"]
-    }
+    },
+    "queue": "local"
   },
   "Yara_Scan_Florian": {
     "type": "file",
     "description": "scan a file with Neo23x0 yara rules",
     "python_module": "yara_scan.YaraScan",
     "soft_time_limit": 60,
+    "queue":  "default",
     "additional_config_params": {
       "git_repo_main_dir": ["/opt/deploy/yara/signature-base"],
       "directories_with_rules": ["/opt/deploy/yara/signature-base/yara"]
@@ -1155,6 +1175,7 @@
     "description": "scan a file with Samir Threat Hunting yara rules",
     "python_module": "yara_scan.YaraScan",
     "soft_time_limit": 60,
+    "queue": "local",
     "additional_config_params": {
       "git_repo_main_dir": ["/opt/deploy/yara/samir_rules"],
       "directories_with_rules": ["/opt/deploy/yara/samir_rules"]
@@ -1165,6 +1186,7 @@
     "description": "scan a file with Inquest yara rules",
     "python_module": "yara_scan.YaraScan",
     "soft_time_limit": 60,
+    "queue": "local",
     "additional_config_params": {
       "git_repo_main_dir": [
         "/opt/deploy/yara/inquest_rules"
@@ -1180,6 +1202,7 @@
     "description": "scan a file with Intezer yara rules",
     "python_module": "yara_scan.YaraScan",
     "soft_time_limit": 60,
+    "queue": "local",
     "additional_config_params": {
       "directories_with_rules": [
         "/opt/deploy/yara/intezer_rules"
@@ -1191,6 +1214,7 @@
     "description": "scan a file with McAfee yara rules",
     "python_module": "yara_scan.YaraScan",
     "soft_time_limit": 60,
+    "queue": "local",
     "additional_config_params": {
       "git_repo_main_dir": [
         "/opt/deploy/yara/mcafee_rules"
@@ -1210,6 +1234,7 @@
     "description": "scan a file with ReversingLabs yara rules",
     "python_module": "yara_scan.YaraScan",
     "soft_time_limit": 60,
+    "queue": "local",
     "additional_config_params": {
       "git_repo_main_dir": ["/opt/deploy/yara/reversinglabs_rules"],
       "directories_with_rules": [
@@ -1229,6 +1254,7 @@
     "description": "scan a file with Stratosphere yara rules",
     "python_module": "yara_scan.YaraScan",
     "soft_time_limit": 60,
+    "queue": "local",
     "additional_config_params": {
       "git_repo_main_dir": ["/opt/deploy/yara/stratosphere_rules"],
       "directories_with_rules": [

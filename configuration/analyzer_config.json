@@ -194,7 +194,7 @@
       "application/xml",
       "application/zip"
     ],
-    "decription": "static generic document analysis",
+    "decription": "static generic document analysis (Oletools)",
     "python_module": "doc_info.DocInfo",
     "soft_time_limit": 30
   },
@@ -471,6 +471,18 @@
     "python_module": "mb_get.MB_GET",
     "soft_time_limit": 50
   },
+  "MalwareBazaar_Google_Observable": {
+    "type": "observable",
+    "observable_supported": [
+      "ip",
+      "domain",
+      "url"
+    ],
+    "external_service": true,
+    "description": "Check if a particular IP, domain or url is known to MalwareBazaar using google search",
+    "python_module": "mb_google.MB_GOOGLE",
+    "soft_time_limit": 50
+  },
   "MaxMindGeoIP": {
     "type": "observable",
     "observable_supported": ["ip"],
@@ -528,7 +540,7 @@
     "supported_filetypes": [
       "application/pdf"
     ],
-    "description": "static PDF analysis",
+    "description": "static PDF analysis (peepdf + pdfid)",
     "python_module": "pdf_info.PDFInfo",
     "soft_time_limit": 30
   },
@@ -537,7 +549,7 @@
     "supported_filetypes": [
       "application/x-dosexec"
     ],
-    "description": "static PE analysis",
+    "description": "static PE analysis (pefile)",
     "python_module": "pe_info.PEInfo",
     "soft_time_limit": 30
   },
@@ -655,7 +667,7 @@
       "text/rtf",
       "application/rtf"
     ],
-    "description": "static RTF analysis",
+    "description": "static RTF analysis (Oletools)",
     "python_module": "rtf_info.RTFInfo",
     "soft_time_limit": 30
   },
@@ -803,7 +815,7 @@
   },
   "Strings_Info_ML": {
     "type": "file",
-    "description": "strings extraction plus strings ranking based on Machine Learning",
+    "description": "strings extraction plus strings ranking based on Machine Learning. Leverages Fireeye's Stringsifter",
     "python_module": "strings_info.StringsInfo",
     "additional_config_params": {
       "max_number_of_strings": 200,
@@ -922,9 +934,10 @@
   },
   "Triage_Scan": {
     "type": "file",
-    "description": "leverage triage sandbox environment to scan various files",
+    "description": "leverage Triage sandbox environment to scan various files",
     "python_module": "triage_scan.TriageScanFile",
     "requires_configuration": true,
+    "external_service": true,
     "additional_config_params": {
       "api_key_name": "TRIAGE_KEY",
       "endpoint": "public",
@@ -938,6 +951,8 @@
       "application/x-dosexec"
     ],
     "description": "UnpacMe unpacker",
+    "external_service": true,
+    "leaks_info": true,
     "python_module": "unpac_me.UnpacMe",
     "additional_config_params": {
       "api_key_name": "UNPAC_ME_API_KEY",
@@ -1125,6 +1140,16 @@
       "directories_with_rules": ["/opt/deploy/yara/rules"]
     }
   },
+  "Yara_Scan_Daily_Ioc": {
+    "type": "file",
+    "description": "scan a file with StrangerealIntel daily IOC yara rules",
+    "python_module": "yara_scan.YaraScan",
+    "soft_time_limit": 60,
+    "additional_config_params": {
+      "git_repo_main_dir": ["/opt/deploy/yara/daily_ioc_rules"],
+      "directories_with_rules": ["/opt/deploy/yara/daily_ioc_rules"]
+    }
+  },
   "Yara_Scan_Florian": {
     "type": "file",
     "description": "scan a file with Neo23x0 yara rules",
@@ -1143,6 +1168,21 @@
     "additional_config_params": {
       "git_repo_main_dir": ["/opt/deploy/yara/samir_rules"],
       "directories_with_rules": ["/opt/deploy/yara/samir_rules"]
+    }
+  },
+  "Yara_Scan_Inquest": {
+    "type": "file",
+    "description": "scan a file with Inquest yara rules",
+    "python_module": "yara_scan.YaraScan",
+    "soft_time_limit": 60,
+    "additional_config_params": {
+      "git_repo_main_dir": [
+        "/opt/deploy/yara/inquest_rules"
+      ],
+      "directories_with_rules": [
+        "/opt/deploy/yara/inquest_rules",
+        "/opt/deploy/yara/inquest_rules/labs.inquest.net"
+      ]
     }
   },
   "Yara_Scan_Intezer": {

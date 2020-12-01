@@ -146,6 +146,10 @@ CELERY_WORKER_HIJACK_ROOT_LOGGER = False
 CELERY_TASK_ACKS_LATE = True
 CELERY_WORKER_PREFETCH_MULTIPLIER = 1
 CELERY_TASK_DEFAULT_QUEUE = "analyzers_queue"
+# this is to avoid RAM issues caused by long usage of this tool
+CELERY_WORKER_MAX_TASKS_PER_CHILD = 200
+# value is in kilobytes
+CELERY_WORKER_MAX_MEMORY_PER_CHILD = 4000
 
 AWS_SQS = os.environ.get("AWS_SQS", False) == "True"
 if AWS_SQS:

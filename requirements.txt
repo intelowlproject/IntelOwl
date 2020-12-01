@@ -9,7 +9,6 @@ certifi==2019.6.16
 cffi==1.12.3
 chardet==3.0.4
 checkdmarc==4.3.1
-colorama==0.3.7
 colorclass==2.2.0
 configparser==3.8.1
 cryptography==2.7
@@ -40,7 +39,7 @@ numpy==1.17.1
 olefile==0.46
 oletools==0.56
 OTXv2==1.5.9
-peepdf==0.4.2
+peepdf-fork==0.4.3
 pdfid==1.0.2
 https://github.com/mlodic/pefile/archive/master.tar.gz
 pluggy==0.13.0

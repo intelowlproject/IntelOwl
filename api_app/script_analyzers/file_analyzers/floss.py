@@ -4,7 +4,7 @@ from api_app.script_analyzers.classes import FileAnalyzer, DockerBasedAnalyzer
 
 class Floss(FileAnalyzer, DockerBasedAnalyzer):
     name: str = "Floss"
-    url: str = "http://exe_analyzers:4002/floss"
+    url: str = "http://static_analyzers:4002/floss"
     # interval between http request polling
     poll_distance: int = 10
     # http request polling max number of tries

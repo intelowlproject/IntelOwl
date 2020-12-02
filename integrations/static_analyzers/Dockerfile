@@ -1,9 +1,7 @@
 FROM python:3.8.4-slim
 
 ENV PROJECT_PATH /opt/deploy
-ENV LOG_PATH /var/log/intel_owl/exe_analyzers
-
-RUN mkdir -p $LOG_PATH
+ENV LOG_PATH /var/log/intel_owl/static_analyzers
 
 # update and install packages
 RUN apt-get update \
@@ -12,7 +10,7 @@ RUN apt-get update \
     && pip3 install --upgrade pip
 
 # Add a new low-privileged user
-RUN useradd -ms /bin/bash exe_analyzers-user
+RUN useradd -ms /bin/bash static_analyzers-user
 
 # Install capa standalone binary
 WORKDIR ${PROJECT_PATH}
@@ -24,7 +22,7 @@ RUN wget -q -O capa-v1.1.0-linux https://github.com/fireeye/capa/releases/downlo
 RUN wget -q -O floss-linux https://s3.amazonaws.com/build-artifacts.floss.flare.fireeye.com/travis/linux/dist/floss \
     && chmod +x floss-linux \
     && ln -s ${PROJECT_PATH}/floss-linux /usr/local/bin/floss \
-    && chown -R exe_analyzers-user:exe_analyzers-user .
+    && chown -R static_analyzers-user:static_analyzers-user .
 
 # Build and install PEframe
 RUN git clone --depth 1 https://github.com/guelfoweb/peframe.git
@@ -33,10 +31,10 @@ RUN cd peframe && rm -rf .git && pip3 install -r requirements.txt --no-cache-dir
     && rm -rf ./peframe
 
 # Build Flask REST API
-WORKDIR ${PROJECT_PATH}/exe_analyzers-flask
+WORKDIR ${PROJECT_PATH}/static_analyzers-flask
 COPY app.py requirements.txt entrypoint.sh ./
 RUN pip3 install -r requirements.txt --no-cache-dir \
-    && chown -R exe_analyzers-user:exe_analyzers-user . \
+    && chown -R static_analyzers-user:static_analyzers-user . \
     && chmod +x entrypoint.sh
 
 # not needed anymore

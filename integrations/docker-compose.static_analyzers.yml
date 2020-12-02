@@ -5,11 +5,9 @@ version: '3'
 # All additional integrations should be added following this format only.
 
 services:
-  exe_analyzers:
-    build:
-      context: ./integrations/exe_analyzers
-      dockerfile: Dockerfile
-    container_name: intelowl_exe_analyzers
+  static_analyzers:
+    image: intelowlproject/intelowl_static_analyzers:${INTELOWL_TAG_VERSION}
+    container_name: intelowl_static_analyzers
     restart: unless-stopped
     expose:
       - "4002"

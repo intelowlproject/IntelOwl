@@ -26,7 +26,7 @@ table, th, td {
     <th>Description</th>
   </tr>
   <tr>
-    <td>EXE Analyzers</td>
+    <td>Static Analyzers</td>
     <td><code>PEframe_Scan</code>, <code>Capa_Info</code>, <code>Floss</code></td>
     <td>
     <ul>

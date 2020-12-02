@@ -15,12 +15,12 @@ logger = logging.getLogger("flask_shell2http")
 # logger config
 formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 log_level = os.getenv("LOG_LEVEL", logging.INFO)
-log_path = os.getenv("LOG_PATH", "/var/log/intel_owl/exe_analyzers")
+log_path = os.getenv("LOG_PATH", "/var/log/intel_owl/static_analyzers")
 # create new file handlers, files are created if doesn't already exists
-fh = logging.FileHandler(f"{log_path}/exe_analyzers.log")
+fh = logging.FileHandler(f"{log_path}/static_analyzers.log")
 fh.setFormatter(formatter)
 fh.setLevel(log_level)
-fh_err = logging.FileHandler(f"{log_path}/exe_analyzers_errors.log")
+fh_err = logging.FileHandler(f"{log_path}/static_analyzers_errors.log")
 fh_err.setFormatter(formatter)
 fh_err.setLevel(logging.ERROR)
 # add the handlers to the logger

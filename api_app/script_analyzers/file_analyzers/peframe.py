@@ -4,7 +4,7 @@ from api_app.script_analyzers.classes import FileAnalyzer, DockerBasedAnalyzer
 
 class PEframe(FileAnalyzer, DockerBasedAnalyzer):
     name: str = "PEframe"
-    url: str = "http://exe_analyzers:4002/peframe"
+    url: str = "http://static_analyzers:4002/peframe"
     # http request polling max number of tries
     max_tries: int = 25
     # interval between http request polling

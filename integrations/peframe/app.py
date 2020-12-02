@@ -11,9 +11,7 @@ from flask_shell2http import Shell2HTTP
 # get flask-shell2http logger instance
 logger = logging.getLogger("flask_shell2http")
 # logger config
-formatter = logging.Formatter(
-    "%(asctime)s.%(msecs)03d - %(name)s - %(levelname)s - %(message)s"
-)
+formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 log_level = os.getenv("LOG_LEVEL", logging.INFO)
 log_path = os.getenv("LOG_PATH", "/var/log/intel_owl/peframe")
 # create new file handlers, files are created if doesn't already exists

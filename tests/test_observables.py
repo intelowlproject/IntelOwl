@@ -15,6 +15,7 @@ from api_app.script_analyzers.observable_analyzers import (
     ipinfo,
     maxmind,
     greynoise,
+    stratosphere,
     talos,
     tor,
     circl_pssl,
@@ -211,6 +212,16 @@ class IPAnalyzersTests(
     def test_greynoise(self, mock_get=None, mock_post=None):
         report = greynoise.GreyNoise(
             "GreyNoise",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    def test_stratos(self, mock_get=None, mock_post=None):
+        report = stratosphere.Stratos(
+            "Stratosphere_Blacklist",
             self.job_id,
             self.observable_name,
             self.observable_classification,

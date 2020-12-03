@@ -2,9 +2,9 @@ from api_app.helpers import get_binary
 from api_app.script_analyzers.classes import FileAnalyzer, DockerBasedAnalyzer
 
 
-class CapaInfo(FileAnalyzer, DockerBasedAnalyzer):
-    name: str = "Capa"
-    url: str = "http://static_analyzers:4002/capa"
+class Floss(FileAnalyzer, DockerBasedAnalyzer):
+    name: str = "Floss"
+    url: str = "http://static_analyzers:4002/floss"
     # interval between http request polling
     poll_distance: int = 10
     # http request polling max number of tries
@@ -18,8 +18,11 @@ class CapaInfo(FileAnalyzer, DockerBasedAnalyzer):
         binary = get_binary(self.job_id)
         # make request data
         fname = str(self.filename).replace("/", "_").replace(" ", "_")
-        args = [f"@{fname}", "-j"]
-        req_data = {"args": args, "timeout": self.timeout}
+        args = [f"@{fname}", f"--output-json=/tmp/{fname}.json"]
+        req_data = {
+            "args": args,
+            "timeout": self.timeout,
+            "callback_context": {"read_result_from": fname},
+        }
         req_files = {fname: binary}
-
         return self._docker_run(req_data, req_files)

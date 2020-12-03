@@ -74,7 +74,7 @@ After having written the new python module, you have to remember to:
 If the analyzer you wish to integrate doesn't exist as a callable API online or python package, it should be integrated with its own docker image
 which can be queried from the main Django API.
 
-* It should follow the same design principle as the [PEframe's integration](https://github.com/intelowlproject/IntelOwl/tree/develop/integrations), unless there's very good reason not to.
+* It should follow the same design principle as the [Box-Js integration](https://github.com/intelowlproject/IntelOwl/tree/develop/integrations), unless there's very good reason not to.
 * The dockerfile should be placed at `./integrations/<analyzer_name>/Dockerfile`.
 * A docker-compose file should be placed under `./integrations` with the name `docker-compose.<analyzer_name>.yml`
 * If your docker-image uses any environment variables, add them in the [`env_file_integrations_template`](https://github.com/intelowlproject/IntelOwl/blob/develop/env_file_integrations_template)

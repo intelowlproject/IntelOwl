@@ -5,11 +5,11 @@ version: '3'
 # All additional integrations should be added following this format only.
 
 services:
-  capa:
+  static_analyzers:
     build:
-      context: ./integrations/capa
+      context: ./integrations/static_analyzers
       dockerfile: Dockerfile
-    container_name: intelowl_capa
+    container_name: intelowl_static_analyzers
     restart: unless-stopped
     expose:
       - "4002"

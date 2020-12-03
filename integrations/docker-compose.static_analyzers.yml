@@ -5,9 +5,9 @@ version: '3'
 # All additional integrations should be added following this format only.
 
 services:
-  capa:
-    image: intelowlproject/intelowl_capa:${INTELOWL_TAG_VERSION}
-    container_name: intelowl_capa
+  static_analyzers:
+    image: intelowlproject/intelowl_static_analyzers:${INTELOWL_TAG_VERSION}
+    container_name: intelowl_static_analyzers
     restart: unless-stopped
     expose:
       - "4002"

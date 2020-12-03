@@ -26,19 +26,20 @@ table, th, td {
     <th>Description</th>
   </tr>
   <tr>
-    <td>PEframe</td>
-    <td><code>PEframe_Scan</code></td>
-    <td>performs static analysis on Portable Executable malware and generic suspicious file</td>
+    <td>Static Analyzers</td>
+    <td><code>PEframe_Scan</code>, <code>Capa_Info</code>, <code>Floss</code></td>
+    <td>
+    <ul>
+    <li>Capa detects capabilities in executable files</li>
+    <li>PEFrame performs static analysis on Portable Executable malware and malicious MS Office documents</li>
+    <li>FLOSS automatically deobfuscate strings from malware binaries</li>
+    </ul>
+    </td>
   </tr>
   <tr>
     <td>Thug</td>
     <td><code>Thug_URL_Info</code>, <code>Thug_HTML_Info</code></td>
     <td>performs hybrid dynamic/static analysis on a URL or HTML page.</td>
-  </tr>
-  <tr>
-    <td>FireEye Capa</td>
-    <td><code>Capa_Info</code></td>
-    <td>detects capabilities in executable files</td>
   </tr>
   <tr>
     <td>Box-JS</td>

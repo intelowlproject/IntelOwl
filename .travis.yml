@@ -13,9 +13,11 @@ services:
 before_install:
 - sudo apt-get update
 - unzip -P infected tests/test_files.zip -d .
+- touch docker/env_file_app
+- touch docker/env_file_postgres
 install:
-- sudo docker-compose -f docker-compose-for-travis.yml build
-- sudo docker-compose -f docker-compose-for-travis.yml up -d
+- sudo docker-compose -f docker/default.yml -f docker/travis.override.yml build
+- sudo docker-compose -f docker/default.yml -f docker/travis.override.yml up -d
 script:
 - sudo docker exec -ti intel_owl_uwsgi black . --check
 - sudo docker exec -ti intel_owl_uwsgi flake8 . --count

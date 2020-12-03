@@ -26,7 +26,7 @@ pre-commit install
 You may want to look at a few existing examples to start to build a new one, such as:
 - [shodan.py](https://github.com/intelowlproject/IntelOwl/blob/develop/api_app/script_analyzers/observable_analyzers/shodan.py), if you are creating an observable analyzer
 - [intezer_scan.py](https://github.com/intelowlproject/IntelOwl/blob/develop/api_app/script_analyzers/file_analyzers/intezer_scan.py), if you are creating a file analyzer
-- [peframe.py](https://github.com/intelowlproject/IntelOwl/blob/develop/api_app/script_analyzers/file_analyzers/peframe.py), if you creating a [docker based analyzer](#integrating-a-docker-based-analyzer)
+- [peframe.py](https://github.com/intelowlproject/IntelOwl/blob/develop/api_app/script_analyzers/file_analyzers/peframe.py), if you are creating a [docker based analyzer](#integrating-a-docker-based-analyzer)
 
 After having written the new python module, you have to remember to:
 * Put the module in the `file_analyzers` or `observable_analyzers` directory based on what it can analyze
@@ -98,8 +98,8 @@ $ flake8 . --show-source --statistics
 2. Run the build and start the app using the docker-compose test file. In this way, you would launch the code in your environment and not the last official image in Docker Hub:
 
 ```bash
-$ docker-compose -f docker-compose-for-travis.yml build
-$ docker-compose -f docker-compose-for-travis.yml up
+$ docker-compose -f docker/default.yml -f docker/travis.override.yml build
+$ docker-compose -f docker/default.yml -f docker/travis.override.yml up
 ```
 
 3. Here, we simulate the travis CI tests locally by running the following 3 tests:

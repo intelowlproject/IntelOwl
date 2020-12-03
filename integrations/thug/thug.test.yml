@@ -5,7 +5,7 @@ version: '3'
 services:
   thug:
     build:
-      context: ./integrations/thug
+      context: ../integrations/thug
       dockerfile: Dockerfile
     container_name: intelowl_thug
     restart: unless-stopped

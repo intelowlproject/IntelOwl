@@ -6,13 +6,7 @@
 __pycache__
 venv/
 .env
-env_file_app
-env_file_app_template
-env_file_postgres
-env_file_postgres_template
-env_file_integrations
-env_file_integrations_template
-env_file_app_travis
+docker/env_file_*
 docs/
 integrations/
 docker-compose*

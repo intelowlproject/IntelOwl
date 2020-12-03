@@ -2,12 +2,27 @@
 
 This page includes details about some advanced features that Intel Owl provides which can be optionally enabled. Namely,
 
+- [Smart start](#smart-start)
 - [Optional Analyzers](#optional-analyzers)
 - [Customize analyzer execution at time of request](#customize-analyzer-execution-at-time-of-request)
 - [Elastic Search (with Kibana)](#elastic-search)
 - [Django Groups & Permissions](#django-groups-permissions)
 - [Authentication options](#authentication-options)
 - [GKE deployment](#google-kubernetes-engine-deployment)
+- [Multi Queue](#multi-queue)
+
+## Smart start
+Users that have at least Python 3.6 installed in their machine can leverage a script to help them configure and execute IntelOwl with additional or advanced configuration.
+
+We are talking about a CLI interface called [start.py](https://github.com/intelowlproject/IntelOwl/blob/master/start.py).
+```
+python3 start.py --help
+```
+
+The CLI provides the primitives to correctly build, run or stop the containers for IntelOwl.
+It is possible to attach every optional docker container that IntelOwl has:
+this means that it is possible to have IntelOwl that runs the `multi_queue` [feature](#multi-queue) with `traefik` enabled and every [optional docker analyzer](#optional-analyzers) is active.
+At last, it is possible to insert an optional docker argument, that the CLI will pass to docker.    
 
 ## Optional Analyzers
 Some analyzers which run in their own Docker containers are kept disabled by default. They are disabled by default to prevent accidentally starting too many containers and making your computer unresponsive.
@@ -189,9 +204,12 @@ Refer to the following blog post for an example on how to deploy IntelOwl on Goo
 [Deploying Intel-Owl on GKE](https://mostwanted002.cf/post/intel-owl-gke/) by [Mayank Malik](https://twitter.com/_mostwanted002_).
 
 ## Multi Queue
-IntelOwl provides a [docker-compose-multi-queue](https://github.com/intelowlproject/IntelOwl/blob/master/docker-compose-multi-queue.yml), allowing IntelOwl users to better scale with the performance of their own architecture.
+IntelOwl provides an additional `docker-compose` file,  [multi-queue.override.yaml](https://github.com/intelowlproject/IntelOwl/blob/master/docker/multi-queue.override.yml) file, allowing IntelOwl users to better scale with the performance of their own architecture.
+The command to correctly use the file is the following
+`docker-compose -f docker/default.yaml -f docker/multi-queue.override.yaml`, leveraging the [override](https://docs.docker.com/compose/extends/) feature of docker.
 
-It is possible to define new celery worker, adding a new container in the dockerfile, as shown in the `docker-compose-multi-queue`. 
+
+It is possible to define new celery workers, each requires the addition of a new container in the docker-compose file, as shown in the `multi-queue.override.yaml`. 
 
 IntelOwl moreover requires that the name of the workers are provided in the `docker-compose` file. This is done through the environment variable `CELERY_QUEUES` inside the `uwsgi` container. Each queue must be separated using the character `,`, as shown in the [example](https://github.com/intelowlproject/IntelOwl/blob/master/docker-compose-multi-queue.yml#L29).
 

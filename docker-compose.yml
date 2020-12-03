@@ -64,12 +64,12 @@ services:
       - rabbitmq
       - postgres
 
-  celery_worker:
+  celery_worker_default:
     image: intelowlproject/intelowl:${INTELOWL_TAG_VERSION}
-    container_name: intel_owl_celery_worker
+    container_name: intel_owl_celery_worker_default
     restart: unless-stopped
     stop_grace_period: 3m
-    command: /usr/local/bin/celery -A intel_owl.celery worker --uid www-data --gid www-data --pidfile="/tmp/%n.pid"
+    command: /usr/local/bin/celery -A intel_owl.celery worker -n worker_default -P eventlet --uid www-data --gid www-data --time-limit=10000 --pidfile="/tmp/%n.pid" -Ofair -Q default
     volumes:
       - ./configuration/analyzer_config.json:/opt/deploy/configuration/analyzer_config.json
       - generic_logs:/var/log/intel_owl
@@ -79,6 +79,7 @@ services:
     depends_on:
       - rabbitmq
       - postgres
+
 
 volumes:
   postgres_data:

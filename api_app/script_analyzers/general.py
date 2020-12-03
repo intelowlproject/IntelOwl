@@ -1,12 +1,12 @@
 import logging
 from celery.execute import send_task
 
-from intel_owl import settings
 from api_app.exceptions import (
     AnalyzerConfigurationException,
     AnalyzerRunException,
 )
 from api_app.helpers import generate_sha256
+from intel_owl.settings import CELERY_QUEUES
 from .utils import (
     set_job_status,
     set_failed_analyzer,
@@ -46,7 +46,16 @@ def start_analyzers(
             adjust_analyzer_config(
                 runtime_configuration, additional_config_params, analyzer
             )
+            # get celery queue
+            queue = ac.get("queue", "default")
+            if queue not in CELERY_QUEUES:
+                logger.error(
+                    f"Analyzer {analyzers_to_execute} has a wrong queue."
+                    f" Setting to default"
+                )
+                queue = "default"
             # construct arguments
+
             if is_sample:
                 # check if we should run the hash instead of the binary
                 run_hash = ac.get("run_hash", False)
@@ -98,7 +107,7 @@ def start_analyzers(
             send_task(
                 "run_analyzer",
                 args=args,
-                queue=settings.CELERY_TASK_DEFAULT_QUEUE,
+                queue=queue,
                 soft_time_limit=stl,
             )
 

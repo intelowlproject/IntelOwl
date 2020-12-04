@@ -1,7 +1,7 @@
 import os
 import logging
-import traceback
 import requests
+import itertools
 
 from api_app.exceptions import AnalyzerRunException
 from api_app.script_analyzers import classes
@@ -24,56 +24,48 @@ class Stratos(classes.ObservableAnalyzer):
         ip = self.observable_name
         result = {
             "last24hrs": False,
-            "last24hrs_rating": "_",
+            "last24hrs_rating": "",
             "new_attacker": False,
-            "new_attacker_rating": "_",
+            "new_attacker_rating": "",
             "repeated_attacker": False,
-            "repeated_attacker_rating": "_",
+            "repeated_attacker_rating": "",
         }
 
         self.check_dataset_status()
 
-        with open(db_loc0, "r") as f:
-            db = f.read()
-        db_list = db.split("\n")
-        count = 0
-        for ip_tuple in db_list:
-            if count < 2:
-                count += 1
-                continue
-            else:
-                if ip in ip_tuple:
-                    ip_rating = ((ip_tuple.split(","))[2]).strip()
-                    result["last24hrs"] = True
-                    result["last24hrs_rating"] = ip_rating
+        with open(db_loc0, "r") as f0, open(db_loc1, "r") as f1, open(
+            db_loc2, "r"
+        ) as f2:
+            db0 = f0.read()
+            db1 = f1.read()
+            db2 = f2.read()
 
-        with open(db_loc1, "r") as f:
-            db = f.read()
-        db_list = db.split("\n")
-        count = 0
-        for ip_tuple in db_list:
-            if count < 2:
-                count += 1
-                continue
-            else:
-                if ip in ip_tuple:
-                    ip_rating = ((ip_tuple.split(","))[2]).strip()
-                    result["new_attacker"] = True
-                    result["new_attacker_rating"] = ip_rating
+        db_list0 = db0.split("\n")
+        db_list1 = db1.split("\n")
+        db_list2 = db2.split("\n")
 
-        with open(db_loc2, "r") as f:
-            db = f.read()
-        db_list = db.split("\n")
         count = 0
-        for ip_tuple in db_list:
+        for (ip0, ip1, ip2) in itertools.zip_longest(db_list0, db_list1, db_list2):
             if count < 2:
                 count += 1
                 continue
             else:
-                if ip in ip_tuple:
-                    ip_rating = ((ip_tuple.split(","))[2]).strip()
-                    result["repeated_attacker"] = True
-                    result["repeated_attacker_rating"] = ip_rating
+                if ip0:
+                    if ip in ip0:
+                        ip_rating = ((ip0.split(","))[2]).strip()
+                        result["last24hrs"] = True
+                        result["last24hrs_rating"] = ip_rating
+                if ip1:
+                    if ip in ip1:
+                        ip_rating = ((ip1.split(","))[2]).strip()
+                        result["new_attacker"] = True
+                        result["new_attacker_rating"] = ip_rating
+
+                if ip2:
+                    if ip in ip2:
+                        ip_rating = ((ip2.split(","))[2]).strip()
+                        result["repeated_attacker"] = True
+                        result["repeated_attacker_rating"] = ip_rating
 
         return result
 
@@ -112,7 +104,7 @@ class Stratos(classes.ObservableAnalyzer):
             logger.info("ended download of dataset from stratosphere")
 
         except Exception as e:
-            traceback.print_exc()
+            logger.debug("Traceback %s", exc_info=True)
             logger.exception(e)
 
         db_location = [db_loc0, db_loc1, db_loc2]
@@ -128,7 +120,8 @@ class Stratos(classes.ObservableAnalyzer):
         dt_object = datetime.fromtimestamp(timestamp)
 
         if (
-            today.day == dt_object.day
+            dt_object.hour > 3
+            and today.day == dt_object.day
             and today.month == dt_object.month
             and today.year == dt_object.year
         ):

@@ -238,6 +238,18 @@
     "type": "file",
     "supported_filetypes": ["application/x-dosexec"],
     "python_module": "floss.Floss",
+    "additional_config_params": {
+     "max_no_of_strings": {
+       "stack_strings": 1000,
+       "static_strings": 1000,
+       "decoded_strings": 1000
+     },
+     "rank_strings": {
+      "stack_strings": false,
+      "static_strings": false,
+      "decoded_strings": false
+     }
+    },
     "description": "Advanced String Extraction by FireEye",
     "soft_time_limit": 500
   },

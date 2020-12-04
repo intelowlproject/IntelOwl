@@ -81,3 +81,8 @@ shell2http.register_command(
 
 # with this, we can make http calls to the endpoint: /peframe
 shell2http.register_command(endpoint="peframe", command_name="peframe")
+
+# with this, we can make http calls to the endpoint: /stringsifter
+shell2http.register_command(
+    endpoint="stringsifter", command_name="./stringsifter_wrapper.py"
+)

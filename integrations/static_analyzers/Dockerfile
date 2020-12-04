@@ -30,12 +30,15 @@ RUN cd peframe && rm -rf .git && pip3 install -r requirements.txt --no-cache-dir
     && python3 setup.py install \
     && rm -rf ./peframe
 
+# Install stringsifter
+RUN pip3 install stringsifter==2.20201202
+
 # Build Flask REST API
 WORKDIR ${PROJECT_PATH}/static_analyzers-flask
-COPY app.py requirements.txt entrypoint.sh ./
+COPY app.py requirements.txt entrypoint.sh stringsifter_wrapper.py ./
 RUN pip3 install -r requirements.txt --no-cache-dir \
     && chown -R static_analyzers-user:static_analyzers-user . \
-    && chmod +x entrypoint.sh
+    && chmod +x entrypoint.sh stringsifter_wrapper.py
 
 # not needed anymore
 RUN apt-get remove -y wget git \

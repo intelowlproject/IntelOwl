@@ -1,7 +1,6 @@
 import os
 import logging
 import requests
-import itertools
 
 from api_app.exceptions import AnalyzerRunException
 from api_app.script_analyzers import classes
@@ -20,6 +19,23 @@ db_loc2 = f"{settings.MEDIA_ROOT}/{db_name2}"
 
 
 class Stratos(classes.ObservableAnalyzer):
+    def check_in_list(self,dataset_loc, ip):
+        with open(dataset_loc, "r") as f:
+            db = f.read()
+
+        db_list = db.split("\n")
+
+        count = 0
+        for ip_tuple in db_list:
+            if count < 2:
+                count += 1
+                continue
+            else:
+                if ip in ip_tuple:
+                    ip_rating = ((ip_tuple.split(","))[2]).strip()
+                    return(True, ip_rating)
+        return(False, "")
+
     def run(self):
         ip = self.observable_name
         result = {
@@ -33,41 +49,29 @@ class Stratos(classes.ObservableAnalyzer):
 
         self.check_dataset_status()
 
-        with open(db_loc0, "r") as f0, open(db_loc1, "r") as f1, open(
-            db_loc2, "r"
-        ) as f2:
-            db0 = f0.read()
-            db1 = f1.read()
-            db2 = f2.read()
+        ans = self.check_in_list(db_loc0, ip)
+        if(ans[0]):
+            result["last24hrs"] = True
+            result["last24hrs_rating"] = ans[1]
 
-        db_list0 = db0.split("\n")
-        db_list1 = db1.split("\n")
-        db_list2 = db2.split("\n")
+        ans = self.check_in_list(db_loc1, ip)
+        if(ans[0]):
+            result["new_attacker"] = True
+            result["new_attacker_rating"] = ans[1]
 
-        count = 0
-        for (ip0, ip1, ip2) in itertools.zip_longest(db_list0, db_list1, db_list2):
-            if count < 2:
-                count += 1
-                continue
-            else:
-                if ip0:
-                    if ip in ip0:
-                        ip_rating = ((ip0.split(","))[2]).strip()
-                        result["last24hrs"] = True
-                        result["last24hrs_rating"] = ip_rating
-                if ip1:
-                    if ip in ip1:
-                        ip_rating = ((ip1.split(","))[2]).strip()
-                        result["new_attacker"] = True
-                        result["new_attacker_rating"] = ip_rating
-
-                if ip2:
-                    if ip in ip2:
-                        ip_rating = ((ip2.split(","))[2]).strip()
-                        result["repeated_attacker"] = True
-                        result["repeated_attacker_rating"] = ip_rating
+        ans = self.check_in_list(db_loc2, ip)
+        if(ans[0]):
+            result["repeated_attacker"] = True
+            result["repeated_attacker_rating"] = ans[1]
 
         return result
+
+    def download_dataset(self, url, db_loc):
+        p = requests.get(url, verify=False)
+        p.raise_for_status()
+
+        with open(db_loc, "w") as f:
+            f.write(p.content.decode())
 
     def updater(self):
         try:
@@ -80,23 +84,9 @@ class Stratos(classes.ObservableAnalyzer):
             url1 = base_url + mid_url + priority_url + "newest_attackers.csv"
             url2 = base_url + mid_url + priority_url + "repeated_attackers.csv"
 
-            p = requests.get(url0, verify=False)
-            p.raise_for_status()
-
-            q = requests.get(url1, verify=False)
-            q.raise_for_status()
-
-            r = requests.get(url2, verify=False)
-            r.raise_for_status()
-
-            with open(db_loc0, "w") as f:
-                f.write(p.content.decode())
-
-            with open(db_loc1, "w") as f:
-                f.write(q.content.decode())
-
-            with open(db_loc2, "w") as f:
-                f.write(r.content.decode())
+            self.download_dataset(url0, db_loc0)
+            self.download_dataset(url1, db_loc1)
+            self.download_dataset(url2, db_loc2)
 
             if not os.path.exists(db_loc0 or db_loc1 or db_loc2):
                 raise AnalyzerRunException("failed extraction of stratosphere dataset")

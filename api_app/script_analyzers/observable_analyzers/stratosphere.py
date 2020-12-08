@@ -20,53 +20,40 @@ db_loc2 = f"{settings.MEDIA_ROOT}/{db_name2}"
 
 class Stratos(classes.ObservableAnalyzer):
     def check_in_list(self,dataset_loc, ip):
+    # Checks the IP in a list(S.No,IP,Rating).
         with open(dataset_loc, "r") as f:
             db = f.read()
 
         db_list = db.split("\n")
 
-        count = 0
-        for ip_tuple in db_list:
-            if count < 2:
-                count += 1
-                continue
-            else:
-                if ip in ip_tuple:
-                    ip_rating = ((ip_tuple.split(","))[2]).strip()
-                    return(True, ip_rating)
-        return(False, "")
+        for ip_tuple in enumerate(db_list):
+            if ip_tuple[0] >= 2:
+                if ip in ip_tuple[1]:
+                    ip_rating = ((ip_tuple[1].split(","))[2]).strip()
+                    return(ip_rating)
+        return("")
 
     def run(self):
         ip = self.observable_name
         result = {
-            "last24hrs": False,
             "last24hrs_rating": "",
-            "new_attacker": False,
             "new_attacker_rating": "",
-            "repeated_attacker": False,
             "repeated_attacker_rating": "",
         }
 
         self.check_dataset_status()
 
-        ans = self.check_in_list(db_loc0, ip)
-        if(ans[0]):
-            result["last24hrs"] = True
-            result["last24hrs_rating"] = ans[1]
-
-        ans = self.check_in_list(db_loc1, ip)
-        if(ans[0]):
-            result["new_attacker"] = True
-            result["new_attacker_rating"] = ans[1]
-
-        ans = self.check_in_list(db_loc2, ip)
-        if(ans[0]):
-            result["repeated_attacker"] = True
-            result["repeated_attacker_rating"] = ans[1]
+        #Checks the IP in last24hrs attacker list.
+        result["last24hrs_rating"] = self.check_in_list(db_loc0, ip)
+        #Checks the IP in new attacker list.
+        result["new_attacker_rating"] = self.check_in_list(db_loc1, ip)
+        #Checks the IP in repeated attacker list.
+        result["repeated_attacker_rating"] = self.check_in_list(db_loc2, ip)
 
         return result
 
     def download_dataset(self, url, db_loc):
+        # Dataset website certificates are not correctly configured.
         p = requests.get(url, verify=False)
         p.raise_for_status()
 

@@ -18,6 +18,7 @@ class YaraScan(FileAnalyzer):
         self.directories_with_rules = additional_config_params.get(
             "directories_with_rules", []
         )
+        self.recursive = additional_config_params.get("recursive", False)
         self.result = []
         self.ruleset: List[Tuple[str, yara.Rules]] = []
 
@@ -48,7 +49,9 @@ class YaraScan(FileAnalyzer):
                     logger.exception(f"Rule {full_path} " f"has a syntax error {e}")
                     continue
             else:
-                self.load_directory(full_path)
+                if self.recursive:
+                    logger.info(f"Loading directory {full_path}")
+                    self.load_directory(full_path)
 
     def _validated_matches(self, rules: yara.Rules) -> []:
         try:

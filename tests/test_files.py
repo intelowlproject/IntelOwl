@@ -219,7 +219,8 @@ class FileAnalyzersEXETests(TestCase):
         additional_params = {
             "directories_with_rules": [
                 "/opt/deploy/yara/daily_ioc_rules",
-            ]
+            ],
+            "recursive":True
         }
         report = yara_scan.YaraScan(
             "Yara_Scan",
@@ -252,7 +253,6 @@ class FileAnalyzersEXETests(TestCase):
         additional_params = {
             "directories_with_rules": [
                 "/opt/deploy/yara/inquest_rules",
-                "/opt/deploy/yara/inquest_rules/labs.inquest.net",
             ]
         }
         report = yara_scan.YaraScan(
@@ -284,15 +284,10 @@ class FileAnalyzersEXETests(TestCase):
     def test_yara_reversinglabs(self):
         additional_params = {
             "directories_with_rules": [
-                "/opt/deploy/yara/reversinglabs_rules/yara/certificate",
-                "/opt/deploy/yara/reversinglabs_rules/yara/downloader",
-                "/opt/deploy/yara/reversinglabs_rules/yara/exploit",
-                "/opt/deploy/yara/reversinglabs_rules/yara/infostealer",
-                "/opt/deploy/yara/reversinglabs_rules/yara/pua",
-                "/opt/deploy/yara/reversinglabs_rules/yara/ransomware",
-                "/opt/deploy/yara/reversinglabs_rules/yara/trojan",
-                "/opt/deploy/yara/reversinglabs_rules/yara/virus",
-            ]
+                "/opt/deploy/yara/reversinglabs_rules/yara"
+            ],
+            "recursive":True
+
         }
         report = yara_scan.YaraScan(
             "Yara_Scan",

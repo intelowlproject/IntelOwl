@@ -66,7 +66,7 @@ After having written the new python module, you have to remember to:
 
 * Add the new analyzer/s in the lists in the docs: [Usage](./Usage.md). Also, if the analyzer provides additional optional configuration, add the available options here: [Advanced-Usage](./Advanced-Usage.md)
 
-* Ultimately, add the required secrets in the files [env_file_app_template](https://github.com/intelowlproject/IntelOwl/blob/master/env_file_app_template), [env_file_app_travis](https://github.com/certego/IntelOwl/blob/master/env_file_app_travis) and in the docs: [Installation](./Installation.md)
+* Ultimately, add the required secrets in the files [env_file_app_template](https://github.com/intelowlproject/IntelOwl/blob/master/env_file_app_template), [env_file_app_ci](https://github.com/certego/IntelOwl/blob/master/env_file_app_travis) and in the docs: [Installation](./Installation.md)
 
 * In the Pull Request remember to provide some real world examples (screenshots and raw JSON results) of some successful executions of the analyzer to let us understand how it would work.
 
@@ -98,11 +98,11 @@ $ flake8 . --show-source --statistics
 2. Run the build and start the app using the docker-compose test file. In this way, you would launch the code in your environment and not the last official image in Docker Hub:
 
 ```bash
-$ docker-compose -f docker-compose-for-travis.yml build
-$ docker-compose -f docker-compose-for-travis.yml up
+$ docker-compose -f docker-compose-for-ci.yml build
+$ docker-compose -f docker-compose-for-ci.yml up
 ```
 
-3. Here, we simulate the travis CI tests locally by running the following 3 tests:
+3. Here, we simulate the GitHub CI tests locally by running the following 3 tests:
 
 (you can skip first 2 checks if you have installed `pre-commit`)
 

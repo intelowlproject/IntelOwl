@@ -43,7 +43,7 @@ from .mock_utils import (
 
 from intel_owl import settings
 
-# disable logging library for travis
+# disable logging library for Continuous Integration
 if settings.DISABLE_LOGGING_TEST:
     logging.disable(logging.CRITICAL)
 

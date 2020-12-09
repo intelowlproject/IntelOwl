@@ -19,7 +19,7 @@ db_loc2 = f"{settings.MEDIA_ROOT}/{db_name2}"
 
 
 class Stratos(classes.ObservableAnalyzer):
-    def check_in_list(self,dataset_loc, ip):
+    def check_in_list(self, dataset_loc, ip):
         # Checks the IP in a list(S.No,IP,Rating).
         with open(dataset_loc, "r") as f:
             db = f.read()
@@ -30,8 +30,8 @@ class Stratos(classes.ObservableAnalyzer):
             if ip_tuple[0] >= 2:
                 if ip in ip_tuple[1]:
                     ip_rating = ((ip_tuple[1].split(","))[2]).strip()
-                    return(ip_rating)
-        return("")
+                    return ip_rating
+        return ""
 
     def run(self):
         ip = self.observable_name

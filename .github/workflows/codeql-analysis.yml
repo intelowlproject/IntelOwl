@@ -38,6 +38,8 @@ jobs:
         python-version: '3.7'
     - name: Install dependencies
       run: |
+        apt-get update
+        apt-get install -y --no-install-recommends apt-utils libsasl2-dev libssl-dev libldap2-dev python-dev libfuzzy-dev net-tools python-psycopg2 git osslsigncode exiftool
         python -m pip install --upgrade pip
         if [ -f requirements.txt ];
         then pip install -r requirements.txt;

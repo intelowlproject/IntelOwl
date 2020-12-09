@@ -23,7 +23,7 @@ services:
     expose:
       - "8001"
     env_file:
-      - env_file_app_travis
+      - env_file_app_ci
     depends_on:
       - postgres
 
@@ -55,7 +55,7 @@ services:
       - generic_logs:/var/log/intel_owl
       - shared_files:/opt/deploy/files_required
     env_file:
-      - env_file_app_travis
+      - env_file_app_ci
     depends_on:
       - rabbitmq
       - postgres
@@ -71,7 +71,7 @@ services:
       - generic_logs:/var/log/intel_owl
       - shared_files:/opt/deploy/files_required
     env_file:
-      - env_file_app_travis
+      - env_file_app_ci
     depends_on:
       - rabbitmq
       - postgres

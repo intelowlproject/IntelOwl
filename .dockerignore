@@ -2,7 +2,6 @@
 .git
 .vscode
 .lgtm.yml
-.travis.yml
 __pycache__
 venv/
 .env
@@ -13,6 +12,7 @@ env_file_postgres_template
 env_file_integrations
 env_file_integrations_template
 env_file_app_travis
+env_file_app_ci
 docs/
 integrations/
 docker-compose*

@@ -20,7 +20,7 @@ db_loc2 = f"{settings.MEDIA_ROOT}/{db_name2}"
 
 class Stratos(classes.ObservableAnalyzer):
     def check_in_list(self,dataset_loc, ip):
-    # Checks the IP in a list(S.No,IP,Rating).
+        # Checks the IP in a list(S.No,IP,Rating).
         with open(dataset_loc, "r") as f:
             db = f.read()
 
@@ -43,11 +43,11 @@ class Stratos(classes.ObservableAnalyzer):
 
         self.check_dataset_status()
 
-        #Checks the IP in last24hrs attacker list.
+        # Checks the IP in last24hrs attacker list.
         result["last24hrs_rating"] = self.check_in_list(db_loc0, ip)
-        #Checks the IP in new attacker list.
+        # Checks the IP in new attacker list.
         result["new_attacker_rating"] = self.check_in_list(db_loc1, ip)
-        #Checks the IP in repeated attacker list.
+        # Checks the IP in repeated attacker list.
         result["repeated_attacker_rating"] = self.check_in_list(db_loc2, ip)
 
         return result

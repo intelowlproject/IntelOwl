@@ -1173,7 +1173,22 @@
     "soft_time_limit": 60,
     "additional_config_params": {
       "git_repo_main_dir": ["/opt/deploy/yara/daily_ioc_rules"],
-      "directories_with_rules": ["/opt/deploy/yara/daily_ioc_rules"]
+      "directories_with_rules": ["/opt/deploy/yara/daily_ioc_rules"],
+      "recursive": true
+    }
+  },
+  "Yara_Scan_FireEye": {
+    "type": "file",
+    "description": "scan a file with FireEye yara rules",
+    "python_module": "yara_scan.YaraScan",
+    "soft_time_limit": 60,
+    "queue": "local",
+    "additional_config_params": {
+      "git_repo_main_dir": ["/opt/deploy/yara/fireeye_rules"],
+      "directories_with_rules": [
+        "/opt/deploy/yara/fireeye_rules/rules"
+      ],
+      "recursive": true
     }
   },
   "Yara_Scan_Florian": {
@@ -1187,17 +1202,6 @@
       "directories_with_rules": ["/opt/deploy/yara/signature-base/yara"]
     }
   },
-  "Yara_Scan_Samir": {
-    "type": "file",
-    "description": "scan a file with Samir Threat Hunting yara rules",
-    "python_module": "yara_scan.YaraScan",
-    "soft_time_limit": 60,
-    "queue": "local",
-    "additional_config_params": {
-      "git_repo_main_dir": ["/opt/deploy/yara/samir_rules"],
-      "directories_with_rules": ["/opt/deploy/yara/samir_rules"]
-    }
-  },
   "Yara_Scan_Inquest": {
     "type": "file",
     "description": "scan a file with Inquest yara rules",
@@ -1209,9 +1213,9 @@
         "/opt/deploy/yara/inquest_rules"
       ],
       "directories_with_rules": [
-        "/opt/deploy/yara/inquest_rules",
-        "/opt/deploy/yara/inquest_rules/labs.inquest.net"
-      ]
+        "/opt/deploy/yara/inquest_rules"
+      ],
+      "recursive": false
     }
   },
   "Yara_Scan_Intezer": {
@@ -1255,15 +1259,20 @@
     "additional_config_params": {
       "git_repo_main_dir": ["/opt/deploy/yara/reversinglabs_rules"],
       "directories_with_rules": [
-        "/opt/deploy/yara/reversinglabs_rules/yara/certificate",
-        "/opt/deploy/yara/reversinglabs_rules/yara/downloader",
-        "/opt/deploy/yara/reversinglabs_rules/yara/exploit",
-        "/opt/deploy/yara/reversinglabs_rules/yara/infostealer",
-        "/opt/deploy/yara/reversinglabs_rules/yara/pua",
-        "/opt/deploy/yara/reversinglabs_rules/yara/ransomware",
-        "/opt/deploy/yara/reversinglabs_rules/yara/trojan",
-        "/opt/deploy/yara/reversinglabs_rules/yara/virus"
-      ]
+        "/opt/deploy/yara/reversinglabs_rules/yara"
+      ],
+      "recursive": true
+    }
+  },
+  "Yara_Scan_Samir": {
+    "type": "file",
+    "description": "scan a file with Samir Threat Hunting yara rules",
+    "python_module": "yara_scan.YaraScan",
+    "soft_time_limit": 60,
+    "queue": "local",
+    "additional_config_params": {
+      "git_repo_main_dir": ["/opt/deploy/yara/samir_rules"],
+      "directories_with_rules": ["/opt/deploy/yara/samir_rules"]
     }
   },
   "Yara_Scan_Stratosphere": {

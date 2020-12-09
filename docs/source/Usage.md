@@ -61,6 +61,7 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * `Yara_Scan_McAfee`: scan a file with McAfee yara rules
 * `Yara_Scan_Samir`: scan a file with Samir Threat Hunting yara rules
 * `Yara_Scan_Stratosphere`: scan a file with Stratosphere yara rules
+* `Yara_Scan_FireEye`: scan a file with FireEye yara rules
 * `Yara_Scan_ReversingLabs`: scan a file with ReversingLabs yara rules
 * `Yara_Scan_Custom_Signatures`: scan a file with your own added signatures
 * `MalwareBazaar_Get_File`: Check if a particular malware sample is known to MalwareBazaar

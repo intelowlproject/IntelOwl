@@ -1,0 +1,40 @@
+version: '3'
+
+services:
+  uwsgi:
+    environment:
+      - CELERY_QUEUES="default,local,long"
+
+
+  celery_worker_local:
+    image: intelowlproject/intelowl:${INTELOWL_TAG_VERSION}
+    container_name: intel_owl_celery_worker_local
+    restart: unless-stopped
+    stop_grace_period: 3m
+    command: /usr/local/bin/celery -A intel_owl.celery worker -n worker_local --uid www-data --time-limit=10000 --gid www-data --pidfile="/tmp/%n.pid" -Ofair -Q local
+    volumes:
+      - ../configuration/analyzer_config.json:/opt/deploy/configuration/analyzer_config.json
+      - generic_logs:/var/log/intel_owl
+      - shared_files:/opt/deploy/files_required
+    env_file:
+      - env_file_app
+    depends_on:
+      - rabbitmq
+      - postgres
+
+  celery_worker_long:
+    image: intelowlproject/intelowl:${INTELOWL_TAG_VERSION}
+    container_name: intel_owl_celery_worker_long
+    restart: unless-stopped
+    stop_grace_period: 3m
+    command: /usr/local/bin/celery -A intel_owl.celery worker -n worker_long --uid www-data --gid www-data --time-limit=40000 --pidfile="/tmp/%n.pid" -Ofair -Q long
+    volumes:
+      - ../configuration/analyzer_config.json:/opt/deploy/configuration/analyzer_config.json
+      - generic_logs:/var/log/intel_owl
+      - shared_files:/opt/deploy/files_required
+    env_file:
+      - env_file_app
+    depends_on:
+      - rabbitmq
+      - postgres
+

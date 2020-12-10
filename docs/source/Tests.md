@@ -19,7 +19,7 @@
 ### Launch tests
     
 - Start the app using the docker-compose test file. In this way, you would launch the code in your environment and not the last official image in Docker Hub:
-`docker-compose -f docker-compose-for-tests.yml up`
+`docker-compose -f docker/default.yml -f docker/test.override.yml up`
 
 - Run tests from the project directory:
 `docker exec -ti intel_owl_uwsgi python3 manage.py test tests`
@@ -28,5 +28,5 @@
 `docker exec -ti intel_owl_uwsgi python3 manage.py test tests.test_observables.DomainAnalyzersTests.test_checkdmarc`
 
 - Rebuild the local image after changes were made:
-`docker-compose -f docker-compose-for-tests.yml build`
+`docker-compose -f docker/default.yml -f docker/test.override.yml build`
     

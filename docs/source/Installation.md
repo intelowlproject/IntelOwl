@@ -108,7 +108,7 @@ Required variables (we need to insert some of the values we have put in the prev
 * `POSTGRES_USER` (same as DB_USER)
 * `POSTGRES_DB` -> default `intel_owl_db`
 
-If you prefer to use an external PostgreSQL instance, you should just remove the relative image from the `docker-compose.yml` file and provide the configuration to connect to your controlled instance/s.
+If you prefer to use an external PostgreSQL instance, you should just remove the relative image from the `docker/default.yml` file and provide the configuration to connect to your controlled instance/s.
 
 ### Web server configuration (optional)
 Intel Owl provides basic configuration for:
@@ -137,10 +137,9 @@ Then you should modify the `nginx` service configuration in `docker-compose.yml`
 ##### HTTPS with Let's Encrypt
 We provide a specific docker-compose file that leverages [Traefik](https://docs.traefik.io/) to allow fast deployments of public-faced and HTTPS-enabled applications.
 
-Before using it, you should configure the configuration file `docker-compose-with-traefik.yml` by changing the email address and the hostname where the application is served. For a detailed explanation follow the official documentation: [Traefix doc](https://docs.traefik.io/user-guides/docker-compose/acme-http/).
+Before using it, you should configure the configuration file `docker/traefik.override.yml` by changing the email address and the hostname where the application is served. For a detailed explanation follow the official documentation: [Traefix doc](https://docs.traefik.io/user-guides/docker-compose/acme-http/).
  
-After the configuration is done, you should run docker-compose in this way:
-`docker-compose -f docker-compose-with-traefik.yml up`
+After the configuration is done, you should either add the `traefik.override.yml` reference in the `.env` file or you can use the `start.py` [script](https://intelowl.readthedocs.io/en/stable/Advanced-Usage.html#smart-start)
 
 
 ### Analyzers configuration (optional)

@@ -856,6 +856,15 @@
     "soft_time_limit": 70,
     "queue": "local"
   },
+  "Stratosphere_Blacklist": {
+    "type": "observable",
+    "observable_supported": [
+      "ip"
+    ],
+    "description": "Cross refernce an IP in blacklist provided by Stratosphere lab",
+    "python_module": "stratosphere.Stratos",
+    "soft_time_limit": 120
+  },
   "TalosReputation": {
     "type": "observable",
     "observable_supported": [

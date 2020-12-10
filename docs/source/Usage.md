@@ -81,6 +81,7 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * `HybridAnalysis_Get_Observable`: search an observable in the HybridAnalysis sandbox reports
 * `OTXQuery`: scan an observable on [Alienvault OTX](https://otx.alienvault.com/)
 * `TalosReputation`: check an IP reputation from Talos
+* `Stratosphere_Blacklist`: Cross-reference an IP from blacklists maintained by Stratosphere Labs
 * `Robtex_Forward_PDNS_Query`: scan a domain against the Robtex Passive DNS DB
 * `Robtex_Reverse_PDNS_Query`: scan an IP against the Robtex Passive DNS DB
 * `Robtex_IP_Query`: get IP info from Robtex

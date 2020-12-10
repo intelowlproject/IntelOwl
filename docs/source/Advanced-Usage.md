@@ -27,13 +27,15 @@ table, th, td {
   </tr>
   <tr>
     <td>Static Analyzers</td>
-    <td><code>PEframe_Scan</code>, <code>Capa_Info</code>, <code>Floss</code></td>
+    <td><code>PEframe_Scan</code>, <code>Capa_Info</code>, <code>Floss</code>, <code>Strings_Info_Classic</code>, <code>Strings_Info_ML</code>, <code>Manalyze</code></td>
     <td>
     <ul>
-    <li>Capa detects capabilities in executable files</li>
-    <li>PEFrame performs static analysis on Portable Executable malware and malicious MS Office documents</li>
-    <li>FLOSS automatically deobfuscate strings from malware binaries</li>
-    </ul>
+      <li>Capa detects capabilities in executable files</li>
+      <li>PEFrame performs static analysis on Portable Executable malware and malicious MS Office documents</li>
+      <li>FLOSS automatically deobfuscate strings from malware binaries</li>
+      <li>String_Info_Classic extracts human-readable strings where as ML version of it ranks them</li>
+      <li>Manalyze statically analyzes PE (Portable-Executable) files in-depth</li>
+      </ul>
     </td>
   </tr>
   <tr>

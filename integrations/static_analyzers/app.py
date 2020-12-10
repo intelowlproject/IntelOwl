@@ -86,3 +86,6 @@ shell2http.register_command(endpoint="peframe", command_name="peframe")
 shell2http.register_command(
     endpoint="stringsifter", command_name="./stringsifter_wrapper.py"
 )
+
+# with this, we can make http calls to the endpoint: /manalyze
+shell2http.register_command(endpoint="manalyze", command_name="/usr/local/bin/manalyze")

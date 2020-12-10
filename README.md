@@ -84,6 +84,7 @@ license terms.
 [IntelX](https://intelx.io/terms-of-service),
 [Speakeasy](https://github.com/fireeye/speakeasy),
 [Checkdmarc](https://github.com/domainaware/checkdmarc)
+[Manalyze](https://github.com/JusticeRage/Manalyze)
 
 ## Acknowledgments
 

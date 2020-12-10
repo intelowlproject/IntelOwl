@@ -2,7 +2,6 @@
 .git
 .vscode
 .lgtm.yml
-.travis.yml
 __pycache__
 venv/
 .env

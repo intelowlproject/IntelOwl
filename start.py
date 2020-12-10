@@ -8,7 +8,7 @@ docker_analyzers = ["thug", "apk_analyzers", "box_js", "static_analyzers"]
 path_mapping = {
     "default": "docker/default.yml",
     "test": "docker/test.override.yml",
-    "travis": "docker/travis.override.yml",
+    "ci": "docker/ci.override.yml",
     "traefik": "docker/traefik.override.yml",
     "multi_queue": "docker/multi-queue.override.yml",
     "apk_analyzers": "integrations/apk_analyzers/apk.yml",
@@ -32,7 +32,7 @@ path_mapping["all_analyzers.test"] = [
         allow_extra_args=True,
     )
 )
-@click.argument("mode", required=True, type=click.Choice(["prod", "test", "travis"]))
+@click.argument("mode", required=True, type=click.Choice(["prod", "test", "ci"]))
 @click.argument(
     "docker_command", required=True, type=click.Choice(["build", "up", "down"])
 )
@@ -69,7 +69,7 @@ def start(
         return
     command = "docker-compose"
     command += f" -f {path_mapping['default']}"
-    for key in ["test", "travis", "traefik", "multi_queue"]:
+    for key in ["test", "ci", "traefik", "multi_queue"]:
         if key in local_keys and local_keys[key]:
             command += f" -f {path_mapping[key]}"
     for key in docker_analyzers:

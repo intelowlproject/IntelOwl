@@ -52,7 +52,7 @@ from .utils import (
 from intel_owl import settings
 
 logger = logging.getLogger(__name__)
-# disable logging library for travis
+# disable logging library for Continuous Integration
 if settings.DISABLE_LOGGING_TEST:
     logging.disable(logging.CRITICAL)
 

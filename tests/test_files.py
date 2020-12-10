@@ -43,7 +43,7 @@ from .mock_utils import (
 
 from intel_owl import settings
 
-# disable logging library for travis
+# disable logging library for Continuous Integration
 if settings.DISABLE_LOGGING_TEST:
     logging.disable(logging.CRITICAL)
 
@@ -106,7 +106,9 @@ class FileAnalyzersEXETests(TestCase):
         ).start()
         self.assertEqual(report.get("success", False), True)
 
-    def test_stringsinfo_ml_exe(self):
+    @mock_connections(patch("requests.get", side_effect=mocked_docker_analyzer_get))
+    @mock_connections(patch("requests.post", side_effect=mocked_docker_analyzer_post))
+    def test_stringsinfo_ml_exe(self, mock_get=None, mock_post=None):
         report = strings_info.StringsInfo(
             "Strings_Info_ML",
             self.job_id,
@@ -117,7 +119,9 @@ class FileAnalyzersEXETests(TestCase):
         ).start()
         self.assertEqual(report.get("success", False), True)
 
-    def test_stringsinfo_classic_exe(self):
+    @mock_connections(patch("requests.get", side_effect=mocked_docker_analyzer_get))
+    @mock_connections(patch("requests.post", side_effect=mocked_docker_analyzer_post))
+    def test_stringsinfo_classic_exe(self, mock_get=None, mock_post=None):
         report = strings_info.StringsInfo(
             "Strings_Info_Classic",
             self.job_id,

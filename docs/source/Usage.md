@@ -138,6 +138,9 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * `IPInfo`: Location Information about an IP
 * `Zoomeye`: [Zoomeye](https://www.zoomeye.org) Cyberspace Search Engine recording information of devices, websites, services and components etc..
 
+#### Generic analyzers (email, phone number, ...)
+* `EmailRep`: search an email address on emailrep.io
+
 #### [Additional analyzers](https://intelowl.readthedocs.io/en/develop/Advanced-Usage.html#optional-analyzers) that can be enabled per your wish.
 
 ## Analyzers customization

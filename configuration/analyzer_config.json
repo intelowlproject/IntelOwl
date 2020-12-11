@@ -422,6 +422,13 @@
     },
     "soft_time_limit": 30
   },
+  "Manalyze": {
+    "type": "file",
+    "supported_filetypes": ["application/x-dosexec"],
+    "description": "A static analyzer for PE files",
+    "python_module": "manalyze.Manalyze",
+    "soft_time_limit": 720
+  },
   "MISP": {
     "type": "observable",
     "observable_supported": [

@@ -6,6 +6,7 @@ ENV LOG_PATH /var/log/intel_owl/static_analyzers
 # update and install packages
 RUN apt-get update \
     && apt-get install -y --no-install-recommends wget git libssl1.1 swig g++ make libssl-dev libmagic1 \
+    libboost-regex-dev libboost-program-options-dev libboost-system-dev libboost-filesystem-dev build-essential cmake \
     && rm -rf /var/lib/apt/lists/* \
     && pip3 install --upgrade pip
 
@@ -32,6 +33,14 @@ RUN cd peframe && rm -rf .git && pip3 install -r requirements.txt --no-cache-dir
 
 # Install stringsifter
 RUN pip3 install stringsifter==2.20201202
+
+# Install and build Manalyze
+RUN git clone https://github.com/JusticeRage/Manalyze.git \
+    && cd Manalyze \
+    && cmake . \
+    && make -j5 \
+    && make install
+
 
 # Build Flask REST API
 WORKDIR ${PROJECT_PATH}/static_analyzers-flask

@@ -1,3 +1,4 @@
+import re
 import logging
 import requests
 
@@ -20,6 +21,7 @@ class InQuest(ObservableAnalyzer):
         self.analysis_type = additional_config_params.get(
             "inquest_analysis", "dfi_search"
         )
+        self.generic_identifier_mode = "user-defined"  # Or auto
 
     @property
     def hash_type(self):
@@ -31,6 +33,14 @@ class InQuest(ObservableAnalyzer):
                 "Supported hash types are: 'md5', 'sha1', 'sha256', 'sha512'."
             )
         return hash_type
+
+    @property
+    def type_of_generic(self):
+        if re.match(r"^[\w\.\+\-]+\@[\w]+\.[a-z]{2,3}$", self.observable_name):
+            return "email"
+        else:
+            # TODO: This should be validated more thoroughly
+            return "filename"
 
     def run(self):
         result = {}
@@ -49,11 +59,25 @@ class InQuest(ObservableAnalyzer):
                 uri = (
                     f"/api/dfi/search/hash/{self.hash_type}?hash={self.observable_name}"
                 )
+
             elif self.observable_classification in ["ip", "url", "domain"]:
                 uri = (
                     f"/api/dfi/search/ioc/{self.observable_classification}"
                     f"?keyword={self.observable_name}"
                 )
+
+            elif self.observable_classification == "generic":
+                try:
+                    type_, value = self.observable_name.split(":")
+                except ValueError:
+                    self.generic_identifier_mode = "auto"
+                    type_ = self.type_of_generic
+                    value = self.observable_name
+
+                if type_ not in ["email", "filename", "registry", "xmpid"]:
+                    raise AnalyzerRunException(f"Unknown Type: {type_}")
+
+                uri = f"/api/dfi/search/ioc/{type_}?keyword={value}"
             else:
                 raise AnalyzerRunException()
 
@@ -80,5 +104,8 @@ class InQuest(ObservableAnalyzer):
             and self.observable_classification == "hash"
         ):
             result["hash_type"] = self.hash_type
+
+        if self.generic_identifier_mode == "auto":
+            result["type_of_generic"] = self.type_of_generic
 
         return result

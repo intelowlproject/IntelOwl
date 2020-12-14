@@ -87,7 +87,7 @@ class CommonTestCases_observables(metaclass=ABCMeta):
 
     def test_InQuest_IOCdb(self, mock_get=None, mock_post=None):
         report = inquest.InQuest(
-            "InQuest",
+            "InQuest_IOCdb",
             self.job_id,
             self.observable_name,
             self.observable_classification,
@@ -97,7 +97,7 @@ class CommonTestCases_observables(metaclass=ABCMeta):
 
     def test_InQuest_REPdb(self, mock_get=None, mock_post=None):
         report = inquest.InQuest(
-            "InQuest",
+            "InQuest_REPdb",
             self.job_id,
             self.observable_name,
             self.observable_classification,
@@ -107,7 +107,7 @@ class CommonTestCases_observables(metaclass=ABCMeta):
 
     def test_InQuest_DFI(self, mock_get=None, mock_post=None):
         report = inquest.InQuest(
-            "InQuest",
+            "InQuest_DFI",
             self.job_id,
             self.observable_name,
             self.observable_classification,

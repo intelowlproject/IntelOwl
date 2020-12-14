@@ -20,7 +20,7 @@ services:
       - static_content:/opt/deploy/intel_owl/static
       - shared_files:/opt/deploy/files_required
     entrypoint:
-      - ./docker_entrypoint.sh
+      - ./docker//docker_entrypoint.sh
     expose:
       - "8001"
     env_file:

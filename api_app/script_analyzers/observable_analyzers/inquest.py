@@ -34,13 +34,13 @@ class InQuest(ObservableAnalyzer):
             )
         return hash_type
 
-    @property
     def type_of_generic(self):
         if re.match(r"^[\w\.\+\-]+\@[\w]+\.[a-z]{2,3}$", self.observable_name):
-            return "email"
+            type_ = "email"
         else:
             # TODO: This should be validated more thoroughly
-            return "filename"
+            type_ = "filename"
+        return type_
 
     def run(self):
         result = {}
@@ -71,7 +71,7 @@ class InQuest(ObservableAnalyzer):
                     type_, value = self.observable_name.split(":")
                 except ValueError:
                     self.generic_identifier_mode = "auto"
-                    type_ = self.type_of_generic
+                    type_ = self.type_of_generic()
                     value = self.observable_name
 
                 if type_ not in ["email", "filename", "registry", "xmpid"]:
@@ -106,6 +106,6 @@ class InQuest(ObservableAnalyzer):
             result["hash_type"] = self.hash_type
 
         if self.generic_identifier_mode == "auto":
-            result["type_of_generic"] = self.type_of_generic
+            result["type_of_generic"] = self.type_of_generic()
 
         return result

@@ -39,6 +39,7 @@ from api_app.script_analyzers.observable_analyzers import (
     zoomeye,
     emailrep,
     triage_search,
+    inquest,
 )
 from api_app.models import Job
 from .mock_utils import (
@@ -640,5 +641,35 @@ class GenericAnalyzersTest(TestCase):
             self.observable_name,
             self.observable_classification,
             {},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    def test_InQuest_IOCdb(self, mock_get=None, mock_post=None):
+        report = inquest.InQuest(
+            "InQuest_IOCdb",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {"inquest_analysis": "iocdb_search"},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    def test_InQuest_REPdb(self, mock_get=None, mock_post=None):
+        report = inquest.InQuest(
+            "InQuest_REPdb",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {"inquest_analysis": "repdb_search"},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    def test_InQuest_DFI(self, mock_get=None, mock_post=None):
+        report = inquest.InQuest(
+            "InQuest_DFI",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {"inquest_analysis": "dfi_search"},
         ).start()
         self.assertEqual(report.get("success", False), True)

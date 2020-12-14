@@ -1,6 +1,7 @@
 # for observable analyzers, if can customize the behavior based on:
 # DISABLE_LOGGING_TEST to True -> logging disabled
 # MOCK_CONNECTIONS to True -> connections to external analyzers are faked
+import hashlib
 import logging
 import os
 from unittest import skipIf
@@ -15,6 +16,7 @@ from api_app.script_analyzers.observable_analyzers import (
     ipinfo,
     maxmind,
     greynoise,
+    stratosphere,
     talos,
     tor,
     circl_pssl,
@@ -35,7 +37,9 @@ from api_app.script_analyzers.observable_analyzers import (
     phishtank,
     dnstwist,
     zoomeye,
+    emailrep,
 )
+from api_app.models import Job
 from .mock_utils import (
     MockResponse,
     MockResponseNoOp,
@@ -211,6 +215,16 @@ class IPAnalyzersTests(
     def test_greynoise(self, mock_get=None, mock_post=None):
         report = greynoise.GreyNoise(
             "GreyNoise",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    def test_stratos(self, mock_get=None, mock_post=None):
+        report = stratosphere.Stratos(
+            "Stratosphere_Blacklist",
             self.job_id,
             self.observable_name,
             self.observable_classification,
@@ -537,6 +551,46 @@ class HashAnalyzersTests(
     def test_cymru_get(self, mock_get=None, mock_post=None):
         report = cymru.Cymru(
             "Cymru_Hash_Registry_Get_Observable",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+
+class GenericAnalyzersTest(TestCase):
+    """
+    Tests against observable that are into generic classification, like email addresses,
+    phone number and so on
+    """
+
+    @staticmethod
+    def get_params():
+        return {
+            "source": "test",
+            "is_sample": False,
+            "observable_name": os.environ.get("TEST_GENERIC", "email@example.com"),
+            "observable_classification": "generic",
+            "force_privacy": False,
+            "analyzers_requested": ["test"],
+        }
+
+    def setUp(self):
+        params = self.get_params()
+        params["md5"] = hashlib.md5(
+            params["observable_name"].encode("utf-8")
+        ).hexdigest()
+        test_job = Job(**params)
+        test_job.save()
+        self.job_id = test_job.id
+        self.observable_name = test_job.observable_name
+        self.observable_classification = test_job.observable_classification
+
+    @mock_connections(patch("requests.get", side_effect=mocked_requests))
+    def test_emailrep(self, mock_get=None):
+        report = emailrep.EmailRep(
+            "EmailRep",
             self.job_id,
             self.observable_name,
             self.observable_classification,

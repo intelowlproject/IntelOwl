@@ -43,6 +43,7 @@ URLSCAN_API_KEY=test
 PHISHTANK_API_KEY=test
 ZOOMEYE_KEY=test
 TRIAGE_KEY=test
+EMAILREP_KEY=test
 
 # Test tokens
 TEST_JOB_ID=1
@@ -50,6 +51,7 @@ TEST_IP=8.8.8.8
 TEST_DOMAIN=www.google.com
 TEST_URL=https://www.google.com/search?test
 TEST_MD5=446c5fbb11b9ce058450555c1c27153c
+TEST_GENERIC=email@example.com
 
 # URLs
 CUCKOO_URL=http://fake_url.com

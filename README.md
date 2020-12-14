@@ -73,6 +73,7 @@ license terms.
 [Intezer Yara rules](https://github.com/intezer/yara-rules),
 [McAfee Yara rules](https://github.com/advanced-threat-research/Yara-Rules),
 [Stratosphere Yara rules](https://github.com/stratosphereips/yara-rules),
+[FireEye Yara rules](https://github.com/fireeye/red_team_tool_countermeasures),
 [ReversingLabs Yara rules](https://github.com/reversinglabs/reversinglabs-yara-rules),
 [Samir Yara rules](https://github.com/sbousseaden/YaraHunts),
 [InQuest Yara rules](https://github.com/InQuest/yara-rules),
@@ -83,6 +84,7 @@ license terms.
 [IntelX](https://intelx.io/terms-of-service),
 [Speakeasy](https://github.com/fireeye/speakeasy),
 [Checkdmarc](https://github.com/domainaware/checkdmarc)
+[Manalyze](https://github.com/JusticeRage/Manalyze)
 
 ## Acknowledgments
 

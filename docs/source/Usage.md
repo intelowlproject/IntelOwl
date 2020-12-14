@@ -61,6 +61,7 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * `Yara_Scan_McAfee`: scan a file with McAfee yara rules
 * `Yara_Scan_Samir`: scan a file with Samir Threat Hunting yara rules
 * `Yara_Scan_Stratosphere`: scan a file with Stratosphere yara rules
+* `Yara_Scan_FireEye`: scan a file with FireEye yara rules
 * `Yara_Scan_ReversingLabs`: scan a file with ReversingLabs yara rules
 * `Yara_Scan_Custom_Signatures`: scan a file with your own added signatures
 * `MalwareBazaar_Get_File`: Check if a particular malware sample is known to MalwareBazaar
@@ -74,6 +75,7 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * `IntelX_Phonebook`: [IntelligenceX](https://intelx.io/) is a search engine and data archive. Fetches emails, urls, domains associated with an observable.
 * `UnpacMe_EXE_Unpacker`: [UnpacMe](https://www.unpac.me/) is an automated malware unpacking service
 * `Triage_Scan`: leverage [Triage](https://tria.ge) sandbox environment to scan various files
+* `Manalyze`: [Manalyze](https://github.com/JusticeRage/Manalyze) performs static analysis on PE executables to detect undesirable behavior.
 
 #### Observable analyzers (ip, domain, url, hash)
 * `VirusTotal_v3_Get_Observable`: search an observable in the VirusTotal DB
@@ -81,6 +83,7 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * `HybridAnalysis_Get_Observable`: search an observable in the HybridAnalysis sandbox reports
 * `OTXQuery`: scan an observable on [Alienvault OTX](https://otx.alienvault.com/)
 * `TalosReputation`: check an IP reputation from Talos
+* `Stratosphere_Blacklist`: Cross-reference an IP from blacklists maintained by Stratosphere Labs
 * `Robtex_Forward_PDNS_Query`: scan a domain against the Robtex Passive DNS DB
 * `Robtex_Reverse_PDNS_Query`: scan an IP against the Robtex Passive DNS DB
 * `Robtex_IP_Query`: get IP info from Robtex
@@ -134,6 +137,9 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * `DNStwist`: Scan a url/domain to find potentially malicious permutations via dns fuzzing. [dnstwist repo](https://github.com/elceef/dnstwist) 
 * `IPInfo`: Location Information about an IP
 * `Zoomeye`: [Zoomeye](https://www.zoomeye.org) Cyberspace Search Engine recording information of devices, websites, services and components etc..
+
+#### Generic analyzers (email, phone number, ...)
+* `EmailRep`: search an email address on emailrep.io
 
 #### [Additional analyzers](https://intelowl.readthedocs.io/en/develop/Advanced-Usage.html#optional-analyzers) that can be enabled per your wish.
 

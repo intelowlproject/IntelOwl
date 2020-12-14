@@ -1,4 +1,4 @@
-# !!!! This file is used only to give required variables to the Travis Build
+# !!!! This file is used only to give required variables to the CI Build
 # Required Secrets
 DB_HOST=postgres
 DB_PORT=5432

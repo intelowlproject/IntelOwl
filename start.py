@@ -101,7 +101,9 @@ def start(
         return
     command = "docker-compose"
     command += f" -f {path_mapping['default']}"
-    for key in ["test", "ci", "traefik", "multi_queue"]:
+    if mode in ["ci", "test"]:
+        command += f" -f {path_mapping[mode]}"
+    for key in ["traefik", "multi_queue"]:
         if key in local_keys and local_keys[key]:
             command += f" -f {path_mapping[key]}"
     for key in docker_analyzers:

@@ -104,11 +104,7 @@ $ docker-compose -f docker/default.yml -f docker/ci.override.yml up
 
 3. Here, we simulate the GitHub CI tests locally by running the following 3 tests:
 
-(you can skip first 2 checks if you have installed `pre-commit`)
-
 ```bash
-$ docker exec -ti intel_owl_uwsgi black . --check --exclude "migrations|venv"
-$ docker exec -ti intel_owl_uwsgi flake8 . --count
 $ docker exec -ti intel_owl_uwsgi unzip -P infected tests/test_files.zip
 $ docker exec -ti intel_owl_uwsgi python manage.py test tests
 ```

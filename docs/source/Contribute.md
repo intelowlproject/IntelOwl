@@ -83,6 +83,9 @@ which can be queried from the main Django API.
 
 ## Create a pull request
 
+### Install testing requirements
+1. Run `pip install -r test-requirements.txt` to install the requirements to  validate your code. 
+
 #### Pass linting and tests
 1. Run `psf/black` to lint the files automatically and then `flake8` to check:
  

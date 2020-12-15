@@ -80,6 +80,7 @@ Optional variables needed to enable specific analyzers:
 * `VT_KEY`: VirusTotal API key
 * `HA_KEY`: HybridAnalysis API key
 * `INTEZER_KEY`: Intezer API key
+* `INQUEST_API_KEY`: InQuest API key
 * `FIRST_MISP_API`: FIRST MISP API key
 * `FIRST_MISP_URL`: FIRST MISP URL
 * `MISP_KEY`: your own MISP instance key

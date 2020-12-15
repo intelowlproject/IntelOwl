@@ -17,6 +17,7 @@ from api_app.script_analyzers.observable_analyzers import (
     intelx,
     urlscan,
     mb_google,
+    inquest,
 )
 
 from api_app.script_analyzers.observable_analyzers.dns.dns_resolvers import (
@@ -81,6 +82,36 @@ class CommonTestCases_observables(metaclass=ABCMeta):
     def test_otx(self, mock_get=None, mock_post=None):
         report = otx.OTX(
             "OTX", self.job_id, self.observable_name, self.observable_classification, {}
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    def test_InQuest_IOCdb(self, mock_get=None, mock_post=None):
+        report = inquest.InQuest(
+            "InQuest",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {"inquest_analysis": "iocdb_search"},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    def test_InQuest_REPdb(self, mock_get=None, mock_post=None):
+        report = inquest.InQuest(
+            "InQuest",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {"inquest_analysis": "repdb_search"},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    def test_InQuest_DFI(self, mock_get=None, mock_post=None):
+        report = inquest.InQuest(
+            "InQuest",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {"inquest_analysis": "dfi_search"},
         ).start()
         self.assertEqual(report.get("success", False), True)
 

@@ -109,7 +109,12 @@ List of some of the analyzers with optional configuration:
   * `query`: Follow according to [docs](https://www.zoomeye.org/doc#host-search), but omit `ip`, `hostname`. Eg: `"query": "city:biejing port:21"`
   * `facets`(default: Empty string): A comma-separated list of properties to get summary information on query. Eg: `"facets:app,os"`
   * `page`(default 1): The page number to paging
-  * `history`(default True):  	To query the history data. 
+  * `history`(default True):  	To query the history data.
+* `Triage_Scan` and `Triage_Search`:
+  * `endpoint` (default public): choose whether to query on the public or the private endpoint of triage.
+  * `report_type` (default overview): determines how detailed the final report will be. (overview/complete)
+* `Triage_Search`:
+  * `analysis_type` (default search): choose whether to search for existing observable reports or upload for scanning via URL. (search/submit)
 
 There are two ways to do this:
 

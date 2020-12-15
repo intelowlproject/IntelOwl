@@ -421,6 +421,42 @@
     "soft_time_limit": 180,
     "queue": "long"
   },
+"InQuest_IOCdb": {
+  "type": "observable",
+  "observable_supported": ["ip", "url", "domain", "hash", "generic"],
+  "external_service": true,
+  "description": "Indicators of Compromise Database - search IOCdb",
+  "requires_configuration": true,
+  "python_module": "inquest.InQuest",
+  "additional_config_params": {
+    "api_key_name": "INQUEST_API_KEY",
+    "inquest_analysis" : "iocdb_search"
+  }
+},
+"InQuest_REPdb": {
+  "type": "observable",
+  "observable_supported": ["ip", "url", "domain", "hash", "generic"],
+  "external_service": true,
+  "description": "Reputation Database - search REPdb",
+  "requires_configuration": true,
+  "python_module": "inquest.InQuest",
+  "additional_config_params": {
+    "api_key_name": "INQUEST_API_KEY",
+    "inquest_analysis" : "repdb_search"
+  }
+},
+"InQuest_DFI": {
+  "type": "observable",
+  "observable_supported": ["ip", "url", "domain", "hash", "generic"],
+  "external_service": true,
+  "description": "Deep File Inspection - search dfi",
+  "requires_configuration": true,
+  "python_module": "inquest.InQuest",
+  "additional_config_params": {
+    "api_key_name": "INQUEST_API_KEY",
+    "inquest_analysis" : "dfi_search"
+  }
+},
   "IPInfo": {
     "type": "observable",
     "observable_supported": ["ip"],
@@ -994,6 +1030,24 @@
     "python_module": "tor.Tor",
     "soft_time_limit": 30
   },
+  "Triage_Search": {
+    "type": "observable",
+    "observable_supported": [
+      "url",
+      "hash"
+    ],
+    "description": "analyze a url sample using triage sandbox environment",
+    "python_module": "triage_search.TriageSearch",
+    "requires_configuration": true,
+    "external_service": true,
+    "additional_config_params": {
+      "api_key_name": "TRIAGE_KEY",
+      "endpoint": "public",
+      "analysis_type": "search",
+      "report_type": "overview"
+    },
+    "soft_time_limit": 300
+  },
   "Triage_Scan": {
     "type": "file",
     "description": "leverage Triage sandbox environment to scan various files",
@@ -1003,9 +1057,9 @@
     "additional_config_params": {
       "api_key_name": "TRIAGE_KEY",
       "endpoint": "public",
-      "report_type": "overview",
-      "soft_time_limit": 300
+      "report_type": "overview"
     },
+    "soft_time_limit": 300,
     "queue": "long"
   },
   "UnpacMe_EXE_Unpacker": {

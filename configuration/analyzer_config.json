@@ -421,6 +421,42 @@
     "soft_time_limit": 180,
     "queue": "long"
   },
+"InQuest_IOCdb": {
+  "type": "observable",
+  "observable_supported": ["ip", "url", "domain", "hash", "generic"],
+  "external_service": true,
+  "description": "Indicators of Compromise Database - search IOCdb",
+  "requires_configuration": true,
+  "python_module": "inquest.InQuest",
+  "additional_config_params": {
+    "api_key_name": "INQUEST_API_KEY",
+    "inquest_analysis" : "iocdb_search"
+  }
+},
+"InQuest_REPdb": {
+  "type": "observable",
+  "observable_supported": ["ip", "url", "domain", "hash", "generic"],
+  "external_service": true,
+  "description": "Reputation Database - search REPdb",
+  "requires_configuration": true,
+  "python_module": "inquest.InQuest",
+  "additional_config_params": {
+    "api_key_name": "INQUEST_API_KEY",
+    "inquest_analysis" : "repdb_search"
+  }
+},
+"InQuest_DFI": {
+  "type": "observable",
+  "observable_supported": ["ip", "url", "domain", "hash", "generic"],
+  "external_service": true,
+  "description": "Deep File Inspection - search dfi",
+  "requires_configuration": true,
+  "python_module": "inquest.InQuest",
+  "additional_config_params": {
+    "api_key_name": "INQUEST_API_KEY",
+    "inquest_analysis" : "dfi_search"
+  }
+},
   "IPInfo": {
     "type": "observable",
     "observable_supported": ["ip"],

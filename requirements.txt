@@ -36,7 +36,7 @@ oletools==0.56
 OTXv2==1.5.9
 peepdf-fork==0.4.3
 pdfid==1.0.2
-https://github.com/mlodic/pefile/archive/master.tar.gz
+pefile-fork==2020.12.16
 psycopg2-binary==2.8.4
 pyasn1==0.4.6
 pyasn1-modules==0.2.6

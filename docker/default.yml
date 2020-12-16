@@ -74,6 +74,11 @@ services:
       - ../configuration/analyzer_config.json:/opt/deploy/configuration/analyzer_config.json
       - generic_logs:/var/log/intel_owl
       - shared_files:/opt/deploy/files_required
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "10m"
     env_file:
       - env_file_app
     depends_on:

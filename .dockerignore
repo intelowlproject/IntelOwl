@@ -6,6 +6,7 @@ __pycache__
 venv/
 .env
 docker/env_file_*
+docker/custom.override.yml
 docs/
 integrations/
 docker-compose*

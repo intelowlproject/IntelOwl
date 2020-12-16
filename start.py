@@ -30,11 +30,14 @@ path_mapping["all_analyzers.test"] = [
     context_settings=dict(
         ignore_unknown_options=True,
         allow_extra_args=True,
+        help_option_names=["-h", "--help"],
     )
 )
 @click.argument("mode", required=True, type=click.Choice(["prod", "test", "ci"]))
 @click.argument(
-    "docker_command", required=True, type=click.Choice(["build", "up", "down"])
+    "docker_command",
+    required=True,
+    type=click.Choice(["build", "up", "start", "restart", "down", "kill", "logs"]),
 )
 @click.option(
     "--traefik",
@@ -119,7 +122,10 @@ def start(
 
     command += f" {docker_command}"
 
-    subprocess.run(command.split(" ") + ctx.args, check=True)
+    try:
+        subprocess.run(command.split(" ") + ctx.args, check=True)
+    except KeyboardInterrupt:
+        subprocess.run(["docker-compose", "down"], check=True)
 
 
 if __name__ == "__main__":

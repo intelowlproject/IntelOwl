@@ -1,1 +1,1 @@
-# This requirements.txt is intentionally left blank for RTD build
+sphinx_rtd_theme==0.5.0

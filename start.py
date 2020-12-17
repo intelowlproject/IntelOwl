@@ -22,7 +22,7 @@ path_mapping = {
 }
 path_mapping["all_analyzers"] = [path_mapping[key] for key in docker_analyzers]
 path_mapping["all_analyzers.test"] = [
-    path_mapping[f"{key}.test"] for key in docker_analyzers
+    path_mapping[key + ".test"] for key in docker_analyzers
 ]
 
 
@@ -100,24 +100,24 @@ def start(
         )
         return
     command = "docker-compose"
-    command += f" -f {path_mapping['default']}"
+    command += " -f " + path_mapping["default"]
     if mode in ["ci", "test"]:
-        command += f" -f {path_mapping[mode]}"
+        command += " -f " + path_mapping[mode]
     for key in ["traefik", "multi_queue"]:
         if key in local_keys and local_keys[key]:
-            command += f" -f {path_mapping[key]}"
+            command += " -f " + path_mapping[key]
     for key in docker_analyzers:
         if key in local_keys and local_keys[key]:
-            command += f" -f {path_mapping[f'{key}{test_appendix}']}"
+            command += " -f " + path_mapping[key + test_appendix]
     if all_analyzers:
         command += "".join(
             [
                 " -f " + analyzer
-                for analyzer in path_mapping[f"all_analyzers{test_appendix}"]
+                for analyzer in path_mapping["all_analyzers" + test_appendix]
             ]
         )
 
-    command += f" {docker_command}"
+    command += " " + docker_command
 
     subprocess.run(command.split(" ") + ctx.args, check=True)
 

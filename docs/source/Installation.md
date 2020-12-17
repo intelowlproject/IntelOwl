@@ -33,7 +33,9 @@ docker exec -ti intel_owl_uwsgi python3 manage.py createsuperuser
 Also, there is a [youtube video](https://www.youtube.com/watch?v=GuEhqQJSQAs) that may help in the installation process.
 
 ## Deployment
-The project leverages docker-compose for a classic server deployment. So, you need [docker](https://docs.docker.com/get-docker/) and [docker-compose](https://docs.docker.com/compose/install/) installed in your machine.
+The project leverages docker-compose for a classic server deployment. So, you need to install these engines in your machine:
+* [docker](https://docs.docker.com/get-docker/) v.1.13.0+
+* [docker-compose](https://docs.docker.com/compose/install/) v.1.23.2+
 
 Then, we suggest you to clone the project, configure the required environment variables and run `docker-compose up` using the docker-compose file that is embedded in the project.
 

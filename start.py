@@ -119,7 +119,7 @@ def start(
                 for analyzer in path_mapping["all_analyzers" + test_appendix]
             ]
         )
-
+    command += " -p intel_owl"
     command += " " + docker_command
 
     try:

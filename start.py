@@ -1,5 +1,5 @@
-import click
 import subprocess
+import argparse
 
 INTELOWL_TAG_VERSION = "v1.9.1"
 
@@ -26,93 +26,69 @@ path_mapping["all_analyzers.test"] = [
 ]
 
 
-@click.command(
-    context_settings=dict(
-        ignore_unknown_options=True,
-        allow_extra_args=True,
-        help_option_names=["-h", "--help"],
+def start():
+    parser = argparse.ArgumentParser()
+    # mandatory arguments
+    parser.add_argument("mode", type=str, choices=["prod", "test", "ci"])
+    parser.add_argument(
+        "docker_command",
+        type=str,
+        choices=["build", "up", "start", "restart", "down", "kill", "logs"],
     )
-)
-@click.argument("mode", required=True, type=click.Choice(["prod", "test", "ci"]))
-@click.argument(
-    "docker_command",
-    required=True,
-    type=click.Choice(["build", "up", "start", "restart", "down", "kill", "logs"]),
-)
-@click.option(
-    "--traefik",
-    default=False,
-    is_flag=True,
-    help="Uses the traefik.override.yml compose file",
-)
-@click.option(
-    "--multi_queue",
-    default=False,
-    is_flag=True,
-    help="Uses the multiqueue.override.yml compose file",
-)
-@click.option(
-    "--thug",
-    default=False,
-    is_flag=True,
-    help="Uses the integration/thug.override.yml compose file",
-)
-@click.option(
-    "--static_analyzers",
-    default=False,
-    is_flag=True,
-    help="Uses the integration/static-analyzers.override.yml compose file",
-)
-@click.option(
-    "--box_js",
-    default=False,
-    is_flag=True,
-    help="Uses the integration/box-js.override.yml compose file",
-)
-@click.option(
-    "--apk_analyzers",
-    default=False,
-    is_flag=True,
-    help="Uses the integration/apk-analyzers.override.yml compose file",
-)
-@click.option(
-    "--all_analyzers", default=False, is_flag=True, help="Uses every integration"
-)
-@click.pass_context
-def start(
-    ctx,
-    mode,
-    docker_command,
-    traefik,
-    thug,
-    static_analyzers,
-    box_js,
-    apk_analyzers,
-    all_analyzers,
-    multi_queue,
-):
-    local_keys = locals()
+
+    # integrations
+    parser.add_argument(
+        "--all_analyzers",
+        required=False,
+        action="store_true",
+        help="Uses every integration",
+    )
+    for integration in docker_analyzers:
+        parser.add_argument(
+            "--" + integration,
+            required=False,
+            action="store_true",
+            help="Uses the integration/" + integration + ".override.yml compose file",
+        )
+
+    # possible upgrades
+    parser.add_argument(
+        "--multi_queue",
+        required=False,
+        action="store_true",
+        help="Uses the multiqueue.override.yml compose file",
+    )
+    parser.add_argument(
+        "--traefik",
+        required=False,
+        action="store_true",
+        help="Uses the traefik.override.yml compose file",
+    )
+    args, unknown = parser.parse_known_args()
+    # logic
     test_appendix = ""
-    if mode == "test":
+    if args.mode == "test":
         test_appendix = ".test"
-    docker_flags = [local_keys[docker_analyzer] for docker_analyzer in docker_analyzers]
-    if all_analyzers and any(docker_flags):
-        click.echo(
+    docker_flags = [
+        args.__dict__[docker_analyzer] for docker_analyzer in docker_analyzers
+    ]
+    if args.all_analyzers and any(docker_flags):
+        parser.error(
             "It is not possible to select both  "
             "`all_analyzers` and another docker container"
         )
         return
     command = "docker-compose"
     command += " -f " + path_mapping["default"]
-    if mode in ["ci", "test"]:
-        command += " -f " + path_mapping[mode]
+    if args.mode in ["ci", "test"]:
+        command += " -f " + path_mapping[args.mode]
     for key in ["traefik", "multi_queue"]:
-        if key in local_keys and local_keys[key]:
+        if args.__dict__[key]:
             command += " -f " + path_mapping[key]
     for key in docker_analyzers:
-        if key in local_keys and local_keys[key]:
+        if args.__dict__[key]:
             command += " -f " + path_mapping[key + test_appendix]
-    if all_analyzers:
+    if args.all_analyzers:
         command += "".join(
             [
                 " -f " + analyzer
@@ -120,10 +96,9 @@ def start(
             ]
         )
     command += " -p intel_owl"
-    command += " " + docker_command
-
+    command += " " + args.docker_command
     try:
-        subprocess.run(command.split(" ") + ctx.args, check=True)
+        subprocess.run(command.split(" ") + unknown, check=True)
     except KeyboardInterrupt:
         subprocess.run(["docker-compose", "down"], check=True)
 

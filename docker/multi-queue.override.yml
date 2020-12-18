@@ -3,7 +3,7 @@ version: '3'
 services:
   uwsgi:
     environment:
-      - CELERY_QUEUES="default,local,long"
+      - CELERY_QUEUES=default,local,long
 
 
   celery_worker_local:

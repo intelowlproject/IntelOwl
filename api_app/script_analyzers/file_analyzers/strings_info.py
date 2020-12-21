@@ -38,7 +38,9 @@ class StringsInfo(FileAnalyzer, DockerBasedAnalyzer):
         }
         req_files = {fname: binary}
         result = self._docker_run(req_data, req_files)
-
+        exceed_max_strings = len(result) > self.max_no_of_strings
+        if exceed_max_strings:
+            result = [s for s in result[: self.max_no_of_strings]]
         if self.rank_strings:
             args = [
                 "rank_strings",
@@ -49,11 +51,8 @@ class StringsInfo(FileAnalyzer, DockerBasedAnalyzer):
             ]
             req_data = {"args": args, "timeout": self.timeout}
             result = self._docker_run(req_data)
-            result = {"data": result, "exceeded_max_number_of_strings": False}
-        elif len(result) > self.max_no_of_strings:
-            result = [s for s in result[: self.max_no_of_strings]]
-            result = {"data": result, "exceeded_max_number_of_strings": True}
-        result["data"] = [
-            row[: self.max_chars_for_string] for row in result.get("data", [])
-        ]
+        result = {
+            "data": [row[: self.max_chars_for_string] for row in result],
+            "exceeded_max_number_of_strings": exceed_max_strings,
+        }
         return result

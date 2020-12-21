@@ -878,6 +878,16 @@
     "soft_time_limit": 30,
     "queue": "local"
   },
+  "SpeakEasy": {
+    "type": "file",
+    "supported_filetypes": [
+      "application/x-dosexec"
+    ],
+    "description": "speakeasy emulation report",
+    "python_module": "speakeasy_emulation.SpeakEasy",
+    "soft_time_limit": 120,
+    "queue": "long"
+  },
   "Strings_Info_Classic": {
     "type": "file",
     "description": "strings extraction",
@@ -888,16 +898,6 @@
     },
     "soft_time_limit": 70,
     "queue": "local"
-  },
-  "SpeakEasy": {
-    "type": "file",
-    "supported_filetypes": [
-      "application/x-dosexec"
-    ],
-    "description": "speakeasy emulation report",
-    "python_module": "speakeasy_emulation.SpeakEasy",
-    "soft_time_limit": 120,
-    "queue": "long"
   },
   "Strings_Info_ML": {
     "type": "file",

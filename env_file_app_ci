@@ -44,6 +44,7 @@ PHISHTANK_API_KEY=test
 ZOOMEYE_KEY=test
 TRIAGE_KEY=test
 EMAILREP_KEY=test
+MWDB_Key=
 
 # Test tokens
 TEST_JOB_ID=1

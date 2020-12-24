@@ -95,6 +95,10 @@ List of some of the analyzers with optional configuration:
   * `facets`(default: Empty string): A comma-separated list of properties to get summary information on query. Eg: `"facets:app,os"`
   * `page`(default 1): The page number to paging
   * `history`(default True):  	To query the history data. 
+* `MWDB_Scan`:
+    * `upload_file` (default 0): Uploads the file to repository.
+    * `wait_time` (default 200): Wait after uploading the file. Allows MWDB repository to perform analysis on the file.
+
 
 There are two ways to do this:
 

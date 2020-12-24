@@ -76,3 +76,4 @@ dnstwist==20201022
 ppdeep>=20200505
 google>=3.0.0
 eventlet==0.29.1
+mwdblib==3.3.1 

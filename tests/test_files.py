@@ -31,6 +31,7 @@ from api_app.script_analyzers.file_analyzers import (
     triage_scan,
     floss,
     manalyze,
+    mwdb_scan,
 )
 from api_app.script_analyzers.observable_analyzers import vt3_get
 
@@ -466,6 +467,18 @@ class FileAnalyzersEXETests(TestCase):
             self.filename,
             self.md5,
             {},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    def test_mwdb_scan(self, mock_get=None, mock_post=None):
+        additional_params = {"api_key": '', "upload_file": 1, "wait_time": 200}
+        report = mwdb_scan.MWDB_Scan(
+            "MWDB_Scan",
+            self.job_id,
+            self.filepath,
+            self.filename,
+            self.md5,
+            additional_params,
         ).start()
         self.assertEqual(report.get("success", False), True)
 

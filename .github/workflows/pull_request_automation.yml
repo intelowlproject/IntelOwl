@@ -19,10 +19,15 @@ jobs:
       run: |
         sudo apt-get update
         unzip -P infected tests/test_files.zip -d .
+        cp docker/env_file_app_template docker/env_file_app
+        cp docker/env_file_postgres_template docker/env_file_postgres
     - name: Install
       run: |
-        sudo docker-compose -f docker-compose-for-ci.yml build
-        sudo docker-compose -f docker-compose-for-ci.yml up -d
+        sudo docker-compose -f docker/default.yml -f docker/ci.override.yml build
+        sudo docker-compose -f docker/default.yml -f docker/ci.override.yml up -d
+    - name: Install Linters and Black
+      run: |
+        sudo docker exec intel_owl_uwsgi pip3 install --no-cache-dir --compile -r test-requirements.txt
     - name: Check Black code Style
       run: |
         sudo docker exec intel_owl_uwsgi black . --check --exclude "migrations|venv"

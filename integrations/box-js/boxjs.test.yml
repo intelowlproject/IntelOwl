@@ -5,14 +5,14 @@ version: '3'
 # All additional integrations should be added following this format only.
 
 services:
-  apk_analyzers:
+  boxjs:
     build:
-      context: ./integrations/apk_analyzers
+      context: ../integrations/box-js
       dockerfile: Dockerfile
-    container_name: intelowl_apk_analyzers
+    container_name: intelowl_boxjs
     restart: unless-stopped
     expose:
-      - "4004"
+      - "4003"
     env_file:
       - env_file_integrations
     volumes:

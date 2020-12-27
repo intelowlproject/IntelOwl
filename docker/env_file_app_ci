@@ -1,4 +1,4 @@
-# !!!! This file is used only to give required variables to the Travis Build
+# !!!! This file is used only to give required variables to the CI Build
 # Required Secrets
 DB_HOST=postgres
 DB_PORT=5432
@@ -25,6 +25,7 @@ CIRCL_CREDENTIALS=user|pass
 VT_KEY=test
 HA_KEY=test
 INTEZER_KEY=test
+INQUEST_API_KEY=test
 FIRST_MISP_API=test
 MISP_KEY=test
 MAXMIND_KEY=test

@@ -38,6 +38,8 @@ from api_app.script_analyzers.observable_analyzers import (
     dnstwist,
     zoomeye,
     emailrep,
+    triage_search,
+    inquest,
 )
 from api_app.models import Job
 from .mock_utils import (
@@ -80,6 +82,14 @@ def mocked_dnsdb_v2_request(*args, **kwargs):
         '"rdata":"0.0.0.0"}}\n'
         '{"cond":"limited","msg":"Result limit reached"}\n',
     )
+
+
+def mocked_triage_get(*args, **kwargs):
+    return MockResponse({"tasks": {"task_1": {}, "task_2": {}}, "data": []}, 200)
+
+
+def mocked_triage_post(*args, **kwargs):
+    return MockResponse({"id": "sample_id", "status": "pending"}, 200)
 
 
 @mock_connections(patch("requests.get", side_effect=mocked_requests))
@@ -519,6 +529,30 @@ class URLAnalyzersTests(
         ).start()
         self.assertEqual(report.get("success", False), True)
 
+    @mock_connections(patch("requests.Session.get", side_effect=mocked_triage_get))
+    @mock_connections(patch("requests.Session.post", side_effect=mocked_triage_post))
+    def test_triage_search(self, *args):
+        report = triage_search.TriageSearch(
+            "Triage_Search",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    @mock_connections(patch("requests.Session.get", side_effect=mocked_triage_get))
+    @mock_connections(patch("requests.Session.post", side_effect=mocked_triage_post))
+    def test_triage_submit(self, *args):
+        report = triage_search.TriageSearch(
+            "Triage_Search",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {"analysis_type": "submit"},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
 
 @mock_connections(patch("requests.get", side_effect=mocked_requests))
 @mock_connections(patch("requests.post", side_effect=mocked_requests))
@@ -551,6 +585,18 @@ class HashAnalyzersTests(
     def test_cymru_get(self, mock_get=None, mock_post=None):
         report = cymru.Cymru(
             "Cymru_Hash_Registry_Get_Observable",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    @mock_connections(patch("requests.Session.get", side_effect=mocked_triage_get))
+    @mock_connections(patch("requests.Session.post", side_effect=mocked_triage_post))
+    def test_triage_search(self, *args):
+        report = triage_search.TriageSearch(
+            "Triage_Search",
             self.job_id,
             self.observable_name,
             self.observable_classification,
@@ -595,5 +641,35 @@ class GenericAnalyzersTest(TestCase):
             self.observable_name,
             self.observable_classification,
             {},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    def test_InQuest_IOCdb(self, mock_get=None, mock_post=None):
+        report = inquest.InQuest(
+            "InQuest_IOCdb",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {"inquest_analysis": "iocdb_search"},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    def test_InQuest_REPdb(self, mock_get=None, mock_post=None):
+        report = inquest.InQuest(
+            "InQuest_REPdb",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {"inquest_analysis": "repdb_search"},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    def test_InQuest_DFI(self, mock_get=None, mock_post=None):
+        report = inquest.InQuest(
+            "InQuest_DFI",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {"inquest_analysis": "dfi_search"},
         ).start()
         self.assertEqual(report.get("success", False), True)

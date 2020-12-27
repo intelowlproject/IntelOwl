@@ -138,6 +138,10 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * `DNStwist`: Scan a url/domain to find potentially malicious permutations via dns fuzzing. [dnstwist repo](https://github.com/elceef/dnstwist) 
 * `IPInfo`: Location Information about an IP
 * `Zoomeye`: [Zoomeye](https://www.zoomeye.org) Cyberspace Search Engine recording information of devices, websites, services and components etc..
+* `Triage_Search`: Search for reports of observables or upload from URL on triage cloud
+* `InQuest_IOCdb`: Indicators of Compromise Database by [InQuest Labs](https://labs.inquest.net/iocdb)
+* `InQuest_REPdb`: Search in [InQuest Lab's](https://labs.inquest.net/repdb) Reputation Database
+* `InQuest_DFI`: Deep File Inspection by [InQuest Labs](https://labs.inquest.net/dfi)
 
 #### Generic analyzers (email, phone number, ...)
 * `EmailRep`: search an email address on emailrep.io

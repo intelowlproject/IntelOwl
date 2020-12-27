@@ -1,0 +1,46 @@
+version: '3'
+
+services:
+  postgres:
+    env_file:
+      - env_file_postgres_template
+  uwsgi:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+
+    volumes:
+      - ../configuration/intel_owl.ini:/etc/uwsgi/sites/intel_owl.ini
+      - ../configuration/analyzer_config.json:/opt/deploy/configuration/analyzer_config.json
+      - ../configuration/ldap_config.py:/opt/deploy/configuration/ldap_config.py
+      - generic_logs:/var/log/intel_owl
+      - shared_files:/opt/deploy/files_required
+    env_file:
+      - env_file_app_ci
+
+  nginx:
+    image: library/nginx:1.19-alpine
+    volumes:
+      - ../configuration/intel_owl_nginx_http:/etc/nginx/conf.d/default.conf
+      - nginx_logs:/var/log/nginx
+
+  celery_beat:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    env_file:
+      - env_file_app_ci
+
+  celery_worker_default:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    env_file:
+      - env_file_app_ci
+
+volumes:
+  postgres_data:
+  nginx_logs:
+  generic_logs:
+  shared_files:
+

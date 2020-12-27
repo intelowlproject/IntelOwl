@@ -21,6 +21,7 @@ RUN apt-get update \
 RUN pip3 install --upgrade pip
 
 COPY requirements.txt $PYTHONPATH/requirements.txt
+COPY test-requirements.txt $PYTHONPATH/test-requirements.txt
 WORKDIR $PYTHONPATH
 
 RUN pip3 install --no-cache-dir --compile -r requirements.txt

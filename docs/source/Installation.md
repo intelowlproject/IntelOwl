@@ -33,7 +33,9 @@ docker exec -ti intel_owl_uwsgi python3 manage.py createsuperuser
 Also, there is a [youtube video](https://www.youtube.com/watch?v=GuEhqQJSQAs) that may help in the installation process.
 
 ## Deployment
-The project leverages docker-compose for a classic server deployment. So, you need [docker](https://docs.docker.com/get-docker/) and [docker-compose](https://docs.docker.com/compose/install/) installed in your machine.
+The project leverages docker-compose for a classic server deployment. So, you need to install these engines in your machine:
+* [docker](https://docs.docker.com/get-docker/) v.1.13.0+
+* [docker-compose](https://docs.docker.com/compose/install/) v.1.23.2+
 
 Then, we suggest you to clone the project, configure the required environment variables and run `docker-compose up` using the docker-compose file that is embedded in the project.
 
@@ -80,6 +82,7 @@ Optional variables needed to enable specific analyzers:
 * `VT_KEY`: VirusTotal API key
 * `HA_KEY`: HybridAnalysis API key
 * `INTEZER_KEY`: Intezer API key
+* `INQUEST_API_KEY`: InQuest API key
 * `FIRST_MISP_API`: FIRST MISP API key
 * `FIRST_MISP_URL`: FIRST MISP URL
 * `MISP_KEY`: your own MISP instance key
@@ -94,6 +97,7 @@ Optional variables needed to enable specific analyzers:
 * `UNPAC_ME_API_KEY`: UnpacMe API ([docs](https://api.unpac.me/))
 * `IPINFO_KEY`: ipinfo API key
 * `ZOOMEYE_KEY`: ZoomEye API Key([docs](https://www.zoomeye.org/doc))
+* `TRIAGE_KEY`: tria.ge API key([docs](https://tria.ge/docs/))
 
 Advanced additional configuration:
 * `OLD_JOBS_RETENTION_DAYS`: Database retention, default 3 days. Change this if you want to keep your old analysis longer in the database.
@@ -108,7 +112,7 @@ Required variables (we need to insert some of the values we have put in the prev
 * `POSTGRES_USER` (same as DB_USER)
 * `POSTGRES_DB` -> default `intel_owl_db`
 
-If you prefer to use an external PostgreSQL instance, you should just remove the relative image from the `docker-compose.yml` file and provide the configuration to connect to your controlled instance/s.
+If you prefer to use an external PostgreSQL instance, you should just remove the relative image from the `docker/default.yml` file and provide the configuration to connect to your controlled instance/s.
 
 ### Web server configuration (optional)
 Intel Owl provides basic configuration for:
@@ -137,10 +141,9 @@ Then you should modify the `nginx` service configuration in `docker-compose.yml`
 ##### HTTPS with Let's Encrypt
 We provide a specific docker-compose file that leverages [Traefik](https://docs.traefik.io/) to allow fast deployments of public-faced and HTTPS-enabled applications.
 
-Before using it, you should configure the configuration file `docker-compose-with-traefik.yml` by changing the email address and the hostname where the application is served. For a detailed explanation follow the official documentation: [Traefix doc](https://docs.traefik.io/user-guides/docker-compose/acme-http/).
+Before using it, you should configure the configuration file `docker/traefik.override.yml` by changing the email address and the hostname where the application is served. For a detailed explanation follow the official documentation: [Traefix doc](https://docs.traefik.io/user-guides/docker-compose/acme-http/).
  
-After the configuration is done, you should run docker-compose in this way:
-`docker-compose -f docker-compose-with-traefik.yml up`
+After the configuration is done, you should either add the `traefik.override.yml` reference in the `.env` file or you can use the `start.py` [script](https://intelowl.readthedocs.io/en/stable/Advanced-Usage.html#smart-start)
 
 
 ### Analyzers configuration (optional)

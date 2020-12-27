@@ -471,7 +471,7 @@ class FileAnalyzersEXETests(TestCase):
         self.assertEqual(report.get("success", False), True)
 
     def test_mwdb_scan(self, mock_get=None, mock_post=None):
-        additional_params = {"api_key": '', "upload_file": 1, "wait_time": 200}
+        additional_params = {"api_key": "", "upload_file": 1, "wait_time": 200}
         report = mwdb_scan.MWDB_Scan(
             "MWDB_Scan",
             self.job_id,

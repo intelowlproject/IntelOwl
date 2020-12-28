@@ -13,17 +13,17 @@ class MWDB_Scan(FileAnalyzer):
         return res
 
     def set_config(self, additional_config_params):
-        self.api_key = additional_config_params.get("api_key", None)
+        self.api_key_name = additional_config_params.get("api_key_name", None)
         self.upload_file = additional_config_params.get("upload_file", None)
         self.wait_time = additional_config_params.get("wait_time", None)
 
     def run(self):
-        if not self.api_key:
+        if not self.api_key_name:
             raise AnalyzerRunException(
-                f"No API key retrieved with name: {self.api_key}"
+                f"No API key retrieved with name: {self.api_key_name}"
             )
 
-        mwdb = MWDB(api_key=self.api_key)
+        mwdb = MWDB(api_key=self.api_key_name)
         binary = get_binary(self.job_id)
         query = str(hashlib.sha256(binary).hexdigest())
 

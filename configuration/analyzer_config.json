@@ -575,7 +575,7 @@
     "requires_configuration": true,
     "python_module": "mwdb_scan.MWDB_Scan",
     "additional_config_params": {
-      "api_key": "",
+      "api_key_name": "MWDB_Key",
       "upload_file": 0,
       "wait_time": 200
     },

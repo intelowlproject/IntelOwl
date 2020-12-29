@@ -33,7 +33,7 @@ def start():
     parser.add_argument(
         "docker_command",
         type=str,
-        choices=["build", "up", "start", "restart", "down", "kill", "logs"],
+        choices=["build", "up", "start", "restart", "down", "kill", "logs", "ps"],
     )
 
     # integrations

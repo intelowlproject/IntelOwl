@@ -3,7 +3,7 @@ import argparse
 
 INTELOWL_TAG_VERSION = "v1.9.1"
 
-docker_analyzers = ["thug", "apk_analyzers", "box_js", "static_analyzers"]
+docker_analyzers = ["thug", "apk_analyzers", "box_js", "static_analyzers", "qiling"]
 
 path_mapping = {
     "default": "docker/default.yml",
@@ -19,6 +19,8 @@ path_mapping = {
     "box_js.test": "integrations/box-js/boxjs.test.yml",
     "static_analyzers.test": "integrations/static_analyzers/static_analyzers.test.yml",
     "thug.test": "integrations/thug/thug.test.yml",
+    "qiling": "integrations/qiling/qiling.yml",
+    "qiling.test": "integrations/qiling/qiling.test.yml",
 }
 path_mapping["all_analyzers"] = [path_mapping[key] for key in docker_analyzers]
 path_mapping["all_analyzers.test"] = [
@@ -48,7 +50,7 @@ def start():
             "--" + integration,
             required=False,
             action="store_true",
-            help="Uses the integration/" + integration + ".override.yml compose file",
+            help="Uses the integration/" + integration + ".yml compose file",
         )
 
     # possible upgrades

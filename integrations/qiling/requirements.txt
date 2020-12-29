@@ -1,0 +1,9 @@
+click==7.1.1
+Flask==1.1.2
+Flask-Executor==0.9.3
+Flask-Shell2HTTP==1.4.3
+itsdangerous==1.1.0
+Jinja2==2.11.2
+MarkupSafe==1.1.1
+Werkzeug==1.0.1
+gunicorn==20.0.4

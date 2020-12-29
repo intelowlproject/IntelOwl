@@ -68,6 +68,20 @@ table, th, td {
     <td><code>APKiD_Scan_APK_DEX_JAR</code></td>
     <td>identifies many compilers, packers, obfuscators, and other weird stuff from an APK or DEX file</td>
   </tr>
+  <tr>
+    <td>Qiling</td>
+    <td><code>Qiling_Windows</code>
+    <code>Qiling_Windows_Shellcode</code>
+    <code>Qiling_Linux</code>
+    <code>Qiling_Linux_Shellcode</code>
+    </td>
+    <td>Tool for emulate the execution of a binary file or a shellcode.
+     It requires the configuration of its rootfs, and the optional configuration of profiles.
+     The rootfs can be copied from the <a href="https://github.com/qilingframework/qiling/tree/master/examples/rootfs"> Qiling project</a>: please remember that Windows dll <b> must</b> be manually added for license reasons.
+     Qiling provides a <a href="https://github.com/qilingframework/qiling/blob/master/examples/scripts/dllscollector.bat"> DllCollector</a> to retrieve dlls from your licensed Windows. 
+     <a href="https://docs.qiling.io/en/latest/profile/"> Profiles </a> must be placed in the <code>profiles</code> subfolder
+     </td>
+  </tr>
 </table>
 
 In the project, you can find template file `.env_file_integrations_template`. You have to create new file named `env_file_integrations` from this.
@@ -115,6 +129,11 @@ List of some of the analyzers with optional configuration:
   * `report_type` (default overview): determines how detailed the final report will be. (overview/complete)
 * `Triage_Search`:
   * `analysis_type` (default search): choose whether to search for existing observable reports or upload for scanning via URL. (search/submit)
+* `Qiling`:
+  * `arch`(default x86): change system architecture for the emulation 
+  * `os`(default windows or linux): change operating system for the emulation 
+  * `profile`(default none): add a Qiling [profile](https://docs.qiling.io/en/latest/profile/)
+  * `shellcode`(default false): true if the file is a shellcode 
 
 There are two ways to do this:
 

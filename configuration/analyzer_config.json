@@ -672,6 +672,75 @@
     },
     "soft_time_limit": 100
   },
+  "Qiling_Windows": {
+    "type": "file",
+    "supported_filetypes": [
+      "application/x-dosexec"
+    ],
+    "external_service": false,
+    "description": "Qiling PE emulation",
+    "soft_time_limit": 120,
+    "python_module": "qiling.Qiling",
+    "additional_config_params": {
+      "os": "windows",
+      "arch": "x86",
+      "profile": null,
+      "shellcode": false
+    },
+    "queue": "long"
+  },
+  "Qiling_Windows_Shellcode": {
+    "type": "file",
+    "supported_filetypes": [
+      "text/plain"
+    ],
+    "external_service": false,
+    "description": "Qiling windows shellcode emulation",
+    "soft_time_limit": 120,
+    "python_module": "qiling.Qiling",
+    "additional_config_params": {
+      "os": "windows",
+      "arch": "x86",
+      "profile": null,
+      "shellcode": true
+    },
+    "queue": "long"
+  },
+    "Qiling_Linux": {
+    "type": "file",
+      "supported_filetypes": [
+      "application/x-sharedlib",
+      "application/x-executable"
+    ],
+    "external_service": false,
+    "description": "Qiling ELF emulation",
+    "soft_time_limit": 120,
+    "python_module": "qiling.Qiling",
+    "additional_config_params": {
+      "os": "linux",
+      "arch": "x86",
+      "profile": null,
+      "shellcode": false
+    },
+    "queue": "long"
+  },
+    "Qiling_Linux_Shellcode": {
+    "type": "file",
+      "supported_filetypes": [
+      "text/plain"
+    ],
+    "external_service": false,
+    "description": "Qiling linux shellcode emulation",
+    "soft_time_limit": 120,
+    "python_module": "qiling.Qiling",
+    "additional_config_params": {
+      "os": "linux",
+      "arch": "x86",
+      "profile": null,
+      "shellcode": true
+    },
+    "queue": "long"
+  },
   "Quad9_DNS": {
     "type": "observable",
     "observable_supported": ["domain", "url"],

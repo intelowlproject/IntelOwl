@@ -1,4 +1,4 @@
-FROM python:3.7
+FROM python:3.8
 
 ENV PYTHONUNBUFFERED 1
 ENV DJANGO_SETTINGS_MODULE intel_owl.settings

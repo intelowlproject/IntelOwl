@@ -134,6 +134,9 @@ List of some of the analyzers with optional configuration:
   * `os`(default windows or linux): change operating system for the emulation 
   * `profile`(default none): add a Qiling [profile](https://docs.qiling.io/en/latest/profile/)
   * `shellcode`(default false): true if the file is a shellcode 
+* `WiGLE`:
+  * `search_type` (default `WiFi Network`). Supported are: `WiFi Network`, `CDMA Network`, `Bluetooth Network`, `GSM/LTE/WCDMA Network`
+  * Above mentioned `search_type` is just different routes mentioned in [docs](https://api.wigle.net/swagger#/v3_ALPHA). Also, the string to be passed in input field of generic analyzers have a format. Different variables are separated by semicolons(`;`) and the field-name and value are separated by equals sign(`=`). Example string for search_type `CDMA Network` is `sid=12345;nid=12345;bsid=12345`
 
 There are two ways to do this:
 
@@ -157,7 +160,6 @@ runtime_configuration = {
 }
 pyintelowl_client.send_file_analysis_request(..., runtime_configuration=runtime_configuration)
 ```
-
 
 ## Elastic Search
 

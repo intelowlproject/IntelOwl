@@ -144,7 +144,9 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * `InQuest_DFI`: Deep File Inspection by [InQuest Labs](https://labs.inquest.net/dfi)
 
 #### Generic analyzers (email, phone number, ...)
+Some Analyzers require details other than just IP, URL, Domain etc... We classified them as Generic Analyzers. Since the type of field is not known, there is a format for strings to be followed.
 * `EmailRep`: search an email address on emailrep.io
+* `WiGLE`: Maps and database of 802.11 wireless networks, with statistics, submitted by wardrivers, netstumblers, and net huggers.
 
 #### [Additional analyzers](https://intelowl.readthedocs.io/en/develop/Advanced-Usage.html#optional-analyzers) that can be enabled per your wish.
 

@@ -2,8 +2,11 @@
 
 [**Upgrade Guide**](https://intelowl.readthedocs.io/en/latest/Installation.html#update-to-the-most-recent-version)
 
-## [v2.0.0-rc](https://github.com/intelowlproject/IntelOwl/releases/tag/v2.0.0-rc)
+## [v2.0.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v2.0.0)
 **BREAKING CHANGES:**
+- moved docker and docker-compose files under `docker/` folder.
+- users upgrading from previous versions need to manually move `env_file_app`, `env_file_postgres` and `env_file_integrations` files under `docker/`.
+- users are to use the new [start.py](https://intelowl.readthedocs.io/en/stable/Installation.html#run) method to build or start IntelOwl containers
 - moved the following analyzers together in a specific optional docker container named `static_analyzers`.
   - [`Capa`](https://github.com/fireeye/capa)
   - [`PeFrame`](https://github.com/guelfoweb/peframe)
@@ -26,7 +29,6 @@ Please see [docs](https://intelowl.readthedocs.io/en/stable/Advanced-Usage.html#
 
 **FIXES/IMPROVEMENTS/Dependency upgrades:**
 - upgraded main Dockerfile to python 3.8
-- added new [start.py](https://intelowl.readthedocs.io/en/stable/Installation.html#run) script to help users to configure and execute IntelOwl with additional or advanced configuration
 - added support for the `generic` observable type. In this way it is possible to build analyzers that can analyze everything and not only IPs, domains, URLs or hashes
 - added [Multi-queue](https://intelowl.readthedocs.io/en/stable/Advanced-Usage.html#multi-queue) option to optimize usage of Celery queues. This is intended for advanced users.
 - updated GUI to new [IntelOwl-ng](https://github.com/intelowlproject/IntelOwl-ng/releases/tag/v1.7.0) version

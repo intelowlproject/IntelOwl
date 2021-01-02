@@ -269,6 +269,9 @@ If you make some code changes and you like to rebuild the project, follow these 
 2. Add this new image tag in the `docker/test.override.yml` file.
 3. Start the containers with `python start.py test up --build`.
 
+### Updating to >=2.0.0 from a 1.x.x version
+Users upgrading from previous versions need to manually move `env_file_app`, `env_file_postgres` and `env_file_integrations` files under the new `docker` directory.
+
 ### Updating to >v1.3.x from any prior version
 
 If you are updating to >[v1.3.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v1.3.0) from any prior version, you need to execute a helper script so that the old data present in the database doesn't break.

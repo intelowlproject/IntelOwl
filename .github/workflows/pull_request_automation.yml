@@ -1,4 +1,4 @@
-name: Pull request automation
+name: Build & Tests
 
 on:
   pull_request:

@@ -71,3 +71,4 @@ HTTPS_ENABLED=not_enabled
 AWS_SECRETS=False
 AWS_SQS=False
 AWS_REGION=eu-central-1
+DJANGO_SETTINGS_MODULE=intel_owl.settings

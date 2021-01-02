@@ -3,7 +3,7 @@
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/intelowlproject/IntelOwl.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/intelowlproject/IntelOwl/context:python)
 [![CodeFactor](https://www.codefactor.io/repository/github/intelowlproject/intelowl/badge)](https://www.codefactor.io/repository/github/intelowlproject/intelowl)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-![Pull request automation](https://github.com/intelowlproject/IntelOwl/workflows/Pull%20request%20automation/badge.svg)
+![Build & Tests](https://github.com/intelowlproject/IntelOwl/workflows/Build%20&%20Tests/badge.svg)
 
 <img src="static_intel/xscode-banner.png" width=600 height=125 alt="Get Support"/><br/>
 _For urgent issues and priority support, visit [https://xscode.com/intelowlproject/IntelOwl](https://xscode.com/intelowlproject/IntelOwl)._
@@ -43,9 +43,11 @@ To know more about the project and it's growth over time, you may be interested 
 
 You can see the full list of all available analyzers in the [documentation](https://intelowl.readthedocs.io/en/latest/Usage.html#available-analyzers) or [live demo](https://intelowlclient.firebaseapp.com/pages/analyzers/table).
 
-| Inbuilt modules 	| External Services 	| Free modules that require additional configuration 	|
-|-	|-	|-	|
-| - Static Document, RTF, PDF, PE, Generic File Analysis<br>- Strings analysis with ML<br>- PE Emulation with Speakeasy<br>- PE Signature verification<br>- PE Capabilities Extraction<br>- Emulated Javascript Analysis<br>- Android Malware Analysis<br>- SPF and DMARC Validator<br>- more... 	| - GreyNoise v2<br>- Intezer Scan<br>- VirusTotal v2+v3<br>- HybridAnalysis<br>- Censys.io<br>- Shodan<br>- AlienVault OTX<br>- Threatminer<br>- Abuse.ch<br>- many more.. 	| - Cuckoo (requires at least one working Cuckoo instance)<br>- MISP (requires at least one working MISP instance)<br>- Yara (Community, Neo23x0, Intezer, McAfee rules are already available. There's the chance to add your own rules) 	|
+| Type                                               | Analyzers Available                                                                                                                                                                                                                                                                                            |
+|----------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Inbuilt modules                                    | - Static Document, RTF, PDF, PE, Generic File Analysis<br/> - Strings analysis with ML<br/> - PE Emulation with Speakeasy<br/> - PE Signature verification<br/> - PE Capabilities Extraction<br/> - Emulated Javascript Analysis<br/> - Android Malware Analysis<br/> - SPF and DMARC Validator<br/> - more... |
+| External services                                  | - GreyNoise v2<br/> - Intezer Scan<br/>  - VirusTotal v2+v3<br/>  - HybridAnalysis<br/>  - Censys.io<br/>  - Shodan<br/>  - AlienVault OTX<br/>  - Threatminer<br/>  - Abuse.ch<br/>  - many more..                                                                                                            |
+| Free modules that require additional configuration | - Cuckoo (requires at least one working Cuckoo instance)<br/>  - MISP (requires at least one working MISP instance)<br/>  - Yara (Community, Neo23x0, Intezer, McAfee rules are already available. There's the chance to add your own rules)                                                                   |
 
 ## Legal notice
 

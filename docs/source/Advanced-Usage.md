@@ -2,7 +2,6 @@
 
 This page includes details about some advanced features that Intel Owl provides which can be optionally enabled. Namely,
 
-- [Smart start](#smart-start)
 - [Optional Analyzers](#optional-analyzers)
 - [Customize analyzer execution at time of request](#customize-analyzer-execution-at-time-of-request)
 - [Elastic Search (with Kibana)](#elastic-search)
@@ -11,18 +10,6 @@ This page includes details about some advanced features that Intel Owl provides 
 - [GKE deployment](#google-kubernetes-engine-deployment)
 - [Multi Queue](#multi-queue)
 
-## Smart start
-Users that have at least Python 3.5 installed in their machine can leverage a script to help them configure and execute IntelOwl with additional or advanced configuration.
-
-We are talking about a CLI interface called [start.py](https://github.com/intelowlproject/IntelOwl/blob/master/start.py).
-```
-python3 start.py --help
-```
-
-The CLI provides the primitives to correctly build, run or stop the containers for IntelOwl.
-It is possible to attach every optional docker container that IntelOwl has:
-this means that it is possible to have IntelOwl that runs the `multi_queue` [feature](#multi-queue) with `traefik` enabled and every [optional docker analyzer](#optional-analyzers) is active.
-At last, it is possible to insert an optional docker argument, that the CLI will pass to docker.    
 
 ## Optional Analyzers
 Some analyzers which run in their own Docker containers are kept disabled by default. They are disabled by default to prevent accidentally starting too many containers and making your computer unresponsive.
@@ -152,7 +139,7 @@ Example:
 #### from [Pyintelowl](https://github.com/intelowlproject/pyintelowl)
 While using `send_observable_analysis_request` or `send_file_analysis_request` endpoints, you can pass the parameter `runtime_configuration` with the optional values.
 Example:
-```
+```python
 runtime_configuration = {
     "Doc_Info": {
         "additional_passwords_to_check": ["passwd", "2020"]

@@ -9,3 +9,4 @@ docker/custom.override.yml
 venv/
 intel_owl_test_env/
 compose-elk.yml
+docs/build/

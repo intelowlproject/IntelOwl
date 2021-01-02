@@ -5,10 +5,10 @@
 ## [v2.0.0-rc](https://github.com/intelowlproject/IntelOwl/releases/tag/v2.0.0-rc)
 **BREAKING CHANGES:**
 - moved the following analyzers together in a specific optional docker container named `static_analyzers`.
-  - [Capa](https://github.com/fireeye/capa)
-  - [PeFrame](https://github.com/guelfoweb/peframe)
-  - Strings_Info_Classic (based on [flarestrings](https://github.com/fireeye/stringsifter))
-  - Strings_Info_ML (based on [stringsifter](https://github.com/fireeye/stringsifter))
+  - [`Capa`](https://github.com/fireeye/capa)
+  - [`PeFrame`](https://github.com/guelfoweb/peframe)
+  - `Strings_Info_Classic` (based on [flarestrings](https://github.com/fireeye/stringsifter))
+  - `Strings_Info_ML` (based on [stringsifter](https://github.com/fireeye/stringsifter))
     
 Please see [docs](https://intelowl.readthedocs.io/en/stable/Advanced-Usage.html#optional-analyzers) to understand how to enable these optional analyzers
 
@@ -21,18 +21,18 @@ Please see [docs](https://intelowl.readthedocs.io/en/stable/Advanced-Usage.html#
 - added [InQuest](https://labs.inquest.net) analyzer
 - added [WiGLE](api.wigle.net) analyzer
 - new analyzers were added to the `static_analyzers` optional docker container (see [docs](https://intelowl.readthedocs.io/en/stable/Advanced-Usage.html#optional-analyzers) to understand how to activate it).
-  -  [FireEye Floss](https://github.com/fireeye/flare-floss) strings analysis.
-  -  [Manalyze](https://github.com/JusticeRage/Manalyze) file analyzer
+  -  [`FireEye Floss`](https://github.com/fireeye/flare-floss) strings analysis.
+  -  [`Manalyze`](https://github.com/JusticeRage/Manalyze) file analyzer
 
 **FIXES/IMPROVEMENTS/Dependency upgrades:**
 - upgraded main Dockerfile to python 3.8
-- added new [start.py](https://intelowl.readthedocs.io/en/stable/Advanced-Usage.html#smart-start) script to help users to configure and execute IntelOwl with additional or advanced configuration
+- added new [start.py](https://intelowl.readthedocs.io/en/stable/Installation.html#run) script to help users to configure and execute IntelOwl with additional or advanced configuration
 - added support for the `generic` observable type. In this way it is possible to build analyzers that can analyze everything and not only IPs, domains, URLs or hashes
 - added [Multi-queue](https://intelowl.readthedocs.io/en/stable/Advanced-Usage.html#multi-queue) option to optimize usage of Celery queues. This is intended for advanced users.
 - updated GUI to new [IntelOwl-ng](https://github.com/intelowlproject/IntelOwl-ng/releases/tag/v1.7.0) version
 - upgraded [Speakeasy](https://github.com/fireeye/speakeasy), [Quark-Engine](https://github.com/quark-engine/quark-engine) and [Dnstwist](https://github.com/elceef/dnstwist) analyzers to last versions
 - moved from Travis CI to Github CI
-- added [CodeCov](https://about.codecov.io/) coverage support
+- added [CodeCov](https://about.codecov.io/) coverage support (*so we will be improving the test coverage shortly*)
 - moved PEFile library pointer to a forked [pip repo](https://pypi.org/project/pefile-fork/) that contains some fixes.  
 - fix to log directiories that could result in some optional analyzers to break
 - added milliseconds to logs

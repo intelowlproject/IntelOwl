@@ -110,7 +110,6 @@ def start():
     # we use try/catch to mimick docker-compose's behaviour of handling CTRL+C event
     try:
         command = base_command + [args.docker_command] + unknown
-        print(command)
         subprocess.run(command)
     except KeyboardInterrupt:
         print(

@@ -1,7 +1,7 @@
 import subprocess
 import argparse
 
-INTELOWL_TAG_VERSION = "v1.9.1"
+INTELOWL_TAG_VERSION = "v2.0.0-rc"
 
 docker_analyzers = ["thug", "apk_analyzers", "box_js", "static_analyzers", "qiling"]
 

@@ -12,7 +12,7 @@ This page includes details about some advanced features that Intel Owl provides 
 - [Multi Queue](#multi-queue)
 
 ## Smart start
-Users that have at least Python 3.6 installed in their machine can leverage a script to help them configure and execute IntelOwl with additional or advanced configuration.
+Users that have at least Python 3.5 installed in their machine can leverage a script to help them configure and execute IntelOwl with additional or advanced configuration.
 
 We are talking about a CLI interface called [start.py](https://github.com/intelowlproject/IntelOwl/blob/master/start.py).
 ```

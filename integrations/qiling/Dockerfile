@@ -1,4 +1,4 @@
-FROM qilingframework/qiling:1.2
+FROM qilingframework/qiling:latest
 
 ENV PROJECT_PATH /opt/deploy
 ENV LOG_PATH /var/log/intel_owl/qiling

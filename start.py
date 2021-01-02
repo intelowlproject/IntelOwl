@@ -1,8 +1,6 @@
 import subprocess
 import argparse
 
-INTELOWL_TAG_VERSION = "v2.0.0-rc"
-
 docker_analyzers = ["thug", "apk_analyzers", "box_js", "static_analyzers", "qiling"]
 
 path_mapping = {
@@ -35,7 +33,17 @@ def start():
     parser.add_argument(
         "docker_command",
         type=str,
-        choices=["build", "up", "start", "restart", "down", "kill", "logs", "ps"],
+        choices=[
+            "build",
+            "up",
+            "start",
+            "restart",
+            "down",
+            "stop",
+            "kill",
+            "logs",
+            "ps",
+        ],
     )
 
     # integrations
@@ -80,29 +88,41 @@ def start():
             "`all_analyzers` and another docker container"
         )
         return
-    command = "docker-compose"
-    command += " -f " + path_mapping["default"]
+    compose_files = []
+    compose_files.append(path_mapping["default"])
     if args.mode in ["ci", "test"]:
-        command += " -f " + path_mapping[args.mode]
+        compose_files.append(path_mapping[args.mode])
     for key in ["traefik", "multi_queue"]:
         if args.__dict__[key]:
-            command += " -f " + path_mapping[key]
+            compose_files.append(path_mapping[key])
     for key in docker_analyzers:
         if args.__dict__[key]:
-            command += " -f " + path_mapping[key + test_appendix]
+            compose_files.append(path_mapping[key + test_appendix])
     if args.all_analyzers:
-        command += "".join(
-            [
-                " -f " + analyzer
-                for analyzer in path_mapping["all_analyzers" + test_appendix]
-            ]
+        compose_files.extend(
+            [analyzer for analyzer in path_mapping["all_analyzers" + test_appendix]]
         )
-    command += " -p intel_owl"
-    command += " " + args.docker_command
+    # construct final command
+    base_command = [
+        "docker-compose",
+        "-p",
+        "intel_owl",
+        "-f",
+        "-f ".join(compose_files),
+    ]
+    # we use try/catch to mimick docker-compose's behaviour of handling CTRL+C event
     try:
-        subprocess.run(command.split(" ") + unknown, check=True)
+        subprocess.run(base_command + [args.docker_command] + unknown)
     except KeyboardInterrupt:
-        subprocess.run(["docker-compose", "down"], check=True)
+        print(
+            "---- stopping the containers, please wait... ",
+            "(press Ctrl+C again to force) ----",
+        )
+        try:
+            subprocess.run(base_command + ["stop"])
+        except KeyboardInterrupt:
+            # just need to catch it
+            pass
 
 
 if __name__ == "__main__":

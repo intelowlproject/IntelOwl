@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     "guardian",
     "api_app.apps.ApiAppConfig",
     "django_elasticsearch_dsl",
+    "django_nose",
 ]
 
 MIDDLEWARE = [
@@ -89,6 +90,8 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
     "EXCEPTION_HANDLER": "rest_framework.views.exception_handler",
 }
+
+TEST_RUNNER = "django_nose.NoseTestSuiteRunner"
 
 # Django-Rest-Durin
 REST_DURIN = {
@@ -145,7 +148,7 @@ CELERY_WORKER_HIJACK_ROOT_LOGGER = False
 # these two are needed to enable priority and correct tasks execution
 CELERY_TASK_ACKS_LATE = True
 CELERY_WORKER_PREFETCH_MULTIPLIER = 1
-CELERY_TASK_DEFAULT_QUEUE = "analyzers_queue"
+CELERY_QUEUES = os.environ.get("CELERY_QUEUES", "default").split(",")
 # this is to avoid RAM issues caused by long usage of this tool
 CELERY_WORKER_MAX_TASKS_PER_CHILD = 200
 # value is in kilobytes
@@ -219,7 +222,6 @@ LOGGING = {
     "formatters": {
         "stdfmt": {
             "format": "%(asctime)s - %(name)s - %(funcName)s - %(levelname)s - %(message)s",
-            "datefmt": "%Y-%m-%d %H:%M:%S",
         },
     },
     "handlers": {

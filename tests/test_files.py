@@ -29,6 +29,9 @@ from api_app.script_analyzers.file_analyzers import (
     unpac_me,
     xlm_macro_deobfuscator,
     triage_scan,
+    floss,
+    manalyze,
+    qiling,
 )
 from api_app.script_analyzers.observable_analyzers import vt3_get
 
@@ -42,7 +45,7 @@ from .mock_utils import (
 
 from intel_owl import settings
 
-# disable logging library for travis
+# disable logging library for Continuous Integration
 if settings.DISABLE_LOGGING_TEST:
     logging.disable(logging.CRITICAL)
 
@@ -105,7 +108,9 @@ class FileAnalyzersEXETests(TestCase):
         ).start()
         self.assertEqual(report.get("success", False), True)
 
-    def test_stringsinfo_ml_exe(self):
+    @mock_connections(patch("requests.get", side_effect=mocked_docker_analyzer_get))
+    @mock_connections(patch("requests.post", side_effect=mocked_docker_analyzer_post))
+    def test_stringsinfo_ml_exe(self, mock_get=None, mock_post=None):
         report = strings_info.StringsInfo(
             "Strings_Info_ML",
             self.job_id,
@@ -116,7 +121,9 @@ class FileAnalyzersEXETests(TestCase):
         ).start()
         self.assertEqual(report.get("success", False), True)
 
-    def test_stringsinfo_classic_exe(self):
+    @mock_connections(patch("requests.get", side_effect=mocked_docker_analyzer_get))
+    @mock_connections(patch("requests.post", side_effect=mocked_docker_analyzer_post))
+    def test_stringsinfo_classic_exe(self, mock_get=None, mock_post=None):
         report = strings_info.StringsInfo(
             "Strings_Info_Classic",
             self.job_id,
@@ -142,6 +149,19 @@ class FileAnalyzersEXETests(TestCase):
     def test_speakeasy_exe(self):
         report = speakeasy_emulation.SpeakEasy(
             "Speakeasy", self.job_id, self.filepath, self.filename, self.md5, {}
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    @mock_connections(patch("requests.get", side_effect=mocked_docker_analyzer_get))
+    @mock_connections(patch("requests.post", side_effect=mocked_docker_analyzer_post))
+    def test_qiling_exe(self, mock_get=None, mock_post=None):
+        report = qiling.Qiling(
+            "Qiling_Windows",
+            self.job_id,
+            self.filepath,
+            self.filename,
+            self.md5,
+            {"os": "windows", "arch": "x86"},
         ).start()
         self.assertEqual(report.get("success", False), True)
 
@@ -218,7 +238,8 @@ class FileAnalyzersEXETests(TestCase):
         additional_params = {
             "directories_with_rules": [
                 "/opt/deploy/yara/daily_ioc_rules",
-            ]
+            ],
+            "recursive": True,
         }
         report = yara_scan.YaraScan(
             "Yara_Scan",
@@ -282,16 +303,8 @@ class FileAnalyzersEXETests(TestCase):
 
     def test_yara_reversinglabs(self):
         additional_params = {
-            "directories_with_rules": [
-                "/opt/deploy/yara/reversinglabs_rules/yara/certificate",
-                "/opt/deploy/yara/reversinglabs_rules/yara/downloader",
-                "/opt/deploy/yara/reversinglabs_rules/yara/exploit",
-                "/opt/deploy/yara/reversinglabs_rules/yara/infostealer",
-                "/opt/deploy/yara/reversinglabs_rules/yara/pua",
-                "/opt/deploy/yara/reversinglabs_rules/yara/ransomware",
-                "/opt/deploy/yara/reversinglabs_rules/yara/trojan",
-                "/opt/deploy/yara/reversinglabs_rules/yara/virus",
-            ]
+            "directories_with_rules": ["/opt/deploy/yara/reversinglabs_rules/yara"],
+            "recursive": True,
         }
         report = yara_scan.YaraScan(
             "Yara_Scan",
@@ -308,6 +321,23 @@ class FileAnalyzersEXETests(TestCase):
             "directories_with_rules": [
                 "/opt/deploy/yara/samir_rules",
             ]
+        }
+        report = yara_scan.YaraScan(
+            "Yara_Scan",
+            self.job_id,
+            self.filepath,
+            self.filename,
+            self.md5,
+            additional_params,
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    def test_yara_fireeye(self):
+        additional_params = {
+            "directories_with_rules": [
+                "/opt/deploy/yara/fireeye_rules/rules",
+            ],
+            "recursive": True,
         }
         report = yara_scan.YaraScan(
             "Yara_Scan",
@@ -419,6 +449,32 @@ class FileAnalyzersEXETests(TestCase):
     def test_triage_scan(self, mock_get=None, mock_post=None):
         report = triage_scan.TriageScanFile(
             "Triage_Scan",
+            self.job_id,
+            self.filepath,
+            self.filename,
+            self.md5,
+            {},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    @mock_connections(patch("requests.get", side_effect=mocked_docker_analyzer_get))
+    @mock_connections(patch("requests.post", side_effect=mocked_docker_analyzer_post))
+    def test_floss(self, mock_get=None, mock_post=None):
+        report = floss.Floss(
+            "Floss",
+            self.job_id,
+            self.filepath,
+            self.filename,
+            self.md5,
+            {},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    @mock_connections(patch("requests.get", side_effect=mocked_docker_analyzer_get))
+    @mock_connections(patch("requests.post", side_effect=mocked_docker_analyzer_post))
+    def test_manalyze(self, mock_get=None, mock_post=None):
+        report = manalyze.Manalyze(
+            "Manalyze",
             self.job_id,
             self.filepath,
             self.filename,

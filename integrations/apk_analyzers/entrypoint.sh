@@ -1,7 +1,8 @@
 #!/bin/sh
-
+mkdir -p ${LOG_PATH}
 touch ${LOG_PATH}/gunicorn_access.log ${LOG_PATH}/gunicorn_errors.log
 chown -R apk-user:apk-user ${LOG_PATH}
+su apk-user -s /bin/bash
 exec gunicorn 'app:app' \
     --bind '0.0.0.0:4004' \
     --user ${USER} \

@@ -8,6 +8,8 @@ This page includes details about some advanced features that Intel Owl provides 
 - [Django Groups & Permissions](#django-groups-permissions)
 - [Authentication options](#authentication-options)
 - [GKE deployment](#google-kubernetes-engine-deployment)
+- [Multi Queue](#multi-queue)
+
 
 ## Optional Analyzers
 Some analyzers which run in their own Docker containers are kept disabled by default. They are disabled by default to prevent accidentally starting too many containers and making your computer unresponsive.
@@ -26,19 +28,22 @@ table, th, td {
     <th>Description</th>
   </tr>
   <tr>
-    <td>PEframe</td>
-    <td><code>PEframe_Scan</code></td>
-    <td>performs static analysis on Portable Executable malware and generic suspicious file</td>
+    <td>Static Analyzers</td>
+    <td><code>PEframe_Scan</code>, <code>Capa_Info</code>, <code>Floss</code>, <code>Strings_Info_Classic</code>, <code>Strings_Info_ML</code>, <code>Manalyze</code></td>
+    <td>
+    <ul>
+      <li>Capa detects capabilities in executable files</li>
+      <li>PEFrame performs static analysis on Portable Executable malware and malicious MS Office documents</li>
+      <li>FLOSS automatically deobfuscate strings from malware binaries</li>
+      <li>String_Info_Classic extracts human-readable strings where as ML version of it ranks them</li>
+      <li>Manalyze statically analyzes PE (Portable-Executable) files in-depth</li>
+      </ul>
+    </td>
   </tr>
   <tr>
     <td>Thug</td>
     <td><code>Thug_URL_Info</code>, <code>Thug_HTML_Info</code></td>
     <td>performs hybrid dynamic/static analysis on a URL or HTML page.</td>
-  </tr>
-  <tr>
-    <td>FireEye Capa</td>
-    <td><code>Capa_Info</code></td>
-    <td>detects capabilities in executable files</td>
   </tr>
   <tr>
     <td>Box-JS</td>
@@ -49,6 +54,20 @@ table, th, td {
     <td>APK Analyzers</td>
     <td><code>APKiD_Scan_APK_DEX_JAR</code></td>
     <td>identifies many compilers, packers, obfuscators, and other weird stuff from an APK or DEX file</td>
+  </tr>
+  <tr>
+    <td>Qiling</td>
+    <td><code>Qiling_Windows</code>
+    <code>Qiling_Windows_Shellcode</code>
+    <code>Qiling_Linux</code>
+    <code>Qiling_Linux_Shellcode</code>
+    </td>
+    <td>Tool for emulate the execution of a binary file or a shellcode.
+     It requires the configuration of its rootfs, and the optional configuration of profiles.
+     The rootfs can be copied from the <a href="https://github.com/qilingframework/qiling/tree/master/examples/rootfs"> Qiling project</a>: please remember that Windows dll <b> must</b> be manually added for license reasons.
+     Qiling provides a <a href="https://github.com/qilingframework/qiling/blob/master/examples/scripts/dllscollector.bat"> DllCollector</a> to retrieve dlls from your licensed Windows. 
+     <a href="https://docs.qiling.io/en/latest/profile/"> Profiles </a> must be placed in the <code>profiles</code> subfolder
+     </td>
   </tr>
 </table>
 
@@ -91,7 +110,20 @@ List of some of the analyzers with optional configuration:
   * `query`: Follow according to [docs](https://www.zoomeye.org/doc#host-search), but omit `ip`, `hostname`. Eg: `"query": "city:biejing port:21"`
   * `facets`(default: Empty string): A comma-separated list of properties to get summary information on query. Eg: `"facets:app,os"`
   * `page`(default 1): The page number to paging
-  * `history`(default True):  	To query the history data. 
+  * `history`(default True):  	To query the history data.
+* `Triage_Scan` and `Triage_Search`:
+  * `endpoint` (default public): choose whether to query on the public or the private endpoint of triage.
+  * `report_type` (default overview): determines how detailed the final report will be. (overview/complete)
+* `Triage_Search`:
+  * `analysis_type` (default search): choose whether to search for existing observable reports or upload for scanning via URL. (search/submit)
+* `Qiling`:
+  * `arch`(default x86): change system architecture for the emulation 
+  * `os`(default windows or linux): change operating system for the emulation 
+  * `profile`(default none): add a Qiling [profile](https://docs.qiling.io/en/latest/profile/)
+  * `shellcode`(default false): true if the file is a shellcode 
+* `WiGLE`:
+  * `search_type` (default `WiFi Network`). Supported are: `WiFi Network`, `CDMA Network`, `Bluetooth Network`, `GSM/LTE/WCDMA Network`
+  * Above mentioned `search_type` is just different routes mentioned in [docs](https://api.wigle.net/swagger#/v3_ALPHA). Also, the string to be passed in input field of generic analyzers have a format. Different variables are separated by semicolons(`;`) and the field-name and value are separated by equals sign(`=`). Example string for search_type `CDMA Network` is `sid=12345;nid=12345;bsid=12345`
 
 There are two ways to do this:
 
@@ -107,7 +139,7 @@ Example:
 #### from [Pyintelowl](https://github.com/intelowlproject/pyintelowl)
 While using `send_observable_analysis_request` or `send_file_analysis_request` endpoints, you can pass the parameter `runtime_configuration` with the optional values.
 Example:
-```
+```python
 runtime_configuration = {
     "Doc_Info": {
         "additional_passwords_to_check": ["passwd", "2020"]
@@ -115,7 +147,6 @@ runtime_configuration = {
 }
 pyintelowl_client.send_file_analysis_request(..., runtime_configuration=runtime_configuration)
 ```
-
 
 ## Elastic Search
 
@@ -186,3 +217,16 @@ How to configure and enable LDAP on Intel Owl?
 Refer to the following blog post for an example on how to deploy IntelOwl on Google Kubernetes Engine:
 
 [Deploying Intel-Owl on GKE](https://mostwanted002.cf/post/intel-owl-gke/) by [Mayank Malik](https://twitter.com/_mostwanted002_).
+
+## Multi Queue
+IntelOwl provides an additional `docker-compose` file,  [multi-queue.override.yaml](https://github.com/intelowlproject/IntelOwl/blob/master/docker/multi-queue.override.yml) file, allowing IntelOwl users to better scale with the performance of their own architecture.
+The command to correctly use the file is the following
+`docker-compose -f docker/default.yaml -f docker/multi-queue.override.yaml`, leveraging the [override](https://docs.docker.com/compose/extends/) feature of docker.
+
+
+It is possible to define new celery workers, each requires the addition of a new container in the docker-compose file, as shown in the `multi-queue.override.yaml`. 
+
+IntelOwl moreover requires that the name of the workers are provided in the `docker-compose` file. This is done through the environment variable `CELERY_QUEUES` inside the `uwsgi` container. Each queue must be separated using the character `,`, as shown in the [example](https://github.com/intelowlproject/IntelOwl/blob/master/docker-compose-multi-queue.yml#L29).
+
+Now it is possible to specify for each configuration inside [analyzer_config](https://github.com/intelowlproject/IntelOwl/blob/master/configuration/analyzer_config.json) the desired queue. If no queue are provided, the `default` queue will be selected.
+ 

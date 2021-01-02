@@ -1,0 +1,78 @@
+# Required Secrets
+DJANGO_SECRET=
+DB_HOST=postgres
+DB_PORT=5432
+DB_USER=user
+DB_PASSWORD=password
+
+# Additional Config variables
+# jobs older than this would be flushed from the database periodically. Default: 3 days
+OLD_JOBS_RETENTION_DAYS=3
+
+# Elastic Search Configuration
+ELASTICSEARCH_ENABLED=False
+ELASTICSEARCH_HOST=
+# consult to: https://django-elasticsearch-dsl.readthedocs.io/en/latest/settings.html
+ELASTICSEARCH_NO_OF_SHARDS=1
+ELASTICSEARCH_NO_OF_REPLICAS=0
+
+# Optional API keys
+CUCKOO_API_KEY=
+SHODAN_KEY=
+ABUSEIPDB_KEY=
+AUTH0_KEY=
+SECURITYTRAILS_KEY=
+GSF_KEY=
+OTX_KEY=
+CIRCL_CREDENTIALS=user|pass
+VT_KEY=
+HA_KEY=
+INTEZER_KEY=
+INQUEST_API_KEY=
+FIRST_MISP_API=
+MISP_KEY=
+MAXMIND_KEY=
+DNSDB_KEY=
+HONEYDB_API_ID=
+HONEYDB_API_KEY=
+HUNTER_API_KEY=
+CENSYS_API_ID=
+CENSYS_API_SECRET=
+ONYPHE_KEY=
+GREYNOISE_API_KEY=
+PULSEDIVE_API_KEY=
+INTELX_API_KEY=
+WHOISXMLAPI_KEY=
+UNPAC_ME_API_KEY=
+URLSCAN_API_KEY=
+PHISHTANK_API_KEY=
+IPINFO_KEY=
+ZOOMEYE_KEY=
+TRIAGE_KEY=
+EMAILREP_KEY=
+WIGLE_KEY=
+
+# Test tokens
+TEST_JOB_ID=1
+TEST_IP=8.8.8.8
+TEST_DOMAIN=www.google.com
+TEST_URL=https://www.google.com/search?test
+TEST_MD5=446c5fbb11b9ce058450555c1c27153c
+
+# URLs
+CUCKOO_URL=
+MISP_URL=
+FIRST_MISP_URL=
+VT_NOTIFY_URL=
+
+# other variables
+DEBUG=False
+LDAP_ENABLED=False
+DISABLE_LOGGING_TEST=False
+MOCK_CONNECTIONS=False
+CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672
+DB_NAME=intel_owl_db
+HTTPS_ENABLED=not_enabled
+AWS_SECRETS=False
+AWS_SQS=False
+AWS_REGION=eu-central-1

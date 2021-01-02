@@ -9,7 +9,7 @@ class WiGLE(classes.ObservableAnalyzer):
     base_url: str = "https://api.wigle.net"
 
     def set_config(self, additional_config_params):
-        self.api_key_name = additional_config_params.get("api_key_name", "WiGLE_KEY")
+        self.api_key_name = additional_config_params.get("api_key_name", "WIGLE_KEY")
         self.__api_key = secrets.get_secret(self.api_key_name)
         self.search_type = additional_config_params.get("search_type", "WiFi Network")
 

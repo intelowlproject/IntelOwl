@@ -1304,7 +1304,7 @@
     "requires_configuration": true,
     "python_module": "wigle.WiGLE",
     "additional_config_params": {
-      "api_key_name": "WiGLE_KEY",
+      "api_key_name": "WIGLE_KEY",
       "search_type": "WiFi Network"
     },
     "soft_time_limit": 30

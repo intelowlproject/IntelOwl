@@ -54,7 +54,7 @@ class Stratos(classes.ObservableAnalyzer):
 
     def download_dataset(self, url, db_loc):
         # Dataset website certificates are not correctly configured.
-        p = requests.get(url, verify=False)
+        p = requests.get(url, verify=False)  # lgtm [py/request-without-cert-validation]
         p.raise_for_status()
 
         with open(db_loc, "w") as f:

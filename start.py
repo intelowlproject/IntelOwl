@@ -103,16 +103,15 @@ def start():
             [analyzer for analyzer in path_mapping["all_analyzers" + test_appendix]]
         )
     # construct final command
-    base_command = [
-        "docker-compose",
-        "-p",
-        "intel_owl",
-        "-f",
-        "-f ".join(compose_files),
-    ]
+    base_command = ["docker-compose", "-p", "intel_owl"]
+    for compose_file in compose_files:
+        base_command.append("-f")
+        base_command.append(compose_file)
     # we use try/catch to mimick docker-compose's behaviour of handling CTRL+C event
     try:
-        subprocess.run(base_command + [args.docker_command] + unknown)
+        command = base_command + [args.docker_command] + unknown
+        print(command)
+        subprocess.run(command)
     except KeyboardInterrupt:
         print(
             "---- stopping the containers, please wait... ",

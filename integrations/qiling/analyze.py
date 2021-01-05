@@ -16,9 +16,11 @@ def my_sandbox(file, ql_os, ql_arch, shellcode=False, profile=None):
     if profile:
         args["profile"] = f"{BASE_PATH}/profiles/{profile}"
     if shellcode:
-        args["shellcoder"] = file
-    else:
-        args["rootfs"] = f"{BASE_PATH}/rootfs/{ql_arch}_{ql_os}"
+        with open(file, "br") as f:
+            args["shellcoder"] = f.read()
+        args["ostype"] = ql_os
+        args["archtype"] = ql_arch
+    args["rootfs"] = f"{BASE_PATH}/rootfs/{ql_arch}_{ql_os}"
     # This is done to block the emulated software to print to standard output
     f = open(os.devnull, "w")
     try:

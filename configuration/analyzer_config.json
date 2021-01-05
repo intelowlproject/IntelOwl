@@ -692,7 +692,7 @@
   "Qiling_Windows_Shellcode": {
     "type": "file",
     "supported_filetypes": [
-      "text/plain"
+      "application/octet-stream"
     ],
     "external_service": false,
     "description": "Qiling windows shellcode emulation",
@@ -727,7 +727,7 @@
     "Qiling_Linux_Shellcode": {
     "type": "file",
       "supported_filetypes": [
-      "text/plain"
+      "application/octet-stream"
     ],
     "external_service": false,
     "description": "Qiling linux shellcode emulation",

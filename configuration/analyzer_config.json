@@ -8,7 +8,6 @@
       "application/x-dex"
     ],
     "python_module": "apkid.APKiD",
-    "disabled": true,
     "description": "APKiD identifies many compilers, packers, obfuscators, and other weird stuff from an APK or DEX file.",
     "soft_time_limit": 400
   },

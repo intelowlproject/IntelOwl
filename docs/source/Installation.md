@@ -200,7 +200,9 @@ You can customize the AWS Region changing the environment variable `AWS_REGION`.
 If you like, you could use AWS SQS instead of Rabbit-MQ to manage your queues.
 In that case, you should change the parameter `CELERY_BROKER_URL` to `sqs://` and give your instances on AWS the proper permissions to access it.
 
-Also, you need to set the environment variable `AWS_SQS` to `True` to activate the additional required settings.
+Also, you need to set the environment variable `AWS_SQS` to `True` to activate the additional required settings.                                                                                                                                                                
+~why AWS SQS instead of Rabbit-MQ?
+/SQS would be my preference over RabbitMQ, here is why. SQS is a managed service. So you don't have to worry about operational aspects of running a messaging system including administration, security, monitoring etc.
 
 #### ... More coming
 

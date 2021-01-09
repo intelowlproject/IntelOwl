@@ -72,8 +72,6 @@ dnstwist==20201228
 ppdeep>=20200505
 google>=3.0.0
 eventlet==0.29.1
-<<<<<<< HEAD
 mwdblib==3.3.1 
-=======
 django-nose==1.4.7
->>>>>>> 7463881edc8448fd6f9c78a8ca192412c1a49578
+

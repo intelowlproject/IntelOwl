@@ -31,11 +31,8 @@ from api_app.script_analyzers.file_analyzers import (
     triage_scan,
     floss,
     manalyze,
-<<<<<<< HEAD
     mwdb_scan,
-=======
     qiling,
->>>>>>> 7463881edc8448fd6f9c78a8ca192412c1a49578
 )
 from api_app.script_analyzers.observable_analyzers import vt3_get
 

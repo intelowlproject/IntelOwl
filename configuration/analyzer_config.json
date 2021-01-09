@@ -573,11 +573,12 @@
     "type": "file",
     "description": "Scan a file against MWDB by Cert Polska",
     "requires_configuration": true,
+    "external_service": true,
+    "leaks_info": true,
     "python_module": "mwdb_scan.MWDB_Scan",
     "additional_config_params": {
-      "api_key_name": "MWDB_Key",
-      "upload_file": 0,
-      "wait_time": 200
+      "api_key_name": "MWDB_KEY",
+      "upload_file": false
     },
     "soft_time_limit": 400
   },

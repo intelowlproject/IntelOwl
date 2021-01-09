@@ -111,8 +111,7 @@ List of some of the analyzers with optional configuration:
   * `page`(default 1): The page number to paging
   * `history`(default True): To query the history data. 
 * `MWDB_Scan`:
-    * `upload_file` (default 0): Uploads the file to repository.
-    * `wait_time` (default 200): Wait after uploading the file. Allows MWDB repository to perform analysis on the file.
+    * `upload_file` (default false): Uploads the file to repository.
 * `Triage_Scan` and `Triage_Search`:
   * `endpoint` (default public): choose whether to query on the public or the private endpoint of triage.
   * `report_type` (default overview): determines how detailed the final report will be. (overview/complete)

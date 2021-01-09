@@ -71,12 +71,11 @@ def mocked_vt_post(*args, **kwargs):
     return MockResponse({"scan_id": "scan_id_test", "data": {"id": "id_test"}}, 200)
 
 
-def mocked_mwdb_get(*args, **kwargs):
-    return MockResponse({"scan_id": "scan_id_test", "data": {"id": "id_test"}}, 200)
-
-
-def mocked_mwdb_post(*args, **kwargs):
-    return MockResponse({"scan_id": "scan_id_test", "data": {"id": "id_test"}}, 200)
+def mocked_mwdb_response(*args, **kwargs):
+    Response = MagicMock()
+    Response.query_file.data = {"id": "id_test"}
+    Response.query_file.metakeys = {"keys": "keys_test"}
+    return Response
 
 
 def mocked_intezer(*args, **kwargs):
@@ -478,10 +477,9 @@ class FileAnalyzersEXETests(TestCase):
         ).start()
         self.assertEqual(report.get("success", False), True)
 
-    @mock_connections(patch("requests.get", side_effect=mocked_mwdb_get))
-    @mock_connections(patch("requests.post", side_effect=mocked_mwdb_post))
+    @patch("mwdblib.MWDB", side_effect=mocked_mwdb_response)
     def test_mwdb_scan(self, mock_get=None, mock_post=None):
-        additional_params = {"upload_file": 0, "wait_time": 200}
+        additional_params = {"api_key_name": "test_api", "upload_file": 0}
         report = mwdb_scan.MWDB_Scan(
             "MWDB_Scan",
             self.job_id,

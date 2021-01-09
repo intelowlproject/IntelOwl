@@ -1,9 +1,7 @@
 import subprocess
 import argparse
 
-INTELOWL_TAG_VERSION = "v1.9.1"
-
-docker_analyzers = ["thug", "apk_analyzers", "box_js", "static_analyzers"]
+docker_analyzers = ["thug", "apk_analyzers", "box_js", "static_analyzers", "qiling"]
 
 path_mapping = {
     "default": "docker/default.yml",
@@ -19,6 +17,8 @@ path_mapping = {
     "box_js.test": "integrations/box-js/boxjs.test.yml",
     "static_analyzers.test": "integrations/static_analyzers/static_analyzers.test.yml",
     "thug.test": "integrations/thug/thug.test.yml",
+    "qiling": "integrations/qiling/qiling.yml",
+    "qiling.test": "integrations/qiling/qiling.test.yml",
 }
 path_mapping["all_analyzers"] = [path_mapping[key] for key in docker_analyzers]
 path_mapping["all_analyzers.test"] = [
@@ -33,7 +33,17 @@ def start():
     parser.add_argument(
         "docker_command",
         type=str,
-        choices=["build", "up", "start", "restart", "down", "kill", "logs"],
+        choices=[
+            "build",
+            "up",
+            "start",
+            "restart",
+            "down",
+            "stop",
+            "kill",
+            "logs",
+            "ps",
+        ],
     )
 
     # integrations
@@ -48,7 +58,7 @@ def start():
             "--" + integration,
             required=False,
             action="store_true",
-            help="Uses the integration/" + integration + ".override.yml compose file",
+            help="Uses the integration/" + integration + ".yml compose file",
         )
 
     # possible upgrades
@@ -78,29 +88,39 @@ def start():
             "`all_analyzers` and another docker container"
         )
         return
-    command = "docker-compose"
-    command += " -f " + path_mapping["default"]
+    compose_files = []
+    compose_files.append(path_mapping["default"])
     if args.mode in ["ci", "test"]:
-        command += " -f " + path_mapping[args.mode]
+        compose_files.append(path_mapping[args.mode])
     for key in ["traefik", "multi_queue"]:
         if args.__dict__[key]:
-            command += " -f " + path_mapping[key]
+            compose_files.append(path_mapping[key])
     for key in docker_analyzers:
         if args.__dict__[key]:
-            command += " -f " + path_mapping[key + test_appendix]
+            compose_files.append(path_mapping[key + test_appendix])
     if args.all_analyzers:
-        command += "".join(
-            [
-                " -f " + analyzer
-                for analyzer in path_mapping["all_analyzers" + test_appendix]
-            ]
+        compose_files.extend(
+            [analyzer for analyzer in path_mapping["all_analyzers" + test_appendix]]
         )
-    command += " -p intel_owl"
-    command += " " + args.docker_command
+    # construct final command
+    base_command = ["docker-compose", "-p", "intel_owl"]
+    for compose_file in compose_files:
+        base_command.append("-f")
+        base_command.append(compose_file)
+    # we use try/catch to mimick docker-compose's behaviour of handling CTRL+C event
     try:
-        subprocess.run(command.split(" ") + unknown, check=True)
+        command = base_command + [args.docker_command] + unknown
+        subprocess.run(command)
     except KeyboardInterrupt:
-        subprocess.run(["docker-compose", "down"], check=True)
+        print(
+            "---- stopping the containers, please wait... ",
+            "(press Ctrl+C again to force) ----",
+        )
+        try:
+            subprocess.run(base_command + ["stop"])
+        except KeyboardInterrupt:
+            # just need to catch it
+            pass
 
 
 if __name__ == "__main__":

@@ -44,6 +44,7 @@ After having written the new python module, you have to remember to:
       "python_module": "<module_name>.<class_name>",
       "description": "very cool analyzer",
       "requires_configuration": true,
+      "queue": "long",
       "additional_config_params": {
            "custom_required_param": "ANALYZER_SPECIAL_KEY"
       }
@@ -60,7 +61,10 @@ After having written the new python module, you have to remember to:
   In that way you can create more than one analyzer for a specific python module, each one based on different configurations.
   MISP and Yara Analyzers are a good example of this use case: for instance, you can use different analyzers for different MISP instances.
 
-* Add required unit tests in the [tests](https://github.com/intelowlproject/IntelOwl/blob/master/tests) folder
+  Please see [Analyzers customization section](https://intelowl.readthedocs.io/en/latest/Usage.html#analyzers-customization) to get the explanation of the other available keys.
+
+
+* Add required unit tests in the [tests](https://github.com/intelowlproject/IntelOwl/blob/master/tests) folder.
  
   Then follow the [Test](./Tests.md) guide to start testing.
 

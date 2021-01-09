@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     "guardian",
     "api_app.apps.ApiAppConfig",
     "django_elasticsearch_dsl",
+    "django_nose",
 ]
 
 MIDDLEWARE = [
@@ -89,6 +90,8 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
     "EXCEPTION_HANDLER": "rest_framework.views.exception_handler",
 }
+
+TEST_RUNNER = "django_nose.NoseTestSuiteRunner"
 
 # Django-Rest-Durin
 REST_DURIN = {

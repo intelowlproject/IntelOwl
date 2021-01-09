@@ -1,6 +1,6 @@
 # Introduction
 
-Official announcement: [Certego News](https://www.certego.net/en/news/new-year-new-tool-intel-owl/)
+Official first announcement: [Certego News](https://www.certego.net/en/news/new-year-new-tool-intel-owl/)
 
 IntelOwl was designed with the intent to help the community, in particular those researchers that can not afford commercial solutions, in the generation of threat intelligence data, in a simple, scalable and reliable way.
 
@@ -8,7 +8,7 @@ Main features:
 
 * modern Django-Python application: easy to understand and write code upon it
 * it can get data from multiple sources with a single API request
-* about 100 available analyzers that you can use to generate or retrieve data about a suspicious file or observable (IP, domain, …)
+* more than 100 available analyzers that you can use to generate or retrieve data about a suspicious file or observable (IP, domain, …)
 * Built-in Web Interface: **[IntelOwl-ng](https://github.com/intelowlproject/IntelOwl-ng)** provides features such as dashboard, visualizations of analysis data, easy to use forms for requesting new analysis and more.
 * official library and CLI client available on Github: [PyIntelOwl](https://github.com/intelowlproject/pyintelowl)
 * easily integrable with other tools thanks to the REST API framework and to the PyIntelOwl library.

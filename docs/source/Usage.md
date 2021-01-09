@@ -76,7 +76,11 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * `UnpacMe_EXE_Unpacker`: [UnpacMe](https://www.unpac.me/) is an automated malware unpacking service
 * `Triage_Scan`: leverage [Triage](https://tria.ge) sandbox environment to scan various files
 * `Manalyze`: [Manalyze](https://github.com/JusticeRage/Manalyze) performs static analysis on PE executables to detect undesirable behavior.
+<<<<<<< HEAD
 * `MWDB_Scan`: [mwdblib](https://mwdb.readthedocs.io/en/latest/) Retrieve malware file analysis from repository maintained by CERT Polska MWDB.
+=======
+* `Qiling`: [Qiling](https://github.com/qilingframework/qiling) qiling binary emulation.
+>>>>>>> 7463881edc8448fd6f9c78a8ca192412c1a49578
 
 #### Observable analyzers (ip, domain, url, hash)
 * `VirusTotal_v3_Get_Observable`: search an observable in the VirusTotal DB
@@ -144,7 +148,9 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * `InQuest_DFI`: Deep File Inspection by [InQuest Labs](https://labs.inquest.net/dfi)
 
 #### Generic analyzers (email, phone number, ...)
+Some Analyzers require details other than just IP, URL, Domain etc... We classified them as Generic Analyzers. Since the type of field is not known, there is a format for strings to be followed.
 * `EmailRep`: search an email address on emailrep.io
+* `WiGLE`: Maps and database of 802.11 wireless networks, with statistics, submitted by wardrivers, netstumblers, and net huggers.
 
 #### [Additional analyzers](https://intelowl.readthedocs.io/en/develop/Advanced-Usage.html#optional-analyzers) that can be enabled per your wish.
 
@@ -159,6 +165,7 @@ The following are all the keys that you can change without touching the source c
 * `not_supported_filetypes`: can be populated as a list. If set, if you ask to analyze a file with a mimetype from the ones you specified, it won't be executed
 * `observable_supported`: can be populated as a list. If set, if you ask to analyze an observable that is not in this list, it won't be executed. Valid values are: `ip`, `domain`, `url`, `hash`
 * `soft_time_limit`: this is the maximum time (in seconds) of execution for an analyzer. Once reached, the task will be killed (or managed in the code by a custom Exception). Default 300s
+* `queue`: this takes effects only when [multi-queue](https://intelowl.readthedocs.io/en/develop/Advanced-Usage.html#multi-queue) is enabled. Choose which celery worker would execute the task: `local` (ideal for tasks that leverage local applications like Yara), `long` (ideal for long tasks) or `default` (ideal for simple webAPI-based analyzers).
 
 Also, you can change the name of every available analyzer based on your wishes.
 

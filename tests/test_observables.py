@@ -40,6 +40,7 @@ from api_app.script_analyzers.observable_analyzers import (
     emailrep,
     triage_search,
     inquest,
+    wigle,
 )
 from api_app.models import Job
 from .mock_utils import (
@@ -671,5 +672,16 @@ class GenericAnalyzersTest(TestCase):
             self.observable_name,
             self.observable_classification,
             {"inquest_analysis": "dfi_search"},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    @mock_connections(patch("requests.get", side_effect=mocked_requests))
+    def test_wigle(self, mock_get=None):
+        report = wigle.WiGLE(
+            "WiGLE",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {},
         ).start()
         self.assertEqual(report.get("success", False), True)

@@ -685,6 +685,75 @@
     },
     "soft_time_limit": 100
   },
+  "Qiling_Windows": {
+    "type": "file",
+    "supported_filetypes": [
+      "application/x-dosexec"
+    ],
+    "external_service": false,
+    "description": "Qiling PE emulation",
+    "soft_time_limit": 120,
+    "python_module": "qiling.Qiling",
+    "additional_config_params": {
+      "os": "windows",
+      "arch": "x86",
+      "profile": null,
+      "shellcode": false
+    },
+    "queue": "long"
+  },
+  "Qiling_Windows_Shellcode": {
+    "type": "file",
+    "supported_filetypes": [
+      "text/plain"
+    ],
+    "external_service": false,
+    "description": "Qiling windows shellcode emulation",
+    "soft_time_limit": 120,
+    "python_module": "qiling.Qiling",
+    "additional_config_params": {
+      "os": "windows",
+      "arch": "x86",
+      "profile": null,
+      "shellcode": true
+    },
+    "queue": "long"
+  },
+    "Qiling_Linux": {
+    "type": "file",
+      "supported_filetypes": [
+      "application/x-sharedlib",
+      "application/x-executable"
+    ],
+    "external_service": false,
+    "description": "Qiling ELF emulation",
+    "soft_time_limit": 120,
+    "python_module": "qiling.Qiling",
+    "additional_config_params": {
+      "os": "linux",
+      "arch": "x86",
+      "profile": null,
+      "shellcode": false
+    },
+    "queue": "long"
+  },
+    "Qiling_Linux_Shellcode": {
+    "type": "file",
+      "supported_filetypes": [
+      "text/plain"
+    ],
+    "external_service": false,
+    "description": "Qiling linux shellcode emulation",
+    "soft_time_limit": 120,
+    "python_module": "qiling.Qiling",
+    "additional_config_params": {
+      "os": "linux",
+      "arch": "x86",
+      "profile": null,
+      "shellcode": true
+    },
+    "queue": "long"
+  },
   "Quad9_DNS": {
     "type": "observable",
     "observable_supported": ["domain", "url"],
@@ -1237,6 +1306,19 @@
     "python_module": "whoisxmlapi.Whoisxmlapi",
     "additional_config_params": {
       "api_key_name": "WHOISXMLAPI_KEY"
+    },
+    "soft_time_limit": 30
+  },
+  "WiGLE": {
+    "type": "observable",
+    "observable_supported": ["generic"],
+    "external_service": true,
+    "description": "Maps and database of 802.11 wireless networks, with statistics, submitted by wardrivers, netstumblers, and net huggers.",
+    "requires_configuration": true,
+    "python_module": "wigle.WiGLE",
+    "additional_config_params": {
+      "api_key_name": "WIGLE_KEY",
+      "search_type": "WiFi Network"
     },
     "soft_time_limit": 30
   },

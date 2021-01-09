@@ -2,7 +2,6 @@
 
 This page includes details about some advanced features that Intel Owl provides which can be optionally enabled. Namely,
 
-- [Smart start](#smart-start)
 - [Optional Analyzers](#optional-analyzers)
 - [Customize analyzer execution at time of request](#customize-analyzer-execution-at-time-of-request)
 - [Elastic Search (with Kibana)](#elastic-search)
@@ -11,18 +10,6 @@ This page includes details about some advanced features that Intel Owl provides 
 - [GKE deployment](#google-kubernetes-engine-deployment)
 - [Multi Queue](#multi-queue)
 
-## Smart start
-Users that have at least Python 3.6 installed in their machine can leverage a script to help them configure and execute IntelOwl with additional or advanced configuration.
-
-We are talking about a CLI interface called [start.py](https://github.com/intelowlproject/IntelOwl/blob/master/start.py).
-```
-python3 start.py --help
-```
-
-The CLI provides the primitives to correctly build, run or stop the containers for IntelOwl.
-It is possible to attach every optional docker container that IntelOwl has:
-this means that it is possible to have IntelOwl that runs the `multi_queue` [feature](#multi-queue) with `traefik` enabled and every [optional docker analyzer](#optional-analyzers) is active.
-At last, it is possible to insert an optional docker argument, that the CLI will pass to docker.    
 
 ## Optional Analyzers
 Some analyzers which run in their own Docker containers are kept disabled by default. They are disabled by default to prevent accidentally starting too many containers and making your computer unresponsive.
@@ -67,6 +54,20 @@ table, th, td {
     <td>APK Analyzers</td>
     <td><code>APKiD_Scan_APK_DEX_JAR</code></td>
     <td>identifies many compilers, packers, obfuscators, and other weird stuff from an APK or DEX file</td>
+  </tr>
+  <tr>
+    <td>Qiling</td>
+    <td><code>Qiling_Windows</code>
+    <code>Qiling_Windows_Shellcode</code>
+    <code>Qiling_Linux</code>
+    <code>Qiling_Linux_Shellcode</code>
+    </td>
+    <td>Tool for emulate the execution of a binary file or a shellcode.
+     It requires the configuration of its rootfs, and the optional configuration of profiles.
+     The rootfs can be copied from the <a href="https://github.com/qilingframework/qiling/tree/master/examples/rootfs"> Qiling project</a>: please remember that Windows dll <b> must</b> be manually added for license reasons.
+     Qiling provides a <a href="https://github.com/qilingframework/qiling/blob/master/examples/scripts/dllscollector.bat"> DllCollector</a> to retrieve dlls from your licensed Windows. 
+     <a href="https://docs.qiling.io/en/latest/profile/"> Profiles </a> must be placed in the <code>profiles</code> subfolder
+     </td>
   </tr>
 </table>
 
@@ -117,6 +118,14 @@ List of some of the analyzers with optional configuration:
   * `report_type` (default overview): determines how detailed the final report will be. (overview/complete)
 * `Triage_Search`:
   * `analysis_type` (default search): choose whether to search for existing observable reports or upload for scanning via URL. (search/submit)
+* `Qiling`:
+  * `arch`(default x86): change system architecture for the emulation 
+  * `os`(default windows or linux): change operating system for the emulation 
+  * `profile`(default none): add a Qiling [profile](https://docs.qiling.io/en/latest/profile/)
+  * `shellcode`(default false): true if the file is a shellcode 
+* `WiGLE`:
+  * `search_type` (default `WiFi Network`). Supported are: `WiFi Network`, `CDMA Network`, `Bluetooth Network`, `GSM/LTE/WCDMA Network`
+  * Above mentioned `search_type` is just different routes mentioned in [docs](https://api.wigle.net/swagger#/v3_ALPHA). Also, the string to be passed in input field of generic analyzers have a format. Different variables are separated by semicolons(`;`) and the field-name and value are separated by equals sign(`=`). Example string for search_type `CDMA Network` is `sid=12345;nid=12345;bsid=12345`
 
 
 There are two ways to do this:
@@ -133,7 +142,7 @@ Example:
 #### from [Pyintelowl](https://github.com/intelowlproject/pyintelowl)
 While using `send_observable_analysis_request` or `send_file_analysis_request` endpoints, you can pass the parameter `runtime_configuration` with the optional values.
 Example:
-```
+```python
 runtime_configuration = {
     "Doc_Info": {
         "additional_passwords_to_check": ["passwd", "2020"]
@@ -141,7 +150,6 @@ runtime_configuration = {
 }
 pyintelowl_client.send_file_analysis_request(..., runtime_configuration=runtime_configuration)
 ```
-
 
 ## Elastic Search
 

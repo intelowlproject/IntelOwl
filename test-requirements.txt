@@ -1,3 +1,5 @@
 flake8==3.8.4
 black==20.8b1
 pre-commit==2.9.2
+django-nose==1.4.7
+coverage==5.3.1

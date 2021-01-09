@@ -5,72 +5,87 @@ Obviously we strongly suggest to read through all the page to configure IntelOwl
 
 However, if you feel lazy, you could just install and test IntelOwl with the following steps.
 
-
-```
+```bash
+# clone the IntelOwl project repository
 git clone https://github.com/intelowlproject/IntelOwl
-cd IntelOwl
+cd IntelOwl/
 
-# copy env files
-cp env_file_postgres_template env_file_postgres
+# construct environment files from templates
+cd docker/
 cp env_file_app_template env_file_app
-
-# (optional) edit env files before starting the app to configure some analyzers
-# see "Deployment preparation" paragraph below
-
-# (optional) enable all docker-based analyzers
+cp env_file_postgres_template env_file_postgres
 cp env_file_integrations_template env_file_integrations
-# in `.env` file comment line 13 and uncomment line 15
 
 # start the app
-docker-compose up -d
+cd ..
+python start.py prod up
 
 # create a super user 
 docker exec -ti intel_owl_uwsgi python3 manage.py createsuperuser
 
-# now the app is running on localhost:80
+# now the app is running on http://localhost:80
 ```
 
-Also, there is a [youtube video](https://www.youtube.com/watch?v=GuEhqQJSQAs) that may help in the installation process.
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+There is a <a href="https://www.youtube.com/watch?v=GuEhqQJSQAs" target="_blank">YouTube video</a> that may help in the installation process. (<i>ManySteps have changed since v2.0.0</i>)
+</div>
 
-## Deployment
-The project leverages docker-compose for a classic server deployment. So, you need to install these engines in your machine:
-* [docker](https://docs.docker.com/get-docker/) v.1.13.0+
-* [docker-compose](https://docs.docker.com/compose/install/) v.1.23.2+
+## Requirements
+The project leverages `docker-compose` with a custom python script so you need to have the following packages installed in your machine:
+* [docker](https://docs.docker.com/get-docker/) - v1.13.0+
+* [docker-compose](https://docs.docker.com/compose/install/) - v1.23.2+
+* [python](https://www.python.org/) - v3.5+
 
-Then, we suggest you to clone the project, configure the required environment variables and run `docker-compose up` using the docker-compose file that is embedded in the project.
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul>
+<li>The project uses public docker image that is available on <a href="https://hub.docker.com/repository/docker/intelowlproject/intelowl">Docker Hub</a></li>
+<li>IntelOwl is tested and supported to work in a Linux-based OS. It <i>may</i> also run on windows, but that is not officialy supported yet.</li>
+</ul>
+</div>
 
-That file leverages a public docker image that is available in [Docker Hub](https://hub.docker.com/repository/docker/intelowlproject/intelowl)
-
-IntelOwl is tested and supported to work in a Linux-based OS. We do not provide support for deployments in Windows.
-
-## Deployment components
-Main components of the web application:
+## Deployment Components
+IntelOwl is composed of various different services, namely:
 * Angular: Frontend ([IntelOwl-ng](https://github.com/intelowlproject/IntelOwl-ng))
 * Django: Backend
 * PostgreSQL: Database
 * Rabbit-MQ: Message Broker
 * Celery: Task Queue
-* Nginx: Web Server
+* Nginx: Reverse proxy for the Django API and web asssets.
 * Uwsgi: Application Server
-* Elastic Search (optional): Auto-sync indexing of analysis' results.
-* Kibana (optional): GUI for Elastic Search. We provide a saved configuration with dashboards and visualizations.
-* Flower (optional): Celery Management Web Interface
+* Elastic Search (*optional*): Auto-sync indexing of analysis' results.
+* Kibana (*optional*): GUI for Elastic Search. We provide a saved configuration with dashboards and visualizations.
+* Flower (*optional*): Celery Management Web Interface
 
-All these components are managed by docker-compose
+All these components are managed via docker-compose.
 
-## Deployment preparation
+## Deployment Preparation
+
+- [Environment configuration (required)](#environment-configuration-required)
+- [Database configuration (required)](#database-configuration-required)
+- [Web server configuration (optional)](#web-server-configuration-optional)
+- [Analyzers configuration (optional)](#analyzers-configuration-optional)
+
+Open a terminal and execute below commands to construct new environment files from provided templates.
+
+```bash
+cd docker/
+cp env_file_app_template env_file_app
+cp env_file_postgres_template env_file_postgres
+cp env_file_integrations_template env_file_integrations
+```
+
 ### Environment configuration (required)
-Before running the project, you must populate some environment variables in a file to provide the required configuration.
-In the project you can find a template file named `env_file_app_template`.
-You have to create a new file named `env_file_app` from that template and modify it with your own configuration.
+In the `env_file_app`, configure different variables as explained below.
 
-REQUIRED variables to run the image:
-* `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`: PostgreSQL configuration
+**REQUIRED** variables to run the image:
+* `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`: PostgreSQL configuration (The DB credentals should match the ones in the `env_file_postgres`).
 
-Strongly recommended variable to set:
+**Strongly recommended** variable to set:
 * `DJANGO_SECRET`: random 50 chars key, must be unique. If you do not provide one, Intel Owl will automatically set a new secret on every run.
 
-Optional variables needed to enable specific analyzers:
+**Optional** variables needed to enable specific analyzers:
 * `ABUSEIPDB_KEY`: AbuseIPDB API key
 * `AUTH0_KEY`: Auth0 API Key
 * `SECURITYTRAILS_KEY`: Securitytrails API Key
@@ -98,56 +113,55 @@ Optional variables needed to enable specific analyzers:
 * `IPINFO_KEY`: ipinfo API key
 * `ZOOMEYE_KEY`: ZoomEye API Key([docs](https://www.zoomeye.org/doc))
 * `TRIAGE_KEY`: tria.ge API key([docs](https://tria.ge/docs/))
+* `WIGLE_KEY`: WiGLE API Key([docs](https://api.wigle.net/))
 
-Advanced additional configuration:
-* `OLD_JOBS_RETENTION_DAYS`: Database retention, default 3 days. Change this if you want to keep your old analysis longer in the database.
+**Advanced** additional configuration:
+* `OLD_JOBS_RETENTION_DAYS`: Database retention for analysis results (default: 3 days). Change this if you want to keep your old analysis longer in the database.
 
 ### Database configuration (required)
-Before running the project, you must populate the basic configuration for PostgreSQL.
-In the project you can find a template file named `env_file_postgres_template`.
-You have to create a new file named `env_file_postgres` from that template and modify it with your own configuration.
+In the `env_file_postgres`, configure different variables as explained below.
 
-Required variables (we need to insert some of the values we have put in the previous configuration):
-* `POSTGRES_PASSWORD` (same as DB_PASSWORD)
-* `POSTGRES_USER` (same as DB_USER)
-* `POSTGRES_DB` -> default `intel_owl_db`
+**Required** variables:
+* `POSTGRES_PASSWORD` (same as `DB_PASSWORD`)
+* `POSTGRES_USER` (same as `DB_USER`)
+* `POSTGRES_DB` (default: `intel_owl_db`)
 
-If you prefer to use an external PostgreSQL instance, you should just remove the relative image from the `docker/default.yml` file and provide the configuration to connect to your controlled instance/s.
+If you prefer to use an external PostgreSQL instance, you should just remove the relative image from the `docker/default.yml` file and provide the configuration to connect to your controlled instances.
 
 ### Web server configuration (optional)
 Intel Owl provides basic configuration for:
-* Nginx (`intel_owl_nginx_http`)
-* Uwsgi (`intel_owl.ini`)
-
-You can find them in the `configuration` directory.
+* Nginx (`configuration/intel_owl_nginx_http`)
+* Uwsgi (`configuration/intel_owl.ini`)
 
 In case you enable HTTPS, remember to set the environment variable `HTTPS_ENABLED` as "enabled" to increment the security of the application.
 
 There are 3 options to execute the web server:
 
-##### HTTP only (default)
-The project would use the default deployment configuration and HTTP only.
+- **HTTP only (default)**
 
-##### HTTPS with your own certificate
-The project provides a template file to configure Nginx to serve HTTPS: `intel_owl_nginx_https`.
+    The project would use the default deployment configuration and HTTP only.
 
-You should change `ssl_certificate`, `ssl_certificate_key` and `server_name` in that file.
+- **HTTPS with your own certificate**
 
-Then you should modify the `nginx` service configuration in `docker-compose.yml`:
-* change `intel_owl_nginx_http` with `intel_owl_nginx_https`
-* in `volumes` add the option for mounting the directory that hosts your certificate and your certificate key.
+    The project provides a template file to configure Nginx to serve HTTPS: `configuration/intel_owl_nginx_https`.
 
+    You should change `ssl_certificate`, `ssl_certificate_key` and `server_name` in that file.
 
-##### HTTPS with Let's Encrypt
-We provide a specific docker-compose file that leverages [Traefik](https://docs.traefik.io/) to allow fast deployments of public-faced and HTTPS-enabled applications.
+    Then you should modify the `nginx` service configuration in `docker/default.yml`:
+    * change `intel_owl_nginx_http` with `intel_owl_nginx_https`
+    * in `volumes` add the option for mounting the directory that hosts your certificate and your certificate key.
 
-Before using it, you should configure the configuration file `docker/traefik.override.yml` by changing the email address and the hostname where the application is served. For a detailed explanation follow the official documentation: [Traefix doc](https://docs.traefik.io/user-guides/docker-compose/acme-http/).
- 
-After the configuration is done, you should either add the `traefik.override.yml` reference in the `.env` file or you can use the `start.py` [script](https://intelowl.readthedocs.io/en/stable/Advanced-Usage.html#smart-start)
+- **HTTPS with Let's Encrypt**
+
+    We provide a specific docker-compose file that leverages [Traefik](https://docs.traefik.io/) to allow fast deployments of public-faced and HTTPS-enabled applications.
+
+    Before using it, you should configure the configuration file `docker/traefik.override.yml` by changing the email address and the hostname where the application is served. For a detailed explanation follow the official documentation: [Traefix doc](https://docs.traefik.io/user-guides/docker-compose/acme-http/).
+    
+    After the configuration is done, you should either add the `traefik.override.yml` reference in the `.env` file or you can use the `start.py` [script](https://intelowl.readthedocs.io/en/stable/Advanced-Usage.html#smart-start)
 
 
 ### Analyzers configuration (optional)
-In the file `analyzers_config.json` there is the configuration for all the available analyzers you can run.
+In the file `configuration/analyzers_config.json` there is the configuration for all the available analyzers you can run.
 For a complete list of all current available analyzer please look at: [Usage](./Usage.md)
 
 You may want to change this configuration to add new analyzers or to change the configuration of some of them.
@@ -155,35 +169,23 @@ You may want to change this configuration to add new analyzers or to change the 
 The name of the analyzers can be changed at every moment based on your wishes.
 You just need to remember that it's important that you keep at least the following keys in the analyzers dictionaries to let them run correctly:
 * `type`: can be `file` or `observable`. It specifies what the analyzer should analyze
-* `python_module`: name of the task that the analyzer must launch
+* `python_module`: path to the analyzer class
 
-For a full description of the available keys, check the [Usage](./Usage.md) page
 
-> Some analyzers are kept optional and can easily be enabled. Refer to [this](https://intelowl.readthedocs.io/en/stable/Advanced-Usage.html#optional-analyzers) part of the docs.
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+You can see the full list of all available analyzers in the <a href="Usage.html#available-analyzers">Usage.html</a> or <a href="https://intelowlclient.firebaseapp.com/pages/analyzers/table">Live Demo</a>.
+</div>
 
-### Authentication options (optional)
-> Refer to [this](https://intelowl.readthedocs.io/en/stable/Advanced-Usage.html#authentication-options) part of the docs.
-
-### Rebuilding the project
-If you make some code changes and you like to rebuild the project, launch the following command from the project directory:
-
-`docker build --tag=<your_tag> .`
-
-Then, you should provide your own image in the `docker-compose.yml` file.
-
-## Deploy on Remnux
-[Remnux](https://remnux.org/) is a Linux Toolkit for Malware Analysis.
-
-IntelOwl and Remnux have the same goal: save the time of people who need to perform malware analysis or info gathering.
-
-Therefore we suggest [Remnux](https://docs.remnux.org/) users to install IntelOwl to leverage all the tools provided by both projects in a unique environment.
-
-To do that, you can follow the same steps detailed [above](https://intelowl.readthedocs.io/en/latest/Installation.html#tl-dr) for the installation of IntelOwl.
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+Some analyzers are kept optional and can easily be enabled. Refer to <a href="Advanced-Usage.html#optional-analyzers">this</a> part of the docs.
+</div>
 
 ## AWS support
 At the moment there's a basic support for some of the AWS services. More is coming in the future. 
 
-### Secrets
+#### Secrets
 If you would like to run this project on AWS, I'd suggest you to use the "Secrets Manager" to store your credentials. In this way your secrets would be better protected.
 
 This project supports this kind of configuration. Instead of adding the variables to the environment file, you should just add them with the same name on the AWS Secrets Manager and Intel Owl will fetch them transparently.
@@ -194,39 +196,83 @@ Also, you need to set the environment variable `AWS_SECRETS` to `True` to enable
 
 You can customize the AWS Region changing the environment variable `AWS_REGION`.
 
-### SQS
+#### SQS
 If you like, you could use AWS SQS instead of Rabbit-MQ to manage your queues.
 In that case, you should change the parameter `CELERY_BROKER_URL` to `sqs://` and give your instances on AWS the proper permissions to access it.
 
 Also, you need to set the environment variable `AWS_SQS` to `True` to activate the additional required settings.
 
-### ... More coming
+#### ... More coming
 
 
 ## Run
-After having properly configured the environment files as suggested previously, you can run the image.
-The project uses `docker-compose`. You have to move to the project main directory to properly run it.
 
-`docker-compose up -d`
+<div class="admonition note">
+<p class="admonition-title">Important Info</p>
+IntelOwl depends heavily on docker and docker compose so as to hide this complexity from the enduser the project
+leverages a custom script (<code>start.py</code>) to interface with <code>docker-compose</code>.
+
+You may invoke <code>$ python3 start.py --help</code> to get help and usage info.
+
+The CLI provides the primitives to correctly build, run or stop the containers for IntelOwl. Therefore,
+<ul>
+<li>It is possible to attach every optional docker container that IntelOwl has:
+<a href="Advanced-Usage.html#multi-queue"><em>multi_queue</em></a> with <em>traefik</em> enabled while every <a href="Advanced-Usage.html#optional-analyzers">optional docker analyzer</a> is active.</li> 
+<li>It is possible to insert an optional docker argument that the CLI will pass to <code>docker-compose</code></li>
+</ul>
+</div>
 
 
-## After deployment
+
+
+Now that you have completed different configurations, starting the containers is as simple as invoking:
+
+```bash
+$ python start.py prod up
+```
+
+## After Deployment
 
 ### Users creation
 You may want to run `docker exec -ti intel_owl_uwsgi python3 manage.py createsuperuser` after first run to create a superuser.
 Then you can add other users directly from the Django Admin Interface after having logged with the superuser account.
 
-> For Django Groups & Permissions settings, refer [here](https://intelowl.readthedocs.io/en/stable/Advanced-Usage.html#django-groups-permissions).
+### Django Groups & Permissions settings
 
-## Update to the most recent version
+Refer to [this](./Advanced-Usage.md#django-groups-permissions) section of the docs.
+
+## Extras
+
+### Deploy on Remnux
+[Remnux](https://remnux.org/) is a Linux Toolkit for Malware Analysis.
+
+IntelOwl and Remnux have the same goal: save the time of people who need to perform malware analysis or info gathering.
+
+Therefore we suggest [Remnux](https://docs.remnux.org/) users to install IntelOwl to leverage all the tools provided by both projects in a unique environment.
+
+To do that, you can follow the same steps detailed [above](https://intelowl.readthedocs.io/en/latest/Installation.html#tl-dr) for the installation of IntelOwl.
+
+### Update to the most recent version
 To update the project with the most recent available code you have to follow these steps:
 
 ```bash
-cd <your_intel_owl_directory> && git pull -> updates the project
-docker-compose down && docker-compose up --build -d   -> restart the IntelOwl application
+$ cd <your_intel_owl_directory> # go into the project directory
+$ git pull # pull new changes
+$ python start.py prod stop # kill the currently running IntelOwl containers 
+$ python start.py prod up --build # restart the IntelOwl application
 ```
 
-#### Updating to >v1.3.x from any prior version
+### Rebuilding the project/ Creating custom docker build
+If you make some code changes and you like to rebuild the project, follow these steps:
+
+1. `python start.py test build --tag=<your_tag> .` to build the new docker image.
+2. Add this new image tag in the `docker/test.override.yml` file.
+3. Start the containers with `python start.py test up --build`.
+
+### Updating to >=2.0.0 from a 1.x.x version
+Users upgrading from previous versions need to manually move `env_file_app`, `env_file_postgres` and `env_file_integrations` files under the new `docker` directory.
+
+### Updating to >v1.3.x from any prior version
 
 If you are updating to >[v1.3.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v1.3.0) from any prior version, you need to execute a helper script so that the old data present in the database doesn't break.
 

@@ -43,7 +43,8 @@ def tor_updater():
 
 @shared_task(soft_time_limit=20)
 def maxmind_updater():
-    maxmind.Maxmind.updater({})
+    for db in maxmind.db_names:
+        maxmind.Maxmind.updater({}, db)
 
 
 @shared_task(soft_time_limit=60)

@@ -7,6 +7,7 @@ path_mapping = {
     "default": "docker/default.yml",
     "test": "docker/test.override.yml",
     "ci": "docker/ci.override.yml",
+    "custom": "docker/custom.override.yml",
     "traefik": "docker/traefik.override.yml",
     "multi_queue": "docker/multi-queue.override.yml",
     "apk_analyzers": "integrations/apk_analyzers/apk.yml",
@@ -74,6 +75,12 @@ def start():
         action="store_true",
         help="Uses the traefik.override.yml compose file",
     )
+    parser.add_argument(
+        "--custom",
+        required=False,
+        action="store_true",
+        help="Uses custom.override.yml to leverage your customized configuration",
+    )
     args, unknown = parser.parse_known_args()
     # logic
     test_appendix = ""
@@ -92,7 +99,7 @@ def start():
     compose_files.append(path_mapping["default"])
     if args.mode in ["ci", "test"]:
         compose_files.append(path_mapping[args.mode])
-    for key in ["traefik", "multi_queue"]:
+    for key in ["traefik", "multi_queue", "custom"]:
         if args.__dict__[key]:
             compose_files.append(path_mapping[key])
     for key in docker_analyzers:
@@ -113,11 +120,11 @@ def start():
         subprocess.run(command)
     except KeyboardInterrupt:
         print(
-            "---- stopping the containers, please wait... ",
+            "---- removing the containers, please wait... ",
             "(press Ctrl+C again to force) ----",
         )
         try:
-            subprocess.run(base_command + ["stop"])
+            subprocess.run(base_command + ["down"])
         except KeyboardInterrupt:
             # just need to catch it
             pass

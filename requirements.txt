@@ -28,7 +28,7 @@ importlib-metadata==3.1.1
 jmespath==0.9.4
 jsbeautifier==1.6.2
 jsonschema==3.2.0
-maxminddb==1.5.4
+maxminddb==2.0.3
 msoffcrypto-tool==4.10.1
 numpy==1.19.4
 olefile==0.46

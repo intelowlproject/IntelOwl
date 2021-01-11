@@ -1,10 +1,9 @@
 from api_app.script_analyzers.classes import FileAnalyzer
+from quark.report import Report
 
 
 class QuarkEngine(FileAnalyzer):
     def run(self):
-        from quark.report import Report
-
         # new report object
         report = Report()
         # start analysis

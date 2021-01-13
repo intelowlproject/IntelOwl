@@ -117,6 +117,17 @@
     },
     "soft_time_limit": 30
   },
+  "CRXcavator": {
+    "type": "observable",
+    "observable_supported": [
+      "generic"
+    ],
+    "external_service": true,
+    "description": "scans a chrome extension against crxcavator.io",
+    "requires_configuration": false,
+    "python_module": "crxcavator.CRXcavator",
+    "soft_time_limit": 30
+  },
   "Cuckoo_Scan": {
     "type": "file",
     "disabled": false,

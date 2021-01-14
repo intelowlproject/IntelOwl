@@ -28,8 +28,8 @@ class MWDB_Scan(FileAnalyzer):
             file_object.flush()
             while self.max_retries:
                 self.max_retries -= 1
-                file_info = mwdb.query_file(file_object.data["id"])
                 time.sleep(10)
+                file_info = mwdb.query_file(file_object.data["id"])
                 if "karton" in file_info.metakeys.keys():
                     break
                 else:

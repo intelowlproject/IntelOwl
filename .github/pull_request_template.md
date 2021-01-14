@@ -24,8 +24,12 @@ Please delete options that are not relevant.
 - [ ] `Black` gave 0 errors.
 - [ ] `Flake` gave 0 errors.
 - [ ] I squashed the commits into a single one.
+  
+### please follow these rules
+- If your changes decrease the overall tests coverage (you will know after the Codecov CI job is done), you should add the required tests to fix the problem
+- Everytime you make changes to the PR and you think the work is done, you should explicitly ask for a review
 
 # Real World Example
 
 Please delete if the PR is for bug fixing.
-Otherwise, please provide a screenshot of the results and the resulting raw json, allowing to understand how the analyzer works.
+Otherwise, please provide the resulting raw JSON of a finished analysis (and, if you like, a screenshot of the results). This is to allow the maintainers to understand how the analyzer works.

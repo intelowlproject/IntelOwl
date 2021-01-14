@@ -41,6 +41,7 @@ from api_app.script_analyzers.observable_analyzers import (
     triage_search,
     inquest,
     wigle,
+    crxcavator,
 )
 from api_app.models import Job
 from .mock_utils import (
@@ -679,6 +680,17 @@ class GenericAnalyzersTest(TestCase):
     def test_wigle(self, mock_get=None):
         report = wigle.WiGLE(
             "WiGLE",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    @mock_connections(patch("requests.get", side_effect=mocked_requests))
+    def test_crxcavator(self, mock_get=None):
+        report = crxcavator.CRXcavator(
+            "CRXcavator",
             self.job_id,
             self.observable_name,
             self.observable_classification,

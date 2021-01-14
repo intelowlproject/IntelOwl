@@ -578,7 +578,8 @@
     "python_module": "mwdb_scan.MWDB_Scan",
     "additional_config_params": {
       "api_key_name": "MWDB_KEY",
-      "upload_file": false
+      "upload_file": false,
+      "max_retries": 20
     },
     "soft_time_limit": 400
   },

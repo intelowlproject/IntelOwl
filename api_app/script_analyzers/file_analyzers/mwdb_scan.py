@@ -26,7 +26,8 @@ class MWDB_Scan(FileAnalyzer):
         if self.upload_file:
             file_object = mwdb.upload_file(query, binary)
             file_object.flush()
-            while self.max_retries -= 1:
+            while self.max_retries:
+                self.max_retries -= 1
                 file_info = mwdb.query_file(file_object.data["id"])
                 time.sleep(10)
                 if "karton" in file_info.metakeys.keys():

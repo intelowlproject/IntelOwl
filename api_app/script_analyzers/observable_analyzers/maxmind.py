@@ -42,8 +42,8 @@ class Maxmind(classes.ObservableAnalyzer):
 
     @staticmethod
     def updater(additional_config_params, db):
+        db_location = _get_db_location(db)
         try:
-            db_location = _get_db_location(db)
             api_key_name = additional_config_params.get("api_key_name", "MAXMIND_KEY")
             api_key = secrets.get_secret(api_key_name)
             if not api_key:
@@ -111,6 +111,8 @@ class Maxmind(classes.ObservableAnalyzer):
         except Exception as e:
             traceback.print_exc()
             logger.exception(str(e))
+
+        return db_location
 
 
 def _get_db_location(db):

@@ -16,7 +16,7 @@ class CuckooAnalysis(FileAnalyzer):
         # cuckoo installation can be with or without the api_token
         # it depends on version and configuration
         self.session = requests.Session()
-        api_key_name = additional_config_params.get("api_key_name", None)
+        api_key_name = additional_config_params.get("api_key_name", "CUCKOO_API_KEY")
         if api_key_name:
             api_key = secrets.get_secret(api_key_name)
             self.session.headers["Authorization"] = f"Bearer {api_key}"

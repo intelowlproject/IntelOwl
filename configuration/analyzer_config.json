@@ -16,7 +16,7 @@
     "observable_supported": ["ip"],
     "external_service": true,
     "description": "check if an ip was reported on AbuseIPDB",
-    "requires_configuration": true,
+    "required_secrets": ["ABUSEIPDB_KEY"],
     "python_module": "abuseipdb.AbuseIPDB",
     "soft_time_limit": 30
   },
@@ -27,7 +27,7 @@
     ],
     "external_service": true,
     "description": "scan an IP against the Auth0 API",
-    "requires_configuration": true,
+    "required_secrets": ["AUTH0_KEY"],
     "python_module": "auth0.Auth0",
     "soft_time_limit": 30
   },
@@ -54,7 +54,7 @@
     "observable_supported": ["domain","url"],
     "external_service": true,
     "description": "scan an observable against the CIRCL Passive DNS DB",
-    "requires_configuration": true,
+    "required_secrets": ["CIRCL_CREDENTIALS"],
     "python_module": "circl_pdns.CIRCL_PDNS",
     "soft_time_limit": 30
   },
@@ -63,7 +63,7 @@
     "observable_supported": ["ip"],
     "external_service": true,
     "description": "scan an observable against the CIRCL Passive SSL DB",
-    "requires_configuration": true,
+    "required_secrets": ["CIRCL_CREDENTIALS"],
     "python_module": "circl_pssl.CIRCL_PSSL",
     "soft_time_limit": 30
   },
@@ -110,7 +110,7 @@
     "observable_supported": ["ip"],
     "external_service": true,
     "description": "scan an IP address against Censys View API",
-    "requires_configuration": true,
+    "required_secrets": ["CENSYS_API_ID", "CENSYS_API_SECRET"],
     "python_module": "censys.Censys",
     "additional_config_params": {
       "censys_analysis": "search"
@@ -124,7 +124,7 @@
     ],
     "external_service": true,
     "description": "scans a chrome extension against crxcavator.io",
-    "requires_configuration": false,
+    "required_secrets": [],
     "python_module": "crxcavator.CRXcavator",
     "soft_time_limit": 30
   },
@@ -132,7 +132,7 @@
     "type": "file",
     "disabled": false,
     "decription": "scan a file on a Cuckoo instance",
-    "requires_configuration": true,
+    "required_secrets": ["CUCKOO_API_KEY"],
     "python_module": "cuckoo_scan.CuckooAnalysis",
     "additional_config_params": {
       "api_key_name": "CUCKOO_API_KEY",
@@ -167,7 +167,7 @@
     ],
     "external_service": true,
     "description": "scan an observable against the Passive DNS Farsight Database (support both v1 and v2 versions)",
-    "requires_configuration": true,
+    "required_secrets": ["DNSDB_KEY"],
     "python_module": "dnsdb.DNSdb",
     "soft_time_limit": 30,
     "additional_config_params": {
@@ -185,6 +185,10 @@
     "description": "scans for potentially malicious permutations of a domain name",
     "python_module": "dnstwist.DNStwist",
     "additional_config_params": {
+      "ssdeep": false,
+      "mxcheck": false,
+      "tld": false,
+      "tld_dict": "abused_tlds.dict"
     }
   },
   "Doc_Info": {
@@ -209,7 +213,10 @@
     "decription": "static generic document analysis (Oletools)",
     "python_module": "doc_info.DocInfo",
     "soft_time_limit": 30,
-    "queue": "local"
+    "queue": "local",
+    "additional_config_params": {
+      "additional_passwords_to_check": []
+    }
   },
   "Doc_Info_Experimental": {
     "type": "file",
@@ -232,7 +239,8 @@
     "decription": "static document analysis with new features to analyze XLM macros, encrypted macros and more",
     "python_module": "doc_info.DocInfo",
     "additional_config_params": {
-      "experimental": true
+      "experimental": true,
+      "additional_passwords_to_check": []
     },
     "soft_time_limit": 30,
     "queue": "local"
@@ -243,6 +251,7 @@
     "external_service": true,
     "description": "Get email reputation from emailrep.io",
     "python_module": "emailrep.EmailRep",
+    "required_secrets": [],
     "additional_config_params": {
       "api_key_name": "EMAILREP_KEY"
     },
@@ -301,7 +310,7 @@
     "observable_supported": ["ip", "domain", "url"],
     "external_service": true,
     "description": "Scan an observable against GoogleSafeBrowsing DB",
-    "requires_configuration": true,
+    "required_secrets": ["GSF_KEY"],
     "soft_time_limit": 30,
     "python_module": "dns.dns_malicious_detectors.googlesf.GoogleSF"
   },
@@ -310,7 +319,7 @@
     "observable_supported": ["ip"],
     "external_service": true,
     "description": "scan an IP against the Greynoise API (requires API key)",
-    "requires_configuration": true,
+    "required_secrets": ["GREYNOISE_API_KEY"],
     "python_module": "greynoise.GreyNoise",
     "additional_config_params": {
       "greynoise_api_version": "v2",
@@ -325,6 +334,7 @@
     ],
     "external_service": true,
     "description": "scan an IP against the Alpha Greynoise API (no API key required)",
+    "required_secrets": ["GREYNOISE_API_KEY"],
     "python_module": "greynoise.GreyNoise",
     "additional_config_params": {
       "greynoise_api_version": "v1"
@@ -338,7 +348,7 @@
     ],
     "external_service": true,
     "description": "HoneyDB IP lookup service",
-    "requires_configuration": true,
+    "required_secrets": ["HONEYDB_API_ID", "HONEYDB_API_KEY"],
     "python_module": "honeydb.HoneyDB",
     "additional_config_params": {
       "api_key_name": "HONEYDB_API_KEY",
@@ -354,7 +364,7 @@
     ],
     "external_service": true,
     "description": "scan an IP against HoneyDB.ioâ€™s Twitter Threat Feed",
-    "requires_configuration": true,
+    "required_secrets": ["HONEYDB_API_ID", "HONEYDB_API_KEY"],
     "python_module": "honeydb.HoneyDB",
     "additional_config_params": {
       "api_key_name": "HONEYDB_API_KEY",
@@ -370,7 +380,7 @@
     ],
     "external_service": true,
     "description": "Scans a domain name and returns set of data about the organisation, the email address found and additional information about the people owning those email addresses",
-    "requires_configuration": true,
+    "required_secrets": ["HUNTER_API_KEY"],
     "python_module": "hunter.Hunter",
     "additional_config_params": {
       "api_key_name": "HUNTER_API_KEY"
@@ -382,7 +392,7 @@
     "external_service": true,
     "run_hash": true,
     "description": "check file hash on HybridAnalysis sandbox reports",
-    "requires_configuration": true,
+    "required_secrets": ["HA_KEY"],
     "python_module": "ha_get.HybridAnalysisGet",
     "soft_time_limit": 30
   },
@@ -396,7 +406,7 @@
     ],
     "external_service": true,
     "description": "search an observable in the HybridAnalysis sandbox reports",
-    "requires_configuration": true,
+    "required_secrets": ["HA_KEY"],
     "python_module": "ha_get.HybridAnalysisGet",
     "soft_time_limit": 30
   },
@@ -410,7 +420,7 @@
     ],
     "description": "Phonebook alike search against IntelX API",
     "external_service": true,
-    "requires_configuration": true,
+    "required_secrets": ["INTELX_API_KEY"],
     "python_module": "intelx.IntelX",
     "additional_config_params": {
       "api_key_name": "INTELX_API_KEY",
@@ -426,7 +436,7 @@
     ],
     "leaks_info": true,
     "description": "scan a file on Intezer",
-    "requires_configuration": true,
+    "required_secrets": ["INTEZER_KEY"],
     "python_module": "intezer_scan.IntezerScan",
     "soft_time_limit": 180,
     "queue": "long"
@@ -436,7 +446,7 @@
   "observable_supported": ["ip", "url", "domain", "hash", "generic"],
   "external_service": true,
   "description": "Indicators of Compromise Database - search IOCdb",
-  "requires_configuration": true,
+  "required_secrets": ["INQUEST_API_KEY"],
   "python_module": "inquest.InQuest",
   "additional_config_params": {
     "api_key_name": "INQUEST_API_KEY",
@@ -448,7 +458,7 @@
   "observable_supported": ["ip", "url", "domain", "hash", "generic"],
   "external_service": true,
   "description": "Reputation Database - search REPdb",
-  "requires_configuration": true,
+  "required_secrets": ["INQUEST_API_KEY"],
   "python_module": "inquest.InQuest",
   "additional_config_params": {
     "api_key_name": "INQUEST_API_KEY",
@@ -460,7 +470,7 @@
   "observable_supported": ["ip", "url", "domain", "hash", "generic"],
   "external_service": true,
   "description": "Deep File Inspection - search dfi",
-  "requires_configuration": true,
+  "required_secrets": ["INQUEST_API_KEY"],
   "python_module": "inquest.InQuest",
   "additional_config_params": {
     "api_key_name": "INQUEST_API_KEY",
@@ -472,7 +482,7 @@
     "observable_supported": ["ip"],
     "external_service": true,
     "description": "Brief Information regarding given IP",
-    "requires_configuration": true,
+    "required_secrets": ["IPINFO_KEY"],
     "python_module": "ipinfo.IPInfo",
     "additional_config_params": {
       "api_key_name": "IPINFO_KEY"
@@ -496,7 +506,7 @@
     ],
     "external_service": true,
     "description": "scan an observable on a custom MISP instance",
-    "requires_configuration": true,
+    "required_secrets": ["MISP_URL", "MISP_KEY"],
     "python_module": "misp.MISP",
     "additional_config_params": {
       "api_key_name": "MISP_KEY",
@@ -514,7 +524,7 @@
     ],
     "external_service": true,
     "description": "scan an observable on the FIRST MISP instance",
-    "requires_configuration": true,
+    "required_secrets": ["FIRST_MISP_URL", "FIRST_MISP_API"],
     "python_module": "misp.MISP",
     "additional_config_params": {
       "api_key_name": "FIRST_MISP_API",
@@ -525,8 +535,9 @@
   "MISPFIRST_Check_Hash": {
     "type": "file",
     "run_hash": true,
+    "external_service": true,
     "description": "check a file hash on the FIRST MISP instance",
-    "requires_configuration": true,
+    "required_secrets": ["FIRST_MISP_URL", "FIRST_MISP_API"],
     "python_module": "misp.MISP",
     "additional_config_params": {
       "api_key_name": "FIRST_MISP_API",
@@ -537,8 +548,9 @@
   "MISP_Check_Hash": {
     "type": "file",
     "run_hash": true,
+    "external_service": true,
     "description": "check a file hash on a MISP instance",
-    "requires_configuration": true,
+    "required_secrets": ["MISP_URL", "MISP_KEY"],
     "python_module": "misp.MISP",
     "soft_time_limit": 30
   },
@@ -575,7 +587,9 @@
   "MaxMindGeoIP": {
     "type": "observable",
     "observable_supported": ["ip"],
+    "external_service": true,
     "description": "extract GeoIP info for an IP",
+    "required_secrets": ["MAXMIND_KEY"],
     "python_module": "maxmind.Maxmind",
     "soft_time_limit": 30
   },
@@ -588,7 +602,7 @@
     ],
     "external_service": true,
     "description": "search an observable in the ONYPHE",
-    "requires_configuration": true,
+    "required_secrets": ["ONYPHE_KEY"],
     "python_module": "onyphe.Onyphe",
     "additional_config_params": {
       "api_key_name": "ONYPHE_KEY"
@@ -605,7 +619,7 @@
     ],
     "external_service": true,
     "description": "scan an observable on Alienvault OTX",
-    "requires_configuration": true,
+    "required_secrets": ["OTX_KEY"],
     "python_module": "otx.OTX",
     "additional_config_params": {
       "verbose": false
@@ -617,7 +631,7 @@
     "external_service": true,
     "run_hash": true,
     "decsription": "check file hash on OTX Alienvault",
-    "requires_configuration": true,
+    "required_secrets": ["OTX_KEY"],
     "python_module": "otx.OTX",
     "additional_config_params": {
       "verbose": false
@@ -660,6 +674,7 @@
     "external_service": true,
     "soft_time_limit": 100,
     "description": "Check if url is verified in Phishtank API",
+    "required_secrets": ["PHISHTANK_API_KEY"],
     "python_module": "phishtank.Phishtank",
     "additional_config_params": {
       "api_key_name": "PHISHTANK_API_KEY"
@@ -675,6 +690,7 @@
     ],
     "external_service": true,
     "description": "Scan indicators and retrieve results from Pulsedive's API",
+    "required_secrets": ["PULSEDIVE_API_KEY"],
     "python_module": "pulsedive.Pulsedive",
     "additional_config_params": {
       "api_key_name": "PULSEDIVE_API_KEY",
@@ -716,7 +732,7 @@
     },
     "queue": "long"
   },
-    "Qiling_Linux": {
+  "Qiling_Linux": {
     "type": "file",
       "supported_filetypes": [
       "application/x-sharedlib",
@@ -734,7 +750,7 @@
     },
     "queue": "long"
   },
-    "Qiling_Linux_Shellcode": {
+  "Qiling_Linux_Shellcode": {
     "type": "file",
       "supported_filetypes": [
       "application/octet-stream"
@@ -840,7 +856,7 @@
     ],
     "external_service": true,
     "description": "scan a domain against securitytrails API for general details",
-    "requires_configuration": true,
+    "required_secrets": ["SECURITYTRAILS_KEY"],
     "python_module": "securitytrails.SecurityTrails",
     "additional_config_params": {
       "securitytrails_analysis": "current",
@@ -855,7 +871,7 @@
     ],
     "external_service": true,
     "description": "scan a domain against securitytrails API for historical DNS",
-    "requires_configuration": true,
+    "required_secrets": ["SECURITYTRAILS_KEY"],
     "python_module": "securitytrails.SecurityTrails",
     "additional_config_params": {
       "securitytrails_analysis": "history",
@@ -870,7 +886,7 @@
     ],
     "external_service": true,
     "description": "scan a domain against securitytrails API for historical WHOIS",
-    "requires_configuration": true,
+    "required_secrets": ["SECURITYTRAILS_KEY"],
     "python_module": "securitytrails.SecurityTrails",
     "additional_config_params": {
       "securitytrails_analysis": "history",
@@ -885,7 +901,7 @@
     ],
     "external_service": true,
     "description": "scan an IP against securitytrails API for neighbour IPs",
-    "requires_configuration": true,
+    "required_secrets": ["SECURITYTRAILS_KEY"],
     "python_module": "securitytrails.SecurityTrails",
     "soft_time_limit": 30
   },
@@ -896,7 +912,7 @@
     ],
     "external_service": true,
     "description": "scan a domain against securitytrails API for subdomains",
-    "requires_configuration": true,
+    "required_secrets": ["SECURITYTRAILS_KEY"],
     "python_module": "securitytrails.SecurityTrails",
     "additional_config_params": {
       "securitytrails_analysis": "current",
@@ -911,7 +927,7 @@
     ],
     "external_service": true,
     "description": "scan a domain against securitytrails API for tags",
-    "requires_configuration": true,
+    "required_secrets": ["SECURITYTRAILS_KEY"],
     "python_module": "securitytrails.SecurityTrails",
     "additional_config_params": {
       "securitytrails_analysis": "current",
@@ -926,7 +942,7 @@
     ],
     "external_service": true,
     "description": "scan an IP against Shodan Honeyscore API",
-    "requires_configuration": true,
+    "required_secrets": [],
     "python_module": "shodan.Shodan",
     "additional_config_params": {
       "shodan_analysis": "honeyscore"
@@ -940,7 +956,7 @@
     ],
     "external_service": true,
     "description": "scan an IP against Shodan Search API",
-    "requires_configuration": true,
+    "required_secrets": ["SHODAN_KEY"],
     "python_module": "shodan.Shodan",
     "additional_config_params": {
       "shodan_analysis": "search"
@@ -1056,7 +1072,6 @@
     ],
     "description": "Perform hybrid dynamic/static analysis on a saved HTML page",
     "python_module": "thug_file.ThugFile",
-    "requires_configuration": true,
     "additional_config_params": {
       "dom_events": "click,mouseover",
       "use_proxy": false,
@@ -1076,7 +1091,6 @@
     ],
     "description": "Perform hybrid dynamic/static analysis on a URL",
     "python_module": "thug_url.ThugUrl",
-    "requires_configuration": true,
     "additional_config_params": {
       "dom_events": "click,mouseover",
       "use_proxy": false,
@@ -1117,7 +1131,7 @@
     ],
     "description": "analyze a url sample using triage sandbox environment",
     "python_module": "triage_search.TriageSearch",
-    "requires_configuration": true,
+    "required_secrets": ["TRIAGE_KEY"],
     "external_service": true,
     "additional_config_params": {
       "api_key_name": "TRIAGE_KEY",
@@ -1131,7 +1145,7 @@
     "type": "file",
     "description": "leverage Triage sandbox environment to scan various files",
     "python_module": "triage_scan.TriageScanFile",
-    "requires_configuration": true,
+    "required_secrets": ["TRIAGE_KEY"],
     "external_service": true,
     "additional_config_params": {
       "api_key_name": "TRIAGE_KEY",
@@ -1147,6 +1161,7 @@
       "application/x-dosexec"
     ],
     "description": "UnpacMe unpacker",
+    "required_secrets": ["UNPAC_ME_API_KEY"],
     "external_service": true,
     "leaks_info": true,
     "python_module": "unpac_me.UnpacMe",
@@ -1176,7 +1191,7 @@
     ],
     "external_service": true,
     "description": "Submit & retrieve result of a URL against URLScan API",
-    "requires_configuration": true,
+    "required_secrets": ["URLSCAN_API_KEY"],
     "python_module": "urlscan.UrlScan",
     "additional_config_params": {
       "api_key_name": "URLSCAN_API_KEY",
@@ -1195,7 +1210,6 @@
     ],
     "external_service": true,
     "description": "Search an IP/domain/url/hash against URLScan API",
-    "requires_configuration": true,
     "python_module": "urlscan.UrlScan",
     "additional_config_params": {
       "api_key_name": "URLSCAN_API_KEY",
@@ -1209,7 +1223,7 @@
     "disabled": true,
     "run_hash": true,
     "description": "check file hash on VirusTotal using old API endpoints",
-    "requires_configuration": true,
+    "required_secrets": ["VT_KEY"],
     "python_module": "vt2_get.VirusTotalv2",
     "additional_config_params": {
       "api_key_name": "VT_KEY"
@@ -1227,7 +1241,7 @@
     "external_service": true,
     "disabled": true,
     "description": "search an observable in the VirusTotal DB using the old API endpoints",
-    "requires_configuration": true,
+    "required_secrets": ["VT_KEY"],
     "python_module": "vt2_get.VirusTotalv2",
     "additional_config_params": {
       "api_key_name": "VT_KEY"
@@ -1240,7 +1254,7 @@
     "disabled": true,
     "leaks_info": true,
     "description": "scan a file on VirusTotal using old API endpoints",
-    "requires_configuration": true,
+    "required_secrets": ["VT_KEY"],
     "python_module": "vt2_scan.VirusTotalv2ScanFile",
     "additional_config_params": {
       "api_key_name": "VT_KEY"
@@ -1253,7 +1267,7 @@
     "disabled": true,
     "run_hash": true,
     "description": "check file hash on VirusTotal",
-    "requires_configuration": true,
+    "required_secrets": ["VT_KEY"],
     "python_module": "vt3_get.VirusTotalv3",
     "additional_config_params": {
       "api_key_name": "VT_KEY"
@@ -1266,7 +1280,7 @@
     "leaks_info": true,
     "run_hash": true,
     "description": "check file hash on VirusTotal. If not already available, send the sample and perform a new scan",
-    "requires_configuration": true,
+    "required_secrets": ["VT_KEY"],
     "python_module": "vt3_get.VirusTotalv3",
     "additional_config_params": {
       "api_key_name": "VT_KEY",
@@ -1284,7 +1298,7 @@
     ],
     "external_service": true,
     "description": "search an observable in the VirusTotal DB",
-    "requires_configuration": true,
+    "required_secrets": ["VT_KEY"],
     "python_module": "vt3_get.VirusTotalv3",
     "additional_config_params": {
       "api_key_name": "VT_KEY"
@@ -1299,7 +1313,7 @@
     ],
     "external_service": true,
     "description": "the WHOIS record data, of a domain name, an IP address, or an email address",
-    "requires_configuration": true,
+    "required_secrets": ["WHOISXMLAPI_KEY"],
     "python_module": "whoisxmlapi.Whoisxmlapi",
     "additional_config_params": {
       "api_key_name": "WHOISXMLAPI_KEY"
@@ -1311,7 +1325,7 @@
     "observable_supported": ["generic"],
     "external_service": true,
     "description": "Maps and database of 802.11 wireless networks, with statistics, submitted by wardrivers, netstumblers, and net huggers.",
-    "requires_configuration": true,
+    "required_secrets": ["WIGLE_KEY"],
     "python_module": "wigle.WiGLE",
     "additional_config_params": {
       "api_key_name": "WIGLE_KEY",
@@ -1477,7 +1491,7 @@
   "ZoomEye": {
     "type": "observable",
     "observable_supported": ["ip", "domain"],
-    "requires_configuration": true,
+    "required_secrets": ["ZOOMEYE_KEY"],
     "external_service": true,
     "description": "Cyberspace Search Engine recording information of devices, websites, services and components etc..",
     "python_module": "zoomeye.ZoomEye",

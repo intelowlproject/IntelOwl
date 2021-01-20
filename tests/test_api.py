@@ -202,15 +202,18 @@ class ApiJobTests(TestCase):
 class ApiTagTests(TestCase):
     def setUp(self):
         self.client = APIClient()
-        self.user = User.objects.create_superuser(
+        self.user = User.objects.create_user(
             username="test", email="test@intelowl.com", password="test"
         )
-        self.client.force_authenticate(user=self.user)
+        self.admin_user = User.objects.create_superuser(
+            username="test_admin", email="testadmin@intelowl.com", password="testadmin"
+        )
         self.tag = models.Tag.objects.create(label="Test", color="#FF5733")
         self.tag_id = os.environ.get("TEST_TAG_ID", "1")
 
     def test_create_new_tag(self):
-        self.assertEqual(self.user.has_perm("api_app.add_tag", self.tag), True)
+        self.client.force_authenticate(user=self.admin_user)
+        self.assertEqual(self.admin_user.has_perm("api_app.add_tag", self.tag), True)
         self.assertEqual(models.Tag.objects.count(), 1)
         data = {"label": "testLabel", "color": "#91EE28"}
         response = self.client.post("/api/tags", data)
@@ -218,22 +221,46 @@ class ApiTagTests(TestCase):
         self.assertEqual(models.Tag.objects.count(), 2)
 
     def test_list_all_tags(self):
+        self.client.force_authenticate(user=self.admin_user)
         response = self.client.get("/api/tags")
         self.assertEqual(response.status_code, 200)
 
     def test_get_tag_by_id(self):
-        self.assertEqual(self.user.has_perm("api_app.view_tag", self.tag), True)
+        self.client.force_authenticate(user=self.user)
+        self.assertEqual(self.user.has_perm("api_app.view_tag", self.tag), False)
+        response = self.client.get(f"/api/tags/{self.tag_id}")
+        self.assertEqual(response.status_code, 404)
+
+    def test_get_tag_by_id_admin(self):
+        self.client.force_authenticate(user=self.admin_user)
+        self.assertEqual(self.admin_user.has_perm("api_app.view_tag", self.tag), True)
         response = self.client.get(f"/api/tags/{self.tag_id}")
         self.assertEqual(response.status_code, 200)
 
     def test_update_tag_by_id(self):
-        self.assertEqual(self.user.has_perm("api_app.change_tag", self.tag), True)
+        self.client.force_authenticate(user=self.user)
+        self.assertEqual(self.user.has_perm("api_app.change_tag", self.tag), False)
+        new_data = {"label": "newTestLabel", "color": "#765A54"}
+        response = self.client.put(f"/api/tags/{self.tag_id}", new_data)
+        self.assertEqual(response.status_code, 404)
+
+    def test_update_tag_by_id_admin(self):
+        self.client.force_authenticate(user=self.admin_user)
+        self.assertEqual(self.admin_user.has_perm("api_app.change_tag", self.tag), True)
         new_data = {"label": "newTestLabel", "color": "#765A54"}
         response = self.client.put(f"/api/tags/{self.tag_id}", new_data)
         self.assertEqual(response.status_code, 200)
 
     def test_delete_tag_by_id(self):
-        self.assertEqual(self.user.has_perm("api_app.delete_tag", self.tag), True)
+        self.client.force_authenticate(user=self.user)
+        self.assertEqual(self.user.has_perm("api_app.delete_tag", self.tag), False)
+        response = self.client.delete(f"/api/tags/{self.tag_id}")
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(models.Tag.objects.count(), 1)
+
+    def test_delete_tag_by_id_admin(self):
+        self.client.force_authenticate(user=self.admin_user)
+        self.assertEqual(self.admin_user.has_perm("api_app.delete_tag", self.tag), True)
         self.assertEqual(models.Tag.objects.count(), 1)
         response = self.client.delete(f"/api/tags/{self.tag_id}")
         self.assertEqual(response.status_code, 200)

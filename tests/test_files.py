@@ -73,9 +73,13 @@ def mocked_vt_post(*args, **kwargs):
 
 
 def mocked_mwdb_response(*args, **kwargs):
-    Response = MagicMock()
-    Response.query_file.data = {"id": "id_test"}
-    Response.query_file.metakeys = {"keys": "keys_test"}
+    attrs = {"data": {"id": "id_test"}, "metakeys": {"karton": "test_analysis"}}
+    fileInfo = MagicMock()
+    fileInfo.configure_mock(**attrs)
+    QueryResponse = MagicMock()
+    attrs = {"query_file.return_value": fileInfo}
+    QueryResponse.configure_mock(**attrs)
+    Response = MagicMock(return_value=QueryResponse)
     return Response
 
 
@@ -493,7 +497,25 @@ class FileAnalyzersEXETests(TestCase):
 
     @patch("mwdblib.MWDB", side_effect=mocked_mwdb_response)
     def test_mwdb_scan(self, mock_get=None, mock_post=None):
-        additional_params = {"api_key_name": "test_api", "upload_file": 0}
+        additional_params = {"api_key_name": "test_api", "upload_file": False}
+        report = mwdb_scan.MWDB_Scan(
+            "MWDB_Scan",
+            self.job_id,
+            self.filepath,
+            self.filename,
+            self.md5,
+            additional_params,
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    @patch("mwdblib.MWDB", side_effect=mocked_mwdb_response)
+    @patch.object(mwdb_scan.MWDB_Scan, "file_analysis", return_value=True)
+    def test_mwdb_scan_uploadfile(self, mock_get=None, mock_post=None):
+        additional_params = {
+            "api_key_name": "test_api",
+            "upload_file": True,
+            "max_tries": 20,
+        }
         report = mwdb_scan.MWDB_Scan(
             "MWDB_Scan",
             self.job_id,

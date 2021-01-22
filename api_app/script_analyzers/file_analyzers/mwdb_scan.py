@@ -1,17 +1,27 @@
 import hashlib
 import time
 import mwdblib
+import logging
 
 from api_app.exceptions import AnalyzerRunException
 from api_app.helpers import get_binary
 from api_app.script_analyzers.classes import FileAnalyzer
+
+logger = logging.getLogger(__name__)
 
 
 class MWDB_Scan(FileAnalyzer):
     def set_config(self, additional_config_params):
         self.api_key_name = additional_config_params.get("api_key_name", None)
         self.upload_file = additional_config_params.get("upload_file", False)
-        self.max_retries = additional_config_params.get("max_retries", 20)
+        self.max_tries = additional_config_params.get("max_tries", 50)
+        self.poll_distance = 5
+
+    def file_analysis(self, file_info):
+        if "karton" in file_info.metakeys.keys():
+            return True
+        else:
+            return False
 
     def run(self):
         if not self.api_key_name:
@@ -24,16 +34,19 @@ class MWDB_Scan(FileAnalyzer):
         query = str(hashlib.sha256(binary).hexdigest())
 
         if self.upload_file:
+            logger.info(f"mwdb_scan uploading sample: {self.md5}")
             file_object = mwdb.upload_file(query, binary)
             file_object.flush()
-            while self.max_retries:
-                self.max_retries -= 1
-                time.sleep(10)
+            for _try in range(self.max_tries):
+                logger.info(
+                    f"mwdb_scan sample: {self.md5} polling for result try #{_try + 1}"
+                )
+                time.sleep(self.poll_distance)
                 file_info = mwdb.query_file(file_object.data["id"])
-                if "karton" in file_info.metakeys.keys():
+                if self.file_analysis(file_info):
                     break
-                else:
-                    continue
+            if not self.file_analysis(file_info):
+                raise AnalyzerRunException("max retry attempts exceeded")
         else:
             try:
                 file_info = mwdb.query_file(query)

@@ -579,7 +579,7 @@
     "additional_config_params": {
       "api_key_name": "MWDB_KEY",
       "upload_file": false,
-      "max_retries": 20
+      "max_tries": 50
     },
     "soft_time_limit": 400
   },

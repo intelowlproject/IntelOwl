@@ -18,10 +18,7 @@ class MWDB_Scan(FileAnalyzer):
         self.poll_distance = 5
 
     def file_analysis(self, file_info):
-        if "karton" in file_info.metakeys.keys():
-            return True
-        else:
-            return False
+        return "karton" in file_info.metakeys.keys()
 
     def run(self):
         if not self.api_key_name:

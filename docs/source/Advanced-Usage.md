@@ -71,11 +71,16 @@ table, th, td {
   </tr>
 </table>
 
-In the project, you can find template file `.env_file_integrations_template`. You have to create new file named `env_file_integrations` from this.
 
-Docker services defined in the compose files added in `COMPOSE_FILE` variable present in the `.env` file are ran on `docker-compose up`. So, modify it to include only the analyzers you wish to use.
-Such compose files are available under `integrations/`.
+To enable all the optional analyzers you can add the option `--all_analyzers` when starting the project. Example:
+```
+python3 start.py prod --all_analyzers up
+```
 
+Otherwise you can enable just one of the cited integration by using the related option. Example:
+```
+python3 start.py prod --qiling up
+```
 
 ## Customize analyzer execution at time of request
 Some analyzers provide the chance to customize the performed analysis based on options that are different for each analyzer. This is configurable via the `CUSTOM ANALYZERS CONFIGURATION` button on the scan form or you can pass these values as a dictionary when using the pyintelowl client.
@@ -223,13 +228,18 @@ Refer to the following blog post for an example on how to deploy IntelOwl on Goo
 
 ## Multi Queue
 IntelOwl provides an additional `docker-compose` file,  [multi-queue.override.yaml](https://github.com/intelowlproject/IntelOwl/blob/master/docker/multi-queue.override.yml) file, allowing IntelOwl users to better scale with the performance of their own architecture.
-The command to correctly use the file is the following
-`docker-compose -f docker/default.yaml -f docker/multi-queue.override.yaml`, leveraging the [override](https://docs.docker.com/compose/extends/) feature of docker.
 
+If you want to leverage it, you should add the option `--multi-queue` when starting the project. Example:
+```
+python3 start.py prod --multi-queue up
+```
 
-It is possible to define new celery workers, each requires the addition of a new container in the docker-compose file, as shown in the `multi-queue.override.yaml`. 
+This functionality is not enabled by default because this deployment would start 2 more containers so the resource consumption is higher. We suggest to use this option only when leveraging IntelOwl massively.
 
-IntelOwl moreover requires that the name of the workers are provided in the `docker-compose` file. This is done through the environment variable `CELERY_QUEUES` inside the `uwsgi` container. Each queue must be separated using the character `,`, as shown in the [example](https://github.com/intelowlproject/IntelOwl/blob/master/docker-compose-multi-queue.yml#L29).
+#### Queue Customization 
+It is possible to define new celery workers: each requires the addition of a new container in the docker-compose file, as shown in the `multi-queue.override.yaml`. 
+
+Moreover IntelOwl requires that the name of the workers are provided in the `docker-compose` file. This is done through the environment variable `CELERY_QUEUES` inside the `uwsgi` container. Each queue must be separated using the character `,`, as shown in the [example](https://github.com/intelowlproject/IntelOwl/blob/master/docker/multi-queue.override.yml#L6).
 
 Now it is possible to specify for each configuration inside [analyzer_config](https://github.com/intelowlproject/IntelOwl/blob/master/configuration/analyzer_config.json) the desired queue. If no queue are provided, the `default` queue will be selected.
  

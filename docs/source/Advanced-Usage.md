@@ -73,12 +73,12 @@ table, th, td {
 
 
 To enable all the optional analyzers you can add the option `--all_analyzers` when starting the project. Example:
-```
+```bash
 python3 start.py prod --all_analyzers up
 ```
 
 Otherwise you can enable just one of the cited integration by using the related option. Example:
-```
+```bash
 python3 start.py prod --qiling up
 ```
 
@@ -136,19 +136,18 @@ List of some of the analyzers with optional configuration:
   * Every Chrome-Extension has a unique alpha=numerc identifier. That's the only Input necessary. Eg: `Norton Safe Search Enhanced`'s identifier is `eoigllimhcllmhedfbmahegmoakcdakd`.
  
 
-
 There are two ways to do this:
 
-#### from the GUI
+##### from the GUI
 You can click on "**Custom analyzer configuration**" button and add the runtime configuration in the form of a dictionary.
 Example:
-```
+```javascript
 "VirusTotal_v3_Get_File": {
     "force_active_scan_if_old": true
 }
 ```
 
-#### from [Pyintelowl](https://github.com/intelowlproject/pyintelowl)
+##### from [Pyintelowl](https://github.com/intelowlproject/pyintelowl)
 While using `send_observable_analysis_request` or `send_file_analysis_request` endpoints, you can pass the parameter `runtime_configuration` with the optional values.
 Example:
 ```python
@@ -231,17 +230,17 @@ Refer to the following blog post for an example on how to deploy IntelOwl on Goo
 [Deploying Intel-Owl on GKE](https://mostwanted002.cf/post/intel-owl-gke/) by [Mayank Malik](https://twitter.com/_mostwanted002_).
 
 ## Multi Queue
-IntelOwl provides an additional `docker-compose` file,  [multi-queue.override.yaml](https://github.com/intelowlproject/IntelOwl/blob/master/docker/multi-queue.override.yml) file, allowing IntelOwl users to better scale with the performance of their own architecture.
+IntelOwl provides an additional [multi-queue.override.yml](https://github.com/intelowlproject/IntelOwl/blob/master/docker/multi-queue.override.yml) compose file allowing IntelOwl users to better scale with the performance of their own architecture.
 
 If you want to leverage it, you should add the option `--multi-queue` when starting the project. Example:
-```
+```bash
 python3 start.py prod --multi-queue up
 ```
 
 This functionality is not enabled by default because this deployment would start 2 more containers so the resource consumption is higher. We suggest to use this option only when leveraging IntelOwl massively.
 
 #### Queue Customization 
-It is possible to define new celery workers: each requires the addition of a new container in the docker-compose file, as shown in the `multi-queue.override.yaml`. 
+It is possible to define new celery workers: each requires the addition of a new container in the docker-compose file, as shown in the `multi-queue.override.yml`. 
 
 Moreover IntelOwl requires that the name of the workers are provided in the `docker-compose` file. This is done through the environment variable `CELERY_QUEUES` inside the `uwsgi` container. Each queue must be separated using the character `,`, as shown in the [example](https://github.com/intelowlproject/IntelOwl/blob/master/docker/multi-queue.override.yml#L6).
 

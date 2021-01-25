@@ -110,4 +110,4 @@ Feel free to contact the main developers at any time:
 
 We also have:
 - a dedicated twitter account for the project: [@intel_owl](https://twitter.com/intel_owl).
-- [official site](intelowlproject.github.io) hosted in Github Pages
+- [official site](https://intelowlproject.github.io) hosted in Github Pages

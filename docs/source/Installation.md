@@ -157,7 +157,7 @@ There are 3 options to execute the web server:
 
     Before using it, you should configure the configuration file `docker/traefik.override.yml` by changing the email address and the hostname where the application is served. For a detailed explanation follow the official documentation: [Traefix doc](https://docs.traefik.io/user-guides/docker-compose/acme-http/).
     
-    After the configuration is done, you can add the option `--traefik` while executing the `start.py` [script](https://intelowl.readthedocs.io/en/stable/Advanced-Usage.html#smart-start).
+    After the configuration is done, you can add the option `--traefik` while executing the [`start.py`](#run)
 
 
 ### Analyzers configuration (optional)

@@ -71,11 +71,16 @@ table, th, td {
   </tr>
 </table>
 
-In the project, you can find template file `.env_file_integrations_template`. You have to create new file named `env_file_integrations` from this.
 
-Docker services defined in the compose files added in `COMPOSE_FILE` variable present in the `.env` file are ran on `docker-compose up`. So, modify it to include only the analyzers you wish to use.
-Such compose files are available under `integrations/`.
+To enable all the optional analyzers you can add the option `--all_analyzers` when starting the project. Example:
+```bash
+python3 start.py prod --all_analyzers up
+```
 
+Otherwise you can enable just one of the cited integration by using the related option. Example:
+```bash
+python3 start.py prod --qiling up
+```
 
 ## Customize analyzer execution at time of request
 Some analyzers provide the chance to customize the performed analysis based on options that are different for each analyzer. This is configurable via the `CUSTOM ANALYZERS CONFIGURATION` button on the scan form or you can pass these values as a dictionary when using the pyintelowl client.
@@ -110,7 +115,10 @@ List of some of the analyzers with optional configuration:
   * `query`: Follow according to [docs](https://www.zoomeye.org/doc#host-search), but omit `ip`, `hostname`. Eg: `"query": "city:biejing port:21"`
   * `facets`(default: Empty string): A comma-separated list of properties to get summary information on query. Eg: `"facets:app,os"`
   * `page`(default 1): The page number to paging
-  * `history`(default True):  	To query the history data.
+  * `history`(default True): To query the history data. 
+* `MWDB_Scan`:
+    * `upload_file` (default False): Uploads the file to repository.
+    * `max_tries` (default 50): Number of retries to perform for polling analysis results.
 * `Triage_Scan` and `Triage_Search`:
   * `endpoint` (default public): choose whether to query on the public or the private endpoint of triage.
   * `report_type` (default overview): determines how detailed the final report will be. (overview/complete)
@@ -124,19 +132,22 @@ List of some of the analyzers with optional configuration:
 * `WiGLE`:
   * `search_type` (default `WiFi Network`). Supported are: `WiFi Network`, `CDMA Network`, `Bluetooth Network`, `GSM/LTE/WCDMA Network`
   * Above mentioned `search_type` is just different routes mentioned in [docs](https://api.wigle.net/swagger#/v3_ALPHA). Also, the string to be passed in input field of generic analyzers have a format. Different variables are separated by semicolons(`;`) and the field-name and value are separated by equals sign(`=`). Example string for search_type `CDMA Network` is `sid=12345;nid=12345;bsid=12345`
+* `CRXcavator`:
+  * Every Chrome-Extension has a unique alpha=numerc identifier. That's the only Input necessary. Eg: `Norton Safe Search Enhanced`'s identifier is `eoigllimhcllmhedfbmahegmoakcdakd`.
+ 
 
 There are two ways to do this:
 
-#### from the GUI
+##### from the GUI
 You can click on "**Custom analyzer configuration**" button and add the runtime configuration in the form of a dictionary.
 Example:
-```
+```javascript
 "VirusTotal_v3_Get_File": {
     "force_active_scan_if_old": true
 }
 ```
 
-#### from [Pyintelowl](https://github.com/intelowlproject/pyintelowl)
+##### from [Pyintelowl](https://github.com/intelowlproject/pyintelowl)
 While using `send_observable_analysis_request` or `send_file_analysis_request` endpoints, you can pass the parameter `runtime_configuration` with the optional values.
 Example:
 ```python
@@ -219,14 +230,19 @@ Refer to the following blog post for an example on how to deploy IntelOwl on Goo
 [Deploying Intel-Owl on GKE](https://mostwanted002.cf/post/intel-owl-gke/) by [Mayank Malik](https://twitter.com/_mostwanted002_).
 
 ## Multi Queue
-IntelOwl provides an additional `docker-compose` file,  [multi-queue.override.yaml](https://github.com/intelowlproject/IntelOwl/blob/master/docker/multi-queue.override.yml) file, allowing IntelOwl users to better scale with the performance of their own architecture.
-The command to correctly use the file is the following
-`docker-compose -f docker/default.yaml -f docker/multi-queue.override.yaml`, leveraging the [override](https://docs.docker.com/compose/extends/) feature of docker.
+IntelOwl provides an additional [multi-queue.override.yml](https://github.com/intelowlproject/IntelOwl/blob/master/docker/multi-queue.override.yml) compose file allowing IntelOwl users to better scale with the performance of their own architecture.
 
+If you want to leverage it, you should add the option `--multi-queue` when starting the project. Example:
+```bash
+python3 start.py prod --multi-queue up
+```
 
-It is possible to define new celery workers, each requires the addition of a new container in the docker-compose file, as shown in the `multi-queue.override.yaml`. 
+This functionality is not enabled by default because this deployment would start 2 more containers so the resource consumption is higher. We suggest to use this option only when leveraging IntelOwl massively.
 
-IntelOwl moreover requires that the name of the workers are provided in the `docker-compose` file. This is done through the environment variable `CELERY_QUEUES` inside the `uwsgi` container. Each queue must be separated using the character `,`, as shown in the [example](https://github.com/intelowlproject/IntelOwl/blob/master/docker-compose-multi-queue.yml#L29).
+#### Queue Customization 
+It is possible to define new celery workers: each requires the addition of a new container in the docker-compose file, as shown in the `multi-queue.override.yml`. 
+
+Moreover IntelOwl requires that the name of the workers are provided in the `docker-compose` file. This is done through the environment variable `CELERY_QUEUES` inside the `uwsgi` container. Each queue must be separated using the character `,`, as shown in the [example](https://github.com/intelowlproject/IntelOwl/blob/master/docker/multi-queue.override.yml#L6).
 
 Now it is possible to specify for each configuration inside [analyzer_config](https://github.com/intelowlproject/IntelOwl/blob/master/configuration/analyzer_config.json) the desired queue. If no queue are provided, the `default` queue will be selected.
  

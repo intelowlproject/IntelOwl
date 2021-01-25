@@ -8,7 +8,6 @@
       "application/x-dex"
     ],
     "python_module": "apkid.APKiD",
-    "disabled": true,
     "description": "APKiD identifies many compilers, packers, obfuscators, and other weird stuff from an APK or DEX file.",
     "soft_time_limit": 400
   },
@@ -116,6 +115,17 @@
     "additional_config_params": {
       "censys_analysis": "search"
     },
+    "soft_time_limit": 30
+  },
+  "CRXcavator": {
+    "type": "observable",
+    "observable_supported": [
+      "generic"
+    ],
+    "external_service": true,
+    "description": "scans a chrome extension against crxcavator.io",
+    "requires_configuration": false,
+    "python_module": "crxcavator.CRXcavator",
     "soft_time_limit": 30
   },
   "Cuckoo_Scan": {
@@ -569,6 +579,20 @@
     "python_module": "maxmind.Maxmind",
     "soft_time_limit": 30
   },
+  "MWDB_Scan": {
+    "type": "file",
+    "description": "Scan a file against MWDB by Cert Polska",
+    "requires_configuration": true,
+    "external_service": true,
+    "leaks_info": true,
+    "python_module": "mwdb_scan.MWDB_Scan",
+    "additional_config_params": {
+      "api_key_name": "MWDB_KEY",
+      "upload_file": false,
+      "max_tries": 50
+    },
+    "soft_time_limit": 400
+  },
   "ONYPHE": {
     "type": "observable",
     "observable_supported": [
@@ -692,7 +716,7 @@
   "Qiling_Windows_Shellcode": {
     "type": "file",
     "supported_filetypes": [
-      "text/plain"
+      "application/octet-stream"
     ],
     "external_service": false,
     "description": "Qiling windows shellcode emulation",
@@ -727,7 +751,7 @@
     "Qiling_Linux_Shellcode": {
     "type": "file",
       "supported_filetypes": [
-      "text/plain"
+      "application/octet-stream"
     ],
     "external_service": false,
     "description": "Qiling linux shellcode emulation",

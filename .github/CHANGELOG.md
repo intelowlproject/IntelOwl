@@ -2,6 +2,21 @@
 
 [**Upgrade Guide**](https://intelowl.readthedocs.io/en/latest/Installation.html#update-to-the-most-recent-version)
 
+## [v2.1.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v2.1.0)
+**IMPORTANT FIX**
+We changed `docker-compose` file names for optional analyzers. In the `v.2.0.0` this broke Docker Hub builds, causing them to fail. Please upgrade to this version to be able to use the optional analyzers again.
+
+**NEW INBUILT ANALYZERS:**
+- added [CRXCavator](https://crxcavator.io/) analyzer for malicious Chrome extensions
+- added [CERT Polska MWDB](https://mwdb.cert.pl) analyzer for malicious files
+
+**FIXES/IMPROVEMENTS/Dependency upgrades:**
+- updated `Quark_Engine` to last version and fixed rules
+- `Maxmind` analyzer now retrieves City data too
+- fixes for `Qiling` analyzer
+- re-enabled `APKiD_Scan_APK_DEX_JAR` analyzer for Android samples
+- adjusts to auto-build, PR template and documentation
+
 ## [v2.0.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v2.0.0)
 **BREAKING CHANGES:**
 - moved docker and docker-compose files under `docker/` folder.

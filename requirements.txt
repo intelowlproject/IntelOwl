@@ -28,7 +28,7 @@ importlib-metadata==3.1.1
 jmespath==0.9.4
 jsbeautifier==1.6.2
 jsonschema==3.2.0
-maxminddb==1.5.4
+maxminddb==2.0.3
 msoffcrypto-tool==4.10.1
 numpy==1.19.4
 olefile==0.46
@@ -63,7 +63,7 @@ wrapt==1.11.2
 yara-python==4.0.2
 zipp==3.4.0
 djangorestframework-guardian==0.3.0
-quark-engine==20.12
+quark-engine==21.1.2
 git+https://github.com/DissectMalware/XLMMacroDeobfuscator.git@89fbce0c87014a4b5a22c1aef09c8b3ea9bf16c0
 speakeasy-emulator==1.4.8
 django-memoize==2.3.1
@@ -72,4 +72,6 @@ dnstwist==20201228
 ppdeep>=20200505
 google>=3.0.0
 eventlet==0.29.1
+mwdblib==3.3.1 
 django-nose==1.4.7
+

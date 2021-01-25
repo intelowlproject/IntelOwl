@@ -2,7 +2,7 @@
 
 [**Upgrade Guide**](https://intelowl.readthedocs.io/en/latest/Installation.html#update-to-the-most-recent-version)
 
-## [v2.0.1](https://github.com/intelowlproject/IntelOwl/releases/tag/v2.0.1)
+## [v2.1.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v2.1.0)
 **IMPORTANT FIX**
 We changed `docker-compose` file names for optional analyzers. In the `v.2.0.0` this broke Docker Hub builds, causing them to fail. Please upgrade to this version to be able to use the optional analyzers again.
 

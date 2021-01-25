@@ -115,7 +115,10 @@ List of some of the analyzers with optional configuration:
   * `query`: Follow according to [docs](https://www.zoomeye.org/doc#host-search), but omit `ip`, `hostname`. Eg: `"query": "city:biejing port:21"`
   * `facets`(default: Empty string): A comma-separated list of properties to get summary information on query. Eg: `"facets:app,os"`
   * `page`(default 1): The page number to paging
-  * `history`(default True):  	To query the history data.
+  * `history`(default True): To query the history data. 
+* `MWDB_Scan`:
+    * `upload_file` (default False): Uploads the file to repository.
+    * `max_tries` (default 50): Number of retries to perform for polling analysis results.
 * `Triage_Scan` and `Triage_Search`:
   * `endpoint` (default public): choose whether to query on the public or the private endpoint of triage.
   * `report_type` (default overview): determines how detailed the final report will be. (overview/complete)
@@ -132,6 +135,7 @@ List of some of the analyzers with optional configuration:
 * `CRXcavator`:
   * Every Chrome-Extension has a unique alpha=numerc identifier. That's the only Input necessary. Eg: `Norton Safe Search Enhanced`'s identifier is `eoigllimhcllmhedfbmahegmoakcdakd`.
  
+
 
 There are two ways to do this:
 

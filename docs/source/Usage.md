@@ -76,7 +76,9 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * `UnpacMe_EXE_Unpacker`: [UnpacMe](https://www.unpac.me/) is an automated malware unpacking service
 * `Triage_Scan`: leverage [Triage](https://tria.ge) sandbox environment to scan various files
 * `Manalyze`: [Manalyze](https://github.com/JusticeRage/Manalyze) performs static analysis on PE executables to detect undesirable behavior.
+* `MWDB_Scan`: [mwdblib](https://mwdb.readthedocs.io/en/latest/) Retrieve malware file analysis from repository maintained by CERT Polska MWDB.
 * `Qiling`: [Qiling](https://github.com/qilingframework/qiling) qiling binary emulation.
+
 
 #### Observable analyzers (ip, domain, url, hash)
 * `VirusTotal_v3_Get_Observable`: search an observable in the VirusTotal DB

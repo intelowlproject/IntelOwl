@@ -45,7 +45,9 @@ PHISHTANK_API_KEY=test
 ZOOMEYE_KEY=test
 TRIAGE_KEY=test
 EMAILREP_KEY=test
+MWDB_KEY=test
 WIGLE_KEY=test
+
 
 # Test tokens
 TEST_JOB_ID=1
@@ -72,3 +74,4 @@ AWS_SECRETS=False
 AWS_SQS=False
 AWS_REGION=eu-central-1
 DJANGO_SETTINGS_MODULE=intel_owl.settings
+

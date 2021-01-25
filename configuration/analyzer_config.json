@@ -579,6 +579,20 @@
     "python_module": "maxmind.Maxmind",
     "soft_time_limit": 30
   },
+  "MWDB_Scan": {
+    "type": "file",
+    "description": "Scan a file against MWDB by Cert Polska",
+    "requires_configuration": true,
+    "external_service": true,
+    "leaks_info": true,
+    "python_module": "mwdb_scan.MWDB_Scan",
+    "additional_config_params": {
+      "api_key_name": "MWDB_KEY",
+      "upload_file": false,
+      "max_tries": 50
+    },
+    "soft_time_limit": 400
+  },
   "ONYPHE": {
     "type": "observable",
     "observable_supported": [

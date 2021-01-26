@@ -11,12 +11,17 @@ path_mapping = {
     "traefik": "docker/traefik.override.yml",
     "multi_queue": "docker/multi-queue.override.yml",
 }
+# to fix the box-js folder name
 path_mapping.update(
-    {name: f"integrations/{name}/compose.yml" for name in docker_analyzers}
+    {
+        name: f"integrations/{name.replace('box_js', 'box-js')}/compose.yml"
+        for name in docker_analyzers
+    }
 )
 path_mapping.update(
     {
-        name + ".test": f"integrations/{name}/compose-tests.yml"
+        name
+        + ".test": f"integrations/{name.replace('box_js', 'box-js')}/compose-tests.yml"
         for name in docker_analyzers
     }
 )

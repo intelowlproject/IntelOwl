@@ -35,7 +35,7 @@ There is a <a href="https://www.youtube.com/watch?v=GuEhqQJSQAs" target="_blank"
 The project leverages `docker-compose` with a custom python script so you need to have the following packages installed in your machine:
 * [docker](https://docs.docker.com/get-docker/) - v1.13.0+
 * [docker-compose](https://docs.docker.com/compose/install/) - v1.23.2+
-* [python](https://www.python.org/) - v3.5+
+* [python](https://www.python.org/) - v3.6+
 
 <div class="admonition note">
 <p class="admonition-title">Note</p>

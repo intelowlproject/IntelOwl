@@ -117,7 +117,13 @@ def start():
             [analyzer for analyzer in path_mapping[f"all_analyzers{test_appendix}"]]
         )
     # construct final command
-    base_command = ["docker-compose", "-p", "intel_owl"]
+    base_command = [
+        "docker-compose",
+        "-p",
+        "intel_owl",
+        "--project-directory",
+        "docker",
+    ]
     for compose_file in compose_files:
         base_command.append("-f")
         base_command.append(compose_file)

@@ -13,7 +13,7 @@ configparser==3.8.1
 cryptography==2.7
 dataclasses==0.6
 Deprecated==1.2.7
-Django==2.2.16
+Django==2.2.18
 django-auth-ldap==2.2.0
 djangorestframework==3.12.1
 dnspython==1.16.0

@@ -2,10 +2,10 @@
 
 [**Upgrade Guide**](https://intelowl.readthedocs.io/en/latest/Installation.html#update-to-the-most-recent-version)
 
-## [v2.1.1](https://github.com/intelowlproject/IntelOwl/releases/tag/v2.1.0)
+## [v2.1.1](https://github.com/intelowlproject/IntelOwl/releases/tag/v2.1.1)
 **FIXES/IMPROVEMENTS/Dependency upgrades**
 - now `start.py` works with the most recent 1.28.2 version of docker-compose
-- updated Django, Yara and Speakeasy
+- updated Django, Yara and Speakeasy to most recent versions
 
 
 ## [v2.1.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v2.1.0)

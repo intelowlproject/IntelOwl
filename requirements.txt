@@ -13,7 +13,7 @@ configparser==3.8.1
 cryptography==2.7
 dataclasses==0.6
 Deprecated==1.2.7
-Django==2.2.16
+Django==2.2.18
 django-auth-ldap==2.2.0
 djangorestframework==3.12.1
 dnspython==1.16.0
@@ -60,12 +60,12 @@ urllib3==1.25.3
 uWSGI==2.0.18
 vine==1.3.0
 wrapt==1.11.2
-yara-python==4.0.2
+yara-python==4.0.3
 zipp==3.4.0
 djangorestframework-guardian==0.3.0
 quark-engine==21.1.2
 git+https://github.com/DissectMalware/XLMMacroDeobfuscator.git@89fbce0c87014a4b5a22c1aef09c8b3ea9bf16c0
-speakeasy-emulator==1.4.8
+speakeasy-emulator==1.5.1
 django-memoize==2.3.1
 django-rest-durin==0.1.0
 dnstwist==20201228

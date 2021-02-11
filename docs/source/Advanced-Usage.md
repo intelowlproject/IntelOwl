@@ -178,7 +178,7 @@ Intel Owl provides a saved configuration (with example dashboard and visualizati
 5. Now start the docker containers and execute,
 
   ```bash
-  docker exec -ti intel_owl_uwsgi python manage.py search_index --rebuild
+  docker exec -ti intelowl_uwsgi python manage.py search_index --rebuild
   ```
 
   This will build and populate all existing job objects into the `jobs` index.

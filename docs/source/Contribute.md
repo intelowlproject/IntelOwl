@@ -109,11 +109,11 @@ $ docker-compose -f docker/default.yml -f docker/ci.override.yml up
 3. Here, we simulate the GitHub CI tests locally by running the following 3 tests:
 
 ```bash
-$ docker exec -ti intel_owl_uwsgi unzip -P infected tests/test_files.zip
-$ docker exec -ti intel_owl_uwsgi python manage.py test tests
+$ docker exec -ti intelowl_uwsgi unzip -P infected tests/test_files.zip
+$ docker exec -ti intelowl_uwsgi python manage.py test tests
 ```
 
-> Note: To run a particular test case, you want to set it's full path. For example, `docker exec -ti intel_owl_uwsgi python manage.py test tests.test_observables.<test_case_class_name>.<func_name>`
+> Note: To run a particular test case, you want to set it's full path. For example, `docker exec -ti intelowl_uwsgi python manage.py test tests.test_observables.<test_case_class_name>.<func_name>`
 
 Please make sure all 3 of these tests return positively.
 

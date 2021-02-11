@@ -3,7 +3,7 @@ version: '3'
 services:
   postgres:
     image: library/postgres:12-alpine
-    container_name: intel_owl_postgres
+    container_name: intelowl_postgres
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     env_file:
@@ -11,7 +11,7 @@ services:
 
   uwsgi:
     image: intelowlproject/intelowl:${INTELOWL_TAG_VERSION}
-    container_name: intel_owl_uwsgi
+    container_name: intelowl_uwsgi
     volumes:
       - ../configuration/intel_owl.ini:/etc/uwsgi/sites/intel_owl.ini
       - ../configuration/analyzer_config.json:/opt/deploy/configuration/analyzer_config.json
@@ -30,7 +30,7 @@ services:
 
   nginx:
     image: intelowlproject/intelowl_nginx:${INTELOWL_TAG_VERSION}
-    container_name: intel_owl_nginx
+    container_name: intelowl_nginx
     restart: unless-stopped
     hostname: nginx
     volumes:
@@ -45,13 +45,13 @@ services:
 
   rabbitmq:
     image: library/rabbitmq:3.8-alpine
-    container_name: intel_owl_rabbitmq
+    container_name: intelowl_rabbitmq
     logging:
       driver: none
 
   celery_beat:
     image: intelowlproject/intelowl:${INTELOWL_TAG_VERSION}
-    container_name: intel_owl_celery_beat
+    container_name: intelowl_celery_beat
     restart: unless-stopped
     command: /usr/local/bin/celery -A intel_owl.celery beat --uid www-data --gid www-data --pidfile=/tmp/celerybeat.pid --schedule=/tmp/celerybeat-schedule
     volumes:
@@ -66,7 +66,7 @@ services:
 
   celery_worker_default:
     image: intelowlproject/intelowl:${INTELOWL_TAG_VERSION}
-    container_name: intel_owl_celery_worker_default
+    container_name: intelowl_celery_worker_default
     restart: unless-stopped
     stop_grace_period: 3m
     command: /usr/local/bin/celery -A intel_owl.celery worker -n worker_default -P eventlet --uid www-data --gid www-data --time-limit=10000 --pidfile="/tmp/%n.pid" -Ofair -Q default

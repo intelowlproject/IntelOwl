@@ -4,11 +4,11 @@ services:
   postgres:
     env_file:
       - env_file_postgres_template
+
   uwsgi:
     build:
       context: ..
       dockerfile: docker/Dockerfile
-
     volumes:
       - ../configuration/intel_owl.ini:/etc/uwsgi/sites/intel_owl.ini
       - ../configuration/analyzer_config.json:/opt/deploy/configuration/analyzer_config.json

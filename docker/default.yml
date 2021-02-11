@@ -20,7 +20,7 @@ services:
       - static_content:/opt/deploy/intel_owl/static
       - shared_files:/opt/deploy/files_required
     entrypoint:
-      - ./docker//docker_entrypoint.sh
+      - ./docker/entrypoint_uwsgi.sh
     expose:
       - "8001"
     env_file:
@@ -29,9 +29,7 @@ services:
       - postgres
 
   nginx:
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile_nginx
+    image: intelowlproject/intelowl_nginx:${INTELOWL_TAG_VERSION}
     container_name: intel_owl_nginx
     restart: unless-stopped
     hostname: nginx

@@ -3,11 +3,13 @@ import logging
 from api_app import models, serializers, helpers
 from api_app.permissions import ExtendedObjectPermissions
 from .script_analyzers import general
+from intel_owl.celery import app as celery_app
 
 from wsgiref.util import FileWrapper
 
 from django.http import HttpResponse
 from django.db.models import Q
+from django.core.cache import cache
 from rest_framework.response import Response
 from rest_framework import status, viewsets, mixins
 from rest_framework.decorators import api_view
@@ -417,6 +419,58 @@ def download_sample(request):
         logger.exception(f"download_sample requester:{str(request.user)} error:{e}.")
         return Response(
             {"detail": "error in download_sample. Check logs."},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+@api_view(["PATCH"])
+def kill_running_job(request):
+    """
+    kill running job by closing celery tasks and marking as killed
+    :param request: job_id
+    :returns: 200 if killed, 404 not found, 403 forbidden, 400 bad request
+    """
+    try:
+        data_received = request.query_params
+        logger.info(
+            f"kill_running_job received request from {str(request.user)}."
+            f"Data received {data_received}."
+        )
+        if "job_id" not in data_received:
+            return Response({"error": "821"}, status=status.HTTP_400_BAD_REQUEST)
+        # get job object
+        try:
+            job = models.Job.objects.get(id=data_received["job_id"])
+        except models.Job.DoesNotExist:
+            return Response(
+                {"detail": "job not found"}, status=status.HTTP_404_NOT_FOUND
+            )
+        # check permission
+        if not request.user.has_perm("api_app.change_job", job):
+            return Response(
+                {"detail": "You don't have permission to perform this operation."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        # check if job running
+        if job.status != "running":
+            return Response(
+                {"detail": "job not running"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        # close celery tasks
+        task_ids = cache.get(data_received["job_id"])
+        if isinstance(task_ids, list) and len(task_ids):
+            celery_app.control.revoke(task_ids)
+            cache.delete((data_received["job_id"]))
+        # set job status
+        job.status = "killed"
+        job.save()
+        return Response(status=status.HTTP_200_OK)
+
+    except Exception as e:
+        logger.exception(f"kill_running_job requester:{str(request.user)} error:{e}.")
+        return Response(
+            {"error": "error in kill_running_job. Check logs."},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
 

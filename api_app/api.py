@@ -3,13 +3,11 @@ import logging
 from api_app import models, serializers, helpers
 from api_app.permissions import ExtendedObjectPermissions
 from .script_analyzers import general
-from intel_owl.celery import app as celery_app
 
 from wsgiref.util import FileWrapper
 
 from django.http import HttpResponse
 from django.db.models import Q
-from django.core.cache import cache
 from rest_framework.response import Response
 from rest_framework import status, viewsets, mixins
 from rest_framework.decorators import api_view
@@ -458,10 +456,7 @@ def kill_running_job(request):
                 status=status.HTTP_400_BAD_REQUEST,
             )
         # close celery tasks
-        task_ids = cache.get(data_received["job_id"])
-        if isinstance(task_ids, list):
-            celery_app.control.revoke(task_ids)
-            cache.delete((data_received["job_id"]))
+        general.kill_running_analysis(data_received["job_id"])
         # set job status
         job.status = "killed"
         job.save()

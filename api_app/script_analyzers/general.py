@@ -2,7 +2,9 @@ import logging
 from celery import uuid
 from django.core.cache import cache
 
-from intel_owl.tasks import run_analyzer
+
+from intel_owl.celery import app as celery_app
+from intel_owl import tasks
 from api_app.exceptions import (
     AnalyzerConfigurationException,
     AnalyzerRunException,
@@ -107,7 +109,7 @@ def start_analyzers(
             # run analyzer with a celery task asynchronously
             stl = ac.get("soft_time_limit", 300)
             t_id = uuid()
-            run_analyzer.apply_async(
+            tasks.run_analyzer.apply_async(
                 args=args, queue=queue, soft_time_limit=stl, task_id=t_id
             )
             # to track task_id by job_id
@@ -122,3 +124,10 @@ def start_analyzers(
             err_msg = f"({analyzer}, job_id #{job_id}) -> Error: {e}"
             logger.error(err_msg)
             set_failed_analyzer(analyzer, job_id, err_msg)
+
+
+def kill_running_analysis(job_id):
+    task_ids = cache.get(job_id)
+    if isinstance(task_ids, list):
+        celery_app.control.revoke(task_ids)
+        cache.delete(job_id)

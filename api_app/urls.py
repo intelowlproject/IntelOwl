@@ -31,7 +31,7 @@ urlpatterns = [
     path("ask_analysis_result", ask_analysis_result),
     path("get_analyzer_configs", get_analyzer_configs),
     path("download_sample", download_sample),
-    path("job/kill/", kill_running_job),
+    path("kill_analysis", kill_running_job),
     # Viewsets
     path(r"", include(router.urls)),
 ]

@@ -459,7 +459,7 @@ def kill_running_job(request):
             )
         # close celery tasks
         task_ids = cache.get(data_received["job_id"])
-        if isinstance(task_ids, list) and len(task_ids):
+        if isinstance(task_ids, list):
             celery_app.control.revoke(task_ids)
             cache.delete((data_received["job_id"]))
         # set job status

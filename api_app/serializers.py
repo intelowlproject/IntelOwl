@@ -84,17 +84,20 @@ class JobSerializer(ObjectPermissionsAssignmentMixin, serializers.ModelSerialize
 
     def get_permissions_map(self, created):
         """
-        'view' permission is applied to all the groups the requesting user belongs to
+        * 'view' permission is applied to all the groups the requesting user belongs to
         if private is True.
+        * 'delete' permission is only given to the user who created the job
         """
         rqst = self.context["request"]
+        current_user = rqst.user
         if rqst.data.get("private", False):
-            grps = rqst.user.groups.all()
+            grps = current_user.groups.all()
         else:
             grps = Group.objects.all()
 
         return {
             "view_job": [*grps],
+            "delete_job": [current_user],
         }
 
     def validate(self, data):

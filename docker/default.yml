@@ -48,6 +48,8 @@ services:
   rabbitmq:
     image: library/rabbitmq:3.8-alpine
     container_name: intel_owl_rabbitmq
+    logging:
+      driver: none
 
   celery_beat:
     image: intelowlproject/intelowl:${INTELOWL_TAG_VERSION}

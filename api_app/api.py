@@ -9,7 +9,7 @@ from wsgiref.util import FileWrapper
 from django.http import HttpResponse
 from django.db.models import Q
 from rest_framework.response import Response
-from rest_framework import status, viewsets
+from rest_framework import status, viewsets, mixins
 from rest_framework.decorators import api_view
 from rest_framework.permissions import DjangoObjectPermissions
 from guardian.decorators import permission_required_or_403
@@ -421,16 +421,23 @@ def download_sample(request):
         )
 
 
-class JobViewSet(viewsets.ReadOnlyModelViewSet):
+class JobViewSet(
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.DestroyModelMixin,
+    viewsets.GenericViewSet,
+):
     """
     REST endpoint to fetch list of jobs or retrieve a job with job ID.
     Requires authentication.
 
     :methods_allowed:
-        GET, OPTIONS
+        GET, OPTIONS, DELETE
 
     :return 200:
-        if ok
+        if GET ok
+    :return 204:
+        if DELETE ok
     :return 404:
         if not found
     :return 405:

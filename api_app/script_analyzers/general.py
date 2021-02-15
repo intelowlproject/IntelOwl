@@ -4,7 +4,6 @@ from django.core.cache import cache
 
 
 from intel_owl.celery import app as celery_app
-from intel_owl import tasks
 from api_app.exceptions import (
     AnalyzerConfigurationException,
     AnalyzerRunException,
@@ -109,8 +108,12 @@ def start_analyzers(
             # run analyzer with a celery task asynchronously
             stl = ac.get("soft_time_limit", 300)
             t_id = uuid()
-            tasks.run_analyzer.apply_async(
-                args=args, queue=queue, soft_time_limit=stl, task_id=t_id
+            celery_app.send_task(
+                "run_analyzer",
+                args=args,
+                queue=queue,
+                soft_time_limit=stl,
+                task_id=t_id,
             )
             # to track task_id by job_id
             task_ids = cache.get(job_id)

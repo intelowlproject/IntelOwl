@@ -16,6 +16,7 @@ STATUS = [
     ("reported_without_fails", "reported_without_fails"),
     ("reported_with_fails", "reported_with_fails"),
     ("failed", "failed"),
+    ("killed", "killed"),
 ]
 
 

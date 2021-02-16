@@ -10,7 +10,7 @@ from django.http import HttpResponse
 from django.db.models import Q
 from rest_framework.response import Response
 from rest_framework import status, viewsets, mixins
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, action
 from rest_framework.permissions import DjangoObjectPermissions
 from guardian.decorators import permission_required_or_403
 from rest_framework_guardian.filters import ObjectPermissionsFilter
@@ -421,55 +421,6 @@ def download_sample(request):
         )
 
 
-@api_view(["PATCH"])
-def kill_running_job(request):
-    """
-    kill running job by closing celery tasks and marking as killed
-    :param request: job_id
-    :returns: 200 if killed, 404 not found, 403 forbidden, 400 bad request
-    """
-    try:
-        data_received = request.query_params
-        logger.info(
-            f"kill_running_job received request from {str(request.user)}."
-            f"Data received {data_received}."
-        )
-        if "job_id" not in data_received:
-            return Response({"error": "821"}, status=status.HTTP_400_BAD_REQUEST)
-        # get job object
-        try:
-            job = models.Job.objects.get(id=data_received["job_id"])
-        except models.Job.DoesNotExist:
-            return Response(
-                {"detail": "job not found"}, status=status.HTTP_404_NOT_FOUND
-            )
-        # check permission
-        if not request.user.has_perm("api_app.change_job", job):
-            return Response(
-                {"detail": "You don't have permission to perform this operation."},
-                status=status.HTTP_403_FORBIDDEN,
-            )
-        # check if job running
-        if job.status != "running":
-            return Response(
-                {"detail": "job not running"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        # close celery tasks
-        general.kill_running_analysis(data_received["job_id"])
-        # set job status
-        job.status = "killed"
-        job.save()
-        return Response(status=status.HTTP_200_OK)
-
-    except Exception as e:
-        logger.exception(f"kill_running_job requester:{str(request.user)} error:{e}.")
-        return Response(
-            {"error": "error in kill_running_job. Check logs."},
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        )
-
-
 class JobViewSet(
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
@@ -511,6 +462,54 @@ class JobViewSet(
             return self.serializer_action_classes[self.action]
         except (KeyError, AttributeError):
             return super(JobViewSet, self).get_serializer_class()
+
+    @action(detail=True, methods=["patch"])
+    def kill(self, request, pk=None):
+        """
+        kill running job by closing celery tasks and marking as killed
+        :url param: pk (job_id)
+        :returns: 200 if killed, 404 not found, 403 forbidden, 400 bad request
+        """
+        try:
+            job_id = pk
+            logger.info(
+                f"kill running job received request from {str(request.user)} "
+                f"for JOB ID {job_id}."
+            )
+            # get job
+            try:
+                job = models.Job.objects.get(pk=pk)
+            except models.Job.DoesNotExist:
+                return Response(
+                    {"detail": "job not found"}, status=status.HTTP_404_NOT_FOUND
+                )
+            # check permission
+            if not request.user.has_perm("api_app.change_job", job):
+                return Response(
+                    {"detail": "You don't have permission to perform this operation."},
+                    status=status.HTTP_403_FORBIDDEN,
+                )
+            # check if job running
+            if job.status != "running":
+                return Response(
+                    {"detail": "job not running"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            # close celery tasks
+            general.kill_running_analysis(job_id)
+            # set job status
+            job.status = "killed"
+            job.save()
+            return Response(status=status.HTTP_200_OK)
+
+        except Exception as e:
+            logger.exception(
+                f"kill_running_job requester:{str(request.user)} error:{e}."
+            )
+            return Response(
+                {"error": "error in kill_running_job. Check logs."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
 
 class TagViewSet(viewsets.ModelViewSet):

@@ -7,7 +7,6 @@ from .api import (
     ask_analysis_result,
     get_analyzer_configs,
     download_sample,
-    kill_running_job,
     TagViewSet,
     JobViewSet,
 )
@@ -31,7 +30,6 @@ urlpatterns = [
     path("ask_analysis_result", ask_analysis_result),
     path("get_analyzer_configs", get_analyzer_configs),
     path("download_sample", download_sample),
-    path("kill_analysis", kill_running_job),
     # Viewsets
     path(r"", include(router.urls)),
 ]

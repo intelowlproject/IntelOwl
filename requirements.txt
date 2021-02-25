@@ -72,6 +72,6 @@ dnstwist==20201228
 ppdeep>=20200505
 google>=3.0.0
 eventlet==0.29.1
-mwdblib==3.3.1 
+mwdblib==3.3.1
 django-nose==1.4.7
-
+drf-yasg==1.20.0

@@ -1,5 +1,8 @@
 from django.urls import include, path
 from rest_framework import routers
+from durin.auth import CachedTokenAuthentication
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
 
 from .api import (
     ask_analysis_availability,
@@ -19,6 +22,16 @@ router = routers.DefaultRouter(trailing_slash=False)
 router.register(r"tags", TagViewSet)
 router.register(r"jobs", JobViewSet)
 
+schema_view = get_schema_view(
+    openapi.Info(
+        title="IntelOwl API",
+        default_version="v1",
+        license=openapi.License(name="AGPL-3.0 License "),
+    ),
+    public=True,
+    authentication_classes=(CachedTokenAuthentication,),
+)
+
 # These come after /api/..
 urlpatterns = [
     # Auth APIs
@@ -32,4 +45,10 @@ urlpatterns = [
     path("download_sample", download_sample),
     # Viewsets
     path(r"", include(router.urls)),
+    # API Docs from swagger
+    path(
+        "docs/",
+        schema_view.with_ui("swagger", cache_timeout=0),
+        name="schema-swagger-ui",
+    ),
 ]

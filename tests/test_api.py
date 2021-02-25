@@ -187,3 +187,7 @@ class ApiTests(TestCase):
         data = {"job_id": job_id}
         response = self.client.get("/api/ask_analysis_result", data)
         self.assertEqual(response.status_code, 200)
+
+    def test_api_docs_access_200(self):
+        response = self.client.get("/api/docs/")
+        self.assertEqual(response.status_code, 200)

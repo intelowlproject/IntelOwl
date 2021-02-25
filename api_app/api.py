@@ -8,6 +8,8 @@ from wsgiref.util import FileWrapper
 
 from django.http import HttpResponse
 from django.db.models import Q
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework.response import Response
 from rest_framework import status, viewsets, mixins
 from rest_framework.decorators import api_view, action
@@ -22,6 +24,41 @@ logger = logging.getLogger(__name__)
 """ REST API endpoints """
 
 
+@swagger_auto_schema(
+    methods=["get"],
+    manual_parameters=[
+        openapi.Parameter(
+            "md5",
+            openapi.IN_QUERY,
+            "md5 of the sample or observable to look for",
+            type=openapi.TYPE_STRING,
+        ),
+        openapi.Parameter(
+            "analyzers_needed",
+            openapi.IN_QUERY,
+            "specify analyzers needed. It requires either this or "
+            "run_all_available_analyzers",
+            type=openapi.TYPE_ARRAY,
+            items=openapi.Items(type=openapi.TYPE_STRING),
+        ),
+        openapi.Parameter(
+            "run_all_available_analyzers",
+            openapi.IN_QUERY,
+            "if we are looking for an analysis executed with this flag set",
+            type=openapi.TYPE_BOOLEAN,
+        ),
+        openapi.Parameter(
+            "running_only",
+            openapi.IN_QUERY,
+            "check only for running analysis, default False, any value is True",
+            type=openapi.TYPE_BOOLEAN,
+        ),
+    ],
+    responses={
+        200: openapi.Response("if ok with list of all analysis related to that md5"),
+        500: openapi.Response("if failed"),
+    },
+)
 @api_view(["GET"])
 @permission_required_or_403("api_app.view_job")
 def ask_analysis_availability(request):
@@ -31,21 +68,6 @@ def ask_analysis_availability(request):
     status "running" or "reported_without_fails"
     Also, you need to specify the analyzers needed because, otherwise, it is
     highly probable that you won't get all the results that you expect
-
-    :param md5: string
-        md5 of the sample or observable to look for
-    :param [analyzers_needed]: list
-        specify analyzers needed. It requires either this
-        or run_all_available_analyzers
-    :param [run_all_available_analyzers]: bool
-        if we are looking for an analysis executed with this flag set
-    :param [running_only]: bool
-        check only for running analysis, default False, any value is True
-
-    :return 200:
-        if ok with list of all analysis related to that md5
-    :return 500:
-        if failed
     """
     source = str(request.user)
     analyzers_needed_list = []
@@ -125,51 +147,115 @@ def ask_analysis_availability(request):
         )
 
 
+@swagger_auto_schema(
+    methods=["post"],
+    manual_parameters=[
+        openapi.Parameter(
+            "is_sample",
+            openapi.IN_QUERY,
+            "is a sample (file) or an observable (domain, ip, ...)",
+            type=openapi.TYPE_BOOLEAN,
+        ),
+        openapi.Parameter(
+            "md5",
+            openapi.IN_QUERY,
+            "md5 of the item to analyze",
+            type=openapi.TYPE_STRING,
+        ),
+        openapi.Parameter(
+            "file",
+            openapi.IN_QUERY,
+            "required if is_sample=True, the binary",
+            type=openapi.FORMAT_BINARY,
+        ),
+        openapi.Parameter(
+            "file_mimetype",
+            openapi.IN_QUERY,
+            "optional, the binary mimetype, calculated by default",
+            type=openapi.TYPE_STRING,
+        ),
+        openapi.Parameter(
+            "file_name",
+            openapi.IN_QUERY,
+            "optional if is_sample=True, the binary name",
+            type=openapi.TYPE_STRING,
+        ),
+        openapi.Parameter(
+            "observable_name",
+            openapi.IN_QUERY,
+            "required if is_sample=False, the observable value",
+            type=openapi.TYPE_STRING,
+        ),
+        openapi.Parameter(
+            "observable_classification",
+            openapi.IN_QUERY,
+            "required if is_sample=False, (domain, ip, ...)",
+            type=openapi.TYPE_STRING,
+        ),
+        openapi.Parameter(
+            "analyzers_requested",
+            openapi.IN_QUERY,
+            "list of requested analyzer to run, before filters",
+            type=openapi.TYPE_ARRAY,
+            items=openapi.Items(type=openapi.TYPE_STRING),
+        ),
+        openapi.Parameter(
+            "tags_id",
+            openapi.IN_QUERY,
+            "list of id's of tags to apply to job",
+            type=openapi.TYPE_ARRAY,
+            items=openapi.Items(type=openapi.TYPE_INTEGER),
+        ),
+        openapi.Parameter(
+            "run_all_available_analyzers",
+            openapi.IN_QUERY,
+            type=openapi.TYPE_BOOLEAN,
+            default=False,
+        ),
+        openapi.Parameter(
+            "private",
+            openapi.IN_QUERY,
+            "enable it to allow view permissions to only requesting user's groups.",
+            type=openapi.TYPE_BOOLEAN,
+            default=False,
+        ),
+        openapi.Parameter(
+            "force_privacy",
+            openapi.IN_QUERY,
+            "enable it if you want to avoid to run analyzers with privacy issues",
+            type=openapi.TYPE_BOOLEAN,
+            default=False,
+        ),
+        openapi.Parameter(
+            "disable_external_analyzers",
+            openapi.IN_QUERY,
+            "enable it if you want to exclude external analyzers",
+            type=openapi.TYPE_BOOLEAN,
+            default=False,
+        ),
+        openapi.Parameter(
+            "runtime_configuration",
+            openapi.IN_QUERY,
+            "contains additional parameters for particular analyzers",
+            type=openapi.TYPE_OBJECT,
+        ),
+        openapi.Parameter(
+            "test",
+            openapi.IN_QUERY,
+            "disable analysis for API testing",
+            type=openapi.TYPE_BOOLEAN,
+        ),
+    ],
+    responses={
+        202: openapi.Response("if accepted"),
+        500: openapi.Response("if failed"),
+    },
+)
 @api_view(["POST"])
 @permission_required_or_403("api_app.add_job")
 def send_analysis_request(request):
     """
     This endpoint allows to start a Job related to a file or an observable
-
-    :param is_sample: bool
-        is a sample (file) or an observable (domain, ip, ...)
-    :param md5: string
-        md5 of the item to analyze
-    :param [file]: binary
-        required if is_sample=True, the binary
-    :param [file_mimetype]: string
-        optional, the binary mimetype, calculated by default
-    :param [file_name]: string
-        optional if is_sample=True, the binary name
-    :param [observable_name]: string
-        required if is_sample=False, the observable value
-    :param [observable_classification]: string
-        required if is_sample=False, (domain, ip, ...)
-    :param [analyzers_requested]: list
-        list of requested analyzer to run, before filters
-    :param [tags_id]: list<int>
-        list of id's of tags to apply to job
-    :param [run_all_available_analyzers]: bool
-        default False
-    :param [private]: bool
-        default False,
-        enable it to allow view permissions to only requesting user's groups.
-    :param [force_privacy]: bool
-        default False,
-        enable it if you want to avoid to run analyzers with privacy issues
-    :param [disable_external_analyzers]: bool
-        default False,
-        enable it if you want to exclude external analyzers
-    :param: [runtime_configuration]: dict
-        default {},
-        contains additional parameters for particular analyzers
-    :param [test]: bool
-        disable analysis for API testing
-
-    :return 202:
-        if accepted
-    :return 500:
-        if failed
     """
     source = str(request.user)
     warnings = []
@@ -291,18 +377,26 @@ def send_analysis_request(request):
         )
 
 
+@swagger_auto_schema(
+    methods=["get"],
+    manual_parameters=[
+        openapi.Parameter(
+            "job_id",
+            openapi.IN_QUERY,
+            "Job ID",
+            type=openapi.FORMAT_UUID,
+        ),
+    ],
+    responses={
+        200: openapi.Response("if ok"),
+        500: openapi.Response("if failed"),
+    },
+)
 @api_view(["GET"])
 @permission_required_or_403("api_app.view_job")
 def ask_analysis_result(request):
     """
     Endpoint to retrieve the status and results of a specific Job based on its ID
-
-    :param job_id: integer
-        Job ID
-    :return 200:
-        if ok
-    :return 500:
-        if failed
     """
     source = str(request.user)
     try:
@@ -353,16 +447,18 @@ def ask_analysis_result(request):
         )
 
 
+@swagger_auto_schema(
+    methods=["get"],
+    responses={
+        200: openapi.Response("if ok"),
+        500: openapi.Response("if failed"),
+    },
+)
 @api_view(["GET"])
 def get_analyzer_configs(request):
     """
     get the uploaded analyzer configuration,
     can be useful if you want to choose the analyzers programmatically
-
-    :return 200:
-        if ok
-    :return 500:
-        if failed
     """
     try:
         logger.info(f"get_analyzer_configs received request from {str(request.user)}.")
@@ -381,12 +477,26 @@ def get_analyzer_configs(request):
         )
 
 
+@swagger_auto_schema(
+    methods=["get"],
+    manual_parameters=[
+        openapi.Parameter(
+            "job_id",
+            openapi.IN_QUERY,
+            "Job ID",
+            type=openapi.FORMAT_UUID,
+        ),
+    ],
+    responses={
+        200: openapi.Response("if found"),
+        403: openapi.Response("forbidden"),
+        404: openapi.Response("not found"),
+    },
+)
 @api_view(["GET"])
 def download_sample(request):
     """
     this method is used to download a sample from a Job ID
-    :param request: job_id
-    :returns: 200 if found, 404 not found, 403 forbidden
     """
     try:
         data_received = request.query_params
@@ -430,18 +540,6 @@ class JobViewSet(
     """
     REST endpoint to fetch list of jobs or retrieve a job with job ID.
     Requires authentication.
-
-    :methods_allowed:
-        GET, OPTIONS, DELETE
-
-    :return 200:
-        if GET ok
-    :return 204:
-        if DELETE ok
-    :return 404:
-        if not found
-    :return 405:
-        if wrong HTTP method
     """
 
     queryset = models.Job.objects.order_by("-received_request_time").all()
@@ -463,12 +561,27 @@ class JobViewSet(
         except (KeyError, AttributeError):
             return super(JobViewSet, self).get_serializer_class()
 
+    @swagger_auto_schema(
+        methods=["patch"],
+        manual_parameters=[
+            openapi.Parameter(
+                "job_id",
+                openapi.IN_QUERY,
+                "Job ID",
+                type=openapi.FORMAT_UUID,
+            ),
+        ],
+        responses={
+            200: openapi.Response("if killed"),
+            400: openapi.Response("bad request"),
+            403: openapi.Response("forbidden"),
+            404: openapi.Response("not found"),
+        },
+    )
     @action(detail=True, methods=["patch"])
     def kill(self, request, pk=None):
         """
         kill running job by closing celery tasks and marking as killed
-        :url param: pk (job_id)
-        :returns: 200 if killed, 404 not found, 403 forbidden, 400 bad request
         """
         try:
             job_id = pk
@@ -517,16 +630,6 @@ class TagViewSet(viewsets.ModelViewSet):
     REST endpoint to pefrom CRUD operations on Job tags.
     Requires authentication.
     POST/PUT/DELETE requires model/object level permission.
-
-    :methods_allowed:
-        GET, POST, PUT, DELETE, OPTIONS
-
-    :return 200:
-        if ok
-    :return 404:
-        if not found
-    :return 405:
-        if wrong HTTP method
     """
 
     queryset = models.Tag.objects.all()

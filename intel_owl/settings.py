@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     "api_app.apps.ApiAppConfig",
     "django_elasticsearch_dsl",
     "django_nose",
+    "drf_yasg",
 ]
 
 MIDDLEWARE = [

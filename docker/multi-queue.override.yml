@@ -8,7 +8,7 @@ services:
 
   celery_worker_local:
     image: intelowlproject/intelowl:${INTELOWL_TAG_VERSION}
-    container_name: intel_owl_celery_worker_local
+    container_name: intelowl_celery_worker_local
     restart: unless-stopped
     stop_grace_period: 3m
     command: /usr/local/bin/celery -A intel_owl.celery worker -n worker_local --uid www-data --time-limit=10000 --gid www-data --pidfile="/tmp/%n.pid" -Ofair -Q local
@@ -24,7 +24,7 @@ services:
 
   celery_worker_long:
     image: intelowlproject/intelowl:${INTELOWL_TAG_VERSION}
-    container_name: intel_owl_celery_worker_long
+    container_name: intelowl_celery_worker_long
     restart: unless-stopped
     stop_grace_period: 3m
     command: /usr/local/bin/celery -A intel_owl.celery worker -n worker_long --uid www-data --gid www-data --time-limit=40000 --pidfile="/tmp/%n.pid" -Ofair -Q long

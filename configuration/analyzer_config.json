@@ -500,7 +500,8 @@
     "python_module": "misp.MISP",
     "additional_config_params": {
       "api_key_name": "MISP_KEY",
-      "url_key_name": "MISP_URL"
+      "url_key_name": "MISP_URL",
+      "ssl_check": "MISP_SSL_CHECK"
     },
     "soft_time_limit": 30
   },

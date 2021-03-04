@@ -10,6 +10,7 @@ class MISP(classes.ObservableAnalyzer):
     def set_config(self, additional_config_params):
         self.api_key_name = additional_config_params.get("api_key_name", "MISP_KEY")
         self.url_key_name = additional_config_params.get("url_key_name", "MISP_URL")
+        self.ssl_check = additional_config_params.get("ssl_check", "MISP_SSL_CHECK")
         self.url_name = secrets.get_secret(self.url_key_name)
 
     def run(self):
@@ -24,7 +25,14 @@ class MISP(classes.ObservableAnalyzer):
                 f"no MISP URL retrieved, key value: {self.url_key_name}"
             )
 
-        misp_instance = pymisp.ExpandedPyMISP(self.url_name, api_key)
+        if not self.ssl_check:
+            self.ssl_check = True
+        elif secrets.get_secret(self.ssl_check) == "False":
+            self.ssl_check = False
+        else:
+            self.ssl_check = True
+
+        misp_instance = pymisp.ExpandedPyMISP(self.url_name, api_key, self.ssl_check)
         # debug=True)
 
         # we check only for events not older than 90 days and max 50 results

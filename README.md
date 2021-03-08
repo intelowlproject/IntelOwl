@@ -1,12 +1,9 @@
-<img src="static_intel/intel_owl.jpeg" width=500 height=200 alt="Intel Owl"/>
+<img src="static_intel/intel_owl_positive.png" width=546 height=130 alt="Intel Owl"/>
 
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/intelowlproject/IntelOwl.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/intelowlproject/IntelOwl/context:python)
 [![CodeFactor](https://www.codefactor.io/repository/github/intelowlproject/intelowl/badge)](https://www.codefactor.io/repository/github/intelowlproject/intelowl)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 ![Build & Tests](https://github.com/intelowlproject/IntelOwl/workflows/Build%20&%20Tests/badge.svg)
-
-<img src="static_intel/xscode-banner.png" width=600 height=125 alt="Get Support"/><br/>
-_For urgent issues and priority support, visit [https://xscode.com/intelowlproject/IntelOwl](https://xscode.com/intelowlproject/IntelOwl)._
 
 # Intel Owl
 
@@ -49,6 +46,10 @@ You can see the full list of all available analyzers in the [documentation](http
 | External services                                  | - GreyNoise v2<br/> - Intezer Scan<br/>  - VirusTotal v2+v3<br/>  - HybridAnalysis<br/>  - Censys.io<br/>  - Shodan<br/>  - AlienVault OTX<br/>  - Threatminer<br/>  - Abuse.ch<br/>  - many more..                                                                                                            |
 | Free modules that require additional configuration | - Cuckoo (requires at least one working Cuckoo instance)<br/>  - MISP (requires at least one working MISP instance)<br/>  - Yara (Community, Neo23x0, Intezer, McAfee rules are already available. There's the chance to add your own rules)                                                                   |
 
+## Premium support 
+<img src="static_intel/xscode-banner.png" width=500 height=150 alt="Get Support"/><br/>
+_For urgent issues and priority support, visit [https://xscode.com/intelowlproject/IntelOwl](https://xscode.com/intelowlproject/IntelOwl)._
+
 ## Legal notice
 
 You as a user of this project must review, accept and comply with the license
@@ -85,22 +86,27 @@ license terms.
 [Quark-Engine](https://github.com/quark-engine/quark-engine),
 [IntelX](https://intelx.io/terms-of-service),
 [Speakeasy](https://github.com/fireeye/speakeasy),
-[Checkdmarc](https://github.com/domainaware/checkdmarc)
-[Manalyze](https://github.com/JusticeRage/Manalyze)
+[Checkdmarc](https://github.com/domainaware/checkdmarc),
+[Manalyze](https://github.com/JusticeRage/Manalyze),
 [Qiling](https://github.com/qilingframework/qiling)
 
 ## Acknowledgments
 
+### Sponsors
+
 This project was created and will be upgraded thanks to the following organizations:
 
-<a href="https://www.certego.net"> <img style="margin-right: 2px" src="static_intel/Certego.png" alt="Certego Logo"/> </a>
-<a href="https://www.honeynet.org"> <img style="border: 0.2px solid black" src="static_intel/logo-thp-100.png" alt="Honeynet.org logo"> </a>
+* Certego: <a href="https://www.certego.net"> <img style="margin-right: 2px" src="static_intel/Certego.png" alt="Certego Logo"/> </a>
+* The Honeynet Project: <a href="https://www.honeynet.org"> <img style="border: 0.2px solid black" src="static_intel/honeynet_logo.png" alt="Honeynet.org logo"> </a>
 
 #### Google Summer Of Code
 
-The project was accepted to the GSoC 2020 under the Honeynet Project!! A lot of [new features](https://www.honeynet.org/gsoc/gsoc-2020/google-summer-of-code-2020-project-ideas/#intel-owl-improvements) were developed by Eshaan Bansal ([Twitter](https://twitter.com/mask0fmydisguis)).
+Since its birth, this project has been partecipating to the GSoC under the Honeynet Project!
 
-Stay tuned for the upcoming GSoC 2021! Join the [Honeynet Slack chat](https://gsoc-slack.honeynet.org/) for more info.
+* 2020: a lot of [new features](https://www.honeynet.org/gsoc/gsoc-2020/google-summer-of-code-2020-project-ideas/#intel-owl-improvements) were developed by Eshaan Bansal ([Twitter](https://twitter.com/mask0fmydisguis)).
+* 2021: you? [Projects available](https://www.honeynet.org/gsoc/gsoc-2021/google-summer-of-code-2021-project-ideas/)
+
+Stay tuned for the upcoming GSoC! Join the [Honeynet Slack chat](https://gsoc-slack.honeynet.org/) for more info.
 
 ## About the author and maintainers
 

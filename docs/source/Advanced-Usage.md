@@ -89,6 +89,9 @@ List of some of the analyzers with optional configuration:
 * `VirusTotal_v3_Get_File*`:
     * `force_active_scan` (default False): if the sample is not already in VT, send the sample and perform a scan
     * `force_active_scan_if_old` (default False): if the sample is old, it would be rescanned
+* `MISP`:
+    * `ssl_check`: (default True), enable SSL certificate server verification. Change this if your MISP instance has not SSL enabled
+    * `debug`: (default False) enable debug logs
 * `Doc_Info*`:
     * `additional_passwords_to_check`: list of passwords to try when decrypting the document
 * `Thug_URL_Info` and `Thug_HTML_Info` ((defaults can be seen here [analyzer_config.json](https://github.com/intelowlproject/IntelOwl/blob/master/configuration/analyzer_config.json)):

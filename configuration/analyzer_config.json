@@ -501,7 +501,7 @@
     "additional_config_params": {
       "api_key_name": "MISP_KEY",
       "url_key_name": "MISP_URL",
-      "ssl_check": "MISP_SSL_CHECK"
+      "ssl_check": true
     },
     "soft_time_limit": 30
   },

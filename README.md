@@ -1,4 +1,4 @@
-<img src="static_intel/intel_owl_positive.png" width=546 height=130 alt="Intel Owl"/>
+<img src="static_intel/intel_owl_positive.png" width=547 height=150 alt="Intel Owl"/>
 
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/intelowlproject/IntelOwl.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/intelowlproject/IntelOwl/context:python)
 [![CodeFactor](https://www.codefactor.io/repository/github/intelowlproject/intelowl/badge)](https://www.codefactor.io/repository/github/intelowlproject/intelowl)
@@ -96,8 +96,8 @@ license terms.
 
 This project was created and will be upgraded thanks to the following organizations:
 
-* Certego: <a href="https://www.certego.net"> <img style="margin-right: 2px" src="static_intel/Certego.png" alt="Certego Logo"/> </a>
-* The Honeynet Project: <a href="https://www.honeynet.org"> <img style="border: 0.2px solid black" src="static_intel/honeynet_logo.png" alt="Honeynet.org logo"> </a>
+* Certego: <a href="https://www.certego.net"> <img style="margin-right: 2px" width=351 height=100 src="static_intel/Certego.png" alt="Certego Logo"/> </a>
+* The Honeynet Project: <a href="https://www.honeynet.org"> <img style="border: 0.2px solid black" width=230 height=300 src="static_intel/honeynet_logo.png" alt="Honeynet.org logo"> </a>
 
 #### Google Summer Of Code
 

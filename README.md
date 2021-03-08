@@ -97,10 +97,10 @@ license terms.
 This project was created and will be upgraded thanks to the following organizations:
 
 #### Certego
-<a href="https://www.certego.net"> <img style="margin-right: 2px" width=281 height=80 src="static_intel/Certego.png" alt="Certego Logo"/> </a>
+<a href="https://www.certego.net"> <img style="margin-right: 2px" width=176 height=50 src="static_intel/Certego.png" alt="Certego Logo"/> </a>
 
 #### The Honeynet Project
-<a href="https://www.honeynet.org"> <img style="border: 0.2px solid black" width=153 height=200 src="static_intel/honeynet_logo.png" alt="Honeynet.org logo"> </a>
+<a href="https://www.honeynet.org"> <img style="border: 0.2px solid black" width=115 height=150 src="static_intel/honeynet_logo.png" alt="Honeynet.org logo"> </a>
 
 #### Google Summer Of Code
 

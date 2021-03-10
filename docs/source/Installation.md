@@ -21,7 +21,7 @@ cd ..
 python start.py prod up
 
 # create a super user 
-docker exec -ti intelowl_uwsgi python3 manage.py createsuperuser
+docker exec -ti intel_owl_uwsgi python3 manage.py createsuperuser
 
 # now the app is running on http://localhost:80
 ```

@@ -42,6 +42,7 @@ from api_app.script_analyzers.observable_analyzers import (
     inquest,
     wigle,
     crxcavator,
+    threatfox,
 )
 from api_app.models import Job
 from .mock_utils import (
@@ -691,6 +692,17 @@ class GenericAnalyzersTest(TestCase):
     def test_crxcavator(self, mock_get=None):
         report = crxcavator.CRXcavator(
             "CRXcavator",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    @mock_connections(patch("requests.post", side_effect=mocked_requests))
+    def test_threatfox(self, mock_get=None):
+        report = threatfox.ThreatFox(
+            "ThreatFox",
             self.job_id,
             self.observable_name,
             self.observable_classification,

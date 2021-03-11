@@ -47,6 +47,7 @@ TRIAGE_KEY=test
 EMAILREP_KEY=test
 MWDB_KEY=test
 WIGLE_KEY=test
+THREATFOX_KEY=test
 
 
 # Test tokens

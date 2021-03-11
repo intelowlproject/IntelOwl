@@ -1022,6 +1022,14 @@
     "python_module": "talos.Talos",
     "soft_time_limit": 30
   },
+  "ThreatFox": {
+    "type": "observable",
+    "observable_supported": ["generic"],
+    "external_service": true,
+    "description": "ThreatFox is a free platform from abuse.ch with the goal of sharing indicators of compromise (IOCs) associated with malware with the infosec community, AV vendors and threat intelligence providers.",
+    "python_module": "threatfox.ThreatFox",
+    "soft_time_limit": 30
+  },
   "Threatminer_PDNS": {
     "type": "observable",
     "observable_supported": [

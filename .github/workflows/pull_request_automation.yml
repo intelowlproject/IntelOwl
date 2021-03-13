@@ -12,7 +12,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python
-      uses: actions/setup-python@v1
+      uses: actions/setup-python@v2
       with:
         python-version: 3.8
     - name: Before Install
@@ -27,18 +27,18 @@ jobs:
         sudo docker-compose -f docker/default.yml -f docker/ci.override.yml up -d
     - name: Install Linters and Black
       run: |
-        sudo docker exec intel_owl_uwsgi pip3 install --no-cache-dir --compile -r test-requirements.txt
+        sudo docker exec intelowl_uwsgi pip3 install --no-cache-dir --compile -r test-requirements.txt
     - name: Check Black code Style
       run: |
-        sudo docker exec intel_owl_uwsgi black . --check --exclude "migrations|venv"
+        sudo docker exec intelowl_uwsgi black . --check --exclude "migrations|venv"
     - name: Lint with flake8 (PEP8 enforcer + linter)
       run: |
-        sudo docker exec intel_owl_uwsgi flake8 . --count
+        sudo docker exec intelowl_uwsgi flake8 . --count
     - name: Run Tests
       run: |
-        sudo docker exec intel_owl_uwsgi python manage.py test --with-coverage --cover-xml --cover-xml-file=/opt/deploy/intel_owl/coverage.xml tests
+        sudo docker exec intelowl_uwsgi python manage.py test --with-coverage --cover-xml --cover-xml-file=/opt/deploy/intel_owl/coverage.xml tests
         mkdir coverage_reports
-        sudo docker cp intel_owl_uwsgi:/opt/deploy/intel_owl/coverage.xml coverage_reports/coverage.xml
+        sudo docker cp intelowl_uwsgi:/opt/deploy/intel_owl/coverage.xml coverage_reports/coverage.xml
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
       with:

@@ -21,7 +21,7 @@ cd ..
 python start.py prod up
 
 # create a super user 
-docker exec -ti intel_owl_uwsgi python3 manage.py createsuperuser
+docker exec -ti intelowl_uwsgi python3 manage.py createsuperuser
 
 # now the app is running on http://localhost:80
 ```
@@ -234,7 +234,7 @@ $ python start.py prod up
 ## After Deployment
 
 ### Users creation
-You may want to run `docker exec -ti intel_owl_uwsgi python3 manage.py createsuperuser` after first run to create a superuser.
+You may want to run `docker exec -ti intelowl_uwsgi python3 manage.py createsuperuser` after first run to create a superuser.
 Then you can add other users directly from the Django Admin Interface after having logged with the superuser account.
 
 ### Django Groups & Permissions settings
@@ -279,7 +279,7 @@ If you are updating to >[v1.3.0](https://github.com/intelowlproject/IntelOwl/rel
 1. Follow the above updation steps, once the docker containers are up and running execute the following in a new terminal
 
     ```bash
-    docker exec -ti intel_owl_uwsgi bash
+    docker exec -ti intelowl_uwsgi bash
     ```
 
     to get a shell session inside the IntelOwl's container.

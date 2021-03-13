@@ -2,6 +2,28 @@
 
 [**Upgrade Guide**](https://intelowl.readthedocs.io/en/latest/Installation.html#update-to-the-most-recent-version)
 
+## [v2.2.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v2.2.0)
+- IntelOwl has **brand new project logos**. Thanks to @Certego.
+ 
+**New Features:**
+- Introduced the possibility to enable/disable SSL check while connecting to a MISP platform. Thanks to @raw-data.
+- Users can now request to kill a job whose status is `running`. 
+   * GUI: Button on job result page.
+   * PyIntelOwl: `IntelOwl.kill_running_job` function
+   * CLI: `$ pyintelowl jobs kill <id>`
+   * API: `PATCH /api/jobs/{id}/kill`
+- Users can now delete a job.
+   * GUI: Button on job result page.
+   * PyIntelOwl: `IntelOwl.delete_job_by_id` function
+   * CLI: `$ pyintelowl jobs rm <id>`
+   * API: `DELETE /api/jobs/{id}`
+ - Users can now delete a tag from the command line/pyintelowl (Eg: `$ pyintelowl tags rm <id>`). (Before, it was only possible from the web GUI or direct HTTP call.)
+
+**Others:**
+- Deprecate `ask_analysis_result` API.
+- Update permission section of docs
+
+
 ## [v2.1.1](https://github.com/intelowlproject/IntelOwl/releases/tag/v2.1.1)
 **FIXES/IMPROVEMENTS/Dependency upgrades**
 - now `start.py` works with the most recent 1.28.2 version of docker-compose

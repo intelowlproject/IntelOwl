@@ -17,9 +17,11 @@ def save_profile(sender, instance, created, **kwargs):
     if created:
         grp, grp_created = Group.objects.get_or_create(name="DefaultGlobal")
         if grp_created:
-            # view/add permissions for Job model
+            # view/add/change/delete permissions for Job model
             assign_perm("api_app.view_job", grp)
             assign_perm("api_app.add_job", grp)
+            assign_perm("api_app.change_job", grp)
+            assign_perm("api_app.delete_job", grp)
             # view/add/change permissions for Tag model
             assign_perm("api_app.view_tag", grp)
             assign_perm("api_app.add_tag", grp)

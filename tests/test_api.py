@@ -180,10 +180,3 @@ class ApiTests(TestCase):
         }
         response = self.client.post("/api/send_analysis_request", data)
         self.assertEqual(response.status_code, 200)
-
-    def test_ask_analysis_result(self):
-        # put your test job_id
-        job_id = os.environ.get("TEST_JOB_ID", "1")
-        data = {"job_id": job_id}
-        response = self.client.get("/api/ask_analysis_result", data)
-        self.assertEqual(response.status_code, 200)

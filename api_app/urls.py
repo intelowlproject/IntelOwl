@@ -4,7 +4,6 @@ from rest_framework import routers
 from .api import (
     ask_analysis_availability,
     send_analysis_request,
-    ask_analysis_result,
     get_analyzer_configs,
     download_sample,
     TagViewSet,
@@ -27,7 +26,6 @@ urlpatterns = [
     # Main APIs
     path("ask_analysis_availability", ask_analysis_availability),
     path("send_analysis_request", send_analysis_request),
-    path("ask_analysis_result", ask_analysis_result),
     path("get_analyzer_configs", get_analyzer_configs),
     path("download_sample", download_sample),
     # Viewsets

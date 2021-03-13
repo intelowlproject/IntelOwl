@@ -30,7 +30,7 @@ jsbeautifier==1.6.2
 jsonschema==3.2.0
 maxminddb==2.0.3
 msoffcrypto-tool==4.10.1
-numpy==1.19.4
+numpy==1.20.1
 olefile==0.46
 oletools==0.56
 OTXv2==1.5.9

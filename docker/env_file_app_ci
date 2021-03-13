@@ -47,6 +47,8 @@ TRIAGE_KEY=test
 EMAILREP_KEY=test
 MWDB_KEY=test
 WIGLE_KEY=test
+XFORCE_KEY=test
+XFORCE_PASSWORD=test
 
 
 # Test tokens

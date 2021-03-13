@@ -114,6 +114,7 @@ In the `env_file_app`, configure different variables as explained below.
 * `ZOOMEYE_KEY`: ZoomEye API Key([docs](https://www.zoomeye.org/doc))
 * `TRIAGE_KEY`: tria.ge API key([docs](https://tria.ge/docs/))
 * `WIGLE_KEY`: WiGLE API Key([docs](https://api.wigle.net/))
+* `XFORCE_KEY` & `XFORCE_PASSWORD`: IBM X-Force Exchange API ([docs](https://api.xforce.ibmcloud.com/doc/))
 
 **Advanced** additional configuration:
 * `OLD_JOBS_RETENTION_DAYS`: Database retention for analysis results (default: 3 days). Change this if you want to keep your old analysis longer in the database.

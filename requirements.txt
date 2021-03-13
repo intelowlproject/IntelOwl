@@ -52,7 +52,7 @@ pysafebrowsing==0.1.1
 PySocks==1.7.1
 python-magic==0.4.15
 pytz==2019.2
-requests==2.22.0
+requests==2.25.1
 s3transfer==0.2.1
 smmap2==2.0.5
 sqlparse==0.2.4

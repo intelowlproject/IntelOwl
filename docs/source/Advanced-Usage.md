@@ -198,16 +198,50 @@ As an administrator here's what you need to know,
    just strip `DefaultGlobal` of all permissions but do *not* delete it.
 
 The permissions work the way one would expect,
-- `api_app | job | Can view job` allows users to fetch list of all jobs he/she has permission for or a particular job with it's ID.
-- `api_app | job | Can create job` allows users to request new analysis. When user creates a job (requests new analysis),
-    - the object level `view` permission is applied to all groups the requesting user belongs to or to all groups (depending on the parameters passed). 
-    - the object level `change` and `delete` permission is restricted to superusers/admin.
-- `api_app | tag | Can create tag` allows users to create new tags. When user creates a new tag,
-    - this new tag is visible (object level `view` permission) to each and every group but,
-    - the object level `change` and `delete` permission is given to only those groups the requesting user belongs to. 
-    - This is done because tag labels and colors are unique columns and the admin in most cases would want to define tags that are usable (but not modifiable) by users of all groups.
-- `api_app | tag | Can view tag` allows users to fetch list of all tags or a particular tag with it's ID.
-- `api_app | tag | Can change tag` allows users to edit a tag granted that user has the object level permission for the particular tag.
+
+<table style="width:100%">
+  <tr>
+    <th>Permission Name</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td><code>api_app | job | Can create job</code></td>
+    <td>Allows users to request new analysis. When user creates a job (requests new analysis),
+    - the object level <code>view</code> permission is applied to all groups the requesting user belongs to or to all groups (depending on the parameters passed).</td>
+  </tr>
+  <tr>
+    <td><code>api_app | job | Can view job</code></td>
+    <td>Allows users to fetch list of all jobs they have permission for or a particular job with it's ID.</td>
+  </tr>
+  <tr>
+    <td><code>api_app | job | Can change job</code></td>
+    <td>Allows user to change job attributes (eg: kill a running analysis). The object level permission is applied to all groups the requesting user belongs to.</td>
+  </tr>
+  <tr>
+    <td><code>api_app | job | Can change job</code></td>
+    <td>Allows user to delete an existing job. The object level permission is applied to all groups the requesting user belongs to.</td>
+  </tr>
+  <tr>
+    <td><code>api_app | tag | Can create tag</code></td>
+    <td>
+      Allows users to create new tags. When user creates a new tag,
+      <ul>
+        <li>this new tag is visible (object level `view` permission) to each and every group but,</li>
+        <li>the object level `change` and `delete` permission is given to only those groups the requesting user belongs to.</li>
+        <li>This is done because tag labels and colors are unique columns and the admin in most cases would want to define tags that are usable (but not modifiable) by users of all groups.</li>
+      </ul>
+    </td>
+  </tr>
+  <tr>
+    <td><code>api_app | tag | Can view tag</code></td>
+    <td>Allows users to fetch list of all tags or a particular tag with it's ID</td>
+  </tr>
+  <tr>
+    <td><code>api_app | tag | Can change tag</code></td>
+    <td>allows users to edit a tag granted that user has the object level permission for the particular tag</td>
+  </tr>
+</table>
+
 
 ## Authentication options
 IntelOwl provides support for some of the most common authentication methods:
@@ -247,5 +281,5 @@ It is possible to define new celery workers: each requires the addition of a new
 
 Moreover IntelOwl requires that the name of the workers are provided in the `docker-compose` file. This is done through the environment variable `CELERY_QUEUES` inside the `uwsgi` container. Each queue must be separated using the character `,`, as shown in the [example](https://github.com/intelowlproject/IntelOwl/blob/master/docker/multi-queue.override.yml#L6).
 
-Now it is possible to specify for each configuration inside [analyzer_config](https://github.com/intelowlproject/IntelOwl/blob/master/configuration/analyzer_config.json) the desired queue. If no queue are provided, the `default` queue will be selected.
+One can customize what analyzer should use what queue by specifying so in the analyzer entry in the [analyzer_config.json](https://github.com/intelowlproject/IntelOwl/blob/master/configuration/analyzer_config.json) configuration file. If no queue(s) are provided, the `default` queue will be selected.
  

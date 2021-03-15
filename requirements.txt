@@ -2,7 +2,6 @@ asn1crypto==0.24.0
 attrs==20.3.0
 billiard==3.6.3.0
 boto3==1.9.216
-botocore==1.12.216
 celery==4.4.7
 certifi==2019.6.16
 cffi==1.12.3
@@ -24,7 +23,6 @@ future==0.17.1
 gitdb2==2.0.5
 GitPython==3.0.2
 idna==2.8
-importlib-metadata==3.1.1
 jmespath==0.9.4
 jsbeautifier==1.6.2
 jsonschema==3.2.0
@@ -53,8 +51,6 @@ PySocks==1.7.1
 python-magic==0.4.15
 pytz==2019.2
 requests==2.25.1
-s3transfer==0.2.1
-smmap2==2.0.5
 sqlparse==0.2.4
 urllib3==1.25.3
 uWSGI==2.0.18

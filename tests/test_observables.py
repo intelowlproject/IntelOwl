@@ -54,6 +54,7 @@ from .utils import (
     CommonTestCases_observables,
     CommonTestCases_ip_url_domain,
     CommonTestCases_ip_domain_hash,
+    CommonTestCases_ip_url_hash,
     CommonTestCases_url_domain,
 )
 
@@ -99,6 +100,7 @@ def mocked_triage_post(*args, **kwargs):
 class IPAnalyzersTests(
     CommonTestCases_ip_domain_hash,
     CommonTestCases_ip_url_domain,
+    CommonTestCases_ip_url_hash,
     CommonTestCases_observables,
     TestCase,
 ):
@@ -467,6 +469,7 @@ class DomainAnalyzersTests(
 class URLAnalyzersTests(
     CommonTestCases_ip_url_domain,
     CommonTestCases_url_domain,
+    CommonTestCases_ip_url_hash,
     CommonTestCases_observables,
     TestCase,
 ):
@@ -559,7 +562,10 @@ class URLAnalyzersTests(
 @mock_connections(patch("requests.get", side_effect=mocked_requests))
 @mock_connections(patch("requests.post", side_effect=mocked_requests))
 class HashAnalyzersTests(
-    CommonTestCases_ip_domain_hash, CommonTestCases_observables, TestCase
+    CommonTestCases_ip_url_hash,
+    CommonTestCases_ip_domain_hash,
+    CommonTestCases_observables,
+    TestCase,
 ):
     @staticmethod
     def get_params():

@@ -1334,6 +1334,23 @@
     },
     "soft_time_limit": 30
   },
+  "XForceExchange": {
+    "type": "observable",
+    "observable_supported": [
+      "ip",
+      "hash",
+      "url"
+    ],
+    "external_service": true,
+    "description": "scan an observable on IBM X-Force Exchange.",
+    "requires_configuration": true,
+    "python_module": "xforce.XForce",
+    "soft_time_limit": 30,
+    "additional_config_params": {
+      "api_key_name": "XFORCE_KEY",
+      "api_password_name": "XFORCE_PASSWORD"
+    }
+  },
   "Xlm_Macro_Deobfuscator": {
     "type": "file",
     "supported_filetypes": [

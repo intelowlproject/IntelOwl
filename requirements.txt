@@ -70,4 +70,5 @@ google>=3.0.0
 eventlet==0.29.1
 mwdblib==3.3.1 
 django-nose==1.4.7
-
+drf-spectacular==0.14.0
+sphinxcontrib-openapi==0.7.0

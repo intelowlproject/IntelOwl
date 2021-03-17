@@ -34,20 +34,16 @@ def ask_analysis_availability(request):
     Also, you need to specify the analyzers needed because, otherwise, it is
     highly probable that you won't get all the results that you expect
 
-    :param md5: string
-        md5 of the sample or observable to look for
-    :param [analyzers_needed]: list
-        specify analyzers needed. It requires either this
+    :param str md5: md5 of the sample or observable to look for
+    :param list analyzers_needed: specify analyzers needed. It requires either this
         or run_all_available_analyzers
-    :param [run_all_available_analyzers]: bool
+    :param bool run_all_available_analyzers:
         if we are looking for an analysis executed with this flag set
-    :param [running_only]: bool
-        check only for running analysis, default False, any value is True
-
-    :return 200:
-        if ok with list of all analysis related to that md5
-    :return 500:
-        if failed
+    :param bool running_only: check only for running analysis,
+        default False, any value is True
+    :returns:
+        - 200 - if ok with list of all analysis related to that md5
+        - 500 - if failed
     """
     source = str(request.user)
     analyzers_needed_list = []
@@ -133,45 +129,29 @@ def send_analysis_request(request):
     """
     This endpoint allows to start a Job related to a file or an observable
 
-    :param is_sample: bool
-        is a sample (file) or an observable (domain, ip, ...)
-    :param md5: string
-        md5 of the item to analyze
-    :param [file]: binary
-        required if is_sample=True, the binary
-    :param [file_mimetype]: string
-        optional, the binary mimetype, calculated by default
-    :param [file_name]: string
-        optional if is_sample=True, the binary name
-    :param [observable_name]: string
-        required if is_sample=False, the observable value
-    :param [observable_classification]: string
-        required if is_sample=False, (domain, ip, ...)
-    :param [analyzers_requested]: list
-        list of requested analyzer to run, before filters
-    :param [tags_id]: list<int>
-        list of id's of tags to apply to job
-    :param [run_all_available_analyzers]: bool
-        default False
-    :param [private]: bool
-        default False,
+    :param bool is_sample: is a sample (file) or an observable (domain, ip, ...)
+    :param str md5:  md5 of the item to analyze
+    :param binary file: required if is_sample=True, the binary
+    :param str file_mimetype:  optional, the binary mimetype, calculated by default
+    :param str file_name: optional if is_sample=True, the binary name
+    :param str observable_name:  required if is_sample=False, the observable value
+    :param str observable_classification: required if is_sample=False, (domain, ip, ...)
+    :param list analyzers_requested: list of requested analyzer to run, before filters
+    :param list<int> tags_id: list of id's of tags to apply to job
+    :param bool run_all_available_analyzers: default False
+    :param bool private: default False,
         enable it to allow view permissions to only requesting user's groups.
-    :param [force_privacy]: bool
-        default False,
+    :param bool force_privacy: default False,
         enable it if you want to avoid to run analyzers with privacy issues
-    :param [disable_external_analyzers]: bool
-        default False,
+    :param bool disable_external_analyzers: default False,
         enable it if you want to exclude external analyzers
-    :param: [runtime_configuration]: dict
-        default {},
+    :param dict runtime_configuration: default {},
         contains additional parameters for particular analyzers
-    :param [test]: bool
-        disable analysis for API testing
+    :param bool test: disable analysis for API testing
 
-    :return 202:
-        if accepted
-    :return 500:
-        if failed
+    :returns:
+        - 202 - if accepted
+        - 500 - if failed
     """
     source = str(request.user)
     warnings = []
@@ -296,13 +276,12 @@ def send_analysis_request(request):
 @api_view(["GET"])
 def get_analyzer_configs(request):
     """
-    get the uploaded analyzer configuration,
+    Get the uploaded analyzer configuration,
     can be useful if you want to choose the analyzers programmatically
 
-    :return 200:
-        if ok
-    :return 500:
-        if failed
+    :returns:
+        - 200 - if ok
+        - 500 - if failed
     """
     try:
         logger.info(f"get_analyzer_configs received request from {str(request.user)}.")
@@ -324,9 +303,13 @@ def get_analyzer_configs(request):
 @api_view(["GET"])
 def download_sample(request):
     """
-    this method is used to download a sample from a Job ID
+    This method is used to download a sample from a Job ID
+
     :param request: job_id
-    :returns: 200 if found, 404 not found, 403 forbidden
+    :returns:
+        - 200 - if found
+        - 404 - not found
+        - 403 - forbidden
     """
     try:
         data_received = request.query_params
@@ -371,14 +354,11 @@ class JobViewSet(
     :methods_allowed:
         GET, OPTIONS, DELETE
 
-    :return 200:
-        if GET ok
-    :return 204:
-        if DELETE ok
-    :return 404:
-        if not found
-    :return 405:
-        if wrong HTTP method
+    :returns:
+        - 200 - if GET ok
+        - 204 - if DELETE ok
+        - 404 if not found
+        - 405 if wrong HTTP method
     """
 
     queryset = models.Job.objects.order_by("-received_request_time").all()
@@ -408,9 +388,13 @@ class JobViewSet(
     )
     def kill(self, request, pk=None):
         """
-        kill running job by closing celery tasks and marking as killed
-        :url param: pk (job_id)
-        :returns: 200 if killed, 404 not found, 403 forbidden, 400 bad request
+        Kill running job by closing celery tasks and marking as killed
+
+        :param url: pk (job_id)
+        :returns:
+         - 200 - if killed
+         - 404 - not found
+         - 403 - forbidden, 400 bad request
         """
         try:
             logger.info(
@@ -457,12 +441,10 @@ class TagViewSet(viewsets.ModelViewSet):
     :methods_allowed:
         GET, POST, PUT, DELETE, OPTIONS
 
-    :return 200:
-        if ok
-    :return 404:
-        if not found
-    :return 405:
-        if wrong HTTP method
+    :returns:
+        - 200 - if ok
+        - 404 - if not found
+        - 405 - if wrong HTTP method
     """
 
     queryset = models.Tag.objects.all()

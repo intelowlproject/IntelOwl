@@ -1,6 +1,6 @@
 {
     "puppeteerArgs": [
-        "--no-sandbox"
+
     ],
     "timeout": 120000
 }

@@ -15,3 +15,5 @@ services:
       - env_file_integrations
     volumes:
       - generic_logs:/var/log/intel_owl
+    security_opt: 
+      - seccomp:"integrations/rendertron/chrome.json"

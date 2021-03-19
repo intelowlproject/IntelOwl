@@ -706,7 +706,7 @@
     "python_module": "rendertron.Rendertron",
     "requires_configuration": true,
     "additional_config_params": {},
-    "soft_time_limit": 600,
+    "soft_time_limit": 150,
     "queue": "local"
   },
   "Qiling_Windows": {

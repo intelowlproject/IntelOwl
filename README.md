@@ -88,7 +88,8 @@ license terms.
 [Speakeasy](https://github.com/fireeye/speakeasy),
 [Checkdmarc](https://github.com/domainaware/checkdmarc),
 [Manalyze](https://github.com/JusticeRage/Manalyze),
-[Qiling](https://github.com/qilingframework/qiling)
+[Qiling](https://github.com/qilingframework/qiling),
+[Renderton](https://github.com/GoogleChrome/rendertron/blob/main/LICENSE)
 
 ## Acknowledgments
 

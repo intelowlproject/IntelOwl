@@ -34,7 +34,13 @@ release = "v2.2.0"
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ["recommonmark", "sphinx_rtd_theme", "sphinxcontrib.openapi"]
+extensions = [
+    "recommonmark",
+    "sphinx_rtd_theme",
+    "sphinxcontrib.openapi",
+    "sphinxcontrib.redoc",
+]
+redoc_uri = "https://cdn.jsdelivr.net/npm/redoc@next/bundles/redoc.standalone.js"
 
 source_suffix = [".rst", ".md"]
 
@@ -47,6 +53,15 @@ templates_path = ["_templates"]
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = []
+
+redoc = [
+    {
+        "name": "IntelOwl Redoc",
+        "page": "Redoc",
+        "spec": "schema.yml",
+        "opts": {"suppress-warnings": True, "hide-hostname": True},
+    }
+]
 
 
 # -- Options for HTML output -------------------------------------------------

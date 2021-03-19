@@ -6,28 +6,62 @@ paths:
   /api/ask_analysis_availability:
     get:
       operationId: api_ask_analysis_availability_retrieve
-      description: |-
-        This is useful to avoid repeating the same analysis multiple times.
-        By default this API checks if there are existing analysis related to the md5 in
-        status "running" or "reported_without_fails"
-        Also, you need to specify the analyzers needed because, otherwise, it is
-        highly probable that you won't get all the results that you expect
+      description: |2-
 
-        :param str md5: md5 of the sample or observable to look for
-        :param list analyzers_needed: specify analyzers needed. It requires either this
-            or run_all_available_analyzers
-        :param bool run_all_available_analyzers:
-            if we are looking for an analysis executed with this flag set
-        :param bool running_only: check only for running analysis,
-            default False, any value is True
-        :returns:
-            - 200 - if ok with list of all analysis related to that md5
-            - 500 - if failed
+            This is useful to avoid repeating the same analysis multiple times.
+            By default this API checks if there are existing analysis related to the md5 in
+            status "running" or "reported_without_fails"
+            Also, you need to specify the analyzers needed because, otherwise, it is
+            highly probable that you won't get all the results that you expect
+      parameters:
+      - in: query
+        name: analyzers_needed
+        schema:
+          type: object
+          additionalProperties: {}
+        description: |2-
+
+                      Specify analyzers needed.
+                      It requires either this or run_all_available_analyzers
+      - in: query
+        name: md5
+        schema:
+          type: string
+        description: md5 of the sample or observable to look for
+      - in: query
+        name: run_all_available_analyzers
+        schema:
+          type: boolean
+        description: If we are looking for an analysis executed with this flag set
+      - in: query
+        name: running_only
+        schema:
+          type: boolean
+        description: |2-
+
+                      Check only for running analysis,
+                      default False, any value is True
       tags:
       - api
       responses:
         '200':
-          description: No response body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AskAnalysisAvailabilitySuccessResponse'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AskAnalysisAvailabilityInsufficientDataResponse'
+          description: ''
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AskAnalysisAvailabilityErrorResponse'
+          description: ''
   /api/auth/login:
     post:
       operationId: api_auth_login_create
@@ -72,49 +106,62 @@ paths:
   /api/download_sample:
     get:
       operationId: api_download_sample_retrieve
-      description: |-
-        This method is used to download a sample from a Job ID
-
-        :param request: job_id
-        :returns:
-            - 200 - if found
-            - 404 - not found
-            - 403 - forbidden
+      description: This method is used to download a sample from a Job ID
+      parameters:
+      - in: query
+        name: job_id
+        schema:
+          type: integer
+        description: Job Id
       tags:
       - api
       responses:
         '200':
-          description: No response body
+          content:
+            application/json:
+              schema:
+                type: string
+                format: binary
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DownloadSampleInsufficientData'
+          description: ''
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DownloadSampleInsufficientData'
+          description: ''
   /api/get_analyzer_configs:
     get:
       operationId: api_get_analyzer_configs_retrieve
-      description: |-
+      description: |2-
+
         Get the uploaded analyzer configuration,
         can be useful if you want to choose the analyzers programmatically
-
-        :returns:
-            - 200 - if ok
-            - 500 - if failed
       tags:
       - api
       responses:
         '200':
-          description: No response body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetAnalyzerConfigsSuccessResponse'
+          description: ''
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetAnalyzerConfigsFailedResponse'
+          description: ''
   /api/jobs:
     get:
       operationId: api_jobs_list
-      description: |-
-        REST endpoint to fetch list of jobs or retrieve a job with job ID.
-        Requires authentication.
-
-        :methods_allowed:
-            GET, OPTIONS, DELETE
-
-        :returns:
-            - 200 - if GET ok
-            - 204 - if DELETE ok
-            - 404 if not found
-            - 405 if wrong HTTP method
+      description: "\n    REST endpoint to fetch list of jobs or retrieve a job with\
+        \ job ID.\n    Requires authentication.\n    "
       tags:
       - api
       responses:
@@ -129,18 +176,8 @@ paths:
   /api/jobs/{id}:
     get:
       operationId: api_jobs_retrieve
-      description: |-
-        REST endpoint to fetch list of jobs or retrieve a job with job ID.
-        Requires authentication.
-
-        :methods_allowed:
-            GET, OPTIONS, DELETE
-
-        :returns:
-            - 200 - if GET ok
-            - 204 - if DELETE ok
-            - 404 if not found
-            - 405 if wrong HTTP method
+      description: "\n    REST endpoint to fetch list of jobs or retrieve a job with\
+        \ job ID.\n    Requires authentication.\n    "
       parameters:
       - in: path
         name: id
@@ -159,18 +196,8 @@ paths:
           description: ''
     delete:
       operationId: api_jobs_destroy
-      description: |-
-        REST endpoint to fetch list of jobs or retrieve a job with job ID.
-        Requires authentication.
-
-        :methods_allowed:
-            GET, OPTIONS, DELETE
-
-        :returns:
-            - 200 - if GET ok
-            - 204 - if DELETE ok
-            - 404 if not found
-            - 405 if wrong HTTP method
+      description: "\n    REST endpoint to fetch list of jobs or retrieve a job with\
+        \ job ID.\n    Requires authentication.\n    "
       parameters:
       - in: path
         name: id
@@ -186,14 +213,8 @@ paths:
   /api/jobs/{id}/kill:
     patch:
       operationId: api_jobs_kill_partial_update
-      description: |-
-        Kill running job by closing celery tasks and marking as killed
-
-        :param url: pk (job_id)
-        :returns:
-         - 200 - if killed
-         - 404 - not found
-         - 403 - forbidden, 400 bad request
+      description: "\n    REST endpoint to fetch list of jobs or retrieve a job with\
+        \ job ID.\n    Requires authentication.\n    "
       parameters:
       - in: path
         name: id
@@ -224,52 +245,128 @@ paths:
   /api/send_analysis_request:
     post:
       operationId: api_send_analysis_request_create
-      description: |-
-        This endpoint allows to start a Job related to a file or an observable
+      description: |2-
 
-        :param bool is_sample: is a sample (file) or an observable (domain, ip, ...)
-        :param str md5:  md5 of the item to analyze
-        :param binary file: required if is_sample=True, the binary
-        :param str file_mimetype:  optional, the binary mimetype, calculated by default
-        :param str file_name: optional if is_sample=True, the binary name
-        :param str observable_name:  required if is_sample=False, the observable value
-        :param str observable_classification: required if is_sample=False, (domain, ip, ...)
-        :param list analyzers_requested: list of requested analyzer to run, before filters
-        :param list<int> tags_id: list of id's of tags to apply to job
-        :param bool run_all_available_analyzers: default False
-        :param bool private: default False,
-            enable it to allow view permissions to only requesting user's groups.
-        :param bool force_privacy: default False,
-            enable it if you want to avoid to run analyzers with privacy issues
-        :param bool disable_external_analyzers: default False,
-            enable it if you want to exclude external analyzers
-        :param dict runtime_configuration: default {},
-            contains additional parameters for particular analyzers
-        :param bool test: disable analysis for API testing
+            This endpoint allows to start a Job related to a file or an observable
+      parameters:
+      - in: query
+        name: analyzers_requested
+        schema:
+          type: object
+          additionalProperties: {}
+        description: list of requested analyzer to run, before filters
+      - in: query
+        name: disable_external_analyzers
+        schema:
+          type: boolean
+        description: |2-
 
-        :returns:
-            - 202 - if accepted
-            - 500 - if failed
+                      Default False, enable it if you want to exclude external analyzers
+      - in: query
+        name: file
+        schema:
+          type: string
+          format: binary
+        description: required if is_sample=True, the binary
+      - in: query
+        name: file_mimetype
+        schema:
+          type: string
+        description: optional, the binary mimetype, calculated by default
+      - in: query
+        name: file_name
+        schema:
+          type: string
+        description: optional if is_sample=True, the binary name
+      - in: query
+        name: force_privacy
+        schema:
+          type: boolean
+        description: |2-
+
+                      Default False,
+                      enable it if you want to avoid to run analyzers with privacy issues
+      - in: query
+        name: is_sample
+        schema:
+          type: boolean
+        description: is a sample (file) or an observable (domain, ip, ...)
+      - in: query
+        name: md5
+        schema:
+          type: string
+        description: md5 of the item to analyze
+      - in: query
+        name: observable_classification
+        schema:
+          type: string
+        description: required if is_sample=False, (domain, ip, ...)
+      - in: query
+        name: observable_name
+        schema:
+          type: string
+        description: required if is_sample=False, the observable value
+      - in: query
+        name: private
+        schema:
+          type: boolean
+        description: |2-
+
+                      Default False,
+                      enable it to allow view permissions to only requesting user's groups.
+      - in: query
+        name: run_all_available_analyzers
+        schema:
+          type: boolean
+        description: default False
+      - in: query
+        name: runtime_configuration
+        schema:
+          type: object
+          additionalProperties: {}
+        description: |2-
+
+                      Default {}, contains additional parameters for particular analyzers
+      - in: query
+        name: tags_id
+        schema:
+          type: object
+          additionalProperties: {}
+        description: list of id's of tags to apply to job
+      - in: query
+        name: test
+        schema:
+          type: boolean
+        description: disable analysis for API testing
       tags:
       - api
       responses:
-        '200':
-          description: No response body
+        '202':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SendAnalysisRequestSuccessResponse'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SendAnalysisRequestInsufficientData'
+          description: ''
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SendAnalysisRequestError'
+          description: ''
   /api/tags:
     get:
       operationId: api_tags_list
-      description: |-
-        REST endpoint to pefrom CRUD operations on Job tags.
-        Requires authentication.
-        POST/PUT/DELETE requires model/object level permission.
+      description: |2-
 
-        :methods_allowed:
-            GET, POST, PUT, DELETE, OPTIONS
-
-        :returns:
-            - 200 - if ok
-            - 404 - if not found
-            - 405 - if wrong HTTP method
+            REST endpoint to pefrom CRUD operations on Job tags.
+            Requires authentication.
+            POST/PUT/DELETE requires model/object level permission.
       tags:
       - api
       responses:
@@ -283,18 +380,11 @@ paths:
           description: ''
     post:
       operationId: api_tags_create
-      description: |-
-        REST endpoint to pefrom CRUD operations on Job tags.
-        Requires authentication.
-        POST/PUT/DELETE requires model/object level permission.
+      description: |2-
 
-        :methods_allowed:
-            GET, POST, PUT, DELETE, OPTIONS
-
-        :returns:
-            - 200 - if ok
-            - 404 - if not found
-            - 405 - if wrong HTTP method
+            REST endpoint to pefrom CRUD operations on Job tags.
+            Requires authentication.
+            POST/PUT/DELETE requires model/object level permission.
       tags:
       - api
       requestBody:
@@ -319,18 +409,11 @@ paths:
   /api/tags/{id}:
     get:
       operationId: api_tags_retrieve
-      description: |-
-        REST endpoint to pefrom CRUD operations on Job tags.
-        Requires authentication.
-        POST/PUT/DELETE requires model/object level permission.
+      description: |2-
 
-        :methods_allowed:
-            GET, POST, PUT, DELETE, OPTIONS
-
-        :returns:
-            - 200 - if ok
-            - 404 - if not found
-            - 405 - if wrong HTTP method
+            REST endpoint to pefrom CRUD operations on Job tags.
+            Requires authentication.
+            POST/PUT/DELETE requires model/object level permission.
       parameters:
       - in: path
         name: id
@@ -349,18 +432,11 @@ paths:
           description: ''
     put:
       operationId: api_tags_update
-      description: |-
-        REST endpoint to pefrom CRUD operations on Job tags.
-        Requires authentication.
-        POST/PUT/DELETE requires model/object level permission.
+      description: |2-
 
-        :methods_allowed:
-            GET, POST, PUT, DELETE, OPTIONS
-
-        :returns:
-            - 200 - if ok
-            - 404 - if not found
-            - 405 - if wrong HTTP method
+            REST endpoint to pefrom CRUD operations on Job tags.
+            Requires authentication.
+            POST/PUT/DELETE requires model/object level permission.
       parameters:
       - in: path
         name: id
@@ -391,18 +467,11 @@ paths:
           description: ''
     patch:
       operationId: api_tags_partial_update
-      description: |-
-        REST endpoint to pefrom CRUD operations on Job tags.
-        Requires authentication.
-        POST/PUT/DELETE requires model/object level permission.
+      description: |2-
 
-        :methods_allowed:
-            GET, POST, PUT, DELETE, OPTIONS
-
-        :returns:
-            - 200 - if ok
-            - 404 - if not found
-            - 405 - if wrong HTTP method
+            REST endpoint to pefrom CRUD operations on Job tags.
+            Requires authentication.
+            POST/PUT/DELETE requires model/object level permission.
       parameters:
       - in: path
         name: id
@@ -432,18 +501,11 @@ paths:
           description: ''
     delete:
       operationId: api_tags_destroy
-      description: |-
-        REST endpoint to pefrom CRUD operations on Job tags.
-        Requires authentication.
-        POST/PUT/DELETE requires model/object level permission.
+      description: |2-
 
-        :methods_allowed:
-            GET, POST, PUT, DELETE, OPTIONS
-
-        :returns:
-            - 200 - if ok
-            - 404 - if not found
-            - 405 - if wrong HTTP method
+            REST endpoint to pefrom CRUD operations on Job tags.
+            Requires authentication.
+            POST/PUT/DELETE requires model/object level permission.
       parameters:
       - in: path
         name: id
@@ -458,6 +520,58 @@ paths:
           description: No response body
 components:
   schemas:
+    AskAnalysisAvailabilityErrorResponse:
+      type: object
+      properties:
+        detail:
+          type: string
+          readOnly: true
+      required:
+      - detail
+    AskAnalysisAvailabilityInsufficientDataResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          readOnly: true
+      required:
+      - error
+    AskAnalysisAvailabilitySuccessResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          readOnly: true
+        job_id:
+          type: string
+          readOnly: true
+      required:
+      - job_id
+      - status
+    DownloadSampleInsufficientData:
+      type: object
+      properties:
+        detail:
+          type: string
+          readOnly: true
+      required:
+      - detail
+    GetAnalyzerConfigsFailedResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          readOnly: true
+      required:
+      - error
+    GetAnalyzerConfigsSuccessResponse:
+      type: object
+      properties:
+        analyzers_config:
+          type: object
+          additionalProperties: {}
+      required:
+      - analyzers_config
     Job:
       type: object
       description: |-
@@ -682,6 +796,33 @@ components:
         color:
           type: string
           maxLength: 7
+    SendAnalysisRequestError:
+      type: object
+      properties:
+        detail:
+          type: string
+          readOnly: true
+      required:
+      - detail
+    SendAnalysisRequestInsufficientData:
+      type: object
+      properties:
+        error:
+          type: string
+          readOnly: true
+      required:
+      - error
+    SendAnalysisRequestSuccessResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          readOnly: true
+        job_id:
+          type: integer
+      required:
+      - job_id
+      - status
     StatusEnum:
       enum:
       - pending

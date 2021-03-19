@@ -1,6 +1,6 @@
 # IMPORTANT: The version must match the version of docker-compose.yml
 ---
-version: '3'
+version: "3"
 
 # All additional integrations should be added following this format only.
 
@@ -17,5 +17,5 @@ services:
       - env_file_integrations
     volumes:
       - generic_logs:/var/log/intel_owl
-    security_opt:   
-      - seccomp:"integrations/rendertron/chrome.json"
+    security_opt:
+      - seccomp:"integrations/rendertron/seccomp/chrome.json"

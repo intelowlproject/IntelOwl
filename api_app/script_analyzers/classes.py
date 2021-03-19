@@ -295,12 +295,6 @@ class DockerBasedAnalyzer(metaclass=ABCMeta):
             raise AnalyzerRunException("max polls tried without getting any result.")
         return json_data
 
-    def _handle_test_run(self):
-        if hasattr(self, "is_test") and getattr(self, "is_test"):
-            # only happens in case of testing
-            self.report["success"] = True
-            return {}
-
     def _raise_container_not_running(self):
         raise AnalyzerConfigurationException(
             f"{self.name} docker container is not running.\n"
@@ -327,7 +321,10 @@ class DockerBasedAnalyzer(metaclass=ABCMeta):
         """
 
         # handle in case this is a test
-        self._handle_test_run()
+        if hasattr(self, "is_test") and getattr(self, "is_test"):
+            # only happens in case of testing
+            self.report["success"] = True
+            return {}
 
         # step #1: request new analysis
         args = req_data.get("args", [])
@@ -372,8 +369,6 @@ class DockerBasedAnalyzer(metaclass=ABCMeta):
         Returns:
             Response: Response object of request
         """
-
-        self._handle_test_run()
 
         # step #1: request new analysis
         try:

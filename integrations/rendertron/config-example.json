@@ -1,7 +1,6 @@
 {
     "puppeteerArgs": [
-        "--proxy-server=<YOUR PROXY SERVER>",
-        "--no-sandbox"
+        "--proxy-server=<YOUR PROXY SERVER>"
     ],
     "timeout": 120000
 }

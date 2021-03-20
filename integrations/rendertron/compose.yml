@@ -11,9 +11,5 @@ services:
     restart: unless-stopped
     expose:
       - "4006"
-    env_file:
-      - env_file_integrations
-    volumes:
-      - generic_logs:/var/log/intel_owl
     security_opt:
       - seccomp:"integrations/rendertron/seccomp/chrome.json"

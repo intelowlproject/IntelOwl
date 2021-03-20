@@ -1,0 +1,15 @@
+# IMPORTANT: The version must match the version of docker-compose.yml
+---
+version: "3"
+
+# All additional integrations should be added following this format only.
+
+services:
+  rendertron:
+    image: intelowlproject/intelowl_rendertron:${INTELOWL_TAG_VERSION}
+    container_name: intelowl_rendertron
+    restart: unless-stopped
+    expose:
+      - "4006"
+    security_opt:
+      - seccomp:"integrations/rendertron/seccomp/chrome.json"

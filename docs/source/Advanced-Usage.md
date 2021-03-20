@@ -2,13 +2,20 @@
 
 This page includes details about some advanced features that Intel Owl provides which can be optionally enabled. Namely,
 
-- [Optional Analyzers](#optional-analyzers)
-- [Customize analyzer execution at time of request](#customize-analyzer-execution-at-time-of-request)
-- [Elastic Search (with Kibana)](#elastic-search)
-- [Django Groups & Permissions](#django-groups-permissions)
-- [Authentication options](#authentication-options)
-- [GKE deployment](#google-kubernetes-engine-deployment)
-- [Multi Queue](#multi-queue)
+- [Advanced Usage](#advanced-usage)
+  - [Optional Analyzers](#optional-analyzers)
+  - [Customize analyzer execution at time of request](#customize-analyzer-execution-at-time-of-request)
+        - [from the GUI](#from-the-gui)
+        - [from Pyintelowl](#from-pyintelowl)
+  - [Elastic Search](#elastic-search)
+      - [Kibana](#kibana)
+      - [Example Configuration](#example-configuration)
+  - [Django Groups & Permissions](#django-groups--permissions)
+  - [Authentication options](#authentication-options)
+      - [LDAP](#ldap)
+  - [Google Kubernetes Engine deployment](#google-kubernetes-engine-deployment)
+  - [Multi Queue](#multi-queue)
+      - [Queue Customization](#queue-customization)
 
 
 ## Optional Analyzers
@@ -68,6 +75,11 @@ table, th, td {
      Qiling provides a <a href="https://github.com/qilingframework/qiling/blob/master/examples/scripts/dllscollector.bat"> DllCollector</a> to retrieve dlls from your licensed Windows. 
      <a href="https://docs.qiling.io/en/latest/profile/"> Profiles </a> must be placed in the <code>profiles</code> subfolder
      </td>
+  </tr>
+  <tr>
+    <td>Renderton</td>
+    <td><code>Renderton</code></td>
+    <td>get screenshot of a web page using rendertron (a headless chrome solution using puppeteer). Configuration variables have to be included in the `config.json`, see <a href="https://github.com/GoogleChrome/rendertron#config"> config options of renderton </a>. To use a proxy, include an argument <code>--proxy-server=YOUR_PROXY_SERVER</code> in <code>puppeteerArgs</code>.</td>
   </tr>
 </table>
 

@@ -18,7 +18,7 @@ djangorestframework==3.12.1
 dnspython==1.16.0
 docutils==0.15.2
 easygui==0.98.1
-flower==0.9.3
+flower==0.9.7
 future==0.17.1
 gitdb2==2.0.5
 GitPython==3.0.2

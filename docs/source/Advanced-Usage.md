@@ -149,6 +149,16 @@ List of some of the analyzers with optional configuration:
   * Above mentioned `search_type` is just different routes mentioned in [docs](https://api.wigle.net/swagger#/v3_ALPHA). Also, the string to be passed in input field of generic analyzers have a format. Different variables are separated by semicolons(`;`) and the field-name and value are separated by equals sign(`=`). Example string for search_type `CDMA Network` is `sid=12345;nid=12345;bsid=12345`
 * `CRXcavator`:
   * Every Chrome-Extension has a unique alpha=numerc identifier. That's the only Input necessary. Eg: `Norton Safe Search Enhanced`'s identifier is `eoigllimhcllmhedfbmahegmoakcdakd`.
+* `SSAPINet`:
+  *  `use_proxy` (default `false`) and `proxy` (default `""`) - use these options to pass your request through a proxy server.
+  *  `output` (default `"image"`) (available options `"image"`, `"json"`) - this specifies whether the result would be a raw image or json (containing link to the image stored on their server).
+  *  `extra_api_params` (default `{"full_page": true}`) - all other parameters provided by the API can be added here as an object (dictionary). Some of the params available are: 
+     * `full_page` (default `true`) - if `true`, takes screenshot of the entire webpage.
+     * `fresh` (default `false`) - if `true`, forces a fresh screenshot instead of a cached one.
+     * `lazy_load` (default `false`) - if `true`, their browser will scroll down the entire page so that all content is loaded.
+     * `destroy_screenshot` (default `false`) - if `true` the screenshot is not stored on their servers. Please make sure to use `output` parameter with value `image`, so you don't lose the screenshot, as the image link provided in the `json` result would work only once.
+     
+     Refer to the [docs](https://screenshotapi.net/documentation) for a reference to what other parameters are and their default values.
  
 
 There are two ways to do this:

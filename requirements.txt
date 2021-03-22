@@ -42,7 +42,7 @@ pycparser==2.19
 pydeep==0.4
 pyexifinfo==0.4.0
 pymisp==2.4.126
-pyparsing==2.4.2
+pyparsing==2.4.7
 pypdns==1.4.1
 pypssl==2.1
 pyrsistent==0.15.4

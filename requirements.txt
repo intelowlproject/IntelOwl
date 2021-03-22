@@ -8,6 +8,7 @@ djangorestframework==3.12.1
 dnspython==1.16.0
 easygui==0.98.1
 flower==0.9.7
+gitdb2==2.0.5
 GitPython==3.0.2
 maxminddb==2.0.3
 oletools==0.56

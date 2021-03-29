@@ -1,4 +1,4 @@
-boto3==1.9.216
+boto3==1.17.39
 celery==4.4.7
 checkdmarc==4.3.1
 dataclasses==0.6

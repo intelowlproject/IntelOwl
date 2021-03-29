@@ -63,7 +63,7 @@ cd /opt/deploy
 git clone https://github.com/quark-engine/quark-rules quark-rules
 # this is done to lock the version since the repo does not have tags.
 cd quark-rules
-git reset --hard b2cca423ed3c0786e6e41b2cb277676ed66d7854
+git checkout tags/0.0.1
 # chown directories
 chown -R www-data:www-data /opt/deploy/yara /opt/deploy/quark-rules
 

@@ -28,8 +28,8 @@ requests==2.25.1
 uWSGI==2.0.19.1
 yara-python==4.0.3
 djangorestframework-guardian==0.3.0
-quark-engine==21.1.2
-git+https://github.com/DissectMalware/XLMMacroDeobfuscator.git@89fbce0c87014a4b5a22c1aef09c8b3ea9bf16c0
+quark-engine==21.3.3
+git+https://github.com/DissectMalware/XLMMacroDeobfuscator.git@4b5d649b0028e2c109f5f5d7a7547ef9dcccc90a
 speakeasy-emulator==1.5.1
 django-memoize==2.3.1
 django-rest-durin==0.1.0

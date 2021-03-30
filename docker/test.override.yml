@@ -10,13 +10,3 @@ services:
     build:
       context: ..
       dockerfile: ./${DOCKERFILE_NGINX}
-
-  celery_beat:
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile
-
-  celery_worker_default:
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile

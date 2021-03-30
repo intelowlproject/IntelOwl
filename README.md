@@ -104,7 +104,7 @@ This project was created and will be upgraded thanks to the following organizati
 
 #### Google Summer Of Code
 
-Since its birth, this project has been partecipating to the GSoC under the Honeynet Project!
+Since its birth, this project has been participating in the GSoC under the Honeynet Project!
 
 * 2020: a lot of [new features](https://www.honeynet.org/gsoc/gsoc-2020/google-summer-of-code-2020-project-ideas/#intel-owl-improvements) were developed by Eshaan Bansal ([Twitter](https://twitter.com/mask0fmydisguis)).
 * 2021: you? [Projects available](https://www.honeynet.org/gsoc/gsoc-2021/google-summer-of-code-2021-project-ideas/)

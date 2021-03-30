@@ -327,7 +327,7 @@
     "description": "scan an IP against the Alpha Greynoise API (no API key required)",
     "python_module": "greynoise.GreyNoise",
     "additional_config_params": {
-      "greynoise_api_version": "v1"
+      "greynoise_api_version": "v3"
     },
     "soft_time_limit": 30
   },

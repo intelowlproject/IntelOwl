@@ -9,7 +9,7 @@ class GreyNoise(classes.ObservableAnalyzer):
     base_url: str = "https://api.greynoise.io"
 
     def set_config(self, additional_config_params):
-        self.api_version = additional_config_params.get("greynoise_api_version", "v1")
+        self.api_version = additional_config_params.get("greynoise_api_version", "v3")
         self.api_key_name = additional_config_params.get(
             "api_key_name", "GREYNOISE_API_KEY"
         )
@@ -18,8 +18,8 @@ class GreyNoise(classes.ObservableAnalyzer):
         )
 
     def run(self):
-        if self.api_version == "v1":
-            url = f"{self.base_url}/v1/query/ip"
+        if self.api_version == "v3":
+            url = f"{self.base_url}/v3/query/ip"
             headers = {"Content-Type": "application/x-www-form-urlencoded"}
             data = {"ip": self.observable_name}
 

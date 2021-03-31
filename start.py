@@ -1,7 +1,14 @@
 import subprocess
 import argparse
 
-docker_analyzers = ["thug", "apk_analyzers", "box_js", "static_analyzers", "qiling"]
+docker_analyzers = [
+    "thug",
+    "apk_analyzers",
+    "box_js",
+    "rendertron",
+    "static_analyzers",
+    "qiling",
+]
 
 path_mapping = {
     "default": "docker/default.yml",

@@ -42,6 +42,8 @@ from api_app.script_analyzers.observable_analyzers import (
     inquest,
     wigle,
     crxcavator,
+    rendertron,
+    ss_api_net,
 )
 from api_app.models import Job
 from .mock_utils import (
@@ -555,6 +557,26 @@ class URLAnalyzersTests(
             self.observable_name,
             self.observable_classification,
             {"analysis_type": "submit"},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    def test_rendertron(self, mock_get=None, mock_post=None):
+        report = rendertron.Rendertron(
+            "Rendertron",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    def test_ss_api_net(self, mock_get=None, mock_post=None):
+        report = ss_api_net.SSAPINet(
+            "SSAPINet",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {},
         ).start()
         self.assertEqual(report.get("success", False), True)
 

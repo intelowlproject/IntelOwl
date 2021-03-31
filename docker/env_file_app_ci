@@ -49,7 +49,7 @@ MWDB_KEY=test
 WIGLE_KEY=test
 XFORCE_KEY=test
 XFORCE_PASSWORD=test
-
+SSAPINET_KEY=test
 
 # Test tokens
 TEST_JOB_ID=1

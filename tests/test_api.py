@@ -16,14 +16,17 @@ if settings.DISABLE_LOGGING_TEST:
     logging.disable(logging.CRITICAL)
 
 
-class ApiJobTests(TestCase):
-    def setUp(self):
-        self.client = APIClient()
-        self.user = User.objects.create_superuser(
+class ApiViewTests(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super(ApiViewTests, cls).setUpClass()
+        cls.superuser = User.objects.create_superuser(
             username="test", email="test@intelowl.com", password="test"
         )
-        self.client.force_authenticate(user=self.user)
-        self.job_id = os.environ.get("TEST_JOB_ID", "1")
+
+    def setUp(self):
+        self.client = APIClient()
+        self.client.force_authenticate(user=self.superuser)
 
     def test_ask_analysis_availability(self):
         md5 = os.environ.get("TEST_MD5", "446c5fbb11b9ce058450555c1c27153c")
@@ -183,33 +186,92 @@ class ApiJobTests(TestCase):
         response = self.client.post("/api/send_analysis_request", data)
         self.assertEqual(response.status_code, 200)
 
-    def test_list_all_jobs(self):
-        response = self.client.get("/api/jobs")
-        logger.info(response)
-        self.assertEqual(response.status_code, 200)
 
-    def test_get_job_by_id(self):
-        self.assertEqual(self.user.has_perm("api_app.view_job"), True)
-        response = self.client.get(f"/api/jobs/{self.job_id}")
-        logger.info(response)
-        self.assertEqual(response.status_code, 200)
-
-
-class ApiTagTests(TestCase):
-    def setUp(self):
-        self.client = APIClient()
-        self.user = User.objects.create_user(
+class JobViewsetTests(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super(JobViewsetTests, cls).setUpClass()
+        cls.superuser = User.objects.create_superuser(
             username="test", email="test@intelowl.com", password="test"
         )
-        self.admin_user = User.objects.create_superuser(
-            username="test_admin", email="testadmin@intelowl.com", password="testadmin"
+
+    def setUp(self):
+        self.client = APIClient()
+        self.client.force_authenticate(user=self.superuser)
+        self.job, _ = models.Job.objects.get_or_create(
+            **{
+                "id": 1,
+                "observable_name": os.environ.get("TEST_IP"),
+                "md5": os.environ.get("TEST_MD5"),
+                "observable_classification": "ip",
+                "is_sample": False,
+                "run_all_available_analyzers": True,
+            }
         )
-        self.tag = models.Tag.objects.create(label="Test", color="#FF5733")
-        self.tag_id = os.environ.get("TEST_TAG_ID", "1")
+
+    def test_list_all_jobs(self):
+        response = self.client.get("/api/jobs")
+        self.assertEqual(response.status_code, 200)
+
+    def test_get_job_by_id_200(self):
+        response = self.client.get(f"/api/jobs/{self.job.id}")
+        self.assertEqual(response.status_code, 200)
+
+    def test_get_job_by_id_404(self):
+        # requesting for an ID that we know does not exist in DB
+        response = self.client.get("/api/jobs/999")
+        self.assertEqual(response.status_code, 404)
+
+    def test_delete_job_by_id_204(self):
+        self.assertEqual(models.Job.objects.count(), 1)
+        response = self.client.delete(f"/api/jobs/{self.job.id}")
+        self.assertEqual(response.status_code, 204)
+        self.assertEqual(models.Job.objects.count(), 0)
+
+    def test_delete_job_by_id_404(self):
+        self.assertEqual(models.Job.objects.count(), 1)
+        # requesting for an ID that we know does not exist in DB
+        response = self.client.delete("/api/jobs/999")
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(models.Job.objects.count(), 1)
+
+    def test_kill_job_by_id_200(self):
+        job = models.Job.objects.create(status="running")
+        self.assertEqual(job.status, "running")
+        response = self.client.patch(f"/api/jobs/{job.id}/kill")
+        self.assertEqual(response.status_code, 200)
+        job.refresh_from_db()
+        self.assertEqual(job.status, "killed")
+
+    def test_kill_job_by_id_404(self):
+        response = self.client.patch("/api/jobs/999/kill")
+        self.assertEqual(response.status_code, 404)
+
+    def test_kill_job_by_id_400(self):
+        # create a new job whose status is not "running"
+        job = models.Job.objects.create(status="reported_without_fails")
+        self.assertEqual(job.status, "reported_without_fails")
+        response = self.client.patch(f"/api/jobs/{job.id}/kill")
+        self.assertDictEqual(response.json(), {"detail": "Job is not running"})
+        self.assertEqual(response.status_code, 400)
+
+
+class TagViewsetTests(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super(TagViewsetTests, cls).setUpClass()
+        cls.superuser = User.objects.create_superuser(
+            username="test", email="test@intelowl.com", password="test"
+        )
+
+    def setUp(self):
+        self.client = APIClient()
+        self.client.force_authenticate(user=self.superuser)
+        self.tag, _ = models.Tag.objects.get_or_create(
+            id=1, label="Test", color="#FF5733"
+        )
 
     def test_create_new_tag(self):
-        self.client.force_authenticate(user=self.admin_user)
-        self.assertEqual(self.admin_user.has_perm("api_app.add_tag", self.tag), True)
         self.assertEqual(models.Tag.objects.count(), 1)
         data = {"label": "testLabel", "color": "#91EE28"}
         response = self.client.post("/api/tags", data)
@@ -217,47 +279,39 @@ class ApiTagTests(TestCase):
         self.assertEqual(models.Tag.objects.count(), 2)
 
     def test_list_all_tags(self):
-        self.client.force_authenticate(user=self.admin_user)
         response = self.client.get("/api/tags")
         self.assertEqual(response.status_code, 200)
 
-    def test_get_tag_by_id(self):
-        self.client.force_authenticate(user=self.user)
-        self.assertEqual(self.user.has_perm("api_app.view_tag", self.tag), False)
-        response = self.client.get(f"/api/tags/{self.tag_id}")
+    def test_get_tag_by_id_200(self):
+        response = self.client.get(f"/api/tags/{self.tag.id}")
+        self.assertEqual(response.status_code, 200)
+
+    def test_get_tag_by_id_404(self):
+        # requesting for an ID that we know does not exist in DB
+        response = self.client.get("/api/tags/999")
         self.assertEqual(response.status_code, 404)
 
-    def test_get_tag_by_id_admin(self):
-        self.client.force_authenticate(user=self.admin_user)
-        self.assertEqual(self.admin_user.has_perm("api_app.view_tag", self.tag), True)
-        response = self.client.get(f"/api/tags/{self.tag_id}")
+    def test_update_tag_by_id_200(self):
+        new_data = {"label": "newTestLabel", "color": "#765A54"}
+        response = self.client.put(f"/api/tags/{self.tag.id}", new_data)
+        self.assertDictContainsSubset(response.json, new_data)
         self.assertEqual(response.status_code, 200)
 
-    def test_update_tag_by_id(self):
-        self.client.force_authenticate(user=self.user)
-        self.assertEqual(self.user.has_perm("api_app.change_tag", self.tag), False)
+    def test_update_tag_by_id_404(self):
         new_data = {"label": "newTestLabel", "color": "#765A54"}
-        response = self.client.put(f"/api/tags/{self.tag_id}", new_data)
+        # requesting for an ID that we know does not exist in DB
+        response = self.client.put("/api/tags/999", new_data)
         self.assertEqual(response.status_code, 404)
 
-    def test_update_tag_by_id_admin(self):
-        self.client.force_authenticate(user=self.admin_user)
-        self.assertEqual(self.admin_user.has_perm("api_app.change_tag", self.tag), True)
-        new_data = {"label": "newTestLabel", "color": "#765A54"}
-        response = self.client.put(f"/api/tags/{self.tag_id}", new_data)
-        self.assertEqual(response.status_code, 200)
-
-    def test_delete_tag_by_id(self):
-        self.client.force_authenticate(user=self.user)
-        self.assertEqual(self.user.has_perm("api_app.delete_tag", self.tag), False)
-        response = self.client.delete(f"/api/tags/{self.tag_id}")
-        self.assertEqual(response.status_code, 403)
+    def test_delete_tag_by_id_404(self):
+        self.assertEqual(models.Tag.objects.count(), 1)
+        # requesting for an ID that we know does not exist in DB
+        response = self.client.delete("/api/tags/999")
+        self.assertEqual(response.status_code, 404)
         self.assertEqual(models.Tag.objects.count(), 1)
 
-    def test_delete_tag_by_id_admin(self):
-        self.client.force_authenticate(user=self.admin_user)
-        self.assertEqual(self.admin_user.has_perm("api_app.delete_tag", self.tag), True)
+    def test_delete_tag_by_id_204(self):
         self.assertEqual(models.Tag.objects.count(), 1)
-        response = self.client.delete(f"/api/tags/{self.tag_id}")
-        self.assertEqual(response.status_code, 200)
+        response = self.client.delete(f"/api/tags/{self.tag.id}")
+        self.assertEqual(response.status_code, 204)
         self.assertEqual(models.Tag.objects.count(), 0)

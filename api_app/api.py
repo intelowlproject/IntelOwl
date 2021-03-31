@@ -9,12 +9,12 @@ from wsgiref.util import FileWrapper
 from django.utils.decorators import method_decorator
 from django.http import HttpResponse
 from django.db.models import Q
-from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from rest_framework import serializers as BaseSerializer
 from rest_framework import status, viewsets, mixins
 from rest_framework.decorators import api_view, action
 from rest_framework.permissions import DjangoObjectPermissions
+from rest_framework.exceptions import NotFound, ParseError, PermissionDenied
 from guardian.decorators import permission_required_or_403
 from rest_framework_guardian.filters import ObjectPermissionsFilter
 from drf_spectacular.utils import (
@@ -528,40 +528,27 @@ class JobViewSet(
          - 404 - not found
          - 403 - forbidden, 400 bad request
         """
+        logger.info(
+            f"kill running job received request from {str(request.user)} "
+            f"-- (job_id:{pk})."
+        )
+        # get job object or raise 404
         try:
-            logger.info(
-                f"kill running job received request from {str(request.user)} "
-                f"-- (job_id:{pk})."
-            )
-            # get job object or raise 404
-            job = get_object_or_404(models.Job, pk=pk)
-            # check permission
-            if not request.user.has_perm("api_app.change_job", job):
-                return Response(
-                    {"detail": "You don't have permission to perform this operation."},
-                    status=status.HTTP_403_FORBIDDEN,
-                )
-            # check if job running
-            if job.status != "running":
-                return Response(
-                    {"detail": "Job is not running"},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-            # close celery tasks
-            general.kill_running_analysis(pk)
-            # set job status
-            job.status = "killed"
-            job.save()
-            return Response(status=status.HTTP_200_OK)
-
-        except Exception as e:
-            logger.exception(
-                f"kill_running_job requester:{str(request.user)} error:{e}."
-            )
-            return Response(
-                {"error": "error in kill_running_job. Check logs."},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
+            job = models.Job.objects.get(pk=pk)
+        except models.Job.DoesNotExist:
+            raise NotFound()
+        # check permission
+        if not request.user.has_perm("api_app.change_job", job):
+            raise PermissionDenied()
+        # check if job running
+        if job.status != "running":
+            raise ParseError(detail="Job is not running")
+        # close celery tasks
+        general.kill_running_analysis(pk)
+        # set job status
+        job.status = "killed"
+        job.save()
+        return Response(status=status.HTTP_200_OK)
 
 
 @add_docs(

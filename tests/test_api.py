@@ -8,12 +8,23 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from rest_framework.test import APIClient
 
 from intel_owl import settings
-from api_app import models
+from api_app import models, helpers
 
 logger = logging.getLogger(__name__)
 # disable logging library
 if settings.DISABLE_LOGGING_TEST:
     logging.disable(logging.CRITICAL)
+
+
+def get_test_file(fname):
+    floc = f"{settings.PROJECT_LOCATION}/test_files/{fname}"
+    with open(floc, "rb") as f:
+        binary = f.read()
+    uploaded_file = SimpleUploadedFile(
+        fname, binary, content_type="multipart/form-data"
+    )
+    md5 = hashlib.md5(binary).hexdigest()
+    return uploaded_file, md5
 
 
 class ApiViewTests(TestCase):
@@ -46,20 +57,14 @@ class ApiViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_send_corrupted_sample_pe(self):
-        filename = "non_valid_pe.exe"
-        test_file = f"{settings.PROJECT_LOCATION}/test_files/{filename}"
-        with open(test_file, "rb") as f:
-            binary = f.read()
-        md5 = hashlib.md5(binary).hexdigest()
         analyzers_requested = [
             "File_Info",
             "PE_Info",
             "Strings_Info_Classic",
             "Signature_Info",
         ]
-        uploaded_file = SimpleUploadedFile(
-            filename, binary, content_type="multipart/form-data"
-        )
+        filename = "non_valid_pe.exe"
+        uploaded_file, md5 = get_test_file(filename)
         data = {
             "md5": md5,
             "analyzers_requested": analyzers_requested,
@@ -75,11 +80,6 @@ class ApiViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_send_analysis_request_sample(self):
-        filename = "file.exe"
-        test_file = f"{settings.PROJECT_LOCATION}/test_files/{filename}"
-        with open(test_file, "rb") as f:
-            binary = f.read()
-        md5 = hashlib.md5(binary).hexdigest()
         analyzers_requested = [
             "Yara_Scan",
             "HybridAnalysis_Get_File",
@@ -95,9 +95,8 @@ class ApiViewTests(TestCase):
             "Strings_Info_ML",
             "MalwareBazaar_Get_File",
         ]
-        uploaded_file = SimpleUploadedFile(
-            filename, binary, content_type="multipart/form-data"
-        )
+        filename = "file.exe"
+        uploaded_file, md5 = get_test_file(filename)
         data = {
             "md5": md5,
             "analyzers_requested": analyzers_requested,
@@ -185,6 +184,47 @@ class ApiViewTests(TestCase):
         }
         response = self.client.post("/api/send_analysis_request", data)
         self.assertEqual(response.status_code, 200)
+
+    def test_get_analyzer_config(self):
+        response = self.client.get("/api/get_analyzer_configs")
+        self.assertEqual(response.status_code, 200)
+        self.assertNotEqual(response.json(), {})
+        self.assertDictEqual(response.json(), helpers.get_analyzer_config())
+
+    def test_download_sample_200(self):
+        self.assertEqual(models.Job.objects.count(), 1)
+        filename = "file.exe"
+        uploaded_file, md5 = get_test_file(filename)
+        job = models.Job.objects.create(
+            **{
+                "md5": md5,
+                "is_sample": True,
+                "file_name": filename,
+                "file_mimetype": "application/x-dosexec",
+                "file": uploaded_file,
+            }
+        )
+        self.assertEqual(models.Job.objects.count(), 2)
+        response = self.client.get(f"/api/download_sample?job_id={job.id}")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.headers["Content-Disposition"],
+            f"attachment; filename={job.file_name}",
+        )
+
+    def test_download_sample_404(self):
+        # requesting for an ID that we know does not exist in DB
+        response = self.client.get("/api/download_sample?job_id=999")
+        self.assertEqual(response.status_code, 404)
+
+    def test_download_sample_400(self):
+        # requesting for job where is_sample=False
+        response = self.client.get(f"/api/download_sample?job_id={self.job.id}")
+        self.assertEqual(response.status_code, 400)
+        self.assertDictContainsSubset(
+            response.json(),
+            {"detail": "Requested job does not have a sample associated with it."},
+        )
 
 
 class JobViewsetTests(TestCase):

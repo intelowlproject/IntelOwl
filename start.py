@@ -1,7 +1,14 @@
 import subprocess
 import argparse
 
-docker_analyzers = ["thug", "apk_analyzers", "box_js", "static_analyzers", "qiling"]
+docker_analyzers = [
+    "thug",
+    "apk_analyzers",
+    "box_js",
+    "rendertron",
+    "static_analyzers",
+    "qiling",
+]
 
 path_mapping = {
     "default": "docker/default.yml",
@@ -10,17 +17,21 @@ path_mapping = {
     "custom": "docker/custom.override.yml",
     "traefik": "docker/traefik.override.yml",
     "multi_queue": "docker/multi-queue.override.yml",
-    "apk_analyzers": "integrations/apk_analyzers/apk.yml",
-    "box_js": "integrations/box-js/boxjs.yml",
-    "static_analyzers": "integrations/static_analyzers/static_analyzers.yml",
-    "thug": "integrations/thug/thug.yml",
-    "apk_analyzers.test": "integrations/apk_analyzers/apk.test.yml",
-    "box_js.test": "integrations/box-js/boxjs.test.yml",
-    "static_analyzers.test": "integrations/static_analyzers/static_analyzers.test.yml",
-    "thug.test": "integrations/thug/thug.test.yml",
-    "qiling": "integrations/qiling/qiling.yml",
-    "qiling.test": "integrations/qiling/qiling.test.yml",
 }
+# to fix the box-js folder name
+path_mapping.update(
+    {
+        name: f"integrations/{name.replace('box_js', 'box-js')}/compose.yml"
+        for name in docker_analyzers
+    }
+)
+path_mapping.update(
+    {
+        name
+        + ".test": f"integrations/{name.replace('box_js', 'box-js')}/compose-tests.yml"
+        for name in docker_analyzers
+    }
+)
 path_mapping["all_analyzers"] = [path_mapping[key] for key in docker_analyzers]
 path_mapping["all_analyzers.test"] = [
     path_mapping[key + ".test"] for key in docker_analyzers
@@ -56,10 +67,10 @@ def start():
     )
     for integration in docker_analyzers:
         parser.add_argument(
-            "--" + integration,
+            f"--{integration}",
             required=False,
             action="store_true",
-            help="Uses the integration/" + integration + ".yml compose file",
+            help=f"Uses the integrations/{integration}/compose.yml file",
         )
 
     # possible upgrades
@@ -95,22 +106,31 @@ def start():
             "`all_analyzers` and another docker container"
         )
         return
-    compose_files = []
-    compose_files.append(path_mapping["default"])
+    # default file
+    compose_files = [path_mapping["default"]]
+    # mode
     if args.mode in ["ci", "test"]:
         compose_files.append(path_mapping[args.mode])
+    # upgrades
     for key in ["traefik", "multi_queue", "custom"]:
         if args.__dict__[key]:
             compose_files.append(path_mapping[key])
+    # additional integrations
     for key in docker_analyzers:
         if args.__dict__[key]:
             compose_files.append(path_mapping[key + test_appendix])
     if args.all_analyzers:
         compose_files.extend(
-            [analyzer for analyzer in path_mapping["all_analyzers" + test_appendix]]
+            [analyzer for analyzer in path_mapping[f"all_analyzers{test_appendix}"]]
         )
     # construct final command
-    base_command = ["docker-compose", "-p", "intel_owl"]
+    base_command = [
+        "docker-compose",
+        "-p",
+        "intel_owl",
+        "--project-directory",
+        "docker",
+    ]
     for compose_file in compose_files:
         base_command.append("-f")
         base_command.append(compose_file)

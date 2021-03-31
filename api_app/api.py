@@ -6,11 +6,13 @@ from .script_analyzers import general
 
 from wsgiref.util import FileWrapper
 
+from django.utils.decorators import method_decorator
 from django.http import HttpResponse
 from django.db.models import Q
+from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
-from rest_framework import status, viewsets
-from rest_framework.decorators import api_view
+from rest_framework import status, viewsets, mixins
+from rest_framework.decorators import api_view, action
 from rest_framework.permissions import DjangoObjectPermissions
 from guardian.decorators import permission_required_or_403
 from rest_framework_guardian.filters import ObjectPermissionsFilter
@@ -292,68 +294,6 @@ def send_analysis_request(request):
 
 
 @api_view(["GET"])
-@permission_required_or_403("api_app.view_job")
-def ask_analysis_result(request):
-    """
-    Endpoint to retrieve the status and results of a specific Job based on its ID
-
-    :param job_id: integer
-        Job ID
-    :return 200:
-        if ok
-    :return 500:
-        if failed
-    """
-    source = str(request.user)
-    try:
-        data_received = request.query_params
-        logger.info(
-            f"""
-            ask_analysis_result received request from {source}.
-             Data:{dict(data_received)}
-            """
-        )
-        if "job_id" not in data_received:
-            return Response({"error": "820"}, status=status.HTTP_400_BAD_REQUEST)
-
-        job_id = data_received["job_id"]
-        try:
-            job = models.Job.objects.get(id=job_id)
-            # check permission
-            if not request.user.has_perm("api_app.view_job", job):
-                return Response(
-                    {"detail": "You don't have permission to perform this operation."},
-                    status=status.HTTP_403_FORBIDDEN,
-                )
-        except models.Job.DoesNotExist:
-            response_dict = {"status": "not_available"}
-        else:
-            response_dict = {
-                "status": job.status,
-                "results": job.analysis_reports,
-                "job_id": str(job.id),
-            }
-            # adding elapsed time
-            finished_analysis_time = getattr(job, "finished_analysis_time", None)
-            if not finished_analysis_time:
-                finished_analysis_time = helpers.get_now()
-            elapsed_time = finished_analysis_time - job.received_request_time
-            seconds = elapsed_time.total_seconds()
-            response_dict["elapsed_time_in_seconds"] = seconds
-
-        logger.debug(response_dict)
-
-        return Response(response_dict, status=status.HTTP_200_OK)
-
-    except Exception as e:
-        logger.exception(f"ask_analysis_result requester:{source} error:{e}")
-        return Response(
-            {"error": "error in ask_analysis_result. Check logs"},
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        )
-
-
-@api_view(["GET"])
 def get_analyzer_configs(request):
     """
     get the uploaded analyzer configuration,
@@ -393,11 +333,8 @@ def download_sample(request):
         logger.info(f"Get binary by Job ID. Data received {data_received}")
         if "job_id" not in data_received:
             return Response({"error": "821"}, status=status.HTTP_400_BAD_REQUEST)
-        # get job object
-        try:
-            job = models.Job.objects.get(id=data_received["job_id"])
-        except models.Job.DoesNotExist:
-            return Response({"detail": "not found"}, status=status.HTTP_404_NOT_FOUND)
+        # get job object or raise 404
+        job = get_object_or_404(models.Job, pk=data_received["id"])
         # check permission
         if not request.user.has_perm("api_app.view_job", job):
             return Response(
@@ -421,16 +358,23 @@ def download_sample(request):
         )
 
 
-class JobViewSet(viewsets.ReadOnlyModelViewSet):
+class JobViewSet(
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.DestroyModelMixin,
+    viewsets.GenericViewSet,
+):
     """
     REST endpoint to fetch list of jobs or retrieve a job with job ID.
     Requires authentication.
 
     :methods_allowed:
-        GET, OPTIONS
+        GET, OPTIONS, DELETE
 
     :return 200:
-        if ok
+        if GET ok
+    :return 204:
+        if DELETE ok
     :return 404:
         if not found
     :return 405:
@@ -455,6 +399,53 @@ class JobViewSet(viewsets.ReadOnlyModelViewSet):
             return self.serializer_action_classes[self.action]
         except (KeyError, AttributeError):
             return super(JobViewSet, self).get_serializer_class()
+
+    @action(detail=True, methods=["patch"])
+    @method_decorator(
+        [
+            permission_required_or_403("api_app.change_job"),
+        ]
+    )
+    def kill(self, request, pk=None):
+        """
+        kill running job by closing celery tasks and marking as killed
+        :url param: pk (job_id)
+        :returns: 200 if killed, 404 not found, 403 forbidden, 400 bad request
+        """
+        try:
+            logger.info(
+                f"kill running job received request from {str(request.user)} "
+                f"-- (job_id:{pk})."
+            )
+            # get job object or raise 404
+            job = get_object_or_404(models.Job, pk=pk)
+            # check permission
+            if not request.user.has_perm("api_app.change_job", job):
+                return Response(
+                    {"detail": "You don't have permission to perform this operation."},
+                    status=status.HTTP_403_FORBIDDEN,
+                )
+            # check if job running
+            if job.status != "running":
+                return Response(
+                    {"detail": "Job is not running"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            # close celery tasks
+            general.kill_running_analysis(pk)
+            # set job status
+            job.status = "killed"
+            job.save()
+            return Response(status=status.HTTP_200_OK)
+
+        except Exception as e:
+            logger.exception(
+                f"kill_running_job requester:{str(request.user)} error:{e}."
+            )
+            return Response(
+                {"error": "error in kill_running_job. Check logs."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
 
 class TagViewSet(viewsets.ModelViewSet):

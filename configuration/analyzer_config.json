@@ -117,6 +117,17 @@
     },
     "soft_time_limit": 30
   },
+  "CRXcavator": {
+    "type": "observable",
+    "observable_supported": [
+      "generic"
+    ],
+    "external_service": true,
+    "description": "scans a chrome extension against crxcavator.io",
+    "requires_configuration": false,
+    "python_module": "crxcavator.CRXcavator",
+    "soft_time_limit": 30
+  },
   "Cuckoo_Scan": {
     "type": "file",
     "disabled": false,
@@ -489,7 +500,8 @@
     "python_module": "misp.MISP",
     "additional_config_params": {
       "api_key_name": "MISP_KEY",
-      "url_key_name": "MISP_URL"
+      "url_key_name": "MISP_URL",
+      "ssl_check": true
     },
     "soft_time_limit": 30
   },
@@ -567,6 +579,20 @@
     "description": "extract GeoIP info for an IP",
     "python_module": "maxmind.Maxmind",
     "soft_time_limit": 30
+  },
+  "MWDB_Scan": {
+    "type": "file",
+    "description": "Scan a file against MWDB by Cert Polska",
+    "requires_configuration": true,
+    "external_service": true,
+    "leaks_info": true,
+    "python_module": "mwdb_scan.MWDB_Scan",
+    "additional_config_params": {
+      "api_key_name": "MWDB_KEY",
+      "upload_file": false,
+      "max_tries": 50
+    },
+    "soft_time_limit": 400
   },
   "ONYPHE": {
     "type": "observable",
@@ -670,6 +696,18 @@
       "active_scan": true
     },
     "soft_time_limit": 100
+  },
+  "Rendertron": {
+    "type": "observable",
+    "observable_supported": [
+      "url"
+    ],
+    "description": "get screenshot of a web page using rendertron (puppeteer)",
+    "python_module": "rendertron.Rendertron",
+    "requires_configuration": true,
+    "additional_config_params": {},
+    "soft_time_limit": 320,
+    "queue": "local"
   },
   "Qiling_Windows": {
     "type": "file",
@@ -955,6 +993,26 @@
     "python_module": "speakeasy_emulation.SpeakEasy",
     "soft_time_limit": 120,
     "queue": "long"
+  },
+  "SSAPINet": {
+    "type": "observable",
+    "observable_supported": [
+      "url"
+    ],
+    "external_service": true,
+    "description": "get a screenshot of a web page using screenshotapi.net (external source)",
+    "requires_configuration": true,
+    "python_module": "ss_api_net.SSAPINet",
+    "soft_time_limit": 300,
+    "additional_config_params": {
+      "api_key_name": "SSAPINET_KEY",
+      "use_proxy": false,
+      "proxy": "",
+      "output": "image",
+      "extra_api_params" : {
+        "full_page": true
+      }
+    }
   },
   "Strings_Info_Classic": {
     "type": "file",
@@ -1307,6 +1365,23 @@
       "search_type": "WiFi Network"
     },
     "soft_time_limit": 30
+  },
+  "XForceExchange": {
+    "type": "observable",
+    "observable_supported": [
+      "ip",
+      "hash",
+      "url"
+    ],
+    "external_service": true,
+    "description": "scan an observable on IBM X-Force Exchange.",
+    "requires_configuration": true,
+    "python_module": "xforce.XForce",
+    "soft_time_limit": 30,
+    "additional_config_params": {
+      "api_key_name": "XFORCE_KEY",
+      "api_password_name": "XFORCE_PASSWORD"
+    }
   },
   "Xlm_Macro_Deobfuscator": {
     "type": "file",

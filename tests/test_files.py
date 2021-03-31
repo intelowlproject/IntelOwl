@@ -31,6 +31,7 @@ from api_app.script_analyzers.file_analyzers import (
     triage_scan,
     floss,
     manalyze,
+    mwdb_scan,
     qiling,
 )
 from api_app.script_analyzers.observable_analyzers import vt3_get
@@ -69,6 +70,17 @@ def mocked_vt_get(*args, **kwargs):
 
 def mocked_vt_post(*args, **kwargs):
     return MockResponse({"scan_id": "scan_id_test", "data": {"id": "id_test"}}, 200)
+
+
+def mocked_mwdb_response(*args, **kwargs):
+    attrs = {"data": {"id": "id_test"}, "metakeys": {"karton": "test_analysis"}}
+    fileInfo = MagicMock()
+    fileInfo.configure_mock(**attrs)
+    QueryResponse = MagicMock()
+    attrs = {"query_file.return_value": fileInfo}
+    QueryResponse.configure_mock(**attrs)
+    Response = MagicMock(return_value=QueryResponse)
+    return Response
 
 
 def mocked_intezer(*args, **kwargs):
@@ -480,6 +492,37 @@ class FileAnalyzersEXETests(TestCase):
             self.filename,
             self.md5,
             {},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    @patch("mwdblib.MWDB", side_effect=mocked_mwdb_response)
+    def test_mwdb_scan(self, mock_get=None, mock_post=None):
+        additional_params = {"api_key_name": "test_api", "upload_file": False}
+        report = mwdb_scan.MWDB_Scan(
+            "MWDB_Scan",
+            self.job_id,
+            self.filepath,
+            self.filename,
+            self.md5,
+            additional_params,
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    @patch("mwdblib.MWDB", side_effect=mocked_mwdb_response)
+    @patch.object(mwdb_scan.MWDB_Scan, "file_analysis", return_value=True)
+    def test_mwdb_scan_uploadfile(self, mock_get=None, mock_post=None):
+        additional_params = {
+            "api_key_name": "test_api",
+            "upload_file": True,
+            "max_tries": 20,
+        }
+        report = mwdb_scan.MWDB_Scan(
+            "MWDB_Scan",
+            self.job_id,
+            self.filepath,
+            self.filename,
+            self.md5,
+            additional_params,
         ).start()
         self.assertEqual(report.get("success", False), True)
 

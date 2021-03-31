@@ -18,6 +18,7 @@ from api_app.script_analyzers.observable_analyzers import (
     urlscan,
     mb_google,
     inquest,
+    xforce,
 )
 
 from api_app.script_analyzers.observable_analyzers.dns.dns_resolvers import (
@@ -317,5 +318,23 @@ class CommonTestCases_url_domain(metaclass=ABCMeta):
             self.observable_name,
             self.observable_classification,
             additional_params,
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+
+class CommonTestCases_ip_url_hash(metaclass=ABCMeta):
+    """
+    Tests which are common for IP, url, hash types.
+    """
+
+    def test_xforce(self, *args):
+        if self.observable_classification == "hash":
+            self.observable_name = "9498FF82A64FF445398C8426ED63EA5B"
+        report = xforce.XForce(
+            "XForce",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {},
         ).start()
         self.assertEqual(report.get("success", False), True)

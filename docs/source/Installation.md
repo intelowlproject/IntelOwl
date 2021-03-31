@@ -21,7 +21,7 @@ cd ..
 python start.py prod up
 
 # create a super user 
-docker exec -ti intel_owl_uwsgi python3 manage.py createsuperuser
+docker exec -ti intelowl_uwsgi python3 manage.py createsuperuser
 
 # now the app is running on http://localhost:80
 ```
@@ -35,7 +35,7 @@ There is a <a href="https://www.youtube.com/watch?v=GuEhqQJSQAs" target="_blank"
 The project leverages `docker-compose` with a custom python script so you need to have the following packages installed in your machine:
 * [docker](https://docs.docker.com/get-docker/) - v1.13.0+
 * [docker-compose](https://docs.docker.com/compose/install/) - v1.23.2+
-* [python](https://www.python.org/) - v3.5+
+* [python](https://www.python.org/) - v3.6+
 
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -114,6 +114,8 @@ In the `env_file_app`, configure different variables as explained below.
 * `ZOOMEYE_KEY`: ZoomEye API Key([docs](https://www.zoomeye.org/doc))
 * `TRIAGE_KEY`: tria.ge API key([docs](https://tria.ge/docs/))
 * `WIGLE_KEY`: WiGLE API Key([docs](https://api.wigle.net/))
+* `XFORCE_KEY` & `XFORCE_PASSWORD`: IBM X-Force Exchange API ([docs](https://api.xforce.ibmcloud.com/doc/))
+* `SSAPINET_KEY`: screenshotapi.net ([docs](https://screenshotapi.net/documentation))
 
 **Advanced** additional configuration:
 * `OLD_JOBS_RETENTION_DAYS`: Database retention for analysis results (default: 3 days). Change this if you want to keep your old analysis longer in the database.
@@ -157,7 +159,7 @@ There are 3 options to execute the web server:
 
     Before using it, you should configure the configuration file `docker/traefik.override.yml` by changing the email address and the hostname where the application is served. For a detailed explanation follow the official documentation: [Traefix doc](https://docs.traefik.io/user-guides/docker-compose/acme-http/).
     
-    After the configuration is done, you should either add the `traefik.override.yml` reference in the `.env` file or you can use the `start.py` [script](https://intelowl.readthedocs.io/en/stable/Advanced-Usage.html#smart-start)
+    After the configuration is done, you can add the option `--traefik` while executing the [`start.py`](#run)
 
 
 ### Analyzers configuration (optional)
@@ -234,12 +236,12 @@ $ python start.py prod up
 ## After Deployment
 
 ### Users creation
-You may want to run `docker exec -ti intel_owl_uwsgi python3 manage.py createsuperuser` after first run to create a superuser.
+You may want to run `docker exec -ti intelowl_uwsgi python3 manage.py createsuperuser` after first run to create a superuser.
 Then you can add other users directly from the Django Admin Interface after having logged with the superuser account.
 
 ### Django Groups & Permissions settings
 
-Refer to [this](./Advanced-Usage.md#django-groups-permissions) section of the docs.
+Refer to [this](./Advanced-Usage.html#django-groups-permissions) section of the docs.
 
 ## Extras
 
@@ -279,7 +281,7 @@ If you are updating to >[v1.3.0](https://github.com/intelowlproject/IntelOwl/rel
 1. Follow the above updation steps, once the docker containers are up and running execute the following in a new terminal
 
     ```bash
-    docker exec -ti intel_owl_uwsgi bash
+    docker exec -ti intelowl_uwsgi bash
     ```
 
     to get a shell session inside the IntelOwl's container.

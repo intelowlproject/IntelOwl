@@ -76,7 +76,9 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * `UnpacMe_EXE_Unpacker`: [UnpacMe](https://www.unpac.me/) is an automated malware unpacking service
 * `Triage_Scan`: leverage [Triage](https://tria.ge) sandbox environment to scan various files
 * `Manalyze`: [Manalyze](https://github.com/JusticeRage/Manalyze) performs static analysis on PE executables to detect undesirable behavior.
+* `MWDB_Scan`: [mwdblib](https://mwdb.readthedocs.io/en/latest/) Retrieve malware file analysis from repository maintained by CERT Polska MWDB.
 * `Qiling`: [Qiling](https://github.com/qilingframework/qiling) qiling binary emulation.
+
 
 #### Observable analyzers (ip, domain, url, hash)
 * `VirusTotal_v3_Get_Observable`: search an observable in the VirusTotal DB
@@ -142,11 +144,15 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * `InQuest_IOCdb`: Indicators of Compromise Database by [InQuest Labs](https://labs.inquest.net/iocdb)
 * `InQuest_REPdb`: Search in [InQuest Lab's](https://labs.inquest.net/repdb) Reputation Database
 * `InQuest_DFI`: Deep File Inspection by [InQuest Labs](https://labs.inquest.net/dfi)
+* `XForceExchange`: scan an observable on [IBM X-Force Exchange](https://exchange.xforce.ibmcloud.com/)
+* `Renderton`: get screenshot of a web page using rendertron (puppeteer) [renderton repo](https://github.com/GoogleChrome/rendertron)
+*  `SSAPINet`: get a screenshot of a web page using [screenshotapi.net](https://screenshotapi.net/) (external source); additional config options can be added to `extra_api_params` [in the config](https://github.com/intelowlproject/IntelOwl/blob/master/configuration/analyzer_config.json).
 
 #### Generic analyzers (email, phone number, ...)
 Some Analyzers require details other than just IP, URL, Domain etc... We classified them as Generic Analyzers. Since the type of field is not known, there is a format for strings to be followed.
 * `EmailRep`: search an email address on emailrep.io
 * `WiGLE`: Maps and database of 802.11 wireless networks, with statistics, submitted by wardrivers, netstumblers, and net huggers.
+* `CRXcavator`: scans a chrome extension against crxcavator.io
 
 #### [Additional analyzers](https://intelowl.readthedocs.io/en/develop/Advanced-Usage.html#optional-analyzers) that can be enabled per your wish.
 

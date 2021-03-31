@@ -2,13 +2,20 @@
 
 This page includes details about some advanced features that Intel Owl provides which can be optionally enabled. Namely,
 
-- [Optional Analyzers](#optional-analyzers)
-- [Customize analyzer execution at time of request](#customize-analyzer-execution-at-time-of-request)
-- [Elastic Search (with Kibana)](#elastic-search)
-- [Django Groups & Permissions](#django-groups-permissions)
-- [Authentication options](#authentication-options)
-- [GKE deployment](#google-kubernetes-engine-deployment)
-- [Multi Queue](#multi-queue)
+- [Advanced Usage](#advanced-usage)
+  - [Optional Analyzers](#optional-analyzers)
+  - [Customize analyzer execution at time of request](#customize-analyzer-execution-at-time-of-request)
+        - [from the GUI](#from-the-gui)
+        - [from Pyintelowl](#from-pyintelowl)
+  - [Elastic Search](#elastic-search)
+      - [Kibana](#kibana)
+      - [Example Configuration](#example-configuration)
+  - [Django Groups & Permissions](#django-groups--permissions)
+  - [Authentication options](#authentication-options)
+      - [LDAP](#ldap)
+  - [Google Kubernetes Engine deployment](#google-kubernetes-engine-deployment)
+  - [Multi Queue](#multi-queue)
+      - [Queue Customization](#queue-customization)
 
 
 ## Optional Analyzers
@@ -69,13 +76,23 @@ table, th, td {
      <a href="https://docs.qiling.io/en/latest/profile/"> Profiles </a> must be placed in the <code>profiles</code> subfolder
      </td>
   </tr>
+  <tr>
+    <td>Renderton</td>
+    <td><code>Renderton</code></td>
+    <td>get screenshot of a web page using rendertron (a headless chrome solution using puppeteer). Configuration variables have to be included in the `config.json`, see <a href="https://github.com/GoogleChrome/rendertron#config"> config options of renderton </a>. To use a proxy, include an argument <code>--proxy-server=YOUR_PROXY_SERVER</code> in <code>puppeteerArgs</code>.</td>
+  </tr>
 </table>
 
-In the project, you can find template file `.env_file_integrations_template`. You have to create new file named `env_file_integrations` from this.
 
-Docker services defined in the compose files added in `COMPOSE_FILE` variable present in the `.env` file are ran on `docker-compose up`. So, modify it to include only the analyzers you wish to use.
-Such compose files are available under `integrations/`.
+To enable all the optional analyzers you can add the option `--all_analyzers` when starting the project. Example:
+```bash
+python3 start.py prod --all_analyzers up
+```
 
+Otherwise you can enable just one of the cited integration by using the related option. Example:
+```bash
+python3 start.py prod --qiling up
+```
 
 ## Customize analyzer execution at time of request
 Some analyzers provide the chance to customize the performed analysis based on options that are different for each analyzer. This is configurable via the `CUSTOM ANALYZERS CONFIGURATION` button on the scan form or you can pass these values as a dictionary when using the pyintelowl client.
@@ -84,6 +101,9 @@ List of some of the analyzers with optional configuration:
 * `VirusTotal_v3_Get_File*`:
     * `force_active_scan` (default False): if the sample is not already in VT, send the sample and perform a scan
     * `force_active_scan_if_old` (default False): if the sample is old, it would be rescanned
+* `MISP`:
+    * `ssl_check`: (default True), enable SSL certificate server verification. Change this if your MISP instance has not SSL enabled
+    * `debug`: (default False) enable debug logs
 * `Doc_Info*`:
     * `additional_passwords_to_check`: list of passwords to try when decrypting the document
 * `Thug_URL_Info` and `Thug_HTML_Info` ((defaults can be seen here [analyzer_config.json](https://github.com/intelowlproject/IntelOwl/blob/master/configuration/analyzer_config.json)):
@@ -110,7 +130,10 @@ List of some of the analyzers with optional configuration:
   * `query`: Follow according to [docs](https://www.zoomeye.org/doc#host-search), but omit `ip`, `hostname`. Eg: `"query": "city:biejing port:21"`
   * `facets`(default: Empty string): A comma-separated list of properties to get summary information on query. Eg: `"facets:app,os"`
   * `page`(default 1): The page number to paging
-  * `history`(default True):  	To query the history data.
+  * `history`(default True): To query the history data. 
+* `MWDB_Scan`:
+    * `upload_file` (default False): Uploads the file to repository.
+    * `max_tries` (default 50): Number of retries to perform for polling analysis results.
 * `Triage_Scan` and `Triage_Search`:
   * `endpoint` (default public): choose whether to query on the public or the private endpoint of triage.
   * `report_type` (default overview): determines how detailed the final report will be. (overview/complete)
@@ -124,19 +147,32 @@ List of some of the analyzers with optional configuration:
 * `WiGLE`:
   * `search_type` (default `WiFi Network`). Supported are: `WiFi Network`, `CDMA Network`, `Bluetooth Network`, `GSM/LTE/WCDMA Network`
   * Above mentioned `search_type` is just different routes mentioned in [docs](https://api.wigle.net/swagger#/v3_ALPHA). Also, the string to be passed in input field of generic analyzers have a format. Different variables are separated by semicolons(`;`) and the field-name and value are separated by equals sign(`=`). Example string for search_type `CDMA Network` is `sid=12345;nid=12345;bsid=12345`
+* `CRXcavator`:
+  * Every Chrome-Extension has a unique alpha=numerc identifier. That's the only Input necessary. Eg: `Norton Safe Search Enhanced`'s identifier is `eoigllimhcllmhedfbmahegmoakcdakd`.
+* `SSAPINet`:
+  *  `use_proxy` (default `false`) and `proxy` (default `""`) - use these options to pass your request through a proxy server.
+  *  `output` (default `"image"`) (available options `"image"`, `"json"`) - this specifies whether the result would be a raw image or json (containing link to the image stored on their server).
+  *  `extra_api_params` (default `{"full_page": true}`) - all other parameters provided by the API can be added here as an object (dictionary). Some of the params available are: 
+     * `full_page` (default `true`) - if `true`, takes screenshot of the entire webpage.
+     * `fresh` (default `false`) - if `true`, forces a fresh screenshot instead of a cached one.
+     * `lazy_load` (default `false`) - if `true`, their browser will scroll down the entire page so that all content is loaded.
+     * `destroy_screenshot` (default `false`) - if `true` the screenshot is not stored on their servers. Please make sure to use `output` parameter with value `image`, so you don't lose the screenshot, as the image link provided in the `json` result would work only once.
+     
+     Refer to the [docs](https://screenshotapi.net/documentation) for a reference to what other parameters are and their default values.
+ 
 
 There are two ways to do this:
 
-#### from the GUI
+##### from the GUI
 You can click on "**Custom analyzer configuration**" button and add the runtime configuration in the form of a dictionary.
 Example:
-```
+```javascript
 "VirusTotal_v3_Get_File": {
     "force_active_scan_if_old": true
 }
 ```
 
-#### from [Pyintelowl](https://github.com/intelowlproject/pyintelowl)
+##### from [Pyintelowl](https://github.com/intelowlproject/pyintelowl)
 While using `send_observable_analysis_request` or `send_file_analysis_request` endpoints, you can pass the parameter `runtime_configuration` with the optional values.
 Example:
 ```python
@@ -167,7 +203,7 @@ Intel Owl provides a saved configuration (with example dashboard and visualizati
 5. Now start the docker containers and execute,
 
   ```bash
-  docker exec -ti intel_owl_uwsgi python manage.py search_index --rebuild
+  docker exec -ti intelowl_uwsgi python manage.py search_index --rebuild
   ```
 
   This will build and populate all existing job objects into the `jobs` index.
@@ -184,16 +220,50 @@ As an administrator here's what you need to know,
    just strip `DefaultGlobal` of all permissions but do *not* delete it.
 
 The permissions work the way one would expect,
-- `api_app | job | Can view job` allows users to fetch list of all jobs he/she has permission for or a particular job with it's ID.
-- `api_app | job | Can create job` allows users to request new analysis. When user creates a job (requests new analysis),
-    - the object level `view` permission is applied to all groups the requesting user belongs to or to all groups (depending on the parameters passed). 
-    - the object level `change` and `delete` permission is restricted to superusers/admin.
-- `api_app | tag | Can create tag` allows users to create new tags. When user creates a new tag,
-    - this new tag is visible (object level `view` permission) to each and every group but,
-    - the object level `change` and `delete` permission is given to only those groups the requesting user belongs to. 
-    - This is done because tag labels and colors are unique columns and the admin in most cases would want to define tags that are usable (but not modifiable) by users of all groups.
-- `api_app | tag | Can view tag` allows users to fetch list of all tags or a particular tag with it's ID.
-- `api_app | tag | Can change tag` allows users to edit a tag granted that user has the object level permission for the particular tag.
+
+<table style="width:100%">
+  <tr>
+    <th>Permission Name</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td><code>api_app | job | Can create job</code></td>
+    <td>Allows users to request new analysis. When user creates a job (requests new analysis),
+    - the object level <code>view</code> permission is applied to all groups the requesting user belongs to or to all groups (depending on the parameters passed).</td>
+  </tr>
+  <tr>
+    <td><code>api_app | job | Can view job</code></td>
+    <td>Allows users to fetch list of all jobs they have permission for or a particular job with it's ID.</td>
+  </tr>
+  <tr>
+    <td><code>api_app | job | Can change job</code></td>
+    <td>Allows user to change job attributes (eg: kill a running analysis). The object level permission is applied to all groups the requesting user belongs to.</td>
+  </tr>
+  <tr>
+    <td><code>api_app | job | Can change job</code></td>
+    <td>Allows user to delete an existing job. The object level permission is applied to all groups the requesting user belongs to.</td>
+  </tr>
+  <tr>
+    <td><code>api_app | tag | Can create tag</code></td>
+    <td>
+      Allows users to create new tags. When user creates a new tag,
+      <ul>
+        <li>this new tag is visible (object level `view` permission) to each and every group but,</li>
+        <li>the object level `change` and `delete` permission is given to only those groups the requesting user belongs to.</li>
+        <li>This is done because tag labels and colors are unique columns and the admin in most cases would want to define tags that are usable (but not modifiable) by users of all groups.</li>
+      </ul>
+    </td>
+  </tr>
+  <tr>
+    <td><code>api_app | tag | Can view tag</code></td>
+    <td>Allows users to fetch list of all tags or a particular tag with it's ID</td>
+  </tr>
+  <tr>
+    <td><code>api_app | tag | Can change tag</code></td>
+    <td>allows users to edit a tag granted that user has the object level permission for the particular tag</td>
+  </tr>
+</table>
+
 
 ## Authentication options
 IntelOwl provides support for some of the most common authentication methods:
@@ -219,14 +289,19 @@ Refer to the following blog post for an example on how to deploy IntelOwl on Goo
 [Deploying Intel-Owl on GKE](https://mostwanted002.cf/post/intel-owl-gke/) by [Mayank Malik](https://twitter.com/_mostwanted002_).
 
 ## Multi Queue
-IntelOwl provides an additional `docker-compose` file,  [multi-queue.override.yaml](https://github.com/intelowlproject/IntelOwl/blob/master/docker/multi-queue.override.yml) file, allowing IntelOwl users to better scale with the performance of their own architecture.
-The command to correctly use the file is the following
-`docker-compose -f docker/default.yaml -f docker/multi-queue.override.yaml`, leveraging the [override](https://docs.docker.com/compose/extends/) feature of docker.
+IntelOwl provides an additional [multi-queue.override.yml](https://github.com/intelowlproject/IntelOwl/blob/master/docker/multi-queue.override.yml) compose file allowing IntelOwl users to better scale with the performance of their own architecture.
 
+If you want to leverage it, you should add the option `--multi-queue` when starting the project. Example:
+```bash
+python3 start.py prod --multi-queue up
+```
 
-It is possible to define new celery workers, each requires the addition of a new container in the docker-compose file, as shown in the `multi-queue.override.yaml`. 
+This functionality is not enabled by default because this deployment would start 2 more containers so the resource consumption is higher. We suggest to use this option only when leveraging IntelOwl massively.
 
-IntelOwl moreover requires that the name of the workers are provided in the `docker-compose` file. This is done through the environment variable `CELERY_QUEUES` inside the `uwsgi` container. Each queue must be separated using the character `,`, as shown in the [example](https://github.com/intelowlproject/IntelOwl/blob/master/docker-compose-multi-queue.yml#L29).
+#### Queue Customization 
+It is possible to define new celery workers: each requires the addition of a new container in the docker-compose file, as shown in the `multi-queue.override.yml`. 
 
-Now it is possible to specify for each configuration inside [analyzer_config](https://github.com/intelowlproject/IntelOwl/blob/master/configuration/analyzer_config.json) the desired queue. If no queue are provided, the `default` queue will be selected.
+Moreover IntelOwl requires that the name of the workers are provided in the `docker-compose` file. This is done through the environment variable `CELERY_QUEUES` inside the `uwsgi` container. Each queue must be separated using the character `,`, as shown in the [example](https://github.com/intelowlproject/IntelOwl/blob/master/docker/multi-queue.override.yml#L6).
+
+One can customize what analyzer should use what queue by specifying so in the analyzer entry in the [analyzer_config.json](https://github.com/intelowlproject/IntelOwl/blob/master/configuration/analyzer_config.json) configuration file. If no queue(s) are provided, the `default` queue will be selected.
  

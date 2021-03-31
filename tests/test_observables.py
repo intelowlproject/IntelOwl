@@ -41,6 +41,9 @@ from api_app.script_analyzers.observable_analyzers import (
     triage_search,
     inquest,
     wigle,
+    crxcavator,
+    rendertron,
+    ss_api_net,
 )
 from api_app.models import Job
 from .mock_utils import (
@@ -53,6 +56,7 @@ from .utils import (
     CommonTestCases_observables,
     CommonTestCases_ip_url_domain,
     CommonTestCases_ip_domain_hash,
+    CommonTestCases_ip_url_hash,
     CommonTestCases_url_domain,
 )
 
@@ -98,6 +102,7 @@ def mocked_triage_post(*args, **kwargs):
 class IPAnalyzersTests(
     CommonTestCases_ip_domain_hash,
     CommonTestCases_ip_url_domain,
+    CommonTestCases_ip_url_hash,
     CommonTestCases_observables,
     TestCase,
 ):
@@ -466,6 +471,7 @@ class DomainAnalyzersTests(
 class URLAnalyzersTests(
     CommonTestCases_ip_url_domain,
     CommonTestCases_url_domain,
+    CommonTestCases_ip_url_hash,
     CommonTestCases_observables,
     TestCase,
 ):
@@ -554,11 +560,34 @@ class URLAnalyzersTests(
         ).start()
         self.assertEqual(report.get("success", False), True)
 
+    def test_rendertron(self, mock_get=None, mock_post=None):
+        report = rendertron.Rendertron(
+            "Rendertron",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    def test_ss_api_net(self, mock_get=None, mock_post=None):
+        report = ss_api_net.SSAPINet(
+            "SSAPINet",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
 
 @mock_connections(patch("requests.get", side_effect=mocked_requests))
 @mock_connections(patch("requests.post", side_effect=mocked_requests))
 class HashAnalyzersTests(
-    CommonTestCases_ip_domain_hash, CommonTestCases_observables, TestCase
+    CommonTestCases_ip_url_hash,
+    CommonTestCases_ip_domain_hash,
+    CommonTestCases_observables,
+    TestCase,
 ):
     @staticmethod
     def get_params():
@@ -679,6 +708,17 @@ class GenericAnalyzersTest(TestCase):
     def test_wigle(self, mock_get=None):
         report = wigle.WiGLE(
             "WiGLE",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    @mock_connections(patch("requests.get", side_effect=mocked_requests))
+    def test_crxcavator(self, mock_get=None):
+        report = crxcavator.CRXcavator(
+            "CRXcavator",
             self.job_id,
             self.observable_name,
             self.observable_classification,

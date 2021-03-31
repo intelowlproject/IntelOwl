@@ -2,6 +2,49 @@
 
 [**Upgrade Guide**](https://intelowl.readthedocs.io/en/latest/Installation.html#update-to-the-most-recent-version)
 
+## [v2.2.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v2.2.0)
+- IntelOwl has **brand new project logos**. Thanks to @Certego.
+ 
+**New Features:**
+- Introduced the possibility to enable/disable SSL check while connecting to a MISP platform. Thanks to @raw-data.
+- Users can now request to kill a job whose status is `running`. 
+   * GUI: Button on job result page.
+   * PyIntelOwl: `IntelOwl.kill_running_job` function
+   * CLI: `$ pyintelowl jobs kill <id>`
+   * API: `PATCH /api/jobs/{id}/kill`
+- Users can now delete a job.
+   * GUI: Button on job result page.
+   * PyIntelOwl: `IntelOwl.delete_job_by_id` function
+   * CLI: `$ pyintelowl jobs rm <id>`
+   * API: `DELETE /api/jobs/{id}`
+ - Users can now delete a tag from the command line/pyintelowl (Eg: `$ pyintelowl tags rm <id>`). (Before, it was only possible from the web GUI or direct HTTP call.)
+
+**Others:**
+- Deprecate `ask_analysis_result` API.
+- Update permission section of docs
+
+
+## [v2.1.1](https://github.com/intelowlproject/IntelOwl/releases/tag/v2.1.1)
+**FIXES/IMPROVEMENTS/Dependency upgrades**
+- now `start.py` works with the most recent 1.28.2 version of docker-compose
+- updated Django, Yara and Speakeasy to most recent versions
+
+
+## [v2.1.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v2.1.0)
+**IMPORTANT FIX**
+We changed `docker-compose` file names for optional analyzers. In the `v.2.0.0` this broke Docker Hub builds, causing them to fail. Please upgrade to this version to be able to use the optional analyzers again.
+
+**NEW INBUILT ANALYZERS:**
+- added [CRXCavator](https://crxcavator.io/) analyzer for malicious Chrome extensions
+- added [CERT Polska MWDB](https://mwdb.cert.pl) analyzer for malicious files
+
+**FIXES/IMPROVEMENTS/Dependency upgrades:**
+- updated `Quark_Engine` to last version and fixed rules
+- `Maxmind` analyzer now retrieves City data too
+- fixes for `Qiling` analyzer
+- re-enabled `APKiD_Scan_APK_DEX_JAR` analyzer for Android samples
+- adjusts to auto-build, PR template and documentation
+
 ## [v2.0.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v2.0.0)
 **BREAKING CHANGES:**
 - moved docker and docker-compose files under `docker/` folder.

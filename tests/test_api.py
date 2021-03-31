@@ -183,19 +183,15 @@ class ApiJobTests(TestCase):
         response = self.client.post("/api/send_analysis_request", data)
         self.assertEqual(response.status_code, 200)
 
-    def test_ask_analysis_result(self):
-        # put your test job_id
-        data = {"job_id": self.job_id}
-        response = self.client.get("/api/ask_analysis_result", data)
-        self.assertEqual(response.status_code, 200)
-
     def test_list_all_jobs(self):
         response = self.client.get("/api/jobs")
+        logger.info(response)
         self.assertEqual(response.status_code, 200)
 
     def test_get_job_by_id(self):
         self.assertEqual(self.user.has_perm("api_app.view_job"), True)
         response = self.client.get(f"/api/jobs/{self.job_id}")
+        logger.info(response)
         self.assertEqual(response.status_code, 200)
 
 

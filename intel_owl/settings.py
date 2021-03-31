@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     "api_app.apps.ApiAppConfig",
     "django_elasticsearch_dsl",
     "django_nose",
+    "drf_spectacular",
 ]
 
 MIDDLEWARE = [
@@ -89,6 +90,7 @@ REST_FRAMEWORK = {
     ],
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
     "EXCEPTION_HANDLER": "rest_framework.views.exception_handler",
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
 TEST_RUNNER = "django_nose.NoseTestSuiteRunner"

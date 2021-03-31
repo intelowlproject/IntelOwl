@@ -15,6 +15,8 @@ Welcome to IntelOwl's documentation!
    Advanced-Usage
    Contribute
    Tests
+   OpenAPI Doc <OpenAPI>
+   Redoc
 
 
 

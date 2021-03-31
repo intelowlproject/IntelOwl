@@ -456,7 +456,7 @@ def download_sample(request):
         return Response({"error": "821"}, status=status.HTTP_400_BAD_REQUEST)
     # get job object or raise 404
     try:
-        job = models.Job.objects.get(pk=data_received["id"])
+        job = models.Job.objects.get(pk=data_received["job_id"])
     except models.Job.DoesNotExist:
         raise NotFound()
     # check permission

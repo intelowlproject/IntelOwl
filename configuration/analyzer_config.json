@@ -697,6 +697,18 @@
     },
     "soft_time_limit": 100
   },
+  "Rendertron": {
+    "type": "observable",
+    "observable_supported": [
+      "url"
+    ],
+    "description": "get screenshot of a web page using rendertron (puppeteer)",
+    "python_module": "rendertron.Rendertron",
+    "requires_configuration": true,
+    "additional_config_params": {},
+    "soft_time_limit": 320,
+    "queue": "local"
+  },
   "Qiling_Windows": {
     "type": "file",
     "supported_filetypes": [
@@ -981,6 +993,26 @@
     "python_module": "speakeasy_emulation.SpeakEasy",
     "soft_time_limit": 120,
     "queue": "long"
+  },
+  "SSAPINet": {
+    "type": "observable",
+    "observable_supported": [
+      "url"
+    ],
+    "external_service": true,
+    "description": "get a screenshot of a web page using screenshotapi.net (external source)",
+    "requires_configuration": true,
+    "python_module": "ss_api_net.SSAPINet",
+    "soft_time_limit": 300,
+    "additional_config_params": {
+      "api_key_name": "SSAPINET_KEY",
+      "use_proxy": false,
+      "proxy": "",
+      "output": "image",
+      "extra_api_params" : {
+        "full_page": true
+      }
+    }
   },
   "Strings_Info_Classic": {
     "type": "file",

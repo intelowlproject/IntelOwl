@@ -16,17 +16,6 @@ if settings.DISABLE_LOGGING_TEST:
     logging.disable(logging.CRITICAL)
 
 
-def get_test_file(fname):
-    floc = f"{settings.PROJECT_LOCATION}/test_files/{fname}"
-    with open(floc, "rb") as f:
-        binary = f.read()
-    uploaded_file = SimpleUploadedFile(
-        fname, binary, content_type="multipart/form-data"
-    )
-    md5 = hashlib.md5(binary).hexdigest()
-    return uploaded_file, md5
-
-
 class ApiViewTests(TestCase):
     @classmethod
     def setUpClass(cls):
@@ -38,6 +27,17 @@ class ApiViewTests(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.client.force_authenticate(user=self.superuser)
+
+    @staticmethod
+    def __get_test_file(fname):
+        floc = f"{settings.PROJECT_LOCATION}/test_files/{fname}"
+        with open(floc, "rb") as f:
+            binary = f.read()
+        uploaded_file = SimpleUploadedFile(
+            fname, binary, content_type="multipart/form-data"
+        )
+        md5 = hashlib.md5(binary).hexdigest()
+        return uploaded_file, md5
 
     def test_ask_analysis_availability(self):
         md5 = os.environ.get("TEST_MD5", "446c5fbb11b9ce058450555c1c27153c")
@@ -64,7 +64,7 @@ class ApiViewTests(TestCase):
             "Signature_Info",
         ]
         filename = "non_valid_pe.exe"
-        uploaded_file, md5 = get_test_file(filename)
+        uploaded_file, md5 = self.__get_test_file(filename)
         data = {
             "md5": md5,
             "analyzers_requested": analyzers_requested,
@@ -96,7 +96,7 @@ class ApiViewTests(TestCase):
             "MalwareBazaar_Get_File",
         ]
         filename = "file.exe"
-        uploaded_file, md5 = get_test_file(filename)
+        uploaded_file, md5 = self.__get_test_file(filename)
         data = {
             "md5": md5,
             "analyzers_requested": analyzers_requested,
@@ -192,9 +192,9 @@ class ApiViewTests(TestCase):
         self.assertDictEqual(response.json(), helpers.get_analyzer_config())
 
     def test_download_sample_200(self):
-        self.assertEqual(models.Job.objects.count(), 1)
+        self.assertEqual(models.Job.objects.count(), 0)
         filename = "file.exe"
-        uploaded_file, md5 = get_test_file(filename)
+        uploaded_file, md5 = self.__get_test_file(filename)
         job = models.Job.objects.create(
             **{
                 "md5": md5,
@@ -204,11 +204,11 @@ class ApiViewTests(TestCase):
                 "file": uploaded_file,
             }
         )
-        self.assertEqual(models.Job.objects.count(), 2)
+        self.assertEqual(models.Job.objects.count(), 1)
         response = self.client.get(f"/api/download_sample?job_id={job.id}")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
-            response.headers["Content-Disposition"],
+            response.get("Content-Disposition"),
             f"attachment; filename={job.file_name}",
         )
 
@@ -219,11 +219,12 @@ class ApiViewTests(TestCase):
 
     def test_download_sample_400(self):
         # requesting for job where is_sample=False
-        response = self.client.get(f"/api/download_sample?job_id={self.job.id}")
+        job = models.Job.objects.create(is_sample=False)
+        response = self.client.get(f"/api/download_sample?job_id={job.id}")
         self.assertEqual(response.status_code, 400)
         self.assertDictContainsSubset(
-            response.json(),
             {"detail": "Requested job does not have a sample associated with it."},
+            response.json(),
         )
 
 
@@ -240,7 +241,6 @@ class JobViewsetTests(TestCase):
         self.client.force_authenticate(user=self.superuser)
         self.job, _ = models.Job.objects.get_or_create(
             **{
-                "id": 1,
                 "observable_name": os.environ.get("TEST_IP"),
                 "md5": os.environ.get("TEST_MD5"),
                 "observable_classification": "ip",
@@ -308,14 +308,15 @@ class TagViewsetTests(TestCase):
         self.client = APIClient()
         self.client.force_authenticate(user=self.superuser)
         self.tag, _ = models.Tag.objects.get_or_create(
-            id=1, label="Test", color="#FF5733"
+            label="testlabel1", color="#FF5733"
         )
 
     def test_create_new_tag(self):
         self.assertEqual(models.Tag.objects.count(), 1)
-        data = {"label": "testLabel", "color": "#91EE28"}
+        data = {"label": "testlabel2", "color": "#91EE28"}
         response = self.client.post("/api/tags", data)
         self.assertEqual(response.status_code, 201)
+        self.assertDictContainsSubset(data, response.json())
         self.assertEqual(models.Tag.objects.count(), 2)
 
     def test_list_all_tags(self):
@@ -334,7 +335,7 @@ class TagViewsetTests(TestCase):
     def test_update_tag_by_id_200(self):
         new_data = {"label": "newTestLabel", "color": "#765A54"}
         response = self.client.put(f"/api/tags/{self.tag.id}", new_data)
-        self.assertDictContainsSubset(response.json, new_data)
+        self.assertDictContainsSubset(new_data, response.json())
         self.assertEqual(response.status_code, 200)
 
     def test_update_tag_by_id_404(self):

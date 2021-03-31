@@ -52,11 +52,7 @@ XFORCE_PASSWORD=test
 SSAPINET_KEY=test
 
 # Test tokens
-<<<<<<< HEAD
-=======
 TEST_JOB_ID=1
-TEST_TAG_ID=1
->>>>>>> 93f8607459471b2594ea7f8b542a102406bacc24
 TEST_IP=8.8.8.8
 TEST_DOMAIN=www.google.com
 TEST_URL=https://www.google.com/search?test

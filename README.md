@@ -66,6 +66,7 @@ license terms.
 [XLMMacroDeobfuscator](https://github.com/DissectMalware/XLMMacroDeobfuscator),
 [MaxMind-DB-Reader-python](https://github.com/maxmind/MaxMind-DB-Reader-python),
 [pysafebrowsing](https://github.com/Te-k/pysafebrowsing),
+[google-web-risk](https://github.com/googleapis/python-webrisk),
 [PyMISP](https://github.com/MISP/PyMISP),
 [OTX-Python-SDK](https://github.com/AlienVault-OTX/OTX-Python-SDK),
 [yara-python](https://github.com/VirusTotal/yara-python),

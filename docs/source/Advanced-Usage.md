@@ -7,6 +7,7 @@ This page includes details about some advanced features that Intel Owl provides 
   - [Customize analyzer execution at time of request](#customize-analyzer-execution-at-time-of-request)
         - [from the GUI](#from-the-gui)
         - [from Pyintelowl](#from-pyintelowl)
+  - [Analyzers with special configuration](#analyzers-with-special-configuration)
   - [Elastic Search](#elastic-search)
       - [Kibana](#kibana)
       - [Example Configuration](#example-configuration)
@@ -183,6 +184,13 @@ runtime_configuration = {
 }
 pyintelowl_client.send_file_analysis_request(..., runtime_configuration=runtime_configuration)
 ```
+
+## Analyzers with special configuration
+Some analyzers could require a special configuration:
+* `GoogleWebRisk`: this analyzer needs a service account key with the Google Cloud credentials to work properly.
+You should follow the [official guide](https://cloud.google.com/web-risk/docs/quickstart) for creating the key.
+Then you can copy the generated JSON key file in the directory `configuration` of the project and change its name to `service_account_keyfile.json`.
+This is the default configuration. If you want to customize the name or the location of the file, you can change the environment variable `GOOGLE_APPLICATION_CREDENTIALS` in the `env_file_app` file.
 
 ## Elastic Search
 

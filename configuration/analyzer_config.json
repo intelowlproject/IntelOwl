@@ -296,6 +296,15 @@
       "query_type": "A"
     }
   },
+  "GoogleWebRisk": {
+    "type": "observable",
+    "observable_supported": ["ip", "domain", "url"],
+    "external_service": true,
+    "description": "Scan an observable against Web Risk API",
+    "requires_configuration": true,
+    "soft_time_limit": 20,
+    "python_module": "dns.dns_malicious_detectors.google_webrisk.WebRisk"
+  },
   "GoogleSafebrowsing": {
     "type": "observable",
     "observable_supported": ["ip", "domain", "url"],

@@ -23,7 +23,7 @@ Please delete options that are not relevant.
 - [ ] The tests gave 0 errors.
 - [ ] `Black` gave 0 errors.
 - [ ] `Flake` gave 0 errors.
-- [ ] I squashed the commits into a single one.
+- [ ] I squashed the commits into a single one. (optional, they will be squashed anyway by the maintainer)
   
 ### please follow these rules
 - If your changes decrease the overall tests coverage (you will know after the Codecov CI job is done), you should add the required tests to fix the problem

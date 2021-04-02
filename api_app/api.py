@@ -9,12 +9,12 @@ from wsgiref.util import FileWrapper
 from django.utils.decorators import method_decorator
 from django.http import HttpResponse
 from django.db.models import Q
-from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from rest_framework import serializers as BaseSerializer
 from rest_framework import status, viewsets, mixins
 from rest_framework.decorators import api_view, action
 from rest_framework.permissions import DjangoObjectPermissions
+from rest_framework.exceptions import NotFound, ParseError, PermissionDenied
 from guardian.decorators import permission_required_or_403
 from rest_framework_guardian.filters import ObjectPermissionsFilter
 from drf_spectacular.utils import (
@@ -419,8 +419,8 @@ can be useful if you want to choose the analyzers programmatically""",
 def get_analyzer_configs(request):
     try:
         logger.info(f"get_analyzer_configs received request from {str(request.user)}.")
-        analyzers_config = helpers.get_analyzer_config()
-        return Response(analyzers_config)
+        ac = helpers.get_analyzer_config()
+        return Response(ac, status=status.HTTP_200_OK)
     except Exception as e:
         logger.exception(
             f"get_analyzer_configs requester:{str(request.user)} error:{e}."
@@ -450,34 +450,26 @@ def get_analyzer_configs(request):
 )
 @api_view(["GET"])
 def download_sample(request):
+    data_received = request.query_params
+    logger.info(f"Get binary by Job ID. Data received {data_received}")
+    if "job_id" not in data_received:
+        return Response({"error": "821"}, status=status.HTTP_400_BAD_REQUEST)
+    # get job object or raise 404
     try:
-        data_received = request.query_params
-        logger.info(f"Get binary by Job ID. Data received {data_received}")
-        if "job_id" not in data_received:
-            return Response({"error": "821"}, status=status.HTTP_400_BAD_REQUEST)
-        # get job object or raise 404
-        job = get_object_or_404(models.Job, pk=data_received["id"])
-        # check permission
-        if not request.user.has_perm("api_app.view_job", job):
-            return Response(
-                {"detail": "You don't have permission to perform this operation."},
-                status=status.HTTP_403_FORBIDDEN,
-            )
-        # make sure it is a sample
-        if not job.is_sample:
-            return Response(
-                {"detail": "job without sample"}, status=status.HTTP_400_BAD_REQUEST
-            )
-        response = HttpResponse(FileWrapper(job.file), content_type=job.file_mimetype)
-        response["Content-Disposition"] = f"attachment; filename={job.file_name}"
-        return response
-
-    except Exception as e:
-        logger.exception(f"download_sample requester:{str(request.user)} error:{e}.")
-        return Response(
-            {"detail": "error in download_sample. Check logs."},
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        job = models.Job.objects.get(pk=data_received["job_id"])
+    except models.Job.DoesNotExist:
+        raise NotFound()
+    # check permission
+    if not request.user.has_perm("api_app.view_job", job):
+        raise PermissionDenied()
+    # make sure it is a sample
+    if not job.is_sample:
+        raise ParseError(
+            detail="Requested job does not have a sample associated with it."
         )
+    response = HttpResponse(FileWrapper(job.file), content_type=job.file_mimetype)
+    response["Content-Disposition"] = f"attachment; filename={job.file_name}"
+    return response
 
 
 @add_docs(
@@ -528,40 +520,27 @@ class JobViewSet(
          - 404 - not found
          - 403 - forbidden, 400 bad request
         """
+        logger.info(
+            f"kill running job received request from {str(request.user)} "
+            f"-- (job_id:{pk})."
+        )
+        # get job object or raise 404
         try:
-            logger.info(
-                f"kill running job received request from {str(request.user)} "
-                f"-- (job_id:{pk})."
-            )
-            # get job object or raise 404
-            job = get_object_or_404(models.Job, pk=pk)
-            # check permission
-            if not request.user.has_perm("api_app.change_job", job):
-                return Response(
-                    {"detail": "You don't have permission to perform this operation."},
-                    status=status.HTTP_403_FORBIDDEN,
-                )
-            # check if job running
-            if job.status != "running":
-                return Response(
-                    {"detail": "Job is not running"},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-            # close celery tasks
-            general.kill_running_analysis(pk)
-            # set job status
-            job.status = "killed"
-            job.save()
-            return Response(status=status.HTTP_200_OK)
-
-        except Exception as e:
-            logger.exception(
-                f"kill_running_job requester:{str(request.user)} error:{e}."
-            )
-            return Response(
-                {"error": "error in kill_running_job. Check logs."},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
+            job = models.Job.objects.get(pk=pk)
+        except models.Job.DoesNotExist:
+            raise NotFound()
+        # check permission
+        if not request.user.has_perm("api_app.change_job", job):
+            raise PermissionDenied()
+        # check if job running
+        if job.status != "running":
+            raise ParseError(detail="Job is not running")
+        # close celery tasks
+        general.kill_running_analysis(pk)
+        # set job status
+        job.status = "killed"
+        job.save()
+        return Response(status=status.HTTP_200_OK)
 
 
 @add_docs(

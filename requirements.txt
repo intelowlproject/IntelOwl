@@ -13,7 +13,7 @@ dnspython==1.16.0
 dnstwist==20201228
 ppdeep>=20200505
 easygui==0.98.1
-eventlet==0.29.1
+eventlet==0.30.2
 flower==0.9.7
 GitPython==3.1.14
 google>=3.0.0

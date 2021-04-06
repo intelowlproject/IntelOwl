@@ -255,6 +255,17 @@
     "soft_time_limit": 30,
     "queue": "local"
   },
+  "FireHol_IPList": {
+    "type": "observable",
+    "observable_supported": ["ip"],
+    "external_service": true,
+    "description": "check if an IP is in FireHol's IPList",
+    "python_module": "firehol_iplist.FireHol_IPList",
+    "additional_config_params": {
+      "list_names": ["firehol_level1.netset"]
+    },
+    "soft_time_limit": 180
+  },
   "Floss": {
     "type": "file",
     "supported_filetypes": ["application/x-dosexec"],

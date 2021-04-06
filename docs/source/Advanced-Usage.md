@@ -159,7 +159,8 @@ List of some of the analyzers with optional configuration:
      * `destroy_screenshot` (default `false`) - if `true` the screenshot is not stored on their servers. Please make sure to use `output` parameter with value `image`, so you don't lose the screenshot, as the image link provided in the `json` result would work only once.
      
      Refer to the [docs](https://screenshotapi.net/documentation) for a reference to what other parameters are and their default values.
- 
+* `FireHol_IPList`:
+  * `list_names`: Add [FireHol's IPList](https://iplists.firehol.org/) names as comma separated values in `list_names` array.
 
 There are two ways to do this:
 

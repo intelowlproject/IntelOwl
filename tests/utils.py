@@ -31,6 +31,7 @@ from api_app.script_analyzers.observable_analyzers.dns.dns_resolvers import (
 from api_app.script_analyzers.observable_analyzers.dns.dns_malicious_detectors import (
     cloudflare_malicious_detector,
     googlesf,
+    google_webrisk,
     quad9_malicious_detector,
 )
 
@@ -191,6 +192,22 @@ class CommonTestCases_ip_url_domain(metaclass=ABCMeta):
     def test_gsf(self, mock_get=None, mock_post=None):
         report = googlesf.GoogleSF(
             "GoogleSafeBrowsing",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    @mock_connections(
+        patch(
+            "api_app.script_analyzers.observable_analyzers.dns."
+            "dns_malicious_detectors.google_webrisk.WebRiskServiceClient"
+        )
+    )
+    def test_google_web_risk(self, *args):
+        report = google_webrisk.WebRisk(
+            "GoogleWebRisk",
             self.job_id,
             self.observable_name,
             self.observable_classification,

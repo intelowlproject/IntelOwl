@@ -17,6 +17,7 @@ eventlet==0.30.2
 flower==0.9.7
 GitPython==3.1.14
 google>=3.0.0
+google-cloud-webrisk==1.2.0
 maxminddb==2.0.3
 mwdblib==3.3.1
 oletools==0.56.1

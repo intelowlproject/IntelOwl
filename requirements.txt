@@ -13,14 +13,14 @@ dnspython==1.16.0
 dnstwist==20201228
 ppdeep>=20200505
 easygui==0.98.1
-eventlet==0.29.1
+eventlet==0.30.2
 flower==0.9.7
 GitPython==3.1.14
 google>=3.0.0
 google-cloud-webrisk==1.2.0
 maxminddb==2.0.3
 mwdblib==3.3.1
-oletools==0.56
+oletools==0.56.1
 OTXv2==1.5.9
 peepdf-fork==0.4.3
 pdfid==1.0.2
@@ -38,6 +38,6 @@ quark-engine==21.3.4
 requests==2.25.1
 speakeasy-emulator==1.5.1
 uWSGI==2.0.19.1
-yara-python==4.0.3
+yara-python==4.0.5
 git+https://github.com/DissectMalware/XLMMacroDeobfuscator.git@4b5d649b0028e2c109f5f5d7a7547ef9dcccc90a
-drf-spectacular==0.14.0
+drf-spectacular==0.15.0

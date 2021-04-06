@@ -44,6 +44,7 @@ from api_app.script_analyzers.observable_analyzers import (
     crxcavator,
     rendertron,
     ss_api_net,
+    firehol_iplist,
 )
 from api_app.models import Job
 from .mock_utils import (
@@ -95,6 +96,17 @@ def mocked_triage_get(*args, **kwargs):
 
 def mocked_triage_post(*args, **kwargs):
     return MockResponse({"id": "sample_id", "status": "pending"}, 200)
+
+
+def mocked_firehol_iplist(*args, **kwargs):
+    return MockResponse(
+        json_data={},
+        status_code=200,
+        text="""0.0.0.0/8\n
+            1.10.16.0/20\n
+            1.19.0.0/16\n
+            3.90.198.217\n""",
+    )
 
 
 @mock_connections(patch("requests.get", side_effect=mocked_requests))
@@ -265,6 +277,17 @@ class IPAnalyzersTests(
             self.observable_name,
             self.observable_classification,
             {},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    @mock_connections(patch("requests.get", side_effect=mocked_firehol_iplist))
+    def test_firehol_iplist(self, *args):
+        report = firehol_iplist.FireHol_IPList(
+            "FireHol_IPList",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {"list_names": ["firehol_level1.netset"]},
         ).start()
         self.assertEqual(report.get("success", False), True)
 

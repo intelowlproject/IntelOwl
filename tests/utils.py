@@ -43,22 +43,6 @@ from .mock_utils import (
 )
 
 
-# a mock response class that has no operation
-class MockWebRisk:
-    def __init__(self):
-        pass
-
-    def search_uris(self, **kwargs):
-        return MockWebRiskResponse()
-
-
-class MockWebRiskResponse:
-    threat_types = [1, 2, 3]
-
-    def __init__(self):
-        pass
-
-
 # Abstract Base classes constructed for most common occuring combinations
 # to avoid duplication of code
 class CommonTestCases_observables(metaclass=ABCMeta):
@@ -217,8 +201,8 @@ class CommonTestCases_ip_url_domain(metaclass=ABCMeta):
 
     @mock_connections(
         patch(
-            "google.cloud.webrisk_v1.services.web_risk_service.WebRiskServiceClient",
-            side_effect=MockWebRisk(),
+            "api_app.script_analyzers.observable_analyzers.dns."
+            "dns_malicious_detectors.google_webrisk.WebRiskServiceClient"
         )
     )
     def test_google_web_risk(self, *args):

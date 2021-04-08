@@ -26,8 +26,12 @@ class MISP(classes.ObservableAnalyzer):
                 f"no MISP URL retrieved, key value: {self.url_key_name}"
             )
 
-        misp_instance = pymisp.ExpandedPyMISP(
-            url=self.url_name, key=api_key, ssl=self.ssl_check, debug=self.debug
+        misp_instance = pymisp.PyMISP(
+            url=self.url_name,
+            key=api_key,
+            ssl=self.ssl_check,
+            debug=self.debug,
+            timeout=5,
         )
 
         # we check only for events not older than 90 days and max 50 results

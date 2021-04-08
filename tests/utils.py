@@ -149,7 +149,7 @@ class CommonTestCases_observables(metaclass=ABCMeta):
         ).start()
         self.assertEqual(report.get("success", False), True)
 
-    @mock_connections(patch("pymisp.ExpandedPyMISP", side_effect=mocked_requests_noop))
+    @mock_connections(patch("pymisp.PyMISP", side_effect=mocked_requests_noop))
     def test_misp_first(self, *args):
         report = misp.MISP(
             "MISP_FIRST",

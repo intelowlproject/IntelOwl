@@ -12,6 +12,7 @@ djangorestframework-guardian==0.3.0
 dnspython==1.16.0
 dnstwist==20201228
 ppdeep>=20200505
+drf-spectacular==0.15.0
 easygui==0.98.1
 eventlet==0.30.2
 flower==0.9.7
@@ -28,7 +29,7 @@ pefile-fork==2020.12.16
 psycopg2-binary==2.8.6
 pydeep==0.4
 pyexifinfo==0.4.0
-pymisp==2.4.140
+pymisp==2.4.141.1
 pypdns==1.5.1
 pypssl==2.1
 pysafebrowsing==0.1.1
@@ -40,4 +41,3 @@ speakeasy-emulator==1.5.1
 uWSGI==2.0.19.1
 yara-python==4.0.5
 git+https://github.com/DissectMalware/XLMMacroDeobfuscator.git@4b5d649b0028e2c109f5f5d7a7547ef9dcccc90a
-drf-spectacular==0.15.0

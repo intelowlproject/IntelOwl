@@ -22,7 +22,7 @@ google-cloud-webrisk==1.2.0
 maxminddb==2.0.3
 mwdblib==3.3.1
 oletools==0.56.1
-OTXv2==1.5.9
+OTXv2==1.5.12
 peepdf-fork==0.4.3
 pdfid==1.0.2
 pefile-fork==2020.12.16

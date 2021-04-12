@@ -81,7 +81,13 @@ class CommonTestCases_observables(metaclass=ABCMeta):
         ).start()
         self.assertEqual(report.get("success", False), True)
 
-    def test_otx(self, mock_get=None, mock_post=None):
+    @mock_connections(
+        patch(
+            "requests.Session.get",
+            side_effect=mocked_requests,
+        )
+    )
+    def test_otx(self, *args):
         report = otx.OTX(
             "OTX", self.job_id, self.observable_name, self.observable_classification, {}
         ).start()

@@ -24,7 +24,7 @@ mwdblib==3.3.1
 oletools==0.56.1
 OTXv2==1.5.9
 peepdf-fork==0.4.3
-pdfid==1.0.2
+pdfid==1.0.4
 pefile-fork==2020.12.16
 psycopg2-binary==2.8.6
 pydeep==0.4

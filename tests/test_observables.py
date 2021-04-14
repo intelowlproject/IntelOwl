@@ -230,13 +230,23 @@ class IPAnalyzersTests(
         ).start()
         self.assertEqual(report.get("success", False), True)
 
-    def test_greynoisealpha(self, mock_get=None, mock_post=None):
+    def test_greynoise_alpha(self, mock_get=None, mock_post=None):
         report = greynoise.GreyNoise(
             "GreyNoiseAlpha",
             self.job_id,
             self.observable_name,
             self.observable_classification,
-            {},
+            {"greynoise_api_version": "v1"},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    def test_greynoise_community(self, mock_get=None, mock_post=None):
+        report = greynoise.GreyNoise(
+            "GreyNoiseCommunity",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {"greynoise_api_version": "v3"},
         ).start()
         self.assertEqual(report.get("success", False), True)
 
@@ -246,7 +256,7 @@ class IPAnalyzersTests(
             self.job_id,
             self.observable_name,
             self.observable_classification,
-            {},
+            {"greynoise_api_version": "v2"},
         ).start()
         self.assertEqual(report.get("success", False), True)
 

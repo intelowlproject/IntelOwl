@@ -3,7 +3,9 @@ import time
 import logging
 import requests
 import json
+
 from abc import ABCMeta, abstractmethod
+from celery.exceptions import SoftTimeLimitExceeded
 
 from api_app.exceptions import (
     AnalyzerRunNotImplemented,
@@ -99,7 +101,11 @@ class BaseAnalyzerMixin(metaclass=ABCMeta):
             result = self.run()
             result = self._validate_result(result)
             self.report["report"] = result
-        except (AnalyzerConfigurationException, AnalyzerRunException) as e:
+        except (
+            AnalyzerConfigurationException,
+            AnalyzerRunException,
+            SoftTimeLimitExceeded,
+        ) as e:
             self._handle_analyzer_exception(e)
         except Exception as e:
             self._handle_base_exception(e)

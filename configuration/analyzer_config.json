@@ -1089,6 +1089,14 @@
     "python_module": "talos.Talos",
     "soft_time_limit": 30
   },
+  "ThreatFox": {
+    "type": "observable",
+    "observable_supported": ["ip", "url", "domain", "hash", "generic"],
+    "external_service": true,
+    "description": "search for an IOC in ThreatFox's database",
+    "python_module": "threatfox.ThreatFox",
+    "soft_time_limit": 30
+  },
   "Threatminer_PDNS": {
     "type": "observable",
     "observable_supported": [

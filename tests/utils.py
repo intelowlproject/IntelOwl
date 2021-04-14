@@ -19,6 +19,7 @@ from api_app.script_analyzers.observable_analyzers import (
     mb_google,
     inquest,
     xforce,
+    threatfox,
 )
 
 from api_app.script_analyzers.observable_analyzers.dns.dns_resolvers import (
@@ -163,6 +164,16 @@ class CommonTestCases_observables(metaclass=ABCMeta):
             self.observable_name,
             self.observable_classification,
             {"api_key_name": "FIRST_MISP_API", "url_key_name": "FIRST_MISP_URL"},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    def test_threatfox(self, mock_get=None, mock_post=None):
+        report = threatfox.ThreatFox(
+            "ThreatFox",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {},
         ).start()
         self.assertEqual(report.get("success", False), True)
 

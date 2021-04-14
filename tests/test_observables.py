@@ -45,6 +45,7 @@ from api_app.script_analyzers.observable_analyzers import (
     rendertron,
     ss_api_net,
     firehol_iplist,
+    threatfox,
 )
 from api_app.models import Job
 from .mock_utils import (
@@ -734,6 +735,16 @@ class GenericAnalyzersTest(TestCase):
             self.observable_name,
             self.observable_classification,
             {"inquest_analysis": "dfi_search"},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    def test_threatfox(self, mock_get=None, mock_post=None):
+        report = threatfox.ThreatFox(
+            "ThreatFox",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {},
         ).start()
         self.assertEqual(report.get("success", False), True)
 

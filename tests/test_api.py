@@ -155,7 +155,7 @@ class ApiViewTests(TestCase):
             "Shodan_Honeyscore",
             "MaxMindGeoIP",
             "CIRCLPassiveSSL",
-            "GreyNoiseAlpha",
+            "GreyNoiseCommunity",
             "GreyNoise",
             "GoogleSafebrowsing",
             "Robtex_IP_Query",

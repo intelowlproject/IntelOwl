@@ -37,7 +37,7 @@ PySocks==1.7.1
 python-magic==0.4.22
 quark-engine==21.3.4
 requests==2.25.1
-speakeasy-emulator==1.5.1
+speakeasy-emulator==1.5.2
 uWSGI==2.0.19.1
 yara-python==4.0.5
 git+https://github.com/DissectMalware/XLMMacroDeobfuscator.git@4b5d649b0028e2c109f5f5d7a7547ef9dcccc90a

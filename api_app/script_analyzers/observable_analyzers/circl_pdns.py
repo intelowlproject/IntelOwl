@@ -32,7 +32,7 @@ class CIRCL_PDNS(classes.ObservableAnalyzer):
         if self.observable_classification == "url":
             domain = urlparse(self.observable_name).hostname
 
-        result = pdns.query(domain)
+        result = pdns.query(domain, timeout=5)
         for result_item in result:
             keys_to_decode = ["time_first", "time_last"]
             for key_to_decode in keys_to_decode:

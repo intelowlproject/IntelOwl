@@ -30,7 +30,7 @@ psycopg2-binary==2.8.6
 pydeep==0.4
 pyexifinfo==0.4.0
 pymisp==2.4.141.1
-pypdns==1.5.1
+pypdns==1.5.2
 pypssl==2.1
 pysafebrowsing==0.1.1
 PySocks==1.7.1

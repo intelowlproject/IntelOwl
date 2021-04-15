@@ -1,0 +1,6 @@
+{
+    "puppeteerArgs": [
+
+    ],
+    "timeout": 300000
+}

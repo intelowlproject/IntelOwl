@@ -11,7 +11,7 @@ services:
     container_name: intelowl_celery_worker_local
     restart: unless-stopped
     stop_grace_period: 3m
-    command: /usr/local/bin/celery -A intel_owl.celery worker -n worker_local --uid www-data --time-limit=10000 --gid www-data --pidfile="/tmp/%n.pid" -Ofair -Q local
+    command: /usr/local/bin/celery -A intel_owl.celery worker -n worker_local --uid www-data --time-limit=10000 --gid www-data --pidfile= -Ofair -Q local
     volumes:
       - ../configuration/analyzer_config.json:/opt/deploy/configuration/analyzer_config.json
       - generic_logs:/var/log/intel_owl
@@ -27,7 +27,7 @@ services:
     container_name: intelowl_celery_worker_long
     restart: unless-stopped
     stop_grace_period: 3m
-    command: /usr/local/bin/celery -A intel_owl.celery worker -n worker_long --uid www-data --gid www-data --time-limit=40000 --pidfile="/tmp/%n.pid" -Ofair -Q long
+    command: /usr/local/bin/celery -A intel_owl.celery worker -n worker_long --uid www-data --gid www-data --time-limit=40000 --pidfile= -Ofair -Q long
     volumes:
       - ../configuration/analyzer_config.json:/opt/deploy/configuration/analyzer_config.json
       - generic_logs:/var/log/intel_owl

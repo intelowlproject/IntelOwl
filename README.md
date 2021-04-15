@@ -3,6 +3,7 @@
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/intelowlproject/IntelOwl.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/intelowlproject/IntelOwl/context:python)
 [![CodeFactor](https://www.codefactor.io/repository/github/intelowlproject/intelowl/badge)](https://www.codefactor.io/repository/github/intelowlproject/intelowl)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![codecov](https://codecov.io/gh/intelowlproject/IntelOwl/branch/master/graph/badge.svg?token=R097M4TYA6)](https://codecov.io/gh/intelowlproject/IntelOwl)
 ![Build & Tests](https://github.com/intelowlproject/IntelOwl/workflows/Build%20&%20Tests/badge.svg)
 
 # Intel Owl
@@ -66,6 +67,7 @@ license terms.
 [XLMMacroDeobfuscator](https://github.com/DissectMalware/XLMMacroDeobfuscator),
 [MaxMind-DB-Reader-python](https://github.com/maxmind/MaxMind-DB-Reader-python),
 [pysafebrowsing](https://github.com/Te-k/pysafebrowsing),
+[google-web-risk](https://github.com/googleapis/python-webrisk),
 [PyMISP](https://github.com/MISP/PyMISP),
 [OTX-Python-SDK](https://github.com/AlienVault-OTX/OTX-Python-SDK),
 [yara-python](https://github.com/VirusTotal/yara-python),
@@ -88,7 +90,8 @@ license terms.
 [Speakeasy](https://github.com/fireeye/speakeasy),
 [Checkdmarc](https://github.com/domainaware/checkdmarc),
 [Manalyze](https://github.com/JusticeRage/Manalyze),
-[Qiling](https://github.com/qilingframework/qiling)
+[Qiling](https://github.com/qilingframework/qiling),
+[Renderton](https://github.com/GoogleChrome/rendertron/blob/main/LICENSE)
 
 ## Acknowledgments
 
@@ -104,7 +107,7 @@ This project was created and will be upgraded thanks to the following organizati
 
 #### Google Summer Of Code
 
-Since its birth, this project has been partecipating to the GSoC under the Honeynet Project!
+Since its birth, this project has been participating in the GSoC under the Honeynet Project!
 
 * 2020: a lot of [new features](https://www.honeynet.org/gsoc/gsoc-2020/google-summer-of-code-2020-project-ideas/#intel-owl-improvements) were developed by Eshaan Bansal ([Twitter](https://twitter.com/mask0fmydisguis)).
 * 2021: you? [Projects available](https://www.honeynet.org/gsoc/gsoc-2021/google-summer-of-code-2021-project-ideas/)

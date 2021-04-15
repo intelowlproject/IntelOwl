@@ -3,13 +3,14 @@ from celery import uuid
 from django.core.cache import cache
 
 
-from intel_owl.celery import app as celery_app
 from api_app.exceptions import (
     AnalyzerConfigurationException,
     AnalyzerRunException,
 )
 from api_app.helpers import generate_sha256
 from intel_owl.settings import CELERY_QUEUES
+from intel_owl.celery import app as celery_app
+
 from .utils import (
     set_job_status,
     set_failed_analyzer,

@@ -9,13 +9,20 @@ from wsgiref.util import FileWrapper
 from django.utils.decorators import method_decorator
 from django.http import HttpResponse
 from django.db.models import Q
-from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
+from rest_framework import serializers as BaseSerializer
 from rest_framework import status, viewsets, mixins
 from rest_framework.decorators import api_view, action
 from rest_framework.permissions import DjangoObjectPermissions
+from rest_framework.exceptions import NotFound, ParseError, PermissionDenied
 from guardian.decorators import permission_required_or_403
 from rest_framework_guardian.filters import ObjectPermissionsFilter
+from drf_spectacular.utils import (
+    extend_schema as add_docs,
+    OpenApiParameter,
+    inline_serializer,
+)
+from drf_spectacular.types import OpenApiTypes
 
 
 logger = logging.getLogger(__name__)
@@ -24,31 +31,65 @@ logger = logging.getLogger(__name__)
 """ REST API endpoints """
 
 
-@api_view(["GET"])
-@permission_required_or_403("api_app.view_job")
-def ask_analysis_availability(request):
-    """
+@add_docs(
+    description="""
     This is useful to avoid repeating the same analysis multiple times.
     By default this API checks if there are existing analysis related to the md5 in
     status "running" or "reported_without_fails"
     Also, you need to specify the analyzers needed because, otherwise, it is
-    highly probable that you won't get all the results that you expect
-
-    :param md5: string
-        md5 of the sample or observable to look for
-    :param [analyzers_needed]: list
-        specify analyzers needed. It requires either this
-        or run_all_available_analyzers
-    :param [run_all_available_analyzers]: bool
-        if we are looking for an analysis executed with this flag set
-    :param [running_only]: bool
-        check only for running analysis, default False, any value is True
-
-    :return 200:
-        if ok with list of all analysis related to that md5
-    :return 500:
-        if failed
-    """
+    highly probable that you won't get all the results that you expect""",
+    parameters=[
+        OpenApiParameter(
+            name="md5",
+            type=OpenApiTypes.STR,
+            description="md5 of the sample or observable to look for",
+        ),
+        OpenApiParameter(
+            name="analyzers_needed",
+            type=OpenApiTypes.OBJECT,
+            description="""
+            Specify analyzers needed.
+            It requires either this or run_all_available_analyzers""",
+        ),
+        OpenApiParameter(
+            name="run_all_available_analyzers",
+            type=OpenApiTypes.BOOL,
+            description="If we are looking for an analysis executed with this flag set",
+        ),
+        OpenApiParameter(
+            name="running_only",
+            type=OpenApiTypes.BOOL,
+            description="""
+            Check only for running analysis,
+            default False, any value is True""",
+        ),
+    ],
+    responses={
+        200: inline_serializer(
+            name="AskAnalysisAvailabilitySuccessResponse",
+            fields={
+                "status": BaseSerializer.StringRelatedField(),
+                "job_id": BaseSerializer.StringRelatedField(),
+                "analyzers_to_execute": OpenApiTypes.OBJECT,
+            },
+        ),
+        400: inline_serializer(
+            name="AskAnalysisAvailabilityInsufficientDataResponse",
+            fields={
+                "error": BaseSerializer.StringRelatedField(),
+            },
+        ),
+        500: inline_serializer(
+            name="AskAnalysisAvailabilityErrorResponse",
+            fields={
+                "detail": BaseSerializer.StringRelatedField(),
+            },
+        ),
+    },
+)
+@api_view(["GET"])
+@permission_required_or_403("api_app.view_job")
+def ask_analysis_availability(request):
     source = str(request.user)
     analyzers_needed_list = []
     run_all_available_analyzers = False
@@ -127,52 +168,117 @@ def ask_analysis_availability(request):
         )
 
 
+@add_docs(
+    description="""
+    This endpoint allows to start a Job related to a file or an observable""",
+    parameters=[
+        OpenApiParameter(
+            name="is_sample",
+            type=OpenApiTypes.BOOL,
+            description="is a sample (file) or an observable (domain, ip, ...)",
+        ),
+        OpenApiParameter(
+            name="md5", type=OpenApiTypes.STR, description="md5 of the item to analyze"
+        ),
+        OpenApiParameter(
+            name="file",
+            type=OpenApiTypes.BINARY,
+            description="required if is_sample=True, the binary",
+        ),
+        OpenApiParameter(
+            name="file_mimetype",
+            type=OpenApiTypes.STR,
+            description="optional, the binary mimetype, calculated by default",
+        ),
+        OpenApiParameter(
+            name="file_name",
+            type=OpenApiTypes.STR,
+            description="optional if is_sample=True, the binary name",
+        ),
+        OpenApiParameter(
+            name="observable_name",
+            type=OpenApiTypes.STR,
+            description="required if is_sample=False, the observable value",
+        ),
+        OpenApiParameter(
+            name="observable_classification",
+            type=OpenApiTypes.STR,
+            description="required if is_sample=False, (domain, ip, ...)",
+        ),
+        OpenApiParameter(
+            name="analyzers_requested",
+            type=OpenApiTypes.OBJECT,
+            description="list of requested analyzer to run, before filters",
+        ),
+        OpenApiParameter(
+            name="tags_id",
+            type=OpenApiTypes.OBJECT,
+            description="list of id's of tags to apply to job",
+        ),
+        OpenApiParameter(
+            name="run_all_available_analyzers",
+            type=OpenApiTypes.BOOL,
+            description="default False",
+        ),
+        OpenApiParameter(
+            name="private",
+            type=OpenApiTypes.BOOL,
+            description="""
+            Default False,
+            enable it to allow view permissions to only requesting user's groups.""",
+        ),
+        OpenApiParameter(
+            name="force_privacy",
+            type=OpenApiTypes.BOOL,
+            description="""
+            Default False,
+            enable it if you want to avoid to run analyzers with privacy issues""",
+        ),
+        OpenApiParameter(
+            name="disable_external_analyzers",
+            type=OpenApiTypes.BOOL,
+            description="""
+            Default False, enable it if you want to exclude external analyzers""",
+        ),
+        OpenApiParameter(
+            name="runtime_configuration",
+            type=OpenApiTypes.OBJECT,
+            description=r"""
+            Default {}, contains additional parameters for particular analyzers""",
+        ),
+        OpenApiParameter(
+            name="test",
+            type=OpenApiTypes.BOOL,
+            description="disable analysis for API testing",
+        ),
+    ],
+    responses={
+        202: inline_serializer(
+            "SendAnalysisRequestSuccessResponse",
+            fields={
+                "status": BaseSerializer.StringRelatedField(),
+                "job_id": BaseSerializer.IntegerField(),
+                "warnings": OpenApiTypes.OBJECT,
+                "analyzers_running": OpenApiTypes.OBJECT,
+            },
+        ),
+        400: inline_serializer(
+            name="SendAnalysisRequestInsufficientData",
+            fields={
+                "error": BaseSerializer.StringRelatedField(),
+            },
+        ),
+        500: inline_serializer(
+            name="SendAnalysisRequestError",
+            fields={
+                "detail": BaseSerializer.StringRelatedField(),
+            },
+        ),
+    },
+)
 @api_view(["POST"])
 @permission_required_or_403("api_app.add_job")
 def send_analysis_request(request):
-    """
-    This endpoint allows to start a Job related to a file or an observable
-
-    :param is_sample: bool
-        is a sample (file) or an observable (domain, ip, ...)
-    :param md5: string
-        md5 of the item to analyze
-    :param [file]: binary
-        required if is_sample=True, the binary
-    :param [file_mimetype]: string
-        optional, the binary mimetype, calculated by default
-    :param [file_name]: string
-        optional if is_sample=True, the binary name
-    :param [observable_name]: string
-        required if is_sample=False, the observable value
-    :param [observable_classification]: string
-        required if is_sample=False, (domain, ip, ...)
-    :param [analyzers_requested]: list
-        list of requested analyzer to run, before filters
-    :param [tags_id]: list<int>
-        list of id's of tags to apply to job
-    :param [run_all_available_analyzers]: bool
-        default False
-    :param [private]: bool
-        default False,
-        enable it to allow view permissions to only requesting user's groups.
-    :param [force_privacy]: bool
-        default False,
-        enable it if you want to avoid to run analyzers with privacy issues
-    :param [disable_external_analyzers]: bool
-        default False,
-        enable it if you want to exclude external analyzers
-    :param: [runtime_configuration]: dict
-        default {},
-        contains additional parameters for particular analyzers
-    :param [test]: bool
-        disable analysis for API testing
-
-    :return 202:
-        if accepted
-    :return 500:
-        if failed
-    """
     source = str(request.user)
     warnings = []
     try:
@@ -293,24 +399,28 @@ def send_analysis_request(request):
         )
 
 
+@add_docs(
+    description="""
+Get the uploaded analyzer configuration,
+can be useful if you want to choose the analyzers programmatically""",
+    parameters=[],
+    responses={
+        200: inline_serializer(
+            name="GetAnalyzerConfigsSuccessResponse",
+            fields={"analyzers_config": BaseSerializer.DictField()},
+        ),
+        500: inline_serializer(
+            name="GetAnalyzerConfigsFailedResponse",
+            fields={"error": BaseSerializer.StringRelatedField()},
+        ),
+    },
+)
 @api_view(["GET"])
 def get_analyzer_configs(request):
-    """
-    get the uploaded analyzer configuration,
-    can be useful if you want to choose the analyzers programmatically
-
-    :return 200:
-        if ok
-    :return 500:
-        if failed
-    """
     try:
         logger.info(f"get_analyzer_configs received request from {str(request.user)}.")
-
-        analyzers_config = helpers.get_analyzer_config()
-
-        return Response(analyzers_config)
-
+        ac = helpers.get_analyzer_config()
+        return Response(ac, status=status.HTTP_200_OK)
     except Exception as e:
         logger.exception(
             f"get_analyzer_configs requester:{str(request.user)} error:{e}."
@@ -321,65 +431,59 @@ def get_analyzer_configs(request):
         )
 
 
+@add_docs(
+    description="This method is used to download a sample from a Job ID",
+    parameters=[
+        OpenApiParameter(name="job_id", type=OpenApiTypes.INT, description="Job Id")
+    ],
+    responses={
+        200: OpenApiTypes.BINARY,
+        400: inline_serializer(
+            "DownloadSampleInsufficientData",
+            fields={"detail": BaseSerializer.StringRelatedField()},
+        ),
+        500: inline_serializer(
+            "DownloadSampleInsufficientData",
+            fields={"detail": BaseSerializer.StringRelatedField()},
+        ),
+    },
+)
 @api_view(["GET"])
 def download_sample(request):
-    """
-    this method is used to download a sample from a Job ID
-    :param request: job_id
-    :returns: 200 if found, 404 not found, 403 forbidden
-    """
+    data_received = request.query_params
+    logger.info(f"Get binary by Job ID. Data received {data_received}")
+    if "job_id" not in data_received:
+        return Response({"error": "821"}, status=status.HTTP_400_BAD_REQUEST)
+    # get job object or raise 404
     try:
-        data_received = request.query_params
-        logger.info(f"Get binary by Job ID. Data received {data_received}")
-        if "job_id" not in data_received:
-            return Response({"error": "821"}, status=status.HTTP_400_BAD_REQUEST)
-        # get job object or raise 404
-        job = get_object_or_404(models.Job, pk=data_received["id"])
-        # check permission
-        if not request.user.has_perm("api_app.view_job", job):
-            return Response(
-                {"detail": "You don't have permission to perform this operation."},
-                status=status.HTTP_403_FORBIDDEN,
-            )
-        # make sure it is a sample
-        if not job.is_sample:
-            return Response(
-                {"detail": "job without sample"}, status=status.HTTP_400_BAD_REQUEST
-            )
-        response = HttpResponse(FileWrapper(job.file), content_type=job.file_mimetype)
-        response["Content-Disposition"] = f"attachment; filename={job.file_name}"
-        return response
-
-    except Exception as e:
-        logger.exception(f"download_sample requester:{str(request.user)} error:{e}.")
-        return Response(
-            {"detail": "error in download_sample. Check logs."},
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        job = models.Job.objects.get(pk=data_received["job_id"])
+    except models.Job.DoesNotExist:
+        raise NotFound()
+    # check permission
+    if not request.user.has_perm("api_app.view_job", job):
+        raise PermissionDenied()
+    # make sure it is a sample
+    if not job.is_sample:
+        raise ParseError(
+            detail="Requested job does not have a sample associated with it."
         )
+    response = HttpResponse(FileWrapper(job.file), content_type=job.file_mimetype)
+    response["Content-Disposition"] = f"attachment; filename={job.file_name}"
+    return response
 
 
+@add_docs(
+    description="""
+    REST endpoint to fetch list of jobs or retrieve a job with job ID.
+    Requires authentication.
+    """
+)
 class JobViewSet(
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
     mixins.DestroyModelMixin,
     viewsets.GenericViewSet,
 ):
-    """
-    REST endpoint to fetch list of jobs or retrieve a job with job ID.
-    Requires authentication.
-
-    :methods_allowed:
-        GET, OPTIONS, DELETE
-
-    :return 200:
-        if GET ok
-    :return 204:
-        if DELETE ok
-    :return 404:
-        if not found
-    :return 405:
-        if wrong HTTP method
-    """
 
     queryset = models.Job.objects.order_by("-received_request_time").all()
     serializer_class = serializers.JobSerializer
@@ -408,63 +512,44 @@ class JobViewSet(
     )
     def kill(self, request, pk=None):
         """
-        kill running job by closing celery tasks and marking as killed
-        :url param: pk (job_id)
-        :returns: 200 if killed, 404 not found, 403 forbidden, 400 bad request
+        Kill running job by closing celery tasks and marking as killed
+
+        :param url: pk (job_id)
+        :returns:
+         - 200 - if killed
+         - 404 - not found
+         - 403 - forbidden, 400 bad request
         """
+        logger.info(
+            f"kill running job received request from {str(request.user)} "
+            f"-- (job_id:{pk})."
+        )
+        # get job object or raise 404
         try:
-            logger.info(
-                f"kill running job received request from {str(request.user)} "
-                f"-- (job_id:{pk})."
-            )
-            # get job object or raise 404
-            job = get_object_or_404(models.Job, pk=pk)
-            # check permission
-            if not request.user.has_perm("api_app.change_job", job):
-                return Response(
-                    {"detail": "You don't have permission to perform this operation."},
-                    status=status.HTTP_403_FORBIDDEN,
-                )
-            # check if job running
-            if job.status != "running":
-                return Response(
-                    {"detail": "Job is not running"},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-            # close celery tasks
-            general.kill_running_analysis(pk)
-            # set job status
-            job.status = "killed"
-            job.save()
-            return Response(status=status.HTTP_200_OK)
-
-        except Exception as e:
-            logger.exception(
-                f"kill_running_job requester:{str(request.user)} error:{e}."
-            )
-            return Response(
-                {"error": "error in kill_running_job. Check logs."},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
+            job = models.Job.objects.get(pk=pk)
+        except models.Job.DoesNotExist:
+            raise NotFound()
+        # check permission
+        if not request.user.has_perm("api_app.change_job", job):
+            raise PermissionDenied()
+        # check if job running
+        if job.status != "running":
+            raise ParseError(detail="Job is not running")
+        # close celery tasks
+        general.kill_running_analysis(pk)
+        # set job status
+        job.status = "killed"
+        job.save()
+        return Response(status=status.HTTP_200_OK)
 
 
-class TagViewSet(viewsets.ModelViewSet):
-    """
+@add_docs(
+    description="""
     REST endpoint to pefrom CRUD operations on Job tags.
     Requires authentication.
-    POST/PUT/DELETE requires model/object level permission.
-
-    :methods_allowed:
-        GET, POST, PUT, DELETE, OPTIONS
-
-    :return 200:
-        if ok
-    :return 404:
-        if not found
-    :return 405:
-        if wrong HTTP method
-    """
-
+    POST/PUT/DELETE requires model/object level permission."""
+)
+class TagViewSet(viewsets.ModelViewSet):
     queryset = models.Tag.objects.all()
     serializer_class = serializers.TagSerializer
     permission_classes = (DjangoObjectPermissions,)

@@ -23,10 +23,10 @@ class MockResponseNoOp:
     def __init__(self, json_data, status_code):
         pass
 
-    def search(self, **kwargs):
+    def search(self, *args, **kwargs):
         return {}
 
-    def query(self, val):
+    def query(self, *args, **kwargs):
         return {}
 
 

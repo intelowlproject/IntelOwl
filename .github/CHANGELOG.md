@@ -2,6 +2,23 @@
 
 [**Upgrade Guide**](https://intelowl.readthedocs.io/en/latest/Installation.html#update-to-the-most-recent-version)
 
+## [v2.3.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v2.3.0)
+- Added [API documentation](https://intelowl.readthedocs.io) with both [Redoc](https://github.com/Redocly/redoc) and [OpenAPI](https://github.com/OAI/OpenAPI-Specification) Format
+
+**NEW INBUILT ANALYZERS:**
+- added [ThreatFox Abuse.ch](https://threatfox.abuse.ch) analyzer for observables
+- added [GreyNoise Community](https://developer.greynoise.io/reference/community-api) analyzer for IP addresses 
+- added [FireHol](http://iplists.firehol.org/) analyzer to detect malicious IP addresses
+- added [SSAPINet](https://screenshotapi.net) analyzer to capture a screenshot of a web page
+- added optional [Google Rendertron](https://github.com/GoogleChrome/rendertron) analyzer to capture a screenshot of a web page without using an external source (this won't leak the URL externally like the previous one)
+- added [IBM X-Force Exchange](https://exchange.xforce.ibmcloud.com/) analyzer for observables
+- added [Google Web Risk](https://cloud.google.com/web-risk) analyzer, an alternative of GoogleSafeBrowsing for commercial purposes
+
+**Others:**
+- A lot of dependency upgrades and clean up of unnecessary ones
+- refactor to some APIs + added tests for untested APIs
+- adjustments to MISP, OTX and Cymru analyzers
+
 ## [v2.2.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v2.2.0)
 - IntelOwl has **brand new project logos**. Thanks to @Certego.
  

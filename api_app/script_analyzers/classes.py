@@ -3,7 +3,9 @@ import time
 import logging
 import requests
 import json
+
 from abc import ABCMeta, abstractmethod
+from celery.exceptions import SoftTimeLimitExceeded
 
 from api_app.exceptions import (
     AnalyzerRunNotImplemented,
@@ -99,7 +101,11 @@ class BaseAnalyzerMixin(metaclass=ABCMeta):
             result = self.run()
             result = self._validate_result(result)
             self.report["report"] = result
-        except (AnalyzerConfigurationException, AnalyzerRunException) as e:
+        except (
+            AnalyzerConfigurationException,
+            AnalyzerRunException,
+            SoftTimeLimitExceeded,
+        ) as e:
             self._handle_analyzer_exception(e)
         except Exception as e:
             self._handle_base_exception(e)
@@ -232,7 +238,7 @@ class DockerBasedAnalyzer(metaclass=ABCMeta):
     poll_distance: int
 
     @staticmethod
-    def __raise_in_case_bad_request(name, resp):
+    def __raise_in_case_bad_request(name, resp, params_to_check=["key"]):
         """
         Raises:
             :class: `AnalyzerRunException`, if bad status code or no key in response
@@ -249,13 +255,14 @@ class DockerBasedAnalyzer(metaclass=ABCMeta):
             raise AnalyzerRunException(
                 f"Internal Server Error in {name} docker container"
             )
-        # check to make sure there was a valid key in response
-        key = resp.json().get("key", None)
-        if not key:
-            raise AnalyzerRunException(
-                "Unexpected Error. "
-                f"Please check log files under /var/log/intel_owl/{name.lower()}/"
-            )
+        # check to make sure there was a valid params in response
+        for param in params_to_check:
+            param_value = resp.json().get(param, None)
+            if not param_value:
+                raise AnalyzerRunException(
+                    "Unexpected Error. "
+                    f"Please check log files under /var/log/intel_owl/{name.lower()}/"
+                )
         # just in case couldn't catch the error manually
         resp.raise_for_status()
 
@@ -294,6 +301,13 @@ class DockerBasedAnalyzer(metaclass=ABCMeta):
             raise AnalyzerRunException("max polls tried without getting any result.")
         return json_data
 
+    def _raise_container_not_running(self):
+        raise AnalyzerConfigurationException(
+            f"{self.name} docker container is not running.\n"
+            f"You have to enable it using the appropriate "
+            f"parameter when executing start.py."
+        )
+
     def _docker_run(self, req_data, req_files=None):
         """
         Helper function that takes of care of requesting new analysis,
@@ -328,11 +342,7 @@ class DockerBasedAnalyzer(metaclass=ABCMeta):
             else:
                 resp1 = requests.post(self.url, json=req_data)
         except requests.exceptions.ConnectionError:
-            raise AnalyzerConfigurationException(
-                f"{self.name} docker container is not running.\n"
-                f"You have to enable it using the appropriate "
-                f"parameter when executing start.py."
-            )
+            self._raise_container_not_running()
 
         # step #2: raise AnalyzerRunException in case of error
         assert self.__raise_in_case_bad_request(self.name, resp1)
@@ -355,3 +365,23 @@ class DockerBasedAnalyzer(metaclass=ABCMeta):
             raise AnalyzerRunException(str(err))
 
         return report
+
+    def _docker_get(self):
+        """
+        Raises:
+            AnalyzerConfigurationException: In case docker service is not running
+            AnalyzerRunException: Any other error
+
+        Returns:
+            Response: Response object of request
+        """
+
+        # step #1: request new analysis
+        try:
+            resp = requests.get(url=self.url)
+        except requests.exceptions.ConnectionError:
+            self._raise_container_not_running()
+
+        # step #2: raise AnalyzerRunException in case of error
+        assert self.__raise_in_case_bad_request(self.name, resp, params_to_check=[])
+        return resp

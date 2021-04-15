@@ -255,6 +255,17 @@
     "soft_time_limit": 30,
     "queue": "local"
   },
+  "FireHol_IPList": {
+    "type": "observable",
+    "observable_supported": ["ip"],
+    "external_service": true,
+    "description": "check if an IP is in FireHol's IPList",
+    "python_module": "firehol_iplist.FireHol_IPList",
+    "additional_config_params": {
+      "list_names": ["firehol_level1.netset"]
+    },
+    "soft_time_limit": 180
+  },
   "Floss": {
     "type": "file",
     "supported_filetypes": ["application/x-dosexec"],
@@ -296,6 +307,15 @@
       "query_type": "A"
     }
   },
+  "GoogleWebRisk": {
+    "type": "observable",
+    "observable_supported": ["ip", "domain", "url"],
+    "external_service": true,
+    "description": "Scan an observable against Web Risk API",
+    "requires_configuration": true,
+    "soft_time_limit": 20,
+    "python_module": "dns.dns_malicious_detectors.google_webrisk.WebRisk"
+  },
   "GoogleSafebrowsing": {
     "type": "observable",
     "observable_supported": ["ip", "domain", "url"],
@@ -318,12 +338,26 @@
     },
     "soft_time_limit": 30
   },
+  "GreyNoiseCommunity": {
+    "type": "observable",
+    "observable_supported": [
+      "ip"
+    ],
+    "external_service": true,
+    "description": "scan an IP against the Community Greynoise API",
+    "python_module": "greynoise.GreyNoise",
+    "additional_config_params": {
+      "greynoise_api_version": "v3"
+    },
+    "soft_time_limit": 30
+  },
   "GreyNoiseAlpha": {
     "type": "observable",
     "observable_supported": [
       "ip"
     ],
     "external_service": true,
+    "disabled": true,
     "description": "scan an IP against the Alpha Greynoise API (no API key required)",
     "python_module": "greynoise.GreyNoise",
     "additional_config_params": {
@@ -697,6 +731,18 @@
     },
     "soft_time_limit": 100
   },
+  "Rendertron": {
+    "type": "observable",
+    "observable_supported": [
+      "url"
+    ],
+    "description": "get screenshot of a web page using rendertron (puppeteer)",
+    "python_module": "rendertron.Rendertron",
+    "requires_configuration": true,
+    "additional_config_params": {},
+    "soft_time_limit": 320,
+    "queue": "local"
+  },
   "Qiling_Windows": {
     "type": "file",
     "supported_filetypes": [
@@ -982,6 +1028,26 @@
     "soft_time_limit": 120,
     "queue": "long"
   },
+  "SSAPINet": {
+    "type": "observable",
+    "observable_supported": [
+      "url"
+    ],
+    "external_service": true,
+    "description": "get a screenshot of a web page using screenshotapi.net (external source)",
+    "requires_configuration": true,
+    "python_module": "ss_api_net.SSAPINet",
+    "soft_time_limit": 300,
+    "additional_config_params": {
+      "api_key_name": "SSAPINET_KEY",
+      "use_proxy": false,
+      "proxy": "",
+      "output": "image",
+      "extra_api_params" : {
+        "full_page": true
+      }
+    }
+  },
   "Strings_Info_Classic": {
     "type": "file",
     "description": "strings extraction",
@@ -1021,6 +1087,14 @@
     "external_service": true,
     "description": "check an IP reputation from Talos downloaded IP list",
     "python_module": "talos.Talos",
+    "soft_time_limit": 30
+  },
+  "ThreatFox": {
+    "type": "observable",
+    "observable_supported": ["ip", "url", "domain", "hash", "generic"],
+    "external_service": true,
+    "description": "search for an IOC in ThreatFox's database",
+    "python_module": "threatfox.ThreatFox",
     "soft_time_limit": 30
   },
   "Threatminer_PDNS": {
@@ -1333,6 +1407,23 @@
       "search_type": "WiFi Network"
     },
     "soft_time_limit": 30
+  },
+  "XForceExchange": {
+    "type": "observable",
+    "observable_supported": [
+      "ip",
+      "hash",
+      "url"
+    ],
+    "external_service": true,
+    "description": "scan an observable on IBM X-Force Exchange.",
+    "requires_configuration": true,
+    "python_module": "xforce.XForce",
+    "soft_time_limit": 30,
+    "additional_config_params": {
+      "api_key_name": "XFORCE_KEY",
+      "api_password_name": "XFORCE_PASSWORD"
+    }
   },
   "Xlm_Macro_Deobfuscator": {
     "type": "file",

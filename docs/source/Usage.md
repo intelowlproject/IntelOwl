@@ -91,7 +91,8 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * `Robtex_Reverse_PDNS_Query`: scan an IP against the Robtex Passive DNS DB
 * `Robtex_IP_Query`: get IP info from Robtex
 * `GoogleSafebrowsing`: Scan an observable against GoogleSafeBrowsing DB
-* `GreyNoiseAlpha`: scan an IP against the Alpha Greynoise API (no API key required)
+* `GoogleWebRisk`: Scan an observable against WebRisk API (Commercial version of Google Safe Browsing). Check the [docs]((https://intelowl.readthedocs.io/en/develop/Advanced-Usage.html#analyzers-with-special-configuration)) to enable this properly
+* `GreyNoiseCommunity`: scan an IP against the Community Greynoise API (no API key required)
 * `GreyNoise`: scan an IP against the Greynoise API (requires API key)
 * `CIRCLPassiveDNS`: scan an observable against the CIRCL Passive DNS DB
 * `CIRCLPassiveSSL`: scan an observable against the CIRCL Passive SSL DB
@@ -144,6 +145,11 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * `InQuest_IOCdb`: Indicators of Compromise Database by [InQuest Labs](https://labs.inquest.net/iocdb)
 * `InQuest_REPdb`: Search in [InQuest Lab's](https://labs.inquest.net/repdb) Reputation Database
 * `InQuest_DFI`: Deep File Inspection by [InQuest Labs](https://labs.inquest.net/dfi)
+* `XForceExchange`: scan an observable on [IBM X-Force Exchange](https://exchange.xforce.ibmcloud.com/)
+* `Renderton`: get screenshot of a web page using rendertron (puppeteer) [renderton repo](https://github.com/GoogleChrome/rendertron)
+* `SSAPINet`: get a screenshot of a web page using [screenshotapi.net](https://screenshotapi.net/) (external source); additional config options can be added to `extra_api_params` [in the config](https://github.com/intelowlproject/IntelOwl/blob/master/configuration/analyzer_config.json).
+* `FireHol_IPList`: check if an IP is in [FireHol's IPList](https://iplists.firehol.org/)
+* `ThreatFox`: search for an IOC in [ThreatFox](https://threatfox.abuse.ch/api/)'s database
 
 #### Generic analyzers (email, phone number, ...)
 Some Analyzers require details other than just IP, URL, Domain etc... We classified them as Generic Analyzers. Since the type of field is not known, there is a format for strings to be followed.

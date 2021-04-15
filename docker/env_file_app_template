@@ -52,6 +52,10 @@ TRIAGE_KEY=
 EMAILREP_KEY=
 MWDB_KEY=
 WIGLE_KEY=
+XFORCE_KEY=
+XFORCE_PASSWORD=
+SSAPINET_KEY=
+GOOGLE_APPLICATION_CREDENTIALS=/opt/deploy/intel_owl/configuration/service_account_keyfile.json
 
 # Test tokens
 TEST_JOB_ID=1

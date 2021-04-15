@@ -2,13 +2,21 @@
 
 This page includes details about some advanced features that Intel Owl provides which can be optionally enabled. Namely,
 
-- [Optional Analyzers](#optional-analyzers)
-- [Customize analyzer execution at time of request](#customize-analyzer-execution-at-time-of-request)
-- [Elastic Search (with Kibana)](#elastic-search)
-- [Django Groups & Permissions](#django-groups-permissions)
-- [Authentication options](#authentication-options)
-- [GKE deployment](#google-kubernetes-engine-deployment)
-- [Multi Queue](#multi-queue)
+- [Advanced Usage](#advanced-usage)
+  - [Optional Analyzers](#optional-analyzers)
+  - [Customize analyzer execution at time of request](#customize-analyzer-execution-at-time-of-request)
+        - [from the GUI](#from-the-gui)
+        - [from Pyintelowl](#from-pyintelowl)
+  - [Analyzers with special configuration](#analyzers-with-special-configuration)
+  - [Elastic Search](#elastic-search)
+      - [Kibana](#kibana)
+      - [Example Configuration](#example-configuration)
+  - [Django Groups & Permissions](#django-groups--permissions)
+  - [Authentication options](#authentication-options)
+      - [LDAP](#ldap)
+  - [Google Kubernetes Engine deployment](#google-kubernetes-engine-deployment)
+  - [Multi Queue](#multi-queue)
+      - [Queue Customization](#queue-customization)
 
 
 ## Optional Analyzers
@@ -68,6 +76,11 @@ table, th, td {
      Qiling provides a <a href="https://github.com/qilingframework/qiling/blob/master/examples/scripts/dllscollector.bat"> DllCollector</a> to retrieve dlls from your licensed Windows. 
      <a href="https://docs.qiling.io/en/latest/profile/"> Profiles </a> must be placed in the <code>profiles</code> subfolder
      </td>
+  </tr>
+  <tr>
+    <td>Renderton</td>
+    <td><code>Renderton</code></td>
+    <td>get screenshot of a web page using rendertron (a headless chrome solution using puppeteer). Configuration variables have to be included in the `config.json`, see <a href="https://github.com/GoogleChrome/rendertron#config"> config options of renderton </a>. To use a proxy, include an argument <code>--proxy-server=YOUR_PROXY_SERVER</code> in <code>puppeteerArgs</code>.</td>
   </tr>
 </table>
 
@@ -137,7 +150,18 @@ List of some of the analyzers with optional configuration:
   * Above mentioned `search_type` is just different routes mentioned in [docs](https://api.wigle.net/swagger#/v3_ALPHA). Also, the string to be passed in input field of generic analyzers have a format. Different variables are separated by semicolons(`;`) and the field-name and value are separated by equals sign(`=`). Example string for search_type `CDMA Network` is `sid=12345;nid=12345;bsid=12345`
 * `CRXcavator`:
   * Every Chrome-Extension has a unique alpha=numerc identifier. That's the only Input necessary. Eg: `Norton Safe Search Enhanced`'s identifier is `eoigllimhcllmhedfbmahegmoakcdakd`.
- 
+* `SSAPINet`:
+  *  `use_proxy` (default `false`) and `proxy` (default `""`) - use these options to pass your request through a proxy server.
+  *  `output` (default `"image"`) (available options `"image"`, `"json"`) - this specifies whether the result would be a raw image or json (containing link to the image stored on their server).
+  *  `extra_api_params` (default `{"full_page": true}`) - all other parameters provided by the API can be added here as an object (dictionary). Some of the params available are: 
+     * `full_page` (default `true`) - if `true`, takes screenshot of the entire webpage.
+     * `fresh` (default `false`) - if `true`, forces a fresh screenshot instead of a cached one.
+     * `lazy_load` (default `false`) - if `true`, their browser will scroll down the entire page so that all content is loaded.
+     * `destroy_screenshot` (default `false`) - if `true` the screenshot is not stored on their servers. Please make sure to use `output` parameter with value `image`, so you don't lose the screenshot, as the image link provided in the `json` result would work only once.
+     
+     Refer to the [docs](https://screenshotapi.net/documentation) for a reference to what other parameters are and their default values.
+* `FireHol_IPList`:
+  * `list_names`: Add [FireHol's IPList](https://iplists.firehol.org/) names as comma separated values in `list_names` array.
 
 There are two ways to do this:
 
@@ -161,6 +185,13 @@ runtime_configuration = {
 }
 pyintelowl_client.send_file_analysis_request(..., runtime_configuration=runtime_configuration)
 ```
+
+## Analyzers with special configuration
+Some analyzers could require a special configuration:
+* `GoogleWebRisk`: this analyzer needs a service account key with the Google Cloud credentials to work properly.
+You should follow the [official guide](https://cloud.google.com/web-risk/docs/quickstart) for creating the key.
+Then you can copy the generated JSON key file in the directory `configuration` of the project and change its name to `service_account_keyfile.json`.
+This is the default configuration. If you want to customize the name or the location of the file, you can change the environment variable `GOOGLE_APPLICATION_CREDENTIALS` in the `env_file_app` file.
 
 ## Elastic Search
 

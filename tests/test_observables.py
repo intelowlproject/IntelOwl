@@ -42,6 +42,10 @@ from api_app.script_analyzers.observable_analyzers import (
     inquest,
     wigle,
     crxcavator,
+    rendertron,
+    ss_api_net,
+    firehol_iplist,
+    threatfox,
 )
 from api_app.models import Job
 from .mock_utils import (
@@ -54,6 +58,7 @@ from .utils import (
     CommonTestCases_observables,
     CommonTestCases_ip_url_domain,
     CommonTestCases_ip_domain_hash,
+    CommonTestCases_ip_url_hash,
     CommonTestCases_url_domain,
 )
 
@@ -94,11 +99,23 @@ def mocked_triage_post(*args, **kwargs):
     return MockResponse({"id": "sample_id", "status": "pending"}, 200)
 
 
+def mocked_firehol_iplist(*args, **kwargs):
+    return MockResponse(
+        json_data={},
+        status_code=200,
+        text="""0.0.0.0/8\n
+            1.10.16.0/20\n
+            1.19.0.0/16\n
+            3.90.198.217\n""",
+    )
+
+
 @mock_connections(patch("requests.get", side_effect=mocked_requests))
 @mock_connections(patch("requests.post", side_effect=mocked_requests))
 class IPAnalyzersTests(
     CommonTestCases_ip_domain_hash,
     CommonTestCases_ip_url_domain,
+    CommonTestCases_ip_url_hash,
     CommonTestCases_observables,
     TestCase,
 ):
@@ -214,13 +231,23 @@ class IPAnalyzersTests(
         ).start()
         self.assertEqual(report.get("success", False), True)
 
-    def test_greynoisealpha(self, mock_get=None, mock_post=None):
+    def test_greynoise_alpha(self, mock_get=None, mock_post=None):
         report = greynoise.GreyNoise(
             "GreyNoiseAlpha",
             self.job_id,
             self.observable_name,
             self.observable_classification,
-            {},
+            {"greynoise_api_version": "v1"},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    def test_greynoise_community(self, mock_get=None, mock_post=None):
+        report = greynoise.GreyNoise(
+            "GreyNoiseCommunity",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {"greynoise_api_version": "v3"},
         ).start()
         self.assertEqual(report.get("success", False), True)
 
@@ -230,7 +257,7 @@ class IPAnalyzersTests(
             self.job_id,
             self.observable_name,
             self.observable_classification,
-            {},
+            {"greynoise_api_version": "v2"},
         ).start()
         self.assertEqual(report.get("success", False), True)
 
@@ -261,6 +288,17 @@ class IPAnalyzersTests(
             self.observable_name,
             self.observable_classification,
             {},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    @mock_connections(patch("requests.get", side_effect=mocked_firehol_iplist))
+    def test_firehol_iplist(self, *args):
+        report = firehol_iplist.FireHol_IPList(
+            "FireHol_IPList",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {"list_names": ["firehol_level1.netset"]},
         ).start()
         self.assertEqual(report.get("success", False), True)
 
@@ -467,6 +505,7 @@ class DomainAnalyzersTests(
 class URLAnalyzersTests(
     CommonTestCases_ip_url_domain,
     CommonTestCases_url_domain,
+    CommonTestCases_ip_url_hash,
     CommonTestCases_observables,
     TestCase,
 ):
@@ -555,11 +594,34 @@ class URLAnalyzersTests(
         ).start()
         self.assertEqual(report.get("success", False), True)
 
+    def test_rendertron(self, mock_get=None, mock_post=None):
+        report = rendertron.Rendertron(
+            "Rendertron",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    def test_ss_api_net(self, mock_get=None, mock_post=None):
+        report = ss_api_net.SSAPINet(
+            "SSAPINet",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
 
 @mock_connections(patch("requests.get", side_effect=mocked_requests))
 @mock_connections(patch("requests.post", side_effect=mocked_requests))
 class HashAnalyzersTests(
-    CommonTestCases_ip_domain_hash, CommonTestCases_observables, TestCase
+    CommonTestCases_ip_url_hash,
+    CommonTestCases_ip_domain_hash,
+    CommonTestCases_observables,
+    TestCase,
 ):
     @staticmethod
     def get_params():
@@ -673,6 +735,16 @@ class GenericAnalyzersTest(TestCase):
             self.observable_name,
             self.observable_classification,
             {"inquest_analysis": "dfi_search"},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    def test_threatfox(self, mock_get=None, mock_post=None):
+        report = threatfox.ThreatFox(
+            "ThreatFox",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {},
         ).start()
         self.assertEqual(report.get("success", False), True)
 

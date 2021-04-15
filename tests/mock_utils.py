@@ -26,7 +26,7 @@ class MockResponseNoOp:
     def search(self, **kwargs):
         return {}
 
-    def query(self, val):
+    def query(self, **kwargs):
         return {}
 
 

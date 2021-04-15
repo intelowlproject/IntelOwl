@@ -16,6 +16,10 @@ class Cymru(ObservableAnalyzer):
                 f"observable type {self.observable_classification} not supported"
             )
 
+        hash_length = len(self.observable_name)
+        if hash_length == 64:
+            raise AnalyzerRunException("sha256 are not supported by the service")
+
         results["found"] = False
         # reference: https://team-cymru.com/community-services/mhr/
         # if the resolution works, this means that the file is reported

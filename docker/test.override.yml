@@ -1,0 +1,12 @@
+version: '3'
+
+services:
+  uwsgi:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+
+  nginx:
+    build:
+      context: ..
+      dockerfile: ./${DOCKERFILE_NGINX}

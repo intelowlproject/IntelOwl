@@ -1,0 +1,19 @@
+# IMPORTANT: The version must match the version of docker-compose.yml
+---
+version: '3'
+
+services:
+  thug:
+    build:
+      context: ../integrations/thug
+      dockerfile: Dockerfile
+    container_name: intelowl_thug
+    restart: unless-stopped
+    expose:
+      - "4001"
+    env_file:
+      - env_file_integrations
+    volumes:
+      - generic_logs:/var/log/intel_owl
+    depends_on:
+      - uwsgi

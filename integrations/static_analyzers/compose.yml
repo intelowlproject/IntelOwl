@@ -1,0 +1,19 @@
+# IMPORTANT: The version must match the version of docker-compose.yml
+---
+version: '3'
+
+# All additional integrations should be added following this format only.
+
+services:
+  static_analyzers:
+    image: intelowlproject/intelowl_static_analyzers:${INTELOWL_TAG_VERSION}
+    container_name: intelowl_static_analyzers
+    restart: unless-stopped
+    expose:
+      - "4002"
+    env_file:
+      - env_file_integrations
+    volumes:
+      - generic_logs:/var/log/intel_owl
+    depends_on:
+      - uwsgi

@@ -43,7 +43,8 @@ def tor_updater():
 
 @shared_task(soft_time_limit=20)
 def maxmind_updater():
-    maxmind.Maxmind.updater({})
+    for db in maxmind.db_names:
+        maxmind.Maxmind.updater({}, db)
 
 
 @shared_task(soft_time_limit=60)
@@ -54,6 +55,8 @@ def yara_updater():
 @app.task(name="run_analyzer", soft_time_limit=500)
 def run_analyzer(cls_path, *args):
     try:
+        # FIXME: we can replace this with `django.utils.module_loading`
+        # ref to django docs: https://cutt.ly/HzF2rcO
         path_parts = cls_path.split(".")
         typ = path_parts[0]
         modname = ".".join(path_parts[1:-1])

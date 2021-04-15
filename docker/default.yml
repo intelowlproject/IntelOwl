@@ -1,0 +1,94 @@
+version: '3'
+
+services:
+  postgres:
+    image: library/postgres:12-alpine
+    container_name: intelowl_postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - ./env_file_postgres
+
+  uwsgi:
+    image: intelowlproject/intelowl:${INTELOWL_TAG_VERSION}
+    container_name: intelowl_uwsgi
+    volumes:
+      - ../configuration/intel_owl.ini:/etc/uwsgi/sites/intel_owl.ini
+      - ../configuration/analyzer_config.json:/opt/deploy/configuration/analyzer_config.json
+      - ../configuration/ldap_config.py:/opt/deploy/configuration/ldap_config.py
+      - generic_logs:/var/log/intel_owl
+      - static_content:/opt/deploy/intel_owl/static
+      - shared_files:/opt/deploy/files_required
+    entrypoint:
+      - ./docker/entrypoint_uwsgi.sh
+    expose:
+      - "8001"
+    env_file:
+      - env_file_app
+    depends_on:
+      - postgres
+
+  nginx:
+    image: intelowlproject/intelowl_nginx:${INTELOWL_TAG_VERSION}
+    container_name: intelowl_nginx
+    restart: unless-stopped
+    hostname: nginx
+    volumes:
+      - ../configuration/intel_owl_nginx_http:/etc/nginx/conf.d/default.conf
+      - nginx_logs:/var/log/nginx
+      - static_content:/var/www/static
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - uwsgi
+
+  rabbitmq:
+    image: library/rabbitmq:3.8-alpine
+    container_name: intelowl_rabbitmq
+    logging:
+      driver: none
+
+  celery_beat:
+    image: intelowlproject/intelowl:${INTELOWL_TAG_VERSION}
+    container_name: intelowl_celery_beat
+    restart: unless-stopped
+    command: /usr/local/bin/celery -A intel_owl.celery beat --uid www-data --gid www-data --pidfile=/tmp/celerybeat.pid --schedule=/tmp/celerybeat-schedule
+    volumes:
+      - ../configuration/analyzer_config.json:/opt/deploy/configuration/analyzer_config.json
+      - generic_logs:/var/log/intel_owl
+      - shared_files:/opt/deploy/files_required
+    env_file:
+      - env_file_app
+    depends_on:
+      - rabbitmq
+      - postgres
+
+  celery_worker_default:
+    image: intelowlproject/intelowl:${INTELOWL_TAG_VERSION}
+    container_name: intelowl_celery_worker_default
+    restart: unless-stopped
+    stop_grace_period: 3m
+    command: /usr/local/bin/celery -A intel_owl.celery worker -n worker_default -P eventlet --uid www-data --gid www-data --time-limit=10000 --pidfile="/tmp/%n.pid" -Ofair -Q default
+    volumes:
+      - ../configuration/analyzer_config.json:/opt/deploy/configuration/analyzer_config.json
+      - generic_logs:/var/log/intel_owl
+      - shared_files:/opt/deploy/files_required
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "10m"
+    env_file:
+      - env_file_app
+    depends_on:
+      - rabbitmq
+      - postgres
+
+
+volumes:
+  postgres_data:
+  nginx_logs:
+  generic_logs:
+  static_content:
+  shared_files:

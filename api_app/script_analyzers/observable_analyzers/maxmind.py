@@ -1,6 +1,7 @@
 import datetime
 import os
 import logging
+import shutil
 import tarfile
 import traceback
 
@@ -13,8 +14,7 @@ from intel_owl import settings, secrets
 
 logger = logging.getLogger(__name__)
 
-db_name = "GeoLite2-Country.mmdb"
-database_location = f"{settings.MEDIA_ROOT}/{db_name}"
+db_names = ["GeoLite2-Country.mmdb", "GeoLite2-City.mmdb"]
 
 
 class Maxmind(classes.ObservableAnalyzer):
@@ -22,24 +22,27 @@ class Maxmind(classes.ObservableAnalyzer):
         self.additional_config_params = additional_config_params
 
     def run(self):
-        try:
-            if not os.path.isfile(database_location):
-                self.updater(self.additional_config_params)
-            reader = maxminddb.open_database(database_location)
-            maxmind_result = reader.get(self.observable_name)
-            reader.close()
-        except maxminddb.InvalidDatabaseError as e:
-            error_message = f"Invalid database error: {e}"
-            logger.exception(error_message)
-            maxmind_result = {"error": error_message}
+        maxmind_final_result = {}
+        for db in db_names:
+            try:
+                db_location = _get_db_location(db)
+                if not os.path.isfile(db_location):
+                    self.updater(self.additional_config_params, db)
+                reader = maxminddb.open_database(db_location)
+                maxmind_result = reader.get(self.observable_name)
+                reader.close()
+            except maxminddb.InvalidDatabaseError as e:
+                error_message = f"Invalid database error: {e}"
+                logger.exception(error_message)
+                maxmind_result = {"error": error_message}
+            logger.info(maxmind_result)
+            maxmind_final_result.update(maxmind_result)
 
-        if not maxmind_result:
-            maxmind_result = {}
-
-        return maxmind_result
+        return maxmind_final_result
 
     @staticmethod
-    def updater(additional_config_params):
+    def updater(additional_config_params, db):
+        db_location = _get_db_location(db)
         try:
             api_key_name = additional_config_params.get("api_key_name", "MAXMIND_KEY")
             api_key = secrets.get_secret(api_key_name)
@@ -48,18 +51,20 @@ class Maxmind(classes.ObservableAnalyzer):
                     f"No API key retrieved with name: '{api_key_name}'"
                 )
 
-            logger.info("starting download of db from maxmind")
+            db_name_wo_ext = db[:-5]
+            logger.info(f"starting download of db {db_name_wo_ext} from maxmind")
             url = (
                 "https://download.maxmind.com/app/geoip_download?edition_id="
-                f"GeoLite2-Country&license_key={api_key}&suffix=tar.gz"
+                f"{db_name_wo_ext}&license_key={api_key}&suffix=tar.gz"
             )
             r = requests.get(url)
             if r.status_code >= 300:
                 raise AnalyzerRunException(
-                    f"failed request for new maxmind db. Status code: {r.status_code}"
+                    f"failed request for new maxmind db {db_name_wo_ext}."
+                    f" Status code: {r.status_code}"
                 )
 
-            tar_db_path = "/tmp/GeoLite2-Country.tar.gz"
+            tar_db_path = f"/tmp/{db_name_wo_ext}.tar.gz"
             with open(tar_db_path, "wb") as f:
                 f.write(r.content)
 
@@ -76,11 +81,11 @@ class Maxmind(classes.ObservableAnalyzer):
                 date_to_check = today - datetime.timedelta(days=counter)
                 formatted_date = date_to_check.strftime("%Y%m%d")
                 downloaded_db_path = (
-                    "{}/GeoLite2-Country_{}/GeoLite2-Country.mmdb"
-                    "".format(directory_to_extract_files, formatted_date)
+                    f"{directory_to_extract_files}/"
+                    f"{db_name_wo_ext}_{formatted_date}/{db}"
                 )
                 try:
-                    os.rename(downloaded_db_path, database_location)
+                    os.rename(downloaded_db_path, db_location)
                 except FileNotFoundError:
                     logger.debug(
                         f"{downloaded_db_path} not found move to the day before"
@@ -88,18 +93,27 @@ class Maxmind(classes.ObservableAnalyzer):
                     counter += 1
                 else:
                     directory_found = True
+                    shutil.rmtree(
+                        f"{directory_to_extract_files}/"
+                        f"{db_name_wo_ext}_{formatted_date}"
+                    )
 
             if directory_found:
                 logger.info(f"maxmind directory found {downloaded_db_path}")
             else:
                 raise AnalyzerRunException(
-                    "failed extraction of maxmind db, reached max number of attempts"
+                    f"failed extraction of maxmind db {db_name_wo_ext},"
+                    f" reached max number of attempts"
                 )
 
-            logger.info("ended download of db from maxmind")
+            logger.info(f"ended download of db {db_name_wo_ext} from maxmind")
 
         except Exception as e:
             traceback.print_exc()
             logger.exception(str(e))
 
-        return database_location
+        return db_location
+
+
+def _get_db_location(db):
+    return f"{settings.MEDIA_ROOT}/{db}"

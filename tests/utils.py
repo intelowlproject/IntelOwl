@@ -17,6 +17,9 @@ from api_app.script_analyzers.observable_analyzers import (
     intelx,
     urlscan,
     mb_google,
+    inquest,
+    xforce,
+    threatfox,
 )
 
 from api_app.script_analyzers.observable_analyzers.dns.dns_resolvers import (
@@ -29,6 +32,7 @@ from api_app.script_analyzers.observable_analyzers.dns.dns_resolvers import (
 from api_app.script_analyzers.observable_analyzers.dns.dns_malicious_detectors import (
     cloudflare_malicious_detector,
     googlesf,
+    google_webrisk,
     quad9_malicious_detector,
 )
 
@@ -78,9 +82,45 @@ class CommonTestCases_observables(metaclass=ABCMeta):
         ).start()
         self.assertEqual(report.get("success", False), True)
 
-    def test_otx(self, mock_get=None, mock_post=None):
+    @mock_connections(
+        patch(
+            "requests.Session.get",
+            side_effect=mocked_requests,
+        )
+    )
+    def test_otx(self, *args):
         report = otx.OTX(
             "OTX", self.job_id, self.observable_name, self.observable_classification, {}
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    def test_InQuest_IOCdb(self, mock_get=None, mock_post=None):
+        report = inquest.InQuest(
+            "InQuest_IOCdb",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {"inquest_analysis": "iocdb_search"},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    def test_InQuest_REPdb(self, mock_get=None, mock_post=None):
+        report = inquest.InQuest(
+            "InQuest_REPdb",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {"inquest_analysis": "repdb_search"},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    def test_InQuest_DFI(self, mock_get=None, mock_post=None):
+        report = inquest.InQuest(
+            "InQuest_DFI",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {"inquest_analysis": "dfi_search"},
         ).start()
         self.assertEqual(report.get("success", False), True)
 
@@ -116,7 +156,7 @@ class CommonTestCases_observables(metaclass=ABCMeta):
         ).start()
         self.assertEqual(report.get("success", False), True)
 
-    @mock_connections(patch("pymisp.ExpandedPyMISP", side_effect=mocked_requests_noop))
+    @mock_connections(patch("pymisp.PyMISP", side_effect=mocked_requests_noop))
     def test_misp_first(self, *args):
         report = misp.MISP(
             "MISP_FIRST",
@@ -124,6 +164,16 @@ class CommonTestCases_observables(metaclass=ABCMeta):
             self.observable_name,
             self.observable_classification,
             {"api_key_name": "FIRST_MISP_API", "url_key_name": "FIRST_MISP_URL"},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    def test_threatfox(self, mock_get=None, mock_post=None):
+        report = threatfox.ThreatFox(
+            "ThreatFox",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {},
         ).start()
         self.assertEqual(report.get("success", False), True)
 
@@ -159,6 +209,22 @@ class CommonTestCases_ip_url_domain(metaclass=ABCMeta):
     def test_gsf(self, mock_get=None, mock_post=None):
         report = googlesf.GoogleSF(
             "GoogleSafeBrowsing",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    @mock_connections(
+        patch(
+            "api_app.script_analyzers.observable_analyzers.dns."
+            "dns_malicious_detectors.google_webrisk.WebRiskServiceClient"
+        )
+    )
+    def test_google_web_risk(self, *args):
+        report = google_webrisk.WebRisk(
+            "GoogleWebRisk",
             self.job_id,
             self.observable_name,
             self.observable_classification,
@@ -286,5 +352,23 @@ class CommonTestCases_url_domain(metaclass=ABCMeta):
             self.observable_name,
             self.observable_classification,
             additional_params,
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+
+class CommonTestCases_ip_url_hash(metaclass=ABCMeta):
+    """
+    Tests which are common for IP, url, hash types.
+    """
+
+    def test_xforce(self, *args):
+        if self.observable_classification == "hash":
+            self.observable_name = "9498FF82A64FF445398C8426ED63EA5B"
+        report = xforce.XForce(
+            "XForce",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {},
         ).start()
         self.assertEqual(report.get("success", False), True)

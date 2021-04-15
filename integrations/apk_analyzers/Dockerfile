@@ -42,4 +42,3 @@ RUN pip3 install -r requirements.txt --no-cache-dir \
 # Serve Flask application using gunicorn
 EXPOSE 4004
 ENTRYPOINT ["./entrypoint.sh"]
-USER ${USER}

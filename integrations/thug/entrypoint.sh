@@ -1,5 +1,5 @@
 #!/bin/sh
-
+mkdir -p ${LOG_PATH}
 touch ${LOG_PATH}/gunicorn_access.log ${LOG_PATH}/gunicorn_errors.log
 chown -R thug:thug ${LOG_PATH}
 su thug -s /bin/bash

@@ -1,12 +1,16 @@
 import logging
-from celery.execute import send_task
+from celery import uuid
+from django.core.cache import cache
 
-from intel_owl import settings
+
 from api_app.exceptions import (
     AnalyzerConfigurationException,
     AnalyzerRunException,
 )
 from api_app.helpers import generate_sha256
+from intel_owl.settings import CELERY_QUEUES
+from intel_owl.celery import app as celery_app
+
 from .utils import (
     set_job_status,
     set_failed_analyzer,
@@ -46,7 +50,16 @@ def start_analyzers(
             adjust_analyzer_config(
                 runtime_configuration, additional_config_params, analyzer
             )
+            # get celery queue
+            queue = ac.get("queue", "default")
+            if queue not in CELERY_QUEUES:
+                logger.error(
+                    f"Analyzer {analyzers_to_execute} has a wrong queue."
+                    f" Setting to default"
+                )
+                queue = "default"
             # construct arguments
+
             if is_sample:
                 # check if we should run the hash instead of the binary
                 run_hash = ac.get("run_hash", False)
@@ -95,14 +108,30 @@ def start_analyzers(
                 ]
             # run analyzer with a celery task asynchronously
             stl = ac.get("soft_time_limit", 300)
-            send_task(
+            t_id = uuid()
+            celery_app.send_task(
                 "run_analyzer",
                 args=args,
-                queue=settings.CELERY_TASK_DEFAULT_QUEUE,
+                queue=queue,
                 soft_time_limit=stl,
+                task_id=t_id,
             )
+            # to track task_id by job_id
+            task_ids = cache.get(job_id)
+            if isinstance(task_ids, list):
+                task_ids.append(t_id)
+            else:
+                task_ids = [t_id]
+            cache.set(job_id, task_ids)
 
         except (AnalyzerConfigurationException, AnalyzerRunException) as e:
             err_msg = f"({analyzer}, job_id #{job_id}) -> Error: {e}"
             logger.error(err_msg)
             set_failed_analyzer(analyzer, job_id, err_msg)
+
+
+def kill_running_analysis(job_id):
+    task_ids = cache.get(job_id)
+    if isinstance(task_ids, list):
+        celery_app.control.revoke(task_ids)
+        cache.delete(job_id)

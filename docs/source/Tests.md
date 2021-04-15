@@ -18,15 +18,15 @@
     
 ### Launch tests
     
-- Start the app using the docker-compose test file. In this way, you would launch the code in your environment and not the last official image in Docker Hub:
-`docker-compose -f docker-compose-for-tests.yml up`
+- Start the app using the python helper script with the option `test`. In this way, you would launch the code in your environment and not the last official image in Docker Hub:
+`python3 start.py test up` or `docker-compose -f docker/default.yml -f docker/test.override.yml up`
 
 - Run tests from the project directory:
-`docker exec -ti intel_owl_uwsgi python3 manage.py test tests`
+`docker exec -ti intelowl_uwsgi python3 manage.py test tests`
 
-- Run only a specific test: (example "test_checkdmarc")
-`docker exec -ti intel_owl_uwsgi python3 manage.py test tests.test_observables.DomainAnalyzersTests.test_checkdmarc`
+- Run only a specific test: (example "test_checkdmarc") (note the `:` after the module name)
+`docker exec -ti intelowl_uwsgi python3 manage.py test tests.test_observables:DomainAnalyzersTests.test_checkdmarc`
 
 - Rebuild the local image after changes were made:
-`docker-compose -f docker-compose-for-tests.yml build`
+`python3 start.py test build` or `docker-compose -f docker/default.yml -f docker/test.override.yml build`
     

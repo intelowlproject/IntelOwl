@@ -61,6 +61,7 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * `Yara_Scan_McAfee`: scan a file with McAfee yara rules
 * `Yara_Scan_Samir`: scan a file with Samir Threat Hunting yara rules
 * `Yara_Scan_Stratosphere`: scan a file with Stratosphere yara rules
+* `Yara_Scan_FireEye`: scan a file with FireEye yara rules
 * `Yara_Scan_ReversingLabs`: scan a file with ReversingLabs yara rules
 * `Yara_Scan_Custom_Signatures`: scan a file with your own added signatures
 * `MalwareBazaar_Get_File`: Check if a particular malware sample is known to MalwareBazaar
@@ -74,6 +75,10 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * `IntelX_Phonebook`: [IntelligenceX](https://intelx.io/) is a search engine and data archive. Fetches emails, urls, domains associated with an observable.
 * `UnpacMe_EXE_Unpacker`: [UnpacMe](https://www.unpac.me/) is an automated malware unpacking service
 * `Triage_Scan`: leverage [Triage](https://tria.ge) sandbox environment to scan various files
+* `Manalyze`: [Manalyze](https://github.com/JusticeRage/Manalyze) performs static analysis on PE executables to detect undesirable behavior.
+* `MWDB_Scan`: [mwdblib](https://mwdb.readthedocs.io/en/latest/) Retrieve malware file analysis from repository maintained by CERT Polska MWDB.
+* `Qiling`: [Qiling](https://github.com/qilingframework/qiling) qiling binary emulation.
+
 
 #### Observable analyzers (ip, domain, url, hash)
 * `VirusTotal_v3_Get_Observable`: search an observable in the VirusTotal DB
@@ -81,11 +86,13 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * `HybridAnalysis_Get_Observable`: search an observable in the HybridAnalysis sandbox reports
 * `OTXQuery`: scan an observable on [Alienvault OTX](https://otx.alienvault.com/)
 * `TalosReputation`: check an IP reputation from Talos
+* `Stratosphere_Blacklist`: Cross-reference an IP from blacklists maintained by Stratosphere Labs
 * `Robtex_Forward_PDNS_Query`: scan a domain against the Robtex Passive DNS DB
 * `Robtex_Reverse_PDNS_Query`: scan an IP against the Robtex Passive DNS DB
 * `Robtex_IP_Query`: get IP info from Robtex
 * `GoogleSafebrowsing`: Scan an observable against GoogleSafeBrowsing DB
-* `GreyNoiseAlpha`: scan an IP against the Alpha Greynoise API (no API key required)
+* `GoogleWebRisk`: Scan an observable against WebRisk API (Commercial version of Google Safe Browsing). Check the [docs]((https://intelowl.readthedocs.io/en/develop/Advanced-Usage.html#analyzers-with-special-configuration)) to enable this properly
+* `GreyNoiseCommunity`: scan an IP against the Community Greynoise API (no API key required)
 * `GreyNoise`: scan an IP against the Greynoise API (requires API key)
 * `CIRCLPassiveDNS`: scan an observable against the CIRCL Passive DNS DB
 * `CIRCLPassiveSSL`: scan an observable against the CIRCL Passive SSL DB
@@ -134,6 +141,21 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * `DNStwist`: Scan a url/domain to find potentially malicious permutations via dns fuzzing. [dnstwist repo](https://github.com/elceef/dnstwist) 
 * `IPInfo`: Location Information about an IP
 * `Zoomeye`: [Zoomeye](https://www.zoomeye.org) Cyberspace Search Engine recording information of devices, websites, services and components etc..
+* `Triage_Search`: Search for reports of observables or upload from URL on triage cloud
+* `InQuest_IOCdb`: Indicators of Compromise Database by [InQuest Labs](https://labs.inquest.net/iocdb)
+* `InQuest_REPdb`: Search in [InQuest Lab's](https://labs.inquest.net/repdb) Reputation Database
+* `InQuest_DFI`: Deep File Inspection by [InQuest Labs](https://labs.inquest.net/dfi)
+* `XForceExchange`: scan an observable on [IBM X-Force Exchange](https://exchange.xforce.ibmcloud.com/)
+* `Renderton`: get screenshot of a web page using rendertron (puppeteer) [renderton repo](https://github.com/GoogleChrome/rendertron)
+* `SSAPINet`: get a screenshot of a web page using [screenshotapi.net](https://screenshotapi.net/) (external source); additional config options can be added to `extra_api_params` [in the config](https://github.com/intelowlproject/IntelOwl/blob/master/configuration/analyzer_config.json).
+* `FireHol_IPList`: check if an IP is in [FireHol's IPList](https://iplists.firehol.org/)
+* `ThreatFox`: search for an IOC in [ThreatFox](https://threatfox.abuse.ch/api/)'s database
+
+#### Generic analyzers (email, phone number, ...)
+Some Analyzers require details other than just IP, URL, Domain etc... We classified them as Generic Analyzers. Since the type of field is not known, there is a format for strings to be followed.
+* `EmailRep`: search an email address on emailrep.io
+* `WiGLE`: Maps and database of 802.11 wireless networks, with statistics, submitted by wardrivers, netstumblers, and net huggers.
+* `CRXcavator`: scans a chrome extension against crxcavator.io
 
 #### [Additional analyzers](https://intelowl.readthedocs.io/en/develop/Advanced-Usage.html#optional-analyzers) that can be enabled per your wish.
 
@@ -148,6 +170,7 @@ The following are all the keys that you can change without touching the source c
 * `not_supported_filetypes`: can be populated as a list. If set, if you ask to analyze a file with a mimetype from the ones you specified, it won't be executed
 * `observable_supported`: can be populated as a list. If set, if you ask to analyze an observable that is not in this list, it won't be executed. Valid values are: `ip`, `domain`, `url`, `hash`
 * `soft_time_limit`: this is the maximum time (in seconds) of execution for an analyzer. Once reached, the task will be killed (or managed in the code by a custom Exception). Default 300s
+* `queue`: this takes effects only when [multi-queue](https://intelowl.readthedocs.io/en/develop/Advanced-Usage.html#multi-queue) is enabled. Choose which celery worker would execute the task: `local` (ideal for tasks that leverage local applications like Yara), `long` (ideal for long tasks) or `default` (ideal for simple webAPI-based analyzers).
 
 Also, you can change the name of every available analyzer based on your wishes.
 

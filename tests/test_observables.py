@@ -1,6 +1,7 @@
 # for observable analyzers, if can customize the behavior based on:
 # DISABLE_LOGGING_TEST to True -> logging disabled
 # MOCK_CONNECTIONS to True -> connections to external analyzers are faked
+import hashlib
 import logging
 import os
 from unittest import skipIf
@@ -15,6 +16,7 @@ from api_app.script_analyzers.observable_analyzers import (
     ipinfo,
     maxmind,
     greynoise,
+    stratosphere,
     talos,
     tor,
     circl_pssl,
@@ -35,7 +37,17 @@ from api_app.script_analyzers.observable_analyzers import (
     phishtank,
     dnstwist,
     zoomeye,
+    emailrep,
+    triage_search,
+    inquest,
+    wigle,
+    crxcavator,
+    rendertron,
+    ss_api_net,
+    firehol_iplist,
+    threatfox,
 )
+from api_app.models import Job
 from .mock_utils import (
     MockResponse,
     MockResponseNoOp,
@@ -46,13 +58,14 @@ from .utils import (
     CommonTestCases_observables,
     CommonTestCases_ip_url_domain,
     CommonTestCases_ip_domain_hash,
+    CommonTestCases_ip_url_hash,
     CommonTestCases_url_domain,
 )
 
 from intel_owl import settings
 
 logger = logging.getLogger(__name__)
-# disable logging library for travis
+# disable logging library for Continuous Integration
 if settings.DISABLE_LOGGING_TEST:
     logging.disable(logging.CRITICAL)
 
@@ -78,11 +91,31 @@ def mocked_dnsdb_v2_request(*args, **kwargs):
     )
 
 
+def mocked_triage_get(*args, **kwargs):
+    return MockResponse({"tasks": {"task_1": {}, "task_2": {}}, "data": []}, 200)
+
+
+def mocked_triage_post(*args, **kwargs):
+    return MockResponse({"id": "sample_id", "status": "pending"}, 200)
+
+
+def mocked_firehol_iplist(*args, **kwargs):
+    return MockResponse(
+        json_data={},
+        status_code=200,
+        text="""0.0.0.0/8\n
+            1.10.16.0/20\n
+            1.19.0.0/16\n
+            3.90.198.217\n""",
+    )
+
+
 @mock_connections(patch("requests.get", side_effect=mocked_requests))
 @mock_connections(patch("requests.post", side_effect=mocked_requests))
 class IPAnalyzersTests(
     CommonTestCases_ip_domain_hash,
     CommonTestCases_ip_url_domain,
+    CommonTestCases_ip_url_hash,
     CommonTestCases_observables,
     TestCase,
 ):
@@ -198,19 +231,39 @@ class IPAnalyzersTests(
         ).start()
         self.assertEqual(report.get("success", False), True)
 
-    def test_greynoisealpha(self, mock_get=None, mock_post=None):
+    def test_greynoise_alpha(self, mock_get=None, mock_post=None):
         report = greynoise.GreyNoise(
             "GreyNoiseAlpha",
             self.job_id,
             self.observable_name,
             self.observable_classification,
-            {},
+            {"greynoise_api_version": "v1"},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    def test_greynoise_community(self, mock_get=None, mock_post=None):
+        report = greynoise.GreyNoise(
+            "GreyNoiseCommunity",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {"greynoise_api_version": "v3"},
         ).start()
         self.assertEqual(report.get("success", False), True)
 
     def test_greynoise(self, mock_get=None, mock_post=None):
         report = greynoise.GreyNoise(
             "GreyNoise",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {"greynoise_api_version": "v2"},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    def test_stratos(self, mock_get=None, mock_post=None):
+        report = stratosphere.Stratos(
+            "Stratosphere_Blacklist",
             self.job_id,
             self.observable_name,
             self.observable_classification,
@@ -235,6 +288,17 @@ class IPAnalyzersTests(
             self.observable_name,
             self.observable_classification,
             {},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    @mock_connections(patch("requests.get", side_effect=mocked_firehol_iplist))
+    def test_firehol_iplist(self, *args):
+        report = firehol_iplist.FireHol_IPList(
+            "FireHol_IPList",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {"list_names": ["firehol_level1.netset"]},
         ).start()
         self.assertEqual(report.get("success", False), True)
 
@@ -441,6 +505,7 @@ class DomainAnalyzersTests(
 class URLAnalyzersTests(
     CommonTestCases_ip_url_domain,
     CommonTestCases_url_domain,
+    CommonTestCases_ip_url_hash,
     CommonTestCases_observables,
     TestCase,
 ):
@@ -505,11 +570,58 @@ class URLAnalyzersTests(
         ).start()
         self.assertEqual(report.get("success", False), True)
 
+    @mock_connections(patch("requests.Session.get", side_effect=mocked_triage_get))
+    @mock_connections(patch("requests.Session.post", side_effect=mocked_triage_post))
+    def test_triage_search(self, *args):
+        report = triage_search.TriageSearch(
+            "Triage_Search",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    @mock_connections(patch("requests.Session.get", side_effect=mocked_triage_get))
+    @mock_connections(patch("requests.Session.post", side_effect=mocked_triage_post))
+    def test_triage_submit(self, *args):
+        report = triage_search.TriageSearch(
+            "Triage_Search",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {"analysis_type": "submit"},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    def test_rendertron(self, mock_get=None, mock_post=None):
+        report = rendertron.Rendertron(
+            "Rendertron",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    def test_ss_api_net(self, mock_get=None, mock_post=None):
+        report = ss_api_net.SSAPINet(
+            "SSAPINet",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
 
 @mock_connections(patch("requests.get", side_effect=mocked_requests))
 @mock_connections(patch("requests.post", side_effect=mocked_requests))
 class HashAnalyzersTests(
-    CommonTestCases_ip_domain_hash, CommonTestCases_observables, TestCase
+    CommonTestCases_ip_url_hash,
+    CommonTestCases_ip_domain_hash,
+    CommonTestCases_observables,
+    TestCase,
 ):
     @staticmethod
     def get_params():
@@ -537,6 +649,120 @@ class HashAnalyzersTests(
     def test_cymru_get(self, mock_get=None, mock_post=None):
         report = cymru.Cymru(
             "Cymru_Hash_Registry_Get_Observable",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    @mock_connections(patch("requests.Session.get", side_effect=mocked_triage_get))
+    @mock_connections(patch("requests.Session.post", side_effect=mocked_triage_post))
+    def test_triage_search(self, *args):
+        report = triage_search.TriageSearch(
+            "Triage_Search",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+
+class GenericAnalyzersTest(TestCase):
+    """
+    Tests against observable that are into generic classification, like email addresses,
+    phone number and so on
+    """
+
+    @staticmethod
+    def get_params():
+        return {
+            "source": "test",
+            "is_sample": False,
+            "observable_name": os.environ.get("TEST_GENERIC", "email@example.com"),
+            "observable_classification": "generic",
+            "force_privacy": False,
+            "analyzers_requested": ["test"],
+        }
+
+    def setUp(self):
+        params = self.get_params()
+        params["md5"] = hashlib.md5(
+            params["observable_name"].encode("utf-8")
+        ).hexdigest()
+        test_job = Job(**params)
+        test_job.save()
+        self.job_id = test_job.id
+        self.observable_name = test_job.observable_name
+        self.observable_classification = test_job.observable_classification
+
+    @mock_connections(patch("requests.get", side_effect=mocked_requests))
+    def test_emailrep(self, mock_get=None):
+        report = emailrep.EmailRep(
+            "EmailRep",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    def test_InQuest_IOCdb(self, mock_get=None, mock_post=None):
+        report = inquest.InQuest(
+            "InQuest_IOCdb",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {"inquest_analysis": "iocdb_search"},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    def test_InQuest_REPdb(self, mock_get=None, mock_post=None):
+        report = inquest.InQuest(
+            "InQuest_REPdb",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {"inquest_analysis": "repdb_search"},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    def test_InQuest_DFI(self, mock_get=None, mock_post=None):
+        report = inquest.InQuest(
+            "InQuest_DFI",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {"inquest_analysis": "dfi_search"},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    def test_threatfox(self, mock_get=None, mock_post=None):
+        report = threatfox.ThreatFox(
+            "ThreatFox",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    @mock_connections(patch("requests.get", side_effect=mocked_requests))
+    def test_wigle(self, mock_get=None):
+        report = wigle.WiGLE(
+            "WiGLE",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    @mock_connections(patch("requests.get", side_effect=mocked_requests))
+    def test_crxcavator(self, mock_get=None):
+        report = crxcavator.CRXcavator(
+            "CRXcavator",
             self.job_id,
             self.observable_name,
             self.observable_classification,

@@ -43,7 +43,7 @@ class PDFInfo(FileAnalyzer):
             self.results["peepdf"] = peepdf_analysis
         except Exception as e:
             logger.exception(e)
-            self.results["peepdf"]["error"] = e
+            self.results["peepdf"]["error"] = str(e)
         else:
             success = True
         return success
@@ -57,7 +57,7 @@ class PDFInfo(FileAnalyzer):
             self.results["pdfid"] = list_of_dict
         except Exception as e:
             logger.exception(e)
-            self.results["pdfid"]["error"] = e
+            self.results["pdfid"]["error"] = str(e)
         else:
             success = True
         return success

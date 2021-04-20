@@ -3,7 +3,7 @@
 ## TL;DR
 Obviously we strongly suggest to read through all the page to configure IntelOwl in the most appropriate way.
 
-However, if you feel lazy, you could just install and test IntelOwl with the following steps.
+However, if you feel lazy, you could just install and test IntelOwl with the following steps. Be sure to run `docker` and `python` commands with `sudo` if permissions/roles have not been set.
 
 ```bash
 # clone the IntelOwl project repository
@@ -12,13 +12,15 @@ cd IntelOwl/
 
 # construct environment files from templates
 cd docker/
+cp .env ../.env
 cp env_file_app_template env_file_app
 cp env_file_postgres_template env_file_postgres
 cp env_file_integrations_template env_file_integrations
 
 # start the app
 cd ..
-python start.py prod up
+python3 start.py prod build
+python3 start.py prod up
 
 # create a super user 
 docker exec -ti intelowl_uwsgi python3 manage.py createsuperuser
@@ -71,6 +73,7 @@ Open a terminal and execute below commands to construct new environment files fr
 
 ```bash
 cd docker/
+cp .env ../.env
 cp env_file_app_template env_file_app
 cp env_file_postgres_template env_file_postgres
 cp env_file_integrations_template env_file_integrations
@@ -230,7 +233,7 @@ The CLI provides the primitives to correctly build, run or stop the containers f
 Now that you have completed different configurations, starting the containers is as simple as invoking:
 
 ```bash
-$ python start.py prod up
+$ python3 start.py prod up
 ```
 
 ## After Deployment

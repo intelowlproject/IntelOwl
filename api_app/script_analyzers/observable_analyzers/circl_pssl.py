@@ -26,7 +26,7 @@ class CIRCL_PSSL(classes.ObservableAnalyzer):
 
         pssl = pypssl.PyPSSL(basic_auth=(user, pwd))
 
-        result = pssl.query(self.observable_name)
+        result = pssl.query(self.observable_name, timeout=5)
 
         certificates = []
         if result.get(self.observable_name, {}):

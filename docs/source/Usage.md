@@ -78,6 +78,7 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * `Manalyze`: [Manalyze](https://github.com/JusticeRage/Manalyze) performs static analysis on PE executables to detect undesirable behavior.
 * `MWDB_Scan`: [mwdblib](https://mwdb.readthedocs.io/en/latest/) Retrieve malware file analysis from repository maintained by CERT Polska MWDB.
 * `Qiling`: [Qiling](https://github.com/qilingframework/qiling) qiling binary emulation.
+* `Malpedia_Scan`: scan a binary or a zip file (pwd:infected) against all the yara rules available in [Malpedia](https://malpedia.caad.fkie.fraunhofer.de/)
 
 
 #### Observable analyzers (ip, domain, url, hash)

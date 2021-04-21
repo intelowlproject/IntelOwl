@@ -577,6 +577,18 @@
     "python_module": "misp.MISP",
     "soft_time_limit": 30
   },
+  "Malpedia_Scan": {
+    "type": "file",
+    "description": "scan a binary or a zip file (pwd:infected) against all the yara rules available in Malpedia",
+    "python_module": "malpedia_scan.MalpediaScan",
+    "requires_configuration": true,
+    "external_service": true,
+    "additional_config_params": {
+      "api_key_name": "MALPEDIA_KEY"
+    },
+    "soft_time_limit": 180,
+    "queue": "long"
+  },
   "MalwareBazaar_Get_File": {
     "type": "file",
     "run_hash": true,

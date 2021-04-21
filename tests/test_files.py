@@ -33,6 +33,7 @@ from api_app.script_analyzers.file_analyzers import (
     manalyze,
     mwdb_scan,
     qiling,
+    malpedia_scan,
 )
 from api_app.script_analyzers.observable_analyzers import vt3_get
 
@@ -222,6 +223,18 @@ class FileAnalyzersEXETests(TestCase):
             self.filename,
             self.md5,
             additional_params,
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    @mock_connections(patch("requests.post", side_effect=mocked_requests))
+    def test_malpedia_scan_exe(self, mock_get=None, mock_post=None):
+        report = malpedia_scan.MalpediaScan(
+            "Malpedia_Scan",
+            self.job_id,
+            self.filepath,
+            self.filename,
+            self.md5,
+            {},
         ).start()
         self.assertEqual(report.get("success", False), True)
 

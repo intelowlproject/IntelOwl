@@ -1,5 +1,5 @@
 boto3==1.17.57
-celery==4.4.7
+celery==5.0.5
 checkdmarc==4.3.1
 dataclasses==0.6
 Django==2.2.20

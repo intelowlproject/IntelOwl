@@ -12,7 +12,7 @@ djangorestframework-guardian==0.3.0
 dnspython==1.16.0
 dnstwist==20201228
 ppdeep>=20200505
-drf-spectacular==0.15.0
+drf-spectacular==0.15.1
 easygui==0.98.2
 eventlet==0.29.1
 flower==0.9.7

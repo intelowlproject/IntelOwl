@@ -109,8 +109,8 @@ This project was created and will be upgraded thanks to the following organizati
 
 Since its birth, this project has been participating in the GSoC under the Honeynet Project!
 
-* 2020: a lot of [new features](https://www.honeynet.org/gsoc/gsoc-2020/google-summer-of-code-2020-project-ideas/#intel-owl-improvements) were developed by Eshaan Bansal ([Twitter](https://twitter.com/mask0fmydisguis)).
-* 2021: you? [Projects available](https://www.honeynet.org/gsoc/gsoc-2021/google-summer-of-code-2021-project-ideas/)
+* 2020: a lot of [new features](https://www.honeynet.org/gsoc/gsoc-2020/google-summer-of-code-2020-project-ideas/#intel-owl-improvements) were developed by [Eshaan Bansal](https://twitter.com/mask0fmydisguis).
+* 2021: [Sarthak Khattar](https://twitter.com/Mr_Momo07) and [Shubham Pandey](https://twitter.com/imshubham31) are working on these [Projects](https://www.honeynet.org/gsoc/gsoc-2021/google-summer-of-code-2021-project-ideas/)
 
 Stay tuned for the upcoming GSoC! Join the [Honeynet Slack chat](https://gsoc-slack.honeynet.org/) for more info.
 

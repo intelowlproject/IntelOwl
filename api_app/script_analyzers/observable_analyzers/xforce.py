@@ -1,3 +1,6 @@
+# This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
+# See the file 'LICENSE' for copying permission.
+
 import requests
 from requests.auth import HTTPBasicAuth
 from urllib.parse import quote_plus

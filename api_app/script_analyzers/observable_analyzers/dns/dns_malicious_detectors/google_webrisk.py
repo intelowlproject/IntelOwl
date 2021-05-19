@@ -1,3 +1,6 @@
+# This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
+# See the file 'LICENSE' for copying permission.
+
 """Check if the domains is reported as malicious by WebRisk Cloud API"""
 import logging
 from os.path import exists

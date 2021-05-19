@@ -1,3 +1,6 @@
+# This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
+# See the file 'LICENSE' for copying permission.
+
 # Check the documentation for the details on how to configure LDAP
 # https://intelowl.readthedocs.io/en/latest/Installation.html
 

@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+
+# This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
+# See the file 'LICENSE' for copying permission.
+
 import json
 from argparse import ArgumentParser
 from subprocess import Popen, PIPE

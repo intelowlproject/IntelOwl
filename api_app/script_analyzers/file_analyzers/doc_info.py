@@ -1,3 +1,6 @@
+# This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
+# See the file 'LICENSE' for copying permission.
+
 # this analyzer leverage a forked version of Oletools ...
 # ... that implements additional features to correctly analyze some particular files
 # original repository: https://github.com/decalage2/oletools

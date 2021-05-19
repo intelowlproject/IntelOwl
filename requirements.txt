@@ -15,7 +15,7 @@ ppdeep>=20200505
 drf-spectacular==0.15.1
 easygui==0.98.2
 eventlet==0.31.0
-GitPython==3.1.14
+GitPython==3.1.17
 google>=3.0.0
 google-cloud-webrisk==1.2.0
 maxminddb==2.0.3

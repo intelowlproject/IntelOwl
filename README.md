@@ -1,17 +1,17 @@
 <img src="static_intel/intel_owl_positive.png" width=547 height=150 alt="Intel Owl"/>
 
 
-![GitHub release (latest by date)](https://img.shields.io/github/v/release/intelowlproject/IntelOwl)
-![GitHub Repo stars](https://img.shields.io/github/stars/intelowlproject/IntelOwl?style=social)
-![Twitter Follow](https://img.shields.io/twitter/follow/intel_owl?style=social)
-[![](https://img.shields.io/badge/official-site-blue)](https://intelowlproject.github.io)
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/intelowlproject/IntelOwl)](https://github.com/intelowlproject/IntelOwl/releases)
+[![GitHub Repo stars](https://img.shields.io/github/stars/intelowlproject/IntelOwl?style=social)](https://github.com/intelowlproject/IntelOwl/stargazers)
+[![Twitter Follow](https://img.shields.io/twitter/follow/intel_owl?style=social)](https://twitter.com/intel_owl)
+[![Official Site](https://img.shields.io/badge/official-site-blue)](https://intelowlproject.github.io)
 
 
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/intelowlproject/IntelOwl.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/intelowlproject/IntelOwl/context:python)
 [![CodeFactor](https://www.codefactor.io/repository/github/intelowlproject/intelowl/badge)](https://www.codefactor.io/repository/github/intelowlproject/intelowl)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![codecov](https://codecov.io/gh/intelowlproject/IntelOwl/branch/master/graph/badge.svg?token=R097M4TYA6)](https://codecov.io/gh/intelowlproject/IntelOwl)
-![Build & Tests](https://github.com/intelowlproject/IntelOwl/workflows/Build%20&%20Tests/badge.svg)
+[![Build & Tests](https://github.com/intelowlproject/IntelOwl/workflows/Build%20&%20Tests/badge.svg)](https://github.com/intelowlproject/IntelOwl/actions)
 
 
 # Intel Owl

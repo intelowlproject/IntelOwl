@@ -1,3 +1,6 @@
+# This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
+# See the file 'LICENSE' for copying permission.
+
 from __future__ import absolute_import, unicode_literals
 from intel_owl.settings import CELERY_QUEUES, CELERY_BROKER_URL, AWS_SQS
 import os

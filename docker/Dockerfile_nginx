@@ -4,8 +4,6 @@ FROM intelowlproject/intelowl_ng:v2.0.1 AS angular-prod-build
 # Stage 2: Inject the build artifacts into nginx container
 FROM library/nginx:1.19-alpine
 
-RUN apk update && apk upgrade && apk add bash
-
 COPY --from=angular-prod-build /usr/src/app/dist /var/www/angular_build
 
 ENV NGINX_LOG_DIR /var/log/nginx

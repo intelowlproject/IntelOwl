@@ -68,6 +68,7 @@ acknowledging that your use of each package will be subject to its respective
 license terms.
 
 [osslsigncode](https://github.com/develar/osslsigncode),
+[PyExifTool](https://github.com/sylikc/pyexiftool),
 [stringsifter](https://github.com/fireeye/stringsifter),
 [peepdf](https://github.com/jesparza/peepdf),
 [pefile](https://github.com/erocarrera/pefile),

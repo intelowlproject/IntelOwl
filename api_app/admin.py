@@ -54,8 +54,7 @@ class CustomAuthTokenAdmin(AuthTokenAdmin):
                     },
                 ),
             ]
-        else:
-            return super().get_fieldsets(request, obj)
+        return super().get_fieldsets(request, obj)
 
     def has_change_permission(self, *args, **kwargs):
         return False

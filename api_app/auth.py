@@ -14,8 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 class LoginView(durin_views.LoginView):
-    @staticmethod
-    def get_client_obj(request):
+    def get_client_obj(self, request):
         return Client.objects.get(name="web-browser")
 
     def post(self, request, *args, **kwargs):

@@ -36,35 +36,32 @@ class CustomAuthTokenAdmin(AuthTokenAdmin):
     Custom admin view for AuthToken model
     """
 
-    fieldsets = []
     exclude = []
     raw_id_fields = ("user",)
-    readonly_fields = ("token", "expiry", "client")
-    __fieldsets_custom = [
-        (
-            "Create token for PyIntelOwl",
-            {
-                "fields": ("user",),
-                "description": """
+    readonly_fields = ("token", "expiry", "created", "expires_in")
+
+    def get_fieldsets(self, request, obj=None):
+        if not obj:
+            return [
+                (
+                    "Create token for PyIntelOwl",
+                    {
+                        "fields": ("user",),
+                        "description": """
                     <h3>Token will be auto-generated on save.</h3>
                     <h3>This token will be valid for 10 years.</h3>
                 """,
-            },
-        ),
-    ]
-
-    def add_view(self, request, extra_content=None):
-        self.fieldsets = self.__fieldsets_custom
-        return super(CustomAuthTokenAdmin, self).add_view(request)
+                    },
+                ),
+            ]
+        return super().get_fieldsets(request, obj)
 
     def has_change_permission(self, *args, **kwargs):
         return False
 
     def save_model(self, request, obj, form, change):
-        client = Client.objects.get(name="pyintelowl")
-        obj = AuthToken.objects.create(
-            user=obj.user, client=client
-        )  # lgtm [py/unused-local-variable]
+        obj.client = Client.objects.get(name="pyintelowl")
+        super(CustomAuthTokenAdmin, self).save_model(request, obj, form, change)
 
 
 admin.site.register(Job, JobAdminView)

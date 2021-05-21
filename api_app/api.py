@@ -488,7 +488,11 @@ class JobViewSet(
     viewsets.GenericViewSet,
 ):
 
-    queryset = models.Job.objects.order_by("-received_request_time").all()
+    queryset = (
+        models.Job.objects.prefetch_related("tags")
+        .order_by("-received_request_time")
+        .all()
+    )
     serializer_class = serializers.JobSerializer
     serializer_action_classes = {
         "list": serializers.JobListSerializer,

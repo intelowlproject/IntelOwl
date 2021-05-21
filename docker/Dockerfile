@@ -14,7 +14,7 @@ RUN mkdir -p ${LOG_PATH} \
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends apt-utils libsasl2-dev libssl-dev \
-        vim libldap2-dev python-dev libfuzzy-dev net-tools python-psycopg2 git osslsigncode exiftool \
+    vim libldap2-dev python-dev libfuzzy-dev net-tools python-psycopg2 git osslsigncode exiftool \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 RUN pip3 install --upgrade pip
@@ -33,7 +33,7 @@ RUN touch ${LOG_PATH}/django/api_app.log ${LOG_PATH}/django/api_app_errors.log \
     && touch ${LOG_PATH}/django/celery.log ${LOG_PATH}/django/celery_errors.log \
     && touch ${LOG_PATH}/django/django_auth_ldap.log \
     && chown -R www-data:www-data ${LOG_PATH} /opt/deploy/ \
-# this is cause stringstifer creates this directory during the build and cause celery to crash
+    # this is cause stringstifer creates this directory during the build and cause celery to crash
     && rm -rf /root/.local
 
 # download yara rules and quark engine rules

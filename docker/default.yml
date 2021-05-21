@@ -13,7 +13,7 @@ services:
     image: intelowlproject/intelowl:${INTELOWL_TAG_VERSION}
     container_name: intelowl_uwsgi
     volumes:
-      - ../configuration/intel_owl.ini:/etc/uwsgi/sites/intel_owl.ini
+      - ../configuration/intel_owl.ini:/etc/uwsgi/sites/intel_owl.ini # uwsgi configuration file
       - ../configuration/analyzer_config.json:/opt/deploy/configuration/analyzer_config.json
       - ../configuration/ldap_config.py:/opt/deploy/configuration/ldap_config.py
       - generic_logs:/var/log/intel_owl
@@ -34,7 +34,8 @@ services:
     restart: unless-stopped
     hostname: nginx
     volumes:
-      - ../configuration/intel_owl_nginx_http:/etc/nginx/conf.d/default.conf
+      - ../configuration/nginx_errors.conf:/etc/nginx/nginx_errors.conf
+      - ../configuration/nginx_http.conf:/etc/nginx/conf.d/default.conf
       - nginx_logs:/var/log/nginx
       - static_content:/var/www/static
     ports:

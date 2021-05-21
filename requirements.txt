@@ -2,7 +2,7 @@ boto3==1.17.74
 celery==5.0.5
 checkdmarc==4.3.1
 dataclasses==0.6
-Django==2.2.20
+Django==3.2.3 #BSD
 django-auth-ldap==2.4.0
 django-nose==1.4.7
 django-rest-durin==0.3.0
@@ -12,7 +12,7 @@ djangorestframework-guardian==0.3.0
 dnspython==1.16.0
 dnstwist==20201228
 ppdeep>=20200505
-drf-spectacular==0.15.1
+drf-spectacular==0.16.0
 easygui==0.98.2
 eventlet==0.31.0
 GitPython==3.1.17
@@ -37,7 +37,7 @@ python-magic==0.4.22
 quark-engine==21.3.4
 requests==2.25.1
 speakeasy-emulator==1.5.2
-uWSGI==2.0.19.1
+uWSGI==2.0.19
 yara-python==4.0.5
 
 git+https://github.com/DissectMalware/xlrd2.git@a666cd8fb4dba4e2898f4f33ee4da515ba91d9b2

@@ -22,6 +22,26 @@ pip install pre-commit
 pre-commit install
 ```
 
+### Start the development instance
+You can execute IntelOwl in development mode by selecting the mode `test` while launching the startup script:
+```
+python3 start.py test up
+```
+Every time you perform a change, you should rebuild the containers to have it reflected in the server:
+```
+python3 start.py test down
+python3 start.py test up --build
+```
+#### Advanced testing configuration
+To avoid wasting of time in rebuilding the containers every time, you can also execute the instance with the option `--django-server`:
+```
+python3 start.py test --django-server up
+```
+In this way, changes will be instantly reflected to the application server without having to rebuild everything.
+
+However remember that the changes won't be automatically reflected to other containers running the python code like the `celery` ones (that IntelOwl uses to execute analyzers).
+This means that you still need to rebuild everything when, for example, you change or create an analyzer.
+
 ## How to add a new analyzer
 You may want to look at a few existing examples to start to build a new one, such as:
 - [shodan.py](https://github.com/intelowlproject/IntelOwl/blob/develop/api_app/script_analyzers/observable_analyzers/shodan.py), if you are creating an observable analyzer
@@ -85,7 +105,7 @@ which can be queried from the main Django API.
 ## Create a pull request
 
 ### Install testing requirements
-Run `pip install -r test-requirements.txt` to install the requirements to  validate your code. 
+Run `pip install -r test-requirements.txt` to install the requirements to validate your code. 
 
 #### Pass linting and tests
 1. Run `psf/black` to lint the files automatically and then `flake8` to check:
@@ -102,8 +122,8 @@ $ flake8 . --show-source --statistics
 2. Run the build and start the app using the docker-compose test file. In this way, you would launch the code in your environment and not the last official image in Docker Hub:
 
 ```bash
-$ docker-compose -f docker/default.yml -f docker/ci.override.yml build
-$ docker-compose -f docker/default.yml -f docker/ci.override.yml up
+$ python3 start.py ci build
+$ python3 start.py ci up
 ```
 
 3. Here, we simulate the GitHub CI tests locally by running the following 3 tests:

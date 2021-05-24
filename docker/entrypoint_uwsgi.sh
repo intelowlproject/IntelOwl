@@ -14,9 +14,10 @@ python manage.py collectstatic --noinput
 
 echo "------------------------------"
 echo "DEBUG: " $DEBUG
+echo "DJANGO_TEST_SERVER: " $DJANGO_TEST_SERVER
 echo "------------------------------"
 
-if [ $DEBUG == "True" ];
+if [ $DEBUG == "True" ] && [ $DJANGO_TEST_SERVER == "True" ];
 then
     python manage.py runserver 0.0.0.0:8001
 else

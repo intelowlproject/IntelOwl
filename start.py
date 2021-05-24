@@ -1,3 +1,6 @@
+# This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
+# See the file 'LICENSE' for copying permission.
+
 import subprocess
 import argparse
 
@@ -14,6 +17,7 @@ path_mapping = {
     "default": "docker/default.yml",
     "test": "docker/test.override.yml",
     "ci": "docker/ci.override.yml",
+    "django_server": "docker/django-server.override.yml",
     "custom": "docker/custom.override.yml",
     "traefik": "docker/traefik.override.yml",
     "multi_queue": "docker/multi-queue.override.yml",
@@ -92,6 +96,13 @@ def start():
         action="store_true",
         help="Uses custom.override.yml to leverage your customized configuration",
     )
+    parser.add_argument(
+        "--django-server",
+        required=False,
+        action="store_true",
+        help="While using 'test' mode, this allows to use the default"
+        " Django server instead of Uwsgi",
+    )
     args, unknown = parser.parse_known_args()
     # logic
     test_appendix = ""
@@ -109,8 +120,13 @@ def start():
     # default file
     compose_files = [path_mapping["default"]]
     # mode
-    if args.mode in ["ci", "test"]:
+    if args.mode == "ci":
         compose_files.append(path_mapping[args.mode])
+    elif args.mode == "test":
+        if args.__dict__["django_server"]:
+            compose_files.append(path_mapping["django_server"])
+        else:
+            compose_files.append(path_mapping[args.mode])
     # upgrades
     for key in ["traefik", "multi_queue", "custom"]:
         if args.__dict__[key]:

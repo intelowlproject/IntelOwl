@@ -1,9 +1,25 @@
 # Installation
 
+## Requirements
+The project leverages `docker-compose` with a custom python script so you need to have the following packages installed in your machine:
+* [docker](https://docs.docker.com/get-docker/) - v1.13.0+
+* [docker-compose](https://docs.docker.com/compose/install/) - v1.23.2+
+* [python](https://www.python.org/) - v3.6+
+
+In some systems you could find pre-installed older versions. Please check this and install a supported version before attempting the installation. Otherwise it would fail.
+
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul>
+<li>The project uses public docker image that is available on <a href="https://hub.docker.com/repository/docker/intelowlproject/intelowl">Docker Hub</a></li>
+<li>IntelOwl is tested and supported to work in a Linux-based OS. It <i>may</i> also run on windows, but that is not officialy supported yet.</li>
+</ul>
+</div>
+
 ## TL;DR
 Obviously we strongly suggest to read through all the page to configure IntelOwl in the most appropriate way.
 
-However, if you feel lazy, you could just install and test IntelOwl with the following steps.
+However, if you feel lazy, you could just install and test IntelOwl with the following steps. Be sure to run `docker` and `python` commands with `sudo` if permissions/roles have not been set
 
 ```bash
 # clone the IntelOwl project repository
@@ -29,20 +45,6 @@ docker exec -ti intelowl_uwsgi python3 manage.py createsuperuser
 <div class="admonition hint">
 <p class="admonition-title">Hint</p>
 There is a <a href="https://www.youtube.com/watch?v=GuEhqQJSQAs" target="_blank">YouTube video</a> that may help in the installation process. (<i>ManySteps have changed since v2.0.0</i>)
-</div>
-
-## Requirements
-The project leverages `docker-compose` with a custom python script so you need to have the following packages installed in your machine:
-* [docker](https://docs.docker.com/get-docker/) - v1.13.0+
-* [docker-compose](https://docs.docker.com/compose/install/) - v1.23.2+
-* [python](https://www.python.org/) - v3.6+
-
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<ul>
-<li>The project uses public docker image that is available on <a href="https://hub.docker.com/repository/docker/intelowlproject/intelowl">Docker Hub</a></li>
-<li>IntelOwl is tested and supported to work in a Linux-based OS. It <i>may</i> also run on windows, but that is not officialy supported yet.</li>
-</ul>
 </div>
 
 ## Deployment Components
@@ -116,6 +118,7 @@ In the `env_file_app`, configure different variables as explained below.
 * `WIGLE_KEY`: WiGLE API Key([docs](https://api.wigle.net/))
 * `XFORCE_KEY` & `XFORCE_PASSWORD`: IBM X-Force Exchange API ([docs](https://api.xforce.ibmcloud.com/doc/))
 * `SSAPINET_KEY`: screenshotapi.net ([docs](https://screenshotapi.net/documentation))
+* `MALPEDIA_KEY`: MALPEDIA API KEY ([docs](https://malpedia.caad.fkie.fraunhofer.de/usage/api))
 
 **Advanced** additional configuration:
 * `OLD_JOBS_RETENTION_DAYS`: Database retention for analysis results (default: 3 days). Change this if you want to keep your old analysis longer in the database.

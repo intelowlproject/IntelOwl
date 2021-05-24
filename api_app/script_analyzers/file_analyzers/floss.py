@@ -1,3 +1,6 @@
+# This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
+# See the file 'LICENSE' for copying permission.
+
 from json import dumps as json_dumps
 from api_app.helpers import get_binary
 from api_app.script_analyzers.classes import FileAnalyzer, DockerBasedAnalyzer

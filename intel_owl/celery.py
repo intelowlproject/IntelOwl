@@ -1,5 +1,8 @@
+# This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
+# See the file 'LICENSE' for copying permission.
+
 from __future__ import absolute_import, unicode_literals
-from intel_owl.settings import CELERY_QUEUES
+from intel_owl.settings import CELERY_QUEUES, CELERY_BROKER_URL, AWS_SQS
 import os
 
 from celery import Celery
@@ -9,9 +12,6 @@ from kombu import Exchange, Queue
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "intel_owl.settings")
 
 app = Celery("intel_owl")
-
-app.config_from_object("django.conf:settings", namespace="CELERY")
-app.conf.update(task_time_limit=1800)  # half hour
 
 app.autodiscover_tasks()
 
@@ -25,6 +25,36 @@ app.conf.task_queues = [
     )
     for key in CELERY_QUEUES
 ]
+
+app.conf.update(
+    task_time_limit=1800,
+    broker_url=CELERY_BROKER_URL,
+    accept_content=["application/json"],
+    task_serializer="json",
+    ignore_result=True,
+    result_serializer="json",
+    imports=("intel_owl.tasks",),
+    worker_redirect_stdouts=False,
+    worker_hijack_root_logger=False,
+    # these two are needed to enable priority and correct tasks execution
+    task_acks_late=True,
+    worker_prefetch_multiplier=1,
+    # this is to avoid RAM issues caused by long usage of this tool
+    worker_max_tasks_per_child=200,
+    # value is in kilobytes
+    worker_max_memory_per_child=4000,
+)
+
+if AWS_SQS:
+    # this is for AWS SQS support
+    app.conf.update(
+        broker_transport_options={
+            "region": "eu-central-1",
+            "polling_interval": 1,
+            "visibility_timeout": 3600,
+            "wait_time_seconds": 20,
+        }
+    )
 
 app.conf.beat_schedule = {
     # execute daily at midnight to cleanup orphaned obj permissions

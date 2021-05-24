@@ -1,3 +1,6 @@
+# This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
+# See the file 'LICENSE' for copying permission.
+
 # this analyzer leverage a forked version of PEfile ...
 # ... that fixes one common problem encountered in a lot of analysis
 # original repository: https://github.com/erocarrera/pefile

@@ -1,3 +1,6 @@
+# This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
+# See the file 'LICENSE' for copying permission.
+
 import time
 import logging
 
@@ -113,12 +116,15 @@ def set_failed_analyzer(analyzer_name, job_id, err_msg):
     set_report_and_cleanup(analyzer_name, job_id, report)
 
 
-def adjust_analyzer_config(runtime_conf, additional_config_params, analyzer):
+def adjust_analyzer_config(
+    runtime_conf, additional_config_params, analyzer, job_id, md5
+):
     if runtime_conf:
         if analyzer in runtime_conf:
             analyzer_runtime_conf = runtime_conf[analyzer]
             additional_config_params.update(analyzer_runtime_conf)
             logger.info(
-                f"adjusted analyzer config for analyzer {analyzer}."
+                f"job_id: {job_id} md5: {md5} adjusted analyzer"
+                f" config for analyzer {analyzer}."
                 f" New config: {additional_config_params}"
             )

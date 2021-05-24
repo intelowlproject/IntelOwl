@@ -1,10 +1,18 @@
 <img src="static_intel/intel_owl_positive.png" width=547 height=150 alt="Intel Owl"/>
 
+
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/intelowlproject/IntelOwl)](https://github.com/intelowlproject/IntelOwl/releases)
+[![GitHub Repo stars](https://img.shields.io/github/stars/intelowlproject/IntelOwl?style=social)](https://github.com/intelowlproject/IntelOwl/stargazers)
+[![Twitter Follow](https://img.shields.io/twitter/follow/intel_owl?style=social)](https://twitter.com/intel_owl)
+[![Official Site](https://img.shields.io/badge/official-site-blue)](https://intelowlproject.github.io)
+
+
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/intelowlproject/IntelOwl.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/intelowlproject/IntelOwl/context:python)
 [![CodeFactor](https://www.codefactor.io/repository/github/intelowlproject/intelowl/badge)](https://www.codefactor.io/repository/github/intelowlproject/intelowl)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![codecov](https://codecov.io/gh/intelowlproject/IntelOwl/branch/master/graph/badge.svg?token=R097M4TYA6)](https://codecov.io/gh/intelowlproject/IntelOwl)
-![Build & Tests](https://github.com/intelowlproject/IntelOwl/workflows/Build%20&%20Tests/badge.svg)
+[![Build & Tests](https://github.com/intelowlproject/IntelOwl/workflows/Build%20&%20Tests/badge.svg)](https://github.com/intelowlproject/IntelOwl/actions)
+
 
 # Intel Owl
 
@@ -60,6 +68,8 @@ acknowledging that your use of each package will be subject to its respective
 license terms.
 
 [osslsigncode](https://github.com/develar/osslsigncode),
+[PyExifTool](https://github.com/sylikc/pyexiftool),
+[Exiftool package](https://exiftool.org/#license),
 [stringsifter](https://github.com/fireeye/stringsifter),
 [peepdf](https://github.com/jesparza/peepdf),
 [pefile](https://github.com/erocarrera/pefile),
@@ -109,17 +119,13 @@ This project was created and will be upgraded thanks to the following organizati
 
 Since its birth, this project has been participating in the GSoC under the Honeynet Project!
 
-* 2020: a lot of [new features](https://www.honeynet.org/gsoc/gsoc-2020/google-summer-of-code-2020-project-ideas/#intel-owl-improvements) were developed by Eshaan Bansal ([Twitter](https://twitter.com/mask0fmydisguis)).
-* 2021: you? [Projects available](https://www.honeynet.org/gsoc/gsoc-2021/google-summer-of-code-2021-project-ideas/)
+* 2020: a lot of [new features](https://www.honeynet.org/gsoc/gsoc-2020/google-summer-of-code-2020-project-ideas/#intel-owl-improvements) were developed by [Eshaan Bansal](https://twitter.com/mask0fmydisguis).
+* 2021: [Sarthak Khattar](https://twitter.com/Mr_Momo07) and [Shubham Pandey](https://twitter.com/imshubham31) are working on these [Projects](https://www.honeynet.org/gsoc/gsoc-2021/google-summer-of-code-2021-project-ideas/)
 
 Stay tuned for the upcoming GSoC! Join the [Honeynet Slack chat](https://gsoc-slack.honeynet.org/) for more info.
 
 ## About the author and maintainers
 
-Feel free to contact the main developers at any time:
-- Matteo Lodi ([Twitter](https://twitter.com/matte_lodi)): Author and creator
-- Eshaan Bansal ([Twitter](https://twitter.com/mask0fmydisguis)): Principal maintainer
-
-We also have:
-- a dedicated twitter account for the project: [@intel_owl](https://twitter.com/intel_owl).
-- [official site](https://intelowlproject.github.io) hosted in Github Pages
+Feel free to contact the main developers at any time in Twitter:
+- [Matteo Lodi](https://twitter.com/matte_lodi): Author and creator
+- [Eshaan Bansal](https://twitter.com/mask0fmydisguis): Principal maintainer

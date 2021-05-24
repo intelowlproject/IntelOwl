@@ -1,3 +1,6 @@
+# This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
+# See the file 'LICENSE' for copying permission.
+
 # Configuration file for the Sphinx documentation builder.
 #
 # This file only contains a selection of the most common options. For a full
@@ -26,7 +29,7 @@ copyright = "2020, Matteo Lodi"
 author = "Matteo Lodi"
 
 # The full version, including alpha/beta/rc tags
-release = "v2.2.0"
+release = "v2.4.0"
 
 
 # -- General configuration ---------------------------------------------------

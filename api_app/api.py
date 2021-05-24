@@ -1,3 +1,6 @@
+# This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
+# See the file 'LICENSE' for copying permission.
+
 import logging
 
 from api_app import models, serializers, helpers
@@ -485,7 +488,11 @@ class JobViewSet(
     viewsets.GenericViewSet,
 ):
 
-    queryset = models.Job.objects.order_by("-received_request_time").all()
+    queryset = (
+        models.Job.objects.prefetch_related("tags")
+        .order_by("-received_request_time")
+        .all()
+    )
     serializer_class = serializers.JobSerializer
     serializer_action_classes = {
         "list": serializers.JobListSerializer,

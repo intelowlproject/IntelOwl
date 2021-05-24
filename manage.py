@@ -1,4 +1,8 @@
 #!/usr/bin/env python
+
+# This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
+# See the file 'LICENSE' for copying permission.
+
 """Django's command-line utility for administrative tasks."""
 import os
 import sys

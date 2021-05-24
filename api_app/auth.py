@@ -1,3 +1,6 @@
+# This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
+# See the file 'LICENSE' for copying permission.
+
 import logging
 
 from django.contrib.auth import login, logout
@@ -11,8 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 class LoginView(durin_views.LoginView):
-    @staticmethod
-    def get_client_obj(request):
+    def get_client_obj(self, request):
         return Client.objects.get(name="web-browser")
 
     def post(self, request, *args, **kwargs):

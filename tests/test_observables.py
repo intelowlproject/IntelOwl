@@ -1,3 +1,6 @@
+# This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
+# See the file 'LICENSE' for copying permission.
+
 # for observable analyzers, if can customize the behavior based on:
 # DISABLE_LOGGING_TEST to True -> logging disabled
 # MOCK_CONNECTIONS to True -> connections to external analyzers are faked

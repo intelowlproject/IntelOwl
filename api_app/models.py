@@ -1,6 +1,14 @@
+# This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
+# See the file 'LICENSE' for copying permission.
+
+from os import remove, path
+
 from django.db import models
+from django.db.models.signals import pre_delete
 from django.contrib.postgres import fields as postgres_fields
 from django.utils import timezone
+from django.dispatch import receiver
+
 
 from .exceptions import AnalyzerRunException
 
@@ -86,3 +94,10 @@ class Job(models.Model):
         if self.is_sample:
             return f'Job("{self.file_name}")'
         return f'Job("{self.observable_name}")'
+
+
+@receiver(pre_delete, sender=Job)
+def delete_file(sender, instance, **kwargs):
+    if instance.file:
+        if path.isfile(instance.file.path):
+            remove(instance.file.path)

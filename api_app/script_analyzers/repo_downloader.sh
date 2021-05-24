@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # this is a simple script that downloads public yara repositories and make some changes on their configuration
+# we have also added the download of other tools like quark-engine rules, dnstwist dictionaries and exiftool
 
 # I suggest you to modify this script based on your needs.
 # Example: you may want to add a new repository. Add the clone here
@@ -67,7 +68,15 @@ git checkout tags/0.0.1
 # chown directories
 chown -R www-data:www-data /opt/deploy/yara /opt/deploy/quark-rules
 
-cd /opt/deploy
-
 # Clone dictionaries for dnstwist analyzer
+cd /opt/deploy
 svn export https://github.com/elceef/dnstwist/tags/20201022/dictionaries dnstwist-dictionaries
+
+# download exiftool
+# https://exiftool.org/install.html#Unix
+mkdir exiftool_download
+cd exiftool_download
+wget https://exiftool.org/Image-ExifTool-12.26.tar.gz
+gzip -dc Image-ExifTool-12.26.tar.gz | tar -xf -
+cd Image-ExifTool-12.26
+chown -R www-data:www-data /opt/deploy/exiftool_download

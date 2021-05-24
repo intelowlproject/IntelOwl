@@ -1,3 +1,6 @@
+# This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
+# See the file 'LICENSE' for copying permission.
+
 import logging
 from celery import uuid
 from django.core.cache import cache
@@ -48,7 +51,7 @@ def start_analyzers(
             additional_config_params = ac.get("additional_config_params", {})
 
             adjust_analyzer_config(
-                runtime_configuration, additional_config_params, analyzer
+                runtime_configuration, additional_config_params, analyzer, job_id, md5
             )
             # get celery queue
             queue = ac.get("queue", "default")

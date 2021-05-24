@@ -1,3 +1,6 @@
+# This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
+# See the file 'LICENSE' for copying permission.
+
 # flake8: noqa
 import os
 from datetime import timedelta
@@ -34,6 +37,7 @@ ALLOWED_HOSTS = ["*"]
 
 # Application definition
 INSTALLED_APPS = [
+    # default
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -41,7 +45,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.postgres",
-    "memoize",
+    # DRF
     "rest_framework",
     "durin",
     "guardian",
@@ -137,34 +141,10 @@ else:
         "default": {"hosts": ""},
     }
 
-# CELERY STUFF
 CELERY_BROKER_URL = secrets.get_secret("CELERY_BROKER_URL")
-CELERY_ACCEPT_CONTENT = ["application/json"]
-CELERY_TASK_SERIALIZER = "json"
-CELERY_IGNORE_RESULT = True
-CELERY_RESULT_SERIALIZER = "json"
-CELERY_TIMEZONE = "Europe/Rome"
-CELERY_IMPORTS = ("intel_owl.tasks",)
-CELERY_WORKER_REDIRECT_STDOUTS = False
-CELERY_WORKER_HIJACK_ROOT_LOGGER = False
-# these two are needed to enable priority and correct tasks execution
-CELERY_TASK_ACKS_LATE = True
-CELERY_WORKER_PREFETCH_MULTIPLIER = 1
 CELERY_QUEUES = os.environ.get("CELERY_QUEUES", "default").split(",")
-# this is to avoid RAM issues caused by long usage of this tool
-CELERY_WORKER_MAX_TASKS_PER_CHILD = 200
-# value is in kilobytes
-CELERY_WORKER_MAX_MEMORY_PER_CHILD = 4000
 
 AWS_SQS = os.environ.get("AWS_SQS", False) == "True"
-if AWS_SQS:
-    # this is for AWS SQS support
-    CELERY_BROKER_TRANSPORT_OPTIONS = {
-        "region": "eu-central-1",
-        "polling_interval": 1,
-        "visibility_timeout": 3600,
-        "wait_time_seconds": 20,
-    }
 
 # Django Guardian
 GUARDIAN_RAISE_403 = True

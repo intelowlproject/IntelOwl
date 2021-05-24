@@ -1,6 +1,22 @@
 # Changelog
 
 [**Upgrade Guide**](https://intelowl.readthedocs.io/en/latest/Installation.html#update-to-the-most-recent-version)
+## [v2.4.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v2.4.0)
+
+We welcome new GSoC students ([Sarthak Khattar](https://twitter.com/Mr_Momo07) and [Shubham Pandey](https://twitter.com/imshubham31)) in the Organization!
+
+
+Main updates:
+- new release of the official GUI [IntelOwl-Ng](https://github.com/intelowlproject/IntelOwl-ng/releases/tag/v2.1.0)
+- added [Malpedia](https://malpedia.caad.fkie.fraunhofer.de) analyzer
+
+Then a lot of maintenance and overall project stability issues solved:
+- removed `eventlet` broken dependency
+- bumped new versions of a lot of dependencies
+- Improved "Installation" and "Contribute" documentation
+- added new badges to the README
+- added `--django-server` [option](https://intelowl.readthedocs.io/en/latest/Contribute.html#how-to-start) to speed up development
+- other little refactors and fixes
 
 ## [v2.3.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v2.3.0)
 - Added [API documentation](https://intelowl.readthedocs.io) with both [Redoc](https://github.com/Redocly/redoc) and [OpenAPI](https://github.com/OAI/OpenAPI-Specification) Format

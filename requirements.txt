@@ -1,4 +1,4 @@
-boto3==1.17.74
+boto3==1.17.78
 celery==5.1.0
 checkdmarc==4.3.1
 dataclasses==0.6
@@ -14,7 +14,6 @@ dnstwist==20201228
 ppdeep>=20200505
 drf-spectacular==0.15.1
 easygui==0.98.2
-eventlet==0.31.0
 GitPython==3.1.17
 google>=3.0.0
 google-cloud-webrisk==1.2.0
@@ -27,7 +26,7 @@ pdfid==1.0.4
 pefile-fork==2020.12.16
 psycopg2-binary==2.8.6
 pydeep==0.4
-pyexifinfo==0.4.0
+PyExifTool==0.4.9
 pymisp==2.4.143
 pypdns==1.5.2
 pypssl==2.2

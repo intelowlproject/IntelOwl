@@ -5,7 +5,7 @@ import logging
 
 from api_app import models, serializers, helpers
 from api_app.permissions import ExtendedObjectPermissions
-from .script_analyzers import general
+from .analyzers_manager import general
 
 from wsgiref.util import FileWrapper
 

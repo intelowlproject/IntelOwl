@@ -16,6 +16,7 @@ Then a lot of maintenance and overall project stability issues solved:
 - Improved "Installation" and "Contribute" documentation
 - added new badges to the README
 - added `--django-server` [option](https://intelowl.readthedocs.io/en/latest/Contribute.html#how-to-start) to speed up development
+- analyzed files are now correctly deleted with the periodic cronjob
 - other little refactors and fixes
 
 ## [v2.3.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v2.3.0)

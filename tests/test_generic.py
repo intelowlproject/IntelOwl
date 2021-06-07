@@ -41,7 +41,7 @@ class CronTests(TestCase):
             self.assertTrue(os.path.exists(db_file_path))
 
     @mock_connections(patch("requests.get", side_effect=mocked_requests))
-    def test_talos_updater(self):
+    def test_talos_updater(self, mock_get=None):
         db_file_path = talos.Talos.updater()
         self.assertTrue(os.path.exists(db_file_path))
 

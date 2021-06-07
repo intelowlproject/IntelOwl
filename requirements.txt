@@ -33,7 +33,7 @@ pypssl==2.2
 pysafebrowsing==0.1.1
 PySocks==1.7.1
 python-magic==0.4.22
-quark-engine==21.6.1
+quark-engine==21.5.1
 requests==2.25.1
 speakeasy-emulator==1.5.2
 uWSGI==2.0.19.1

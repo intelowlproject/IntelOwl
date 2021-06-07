@@ -1,8 +1,8 @@
-boto3==1.17.74
-celery==5.1.0
+boto3==1.17.84
+celery==4.4.7
 checkdmarc==4.3.1
 dataclasses==0.6
-Django==2.2.20
+Django==2.2.24
 django-auth-ldap==2.4.0
 django-nose==1.4.7
 django-rest-durin==0.3.0
@@ -33,7 +33,7 @@ pypssl==2.2
 pysafebrowsing==0.1.1
 PySocks==1.7.1
 python-magic==0.4.22
-quark-engine==21.3.4
+quark-engine==21.6.1
 requests==2.25.1
 speakeasy-emulator==1.5.2
 uWSGI==2.0.19.1

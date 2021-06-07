@@ -2,7 +2,7 @@ boto3==1.17.84
 celery==4.4.7
 checkdmarc==4.3.1
 dataclasses==0.6
-Django==2.2.24
+Django==3.2.4
 django-auth-ldap==2.4.0
 django-nose==1.4.7
 django-rest-durin==0.3.0

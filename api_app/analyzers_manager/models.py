@@ -7,7 +7,13 @@ from api_app.models import Job
 
 
 class Analyzer(models.Model):
-    type_ = models.CharField(choices=["file_analyzer", "observable_analyzer"])
+    analyzer_type = models.CharField(
+        max_length=50,
+        choices=(
+            ("file_analyzer", "file_analyzer"),
+            ("observable_analyzer", "observable_analyzer"),
+        ),
+    )
     disabled = models.BooleanField(default=False, blank=False)
     description = models.TextField()
     python_module = models.CharField(max_length=128, blank=False, null=False)
@@ -21,7 +27,7 @@ class Analyzer(models.Model):
     def _cached_secrets(self, key, val):
         self.__cached_secrets[key] = val
 
-    @cache_memoize(args_rewrite=lambda o: o.pk)
+    @cache_memoize(100, args_rewrite=lambda o: o.pk)
     def verify_secrets(self) -> dict:
         verification = {
             "configured:": False,
@@ -48,8 +54,12 @@ class Analyzer(models.Model):
 
 
 class AnalyzerReport(models.Model):
-    analyzer = models.ForeignKey(Analyzer, related_name="reports")
-    job = models.ForeignKey(Job, related_name="analyzer_reports")
+    analyzer = models.ForeignKey(
+        Analyzer, related_name="reports", on_delete=models.CASCADE
+    )
+    job = models.ForeignKey(
+        Job, related_name="analyzer_reports", on_delete=models.CASCADE
+    )
 
     success = models.BooleanField()
     report = models.JSONField()
@@ -64,9 +74,14 @@ class AnalyzerReport(models.Model):
 class Secret(models.Model):
     name = models.CharField(max_length=50, blank=False, null=False, unique=True)
     env_variable_key = models.CharField(max_length=50)
-    datatype = models.CharField(choices=["str", "int", "bool", "float"])
+    datatype = models.CharField(
+        max_length=8,
+        choices=(("str", "str"), ("int", "int"), ("bool", "bool"), ("float", "float")),
+    )
     required = models.BooleanField(blank=False, default=True)
     default = models.CharField(max_length=50, null=True)
     description = models.TextField()
 
-    analyzer = models.ForeignKey(Analyzer, related_name="secrets")
+    analyzer = models.ForeignKey(
+        Analyzer, related_name="secrets", on_delete=models.CASCADE
+    )

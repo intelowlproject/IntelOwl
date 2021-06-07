@@ -53,7 +53,7 @@ class AnalyzerReport(models.Model):
 
     success = models.BooleanField()
     report = models.JSONField()
-    errros = postgres_fields.ArrayField(
+    errors = postgres_fields.ArrayField(
         models.CharField(max_length=512, blank=True, default=list)
     )
     process_time = models.FloatField()

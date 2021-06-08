@@ -6,7 +6,7 @@ from abc import ABCMeta
 from unittest.mock import patch
 
 from api_app.models import Job
-from api_app.script_analyzers.observable_analyzers import (
+from api_app.analyzers_manager.observable_analyzers import (
     pulsedive,
     otx,
     vt2_get,
@@ -25,14 +25,14 @@ from api_app.script_analyzers.observable_analyzers import (
     threatfox,
 )
 
-from api_app.script_analyzers.observable_analyzers.dns.dns_resolvers import (
+from api_app.analyzers_manager.observable_analyzers.dns.dns_resolvers import (
     classic_dns_resolver,
     cloudflare_dns_resolver,
     google_dns_resolver,
     quad9_dns_resolver,
 )
 
-from api_app.script_analyzers.observable_analyzers.dns.dns_malicious_detectors import (
+from api_app.analyzers_manager.observable_analyzers.dns.dns_malicious_detectors import (
     cloudflare_malicious_detector,
     googlesf,
     google_webrisk,
@@ -221,7 +221,7 @@ class CommonTestCases_ip_url_domain(metaclass=ABCMeta):
 
     @mock_connections(
         patch(
-            "api_app.script_analyzers.observable_analyzers.dns."
+            "api_app.analyzers_manager.observable_analyzers.dns."
             "dns_malicious_detectors.google_webrisk.WebRiskServiceClient"
         )
     )

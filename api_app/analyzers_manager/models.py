@@ -17,7 +17,7 @@ class Analyzer(models.Model):
     disabled = models.BooleanField(default=False, blank=False)
     description = models.TextField()
     python_module = models.CharField(max_length=128, blank=False, null=False)
-    config = models.JSONField()
+    config = postgres_fields.JSONField(default=dict, blank=False, null=False)
 
     @property
     def _cached_secrets(self) -> dict:
@@ -62,7 +62,7 @@ class AnalyzerReport(models.Model):
     )
 
     success = models.BooleanField()
-    report = models.JSONField()
+    report = postgres_fields.JSONField(default=dict, blank=False, null=False)
     errors = postgres_fields.ArrayField(
         models.CharField(max_length=512, blank=True, default=list)
     )

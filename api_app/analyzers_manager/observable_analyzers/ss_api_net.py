@@ -5,7 +5,7 @@ import requests
 import base64
 
 from api_app.exceptions import AnalyzerRunException, AnalyzerConfigurationException
-from api_app.script_analyzers import classes
+from api_app.analyzers_manager import classes
 from intel_owl import secrets
 
 

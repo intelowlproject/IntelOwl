@@ -3,7 +3,7 @@
 
 import logging
 from XLMMacroDeobfuscator.deobfuscator import process_file
-from api_app.script_analyzers.classes import FileAnalyzer
+from api_app.analyzers_manager.classes import FileAnalyzer
 from celery.exceptions import SoftTimeLimitExceeded
 
 logger = logging.getLogger(__name__)

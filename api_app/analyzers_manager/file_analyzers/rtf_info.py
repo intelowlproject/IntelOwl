@@ -4,7 +4,7 @@
 from oletools.rtfobj import RtfObjParser
 
 from api_app.helpers import get_binary
-from api_app.script_analyzers.classes import FileAnalyzer
+from api_app.analyzers_manager.classes import FileAnalyzer
 
 
 class RTFInfo(FileAnalyzer):

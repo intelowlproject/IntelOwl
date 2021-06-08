@@ -3,7 +3,7 @@
 
 import requests
 import logging
-from api_app.script_analyzers.classes import FileAnalyzer
+from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.exceptions import AnalyzerRunException
 import time
 from intel_owl import secrets

@@ -5,7 +5,7 @@ import socket
 import logging
 
 from api_app.exceptions import AnalyzerRunException
-from api_app.script_analyzers.classes import ObservableAnalyzer
+from api_app.analyzers_manager.classes import ObservableAnalyzer
 
 
 logger = logging.getLogger(__name__)

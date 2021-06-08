@@ -113,7 +113,7 @@ List of some of the analyzers with optional configuration:
     * `enable_image_processing_analysis`: see [Thug doc: option -a](https://buffer.github.io/thug/doc/usage.html#basic-usage)
     * `enable_awis`: see [Thug doc: option -E](https://buffer.github.io/thug/doc/usage.html#basic-usage)
     * `user_agent`: see [Thug doc: browser personality](https://buffer.github.io/thug/doc/usage.html#browser-personality)
-* `DNSDB` (defaults can be seen here [dnsdb.py](https://github.com/intelowlproject/IntelOwl/blob/master/api_app/script_analyzers/observable_analyzers/dnsdb.py)), Official [API docs](https://docs.dnsdb.info/dnsdb-apiv2/):
+* `DNSDB` (defaults can be seen here [dnsdb.py](https://github.com/intelowlproject/IntelOwl/blob/master/api_app/analyzers_manager/observable_analyzers/dnsdb.py)), Official [API docs](https://docs.dnsdb.info/dnsdb-apiv2/):
     * `server`: DNSDB server
     * `api_version`: API version of DNSDB
     * `rrtype`: DNS query type

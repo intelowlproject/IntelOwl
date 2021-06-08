@@ -8,8 +8,8 @@ from django.core.files import File
 from django.test import TestCase
 from unittest.mock import patch, MagicMock
 
-from api_app.script_analyzers import utils
-from api_app.script_analyzers.file_analyzers import (
+from api_app.analyzers_manager import utils
+from api_app.analyzers_manager.file_analyzers import (
     file_info,
     signature_info,
     speakeasy_emulation,
@@ -38,7 +38,7 @@ from api_app.script_analyzers.file_analyzers import (
     qiling,
     malpedia_scan,
 )
-from api_app.script_analyzers.observable_analyzers import vt3_get
+from api_app.analyzers_manager.observable_analyzers import vt3_get
 
 from api_app.models import Job
 from .mock_utils import (
@@ -199,7 +199,7 @@ class FileAnalyzersEXETests(TestCase):
     @mock_connections(patch("requests.Session.post", side_effect=mocked_intezer))
     @mock_connections(
         patch(
-            "api_app.script_analyzers.file_analyzers.intezer_scan._get_access_token",
+            "api_app.analyzers_manager.file_analyzers.intezer_scan._get_access_token",
             MagicMock(return_value="tokentest"),
         )
     )

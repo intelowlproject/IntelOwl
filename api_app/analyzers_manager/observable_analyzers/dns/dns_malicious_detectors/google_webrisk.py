@@ -9,8 +9,8 @@ from google.cloud.webrisk_v1.services.web_risk_service import WebRiskServiceClie
 from google.cloud.webrisk_v1.types import ThreatType
 
 from api_app.exceptions import AnalyzerRunException
-from api_app.script_analyzers import classes
-from api_app.script_analyzers.observable_analyzers.dns.dns_responses import (
+from api_app.analyzers_manager import classes
+from api_app.analyzers_manager.observable_analyzers.dns.dns_responses import (
     malicious_detector_response,
 )
 from intel_owl import secrets

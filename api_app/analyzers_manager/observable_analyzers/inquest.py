@@ -6,7 +6,7 @@ import logging
 import requests
 
 from api_app.exceptions import AnalyzerRunException, AnalyzerConfigurationException
-from api_app.script_analyzers.classes import ObservableAnalyzer
+from api_app.analyzers_manager.classes import ObservableAnalyzer
 from intel_owl import secrets
 
 

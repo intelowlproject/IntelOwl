@@ -5,5 +5,5 @@ from rest_framework import viewsets
 from api_app.analyzers_manager.serializers import AnalyzerSerializer
 
 
-class AnalyzerViewSet(viewsets.ModelViewSet):
+class AnalyzerViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = AnalyzerSerializer

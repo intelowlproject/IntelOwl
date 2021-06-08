@@ -7,12 +7,13 @@ from api_app.models import Job
 
 
 class Analyzer(models.Model):
+    CHOICES = (
+        ("file_analyzer", "file_analyzer"),
+        ("observable_analyzer", "observable_analyzer"),
+    )
     analyzer_type = models.CharField(
         max_length=50,
-        choices=(
-            ("file_analyzer", "file_analyzer"),
-            ("observable_analyzer", "observable_analyzer"),
-        ),
+        choices=CHOICES,
     )
     disabled = models.BooleanField(default=False, blank=False)
     description = models.TextField()
@@ -22,10 +23,6 @@ class Analyzer(models.Model):
     @property
     def _cached_secrets(self) -> dict:
         return self.__cached_secrets
-
-    @_cached_secrets.setter
-    def _cached_secrets(self, key, val):
-        self.__cached_secrets[key] = val
 
     @cache_memoize(100, args_rewrite=lambda o: o.pk)
     def verify_secrets(self) -> dict:
@@ -37,14 +34,14 @@ class Analyzer(models.Model):
         for secret in self.secrets.all():
             var = get_secret(secret.env_variable_key)
             if var:
-                self._cached_secrets[secret.name] = var
+                self.__cached_secrets[secret.name] = var
             else:
                 verification["missing_secrets"].append(secret.name)
 
-        if len(verification["missing_secrets"]):
+        if len(verification["missing_secrets"]) == 0:
             verification["configured"] = True
         else:
-            total_secrets = len(self.secrets.all())
+            total_secrets = self.secrets.all().count()
             verified_secrets = total_secrets - len(verification["missing_secrets"])
             verification[
                 "error_message"
@@ -61,22 +58,23 @@ class AnalyzerReport(models.Model):
         Job, related_name="analyzer_reports", on_delete=models.CASCADE
     )
 
-    success = models.BooleanField()
+    success = models.BooleanField(default=False)
     report = postgres_fields.JSONField(default=dict, blank=False, null=False)
     errors = postgres_fields.ArrayField(
         models.CharField(max_length=512, blank=True, default=list)
     )
-    process_time = models.FloatField()
-    started_time = models.TimeField()
-    started_time_str = models.TextField()
+    start_time = models.DateTimeField()
+    end_time = models.DateTimeField()
 
 
 class Secret(models.Model):
+    CHOICES = (("str", "str"), ("int", "int"), ("bool", "bool"), ("float", "float"))
+
     name = models.CharField(max_length=50, blank=False, null=False, unique=True)
     env_variable_key = models.CharField(max_length=50)
     datatype = models.CharField(
         max_length=8,
-        choices=(("str", "str"), ("int", "int"), ("bool", "bool"), ("float", "float")),
+        choices=CHOICES,
     )
     required = models.BooleanField(blank=False, default=True)
     default = models.CharField(max_length=50, null=True)

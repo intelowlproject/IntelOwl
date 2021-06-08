@@ -5,7 +5,7 @@ import logging
 import peepdf
 from pdfid import pdfid
 
-from api_app.script_analyzers.classes import FileAnalyzer
+from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.exceptions import AnalyzerRunException
 
 logger = logging.getLogger(__name__)

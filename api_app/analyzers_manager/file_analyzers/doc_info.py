@@ -13,7 +13,7 @@ from re import sub
 from oletools import mraptor
 from oletools.olevba import VBA_Parser
 
-from api_app.script_analyzers.classes import FileAnalyzer
+from api_app.analyzers_manager.classes import FileAnalyzer
 
 logger = logging.getLogger(__name__)
 

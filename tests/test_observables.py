@@ -12,7 +12,7 @@ from unittest.mock import patch
 
 from django.test import TestCase
 
-from api_app.script_analyzers.observable_analyzers import (
+from api_app.analyzers_manager.observable_analyzers import (
     abuseipdb,
     censys,
     shodan,

@@ -4,7 +4,7 @@
 import requests
 
 from api_app.exceptions import AnalyzerRunException
-from api_app.script_analyzers import classes
+from api_app.analyzers_manager import classes
 
 
 class MB_GET(classes.ObservableAnalyzer):

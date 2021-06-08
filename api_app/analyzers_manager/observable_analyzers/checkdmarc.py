@@ -5,7 +5,7 @@ import subprocess
 import json
 from shutil import which
 
-from api_app.script_analyzers import classes
+from api_app.analyzers_manager import classes
 from api_app.exceptions import AnalyzerRunException
 
 

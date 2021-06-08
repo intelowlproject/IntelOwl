@@ -11,7 +11,7 @@ import pefile
 
 from datetime import datetime
 
-from api_app.script_analyzers.classes import FileAnalyzer
+from api_app.analyzers_manager.classes import FileAnalyzer
 
 logger = logging.getLogger(__name__)
 

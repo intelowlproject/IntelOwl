@@ -8,9 +8,9 @@ import logging
 
 from datetime import datetime, timedelta
 
-from api_app.script_analyzers.file_analyzers import vt3_scan
+from api_app.analyzers_manager.file_analyzers import vt3_scan
 from api_app.exceptions import AnalyzerRunException
-from api_app.script_analyzers import classes
+from api_app.analyzers_manager import classes
 from intel_owl import secrets
 
 logger = logging.getLogger(__name__)

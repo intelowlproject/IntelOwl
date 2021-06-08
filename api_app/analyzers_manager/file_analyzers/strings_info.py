@@ -3,7 +3,7 @@
 
 from json import dumps as json_dumps
 from api_app.helpers import get_binary
-from api_app.script_analyzers.classes import FileAnalyzer, DockerBasedAnalyzer
+from api_app.analyzers_manager.classes import FileAnalyzer, DockerBasedAnalyzer
 
 
 class StringsInfo(FileAnalyzer, DockerBasedAnalyzer):

@@ -8,8 +8,8 @@ from django.test import TestCase
 from unittest import skipIf
 from unittest.mock import patch
 
-from api_app.script_analyzers.file_analyzers import yara_scan
-from api_app.script_analyzers.observable_analyzers import maxmind, talos, tor
+from api_app.analyzers_manager.file_analyzers import yara_scan
+from api_app.analyzers_manager.observable_analyzers import maxmind, talos, tor
 
 from api_app import crons
 from api_app.helpers import get_analyzer_config

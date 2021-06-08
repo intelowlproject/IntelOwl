@@ -7,8 +7,8 @@ import requests
 
 from api_app.exceptions import AnalyzerRunException
 from api_app.helpers import get_binary
-from api_app.script_analyzers.observable_analyzers import vt3_get
-from api_app.script_analyzers.classes import FileAnalyzer
+from api_app.analyzers_manager.observable_analyzers import vt3_get
+from api_app.analyzers_manager.classes import FileAnalyzer
 from intel_owl import secrets
 
 logger = logging.getLogger(__name__)

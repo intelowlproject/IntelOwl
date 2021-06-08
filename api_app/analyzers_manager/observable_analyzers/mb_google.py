@@ -4,8 +4,8 @@
 import googlesearch
 
 from api_app.exceptions import AnalyzerRunException
-from api_app.script_analyzers import classes
-from api_app.script_analyzers.observable_analyzers import mb_get
+from api_app.analyzers_manager import classes
+from api_app.analyzers_manager.observable_analyzers import mb_get
 
 
 class MB_GOOGLE(classes.ObservableAnalyzer):

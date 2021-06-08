@@ -8,7 +8,7 @@ import requests
 import ipaddress
 
 from api_app.exceptions import AnalyzerConfigurationException, AnalyzerRunException
-from api_app.script_analyzers import classes
+from api_app.analyzers_manager import classes
 from intel_owl import settings
 from datetime import datetime
 

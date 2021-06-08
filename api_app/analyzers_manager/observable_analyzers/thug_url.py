@@ -3,7 +3,7 @@
 
 import secrets
 
-from api_app.script_analyzers.classes import ObservableAnalyzer, DockerBasedAnalyzer
+from api_app.analyzers_manager.classes import ObservableAnalyzer, DockerBasedAnalyzer
 
 
 class ThugUrl(ObservableAnalyzer, DockerBasedAnalyzer):

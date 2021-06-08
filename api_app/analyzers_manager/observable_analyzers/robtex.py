@@ -6,7 +6,7 @@ import requests
 from urllib.parse import urlparse
 
 from api_app.exceptions import AnalyzerRunException
-from api_app.script_analyzers import classes
+from api_app.analyzers_manager import classes
 
 
 class Robtex(classes.ObservableAnalyzer):

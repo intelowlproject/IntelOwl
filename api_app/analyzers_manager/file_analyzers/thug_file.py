@@ -3,7 +3,7 @@
 
 import secrets
 from api_app.helpers import get_binary
-from api_app.script_analyzers.classes import FileAnalyzer, DockerBasedAnalyzer
+from api_app.analyzers_manager.classes import FileAnalyzer, DockerBasedAnalyzer
 from ..observable_analyzers.thug_url import ThugUrl
 
 

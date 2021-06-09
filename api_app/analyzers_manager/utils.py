@@ -1,13 +1,13 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-import time
+from datetime import datetime
 import logging
 
 from django.db import transaction
-from django.utils import timezone
 
 from api_app.models import Job
+from api_app.analyzers_manager.models import AnalyzerReport
 from api_app.helpers import get_now
 from api_app.exceptions import AlreadyFailedJobException
 
@@ -43,8 +43,10 @@ def set_report_and_cleanup(analyzer_name, job_id, report):
             # set status "failed" in case all analyzers failed
             failed_analyzers = 0
             for analysis_report in job_object.analysis_reports:
-                if not analysis_report.get("success", False):
+                if not analysis_report.success:
                     failed_analyzers += 1
+            report.save()
+
             if failed_analyzers == num_analysis_reports:
                 status_to_set = "failed"
             elif failed_analyzers >= 1:
@@ -65,16 +67,17 @@ def set_report_and_cleanup(analyzer_name, job_id, report):
         job_object.save(update_fields=["finished_analysis_time"])
 
 
-def get_basic_report_template(analyzer_name):
-    return {
-        "name": analyzer_name,
-        "success": False,
-        "report": {},
-        "errors": [],
-        "process_time": 0,
-        "started_time": time.time(),
-        "started_time_str": timezone.now().strftime("%Y-%m-%d %H:%M:%S"),
-    }
+def get_report_model_object():
+    report_obj = AnalyzerReport(
+        success=False,
+        report={},
+        errors=[],
+        start_time=datetime.now(),
+        end_time=datetime.now(),
+    )
+    report_obj.save()
+
+    return report_obj
 
 
 def get_filepath_filename(job_id):
@@ -111,8 +114,9 @@ def set_failed_analyzer(analyzer_name, job_id, err_msg):
         f"({analyzer_name}, job_id #{job_id}) -> set as FAILED. "
         f" Error message: {err_msg}"
     )
-    report = get_basic_report_template(analyzer_name)
-    report["errors"].append(err_msg)
+    report = get_report_model_object()
+    report.errors.append(err_msg)
+    report.save()
     set_report_and_cleanup(analyzer_name, job_id, report)
 
 

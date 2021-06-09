@@ -1,6 +1,7 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
+from datetime import datetime
 import traceback
 import time
 import logging
@@ -15,7 +16,7 @@ from api_app.exceptions import (
     AnalyzerRunException,
     AnalyzerConfigurationException,
 )
-from .utils import get_basic_report_template
+from .utils import get_report_model_object
 
 logger = logging.getLogger(__name__)
 
@@ -100,10 +101,10 @@ class BaseAnalyzerMixin(metaclass=ABCMeta):
         """
         try:
             self.before_run()
-            self.report = get_basic_report_template(self.analyzer_name)
+            self.report = get_report_model_object()
             result = self.run()
             result = self._validate_result(result)
-            self.report["report"] = result
+            self.report.report = result
         except (
             AnalyzerConfigurationException,
             AnalyzerRunException,
@@ -113,10 +114,10 @@ class BaseAnalyzerMixin(metaclass=ABCMeta):
         except Exception as e:
             self._handle_base_exception(e)
         else:
-            self.report["success"] = True
+            self.report.success = True
 
-        # add process time
-        self.report["process_time"] = time.time() - self.report["started_time"]
+        # add end time of process
+        self.report.end_time = datetime.now()
 
         self.after_run()
 
@@ -128,8 +129,8 @@ class BaseAnalyzerMixin(metaclass=ABCMeta):
             f" Analyzer error: '{err}'"
         )
         logger.error(error_message)
-        self.report["errors"].append(str(err))
-        self.report["success"] = False
+        self.report.errors.append(str(err))
+        self.report.success = False
 
     def _handle_base_exception(self, err):
         traceback.print_exc()
@@ -138,8 +139,8 @@ class BaseAnalyzerMixin(metaclass=ABCMeta):
             f" Unexpected error: '{err}'"
         )
         logger.exception(error_message)
-        self.report["errors"].append(str(err))
-        self.report["success"] = False
+        self.report.errors.append(str(err))
+        self.report.success = False
 
     def __init__(self, analyzer_name, job_id, additional_config_params):
         self.analyzer_name = analyzer_name
@@ -332,7 +333,7 @@ class DockerBasedAnalyzer(metaclass=ABCMeta):
         # handle in case this is a test
         if hasattr(self, "is_test") and getattr(self, "is_test"):
             # only happens in case of testing
-            self.report["success"] = True
+            self.report.success = True
             return {}
 
         # step #1: request new analysis

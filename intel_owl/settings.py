@@ -109,6 +109,9 @@ REST_DURIN = {
     "REFRESH_TOKEN_ON_LOGIN": True,
 }
 
+# DATABASE CONF
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
 DB_HOST = secrets.get_secret("DB_HOST")
 DB_PORT = secrets.get_secret("DB_PORT")
 DB_NAME = os.environ.get("DB_NAME", "intel_owl_db")

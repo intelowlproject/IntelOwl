@@ -1,13 +1,11 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-from datetime import datetime
 import logging
 
 from django.db import transaction
 
 from api_app.models import Job
-from api_app.analyzers_manager.models import AnalyzerReport
 from api_app.helpers import get_now
 from api_app.exceptions import AlreadyFailedJobException
 
@@ -15,8 +13,8 @@ from api_app.exceptions import AlreadyFailedJobException
 logger = logging.getLogger(__name__)
 
 
-def set_report_and_cleanup(analyzer_name, job_id, report):
-    job_repr = f"({analyzer_name}, job_id: #{job_id})"
+def set_report_and_cleanup(analyzer_obj, job_id, report):
+    job_repr = f"({analyzer_obj.name}, job_id: #{job_id})"
     logger.info(f"STARTING set_report_and_cleanup for <-- {job_repr}.")
     job_object = None
 
@@ -67,19 +65,6 @@ def set_report_and_cleanup(analyzer_name, job_id, report):
         job_object.save(update_fields=["finished_analysis_time"])
 
 
-def get_report_model_object():
-    report_obj = AnalyzerReport(
-        success=False,
-        report={},
-        errors=[],
-        start_time=datetime.now(),
-        end_time=datetime.now(),
-    )
-    report_obj.save()
-
-    return report_obj
-
-
 def get_filepath_filename(job_id):
     # this function allows to minimize access to the database
     # in this way the analyzers could not touch the DB until the end of the analysis
@@ -109,15 +94,15 @@ def set_job_status(job_id, status, errors=None):
     job_object.save()
 
 
-def set_failed_analyzer(analyzer_name, job_id, err_msg):
+def set_failed_analyzer(analyzer_obj, job_id, err_msg):
     logger.warning(
-        f"({analyzer_name}, job_id #{job_id}) -> set as FAILED. "
+        f"({analyzer_obj.name}, job_id #{job_id}) -> set as FAILED. "
         f" Error message: {err_msg}"
     )
-    report = get_report_model_object()
+    report = Job.init_report(analyzer_obj, job_id)
     report.errors.append(err_msg)
     report.save()
-    set_report_and_cleanup(analyzer_name, job_id, report)
+    set_report_and_cleanup(analyzer_obj, job_id, report)
 
 
 def adjust_analyzer_config(

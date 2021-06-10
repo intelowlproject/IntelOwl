@@ -27,7 +27,6 @@ logger = logging.getLogger(__name__)
 
 def start_analyzers(
     analyzers_to_execute,
-    analyzers_config,
     runtime_configuration,
     job_id,
     md5,
@@ -40,21 +39,24 @@ def start_analyzers(
         observable_name, observable_classification = get_observable_data(job_id)
 
     for analyzer in analyzers_to_execute:
-        ac = analyzers_config[analyzer]
         try:
-            module = ac.get("python_module", None)
+            module = analyzer.python_module
             if not module:
                 raise AnalyzerConfigurationException(
-                    f"no python_module available in config for {analyzer} analyzer?!"
+                    f"no python_module available in config for {analyzer.name} analyzer?!"  # noqa: E501
                 )
 
-            additional_config_params = ac.get("additional_config_params", {})
+            additional_config_params = analyzer.config
 
             adjust_analyzer_config(
-                runtime_configuration, additional_config_params, analyzer, job_id, md5
+                runtime_configuration,
+                additional_config_params,
+                analyzer.name,
+                job_id,
+                md5,
             )
             # get celery queue
-            queue = ac.get("queue", "default")
+            queue = analyzer.queue
             if queue not in CELERY_QUEUES:
                 logger.error(
                     f"Analyzer {analyzers_to_execute} has a wrong queue."
@@ -65,10 +67,10 @@ def start_analyzers(
 
             if is_sample:
                 # check if we should run the hash instead of the binary
-                run_hash = ac.get("run_hash", False)
+                run_hash = analyzer.run_hash
                 if run_hash:
                     # check which kind of hash the analyzer needs
-                    run_hash_type = ac.get("run_hash_type", "md5")
+                    run_hash_type = analyzer.run_hash_type
                     if run_hash_type == "md5":
                         hash_value = md5
                     elif run_hash_type == "sha256":
@@ -82,7 +84,7 @@ def start_analyzers(
                     # run the analyzer with the hash
                     args = [
                         f"observable_analyzers.{module}",
-                        analyzer,
+                        analyzer.name,
                         job_id,
                         hash_value,
                         "hash",
@@ -92,7 +94,7 @@ def start_analyzers(
                     # run the analyzer with the binary
                     args = [
                         f"file_analyzers.{module}",
-                        analyzer,
+                        analyzer.name,
                         job_id,
                         file_path,
                         filename,
@@ -103,14 +105,14 @@ def start_analyzers(
                 # observables analyzer case
                 args = [
                     f"observable_analyzers.{module}",
-                    analyzer,
+                    analyzer.name,
                     job_id,
                     observable_name,
                     observable_classification,
                     additional_config_params,
                 ]
             # run analyzer with a celery task asynchronously
-            stl = ac.get("soft_time_limit", 300)
+            stl = analyzer.soft_time_limit
             t_id = uuid()
             celery_app.send_task(
                 "run_analyzer",
@@ -128,7 +130,7 @@ def start_analyzers(
             cache.set(job_id, task_ids)
 
         except (AnalyzerConfigurationException, AnalyzerRunException) as e:
-            err_msg = f"({analyzer}, job_id #{job_id}) -> Error: {e}"
+            err_msg = f"({analyzer.name}, job_id #{job_id}) -> Error: {e}"
             logger.error(err_msg)
             set_failed_analyzer(analyzer, job_id, err_msg)
 

@@ -7,18 +7,47 @@ from api_app.models import Job
 
 
 class Analyzer(models.Model):
-    CHOICES = (
+    TYPE_CHOICES = (
         ("file_analyzer", "file_analyzer"),
         ("observable_analyzer", "observable_analyzer"),
     )
+    QUEUE_CHOICES = (
+        ("default", "default"),
+        ("long", "long"),
+        ("local", "local"),
+    )
+    HASH_CHOICES = (("md5", "md5"), ("sha256", "sha256"))
+
+    name = models.CharField(max_length=128, blank=False, null=False)
     analyzer_type = models.CharField(
         max_length=50,
-        choices=CHOICES,
+        choices=TYPE_CHOICES,
     )
     disabled = models.BooleanField(default=False, blank=False)
     description = models.TextField()
     python_module = models.CharField(max_length=128, blank=False, null=False)
-    config = postgres_fields.JSONField(default=dict, blank=False, null=False)
+    config = models.JSONField(default=dict, blank=False, null=False)
+    supported_filetypes = postgres_fields.ArrayField(
+        models.CharField(default=list, max_length=50, blank=True, null=True)
+    )
+    not_supported_filetypes = postgres_fields.ArrayField(
+        models.CharField(default=list, max_length=50, blank=True, null=True)
+    )
+    run_hash = models.BooleanField(default=False, blank=True, null=True)
+    run_hash_type = models.CharField(
+        max_length=50,
+        blank=True,
+        null=True,
+        choices=HASH_CHOICES,
+        default="md5",
+    )
+    observable_supported = postgres_fields.ArrayField(
+        models.CharField(default=list, max_length=50, blank=True, null=True)
+    )
+    leaks_info = models.BooleanField(default=False, blank=True, null=True)
+    external_service = models.BooleanField(default=False, blank=True, null=True)
+    queue = models.CharField(max_length=50, choices=QUEUE_CHOICES, default="default")
+    soft_time_limit = models.IntegerField(default=300)
 
     @property
     def _cached_secrets(self) -> dict:
@@ -51,6 +80,12 @@ class Analyzer(models.Model):
 
 
 class AnalyzerReport(models.Model):
+    STATUS_CHOICES = (
+        ("pending", "pending"),
+        ("running", "running"),
+        ("failed", "failed"),
+        ("success", "success"),
+    )
     analyzer = models.ForeignKey(
         Analyzer, related_name="reports", on_delete=models.CASCADE
     )
@@ -58,8 +93,11 @@ class AnalyzerReport(models.Model):
         Job, related_name="analyzer_reports", on_delete=models.CASCADE
     )
 
-    success = models.BooleanField(default=False)
-    report = postgres_fields.JSONField(default=dict, blank=False, null=False)
+    status = models.CharField(
+        max_length=50,
+        choices=STATUS_CHOICES,
+    )
+    report = models.JSONField(default=dict, blank=False, null=False)
     errors = postgres_fields.ArrayField(
         models.CharField(max_length=512, blank=True, default=list)
     )

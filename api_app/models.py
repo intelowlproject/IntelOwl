@@ -2,6 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 
 from os import remove, path
+from datetime import datetime
 
 from django.db import models
 from django.db.models.signals import pre_delete
@@ -11,6 +12,7 @@ from django.dispatch import receiver
 
 
 from .exceptions import AnalyzerRunException
+from api_app.analyzers_manager.models import AnalyzerReport
 
 
 def file_directory_path(instance, filename):
@@ -92,6 +94,18 @@ class Job(models.Model):
         if self.is_sample:
             return f'Job("{self.file_name}")'
         return f'Job("{self.observable_name}")'
+
+    def init_report(self, analyzer_, job_id):
+        report_obj = AnalyzerReport(
+            analyzer=analyzer_,
+            job=self.object_by_job_id(job_id),
+            report={},
+            errors=[],
+            start_time=datetime.now(),
+            end_time=datetime.now(),
+        )
+
+        return report_obj
 
 
 @receiver(pre_delete, sender=Job)

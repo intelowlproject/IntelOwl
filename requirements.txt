@@ -12,7 +12,7 @@ djangorestframework-guardian==0.3.0
 dnspython==1.16.0
 dnstwist==20201228
 ppdeep>=20200505
-drf-spectacular==0.16.0
+drf-spectacular==0.17.0
 easygui==0.98.2
 GitPython==3.1.17
 google>=3.0.0

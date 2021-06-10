@@ -1,7 +1,7 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-from datetime import datetime
+from django.utils import timezone
 import traceback
 import time
 import logging
@@ -117,7 +117,7 @@ class BaseAnalyzerMixin(metaclass=ABCMeta):
             self.report.success = True
 
         # add end time of process
-        self.report.end_time = datetime.now()
+        self.report.end_time = timezone.now()
 
         self.after_run()
 

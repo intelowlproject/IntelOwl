@@ -48,6 +48,9 @@ class Analyzer(models.Model):
     queue = models.CharField(max_length=50, choices=QUEUE_CHOICES, default="default")
     soft_time_limit = models.IntegerField(default=300)
 
+    def __str__(self):
+        return self.name
+
     @property
     def _cached_secrets(self) -> dict:
         return self.__cached_secrets
@@ -120,3 +123,6 @@ class Secret(models.Model):
     analyzer = models.ForeignKey(
         Analyzer, related_name="secrets", on_delete=models.CASCADE
     )
+
+    def __str__(self):
+        return self.name

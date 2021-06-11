@@ -4,6 +4,7 @@
 import logging
 
 from django.db import transaction
+from django.apps import apps
 
 from api_app.models import Job
 from api_app.helpers import get_now
@@ -13,8 +14,8 @@ from api_app.exceptions import AlreadyFailedJobException
 logger = logging.getLogger(__name__)
 
 
-def set_report_and_cleanup(analyzer_obj, job_id, report):
-    job_repr = f"({analyzer_obj.name}, job_id: #{job_id})"
+def set_report_and_cleanup(analyzer_name, job_id, report):
+    job_repr = f"({analyzer_name}, job_id: #{job_id})"
     logger.info(f"STARTING set_report_and_cleanup for <-- {job_repr}.")
     job_object = None
 
@@ -94,15 +95,18 @@ def set_job_status(job_id, status, errors=None):
     job_object.save()
 
 
-def set_failed_analyzer(analyzer_obj, job_id, err_msg):
+def set_failed_analyzer(analyzer_name, job_id, err_msg):
     logger.warning(
-        f"({analyzer_obj.name}, job_id #{job_id}) -> set as FAILED. "
+        f"({analyzer_name}, job_id #{job_id}) -> set as FAILED. "
         f" Error message: {err_msg}"
     )
+    app_config = apps.get_app_config("analyzers_manager")
+    analyzer_obj = app_config.get_model(analyzer_name)
+
     report = Job.init_report(analyzer_obj, job_id)
     report.errors.append(err_msg)
     report.save()
-    set_report_and_cleanup(analyzer_obj, job_id, report)
+    set_report_and_cleanup(analyzer_name, job_id, report)
 
 
 def adjust_analyzer_config(

@@ -132,7 +132,7 @@ def start_analyzers(
         except (AnalyzerConfigurationException, AnalyzerRunException) as e:
             err_msg = f"({analyzer.name}, job_id #{job_id}) -> Error: {e}"
             logger.error(err_msg)
-            set_failed_analyzer(analyzer, job_id, err_msg)
+            set_failed_analyzer(analyzer.name, job_id, err_msg)
 
 
 def kill_running_analysis(job_id):

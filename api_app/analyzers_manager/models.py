@@ -3,7 +3,6 @@ from django.contrib.postgres import fields as postgres_fields
 from cache_memoize import cache_memoize
 
 from intel_owl.secrets import get_secret
-from api_app.models import Job
 
 
 class Analyzer(models.Model):
@@ -18,7 +17,7 @@ class Analyzer(models.Model):
     )
     HASH_CHOICES = (("md5", "md5"), ("sha256", "sha256"))
 
-    name = models.CharField(max_length=128, blank=False, null=False)
+    name = models.CharField(max_length=128, blank=False, null=False, unique=True)
     analyzer_type = models.CharField(
         max_length=50,
         choices=TYPE_CHOICES,
@@ -90,7 +89,7 @@ class AnalyzerReport(models.Model):
         Analyzer, related_name="reports", on_delete=models.CASCADE
     )
     job = models.ForeignKey(
-        Job, related_name="analyzer_reports", on_delete=models.CASCADE
+        "api_app.Job", related_name="analyzer_reports", on_delete=models.CASCADE
     )
 
     status = models.CharField(

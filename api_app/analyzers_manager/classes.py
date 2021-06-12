@@ -16,7 +16,8 @@ from api_app.exceptions import (
     AnalyzerRunException,
     AnalyzerConfigurationException,
 )
-from .utils import get_report_model_object
+from django.apps import apps
+from api_app.models import Job
 
 logger = logging.getLogger(__name__)
 
@@ -101,7 +102,9 @@ class BaseAnalyzerMixin(metaclass=ABCMeta):
         """
         try:
             self.before_run()
-            self.report = get_report_model_object()
+            app_config = apps.get_app_config("analyzers_manager")
+            analyzer_obj = app_config.get_model(self.analyzer_name)
+            self.report = Job.init_report(analyzer_obj, self.__job_id)
             result = self.run()
             result = self._validate_result(result)
             self.report.report = result

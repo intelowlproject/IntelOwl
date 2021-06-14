@@ -19,7 +19,7 @@ google>=3.0.0
 google-cloud-webrisk==1.2.0
 maxminddb==2.0.3
 mwdblib==3.4.0
-oletools==0.56.2
+oletools==0.60
 OTXv2==1.5.12
 peepdf-fork==0.4.3
 pdfid==1.0.4
@@ -35,7 +35,7 @@ PySocks==1.7.1
 python-magic==0.4.22
 quark-engine==21.6.1
 requests==2.25.1
-speakeasy-emulator==1.5.2
+speakeasy-emulator==1.5.3
 uWSGI==2.0.19.1
 yara-python==4.1.0
 

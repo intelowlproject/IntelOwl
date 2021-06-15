@@ -131,7 +131,7 @@
   "Cuckoo_Scan": {
     "type": "file",
     "disabled": false,
-    "decription": "scan a file on a Cuckoo instance",
+    "description": "scan a file on a Cuckoo instance",
     "requires_configuration": true,
     "python_module": "cuckoo_scan.CuckooAnalysis",
     "additional_config_params": {
@@ -206,7 +206,7 @@
       "application/xml",
       "application/zip"
     ],
-    "decription": "static generic document analysis (Oletools)",
+    "description": "static generic document analysis (Oletools)",
     "python_module": "doc_info.DocInfo",
     "soft_time_limit": 30,
     "queue": "local"
@@ -229,7 +229,7 @@
       "text/xml",
       "application/xml"
     ],
-    "decription": "static document analysis with new features to analyze XLM macros, encrypted macros and more",
+    "description": "static document analysis with new features to analyze XLM macros, encrypted macros and more",
     "python_module": "doc_info.DocInfo",
     "additional_config_params": {
       "experimental": true
@@ -689,7 +689,7 @@
     "type": "file",
     "external_service": true,
     "run_hash": true,
-    "decsription": "check file hash on OTX Alienvault",
+    "description": "check file hash on OTX Alienvault",
     "requires_configuration": true,
     "python_module": "otx.OTX",
     "additional_config_params": {
@@ -1460,7 +1460,7 @@
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       "application/zip"
     ],
-    "decription": "Xlm macro deobfuscator",
+    "description": "Xlm macro deobfuscator",
     "python_module": "xlm_macro_deobfuscator.XlmMacroDeobfuscator",
     "additional_config_params": {
       "passwords_to_check": [

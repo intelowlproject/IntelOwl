@@ -15,7 +15,7 @@ RUN useradd -ms /bin/bash static_analyzers-user
 
 # Install capa
 WORKDIR ${PROJECT_PATH}
-RUN pip3 install flare-capa==1.6.3 \
+RUN pip3 install --no-cache-dir flare-capa==1.6.3 \
     && git clone --depth 1 https://github.com/fireeye/capa-rules.git
 
 # Install FLOSS nightly binary
@@ -31,7 +31,7 @@ RUN cd peframe && rm -rf .git && pip3 install -r requirements.txt --no-cache-dir
     && rm -rf ./peframe
 
 # Install stringsifter
-RUN pip3 install stringsifter==2.20201202
+RUN pip3 install --no-cache-dir stringsifter==2.20201202
 
 # Install and build Manalyze
 RUN git clone https://github.com/JusticeRage/Manalyze.git \

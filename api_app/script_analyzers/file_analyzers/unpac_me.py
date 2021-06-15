@@ -99,4 +99,8 @@ class UnpacMe(FileAnalyzer):
 
     def _get_report(self, unpac_me_id) -> Dict:
         response = self._req_with_checks(f"{self.private}/results/{unpac_me_id}")
-        return response.json()
+        result = response.json()
+        analysis_id = result.get("id", "")
+        if analysis_id:
+            result["permalink"] = f"https://www.unpac.me/results/{analysis_id}"
+        return result

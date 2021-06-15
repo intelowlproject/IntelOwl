@@ -1,4 +1,4 @@
-FROM python:3.8.4-slim
+FROM python:3.8-slim
 
 ENV PROJECT_PATH /opt/deploy
 ENV LOG_PATH /var/log/intel_owl/static_analyzers
@@ -13,11 +13,10 @@ RUN apt-get update \
 # Add a new low-privileged user
 RUN useradd -ms /bin/bash static_analyzers-user
 
-# Install capa standalone binary
+# Install capa
 WORKDIR ${PROJECT_PATH}
-RUN wget -q -O capa-v1.1.0-linux https://github.com/fireeye/capa/releases/download/v1.1.0/capa-linux \
-    && chmod +x capa-v1.1.0-linux \
-    && ln -s ${PROJECT_PATH}/capa-v1.1.0-linux /usr/local/bin/capa
+RUN pip3 install flare-capa==1.6.3 \
+    && git clone --depth 1 https://github.com/fireeye/capa-rules.git
 
 # Install FLOSS nightly binary
 RUN wget -q -O floss-linux https://s3.amazonaws.com/build-artifacts.floss.flare.fireeye.com/travis/linux/dist/floss \

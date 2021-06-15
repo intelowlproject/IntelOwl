@@ -1,6 +1,9 @@
 # Changelog
 
 [**Upgrade Guide**](https://intelowl.readthedocs.io/en/latest/Installation.html#update-to-the-most-recent-version)
+## [v2.4.1](https://github.com/intelowlproject/IntelOwl/releases/tag/v2.4.1)
+A lot of different fixes, tweaks and dependencies upgrades. Also the documentation was updated
+
 ## [v2.4.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v2.4.0)
 
 We welcome new GSoC students ([Sarthak Khattar](https://twitter.com/Mr_Momo07) and [Shubham Pandey](https://twitter.com/imshubham31)) in the Organization!

@@ -4,7 +4,10 @@
 import subprocess
 import json
 import logging
+
 from shutil import which
+from urllib.parse import urlparse
+from ipaddress import AddressValueError, IPv4Address
 
 from api_app.exceptions import AnalyzerRunException
 from api_app.script_analyzers import classes
@@ -21,6 +24,17 @@ class DNStwist(classes.ObservableAnalyzer):
         self._mxcheck = additional_config_params.get("mxcheck", False)
         self._tld = additional_config_params.get("tld", False)
         self._tld_dict = additional_config_params.get("tld_dict", "abused_tlds.dict")
+        self.domain = self.observable_name
+        if self.observable_classification == "url":
+            self.domain = urlparse(self.observable_name).hostname
+            try:
+                IPv4Address(self.domain)
+            except AddressValueError:
+                pass
+            else:
+                raise AnalyzerRunException(
+                    "URL with an IP address instead of a domain cannot be analyzed"
+                )
 
     def run(self):
         if not which(self.command):
@@ -41,7 +55,7 @@ class DNStwist(classes.ObservableAnalyzer):
             final_report["tld"] = True
             args.append(self.dictionary_base_path + self._tld_dict)
 
-        args.append(self.observable_name)
+        args.append(self.domain)
 
         process = subprocess.Popen(
             args,
@@ -56,9 +70,10 @@ class DNStwist(classes.ObservableAnalyzer):
         dns_str = dns_report[0]
 
         try:
-            data = json.loads(dns_str)
-            final_report["data"] = data
+            if dns_str:
+                data = json.loads(dns_str)
+                final_report["data"] = data
         except ValueError as e:
-            raise AnalyzerRunException(e)
+            raise AnalyzerRunException(f"dns_str: {dns_str}. Error: {e}")
 
         return final_report

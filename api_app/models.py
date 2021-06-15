@@ -5,7 +5,7 @@ from os import remove, path
 
 from django.db import models
 from django.db.models.signals import pre_delete
-from django.contrib.postgres import fields as postgres_fields
+from django.contrib.postgres import fields as pg_fields
 from django.utils import timezone
 from django.dispatch import receiver
 
@@ -57,26 +57,24 @@ class Job(models.Model):
     status = models.CharField(
         max_length=32, blank=False, choices=STATUS, default="pending"
     )
-    analyzers_requested = postgres_fields.ArrayField(
+    analyzers_requested = pg_fields.ArrayField(
         models.CharField(max_length=128), blank=True, default=list
     )
     run_all_available_analyzers = models.BooleanField(blank=False, default=False)
-    analyzers_to_execute = postgres_fields.ArrayField(
+    analyzers_to_execute = pg_fields.ArrayField(
         models.CharField(max_length=128), blank=True, default=list
     )
-    analysis_reports = postgres_fields.JSONField(default=list, null=True, blank=True)
+    analysis_reports = models.JSONField(default=list, null=True, blank=True)
     received_request_time = models.DateTimeField(auto_now_add=True)
     finished_analysis_time = models.DateTimeField(blank=True, null=True)
     force_privacy = models.BooleanField(blank=False, default=False)
     disable_external_analyzers = models.BooleanField(blank=False, default=False)
-    errors = postgres_fields.ArrayField(
+    errors = pg_fields.ArrayField(
         models.CharField(max_length=900), blank=True, default=list, null=True
     )
     file = models.FileField(blank=True, upload_to=file_directory_path)
     tags = models.ManyToManyField(Tag, related_name="jobs", blank=True)
-    runtime_configuration = postgres_fields.JSONField(
-        default=dict, null=True, blank=True
-    )
+    runtime_configuration = models.JSONField(default=dict, null=True, blank=True)
 
     @classmethod
     def object_by_job_id(cls, job_id, transaction=False):

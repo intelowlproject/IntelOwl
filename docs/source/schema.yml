@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
-  title: ''
-  version: 0.0.0
+  title: 'IntelOwl API specification'
+  version: 2.4.1
 paths:
   /api/ask_analysis_availability:
     get:

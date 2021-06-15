@@ -10,7 +10,7 @@ from intel_owl import secrets
 
 
 class SSAPINet(classes.ObservableAnalyzer):
-    base_url: str = "https://screenshotapi.net/api/v1/screenshot"
+    base_url: str = "https://shot.screenshotapi.net/screenshot"
 
     def set_config(self, additional_config_params):
         self.api_key_name = additional_config_params.get("api_key_name", "SSAPINET_KEY")

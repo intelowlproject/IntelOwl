@@ -6,6 +6,8 @@ import time
 import mwdblib
 import logging
 
+from intel_owl import secrets
+
 from api_app.exceptions import AnalyzerRunException
 from api_app.helpers import get_binary
 from api_app.script_analyzers.classes import FileAnalyzer
@@ -15,7 +17,8 @@ logger = logging.getLogger(__name__)
 
 class MWDB_Scan(FileAnalyzer):
     def set_config(self, additional_config_params):
-        self.api_key_name = additional_config_params.get("api_key_name", None)
+        self.api_key_name = additional_config_params.get("api_key_name", "MWDB_KEY")
+        self.__api_key = secrets.get_secret(self.api_key_name)
         self.upload_file = additional_config_params.get("upload_file", False)
         self.max_tries = additional_config_params.get("max_tries", 50)
         self.poll_distance = 5
@@ -24,12 +27,7 @@ class MWDB_Scan(FileAnalyzer):
         return "karton" in file_info.metakeys.keys()
 
     def run(self):
-        if not self.api_key_name:
-            raise AnalyzerRunException(
-                f"No API key retrieved with name: {self.api_key_name}"
-            )
-
-        mwdb = mwdblib.MWDB(api_key=self.api_key_name)
+        mwdb = mwdblib.MWDB(api_key=self.__api_key)
         binary = get_binary(self.job_id)
         query = str(hashlib.sha256(binary).hexdigest())
 
@@ -56,4 +54,5 @@ class MWDB_Scan(FileAnalyzer):
                     "if you want to upload and poll results. "
                 )
         result = {"data": file_info.data, "metakeys": file_info.metakeys}
+        result["permalink"] = f"https://mwdb.cert.pl/file/{query}"
         return result

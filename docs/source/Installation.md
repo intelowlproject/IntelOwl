@@ -34,7 +34,7 @@ cp env_file_integrations_template env_file_integrations
 
 # start the app
 cd ..
-python start.py prod up
+python3 start.py prod up
 
 # create a super user 
 docker exec -ti intelowl_uwsgi python3 manage.py createsuperuser
@@ -117,6 +117,7 @@ In the `env_file_app`, configure different variables as explained below.
 * `TRIAGE_KEY`: tria.ge API key([docs](https://tria.ge/docs/))
 * `WIGLE_KEY`: WiGLE API Key([docs](https://api.wigle.net/))
 * `XFORCE_KEY` & `XFORCE_PASSWORD`: IBM X-Force Exchange API ([docs](https://api.xforce.ibmcloud.com/doc/))
+* `MWDB_KEY`: API key for [MWDB](https://mwdb.cert.pl/)
 * `SSAPINET_KEY`: screenshotapi.net ([docs](https://screenshotapi.net/documentation))
 * `MALPEDIA_KEY`: MALPEDIA API KEY ([docs](https://malpedia.caad.fkie.fraunhofer.de/usage/api))
 
@@ -233,8 +234,20 @@ The CLI provides the primitives to correctly build, run or stop the containers f
 Now that you have completed different configurations, starting the containers is as simple as invoking:
 
 ```bash
-$ python start.py prod up
+$ python3 start.py prod up
 ```
+
+You can add the parameter `-d` to run the application in the background.
+
+### Stop
+To stop the application you have to:
+* if executed without `-d` parameter: press `CTRL+C` 
+* if executed with `-d` parameter: `python3 start.py prod down`
+
+### Cleanup of database and application
+This is a destructive operation but can be useful to start again the project from scratch
+
+`python3 start.py prod down -v`
 
 ## After Deployment
 
@@ -263,16 +276,16 @@ To update the project with the most recent available code you have to follow the
 ```bash
 $ cd <your_intel_owl_directory> # go into the project directory
 $ git pull # pull new changes
-$ python start.py prod stop # kill the currently running IntelOwl containers 
-$ python start.py prod up --build # restart the IntelOwl application
+$ python3 start.py prod stop # kill the currently running IntelOwl containers 
+$ python3 start.py prod up --build # restart the IntelOwl application
 ```
 
 ### Rebuilding the project/ Creating custom docker build
 If you make some code changes and you like to rebuild the project, follow these steps:
 
-1. `python start.py test build --tag=<your_tag> .` to build the new docker image.
+1. `python3 start.py test build --tag=<your_tag> .` to build the new docker image.
 2. Add this new image tag in the `docker/test.override.yml` file.
-3. Start the containers with `python start.py test up --build`.
+3. Start the containers with `python3 start.py test up --build`.
 
 ### Updating to >=2.0.0 from a 1.x.x version
 Users upgrading from previous versions need to manually move `env_file_app`, `env_file_postgres` and `env_file_integrations` files under the new `docker` directory.

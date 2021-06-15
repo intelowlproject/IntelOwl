@@ -75,7 +75,9 @@ def intercept_result(context, future: Future) -> None:
 
 
 # with this, we can make http calls to the endpoint: /capa
-shell2http.register_command(endpoint="capa", command_name="/usr/local/bin/capa")
+shell2http.register_command(
+    endpoint="capa", command_name="/usr/local/bin/capa -r /opt/deploy/capa-rules"
+)
 
 # with this, we can make http calls to the endpoint: /floss
 shell2http.register_command(

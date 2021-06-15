@@ -6,6 +6,7 @@ import os
 
 from django.test import TestCase
 from unittest import skipIf
+from unittest.mock import patch
 
 from api_app.script_analyzers.file_analyzers import yara_scan
 from api_app.script_analyzers.observable_analyzers import maxmind, talos, tor
@@ -13,6 +14,8 @@ from api_app.script_analyzers.observable_analyzers import maxmind, talos, tor
 from api_app import crons
 from api_app.helpers import get_analyzer_config
 from intel_owl import settings
+
+from .mock_utils import mock_connections, mocked_requests
 
 logger = logging.getLogger(__name__)
 # disable logging library for Continuous Integration
@@ -37,7 +40,8 @@ class CronTests(TestCase):
             db_file_path = maxmind.Maxmind.updater({}, db)
             self.assertTrue(os.path.exists(db_file_path))
 
-    def test_talos_updater(self):
+    @mock_connections(patch("requests.get", side_effect=mocked_requests))
+    def test_talos_updater(self, mock_get=None):
         db_file_path = talos.Talos.updater()
         self.assertTrue(os.path.exists(db_file_path))
 

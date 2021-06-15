@@ -14,6 +14,9 @@ from intel_owl import secrets
 class CIRCL_PDNS(classes.ObservableAnalyzer):
     def set_config(self, _):
         self.__credentials = secrets.get_secret("CIRCL_CREDENTIALS")
+        self.domain = self.observable_name
+        if self.observable_classification == "url":
+            self.domain = urlparse(self.observable_name).hostname
 
     def run(self):
         # You should save CIRCL credentials with this template: "<user>|<pwd>"
@@ -31,11 +34,13 @@ class CIRCL_PDNS(classes.ObservableAnalyzer):
         pwd = split_credentials[1]
         pdns = pypdns.PyPDNS(basic_auth=(user, pwd))
 
-        domain = self.observable_name
-        if self.observable_classification == "url":
-            domain = urlparse(self.observable_name).hostname
+        try:
+            result = pdns.query(self.domain, timeout=5)
+        except pypdns.errors.UnauthorizedError as e:
+            raise AnalyzerRunException(
+                f"Credentials are not valid: UnauthorizedError: {e}"
+            )
 
-        result = pdns.query(domain, timeout=5)
         for result_item in result:
             keys_to_decode = ["time_first", "time_last"]
             for key_to_decode in keys_to_decode:

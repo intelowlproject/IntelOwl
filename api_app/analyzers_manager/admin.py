@@ -1,11 +1,10 @@
 from django.contrib import admin
 
-from guardian.admin import GuardedModelAdmin
-
 from api_app.analyzers_manager.models import Analyzer, AnalyzerReport, Secret
 
 
-class AnalyzerAdminView(GuardedModelAdmin):
+@admin.register(Analyzer)
+class AnalyzerAdminView(admin.ModelAdmin):
     list_display = (
         "name",
         "analyzer_type",
@@ -17,7 +16,8 @@ class AnalyzerAdminView(GuardedModelAdmin):
     search_fields = ("name", "analyzer_type", "description", "disabled")
 
 
-class AnalyzerReportAdminView(GuardedModelAdmin):
+@admin.register(AnalyzerReport)
+class AnalyzerReportAdminView(admin.ModelAdmin):
     list_display = (
         "analyzer",
         "job",
@@ -30,7 +30,8 @@ class AnalyzerReportAdminView(GuardedModelAdmin):
     search_fields = ("analyzer", "job", "status")
 
 
-class SecretAdminView(GuardedModelAdmin):
+@admin.register(Secret)
+class SecretAdminView(admin.ModelAdmin):
     list_display = (
         "name",
         "env_variable_key",
@@ -40,8 +41,3 @@ class SecretAdminView(GuardedModelAdmin):
         "description",
     )
     search_fields = ("name", "description")
-
-
-admin.site.register(Analyzer, AnalyzerAdminView)
-admin.site.register(AnalyzerReport, AnalyzerReportAdminView)
-admin.site.register(Secret, SecretAdminView)

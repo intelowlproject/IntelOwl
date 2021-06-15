@@ -6,13 +6,13 @@ import logging
 from api_app import models, serializers, helpers
 from api_app.permissions import ExtendedObjectPermissions
 from .analyzers_manager import general
+from .analyzers_manager.models import Analyzer
 
 from wsgiref.util import FileWrapper
 
 from django.utils.decorators import method_decorator
 from django.http import HttpResponse
 from django.db.models import Q
-from django.apps import apps
 from rest_framework.response import Response
 from rest_framework import serializers as BaseSerializer
 from rest_framework import status, viewsets, mixins
@@ -325,8 +325,7 @@ def send_analysis_request(request):
 
             # we need to clean the list of requested analyzers,
             # ... based on configuration data
-            app_config = apps.get_app_config("analyzers_manager")
-            analyzers_config = app_config.get_models()
+            analyzers_queryset = Analyzer.objects.all()
             run_all_available_analyzers = serialized_data.get(
                 "run_all_available_analyzers", False
             )
@@ -341,7 +340,7 @@ def send_analysis_request(request):
                         {"error": "816"}, status=status.HTTP_400_BAD_REQUEST
                     )
                 # just pick all available analyzers
-                analyzers_requested = [analyzer.name for analyzer in analyzers_config]
+                analyzers_requested = [analyzer.name for analyzer in analyzers_queryset]
             cleaned_analyzer_list = helpers.filter_analyzers(
                 serialized_data,
                 analyzers_requested,

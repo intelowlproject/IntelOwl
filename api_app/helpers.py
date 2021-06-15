@@ -9,10 +9,10 @@ import hashlib
 from magic import from_buffer as magic_from_buffer
 
 from django.utils import timezone
-from django.apps import apps
 
 from .exceptions import NotRunnableAnalyzer
 from api_app import models
+from api_app.analyzers_manager.models import Analyzer
 
 logger = logging.getLogger(__name__)
 
@@ -53,8 +53,7 @@ def filter_analyzers(serialized_data, analyzers_requested, warnings, run_all=Fal
     cleaned_analyzer_list = []
     for analyzer in analyzers_requested:
         try:
-            app_config = apps.get_app_config("analyzers_manager")
-            analyzer_config = app_config.get_model(analyzer)
+            analyzer_config = Analyzer.objects.filter(name__iexact=analyzer)
 
             if serialized_data["is_sample"]:
                 if not analyzer_config.analyzer_type == "file":

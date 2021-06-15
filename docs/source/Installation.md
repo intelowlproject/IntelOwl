@@ -117,6 +117,7 @@ In the `env_file_app`, configure different variables as explained below.
 * `TRIAGE_KEY`: tria.ge API key([docs](https://tria.ge/docs/))
 * `WIGLE_KEY`: WiGLE API Key([docs](https://api.wigle.net/))
 * `XFORCE_KEY` & `XFORCE_PASSWORD`: IBM X-Force Exchange API ([docs](https://api.xforce.ibmcloud.com/doc/))
+* `MWDB_KEY`: API key for [MWDB](https://mwdb.cert.pl/)
 * `SSAPINET_KEY`: screenshotapi.net ([docs](https://screenshotapi.net/documentation))
 * `MALPEDIA_KEY`: MALPEDIA API KEY ([docs](https://malpedia.caad.fkie.fraunhofer.de/usage/api))
 

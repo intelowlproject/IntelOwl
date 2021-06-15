@@ -9,7 +9,9 @@ from intel_owl import secrets
 
 
 class HybridAnalysisGet(classes.ObservableAnalyzer):
-    base_url: str = "https://www.hybrid-analysis.com/api/v2/"
+    base_url: str = "https://www.hybrid-analysis.com"
+    api_url: str = f"{base_url}/api/v2/"
+    sample_url: str = f"{base_url}/sample"
 
     def set_config(self, additional_config_params):
         self.api_key_name = additional_config_params.get("api_key_name", "HA_KEY")
@@ -47,9 +49,20 @@ class HybridAnalysisGet(classes.ObservableAnalyzer):
             )
 
         try:
-            response = requests.post(self.base_url + uri, data=data, headers=headers)
+            response = requests.post(self.api_url + uri, data=data, headers=headers)
             response.raise_for_status()
         except requests.RequestException as e:
             raise AnalyzerRunException(e)
 
-        return response.json()
+        result = response.json()
+        # adding permalink to results
+        if isinstance(result, list):
+            for job in result:
+                sha256 = job.get("sha256", "")
+                job_id = job.get("job_id", "")
+                if sha256:
+                    job["permalink"] = f"{self.sample_url}/{sha256}"
+                    if job_id:
+                        job["permalink"] += f"/{job_id}"
+
+        return result

@@ -49,9 +49,7 @@ def my_sandbox(file, ql_os, ql_arch, shellcode=False, profile=None):
     args["rootfs"] = f"{BASE_PATH}/rootfs/{ql_arch}_{ql_os}"
     # Std output is done to block the emulated software to print to standard output
     try:
-        ql = Qiling(
-            [file], **args, output="default", console=False, stdout=StringBuffer()
-        )
+        ql = Qiling([file], **args, console=False, stdout=StringBuffer())
         try:
             ql.run()
         except Exception as e:

@@ -1,13 +1,11 @@
-FROM qilingframework/qiling:1.2.1
+FROM qilingframework/qiling:1.2.4
 
 ENV PROJECT_PATH /opt/deploy
 ENV LOG_PATH /var/log/intel_owl/qiling
-ENV USER  qiling-user
-# update and install packages
+ENV USER qiling-user
 
 # Add a new low-privileged user
 RUN useradd -r -s /sbin/login ${USER}
-
 
 # Build Flask REST API
 WORKDIR ${PROJECT_PATH}/qiling-flask

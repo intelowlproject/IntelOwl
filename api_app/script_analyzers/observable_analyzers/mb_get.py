@@ -9,6 +9,7 @@ from api_app.script_analyzers import classes
 
 class MB_GET(classes.ObservableAnalyzer):
     url: str = "https://mb-api.abuse.ch/api/v1/"
+    sample_url: str = "https://bazaar.abuse.ch/sample/"
 
     def run(self):
         if self.observable_classification != "hash":
@@ -22,4 +23,11 @@ class MB_GET(classes.ObservableAnalyzer):
         response = requests.post(self.url, data=post_data)
         response.raise_for_status()
 
-        return response.json()
+        result = response.json()
+        result_data = result.get("data", [])
+        if result_data and isinstance(result_data, list):
+            sha256 = result_data[0].get("sha256_hash", "")
+            if sha256:
+                result["permalink"] = f"{self.sample_url}{sha256}"
+
+        return result

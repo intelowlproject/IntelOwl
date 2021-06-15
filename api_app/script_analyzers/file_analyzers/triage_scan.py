@@ -5,7 +5,7 @@ import time
 import logging
 import requests
 
-from api_app.exceptions import AnalyzerRunException
+from api_app.exceptions import AnalyzerRunException, AnalyzerConfigurationException
 from api_app.helpers import get_binary
 from api_app.script_analyzers import classes
 from intel_owl import secrets
@@ -18,6 +18,7 @@ class TriageScanFile(classes.FileAnalyzer):
     # using public endpoint as the default url
     base_url: str = "https://api.tria.ge/v0/"
     private_url: str = "https://private.tria.ge/api/v0/"
+    report_url: str = "https://tria.ge/"
 
     def set_config(self, additional_config_params):
         self.endpoint = additional_config_params.get("endpoint", "public")
@@ -27,6 +28,11 @@ class TriageScanFile(classes.FileAnalyzer):
         self.api_key_name = additional_config_params.get("api_key_name", "TRIAGE_KEY")
         self.__api_key = secrets.get_secret(self.api_key_name)
         self.report_type = additional_config_params.get("report_type", "overview")
+        if self.report_type not in ["overview", "complete"]:
+            raise AnalyzerConfigurationException(
+                f"report_type must be 'overview' or 'complete' "
+                f"but it is '{self.report_type}'"
+            )
         self.max_tries = additional_config_params.get("max_tries", 200)
         self.poll_distance = 3
 
@@ -67,8 +73,7 @@ class TriageScanFile(classes.FileAnalyzer):
             self.base_url + f"samples/{sample_id}/events", headers=self.headers
         )
 
-        if self.report_type == "overview" or self.report_type == "complete":
-            final_report["overview"] = self.get_overview_report(sample_id)
+        final_report["overview"] = self.get_overview_report(sample_id)
 
         if self.report_type == "complete":
             final_report["static_report"] = self.get_static_report(sample_id)
@@ -78,6 +83,10 @@ class TriageScanFile(classes.FileAnalyzer):
                 status_code, task_report_json = self.get_task_report(sample_id, task)
                 if status_code == 200:
                     final_report["task_report"][f"{task}"] = task_report_json
+
+        analysis_id = final_report["overview"].get("sample", {}).get("id", "")
+        if analysis_id:
+            final_report["permalink"] = f"{self.report_url}{analysis_id}"
 
         return final_report
 

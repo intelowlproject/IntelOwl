@@ -54,4 +54,5 @@ class MWDB_Scan(FileAnalyzer):
                     "if you want to upload and poll results. "
                 )
         result = {"data": file_info.data, "metakeys": file_info.metakeys}
+        result["permalink"] = f"https://mwdb.cert.pl/file/{query}"
         return result

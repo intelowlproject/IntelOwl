@@ -203,9 +203,9 @@ class IPAnalyzersTests(
         ).start()
         self.assertEqual(report.get("success", False), True)
 
-    def test_honeydb_get(self, mock_get=None, mock_post=None):
+    def test_honeydb_all(self, mock_get=None, mock_post=None):
         report = honeydb.HoneyDB(
-            "HoneyDB_Get",
+            "HoneyDB",
             self.job_id,
             self.observable_name,
             self.observable_classification,
@@ -213,13 +213,13 @@ class IPAnalyzersTests(
         ).start()
         self.assertEqual(report.get("success", False), True)
 
-    def test_honeydb_scan_twitter(self, mock_get=None, mock_post=None):
+    def test_honeydb_single_analysis(self, mock_get=None, mock_post=None):
         report = honeydb.HoneyDB(
-            "HoneyDB_Scan_Twitter",
+            "HoneyDB_IPInfo",
             self.job_id,
             self.observable_name,
             self.observable_classification,
-            {},
+            {"honeydb_analysis": "ip_info"},
         ).start()
         self.assertEqual(report.get("success", False), True)
 

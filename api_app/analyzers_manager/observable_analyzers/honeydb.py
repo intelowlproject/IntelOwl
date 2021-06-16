@@ -4,7 +4,7 @@
 import requests
 import logging
 
-from api_app.exceptions import AnalyzerRunException
+from api_app.exceptions import AnalyzerConfigurationException
 from api_app.analyzers_manager import classes
 from intel_owl import secrets
 

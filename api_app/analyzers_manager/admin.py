@@ -11,7 +11,7 @@ class AnalyzerAdminView(admin.ModelAdmin):
         "disabled",
         "description",
         "python_module",
-        "config",
+        "additional_config_params",
     )
     search_fields = ("name", "analyzer_type", "description", "disabled")
 

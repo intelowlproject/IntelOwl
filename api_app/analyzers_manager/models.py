@@ -25,7 +25,6 @@ class Analyzer(models.Model):
     disabled = models.BooleanField(default=False, blank=False)
     description = models.TextField()
     python_module = models.CharField(max_length=128, blank=False, null=False)
-    config = models.JSONField(default=dict, blank=False, null=False)
     supported_filetypes = postgres_fields.ArrayField(
         models.CharField(default=list, max_length=50, blank=True, null=True)
     )
@@ -47,6 +46,7 @@ class Analyzer(models.Model):
     external_service = models.BooleanField(default=False, blank=True, null=True)
     queue = models.CharField(max_length=50, choices=QUEUE_CHOICES, default="default")
     soft_time_limit = models.IntegerField(default=300)
+    additional_config_params = models.JSONField(default=dict, blank=True, null=True)
 
     def __str__(self):
         return self.name

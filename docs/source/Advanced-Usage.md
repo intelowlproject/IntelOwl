@@ -162,6 +162,8 @@ List of some of the analyzers with optional configuration:
      Refer to the [docs](https://screenshotapi.net/documentation) for a reference to what other parameters are and their default values.
 * `FireHol_IPList`:
   * `list_names`: Add [FireHol's IPList](https://iplists.firehol.org/) names as comma separated values in `list_names` array.
+* `Honey_DB`:
+  * `honeydb_analysis`(default `all`): choose which endpoint to query from the HoneyDB service (options are `scan_twitter`, `ip_query`, `ip_history`, `internet_scanner`, `ip_info`)
 
 There are two ways to do this:
 

@@ -17,36 +17,36 @@ class Analyzer(models.Model):
     )
     HASH_CHOICES = (("md5", "md5"), ("sha256", "sha256"))
 
-    name = models.CharField(max_length=128, blank=False, null=False, unique=True)
+    name = models.CharField(max_length=128, blank=False, unique=True)
     analyzer_type = models.CharField(
         max_length=50,
         choices=TYPE_CHOICES,
+        blank=False,
     )
-    disabled = models.BooleanField(default=False, blank=False)
-    description = models.TextField()
-    python_module = models.CharField(max_length=128, blank=False, null=False)
+    disabled = models.BooleanField(default=False)
+    description = models.TextField(blank=True)
+    python_module = models.CharField(max_length=128, blank=False)
     supported_filetypes = postgres_fields.ArrayField(
-        models.CharField(default=list, max_length=50, blank=True, null=True)
+        models.CharField(default=list, max_length=50, blank=True)
     )
     not_supported_filetypes = postgres_fields.ArrayField(
-        models.CharField(default=list, max_length=50, blank=True, null=True)
+        models.CharField(default=list, max_length=50, blank=True)
     )
-    run_hash = models.BooleanField(default=False, blank=True, null=True)
+    run_hash = models.BooleanField(default=False)
     run_hash_type = models.CharField(
         max_length=50,
         blank=True,
-        null=True,
         choices=HASH_CHOICES,
         default="md5",
     )
     observable_supported = postgres_fields.ArrayField(
-        models.CharField(default=list, max_length=50, blank=True, null=True)
+        models.CharField(default=list, max_length=50, blank=True)
     )
-    leaks_info = models.BooleanField(default=False, blank=True, null=True)
-    external_service = models.BooleanField(default=False, blank=True, null=True)
+    leaks_info = models.BooleanField(default=False)
+    external_service = models.BooleanField(default=False)
     queue = models.CharField(max_length=50, choices=QUEUE_CHOICES, default="default")
-    soft_time_limit = models.IntegerField(default=300)
-    additional_config_params = models.JSONField(default=dict, blank=True, null=True)
+    soft_time_limit = models.PositiveIntegerField(default=300)
+    additional_config_params = models.JSONField(default=dict, blank=True)
 
     def __str__(self):
         return self.name
@@ -98,8 +98,9 @@ class AnalyzerReport(models.Model):
     status = models.CharField(
         max_length=50,
         choices=STATUS_CHOICES,
+        blank=False,
     )
-    report = models.JSONField(default=dict, blank=False, null=False)
+    report = models.JSONField(default=dict, blank=False)
     errors = postgres_fields.ArrayField(
         models.CharField(max_length=512, blank=True, default=list)
     )
@@ -110,14 +111,14 @@ class AnalyzerReport(models.Model):
 class Secret(models.Model):
     CHOICES = (("str", "str"), ("int", "int"), ("bool", "bool"), ("float", "float"))
 
-    name = models.CharField(max_length=50, blank=False, null=False, unique=True)
+    name = models.CharField(max_length=50, blank=False, unique=True)
     env_variable_key = models.CharField(max_length=50)
     datatype = models.CharField(
         max_length=8,
         choices=CHOICES,
     )
-    required = models.BooleanField(blank=False, default=True)
-    default = models.CharField(max_length=50, null=True)
+    required = models.BooleanField(default=True)
+    default = models.CharField(max_length=50, blank=True)
     description = models.TextField()
 
     analyzer = models.ForeignKey(

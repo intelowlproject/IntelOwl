@@ -1,9 +1,9 @@
 from django.urls import include, path
 from rest_framework import routers
-from views import AnalyzerViewSet
+from views import AnalyzerReportViewSet
 
 router = routers.DefaultRouter(trailing_slash=False)
-router.register(r"analyzer", AnalyzerViewSet)
+router.register(r"analyzer", AnalyzerReportViewSet)
 
 urlpatterns = [
     # Viewsets

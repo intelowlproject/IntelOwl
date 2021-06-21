@@ -1,12 +1,24 @@
 from rest_framework import serializers as rfs
-from api_app.analyzers_manager.models import Analyzer
+from api_app.analyzers_manager.models import AnalyzerReport
 
 
-class AnalyzerSerializer(rfs.ModelSerializer):
+class AnalyzerReportSerializer(rfs.ModelSerializer):
     class Meta:
-        model = Analyzer
+        model = AnalyzerReport
+        fields = "__all__"
 
-    verification = rfs.SerializerMethodField()
 
-    def get_verification(self, obj: Analyzer):
-        return obj.verify_secrets()
+class AnalyzerConfigSerializer(rfs.Serializer):
+    name = rfs.CharField(required=True)
+    type_ = rfs.CharField(required=True)
+    python_module = rfs.CharField(required=True)
+    description = rfs.CharField(required=True)
+    disabled = rfs.BooleanField(required=True)
+    secrets = rfs.JSONField(required=True)
+    config = rfs.JSONField(required=True)
+
+    def validate_secrets(self, secrets):
+        pass
+
+    def validate_config(self, config):
+        pass

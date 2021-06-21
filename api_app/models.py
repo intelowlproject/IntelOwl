@@ -95,9 +95,9 @@ class Job(models.Model):
             return f'Job("{self.file_name}")'
         return f'Job("{self.observable_name}")'
 
-    def init_report(self, analyzer_, job_id):
+    def init_report(self, name, job_id):
         report_obj = AnalyzerReport(
-            analyzer=analyzer_,
+            analyzer_name=name,
             job=self.object_by_job_id(job_id),
             report={},
             errors=[],

@@ -1,100 +1,56 @@
 import json
 
+EXTRA_KEYS = [
+    "run_hash",
+    "run_hash_type",
+    "supported_filetypes",
+    "not_supported_filetypes",
+    "observable_supported",
+]
+
 
 def main():
     file_path = "analyzer_config.json"
     with open(file_path, "r") as f:
-        config = json.load(f)
+        analyzer_configs = json.load(f)
 
     new_config = {}
-    for analyzer in config:
-        new_config[analyzer] = {}
-        new_config[analyzer]["type"] = config[analyzer]["type"]
-        new_config[analyzer]["python_module"] = config[analyzer]["python_module"]
+    for name, config in analyzer_configs.items():
+        # Storing general info
+        tmp_config = {
+            "type": config["type"],
+            "python_module": config["python_module"],
+            "description": config.get("description", ""),
+            "disabled": config.get("disabled", False),
+            "requires_configuration": config.get("requires_configuration", False),
+            "external_service": config.get("external_service", False),
+            "leaks_info": config.get("leaks_info", False),
+        }
 
-        if "requires_configuration" in config[analyzer]:
-            new_config[analyzer]["requires_configuration"] = config[analyzer][
-                "requires_configuration"
-            ]
+        # Storing type-specific info
+        for key in EXTRA_KEYS:
+            if key in config:
+                tmp_config[key] = config[key]
 
-        if "leaks_info" in config[analyzer]:
-            new_config[analyzer]["leaks_info"] = config[analyzer]["leaks_info"]
+        # Storing general config info
+        tmp_config["config"] = {
+            "soft_time_limit": config.get("soft_time_limit", 300),
+            "queue": config.get("queue", "default"),
+        }
 
-        if "run_hash" in config[analyzer]:
-            new_config[analyzer]["run_hash"] = config[analyzer]["run_hash"]
+        # Storing analyzer-specific config info
+        tmp_config["secrets"] = {}
+        if "additional_config_params" in config.keys():
+            for s_name, s_value in config["additional_config_params"].items():
+                tmp_config["secrets"][s_name] = {
+                    "value": s_value,
+                    "type": "",
+                    "required": True,
+                    "default": None,
+                    "description": "",
+                }
 
-        if "run_hash_type" in config[analyzer]:
-            new_config[analyzer]["run_hash_type"] = config[analyzer]["run_hash_type"]
-
-        if "disabled" in config[analyzer]:
-            new_config[analyzer]["disabled"] = config[analyzer]["disabled"]
-
-        if "external_service" in config[analyzer]:
-            new_config[analyzer]["external_service"] = config[analyzer][
-                "external_service"
-            ]
-
-        if "supported_filetypes" in config[analyzer]:
-            new_config[analyzer]["supported_filetypes"] = config[analyzer][
-                "supported_filetypes"
-            ]
-
-        if "not_supported_filetypes" in config[analyzer]:
-            new_config[analyzer]["not_supported_filetypes"] = config[analyzer][
-                "not_supported_filetypes"
-            ]
-
-        if "observable_supported" in config[analyzer]:
-            new_config[analyzer]["observable_supported"] = config[analyzer][
-                "observable_supported"
-            ]
-
-        if config[analyzer].get("description", None):
-            new_config[analyzer]["description"] = config[analyzer]["description"]
-
-        new_config[analyzer]["config"] = {}
-        if config[analyzer].get("soft_time_limit", None):
-            new_config[analyzer]["config"]["soft_time_limit"] = config[analyzer][
-                "soft_time_limit"
-            ]
-
-        if config[analyzer].get("queue", None) or config[analyzer].get(
-            "additional_config_params", {}
-        ).get("queue", None):
-
-            if config[analyzer]["queue"]:
-                new_config[analyzer]["config"]["queue"] = config[analyzer]["queue"]
-            else:
-                new_config[analyzer]["config"]["queue"] = config[analyzer][
-                    "additional_config_params"
-                ]["queue"]
-
-        new_config[analyzer]["secrets"] = {}
-        if config[analyzer].get("additional_config_params", None) and config[analyzer][
-            "additional_config_params"
-        ].get("api_key_name", None):
-            new_config[analyzer]["secrets"]["api_key"] = {
-                "secret_name": config[analyzer]["additional_config_params"][
-                    "api_key_name"
-                ],
-                "required": True,
-                "default": None,
-            }
-
-        new_config[analyzer]["additional_config_params"] = config[analyzer].get(
-            "additional_config_params", {}
-        )
-
-        if "api_key_name" in new_config[analyzer]["additional_config_params"]:
-            # Secrets shouldn't be in additional_config_params
-            # Some analyzers have multiple secrets. Do it manually.
-            del new_config[analyzer]["additional_config_params"]["api_key_name"]
-
-        if len(new_config[analyzer]["additional_config_params"].keys()) == 0:
-            del new_config[analyzer]["additional_config_params"]
-
-        if len(new_config[analyzer]["secrets"].keys()) == 0:
-            del new_config[analyzer]["secrets"]
+        new_config[name] = tmp_config
 
     with open("new_analyzer_config.json", "w") as f:
         json.dump(new_config, f, indent=4)

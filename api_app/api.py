@@ -6,7 +6,6 @@ import logging
 from api_app import models, serializers, helpers
 from api_app.permissions import ExtendedObjectPermissions
 from .analyzers_manager import general
-from .analyzers_manager.models import Analyzer
 
 from wsgiref.util import FileWrapper
 
@@ -325,7 +324,7 @@ def send_analysis_request(request):
 
             # we need to clean the list of requested analyzers,
             # ... based on configuration data
-            analyzers_queryset = Analyzer.objects.all()
+            analyzers_config = helpers.get_analyzer_config()
             run_all_available_analyzers = serialized_data.get(
                 "run_all_available_analyzers", False
             )
@@ -340,10 +339,13 @@ def send_analysis_request(request):
                         {"error": "816"}, status=status.HTTP_400_BAD_REQUEST
                     )
                 # just pick all available analyzers
-                analyzers_requested = [analyzer.name for analyzer in analyzers_queryset]
+                analyzers_requested = [
+                    analyzer_name for analyzer_name in analyzers_config
+                ]
             cleaned_analyzer_list = helpers.filter_analyzers(
                 serialized_data,
                 analyzers_requested,
+                analyzers_config,
                 warnings,
                 run_all=run_all_available_analyzers,
             )
@@ -374,6 +376,7 @@ def send_analysis_request(request):
         if not test:
             general.start_analyzers(
                 params["analyzers_to_execute"],
+                analyzers_config,
                 serialized_data["runtime_configuration"],
                 job_id,
                 md5,

@@ -27,6 +27,7 @@ logger = logging.getLogger(__name__)
 
 def start_analyzers(
     analyzers_to_execute,
+    analyzers_config,
     runtime_configuration,
     job_id,
     md5,
@@ -39,14 +40,20 @@ def start_analyzers(
         observable_name, observable_classification = get_observable_data(job_id)
 
     for analyzer in analyzers_to_execute:
+        ac = analyzers_config[analyzer]
         try:
-            module = analyzer.python_module
+            module = ac.get("python_module", None)
             if not module:
                 raise AnalyzerConfigurationException(
-                    f"no python_module available in config for {analyzer.name} analyzer?!"  # noqa: E501
+                    f"no python_module available in config for {analyzer} analyzer?!"  # noqa: E501
                 )
 
-            additional_config_params = analyzer.config
+            # Get analyzer config and secrets
+            config_params = ac.get("config", {})
+            secret_params = ac.get("secrets", {})
+            additional_config_params = {}
+            for name, conf in secret_params.items():
+                additional_config_params[name] = conf["value"]
 
             adjust_analyzer_config(
                 runtime_configuration,
@@ -56,7 +63,7 @@ def start_analyzers(
                 md5,
             )
             # get celery queue
-            queue = analyzer.queue
+            queue = config_params.get("queue", "default")
             if queue not in CELERY_QUEUES:
                 logger.error(
                     f"Analyzer {analyzers_to_execute} has a wrong queue."
@@ -67,10 +74,10 @@ def start_analyzers(
 
             if is_sample:
                 # check if we should run the hash instead of the binary
-                run_hash = analyzer.run_hash
+                run_hash = ac.get("run_hash", False)
                 if run_hash:
                     # check which kind of hash the analyzer needs
-                    run_hash_type = analyzer.run_hash_type
+                    run_hash_type = ac.get("run_hash_type", "md5")
                     if run_hash_type == "md5":
                         hash_value = md5
                     elif run_hash_type == "sha256":
@@ -84,7 +91,7 @@ def start_analyzers(
                     # run the analyzer with the hash
                     args = [
                         f"observable_analyzers.{module}",
-                        analyzer.name,
+                        analyzer,
                         job_id,
                         hash_value,
                         "hash",
@@ -94,7 +101,7 @@ def start_analyzers(
                     # run the analyzer with the binary
                     args = [
                         f"file_analyzers.{module}",
-                        analyzer.name,
+                        analyzer,
                         job_id,
                         file_path,
                         filename,
@@ -105,14 +112,14 @@ def start_analyzers(
                 # observables analyzer case
                 args = [
                     f"observable_analyzers.{module}",
-                    analyzer.name,
+                    analyzer,
                     job_id,
                     observable_name,
                     observable_classification,
                     additional_config_params,
                 ]
             # run analyzer with a celery task asynchronously
-            stl = analyzer.soft_time_limit
+            stl = config_params.get("soft_time_limit", 300)
             t_id = uuid()
             celery_app.send_task(
                 "run_analyzer",
@@ -130,9 +137,9 @@ def start_analyzers(
             cache.set(job_id, task_ids)
 
         except (AnalyzerConfigurationException, AnalyzerRunException) as e:
-            err_msg = f"({analyzer.name}, job_id #{job_id}) -> Error: {e}"
+            err_msg = f"({analyzer}, job_id #{job_id}) -> Error: {e}"
             logger.error(err_msg)
-            set_failed_analyzer(analyzer.name, job_id, err_msg)
+            set_failed_analyzer(analyzer, job_id, err_msg)
 
 
 def kill_running_analysis(job_id):

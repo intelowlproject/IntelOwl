@@ -6,7 +6,6 @@ import logging
 from django.db import transaction
 
 from api_app.models import Job
-from api_app.analyzers_manager.models import Analyzer
 from api_app.helpers import get_now
 from api_app.exceptions import AlreadyFailedJobException
 
@@ -100,9 +99,8 @@ def set_failed_analyzer(analyzer_name, job_id, err_msg):
         f"({analyzer_name}, job_id #{job_id}) -> set as FAILED. "
         f" Error message: {err_msg}"
     )
-    analyzer_obj = Analyzer.objects.filter(name__iexact=analyzer_name)
 
-    report = Job.init_report(analyzer_obj, job_id)
+    report = Job.init_report(analyzer_name, job_id)
     report.errors.append(err_msg)
     report.save()
     set_report_and_cleanup(analyzer_name, job_id, report)

@@ -17,7 +17,6 @@ from api_app.exceptions import (
     AnalyzerConfigurationException,
 )
 from api_app.models import Job
-from api_app.analyzers_manager.models import Analyzer
 
 logger = logging.getLogger(__name__)
 
@@ -102,8 +101,7 @@ class BaseAnalyzerMixin(metaclass=ABCMeta):
         """
         try:
             self.before_run()
-            analyzer_obj = Analyzer.objects.filter(name__iexact=self.analyzer_name)
-            self.report = Job.init_report(analyzer_obj, self.__job_id)
+            self.report = Job.init_report(self.analyzer_name, self.__job_id)
             result = self.run()
             result = self._validate_result(result)
             self.report.report = result

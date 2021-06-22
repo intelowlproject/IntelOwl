@@ -1,7 +1,14 @@
 from rest_framework import serializers
+from django.conf import settings
+
+import os
+import json
+import logging
 
 from intel_owl import secrets as secrets_store
 
+
+logger = logging.getLogger(__name__)
 
 DATA_TYPE_MAPPING = {
     "number": (
@@ -32,8 +39,7 @@ class SecretSerializer(serializers.Serializer):
         ("bool", "bool"),
     )
 
-    key_name = None
-
+    key_name = serializers.CharField(max_length=128)
     secret_name = serializers.CharField(max_length=128)
     type = serializers.ChoiceField(choices=TYPE_CHOICES)
     required = serializers.BooleanField()
@@ -44,16 +50,12 @@ class SecretSerializer(serializers.Serializer):
         default, secret_type = data["default"], data["type"]
         if default is not None and type(default) is not type(secret_type):
             validation_error = {
-                self.key_name: {
+                data["key_name"]: {
                     "default": f"should be of type {secret_type}, got {type(default)}"
                 }
             }
             raise serializers.ValidationError(validation_error)
         return data
-
-    def to_internal_value(self, data):
-        self.key_name = data[0]
-        return data[1]  # tuple (key_name, secret_dict)
 
 
 class ConnectorConfigSerializer(serializers.Serializer):
@@ -68,15 +70,40 @@ class ConnectorConfigSerializer(serializers.Serializer):
     secrets = serializers.JSONField()
     verification = serializers.SerializerMethodField()
 
+    @classmethod
+    def read_and_verify_config(cls):
+        config_path = os.path.join(
+            settings.BASE_DIR, "configuration", "connector_config.json"
+        )
+        with open(config_path) as f:
+            connector_config = json.load(f)
+            serializer_errors = {}
+            for key, config in connector_config.items():
+                serializer = cls(data=config)
+                if serializer.is_valid():
+                    connector_config[
+                        key
+                    ] = serializer.data  # mutate with processed config
+                else:
+                    serializer_errors[key] = serializer.errors
+
+            if bool(serializer_errors):  # returns False if empty
+                logger.error(f"connector config serializer failed: {serializer_errors}")
+                return False, {}
+            return True, connector_config
+
     def validate_secrets(self, secrets):
-        serializer = SecretSerializer(data=list(secrets.items()), many=True)
-        if serializer.is_valid(raise_exception=True):
-            return secrets
+        data = [
+            {"key_name": key, **secret_dict} for key, secret_dict in secrets.items()
+        ]  # list comprehension + spread operator
+        serializer = SecretSerializer(data=data, many=True)
+        serializer.is_valid(raise_exception=True)
+        return secrets
 
     def check_secrets(self, secrets):
         exceptions = {}
         for key_name, secret_dict in secrets.items():
-            if "required" in secret_dict and secret_dict["required"]:
+            if secret_dict.get("required", False):
                 # check if set and correct data type
                 secret_val = secrets_store.get_secret(secret_dict["secret_name"])
                 if not secret_val:

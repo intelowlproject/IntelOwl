@@ -48,6 +48,19 @@ def calculate_mimetype(file_buffer, file_name):
     return calculated_mimetype
 
 
+def map_data_type(secret_type):
+    mapping_dict = {
+        "number": (
+            int,
+            float,
+        ),
+        "string": str,
+        "bool": bool,
+    }
+
+    return mapping_dict
+
+
 def filter_analyzers(
     serialized_data, analyzers_requested, analyzers_config, warnings, run_all=False
 ):

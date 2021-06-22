@@ -26,3 +26,6 @@ class AnalyzerReport(models.Model):
     )
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
+
+    def __str__(self):
+        return f"Analyzer({self.connector})-{self.job}"

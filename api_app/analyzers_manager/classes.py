@@ -102,6 +102,7 @@ class BaseAnalyzerMixin(metaclass=ABCMeta):
         """
         try:
             self.before_run()
+            self.report = Job.init_report(self.analyzer_name, self.job_id)
             result = self.run()
             result = self._validate_result(result)
             self.report.report = result
@@ -145,7 +146,6 @@ class BaseAnalyzerMixin(metaclass=ABCMeta):
     def __init__(self, analyzer_name, job_id, additional_config_params):
         self.analyzer_name = analyzer_name
         self.__job_id = job_id
-        self.report = Job.init_report(self.analyzer_name, self.__job_id)
         self.set_config(additional_config_params)  # lgtm [py/init-calls-subclass]
 
     def __repr__(self):

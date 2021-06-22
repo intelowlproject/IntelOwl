@@ -13,6 +13,49 @@ DATA_TYPE_MAPPING = {
 }
 
 
+class BaseField(serializers.Field):
+    def to_representation(self, value):
+        return value
+
+    def to_internal_value(self, data):
+        return data
+
+
+class SecretSerializer(serializers.Serializer):
+    """
+    validation serializer for `secrets` of ConnectorConfigSerializer
+    """
+
+    TYPE_CHOICES = (
+        ("number", "number"),
+        ("string", "string"),
+        ("bool", "bool"),
+    )
+
+    key_name = None
+
+    secret_name = serializers.CharField(max_length=128)
+    type = serializers.ChoiceField(choices=TYPE_CHOICES)
+    required = serializers.BooleanField()
+    default = BaseField(allow_null=True, required=True)
+    description = serializers.CharField(max_length=512)
+
+    def validate(self, data):
+        default, secret_type = data["default"], data["type"]
+        if default is not None and type(default) is not type(secret_type):
+            validation_error = {
+                self.key_name: {
+                    "default": f"should be of type {secret_type}, got {type(default)}"
+                }
+            }
+            raise serializers.ValidationError(validation_error)
+        return data
+
+    def to_internal_value(self, data):
+        self.key_name = data[0]
+        return data[1]  # tuple (key_name, secret_dict)
+
+
 class ConnectorConfigSerializer(serializers.Serializer):
     """
     serializer for connectors from connector_config.json.
@@ -24,6 +67,11 @@ class ConnectorConfigSerializer(serializers.Serializer):
     config = serializers.JSONField()
     secrets = serializers.JSONField()
     verification = serializers.SerializerMethodField()
+
+    def validate_secrets(self, secrets):
+        serializer = SecretSerializer(data=list(secrets.items()), many=True)
+        if serializer.is_valid(raise_exception=True):
+            return secrets
 
     def check_secrets(self, secrets):
         exceptions = {}

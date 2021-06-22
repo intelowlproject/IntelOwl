@@ -16,11 +16,7 @@ class ConnectorReport(models.Model):
     job = models.ForeignKey(
         "api_app.Job", related_name="connector_reports", on_delete=models.CASCADE
     )
-    status = models.CharField(
-        max_length=50,
-        choices=STATUS_CHOICES,
-        blank=False,
-    )
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES)
     report = models.JSONField(default=dict)
     errors = postgres_fields.ArrayField(
         models.CharField(max_length=512), default=list, blank=True

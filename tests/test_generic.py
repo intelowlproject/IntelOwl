@@ -12,7 +12,7 @@ from api_app.analyzers_manager.file_analyzers import yara_scan
 from api_app.analyzers_manager.observable_analyzers import maxmind, talos, tor
 
 from api_app import crons
-from api_app.helpers import get_analyzer_config
+from ..api_app.analyzers_manager.helpers import get_verified_analyzer_config
 from intel_owl import settings
 
 from .mock_utils import mock_connections, mocked_requests
@@ -57,5 +57,5 @@ class CronTests(TestCase):
 
 class ConfigTests(TestCase):
     def test_config(self):
-        config = get_analyzer_config()
+        config = get_verified_analyzer_config()
         self.assertNotEqual(config, {})

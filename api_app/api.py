@@ -6,6 +6,7 @@ import logging
 from api_app import models, serializers, helpers
 from api_app.permissions import ExtendedObjectPermissions
 from .analyzers_manager import general
+from .analyzers_manager.helpers import get_verified_analyzer_config
 
 from wsgiref.util import FileWrapper
 
@@ -324,7 +325,7 @@ def send_analysis_request(request):
 
             # we need to clean the list of requested analyzers,
             # ... based on configuration data
-            analyzers_config = helpers.get_analyzer_config()
+            analyzers_config = get_verified_analyzer_config()
             run_all_available_analyzers = serialized_data.get(
                 "run_all_available_analyzers", False
             )
@@ -422,7 +423,7 @@ can be useful if you want to choose the analyzers programmatically""",
 def get_analyzer_configs(request):
     try:
         logger.info(f"get_analyzer_configs received request from {str(request.user)}.")
-        ac = helpers.get_analyzer_config()
+        ac = get_verified_analyzer_config()
         return Response(ac, status=status.HTTP_200_OK)
     except Exception as e:
         logger.exception(

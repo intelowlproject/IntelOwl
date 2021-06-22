@@ -44,7 +44,7 @@ def main():
             for s_name, s_value in config["additional_config_params"].items():
                 tmp_config["secrets"][s_name] = {
                     "value": s_value,
-                    "type": "",
+                    "type": "string",
                     "required": True,
                     "default": None,
                     "description": "",

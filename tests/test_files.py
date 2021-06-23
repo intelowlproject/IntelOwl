@@ -122,7 +122,7 @@ class FileAnalyzersEXETests(TestCase):
         report = file_info.FileInfo(
             "File_Info", self.job_id, self.filepath, self.filename, self.md5, {}
         ).start()
-        self.assertEqual(report.get("success", False), True)
+        self.assertEqual(report.status, "success")
 
     @mock_connections(patch("requests.get", side_effect=mocked_docker_analyzer_get))
     @mock_connections(patch("requests.post", side_effect=mocked_docker_analyzer_post))
@@ -135,7 +135,7 @@ class FileAnalyzersEXETests(TestCase):
             self.md5,
             {"rank_strings": True},
         ).start()
-        self.assertEqual(report.get("success", False), True)
+        self.assertEqual(report.status, "success")
 
     @mock_connections(patch("requests.get", side_effect=mocked_docker_analyzer_get))
     @mock_connections(patch("requests.post", side_effect=mocked_docker_analyzer_post))
@@ -148,25 +148,25 @@ class FileAnalyzersEXETests(TestCase):
             self.md5,
             {},
         ).start()
-        self.assertEqual(report.get("success", False), True)
+        self.assertEqual(report.status, "success")
 
     def test_peinfo_exe(self):
         report = pe_info.PEInfo(
             "PE_Info", self.job_id, self.filepath, self.filename, self.md5, {}
         ).start()
-        self.assertEqual(report.get("success", False), True)
+        self.assertEqual(report.status, "success")
 
     def test_signatureinfo_exe(self):
         report = signature_info.SignatureInfo(
             "Signature_Info", self.job_id, self.filepath, self.filename, self.md5, {}
         ).start()
-        self.assertEqual(report.get("success", False), True)
+        self.assertEqual(report.status, "success")
 
     def test_speakeasy_exe(self):
         report = speakeasy_emulation.SpeakEasy(
             "Speakeasy", self.job_id, self.filepath, self.filename, self.md5, {}
         ).start()
-        self.assertEqual(report.get("success", False), True)
+        self.assertEqual(report.status, "success")
 
     @mock_connections(patch("requests.get", side_effect=mocked_docker_analyzer_get))
     @mock_connections(patch("requests.post", side_effect=mocked_docker_analyzer_post))
@@ -179,7 +179,7 @@ class FileAnalyzersEXETests(TestCase):
             self.md5,
             {"os": "windows", "arch": "x86"},
         ).start()
-        self.assertEqual(report.get("success", False), True)
+        self.assertEqual(report.status, "success")
 
     @mock_connections(patch("requests.get", side_effect=mocked_vt_get))
     @mock_connections(patch("requests.post", side_effect=mocked_vt_post))
@@ -193,7 +193,7 @@ class FileAnalyzersEXETests(TestCase):
             self.md5,
             additional_params,
         ).start()
-        self.assertEqual(report.get("success", False), True)
+        self.assertEqual(report.status, "success")
 
     @mock_connections(patch("requests.Session.get", side_effect=mocked_requests))
     @mock_connections(patch("requests.Session.post", side_effect=mocked_intezer))
@@ -213,7 +213,7 @@ class FileAnalyzersEXETests(TestCase):
             self.md5,
             additional_params,
         ).start()
-        self.assertEqual(report.get("success", False), True)
+        self.assertEqual(report.status, "success")
 
     @mock_connections(patch("requests.Session.get", side_effect=mocked_cuckoo_get))
     @mock_connections(patch("requests.Session.post", side_effect=mocked_requests))
@@ -227,7 +227,7 @@ class FileAnalyzersEXETests(TestCase):
             self.md5,
             additional_params,
         ).start()
-        self.assertEqual(report.get("success", False), True)
+        self.assertEqual(report.status, "success")
 
     @mock_connections(patch("requests.post", side_effect=mocked_requests))
     def test_malpedia_scan_exe(self, mock_get=None, mock_post=None):
@@ -239,7 +239,7 @@ class FileAnalyzersEXETests(TestCase):
             self.md5,
             {},
         ).start()
-        self.assertEqual(report.get("success", False), True)
+        self.assertEqual(report.status, "success")
 
     def test_yara_mcafee(self):
         additional_params = {
@@ -260,7 +260,7 @@ class FileAnalyzersEXETests(TestCase):
             self.md5,
             additional_params,
         ).start()
-        self.assertEqual(report.get("success", False), True)
+        self.assertEqual(report.status, "success")
 
     def test_yara_daily_ioc(self):
         additional_params = {
@@ -277,7 +277,7 @@ class FileAnalyzersEXETests(TestCase):
             self.md5,
             additional_params,
         ).start()
-        self.assertEqual(report.get("success", False), True)
+        self.assertEqual(report.status, "success")
 
     def test_yara_stratosphere(self):
         additional_params = {
@@ -294,7 +294,7 @@ class FileAnalyzersEXETests(TestCase):
             self.md5,
             additional_params,
         ).start()
-        self.assertEqual(report.get("success", False), True)
+        self.assertEqual(report.status, "success")
 
     def test_yara_inquest(self):
         additional_params = {
@@ -311,7 +311,7 @@ class FileAnalyzersEXETests(TestCase):
             self.md5,
             additional_params,
         ).start()
-        self.assertEqual(report.get("success", False), True)
+        self.assertEqual(report.status, "success")
 
     def test_yara_intezer(self):
         additional_params = {
@@ -327,7 +327,7 @@ class FileAnalyzersEXETests(TestCase):
             self.md5,
             additional_params,
         ).start()
-        self.assertEqual(report.get("success", False), True)
+        self.assertEqual(report.status, "success")
 
     def test_yara_reversinglabs(self):
         additional_params = {
@@ -342,7 +342,7 @@ class FileAnalyzersEXETests(TestCase):
             self.md5,
             additional_params,
         ).start()
-        self.assertEqual(report.get("success", False), True)
+        self.assertEqual(report.status, "success")
 
     def test_yara_samir(self):
         additional_params = {
@@ -358,7 +358,7 @@ class FileAnalyzersEXETests(TestCase):
             self.md5,
             additional_params,
         ).start()
-        self.assertEqual(report.get("success", False), True)
+        self.assertEqual(report.status, "success")
 
     def test_yara_fireeye(self):
         additional_params = {
@@ -375,7 +375,7 @@ class FileAnalyzersEXETests(TestCase):
             self.md5,
             additional_params,
         ).start()
-        self.assertEqual(report.get("success", False), True)
+        self.assertEqual(report.status, "success")
 
     def test_yara_florian(self):
         additional_params = {
@@ -391,7 +391,7 @@ class FileAnalyzersEXETests(TestCase):
             self.md5,
             additional_params,
         ).start()
-        self.assertEqual(report.get("success", False), True)
+        self.assertEqual(report.status, "success")
 
     def test_yara_community(self):
         additional_params = {
@@ -407,7 +407,7 @@ class FileAnalyzersEXETests(TestCase):
             self.md5,
             additional_params,
         ).start()
-        self.assertEqual(report.get("success", False), True)
+        self.assertEqual(report.status, "success")
 
     @mock_connections(patch("requests.get", side_effect=mocked_unpacme_get))
     @mock_connections(patch("requests.post", side_effect=mocked_unpacme_post))
@@ -420,7 +420,7 @@ class FileAnalyzersEXETests(TestCase):
             self.md5,
             {},
         ).start()
-        self.assertEqual(report.get("success", False), True)
+        self.assertEqual(report.status, "success")
 
     @mock_connections(patch("requests.get", side_effect=mocked_vt_get))
     @mock_connections(patch("requests.post", side_effect=mocked_vt_post))
@@ -434,7 +434,7 @@ class FileAnalyzersEXETests(TestCase):
             self.md5,
             additional_params,
         ).start()
-        self.assertEqual(report.get("success", False), True)
+        self.assertEqual(report.status, "success")
 
     @mock_connections(patch("requests.get", side_effect=mocked_requests))
     @mock_connections(patch("requests.post", side_effect=mocked_requests))
@@ -443,7 +443,7 @@ class FileAnalyzersEXETests(TestCase):
         report = vt3_get.VirusTotalv3(
             "VT_v3_Get_And_Scan", self.job_id, self.md5, "hash", additional_params
         ).start()
-        self.assertEqual(report.get("success", False), True)
+        self.assertEqual(report.status, "success")
 
     @mock_connections(patch("requests.get", side_effect=mocked_docker_analyzer_get))
     @mock_connections(patch("requests.post", side_effect=mocked_docker_analyzer_post))
@@ -457,7 +457,7 @@ class FileAnalyzersEXETests(TestCase):
             self.md5,
             additional_params,
         ).start()
-        self.assertEqual(report.get("success", False), True)
+        self.assertEqual(report.status, "success")
 
     @mock_connections(patch("requests.get", side_effect=mocked_docker_analyzer_get))
     @mock_connections(patch("requests.post", side_effect=mocked_docker_analyzer_post))
@@ -470,7 +470,7 @@ class FileAnalyzersEXETests(TestCase):
             self.md5,
             {},
         ).start()
-        self.assertEqual(report.get("success", False), True)
+        self.assertEqual(report.status, "success")
 
     @mock_connections(patch("requests.get", side_effect=mocked_triage_get))
     @mock_connections(patch("requests.post", side_effect=mocked_triage_post))
@@ -483,7 +483,7 @@ class FileAnalyzersEXETests(TestCase):
             self.md5,
             {},
         ).start()
-        self.assertEqual(report.get("success", False), True)
+        self.assertEqual(report.status, "success")
 
     @mock_connections(patch("requests.get", side_effect=mocked_docker_analyzer_get))
     @mock_connections(patch("requests.post", side_effect=mocked_docker_analyzer_post))
@@ -496,7 +496,7 @@ class FileAnalyzersEXETests(TestCase):
             self.md5,
             {},
         ).start()
-        self.assertEqual(report.get("success", False), True)
+        self.assertEqual(report.status, "success")
 
     @mock_connections(patch("requests.get", side_effect=mocked_docker_analyzer_get))
     @mock_connections(patch("requests.post", side_effect=mocked_docker_analyzer_post))
@@ -509,7 +509,7 @@ class FileAnalyzersEXETests(TestCase):
             self.md5,
             {},
         ).start()
-        self.assertEqual(report.get("success", False), True)
+        self.assertEqual(report.status, "success")
 
     @patch("mwdblib.MWDB", side_effect=mocked_mwdb_response)
     def test_mwdb_scan(self, mock_get=None, mock_post=None):
@@ -522,7 +522,7 @@ class FileAnalyzersEXETests(TestCase):
             self.md5,
             additional_params,
         ).start()
-        self.assertEqual(report.get("success", False), True)
+        self.assertEqual(report.status, "success")
 
     @patch("mwdblib.MWDB", side_effect=mocked_mwdb_response)
     @patch.object(mwdb_scan.MWDB_Scan, "file_analysis", return_value=True)
@@ -540,7 +540,7 @@ class FileAnalyzersEXETests(TestCase):
             self.md5,
             additional_params,
         ).start()
-        self.assertEqual(report.get("success", False), True)
+        self.assertEqual(report.status, "success")
 
 
 class FileAnalyzersDLLTests(TestCase):
@@ -562,19 +562,19 @@ class FileAnalyzersDLLTests(TestCase):
         report = file_info.FileInfo(
             "File_Info", self.job_id, self.filepath, self.filename, self.md5, {}
         ).start()
-        self.assertEqual(report.get("success", False), True)
+        self.assertEqual(report.status, "success")
 
     def test_peinfo_dll(self):
         report = pe_info.PEInfo(
             "PE_Info", self.job_id, self.filepath, self.filename, self.md5, {}
         ).start()
-        self.assertEqual(report.get("success", False), True)
+        self.assertEqual(report.status, "success")
 
     def test_speakeasy_dll(self):
         report = speakeasy_emulation.SpeakEasy(
             "Speakeasy", self.job_id, self.filepath, self.filename, self.md5, {}
         ).start()
-        self.assertEqual(report.get("success", False), True)
+        self.assertEqual(report.status, "success")
 
 
 class FileAnalyzersExcelTests(TestCase):
@@ -602,7 +602,7 @@ class FileAnalyzersExcelTests(TestCase):
             self.md5,
             {},
         ).start()
-        self.assertEqual(report.get("success", False), True)
+        self.assertEqual(report.status, "success")
 
 
 class FileAnalyzersDocTests(TestCase):
@@ -630,7 +630,7 @@ class FileAnalyzersDocTests(TestCase):
         report = doc_info.DocInfo(
             "Doc_Info", self.job_id, self.filepath, self.filename, self.md5, {}
         ).start()
-        self.assertEqual(report.get("success", False), True)
+        self.assertEqual(report.status, "success")
 
     def test_docinfo_experimental(self):
         analyzer_name = "Doc_Info_Experimental"
@@ -650,7 +650,7 @@ class FileAnalyzersDocTests(TestCase):
             self.md5,
             additional_params,
         ).start()
-        self.assertEqual(report.get("success", False), True)
+        self.assertEqual(report.status, "success")
 
     @mock_connections(patch("requests.get", side_effect=mocked_docker_analyzer_get))
     @mock_connections(patch("requests.post", side_effect=mocked_docker_analyzer_post))
@@ -664,7 +664,7 @@ class FileAnalyzersDocTests(TestCase):
             self.md5,
             additional_params,
         ).start()
-        self.assertEqual(report.get("success", False), True)
+        self.assertEqual(report.status, "success")
 
 
 class FileAnalyzersRtfTests(TestCase):
@@ -686,7 +686,7 @@ class FileAnalyzersRtfTests(TestCase):
         report = rtf_info.RTFInfo(
             "Rtf_Info", self.job_id, self.filepath, self.filename, self.md5, {}
         ).start()
-        self.assertEqual(report.get("success", False), True)
+        self.assertEqual(report.status, "success")
 
 
 class FileAnalyzersPDFTests(TestCase):
@@ -708,7 +708,7 @@ class FileAnalyzersPDFTests(TestCase):
         report = pdf_info.PDFInfo(
             "PDF_Info", self.job_id, self.filepath, self.filename, self.md5, {}
         ).start()
-        self.assertEqual(report.get("success", False), True)
+        self.assertEqual(report.status, "success")
 
 
 class FileAnalyzersHTMLTests(TestCase):
@@ -737,7 +737,7 @@ class FileAnalyzersHTMLTests(TestCase):
             self.md5,
             {},
         ).start()
-        self.assertEqual(report.get("success", False), True)
+        self.assertEqual(report.status, "success")
 
 
 class FileAnalyzersJSTests(TestCase):
@@ -766,7 +766,7 @@ class FileAnalyzersJSTests(TestCase):
             self.md5,
             {},
         ).start()
-        self.assertEqual(report.get("success", False), True)
+        self.assertEqual(report.status, "success")
 
 
 class FileAnalyzersAPKTests(TestCase):
@@ -795,7 +795,7 @@ class FileAnalyzersAPKTests(TestCase):
             self.md5,
             {},
         ).start()
-        self.assertEqual(report.get("success", False), True)
+        self.assertEqual(report.status, "success")
 
     def test_quark_engine(self, mock_get=None, mock_post=None):
         report = quark_engine.QuarkEngine(
@@ -806,7 +806,7 @@ class FileAnalyzersAPKTests(TestCase):
             self.md5,
             {},
         ).start()
-        self.assertEqual(report.get("success", False), True)
+        self.assertEqual(report.status, "success")
 
 
 def _generate_test_job_with_file(params, filename):

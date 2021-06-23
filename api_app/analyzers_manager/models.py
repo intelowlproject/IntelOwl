@@ -10,7 +10,7 @@ class AnalyzerReport(models.Model):
         ("success", "success"),
     )
 
-    analyzer_name = models.CharField(max_length=128, blank=False, unique=True)
+    analyzer_name = models.CharField(max_length=128)
     job = models.ForeignKey(
         "api_app.Job", related_name="analyzer_reports", on_delete=models.CASCADE
     )
@@ -18,9 +18,8 @@ class AnalyzerReport(models.Model):
     status = models.CharField(
         max_length=50,
         choices=STATUS_CHOICES,
-        blank=False,
     )
-    report = models.JSONField(default=dict, blank=False)
+    report = models.JSONField(default=dict)
     errors = postgres_fields.ArrayField(
         models.CharField(max_length=512, blank=True, default=list)
     )

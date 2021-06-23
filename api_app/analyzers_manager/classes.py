@@ -115,12 +115,13 @@ class BaseAnalyzerMixin(metaclass=ABCMeta):
         except Exception as e:
             self._handle_base_exception(e)
         else:
-            self.report.success = True
+            self.report.status = "success"
 
         # add end time of process
         self.report.end_time = timezone.now()
 
         self.after_run()
+        self.report.save()
 
         return self.report
 
@@ -131,7 +132,8 @@ class BaseAnalyzerMixin(metaclass=ABCMeta):
         )
         logger.error(error_message)
         self.report.errors.append(str(err))
-        self.report.success = False
+        self.report.status = "failed"
+        self.report.save()
 
     def _handle_base_exception(self, err):
         traceback.print_exc()
@@ -141,7 +143,8 @@ class BaseAnalyzerMixin(metaclass=ABCMeta):
         )
         logger.exception(error_message)
         self.report.errors.append(str(err))
-        self.report.success = False
+        self.report.status = "failed"
+        self.report.save()
 
     def __init__(self, analyzer_name, job_id, additional_config_params):
         self.analyzer_name = analyzer_name
@@ -334,7 +337,7 @@ class DockerBasedAnalyzer(metaclass=ABCMeta):
         # handle in case this is a test
         if hasattr(self, "is_test") and getattr(self, "is_test"):
             # only happens in case of testing
-            self.report.success = True
+            self.report.status = "success"
             return {}
 
         # step #1: request new analysis

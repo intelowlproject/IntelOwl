@@ -2,7 +2,6 @@
 # See the file 'LICENSE' for copying permission.
 
 from os import remove, path
-from datetime import datetime
 
 from django.db import models
 from django.db.models.signals import pre_delete
@@ -90,22 +89,24 @@ class Job(models.Model):
 
         return job_object
 
+    @classmethod
+    def init_report(cls, name, job_id):
+        report_obj = AnalyzerReport(
+            analyzer_name=name,
+            job=cls.object_by_job_id(job_id),
+            status="pending",
+            report={},
+            errors=[],
+            start_time=timezone.now(),
+            end_time=timezone.now(),
+        )
+
+        return report_obj
+
     def __str__(self):
         if self.is_sample:
             return f'Job("{self.file_name}")'
         return f'Job("{self.observable_name}")'
-
-    def init_report(self, name, job_id):
-        report_obj = AnalyzerReport(
-            analyzer_name=name,
-            job=self.object_by_job_id(job_id),
-            report={},
-            errors=[],
-            start_time=datetime.now(),
-            end_time=datetime.now(),
-        )
-
-        return report_obj
 
 
 @receiver(pre_delete, sender=Job)

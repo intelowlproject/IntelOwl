@@ -10,7 +10,7 @@ EXTRA_KEYS = [
 
 
 def main():
-    file_path = "analyzer_config.json"
+    file_path = "old_analyzer_config.json"
     with open(file_path, "r") as f:
         analyzer_configs = json.load(f)
 
@@ -52,7 +52,7 @@ def main():
 
         new_config[name] = tmp_config
 
-    with open("new_analyzer_config.json", "w") as f:
+    with open("analyzer_config.json", "w") as f:
         json.dump(new_config, f, indent=4)
 
 

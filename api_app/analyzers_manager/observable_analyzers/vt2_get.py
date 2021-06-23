@@ -28,7 +28,8 @@ class VirusTotalv2(classes.ObservableAnalyzer):
         resp_code = resp.get("response_code", 1)
         verbose_msg = resp.get("verbose_msg", "")
         if resp_code == -1 or "Invalid resource" in verbose_msg:
-            self.report["errors"].append(verbose_msg)
+            self.report.errors.append(verbose_msg)
+            self.report.save()
             raise AnalyzerRunException(f"response code {resp_code}. response: {resp}")
         return resp
 

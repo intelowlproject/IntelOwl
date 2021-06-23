@@ -129,7 +129,8 @@ class DocInfo(FileAnalyzer):
         except Exception as e:
             error_message = f"job_id {self.job_id} vba parser failed. Error: {e}"
             logger.exception(error_message)
-            self.report["errors"].append(error_message)
+            self.report.errors.append(error_message)
+            self.report.save()
         finally:
             if self.vbaparser:
                 self.vbaparser.close()

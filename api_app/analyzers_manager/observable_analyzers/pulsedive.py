@@ -34,7 +34,8 @@ class Pulsedive(ObservableAnalyzer):
             logger.info(
                 f"{warning}. Continuing without API key..." f" <- {self.__repr__()}"
             )
-            self.report["errors"].append(warning)
+            self.report.errors.append(warning)
+            self.report.save()
         else:
             default_param = f"&key={api_key}"
 

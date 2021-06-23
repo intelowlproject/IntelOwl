@@ -51,8 +51,9 @@ class SignatureInfo(FileAnalyzer):
                 f"filename: {self.filename}. Soft Time Limit Exceeded Error {e}"
             )
             logger.error(error_message)
-            self.report["errors"].append(str(e))
-            self.report["success"] = False
+            self.report.errors.append(str(e))
+            self.report.status = "failed"
+            self.report.save()
             # we should stop the subprocesses...
             # .. in case we reach the time limit for the celery task
             if p:

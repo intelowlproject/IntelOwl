@@ -115,7 +115,8 @@ class PEInfo(FileAnalyzer):
                 "".format(self.job_id, self.analyzer_name, self.md5, self.filename, e)
             )
             logger.warning(warning_message)
-            self.report["errors"].append(warning_message)
-            self.report["success"] = False
+            self.report.errors.append(warning_message)
+            self.report.status = "failed"
+            self.report.save()
 
         return results

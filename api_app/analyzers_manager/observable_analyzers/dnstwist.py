@@ -38,7 +38,8 @@ class DNStwist(classes.ObservableAnalyzer):
 
     def run(self):
         if not which(self.command):
-            self.report["success"] = False
+            self.report.status = "failed"
+            self.report.save()
             raise AnalyzerRunException("dnstwist not installed!")
 
         args = [self.command, "--registered", "--format", "json"]

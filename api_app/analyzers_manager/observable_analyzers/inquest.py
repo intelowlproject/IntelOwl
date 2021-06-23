@@ -55,7 +55,8 @@ class InQuest(ObservableAnalyzer):
             logger.info(
                 f"{warning}. Continuing without API key..." f" <- {self.__repr__()}"
             )
-            self.report["errors"].append(warning)
+            self.report.errors.append(warning)
+            self.report.save()
 
         if self.analysis_type == "dfi_search":
             if self.observable_classification == "hash":

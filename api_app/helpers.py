@@ -30,6 +30,19 @@ def get_analyzer_config():
     return analyzers_config
 
 
+def map_data_type(secret_type):
+    mapping_dict = {
+        "number": (
+            int,
+            float,
+        ),
+        "string": str,
+        "bool": bool,
+    }
+
+    return mapping_dict
+
+
 def calculate_mimetype(file_buffer, file_name):
     read_file_buffer = file_buffer.read()
     calculated_mimetype = magic_from_buffer(read_file_buffer, mime=True)

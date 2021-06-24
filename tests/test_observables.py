@@ -49,6 +49,7 @@ from api_app.script_analyzers.observable_analyzers import (
     ss_api_net,
     firehol_iplist,
     threatfox,
+    darksearch,
 )
 from api_app.models import Job
 from .mock_utils import (
@@ -766,6 +767,22 @@ class GenericAnalyzersTest(TestCase):
     def test_crxcavator(self, mock_get=None):
         report = crxcavator.CRXcavator(
             "CRXcavator",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    @mock_connections(
+        patch(
+            "darksearch.Client.search",
+            side_effect=lambda: [{"total": 1, "last_page": 0, "data": []}],
+        )
+    )
+    def test_darksearch(self, mock_get=None):
+        report = darksearch.DarkSearchQuery(
+            "Darksearch_Query",
             self.job_id,
             self.observable_name,
             self.observable_classification,

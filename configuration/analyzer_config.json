@@ -158,6 +158,19 @@
     "python_module": "cymru.Cymru",
     "soft_time_limit": 50
   },
+  "Darksearch_Query": {
+    "type": "observable",
+    "observable_supported": ["generic"],
+    "external_service": true,
+    "description": "Query against https://darksearch.io/api/search API",
+    "python_module": "darksearch.DarkSearchQuery",
+    "soft_time_limit": 50,
+    "queue": "long",
+    "additional_config_params": {
+      "pages": 10,
+      "proxies": {}
+    }
+  },
   "DNSDB": {
     "type": "observable",
     "observable_supported": [

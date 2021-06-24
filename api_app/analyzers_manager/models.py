@@ -1,14 +1,18 @@
+from enum import Enum
+
 from django.db import models
 from django.contrib.postgres import fields as postgres_fields
 
 
+class Statuses(Enum):
+    FAILED = 0
+    PENDING = 1
+    RUNNING = 2
+    SUCCESS = 3
+
+
 class AnalyzerReport(models.Model):
-    STATUS_CHOICES = (
-        ("pending", "pending"),
-        ("running", "running"),
-        ("failed", "failed"),
-        ("success", "success"),
-    )
+    Statuses = Statuses
 
     analyzer_name = models.CharField(max_length=128)
     job = models.ForeignKey(
@@ -17,7 +21,7 @@ class AnalyzerReport(models.Model):
 
     status = models.CharField(
         max_length=50,
-        choices=STATUS_CHOICES,
+        choices=[(s.name, s.name) for s in Statuses],
     )
     report = models.JSONField(default=dict)
     errors = postgres_fields.ArrayField(
@@ -27,4 +31,4 @@ class AnalyzerReport(models.Model):
     end_time = models.DateTimeField()
 
     def __str__(self):
-        return f"Analyzer({self.connector})-{self.job}"
+        return f"AnalyzerReport(job:#{self.job_id}, {self.analyzer_name})"

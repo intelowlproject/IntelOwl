@@ -94,12 +94,12 @@ class Job(models.Model):
         report_obj = AnalyzerReport(
             analyzer_name=name,
             job=cls.object_by_job_id(job_id),
-            status="pending",
             report={},
             errors=[],
             start_time=timezone.now(),
             end_time=timezone.now(),
         )
+        report_obj.status = report_obj.Statuses.PENDING.name
 
         return report_obj
 

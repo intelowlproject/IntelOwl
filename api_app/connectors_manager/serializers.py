@@ -155,11 +155,11 @@ class ConnectorReportSerializer(serializers.ModelSerializer):
             "started_time_str",
         )
 
-    def get_success(self, instance):
-        if instance.status == "success":
+    def get_success(self, instance: ConnectorReport):
+        if instance.status == instance.Statuses.SUCCESS.name:
             return True
-        elif instance.status == "failure":
+        elif instance.status == instance.Statuses.FAILED.name:
             return False
 
-    def get_started_time_str(self, instance):
+    def get_started_time_str(self, instance: ConnectorReport):
         return instance.start_time.strftime("%Y-%m-%d %H:%M:%S")

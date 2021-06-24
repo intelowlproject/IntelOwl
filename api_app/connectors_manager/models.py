@@ -4,19 +4,26 @@
 from django.db import models
 from django.contrib.postgres import fields as postgres_fields
 
+from enum import Enum
+
+
+class Statuses(Enum):
+    FAILED = 0
+    PENDING = 1
+    RUNNING = 2
+    SUCCESS = 3
+
 
 class ConnectorReport(models.Model):
-    STATUS_CHOICES = (
-        ("pending", "pending"),
-        ("running", "running"),
-        ("failed", "failed"),
-        ("success", "success"),
-    )
+    Statuses = Statuses
+
     connector = models.CharField(max_length=128, unique=True)
     job = models.ForeignKey(
         "api_app.Job", related_name="connector_reports", on_delete=models.CASCADE
     )
-    status = models.CharField(max_length=50, choices=STATUS_CHOICES)
+    status = models.CharField(
+        max_length=50, choices=[(s.name, s.name) for s in Statuses]
+    )
     report = models.JSONField(default=dict)
     errors = postgres_fields.ArrayField(
         models.CharField(max_length=512), default=list, blank=True

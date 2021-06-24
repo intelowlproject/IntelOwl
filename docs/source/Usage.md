@@ -157,7 +157,7 @@ Some Analyzers require details other than just IP, URL, Domain etc... We classif
 * `EmailRep`: search an email address on emailrep.io
 * `WiGLE`: Maps and database of 802.11 wireless networks, with statistics, submitted by wardrivers, netstumblers, and net huggers.
 * `CRXcavator`: scans a chrome extension against crxcavator.io
-* `Darksearch_Query`: Search a keyword against darksearch.io's search API.
+* `Darksearch_Query`: Search a keyword against darksearch.io's search API. It's possible to make complex queries using boolean logic. For example, `OSINT AND CTI OR intelowl NOT hack` is a valid observable name.
 
 #### [Additional analyzers](https://intelowl.readthedocs.io/en/develop/Advanced-Usage.html#optional-analyzers) that can be enabled per your wish.
 

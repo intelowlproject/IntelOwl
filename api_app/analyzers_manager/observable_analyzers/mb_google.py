@@ -27,4 +27,4 @@ class MB_GOOGLE(classes.ObservableAnalyzer):
             ret.append(res)
             del _mb_get
 
-        return ret
+        return {"results": ret}

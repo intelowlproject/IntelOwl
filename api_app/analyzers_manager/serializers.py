@@ -6,7 +6,7 @@ import json
 import logging
 
 from .models import AnalyzerReport
-from . import helpers
+from ..helpers import map_data_type
 
 from intel_owl.secrets import get_secret
 
@@ -77,7 +77,7 @@ class AnalyzerConfigSerializer(rfs.Serializer):
                 secret = get_secret(conf["secret_name"])
                 if not secret:
                     errors[name] = f"'{name}': not set"
-                elif not isinstance(secret, helpers.map_data_type(conf["type"])):
+                elif not isinstance(secret, map_data_type(conf["type"])):
                     errors[
                         name
                     ] = f"'{name}': expected {conf['type']}, got {type(secret)}"

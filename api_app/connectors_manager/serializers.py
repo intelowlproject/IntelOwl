@@ -89,8 +89,8 @@ class ConnectorConfigSerializer(serializers.Serializer):
 
             if bool(serializer_errors):  # returns False if empty
                 logger.error(f"connector config serializer failed: {serializer_errors}")
-                return False, {}
-            return True, connector_config
+                raise serializers.ValidationError(serializer_errors)
+            return connector_config
 
     def validate_secrets(self, secrets):
         data = [

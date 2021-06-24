@@ -8,5 +8,4 @@ from .serializers import ConnectorConfigSerializer
 
 @cache_memoize(100)
 def get_verified_connector_config():
-    success, config = ConnectorConfigSerializer.read_and_verify_config()
-    return config
+    return ConnectorConfigSerializer.read_and_verify_config()

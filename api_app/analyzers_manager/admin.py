@@ -9,8 +9,6 @@ class AnalyzerReportAdminView(admin.ModelAdmin):
         "analyzer_name",
         "job",
         "status",
-        "report",
-        "errors",
         "start_time",
         "end_time",
     )

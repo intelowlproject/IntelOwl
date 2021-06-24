@@ -38,17 +38,20 @@ def main():
             "queue": config.get("queue", "default"),
         }
 
-        # Storing analyzer-specific config info
+        # Storing analyzer secrets info
         tmp_config["secrets"] = {}
         if "additional_config_params" in config.keys():
             for s_name, s_value in config["additional_config_params"].items():
-                tmp_config["secrets"][s_name] = {
-                    "value": s_value,
-                    "type": "string",
-                    "required": True,
-                    "default": None,
-                    "description": "",
-                }
+                if s_name == "api_key_name":
+                    tmp_config["secrets"][s_name] = {
+                        "env_var_key": s_value,
+                        "type": "string",
+                        "required": True,
+                        "default": None,
+                        "description": "",
+                    }
+                else:
+                    tmp_config["config"][s_name] = s_value
 
         new_config[name] = tmp_config
 

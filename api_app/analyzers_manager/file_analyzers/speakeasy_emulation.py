@@ -25,7 +25,7 @@ class SpeakEasy(FileAnalyzer):
             )
             logger.error(error_message)
             self.report.errors.append(str(e))
-            self.report.status = "failed"
+            self.report.status = self.report.Statuses.FAILED.name
             self.report.save()
 
         return results

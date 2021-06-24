@@ -142,7 +142,7 @@ class IPAnalyzersTests(
             self.observable_classification,
             {},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
     def test_auth0(self, mock_get=None, mock_post=None):
         report = auth0.Auth0(
@@ -152,7 +152,7 @@ class IPAnalyzersTests(
             self.observable_classification,
             {},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
     def test_securitytrails_ip(self, mock_get=None, mock_post=None):
         report = securitytrails.SecurityTrails(
@@ -162,7 +162,7 @@ class IPAnalyzersTests(
             self.observable_classification,
             {},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
     def test_censys(self, mock_get=None, mock_post=None):
         report = censys.Censys(
@@ -172,7 +172,7 @@ class IPAnalyzersTests(
             self.observable_classification,
             {},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
     def test_shodan(self, mock_get=None, mock_post=None):
         report = shodan.Shodan(
@@ -182,7 +182,7 @@ class IPAnalyzersTests(
             self.observable_classification,
             {},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
     def test_ipinfo(self, mock_get=None, mock_post=None):
         report = ipinfo.IPInfo(
@@ -192,7 +192,7 @@ class IPAnalyzersTests(
             self.observable_classification,
             {},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
     def test_threatminer_ip(self, mock_get=None, mock_post=None):
         report = threatminer.Threatminer(
@@ -202,7 +202,7 @@ class IPAnalyzersTests(
             self.observable_classification,
             {},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
     def test_honeydb_all(self, mock_get=None, mock_post=None):
         report = honeydb.HoneyDB(
@@ -212,7 +212,7 @@ class IPAnalyzersTests(
             self.observable_classification,
             {},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
     def test_honeydb_single_analysis(self, mock_get=None, mock_post=None):
         report = honeydb.HoneyDB(
@@ -222,7 +222,7 @@ class IPAnalyzersTests(
             self.observable_classification,
             {"honeydb_analysis": "ip_info"},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
     @skipIf(settings.MOCK_CONNECTIONS, "not working without connection")
     def test_maxmind(self, mock_get=None, mock_post=None):
@@ -233,7 +233,7 @@ class IPAnalyzersTests(
             self.observable_classification,
             {},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
     def test_greynoise_alpha(self, mock_get=None, mock_post=None):
         report = greynoise.GreyNoise(
@@ -243,7 +243,7 @@ class IPAnalyzersTests(
             self.observable_classification,
             {"greynoise_api_version": "v1"},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
     def test_greynoise_community(self, mock_get=None, mock_post=None):
         report = greynoise.GreyNoise(
@@ -253,7 +253,7 @@ class IPAnalyzersTests(
             self.observable_classification,
             {"greynoise_api_version": "v3"},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
     def test_greynoise(self, mock_get=None, mock_post=None):
         report = greynoise.GreyNoise(
@@ -263,7 +263,7 @@ class IPAnalyzersTests(
             self.observable_classification,
             {"greynoise_api_version": "v2"},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
     def test_stratos(self, mock_get=None, mock_post=None):
         report = stratosphere.Stratos(
@@ -273,7 +273,7 @@ class IPAnalyzersTests(
             self.observable_classification,
             {},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
     def test_talos(self, mock_get=None, mock_post=None):
         report = talos.Talos(
@@ -283,7 +283,7 @@ class IPAnalyzersTests(
             self.observable_classification,
             {},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
     def test_tor(self, mock_get=None, mock_post=None):
         report = tor.Tor(
@@ -293,7 +293,7 @@ class IPAnalyzersTests(
             self.observable_classification,
             {},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
     @mock_connections(patch("requests.get", side_effect=mocked_firehol_iplist))
     def test_firehol_iplist(self, *args):
@@ -304,7 +304,7 @@ class IPAnalyzersTests(
             self.observable_classification,
             {"list_names": ["firehol_level1.netset"]},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
     @mock_connections(patch("pypssl.PyPSSL", side_effect=mocked_pypssl))
     def test_circl_pssl(self, mock_get=None, mock_post=None, sessions_get=None):
@@ -315,7 +315,7 @@ class IPAnalyzersTests(
             self.observable_classification,
             {},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
     def test_robtex_ip(self, mock_get=None, mock_post=None):
         report = robtex.Robtex(
@@ -325,7 +325,7 @@ class IPAnalyzersTests(
             self.observable_classification,
             {},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
     def test_robtex_rdns(self, mock_get=None, mock_post=None):
         report = robtex.Robtex(
@@ -335,7 +335,7 @@ class IPAnalyzersTests(
             self.observable_classification,
             {},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
     @mock_connections(patch("requests.get", side_effect=mocked_dnsdb_v2_request))
     def test_dnsdb(self, mock_get=None, mock_post=None, mock_text_response=None):
@@ -346,7 +346,7 @@ class IPAnalyzersTests(
             self.observable_classification,
             {},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
     def test_whoisxmlapi_ip(self, mock_get=None, mock_post=None):
         report = whoisxmlapi.Whoisxmlapi(
@@ -356,7 +356,7 @@ class IPAnalyzersTests(
             self.observable_classification,
             {},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
     def test_zoomeye(self, mock_get=None, mock_post=None):
         report = zoomeye.ZoomEye(
@@ -366,7 +366,7 @@ class IPAnalyzersTests(
             self.observable_classification,
             {},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
 
 @mock_connections(patch("requests.get", side_effect=mocked_requests))
@@ -397,7 +397,7 @@ class DomainAnalyzersTests(
             self.observable_classification,
             {},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
     def test_securitytrails_domain(self, mock_get=None, mock_post=None):
         report = securitytrails.SecurityTrails(
@@ -407,7 +407,7 @@ class DomainAnalyzersTests(
             self.observable_classification,
             {},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
     def test_hunter(self, mock_get=None, mock_post=None):
         report = hunter.Hunter(
@@ -417,7 +417,7 @@ class DomainAnalyzersTests(
             self.observable_classification,
             {},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
     def test_threatminer_domain(self, mock_get=None, mock_post=None):
         report = threatminer.Threatminer(
@@ -427,7 +427,7 @@ class DomainAnalyzersTests(
             self.observable_classification,
             {},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
     @mock_connections(patch("pypdns.PyPDNS", side_effect=mocked_pypdns))
     def test_circl_pdns(self, mock_get=None, mock_post=None, sessions_get=None):
@@ -438,7 +438,7 @@ class DomainAnalyzersTests(
             self.observable_classification,
             {},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
     def test_robtex_fdns(self, mock_get=None, mock_post=None):
         report = robtex.Robtex(
@@ -448,7 +448,7 @@ class DomainAnalyzersTests(
             self.observable_classification,
             {},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
     @mock_connections(patch("requests.get", side_effect=mocked_dnsdb_v2_request))
     def test_dnsdb(self, mock_get=None, mock_post=None, mock_text_response=None):
@@ -459,7 +459,7 @@ class DomainAnalyzersTests(
             self.observable_classification,
             {},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
     def test_whoisxmlapi_domain(self, mock_get=None, mock_post=None):
         report = whoisxmlapi.Whoisxmlapi(
@@ -469,7 +469,7 @@ class DomainAnalyzersTests(
             self.observable_classification,
             {},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
     def test_checkdmarc(self, mock_get=None, mock_post=None):
         report = checkdmarc.CheckDMARC(
@@ -480,7 +480,7 @@ class DomainAnalyzersTests(
             {},
         ).start()
 
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
     def test_dnstwist(self, mock_get=None, mock_post=None):
         report = dnstwist.DNStwist(
@@ -491,7 +491,7 @@ class DomainAnalyzersTests(
             {"tld": True, "mxcheck": True, "ssdeep": True},
         ).start()
 
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
     def test_zoomeye(self, mock_get=None, mock_post=None):
         report = zoomeye.ZoomEye(
@@ -501,7 +501,7 @@ class DomainAnalyzersTests(
             self.observable_classification,
             {},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
 
 @mock_connections(patch("requests.get", side_effect=mocked_requests))
@@ -535,7 +535,7 @@ class URLAnalyzersTests(
             self.observable_classification,
             {},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
     def test_phishtank(self, *args):
         report = phishtank.Phishtank(
@@ -545,7 +545,7 @@ class URLAnalyzersTests(
             self.observable_classification,
             {},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
     @mock_connections(
         patch(
@@ -562,7 +562,7 @@ class URLAnalyzersTests(
             self.observable_classification,
             {"urlscan_analysis": "submit_result"},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
     def test_robtex_fdns(self, mock_get=None, mock_post=None):
         report = robtex.Robtex(
@@ -572,7 +572,7 @@ class URLAnalyzersTests(
             self.observable_classification,
             {},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
     @mock_connections(patch("requests.Session.get", side_effect=mocked_triage_get))
     @mock_connections(patch("requests.Session.post", side_effect=mocked_triage_post))
@@ -584,7 +584,7 @@ class URLAnalyzersTests(
             self.observable_classification,
             {},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
     @mock_connections(patch("requests.Session.get", side_effect=mocked_triage_get))
     @mock_connections(patch("requests.Session.post", side_effect=mocked_triage_post))
@@ -596,7 +596,7 @@ class URLAnalyzersTests(
             self.observable_classification,
             {"analysis_type": "submit"},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
     def test_rendertron(self, mock_get=None, mock_post=None):
         report = rendertron.Rendertron(
@@ -606,7 +606,7 @@ class URLAnalyzersTests(
             self.observable_classification,
             {},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
     def test_ss_api_net(self, mock_get=None, mock_post=None):
         report = ss_api_net.SSAPINet(
@@ -616,7 +616,7 @@ class URLAnalyzersTests(
             self.observable_classification,
             {},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
 
 @mock_connections(patch("requests.get", side_effect=mocked_requests))
@@ -648,7 +648,7 @@ class HashAnalyzersTests(
             self.observable_classification,
             {},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
     def test_cymru_get(self, mock_get=None, mock_post=None):
         report = cymru.Cymru(
@@ -658,7 +658,7 @@ class HashAnalyzersTests(
             self.observable_classification,
             {},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
     @mock_connections(patch("requests.Session.get", side_effect=mocked_triage_get))
     @mock_connections(patch("requests.Session.post", side_effect=mocked_triage_post))
@@ -670,7 +670,7 @@ class HashAnalyzersTests(
             self.observable_classification,
             {},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
 
 class GenericAnalyzersTest(TestCase):
@@ -710,7 +710,7 @@ class GenericAnalyzersTest(TestCase):
             self.observable_classification,
             {},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
     def test_InQuest_IOCdb(self, mock_get=None, mock_post=None):
         report = inquest.InQuest(
@@ -720,7 +720,7 @@ class GenericAnalyzersTest(TestCase):
             self.observable_classification,
             {"inquest_analysis": "iocdb_search"},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
     def test_InQuest_REPdb(self, mock_get=None, mock_post=None):
         report = inquest.InQuest(
@@ -730,7 +730,7 @@ class GenericAnalyzersTest(TestCase):
             self.observable_classification,
             {"inquest_analysis": "repdb_search"},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
     def test_InQuest_DFI(self, mock_get=None, mock_post=None):
         report = inquest.InQuest(
@@ -740,7 +740,7 @@ class GenericAnalyzersTest(TestCase):
             self.observable_classification,
             {"inquest_analysis": "dfi_search"},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
     def test_threatfox(self, mock_get=None, mock_post=None):
         report = threatfox.ThreatFox(
@@ -750,7 +750,7 @@ class GenericAnalyzersTest(TestCase):
             self.observable_classification,
             {},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
     @mock_connections(patch("requests.get", side_effect=mocked_requests))
     def test_wigle(self, mock_get=None):
@@ -761,7 +761,7 @@ class GenericAnalyzersTest(TestCase):
             self.observable_classification,
             {},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
     @mock_connections(patch("requests.get", side_effect=mocked_requests))
     def test_crxcavator(self, mock_get=None):
@@ -772,7 +772,7 @@ class GenericAnalyzersTest(TestCase):
             self.observable_classification,
             {},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
     @mock_connections(
         patch(
@@ -790,4 +790,4 @@ class GenericAnalyzersTest(TestCase):
             self.observable_classification,
             {},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)

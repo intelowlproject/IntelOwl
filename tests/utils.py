@@ -74,7 +74,7 @@ class CommonTestCases_observables(metaclass=ABCMeta):
             self.observable_classification,
             {"max_tries": 1},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
     def test_vt2_get(self, mock_get=None, mock_post=None):
         report = vt2_get.VirusTotalv2(
@@ -84,7 +84,7 @@ class CommonTestCases_observables(metaclass=ABCMeta):
             self.observable_classification,
             {},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
     @mock_connections(
         patch(
@@ -96,7 +96,7 @@ class CommonTestCases_observables(metaclass=ABCMeta):
         report = otx.OTX(
             "OTX", self.job_id, self.observable_name, self.observable_classification, {}
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
     def test_InQuest_IOCdb(self, mock_get=None, mock_post=None):
         report = inquest.InQuest(
@@ -106,7 +106,7 @@ class CommonTestCases_observables(metaclass=ABCMeta):
             self.observable_classification,
             {"inquest_analysis": "iocdb_search"},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
     def test_InQuest_REPdb(self, mock_get=None, mock_post=None):
         report = inquest.InQuest(
@@ -116,7 +116,7 @@ class CommonTestCases_observables(metaclass=ABCMeta):
             self.observable_classification,
             {"inquest_analysis": "repdb_search"},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
     def test_InQuest_DFI(self, mock_get=None, mock_post=None):
         report = inquest.InQuest(
@@ -126,7 +126,7 @@ class CommonTestCases_observables(metaclass=ABCMeta):
             self.observable_classification,
             {"inquest_analysis": "dfi_search"},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
     def test_pulsevide(self, mock_get=None, mock_post=None):
         report = pulsedive.Pulsedive(
@@ -136,7 +136,7 @@ class CommonTestCases_observables(metaclass=ABCMeta):
             self.observable_classification,
             {},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
     @mock_connections(
         patch(
@@ -158,7 +158,7 @@ class CommonTestCases_observables(metaclass=ABCMeta):
             self.observable_classification,
             {},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
     @mock_connections(patch("pymisp.PyMISP", side_effect=mocked_requests_noop))
     def test_misp_first(self, *args):
@@ -169,7 +169,7 @@ class CommonTestCases_observables(metaclass=ABCMeta):
             self.observable_classification,
             {"api_key_name": "FIRST_MISP_API", "url_key_name": "FIRST_MISP_URL"},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
     def test_threatfox(self, mock_get=None, mock_post=None):
         report = threatfox.ThreatFox(
@@ -179,7 +179,7 @@ class CommonTestCases_observables(metaclass=ABCMeta):
             self.observable_classification,
             {},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
     @mock_connections(patch("requests.Session.get", side_effect=mocked_requests))
     def test_urlscan_search(self, *args):
@@ -192,7 +192,7 @@ class CommonTestCases_observables(metaclass=ABCMeta):
             self.observable_classification,
             {"urlscan_analysis": "search"},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
     @mock_connections(
         patch(
@@ -226,7 +226,7 @@ class CommonTestCases_ip_url_domain(metaclass=ABCMeta):
             self.observable_classification,
             {},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
     def test_gsf(self, mock_get=None, mock_post=None):
         report = googlesf.GoogleSF(
@@ -236,7 +236,7 @@ class CommonTestCases_ip_url_domain(metaclass=ABCMeta):
             self.observable_classification,
             {},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
     @mock_connections(
         patch(
@@ -252,7 +252,7 @@ class CommonTestCases_ip_url_domain(metaclass=ABCMeta):
             self.observable_classification,
             {},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
     def test_onyphe(self, mock_get=None, mock_post=None):
         report = onyphe.Onyphe(
@@ -262,7 +262,7 @@ class CommonTestCases_ip_url_domain(metaclass=ABCMeta):
             self.observable_classification,
             {},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
     def test_mb_google(self, mock_get=None, mock_post=None):
         report = mb_google.MB_GOOGLE(
@@ -272,7 +272,7 @@ class CommonTestCases_ip_url_domain(metaclass=ABCMeta):
             self.observable_classification,
             {},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
 
 class CommonTestCases_ip_domain_hash(metaclass=ABCMeta):
@@ -288,7 +288,7 @@ class CommonTestCases_ip_domain_hash(metaclass=ABCMeta):
             self.observable_classification,
             {},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
 
 class CommonTestCases_url_domain(metaclass=ABCMeta):
@@ -304,7 +304,7 @@ class CommonTestCases_url_domain(metaclass=ABCMeta):
             self.observable_classification,
             {},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
     def test_cloudflare_malicious_detector(self, mock_get=None, mock_post=None):
         report = cloudflare_malicious_detector.CloudFlareMaliciousDetector(
@@ -314,7 +314,7 @@ class CommonTestCases_url_domain(metaclass=ABCMeta):
             self.observable_classification,
             {},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
     def test_fortiguard(self, mock_get=None, mock_post=None):
         report = fortiguard.Fortiguard(
@@ -324,7 +324,7 @@ class CommonTestCases_url_domain(metaclass=ABCMeta):
             self.observable_classification,
             {},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
     def test_google_dns_resolver(self, mock_get=None, mock_post=None):
         report = google_dns_resolver.GoogleDNSResolver(
@@ -334,7 +334,7 @@ class CommonTestCases_url_domain(metaclass=ABCMeta):
             self.observable_classification,
             {},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
     def test_quad9_dns_resolver(self, mock_get=None, mock_post=None):
         report = quad9_dns_resolver.Quad9DNSResolver(
@@ -344,7 +344,7 @@ class CommonTestCases_url_domain(metaclass=ABCMeta):
             self.observable_classification,
             {},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
     def test_quad9_malicious_detector(self, mock_get=None, mock_post=None):
         report = quad9_malicious_detector.Quad9MaliciousDetector(
@@ -354,7 +354,7 @@ class CommonTestCases_url_domain(metaclass=ABCMeta):
             self.observable_classification,
             {},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
     def test_urlhaus(self, mock_get=None, mock_post=None):
         report = urlhaus.URLHaus(
@@ -364,7 +364,7 @@ class CommonTestCases_url_domain(metaclass=ABCMeta):
             self.observable_classification,
             {},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
     def test_thug_url(self, mock_get=None, mock_post=None):
         additional_params = {"test": True}
@@ -375,7 +375,7 @@ class CommonTestCases_url_domain(metaclass=ABCMeta):
             self.observable_classification,
             additional_params,
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
 
 class CommonTestCases_ip_url_hash(metaclass=ABCMeta):
@@ -393,4 +393,4 @@ class CommonTestCases_ip_url_hash(metaclass=ABCMeta):
             self.observable_classification,
             {},
         ).start()
-        self.assertEqual(report.status, "success")
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)

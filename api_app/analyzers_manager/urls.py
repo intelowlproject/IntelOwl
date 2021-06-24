@@ -1,11 +1,7 @@
-from django.urls import include, path
-from rest_framework import routers
-from views import AnalyzerReportViewSet
+from django.urls import path
 
-router = routers.DefaultRouter(trailing_slash=False)
-router.register(r"analyzer_report", AnalyzerReportViewSet)
+from .views import AnalyzerListAPI
 
 urlpatterns = [
-    # Viewsets
-    path(r"", include(router.urls))
+    path("get_analyzer_configs", AnalyzerListAPI.as_view()),
 ]

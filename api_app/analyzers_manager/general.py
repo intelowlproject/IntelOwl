@@ -52,8 +52,15 @@ def start_analyzers(
             config_params = ac.get("config", {})
             secret_params = ac.get("secrets", {})
             additional_config_params = {}
+
+            # Creating additional_config_parmas
+            # Adding all secrets
             for name, conf in secret_params.items():
-                additional_config_params[name] = conf["value"]
+                additional_config_params[name] = conf.get("env_var_key", "")
+
+            # Adding all config parameters
+            for key, value in config_params.items():
+                additional_config_params[key] = value
 
             adjust_analyzer_config(
                 runtime_configuration,

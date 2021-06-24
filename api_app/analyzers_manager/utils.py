@@ -41,7 +41,7 @@ def set_report_and_cleanup(analyzer_name, job_id, report):
             # set status "failed" in case all analyzers failed
             failed_analyzers = 0
             for analysis_report in job_object.analysis_reports:
-                if analysis_report.status != "success":
+                if analysis_report.status != analysis_report.Statuses.SUCCESS.name:
                     failed_analyzers += 1
             report.save()
 

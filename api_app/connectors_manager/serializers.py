@@ -6,7 +6,7 @@ import json
 import logging
 
 from intel_owl import secrets as secrets_store
-
+from .models import ConnectorReport
 
 logger = logging.getLogger(__name__)
 
@@ -133,3 +133,33 @@ class ConnectorConfigSerializer(serializers.Serializer):
             "error_message": final_err_msg,
             "missing_secrets": missing_secrets,
         }
+
+
+class ConnectorReportSerializer(serializers.ModelSerializer):
+    """
+    ConnectorReport model's serializer.
+    """
+
+    name = serializers.CharField(source="connector")
+    success = serializers.SerializerMethodField()
+    started_time_str = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ConnectorReport
+        fields = (
+            "name",
+            "success",
+            "report",
+            "errors",
+            "process_time",
+            "started_time_str",
+        )
+
+    def get_success(self, instance):
+        if instance.status == "success":
+            return True
+        elif instance.status == "failure":
+            return False
+
+    def get_started_time_str(self, instance):
+        return instance.start_time.strftime("%Y-%m-%d %H:%M:%S")

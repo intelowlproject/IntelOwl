@@ -26,3 +26,7 @@ class ConnectorReport(models.Model):
 
     def __str__(self):
         return f"Connector({self.connector})-{self.job}"
+
+    @property
+    def process_time(self):
+        return self.end_time - self.start_time

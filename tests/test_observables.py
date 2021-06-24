@@ -777,7 +777,9 @@ class GenericAnalyzersTest(TestCase):
     @mock_connections(
         patch(
             "darksearch.Client.search",
-            side_effect=lambda: [{"total": 1, "last_page": 0, "data": []}],
+            side_effect=lambda *args, **kwargs: [
+                {"total": 1, "last_page": 0, "data": []}
+            ],
         )
     )
     def test_darksearch(self, mock_get=None):

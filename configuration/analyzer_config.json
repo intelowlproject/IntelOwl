@@ -160,7 +160,7 @@
   },
   "Darksearch_Query": {
     "type": "observable",
-    "observable_supported": ["generic"],
+    "observable_supported": ["ip", "url", "domain", "hash", "generic"],
     "external_service": true,
     "description": "Query against https://darksearch.io/api/search API",
     "python_module": "darksearch.DarkSearchQuery",

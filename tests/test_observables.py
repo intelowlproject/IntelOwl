@@ -49,6 +49,7 @@ from api_app.script_analyzers.observable_analyzers import (
     ss_api_net,
     firehol_iplist,
     threatfox,
+    darksearch,
 )
 from api_app.models import Job
 from .mock_utils import (
@@ -203,9 +204,9 @@ class IPAnalyzersTests(
         ).start()
         self.assertEqual(report.get("success", False), True)
 
-    def test_honeydb_get(self, mock_get=None, mock_post=None):
+    def test_honeydb_all(self, mock_get=None, mock_post=None):
         report = honeydb.HoneyDB(
-            "HoneyDB_Get",
+            "HoneyDB",
             self.job_id,
             self.observable_name,
             self.observable_classification,
@@ -213,13 +214,13 @@ class IPAnalyzersTests(
         ).start()
         self.assertEqual(report.get("success", False), True)
 
-    def test_honeydb_scan_twitter(self, mock_get=None, mock_post=None):
+    def test_honeydb_single_analysis(self, mock_get=None, mock_post=None):
         report = honeydb.HoneyDB(
-            "HoneyDB_Scan_Twitter",
+            "HoneyDB_IPInfo",
             self.job_id,
             self.observable_name,
             self.observable_classification,
-            {},
+            {"honeydb_analysis": "ip_info"},
         ).start()
         self.assertEqual(report.get("success", False), True)
 
@@ -766,6 +767,24 @@ class GenericAnalyzersTest(TestCase):
     def test_crxcavator(self, mock_get=None):
         report = crxcavator.CRXcavator(
             "CRXcavator",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    @mock_connections(
+        patch(
+            "darksearch.Client.search",
+            side_effect=lambda *args, **kwargs: [
+                {"total": 1, "last_page": 0, "data": []}
+            ],
+        )
+    )
+    def test_darksearch(self, *args, **kwargs):
+        report = darksearch.DarkSearchQuery(
+            "Darksearch_Query",
             self.job_id,
             self.observable_name,
             self.observable_classification,

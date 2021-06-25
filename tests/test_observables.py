@@ -782,7 +782,7 @@ class GenericAnalyzersTest(TestCase):
             ],
         )
     )
-    def test_darksearch(self, mock_get=None):
+    def test_darksearch(self, *args, **kwargs):
         report = darksearch.DarkSearchQuery(
             "Darksearch_Query",
             self.job_id,

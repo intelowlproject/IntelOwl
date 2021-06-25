@@ -23,6 +23,7 @@ from api_app.script_analyzers.observable_analyzers import (
     inquest,
     xforce,
     threatfox,
+    darksearch,
 )
 
 from api_app.script_analyzers.observable_analyzers.dns.dns_resolvers import (
@@ -190,6 +191,24 @@ class CommonTestCases_observables(metaclass=ABCMeta):
             self.observable_name,
             self.observable_classification,
             {"urlscan_analysis": "search"},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    @mock_connections(
+        patch(
+            "darksearch.Client.search",
+            side_effect=lambda *args, **kwargs: [
+                {"total": 1, "last_page": 0, "data": []}
+            ],
+        )
+    )
+    def test_darksearch(self, *args, **kwargs):
+        report = darksearch.DarkSearchQuery(
+            "Darksearch_Query",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {},
         ).start()
         self.assertEqual(report.get("success", False), True)
 

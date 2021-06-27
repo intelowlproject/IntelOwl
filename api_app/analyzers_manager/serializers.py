@@ -29,13 +29,33 @@ class AnalyzerReportSerializer(rfs.ModelSerializer):
 
 
 class AnalyzerConfigSerializer(rfs.Serializer):
+    TYPE_CHOICES = (
+        ("file", "file"),
+        ("observable", "observable"),
+    )
+    HASH_CHOICES = (
+        ("md5", "md5"),
+        ("sha256", "sha256"),
+    )
+
+    # Required fields
     name = rfs.CharField(required=True)
-    type_ = rfs.CharField(required=True)
+    type = rfs.ChoiceField(required=True, choices=TYPE_CHOICES)
     python_module = rfs.CharField(required=True)
-    description = rfs.CharField(required=True)
     disabled = rfs.BooleanField(required=True)
-    secrets = rfs.JSONField(required=True)
+    requires_configuration = rfs.BooleanField(required=True)
+    external_service = rfs.BooleanField(required=True)
     config = rfs.JSONField(required=True)
+    # Optional Fields
+    secrets = rfs.JSONField(required=False)
+    description = rfs.CharField(allow_blank=True, required=False)
+    leaks_info = rfs.BooleanField(required=False)
+    run_hash = rfs.BooleanField(required=False)
+    run_hash_type = rfs.ChoiceField(required=False, choices=HASH_CHOICES)
+    supported_filetypes = rfs.ListField(required=False)
+    not_supported_filetypes = rfs.ListField(required=False)
+    observable_supported = rfs.ListField(required=False)
+    # Automatically Populated Fields
     verification = rfs.SerializerMethodField()
 
     @classmethod
@@ -47,7 +67,8 @@ class AnalyzerConfigSerializer(rfs.Serializer):
             analyzers_config = json.load(f)
             serializer_errors = {}
             for key, config in analyzers_config.items():
-                serializer = cls(data=config)
+                new_config = {"name": key, **config}
+                serializer = cls(data=new_config)
                 if serializer.is_valid():
                     analyzers_config[key] = serializer.data
                 else:
@@ -55,9 +76,9 @@ class AnalyzerConfigSerializer(rfs.Serializer):
 
             if bool(serializer_errors):
                 logger.error(f"analyzer config serializer failed: {serializer_errors}")
-                return False, {}
+                raise rfs.ValidationError(serializer_errors)
 
-            return True, analyzers_config
+            return analyzers_config
 
     def validate_secrets(self, secrets):
         data = [
@@ -74,7 +95,7 @@ class AnalyzerConfigSerializer(rfs.Serializer):
 
         for name, conf in secrets.items():
             if conf.get("required", False):
-                secret = get_secret(conf["secret_name"])
+                secret = get_secret(conf["env_var_key"])
                 if not secret:
                     errors[name] = f"'{name}': not set"
                 elif not isinstance(secret, map_data_type(conf["type"])):
@@ -108,12 +129,12 @@ class SecretSerializer(rfs.Serializer):
         ("bool", "bool"),
     )
 
-    key_name = rfs.CharField(max_length=128)
-    secret_name = rfs.CharField(max_length=128)
-    type_ = rfs.ChoiceField(choices=TYPE_CHOICES)
-    required = rfs.BooleanField()
+    key_name = rfs.CharField(required=True, max_length=128)
+    env_var_key = rfs.CharField(required=True, max_length=128)
+    type = rfs.ChoiceField(required=True, choices=TYPE_CHOICES)
+    required = rfs.BooleanField(required=True)
     default = BaseField(allow_null=True, required=True)
-    description = rfs.CharField(max_length=512)
+    description = rfs.CharField(allow_blank=True, required=False, max_length=512)
 
     def validate(self, data):
         default, secret_type = data["default"], data["type"]

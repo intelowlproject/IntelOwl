@@ -40,7 +40,7 @@ def map_data_type(secret_type):
         "bool": bool,
     }
 
-    return mapping_dict
+    return mapping_dict[secret_type]
 
 
 def calculate_mimetype(file_buffer, file_name):

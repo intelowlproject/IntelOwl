@@ -23,7 +23,7 @@ class MB_GOOGLE(classes.ObservableAnalyzer):
             _mb_get = mb_get.MB_GET(
                 "MalwareBazaar_Google_Observable", self.job_id, mb_hash, "hash", {}
             )
-            res = _mb_get.start()
+            res = _mb_get.run()
             ret.append(res)
             del _mb_get
 

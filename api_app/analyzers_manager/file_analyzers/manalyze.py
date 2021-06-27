@@ -28,4 +28,5 @@ class Manalyze(FileAnalyzer, DockerBasedAnalyzer):
         }
         req_files = {fname: binary}
         report = self._docker_run(req_data, req_files)
-        return report.values()
+
+        return report

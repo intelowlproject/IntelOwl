@@ -84,7 +84,7 @@ def mocked_mwdb_response(*args, **kwargs):
     attrs = {"query_file.return_value": fileInfo}
     QueryResponse.configure_mock(**attrs)
     Response = MagicMock(return_value=QueryResponse)
-    return Response
+    return Response.return_value
 
 
 def mocked_intezer(*args, **kwargs):

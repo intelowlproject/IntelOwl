@@ -210,7 +210,7 @@ class CommonTestCases_observables(metaclass=ABCMeta):
             self.observable_classification,
             {},
         ).start()
-        self.assertEqual(report.get("success", False), True)
+        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
 
 class CommonTestCases_ip_url_domain(metaclass=ABCMeta):

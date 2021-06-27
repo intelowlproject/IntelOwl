@@ -133,7 +133,6 @@ class BaseAnalyzerMixin(metaclass=ABCMeta):
         logger.error(error_message)
         self.report.errors.append(str(err))
         self.report.status = self.report.Statuses.FAILED.name
-        self.report.save()
 
     def _handle_base_exception(self, err):
         traceback.print_exc()
@@ -144,7 +143,6 @@ class BaseAnalyzerMixin(metaclass=ABCMeta):
         logger.exception(error_message)
         self.report.errors.append(str(err))
         self.report.status = self.report.Statuses.FAILED.name
-        self.report.save()
 
     def __init__(self, analyzer_name, job_id, additional_config_params):
         self.analyzer_name = analyzer_name

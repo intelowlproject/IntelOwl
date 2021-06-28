@@ -89,6 +89,11 @@ class Job(models.Model):
 
         return job_object
 
+    def __str__(self):
+        if self.is_sample:
+            return f'Job("{self.file_name}")'
+        return f'Job("{self.observable_name}")'
+
     @classmethod
     def init_report(cls, name, job_id):
         report_obj = AnalyzerReport(
@@ -102,11 +107,6 @@ class Job(models.Model):
         report_obj.status = report_obj.Statuses.PENDING.name
 
         return report_obj
-
-    def __str__(self):
-        if self.is_sample:
-            return f'Job("{self.file_name}")'
-        return f'Job("{self.observable_name}")'
 
 
 @receiver(pre_delete, sender=Job)

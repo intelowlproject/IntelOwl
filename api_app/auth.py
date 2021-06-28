@@ -14,8 +14,9 @@ logger = logging.getLogger(__name__)
 
 
 class LoginView(durin_views.LoginView):
-    def get_client_obj(self, request):
-        return Client.objects.get(name="web-browser")
+    def get_client_obj(self, request) -> Client:
+        client, _created = Client.objects.get_or_create(name="web-browser")
+        return client
 
     def post(self, request, *args, **kwargs):
         response = super(LoginView, self).post(request, *args, **kwargs)

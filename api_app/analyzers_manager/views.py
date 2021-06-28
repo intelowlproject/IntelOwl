@@ -7,7 +7,7 @@ from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework import serializers as BaseSerializer
 
-from api_app.analyzers_manager import helpers
+from .serializers import AnalyzerConfigSerializer
 from drf_spectacular.utils import (
     extend_schema as add_docs,
     inline_serializer,
@@ -38,7 +38,7 @@ class AnalyzerListAPI(generics.ListAPIView):
             logger.info(
                 f"get_analyzer_configs received request from {str(request.user)}."
             )
-            ac = helpers.get_verified_analyzer_config()
+            ac = AnalyzerConfigSerializer.read_and_verify_config()
             return Response(ac, status=status.HTTP_200_OK)
         except Exception as e:
             logger.exception(

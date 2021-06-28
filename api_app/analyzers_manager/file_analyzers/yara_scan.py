@@ -11,7 +11,7 @@ from git import Repo
 
 from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager.classes import FileAnalyzer
-from ..helpers import get_verified_analyzer_config
+from ..serializers import AnalyzerConfigSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -111,7 +111,7 @@ class YaraScan(FileAnalyzer):
     @staticmethod
     def yara_update_repos():
         logger.info("started pulling images from yara public repos")
-        analyzer_config = get_verified_analyzer_config()
+        analyzer_config = AnalyzerConfigSerializer.read_and_verify_config()
         found_yara_dirs = []
         for analyzer_name, analyzer_config in analyzer_config.items():
             if analyzer_name.startswith("Yara_Scan"):

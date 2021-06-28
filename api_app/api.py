@@ -6,7 +6,7 @@ import logging
 from api_app import models, serializers, helpers
 from api_app.permissions import ExtendedObjectPermissions
 from .analyzers_manager import general
-from api_app.analyzers_manager.helpers import get_verified_analyzer_config
+from api_app.analyzers_manager.serializers import AnalyzerConfigSerializer
 
 from wsgiref.util import FileWrapper
 
@@ -325,7 +325,7 @@ def send_analysis_request(request):
 
             # we need to clean the list of requested analyzers,
             # ... based on configuration data
-            analyzers_config = get_verified_analyzer_config()
+            analyzers_config = AnalyzerConfigSerializer.read_and_verify_config()
             run_all_available_analyzers = serialized_data.get(
                 "run_all_available_analyzers", False
             )

@@ -12,7 +12,7 @@ from rest_framework.test import APIClient
 
 from intel_owl import settings
 from api_app import models
-from api_app.analyzers_manager.helpers import get_verified_analyzer_config
+from api_app.analyzers_manager.serializers import AnalyzerConfigSerializer
 
 logger = logging.getLogger(__name__)
 # disable logging library
@@ -193,7 +193,9 @@ class ApiViewTests(TestCase):
         response = self.client.get("/api/get_analyzer_configs")
         self.assertEqual(response.status_code, 200)
         self.assertNotEqual(response.json(), {})
-        self.assertDictEqual(response.json(), get_verified_analyzer_config())
+        self.assertDictEqual(
+            response.json(), AnalyzerConfigSerializer.read_and_verify_config()
+        )
 
     def test_download_sample_200(self):
         self.assertEqual(models.Job.objects.count(), 0)

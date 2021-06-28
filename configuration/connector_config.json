@@ -8,14 +8,14 @@
     },
     "secrets": {
       "api_key_name": {
-        "secret_name": "MISP_KEY",
+        "env_var_key": "MISP_KEY",
         "type": "string",
         "required": true,
         "default": null,
         "description": "API key for your MISP instance"
       },
       "url_key_name": {
-        "secret_name": "MISP_URL",
+        "env_var_key": "MISP_URL",
         "type": "string",
         "required": true,
         "default": null,

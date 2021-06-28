@@ -40,7 +40,7 @@ class SecretSerializer(serializers.Serializer):
     )
 
     key_name = serializers.CharField(max_length=128)
-    secret_name = serializers.CharField(max_length=128)
+    env_var_key = serializers.CharField(max_length=128)
     type = serializers.ChoiceField(choices=TYPE_CHOICES)
     required = serializers.BooleanField()
     default = BaseField(allow_null=True, required=True)
@@ -105,7 +105,7 @@ class ConnectorConfigSerializer(serializers.Serializer):
         for key_name, secret_dict in secrets.items():
             if secret_dict.get("required", False):
                 # check if set and correct data type
-                secret_val = secrets_store.get_secret(secret_dict["secret_name"])
+                secret_val = secrets_store.get_secret(secret_dict["env_var_key"])
                 if not secret_val:
                     exceptions[key_name] = f"'{key_name}': not set"
                 elif secret_val and not isinstance(

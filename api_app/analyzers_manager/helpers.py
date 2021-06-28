@@ -1,3 +1,6 @@
+# This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
+# See the file 'LICENSE' for copying permission.
+
 from cache_memoize import cache_memoize
 
 from .serializers import AnalyzerConfigSerializer

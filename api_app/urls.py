@@ -12,8 +12,6 @@ from .api import (
     TagViewSet,
     JobViewSet,
 )
-from .connectors_manager.api import ConnectorListAPI
-
 from .auth import LoginView, LogoutView
 
 
@@ -35,5 +33,5 @@ urlpatterns = [
     # Viewsets
     path(r"", include(router.urls)),
     # Connectors
-    path("get_connector_configs", ConnectorListAPI.as_view()),
+    path(r"", include("api_app.connectors_manager.urls")),
 ]

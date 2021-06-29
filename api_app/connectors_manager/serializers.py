@@ -141,25 +141,14 @@ class ConnectorReportSerializer(serializers.ModelSerializer):
     """
 
     name = serializers.CharField(source="connector")
-    success = serializers.SerializerMethodField()
-    started_time_str = serializers.SerializerMethodField()
 
     class Meta:
         model = ConnectorReport
         fields = (
             "name",
-            "success",
+            "status",
             "report",
             "errors",
             "process_time",
-            "started_time_str",
+            "start_time",
         )
-
-    def get_success(self, instance: ConnectorReport):
-        if instance.status == instance.Statuses.SUCCESS.name:
-            return True
-        elif instance.status == instance.Statuses.FAILED.name:
-            return False
-
-    def get_started_time_str(self, instance: ConnectorReport):
-        return instance.start_time.strftime("%Y-%m-%d %H:%M:%S")

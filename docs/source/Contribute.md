@@ -56,17 +56,22 @@ After having written the new python module, you have to remember to:
   ```javascript
   "Analyzer_Name": {
       "type": "file",
+      "python_module": "<module_name>.<class_name>",
+      "description": "very cool analyzer",
       "external_service": true,
       "leaks_info": true,
       "run_hash": true,
-      "soft_time_limit": 100,
       "supported_filetypes": ["application/javascript"],
-      "python_module": "<module_name>.<class_name>",
-      "description": "very cool analyzer",
-      "requires_configuration": true,
-      "queue": "long",
-      "additional_config_params": {
-           "custom_required_param": "ANALYZER_SPECIAL_KEY"
+      "config": {
+        "soft_time_limit": 100,
+        "queue": "long",
+      }
+      "secrets": {
+           "env_var_key": "ANALYZER_SPECIAL_KEY",
+           "type": "string",
+           "required": true,
+           "default": null,
+           "description": "API Key for the analyzer",
       }
   },
   ```
@@ -75,9 +80,8 @@ After having written the new python module, you have to remember to:
   * `type`: can be `file` or `observable`. It specifies what the analyzer should analyze
   * `python_module`: name of the task that the analyzer must launch
   * `description`: little description of the analyzer
-  * `requires_configuration`: if the analyzer requires a configuration made by the user (for example setting an API key)
   
-  The `additional_config_params` can be used in case the new analyzer requires additional configuration.
+  The `config` can be used in case the new analyzer uses specific configuration arguments and `secrets` can be used to declare any secrets the analyzer requires in order to run (Example: API Key). 
   In that way you can create more than one analyzer for a specific python module, each one based on different configurations.
   MISP and Yara Analyzers are a good example of this use case: for instance, you can use different analyzers for different MISP instances.
 
@@ -161,9 +165,8 @@ Also remember to pull the most recent changes available in the **develop** branc
     "Yara_Scan_Custom_Signatures": {
         "type": "file",
         "python_module": "yara.Yara",
-        "requires_configuration": true,
         "description": "Executes Yara with custom signatures",
-        "additional_config_params": {
+        "config": {
             "directories_with_rules": ["/opt/deploy/yara/custom_signatures"]
         }
     },

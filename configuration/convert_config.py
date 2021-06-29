@@ -25,7 +25,6 @@ def main():
             "python_module": config["python_module"],
             "description": config.get("description", ""),
             "disabled": config.get("disabled", False),
-            "requires_configuration": config.get("requires_configuration", False),
             "external_service": config.get("external_service", False),
             "leaks_info": config.get("leaks_info", False),
         }

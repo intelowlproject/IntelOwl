@@ -4,7 +4,6 @@
         "python_module": "apkid.APKiD",
         "description": "APKiD identifies many compilers, packers, obfuscators, and other weird stuff from an APK or DEX file.",
         "disabled": false,
-        "requires_configuration": false,
         "external_service": false,
         "leaks_info": false,
         "supported_filetypes": [
@@ -24,7 +23,6 @@
         "python_module": "abuseipdb.AbuseIPDB",
         "description": "check if an ip was reported on AbuseIPDB",
         "disabled": false,
-        "requires_configuration": true,
         "external_service": true,
         "leaks_info": false,
         "observable_supported": [
@@ -41,7 +39,6 @@
         "python_module": "auth0.Auth0",
         "description": "scan an IP against the Auth0 API",
         "disabled": false,
-        "requires_configuration": true,
         "external_service": true,
         "leaks_info": false,
         "observable_supported": [
@@ -58,7 +55,6 @@
         "python_module": "boxjs_scan.BoxJS",
         "description": "A tool for studying JavaScript malware",
         "disabled": false,
-        "requires_configuration": false,
         "external_service": false,
         "leaks_info": false,
         "supported_filetypes": [
@@ -77,7 +73,6 @@
         "python_module": "checkdmarc.CheckDMARC",
         "description": "An SPF and DMARC DNS records validator",
         "disabled": false,
-        "requires_configuration": false,
         "external_service": false,
         "leaks_info": false,
         "observable_supported": [
@@ -94,7 +89,6 @@
         "python_module": "circl_pdns.CIRCL_PDNS",
         "description": "scan an observable against the CIRCL Passive DNS DB",
         "disabled": false,
-        "requires_configuration": true,
         "external_service": true,
         "leaks_info": false,
         "observable_supported": [
@@ -112,7 +106,6 @@
         "python_module": "circl_pssl.CIRCL_PSSL",
         "description": "scan an observable against the CIRCL Passive SSL DB",
         "disabled": false,
-        "requires_configuration": true,
         "external_service": true,
         "leaks_info": false,
         "observable_supported": [
@@ -129,7 +122,6 @@
         "python_module": "dns.dns_resolvers.classic_dns_resolver.ClassicDNSResolver",
         "description": "Retrieve current domain resolution with default DNS",
         "disabled": false,
-        "requires_configuration": false,
         "external_service": true,
         "leaks_info": false,
         "observable_supported": [
@@ -149,7 +141,6 @@
         "python_module": "dns.dns_resolvers.cloudflare_dns_resolver.CloudFlareDNSResolver",
         "description": "Retrieve current domain resolution with CloudFlare DoH (DNS over HTTPS)",
         "disabled": false,
-        "requires_configuration": false,
         "external_service": true,
         "leaks_info": false,
         "observable_supported": [
@@ -168,7 +159,6 @@
         "python_module": "dns.dns_malicious_detectors.cloudflare_malicious_detector.CloudFlareMaliciousDetector",
         "description": "Scan an observable against CloudFlare DB",
         "disabled": false,
-        "requires_configuration": false,
         "external_service": true,
         "leaks_info": false,
         "observable_supported": [
@@ -186,7 +176,6 @@
         "python_module": "capa_info.CapaInfo",
         "description": "capa detects capabilities in executable files",
         "disabled": false,
-        "requires_configuration": false,
         "external_service": false,
         "leaks_info": false,
         "supported_filetypes": [
@@ -203,7 +192,6 @@
         "python_module": "censys.Censys",
         "description": "scan an IP address against Censys View API",
         "disabled": false,
-        "requires_configuration": true,
         "external_service": true,
         "leaks_info": false,
         "observable_supported": [
@@ -221,7 +209,6 @@
         "python_module": "crxcavator.CRXcavator",
         "description": "scans a chrome extension against crxcavator.io",
         "disabled": false,
-        "requires_configuration": false,
         "external_service": true,
         "leaks_info": false,
         "observable_supported": [
@@ -238,7 +225,6 @@
         "python_module": "cuckoo_scan.CuckooAnalysis",
         "description": "scan a file on a Cuckoo instance",
         "disabled": false,
-        "requires_configuration": true,
         "external_service": false,
         "leaks_info": false,
         "config": {
@@ -262,7 +248,6 @@
         "python_module": "cymru.Cymru",
         "description": "Check if a particular file is known to be malware by Team Cymru",
         "disabled": false,
-        "requires_configuration": false,
         "external_service": true,
         "leaks_info": false,
         "run_hash": true,
@@ -277,7 +262,6 @@
         "python_module": "cymru.Cymru",
         "description": "Check if a particular hash is available in the malware hash registry of Team Cymru",
         "disabled": false,
-        "requires_configuration": false,
         "external_service": true,
         "leaks_info": false,
         "observable_supported": [
@@ -289,12 +273,33 @@
         },
         "secrets": {}
     },
+    "Darksearch_Query": {
+        "type": "observable",
+        "python_module": "darksearch.DarkSearchQuery",
+        "description": "Query against https://darksearch.io/api/search API",
+        "disabled": false,
+        "external_service": true,
+        "leaks_info": false,
+        "observable_supported": [
+            "ip",
+            "url",
+            "domain",
+            "hash",
+            "generic"
+        ],
+        "config": {
+            "soft_time_limit": 50,
+            "queue": "long",
+            "pages": 10,
+            "proxies": {}
+        },
+        "secrets": {}
+    },
     "DNSDB": {
         "type": "observable",
         "python_module": "dnsdb.DNSdb",
         "description": "scan an observable against the Passive DNS Farsight Database (support both v1 and v2 versions)",
         "disabled": false,
-        "requires_configuration": true,
         "external_service": true,
         "leaks_info": false,
         "observable_supported": [
@@ -315,7 +320,6 @@
         "python_module": "dnstwist.DNStwist",
         "description": "scans for potentially malicious permutations of a domain name",
         "disabled": false,
-        "requires_configuration": false,
         "external_service": true,
         "leaks_info": false,
         "observable_supported": [
@@ -333,7 +337,6 @@
         "python_module": "doc_info.DocInfo",
         "description": "static generic document analysis (Oletools)",
         "disabled": false,
-        "requires_configuration": false,
         "external_service": false,
         "leaks_info": false,
         "supported_filetypes": [
@@ -364,7 +367,6 @@
         "python_module": "doc_info.DocInfo",
         "description": "static document analysis with new features to analyze XLM macros, encrypted macros and more",
         "disabled": false,
-        "requires_configuration": false,
         "external_service": false,
         "leaks_info": false,
         "supported_filetypes": [
@@ -395,7 +397,6 @@
         "python_module": "emailrep.EmailRep",
         "description": "Get email reputation from emailrep.io",
         "disabled": false,
-        "requires_configuration": false,
         "external_service": true,
         "leaks_info": false,
         "observable_supported": [
@@ -420,7 +421,6 @@
         "python_module": "file_info.FileInfo",
         "description": "basic static analysis, extracts metadata and hashes",
         "disabled": false,
-        "requires_configuration": false,
         "external_service": false,
         "leaks_info": false,
         "config": {
@@ -434,7 +434,6 @@
         "python_module": "firehol_iplist.FireHol_IPList",
         "description": "check if an IP is in FireHol's IPList",
         "disabled": false,
-        "requires_configuration": false,
         "external_service": true,
         "leaks_info": false,
         "observable_supported": [
@@ -454,7 +453,6 @@
         "python_module": "floss.Floss",
         "description": "Advanced String Extraction by FireEye",
         "disabled": false,
-        "requires_configuration": false,
         "external_service": false,
         "leaks_info": false,
         "supported_filetypes": [
@@ -481,7 +479,6 @@
         "python_module": "fortiguard.Fortiguard",
         "description": "scan an observable with the Fortiguard URL Analyzer",
         "disabled": false,
-        "requires_configuration": false,
         "external_service": true,
         "leaks_info": false,
         "observable_supported": [
@@ -499,7 +496,6 @@
         "python_module": "dns.dns_resolvers.google_dns_resolver.GoogleDNSResolver",
         "description": "Retrieve current domain resolution with Google DoH (DNS over HTTPS)",
         "disabled": false,
-        "requires_configuration": false,
         "external_service": true,
         "leaks_info": false,
         "observable_supported": [
@@ -518,7 +514,6 @@
         "python_module": "dns.dns_malicious_detectors.google_webrisk.WebRisk",
         "description": "Scan an observable against Web Risk API",
         "disabled": false,
-        "requires_configuration": true,
         "external_service": true,
         "leaks_info": false,
         "observable_supported": [
@@ -537,7 +532,6 @@
         "python_module": "dns.dns_malicious_detectors.googlesf.GoogleSF",
         "description": "Scan an observable against GoogleSafeBrowsing DB",
         "disabled": false,
-        "requires_configuration": true,
         "external_service": true,
         "leaks_info": false,
         "observable_supported": [
@@ -556,7 +550,6 @@
         "python_module": "greynoise.GreyNoise",
         "description": "scan an IP against the Greynoise API (requires API key)",
         "disabled": false,
-        "requires_configuration": true,
         "external_service": true,
         "leaks_info": false,
         "observable_supported": [
@@ -582,7 +575,6 @@
         "python_module": "greynoise.GreyNoise",
         "description": "scan an IP against the Community Greynoise API",
         "disabled": false,
-        "requires_configuration": false,
         "external_service": true,
         "leaks_info": false,
         "observable_supported": [
@@ -600,7 +592,6 @@
         "python_module": "greynoise.GreyNoise",
         "description": "scan an IP against the Alpha Greynoise API (no API key required)",
         "disabled": true,
-        "requires_configuration": false,
         "external_service": true,
         "leaks_info": false,
         "observable_supported": [
@@ -618,7 +609,6 @@
         "python_module": "honeydb.HoneyDB",
         "description": "HoneyDB IP lookup service",
         "disabled": false,
-        "requires_configuration": true,
         "external_service": true,
         "leaks_info": false,
         "observable_supported": [
@@ -645,7 +635,6 @@
         "python_module": "hunter.Hunter",
         "description": "Scans a domain name and returns set of data about the organisation, the email address found and additional information about the people owning those email addresses",
         "disabled": false,
-        "requires_configuration": true,
         "external_service": true,
         "leaks_info": false,
         "observable_supported": [
@@ -670,7 +659,6 @@
         "python_module": "ha_get.HybridAnalysisGet",
         "description": "check file hash on HybridAnalysis sandbox reports",
         "disabled": false,
-        "requires_configuration": true,
         "external_service": true,
         "leaks_info": false,
         "run_hash": true,
@@ -685,7 +673,6 @@
         "python_module": "ha_get.HybridAnalysisGet",
         "description": "search an observable in the HybridAnalysis sandbox reports",
         "disabled": false,
-        "requires_configuration": true,
         "external_service": true,
         "leaks_info": false,
         "observable_supported": [
@@ -705,7 +692,6 @@
         "python_module": "intelx.IntelX",
         "description": "Phonebook alike search against IntelX API",
         "disabled": false,
-        "requires_configuration": true,
         "external_service": true,
         "leaks_info": false,
         "observable_supported": [
@@ -734,7 +720,6 @@
         "python_module": "intezer_scan.IntezerScan",
         "description": "scan a file on Intezer",
         "disabled": false,
-        "requires_configuration": true,
         "external_service": true,
         "leaks_info": true,
         "supported_filetypes": [
@@ -751,7 +736,6 @@
         "python_module": "inquest.InQuest",
         "description": "Indicators of Compromise Database - search IOCdb",
         "disabled": false,
-        "requires_configuration": true,
         "external_service": true,
         "leaks_info": false,
         "observable_supported": [
@@ -781,7 +765,6 @@
         "python_module": "inquest.InQuest",
         "description": "Reputation Database - search REPdb",
         "disabled": false,
-        "requires_configuration": true,
         "external_service": true,
         "leaks_info": false,
         "observable_supported": [
@@ -811,7 +794,6 @@
         "python_module": "inquest.InQuest",
         "description": "Deep File Inspection - search dfi",
         "disabled": false,
-        "requires_configuration": true,
         "external_service": true,
         "leaks_info": false,
         "observable_supported": [
@@ -841,7 +823,6 @@
         "python_module": "ipinfo.IPInfo",
         "description": "Brief Information regarding given IP",
         "disabled": false,
-        "requires_configuration": true,
         "external_service": true,
         "leaks_info": false,
         "observable_supported": [
@@ -866,7 +847,6 @@
         "python_module": "manalyze.Manalyze",
         "description": "A static analyzer for PE files",
         "disabled": false,
-        "requires_configuration": false,
         "external_service": false,
         "leaks_info": false,
         "supported_filetypes": [
@@ -883,7 +863,6 @@
         "python_module": "misp.MISP",
         "description": "scan an observable on a custom MISP instance",
         "disabled": false,
-        "requires_configuration": true,
         "external_service": true,
         "leaks_info": false,
         "observable_supported": [
@@ -913,7 +892,6 @@
         "python_module": "misp.MISP",
         "description": "scan an observable on the FIRST MISP instance",
         "disabled": false,
-        "requires_configuration": true,
         "external_service": true,
         "leaks_info": false,
         "observable_supported": [
@@ -942,7 +920,6 @@
         "python_module": "misp.MISP",
         "description": "check a file hash on the FIRST MISP instance",
         "disabled": false,
-        "requires_configuration": true,
         "external_service": false,
         "leaks_info": false,
         "run_hash": true,
@@ -966,7 +943,6 @@
         "python_module": "misp.MISP",
         "description": "check a file hash on a MISP instance",
         "disabled": false,
-        "requires_configuration": true,
         "external_service": false,
         "leaks_info": false,
         "run_hash": true,
@@ -981,7 +957,6 @@
         "python_module": "malpedia_scan.MalpediaScan",
         "description": "scan a binary or a zip file (pwd:infected) against all the yara rules available in Malpedia",
         "disabled": false,
-        "requires_configuration": true,
         "external_service": true,
         "leaks_info": false,
         "supported_filetypes": [
@@ -1015,7 +990,6 @@
         "python_module": "mb_get.MB_GET",
         "description": "Check if a particular malware sample is known to MalwareBazaar",
         "disabled": false,
-        "requires_configuration": false,
         "external_service": true,
         "leaks_info": false,
         "run_hash": true,
@@ -1030,7 +1004,6 @@
         "python_module": "mb_get.MB_GET",
         "description": "Check if a particular malware hash is known to MalwareBazaar",
         "disabled": false,
-        "requires_configuration": false,
         "external_service": true,
         "leaks_info": false,
         "observable_supported": [
@@ -1047,7 +1020,6 @@
         "python_module": "mb_google.MB_GOOGLE",
         "description": "Check if a particular IP, domain or url is known to MalwareBazaar using google search",
         "disabled": false,
-        "requires_configuration": false,
         "external_service": true,
         "leaks_info": false,
         "observable_supported": [
@@ -1066,7 +1038,6 @@
         "python_module": "maxmind.Maxmind",
         "description": "extract GeoIP info for an IP",
         "disabled": false,
-        "requires_configuration": false,
         "external_service": false,
         "leaks_info": false,
         "observable_supported": [
@@ -1083,7 +1054,6 @@
         "python_module": "mwdb_scan.MWDB_Scan",
         "description": "Scan a file against MWDB by Cert Polska",
         "disabled": false,
-        "requires_configuration": true,
         "external_service": true,
         "leaks_info": true,
         "config": {
@@ -1107,7 +1077,6 @@
         "python_module": "onyphe.Onyphe",
         "description": "search an observable in the ONYPHE",
         "disabled": false,
-        "requires_configuration": true,
         "external_service": true,
         "leaks_info": false,
         "observable_supported": [
@@ -1134,7 +1103,6 @@
         "python_module": "otx.OTX",
         "description": "scan an observable on Alienvault OTX",
         "disabled": false,
-        "requires_configuration": true,
         "external_service": true,
         "leaks_info": false,
         "observable_supported": [
@@ -1155,7 +1123,6 @@
         "python_module": "otx.OTX",
         "description": "check file hash on OTX Alienvault",
         "disabled": false,
-        "requires_configuration": true,
         "external_service": true,
         "leaks_info": false,
         "run_hash": true,
@@ -1171,7 +1138,6 @@
         "python_module": "pdf_info.PDFInfo",
         "description": "static PDF analysis (peepdf + pdfid)",
         "disabled": false,
-        "requires_configuration": false,
         "external_service": false,
         "leaks_info": false,
         "supported_filetypes": [
@@ -1188,7 +1154,6 @@
         "python_module": "pe_info.PEInfo",
         "description": "static PE analysis (pefile)",
         "disabled": false,
-        "requires_configuration": false,
         "external_service": false,
         "leaks_info": false,
         "supported_filetypes": [
@@ -1205,7 +1170,6 @@
         "python_module": "peframe.PEframe",
         "description": "Perform static analysis on Portable Executable malware and malicious MS Office documents",
         "disabled": false,
-        "requires_configuration": false,
         "external_service": false,
         "leaks_info": false,
         "supported_filetypes": [
@@ -1222,7 +1186,6 @@
         "python_module": "phishtank.Phishtank",
         "description": "Check if url is verified in Phishtank API",
         "disabled": false,
-        "requires_configuration": false,
         "external_service": true,
         "leaks_info": false,
         "observable_supported": [
@@ -1247,7 +1210,6 @@
         "python_module": "pulsedive.Pulsedive",
         "description": "Scan indicators and retrieve results from Pulsedive's API",
         "disabled": false,
-        "requires_configuration": false,
         "external_service": true,
         "leaks_info": false,
         "observable_supported": [
@@ -1276,7 +1238,6 @@
         "python_module": "rendertron.Rendertron",
         "description": "get screenshot of a web page using rendertron (puppeteer)",
         "disabled": false,
-        "requires_configuration": true,
         "external_service": false,
         "leaks_info": false,
         "observable_supported": [
@@ -1293,7 +1254,6 @@
         "python_module": "qiling.Qiling",
         "description": "Qiling PE emulation",
         "disabled": false,
-        "requires_configuration": false,
         "external_service": false,
         "leaks_info": false,
         "supported_filetypes": [
@@ -1314,7 +1274,6 @@
         "python_module": "qiling.Qiling",
         "description": "Qiling windows shellcode emulation",
         "disabled": false,
-        "requires_configuration": false,
         "external_service": false,
         "leaks_info": false,
         "supported_filetypes": [
@@ -1335,7 +1294,6 @@
         "python_module": "qiling.Qiling",
         "description": "Qiling ELF emulation",
         "disabled": false,
-        "requires_configuration": false,
         "external_service": false,
         "leaks_info": false,
         "supported_filetypes": [
@@ -1357,7 +1315,6 @@
         "python_module": "qiling.Qiling",
         "description": "Qiling linux shellcode emulation",
         "disabled": false,
-        "requires_configuration": false,
         "external_service": false,
         "leaks_info": false,
         "supported_filetypes": [
@@ -1378,7 +1335,6 @@
         "python_module": "dns.dns_resolvers.quad9_dns_resolver.Quad9DNSResolver",
         "description": "Retrieve current domain resolution with Quad9 DoH (DNS over HTTPS)",
         "disabled": false,
-        "requires_configuration": false,
         "external_service": true,
         "leaks_info": false,
         "observable_supported": [
@@ -1397,7 +1353,6 @@
         "python_module": "dns.dns_malicious_detectors.quad9_malicious_detector.Quad9MaliciousDetector",
         "description": "Check if a domain or an url is marked as malicious in Quad9 database",
         "disabled": false,
-        "requires_configuration": false,
         "external_service": true,
         "leaks_info": false,
         "observable_supported": [
@@ -1415,7 +1370,6 @@
         "python_module": "quark_engine.QuarkEngine",
         "description": "An Obfuscation-Neglect Android Malware Scoring System",
         "disabled": false,
-        "requires_configuration": false,
         "external_service": false,
         "leaks_info": false,
         "supported_filetypes": [
@@ -1435,7 +1389,6 @@
         "python_module": "robtex.Robtex",
         "description": "scan a domain against the Robtex Passive DNS DB",
         "disabled": false,
-        "requires_configuration": false,
         "external_service": true,
         "leaks_info": false,
         "observable_supported": [
@@ -1454,7 +1407,6 @@
         "python_module": "robtex.Robtex",
         "description": "get IP info from Robtex",
         "disabled": false,
-        "requires_configuration": false,
         "external_service": true,
         "leaks_info": false,
         "observable_supported": [
@@ -1472,7 +1424,6 @@
         "python_module": "robtex.Robtex",
         "description": "scan an IP against the Robtex Passive DNS DB",
         "disabled": false,
-        "requires_configuration": false,
         "external_service": true,
         "leaks_info": false,
         "observable_supported": [
@@ -1490,7 +1441,6 @@
         "python_module": "rtf_info.RTFInfo",
         "description": "static RTF analysis (Oletools)",
         "disabled": false,
-        "requires_configuration": false,
         "external_service": false,
         "leaks_info": false,
         "supported_filetypes": [
@@ -1508,7 +1458,6 @@
         "python_module": "securitytrails.SecurityTrails",
         "description": "scan a domain against securitytrails API for general details",
         "disabled": false,
-        "requires_configuration": true,
         "external_service": true,
         "leaks_info": false,
         "observable_supported": [
@@ -1527,7 +1476,6 @@
         "python_module": "securitytrails.SecurityTrails",
         "description": "scan a domain against securitytrails API for historical DNS",
         "disabled": false,
-        "requires_configuration": true,
         "external_service": true,
         "leaks_info": false,
         "observable_supported": [
@@ -1546,7 +1494,6 @@
         "python_module": "securitytrails.SecurityTrails",
         "description": "scan a domain against securitytrails API for historical WHOIS",
         "disabled": false,
-        "requires_configuration": true,
         "external_service": true,
         "leaks_info": false,
         "observable_supported": [
@@ -1565,7 +1512,6 @@
         "python_module": "securitytrails.SecurityTrails",
         "description": "scan an IP against securitytrails API for neighbour IPs",
         "disabled": false,
-        "requires_configuration": true,
         "external_service": true,
         "leaks_info": false,
         "observable_supported": [
@@ -1582,7 +1528,6 @@
         "python_module": "securitytrails.SecurityTrails",
         "description": "scan a domain against securitytrails API for subdomains",
         "disabled": false,
-        "requires_configuration": true,
         "external_service": true,
         "leaks_info": false,
         "observable_supported": [
@@ -1601,7 +1546,6 @@
         "python_module": "securitytrails.SecurityTrails",
         "description": "scan a domain against securitytrails API for tags",
         "disabled": false,
-        "requires_configuration": true,
         "external_service": true,
         "leaks_info": false,
         "observable_supported": [
@@ -1620,7 +1564,6 @@
         "python_module": "shodan.Shodan",
         "description": "scan an IP against Shodan Honeyscore API",
         "disabled": false,
-        "requires_configuration": true,
         "external_service": true,
         "leaks_info": false,
         "observable_supported": [
@@ -1638,7 +1581,6 @@
         "python_module": "shodan.Shodan",
         "description": "scan an IP against Shodan Search API",
         "disabled": false,
-        "requires_configuration": true,
         "external_service": true,
         "leaks_info": false,
         "observable_supported": [
@@ -1656,7 +1598,6 @@
         "python_module": "signature_info.SignatureInfo",
         "description": "PE signature extractor",
         "disabled": false,
-        "requires_configuration": false,
         "external_service": false,
         "leaks_info": false,
         "supported_filetypes": [
@@ -1673,7 +1614,6 @@
         "python_module": "speakeasy_emulation.SpeakEasy",
         "description": "speakeasy emulation report",
         "disabled": false,
-        "requires_configuration": false,
         "external_service": false,
         "leaks_info": false,
         "supported_filetypes": [
@@ -1690,7 +1630,6 @@
         "python_module": "ss_api_net.SSAPINet",
         "description": "get a screenshot of a web page using screenshotapi.net (external source)",
         "disabled": false,
-        "requires_configuration": true,
         "external_service": true,
         "leaks_info": false,
         "observable_supported": [
@@ -1721,7 +1660,6 @@
         "python_module": "strings_info.StringsInfo",
         "description": "strings extraction",
         "disabled": false,
-        "requires_configuration": false,
         "external_service": false,
         "leaks_info": false,
         "config": {
@@ -1737,7 +1675,6 @@
         "python_module": "strings_info.StringsInfo",
         "description": "strings extraction plus strings ranking based on Machine Learning. Leverages Fireeye's Stringsifter",
         "disabled": false,
-        "requires_configuration": false,
         "external_service": false,
         "leaks_info": false,
         "config": {
@@ -1753,7 +1690,6 @@
         "python_module": "stratosphere.Stratos",
         "description": "Cross refernce an IP in blacklist provided by Stratosphere lab",
         "disabled": false,
-        "requires_configuration": false,
         "external_service": false,
         "leaks_info": false,
         "observable_supported": [
@@ -1770,7 +1706,6 @@
         "python_module": "talos.Talos",
         "description": "check an IP reputation from Talos downloaded IP list",
         "disabled": false,
-        "requires_configuration": false,
         "external_service": true,
         "leaks_info": false,
         "observable_supported": [
@@ -1787,7 +1722,6 @@
         "python_module": "threatfox.ThreatFox",
         "description": "search for an IOC in ThreatFox's database",
         "disabled": false,
-        "requires_configuration": false,
         "external_service": true,
         "leaks_info": false,
         "observable_supported": [
@@ -1808,7 +1742,6 @@
         "python_module": "threatminer.Threatminer",
         "description": "retrieve PDNS data from Threatminer API",
         "disabled": false,
-        "requires_configuration": false,
         "external_service": true,
         "leaks_info": false,
         "observable_supported": [
@@ -1827,7 +1760,6 @@
         "python_module": "threatminer.Threatminer",
         "description": "retrieve reports from Threatminer API",
         "disabled": false,
-        "requires_configuration": false,
         "external_service": true,
         "leaks_info": false,
         "observable_supported": [
@@ -1846,7 +1778,6 @@
         "python_module": "threatminer.Threatminer",
         "description": "retrieve subdomains from Threatminer API",
         "disabled": false,
-        "requires_configuration": false,
         "external_service": true,
         "leaks_info": false,
         "observable_supported": [
@@ -1864,7 +1795,6 @@
         "python_module": "thug_file.ThugFile",
         "description": "Perform hybrid dynamic/static analysis on a saved HTML page",
         "disabled": false,
-        "requires_configuration": true,
         "external_service": false,
         "leaks_info": false,
         "supported_filetypes": [
@@ -1887,7 +1817,6 @@
         "python_module": "thug_url.ThugUrl",
         "description": "Perform hybrid dynamic/static analysis on a URL",
         "disabled": false,
-        "requires_configuration": true,
         "external_service": false,
         "leaks_info": false,
         "observable_supported": [
@@ -1911,7 +1840,6 @@
         "python_module": "tor.Tor",
         "description": "check if an IP is a Tor Exit Node",
         "disabled": false,
-        "requires_configuration": false,
         "external_service": true,
         "leaks_info": false,
         "observable_supported": [
@@ -1928,7 +1856,6 @@
         "python_module": "tor.Tor",
         "description": "check if a domain is in the last Tranco ranking top sites list",
         "disabled": false,
-        "requires_configuration": false,
         "external_service": true,
         "leaks_info": false,
         "observable_supported": [
@@ -1946,7 +1873,6 @@
         "python_module": "triage_search.TriageSearch",
         "description": "analyze a url sample using triage sandbox environment",
         "disabled": false,
-        "requires_configuration": true,
         "external_service": true,
         "leaks_info": false,
         "observable_supported": [
@@ -1975,7 +1901,6 @@
         "python_module": "triage_scan.TriageScanFile",
         "description": "leverage Triage sandbox environment to scan various files",
         "disabled": false,
-        "requires_configuration": true,
         "external_service": true,
         "leaks_info": false,
         "config": {
@@ -1999,7 +1924,6 @@
         "python_module": "unpac_me.UnpacMe",
         "description": "UnpacMe unpacker",
         "disabled": false,
-        "requires_configuration": false,
         "external_service": true,
         "leaks_info": true,
         "supported_filetypes": [
@@ -2026,7 +1950,6 @@
         "python_module": "urlhaus.URLHaus",
         "description": "Query a domain or URL against URLhaus API",
         "disabled": false,
-        "requires_configuration": false,
         "external_service": true,
         "leaks_info": false,
         "observable_supported": [
@@ -2044,7 +1967,6 @@
         "python_module": "urlscan.UrlScan",
         "description": "Submit & retrieve result of a URL against URLScan API",
         "disabled": false,
-        "requires_configuration": true,
         "external_service": true,
         "leaks_info": false,
         "observable_supported": [
@@ -2071,7 +1993,6 @@
         "python_module": "urlscan.UrlScan",
         "description": "Search an IP/domain/url/hash against URLScan API",
         "disabled": false,
-        "requires_configuration": true,
         "external_service": true,
         "leaks_info": false,
         "observable_supported": [
@@ -2100,7 +2021,6 @@
         "python_module": "vt2_get.VirusTotalv2",
         "description": "check file hash on VirusTotal using old API endpoints",
         "disabled": true,
-        "requires_configuration": true,
         "external_service": true,
         "leaks_info": false,
         "run_hash": true,
@@ -2123,7 +2043,6 @@
         "python_module": "vt2_get.VirusTotalv2",
         "description": "search an observable in the VirusTotal DB using the old API endpoints",
         "disabled": true,
-        "requires_configuration": true,
         "external_service": true,
         "leaks_info": false,
         "observable_supported": [
@@ -2151,7 +2070,6 @@
         "python_module": "vt2_scan.VirusTotalv2ScanFile",
         "description": "scan a file on VirusTotal using old API endpoints",
         "disabled": true,
-        "requires_configuration": true,
         "external_service": true,
         "leaks_info": true,
         "config": {
@@ -2173,7 +2091,6 @@
         "python_module": "vt3_get.VirusTotalv3",
         "description": "check file hash on VirusTotal",
         "disabled": true,
-        "requires_configuration": true,
         "external_service": true,
         "leaks_info": false,
         "run_hash": true,
@@ -2196,7 +2113,6 @@
         "python_module": "vt3_get.VirusTotalv3",
         "description": "check file hash on VirusTotal. If not already available, send the sample and perform a new scan",
         "disabled": false,
-        "requires_configuration": true,
         "external_service": true,
         "leaks_info": true,
         "run_hash": true,
@@ -2220,7 +2136,6 @@
         "python_module": "vt3_get.VirusTotalv3",
         "description": "search an observable in the VirusTotal DB",
         "disabled": false,
-        "requires_configuration": true,
         "external_service": true,
         "leaks_info": false,
         "observable_supported": [
@@ -2248,7 +2163,6 @@
         "python_module": "whoisxmlapi.Whoisxmlapi",
         "description": "the WHOIS record data, of a domain name, an IP address, or an email address",
         "disabled": false,
-        "requires_configuration": true,
         "external_service": true,
         "leaks_info": false,
         "observable_supported": [
@@ -2274,7 +2188,6 @@
         "python_module": "wigle.WiGLE",
         "description": "Maps and database of 802.11 wireless networks, with statistics, submitted by wardrivers, netstumblers, and net huggers.",
         "disabled": false,
-        "requires_configuration": true,
         "external_service": true,
         "leaks_info": false,
         "observable_supported": [
@@ -2300,7 +2213,6 @@
         "python_module": "xforce.XForce",
         "description": "scan an observable on IBM X-Force Exchange.",
         "disabled": false,
-        "requires_configuration": true,
         "external_service": true,
         "leaks_info": false,
         "observable_supported": [
@@ -2328,7 +2240,6 @@
         "python_module": "xlm_macro_deobfuscator.XlmMacroDeobfuscator",
         "description": "Xlm macro deobfuscator",
         "disabled": false,
-        "requires_configuration": false,
         "external_service": false,
         "leaks_info": false,
         "supported_filetypes": [
@@ -2356,7 +2267,6 @@
         "python_module": "yara_scan.YaraScan",
         "description": "scan a file with community yara rules",
         "disabled": false,
-        "requires_configuration": false,
         "external_service": false,
         "leaks_info": false,
         "config": {
@@ -2373,7 +2283,6 @@
         "python_module": "yara_scan.YaraScan",
         "description": "scan a file with StrangerealIntel daily IOC yara rules",
         "disabled": false,
-        "requires_configuration": false,
         "external_service": false,
         "leaks_info": false,
         "config": {
@@ -2394,7 +2303,6 @@
         "python_module": "yara_scan.YaraScan",
         "description": "scan a file with FireEye yara rules",
         "disabled": false,
-        "requires_configuration": false,
         "external_service": false,
         "leaks_info": false,
         "config": {
@@ -2415,7 +2323,6 @@
         "python_module": "yara_scan.YaraScan",
         "description": "scan a file with Neo23x0 yara rules",
         "disabled": false,
-        "requires_configuration": false,
         "external_service": false,
         "leaks_info": false,
         "config": {
@@ -2435,7 +2342,6 @@
         "python_module": "yara_scan.YaraScan",
         "description": "scan a file with Inquest yara rules",
         "disabled": false,
-        "requires_configuration": false,
         "external_service": false,
         "leaks_info": false,
         "config": {
@@ -2456,7 +2362,6 @@
         "python_module": "yara_scan.YaraScan",
         "description": "scan a file with Intezer yara rules",
         "disabled": false,
-        "requires_configuration": false,
         "external_service": false,
         "leaks_info": false,
         "config": {
@@ -2473,7 +2378,6 @@
         "python_module": "yara_scan.YaraScan",
         "description": "scan a file with McAfee yara rules",
         "disabled": false,
-        "requires_configuration": false,
         "external_service": false,
         "leaks_info": false,
         "config": {
@@ -2498,7 +2402,6 @@
         "python_module": "yara_scan.YaraScan",
         "description": "scan a file with ReversingLabs yara rules",
         "disabled": false,
-        "requires_configuration": false,
         "external_service": false,
         "leaks_info": false,
         "config": {
@@ -2519,7 +2422,6 @@
         "python_module": "yara_scan.YaraScan",
         "description": "scan a file with Samir Threat Hunting yara rules",
         "disabled": false,
-        "requires_configuration": false,
         "external_service": false,
         "leaks_info": false,
         "config": {
@@ -2539,7 +2441,6 @@
         "python_module": "yara_scan.YaraScan",
         "description": "scan a file with Stratosphere yara rules",
         "disabled": false,
-        "requires_configuration": false,
         "external_service": false,
         "leaks_info": false,
         "config": {
@@ -2560,7 +2461,6 @@
         "python_module": "zoomeye.ZoomEye",
         "description": "Cyberspace Search Engine recording information of devices, websites, services and components etc..",
         "disabled": false,
-        "requires_configuration": true,
         "external_service": true,
         "leaks_info": false,
         "observable_supported": [

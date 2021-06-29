@@ -46,7 +46,6 @@ class AnalyzerConfigSerializer(rfs.Serializer):
     type = rfs.ChoiceField(required=True, choices=TYPE_CHOICES)
     python_module = rfs.CharField(required=True)
     disabled = rfs.BooleanField(required=True)
-    requires_configuration = rfs.BooleanField(required=True)
     external_service = rfs.BooleanField(required=True)
     config = rfs.JSONField(required=True)
     # Optional Fields

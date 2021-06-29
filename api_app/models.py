@@ -64,6 +64,9 @@ class Job(models.Model):
     analyzers_to_execute = pg_fields.ArrayField(
         models.CharField(max_length=128), blank=True, default=list
     )
+    connectors_to_execute = pg_fields.ArrayField(
+        models.CharField(max_length=128), blank=True, default=list
+    )
     analysis_reports = models.JSONField(default=list, null=True, blank=True)
     received_request_time = models.DateTimeField(auto_now_add=True)
     finished_analysis_time = models.DateTimeField(blank=True, null=True)

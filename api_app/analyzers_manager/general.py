@@ -1,0 +1,156 @@
+# This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
+# See the file 'LICENSE' for copying permission.
+
+import logging
+from celery import uuid
+from django.core.cache import cache
+
+
+from api_app.exceptions import (
+    AnalyzerConfigurationException,
+    AnalyzerRunException,
+)
+from api_app.helpers import generate_sha256
+from intel_owl.settings import CELERY_QUEUES
+from intel_owl.celery import app as celery_app
+
+from .utils import (
+    set_job_status,
+    set_failed_analyzer,
+    get_filepath_filename,
+    get_observable_data,
+    adjust_analyzer_config,
+)
+
+logger = logging.getLogger(__name__)
+
+
+def start_analyzers(
+    analyzers_to_execute,
+    analyzers_config,
+    runtime_configuration,
+    job_id,
+    md5,
+    is_sample,
+):
+    set_job_status(job_id, "running")
+    if is_sample:
+        file_path, filename = get_filepath_filename(job_id)
+    else:
+        observable_name, observable_classification = get_observable_data(job_id)
+
+    for analyzer in analyzers_to_execute:
+        ac = analyzers_config[analyzer]
+        try:
+            module = ac.get("python_module", None)
+            if not module:
+                raise AnalyzerConfigurationException(
+                    f"no python_module available in config for {analyzer} analyzer?!"  # noqa: E501
+                )
+
+            # Get analyzer config and secrets
+            config_params = ac.get("config", {})
+            secret_params = ac.get("secrets", {})
+            additional_config_params = {}
+
+            # Creating additional_config_parmas
+            # Adding all secrets
+            for name, conf in secret_params.items():
+                additional_config_params[name] = conf.get("env_var_key", "")
+
+            # Adding all config parameters
+            for key, value in config_params.items():
+                additional_config_params[key] = value
+
+            adjust_analyzer_config(
+                runtime_configuration,
+                additional_config_params,
+                analyzer.name,
+                job_id,
+                md5,
+            )
+            # get celery queue
+            queue = config_params.get("queue", "default")
+            if queue not in CELERY_QUEUES:
+                logger.error(
+                    f"Analyzer {analyzers_to_execute} has a wrong queue."
+                    f" Setting to default"
+                )
+                queue = "default"
+            # construct arguments
+
+            if is_sample:
+                # check if we should run the hash instead of the binary
+                run_hash = ac.get("run_hash", False)
+                if run_hash:
+                    # check which kind of hash the analyzer needs
+                    run_hash_type = ac.get("run_hash_type", "md5")
+                    if run_hash_type == "md5":
+                        hash_value = md5
+                    elif run_hash_type == "sha256":
+                        hash_value = generate_sha256(job_id)
+                    else:
+                        error_message = (
+                            f"only md5 and sha256 are supported "
+                            f"but you asked {run_hash_type}. job_id: {job_id}"
+                        )
+                        raise AnalyzerConfigurationException(error_message)
+                    # run the analyzer with the hash
+                    args = [
+                        f"observable_analyzers.{module}",
+                        analyzer,
+                        job_id,
+                        hash_value,
+                        "hash",
+                        additional_config_params,
+                    ]
+                else:
+                    # run the analyzer with the binary
+                    args = [
+                        f"file_analyzers.{module}",
+                        analyzer,
+                        job_id,
+                        file_path,
+                        filename,
+                        md5,
+                        additional_config_params,
+                    ]
+            else:
+                # observables analyzer case
+                args = [
+                    f"observable_analyzers.{module}",
+                    analyzer,
+                    job_id,
+                    observable_name,
+                    observable_classification,
+                    additional_config_params,
+                ]
+            # run analyzer with a celery task asynchronously
+            stl = config_params.get("soft_time_limit", 300)
+            t_id = uuid()
+            celery_app.send_task(
+                "run_analyzer",
+                args=args,
+                queue=queue,
+                soft_time_limit=stl,
+                task_id=t_id,
+            )
+            # to track task_id by job_id
+            task_ids = cache.get(job_id)
+            if isinstance(task_ids, list):
+                task_ids.append(t_id)
+            else:
+                task_ids = [t_id]
+            cache.set(job_id, task_ids)
+
+        except (AnalyzerConfigurationException, AnalyzerRunException) as e:
+            err_msg = f"({analyzer}, job_id #{job_id}) -> Error: {e}"
+            logger.error(err_msg)
+            set_failed_analyzer(analyzer, job_id, err_msg)
+
+
+def kill_running_analysis(job_id):
+    task_ids = cache.get(job_id)
+    if isinstance(task_ids, list):
+        celery_app.control.revoke(task_ids)
+        cache.delete(job_id)

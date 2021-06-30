@@ -11,6 +11,7 @@ from django.dispatch import receiver
 
 
 from .exceptions import AnalyzerRunException
+from api_app.analyzers_manager.models import AnalyzerReport
 
 
 def file_directory_path(instance, filename):
@@ -95,6 +96,20 @@ class Job(models.Model):
         if self.is_sample:
             return f'Job("{self.file_name}")'
         return f'Job("{self.observable_name}")'
+
+    @classmethod
+    def init_report(cls, name, job_id):
+        report_obj = AnalyzerReport(
+            analyzer_name=name,
+            job=cls.object_by_job_id(job_id),
+            report={},
+            errors=[],
+            start_time=timezone.now(),
+            end_time=timezone.now(),
+        )
+        report_obj.status = report_obj.Statuses.PENDING.name
+
+        return report_obj
 
 
 @receiver(pre_delete, sender=Job)

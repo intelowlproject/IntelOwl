@@ -5,7 +5,8 @@ import logging
 
 from api_app import models, serializers, helpers
 from api_app.permissions import ExtendedObjectPermissions
-from .script_analyzers import general
+from .analyzers_manager import general
+from api_app.analyzers_manager.serializers import AnalyzerConfigSerializer
 
 from wsgiref.util import FileWrapper
 
@@ -324,7 +325,7 @@ def send_analysis_request(request):
 
             # we need to clean the list of requested analyzers,
             # ... based on configuration data
-            analyzers_config = helpers.get_analyzer_config()
+            analyzers_config = AnalyzerConfigSerializer.read_and_verify_config()
             run_all_available_analyzers = serialized_data.get(
                 "run_all_available_analyzers", False
             )
@@ -398,38 +399,6 @@ def send_analysis_request(request):
         logger.exception(f"receive_analysis_request requester:{source} error:{e}.")
         return Response(
             {"detail": "error in send_analysis_request. Check logs"},
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        )
-
-
-@add_docs(
-    description="""
-Get the uploaded analyzer configuration,
-can be useful if you want to choose the analyzers programmatically""",
-    parameters=[],
-    responses={
-        200: inline_serializer(
-            name="GetAnalyzerConfigsSuccessResponse",
-            fields={"analyzers_config": BaseSerializer.DictField()},
-        ),
-        500: inline_serializer(
-            name="GetAnalyzerConfigsFailedResponse",
-            fields={"error": BaseSerializer.StringRelatedField()},
-        ),
-    },
-)
-@api_view(["GET"])
-def get_analyzer_configs(request):
-    try:
-        logger.info(f"get_analyzer_configs received request from {str(request.user)}.")
-        ac = helpers.get_analyzer_config()
-        return Response(ac, status=status.HTTP_200_OK)
-    except Exception as e:
-        logger.exception(
-            f"get_analyzer_configs requester:{str(request.user)} error:{e}."
-        )
-        return Response(
-            {"error": "error in get_analyzer_configs. Check logs."},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
 

@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     "durin",
     "guardian",
     "api_app.apps.ApiAppConfig",
+    "api_app.analyzers_manager.apps.AnalyzersManagerConfig",
     "api_app.connectors_manager.apps.ConnectorsManagerConfig",
     "django_elasticsearch_dsl",
     "django_nose",

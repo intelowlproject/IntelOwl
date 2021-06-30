@@ -44,9 +44,9 @@ This means that you still need to rebuild everything when, for example, you chan
 
 ## How to add a new analyzer
 You may want to look at a few existing examples to start to build a new one, such as:
-- [shodan.py](https://github.com/intelowlproject/IntelOwl/blob/develop/api_app/script_analyzers/observable_analyzers/shodan.py), if you are creating an observable analyzer
-- [intezer_scan.py](https://github.com/intelowlproject/IntelOwl/blob/develop/api_app/script_analyzers/file_analyzers/intezer_scan.py), if you are creating a file analyzer
-- [peframe.py](https://github.com/intelowlproject/IntelOwl/blob/develop/api_app/script_analyzers/file_analyzers/peframe.py), if you are creating a [docker based analyzer](#integrating-a-docker-based-analyzer)
+- [shodan.py](https://github.com/intelowlproject/IntelOwl/blob/develop/api_app/analyzers_manager/observable_analyzers/shodan.py), if you are creating an observable analyzer
+- [intezer_scan.py](https://github.com/intelowlproject/IntelOwl/blob/develop/api_app/analyzers_manager/file_analyzers/intezer_scan.py), if you are creating a file analyzer
+- [peframe.py](https://github.com/intelowlproject/IntelOwl/blob/develop/api_app/analyzers_manager/file_analyzers/peframe.py), if you are creating a [docker based analyzer](#integrating-a-docker-based-analyzer)
 
 After having written the new python module, you have to remember to:
 1. Put the module in the `file_analyzers` or `observable_analyzers` directory based on what it can analyze
@@ -56,17 +56,22 @@ After having written the new python module, you have to remember to:
   ```javascript
   "Analyzer_Name": {
       "type": "file",
+      "python_module": "<module_name>.<class_name>",
+      "description": "very cool analyzer",
       "external_service": true,
       "leaks_info": true,
       "run_hash": true,
-      "soft_time_limit": 100,
       "supported_filetypes": ["application/javascript"],
-      "python_module": "<module_name>.<class_name>",
-      "description": "very cool analyzer",
-      "requires_configuration": true,
-      "queue": "long",
-      "additional_config_params": {
-           "custom_required_param": "ANALYZER_SPECIAL_KEY"
+      "config": {
+        "soft_time_limit": 100,
+        "queue": "long",
+      }
+      "secrets": {
+           "env_var_key": "ANALYZER_SPECIAL_KEY",
+           "type": "string",
+           "required": true,
+           "default": null,
+           "description": "API Key for the analyzer",
       }
   },
   ```
@@ -75,9 +80,8 @@ After having written the new python module, you have to remember to:
   * `type`: can be `file` or `observable`. It specifies what the analyzer should analyze
   * `python_module`: name of the task that the analyzer must launch
   * `description`: little description of the analyzer
-  * `requires_configuration`: if the analyzer requires a configuration made by the user (for example setting an API key)
   
-  The `additional_config_params` can be used in case the new analyzer requires additional configuration.
+  The `config` can be used in case the new analyzer uses specific configuration arguments and `secrets` can be used to declare any secrets the analyzer requires in order to run (Example: API Key). 
   In that way you can create more than one analyzer for a specific python module, each one based on different configurations.
   MISP and Yara Analyzers are a good example of this use case: for instance, you can use different analyzers for different MISP instances.
 
@@ -161,9 +165,8 @@ Also remember to pull the most recent changes available in the **develop** branc
     "Yara_Scan_Custom_Signatures": {
         "type": "file",
         "python_module": "yara.Yara",
-        "requires_configuration": true,
         "description": "Executes Yara with custom signatures",
-        "additional_config_params": {
+        "config": {
             "directories_with_rules": ["/opt/deploy/yara/custom_signatures"]
         }
     },

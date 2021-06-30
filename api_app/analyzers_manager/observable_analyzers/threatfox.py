@@ -1,0 +1,27 @@
+# This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
+# See the file 'LICENSE' for copying permission.
+
+import requests
+import json
+
+from api_app.exceptions import AnalyzerRunException
+from api_app.analyzers_manager import classes
+
+
+class ThreatFox(classes.ObservableAnalyzer):
+    base_url: str = "https://threatfox-api.abuse.ch/api/v1/"
+
+    def run(self):
+        payload = {
+            "query": "search_ioc",
+        }
+
+        try:
+            payload["search_term"] = self.observable_name
+            response = requests.post(self.base_url, data=json.dumps(payload))
+            response.raise_for_status()
+        except requests.RequestException as e:
+            raise AnalyzerRunException(e)
+
+        result = response.json()
+        return result

@@ -1,6 +1,13 @@
 # Changelog
 
 [**Upgrade Guide**](https://intelowl.readthedocs.io/en/latest/Installation.html#update-to-the-most-recent-version)
+
+## [v2.4.2](https://github.com/intelowlproject/IntelOwl/releases/tag/v2.4.2)
+- darksearch.io search API analyzer
+- improved abuseipdb analyzer to show matched categories in a human readable form too
+- improved HoneyDB analyzer 
+- as always: fixes, tweaks and dependencies upgrades.
+
 ## [v2.4.1](https://github.com/intelowlproject/IntelOwl/releases/tag/v2.4.1)
 A lot of different fixes, tweaks and dependencies upgrades. Also the documentation was updated
 

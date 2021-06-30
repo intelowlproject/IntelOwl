@@ -30,6 +30,19 @@ def get_analyzer_config():
     return analyzers_config
 
 
+def map_data_type(secret_type):
+    mapping_dict = {
+        "number": (
+            int,
+            float,
+        ),
+        "string": str,
+        "bool": bool,
+    }
+
+    return mapping_dict[secret_type]
+
+
 def calculate_mimetype(file_buffer, file_name):
     read_file_buffer = file_buffer.read()
     calculated_mimetype = magic_from_buffer(read_file_buffer, mime=True)
@@ -55,7 +68,7 @@ def filter_analyzers(
     for analyzer in analyzers_requested:
         try:
             if analyzer not in analyzers_config:
-                raise NotRunnableAnalyzer(f"{analyzer} not available in configuration.")
+                raise NotRunnableAnalyzer(f"{analyzer} not available in configuration")
 
             analyzer_config = analyzers_config[analyzer]
 

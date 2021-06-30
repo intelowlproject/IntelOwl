@@ -8,11 +8,11 @@ from guardian import utils
 
 from intel_owl.celery import app
 from api_app import crons
-from api_app.script_analyzers.classes import BaseAnalyzerMixin
-from api_app.script_analyzers.utils import set_report_and_cleanup, set_failed_analyzer
+from api_app.analyzers_manager.classes import BaseAnalyzerMixin
+from api_app.analyzers_manager.utils import set_report_and_cleanup, set_failed_analyzer
 
-from api_app.script_analyzers.file_analyzers import yara_scan
-from api_app.script_analyzers.observable_analyzers import (
+from api_app.analyzers_manager.file_analyzers import yara_scan
+from api_app.analyzers_manager.observable_analyzers import (
     maxmind,
     talos,
     tor,
@@ -64,7 +64,7 @@ def run_analyzer(cls_path, *args):
         typ = path_parts[0]
         modname = ".".join(path_parts[1:-1])
         clsname = path_parts[-1]
-        modpath = f"api_app.script_analyzers.{typ}.{modname}"
+        modpath = f"api_app.analyzers_manager.{typ}.{modname}"
         mod = importlib.import_module(modpath)
         if not mod:
             raise Exception(f"Module: {cls_path} couldn't be imported")

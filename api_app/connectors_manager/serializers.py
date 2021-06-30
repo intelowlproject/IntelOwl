@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from django.conf import settings
+from cache_memoize import cache_memoize
 
 import os
 import json
@@ -71,6 +72,7 @@ class ConnectorConfigSerializer(serializers.Serializer):
     verification = serializers.SerializerMethodField()
 
     @classmethod
+    @cache_memoize(100)
     def read_and_verify_config(cls):
         config_path = os.path.join(
             settings.BASE_DIR, "configuration", "connector_config.json"

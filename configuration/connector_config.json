@@ -1,0 +1,26 @@
+{
+  "MISP": {
+    "disabled": false,
+    "description": "MISP Connector",
+    "python_module": "misp.MISP",
+    "config": {
+      "soft_time_limit": 30
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "MISP_KEY",
+        "type": "string",
+        "required": true,
+        "default": null,
+        "description": "API key for your MISP instance"
+      },
+      "url_key_name": {
+        "env_var_key": "MISP_URL",
+        "type": "string",
+        "required": true,
+        "default": null,
+        "description": "URL of your MISP instance"
+      }
+    }
+  }
+}

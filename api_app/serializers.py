@@ -9,6 +9,7 @@ from rest_framework_guardian.serializers import ObjectPermissionsAssignmentMixin
 
 from api_app.models import Job, Tag
 from .analyzers_manager.serializers import AnalyzerReportSerializer
+from .connectors_manager.serializers import ConnectorReportSerializer
 
 
 class TagSerializer(ObjectPermissionsAssignmentMixin, serializers.ModelSerializer):
@@ -81,6 +82,7 @@ class JobSerializer(ObjectPermissionsAssignmentMixin, serializers.ModelSerialize
         many=True, write_only=True, queryset=Tag.objects.all()
     )
     analyzer_reports = AnalyzerReportSerializer(many=True, read_only=True)
+    connector_reports = ConnectorReportSerializer(many=True, read_only=True)
 
     class Meta:
         model = Job

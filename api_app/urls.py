@@ -11,7 +11,6 @@ from .api import (
     TagViewSet,
     JobViewSet,
 )
-
 from .auth import LoginView, LogoutView
 
 
@@ -32,4 +31,6 @@ urlpatterns = [
     path(r"", include("api_app.analyzers_manager.urls")),
     # Viewsets
     path(r"", include(router.urls)),
+    # Connectors
+    path(r"", include("api_app.connectors_manager.urls")),
 ]

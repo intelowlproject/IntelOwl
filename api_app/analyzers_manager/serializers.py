@@ -3,6 +3,7 @@
 
 from rest_framework import serializers as rfs
 from django.conf import settings
+from cache_memoize import cache_memoize
 
 import os
 import json
@@ -61,6 +62,7 @@ class AnalyzerConfigSerializer(rfs.Serializer):
     verification = rfs.SerializerMethodField()
 
     @classmethod
+    @cache_memoize(100)
     def read_and_verify_config(cls):
         config_path = os.path.join(
             settings.BASE_DIR, "configuration", "analyzer_config.json"

@@ -111,11 +111,12 @@ class AnalyzerConfigSerializer(rfs.Serializer):
 
     def get_verification(self, config):
         errors = self.check_secrets(config["secrets"])
+        total_secrets = len(config["secrets"])
         missing_secrets = list(errors.keys())
+        satisfied_secrets = total_secrets - len(missing_secrets)
+
         tooltip_error_msg = ";".join(errors.values())
-        tooltip_error_msg += (
-            f", ({len(missing_secrets)} of {len(config['secrets'])} satisfied)"
-        )
+        tooltip_error_msg += f", ({satisfied_secrets} of {total_secrets} satisfied)"
 
         verified = {
             "configured": len(missing_secrets) == 0,

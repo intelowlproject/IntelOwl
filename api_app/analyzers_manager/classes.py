@@ -94,6 +94,31 @@ class BaseAnalyzerMixin(metaclass=ABCMeta):
             result = 9223372036854775807
         return result
 
+    def get_report_object(self):
+        """
+        Returns report object set in *start* fn
+        """
+        return Job.init_analyzer_report(self.analyzer_name, self.job_id)
+
+    def get_error_message(self, err, is_base_err=False):
+        """
+        Returns error message for
+        *_handle_analyzer_exception* and *_handle_base_exception* fn
+        """
+        return (
+            f"job_id:{self.job_id}, analyzer: '{self.analyzer_name}'."
+            f" {'Unexpected error' if is_base_err else 'Analyzer error'}: '{err}'"
+        )
+
+    def get_exceptions_to_catch(self):
+        """
+        Returns additional exceptions to catch when running *start* fn
+        """
+        return (
+            AnalyzerConfigurationException,
+            AnalyzerRunException,
+        )
+
     def start(self):
         """
         Entrypoint function to execute the analyzer.
@@ -102,13 +127,12 @@ class BaseAnalyzerMixin(metaclass=ABCMeta):
         """
         try:
             self.before_run()
-            self.report = Job.init_report(self.analyzer_name, self.job_id)
+            self.report = self.get_report_object()
             result = self.run()
             result = self._validate_result(result)
             self.report.report = result
         except (
-            AnalyzerConfigurationException,
-            AnalyzerRunException,
+            *self.get_exceptions_to_catch(),
             SoftTimeLimitExceeded,
         ) as e:
             self._handle_analyzer_exception(e)
@@ -126,20 +150,14 @@ class BaseAnalyzerMixin(metaclass=ABCMeta):
         return self.report
 
     def _handle_analyzer_exception(self, err):
-        error_message = (
-            f"job_id:{self.job_id}, analyzer: '{self.analyzer_name}'."
-            f" Analyzer error: '{err}'"
-        )
+        error_message = self.get_error_message(err)
         logger.error(error_message)
         self.report.errors.append(str(err))
         self.report.status = self.report.Statuses.FAILED.name
 
     def _handle_base_exception(self, err):
         traceback.print_exc()
-        error_message = (
-            f"job_id:{self.job_id}, analyzer:'{self.analyzer_name}'."
-            f" Unexpected error: '{err}'"
-        )
+        error_message = self.get_error_message(err, is_base_err=True)
         logger.exception(error_message)
         self.report.errors.append(str(err))
         self.report.status = self.report.Statuses.FAILED.name

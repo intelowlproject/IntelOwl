@@ -93,7 +93,7 @@ def set_failed_analyzer(analyzer_name, job_id, err_msg):
         f" Error message: {err_msg}"
     )
 
-    report = Job.init_report(analyzer_name, job_id)
+    report = Job.init_analyzer_report(analyzer_name, job_id)
     report.errors.append(err_msg)
     report.save()
     set_report_and_cleanup(analyzer_name, job_id)

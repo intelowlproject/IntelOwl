@@ -11,7 +11,8 @@ from django.dispatch import receiver
 
 
 from .exceptions import AnalyzerRunException
-from api_app.analyzers_manager.models import AnalyzerReport
+from .analyzers_manager.models import AnalyzerReport
+from .connectors_manager.models import ConnectorReport
 
 
 def file_directory_path(instance, filename):
@@ -97,12 +98,26 @@ class Job(models.Model):
         return f'Job("{self.observable_name}")'
 
     @classmethod
-    def init_report(cls, name, job_id):
+    def init_analyzer_report(cls, name, job_id):
         report_obj = AnalyzerReport(
             analyzer_name=name,
             job=cls.object_by_job_id(job_id),
             report={},
             errors=[],
+        )
+        report_obj.status = report_obj.Statuses.PENDING.name
+
+        return report_obj
+
+    @classmethod
+    def init_connector_report(cls, name, job_id):
+        report_obj = ConnectorReport(
+            connector=name,
+            job=cls.object_by_job_id(job_id),
+            report={},
+            errors=[],
+            start_time=timezone.now(),
+            end_time=timezone.now(),
         )
         report_obj.status = report_obj.Statuses.PENDING.name
 

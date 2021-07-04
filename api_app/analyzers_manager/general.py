@@ -65,7 +65,7 @@ def start_analyzers(
             adjust_analyzer_config(
                 runtime_configuration,
                 additional_config_params,
-                analyzer.name,
+                analyzer,
                 job_id,
                 md5,
             )

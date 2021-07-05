@@ -13,7 +13,7 @@ from api_app.exceptions import AlreadyFailedJobException
 logger = logging.getLogger(__name__)
 
 
-def set_report_and_cleanup(analyzer_name, job_id, report):
+def set_report_and_cleanup(analyzer_name, job_id):
     job_repr = f"({analyzer_name}, job_id: #{job_id})"
     logger.info(f"STARTING set_report_and_cleanup for <-- {job_repr}.")
     job_object = None
@@ -21,12 +21,12 @@ def set_report_and_cleanup(analyzer_name, job_id, report):
     try:
         with transaction.atomic():
             job_object = Job.object_by_job_id(job_id, transaction=True)
-            job_object.analysis_reports.append(report)
-            job_object.save(update_fields=["analysis_reports"])
+            job_object.save()
             if job_object.status == "failed":
                 raise AlreadyFailedJobException()
 
-        num_analysis_reports = len(job_object.analysis_reports)
+        analysis_reports = job_object.analyzer_reports.all()
+        num_analysis_reports = len(analysis_reports)
         num_analyzers_to_execute = len(job_object.analyzers_to_execute)
         logger.info(
             f"REPORT: num analysis reports:{num_analysis_reports}, "
@@ -40,10 +40,9 @@ def set_report_and_cleanup(analyzer_name, job_id, report):
             status_to_set = "reported_without_fails"
             # set status "failed" in case all analyzers failed
             failed_analyzers = 0
-            for analysis_report in job_object.analysis_reports:
+            for analysis_report in analysis_reports:
                 if analysis_report.status != analysis_report.Statuses.SUCCESS.name:
                     failed_analyzers += 1
-            report.save()
 
             if failed_analyzers == num_analysis_reports:
                 status_to_set = "failed"
@@ -54,9 +53,7 @@ def set_report_and_cleanup(analyzer_name, job_id, report):
             job_object.save(update_fields=["finished_analysis_time"])
 
     except AlreadyFailedJobException:
-        logger.error(
-            f"job_id {job_id} status failed. Do not process the report {report}"
-        )
+        logger.error(f"job_id {job_id} status failed. Do not process the report")
 
     except Exception as e:
         logger.exception(f"job_id: {job_id}, Error: {e}")
@@ -103,7 +100,7 @@ def set_failed_analyzer(analyzer_name, job_id, err_msg):
     report = Job.init_report(analyzer_name, job_id)
     report.errors.append(err_msg)
     report.save()
-    set_report_and_cleanup(analyzer_name, job_id, report)
+    set_report_and_cleanup(analyzer_name, job_id)
 
 
 def adjust_analyzer_config(

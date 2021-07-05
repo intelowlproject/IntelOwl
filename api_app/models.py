@@ -68,7 +68,6 @@ class Job(models.Model):
     connectors_to_execute = pg_fields.ArrayField(
         models.CharField(max_length=128), blank=True, default=list
     )
-    analysis_reports = models.JSONField(default=list, null=True, blank=True)
     received_request_time = models.DateTimeField(auto_now_add=True)
     finished_analysis_time = models.DateTimeField(blank=True, null=True)
     force_privacy = models.BooleanField(blank=False, default=False)
@@ -104,8 +103,6 @@ class Job(models.Model):
             job=cls.object_by_job_id(job_id),
             report={},
             errors=[],
-            start_time=timezone.now(),
-            end_time=timezone.now(),
         )
         report_obj.status = report_obj.Statuses.PENDING.name
 

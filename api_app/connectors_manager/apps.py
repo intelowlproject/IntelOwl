@@ -8,9 +8,8 @@ class ConnectorsManagerConfig(AppConfig):
     name = "api_app.connectors_manager"
 
     def ready(self):
-        import os
         from .serializers import ConnectorConfigSerializer  # to avoid import issue
 
-        if os.environ.get("CONNECTOR_CONFIG_INIT", None) is None:
-            os.environ["CONNECTOR_CONFIG_INIT"] = str(True)
-            ConnectorConfigSerializer.read_and_verify_config(_refresh=True)
+        # we "greedy cache" the config at start of application
+        # because it is an expensive operation
+        ConnectorConfigSerializer.read_and_verify_config()

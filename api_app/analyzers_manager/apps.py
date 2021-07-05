@@ -8,9 +8,8 @@ class AnalyzersManagerConfig(AppConfig):
     name = "api_app.analyzers_manager"
 
     def ready(self):
-        import os
         from .serializers import AnalyzerConfigSerializer  # to avoid import issue
 
-        if os.environ.get("ANALYZER_CONFIG_INIT", None) is None:
-            os.environ["ANALYZER_CONFIG_INIT"] = str(True)
-            AnalyzerConfigSerializer.read_and_verify_config(_refresh=True)
+        # we "greedy cache" the config at start of application
+        # because it is an expensive operation
+        AnalyzerConfigSerializer.read_and_verify_config()

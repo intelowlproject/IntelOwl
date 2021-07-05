@@ -14,6 +14,10 @@ class AnalyzerReportSerializer(rfs.ModelSerializer):
 
 
 class AnalyzerConfigSerializer(AbstractConfigSerializer):
+    """
+    Serializer for `analyzer_config.json`.
+    """
+
     CONFIG_FILE_NAME = "analyzer_config.json"
     TYPE_CHOICES = (
         ("file", "file"),

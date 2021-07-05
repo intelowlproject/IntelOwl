@@ -69,8 +69,8 @@ def get_secret(secret_name):
     then try to find the secret in AWS Secret Manager
     """
     secret = os.environ.get(secret_name, "")
-    aws_secrets = os.environ.get("AWS_SECRETS", False)
-    if not secret and aws_secrets:
+    aws_secrets_enabled = os.environ.get("AWS_SECRETS", False) == "True"
+    if not secret and aws_secrets_enabled:
         try:
             secret = aws_get_secret(secret_name)
         except RetrieveSecretException as e:

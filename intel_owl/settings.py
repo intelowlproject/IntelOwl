@@ -149,6 +149,8 @@ else:
 CELERY_BROKER_URL = secrets.get_secret("CELERY_BROKER_URL")
 CELERY_QUEUES = os.environ.get("CELERY_QUEUES", "default").split(",")
 
+# AWS
+AWS_SECRETS = os.environ.get("AWS_SECRETS", False) == "True"
 AWS_SQS = os.environ.get("AWS_SQS", False) == "True"
 
 # Django Guardian

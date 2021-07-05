@@ -124,10 +124,11 @@ class ConnectorConfigSerializer(serializers.Serializer):
         # raw instance because input is json and not django model object
         exceptions = self.check_secrets(raw_instance["secrets"])
         missing_secrets = list(exceptions.keys())
+        num_total_secrets = len(raw_instance["secrets"].keys())
         final_err_msg = ";".join(exceptions.values())
         final_err_msg += "; (%d of %d satisfied)" % (
-            len(missing_secrets),
-            len(raw_instance["secrets"].keys()),
+            num_total_secrets - len(missing_secrets),
+            num_total_secrets,
         )
 
         return {

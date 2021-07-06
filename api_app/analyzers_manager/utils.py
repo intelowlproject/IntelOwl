@@ -3,8 +3,6 @@
 
 import logging
 
-from django.db import transaction
-
 from api_app.models import Job
 from api_app.helpers import get_now
 from api_app.exceptions import AlreadyFailedJobException
@@ -19,10 +17,9 @@ def set_report_and_cleanup(analyzer_name, job_id):
     job_object = None
 
     try:
-        with transaction.atomic():
-            job_object = Job.object_by_job_id(job_id)
-            if job_object.status == "failed":
-                raise AlreadyFailedJobException()
+        job_object = Job.object_by_job_id(job_id)
+        if job_object.status == "failed":
+            raise AlreadyFailedJobException()
 
         analysis_reports = job_object.analyzer_reports.all()
         num_analysis_reports = len(analysis_reports)

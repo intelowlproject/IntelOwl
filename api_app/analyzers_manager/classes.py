@@ -120,10 +120,6 @@ class BaseAnalyzerMixin(metaclass=ABCMeta):
         # add end time of process
         self.report.end_time = timezone.now()
 
-        # add process time
-        process_time = self.report.end_time - self.report.start_time
-        self.report.process_time = process_time.total_seconds()
-
         self.after_run()
         self.report.save()
 

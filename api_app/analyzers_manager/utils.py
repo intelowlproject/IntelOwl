@@ -20,8 +20,7 @@ def set_report_and_cleanup(analyzer_name, job_id):
 
     try:
         with transaction.atomic():
-            job_object = Job.object_by_job_id(job_id, transaction=True)
-            job_object.save()
+            job_object = Job.object_by_job_id(job_id)
             if job_object.status == "failed":
                 raise AlreadyFailedJobException()
 

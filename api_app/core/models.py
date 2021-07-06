@@ -2,6 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 
 from django.db import models
+from django.utils import timezone
 from django.contrib.postgres import fields as pg_fields
 
 from enum import Enum
@@ -26,8 +27,8 @@ class AbstractReport(models.Model):
     errors = pg_fields.ArrayField(
         models.CharField(max_length=512), default=list, blank=True
     )
-    start_time = models.DateTimeField()
-    end_time = models.DateTimeField()
+    start_time = models.DateTimeField(default=timezone.now)
+    end_time = models.DateTimeField(default=timezone.now)
 
     # meta
     class Meta:

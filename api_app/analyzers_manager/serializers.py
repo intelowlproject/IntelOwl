@@ -8,10 +8,16 @@ from .models import AnalyzerReport
 
 
 class AnalyzerReportSerializer(rfs.ModelSerializer):
+    """
+    AnalyzerReport model's serializer.
+    """
+
+    name = rfs.CharField(source="analyzer_name")
+
     class Meta:
         model = AnalyzerReport
         fields = (
-            "analyzer_name",
+            "name",
             "status",
             "report",
             "errors",

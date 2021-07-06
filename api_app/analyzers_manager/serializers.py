@@ -8,9 +8,23 @@ from .models import AnalyzerReport
 
 
 class AnalyzerReportSerializer(rfs.ModelSerializer):
+    """
+    AnalyzerReport model's serializer.
+    """
+
+    name = rfs.CharField(source="analyzer_name")
+
     class Meta:
         model = AnalyzerReport
-        fields = "__all__"
+        fields = (
+            "name",
+            "status",
+            "report",
+            "errors",
+            "process_time",
+            "start_time",
+            "end_time",
+        )
 
 
 class AnalyzerConfigSerializer(AbstractConfigSerializer):

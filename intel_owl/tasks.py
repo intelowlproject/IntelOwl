@@ -78,7 +78,6 @@ def run_analyzer(cls_path, *args):
         set_report_and_cleanup(
             instance.analyzer_name,
             instance.job_id,
-            instance.report,
         )
     except Exception as e:
         set_failed_analyzer(args[0], args[1], str(e))

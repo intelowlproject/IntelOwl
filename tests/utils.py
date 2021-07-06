@@ -128,7 +128,7 @@ class CommonTestCases_observables(metaclass=ABCMeta):
         ).start()
         self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
-    def test_pulsevide(self, mock_get=None, mock_post=None):
+    def test_pulsedive(self, mock_get=None, mock_post=None):
         report = pulsedive.Pulsedive(
             "Pulsedive_Active_IOC",
             self.job_id,

@@ -8,7 +8,7 @@ from api_app.core.models import AbstractReport
 
 class ConnectorReport(AbstractReport):
 
-    connector = models.CharField(max_length=128, unique=True)
+    connector = models.CharField(max_length=128)
     job = models.ForeignKey(
         "api_app.Job", related_name="connector_reports", on_delete=models.CASCADE
     )

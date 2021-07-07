@@ -11,6 +11,17 @@ EXTRA_KEYS = [
     "observable_supported",
 ]
 
+SECRET_KEYS = [
+    # For MISP, Cuckoo Scan, Virus Total
+    "url_key_name",
+    # For HoneyDB, Censys
+    "api_id_name",
+    # For XForce
+    "api_password_name",
+    # For all
+    "api_key_name",
+]
+
 
 def main():
     file_path = "old_analyzer_config.json"
@@ -44,7 +55,7 @@ def main():
         tmp_config["secrets"] = {}
         if "additional_config_params" in config.keys():
             for s_name, s_value in config["additional_config_params"].items():
-                if s_name == "api_key_name":
+                if s_name in SECRET_KEYS:
                     tmp_config["secrets"][s_name] = {
                         "env_var_key": s_value,
                         "type": "string",

@@ -3,7 +3,7 @@
 
 from django.urls import path
 
-from .api import ConnectorListAPI
+from .views import ConnectorListAPI
 
 urlpatterns = [
     path("get_connector_configs", ConnectorListAPI.as_view()),

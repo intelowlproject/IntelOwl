@@ -1,72 +1,63 @@
-from abc import abstractmethod
 import logging
 
 from ..exceptions import (
     ConnectorConfigurationException,
     ConnectorRunException,
-    ConnectorRunNotImplemented,
 )
-from ..analyzers_manager.classes import BaseAnalyzerMixin
+
+from api_app.core.classes import Plugin
 from api_app.models import Job
+from .models import ConnectorReport
+from .serializers import ConnectorConfigSerializer
 
 
 logger = logging.getLogger(__name__)
 
 
-class BaseConnectorMixin(BaseAnalyzerMixin):
+class Connector(Plugin):
     """
-    Abstract Base class for Connectors.
-    Never inherit from this branch,
-    always use Connector class.
+    Abstract class for all Connectors.
+    Inherit from this branch when defining a connector.
+    Need to overrwrite `set_params(self, params: dict)`
+     and `run(self)` functions.
     """
 
-    connector_name: str
+    @property
+    def connector_name(self) -> str:
+        return self._config_dict["name"]
 
-    @abstractmethod
-    def run(self):
-        raise ConnectorRunNotImplemented(self.connector_name)
-
-    def get_report_object(self):
-        return Job.init_connector_report(self.connector_name, self.job_id)
-
-    def get_error_message(self, err, is_base_err=False):
-        return (
-            f"job_id:{self.job_id}, connector: '{self.connector_name}'."
-            f" {'Unexpected error' if is_base_err else 'Connector error'}: '{err}'"
+    def init_report_object(self) -> ConnectorReport:
+        return ConnectorReport.objects.create(
+            job=self.job_id,
+            connector=self.connector_name,
+            report={},
+            errors=[],
+            status=ConnectorReport.Statuses.PENDING.name,
         )
 
-    def get_exceptions_to_catch(self):
+    def get_exceptions_to_catch(self) -> list:
         return (
             ConnectorConfigurationException,
             ConnectorRunException,
         )
 
-    def __init__(self, connector_name, job_id, additional_config_params):
-        self.connector_name = connector_name
-        super().__init__("", job_id, additional_config_params)
+    def get_serializer_class(self):
+        return ConnectorConfigSerializer
 
-    def __repr__(self):
-        return f"({self.connector_name}, job_id: #{self.job_id})"
-
-
-class Connector(BaseConnectorMixin):
-    """
-    Abstract class for all Connectors.
-    Inherit from this branch when defining a connector.
-    Need to overrwrite `set_config(self, additional_config_params)`
-     and `run(self)` functions.
-    """
-
-    def __init__(
-        self,
-        connector_name,
-        job_id,
-        additional_config_params,
-    ):
-        super().__init__(connector_name, job_id, additional_config_params)
+    def get_error_message(self, err, is_base_err=False):
+        return (
+            f"{self.__repr__()}."
+            f" {'Unexpected error' if is_base_err else 'Connector error'}: '{err}'"
+        )
 
     def before_run(self):
         logger.info(f"STARTED connector: {self.__repr__()}")
 
     def after_run(self):
         logger.info(f"FINISHED connector: {self.__repr__()}")
+
+    def __init__(self, config_dict: dict, job_id: int, **kwargs):
+        super(self, Connector).__init__(config_dict, job_id, **kwargs)
+
+    def __repr__(self):
+        return f"({self.connector_name}, job: #{self.job_id})"

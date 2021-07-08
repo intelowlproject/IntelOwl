@@ -1,5 +1,6 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
+from enum import Enum
 
 from rest_framework import serializers as rfs
 
@@ -33,22 +34,54 @@ class AnalyzerConfigSerializer(AbstractConfigSerializer):
     """
 
     CONFIG_FILE_NAME = "analyzer_config.json"
-    TYPE_CHOICES = (
-        ("file", "file"),
-        ("observable", "observable"),
-    )
-    HASH_CHOICES = (
-        ("md5", "md5"),
-        ("sha256", "sha256"),
-    )
+
+    class TypeChoices(Enum):
+        FILE = "file"
+        OBSERVABLE = "observable"
+
+    class HashChoices(Enum):
+        MD5 = "md5"
+        SHA256 = "sha256"
+
+    class ObservableTypes(Enum):
+        IP = "ip"
+        URL = "url"
+        DOMAIN = "domain"
+        HASH = "hash"
+        GENERIC = "generic"
 
     # Required fields
-    type = rfs.ChoiceField(required=True, choices=TYPE_CHOICES)
+    type = rfs.ChoiceField(required=True, choices=[c.name for c in TypeChoices])
     external_service = rfs.BooleanField(required=True)
     # Optional Fields
-    leaks_info = rfs.BooleanField(required=False)
-    run_hash = rfs.BooleanField(required=False)
-    run_hash_type = rfs.ChoiceField(required=False, choices=HASH_CHOICES)
+    leaks_info = rfs.BooleanField(required=False, default=False)
+    run_hash = rfs.BooleanField(required=False, default=False)
+    run_hash_type = rfs.ChoiceField(
+        required=False, choices=[c.name for c in HashChoices]
+    )
     supported_filetypes = rfs.ListField(required=False)
     not_supported_filetypes = rfs.ListField(required=False)
-    observable_supported = rfs.ListField(required=False)
+    observable_supported = rfs.MultipleChoiceField(
+        choices=[c.name for c in ObservableTypes]
+    )
+
+    def validate_python_module(self, python_module: str):
+        from .general import build_import_path
+        from django.utils.module_loading import import_string
+
+        clspath = build_import_path(
+            python_module,
+            observable_analyzer=(
+                self.data["type"] == self.TypeChoices.OBSERVABLE
+                or self.data["type"] == self.TypeChoices.FILE
+                and self.data["run_hash"]
+            ),
+        )
+        try:
+            import_string(clspath)
+        except ImportError:
+            raise rfs.ValidationError(
+                f"`python_module` incorrect, {clspath} couldn't be imported"
+            )
+
+        return python_module

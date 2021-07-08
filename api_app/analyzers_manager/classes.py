@@ -16,53 +16,61 @@ from api_app.exceptions import (
     AnalyzerRunException,
     AnalyzerConfigurationException,
 )
+from api_app.core.classes import Plugin
 from api_app.models import Job
+from api_app.helpers import generate_sha256
+
+from .models import AnalyzerReport
+from .serializers import AnalyzerConfigSerializer
 
 logger = logging.getLogger(__name__)
 
 
-class BaseAnalyzerMixin(metaclass=ABCMeta):
+class BaseAnalyzerMixin(Plugin):
     """
     Abstract Base class for Analyzers.
     Never inherit from this branch,
     always use either one of ObservableAnalyzer or FileAnalyzer classes.
     """
 
-    __job_id: int
-    analyzer_name: str
-    report: dict
-
     @property
-    def job_id(self):
-        return self.__job_id
+    def analyzer_name(self) -> str:
+        return self._config_dict["name"]
 
-    @abstractmethod
-    def before_run(self):
+    def init_report_object(self) -> AnalyzerReport:
         """
-        function called directly before run function.
+        Returns report object set in *start* fn
         """
+        return AnalyzerReport.objects.create(
+            job=self.job_id,
+            analyzer_name=self.analyzer_name,
+            report={},
+            errors=[],
+            status=AnalyzerReport.Statuses.PENDING.name,
+            runtime_configuration=self.kwargs.get("runtime_conf", {}),
+        )
 
-    @abstractmethod
-    def run(self):
+    def get_exceptions_to_catch(self):
         """
-        Called from *start* fn and wrapped in a try-catch block.
-        Should be overwritten in child class
-        :returns report: JSON
+        Returns additional exceptions to catch when running *start* fn
         """
-        raise AnalyzerRunNotImplemented(self.analyzer_name)
+        return (
+            AnalyzerConfigurationException,
+            AnalyzerRunException,
+        )
 
-    @abstractmethod
-    def after_run(self):
-        """
-        function called after run function.
-        """
+    def get_serializer_class(self):
+        return AnalyzerConfigSerializer
 
-    def set_config(self, additional_config_params):
+    def get_error_message(self, err, is_base_err=False):
         """
-        function to parse additional_config_params.
-        verify params, API keys, etc.
-        In most cases, this would be overwritten.
+        Returns error message for
+        *_handle_analyzer_exception* and *_handle_base_exception* fn
         """
+        return (
+            f"{self.__repr__()}."
+            f" {'Unexpected error' if is_base_err else 'Analyzer error'}: '{err}'"
+        )
 
     def _validate_result(self, result, level=0, max_recursion=190):
         """
@@ -94,78 +102,11 @@ class BaseAnalyzerMixin(metaclass=ABCMeta):
             result = 9223372036854775807
         return result
 
-    def get_report_object(self):
-        """
-        Returns report object set in *start* fn
-        """
-        return Job.init_analyzer_report(self.analyzer_name, self.job_id)
+    def after_run(self):
+        self.report.report = self._validate_result(self.report.report)
 
-    def get_error_message(self, err, is_base_err=False):
-        """
-        Returns error message for
-        *_handle_analyzer_exception* and *_handle_base_exception* fn
-        """
-        return (
-            f"job_id:{self.job_id}, analyzer: '{self.analyzer_name}'."
-            f" {'Unexpected error' if is_base_err else 'Analyzer error'}: '{err}'"
-        )
-
-    def get_exceptions_to_catch(self):
-        """
-        Returns additional exceptions to catch when running *start* fn
-        """
-        return (
-            AnalyzerConfigurationException,
-            AnalyzerRunException,
-        )
-
-    def start(self):
-        """
-        Entrypoint function to execute the analyzer.
-        calls `before_run`, `run`, `after_run`
-        in that order with exception handling.
-        """
-        try:
-            self.before_run()
-            self.report = self.get_report_object()
-            result = self.run()
-            result = self._validate_result(result)
-            self.report.report = result
-        except (
-            *self.get_exceptions_to_catch(),
-            SoftTimeLimitExceeded,
-        ) as e:
-            self._handle_analyzer_exception(e)
-        except Exception as e:
-            self._handle_base_exception(e)
-        else:
-            self.report.status = self.report.Statuses.SUCCESS.name
-
-        # add end time of process
-        self.report.end_time = timezone.now()
-
-        self.after_run()
-        self.report.save()
-
-        return self.report
-
-    def _handle_analyzer_exception(self, err):
-        error_message = self.get_error_message(err)
-        logger.error(error_message)
-        self.report.errors.append(str(err))
-        self.report.status = self.report.Statuses.FAILED.name
-
-    def _handle_base_exception(self, err):
-        traceback.print_exc()
-        error_message = self.get_error_message(err, is_base_err=True)
-        logger.exception(error_message)
-        self.report.errors.append(str(err))
-        self.report.status = self.report.Statuses.FAILED.name
-
-    def __init__(self, analyzer_name, job_id, additional_config_params):
-        self.analyzer_name = analyzer_name
-        self.__job_id = job_id
-        self.set_config(additional_config_params)  # lgtm [py/init-calls-subclass]
+    def __init__(self, config_dict: dict, job_id: int, **kwargs):
+        super(self, BaseAnalyzerMixin).__init__(config_dict, job_id, **kwargs)
 
     def __repr__(self):
         return f"({self.analyzer_name}, job_id: #{self.job_id})"
@@ -182,25 +123,32 @@ class ObservableAnalyzer(BaseAnalyzerMixin):
     observable_name: str
     observable_classification: str
 
-    def __init__(
-        self,
-        analyzer_name,
-        job_id,
-        obs_name,
-        obs_classification,
-        additional_config_params,
-    ):
-        self.observable_name = obs_name
-        self.observable_classification = obs_classification
-        super().__init__(analyzer_name, job_id, additional_config_params)
+    def __init__(self, config_dict: dict, job_id: int, **kwargs):
+        super(self, BaseAnalyzerMixin).__init__(config_dict, job_id, **kwargs)
+        # check if we should run the hash instead of the binary
+        if self._job.is_sample and config_dict.get("run_hash", False):
+            self.observable_classification = (
+                AnalyzerConfigSerializer.ObservableTypes.HASH
+            )
+            # check which kind of hash the analyzer needs
+            run_hash_type = config_dict["run_hash_type"]
+            if run_hash_type == AnalyzerConfigSerializer.HashChoices.MD5:
+                self.observable_name = self._job.md5
+            else:
+                self.observable_name = generate_sha256(self.job_id)
+        else:
+            self.observable_name = self._job.observable_name
+            self.observable_classification = self._job.observable_classification
 
     def before_run(self):
+        super().before_run()
         logger.info(
             f"STARTED analyzer: {self.__repr__()} -> "
             f"Observable: {self.observable_name}."
         )
 
     def after_run(self):
+        super().after_run()
         logger.info(
             f"FINISHED analyzer: {self.__repr__()} -> "
             f"Observable: {self.observable_name}."
@@ -218,24 +166,26 @@ class FileAnalyzer(BaseAnalyzerMixin):
     md5: str
     filepath: str
     filename: str
+    file_mimetype: str
 
-    def __init__(
-        self, analyzer_name, job_id, fpath, fname, md5, additional_config_params
-    ):
-        self.md5 = md5
-        self.filepath = fpath
-        self.filename = fname
-        super().__init__(analyzer_name, job_id, additional_config_params)
+    def __init__(self, config_dict: dict, job_id: int, **kwargs):
+        super(self, BaseAnalyzerMixin).__init__(config_dict, job_id, **kwargs)
+        self.md5 = self._job.md5
+        self.filepath = self._job.file.path
+        self.filename = self._job.filename
+        self.file_mimetype = self._job.file_mimetype
 
     def before_run(self):
+        super().before_run()
         logger.info(
-            f"STARTED analyzer: {self.__repr__()} -> "
+            f"STARTED analyzer: {repr(self)} -> "
             f"File: ({self.filename}, md5: {self.md5})"
         )
 
     def after_run(self):
+        super().after_run()
         logger.info(
-            f"FINISHED analyzer: {self.__repr__()} -> "
+            f"FINISHED analyzer: {repr(self)} -> "
             f"File: ({self.filename}, md5: {self.md5})"
         )
 

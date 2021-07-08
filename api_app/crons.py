@@ -33,9 +33,9 @@ def check_stuck_analysis():
                 f"Setting the job to status to 'failed'"
             )
             jobs_id_stuck.append(running_job.id)
-            general.set_job_status(running_job.id, "failed")
+            running_job = "failed"
             running_job.finished_analysis_time = get_now()
-            running_job.save(update_fields=["finished_analysis_time"])
+            running_job.save(update_fields=["status", "finished_analysis_time"])
 
     logger.info("finished check_stuck_analysis")
 

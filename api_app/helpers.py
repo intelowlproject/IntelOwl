@@ -12,6 +12,7 @@ from django.utils import timezone
 
 from .exceptions import NotRunnableAnalyzer
 from api_app import models
+from api_app.analyzers_manager.serializers import AnalyzerConfigSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -49,9 +50,16 @@ def calculate_mimetype(file_buffer, file_name):
 
 
 def filter_analyzers(
-    serialized_data, analyzers_requested, analyzers_config, warnings, run_all=False
-):
+    serialized_data, analyzers_requested, warnings, run_all=False
+) -> list:
     cleaned_analyzer_list = []
+
+    analyzers_config = AnalyzerConfigSerializer.read_and_verify_config()
+
+    if analyzers_requested == "__all__":
+        # select all
+        analyzers_requested = list(analyzers_config.keys())
+
     for analyzer in analyzers_requested:
         try:
             if analyzer not in analyzers_config:
@@ -117,7 +125,7 @@ def filter_analyzers(
                 )
         except NotRunnableAnalyzer as e:
             if run_all:
-                # in this case, they are not warnings but excepted and wanted behavior
+                # in this case, they are not warnings but expected and wanted behavior
                 logger.debug(e)
             else:
                 logger.warning(e)

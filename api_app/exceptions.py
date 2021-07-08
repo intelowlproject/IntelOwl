@@ -32,11 +32,3 @@ class ConnectorConfigurationException(Exception):
 
 class ConnectorRunException(Exception):
     pass
-
-
-class ConnectorRunNotImplemented(Exception):
-    def __init__(self, connector_name):
-        self.connector_name = connector_name
-
-    def __repr__(self):
-        return f"run() is not implemented for connector {self.connector_name}."

@@ -49,6 +49,9 @@ services:
     container_name: intelowl_rabbitmq
     logging:
       driver: none
+    expose:
+      - "15672"
+
 
   celery_beat:
     image: intelowlproject/intelowl:${INTELOWL_TAG_VERSION}
@@ -70,7 +73,7 @@ services:
     container_name: intelowl_celery_worker_default
     restart: unless-stopped
     stop_grace_period: 3m
-    command: /usr/local/bin/celery -A intel_owl.celery worker -n worker_default --uid www-data --gid www-data --time-limit=10000 --pidfile= -Ofair -Q default
+    command: /usr/local/bin/celery -A intel_owl.celery worker -n worker_default --uid www-data --gid www-data --time-limit=10000 --pidfile= -Ofair -Q default -E
     volumes:
       - ../configuration/analyzer_config.json:/opt/deploy/configuration/analyzer_config.json
       - generic_logs:/var/log/intel_owl

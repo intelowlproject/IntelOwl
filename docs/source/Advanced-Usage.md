@@ -299,7 +299,9 @@ Refer to the following blog post for an example on how to deploy IntelOwl on Goo
 
 [Deploying Intel-Owl on GKE](https://mostwanted002.cf/post/intel-owl-gke/) by [Mayank Malik](https://twitter.com/_mostwanted002_).
 
-## Multi Queue
+## Queue 
+
+#### Multi Queue
 IntelOwl provides an additional [multi-queue.override.yml](https://github.com/intelowlproject/IntelOwl/blob/master/docker/multi-queue.override.yml) compose file allowing IntelOwl users to better scale with the performance of their own architecture.
 
 If you want to leverage it, you should add the option `--multi-queue` when starting the project. Example:
@@ -316,3 +318,5 @@ Moreover IntelOwl requires that the name of the workers are provided in the `doc
 
 One can customize what analyzer should use what queue by specifying so in the analyzer entry in the [analyzer_config.json](https://github.com/intelowlproject/IntelOwl/blob/master/configuration/analyzer_config.json) configuration file. If no queue(s) are provided, the `default` queue will be selected.
  
+#### Queue monitoring
+IntelOwl provides an additional [flower.override.yml](https://github.com/intelowlproject/IntelOwl/blob/master/docker/flower.override.yml) compose file allowing IntelOwl users to use [Flower](https://flower.readthedocs.io/) features to monitor and manage queues and tasks

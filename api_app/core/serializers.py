@@ -70,7 +70,11 @@ class AbstractConfigSerializer(rfs.Serializer):
     Abstract serializer for `analyzer_config.json` and `connector_config.json` files.
     """
 
+    # constants
     CONFIG_FILE_NAME = ""
+
+    # sentinel/ flag
+    _is_valid_flag = False
 
     # common fields
     name = rfs.CharField(required=True)
@@ -81,6 +85,12 @@ class AbstractConfigSerializer(rfs.Serializer):
     description = rfs.CharField(allow_blank=True, required=False)
     # automatically populated fields
     verification = rfs.SerializerMethodField()
+
+    def is_valid(self, raise_exception=False):
+        ret = super().is_valid(raise_exception=raise_exception)
+        if ret:
+            self._is_valid_flag = True
+        return ret
 
     def get_verification(self, raw_instance):
         # raw instance because input is json and not django model object
@@ -110,6 +120,8 @@ class AbstractConfigSerializer(rfs.Serializer):
         serializer.is_valid(raise_exception=True)
         return secrets
 
+    # utility methods
+
     def _check_secrets(self, secrets):
         errors = {}
         for key_name, secret_dict in secrets.items():
@@ -126,7 +138,28 @@ class AbstractConfigSerializer(rfs.Serializer):
                         secret_dict["type"],
                         type(secret_val),
                     )
+                else:
+                    self.__cached_secrets[key_name] = secret_val
         return errors
+
+    def _read_secrets(self) -> dict:
+        """
+        Returns a dict of `secret_key: secret_value` mapping.
+        must be called after `.is_valid()`.
+        """
+        assert (
+            self._is_valid_flag == True
+        ), "Cannot call `._read_secrets()` before `.is_valid()` or if validation failed."
+
+        secrets = {}
+        for key_name, secret_dict in self.data["secrets"].items():
+            secret_val = secrets_store.get_secret(secret_dict["env_var_key"])
+            if secret_val:
+                secrets[key_name] = secret_val
+            else:
+                secrets[key_name] = secret_dict["default"]
+
+        return secrets
 
     @classmethod
     def _get_config_path(cls) -> str:

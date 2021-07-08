@@ -634,14 +634,7 @@ class FileAnalyzersDocTests(TestCase):
 
     def test_docinfo_experimental(self):
         analyzer_name = "Doc_Info_Experimental"
-        additional_params = {"experimental": True}
-        utils.adjust_analyzer_config(
-            self.runtime_configuration,
-            additional_params,
-            analyzer_name,
-            self.job_id,
-            self.md5,
-        )
+        additional_params = {**self.runtime_configuration, "experimental": True}
         report = doc_info.DocInfo(
             analyzer_name,
             self.job_id,

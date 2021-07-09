@@ -6,7 +6,6 @@ from ..exceptions import (
 )
 
 from api_app.core.classes import Plugin
-from api_app.models import Job
 from .models import ConnectorReport
 from .serializers import ConnectorConfigSerializer
 

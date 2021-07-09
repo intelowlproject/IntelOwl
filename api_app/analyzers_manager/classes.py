@@ -1,23 +1,18 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-from django.utils import timezone
-import traceback
 import time
 import logging
 import requests
 import json
 
-from abc import ABCMeta, abstractmethod
-from celery.exceptions import SoftTimeLimitExceeded
+from abc import ABCMeta
 
 from api_app.exceptions import (
-    AnalyzerRunNotImplemented,
     AnalyzerRunException,
     AnalyzerConfigurationException,
 )
 from api_app.core.classes import Plugin
-from api_app.models import Job
 from api_app.helpers import generate_sha256
 
 from .models import AnalyzerReport

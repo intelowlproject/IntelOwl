@@ -193,7 +193,7 @@ def start_analyzers(
 
 
 def job_cleanup(job_id: int):
-    job: Job = Job.objects.get(pk=job_id)
+    job = Job.objects.get(pk=job_id)
     logger.info(f"STARTING set_report_and_cleanup for <-- {repr(job)}.")
     status_to_set = "failed"
 

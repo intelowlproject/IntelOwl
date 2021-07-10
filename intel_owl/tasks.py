@@ -10,9 +10,7 @@ from django.utils.module_loading import import_string
 from intel_owl.celery import app
 from api_app import crons
 from api_app.models import Job
-from api_app.analyzers_manager.classes import BaseAnalyzerMixin
 from api_app.analyzers_manager import controller as analyzers_controller
-from api_app.connectors_manager.classes import Connector
 from api_app.connectors_manager import controller as connectors_controller
 
 from api_app.analyzers_manager.file_analyzers import yara_scan
@@ -74,7 +72,7 @@ def start_analyzers(
 @app.task(name="run_analyzer", soft_time_limit=500)
 def run_analyzer(job_id: int, config_dict: dict, **kwargs):
     try:
-        cls_path: str = analyzers_controller.build_import_path(
+        cls_path = analyzers_controller.build_import_path(
             config_dict["python_module"],
             observable_analyzer=(
                 config_dict["type"] == "observable"
@@ -83,13 +81,11 @@ def run_analyzer(job_id: int, config_dict: dict, **kwargs):
             ),
         )
         try:
-            klass: Connector = import_string(cls_path)
+            klass = import_string(cls_path)
         except ImportError:
             raise Exception(f"Class: {cls_path} couldn't be imported")
 
-        instance: BaseAnalyzerMixin = klass(
-            config_dict=config_dict, job_id=job_id, **kwargs
-        )
+        instance = klass(config_dict=config_dict, job_id=job_id, **kwargs)
         instance.start()
         analyzers_controller.job_cleanup(instance.job_id)
 
@@ -118,15 +114,13 @@ def on_job_success(job_id: int):
 @app.task(name="run_connector", soft_time_limit=500)
 def run_connector(job_id: int, config_dict: dict, **kwargs):
     try:
-        cls_path: str = connectors_controller.build_import_path(
-            config_dict["python_module"]
-        )
+        cls_path = connectors_controller.build_import_path(config_dict["python_module"])
         try:
-            klass: Connector = import_string(cls_path)
+            klass = import_string(cls_path)
         except ImportError:
             raise Exception(f"Class: {cls_path} couldn't be imported")
 
-        instance: Connector = klass(config_dict=config_dict, job_id=job_id, **kwargs)
+        instance = klass(config_dict=config_dict, job_id=job_id, **kwargs)
         instance.start()
     except Exception as e:
         connectors_controller.set_failed_connector(job_id, config_dict["name"], str(e))

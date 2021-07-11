@@ -13,15 +13,15 @@ class Qiling(FileAnalyzer, DockerBasedAnalyzer):
     # interval between http request polling (in secs)
     poll_distance: int = 30
 
-    def set_config(self, additional_config_params):
+    def set_params(self, params):
         self.args = []
-        os = additional_config_params.get("os", "x86")
-        arch = additional_config_params.get("arch", "windows")
+        os = params.get("os", "x86")
+        arch = params.get("arch", "windows")
         self.args.extend([os] + [arch])
-        shellcode = additional_config_params.get("shellcode", False)
+        shellcode = params.get("shellcode", False)
         if shellcode:
             self.args.append("--shellcode")
-        profile = additional_config_params.get("profile", None)
+        profile = params.get("profile", None)
         if profile:
             self.args.extend(["--profile"] + [profile])
 

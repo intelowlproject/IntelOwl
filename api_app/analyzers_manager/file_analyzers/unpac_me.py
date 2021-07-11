@@ -6,7 +6,6 @@ import logging
 from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.exceptions import AnalyzerRunException
 import time
-from intel_owl import secrets
 from typing import Dict
 
 logger = logging.getLogger(__name__)
@@ -15,23 +14,16 @@ logger = logging.getLogger(__name__)
 class UnpacMe(FileAnalyzer):
     base_url: str = "https://api.unpac.me/api/v1/"
 
-    def set_config(self, additional_config_params):
-        self.api_key_name = additional_config_params.get(
-            "api_key_name", "UNPAC_ME_API_KEY"
-        )
-        private = additional_config_params.get("private", False)
+    def set_params(self, params):
+        private = params.get("private", False)
         self.private = "private" if private else "public"
-        self.__api_key = secrets.get_secret(self.api_key_name)
+        self.__api_key = self._secrets["api_key_name"]
         # max no. of tries when polling for result
-        self.max_tries = additional_config_params.get("max_tries", 30)
+        self.max_tries = params.get("max_tries", 30)
         # interval b/w HTTP requests when polling
         self.poll_distance = 5
 
     def run(self):
-        if not self.__api_key:
-            raise AnalyzerRunException(
-                f"No API key retrieved with name: {self.api_key_name}"
-            )
         self.headers = {"Authorization": "Key %s" % self.__api_key}
         unpac_id = self._upload()
         logger.info(f"md5 {self.md5} job {self.job_id} uploaded id {unpac_id}")

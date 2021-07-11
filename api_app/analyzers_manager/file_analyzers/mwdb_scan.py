@@ -6,8 +6,6 @@ import time
 import mwdblib
 import logging
 
-from intel_owl import secrets
-
 from api_app.exceptions import AnalyzerRunException
 from api_app.helpers import get_binary
 from api_app.analyzers_manager.classes import FileAnalyzer
@@ -16,11 +14,10 @@ logger = logging.getLogger(__name__)
 
 
 class MWDB_Scan(FileAnalyzer):
-    def set_config(self, additional_config_params):
-        self.api_key_name = additional_config_params.get("api_key_name", "MWDB_KEY")
-        self.__api_key = secrets.get_secret(self.api_key_name)
-        self.upload_file = additional_config_params.get("upload_file", False)
-        self.max_tries = additional_config_params.get("max_tries", 50)
+    def set_params(self, params):
+        self.__api_key = self._secrets["api_key_name"]
+        self.upload_file = params.get("upload_file", False)
+        self.max_tries = params.get("max_tries", 50)
         self.poll_distance = 5
 
     def file_analysis(self, file_info):

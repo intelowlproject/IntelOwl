@@ -17,11 +17,9 @@ logger = logging.getLogger(__name__)
 
 
 class YaraScan(FileAnalyzer):
-    def set_config(self, additional_config_params):
-        self.directories_with_rules = additional_config_params.get(
-            "directories_with_rules", []
-        )
-        self.recursive = additional_config_params.get("recursive", False)
+    def set_params(self, params):
+        self.directories_with_rules = params.get("directories_with_rules", [])
+        self.recursive = params.get("recursive", False)
         self.result = []
         self.ruleset: List[Tuple[str, yara.Rules]] = []
 

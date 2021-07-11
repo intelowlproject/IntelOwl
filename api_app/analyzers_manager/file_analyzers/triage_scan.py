@@ -8,8 +8,6 @@ import requests
 from api_app.exceptions import AnalyzerRunException, AnalyzerConfigurationException
 from api_app.helpers import get_binary
 from api_app.analyzers_manager import classes
-from intel_owl import secrets
-
 
 logger = logging.getLogger(__name__)
 
@@ -20,29 +18,23 @@ class TriageScanFile(classes.FileAnalyzer):
     private_url: str = "https://private.tria.ge/api/v0/"
     report_url: str = "https://tria.ge/"
 
-    def set_config(self, additional_config_params):
-        self.endpoint = additional_config_params.get("endpoint", "public")
+    def set_params(self, params):
+        self.endpoint = params.get("endpoint", "public")
         if self.endpoint == "private":
             self.base_url = self.private_url
 
-        self.api_key_name = additional_config_params.get("api_key_name", "TRIAGE_KEY")
-        self.__api_key = secrets.get_secret(self.api_key_name)
-        self.report_type = additional_config_params.get("report_type", "overview")
+        self.__api_key = self._secrets["api_key_name"]
+        self.report_type = params.get("report_type", "overview")
         if self.report_type not in ["overview", "complete"]:
             raise AnalyzerConfigurationException(
                 f"report_type must be 'overview' or 'complete' "
                 f"but it is '{self.report_type}'"
             )
-        self.max_tries = additional_config_params.get("max_tries", 200)
+        self.max_tries = params.get("max_tries", 200)
         self.poll_distance = 3
 
     def run(self):
         final_report = {}
-        if not self.__api_key:
-            raise AnalyzerRunException(
-                f"No API key retrieved with name: {self.api_key_name}"
-            )
-
         self.headers = {"Authorization": f"Bearer {self.__api_key}"}
 
         name_to_send = self.filename if self.filename else self.md5

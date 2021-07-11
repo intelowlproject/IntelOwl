@@ -29,10 +29,10 @@ class CannotDecryptException(Exception):
 
 
 class DocInfo(FileAnalyzer):
-    def set_config(self, additional_config_params):
+    def set_params(self, params):
         self.olevba_results = {}
         self.vbaparser = None
-        self.experimental = additional_config_params.get("experimental", False)
+        self.experimental = params.get("experimental", False)
         self.passwords_to_check = []
         # this is to extract the passwords for encryption requested by the client
         # you can use pyintelowl to send additional passwords to check for
@@ -42,9 +42,7 @@ class DocInfo(FileAnalyzer):
         #                     "additional_passwords_to_check": ["testpassword"]
         #                 }
         #             },
-        additional_passwords_to_check = additional_config_params.get(
-            "additional_passwords_to_check", []
-        )
+        additional_passwords_to_check = params.get("additional_passwords_to_check", [])
         if isinstance(additional_passwords_to_check, list):
             self.passwords_to_check.extend(additional_passwords_to_check)
 

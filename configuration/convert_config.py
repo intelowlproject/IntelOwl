@@ -16,9 +16,13 @@ SECRET_KEYS = [
     "url_key_name",
     # For HoneyDB, Censys
     "api_id_name",
+    # For Censys
+    "api_secret_name",
     # For XForce
     "api_password_name",
-    # For all
+    # For Circl
+    "pdns_credentials",
+    # For others
     "api_key_name",
 ]
 

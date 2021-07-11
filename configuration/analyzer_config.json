@@ -115,7 +115,15 @@
             "soft_time_limit": 30,
             "queue": "default"
         },
-        "secrets": {}
+        "secrets": {
+            "pdns_credentials": {
+                "env_var_key": "CIRCL_CREDENTIALS",
+                "type": "string",
+                "required": true,
+                "default": null,
+                "description": ""
+            }
+        }
     },
     "CIRCLPassiveSSL": {
         "type": "observable",
@@ -131,7 +139,15 @@
             "soft_time_limit": 30,
             "queue": "default"
         },
-        "secrets": {}
+        "secrets": {
+            "pdns_credentials": {
+                "env_var_key": "CIRCL_CREDENTIALS",
+                "type": "string",
+                "required": true,
+                "default": null,
+                "description": ""
+            }
+        }
     },
     "Classic_DNS": {
         "type": "observable",
@@ -219,14 +235,14 @@
             "censys_analysis": "search"
         },
         "secrets": {
-            "api_key_name": {
+            "api_id_name": {
                 "env_var_key": "CENSYS_API_ID",
                 "type": "string",
                 "required": true,
                 "default": null,
                 "description": ""
             },
-            "api_id_name": {
+            "api_secret_name": {
                 "env_var_key": "CENSYS_API_SECRET",
                 "type": "string",
                 "required": true,

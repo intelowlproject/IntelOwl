@@ -7,7 +7,6 @@ import time
 
 from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager.classes import ObservableAnalyzer
-from intel_owl import secrets
 
 
 logger = logging.getLogger(__name__)
@@ -18,31 +17,28 @@ class Pulsedive(ObservableAnalyzer):
     max_tries: int = 10
     poll_distance: int = 10
 
-    def set_config(self, additional_config_params):
-        self.api_key_name = additional_config_params.get(
-            "api_key_name", "PULSEDIVE_API_KEY"
-        )
-        active_scan = additional_config_params.get("active_scan", True)
+    def set_params(self, params):
+        active_scan = params.get("active_scan", True)
         self.probe = 1 if active_scan else 0
+        self.__api_key = self._secrets["api_key_name"]
 
     def run(self):
         result = {}
         default_param = ""
-        api_key = secrets.get_secret(self.api_key_name)
-        if not api_key:
-            warning = f"No API key retrieved with name: {self.api_key_name}"
+        if not self.__api_key:
+            warning = "No API key retrieved"
             logger.info(
                 f"{warning}. Continuing without API key..." f" <- {self.__repr__()}"
             )
             self.report.errors.append(warning)
             self.report.save()
         else:
-            default_param = f"&key={api_key}"
+            default_param = f"&key={self.__api_key}"
 
         # headers = {"Key": api_key, "Accept": "application/json"}
         # 1. query to info.php to check if the indicator is already in the database
         params = f"indicator={self.observable_name}"
-        if api_key:
+        if self.__api_key:
             params += default_param
         resp = requests.get(f"{self.base_url}/info.php?{params}")
         if resp.status_code == 404:

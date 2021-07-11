@@ -12,8 +12,8 @@ from api_app.analyzers_manager import classes
 class Robtex(classes.ObservableAnalyzer):
     base_url = "https://freeapi.robtex.com/"
 
-    def set_config(self, additional_config_params):
-        self.analysis_type = additional_config_params.get("robtex_analysis", "ip_query")
+    def set_params(self, params):
+        self.analysis_type = params.get("robtex_analysis", "ip_query")
 
     def run(self):
         if self.analysis_type == "ip_query":

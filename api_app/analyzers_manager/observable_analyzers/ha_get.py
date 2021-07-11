@@ -5,7 +5,6 @@ import requests
 
 from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager import classes
-from intel_owl import secrets
 
 
 class HybridAnalysisGet(classes.ObservableAnalyzer):
@@ -13,18 +12,12 @@ class HybridAnalysisGet(classes.ObservableAnalyzer):
     api_url: str = f"{base_url}/api/v2/"
     sample_url: str = f"{base_url}/sample"
 
-    def set_config(self, additional_config_params):
-        self.api_key_name = additional_config_params.get("api_key_name", "HA_KEY")
+    def set_params(self, params):
+        self.api_key = self._secrets["api_key_name"]
 
     def run(self):
-        api_key = secrets.get_secret(self.api_key_name)
-        if not api_key:
-            raise AnalyzerRunException(
-                f"No API key retrieved with name {self.api_key_name}"
-            )
-
         headers = {
-            "api-key": api_key,
+            "api-key": self.api_key,
             "user-agent": "Falcon Sandbox",
             "accept": "application/json",
         }

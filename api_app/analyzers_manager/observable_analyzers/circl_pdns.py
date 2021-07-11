@@ -8,21 +8,17 @@ from urllib.parse import urlparse
 
 from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager import classes
-from intel_owl import secrets
 
 
 class CIRCL_PDNS(classes.ObservableAnalyzer):
-    def set_config(self, _):
-        self.__credentials = secrets.get_secret("CIRCL_CREDENTIALS")
+    def set_params(self, params):
+        self.__credentials = self._secrets["pdns_credentials"]
         self.domain = self.observable_name
         if self.observable_classification == "url":
             self.domain = urlparse(self.observable_name).hostname
 
     def run(self):
         # You should save CIRCL credentials with this template: "<user>|<pwd>"
-        if not self.__credentials:
-            raise AnalyzerRunException("no credentials retrieved")
-
         split_credentials = self.__credentials.split("|")
         if len(split_credentials) != 2:
             raise AnalyzerRunException(

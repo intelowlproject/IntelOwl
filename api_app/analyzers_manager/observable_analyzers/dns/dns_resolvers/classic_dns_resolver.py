@@ -21,8 +21,8 @@ logger = logging.getLogger(__name__)
 class ClassicDNSResolver(classes.ObservableAnalyzer):
     """Resolve a DNS query with Default resolver"""
 
-    def set_config(self, additional_config_params):
-        self._query_type = additional_config_params.get("query_type", "A")
+    def set_params(self, params):
+        self._query_type = params.get("query_type", "A")
 
     def run(self):
         resolutions = []

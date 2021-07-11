@@ -5,24 +5,17 @@ import requests
 
 from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager import classes
-from intel_owl import secrets
 
 
 class Onyphe(classes.ObservableAnalyzer):
     base_url: str = "https://www.onyphe.io/api/v2/summary/"
 
-    def set_config(self, additional_config_params):
-        self.api_key_name = additional_config_params.get("api_key_name", "ONYPHE_KEY")
+    def set_params(self, params):
+        self.__api_key = self._secrets["api_key_name"]
 
     def run(self):
-        api_key = secrets.get_secret(self.api_key_name)
-        if not api_key:
-            raise AnalyzerRunException(
-                f"no API key retrieved with name: '{self.api_key_name}'"
-            )
-
         headers = {
-            "Authorization": f"apikey {api_key}",
+            "Authorization": f"apikey {self.__api_key}",
             "Content-Type": "application/json",
         }
         obs_clsfn = self.observable_classification

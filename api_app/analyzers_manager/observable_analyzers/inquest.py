@@ -7,7 +7,6 @@ import requests
 
 from api_app.exceptions import AnalyzerRunException, AnalyzerConfigurationException
 from api_app.analyzers_manager.classes import ObservableAnalyzer
-from intel_owl import secrets
 
 
 logger = logging.getLogger(__name__)
@@ -16,14 +15,9 @@ logger = logging.getLogger(__name__)
 class InQuest(ObservableAnalyzer):
     base_url: str = "https://labs.inquest.net"
 
-    def set_config(self, additional_config_params):
-        self.api_key_name = additional_config_params.get(
-            "api_key_name", "INQUEST_API_KEY"
-        )
-        self.__api_key = secrets.get_secret(self.api_key_name)
-        self.analysis_type = additional_config_params.get(
-            "inquest_analysis", "dfi_search"
-        )
+    def set_params(self, params):
+        self.__api_key = self._secrets["api_key_name"]
+        self.analysis_type = params.get("inquest_analysis", "dfi_search")
         self.generic_identifier_mode = "user-defined"  # Or auto
 
     @property
@@ -51,7 +45,7 @@ class InQuest(ObservableAnalyzer):
         if self.__api_key:
             headers["Authorization"] = self.__api_key
         else:
-            warning = f"No API key retrieved with name: {self.api_key_name}"
+            warning = "No API key retrieved"
             logger.info(
                 f"{warning}. Continuing without API key..." f" <- {self.__repr__()}"
             )

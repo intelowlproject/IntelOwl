@@ -20,8 +20,8 @@ logger = logging.getLogger(__name__)
 class GoogleDNSResolver(classes.ObservableAnalyzer):
     """Resolve a DNS query with Google"""
 
-    def set_config(self, additional_config_params):
-        self._query_type = additional_config_params.get("query_type", "A")
+    def set_params(self, params):
+        self._query_type = params.get("query_type", "A")
 
     def run(self):
         try:

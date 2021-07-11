@@ -7,9 +7,9 @@ from api_app.analyzers_manager.classes import ObservableAnalyzer
 class DarkSearchQuery(ObservableAnalyzer):
     name: str = "DarkSearchQuery"
 
-    def set_config(self, config_params):
-        self.num_pages = int(config_params.get("pages", 5))
-        self.proxies = config_params.get("proxies", None)
+    def set_params(self, params):
+        self.num_pages = int(params.get("pages", 5))
+        self.proxies = params.get("proxies", None)
 
     def run(self):
         from darksearch import Client

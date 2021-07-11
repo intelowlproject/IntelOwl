@@ -6,7 +6,6 @@ import logging
 
 from api_app.exceptions import AnalyzerConfigurationException
 from api_app.analyzers_manager import classes
-from intel_owl import secrets
 
 logger = logging.getLogger(__name__)
 
@@ -14,10 +13,8 @@ logger = logging.getLogger(__name__)
 class HoneyDB(classes.ObservableAnalyzer):
     base_url = "https://honeydb.io/api"
 
-    def set_config(self, additional_config_params):
-        api_key_name = additional_config_params.get("api_key_name", "HONEYDB_API_KEY")
-        api_id_name = additional_config_params.get("api_id_name", "HONEYDB_API_ID")
-        self.analysis_type = additional_config_params.get("honeydb_analysis", "all")
+    def set_params(self, params):
+        self.analysis_type = params.get("honeydb_analysis", "all")
         self.endpoints = [
             "scan_twitter",
             "ip_query",
@@ -29,12 +26,9 @@ class HoneyDB(classes.ObservableAnalyzer):
             raise AnalyzerConfigurationException(
                 f"analysis_type is not valid: {self.analysis_type}"
             )
-        self.__api_key = secrets.get_secret(api_key_name)
-        self.__api_id = secrets.get_secret(api_id_name)
-        if not self.__api_key:
-            raise AnalyzerConfigurationException("No HoneyDB API Key retrieved")
-        if not self.__api_id:
-            raise AnalyzerConfigurationException("No HoneyDB API ID retrieved")
+
+        self.__api_key = self.secrets["api_key_name"]
+        self.__api_id = self.secrets["api_id_name"]
         self.headers = {
             "X-HoneyDb-ApiKey": self.__api_key,
             "X-HoneyDb-ApiId": self.__api_id,

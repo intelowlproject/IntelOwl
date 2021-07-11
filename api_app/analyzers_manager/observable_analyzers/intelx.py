@@ -4,9 +4,8 @@
 import requests
 import time
 
-from api_app.exceptions import AnalyzerConfigurationException, AnalyzerRunException
+from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager.classes import ObservableAnalyzer
-from intel_owl import secrets
 
 
 class IntelX(ObservableAnalyzer):
@@ -18,21 +17,13 @@ class IntelX(ObservableAnalyzer):
 
     base_url: str = "https://2.intelx.io/phonebook/search"
 
-    def set_config(self, additional_config_params):
-        self._rows_limit = int(additional_config_params.get("rows_limit", 100))
-        self._api_key_name = additional_config_params.get(
-            "api_key_name", "INTELX_API_KEY"
-        )
+    def set_params(self, params):
+        self._rows_limit = int(params.get("rows_limit", 100))
+        self.__api_key = self._secrets["api_key_name"]
 
     def run(self):
-        api_key = secrets.get_secret(self._api_key_name)
-        if not api_key:
-            raise AnalyzerConfigurationException(
-                f"No API key retrieved with name: '{self._api_key_name}'"
-            )
-
         session = requests.Session()
-        session.headers.update({"x-key": api_key, "User-Agent": "IntelOwl/v1.x"})
+        session.headers.update({"x-key": self.__api_key, "User-Agent": "IntelOwl/v1.x"})
         params = {
             "term": self.observable_name,
             "buckets": [],

@@ -13,7 +13,7 @@ import requests
 
 from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager import classes
-from intel_owl import settings, secrets
+from intel_owl import settings
 
 logger = logging.getLogger(__name__)
 
@@ -21,8 +21,9 @@ db_names = ["GeoLite2-Country.mmdb", "GeoLite2-City.mmdb"]
 
 
 class Maxmind(classes.ObservableAnalyzer):
-    def set_config(self, additional_config_params):
-        self.additional_config_params = additional_config_params
+    def set_params(self, params):
+        self.params = params
+        self.__api_key = self._secrets["api_key_name"]
 
     def run(self):
         maxmind_final_result = {}
@@ -30,7 +31,7 @@ class Maxmind(classes.ObservableAnalyzer):
             try:
                 db_location = _get_db_location(db)
                 if not os.path.isfile(db_location):
-                    self.updater(self.additional_config_params, db)
+                    self.updater(self.params, db)
                 reader = maxminddb.open_database(db_location)
                 maxmind_result = reader.get(self.observable_name)
                 reader.close()
@@ -43,22 +44,15 @@ class Maxmind(classes.ObservableAnalyzer):
 
         return maxmind_final_result
 
-    @staticmethod
-    def updater(additional_config_params, db):
+    def updater(self, params, db):
         db_location = _get_db_location(db)
         try:
-            api_key_name = additional_config_params.get("api_key_name", "MAXMIND_KEY")
-            api_key = secrets.get_secret(api_key_name)
-            if not api_key:
-                raise AnalyzerRunException(
-                    f"No API key retrieved with name: '{api_key_name}'"
-                )
 
             db_name_wo_ext = db[:-5]
             logger.info(f"starting download of db {db_name_wo_ext} from maxmind")
             url = (
                 "https://download.maxmind.com/app/geoip_download?edition_id="
-                f"{db_name_wo_ext}&license_key={api_key}&suffix=tar.gz"
+                f"{db_name_wo_ext}&license_key={self.__api_key}&suffix=tar.gz"
             )
             r = requests.get(url)
             if r.status_code >= 300:

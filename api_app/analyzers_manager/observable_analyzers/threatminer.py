@@ -10,8 +10,8 @@ from api_app.analyzers_manager import classes
 class Threatminer(classes.ObservableAnalyzer):
     base_url = "https://api.threatminer.org/v2/"
 
-    def set_config(self, additional_config_params):
-        self.rt_value = additional_config_params.get("rt_value", "")
+    def set_params(self, params):
+        self.rt_value = params.get("rt_value", "")
 
     def run(self):
         params = {"q": self.observable_name}

@@ -10,19 +10,13 @@ from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.observable_analyzers.dns.dns_responses import (
     malicious_detector_response,
 )
-from intel_owl import secrets
 
 
 class GoogleSF(classes.ObservableAnalyzer):
     """Check if observable analyzed is marked as malicious for Google SafeBrowsing"""
 
     def run(self):
-        api_key_name = "GSF_KEY"
-        api_key = secrets.get_secret(api_key_name)
-        if not api_key:
-            raise AnalyzerRunException(
-                f"No API key retrieved with name: '{api_key_name}'"
-            )
+        api_key = self._secrets["api_key_name"]
 
         sb_instance = SafeBrowsing(api_key)
         response = sb_instance.lookup_urls([self.observable_name])

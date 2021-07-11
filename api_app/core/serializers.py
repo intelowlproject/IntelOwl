@@ -121,7 +121,6 @@ class AbstractConfigSerializer(rfs.Serializer):
         return secrets
 
     # utility methods
-
     def _check_secrets(self, secrets):
         errors = {}
         for key_name, secret_dict in secrets.items():
@@ -138,8 +137,7 @@ class AbstractConfigSerializer(rfs.Serializer):
                         secret_dict["type"],
                         type(secret_val),
                     )
-                else:
-                    self.__cached_secrets[key_name] = secret_val
+
         return errors
 
     def _read_secrets(self) -> dict:

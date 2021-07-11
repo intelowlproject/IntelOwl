@@ -111,7 +111,7 @@ class ObservableAnalyzer(BaseAnalyzerMixin):
     """
     Abstract class for Observable Analyzers.
     Inherit from this branch when defining a IP, URL or domain analyzer.
-    Need to overrwrite `set_config(self, additional_config_params)`
+    Need to overrwrite `set_params(self, params)`
      and `run(self)` functions.
     """
 
@@ -154,7 +154,7 @@ class FileAnalyzer(BaseAnalyzerMixin):
     """
     Abstract class for File Analyzers.
     Inherit from this branch when defining a file analyzer.
-    Need to overrwrite `set_config(self, additional_config_params)`
+    Need to overrwrite `set_params(self, params)`
      and `run(self)` functions.
     """
 

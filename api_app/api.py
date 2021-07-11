@@ -340,7 +340,7 @@ def send_analysis_request(request):
                     )
                 # just pick all available analyzers
                 analyzers_requested = "__all__"
-            cleaned_analyzer_list = helpers.filter_analyzers(
+            cleaned_analyzer_list = analyzers_controller.filter_analyzers(
                 serialized_data,
                 analyzers_requested,
                 warnings,

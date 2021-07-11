@@ -113,12 +113,12 @@ class YaraScan(FileAnalyzer):
         found_yara_dirs = []
         for analyzer_name, analyzer_config in analyzer_config.items():
             if analyzer_name.startswith("Yara_Scan"):
-                yara_dirs = analyzer_config.get("additional_config_params", {}).get(
+                yara_dirs = analyzer_config.get("config", {}).get(
                     "git_repo_main_dir", []
                 )
                 if not yara_dirs:
                     # fall back to required key
-                    yara_dirs = analyzer_config.get("additional_config_params", {}).get(
+                    yara_dirs = analyzer_config.get("config", {}).get(
                         "directories_with_rules", []
                     )
                     found_yara_dirs.extend(yara_dirs)

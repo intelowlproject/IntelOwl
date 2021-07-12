@@ -240,7 +240,8 @@
       "text/x-ms-iqy",
       "application/excel",
       "text/xml",
-      "application/xml"
+      "application/xml",
+      "application/zip"
     ],
     "description": "static document analysis with new features to analyze XLM macros, encrypted macros and more",
     "python_module": "doc_info.DocInfo",

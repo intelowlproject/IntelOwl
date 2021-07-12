@@ -390,7 +390,10 @@
         ],
         "config": {
             "soft_time_limit": 300,
-            "queue": "default"
+            "queue": "default",
+            "tld": true,
+            "mxcheck": true,
+            "ssdeep": true
         },
         "secrets": {}
     },
@@ -2398,7 +2401,8 @@
         ],
         "config": {
             "soft_time_limit": 40,
-            "queue": "default"
+            "queue": "default",
+            "max_tries": 10
         },
         "secrets": {
             "api_key_name": {

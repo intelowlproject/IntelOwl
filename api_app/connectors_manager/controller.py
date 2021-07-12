@@ -91,14 +91,14 @@ def start_connectors(
         celery_app.send_task(
             CELERY_TASK_NAME,
             args=args,
-            kwargs={"job_id": job_id, "runtime_conf": runtime_conf, **celery_kwargs},
+            kwargs={"runtime_conf": runtime_conf, **celery_kwargs},
             queue=queue,
             soft_time_limit=stl,
             task_id=task_id,
         )
 
     # cache the task ids
-    cache.set(build_cache_key(job_id), connectors_task_id_map.values())
+    cache.set(build_cache_key(job_id), list(connectors_task_id_map.values()))
 
     return connectors_task_id_map
 

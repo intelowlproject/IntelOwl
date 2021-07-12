@@ -71,7 +71,9 @@ def run_analyzer(job_id: int, config_dict: dict, **kwargs):
     # run analyzer
     instance = analyzers_controller.run_analyzer(job_id, config_dict, **kwargs)
     # fire connectors when job finishes with success
-    if instance and instance._job.status == "reported_without_fails":
+    if instance and instance._job:
+        del instance._job  # invalidate cache
+    if instance._job.status == "reported_without_fails":
         app.send_task(
             "on_job_success",
             args=[

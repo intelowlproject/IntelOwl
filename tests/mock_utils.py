@@ -1,8 +1,10 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
-
 # mock_utils.py: useful utils for mocking requests and responses for testing
-from intel_owl import settings
+
+from unittest import skipIf
+from unittest.mock import patch
+from django.conf import settings
 
 
 # class for mocking responses
@@ -34,6 +36,15 @@ class MockResponseNoOp:
 
 
 # it is optional to mock requests
+def if_mock(decorators: list):
+    def apply_all(f):
+        for d in reversed(decorators):
+            f = d(f)
+        return f
+
+    return apply_all if settings.MOCK_CONNECTIONS else lambda x: x
+
+
 def mock_connections(decorator):
     return decorator if settings.MOCK_CONNECTIONS else lambda x: x
 

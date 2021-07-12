@@ -189,14 +189,6 @@ class ApiViewTests(TestCase):
         response = self.client.post("/api/send_analysis_request", data)
         self.assertEqual(response.status_code, 200)
 
-    def test_get_analyzer_config(self):
-        response = self.client.get("/api/get_analyzer_configs")
-        self.assertEqual(response.status_code, 200)
-        self.assertNotEqual(response.json(), {})
-        self.assertDictEqual(
-            response.json(), AnalyzerConfigSerializer.read_and_verify_config()
-        )
-
     def test_download_sample_200(self):
         self.assertEqual(models.Job.objects.count(), 0)
         filename = "file.exe"

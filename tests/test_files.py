@@ -8,7 +8,6 @@ from django.core.files import File
 from django.test import TestCase
 from unittest.mock import patch, MagicMock
 
-from api_app.analyzers_manager import utils
 from api_app.analyzers_manager.file_analyzers import (
     file_info,
     signature_info,
@@ -133,7 +132,7 @@ class FileAnalyzersEXETests(TestCase):
             self.filepath,
             self.filename,
             self.md5,
-            {"rank_strings": True},
+            {"rank_strings": False},
         ).start()
         self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
@@ -625,12 +624,6 @@ class FileAnalyzersDocTests(TestCase):
         self.filepath, self.filename = utils.get_filepath_filename(self.job_id)
         self.runtime_configuration = test_job.runtime_configuration
         self.md5 = test_job.md5
-
-    def test_docinfo(self):
-        report = doc_info.DocInfo(
-            "Doc_Info", self.job_id, self.filepath, self.filename, self.md5, {}
-        ).start()
-        self.assertEqual(report.status, report.Statuses.SUCCESS.name)
 
     def test_docinfo_experimental(self):
         analyzer_name = "Doc_Info_Experimental"

@@ -23,7 +23,10 @@ class CloudFlareMaliciousDetector(classes.ObservableAnalyzer):
             is_malicious = False
             observable = self.observable_name
             # for URLs we are checking the relative domain
-            if self.observable_classification == self._serializer.ObservableTypes.URL.value:
+            if (
+                self.observable_classification
+                == self._serializer.ObservableTypes.URL.value
+            ):
                 observable = urlparse(self.observable_name).hostname
 
             client = requests.session()

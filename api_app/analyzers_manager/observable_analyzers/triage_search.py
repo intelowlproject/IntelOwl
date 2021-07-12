@@ -46,7 +46,10 @@ class TriageSearch(classes.ObservableAnalyzer):
         return response
 
     def __triage_search(self):
-        if self.observable_classification == self._serializer.ObservableTypes.HASH.value:
+        if (
+            self.observable_classification
+            == self._serializer.ObservableTypes.HASH.value
+        ):
             params = {"query": self.observable_name}
         else:
             params = {

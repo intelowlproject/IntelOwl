@@ -26,7 +26,9 @@ class EmailRep(classes.ObservableAnalyzer):
             "Accept": "application/json",
         }
 
-        if self.observable_classification not in [self._serializer.ObservableTypes.GENERIC.value]:
+        if self.observable_classification not in [
+            self._serializer.ObservableTypes.GENERIC.value
+        ]:
             raise AnalyzerRunException(
                 f"not supported observable type {self.observable_classification}."
                 f" Supported: generic"

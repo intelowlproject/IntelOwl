@@ -12,7 +12,10 @@ class MB_GET(classes.ObservableAnalyzer):
     sample_url: str = "https://bazaar.abuse.ch/sample/"
 
     def run(self):
-        if self.observable_classification != self._serializer.ObservableTypes.HASH.value:
+        if (
+            self.observable_classification
+            != self._serializer.ObservableTypes.HASH.value
+        ):
             raise AnalyzerRunException(
                 f"not supported observable type {self.observable_classification}."
                 f" Supported: hash only"

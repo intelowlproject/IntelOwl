@@ -53,7 +53,10 @@ class InQuest(ObservableAnalyzer):
             self.report.save()
 
         if self.analysis_type == "dfi_search":
-            if self.observable_classification == self._serializer.ObservableTypes.HASH.value:
+            if (
+                self.observable_classification
+                == self._serializer.ObservableTypes.HASH.value
+            ):
                 uri = (
                     f"/api/dfi/search/hash/{self.hash_type}?hash={self.observable_name}"
                 )
@@ -68,7 +71,10 @@ class InQuest(ObservableAnalyzer):
                     f"?keyword={self.observable_name}"
                 )
 
-            elif self.observable_classification == self._serializer.ObservableTypes.GENERIC.value:
+            elif (
+                self.observable_classification
+                == self._serializer.ObservableTypes.GENERIC.value
+            ):
                 try:
                     type_, value = self.observable_name.split(":")
                 except ValueError:
@@ -103,7 +109,8 @@ class InQuest(ObservableAnalyzer):
         result = response.json()
         if (
             self.analysis_type == "dfi_search"
-            and self.observable_classification == self._serializer.ObservableTypes.HASH.value
+            and self.observable_classification
+            == self._serializer.ObservableTypes.HASH.value
         ):
             result["hash_type"] = self.hash_type
 

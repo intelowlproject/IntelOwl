@@ -8,6 +8,7 @@ from urllib.parse import urlparse
 
 from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager import classes
+from ..serializers.AnalyzerConfigSerializer import ObservableTypes
 
 
 class OTX(classes.ObservableAnalyzer):
@@ -20,16 +21,19 @@ class OTX(classes.ObservableAnalyzer):
 
         obs_clsf = self.observable_classification
         to_analyze_observable = self.observable_name
-        if obs_clsf == "ip":
+
+        if obs_clsf == ObservableTypes.IP.value:
             otx_type = OTXv2.IndicatorTypes.IPv4
-        elif obs_clsf == "url":
+        elif obs_clsf == ObservableTypes.URL.value:
             to_analyze_observable = urlparse(self.observable_name).hostname
+
             try:
                 to_analyze_observable = IPv4Address(to_analyze_observable)
             except AddressValueError:
                 otx_type = OTXv2.IndicatorTypes.DOMAIN
             else:
                 otx_type = OTXv2.IndicatorTypes.IPv4
+
             if not to_analyze_observable:
                 raise AnalyzerRunException("extracted observable is None")
         elif obs_clsf == "domain":

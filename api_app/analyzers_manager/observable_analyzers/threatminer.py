@@ -5,6 +5,7 @@ import requests
 
 from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager import classes
+from ..serializers.AnalyzerConfigSerializer import ObservableTypes
 
 
 class Threatminer(classes.ObservableAnalyzer):
@@ -18,9 +19,9 @@ class Threatminer(classes.ObservableAnalyzer):
         if self.rt_value:
             params["rt"] = self.rt_value
 
-        if self.observable_classification == "domain":
+        if self.observable_classification == ObservableTypes.DOMAIN.value:
             uri = "domain.php"
-        elif self.observable_classification == "ip":
+        elif self.observable_classification == ObservableTypes.IP.value:
             uri = "host.php"
         else:
             raise AnalyzerRunException(

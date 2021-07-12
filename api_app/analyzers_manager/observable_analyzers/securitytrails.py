@@ -5,6 +5,7 @@ import requests
 
 from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager import classes
+from ..serializers.AnalyzerConfigSerializer import ObservableTypes
 
 
 class SecurityTrails(classes.ObservableAnalyzer):
@@ -19,9 +20,9 @@ class SecurityTrails(classes.ObservableAnalyzer):
     def run(self):
         headers = {"apikey": self.__api_key, "Content-Type": "application/json"}
 
-        if self.observable_classification == "ip":
+        if self.observable_classification == ObservableTypes.IP.value:
             uri = f"ips/nearby/{self.observable_name}"
-        elif self.observable_classification == "domain":
+        elif self.observable_classification == ObservableTypes.DOMAIN.value:
             if self.analysis_type == "current":
                 if self.current_type == "details":
                     uri = f"domain/{self.observable_name}"

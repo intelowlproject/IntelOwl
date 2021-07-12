@@ -5,6 +5,7 @@ import requests
 
 from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager import classes
+from ..serializers.AnalyzerConfigSerializer import ObservableTypes
 
 
 class Onyphe(classes.ObservableAnalyzer):
@@ -20,11 +21,11 @@ class Onyphe(classes.ObservableAnalyzer):
         }
         obs_clsfn = self.observable_classification
 
-        if obs_clsfn == "domain":
+        if obs_clsfn == ObservableTypes.DOMAIN.value:
             uri = f"domain/{self.observable_name}"
-        elif obs_clsfn == "ip":
+        elif obs_clsfn == ObservableTypes.IP.value:
             uri = f"ip/{self.observable_name}"
-        elif obs_clsfn == "url":
+        elif obs_clsfn == ObservableTypes.URL.value:
             uri = f"hostname/{self.observable_name}"
         else:
             raise AnalyzerRunException(

@@ -11,6 +11,7 @@ from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.observable_analyzers.dns.dns_responses import (
     dns_resolver_response,
 )
+from ....serializers.AnalyzerConfigSerializer import ObservableTypes
 
 import logging
 
@@ -27,7 +28,7 @@ class GoogleDNSResolver(classes.ObservableAnalyzer):
         try:
             observable = self.observable_name
             # for URLs we are checking the relative domain
-            if self.observable_classification == "url":
+            if self.observable_classification == ObservableTypes.URL.value:
                 observable = urlparse(self.observable_name).hostname
 
             params = {

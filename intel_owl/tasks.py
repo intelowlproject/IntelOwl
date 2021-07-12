@@ -5,8 +5,6 @@ from __future__ import absolute_import, unicode_literals
 from celery import shared_task
 from guardian import utils
 
-from django.utils.module_loading import import_string
-
 from intel_owl.celery import app
 from api_app import crons
 from api_app.models import Job
@@ -62,43 +60,24 @@ def start_analyzers(
     job_id: int,
     analyzers_to_execute: list,
     runtime_configuration: dict,
-    celery_kwargs: dict = {},
 ):
     analyzers_controller.start_analyzers(
-        job_id, analyzers_to_execute, runtime_configuration, celery_kwargs
+        job_id, analyzers_to_execute, runtime_configuration
     )
 
 
 @app.task(name="run_analyzer", soft_time_limit=500)
 def run_analyzer(job_id: int, config_dict: dict, **kwargs):
-    try:
-        cls_path = analyzers_controller.build_import_path(
-            config_dict["python_module"],
-            observable_analyzer=(
-                config_dict["type"] == "observable"
-                or config_dict["type"] == "file"
-                and config_dict["run_hash"]
-            ),
+    # run analyzer
+    instance = analyzers_controller.run_analyzer(job_id, config_dict, **kwargs)
+    # fire connectors when job finishes with success
+    if instance and instance._job.status == "reported_without_fails":
+        app.send_task(
+            "on_job_success",
+            args=[
+                instance.job_id,
+            ],
         )
-        try:
-            klass = import_string(cls_path)
-        except ImportError:
-            raise Exception(f"Class: {cls_path} couldn't be imported")
-
-        instance = klass(config_dict=config_dict, job_id=job_id, **kwargs)
-        instance.start()
-        analyzers_controller.job_cleanup(instance.job_id)
-
-        # fire connectors when job finishes with success
-        if instance._job.status == "reported_without_fails":
-            app.send_task(
-                "on_job_success",
-                args=[
-                    instance.job_id,
-                ],
-            )
-    except Exception as e:
-        analyzers_controller.set_failed_analyzer(job_id, config_dict["name"], str(e))
 
 
 @app.task(name="on_job_success", soft_time_limit=500)
@@ -113,14 +92,4 @@ def on_job_success(job_id: int):
 
 @app.task(name="run_connector", soft_time_limit=500)
 def run_connector(job_id: int, config_dict: dict, **kwargs):
-    try:
-        cls_path = connectors_controller.build_import_path(config_dict["python_module"])
-        try:
-            klass = import_string(cls_path)
-        except ImportError:
-            raise Exception(f"Class: {cls_path} couldn't be imported")
-
-        instance = klass(config_dict=config_dict, job_id=job_id, **kwargs)
-        instance.start()
-    except Exception as e:
-        connectors_controller.set_failed_connector(job_id, config_dict["name"], str(e))
+    connectors_controller.run_connector(job_id, config_dict, **kwargs)

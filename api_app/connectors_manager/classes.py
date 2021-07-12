@@ -27,7 +27,7 @@ class Connector(Plugin):
 
     def init_report_object(self) -> ConnectorReport:
         return ConnectorReport.objects.create(
-            job=self.job_id,
+            job_id=self.job_id,
             connector=self.connector_name,
             report={},
             errors=[],
@@ -54,9 +54,6 @@ class Connector(Plugin):
 
     def after_run(self):
         logger.info(f"FINISHED connector: {self.__repr__()}")
-
-    def __init__(self, config_dict: dict, job_id: int, **kwargs):
-        super(self, Connector).__init__(config_dict, job_id, **kwargs)
 
     def __repr__(self):
         return f"({self.connector_name}, job: #{self.job_id})"

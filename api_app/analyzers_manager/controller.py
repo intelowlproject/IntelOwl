@@ -4,12 +4,14 @@
 import logging
 from celery import uuid
 from django.core.cache import cache
+from django.utils.module_loading import import_string
 
 from intel_owl.settings import CELERY_QUEUES
 from intel_owl.celery import app as celery_app
 
-from . import serializers
+from .classes import BaseAnalyzerMixin
 from .models import AnalyzerReport
+from .serializers import AnalyzerConfigSerializer
 from ..models import Job
 from ..helpers import get_now
 from ..exceptions import AlreadyFailedJobException, NotRunnableAnalyzer
@@ -36,11 +38,12 @@ def build_cache_key(job_id: int):
 
 
 def filter_analyzers(
-    serialized_data, analyzers_requested, warnings, run_all=False
+    serialized_data: dict, analyzers_requested: list, warnings: list, run_all=False
 ) -> list:
+    # init empty list
     cleaned_analyzer_list = []
 
-    analyzers_config = serializers.AnalyzerConfigSerializer.read_and_verify_config()
+    analyzers_config = AnalyzerConfigSerializer.read_and_verify_config()
 
     if analyzers_requested == "__all__":
         # select all
@@ -125,14 +128,13 @@ def filter_analyzers(
 def start_analyzers(
     job_id: int,
     analyzers_to_execute: list,
-    runtime_configuration: dict = {},
-    celery_kwargs: dict = {},
+    runtime_configuration: dict = dict(),
 ) -> dict:
     # mapping of analyzer name and task_id
     analyzer_task_id_map = {}
 
     # get analyzer config
-    analyzers_config = serializers.AnalyzerConfigSerializer.read_and_verify_config()
+    analyzers_config = AnalyzerConfigSerializer.read_and_verify_config()
 
     # get job
     job = Job.objects.get(pk=job_id)
@@ -172,6 +174,7 @@ def start_analyzers(
                 "config": config_params,
             },
         ]
+        kwargs = {"runtime_conf": runtime_conf}
         # gen new task_id
         task_id = uuid()
         # add to map
@@ -180,21 +183,21 @@ def start_analyzers(
         celery_app.send_task(
             CELERY_TASK_NAME,
             args=args,
-            kwargs={"job_id": job_id, "runtime_conf": runtime_conf, **celery_kwargs},
+            kwargs=kwargs,
             queue=queue,
             soft_time_limit=stl,
             task_id=task_id,
         )
 
     # cache the task ids
-    cache.set(build_cache_key(job_id), analyzer_task_id_map.values())
+    cache.set(build_cache_key(job_id), list(analyzer_task_id_map.values()))
 
     return analyzer_task_id_map
 
 
 def job_cleanup(job_id: int):
     job = Job.objects.get(pk=job_id)
-    logger.info(f"STARTING set_report_and_cleanup for <-- {repr(job)}.")
+    logger.info(f"STARTING job_cleanup for <-- {job.__repr__()}.")
     status_to_set = "failed"
 
     try:
@@ -207,7 +210,7 @@ def job_cleanup(job_id: int):
         logger.info(
             f"REPORT: num analysis reports:{num_analysis_reports}, "
             f"num analyzer to execute:{num_analyzers_to_execute}"
-            f" <-- {repr(job)}."
+            f" <-- {job.__repr__()}."
         )
 
         # check if it was the last analysis...
@@ -236,13 +239,13 @@ def job_cleanup(job_id: int):
         if not (job.status == "failed" and job.finished_analysis_time):
             job.finished_analysis_time = get_now()
         job.status = status_to_set
-        job.save(update_fields=["status", "errros", "finished_analysis_time"])
+        job.save(update_fields=["status", "errors", "finished_analysis_time"])
 
 
 def set_failed_analyzer(job_id: int, analyzer_name: str, err_msg):
     status = AnalyzerReport.Statuses.FAILED.name
     logger.warning(
-        f"({analyzer_name}, job_id #{job_id}) -> set as {status}. ",
+        f"(job: #{job_id}, analyzer:{analyzer_name}) -> set as {status}. ",
         f" Error: {err_msg}",
     )
     report = AnalyzerReport.objects.create(
@@ -262,3 +265,28 @@ def kill_running_analysis(job_id: int) -> None:
     if isinstance(task_ids, list):
         celery_app.control.revoke(task_ids)
         cache.delete(key)
+
+
+def run_analyzer(job_id: int, config_dict: dict, **kwargs) -> BaseAnalyzerMixin:
+    instance = None
+    try:
+        cls_path = build_import_path(
+            config_dict["python_module"],
+            observable_analyzer=(
+                config_dict["type"] == "observable"
+                or config_dict["type"] == "file"
+                and config_dict["run_hash"]
+            ),
+        )
+        try:
+            klass: BaseAnalyzerMixin = import_string(cls_path)
+        except ImportError:
+            raise Exception(f"Class: {cls_path} couldn't be imported")
+
+        instance = klass(config_dict=config_dict, job_id=job_id, **kwargs)
+        instance.start()
+        job_cleanup(job_id)
+    except Exception as e:
+        set_failed_analyzer(job_id, config_dict["name"], str(e))
+
+    return instance

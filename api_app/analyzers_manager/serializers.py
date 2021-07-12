@@ -3,10 +3,8 @@
 from enum import Enum
 
 from rest_framework import serializers as rfs
-from django.utils.module_loading import import_string
 
 from api_app.core.serializers import AbstractConfigSerializer
-from .controller import build_import_path
 from .models import AnalyzerReport
 
 
@@ -63,11 +61,15 @@ class AnalyzerConfigSerializer(AbstractConfigSerializer):
     )
     supported_filetypes = rfs.ListField(required=False)
     not_supported_filetypes = rfs.ListField(required=False)
-    observable_supported = rfs.MultipleChoiceField(
-        choices=[c.value for c in ObservableTypes], required=False
+    observable_supported = rfs.ListField(
+        child=rfs.ChoiceField(choices=[c.value for c in ObservableTypes]),
+        required=False,
     )
 
     def validate_python_module(self, python_module: str):
+        from django.utils.module_loading import import_string
+        from .controller import build_import_path
+
         clspath = build_import_path(
             python_module,
             observable_analyzer=(

@@ -37,7 +37,7 @@ class BaseAnalyzerMixin(Plugin):
         Returns report object set in *start* fn
         """
         return AnalyzerReport.objects.create(
-            job=self.job_id,
+            job_id=self.job_id,
             analyzer_name=self.analyzer_name,
             report={},
             errors=[],
@@ -97,11 +97,11 @@ class BaseAnalyzerMixin(Plugin):
             result = 9223372036854775807
         return result
 
+    def before_run(self):
+        self.report.update_status(status=self.report.Statuses.RUNNING)
+
     def after_run(self):
         self.report.report = self._validate_result(self.report.report)
-
-    def __init__(self, config_dict: dict, job_id: int, **kwargs):
-        super(self, BaseAnalyzerMixin).__init__(config_dict, job_id, **kwargs)
 
     def __repr__(self):
         return f"({self.analyzer_name}, job_id: #{self.job_id})"
@@ -119,7 +119,7 @@ class ObservableAnalyzer(BaseAnalyzerMixin):
     observable_classification: str
 
     def __init__(self, config_dict: dict, job_id: int, **kwargs):
-        super(self, BaseAnalyzerMixin).__init__(config_dict, job_id, **kwargs)
+        super(ObservableAnalyzer, self).__init__(config_dict, job_id, **kwargs)
         # check if we should run the hash instead of the binary
         if self._job.is_sample and config_dict.get("run_hash", False):
             self.observable_classification = (
@@ -164,7 +164,7 @@ class FileAnalyzer(BaseAnalyzerMixin):
     file_mimetype: str
 
     def __init__(self, config_dict: dict, job_id: int, **kwargs):
-        super(self, BaseAnalyzerMixin).__init__(config_dict, job_id, **kwargs)
+        super(FileAnalyzer, self).__init__(config_dict, job_id, **kwargs)
         self.md5 = self._job.md5
         self.filepath = self._job.file.path
         self.filename = self._job.filename
@@ -173,14 +173,14 @@ class FileAnalyzer(BaseAnalyzerMixin):
     def before_run(self):
         super().before_run()
         logger.info(
-            f"STARTED analyzer: {repr(self)} -> "
+            f"STARTED analyzer: {self.__repr__()} -> "
             f"File: ({self.filename}, md5: {self.md5})"
         )
 
     def after_run(self):
         super().after_run()
         logger.info(
-            f"FINISHED analyzer: {repr(self)} -> "
+            f"FINISHED analyzer: {self.__repr__()} -> "
             f"File: ({self.filename}, md5: {self.md5})"
         )
 

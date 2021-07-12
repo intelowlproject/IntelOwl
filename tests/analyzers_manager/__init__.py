@@ -46,10 +46,8 @@ class _ObservableAnalyzersScriptsTestCase(TestCase):
         self.analyzer_config: dict = AnalyzerConfigSerializer.read_and_verify_config()
         # define runtime configs
         self.runtime_configuration = {
-            "HoneyDB": {"honeydb_analysis": "ip_info"},
             "Thug_URL_Info": {"test": True},
             "Triage_Search": {"analysis_type": "submit"},
-            "FILE_INFO": {"rank_strings": False},
         }
         # save job
         params = self.get_params()

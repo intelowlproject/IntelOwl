@@ -8,15 +8,19 @@ from api_app.models import Job
 from api_app.analyzers_manager.serializers import AnalyzerConfigSerializer
 from api_app.analyzers_manager import controller as analyzers_controller
 
-from .utils import mock_connections, analyzer_mock_fnsmap
+from .utils import if_mock, patch, mocked_requests
 
 # for observable analyzers, if can customize the behavior based on:
 # DISABLE_LOGGING_TEST to True -> logging disabled
 # MOCK_CONNECTIONS to True -> connections to external analyzers are faked
 
 
-@mock_connections(patch("requests.get", side_effect=mocked_requests))
-@mock_connections(patch("requests.post", side_effect=mocked_requests))
+@if_mock(
+    [
+        patch("requests.get", side_effect=mocked_requests),
+        patch("requests.post", side_effect=mocked_requests),
+    ]
+)
 class _ObservableAnalyzersScriptsTestCase(TestCase):
 
     test_job: Job
@@ -58,7 +62,7 @@ class _ObservableAnalyzersScriptsTestCase(TestCase):
         self.filtered_analyzers_dictlist: list = [
             config
             for config in self.analyzer_config.values()
-            if config["name"] == "Darksearch_Query"
+            if params["observable_classification"] in config["observable_supported"]
         ]
         return super().setUp()
 

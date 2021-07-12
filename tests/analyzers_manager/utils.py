@@ -6,7 +6,7 @@ from intel_owl import settings
 from ..mock_utils import (
     MockResponse,
     MockResponseNoOp,
-    mock_connections,
+    if_mock,
     mocked_requests,
     mocked_requests_noop,
 )
@@ -62,93 +62,65 @@ analyzer_mock_fnsmap = {
     "MaxMindGeoIP": [
         skipIf(settings.MOCK_CONNECTIONS, "not working without connection")
     ],
-    "FireHol_IPList": [
-        mock_connections(patch("requests.get", side_effect=mocked_firehol_iplist))
-    ],
+    "FireHol_IPList": [patch("requests.get", side_effect=mocked_firehol_iplist)],
     "CIRCLPassiveSSL": [
-        mock_connections(patch("pypssl.PyPSSL", side_effect=mocked_pypssl)),
+        patch("pypssl.PyPSSL", side_effect=mocked_pypssl),
     ],
-    "DNSDB": [
-        mock_connections(patch("requests.get", side_effect=mocked_dnsdb_v2_request))
-    ],
-    "CIRCLPassiveDNS": [
-        mock_connections(patch("pypdns.PyPDNS", side_effect=mocked_pypdns))
-    ],
+    "DNSDB": [patch("requests.get", side_effect=mocked_dnsdb_v2_request)],
+    "CIRCLPassiveDNS": [patch("pypdns.PyPDNS", side_effect=mocked_pypdns)],
     "UrlScan_Submit_Result": [
-        mock_connections(
-            patch(
-                "requests.Session.post",
-                side_effect=lambda *args, **kwargs: MockResponse({"api": "test"}, 200),
-            )
+        patch(
+            "requests.Session.post",
+            side_effect=lambda *args, **kwargs: MockResponse({"api": "test"}, 200),
         ),
-        mock_connections(patch("requests.Session.get", side_effect=mocked_requests)),
+        patch("requests.Session.get", side_effect=mocked_requests),
     ],
     "UrlScan_Search": [
-        mock_connections(
-            patch(
-                "requests.Session.post",
-                side_effect=lambda *args, **kwargs: MockResponse({"api": "test"}, 200),
-            )
+        patch(
+            "requests.Session.post",
+            side_effect=lambda *args, **kwargs: MockResponse({"api": "test"}, 200),
         ),
-        mock_connections(patch("requests.Session.get", side_effect=mocked_requests)),
+        patch("requests.Session.get", side_effect=mocked_requests),
     ],
     "Darksearch_Query": [
-        mock_connections(
-            patch(
-                "darksearch.Client.search",
-                side_effect=lambda *args, **kwargs: [
-                    {"total": 1, "last_page": 0, "data": []}
-                ],
-            )
+        patch(
+            "darksearch.Client.search",
+            side_effect=lambda *args, **kwargs: [
+                {"total": 1, "last_page": 0, "data": []}
+            ],
         )
     ],
     "Triage_Search": [
-        mock_connections(patch("requests.Session.get", side_effect=mocked_triage_get)),
-        mock_connections(
-            patch("requests.Session.post", side_effect=mocked_triage_post)
-        ),
+        patch("requests.Session.get", side_effect=mocked_triage_get),
+        patch("requests.Session.post", side_effect=mocked_triage_post),
     ],
     "OTXQuery": [
-        mock_connections(
-            patch(
-                "requests.Session.get",
-                side_effect=mocked_requests,
-            )
+        patch(
+            "requests.Session.get",
+            side_effect=mocked_requests,
         )
     ],
     "OTX_Check_Hash": [
-        mock_connections(
-            patch(
-                "requests.Session.get",
-                side_effect=mocked_requests,
-            )
+        patch(
+            "requests.Session.get",
+            side_effect=mocked_requests,
         )
     ],
     "IntelX_Phonebook": [
-        mock_connections(
-            patch(
-                "requests.Session.post",
-                side_effect=lambda *args, **kwargs: MockResponse({"id": 1}, 200),
-            )
+        patch(
+            "requests.Session.post",
+            side_effect=lambda *args, **kwargs: MockResponse({"id": 1}, 200),
         ),
-        mock_connections(
-            patch(
-                "requests.Session.get",
-                side_effect=lambda *args, **kwargs: MockResponse(
-                    {"selectors": []}, 200
-                ),
-            )
+        patch(
+            "requests.Session.get",
+            side_effect=lambda *args, **kwargs: MockResponse({"selectors": []}, 200),
         ),
     ],
-    "MISPFIRST": [
-        mock_connections(patch("pymisp.PyMISP", side_effect=mocked_requests_noop))
-    ],
+    "MISPFIRST": [patch("pymisp.PyMISP", side_effect=mocked_requests_noop)],
     "GoogleWebRisk": [
-        mock_connections(
-            patch(
-                "api_app.analyzers_manager.observable_analyzers.dns."
-                "dns_malicious_detectors.google_webrisk.WebRiskServiceClient"
-            )
+        patch(
+            "api_app.analyzers_manager.observable_analyzers.dns."
+            "dns_malicious_detectors.google_webrisk.WebRiskServiceClient"
         )
     ],
 }

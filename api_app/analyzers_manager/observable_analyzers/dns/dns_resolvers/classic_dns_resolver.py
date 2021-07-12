@@ -12,6 +12,7 @@ from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.observable_analyzers.dns.dns_responses import (
     dns_resolver_response,
 )
+from ....serializers.AnalyzerConfigSerializer import ObservableTypes
 
 import logging
 
@@ -26,7 +27,7 @@ class ClassicDNSResolver(classes.ObservableAnalyzer):
 
     def run(self):
         resolutions = []
-        if self.observable_classification == "ip":
+        if self.observable_classification == ObservableTypes.IP.value:
             try:
                 ipaddress.ip_address(self.observable_name)
                 hostname, alias, ip = socket.gethostbyaddr(self.observable_name)
@@ -37,10 +38,13 @@ class ClassicDNSResolver(classes.ObservableAnalyzer):
             except (socket.gaierror, socket.herror):
                 logger.warning(f"No resolution for ip {self.observable_name}")
                 resolutions = []
-        elif self.observable_classification in ["domain", "url"]:
+        elif self.observable_classification in [
+            ObservableTypes.DOMAIN.value,
+            ObservableTypes.URL.value,
+        ]:
             observable = self.observable_name
             # for URLs we are checking the relative domain
-            if self.observable_classification == "url":
+            if self.observable_classification == ObservableTypes.URL.value:
                 observable = urlparse(self.observable_name).hostname
 
             try:

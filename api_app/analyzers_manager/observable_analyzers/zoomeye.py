@@ -5,6 +5,7 @@ import requests
 
 from api_app.exceptions import AnalyzerRunException, AnalyzerConfigurationException
 from api_app.analyzers_manager import classes
+from ..serializers.AnalyzerConfigSerializer import ObservableTypes
 
 
 class ZoomEye(classes.ObservableAnalyzer):
@@ -19,7 +20,7 @@ class ZoomEye(classes.ObservableAnalyzer):
         self.__api_key = self._secrets["api_key_name"]
 
     def __build_zoomeye_url(self):
-        if self.observable_classification == "ip":
+        if self.observable_classification == ObservableTypes.IP.value:
             self.query += f" ip:{self.observable_name}"
         else:
             self.query += f" hostname:{self.observable_name}"

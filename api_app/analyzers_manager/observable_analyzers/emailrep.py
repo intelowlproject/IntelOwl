@@ -5,6 +5,7 @@ import requests
 
 from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager import classes
+from ..serializers.AnalyzerConfigSerializer import ObservableTypes
 
 
 class EmailRep(classes.ObservableAnalyzer):
@@ -26,7 +27,7 @@ class EmailRep(classes.ObservableAnalyzer):
             "Accept": "application/json",
         }
 
-        if self.observable_classification not in ["generic"]:
+        if self.observable_classification not in [ObservableTypes.GENERIC.value]:
             raise AnalyzerRunException(
                 f"not supported observable type {self.observable_classification}."
                 f" Supported: generic"

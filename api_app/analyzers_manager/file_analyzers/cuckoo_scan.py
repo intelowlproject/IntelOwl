@@ -23,15 +23,16 @@ class CuckooAnalysis(FileAnalyzer):
             logger.info(
                 f"{self.__repr__()}, (md5: {self.md5}) -> Continuing w/o API key.."
             )
+        else:
+            self.session.headers["Authorization"] = f"Bearer {self.__api_key}"
 
-        self.session.headers["Authorization"] = f"Bearer {self.__api_key}"
         self.cuckoo_url = self._secrets["url_key_name"]
         self.task_id = 0
         self.result = {}
         # no. of tries requesting new scan
-        self.max_post_tries = config.get("max_post_tries", 5)
+        self.max_post_tries = params.get("max_post_tries", 5)
         # no. of tries when polling for result
-        self.max_get_tries = config.get("max_poll_tries", 20)
+        self.max_get_tries = params.get("max_poll_tries", 20)
 
     def run(self):
         binary = get_binary(self.job_id)

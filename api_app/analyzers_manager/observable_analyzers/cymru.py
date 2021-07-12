@@ -6,6 +6,7 @@ import logging
 
 from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager.classes import ObservableAnalyzer
+from ..serializers.AnalyzerConfigSerializer import ObservableTypes
 
 
 logger = logging.getLogger(__name__)
@@ -14,7 +15,7 @@ logger = logging.getLogger(__name__)
 class Cymru(ObservableAnalyzer):
     def run(self):
         results = {}
-        if self.observable_classification != "hash":
+        if self.observable_classification != ObservableTypes.HASH.value:
             raise AnalyzerRunException(
                 f"observable type {self.observable_classification} not supported"
             )

@@ -275,7 +275,7 @@ def run_analyzer(job_id: int, config_dict: dict, **kwargs) -> BaseAnalyzerMixin:
             observable_analyzer=(
                 config_dict["type"] == "observable"
                 or config_dict["type"] == "file"
-                and config_dict["run_hash"]
+                and config_dict.get("run_hash", False)
             ),
         )
         try:

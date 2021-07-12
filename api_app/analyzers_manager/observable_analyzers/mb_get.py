@@ -5,6 +5,7 @@ import requests
 
 from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager import classes
+from ..serializers.AnalyzerConfigSerializer import ObservableTypes
 
 
 class MB_GET(classes.ObservableAnalyzer):
@@ -12,7 +13,7 @@ class MB_GET(classes.ObservableAnalyzer):
     sample_url: str = "https://bazaar.abuse.ch/sample/"
 
     def run(self):
-        if self.observable_classification != "hash":
+        if self.observable_classification != ObservableTypes.HASH.value:
             raise AnalyzerRunException(
                 f"not supported observable type {self.observable_classification}."
                 f" Supported: hash only"

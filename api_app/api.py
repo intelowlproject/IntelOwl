@@ -354,10 +354,11 @@ def send_analysis_request(request):
                 )
                 return Response({"error": "814"}, status=status.HTTP_400_BAD_REQUEST)
 
+            runtime_configuration = serialized_data.pop("runtime_configuration", {})
             # save the arrived data plus new params into a new job object
             serializer.save(**params)
-            job_id = serializer.data.get("id", None)
             md5 = serializer.data.get("md5", "")
+            job_id = serializer.data.get("id", None)
             logger.info(f"New Job added with ID: #{job_id} and md5: {md5}.")
             if not job_id:
                 return Response({"error": "815"}, status=status.HTTP_400_BAD_REQUEST)
@@ -376,7 +377,7 @@ def send_analysis_request(request):
                 kwargs=dict(
                     job_id=job_id,
                     analyzers_to_execute=params["analyzers_to_execute"],
-                    runtime_configuration=serialized_data["runtime_configuration"],
+                    runtime_configuration=runtime_configuration,
                 ),
             )
 

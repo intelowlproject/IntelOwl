@@ -5,7 +5,6 @@ import time
 import logging
 import requests
 import json
-
 from abc import ABCMeta
 
 from api_app.exceptions import (
@@ -54,7 +53,7 @@ class BaseAnalyzerMixin(Plugin):
             AnalyzerRunException,
         )
 
-    def get_serializer_class(self):
+    def get_serializer_class(self) -> AnalyzerConfigSerializer:
         return AnalyzerConfigSerializer
 
     def get_error_message(self, err, is_base_err=False):
@@ -123,7 +122,7 @@ class ObservableAnalyzer(BaseAnalyzerMixin):
         # check if we should run the hash instead of the binary
         if self._job.is_sample and config_dict.get("run_hash", False):
             self.observable_classification = (
-                AnalyzerConfigSerializer.ObservableTypes.HASH
+                AnalyzerConfigSerializer.self._serializer.ObservableTypes.HASH
             )
             # check which kind of hash the analyzer needs
             run_hash_type = config_dict["run_hash_type"]

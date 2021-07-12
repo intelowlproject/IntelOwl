@@ -11,7 +11,6 @@ from ipaddress import AddressValueError, IPv4Address
 
 from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager import classes
-from ..serializers.AnalyzerConfigSerializer import ObservableTypes
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +25,7 @@ class DNStwist(classes.ObservableAnalyzer):
         self._tld = params.get("tld", False)
         self._tld_dict = params.get("tld_dict", "abused_tlds.dict")
         self.domain = self.observable_name
-        if self.observable_classification == ObservableTypes.URL.value:
+        if self.observable_classification == self._serializer.ObservableTypes.URL.value:
             self.domain = urlparse(self.observable_name).hostname
             try:
                 IPv4Address(self.domain)

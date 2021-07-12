@@ -8,7 +8,6 @@ from urllib.parse import urlparse
 
 from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager import classes
-from ..serializers.AnalyzerConfigSerializer import ObservableTypes
 
 
 class OTX(classes.ObservableAnalyzer):
@@ -22,9 +21,9 @@ class OTX(classes.ObservableAnalyzer):
         obs_clsf = self.observable_classification
         to_analyze_observable = self.observable_name
 
-        if obs_clsf == ObservableTypes.IP.value:
+        if obs_clsf == self._serializer.ObservableTypes.IP.value:
             otx_type = OTXv2.IndicatorTypes.IPv4
-        elif obs_clsf == ObservableTypes.URL.value:
+        elif obs_clsf == self._serializer.ObservableTypes.URL.value:
             to_analyze_observable = urlparse(self.observable_name).hostname
 
             try:

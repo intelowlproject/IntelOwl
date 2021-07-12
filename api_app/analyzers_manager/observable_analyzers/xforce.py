@@ -7,7 +7,6 @@ from urllib.parse import quote_plus
 
 from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager import classes
-from ..serializers.AnalyzerConfigSerializer import ObservableTypes
 
 
 class XForce(classes.ObservableAnalyzer):
@@ -24,7 +23,7 @@ class XForce(classes.ObservableAnalyzer):
         result = {}
         for endpoint in endpoints:
             try:
-                if self.observable_classification == ObservableTypes.URL.value:
+                if self.observable_classification == self._serializer.ObservableTypes.URL.value:
                     observable_to_check = quote_plus(self.observable_name)
                 else:
                     observable_to_check = self.observable_name
@@ -44,11 +43,11 @@ class XForce(classes.ObservableAnalyzer):
         :rtype: list
         """
 
-        if self.observable_classification == ObservableTypes.IP.value:
+        if self.observable_classification == self._serializer.ObservableTypes.IP.value:
             endpoints = ["ipr", "ipr/history", "ipr/malware"]
-        elif self.observable_classification == ObservableTypes.HASH.value:
+        elif self.observable_classification == self._serializer.ObservableTypes.HASH.value:
             endpoints = ["malware"]
-        elif self.observable_classification == ObservableTypes.URL.value:
+        elif self.observable_classification == self._serializer.ObservableTypes.URL.value:
             endpoints = ["url", "url/history", "url/malware"]
         else:
             raise AnalyzerRunException(

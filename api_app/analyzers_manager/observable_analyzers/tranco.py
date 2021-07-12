@@ -5,7 +5,6 @@ import requests
 from urllib.parse import urlparse
 
 from api_app.analyzers_manager import classes
-from ..serializers.AnalyzerConfigSerializer import ObservableTypes
 
 
 class Tranco(classes.ObservableAnalyzer):
@@ -13,7 +12,7 @@ class Tranco(classes.ObservableAnalyzer):
 
     def run(self):
         observable_to_analyze = self.observable_name
-        if self.observable_classification == ObservableTypes.URL.value:
+        if self.observable_classification == self._serializer.ObservableTypes.URL.value:
             observable_to_analyze = urlparse(self.observable_name).hostname
 
         url = self.base_url + observable_to_analyze

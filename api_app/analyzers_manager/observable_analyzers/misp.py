@@ -6,7 +6,6 @@ import pymisp
 
 from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager import classes
-from ..serializers.AnalyzerConfigSerializer import ObservableTypes
 
 
 class MISP(classes.ObservableAnalyzer):
@@ -37,7 +36,7 @@ class MISP(classes.ObservableAnalyzer):
             "limit": 50,
             "enforce_warninglist": True,
         }
-        if self.observable_classification == ObservableTypes.HASH.value:
+        if self.observable_classification == self._serializer.ObservableTypes.HASH.value:
             params["type_attribute"] = ["md5", "sha1", "sha256"]
         result_search = misp_instance.search(**params)
         if isinstance(result_search, dict):

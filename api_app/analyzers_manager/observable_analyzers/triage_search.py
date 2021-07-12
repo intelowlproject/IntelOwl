@@ -7,7 +7,6 @@ import requests
 
 from api_app.exceptions import AnalyzerRunException, AnalyzerConfigurationException
 from api_app.analyzers_manager import classes
-from ..serializers.AnalyzerConfigSerializer import ObservableTypes
 
 
 logger = logging.getLogger(__name__)
@@ -47,7 +46,7 @@ class TriageSearch(classes.ObservableAnalyzer):
         return response
 
     def __triage_search(self):
-        if self.observable_classification == ObservableTypes.HASH.value:
+        if self.observable_classification == self._serializer.ObservableTypes.HASH.value:
             params = {"query": self.observable_name}
         else:
             params = {

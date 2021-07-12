@@ -11,7 +11,6 @@ from api_app.analyzers_manager.observable_analyzers.dns.dns_responses import (
     malicious_detector_response,
 )
 from api_app.exceptions import AnalyzerRunException
-from ....serializers.AnalyzerConfigSerializer import ObservableTypes
 
 
 class Quad9MaliciousDetector(classes.ObservableAnalyzer):
@@ -27,7 +26,7 @@ class Quad9MaliciousDetector(classes.ObservableAnalyzer):
     def run(self):
         observable = self.observable_name
         # for URLs we are checking the relative domain
-        if self.observable_classification == ObservableTypes.URL.value:
+        if self.observable_classification == self._serializer.ObservableTypes.URL.value:
             observable = urlparse(self.observable_name).hostname
 
         quad9_answer = self._quad9_dns_query(observable)

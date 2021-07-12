@@ -8,14 +8,13 @@ from urllib.parse import urlparse
 
 from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager import classes
-from ..serializers.AnalyzerConfigSerializer import ObservableTypes
 
 
 class CIRCL_PDNS(classes.ObservableAnalyzer):
     def set_params(self, params):
         self.__credentials = self._secrets["pdns_credentials"]
         self.domain = self.observable_name
-        if self.observable_classification == ObservableTypes.URL.value:
+        if self.observable_classification == self._serializer.ObservableTypes.URL.value:
             self.domain = urlparse(self.observable_name).hostname
 
     def run(self):

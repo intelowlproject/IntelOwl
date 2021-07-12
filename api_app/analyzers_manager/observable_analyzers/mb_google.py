@@ -6,15 +6,14 @@ import googlesearch
 from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.observable_analyzers import mb_get
-from ..serializers.AnalyzerConfigSerializer import ObservableTypes
 
 
 class MB_GOOGLE(classes.ObservableAnalyzer):
     def run(self):
         if self.observable_classification not in [
-            ObservableTypes.IP.value,
-            ObservableTypes.DOMAIN.value,
-            ObservableTypes.URL.value,
+            self._serializer.ObservableTypes.IP.value,
+            self._serializer.ObservableTypes.DOMAIN.value,
+            self._serializer.ObservableTypes.URL.value,
         ]:
             raise AnalyzerRunException(
                 f"not supported observable type {self.observable_classification}."

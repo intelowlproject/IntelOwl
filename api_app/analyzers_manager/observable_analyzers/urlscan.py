@@ -6,7 +6,6 @@ import time
 import logging
 from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager.classes import ObservableAnalyzer
-from ..serializers.AnalyzerConfigSerializer import ObservableTypes
 
 
 logger = logging.getLogger(__name__)
@@ -82,7 +81,7 @@ class UrlScan(ObservableAnalyzer):
             "q": f'{self.observable_classification}:"{self.observable_name}"',
             "size": self.search_size,
         }
-        if self.observable_classification == ObservableTypes.URL.value:
+        if self.observable_classification == self._serializer.ObservableTypes.URL.value:
             params["q"] = "page." + params["q"]
         try:
             resp = self.session.get(self.base_url + "/search/", params=params)

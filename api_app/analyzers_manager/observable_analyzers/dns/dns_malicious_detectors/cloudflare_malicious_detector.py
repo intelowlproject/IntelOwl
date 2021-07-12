@@ -11,7 +11,6 @@ from api_app.analyzers_manager.observable_analyzers.dns.dns_responses import (
     malicious_detector_response,
 )
 from api_app.analyzers_manager import classes
-from ....serializers.AnalyzerConfigSerializer import ObservableTypes
 
 
 class CloudFlareMaliciousDetector(classes.ObservableAnalyzer):
@@ -24,7 +23,7 @@ class CloudFlareMaliciousDetector(classes.ObservableAnalyzer):
             is_malicious = False
             observable = self.observable_name
             # for URLs we are checking the relative domain
-            if self.observable_classification == ObservableTypes.URL.value:
+            if self.observable_classification == self._serializer.ObservableTypes.URL.value:
                 observable = urlparse(self.observable_name).hostname
 
             client = requests.session()

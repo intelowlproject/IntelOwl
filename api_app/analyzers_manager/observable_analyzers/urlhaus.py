@@ -5,7 +5,6 @@ import requests
 
 from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager import classes
-from ..serializers.AnalyzerConfigSerializer import ObservableTypes
 
 
 class URLHaus(classes.ObservableAnalyzer):
@@ -13,10 +12,10 @@ class URLHaus(classes.ObservableAnalyzer):
 
     def run(self):
         headers = {"Accept": "application/json"}
-        if self.observable_classification == ObservableTypes.DOMAIN.value:
+        if self.observable_classification == self._serializer.ObservableTypes.DOMAIN.value:
             uri = "host/"
             post_data = {"host": self.observable_name}
-        elif self.observable_classification == ObservableTypes.URL.value:
+        elif self.observable_classification == self._serializer.ObservableTypes.URL.value:
             uri = "url/"
             post_data = {"url": self.observable_name}
         else:

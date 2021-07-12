@@ -51,7 +51,6 @@ class Plugin(metaclass=ABCMeta):
         method which receives the parse config["config"] dict.
         This is called inside `start` and serves as a post `__init__` hook.
         """
-        raise NotImplementedError()
 
     @abstractmethod
     def before_run(self):

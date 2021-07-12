@@ -46,11 +46,10 @@ class Plugin(metaclass=ABCMeta):
     def _params(self) -> dict:
         return self._serializer.data["config"]
 
-    @abstractmethod
     def set_params(self, params: dict):
         """
         method which receives the parse config["config"] dict.
-        This is called inside `__init__` to serve as a post `__init__` hook.
+        This is called inside `start` and serves as a post `__init__` hook.
         """
         raise NotImplementedError()
 

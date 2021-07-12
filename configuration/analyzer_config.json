@@ -217,7 +217,8 @@
       "application/excel",
       "text/xml",
       "application/xml",
-      "application/zip"
+      "application/zip",
+      "application/encrypted"
     ],
     "description": "static generic document analysis (Oletools)",
     "python_module": "doc_info.DocInfo",
@@ -241,7 +242,8 @@
       "application/excel",
       "text/xml",
       "application/xml",
-      "application/zip"
+      "application/zip",
+      "application/encrypted"
     ],
     "description": "static document analysis with new features to analyze XLM macros, encrypted macros and more",
     "python_module": "doc_info.DocInfo",

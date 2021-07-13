@@ -27,8 +27,9 @@ class HoneyDB(classes.ObservableAnalyzer):
                 f"analysis_type is not valid: {self.analysis_type}"
             )
 
-        self.__api_key = self.secrets["api_key_name"]
-        self.__api_id = self.secrets["api_id_name"]
+        # set secrets
+        self.__api_key = self._secrets["api_key_name"]
+        self.__api_id = self._secrets["api_id_name"]
         self.headers = {
             "X-HoneyDb-ApiKey": self.__api_key,
             "X-HoneyDb-ApiId": self.__api_id,

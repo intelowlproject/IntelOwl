@@ -1458,7 +1458,9 @@
       "application/vnd.ms-excel.sheet.macroEnabled.12",
       "application/excel",
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      "application/zip"
+      "application/zip",
+      "application/xml",
+      "application/encrypted"
     ],
     "description": "Xlm macro deobfuscator",
     "python_module": "xlm_macro_deobfuscator.XlmMacroDeobfuscator",

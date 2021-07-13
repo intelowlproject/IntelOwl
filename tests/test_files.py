@@ -102,6 +102,12 @@ def mocked_triage_post(*args, **kwargs):
     return MockResponse({"id": "sample_id", "status": "pending"}, 200)
 
 
+def get_filepath_filename(job_object: Job):
+    filename = job_object.file_name
+    file_path = job_object.file.path
+    return file_path, filename
+
+
 class FileAnalyzersEXETests(TestCase):
     def setUp(self):
         params = {
@@ -114,7 +120,7 @@ class FileAnalyzersEXETests(TestCase):
         filename = "file.exe"
         test_job = _generate_test_job_with_file(params, filename)
         self.job_id = test_job.id
-        self.filepath, self.filename = utils.get_filepath_filename(self.job_id)
+        self.filepath, self.filename = get_filepath_filename(self.job_id)
         self.md5 = test_job.md5
 
     def test_fileinfo_exe(self):
@@ -554,7 +560,7 @@ class FileAnalyzersDLLTests(TestCase):
         filename = "file.dll"
         test_job = _generate_test_job_with_file(params, filename)
         self.job_id = test_job.id
-        self.filepath, self.filename = utils.get_filepath_filename(self.job_id)
+        self.filepath, self.filename = get_filepath_filename(self.job_id)
         self.md5 = test_job.md5
 
     def test_fileinfo_dll(self):
@@ -588,7 +594,7 @@ class FileAnalyzersExcelTests(TestCase):
         filename = "document.xls"
         test_job = _generate_test_job_with_file(params, filename)
         self.job_id = test_job.id
-        self.filepath, self.filename = utils.get_filepath_filename(self.job_id)
+        self.filepath, self.filename = get_filepath_filename(self.job_id)
         self.runtime_configuration = test_job.runtime_configuration
         self.md5 = test_job.md5
 
@@ -621,7 +627,7 @@ class FileAnalyzersDocTests(TestCase):
         filename = "document.doc"
         test_job = _generate_test_job_with_file(params, filename)
         self.job_id = test_job.id
-        self.filepath, self.filename = utils.get_filepath_filename(self.job_id)
+        self.filepath, self.filename = get_filepath_filename(self.job_id)
         self.runtime_configuration = test_job.runtime_configuration
         self.md5 = test_job.md5
 
@@ -665,7 +671,7 @@ class FileAnalyzersRtfTests(TestCase):
         filename = "document.rtf"
         test_job = _generate_test_job_with_file(params, filename)
         self.job_id = test_job.id
-        self.filepath, self.filename = utils.get_filepath_filename(self.job_id)
+        self.filepath, self.filename = get_filepath_filename(self.job_id)
         self.md5 = test_job.md5
 
     def test_rtfinfo(self):
@@ -687,7 +693,7 @@ class FileAnalyzersPDFTests(TestCase):
         filename = "document.pdf"
         test_job = _generate_test_job_with_file(params, filename)
         self.job_id = test_job.id
-        self.filepath, self.filename = utils.get_filepath_filename(self.job_id)
+        self.filepath, self.filename = get_filepath_filename(self.job_id)
         self.md5 = test_job.md5
 
     def test_pdfinfo(self):
@@ -709,7 +715,7 @@ class FileAnalyzersHTMLTests(TestCase):
         filename = "page.html"
         test_job = _generate_test_job_with_file(params, filename)
         self.job_id = test_job.id
-        self.filepath, self.filename = utils.get_filepath_filename(self.job_id)
+        self.filepath, self.filename = get_filepath_filename(self.job_id)
         self.md5 = test_job.md5
 
     @mock_connections(patch("requests.get", side_effect=mocked_docker_analyzer_get))
@@ -738,7 +744,7 @@ class FileAnalyzersJSTests(TestCase):
         filename = "file.jse"
         test_job = _generate_test_job_with_file(params, filename)
         self.job_id = test_job.id
-        self.filepath, self.filename = utils.get_filepath_filename(self.job_id)
+        self.filepath, self.filename = get_filepath_filename(self.job_id)
         self.md5 = test_job.md5
 
     @mock_connections(patch("requests.get", side_effect=mocked_docker_analyzer_get))
@@ -767,7 +773,7 @@ class FileAnalyzersAPKTests(TestCase):
         filename = "sample.apk"
         test_job = _generate_test_job_with_file(params, filename)
         self.job_id = test_job.id
-        self.filepath, self.filename = utils.get_filepath_filename(self.job_id)
+        self.filepath, self.filename = get_filepath_filename(self.job_id)
         self.md5 = test_job.md5
 
     @mock_connections(patch("requests.get", side_effect=mocked_docker_analyzer_get))

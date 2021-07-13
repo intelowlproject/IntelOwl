@@ -12,7 +12,6 @@ from rest_framework.test import APIClient
 
 from intel_owl import settings
 from api_app import models
-from api_app.analyzers_manager.serializers import AnalyzerConfigSerializer
 
 logger = logging.getLogger(__name__)
 # disable logging library

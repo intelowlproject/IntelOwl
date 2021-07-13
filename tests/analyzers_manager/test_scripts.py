@@ -1,14 +1,13 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 import os
-from unittest.mock import patch
 
 from api_app.analyzers_manager.serializers import AnalyzerConfigSerializer
 
 from . import _ObservableAnalyzersScriptsTestCase
 
 
-######### TEST CASES ##########
+######### TEST CASES ########## noqa E266
 
 
 class IPAnalyzersTestCase(_ObservableAnalyzersScriptsTestCase):
@@ -31,7 +30,7 @@ class DomainAnalyzersTestCase(_ObservableAnalyzersScriptsTestCase):
         return {
             **super().get_params(),
             "observable_name": os.environ.get("TEST_DOMAIN", "www.google.com"),
-            "observable_classification": AnalyzerConfigSerializer.ObservableTypes.DOMAIN,
+            "observable_classification": AnalyzerConfigSerializer.ObservableTypes.DOMAIN,  # noqa E501
         }
 
     @classmethod
@@ -77,7 +76,7 @@ class GenericAnalyzersTestCase(_ObservableAnalyzersScriptsTestCase):
         return {
             **super().get_params(),
             "observable_name": os.environ.get("TEST_GENERIC", "email@example.com"),
-            "observable_classification": AnalyzerConfigSerializer.ObservableTypes.GENERIC,
+            "observable_classification": AnalyzerConfigSerializer.ObservableTypes.GENERIC,  # noqa E501
         }
 
     @classmethod

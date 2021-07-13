@@ -6,13 +6,12 @@ from intel_owl import settings
 from ..mock_utils import (
     MockResponse,
     MockResponseNoOp,
-    if_mock,
     mocked_requests,
     mocked_requests_noop,
 )
 
 
-######### MOCK UTILS ##########
+######### MOCK UTILS ########## noqa E226
 
 
 def mocked_pypssl(*args, **kwargs):
@@ -55,7 +54,7 @@ def mocked_firehol_iplist(*args, **kwargs):
     )
 
 
-#### mocks functions - analyzer map ####
+# mocks functions - analyzer map
 
 
 analyzer_mock_fnsmap = {

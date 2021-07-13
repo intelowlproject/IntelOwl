@@ -20,12 +20,12 @@ def get_logger() -> logging.Logger:
 class CustomAPITestCase(TestCase):
     @classmethod
     def setUpClass(cls):
-        super(CustomTestCase, cls).setUpClass()
+        super(CustomAPITestCase, cls).setUpClass()
         cls.superuser = User.objects.create_superuser(
             username="test", email="test@intelowl.com", password="test"
         )
 
     def setUp(self):
-        super(CustomTestCase, self).setUp()
+        super(CustomAPITestCase, self).setUp()
         self.client = APIClient()
         self.client.force_authenticate(user=self.superuser)

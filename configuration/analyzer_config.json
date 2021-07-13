@@ -1188,7 +1188,7 @@
             "url"
         ],
         "config": {
-            "soft_time_limit": 50,
+            "soft_time_limit": 100,
             "queue": "default"
         },
         "secrets": {}

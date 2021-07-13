@@ -2,11 +2,12 @@
 # See the file 'LICENSE' for copying permission.
 
 import logging
+from typing import Union, Dict, List
 from celery import uuid
 from django.core.cache import cache
 from django.utils.module_loading import import_string
+from django.conf import settings
 
-from intel_owl.settings import CELERY_QUEUES
 from intel_owl.celery import app as celery_app
 
 from .classes import BaseAnalyzerMixin
@@ -23,7 +24,6 @@ logger = logging.getLogger(__name__)
 CELERY_TASK_NAME = "run_analyzer"
 ALL_ANALYZERS = "__all__"
 DEFAULT_QUEUE = "default"
-DEFAULT_SOFT_TIME_LIMIT = 300
 
 
 def build_import_path(cls_path: str, observable_analyzer=True) -> str:
@@ -33,84 +33,78 @@ def build_import_path(cls_path: str, observable_analyzer=True) -> str:
         return f"api_app.analyzers_manager.file_analyzers.{cls_path}"
 
 
-def build_cache_key(job_id: int):
+def build_cache_key(job_id: int) -> str:
     return f"job.{job_id}.analyzers_manager.task_ids"
 
 
 def filter_analyzers(
-    serialized_data: dict, analyzers_requested: list, warnings: list, run_all=False
-) -> list:
+    serialized_data: Dict, analyzers_requested: Union[List, str], warnings: List
+) -> List[str]:
     # init empty list
     cleaned_analyzer_list = []
 
-    analyzers_config = AnalyzerConfigSerializer.read_and_verify_config()
+    # run all analyzers ?
+    run_all = analyzers_requested == ALL_ANALYZERS
 
-    if analyzers_requested == "__all__":
+    # read config
+    analyzer_dataclasses = AnalyzerConfigSerializer.get_as_dataclasses()
+    all_analyzer_names: List[str] = list(analyzer_dataclasses.keys())
+    if run_all:
         # select all
-        analyzers_requested = list(analyzers_config.keys())
+        selected_analyzers: List[str] = all_analyzer_names
+    else:
+        # select the ones requested
+        selected_analyzers: List[str] = analyzers_requested
 
-    for analyzer in analyzers_requested:
+    for a_name in selected_analyzers:
         try:
-            if analyzer not in analyzers_config:
-                raise NotRunnableAnalyzer(f"{analyzer} not available in configuration")
+            found = a_name not in all_analyzer_names
+            if not run_all and found:
+                raise NotRunnableAnalyzer(f"{a_name} not available in configuration")
 
-            analyzer_config = analyzers_config[analyzer]
+            config = analyzer_dataclasses[a_name]
+
+            if not config.is_ready_to_use:
+                raise NotRunnableAnalyzer(
+                    f"{a_name} is disabled or unconfigured, won't be run."
+                )
 
             if serialized_data["is_sample"]:
-                if not analyzer_config.get("type", None) == "file":
+                if config.is_type_observable:
                     raise NotRunnableAnalyzer(
-                        f"{analyzer} won't be run because does not support files."
+                        f"{a_name} won't be run because does not support files."
                     )
-                if (
-                    analyzer_config.get("supported_filetypes", [])
-                    and serialized_data["file_mimetype"]
-                    not in analyzer_config["supported_filetypes"]
-                ):
+                if config.is_filetype_supported(serialized_data["file_mimetype"]):
                     raise_message = (
-                        f"{analyzer} won't be run because mimetype."
+                        f"{a_name} won't be run because mimetype."
                         f"{serialized_data['file_mimetype']} is not supported."
-                        f"Supported are:"
-                        f"{analyzer_config['supported_filetypes']}."
                     )
-                    raise NotRunnableAnalyzer(raise_message)
-                if (
-                    analyzer_config.get("not_supported_filetypes", "")
-                    and serialized_data["file_mimetype"]
-                    in analyzer_config["not_supported_filetypes"]
-                ):
-                    raise_message = f"""
-                        {analyzer} won't be run because mimetype
-                        {serialized_data['file_mimetype']} is not supported.
-                        Not supported are:{analyzer_config['not_supported_filetypes']}.
-                    """
-                    raise NotRunnableAnalyzer(raise_message)
             else:
-                if not analyzer_config.get("type", None) == "observable":
+                if not config.is_type_observable:
                     raise NotRunnableAnalyzer(
-                        f"{analyzer} won't be run because does not support observable."
+                        f"{a_name} won't be run because does not support observable."
                     )
-                if serialized_data[
-                    "observable_classification"
-                ] not in analyzer_config.get("observable_supported", []):
+
+                if not config.is_observable_type_supported(
+                    serialized_data["observable_classification"]
+                ):
                     raise NotRunnableAnalyzer(
                         f"""
-                        {analyzer} won't be run because does not support
+                        {a_name} won't be run because does not support
                          observable type {serialized_data['observable_classification']}.
                         """
                     )
-            if analyzer_config.get("disabled", False):
-                raise NotRunnableAnalyzer(f"{analyzer} is disabled, won't be run.")
-            if serialized_data["force_privacy"] and analyzer_config.get(
-                "leaks_info", False
-            ):
+
+            if serialized_data["force_privacy"] and config.leaks_info:
                 raise NotRunnableAnalyzer(
-                    f"{analyzer} won't be run because it leaks info externally."
+                    f"{a_name} won't be run because it leaks info externally."
                 )
-            if serialized_data["disable_external_analyzers"] and analyzer_config.get(
-                "external_service", False
+            if (
+                serialized_data["disable_external_analyzers"]
+                and config.external_service
             ):
                 raise NotRunnableAnalyzer(
-                    f"{analyzer} won't be run because you filtered external analyzers."
+                    f"{a_name} won't be run because you filtered external analyzers."
                 )
         except NotRunnableAnalyzer as e:
             if run_all:
@@ -120,113 +114,105 @@ def filter_analyzers(
                 logger.warning(e)
                 warnings.append(str(e))
         else:
-            cleaned_analyzer_list.append(analyzer)
+            cleaned_analyzer_list.append(a_name)
 
     return cleaned_analyzer_list
 
 
 def start_analyzers(
     job_id: int,
-    analyzers_to_execute: list,
-    runtime_configuration: dict = dict(),
-) -> dict:
-    # mapping of analyzer name and task_id
-    analyzer_task_id_map = {}
+    analyzers_to_execute: List[str],
+    runtime_configuration: Dict[str, Dict] = dict(),
+) -> List[str]:
+    # init empty lists
+    task_ids = []
 
     # get analyzer config
-    analyzers_config = AnalyzerConfigSerializer.read_and_verify_config()
+    analyzer_dataclasses = AnalyzerConfigSerializer.get_as_dataclasses()
 
     # get job
     job = Job.objects.get(pk=job_id)
     job.update_status("running")  # set job status to running
 
     # loop over and fire the analyzers in a celery task
-    for analyzer_name in analyzers_to_execute:
-        ac = analyzers_config[analyzer_name]
+    for a_name in analyzers_to_execute:
+        # get corresponding dataclass
+        config = analyzer_dataclasses[a_name]
 
-        if ac["disabled"] or not ac["verification"]["configured"]:
-            # if disabled or unconfigured
+        # if disabled or unconfigured
+        if not config.is_ready_to_use:
             continue
 
         # get runtime_configuration if any specified for this analyzer
-        runtime_conf = runtime_configuration.get(analyzer_name, {})
-        # merge ac["config"] with runtime_configuration
-        config_params = {
-            **ac["config"],
+        runtime_conf = runtime_configuration.get(a_name, {})
+
+        # merge runtime_conf
+        config.config = {
+            **config.config,
             **runtime_conf,
         }
+        # construct arguments
+        args = [job_id, config.asdict()]
+        kwargs = {"runtime_conf": runtime_conf}
         # get celery queue
-        queue = config_params.get("queue", DEFAULT_QUEUE)
-        if queue not in CELERY_QUEUES:
+        queue = config.params.queue
+        if queue not in settings.CELERY_QUEUES:
             logger.warning(
-                f"Analyzer {analyzers_to_execute} has a wrong queue."
-                f" Setting to `{DEFAULT_QUEUE}`"
+                f"Analyzer {a_name} has a wrong queue." f" Setting to `{DEFAULT_QUEUE}`"
             )
             queue = DEFAULT_QUEUE
-        # get soft time limit
-        stl = config_params.get("soft_time_limit", DEFAULT_SOFT_TIME_LIMIT)
-        # construct arguments
-        args = [
-            job_id,
-            {
-                **ac,
-                "name": analyzer_name,
-                "config": config_params,
-            },
-        ]
-        kwargs = {"runtime_conf": runtime_conf}
+        # get soft_time_limit
+        soft_time_limit = config.params.soft_time_limit
         # gen new task_id
         task_id = uuid()
-        # add to map
-        analyzer_task_id_map[analyzer_name] = task_id
+        # add to list
+        task_ids.append(task_id)
         # run analyzer with a celery task asynchronously
         celery_app.send_task(
             CELERY_TASK_NAME,
             args=args,
             kwargs=kwargs,
             queue=queue,
-            soft_time_limit=stl,
+            soft_time_limit=soft_time_limit,
             task_id=task_id,
         )
 
     # cache the task ids
-    cache.set(build_cache_key(job_id), list(analyzer_task_id_map.values()))
+    cache.set(build_cache_key(job_id), task_ids)
 
-    return analyzer_task_id_map
+    return task_ids
 
 
-def job_cleanup(job_id: int):
+def job_cleanup(job_id: int) -> None:
     job = Job.objects.get(pk=job_id)
-    logger.info(f"STARTING job_cleanup for <-- {job.__repr__()}.")
-    status_to_set = "failed"
+    logger.info(f"[STARTING] job_cleanup for <-- {job.__repr__()}.")
+    status_to_set = "running"
 
     try:
         if job.status == "failed":
             raise AlreadyFailedJobException()
 
-        analysis_reports = job.analyzer_reports.all()
-        num_analysis_reports = len(analysis_reports)
+        num_reports = job.analyzer_reports.count()
         num_analyzers_to_execute = len(job.analyzers_to_execute)
         logger.info(
-            f"REPORT: num analysis reports:{num_analysis_reports}, "
+            f"[REPORT] num analysis reports:{num_reports}, "
             f"num analyzer to execute:{num_analyzers_to_execute}"
             f" <-- {job.__repr__()}."
         )
 
         # check if it was the last analysis...
         # ..In case, set the analysis as "reported" or "failed"
-        if num_analysis_reports == num_analyzers_to_execute:
-            status_to_set = "reported_without_fails"
-            # set status "failed" in case all analyzers failed
-            failed_analyzers = 0
-            for analysis_report in analysis_reports:
-                if analysis_report.status != analysis_report.Statuses.SUCCESS.name:
-                    failed_analyzers += 1
+        if num_reports == num_analyzers_to_execute:
+            num_failed_reports = job.analyzer_reports.filter(
+                status=AnalyzerReport.Statuses.FAILED.name
+            ).count()
 
-            if failed_analyzers == num_analysis_reports:
+            if num_failed_reports == num_reports:
                 status_to_set = "failed"
-            elif failed_analyzers >= 1:
+            elif num_failed_reports >= 1:
                 status_to_set = "reported_with_fails"
+            else:
+                status_to_set = "reported_without_fails"
 
     except AlreadyFailedJobException:
         logger.error(f"job_id {job_id} status failed. Do not process the report")
@@ -267,15 +253,16 @@ def kill_running_analysis(job_id: int) -> None:
         cache.delete(key)
 
 
-def run_analyzer(job_id: int, config_dict: dict, **kwargs) -> BaseAnalyzerMixin:
-    instance = None
+def run_analyzer(job_id: int, config_dict: dict, **kwargs) -> None:
+    config = AnalyzerConfigSerializer.dict_to_dataclass(config_dict)
     try:
         cls_path = build_import_path(
+            config.python_module,
             config_dict["python_module"],
             observable_analyzer=(
-                config_dict["type"] == "observable"
-                or config_dict["type"] == "file"
-                and config_dict.get("run_hash", False)
+                config.is_type_observable
+                or not config.is_type_observable
+                and config.run_hash
             ),
         )
         try:
@@ -285,8 +272,5 @@ def run_analyzer(job_id: int, config_dict: dict, **kwargs) -> BaseAnalyzerMixin:
 
         instance = klass(config_dict=config_dict, job_id=job_id, **kwargs)
         instance.start()
-        job_cleanup(job_id)
     except Exception as e:
-        set_failed_analyzer(job_id, config_dict["name"], str(e))
-
-    return instance
+        set_failed_analyzer(job_id, config.name, str(e))

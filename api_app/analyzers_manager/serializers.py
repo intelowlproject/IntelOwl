@@ -1,11 +1,14 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
+from typing import Dict
 from enum import Enum
 
 from rest_framework import serializers as rfs
 
 from api_app.core.serializers import AbstractConfigSerializer
 from .models import AnalyzerReport
+from .dataclasses import AnalyzerConfig
+from .constants import TypeChoices, HashChoices, ObservableTypes
 
 
 class AnalyzerReportSerializer(rfs.ModelSerializer):
@@ -35,35 +38,23 @@ class AnalyzerConfigSerializer(AbstractConfigSerializer):
 
     CONFIG_FILE_NAME = "analyzer_config.json"
 
-    class TypeChoices(Enum):
-        FILE = "file"
-        OBSERVABLE = "observable"
-
-    class HashChoices(Enum):
-        MD5 = "md5"
-        SHA256 = "sha256"
-
-    class ObservableTypes(Enum):
-        IP = "ip"
-        URL = "url"
-        DOMAIN = "domain"
-        HASH = "hash"
-        GENERIC = "generic"
+    TypeChoices = TypeChoices
+    HashChoices = HashChoices
+    ObservableTypes = ObservableTypes
 
     # Required fields
-    type = rfs.ChoiceField(required=True, choices=[c.value for c in TypeChoices])
+    type = rfs.ChoiceField(required=True, choices=TypeChoices.aslist())
     external_service = rfs.BooleanField(required=True)
     # Optional Fields
     leaks_info = rfs.BooleanField(required=False, default=False)
     run_hash = rfs.BooleanField(required=False, default=False)
-    run_hash_type = rfs.ChoiceField(
-        required=False, choices=[c.value for c in HashChoices]
-    )
-    supported_filetypes = rfs.ListField(required=False)
-    not_supported_filetypes = rfs.ListField(required=False)
+    run_hash_type = rfs.ChoiceField(required=False, choices=HashChoices.aslist())
+    supported_filetypes = rfs.ListField(required=False, default=[])
+    not_supported_filetypes = rfs.ListField(required=False, default=[])
     observable_supported = rfs.ListField(
-        child=rfs.ChoiceField(choices=[c.value for c in ObservableTypes]),
+        child=rfs.ChoiceField(choices=ObservableTypes.aslist()),
         required=False,
+        default=[],
     )
 
     def validate_python_module(self, python_module: str):
@@ -88,3 +79,14 @@ class AnalyzerConfigSerializer(AbstractConfigSerializer):
             )
 
         return python_module
+
+    @classmethod
+    def dict_to_dataclass(cls, data: dict) -> AnalyzerConfig:
+        return AnalyzerConfig(**data)
+
+    @classmethod
+    def get_as_dataclasses(cls) -> Dict[str, AnalyzerConfig]:
+        return {
+            name: cls.dict_to_dataclass(attrs)
+            for name, attrs in cls.read_and_verify_config().items()
+        }

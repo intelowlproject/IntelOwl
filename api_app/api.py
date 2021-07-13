@@ -339,12 +339,11 @@ def send_analysis_request(request):
                         {"error": "816"}, status=status.HTTP_400_BAD_REQUEST
                     )
                 # just pick all available analyzers
-                analyzers_requested = "__all__"
+                analyzers_requested = analyzers_controller.ALL_ANALYZERS
             cleaned_analyzer_list = analyzers_controller.filter_analyzers(
                 serialized_data,
                 analyzers_requested,
                 warnings,
-                run_all=run_all_available_analyzers,
             )
             params["analyzers_to_execute"] = cleaned_analyzer_list
             if len(cleaned_analyzer_list) < 1:

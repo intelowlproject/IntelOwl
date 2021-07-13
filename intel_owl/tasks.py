@@ -69,15 +69,17 @@ def start_analyzers(
 @app.task(name="run_analyzer", soft_time_limit=500)
 def run_analyzer(job_id: int, config_dict: dict, **kwargs):
     # run analyzer
-    instance = analyzers_controller.run_analyzer(job_id, config_dict, **kwargs)
+    analyzers_controller.run_analyzer(job_id, config_dict, **kwargs)
+    # FIXME @eshaan7: find a better place for these callback
+    # execute some callbacks
+    analyzers_controller.job_cleanup(job_id)
     # fire connectors when job finishes with success
-    if instance and instance._job:
-        del instance._job  # invalidate cache
-    if instance._job.status == "reported_without_fails":
+    job = Job.objects.only("id", "status").get(pk=job_id)
+    if job.status == "reported_without_fails":
         app.send_task(
             "on_job_success",
             args=[
-                instance.job_id,
+                job_id,
             ],
         )
 

@@ -1,10 +1,14 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
+from typing import Dict
+from enum import Enum
 
 from rest_framework import serializers as rfs
 
 from api_app.core.serializers import AbstractConfigSerializer
 from .models import AnalyzerReport
+from .dataclasses import AnalyzerConfig
+from .constants import TypeChoices, HashChoices, ObservableTypes
 
 
 class AnalyzerReportSerializer(rfs.ModelSerializer):
@@ -33,22 +37,56 @@ class AnalyzerConfigSerializer(AbstractConfigSerializer):
     """
 
     CONFIG_FILE_NAME = "analyzer_config.json"
-    TYPE_CHOICES = (
-        ("file", "file"),
-        ("observable", "observable"),
-    )
-    HASH_CHOICES = (
-        ("md5", "md5"),
-        ("sha256", "sha256"),
-    )
+
+    TypeChoices = TypeChoices
+    HashChoices = HashChoices
+    ObservableTypes = ObservableTypes
 
     # Required fields
-    type = rfs.ChoiceField(required=True, choices=TYPE_CHOICES)
+    type = rfs.ChoiceField(required=True, choices=TypeChoices.aslist())
     external_service = rfs.BooleanField(required=True)
     # Optional Fields
-    leaks_info = rfs.BooleanField(required=False)
-    run_hash = rfs.BooleanField(required=False)
-    run_hash_type = rfs.ChoiceField(required=False, choices=HASH_CHOICES)
-    supported_filetypes = rfs.ListField(required=False)
-    not_supported_filetypes = rfs.ListField(required=False)
-    observable_supported = rfs.ListField(required=False)
+    leaks_info = rfs.BooleanField(required=False, default=False)
+    run_hash = rfs.BooleanField(required=False, default=False)
+    run_hash_type = rfs.ChoiceField(required=False, choices=HashChoices.aslist())
+    supported_filetypes = rfs.ListField(required=False, default=[])
+    not_supported_filetypes = rfs.ListField(required=False, default=[])
+    observable_supported = rfs.ListField(
+        child=rfs.ChoiceField(choices=ObservableTypes.aslist()),
+        required=False,
+        default=[],
+    )
+
+    def validate_python_module(self, python_module: str):
+        from django.utils.module_loading import import_string
+        from .controller import build_import_path
+
+        clspath = build_import_path(
+            python_module,
+            observable_analyzer=(
+                self.initial_data["type"] == self.TypeChoices.OBSERVABLE.value
+                or (
+                    self.initial_data["type"] == self.TypeChoices.FILE.value
+                    and self.initial_data.get("run_hash", False)
+                )
+            ),
+        )
+        try:
+            import_string(clspath)
+        except ImportError:
+            raise rfs.ValidationError(
+                f"`python_module` incorrect, {clspath} couldn't be imported"
+            )
+
+        return python_module
+
+    @classmethod
+    def dict_to_dataclass(cls, data: dict) -> AnalyzerConfig:
+        return AnalyzerConfig(**data)
+
+    @classmethod
+    def get_as_dataclasses(cls) -> Dict[str, AnalyzerConfig]:
+        return {
+            name: cls.dict_to_dataclass(attrs)
+            for name, attrs in cls.read_and_verify_config().items()
+        }

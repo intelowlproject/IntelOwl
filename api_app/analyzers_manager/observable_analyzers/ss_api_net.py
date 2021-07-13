@@ -6,27 +6,21 @@ import base64
 
 from api_app.exceptions import AnalyzerRunException, AnalyzerConfigurationException
 from api_app.analyzers_manager import classes
-from intel_owl import secrets
 
 
 class SSAPINet(classes.ObservableAnalyzer):
     base_url: str = "https://shot.screenshotapi.net/screenshot"
 
-    def set_config(self, additional_config_params):
-        self.api_key_name = additional_config_params.get("api_key_name", "SSAPINET_KEY")
-        self.__api_key = secrets.get_secret(self.api_key_name)
-        self.use_proxy = additional_config_params.get("use_proxy", False)
+    def set_params(self, params):
+        self.__api_key = self._secrets["api_key_name"]
+        self.use_proxy = params.get("use_proxy", False)
         if self.use_proxy:
-            self.proxy = additional_config_params.get("proxy", "")
-        self.output = additional_config_params.get("output", "image")
+            self.proxy = params.get("proxy", "")
+        self.output = params.get("output", "image")
         # for other params provided by the API
-        self.extra_api_params = additional_config_params.get("extra_api_params", {})
+        self.extra_api_params = params.get("extra_api_params", {})
 
     def run(self):
-        if not self.__api_key:
-            raise AnalyzerConfigurationException(
-                f"No API key retrieved with name: {self.api_key_name}."
-            )
         if self.use_proxy and not self.proxy:
             raise AnalyzerConfigurationException(
                 "No proxy retrieved when use_proxy is true."

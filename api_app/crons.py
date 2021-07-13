@@ -4,9 +4,8 @@
 import datetime
 import logging
 
-from api_app.models import Job
-from api_app.analyzers_manager import general
-from api_app.helpers import get_now
+from .models import Job
+from .helpers import get_now
 from intel_owl import secrets
 
 logger = logging.getLogger(__name__)
@@ -20,22 +19,22 @@ def check_stuck_analysis():
     we can just put this function as a cron to cleanup.
     """
     logger.info("started check_stuck_analysis")
-    running_jobs = Job.objects.filter(status="running")
+    running_jobs = list(Job.objects.filter(status="running"))
     logger.info(f"checking if {len(running_jobs)} jobs are stuck")
 
+    now = get_now()
+    difference = now - datetime.timedelta(minutes=25)
     jobs_id_stuck = []
     for running_job in running_jobs:
-        now = get_now()
-        difference = now - datetime.timedelta(minutes=25)
         if difference > running_job.received_request_time:
             logger.error(
                 f"found stuck analysis, job_id:{running_job.id}."
                 f"Setting the job to status to 'failed'"
             )
             jobs_id_stuck.append(running_job.id)
-            general.set_job_status(running_job.id, "failed")
-            running_job.finished_analysis_time = get_now()
-            running_job.save(update_fields=["finished_analysis_time"])
+            running_job.status = "failed"
+            running_job.finished_analysis_time = now
+            running_job.save(update_fields=["status", "finished_analysis_time"])
 
     logger.info("finished check_stuck_analysis")
 

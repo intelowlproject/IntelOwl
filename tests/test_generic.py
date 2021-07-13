@@ -12,7 +12,6 @@ from api_app.analyzers_manager.file_analyzers import yara_scan
 from api_app.analyzers_manager.observable_analyzers import maxmind, talos, tor
 
 from api_app import crons
-from api_app.analyzers_manager.serializers import AnalyzerConfigSerializer
 from intel_owl import settings
 
 from .mock_utils import mock_connections, mocked_requests
@@ -53,9 +52,3 @@ class CronTests(TestCase):
         file_paths = yara_scan.YaraScan.yara_update_repos()
         for file_path in file_paths:
             self.assertTrue(os.path.exists(file_path))
-
-
-class ConfigTests(TestCase):
-    def test_config(self):
-        config = AnalyzerConfigSerializer.read_and_verify_config()
-        self.assertNotEqual(config, {})

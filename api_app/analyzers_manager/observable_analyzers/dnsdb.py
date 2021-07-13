@@ -9,7 +9,6 @@ from dateutil import parser as dateutil_parser
 
 from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager import classes
-from intel_owl import secrets
 
 _query_types = [
     "domain",
@@ -47,20 +46,19 @@ class DNSdb(classes.ObservableAnalyzer):
     Allow different query types: normal, with left or right wildcard and nameserver.
     """
 
-    def set_config(self, additional_config_params):
+    def set_params(self, params):
         # API settings
-        self._dnsdb_server = additional_config_params.get("server", "api.dnsdb.info")
-        api_key_name = additional_config_params.get("api_key_name", "DNSDB_KEY")
-        self.__api_key = secrets.get_secret(api_key_name)
-        self._api_version = additional_config_params.get("api_version", 2)
+        self._dnsdb_server = params.get("server", "api.dnsdb.info")
+        self.__api_key = self._secrets["api_key_name"]
+        self._api_version = params.get("api_version", 2)
         # search params
-        self._rrtype = additional_config_params.get("rrtype", "")
-        self._query_type = additional_config_params.get("query_type", "domain")
-        self._limit = additional_config_params.get("limit", 10000)
-        self._time_first_before = additional_config_params.get("time_first_before", "")
-        self._time_first_after = additional_config_params.get("time_first_after", "")
-        self._time_last_before = additional_config_params.get("time_last_before", "")
-        self._time_last_after = additional_config_params.get("time_last_after", "")
+        self._rrtype = params.get("rrtype", "")
+        self._query_type = params.get("query_type", "domain")
+        self._limit = params.get("limit", 10000)
+        self._time_first_before = params.get("time_first_before", "")
+        self._time_first_after = params.get("time_first_after", "")
+        self._time_last_before = params.get("time_last_before", "")
+        self._time_last_after = params.get("time_last_after", "")
         self.no_results_found = False
 
     def run(self):
@@ -88,9 +86,6 @@ class DNSdb(classes.ObservableAnalyzer):
 
     def _validate_params(self):
         """Raise an AnalyzerRunException if some params are not valid"""
-
-        if not self.__api_key:
-            raise AnalyzerRunException("no api key retrieved")
 
         if self._api_version not in _supported_api_version:
             raise AnalyzerRunException(
@@ -175,12 +170,15 @@ class DNSdb(classes.ObservableAnalyzer):
 
         observable_to_check = self.observable_name
         # for URLs we are checking the relative domain
-        if self.observable_classification == "url":
+        if self.observable_classification == self._serializer.ObservableTypes.URL.value:
             observable_to_check = urlparse(self.observable_name).hostname
 
-        if self.observable_classification == "ip":
+        if self.observable_classification == self._serializer.ObservableTypes.IP.value:
             endpoint = "rdata/ip"
-        elif self.observable_classification in ["domain", "url"]:
+        elif self.observable_classification in [
+            self._serializer.ObservableTypes.DOMAIN.value,
+            self._serializer.ObservableTypes.URL.value,
+        ]:
             if self._query_type == "domain":
                 endpoint = "rrset/name"
             elif self._query_type == "rrname-wildcard-left":

@@ -51,11 +51,13 @@ class JobListSerializer(serializers.ModelSerializer):
             "tags",
             "process_time",
             "no_of_analyzers_executed",
+            "no_of_connectors_executed",
         )
 
     tags = TagSerializer(many=True, read_only=True)
     process_time = serializers.SerializerMethodField()
     no_of_analyzers_executed = serializers.SerializerMethodField()
+    no_of_connectors_executed = serializers.SerializerMethodField()
 
     def get_process_time(self, obj: Job):
         if not obj.finished_analysis_time:
@@ -70,6 +72,11 @@ class JobListSerializer(serializers.ModelSerializer):
         n2 = len(obj.analyzers_requested)
         return f"{n1}/{n2}"
 
+    def get_no_of_connectors_executed(self, obj: Job):
+        if obj.status != "reported_without_fails":
+            return "-"  # N/A in this case
+        return len(obj.connectors_to_execute)
+
 
 class JobSerializer(ObjectPermissionsAssignmentMixin, serializers.ModelSerializer):
     """
@@ -81,6 +88,7 @@ class JobSerializer(ObjectPermissionsAssignmentMixin, serializers.ModelSerialize
     tags_id = serializers.PrimaryKeyRelatedField(
         many=True, write_only=True, queryset=Tag.objects.all()
     )
+    runtime_configuration = serializers.JSONField(write_only=True)
     analyzer_reports = AnalyzerReportSerializer(many=True, read_only=True)
     connector_reports = ConnectorReportSerializer(many=True, read_only=True)
 

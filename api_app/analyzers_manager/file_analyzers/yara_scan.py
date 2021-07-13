@@ -17,11 +17,9 @@ logger = logging.getLogger(__name__)
 
 
 class YaraScan(FileAnalyzer):
-    def set_config(self, additional_config_params):
-        self.directories_with_rules = additional_config_params.get(
-            "directories_with_rules", []
-        )
-        self.recursive = additional_config_params.get("recursive", False)
+    def set_params(self, params):
+        self.directories_with_rules = params.get("directories_with_rules", [])
+        self.recursive = params.get("recursive", False)
         self.result = []
         self.ruleset: List[Tuple[str, yara.Rules]] = []
 
@@ -115,12 +113,12 @@ class YaraScan(FileAnalyzer):
         found_yara_dirs = []
         for analyzer_name, analyzer_config in analyzer_config.items():
             if analyzer_name.startswith("Yara_Scan"):
-                yara_dirs = analyzer_config.get("additional_config_params", {}).get(
+                yara_dirs = analyzer_config.get("config", {}).get(
                     "git_repo_main_dir", []
                 )
                 if not yara_dirs:
                     # fall back to required key
-                    yara_dirs = analyzer_config.get("additional_config_params", {}).get(
+                    yara_dirs = analyzer_config.get("config", {}).get(
                         "directories_with_rules", []
                     )
                     found_yara_dirs.extend(yara_dirs)

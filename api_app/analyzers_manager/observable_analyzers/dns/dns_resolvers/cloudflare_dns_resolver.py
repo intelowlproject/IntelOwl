@@ -20,14 +20,17 @@ logger = logging.getLogger(__name__)
 class CloudFlareDNSResolver(classes.ObservableAnalyzer):
     """Resolve a DNS query with CloudFlare"""
 
-    def set_config(self, additional_config_params):
-        self._query_type = additional_config_params.get("query_type", "A")
+    def set_params(self, params):
+        self._query_type = params.get("query_type", "A")
 
     def run(self):
         try:
             observable = self.observable_name
             # for URLs we are checking the relative domain
-            if self.observable_classification == "url":
+            if (
+                self.observable_classification
+                == self._serializer.ObservableTypes.URL.value
+            ):
                 observable = urlparse(self.observable_name).hostname
 
             client = requests.session()

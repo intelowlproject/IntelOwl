@@ -5,23 +5,21 @@ import requests
 
 from api_app.exceptions import AnalyzerRunException, AnalyzerConfigurationException
 from api_app.analyzers_manager import classes
-from intel_owl import secrets
 
 
 class ZoomEye(classes.ObservableAnalyzer):
     base_url: str = "https://api.zoomeye.org/"
 
-    def set_config(self, additional_config_params):
-        self.api_key_name = additional_config_params.get("api_key_name", "ZOOMEYE_KEY")
-        self.search_type = additional_config_params.get("search_type", "host")
-        self.query = additional_config_params.get("query", "")
-        self.page = additional_config_params.get("page", 1)
-        self.facets = additional_config_params.get("facets", "")
-        self.history = additional_config_params.get("history", True)
-        self.__api_key = secrets.get_secret(self.api_key_name)
+    def set_params(self, params):
+        self.search_type = params.get("search_type", "host")
+        self.query = params.get("query", "")
+        self.page = params.get("page", 1)
+        self.facets = params.get("facets", "")
+        self.history = params.get("history", True)
+        self.__api_key = self._secrets["api_key_name"]
 
     def __build_zoomeye_url(self):
-        if self.observable_classification == "ip":
+        if self.observable_classification == self._serializer.ObservableTypes.IP.value:
             self.query += f" ip:{self.observable_name}"
         else:
             self.query += f" hostname:{self.observable_name}"
@@ -49,11 +47,6 @@ class ZoomEye(classes.ObservableAnalyzer):
             )
 
     def run(self):
-        if not self.__api_key:
-            raise AnalyzerRunException(
-                f"No API key retrieved with name: '{self.api_key_name}'"
-            )
-
         self.__build_zoomeye_url()
 
         try:

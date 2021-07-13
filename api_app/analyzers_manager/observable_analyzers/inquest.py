@@ -7,7 +7,6 @@ import requests
 
 from api_app.exceptions import AnalyzerRunException, AnalyzerConfigurationException
 from api_app.analyzers_manager.classes import ObservableAnalyzer
-from intel_owl import secrets
 
 
 logger = logging.getLogger(__name__)
@@ -16,14 +15,9 @@ logger = logging.getLogger(__name__)
 class InQuest(ObservableAnalyzer):
     base_url: str = "https://labs.inquest.net"
 
-    def set_config(self, additional_config_params):
-        self.api_key_name = additional_config_params.get(
-            "api_key_name", "INQUEST_API_KEY"
-        )
-        self.__api_key = secrets.get_secret(self.api_key_name)
-        self.analysis_type = additional_config_params.get(
-            "inquest_analysis", "dfi_search"
-        )
+    def set_params(self, params):
+        self.__api_key = self._secrets["api_key_name"]
+        self.analysis_type = params.get("inquest_analysis", "dfi_search")
         self.generic_identifier_mode = "user-defined"  # Or auto
 
     @property
@@ -51,7 +45,7 @@ class InQuest(ObservableAnalyzer):
         if self.__api_key:
             headers["Authorization"] = self.__api_key
         else:
-            warning = f"No API key retrieved with name: {self.api_key_name}"
+            warning = "No API key retrieved"
             logger.info(
                 f"{warning}. Continuing without API key..." f" <- {self.__repr__()}"
             )
@@ -59,18 +53,28 @@ class InQuest(ObservableAnalyzer):
             self.report.save()
 
         if self.analysis_type == "dfi_search":
-            if self.observable_classification == "hash":
+            if (
+                self.observable_classification
+                == self._serializer.ObservableTypes.HASH.value
+            ):
                 uri = (
                     f"/api/dfi/search/hash/{self.hash_type}?hash={self.observable_name}"
                 )
 
-            elif self.observable_classification in ["ip", "url", "domain"]:
+            elif self.observable_classification in [
+                self._serializer.ObservableTypes.IP.value,
+                self._serializer.ObservableTypes.URL.value,
+                self._serializer.ObservableTypes.DOMAIN.value,
+            ]:
                 uri = (
                     f"/api/dfi/search/ioc/{self.observable_classification}"
                     f"?keyword={self.observable_name}"
                 )
 
-            elif self.observable_classification == "generic":
+            elif (
+                self.observable_classification
+                == self._serializer.ObservableTypes.GENERIC.value
+            ):
                 try:
                     type_, value = self.observable_name.split(":")
                 except ValueError:
@@ -105,7 +109,8 @@ class InQuest(ObservableAnalyzer):
         result = response.json()
         if (
             self.analysis_type == "dfi_search"
-            and self.observable_classification == "hash"
+            and self.observable_classification
+            == self._serializer.ObservableTypes.HASH.value
         ):
             result["hash_type"] = self.hash_type
 

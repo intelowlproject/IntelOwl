@@ -5,24 +5,17 @@ import requests
 
 from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager import classes
-from intel_owl import secrets
 
 vt_base = "https://www.virustotal.com/vtapi/v2/"
 
 
 class VirusTotalv2(classes.ObservableAnalyzer):
-    def set_config(self, additional_config_params):
-        self.api_key_name = additional_config_params.get("api_key_name", "VT_KEY")
+    def set_params(self, params):
+        self.__api_key = self._secrets["api_key_name"]
 
     def run(self):
-        api_key = secrets.get_secret(self.api_key_name)
-        if not api_key:
-            raise AnalyzerRunException(
-                f"No API key retrieved with name: {self.api_key_name}"
-            )
-
         resp = vt_get_report(
-            api_key, self.observable_name, self.observable_classification
+            self.__api_key, self.observable_name, self.observable_classification
         )
 
         resp_code = resp.get("response_code", 1)

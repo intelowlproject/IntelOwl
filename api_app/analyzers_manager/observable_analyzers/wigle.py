@@ -5,16 +5,14 @@ import requests
 
 from api_app.exceptions import AnalyzerRunException, AnalyzerConfigurationException
 from api_app.analyzers_manager import classes
-from intel_owl import secrets
 
 
 class WiGLE(classes.ObservableAnalyzer):
     base_url: str = "https://api.wigle.net"
 
-    def set_config(self, additional_config_params):
-        self.api_key_name = additional_config_params.get("api_key_name", "WIGLE_KEY")
-        self.__api_key = secrets.get_secret(self.api_key_name)
-        self.search_type = additional_config_params.get("search_type", "WiFi Network")
+    def set_params(self, params):
+        self.__api_key = self._secrets["api_key_name"]
+        self.search_type = params.get("search_type", "WiFi Network")
 
     def __prepare_args(self):
         # Sample Argument: operator=001;type=GSM
@@ -30,10 +28,6 @@ class WiGLE(classes.ObservableAnalyzer):
 
     def run(self):
         self.__prepare_args()
-        if not self.__api_key:
-            raise AnalyzerConfigurationException(
-                f"No API key retrieved with name: {self.api_key_name}."
-            )
 
         try:
             if self.search_type == "WiFi Network":

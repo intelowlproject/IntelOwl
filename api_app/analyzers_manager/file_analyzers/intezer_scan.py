@@ -9,7 +9,6 @@ import logging
 from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.helpers import get_now_date_only, get_binary
-from intel_owl import secrets
 
 logger = logging.getLogger(__name__)
 
@@ -17,26 +16,20 @@ logger = logging.getLogger(__name__)
 class IntezerScan(FileAnalyzer):
     base_url: str = "https://analyze.intezer.com/api/v2-0"
 
-    def set_config(self, additional_config_params):
-        self.api_key_name = additional_config_params.get("api_key_name", "INTEZER_KEY")
+    def set_params(self, params):
+        self.__api_key = self._secrets["api_key_name"]
         # max no. of tries when polling for result
-        self.max_tries = additional_config_params.get("max_tries", 200)
+        self.max_tries = params.get("max_tries", 200)
         # interval b/w HTTP requests when polling
         self.poll_distance = 3
-        self.is_test = additional_config_params.get("is_test", False)
+        self.is_test = params.get("is_test", False)
 
     def run(self):
-        api_key = secrets.get_secret(self.api_key_name)
-        if not api_key:
-            raise AnalyzerRunException(
-                f"No API key retrieved with name: '{self.api_key_name}'"
-            )
-
         intezer_token = os.environ.get("INTEZER_TOKEN", "")
         intezer_token_date = os.environ.get("INTEZER_TOKEN_DATE", None)
         today = get_now_date_only()
         if not intezer_token or intezer_token_date != today:
-            intezer_token = _get_access_token(api_key)
+            intezer_token = _get_access_token(self.__api_key)
             if not intezer_token:
                 raise AnalyzerRunException("token extraction failed")
 

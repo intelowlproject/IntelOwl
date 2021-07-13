@@ -5,17 +5,14 @@ import requests
 import logging
 from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager.classes import ObservableAnalyzer
-from intel_owl import secrets
 import base64
 
 logger = logging.getLogger(__name__)
 
 
 class Phishtank(ObservableAnalyzer):
-    def set_config(self, additional_config_params):
-        self.api_key_name = additional_config_params.get(
-            "api_key_name", "PHISHTANK_API_KEY"
-        )
+    def set_params(self, params):
+        self.__api_key = self._secrets["api_key_name"]
 
     def run(self):
         result = {}
@@ -24,11 +21,10 @@ class Phishtank(ObservableAnalyzer):
             "url": base64.b64encode(self.observable_name.encode("utf-8")),
             "format": "json",
         }
-        api_key = secrets.get_secret(self.api_key_name)
-        if not api_key:
+        if not self.__api_key:
             logger.warning(f"{self.__repr__()} -> Continuing w/o API key..")
         else:
-            data["app_key"] = api_key
+            data["app_key"] = self.__api_key
         try:
             resp = requests.post(
                 "https://checkurl.phishtank.com/checkurl/", data=data, headers=headers

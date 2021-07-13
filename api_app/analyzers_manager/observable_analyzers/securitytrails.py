@@ -5,38 +5,26 @@ import requests
 
 from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager import classes
-from intel_owl import secrets
 
 
 class SecurityTrails(classes.ObservableAnalyzer):
     base_url: str = "https://api.securitytrails.com/v1/"
 
-    def set_config(self, additional_config_params):
-        self.analysis_type = additional_config_params.get(
-            "securitytrails_analysis", "current"
-        )
-        self.current_type = additional_config_params.get(
-            "securitytrails_current_type", "details"
-        )
-        self.history_analysis = additional_config_params.get(
-            "securitytrails_history_analysis", "whois"
-        )
-        self.api_key_name = additional_config_params.get(
-            "api_key_name", "SECURITYTRAILS_KEY"
-        )
+    def set_params(self, params):
+        self.analysis_type = params.get("securitytrails_analysis", "current")
+        self.current_type = params.get("securitytrails_current_type", "details")
+        self.history_analysis = params.get("securitytrails_history_analysis", "whois")
+        self.__api_key = self._secrets["api_key_name"]
 
     def run(self):
-        api_key = secrets.get_secret(self.api_key_name)
-        if not api_key:
-            raise AnalyzerRunException(
-                f"No API key retrieved with name: '{self.api_key_name}'"
-            )
+        headers = {"apikey": self.__api_key, "Content-Type": "application/json"}
 
-        headers = {"apikey": api_key, "Content-Type": "application/json"}
-
-        if self.observable_classification == "ip":
+        if self.observable_classification == self._serializer.ObservableTypes.IP.value:
             uri = f"ips/nearby/{self.observable_name}"
-        elif self.observable_classification == "domain":
+        elif (
+            self.observable_classification
+            == self._serializer.ObservableTypes.DOMAIN.value
+        ):
             if self.analysis_type == "current":
                 if self.current_type == "details":
                     uri = f"domain/{self.observable_name}"

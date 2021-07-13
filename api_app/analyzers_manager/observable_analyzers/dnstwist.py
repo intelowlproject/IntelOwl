@@ -19,13 +19,13 @@ class DNStwist(classes.ObservableAnalyzer):
     command: str = "dnstwist"
     dictionary_base_path: str = "/opt/deploy/dnstwist-dictionaries/"
 
-    def set_config(self, additional_config_params):
-        self._ssdeep = additional_config_params.get("ssdeep", False)
-        self._mxcheck = additional_config_params.get("mxcheck", False)
-        self._tld = additional_config_params.get("tld", False)
-        self._tld_dict = additional_config_params.get("tld_dict", "abused_tlds.dict")
+    def set_params(self, params):
+        self._ssdeep = params.get("ssdeep", False)
+        self._mxcheck = params.get("mxcheck", False)
+        self._tld = params.get("tld", False)
+        self._tld_dict = params.get("tld_dict", "abused_tlds.dict")
         self.domain = self.observable_name
-        if self.observable_classification == "url":
+        if self.observable_classification == self._serializer.ObservableTypes.URL.value:
             self.domain = urlparse(self.observable_name).hostname
             try:
                 IPv4Address(self.domain)

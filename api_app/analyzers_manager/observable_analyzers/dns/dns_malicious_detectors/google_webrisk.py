@@ -13,7 +13,6 @@ from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.observable_analyzers.dns.dns_responses import (
     malicious_detector_response,
 )
-from intel_owl import secrets
 
 logger = logging.getLogger(__name__)
 
@@ -22,12 +21,7 @@ class WebRisk(classes.ObservableAnalyzer):
     """Check if observable analyzed is marked as malicious by Google WebRisk API"""
 
     def run(self):
-        api_key_name = "GOOGLE_APPLICATION_CREDENTIALS"
-        credentials = secrets.get_secret(api_key_name)
-        if not credentials:
-            raise AnalyzerRunException(
-                f"No credentials retrieved with name: '{api_key_name}'"
-            )
+        credentials = self._secrets["api_key_name"]
         if not exists(credentials):
             raise AnalyzerRunException(
                 f"{credentials} should be an existing file. "

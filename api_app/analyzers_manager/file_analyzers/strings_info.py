@@ -17,17 +17,13 @@ class StringsInfo(FileAnalyzer, DockerBasedAnalyzer):
     timeout: int = 60 * 9
     # whereas subprocess timeout is kept as 60 * 9 = 9 minutes
 
-    def set_config(self, additional_config_params):
-        self.max_no_of_strings = int(
-            additional_config_params.get("max_number_of_strings", 300)
-        )
-        self.max_chars_for_string = int(
-            additional_config_params.get("max_characters_for_string", 1000)
-        )
+    def set_params(self, params):
+        self.max_no_of_strings = int(params.get("max_number_of_strings", 300))
+        self.max_chars_for_string = int(params.get("max_characters_for_string", 1000))
 
         # If set, this module will use Machine Learning feature
         # CARE!! ranked_strings could be cpu/ram intensive and very slow
-        self.rank_strings = additional_config_params.get("rank_strings", False)
+        self.rank_strings = params.get("rank_strings", False)
 
     def run(self):
         # get binary

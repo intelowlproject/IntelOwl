@@ -10,7 +10,6 @@ from api_app.exceptions import AnalyzerRunException
 from api_app.helpers import get_binary
 from api_app.analyzers_manager.observable_analyzers import vt2_get
 from api_app.analyzers_manager import classes
-from intel_owl import secrets
 
 
 logger = logging.getLogger(__name__)
@@ -19,27 +18,19 @@ logger = logging.getLogger(__name__)
 class VirusTotalv2ScanFile(classes.FileAnalyzer):
     base_url: str = "https://www.virustotal.com/vtapi/v2/"
 
-    def set_config(self, additional_config_params):
-        self.api_key_name = additional_config_params.get("api_key_name", "VT_KEY")
-        self.__api_key = secrets.get_secret(self.api_key_name)
+    def set_params(self, params):
+        self.__api_key = self._secrets["api_key_name"]
         # this is a config value that can be used...
         # .. to force the waiting of the scan result anyway
-        self.wait_for_scan_anyway = additional_config_params.get(
-            "wait_for_scan_anyway", False
-        )
+        self.wait_for_scan_anyway = params.get("wait_for_scan_anyway", False)
         # max no. of tries when polling for result
-        self.max_tries = additional_config_params.get("max_tries", 10)
+        self.max_tries = params.get("max_tries", 10)
         # max 5 minutes waiting
         self.poll_distance = 30
 
     def run(self):
         result = None
-        if not self.__api_key:
-            raise AnalyzerRunException(
-                f"No API key retrieved with name: {self.api_key_name}"
-            )
-
-        notify_url = secrets.get_secret("VT_NOTIFY_URL")
+        notify_url = self._secrets["url_key_name"]
         resp = self.__vt_request_scan(notify_url)
 
         # in case we didn't use the webhook to get the result of the scan,...

@@ -5,15 +5,13 @@ import requests
 
 from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager import classes
-from intel_owl import secrets
 
 
 class EmailRep(classes.ObservableAnalyzer):
     base_url: str = "https://emailrep.io/{}"
 
-    def set_config(self, additional_config_params):
-        self.api_key_name = additional_config_params.get("api_key_name", "EMAILREP_KEY")
-        self.__api_key = secrets.get_secret(self.api_key_name)
+    def set_params(self, params):
+        self.__api_key = self._secrets["api_key_name"]
 
     def run(self):
         """
@@ -28,7 +26,9 @@ class EmailRep(classes.ObservableAnalyzer):
             "Accept": "application/json",
         }
 
-        if self.observable_classification not in ["generic"]:
+        if self.observable_classification not in [
+            self._serializer.ObservableTypes.GENERIC.value
+        ]:
             raise AnalyzerRunException(
                 f"not supported observable type {self.observable_classification}."
                 f" Supported: generic"

@@ -14,9 +14,9 @@ class ThugUrl(ObservableAnalyzer, DockerBasedAnalyzer):
     # interval between http request polling (in seconds)
     poll_distance: int = 30
 
-    def set_config(self, additional_config_params):
-        self.args = self._thug_args_builder(additional_config_params)
-        self.is_test = additional_config_params.get("test", False)
+    def set_params(self, params):
+        self.args = self._thug_args_builder(params)
+        self.is_test = params.get("test", False)
 
     @staticmethod
     def _thug_args_builder(config_params):

@@ -12,8 +12,8 @@ from api_app.analyzers_manager import classes
 class Robtex(classes.ObservableAnalyzer):
     base_url = "https://freeapi.robtex.com/"
 
-    def set_config(self, additional_config_params):
-        self.analysis_type = additional_config_params.get("robtex_analysis", "ip_query")
+    def set_params(self, params):
+        self.analysis_type = params.get("robtex_analysis", "ip_query")
 
     def run(self):
         if self.analysis_type == "ip_query":
@@ -22,7 +22,10 @@ class Robtex(classes.ObservableAnalyzer):
             uri = f"pdns/reverse/{self.observable_name}"
         elif self.analysis_type == "forward_pdns":
             domain = self.observable_name
-            if self.observable_classification == "url":
+            if (
+                self.observable_classification
+                == self._serializer.ObservableTypes.URL.value
+            ):
                 domain = urlparse(self.observable_name).hostname
             uri = f"pdns/forward/{domain}"
         else:

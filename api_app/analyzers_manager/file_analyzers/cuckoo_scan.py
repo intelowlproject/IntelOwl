@@ -6,39 +6,35 @@ import time
 import requests
 import logging
 
-from api_app.exceptions import AnalyzerRunException, AnalyzerConfigurationException
+from api_app.exceptions import AnalyzerRunException
 from api_app.helpers import get_binary
 from api_app.analyzers_manager.classes import FileAnalyzer
-from intel_owl import secrets
 
 logger = logging.getLogger(__name__)
 
 
 class CuckooAnalysis(FileAnalyzer):
-    def set_config(self, additional_config_params):
+    def set_params(self, params):
         # cuckoo installation can be with or without the api_token
         # it depends on version and configuration
         self.session = requests.Session()
-        api_key_name = additional_config_params.get("api_key_name", None)
-        if api_key_name:
-            api_key = secrets.get_secret(api_key_name)
-            self.session.headers["Authorization"] = f"Bearer {api_key}"
-        else:
+        self.__api_key = self._secrets["api_key_name"]
+        if not __api_key:
             logger.info(
                 f"{self.__repr__()}, (md5: {self.md5}) -> Continuing w/o API key.."
             )
-        self.cuckoo_url = secrets.get_secret("CUCKOO_URL")
+        else:
+            self.session.headers["Authorization"] = f"Bearer {self.__api_key}"
+
+        self.cuckoo_url = self._secrets["url_key_name"]
         self.task_id = 0
         self.result = {}
         # no. of tries requesting new scan
-        self.max_post_tries = additional_config_params.get("max_post_tries", 5)
+        self.max_post_tries = params.get("max_post_tries", 5)
         # no. of tries when polling for result
-        self.max_get_tries = additional_config_params.get("max_poll_tries", 20)
+        self.max_get_tries = params.get("max_poll_tries", 20)
 
     def run(self):
-        if not self.cuckoo_url:
-            raise AnalyzerConfigurationException("cuckoo URL missing")
-
         binary = get_binary(self.job_id)
         if not binary:
             raise AnalyzerRunException("is the binary empty?!")

@@ -10,17 +10,22 @@ from api_app.analyzers_manager import classes
 class Threatminer(classes.ObservableAnalyzer):
     base_url = "https://api.threatminer.org/v2/"
 
-    def set_config(self, additional_config_params):
-        self.rt_value = additional_config_params.get("rt_value", "")
+    def set_params(self, params):
+        self.rt_value = params.get("rt_value", "")
 
     def run(self):
         params = {"q": self.observable_name}
         if self.rt_value:
             params["rt"] = self.rt_value
 
-        if self.observable_classification == "domain":
+        if (
+            self.observable_classification
+            == self._serializer.ObservableTypes.DOMAIN.value
+        ):
             uri = "domain.php"
-        elif self.observable_classification == "ip":
+        elif (
+            self.observable_classification == self._serializer.ObservableTypes.IP.value
+        ):
             uri = "host.php"
         else:
             raise AnalyzerRunException(

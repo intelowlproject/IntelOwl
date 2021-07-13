@@ -38,3 +38,13 @@ class AbstractReport(models.Model):
     @property
     def process_time(self):
         return self.end_time - self.start_time
+
+    def update_status(self, status: str, save=True):
+        self.status = status
+        if save:
+            self.save(update_fields=["status"])
+
+    def append_error(self, err_msg: str, save=True):
+        self.errors.append(err_msg)
+        if save:
+            self.save(update_fields=["errors"])

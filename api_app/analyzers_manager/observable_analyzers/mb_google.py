@@ -3,28 +3,29 @@
 
 import googlesearch
 
-from api_app.exceptions import AnalyzerRunException
-from api_app.analyzers_manager import classes
-from api_app.analyzers_manager.observable_analyzers import mb_get
+from .mb_get import MB_GET
 
 
-class MB_GOOGLE(classes.ObservableAnalyzer):
+class MB_GOOGLE(MB_GET):
+    """
+    This is a modified version of MB_GET.
+    """
+
     def run(self):
-        if self.observable_classification not in ["ip", "domain", "url"]:
-            raise AnalyzerRunException(
-                f"not supported observable type {self.observable_classification}."
-                f" Supported: ip, domain, url"
-            )
+        results = {}
 
-        query = "{} site:bazaar.abuse.ch".format(self.observable_name)
-        ret = []
+        # save for later
+        observable_name = self.observable_name
+
+        query = "{} site:bazaar.abuse.ch".format(observable_name)
         for url in googlesearch.search(query, stop=20):
             mb_hash = url.split("/")[-2]
-            _mb_get = mb_get.MB_GET(
-                "MalwareBazaar_Google_Observable", self.job_id, mb_hash, "hash", {}
-            )
-            res = _mb_get.run()
-            ret.append(res)
-            del _mb_get
+            # overwrite self.observable_name so super class works correctly
+            self.observable_name = mb_hash
+            res = super(MB_GOOGLE, self).run()
+            results[mb_hash] = res
 
-        return {"results": ret}
+        # revert back
+        self.observable_name = observable_name
+
+        return results

@@ -6,32 +6,19 @@ import pymisp
 
 from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager import classes
-from intel_owl import secrets
 
 
 class MISP(classes.ObservableAnalyzer):
-    def set_config(self, additional_config_params):
-        self.api_key_name = additional_config_params.get("api_key_name", "MISP_KEY")
-        self.url_key_name = additional_config_params.get("url_key_name", "MISP_URL")
-        self.ssl_check = additional_config_params.get("ssl_check", True)
-        self.debug = additional_config_params.get("debug", False)
-        self.url_name = secrets.get_secret(self.url_key_name)
+    def set_params(self, params):
+        self.ssl_check = params.get("ssl_check", True)
+        self.debug = params.get("debug", False)
+        self.__url_name = self._secrets["url_key_name"]
+        self.__api_key = self._secrets["api_key_name"]
 
     def run(self):
-        api_key = secrets.get_secret(self.api_key_name)
-        if not api_key:
-            raise AnalyzerRunException(
-                f"no MISP API key retrieved with name: {self.api_key_name}"
-            )
-
-        if not self.url_name:
-            raise AnalyzerRunException(
-                f"no MISP URL retrieved, key value: {self.url_key_name}"
-            )
-
         misp_instance = pymisp.PyMISP(
-            url=self.url_name,
-            key=api_key,
+            url=self.__url_name,
+            key=self.__api_key,
             ssl=self.ssl_check,
             debug=self.debug,
             timeout=5,
@@ -49,7 +36,10 @@ class MISP(classes.ObservableAnalyzer):
             "limit": 50,
             "enforce_warninglist": True,
         }
-        if self.observable_classification == "hash":
+        if (
+            self.observable_classification
+            == self._serializer.ObservableTypes.HASH.value
+        ):
             params["type_attribute"] = ["md5", "sha1", "sha256"]
         result_search = misp_instance.search(**params)
         if isinstance(result_search, dict):

@@ -6,7 +6,6 @@ import time
 import logging
 from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager.classes import ObservableAnalyzer
-from intel_owl import secrets
 
 
 logger = logging.getLogger(__name__)
@@ -15,27 +14,20 @@ logger = logging.getLogger(__name__)
 class UrlScan(ObservableAnalyzer):
     base_url: str = "https://urlscan.io/api/v1"
 
-    def set_config(self, additional_config_params):
-        self.analysis_type = additional_config_params.get("urlscan_analysis", "search")
-        self.visibility = additional_config_params.get("visibility", "private")
-        self.search_size = additional_config_params.get("search_size", 100)
-        self.api_key_name = additional_config_params.get(
-            "api_key_name", "URLSCAN_API_KEY"
-        )
+    def set_params(self, params):
+        self.analysis_type = params.get("urlscan_analysis", "search")
+        self.visibility = params.get("visibility", "private")
+        self.search_size = params.get("search_size", 100)
+        self.__api_key = self._secrets["api_key_name"]
 
     def run(self):
         result = {}
         headers = {"Content-Type": "application/json", "User-Agent": "IntelOwl/v1.x"}
-        api_key = secrets.get_secret(self.api_key_name)
-        if not api_key:
-            if self.analysis_type == "search":
-                logger.warning(f"{self.__repr__()} -> Continuing w/o API key..")
-            else:
-                raise AnalyzerRunException(
-                    f"No API key retrieved for name {self.api_key_name}."
-                )
+        if not self.__api_key and self.analysis_type == "search":
+            logger.warning(f"{self.__repr__()} -> Continuing w/o API key..")
         else:
-            headers["API-Key"] = api_key
+            headers["API-Key"] = self.__api_key
+
         self.session = requests.Session()
         self.session.headers = headers
         if self.analysis_type == "search":
@@ -89,7 +81,7 @@ class UrlScan(ObservableAnalyzer):
             "q": f'{self.observable_classification}:"{self.observable_name}"',
             "size": self.search_size,
         }
-        if self.observable_classification == "url":
+        if self.observable_classification == self._serializer.ObservableTypes.URL.value:
             params["q"] = "page." + params["q"]
         try:
             resp = self.session.get(self.base_url + "/search/", params=params)

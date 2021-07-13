@@ -7,7 +7,6 @@ import requests
 
 from api_app.exceptions import AnalyzerRunException, AnalyzerConfigurationException
 from api_app.analyzers_manager import classes
-from intel_owl import secrets
 
 
 logger = logging.getLogger(__name__)
@@ -18,24 +17,18 @@ class TriageSearch(classes.ObservableAnalyzer):
     base_url: str = "https://api.tria.ge/v0/"
     private_url: str = "https://private.tria.ge/api/v0/"
 
-    def set_config(self, additional_config_params):
-        self.endpoint = additional_config_params.get("endpoint", "public")
+    def set_params(self, params):
+        self.endpoint = params.get("endpoint", "public")
         if self.endpoint == "private":
             self.base_url = self.private_url
 
-        self.api_key_name = additional_config_params.get("api_key_name", "TRIAGE_KEY")
-        self.__api_key = secrets.get_secret(self.api_key_name)
-        self.analysis_type = additional_config_params.get("analysis_type", "search")
-        self.report_type = additional_config_params.get("report_type", "overview")
-        self.max_tries = additional_config_params.get("max_tries", 200)
+        self.__api_key = self._secrets["api_key_name"]
+        self.analysis_type = params.get("analysis_type", "search")
+        self.report_type = params.get("report_type", "overview")
+        self.max_tries = params.get("max_tries", 200)
         self.poll_distance = 5
 
     def run(self):
-        if not self.__api_key:
-            raise AnalyzerRunException(
-                f"No API key retrieved with name: {self.api_key_name}"
-            )
-
         self.session = requests.Session()
         self.session.headers = {"Authorization": f"Bearer {self.__api_key}"}
 
@@ -53,7 +46,10 @@ class TriageSearch(classes.ObservableAnalyzer):
         return response
 
     def __triage_search(self):
-        if self.observable_classification == "hash":
+        if (
+            self.observable_classification
+            == self._serializer.ObservableTypes.HASH.value
+        ):
             params = {"query": self.observable_name}
         else:
             params = {

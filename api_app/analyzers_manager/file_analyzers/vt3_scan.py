@@ -9,7 +9,6 @@ from api_app.exceptions import AnalyzerRunException
 from api_app.helpers import get_binary
 from api_app.analyzers_manager.observable_analyzers import vt3_get
 from api_app.analyzers_manager.classes import FileAnalyzer
-from intel_owl import secrets
 
 logger = logging.getLogger(__name__)
 
@@ -18,23 +17,17 @@ vt_base = "https://www.virustotal.com/api/v3/"
 
 
 class VirusTotalv3ScanFile(FileAnalyzer):
-    def set_config(self, additional_config_params):
-        self.api_key_name = additional_config_params.get("api_key_name", "VT_KEY")
-        self.additional_config_params = additional_config_params
+    def set_params(self, params):
+        self.__api_key = self._secrets["api_key_name"]
+        self.params = params
         # max no. of tries when polling for result
-        self.max_tries = additional_config_params.get("max_tries", 100)
+        self.max_tries = params.get("max_tries", 100)
         # interval b/w HTTP requests when polling
         self.poll_distance = 5
 
     def run(self):
-        api_key = secrets.get_secret(self.api_key_name)
-        if not api_key:
-            raise AnalyzerRunException(
-                f"No API key retrieved with name: {self.api_key_name}"
-            )
-
         return vt_scan_file(
-            api_key,
+            self.__api_key,
             self.md5,
             self.job_id,
             max_tries=self.max_tries,

@@ -18,10 +18,8 @@ db_path = f"{settings.MEDIA_ROOT}"
 
 
 class FireHol_IPList(classes.ObservableAnalyzer):
-    def set_config(self, additional_config_params):
-        self.list_names = additional_config_params.get(
-            "list_names", ["firehol_level1.netset"]
-        )
+    def set_params(self, params):
+        self.list_names = params.get("list_names", ["firehol_level1.netset"])
 
     def run(self):
         ip = self.observable_name

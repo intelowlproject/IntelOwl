@@ -3,7 +3,6 @@
 
 import requests
 
-from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager import classes
 
 
@@ -12,12 +11,6 @@ class MB_GET(classes.ObservableAnalyzer):
     sample_url: str = "https://bazaar.abuse.ch/sample/"
 
     def run(self):
-        if self.observable_classification != "hash":
-            raise AnalyzerRunException(
-                f"not supported observable type {self.observable_classification}."
-                f" Supported: hash only"
-            )
-
         post_data = {"query": "get_info", "hash": self.observable_name}
 
         response = requests.post(self.url, data=post_data)

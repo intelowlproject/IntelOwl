@@ -11,7 +11,6 @@ from django.dispatch import receiver
 
 
 from .exceptions import AnalyzerRunException
-from api_app.analyzers_manager.models import AnalyzerReport
 
 
 def file_directory_path(instance, filename):
@@ -77,7 +76,6 @@ class Job(models.Model):
     )
     file = models.FileField(blank=True, upload_to=file_directory_path)
     tags = models.ManyToManyField(Tag, related_name="jobs", blank=True)
-    runtime_configuration = models.JSONField(default=dict, null=True, blank=True)
 
     @classmethod
     def object_by_job_id(cls, job_id, transaction=False):
@@ -91,22 +89,20 @@ class Job(models.Model):
 
         return job_object
 
+    def update_status(self, status: str, save=True):
+        self.status = status
+        if save:
+            self.save(update_fields=["status"])
+
+    def append_error(self, err_msg: str, save=True):
+        self.errors.append(err_msg)
+        if save:
+            self.save(update_fields=["errors"])
+
     def __str__(self):
         if self.is_sample:
-            return f'Job("{self.file_name}")'
-        return f'Job("{self.observable_name}")'
-
-    @classmethod
-    def init_report(cls, name, job_id):
-        report_obj = AnalyzerReport(
-            analyzer_name=name,
-            job=cls.object_by_job_id(job_id),
-            report={},
-            errors=[],
-        )
-        report_obj.status = report_obj.Statuses.PENDING.name
-
-        return report_obj
+            return f'Job(#{self.pk}, "{self.file_name}")'
+        return f'Job(#{self.pk}, "{self.observable_name}")'
 
 
 @receiver(pre_delete, sender=Job)

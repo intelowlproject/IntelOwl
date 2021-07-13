@@ -8,35 +8,31 @@ from urllib.parse import urlparse
 
 from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager import classes
-from intel_owl import secrets
 
 
 class OTX(classes.ObservableAnalyzer):
-    def set_config(self, additional_config_params):
-        self.api_key_name = additional_config_params.get("api_key_name", "OTX_KEY")
-        self.verbose = additional_config_params.get("verbose", False)
+    def set_params(self, params):
+        self.__api_key = self._secrets["api_key_name"]
+        self.verbose = params.get("verbose", False)
 
     def run(self):
-        api_key = secrets.get_secret(self.api_key_name)
-        if not api_key:
-            raise AnalyzerRunException(
-                f"No API key retrieved with name: {self.api_key_name}"
-            )
-
-        otx = OTXv2.OTXv2(api_key)
+        otx = OTXv2.OTXv2(self.__api_key)
 
         obs_clsf = self.observable_classification
         to_analyze_observable = self.observable_name
-        if obs_clsf == "ip":
+
+        if obs_clsf == self._serializer.ObservableTypes.IP.value:
             otx_type = OTXv2.IndicatorTypes.IPv4
-        elif obs_clsf == "url":
+        elif obs_clsf == self._serializer.ObservableTypes.URL.value:
             to_analyze_observable = urlparse(self.observable_name).hostname
+
             try:
                 to_analyze_observable = IPv4Address(to_analyze_observable)
             except AddressValueError:
                 otx_type = OTXv2.IndicatorTypes.DOMAIN
             else:
                 otx_type = OTXv2.IndicatorTypes.IPv4
+
             if not to_analyze_observable:
                 raise AnalyzerRunException("extracted observable is None")
         elif obs_clsf == "domain":

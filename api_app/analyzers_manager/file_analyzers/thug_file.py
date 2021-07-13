@@ -15,8 +15,8 @@ class ThugFile(FileAnalyzer, DockerBasedAnalyzer):
     # interval between http request polling (in secs)
     poll_distance: int = 30
 
-    def set_config(self, additional_config_params):
-        self.args = ThugUrl._thug_args_builder(additional_config_params)
+    def set_params(self, params):
+        self.args = ThugUrl._thug_args_builder(params)
 
     def run(self):
         # construct a valid dir name into which thug will save the result

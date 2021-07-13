@@ -24,3 +24,11 @@ class AnalyzerRunNotImplemented(Exception):
 
     def __repr__(self):
         return f"run() is not implemented for analyzer {self.analyzer_name}."
+
+
+class ConnectorConfigurationException(Exception):
+    pass
+
+
+class ConnectorRunException(Exception):
+    pass

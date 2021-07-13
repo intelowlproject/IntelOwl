@@ -16,8 +16,8 @@ from api_app.analyzers_manager.observable_analyzers.dns.dns_responses import (
 class Quad9DNSResolver(classes.ObservableAnalyzer):
     """Resolve a DNS query with Quad9"""
 
-    def set_config(self, additional_config_params):
-        self._query_type = additional_config_params.get("query_type", "A")
+    def set_params(self, params):
+        self._query_type = params.get("query_type", "A")
 
     def run(self):
         try:

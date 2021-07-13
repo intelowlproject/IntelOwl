@@ -11,7 +11,6 @@ from datetime import datetime, timedelta
 from api_app.analyzers_manager.file_analyzers import vt3_scan
 from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager import classes
-from intel_owl import secrets
 
 logger = logging.getLogger(__name__)
 
@@ -19,22 +18,16 @@ vt_base = "https://www.virustotal.com/api/v3/"
 
 
 class VirusTotalv3(classes.ObservableAnalyzer):
-    def set_config(self, additional_config_params):
-        self.api_key_name = additional_config_params.get("api_key_name", "VT_KEY")
-        self.__api_key = secrets.get_secret(self.api_key_name)
-        self.additional_config_params = additional_config_params
+    def set_params(self, params):
+        self.__api_key = self._secrets["api_key_name"]
+        self.params = params
 
     def run(self):
-        if not self.__api_key:
-            raise AnalyzerRunException(
-                f"No API key retrieved with name: {self.api_key_name}"
-            )
-
         result = vt_get_report(
             self.__api_key,
             self.observable_name,
             self.observable_classification,
-            self.additional_config_params,
+            self.params,
             self.job_id,
         )
 
@@ -45,14 +38,14 @@ def vt_get_report(
     api_key,
     observable_name,
     obs_clfn,
-    additional_config_params,
+    config_params,
     job_id,
 ):
     headers = {"x-apikey": api_key}
 
     params, uri = get_requests_params_and_uri(obs_clfn, observable_name)
 
-    max_tries = additional_config_params.get("max_tries", 10)
+    max_tries = config_params.get("max_tries", 10)
     poll_distance = 30
     result = {}
     already_done_active_scan_because_report_was_old = False
@@ -79,9 +72,7 @@ def vt_get_report(
             # .. otherwise it would fail if it's not available
             if response.status_code == 404:
                 logger.info(f"hash {observable_name} not found on VT")
-                force_active_file_scan = additional_config_params.get(
-                    "force_active_scan", False
-                )
+                force_active_file_scan = config_params.get("force_active_scan", False)
                 if force_active_file_scan:
                     logger.info(f"forcing VT active scan for hash {observable_name}")
                     result = vt3_scan.vt_scan_file(api_key, observable_name, job_id)
@@ -96,7 +87,7 @@ def vt_get_report(
                 if last_analysis_results:
                     # at this time, if the flag if set,
                     # we are going to force the analysis again for old samples
-                    force_active_file_scan_if_old = additional_config_params.get(
+                    force_active_file_scan_if_old = config_params.get(
                         "force_active_scan_if_old", False
                     )
                     if (

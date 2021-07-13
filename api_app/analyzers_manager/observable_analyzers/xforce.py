@@ -5,39 +5,28 @@ import requests
 from requests.auth import HTTPBasicAuth
 from urllib.parse import quote_plus
 
-from api_app.exceptions import AnalyzerRunException, AnalyzerConfigurationException
+from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager import classes
-from intel_owl import secrets
 
 
 class XForce(classes.ObservableAnalyzer):
     base_url: str = "https://api.xforce.ibmcloud.com"
 
-    def set_config(self, additional_config_params):
-        self.api_key_name = additional_config_params.get("api_key_name", "XFORCE_KEY")
-        self.api_password_name = additional_config_params.get(
-            "api_password_name", "XFORCE_PASSWORD"
-        )
-        self.__api_key = secrets.get_secret(self.api_key_name)
-        self.__api_password = secrets.get_secret(self.api_password_name)
+    def set_params(self, params):
+        self.__api_key = self._secrets["api_key_name"]
+        self.__api_password = self._secrets["api_password_name"]
 
     def run(self):
-        if not self.__api_key:
-            raise AnalyzerConfigurationException(
-                f"No API key retrieved with name: {self.api_key_name}."
-            )
-        if not self.__api_password:
-            raise AnalyzerConfigurationException(
-                f"No API password retrieved with name: {self.api_password_name}."
-            )
-
         auth = HTTPBasicAuth(self.__api_key, self.__api_password)
 
         endpoints = self._get_endpoints()
         result = {}
         for endpoint in endpoints:
             try:
-                if self.observable_classification == "url":
+                if (
+                    self.observable_classification
+                    == self._serializer.ObservableTypes.URL.value
+                ):
                     observable_to_check = quote_plus(self.observable_name)
                 else:
                     observable_to_check = self.observable_name
@@ -57,11 +46,16 @@ class XForce(classes.ObservableAnalyzer):
         :rtype: list
         """
 
-        if self.observable_classification == "ip":
+        if self.observable_classification == self._serializer.ObservableTypes.IP.value:
             endpoints = ["ipr", "ipr/history", "ipr/malware"]
-        elif self.observable_classification == "hash":
+        elif (
+            self.observable_classification
+            == self._serializer.ObservableTypes.HASH.value
+        ):
             endpoints = ["malware"]
-        elif self.observable_classification == "url":
+        elif (
+            self.observable_classification == self._serializer.ObservableTypes.URL.value
+        ):
             endpoints = ["url", "url/history", "url/malware"]
         else:
             raise AnalyzerRunException(

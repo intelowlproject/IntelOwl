@@ -21,12 +21,12 @@ logger = logging.getLogger(__name__)
 class ClassicDNSResolver(classes.ObservableAnalyzer):
     """Resolve a DNS query with Default resolver"""
 
-    def set_config(self, additional_config_params):
-        self._query_type = additional_config_params.get("query_type", "A")
+    def set_params(self, params):
+        self._query_type = params.get("query_type", "A")
 
     def run(self):
         resolutions = []
-        if self.observable_classification == "ip":
+        if self.observable_classification == self._serializer.ObservableTypes.IP.value:
             try:
                 ipaddress.ip_address(self.observable_name)
                 hostname, alias, ip = socket.gethostbyaddr(self.observable_name)
@@ -37,10 +37,16 @@ class ClassicDNSResolver(classes.ObservableAnalyzer):
             except (socket.gaierror, socket.herror):
                 logger.warning(f"No resolution for ip {self.observable_name}")
                 resolutions = []
-        elif self.observable_classification in ["domain", "url"]:
+        elif self.observable_classification in [
+            self._serializer.ObservableTypes.DOMAIN.value,
+            self._serializer.ObservableTypes.URL.value,
+        ]:
             observable = self.observable_name
             # for URLs we are checking the relative domain
-            if self.observable_classification == "url":
+            if (
+                self.observable_classification
+                == self._serializer.ObservableTypes.URL.value
+            ):
                 observable = urlparse(self.observable_name).hostname
 
             try:

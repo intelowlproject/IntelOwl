@@ -3,10 +3,10 @@
 
 import logging
 
+from intel_owl.celery import app as celery_app
 from api_app import models, serializers, helpers
 from api_app.permissions import ExtendedObjectPermissions
-from .analyzers_manager import general
-from api_app.analyzers_manager.serializers import AnalyzerConfigSerializer
+from .analyzers_manager import controller as analyzers_controller
 
 from wsgiref.util import FileWrapper
 
@@ -325,7 +325,6 @@ def send_analysis_request(request):
 
             # we need to clean the list of requested analyzers,
             # ... based on configuration data
-            analyzers_config = AnalyzerConfigSerializer.read_and_verify_config()
             run_all_available_analyzers = serialized_data.get(
                 "run_all_available_analyzers", False
             )
@@ -340,15 +339,11 @@ def send_analysis_request(request):
                         {"error": "816"}, status=status.HTTP_400_BAD_REQUEST
                     )
                 # just pick all available analyzers
-                analyzers_requested = [
-                    analyzer_name for analyzer_name in analyzers_config
-                ]
-            cleaned_analyzer_list = helpers.filter_analyzers(
+                analyzers_requested = analyzers_controller.ALL_ANALYZERS
+            cleaned_analyzer_list = analyzers_controller.filter_analyzers(
                 serialized_data,
                 analyzers_requested,
-                analyzers_config,
                 warnings,
-                run_all=run_all_available_analyzers,
             )
             params["analyzers_to_execute"] = cleaned_analyzer_list
             if len(cleaned_analyzer_list) < 1:
@@ -358,10 +353,11 @@ def send_analysis_request(request):
                 )
                 return Response({"error": "814"}, status=status.HTTP_400_BAD_REQUEST)
 
+            runtime_configuration = serialized_data.pop("runtime_configuration", {})
             # save the arrived data plus new params into a new job object
             serializer.save(**params)
-            job_id = serializer.data.get("id", None)
             md5 = serializer.data.get("md5", "")
+            job_id = serializer.data.get("id", None)
             logger.info(f"New Job added with ID: #{job_id} and md5: {md5}.")
             if not job_id:
                 return Response({"error": "815"}, status=status.HTTP_400_BAD_REQUEST)
@@ -373,15 +369,15 @@ def send_analysis_request(request):
                 {"error": error_message}, status=status.HTTP_400_BAD_REQUEST
             )
 
-        is_sample = serializer.data.get("is_sample", False)
         if not test:
-            general.start_analyzers(
-                params["analyzers_to_execute"],
-                analyzers_config,
-                serialized_data["runtime_configuration"],
-                job_id,
-                md5,
-                is_sample,
+            # fire celery task
+            celery_app.send_task(
+                "start_analyzers",
+                kwargs=dict(
+                    job_id=job_id,
+                    analyzers_to_execute=params["analyzers_to_execute"],
+                    runtime_configuration=runtime_configuration,
+                ),
             )
 
         response_dict = {
@@ -512,10 +508,9 @@ class JobViewSet(
         if job.status != "running":
             raise ParseError(detail="Job is not running")
         # close celery tasks
-        general.kill_running_analysis(pk)
+        analyzers_controller.kill_running_analysis(pk)
         # set job status
-        job.status = "killed"
-        job.save()
+        job.update_status("killed")
         return Response(status=status.HTTP_200_OK)
 
 

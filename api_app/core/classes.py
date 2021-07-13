@@ -78,7 +78,8 @@ class Plugin(metaclass=ABCMeta):
     @abstractmethod
     def init_report_object(self) -> AbstractReport:
         """
-        Returns report object set in *start* fn
+        Returns: instance of a subclass of ``AbstractReport``.
+        Called inside `__init__`.
         """
         raise NotImplementedError()
 
@@ -107,7 +108,6 @@ class Plugin(metaclass=ABCMeta):
         """
         try:
             self.set_params(self._params)
-            self.report = self.init_report_object()
             self.before_run()
             _result = self.run()
             self.report.report = _result
@@ -143,3 +143,4 @@ class Plugin(metaclass=ABCMeta):
         self._config_dict = config_dict
         self.job_id = job_id
         self.kwargs = kwargs
+        self.report = self.init_report_object()

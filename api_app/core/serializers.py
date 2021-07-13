@@ -79,7 +79,7 @@ class AbstractConfigSerializer(rfs.Serializer):
     # common fields
     name = rfs.CharField(required=True)
     python_module = rfs.CharField(required=True, max_length=128)
-    disabled = rfs.BooleanField()
+    disabled = rfs.BooleanField(required=True)
     config = rfs.JSONField(required=True)
     secrets = rfs.JSONField(required=False)
     description = rfs.CharField(allow_blank=True, required=False)
@@ -147,7 +147,7 @@ class AbstractConfigSerializer(rfs.Serializer):
         """
         assert (
             self._is_valid_flag
-        ), "Cannot call `._read_secrets()` before `.is_valid()` or validation failed."
+        ), "Cannot call `._read_secrets()` before `.is_valid()` or if validation failed."
 
         secrets = {}
         for key_name, secret_dict in self.data["secrets"].items():
@@ -214,3 +214,11 @@ class AbstractConfigSerializer(rfs.Serializer):
             raise rfs.ValidationError(serializer_errors)
 
         return config_dict
+
+    @classmethod
+    def dict_to_dataclass(cls, data: dict):
+        raise NotImplementedError()
+
+    @classmethod
+    def get_as_dataclasses(cls):
+        raise NotImplementedError()

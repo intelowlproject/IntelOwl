@@ -258,7 +258,6 @@ def run_analyzer(job_id: int, config_dict: dict, **kwargs) -> None:
     try:
         cls_path = build_import_path(
             config.python_module,
-            config_dict["python_module"],
             observable_analyzer=(
                 config.is_type_observable
                 or not config.is_type_observable

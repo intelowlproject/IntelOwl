@@ -8,6 +8,7 @@ from abc import ABCMeta, abstractmethod
 from celery.exceptions import SoftTimeLimitExceeded
 from django.utils import timezone
 from django.utils.functional import cached_property
+from django.conf import settings
 
 from api_app.models import Job
 from .models import AbstractReport
@@ -100,14 +101,13 @@ class Plugin(metaclass=ABCMeta):
     def get_error_message(self, exc, is_base_err=False):
         return f" {'[Unexpected error]' if is_base_err else '[Error]'}: '{exc}'"
 
-    def start(self) -> AbstractReport:
+    def start(self, *args, **kwargs) -> AbstractReport:
         """
         Entrypoint function to execute the plugin.
         calls `before_run`, `run`, `after_run`
         in that order with exception handling.
         """
         try:
-            self.set_params(self._params)
             self.before_run()
             _result = self.run()
             self.report.report = _result
@@ -139,8 +139,30 @@ class Plugin(metaclass=ABCMeta):
         self.report.errors.append(str(exc))
         self.report.status = self.report.Statuses.FAILED.name
 
+    @classmethod
+    def _monkeypatch(cls, patches: list = []) -> None:
+        """
+        Hook to monkey-patch class for testing purposes.
+        """
+        for mock_fn in patches:
+            cls.start = mock_fn(cls.start)
+
+    def __post__init__(self) -> None:
+        """
+        Hook for post `__init__` processsing.
+        Always call `super().__post__init__()` if overwritten in subclass.
+        """
+        # init report
+        self.report = self.init_report_object()
+        # set params
+        self.set_params(self._params)
+        # monkeypatch if in test suite
+        if settings.TEST_MODE:
+            self._monkeypatch()
+
     def __init__(self, config_dict: dict, job_id: int, **kwargs):
         self._config_dict = config_dict
         self.job_id = job_id
         self.kwargs = kwargs
-        self.report = self.init_report_object()
+        # some post init processing
+        self.__post__init__()

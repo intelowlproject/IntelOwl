@@ -88,7 +88,7 @@ class JobSerializer(ObjectPermissionsAssignmentMixin, serializers.ModelSerialize
     tags_id = serializers.PrimaryKeyRelatedField(
         many=True, write_only=True, queryset=Tag.objects.all()
     )
-    runtime_configuration = serializers.JSONField(write_only=True)
+    runtime_configuration = serializers.JSONField(write_only=True, default={})
     analyzer_reports = AnalyzerReportSerializer(many=True, read_only=True)
     connector_reports = ConnectorReportSerializer(many=True, read_only=True)
 

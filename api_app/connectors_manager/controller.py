@@ -59,22 +59,15 @@ def start_connectors(
 
         # get runtime_configuration if any specified for this analyzer
         runtime_conf = runtime_configuration.get(connector_name, {})
-        # merge cc["config"] with runtime_configuration
-        config_params = {
+        # merge runtime_conf
+        cc.config = {
             **cc.config,
             **runtime_conf,
         }
         # construct args
-        args = [
-            job_id,
-            {
-                **cc,
-                "name": connector_name,
-                "config": config_params,
-            },
-        ]
+        args = [job_id, cc.asdict()]
         # get celery queue
-        queue = config_params.get("queue", DEFAULT_QUEUE)
+        queue = cc.params.queue
         if queue not in settings.CELERY_QUEUES:
             logger.error(
                 f"Connector {connector_name} has a wrong queue."
@@ -82,7 +75,7 @@ def start_connectors(
             )
             queue = DEFAULT_QUEUE
         # get soft_time_limit
-        stl = config_params.get("soft_time_limit", DEFAULT_SOFT_TIME_LIMIT)
+        stl = cc.params.soft_time_limit
         # gen a new task_id
         task_id = uuid()
         # add to map

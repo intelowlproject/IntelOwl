@@ -1,9 +1,8 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 # mock_utils.py: useful utils for mocking requests and responses for testing
-# flake8: noqa
 
-from unittest import skipIf  # flake8: noqa
+from unittest import skipIf, skip  # flake8: noqa
 from unittest.mock import patch, MagicMock  # flake8: noqa
 from django.conf import settings
 
@@ -46,8 +45,13 @@ def if_mock(decorators: list):
     return apply_all if settings.MOCK_CONNECTIONS else lambda x: x
 
 
-def mock_connections(decorator):
-    return decorator if settings.MOCK_CONNECTIONS else lambda x: x
+def if_mock_connections(*decorators):
+    def apply_all(f):
+        for d in reversed(decorators):
+            f = d(f)
+        return f
+
+    return apply_all if settings.MOCK_CONNECTIONS else lambda x: x
 
 
 def mocked_requests(*args, **kwargs):

@@ -12,11 +12,29 @@ from api_app.analyzers_manager import classes
 from intel_owl import settings
 from datetime import datetime
 
+from tests.mock_utils import if_mock, patch, MockResponse
+
 logger = logging.getLogger(__name__)
 
 db_path = f"{settings.MEDIA_ROOT}"
 
 
+def mocked_firehol_iplist(*args, **kwargs):
+    return MockResponse(
+        json_data={},
+        status_code=200,
+        text="""0.0.0.0/8\n
+            1.10.16.0/20\n
+            1.19.0.0/16\n
+            3.90.198.217\n""",
+    )
+
+
+@if_mock(
+    [
+        patch("requests.get", side_effect=mocked_firehol_iplist),
+    ]
+)
 class FireHol_IPList(classes.ObservableAnalyzer):
     def set_params(self, params):
         self.list_names = params.get("list_names", ["firehol_level1.netset"])

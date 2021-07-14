@@ -1,8 +1,7 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
-from unittest.mock import patch
 
-from tests.mock_utils import if_mock
+from tests.mock_utils import if_mock, patch
 from api_app.analyzers_manager.classes import ObservableAnalyzer
 
 

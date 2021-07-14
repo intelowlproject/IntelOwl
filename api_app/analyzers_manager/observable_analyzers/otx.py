@@ -9,7 +9,17 @@ from urllib.parse import urlparse
 from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager import classes
 
+from tests.mock_utils import if_mock, patch, mocked_requests
 
+
+@if_mock(
+    [
+        patch(
+            "requests.Session.get",
+            side_effect=mocked_requests,
+        )
+    ]
+)
 class OTX(classes.ObservableAnalyzer):
     def set_params(self, params):
         self.__api_key = self._secrets["api_key_name"]

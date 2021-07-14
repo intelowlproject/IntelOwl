@@ -15,11 +15,14 @@ from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager import classes
 from intel_owl import settings
 
+from tests.mock_utils import skipIf, if_mock
+
 logger = logging.getLogger(__name__)
 
 db_names = ["GeoLite2-Country.mmdb", "GeoLite2-City.mmdb"]
 
 
+@if_mock([skipIf(settings.MOCK_CONNECTIONS, "not working without connection")])
 class Maxmind(classes.ObservableAnalyzer):
     def set_params(self, params):
         self.params = params

@@ -9,7 +9,18 @@ from urllib.parse import urlparse
 from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager import classes
 
+from tests.mock_utils import if_mock, patch, MockResponseNoOp
 
+
+def mocked_pypdns(*args, **kwargs):
+    return MockResponseNoOp({}, 200)
+
+
+@if_mock(
+    [
+        patch("pypdns.PyPDNS", side_effect=mocked_pypdns),
+    ]
+)
 class CIRCL_PDNS(classes.ObservableAnalyzer):
     def set_params(self, params):
         self.__credentials = self._secrets["pdns_credentials"]

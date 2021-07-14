@@ -22,7 +22,6 @@ logger = logging.getLogger(__name__)
 db_names = ["GeoLite2-Country.mmdb", "GeoLite2-City.mmdb"]
 
 
-@if_mock([skipIf(settings.MOCK_CONNECTIONS, "not working without connection")])
 class Maxmind(classes.ObservableAnalyzer):
     def set_params(self, params):
         self.params = params

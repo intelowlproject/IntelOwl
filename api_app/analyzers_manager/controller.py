@@ -74,7 +74,7 @@ def filter_analyzers(
                     raise NotRunnableAnalyzer(
                         f"{a_name} won't be run because does not support files."
                     )
-                if config.is_filetype_supported(serialized_data["file_mimetype"]):
+                if not config.is_filetype_supported(serialized_data["file_mimetype"]):
                     raise NotRunnableAnalyzer(
                         f"""
                         {a_name} won't be run because mimetype

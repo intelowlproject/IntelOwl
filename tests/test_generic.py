@@ -1,7 +1,6 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-import logging
 import os
 
 from django.test import TestCase
@@ -11,7 +10,7 @@ from api_app.analyzers_manager.observable_analyzers import maxmind, talos, tor
 
 from api_app import crons
 
-from .mock_utils import if_mock_connections, skip, mocked_requests
+from .mock_utils import if_mock_connections, patch, skip, mocked_requests
 from . import get_logger
 
 logger = get_logger()

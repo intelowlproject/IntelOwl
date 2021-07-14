@@ -2,7 +2,6 @@
 # See the file 'LICENSE' for copying permission.
 
 import hashlib
-import logging
 import os
 
 from django.contrib.auth.models import User
@@ -12,10 +11,6 @@ from django.conf import settings
 from rest_framework.test import APIClient
 
 from api_app import models
-
-from . import get_logger
-
-logger = get_logger()
 
 
 class ApiViewTests(TestCase):

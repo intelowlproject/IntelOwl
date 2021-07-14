@@ -7,7 +7,7 @@ from api_app.analyzers_manager.constants import ObservableTypes
 from . import _ObservableAnalyzersScriptsTestCase, _FileAnalyzersScriptsTestCase
 
 
-#### Observable Analyzer Test Cases ####
+# Observable Analyzer Test Cases
 
 
 class IPAnalyzersTestCase(_ObservableAnalyzersScriptsTestCase):
@@ -64,7 +64,7 @@ class GenericAnalyzersTestCase(_ObservableAnalyzersScriptsTestCase):
         }
 
 
-#### File Analyzer Test Cases ####
+# File Analyzer Test Cases
 
 
 class EXEAnalyzersTestCase(_FileAnalyzersScriptsTestCase):

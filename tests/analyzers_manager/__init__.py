@@ -65,7 +65,8 @@ class _AbstractAnalyzersScriptTestCase(TransactionTestCase):
     def test_start_analyzers(self, *args, **kwargs):
         print(f"\n[START] -----{self.__class__.__name__}.test_start_analyzers----")
         print(
-            f"[REPORT] Job:{self.test_job.pk}, status:'{self.test_job.status}', analyzers:{self.test_job.analyzers_to_execute}"
+            f"[REPORT] Job:{self.test_job.pk}, status:'{self.test_job.status}',",
+            f"analyzers:{self.test_job.analyzers_to_execute}",
         )
 
         # execute analyzers
@@ -92,7 +93,7 @@ class _AbstractAnalyzersScriptTestCase(TransactionTestCase):
                 self.assertEqual(
                     stats["all"],
                     stats["success"],
-                    msg=f"all reports status must be `SUCCESS`.",
+                    msg="all reports status must be `SUCCESS`.",
                 )
                 print(f"[END] -----{self.__class__.__name__}.test_start_analyzers----")
                 return True

@@ -2,8 +2,8 @@
 # See the file 'LICENSE' for copying permission.
 # mock_utils.py: useful utils for mocking requests and responses for testing
 
-from unittest import skipIf, skip  # flake8: noqa
-from unittest.mock import patch, MagicMock  # flake8: noqa
+from unittest import skipIf, skip  # noqa: F401
+from unittest.mock import patch, MagicMock  # noqa: F401
 from django.conf import settings
 
 

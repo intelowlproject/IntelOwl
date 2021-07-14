@@ -5,7 +5,7 @@ from enum import Enum
 import typing
 
 
-class AnalyzerConfigEnum(Enum):
+class BaseEnum(Enum):
     @classmethod
     def aslist(cls) -> list:
         return [c.value for c in cls]
@@ -15,17 +15,17 @@ class AnalyzerConfigEnum(Enum):
         return typing.Literal[cls.aslist()]
 
 
-class TypeChoices(AnalyzerConfigEnum):
+class TypeChoices(BaseEnum):
     FILE = "file"
     OBSERVABLE = "observable"
 
 
-class HashChoices(AnalyzerConfigEnum):
+class HashChoices(BaseEnum):
     MD5 = "md5"
     SHA256 = "sha256"
 
 
-class ObservableTypes(AnalyzerConfigEnum):
+class ObservableTypes(BaseEnum):
     IP = "ip"
     URL = "url"
     DOMAIN = "domain"

@@ -53,8 +53,8 @@ def start_connectors(
 
     # loop over and fire the connectors in a celery task
     for connector_name, cc in connectors_config.items():
-        if cc.disabled or not cc.verification.configured:
-            # if disabled or unconfigured
+        if not cc.is_ready_to_use():
+            # skip this connector
             continue
 
         # get runtime_configuration if any specified for this analyzer

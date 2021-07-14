@@ -6,7 +6,8 @@
     "config": {
       "soft_time_limit": 30,
       "ssl_check": true,
-      "debug": false
+      "debug": false,
+      "tlp": "white"
     },
     "secrets": {
       "api_key_name": {

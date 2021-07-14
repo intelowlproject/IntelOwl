@@ -4,7 +4,10 @@
 import hashlib
 import time
 from unittest.mock import patch
+
 from django.test import TestCase
+from django.core.files import File
+from django.conf import settings
 
 from api_app.models import Job
 from api_app.analyzers_manager.serializers import AnalyzerConfigSerializer
@@ -24,7 +27,7 @@ from ..mock_utils import if_mock, mocked_requests
         patch("requests.post", side_effect=mocked_requests),
     ]
 )
-class _ObservableAnalyzersScriptsTestCase(TestCase):
+class _AbstractAnalyzersScriptTestCase(TestCase):
 
     test_job: Job
     analyzer_config: dict
@@ -42,41 +45,14 @@ class _ObservableAnalyzersScriptsTestCase(TestCase):
 
     @classmethod
     def setUpClass(cls):
-        if cls is _ObservableAnalyzersScriptsTestCase:
+        if cls in [
+            _AbstractAnalyzersScriptTestCase,
+            _ObservableAnalyzersScriptsTestCase,
+            _FileAnalyzersScriptsTestCase,
+        ]:
             return cls.skipTest(f"{cls.__name__} is an abstract base class.")
         else:
-            return super(_ObservableAnalyzersScriptsTestCase, cls).setUpClass()
-
-    @classmethod
-    def setUpTestData(cls):
-        # analyzer config
-        cls.analyzer_configs = AnalyzerConfigSerializer.get_as_dataclasses()
-        # define runtime configs
-        cls.runtime_configuration = {
-            "Thug_URL_Info": {"test": True},
-            "Triage_Search": {"analysis_type": "submit"},
-        }
-        return super().setUpTestData()
-
-    def setUp(self):
-        # save job
-        params = self.get_params()
-        params["md5"] = hashlib.md5(
-            params["observable_name"].encode("utf-8")
-        ).hexdigest()
-        self.test_job = Job(**params)
-        self.test_job.save()
-        # filter analyzers list
-        self.filtered_analyzers_list: list = [
-            config
-            for config in self.analyzer_configs.values()
-            if config.is_observable_type_supported(params["observable_classification"])
-        ]
-        return super().setUp()
-
-    def tearDown(self):
-        self.test_job.delete()
-        return super().tearDown()
+            return super(_AbstractAnalyzersScriptTestCase, cls).setUpClass()
 
     def test_start_analyzers_all(self, *args, **kwargs):
         analyzers_controller.start_analyzers(
@@ -99,3 +75,67 @@ class _ObservableAnalyzersScriptsTestCase(TestCase):
                     msg=f"all reports status must be {AnalyzerReport.Statuses.SUCCESS.name}",
                 )
             time.sleep(5)
+
+
+class _ObservableAnalyzersScriptsTestCase(_AbstractAnalyzersScriptTestCase):
+
+    # define runtime configs
+    runtime_configuration = {
+        "Thug_URL_Info": {"test": True},
+        "Triage_Search": {"analysis_type": "submit"},
+    }
+
+    def setUp(self):
+        # analyzer config
+        self.analyzer_configs = AnalyzerConfigSerializer.get_as_dataclasses()
+        # save job
+        params = self.get_params()
+        params["md5"] = hashlib.md5(
+            params["observable_name"].encode("utf-8")
+        ).hexdigest()
+        self.test_job = Job(**params)
+        self.test_job.save()
+        # filter analyzers list
+        self.filtered_analyzers_list: list = [
+            config
+            for config in self.analyzer_configs.values()
+            if config.is_observable_type_supported(params["observable_classification"])
+        ]
+        return super().setUp()
+
+    def tearDown(self):
+        self.test_job.delete()
+        return super().tearDown()
+
+
+class _FileAnalyzersScriptsTestCase(_AbstractAnalyzersScriptTestCase):
+
+    # define runtime configs
+    runtime_configuration = {}
+
+    def setUp(self):
+        # analyzer config
+        self.analyzer_configs = AnalyzerConfigSerializer.get_as_dataclasses()
+        # save job
+        params = self.get_params()
+        params["md5"] = hashlib.md5(params["file"].file.read()).hexdigest()
+        self.test_job = Job(**params)
+        self.test_job.save()
+        # filter analyzers list
+        self.filtered_analyzers_list: list = [
+            config
+            for config in self.analyzer_configs.values()
+            if config.is_filetype_supported(params["file_mimetype"])
+        ]
+        return super().setUp()
+
+    def tearDown(self):
+        self.test_job.delete()
+        return super().tearDown()
+
+    @staticmethod
+    def _get_file(filename: str):
+        test_file = f"{settings.PROJECT_LOCATION}/test_files/{filename}"
+        with open(test_file, "rb") as f:
+            django_file = File(f)
+        return django_file

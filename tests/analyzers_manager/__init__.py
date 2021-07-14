@@ -3,18 +3,16 @@
 
 import hashlib
 import time
-from unittest.mock import patch
 
-from django.test import TestCase
+from django.test import TransactionTestCase
 from django.core.files import File
 from django.conf import settings
 
 from intel_owl.celery import app as celery_app
 from api_app.models import Job
 from api_app.analyzers_manager.serializers import AnalyzerConfigSerializer
-from api_app.analyzers_manager.models import AnalyzerReport
 
-from ..mock_utils import if_mock, mocked_requests
+from ..mock_utils import if_mock, patch, mocked_requests
 
 # for observable analyzers, if can customize the behavior based on:
 # MOCK_CONNECTIONS to True -> connections to external analyzers are faked
@@ -26,7 +24,11 @@ from ..mock_utils import if_mock, mocked_requests
         patch("requests.post", side_effect=mocked_requests),
     ]
 )
-class _AbstractAnalyzersScriptTestCase(TestCase):
+class _AbstractAnalyzersScriptTestCase(TransactionTestCase):
+
+    # constants
+    TIMEOUT_SECONDS: int = 120  # 2 minutes
+    SLEEP_SECONDS: int = 5  # 5 seconds
 
     test_job: Job
     analyzer_config: dict
@@ -54,14 +56,16 @@ class _AbstractAnalyzersScriptTestCase(TestCase):
             return super(_AbstractAnalyzersScriptTestCase, cls).setUpClass()
 
     def setUp(self):
-        # cleanup
-        # Job.objects.all().delete()
         # analyzer config
         self.analyzer_configs = AnalyzerConfigSerializer.get_as_dataclasses()
         return super().setUp()
 
+    def tearDown(self):
+        self.test_job.delete()
+        return super().tearDown()
+
     def test_start_analyzers_all(self, *args, **kwargs):
-        print("\n[START] ---test_start_analyzers_all---")
+        print("\n[START] -----test_start_analyzers_all----")
         print(
             f"[REPORT] Job:{self.test_job.pk}, status:'{self.test_job.status}', analyzers:{self.test_job.analyzers_to_execute}"
         )
@@ -74,10 +78,10 @@ class _AbstractAnalyzersScriptTestCase(TestCase):
                 self.test_job.analyzers_to_execute,
                 self.runtime_configuration,
             ],
-            queue="default",
         )
 
-        for i in range(0, 1000):
+        for i in range(0, int(self.TIMEOUT_SECONDS / self.SLEEP_SECONDS)):
+            time.sleep(self.SLEEP_SECONDS)
             self.test_job.refresh_from_db()
             status = self.test_job.status
             stats = self.test_job.get_analyzer_reports_stats()
@@ -86,15 +90,17 @@ class _AbstractAnalyzersScriptTestCase(TestCase):
                 f"\n>>> Job:{self.test_job.pk}, status:'{status}', reports:{stats}",
             )
             if status not in ["running", "pending"]:
-                self.assertEquals(status, "reported_without_fails")
-                self.assertEquals(
+                self.assertEqual(status, "reported_without_fails")
+                self.assertEqual(
                     stats["all"],
                     stats["success"],
-                    msg=f"report status must be SUCCESS",
+                    msg=f"all reports status must be `SUCCESS`.",
                 )
-            time.sleep(5)
+                print("[END] -----test_start_analyzers_all----")
+                return True
 
-        print("[END] ---test_start_analyzers_all---")
+        # the test should not reach here
+        self.fail("test timed out")
 
 
 class _ObservableAnalyzersScriptsTestCase(_AbstractAnalyzersScriptTestCase):
@@ -102,16 +108,11 @@ class _ObservableAnalyzersScriptsTestCase(_AbstractAnalyzersScriptTestCase):
     # define runtime configs
     runtime_configuration = {
         "Thug_URL_Info": {"test": True},
-        "Triage_Search": {"analysis_type": "submit"},
-        "FireHol_IPList": {"list_names": ["firehol_level1.netset"]},
-        "DNStwist": {"tld": True, "mxcheck": True, "ssdeep": True},
-        "UrlScan_Submit_Result": {"urlscan_analysis": "submit_result"},
-        "InQuest_IOCdb": {"inquest_analysis": "iocdb_search"},
-        "InQuest_REPdb": {"inquest_analysis": "repdb_search"},
-        "InQuest_DFI": {"inquest_analysis": "dfi_search"},
-        "GreyNoiseAlpha": {"greynoise_api_version": "v1"},
-        "GreyNoise": {"greynoise_api_version": "v2"},
-        "GreyNoiseCommunity": {"greynoise_api_version": "v3"},
+        "Triage_Search": {
+            "analysis_type": "submit",
+            "max_tries": 1,
+            "endpoint": "public",
+        },
     }
 
     def setUp(self):
@@ -133,10 +134,6 @@ class _ObservableAnalyzersScriptsTestCase(_AbstractAnalyzersScriptTestCase):
         ]
         # save job
         self.test_job.save()
-
-    def tearDown(self):
-        # self.test_job.delete()
-        return super().tearDown()
 
 
 class _FileAnalyzersScriptsTestCase(_AbstractAnalyzersScriptTestCase):
@@ -186,7 +183,3 @@ class _FileAnalyzersScriptsTestCase(_AbstractAnalyzersScriptTestCase):
         ]
         # save job
         self.test_job.save()
-
-    def tearDown(self):
-        self.test_job.delete()
-        return super().tearDown()

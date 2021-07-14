@@ -128,6 +128,9 @@ DATABASES = {
         "PORT": DB_PORT,
         "USER": DB_USER,
         "PASSWORD": DB_PASSWORD,
+        "TEST": {
+            "NAME": DB_NAME,
+        },
     },
 }
 

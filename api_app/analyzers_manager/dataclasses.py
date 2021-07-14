@@ -25,6 +25,7 @@ class AnalyzerConfig(AbstractConfig):
 
     # utils
 
+    @property
     def is_type_observable(self) -> bool:
         return self.type == TypeChoices.OBSERVABLE.value
 

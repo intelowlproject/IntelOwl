@@ -3,8 +3,8 @@
 # mock_utils.py: useful utils for mocking requests and responses for testing
 # flake8: noqa
 
-from unittest import skipIf
-from unittest.mock import patch, MagicMock
+from unittest import skipIf  # flake8: noqa
+from unittest.mock import patch, MagicMock  # flake8: noqa
 from django.conf import settings
 
 

@@ -7,6 +7,9 @@ from api_app.analyzers_manager.constants import ObservableTypes
 from . import _ObservableAnalyzersScriptsTestCase, _FileAnalyzersScriptsTestCase
 
 
+#### Observable Analyzer Test Cases ####
+
+
 class IPAnalyzersTestCase(_ObservableAnalyzersScriptsTestCase):
     @classmethod
     def get_params(cls):
@@ -60,9 +63,8 @@ class GenericAnalyzersTestCase(_ObservableAnalyzersScriptsTestCase):
             "observable_classification": ObservableTypes.GENERIC.value,
         }
 
-    @classmethod
-    def setUpClass(cls):
-        pass
+
+#### File Analyzer Test Cases ####
 
 
 class EXEAnalyzersTestCase(_FileAnalyzersScriptsTestCase):
@@ -74,10 +76,6 @@ class EXEAnalyzersTestCase(_FileAnalyzersScriptsTestCase):
             "file_mimetype": "application/x-dosexec",
         }
 
-    @classmethod
-    def setUpClass(cls):
-        pass
-
 
 class DLLAnalyzersTestCase(_FileAnalyzersScriptsTestCase):
     @classmethod
@@ -87,10 +85,6 @@ class DLLAnalyzersTestCase(_FileAnalyzersScriptsTestCase):
             "file_name": "file.dll",
             "file_mimetype": "application/x-dosexec",
         }
-
-    @classmethod
-    def setUpClass(cls):
-        pass
 
 
 class ExcelAnalyzersTestCase(_FileAnalyzersScriptsTestCase):
@@ -102,10 +96,6 @@ class ExcelAnalyzersTestCase(_FileAnalyzersScriptsTestCase):
             "file_mimetype": "application/vnd.ms-excel",
         }
 
-    @classmethod
-    def setUpClass(cls):
-        pass
-
 
 class DocAnalyzersTestCase(_FileAnalyzersScriptsTestCase):
     @classmethod
@@ -115,10 +105,6 @@ class DocAnalyzersTestCase(_FileAnalyzersScriptsTestCase):
             "file_name": "document.doc",
             "file_mimetype": "application/msword",
         }
-
-    @classmethod
-    def setUpClass(cls):
-        pass
 
 
 class RtfAnalyzersTestCase(_FileAnalyzersScriptsTestCase):
@@ -130,10 +116,6 @@ class RtfAnalyzersTestCase(_FileAnalyzersScriptsTestCase):
             "file_mimetype": "text/rtf",
         }
 
-    @classmethod
-    def setUpClass(cls):
-        pass
-
 
 class PDFAnalyzersTestCase(_FileAnalyzersScriptsTestCase):
     @classmethod
@@ -143,10 +125,6 @@ class PDFAnalyzersTestCase(_FileAnalyzersScriptsTestCase):
             "file_name": "document.pdf",
             "file_mimetype": "application/pdf",
         }
-
-    @classmethod
-    def setUpClass(cls):
-        pass
 
 
 class HTMLAnalyzersTestCase(_FileAnalyzersScriptsTestCase):
@@ -158,10 +136,6 @@ class HTMLAnalyzersTestCase(_FileAnalyzersScriptsTestCase):
             "file_mimetype": "text/html",
         }
 
-    @classmethod
-    def setUpClass(cls):
-        pass
-
 
 class JSAnalyzersTestCase(_FileAnalyzersScriptsTestCase):
     @classmethod
@@ -172,10 +146,6 @@ class JSAnalyzersTestCase(_FileAnalyzersScriptsTestCase):
             "file_mimetype": "application/javascript",
         }
 
-    @classmethod
-    def setUpClass(cls):
-        pass
-
 
 class APKAnalyzersTestCase(_FileAnalyzersScriptsTestCase):
     @classmethod
@@ -185,7 +155,3 @@ class APKAnalyzersTestCase(_FileAnalyzersScriptsTestCase):
             "file_name": "sample.apk",
             "file_mimetype": "application/vnd.android.package-archive",
         }
-
-    @classmethod
-    def setUpClass(cls):
-        pass

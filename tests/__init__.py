@@ -10,7 +10,7 @@ from intel_owl import settings
 
 def get_logger() -> logging.Logger:
     logger = logging.getLogger(__name__)
-    # disable logging library
+    # DISABLE_LOGGING_TEST to True -> logging disabled
     if settings.DISABLE_LOGGING_TEST:
         logging.disable(logging.CRITICAL)
 

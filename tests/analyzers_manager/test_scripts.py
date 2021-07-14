@@ -5,12 +5,9 @@ import os
 from api_app.analyzers_manager.constants import ObservableTypes
 
 from . import _ObservableAnalyzersScriptsTestCase, _FileAnalyzersScriptsTestCase
-<<<<<<< HEAD
 
 
 # Observable Analyzer Test Cases
-=======
->>>>>>> 6f181e6 (refactor and fix file analyzer tests)
 
 
 class IPAnalyzersTestCase(_ObservableAnalyzersScriptsTestCase):
@@ -66,14 +63,8 @@ class GenericAnalyzersTestCase(_ObservableAnalyzersScriptsTestCase):
             "observable_classification": ObservableTypes.GENERIC.value,
         }
 
-<<<<<<< HEAD
 
 # File Analyzer Test Cases
-=======
-    @classmethod
-    def setUpClass(cls):
-        pass
->>>>>>> 6f181e6 (refactor and fix file analyzer tests)
 
 
 class EXEAnalyzersTestCase(_FileAnalyzersScriptsTestCase):
@@ -85,13 +76,6 @@ class EXEAnalyzersTestCase(_FileAnalyzersScriptsTestCase):
             "file_mimetype": "application/x-dosexec",
         }
 
-<<<<<<< HEAD
-=======
-    @classmethod
-    def setUpClass(cls):
-        pass
-
->>>>>>> 6f181e6 (refactor and fix file analyzer tests)
 
 class DLLAnalyzersTestCase(_FileAnalyzersScriptsTestCase):
     @classmethod
@@ -102,13 +86,6 @@ class DLLAnalyzersTestCase(_FileAnalyzersScriptsTestCase):
             "file_mimetype": "application/x-dosexec",
         }
 
-<<<<<<< HEAD
-=======
-    @classmethod
-    def setUpClass(cls):
-        pass
-
->>>>>>> 6f181e6 (refactor and fix file analyzer tests)
 
 class ExcelAnalyzersTestCase(_FileAnalyzersScriptsTestCase):
     @classmethod
@@ -119,13 +96,6 @@ class ExcelAnalyzersTestCase(_FileAnalyzersScriptsTestCase):
             "file_mimetype": "application/vnd.ms-excel",
         }
 
-<<<<<<< HEAD
-=======
-    @classmethod
-    def setUpClass(cls):
-        pass
-
->>>>>>> 6f181e6 (refactor and fix file analyzer tests)
 
 class DocAnalyzersTestCase(_FileAnalyzersScriptsTestCase):
     @classmethod
@@ -136,13 +106,6 @@ class DocAnalyzersTestCase(_FileAnalyzersScriptsTestCase):
             "file_mimetype": "application/msword",
         }
 
-<<<<<<< HEAD
-=======
-    @classmethod
-    def setUpClass(cls):
-        pass
-
->>>>>>> 6f181e6 (refactor and fix file analyzer tests)
 
 class RtfAnalyzersTestCase(_FileAnalyzersScriptsTestCase):
     @classmethod
@@ -153,13 +116,6 @@ class RtfAnalyzersTestCase(_FileAnalyzersScriptsTestCase):
             "file_mimetype": "text/rtf",
         }
 
-<<<<<<< HEAD
-=======
-    @classmethod
-    def setUpClass(cls):
-        pass
-
->>>>>>> 6f181e6 (refactor and fix file analyzer tests)
 
 class PDFAnalyzersTestCase(_FileAnalyzersScriptsTestCase):
     @classmethod
@@ -170,13 +126,6 @@ class PDFAnalyzersTestCase(_FileAnalyzersScriptsTestCase):
             "file_mimetype": "application/pdf",
         }
 
-<<<<<<< HEAD
-=======
-    @classmethod
-    def setUpClass(cls):
-        pass
-
->>>>>>> 6f181e6 (refactor and fix file analyzer tests)
 
 class HTMLAnalyzersTestCase(_FileAnalyzersScriptsTestCase):
     @classmethod
@@ -187,13 +136,6 @@ class HTMLAnalyzersTestCase(_FileAnalyzersScriptsTestCase):
             "file_mimetype": "text/html",
         }
 
-<<<<<<< HEAD
-=======
-    @classmethod
-    def setUpClass(cls):
-        pass
-
->>>>>>> 6f181e6 (refactor and fix file analyzer tests)
 
 class JSAnalyzersTestCase(_FileAnalyzersScriptsTestCase):
     @classmethod
@@ -204,13 +146,6 @@ class JSAnalyzersTestCase(_FileAnalyzersScriptsTestCase):
             "file_mimetype": "application/javascript",
         }
 
-<<<<<<< HEAD
-=======
-    @classmethod
-    def setUpClass(cls):
-        pass
-
->>>>>>> 6f181e6 (refactor and fix file analyzer tests)
 
 class APKAnalyzersTestCase(_FileAnalyzersScriptsTestCase):
     @classmethod
@@ -220,10 +155,3 @@ class APKAnalyzersTestCase(_FileAnalyzersScriptsTestCase):
             "file_name": "sample.apk",
             "file_mimetype": "application/vnd.android.package-archive",
         }
-<<<<<<< HEAD
-=======
-
-    @classmethod
-    def setUpClass(cls):
-        pass
->>>>>>> 6f181e6 (refactor and fix file analyzer tests)

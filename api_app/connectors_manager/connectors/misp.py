@@ -14,7 +14,7 @@ INTELOWL_MISP_TYPE_MAP = {
     "domain": "domain",
     "url": "url",
     # "hash" (checked from helpers.get_hash_type)
-    "general": "text",  # misc field, so keeping text
+    "generic": "text",  # misc field, so keeping text
     "file": "filename|md5",
 }
 
@@ -30,7 +30,7 @@ class MISP(Connector):
     @property
     def _event_obj(self) -> pymisp.MISPEvent:
         obj = pymisp.MISPEvent()
-        obj.info = f"Intelowl Job-{self.job_id}: {self._job.observable_name}"
+        obj.info = f"Intelowl Job-{self.job_id}"
         obj.distribution = 0  # your_organisation_only
         obj.threat_level_id = 4  # undefined
         obj.analysis = 2  # completed
@@ -39,7 +39,7 @@ class MISP(Connector):
 
         # Add tags from Job
         for tag in self._job.tags.all():
-            obj.add_tag(f"{tag.label}")
+            obj.add_tag(f"intelowl-tag:{tag.label}")
 
         return obj
 
@@ -70,7 +70,7 @@ class MISP(Connector):
         return obj
 
     @property
-    def _secondary_attr_objs(self) -> List(pymisp.MISPAttribute):
+    def _secondary_attr_objs(self) -> List[pymisp.MISPAttribute]:
         obj_list = []
         if self._job.is_sample:
             # mime-type
@@ -104,9 +104,12 @@ class MISP(Connector):
         event = self._event_obj
         attributes = [
             self._base_attr_obj,
-            self._link_attr_obj,
             *self._secondary_attr_objs,
+            self._link_attr_obj,
         ]
+
+        # append attribute name to event info
+        event.info += f": {self._base_attr_obj.value}"
 
         # add event to MISP Instance
         misp_event = misp_instance.add_event(event, pythonify=True)

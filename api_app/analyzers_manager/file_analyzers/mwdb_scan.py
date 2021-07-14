@@ -10,11 +10,7 @@ from api_app.exceptions import AnalyzerRunException
 from api_app.helpers import get_binary
 from api_app.analyzers_manager.classes import FileAnalyzer
 
-<<<<<<< HEAD
 from tests.mock_utils import patch, if_mock_connections, MagicMock
-=======
-from tests.mock_utils import patch, if_mock, MagicMock
->>>>>>> 6f181e6 (refactor and fix file analyzer tests)
 
 logger = logging.getLogger(__name__)
 
@@ -30,18 +26,6 @@ def mocked_mwdb_response(*args, **kwargs):
     return Response.return_value
 
 
-<<<<<<< HEAD
-=======
-@if_mock(
-    [
-        patch(
-            "mwdblib.MWDB",
-            side_effect=mocked_mwdb_response,
-        ),
-        # patch.object(mwdb_scan.MWDB_Scan, "file_analysis", return_value=True),
-    ]
-)
->>>>>>> 6f181e6 (refactor and fix file analyzer tests)
 class MWDB_Scan(FileAnalyzer):
     def set_params(self, params):
         self.__api_key = self._secrets["api_key_name"]

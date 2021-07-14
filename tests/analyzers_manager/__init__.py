@@ -103,6 +103,15 @@ class _ObservableAnalyzersScriptsTestCase(_AbstractAnalyzersScriptTestCase):
     runtime_configuration = {
         "Thug_URL_Info": {"test": True},
         "Triage_Search": {"analysis_type": "submit"},
+        "FireHol_IPList": {"list_names": ["firehol_level1.netset"]},
+        "DNStwist": {"tld": True, "mxcheck": True, "ssdeep": True},
+        "UrlScan_Submit_Result": {"urlscan_analysis": "submit_result"},
+        "InQuest_IOCdb": {"inquest_analysis": "iocdb_search"},
+        "InQuest_REPdb": {"inquest_analysis": "repdb_search"},
+        "InQuest_DFI": {"inquest_analysis": "dfi_search"},
+        "GreyNoiseAlpha": {"greynoise_api_version": "v1"},
+        "GreyNoise": {"greynoise_api_version": "v2"},
+        "GreyNoiseCommunity": {"greynoise_api_version": "v3"},
     }
 
     def setUp(self):

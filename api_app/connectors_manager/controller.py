@@ -53,7 +53,7 @@ def start_connectors(
 
     # loop over and fire the connectors in a celery task
     for connector_name, cc in connectors_config.items():
-        if not cc.is_ready_to_use():
+        if not cc.is_ready_to_use:
             # skip this connector
             continue
 

@@ -12,17 +12,15 @@ from intel_owl.celery import app as celery_app
 from api_app.models import Job
 from api_app.analyzers_manager.serializers import AnalyzerConfigSerializer
 
-from ..mock_utils import if_mock, patch, mocked_requests
+from ..mock_utils import if_mock_connections, patch, mocked_requests
 
 # for observable analyzers, if can customize the behavior based on:
 # MOCK_CONNECTIONS to True -> connections to external analyzers are faked
 
 
-@if_mock(
-    [
-        patch("requests.get", side_effect=mocked_requests),
-        patch("requests.post", side_effect=mocked_requests),
-    ]
+@if_mock_connections(
+    patch("requests.get", side_effect=mocked_requests),
+    patch("requests.post", side_effect=mocked_requests),
 )
 class _AbstractAnalyzersScriptTestCase(TransactionTestCase):
 
@@ -64,8 +62,8 @@ class _AbstractAnalyzersScriptTestCase(TransactionTestCase):
         self.test_job.delete()
         return super().tearDown()
 
-    def test_start_analyzers_all(self, *args, **kwargs):
-        print("\n[START] -----test_start_analyzers_all----")
+    def test_start_analyzers(self, *args, **kwargs):
+        print(f"\n[START] -----{self.__class__.__name__}.test_start_analyzers----")
         print(
             f"[REPORT] Job:{self.test_job.pk}, status:'{self.test_job.status}', analyzers:{self.test_job.analyzers_to_execute}"
         )
@@ -96,7 +94,7 @@ class _AbstractAnalyzersScriptTestCase(TransactionTestCase):
                     stats["success"],
                     msg=f"all reports status must be `SUCCESS`.",
                 )
-                print("[END] -----test_start_analyzers_all----")
+                print(f"[END] -----{self.__class__.__name__}.test_start_analyzers----")
                 return True
 
         # the test should not reach here
@@ -129,9 +127,7 @@ class _ObservableAnalyzersScriptsTestCase(_AbstractAnalyzersScriptTestCase):
             for config in self.analyzer_configs.values()
             if config.is_observable_type_supported(params["observable_classification"])
         ]
-        self.test_job.analyzers_to_execute = [
-            c.name for c in self.filtered_analyzers_list
-        ]
+        self.test_job.analyzers_to_execute = ["Darksearch_Query"]
         # save job
         self.test_job.save()
 

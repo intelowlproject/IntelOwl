@@ -75,7 +75,7 @@ def filter_analyzers(
                         f"{a_name} won't be run because does not support files."
                     )
                 if config.is_filetype_supported(serialized_data["file_mimetype"]):
-                    raise_message = (
+                    raise NotRunnableAnalyzer(
                         f"{a_name} won't be run because mimetype."
                         f"{serialized_data['file_mimetype']} is not supported."
                     )
@@ -122,8 +122,11 @@ def filter_analyzers(
 def start_analyzers(
     job_id: int,
     analyzers_to_execute: List[str],
-    runtime_configuration: Dict[str, Dict] = dict(),
+    runtime_configuration: Dict[str, Dict] = None,
 ) -> List[str]:
+    # we should not use mutable objects as default to avoid unexpected issues
+    if runtime_configuration is None:
+        runtime_configuration = dict()
     # init empty lists
     task_ids = []
 

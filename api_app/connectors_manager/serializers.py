@@ -2,9 +2,11 @@
 # See the file 'LICENSE' for copying permission.
 
 from rest_framework import serializers as rfs
+from typing import Dict
 
 from api_app.core.serializers import AbstractConfigSerializer
 from .models import ConnectorReport
+from .dataclasses import ConnectorConfig
 
 
 class ConnectorConfigSerializer(AbstractConfigSerializer):
@@ -27,6 +29,17 @@ class ConnectorConfigSerializer(AbstractConfigSerializer):
             )
 
         return python_module
+
+    @classmethod
+    def dict_to_dataclass(cls, data: dict) -> ConnectorConfig:
+        return ConnectorConfig(**data)
+
+    @classmethod
+    def get_as_dataclasses(cls) -> Dict[str, ConnectorConfig]:
+        return {
+            name: cls.dict_to_dataclass(attrs)
+            for name, attrs in cls.read_and_verify_config().items()
+        }
 
 
 class ConnectorReportSerializer(rfs.ModelSerializer):

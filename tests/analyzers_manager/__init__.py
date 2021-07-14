@@ -3,6 +3,11 @@
 
 import hashlib
 import time
+<<<<<<< HEAD
+=======
+from unittest.mock import patch
+from django.test import TestCase
+>>>>>>> 4b888f0 (fixes(tests): fixes in _ObservableAnalyzersScriptsTestCase)
 
 from django.test import TransactionTestCase
 from django.core.files import File
@@ -53,7 +58,8 @@ class _AbstractAnalyzersScriptTestCase(TransactionTestCase):
         else:
             return super(_AbstractAnalyzersScriptTestCase, cls).setUpClass()
 
-    def setUp(self):
+    @classmethod
+    def setUpTestData(cls):
         # analyzer config
         self.analyzer_configs = AnalyzerConfigSerializer.get_as_dataclasses()
         return super().setUp()

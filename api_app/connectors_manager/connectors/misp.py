@@ -1,17 +1,17 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
+from api_app import helpers
 import pymisp
 
-from ..classes import Connector
+from api_app.connectors_manager.classes import Connector
 
 
-# TODO: identify type of hash
 INTELOWL_MISP_TYPE_MAP = {
     "ip": "ip-src",
     "domain": "domain",
     "url": "url",
-    "hash": "md5",
+    # "hash" (checked from helpers.get_hash_type)
     "general": "text",  # misc field, so keeping text
     "file": "filename",
 }
@@ -27,13 +27,15 @@ class MISP(Connector):
     @property
     def _event_obj(self):
         obj = pymisp.MISPEvent()
-        obj.info = f"Intelowl Analysis: {self.obs_name}"
+        obj.info = f"Intelowl Analysis: {self._job.observable_name}"
         obj.distribution = 0  # your_organisation_only
         obj.threat_level_id = 4  # undefined
         obj.analysis = 2  # completed
         obj.add_tag("intelowl")
 
-        # TODO: Add tags from Job
+        # Add tags from Job
+        for tag in self._job.tags.all():
+            obj.add_tag(f"{tag.label}:{tag.color}")
 
         return obj
 
@@ -45,11 +47,15 @@ class MISP(Connector):
         else:
             type = self._job.observable_classification
             value = self._job.observable_name
+            if type == "hash":
+                matched_type = helpers.get_hash_type()
+                # override with matched type
+                type = matched_type if matched_type is not None else "text"
 
         obj = pymisp.MISPAttribute()
         obj.type = INTELOWL_MISP_TYPE_MAP[type]
         obj.value = value
-        obj.add_tag(f"intelowl:{self.obs_type}")
+        obj.add_tag(f"intelowl-{type}")
 
         return obj
 

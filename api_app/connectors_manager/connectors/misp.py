@@ -30,11 +30,11 @@ class MISP(Connector):
     @property
     def _event_obj(self) -> pymisp.MISPEvent:
         obj = pymisp.MISPEvent()
-        obj.info = f"Intelowl Analysis: {self._job.observable_name}"
+        obj.info = f"Intelowl Job-{self.job_id}: {self._job.observable_name}"
         obj.distribution = 0  # your_organisation_only
         obj.threat_level_id = 4  # undefined
         obj.analysis = 2  # completed
-        obj.add_tag("intelowl")
+        obj.add_tag("source:intelowl")
         obj.add_tag(f"tlp:{self.tlp}")  # tlp tag for sharing
 
         # Add tags from Job
@@ -65,7 +65,9 @@ class MISP(Connector):
             else:
                 type = INTELOWL_MISP_TYPE_MAP[type]
 
-        return self._get_attr_obj(type, value)
+        obj = self._get_attr_obj(type, value)
+        obj.comment = f"Analyzers Executed: {self._job.analyzers_to_execute}"
+        return obj
 
     @property
     def _secondary_attr_objs(self) -> List(pymisp.MISPAttribute):

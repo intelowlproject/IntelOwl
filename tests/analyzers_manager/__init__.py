@@ -72,7 +72,7 @@ class _AbstractAnalyzersScriptTestCase(TestCase):
                 self.assertEquals(
                     num_all_reports,
                     num_success_reports,
-                    msg=f"all reports status must be {AnalyzerReport.Statuses.SUCCESS.name}",
+                    msg=f"report status must be {AnalyzerReport.Statuses.SUCCESS.name}",
                 )
             time.sleep(5)
 
@@ -95,6 +95,7 @@ class _ObservableAnalyzersScriptsTestCase(_AbstractAnalyzersScriptTestCase):
         ).hexdigest()
         self.test_job = Job(**params)
         self.test_job.save()
+
         # filter analyzers list
         self.filtered_analyzers_list: list = [
             config
@@ -111,16 +112,102 @@ class _ObservableAnalyzersScriptsTestCase(_AbstractAnalyzersScriptTestCase):
 class _FileAnalyzersScriptsTestCase(_AbstractAnalyzersScriptTestCase):
 
     # define runtime configs
-    runtime_configuration = {}
+    runtime_configuration = {
+        "Strings_Info_ML": {"rank_strings": False},
+        "Qiling_Windows": {"os": "windows", "arch": "x86"},
+        "VirusTotal_v2_Scan_File": {"wait_for_scan_anyway": True, "max_tries": 1},
+        "VirusTotal_v3_Scan_File": {"max_tries": 1},
+        "VirusTotal_v3_Get_File_And_Scan": {"max_tries": 1, "force_active_scan": True},
+        "Intezer_Scan": {"max_tries": 1, "is_test": True},
+        "Cuckoo_Scan": {"max_poll_tries": 1, "max_post_tries": 1},
+        "PEframe_Scan": {"max_tries": 1},
+        "MWDB_Scan": {
+            "api_key_name": "test_api",
+            "upload_file": False,
+            "max_tries": 20,
+        },
+        "Doc_Info_Experimental": {
+            "additional_passwords_to_check": ["testpassword"],
+            "experimental": True,
+        },
+        "Yara_Scan_McAfee": {
+            "directories_with_rules": [
+                "/opt/deploy/yara/mcafee_rules/APT",
+                "/opt/deploy/yara/mcafee_rules/RAT",
+                "/opt/deploy/yara/mcafee_rules/malware",
+                "/opt/deploy/yara/mcafee_rules/miners",
+                "/opt/deploy/yara/mcafee_rules/ransomware",
+                "/opt/deploy/yara/mcafee_rules/stealer",
+            ]
+        },
+        "Yara_Scan_Daily_Ioc": {
+            "directories_with_rules": [
+                "/opt/deploy/yara/daily_ioc_rules",
+            ],
+            "recursive": True,
+        },
+        "Yara_Scan_Stratosphere": {
+            "directories_with_rules": [
+                "/opt/deploy/yara/stratosphere_rules/malware",
+                "/opt/deploy/yara/stratosphere_rules/protocols",
+            ]
+        },
+        "Yara_Scan_Inquest": {
+            "directories_with_rules": [
+                "/opt/deploy/yara/inquest_rules",
+                "/opt/deploy/yara/inquest_rules/labs.inquest.net",
+            ]
+        },
+        "Yara_Scan_Intezer": {
+            "directories_with_rules": [
+                "/opt/deploy/yara/intezer_rules",
+            ]
+        },
+        "Yara_Scan_ReversingLabs": {
+            "directories_with_rules": ["/opt/deploy/yara/reversinglabs_rules/yara"],
+            "recursive": True,
+        },
+        "Yara_Scan_Samir": {
+            "directories_with_rules": [
+                "/opt/deploy/yara/samir_rules",
+            ]
+        },
+        "Yara_Scan_FireEye": {
+            "directories_with_rules": [
+                "/opt/deploy/yara/fireeye_rules/rules",
+            ],
+            "recursive": True,
+        },
+        "Yara_Scan_Florian": {
+            "directories_with_rules": [
+                "/opt/deploy/yara/signature-base/yara",
+            ]
+        },
+        "Yara_Scan_Community": {
+            "directories_with_rules": [
+                "/opt/deploy/yara/rules",
+            ]
+        },
+    }
+
+    @staticmethod
+    def _get_file(filename: str):
+        test_file = f"{settings.PROJECT_LOCATION}/test_files/{filename}"
+        with open(test_file, "rb") as f:
+            django_file = File(f)
+        return django_file
 
     def setUp(self):
         # analyzer config
         self.analyzer_configs = AnalyzerConfigSerializer.get_as_dataclasses()
+
         # save job
         params = self.get_params()
+        params["file"] = self._get_file(params["file_name"])
         params["md5"] = hashlib.md5(params["file"].file.read()).hexdigest()
         self.test_job = Job(**params)
         self.test_job.save()
+
         # filter analyzers list
         self.filtered_analyzers_list: list = [
             config
@@ -133,9 +220,33 @@ class _FileAnalyzersScriptsTestCase(_AbstractAnalyzersScriptTestCase):
         self.test_job.delete()
         return super().tearDown()
 
-    @staticmethod
-    def _get_file(filename: str):
-        test_file = f"{settings.PROJECT_LOCATION}/test_files/{filename}"
-        with open(test_file, "rb") as f:
-            django_file = File(f)
-        return django_file
+    def test_run_analyzer_all(self, *args, **kwargs):
+        for config_dict in self.filtered_analyzers_dictlist:
+            runtime_conf: dict = self.runtime_configuration.get(config_dict["name"], {})
+
+            # merge config dict
+            config_dict = {
+                **config_dict,
+                # merge config_dict["config"] with runtime_configuration
+                "config": {
+                    **config_dict["config"],
+                    **runtime_conf,
+                },
+            }
+
+            # run analyzer
+            analyzer_instance = analyzers_controller.run_analyzer(
+                self.test_job.pk,
+                config_dict,
+                job_id=self.test_job.pk,
+                runtime_conf=runtime_conf,
+            )
+            # asserts
+            self.assertEqual(
+                analyzer_instance._job.pk,
+                self.test_job.pk,
+            )
+            self.assertEqual(
+                analyzer_instance.report.status,
+                analyzer_instance.report.Statuses.SUCCESS.name,
+            )

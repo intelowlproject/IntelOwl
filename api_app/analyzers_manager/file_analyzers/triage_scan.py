@@ -9,9 +9,31 @@ from api_app.exceptions import AnalyzerRunException, AnalyzerConfigurationExcept
 from api_app.helpers import get_binary
 from api_app.analyzers_manager import classes
 
+from tests.mock_utils import patch, if_mock, MockResponse
+
 logger = logging.getLogger(__name__)
 
 
+def mocked_triage_get(*args, **kwargs):
+    return MockResponse({"tasks": {"task_1": {}, "task_2": {}}}, 200)
+
+
+def mocked_triage_post(*args, **kwargs):
+    return MockResponse({"id": "sample_id", "status": "pending"}, 200)
+
+
+@if_mock(
+    [
+        patch(
+            "requests.get",
+            side_effect=mocked_triage_get,
+        ),
+        patch(
+            "requests.post",
+            side_effect=mocked_triage_post,
+        ),
+    ]
+)
 class TriageScanFile(classes.FileAnalyzer):
     # using public endpoint as the default url
     base_url: str = "https://api.tria.ge/v0/"

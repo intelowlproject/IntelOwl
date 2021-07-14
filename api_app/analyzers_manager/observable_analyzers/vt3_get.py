@@ -12,11 +12,25 @@ from api_app.analyzers_manager.file_analyzers import vt3_scan
 from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager import classes
 
+from tests.mock_utils import patch, if_mock, mocked_requests
+
 logger = logging.getLogger(__name__)
 
 vt_base = "https://www.virustotal.com/api/v3/"
 
 
+@if_mock(
+    [
+        patch(
+            "requests.get",
+            side_effect=mocked_requests,
+        ),
+        patch(
+            "requests.post",
+            side_effect=mocked_requests,
+        ),
+    ]
+)
 class VirusTotalv3(classes.ObservableAnalyzer):
     def set_params(self, params):
         self.__api_key = self._secrets["api_key_name"]

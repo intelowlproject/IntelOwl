@@ -10,9 +10,25 @@ from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.helpers import get_now_date_only, get_binary
 
+from tests.mock_utils import patch, if_mock, MagicMock, mocked_requests, MockResponse
+
 logger = logging.getLogger(__name__)
 
 
+def mocked_intezer(*args, **kwargs):
+    return MockResponse({}, 201)
+
+
+@if_mock(
+    [
+        patch("requests.Session.get", side_effect=mocked_requests),
+        patch("requests.Session.post", side_effect=mocked_intezer),
+        patch(
+            "api_app.analyzers_manager.file_analyzers.intezer_scan._get_access_token",
+            MagicMock(return_value="tokentest"),
+        ),
+    ]
+)
 class IntezerScan(FileAnalyzer):
     base_url: str = "https://analyze.intezer.com/api/v2-0"
 

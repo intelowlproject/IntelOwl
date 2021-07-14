@@ -10,9 +10,31 @@ from api_app.exceptions import AnalyzerRunException
 from api_app.helpers import get_binary
 from api_app.analyzers_manager.classes import FileAnalyzer
 
+from tests.mock_utils import patch, if_mock, MagicMock
+
 logger = logging.getLogger(__name__)
 
 
+def mocked_mwdb_response(*args, **kwargs):
+    attrs = {"data": {"id": "id_test"}, "metakeys": {"karton": "test_analysis"}}
+    fileInfo = MagicMock()
+    fileInfo.configure_mock(**attrs)
+    QueryResponse = MagicMock()
+    attrs = {"query_file.return_value": fileInfo}
+    QueryResponse.configure_mock(**attrs)
+    Response = MagicMock(return_value=QueryResponse)
+    return Response.return_value
+
+
+@if_mock(
+    [
+        patch(
+            "mwdblib.MWDB",
+            side_effect=mocked_mwdb_response,
+        ),
+        # patch.object(mwdb_scan.MWDB_Scan, "file_analysis", return_value=True),
+    ]
+)
 class MWDB_Scan(FileAnalyzer):
     def set_params(self, params):
         self.__api_key = self._secrets["api_key_name"]

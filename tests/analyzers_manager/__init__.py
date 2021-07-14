@@ -2,13 +2,16 @@
 # See the file 'LICENSE' for copying permission.
 
 import hashlib
+import time
+from unittest.mock import patch
 from django.test import TestCase
 
 from api_app.models import Job
 from api_app.analyzers_manager.serializers import AnalyzerConfigSerializer
 from api_app.analyzers_manager import controller as analyzers_controller
+from api_app.analyzers_manager.models import AnalyzerReport
 
-from .utils import if_mock, patch, mocked_requests
+from ..mock_utils import if_mock, mocked_requests
 
 # for observable analyzers, if can customize the behavior based on:
 # DISABLE_LOGGING_TEST to True -> logging disabled
@@ -39,16 +42,23 @@ class _ObservableAnalyzersScriptsTestCase(TestCase):
 
     @classmethod
     def setUpClass(cls):
-        raise cls.skipTest("abstract test case")
+        if cls is _ObservableAnalyzersScriptsTestCase:
+            return cls.skipTest(f"{cls.__name__} is an abstract base class.")
+        else:
+            return super(_ObservableAnalyzersScriptsTestCase, cls).setUpClass()
 
-    def setUp(self):
+    @classmethod
+    def setUpTestData(cls):
         # analyzer config
-        self.analyzer_config: dict = AnalyzerConfigSerializer.read_and_verify_config()
+        cls.analyzer_configs = AnalyzerConfigSerializer.get_as_dataclasses()
         # define runtime configs
-        self.runtime_configuration = {
+        cls.runtime_configuration = {
             "Thug_URL_Info": {"test": True},
             "Triage_Search": {"analysis_type": "submit"},
         }
+        return super().setUpTestData()
+
+    def setUp(self):
         # save job
         params = self.get_params()
         params["md5"] = hashlib.md5(
@@ -57,10 +67,10 @@ class _ObservableAnalyzersScriptsTestCase(TestCase):
         self.test_job = Job(**params)
         self.test_job.save()
         # filter analyzers list
-        self.filtered_analyzers_dictlist: list = [
+        self.filtered_analyzers_list: list = [
             config
-            for config in self.analyzer_config.values()
-            if params["observable_classification"] in config["observable_supported"]
+            for config in self.analyzer_configs.values()
+            if config.is_observable_type_supported(params["observable_classification"])
         ]
         return super().setUp()
 
@@ -68,35 +78,24 @@ class _ObservableAnalyzersScriptsTestCase(TestCase):
         self.test_job.delete()
         return super().tearDown()
 
-    def test_run_analyzer_all(self, *args, **kwargs):
-        for config_dict in self.filtered_analyzers_dictlist:
+    def test_start_analyzers_all(self, *args, **kwargs):
+        analyzers_controller.start_analyzers(
+            job_id=self.test_job.pk,
+            analyzers_to_execute=[c.name for c in self.filtered_analyzers_list],
+            runtime_configuration=self.runtime_configuration,
+        )
 
-            runtime_conf: dict = self.runtime_configuration.get(config_dict["name"], {})
-
-            # merge config dict
-            config_dict = {
-                **config_dict,
-                # merge config_dict["config"] with runtime_configuration
-                "config": {
-                    **config_dict["config"],
-                    **runtime_conf,
-                },
-            }
-
-            # run analyzer
-            analyzer_instance = analyzers_controller.run_analyzer(
-                self.test_job.pk,
-                config_dict,
-                job_id=self.test_job.pk,
-                runtime_conf=runtime_conf,
-            )
-            print(analyzer_instance.analyzer_name, analyzer_instance.report.report)
-            # asserts
-            self.assertEqual(
-                analyzer_instance._job.pk,
-                self.test_job.pk,
-            )
-            self.assertEqual(
-                analyzer_instance.report.status,
-                analyzer_instance.report.Statuses.SUCCESS.name,
-            )
+        while True:
+            self.test_job.refresh_from_db()
+            if self.test_job.status not in ["running", "pending"]:
+                self.assertEquals(self.test_job.status, "reported_without_fails")
+                num_all_reports = self.test_job.analyzer_reports.count()
+                num_success_reports = self.test_job.analyzer_reports.filter(
+                    status=AnalyzerReport.Statuses.SUCCESS.name
+                ).count()
+                self.assertEquals(
+                    num_all_reports,
+                    num_success_reports,
+                    msg=f"all reports status must be {AnalyzerReport.Statuses.SUCCESS.name}",
+                )
+            time.sleep(5)

@@ -37,7 +37,7 @@ class CuckooAnalysis(FileAnalyzer):
         # it depends on version and configuration
         self.session = requests.Session()
         self.__api_key = self._secrets["api_key_name"]
-        if not __api_key:
+        if not self.__api_key:
             logger.info(
                 f"{self.__repr__()}, (md5: {self.md5}) -> Continuing w/o API key.."
             )

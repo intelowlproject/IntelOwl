@@ -42,7 +42,7 @@ def start_connectors(
     connectors_task_id_map = {}
 
     # get connectors config
-    connectors_config = ConnectorConfigSerializer.read_and_verify_config()
+    connectors_config = ConnectorConfigSerializer.get_as_dataclasses()
     if not connector_names == ALL_CONNECTORS:
         # filter/ select only the ones that were specified
         connectors_config = {
@@ -53,15 +53,15 @@ def start_connectors(
 
     # loop over and fire the connectors in a celery task
     for connector_name, cc in connectors_config.items():
-        if cc["disabled"] or not cc["verification"]["configured"]:
-            # if disabled or unconfigured
+        if not cc.is_ready_to_use:
+            # skip this connector
             continue
 
         # get runtime_configuration if any specified for this analyzer
         runtime_conf = runtime_configuration.get(connector_name, {})
         # merge cc["config"] with runtime_configuration
         config_params = {
-            **cc["config"],
+            **cc.config,
             **runtime_conf,
         }
         # construct args

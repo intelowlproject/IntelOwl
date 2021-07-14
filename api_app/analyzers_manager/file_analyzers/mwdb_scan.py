@@ -10,7 +10,7 @@ from api_app.exceptions import AnalyzerRunException
 from api_app.helpers import get_binary
 from api_app.analyzers_manager.classes import FileAnalyzer
 
-from tests.mock_utils import patch, if_mock, MagicMock
+from tests.mock_utils import patch, if_mock_connections, MagicMock
 
 logger = logging.getLogger(__name__)
 
@@ -26,15 +26,6 @@ def mocked_mwdb_response(*args, **kwargs):
     return Response.return_value
 
 
-@if_mock(
-    [
-        patch(
-            "mwdblib.MWDB",
-            side_effect=mocked_mwdb_response,
-        ),
-        # patch.object(mwdb_scan.MWDB_Scan, "file_analysis", return_value=True),
-    ]
-)
 class MWDB_Scan(FileAnalyzer):
     def set_params(self, params):
         self.__api_key = self._secrets["api_key_name"]
@@ -75,3 +66,16 @@ class MWDB_Scan(FileAnalyzer):
         result = {"data": file_info.data, "metakeys": file_info.metakeys}
         result["permalink"] = f"https://mwdb.cert.pl/file/{query}"
         return result
+
+    @classmethod
+    def _monkeypatch(cls):
+        patches = [
+            if_mock_connections(
+                patch(
+                    "mwdblib.MWDB",
+                    side_effect=mocked_mwdb_response,
+                ),
+                patch.object(cls, "file_analysis", return_value=True),
+            )
+        ]
+        return super()._monkeypatch(patches=patches)

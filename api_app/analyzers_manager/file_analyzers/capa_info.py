@@ -4,7 +4,26 @@
 from api_app.helpers import get_binary
 from api_app.analyzers_manager.classes import FileAnalyzer, DockerBasedAnalyzer
 
+from tests.mock_utils import (
+    patch,
+    if_mock,
+    mocked_docker_analyzer_get,
+    mocked_docker_analyzer_post,
+)
 
+
+@if_mock(
+    [
+        patch(
+            "requests.get",
+            side_effect=mocked_docker_analyzer_get,
+        ),
+        patch(
+            "requests.post",
+            side_effect=mocked_docker_analyzer_post,
+        ),
+    ]
+)
 class CapaInfo(FileAnalyzer, DockerBasedAnalyzer):
     name: str = "Capa"
     url: str = "http://static_analyzers:4002/capa"

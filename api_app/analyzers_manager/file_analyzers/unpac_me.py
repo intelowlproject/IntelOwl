@@ -8,9 +8,31 @@ from api_app.exceptions import AnalyzerRunException
 import time
 from typing import Dict
 
+from tests.mock_utils import patch, if_mock, MockResponse
+
 logger = logging.getLogger(__name__)
 
 
+def mocked_unpacme_post(*args, **kwargs):
+    return MockResponse({"id": "test"}, 200)
+
+
+def mocked_unpacme_get(*args, **kwargs):
+    return MockResponse({"id": "test", "status": "complete"}, 200)
+
+
+@if_mock(
+    [
+        patch(
+            "requests.get",
+            side_effect=mocked_unpacme_get,
+        ),
+        patch(
+            "requests.post",
+            side_effect=mocked_unpacme_post,
+        ),
+    ]
+)
 class UnpacMe(FileAnalyzer):
     base_url: str = "https://api.unpac.me/api/v1/"
 

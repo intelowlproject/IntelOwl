@@ -5,7 +5,26 @@ from json import dumps as json_dumps
 from api_app.helpers import get_binary
 from api_app.analyzers_manager.classes import FileAnalyzer, DockerBasedAnalyzer
 
+from tests.mock_utils import (
+    patch,
+    if_mock,
+    mocked_docker_analyzer_get,
+    mocked_docker_analyzer_post,
+)
 
+
+@if_mock(
+    [
+        patch(
+            "requests.get",
+            side_effect=mocked_docker_analyzer_get,
+        ),
+        patch(
+            "requests.post",
+            side_effect=mocked_docker_analyzer_post,
+        ),
+    ]
+)
 class Floss(FileAnalyzer, DockerBasedAnalyzer):
     name: str = "Floss"
     url: str = "http://static_analyzers:4002/floss"
@@ -18,12 +37,12 @@ class Floss(FileAnalyzer, DockerBasedAnalyzer):
     timeout: int = 60 * 9
     # whereas subprocess timeout is kept as 60 * 9 = 9 minutes
 
-    def set_params(self, additional_config_params):
-        self.max_no_of_strings = additional_config_params.get(
+    def set_params(self, params):
+        self.max_no_of_strings = params.get(
             "max_no_of_strings",
             {"stack_strings": 1000, "static_strings": 1000, "decoded_strings": 1000},
         )
-        self.rank_strings = additional_config_params.get(
+        self.rank_strings = params.get(
             "rank_strings",
             {"stack_strings": False, "static_strings": False, "decoded_strings": False},
         )

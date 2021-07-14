@@ -14,9 +14,19 @@ from api_app.analyzers_manager.observable_analyzers.dns.dns_responses import (
     malicious_detector_response,
 )
 
+from tests.mock_utils import if_mock, patch
+
 logger = logging.getLogger(__name__)
 
 
+@if_mock(
+    [
+        patch(
+            "api_app.analyzers_manager.observable_analyzers.dns."
+            "dns_malicious_detectors.google_webrisk.WebRiskServiceClient"
+        )
+    ]
+)
 class WebRisk(classes.ObservableAnalyzer):
     """Check if observable analyzed is marked as malicious by Google WebRisk API"""
 

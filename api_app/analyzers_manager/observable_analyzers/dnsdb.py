@@ -10,6 +10,8 @@ from dateutil import parser as dateutil_parser
 from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager import classes
 
+from tests.mock_utils import if_mock, patch, MockResponse
+
 _query_types = [
     "domain",
     "rrname-wildcard-left",
@@ -37,6 +39,24 @@ _supported_rrtype = [
 _supported_api_version = [1, 2]
 
 
+def mocked_dnsdb_v2_request(*args, **kwargs):
+    return MockResponse(
+        json_data={},
+        status_code=200,
+        text='{"cond":"begin"}\n'
+        '{"obj":{"count":1,"zone_time_first":1349367341,'
+        '"zone_time_last":1440606099,"rrname":"mocked.data.net.",'
+        '"rrtype":"A","bailiwick":"net.",'
+        '"rdata":"0.0.0.0"}}\n'
+        '{"cond":"limited","msg":"Result limit reached"}\n',
+    )
+
+
+@if_mock(
+    [
+        patch("requests.get", side_effect=mocked_dnsdb_v2_request),
+    ]
+)
 class DNSdb(classes.ObservableAnalyzer):
     """Farsight passive DNS API
 

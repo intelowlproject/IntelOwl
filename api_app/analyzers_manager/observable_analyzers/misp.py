@@ -7,7 +7,14 @@ import pymisp
 from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager import classes
 
+from tests.mock_utils import if_mock, patch, mocked_requests_noop
 
+
+@if_mock(
+    [
+        patch("pymisp.PyMISP", side_effect=mocked_requests_noop),
+    ]
+)
 class MISP(classes.ObservableAnalyzer):
     def set_params(self, params):
         self.ssl_check = params.get("ssl_check", True)

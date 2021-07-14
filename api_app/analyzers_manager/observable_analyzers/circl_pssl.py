@@ -6,7 +6,18 @@ import pypssl
 from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager import classes
 
+from tests.mock_utils import if_mock, patch, MockResponseNoOp
 
+
+def mocked_pypssl(*args, **kwargs):
+    return MockResponseNoOp({}, 200)
+
+
+@if_mock(
+    [
+        patch("pypssl.PyPSSL", side_effect=mocked_pypssl),
+    ]
+)
 class CIRCL_PSSL(classes.ObservableAnalyzer):
     def set_params(self, params):
         self.__credentials = self._secrets["pdns_credentials"]

@@ -7,10 +7,20 @@ import logging
 from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager.classes import ObservableAnalyzer
 
+from tests.mock_utils import if_mock, patch, mocked_requests, MockResponse
 
 logger = logging.getLogger(__name__)
 
 
+@if_mock(
+    [
+        patch(
+            "requests.Session.post",
+            side_effect=lambda *args, **kwargs: MockResponse({"api": "test"}, 200),
+        ),
+        patch("requests.Session.get", side_effect=mocked_requests),
+    ]
+)
 class UrlScan(ObservableAnalyzer):
     base_url: str = "https://urlscan.io/api/v1"
 

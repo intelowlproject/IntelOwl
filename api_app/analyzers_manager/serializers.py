@@ -1,7 +1,6 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 from typing import Dict
-from enum import Enum
 
 from rest_framework import serializers as rfs
 

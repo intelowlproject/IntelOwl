@@ -1,1 +1,1 @@
-docker exec -ti intelowl_uwsgi python3 manage.py $1
+docker exec -ti intelowl_uwsgi python3 manage.py $@

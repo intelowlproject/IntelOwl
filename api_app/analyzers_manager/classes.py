@@ -166,7 +166,7 @@ class FileAnalyzer(BaseAnalyzerMixin):
         super(FileAnalyzer, self).__init__(config_dict, job_id, **kwargs)
         self.md5 = self._job.md5
         self.filepath = self._job.file.path
-        self.filename = self._job.filename
+        self.filename = self._job.file_name
         self.file_mimetype = self._job.file_mimetype
 
     def before_run(self):

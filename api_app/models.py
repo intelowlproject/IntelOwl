@@ -99,6 +99,25 @@ class Job(models.Model):
         if save:
             self.save(update_fields=["errors"])
 
+    def get_analyzer_reports_stats(self) -> dict:
+        from api_app.core.models import AbstractReport
+
+        return self.analyzer_reports.aggregate(
+            all=models.Count("status"),
+            running=models.Count(
+                "status",
+                filter=models.Q(status=AbstractReport.Statuses.RUNNING.name),
+            ),
+            failed=models.Count(
+                "status",
+                filter=models.Q(status=AbstractReport.Statuses.FAILED.name),
+            ),
+            success=models.Count(
+                "status",
+                filter=models.Q(status=AbstractReport.Statuses.SUCCESS.name),
+            ),
+        )
+
     def __str__(self):
         if self.is_sample:
             return f'Job(#{self.pk}, "{self.file_name}")'

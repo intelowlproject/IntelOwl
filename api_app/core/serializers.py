@@ -147,7 +147,7 @@ class AbstractConfigSerializer(rfs.Serializer):
         """
         assert (
             self._is_valid_flag
-        ), "Cannot call `._read_secrets()` before `.is_valid()` or if validation failed."
+        ), "Cannot call `._read_secrets()` before `.is_valid()` or if validation failed"
 
         secrets = {}
         for key_name, secret_dict in self.data["secrets"].items():

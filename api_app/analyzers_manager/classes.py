@@ -19,6 +19,12 @@ from .dataclasses import AnalyzerConfig
 from .constants import HashChoices, ObservableTypes, TypeChoices
 from .serializers import AnalyzerConfigSerializer
 
+from tests.mock_utils import (
+    patch,
+    mocked_docker_analyzer_get,
+    mocked_docker_analyzer_post,
+)
+
 logger = logging.getLogger(__name__)
 
 
@@ -190,7 +196,7 @@ class FileAnalyzer(BaseAnalyzerMixin):
 class DockerBasedAnalyzer(metaclass=ABCMeta):
     """
     Abstract class for a docker based analyzer (integration).
-    Inherit this branch along with either one of ObservableAnalyzer or FileAnalyzer
+    Inherit this branch along with either one of ``ObservableAnalyzer`` or ``FileAnalyzer``
     when defining a docker based analyzer.
     See `peframe.py` for example.
 
@@ -356,3 +362,17 @@ class DockerBasedAnalyzer(metaclass=ABCMeta):
         # step #2: raise AnalyzerRunException in case of error
         assert self.__raise_in_case_bad_request(self.name, resp, params_to_check=[])
         return resp
+
+    @classmethod
+    def _monkeypatch(cls):
+        patches = [
+            patch(
+                "requests.get",
+                side_effect=mocked_docker_analyzer_get,
+            ),
+            patch(
+                "requests.post",
+                side_effect=mocked_docker_analyzer_post,
+            ),
+        ]
+        return super()._monkeypatch(patches=patches)

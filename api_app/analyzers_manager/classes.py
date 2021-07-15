@@ -196,7 +196,8 @@ class FileAnalyzer(BaseAnalyzerMixin):
 class DockerBasedAnalyzer(metaclass=ABCMeta):
     """
     Abstract class for a docker based analyzer (integration).
-    Inherit this branch along with either one of ``ObservableAnalyzer`` or ``FileAnalyzer``
+    Inherit this branch along with either
+    one of ``ObservableAnalyzer`` or ``FileAnalyzer``
     when defining a docker based analyzer.
     See `peframe.py` for example.
 

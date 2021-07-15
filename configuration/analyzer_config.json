@@ -171,6 +171,20 @@
       "proxies": {}
     }
   },
+  "Dehashed_Search": {
+    "type": "observable",
+    "observable_supported": ["ip", "url", "domain", "hash", "generic"],
+    "external_service": true,
+    "description": "Query against https://dehashed.com's search API",
+    "python_module": "dehashed.DehashedSearch",
+    "soft_time_limit": 50,
+    "queue": "long",
+    "additional_config_params": {
+      "api_key_name": "DEHASHED_AUTH_KEY",
+      "size": 100,
+      "pages": 1
+    }
+  },
   "DNSDB": {
     "type": "observable",
     "observable_supported": [

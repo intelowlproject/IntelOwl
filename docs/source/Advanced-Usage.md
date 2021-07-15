@@ -164,6 +164,9 @@ List of some of the analyzers with optional configuration:
   * `list_names`: Add [FireHol's IPList](https://iplists.firehol.org/) names as comma separated values in `list_names` array.
 * `Honey_DB`:
   * `honeydb_analysis`(default `all`): choose which endpoint to query from the HoneyDB service (options are `scan_twitter`, `ip_query`, `ip_history`, `internet_scanner`, `ip_info`)
+* `Dehashed_Search`
+  * `size` and `pages` can be configured. It's recommended to make `size` a high value but keep `page` to 1 only to save on credits.
+  * Refer to the "Sizing & Pagination" section in [dehashed docs](https://www.dehashed.com/docs)
 
 There are two ways to do this:
 

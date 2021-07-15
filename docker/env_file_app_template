@@ -57,6 +57,8 @@ XFORCE_PASSWORD=
 SSAPINET_KEY=
 GOOGLE_APPLICATION_CREDENTIALS=/opt/deploy/intel_owl/configuration/service_account_keyfile.json
 MALPEDIA_KEY=
+# DEHASHED_AUTH_KEY format is `email:api-key`
+DEHASHED_AUTH_KEY=
 
 # Test tokens
 TEST_JOB_ID=1

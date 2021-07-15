@@ -15,7 +15,7 @@ class Fortiguard(classes.ObservableAnalyzer):
     def run(self):
         observable = self.observable_name
         # for URLs we are checking the relative domain
-        if self.observable_classification == self._serializer.ObservableTypes.URL.value:
+        if self.observable_classification == self.ObservableTypes.URL.value:
             observable = urlparse(self.observable_name).hostname
         pattern = re.compile(r"(?:Category: )([\w\s]+)")
         url = self.baseurl + observable

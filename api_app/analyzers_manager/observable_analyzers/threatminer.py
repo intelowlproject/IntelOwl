@@ -18,14 +18,9 @@ class Threatminer(classes.ObservableAnalyzer):
         if self.rt_value:
             params["rt"] = self.rt_value
 
-        if (
-            self.observable_classification
-            == self._serializer.ObservableTypes.DOMAIN.value
-        ):
+        if self.observable_classification == self.ObservableTypes.DOMAIN.value:
             uri = "domain.php"
-        elif (
-            self.observable_classification == self._serializer.ObservableTypes.IP.value
-        ):
+        elif self.observable_classification == self.ObservableTypes.IP.value:
             uri = "host.php"
         else:
             raise AnalyzerRunException(

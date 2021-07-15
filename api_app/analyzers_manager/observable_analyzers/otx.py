@@ -21,9 +21,9 @@ class OTX(classes.ObservableAnalyzer):
         obs_clsf = self.observable_classification
         to_analyze_observable = self.observable_name
 
-        if obs_clsf == self._serializer.ObservableTypes.IP.value:
+        if obs_clsf == self.ObservableTypes.IP.value:
             otx_type = OTXv2.IndicatorTypes.IPv4
-        elif obs_clsf == self._serializer.ObservableTypes.URL.value:
+        elif obs_clsf == self.ObservableTypes.URL.value:
             to_analyze_observable = urlparse(self.observable_name).hostname
 
             try:

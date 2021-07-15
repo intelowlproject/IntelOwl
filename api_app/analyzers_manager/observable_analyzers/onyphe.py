@@ -20,11 +20,11 @@ class Onyphe(classes.ObservableAnalyzer):
         }
         obs_clsfn = self.observable_classification
 
-        if obs_clsfn == self._serializer.ObservableTypes.DOMAIN.value:
+        if obs_clsfn == self.ObservableTypes.DOMAIN.value:
             uri = f"domain/{self.observable_name}"
-        elif obs_clsfn == self._serializer.ObservableTypes.IP.value:
+        elif obs_clsfn == self.ObservableTypes.IP.value:
             uri = f"ip/{self.observable_name}"
-        elif obs_clsfn == self._serializer.ObservableTypes.URL.value:
+        elif obs_clsfn == self.ObservableTypes.URL.value:
             uri = f"hostname/{self.observable_name}"
         else:
             raise AnalyzerRunException(

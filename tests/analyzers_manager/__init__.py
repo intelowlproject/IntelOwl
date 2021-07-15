@@ -3,6 +3,7 @@
 
 import hashlib
 import time
+import typing
 
 from django.test import TransactionTestCase
 from django.core.files import File
@@ -155,28 +156,27 @@ class _FileAnalyzersScriptsTestCase(_AbstractAnalyzersScriptTestCase):
         },
     }
 
-    @staticmethod
-    def _get_file(filename: str) -> File:
+    def _read_file_save_job(self, filename: str):
         test_file = f"{settings.PROJECT_LOCATION}/test_files/{filename}"
         with open(test_file, "rb") as f:
-            django_file = File(f)
-        return django_file
+            self.test_job.file = File(f)
+            self.test_job.md5 = hashlib.md5(f.read()).hexdigest()
+            self.test_job.save()
 
     def setUp(self):
         super().setUp()
-        # init job instance
+        # get params
         params = self.get_params()
-        params["file"] = self._get_file(params["file_name"])
-        params["md5"] = hashlib.md5(params["file"].file.read()).hexdigest()
-        self.test_job = Job(**params)
         # filter analyzers list
         self.filtered_analyzers_list: list = [
             config
             for config in self.analyzer_configs.values()
-            if config.is_filetype_supported(params["file_mimetype"])
+            if config.is_type_file
+            and config.is_filetype_supported(params["file_mimetype"])
         ]
+        # save job instance
+        self.test_job = Job(**params)
         self.test_job.analyzers_to_execute = [
             c.name for c in self.filtered_analyzers_list
         ]
-        # save job
-        self.test_job.save()
+        self._read_file_save_job(filename=params["file_name"])

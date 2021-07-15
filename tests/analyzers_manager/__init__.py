@@ -3,6 +3,7 @@
 
 import hashlib
 import time
+import typing
 
 from django.test import TransactionTestCase
 from django.core.files import File

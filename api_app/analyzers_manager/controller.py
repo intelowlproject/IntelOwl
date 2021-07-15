@@ -128,7 +128,11 @@ def start_analyzers(
 ) -> List[str]:
     # we should not use mutable objects as default to avoid unexpected issues
     if runtime_configuration is None:
+<<<<<<< HEAD
         runtime_configuration = {}
+=======
+        runtime_configuration = dict()
+>>>>>>> origin/develop-2
     # init empty lists
     task_ids = []
 

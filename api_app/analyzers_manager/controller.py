@@ -70,14 +70,16 @@ def filter_analyzers(
                 )
 
             if serialized_data["is_sample"]:
-                if config.is_type_observable:
+                if not config.is_type_file:
                     raise NotRunnableAnalyzer(
                         f"{a_name} won't be run because does not support files."
                     )
-                if config.is_filetype_supported(serialized_data["file_mimetype"]):
+                if not config.is_filetype_supported(serialized_data["file_mimetype"]):
                     raise NotRunnableAnalyzer(
-                        f"{a_name} won't be run because mimetype."
-                        f"{serialized_data['file_mimetype']} is not supported."
+                        f"""
+                        {a_name} won't be run because mimetype
+                        {serialized_data['file_mimetype']} is not supported.
+                        """
                     )
             else:
                 if not config.is_type_observable:
@@ -126,7 +128,11 @@ def start_analyzers(
 ) -> List[str]:
     # we should not use mutable objects as default to avoid unexpected issues
     if runtime_configuration is None:
+<<<<<<< HEAD
+        runtime_configuration = {}
+=======
         runtime_configuration = dict()
+>>>>>>> origin/develop-2
     # init empty lists
     task_ids = []
 
@@ -187,7 +193,7 @@ def start_analyzers(
 
 
 def job_cleanup(job_id: int) -> None:
-    job = Job.objects.get(pk=job_id)
+    job: Job = Job.objects.get(pk=job_id)
     logger.info(f"[STARTING] job_cleanup for <-- {job.__repr__()}.")
     status_to_set = "running"
 
@@ -195,27 +201,18 @@ def job_cleanup(job_id: int) -> None:
         if job.status == "failed":
             raise AlreadyFailedJobException()
 
-        num_reports = job.analyzer_reports.count()
-        num_analyzers_to_execute = len(job.analyzers_to_execute)
-        logger.info(
-            f"[REPORT] num analysis reports:{num_reports}, "
-            f"num analyzer to execute:{num_analyzers_to_execute}"
-            f" <-- {job.__repr__()}."
-        )
+        stats = job.get_analyzer_reports_stats()
 
-        # check if it was the last analysis...
-        # ..In case, set the analysis as "reported" or "failed"
-        if num_reports == num_analyzers_to_execute:
-            num_failed_reports = job.analyzer_reports.filter(
-                status=AnalyzerReport.Statuses.FAILED.name
-            ).count()
+        logger.info(f"[REPORT] {job.__repr__()}, status:{job.status}, reports:{stats}")
 
-            if num_failed_reports == num_reports:
-                status_to_set = "failed"
-            elif num_failed_reports >= 1:
-                status_to_set = "reported_with_fails"
-            else:
-                status_to_set = "reported_without_fails"
+        if stats["running"] > 0:
+            status_to_set = "running"
+        elif stats["success"] == stats["all"]:
+            status_to_set = "reported_without_fails"
+        elif stats["failed"] == stats["all"]:
+            status_to_set = "failed"
+        elif stats["failed"] >= 1:
+            status_to_set = "reported_with_fails"
 
     except AlreadyFailedJobException:
         logger.error(f"job_id {job_id} status failed. Do not process the report")
@@ -237,14 +234,13 @@ def set_failed_analyzer(job_id: int, analyzer_name: str, err_msg):
         f"(job: #{job_id}, analyzer:{analyzer_name}) -> set as {status}. ",
         f" Error: {err_msg}",
     )
-    report = AnalyzerReport.objects.create(
+    report, _ = AnalyzerReport.objects.get_or_create(
         job_id=job_id,
         analyzer_name=analyzer_name,
         report={},
         errors=[err_msg],
         status=status,
     )
-    job_cleanup(job_id)
     return report
 
 

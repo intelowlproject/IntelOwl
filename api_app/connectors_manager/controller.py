@@ -35,9 +35,12 @@ def build_cache_key(job_id: int) -> str:
 def start_connectors(
     job_id: int,
     connector_names: Union[List, str] = ALL_CONNECTORS,
-    runtime_configuration: Dict = {},
-    **celery_kwargs,
+    runtime_configuration: Dict[str, Dict] = None,
 ) -> dict:
+    # we should not use mutable objects as default to avoid unexpected issues
+    if runtime_configuration is None:
+        runtime_configuration = {}
+
     # mapping of connector name and task_id
     connectors_task_id_map = {}
 
@@ -84,7 +87,7 @@ def start_connectors(
         celery_app.send_task(
             CELERY_TASK_NAME,
             args=args,
-            kwargs={"runtime_conf": runtime_conf, **celery_kwargs},
+            kwargs={"runtime_conf": runtime_conf},
             queue=queue,
             soft_time_limit=stl,
             task_id=task_id,

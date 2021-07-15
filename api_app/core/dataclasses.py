@@ -3,6 +3,9 @@
 import typing
 import dataclasses
 
+from intel_owl import secrets as secrets_store
+
+
 # constants
 DEFAULT_QUEUE = "default"
 DEFAULT_SOFT_TIME_LIMIT = 300
@@ -63,3 +66,17 @@ class AbstractConfig:
             self.__cached_dict = dataclasses.asdict(self)
 
         return self.__cached_dict
+
+    def _read_secrets(self) -> dict:
+        """
+        Returns a dict of `secret_key: secret_value` mapping.
+        """
+        secrets = {}
+        for key_name, secret_dict in self.secrets.items():
+            secret_val = secrets_store.get_secret(secret_dict["env_var_key"])
+            if secret_val:
+                secrets[key_name] = secret_val
+            else:
+                secrets[key_name] = secret_dict["default"]
+
+        return secrets

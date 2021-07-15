@@ -10,6 +10,8 @@ from api_app import crons
 from api_app.models import Job
 from api_app.analyzers_manager import controller as analyzers_controller
 from api_app.connectors_manager import controller as connectors_controller
+from api_app.analyzers_manager.serializers import AnalyzerConfigSerializer
+from api_app.connectors_manager.serializers import ConnectorConfigSerializer
 
 from api_app.analyzers_manager.file_analyzers import yara_scan
 from api_app.analyzers_manager.observable_analyzers import (
@@ -68,8 +70,9 @@ def start_analyzers(
 
 @app.task(name="run_analyzer", soft_time_limit=500)
 def run_analyzer(job_id: int, config_dict: dict, **kwargs):
+    config = AnalyzerConfigSerializer.dict_to_dataclass(config_dict)
     # run analyzer
-    analyzers_controller.run_analyzer(job_id, config_dict, **kwargs)
+    analyzers_controller.run_analyzer(job_id, config, **kwargs)
     # FIXME @eshaan7: find a better place for these callback
     # execute some callbacks
     analyzers_controller.job_cleanup(job_id)
@@ -96,4 +99,5 @@ def on_job_success(job_id: int):
 
 @app.task(name="run_connector", soft_time_limit=500)
 def run_connector(job_id: int, config_dict: dict, **kwargs):
-    connectors_controller.run_connector(job_id, config_dict, **kwargs)
+    config = ConnectorConfigSerializer.dict_to_dataclass(config_dict)
+    connectors_controller.run_connector(job_id, config, **kwargs)

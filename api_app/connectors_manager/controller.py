@@ -11,6 +11,7 @@ from django.utils.module_loading import import_string
 from intel_owl.celery import app as celery_app
 
 from .serializers import ConnectorConfigSerializer
+from .dataclasses import ConnectorConfig
 from .models import ConnectorReport
 from .classes import Connector
 
@@ -115,18 +116,18 @@ def set_failed_connector(job_id: int, connector_name: str, err_msg: str):
     return report
 
 
-def run_connector(job_id: int, config_dict: dict, **kwargs) -> Connector:
+def run_connector(job_id: int, config: ConnectorConfig, **kwargs) -> Connector:
     instance = None
     try:
-        cls_path = build_import_path(config_dict["python_module"])
+        cls_path = build_import_path(config.python_module)
         try:
             klass: Connector = import_string(cls_path)
         except ImportError:
             raise Exception(f"Class: {cls_path} couldn't be imported")
 
-        instance = klass(config_dict=config_dict, job_id=job_id, **kwargs)
+        instance = klass(config=config, job_id=job_id, **kwargs)
         instance.start()
     except Exception as e:
-        set_failed_connector(job_id, config_dict["name"], str(e))
+        set_failed_connector(job_id, config.name, str(e))
 
     return instance

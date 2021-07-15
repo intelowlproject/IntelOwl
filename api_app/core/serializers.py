@@ -140,25 +140,6 @@ class AbstractConfigSerializer(rfs.Serializer):
 
         return errors
 
-    def _read_secrets(self) -> dict:
-        """
-        Returns a dict of `secret_key: secret_value` mapping.
-        must be called after `.is_valid()`.
-        """
-        assert (
-            self._is_valid_flag
-        ), "Cannot call `._read_secrets()` before `.is_valid()` or if validation failed"
-
-        secrets = {}
-        for key_name, secret_dict in self.data["secrets"].items():
-            secret_val = secrets_store.get_secret(secret_dict["env_var_key"])
-            if secret_val:
-                secrets[key_name] = secret_val
-            else:
-                secrets[key_name] = secret_dict["default"]
-
-        return secrets
-
     @classmethod
     def _get_config_path(cls) -> str:
         """

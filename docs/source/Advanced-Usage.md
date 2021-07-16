@@ -320,7 +320,14 @@ One can customize what analyzer should use what queue by specifying so in the an
  
 #### Queue monitoring
 IntelOwl provides an additional [flower.override.yml](https://github.com/intelowlproject/IntelOwl/blob/master/docker/flower.override.yml) compose file allowing IntelOwl users to use [Flower](https://flower.readthedocs.io/) features to monitor and manage queues and tasks
+
 If you want to leverage it, you should add the option `--flower` when starting the project. Example:
 ```bash
 python3 start.py prod --flower up
 ```
+The flower interface is available at port 5555: to change the credentials for its access, update the environment variables
+```bash
+FLOWER_USER
+FLOWER_PWD
+```
+or change the `.htpasswd` file.

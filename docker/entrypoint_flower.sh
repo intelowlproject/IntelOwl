@@ -14,10 +14,7 @@ echo "BROKER: ${CELERY_BROKER_URL}"
 echo "------------------------------"
 
 CMD="/usr/local/bin/celery  -A intel_owl.celery --broker $CELERY_BROKER_URL flower --broker_api=http://guest:guest@rabbitmq:15672/api/"
-if [[ ! -f ".htpasswd" ]]; then
-  echo "Creating .htpasswd file"
-  htpasswd -cb .htpasswd ${USER} ${PASSWORD}
-fi
+htpasswd -cb .htpasswd ${USER} ${PASSWORD}
 
 if [[ $DEBUG == "True" ]] && [[ $DJANGO_TEST_SERVER == "True" ]];
 then

@@ -2,7 +2,7 @@ version: "3"
 
 services:
   rabbitmq:
-    image: library/rabbitmq:3.8.19-management
+    image: library/rabbitmq:3.8-management
     container_name: intelowl_rabbitmq
     logging:
       driver: none
@@ -26,7 +26,7 @@ services:
 
   nginx:
     volumes:
-      - ./.htpasswd:/.htpasswd
+      - ./.htpasswd:/etc/nginx/.htpasswd
     ports:
       - "5555:5555"
     depends_on:

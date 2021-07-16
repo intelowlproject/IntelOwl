@@ -4,7 +4,7 @@
 import logging
 
 from intel_owl.celery import app as celery_app
-from api_app import models, serializers, helpers
+from api_app import models, serializers
 from api_app.permissions import ExtendedObjectPermissions
 from .analyzers_manager import controller as analyzers_controller
 
@@ -30,6 +30,76 @@ from drf_spectacular.types import OpenApiTypes
 
 
 logger = logging.getLogger(__name__)
+
+
+def send_for_analysis(prep_data, test):
+    """
+    Send task (file/observable) for analysis
+    """
+
+    # Check if task is test or not
+    if not test:
+        # fire celery task
+        celery_app.send_task(
+            "start_analyzers",
+            kwargs=dict(
+                job_id=prep_data["job_id"],
+                analyzers_to_execute=prep_data["analyzers_to_execute"],
+                runtime_configuration=prep_data["runtime_config"],
+            ),
+        )
+
+    response_dict = {
+        "status": "accepted",
+        "job_id": prep_data["job_id"],
+        "warnings": prep_data["warnings"],
+        "analyzers_running": prep_data["analyzers_to_execute"],
+    }
+
+    logger.debug(response_dict)
+
+    return Response(response_dict, status=status.HTTP_200_OK)
+
+
+def prepare_for_analysis(serializer, params):
+    """
+    Prepare file/observable for analysis
+    """
+
+    warnings = []
+    serialized_data = serializer.validated_data
+
+    cleaned_analyzer_list = analyzers_controller.filter_analyzers(
+        serialized_data,
+        warnings,
+    )
+    params["analyzers_to_execute"] = cleaned_analyzer_list
+    if len(cleaned_analyzer_list) < 1:
+        logger.info(
+            """after the filter, no analyzers can be run.
+                Try with other analyzers"""
+        )
+        return {"error": "no analyzers can be run after filtering."}
+
+    runtime_configuration = serialized_data.pop("runtime_configuration", {})
+
+    # save the arrived data plus new params into a new job object
+    serializer.save(**params)
+    md5 = serializer.data.get("md5", "")
+    job_id = serializer.data.get("id", None)
+    logger.info(f"New Job added with ID: #{job_id} and md5: {md5}.")
+
+    if not job_id:
+        return {"error": "failed to create new job: job_id is None"}
+
+    prep_data = {
+        "job_id": job_id,
+        "runtime_config": runtime_configuration,
+        "analyzers_to_execute": cleaned_analyzer_list,
+        "warnings": warnings,
+    }
+
+    return prep_data
 
 
 """ REST API endpoints """
@@ -174,7 +244,7 @@ def ask_analysis_availability(request):
 
 @add_docs(
     description="""
-    This endpoint allows to start a Job related to a file or an observable""",
+    This endpoint allows to start a Job related to a file""",
     parameters=[
         OpenApiParameter(
             name="is_sample",
@@ -198,6 +268,129 @@ def ask_analysis_availability(request):
             name="file_name",
             type=OpenApiTypes.STR,
             description="optional if is_sample=True, the binary name",
+        ),
+        OpenApiParameter(
+            name="analyzers_requested",
+            type=OpenApiTypes.OBJECT,
+            description="list of requested analyzer to run, before filters",
+        ),
+        OpenApiParameter(
+            name="tags_id",
+            type=OpenApiTypes.OBJECT,
+            description="list of id's of tags to apply to job",
+        ),
+        OpenApiParameter(
+            name="run_all_available_analyzers",
+            type=OpenApiTypes.BOOL,
+            description="default False",
+        ),
+        OpenApiParameter(
+            name="private",
+            type=OpenApiTypes.BOOL,
+            description="""
+            Default False,
+            enable it to allow view permissions to only requesting user's groups.""",
+        ),
+        OpenApiParameter(
+            name="force_privacy",
+            type=OpenApiTypes.BOOL,
+            description="""
+            Default False,
+            enable it if you want to avoid to run analyzers with privacy issues""",
+        ),
+        OpenApiParameter(
+            name="disable_external_analyzers",
+            type=OpenApiTypes.BOOL,
+            description="""
+            Default False, enable it if you want to exclude external analyzers""",
+        ),
+        OpenApiParameter(
+            name="runtime_configuration",
+            type=OpenApiTypes.OBJECT,
+            description=r"""
+            Default {}, contains additional parameters for particular analyzers""",
+        ),
+        OpenApiParameter(
+            name="test",
+            type=OpenApiTypes.BOOL,
+            description="disable analysis for API testing",
+        ),
+    ],
+    responses={
+        202: inline_serializer(
+            "SendAnalysisRequestSuccessResponse",
+            fields={
+                "status": BaseSerializer.StringRelatedField(),
+                "job_id": BaseSerializer.IntegerField(),
+                "warnings": OpenApiTypes.OBJECT,
+                "analyzers_running": OpenApiTypes.OBJECT,
+            },
+        ),
+        400: inline_serializer(
+            name="SendAnalysisRequestInsufficientData",
+            fields={
+                "error": BaseSerializer.StringRelatedField(),
+            },
+        ),
+        500: inline_serializer(
+            name="SendAnalysisRequestError",
+            fields={
+                "detail": BaseSerializer.StringRelatedField(),
+            },
+        ),
+    },
+)
+@api_view(["POST"])
+@permission_required_or_403("api_job.add_job")
+def analyze_file(request):
+    source = str(request.user)
+    try:
+        data_received = request.data
+        logger.info(
+            f"analyze_file received request from {source}."
+            f"Data:{dict(data_received)}."
+        )
+
+        test = data_received.get("test", False)
+        params = {"source": source}
+
+        serializer = serializers.FileAnalysisSerializer(
+            data=data_received, context={"request": request}
+        )
+
+        if serializer.is_valid():
+            prep_data = prepare_for_analysis(serializer, params)
+        else:
+            error_message = f"serializer validation failed: {serializer.errors}"
+            logger.error(error_message)
+            return Response(
+                {"error": error_message}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if "error" in prep_data.keys():
+            return Response(prep_data, status=status.HTTP_400_BAD_REQUEST)
+
+        return send_for_analysis(prep_data, test)
+
+    except Exception as e:
+        logger.exception(f"receive_analysis_request requester:{source} error:{e}.")
+        return Response(
+            {"detail": "error in analyze_file. Check logs"},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+@add_docs(
+    description="""
+    This endpoint allows to start a Job related to an observable""",
+    parameters=[
+        OpenApiParameter(
+            name="is_sample",
+            type=OpenApiTypes.BOOL,
+            description="is a sample (file) or an observable (domain, ip, ...)",
+        ),
+        OpenApiParameter(
+            name="md5", type=OpenApiTypes.STR, description="md5 of the item to analyze"
         ),
         OpenApiParameter(
             name="observable_name",
@@ -281,87 +474,25 @@ def ask_analysis_availability(request):
     },
 )
 @api_view(["POST"])
-@permission_required_or_403("api_app.add_job")
-def send_analysis_request(request):
+@permission_required_or_403("api_job.add_job")
+def analyze_observable(request):
     source = str(request.user)
-    warnings = []
     try:
         data_received = request.data
         logger.info(
-            f"send_analysis_request received request from {source}."
+            f"analyze_observable received request from {source}."
             f"Data:{dict(data_received)}."
         )
 
         test = data_received.get("test", False)
-
         params = {"source": source}
 
-        serializer = serializers.JobSerializer(
+        serializer = serializers.ObservableAnalysisSerializer(
             data=data_received, context={"request": request}
         )
+
         if serializer.is_valid():
-            serialized_data = serializer.validated_data
-            logger.info(f"serialized_data: {serialized_data}")
-
-            # some values are mandatory only in certain cases
-            if serialized_data["is_sample"]:
-                if "file" not in data_received:
-                    return Response(
-                        {"error": "810"}, status=status.HTTP_400_BAD_REQUEST
-                    )
-                if "file_mimetype" not in data_received:
-                    serialized_data["file_mimetype"] = helpers.calculate_mimetype(
-                        data_received["file"], data_received.get("file_name", "")
-                    )
-            else:
-                if "observable_name" not in data_received:
-                    return Response(
-                        {"error": "812"}, status=status.HTTP_400_BAD_REQUEST
-                    )
-                if "observable_classification" not in data_received:
-                    return Response(
-                        {"error": "813"}, status=status.HTTP_400_BAD_REQUEST
-                    )
-
-            # we need to clean the list of requested analyzers,
-            # ... based on configuration data
-            run_all_available_analyzers = serialized_data.get(
-                "run_all_available_analyzers", False
-            )
-            analyzers_requested = serialized_data.get("analyzers_requested", [])
-            if run_all_available_analyzers:
-                if analyzers_requested:
-                    logger.info(
-                        """either you specify a list of requested analyzers or the
-                         'run_all_available_analyzers' parameter, not both"""
-                    )
-                    return Response(
-                        {"error": "816"}, status=status.HTTP_400_BAD_REQUEST
-                    )
-                # just pick all available analyzers
-                analyzers_requested = analyzers_controller.ALL_ANALYZERS
-            cleaned_analyzer_list = analyzers_controller.filter_analyzers(
-                serialized_data,
-                analyzers_requested,
-                warnings,
-            )
-            params["analyzers_to_execute"] = cleaned_analyzer_list
-            if len(cleaned_analyzer_list) < 1:
-                logger.info(
-                    """after the filter, no analyzers can be run.
-                     Try with other analyzers"""
-                )
-                return Response({"error": "814"}, status=status.HTTP_400_BAD_REQUEST)
-
-            runtime_configuration = serialized_data.pop("runtime_configuration", {})
-            # save the arrived data plus new params into a new job object
-            serializer.save(**params)
-            md5 = serializer.data.get("md5", "")
-            job_id = serializer.data.get("id", None)
-            logger.info(f"New Job added with ID: #{job_id} and md5: {md5}.")
-            if not job_id:
-                return Response({"error": "815"}, status=status.HTTP_400_BAD_REQUEST)
-
+            prep_data = prepare_for_analysis(serializer, params)
         else:
             error_message = f"serializer validation failed: {serializer.errors}"
             logger.error(error_message)
@@ -369,32 +500,15 @@ def send_analysis_request(request):
                 {"error": error_message}, status=status.HTTP_400_BAD_REQUEST
             )
 
-        if not test:
-            # fire celery task
-            celery_app.send_task(
-                "start_analyzers",
-                kwargs=dict(
-                    job_id=job_id,
-                    analyzers_to_execute=params["analyzers_to_execute"],
-                    runtime_configuration=runtime_configuration,
-                ),
-            )
+        if "error" in prep_data.keys():
+            return Response(prep_data, status=status.HTTP_400_BAD_REQUEST)
 
-        response_dict = {
-            "status": "accepted",
-            "job_id": job_id,
-            "warnings": warnings,
-            "analyzers_running": cleaned_analyzer_list,
-        }
-
-        logger.debug(response_dict)
-
-        return Response(response_dict, status=status.HTTP_200_OK)
+        return send_for_analysis(prep_data, test)
 
     except Exception as e:
         logger.exception(f"receive_analysis_request requester:{source} error:{e}.")
         return Response(
-            {"detail": "error in send_analysis_request. Check logs"},
+            {"detail": "error in analyze_observable. Check logs"},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
 

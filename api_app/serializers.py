@@ -8,6 +8,8 @@ from rest_framework import serializers
 from rest_framework_guardian.serializers import ObjectPermissionsAssignmentMixin
 
 from api_app.models import Job, Tag
+from .helpers import calculate_mimetype
+from .analyzers_manager import controller as analyzers_controller
 from .analyzers_manager.serializers import AnalyzerReportSerializer
 from .connectors_manager.serializers import ConnectorReportSerializer
 
@@ -81,16 +83,10 @@ class JobListSerializer(serializers.ModelSerializer):
 class JobSerializer(ObjectPermissionsAssignmentMixin, serializers.ModelSerializer):
     """
     Job model's serializer.
-    Used for create(), retrieve()
+    Used for retrieve()
     """
 
     tags = TagSerializer(many=True, read_only=True)
-    tags_id = serializers.PrimaryKeyRelatedField(
-        many=True, write_only=True, queryset=Tag.objects.all()
-    )
-    runtime_configuration = serializers.JSONField(
-        required=False, default={}, write_only=True
-    )
     analyzer_reports = AnalyzerReportSerializer(many=True, read_only=True)
     connector_reports = ConnectorReportSerializer(many=True, read_only=True)
 
@@ -120,12 +116,135 @@ class JobSerializer(ObjectPermissionsAssignmentMixin, serializers.ModelSerialize
             "change_job": [*usr_groups],
         }
 
+
+class FileAnalysisSerializer(serializers.ModelSerializer):
+    """
+    Job model's serializer for File Analysis.
+    Used for create()
+    """
+
+    tags_id = serializers.PrimaryKeyRelatedField(
+        many=True, write_only=True, queryset=Tag.objects.all()
+    )
+    runtime_configuration = serializers.JSONField(
+        required=False, default={}, write_only=True
+    )
+    file = serializers.FileField(required=True)
+    file_name = serializers.CharField(required=True)
+    is_sample = serializers.HiddenField(default=True)
+    file_mimetype = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Job
+        fields = (
+            "id",
+            "source",
+            "is_sample",
+            "md5",
+            "force_privacy",
+            "disable_external_analyzers",
+            "file",
+            "file_name",
+            "file_mimetype",
+            "runtime_configuration",
+            "analyzers_requested",
+            "analyzers_to_execute",
+            "tags_id",
+            "tags",
+        )
+
+    def get_file_mimetype(self, data):
+        return calculate_mimetype(data["file"], data["file_name"])
+
     def validate(self, data):
         # check and validate runtime_configuration
         runtime_conf = data.get("runtime_configuration", {})
         if runtime_conf and isinstance(runtime_conf, list):
             runtime_conf = json.loads(runtime_conf[0])
         data["runtime_configuration"] = runtime_conf
+
+        run_all_available_analyzers = data.get("run_all_available_analyzers", False)
+        analyzers_requested = data.get("analyzers_requested", [])
+        if run_all_available_analyzers:
+            if analyzers_requested:
+                raise serializers.ValidationError(
+                    {
+                        """
+                        analyzers_requested and run_all_available_analyzers
+                        cannot be used together
+                        """
+                    }
+                )
+
+            data["analyzers_requested"] = analyzers_controller.ALL_ANALYZERS
+
+        return data
+
+    def create(self, validated_data):
+        tags = validated_data.pop("tags_id", None)
+        job = Job.objects.create(**validated_data)
+        if tags:
+            job.tags.set(tags)
+
+        return job
+
+
+class ObservableAnalysisSerializer(serializers.ModelSerializer):
+    """
+    Job model's serializer for Observable Analysis.
+    Used for create()
+    """
+
+    tags_id = serializers.PrimaryKeyRelatedField(
+        many=True, write_only=True, queryset=Tag.objects.all()
+    )
+    runtime_configuration = serializers.JSONField(
+        required=False, default={}, write_only=True
+    )
+    observable_name = serializers.CharField(required=True)
+    observable_classification = serializers.CharField(required=True)
+    is_sample = serializers.HiddenField(default=False)
+
+    class Meta:
+        model = Job
+        fields = (
+            "id",
+            "source",
+            "is_sample",
+            "md5",
+            "force_privacy",
+            "disable_external_analyzers",
+            "observable_name",
+            "observable_classification",
+            "runtime_configuration",
+            "analyzers_requested",
+            "analyzers_to_execute",
+            "tags_id",
+            "tags",
+        )
+
+    def validate(self, data):
+        # check and validate runtime_configuration
+        runtime_conf = data.get("runtime_configuration", {})
+        if runtime_conf and isinstance(runtime_conf, list):
+            runtime_conf = json.loads(runtime_conf[0])
+        data["runtime_configuration"] = runtime_conf
+
+        run_all_available_analyzers = data.get("run_all_available_analyzers", False)
+        analyzers_requested = data.get("analyzers_requested", [])
+        if run_all_available_analyzers:
+            if analyzers_requested:
+                raise serializers.ValidationError(
+                    {
+                        """
+                        analyzers_requested and run_all_available_analyzers
+                        cannot be used together
+                        """
+                    }
+                )
+
+            data["analyzers_requested"] = analyzers_controller.ALL_ANALYZERS
+
         return data
 
     def create(self, validated_data):

@@ -8,7 +8,6 @@ done
 USER="${FLOWER_USER:=flower}"
 PASSWORD="${FLOWER_PWD:=flower}"
 echo "------------------------------"
-env
 echo "DEBUG:  ${DEBUG}"
 echo "DJANGO_TEST_SERVER: ${DJANGO_TEST_SERVER}"
 echo "BROKER: ${CELERY_BROKER_URL}"

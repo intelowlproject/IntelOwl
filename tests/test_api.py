@@ -71,9 +71,7 @@ class ApiViewTests(TestCase):
             "file": uploaded_file,
             "test": True,
         }
-        response = self.client.post(
-            "/api/send_analysis_request", data, format="multipart"
-        )
+        response = self.client.post("/api/analyze_file", data, format="multipart")
         self.assertEqual(response.status_code, 200)
 
     def test_send_analysis_request_sample(self):
@@ -103,9 +101,7 @@ class ApiViewTests(TestCase):
             "file": uploaded_file,
             "test": True,
         }
-        response = self.client.post(
-            "/api/send_analysis_request", data, format="multipart"
-        )
+        response = self.client.post("/api/analyze_file", data, format="multipart")
         self.assertEqual(response.status_code, 200)
 
     def test_send_analysis_request_domain(self):
@@ -139,7 +135,7 @@ class ApiViewTests(TestCase):
             "observable_classification": "domain",
             "test": True,
         }
-        response = self.client.post("/api/send_analysis_request", data)
+        response = self.client.post("/api/analyze_observable", data)
         self.assertEqual(response.status_code, 200)
 
     def test_send_analysis_request_ip(self):
@@ -179,7 +175,7 @@ class ApiViewTests(TestCase):
             "observable_classification": "ip",
             "test": True,
         }
-        response = self.client.post("/api/send_analysis_request", data)
+        response = self.client.post("/api/analyze_observable", data)
         self.assertEqual(response.status_code, 200)
 
     def test_download_sample_200(self):

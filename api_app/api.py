@@ -53,21 +53,19 @@ def send_for_analysis(prep_data, test):
     response_dict = {
         "status": "accepted",
         "job_id": prep_data["job_id"],
-        "warnings": prep_data["warnings"],
         "analyzers_running": prep_data["analyzers_to_execute"],
     }
 
     logger.debug(response_dict)
 
-    return Response(response_dict, status=status.HTTP_200_OK)
+    return response_dict
 
 
-def prepare_for_analysis(serializer, params):
+def prepare_for_analysis(serializer, params, warnings):
     """
     Prepare file/observable for analysis
     """
 
-    warnings = []
     serialized_data = serializer.validated_data
 
     cleaned_analyzer_list = analyzers_controller.filter_analyzers(
@@ -101,7 +99,6 @@ def prepare_for_analysis(serializer, params):
         "job_id": job_id,
         "runtime_config": runtime_configuration,
         "analyzers_to_execute": cleaned_analyzer_list,
-        "warnings": warnings,
     }
 
     return prep_data
@@ -349,6 +346,7 @@ def ask_analysis_availability(request):
 @permission_required_or_403("api_app.add_job")
 def analyze_file(request):
     source = str(request.user)
+    warnings = []
     try:
         data_received = request.data
         logger.info(
@@ -364,7 +362,7 @@ def analyze_file(request):
         )
 
         if serializer.is_valid():
-            prep_data = prepare_for_analysis(serializer, params)
+            prep_data = prepare_for_analysis(serializer, params, warnings)
         else:
             error_message = f"serializer validation failed: {serializer.errors}"
             logger.error(error_message)
@@ -372,7 +370,12 @@ def analyze_file(request):
                 {"error": error_message}, status=status.HTTP_400_BAD_REQUEST
             )
 
-        return send_for_analysis(prep_data, test)
+        response_dict = {
+            **send_for_analysis(prep_data, test),
+            "warnings": warnings,
+        }
+
+        return Response(response_dict, status=status.HTTP_200_OK)
 
     except Exception as e:
         logger.exception(f"receive_analysis_request requester:{source} error:{e}.")

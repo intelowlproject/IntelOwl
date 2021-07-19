@@ -117,44 +117,33 @@ class JobSerializer(ObjectPermissionsAssignmentMixin, serializers.ModelSerialize
         }
 
 
-class FileAnalysisSerializer(serializers.ModelSerializer):
+class _JobCreateSerializerMixin(
+    ObjectPermissionsAssignmentMixin, serializers.ModelSerializer
+):
     """
-    Job model's serializer for File Analysis.
-    Used for create()
+    Base Serializer for Job create().
     """
 
-    tags_id = serializers.PrimaryKeyRelatedField(
-        many=True, write_only=True, queryset=Tag.objects.all()
-    )
-    runtime_configuration = serializers.JSONField(
-        required=False, default={}, write_only=True
-    )
-    file = serializers.FileField(required=True)
-    file_name = serializers.CharField(required=True)
-    is_sample = serializers.HiddenField(default=True)
-    file_mimetype = serializers.SerializerMethodField()
+    def get_permissions_map(self, created):
+        """
+        * 'view' permission is applied to all the groups the requesting user belongs to
+        if private is True.
+        * 'delete' permission is only given to the user who created the job
+        * 'change' permission is given to
+        """
+        rqst = self.context["request"]
+        current_user = rqst.user
+        usr_groups = current_user.groups.all()
+        if rqst.data.get("private", False):
+            view_grps = usr_groups
+        else:
+            view_grps = Group.objects.all()
 
-    class Meta:
-        model = Job
-        fields = (
-            "id",
-            "source",
-            "is_sample",
-            "md5",
-            "force_privacy",
-            "disable_external_analyzers",
-            "file",
-            "file_name",
-            "file_mimetype",
-            "runtime_configuration",
-            "analyzers_requested",
-            "analyzers_to_execute",
-            "tags_id",
-            "tags",
-        )
-
-    def get_file_mimetype(self, data):
-        return calculate_mimetype(data["file"], data["file_name"])
+        return {
+            "view_job": [*view_grps],
+            "delete_job": [*usr_groups],
+            "change_job": [*usr_groups],
+        }
 
     def validate(self, data):
         # check and validate runtime_configuration
@@ -189,7 +178,49 @@ class FileAnalysisSerializer(serializers.ModelSerializer):
         return job
 
 
-class ObservableAnalysisSerializer(serializers.ModelSerializer):
+class FileAnalysisSerializer(_JobCreateSerializerMixin):
+    """
+    Job model's serializer for File Analysis.
+    Used for create()
+    """
+
+    tags_id = serializers.PrimaryKeyRelatedField(
+        many=True, write_only=True, queryset=Tag.objects.all()
+    )
+    runtime_configuration = serializers.JSONField(
+        required=False, default={}, write_only=True
+    )
+    file = serializers.FileField(required=True)
+    file_name = serializers.CharField(required=True)
+    is_sample = serializers.HiddenField(default=True)
+    file_mimetype = serializers.HiddenField(default=None)
+
+    class Meta:
+        model = Job
+        fields = (
+            "id",
+            "source",
+            "is_sample",
+            "md5",
+            "force_privacy",
+            "disable_external_analyzers",
+            "file",
+            "file_name",
+            "file_mimetype",
+            "runtime_configuration",
+            "analyzers_requested",
+            "analyzers_to_execute",
+            "tags_id",
+        )
+
+    def validate(self, attrs):
+        super().validate(attrs)
+
+        attrs["file_mimetype"] = calculate_mimetype(attrs["file"], attrs["file_name"])
+        return attrs
+
+
+class ObservableAnalysisSerializer(_JobCreateSerializerMixin):
     """
     Job model's serializer for Observable Analysis.
     Used for create()
@@ -220,37 +251,4 @@ class ObservableAnalysisSerializer(serializers.ModelSerializer):
             "analyzers_requested",
             "analyzers_to_execute",
             "tags_id",
-            "tags",
         )
-
-    def validate(self, data):
-        # check and validate runtime_configuration
-        runtime_conf = data.get("runtime_configuration", {})
-        if runtime_conf and isinstance(runtime_conf, list):
-            runtime_conf = json.loads(runtime_conf[0])
-        data["runtime_configuration"] = runtime_conf
-
-        run_all_available_analyzers = data.get("run_all_available_analyzers", False)
-        analyzers_requested = data.get("analyzers_requested", [])
-        if run_all_available_analyzers:
-            if analyzers_requested:
-                raise serializers.ValidationError(
-                    {
-                        """
-                        analyzers_requested and run_all_available_analyzers
-                        cannot be used together
-                        """
-                    }
-                )
-
-            data["analyzers_requested"] = analyzers_controller.ALL_ANALYZERS
-
-        return data
-
-    def create(self, validated_data):
-        tags = validated_data.pop("tags_id", None)
-        job = Job.objects.create(**validated_data)
-        if tags:
-            job.tags.set(tags)
-
-        return job

@@ -341,7 +341,7 @@ def ask_analysis_availability(request):
     },
 )
 @api_view(["POST"])
-@permission_required_or_403("api_job.add_job")
+@permission_required_or_403("api_app.add_job")
 def analyze_file(request):
     source = str(request.user)
     try:
@@ -474,7 +474,7 @@ def analyze_file(request):
     },
 )
 @api_view(["POST"])
-@permission_required_or_403("api_job.add_job")
+@permission_required_or_403("api_app.add_job")
 def analyze_observable(request):
     source = str(request.user)
     try:

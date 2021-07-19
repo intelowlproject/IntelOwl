@@ -502,9 +502,6 @@ def analyze_observable(request):
                 {"error": error_message}, status=status.HTTP_400_BAD_REQUEST
             )
 
-        if "error" in prep_data.keys():
-            return Response(prep_data, status=status.HTTP_400_BAD_REQUEST)
-
         return send_for_analysis(prep_data, test)
 
     except Exception as e:

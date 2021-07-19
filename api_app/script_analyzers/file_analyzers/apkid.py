@@ -1,7 +1,6 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-from api_app.helpers import get_binary
 from api_app.script_analyzers.classes import FileAnalyzer, DockerBasedAnalyzer
 
 
@@ -17,7 +16,6 @@ class APKiD(FileAnalyzer, DockerBasedAnalyzer):
         # construct a valid filename into which thug will save the result
         fname = str(self.filename).replace("/", "_").replace(" ", "_")
         # get the file to send
-        binary = get_binary(self.job_id)
         # construct arguments, For example this corresponds to,
         # apkid -j file.apk
         args = [
@@ -29,6 +27,6 @@ class APKiD(FileAnalyzer, DockerBasedAnalyzer):
         req_data = {
             "args": args,
         }
-        req_files = {fname: binary}
+        req_files = {fname: self.binary}
 
         return self._docker_run(req_data, req_files)

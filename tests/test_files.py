@@ -103,25 +103,32 @@ def mocked_triage_post(*args, **kwargs):
     return MockResponse({"id": "sample_id", "status": "pending"}, 200)
 
 
-class FileAnalyzersEXETests(TestCase):
+class FileAnalyzer(TestCase):
+    filename: str
+    params: dict
+
     def setUp(self):
-        params = {
-            "source": "test",
-            "is_sample": True,
-            "file_mimetype": "application/x-dosexec",
-            "force_privacy": False,
-            "analyzers_requested": ["test"],
-        }
-        filename = "file.exe"
-        test_job = _generate_test_job_with_file(params, filename)
+        test_job = _generate_test_job_with_file(self.params, self.filename)
         self.job_id = test_job.id
-        self.filepath, self.filename = utils.get_filepath_filename(self.job_id)
+        self.filename = test_job.file_name
+        self.filepath = test_job.file.storage.retrieve(
+            analyzer="test", name=test_job.file.name
+        )
         self.md5 = test_job.md5
 
+
+class FileAnalyzersEXETests(FileAnalyzer):
+    params = {
+        "source": "test",
+        "is_sample": True,
+        "file_mimetype": "application/x-dosexec",
+        "force_privacy": False,
+        "analyzers_requested": ["test"],
+    }
+    filename = "file.exe"
+
     def test_fileinfo_exe(self):
-        report = file_info.FileInfo(
-            "File_Info", self.job_id, self.filepath, self.filename, self.md5, {}
-        ).start()
+        report = file_info.FileInfo("File_Info", self.job_id, self.md5, {}).start()
         self.assertEqual(report.get("success", False), True)
 
     @mock_connections(patch("requests.get", side_effect=mocked_docker_analyzer_get))
@@ -130,8 +137,6 @@ class FileAnalyzersEXETests(TestCase):
         report = strings_info.StringsInfo(
             "Strings_Info_ML",
             self.job_id,
-            self.filepath,
-            self.filename,
             self.md5,
             {"rank_strings": True},
         ).start()
@@ -143,28 +148,24 @@ class FileAnalyzersEXETests(TestCase):
         report = strings_info.StringsInfo(
             "Strings_Info_Classic",
             self.job_id,
-            self.filepath,
-            self.filename,
             self.md5,
             {},
         ).start()
         self.assertEqual(report.get("success", False), True)
 
     def test_peinfo_exe(self):
-        report = pe_info.PEInfo(
-            "PE_Info", self.job_id, self.filepath, self.filename, self.md5, {}
-        ).start()
+        report = pe_info.PEInfo("PE_Info", self.job_id, self.md5, {}).start()
         self.assertEqual(report.get("success", False), True)
 
     def test_signatureinfo_exe(self):
         report = signature_info.SignatureInfo(
-            "Signature_Info", self.job_id, self.filepath, self.filename, self.md5, {}
+            "Signature_Info", self.job_id, self.md5, {}
         ).start()
         self.assertEqual(report.get("success", False), True)
 
     def test_speakeasy_exe(self):
         report = speakeasy_emulation.SpeakEasy(
-            "Speakeasy", self.job_id, self.filepath, self.filename, self.md5, {}
+            "Speakeasy", self.job_id, self.md5, {}
         ).start()
         self.assertEqual(report.get("success", False), True)
 
@@ -174,8 +175,6 @@ class FileAnalyzersEXETests(TestCase):
         report = qiling.Qiling(
             "Qiling_Windows",
             self.job_id,
-            self.filepath,
-            self.filename,
             self.md5,
             {"os": "windows", "arch": "x86"},
         ).start()
@@ -188,8 +187,6 @@ class FileAnalyzersEXETests(TestCase):
         report = vt2_scan.VirusTotalv2ScanFile(
             "VT_v2_Scan",
             self.job_id,
-            self.filepath,
-            self.filename,
             self.md5,
             additional_params,
         ).start()
@@ -208,8 +205,6 @@ class FileAnalyzersEXETests(TestCase):
         report = intezer_scan.IntezerScan(
             "Intezer_Scan",
             self.job_id,
-            self.filepath,
-            self.filename,
             self.md5,
             additional_params,
         ).start()
@@ -222,8 +217,6 @@ class FileAnalyzersEXETests(TestCase):
         report = cuckoo_scan.CuckooAnalysis(
             "Cuckoo_Scan",
             self.job_id,
-            self.filepath,
-            self.filename,
             self.md5,
             additional_params,
         ).start()
@@ -234,8 +227,6 @@ class FileAnalyzersEXETests(TestCase):
         report = malpedia_scan.MalpediaScan(
             "Malpedia_Scan",
             self.job_id,
-            self.filepath,
-            self.filename,
             self.md5,
             {},
         ).start()
@@ -255,8 +246,6 @@ class FileAnalyzersEXETests(TestCase):
         report = yara_scan.YaraScan(
             "Yara_Scan",
             self.job_id,
-            self.filepath,
-            self.filename,
             self.md5,
             additional_params,
         ).start()
@@ -272,8 +261,6 @@ class FileAnalyzersEXETests(TestCase):
         report = yara_scan.YaraScan(
             "Yara_Scan",
             self.job_id,
-            self.filepath,
-            self.filename,
             self.md5,
             additional_params,
         ).start()
@@ -289,8 +276,6 @@ class FileAnalyzersEXETests(TestCase):
         report = yara_scan.YaraScan(
             "Yara_Scan",
             self.job_id,
-            self.filepath,
-            self.filename,
             self.md5,
             additional_params,
         ).start()
@@ -306,8 +291,6 @@ class FileAnalyzersEXETests(TestCase):
         report = yara_scan.YaraScan(
             "Yara_Scan",
             self.job_id,
-            self.filepath,
-            self.filename,
             self.md5,
             additional_params,
         ).start()
@@ -322,8 +305,6 @@ class FileAnalyzersEXETests(TestCase):
         report = yara_scan.YaraScan(
             "Yara_Scan",
             self.job_id,
-            self.filepath,
-            self.filename,
             self.md5,
             additional_params,
         ).start()
@@ -337,8 +318,6 @@ class FileAnalyzersEXETests(TestCase):
         report = yara_scan.YaraScan(
             "Yara_Scan",
             self.job_id,
-            self.filepath,
-            self.filename,
             self.md5,
             additional_params,
         ).start()
@@ -353,8 +332,6 @@ class FileAnalyzersEXETests(TestCase):
         report = yara_scan.YaraScan(
             "Yara_Scan",
             self.job_id,
-            self.filepath,
-            self.filename,
             self.md5,
             additional_params,
         ).start()
@@ -370,8 +347,6 @@ class FileAnalyzersEXETests(TestCase):
         report = yara_scan.YaraScan(
             "Yara_Scan",
             self.job_id,
-            self.filepath,
-            self.filename,
             self.md5,
             additional_params,
         ).start()
@@ -386,8 +361,6 @@ class FileAnalyzersEXETests(TestCase):
         report = yara_scan.YaraScan(
             "Yara_Scan",
             self.job_id,
-            self.filepath,
-            self.filename,
             self.md5,
             additional_params,
         ).start()
@@ -402,8 +375,6 @@ class FileAnalyzersEXETests(TestCase):
         report = yara_scan.YaraScan(
             "Yara_Scan",
             self.job_id,
-            self.filepath,
-            self.filename,
             self.md5,
             additional_params,
         ).start()
@@ -415,8 +386,6 @@ class FileAnalyzersEXETests(TestCase):
         report = unpac_me.UnpacMe(
             "UnpacMe_EXE_Unpacker",
             self.job_id,
-            self.filepath,
-            self.filename,
             self.md5,
             {},
         ).start()
@@ -429,8 +398,6 @@ class FileAnalyzersEXETests(TestCase):
         report = vt3_scan.VirusTotalv3ScanFile(
             "VT_v3_Scan",
             self.job_id,
-            self.filepath,
-            self.filename,
             self.md5,
             additional_params,
         ).start()
@@ -452,8 +419,6 @@ class FileAnalyzersEXETests(TestCase):
         report = peframe.PEframe(
             "PEframe_Scan",
             self.job_id,
-            self.filepath,
-            self.filename,
             self.md5,
             additional_params,
         ).start()
@@ -465,8 +430,6 @@ class FileAnalyzersEXETests(TestCase):
         report = capa_info.CapaInfo(
             "Capa_Info",
             self.job_id,
-            self.filepath,
-            self.filename,
             self.md5,
             {},
         ).start()
@@ -478,8 +441,6 @@ class FileAnalyzersEXETests(TestCase):
         report = triage_scan.TriageScanFile(
             "Triage_Scan",
             self.job_id,
-            self.filepath,
-            self.filename,
             self.md5,
             {},
         ).start()
@@ -491,8 +452,6 @@ class FileAnalyzersEXETests(TestCase):
         report = floss.Floss(
             "Floss",
             self.job_id,
-            self.filepath,
-            self.filename,
             self.md5,
             {},
         ).start()
@@ -504,8 +463,6 @@ class FileAnalyzersEXETests(TestCase):
         report = manalyze.Manalyze(
             "Manalyze",
             self.job_id,
-            self.filepath,
-            self.filename,
             self.md5,
             {},
         ).start()
@@ -517,8 +474,6 @@ class FileAnalyzersEXETests(TestCase):
         report = mwdb_scan.MWDB_Scan(
             "MWDB_Scan",
             self.job_id,
-            self.filepath,
-            self.filename,
             self.md5,
             additional_params,
         ).start()
@@ -535,101 +490,72 @@ class FileAnalyzersEXETests(TestCase):
         report = mwdb_scan.MWDB_Scan(
             "MWDB_Scan",
             self.job_id,
-            self.filepath,
-            self.filename,
             self.md5,
             additional_params,
         ).start()
         self.assertEqual(report.get("success", False), True)
 
 
-class FileAnalyzersDLLTests(TestCase):
-    def setUp(self):
-        params = {
-            "source": "test",
-            "is_sample": True,
-            "file_mimetype": "application/x-dosexec",
-            "force_privacy": False,
-            "analyzers_requested": ["test"],
-        }
-        filename = "file.dll"
-        test_job = _generate_test_job_with_file(params, filename)
-        self.job_id = test_job.id
-        self.filepath, self.filename = utils.get_filepath_filename(self.job_id)
-        self.md5 = test_job.md5
+class FileAnalyzersDLLTests(FileAnalyzer):
+    filename = "file.dll"
+    params = {
+        "source": "test",
+        "is_sample": True,
+        "file_mimetype": "application/x-dosexec",
+        "force_privacy": False,
+        "analyzers_requested": ["test"],
+    }
 
     def test_fileinfo_dll(self):
-        report = file_info.FileInfo(
-            "File_Info", self.job_id, self.filepath, self.filename, self.md5, {}
-        ).start()
+        report = file_info.FileInfo("File_Info", self.job_id, self.md5, {}).start()
         self.assertEqual(report.get("success", False), True)
 
     def test_peinfo_dll(self):
-        report = pe_info.PEInfo(
-            "PE_Info", self.job_id, self.filepath, self.filename, self.md5, {}
-        ).start()
+        report = pe_info.PEInfo("PE_Info", self.job_id, self.md5, {}).start()
         self.assertEqual(report.get("success", False), True)
 
     def test_speakeasy_dll(self):
         report = speakeasy_emulation.SpeakEasy(
-            "Speakeasy", self.job_id, self.filepath, self.filename, self.md5, {}
+            "Speakeasy", self.job_id, self.md5, {}
         ).start()
         self.assertEqual(report.get("success", False), True)
 
 
-class FileAnalyzersExcelTests(TestCase):
-    def setUp(self):
-        params = {
-            "source": "test",
-            "is_sample": True,
-            "file_mimetype": "application/vnd.ms-excel",
-            "force_privacy": False,
-            "analyzers_requested": ["test"],
-        }
-        filename = "document.xls"
-        test_job = _generate_test_job_with_file(params, filename)
-        self.job_id = test_job.id
-        self.filepath, self.filename = utils.get_filepath_filename(self.job_id)
-        self.runtime_configuration = test_job.runtime_configuration
-        self.md5 = test_job.md5
+class FileAnalyzersExcelTests(FileAnalyzer):
+    params = {
+        "source": "test",
+        "is_sample": True,
+        "file_mimetype": "application/vnd.ms-excel",
+        "force_privacy": False,
+        "analyzers_requested": ["test"],
+    }
+    filename = "document.xls"
 
     def test_xlm_macro_deobfuscator_excel(self):
         report = xlm_macro_deobfuscator.XlmMacroDeobfuscator(
             "Xlm_Macro_Deobfuscator",
             self.job_id,
-            self.filepath,
-            self.filename,
             self.md5,
             {},
         ).start()
         self.assertEqual(report.get("success", False), True)
 
 
-class FileAnalyzersDocTests(TestCase):
-    def setUp(self):
-        params = {
-            "source": "test",
-            "is_sample": True,
-            "file_mimetype": "application/msword",
-            "force_privacy": False,
-            "analyzers_requested": ["test"],
-            "runtime_configuration": {
-                "Doc_Info_Experimental": {
-                    "additional_passwords_to_check": ["testpassword"]
-                }
-            },
-        }
-        filename = "document.doc"
-        test_job = _generate_test_job_with_file(params, filename)
-        self.job_id = test_job.id
-        self.filepath, self.filename = utils.get_filepath_filename(self.job_id)
-        self.runtime_configuration = test_job.runtime_configuration
-        self.md5 = test_job.md5
+class FileAnalyzersDocTests(FileAnalyzer):
+    params = {
+        "source": "test",
+        "is_sample": True,
+        "file_mimetype": "application/msword",
+        "force_privacy": False,
+        "analyzers_requested": ["test"],
+        "runtime_configuration": {
+            "Doc_Info_Experimental": {"additional_passwords_to_check": ["testpassword"]}
+        },
+    }
+    filename = "document.doc"
 
     def test_docinfo(self):
-        report = doc_info.DocInfo(
-            "Doc_Info", self.job_id, self.filepath, self.filename, self.md5, {}
-        ).start()
+        report = doc_info.DocInfo("Doc_Info", self.job_id, self.md5, {}).start()
         self.assertEqual(report.get("success", False), True)
 
     def test_docinfo_experimental(self):
@@ -645,8 +571,6 @@ class FileAnalyzersDocTests(TestCase):
         report = doc_info.DocInfo(
             analyzer_name,
             self.job_id,
-            self.filepath,
-            self.filename,
             self.md5,
             additional_params,
         ).start()
@@ -659,72 +583,51 @@ class FileAnalyzersDocTests(TestCase):
         report = peframe.PEframe(
             "PEframe_Scan",
             self.job_id,
-            self.filepath,
-            self.filename,
             self.md5,
             additional_params,
         ).start()
         self.assertEqual(report.get("success", False), True)
 
 
-class FileAnalyzersRtfTests(TestCase):
-    def setUp(self):
-        params = {
-            "source": "test",
-            "is_sample": True,
-            "file_mimetype": "text/rtf",
-            "force_privacy": False,
-            "analyzers_requested": ["test"],
-        }
-        filename = "document.rtf"
-        test_job = _generate_test_job_with_file(params, filename)
-        self.job_id = test_job.id
-        self.filepath, self.filename = utils.get_filepath_filename(self.job_id)
-        self.md5 = test_job.md5
+class FileAnalyzersRtfTests(FileAnalyzer):
+    params = {
+        "source": "test",
+        "is_sample": True,
+        "file_mimetype": "text/rtf",
+        "force_privacy": False,
+        "analyzers_requested": ["test"],
+    }
+    filename = "document.rtf"
 
     def test_rtfinfo(self):
-        report = rtf_info.RTFInfo(
-            "Rtf_Info", self.job_id, self.filepath, self.filename, self.md5, {}
-        ).start()
+        report = rtf_info.RTFInfo("Rtf_Info", self.job_id, self.md5, {}).start()
         self.assertEqual(report.get("success", False), True)
 
 
-class FileAnalyzersPDFTests(TestCase):
-    def setUp(self):
-        params = {
-            "source": "test",
-            "is_sample": True,
-            "file_mimetype": "application/pdf",
-            "force_privacy": False,
-            "analyzers_requested": ["test"],
-        }
-        filename = "document.pdf"
-        test_job = _generate_test_job_with_file(params, filename)
-        self.job_id = test_job.id
-        self.filepath, self.filename = utils.get_filepath_filename(self.job_id)
-        self.md5 = test_job.md5
+class FileAnalyzersPDFTests(FileAnalyzer):
+    params = {
+        "source": "test",
+        "is_sample": True,
+        "file_mimetype": "application/pdf",
+        "force_privacy": False,
+        "analyzers_requested": ["test"],
+    }
+    filename = "document.pdf"
 
     def test_pdfinfo(self):
-        report = pdf_info.PDFInfo(
-            "PDF_Info", self.job_id, self.filepath, self.filename, self.md5, {}
-        ).start()
+        report = pdf_info.PDFInfo("PDF_Info", self.job_id, self.md5, {}).start()
         self.assertEqual(report.get("success", False), True)
 
 
-class FileAnalyzersHTMLTests(TestCase):
-    def setUp(self):
-        params = {
-            "source": "test",
-            "is_sample": True,
-            "file_mimetype": "text/html",
-            "force_privacy": False,
-            "analyzers_requested": ["test"],
-        }
-        filename = "page.html"
-        test_job = _generate_test_job_with_file(params, filename)
-        self.job_id = test_job.id
-        self.filepath, self.filename = utils.get_filepath_filename(self.job_id)
-        self.md5 = test_job.md5
+class FileAnalyzersHTMLTests(FileAnalyzer):
+    params = {
+        "source": "test",
+        "is_sample": True,
+        "file_mimetype": "text/html",
+        "force_privacy": False,
+        "analyzers_requested": ["test"],
+    }
+    filename = "page.html"
 
     @mock_connections(patch("requests.get", side_effect=mocked_docker_analyzer_get))
     @mock_connections(patch("requests.post", side_effect=mocked_docker_analyzer_post))
@@ -732,28 +635,21 @@ class FileAnalyzersHTMLTests(TestCase):
         report = thug_file.ThugFile(
             "Thug_HTML_Info",
             self.job_id,
-            self.filepath,
-            self.filename,
             self.md5,
             {},
         ).start()
         self.assertEqual(report.get("success", False), True)
 
 
-class FileAnalyzersJSTests(TestCase):
-    def setUp(self):
-        params = {
-            "source": "test",
-            "is_sample": True,
-            "file_mimetype": "application/javascript",
-            "force_privacy": False,
-            "analyzers_requested": ["test"],
-        }
-        filename = "file.jse"
-        test_job = _generate_test_job_with_file(params, filename)
-        self.job_id = test_job.id
-        self.filepath, self.filename = utils.get_filepath_filename(self.job_id)
-        self.md5 = test_job.md5
+class FileAnalyzersJSTests(FileAnalyzer):
+    params = {
+        "source": "test",
+        "is_sample": True,
+        "file_mimetype": "application/javascript",
+        "force_privacy": False,
+        "analyzers_requested": ["test"],
+    }
+    filename = "file.jse"
 
     @mock_connections(patch("requests.get", side_effect=mocked_docker_analyzer_get))
     @mock_connections(patch("requests.post", side_effect=mocked_docker_analyzer_post))
@@ -761,28 +657,21 @@ class FileAnalyzersJSTests(TestCase):
         report = boxjs_scan.BoxJS(
             "BoxJS_Scan_JavaScript",
             self.job_id,
-            self.filepath,
-            self.filename,
             self.md5,
             {},
         ).start()
         self.assertEqual(report.get("success", False), True)
 
 
-class FileAnalyzersAPKTests(TestCase):
-    def setUp(self):
-        params = {
-            "source": "test",
-            "is_sample": True,
-            "file_mimetype": "application/vnd.android.package-archive",
-            "force_privacy": False,
-            "analyzers_requested": ["test"],
-        }
-        filename = "sample.apk"
-        test_job = _generate_test_job_with_file(params, filename)
-        self.job_id = test_job.id
-        self.filepath, self.filename = utils.get_filepath_filename(self.job_id)
-        self.md5 = test_job.md5
+class FileAnalyzersAPKTests(FileAnalyzer):
+    params = {
+        "source": "test",
+        "is_sample": True,
+        "file_mimetype": "application/vnd.android.package-archive",
+        "force_privacy": False,
+        "analyzers_requested": ["test"],
+    }
+    filename = "sample.apk"
 
     @mock_connections(patch("requests.get", side_effect=mocked_docker_analyzer_get))
     @mock_connections(patch("requests.post", side_effect=mocked_docker_analyzer_post))
@@ -790,8 +679,6 @@ class FileAnalyzersAPKTests(TestCase):
         report = apkid.APKiD(
             "APKiD_Scan_APK_DEX_JAR",
             self.job_id,
-            self.filepath,
-            self.filename,
             self.md5,
             {},
         ).start()
@@ -801,8 +688,6 @@ class FileAnalyzersAPKTests(TestCase):
         report = quark_engine.QuarkEngine(
             "Quark_Engine_APK",
             self.job_id,
-            self.filepath,
-            self.filename,
             self.md5,
             {},
         ).start()

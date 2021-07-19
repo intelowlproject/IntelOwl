@@ -3,7 +3,6 @@
 
 from oletools.rtfobj import RtfObjParser
 
-from api_app.helpers import get_binary
 from api_app.script_analyzers.classes import FileAnalyzer
 
 
@@ -12,8 +11,7 @@ class RTFInfo(FileAnalyzer):
         results = {}
 
         rtfobj_results = {}
-        binary = get_binary(self.job_id)
-        rtfp = RtfObjParser(binary)
+        rtfp = RtfObjParser(self.binary)
         rtfp.parse()
         rtfobj_results["ole_objects"] = []
         for rtfobj in rtfp.objects:

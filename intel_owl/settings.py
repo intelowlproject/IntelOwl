@@ -5,6 +5,7 @@
 import os
 from datetime import timedelta
 
+from django.core.files.storage import FileSystemStorage
 from django.core.management.utils import get_random_secret_key
 
 from intel_owl import secrets
@@ -23,6 +24,49 @@ MEDIA_ROOT = "/opt/deploy/files_required"
 DISABLE_LOGGING_TEST = os.environ.get("DISABLE_LOGGING_TEST", False) == "True"
 MOCK_CONNECTIONS = os.environ.get("MOCK_CONNECTIONS", False) == "True"
 LDAP_ENABLED = os.environ.get("LDAP_ENABLED", False) == "True"
+LOCAL_STORAGE = os.environ.get("LOCAL_STORAGE", "True") == "True"
+
+# Storage settings
+if LOCAL_STORAGE:
+
+    class FileSystemStorageWrapper(FileSystemStorage):
+        def retrieve(self, analyzer, name):
+            # we have one single sample for every analyzer
+            return self.path(name)
+
+    DEFAULT_FILE_STORAGE = "intel_owl.settings.FileSystemStorageWrapper"
+    STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
+else:
+    from storages.backends.s3boto3 import S3Boto3Storage
+
+    class S3Boto3StorageWrapper(S3Boto3Storage):
+        def retrieve(self, analyzer, name):
+            # FIXME we can optimize this a lot.
+            #  Right now we are doing an http request FOR analyzer. We can have a
+            #  proxy that will store the content and then save it locally
+
+            # The idea is to download the file in MEDIA_ROOT/analyzer/namefile if it does not exist
+            path_dir = os.path.join(MEDIA_ROOT, analyzer)
+            _path = os.path.join(path_dir, name)
+            if not os.path.exists(_path):
+                os.makedirs(path_dir, exist_ok=True)
+                assert self.exists(name)
+                with self.open(name) as s3_file_object:
+                    content = s3_file_object.read()
+                    s3_file_object.seek(0)
+                    with open(_path, "wb") as local_file_object:
+                        local_file_object.write(content)
+            return _path
+
+    DEFAULT_FILE_STORAGE = "intel_owl.settings.S3Boto3StorageWrapper"
+    STATICFILES_STORAGE = "storages.backends.s3boto3.S3StaticStorage"
+    AWS_STORAGE_BUCKET_NAME = secrets.get_secret("AWS_STORAGE_BUCKET_NAME")
+
+# AWS settings
+AWS_IAM_ACCESS = os.environ.get("AWS_IAM_ACCESS", False) == "True"
+if not AWS_IAM_ACCESS:
+    AWS_ACCESS_KEY_ID = secrets.get_secret("AWS_ACCESS_KEY_ID")
+    AWS_SECRET_ACCESS_KEY = secrets.get_secret("AWS_SECRET_ACCESS_KEY")
 
 # Security Stuff
 HTTPS_ENABLED = os.environ.get("HTTPS_ENABLED", "not_enabled")

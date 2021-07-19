@@ -5,7 +5,6 @@ import requests
 
 from api_app.exceptions import AnalyzerRunException, AnalyzerConfigurationException
 from api_app.script_analyzers.classes import FileAnalyzer
-from api_app.helpers import get_binary
 from intel_owl import secrets
 
 
@@ -28,8 +27,7 @@ class MalpediaScan(FileAnalyzer):
 
         url = self.base_url + "scan/binary"
         headers = {"Authorization": f"APIToken {self.__api_key}"}
-        binary = get_binary(self.job_id)
-        files = {"file": binary}
+        files = {"file": self.binary}
 
         try:
             response = requests.post(url, headers=headers, files=files)

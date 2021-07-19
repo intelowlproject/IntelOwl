@@ -4,11 +4,13 @@
 import traceback
 import time
 import logging
+
 import requests
 import json
 
 from abc import ABCMeta, abstractmethod
 from celery.exceptions import SoftTimeLimitExceeded
+from django.conf import settings
 
 from api_app.exceptions import (
     AnalyzerRunNotImplemented,
@@ -186,7 +188,7 @@ class ObservableAnalyzer(BaseAnalyzerMixin):
         )
 
 
-class FileAnalyzer(BaseAnalyzerMixin):
+class FileAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
     """
     Abstract class for File Analyzers.
     Inherit from this branch when defining a file analyzer.
@@ -195,15 +197,31 @@ class FileAnalyzer(BaseAnalyzerMixin):
     """
 
     md5: str
-    filepath: str
     filename: str
 
-    def __init__(
-        self, analyzer_name, job_id, fpath, fname, md5, additional_config_params
-    ):
+    @property
+    def filepath(self):
+        if self._filepath is None:
+            self._filepath = self.job_object.file.storage.retrieve(
+                name=self.job_object.file.name, analyzer=self.analyzer_name
+            )
+        return self._filepath
+
+    @property
+    def binary(self):
+        if self._binary is None:
+            self._binary = self.job_object.file.read()
+            self.job_object.file.seek(0)
+        return self._binary
+
+    def __init__(self, analyzer_name, job_id, md5, additional_config_params):
+        from api_app.models import Job
+
+        self.job_object = Job.object_by_job_id(job_id)
         self.md5 = md5
-        self.filepath = fpath
-        self.filename = fname
+        self.filename = self.job_object.file_name
+        self._binary = None
+        self._filepath = None
         super().__init__(analyzer_name, job_id, additional_config_params)
 
     def before_run(self):
@@ -213,6 +231,14 @@ class FileAnalyzer(BaseAnalyzerMixin):
         )
 
     def after_run(self):
+        # We delete the file only if we have single copy for analyzer
+        # and the file has been saved locally.
+        # Otherwise we would remove the single file that we have on the server
+
+        if not settings.LOCAL_STORAGE and self._filepath is not None:
+            import os
+
+            os.remove(self.filepath)
         logger.info(
             f"FINISHED analyzer: {self.__repr__()} -> "
             f"File: ({self.filename}, md5: {self.md5})"

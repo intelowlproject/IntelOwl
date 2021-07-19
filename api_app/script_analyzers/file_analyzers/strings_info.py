@@ -2,7 +2,6 @@
 # See the file 'LICENSE' for copying permission.
 
 from json import dumps as json_dumps
-from api_app.helpers import get_binary
 from api_app.script_analyzers.classes import FileAnalyzer, DockerBasedAnalyzer
 
 
@@ -30,8 +29,6 @@ class StringsInfo(FileAnalyzer, DockerBasedAnalyzer):
         self.rank_strings = additional_config_params.get("rank_strings", False)
 
     def run(self):
-        # get binary
-        binary = get_binary(self.job_id)
         # make request data
         fname = str(self.filename).replace("/", "_").replace(" ", "_")
         args = ["flarestrings", f"@{fname}"]
@@ -39,7 +36,7 @@ class StringsInfo(FileAnalyzer, DockerBasedAnalyzer):
             "args": args,
             "timeout": self.timeout,
         }
-        req_files = {fname: binary}
+        req_files = {fname: self.binary}
         result = self._docker_run(req_data, req_files)
         exceed_max_strings = len(result) > self.max_no_of_strings
         if exceed_max_strings:

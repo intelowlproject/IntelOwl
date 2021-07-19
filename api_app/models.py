@@ -1,8 +1,6 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-from os import remove, path
-
 from django.db import models
 from django.db.models.signals import pre_delete
 from django.contrib.postgres import fields as pg_fields
@@ -96,6 +94,6 @@ class Job(models.Model):
 
 @receiver(pre_delete, sender=Job)
 def delete_file(sender, instance, **kwargs):
+    assert isinstance(instance, Job)
     if instance.file:
-        if path.isfile(instance.file.path):
-            remove(instance.file.path)
+        instance.file.delete()

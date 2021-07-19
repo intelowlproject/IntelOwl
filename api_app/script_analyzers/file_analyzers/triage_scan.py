@@ -6,7 +6,6 @@ import logging
 import requests
 
 from api_app.exceptions import AnalyzerRunException, AnalyzerConfigurationException
-from api_app.helpers import get_binary
 from api_app.script_analyzers import classes
 from intel_owl import secrets
 
@@ -46,9 +45,8 @@ class TriageScanFile(classes.FileAnalyzer):
         self.headers = {"Authorization": f"Bearer {self.__api_key}"}
 
         name_to_send = self.filename if self.filename else self.md5
-        binary = get_binary(self.job_id)
         files = {
-            "file": (name_to_send, binary),
+            "file": (name_to_send, self.binary),
             "_json": (None, b'{"kind": "file", "interactive": false}'),
         }
 

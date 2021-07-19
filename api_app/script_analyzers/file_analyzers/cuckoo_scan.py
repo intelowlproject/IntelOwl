@@ -7,7 +7,6 @@ import requests
 import logging
 
 from api_app.exceptions import AnalyzerRunException, AnalyzerConfigurationException
-from api_app.helpers import get_binary
 from api_app.script_analyzers.classes import FileAnalyzer
 from intel_owl import secrets
 
@@ -41,11 +40,10 @@ class CuckooAnalysis(FileAnalyzer):
         if not self.cuckoo_url:
             raise AnalyzerConfigurationException("cuckoo URL missing")
 
-        binary = get_binary(self.job_id)
-        if not binary:
+        if not self.binary:
             raise AnalyzerRunException("is the binary empty?!")
 
-        self.__cuckoo_request_scan(binary)
+        self.__cuckoo_request_scan(self.binary)
         self.__cuckoo_poll_result()
         result = self.__cuckoo_retrieve_and_create_report()
 

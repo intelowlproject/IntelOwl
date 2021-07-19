@@ -8,7 +8,7 @@ import logging
 
 from api_app.exceptions import AnalyzerRunException
 from api_app.script_analyzers.classes import FileAnalyzer
-from api_app.helpers import get_now_date_only, get_binary
+from api_app.helpers import get_now_date_only
 from intel_owl import secrets
 
 logger = logging.getLogger(__name__)
@@ -47,8 +47,7 @@ class IntezerScan(FileAnalyzer):
         session.headers["Authorization"] = f"Bearer {intezer_token}"
 
         name_to_send = self.filename if self.filename else self.md5
-        binary = get_binary(self.job_id)
-        files = {"file": (name_to_send, binary)}
+        files = {"file": (name_to_send, self.binary)}
         logger.info(f"intezer md5 {self.md5} sending sample for analysis")
         response = session.post(self.base_url + "/analyze", files=files)
         if response.status_code != 201:

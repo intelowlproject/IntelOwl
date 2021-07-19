@@ -2,7 +2,6 @@
 # See the file 'LICENSE' for copying permission.
 
 from json import dumps as json_dumps
-from api_app.helpers import get_binary
 from api_app.script_analyzers.classes import FileAnalyzer, DockerBasedAnalyzer
 
 
@@ -29,8 +28,6 @@ class Floss(FileAnalyzer, DockerBasedAnalyzer):
         )
 
     def run(self):
-        # get binary
-        binary = get_binary(self.job_id)
         # make request data
         fname = str(self.filename).replace("/", "_").replace(" ", "_")
         args = [f"@{fname}", f"--output-json=/tmp/{fname}.json"]
@@ -39,7 +36,7 @@ class Floss(FileAnalyzer, DockerBasedAnalyzer):
             "timeout": self.timeout,
             "callback_context": {"read_result_from": fname},
         }
-        req_files = {fname: binary}
+        req_files = {fname: self.binary}
         result = self._docker_run(req_data, req_files)
         result["exceeded_max_number_of_strings"] = {}
 

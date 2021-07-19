@@ -1,7 +1,6 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-from api_app.helpers import get_binary
 from api_app.script_analyzers.classes import FileAnalyzer, DockerBasedAnalyzer
 
 
@@ -14,12 +13,10 @@ class PEframe(FileAnalyzer, DockerBasedAnalyzer):
     poll_distance: int = 5
 
     def run(self):
-        # get binary
-        binary = get_binary(self.job_id)
         # make request data
         fname = str(self.filename).replace("/", "_").replace(" ", "_")
         req_data = {"args": ["-j", f"@{fname}"]}
-        req_files = {fname: binary}
+        req_files = {fname: self.binary}
 
         result = self._docker_run(req_data, req_files)
 

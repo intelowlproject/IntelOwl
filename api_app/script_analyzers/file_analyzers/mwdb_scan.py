@@ -9,7 +9,6 @@ import logging
 from intel_owl import secrets
 
 from api_app.exceptions import AnalyzerRunException
-from api_app.helpers import get_binary
 from api_app.script_analyzers.classes import FileAnalyzer
 
 logger = logging.getLogger(__name__)
@@ -28,12 +27,11 @@ class MWDB_Scan(FileAnalyzer):
 
     def run(self):
         mwdb = mwdblib.MWDB(api_key=self.__api_key)
-        binary = get_binary(self.job_id)
-        query = str(hashlib.sha256(binary).hexdigest())
+        query = str(hashlib.sha256(self.binary).hexdigest())
 
         if self.upload_file:
             logger.info(f"mwdb_scan uploading sample: {self.md5}")
-            file_object = mwdb.upload_file(query, binary)
+            file_object = mwdb.upload_file(query, self.binary)
             file_object.flush()
             for _try in range(self.max_tries):
                 logger.info(

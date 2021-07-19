@@ -7,7 +7,6 @@ import logging
 import requests
 
 from api_app.exceptions import AnalyzerRunException
-from api_app.helpers import get_binary
 from api_app.script_analyzers.observable_analyzers import vt2_get
 from api_app.script_analyzers import classes
 from intel_owl import secrets
@@ -58,11 +57,10 @@ class VirusTotalv2ScanFile(classes.FileAnalyzer):
         return result if result else resp
 
     def __vt_request_scan(self, notify_url):
-        binary = get_binary(self.job_id)
         params = {"apikey": self.__api_key}
         if notify_url:
             params["notify_url"] = notify_url
-        files = {"file": binary}
+        files = {"file": self.binary}
 
         try:
             resp = requests.post(

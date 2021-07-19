@@ -1,7 +1,6 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-from api_app.helpers import get_binary
 from api_app.script_analyzers.classes import FileAnalyzer, DockerBasedAnalyzer
 
 
@@ -17,8 +16,6 @@ class Manalyze(FileAnalyzer, DockerBasedAnalyzer):
     # whereas subprocess timeout is kept as 60 * 9 = 9 minutes
 
     def run(self):
-        # get binary
-        binary = get_binary(self.job_id)
         # make request data
         fname = str(self.filename).replace("/", "_").replace(" ", "_")
         args = [f"@{fname}", "--output", "json"]
@@ -26,6 +23,6 @@ class Manalyze(FileAnalyzer, DockerBasedAnalyzer):
             "args": args,
             "timeout": self.timeout,
         }
-        req_files = {fname: binary}
+        req_files = {fname: self.binary}
         report = self._docker_run(req_data, req_files)
         return report.values()

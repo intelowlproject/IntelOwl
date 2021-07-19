@@ -17,7 +17,6 @@ from intel_owl.celery import app as celery_app
 from .utils import (
     set_job_status,
     set_failed_analyzer,
-    get_filepath_filename,
     get_observable_data,
     adjust_analyzer_config,
 )
@@ -34,9 +33,7 @@ def start_analyzers(
     is_sample,
 ):
     set_job_status(job_id, "running")
-    if is_sample:
-        file_path, filename = get_filepath_filename(job_id)
-    else:
+    if not is_sample:
         observable_name, observable_classification = get_observable_data(job_id)
 
     for analyzer in analyzers_to_execute:
@@ -94,8 +91,6 @@ def start_analyzers(
                         f"file_analyzers.{module}",
                         analyzer,
                         job_id,
-                        file_path,
-                        filename,
                         md5,
                         additional_config_params,
                     ]

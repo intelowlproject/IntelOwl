@@ -77,15 +77,6 @@ def get_basic_report_template(analyzer_name):
     }
 
 
-def get_filepath_filename(job_id):
-    # this function allows to minimize access to the database
-    # in this way the analyzers could not touch the DB until the end of the analysis
-    job_object = Job.object_by_job_id(job_id)
-    filename = job_object.file_name
-    file_path = job_object.file.path
-    return file_path, filename
-
-
 def get_observable_data(job_id):
     job_object = Job.object_by_job_id(job_id)
     observable_name = job_object.observable_name

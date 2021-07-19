@@ -10,6 +10,10 @@ class AnalyzerConfigurationException(Exception):
     pass
 
 
+class AnalyzerPreparationException(Exception):
+    pass
+
+
 class AnalyzerRunException(Exception):
     pass
 

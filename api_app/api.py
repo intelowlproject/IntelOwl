@@ -6,6 +6,7 @@ import logging
 from intel_owl.celery import app as celery_app
 from api_app import models, serializers
 from api_app.permissions import ExtendedObjectPermissions
+from .exceptions import AnalyzerPreparationException
 from .analyzers_manager import controller as analyzers_controller
 
 from wsgiref.util import FileWrapper
@@ -75,11 +76,11 @@ def prepare_for_analysis(serializer, params):
     )
     params["analyzers_to_execute"] = cleaned_analyzer_list
     if len(cleaned_analyzer_list) < 1:
-        logger.info(
-            """after the filter, no analyzers can be run.
-                Try with other analyzers"""
+        raise AnalyzerPreparationException(
+            """
+            No Analyzers can be run after filtering.
+            """
         )
-        return {"error": "no analyzers can be run after filtering."}
 
     runtime_configuration = serialized_data.pop("runtime_configuration", {})
 
@@ -87,10 +88,14 @@ def prepare_for_analysis(serializer, params):
     serializer.save(**params)
     md5 = serializer.data.get("md5", "")
     job_id = serializer.data.get("id", None)
-    logger.info(f"New Job added with ID: #{job_id} and md5: {md5}.")
 
     if not job_id:
-        return {"error": "failed to create new job: job_id is None"}
+        raise AnalyzerPreparationException(
+            """
+            Failed to create a new job: job_id is None.
+            """
+        )
+    logger.info(f"New Job added with ID: #{job_id} and md5: {md5}.")
 
     prep_data = {
         "job_id": job_id,
@@ -366,9 +371,6 @@ def analyze_file(request):
             return Response(
                 {"error": error_message}, status=status.HTTP_400_BAD_REQUEST
             )
-
-        if "error" in prep_data.keys():
-            return Response(prep_data, status=status.HTTP_400_BAD_REQUEST)
 
         return send_for_analysis(prep_data, test)
 

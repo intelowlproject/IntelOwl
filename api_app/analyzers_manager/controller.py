@@ -2,7 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 
 import logging
-from typing import Union, Dict, List
+from typing import Dict, List
 from celery import uuid
 from django.core.cache import cache
 from django.utils.module_loading import import_string
@@ -38,11 +38,10 @@ def build_cache_key(job_id: int) -> str:
     return f"job.{job_id}.analyzers_manager.task_ids"
 
 
-def filter_analyzers(
-    serialized_data: Dict, analyzers_requested: Union[List, str], warnings: List
-) -> List[str]:
+def filter_analyzers(serialized_data: Dict, warnings: List) -> List[str]:
     # init empty list
     cleaned_analyzer_list = []
+    analyzers_requested = serialized_data["analyzers_requested"]
 
     # run all analyzers ?
     run_all = analyzers_requested == ALL_ANALYZERS

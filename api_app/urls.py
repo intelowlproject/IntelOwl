@@ -6,7 +6,8 @@ from rest_framework import routers
 
 from .api import (
     ask_analysis_availability,
-    send_analysis_request,
+    analyze_file,
+    analyze_observable,
     download_sample,
     TagViewSet,
     JobViewSet,
@@ -26,7 +27,8 @@ urlpatterns = [
     path("auth/logout", LogoutView.as_view(), name="auth_logout"),
     # Main APIs
     path("ask_analysis_availability", ask_analysis_availability),
-    path("send_analysis_request", send_analysis_request),
+    path("analyze_file", analyze_file),
+    path("analyze_observable", analyze_observable),
     path("download_sample", download_sample),
     path(r"", include("api_app.analyzers_manager.urls")),
     # Viewsets

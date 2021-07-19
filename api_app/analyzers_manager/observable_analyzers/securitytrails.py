@@ -19,12 +19,9 @@ class SecurityTrails(classes.ObservableAnalyzer):
     def run(self):
         headers = {"apikey": self.__api_key, "Content-Type": "application/json"}
 
-        if self.observable_classification == self._serializer.ObservableTypes.IP.value:
+        if self.observable_classification == self.ObservableTypes.IP.value:
             uri = f"ips/nearby/{self.observable_name}"
-        elif (
-            self.observable_classification
-            == self._serializer.ObservableTypes.DOMAIN.value
-        ):
+        elif self.observable_classification == self.ObservableTypes.DOMAIN.value:
             if self.analysis_type == "current":
                 if self.current_type == "details":
                     uri = f"domain/{self.observable_name}"

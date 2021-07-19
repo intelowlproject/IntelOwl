@@ -13,6 +13,7 @@ from intel_owl.celery import app as celery_app
 from .classes import BaseAnalyzerMixin
 from .models import AnalyzerReport
 from .serializers import AnalyzerConfigSerializer
+from .dataclasses import AnalyzerConfig
 from ..models import Job
 from ..helpers import get_now
 from ..exceptions import AlreadyFailedJobException, NotRunnableAnalyzer
@@ -248,8 +249,7 @@ def kill_running_analysis(job_id: int) -> None:
         cache.delete(key)
 
 
-def run_analyzer(job_id: int, config_dict: dict, **kwargs) -> None:
-    config = AnalyzerConfigSerializer.dict_to_dataclass(config_dict)
+def run_analyzer(job_id: int, config: AnalyzerConfig, **kwargs) -> None:
     try:
         cls_path = build_import_path(
             config.python_module,
@@ -264,7 +264,7 @@ def run_analyzer(job_id: int, config_dict: dict, **kwargs) -> None:
         except ImportError:
             raise Exception(f"Class: {cls_path} couldn't be imported")
 
-        instance = klass(config_dict=config_dict, job_id=job_id, **kwargs)
+        instance = klass(config=config, job_id=job_id, **kwargs)
         instance.start()
     except Exception as e:
         set_failed_analyzer(job_id, config.name, str(e))

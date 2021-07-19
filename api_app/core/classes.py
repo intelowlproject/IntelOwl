@@ -11,7 +11,7 @@ from django.utils.functional import cached_property
 
 from api_app.models import Job
 from .models import AbstractReport
-from .serializers import AbstractConfigSerializer
+from .dataclasses import AbstractConfig
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +22,7 @@ class Plugin(metaclass=ABCMeta):
     For internal use only.
     """
 
-    _config_dict: dict
+    _config: AbstractConfig
     job_id: int
     kwargs: dict
     report: AbstractReport
@@ -32,19 +32,12 @@ class Plugin(metaclass=ABCMeta):
         return Job.objects.get(pk=self.job_id)
 
     @cached_property
-    def _serializer(self) -> AbstractConfigSerializer:
-        klass = self.get_serializer_class()
-        serializer = klass(data=self._config_dict)
-        serializer.is_valid(raise_exception=True)
-        return serializer
-
-    @cached_property
     def _secrets(self) -> dict:
-        return self._serializer._read_secrets()
+        return self._config._read_secrets()
 
-    @cached_property
+    @property
     def _params(self) -> dict:
-        return self._serializer.data["config"]
+        return self._config.config
 
     def set_params(self, params: dict):
         """
@@ -90,13 +83,6 @@ class Plugin(metaclass=ABCMeta):
         """
         raise NotImplementedError()
 
-    @abstractmethod
-    def get_serializer_class(self) -> AbstractConfigSerializer:
-        """
-        Returns serializer class
-        """
-        raise NotImplementedError()
-
     def get_error_message(self, exc, is_base_err=False):
         return f" {'[Unexpected error]' if is_base_err else '[Error]'}: '{exc}'"
 
@@ -139,8 +125,8 @@ class Plugin(metaclass=ABCMeta):
         self.report.errors.append(str(exc))
         self.report.status = self.report.Statuses.FAILED.name
 
-    def __init__(self, config_dict: dict, job_id: int, **kwargs):
-        self._config_dict = config_dict
+    def __init__(self, config: AbstractConfig, job_id: int, **kwargs):
+        self._config = config
         self.job_id = job_id
         self.kwargs = kwargs
         self.report = self.init_report_object()

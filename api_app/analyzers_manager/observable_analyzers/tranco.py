@@ -12,7 +12,7 @@ class Tranco(classes.ObservableAnalyzer):
 
     def run(self):
         observable_to_analyze = self.observable_name
-        if self.observable_classification == self._serializer.ObservableTypes.URL.value:
+        if self.observable_classification == self.ObservableTypes.URL.value:
             observable_to_analyze = urlparse(self.observable_name).hostname
 
         url = self.base_url + observable_to_analyze

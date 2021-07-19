@@ -15,6 +15,8 @@ from api_app.core.classes import Plugin
 from api_app.helpers import generate_sha256
 
 from .models import AnalyzerReport
+from .dataclasses import AnalyzerConfig
+from .constants import HashChoices, ObservableTypes, TypeChoices
 from .serializers import AnalyzerConfigSerializer
 
 logger = logging.getLogger(__name__)
@@ -27,9 +29,13 @@ class BaseAnalyzerMixin(Plugin):
     always use either one of ObservableAnalyzer or FileAnalyzer classes.
     """
 
+    HashChoices = HashChoices
+    ObservableTypes = ObservableTypes
+    TypeChoices = TypeChoices
+
     @property
     def analyzer_name(self) -> str:
-        return self._config_dict["name"]
+        return self._config.name
 
     def init_report_object(self) -> AnalyzerReport:
         """
@@ -52,9 +58,6 @@ class BaseAnalyzerMixin(Plugin):
             AnalyzerConfigurationException,
             AnalyzerRunException,
         )
-
-    def get_serializer_class(self) -> AnalyzerConfigSerializer:
-        return AnalyzerConfigSerializer
 
     def get_error_message(self, err, is_base_err=False):
         """
@@ -117,15 +120,15 @@ class ObservableAnalyzer(BaseAnalyzerMixin):
     observable_name: str
     observable_classification: str
 
-    def __init__(self, config_dict: dict, job_id: int, **kwargs):
-        super(ObservableAnalyzer, self).__init__(config_dict, job_id, **kwargs)
+    def __init__(self, config: AnalyzerConfig, job_id: int, **kwargs):
+        super(ObservableAnalyzer, self).__init__(config, job_id, **kwargs)
         # check if we should run the hash instead of the binary
-        if self._job.is_sample and config_dict.get("run_hash", False):
+        if self._job.is_sample and config.run_hash:
             self.observable_classification = (
-                AnalyzerConfigSerializer.self._serializer.ObservableTypes.HASH
+                AnalyzerConfigSerializer.ObservableTypes.HASH
             )
             # check which kind of hash the analyzer needs
-            run_hash_type = config_dict["run_hash_type"]
+            run_hash_type = config.run_hash_type
             if run_hash_type == AnalyzerConfigSerializer.HashChoices.MD5:
                 self.observable_name = self._job.md5
             else:
@@ -162,8 +165,8 @@ class FileAnalyzer(BaseAnalyzerMixin):
     filename: str
     file_mimetype: str
 
-    def __init__(self, config_dict: dict, job_id: int, **kwargs):
-        super(FileAnalyzer, self).__init__(config_dict, job_id, **kwargs)
+    def __init__(self, config: AnalyzerConfig, job_id: int, **kwargs):
+        super(FileAnalyzer, self).__init__(config, job_id, **kwargs)
         self.md5 = self._job.md5
         self.filepath = self._job.file.path
         self.filename = self._job.file_name

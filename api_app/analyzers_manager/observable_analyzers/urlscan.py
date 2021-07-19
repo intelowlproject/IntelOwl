@@ -81,7 +81,7 @@ class UrlScan(ObservableAnalyzer):
             "q": f'{self.observable_classification}:"{self.observable_name}"',
             "size": self.search_size,
         }
-        if self.observable_classification == self._serializer.ObservableTypes.URL.value:
+        if self.observable_classification == self.ObservableTypes.URL.value:
             params["q"] = "page." + params["q"]
         try:
             resp = self.session.get(self.base_url + "/search/", params=params)

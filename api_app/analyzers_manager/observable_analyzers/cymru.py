@@ -14,10 +14,7 @@ logger = logging.getLogger(__name__)
 class Cymru(ObservableAnalyzer):
     def run(self):
         results = {}
-        if (
-            self.observable_classification
-            != self._serializer.ObservableTypes.HASH.value
-        ):
+        if self.observable_classification != self.ObservableTypes.HASH.value:
             raise AnalyzerRunException(
                 f"observable type {self.observable_classification} not supported"
             )

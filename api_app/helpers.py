@@ -5,7 +5,6 @@
 
 import json
 import logging
-import hashlib
 from magic import from_buffer as magic_from_buffer
 
 from django.utils import timezone

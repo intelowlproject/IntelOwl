@@ -5,7 +5,6 @@ import datetime
 import logging
 
 from api_app.models import Job
-from api_app.script_analyzers import general
 from api_app.helpers import get_now
 from intel_owl import secrets
 

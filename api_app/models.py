@@ -1,5 +1,6 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
+import logging
 
 from django.db import models
 from django.db.models.signals import pre_delete
@@ -9,6 +10,8 @@ from django.dispatch import receiver
 
 
 from .exceptions import AnalyzerRunException
+
+logger = logging.getLogger(__name__)
 
 
 def file_directory_path(instance, filename):
@@ -90,6 +93,26 @@ class Job(models.Model):
         if self.is_sample:
             return f'Job("{self.file_name}")'
         return f'Job("{self.observable_name}")'
+
+    @classmethod
+    def set_status(cls, job_id, status, errors=None):
+        message = f"setting job_id {job_id} to status {status}"
+        if status == "failed":
+            logger.error(message)
+        else:
+            logger.info(message)
+        job_object = Job.object_by_job_id(job_id)
+        if errors:
+            job_object.errors.extend(errors)
+        job_object.status = status
+        job_object.save()
+
+    @classmethod
+    def sha256sum(cls, job_id):
+        import hashlib
+
+        job = Job.object_by_job_id(job_id)
+        return hashlib.sha256(job.file.read()).hexdigest()
 
 
 @receiver(pre_delete, sender=Job)

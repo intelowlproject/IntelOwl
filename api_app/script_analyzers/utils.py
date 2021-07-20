@@ -49,7 +49,7 @@ def set_report_and_cleanup(analyzer_name, job_id, report):
                 status_to_set = "failed"
             elif failed_analyzers >= 1:
                 status_to_set = "reported_with_fails"
-            set_job_status(job_id, status_to_set)
+            Job.set_status(job_id, status_to_set)
             job_object.finished_analysis_time = get_now()
             job_object.save(update_fields=["finished_analysis_time"])
 
@@ -60,7 +60,7 @@ def set_report_and_cleanup(analyzer_name, job_id, report):
 
     except Exception as e:
         logger.exception(f"job_id: {job_id}, Error: {e}")
-        set_job_status(job_id, "failed", errors=[str(e)])
+        Job.set_status(job_id, "failed", errors=[str(e)])
         job_object.finished_analysis_time = get_now()
         job_object.save(update_fields=["finished_analysis_time"])
 
@@ -82,19 +82,6 @@ def get_observable_data(job_id):
     observable_name = job_object.observable_name
     observable_classification = job_object.observable_classification
     return observable_name, observable_classification
-
-
-def set_job_status(job_id, status, errors=None):
-    message = f"setting job_id {job_id} to status {status}"
-    if status == "failed":
-        logger.error(message)
-    else:
-        logger.info(message)
-    job_object = Job.object_by_job_id(job_id)
-    if errors:
-        job_object.errors.extend(errors)
-    job_object.status = status
-    job_object.save()
 
 
 def set_failed_analyzer(analyzer_name, job_id, err_msg):

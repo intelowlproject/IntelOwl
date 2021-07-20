@@ -125,10 +125,3 @@ def filter_analyzers(
             cleaned_analyzer_list.append(analyzer)
 
     return cleaned_analyzer_list
-
-
-def generate_sha256(job_id):
-    from api_app.models import Job
-
-    job = Job.object_by_job_id(job_id)
-    return hashlib.sha256(job.file.read()).hexdigest()

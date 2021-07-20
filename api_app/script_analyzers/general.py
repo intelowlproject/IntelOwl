@@ -10,16 +10,15 @@ from api_app.exceptions import (
     AnalyzerConfigurationException,
     AnalyzerRunException,
 )
-from api_app.helpers import generate_sha256
 from intel_owl.settings import CELERY_QUEUES
 from intel_owl.celery import app as celery_app
 
 from .utils import (
-    set_job_status,
     set_failed_analyzer,
     get_observable_data,
     adjust_analyzer_config,
 )
+from ..models import Job
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +31,7 @@ def start_analyzers(
     md5,
     is_sample,
 ):
-    set_job_status(job_id, "running")
+    Job.set_status(job_id, "running")
     if not is_sample:
         observable_name, observable_classification = get_observable_data(job_id)
 
@@ -69,7 +68,7 @@ def start_analyzers(
                     if run_hash_type == "md5":
                         hash_value = md5
                     elif run_hash_type == "sha256":
-                        hash_value = generate_sha256(job_id)
+                        hash_value = Job.object_by_job_id(job_id)
                     else:
                         error_message = (
                             f"only md5 and sha256 are supported "

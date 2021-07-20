@@ -153,6 +153,14 @@ class _JobCreateSerializerMixin(
 
         run_all_available_analyzers = data.get("run_all_available_analyzers", False)
         analyzers_requested = data.get("analyzers_requested", [])
+        if not run_all_available_analyzers and not analyzers_requested:
+            raise serializers.ValidationError(
+                """
+                Atleast one of analyzers_requested and run_all_available_analyzers
+                should be provided.
+                """
+            )
+
         if run_all_available_analyzers:
             if analyzers_requested:
                 raise serializers.ValidationError(
@@ -191,6 +199,7 @@ class FileAnalysisSerializer(_JobCreateSerializerMixin):
     file_name = serializers.CharField(required=True)
     is_sample = serializers.HiddenField(default=True)
     file_mimetype = serializers.HiddenField(default=None)
+    analyzers_requested = serializers.ListField(default=list)
 
     class Meta:
         model = Job
@@ -207,7 +216,6 @@ class FileAnalysisSerializer(_JobCreateSerializerMixin):
             "run_all_available_analyzers",
             "runtime_configuration",
             "analyzers_requested",
-            "analyzers_to_execute",
             "tags_id",
         )
 
@@ -233,6 +241,7 @@ class ObservableAnalysisSerializer(_JobCreateSerializerMixin):
     observable_name = serializers.CharField(required=True)
     observable_classification = serializers.CharField(required=True)
     is_sample = serializers.HiddenField(default=False)
+    analyzers_requested = serializers.ListField(default=list)
 
     class Meta:
         model = Job
@@ -248,6 +257,5 @@ class ObservableAnalysisSerializer(_JobCreateSerializerMixin):
             "run_all_available_analyzers",
             "runtime_configuration",
             "analyzers_requested",
-            "analyzers_to_execute",
             "tags_id",
         )

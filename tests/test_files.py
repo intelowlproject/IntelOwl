@@ -559,6 +559,9 @@ class FileAnalyzersDocTests(FileAnalyzer):
         self.assertEqual(report.get("success", False), True)
 
     def test_docinfo_experimental(self):
+        job = Job.object_by_job_id(self.job_id)
+        self.runtime_configuration = job.runtime_configuration
+
         analyzer_name = "Doc_Info_Experimental"
         additional_params = {"experimental": True}
         utils.adjust_analyzer_config(

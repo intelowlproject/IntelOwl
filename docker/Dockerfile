@@ -23,8 +23,6 @@ RUN pip3 install --upgrade pip
 COPY requirements.txt $PYTHONPATH/requirements.txt
 COPY test-requirements.txt $PYTHONPATH/test-requirements.txt
 WORKDIR $PYTHONPATH
-# otherwise we have conflict with click dependencies between Quark and Celery
-ENV QUARK_WITHOUT_CLI=1
 
 RUN pip3 install --no-cache-dir --compile -r requirements.txt
 # install elasticsearch-dsl's appropriate version as specified by user

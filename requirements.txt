@@ -33,7 +33,7 @@ pypssl==2.2
 pysafebrowsing==0.1.1
 PySocks==1.7.1
 python-magic==0.4.22
-git+https://github.com/quark-engine/quark-engine.git@v21.7.1 #pip version has conflict with celery
+quark-engine==21.7.2
 requests==2.25.1
 speakeasy-emulator==1.5.3
 uWSGI==2.0.19.1

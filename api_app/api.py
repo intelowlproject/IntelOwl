@@ -263,77 +263,7 @@ def ask_analysis_availability(request):
 @add_docs(
     description="""
     This endpoint allows to start a Job related to a file""",
-    parameters=[
-        OpenApiParameter(
-            name="is_sample",
-            type=OpenApiTypes.BOOL,
-            description="is a sample (file) or an observable (domain, ip, ...)",
-        ),
-        OpenApiParameter(
-            name="md5", type=OpenApiTypes.STR, description="md5 of the item to analyze"
-        ),
-        OpenApiParameter(
-            name="file",
-            type=OpenApiTypes.BINARY,
-            description="required if is_sample=True, the binary",
-        ),
-        OpenApiParameter(
-            name="file_mimetype",
-            type=OpenApiTypes.STR,
-            description="optional, the binary mimetype, calculated by default",
-        ),
-        OpenApiParameter(
-            name="file_name",
-            type=OpenApiTypes.STR,
-            description="optional if is_sample=True, the binary name",
-        ),
-        OpenApiParameter(
-            name="analyzers_requested",
-            type=OpenApiTypes.OBJECT,
-            description="list of requested analyzer to run, before filters",
-        ),
-        OpenApiParameter(
-            name="tags_id",
-            type=OpenApiTypes.OBJECT,
-            description="list of id's of tags to apply to job",
-        ),
-        OpenApiParameter(
-            name="run_all_available_analyzers",
-            type=OpenApiTypes.BOOL,
-            description="default False",
-        ),
-        OpenApiParameter(
-            name="private",
-            type=OpenApiTypes.BOOL,
-            description="""
-            Default False,
-            enable it to allow view permissions to only requesting user's groups.""",
-        ),
-        OpenApiParameter(
-            name="force_privacy",
-            type=OpenApiTypes.BOOL,
-            description="""
-            Default False,
-            enable it if you want to avoid to run analyzers with privacy issues""",
-        ),
-        OpenApiParameter(
-            name="disable_external_analyzers",
-            type=OpenApiTypes.BOOL,
-            description="""
-            Default False, enable it if you want to exclude external analyzers""",
-        ),
-        OpenApiParameter(
-            name="runtime_configuration",
-            type=OpenApiTypes.OBJECT,
-            description=r"""
-            Default {}, contains additional parameters for particular analyzers""",
-        ),
-        OpenApiParameter(
-            name="test",
-            type=OpenApiTypes.BOOL,
-            description="disable analysis for API testing",
-        ),
-    ],
+    request=serializers.FileAnalysisSerializer,
     responses={
         202: inline_serializer(
             "SendAnalysisRequestSuccessResponse",
@@ -367,72 +297,7 @@ def analyze_file(request):
 @add_docs(
     description="""
     This endpoint allows to start a Job related to an observable""",
-    parameters=[
-        OpenApiParameter(
-            name="is_sample",
-            type=OpenApiTypes.BOOL,
-            description="is a sample (file) or an observable (domain, ip, ...)",
-        ),
-        OpenApiParameter(
-            name="md5", type=OpenApiTypes.STR, description="md5 of the item to analyze"
-        ),
-        OpenApiParameter(
-            name="observable_name",
-            type=OpenApiTypes.STR,
-            description="required if is_sample=False, the observable value",
-        ),
-        OpenApiParameter(
-            name="observable_classification",
-            type=OpenApiTypes.STR,
-            description="required if is_sample=False, (domain, ip, ...)",
-        ),
-        OpenApiParameter(
-            name="analyzers_requested",
-            type=OpenApiTypes.OBJECT,
-            description="list of requested analyzer to run, before filters",
-        ),
-        OpenApiParameter(
-            name="tags_id",
-            type=OpenApiTypes.OBJECT,
-            description="list of id's of tags to apply to job",
-        ),
-        OpenApiParameter(
-            name="run_all_available_analyzers",
-            type=OpenApiTypes.BOOL,
-            description="default False",
-        ),
-        OpenApiParameter(
-            name="private",
-            type=OpenApiTypes.BOOL,
-            description="""
-            Default False,
-            enable it to allow view permissions to only requesting user's groups.""",
-        ),
-        OpenApiParameter(
-            name="force_privacy",
-            type=OpenApiTypes.BOOL,
-            description="""
-            Default False,
-            enable it if you want to avoid to run analyzers with privacy issues""",
-        ),
-        OpenApiParameter(
-            name="disable_external_analyzers",
-            type=OpenApiTypes.BOOL,
-            description="""
-            Default False, enable it if you want to exclude external analyzers""",
-        ),
-        OpenApiParameter(
-            name="runtime_configuration",
-            type=OpenApiTypes.OBJECT,
-            description=r"""
-            Default {}, contains additional parameters for particular analyzers""",
-        ),
-        OpenApiParameter(
-            name="test",
-            type=OpenApiTypes.BOOL,
-            description="disable analysis for API testing",
-        ),
-    ],
+    request=serializers.ObservableAnalysisSerializer,
     responses={
         202: inline_serializer(
             "SendAnalysisRequestSuccessResponse",

@@ -44,7 +44,7 @@ def filter_analyzers(serialized_data: Dict, warnings: List) -> List[str]:
     analyzers_requested = serialized_data["analyzers_requested"]
 
     # run all analyzers ?
-    run_all = analyzers_requested == ALL_ANALYZERS
+    run_all = serialized_data.get("run_all_available_analyzers", False)
 
     # read config
     analyzer_dataclasses = AnalyzerConfigSerializer.get_as_dataclasses()

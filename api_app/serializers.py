@@ -9,7 +9,6 @@ from rest_framework_guardian.serializers import ObjectPermissionsAssignmentMixin
 
 from api_app.models import Job, Tag
 from .helpers import calculate_mimetype
-from .analyzers_manager import controller as analyzers_controller
 from .analyzers_manager.serializers import AnalyzerReportSerializer
 from .connectors_manager.serializers import ConnectorReportSerializer
 
@@ -160,12 +159,10 @@ class _JobCreateSerializerMixin(
                     {
                         """
                         analyzers_requested and run_all_available_analyzers
-                        cannot be used together
+                        cannot be used together.
                         """
                     }
                 )
-
-            data["analyzers_requested"] = analyzers_controller.ALL_ANALYZERS
 
         return data
 
@@ -207,6 +204,7 @@ class FileAnalysisSerializer(_JobCreateSerializerMixin):
             "file",
             "file_name",
             "file_mimetype",
+            "run_all_available_analyzers",
             "runtime_configuration",
             "analyzers_requested",
             "analyzers_to_execute",
@@ -247,6 +245,7 @@ class ObservableAnalysisSerializer(_JobCreateSerializerMixin):
             "disable_external_analyzers",
             "observable_name",
             "observable_classification",
+            "run_all_available_analyzers",
             "runtime_configuration",
             "analyzers_requested",
             "analyzers_to_execute",

@@ -237,7 +237,7 @@ def kill_running_analysis(job_id: int) -> None:
         cache.delete(key)
 
 
-def run_analyzer(job_id: int, config: AnalyzerConfig, **kwargs) -> None:
+def run_analyzer(job_id: int, config: AnalyzerConfig, **kwargs) -> AnalyzerReport:
     try:
         cls_path = config.get_full_import_path()
         try:
@@ -246,6 +246,8 @@ def run_analyzer(job_id: int, config: AnalyzerConfig, **kwargs) -> None:
             raise Exception(f"Class: {cls_path} couldn't be imported")
 
         instance = klass(config=config, job_id=job_id, **kwargs)
-        instance.start()
+        report = instance.start()
     except Exception as e:
-        set_failed_analyzer(job_id, config.name, str(e))
+        report = set_failed_analyzer(job_id, config.name, str(e))
+
+    return report

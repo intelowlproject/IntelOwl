@@ -133,8 +133,8 @@ def start_analyzers(
         # get corresponding dataclass
         config = analyzer_dataclasses[a_name]
 
-        # if disabled or unconfigured
-        if not config.is_ready_to_use:
+        # if disabled or unconfigured (this check is bypassed in TEST_MODE)
+        if not config.is_ready_to_use and not settings.TEST_MODE:
             continue
 
         # get runtime_configuration if any specified for this analyzer

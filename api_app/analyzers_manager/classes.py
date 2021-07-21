@@ -15,14 +15,13 @@ from api_app.core.classes import Plugin
 from api_app.helpers import generate_sha256
 
 from .models import AnalyzerReport
-from .dataclasses import AnalyzerConfig
 from .constants import HashChoices, ObservableTypes, TypeChoices
-from .serializers import AnalyzerConfigSerializer
 
 from tests.mock_utils import (
     patch,
     mocked_docker_analyzer_get,
     mocked_docker_analyzer_post,
+    MockResponse,
 )
 
 logger = logging.getLogger(__name__)
@@ -115,7 +114,7 @@ class BaseAnalyzerMixin(Plugin):
         return f"({self.analyzer_name}, job_id: #{self.job_id})"
 
 
-class ObservableAnalyzer(BaseAnalyzerMixin):
+class ObservableAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
     """
     Abstract class for Observable Analyzers.
     Inherit from this branch when defining a IP, URL or domain analyzer.
@@ -126,22 +125,20 @@ class ObservableAnalyzer(BaseAnalyzerMixin):
     observable_name: str
     observable_classification: str
 
-    def __init__(self, config: AnalyzerConfig, job_id: int, **kwargs):
-        super(ObservableAnalyzer, self).__init__(config, job_id, **kwargs)
+    def __post__init__(self):
         # check if we should run the hash instead of the binary
-        if self._job.is_sample and config.run_hash:
-            self.observable_classification = (
-                AnalyzerConfigSerializer.ObservableTypes.HASH
-            )
+        if self._job.is_sample and self._config.run_hash:
+            self.observable_classification = ObservableTypes.HASH.value
             # check which kind of hash the analyzer needs
-            run_hash_type = config.run_hash_type
-            if run_hash_type == AnalyzerConfigSerializer.HashChoices.MD5:
+            run_hash_type = self._config.run_hash_type
+            if run_hash_type == HashChoices.MD5.value:
                 self.observable_name = self._job.md5
             else:
                 self.observable_name = generate_sha256(self.job_id)
         else:
             self.observable_name = self._job.observable_name
             self.observable_classification = self._job.observable_classification
+        return super(ObservableAnalyzer, self).__post__init__()
 
     def before_run(self):
         super().before_run()
@@ -157,8 +154,24 @@ class ObservableAnalyzer(BaseAnalyzerMixin):
             f"Observable: {self.observable_name}."
         )
 
+    @classmethod
+    def _monkeypatch(cls, patches: list = []):
+        patches.extend(
+            [
+                patch(
+                    "requests.get",
+                    return_value=MockResponse({}, 200),
+                ),
+                patch(
+                    "requests.post",
+                    return_value=MockResponse({}, 200),
+                ),
+            ]
+        )
+        return super()._monkeypatch(patches=patches)
 
-class FileAnalyzer(BaseAnalyzerMixin):
+
+class FileAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
     """
     Abstract class for File Analyzers.
     Inherit from this branch when defining a file analyzer.
@@ -171,12 +184,12 @@ class FileAnalyzer(BaseAnalyzerMixin):
     filename: str
     file_mimetype: str
 
-    def __init__(self, config: AnalyzerConfig, job_id: int, **kwargs):
-        super(FileAnalyzer, self).__init__(config, job_id, **kwargs)
+    def __post__init__(self):
         self.md5 = self._job.md5
         self.filepath = self._job.file.path
         self.filename = self._job.file_name
         self.file_mimetype = self._job.file_mimetype
+        return super(FileAnalyzer, self).__post__init__()
 
     def before_run(self):
         super().before_run()
@@ -193,7 +206,7 @@ class FileAnalyzer(BaseAnalyzerMixin):
         )
 
 
-class DockerBasedAnalyzer(metaclass=ABCMeta):
+class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
     """
     Abstract class for a docker based analyzer (integration).
     Inherit this branch along with either

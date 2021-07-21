@@ -146,8 +146,8 @@ class Plugin(metaclass=ABCMeta):
         if settings.TEST_MODE:
             self._monkeypatch()
 
-    def __init__(self, config_dict: dict, job_id: int, **kwargs):
-        self._config_dict = config_dict
+    def __init__(self, config: AbstractConfig, job_id: int, **kwargs):
+        self._config = config
         self.job_id = job_id
         self.kwargs = kwargs
         # some post init processing

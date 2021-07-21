@@ -1,6 +1,10 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
-# mock_utils.py: useful utils for mocking requests and responses for testing
+"""
+mock_utils.py: useful utils for mocking requests and responses for testing
+for observable analyzers, if can customize the behavior based on:
+MOCK_CONNECTIONS to True -> connections to external analyzers are faked
+"""
 
 from unittest import skipIf, skip  # noqa: F401
 from unittest.mock import patch, MagicMock  # noqa: F401
@@ -52,14 +56,6 @@ def if_mock_connections(*decorators):
         return f
 
     return apply_all if settings.MOCK_CONNECTIONS else lambda x: x
-
-
-def mocked_requests(*args, **kwargs):
-    return MockResponse({}, 200)
-
-
-def mocked_requests_noop(*args, **kwargs):
-    return MockResponseNoOp({}, 200)
 
 
 def mocked_docker_analyzer_get(*args, **kwargs):

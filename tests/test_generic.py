@@ -10,7 +10,7 @@ from api_app.analyzers_manager.observable_analyzers import maxmind, talos, tor
 
 from api_app import crons
 
-from .mock_utils import if_mock_connections, patch, skip, mocked_requests
+from .mock_utils import if_mock_connections, patch, skip, MockResponse
 from . import get_logger
 
 logger = get_logger()
@@ -33,7 +33,7 @@ class CronTests(TestCase):
             db_file_path = maxmind.Maxmind.updater({}, db)
             self.assertTrue(os.path.exists(db_file_path))
 
-    @if_mock_connections(patch("requests.get", side_effect=mocked_requests))
+    @if_mock_connections(patch("requests.get", return_value=MockResponse({}, 200)))
     def test_talos_updater(self, mock_get=None):
         db_file_path = talos.Talos.updater()
         self.assertTrue(os.path.exists(db_file_path))

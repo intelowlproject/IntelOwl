@@ -53,11 +53,10 @@ class _AbstractAnalyzersScriptTestCase(TransactionTestCase):
         else:
             return super(_AbstractAnalyzersScriptTestCase, cls).setUpClass()
 
-    @classmethod
-    def setUpTestData(cls):
+    def setUp(self):
         # analyzer config
-        cls.analyzer_configs = AnalyzerConfigSerializer.get_as_dataclasses()
-        return super().setUpTestData()
+        self.analyzer_configs = AnalyzerConfigSerializer.get_as_dataclasses()
+        return super().setUp()
 
     def tearDown(self):
         self.test_job.delete()

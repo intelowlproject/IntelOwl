@@ -2,11 +2,11 @@
 # See the file 'LICENSE' for copying permission.
 
 import logging
+from typing import Union
 
 from intel_owl.celery import app as celery_app
 from api_app import models, serializers
 from api_app.permissions import ExtendedObjectPermissions
-from .exceptions import AnalyzerPreparationException
 from .analyzers_manager import controller as analyzers_controller
 
 from wsgiref.util import FileWrapper
@@ -19,7 +19,11 @@ from rest_framework import serializers as BaseSerializer
 from rest_framework import status, viewsets, mixins
 from rest_framework.decorators import api_view, action
 from rest_framework.permissions import DjangoObjectPermissions
-from rest_framework.exceptions import NotFound, ParseError, PermissionDenied
+from rest_framework.exceptions import (
+    ValidationError,
+    NotFound,
+    PermissionDenied,
+)
 from guardian.decorators import permission_required_or_403
 from rest_framework_guardian.filters import ObjectPermissionsFilter
 from drf_spectacular.utils import (
@@ -33,91 +37,64 @@ from drf_spectacular.types import OpenApiTypes
 logger = logging.getLogger(__name__)
 
 
-def _analysis_request(request, serializer_class):
+def _analysis_request(
+    request,
+    serializer_class: Union[
+        serializers.FileAnalysisSerializer, serializers.ObservableAnalysisSerializer
+    ],
+):
     """
     Prepare and send file/observable for analysis
     """
-
-    source = str(request.user)
     warnings = []
-    try:
-        data_received = request.data
-        logger.info(
-            f"analyze_file received request from {source}."
-            f"Data:{dict(data_received)}."
+    source = str(request.user)
+    data_received = request.data
+    logger.info(
+        f"analyze_file received request from {source}." f"Data:{dict(data_received)}."
+    )
+    test = data_received.get("test", False)
+
+    # serialize request data and validate
+    serializer = serializer_class(data=data_received, context={"request": request})
+    serializer.is_valid(raise_exception=True)
+
+    serialized_data = serializer.validated_data
+    runtime_configuration = serialized_data.pop("runtime_configuration", {})
+
+    cleaned_analyzer_list = analyzers_controller.filter_analyzers(
+        serialized_data,
+        warnings,
+    )
+    if not cleaned_analyzer_list:
+        raise ValidationError("No Analyzers can be run after filtering.")
+
+    # save the arrived data plus new params into a new job object
+    job = serializer.save(source=source, analyzers_to_execute=cleaned_analyzer_list)
+
+    logger.info(f"New Job added to queue <- {repr(job)}.")
+
+    # Check if task is test or not
+    if not test:
+        # fire celery task
+        celery_app.send_task(
+            "start_analyzers",
+            kwargs=dict(
+                job_id=job.pk,
+                analyzers_to_execute=cleaned_analyzer_list,
+                runtime_configuration=runtime_configuration,
+            ),
         )
 
-        test = data_received.get("test", False)
-        params = {"source": source}
+    response_dict = {
+        "status": "accepted",
+        "job_id": job.pk,
+        "warnings": warnings,
+        "analyzers_running": cleaned_analyzer_list,
+    }
 
-        serializer = serializer_class(data=data_received, context={"request": request})
+    logger.debug(response_dict)
 
-        if serializer.is_valid():
-            serialized_data = serializer.validated_data
-
-            cleaned_analyzer_list = analyzers_controller.filter_analyzers(
-                serialized_data,
-                warnings,
-            )
-            params["analyzers_to_execute"] = cleaned_analyzer_list
-            if len(cleaned_analyzer_list) < 1:
-                raise AnalyzerPreparationException(
-                    """
-                    No Analyzers can be run after filtering.
-                    """
-                )
-
-            runtime_configuration = serialized_data.pop("runtime_configuration", {})
-
-            # save the arrived data plus new params into a new job object
-            serializer.save(**params)
-            md5 = serializer.data.get("md5", "")
-            job_id = serializer.data.get("id", None)
-
-            if not job_id:
-                raise AnalyzerPreparationException(
-                    """
-                    Failed to create a new job: job_id is None.
-                    """
-                )
-            logger.info(f"New Job added with ID: #{job_id} and md5: {md5}.")
-
-        else:
-            error_message = f"serializer validation failed: {serializer.errors}"
-            logger.error(error_message)
-            return Response(
-                {"error": error_message}, status=status.HTTP_400_BAD_REQUEST
-            )
-
-        # Check if task is test or not
-        if not test:
-            # fire celery task
-            celery_app.send_task(
-                "start_analyzers",
-                kwargs=dict(
-                    job_id=job_id,
-                    analyzers_to_execute=params["analyzers_to_execute"],
-                    runtime_configuration=runtime_configuration,
-                ),
-            )
-
-        response_dict = {
-            "status": "accepted",
-            "job_id": job_id,
-            "warnings": warnings,
-            "analyzers_running": cleaned_analyzer_list,
-        }
-
-        logger.debug(response_dict)
-
-        return Response(response_dict, status=status.HTTP_200_OK)
-
-    except Exception as e:
-        logger.exception(f"receive_analysis_request requester:{source} error:{e}.")
-        return Response(
-            {"detail": f"error in {serializer_class.__name__} Check logs"},
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        )
+    return Response(response_dict, status=status.HTTP_200_OK)
 
 
 """ REST API endpoints """
@@ -261,29 +238,16 @@ def ask_analysis_availability(request):
 
 
 @add_docs(
-    description="""
-    This endpoint allows to start a Job related to a file""",
+    description="This endpoint allows to start a Job related to a file",
     request=serializers.FileAnalysisSerializer,
     responses={
-        202: inline_serializer(
-            "SendAnalysisRequestSuccessResponse",
+        200: inline_serializer(
+            "FileAnalysisResponseSerializer",
             fields={
                 "status": BaseSerializer.StringRelatedField(),
                 "job_id": BaseSerializer.IntegerField(),
                 "warnings": OpenApiTypes.OBJECT,
                 "analyzers_running": OpenApiTypes.OBJECT,
-            },
-        ),
-        400: inline_serializer(
-            name="SendAnalysisRequestInsufficientData",
-            fields={
-                "error": BaseSerializer.StringRelatedField(),
-            },
-        ),
-        500: inline_serializer(
-            name="SendAnalysisRequestError",
-            fields={
-                "detail": BaseSerializer.StringRelatedField(),
             },
         ),
     },
@@ -295,29 +259,16 @@ def analyze_file(request):
 
 
 @add_docs(
-    description="""
-    This endpoint allows to start a Job related to an observable""",
+    description="This endpoint allows to start a Job related to an observable",
     request=serializers.ObservableAnalysisSerializer,
     responses={
-        202: inline_serializer(
-            "SendAnalysisRequestSuccessResponse",
+        200: inline_serializer(
+            "ObservableAnalysisResponseSerializer",
             fields={
                 "status": BaseSerializer.StringRelatedField(),
                 "job_id": BaseSerializer.IntegerField(),
                 "warnings": OpenApiTypes.OBJECT,
                 "analyzers_running": OpenApiTypes.OBJECT,
-            },
-        ),
-        400: inline_serializer(
-            name="SendAnalysisRequestInsufficientData",
-            fields={
-                "error": BaseSerializer.StringRelatedField(),
-            },
-        ),
-        500: inline_serializer(
-            name="SendAnalysisRequestError",
-            fields={
-                "detail": BaseSerializer.StringRelatedField(),
             },
         ),
     },
@@ -361,7 +312,7 @@ def download_sample(request):
         raise PermissionDenied()
     # make sure it is a sample
     if not job.is_sample:
-        raise ParseError(
+        raise ValidationError(
             detail="Requested job does not have a sample associated with it."
         )
     response = HttpResponse(FileWrapper(job.file), content_type=job.file_mimetype)
@@ -426,16 +377,12 @@ class JobViewSet(
             f"-- (job_id:{pk})."
         )
         # get job object or raise 404
-        try:
-            job = models.Job.objects.get(pk=pk)
-        except models.Job.DoesNotExist:
-            raise NotFound()
-        # check permission
+        job = self.get_object()
         if not request.user.has_perm("api_app.change_job", job):
             raise PermissionDenied()
         # check if job running
         if job.status != "running":
-            raise ParseError(detail="Job is not running")
+            raise ValidationError(detail="Job is not running")
         # close celery tasks
         analyzers_controller.kill_running_analysis(pk)
         # set job status

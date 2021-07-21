@@ -76,10 +76,8 @@ def filter_analyzers(serialized_data: Dict, warnings: List) -> List[str]:
                     )
                 if not config.is_filetype_supported(serialized_data["file_mimetype"]):
                     raise NotRunnableAnalyzer(
-                        f"""
-                        {a_name} won't be run because mimetype
-                        {serialized_data['file_mimetype']} is not supported.
-                        """
+                        f"{a_name} won't be run because mimetype "
+                        f"{serialized_data['file_mimetype']} is not supported."
                     )
             else:
                 if not config.is_type_observable:
@@ -91,10 +89,8 @@ def filter_analyzers(serialized_data: Dict, warnings: List) -> List[str]:
                     serialized_data["observable_classification"]
                 ):
                     raise NotRunnableAnalyzer(
-                        f"""
-                        {a_name} won't be run because does not support
-                         observable type {serialized_data['observable_classification']}.
-                        """
+                        f"{a_name} won't be run because does not support observable  "
+                        f"type {serialized_data['observable_classification']}."
                     )
 
             if serialized_data["force_privacy"] and config.leaks_info:

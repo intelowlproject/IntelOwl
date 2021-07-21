@@ -11,4 +11,5 @@ __all__ = ["ConnectorConfig"]
 
 @dataclasses.dataclass
 class ConnectorConfig(AbstractConfig):
-    pass
+    def get_full_import_path(self) -> str:
+        return f"api_app.connectors_manager.connectors.{self.python_module}"

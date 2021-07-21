@@ -1,5 +1,6 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
+from abc import abstractmethod
 import typing
 import dataclasses
 
@@ -80,3 +81,7 @@ class AbstractConfig:
                 secrets[key_name] = secret_dict["default"]
 
         return secrets
+
+    @abstractmethod
+    def get_full_import_path(self) -> str:
+        raise NotImplementedError()

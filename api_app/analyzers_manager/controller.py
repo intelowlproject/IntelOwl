@@ -27,13 +27,6 @@ ALL_ANALYZERS = "__all__"
 DEFAULT_QUEUE = "default"
 
 
-def build_import_path(cls_path: str, observable_analyzer=True) -> str:
-    if observable_analyzer:
-        return f"api_app.analyzers_manager.observable_analyzers.{cls_path}"
-    else:
-        return f"api_app.analyzers_manager.file_analyzers.{cls_path}"
-
-
 def build_cache_key(job_id: int) -> str:
     return f"job.{job_id}.analyzers_manager.task_ids"
 
@@ -246,14 +239,7 @@ def kill_running_analysis(job_id: int) -> None:
 
 def run_analyzer(job_id: int, config: AnalyzerConfig, **kwargs) -> None:
     try:
-        cls_path = build_import_path(
-            config.python_module,
-            observable_analyzer=(
-                config.is_type_observable
-                or not config.is_type_observable
-                and config.run_hash
-            ),
-        )
+        cls_path = config.get_full_import_path()
         try:
             klass: BaseAnalyzerMixin = import_string(cls_path)
         except ImportError:

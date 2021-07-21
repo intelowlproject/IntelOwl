@@ -25,10 +25,6 @@ DEFAULT_QUEUE = "default"
 DEFAULT_SOFT_TIME_LIMIT = 300
 
 
-def build_import_path(cls_path: str) -> str:
-    return f"api_app.connectors_manager.connectors.{cls_path}"
-
-
 def build_cache_key(job_id: int) -> str:
     return f"job.{job_id}.connector_manager.task_ids"
 
@@ -119,7 +115,7 @@ def set_failed_connector(job_id: int, connector_name: str, err_msg: str):
 def run_connector(job_id: int, config: ConnectorConfig, **kwargs) -> Connector:
     instance = None
     try:
-        cls_path = build_import_path(config.python_module)
+        cls_path = config.get_full_import_path()
         try:
             klass: Connector = import_string(cls_path)
         except ImportError:

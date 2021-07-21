@@ -2,6 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 from typing import Dict
 
+from django.utils.module_loading import import_string
 from rest_framework import serializers as rfs
 
 from api_app.core.serializers import AbstractConfigSerializer
@@ -57,19 +58,14 @@ class AnalyzerConfigSerializer(AbstractConfigSerializer):
     )
 
     def validate_python_module(self, python_module: str):
-        from django.utils.module_loading import import_string
-        from .controller import build_import_path
+        if self.initial_data["type"] == self.TypeChoices.OBSERVABLE.value or (
+            self.initial_data["type"] == self.TypeChoices.FILE.value
+            and self.initial_data.get("run_hash", False)
+        ):
+            clspath = f"api_app.analyzers_manager.observable_analyzers.{python_module}"
+        else:
+            clspath = f"api_app.analyzers_manager.file_analyzers.{python_module}"
 
-        clspath = build_import_path(
-            python_module,
-            observable_analyzer=(
-                self.initial_data["type"] == self.TypeChoices.OBSERVABLE.value
-                or (
-                    self.initial_data["type"] == self.TypeChoices.FILE.value
-                    and self.initial_data.get("run_hash", False)
-                )
-            ),
-        )
         try:
             import_string(clspath)
         except ImportError:

@@ -29,7 +29,7 @@ class _AbstractAnalyzersScriptTestCase(TransactionTestCase):
     SLEEP_SECONDS: int = 5  # 5 seconds
 
     test_job: Job
-    analyzer_config: dict
+    analyzer_configs: dict
     runtime_configuration: dict
     filtered_analyzers_dictlist: list
 
@@ -56,8 +56,8 @@ class _AbstractAnalyzersScriptTestCase(TransactionTestCase):
     @classmethod
     def setUpTestData(cls):
         # analyzer config
-        self.analyzer_configs = AnalyzerConfigSerializer.get_as_dataclasses()
-        return super().setUp()
+        cls.analyzer_configs = AnalyzerConfigSerializer.get_as_dataclasses()
+        return super().setUpTestData()
 
     def tearDown(self):
         self.test_job.delete()

@@ -7,21 +7,9 @@ import time
 from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager.classes import ObservableAnalyzer
 
-from tests.mock_utils import if_mock, patch, MockResponse
+from tests.mock_utils import if_mock_connections, patch, MockResponse
 
 
-@if_mock(
-    [
-        patch(
-            "requests.Session.post",
-            side_effect=lambda *args, **kwargs: MockResponse({"id": 1}, 200),
-        ),
-        patch(
-            "requests.Session.get",
-            side_effect=lambda *args, **kwargs: MockResponse({"selectors": []}, 200),
-        ),
-    ]
-)
 class IntelX(ObservableAnalyzer):
     """
     Analyzer Name: `IntelX_Phonebook`\n
@@ -79,3 +67,21 @@ class IntelX(ObservableAnalyzer):
             result[selectortypeh].append(block["selectorvalue"])
 
         return result
+
+    @classmethod
+    def _monkeypatch(cls):
+        patches = [
+            if_mock_connections(
+                patch(
+                    "requests.Session.post",
+                    side_effect=lambda *args, **kwargs: MockResponse({"id": 1}, 200),
+                ),
+                patch(
+                    "requests.Session.get",
+                    side_effect=lambda *args, **kwargs: MockResponse(
+                        {"selectors": []}, 200
+                    ),
+                ),
+            )
+        ]
+        return super()._monkeypatch(patches=patches)

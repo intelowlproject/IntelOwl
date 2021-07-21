@@ -8,7 +8,7 @@ import requests
 from api_app.exceptions import AnalyzerRunException, AnalyzerConfigurationException
 from api_app.analyzers_manager import classes
 
-from tests.mock_utils import if_mock, patch, MockResponse
+from tests.mock_utils import if_mock_connections, patch, MockResponse
 
 logger = logging.getLogger(__name__)
 
@@ -21,12 +21,6 @@ def mocked_triage_post(*args, **kwargs):
     return MockResponse({"id": "sample_id", "status": "pending"}, 200)
 
 
-@if_mock(
-    [
-        patch("requests.Session.get", side_effect=mocked_triage_get),
-        patch("requests.Session.post", side_effect=mocked_triage_post),
-    ]
-)
 class TriageSearch(classes.ObservableAnalyzer):
     # using public endpoint as the default url
     base_url: str = "https://api.tria.ge/v0/"
@@ -124,3 +118,13 @@ class TriageSearch(classes.ObservableAnalyzer):
             self.base_url + f"samples/{sample_id}/{task}/report_triage.json"
         )
         return (task_report.status_code, task_report.json())
+
+    @classmethod
+    def _monkeypatch(cls):
+        patches = [
+            if_mock_connections(
+                patch("requests.Session.get", side_effect=mocked_triage_get),
+                patch("requests.Session.post", side_effect=mocked_triage_post),
+            )
+        ]
+        return super()._monkeypatch(patches=patches)

@@ -7,20 +7,11 @@ import logging
 from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager.classes import ObservableAnalyzer
 
-from tests.mock_utils import if_mock, patch, mocked_requests, MockResponse
+from tests.mock_utils import if_mock_connections, patch, mocked_requests, MockResponse
 
 logger = logging.getLogger(__name__)
 
 
-@if_mock(
-    [
-        patch(
-            "requests.Session.post",
-            side_effect=lambda *args, **kwargs: MockResponse({"api": "test"}, 200),
-        ),
-        patch("requests.Session.get", side_effect=mocked_requests),
-    ]
-)
 class UrlScan(ObservableAnalyzer):
     base_url: str = "https://urlscan.io/api/v1"
 
@@ -100,3 +91,18 @@ class UrlScan(ObservableAnalyzer):
         except requests.RequestException as e:
             raise AnalyzerRunException(e)
         return result
+
+    @classmethod
+    def _monkeypatch(cls):
+        patches = [
+            if_mock_connections(
+                patch(
+                    "requests.Session.post",
+                    side_effect=lambda *args, **kwargs: MockResponse(
+                        {"api": "test"}, 200
+                    ),
+                ),
+                patch("requests.Session.get", side_effect=mocked_requests),
+            )
+        ]
+        return super()._monkeypatch(patches=patches)

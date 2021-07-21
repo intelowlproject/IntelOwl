@@ -6,18 +6,13 @@ import pypssl
 from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager import classes
 
-from tests.mock_utils import if_mock, patch, MockResponseNoOp
+from tests.mock_utils import if_mock_connections, patch, MockResponseNoOp
 
 
 def mocked_pypssl(*args, **kwargs):
     return MockResponseNoOp({}, 200)
 
 
-@if_mock(
-    [
-        patch("pypssl.PyPSSL", side_effect=mocked_pypssl),
-    ]
-)
 class CIRCL_PSSL(classes.ObservableAnalyzer):
     def set_params(self, params):
         self.__credentials = self._secrets["pdns_credentials"]
@@ -57,3 +52,12 @@ class CIRCL_PSSL(classes.ObservableAnalyzer):
                 )
 
         return parsed_result
+
+    @classmethod
+    def _monkeypatch(cls):
+        patches = [
+            if_mock_connections(
+                patch("pypssl.PyPSSL", side_effect=mocked_pypssl),
+            )
+        ]
+        return super()._monkeypatch(patches=patches)

@@ -10,7 +10,7 @@ from dateutil import parser as dateutil_parser
 from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager import classes
 
-from tests.mock_utils import if_mock, patch, MockResponse
+from tests.mock_utils import if_mock_connections, patch, MockResponse
 
 _query_types = [
     "domain",
@@ -52,11 +52,6 @@ def mocked_dnsdb_v2_request(*args, **kwargs):
     )
 
 
-@if_mock(
-    [
-        patch("requests.get", side_effect=mocked_dnsdb_v2_request),
-    ]
-)
 class DNSdb(classes.ObservableAnalyzer):
     """Farsight passive DNS API
 
@@ -303,3 +298,12 @@ class DNSdb(classes.ObservableAnalyzer):
             )
 
         return json_extracted_results
+
+    @classmethod
+    def _monkeypatch(cls):
+        patches = [
+            if_mock_connections(
+                patch("requests.get", side_effect=mocked_dnsdb_v2_request),
+            )
+        ]
+        return super()._monkeypatch(patches=patches)

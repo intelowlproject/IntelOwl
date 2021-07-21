@@ -12,7 +12,7 @@ from api_app.analyzers_manager import classes
 from intel_owl import settings
 from datetime import datetime
 
-from tests.mock_utils import if_mock, patch, MockResponse
+from tests.mock_utils import if_mock_connections, patch, MockResponse
 
 logger = logging.getLogger(__name__)
 
@@ -30,11 +30,6 @@ def mocked_firehol_iplist(*args, **kwargs):
     )
 
 
-@if_mock(
-    [
-        patch("requests.get", side_effect=mocked_firehol_iplist),
-    ]
-)
 class FireHol_IPList(classes.ObservableAnalyzer):
     def set_params(self, params):
         self.list_names = params.get("list_names", ["firehol_level1.netset"])
@@ -115,3 +110,12 @@ class FireHol_IPList(classes.ObservableAnalyzer):
         else:
             os.remove(iplist_location)
             self.download_iplist(list_name)
+
+    @classmethod
+    def _monkeypatch(cls):
+        patches = [
+            if_mock_connections(
+                patch("requests.get", side_effect=mocked_firehol_iplist),
+            )
+        ]
+        return super()._monkeypatch(patches=patches)

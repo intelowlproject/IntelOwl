@@ -2,7 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 
 import logging
-from typing import Union, Dict, List
+from typing import Dict, List
 from celery import uuid
 from django.core.cache import cache
 from django.utils.module_loading import import_string
@@ -38,14 +38,13 @@ def build_cache_key(job_id: int) -> str:
     return f"job.{job_id}.analyzers_manager.task_ids"
 
 
-def filter_analyzers(
-    serialized_data: Dict, analyzers_requested: Union[List, str], warnings: List
-) -> List[str]:
+def filter_analyzers(serialized_data: Dict, warnings: List) -> List[str]:
     # init empty list
     cleaned_analyzer_list = []
+    analyzers_requested = serialized_data["analyzers_requested"]
 
     # run all analyzers ?
-    run_all = analyzers_requested == ALL_ANALYZERS
+    run_all = serialized_data.get("run_all_available_analyzers", False)
 
     # read config
     analyzer_dataclasses = AnalyzerConfigSerializer.get_as_dataclasses()
@@ -77,10 +76,8 @@ def filter_analyzers(
                     )
                 if not config.is_filetype_supported(serialized_data["file_mimetype"]):
                     raise NotRunnableAnalyzer(
-                        f"""
-                        {a_name} won't be run because mimetype
-                        {serialized_data['file_mimetype']} is not supported.
-                        """
+                        f"{a_name} won't be run because mimetype "
+                        f"{serialized_data['file_mimetype']} is not supported."
                     )
             else:
                 if not config.is_type_observable:
@@ -92,10 +89,8 @@ def filter_analyzers(
                     serialized_data["observable_classification"]
                 ):
                     raise NotRunnableAnalyzer(
-                        f"""
-                        {a_name} won't be run because does not support
-                         observable type {serialized_data['observable_classification']}.
-                        """
+                        f"{a_name} won't be run because does not support observable  "
+                        f"type {serialized_data['observable_classification']}."
                     )
 
             if serialized_data["force_privacy"] and config.leaks_info:

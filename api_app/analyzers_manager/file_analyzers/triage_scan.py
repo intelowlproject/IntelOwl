@@ -9,7 +9,7 @@ from api_app.exceptions import AnalyzerRunException, AnalyzerConfigurationExcept
 from api_app.helpers import get_binary
 from api_app.analyzers_manager import classes
 
-from tests.mock_utils import patch, if_mock, MockResponse
+from tests.mock_utils import patch, if_mock_connections, MockResponse
 
 logger = logging.getLogger(__name__)
 
@@ -22,18 +22,6 @@ def mocked_triage_post(*args, **kwargs):
     return MockResponse({"id": "sample_id", "status": "pending"}, 200)
 
 
-@if_mock(
-    [
-        patch(
-            "requests.get",
-            side_effect=mocked_triage_get,
-        ),
-        patch(
-            "requests.post",
-            side_effect=mocked_triage_post,
-        ),
-    ]
-)
 class TriageScanFile(classes.FileAnalyzer):
     # using public endpoint as the default url
     base_url: str = "https://api.tria.ge/v0/"
@@ -124,3 +112,19 @@ class TriageScanFile(classes.FileAnalyzer):
             headers=self.headers,
         )
         return (task_report.status_code, task_report.json())
+
+    @classmethod
+    def _monkeypatch(cls):
+        patches = [
+            if_mock_connections(
+                patch(
+                    "requests.get",
+                    side_effect=mocked_triage_get,
+                ),
+                patch(
+                    "requests.post",
+                    side_effect=mocked_triage_post,
+                ),
+            )
+        ]
+        return super()._monkeypatch(patches=patches)

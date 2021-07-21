@@ -11,7 +11,7 @@ from api_app.helpers import get_binary
 from api_app.analyzers_manager.observable_analyzers import vt2_get
 from api_app.analyzers_manager import classes
 
-from tests.mock_utils import patch, if_mock, MockResponse
+from tests.mock_utils import patch, if_mock_connections, MockResponse
 
 logger = logging.getLogger(__name__)
 
@@ -24,12 +24,6 @@ def mocked_vt_post(*args, **kwargs):
     return MockResponse({"scan_id": "scan_id_test", "data": {"id": "id_test"}}, 200)
 
 
-@if_mock(
-    [
-        patch("requests.get", side_effect=mocked_vt_get),
-        patch("requests.post", side_effect=mocked_vt_post),
-    ]
-)
 class VirusTotalv2ScanFile(classes.FileAnalyzer):
     base_url: str = "https://www.virustotal.com/vtapi/v2/"
 
@@ -102,3 +96,13 @@ class VirusTotalv2ScanFile(classes.FileAnalyzer):
             f"max VT polls tried without getting any result. job_id #{self.job_id}"
         )
         return None
+
+    @classmethod
+    def _monkeypatch(cls):
+        patches = [
+            if_mock_connections(
+                patch("requests.get", side_effect=mocked_vt_get),
+                patch("requests.post", side_effect=mocked_vt_post),
+            )
+        ]
+        return super()._monkeypatch(patches=patches)

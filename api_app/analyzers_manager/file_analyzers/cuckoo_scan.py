@@ -10,7 +10,7 @@ from api_app.exceptions import AnalyzerRunException
 from api_app.helpers import get_binary
 from api_app.analyzers_manager.classes import FileAnalyzer
 
-from tests.mock_utils import patch, if_mock, mocked_requests, MockResponse
+from tests.mock_utils import patch, if_mock_connections, mocked_requests, MockResponse
 
 logger = logging.getLogger(__name__)
 
@@ -19,18 +19,6 @@ def mocked_cuckoo_get(*args, **kwargs):
     return MockResponse({"task": {"status": "reported"}}, 200)
 
 
-@if_mock(
-    [
-        patch(
-            "requests.Session.get",
-            side_effect=mocked_cuckoo_get,
-        ),
-        patch(
-            "requests.Session.post",
-            side_effect=mocked_requests,
-        ),
-    ]
-)
 class CuckooAnalysis(FileAnalyzer):
     def set_params(self, params):
         # cuckoo installation can be with or without the api_token
@@ -281,3 +269,19 @@ class CuckooAnalysis(FileAnalyzer):
         logger.info(f"report generated for ({self.filename},{self.md5})")
 
         return result
+
+    @classmethod
+    def _monkeypatch(cls):
+        patches = [
+            if_mock_connections(
+                patch(
+                    "requests.Session.get",
+                    side_effect=mocked_cuckoo_get,
+                ),
+                patch(
+                    "requests.Session.post",
+                    side_effect=mocked_requests,
+                ),
+            )
+        ]
+        return super()._monkeypatch(patches=patches)

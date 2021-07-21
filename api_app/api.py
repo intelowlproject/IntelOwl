@@ -66,7 +66,7 @@ def _analysis_request(
         warnings,
     )
     if not cleaned_analyzer_list:
-        raise ValidationError("No Analyzers can be run after filtering.")
+        raise ValidationError({"detail": "No Analyzers can be run after filtering."})
 
     # save the arrived data plus new params into a new job object
     job = serializer.save(source=source, analyzers_to_execute=cleaned_analyzer_list)

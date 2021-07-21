@@ -313,7 +313,7 @@ def download_sample(request):
     # make sure it is a sample
     if not job.is_sample:
         raise ValidationError(
-            detail="Requested job does not have a sample associated with it."
+            {"detail": "Requested job does not have a sample associated with it."}
         )
     response = HttpResponse(FileWrapper(job.file), content_type=job.file_mimetype)
     response["Content-Disposition"] = f"attachment; filename={job.file_name}"
@@ -382,7 +382,7 @@ class JobViewSet(
             raise PermissionDenied()
         # check if job running
         if job.status != "running":
-            raise ValidationError(detail="Job is not running")
+            raise ValidationError({"detail": "Job is not running"})
         # close celery tasks
         analyzers_controller.kill_running_analysis(pk)
         # set job status

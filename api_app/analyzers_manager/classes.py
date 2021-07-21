@@ -365,15 +365,17 @@ class DockerBasedAnalyzer(metaclass=ABCMeta):
         return resp
 
     @classmethod
-    def _monkeypatch(cls):
-        patches = [
-            patch(
-                "requests.get",
-                side_effect=mocked_docker_analyzer_get,
-            ),
-            patch(
-                "requests.post",
-                side_effect=mocked_docker_analyzer_post,
-            ),
-        ]
+    def _monkeypatch(cls, patches: list = []):
+        patches.extend(
+            [
+                patch(
+                    "requests.get",
+                    side_effect=mocked_docker_analyzer_get,
+                ),
+                patch(
+                    "requests.post",
+                    side_effect=mocked_docker_analyzer_post,
+                ),
+            ]
+        )
         return super()._monkeypatch(patches=patches)

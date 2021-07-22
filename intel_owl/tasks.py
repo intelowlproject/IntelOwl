@@ -72,12 +72,13 @@ def start_analyzers(
 def run_analyzer(job_id: int, config_dict: dict, **kwargs):
     config = AnalyzerConfigSerializer.dict_to_dataclass(config_dict)
     # run analyzer
-    analyzers_controller.run_analyzer(job_id, config, **kwargs)
-    # FIXME @eshaan7: find a better place for these callback
+    report = analyzers_controller.run_analyzer(job_id, config, **kwargs)
+    # get job
+    job = report.job
     # execute some callbacks
-    analyzers_controller.job_cleanup(job_id)
+    # FIXME @eshaan7: find a better place for these callback
+    analyzers_controller.job_cleanup(job)
     # fire connectors when job finishes with success
-    job = Job.objects.only("id", "status").get(pk=job_id)
     if job.status == "reported_without_fails":
         app.send_task(
             "on_job_success",

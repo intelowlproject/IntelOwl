@@ -177,8 +177,7 @@ def start_analyzers(
     return task_ids
 
 
-def job_cleanup(job_id: int) -> None:
-    job: Job = Job.objects.get(pk=job_id)
+def job_cleanup(job: Job) -> None:
     logger.info(f"[STARTING] job_cleanup for <-- {job.__repr__()}.")
     status_to_set = "running"
 
@@ -190,20 +189,23 @@ def job_cleanup(job_id: int) -> None:
 
         logger.info(f"[REPORT] {job.__repr__()}, status:{job.status}, reports:{stats}")
 
-        if stats["running"] > 0:
-            status_to_set = "running"
-        elif stats["success"] == stats["all"]:
-            status_to_set = "reported_without_fails"
-        elif stats["failed"] == stats["all"]:
-            status_to_set = "failed"
-        elif stats["failed"] >= 1:
-            status_to_set = "reported_with_fails"
+        if len(job.analyzers_to_execute) == stats["all"]:
+            if stats["running"] > 0 or stats["pending"] > 0:
+                status_to_set = "running"
+            elif stats["success"] == stats["all"]:
+                status_to_set = "reported_without_fails"
+            elif stats["failed"] == stats["all"]:
+                status_to_set = "failed"
+            elif stats["failed"] >= 1:
+                status_to_set = "reported_with_fails"
 
     except AlreadyFailedJobException:
-        logger.error(f"job_id {job_id} status failed. Do not process the report")
+        logger.error(
+            f"[REPORT] {job.__repr__()}, status: failed. Do not process the report"
+        )
 
     except Exception as e:
-        logger.exception(f"job_id: {job_id}, Error: {e}")
+        logger.exception(f"job_id: {job.pk}, Error: {e}")
         job.append_error(str(e), save=False)
 
     finally:

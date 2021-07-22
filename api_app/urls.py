@@ -8,7 +8,6 @@ from .api import (
     ask_analysis_availability,
     analyze_file,
     analyze_observable,
-    download_sample,
     TagViewSet,
     JobViewSet,
 )
@@ -29,7 +28,6 @@ urlpatterns = [
     path("ask_analysis_availability", ask_analysis_availability),
     path("analyze_file", analyze_file),
     path("analyze_observable", analyze_observable),
-    path("download_sample", download_sample),
     path(r"", include("api_app.analyzers_manager.urls")),
     # Viewsets
     path(r"", include(router.urls)),

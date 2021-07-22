@@ -14,15 +14,10 @@ from tests.mock_utils import (
     patch,
     if_mock_connections,
     MagicMock,
-    mocked_requests,
     MockResponse,
 )
 
 logger = logging.getLogger(__name__)
-
-
-def mocked_intezer(*args, **kwargs):
-    return MockResponse({}, 201)
 
 
 def _get_access_token(api_key):
@@ -96,8 +91,8 @@ class IntezerScan(FileAnalyzer):
     def _monkeypatch(cls):
         patches = [
             if_mock_connections(
-                patch("requests.Session.get", side_effect=mocked_requests),
-                patch("requests.Session.post", side_effect=mocked_intezer),
+                patch("requests.Session.get", return_value=MockResponse({}, 200)),
+                patch("requests.Session.post", return_value=MockResponse({}, 201)),
                 patch(
                     "api_app.analyzers_manager.file_analyzers.intezer_scan._get_access_token",  # noqa: E501
                     MagicMock(return_value="tokentest"),

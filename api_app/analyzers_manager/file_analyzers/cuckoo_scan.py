@@ -10,13 +10,9 @@ from api_app.exceptions import AnalyzerRunException
 from api_app.helpers import get_binary
 from api_app.analyzers_manager.classes import FileAnalyzer
 
-from tests.mock_utils import patch, if_mock_connections, mocked_requests, MockResponse
+from tests.mock_utils import patch, if_mock_connections, MockResponse
 
 logger = logging.getLogger(__name__)
-
-
-def mocked_cuckoo_get(*args, **kwargs):
-    return MockResponse({"task": {"status": "reported"}}, 200)
 
 
 class CuckooAnalysis(FileAnalyzer):
@@ -276,11 +272,11 @@ class CuckooAnalysis(FileAnalyzer):
             if_mock_connections(
                 patch(
                     "requests.Session.get",
-                    side_effect=mocked_cuckoo_get,
+                    return_value=MockResponse({"task": {"status": "reported"}}, 200),
                 ),
                 patch(
                     "requests.Session.post",
-                    side_effect=mocked_requests,
+                    return_value=MockResponse({}, 200),
                 ),
             )
         ]

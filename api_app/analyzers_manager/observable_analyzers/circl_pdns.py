@@ -12,10 +12,6 @@ from api_app.analyzers_manager import classes
 from tests.mock_utils import if_mock_connections, patch, MockResponseNoOp
 
 
-def mocked_pypdns(*args, **kwargs):
-    return MockResponseNoOp({}, 200)
-
-
 class CIRCL_PDNS(classes.ObservableAnalyzer):
     def set_params(self, params):
         self.__credentials = self._secrets["pdns_credentials"]
@@ -58,7 +54,7 @@ class CIRCL_PDNS(classes.ObservableAnalyzer):
     def _monkeypatch(cls):
         patches = [
             if_mock_connections(
-                patch("pypdns.PyPDNS", side_effect=mocked_pypdns),
+                patch("pypdns.PyPDNS", return_value=MockResponseNoOp({}, 200)),
             )
         ]
         return super()._monkeypatch(patches=patches)

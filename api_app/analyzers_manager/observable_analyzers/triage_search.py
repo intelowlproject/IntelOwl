@@ -13,14 +13,6 @@ from tests.mock_utils import if_mock_connections, patch, MockResponse
 logger = logging.getLogger(__name__)
 
 
-def mocked_triage_get(*args, **kwargs):
-    return MockResponse({"tasks": {"task_1": {}, "task_2": {}}, "data": []}, 200)
-
-
-def mocked_triage_post(*args, **kwargs):
-    return MockResponse({"id": "sample_id", "status": "pending"}, 200)
-
-
 class TriageSearch(classes.ObservableAnalyzer):
     # using public endpoint as the default url
     base_url: str = "https://api.tria.ge/v0/"
@@ -123,8 +115,18 @@ class TriageSearch(classes.ObservableAnalyzer):
     def _monkeypatch(cls):
         patches = [
             if_mock_connections(
-                patch("requests.Session.get", side_effect=mocked_triage_get),
-                patch("requests.Session.post", side_effect=mocked_triage_post),
+                patch(
+                    "requests.Session.get",
+                    return_value=MockResponse(
+                        {"tasks": {"task_1": {}, "task_2": {}}, "data": []}, 200
+                    ),
+                ),
+                patch(
+                    "requests.Session.post",
+                    return_value=MockResponse(
+                        {"id": "sample_id", "status": "pending"}, 200
+                    ),
+                ),
             )
         ]
         return super()._monkeypatch(patches=patches)

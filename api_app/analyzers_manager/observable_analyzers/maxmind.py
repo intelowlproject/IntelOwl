@@ -15,7 +15,7 @@ from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager import classes
 from intel_owl import settings
 
-from tests.mock_utils import skip, if_mock_connections
+from tests.mock_utils import patch, if_mock_connections
 
 logger = logging.getLogger(__name__)
 
@@ -115,7 +115,8 @@ class Maxmind(classes.ObservableAnalyzer):
 
     @classmethod
     def _monkeypatch(cls):
-        patches = [if_mock_connections(skip("not working without connection"))]
+        # completely skip because doesnt work without connection.
+        patches = [if_mock_connections(patch.object(cls, "run", return_value={}))]
         return super()._monkeypatch(patches=patches)
 
 

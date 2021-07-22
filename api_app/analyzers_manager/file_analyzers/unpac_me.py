@@ -13,14 +13,6 @@ from tests.mock_utils import patch, if_mock_connections, MockResponse
 logger = logging.getLogger(__name__)
 
 
-def mocked_unpacme_post(*args, **kwargs):
-    return MockResponse({"id": "test"}, 200)
-
-
-def mocked_unpacme_get(*args, **kwargs):
-    return MockResponse({"id": "test", "status": "complete"}, 200)
-
-
 class UnpacMe(FileAnalyzer):
     base_url: str = "https://api.unpac.me/api/v1/"
 
@@ -113,11 +105,13 @@ class UnpacMe(FileAnalyzer):
             if_mock_connections(
                 patch(
                     "requests.get",
-                    side_effect=mocked_unpacme_get,
+                    return_value=MockResponse(
+                        {"id": "test", "status": "complete"}, 200
+                    ),
                 ),
                 patch(
                     "requests.post",
-                    side_effect=mocked_unpacme_post,
+                    return_value=MockResponse({"id": "test"}, 200),
                 ),
             )
         ]

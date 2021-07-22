@@ -7,7 +7,7 @@ from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.helpers import get_binary
 
-from tests.mock_utils import patch, if_mock_connections, mocked_requests
+from tests.mock_utils import patch, if_mock_connections, MockResponse
 
 
 class MalpediaScan(FileAnalyzer):
@@ -42,7 +42,7 @@ class MalpediaScan(FileAnalyzer):
             if_mock_connections(
                 patch(
                     "requests.post",
-                    side_effect=mocked_requests,
+                    return_value=MockResponse({}, 200),
                 )
             )
         ]

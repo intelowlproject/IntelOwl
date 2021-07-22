@@ -19,17 +19,6 @@ logger = logging.getLogger(__name__)
 db_path = f"{settings.MEDIA_ROOT}"
 
 
-def mocked_firehol_iplist(*args, **kwargs):
-    return MockResponse(
-        json_data={},
-        status_code=200,
-        text="""0.0.0.0/8\n
-            1.10.16.0/20\n
-            1.19.0.0/16\n
-            3.90.198.217\n""",
-    )
-
-
 class FireHol_IPList(classes.ObservableAnalyzer):
     def set_params(self, params):
         self.list_names = params.get("list_names", ["firehol_level1.netset"])
@@ -115,7 +104,17 @@ class FireHol_IPList(classes.ObservableAnalyzer):
     def _monkeypatch(cls):
         patches = [
             if_mock_connections(
-                patch("requests.get", side_effect=mocked_firehol_iplist),
+                patch(
+                    "requests.get",
+                    return_value=MockResponse(
+                        json_data={},
+                        status_code=200,
+                        text="""0.0.0.0/8\n
+                                1.10.16.0/20\n
+                                1.19.0.0/16\n
+                                3.90.198.217\n""",
+                    ),
+                ),
             )
         ]
         return super()._monkeypatch(patches=patches)

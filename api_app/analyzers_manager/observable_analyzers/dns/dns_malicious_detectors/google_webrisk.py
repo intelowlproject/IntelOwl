@@ -14,19 +14,11 @@ from api_app.analyzers_manager.observable_analyzers.dns.dns_responses import (
     malicious_detector_response,
 )
 
-from tests.mock_utils import if_mock, patch
+from tests.mock_utils import if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
 
-@if_mock(
-    [
-        patch(
-            "api_app.analyzers_manager.observable_analyzers.dns."
-            "dns_malicious_detectors.google_webrisk.WebRiskServiceClient"
-        )
-    ]
-)
 class WebRisk(classes.ObservableAnalyzer):
     """Check if observable analyzed is marked as malicious by Google WebRisk API"""
 
@@ -68,3 +60,15 @@ class WebRisk(classes.ObservableAnalyzer):
                 threats_list.append("UNWANTED_SOFTWARE")
             web_risk_result["threats"] = threats_list
         return web_risk_result
+
+    @classmethod
+    def _monkeypatch(cls):
+        patches = [
+            if_mock_connections(
+                patch(
+                    "api_app.analyzers_manager.observable_analyzers.dns."
+                    "dns_malicious_detectors.google_webrisk.WebRiskServiceClient"
+                )
+            )
+        ]
+        return super()._monkeypatch(patches=patches)

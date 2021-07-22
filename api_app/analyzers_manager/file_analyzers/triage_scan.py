@@ -14,14 +14,6 @@ from tests.mock_utils import patch, if_mock_connections, MockResponse
 logger = logging.getLogger(__name__)
 
 
-def mocked_triage_get(*args, **kwargs):
-    return MockResponse({"tasks": {"task_1": {}, "task_2": {}}}, 200)
-
-
-def mocked_triage_post(*args, **kwargs):
-    return MockResponse({"id": "sample_id", "status": "pending"}, 200)
-
-
 class TriageScanFile(classes.FileAnalyzer):
     # using public endpoint as the default url
     base_url: str = "https://api.tria.ge/v0/"
@@ -119,11 +111,15 @@ class TriageScanFile(classes.FileAnalyzer):
             if_mock_connections(
                 patch(
                     "requests.get",
-                    side_effect=mocked_triage_get,
+                    return_value=MockResponse(
+                        {"tasks": {"task_1": {}, "task_2": {}}}, 200
+                    ),
                 ),
                 patch(
                     "requests.post",
-                    side_effect=mocked_triage_post,
+                    return_value=MockResponse(
+                        {"id": "sample_id", "status": "pending"}, 200
+                    ),
                 ),
             )
         ]

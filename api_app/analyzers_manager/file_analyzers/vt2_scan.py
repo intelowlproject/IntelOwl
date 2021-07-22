@@ -16,14 +16,6 @@ from tests.mock_utils import patch, if_mock_connections, MockResponse
 logger = logging.getLogger(__name__)
 
 
-def mocked_vt_get(*args, **kwargs):
-    return MockResponse({"data": {"attributes": {"status": "completed"}}}, 200)
-
-
-def mocked_vt_post(*args, **kwargs):
-    return MockResponse({"scan_id": "scan_id_test", "data": {"id": "id_test"}}, 200)
-
-
 class VirusTotalv2ScanFile(classes.FileAnalyzer):
     base_url: str = "https://www.virustotal.com/vtapi/v2/"
 
@@ -101,8 +93,18 @@ class VirusTotalv2ScanFile(classes.FileAnalyzer):
     def _monkeypatch(cls):
         patches = [
             if_mock_connections(
-                patch("requests.get", side_effect=mocked_vt_get),
-                patch("requests.post", side_effect=mocked_vt_post),
+                patch(
+                    "requests.get",
+                    return_value=MockResponse(
+                        {"data": {"attributes": {"status": "completed"}}}, 200
+                    ),
+                ),
+                patch(
+                    "requests.post",
+                    return_value=MockResponse(
+                        {"scan_id": "scan_id_test", "data": {"id": "id_test"}}, 200
+                    ),
+                ),
             )
         ]
         return super()._monkeypatch(patches=patches)

@@ -18,14 +18,6 @@ logger = logging.getLogger(__name__)
 vt_base = "https://www.virustotal.com/api/v3/"
 
 
-def mocked_vt_get(*args, **kwargs):
-    return MockResponse({"data": {"attributes": {"status": "completed"}}}, 200)
-
-
-def mocked_vt_post(*args, **kwargs):
-    return MockResponse({"scan_id": "scan_id_test", "data": {"id": "id_test"}}, 200)
-
-
 class VirusTotalv3ScanFile(FileAnalyzer):
     def set_params(self, params):
         self.__api_key = self._secrets["api_key_name"]
@@ -50,11 +42,15 @@ class VirusTotalv3ScanFile(FileAnalyzer):
             if_mock_connections(
                 patch(
                     "requests.get",
-                    side_effect=mocked_vt_get,
+                    return_value=MockResponse(
+                        {"data": {"attributes": {"status": "completed"}}}, 200
+                    ),
                 ),
                 patch(
                     "requests.post",
-                    side_effect=mocked_vt_post,
+                    return_value=MockResponse(
+                        {"scan_id": "scan_id_test", "data": {"id": "id_test"}}, 200
+                    ),
                 ),
             )
         ]

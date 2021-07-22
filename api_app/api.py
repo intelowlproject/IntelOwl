@@ -21,7 +21,6 @@ from rest_framework.decorators import api_view, action
 from rest_framework.permissions import DjangoObjectPermissions
 from rest_framework.exceptions import (
     ValidationError,
-    NotFound,
     PermissionDenied,
 )
 from guardian.decorators import permission_required_or_403

@@ -2,21 +2,15 @@
 # See the file 'LICENSE' for copying permission.
 
 import hashlib
-import logging
 import os
 
 from django.contrib.auth.models import User
 from django.test import TestCase
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.conf import settings
 from rest_framework.test import APIClient
 
-from intel_owl import settings
 from api_app import models
-
-logger = logging.getLogger(__name__)
-# disable logging library
-if settings.DISABLE_LOGGING_TEST:
-    logging.disable(logging.CRITICAL)
 
 
 class ApiViewTests(TestCase):

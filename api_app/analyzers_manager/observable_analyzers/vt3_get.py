@@ -20,14 +20,13 @@ vt_base = "https://www.virustotal.com/api/v3/"
 class VirusTotalv3(classes.ObservableAnalyzer):
     def set_params(self, params):
         self.__api_key = self._secrets["api_key_name"]
-        self.params = params
 
     def run(self):
         result = vt_get_report(
             self.__api_key,
             self.observable_name,
             self.observable_classification,
-            self.params,
+            self._params,
             self.job_id,
         )
 
@@ -46,7 +45,7 @@ def vt_get_report(
     params, uri = get_requests_params_and_uri(obs_clfn, observable_name)
 
     max_tries = config_params.get("max_tries", 10)
-    poll_distance = 30
+    poll_distance = config_params.get("poll_distance", 30)
     result = {}
     already_done_active_scan_because_report_was_old = False
     for chance in range(max_tries):

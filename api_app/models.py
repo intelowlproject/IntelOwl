@@ -102,20 +102,25 @@ class Job(models.Model):
     def get_analyzer_reports_stats(self) -> dict:
         from api_app.core.models import AbstractReport
 
+        aggregators = {
+            s.name.lower(): models.Count("status", filter=models.Q(status=s.name))
+            for s in AbstractReport.Statuses
+        }
         return self.analyzer_reports.aggregate(
             all=models.Count("status"),
-            running=models.Count(
-                "status",
-                filter=models.Q(status=AbstractReport.Statuses.RUNNING.name),
-            ),
-            failed=models.Count(
-                "status",
-                filter=models.Q(status=AbstractReport.Statuses.FAILED.name),
-            ),
-            success=models.Count(
-                "status",
-                filter=models.Q(status=AbstractReport.Statuses.SUCCESS.name),
-            ),
+            **aggregators,
+        )
+
+    def get_connector_reports_stats(self) -> dict:
+        from api_app.core.models import AbstractReport
+
+        aggregators = {
+            s.name.lower(): models.Count("status", filter=models.Q(status=s.name))
+            for s in AbstractReport.Statuses
+        }
+        return self.connector_reports.aggregate(
+            all=models.Count("status"),
+            **aggregators,
         )
 
     def __str__(self):

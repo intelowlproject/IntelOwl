@@ -2,29 +2,25 @@
 # See the file 'LICENSE' for copying permission.
 
 import hashlib
-from django.test import TestCase
+import time
 
+from django.test import TransactionTestCase
+from django.core.files import File
+from django.conf import settings
+
+from intel_owl.tasks import start_analyzers
 from api_app.models import Job
 from api_app.analyzers_manager.serializers import AnalyzerConfigSerializer
-from api_app.analyzers_manager import controller as analyzers_controller
-
-from .utils import if_mock, patch, mocked_requests
-
-# for observable analyzers, if can customize the behavior based on:
-# DISABLE_LOGGING_TEST to True -> logging disabled
-# MOCK_CONNECTIONS to True -> connections to external analyzers are faked
 
 
-@if_mock(
-    [
-        patch("requests.get", side_effect=mocked_requests),
-        patch("requests.post", side_effect=mocked_requests),
-    ]
-)
-class _ObservableAnalyzersScriptsTestCase(TestCase):
+class _AbstractAnalyzersScriptTestCase(TransactionTestCase):
+
+    # constants
+    TIMEOUT_SECONDS: int = 60 * 5  # 5 minutes
+    SLEEP_SECONDS: int = 5  # 5 seconds
 
     test_job: Job
-    analyzer_config: dict
+    analyzer_configs: dict
     runtime_configuration: dict
     filtered_analyzers_dictlist: list
 
@@ -32,71 +28,204 @@ class _ObservableAnalyzersScriptsTestCase(TestCase):
     def get_params(cls):
         return {
             "source": "test",
-            "is_sample": False,
             "force_privacy": False,
             "analyzers_requested": ["test"],
         }
 
     @classmethod
     def setUpClass(cls):
-        raise cls.skipTest("abstract test case")
+        if cls in [
+            _AbstractAnalyzersScriptTestCase,
+            _ObservableAnalyzersScriptsTestCase,
+            _FileAnalyzersScriptsTestCase,
+        ]:
+            return cls.skipTest(f"{cls.__name__} is an abstract base class.")
+        else:
+            return super(_AbstractAnalyzersScriptTestCase, cls).setUpClass()
 
     def setUp(self):
         # analyzer config
-        self.analyzer_config: dict = AnalyzerConfigSerializer.read_and_verify_config()
-        # define runtime configs
-        self.runtime_configuration = {
-            "Thug_URL_Info": {"test": True},
-            "Triage_Search": {"analysis_type": "submit"},
-        }
-        # save job
-        params = self.get_params()
-        params["md5"] = hashlib.md5(
-            params["observable_name"].encode("utf-8")
-        ).hexdigest()
-        self.test_job = Job(**params)
-        self.test_job.save()
-        # filter analyzers list
-        self.filtered_analyzers_dictlist: list = [
-            config
-            for config in self.analyzer_config.values()
-            if params["observable_classification"] in config["observable_supported"]
-        ]
+        self.analyzer_configs = AnalyzerConfigSerializer.get_as_dataclasses()
         return super().setUp()
 
     def tearDown(self):
         self.test_job.delete()
         return super().tearDown()
 
-    def test_run_analyzer_all(self, *args, **kwargs):
-        for config_dict in self.filtered_analyzers_dictlist:
+    def test_start_analyzers(self, *args, **kwargs):
+        print(f"\n[START] -----{self.__class__.__name__}.test_start_analyzers----")
+        print(
+            f"[REPORT] Job:{self.test_job.pk}, status:'{self.test_job.status}',",
+            f"analyzers:{self.test_job.analyzers_to_execute}",
+        )
 
-            runtime_conf: dict = self.runtime_configuration.get(config_dict["name"], {})
-
-            # merge config dict
-            config_dict = {
-                **config_dict,
-                # merge config_dict["config"] with runtime_configuration
-                "config": {
-                    **config_dict["config"],
-                    **runtime_conf,
-                },
-            }
-
-            # run analyzer
-            analyzer_instance = analyzers_controller.run_analyzer(
+        # execute analyzers
+        start_analyzers.apply_async(
+            args=[
                 self.test_job.pk,
-                config_dict,
-                job_id=self.test_job.pk,
-                runtime_conf=runtime_conf,
+                self.test_job.analyzers_to_execute,
+                self.runtime_configuration,
+            ],
+        )
+
+        for i in range(0, int(self.TIMEOUT_SECONDS / self.SLEEP_SECONDS)):
+            time.sleep(self.SLEEP_SECONDS)
+            # reload test_job object
+            self.test_job.refresh_from_db()
+            status = self.test_job.status
+            analyzers_stats = self.test_job.get_analyzer_reports_stats()
+            connectors_stats = self.test_job.get_connector_reports_stats()
+            running_or_pending_analyzers = list(
+                self.test_job.analyzer_reports.filter(
+                    status__in=["PENDING", "RUNNING"]
+                ).values_list("analyzer_name", flat=True)
             )
-            print(analyzer_instance.analyzer_name, analyzer_instance.report.report)
-            # asserts
-            self.assertEqual(
-                analyzer_instance._job.pk,
-                self.test_job.pk,
+            print(
+                f"[REPORT] (poll #{i})",
+                f"\n>>> Job:{self.test_job.pk}, status:'{status}'",
+                f"\n>>> analyzer_reports:{analyzers_stats}",
+                f"\n>>> connector_reports:{connectors_stats} ",
+                f"\n>>> Running/Pending analyzers: {running_or_pending_analyzers}",
             )
-            self.assertEqual(
-                analyzer_instance.report.status,
-                analyzer_instance.report.Statuses.SUCCESS.name,
-            )
+            # fail immediately if any analyzer or connector failed
+            if analyzers_stats["failed"] > 0 or connectors_stats["failed"] > 0:
+                failed_analyzers = [
+                    (r.analyzer_name, r.report, r.errors)
+                    for r in self.test_job.analyzer_reports.filter(status="FAILED")
+                ]
+                failed_connectors = [
+                    (r.name, r.report, r.errors)
+                    for r in self.test_job.connector_reports.filter(status="FAILED")
+                ]
+                print(
+                    f"\n>>> Failed analyzers: {failed_analyzers}",
+                    f"\n>>> Failed connectors: {failed_connectors}",
+                )
+                self.fail()
+            # check analyzers status
+            if status not in ["running", "pending"]:
+                self.assertEqual(
+                    status,
+                    "reported_without_fails",
+                    msg="`test_job` status must be success",
+                )
+                self.assertEqual(
+                    len(self.test_job.analyzers_to_execute),
+                    self.test_job.analyzer_reports.count(),
+                    msg="all analyzer reports must be there",
+                )
+                self.assertEqual(
+                    analyzers_stats["all"],
+                    analyzers_stats["success"],
+                    msg="all `analyzer_reports` status must be `SUCCESS`",
+                )
+                # check connectors status
+                if connectors_stats["all"] > 0 and connectors_stats["running"] == 0:
+                    self.assertEqual(
+                        len(self.test_job.connectors_to_execute),
+                        self.test_job.connector_reports.count(),
+                        "all connector reports must be there",
+                    )
+                    self.assertEqual(
+                        connectors_stats["all"],
+                        connectors_stats["success"],
+                        msg="all `connector_reports` status must be `SUCCESS`.",
+                    )
+                    print(
+                        f"[END] -----{self.__class__.__name__}.test_start_analyzers----"
+                    )
+                    return True
+        # the test should not reach here
+        self.fail("test timed out")
+
+
+class _ObservableAnalyzersScriptsTestCase(_AbstractAnalyzersScriptTestCase):
+
+    # define runtime configs
+    runtime_configuration = {
+        "Thug_URL_Info": {"test": True},
+        "Triage_Search": {
+            "analysis_type": "submit",
+            "max_tries": 1,
+            "endpoint": "public",
+        },
+        "VirusTotal_v3_Get_Observable": {
+            "max_tries": 1,
+            "poll_distance": 1,
+        },
+        "IntelX_Phonebook": {
+            "timeout": -5,
+        },
+    }
+
+    @classmethod
+    def get_params(cls):
+        return {
+            **super().get_params(),
+            "is_sample": False,
+        }
+
+    def setUp(self):
+        super().setUp()
+        # init job instance
+        params = self.get_params()
+        params["md5"] = hashlib.md5(
+            params["observable_name"].encode("utf-8")
+        ).hexdigest()
+        self.test_job = Job(**params)
+        # filter analyzers list
+        filtered_analyzers_list: list = [
+            config
+            for config in self.analyzer_configs.values()
+            if config.is_observable_type_supported(params["observable_classification"])
+        ]
+        self.test_job.analyzers_to_execute = [
+            config.name for config in filtered_analyzers_list
+        ]
+        # self.test_job.analyzers_to_execute = ["Darksearch_Query"]
+        # save job
+        self.test_job.save()
+
+
+class _FileAnalyzersScriptsTestCase(_AbstractAnalyzersScriptTestCase):
+
+    # define runtime configs
+    runtime_configuration = {
+        "VirusTotal_v2_Scan_File": {"wait_for_scan_anyway": True, "max_tries": 1},
+        "VirusTotal_v3_Scan_File": {"max_tries": 1, "poll_distance": 1},
+        "VirusTotal_v3_Get_File": {"max_tries": 1, "poll_distance": 1},
+        "VirusTotal_v3_Get_File_And_Scan": {"max_tries": 1, "poll_distance": 1},
+        "Intezer_Scan": {"max_tries": 1, "is_test": True},
+        "Cuckoo_Scan": {"max_poll_tries": 1, "max_post_tries": 1},
+        "PEframe_Scan": {"max_tries": 1},
+        "MWDB_Scan": {
+            "upload_file": True,
+            "max_tries": 1,
+        },
+        "Doc_Info_Experimental": {
+            "additional_passwords_to_check": ["testpassword"],
+            "experimental": True,
+        },
+    }
+
+    @classmethod
+    def get_params(cls):
+        return {
+            **super().get_params(),
+            "is_sample": True,
+        }
+
+    def setUp(self):
+        super().setUp()
+        # get params
+        params = self.get_params()
+        # save job instance
+        self.test_job = Job(**params)
+        self._read_file_save_job(filename=params["file_name"])
+
+    def _read_file_save_job(self, filename: str):
+        test_file = f"{settings.PROJECT_LOCATION}/test_files/{filename}"
+        with open(test_file, "rb") as f:
+            self.test_job.file = File(f)
+            self.test_job.md5 = hashlib.md5(f.read()).hexdigest()
+            self.test_job.save()

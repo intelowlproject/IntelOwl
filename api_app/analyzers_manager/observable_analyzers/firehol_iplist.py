@@ -12,6 +12,8 @@ from api_app.analyzers_manager import classes
 from intel_owl import settings
 from datetime import datetime
 
+from tests.mock_utils import if_mock_connections, patch, MockResponse
+
 logger = logging.getLogger(__name__)
 
 db_path = f"{settings.MEDIA_ROOT}"
@@ -97,3 +99,22 @@ class FireHol_IPList(classes.ObservableAnalyzer):
         else:
             os.remove(iplist_location)
             self.download_iplist(list_name)
+
+    @classmethod
+    def _monkeypatch(cls):
+        patches = [
+            if_mock_connections(
+                patch(
+                    "requests.get",
+                    return_value=MockResponse(
+                        json_data={},
+                        status_code=200,
+                        text="""0.0.0.0/8\n
+                                1.10.16.0/20\n
+                                1.19.0.0/16\n
+                                3.90.198.217\n""",
+                    ),
+                ),
+            )
+        ]
+        return super()._monkeypatch(patches=patches)

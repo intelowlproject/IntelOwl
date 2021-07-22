@@ -133,8 +133,8 @@ def start_analyzers(
         # get corresponding dataclass
         config = analyzer_dataclasses[a_name]
 
-        # if disabled or unconfigured
-        if not config.is_ready_to_use:
+        # if disabled or unconfigured (this check is bypassed in TEST_MODE)
+        if not config.is_ready_to_use and not settings.TEST_MODE:
             continue
 
         # get runtime_configuration if any specified for this analyzer
@@ -177,8 +177,7 @@ def start_analyzers(
     return task_ids
 
 
-def job_cleanup(job_id: int) -> None:
-    job: Job = Job.objects.get(pk=job_id)
+def job_cleanup(job: Job) -> None:
     logger.info(f"[STARTING] job_cleanup for <-- {job.__repr__()}.")
     status_to_set = "running"
 
@@ -190,20 +189,23 @@ def job_cleanup(job_id: int) -> None:
 
         logger.info(f"[REPORT] {job.__repr__()}, status:{job.status}, reports:{stats}")
 
-        if stats["running"] > 0:
-            status_to_set = "running"
-        elif stats["success"] == stats["all"]:
-            status_to_set = "reported_without_fails"
-        elif stats["failed"] == stats["all"]:
-            status_to_set = "failed"
-        elif stats["failed"] >= 1:
-            status_to_set = "reported_with_fails"
+        if len(job.analyzers_to_execute) == stats["all"]:
+            if stats["running"] > 0 or stats["pending"] > 0:
+                status_to_set = "running"
+            elif stats["success"] == stats["all"]:
+                status_to_set = "reported_without_fails"
+            elif stats["failed"] == stats["all"]:
+                status_to_set = "failed"
+            elif stats["failed"] >= 1:
+                status_to_set = "reported_with_fails"
 
     except AlreadyFailedJobException:
-        logger.error(f"job_id {job_id} status failed. Do not process the report")
+        logger.error(
+            f"[REPORT] {job.__repr__()}, status: failed. Do not process the report"
+        )
 
     except Exception as e:
-        logger.exception(f"job_id: {job_id}, Error: {e}")
+        logger.exception(f"job_id: {job.pk}, Error: {e}")
         job.append_error(str(e), save=False)
 
     finally:
@@ -237,7 +239,7 @@ def kill_running_analysis(job_id: int) -> None:
         cache.delete(key)
 
 
-def run_analyzer(job_id: int, config: AnalyzerConfig, **kwargs) -> None:
+def run_analyzer(job_id: int, config: AnalyzerConfig, **kwargs) -> AnalyzerReport:
     try:
         cls_path = config.get_full_import_path()
         try:
@@ -246,6 +248,8 @@ def run_analyzer(job_id: int, config: AnalyzerConfig, **kwargs) -> None:
             raise Exception(f"Class: {cls_path} couldn't be imported")
 
         instance = klass(config=config, job_id=job_id, **kwargs)
-        instance.start()
+        report = instance.start()
     except Exception as e:
-        set_failed_analyzer(job_id, config.name, str(e))
+        report = set_failed_analyzer(job_id, config.name, str(e))
+
+    return report

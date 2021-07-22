@@ -9,6 +9,8 @@ from urllib.parse import urlparse
 from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager import classes
 
+from tests.mock_utils import if_mock_connections, patch, MockResponse
+
 
 class OTX(classes.ObservableAnalyzer):
     def set_params(self, params):
@@ -35,9 +37,9 @@ class OTX(classes.ObservableAnalyzer):
 
             if not to_analyze_observable:
                 raise AnalyzerRunException("extracted observable is None")
-        elif obs_clsf == "domain":
+        elif obs_clsf == self.ObservableTypes.DOMAIN.value:
             otx_type = OTXv2.IndicatorTypes.DOMAIN
-        elif obs_clsf == "hash":
+        elif obs_clsf == self.ObservableTypes.HASH.value:
             otx_type = OTXv2.IndicatorTypes.FILE_HASH_MD5
         else:
             raise AnalyzerRunException(
@@ -71,3 +73,12 @@ class OTX(classes.ObservableAnalyzer):
                     result["analysis"]["plugins"] = "removed because too long"
 
         return result
+
+    @classmethod
+    def _monkeypatch(cls):
+        patches = [
+            if_mock_connections(
+                patch("requests.Session.get", return_value=MockResponse({}, 200))
+            )
+        ]
+        return super()._monkeypatch(patches=patches)

@@ -34,12 +34,47 @@ jobs:
     - name: Lint with flake8 (PEP8 enforcer + linter)
       run: |
         sudo docker exec intelowl_uwsgi flake8 . --count
-    - name: Run Tests
+    - name: "Test: API"
       run: |
-        sudo docker exec intelowl_uwsgi python manage.py test --with-coverage --cover-xml --cover-xml-file=/opt/deploy/intel_owl/coverage.xml tests
+        COVERAGE_DIR="/opt/deploy/intel_owl/coverage_reports"
+        sudo docker exec intelowl_uwsgi python manage.py test \
+          tests.test_api tests.test_auth \
+          --with-coverage --cover-xml --cover-xml-file=${COVERAGE_DIR}/api.xml 
+    - name: "Test: Cron"
+      run: |
+        COVERAGE_DIR="/opt/deploy/intel_owl/coverage_reports"
+        sudo docker exec intelowl_uwsgi python manage.py test \
+          tests.test_generic \
+          --with-coverage --cover-xml --cover-xml-file=${COVERAGE_DIR}/cron.xml 
+    - name: "Test: Connectors Manager"
+      run: |
+        COVERAGE_DIR="/opt/deploy/intel_owl/coverage_reports"
+        sudo docker exec intelowl_uwsgi python manage.py test \
+          tests.connectors_manager \
+          --with-coverage --cover-xml --cover-xml-file=${COVERAGE_DIR}/connectors.xml
+    - name: "Test: Analyzers Manager (views, serializers)"
+      run: |
+        COVERAGE_DIR="/opt/deploy/intel_owl/coverage_reports"
+        sudo docker exec intelowl_uwsgi python manage.py test \
+          tests.analyzers_manager.test_views tests.analyzers_manager.test_serializers \
+          --with-coverage --cover-xml --cover-xml-file=${COVERAGE_DIR}/analyzers.xml
+    - name: "Test: Analyzers Manager (observable analyzers)"
+      run: |
+        COVERAGE_DIR="/opt/deploy/intel_owl/coverage_reports"
+        sudo docker exec intelowl_uwsgi python manage.py test \
+          tests.analyzers_manager.test_observable_scripts \
+          --with-coverage --cover-xml --cover-xml-file=${COVERAGE_DIR}/analyzers-obs.xml
+    - name: "Test: Analyzers Manager (file analyzers)"
+      run: |
+        COVERAGE_DIR="/opt/deploy/intel_owl/coverage_reports"
+        sudo docker exec intelowl_uwsgi python manage.py test \
+          tests.analyzers_manager.test_file_scripts \
+          --with-coverage --cover-xml --cover-xml-file=${COVERAGE_DIR}/analyzers-files.xml
+    - name: Copy coverage directory to host
+      run: |
         mkdir coverage_reports
-        sudo docker cp intelowl_uwsgi:/opt/deploy/intel_owl/coverage.xml coverage_reports/coverage.xml
+        sudo docker cp intelowl_uwsgi:/opt/deploy/intel_owl/coverage_reports coverage_reports/
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
       with:
-        file: coverage_reports/coverage.xml
+        directory: coverage_reports

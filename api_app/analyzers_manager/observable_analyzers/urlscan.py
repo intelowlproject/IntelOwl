@@ -7,6 +7,7 @@ import logging
 from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager.classes import ObservableAnalyzer
 
+from tests.mock_utils import if_mock_connections, patch, MockResponse
 
 logger = logging.getLogger(__name__)
 
@@ -90,3 +91,16 @@ class UrlScan(ObservableAnalyzer):
         except requests.RequestException as e:
             raise AnalyzerRunException(e)
         return result
+
+    @classmethod
+    def _monkeypatch(cls):
+        patches = [
+            if_mock_connections(
+                patch(
+                    "requests.Session.post",
+                    return_value=MockResponse({"api": "test"}, 200),
+                ),
+                patch("requests.Session.get", return_value=MockResponse({}, 200)),
+            )
+        ]
+        return super()._monkeypatch(patches=patches)

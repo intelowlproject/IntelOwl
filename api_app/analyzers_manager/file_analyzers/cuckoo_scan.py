@@ -10,6 +10,8 @@ from api_app.exceptions import AnalyzerRunException
 from api_app.helpers import get_binary
 from api_app.analyzers_manager.classes import FileAnalyzer
 
+from tests.mock_utils import patch, if_mock_connections, MockResponse
+
 logger = logging.getLogger(__name__)
 
 
@@ -19,7 +21,7 @@ class CuckooAnalysis(FileAnalyzer):
         # it depends on version and configuration
         self.session = requests.Session()
         self.__api_key = self._secrets["api_key_name"]
-        if not __api_key:
+        if not self.__api_key:
             logger.info(
                 f"{self.__repr__()}, (md5: {self.md5}) -> Continuing w/o API key.."
             )
@@ -263,3 +265,19 @@ class CuckooAnalysis(FileAnalyzer):
         logger.info(f"report generated for ({self.filename},{self.md5})")
 
         return result
+
+    @classmethod
+    def _monkeypatch(cls):
+        patches = [
+            if_mock_connections(
+                patch(
+                    "requests.Session.get",
+                    return_value=MockResponse({"task": {"status": "reported"}}, 200),
+                ),
+                patch(
+                    "requests.Session.post",
+                    return_value=MockResponse({}, 200),
+                ),
+            )
+        ]
+        return super()._monkeypatch(patches=patches)

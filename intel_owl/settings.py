@@ -22,6 +22,7 @@ PROJECT_LOCATION = "/opt/deploy/intel_owl"
 MEDIA_ROOT = "/opt/deploy/files_required"
 DISABLE_LOGGING_TEST = os.environ.get("DISABLE_LOGGING_TEST", False) == "True"
 MOCK_CONNECTIONS = os.environ.get("MOCK_CONNECTIONS", False) == "True"
+TEST_MODE = MOCK_CONNECTIONS
 LDAP_ENABLED = os.environ.get("LDAP_ENABLED", False) == "True"
 
 # Security Stuff
@@ -99,8 +100,6 @@ REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
-TEST_RUNNER = "django_nose.NoseTestSuiteRunner"
-
 # Django-Rest-Durin
 REST_DURIN = {
     "DEFAULT_TOKEN_TTL": timedelta(days=14),
@@ -128,8 +127,14 @@ DATABASES = {
         "PORT": DB_PORT,
         "USER": DB_USER,
         "PASSWORD": DB_PASSWORD,
+        "TEST": {
+            "MIRROR": "default",
+            "NAME": DB_NAME,
+        },
     },
 }
+
+TEST_RUNNER = "django_nose.NoseTestSuiteRunner"
 
 # Elastic Search Configuration
 if os.environ.get("ELASTICSEARCH_ENABLED", False) == "True":

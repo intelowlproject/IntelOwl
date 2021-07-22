@@ -47,6 +47,12 @@ class EXEAnalyzersTestCase(_FileAnalyzersScriptsTestCase):
                 "VirusTotal_v2_Scan_File",
                 "VirusTotal_v3_Get_File",
                 "VirusTotal_v3_Get_File_And_Scan",
+                "Cymru_Hash_Registry_Get_File",
+                "HybridAnalysis_Get_File",
+                "MISPFIRST_Check_Hash",
+                "MISP_Check_Hash",
+                "MalwareBazaar_Get_File",
+                "OTX_Check_Hash",
             ],
         }
 

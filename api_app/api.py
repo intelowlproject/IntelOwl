@@ -357,16 +357,8 @@ class JobViewSet(
         """
         Download a sample from a given Job ID.
         """
-        data_received = request.query_params
-        logger.info(f"Get binary by Job ID. Data received {data_received}")
-        if "job_id" not in data_received:
-            return Response({"error": "821"}, status=status.HTTP_400_BAD_REQUEST)
-
-        # get job object or raise 404
-        try:
-            job = self.get_object()
-        except job.DoesNotExist:
-            raise NotFound()
+        # get job object
+        job = self.get_object()
 
         # check permission
         if not request.user.has_perm("api_app.view_job", job):

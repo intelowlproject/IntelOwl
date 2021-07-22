@@ -353,7 +353,7 @@ class JobViewSet(
         return Response(status=status.HTTP_200_OK)
 
     @action(detail=True, methods=["get"])
-    def download_sample(self, request):
+    def download_sample(self, request, pk=None):
         """
         Download a sample from a given Job ID.
         """
@@ -364,8 +364,8 @@ class JobViewSet(
 
         # get job object or raise 404
         try:
-            job = models.Job.objects.get(pk=data_received["job_id"])
-        except models.Job.DoesNotExist:
+            job = self.get_object()
+        except job.DoesNotExist:
             raise NotFound()
 
         # check permission

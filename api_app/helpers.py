@@ -79,7 +79,9 @@ def get_hash_type(hash_value):
         "sha512": re.compile(r"^[a-f\d]{128}$", re.IGNORECASE | re.ASCII),
     }
 
+    detected_hash_type = None
     for hash_type, re_hash in RE_HASH_MAP.items():
         if re.match(re_hash, hash_value):
-            return hash_type
-    return None  # no matches
+            detected_hash_type = hash_type
+            break
+    return detected_hash_type  # stays None if no matches

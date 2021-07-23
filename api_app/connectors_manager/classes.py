@@ -27,7 +27,7 @@ class Connector(Plugin):
     def init_report_object(self) -> ConnectorReport:
         return ConnectorReport.objects.create(
             job_id=self.job_id,
-            connector=self.connector_name,
+            connector_name=self.connector_name,
             report={},
             errors=[],
             status=ConnectorReport.Statuses.PENDING.name,

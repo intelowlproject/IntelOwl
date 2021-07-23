@@ -8,12 +8,12 @@ from api_app.core.models import AbstractReport
 
 class ConnectorReport(AbstractReport):
     class Meta:
-        unique_together = [("connector", "job")]
+        unique_together = [("connector_name", "job")]
 
-    connector = models.CharField(max_length=128)
+    connector_name = models.CharField(max_length=128)
     job = models.ForeignKey(
         "api_app.Job", related_name="connector_reports", on_delete=models.CASCADE
     )
 
     def __str__(self):
-        return f"ConnectorReport(job:#{self.job_id}, {self.connector})"
+        return f"ConnectorReport(job:#{self.job_id}, {self.connector_name})"

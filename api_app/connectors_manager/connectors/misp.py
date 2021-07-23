@@ -123,6 +123,40 @@ class MISP(Connector):
 
     @classmethod
     def _monkeypatch(cls):
-        # completely skip because doesnt work without connection.
-        patches = [if_mock_connections(patch.object(cls, "run", return_value={}))]
+        patches = [
+            if_mock_connections(
+                patch(
+                    "pymisp.PyMISP",
+                    side_effect=MockPyMISP,
+                )
+            )
+        ]
         return super()._monkeypatch(patches=patches)
+
+
+# Mocks
+class MockMISPElement:
+    """
+    Mocked element(event/attribute) for testing
+    """
+
+    id: int = 1
+
+
+class MockPyMISP:
+    """
+    Mocked PyMISP instance for testing
+     methods which require connection to a MISP instance
+    """
+
+    def __init__(self, *args, **kwargs) -> None:
+        pass
+
+    def add_event(self, *args, **kwargs) -> MockMISPElement:
+        return MockMISPElement()
+
+    def add_attribute(self, *args, **kwargs) -> MockMISPElement:
+        return MockMISPElement()
+
+    def get_event(self, event_id) -> dict:
+        return {"Event": {"id": event_id}}

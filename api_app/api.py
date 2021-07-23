@@ -14,6 +14,7 @@ from wsgiref.util import FileWrapper
 from django.utils.decorators import method_decorator
 from django.http import HttpResponse
 from django.db.models import Q
+from django.conf import settings
 from rest_framework.response import Response
 from rest_framework import serializers as BaseSerializer
 from rest_framework import status, viewsets, mixins
@@ -52,7 +53,6 @@ def _analysis_request(
     logger.info(
         f"analyze_file received request from {source}." f"Data:{dict(data_received)}."
     )
-    test = data_received.get("test", False)
 
     # serialize request data and validate
     serializer = serializer_class(data=data_received, context={"request": request})
@@ -74,7 +74,7 @@ def _analysis_request(
     logger.info(f"New Job added to queue <- {repr(job)}.")
 
     # Check if task is test or not
-    if not test:
+    if settings.TEST_MODE:
         # fire celery task
         celery_app.send_task(
             "start_analyzers",

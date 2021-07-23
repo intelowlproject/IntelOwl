@@ -1,6 +1,7 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
+from django.conf import settings
 import os
 import time
 import requests
@@ -45,7 +46,6 @@ class IntezerScan(FileAnalyzer):
         self.max_tries = params.get("max_tries", 200)
         # interval b/w HTTP requests when polling
         self.poll_distance = 3
-        self.is_test = params.get("is_test", False)
 
     def run(self):
         intezer_token = os.environ.get("INTEZER_TOKEN", "")
@@ -82,7 +82,7 @@ class IntezerScan(FileAnalyzer):
                 response = session.get(self.base_url + result_url)
                 response.raise_for_status()
 
-        if response.status_code != 200 and not self.is_test:
+        if response.status_code != 200 and not settings.TEST_MODE:
             raise AnalyzerRunException("received max tries attempts")
 
         return response.json()

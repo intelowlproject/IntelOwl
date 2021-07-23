@@ -1,6 +1,7 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
+from django.conf import settings
 import time
 import logging
 import requests
@@ -318,7 +319,7 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
         """
 
         # handle in case this is a test
-        if hasattr(self, "is_test") and getattr(self, "is_test"):
+        if settings.TEST_MODE:
             # only happens in case of testing
             self.report.status = self.report.Statuses.SUCCESS.name
             return {}

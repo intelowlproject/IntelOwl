@@ -99,6 +99,30 @@ class Job(models.Model):
         if save:
             self.save(update_fields=["errors"])
 
+    def get_analyzer_reports_stats(self) -> dict:
+        from api_app.core.models import AbstractReport
+
+        aggregators = {
+            s.name.lower(): models.Count("status", filter=models.Q(status=s.name))
+            for s in AbstractReport.Statuses
+        }
+        return self.analyzer_reports.aggregate(
+            all=models.Count("status"),
+            **aggregators,
+        )
+
+    def get_connector_reports_stats(self) -> dict:
+        from api_app.core.models import AbstractReport
+
+        aggregators = {
+            s.name.lower(): models.Count("status", filter=models.Q(status=s.name))
+            for s in AbstractReport.Statuses
+        }
+        return self.connector_reports.aggregate(
+            all=models.Count("status"),
+            **aggregators,
+        )
+
     def __str__(self):
         if self.is_sample:
             return f'Job(#{self.pk}, "{self.file_name}")'

@@ -1,25 +1,19 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-import logging
 import os
 
 from django.test import TestCase
-from unittest import skipIf
-from unittest.mock import patch
 
 from api_app.analyzers_manager.file_analyzers import yara_scan
 from api_app.analyzers_manager.observable_analyzers import maxmind, talos, tor
 
 from api_app import crons
-from intel_owl import settings
 
-from .mock_utils import mock_connections, mocked_requests
+from .mock_utils import if_mock_connections, patch, skip, MockResponse
+from . import get_logger
 
-logger = logging.getLogger(__name__)
-# disable logging library for Continuous Integration
-if settings.DISABLE_LOGGING_TEST:
-    logging.disable(logging.CRITICAL)
+logger = get_logger()
 
 
 class CronTests(TestCase):
@@ -33,13 +27,13 @@ class CronTests(TestCase):
         logger.info(f"old jobs deleted: {num_jobs_to_delete}")
         self.assertTrue(True)
 
-    @skipIf(settings.MOCK_CONNECTIONS, "not working without connection")
+    @if_mock_connections(skip("not working without connection"))
     def test_maxmind_updater(self):
         for db in maxmind.db_names:
             db_file_path = maxmind.Maxmind.updater({}, db)
             self.assertTrue(os.path.exists(db_file_path))
 
-    @mock_connections(patch("requests.get", side_effect=mocked_requests))
+    @if_mock_connections(patch("requests.get", return_value=MockResponse({}, 200)))
     def test_talos_updater(self, mock_get=None):
         db_file_path = talos.Talos.updater()
         self.assertTrue(os.path.exists(db_file_path))

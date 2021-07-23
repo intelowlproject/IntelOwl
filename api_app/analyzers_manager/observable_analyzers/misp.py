@@ -7,6 +7,8 @@ import pymisp
 from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager import classes
 
+from tests.mock_utils import if_mock_connections, patch, MockResponseNoOp
+
 
 class MISP(classes.ObservableAnalyzer):
     def set_params(self, params):
@@ -36,10 +38,7 @@ class MISP(classes.ObservableAnalyzer):
             "limit": 50,
             "enforce_warninglist": True,
         }
-        if (
-            self.observable_classification
-            == self._serializer.ObservableTypes.HASH.value
-        ):
+        if self.observable_classification == self.ObservableTypes.HASH.value:
             params["type_attribute"] = ["md5", "sha1", "sha256"]
         result_search = misp_instance.search(**params)
         if isinstance(result_search, dict):
@@ -47,4 +46,13 @@ class MISP(classes.ObservableAnalyzer):
             if errors:
                 raise AnalyzerRunException(errors)
 
-        return {"result_search": result_search, "instance_url": self.url_name}
+        return {"result_search": result_search, "instance_url": self.__url_name}
+
+    @classmethod
+    def _monkeypatch(cls):
+        patches = [
+            if_mock_connections(
+                patch("pymisp.PyMISP", return_value=MockResponseNoOp({}, 200)),
+            )
+        ]
+        return super()._monkeypatch(patches=patches)

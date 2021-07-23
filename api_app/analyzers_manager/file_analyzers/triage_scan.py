@@ -9,6 +9,8 @@ from api_app.exceptions import AnalyzerRunException, AnalyzerConfigurationExcept
 from api_app.helpers import get_binary
 from api_app.analyzers_manager import classes
 
+from tests.mock_utils import patch, if_mock_connections, MockResponse
+
 logger = logging.getLogger(__name__)
 
 
@@ -102,3 +104,23 @@ class TriageScanFile(classes.FileAnalyzer):
             headers=self.headers,
         )
         return (task_report.status_code, task_report.json())
+
+    @classmethod
+    def _monkeypatch(cls):
+        patches = [
+            if_mock_connections(
+                patch(
+                    "requests.get",
+                    return_value=MockResponse(
+                        {"tasks": {"task_1": {}, "task_2": {}}}, 200
+                    ),
+                ),
+                patch(
+                    "requests.post",
+                    return_value=MockResponse(
+                        {"id": "sample_id", "status": "pending"}, 200
+                    ),
+                ),
+            )
+        ]
+        return super()._monkeypatch(patches=patches)

@@ -25,7 +25,7 @@ class DNStwist(classes.ObservableAnalyzer):
         self._tld = params.get("tld", False)
         self._tld_dict = params.get("tld_dict", "abused_tlds.dict")
         self.domain = self.observable_name
-        if self.observable_classification == self._serializer.ObservableTypes.URL.value:
+        if self.observable_classification == self.ObservableTypes.URL.value:
             self.domain = urlparse(self.observable_name).hostname
             try:
                 IPv4Address(self.domain)

@@ -8,6 +8,7 @@ import requests
 from api_app.exceptions import AnalyzerRunException, AnalyzerConfigurationException
 from api_app.analyzers_manager import classes
 
+from tests.mock_utils import if_mock_connections, patch, MockResponse
 
 logger = logging.getLogger(__name__)
 
@@ -46,10 +47,7 @@ class TriageSearch(classes.ObservableAnalyzer):
         return response
 
     def __triage_search(self):
-        if (
-            self.observable_classification
-            == self._serializer.ObservableTypes.HASH.value
-        ):
+        if self.observable_classification == self.ObservableTypes.HASH.value:
             params = {"query": self.observable_name}
         else:
             params = {
@@ -112,3 +110,23 @@ class TriageSearch(classes.ObservableAnalyzer):
             self.base_url + f"samples/{sample_id}/{task}/report_triage.json"
         )
         return (task_report.status_code, task_report.json())
+
+    @classmethod
+    def _monkeypatch(cls):
+        patches = [
+            if_mock_connections(
+                patch(
+                    "requests.Session.get",
+                    return_value=MockResponse(
+                        {"tasks": {"task_1": {}, "task_2": {}}, "data": []}, 200
+                    ),
+                ),
+                patch(
+                    "requests.Session.post",
+                    return_value=MockResponse(
+                        {"id": "sample_id", "status": "pending"}, 200
+                    ),
+                ),
+            )
+        ]
+        return super()._monkeypatch(patches=patches)

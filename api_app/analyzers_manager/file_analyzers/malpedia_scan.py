@@ -7,6 +7,8 @@ from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.helpers import get_binary
 
+from tests.mock_utils import patch, if_mock_connections, MockResponse
+
 
 class MalpediaScan(FileAnalyzer):
     base_url: str = "https://malpedia.caad.fkie.fraunhofer.de/api/"
@@ -33,3 +35,15 @@ class MalpediaScan(FileAnalyzer):
 
         result = response.json()
         return result
+
+    @classmethod
+    def _monkeypatch(cls):
+        patches = [
+            if_mock_connections(
+                patch(
+                    "requests.post",
+                    return_value=MockResponse({}, 200),
+                )
+            )
+        ]
+        return super()._monkeypatch(patches=patches)

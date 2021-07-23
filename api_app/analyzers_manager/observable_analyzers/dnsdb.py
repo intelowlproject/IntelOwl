@@ -10,6 +10,8 @@ from dateutil import parser as dateutil_parser
 from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager import classes
 
+from tests.mock_utils import if_mock_connections, patch, MockResponse
+
 _query_types = [
     "domain",
     "rrname-wildcard-left",
@@ -170,14 +172,14 @@ class DNSdb(classes.ObservableAnalyzer):
 
         observable_to_check = self.observable_name
         # for URLs we are checking the relative domain
-        if self.observable_classification == self._serializer.ObservableTypes.URL.value:
+        if self.observable_classification == self.ObservableTypes.URL.value:
             observable_to_check = urlparse(self.observable_name).hostname
 
-        if self.observable_classification == self._serializer.ObservableTypes.IP.value:
+        if self.observable_classification == self.ObservableTypes.IP.value:
             endpoint = "rdata/ip"
         elif self.observable_classification in [
-            self._serializer.ObservableTypes.DOMAIN.value,
-            self._serializer.ObservableTypes.URL.value,
+            self.ObservableTypes.DOMAIN.value,
+            self.ObservableTypes.URL.value,
         ]:
             if self._query_type == "domain":
                 endpoint = "rrset/name"
@@ -283,3 +285,24 @@ class DNSdb(classes.ObservableAnalyzer):
             )
 
         return json_extracted_results
+
+    @classmethod
+    def _monkeypatch(cls):
+        patches = [
+            if_mock_connections(
+                patch(
+                    "requests.get",
+                    return_value=MockResponse(
+                        json_data={},
+                        status_code=200,
+                        text='{"cond":"begin"}\n'
+                        '{"obj":{"count":1,"zone_time_first":1349367341,'
+                        '"zone_time_last":1440606099,"rrname":"mocked.data.net.",'
+                        '"rrtype":"A","bailiwick":"net.",'
+                        '"rdata":"0.0.0.0"}}\n'
+                        '{"cond":"limited","msg":"Result limit reached"}\n',
+                    ),
+                ),
+            )
+        ]
+        return super()._monkeypatch(patches=patches)

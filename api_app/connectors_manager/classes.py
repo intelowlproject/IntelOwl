@@ -7,7 +7,6 @@ from ..exceptions import (
 
 from api_app.core.classes import Plugin
 from .models import ConnectorReport
-from .serializers import ConnectorConfigSerializer
 
 
 logger = logging.getLogger(__name__)
@@ -23,7 +22,7 @@ class Connector(Plugin):
 
     @property
     def connector_name(self) -> str:
-        return self._config_dict["name"]
+        return self._config.name
 
     def init_report_object(self) -> ConnectorReport:
         return ConnectorReport.objects.create(
@@ -39,9 +38,6 @@ class Connector(Plugin):
             ConnectorConfigurationException,
             ConnectorRunException,
         )
-
-    def get_serializer_class(self):
-        return ConnectorConfigSerializer
 
     def get_error_message(self, err, is_base_err=False):
         return (

@@ -7,6 +7,7 @@ import logging
 from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager.classes import ObservableAnalyzer
 
+from tests.mock_utils import if_mock_connections, patch, MockResponse
 
 logger = logging.getLogger(__name__)
 
@@ -81,7 +82,7 @@ class UrlScan(ObservableAnalyzer):
             "q": f'{self.observable_classification}:"{self.observable_name}"',
             "size": self.search_size,
         }
-        if self.observable_classification == self._serializer.ObservableTypes.URL.value:
+        if self.observable_classification == self.ObservableTypes.URL.value:
             params["q"] = "page." + params["q"]
         try:
             resp = self.session.get(self.base_url + "/search/", params=params)
@@ -90,3 +91,16 @@ class UrlScan(ObservableAnalyzer):
         except requests.RequestException as e:
             raise AnalyzerRunException(e)
         return result
+
+    @classmethod
+    def _monkeypatch(cls):
+        patches = [
+            if_mock_connections(
+                patch(
+                    "requests.Session.post",
+                    return_value=MockResponse({"api": "test"}, 200),
+                ),
+                patch("requests.Session.get", return_value=MockResponse({}, 200)),
+            )
+        ]
+        return super()._monkeypatch(patches=patches)

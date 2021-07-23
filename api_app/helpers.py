@@ -30,22 +30,25 @@ def get_analyzer_config():
     return analyzers_config
 
 
-def calculate_mimetype(file_buffer, file_name):
-    read_file_buffer = file_buffer.read()
-    calculated_mimetype = magic_from_buffer(read_file_buffer, mime=True)
+def calculate_mimetype(file_pointer, file_name) -> str:
+    mimetype = None
     if file_name:
         if file_name.endswith(".js") or file_name.endswith(".jse"):
-            calculated_mimetype = "application/javascript"
+            mimetype = "application/javascript"
         elif file_name.endswith(".vbs") or file_name.endswith(".vbe"):
-            calculated_mimetype = "application/x-vbscript"
+            mimetype = "application/x-vbscript"
         elif file_name.endswith(".iqy"):
-            calculated_mimetype = "text/x-ms-iqy"
+            mimetype = "text/x-ms-iqy"
         elif file_name.endswith(".apk"):
-            calculated_mimetype = "application/vnd.android.package-archive"
+            mimetype = "application/vnd.android.package-archive"
         elif file_name.endswith(".dex"):
-            calculated_mimetype = "application/x-dex"
+            mimetype = "application/x-dex"
 
-    return calculated_mimetype
+    if not mimetype:
+        buffer = file_pointer.read()
+        mimetype = magic_from_buffer(buffer, mime=True)
+
+    return mimetype
 
 
 def get_binary(job_id, job_object=None):

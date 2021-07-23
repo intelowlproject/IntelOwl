@@ -10,7 +10,30 @@ from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.helpers import get_now_date_only, get_binary
 
+from tests.mock_utils import (
+    patch,
+    if_mock_connections,
+    MagicMock,
+    MockResponse,
+)
+
 logger = logging.getLogger(__name__)
+
+
+def _get_access_token(api_key):
+    """
+    this should be done just once in a day
+    """
+    base_url = "https://analyze.intezer.com/api/v2-0"
+    response = requests.post(
+        base_url + "/get-access-token", json={"api_key": api_key}
+    )  # lgtm [py/uninitialized-local-variable]
+    response.raise_for_status()
+    response_json = response.json()
+    token = response_json.get("result", "")
+    os.environ["INTEZER_TOKEN"] = token
+    os.environ["INTEZER_TOKEN_DATE"] = get_now_date_only()
+    return token
 
 
 class IntezerScan(FileAnalyzer):
@@ -64,18 +87,16 @@ class IntezerScan(FileAnalyzer):
 
         return response.json()
 
-
-def _get_access_token(api_key):
-    """
-    this should be done just once in a day
-    """
-    base_url = "https://analyze.intezer.com/api/v2-0"
-    response = requests.post(
-        base_url + "/get-access-token", json={"api_key": api_key}
-    )  # lgtm [py/uninitialized-local-variable]
-    response.raise_for_status()
-    response_json = response.json()
-    token = response_json.get("result", "")
-    os.environ["INTEZER_TOKEN"] = token
-    os.environ["INTEZER_TOKEN_DATE"] = get_now_date_only()
-    return token
+    @classmethod
+    def _monkeypatch(cls):
+        patches = [
+            if_mock_connections(
+                patch("requests.Session.get", return_value=MockResponse({}, 200)),
+                patch("requests.Session.post", return_value=MockResponse({}, 201)),
+                patch(
+                    "api_app.analyzers_manager.file_analyzers.intezer_scan._get_access_token",  # noqa: E501
+                    MagicMock(return_value="tokentest"),
+                ),
+            )
+        ]
+        return super()._monkeypatch(patches=patches)

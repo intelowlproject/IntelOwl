@@ -1,8 +1,11 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-from rest_framework import serializers as rfs
 from typing import Dict
+
+from django.utils.module_loading import import_string
+from rest_framework import serializers as rfs
+
 
 from api_app.core.serializers import AbstractConfigSerializer
 from .models import ConnectorReport
@@ -17,10 +20,7 @@ class ConnectorConfigSerializer(AbstractConfigSerializer):
     CONFIG_FILE_NAME = "connector_config.json"
 
     def validate_python_module(self, python_module: str):
-        from .controller import build_import_path
-        from django.utils.module_loading import import_string
-
-        clspath = build_import_path(python_module)
+        clspath = f"api_app.connectors_manager.connectors.{python_module}"
         try:
             import_string(clspath)
         except ImportError:

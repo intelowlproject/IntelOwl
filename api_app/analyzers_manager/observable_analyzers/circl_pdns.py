@@ -9,12 +9,14 @@ from urllib.parse import urlparse
 from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager import classes
 
+from tests.mock_utils import if_mock_connections, patch, MockResponseNoOp
+
 
 class CIRCL_PDNS(classes.ObservableAnalyzer):
     def set_params(self, params):
         self.__credentials = self._secrets["pdns_credentials"]
         self.domain = self.observable_name
-        if self.observable_classification == self._serializer.ObservableTypes.URL.value:
+        if self.observable_classification == self.ObservableTypes.URL.value:
             self.domain = urlparse(self.observable_name).hostname
 
     def run(self):
@@ -47,3 +49,12 @@ class CIRCL_PDNS(classes.ObservableAnalyzer):
                     )
 
         return result
+
+    @classmethod
+    def _monkeypatch(cls):
+        patches = [
+            if_mock_connections(
+                patch("pypdns.PyPDNS", return_value=MockResponseNoOp({}, 200)),
+            )
+        ]
+        return super()._monkeypatch(patches=patches)

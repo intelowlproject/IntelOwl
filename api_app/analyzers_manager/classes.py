@@ -15,7 +15,14 @@ from api_app.core.classes import Plugin
 from api_app.helpers import generate_sha256
 
 from .models import AnalyzerReport
-from .serializers import AnalyzerConfigSerializer
+from .constants import HashChoices, ObservableTypes, TypeChoices
+
+from tests.mock_utils import (
+    patch,
+    mocked_docker_analyzer_get,
+    mocked_docker_analyzer_post,
+    MockResponse,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -27,9 +34,13 @@ class BaseAnalyzerMixin(Plugin):
     always use either one of ObservableAnalyzer or FileAnalyzer classes.
     """
 
+    HashChoices = HashChoices
+    ObservableTypes = ObservableTypes
+    TypeChoices = TypeChoices
+
     @property
     def analyzer_name(self) -> str:
-        return self._config_dict["name"]
+        return self._config.name
 
     def init_report_object(self) -> AnalyzerReport:
         """
@@ -52,9 +63,6 @@ class BaseAnalyzerMixin(Plugin):
             AnalyzerConfigurationException,
             AnalyzerRunException,
         )
-
-    def get_serializer_class(self) -> AnalyzerConfigSerializer:
-        return AnalyzerConfigSerializer
 
     def get_error_message(self, err, is_base_err=False):
         """
@@ -106,7 +114,7 @@ class BaseAnalyzerMixin(Plugin):
         return f"({self.analyzer_name}, job_id: #{self.job_id})"
 
 
-class ObservableAnalyzer(BaseAnalyzerMixin):
+class ObservableAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
     """
     Abstract class for Observable Analyzers.
     Inherit from this branch when defining a IP, URL or domain analyzer.
@@ -117,22 +125,20 @@ class ObservableAnalyzer(BaseAnalyzerMixin):
     observable_name: str
     observable_classification: str
 
-    def __init__(self, config_dict: dict, job_id: int, **kwargs):
-        super(ObservableAnalyzer, self).__init__(config_dict, job_id, **kwargs)
+    def __post__init__(self):
         # check if we should run the hash instead of the binary
-        if self._job.is_sample and config_dict.get("run_hash", False):
-            self.observable_classification = (
-                AnalyzerConfigSerializer.self._serializer.ObservableTypes.HASH
-            )
+        if self._job.is_sample and self._config.run_hash:
+            self.observable_classification = ObservableTypes.HASH.value
             # check which kind of hash the analyzer needs
-            run_hash_type = config_dict["run_hash_type"]
-            if run_hash_type == AnalyzerConfigSerializer.HashChoices.MD5:
+            run_hash_type = self._config.run_hash_type
+            if run_hash_type == HashChoices.MD5.value:
                 self.observable_name = self._job.md5
             else:
                 self.observable_name = generate_sha256(self.job_id)
         else:
             self.observable_name = self._job.observable_name
             self.observable_classification = self._job.observable_classification
+        return super(ObservableAnalyzer, self).__post__init__()
 
     def before_run(self):
         super().before_run()
@@ -148,8 +154,24 @@ class ObservableAnalyzer(BaseAnalyzerMixin):
             f"Observable: {self.observable_name}."
         )
 
+    @classmethod
+    def _monkeypatch(cls, patches: list = []):
+        patches.extend(
+            [
+                patch(
+                    "requests.get",
+                    return_value=MockResponse({}, 200),
+                ),
+                patch(
+                    "requests.post",
+                    return_value=MockResponse({}, 200),
+                ),
+            ]
+        )
+        return super()._monkeypatch(patches=patches)
 
-class FileAnalyzer(BaseAnalyzerMixin):
+
+class FileAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
     """
     Abstract class for File Analyzers.
     Inherit from this branch when defining a file analyzer.
@@ -162,12 +184,12 @@ class FileAnalyzer(BaseAnalyzerMixin):
     filename: str
     file_mimetype: str
 
-    def __init__(self, config_dict: dict, job_id: int, **kwargs):
-        super(FileAnalyzer, self).__init__(config_dict, job_id, **kwargs)
+    def __post__init__(self):
         self.md5 = self._job.md5
         self.filepath = self._job.file.path
         self.filename = self._job.file_name
         self.file_mimetype = self._job.file_mimetype
+        return super(FileAnalyzer, self).__post__init__()
 
     def before_run(self):
         super().before_run()
@@ -184,10 +206,11 @@ class FileAnalyzer(BaseAnalyzerMixin):
         )
 
 
-class DockerBasedAnalyzer(metaclass=ABCMeta):
+class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
     """
     Abstract class for a docker based analyzer (integration).
-    Inherit this branch along with either one of ObservableAnalyzer or FileAnalyzer
+    Inherit this branch along with either
+    one of ``ObservableAnalyzer`` or ``FileAnalyzer``
     when defining a docker based analyzer.
     See `peframe.py` for example.
 
@@ -353,3 +376,19 @@ class DockerBasedAnalyzer(metaclass=ABCMeta):
         # step #2: raise AnalyzerRunException in case of error
         assert self.__raise_in_case_bad_request(self.name, resp, params_to_check=[])
         return resp
+
+    @classmethod
+    def _monkeypatch(cls, patches: list = []):
+        patches.extend(
+            [
+                patch(
+                    "requests.get",
+                    side_effect=mocked_docker_analyzer_get,
+                ),
+                patch(
+                    "requests.post",
+                    side_effect=mocked_docker_analyzer_post,
+                ),
+            ]
+        )
+        return super()._monkeypatch(patches=patches)

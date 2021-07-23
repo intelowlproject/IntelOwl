@@ -29,11 +29,23 @@ class AnalyzerConfig(AbstractConfig):
     def is_type_observable(self) -> bool:
         return self.type == TypeChoices.OBSERVABLE.value
 
+    @property
+    def is_type_file(self) -> bool:
+        return self.type == TypeChoices.FILE.value
+
     def is_observable_type_supported(self, observable_classification: str) -> bool:
         return observable_classification in self.observable_supported
 
     def is_filetype_supported(self, file_mimetype: str) -> bool:
         return (
             file_mimetype in self.supported_filetypes
-            and file_mimetype not in self.not_supported_filetypes
+            or file_mimetype not in self.not_supported_filetypes
         )
+
+    def get_full_import_path(self) -> str:
+        if self.is_type_observable or (self.is_type_file and self.run_hash):
+            return (
+                f"api_app.analyzers_manager.observable_analyzers.{self.python_module}"
+            )
+        else:
+            return f"api_app.analyzers_manager.file_analyzers.{self.python_module}"

@@ -7,6 +7,8 @@ import time
 from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager.classes import ObservableAnalyzer
 
+from tests.mock_utils import if_mock_connections, patch, MockResponse
+
 
 class IntelX(ObservableAnalyzer):
     """
@@ -19,17 +21,18 @@ class IntelX(ObservableAnalyzer):
 
     def set_params(self, params):
         self._rows_limit = int(params.get("rows_limit", 100))
+        self._timeout = int(params.get("timeout", 10))
         self.__api_key = self._secrets["api_key_name"]
 
     def run(self):
         session = requests.Session()
-        session.headers.update({"x-key": self.__api_key, "User-Agent": "IntelOwl/v1.x"})
+        session.headers.update({"x-key": self.__api_key, "User-Agent": "IntelOwl/v3.x"})
         params = {
             "term": self.observable_name,
             "buckets": [],
             "lookuplevel": 0,
             "maxresults": self._rows_limit,
-            "timeout": 10,
+            "timeout": self._timeout,
             "sort": 4,
             "media": 0,
             "terminate": [],
@@ -43,7 +46,7 @@ class IntelX(ObservableAnalyzer):
             raise AnalyzerRunException(
                 f"Failed to request search. Status code: {r.status_code}."
             )
-        time.sleep(15)
+        time.sleep(self._timeout + 5)  # wait a lil extra than timeout
         r = session.get(
             f"{self.base_url}/result?id={search_id}&limit={self._rows_limit}&offset=-1"
         )
@@ -65,3 +68,19 @@ class IntelX(ObservableAnalyzer):
             result[selectortypeh].append(block["selectorvalue"])
 
         return result
+
+    @classmethod
+    def _monkeypatch(cls):
+        patches = [
+            if_mock_connections(
+                patch(
+                    "requests.Session.post",
+                    return_value=MockResponse({"id": 1}, 200),
+                ),
+                patch(
+                    "requests.Session.get",
+                    return_value=MockResponse({"selectors": []}, 200),
+                ),
+            )
+        ]
+        return super()._monkeypatch(patches=patches)

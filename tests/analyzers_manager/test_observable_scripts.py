@@ -2,12 +2,12 @@
 # See the file 'LICENSE' for copying permission.
 import os
 
-from api_app.analyzers_manager.serializers import AnalyzerConfigSerializer
+from api_app.analyzers_manager.constants import ObservableTypes
 
 from . import _ObservableAnalyzersScriptsTestCase
 
 
-######### TEST CASES ########## noqa E266
+# Observable Analyzer Test Cases
 
 
 class IPAnalyzersTestCase(_ObservableAnalyzersScriptsTestCase):
@@ -16,12 +16,8 @@ class IPAnalyzersTestCase(_ObservableAnalyzersScriptsTestCase):
         return {
             **super().get_params(),
             "observable_name": os.environ.get("TEST_IP", "8.8.8.8"),
-            "observable_classification": AnalyzerConfigSerializer.ObservableTypes.IP,
+            "observable_classification": ObservableTypes.IP.value,
         }
-
-    @classmethod
-    def setUpClass(cls):
-        pass
 
 
 class DomainAnalyzersTestCase(_ObservableAnalyzersScriptsTestCase):
@@ -30,12 +26,8 @@ class DomainAnalyzersTestCase(_ObservableAnalyzersScriptsTestCase):
         return {
             **super().get_params(),
             "observable_name": os.environ.get("TEST_DOMAIN", "www.google.com"),
-            "observable_classification": AnalyzerConfigSerializer.ObservableTypes.DOMAIN,  # noqa E501
+            "observable_classification": ObservableTypes.DOMAIN.value,
         }
-
-    @classmethod
-    def setUpClass(cls):
-        pass
 
 
 class URLAnalyzersTestCase(_ObservableAnalyzersScriptsTestCase):
@@ -46,12 +38,8 @@ class URLAnalyzersTestCase(_ObservableAnalyzersScriptsTestCase):
             "observable_name": os.environ.get(
                 "TEST_URL", "https://www.honeynet.org/projects/active/intel-owl/"
             ),
-            "observable_classification": AnalyzerConfigSerializer.ObservableTypes.URL,
+            "observable_classification": ObservableTypes.URL.value,
         }
-
-    @classmethod
-    def setUpClass(cls):
-        pass
 
 
 class HashAnalyzersTestCase(_ObservableAnalyzersScriptsTestCase):
@@ -62,12 +50,8 @@ class HashAnalyzersTestCase(_ObservableAnalyzersScriptsTestCase):
             "observable_name": os.environ.get(
                 "TEST_MD5", "446c5fbb11b9ce058450555c1c27153c"
             ),
-            "observable_classification": AnalyzerConfigSerializer.ObservableTypes.HASH,
+            "observable_classification": ObservableTypes.HASH.value,
         }
-
-    @classmethod
-    def setUpClass(cls):
-        pass
 
 
 class GenericAnalyzersTestCase(_ObservableAnalyzersScriptsTestCase):
@@ -76,9 +60,5 @@ class GenericAnalyzersTestCase(_ObservableAnalyzersScriptsTestCase):
         return {
             **super().get_params(),
             "observable_name": os.environ.get("TEST_GENERIC", "email@example.com"),
-            "observable_classification": AnalyzerConfigSerializer.ObservableTypes.GENERIC,  # noqa E501
+            "observable_classification": ObservableTypes.GENERIC.value,
         }
-
-    @classmethod
-    def setUpClass(cls):
-        pass

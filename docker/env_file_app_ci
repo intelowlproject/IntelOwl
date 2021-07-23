@@ -8,6 +8,7 @@ DB_NAME=intel_owl_db
 
 # Config variables
 OLD_JOBS_RETENTION_DAYS=2
+INTELOWL_WEB_CLIENT_DOMAIN=localhost
 
 # Elastic Search Configuration
 ELASTICSEARCH_ENABLED=False

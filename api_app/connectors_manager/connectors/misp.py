@@ -1,10 +1,13 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
+from django.conf import settings
+
 import hashlib
 import pymisp
 from typing import List
 
+from tests.mock_utils import patch, if_mock_connections
 from api_app.connectors_manager.classes import Connector
 from api_app import helpers
 
@@ -84,8 +87,7 @@ class MISP(Connector):
         """
         obj = pymisp.MISPAttribute()
         obj.type = "link"
-        # TODO: get instance url
-        obj.value = f"http://localhost/pages/scan/result/{self.job_id}"
+        obj.value = f"{settings.WEB_CLIENT_URL}/pages/scan/result/{self.job_id}"
         obj.comment = "View Analysis on IntelOwl"
         obj.disable_correlation = True
 
@@ -118,3 +120,9 @@ class MISP(Connector):
             misp_instance.add_attribute(misp_event.id, attr)
 
         return misp_instance.get_event(misp_event.id)
+
+    @classmethod
+    def _monkeypatch(cls):
+        # completely skip because doesnt work without connection.
+        patches = [if_mock_connections(patch.object(cls, "run", return_value={}))]
+        return super()._monkeypatch(patches=patches)

@@ -47,7 +47,7 @@ class ConnectorReportSerializer(rfs.ModelSerializer):
     ConnectorReport model's serializer.
     """
 
-    name = rfs.CharField(source="connector")
+    name = rfs.CharField(source="connector_name")
 
     class Meta:
         model = ConnectorReport

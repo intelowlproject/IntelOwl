@@ -11,10 +11,10 @@ class ConnectorReportAdminView(admin.ModelAdmin):
     list_display = (
         "id",
         "status",
-        "connector",
+        "connector_name",
         "job",
         "start_time",
         "end_time",
     )
     list_display_links = ("id",)
-    search_fields = ("connector",)
+    search_fields = ("connector_name",)

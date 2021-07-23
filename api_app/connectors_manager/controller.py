@@ -104,7 +104,7 @@ def set_failed_connector(job_id: int, connector_name: str, err_msg: str):
     )
     report = ConnectorReport.objects.create(
         job_id=job_id,
-        connector=connector_name,
+        connector_name=connector_name,
         report={},
         errors=[err_msg],
         status=status,

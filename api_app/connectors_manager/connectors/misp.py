@@ -137,7 +137,7 @@ class MISP(Connector):
 # Mocks
 class MockMISPElement:
     """
-    Mocked element(event/attribute) for testing
+    Mock element(event/attribute) for testing
     """
 
     id: int = 1
@@ -145,7 +145,7 @@ class MockMISPElement:
 
 class MockPyMISP:
     """
-    Mocked PyMISP instance for testing
+    Mock PyMISP instance for testing
      methods which require connection to a MISP instance
     """
 

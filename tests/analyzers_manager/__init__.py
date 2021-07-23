@@ -94,7 +94,7 @@ class _AbstractAnalyzersScriptTestCase(TransactionTestCase):
                     for r in self.test_job.analyzer_reports.filter(status="FAILED")
                 ]
                 failed_connectors = [
-                    (r.name, r.report, r.errors)
+                    (r.connector_name, r.report, r.errors)
                     for r in self.test_job.connector_reports.filter(status="FAILED")
                 ]
                 print(

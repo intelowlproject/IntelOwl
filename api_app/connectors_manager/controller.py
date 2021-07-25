@@ -91,7 +91,7 @@ def start_connectors(
         )
 
     # cache the task ids
-    cache.set(build_cache_key(job_id), list(connectors_task_id_map.values()))
+    cache.set(build_cache_key(job_id), connectors_task_id_map)
 
     return connectors_task_id_map
 

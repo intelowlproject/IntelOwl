@@ -118,8 +118,9 @@ def start_analyzers(
     # we should not use mutable objects as default to avoid unexpected issues
     if runtime_configuration is None:
         runtime_configuration = {}
-    # init empty lists
-    task_ids = []
+
+    # mapping of analyzer name and task_id
+    analyzers_task_id_map = {}
 
     # get analyzer config
     analyzer_dataclasses = AnalyzerConfigSerializer.get_as_dataclasses()
@@ -159,8 +160,8 @@ def start_analyzers(
         soft_time_limit = config.params.soft_time_limit
         # gen new task_id
         task_id = uuid()
-        # add to list
-        task_ids.append(task_id)
+        # add to map
+        analyzers_task_id_map[a_name] = task_id
         # run analyzer with a celery task asynchronously
         celery_app.send_task(
             CELERY_TASK_NAME,
@@ -172,9 +173,9 @@ def start_analyzers(
         )
 
     # cache the task ids
-    cache.set(build_cache_key(job_id), task_ids)
+    cache.set(build_cache_key(job_id), analyzers_task_id_map)
 
-    return task_ids
+    return analyzers_task_id_map
 
 
 def job_cleanup(job: Job) -> None:
@@ -198,6 +199,8 @@ def job_cleanup(job: Job) -> None:
                 status_to_set = "failed"
             elif stats["failed"] >= 1:
                 status_to_set = "reported_with_fails"
+            elif stats["killed"] == stats["all"]:
+                status_to_set = "killed"
 
     except AlreadyFailedJobException:
         logger.error(
@@ -229,14 +232,6 @@ def set_failed_analyzer(job_id: int, analyzer_name: str, err_msg):
         status=status,
     )
     return report
-
-
-def kill_running_analysis(job_id: int) -> None:
-    key = build_cache_key(job_id)
-    task_ids = cache.get(key)
-    if isinstance(task_ids, list):
-        celery_app.control.revoke(task_ids)
-        cache.delete(key)
 
 
 def run_analyzer(job_id: int, config: AnalyzerConfig, **kwargs) -> AnalyzerReport:

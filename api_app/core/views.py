@@ -13,10 +13,6 @@ from .models import AbstractReport
 
 class PluginActionViewSet(viewsets.ViewSet, metaclass=ABCMeta):
     @abstractmethod
-    def get_controller_module(self):
-        raise NotImplementedError()
-
-    @abstractmethod
     def get_object(self, job_id, name) -> AbstractReport:
         """
         overrides drf's get_object

@@ -12,7 +12,6 @@ router = routers.DefaultRouter(trailing_slash=False)
 router.register(
     r"job/(?P<job_id>\d+)/analyzer/(?P<name>\w+)",
     AnalyzerActionViewSet,
-    basename="analyzer",
 )
 
 urlpatterns = [

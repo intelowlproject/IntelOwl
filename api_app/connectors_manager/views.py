@@ -3,11 +3,30 @@
 
 from rest_framework import generics
 from rest_framework.response import Response
+from django.http.response import Http404
 
+from api_app.core.views import PluginActionViewSet
 from .serializers import ConnectorConfigSerializer
+from .models import ConnectorReport
 
 
 class ConnectorListAPI(generics.ListAPIView):
     def list(self, request):
         connector_config = ConnectorConfigSerializer.read_and_verify_config()
         return Response(connector_config)
+
+
+class ConnectorActionViewSet(PluginActionViewSet):
+    queryset = ConnectorReport.objects.all()
+
+    def get_object(self, job_id, connector_name) -> ConnectorReport:
+        try:
+            return self.queryset.get(
+                job_id=job_id,
+                connector_name=connector_name,
+            )
+        except ConnectorReport.DoesNotExist:
+            raise Http404
+
+    def _post_kill(self, report):
+        pass

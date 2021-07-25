@@ -58,9 +58,6 @@ class AnalyzerListAPI(generics.ListAPIView):
 class AnalyzerActionViewSet(PluginActionViewSet):
     queryset = AnalyzerReport.objects.all()
 
-    def get_controller_module(self):
-        return analyzers_controller
-
     def get_object(self, job_id, analyzer_name) -> AnalyzerReport:
         try:
             return self.queryset.get(

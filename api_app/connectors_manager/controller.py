@@ -5,7 +5,6 @@ import logging
 from typing import Union, List, Dict
 from celery import uuid
 
-from django.core.cache import cache
 from django.conf import settings
 from django.utils.module_loading import import_string
 from intel_owl.celery import app as celery_app
@@ -64,8 +63,11 @@ def start_connectors(
             **cc.config,
             **runtime_conf,
         }
+        # gen a new task_id
+        task_id = uuid()
         # construct args
         args = [job_id, cc.asdict()]
+        kwargs = {"runtime_conf": runtime_conf, "task_id": task_id}
         # get celery queue
         queue = cc.params.queue
         if queue not in settings.CELERY_QUEUES:
@@ -76,22 +78,17 @@ def start_connectors(
             queue = DEFAULT_QUEUE
         # get soft_time_limit
         stl = cc.params.soft_time_limit
-        # gen a new task_id
-        task_id = uuid()
         # add to map
         connectors_task_id_map[connector_name] = task_id
         # fire celery task to run connector
         celery_app.send_task(
             CELERY_TASK_NAME,
             args=args,
-            kwargs={"runtime_conf": runtime_conf},
+            kwargs=kwargs,
             queue=queue,
             soft_time_limit=stl,
             task_id=task_id,
         )
-
-    # cache the task ids
-    cache.set(build_cache_key(job_id), connectors_task_id_map)
 
     return connectors_task_id_map
 

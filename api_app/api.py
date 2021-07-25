@@ -8,7 +8,6 @@ from intel_owl.celery import app as celery_app
 from api_app import models, serializers
 from api_app.permissions import ExtendedObjectPermissions
 from .analyzers_manager import controller as analyzers_controller
-from .core import controller as plugins_controller
 
 from wsgiref.util import FileWrapper
 
@@ -384,9 +383,8 @@ class JobViewSet(
         # check if job running
         if job.status != "running":
             raise ValidationError({"detail": "Job is not running"})
-        # close celery tasks
-        cache_key = analyzers_controller.build_cache_key(pk)
-        plugins_controller.kill_running_plugin(cache_key, "__all__")
+        # close celery tasks and mark reports as killed
+        analyzers_controller.kill_ongoing_analysis(job)
         # set job status
         job.update_status("killed")
         return Response(status=status.HTTP_200_OK)

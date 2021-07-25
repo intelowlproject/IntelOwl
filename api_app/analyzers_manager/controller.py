@@ -4,7 +4,6 @@
 import logging
 from typing import Dict, List
 from celery import uuid
-from django.core.cache import cache
 from django.utils.module_loading import import_string
 from django.conf import settings
 
@@ -25,10 +24,6 @@ logger = logging.getLogger(__name__)
 CELERY_TASK_NAME = "run_analyzer"
 ALL_ANALYZERS = "__all__"
 DEFAULT_QUEUE = "default"
-
-
-def build_cache_key(job_id: int) -> str:
-    return f"job.{job_id}.analyzers_manager.task_ids"
 
 
 def filter_analyzers(serialized_data: Dict, warnings: List) -> List[str]:
@@ -146,9 +141,11 @@ def start_analyzers(
             **config.config,
             **runtime_conf,
         }
+        # gen new task_id
+        task_id = uuid()
         # construct arguments
         args = [job_id, config.asdict()]
-        kwargs = {"runtime_conf": runtime_conf}
+        kwargs = {"runtime_conf": runtime_conf, "task_id": task_id}
         # get celery queue
         queue = config.params.queue
         if queue not in settings.CELERY_QUEUES:
@@ -158,8 +155,6 @@ def start_analyzers(
             queue = DEFAULT_QUEUE
         # get soft_time_limit
         soft_time_limit = config.params.soft_time_limit
-        # gen new task_id
-        task_id = uuid()
         # add to map
         analyzers_task_id_map[a_name] = task_id
         # run analyzer with a celery task asynchronously
@@ -171,9 +166,6 @@ def start_analyzers(
             soft_time_limit=soft_time_limit,
             task_id=task_id,
         )
-
-    # cache the task ids
-    cache.set(build_cache_key(job_id), analyzers_task_id_map)
 
     return analyzers_task_id_map
 
@@ -248,3 +240,19 @@ def run_analyzer(job_id: int, config: AnalyzerConfig, **kwargs) -> AnalyzerRepor
         report = set_failed_analyzer(job_id, config.name, str(e))
 
     return report
+
+
+def kill_ongoing_analysis(job: Job):
+    qs = job.analyzer_reports.all()
+    # kill celery tasks using task ids
+    task_ids = list(qs.values_list("task_id", flat=True))
+    celery_app.control.revoke(task_ids, terminate=True)
+
+    # update report statuses
+    statuses_to_filter = [
+        AnalyzerReport.Statuses.PENDING.name,
+        AnalyzerReport.Statuses.RUNNING.name,
+    ]
+    qs.filter(status__in=statuses_to_filter).update(
+        status=AnalyzerReport.Statuses.KILLED.name
+    )

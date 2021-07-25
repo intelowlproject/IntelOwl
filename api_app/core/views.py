@@ -1,4 +1,3 @@
-from api_app.core.models import AbstractReport
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.exceptions import (
@@ -8,7 +7,8 @@ from rest_framework.exceptions import (
 from rest_framework.response import Response
 from abc import ABCMeta, abstractmethod
 
-from . import controller as plugins_controller
+from intel_owl.celery import app as celery_app
+from .models import AbstractReport
 
 
 class PluginActionViewSet(viewsets.ViewSet, metaclass=ABCMeta):
@@ -17,7 +17,7 @@ class PluginActionViewSet(viewsets.ViewSet, metaclass=ABCMeta):
         raise NotImplementedError()
 
     @abstractmethod
-    def get_object(self, job_id, name):
+    def get_object(self, job_id, name) -> AbstractReport:
         """
         overrides drf's get_object
         get plugin report object by name and job_id
@@ -55,9 +55,8 @@ class PluginActionViewSet(viewsets.ViewSet, metaclass=ABCMeta):
         ]:
             raise ValidationError({"detail": "Plugin call is not running or pending"})
 
-        # close celery task
-        cache_key = self.get_controller_module().build_cache_key(job_id)
-        plugins_controller.kill_running_plugin(cache_key, name)
+        # kill celery task
+        celery_app.control.revoke(report.task_id, terminate=True)
         # update report
         report.status = AbstractReport.Statuses.KILLED.name
         report.save(update_fields=["status"])

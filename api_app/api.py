@@ -74,7 +74,7 @@ def _analysis_request(
     logger.info(f"New Job added to queue <- {repr(job)}.")
 
     # Check if task is test or not
-    if settings.TEST_MODE:
+    if not settings.TEST_MODE:
         # fire celery task
         celery_app.send_task(
             "start_analyzers",

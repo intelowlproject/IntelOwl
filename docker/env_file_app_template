@@ -8,6 +8,8 @@ DB_PASSWORD=password
 # Additional Config variables
 # jobs older than this would be flushed from the database periodically. Default: 3 days
 OLD_JOBS_RETENTION_DAYS=3
+# used for generating links to web client e.g. job results page; Default: localhost
+INTELOWL_WEB_CLIENT_DOMAIN=localhost
 
 # Elastic Search Configuration
 ELASTICSEARCH_ENABLED=False

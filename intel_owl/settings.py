@@ -25,11 +25,17 @@ MOCK_CONNECTIONS = os.environ.get("MOCK_CONNECTIONS", False) == "True"
 TEST_MODE = MOCK_CONNECTIONS
 LDAP_ENABLED = os.environ.get("LDAP_ENABLED", False) == "True"
 
+# used for generating links to web client e.g. job results page
+WEB_CLIENT_DOMAIN = secrets.get_secret("INTELOWL_WEB_CLIENT_DOMAIN")
+
 # Security Stuff
 HTTPS_ENABLED = os.environ.get("HTTPS_ENABLED", "not_enabled")
 if HTTPS_ENABLED == "enabled":
     CSRF_COOKIE_SECURE = True
     SESSION_COOKIE_SECURE = True
+    WEB_CLIENT_URL = f"https://{WEB_CLIENT_DOMAIN}"
+else:
+    WEB_CLIENT_URL = f"http://{WEB_CLIENT_DOMAIN}"
 
 SESSION_COOKIE_SAMESITE = "Strict"
 CSRF_COOKIE_SAMESITE = "Strict"

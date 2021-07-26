@@ -21,7 +21,6 @@ from rest_framework.decorators import api_view, action
 from rest_framework.permissions import DjangoObjectPermissions
 from rest_framework.exceptions import (
     ValidationError,
-    NotFound,
     PermissionDenied,
 )
 from guardian.decorators import permission_required_or_403
@@ -280,47 +279,6 @@ def analyze_observable(request):
 
 
 @add_docs(
-    description="This method is used to download a sample from a Job ID",
-    parameters=[
-        OpenApiParameter(name="job_id", type=OpenApiTypes.INT, description="Job Id")
-    ],
-    responses={
-        200: OpenApiTypes.BINARY,
-        400: inline_serializer(
-            "DownloadSampleInsufficientData",
-            fields={"detail": BaseSerializer.StringRelatedField()},
-        ),
-        500: inline_serializer(
-            "DownloadSampleInsufficientData",
-            fields={"detail": BaseSerializer.StringRelatedField()},
-        ),
-    },
-)
-@api_view(["GET"])
-def download_sample(request):
-    data_received = request.query_params
-    logger.info(f"Get binary by Job ID. Data received {data_received}")
-    if "job_id" not in data_received:
-        return Response({"error": "821"}, status=status.HTTP_400_BAD_REQUEST)
-    # get job object or raise 404
-    try:
-        job = models.Job.objects.get(pk=data_received["job_id"])
-    except models.Job.DoesNotExist:
-        raise NotFound()
-    # check permission
-    if not request.user.has_perm("api_app.view_job", job):
-        raise PermissionDenied()
-    # make sure it is a sample
-    if not job.is_sample:
-        raise ValidationError(
-            {"detail": "Requested job does not have a sample associated with it."}
-        )
-    response = HttpResponse(FileWrapper(job.file), content_type=job.file_mimetype)
-    response["Content-Disposition"] = f"attachment; filename={job.file_name}"
-    return response
-
-
-@add_docs(
     description="""
     REST endpoint to fetch list of jobs or retrieve a job with job ID.
     Requires authentication.
@@ -376,18 +334,43 @@ class JobViewSet(
             f"kill running job received request from {str(request.user)} "
             f"-- (job_id:{pk})."
         )
+
         # get job object or raise 404
         job = self.get_object()
         if not request.user.has_perm("api_app.change_job", job):
             raise PermissionDenied()
+
         # check if job running
         if job.status != "running":
             raise ValidationError({"detail": "Job is not running"})
+
         # close celery tasks
         analyzers_controller.kill_running_analysis(pk)
         # set job status
         job.update_status("killed")
+
         return Response(status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=["get"])
+    def download_sample(self, request, pk=None):
+        """
+        Download a sample from a given Job ID.
+        """
+        # get job object
+        job = self.get_object()
+
+        # check permission
+        if not request.user.has_perm("api_app.view_job", job):
+            raise PermissionDenied()
+
+        # make sure it is a sample
+        if not job.is_sample:
+            raise ValidationError(
+                {"detail": "Requested job does not have a sample associated with it."}
+            )
+        response = HttpResponse(FileWrapper(job.file), content_type=job.file_mimetype)
+        response["Content-Disposition"] = f"attachment; filename={job.file_name}"
+        return response
 
 
 @add_docs(

@@ -192,7 +192,7 @@ class ApiViewTests(TestCase):
             }
         )
         self.assertEqual(models.Job.objects.count(), 1)
-        response = self.client.get(f"/api/download_sample?job_id={job.id}")
+        response = self.client.get(f"/api/jobs/{job.id}/download_sample")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
             response.get("Content-Disposition"),
@@ -201,13 +201,13 @@ class ApiViewTests(TestCase):
 
     def test_download_sample_404(self):
         # requesting for an ID that we know does not exist in DB
-        response = self.client.get("/api/download_sample?job_id=999")
+        response = self.client.get("/api/jobs/999/download_sample")
         self.assertEqual(response.status_code, 404)
 
     def test_download_sample_400(self):
         # requesting for job where is_sample=False
         job = models.Job.objects.create(is_sample=False)
-        response = self.client.get(f"/api/download_sample?job_id={job.id}")
+        response = self.client.get(f"/api/jobs/{job.id}/download_sample")
         self.assertEqual(response.status_code, 400)
         self.assertDictContainsSubset(
             {"detail": "Requested job does not have a sample associated with it."},

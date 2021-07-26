@@ -1,3 +1,5 @@
+from abc import ABCMeta, abstractmethod
+from api_app.core.models import AbstractReport
 import logging
 
 from django.contrib.auth.models import User
@@ -29,3 +31,49 @@ class CustomAPITestCase(TestCase):
         super(CustomAPITestCase, self).setUp()
         self.client = APIClient()
         self.client.force_authenticate(user=self.superuser)
+
+
+class PluginActionViewsetTestCase(CustomAPITestCase, metaclass=ABCMeta):
+    @classmethod
+    def setUpClass(cls):
+        super(PluginActionViewsetTestCase, cls).setUpClass()
+
+    def setUp(self):
+        super(PluginActionViewsetTestCase, self).setUp()
+        self.report, self.plugin_type = self.init_report()
+
+    @abstractmethod
+    def init_report(self, status):
+        """
+        returns report object, plugin_type
+        """
+        raise NotImplementedError()
+
+    @property
+    def plugin_name(self):
+        return getattr(self.report, f"{self.plugin_type}_name")
+
+    def test_kill_plugin_200(self):
+        response = self.client.patch(
+            f"/api/job/{self.report.job_id}/{self.plugin_type}/{self.plugin_name}/kill"
+        )
+        self.assertEqual(response.status_code, 200)
+        self.report.refresh_from_db()
+        self.assertEqual(self.report.status, AbstractReport.Statuses.KILLED.name)
+
+    def test_kill_job_by_id_404(self):
+        response = self.client.patch(
+            f"/api/job/{self.report.job_id}/{self.plugin_type}/PLUGIN_404/kill"
+        )
+        self.assertEqual(response.status_code, 404)
+
+    def test_kill_job_by_id_400(self):
+        # create a new report whose status is not "running"/"pending"
+        _report, _ = self.init_report(status=AbstractReport.Statuses.SUCCESS.name)
+        response = self.client.patch(
+            f"/api/job/{_report.job_id}/{self.plugin_type}/{self.plugin_name}/kill"
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertDictEqual(
+            response.json(), {"detail": "Plugin call is not running or pending"}
+        )

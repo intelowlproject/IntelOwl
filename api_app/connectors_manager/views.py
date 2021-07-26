@@ -3,7 +3,7 @@
 
 from rest_framework import generics
 from rest_framework.response import Response
-from django.http.response import Http404
+from rest_framework.exceptions import NotFound
 
 from api_app.core.views import PluginActionViewSet
 from .serializers import ConnectorConfigSerializer
@@ -26,7 +26,7 @@ class ConnectorActionViewSet(PluginActionViewSet):
                 connector_name=connector_name,
             )
         except ConnectorReport.DoesNotExist:
-            raise Http404
+            raise NotFound()
 
     def _post_kill(self, report):
         pass

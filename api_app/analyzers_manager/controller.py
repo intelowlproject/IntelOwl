@@ -109,7 +109,7 @@ def start_analyzers(
     job_id: int,
     analyzers_to_execute: List[str],
     runtime_configuration: Dict[str, Dict] = None,
-) -> List[str]:
+) -> Dict[str, str]:
     # we should not use mutable objects as default to avoid unexpected issues
     if runtime_configuration is None:
         runtime_configuration = {}
@@ -243,16 +243,14 @@ def run_analyzer(job_id: int, config: AnalyzerConfig, **kwargs) -> AnalyzerRepor
 
 
 def kill_ongoing_analysis(job: Job):
-    qs = job.analyzer_reports.all()
+    statuses_to_filter = [
+        AnalyzerReport.Statuses.PENDING.name,
+        AnalyzerReport.Statuses.RUNNING.name,
+    ]
+    qs = job.analyzer_reports.filter(status__in=statuses_to_filter)
     # kill celery tasks using task ids
     task_ids = list(qs.values_list("task_id", flat=True))
     celery_app.control.revoke(task_ids, terminate=True)
 
     # update report statuses
-    statuses_to_filter = [
-        AnalyzerReport.Statuses.PENDING.name,
-        AnalyzerReport.Statuses.RUNNING.name,
-    ]
-    qs.filter(status__in=statuses_to_filter).update(
-        status=AnalyzerReport.Statuses.KILLED.name
-    )
+    qs.update(status=AnalyzerReport.Statuses.KILLED.name)

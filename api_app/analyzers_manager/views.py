@@ -6,7 +6,7 @@ import logging
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework import serializers as BaseSerializer
-from django.http.response import Http404
+from rest_framework.exceptions import NotFound
 
 
 from api_app.core.views import PluginActionViewSet
@@ -65,7 +65,7 @@ class AnalyzerActionViewSet(PluginActionViewSet):
                 analyzer_name=analyzer_name,
             )
         except AnalyzerReport.DoesNotExist:
-            raise Http404
+            raise NotFound()
 
     def _post_kill(self, report):
         # clean up job

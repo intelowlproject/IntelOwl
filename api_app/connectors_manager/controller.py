@@ -32,7 +32,7 @@ def start_connectors(
     job_id: int,
     connector_names: Union[List, str] = ALL_CONNECTORS,
     runtime_configuration: Dict[str, Dict] = None,
-) -> dict:
+) -> Dict[str, str]:
     # we should not use mutable objects as default to avoid unexpected issues
     if runtime_configuration is None:
         runtime_configuration = {}

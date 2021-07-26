@@ -1,7 +1,6 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-from typing import Tuple
 from api_app.connectors_manager.serializers import ConnectorConfigSerializer
 from api_app.connectors_manager.models import ConnectorReport
 from api_app.models import Job
@@ -20,15 +19,17 @@ class ConnectorAppViewsTestCase(CustomAPITestCase):
         )
 
 
-class ConnectorActionViewSetTests(PluginActionViewsetTestCase):
+class ConnectorActionViewSetTests(CustomAPITestCase, PluginActionViewsetTestCase):
     @classmethod
     def setUpClass(cls):
         super(ConnectorActionViewSetTests, cls).setUpClass()
 
     def setUp(self):
         super(ConnectorActionViewSetTests, self).setUp()
+        self.report = self.init_report()
+        self.plugin_type = "connector"
 
-    def init_report(self, status=None) -> Tuple[ConnectorReport, str]:
+    def init_report(self, status=None) -> ConnectorReport:
         _job = Job.objects.create(status="running")
         _report, _ = ConnectorReport.objects.get_or_create(
             **{
@@ -40,4 +41,4 @@ class ConnectorActionViewSetTests(PluginActionViewsetTestCase):
                 "task_id": "4b77bdd6-d05b-442b-92e8-d53de5d7c1a9",
             }
         )
-        return _report, "connector"  # report, plugin_type
+        return _report

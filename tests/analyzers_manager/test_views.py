@@ -1,7 +1,6 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-from typing import Tuple
 from api_app.analyzers_manager.serializers import AnalyzerConfigSerializer
 from api_app.analyzers_manager.models import AnalyzerReport
 from api_app.models import Job
@@ -20,15 +19,17 @@ class AnalyzerAppViewsTestCase(CustomAPITestCase):
         )
 
 
-class AnalyzerActionViewSetTests(PluginActionViewsetTestCase):
+class AnalyzerActionViewSetTests(CustomAPITestCase, PluginActionViewsetTestCase):
     @classmethod
     def setUpClass(cls):
         super(AnalyzerActionViewSetTests, cls).setUpClass()
 
     def setUp(self):
         super(AnalyzerActionViewSetTests, self).setUp()
+        self.report = self.init_report()
+        self.plugin_type = "analyzer"
 
-    def init_report(self, status=None) -> Tuple[AnalyzerReport, str]:
+    def init_report(self, status=None) -> AnalyzerReport:
         _job = Job.objects.create(status="running")
         _report, _ = AnalyzerReport.objects.get_or_create(
             **{
@@ -40,4 +41,4 @@ class AnalyzerActionViewSetTests(PluginActionViewsetTestCase):
                 "task_id": "4b77bdd6-d05b-442b-92e8-d53de5d7c1a9",
             }
         )
-        return _report, "analyzer"  # report, plugin_type
+        return _report

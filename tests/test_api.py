@@ -69,7 +69,6 @@ class ApiViewTests(TestCase):
             "file_name": filename,
             "file_mimetype": "application/x-dosexec",
             "file": uploaded_file,
-            "test": True,
         }
         response = self.client.post("/api/analyze_file", data, format="multipart")
         self.assertEqual(response.status_code, 200)
@@ -99,7 +98,6 @@ class ApiViewTests(TestCase):
             "file_name": filename,
             "file_mimetype": "application/x-dosexec",
             "file": uploaded_file,
-            "test": True,
         }
         response = self.client.post("/api/analyze_file", data, format="multipart")
         self.assertEqual(response.status_code, 200)
@@ -133,7 +131,6 @@ class ApiViewTests(TestCase):
             "is_sample": False,
             "observable_name": observable_name,
             "observable_classification": "domain",
-            "test": True,
         }
         response = self.client.post("/api/analyze_observable", data)
         self.assertEqual(response.status_code, 200)
@@ -173,7 +170,6 @@ class ApiViewTests(TestCase):
             "is_sample": False,
             "observable_name": observable_name,
             "observable_classification": "ip",
-            "test": True,
         }
         response = self.client.post("/api/analyze_observable", data)
         self.assertEqual(response.status_code, 200)

@@ -143,7 +143,6 @@ class _ObservableAnalyzersScriptsTestCase(_AbstractAnalyzersScriptTestCase):
 
     # define runtime configs
     runtime_configuration = {
-        "Thug_URL_Info": {"test": True},
         "Triage_Search": {
             "analysis_type": "submit",
             "max_tries": 1,
@@ -195,7 +194,7 @@ class _FileAnalyzersScriptsTestCase(_AbstractAnalyzersScriptTestCase):
         "VirusTotal_v3_Scan_File": {"max_tries": 1, "poll_distance": 1},
         "VirusTotal_v3_Get_File": {"max_tries": 1, "poll_distance": 1},
         "VirusTotal_v3_Get_File_And_Scan": {"max_tries": 1, "poll_distance": 1},
-        "Intezer_Scan": {"max_tries": 1, "is_test": True},
+        "Intezer_Scan": {"max_tries": 1},
         "Cuckoo_Scan": {"max_poll_tries": 1, "max_post_tries": 1},
         "PEframe_Scan": {"max_tries": 1},
         "MWDB_Scan": {

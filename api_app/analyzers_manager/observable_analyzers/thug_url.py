@@ -16,7 +16,6 @@ class ThugUrl(ObservableAnalyzer, DockerBasedAnalyzer):
 
     def set_params(self, params):
         self.args = self._thug_args_builder(params)
-        self.is_test = params.get("test", False)
 
     @staticmethod
     def _thug_args_builder(config_params):

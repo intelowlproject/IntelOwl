@@ -35,7 +35,7 @@ PySocks==1.7.1
 python-magic==0.4.22
 quark-engine==21.7.2
 requests==2.26.0
-speakeasy-emulator==1.5.3
+speakeasy-emulator==1.5.5
 uWSGI==2.0.19.1
 yara-python==4.1.0
 darksearch==2.1.2

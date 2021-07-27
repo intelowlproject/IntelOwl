@@ -70,3 +70,11 @@ class AnalyzerActionViewSet(PluginActionViewSet):
     def _post_kill(self, report):
         # clean up job
         analyzers_controller.job_cleanup(report.job)
+
+    def _start_retry(self, report: AnalyzerReport):
+        analyzers_to_execute = [report.analyzer_name]
+        report.job.status = "running"  # update job status to running
+        report.job.save(update_fields=["status"])
+        analyzers_controller.start_analyzers(
+            report.job.id, analyzers_to_execute, report.runtime_configuration
+        )

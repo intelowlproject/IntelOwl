@@ -8,6 +8,7 @@ from rest_framework.exceptions import NotFound
 from api_app.core.views import PluginActionViewSet
 from .serializers import ConnectorConfigSerializer
 from .models import ConnectorReport
+from . import controller as connectors_controller
 
 
 class ConnectorListAPI(generics.ListAPIView):
@@ -30,3 +31,10 @@ class ConnectorActionViewSet(PluginActionViewSet):
 
     def _post_kill(self, report):
         pass
+
+    def _start_retry(self, report: ConnectorReport):
+        connectors_to_execute = [report.connector_name]
+        connectors_controller.start_connectors(
+            report.job.id,
+            connectors_to_execute,
+        )

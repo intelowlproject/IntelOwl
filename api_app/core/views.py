@@ -27,6 +27,13 @@ class PluginActionViewSet(viewsets.ViewSet, metaclass=ABCMeta):
         """
         raise NotImplementedError()
 
+    @abstractmethod
+    def _start_retry(self, report):
+        """
+        override this to implement retry for each plugin type
+        """
+        raise NotImplementedError()
+
     @action(detail=False, methods=["patch"])
     def kill(self, request, job_id, name):
         """
@@ -58,5 +65,38 @@ class PluginActionViewSet(viewsets.ViewSet, metaclass=ABCMeta):
         report.save(update_fields=["status"])
         # execute callback post kill
         self._post_kill(report)
+
+        return Response(status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=["patch"])
+    def retry(self, request, job_id, name):
+        """
+        Retry a plugin run if it failed/was killed previously
+         regenerates the args required and starts a new celery task
+
+        :params url:
+         - job_id
+         - name (plugin name)
+        :returns:
+         - 200 - if success
+         - 404 - not found
+         - 403 - forbidden
+         - 400 - bad request
+        """
+
+        # get report object or raise 404
+        report = self.get_object(job_id, name)
+        if not request.user.has_perm("api_app.change_job", report.job):
+            raise PermissionDenied()
+        if report.status not in [
+            AbstractReport.Statuses.FAILED.name,
+            AbstractReport.Statuses.KILLED.name,
+        ]:
+            raise ValidationError(
+                {"detail": "Plugin call status should be failed or killed"}
+            )
+
+        # retry with the same arguments
+        self._start_retry(report)
 
         return Response(status=status.HTTP_200_OK)

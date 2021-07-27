@@ -2,6 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 
 from django.conf import settings
+from django.utils import timezone
 import time
 import logging
 import requests
@@ -47,15 +48,31 @@ class BaseAnalyzerMixin(Plugin):
         """
         Returns report object set in *start* fn
         """
-        return AnalyzerReport.objects.create(
-            job_id=self.job_id,
-            analyzer_name=self.analyzer_name,
-            report={},
-            errors=[],
-            status=AnalyzerReport.Statuses.PENDING.name,
-            runtime_configuration=self.kwargs.get("runtime_conf", {}),
-            task_id=self.kwargs["task_id"],
+        # unique constraint ensures only one report is possible
+        _report_qs = AnalyzerReport.objects.filter(
+            job_id=self.job_id, analyzer_name=self.analyzer_name
         )
+        if _report_qs.exists():  # case: recurring analyzer run
+            _report_qs.update(
+                report={},
+                errors=[],
+                status=AnalyzerReport.Statuses.PENDING.name,
+                # runtime_configuration stays the same
+                task_id=self.kwargs["task_id"],
+                start_time=timezone.now(),
+                end_time=timezone.now(),
+            )
+            return _report_qs[0]
+        else:
+            return AnalyzerReport.objects.create(
+                job_id=self.job_id,
+                analyzer_name=self.analyzer_name,
+                report={},
+                errors=[],
+                status=AnalyzerReport.Statuses.PENDING.name,
+                runtime_configuration=self.kwargs.get("runtime_conf", {}),
+                task_id=self.kwargs["task_id"],
+            )
 
     def get_exceptions_to_catch(self):
         """

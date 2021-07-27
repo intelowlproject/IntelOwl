@@ -31,6 +31,7 @@ class Connector(Plugin):
             report={},
             errors=[],
             status=ConnectorReport.Statuses.PENDING.name,
+            task_id=self.kwargs["task_id"],
         )
 
     def get_exceptions_to_catch(self) -> list:

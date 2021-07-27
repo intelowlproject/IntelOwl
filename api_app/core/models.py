@@ -13,6 +13,7 @@ class Statuses(Enum):
     PENDING = 1
     RUNNING = 2
     SUCCESS = 3
+    KILLED = 4
 
 
 class AbstractReport(models.Model):
@@ -29,6 +30,7 @@ class AbstractReport(models.Model):
     )
     start_time = models.DateTimeField(default=timezone.now)
     end_time = models.DateTimeField(default=timezone.now)
+    task_id = models.UUIDField()  # tracks celery task id
 
     # meta
     class Meta:

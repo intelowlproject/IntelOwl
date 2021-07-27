@@ -343,9 +343,8 @@ class JobViewSet(
         # check if job running
         if job.status != "running":
             raise ValidationError({"detail": "Job is not running"})
-
-        # close celery tasks
-        analyzers_controller.kill_running_analysis(pk)
+        # close celery tasks and mark reports as killed
+        analyzers_controller.kill_ongoing_analysis(job)
         # set job status
         job.update_status("killed")
 

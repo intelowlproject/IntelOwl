@@ -6,8 +6,13 @@ import logging
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework import serializers as BaseSerializer
+from rest_framework.exceptions import NotFound
 
+
+from api_app.core.views import PluginActionViewSet
 from .serializers import AnalyzerConfigSerializer
+from . import controller as analyzers_controller
+from .models import AnalyzerReport
 from drf_spectacular.utils import (
     extend_schema as add_docs,
     inline_serializer,
@@ -48,3 +53,20 @@ class AnalyzerListAPI(generics.ListAPIView):
                 {"error": "error in get_analyzer_configs. Check logs."},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
+
+
+class AnalyzerActionViewSet(PluginActionViewSet):
+    queryset = AnalyzerReport.objects.all()
+
+    def get_object(self, job_id, analyzer_name) -> AnalyzerReport:
+        try:
+            return self.queryset.get(
+                job_id=job_id,
+                analyzer_name=analyzer_name,
+            )
+        except AnalyzerReport.DoesNotExist:
+            raise NotFound()
+
+    def _post_kill(self, report):
+        # clean up job
+        analyzers_controller.job_cleanup(report.job)

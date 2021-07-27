@@ -4,7 +4,6 @@
 import logging
 from typing import Dict, List
 from celery import uuid
-from django.core.cache import cache
 from django.utils.module_loading import import_string
 from django.conf import settings
 
@@ -25,10 +24,6 @@ logger = logging.getLogger(__name__)
 CELERY_TASK_NAME = "run_analyzer"
 ALL_ANALYZERS = "__all__"
 DEFAULT_QUEUE = "default"
-
-
-def build_cache_key(job_id: int) -> str:
-    return f"job.{job_id}.analyzers_manager.task_ids"
 
 
 def filter_analyzers(serialized_data: Dict, warnings: List) -> List[str]:
@@ -114,12 +109,13 @@ def start_analyzers(
     job_id: int,
     analyzers_to_execute: List[str],
     runtime_configuration: Dict[str, Dict] = None,
-) -> List[str]:
+) -> Dict[str, str]:
     # we should not use mutable objects as default to avoid unexpected issues
     if runtime_configuration is None:
         runtime_configuration = {}
-    # init empty lists
-    task_ids = []
+
+    # mapping of analyzer name and task_id
+    analyzers_task_id_map = {}
 
     # get analyzer config
     analyzer_dataclasses = AnalyzerConfigSerializer.get_as_dataclasses()
@@ -145,9 +141,11 @@ def start_analyzers(
             **config.config,
             **runtime_conf,
         }
+        # gen new task_id
+        task_id = uuid()
         # construct arguments
         args = [job_id, config.asdict()]
-        kwargs = {"runtime_conf": runtime_conf}
+        kwargs = {"runtime_conf": runtime_conf, "task_id": task_id}
         # get celery queue
         queue = config.params.queue
         if queue not in settings.CELERY_QUEUES:
@@ -157,10 +155,8 @@ def start_analyzers(
             queue = DEFAULT_QUEUE
         # get soft_time_limit
         soft_time_limit = config.params.soft_time_limit
-        # gen new task_id
-        task_id = uuid()
-        # add to list
-        task_ids.append(task_id)
+        # add to map
+        analyzers_task_id_map[a_name] = task_id
         # run analyzer with a celery task asynchronously
         celery_app.send_task(
             CELERY_TASK_NAME,
@@ -171,10 +167,7 @@ def start_analyzers(
             task_id=task_id,
         )
 
-    # cache the task ids
-    cache.set(build_cache_key(job_id), task_ids)
-
-    return task_ids
+    return analyzers_task_id_map
 
 
 def job_cleanup(job: Job) -> None:
@@ -198,6 +191,8 @@ def job_cleanup(job: Job) -> None:
                 status_to_set = "failed"
             elif stats["failed"] >= 1:
                 status_to_set = "reported_with_fails"
+            elif stats["killed"] == stats["all"]:
+                status_to_set = "killed"
 
     except AlreadyFailedJobException:
         logger.error(
@@ -231,14 +226,6 @@ def set_failed_analyzer(job_id: int, analyzer_name: str, err_msg):
     return report
 
 
-def kill_running_analysis(job_id: int) -> None:
-    key = build_cache_key(job_id)
-    task_ids = cache.get(key)
-    if isinstance(task_ids, list):
-        celery_app.control.revoke(task_ids)
-        cache.delete(key)
-
-
 def run_analyzer(job_id: int, config: AnalyzerConfig, **kwargs) -> AnalyzerReport:
     try:
         cls_path = config.get_full_import_path()
@@ -253,3 +240,17 @@ def run_analyzer(job_id: int, config: AnalyzerConfig, **kwargs) -> AnalyzerRepor
         report = set_failed_analyzer(job_id, config.name, str(e))
 
     return report
+
+
+def kill_ongoing_analysis(job: Job):
+    statuses_to_filter = [
+        AnalyzerReport.Statuses.PENDING.name,
+        AnalyzerReport.Statuses.RUNNING.name,
+    ]
+    qs = job.analyzer_reports.filter(status__in=statuses_to_filter)
+    # kill celery tasks using task ids
+    task_ids = list(qs.values_list("task_id", flat=True))
+    celery_app.control.revoke(task_ids, terminate=True)
+
+    # update report statuses
+    qs.update(status=AnalyzerReport.Statuses.KILLED.name)

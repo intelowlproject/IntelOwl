@@ -53,6 +53,7 @@ class BaseAnalyzerMixin(Plugin):
             errors=[],
             status=AnalyzerReport.Statuses.PENDING.name,
             runtime_configuration=self.kwargs.get("runtime_conf", {}),
+            task_id=self.kwargs["task_id"],
         )
 
     def get_exceptions_to_catch(self):

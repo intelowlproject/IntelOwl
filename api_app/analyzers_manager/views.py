@@ -58,11 +58,11 @@ class AnalyzerListAPI(generics.ListAPIView):
 class AnalyzerActionViewSet(PluginActionViewSet):
     queryset = AnalyzerReport.objects.all()
 
-    def get_object(self, job_id, analyzer_name) -> AnalyzerReport:
+    def get_object(self, job_id, name) -> AnalyzerReport:
         try:
             return self.queryset.get(
                 job_id=job_id,
-                analyzer_name=analyzer_name,
+                name=name,
             )
         except AnalyzerReport.DoesNotExist:
             raise NotFound()
@@ -73,8 +73,7 @@ class AnalyzerActionViewSet(PluginActionViewSet):
 
     def _start_retry(self, report: AnalyzerReport):
         analyzers_to_execute = [report.analyzer_name]
-        report.job.status = "running"  # update job status to running
-        report.job.save(update_fields=["status"])
+        runtime_configuration = {report.analyzer_name: report.runtime_configuration}
         analyzers_controller.start_analyzers(
-            report.job.id, analyzers_to_execute, report.runtime_configuration
+            report.job.id, analyzers_to_execute, runtime_configuration
         )

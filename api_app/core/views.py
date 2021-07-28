@@ -61,8 +61,7 @@ class PluginActionViewSet(viewsets.ViewSet, metaclass=ABCMeta):
         # kill celery task
         celery_app.control.revoke(report.task_id, terminate=True)
         # update report
-        report.status = AbstractReport.Statuses.KILLED.name
-        report.save(update_fields=["status"])
+        report.update_status(AbstractReport.Statuses.KILLED.name)
         # execute callback post kill
         self._post_kill(report)
 

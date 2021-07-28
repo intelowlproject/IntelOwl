@@ -20,11 +20,11 @@ class ConnectorListAPI(generics.ListAPIView):
 class ConnectorActionViewSet(PluginActionViewSet):
     queryset = ConnectorReport.objects.all()
 
-    def get_object(self, job_id, connector_name) -> ConnectorReport:
+    def get_object(self, job_id, name) -> ConnectorReport:
         try:
             return self.queryset.get(
                 job_id=job_id,
-                connector_name=connector_name,
+                name=name,
             )
         except ConnectorReport.DoesNotExist:
             raise NotFound()

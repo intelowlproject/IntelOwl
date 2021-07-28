@@ -1,4 +1,5 @@
 from abc import ABCMeta, abstractmethod
+from api_app.models import Job
 from api_app.core.models import AbstractReport
 import logging
 
@@ -35,11 +36,25 @@ class CustomAPITestCase(TestCase):
 
 class PluginActionViewsetTestCase(metaclass=ABCMeta):
     @abstractmethod
-    def init_report(self, status):
+    def get_report_class(self):
         """
-        returns report object
+        Returns Model to be used for *init_report*
         """
         raise NotImplementedError()
+
+    def init_report(self, status=None):
+        _job = Job.objects.create(status="running")
+        _report, _ = self.get_report_class().objects.get_or_create(
+            **{
+                "job_id": _job.id,
+                "name": "MISP",
+                "status": AbstractReport.Statuses.PENDING.name
+                if status is None
+                else status,
+                "task_id": "4b77bdd6-d05b-442b-92e8-d53de5d7c1a9",
+            }
+        )
+        return _report
 
     @property
     def plugin_name(self):

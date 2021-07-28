@@ -210,15 +210,15 @@ def job_cleanup(job: Job) -> None:
         job.save(update_fields=["status", "errors", "finished_analysis_time"])
 
 
-def set_failed_analyzer(job_id: int, analyzer_name: str, err_msg):
+def set_failed_analyzer(job_id: int, name: str, err_msg):
     status = AnalyzerReport.Statuses.FAILED.name
     logger.warning(
-        f"(job: #{job_id}, analyzer:{analyzer_name}) -> set as {status}. ",
+        f"(job: #{job_id}, analyzer:{name}) -> set as {status}. ",
         f" Error: {err_msg}",
     )
     report, _ = AnalyzerReport.objects.get_or_create(
         job_id=job_id,
-        analyzer_name=analyzer_name,
+        name=name,
         report={},
         errors=[err_msg],
         status=status,

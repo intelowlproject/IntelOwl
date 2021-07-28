@@ -21,6 +21,7 @@ class AbstractReport(models.Model):
     Statuses = Statuses
 
     # fields
+    name = models.CharField(max_length=128)
     status = models.CharField(
         max_length=50, choices=[(s.name, s.name) for s in Statuses]
     )
@@ -28,6 +29,7 @@ class AbstractReport(models.Model):
     errors = pg_fields.ArrayField(
         models.CharField(max_length=512), default=list, blank=True
     )
+    runtime_configuration = models.JSONField(default=dict, null=True, blank=True)
     start_time = models.DateTimeField(default=timezone.now)
     end_time = models.DateTimeField(default=timezone.now)
     task_id = models.UUIDField()  # tracks celery task id

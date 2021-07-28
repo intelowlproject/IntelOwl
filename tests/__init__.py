@@ -69,3 +69,28 @@ class PluginActionViewsetTestCase(metaclass=ABCMeta):
         self.assertDictEqual(
             response.json(), {"detail": "Plugin call is not running or pending"}
         )
+
+    def test_retry_plugin_200(self):
+        # create new report with status failed
+        _report = self.init_report(status=AbstractReport.Statuses.FAILED.name)
+        response = self.client.patch(
+            f"/api/job/{_report.job_id}/{self.plugin_type}/{self.plugin_name}/retry"
+        )
+        self.assertEqual(response.status_code, 200)
+
+    def test_retry_plugin_404(self):
+        response = self.client.patch(
+            f"/api/job/{self.report.job_id}/{self.plugin_type}/PLUGIN_404/retry"
+        )
+        self.assertEqual(response.status_code, 404)
+
+    def test_retry_plugin_400(self):
+        # create a new report whose status is not "failed"/"killed"
+        _report = self.init_report(status=AbstractReport.Statuses.SUCCESS.name)
+        response = self.client.patch(
+            f"/api/job/{_report.job_id}/{self.plugin_type}/{self.plugin_name}/retry"
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertDictEqual(
+            response.json(), {"detail": "Plugin call status should be failed or killed"}
+        )

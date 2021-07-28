@@ -69,8 +69,9 @@ class Plugin(metaclass=ABCMeta):
         """
         raise NotImplementedError()
 
+    @property
     @abstractmethod
-    def get_report_class(self):
+    def report_model(self):
         """
         Returns Model to be used for *init_report_object*
         """
@@ -82,7 +83,7 @@ class Plugin(metaclass=ABCMeta):
         """
         # unique constraint ensures only one report is possible
         # update case: recurring plugin run
-        _report, _ = self.get_report_class().objects.update_or_create(
+        _report, _ = self.report_model.objects.update_or_create(
             job_id=self.job_id,
             name=self._config.name,
             defaults={

@@ -27,7 +27,8 @@ class Connector(Plugin):
     def connector_name(self) -> str:
         return self._config.name
 
-    def get_report_class(self):
+    @property
+    def report_model(self):
         return ConnectorReport
 
     def get_exceptions_to_catch(self) -> list:

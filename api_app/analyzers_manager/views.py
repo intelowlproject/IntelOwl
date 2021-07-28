@@ -6,7 +6,6 @@ import logging
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework import serializers as BaseSerializer
-from rest_framework.exceptions import NotFound
 
 
 from api_app.core.views import PluginActionViewSet
@@ -58,14 +57,9 @@ class AnalyzerListAPI(generics.ListAPIView):
 class AnalyzerActionViewSet(PluginActionViewSet):
     queryset = AnalyzerReport.objects.all()
 
-    def get_object(self, job_id, name) -> AnalyzerReport:
-        try:
-            return self.queryset.get(
-                job_id=job_id,
-                name=name,
-            )
-        except AnalyzerReport.DoesNotExist:
-            raise NotFound()
+    @property
+    def report_model(self):
+        return AnalyzerReport
 
     def _post_kill(self, report):
         # clean up job

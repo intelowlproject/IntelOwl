@@ -3,7 +3,6 @@
 
 from rest_framework import generics
 from rest_framework.response import Response
-from rest_framework.exceptions import NotFound
 
 from api_app.core.views import PluginActionViewSet
 from .serializers import ConnectorConfigSerializer
@@ -20,14 +19,9 @@ class ConnectorListAPI(generics.ListAPIView):
 class ConnectorActionViewSet(PluginActionViewSet):
     queryset = ConnectorReport.objects.all()
 
-    def get_object(self, job_id, name) -> ConnectorReport:
-        try:
-            return self.queryset.get(
-                job_id=job_id,
-                name=name,
-            )
-        except ConnectorReport.DoesNotExist:
-            raise NotFound()
+    @property
+    def report_model(self):
+        return ConnectorReport
 
     def _post_kill(self, report):
         pass

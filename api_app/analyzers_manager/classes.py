@@ -43,7 +43,8 @@ class BaseAnalyzerMixin(Plugin):
     def analyzer_name(self) -> str:
         return self._config.name
 
-    def get_report_class(self):
+    @property
+    def report_model(self):
         return AnalyzerReport
 
     def get_exceptions_to_catch(self):

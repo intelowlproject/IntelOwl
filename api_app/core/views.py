@@ -2,6 +2,7 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.exceptions import (
     ValidationError,
+    NotFound,
     PermissionDenied,
 )
 from rest_framework.response import Response
@@ -12,12 +13,9 @@ from .models import AbstractReport
 
 
 class PluginActionViewSet(viewsets.ViewSet, metaclass=ABCMeta):
+    @property
     @abstractmethod
-    def get_object(self, job_id, name) -> AbstractReport:
-        """
-        overrides drf's get_object
-        get plugin report object by name and job_id
-        """
+    def report_model(self):
         raise NotImplementedError()
 
     @abstractmethod
@@ -33,6 +31,19 @@ class PluginActionViewSet(viewsets.ViewSet, metaclass=ABCMeta):
         override this to implement retry for each plugin type
         """
         raise NotImplementedError()
+
+    def get_object(self, job_id, name):
+        """
+        overrides drf's get_object
+        get plugin report object by name and job_id
+        """
+        try:
+            return self.report_model.objects.get(
+                job_id=job_id,
+                name=name,
+            )
+        except self.report_model.DoesNotExist:
+            raise NotFound()
 
     @action(detail=False, methods=["patch"])
     def kill(self, request, job_id, name):

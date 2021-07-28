@@ -15,9 +15,9 @@ class AnalyzerReport(AbstractReport):
         "api_app.Job", related_name="analyzer_reports", on_delete=models.CASCADE
     )
 
+    def __str__(self):
+        return f"AnalyzerReport(job:#{self.job_id}, {self.analyzer_name})"
+
     @property
     def analyzer_name(self) -> str:
         return self.name
-
-    def __str__(self):
-        return f"AnalyzerReport(job:#{self.job_id}, {self.analyzer_name})"

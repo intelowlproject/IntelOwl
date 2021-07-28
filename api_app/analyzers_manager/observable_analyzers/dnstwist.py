@@ -24,11 +24,17 @@ class DNStwist(classes.ObservableAnalyzer):
         self._mxcheck = params.get("mxcheck", False)
         self._tld = params.get("tld", False)
         self._tld_dict = params.get("tld_dict", "abused_tlds.dict")
-        self.domain = self.observable_name
+
+    def run(self):
+        if not which(self.command):
+            raise AnalyzerRunException("dnstwist not installed!")
+
+        domain = self.observable_name
+
         if self.observable_classification == self.ObservableTypes.URL.value:
-            self.domain = urlparse(self.observable_name).hostname
+            domain = urlparse(self.observable_name).hostname
             try:
-                IPv4Address(self.domain)
+                IPv4Address(domain)
             except AddressValueError:
                 pass
             else:
@@ -36,27 +42,22 @@ class DNStwist(classes.ObservableAnalyzer):
                     "URL with an IP address instead of a domain cannot be analyzed"
                 )
 
-    def run(self):
-        if not which(self.command):
-            self.report.status = self.report.Statuses.FAILED.name
-            self.report.save()
-            raise AnalyzerRunException("dnstwist not installed!")
+        final_report = {
+            "ssdeep": self._ssdeep,
+            "mxcheck": self._mxcheck,
+            "tld": self._tld,
+        }
 
         args = [self.command, "--registered", "--format", "json"]
-        final_report = {}
-
         if self._ssdeep:
             args.append("--ssdeep")
-            final_report["ssdeep"] = True
         if self._mxcheck:
             args.append("--mxcheck")
-            final_report["mxcheck"] = True
         if self._tld:
             args.append("--tld")
-            final_report["tld"] = True
             args.append(self.dictionary_base_path + self._tld_dict)
 
-        args.append(self.domain)
+        args.append(domain)
 
         process = subprocess.Popen(
             args,

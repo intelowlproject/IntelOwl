@@ -7,6 +7,9 @@ done
 
 # Apply database migrations
 echo "Waiting for db to be ready..."
+# makemigrations is needed only for the durin package.
+# The customization of the parameters is not applied until the migration is done
+python manage.py makemigrations durin
 python manage.py migrate
 
 # Collect static files

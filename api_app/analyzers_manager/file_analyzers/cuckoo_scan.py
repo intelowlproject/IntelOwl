@@ -20,13 +20,13 @@ class CuckooAnalysis(FileAnalyzer):
         # cuckoo installation can be with or without the api_token
         # it depends on version and configuration
         self.session = requests.Session()
-        self.__api_key = self._secrets["api_key_name"]
-        if not self.__api_key:
+        api_key = self._secrets["api_key_name"]
+        if not api_key:
             logger.info(
                 f"{self.__repr__()}, (md5: {self.md5}) -> Continuing w/o API key.."
             )
         else:
-            self.session.headers["Authorization"] = f"Bearer {self.__api_key}"
+            self.session.headers["Authorization"] = f"Bearer {api_key}"
 
         self.cuckoo_url = self._secrets["url_key_name"]
         self.task_id = 0
@@ -236,6 +236,7 @@ class CuckooAnalysis(FileAnalyzer):
         yara = [yara_match["name"] for yara_match in file_data.get("yara", [])]
 
         result = {
+            "link": f"{self.cuckoo_url}analysis/{cuckoo_id}/summary",
             "signatures": list_description_signatures,
             "signatures_detailed": list_detailed_signatures,
             "suricata_alerts": suricata_alerts,

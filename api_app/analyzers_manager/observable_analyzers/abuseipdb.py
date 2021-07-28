@@ -34,6 +34,8 @@ class AbuseIPDB(ObservableAnalyzer):
                     category_human_readable = "unknown category"
                 report["categories_human_readable"].append(category_human_readable)
 
+        result["permalink"] = f"https://www.abuseipdb.com/check/{self.observable_name}"
+
         return result
 
     @staticmethod

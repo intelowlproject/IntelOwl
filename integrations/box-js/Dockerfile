@@ -1,4 +1,4 @@
-FROM python:3.8.4-alpine3.12
+FROM python:3.8-alpine
 
 ENV PROJECT_PATH /opt/deploy
 ENV LOG_PATH /var/log/intel_owl/box-js

@@ -76,7 +76,9 @@ svn export https://github.com/elceef/dnstwist/tags/20201022/dictionaries dnstwis
 # https://exiftool.org/install.html#Unix
 mkdir exiftool_download
 cd exiftool_download
-wget https://exiftool.org/Image-ExifTool-12.26.tar.gz
-gzip -dc Image-ExifTool-12.26.tar.gz | tar -xf -
-cd Image-ExifTool-12.26
+version=$(curl https://exiftool.org/ver.txt)
+echo "$version" >> exiftool_version.txt
+wget "https://exiftool.org/Image-ExifTool-$version.tar.gz"
+gzip -dc "Image-ExifTool-$version.tar.gz" | tar -xf -
+cd "Image-ExifTool-$version"
 chown -R www-data:www-data /opt/deploy/exiftool_download

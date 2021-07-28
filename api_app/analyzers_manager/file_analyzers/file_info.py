@@ -16,8 +16,11 @@ logger = logging.getLogger(__name__)
 class FileInfo(FileAnalyzer):
     def set_params(self, params):
         # check repo_downloader.sh file
+        exiftool_download_path = "/opt/deploy/exiftool_download"
+        with open(f"{exiftool_download_path}/exiftool_version.txt", "r") as f:
+            version = f.read().strip()
         self.exiftool_path = (
-            "/opt/deploy/exiftool_download/Image-ExifTool-12.26/exiftool"
+            f"{exiftool_download_path}/Image-ExifTool-{version}/exiftool"
         )
 
     def run(self):

@@ -6,17 +6,13 @@ from django.utils import timezone
 from django.contrib.postgres import fields as pg_fields
 
 
-class Status(models.TextChoices):
-    FAILED = "FAILED"
-    PENDING = "PENDING"
-    RUNNING = "RUNNING"
-    SUCCESS = "SUCCESS"
-    KILLED = "KILLED"
-
-
 class AbstractReport(models.Model):
-    # constants
-    Status = Status
+    class Status(models.TextChoices):
+        FAILED = "FAILED"
+        PENDING = "PENDING"
+        RUNNING = "RUNNING"
+        SUCCESS = "SUCCESS"
+        KILLED = "KILLED"
 
     # fields
     name = models.CharField(max_length=128)

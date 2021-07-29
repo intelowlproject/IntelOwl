@@ -52,7 +52,7 @@ class SignatureInfo(FileAnalyzer):
             )
             logger.error(error_message)
             self.report.errors.append(str(e))
-            self.report.status = self.report.Statuses.FAILED.name
+            self.report.status = self.report.Status.FAILED
             self.report.save()
             # we should stop the subprocesses...
             # .. in case we reach the time limit for the celery task

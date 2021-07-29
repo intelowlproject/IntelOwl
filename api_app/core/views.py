@@ -68,8 +68,8 @@ class PluginActionViewSet(viewsets.ViewSet, metaclass=ABCMeta):
         if not request.user.has_perm("api_app.change_job", report.job):
             raise PermissionDenied()
         if report.status not in [
-            AbstractReport.Statuses.RUNNING.name,
-            AbstractReport.Statuses.PENDING.name,
+            AbstractReport.Status.RUNNING,
+            AbstractReport.Status.PENDING,
         ]:
             raise ValidationError({"detail": "Plugin call is not running or pending"})
 

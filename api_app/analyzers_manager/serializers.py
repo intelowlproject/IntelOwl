@@ -56,8 +56,8 @@ class AnalyzerConfigSerializer(AbstractConfigSerializer):
     )
 
     def validate_python_module(self, python_module: str):
-        if self.initial_data["type"] == self.TypeChoices.OBSERVABLE.value or (
-            self.initial_data["type"] == self.TypeChoices.FILE.value
+        if self.initial_data["type"] == self.TypeChoices.OBSERVABLE or (
+            self.initial_data["type"] == self.TypeChoices.FILE
             and self.initial_data.get("run_hash", False)
         ):
             clspath = f"api_app.analyzers_manager.observable_analyzers.{python_module}"

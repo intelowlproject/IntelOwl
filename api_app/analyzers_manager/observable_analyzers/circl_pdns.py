@@ -16,7 +16,7 @@ class CIRCL_PDNS(classes.ObservableAnalyzer):
     def set_params(self, params):
         self.__credentials = self._secrets["pdns_credentials"]
         self.domain = self.observable_name
-        if self.observable_classification == self.ObservableTypes.URL.value:
+        if self.observable_classification == self.ObservableTypes.URL:
             self.domain = urlparse(self.observable_name).hostname
 
     def run(self):

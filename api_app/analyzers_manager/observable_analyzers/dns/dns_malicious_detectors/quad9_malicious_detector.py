@@ -26,7 +26,7 @@ class Quad9MaliciousDetector(classes.ObservableAnalyzer):
     def run(self):
         observable = self.observable_name
         # for URLs we are checking the relative domain
-        if self.observable_classification == self.ObservableTypes.URL.value:
+        if self.observable_classification == self.ObservableTypes.URL:
             observable = urlparse(self.observable_name).hostname
 
         quad9_answer = self._quad9_dns_query(observable)

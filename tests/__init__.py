@@ -67,7 +67,7 @@ class PluginActionViewsetTestCase(metaclass=ABCMeta):
         )
         self.assertEqual(response.status_code, 204)
         self.report.refresh_from_db()
-        self.assertEqual(self.report.status, AbstractReport.Statuses.KILLED.name)
+        self.assertEqual(self.report.status, AbstractReport.Status.KILLED)
 
     def test_kill_plugin_404(self):
         response = self.client.patch(
@@ -77,7 +77,7 @@ class PluginActionViewsetTestCase(metaclass=ABCMeta):
 
     def test_kill_plugin_400(self):
         # create a new report whose status is not "running"/"pending"
-        _report = self.init_report(status=AbstractReport.Statuses.SUCCESS.name)
+        _report = self.init_report(status=AbstractReport.Status.SUCCESS)
         response = self.client.patch(
             f"/api/job/{_report.job_id}/{self.plugin_type}/{self.plugin_name}/kill"
         )

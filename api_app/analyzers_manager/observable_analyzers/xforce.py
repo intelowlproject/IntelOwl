@@ -23,7 +23,7 @@ class XForce(classes.ObservableAnalyzer):
         result = {}
         for endpoint in endpoints:
             try:
-                if self.observable_classification == self.ObservableTypes.URL.value:
+                if self.observable_classification == self.ObservableTypes.URL:
                     observable_to_check = quote_plus(self.observable_name)
                 else:
                     observable_to_check = self.observable_name
@@ -43,11 +43,11 @@ class XForce(classes.ObservableAnalyzer):
         :rtype: list
         """
 
-        if self.observable_classification == self.ObservableTypes.IP.value:
+        if self.observable_classification == self.ObservableTypes.IP:
             endpoints = ["ipr", "ipr/history", "ipr/malware"]
-        elif self.observable_classification == self.ObservableTypes.HASH.value:
+        elif self.observable_classification == self.ObservableTypes.HASH:
             endpoints = ["malware"]
-        elif self.observable_classification == self.ObservableTypes.URL.value:
+        elif self.observable_classification == self.ObservableTypes.URL:
             endpoints = ["url", "url/history", "url/malware"]
         else:
             raise AnalyzerRunException(

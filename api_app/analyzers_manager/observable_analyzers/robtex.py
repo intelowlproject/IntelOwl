@@ -22,7 +22,7 @@ class Robtex(classes.ObservableAnalyzer):
             uri = f"pdns/reverse/{self.observable_name}"
         elif self.analysis_type == "forward_pdns":
             domain = self.observable_name
-            if self.observable_classification == self.ObservableTypes.URL.value:
+            if self.observable_classification == self.ObservableTypes.URL:
                 domain = urlparse(self.observable_name).hostname
             uri = f"pdns/forward/{domain}"
         else:

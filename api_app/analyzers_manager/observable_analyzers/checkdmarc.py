@@ -14,7 +14,7 @@ class CheckDMARC(classes.ObservableAnalyzer):
 
     def run(self):
         if not which(self.check_command):
-            self.report.status = self.report.Statuses.FAILED.name
+            self.report.status = self.report.Status.FAILED
             self.report.save()
             raise AnalyzerRunException("checkdmarc not installed!")
 

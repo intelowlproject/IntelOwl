@@ -31,7 +31,7 @@ class DNStwist(classes.ObservableAnalyzer):
 
         domain = self.observable_name
 
-        if self.observable_classification == self.ObservableTypes.URL.value:
+        if self.observable_classification == self.ObservableTypes.URL:
             domain = urlparse(self.observable_name).hostname
             try:
                 IPv4Address(domain)

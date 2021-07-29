@@ -123,7 +123,7 @@ class Plugin(metaclass=ABCMeta):
         except Exception as e:
             self._handle_base_exception(e)
         else:
-            self.report.status = self.report.Statuses.SUCCESS.name
+            self.report.status = self.report.Status.SUCCESS
 
         # add end time of process
         self.report.end_time = timezone.now()
@@ -137,14 +137,14 @@ class Plugin(metaclass=ABCMeta):
         error_message = self.get_error_message(exc)
         logger.error(error_message)
         self.report.errors.append(str(exc))
-        self.report.status = self.report.Statuses.FAILED.name
+        self.report.status = self.report.Status.FAILED
 
     def _handle_base_exception(self, exc) -> None:
         traceback.print_exc()
         error_message = self.get_error_message(exc, is_base_err=True)
         logger.exception(error_message)
         self.report.errors.append(str(exc))
-        self.report.status = self.report.Statuses.FAILED.name
+        self.report.status = self.report.Status.FAILED
 
     @classmethod
     def _monkeypatch(cls, patches: list = []) -> None:

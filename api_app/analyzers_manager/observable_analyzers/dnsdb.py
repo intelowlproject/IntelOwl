@@ -172,14 +172,14 @@ class DNSdb(classes.ObservableAnalyzer):
 
         observable_to_check = self.observable_name
         # for URLs we are checking the relative domain
-        if self.observable_classification == self.ObservableTypes.URL.value:
+        if self.observable_classification == self.ObservableTypes.URL:
             observable_to_check = urlparse(self.observable_name).hostname
 
-        if self.observable_classification == self.ObservableTypes.IP.value:
+        if self.observable_classification == self.ObservableTypes.IP:
             endpoint = "rdata/ip"
         elif self.observable_classification in [
-            self.ObservableTypes.DOMAIN.value,
-            self.ObservableTypes.URL.value,
+            self.ObservableTypes.DOMAIN,
+            self.ObservableTypes.URL,
         ]:
             if self._query_type == "domain":
                 endpoint = "rrset/name"

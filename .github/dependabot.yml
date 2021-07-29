@@ -18,7 +18,7 @@ updates:
     schedule:
       interval: "weekly"
       day: "tuesday"
-    target-branch: "develop"
+    target-branch: "dependabot-validation"
     ignore:
       # ignore all patch updates since we are using ~=
       # this does not work for security updates
@@ -37,42 +37,42 @@ updates:
     schedule:
       interval: "weekly"
       day: "tuesday"
-    target-branch: "develop"
+    target-branch: "dependabot-validation"
 
   - package-ecosystem: "docker"
     directory: "/integrations/box-js"
     schedule:
       interval: "weekly"
       day: "tuesday"
-    target-branch: "develop"
+    target-branch: "dependabot-validation"
 
   - package-ecosystem: "docker"
     directory: "/integrations/qiling"
     schedule:
       interval: "weekly"
       day: "tuesday"
-    target-branch: "develop"
+    target-branch: "dependabot-validation"
 
   - package-ecosystem: "docker"
     directory: "/integrations/rendertron"
     schedule:
       interval: "weekly"
       day: "tuesday"
-    target-branch: "develop"
+    target-branch: "dependabot-validation"
 
   - package-ecosystem: "docker"
     directory: "/integrations/static_analyzers"
     schedule:
       interval: "weekly"
       day: "tuesday"
-    target-branch: "develop"
+    target-branch: "dependabot-validation"
 
   - package-ecosystem: "docker"
     directory: "/integrations/thug"
     schedule:
       interval: "weekly"
       day: "tuesday"
-    target-branch: "develop"
+    target-branch: "dependabot-validation"
 
   - package-ecosystem: "github-actions"
     directory: "/"

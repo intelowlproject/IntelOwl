@@ -8,7 +8,7 @@ docker_analyzers = [
     "thug",
     "apk_analyzers",
     "box_js",
-    #    "rendertron",
+    "rendertron",
     "static_analyzers",
     "qiling",
 ]

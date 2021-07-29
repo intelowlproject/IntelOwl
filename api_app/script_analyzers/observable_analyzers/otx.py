@@ -60,6 +60,10 @@ class OTX(classes.ObservableAnalyzer):
             # for some observables the output could really be overwhelming
             if not self.verbose and result["pulses"]:
                 result["pulses"] = result["pulses"][:20]
+            for pulse in result["pulses"]:
+                pulse_id = pulse.get("id", "")
+                if pulse_id:
+                    pulse["link"] = f"https://otx.alienvault.com/pulse/{pulse_id}"
             result["geo"] = details.get("geo", {})
             result["malware_samples"] = [
                 d.get("hash", "") for d in details.get("malware", {}).get("data", [])

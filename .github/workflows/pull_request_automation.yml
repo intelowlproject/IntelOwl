@@ -55,7 +55,8 @@ jobs:
         sudo docker/scripts/coverage_test.sh tests.analyzers_manager.test_file_scripts
     - name: "Coverage: generate xml and transfer from docker container to host"
       run: |
-        sudo coverage xml
+        sudo docker exec intelowl_uwsgi coverage combine
+        sudo docker exec intelowl_uwsgi coverage xml
         sudo docker cp intelowl_uwsgi:/opt/deploy/intel_owl/coverage.xml coverage.xml
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v2.0.2

@@ -1,3 +1,3 @@
 docker exec intelowl_uwsgi \
-    coverage run --append \
+    coverage run \
     manage.py test $@

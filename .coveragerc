@@ -1,7 +1,10 @@
 [run]
 branch = True
-source = IntelOwl
+source = 
+    api_app
+    intel_owl
 concurrency = multiprocessing
+parallel = True
 
 [report]
 exclude_lines =

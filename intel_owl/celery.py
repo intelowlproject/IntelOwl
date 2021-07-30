@@ -15,18 +15,17 @@ app = Celery("intel_owl")
 
 app.autodiscover_tasks()
 
-app.conf.task_default_queue = "default"
-
-app.conf.task_queues = [
-    Queue(
-        key,
-        Exchange(key),
-        routing_key=key,
-    )
-    for key in CELERY_QUEUES
-]
 
 app.conf.update(
+    task_default_queue="default",
+    task_queues=[
+        Queue(
+            key,
+            Exchange(key),
+            routing_key=key,
+        )
+        for key in CELERY_QUEUES
+    ],
     task_time_limit=1800,
     broker_url=CELERY_BROKER_URL,
     accept_content=["application/json"],

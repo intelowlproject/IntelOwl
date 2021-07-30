@@ -20,9 +20,7 @@ class AbstractReport(models.Model):
 
     # fields
     name = models.CharField(max_length=128)
-    status = models.CharField(
-        max_length=50, choices=[(s.name, s.name) for s in Statuses]
-    )
+    status = models.CharField(max_length=50, choices=Status.choices)
     report = models.JSONField(default=dict)
     errors = pg_fields.ArrayField(
         models.CharField(max_length=512), default=list, blank=True

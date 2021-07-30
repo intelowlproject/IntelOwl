@@ -13,15 +13,15 @@ __all__ = ["AnalyzerConfig"]
 @dataclasses.dataclass
 class AnalyzerConfig(AbstractConfig):
     # Required fields
-    type: TypeChoices.as_type()
+    type: typing.Literal[TypeChoices.values]
     supported_filetypes: typing.List[str]
     not_supported_filetypes: typing.List[str]
-    observable_supported: typing.List[ObservableTypes.as_type()]
+    observable_supported: typing.List[typing.Literal[ObservableTypes.values]]
     # Optional Fields
     external_service: bool = False
     leaks_info: bool = False
     run_hash: bool = False
-    run_hash_type: HashChoices.as_type() = HashChoices.MD5
+    run_hash_type: typing.Literal[HashChoices.values] = HashChoices.MD5
 
     # utils
 

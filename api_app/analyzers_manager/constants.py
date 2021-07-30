@@ -2,30 +2,19 @@
 # See the file 'LICENSE' for copying permission.
 
 from django.db import models
-import typing
 
 
-class BaseChoices(models.TextChoices):
-    @classmethod
-    def aslist(cls) -> list:
-        return [c for c in cls]
-
-    @classmethod
-    def as_type(cls) -> typing.Literal:
-        return typing.Literal[cls.aslist()]
-
-
-class TypeChoices(BaseChoices):
+class TypeChoices(models.TextChoices):
     FILE = "file"
     OBSERVABLE = "observable"
 
 
-class HashChoices(BaseChoices):
+class HashChoices(models.TextChoices):
     MD5 = "md5"
     SHA256 = "sha256"
 
 
-class ObservableTypes(BaseChoices):
+class ObservableTypes(models.TextChoices):
     IP = "ip"
     URL = "url"
     DOMAIN = "domain"

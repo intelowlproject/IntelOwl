@@ -210,13 +210,8 @@ def job_cleanup(job: Job) -> None:
         job.save(update_fields=["status", "errors", "finished_analysis_time"])
 
 
-<<<<<<< HEAD
 def set_failed_analyzer(job_id: int, name: str, err_msg):
-    status = AnalyzerReport.Statuses.FAILED.name
-=======
-def set_failed_analyzer(job_id: int, analyzer_name: str, err_msg):
     status = AnalyzerReport.Status.FAILED
->>>>>>> ff280f6 (replace Enum with django.models.TextChoices)
     logger.warning(
         f"(job: #{job_id}, analyzer:{name}) -> set as {status}. ",
         f" Error: {err_msg}",

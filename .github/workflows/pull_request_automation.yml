@@ -31,50 +31,45 @@ jobs:
     - name: "Install test-requirements.txt inside docker container"
       run: |
         sudo docker exec intelowl_uwsgi pip3 install --no-cache-dir --compile -r test-requirements.txt
-    # - name: "Check Black code Style"
-    #   run: |
-    #     sudo docker exec intelowl_uwsgi black . --check --exclude "migrations|venv"
-    # - name: "Lint with flake8 (PEP8 enforcer + linter)"
-    #   run: |
-    #     sudo docker exec intelowl_uwsgi flake8 . --count
+    - name: "Check Black code Style"
+      run: |
+        sudo docker exec intelowl_uwsgi black . --check --exclude "migrations|venv"
+    - name: "Lint with flake8 (PEP8 enforcer + linter)"
+      run: |
+        sudo docker exec intelowl_uwsgi flake8 . --count
     - name: "Test: API"
       run: |
         sudo docker/scripts/test.sh \
           tests.test_api tests.test_auth \
           --with-coverage --cover-xml --cover-xml-file=${COVERAGE_DIR}/api.xml 
-    # - name: "Test: Cron"
-    #   run: |
-    #     sudo docker/scripts/test.sh \
-    #       tests.test_generic \
-    #       --with-coverage --cover-xml --cover-xml-file=${COVERAGE_DIR}/cron.xml 
-    # - name: "Test: Connectors Manager"
-    #   run: |
-    #     sudo docker/scripts/test.sh \
-    #       tests.connectors_manager \
-    #       --with-coverage --cover-xml --cover-xml-file=${COVERAGE_DIR}/connectors.xml
-    # - name: "Test: Analyzers Manager (views, serializers)"
-    #   run: |
-    #     sudo docker/scripts/test.sh \
-    #       tests.analyzers_manager.test_views tests.analyzers_manager.test_serializers \
-    #       --with-coverage --cover-xml --cover-xml-file=${COVERAGE_DIR}/analyzers.xml
-    # - name: "Test: Analyzers Manager (observable analyzers)"
-    #   run: |
-    #     sudo docker/scripts/test.sh \
-    #       tests.analyzers_manager.test_observable_scripts \
-    #       --with-coverage --cover-xml --cover-xml-file=${COVERAGE_DIR}/analyzers-obs.xml
-    # - name: "Test: Analyzers Manager (file analyzers)"
-    #   run: |
-    #     sudo docker/scripts/test.sh \
-    #       tests.analyzers_manager.test_file_scripts \
-    #       --with-coverage --cover-xml --cover-xml-file=${COVERAGE_DIR}/analyzers-files.xml
+    - name: "Test: Cron"
+      run: |
+        sudo docker/scripts/test.sh \
+          tests.test_generic \
+          --with-coverage --cover-xml --cover-xml-file=${COVERAGE_DIR}/cron.xml 
+    - name: "Test: Connectors Manager"
+      run: |
+        sudo docker/scripts/test.sh \
+          tests.connectors_manager \
+          --with-coverage --cover-xml --cover-xml-file=${COVERAGE_DIR}/connectors.xml
+    - name: "Test: Analyzers Manager (views, serializers)"
+      run: |
+        sudo docker/scripts/test.sh \
+          tests.analyzers_manager.test_views tests.analyzers_manager.test_serializers \
+          --with-coverage --cover-xml --cover-xml-file=${COVERAGE_DIR}/analyzers.xml
+    - name: "Test: Analyzers Manager (observable analyzers)"
+      run: |
+        sudo docker/scripts/test.sh \
+          tests.analyzers_manager.test_observable_scripts \
+          --with-coverage --cover-xml --cover-xml-file=${COVERAGE_DIR}/analyzers-obs.xml
+    - name: "Test: Analyzers Manager (file analyzers)"
+      run: |
+        sudo docker/scripts/test.sh \
+          tests.analyzers_manager.test_file_scripts \
+          --with-coverage --cover-xml --cover-xml-file=${COVERAGE_DIR}/analyzers-files.xml
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v2.0.2
       with:
-        files: >
-        ./coverage_reports/api.xml,
-        ./coverage_reports/connectors.xml,
-        ./coverage_reports/analyzers.xml,
-        ./coverage_reports/analyzers-obs.xml,
-        ./coverage_reports/analyzers-files.xml
-       fail_ci_if_error: true
+        files: ./coverage_reports/api.xml, ./coverage_reports/connectors.xml, ./coverage_reports/analyzers.xml, ./coverage_reports/analyzers-obs.xml, ./coverage_reports/analyzers-files.xml
+        fail_ci_if_error: true
         verbose: true

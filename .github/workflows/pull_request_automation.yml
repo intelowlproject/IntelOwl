@@ -71,6 +71,5 @@ jobs:
       uses: codecov/codecov-action@v2.0.2
       with:
         directory: ./coverage_reports/
-        files: *.xml
         fail_ci_if_error: true
         verbose: true

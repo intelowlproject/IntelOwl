@@ -62,14 +62,12 @@ class AnalyzerActionViewSet(PluginActionViewSet):
         return AnalyzerReport
 
     def perform_kill(self, report):
-        super().perform_kill(self, report)
+        super().perform_kill(report)
         # clean up job
         analyzers_controller.job_cleanup(report.job)
 
     def perform_retry(self, report: AnalyzerReport):
-        analyzers_to_execute, runtime_configuration = super().perform_retry(
-            self, report
-        )
+        analyzers_to_execute, runtime_configuration = super().perform_retry(report)
         analyzers_controller.start_analyzers(
             report.job.id, analyzers_to_execute, runtime_configuration
         )

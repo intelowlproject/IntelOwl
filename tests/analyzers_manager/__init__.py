@@ -4,6 +4,7 @@
 import hashlib
 import time
 
+from unittest import SkipTest
 from django.test import TransactionTestCase
 from django.core.files import File
 from django.conf import settings
@@ -39,7 +40,7 @@ class _AbstractAnalyzersScriptTestCase(TransactionTestCase):
             _ObservableAnalyzersScriptsTestCase,
             _FileAnalyzersScriptsTestCase,
         ]:
-            return cls.skipTest(f"{cls.__name__} is an abstract base class.")
+            raise SkipTest(f"{cls.__name__} is an abstract base class.")
         else:
             return super(_AbstractAnalyzersScriptTestCase, cls).setUpClass()
 
@@ -60,7 +61,8 @@ class _AbstractAnalyzersScriptTestCase(TransactionTestCase):
         )
 
         # execute analyzers
-        start_analyzers.apply_async(
+        # using `apply` so it runs synchronously, will block until the task returns
+        start_analyzers.apply(
             args=[
                 self.test_job.pk,
                 self.test_job.analyzers_to_execute,

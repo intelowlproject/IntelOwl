@@ -73,7 +73,7 @@ class PluginActionViewSet(viewsets.ViewSet, metaclass=ABCMeta):
         ]:
             raise ValidationError({"detail": "Plugin call is not running or pending"})
 
-        self.perform_kill()
+        self.perform_kill(report)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=False, methods=["patch"])

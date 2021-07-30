@@ -43,19 +43,9 @@ class BaseAnalyzerMixin(Plugin):
     def analyzer_name(self) -> str:
         return self._config.name
 
-    def init_report_object(self) -> AnalyzerReport:
-        """
-        Returns report object set in *start* fn
-        """
-        return AnalyzerReport.objects.create(
-            job_id=self.job_id,
-            analyzer_name=self.analyzer_name,
-            report={},
-            errors=[],
-            status=AnalyzerReport.Statuses.PENDING.name,
-            runtime_configuration=self.kwargs.get("runtime_conf", {}),
-            task_id=self.kwargs["task_id"],
-        )
+    @property
+    def report_model(self):
+        return AnalyzerReport
 
     def get_exceptions_to_catch(self):
         """

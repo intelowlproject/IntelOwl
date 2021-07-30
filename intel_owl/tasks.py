@@ -79,7 +79,8 @@ def run_analyzer(job_id: int, config_dict: dict, **kwargs):
     # FIXME @eshaan7: find a better place for these callback
     analyzers_controller.job_cleanup(job)
     # fire connectors when job finishes with success
-    if job.status == "reported_without_fails":
+    # avoid re-triggering of connectors (case: recurring analyzer run)
+    if job.status == "reported_without_fails" and not len(job.connectors_to_execute):
         app.send_task(
             "on_job_success",
             args=[

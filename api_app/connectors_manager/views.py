@@ -3,11 +3,11 @@
 
 from rest_framework import generics
 from rest_framework.response import Response
-from rest_framework.exceptions import NotFound
 
 from api_app.core.views import PluginActionViewSet
 from .serializers import ConnectorConfigSerializer
 from .models import ConnectorReport
+from . import controller as connectors_controller
 
 
 class ConnectorListAPI(generics.ListAPIView):
@@ -19,14 +19,14 @@ class ConnectorListAPI(generics.ListAPIView):
 class ConnectorActionViewSet(PluginActionViewSet):
     queryset = ConnectorReport.objects.all()
 
-    def get_object(self, job_id, connector_name) -> ConnectorReport:
-        try:
-            return self.queryset.get(
-                job_id=job_id,
-                connector_name=connector_name,
-            )
-        except ConnectorReport.DoesNotExist:
-            raise NotFound()
+    @property
+    def report_model(self):
+        return ConnectorReport
 
-    def _post_kill(self, report):
-        pass
+    def perform_retry(self, report: ConnectorReport):
+        connectors_to_execute, runtime_configuration = super().perform_retry(report)
+        connectors_controller.start_connectors(
+            report.job.id,
+            connectors_to_execute,
+            runtime_configuration,
+        )

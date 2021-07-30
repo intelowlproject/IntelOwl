@@ -1,3 +1,6 @@
+# This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
+# See the file 'LICENSE' for copying permission.
+
 import logging
 
 from ..exceptions import (
@@ -24,15 +27,9 @@ class Connector(Plugin):
     def connector_name(self) -> str:
         return self._config.name
 
-    def init_report_object(self) -> ConnectorReport:
-        return ConnectorReport.objects.create(
-            job_id=self.job_id,
-            connector_name=self.connector_name,
-            report={},
-            errors=[],
-            status=ConnectorReport.Statuses.PENDING.name,
-            task_id=self.kwargs["task_id"],
-        )
+    @property
+    def report_model(self):
+        return ConnectorReport
 
     def get_exceptions_to_catch(self) -> list:
         return (

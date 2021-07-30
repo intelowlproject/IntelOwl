@@ -78,7 +78,7 @@ class _AbstractAnalyzersScriptTestCase(TransactionTestCase):
             running_or_pending_analyzers = list(
                 self.test_job.analyzer_reports.filter(
                     status__in=["PENDING", "RUNNING"]
-                ).values_list("analyzer_name", flat=True)
+                ).values_list("name", flat=True)
             )
             print(
                 f"[REPORT] (poll #{i})",

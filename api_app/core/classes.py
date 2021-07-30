@@ -69,13 +69,34 @@ class Plugin(metaclass=ABCMeta):
         """
         raise NotImplementedError()
 
+    @property
     @abstractmethod
-    def init_report_object(self) -> AbstractReport:
+    def report_model(self):
         """
-        Returns: instance of a subclass of ``AbstractReport``.
-        Called inside `__init__`.
+        Returns Model to be used for *init_report_object*
         """
         raise NotImplementedError()
+
+    def init_report_object(self):
+        """
+        Returns report object set in *__post__init__* fn
+        """
+        # unique constraint ensures only one report is possible
+        # update case: recurring plugin run
+        _report, _ = self.report_model.objects.update_or_create(
+            job_id=self.job_id,
+            name=self._config.name,
+            defaults={
+                "report": {},
+                "errors": [],
+                "status": AbstractReport.Statuses.PENDING.name,
+                "runtime_configuration": self.kwargs.get("runtime_conf", {}),
+                "task_id": self.kwargs["task_id"],
+                "start_time": timezone.now(),
+                "end_time": timezone.now(),
+            },
+        )
+        return _report
 
     @abstractmethod
     def get_exceptions_to_catch(self) -> list:

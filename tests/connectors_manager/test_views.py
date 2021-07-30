@@ -3,7 +3,6 @@
 
 from api_app.connectors_manager.serializers import ConnectorConfigSerializer
 from api_app.connectors_manager.models import ConnectorReport
-from api_app.models import Job
 
 
 from .. import CustomAPITestCase, PluginActionViewsetTestCase
@@ -29,16 +28,6 @@ class ConnectorActionViewSetTests(CustomAPITestCase, PluginActionViewsetTestCase
         self.report = self.init_report()
         self.plugin_type = "connector"
 
-    def init_report(self, status=None) -> ConnectorReport:
-        _job = Job.objects.create(status="running")
-        _report, _ = ConnectorReport.objects.get_or_create(
-            **{
-                "job_id": _job.id,
-                "connector_name": "MISP",
-                "status": ConnectorReport.Statuses.PENDING.name
-                if status is None
-                else status,
-                "task_id": "4b77bdd6-d05b-442b-92e8-d53de5d7c1a9",
-            }
-        )
-        return _report
+    @property
+    def report_model(self):
+        return ConnectorReport

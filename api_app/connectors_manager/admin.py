@@ -10,11 +10,11 @@ from api_app.connectors_manager.models import ConnectorReport
 class ConnectorReportAdminView(admin.ModelAdmin):
     list_display = (
         "id",
-        "status",
-        "connector_name",
+        "name",
         "job",
+        "status",
         "start_time",
         "end_time",
     )
     list_display_links = ("id",)
-    search_fields = ("connector_name",)
+    search_fields = ("name",)

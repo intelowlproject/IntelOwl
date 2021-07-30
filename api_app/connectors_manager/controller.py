@@ -93,15 +93,14 @@ def start_connectors(
     return connectors_task_id_map
 
 
-def set_failed_connector(job_id: int, connector_name: str, err_msg: str):
+def set_failed_connector(job_id: int, name: str, err_msg: str):
     status = ConnectorReport.Statuses.FAILED.name
     logger.warning(
-        f"({connector_name}, job_id #{job_id}) -> set as {status}. "
-        f" Error: {err_msg}"
+        f"({name}, job_id #{job_id}) -> set as {status}. " f" Error: {err_msg}"
     )
     report = ConnectorReport.objects.create(
         job_id=job_id,
-        connector_name=connector_name,
+        name=name,
         report={},
         errors=[err_msg],
         status=status,

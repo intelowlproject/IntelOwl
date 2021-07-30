@@ -9,10 +9,12 @@ from api_app.analyzers_manager.models import AnalyzerReport
 @admin.register(AnalyzerReport)
 class AnalyzerReportAdminView(admin.ModelAdmin):
     list_display = (
-        "analyzer_name",
+        "id",
+        "name",
         "job",
         "status",
         "start_time",
         "end_time",
     )
-    search_fields = ("analyzer_name", "job", "status")
+    list_display_links = ("id",)
+    search_fields = ("name",)

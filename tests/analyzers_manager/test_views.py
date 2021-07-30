@@ -28,5 +28,6 @@ class AnalyzerActionViewSetTests(CustomAPITestCase, PluginActionViewsetTestCase)
         self.report = self.init_report()
         self.plugin_type = "analyzer"
 
-    def get_report_class(self):
+    @property
+    def report_model(self):
         return AnalyzerReport

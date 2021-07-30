@@ -18,20 +18,6 @@ class PluginActionViewSet(viewsets.ViewSet, metaclass=ABCMeta):
     def report_model(self):
         raise NotImplementedError()
 
-    @abstractmethod
-    def _post_kill(self, report):
-        """
-        callback executed post plugin kill
-        """
-        raise NotImplementedError()
-
-    @abstractmethod
-    def _start_retry(self, report):
-        """
-        override this to implement retry for each plugin type
-        """
-        raise NotImplementedError()
-
     def get_object(self, job_id, name):
         """
         overrides drf's get_object
@@ -45,6 +31,24 @@ class PluginActionViewSet(viewsets.ViewSet, metaclass=ABCMeta):
         except self.report_model.DoesNotExist:
             raise NotFound()
 
+    def perform_kill(self, report: AbstractReport):
+        """
+        performs kill
+         override for callbacks after kill operation
+        """
+        # kill celery task
+        celery_app.control.revoke(report.task_id, terminate=True)
+        # update report
+        report.update_status(AbstractReport.Statuses.KILLED.name)
+
+    def perform_retry(self, report: AbstractReport):
+        """
+        override to run plugin with these arguments
+        """
+        plugins_to_execute = [report.name]
+        runtime_configuration = {report.name: report.runtime_configuration}
+        return plugins_to_execute, runtime_configuration
+
     @action(detail=False, methods=["patch"])
     def kill(self, request, job_id, name):
         """
@@ -54,7 +58,7 @@ class PluginActionViewSet(viewsets.ViewSet, metaclass=ABCMeta):
          - job_id
          - name (plugin name)
         :returns:
-         - 200 - if killed
+         - 204 - if killed
          - 404 - not found
          - 403 - forbidden, 400 bad request
         """
@@ -69,14 +73,8 @@ class PluginActionViewSet(viewsets.ViewSet, metaclass=ABCMeta):
         ]:
             raise ValidationError({"detail": "Plugin call is not running or pending"})
 
-        # kill celery task
-        celery_app.control.revoke(report.task_id, terminate=True)
-        # update report
-        report.update_status(AbstractReport.Statuses.KILLED.name)
-        # execute callback post kill
-        self._post_kill(report)
-
-        return Response(status=status.HTTP_200_OK)
+        self.perform_kill()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=False, methods=["patch"])
     def retry(self, request, job_id, name):
@@ -88,7 +86,7 @@ class PluginActionViewSet(viewsets.ViewSet, metaclass=ABCMeta):
          - job_id
          - name (plugin name)
         :returns:
-         - 200 - if success
+         - 204 - if success
          - 404 - not found
          - 403 - forbidden
          - 400 - bad request
@@ -107,6 +105,5 @@ class PluginActionViewSet(viewsets.ViewSet, metaclass=ABCMeta):
             )
 
         # retry with the same arguments
-        self._start_retry(report)
-
-        return Response(status=status.HTTP_200_OK)
+        self.perform_retry(report)
+        return Response(status=status.HTTP_204_NO_CONTENT)

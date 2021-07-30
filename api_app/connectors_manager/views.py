@@ -23,12 +23,12 @@ class ConnectorActionViewSet(PluginActionViewSet):
     def report_model(self):
         return ConnectorReport
 
-    def _post_kill(self, report):
-        pass
-
-    def _start_retry(self, report: ConnectorReport):
-        connectors_to_execute = [report.connector_name]
+    def perform_retry(self, report: ConnectorReport):
+        connectors_to_execute, runtime_configuration = super().perform_retry(
+            self, report
+        )
         connectors_controller.start_connectors(
             report.job.id,
             connectors_to_execute,
+            runtime_configuration,
         )

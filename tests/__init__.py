@@ -35,8 +35,9 @@ class CustomAPITestCase(TestCase):
 
 
 class PluginActionViewsetTestCase(metaclass=ABCMeta):
+    @property
     @abstractmethod
-    def get_report_class(self):
+    def report_model(self):
         """
         Returns Model to be used for *init_report*
         """
@@ -44,7 +45,7 @@ class PluginActionViewsetTestCase(metaclass=ABCMeta):
 
     def init_report(self, status=None):
         _job = Job.objects.create(status="running")
-        _report, _ = self.get_report_class().objects.get_or_create(
+        _report, _ = self.report_model.objects.get_or_create(
             **{
                 "job_id": _job.id,
                 "name": "MISP",
@@ -60,11 +61,11 @@ class PluginActionViewsetTestCase(metaclass=ABCMeta):
     def plugin_name(self):
         return getattr(self.report, f"{self.plugin_type}_name")
 
-    def test_kill_plugin_200(self):
+    def test_kill_plugin_204(self):
         response = self.client.patch(
             f"/api/job/{self.report.job_id}/{self.plugin_type}/{self.plugin_name}/kill"
         )
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 204)
         self.report.refresh_from_db()
         self.assertEqual(self.report.status, AbstractReport.Statuses.KILLED.name)
 
@@ -85,13 +86,13 @@ class PluginActionViewsetTestCase(metaclass=ABCMeta):
             response.json(), {"detail": "Plugin call is not running or pending"}
         )
 
-    def test_retry_plugin_200(self):
+    def test_retry_plugin_204(self):
         # create new report with status failed
         _report = self.init_report(status=AbstractReport.Statuses.FAILED.name)
         response = self.client.patch(
             f"/api/job/{_report.job_id}/{self.plugin_type}/{self.plugin_name}/retry"
         )
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 204)
 
     def test_retry_plugin_404(self):
         response = self.client.patch(

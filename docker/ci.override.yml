@@ -11,8 +11,6 @@ services:
       dockerfile: docker/Dockerfile
     env_file:
       - env_file_app_ci
-    volumes:
-      - ../coverage_reports:/opt/deploy/intel_owl/coverage_reports
 
   nginx:
     image: library/nginx:1.19-alpine

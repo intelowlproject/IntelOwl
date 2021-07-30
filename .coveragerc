@@ -1,6 +1,7 @@
 [run]
 branch = True
 source = IntelOwl
+concurrency = multiprocessing
 
 [report]
 exclude_lines =
@@ -11,3 +12,5 @@ exclude_lines =
 ignore_errors = True
 omit =
     tests/*
+    .venv/*
+    venv/

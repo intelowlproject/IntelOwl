@@ -5,7 +5,7 @@ import logging
 
 from subprocess import Popen, DEVNULL, PIPE
 
-from celery.exception import SoftTimeLimitExceeded
+from celery.exceptions import SoftTimeLimitExceeded
 
 from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager.classes import FileAnalyzer

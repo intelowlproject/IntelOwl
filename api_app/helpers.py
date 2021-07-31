@@ -5,6 +5,7 @@
 
 import json
 import logging
+import ipaddress
 import hashlib
 import re
 from magic import from_buffer as magic_from_buffer
@@ -67,6 +68,33 @@ def generate_sha256(job_id):
     return hashlib.sha256(binary).hexdigest()
 
 
+def generate_hashes(job_id):
+    """
+    Returns hashes of job sample
+    Formats: md5, sha1, sha256
+    """
+    binary = get_binary(job_id)
+    return {
+        "md5": hashlib.md5(binary).hexdigest(),
+        "sha-1": hashlib.sha1(binary).hexdigest(),
+        "sha-256": hashlib.sha256(binary).hexdigest(),
+    }
+
+
+def get_ip_version(ip_value):
+    """
+    Returns ip version
+    Supports IPv4 and IPv6
+    """
+    ip_type = None
+    try:
+        ip = ipaddress.ip_address(ip_value)
+        ip_type = ip.version
+    except ValueError as e:
+        logger.error(e)
+    return ip_type
+
+
 def get_hash_type(hash_value):
     """
     Returns hash type
@@ -74,9 +102,9 @@ def get_hash_type(hash_value):
     """
     RE_HASH_MAP = {
         "md5": re.compile(r"^[a-f\d]{32}$", re.IGNORECASE | re.ASCII),
-        "sha1": re.compile(r"^[a-f\d]{40}$", re.IGNORECASE | re.ASCII),
-        "sha256": re.compile(r"^[a-f\d]{64}$", re.IGNORECASE | re.ASCII),
-        "sha512": re.compile(r"^[a-f\d]{128}$", re.IGNORECASE | re.ASCII),
+        "sha-1": re.compile(r"^[a-f\d]{40}$", re.IGNORECASE | re.ASCII),
+        "sha-256": re.compile(r"^[a-f\d]{64}$", re.IGNORECASE | re.ASCII),
+        "sha-512": re.compile(r"^[a-f\d]{128}$", re.IGNORECASE | re.ASCII),
     }
 
     detected_hash_type = None

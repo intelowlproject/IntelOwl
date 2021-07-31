@@ -25,5 +25,39 @@
         "description": "URL of your MISP instance"
       }
     }
+  },
+  "OpenCTI": {
+    "disabled": false,
+    "description": "OpenCTI Connector",
+    "python_module": "opencti.OpenCTI",
+    "config": {
+      "soft_time_limit": 30,
+      "ssl_verify": true,
+      "proxies": {
+        "http": "",
+        "https": ""
+      },
+      "tlp": {
+        "type": "white",
+        "color": "#FFFFFF",
+        "x_opencti_order": 0
+      }
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "OPENCTI_KEY",
+        "type": "string",
+        "required": true,
+        "default": null,
+        "description": "API key for your OpenCTI instance"
+      },
+      "url_key_name": {
+        "env_var_key": "OPENCTI_URL",
+        "type": "string",
+        "required": true,
+        "default": null,
+        "description": "URL of your OpenCTI instance"
+      }
+    }
   }
 }

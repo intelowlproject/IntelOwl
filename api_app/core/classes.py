@@ -89,7 +89,7 @@ class Plugin(metaclass=ABCMeta):
             defaults={
                 "report": {},
                 "errors": [],
-                "status": AbstractReport.Statuses.PENDING.name,
+                "status": AbstractReport.Status.PENDING,
                 "runtime_configuration": self.kwargs.get("runtime_conf", {}),
                 "task_id": self.kwargs["task_id"],
                 "start_time": timezone.now(),

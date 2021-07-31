@@ -39,7 +39,7 @@ class PluginActionViewSet(viewsets.ViewSet, metaclass=ABCMeta):
         # kill celery task
         celery_app.control.revoke(report.task_id, terminate=True)
         # update report
-        report.update_status(AbstractReport.Statuses.KILLED.name)
+        report.update_status(AbstractReport.Status.KILLED)
 
     def perform_retry(self, report: AbstractReport):
         """
@@ -97,8 +97,8 @@ class PluginActionViewSet(viewsets.ViewSet, metaclass=ABCMeta):
         if not request.user.has_perm("api_app.change_job", report.job):
             raise PermissionDenied()
         if report.status not in [
-            AbstractReport.Statuses.FAILED.name,
-            AbstractReport.Statuses.KILLED.name,
+            AbstractReport.Status.FAILED,
+            AbstractReport.Status.KILLED,
         ]:
             raise ValidationError(
                 {"detail": "Plugin call status should be failed or killed"}

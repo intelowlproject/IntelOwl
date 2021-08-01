@@ -3,8 +3,10 @@
 
 from django.conf import settings
 
-from pycti import OpenCTIApiClient
+from pycti.api.opencti_api_client import File
+import pycti
 
+from tests.mock_utils import patch, if_mock_connections
 from api_app import helpers
 from ..classes import Connector
 
@@ -75,7 +77,7 @@ class OpenCTI(Connector):
 
     def run(self):
         # set up client
-        opencti_api_client = OpenCTIApiClient(
+        opencti_instance = pycti.OpenCTIApiClient(
             url=self.__url_name,
             token=self.__api_key,
             ssl_verify=self.ssl_verify,
@@ -83,7 +85,7 @@ class OpenCTI(Connector):
         )
 
         # Create author (if it doesn't exist)
-        organization = opencti_api_client.identity.create(
+        organization = pycti.Identity(opencti_instance).create(
             type="Organization",
             name="IntelOwl",
             description=(
@@ -94,7 +96,7 @@ class OpenCTI(Connector):
             ),
         )
         # Create the marking definition
-        marking_definition = opencti_api_client.marking_definition.create(
+        marking_definition = pycti.MarkingDefinition(opencti_instance).create(
             definition_type="TLP",
             definition="TLP:%s" % self.tlp["type"].upper(),
             x_opencti_color=self.tlp["color"].upper(),
@@ -103,14 +105,14 @@ class OpenCTI(Connector):
 
         # Create the observable
         observable_data = self.generate_observable_data()
-        observable = opencti_api_client.stix_cyber_observable.create(
+        observable = pycti.StixCyberObservable(opencti_instance, File).create(
             observableData=observable_data,
             createdBy=organization["id"],
             objectMarking=marking_definition["id"],
         )
 
         # Create the report
-        report = opencti_api_client.report.create(
+        report = pycti.Report(opencti_instance).create(
             name=f"IntelOwl Job-{self.job_id}",
             description=(
                 f"This is IntelOwl's analysis report for Job: {self.job_id}."
@@ -123,24 +125,47 @@ class OpenCTI(Connector):
             x_opencti_report_status=2,  # Analyzed
         )
         # Create the external reference
-        external_reference = opencti_api_client.external_reference.create(
+        external_reference = pycti.ExternalReference(opencti_instance).create(
             source_name="IntelOwl Analysis",
             description="View analysis report on the IntelOwl instance",
             url=f"{settings.WEB_CLIENT_URL}/pages/scan/result/{self.job_id}",
         )
         # Add the external reference to the report
-        opencti_api_client.stix_domain_object.add_external_reference(
+        pycti.StixDomainObject(opencti_instance, File).add_external_reference(
             id=report["id"], external_reference_id=external_reference["id"]
         )
 
         # Link Observable and Report
-        opencti_api_client.report.add_stix_object_or_stix_relationship(
+        pycti.Report(opencti_instance).add_stix_object_or_stix_relationship(
             id=report["id"], stixObjectOrStixRelationshipId=observable["id"]
         )
 
         return {
-            "observable": opencti_api_client.stix_cyber_observable.read(
+            "observable": pycti.StixCyberObservable(opencti_instance, File).read(
                 id=observable["id"]
             ),
-            "report": opencti_api_client.report.read(id=report["id"]),
+            "report": pycti.Report(opencti_instance).read(id=report["id"]),
         }
+
+    @classmethod
+    def _monkeypatch(cls):
+        patches = [
+            if_mock_connections(
+                patch("pycti.OpenCTIApiClient", return_value=None),
+                patch("pycti.Identity.create", return_value={"id": 1}),
+                patch("pycti.MarkingDefinition.create", return_value={"id": 1}),
+                patch("pycti.StixCyberObservable.create", return_value={"id": 1}),
+                patch("pycti.Report.create", return_value={"id": 1}),
+                patch("pycti.ExternalReference.create", return_value={"id": 1}),
+                patch(
+                    "pycti.StixDomainObject.add_external_reference", return_value=None
+                ),
+                patch(
+                    "pycti.Report.add_stix_object_or_stix_relationship",
+                    return_value=None,
+                ),
+                patch("pycti.StixCyberObservable.read", return_value={"id": 1}),
+                patch("pycti.Report.read", return_value={"id": 1}),
+            )
+        ]
+        return super()._monkeypatch(patches=patches)

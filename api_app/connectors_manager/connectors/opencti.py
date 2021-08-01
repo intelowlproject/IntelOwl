@@ -32,7 +32,7 @@ class OpenCTI(Connector):
         self.__url_name = self._secrets["url_key_name"]
         self.__api_key = self._secrets["api_key_name"]
 
-    def get_observable_type(self):
+    def get_observable_type(self) -> str:
         if self._job.is_sample:
             type = INTELOWL_OPENCTI_TYPE_MAP["file"]
         elif self._job.observable_classification == "hash":
@@ -56,7 +56,7 @@ class OpenCTI(Connector):
 
         return type
 
-    def create_observable(self):
+    def generate_observable_data(self) -> dict:
         observable_data = {"type": self.get_observable_type()}
         if self._job.is_sample:
             observable_data["name"] = self._job.file_name
@@ -71,16 +71,11 @@ class OpenCTI(Connector):
         else:
             observable_data["value"] = self._job.observable_name
 
-        observable = self.opencti_api_client.stix_cyber_observable.create(
-            observableData=observable_data,
-            createdBy=self.organization["id"],
-            objectMarking=self.marking_definition["id"],
-        )
-        return observable
+        return observable_data
 
     def run(self):
         # set up client
-        self.opencti_api_client = OpenCTIApiClient(
+        opencti_api_client = OpenCTIApiClient(
             url=self.__url_name,
             token=self.__api_key,
             ssl_verify=self.ssl_verify,
@@ -88,7 +83,7 @@ class OpenCTI(Connector):
         )
 
         # Create author (if it doesn't exist)
-        self.organization = self.opencti_api_client.identity.create(
+        organization = opencti_api_client.identity.create(
             type="Organization",
             name="IntelOwl",
             description=(
@@ -99,7 +94,7 @@ class OpenCTI(Connector):
             ),
         )
         # Create the marking definition
-        self.marking_definition = self.opencti_api_client.marking_definition.create(
+        marking_definition = opencti_api_client.marking_definition.create(
             definition_type="TLP",
             definition="TLP:%s" % self.tlp["type"].upper(),
             x_opencti_color=self.tlp["color"].upper(),
@@ -107,10 +102,15 @@ class OpenCTI(Connector):
         )
 
         # Create the observable
-        observable = self.create_observable()
+        observable_data = self.generate_observable_data()
+        observable = opencti_api_client.stix_cyber_observable.create(
+            observableData=observable_data,
+            createdBy=organization["id"],
+            objectMarking=marking_definition["id"],
+        )
 
         # Create the report
-        report = self.opencti_api_client.report.create(
+        report = opencti_api_client.report.create(
             name=f"IntelOwl Job-{self.job_id}",
             description=(
                 f"This is IntelOwl's analysis report for Job: {self.job_id}."
@@ -118,29 +118,29 @@ class OpenCTI(Connector):
             ),
             published=self._job.received_request_time.strftime("%Y-%m-%dT%H:%M:%SZ"),
             report_types=["internal-report"],
-            createdBy=self.organization["id"],
-            objectMarking=self.marking_definition["id"],
+            createdBy=organization["id"],
+            objectMarking=marking_definition["id"],
             x_opencti_report_status=2,  # Analyzed
         )
         # Create the external reference
-        external_reference = self.opencti_api_client.external_reference.create(
+        external_reference = opencti_api_client.external_reference.create(
             source_name="IntelOwl Analysis",
             description="View analysis report on the IntelOwl instance",
             url=f"{settings.WEB_CLIENT_URL}/pages/scan/result/{self.job_id}",
         )
         # Add the external reference to the report
-        self.opencti_api_client.stix_domain_object.add_external_reference(
+        opencti_api_client.stix_domain_object.add_external_reference(
             id=report["id"], external_reference_id=external_reference["id"]
         )
 
         # Link Observable and Report
-        self.opencti_api_client.report.add_stix_object_or_stix_relationship(
+        opencti_api_client.report.add_stix_object_or_stix_relationship(
             id=report["id"], stixObjectOrStixRelationshipId=observable["id"]
         )
 
         return {
-            "observable": self.opencti_api_client.stix_cyber_observable.read(
+            "observable": opencti_api_client.stix_cyber_observable.read(
                 id=observable["id"]
             ),
-            "report": self.opencti_api_client.report.read(id=report["id"]),
+            "report": opencti_api_client.report.read(id=report["id"]),
         }

@@ -10,8 +10,6 @@ from api_app import crons
 from api_app.models import Job
 from api_app.analyzers_manager import controller as analyzers_controller
 from api_app.connectors_manager import controller as connectors_controller
-from api_app.analyzers_manager.serializers import AnalyzerConfigSerializer
-from api_app.connectors_manager.serializers import ConnectorConfigSerializer
 
 from api_app.analyzers_manager.file_analyzers import yara_scan
 from api_app.analyzers_manager.observable_analyzers import (
@@ -68,25 +66,19 @@ def start_analyzers(
     )
 
 
+@app.task(name="post_all_analyzers_finished", soft_time_limit=100)
+def post_all_analyzers_finished(job_id: int):
+    analyzers_controller.post_all_analyzers_finished(job_id)
+
+
 @app.task(name="run_analyzer", soft_time_limit=500)
 def run_analyzer(job_id: int, config_dict: dict, **kwargs):
-    config = AnalyzerConfigSerializer.dict_to_dataclass(config_dict)
-    # run analyzer
-    report = analyzers_controller.run_analyzer(job_id, config, **kwargs)
-    # get job
-    job = report.job
-    # execute some callbacks
-    # FIXME @eshaan7: find a better place for these callback
-    analyzers_controller.job_cleanup(job)
-    # fire connectors when job finishes with success
-    # avoid re-triggering of connectors (case: recurring analyzer run)
-    if job.status == "reported_without_fails" and not len(job.connectors_to_execute):
-        app.send_task(
-            "on_job_success",
-            args=[
-                job_id,
-            ],
-        )
+    analyzers_controller.run_analyzer(job_id, config_dict, **kwargs)
+
+
+@app.task(name="run_connector", soft_time_limit=500)
+def run_connector(job_id: int, config_dict: dict, **kwargs):
+    connectors_controller.run_connector(job_id, config_dict, **kwargs)
 
 
 @app.task(name="on_job_success", soft_time_limit=500)
@@ -97,9 +89,3 @@ def on_job_success(job_id: int):
     job = Job.objects.only("id", "connectors_to_execute").get(pk=job_id)
     job.connectors_to_execute = list(connectors_task_id_map.keys())
     job.save(update_fields=["connectors_to_execute"])
-
-
-@app.task(name="run_connector", soft_time_limit=500)
-def run_connector(job_id: int, config_dict: dict, **kwargs):
-    config = ConnectorConfigSerializer.dict_to_dataclass(config_dict)
-    connectors_controller.run_connector(job_id, config, **kwargs)

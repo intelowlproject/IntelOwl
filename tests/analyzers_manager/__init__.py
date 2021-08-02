@@ -63,12 +63,10 @@ class _AbstractAnalyzersScriptTestCase(TransactionTestCase):
 
         # execute analyzers
         # using `apply` so it runs synchronously, will block until the task returns
-        start_analyzers.apply(
-            args=[
-                self.test_job.pk,
-                self.test_job.analyzers_to_execute,
-                self.runtime_configuration,
-            ],
+        start_analyzers(
+            self.test_job.pk,
+            self.test_job.analyzers_to_execute,
+            self.runtime_configuration,
         )
 
         for i in range(0, int(self.TIMEOUT_SECONDS / self.SLEEP_SECONDS)):

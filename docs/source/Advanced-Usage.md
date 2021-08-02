@@ -167,6 +167,10 @@ List of some of the analyzers with optional configuration:
 * `Dehashed_Search`
   * `size` and `pages` can be configured. It's recommended to make `size` a high value but keep `page` to 1 only to save on credits.
   * Refer to the "Sizing & Pagination" section in [dehashed docs](https://www.dehashed.com/docs)
+* `OpenCTI`:
+  * `ssl_verify`: (default `true`), enable SSL certificate server verification. Change this if your OpenCTI instance has not SSL enabled.
+  * `proxies`: (`http` and `https`, default `""`) use these options to pass your request through a proxy server.
+  * `exact_search`: (default `false`) use this if you want exact matches only for the observables returned.
 
 There are two ways to do this:
 

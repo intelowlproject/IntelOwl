@@ -32,7 +32,6 @@ app.conf.update(
     accept_content=["application/json"],
     task_serializer="json",
     result_serializer="json",
-    # task_always_eager=settings.TEST_MODE,
     imports=("intel_owl.tasks",),
     worker_redirect_stdouts=False,
     worker_hijack_root_logger=False,
@@ -43,6 +42,8 @@ app.conf.update(
     worker_max_tasks_per_child=200,
     # value is in kilobytes
     worker_max_memory_per_child=4000,
+    # required for code-coverage to work properly in tests
+    # task_always_eager=TEST_MODE,
 )
 
 if AWS_SQS:

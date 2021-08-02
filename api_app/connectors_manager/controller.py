@@ -3,7 +3,7 @@
 
 import logging
 from typing import Union, List, Dict
-from celery import uuid, signature, group
+from celery import uuid, group
 
 from django.conf import settings
 from django.utils.module_loading import import_string
@@ -15,14 +15,8 @@ logger = logging.getLogger(__name__)
 
 
 # constants
-CELERY_TASK_NAME = "run_connector"
 ALL_CONNECTORS = "__all__"
 DEFAULT_QUEUE = "default"
-DEFAULT_SOFT_TIME_LIMIT = 300
-
-
-def build_cache_key(job_id: int) -> str:
-    return f"job.{job_id}.connector_manager.task_ids"
 
 
 def start_connectors(
@@ -30,6 +24,8 @@ def start_connectors(
     connector_names: Union[List, str] = ALL_CONNECTORS,
     runtime_configuration: Dict[str, Dict] = None,
 ) -> Dict[str, str]:
+    from intel_owl import tasks
+
     # we should not use mutable objects as default to avoid unexpected issues
     if runtime_configuration is None:
         runtime_configuration = {}
@@ -65,8 +61,11 @@ def start_connectors(
         # gen a new task_id
         task_id = uuid()
         # construct args
-        args = [job_id, cc.asdict()]
-        kwargs = {"runtime_conf": runtime_conf, "task_id": task_id}
+        args = [
+            job_id,
+            cc.asdict(),
+            {"runtime_configuration": runtime_conf, "task_id": task_id},
+        ]
         # get celery queue
         queue = cc.params.queue
         if queue not in settings.CELERY_QUEUES:
@@ -81,10 +80,9 @@ def start_connectors(
         connectors_task_id_map[connector_name] = task_id
         # create task signature and add to list
         task_signatures.append(
-            signature(
-                CELERY_TASK_NAME,
-                args=args,
-                kwargs=kwargs,
+            tasks.run_connector.signature(
+                args,
+                {},
                 queue=queue,
                 soft_time_limit=soft_time_limit,
                 task_id=task_id,
@@ -100,22 +98,23 @@ def start_connectors(
     return connectors_task_id_map
 
 
-def set_failed_connector(job_id: int, name: str, err_msg: str) -> ConnectorReport:
+def set_failed_connector(
+    job_id: int, name: str, err_msg: str, **report_defaults
+) -> ConnectorReport:
     status = ConnectorReport.Status.FAILED
-    logger.warning(
-        f"({name}, job_id #{job_id}) -> set as {status}. " f" Error: {err_msg}"
+    logger.warning(f"({name}, job_id #{job_id}) -> set as {status}. Error: {err_msg}")
+    report, _ = ConnectorReport.objects.get_or_create(
+        job_id=job_id, name=name, defaults=report_defaults
     )
-    report = ConnectorReport.objects.create(
-        job_id=job_id,
-        name=name,
-        report={},
-        errors=[err_msg],
-        status=status,
-    )
+    report.status = status
+    report.errors.append(err_msg)
+    report.save()
     return report
 
 
-def run_connector(job_id: int, config_dict: dict, **kwargs) -> ConnectorReport:
+def run_connector(
+    job_id: int, config_dict: dict, report_defaults: dict
+) -> ConnectorReport:
     config = ConnectorConfigSerializer.dict_to_dataclass(config_dict)
     try:
         cls_path = config.get_full_import_path()
@@ -124,9 +123,9 @@ def run_connector(job_id: int, config_dict: dict, **kwargs) -> ConnectorReport:
         except ImportError:
             raise Exception(f"Class: {cls_path} couldn't be imported")
 
-        instance = klass(config=config, job_id=job_id, **kwargs)
+        instance = klass(config=config, job_id=job_id, report_defaults=report_defaults)
         report = instance.start()
     except Exception as e:
-        report = set_failed_connector(job_id, config.name, str(e))
+        report = set_failed_connector(job_id, config.name, str(e), **report_defaults)
 
     return report

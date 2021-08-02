@@ -24,6 +24,7 @@ urlpatterns = [
     # Auth APIs
     path("auth/login", LoginView.as_view(), name="auth_login"),
     path("auth/logout", LogoutView.as_view(), name="auth_logout"),
+    path("auth/", include("rest_framework_social_oauth2.urls")),
     # Main APIs
     path("ask_analysis_availability", ask_analysis_availability),
     path("analyze_file", analyze_file),

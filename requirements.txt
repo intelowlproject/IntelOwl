@@ -4,10 +4,12 @@ checkdmarc==4.4.1
 dataclasses==0.6
 Django==3.2.5
 django-auth-ldap==2.4.0
+django-oauth-toolkit==1.5.0
 django-rest-durin==0.3.0
 django-cache-memoize==0.1.9
 djangorestframework==3.12.4
 djangorestframework-guardian==0.3.0
+django-rest-framework-social-oauth2==1.1.0
 dnspython==2.1.0
 dnstwist==20201228
 ppdeep>=20200505
@@ -32,9 +34,11 @@ pypssl==2.2
 pysafebrowsing==0.1.1
 PySocks==1.7.1
 python-magic==0.4.22
+python-social-auth==0.3.6
 quark-engine==21.7.2
 requests==2.25.1
 speakeasy-emulator==1.5.3
+social-auth-app-django==4.0.0
 uWSGI==2.0.19.1
 yara-python==4.1.0
 darksearch==2.1.2

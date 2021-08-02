@@ -61,6 +61,9 @@ INSTALLED_APPS = [
     "api_app.connectors_manager.apps.ConnectorsManagerConfig",
     "django_elasticsearch_dsl",
     "drf_spectacular",
+    "oauth2_provider",
+    "social_django",
+    "rest_framework_social_oauth2",
 ]
 
 MIDDLEWARE = [
@@ -86,6 +89,8 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "social_django.context_processors.backends",
+                "social_django.context_processors.login_redirect",
             ],
         },
     },
@@ -99,6 +104,12 @@ REST_FRAMEWORK = {
     ],
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "durin.auth.CachedTokenAuthentication",
+        "oauth2_provider.contrib.rest_framework.OAuth2Authentication",
+        "rest_framework_social_oauth2.authentication.SocialAuthentication",
+    ],
+    "AUTHENTICATION_BACKENDS": [
+        "rest_framework_social_oauth2.backends.DjangoOAuth2",
+        "django.contrib.auth.backends.ModelBackend",
     ],
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
     "EXCEPTION_HANDLER": "rest_framework.views.exception_handler",

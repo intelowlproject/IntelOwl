@@ -5,7 +5,7 @@ from pycti.api.opencti_api_client import File
 import pycti
 
 from tests.mock_utils import patch, if_mock_connections
-from ..classes import ObservableAnalyzer
+from api_app.analyzers_manager import classes
 
 
 # for lighter output (credits: Cortex-Analyzers/opencti)
@@ -29,7 +29,7 @@ RESULT_TRIM_MAP = {
 }
 
 
-class OpenCTI(ObservableAnalyzer):
+class OpenCTI(classes.ObservableAnalyzer):
     def set_params(self, params):
         self.ssl_verify = params.get("ssl_verify", True)
         self.proxies = params.get("proxies", {})
@@ -71,11 +71,11 @@ class OpenCTI(ObservableAnalyzer):
             )
             # trim observable data
             for key in RESULT_TRIM_MAP["observable"]:
-                observable.pop(key)
+                observable.pop(key, None)
             for report in reports:
                 # trim report data
                 for key in RESULT_TRIM_MAP["report"]:
-                    report.pop(key)
+                    report.pop(key, None)
 
             observable["reports"] = reports
 

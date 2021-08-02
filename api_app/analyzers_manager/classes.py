@@ -19,6 +19,7 @@ from .models import AnalyzerReport
 from .constants import HashChoices, ObservableTypes, TypeChoices
 
 from tests.mock_utils import (
+    if_mock_connections,
     patch,
     mocked_docker_analyzer_get,
     mocked_docker_analyzer_post,
@@ -148,8 +149,8 @@ class ObservableAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
 
     @classmethod
     def _monkeypatch(cls, patches: list = []):
-        patches.extend(
-            [
+        patches.append(
+            if_mock_connections(
                 patch(
                     "requests.get",
                     return_value=MockResponse({}, 200),
@@ -158,7 +159,7 @@ class ObservableAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
                     "requests.post",
                     return_value=MockResponse({}, 200),
                 ),
-            ]
+            )
         )
         return super()._monkeypatch(patches=patches)
 
@@ -371,8 +372,8 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
 
     @classmethod
     def _monkeypatch(cls, patches: list = []):
-        patches.extend(
-            [
+        patches.append(
+            if_mock_connections(
                 patch(
                     "requests.get",
                     side_effect=mocked_docker_analyzer_get,
@@ -381,6 +382,6 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
                     "requests.post",
                     side_effect=mocked_docker_analyzer_post,
                 ),
-            ]
+            )
         )
         return super()._monkeypatch(patches=patches)

@@ -3,14 +3,11 @@
 
 import logging
 from typing import Union, List, Dict
-from celery import uuid
+from celery import uuid, signature, group
 
 from django.conf import settings
 from django.utils.module_loading import import_string
-from intel_owl.celery import app as celery_app
-
 from .serializers import ConnectorConfigSerializer
-from .dataclasses import ConnectorConfig
 from .models import ConnectorReport
 from .classes import Connector
 
@@ -39,6 +36,8 @@ def start_connectors(
 
     # mapping of connector name and task_id
     connectors_task_id_map = {}
+    # to store the celery task signatures
+    task_signatures = []
 
     # get connectors config
     connectors_config = ConnectorConfigSerializer.get_as_dataclasses()
@@ -50,7 +49,7 @@ def start_connectors(
             if name in connector_names
         }
 
-    # loop over and fire the connectors in a celery task
+    # loop over and create task signatures
     for connector_name, cc in connectors_config.items():
         if not cc.is_ready_to_use:
             # skip this connector
@@ -77,23 +76,31 @@ def start_connectors(
             )
             queue = DEFAULT_QUEUE
         # get soft_time_limit
-        stl = cc.params.soft_time_limit
+        soft_time_limit = cc.params.soft_time_limit
         # add to map
         connectors_task_id_map[connector_name] = task_id
-        # fire celery task to run connector
-        celery_app.send_task(
-            CELERY_TASK_NAME,
-            args=args,
-            kwargs=kwargs,
-            queue=queue,
-            soft_time_limit=stl,
-            task_id=task_id,
+        # create task signature and add to list
+        task_signatures.append(
+            signature(
+                CELERY_TASK_NAME,
+                args=args,
+                kwargs=kwargs,
+                queue=queue,
+                soft_time_limit=soft_time_limit,
+                task_id=task_id,
+                ignore_result=True,  # since we are using group and not chord
+            )
         )
+
+    # fire the connectors in a grouped celery task
+    # https://docs.celeryproject.org/en/stable/userguide/canvas.html
+    mygroup = group(task_signatures)
+    mygroup()
 
     return connectors_task_id_map
 
 
-def set_failed_connector(job_id: int, name: str, err_msg: str):
+def set_failed_connector(job_id: int, name: str, err_msg: str) -> ConnectorReport:
     status = ConnectorReport.Status.FAILED
     logger.warning(
         f"({name}, job_id #{job_id}) -> set as {status}. " f" Error: {err_msg}"
@@ -108,8 +115,8 @@ def set_failed_connector(job_id: int, name: str, err_msg: str):
     return report
 
 
-def run_connector(job_id: int, config: ConnectorConfig, **kwargs) -> Connector:
-    instance = None
+def run_connector(job_id: int, config_dict: dict, **kwargs) -> ConnectorReport:
+    config = ConnectorConfigSerializer.dict_to_dataclass(config_dict)
     try:
         cls_path = config.get_full_import_path()
         try:
@@ -118,8 +125,8 @@ def run_connector(job_id: int, config: ConnectorConfig, **kwargs) -> Connector:
             raise Exception(f"Class: {cls_path} couldn't be imported")
 
         instance = klass(config=config, job_id=job_id, **kwargs)
-        instance.start()
+        report = instance.start()
     except Exception as e:
-        set_failed_connector(job_id, config.name, str(e))
+        report = set_failed_connector(job_id, config.name, str(e))
 
-    return instance
+    return report

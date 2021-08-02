@@ -3,7 +3,7 @@
 
 import logging
 from typing import Dict, List
-from celery import uuid
+from celery import uuid, signature, chord
 from django.utils.module_loading import import_string
 from django.conf import settings
 
@@ -12,7 +12,6 @@ from intel_owl.celery import app as celery_app
 from .classes import BaseAnalyzerMixin
 from .models import AnalyzerReport
 from .serializers import AnalyzerConfigSerializer
-from .dataclasses import AnalyzerConfig
 from ..models import Job
 from ..helpers import get_now
 from ..exceptions import AlreadyFailedJobException, NotRunnableAnalyzer
@@ -21,7 +20,6 @@ from ..exceptions import AlreadyFailedJobException, NotRunnableAnalyzer
 logger = logging.getLogger(__name__)
 
 # constants
-CELERY_TASK_NAME = "run_analyzer"
 ALL_ANALYZERS = "__all__"
 DEFAULT_QUEUE = "default"
 
@@ -109,13 +107,13 @@ def start_analyzers(
     job_id: int,
     analyzers_to_execute: List[str],
     runtime_configuration: Dict[str, Dict] = None,
-) -> Dict[str, str]:
+) -> None:
     # we should not use mutable objects as default to avoid unexpected issues
     if runtime_configuration is None:
         runtime_configuration = {}
 
-    # mapping of analyzer name and task_id
-    analyzers_task_id_map = {}
+    # to store the celery task signatures
+    task_signatures = []
 
     # get analyzer config
     analyzer_dataclasses = AnalyzerConfigSerializer.get_as_dataclasses()
@@ -124,7 +122,7 @@ def start_analyzers(
     job = Job.objects.get(pk=job_id)
     job.update_status("running")  # set job status to running
 
-    # loop over and fire the analyzers in a celery task
+    # loop over and create task signatures
     for a_name in analyzers_to_execute:
         # get corresponding dataclass
         config = analyzer_dataclasses[a_name]
@@ -155,19 +153,28 @@ def start_analyzers(
             queue = DEFAULT_QUEUE
         # get soft_time_limit
         soft_time_limit = config.params.soft_time_limit
-        # add to map
-        analyzers_task_id_map[a_name] = task_id
-        # run analyzer with a celery task asynchronously
-        celery_app.send_task(
-            CELERY_TASK_NAME,
-            args=args,
-            kwargs=kwargs,
-            queue=queue,
-            soft_time_limit=soft_time_limit,
-            task_id=task_id,
+        # create task signature and add to list
+        task_signatures.append(
+            signature(
+                "run_analyzer",
+                args=args,
+                kwargs=kwargs,
+                queue=queue,
+                soft_time_limit=soft_time_limit,
+                task_id=task_id,
+            )
         )
 
-    return analyzers_task_id_map
+    # fire the analyzers in a grouped celery task
+    # also link the callback to be executed
+    # canvas docs: https://docs.celeryproject.org/en/stable/userguide/canvas.html
+    runner = chord(task_signatures)
+    cb_signature = signature(
+        "post_all_analyzers_finished", args=[job.pk], immutable=True
+    )
+    runner(cb_signature)
+
+    return None
 
 
 def job_cleanup(job: Job) -> None:
@@ -226,7 +233,8 @@ def set_failed_analyzer(job_id: int, name: str, err_msg):
     return report
 
 
-def run_analyzer(job_id: int, config: AnalyzerConfig, **kwargs) -> AnalyzerReport:
+def run_analyzer(job_id: int, config_dict: dict, **kwargs) -> AnalyzerReport:
+    config = AnalyzerConfigSerializer.dict_to_dataclass(config_dict)
     try:
         cls_path = config.get_full_import_path()
         try:
@@ -242,7 +250,24 @@ def run_analyzer(job_id: int, config: AnalyzerConfig, **kwargs) -> AnalyzerRepor
     return report
 
 
+def post_all_analyzers_finished(job_id: int):
+    """
+    Callback fn that is executed after all analyzers have finished.
+    """
+    # get job instance
+    job = Job.objects.get(pk=job_id)
+    # execute some callbacks
+    job_cleanup(job)
+    # fire connectors when job finishes with success
+    # avoid re-triggering of connectors (case: recurring analyzer run)
+    if job.status == "reported_without_fails" and not len(job.connectors_to_execute):
+        signature("on_job_success", args=[job_id]).apply_async()
+
+
 def kill_ongoing_analysis(job: Job):
+    """
+    Terminates the analyzer tasks that are currently in running state.
+    """
     statuses_to_filter = [
         AnalyzerReport.Status.PENDING,
         AnalyzerReport.Status.RUNNING,

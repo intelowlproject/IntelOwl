@@ -211,7 +211,7 @@ def job_cleanup(job: Job) -> None:
 
 
 def set_failed_analyzer(job_id: int, name: str, err_msg):
-    status = AnalyzerReport.Statuses.FAILED.name
+    status = AnalyzerReport.Status.FAILED
     logger.warning(
         f"(job: #{job_id}, analyzer:{name}) -> set as {status}. ",
         f" Error: {err_msg}",
@@ -244,8 +244,8 @@ def run_analyzer(job_id: int, config: AnalyzerConfig, **kwargs) -> AnalyzerRepor
 
 def kill_ongoing_analysis(job: Job):
     statuses_to_filter = [
-        AnalyzerReport.Statuses.PENDING.name,
-        AnalyzerReport.Statuses.RUNNING.name,
+        AnalyzerReport.Status.PENDING,
+        AnalyzerReport.Status.RUNNING,
     ]
     qs = job.analyzer_reports.filter(status__in=statuses_to_filter)
     # kill celery tasks using task ids
@@ -253,4 +253,4 @@ def kill_ongoing_analysis(job: Job):
     celery_app.control.revoke(task_ids, terminate=True)
 
     # update report statuses
-    qs.update(status=AnalyzerReport.Statuses.KILLED.name)
+    qs.update(status=AnalyzerReport.Status.KILLED)

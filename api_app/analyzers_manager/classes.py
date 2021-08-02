@@ -97,7 +97,7 @@ class BaseAnalyzerMixin(Plugin):
         return result
 
     def before_run(self):
-        self.report.update_status(status=self.report.Statuses.RUNNING.name)
+        self.report.update_status(status=self.report.Status.RUNNING)
 
     def after_run(self):
         self.report.report = self._validate_result(self.report.report)
@@ -120,10 +120,10 @@ class ObservableAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
     def __post__init__(self):
         # check if we should run the hash instead of the binary
         if self._job.is_sample and self._config.run_hash:
-            self.observable_classification = ObservableTypes.HASH.value
+            self.observable_classification = ObservableTypes.HASH
             # check which kind of hash the analyzer needs
             run_hash_type = self._config.run_hash_type
-            if run_hash_type == HashChoices.MD5.value:
+            if run_hash_type == HashChoices.MD5:
                 self.observable_name = self._job.md5
             else:
                 self.observable_name = generate_sha256(self.job_id)
@@ -312,7 +312,7 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
         # handle in case this is a test
         if settings.TEST_MODE:
             # only happens in case of testing
-            self.report.status = self.report.Statuses.SUCCESS.name
+            self.report.status = self.report.Status.SUCCESS
             return {}
 
         # step #1: request new analysis

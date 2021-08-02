@@ -1,31 +1,20 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-from enum import Enum
-import typing
+from django.db import models
 
 
-class BaseEnum(Enum):
-    @classmethod
-    def aslist(cls) -> list:
-        return [c.value for c in cls]
-
-    @classmethod
-    def as_type(cls) -> typing.Literal:
-        return typing.Literal[cls.aslist()]
-
-
-class TypeChoices(BaseEnum):
+class TypeChoices(models.TextChoices):
     FILE = "file"
     OBSERVABLE = "observable"
 
 
-class HashChoices(BaseEnum):
+class HashChoices(models.TextChoices):
     MD5 = "md5"
     SHA256 = "sha256"
 
 
-class ObservableTypes(BaseEnum):
+class ObservableTypes(models.TextChoices):
     IP = "ip"
     URL = "url"
     DOMAIN = "domain"

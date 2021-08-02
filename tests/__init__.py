@@ -49,9 +49,7 @@ class PluginActionViewsetTestCase(metaclass=ABCMeta):
             **{
                 "job_id": _job.id,
                 "name": "MISP",
-                "status": AbstractReport.Statuses.PENDING.name
-                if status is None
-                else status,
+                "status": AbstractReport.Status.PENDING if status is None else status,
                 "task_id": "4b77bdd6-d05b-442b-92e8-d53de5d7c1a9",
             }
         )
@@ -67,7 +65,7 @@ class PluginActionViewsetTestCase(metaclass=ABCMeta):
         )
         self.assertEqual(response.status_code, 204)
         self.report.refresh_from_db()
-        self.assertEqual(self.report.status, AbstractReport.Statuses.KILLED.name)
+        self.assertEqual(self.report.status, AbstractReport.Status.KILLED)
 
     def test_kill_plugin_404(self):
         response = self.client.patch(
@@ -77,7 +75,7 @@ class PluginActionViewsetTestCase(metaclass=ABCMeta):
 
     def test_kill_plugin_400(self):
         # create a new report whose status is not "running"/"pending"
-        _report = self.init_report(status=AbstractReport.Statuses.SUCCESS.name)
+        _report = self.init_report(status=AbstractReport.Status.SUCCESS)
         response = self.client.patch(
             f"/api/job/{_report.job_id}/{self.plugin_type}/{self.plugin_name}/kill"
         )
@@ -88,7 +86,7 @@ class PluginActionViewsetTestCase(metaclass=ABCMeta):
 
     def test_retry_plugin_204(self):
         # create new report with status failed
-        _report = self.init_report(status=AbstractReport.Statuses.FAILED.name)
+        _report = self.init_report(status=AbstractReport.Status.FAILED)
         response = self.client.patch(
             f"/api/job/{_report.job_id}/{self.plugin_type}/{self.plugin_name}/retry"
         )
@@ -102,7 +100,7 @@ class PluginActionViewsetTestCase(metaclass=ABCMeta):
 
     def test_retry_plugin_400(self):
         # create a new report whose status is not "failed"/"killed"
-        _report = self.init_report(status=AbstractReport.Statuses.SUCCESS.name)
+        _report = self.init_report(status=AbstractReport.Status.SUCCESS)
         response = self.client.patch(
             f"/api/job/{_report.job_id}/{self.plugin_type}/{self.plugin_name}/retry"
         )

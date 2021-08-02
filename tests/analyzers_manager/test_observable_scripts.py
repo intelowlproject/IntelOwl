@@ -16,7 +16,7 @@ class IPAnalyzersTestCase(_ObservableAnalyzersScriptsTestCase):
         return {
             **super().get_params(),
             "observable_name": os.environ.get("TEST_IP", "8.8.8.8"),
-            "observable_classification": ObservableTypes.IP.value,
+            "observable_classification": ObservableTypes.IP,
         }
 
 
@@ -26,7 +26,7 @@ class DomainAnalyzersTestCase(_ObservableAnalyzersScriptsTestCase):
         return {
             **super().get_params(),
             "observable_name": os.environ.get("TEST_DOMAIN", "www.google.com"),
-            "observable_classification": ObservableTypes.DOMAIN.value,
+            "observable_classification": ObservableTypes.DOMAIN,
         }
 
 
@@ -38,7 +38,7 @@ class URLAnalyzersTestCase(_ObservableAnalyzersScriptsTestCase):
             "observable_name": os.environ.get(
                 "TEST_URL", "https://www.honeynet.org/projects/active/intel-owl/"
             ),
-            "observable_classification": ObservableTypes.URL.value,
+            "observable_classification": ObservableTypes.URL,
         }
 
 
@@ -50,7 +50,7 @@ class HashAnalyzersTestCase(_ObservableAnalyzersScriptsTestCase):
             "observable_name": os.environ.get(
                 "TEST_MD5", "446c5fbb11b9ce058450555c1c27153c"
             ),
-            "observable_classification": ObservableTypes.HASH.value,
+            "observable_classification": ObservableTypes.HASH,
         }
 
 
@@ -60,5 +60,5 @@ class GenericAnalyzersTestCase(_ObservableAnalyzersScriptsTestCase):
         return {
             **super().get_params(),
             "observable_name": os.environ.get("TEST_GENERIC", "email@example.com"),
-            "observable_classification": ObservableTypes.GENERIC.value,
+            "observable_classification": ObservableTypes.GENERIC,
         }

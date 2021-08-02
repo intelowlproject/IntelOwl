@@ -26,7 +26,7 @@ class ClassicDNSResolver(classes.ObservableAnalyzer):
 
     def run(self):
         resolutions = []
-        if self.observable_classification == self.ObservableTypes.IP.value:
+        if self.observable_classification == self.ObservableTypes.IP:
             try:
                 ipaddress.ip_address(self.observable_name)
                 hostname, alias, ip = socket.gethostbyaddr(self.observable_name)
@@ -38,12 +38,12 @@ class ClassicDNSResolver(classes.ObservableAnalyzer):
                 logger.warning(f"No resolution for ip {self.observable_name}")
                 resolutions = []
         elif self.observable_classification in [
-            self.ObservableTypes.DOMAIN.value,
-            self.ObservableTypes.URL.value,
+            self.ObservableTypes.DOMAIN,
+            self.ObservableTypes.URL,
         ]:
             observable = self.observable_name
             # for URLs we are checking the relative domain
-            if self.observable_classification == self.ObservableTypes.URL.value:
+            if self.observable_classification == self.ObservableTypes.URL:
                 observable = urlparse(self.observable_name).hostname
 
             try:

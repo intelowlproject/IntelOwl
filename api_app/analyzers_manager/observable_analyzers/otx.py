@@ -23,9 +23,9 @@ class OTX(classes.ObservableAnalyzer):
         obs_clsf = self.observable_classification
         to_analyze_observable = self.observable_name
 
-        if obs_clsf == self.ObservableTypes.IP.value:
+        if obs_clsf == self.ObservableTypes.IP:
             otx_type = OTXv2.IndicatorTypes.IPv4
-        elif obs_clsf == self.ObservableTypes.URL.value:
+        elif obs_clsf == self.ObservableTypes.URL:
             to_analyze_observable = urlparse(self.observable_name).hostname
 
             try:
@@ -37,9 +37,9 @@ class OTX(classes.ObservableAnalyzer):
 
             if not to_analyze_observable:
                 raise AnalyzerRunException("extracted observable is None")
-        elif obs_clsf == self.ObservableTypes.DOMAIN.value:
+        elif obs_clsf == self.ObservableTypes.DOMAIN:
             otx_type = OTXv2.IndicatorTypes.DOMAIN
-        elif obs_clsf == self.ObservableTypes.HASH.value:
+        elif obs_clsf == self.ObservableTypes.HASH:
             otx_type = OTXv2.IndicatorTypes.FILE_HASH_MD5
         else:
             raise AnalyzerRunException(

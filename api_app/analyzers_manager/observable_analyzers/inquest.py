@@ -53,22 +53,22 @@ class InQuest(ObservableAnalyzer):
             self.report.save()
 
         if self.analysis_type == "dfi_search":
-            if self.observable_classification == self.ObservableTypes.HASH.value:
+            if self.observable_classification == self.ObservableTypes.HASH:
                 uri = (
                     f"/api/dfi/search/hash/{self.hash_type}?hash={self.observable_name}"
                 )
 
             elif self.observable_classification in [
-                self.ObservableTypes.IP.value,
-                self.ObservableTypes.URL.value,
-                self.ObservableTypes.DOMAIN.value,
+                self.ObservableTypes.IP,
+                self.ObservableTypes.URL,
+                self.ObservableTypes.DOMAIN,
             ]:
                 uri = (
                     f"/api/dfi/search/ioc/{self.observable_classification}"
                     f"?keyword={self.observable_name}"
                 )
 
-            elif self.observable_classification == self.ObservableTypes.GENERIC.value:
+            elif self.observable_classification == self.ObservableTypes.GENERIC:
                 try:
                     type_, value = self.observable_name.split(":")
                 except ValueError:
@@ -103,7 +103,7 @@ class InQuest(ObservableAnalyzer):
         result = response.json()
         if (
             self.analysis_type == "dfi_search"
-            and self.observable_classification == self.ObservableTypes.HASH.value
+            and self.observable_classification == self.ObservableTypes.HASH
         ):
             result["hash_type"] = self.hash_type
 

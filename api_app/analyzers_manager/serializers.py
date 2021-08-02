@@ -41,23 +41,23 @@ class AnalyzerConfigSerializer(AbstractConfigSerializer):
     ObservableTypes = ObservableTypes
 
     # Required fields
-    type = rfs.ChoiceField(required=True, choices=TypeChoices.aslist())
+    type = rfs.ChoiceField(required=True, choices=TypeChoices.values)
     external_service = rfs.BooleanField(required=True)
     # Optional Fields
     leaks_info = rfs.BooleanField(required=False, default=False)
     run_hash = rfs.BooleanField(required=False, default=False)
-    run_hash_type = rfs.ChoiceField(required=False, choices=HashChoices.aslist())
+    run_hash_type = rfs.ChoiceField(required=False, choices=HashChoices.values)
     supported_filetypes = rfs.ListField(required=False, default=[])
     not_supported_filetypes = rfs.ListField(required=False, default=[])
     observable_supported = rfs.ListField(
-        child=rfs.ChoiceField(choices=ObservableTypes.aslist()),
+        child=rfs.ChoiceField(choices=ObservableTypes.values),
         required=False,
         default=[],
     )
 
     def validate_python_module(self, python_module: str):
-        if self.initial_data["type"] == self.TypeChoices.OBSERVABLE.value or (
-            self.initial_data["type"] == self.TypeChoices.FILE.value
+        if self.initial_data["type"] == self.TypeChoices.OBSERVABLE or (
+            self.initial_data["type"] == self.TypeChoices.FILE
             and self.initial_data.get("run_hash", False)
         ):
             clspath = f"api_app.analyzers_manager.observable_analyzers.{python_module}"

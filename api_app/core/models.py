@@ -5,26 +5,22 @@ from django.db import models
 from django.utils import timezone
 from django.contrib.postgres import fields as pg_fields
 
-from enum import Enum
 
-
-class Statuses(Enum):
-    FAILED = 0
-    PENDING = 1
-    RUNNING = 2
-    SUCCESS = 3
-    KILLED = 4
+class Status(models.TextChoices):
+    FAILED = "FAILED"
+    PENDING = "PENDING"
+    RUNNING = "RUNNING"
+    SUCCESS = "SUCCESS"
+    KILLED = "KILLED"
 
 
 class AbstractReport(models.Model):
     # constants
-    Statuses = Statuses
+    Status = Status
 
     # fields
     name = models.CharField(max_length=128)
-    status = models.CharField(
-        max_length=50, choices=[(s.name, s.name) for s in Statuses]
-    )
+    status = models.CharField(max_length=50, choices=Status.choices)
     report = models.JSONField(default=dict)
     errors = pg_fields.ArrayField(
         models.CharField(max_length=512), default=list, blank=True

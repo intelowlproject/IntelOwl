@@ -12,10 +12,10 @@ class URLHaus(classes.ObservableAnalyzer):
 
     def run(self):
         headers = {"Accept": "application/json"}
-        if self.observable_classification == self.ObservableTypes.DOMAIN.value:
+        if self.observable_classification == self.ObservableTypes.DOMAIN:
             uri = "host/"
             post_data = {"host": self.observable_name}
-        elif self.observable_classification == self.ObservableTypes.URL.value:
+        elif self.observable_classification == self.ObservableTypes.URL:
             uri = "url/"
             post_data = {"url": self.observable_name}
         else:

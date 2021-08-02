@@ -94,7 +94,7 @@ def start_connectors(
 
 
 def set_failed_connector(job_id: int, name: str, err_msg: str):
-    status = ConnectorReport.Statuses.FAILED.name
+    status = ConnectorReport.Status.FAILED
     logger.warning(
         f"({name}, job_id #{job_id}) -> set as {status}. " f" Error: {err_msg}"
     )

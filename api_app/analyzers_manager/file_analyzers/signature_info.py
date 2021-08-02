@@ -45,17 +45,10 @@ class SignatureInfo(FileAnalyzer):
             else:
                 raise AnalyzerRunException("osslsigncode gave no output?")
 
-        except SoftTimeLimitExceeded as e:
-            error_message = (
-                f"job_id:{self.job_id} analyzer:{self.analyzer_name} md5:{self.md5}"
-                f"filename: {self.filename}. Soft Time Limit Exceeded Error {e}"
-            )
-            logger.error(error_message)
-            self.report.errors.append(str(e))
-            self.report.status = self.report.Statuses.FAILED.name
-            self.report.save()
-            # we should stop the subprocesses...
-            # .. in case we reach the time limit for the celery task
+        # we should stop the subprocesses...
+        # .. in case we reach the time limit for the celery task
+        except SoftTimeLimitExceeded as exc:
+            self._handle_exception(exc)
             if p:
                 p.kill()
 

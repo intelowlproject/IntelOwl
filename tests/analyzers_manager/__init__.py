@@ -10,6 +10,7 @@ from django.conf import settings
 
 from intel_owl.tasks import start_analyzers
 from api_app.models import Job
+from api_app.core.models import AbstractReport
 from api_app.analyzers_manager.serializers import AnalyzerConfigSerializer
 
 
@@ -77,7 +78,10 @@ class _AbstractAnalyzersScriptTestCase(TransactionTestCase):
             connectors_stats = self.test_job.get_connector_reports_stats()
             running_or_pending_analyzers = list(
                 self.test_job.analyzer_reports.filter(
-                    status__in=["PENDING", "RUNNING"]
+                    status__in=[
+                        AbstractReport.Status.PENDING,
+                        AbstractReport.Status.RUNNING,
+                    ]
                 ).values_list("name", flat=True)
             )
             print(
@@ -91,11 +95,15 @@ class _AbstractAnalyzersScriptTestCase(TransactionTestCase):
             if analyzers_stats["failed"] > 0 or connectors_stats["failed"] > 0:
                 failed_analyzers = [
                     (r.analyzer_name, r.report, r.errors)
-                    for r in self.test_job.analyzer_reports.filter(status="FAILED")
+                    for r in self.test_job.analyzer_reports.filter(
+                        status=AbstractReport.Status.FAILED
+                    )
                 ]
                 failed_connectors = [
                     (r.connector_name, r.report, r.errors)
-                    for r in self.test_job.connector_reports.filter(status="FAILED")
+                    for r in self.test_job.connector_reports.filter(
+                        status=AbstractReport.Status.FAILED
+                    )
                 ]
                 print(
                     f"\n>>> Failed analyzers: {failed_analyzers}",

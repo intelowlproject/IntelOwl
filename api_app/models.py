@@ -103,8 +103,8 @@ class Job(models.Model):
         from api_app.core.models import AbstractReport
 
         aggregators = {
-            s.name.lower(): models.Count("status", filter=models.Q(status=s.name))
-            for s in AbstractReport.Statuses
+            s.lower(): models.Count("status", filter=models.Q(status=s))
+            for s in AbstractReport.Status.values
         }
         return self.analyzer_reports.aggregate(
             all=models.Count("status"),
@@ -115,8 +115,8 @@ class Job(models.Model):
         from api_app.core.models import AbstractReport
 
         aggregators = {
-            s.name.lower(): models.Count("status", filter=models.Q(status=s.name))
-            for s in AbstractReport.Statuses
+            s.lower(): models.Count("status", filter=models.Q(status=s))
+            for s in AbstractReport.Status.values
         }
         return self.connector_reports.aggregate(
             all=models.Count("status"),

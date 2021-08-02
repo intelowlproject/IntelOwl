@@ -8,7 +8,7 @@ import pycti
 
 from tests.mock_utils import patch, if_mock_connections
 from api_app import helpers
-from ..classes import Connector
+from api_app.connectors_manager import classes
 
 
 INTELOWL_OPENCTI_TYPE_MAP = {
@@ -24,7 +24,7 @@ INTELOWL_OPENCTI_TYPE_MAP = {
 }
 
 
-class OpenCTI(Connector):
+class OpenCTI(classes.Connector):
     def set_params(self, params):
         self.ssl_verify = params.get("ssl_verify", True)
         self.tlp = params.get(

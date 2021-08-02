@@ -1,6 +1,7 @@
 from abc import ABCMeta, abstractmethod
 from api_app.models import Job
 from api_app.core.models import AbstractReport
+from api_app.analyzers_manager.constants import ObservableTypes
 import logging
 
 from django.contrib.auth.models import User
@@ -44,7 +45,11 @@ class PluginActionViewsetTestCase(metaclass=ABCMeta):
         raise NotImplementedError()
 
     def init_report(self, status=None):
-        _job = Job.objects.create(status="running")
+        _job = Job.objects.create(
+            status="running",
+            observable_name="8.8.8.8",
+            observable_classification=ObservableTypes.IP,
+        )
         _report, _ = self.report_model.objects.get_or_create(
             **{
                 "job_id": _job.id,

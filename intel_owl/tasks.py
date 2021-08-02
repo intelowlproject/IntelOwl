@@ -72,13 +72,13 @@ def post_all_analyzers_finished(job_id: int):
 
 
 @app.task(name="run_analyzer", soft_time_limit=500)
-def run_analyzer(job_id: int, config_dict: dict, **kwargs):
-    analyzers_controller.run_analyzer(job_id, config_dict, **kwargs)
+def run_analyzer(job_id: int, config_dict: dict, report_defaults: dict):
+    analyzers_controller.run_analyzer(job_id, config_dict, report_defaults)
 
 
 @app.task(name="run_connector", soft_time_limit=500)
-def run_connector(job_id: int, config_dict: dict, **kwargs):
-    connectors_controller.run_connector(job_id, config_dict, **kwargs)
+def run_connector(job_id: int, config_dict: dict, report_defaults: dict):
+    connectors_controller.run_connector(job_id, config_dict, report_defaults)
 
 
 @app.task(name="on_job_success", soft_time_limit=500)

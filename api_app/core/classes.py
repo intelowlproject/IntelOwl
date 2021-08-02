@@ -25,6 +25,7 @@ class Plugin(metaclass=ABCMeta):
 
     _config: AbstractConfig
     job_id: int
+    report_defaults: dict
     kwargs: dict
     report: AbstractReport
 
@@ -90,10 +91,9 @@ class Plugin(metaclass=ABCMeta):
                 "report": {},
                 "errors": [],
                 "status": AbstractReport.Status.PENDING,
-                "runtime_configuration": self.kwargs.get("runtime_conf", {}),
-                "task_id": self.kwargs["task_id"],
                 "start_time": timezone.now(),
                 "end_time": timezone.now(),
+                **self.report_defaults,
             },
         )
         return _report
@@ -167,9 +167,16 @@ class Plugin(metaclass=ABCMeta):
         if settings.TEST_MODE:
             self._monkeypatch()
 
-    def __init__(self, config: AbstractConfig, job_id: int, **kwargs):
+    def __init__(
+        self,
+        config: AbstractConfig,
+        job_id: int,
+        report_defaults: dict = None,
+        **kwargs,
+    ):
         self._config = config
         self.job_id = job_id
+        self.report_defaults = report_defaults if report_defaults is not None else {}
         self.kwargs = kwargs
         # some post init processing
         self.__post__init__()

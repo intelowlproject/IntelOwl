@@ -142,8 +142,11 @@ def start_analyzers(
         # gen new task_id
         task_id = uuid()
         # construct arguments
-        args = [job_id, config.asdict()]
-        kwargs = {"runtime_conf": runtime_conf, "task_id": task_id}
+        args = [
+            job_id,
+            config.asdict(),
+            {"runtime_configuration": runtime_conf, "task_id": task_id},
+        ]
         # get celery queue
         queue = config.params.queue
         if queue not in settings.CELERY_QUEUES:
@@ -158,7 +161,6 @@ def start_analyzers(
             signature(
                 "run_analyzer",
                 args=args,
-                kwargs=kwargs,
                 queue=queue,
                 soft_time_limit=soft_time_limit,
                 task_id=task_id,
@@ -217,23 +219,23 @@ def job_cleanup(job: Job) -> None:
         job.save(update_fields=["status", "errors", "finished_analysis_time"])
 
 
-def set_failed_analyzer(job_id: int, name: str, err_msg):
+def set_failed_analyzer(job_id: int, name: str, err_msg, **report_defaults):
     status = AnalyzerReport.Status.FAILED
     logger.warning(
-        f"(job: #{job_id}, analyzer:{name}) -> set as {status}. ",
-        f" Error: {err_msg}",
+        f"(job: #{job_id}, analyzer:{name}) -> set as {status}. " f"Error: {err_msg}"
     )
     report, _ = AnalyzerReport.objects.get_or_create(
-        job_id=job_id,
-        name=name,
-        report={},
-        errors=[err_msg],
-        status=status,
+        job_id=job_id, name=name, defaults=report_defaults
     )
+    report.status = status
+    report.errors.append(err_msg)
+    report.save()
     return report
 
 
-def run_analyzer(job_id: int, config_dict: dict, **kwargs) -> AnalyzerReport:
+def run_analyzer(
+    job_id: int, config_dict: dict, report_defaults: dict
+) -> AnalyzerReport:
     config = AnalyzerConfigSerializer.dict_to_dataclass(config_dict)
     try:
         cls_path = config.get_full_import_path()
@@ -242,10 +244,10 @@ def run_analyzer(job_id: int, config_dict: dict, **kwargs) -> AnalyzerReport:
         except ImportError:
             raise Exception(f"Class: {cls_path} couldn't be imported")
 
-        instance = klass(config=config, job_id=job_id, **kwargs)
+        instance = klass(config=config, job_id=job_id, report_defaults=report_defaults)
         report = instance.start()
     except Exception as e:
-        report = set_failed_analyzer(job_id, config.name, str(e))
+        report = set_failed_analyzer(job_id, config.name, str(e), **report_defaults)
 
     return report
 

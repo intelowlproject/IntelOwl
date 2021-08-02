@@ -8,6 +8,8 @@ from urllib.parse import quote_plus
 from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager import classes
 
+from tests.mock_utils import if_mock_connections, patch, MockResponse
+
 
 class XForce(classes.ObservableAnalyzer):
     base_url: str = "https://api.xforce.ibmcloud.com"
@@ -55,3 +57,15 @@ class XForce(classes.ObservableAnalyzer):
             )
 
         return endpoints
+
+    @classmethod
+    def _monkeypatch(cls):
+        patches = [
+            if_mock_connections(
+                patch(
+                    "requests.get",
+                    return_value=MockResponse({}, 200),
+                ),
+            )
+        ]
+        return super()._monkeypatch(patches=patches)

@@ -8,6 +8,8 @@ import requests
 from api_app.exceptions import AnalyzerRunException, AnalyzerConfigurationException
 from api_app.analyzers_manager.classes import ObservableAnalyzer
 
+from tests.mock_utils import if_mock_connections, patch, MockResponse
+
 
 logger = logging.getLogger(__name__)
 
@@ -50,7 +52,6 @@ class InQuest(ObservableAnalyzer):
                 f"{warning}. Continuing without API key..." f" <- {self.__repr__()}"
             )
             self.report.errors.append(warning)
-            self.report.save()
 
         if self.analysis_type == "dfi_search":
             if self.observable_classification == self.ObservableTypes.HASH:
@@ -111,3 +112,15 @@ class InQuest(ObservableAnalyzer):
             result["type_of_generic"] = self.type_of_generic()
 
         return result
+
+    @classmethod
+    def _monkeypatch(cls):
+        patches = [
+            if_mock_connections(
+                patch(
+                    "requests.get",
+                    return_value=MockResponse({}, 200),
+                ),
+            )
+        ]
+        return super()._monkeypatch(patches=patches)

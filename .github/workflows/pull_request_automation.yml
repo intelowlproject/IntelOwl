@@ -8,8 +8,6 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-    env:
-      COVERAGE_DIR: "/opt/deploy/intel_owl/coverage_reports"
 
     steps:
     - uses: actions/checkout@v2
@@ -23,7 +21,7 @@ jobs:
         unzip -P infected tests/test_files.zip -d .
         cp docker/env_file_app_template docker/env_file_app
         cp docker/env_file_postgres_template docker/env_file_postgres
-        sudo chmod u+x docker/scripts/test.sh
+        sudo chmod u+x docker/scripts/coverage_test.sh
     - name: "Build and run containers"
       run: |
         sudo docker-compose -f docker/default.yml -f docker/ci.override.yml build
@@ -39,37 +37,30 @@ jobs:
         sudo docker exec intelowl_uwsgi flake8 . --count
     - name: "Test: API"
       run: |
-        sudo docker/scripts/test.sh \
-          tests.test_api tests.test_auth \
-          --with-coverage --cover-xml --cover-xml-file=${COVERAGE_DIR}/api.xml 
+        sudo docker/scripts/coverage_test.sh tests.test_api tests.test_auth
     - name: "Test: Cron"
       run: |
-        sudo docker/scripts/test.sh \
-          tests.test_generic \
-          --with-coverage --cover-xml --cover-xml-file=${COVERAGE_DIR}/cron.xml 
+        sudo docker/scripts/coverage_test.sh tests.test_generic
     - name: "Test: Connectors Manager"
       run: |
-        sudo docker/scripts/test.sh \
-          tests.connectors_manager \
-          --with-coverage --cover-xml --cover-xml-file=${COVERAGE_DIR}/connectors.xml
+        sudo docker/scripts/coverage_test.sh tests.connectors_manager
     - name: "Test: Analyzers Manager (views, serializers)"
       run: |
-        sudo docker/scripts/test.sh \
-          tests.analyzers_manager.test_views tests.analyzers_manager.test_serializers \
-          --with-coverage --cover-xml --cover-xml-file=${COVERAGE_DIR}/analyzers.xml
+        sudo docker/scripts/coverage_test.sh tests.analyzers_manager.test_views tests.analyzers_manager.test_serializers
     - name: "Test: Analyzers Manager (observable analyzers)"
       run: |
-        sudo docker/scripts/test.sh \
-          tests.analyzers_manager.test_observable_scripts \
-          --with-coverage --cover-xml --cover-xml-file=${COVERAGE_DIR}/analyzers-obs.xml
+        sudo docker/scripts/coverage_test.sh tests.analyzers_manager.test_observable_scripts
     - name: "Test: Analyzers Manager (file analyzers)"
       run: |
-        sudo docker/scripts/test.sh \
-          tests.analyzers_manager.test_file_scripts \
-          --with-coverage --cover-xml --cover-xml-file=${COVERAGE_DIR}/analyzers-files.xml
+        sudo docker/scripts/coverage_test.sh tests.analyzers_manager.test_file_scripts
+    - name: "Coverage: generate xml and transfer from docker container to host"
+      run: |
+        sudo docker exec intelowl_uwsgi coverage combine
+        sudo docker exec intelowl_uwsgi coverage xml
+        sudo docker cp intelowl_uwsgi:/opt/deploy/intel_owl/coverage.xml coverage.xml
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v2.0.2
       with:
-        files: ./coverage_reports/api.xml, ./coverage_reports/connectors.xml, ./coverage_reports/analyzers.xml, ./coverage_reports/analyzers-obs.xml, ./coverage_reports/analyzers-files.xml
+        files: ./coverage.xml
         fail_ci_if_error: true
         verbose: true

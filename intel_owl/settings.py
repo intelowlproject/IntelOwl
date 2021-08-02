@@ -60,7 +60,6 @@ INSTALLED_APPS = [
     "api_app.analyzers_manager.apps.AnalyzersManagerConfig",
     "api_app.connectors_manager.apps.ConnectorsManagerConfig",
     "django_elasticsearch_dsl",
-    "django_nose",
     "drf_spectacular",
 ]
 
@@ -139,8 +138,6 @@ DATABASES = {
         },
     },
 }
-
-TEST_RUNNER = "django_nose.NoseTestSuiteRunner"
 
 # Elastic Search Configuration
 if os.environ.get("ELASTICSEARCH_ENABLED", False) == "True":

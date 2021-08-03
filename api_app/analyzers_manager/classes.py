@@ -23,7 +23,6 @@ from tests.mock_utils import (
     patch,
     mocked_docker_analyzer_get,
     mocked_docker_analyzer_post,
-    MockResponse,
 )
 
 logger = logging.getLogger(__name__)
@@ -146,22 +145,6 @@ class ObservableAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
             f"FINISHED analyzer: {self.__repr__()} -> "
             f"Observable: {self.observable_name}."
         )
-
-    @classmethod
-    def _monkeypatch(cls, patches: list = []):
-        patches.append(
-            if_mock_connections(
-                patch(
-                    "requests.get",
-                    return_value=MockResponse({}, 200),
-                ),
-                patch(
-                    "requests.post",
-                    return_value=MockResponse({}, 200),
-                ),
-            )
-        )
-        return super()._monkeypatch(patches=patches)
 
 
 class FileAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):

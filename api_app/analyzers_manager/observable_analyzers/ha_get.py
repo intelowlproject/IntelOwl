@@ -6,6 +6,8 @@ import requests
 from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager import classes
 
+from tests.mock_utils import if_mock_connections, patch, MockResponse
+
 
 class HybridAnalysisGet(classes.ObservableAnalyzer):
     base_url: str = "https://www.hybrid-analysis.com"
@@ -59,3 +61,23 @@ class HybridAnalysisGet(classes.ObservableAnalyzer):
                         job["permalink"] += f"/{job_id}"
 
         return result
+
+    @classmethod
+    def _monkeypatch(cls):
+        patches = [
+            if_mock_connections(
+                patch(
+                    "requests.post",
+                    return_value=MockResponse(
+                        [
+                            {
+                                "job_id": "1",
+                                "sha256": "abcdefgh",
+                            }
+                        ],
+                        200,
+                    ),
+                ),
+            )
+        ]
+        return super()._monkeypatch(patches=patches)

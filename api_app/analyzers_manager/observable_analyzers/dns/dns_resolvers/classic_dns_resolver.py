@@ -3,17 +3,15 @@
 
 """Default DNS resolutions"""
 
+import logging
 import ipaddress
 import socket
 import dns.resolver
-
 from urllib.parse import urlparse
-from api_app.analyzers_manager import classes
-from api_app.analyzers_manager.observable_analyzers.dns.dns_responses import (
-    dns_resolver_response,
-)
 
-import logging
+from api_app.analyzers_manager import classes
+from ..dns_responses import dns_resolver_response
+
 
 logger = logging.getLogger(__name__)
 
@@ -36,6 +34,9 @@ class ClassicDNSResolver(classes.ObservableAnalyzer):
                     resolutions.append(hostname)
             except (socket.gaierror, socket.herror):
                 logger.warning(f"No resolution for ip {self.observable_name}")
+                self.report.errors.append(
+                    f"No resolution for ip {self.observable_name}"
+                )
                 resolutions = []
         elif self.observable_classification in [
             self.ObservableTypes.DOMAIN,
@@ -64,3 +65,8 @@ class ClassicDNSResolver(classes.ObservableAnalyzer):
                 resolutions = []
 
         return dns_resolver_response(self.observable_name, resolutions)
+
+    @classmethod
+    def _monkeypatch(cls):
+        patches = []
+        return super()._monkeypatch(patches=patches)

@@ -5,6 +5,8 @@ import requests
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
 
+from tests.mock_utils import if_mock_connections, patch, MockResponse
+
 
 class AbuseIPDB(ObservableAnalyzer):
     url: str = "https://api.abuseipdb.com/api/v2/check"
@@ -23,7 +25,7 @@ class AbuseIPDB(ObservableAnalyzer):
         response.raise_for_status()
 
         result = response.json()
-        reports = result.get("data", {}).get("reports", {})
+        reports = result.get("data", {}).get("reports", [])
         mapping = self._get_mapping()
         for report in reports:
             report["categories_human_readable"] = []
@@ -66,3 +68,17 @@ class AbuseIPDB(ObservableAnalyzer):
             23: "IoT Targeted",
         }
         return mapping
+
+    @classmethod
+    def _monkeypatch(cls):
+        patches = [
+            if_mock_connections(
+                patch(
+                    "requests.get",
+                    return_value=MockResponse(
+                        {"data": {"reports": [{"categories": [1, 2]}]}}, 200
+                    ),
+                ),
+            )
+        ]
+        return super()._monkeypatch(patches=patches)

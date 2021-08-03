@@ -3,16 +3,16 @@
 
 """Google DNS resolutions"""
 
+import logging
 import requests
 
 from urllib.parse import urlparse
 from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager import classes
-from api_app.analyzers_manager.observable_analyzers.dns.dns_responses import (
-    dns_resolver_response,
-)
+from ..dns_responses import dns_resolver_response
 
-import logging
+from tests.mock_utils import if_mock_connections, patch, MockResponse
+
 
 logger = logging.getLogger(__name__)
 
@@ -44,3 +44,15 @@ class GoogleDNSResolver(classes.ObservableAnalyzer):
             )
 
         return dns_resolver_response(self.observable_name, resolutions)
+
+    @classmethod
+    def _monkeypatch(cls):
+        patches = [
+            if_mock_connections(
+                patch(
+                    "requests.get",
+                    return_value=MockResponse({"Answer": ["test1", "test2"]}, 200),
+                ),
+            )
+        ]
+        return super()._monkeypatch(patches=patches)

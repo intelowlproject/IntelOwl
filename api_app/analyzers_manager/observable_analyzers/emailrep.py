@@ -6,6 +6,8 @@ import requests
 from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager import classes
 
+from tests.mock_utils import if_mock_connections, patch, MockResponse
+
 
 class EmailRep(classes.ObservableAnalyzer):
     base_url: str = "https://emailrep.io/{}"
@@ -41,3 +43,15 @@ class EmailRep(classes.ObservableAnalyzer):
             raise AnalyzerRunException(e)
 
         return response.json()
+
+    @classmethod
+    def _monkeypatch(cls):
+        patches = [
+            if_mock_connections(
+                patch(
+                    "requests.get",
+                    return_value=MockResponse({}, 200),
+                ),
+            )
+        ]
+        return super()._monkeypatch(patches=patches)

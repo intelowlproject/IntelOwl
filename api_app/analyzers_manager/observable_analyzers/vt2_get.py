@@ -6,6 +6,9 @@ import requests
 from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager import classes
 
+from tests.mock_utils import if_mock_connections, patch, MockResponse
+
+
 vt_base = "https://www.virustotal.com/vtapi/v2/"
 
 
@@ -22,9 +25,20 @@ class VirusTotalv2(classes.ObservableAnalyzer):
         verbose_msg = resp.get("verbose_msg", "")
         if resp_code == -1 or "Invalid resource" in verbose_msg:
             self.report.errors.append(verbose_msg)
-            self.report.save()
             raise AnalyzerRunException(f"response code {resp_code}. response: {resp}")
         return resp
+
+    @classmethod
+    def _monkeypatch(cls):
+        patches = [
+            if_mock_connections(
+                patch(
+                    "requests.get",
+                    return_value=MockResponse({}, 200),
+                ),
+            )
+        ]
+        return super()._monkeypatch(patches=patches)
 
 
 def vt_get_report(api_key, observable_name, obs_clsfn):

@@ -4,13 +4,13 @@
 """Check if the domains is reported as malicious in CloudFlare database"""
 
 import requests
+from urllib.parse import urlparse
 
 from api_app.exceptions import AnalyzerRunException
-from urllib.parse import urlparse
-from api_app.analyzers_manager.observable_analyzers.dns.dns_responses import (
-    malicious_detector_response,
-)
 from api_app.analyzers_manager import classes
+from ..dns_responses import malicious_detector_response
+
+from tests.mock_utils import if_mock_connections, patch, MockResponse
 
 
 class CloudFlareMaliciousDetector(classes.ObservableAnalyzer):
@@ -26,13 +26,12 @@ class CloudFlareMaliciousDetector(classes.ObservableAnalyzer):
             if self.observable_classification == self.ObservableTypes.URL:
                 observable = urlparse(self.observable_name).hostname
 
-            client = requests.session()
             params = {
                 "name": observable,
                 "type": "A",
                 "ct": "application/dns-json",
             }
-            response = client.get(
+            response = requests.get(
                 "https://security.cloudflare-dns.com/dns-query", params=params
             )
             response.raise_for_status()
@@ -49,3 +48,15 @@ class CloudFlareMaliciousDetector(classes.ObservableAnalyzer):
             raise AnalyzerRunException("Connection to CloudFlare failed")
 
         return malicious_detector_response(self.observable_name, is_malicious)
+
+    @classmethod
+    def _monkeypatch(cls):
+        patches = [
+            if_mock_connections(
+                patch(
+                    "requests.get",
+                    return_value=MockResponse({"Answer": [{"data": "0.0.0.0"}]}, 200),
+                ),
+            )
+        ]
+        return super()._monkeypatch(patches=patches)

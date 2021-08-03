@@ -51,7 +51,9 @@ class Robtex(classes.ObservableAnalyzer):
             if_mock_connections(
                 patch(
                     "requests.get",
-                    return_value=MockResponse({}, 200),
+                    return_value=MockResponse(
+                        {}, 200, text='{"test1":"test1"}\r\n{"test2":"test2"}'
+                    ),
                 ),
             )
         ]

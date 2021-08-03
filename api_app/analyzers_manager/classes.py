@@ -353,8 +353,15 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
         assert self.__raise_in_case_bad_request(self.name, resp, params_to_check=[])
         return resp
 
-    @classmethod
-    def _monkeypatch(cls, patches: list = []):
+    def _monkeypatch(self, patches: list = []):
+        """
+        Here, `_monkeypatch` is an instance method and not a class method.
+        This is because when defined with `@classmethod`, we were getting the error
+        ```
+        '_patch' object has no attribute 'is_local'
+        ```
+        whenever multiple analyzers with same parent class were being called.
+        """
         patches.append(
             if_mock_connections(
                 patch(
@@ -367,4 +374,5 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
                 ),
             )
         )
-        return super()._monkeypatch(patches=patches)
+        for mock_fn in patches:
+            self.start = mock_fn(self.start)

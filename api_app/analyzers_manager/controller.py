@@ -237,13 +237,15 @@ def run_analyzer(
     job_id: int, config_dict: dict, report_defaults: dict
 ) -> AnalyzerReport:
     config = AnalyzerConfigSerializer.dict_to_dataclass(config_dict)
+    klass = None
+    report = None
     try:
         cls_path = config.get_full_import_path()
         try:
             klass: BaseAnalyzerMixin = import_string(cls_path)
         except ImportError:
             raise Exception(f"Class: {cls_path} couldn't be imported")
-
+        # else
         instance = klass(config=config, job_id=job_id, report_defaults=report_defaults)
         report = instance.start()
     except Exception as e:

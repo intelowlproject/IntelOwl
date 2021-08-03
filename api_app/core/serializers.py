@@ -184,7 +184,7 @@ class AbstractConfigSerializer(rfs.Serializer):
         serializer_errors = {}
         for key, config in config_dict.items():
             new_config = {"name": key, **config}
-            serializer = cls(data=new_config)
+            serializer = cls(data=new_config)  # lgtm [py/call-to-non-callable]
             if serializer.is_valid():
                 config_dict[key] = serializer.data
             else:

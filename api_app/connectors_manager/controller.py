@@ -116,6 +116,8 @@ def run_connector(
     job_id: int, config_dict: dict, report_defaults: dict
 ) -> ConnectorReport:
     config = ConnectorConfigSerializer.dict_to_dataclass(config_dict)
+    klass = None
+    report = None
     try:
         cls_path = config.get_full_import_path()
         try:

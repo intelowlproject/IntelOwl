@@ -93,7 +93,9 @@ def _analysis_request(
 
     logger.debug(response_dict)
 
-    return Response(response_dict, status=status.HTTP_200_OK)
+    return Response(
+        response_dict, status=status.HTTP_200_OK
+    )  # lgtm [py/stack-trace-exposure]
 
 
 """ REST API endpoints """

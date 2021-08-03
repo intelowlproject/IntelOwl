@@ -89,3 +89,7 @@ HTTPS_ENABLED=not_enabled
 AWS_SECRETS=False
 AWS_SQS=False
 AWS_REGION=eu-central-1
+
+# Google OAuth2
+GOOGLE_APP_ID=
+GOOGLE_APP_SECRET=

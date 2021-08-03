@@ -3,7 +3,7 @@
 
 import logging
 from typing import Dict, List
-from celery import uuid, signature, chord
+from celery import uuid, chord
 from django.utils.module_loading import import_string
 from django.conf import settings
 
@@ -108,6 +108,8 @@ def start_analyzers(
     analyzers_to_execute: List[str],
     runtime_configuration: Dict[str, Dict] = None,
 ) -> None:
+    from intel_owl import tasks
+
     # we should not use mutable objects as default to avoid unexpected issues
     if runtime_configuration is None:
         runtime_configuration = {}
@@ -158,9 +160,9 @@ def start_analyzers(
         soft_time_limit = config.params.soft_time_limit
         # create task signature and add to list
         task_signatures.append(
-            signature(
-                "run_analyzer",
-                args=args,
+            tasks.run_analyzer.signature(
+                args,
+                {},
                 queue=queue,
                 soft_time_limit=soft_time_limit,
                 task_id=task_id,
@@ -171,9 +173,7 @@ def start_analyzers(
     # also link the callback to be executed
     # canvas docs: https://docs.celeryproject.org/en/stable/userguide/canvas.html
     runner = chord(task_signatures)
-    cb_signature = signature(
-        "post_all_analyzers_finished", args=[job.pk], immutable=True
-    )
+    cb_signature = tasks.post_all_analyzers_finished.signature([job.pk], immutable=True)
     runner(cb_signature)
 
     return None
@@ -256,6 +256,8 @@ def post_all_analyzers_finished(job_id: int):
     """
     Callback fn that is executed after all analyzers have finished.
     """
+    from intel_owl import tasks
+
     # get job instance
     job = Job.objects.get(pk=job_id)
     # execute some callbacks
@@ -263,7 +265,7 @@ def post_all_analyzers_finished(job_id: int):
     # fire connectors when job finishes with success
     # avoid re-triggering of connectors (case: recurring analyzer run)
     if job.status == "reported_without_fails" and not len(job.connectors_to_execute):
-        signature("on_job_success", args=[job_id]).apply_async()
+        tasks.on_job_success.apply_async(args=[job_id])
 
 
 def kill_ongoing_analysis(job: Job):

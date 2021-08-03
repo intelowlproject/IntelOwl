@@ -132,10 +132,6 @@ DATABASES = {
         "PORT": DB_PORT,
         "USER": DB_USER,
         "PASSWORD": DB_PASSWORD,
-        "TEST": {
-            "MIRROR": "default",
-            "NAME": DB_NAME,
-        },
     },
 }
 

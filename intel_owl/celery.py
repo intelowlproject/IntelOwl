@@ -2,7 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 
 from __future__ import absolute_import, unicode_literals
-from intel_owl.settings import CELERY_QUEUES, CELERY_BROKER_URL, AWS_SQS
+from intel_owl.settings import CELERY_QUEUES, CELERY_BROKER_URL, AWS_SQS, TEST_MODE
 import os
 
 from celery import Celery
@@ -43,7 +43,7 @@ app.conf.update(
     # value is in kilobytes
     worker_max_memory_per_child=4000,
     # required for code-coverage to work properly in tests
-    # task_always_eager=TEST_MODE,
+    task_always_eager=TEST_MODE,
 )
 
 if AWS_SQS:

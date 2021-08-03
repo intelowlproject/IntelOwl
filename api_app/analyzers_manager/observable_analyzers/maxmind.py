@@ -7,13 +7,14 @@ import logging
 import shutil
 import tarfile
 import traceback
-
 import maxminddb
 import requests
 
+from django.conf import settings
+from intel_owl import secrets
+
 from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager import classes
-from intel_owl import settings
 
 from tests.mock_utils import patch, if_mock_connections
 
@@ -46,7 +47,10 @@ class Maxmind(classes.ObservableAnalyzer):
 
         return maxmind_final_result
 
-    def updater(self, params, db):
+    @classmethod
+    def updater(cls, params, db):
+        # FIXME @eshaan7: dont hardcode api key name
+        api_key = secrets.get_secret("MAXMIND_KEY")
         db_location = _get_db_location(db)
         try:
 
@@ -54,7 +58,7 @@ class Maxmind(classes.ObservableAnalyzer):
             logger.info(f"starting download of db {db_name_wo_ext} from maxmind")
             url = (
                 "https://download.maxmind.com/app/geoip_download?edition_id="
-                f"{db_name_wo_ext}&license_key={self.__api_key}&suffix=tar.gz"
+                f"{db_name_wo_ext}&license_key={api_key}&suffix=tar.gz"
             )
             r = requests.get(url)
             if r.status_code >= 300:

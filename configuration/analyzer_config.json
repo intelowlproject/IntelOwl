@@ -1299,6 +1299,46 @@
       }
     }
   },
+  "OpenCTI": {
+    "type": "observable",
+    "python_module": "opencti.OpenCTI",
+    "description": "scan an observable on a custom OpenCTI instance",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": [
+      "ip",
+      "domain",
+      "url",
+      "hash"
+    ],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default",
+      "ssl_verify": true,
+      "proxies": {
+        "http": "",
+        "https": ""
+      },
+      "exact_search": false
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "OPENCTI_KEY",
+        "type": "string",
+        "required": true,
+        "default": null,
+        "description": "API key for your OpenCTI instance"
+      },
+      "url_key_name": {
+        "env_var_key": "OPENCTI_URL",
+        "type": "string",
+        "required": true,
+        "default": null,
+        "description": "URL of your OpenCTI instance"
+      }
+    }
+  },
   "OTXQuery": {
     "type": "observable",
     "python_module": "otx.OTX",

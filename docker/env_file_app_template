@@ -62,6 +62,7 @@ GOOGLE_APPLICATION_CREDENTIALS=/opt/deploy/intel_owl/configuration/service_accou
 MALPEDIA_KEY=
 # DEHASHED_AUTH_KEY format is `email:api-key`
 DEHASHED_AUTH_KEY=
+OPENCTI_KEY=
 
 # Test tokens
 TEST_JOB_ID=1
@@ -75,6 +76,7 @@ CUCKOO_URL=
 MISP_URL=
 FIRST_MISP_URL=
 VT_NOTIFY_URL=
+OPENCTI_URL=
 
 # other variables
 DEBUG=False

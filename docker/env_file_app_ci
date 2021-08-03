@@ -55,6 +55,7 @@ SSAPINET_KEY=test
 GOOGLE_APPLICATION_CREDENTIALS=/opt/deploy/intel_owl/configuration/service_account_keyfile_example.json
 MALPEDIA_KEY=test
 DEHASHED_AUTH_KEY=email@example.com:verysecureapikey
+OPENCTI_KEY=test
 
 # Test tokens
 TEST_JOB_ID=1
@@ -69,6 +70,7 @@ CUCKOO_URL=http://fake_url.com
 MISP_URL=http://fake_url.com
 FIRST_MISP_URL=http://fake_url.com
 VT_NOTIFY_URL=http://fake_url.com
+OPENCTI_URL=http://fake_url.com
 
 # other variables
 DEBUG=True

@@ -36,7 +36,7 @@ class OpenCTI(classes.Connector):
 
     def get_observable_type(self) -> str:
         if self._job.is_sample:
-            type = INTELOWL_OPENCTI_TYPE_MAP["file"]
+            obs_type = INTELOWL_OPENCTI_TYPE_MAP["file"]
         elif self._job.observable_classification == "hash":
             matched_hash_type = helpers.get_hash_type(self._job.observable_name)
             if matched_hash_type in [
@@ -44,19 +44,19 @@ class OpenCTI(classes.Connector):
                 "sha-1",
                 "sha-256",
             ]:  # sha-512 not supported
-                type = INTELOWL_OPENCTI_TYPE_MAP["file"]
+                obs_type = INTELOWL_OPENCTI_TYPE_MAP["file"]
             else:
-                type = INTELOWL_OPENCTI_TYPE_MAP["generic"]  # text
+                obs_type = INTELOWL_OPENCTI_TYPE_MAP["generic"]  # text
         elif self._job.observable_classification == "ip":
             ip_version = helpers.get_ip_version(self._job.observable_name)
             if ip_version == 4 or ip_version == 6:
-                type = INTELOWL_OPENCTI_TYPE_MAP["ip"][f"v{ip_version}"]  # v4/v6
+                obs_type = INTELOWL_OPENCTI_TYPE_MAP["ip"][f"v{ip_version}"]  # v4/v6
             else:
-                type = INTELOWL_OPENCTI_TYPE_MAP["generic"]  # text
+                obs_type = INTELOWL_OPENCTI_TYPE_MAP["generic"]  # text
         else:
-            type = INTELOWL_OPENCTI_TYPE_MAP[self._job.observable_classification]
+            obs_type = INTELOWL_OPENCTI_TYPE_MAP[self._job.observable_classification]
 
-        return type
+        return obs_type
 
     def generate_observable_data(self) -> dict:
         observable_data = {"type": self.get_observable_type()}

@@ -94,13 +94,13 @@ class _AbstractAnalyzersScriptTestCase(TransactionTestCase):
             # fail immediately if any analyzer or connector failed
             if analyzers_stats["failed"] > 0 or connectors_stats["failed"] > 0:
                 failed_analyzers = [
-                    (r.analyzer_name, r.report, r.errors)
+                    (r.analyzer_name, r.errors)
                     for r in self.test_job.analyzer_reports.filter(
                         status=AbstractReport.Status.FAILED
                     )
                 ]
                 failed_connectors = [
-                    (r.connector_name, r.report, r.errors)
+                    (r.connector_name, r.errors)
                     for r in self.test_job.connector_reports.filter(
                         status=AbstractReport.Status.FAILED
                     )

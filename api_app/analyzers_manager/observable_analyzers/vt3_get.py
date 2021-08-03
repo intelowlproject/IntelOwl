@@ -5,12 +5,14 @@ import base64
 import time
 import requests
 import logging
-
 from datetime import datetime, timedelta
 
 from api_app.analyzers_manager.file_analyzers import vt3_scan
 from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager import classes
+
+from tests.mock_utils import if_mock_connections, patch, MockResponse
+
 
 logger = logging.getLogger(__name__)
 
@@ -31,6 +33,18 @@ class VirusTotalv3(classes.ObservableAnalyzer):
         )
 
         return result
+
+    @classmethod
+    def _monkeypatch(cls):
+        patches = [
+            if_mock_connections(
+                patch(
+                    "requests.get",
+                    return_value=MockResponse({}, 200),
+                ),
+            )
+        ]
+        return super()._monkeypatch(patches=patches)
 
 
 def vt_get_report(

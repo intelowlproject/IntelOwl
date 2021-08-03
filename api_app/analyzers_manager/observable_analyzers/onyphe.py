@@ -6,6 +6,8 @@ import requests
 from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager import classes
 
+from tests.mock_utils import if_mock_connections, patch, MockResponse
+
 
 class Onyphe(classes.ObservableAnalyzer):
     base_url: str = "https://www.onyphe.io/api/v2/summary/"
@@ -39,3 +41,15 @@ class Onyphe(classes.ObservableAnalyzer):
             raise AnalyzerRunException(e)
 
         return response.json()
+
+    @classmethod
+    def _monkeypatch(cls):
+        patches = [
+            if_mock_connections(
+                patch(
+                    "requests.get",
+                    return_value=MockResponse({}, 200),
+                ),
+            )
+        ]
+        return super()._monkeypatch(patches=patches)

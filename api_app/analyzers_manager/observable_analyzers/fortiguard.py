@@ -3,10 +3,11 @@
 
 import re
 import requests
-
 from urllib.parse import urlparse
 
 from api_app.analyzers_manager import classes
+
+from tests.mock_utils import if_mock_connections, patch, MockResponse
 
 
 class Fortiguard(classes.ObservableAnalyzer):
@@ -25,3 +26,17 @@ class Fortiguard(classes.ObservableAnalyzer):
         category_match = re.search(pattern, str(response.content), flags=0)
         dict_response = {"category": category_match.group(1) if category_match else ""}
         return dict_response
+
+    @classmethod
+    def _monkeypatch(cls):
+        patches = [
+            if_mock_connections(
+                patch(
+                    "requests.get",
+                    return_value=MockResponse(
+                        {}, 200, content="Category: Test Fortiguard"
+                    ),
+                ),
+            )
+        ]
+        return super()._monkeypatch(patches=patches)

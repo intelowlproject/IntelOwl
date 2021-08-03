@@ -4,13 +4,13 @@
 """Check if the domains is reported as malicious in Quad9 database"""
 
 import requests
-
 from urllib.parse import urlparse
-from api_app.analyzers_manager import classes
-from api_app.analyzers_manager.observable_analyzers.dns.dns_responses import (
-    malicious_detector_response,
-)
+
 from api_app.exceptions import AnalyzerRunException
+from api_app.analyzers_manager import classes
+from ..dns_responses import malicious_detector_response
+
+from tests.mock_utils import if_mock_connections, patch, MockResponse
 
 
 class Quad9MaliciousDetector(classes.ObservableAnalyzer):
@@ -41,7 +41,7 @@ class Quad9MaliciousDetector(classes.ObservableAnalyzer):
 
         return malicious_detector_response(self.observable_name, False)
 
-    def _quad9_dns_query(self, observable):
+    def _quad9_dns_query(self, observable) -> bool:
         """Perform a DNS query with Quad9 service, return True if Quad9 answer the
         DNS query with a non-empty response.
 
@@ -62,7 +62,7 @@ class Quad9MaliciousDetector(classes.ObservableAnalyzer):
 
         return True if quad9_response.json().get("Answer", None) else False
 
-    def _google_dns_query(self, observable):
+    def _google_dns_query(self, observable) -> bool:
         """Perform a DNS query with Google service, return True if Google answer the
         DNS query.
 
@@ -81,3 +81,15 @@ class Quad9MaliciousDetector(classes.ObservableAnalyzer):
             raise AnalyzerRunException(e)
 
         return True if google_response.json().get("Answer", None) else False
+
+    @classmethod
+    def _monkeypatch(cls):
+        patches = [
+            if_mock_connections(
+                patch(
+                    "requests.get",
+                    return_value=MockResponse({"Answer": False}, 200),
+                ),
+            )
+        ]
+        return super()._monkeypatch(patches=patches)

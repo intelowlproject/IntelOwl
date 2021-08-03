@@ -1,11 +1,15 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-import requests
 import logging
+import requests
+import base64
+
 from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager.classes import ObservableAnalyzer
-import base64
+
+from tests.mock_utils import if_mock_connections, patch, MockResponse
+
 
 logger = logging.getLogger(__name__)
 
@@ -34,3 +38,15 @@ class Phishtank(ObservableAnalyzer):
         except requests.RequestException as e:
             raise AnalyzerRunException(e)
         return result
+
+    @classmethod
+    def _monkeypatch(cls):
+        patches = [
+            if_mock_connections(
+                patch(
+                    "requests.post",
+                    return_value=MockResponse({}, 200),
+                ),
+            )
+        ]
+        return super()._monkeypatch(patches=patches)

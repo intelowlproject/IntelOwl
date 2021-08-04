@@ -84,7 +84,11 @@ class OpenCTI(classes.Connector):
             proxies=self.proxies,
         )
 
-        # Create author (if it doesn't exist)
+        # Entities in OpenCTI are created only if they don't exist
+        # create queries will return the existing entity in that case
+        # use update (default: false) to update the entity if exists
+
+        # Create author (if not exists)
         organization = pycti.Identity(opencti_instance).create(
             type="Organization",
             name="IntelOwl",
@@ -95,15 +99,15 @@ class OpenCTI(classes.Connector):
                 "(https://github.com/intelowlproject/IntelOwl/)"
             ),
         )
-        # Create the marking definition
+        # Create the marking definition (if not exists)
         marking_definition = pycti.MarkingDefinition(opencti_instance).create(
             definition_type="TLP",
-            definition="TLP:%s" % self.tlp["type"].upper(),
+            definition=f"TLP:{self.tlp['type'].upper()}",
             x_opencti_color=self.tlp["color"].upper(),
             x_opencti_order=self.tlp["x_opencti_order"],
         )
 
-        # Create the observable
+        # Create the observable (if not exists with the given type and values)
         observable_data = self.generate_observable_data()
         observable = pycti.StixCyberObservable(opencti_instance, File).create(
             observableData=observable_data,
@@ -111,17 +115,28 @@ class OpenCTI(classes.Connector):
             objectMarking=marking_definition["id"],
         )
 
+        # Create labels from Job tags (if not exists)
+        label_ids = []
+        for tag in self._job.tags.all():
+            label = pycti.Label(opencti_instance).create(
+                value=f"intelowl-tag:{tag.label}",
+                color=tag.color,
+            )
+            label_ids.append(label["id"])
+
         # Create the report
         report = pycti.Report(opencti_instance).create(
             name=f"IntelOwl Job-{self.job_id}",
             description=(
                 f"This is IntelOwl's analysis report for Job: {self.job_id}."
-                f" Analyzers Executed: {self._job.analyzers_to_execute}"
+                # comma separate analyzers executed
+                f" Analyzers Executed: {', '.join(self._job.analyzers_to_execute)}"
             ),
             published=self._job.received_request_time.strftime("%Y-%m-%dT%H:%M:%SZ"),
             report_types=["internal-report"],
             createdBy=organization["id"],
             objectMarking=marking_definition["id"],
+            objectLabel=label_ids,
             x_opencti_report_status=2,  # Analyzed
         )
         # Create the external reference

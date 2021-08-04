@@ -70,7 +70,7 @@ class MISP(Connector):
                 type = INTELOWL_MISP_TYPE_MAP[type]
 
         obj = self._get_attr_obj(type, value)
-        obj.comment = f"Analyzers Executed: {self._job.analyzers_to_execute}"
+        obj.comment = f"Analyzers Executed: {', '.join(self._job.analyzers_to_execute)}"
         return obj
 
     @property

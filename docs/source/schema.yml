@@ -103,38 +103,6 @@ paths:
       responses:
         '200':
           description: No response body
-  /api/download_sample:
-    get:
-      operationId: api_download_sample_retrieve
-      description: This method is used to download a sample from a Job ID
-      parameters:
-      - in: query
-        name: job_id
-        schema:
-          type: integer
-        description: Job Id
-      tags:
-      - api
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                type: string
-                format: binary
-          description: ''
-        '400':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DownloadSampleInsufficientData'
-          description: ''
-        '500':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DownloadSampleInsufficientData'
-          description: ''
   /api/get_analyzer_configs:
     get:
       operationId: api_get_analyzer_configs_retrieve
@@ -210,6 +178,38 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/jobs/{id}/download_sample:
+    get:
+      operationId: api_jobs_download_sample_retrieve
+      description: This method is used to download a sample from a Job ID
+      parameters:
+      - in: query
+        name: job_id
+        schema:
+          type: integer
+        description: Job Id
+      tags:
+      - api
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: string
+                format: binary
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DownloadSampleInsufficientData'
+          description: ''
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DownloadSampleInsufficientData'
+          description: ''
   /api/jobs/{id}/kill:
     patch:
       operationId: api_jobs_kill_partial_update
@@ -242,26 +242,26 @@ paths:
               schema:
                 $ref: '#/components/schemas/Job'
           description: ''
-  /api/send_analysis_request:
+  /api/analyze_file:
     post:
-      operationId: api_send_analysis_request_create
+      operationId: api_analyze_file_create
       description: |2-
 
-            This endpoint allows to start a Job related to a file or an observable
+            This endpoint allows to start a Job related to a file
       parameters:
       - in: query
         name: analyzers_requested
         schema:
           type: object
           additionalProperties: {}
-        description: list of requested analyzer to run, before filters
+        description: list of requested analyzers to run before filtering
       - in: query
         name: disable_external_analyzers
         schema:
           type: boolean
         description: |2-
 
-                      Default False, enable it if you want to exclude external analyzers
+                    Default False, enable it if you want to excluse external analyzers
       - in: query
         name: file
         schema:
@@ -297,6 +297,79 @@ paths:
           type: string
         description: md5 of the item to analyze
       - in: query
+        name: private
+        schema:
+          type: boolean
+        description: |2-
+
+                      Default False,
+                      enable it to allow view permissions to only requesting user's groups.
+      - in: query
+        name: run_all_available_analyzers
+        schema:
+          type: boolean
+        description: default False
+      - in: query
+        name: runtime_configuration
+        schema:
+          type: object
+          additionalProperties: {}
+        description: |2-
+
+                      Default {}, contains additional parameters for particular analyzers
+      - in: query
+        name: tags_id
+        schema:
+          type: object
+          additionalProperties: {}
+        description: list of id's of tags to apply to job
+      - in: query
+        name: test
+        schema:
+          type: boolean
+        description: disable analysis for API testing
+      tags:
+      - api
+      responses:
+        '202':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SendAnalysisRequestSuccessResponse'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SendAnalysisRequestInsufficientData'
+          description: ''
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SendAnalysisRequestError'
+          description: ''
+  /api/analyze_observable:
+    post:
+      operationId: api_analyze_observable_create
+      description:  |2-
+
+            This endpoint allows to start a Job related to an observable
+      parameters:
+      - in: query
+        name: analyzers_requested
+        schema:
+          type: object
+          additionalProperties: {}
+        description: list of requested analyzers to run before filtering
+      - in: query
+        name: disable_external_analyzers
+        schema:
+          type: boolean
+        description: |2-
+
+                    Default False, enable it if you want to excluse external analyzers
+      - in: query
         name: observable_classification
         schema:
           type: string
@@ -306,6 +379,24 @@ paths:
         schema:
           type: string
         description: required if is_sample=False, the observable value
+      - in: query
+        name: force_privacy
+        schema:
+          type: boolean
+        description: |2-
+
+                      Default False,
+                      enable it if you want to avoid to run analyzers with privacy issues
+      - in: query
+        name: is_sample
+        schema:
+          type: boolean
+        description: is a sample (file) or an observable (domain, ip, ...)
+      - in: query
+        name: md5
+        schema:
+          type: string
+        description: md5 of the item to analyze
       - in: query
         name: private
         schema:

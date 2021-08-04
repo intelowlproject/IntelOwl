@@ -1,6 +1,9 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
+import json
+import os
+
 from django.conf import settings
 
 from pycti.api.opencti_api_client import File
@@ -22,6 +25,7 @@ INTELOWL_OPENCTI_TYPE_MAP = {
     "generic": "x-opencti-text",  # misc field, so keeping text
     "file": "file",  # hashes: md5, sha-1, sha-256
 }
+OPENCTI_DB = f"{settings.MEDIA_ROOT}/opencti_db.json"
 
 
 class OpenCTI(classes.Connector):
@@ -75,57 +79,76 @@ class OpenCTI(classes.Connector):
 
         return observable_data
 
+    @property
+    def organization_id(self) -> str:
+        # check if presaved
+        if self.opencti_db.get("organization_id", None) is None:
+            # Create author (if not exists)
+            org = pycti.Identity(self.opencti_instance).create(
+                type="Organization",
+                name="IntelOwl",
+                description=(
+                    "Intel Owl is an Open Source Intelligence, or OSINT solution"
+                    " to get threat intelligence data about a specific file, an IP or a"
+                    " domain from a single API at scale. [Visit the project on GitHub]"
+                    "(https://github.com/intelowlproject/IntelOwl/)"
+                ),
+            )
+            self.opencti_db["organization_id"] = org["id"]
+        return self.opencti_db["organization_id"]
+
+    @property
+    def marking_definition_id(self) -> str:
+        # check if not presaved
+        if self.opencti_db.get("marking_definition_id", None) is None:
+            # Create the marking definition (if not exists)
+            md = pycti.MarkingDefinition(self.opencti_instance).create(
+                definition_type="TLP",
+                definition=f"TLP:{self.tlp['type'].upper()}",
+                x_opencti_color=self.tlp["color"].upper(),
+                x_opencti_order=self.tlp["x_opencti_order"],
+            )
+            self.opencti_db["marking_definition_id"] = md["id"]
+        return self.opencti_db["marking_definition_id"]
+
     def run(self):
         # set up client
-        opencti_instance = pycti.OpenCTIApiClient(
+        self.opencti_instance = pycti.OpenCTIApiClient(
             url=self.__url_name,
             token=self.__api_key,
             ssl_verify=self.ssl_verify,
             proxies=self.proxies,
         )
 
+        self.opencti_db = {}
+        # get presaved values stored in MEDIA_ROOT
+        if os.path.exists(OPENCTI_DB):
+            with open(OPENCTI_DB, "r") as file:
+                self.opencti_db = json.load(file)
+
         # Entities in OpenCTI are created only if they don't exist
         # create queries will return the existing entity in that case
         # use update (default: false) to update the entity if exists
 
-        # Create author (if not exists)
-        organization = pycti.Identity(opencti_instance).create(
-            type="Organization",
-            name="IntelOwl",
-            description=(
-                "Intel Owl is an Open Source Intelligence, or OSINT solution"
-                " to get threat intelligence data about a specific file, an IP"
-                " or a domain from a single API at scale.[Visit the project on GitHub]"
-                "(https://github.com/intelowlproject/IntelOwl/)"
-            ),
-        )
-        # Create the marking definition (if not exists)
-        marking_definition = pycti.MarkingDefinition(opencti_instance).create(
-            definition_type="TLP",
-            definition=f"TLP:{self.tlp['type'].upper()}",
-            x_opencti_color=self.tlp["color"].upper(),
-            x_opencti_order=self.tlp["x_opencti_order"],
-        )
-
         # Create the observable (if not exists with the given type and values)
         observable_data = self.generate_observable_data()
-        observable = pycti.StixCyberObservable(opencti_instance, File).create(
+        observable = pycti.StixCyberObservable(self.opencti_instance, File).create(
             observableData=observable_data,
-            createdBy=organization["id"],
-            objectMarking=marking_definition["id"],
+            createdBy=self.organization_id,
+            objectMarking=self.marking_definition_id,
         )
 
         # Create labels from Job tags (if not exists)
         label_ids = []
         for tag in self._job.tags.all():
-            label = pycti.Label(opencti_instance).create(
+            label = pycti.Label(self.opencti_instance).create(
                 value=f"intelowl-tag:{tag.label}",
                 color=tag.color,
             )
             label_ids.append(label["id"])
 
         # Create the report
-        report = pycti.Report(opencti_instance).create(
+        report = pycti.Report(self.opencti_instance).create(
             name=f"IntelOwl Job-{self.job_id}",
             description=(
                 f"This is IntelOwl's analysis report for Job: {self.job_id}."
@@ -134,32 +157,37 @@ class OpenCTI(classes.Connector):
             ),
             published=self._job.received_request_time.strftime("%Y-%m-%dT%H:%M:%SZ"),
             report_types=["internal-report"],
-            createdBy=organization["id"],
-            objectMarking=marking_definition["id"],
+            createdBy=self.organization_id,
+            objectMarking=self.marking_definition_id,
             objectLabel=label_ids,
             x_opencti_report_status=2,  # Analyzed
         )
         # Create the external reference
-        external_reference = pycti.ExternalReference(opencti_instance).create(
+        external_reference = pycti.ExternalReference(self.opencti_instance).create(
             source_name="IntelOwl Analysis",
             description="View analysis report on the IntelOwl instance",
             url=f"{settings.WEB_CLIENT_URL}/pages/scan/result/{self.job_id}",
         )
         # Add the external reference to the report
-        pycti.StixDomainObject(opencti_instance, File).add_external_reference(
+        pycti.StixDomainObject(self.opencti_instance, File).add_external_reference(
             id=report["id"], external_reference_id=external_reference["id"]
         )
 
         # Link Observable and Report
-        pycti.Report(opencti_instance).add_stix_object_or_stix_relationship(
+        pycti.Report(self.opencti_instance).add_stix_object_or_stix_relationship(
             id=report["id"], stixObjectOrStixRelationshipId=observable["id"]
         )
 
+        # store opencti_db in MEDIA_ROOT (done only once)
+        if not os.path.exists(OPENCTI_DB):
+            with open(OPENCTI_DB, "w") as file:
+                json.dump(self.opencti_db, file)
+
         return {
-            "observable": pycti.StixCyberObservable(opencti_instance, File).read(
+            "observable": pycti.StixCyberObservable(self.opencti_instance, File).read(
                 id=observable["id"]
             ),
-            "report": pycti.Report(opencti_instance).read(id=report["id"]),
+            "report": pycti.Report(self.opencti_instance).read(id=report["id"]),
         }
 
     @classmethod
@@ -170,6 +198,7 @@ class OpenCTI(classes.Connector):
                 patch("pycti.Identity.create", return_value={"id": 1}),
                 patch("pycti.MarkingDefinition.create", return_value={"id": 1}),
                 patch("pycti.StixCyberObservable.create", return_value={"id": 1}),
+                patch("pycti.Label.create", return_value={"id": 1}),
                 patch("pycti.Report.create", return_value={"id": 1}),
                 patch("pycti.ExternalReference.create", return_value={"id": 1}),
                 patch(

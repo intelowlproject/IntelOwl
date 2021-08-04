@@ -28,6 +28,8 @@ class CuckooAnalysis(FileAnalyzer):
                 f"{self.__repr__()}, (md5: {self.md5}) -> Continuing w/o API key.."
             )
         self.cuckoo_url = secrets.get_secret("CUCKOO_URL")
+        if not self.cuckoo_url.endswith("/"):
+            self.cuckoo_url += "/"
         self.task_id = 0
         self.result = {}
         # no. of tries requesting new scan
@@ -238,6 +240,7 @@ class CuckooAnalysis(FileAnalyzer):
         yara = [yara_match["name"] for yara_match in file_data.get("yara", [])]
 
         result = {
+            "link": f"{self.cuckoo_url}analysis/{cuckoo_id}/summary",
             "signatures": list_description_signatures,
             "signatures_detailed": list_detailed_signatures,
             "suricata_alerts": suricata_alerts,

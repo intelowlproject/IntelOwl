@@ -50,6 +50,7 @@ from api_app.script_analyzers.observable_analyzers import (
     firehol_iplist,
     threatfox,
     darksearch,
+    dehashed,
 )
 from api_app.models import Job
 from .mock_utils import (
@@ -785,6 +786,22 @@ class GenericAnalyzersTest(TestCase):
     def test_darksearch(self, *args, **kwargs):
         report = darksearch.DarkSearchQuery(
             "Darksearch_Query",
+            self.job_id,
+            self.observable_name,
+            self.observable_classification,
+            {},
+        ).start()
+        self.assertEqual(report.get("success", False), True)
+
+    @mock_connections(
+        patch(
+            "requests.get",
+            return_value=MockResponse({"entries": ["test"]}, 200),
+        )
+    )
+    def test_dehashed_search(self, *args, **kwargs):
+        report = dehashed.DehashedSearch(
+            "Dehashed_Search",
             self.job_id,
             self.observable_name,
             self.observable_classification,

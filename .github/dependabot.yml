@@ -4,4 +4,119 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+      day: "tuesday"
     target-branch: "develop"
+    ignore:
+      # ignore all patch updates since we are using ~=
+      # this does not work for security updates
+      - dependency-name: "*"
+        update-types: [ "version-update:semver-patch" ]
+
+  # the requirements are the same among all the integrations for now so one of them is enough
+  - package-ecosystem: "pip"
+    directory: "/integrations/static_analyzers"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+    target-branch: "dependabot-validation"
+    ignore:
+      # ignore all patch updates since we are using ~=
+      # this does not work for security updates
+      - dependency-name: "*"
+        update-types: [ "version-update:semver-patch" ]
+
+  - package-ecosystem: "docker"
+    directory: "/docker"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+    target-branch: "develop"
+    ignore:
+      # ignore all patch updates since we are using ~=
+      # this does not work for security updates
+      - dependency-name: "*"
+        update-types: [ "version-update:semver-patch" ]
+
+  - package-ecosystem: "docker"
+    directory: "/integrations/apk_analyzers"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+    target-branch: "dependabot-validation"
+    ignore:
+      # ignore all patch updates since we are using ~=
+      # this does not work for security updates
+      - dependency-name: "*"
+        update-types: [ "version-update:semver-patch" ]
+
+  - package-ecosystem: "docker"
+    directory: "/integrations/box-js"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+    target-branch: "dependabot-validation"
+    ignore:
+      # ignore all patch updates since we are using ~=
+      # this does not work for security updates
+      - dependency-name: "*"
+        update-types: [ "version-update:semver-patch" ]
+
+  - package-ecosystem: "docker"
+    directory: "/integrations/qiling"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+    target-branch: "dependabot-validation"
+    ignore:
+      # ignore all patch updates since we are using ~=
+      # this does not work for security updates
+      - dependency-name: "*"
+        update-types: [ "version-update:semver-patch" ]
+
+  - package-ecosystem: "docker"
+    directory: "/integrations/rendertron"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+    target-branch: "dependabot-validation"
+    ignore:
+      # ignore all patch updates since we are using ~=
+      # this does not work for security updates
+      - dependency-name: "*"
+        update-types: [ "version-update:semver-patch" ]
+
+  - package-ecosystem: "docker"
+    directory: "/integrations/static_analyzers"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+    target-branch: "dependabot-validation"
+    ignore:
+      # ignore all patch updates since we are using ~=
+      # this does not work for security updates
+      - dependency-name: "*"
+        update-types: [ "version-update:semver-patch" ]
+
+  - package-ecosystem: "docker"
+    directory: "/integrations/thug"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+    target-branch: "dependabot-validation"
+    ignore:
+      # ignore all patch updates since we are using ~=
+      # this does not work for security updates
+      - dependency-name: "*"
+        update-types: [ "version-update:semver-patch" ]
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+    target-branch: "develop"
+    ignore:
+      # ignore all patch updates since we are using ~=
+      # this does not work for security updates
+      - dependency-name: "*"
+        update-types: [ "version-update:semver-patch" ]

@@ -1,4 +1,4 @@
-boto3==1.17.105
+boto3==1.18.7
 celery==5.1.2
 checkdmarc==4.4.1
 dataclasses==0.6
@@ -12,11 +12,11 @@ djangorestframework-guardian==0.3.0
 dnspython==2.1.0
 dnstwist==20201228
 ppdeep>=20200505
-drf-spectacular==0.17.2
+drf-spectacular==0.17.3
 easygui==0.98.2
 GitPython==3.1.18
 google>=3.0.0
-google-cloud-webrisk==1.3.0
+google-cloud-webrisk==1.4.1
 maxminddb==2.0.3
 mwdblib==3.4.0
 oletools==0.60
@@ -34,7 +34,7 @@ pysafebrowsing==0.1.1
 PySocks==1.7.1
 python-magic==0.4.22
 quark-engine==21.7.2
-requests==2.25.1
+requests==2.26.0
 speakeasy-emulator==1.5.3
 uWSGI==2.0.19.1
 yara-python==4.1.0

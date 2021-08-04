@@ -137,9 +137,8 @@ $ docker exec -ti intelowl_uwsgi unzip -P infected tests/test_files.zip
 $ docker exec -ti intelowl_uwsgi python manage.py test tests
 ```
 
-> Note: To run a particular test case, you want to set it's full path. For example, `docker exec -ti intelowl_uwsgi python manage.py test tests.test_observables.<test_case_class_name>.<func_name>`
+> Note: IntelOwl has dynamic testing suite. This means that no explicit analyzers/connector tests are required after the addition of a new analyzer or connector.
 
-Please make sure all 3 of these tests return positively.
 
 If everything is working, before submitting your pull request, please squash your commits into a single one!
 

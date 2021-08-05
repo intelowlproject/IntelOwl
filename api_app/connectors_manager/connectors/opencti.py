@@ -1,11 +1,11 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-import json
-import os
+import sys
 
 from django.conf import settings
 
+from cache_memoize import cache_memoize
 from pycti.api.opencti_api_client import File
 import pycti
 
@@ -25,7 +25,6 @@ INTELOWL_OPENCTI_TYPE_MAP = {
     "generic": "x-opencti-text",  # misc field, so keeping text
     "file": "file",  # hashes: md5, sha-1, sha-256
 }
-OPENCTI_DB = f"{settings.MEDIA_ROOT}/opencti_db.json"
 
 
 class OpenCTI(classes.Connector):
@@ -80,36 +79,32 @@ class OpenCTI(classes.Connector):
         return observable_data
 
     @property
-    def organization_id(self) -> str:
-        # check if presaved
-        if self.opencti_db.get("organization_id", None) is None:
-            # Create author (if not exists)
-            org = pycti.Identity(self.opencti_instance).create(
-                type="Organization",
-                name="IntelOwl",
-                description=(
-                    "Intel Owl is an Open Source Intelligence, or OSINT solution"
-                    " to get threat intelligence data about a specific file, an IP or a"
-                    " domain from a single API at scale. [Visit the project on GitHub]"
-                    "(https://github.com/intelowlproject/IntelOwl/)"
-                ),
-            )
-            self.opencti_db["organization_id"] = org["id"]
-        return self.opencti_db["organization_id"]
+    @cache_memoize(timeout=sys.maxsize)
+    def organization_id(self) -> str:  # called only once (cached indefinitely)
+        # Create author (if not exists)
+        org = pycti.Identity(self.opencti_instance).create(
+            type="Organization",
+            name="IntelOwl",
+            description=(
+                "Intel Owl is an Open Source Intelligence, or OSINT solution"
+                " to get threat intelligence data about a specific file, an IP or a"
+                " domain from a single API at scale. [Visit the project on GitHub]"
+                "(https://github.com/intelowlproject/IntelOwl/)"
+            ),
+        )
+        return org["id"]
 
     @property
-    def marking_definition_id(self) -> str:
-        # check if not presaved
-        if self.opencti_db.get("marking_definition_id", None) is None:
-            # Create the marking definition (if not exists)
-            md = pycti.MarkingDefinition(self.opencti_instance).create(
-                definition_type="TLP",
-                definition=f"TLP:{self.tlp['type'].upper()}",
-                x_opencti_color=self.tlp["color"].upper(),
-                x_opencti_order=self.tlp["x_opencti_order"],
-            )
-            self.opencti_db["marking_definition_id"] = md["id"]
-        return self.opencti_db["marking_definition_id"]
+    @cache_memoize(timeout=sys.maxsize)
+    def marking_definition_id(self) -> str:  # called only once (cached indefinitely)
+        # Create the marking definition (if not exists)
+        md = pycti.MarkingDefinition(self.opencti_instance).create(
+            definition_type="TLP",
+            definition=f"TLP:{self.tlp['type'].upper()}",
+            x_opencti_color=self.tlp["color"].upper(),
+            x_opencti_order=self.tlp["x_opencti_order"],
+        )
+        return md["id"]
 
     def run(self):
         # set up client
@@ -119,12 +114,6 @@ class OpenCTI(classes.Connector):
             ssl_verify=self.ssl_verify,
             proxies=self.proxies,
         )
-
-        self.opencti_db = {}
-        # get presaved values stored in MEDIA_ROOT
-        if os.path.exists(OPENCTI_DB):
-            with open(OPENCTI_DB, "r") as file:
-                self.opencti_db = json.load(file)
 
         # Entities in OpenCTI are created only if they don't exist
         # create queries will return the existing entity in that case
@@ -177,11 +166,6 @@ class OpenCTI(classes.Connector):
         pycti.Report(self.opencti_instance).add_stix_object_or_stix_relationship(
             id=report["id"], stixObjectOrStixRelationshipId=observable["id"]
         )
-
-        # store opencti_db in MEDIA_ROOT (done only once)
-        if not os.path.exists(OPENCTI_DB):
-            with open(OPENCTI_DB, "w") as file:
-                json.dump(self.opencti_db, file)
 
         return {
             "observable": pycti.StixCyberObservable(self.opencti_instance, File).read(

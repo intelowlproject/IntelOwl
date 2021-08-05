@@ -120,6 +120,8 @@ In the `env_file_app`, configure different variables as explained below.
 * `MWDB_KEY`: API key for [MWDB](https://mwdb.cert.pl/)
 * `SSAPINET_KEY`: screenshotapi.net ([docs](https://screenshotapi.net/documentation))
 * `MALPEDIA_KEY`: MALPEDIA API KEY ([docs](https://malpedia.caad.fkie.fraunhofer.de/usage/api))
+* `OPENCTI_KEY`: your own OpenCTI instance key
+* `OPENCTI_URL`: your own OpenCTI instance URL
 
 **Advanced** additional configuration:
 * `OLD_JOBS_RETENTION_DAYS`: Database retention for analysis results (default: 3 days). Change this if you want to keep your old analysis longer in the database.

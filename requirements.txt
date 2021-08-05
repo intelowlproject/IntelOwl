@@ -7,6 +7,7 @@ django-auth-ldap==2.4.0
 django-rest-durin==0.3.0
 django-cache-memoize==0.1.9
 djangorestframework==3.12.4
+drf-flex-fields==0.9.1
 djangorestframework-guardian==0.3.0
 dnspython==2.1.0
 dnstwist==20201228

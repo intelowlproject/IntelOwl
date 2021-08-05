@@ -135,16 +135,6 @@ class _AbstractJobCreateSerializer(
         else:
             view_grps = Group.objects.all()
 
-        print("--------------------------")
-        print("--------------------------")
-        print("--------------------------")
-        print("--------------------------")
-        print(self.validated_data["private"])
-        print("--------------------------")
-        print("--------------------------")
-        print("--------------------------")
-        print("--------------------------")
-
         return {
             "view_job": [*view_grps],
             "delete_job": [*usr_groups],

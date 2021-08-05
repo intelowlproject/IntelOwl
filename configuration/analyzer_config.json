@@ -2422,9 +2422,11 @@
     "external_service": true,
     "leaks_info": false,
     "run_hash": true,
+    "run_hash_type": "sha256",
     "config": {
       "soft_time_limit": 40,
-      "queue": "default"
+      "queue": "default",
+      "report_type": "default"
     },
     "secrets": {
       "api_key_name": {
@@ -2444,10 +2446,12 @@
     "external_service": true,
     "leaks_info": true,
     "run_hash": true,
+    "run_hash_type": "sha256",
     "config": {
       "soft_time_limit": 500,
       "queue": "default",
-      "force_active_scan": true
+      "force_active_scan": true,
+      "report_type": "default"
     },
     "secrets": {
       "api_key_name": {

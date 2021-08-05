@@ -56,7 +56,9 @@ def vt_get_report(
 ):
     headers = {"x-apikey": api_key}
 
-    params, uri = get_requests_params_and_uri(obs_clfn, observable_name)
+    params, uri = get_requests_params_and_uri(
+        obs_clfn, observable_name, config_params.get("report_type", "default")
+    )
 
     max_tries = config_params.get("max_tries", 10)
     poll_distance = config_params.get("poll_distance", 30)
@@ -90,7 +92,6 @@ def vt_get_report(
                     logger.info(f"forcing VT active scan for hash {observable_name}")
                     result = vt3_scan.vt_scan_file(api_key, observable_name, job_id)
                     result["performed_active_scan"] = True
-                break
             else:
                 # we should consider the chance that the very sample was already...
                 # ...sent and VT is already analyzing it.
@@ -158,68 +159,75 @@ def vt_get_report(
     return result
 
 
-def get_requests_params_and_uri(obs_clfn, observable_name):
+def get_requests_params_and_uri(obs_clfn, observable_name, report_type):
     params = {}
-    # in this way, you just retrieved metadata about relationships
-    # if you like to get all the data about specific relationships,...
-    # ..you should perform another query
-    # check vt3 API docs for further info
-    if obs_clfn == "domain":
-        relationships_requested = [
-            "communicating_files",
-            "downloaded_files",
-            "historical_whois",
-            "referrer_files",
-            "resolutions",
-            "siblings",
-            "subdomains",
-            "urls",
-        ]
-        uri = f"domains/{observable_name}"
-    elif obs_clfn == "ip":
-        relationships_requested = [
-            "communicating_files",
-            "downloaded_files",
-            "historical_whois",
-            "referrer_files",
-            "resolutions",
-            "urls",
-        ]
-        uri = f"ip_addresses/{observable_name}"
-    elif obs_clfn == "url":
-        relationships_requested = [
-            "downloaded_files",
-            "analyses",
-            "last_serving_ip_address",
-            "redirecting_urls",
-            "submissions",
-        ]
-        url_id = base64.urlsafe_b64encode(observable_name.encode()).decode().strip("=")
-        uri = f"urls/{url_id}"
-    elif obs_clfn == "hash":
-        relationships_requested = [
-            "behaviours",
-            "bundled_files",
-            "comments",
-            "compressed_parents",
-            "contacted_domains",
-            "contacted_ips",
-            "contacted_urls",
-            "execution_parents",
-            "itw_urls",
-            "overlay_parents",
-            "pcap_parents",
-            "pe_resource_parents",
-            "votes",
-        ]
-        uri = f"files/{observable_name}"
+    if report_type == "behavioral":
+        uri = f"files/{observable_name}/behaviour_summary"
+    elif report_type == "sigma":
+        uri = f"sigma_analyses/{observable_name}"
     else:
-        raise AnalyzerRunException(
-            f"Not supported observable type {obs_clfn}. "
-            "Supported are: hash, ip, domain and url."
-        )
+        # in this way, you just retrieved metadata about relationships
+        # if you like to get all the data about specific relationships,...
+        # ..you should perform another query
+        # check vt3 API docs for further info
+        if obs_clfn == "domain":
+            relationships_requested = [
+                "communicating_files",
+                "downloaded_files",
+                "historical_whois",
+                "referrer_files",
+                "resolutions",
+                "siblings",
+                "subdomains",
+                "urls",
+            ]
+            uri = f"domains/{observable_name}"
+        elif obs_clfn == "ip":
+            relationships_requested = [
+                "communicating_files",
+                "downloaded_files",
+                "historical_whois",
+                "referrer_files",
+                "resolutions",
+                "urls",
+            ]
+            uri = f"ip_addresses/{observable_name}"
+        elif obs_clfn == "url":
+            relationships_requested = [
+                "downloaded_files",
+                "analyses",
+                "last_serving_ip_address",
+                "redirecting_urls",
+                "submissions",
+            ]
+            url_id = (
+                base64.urlsafe_b64encode(observable_name.encode()).decode().strip("=")
+            )
+            uri = f"urls/{url_id}"
+        elif obs_clfn == "hash":
+            relationships_requested = [
+                "behaviours",
+                "bundled_files",
+                "comments",
+                "compressed_parents",
+                "contacted_domains",
+                "contacted_ips",
+                "contacted_urls",
+                "execution_parents",
+                "itw_urls",
+                "overlay_parents",
+                "pcap_parents",
+                "pe_resource_parents",
+                "votes",
+            ]
+            uri = f"files/{observable_name}"
+        else:
+            raise AnalyzerRunException(
+                f"Not supported observable type {obs_clfn}. "
+                "Supported are: hash, ip, domain and url."
+            )
 
-    if relationships_requested:
-        params["relationships"] = ",".join(relationships_requested)
+        if relationships_requested:
+            params["relationships"] = ",".join(relationships_requested)
 
     return params, uri

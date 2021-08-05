@@ -116,12 +116,12 @@ def run_connector(
     job_id: int, config_dict: dict, report_defaults: dict
 ) -> ConnectorReport:
     config = ConnectorConfigSerializer.dict_to_dataclass(config_dict)
-    klass = None
-    report = None
+    klass: Connector = None
+    report: ConnectorReport = None
     try:
         cls_path = config.get_full_import_path()
         try:
-            klass: Connector = import_string(cls_path)
+            klass = import_string(cls_path)
         except ImportError:
             raise Exception(f"Class: {cls_path} couldn't be imported")
 

@@ -179,4 +179,4 @@ class Plugin(metaclass=ABCMeta):
         self.report_defaults = report_defaults if report_defaults is not None else {}
         self.kwargs = kwargs
         # some post init processing
-        self.__post__init__()
+        self.__post__init__()  # lgtm [py/init-calls-subclass]

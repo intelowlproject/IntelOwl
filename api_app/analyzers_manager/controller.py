@@ -34,13 +34,14 @@ def filter_analyzers(serialized_data: Dict, warnings: List) -> List[str]:
 
     # read config
     analyzer_dataclasses = AnalyzerConfigSerializer.get_as_dataclasses()
-    all_analyzer_names: List[str] = list(analyzer_dataclasses.keys())
+    all_analyzer_names = list(analyzer_dataclasses.keys())
+    selected_analyzers: List[str] = []
     if run_all:
         # select all
-        selected_analyzers: List[str] = all_analyzer_names
+        selected_analyzers.extend(all_analyzer_names)
     else:
         # select the ones requested
-        selected_analyzers: List[str] = analyzers_requested
+        selected_analyzers.extend(analyzers_requested)
 
     for a_name in selected_analyzers:
         try:
@@ -237,12 +238,12 @@ def run_analyzer(
     job_id: int, config_dict: dict, report_defaults: dict
 ) -> AnalyzerReport:
     config = AnalyzerConfigSerializer.dict_to_dataclass(config_dict)
-    klass = None
-    report = None
+    klass: BaseAnalyzerMixin = None
+    report: AnalyzerReport = None
     try:
         cls_path = config.get_full_import_path()
         try:
-            klass: BaseAnalyzerMixin = import_string(cls_path)
+            klass = import_string(cls_path)
         except ImportError:
             raise Exception(f"Class: {cls_path} couldn't be imported")
         # else

@@ -24,4 +24,4 @@ class Migration(migrations.Migration):
         ("durin", "0001_initial"),
     ]
 
-    operations = [migrations.RunPython(create_default_clients)]
+    operations = [migrations.RunPython(create_default_clients, migrations.RunPython.noop)]

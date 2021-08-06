@@ -88,11 +88,9 @@ After having written the new python module, you have to remember to:
   Please see [Analyzers customization section](https://intelowl.readthedocs.io/en/latest/Usage.html#analyzers-customization) to get the explanation of the other available keys.
 
 
-3. Add required unit tests in the [tests](https://github.com/intelowlproject/IntelOwl/blob/master/tests) folder. Then follow the [Test](./Tests.md) guide to start testing.
+3. Add the new analyzer in the lists in the docs: [Usage](./Usage.md). Also, if the analyzer provides additional optional configuration, add the available options here: [Advanced-Usage](./Advanced-Usage.md)
 
-4. Add the new analyzer in the lists in the docs: [Usage](./Usage.md). Also, if the analyzer provides additional optional configuration, add the available options here: [Advanced-Usage](./Advanced-Usage.md)
-
-5. Ultimately, add the required secrets in the files `docker/env_file_app_template`, `docker/env_file_app_ci` and in the `docs/Installation.md`.
+4. Ultimately, add the required secrets in the files `docker/env_file_app_template`, `docker/env_file_app_ci` and in the `docs/Installation.md`.
 
 5. In the Pull Request remember to provide some real world examples (screenshots and raw JSON results) of some successful executions of the analyzer to let us understand how it would work.
 

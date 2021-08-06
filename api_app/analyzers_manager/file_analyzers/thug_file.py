@@ -2,7 +2,6 @@
 # See the file 'LICENSE' for copying permission.
 
 import secrets
-from api_app.helpers import get_binary
 from api_app.analyzers_manager.classes import FileAnalyzer, DockerBasedAnalyzer
 from ..observable_analyzers.thug_url import ThugUrl
 
@@ -23,7 +22,7 @@ class ThugFile(FileAnalyzer, DockerBasedAnalyzer):
         fname = str(self.filename).replace("/", "_").replace(" ", "_")
         tmp_dir = f"{fname}_{secrets.token_hex(4)}"
         # get the file to send
-        binary = get_binary(self.job_id)
+        binary = self.read_file_bytes()
         # append final arguments,
         # -n -> output directory
         # -l -> the local file to analyze

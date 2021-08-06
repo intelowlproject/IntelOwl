@@ -1,16 +1,15 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-from os import remove, path
+import os
+import hashlib
 
 from django.db import models
 from django.db.models.signals import pre_delete
 from django.contrib.postgres import fields as pg_fields
 from django.utils import timezone
+from django.utils.functional import cached_property
 from django.dispatch import receiver
-
-
-from .exceptions import AnalyzerRunException
 
 
 def file_directory_path(instance, filename):
@@ -77,17 +76,18 @@ class Job(models.Model):
     file = models.FileField(blank=True, upload_to=file_directory_path)
     tags = models.ManyToManyField(Tag, related_name="jobs", blank=True)
 
-    @classmethod
-    def object_by_job_id(cls, job_id, transaction=False):
-        try:
-            if transaction:
-                job_object = cls.objects.select_for_update().get(id=job_id)
-            else:
-                job_object = cls.objects.get(id=job_id)
-        except cls.DoesNotExist:
-            raise AnalyzerRunException(f"No Job with ID:{job_id} retrieved")
+    def __str__(self):
+        if self.is_sample:
+            return f'Job(#{self.pk}, "{self.file_name}")'
+        return f'Job(#{self.pk}, "{self.observable_name}")'
 
-        return job_object
+    @cached_property
+    def sha256(self) -> str:
+        return hashlib.sha256(self.file.read()).hexdigest()
+
+    @cached_property
+    def sha1(self) -> str:
+        return hashlib.sha1(self.file.read()).hexdigest()
 
     def update_status(self, status: str, save=True):
         self.status = status
@@ -123,14 +123,9 @@ class Job(models.Model):
             **aggregators,
         )
 
-    def __str__(self):
-        if self.is_sample:
-            return f'Job(#{self.pk}, "{self.file_name}")'
-        return f'Job(#{self.pk}, "{self.observable_name}")'
-
 
 @receiver(pre_delete, sender=Job)
 def delete_file(sender, instance, **kwargs):
     if instance.file:
-        if path.isfile(instance.file.path):
-            remove(instance.file.path)
+        if os.path.isfile(instance.file.path):
+            os.remove(instance.file.path)

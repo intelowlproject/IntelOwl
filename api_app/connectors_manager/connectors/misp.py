@@ -3,7 +3,6 @@
 
 from django.conf import settings
 
-import hashlib
 import pymisp
 from typing import List
 
@@ -55,21 +54,19 @@ class MISP(Connector):
     @property
     def _base_attr_obj(self) -> pymisp.MISPAttribute:
         if self._job.is_sample:
-            type = INTELOWL_MISP_TYPE_MAP["file"]
-            binary = helpers.get_binary(self.job_id)
-            md5 = hashlib.md5(binary).hexdigest()
-            value = f"{self._job.file_name}|{md5}"
+            _type = INTELOWL_MISP_TYPE_MAP["file"]
+            value = f"{self._job.file_name}|{self._job.md5}"
         else:
-            type = self._job.observable_classification
+            _type = self._job.observable_classification
             value = self._job.observable_name
-            if type == "hash":
+            if _type == "hash":
                 matched_type = helpers.get_hash_type(value)
                 matched_type.replace("-", "")  # convert sha-x to shax
-                type = matched_type if matched_type is not None else "text"
+                _type = matched_type if matched_type is not None else "text"
             else:
-                type = INTELOWL_MISP_TYPE_MAP[type]
+                _type = INTELOWL_MISP_TYPE_MAP[_type]
 
-        obj = self._get_attr_obj(type, value)
+        obj = self._get_attr_obj(_type, value)
         obj.comment = f"Analyzers Executed: {', '.join(self._job.analyzers_to_execute)}"
         return obj
 

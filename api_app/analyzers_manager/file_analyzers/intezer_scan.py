@@ -9,7 +9,7 @@ import logging
 
 from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager.classes import FileAnalyzer
-from api_app.helpers import get_now_date_only, get_binary
+from api_app.helpers import get_now_date_only
 
 from tests.mock_utils import (
     patch,
@@ -63,7 +63,7 @@ class IntezerScan(FileAnalyzer):
         session.headers["Authorization"] = f"Bearer {intezer_token}"
 
         name_to_send = self.filename if self.filename else self.md5
-        binary = get_binary(self.job_id)
+        binary = self.read_file_bytes()
         files = {"file": (name_to_send, binary)}
         logger.info(f"intezer md5 {self.md5} sending sample for analysis")
         response = session.post(self.base_url + "/analyze", files=files)

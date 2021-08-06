@@ -198,7 +198,7 @@ def job_cleanup(job: Job) -> None:
                 status_to_set = "reported_without_fails"
             elif stats["failed"] == stats["all"]:
                 status_to_set = "failed"
-            elif stats["failed"] >= 1:
+            elif stats["failed"] >= 1 or stats["killed"] >= 1:
                 status_to_set = "reported_with_fails"
             elif stats["killed"] == stats["all"]:
                 status_to_set = "killed"

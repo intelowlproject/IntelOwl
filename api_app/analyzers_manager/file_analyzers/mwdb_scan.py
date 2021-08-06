@@ -7,23 +7,11 @@ import mwdblib
 import logging
 
 from api_app.exceptions import AnalyzerRunException
-from api_app.helpers import get_binary
 from api_app.analyzers_manager.classes import FileAnalyzer
 
 from tests.mock_utils import patch, if_mock_connections, MagicMock
 
 logger = logging.getLogger(__name__)
-
-
-def mocked_mwdb_response(*args, **kwargs):
-    attrs = {"data": {"id": "id_test"}, "metakeys": {"karton": "test_analysis"}}
-    fileInfo = MagicMock()
-    fileInfo.configure_mock(**attrs)
-    QueryResponse = MagicMock()
-    attrs = {"query_file.return_value": fileInfo}
-    QueryResponse.configure_mock(**attrs)
-    Response = MagicMock(return_value=QueryResponse)
-    return Response.return_value
 
 
 class MWDB_Scan(FileAnalyzer):
@@ -37,9 +25,10 @@ class MWDB_Scan(FileAnalyzer):
         return "karton" in file_info.metakeys.keys()
 
     def run(self):
-        mwdb = mwdblib.MWDB(api_key=self.__api_key)
-        binary = get_binary(self.job_id)
+        binary = self.read_file_bytes()
         query = str(hashlib.sha256(binary).hexdigest())
+
+        mwdb = mwdblib.MWDB(api_key=self.__api_key)
 
         if self.upload_file:
             logger.info(f"mwdb_scan uploading sample: {self.md5}")
@@ -69,6 +58,16 @@ class MWDB_Scan(FileAnalyzer):
 
     @classmethod
     def _monkeypatch(cls):
+        def mocked_mwdb_response(*args, **kwargs):
+            attrs = {"data": {"id": "id_test"}, "metakeys": {"karton": "test_analysis"}}
+            fileInfo = MagicMock()
+            fileInfo.configure_mock(**attrs)
+            QueryResponse = MagicMock()
+            attrs = {"query_file.return_value": fileInfo}
+            QueryResponse.configure_mock(**attrs)
+            Response = MagicMock(return_value=QueryResponse)
+            return Response.return_value
+
         patches = [
             if_mock_connections(
                 patch(

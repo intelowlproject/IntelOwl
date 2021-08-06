@@ -62,7 +62,11 @@ class OpenCTI(classes.Connector):
         observable_data = {"type": self.get_observable_type()}
         if self._job.is_sample:
             observable_data["name"] = self._job.file_name
-            observable_data["hashes"] = helpers.generate_hashes(self.job_id)
+            observable_data["hashes"] = {
+                "md5": self._job.md5,
+                "sha-1": self._job.sha1,
+                "sha-256": self._job.sha256,
+            }
         elif (
             self._job.observable_classification == "hash"
             and observable_data["type"] == "file"

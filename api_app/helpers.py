@@ -3,16 +3,12 @@
 
 # general helper functions used by the Django API
 
-import json
 import logging
 import ipaddress
-import hashlib
 import re
 from magic import from_buffer as magic_from_buffer
 
 from django.utils import timezone
-
-from . import models
 
 logger = logging.getLogger(__name__)
 
@@ -23,12 +19,6 @@ def get_now_date_only():
 
 def get_now():
     return timezone.now()
-
-
-def get_analyzer_config():
-    with open("/opt/deploy/configuration/analyzer_config.json") as f:
-        analyzers_config = json.load(f)
-    return analyzers_config
 
 
 def calculate_mimetype(file_pointer, file_name) -> str:
@@ -50,35 +40,6 @@ def calculate_mimetype(file_pointer, file_name) -> str:
         mimetype = magic_from_buffer(buffer, mime=True)
 
     return mimetype
-
-
-def get_binary(job_id, job_object=None):
-    if not job_object:
-        job_object = models.Job.object_by_job_id(job_id)
-    logger.info(f"getting binary for job_id {job_id}")
-    job_file = job_object.file
-    logger.info(f"got job_file {job_file} for job_id {job_id}")
-
-    binary = job_file.read()
-    return binary
-
-
-def generate_sha256(job_id):
-    binary = get_binary(job_id)
-    return hashlib.sha256(binary).hexdigest()
-
-
-def generate_hashes(job_id):
-    """
-    Returns hashes of job sample
-    Formats: md5, sha1, sha256
-    """
-    binary = get_binary(job_id)
-    return {
-        "md5": hashlib.md5(binary).hexdigest(),
-        "sha-1": hashlib.sha1(binary).hexdigest(),
-        "sha-256": hashlib.sha256(binary).hexdigest(),
-    }
 
 
 def get_ip_version(ip_value):

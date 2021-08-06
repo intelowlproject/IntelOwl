@@ -1,7 +1,6 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-from api_app.helpers import get_binary
 from api_app.analyzers_manager.classes import FileAnalyzer, DockerBasedAnalyzer
 
 
@@ -18,7 +17,7 @@ class Manalyze(FileAnalyzer, DockerBasedAnalyzer):
 
     def run(self):
         # get binary
-        binary = get_binary(self.job_id)
+        binary = self.read_file_bytes()
         # make request data
         fname = str(self.filename).replace("/", "_").replace(" ", "_")
         args = [f"@{fname}", "--output", "json"]

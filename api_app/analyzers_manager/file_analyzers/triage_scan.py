@@ -6,7 +6,6 @@ import logging
 import requests
 
 from api_app.exceptions import AnalyzerRunException, AnalyzerConfigurationException
-from api_app.helpers import get_binary
 from api_app.analyzers_manager import classes
 
 from tests.mock_utils import patch, if_mock_connections, MockResponse
@@ -40,7 +39,7 @@ class TriageScanFile(classes.FileAnalyzer):
         self.headers = {"Authorization": f"Bearer {self.__api_key}"}
 
         name_to_send = self.filename if self.filename else self.md5
-        binary = get_binary(self.job_id)
+        binary = self.read_file_bytes()
         files = {
             "file": (name_to_send, binary),
             "_json": (None, b'{"kind": "file", "interactive": false}'),

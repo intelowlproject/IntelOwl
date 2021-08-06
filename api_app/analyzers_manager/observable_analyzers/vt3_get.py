@@ -93,7 +93,7 @@ def vt_get_report(
                     logger.info(f"forcing VT active scan for hash {observable_name}")
                     result = vt3_scan.vt_scan_file(api_key, observable_name, job_id)
                     result["performed_active_scan"] = True
-                    break
+                break
             else:
                 # we should consider the chance that the very sample was already...
                 # ...sent and VT is already analyzing it.

@@ -1,11 +1,8 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-import sys
-
 from django.conf import settings
 
-from cache_memoize import cache_memoize
 from pycti.api.opencti_api_client import File
 import pycti
 
@@ -79,9 +76,8 @@ class OpenCTI(classes.Connector):
         return observable_data
 
     @property
-    @cache_memoize(timeout=sys.maxsize)
-    def organization_id(self) -> str:  # called only once (cached indefinitely)
-        # Create author (if not exists)
+    def organization_id(self) -> str:
+        # Create author (if not exists); else update
         org = pycti.Identity(self.opencti_instance).create(
             type="Organization",
             name="IntelOwl",
@@ -91,17 +87,17 @@ class OpenCTI(classes.Connector):
                 " domain from a single API at scale. [Visit the project on GitHub]"
                 "(https://github.com/intelowlproject/IntelOwl/)"
             ),
+            update=True,  # just in case the description is updated in future
         )
         return org["id"]
 
     @property
-    @cache_memoize(timeout=sys.maxsize)
-    def marking_definition_id(self) -> str:  # called only once (cached indefinitely)
+    def marking_definition_id(self) -> str:
         # Create the marking definition (if not exists)
         md = pycti.MarkingDefinition(self.opencti_instance).create(
             definition_type="TLP",
             definition=f"TLP:{self.tlp['type'].upper()}",
-            x_opencti_color=self.tlp["color"].upper(),
+            x_opencti_color=self.tlp["color"].lower(),
             x_opencti_order=self.tlp["x_opencti_order"],
         )
         return md["id"]

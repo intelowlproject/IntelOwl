@@ -39,8 +39,8 @@
       },
       "tlp": {
         "type": "white",
-        "color": "#FFFFFF",
-        "x_opencti_order": 0
+        "color": "#ffffff",
+        "x_opencti_order": 1
       }
     },
     "secrets": {

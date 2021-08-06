@@ -64,12 +64,13 @@ class MISP(Connector):
             value = self._job.observable_name
             if type == "hash":
                 matched_type = helpers.get_hash_type(value)
+                matched_type.replace("-", "")  # convert sha-x to shax
                 type = matched_type if matched_type is not None else "text"
             else:
                 type = INTELOWL_MISP_TYPE_MAP[type]
 
         obj = self._get_attr_obj(type, value)
-        obj.comment = f"Analyzers Executed: {self._job.analyzers_to_execute}"
+        obj.comment = f"Analyzers Executed: {', '.join(self._job.analyzers_to_execute)}"
         return obj
 
     @property

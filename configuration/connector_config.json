@@ -1,6 +1,6 @@
 {
   "MISP": {
-    "disabled": false,
+    "disabled": true,
     "description": "MISP Connector",
     "python_module": "misp.MISP",
     "config": {
@@ -27,7 +27,7 @@
     }
   },
   "OpenCTI": {
-    "disabled": false,
+    "disabled": true,
     "description": "OpenCTI Connector",
     "python_module": "opencti.OpenCTI",
     "config": {

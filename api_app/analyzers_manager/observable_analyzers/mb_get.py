@@ -13,9 +13,13 @@ class MB_GET(classes.ObservableAnalyzer):
     sample_url: str = "https://bazaar.abuse.ch/sample/"
 
     def run(self):
-        post_data = {"query": "get_info", "hash": self.observable_name}
+        return self.query_mb_api(observable_name=self.observable_name)
 
-        response = requests.post(self.url, data=post_data)
+    @classmethod
+    def query_mb_api(cls, observable_name: str) -> dict:
+        post_data = {"query": "get_info", "hash": observable_name}
+
+        response = requests.post(cls.url, data=post_data)
         response.raise_for_status()
 
         result = response.json()
@@ -23,7 +27,7 @@ class MB_GET(classes.ObservableAnalyzer):
         if result_data and isinstance(result_data, list):
             sha256 = result_data[0].get("sha256_hash", "")
             if sha256:
-                result["permalink"] = f"{self.sample_url}{sha256}"
+                result["permalink"] = f"{cls.sample_url}{sha256}"
 
         return result
 
@@ -32,7 +36,7 @@ class MB_GET(classes.ObservableAnalyzer):
         patches = [
             if_mock_connections(
                 patch(
-                    "requests.get",
+                    "requests.post",
                     return_value=MockResponse({"data": [{"sha256_hash": "test"}]}, 200),
                 ),
             )

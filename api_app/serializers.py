@@ -5,6 +5,7 @@ import json
 
 from django.contrib.auth.models import Group
 from rest_framework import serializers
+from rest_flex_fields import FlexFieldsModelSerializer
 from rest_framework_guardian.serializers import ObjectPermissionsAssignmentMixin
 
 from api_app.models import Job, Tag
@@ -88,7 +89,7 @@ class JobListSerializer(serializers.ModelSerializer):
         return f"{n1}/{n2}"
 
 
-class JobSerializer(serializers.ModelSerializer):
+class JobSerializer(FlexFieldsModelSerializer):
     """
     Job model's serializer.
     Used for retrieve()

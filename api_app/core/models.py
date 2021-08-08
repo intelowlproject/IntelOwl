@@ -36,7 +36,7 @@ class AbstractReport(models.Model):
 
     # properties
     @property
-    def process_time(self):
+    def process_time(self) -> float:
         return self.end_time - self.start_time
 
     def update_status(self, status: str, save=True):

@@ -70,7 +70,7 @@ class JobListSerializer(serializers.ModelSerializer):
     no_of_analyzers_executed = serializers.SerializerMethodField()
     no_of_connectors_executed = serializers.SerializerMethodField()
 
-    def get_process_time(self, obj: Job):
+    def get_process_time(self, obj: Job) -> float:
         if not obj.finished_analysis_time:
             return None
         t = obj.finished_analysis_time - obj.received_request_time

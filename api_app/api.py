@@ -15,7 +15,7 @@ from django.http import HttpResponse
 from django.db.models import Q
 from django.conf import settings
 from rest_framework.response import Response
-from rest_framework import serializers as BaseSerializer
+from rest_framework import serializers as rfs
 from rest_framework import status, viewsets, mixins
 from rest_framework.decorators import api_view, action
 from rest_framework.permissions import DjangoObjectPermissions
@@ -137,21 +137,21 @@ def _analysis_request(
         200: inline_serializer(
             name="AskAnalysisAvailabilitySuccessResponse",
             fields={
-                "status": BaseSerializer.StringRelatedField(),
-                "job_id": BaseSerializer.StringRelatedField(),
+                "status": rfs.StringRelatedField(),
+                "job_id": rfs.StringRelatedField(),
                 "analyzers_to_execute": OpenApiTypes.OBJECT,
             },
         ),
         400: inline_serializer(
             name="AskAnalysisAvailabilityInsufficientDataResponse",
             fields={
-                "error": BaseSerializer.StringRelatedField(),
+                "error": rfs.StringRelatedField(),
             },
         ),
         500: inline_serializer(
             name="AskAnalysisAvailabilityErrorResponse",
             fields={
-                "detail": BaseSerializer.StringRelatedField(),
+                "detail": rfs.StringRelatedField(),
             },
         ),
     },
@@ -244,8 +244,8 @@ def ask_analysis_availability(request):
         200: inline_serializer(
             "FileAnalysisResponseSerializer",
             fields={
-                "status": BaseSerializer.StringRelatedField(),
-                "job_id": BaseSerializer.IntegerField(),
+                "status": rfs.StringRelatedField(),
+                "job_id": rfs.IntegerField(),
                 "warnings": OpenApiTypes.OBJECT,
                 "analyzers_running": OpenApiTypes.OBJECT,
             },
@@ -265,8 +265,8 @@ def analyze_file(request):
         200: inline_serializer(
             "ObservableAnalysisResponseSerializer",
             fields={
-                "status": BaseSerializer.StringRelatedField(),
-                "job_id": BaseSerializer.IntegerField(),
+                "status": rfs.StringRelatedField(),
+                "job_id": rfs.IntegerField(),
                 "warnings": OpenApiTypes.OBJECT,
                 "analyzers_running": OpenApiTypes.OBJECT,
             },
@@ -281,7 +281,7 @@ def analyze_observable(request):
 
 @add_docs(
     description="""
-    REST endpoint to fetch list of jobs or retrieve a job with job ID.
+    REST endpoint to fetch list of jobs or retrieve/delete a job with job ID.
     Requires authentication.
     """
 )
@@ -314,6 +314,14 @@ class JobViewSet(
         except (KeyError, AttributeError):
             return super(JobViewSet, self).get_serializer_class()
 
+    @add_docs(
+        description="Kill running job by closing celery tasks and marking as killed",
+        request=None,
+        responses={
+            204: None,
+            400: None,
+        },
+    )
     @action(detail=True, methods=["patch"])
     @method_decorator(
         [
@@ -321,15 +329,6 @@ class JobViewSet(
         ]
     )
     def kill(self, request, pk=None):
-        """
-        Kill running job by closing celery tasks and marking as killed
-
-        :param url: pk (job_id)
-        :returns:
-         - 200 - if killed
-         - 404 - not found
-         - 403 - forbidden, 400 bad request
-        """
         logger.info(
             f"kill running job received request from {str(request.user)} "
             f"-- (job_id:{pk})."
@@ -348,18 +347,18 @@ class JobViewSet(
         # set job status
         job.update_status("killed")
 
-        return Response(status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @add_docs(
         description="Download a sample from a given Job ID.",
         request=None,
-        responses={200: None, 400: None},
+        responses={
+            204: None,
+            400: None,
+        },
     )
     @action(detail=True, methods=["get"])
     def download_sample(self, request, pk=None):
-        """
-        Download a sample from a given Job ID.
-        """
         # get job object
         job = self.get_object()
 

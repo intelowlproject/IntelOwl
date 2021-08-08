@@ -6,6 +6,9 @@ from rest_framework.exceptions import (
     PermissionDenied,
 )
 from rest_framework.response import Response
+from drf_spectacular.utils import (
+    extend_schema as add_docs,
+)
 from abc import ABCMeta, abstractmethod
 
 from intel_owl.celery import app as celery_app
@@ -49,20 +52,16 @@ class PluginActionViewSet(viewsets.ViewSet, metaclass=ABCMeta):
         runtime_configuration = {report.name: report.runtime_configuration}
         return plugins_to_execute, runtime_configuration
 
+    @add_docs(
+        description="Kill running plugin by closing celery task and marking as killed",
+        request=None,
+        responses={
+            204: None,
+            400: None,
+        },
+    )
     @action(detail=False, methods=["patch"])
     def kill(self, request, job_id, name):
-        """
-        Kill running plugin by closing celery task and marking as killed
-
-        :params url:
-         - job_id
-         - name (plugin name)
-        :returns:
-         - 204 - if killed
-         - 404 - not found
-         - 403 - forbidden, 400 bad request
-        """
-
         # get report object or raise 404
         report = self.get_object(job_id, name)
         if not request.user.has_perm("api_app.change_job", report.job):
@@ -76,22 +75,16 @@ class PluginActionViewSet(viewsets.ViewSet, metaclass=ABCMeta):
         self.perform_kill(report)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+    @add_docs(
+        description="Retry a plugin run if it failed/was killed previously",
+        request=None,
+        responses={
+            204: None,
+            400: None,
+        },
+    )
     @action(detail=False, methods=["patch"])
     def retry(self, request, job_id, name):
-        """
-        Retry a plugin run if it failed/was killed previously
-         regenerates the args required and starts a new celery task
-
-        :params url:
-         - job_id
-         - name (plugin name)
-        :returns:
-         - 204 - if success
-         - 404 - not found
-         - 403 - forbidden
-         - 400 - bad request
-        """
-
         # get report object or raise 404
         report = self.get_object(job_id, name)
         if not request.user.has_perm("api_app.change_job", report.job):

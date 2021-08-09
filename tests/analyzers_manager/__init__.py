@@ -128,7 +128,7 @@ class _AbstractAnalyzersScriptTestCase(TransactionTestCase):
                     msg="all `analyzer_reports` status must be `SUCCESS`",
                 )
                 # check connectors status
-                if connectors_stats["all"] >= 0 and connectors_stats["running"] == 0:
+                if connectors_stats["all"] > 0 and connectors_stats["running"] == 0:
                     self.assertEqual(
                         len(self.test_job.connectors_to_execute),
                         self.test_job.connector_reports.count(),

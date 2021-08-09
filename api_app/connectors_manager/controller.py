@@ -47,8 +47,9 @@ def start_connectors(
 
     # loop over and create task signatures
     for connector_name, cc in connectors_config.items():
-        if not cc.is_ready_to_use:
-            # skip this connector
+
+        # if disabled or unconfigured (this check is bypassed in TEST_MODE)
+        if not cc.is_ready_to_use and not settings.TEST_MODE:
             continue
 
         # get runtime_configuration if any specified for this analyzer

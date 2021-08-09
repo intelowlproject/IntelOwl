@@ -258,11 +258,11 @@ class JobViewsetTests(TestCase):
         self.assertEqual(response.status_code, 404)
         self.assertEqual(models.Job.objects.count(), 1)
 
-    def test_kill_job_by_id_200(self):
+    def test_kill_job_by_id_204(self):
         job = models.Job.objects.create(status="running")
         self.assertEqual(job.status, "running")
         response = self.client.patch(f"/api/jobs/{job.id}/kill")
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 204)
         job.refresh_from_db()
         self.assertEqual(job.status, "killed")
 

@@ -178,8 +178,33 @@ The following are all the keys that you can change without touching the source c
 * `soft_time_limit`: this is the maximum time (in seconds) of execution for an analyzer. Once reached, the task will be killed (or managed in the code by a custom Exception). Default 300s
 * `queue`: this takes effects only when [multi-queue](https://intelowl.readthedocs.io/en/develop/Advanced-Usage.html#multi-queue) is enabled. Choose which celery worker would execute the task: `local` (ideal for tasks that leverage local applications like Yara), `long` (ideal for long tasks) or `default` (ideal for simple webAPI-based analyzers).
 
-Also, you can change the name of every available analyzer based on your wishes.
+Also, you can change the name of every available analyzer as you wish.
 
 Changing other keys will break the analyzer. In that case, you should think about create a new python module or to modify an existing one.
+
+To contribute to the project, see [Contribute](./Contribute.md)
+
+## Available Connectors
+
+### Get all available connectors
+You can programmatically retrieve all the available connectors with the official client [PyIntelOwl](https://github.com/intelowlproject/pyintelowl).
+
+### Connectors list
+
+The following is the list of the available connectors:
+* `MISP`: automatically creates an event on your MISP instance, linking the successful analysis on IntelOwl.
+* `OpenCTI`: automatically creates an observable and a linked report on your OpenCTI instance, linking the the successful analysis on IntelOwl.
+
+## Connectors customization
+Connectors being optional are `disabled` by default. You can enable them by changing the configuration values inside `configuration/connector_config.json`. This file is mounted as a docker volume, so you won't need to rebuild the image.
+
+The following are all the keys that you can change without touching the source code:
+* `disabled`: (similar to analyzers) use this to enable/disable certain connectors, the enabled connectors are called after successful analysis.
+* `soft_time_limit`: (similar to analyzers) this is the maximum time (in seconds) of execution for an connector. Once reached, the task will be killed (or managed in the **code** by a custom Exception). Default 300s
+* `queue`: (similar to analyzers) this takes effects only when [multi-queue](https://intelowl.readthedocs.io/en/develop/Advanced-Usage.html#multi-queue) is enabled. Choose which celery worker would execute the task: `local` (ideal for tasks that leverage local applications), `long` (ideal for long tasks) or `default` (ideal for simple webAPI-based connectors).
+
+Also, you can change the name of every available connector as you wish.
+
+Changing other keys will break the connector. In that case, you should think about create a new python module or to modify an existing one.
 
 To contribute to the project, see [Contribute](./Contribute.md)

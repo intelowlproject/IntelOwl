@@ -1,6 +1,6 @@
 # Contribute
 
-Intel Owl was designed to ease the addition of new analyzers. With a simple python script you can integrate your own engine or integrate an external service in a short time.
+Intel Owl was designed to ease the addition of new analyzers/connectors. With a simple python script you can integrate your own engine or integrate an external service in a short time.
 
 > Wish to contribute to the web interface ? See [IntelOwl-ng](https://github.com/intelowlproject/IntelOwl-ng).
 
@@ -44,9 +44,9 @@ This means that you still need to rebuild everything when, for example, you chan
 
 ## How to add a new analyzer
 You may want to look at a few existing examples to start to build a new one, such as:
-- [shodan.py](https://github.com/intelowlproject/IntelOwl/blob/develop/api_app/analyzers_manager/observable_analyzers/shodan.py), if you are creating an observable analyzer
-- [intezer_scan.py](https://github.com/intelowlproject/IntelOwl/blob/develop/api_app/analyzers_manager/file_analyzers/intezer_scan.py), if you are creating a file analyzer
-- [peframe.py](https://github.com/intelowlproject/IntelOwl/blob/develop/api_app/analyzers_manager/file_analyzers/peframe.py), if you are creating a [docker based analyzer](#integrating-a-docker-based-analyzer)
+- [shodan.py](https://github.com/intelowlproject/IntelOwl/blob/master/api_app/analyzers_manager/observable_analyzers/shodan.py), if you are creating an observable analyzer
+- [intezer_scan.py](https://github.com/intelowlproject/IntelOwl/blob/master/api_app/analyzers_manager/file_analyzers/intezer_scan.py), if you are creating a file analyzer
+- [peframe.py](https://github.com/intelowlproject/IntelOwl/blob/master/api_app/analyzers_manager/file_analyzers/peframe.py), if you are creating a [docker based analyzer](#integrating-a-docker-based-analyzer)
 
 After having written the new python module, you have to remember to:
 1. Put the module in the `file_analyzers` or `observable_analyzers` directory based on what it can analyze
@@ -85,7 +85,7 @@ After having written the new python module, you have to remember to:
   In that way you can create more than one analyzer for a specific python module, each one based on different configurations.
   MISP and Yara Analyzers are a good example of this use case: for instance, you can use different analyzers for different MISP instances.
 
-  Please see [Analyzers customization section](https://intelowl.readthedocs.io/en/latest/Usage.html#analyzers-customization) to get the explanation of the other available keys.
+  Please see [Analyzers customization section](./Usage.md#analyzers-customization) to get the explanation of the other available keys.
 
 
 3. Add the new analyzer in the lists in the docs: [Usage](./Usage.md). Also, if the analyzer provides additional optional configuration, add the available options here: [Advanced-Usage](./Advanced-Usage.md)
@@ -103,6 +103,46 @@ which can be queried from the main Django API.
 * Two docker-compose files `compose.yml` for production and `compose-tests.yml` for testing should be placed under `./integrations/<analyzer_name>`.
 * If your docker-image uses any environment variables, add them in the `docker/env_file_integrations_template`.
 * Rest of the steps remain same as given under "How to add a new analyzer".
+
+## How to add a new connector
+You may want to look at a few existing examples to start to build a new one:
+- [misp.py](https://github.com/intelowlproject/IntelOwl/blob/master/api_app/connectors_manager/connectors/misp.py)
+- [opencti.py](https://github.com/intelowlproject/IntelOwl/blob/master/api_app/connectors_manager/connectors/opencti.py)
+
+After having written the new python module, you have to remember to:
+1. Put the module in the `connectors` directory
+2. Add a new entry in the [connector configuration](https://github.com/intelowlproject/IntelOwl/blob/master/configuration/connector_config.json) following alphabetical order:
+  
+  Example:
+  ```javascript
+  "Connector_Name": {
+      "python_module": "<module_name>.<class_name>",
+      "description": "very cool connector",
+      "config": {
+        "soft_time_limit": 100,
+        "queue": "default",
+      }
+      "secrets": {
+           "env_var_key": "CONNECTOR_SPECIAL_KEY",
+           "type": "string",
+           "required": true,
+           "default": null,
+           "description": "API Key for the connector",
+      }
+  },
+  ```
+  
+  Remember to set at least:
+  * `python_module`: name of the task that the connector must launch
+  * `description`: little description of the connector
+  
+  Similar to analyzers, the `config` can be used in case the new connector uses specific configuration arguments and `secrets` can be used to declare any secrets the connector requires in order to run (Example: API Key).
+
+  Please see [Connectors customization section](./Usage.md#connectors-customization) to get the explanation of the other available keys.
+
+
+3. Add the new connector in the lists in the docs: [Usage](./Usage.md). Also, if the connector provides additional optional configuration, add the available options here: [Advanced-Usage](./Advanced-Usage.md)
+4. Follow steps 4-5 of [How to add a new analyzer](./Contribute.md#how-to-add-a-new-analyzer)
 
 ## Create a pull request
 

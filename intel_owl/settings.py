@@ -105,6 +105,12 @@ REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
+# DRF Spectacular
+SPECTACULAR_SETTINGS = {
+    "TITLE": "IntelOwl API specification",
+    "VERSION": "2.5.0",
+}
+
 # Django-Rest-Durin
 REST_DURIN = {
     "DEFAULT_TOKEN_TTL": timedelta(days=14),

@@ -6,6 +6,7 @@ import sys
 import json
 import logging
 import hashlib
+from typing import List, TypedDict
 
 from django.conf import settings
 from rest_framework import serializers as rfs
@@ -24,6 +25,12 @@ DATA_TYPE_MAPPING = {
     "string": str,
     "bool": bool,
 }
+
+
+class ConfigVerificationType(TypedDict):
+    configured: bool
+    error_message: str
+    missing_secrets: List[str]
 
 
 class BaseField(rfs.Field):
@@ -92,7 +99,7 @@ class AbstractConfigSerializer(rfs.Serializer):
             self._is_valid_flag = True
         return ret
 
-    def get_verification(self, raw_instance):
+    def get_verification(self, raw_instance) -> ConfigVerificationType:
         # raw instance because input is json and not django model object
         errors = self._check_secrets(raw_instance["secrets"])
         missing_secrets = list(errors.keys())

@@ -5,7 +5,6 @@ import mwdblib
 import logging
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
-from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager.file_analyzers.mwdb_scan import mocked_mwdb_response
 
 from tests.mock_utils import patch, if_mock_connections

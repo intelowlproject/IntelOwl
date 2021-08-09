@@ -36,6 +36,7 @@ class MWDB_Scan(FileAnalyzer):
         return "karton" in file_info.metakeys.keys()
 
     def run(self):
+        result = {}
         binary = self.read_file_bytes()
         query = str(hashlib.sha256(binary).hexdigest())
 
@@ -67,9 +68,14 @@ class MWDB_Scan(FileAnalyzer):
                 self.report.errors.append(str(exc))
                 self.report.errors.append(err_msg)
                 result["not_found"] = True
+                return result
 
-        result = {"data": file_info.data, "metakeys": file_info.metakeys}
-        result["permalink"] = f"https://mwdb.cert.pl/file/{query}"
+        result.update(
+            data=file_info.data,
+            metakeys=file_info.metakeys,
+            permalink=f"https://mwdb.cert.pl/file/{query}",
+        )
+
         return result
 
     @classmethod

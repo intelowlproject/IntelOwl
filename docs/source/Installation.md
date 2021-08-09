@@ -86,6 +86,7 @@ In the `env_file_app`, configure different variables as explained below.
 
 **Strongly recommended** variable to set:
 * `DJANGO_SECRET`: random 50 chars key, must be unique. If you do not provide one, Intel Owl will automatically set a new secret on every run.
+* `INTELOWL_WEB_CLIENT_DOMAIN` (example: `localhost`/`mywebsite.com`): the web domain of your instance, this is used for generating links to analysis results.
 
 **Optional** variables needed to enable specific analyzers:
 * `ABUSEIPDB_KEY`: AbuseIPDB API key
@@ -122,6 +123,12 @@ In the `env_file_app`, configure different variables as explained below.
 * `MALPEDIA_KEY`: MALPEDIA API KEY ([docs](https://malpedia.caad.fkie.fraunhofer.de/usage/api))
 * `OPENCTI_KEY`: your own OpenCTI instance key
 * `OPENCTI_URL`: your own OpenCTI instance URL
+
+**Optional** variables needed to work with specific connectors:
+* `CONNECTOR_MISP_KEY`: your own MISP instance key to use with `MISP` connector
+* `CONNECTOR_MISP_URL`: your own MISP instance URL to use with `MISP` connector
+* `CONNECTOR_OPENCTI_KEY`: your own OpenCTI instance key to use with `OpenCTI` connector
+* `CONNECTOR_OPENCTI_URL`: your own OpenCTI instance URL to use with `OpenCTI` connector
 
 **Advanced** additional configuration:
 * `OLD_JOBS_RETENTION_DAYS`: Database retention for analysis results (default: 3 days). Change this if you want to keep your old analysis longer in the database.
@@ -170,7 +177,7 @@ There are 3 options to execute the web server:
 
 ### Analyzers configuration (optional)
 In the file `configuration/analyzers_config.json` there is the configuration for all the available analyzers you can run.
-For a complete list of all current available analyzer please look at: [Usage](./Usage.md)
+For a complete list of all current available analyzer please look at: [Usage](./Usage.md#available-analyzers)
 
 You may want to change this configuration to add new analyzers or to change the configuration of some of them.
 
@@ -179,15 +186,26 @@ You just need to remember that it's important that you keep at least the followi
 * `type`: can be `file` or `observable`. It specifies what the analyzer should analyze
 * `python_module`: path to the analyzer class
 
-
 <div class="admonition hint">
 <p class="admonition-title">Hint</p>
-You can see the full list of all available analyzers in the <a href="Usage.html#available-analyzers">Usage.html</a> or <a href="https://intelowlclient.firebaseapp.com/pages/analyzers/table">Live Demo</a>.
+You can see the full list of all available analyzers in the <a href="Usage.html#available-analyzers">Usage.html</a> or <a href="https://intelowlclient.firebaseapp.com/pages/connectors">Live Demo</a>.
 </div>
 
 <div class="admonition hint">
 <p class="admonition-title">Hint</p>
 Some analyzers are kept optional and can easily be enabled. Refer to <a href="Advanced-Usage.html#optional-analyzers">this</a> part of the docs.
+</div>
+
+### Connectors configuration (optional)
+In the file `configuration/connectors_config.json` there is the configuration for all the available connectors you can configure.
+For a complete list of all current available connectors please look at: [Usage](./Usage.md#available-connectors)
+
+Connectors being optional are disabled by default, change this configuration to enable them; add new connectors or customize them.
+The name of the connectors can be changed at every moment based on your wishes.
+
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+You can see the full list of all available connectors in the <a href="Usage.html#available-connectors">Usage.html</a> or <a href="https://intelowlclient.firebaseapp.com/pages/connectors">Live Demo</a>.
 </div>
 
 ## AWS support

@@ -8,6 +8,7 @@ This page includes details about some advanced features that Intel Owl provides 
         - [from the GUI](#from-the-gui)
         - [from Pyintelowl](#from-pyintelowl)
   - [Analyzers with special configuration](#analyzers-with-special-configuration)
+  - [Customization options for connectors](#customization-options-for-connectors)
   - [Elastic Search](#elastic-search)
       - [Kibana](#kibana)
       - [Example Configuration](#example-configuration)
@@ -201,6 +202,17 @@ Some analyzers could require a special configuration:
 You should follow the [official guide](https://cloud.google.com/web-risk/docs/quickstart) for creating the key.
 Then you can copy the generated JSON key file in the directory `configuration` of the project and change its name to `service_account_keyfile.json`.
 This is the default configuration. If you want to customize the name or the location of the file, you can change the environment variable `GOOGLE_APPLICATION_CREDENTIALS` in the `env_file_app` file.
+
+## Customization options for connectors
+Connectors by nature are designed to run independently after each analysis. There is no option to dynamically supply a `runtime_configuration` like analyzers, however you can always change the `configuration/connectors_config.json` as you wish with the following options:
+* `MISP`:
+    * `ssl_check`: (default True), enable SSL certificate server verification. Change this if your MISP instance has not SSL enabled.
+    * `debug`: (default False) enable debug logs
+    * `tlp` (Traffic Light Protocol): (default white) change this as per your organization's threat sharing conventions.
+* `OpenCTI`:
+    * `ssl_verify`: (default `true`), enable SSL certificate server verification. Change this if your OpenCTI instance has not SSL enabled.
+    * `proxies`: (`http` and `https`, default `""`) use these options to pass your request through a proxy server.
+    * `tlp` (Traffic Light Protocol): (default - `type`: white, `color`: #ffffff, `x_opencti_order`: 1) change this as per your organization's threat sharing conventions.
 
 ## Elastic Search
 

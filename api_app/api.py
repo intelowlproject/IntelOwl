@@ -351,12 +351,16 @@ class JobViewSet(
     @add_docs(
         description="Download a sample from a given Job ID.",
         request=None,
-        responses={
-            200: None,
-        },
+        responses={200: OpenApiTypes(7), 400: None},
     )
     @action(detail=True, methods=["get"])
     def download_sample(self, request, pk=None):
+        """
+        Download a sample from a given Job ID.
+
+        :param url: pk (job_id)
+        :returns: bytes
+        """
         # get job object
         job = self.get_object()
 

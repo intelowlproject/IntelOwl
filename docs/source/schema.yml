@@ -372,6 +372,13 @@ paths:
       - durinAuth: []
       responses:
         '200':
+          content:
+            application/json:
+              schema:
+                type: string
+                format: binary
+          description: ''
+        '400':
           description: No response body
   /api/jobs/{id}/kill:
     patch:

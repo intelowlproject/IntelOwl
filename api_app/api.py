@@ -352,6 +352,11 @@ class JobViewSet(
 
         return Response(status=status.HTTP_200_OK)
 
+    @add_docs(
+        description="Download a sample from a given Job ID.",
+        request=None,
+        responses={200: None, 400: None},
+    )
     @action(detail=True, methods=["get"])
     def download_sample(self, request, pk=None):
         """

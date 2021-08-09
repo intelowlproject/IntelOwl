@@ -1,10 +1,11 @@
 {
   "MISP": {
-    "disabled": true,
-    "description": "MISP Connector",
+    "disabled": false,
+    "description": "automatically creates an event on your MISP instance, linking the analysis the successful analysis on IntelOwl",
     "python_module": "misp.MISP",
     "config": {
       "soft_time_limit": 30,
+      "queue": "default",
       "ssl_check": true,
       "debug": false,
       "tlp": "white"
@@ -27,11 +28,12 @@
     }
   },
   "OpenCTI": {
-    "disabled": true,
-    "description": "OpenCTI Connector",
+    "disabled": false,
+    "description": "automatically creates an observable and a linked report on your OpenCTI instance, linking the the successful analysis on IntelOwl",
     "python_module": "opencti.OpenCTI",
     "config": {
       "soft_time_limit": 30,
+      "queue": "default",
       "ssl_verify": true,
       "proxies": {
         "http": "",

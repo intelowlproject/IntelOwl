@@ -8,6 +8,7 @@ This page includes details about some advanced features that Intel Owl provides 
         - [from the GUI](#from-the-gui)
         - [from Pyintelowl](#from-pyintelowl)
   - [Analyzers with special configuration](#analyzers-with-special-configuration)
+  - [Customization options for connectors](#customization-options-for-connectors)
   - [Elastic Search](#elastic-search)
       - [Kibana](#kibana)
       - [Example Configuration](#example-configuration)
@@ -100,11 +101,11 @@ Some analyzers provide the chance to customize the performed analysis based on o
 
 List of some of the analyzers with optional configuration:
 * `VirusTotal_v3_Get_File*`:
-    * `force_active_scan` (default False): if the sample is not already in VT, send the sample and perform a scan
-    * `force_active_scan_if_old` (default False): if the sample is old, it would be rescanned
+    * `force_active_scan` (default `false`): if the sample is not already in VT, send the sample and perform a scan
+    * `force_active_scan_if_old` (default `false`): if the sample is old, it would be rescanned
 * `MISP`:
-    * `ssl_check`: (default True), enable SSL certificate server verification. Change this if your MISP instance has not SSL enabled
-    * `debug`: (default False) enable debug logs
+    * `ssl_check`: (default `true`), enable SSL certificate server verification. Change this if your MISP instance has not SSL enabled
+    * `debug`: (default `false`) enable debug logs
 * `Doc_Info*`:
     * `additional_passwords_to_check`: list of passwords to try when decrypting the document
 * `Thug_URL_Info` and `Thug_HTML_Info` ((defaults can be seen here [analyzer_config.json](https://github.com/intelowlproject/IntelOwl/blob/master/configuration/analyzer_config.json)):
@@ -122,18 +123,18 @@ List of some of the analyzers with optional configuration:
 * `*_DNS` (all DNS resolvers analyzers):
     * `query_type`: query type against the chosen DNS resolver, default is "A"
 * `DNStwist`:
-    * `ssdeep` (default False): enable fuzzy hashing - compare HTML content of original domain with a potentially malicious one and determine similarity.
-    * `mxcheck` (default False): find suspicious mail servers and flag them with SPYING-MX string.
-    * `tld` (default False): check for domains with different TLDs by supplying a dictionary file.
+    * `ssdeep` (default `false`): enable fuzzy hashing - compare HTML content of original domain with a potentially malicious one and determine similarity.
+    * `mxcheck` (default `false`): find suspicious mail servers and flag them with SPYING-MX string.
+    * `tld` (default `false`): check for domains with different TLDs by supplying a dictionary file.
     * `tld_dict` (default abused_tlds.dict): dictionary to use with tld argument. (common_tlds.dict/abused_tlds.dict)
 * `ZoomEye`:
   * `search_type` (defualt host) Choose among `host`, `web`, `both` (both is only available to ZoomEye VIP users)
   * `query`: Follow according to [docs](https://www.zoomeye.org/doc#host-search), but omit `ip`, `hostname`. Eg: `"query": "city:biejing port:21"`
   * `facets`(default: Empty string): A comma-separated list of properties to get summary information on query. Eg: `"facets:app,os"`
   * `page`(default 1): The page number to paging
-  * `history`(default True): To query the history data. 
+  * `history`(default `true`): To query the history data. 
 * `MWDB_Scan`:
-    * `upload_file` (default False): Uploads the file to repository.
+    * `upload_file` (default `false`): Uploads the file to repository.
     * `max_tries` (default 50): Number of retries to perform for polling analysis results.
 * `Triage_Scan` and `Triage_Search`:
   * `endpoint` (default public): choose whether to query on the public or the private endpoint of triage.
@@ -144,7 +145,7 @@ List of some of the analyzers with optional configuration:
   * `arch`(default x86): change system architecture for the emulation 
   * `os`(default windows or linux): change operating system for the emulation 
   * `profile`(default none): add a Qiling [profile](https://docs.qiling.io/en/latest/profile/)
-  * `shellcode`(default false): true if the file is a shellcode 
+  * `shellcode`(default `false`): true if the file is a shellcode 
 * `WiGLE`:
   * `search_type` (default `WiFi Network`). Supported are: `WiFi Network`, `CDMA Network`, `Bluetooth Network`, `GSM/LTE/WCDMA Network`
   * Above mentioned `search_type` is just different routes mentioned in [docs](https://api.wigle.net/swagger#/v3_ALPHA). Also, the string to be passed in input field of generic analyzers have a format. Different variables are separated by semicolons(`;`) and the field-name and value are separated by equals sign(`=`). Example string for search_type `CDMA Network` is `sid=12345;nid=12345;bsid=12345`
@@ -203,6 +204,17 @@ Some analyzers could require a special configuration:
 You should follow the [official guide](https://cloud.google.com/web-risk/docs/quickstart) for creating the key.
 Then you can copy the generated JSON key file in the directory `configuration` of the project and change its name to `service_account_keyfile.json`.
 This is the default configuration. If you want to customize the name or the location of the file, you can change the environment variable `GOOGLE_APPLICATION_CREDENTIALS` in the `env_file_app` file.
+
+## Customization options for connectors
+Connectors by nature are designed to run independently after each analysis. There is no option to dynamically supply a `runtime_configuration` like analyzers, however you can always change the `configuration/connectors_config.json` as you wish with the following options:
+* `MISP`:
+    * `ssl_check`: (default `true`), enable SSL certificate server verification. Change this if your MISP instance has not SSL enabled.
+    * `debug`: (default `false`) enable debug logs
+    * `tlp` (Traffic Light Protocol): (default white) change this as per your organization's threat sharing conventions.
+* `OpenCTI`:
+    * `ssl_verify`: (default `true`), enable SSL certificate server verification. Change this if your OpenCTI instance has not SSL enabled.
+    * `proxies`: (`http` and `https`, default `""`) use these options to pass your request through a proxy server.
+    * `tlp` (Traffic Light Protocol): (default - `type`: white, `color`: #ffffff, `x_opencti_order`: 1) change this as per your organization's threat sharing conventions.
 
 ## Elastic Search
 

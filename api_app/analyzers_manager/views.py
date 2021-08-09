@@ -21,28 +21,33 @@ logger = logging.getLogger(__name__)
 
 
 class AnalyzerListAPI(generics.ListAPIView):
+
+    serializer_class = AnalyzerConfigSerializer
+
     @add_docs(
         description="""
-    Get the uploaded analyzer configuration,
-    can be useful if you want to choose the analyzers programmatically""",
+        Get the uploaded analyzer configuration,
+        can be useful if you want to choose the analyzers programmatically""",
         parameters=[],
         responses={
-            200: inline_serializer(
-                name="GetAnalyzerConfigsSuccessResponse",
-                fields={"analyzers_config": BaseSerializer.DictField()},
-            ),
+            200: AnalyzerConfigSerializer,
             500: inline_serializer(
                 name="GetAnalyzerConfigsFailedResponse",
                 fields={"error": BaseSerializer.StringRelatedField()},
             ),
         },
     )
+    def get(self, request, *args, **kwargs):
+        # @extend_schema needs to be applied to the entrypoint method of the view
+        # `list` call is proxied through the entrypoint `get`
+        return super().get(request, *args, **kwargs)
+
     def list(self, request):
         try:
             logger.info(
                 f"get_analyzer_configs received request from {str(request.user)}."
             )
-            ac = AnalyzerConfigSerializer.read_and_verify_config()
+            ac = self.serializer_class.read_and_verify_config()
             return Response(ac, status=status.HTTP_200_OK)
         except Exception as e:
             logger.exception(

@@ -2487,15 +2487,18 @@
   },
   "VirusTotal_v3_Get_File": {
     "type": "file",
-    "python_module": "vt3_get.VirusTotalv3",
+    "python_module": "vt.vt3_get.VirusTotalv3",
     "description": "check file hash on VirusTotal",
     "disabled": true,
     "external_service": true,
     "leaks_info": false,
     "run_hash": true,
+    "run_hash_type": "sha256",
     "config": {
       "soft_time_limit": 40,
-      "queue": "default"
+      "queue": "default",
+      "include_behaviour_summary": true,
+      "include_sigma_analyses": true
     },
     "secrets": {
       "api_key_name": {
@@ -2509,16 +2512,19 @@
   },
   "VirusTotal_v3_Get_File_And_Scan": {
     "type": "file",
-    "python_module": "vt3_get.VirusTotalv3",
+    "python_module": "vt.vt3_get.VirusTotalv3",
     "description": "check file hash on VirusTotal. If not already available, send the sample and perform a new scan",
     "disabled": false,
     "external_service": true,
     "leaks_info": true,
     "run_hash": true,
+    "run_hash_type": "sha256",
     "config": {
       "soft_time_limit": 500,
       "queue": "default",
-      "force_active_scan": true
+      "force_active_scan": true,
+      "include_behaviour_summary": true,
+      "include_sigma_analyses": true
     },
     "secrets": {
       "api_key_name": {
@@ -2532,7 +2538,7 @@
   },
   "VirusTotal_v3_Get_Observable": {
     "type": "observable",
-    "python_module": "vt3_get.VirusTotalv3",
+    "python_module": "vt.vt3_get.VirusTotalv3",
     "description": "search an observable in the VirusTotal DB",
     "disabled": false,
     "external_service": true,

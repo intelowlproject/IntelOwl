@@ -201,8 +201,12 @@ class _FileAnalyzersScriptsTestCase(_AbstractAnalyzersScriptTestCase):
         "VirusTotal_v2_Scan_File": {"wait_for_scan_anyway": True, "max_tries": 1},
         "VirusTotal_v3_Scan_File": {"max_tries": 1, "poll_distance": 1},
         "VirusTotal_v3_Get_File": {"max_tries": 1, "poll_distance": 1},
-        "VirusTotal_v3_Get_File_And_Scan": {"max_tries": 1, "poll_distance": 1},
-        "Intezer_Scan": {"max_tries": 1},
+        "VirusTotal_v3_Get_File_And_Scan": {
+            "max_tries": 1,
+            "poll_distance": 1,
+            "force_active_scan": True,
+            "force_active_file_scan_if_old": True,
+        },
         "Cuckoo_Scan": {"max_poll_tries": 1, "max_post_tries": 1},
         "PEframe_Scan": {"max_tries": 1},
         "MWDB_Scan": {

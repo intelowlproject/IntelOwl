@@ -101,8 +101,10 @@ Some analyzers provide the chance to customize the performed analysis based on o
 
 List of some of the analyzers with optional configuration:
 * `VirusTotal_v3_Get_File*`:
-    * `force_active_scan` (default `false`): if the sample is not already in VT, send the sample and perform a scan
-    * `force_active_scan_if_old` (default `false`): if the sample is old, it would be rescanned
+    * `force_active_scan` (default False): if the sample is not already in VT, send the sample and perform a scan
+    * `force_active_scan_if_old` (default False): if the sample is old, it would be rescanned
+    * `include_behaviour_summary` (default False): include a summary of behavioral analysis reports alongside default scan report
+    * `include_sigma_analyses` (default False): include sigma analysis report alongside default scan report
 * `MISP`:
     * `ssl_check`: (default `true`), enable SSL certificate server verification. Change this if your MISP instance has not SSL enabled
     * `debug`: (default `false`) enable debug logs

@@ -353,7 +353,7 @@ class JobViewSet(
         description="Download a sample from a given Job ID.",
         request=None,
         responses={
-            204: None,
+            200: None,
             400: None,
         },
     )

@@ -379,7 +379,7 @@ paths:
       security:
       - durinAuth: []
       responses:
-        '204':
+        '200':
           description: No response body
         '400':
           description: No response body

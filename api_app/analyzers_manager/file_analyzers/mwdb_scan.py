@@ -7,7 +7,6 @@ import mwdblib
 import logging
 
 from api_app.exceptions import AnalyzerRunException
-from api_app.helpers import get_binary
 from api_app.analyzers_manager.classes import FileAnalyzer
 
 from tests.mock_utils import patch, if_mock_connections, MagicMock
@@ -37,9 +36,10 @@ class MWDB_Scan(FileAnalyzer):
         return "karton" in file_info.metakeys.keys()
 
     def run(self):
-        mwdb = mwdblib.MWDB(api_key=self.__api_key)
-        binary = get_binary(self.job_id)
+        binary = self.read_file_bytes()
         query = str(hashlib.sha256(binary).hexdigest())
+
+        mwdb = mwdblib.MWDB(api_key=self.__api_key)
 
         if self.upload_file:
             logger.info(f"mwdb_scan uploading sample: {self.md5}")
@@ -58,11 +58,16 @@ class MWDB_Scan(FileAnalyzer):
         else:
             try:
                 file_info = mwdb.query_file(query)
-            except Exception:
-                raise AnalyzerRunException(
-                    "File not found in the MWDB. Set 'upload_file=true' "
+            except Exception as exc:
+                err_msg = (
+                    "Error: File not found in the MWDB. Set 'upload_file=true' "
                     "if you want to upload and poll results. "
                 )
+                logger.error((str(exc), err_msg))
+                self.report.errors.append(str(exc))
+                self.report.errors.append(err_msg)
+                result["not_found"] = True
+
         result = {"data": file_info.data, "metakeys": file_info.metakeys}
         result["permalink"] = f"https://mwdb.cert.pl/file/{query}"
         return result

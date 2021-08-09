@@ -4,11 +4,13 @@
 from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.exceptions import AnalyzerRunException
 
-from quark.report import Report
-
 
 class QuarkEngine(FileAnalyzer):
     def run(self):
+        # this import must stay here.
+        # See https://github.com/quark-engine/quark-engine/issues/225
+        from quark.report import Report
+
         # new report object
         report = Report()
         # start analysis

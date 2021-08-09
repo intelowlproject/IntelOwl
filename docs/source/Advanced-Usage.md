@@ -172,6 +172,8 @@ List of some of the analyzers with optional configuration:
   * `ssl_verify`: (default `true`), enable SSL certificate server verification. Change this if your OpenCTI instance has not SSL enabled.
   * `proxies`: (`http` and `https`, default `""`) use these options to pass your request through a proxy server.
   * `exact_search`: (default `false`) use this if you want exact matches only for the observables returned.
+* `Intezer_Scan`:
+  * `upload_file` (default True): Uploads the analyzed file to Intezer in case an analysis of that file is not available in that platform.
 
 There are two ways to do this:
 

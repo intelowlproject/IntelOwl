@@ -1,8 +1,9 @@
 # Stage 1: Get build artifacts from intelowl-ng
-FROM intelowlproject/intelowl_ng:v2.1.1 AS angular-prod-build
+ARG INTELOWL_NG_TAG_VERSION="v2.1.1"
+FROM intelowlproject/intelowl_ng:${INTELOWL_NG_TAG_VERSION} AS angular-prod-build
 
 # Stage 2: Inject the build artifacts into nginx container
-FROM library/nginx:1.19-alpine
+FROM library/nginx:1.21-alpine
 
 COPY --from=angular-prod-build /usr/src/app/dist /var/www/angular_build
 

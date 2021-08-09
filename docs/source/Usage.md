@@ -152,6 +152,8 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * `FireHol_IPList`: check if an IP is in [FireHol's IPList](https://iplists.firehol.org/)
 * `ThreatFox`: search for an IOC in [ThreatFox](https://threatfox.abuse.ch/api/)'s database
 * `OpenCTI`: scan an observable on an OpenCTI instance
+* `Intezer_Get`: check if an analysis related to a hash is available in [Intezer](https://analyze.intezer.com/))
+* `MWDB_Get`: [mwdblib](https://mwdb.readthedocs.io/en/latest/) Retrieve malware file analysis by hash from repository maintained by CERT Polska MWDB.
 
 #### Generic analyzers (email, phone number, etc.; anything really)
 Some Analyzers require details other than just IP, URL, Domain etc... We classified them as Generic Analyzers. Since the type of field is not known, there is a format for strings to be followed.

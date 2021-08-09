@@ -18,9 +18,9 @@ Please delete options that are not relevant.
 - [ ] The pull request is for the branch develop
 - [ ] A new analyzer or connector was added, in which case:
     - [ ] [Usage](https://github.com/intelowlproject/IntelOwl/blob/master/docs/source/Usage.md) file was updated.
-    - [ ] [Advanced-Usage](./Advanced-Usage.md) was updated (incase the analyzer provides additional optional configuration).
+    - [ ] [Advanced-Usage](./Advanced-Usage.md) was updated (incase the analyzer/connector provides additional optional configuration).
     - [ ] Secrets were added in [env_file_app_template](https://github.com/intelowlproject/IntelOwl/blob/master/docker/env_file_app_template), [env_file_app_ci](https://github.com/certego/IntelOwl/blob/master/docker/env_file_app_ci) and in the [Installation](./Installation.md) docs, if necessary.
-    - [ ] If the analyzer requires mocked testing, `_monkeypatch()` was used in the analyzer's class to apply the necessary decorators.
+    - [ ] If the analyzer/connector requires mocked testing, `_monkeypatch()` was used in it's class to apply the necessary decorators.
     - [ ] If a File analyzer was added, it's name was explicitly defined in [test_file_scripts.py](https://github.com/intelowlproject/IntelOwl/blob/master/tests/analyzers_manager/test_file_scripts.py) (not required for Observable Analyzers).
 - [ ] If external libraries/packages with restrictive licenses were used, they were added in the [ReadMe - Legal Notice](https://github.com/certego/IntelOwl/blob/master/README.md) section.
 - [ ] The tests gave 0 errors.

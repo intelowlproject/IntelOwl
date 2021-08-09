@@ -1,11 +1,61 @@
 openapi: 3.0.3
 info:
-  title: 'IntelOwl API specification'
-  version: 2.4.1
+  title: ''
+  version: 0.0.0
 paths:
+  /api/analyze_file:
+    post:
+      operationId: analyze_file_create
+      description: This endpoint allows to start a Job related to a file
+      tags:
+      - analyze_file
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FileAnalysis'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/FileAnalysis'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/FileAnalysis'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileAnalysisResponse'
+          description: ''
+  /api/analyze_observable:
+    post:
+      operationId: analyze_observable_create
+      description: This endpoint allows to start a Job related to an observable
+      tags:
+      - analyze_observable
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ObservableAnalysis'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ObservableAnalysis'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ObservableAnalysis'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObservableAnalysisResponse'
+          description: ''
   /api/ask_analysis_availability:
     get:
-      operationId: api_ask_analysis_availability_retrieve
+      operationId: ask_analysis_availability_retrieve
       description: |2-
 
             This is useful to avoid repeating the same analysis multiple times.
@@ -42,7 +92,7 @@ paths:
                       Check only for running analysis,
                       default False, any value is True
       tags:
-      - api
+      - ask_analysis_availability
       responses:
         '200':
           content:
@@ -64,12 +114,12 @@ paths:
           description: ''
   /api/auth/login:
     post:
-      operationId: api_auth_login_create
+      operationId: auth_login_create
       description: |-
         Durin's Login View.
 
         This view will return a JSON response when valid ``username``, ``password`` and
-        if not overwritten ``client`` fields are POSTed to the view using
+        (if not overwritten) ``client`` fields are POSTed to the view using
         form data or JSON.
 
         It uses the default serializer provided by
@@ -79,13 +129,13 @@ paths:
         It is possible to customize LoginView behaviour by overriding the following
         helper methods:
       tags:
-      - api
+      - auth
       responses:
         '200':
           description: No response body
   /api/auth/logout:
     post:
-      operationId: api_auth_logout_create
+      operationId: auth_logout_create
       description: |-
         Durin's Logout View.
 
@@ -99,71 +149,155 @@ paths:
 
         :returns: 204 (No content)
       tags:
-      - api
+      - auth
       responses:
         '200':
           description: No response body
-  /api/download_sample:
+  /api/get_analyzer_configs:
     get:
-      operationId: api_download_sample_retrieve
-      description: This method is used to download a sample from a Job ID
+      operationId: get_analyzer_configs_retrieve
+      description: ''
+      tags:
+      - get_analyzer_configs
+      responses:
+        '200':
+          description: No response body
+  /api/get_connector_configs:
+    get:
+      operationId: get_connector_configs_retrieve
+      description: ''
+      tags:
+      - get_connector_configs
+      responses:
+        '200':
+          description: No response body
+  /api/job/{job_id}/analyzer/{name}/kill:
+    patch:
+      operationId: job_analyzer_kill_partial_update
+      description: |-
+        Kill running plugin by closing celery task and marking as killed
+
+        :params url:
+         - job_id
+         - name (plugin name)
+        :returns:
+         - 204 - if killed
+         - 404 - not found
+         - 403 - forbidden, 400 bad request
       parameters:
-      - in: query
+      - in: path
         name: job_id
         schema:
           type: integer
-        description: Job Id
+        required: true
+      - in: path
+        name: name
+        schema:
+          type: string
+        required: true
       tags:
-      - api
+      - job
       responses:
         '200':
-          content:
-            application/json:
-              schema:
-                type: string
-                format: binary
-          description: ''
-        '400':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DownloadSampleInsufficientData'
-          description: ''
-        '500':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DownloadSampleInsufficientData'
-          description: ''
-  /api/get_analyzer_configs:
-    get:
-      operationId: api_get_analyzer_configs_retrieve
-      description: |2-
+          description: No response body
+  /api/job/{job_id}/analyzer/{name}/retry:
+    patch:
+      operationId: job_analyzer_retry_partial_update
+      description: |-
+        Retry a plugin run if it failed/was killed previously
+         regenerates the args required and starts a new celery task
 
-        Get the uploaded analyzer configuration,
-        can be useful if you want to choose the analyzers programmatically
+        :params url:
+         - job_id
+         - name (plugin name)
+        :returns:
+         - 204 - if success
+         - 404 - not found
+         - 403 - forbidden
+         - 400 - bad request
+      parameters:
+      - in: path
+        name: job_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: name
+        schema:
+          type: string
+        required: true
       tags:
-      - api
+      - job
       responses:
         '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GetAnalyzerConfigsSuccessResponse'
-          description: ''
-        '500':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GetAnalyzerConfigsFailedResponse'
-          description: ''
+          description: No response body
+  /api/job/{job_id}/connector/{name}/kill:
+    patch:
+      operationId: job_connector_kill_partial_update
+      description: |-
+        Kill running plugin by closing celery task and marking as killed
+
+        :params url:
+         - job_id
+         - name (plugin name)
+        :returns:
+         - 204 - if killed
+         - 404 - not found
+         - 403 - forbidden, 400 bad request
+      parameters:
+      - in: path
+        name: job_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: name
+        schema:
+          type: string
+        required: true
+      tags:
+      - job
+      responses:
+        '200':
+          description: No response body
+  /api/job/{job_id}/connector/{name}/retry:
+    patch:
+      operationId: job_connector_retry_partial_update
+      description: |-
+        Retry a plugin run if it failed/was killed previously
+         regenerates the args required and starts a new celery task
+
+        :params url:
+         - job_id
+         - name (plugin name)
+        :returns:
+         - 204 - if success
+         - 404 - not found
+         - 403 - forbidden
+         - 400 - bad request
+      parameters:
+      - in: path
+        name: job_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: name
+        schema:
+          type: string
+        required: true
+      tags:
+      - job
+      responses:
+        '200':
+          description: No response body
   /api/jobs:
     get:
-      operationId: api_jobs_list
+      operationId: jobs_list
       description: "\n    REST endpoint to fetch list of jobs or retrieve a job with\
         \ job ID.\n    Requires authentication.\n    "
       tags:
-      - api
+      - jobs
       responses:
         '200':
           content:
@@ -175,7 +309,7 @@ paths:
           description: ''
   /api/jobs/{id}:
     get:
-      operationId: api_jobs_retrieve
+      operationId: jobs_retrieve
       description: "\n    REST endpoint to fetch list of jobs or retrieve a job with\
         \ job ID.\n    Requires authentication.\n    "
       parameters:
@@ -186,7 +320,7 @@ paths:
         description: A unique integer value identifying this job.
         required: true
       tags:
-      - api
+      - jobs
       responses:
         '200':
           content:
@@ -195,7 +329,7 @@ paths:
                 $ref: '#/components/schemas/Job'
           description: ''
     delete:
-      operationId: api_jobs_destroy
+      operationId: jobs_destroy
       description: "\n    REST endpoint to fetch list of jobs or retrieve a job with\
         \ job ID.\n    Requires authentication.\n    "
       parameters:
@@ -206,13 +340,31 @@ paths:
         description: A unique integer value identifying this job.
         required: true
       tags:
-      - api
+      - jobs
       responses:
         '204':
           description: No response body
+  /api/jobs/{id}/download_sample:
+    get:
+      operationId: jobs_download_sample_retrieve
+      description: Download a sample from a given Job ID.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this job.
+        required: true
+      tags:
+      - jobs
+      responses:
+        '200':
+          description: No response body
+        '400':
+          description: No response body
   /api/jobs/{id}/kill:
     patch:
-      operationId: api_jobs_kill_partial_update
+      operationId: jobs_kill_partial_update
       description: "\n    REST endpoint to fetch list of jobs or retrieve a job with\
         \ job ID.\n    Requires authentication.\n    "
       parameters:
@@ -223,7 +375,7 @@ paths:
         description: A unique integer value identifying this job.
         required: true
       tags:
-      - api
+      - jobs
       requestBody:
         content:
           application/json:
@@ -242,133 +394,16 @@ paths:
               schema:
                 $ref: '#/components/schemas/Job'
           description: ''
-  /api/send_analysis_request:
-    post:
-      operationId: api_send_analysis_request_create
-      description: |2-
-
-            This endpoint allows to start a Job related to a file or an observable
-      parameters:
-      - in: query
-        name: analyzers_requested
-        schema:
-          type: object
-          additionalProperties: {}
-        description: list of requested analyzer to run, before filters
-      - in: query
-        name: disable_external_analyzers
-        schema:
-          type: boolean
-        description: |2-
-
-                      Default False, enable it if you want to exclude external analyzers
-      - in: query
-        name: file
-        schema:
-          type: string
-          format: binary
-        description: required if is_sample=True, the binary
-      - in: query
-        name: file_mimetype
-        schema:
-          type: string
-        description: optional, the binary mimetype, calculated by default
-      - in: query
-        name: file_name
-        schema:
-          type: string
-        description: optional if is_sample=True, the binary name
-      - in: query
-        name: force_privacy
-        schema:
-          type: boolean
-        description: |2-
-
-                      Default False,
-                      enable it if you want to avoid to run analyzers with privacy issues
-      - in: query
-        name: is_sample
-        schema:
-          type: boolean
-        description: is a sample (file) or an observable (domain, ip, ...)
-      - in: query
-        name: md5
-        schema:
-          type: string
-        description: md5 of the item to analyze
-      - in: query
-        name: observable_classification
-        schema:
-          type: string
-        description: required if is_sample=False, (domain, ip, ...)
-      - in: query
-        name: observable_name
-        schema:
-          type: string
-        description: required if is_sample=False, the observable value
-      - in: query
-        name: private
-        schema:
-          type: boolean
-        description: |2-
-
-                      Default False,
-                      enable it to allow view permissions to only requesting user's groups.
-      - in: query
-        name: run_all_available_analyzers
-        schema:
-          type: boolean
-        description: default False
-      - in: query
-        name: runtime_configuration
-        schema:
-          type: object
-          additionalProperties: {}
-        description: |2-
-
-                      Default {}, contains additional parameters for particular analyzers
-      - in: query
-        name: tags_id
-        schema:
-          type: object
-          additionalProperties: {}
-        description: list of id's of tags to apply to job
-      - in: query
-        name: test
-        schema:
-          type: boolean
-        description: disable analysis for API testing
-      tags:
-      - api
-      responses:
-        '202':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SendAnalysisRequestSuccessResponse'
-          description: ''
-        '400':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SendAnalysisRequestInsufficientData'
-          description: ''
-        '500':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SendAnalysisRequestError'
-          description: ''
   /api/tags:
     get:
-      operationId: api_tags_list
+      operationId: tags_list
       description: |2-
 
             REST endpoint to pefrom CRUD operations on Job tags.
             Requires authentication.
             POST/PUT/DELETE requires model/object level permission.
       tags:
-      - api
+      - tags
       responses:
         '200':
           content:
@@ -379,14 +414,14 @@ paths:
                   $ref: '#/components/schemas/Tag'
           description: ''
     post:
-      operationId: api_tags_create
+      operationId: tags_create
       description: |2-
 
             REST endpoint to pefrom CRUD operations on Job tags.
             Requires authentication.
             POST/PUT/DELETE requires model/object level permission.
       tags:
-      - api
+      - tags
       requestBody:
         content:
           application/json:
@@ -408,7 +443,7 @@ paths:
           description: ''
   /api/tags/{id}:
     get:
-      operationId: api_tags_retrieve
+      operationId: tags_retrieve
       description: |2-
 
             REST endpoint to pefrom CRUD operations on Job tags.
@@ -422,7 +457,7 @@ paths:
         description: A unique integer value identifying this tag.
         required: true
       tags:
-      - api
+      - tags
       responses:
         '200':
           content:
@@ -431,7 +466,7 @@ paths:
                 $ref: '#/components/schemas/Tag'
           description: ''
     put:
-      operationId: api_tags_update
+      operationId: tags_update
       description: |2-
 
             REST endpoint to pefrom CRUD operations on Job tags.
@@ -445,7 +480,7 @@ paths:
         description: A unique integer value identifying this tag.
         required: true
       tags:
-      - api
+      - tags
       requestBody:
         content:
           application/json:
@@ -466,7 +501,7 @@ paths:
                 $ref: '#/components/schemas/Tag'
           description: ''
     patch:
-      operationId: api_tags_partial_update
+      operationId: tags_partial_update
       description: |2-
 
             REST endpoint to pefrom CRUD operations on Job tags.
@@ -480,7 +515,7 @@ paths:
         description: A unique integer value identifying this tag.
         required: true
       tags:
-      - api
+      - tags
       requestBody:
         content:
           application/json:
@@ -500,7 +535,7 @@ paths:
                 $ref: '#/components/schemas/Tag'
           description: ''
     delete:
-      operationId: api_tags_destroy
+      operationId: tags_destroy
       description: |2-
 
             REST endpoint to pefrom CRUD operations on Job tags.
@@ -514,12 +549,41 @@ paths:
         description: A unique integer value identifying this tag.
         required: true
       tags:
-      - api
+      - tags
       responses:
         '204':
           description: No response body
 components:
   schemas:
+    AnalyzerReport:
+      type: object
+      description: AnalyzerReport model's serializer.
+      properties:
+        name:
+          type: string
+          maxLength: 128
+        status:
+          $ref: '#/components/schemas/Status0b3Enum'
+        report:
+          type: object
+          additionalProperties: {}
+        errors:
+          type: array
+          items:
+            type: string
+        process_time:
+          type: string
+          readOnly: true
+        start_time:
+          type: string
+          format: date-time
+        end_time:
+          type: string
+          format: date-time
+      required:
+      - name
+      - process_time
+      - status
     AskAnalysisAvailabilityErrorResponse:
       type: object
       properties:
@@ -548,35 +612,98 @@ components:
       required:
       - job_id
       - status
-    DownloadSampleInsufficientData:
+    ConnectorReport:
       type: object
+      description: ConnectorReport model's serializer.
       properties:
-        detail:
+        name:
           type: string
-          readOnly: true
-      required:
-      - detail
-    GetAnalyzerConfigsFailedResponse:
-      type: object
-      properties:
-        error:
-          type: string
-          readOnly: true
-      required:
-      - error
-    GetAnalyzerConfigsSuccessResponse:
-      type: object
-      properties:
-        analyzers_config:
+          maxLength: 128
+        status:
+          $ref: '#/components/schemas/Status0b3Enum'
+        report:
           type: object
           additionalProperties: {}
+        errors:
+          type: array
+          items:
+            type: string
+        process_time:
+          type: string
+          readOnly: true
+        start_time:
+          type: string
+          format: date-time
       required:
-      - analyzers_config
+      - name
+      - process_time
+      - status
+    FileAnalysis:
+      type: object
+      description: |-
+        Job model's serializer for File Analysis.
+        Used for create()
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        source:
+          type: string
+          maxLength: 50
+        md5:
+          type: string
+          maxLength: 32
+        force_privacy:
+          type: boolean
+        disable_external_analyzers:
+          type: boolean
+        file:
+          type: string
+          format: uri
+        file_name:
+          type: string
+        run_all_available_analyzers:
+          type: boolean
+          default: false
+        runtime_configuration:
+          type: object
+          additionalProperties: {}
+          writeOnly: true
+          default: {}
+        analyzers_requested:
+          type: array
+          items: {}
+        tags_id:
+          type: array
+          items:
+            type: integer
+            writeOnly: true
+          writeOnly: true
+        private:
+          type: boolean
+          default: false
+      required:
+      - file
+      - file_name
+      - id
+      - md5
+      - tags_id
+    FileAnalysisResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          readOnly: true
+        job_id:
+          type: integer
+      required:
+      - job_id
+      - status
     Job:
       type: object
       description: |-
         Job model's serializer.
-        Used for create(), retrieve()
+        Used for retrieve()
       properties:
         id:
           type: integer
@@ -586,12 +713,16 @@ components:
           items:
             $ref: '#/components/schemas/Tag'
           readOnly: true
-        tags_id:
+        analyzer_reports:
           type: array
           items:
-            type: integer
-            writeOnly: true
-          writeOnly: true
+            $ref: '#/components/schemas/AnalyzerReport'
+          readOnly: true
+        connector_reports:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConnectorReport'
+          readOnly: true
         source:
           type: string
           maxLength: 50
@@ -613,7 +744,7 @@ components:
           type: string
           maxLength: 80
         status:
-          $ref: '#/components/schemas/StatusEnum'
+          $ref: '#/components/schemas/StatusA27Enum'
         analyzers_requested:
           type: array
           items:
@@ -624,10 +755,10 @@ components:
           type: array
           items:
             type: string
-        analysis_reports:
-          type: object
-          additionalProperties: {}
-          nullable: true
+        connectors_to_execute:
+          type: array
+          items:
+            type: string
         received_request_time:
           type: string
           format: date-time
@@ -645,20 +776,13 @@ components:
           items:
             type: string
           nullable: true
-        file:
-          type: string
-          format: uri
-          writeOnly: true
-        runtime_configuration:
-          type: object
-          additionalProperties: {}
-          nullable: true
       required:
+      - analyzer_reports
+      - connector_reports
       - id
       - md5
       - received_request_time
       - tags
-      - tags_id
     JobList:
       type: object
       description: |-
@@ -683,7 +807,7 @@ components:
           type: string
           maxLength: 80
         status:
-          $ref: '#/components/schemas/StatusEnum'
+          $ref: '#/components/schemas/StatusA27Enum'
         tags:
           type: array
           items:
@@ -695,16 +819,80 @@ components:
         no_of_analyzers_executed:
           type: string
           readOnly: true
+        no_of_connectors_executed:
+          type: string
+          readOnly: true
       required:
       - id
       - no_of_analyzers_executed
+      - no_of_connectors_executed
       - process_time
       - tags
+    ObservableAnalysis:
+      type: object
+      description: |-
+        Job model's serializer for Observable Analysis.
+        Used for create()
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        source:
+          type: string
+          maxLength: 50
+        md5:
+          type: string
+          maxLength: 32
+        force_privacy:
+          type: boolean
+        disable_external_analyzers:
+          type: boolean
+        observable_name:
+          type: string
+        observable_classification:
+          type: string
+        run_all_available_analyzers:
+          type: boolean
+          default: false
+        runtime_configuration:
+          type: object
+          additionalProperties: {}
+          writeOnly: true
+          default: {}
+        analyzers_requested:
+          type: array
+          items: {}
+        tags_id:
+          type: array
+          items:
+            type: integer
+            writeOnly: true
+          writeOnly: true
+        private:
+          type: boolean
+          default: false
+      required:
+      - id
+      - md5
+      - observable_classification
+      - observable_name
+      - tags_id
+    ObservableAnalysisResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          readOnly: true
+        job_id:
+          type: integer
+      required:
+      - job_id
+      - status
     PatchedJob:
       type: object
       description: |-
         Job model's serializer.
-        Used for create(), retrieve()
+        Used for retrieve()
       properties:
         id:
           type: integer
@@ -714,12 +902,16 @@ components:
           items:
             $ref: '#/components/schemas/Tag'
           readOnly: true
-        tags_id:
+        analyzer_reports:
           type: array
           items:
-            type: integer
-            writeOnly: true
-          writeOnly: true
+            $ref: '#/components/schemas/AnalyzerReport'
+          readOnly: true
+        connector_reports:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConnectorReport'
+          readOnly: true
         source:
           type: string
           maxLength: 50
@@ -741,7 +933,7 @@ components:
           type: string
           maxLength: 80
         status:
-          $ref: '#/components/schemas/StatusEnum'
+          $ref: '#/components/schemas/StatusA27Enum'
         analyzers_requested:
           type: array
           items:
@@ -752,10 +944,10 @@ components:
           type: array
           items:
             type: string
-        analysis_reports:
-          type: object
-          additionalProperties: {}
-          nullable: true
+        connectors_to_execute:
+          type: array
+          items:
+            type: string
         received_request_time:
           type: string
           format: date-time
@@ -773,14 +965,6 @@ components:
           items:
             type: string
           nullable: true
-        file:
-          type: string
-          format: uri
-          writeOnly: true
-        runtime_configuration:
-          type: object
-          additionalProperties: {}
-          nullable: true
     PatchedTag:
       type: object
       description: |-
@@ -796,34 +980,15 @@ components:
         color:
           type: string
           maxLength: 7
-    SendAnalysisRequestError:
-      type: object
-      properties:
-        detail:
-          type: string
-          readOnly: true
-      required:
-      - detail
-    SendAnalysisRequestInsufficientData:
-      type: object
-      properties:
-        error:
-          type: string
-          readOnly: true
-      required:
-      - error
-    SendAnalysisRequestSuccessResponse:
-      type: object
-      properties:
-        status:
-          type: string
-          readOnly: true
-        job_id:
-          type: integer
-      required:
-      - job_id
-      - status
-    StatusEnum:
+    Status0b3Enum:
+      enum:
+      - FAILED
+      - PENDING
+      - RUNNING
+      - SUCCESS
+      - KILLED
+      type: string
+    StatusA27Enum:
       enum:
       - pending
       - running

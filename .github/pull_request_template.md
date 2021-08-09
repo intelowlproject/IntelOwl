@@ -19,7 +19,6 @@ Please delete options that are not relevant.
 - [ ] If I added a new analyzer, I updated the file [Usage](https://github.com/intelowlproject/IntelOwl/blob/master/docs/source/Usage.md). If the analyzer provides additional optional configuration, I added the available options here: [Advanced-Usage](./Advanced-Usage.md)
 - [ ] If I added external libraries/packages that use restrictive licenses, please add them in the [ReadMe - Legal Notice](https://github.com/certego/IntelOwl/blob/master/README.md) section
 - [ ] I added new secrets in the files [env_file_app_template](https://github.com/intelowlproject/IntelOwl/blob/master/docker/env_file_app_template), [env_file_app_ci](https://github.com/certego/IntelOwl/blob/master/docker/env_file_app_ci) and in the docs: [Installation](./Installation.md)
-- [ ] I have added tests in the [Tests](https://github.com/intelowlproject/IntelOwl/blob/master/tests) folder. 
 - [ ] The tests gave 0 errors.
 - [ ] `Black` gave 0 errors.
 - [ ] `Flake` gave 0 errors.

@@ -13,7 +13,6 @@ from api_app.exceptions import (
     AnalyzerConfigurationException,
 )
 from api_app.core.classes import Plugin
-from api_app.helpers import generate_sha256
 
 from .models import AnalyzerReport
 from .constants import HashChoices, ObservableTypes, TypeChoices
@@ -123,10 +122,10 @@ class ObservableAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
             self.observable_classification = ObservableTypes.HASH
             # check which kind of hash the analyzer needs
             run_hash_type = self._config.run_hash_type
-            if run_hash_type == HashChoices.MD5:
-                self.observable_name = self._job.md5
+            if run_hash_type == HashChoices.SHA256:
+                self.observable_name = self._job.sha256
             else:
-                self.observable_name = generate_sha256(self.job_id)
+                self.observable_name = self._job.md5
         else:
             self.observable_name = self._job.observable_name
             self.observable_classification = self._job.observable_classification
@@ -159,6 +158,9 @@ class FileAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
     filepath: str
     filename: str
     file_mimetype: str
+
+    def read_file_bytes(self) -> bytes:
+        return self._job.file.read()
 
     def __post__init__(self):
         self.md5 = self._job.md5

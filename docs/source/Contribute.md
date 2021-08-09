@@ -88,11 +88,9 @@ After having written the new python module, you have to remember to:
   Please see [Analyzers customization section](https://intelowl.readthedocs.io/en/latest/Usage.html#analyzers-customization) to get the explanation of the other available keys.
 
 
-3. Add required unit tests in the [tests](https://github.com/intelowlproject/IntelOwl/blob/master/tests) folder. Then follow the [Test](./Tests.md) guide to start testing.
+3. Add the new analyzer in the lists in the docs: [Usage](./Usage.md). Also, if the analyzer provides additional optional configuration, add the available options here: [Advanced-Usage](./Advanced-Usage.md)
 
-4. Add the new analyzer in the lists in the docs: [Usage](./Usage.md). Also, if the analyzer provides additional optional configuration, add the available options here: [Advanced-Usage](./Advanced-Usage.md)
-
-5. Ultimately, add the required secrets in the files `docker/env_file_app_template`, `docker/env_file_app_ci` and in the `docs/Installation.md`.
+4. Ultimately, add the required secrets in the files `docker/env_file_app_template`, `docker/env_file_app_ci` and in the `docs/Installation.md`.
 
 5. In the Pull Request remember to provide some real world examples (screenshots and raw JSON results) of some successful executions of the analyzer to let us understand how it would work.
 
@@ -137,9 +135,8 @@ $ docker exec -ti intelowl_uwsgi unzip -P infected tests/test_files.zip
 $ docker exec -ti intelowl_uwsgi python manage.py test tests
 ```
 
-> Note: To run a particular test case, you want to set it's full path. For example, `docker exec -ti intelowl_uwsgi python manage.py test tests.test_observables.<test_case_class_name>.<func_name>`
+> Note: IntelOwl has dynamic testing suite. This means that no explicit analyzers/connector tests are required after the addition of a new analyzer or connector.
 
-Please make sure all 3 of these tests return positively.
 
 If everything is working, before submitting your pull request, please squash your commits into a single one!
 

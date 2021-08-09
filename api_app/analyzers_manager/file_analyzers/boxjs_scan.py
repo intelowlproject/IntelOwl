@@ -1,7 +1,6 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-from api_app.helpers import get_binary
 from api_app.analyzers_manager.classes import FileAnalyzer, DockerBasedAnalyzer
 
 
@@ -17,7 +16,7 @@ class BoxJS(FileAnalyzer, DockerBasedAnalyzer):
         # construct a valid filename into which thug will save the result
         fname = str(self.filename).replace("/", "_").replace(" ", "_")
         # get the file to send
-        binary = get_binary(self.job_id)
+        binary = self.read_file_bytes()
         # construct arguments, For example this corresponds to,
         # box-js sample.js --output-dir=/tmp/boxjs --no-kill ...
         args = [

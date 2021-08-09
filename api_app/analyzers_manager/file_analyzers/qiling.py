@@ -1,7 +1,6 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-from api_app.helpers import get_binary
 from api_app.analyzers_manager.classes import FileAnalyzer, DockerBasedAnalyzer
 
 
@@ -28,8 +27,8 @@ class Qiling(FileAnalyzer, DockerBasedAnalyzer):
     def run(self):
         # get the file to send
         fname = str(self.filename).replace("/", "_").replace(" ", "_")
-        binary = get_binary(self.job_id)
+        binary = self.read_file_bytes()
         # make request parameters
-        req_data = {"args": [f"@{fname}"] + self.args}
+        req_data = {"args": [f"@{fname}", *self.args]}
         req_files = {fname: binary}
         return self._docker_run(req_data, req_files)

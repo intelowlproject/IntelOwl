@@ -5,8 +5,8 @@ import logging
 import time
 import requests
 
+from api_app.models import Job
 from api_app.exceptions import AnalyzerRunException
-from api_app.helpers import get_binary
 from api_app.analyzers_manager.observable_analyzers import vt3_get
 from api_app.analyzers_manager.classes import FileAnalyzer
 
@@ -55,6 +55,14 @@ class VirusTotalv3ScanFile(FileAnalyzer):
             )
         ]
         return super()._monkeypatch(patches=patches)
+
+
+def get_binary(job_id: int) -> bytes:
+    """
+    for backwards compatibility.
+    """
+    job = Job.objects.get(pk=job_id)
+    return job.file.read()
 
 
 def vt_scan_file(

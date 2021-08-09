@@ -2,6 +2,25 @@
 
 [**Upgrade Guide**](https://intelowl.readthedocs.io/en/latest/Installation.html#update-to-the-most-recent-version)
 
+## [v2.5.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v2.5.0)
+**New Inbuilt Analyzers:**
+- New `Dehashed_Search` analyzer: Query any observable/keyword against Dehashed's search API (https://dehashed.com).
+
+**Analyzer Improvements & Fixes:**
+- Improvements in the `cuckoo_scan.py`, `file_info.py`, `abuseipdb.py`, and `otx.py`.
+- Fix: Exiftool download link was broken (Issue [#507](https://github.com/intelowlproject/IntelOwl/issues/507))
+
+**Other:**
+- as always: fixes, tweaks and dependencies upgrades.
+
+**Important Notes:**
+- This is the last stable release in the v2.x pipeline. The next release of IntelOwl, v3.0, will bring exciting new features and breaking changes. Some things that we have in the works:
+  * A new class of plugins called _Connectors_ to allow integration with other SIEM/SOAR projects specifically aimed at Threat Sharing Platforms. 
+  * Support for MISP and Open-CTI.
+  * automatically disabling of unconfigured analyzers
+  * ...and much more
+- IntelOwl joined the official [Docker Open Source Program](https://www.docker.com/blog/expanded-support-for-open-source-software-projects/). :tada: 
+
 ## [v2.4.2](https://github.com/intelowlproject/IntelOwl/releases/tag/v2.4.2)
 - darksearch.io search API analyzer
 - improved abuseipdb analyzer to show matched categories in a human readable form too

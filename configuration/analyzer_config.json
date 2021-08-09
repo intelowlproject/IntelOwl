@@ -2497,8 +2497,8 @@
     "config": {
       "soft_time_limit": 40,
       "queue": "default",
-      "include_behavioral_summary": true,
-      "include_sigma_analysis": true
+      "include_behaviour_summary": true,
+      "include_sigma_analyses": true
     },
     "secrets": {
       "api_key_name": {
@@ -2523,8 +2523,8 @@
       "soft_time_limit": 500,
       "queue": "default",
       "force_active_scan": true,
-      "include_behavioral_summary": true,
-      "include_sigma_analysis": true
+      "include_behaviour_summary": true,
+      "include_sigma_analyses": true
     },
     "secrets": {
       "api_key_name": {

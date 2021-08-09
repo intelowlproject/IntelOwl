@@ -16,15 +16,19 @@ Please delete options that are not relevant.
 # Checklist
 
 - [ ] The pull request is for the branch develop
-- [ ] If I added a new analyzer, I updated the file [Usage](https://github.com/intelowlproject/IntelOwl/blob/master/docs/source/Usage.md). If the analyzer provides additional optional configuration, I added the available options here: [Advanced-Usage](./Advanced-Usage.md)
-- [ ] If I added external libraries/packages that use restrictive licenses, please add them in the [ReadMe - Legal Notice](https://github.com/certego/IntelOwl/blob/master/README.md) section
-- [ ] I added new secrets in the files [env_file_app_template](https://github.com/intelowlproject/IntelOwl/blob/master/docker/env_file_app_template), [env_file_app_ci](https://github.com/certego/IntelOwl/blob/master/docker/env_file_app_ci) and in the docs: [Installation](./Installation.md)
+- [ ] A new analyzer was added, in which case:
+    - [ ] [Usage](https://github.com/intelowlproject/IntelOwl/blob/master/docs/source/Usage.md) file was updated.
+    - [ ] [Advanced-Usage](./Advanced-Usage.md) was updated (incase the analyzer provides additional optional configuration).
+    - [ ] Secrets were added in [env_file_app_template](https://github.com/intelowlproject/IntelOwl/blob/master/docker/env_file_app_template), [env_file_app_ci](https://github.com/certego/IntelOwl/blob/master/docker/env_file_app_ci) and in the [Installation](./Installation.md) docs, if necessary.
+    - [ ] If the analyzer requires mocked testing, `_monkeypatch()` was used in the analyzer's class to apply the necessary decorators.
+    - [ ] If a File analyzer was added, it's name was explicitly defined in [test_file_scripts.py](https://github.com/intelowlproject/IntelOwl/blob/master/tests/analyzers_manager/test_file_scripts.py) (not required for Observable Analyzers).
+- [ ] If external libraries/packages with restrictive licenses were used, they were added in the [ReadMe - Legal Notice](https://github.com/certego/IntelOwl/blob/master/README.md) section.
 - [ ] The tests gave 0 errors.
 - [ ] `Black` gave 0 errors.
 - [ ] `Flake` gave 0 errors.
-- [ ] I squashed the commits into a single one. (optional, they will be squashed anyway by the maintainer)
+- [ ] The commits were squashed into a single one (optional, they will be squashed anyway by the maintainer)
   
-### please follow these rules
+### Important Rules
 - If your changes decrease the overall tests coverage (you will know after the Codecov CI job is done), you should add the required tests to fix the problem
 - Everytime you make changes to the PR and you think the work is done, you should explicitly ask for a review
 

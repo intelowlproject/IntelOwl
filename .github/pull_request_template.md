@@ -16,7 +16,7 @@ Please delete options that are not relevant.
 # Checklist
 
 - [ ] The pull request is for the branch develop
-- [ ] A new analyzer was added, in which case:
+- [ ] A new analyzer or connector was added, in which case:
     - [ ] [Usage](https://github.com/intelowlproject/IntelOwl/blob/master/docs/source/Usage.md) file was updated.
     - [ ] [Advanced-Usage](./Advanced-Usage.md) was updated (incase the analyzer provides additional optional configuration).
     - [ ] Secrets were added in [env_file_app_template](https://github.com/intelowlproject/IntelOwl/blob/master/docker/env_file_app_template), [env_file_app_ci](https://github.com/certego/IntelOwl/blob/master/docker/env_file_app_ci) and in the [Installation](./Installation.md) docs, if necessary.

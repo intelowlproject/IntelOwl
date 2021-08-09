@@ -14,6 +14,17 @@ from tests.mock_utils import patch, if_mock_connections, MagicMock
 logger = logging.getLogger(__name__)
 
 
+def mocked_mwdb_response(*args, **kwargs):
+    attrs = {"data": {"id": "id_test"}, "metakeys": {"karton": "test_analysis"}}
+    fileInfo = MagicMock()
+    fileInfo.configure_mock(**attrs)
+    QueryResponse = MagicMock()
+    attrs = {"query_file.return_value": fileInfo}
+    QueryResponse.configure_mock(**attrs)
+    Response = MagicMock(return_value=QueryResponse)
+    return Response.return_value
+
+
 class MWDB_Scan(FileAnalyzer):
     def set_params(self, params):
         self.__api_key = self._secrets["api_key_name"]
@@ -25,6 +36,7 @@ class MWDB_Scan(FileAnalyzer):
         return "karton" in file_info.metakeys.keys()
 
     def run(self):
+        result = {}
         binary = self.read_file_bytes()
         query = str(hashlib.sha256(binary).hexdigest())
 
@@ -47,27 +59,27 @@ class MWDB_Scan(FileAnalyzer):
         else:
             try:
                 file_info = mwdb.query_file(query)
-            except Exception:
-                raise AnalyzerRunException(
-                    "File not found in the MWDB. Set 'upload_file=true' "
+            except Exception as exc:
+                err_msg = (
+                    "Error: File not found in the MWDB. Set 'upload_file=true' "
                     "if you want to upload and poll results. "
                 )
-        result = {"data": file_info.data, "metakeys": file_info.metakeys}
-        result["permalink"] = f"https://mwdb.cert.pl/file/{query}"
+                logger.error((str(exc), err_msg))
+                self.report.errors.append(str(exc))
+                self.report.errors.append(err_msg)
+                result["not_found"] = True
+                return result
+
+        result.update(
+            data=file_info.data,
+            metakeys=file_info.metakeys,
+            permalink=f"https://mwdb.cert.pl/file/{query}",
+        )
+
         return result
 
     @classmethod
     def _monkeypatch(cls):
-        def mocked_mwdb_response(*args, **kwargs):
-            attrs = {"data": {"id": "id_test"}, "metakeys": {"karton": "test_analysis"}}
-            fileInfo = MagicMock()
-            fileInfo.configure_mock(**attrs)
-            QueryResponse = MagicMock()
-            attrs = {"query_file.return_value": fileInfo}
-            QueryResponse.configure_mock(**attrs)
-            Response = MagicMock(return_value=QueryResponse)
-            return Response.return_value
-
         patches = [
             if_mock_connections(
                 patch(

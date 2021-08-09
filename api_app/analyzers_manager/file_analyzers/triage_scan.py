@@ -102,7 +102,7 @@ class TriageScanFile(classes.FileAnalyzer):
             self.base_url + f"samples/{sample_id}/{task}/report_triage.json",
             headers=self.headers,
         )
-        return (task_report.status_code, task_report.json())
+        return task_report.status_code, task_report.json()
 
     @classmethod
     def _monkeypatch(cls):

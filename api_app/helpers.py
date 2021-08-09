@@ -13,8 +13,8 @@ from django.utils import timezone
 logger = logging.getLogger(__name__)
 
 
-def get_now_date_only():
-    return str(timezone.now().date())
+def get_now_str():
+    return str(timezone.now())
 
 
 def get_now():

@@ -717,9 +717,6 @@ components:
               items:
                 type: string
           readOnly: true
-        start_time:
-          type: string
-          format: date-time
       required:
       - config
       - disabled
@@ -816,48 +813,10 @@ components:
       - status
     GetAnalyzerConfigsFailedResponse:
       type: object
-      description: |-
-        Job model's serializer for File Analysis.
-        Used for create()
       properties:
-        id:
-          type: integer
+        error:
+          type: string
           readOnly: true
-        source:
-          type: string
-          maxLength: 50
-        md5:
-          type: string
-          maxLength: 32
-        force_privacy:
-          type: boolean
-        disable_external_analyzers:
-          type: boolean
-        file:
-          type: string
-          format: uri
-        file_name:
-          type: string
-        run_all_available_analyzers:
-          type: boolean
-          default: false
-        runtime_configuration:
-          type: object
-          additionalProperties: {}
-          writeOnly: true
-          default: {}
-        analyzers_requested:
-          type: array
-          items: {}
-        tags_id:
-          type: array
-          items:
-            type: integer
-            writeOnly: true
-          writeOnly: true
-        private:
-          type: boolean
-          default: false
       required:
       - error
     GetConnectorConfigsFailedResponse:

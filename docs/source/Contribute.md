@@ -92,7 +92,7 @@ After having written the new python module, you have to remember to:
 
 4. Ultimately, add the required secrets in the files `docker/env_file_app_template`, `docker/env_file_app_ci` and in the `docs/Installation.md`.
 
-6. In the Pull Request remember to provide some real world examples (screenshots and raw JSON results) of some successful executions of the analyzer to let us understand how it would work.
+5. In the Pull Request remember to provide some real world examples (screenshots and raw JSON results) of some successful executions of the analyzer to let us understand how it would work.
 
 ### Integrating a docker based analyzer
 If the analyzer you wish to integrate doesn't exist as a callable API online or python package, it should be integrated with its own docker image
@@ -141,7 +141,8 @@ After having written the new python module, you have to remember to:
   Please see [Connectors customization section](./Usage.md#connectors-customization) to get the explanation of the other available keys.
 
 
-3. Follow steps 3-6 of [How to add a new analyzer](./Contribute.md#how-to-add-a-new-analyzer)
+3. Add the new connector in the lists in the docs: [Usage](./Usage.md). Also, if the connector provides additional optional configuration, add the available options here: [Advanced-Usage](./Advanced-Usage.md)
+4. Follow steps 4-5 of [How to add a new analyzer](./Contribute.md#how-to-add-a-new-analyzer)
 
 ## Create a pull request
 

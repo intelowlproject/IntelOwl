@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
-  title: ''
-  version: 0.0.0
+  title: IntelOwl API specification
+  version: 2.5.0
 paths:
   /api/analyze_file:
     post:
@@ -21,6 +21,8 @@ paths:
             schema:
               $ref: '#/components/schemas/FileAnalysis'
         required: true
+      security:
+      - durinAuth: []
       responses:
         '200':
           content:
@@ -46,6 +48,8 @@ paths:
             schema:
               $ref: '#/components/schemas/ObservableAnalysis'
         required: true
+      security:
+      - durinAuth: []
       responses:
         '200':
           content:
@@ -93,6 +97,8 @@ paths:
                       default False, any value is True
       tags:
       - ask_analysis_availability
+      security:
+      - durinAuth: []
       responses:
         '200':
           content:
@@ -155,35 +161,57 @@ paths:
           description: No response body
   /api/get_analyzer_configs:
     get:
-      operationId: get_analyzer_configs_retrieve
-      description: ''
+      operationId: get_analyzer_configs_list
+      description: |2-
+
+                Get the uploaded analyzer configuration,
+                can be useful if you want to choose the analyzers programmatically
       tags:
       - get_analyzer_configs
+      security:
+      - durinAuth: []
       responses:
         '200':
-          description: No response body
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AnalyzerConfig'
+          description: ''
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetAnalyzerConfigsFailedResponse'
+          description: ''
   /api/get_connector_configs:
     get:
-      operationId: get_connector_configs_retrieve
-      description: ''
+      operationId: get_connector_configs_list
+      description: Get the uploaded connector configuration
       tags:
       - get_connector_configs
+      security:
+      - durinAuth: []
       responses:
         '200':
-          description: No response body
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ConnectorConfig'
+          description: ''
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetConnectorConfigsFailedResponse'
+          description: ''
   /api/job/{job_id}/analyzer/{name}/kill:
     patch:
       operationId: job_analyzer_kill_partial_update
-      description: |-
-        Kill running plugin by closing celery task and marking as killed
-
-        :params url:
-         - job_id
-         - name (plugin name)
-        :returns:
-         - 204 - if killed
-         - 404 - not found
-         - 403 - forbidden, 400 bad request
+      description: Kill running plugin by closing celery task and marking as killed
       parameters:
       - in: path
         name: job_id
@@ -197,24 +225,17 @@ paths:
         required: true
       tags:
       - job
+      security:
+      - durinAuth: []
       responses:
-        '200':
+        '204':
+          description: No response body
+        '400':
           description: No response body
   /api/job/{job_id}/analyzer/{name}/retry:
     patch:
       operationId: job_analyzer_retry_partial_update
-      description: |-
-        Retry a plugin run if it failed/was killed previously
-         regenerates the args required and starts a new celery task
-
-        :params url:
-         - job_id
-         - name (plugin name)
-        :returns:
-         - 204 - if success
-         - 404 - not found
-         - 403 - forbidden
-         - 400 - bad request
+      description: Retry a plugin run if it failed/was killed previously
       parameters:
       - in: path
         name: job_id
@@ -228,22 +249,17 @@ paths:
         required: true
       tags:
       - job
+      security:
+      - durinAuth: []
       responses:
-        '200':
+        '204':
+          description: No response body
+        '400':
           description: No response body
   /api/job/{job_id}/connector/{name}/kill:
     patch:
       operationId: job_connector_kill_partial_update
-      description: |-
-        Kill running plugin by closing celery task and marking as killed
-
-        :params url:
-         - job_id
-         - name (plugin name)
-        :returns:
-         - 204 - if killed
-         - 404 - not found
-         - 403 - forbidden, 400 bad request
+      description: Kill running plugin by closing celery task and marking as killed
       parameters:
       - in: path
         name: job_id
@@ -257,24 +273,17 @@ paths:
         required: true
       tags:
       - job
+      security:
+      - durinAuth: []
       responses:
-        '200':
+        '204':
+          description: No response body
+        '400':
           description: No response body
   /api/job/{job_id}/connector/{name}/retry:
     patch:
       operationId: job_connector_retry_partial_update
-      description: |-
-        Retry a plugin run if it failed/was killed previously
-         regenerates the args required and starts a new celery task
-
-        :params url:
-         - job_id
-         - name (plugin name)
-        :returns:
-         - 204 - if success
-         - 404 - not found
-         - 403 - forbidden
-         - 400 - bad request
+      description: Retry a plugin run if it failed/was killed previously
       parameters:
       - in: path
         name: job_id
@@ -288,16 +297,22 @@ paths:
         required: true
       tags:
       - job
+      security:
+      - durinAuth: []
       responses:
-        '200':
+        '204':
+          description: No response body
+        '400':
           description: No response body
   /api/jobs:
     get:
       operationId: jobs_list
-      description: "\n    REST endpoint to fetch list of jobs or retrieve a job with\
-        \ job ID.\n    Requires authentication.\n    "
+      description: "\n    REST endpoint to fetch list of jobs or retrieve/delete a\
+        \ job with job ID.\n    Requires authentication.\n    "
       tags:
       - jobs
+      security:
+      - durinAuth: []
       responses:
         '200':
           content:
@@ -310,8 +325,8 @@ paths:
   /api/jobs/{id}:
     get:
       operationId: jobs_retrieve
-      description: "\n    REST endpoint to fetch list of jobs or retrieve a job with\
-        \ job ID.\n    Requires authentication.\n    "
+      description: "\n    REST endpoint to fetch list of jobs or retrieve/delete a\
+        \ job with job ID.\n    Requires authentication.\n    "
       parameters:
       - in: path
         name: id
@@ -321,6 +336,8 @@ paths:
         required: true
       tags:
       - jobs
+      security:
+      - durinAuth: []
       responses:
         '200':
           content:
@@ -330,8 +347,8 @@ paths:
           description: ''
     delete:
       operationId: jobs_destroy
-      description: "\n    REST endpoint to fetch list of jobs or retrieve a job with\
-        \ job ID.\n    Requires authentication.\n    "
+      description: "\n    REST endpoint to fetch list of jobs or retrieve/delete a\
+        \ job with job ID.\n    Requires authentication.\n    "
       parameters:
       - in: path
         name: id
@@ -341,6 +358,8 @@ paths:
         required: true
       tags:
       - jobs
+      security:
+      - durinAuth: []
       responses:
         '204':
           description: No response body
@@ -357,16 +376,17 @@ paths:
         required: true
       tags:
       - jobs
+      security:
+      - durinAuth: []
       responses:
-        '200':
+        '204':
           description: No response body
         '400':
           description: No response body
   /api/jobs/{id}/kill:
     patch:
       operationId: jobs_kill_partial_update
-      description: "\n    REST endpoint to fetch list of jobs or retrieve a job with\
-        \ job ID.\n    Requires authentication.\n    "
+      description: Kill running job by closing celery tasks and marking as killed
       parameters:
       - in: path
         name: id
@@ -376,24 +396,13 @@ paths:
         required: true
       tags:
       - jobs
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PatchedJob'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/PatchedJob'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/PatchedJob'
+      security:
+      - durinAuth: []
       responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Job'
-          description: ''
+        '204':
+          description: No response body
+        '400':
+          description: No response body
   /api/tags:
     get:
       operationId: tags_list
@@ -404,6 +413,8 @@ paths:
             POST/PUT/DELETE requires model/object level permission.
       tags:
       - tags
+      security:
+      - durinAuth: []
       responses:
         '200':
           content:
@@ -434,6 +445,8 @@ paths:
             schema:
               $ref: '#/components/schemas/Tag'
         required: true
+      security:
+      - durinAuth: []
       responses:
         '201':
           content:
@@ -458,6 +471,8 @@ paths:
         required: true
       tags:
       - tags
+      security:
+      - durinAuth: []
       responses:
         '200':
           content:
@@ -493,6 +508,8 @@ paths:
             schema:
               $ref: '#/components/schemas/Tag'
         required: true
+      security:
+      - durinAuth: []
       responses:
         '200':
           content:
@@ -527,6 +544,8 @@ paths:
           multipart/form-data:
             schema:
               $ref: '#/components/schemas/PatchedTag'
+      security:
+      - durinAuth: []
       responses:
         '200':
           content:
@@ -550,11 +569,77 @@ paths:
         required: true
       tags:
       - tags
+      security:
+      - durinAuth: []
       responses:
         '204':
           description: No response body
 components:
   schemas:
+    AnalyzerConfig:
+      type: object
+      description: Serializer for `analyzer_config.json`.
+      properties:
+        name:
+          type: string
+        python_module:
+          type: string
+          maxLength: 128
+        disabled:
+          type: boolean
+        config:
+          type: object
+          additionalProperties: {}
+        secrets:
+          type: object
+          additionalProperties: {}
+        description:
+          type: string
+        verification:
+          type: object
+          properties:
+            configured:
+              type: boolean
+            error_message:
+              type: string
+            missing_secrets:
+              type: array
+              items:
+                type: string
+          readOnly: true
+        type:
+          $ref: '#/components/schemas/TypeEnum'
+        external_service:
+          type: boolean
+        leaks_info:
+          type: boolean
+          default: false
+        run_hash:
+          type: boolean
+          default: false
+        run_hash_type:
+          $ref: '#/components/schemas/RunHashTypeEnum'
+        supported_filetypes:
+          type: array
+          items: {}
+          default: []
+        not_supported_filetypes:
+          type: array
+          items: {}
+          default: []
+        observable_supported:
+          type: array
+          items:
+            $ref: '#/components/schemas/ObservableSupportedEnum'
+          default: []
+      required:
+      - config
+      - disabled
+      - external_service
+      - name
+      - python_module
+      - type
+      - verification
     AnalyzerReport:
       type: object
       description: AnalyzerReport model's serializer.
@@ -572,7 +657,8 @@ components:
           items:
             type: string
         process_time:
-          type: string
+          type: number
+          format: float
           readOnly: true
         start_time:
           type: string
@@ -612,6 +698,46 @@ components:
       required:
       - job_id
       - status
+    ConnectorConfig:
+      type: object
+      description: Serializer for `connector_config.json`.
+      properties:
+        name:
+          type: string
+        python_module:
+          type: string
+          maxLength: 128
+        disabled:
+          type: boolean
+        config:
+          type: object
+          additionalProperties: {}
+        secrets:
+          type: object
+          additionalProperties: {}
+        description:
+          type: string
+        verification:
+          type: object
+          properties:
+            configured:
+              type: boolean
+            error_message:
+              type: string
+            missing_secrets:
+              type: array
+              items:
+                type: string
+          readOnly: true
+        start_time:
+          type: string
+          format: date-time
+      required:
+      - config
+      - disabled
+      - name
+      - python_module
+      - verification
     ConnectorReport:
       type: object
       description: ConnectorReport model's serializer.
@@ -629,7 +755,8 @@ components:
           items:
             type: string
         process_time:
-          type: string
+          type: number
+          format: float
           readOnly: true
         start_time:
           type: string
@@ -699,6 +826,60 @@ components:
       required:
       - job_id
       - status
+    GetAnalyzerConfigsFailedResponse:
+      type: object
+      description: |-
+        Job model's serializer for File Analysis.
+        Used for create()
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        source:
+          type: string
+          maxLength: 50
+        md5:
+          type: string
+          maxLength: 32
+        force_privacy:
+          type: boolean
+        disable_external_analyzers:
+          type: boolean
+        file:
+          type: string
+          format: uri
+        file_name:
+          type: string
+        run_all_available_analyzers:
+          type: boolean
+          default: false
+        runtime_configuration:
+          type: object
+          additionalProperties: {}
+          writeOnly: true
+          default: {}
+        analyzers_requested:
+          type: array
+          items: {}
+        tags_id:
+          type: array
+          items:
+            type: integer
+            writeOnly: true
+          writeOnly: true
+        private:
+          type: boolean
+          default: false
+      required:
+      - error
+    GetConnectorConfigsFailedResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          readOnly: true
+      required:
+      - error
     Job:
       type: object
       description: |-
@@ -814,7 +995,8 @@ components:
             $ref: '#/components/schemas/Tag'
           readOnly: true
         process_time:
-          type: string
+          type: number
+          format: float
           readOnly: true
         no_of_analyzers_executed:
           type: string
@@ -888,83 +1070,14 @@ components:
       required:
       - job_id
       - status
-    PatchedJob:
-      type: object
-      description: |-
-        Job model's serializer.
-        Used for retrieve()
-      properties:
-        id:
-          type: integer
-          readOnly: true
-        tags:
-          type: array
-          items:
-            $ref: '#/components/schemas/Tag'
-          readOnly: true
-        analyzer_reports:
-          type: array
-          items:
-            $ref: '#/components/schemas/AnalyzerReport'
-          readOnly: true
-        connector_reports:
-          type: array
-          items:
-            $ref: '#/components/schemas/ConnectorReport'
-          readOnly: true
-        source:
-          type: string
-          maxLength: 50
-        is_sample:
-          type: boolean
-        md5:
-          type: string
-          maxLength: 32
-        observable_name:
-          type: string
-          maxLength: 512
-        observable_classification:
-          type: string
-          maxLength: 12
-        file_name:
-          type: string
-          maxLength: 512
-        file_mimetype:
-          type: string
-          maxLength: 80
-        status:
-          $ref: '#/components/schemas/StatusA27Enum'
-        analyzers_requested:
-          type: array
-          items:
-            type: string
-        run_all_available_analyzers:
-          type: boolean
-        analyzers_to_execute:
-          type: array
-          items:
-            type: string
-        connectors_to_execute:
-          type: array
-          items:
-            type: string
-        received_request_time:
-          type: string
-          format: date-time
-          readOnly: true
-        finished_analysis_time:
-          type: string
-          format: date-time
-          nullable: true
-        force_privacy:
-          type: boolean
-        disable_external_analyzers:
-          type: boolean
-        errors:
-          type: array
-          items:
-            type: string
-          nullable: true
+    ObservableSupportedEnum:
+      enum:
+      - ip
+      - url
+      - domain
+      - hash
+      - generic
+      type: string
     PatchedTag:
       type: object
       description: |-
@@ -980,6 +1093,11 @@ components:
         color:
           type: string
           maxLength: 7
+    RunHashTypeEnum:
+      enum:
+      - md5
+      - sha256
+      type: string
     Status0b3Enum:
       enum:
       - FAILED
@@ -1016,3 +1134,14 @@ components:
       - color
       - id
       - label
+    TypeEnum:
+      enum:
+      - file
+      - observable
+      type: string
+  securitySchemes:
+    durinAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: 'Token-based authentication with required prefix: Token'

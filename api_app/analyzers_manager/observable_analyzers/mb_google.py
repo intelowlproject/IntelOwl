@@ -14,18 +14,10 @@ class MB_GOOGLE(MB_GET):
     def run(self):
         results = {}
 
-        # save for later
-        observable_name = self.observable_name
-
-        query = "{} site:bazaar.abuse.ch".format(observable_name)
+        query = "{} site:bazaar.abuse.ch".format(self.observable_name)
         for url in googlesearch.search(query, stop=20):
             mb_hash = url.split("/")[-2]
-            # overwrite self.observable_name so super class works correctly
-            self.observable_name = mb_hash
-            res = super(MB_GOOGLE, self).run()
+            res = super(MB_GOOGLE, self).query_mb_api(observable_name=mb_hash)
             results[mb_hash] = res
-
-        # revert back
-        self.observable_name = observable_name
 
         return results

@@ -33,7 +33,6 @@ class TriageSearch(classes.ObservableAnalyzer):
         self.session = requests.Session()
         self.session.headers = {"Authorization": f"Bearer {self.__api_key}"}
 
-        response = None
         if self.analysis_type == "search":
             response = self.__triage_search()
         elif self.analysis_type == "submit":
@@ -109,7 +108,7 @@ class TriageSearch(classes.ObservableAnalyzer):
         task_report = self.session.get(
             self.base_url + f"samples/{sample_id}/{task}/report_triage.json"
         )
-        return (task_report.status_code, task_report.json())
+        return task_report.status_code, task_report.json()
 
     @classmethod
     def _monkeypatch(cls):

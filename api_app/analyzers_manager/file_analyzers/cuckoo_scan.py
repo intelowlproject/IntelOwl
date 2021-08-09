@@ -7,7 +7,6 @@ import requests
 import logging
 
 from api_app.exceptions import AnalyzerRunException
-from api_app.helpers import get_binary
 from api_app.analyzers_manager.classes import FileAnalyzer
 
 from tests.mock_utils import patch, if_mock_connections, MockResponse
@@ -37,7 +36,7 @@ class CuckooAnalysis(FileAnalyzer):
         self.max_get_tries = params.get("max_poll_tries", 20)
 
     def run(self):
-        binary = get_binary(self.job_id)
+        binary = self.read_file_bytes()
         if not binary:
             raise AnalyzerRunException("is the binary empty?!")
 

@@ -5,8 +5,7 @@ import logging
 from typing import Union
 
 from intel_owl.celery import app as celery_app
-from api_app import models, serializers
-from api_app.permissions import ExtendedObjectPermissions
+from api_app import models, serializers, permissions
 from .analyzers_manager import controller as analyzers_controller
 
 from wsgiref.util import FileWrapper
@@ -292,7 +291,6 @@ class JobViewSet(
     mixins.DestroyModelMixin,
     viewsets.GenericViewSet,
 ):
-
     queryset = (
         models.Job.objects.prefetch_related("tags")
         .order_by("-received_request_time")
@@ -302,7 +300,7 @@ class JobViewSet(
     serializer_action_classes = {
         "list": serializers.JobListSerializer,
     }
-    permission_classes = (ExtendedObjectPermissions,)
+    permission_classes = (permissions.ExtendedObjectPermissions,)
     filter_backends = (ObjectPermissionsFilter,)
 
     def get_serializer_class(self, *args, **kwargs):

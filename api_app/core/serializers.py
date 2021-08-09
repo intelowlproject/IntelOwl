@@ -152,7 +152,6 @@ class AbstractConfigSerializer(rfs.Serializer):
         """
         Returns config file as `dict`.
         """
-        config_dict = {}
         config_path = cls._get_config_path()
         with open(config_path) as f:
             config_dict = json.load(f)
@@ -163,7 +162,6 @@ class AbstractConfigSerializer(rfs.Serializer):
         """
         Returns md5sum of config file.
         """
-        md5hash = None
         fpath = cls._get_config_path()
         with open(fpath, "r") as fp:
             buffer = fp.read().encode("utf-8")

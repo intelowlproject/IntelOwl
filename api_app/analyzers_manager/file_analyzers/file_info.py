@@ -7,7 +7,6 @@ import pydeep
 import magic
 from exiftool import ExifTool
 
-from api_app.helpers import get_binary
 from api_app.analyzers_manager.classes import FileAnalyzer
 
 logger = logging.getLogger(__name__)
@@ -28,7 +27,7 @@ class FileInfo(FileAnalyzer):
         results["magic"] = magic.from_file(self.filepath)
         results["mimetype"] = magic.from_file(self.filepath, mime=True)
 
-        binary = get_binary(self.job_id)
+        binary = self.read_file_bytes()
         results["md5"] = hashlib.md5(binary).hexdigest()
         results["sha1"] = hashlib.sha1(binary).hexdigest()
         results["sha256"] = hashlib.sha256(binary).hexdigest()

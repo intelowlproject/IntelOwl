@@ -105,8 +105,9 @@ which can be queried from the main Django API.
 * Rest of the steps remain same as given under "How to add a new analyzer".
 
 ## How to add a new connector
-You may want to look at a few existing example to start to build a new one:
-- [opencti.py](https://github.com/intelowlproject/IntelOwl/blob/develop/api_app/connectors_manager/connectors/opencti.py)
+You may want to look at a few existing examples to start to build a new one:
+- [misp.py](https://github.com/intelowlproject/IntelOwl/blob/master/api_app/connectors_manager/connectors/misp.py)
+- [opencti.py](https://github.com/intelowlproject/IntelOwl/blob/master/api_app/connectors_manager/connectors/opencti.py)
 
 After having written the new python module, you have to remember to:
 1. Put the module in the `connectors` directory

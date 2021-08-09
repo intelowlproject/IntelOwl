@@ -57,7 +57,6 @@ class PluginActionViewSet(viewsets.ViewSet, metaclass=ABCMeta):
         request=None,
         responses={
             204: None,
-            400: None,
         },
     )
     @action(detail=False, methods=["patch"])
@@ -80,7 +79,6 @@ class PluginActionViewSet(viewsets.ViewSet, metaclass=ABCMeta):
         request=None,
         responses={
             204: None,
-            400: None,
         },
     )
     @action(detail=False, methods=["patch"])

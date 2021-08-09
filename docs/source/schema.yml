@@ -230,8 +230,6 @@ paths:
       responses:
         '204':
           description: No response body
-        '400':
-          description: No response body
   /api/job/{job_id}/analyzer/{name}/retry:
     patch:
       operationId: job_analyzer_retry_partial_update
@@ -253,8 +251,6 @@ paths:
       - durinAuth: []
       responses:
         '204':
-          description: No response body
-        '400':
           description: No response body
   /api/job/{job_id}/connector/{name}/kill:
     patch:
@@ -278,8 +274,6 @@ paths:
       responses:
         '204':
           description: No response body
-        '400':
-          description: No response body
   /api/job/{job_id}/connector/{name}/retry:
     patch:
       operationId: job_connector_retry_partial_update
@@ -301,8 +295,6 @@ paths:
       - durinAuth: []
       responses:
         '204':
-          description: No response body
-        '400':
           description: No response body
   /api/jobs:
     get:
@@ -381,8 +373,6 @@ paths:
       responses:
         '200':
           description: No response body
-        '400':
-          description: No response body
   /api/jobs/{id}/kill:
     patch:
       operationId: jobs_kill_partial_update
@@ -400,8 +390,6 @@ paths:
       - durinAuth: []
       responses:
         '204':
-          description: No response body
-        '400':
           description: No response body
   /api/tags:
     get:

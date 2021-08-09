@@ -117,7 +117,7 @@ class OpenCTI(classes.Connector):
 
         # Entities in OpenCTI are created only if they don't exist
         # create queries will return the existing entity in that case
-        # use update (default: false) to update the entity if exists
+        # use update (default: False) to update the entity if exists
 
         # Create the observable (if not exists with the given type and values)
         observable_data = self.generate_observable_data()

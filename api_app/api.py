@@ -319,7 +319,6 @@ class JobViewSet(
         request=None,
         responses={
             204: None,
-            400: None,
         },
     )
     @action(detail=True, methods=["patch"])
@@ -354,7 +353,6 @@ class JobViewSet(
         request=None,
         responses={
             200: None,
-            400: None,
         },
     )
     @action(detail=True, methods=["get"])

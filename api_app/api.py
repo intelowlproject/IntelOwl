@@ -357,6 +357,12 @@ class JobViewSet(
     )
     @action(detail=True, methods=["get"])
     def download_sample(self, request, pk=None):
+        """
+        Download a sample from a given Job ID.
+
+        :param url: pk (job_id)
+        :returns: bytes
+        """
         # get job object
         job = self.get_object()
 

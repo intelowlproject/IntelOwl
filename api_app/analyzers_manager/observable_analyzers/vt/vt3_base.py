@@ -81,10 +81,9 @@ class VirusTotalv3AnalyzerMixin(BaseAnalyzerMixin):
                         self.force_active_file_scan_if_old
                         and not already_done_active_scan_because_report_was_old
                     ):
-                        now = datetime.utcnow()
                         scan_date = attributes.get("last_analysis_date", 0)
                         scan_date_time = datetime.fromtimestamp(scan_date)
-                        thirty_days_ago = now - timedelta(days=30)
+                        thirty_days_ago = datetime.utcnow() - timedelta(days=30)
                         if thirty_days_ago > scan_date_time:
                             logger.info(
                                 f"hash {observable_name} found on VT with AV reports"

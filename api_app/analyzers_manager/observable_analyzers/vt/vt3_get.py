@@ -22,7 +22,44 @@ class VirusTotalv3(ObservableAnalyzer, VirusTotalv3AnalyzerMixin):
             if_mock_connections(
                 patch(
                     "requests.get",
-                    return_value=MockResponse({}, 200),
+                    side_effect=[
+                        # for _vt_get_report
+                        MockResponse(
+                            {
+                                "data": {
+                                    "attributes": {
+                                        "status": "completed",
+                                        "last_analysis_results": {"test": "test"},
+                                        # must be earlier than 30 days ago
+                                        "last_analysis_date": 1590000000,
+                                    }
+                                }
+                            },
+                            200,
+                        ),
+                        # for _vt_scan_file
+                        MockResponse(
+                            {
+                                "data": {
+                                    "attributes": {
+                                        "status": "completed",
+                                    }
+                                }
+                            },
+                            200,
+                        ),
+                        # for /behaviour_summary
+                        MockResponse({}, 200),
+                        # for /sigma_analyses
+                        MockResponse({}, 200),
+                    ],
+                ),
+                patch(
+                    "requests.post",
+                    # for _vt_scan_file
+                    return_value=MockResponse(
+                        {"scan_id": "scan_id_test", "data": {"id": "id_test"}}, 200
+                    ),
                 ),
             )
         ]

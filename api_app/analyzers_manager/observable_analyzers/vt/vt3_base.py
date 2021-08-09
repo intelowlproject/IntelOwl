@@ -78,7 +78,7 @@ class VirusTotalv3AnalyzerMixin(BaseAnalyzerMixin):
                     # at this time, if the flag if set,
                     # we are going to force the analysis again for old samples
                     if (
-                        self.force_active_file_scan_if_old
+                        self.force_active_scan_if_old
                         and not already_done_active_scan_because_report_was_old
                     ):
                         scan_date = attributes.get("last_analysis_date", 0)

@@ -29,6 +29,11 @@ class MISP(Connector):
         self.__url_name = self._secrets["url_key_name"]
         self.__api_key = self._secrets["api_key_name"]
 
+    @classmethod
+    def health_check(cls, url_loc, cc):
+        url_loc = {"secrets": "url_key_name"}
+        return super().health_check(url_loc, cc)
+
     @property
     def _event_obj(self) -> pymisp.MISPEvent:
         obj = pymisp.MISPEvent()

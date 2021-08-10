@@ -34,6 +34,11 @@ class OpenCTI(classes.Connector):
         self.__url_name = self._secrets["url_key_name"]
         self.__api_key = self._secrets["api_key_name"]
 
+    @classmethod
+    def health_check(cls, url_loc, cc):
+        url_loc = {"secrets": "url_key_name"}
+        return super().health_check(url_loc, cc)
+
     def get_observable_type(self) -> str:
         if self._job.is_sample:
             obs_type = INTELOWL_OPENCTI_TYPE_MAP["file"]

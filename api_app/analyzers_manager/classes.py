@@ -380,7 +380,7 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
             self.start = mock_fn(self.start)
 
     @classmethod
-    def health_check(cls):
+    def health_check(cls) -> bool:
         """
         basic health check: if instance is up or not (timeout - 10s)
         """

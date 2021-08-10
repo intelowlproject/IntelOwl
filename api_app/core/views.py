@@ -1,3 +1,9 @@
+# This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
+# See the file 'LICENSE' for copying permission.
+
+from abc import ABCMeta, abstractmethod
+import logging
+
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.exceptions import (
@@ -9,12 +15,12 @@ from rest_framework.response import Response
 from drf_spectacular.utils import (
     extend_schema as add_docs,
 )
-from abc import ABCMeta, abstractmethod
-
 from rest_framework.views import APIView
 
 from intel_owl.celery import app as celery_app
 from .models import AbstractReport
+
+logger = logging.getLogger(__name__)
 
 
 class PluginActionViewSet(viewsets.ViewSet, metaclass=ABCMeta):
@@ -115,5 +121,12 @@ class PluginHealthCheckAPI(APIView, metaclass=ABCMeta):
         try:
             health_status = self.perform_healthcheck(name)
         except ImportError:
-            raise ValidationError(f"Class: {self.cls_path} couldn't be imported")
+            logger.exception(
+                f"health_check:{name} requester:{str(request.user)}"
+                f" Class: {self.cls_path} couldn't be imported"
+            )
+            return Response(
+                {"error": f"error in health_check:{name}. Check logs."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
         return Response(data={"status": health_status}, status=status.HTTP_200_OK)

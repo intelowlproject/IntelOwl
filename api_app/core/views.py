@@ -11,6 +11,8 @@ from drf_spectacular.utils import (
 )
 from abc import ABCMeta, abstractmethod
 
+from rest_framework.views import APIView
+
 from intel_owl.celery import app as celery_app
 from .models import AbstractReport
 
@@ -98,3 +100,20 @@ class PluginActionViewSet(viewsets.ViewSet, metaclass=ABCMeta):
         # retry with the same arguments
         self.perform_retry(report)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class PluginHealthCheckAPI(APIView, metaclass=ABCMeta):
+    @abstractmethod
+    def get_cls_path(self, plugin_name):
+        raise NotImplementedError()
+
+    @abstractmethod
+    def perform_healthcheck(self, plugin_name):
+        raise NotImplementedError()
+
+    def get(self, request, name):
+        try:
+            health_status = self.perform_healthcheck(name)
+        except ImportError:
+            raise ValidationError(f"Class: {self.cls_path} couldn't be imported")
+        return Response(data={"status": health_status}, status=status.HTTP_200_OK)

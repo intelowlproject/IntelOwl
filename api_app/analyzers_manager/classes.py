@@ -378,3 +378,20 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
         )
         for mock_fn in patches:
             self.start = mock_fn(self.start)
+
+    @classmethod
+    def health_check(cls):
+        """
+        basic health check: if instance is up or not (timeout - 10s)
+        """
+        health_status = False
+
+        try:
+            requests.head(cls.url, timeout=10)
+            health_status = True
+        except requests.exceptions.ConnectionError:
+            pass
+        except requests.exceptions.Timeout:
+            pass
+
+        return health_status

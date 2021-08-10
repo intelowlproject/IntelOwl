@@ -1,14 +1,16 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
+from django.utils.module_loading import import_string
+from api_app.analyzers_manager.classes import DockerBasedAnalyzer
 import logging
 
 from rest_framework import generics, status
+from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework import serializers as BaseSerializer
 
-
-from api_app.core.views import PluginActionViewSet
+from api_app.core.views import PluginActionViewSet, PluginHealthCheckAPI
 from .serializers import AnalyzerConfigSerializer
 from . import controller as analyzers_controller
 from .models import AnalyzerReport
@@ -76,3 +78,19 @@ class AnalyzerActionViewSet(PluginActionViewSet):
         analyzers_controller.start_analyzers(
             report.job.id, analyzers_to_execute, runtime_configuration
         )
+
+
+class AnalyzerHealthCheckAPI(PluginHealthCheckAPI):
+    def get_cls_path(self, analyzer_name) -> str:
+        analyzer_dataclasses = AnalyzerConfigSerializer.get_as_dataclasses()
+        if analyzer_dataclasses.get(analyzer_name, None) is None:
+            raise ValidationError({"detail": "Analyzer doesn't exist"})
+        config = analyzer_dataclasses[analyzer_name]
+        return config.get_full_import_path()
+
+    def perform_healthcheck(self, analyzer_name):
+        klass: DockerBasedAnalyzer = import_string(self.get_cls_path(analyzer_name))
+        # docker analyzers have a common method for health check
+        if not hasattr(klass, "health_check"):
+            raise ValidationError({"detail": "No healthcheck implemented"})
+        return klass.health_check()

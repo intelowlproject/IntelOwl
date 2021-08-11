@@ -3,6 +3,8 @@
 
 import logging
 from typing import Union, List, Dict
+
+from rest_framework.exceptions import ValidationError
 from celery import uuid, group
 
 from django.conf import settings
@@ -132,3 +134,23 @@ def run_connector(
         report = set_failed_connector(job_id, config.name, str(e), **report_defaults)
 
     return report
+
+
+def run_healthcheck(connector_name: str) -> bool:
+    connector_config = ConnectorConfig.get(connector_name)
+    if connector_config is None:
+        raise ValidationError({"detail": "Connector doesn't exist"})
+
+    cls_path = connector_config.get_full_import_path()
+    try:
+        klass: Connector = import_string(cls_path)
+    except ImportError:
+        raise Exception(f"Class: {cls_path} couldn't be imported")
+
+    status = None
+    try:
+        status = klass.health_check(connector_config)
+    except NotImplementedError:
+        raise ValidationError({"detail": "No healthcheck implemented"})
+
+    return status

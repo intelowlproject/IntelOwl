@@ -4,7 +4,7 @@
 from django.conf import settings
 
 import pymisp
-from typing import List
+from typing import Dict, List
 
 from tests.mock_utils import patch, if_mock_connections
 from api_app.connectors_manager.classes import Connector
@@ -30,9 +30,8 @@ class MISP(Connector):
         self.__api_key = self._secrets["api_key_name"]
 
     @classmethod
-    def health_check(cls, url_loc, cc):
-        url_loc = {"secrets": "url_key_name"}
-        return super().health_check(url_loc, cc)
+    def get_healthcheck_url_loc(cls) -> Dict[str, str]:
+        return {"secrets": "url_key_name"}
 
     @property
     def _event_obj(self) -> pymisp.MISPEvent:

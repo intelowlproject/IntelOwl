@@ -1,6 +1,7 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
+from typing import Dict
 from django.conf import settings
 
 from pycti.api.opencti_api_client import File
@@ -35,9 +36,8 @@ class OpenCTI(classes.Connector):
         self.__api_key = self._secrets["api_key_name"]
 
     @classmethod
-    def health_check(cls, url_loc, cc):
-        url_loc = {"secrets": "url_key_name"}
-        return super().health_check(url_loc, cc)
+    def get_healthcheck_url_loc(cls) -> Dict[str, str]:
+        return {"secrets": "url_key_name"}
 
     def get_observable_type(self) -> str:
         if self._job.is_sample:

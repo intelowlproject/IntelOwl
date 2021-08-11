@@ -74,4 +74,4 @@ class ConnectorActionViewSet(PluginActionViewSet):
 
 class ConnectorHealthCheckAPI(PluginHealthCheckAPI):
     def perform_healthcheck(self, connector_name):
-        pass
+        return connectors_controller.run_healthcheck(connector_name)

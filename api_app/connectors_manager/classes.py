@@ -56,17 +56,23 @@ class Connector(Plugin):
         return f"({self.connector_name}, job: #{self.job_id})"
 
     @classmethod
-    def health_check(
-        cls, url_loc: Dict[str, str], cc: ConnectorConfig
-    ) -> Optional[bool]:
+    def get_healthcheck_url_loc(cls) -> Dict[str, str]:
         """
-        basic health check: if instance is up or not (timeout - 10s)
-        url_loc: whether url is in config/secrets or given directly
+        Should return url location: in config/secrets or given directly (url)
           "secrets/config/url": "value"
         """
+        raise NotImplementedError()
 
-        url = None
-        health_status = None
+    @classmethod
+    def health_check(cls, cc: ConnectorConfig) -> Optional[bool]:
+        """
+        basic health check: if instance is up or not (timeout - 10s)
+        raises: NotImplementedError
+          if get_healthcheck_url_loc is not overridden by subclass
+        """
+
+        url_loc = cls.get_healthcheck_url_loc()
+        url, health_status = None, None
 
         if url_loc.get("url", None) is not None:
             url = url_loc["url"]

@@ -110,10 +110,6 @@ class PluginActionViewSet(viewsets.ViewSet, metaclass=ABCMeta):
 
 class PluginHealthCheckAPI(APIView, metaclass=ABCMeta):
     @abstractmethod
-    def get_cls_path(self, plugin_name):
-        raise NotImplementedError()
-
-    @abstractmethod
     def perform_healthcheck(self, plugin_name):
         raise NotImplementedError()
 

@@ -1,13 +1,11 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
-from typing import Dict
 
 from django.utils.module_loading import import_string
 from rest_framework import serializers as rfs
 
 from api_app.core.serializers import AbstractConfigSerializer
 from .models import AnalyzerReport
-from .dataclasses import AnalyzerConfig
 from .constants import TypeChoices, HashChoices, ObservableTypes
 
 
@@ -72,14 +70,3 @@ class AnalyzerConfigSerializer(AbstractConfigSerializer):
             )
 
         return python_module
-
-    @classmethod
-    def dict_to_dataclass(cls, data: dict) -> AnalyzerConfig:
-        return AnalyzerConfig(**data)
-
-    @classmethod
-    def get_as_dataclasses(cls) -> Dict[str, AnalyzerConfig]:
-        return {
-            name: cls.dict_to_dataclass(attrs)
-            for name, attrs in cls.read_and_verify_config().items()
-        }

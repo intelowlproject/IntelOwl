@@ -4,7 +4,6 @@
 import logging
 
 from rest_framework import generics, status
-from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework import serializers as BaseSerializer
 
@@ -79,12 +78,5 @@ class AnalyzerActionViewSet(PluginActionViewSet):
 
 
 class AnalyzerHealthCheckAPI(PluginHealthCheckAPI):
-    def get_cls_path(self, analyzer_name) -> str:
-        analyzer_dataclasses = AnalyzerConfigSerializer.get_as_dataclasses()
-        if analyzer_dataclasses.get(analyzer_name, None) is None:
-            raise ValidationError({"detail": "Analyzer doesn't exist"})
-        config = analyzer_dataclasses[analyzer_name]
-        return config.get_full_import_path()
-
-    def perform_healthcheck(self, analyzer_name):
-        return analyzers_controller.run_healthcheck()
+    def perform_healthcheck(self, analyzer_name) -> bool:
+        return analyzers_controller.run_healthcheck(analyzer_name)

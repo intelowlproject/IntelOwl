@@ -200,11 +200,3 @@ class AbstractConfigSerializer(rfs.Serializer):
             raise rfs.ValidationError(serializer_errors)
 
         return config_dict
-
-    @classmethod
-    def dict_to_dataclass(cls, data: dict):
-        raise NotImplementedError()
-
-    @classmethod
-    def get_as_dataclasses(cls):
-        raise NotImplementedError()

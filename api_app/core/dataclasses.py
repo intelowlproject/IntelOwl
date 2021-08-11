@@ -5,7 +5,6 @@ import typing
 import dataclasses
 
 from intel_owl import secrets as secrets_store
-from .serializers import AbstractConfigSerializer
 
 
 # constants
@@ -35,8 +34,6 @@ class AbstractConfig:
     config: dict
     secrets: dict
     verification: _SecretsVerification
-
-    serializer_class = AbstractConfigSerializer
 
     def __post_init__(self):
         # for nested dataclasses
@@ -99,12 +96,19 @@ class AbstractConfig:
         raise NotImplementedError()
 
     @classmethod
+    @abstractmethod
     def get(cls, name: str) -> typing.Optional["AbstractConfig"]:
         """
         Returns config dataclass by name if found, else None
         """
-        all_configs = cls.serializer_class.read_and_verify_config()
-        config_dict = all_configs.get(name, None)
-        if config_dict is None:
-            return None  # not found
-        return cls.serializer_class.dict_to_dataclass({name: config_dict})
+        raise NotImplementedError()
+
+    @classmethod
+    @abstractmethod
+    def from_dict(cls, data: dict):
+        raise NotImplementedError()
+
+    @classmethod
+    @abstractmethod
+    def all(cls):
+        raise NotImplementedError()

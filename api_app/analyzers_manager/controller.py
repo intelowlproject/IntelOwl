@@ -12,7 +12,6 @@ from intel_owl.celery import app as celery_app
 
 from .classes import BaseAnalyzerMixin, DockerBasedAnalyzer
 from .models import AnalyzerReport
-from .serializers import AnalyzerConfigSerializer
 from .dataclasses import AnalyzerConfig
 from ..models import Job
 from ..helpers import get_now
@@ -35,7 +34,7 @@ def filter_analyzers(serialized_data: Dict, warnings: List) -> List[str]:
     run_all = serialized_data.get("run_all_available_analyzers", False)
 
     # read config
-    analyzer_dataclasses = AnalyzerConfigSerializer.get_as_dataclasses()
+    analyzer_dataclasses = AnalyzerConfig.all()
     all_analyzer_names = list(analyzer_dataclasses.keys())
     selected_analyzers: List[str] = []
     if run_all:
@@ -121,7 +120,7 @@ def start_analyzers(
     task_signatures = []
 
     # get analyzer config
-    analyzer_dataclasses = AnalyzerConfigSerializer.get_as_dataclasses()
+    analyzer_dataclasses = AnalyzerConfig.all()
 
     # get job
     job = Job.objects.get(pk=job_id)
@@ -239,7 +238,7 @@ def set_failed_analyzer(job_id: int, name: str, err_msg, **report_defaults):
 def run_analyzer(
     job_id: int, config_dict: dict, report_defaults: dict
 ) -> AnalyzerReport:
-    config = AnalyzerConfigSerializer.dict_to_dataclass(config_dict)
+    config = AnalyzerConfig.from_dict(config_dict)
     klass: BaseAnalyzerMixin = None
     report: AnalyzerReport = None
     try:

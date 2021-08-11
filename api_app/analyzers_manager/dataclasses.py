@@ -25,8 +25,6 @@ class AnalyzerConfig(AbstractConfig):
 
     # utils
 
-    serializer_class = AnalyzerConfigSerializer
-
     @property
     def is_type_observable(self) -> bool:
         return self.type == TypeChoices.OBSERVABLE
@@ -57,4 +55,19 @@ class AnalyzerConfig(AbstractConfig):
         """
         Returns config dataclass by analyzer_name if found, else None
         """
-        return super().get(analyzer_name)
+        all_configs = AnalyzerConfigSerializer.read_and_verify_config()
+        config_dict = all_configs.get(analyzer_name, None)
+        if config_dict is None:
+            return None  # not found
+        return cls.from_dict(config_dict)
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "AnalyzerConfig":
+        return cls(**data)
+
+    @classmethod
+    def all(cls) -> typing.Dict[str, "AnalyzerConfig"]:
+        return {
+            name: cls.from_dict(attrs)
+            for name, attrs in AnalyzerConfigSerializer.read_and_verify_config().items()
+        }

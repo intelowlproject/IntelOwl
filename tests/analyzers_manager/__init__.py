@@ -12,7 +12,7 @@ from django.conf import settings
 from intel_owl.tasks import start_analyzers
 from api_app.models import Job
 from api_app.core.models import AbstractReport
-from api_app.analyzers_manager.serializers import AnalyzerConfigSerializer
+from api_app.analyzers_manager.dataclasses import AnalyzerConfig
 
 
 class _AbstractAnalyzersScriptTestCase(TransactionTestCase):
@@ -47,7 +47,7 @@ class _AbstractAnalyzersScriptTestCase(TransactionTestCase):
 
     def setUp(self):
         # analyzer config
-        self.analyzer_configs = AnalyzerConfigSerializer.get_as_dataclasses()
+        self.analyzer_configs = AnalyzerConfig.all()
         return super().setUp()
 
     def tearDown(self):

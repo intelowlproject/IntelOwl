@@ -1,0 +1,65 @@
+{
+  "MISP": {
+    "disabled": false,
+    "description": "automatically creates an event on your MISP instance, linking the analysis the successful analysis on IntelOwl",
+    "python_module": "misp.MISP",
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default",
+      "ssl_check": true,
+      "debug": false,
+      "tlp": "white"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "CONNECTOR_MISP_KEY",
+        "type": "string",
+        "required": true,
+        "default": null,
+        "description": "API key for your MISP instance"
+      },
+      "url_key_name": {
+        "env_var_key": "CONNECTOR_MISP_URL",
+        "type": "string",
+        "required": true,
+        "default": null,
+        "description": "URL of your MISP instance"
+      }
+    }
+  },
+  "OpenCTI": {
+    "disabled": false,
+    "description": "automatically creates an observable and a linked report on your OpenCTI instance, linking the the successful analysis on IntelOwl",
+    "python_module": "opencti.OpenCTI",
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default",
+      "ssl_verify": true,
+      "proxies": {
+        "http": "",
+        "https": ""
+      },
+      "tlp": {
+        "type": "white",
+        "color": "#ffffff",
+        "x_opencti_order": 1
+      }
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "CONNECTOR_OPENCTI_KEY",
+        "type": "string",
+        "required": true,
+        "default": null,
+        "description": "API key for your OpenCTI instance"
+      },
+      "url_key_name": {
+        "env_var_key": "CONNECTOR_OPENCTI_URL",
+        "type": "string",
+        "required": true,
+        "default": null,
+        "description": "URL of your OpenCTI instance"
+      }
+    }
+  }
+}

@@ -1,16 +1,15 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-from os import remove, path
+import os
+import hashlib
 
 from django.db import models
 from django.db.models.signals import pre_delete
 from django.contrib.postgres import fields as pg_fields
 from django.utils import timezone
+from django.utils.functional import cached_property
 from django.dispatch import receiver
-
-
-from .exceptions import AnalyzerRunException
 
 
 def file_directory_path(instance, filename):
@@ -64,7 +63,9 @@ class Job(models.Model):
     analyzers_to_execute = pg_fields.ArrayField(
         models.CharField(max_length=128), blank=True, default=list
     )
-    analysis_reports = models.JSONField(default=list, null=True, blank=True)
+    connectors_to_execute = pg_fields.ArrayField(
+        models.CharField(max_length=128), blank=True, default=list
+    )
     received_request_time = models.DateTimeField(auto_now_add=True)
     finished_analysis_time = models.DateTimeField(blank=True, null=True)
     force_privacy = models.BooleanField(blank=False, default=False)
@@ -74,28 +75,57 @@ class Job(models.Model):
     )
     file = models.FileField(blank=True, upload_to=file_directory_path)
     tags = models.ManyToManyField(Tag, related_name="jobs", blank=True)
-    runtime_configuration = models.JSONField(default=dict, null=True, blank=True)
-
-    @classmethod
-    def object_by_job_id(cls, job_id, transaction=False):
-        try:
-            if transaction:
-                job_object = cls.objects.select_for_update().get(id=job_id)
-            else:
-                job_object = cls.objects.get(id=job_id)
-        except cls.DoesNotExist:
-            raise AnalyzerRunException(f"No Job with ID:{job_id} retrieved")
-
-        return job_object
 
     def __str__(self):
         if self.is_sample:
-            return f'Job("{self.file_name}")'
-        return f'Job("{self.observable_name}")'
+            return f'Job(#{self.pk}, "{self.file_name}")'
+        return f'Job(#{self.pk}, "{self.observable_name}")'
+
+    @cached_property
+    def sha256(self) -> str:
+        return hashlib.sha256(self.file.read()).hexdigest()
+
+    @cached_property
+    def sha1(self) -> str:
+        return hashlib.sha1(self.file.read()).hexdigest()
+
+    def update_status(self, status: str, save=True):
+        self.status = status
+        if save:
+            self.save(update_fields=["status"])
+
+    def append_error(self, err_msg: str, save=True):
+        self.errors.append(err_msg)
+        if save:
+            self.save(update_fields=["errors"])
+
+    def get_analyzer_reports_stats(self) -> dict:
+        from api_app.core.models import AbstractReport
+
+        aggregators = {
+            s.lower(): models.Count("status", filter=models.Q(status=s))
+            for s in AbstractReport.Status.values
+        }
+        return self.analyzer_reports.aggregate(
+            all=models.Count("status"),
+            **aggregators,
+        )
+
+    def get_connector_reports_stats(self) -> dict:
+        from api_app.core.models import AbstractReport
+
+        aggregators = {
+            s.lower(): models.Count("status", filter=models.Q(status=s))
+            for s in AbstractReport.Status.values
+        }
+        return self.connector_reports.aggregate(
+            all=models.Count("status"),
+            **aggregators,
+        )
 
 
 @receiver(pre_delete, sender=Job)
 def delete_file(sender, instance, **kwargs):
     if instance.file:
-        if path.isfile(instance.file.path):
-            remove(instance.file.path)
+        if os.path.isfile(instance.file.path):
+            os.remove(instance.file.path)

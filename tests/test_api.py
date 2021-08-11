@@ -2,21 +2,15 @@
 # See the file 'LICENSE' for copying permission.
 
 import hashlib
-import logging
 import os
 
 from django.contrib.auth.models import User
 from django.test import TestCase
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.conf import settings
 from rest_framework.test import APIClient
 
-from intel_owl import settings
-from api_app import models, helpers
-
-logger = logging.getLogger(__name__)
-# disable logging library
-if settings.DISABLE_LOGGING_TEST:
-    logging.disable(logging.CRITICAL)
+from api_app import models
 
 
 class ApiViewTests(TestCase):
@@ -59,7 +53,7 @@ class ApiViewTests(TestCase):
         )
         self.assertEqual(response.status_code, 200)
 
-    def test_send_corrupted_sample_pe(self):
+    def test_analyze_file_corrupted_sample(self):
         analyzers_requested = [
             "File_Info",
             "PE_Info",
@@ -75,14 +69,11 @@ class ApiViewTests(TestCase):
             "file_name": filename,
             "file_mimetype": "application/x-dosexec",
             "file": uploaded_file,
-            "test": True,
         }
-        response = self.client.post(
-            "/api/send_analysis_request", data, format="multipart"
-        )
+        response = self.client.post("/api/analyze_file", data, format="multipart")
         self.assertEqual(response.status_code, 200)
 
-    def test_send_analysis_request_sample(self):
+    def test_analyze_file_sample(self):
         analyzers_requested = [
             "Yara_Scan",
             "HybridAnalysis_Get_File",
@@ -107,14 +98,11 @@ class ApiViewTests(TestCase):
             "file_name": filename,
             "file_mimetype": "application/x-dosexec",
             "file": uploaded_file,
-            "test": True,
         }
-        response = self.client.post(
-            "/api/send_analysis_request", data, format="multipart"
-        )
+        response = self.client.post("/api/analyze_file", data, format="multipart")
         self.assertEqual(response.status_code, 200)
 
-    def test_send_analysis_request_domain(self):
+    def test_analyze_observable_domain(self):
         analyzers_requested = [
             "Fortiguard",
             "CIRCLPassiveDNS",
@@ -143,12 +131,11 @@ class ApiViewTests(TestCase):
             "is_sample": False,
             "observable_name": observable_name,
             "observable_classification": "domain",
-            "test": True,
         }
-        response = self.client.post("/api/send_analysis_request", data)
+        response = self.client.post("/api/analyze_observable", data)
         self.assertEqual(response.status_code, 200)
 
-    def test_send_analysis_request_ip(self):
+    def test_analyze_observable_ip(self):
         analyzers_requested = [
             "TorProject",
             "AbuseIPDB",
@@ -183,16 +170,9 @@ class ApiViewTests(TestCase):
             "is_sample": False,
             "observable_name": observable_name,
             "observable_classification": "ip",
-            "test": True,
         }
-        response = self.client.post("/api/send_analysis_request", data)
+        response = self.client.post("/api/analyze_observable", data)
         self.assertEqual(response.status_code, 200)
-
-    def test_get_analyzer_config(self):
-        response = self.client.get("/api/get_analyzer_configs")
-        self.assertEqual(response.status_code, 200)
-        self.assertNotEqual(response.json(), {})
-        self.assertDictEqual(response.json(), helpers.get_analyzer_config())
 
     def test_download_sample_200(self):
         self.assertEqual(models.Job.objects.count(), 0)
@@ -208,7 +188,7 @@ class ApiViewTests(TestCase):
             }
         )
         self.assertEqual(models.Job.objects.count(), 1)
-        response = self.client.get(f"/api/download_sample?job_id={job.id}")
+        response = self.client.get(f"/api/jobs/{job.id}/download_sample")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
             response.get("Content-Disposition"),
@@ -217,13 +197,13 @@ class ApiViewTests(TestCase):
 
     def test_download_sample_404(self):
         # requesting for an ID that we know does not exist in DB
-        response = self.client.get("/api/download_sample?job_id=999")
+        response = self.client.get("/api/jobs/999/download_sample")
         self.assertEqual(response.status_code, 404)
 
     def test_download_sample_400(self):
         # requesting for job where is_sample=False
         job = models.Job.objects.create(is_sample=False)
-        response = self.client.get(f"/api/download_sample?job_id={job.id}")
+        response = self.client.get(f"/api/jobs/{job.id}/download_sample")
         self.assertEqual(response.status_code, 400)
         self.assertDictContainsSubset(
             {"detail": "Requested job does not have a sample associated with it."},
@@ -278,11 +258,11 @@ class JobViewsetTests(TestCase):
         self.assertEqual(response.status_code, 404)
         self.assertEqual(models.Job.objects.count(), 1)
 
-    def test_kill_job_by_id_200(self):
+    def test_kill_job_by_id_204(self):
         job = models.Job.objects.create(status="running")
         self.assertEqual(job.status, "running")
         response = self.client.patch(f"/api/jobs/{job.id}/kill")
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 204)
         job.refresh_from_db()
         self.assertEqual(job.status, "killed")
 

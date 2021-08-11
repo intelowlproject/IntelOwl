@@ -6,13 +6,11 @@ from rest_framework import routers
 
 from .api import (
     ask_analysis_availability,
-    send_analysis_request,
-    get_analyzer_configs,
-    download_sample,
+    analyze_file,
+    analyze_observable,
     TagViewSet,
     JobViewSet,
 )
-
 from .auth import LoginView, LogoutView
 
 
@@ -28,9 +26,11 @@ urlpatterns = [
     path("auth/logout", LogoutView.as_view(), name="auth_logout"),
     # Main APIs
     path("ask_analysis_availability", ask_analysis_availability),
-    path("send_analysis_request", send_analysis_request),
-    path("get_analyzer_configs", get_analyzer_configs),
-    path("download_sample", download_sample),
+    path("analyze_file", analyze_file),
+    path("analyze_observable", analyze_observable),
+    path(r"", include("api_app.analyzers_manager.urls")),
     # Viewsets
     path(r"", include(router.urls)),
+    # Connectors
+    path(r"", include("api_app.connectors_manager.urls")),
 ]

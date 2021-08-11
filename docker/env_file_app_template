@@ -8,6 +8,8 @@ DB_PASSWORD=password
 # Additional Config variables
 # jobs older than this would be flushed from the database periodically. Default: 3 days
 OLD_JOBS_RETENTION_DAYS=3
+# used for generating links to web client e.g. job results page; Default: localhost
+INTELOWL_WEB_CLIENT_DOMAIN=localhost
 
 # Elastic Search Configuration
 ELASTICSEARCH_ENABLED=False
@@ -24,7 +26,8 @@ AUTH0_KEY=
 SECURITYTRAILS_KEY=
 GSF_KEY=
 OTX_KEY=
-CIRCL_CREDENTIALS=user|pass
+# Format: user|pass
+CIRCL_CREDENTIALS=
 VT_KEY=
 HA_KEY=
 INTEZER_KEY=
@@ -59,6 +62,9 @@ GOOGLE_APPLICATION_CREDENTIALS=/opt/deploy/intel_owl/configuration/service_accou
 MALPEDIA_KEY=
 # DEHASHED_AUTH_KEY format is `email:api-key`
 DEHASHED_AUTH_KEY=
+OPENCTI_KEY=
+CONNECTOR_MISP_KEY=
+CONNECTOR_OPENCTI_KEY=
 
 # Test tokens
 TEST_JOB_ID=1
@@ -72,6 +78,9 @@ CUCKOO_URL=
 MISP_URL=
 FIRST_MISP_URL=
 VT_NOTIFY_URL=
+OPENCTI_URL=
+CONNECTOR_MISP_URL=
+CONNECTOR_OPENCTI_URL=
 
 # other variables
 DEBUG=False

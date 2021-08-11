@@ -1,6 +1,6 @@
 # Contribute
 
-Intel Owl was designed to ease the addition of new analyzers. With a simple python script you can integrate your own engine or integrate an external service in a short time.
+Intel Owl was designed to ease the addition of new analyzers/connectors. With a simple python script you can integrate your own engine or integrate an external service in a short time.
 
 > Wish to contribute to the web interface ? See [IntelOwl-ng](https://github.com/intelowlproject/IntelOwl-ng).
 
@@ -44,9 +44,9 @@ This means that you still need to rebuild everything when, for example, you chan
 
 ## How to add a new analyzer
 You may want to look at a few existing examples to start to build a new one, such as:
-- [shodan.py](https://github.com/intelowlproject/IntelOwl/blob/develop/api_app/script_analyzers/observable_analyzers/shodan.py), if you are creating an observable analyzer
-- [intezer_scan.py](https://github.com/intelowlproject/IntelOwl/blob/develop/api_app/script_analyzers/file_analyzers/intezer_scan.py), if you are creating a file analyzer
-- [peframe.py](https://github.com/intelowlproject/IntelOwl/blob/develop/api_app/script_analyzers/file_analyzers/peframe.py), if you are creating a [docker based analyzer](#integrating-a-docker-based-analyzer)
+- [shodan.py](https://github.com/intelowlproject/IntelOwl/blob/master/api_app/analyzers_manager/observable_analyzers/shodan.py), if you are creating an observable analyzer
+- [intezer_scan.py](https://github.com/intelowlproject/IntelOwl/blob/master/api_app/analyzers_manager/file_analyzers/intezer_scan.py), if you are creating a file analyzer
+- [peframe.py](https://github.com/intelowlproject/IntelOwl/blob/master/api_app/analyzers_manager/file_analyzers/peframe.py), if you are creating a [docker based analyzer](#integrating-a-docker-based-analyzer)
 
 After having written the new python module, you have to remember to:
 1. Put the module in the `file_analyzers` or `observable_analyzers` directory based on what it can analyze
@@ -56,17 +56,22 @@ After having written the new python module, you have to remember to:
   ```javascript
   "Analyzer_Name": {
       "type": "file",
+      "python_module": "<module_name>.<class_name>",
+      "description": "very cool analyzer",
       "external_service": true,
       "leaks_info": true,
       "run_hash": true,
-      "soft_time_limit": 100,
       "supported_filetypes": ["application/javascript"],
-      "python_module": "<module_name>.<class_name>",
-      "description": "very cool analyzer",
-      "requires_configuration": true,
-      "queue": "long",
-      "additional_config_params": {
-           "custom_required_param": "ANALYZER_SPECIAL_KEY"
+      "config": {
+        "soft_time_limit": 100,
+        "queue": "long",
+      }
+      "secrets": {
+           "env_var_key": "ANALYZER_SPECIAL_KEY",
+           "type": "string",
+           "required": true,
+           "default": null,
+           "description": "API Key for the analyzer",
       }
   },
   ```
@@ -75,20 +80,17 @@ After having written the new python module, you have to remember to:
   * `type`: can be `file` or `observable`. It specifies what the analyzer should analyze
   * `python_module`: name of the task that the analyzer must launch
   * `description`: little description of the analyzer
-  * `requires_configuration`: if the analyzer requires a configuration made by the user (for example setting an API key)
   
-  The `additional_config_params` can be used in case the new analyzer requires additional configuration.
+  The `config` can be used in case the new analyzer uses specific configuration arguments and `secrets` can be used to declare any secrets the analyzer requires in order to run (Example: API Key). 
   In that way you can create more than one analyzer for a specific python module, each one based on different configurations.
   MISP and Yara Analyzers are a good example of this use case: for instance, you can use different analyzers for different MISP instances.
 
-  Please see [Analyzers customization section](https://intelowl.readthedocs.io/en/latest/Usage.html#analyzers-customization) to get the explanation of the other available keys.
+  Please see [Analyzers customization section](./Usage.md#analyzers-customization) to get the explanation of the other available keys.
 
 
-3. Add required unit tests in the [tests](https://github.com/intelowlproject/IntelOwl/blob/master/tests) folder. Then follow the [Test](./Tests.md) guide to start testing.
+3. Add the new analyzer in the lists in the docs: [Usage](./Usage.md). Also, if the analyzer provides additional optional configuration, add the available options here: [Advanced-Usage](./Advanced-Usage.md)
 
-4. Add the new analyzer in the lists in the docs: [Usage](./Usage.md). Also, if the analyzer provides additional optional configuration, add the available options here: [Advanced-Usage](./Advanced-Usage.md)
-
-5. Ultimately, add the required secrets in the files `docker/env_file_app_template`, `docker/env_file_app_ci` and in the `docs/Installation.md`.
+4. Ultimately, add the required secrets in the files `docker/env_file_app_template`, `docker/env_file_app_ci` and in the `docs/Installation.md`.
 
 5. In the Pull Request remember to provide some real world examples (screenshots and raw JSON results) of some successful executions of the analyzer to let us understand how it would work.
 
@@ -101,6 +103,46 @@ which can be queried from the main Django API.
 * Two docker-compose files `compose.yml` for production and `compose-tests.yml` for testing should be placed under `./integrations/<analyzer_name>`.
 * If your docker-image uses any environment variables, add them in the `docker/env_file_integrations_template`.
 * Rest of the steps remain same as given under "How to add a new analyzer".
+
+## How to add a new connector
+You may want to look at a few existing examples to start to build a new one:
+- [misp.py](https://github.com/intelowlproject/IntelOwl/blob/master/api_app/connectors_manager/connectors/misp.py)
+- [opencti.py](https://github.com/intelowlproject/IntelOwl/blob/master/api_app/connectors_manager/connectors/opencti.py)
+
+After having written the new python module, you have to remember to:
+1. Put the module in the `connectors` directory
+2. Add a new entry in the [connector configuration](https://github.com/intelowlproject/IntelOwl/blob/master/configuration/connector_config.json) following alphabetical order:
+  
+  Example:
+  ```javascript
+  "Connector_Name": {
+      "python_module": "<module_name>.<class_name>",
+      "description": "very cool connector",
+      "config": {
+        "soft_time_limit": 100,
+        "queue": "default",
+      }
+      "secrets": {
+           "env_var_key": "CONNECTOR_SPECIAL_KEY",
+           "type": "string",
+           "required": true,
+           "default": null,
+           "description": "API Key for the connector",
+      }
+  },
+  ```
+  
+  Remember to set at least:
+  * `python_module`: name of the task that the connector must launch
+  * `description`: little description of the connector
+  
+  Similar to analyzers, the `config` can be used in case the new connector uses specific configuration arguments and `secrets` can be used to declare any secrets the connector requires in order to run (Example: API Key).
+
+  Please see [Connectors customization section](./Usage.md#connectors-customization) to get the explanation of the other available keys.
+
+
+3. Add the new connector in the lists in the docs: [Usage](./Usage.md). Also, if the connector provides additional optional configuration, add the available options here: [Advanced-Usage](./Advanced-Usage.md)
+4. Follow steps 4-5 of [How to add a new analyzer](./Contribute.md#how-to-add-a-new-analyzer)
 
 ## Create a pull request
 
@@ -133,9 +175,8 @@ $ docker exec -ti intelowl_uwsgi unzip -P infected tests/test_files.zip
 $ docker exec -ti intelowl_uwsgi python manage.py test tests
 ```
 
-> Note: To run a particular test case, you want to set it's full path. For example, `docker exec -ti intelowl_uwsgi python manage.py test tests.test_observables.<test_case_class_name>.<func_name>`
+> Note: IntelOwl has dynamic testing suite. This means that no explicit analyzers/connector tests are required after the addition of a new analyzer or connector.
 
-Please make sure all 3 of these tests return positively.
 
 If everything is working, before submitting your pull request, please squash your commits into a single one!
 
@@ -161,9 +202,8 @@ Also remember to pull the most recent changes available in the **develop** branc
     "Yara_Scan_Custom_Signatures": {
         "type": "file",
         "python_module": "yara.Yara",
-        "requires_configuration": true,
         "description": "Executes Yara with custom signatures",
-        "additional_config_params": {
+        "config": {
             "directories_with_rules": ["/opt/deploy/yara/custom_signatures"]
         }
     },

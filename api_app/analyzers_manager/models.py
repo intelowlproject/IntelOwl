@@ -7,13 +7,12 @@ from api_app.core.models import AbstractReport
 
 
 class AnalyzerReport(AbstractReport):
-    # name
-    class Meta:
-        unique_together = [("name", "job")]
-
     job = models.ForeignKey(
         "api_app.Job", related_name="analyzer_reports", on_delete=models.CASCADE
     )
+
+    class Meta:
+        unique_together = [("name", "job")]
 
     def __str__(self):
         return f"AnalyzerReport(job:#{self.job_id}, {self.analyzer_name})"

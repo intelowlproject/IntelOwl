@@ -118,15 +118,5 @@ class PluginHealthCheckAPI(APIView, metaclass=ABCMeta):
         raise NotImplementedError()
 
     def get(self, request, name):
-        try:
-            health_status = self.perform_healthcheck(name)
-        except ImportError:
-            logger.exception(
-                f"health_check:{name} requester:{str(request.user)}"
-                f" Class: {self.cls_path} couldn't be imported"
-            )
-            return Response(
-                {"error": f"error in health_check:{name}. Check logs."},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
+        health_status = self.perform_healthcheck(name)
         return Response(data={"status": health_status}, status=status.HTTP_200_OK)

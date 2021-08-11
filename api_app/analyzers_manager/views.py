@@ -1,8 +1,6 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-from django.utils.module_loading import import_string
-from api_app.analyzers_manager.classes import DockerBasedAnalyzer
 import logging
 
 from rest_framework import generics, status
@@ -89,8 +87,4 @@ class AnalyzerHealthCheckAPI(PluginHealthCheckAPI):
         return config.get_full_import_path()
 
     def perform_healthcheck(self, analyzer_name):
-        klass: DockerBasedAnalyzer = import_string(self.get_cls_path(analyzer_name))
-        # docker analyzers have a common method for health check
-        if not hasattr(klass, "health_check"):
-            raise ValidationError({"detail": "No healthcheck implemented"})
-        return klass.health_check()
+        return analyzers_controller.run_healthcheck()

@@ -6,12 +6,14 @@ from typing import Dict, List
 from celery import uuid, chord
 from django.utils.module_loading import import_string
 from django.conf import settings
+from rest_framework.exceptions import ValidationError
 
 from intel_owl.celery import app as celery_app
 
-from .classes import BaseAnalyzerMixin
+from .classes import BaseAnalyzerMixin, DockerBasedAnalyzer
 from .models import AnalyzerReport
 from .serializers import AnalyzerConfigSerializer
+from .dataclasses import AnalyzerConfig
 from ..models import Job
 from ..helpers import get_now
 from ..exceptions import AlreadyFailedJobException, NotRunnableAnalyzer
@@ -286,3 +288,21 @@ def kill_ongoing_analysis(job: Job):
 
     # update report statuses
     qs.update(status=AnalyzerReport.Status.KILLED)
+
+
+def run_healthcheck(analyzer_name: str) -> bool:
+    analyzer_config = AnalyzerConfig.get(analyzer_name)
+    if analyzer_config is None:
+        raise ValidationError({"detail": "Analyzer doesn't exist"})
+    cls_path = analyzer_config.get_full_import_path()
+
+    try:
+        klass: DockerBasedAnalyzer = import_string(cls_path)
+    except ImportError:
+        raise Exception(f"Class: {cls_path} couldn't be imported")
+
+    # docker analyzers have a common method for health check
+    if not hasattr(klass, "health_check"):
+        raise ValidationError({"detail": "No healthcheck implemented"})
+
+    return klass.health_check()

@@ -5,7 +5,7 @@ import dataclasses
 
 from api_app.core.dataclasses import AbstractConfig
 from .constants import TypeChoices, HashChoices, ObservableTypes
-
+from .serializers import AnalyzerConfigSerializer
 
 __all__ = ["AnalyzerConfig"]
 
@@ -24,6 +24,8 @@ class AnalyzerConfig(AbstractConfig):
     run_hash_type: typing.Literal[HashChoices.values] = HashChoices.MD5
 
     # utils
+
+    serializer_class = AnalyzerConfigSerializer
 
     @property
     def is_type_observable(self) -> bool:
@@ -49,3 +51,10 @@ class AnalyzerConfig(AbstractConfig):
             )
         else:
             return f"api_app.analyzers_manager.file_analyzers.{self.python_module}"
+
+    @classmethod
+    def get(cls, analyzer_name: str) -> typing.Optional["AnalyzerConfig"]:
+        """
+        Returns config dataclass by analyzer_name if found, else None
+        """
+        return super().get(analyzer_name)

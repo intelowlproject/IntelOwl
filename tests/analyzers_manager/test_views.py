@@ -17,6 +17,20 @@ class AnalyzerAppViewsTestCase(CustomAPITestCase):
             response.json(), AnalyzerConfigSerializer.read_and_verify_config()
         )
 
+    def test_analyzer_healthcheck_200(self):
+        response = self.client.get("/api/analyzer/Rendertron/healthcheck")
+        self.assertEqual(response.status_code, 200)
+
+    def test_analyzer_healthcheck_400(self):
+        # non docker analyzer
+        response = self.client.get("/api/analyzer/MISP/healthcheck")
+        self.assertEqual(response.status_code, 400)
+        self.assertDictEqual(response.json(), {"detail": "No healthcheck implemented"})
+        # non existing analyzer
+        response = self.client.get("/api/analyzer/Analyzer404/healthcheck")
+        self.assertEqual(response.status_code, 400)
+        self.assertDictEqual(response.json(), {"detail": "Analyzer doesn't exist"})
+
 
 class AnalyzerActionViewSetTests(CustomAPITestCase, PluginActionViewsetTestCase):
     @classmethod

@@ -12,8 +12,10 @@ from rest_framework.exceptions import (
     PermissionDenied,
 )
 from rest_framework.response import Response
+from rest_framework import serializers as rfs
 from drf_spectacular.utils import (
     extend_schema as add_docs,
+    inline_serializer,
 )
 from rest_framework.views import APIView
 
@@ -108,6 +110,18 @@ class PluginActionViewSet(viewsets.ViewSet, metaclass=ABCMeta):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+@add_docs(
+    description="Health Check: if instance associated with plugin is up or not",
+    request=None,
+    responses={
+        200: inline_serializer(
+            name="PluginHealthCheckSuccessResponse",
+            fields={
+                "status": rfs.NullBooleanField(),
+            },
+        ),
+    },
+)
 class PluginHealthCheckAPI(APIView, metaclass=ABCMeta):
     @abstractmethod
     def perform_healthcheck(self, plugin_name):

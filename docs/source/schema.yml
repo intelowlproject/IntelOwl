@@ -57,6 +57,27 @@ paths:
               schema:
                 $ref: '#/components/schemas/ObservableAnalysisResponse'
           description: ''
+  /api/analyzer/{name}/healthcheck:
+    get:
+      operationId: analyzer_healthcheck_retrieve
+      description: 'Health Check: if instance associated with plugin is up or not'
+      parameters:
+      - in: path
+        name: name
+        schema:
+          type: string
+        required: true
+      tags:
+      - analyzer
+      security:
+      - durinAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PluginHealthCheckSuccessResponse'
+          description: ''
   /api/ask_analysis_availability:
     get:
       operationId: ask_analysis_availability_retrieve
@@ -159,6 +180,27 @@ paths:
       responses:
         '200':
           description: No response body
+  /api/connector/{name}/healthcheck:
+    get:
+      operationId: connector_healthcheck_retrieve
+      description: 'Health Check: if instance associated with plugin is up or not'
+      parameters:
+      - in: path
+        name: name
+        schema:
+          type: string
+        required: true
+      tags:
+      - connector
+      security:
+      - durinAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PluginHealthCheckSuccessResponse'
+          description: ''
   /api/get_analyzer_configs:
     get:
       operationId: get_analyzer_configs_list
@@ -1047,6 +1089,14 @@ components:
         color:
           type: string
           maxLength: 7
+    PluginHealthCheckSuccessResponse:
+      type: object
+      properties:
+        status:
+          type: boolean
+          nullable: true
+      required:
+      - status
     RunHashTypeEnum:
       enum:
       - md5

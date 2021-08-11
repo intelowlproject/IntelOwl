@@ -22,13 +22,15 @@ class MWDBGet(ObservableAnalyzer):
         result = {}
         try:
             file_info = mwdb.query_file(self.observable_name)
-            result["data"]: file_info.data
-            result["metakeys"]: file_info.metakeys
-            result["permalink"] = f"https://mwdb.cert.pl/file/{self.observable_name}"
         except Exception as exc:
             logger.exception(exc)
             self.report.errors.append(str(exc))
             result["not_found"] = True
+        else:
+            result["data"]: file_info.data
+            result["metakeys"]: file_info.metakeys
+            result["permalink"] = f"https://mwdb.cert.pl/file/{self.observable_name}"
+
         return result
 
     @classmethod

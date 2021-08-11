@@ -27,6 +27,7 @@ DEFAULT_QUEUE = "default"
 def filter_analyzers(serialized_data: Dict, warnings: List) -> List[str]:
     # init empty list
     cleaned_analyzer_list = []
+    selected_analyzers = []
     analyzers_requested = serialized_data["analyzers_requested"]
 
     # run all analyzers ?
@@ -35,7 +36,6 @@ def filter_analyzers(serialized_data: Dict, warnings: List) -> List[str]:
     # read config
     analyzer_dataclasses = AnalyzerConfigSerializer.get_as_dataclasses()
     all_analyzer_names = list(analyzer_dataclasses.keys())
-    selected_analyzers: List[str] = []
     if run_all:
         # select all
         selected_analyzers.extend(all_analyzer_names)

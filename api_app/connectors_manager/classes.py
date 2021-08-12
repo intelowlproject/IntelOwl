@@ -56,15 +56,17 @@ class Connector(Plugin):
         return f"({self.connector_name}, job: #{self.job_id})"
 
     @classmethod
-    def health_check(cls, cc: ConnectorConfig) -> Optional[bool]:
+    def health_check(cls, connector_name: str) -> Optional[bool]:
         """
         basic health check: if instance is up or not (timeout - 10s)
-        raises: NotImplementedError
-          if get_healthcheck_url_loc is not overridden by subclass
         """
 
-        health_status = None
-        url = cc._read_secrets(secrets_filter="url_key_name").get("url_key_name", None)
+        health_status, url = None, None
+        cc = ConnectorConfig.get(connector_name)
+        if cc is not None:
+            url = cc._read_secrets(secrets_filter="url_key_name").get(
+                "url_key_name", None
+            )
 
         if url is not None:
             try:

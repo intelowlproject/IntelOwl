@@ -149,7 +149,7 @@ def run_healthcheck(connector_name: str) -> bool:
 
     status = None
     try:
-        status = klass.health_check(connector_config)
+        status = klass.health_check(connector_name)
     except NotImplementedError:
         raise ValidationError({"detail": "No healthcheck implemented"})
 

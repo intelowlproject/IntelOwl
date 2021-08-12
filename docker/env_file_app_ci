@@ -58,6 +58,7 @@ DEHASHED_AUTH_KEY=email@example.com:verysecureapikey
 OPENCTI_KEY=test
 CONNECTOR_MISP_KEY=test
 CONNECTOR_OPENCTI_KEY=test
+CONNECTOR_YETI_KEY=test
 
 # Test tokens
 TEST_JOB_ID=1
@@ -75,6 +76,7 @@ VT_NOTIFY_URL=http://fake_url.com
 OPENCTI_URL=http://fake_url.com
 CONNECTOR_MISP_URL=http://fake_url.com
 CONNECTOR_OPENCTI_URL=http://fake_url.com
+CONNECTOR_YETI_URL=http://fake_url.com
 
 # other variables
 DEBUG=True

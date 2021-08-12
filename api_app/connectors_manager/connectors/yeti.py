@@ -3,25 +3,20 @@
 
 from django.conf import settings
 
-import pyeti
+import requests
 
-from tests.mock_utils import patch, if_mock_connections
+from tests.mock_utils import MockResponse, patch, if_mock_connections
 from api_app.connectors_manager import classes
 from api_app.exceptions import ConnectorRunException
 
 
 class YETI(classes.Connector):
     def set_params(self, params):
-        self.verify_ssl = params.get("verify_ssl", True)
-        self.__url_name = self._secrets["url_key_name"]
-        self.__api_key = self._secrets["api_key_name"]
+        self.verify_ssl: bool = params.get("verify_ssl", True)
+        self.__url_name: str = self._secrets["url_key_name"]
+        self.__api_key: str = self._secrets["api_key_name"]
 
     def run(self):
-        # set up client
-        self.yeti_instance = pyeti.YetiApi(
-            url=self.__url_name, api_key=self.__api_key, verify_ssl=self.verify_ssl
-        )
-
         # get observable value and type
         if self._job.is_sample:
             obs_value = self._job.md5
@@ -44,27 +39,40 @@ class YETI(classes.Connector):
         # get job tags
         tags = list(self._job.tags.all().values_list("label", flat=True))
 
+        # request payload
+        payload = {
+            "value": obs_value,
+            "source": "IntelOwl",
+            "tags": tags,
+            "context": context,
+        }
+        headers = {"Accept": "application/json", "X-Api-Key": self.__api_key}
+        if self.__url_name.endswith("/"):
+            self.__url_name = self.__url_name[:-1]
+        url = f"{self.__url_name}/observable/"
+
         # create observable with `obs_value` if it doesn't exists
         # new context, tags, source are appended with existing ones
-        result = self.yeti_instance.observable_add(
-            value=obs_value, tags=tags, context=context, source="IntelOwl"
-        )
-
-        if result is None:
-            raise ConnectorRunException(
-                "Error while creating observable"
-                f"Possible Error: Couldn't guess observable type for {obs_value}"
+        try:
+            resp = requests.post(
+                url=url,
+                headers=headers,
+                json=payload,
+                verify=self.verify_ssl,
             )
+            resp.raise_for_status()
+        except requests.RequestException as e:
+            raise ConnectorRunException(e)
 
-        return result
+        return resp.json()
 
     @classmethod
     def _monkeypatch(cls):
         patches = [
             if_mock_connections(
                 patch(
-                    "pyeti.YetiApi",
-                    side_effect=MockYetiApi,
+                    "request.post",
+                    return_value=MockResponse({}, 200),
                 )
             )
         ]

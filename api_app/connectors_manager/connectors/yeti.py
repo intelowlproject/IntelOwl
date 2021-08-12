@@ -71,25 +71,9 @@ class YETI(classes.Connector):
         patches = [
             if_mock_connections(
                 patch(
-                    "request.post",
+                    "requests.post",
                     return_value=MockResponse({}, 200),
                 )
             )
         ]
         return super()._monkeypatch(patches=patches)
-
-
-class MockYetiApi:
-    """
-    Mock Pyeti instance for testing
-    """
-
-    def __init__(self, *args, **kwargs) -> None:
-        pass
-
-    def observable_add(self, value, tags, context, *args, **kwargs):
-        return {
-            "value": value,
-            "tags": tags,
-            "context": context,
-        }

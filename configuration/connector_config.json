@@ -63,7 +63,7 @@
     }
   },
   "YETI": {
-    "disabled": false,
+    "disabled": true,
     "description": "finds/create an observable on your YETI instance, linking the the successful analysis on IntelOwl",
     "python_module": "yeti.YETI",
     "config": {

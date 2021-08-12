@@ -2245,7 +2245,7 @@
   },
   "Tranco": {
     "type": "observable",
-    "python_module": "tor.Tor",
+    "python_module": "tranco.Tranco",
     "description": "check if a domain is in the last Tranco ranking top sites list",
     "disabled": false,
     "external_service": true,

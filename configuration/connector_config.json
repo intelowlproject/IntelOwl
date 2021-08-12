@@ -64,7 +64,7 @@
   },
   "YETI": {
     "disabled": true,
-    "description": "finds/create an observable on your YETI instance, linking the the successful analysis on IntelOwl",
+    "description": "find or create observable on YETI, linking the successful analysis on IntelOwl.",
     "python_module": "yeti.YETI",
     "config": {
       "soft_time_limit": 30,

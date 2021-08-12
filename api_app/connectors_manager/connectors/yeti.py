@@ -1,13 +1,13 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-from api_app.exceptions import ConnectorRunException
 from django.conf import settings
 
 import pyeti
 
 from tests.mock_utils import patch, if_mock_connections
 from api_app.connectors_manager import classes
+from api_app.exceptions import ConnectorRunException
 
 
 class YETI(classes.Connector):
@@ -22,18 +22,24 @@ class YETI(classes.Connector):
             url=self.__url_name, api_key=self.__api_key, verify_ssl=self.verify_ssl
         )
 
+        # get observable value and type
+        if self._job.is_sample:
+            obs_value = self._job.md5
+            obs_type = "file"
+        else:
+            obs_value = self._job.observable_name
+            obs_type = self._job.observable_classification
+
         # create context
         context = {
             "source": "IntelOwl",
             "report": f"{settings.WEB_CLIENT_URL}/pages/scan/result/{self.job_id}",
             "status": "analyzed",
             "date": str(self._job.finished_analysis_time),
-            "description": f"IntelOwl's analysis report for Job: {self.job_id}.",
+            "description": "IntelOwl's analysis report for Job: "
+            f"{self.job_id} | {obs_value} | {obs_type}",
             "analyzers executed": ", ".join(self._job.analyzers_to_execute),
         }
-
-        # get observable value
-        obs_value = self._job.md5 if self._job.is_sample else self._job.observable_name
 
         # get job tags
         tags = list(self._job.tags.all().values_list("label", flat=True))

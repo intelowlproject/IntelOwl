@@ -20,6 +20,7 @@ class AnalyzerConfig(AbstractConfig):
     # Optional Fields
     external_service: bool = False
     leaks_info: bool = False
+    docker_based: bool = False
     run_hash: bool = False
     run_hash_type: typing.Literal[HashChoices.values] = HashChoices.MD5
 

@@ -43,6 +43,7 @@ class AnalyzerConfigSerializer(AbstractConfigSerializer):
     external_service = rfs.BooleanField(required=True)
     # Optional Fields
     leaks_info = rfs.BooleanField(required=False, default=False)
+    docker_based = rfs.BooleanField(required=False, default=False)
     run_hash = rfs.BooleanField(required=False, default=False)
     run_hash_type = rfs.ChoiceField(required=False, choices=HashChoices.values)
     supported_filetypes = rfs.ListField(required=False, default=[])

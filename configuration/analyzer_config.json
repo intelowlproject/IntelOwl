@@ -6,6 +6,7 @@
     "disabled": false,
     "external_service": false,
     "leaks_info": false,
+    "docker_based": true,
     "supported_filetypes": [
       "application/zip",
       "application/java-archive",
@@ -73,6 +74,7 @@
     "disabled": false,
     "external_service": false,
     "leaks_info": false,
+    "docker_based": true,
     "supported_filetypes": [
       "application/x-javascript",
       "application/javascript",
@@ -210,6 +212,7 @@
     "disabled": false,
     "external_service": false,
     "leaks_info": false,
+    "docker_based": true,
     "supported_filetypes": [
       "application/x-dosexec"
     ],
@@ -553,6 +556,7 @@
     "disabled": false,
     "external_service": false,
     "leaks_info": false,
+    "docker_based": true,
     "supported_filetypes": [
       "application/x-dosexec"
     ],
@@ -1056,6 +1060,7 @@
     "disabled": false,
     "external_service": false,
     "leaks_info": false,
+    "docker_based": true,
     "supported_filetypes": [
       "application/x-dosexec"
     ],
@@ -1500,6 +1505,7 @@
     "disabled": false,
     "external_service": false,
     "leaks_info": false,
+    "docker_based": true,
     "supported_filetypes": [
       "application/x-dosexec"
     ],
@@ -1568,6 +1574,7 @@
     "disabled": false,
     "external_service": false,
     "leaks_info": false,
+    "docker_based": true,
     "observable_supported": [
       "url"
     ],
@@ -1584,6 +1591,7 @@
     "disabled": false,
     "external_service": false,
     "leaks_info": false,
+    "docker_based": true,
     "supported_filetypes": [
       "application/x-dosexec"
     ],
@@ -1604,6 +1612,7 @@
     "disabled": false,
     "external_service": false,
     "leaks_info": false,
+    "docker_based": true,
     "supported_filetypes": [
       "application/octet-stream"
     ],
@@ -1624,6 +1633,7 @@
     "disabled": false,
     "external_service": false,
     "leaks_info": false,
+    "docker_based": true,
     "supported_filetypes": [
       "application/x-sharedlib",
       "application/x-executable"
@@ -1645,6 +1655,7 @@
     "disabled": false,
     "external_service": false,
     "leaks_info": false,
+    "docker_based": true,
     "supported_filetypes": [
       "application/octet-stream"
     ],
@@ -2054,6 +2065,7 @@
     "disabled": false,
     "external_service": false,
     "leaks_info": false,
+    "docker_based": true,
     "config": {
       "soft_time_limit": 70,
       "queue": "local",
@@ -2069,6 +2081,7 @@
     "disabled": false,
     "external_service": false,
     "leaks_info": false,
+    "docker_based": true,
     "config": {
       "soft_time_limit": 70,
       "queue": "local",
@@ -2189,6 +2202,7 @@
     "disabled": false,
     "external_service": false,
     "leaks_info": false,
+    "docker_based": true,
     "supported_filetypes": [
       "text/html"
     ],
@@ -2211,6 +2225,7 @@
     "disabled": false,
     "external_service": false,
     "leaks_info": false,
+    "docker_based": true,
     "observable_supported": [
       "domain",
       "url"

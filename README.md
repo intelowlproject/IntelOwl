@@ -104,6 +104,7 @@ license terms.
 [Qiling](https://github.com/qilingframework/qiling),
 [Renderton](https://github.com/GoogleChrome/rendertron/blob/main/LICENSE)
 [PyCTI](https://github.com/OpenCTI-Platform/client-python/blob/master/LICENSE)
+[Pyeti](https://github.com/yeti-platform/pyeti/blob/master/LICENSE.md)
 
 ## Acknowledgments
 

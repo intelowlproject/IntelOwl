@@ -2880,12 +2880,14 @@
       "ip",
       "domain",
       "url",
-      "hash"
+      "hash",
+      "generic"
     ],
     "config": {
       "soft_time_limit": 30,
       "queue": "default",
       "verify_ssl": true,
+      "regex": false,
       "results_count": 50
     },
     "secrets": {

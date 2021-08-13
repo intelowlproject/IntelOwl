@@ -179,6 +179,7 @@ List of some of the analyzers with optional configuration:
 * `YETI`:
   * `verify_ssl`: (default `true`), enable SSL certificate server verification. Change this if your YETI instance has not SSL enabled.
   * `results_count`: (default 50), use this to limit the maximum number of results obtained from a search.
+  * `regex`: (default `false`), use this if you are searching for observables using a regex.
 
 There are two ways to do this:
 

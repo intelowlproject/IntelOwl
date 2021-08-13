@@ -2,6 +2,8 @@
 # See the file 'LICENSE' for copying permission.
 
 import logging
+from typing import Optional
+import requests
 
 from ..exceptions import (
     ConnectorConfigurationException,
@@ -10,6 +12,7 @@ from ..exceptions import (
 
 from api_app.core.classes import Plugin
 from .models import ConnectorReport
+from .dataclasses import ConnectorConfig
 
 
 logger = logging.getLogger(__name__)
@@ -51,3 +54,27 @@ class Connector(Plugin):
 
     def __repr__(self):
         return f"({self.connector_name}, job: #{self.job_id})"
+
+    @classmethod
+    def health_check(cls, connector_name: str) -> Optional[bool]:
+        """
+        basic health check: if instance is up or not (timeout - 10s)
+        """
+
+        health_status, url = None, None
+        cc = ConnectorConfig.get(connector_name)
+        if cc is not None:
+            url = cc._read_secrets(secrets_filter="url_key_name").get(
+                "url_key_name", None
+            )
+
+        if url is not None:
+            try:
+                requests.head(url, timeout=10)
+                health_status = True
+            except requests.exceptions.ConnectionError:
+                health_status = False
+            except requests.exceptions.Timeout:
+                health_status = False
+
+        return health_status

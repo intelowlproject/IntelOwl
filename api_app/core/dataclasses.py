@@ -68,12 +68,21 @@ class AbstractConfig:
 
         return self.__cached_dict
 
-    def _read_secrets(self) -> dict:
+    def _read_secrets(self, secrets_filter=[]) -> dict:
         """
         Returns a dict of `secret_key: secret_value` mapping.
+        filter_secrets: filter specific secrets or not (default: return all)
         """
         secrets = {}
-        for key_name, secret_dict in self.secrets.items():
+        if len(secrets_filter):
+            _filtered_secrets = {
+                key_name: self.secrets[key_name]
+                for key_name in self.secrets.keys()
+                if key_name in secrets_filter
+            }
+        else:
+            _filtered_secrets = self.secrets
+        for key_name, secret_dict in _filtered_secrets.items():
             secret_val = secrets_store.get_secret(secret_dict["env_var_key"])
             if secret_val:
                 secrets[key_name] = secret_val
@@ -84,4 +93,22 @@ class AbstractConfig:
 
     @abstractmethod
     def get_full_import_path(self) -> str:
+        raise NotImplementedError()
+
+    @classmethod
+    @abstractmethod
+    def get(cls, name: str) -> typing.Optional["AbstractConfig"]:
+        """
+        Returns config dataclass by name if found, else None
+        """
+        raise NotImplementedError()
+
+    @classmethod
+    @abstractmethod
+    def from_dict(cls, data: dict):
+        raise NotImplementedError()
+
+    @classmethod
+    @abstractmethod
+    def all(cls):
         raise NotImplementedError()

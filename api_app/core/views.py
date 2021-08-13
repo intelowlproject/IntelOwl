@@ -1,3 +1,9 @@
+# This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
+# See the file 'LICENSE' for copying permission.
+
+from abc import ABCMeta, abstractmethod
+import logging
+
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.exceptions import (
@@ -6,13 +12,17 @@ from rest_framework.exceptions import (
     PermissionDenied,
 )
 from rest_framework.response import Response
+from rest_framework import serializers as rfs
 from drf_spectacular.utils import (
     extend_schema as add_docs,
+    inline_serializer,
 )
-from abc import ABCMeta, abstractmethod
+from rest_framework.views import APIView
 
 from intel_owl.celery import app as celery_app
 from .models import AbstractReport
+
+logger = logging.getLogger(__name__)
 
 
 class PluginActionViewSet(viewsets.ViewSet, metaclass=ABCMeta):
@@ -98,3 +108,25 @@ class PluginActionViewSet(viewsets.ViewSet, metaclass=ABCMeta):
         # retry with the same arguments
         self.perform_retry(report)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+@add_docs(
+    description="Health Check: if instance associated with plugin is up or not",
+    request=None,
+    responses={
+        200: inline_serializer(
+            name="PluginHealthCheckSuccessResponse",
+            fields={
+                "status": rfs.NullBooleanField(),
+            },
+        ),
+    },
+)
+class PluginHealthCheckAPI(APIView, metaclass=ABCMeta):
+    @abstractmethod
+    def perform_healthcheck(self, plugin_name):
+        raise NotImplementedError()
+
+    def get(self, request, name):
+        health_status = self.perform_healthcheck(name)
+        return Response(data={"status": health_status}, status=status.HTTP_200_OK)

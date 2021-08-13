@@ -6,12 +6,13 @@ from typing import Dict, List
 from celery import uuid, chord
 from django.utils.module_loading import import_string
 from django.conf import settings
+from rest_framework.exceptions import ValidationError
 
 from intel_owl.celery import app as celery_app
 
-from .classes import BaseAnalyzerMixin
+from .classes import BaseAnalyzerMixin, DockerBasedAnalyzer
 from .models import AnalyzerReport
-from .serializers import AnalyzerConfigSerializer
+from .dataclasses import AnalyzerConfig
 from ..models import Job
 from ..helpers import get_now
 from ..exceptions import AlreadyFailedJobException, NotRunnableAnalyzer
@@ -34,7 +35,7 @@ def filter_analyzers(serialized_data: Dict, warnings: List) -> List[str]:
     run_all = serialized_data.get("run_all_available_analyzers", False)
 
     # read config
-    analyzer_dataclasses = AnalyzerConfigSerializer.get_as_dataclasses()
+    analyzer_dataclasses = AnalyzerConfig.all()
     all_analyzer_names = list(analyzer_dataclasses.keys())
     if run_all:
         # select all
@@ -119,7 +120,7 @@ def start_analyzers(
     task_signatures = []
 
     # get analyzer config
-    analyzer_dataclasses = AnalyzerConfigSerializer.get_as_dataclasses()
+    analyzer_dataclasses = AnalyzerConfig.all()
 
     # get job
     job = Job.objects.get(pk=job_id)
@@ -237,7 +238,7 @@ def set_failed_analyzer(job_id: int, name: str, err_msg, **report_defaults):
 def run_analyzer(
     job_id: int, config_dict: dict, report_defaults: dict
 ) -> AnalyzerReport:
-    config = AnalyzerConfigSerializer.dict_to_dataclass(config_dict)
+    config = AnalyzerConfig.from_dict(config_dict)
     klass: BaseAnalyzerMixin = None
     report: AnalyzerReport = None
     try:
@@ -286,3 +287,21 @@ def kill_ongoing_analysis(job: Job):
 
     # update report statuses
     qs.update(status=AnalyzerReport.Status.KILLED)
+
+
+def run_healthcheck(analyzer_name: str) -> bool:
+    analyzer_config = AnalyzerConfig.get(analyzer_name)
+    if analyzer_config is None:
+        raise ValidationError({"detail": "Analyzer doesn't exist"})
+    cls_path = analyzer_config.get_full_import_path()
+
+    try:
+        klass: DockerBasedAnalyzer = import_string(cls_path)
+    except ImportError:
+        raise Exception(f"Class: {cls_path} couldn't be imported")
+
+    # docker analyzers have a common method for health check
+    if not hasattr(klass, "health_check"):
+        raise ValidationError({"detail": "No healthcheck implemented"})
+
+    return klass.health_check()

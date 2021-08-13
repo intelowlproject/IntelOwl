@@ -7,7 +7,7 @@ from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework import serializers as rfs
 
-from api_app.core.views import PluginActionViewSet
+from api_app.core.views import PluginActionViewSet, PluginHealthCheckAPI
 from .serializers import ConnectorConfigSerializer
 from .models import ConnectorReport
 from . import controller as connectors_controller
@@ -70,3 +70,8 @@ class ConnectorActionViewSet(PluginActionViewSet):
             connectors_to_execute,
             runtime_configuration,
         )
+
+
+class ConnectorHealthCheckAPI(PluginHealthCheckAPI):
+    def perform_healthcheck(self, connector_name):
+        return connectors_controller.run_healthcheck(connector_name)

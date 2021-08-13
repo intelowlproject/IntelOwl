@@ -17,6 +17,15 @@ class ConnectorAppViewsTestCase(CustomAPITestCase):
             response.json(), ConnectorConfigSerializer.read_and_verify_config()
         )
 
+    def test_connector_healthcheck_200(self):
+        response = self.client.get("/api/connector/OpenCTI/healthcheck")
+        self.assertEqual(response.status_code, 200)
+
+    def test_connector_healthcheck_400(self):
+        response = self.client.get("/api/connector/connector404/healthcheck")
+        self.assertEqual(response.status_code, 400)
+        self.assertDictEqual(response.json(), {"detail": "Connector doesn't exist"})
+
 
 class ConnectorActionViewSetTests(CustomAPITestCase, PluginActionViewsetTestCase):
     @classmethod

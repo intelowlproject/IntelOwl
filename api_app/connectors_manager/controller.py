@@ -3,11 +3,13 @@
 
 import logging
 from typing import Union, List, Dict
+
+from rest_framework.exceptions import ValidationError
 from celery import uuid, group
 
 from django.conf import settings
 from django.utils.module_loading import import_string
-from .serializers import ConnectorConfigSerializer
+from .dataclasses import ConnectorConfig
 from .models import ConnectorReport
 from .classes import Connector
 
@@ -36,7 +38,7 @@ def start_connectors(
     task_signatures = []
 
     # get connectors config
-    connectors_config = ConnectorConfigSerializer.get_as_dataclasses()
+    connectors_config = ConnectorConfig.all()
     if not connector_names == ALL_CONNECTORS:
         # filter/ select only the ones that were specified
         connectors_config = {
@@ -116,7 +118,7 @@ def set_failed_connector(
 def run_connector(
     job_id: int, config_dict: dict, report_defaults: dict
 ) -> ConnectorReport:
-    config = ConnectorConfigSerializer.dict_to_dataclass(config_dict)
+    config = ConnectorConfig.from_dict(config_dict)
     klass: Connector = None
     report: ConnectorReport = None
     try:
@@ -132,3 +134,23 @@ def run_connector(
         report = set_failed_connector(job_id, config.name, str(e), **report_defaults)
 
     return report
+
+
+def run_healthcheck(connector_name: str) -> bool:
+    connector_config = ConnectorConfig.get(connector_name)
+    if connector_config is None:
+        raise ValidationError({"detail": "Connector doesn't exist"})
+
+    cls_path = connector_config.get_full_import_path()
+    try:
+        klass: Connector = import_string(cls_path)
+    except ImportError:
+        raise Exception(f"Class: {cls_path} couldn't be imported")
+
+    status = None
+    try:
+        status = klass.health_check(connector_name)
+    except NotImplementedError:
+        raise ValidationError({"detail": "No healthcheck implemented"})
+
+    return status

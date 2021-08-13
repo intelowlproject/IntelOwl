@@ -7,8 +7,7 @@ from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework import serializers as BaseSerializer
 
-
-from api_app.core.views import PluginActionViewSet
+from api_app.core.views import PluginActionViewSet, PluginHealthCheckAPI
 from .serializers import AnalyzerConfigSerializer
 from . import controller as analyzers_controller
 from .models import AnalyzerReport
@@ -76,3 +75,8 @@ class AnalyzerActionViewSet(PluginActionViewSet):
         analyzers_controller.start_analyzers(
             report.job.id, analyzers_to_execute, runtime_configuration
         )
+
+
+class AnalyzerHealthCheckAPI(PluginHealthCheckAPI):
+    def perform_healthcheck(self, analyzer_name) -> bool:
+        return analyzers_controller.run_healthcheck(analyzer_name)

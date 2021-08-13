@@ -1,13 +1,11 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
-from typing import Dict
 
 from django.utils.module_loading import import_string
 from rest_framework import serializers as rfs
 
 from api_app.core.serializers import AbstractConfigSerializer
 from .models import AnalyzerReport
-from .dataclasses import AnalyzerConfig
 from .constants import TypeChoices, HashChoices, ObservableTypes
 
 
@@ -45,6 +43,7 @@ class AnalyzerConfigSerializer(AbstractConfigSerializer):
     external_service = rfs.BooleanField(required=True)
     # Optional Fields
     leaks_info = rfs.BooleanField(required=False, default=False)
+    docker_based = rfs.BooleanField(required=False, default=False)
     run_hash = rfs.BooleanField(required=False, default=False)
     run_hash_type = rfs.ChoiceField(required=False, choices=HashChoices.values)
     supported_filetypes = rfs.ListField(required=False, default=[])
@@ -72,14 +71,3 @@ class AnalyzerConfigSerializer(AbstractConfigSerializer):
             )
 
         return python_module
-
-    @classmethod
-    def dict_to_dataclass(cls, data: dict) -> AnalyzerConfig:
-        return AnalyzerConfig(**data)
-
-    @classmethod
-    def get_as_dataclasses(cls) -> Dict[str, AnalyzerConfig]:
-        return {
-            name: cls.dict_to_dataclass(attrs)
-            for name, attrs in cls.read_and_verify_config().items()
-        }

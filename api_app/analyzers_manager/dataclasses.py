@@ -5,7 +5,7 @@ import dataclasses
 
 from api_app.core.dataclasses import AbstractConfig
 from .constants import TypeChoices, HashChoices, ObservableTypes
-
+from .serializers import AnalyzerConfigSerializer
 
 __all__ = ["AnalyzerConfig"]
 
@@ -20,6 +20,7 @@ class AnalyzerConfig(AbstractConfig):
     # Optional Fields
     external_service: bool = False
     leaks_info: bool = False
+    docker_based: bool = False
     run_hash: bool = False
     run_hash_type: typing.Literal[HashChoices.values] = HashChoices.MD5
 
@@ -49,3 +50,25 @@ class AnalyzerConfig(AbstractConfig):
             )
         else:
             return f"api_app.analyzers_manager.file_analyzers.{self.python_module}"
+
+    @classmethod
+    def get(cls, analyzer_name: str) -> typing.Optional["AnalyzerConfig"]:
+        """
+        Returns config dataclass by analyzer_name if found, else None
+        """
+        all_configs = AnalyzerConfigSerializer.read_and_verify_config()
+        config_dict = all_configs.get(analyzer_name, None)
+        if config_dict is None:
+            return None  # not found
+        return cls.from_dict(config_dict)
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "AnalyzerConfig":
+        return cls(**data)
+
+    @classmethod
+    def all(cls) -> typing.Dict[str, "AnalyzerConfig"]:
+        return {
+            name: cls.from_dict(attrs)
+            for name, attrs in AnalyzerConfigSerializer.read_and_verify_config().items()
+        }

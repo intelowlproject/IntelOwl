@@ -194,6 +194,7 @@ You can programmatically retrieve all the available connectors with the official
 The following is the list of the available connectors:
 * `MISP`: automatically creates an event on your MISP instance, linking the successful analysis on IntelOwl.
 * `OpenCTI`: automatically creates an observable and a linked report on your OpenCTI instance, linking the the successful analysis on IntelOwl.
+* `YETI` (Your Everyday Threat Intelligence): find or create observable on YETI, linking the successful analysis on IntelOwl.
 
 ## Connectors customization
 Connectors being optional are `disabled` by default. You can enable them by changing the configuration values inside `configuration/connector_config.json`. This file is mounted as a docker volume, so you won't need to rebuild the image.

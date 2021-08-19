@@ -1,7 +1,7 @@
 import subprocess
 import logging
-import json
 from shutil import which
+import pyclamd
 
 from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager.classes import FileAnalyzer
@@ -11,14 +11,18 @@ logger = logging.getLogger(__name__)
 
 
 class ClamAV(FileAnalyzer):
-    command: str = "clamdscan"
+    command: str = "clamd"
+    update_database_command: str = "freshclam"
 
     def run(self):
+        if not which(self.update_database_command):
+            logger.warning("Skipping Database updates: freshclam not installed")
+
         if not which(self.command):
             raise AnalyzerRunException("clamav not installed!")
 
-        final_report = {}
-        args = [self.command, self.filepath]
+        # Update database if needed and run ClamAV Daemon
+        args = [self.update_database_command, "&&", self.command]
 
         process = subprocess.Popen(
             args,
@@ -27,16 +31,25 @@ class ClamAV(FileAnalyzer):
         )
         stdout, stderr = process.communicate()
         logger.warning(stderr.decode("utf-8"))
-        final_report["error"] = stderr.decode("utf-8")
-
-        scan_report = stdout.decode("utf-8"), stderr
-        scan_str = scan_report[0]
 
         try:
-            if scan_str:
-                data = json.loads(scan_str)
-                final_report["data"] = data
-        except ValueError as e:
-            raise AnalyzerRunException(f"scan_str: {scan_str}. Error: {e}")
+            cd = pyclamd.ClamdUnixSocket()
+            # Test if server is reachable
+            cd.ping()
+        except pyclamd.ConnectionError:
+            cd = pyclamd.ClamdNetworkSocket()
+            try:
+                cd.ping()
+            except pyclamd.ConnectionError:
+                raise AnalyzerRunException(
+                    "couldn't connect to clamd server by unix or network socket"
+                )
 
-        return final_report
+        try:
+            report = cd.scan_stream(self.read_file_bytes())
+        except pyclamd.BufferTooLongError as e:
+            raise AnalyzerRunException(f"file buffer size exceeds clamd limits: {e}")
+        except pyclamd.ConnectionError as e:
+            raise AnalyzerRunException(f"communication issue with clamd: {e}")
+
+        return {"data": report}

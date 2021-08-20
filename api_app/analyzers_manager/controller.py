@@ -82,9 +82,7 @@ def filter_analyzers(serialized_data: Dict, warnings: List) -> List[str]:
                         f"type {serialized_data['observable_classification']}."
                     )
 
-            if (
-                tlp == TLP.RED or tlp == TLP.AMBER or tlp == TLP.GREEN
-            ) and config.leaks_info:
+            if tlp != TLP.WHITE and config.leaks_info:
                 raise NotRunnableAnalyzer(
                     f"{a_name} won't be run because it leaks info externally."
                 )

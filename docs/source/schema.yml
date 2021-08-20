@@ -651,6 +651,9 @@ components:
         leaks_info:
           type: boolean
           default: false
+        docker_based:
+          type: boolean
+          default: false
         run_hash:
           type: boolean
           default: false
@@ -814,10 +817,8 @@ components:
         md5:
           type: string
           maxLength: 32
-        force_privacy:
-          type: boolean
-        disable_external_analyzers:
-          type: boolean
+        tlp:
+          $ref: '#/components/schemas/TlpEnum'
         file:
           type: string
           format: uri
@@ -840,9 +841,6 @@ components:
             type: integer
             writeOnly: true
           writeOnly: true
-        private:
-          type: boolean
-          default: false
       required:
       - file
       - file_name
@@ -944,10 +942,8 @@ components:
           type: string
           format: date-time
           nullable: true
-        force_privacy:
-          type: boolean
-        disable_external_analyzers:
-          type: boolean
+        tlp:
+          $ref: '#/components/schemas/TlpEnum'
         errors:
           type: array
           items:
@@ -1021,10 +1017,8 @@ components:
         md5:
           type: string
           maxLength: 32
-        force_privacy:
-          type: boolean
-        disable_external_analyzers:
-          type: boolean
+        tlp:
+          $ref: '#/components/schemas/TlpEnum'
         observable_name:
           type: string
         observable_classification:
@@ -1046,9 +1040,6 @@ components:
             type: integer
             writeOnly: true
           writeOnly: true
-        private:
-          type: boolean
-          default: false
       required:
       - id
       - md5
@@ -1138,6 +1129,13 @@ components:
       - color
       - id
       - label
+    TlpEnum:
+      enum:
+      - WHITE
+      - GREEN
+      - AMBER
+      - RED
+      type: string
     TypeEnum:
       enum:
       - file

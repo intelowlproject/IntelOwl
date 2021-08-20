@@ -117,10 +117,13 @@ This project was created and will be upgraded thanks to the following organizati
 #### The Honeynet Project
 <a href="https://www.honeynet.org"> <img style="border: 0.2px solid black" width=115 height=150 src="static_intel/honeynet_logo.png" alt="Honeynet.org logo"> </a>
 
-Since its birth, this project has been participating in the Google Summer of Code (GSoC) under the Honeynet Project!
+Since its birth, this project has been participating in the [Google Summer of Code](https://summerofcode.withgoogle.com/) (GSoC) under the Honeynet Project!
 
-* 2020: a lot of [new features](https://www.honeynet.org/gsoc/gsoc-2020/google-summer-of-code-2020-project-ideas/#intel-owl-improvements) were developed by [Eshaan Bansal](https://twitter.com/mask0fmydisguis).
-* 2021: [Sarthak Khattar](https://twitter.com/Mr_Momo07) and [Shubham Pandey](https://twitter.com/imshubham31) are working on these [Projects](https://www.honeynet.org/gsoc/gsoc-2021/google-summer-of-code-2021-project-ideas/)
+Project Summaries and/or in-development projects:
+* 2020: [Eshaan Bansal](https://twitter.com/mask0fmydisguis): [IntelOwl Work Product](https://www.honeynet.org/2020/08/26/gsoc-2020-work-product%e2%80%8a-%e2%80%8aintel-owl/)
+* 2021: 
+  * [Sarthak Khattar](https://twitter.com/Mr_Momo07): [IntelOwl Improvements](https://www.honeynet.org/2021/08/20/gsoc-2021-project-summary-intelowl-improvements/)
+  * [Shubham Pandey](https://twitter.com/imshubham31): [IntelOwl Connectors Manager and Integrations](https://www.honeynet.org/2021/08/20/gsoc-2021-project-summary-intelowl-connectors-manager-and-integrations/)
 
 Stay tuned for the upcoming GSoC! Join the [Honeynet Slack chat](https://gsoc-slack.honeynet.org/) for more info.
 

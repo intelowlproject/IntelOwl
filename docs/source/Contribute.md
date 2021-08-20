@@ -4,10 +4,12 @@ Intel Owl was designed to ease the addition of new analyzers/connectors. With a 
 
 > Wish to contribute to the web interface ? See [IntelOwl-ng](https://github.com/intelowlproject/IntelOwl-ng).
 
+> Wish to contribute to the python client ? See [pyintelowl](https://github.com/intelowlproject/pyintelowl).
+
 ## Code Style
 Keeping to a consistent code style throughout the project makes it easier to contribute and collaborate. We make use of [`psf/black`](https://github.com/psf/black) for code formatting and [`flake8`](https://flake8.pycqa.org) for style guides.
 
-## How to start
+## How to start (Setup project and development instance)
 Please create a new branch based on the **develop** branch that contains the most recent changes. This is mandatory.
 
 `git checkout -b myfeature develop`
@@ -15,38 +17,39 @@ Please create a new branch based on the **develop** branch that contains the mos
 Then we strongly suggest to configure [pre-commit](https://github.com/pre-commit/pre-commit) to force linters on every commits you perform:
 ```bash
 # create virtualenv to host pre-commit installation
-python3 -m venv intel_owl_test_env
-source intel_owl_test_env/bin/activate
+python3 -m venv venv
+source venv/bin/activate
 # from the project base directory
 pip install pre-commit
 pre-commit install
 ```
 
-### Start the development instance
-You can execute IntelOwl in development mode by selecting the mode `test` while launching the startup script:
-```
-python3 start.py test up
+Now, you can execute IntelOwl in development mode by selecting the mode `test` while launching the startup script:
+```bash
+python3 start.py test --django-server up
 ```
 Every time you perform a change, you should rebuild the containers to have it reflected in the server:
-```
+```bash
 python3 start.py test down
 python3 start.py test up --build
 ```
-#### Advanced testing configuration
-To avoid wasting of time in rebuilding the containers every time, you can also execute the instance with the option `--django-server`:
-```
-python3 start.py test --django-server up
-```
-In this way, changes will be instantly reflected to the application server without having to rebuild everything.
 
-However remember that the changes won't be automatically reflected to other containers running the python code like the `celery` ones (that IntelOwl uses to execute analyzers).
-This means that you still need to rebuild everything when, for example, you change or create an analyzer.
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<ul>
+  <li>
+  With the <code>--django-server</code> changes will be instantly reflected to the application server without having to rebuild the docker images.
+  </li>
+  <li>
+  However remember that the changes won't be automatically reflected to other containers running the python code like the "celery" ones (that IntelOwl uses to execute analyzers). This means that you still need to rebuild everything when, for example, when you change or create an analyzer.
+  </li>
+</div>
 
 ## How to add a new analyzer
 You may want to look at a few existing examples to start to build a new one, such as:
-- [shodan.py](https://github.com/intelowlproject/IntelOwl/blob/master/api_app/analyzers_manager/observable_analyzers/shodan.py), if you are creating an observable analyzer
-- [intezer_scan.py](https://github.com/intelowlproject/IntelOwl/blob/master/api_app/analyzers_manager/file_analyzers/intezer_scan.py), if you are creating a file analyzer
-- [peframe.py](https://github.com/intelowlproject/IntelOwl/blob/master/api_app/analyzers_manager/file_analyzers/peframe.py), if you are creating a [docker based analyzer](#integrating-a-docker-based-analyzer)
+- [shodan.py](https://github.com/intelowlproject/IntelOwl/blob/develop/api_app/analyzers_manager/observable_analyzers/shodan.py), if you are creating an observable analyzer
+- [intezer_scan.py](https://github.com/intelowlproject/IntelOwl/blob/develop/api_app/analyzers_manager/file_analyzers/intezer_scan.py), if you are creating a file analyzer
+- [peframe.py](https://github.com/intelowlproject/IntelOwl/blob/develop/api_app/analyzers_manager/file_analyzers/peframe.py), if you are creating a [docker based analyzer](#integrating-a-docker-based-analyzer)
 
 After having written the new python module, you have to remember to:
 1. Put the module in the `file_analyzers` or `observable_analyzers` directory based on what it can analyze
@@ -55,38 +58,38 @@ After having written the new python module, you have to remember to:
   Example:
   ```javascript
   "Analyzer_Name": {
-      "type": "file",
+      "type": "file", // or "observable"
       "python_module": "<module_name>.<class_name>",
       "description": "very cool analyzer",
       "external_service": true,
-      "leaks_info": true,
-      "run_hash": true,
-      "supported_filetypes": ["application/javascript"],
+      "leaks_info": true
+      "run_hash": true, // required only for file analyzer
+      "observable_supported": ["ip", "domain", "url", "hash", "generic"], // required only for observable analyzer
+      "supported_filetypes": ["application/javascript"], // required only for file analyzer
       "config": {
         "soft_time_limit": 100,
         "queue": "long",
       }
       "secrets": {
-           "env_var_key": "ANALYZER_SPECIAL_KEY",
-           "type": "string",
-           "required": true,
-           "default": null,
-           "description": "API Key for the analyzer",
+        "api_key_name": {
+          "env_var_key": "ANALYZER_SPECIAL_KEY",
+          "type": "string",
+          "required": true,
+          "default": null,
+          "description": "API Key for the analyzer",
+        }
       }
   },
   ```
   
-  Remember to set at least:
-  * `type`: can be `file` or `observable`. It specifies what the analyzer should analyze
-  * `python_module`: name of the task that the analyzer must launch
-  * `description`: little description of the analyzer
-  
-  The `config` can be used in case the new analyzer uses specific configuration arguments and `secrets` can be used to declare any secrets the analyzer requires in order to run (Example: API Key). 
+  The `config` can be used in case the new analyzer uses specific configuration arguments and `secrets` can be used to declare any secrets the analyzer requires in order to run (Example: API Key, URL, etc.). 
   In that way you can create more than one analyzer for a specific python module, each one based on different configurations.
   MISP and Yara Analyzers are a good example of this use case: for instance, you can use different analyzers for different MISP instances.
 
+  <div class="admonition note">
+  <p class="admonition-title">Note</p>
   Please see [Analyzers customization section](./Usage.md#analyzers-customization) to get the explanation of the other available keys.
-
+  </div>
 
 3. Add the new analyzer in the lists in the docs: [Usage](./Usage.md). Also, if the analyzer provides additional optional configuration, add the available options here: [Advanced-Usage](./Advanced-Usage.md)
 
@@ -95,10 +98,10 @@ After having written the new python module, you have to remember to:
 5. In the Pull Request remember to provide some real world examples (screenshots and raw JSON results) of some successful executions of the analyzer to let us understand how it would work.
 
 ### Integrating a docker based analyzer
-If the analyzer you wish to integrate doesn't exist as a callable API online or python package, it should be integrated with its own docker image
-which can be queried from the main Django API.
+If the analyzer you wish to integrate doesn't exist as a public API or python package, it should be integrated with its own docker image
+which can be queried from the main Django app.
 
-* It should follow the same design principle as the [Box-Js integration](https://github.com/intelowlproject/IntelOwl/tree/develop/integrations), unless there's very good reason not to.
+* It should follow the same design principle as the [other such existing integrations](https://github.com/intelowlproject/IntelOwl/tree/develop/integrations), unless there's very good reason not to.
 * The dockerfile should be placed at `./integrations/<analyzer_name>/Dockerfile`.
 * Two docker-compose files `compose.yml` for production and `compose-tests.yml` for testing should be placed under `./integrations/<analyzer_name>`.
 * If your docker-image uses any environment variables, add them in the `docker/env_file_integrations_template`.
@@ -111,7 +114,7 @@ You may want to look at a few existing examples to start to build a new one:
 
 After having written the new python module, you have to remember to:
 1. Put the module in the `connectors` directory
-2. Add a new entry in the [connector configuration](https://github.com/intelowlproject/IntelOwl/blob/master/configuration/connector_config.json) following alphabetical order:
+2. Add a new entry in the [connector_config.json](https://github.com/intelowlproject/IntelOwl/blob/master/configuration/connector_config.json) following alphabetical order:
   
   Example:
   ```javascript
@@ -198,15 +201,3 @@ Squashing commits can be a tricky process but once you figure it out, it's reall
 Please create pull requests only for the branch **develop**. That code will be pushed to master only on a new release.
 
 Also remember to pull the most recent changes available in the **develop** branch before submitting your PR. If your PR has merge conflicts caused by this behavior, it won't be accepted.
-
-### Example: add an analyzer configuration for your own Yara signatures
-```json
-    "Yara_Scan_Custom_Signatures": {
-        "type": "file",
-        "python_module": "yara.Yara",
-        "description": "Executes Yara with custom signatures",
-        "config": {
-            "directories_with_rules": ["/opt/deploy/yara/custom_signatures"]
-        }
-    },
-```

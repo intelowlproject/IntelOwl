@@ -88,9 +88,7 @@ class Job(models.Model):
     )
     received_request_time = models.DateTimeField(auto_now_add=True)
     finished_analysis_time = models.DateTimeField(blank=True, null=True)
-    tlp = models.CharField(
-        max_length=8, blank=False, choices=TLP.choices, default=TLP.WHITE
-    )
+    tlp = models.CharField(max_length=8, choices=TLP.choices, default=TLP.WHITE)
     errors = pg_fields.ArrayField(
         models.CharField(max_length=900), blank=True, default=list, null=True
     )

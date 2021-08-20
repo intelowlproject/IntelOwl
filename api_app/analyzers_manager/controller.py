@@ -30,7 +30,7 @@ def filter_analyzers(serialized_data: Dict, warnings: List) -> List[str]:
     cleaned_analyzer_list = []
     selected_analyzers = []
     analyzers_requested = serialized_data["analyzers_requested"]
-    tlp = serialized_data["tlp"].upper()
+    tlp = serialized_data.get("tlp", TLP.WHITE).upper()
 
     # run all analyzers ?
     run_all = serialized_data.get("run_all_available_analyzers", False)

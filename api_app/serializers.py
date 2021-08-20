@@ -130,7 +130,7 @@ class _AbstractJobCreateSerializer(
         """
         current_user = self.context["request"].user
         usr_groups = current_user.groups.all()
-        tlp = self.validated_data["tlp"].upper()
+        tlp = self.validated_data.get("tlp", TLP.WHITE).upper()
         if tlp == TLP.RED or tlp == TLP.AMBER:
             view_grps = usr_groups
         else:

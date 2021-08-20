@@ -30,7 +30,6 @@ class _AbstractAnalyzersScriptTestCase(TransactionTestCase):
     def get_params(cls):
         return {
             "source": "test",
-            "force_privacy": False,
             "analyzers_requested": ["test"],
         }
 

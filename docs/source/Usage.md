@@ -10,22 +10,71 @@ There are multiple ways to interact with the Intel Owl APIs,
     - Inbuilt Web interface with dashboard, visualizations of analysis data, easy to use forms for requesting
     new analysis, tags management and more features
     - [Live Demo](https://intelowlclient.firebaseapp.com/)
-    - Built with Angular 9 and available on [Github](https://github.com/intelowlproject/intelowl-ng).
+    - Built with Angular 9+ and available on [Github](https://github.com/intelowlproject/intelowl-ng).
 
-2. pyIntelOwl (CLI/Library) ["How to use" Youtube video](https://www.youtube.com/watch?v=fpd6Kt9EZdI)
+2. pyIntelOwl (CLI/SDK)
 
     - Official client that is available at: [PyIntelOwl](https://github.com/intelowlproject/pyintelowl),
     - Can be used as a library for your own python projects or...
     - directly via the command line interface.
 
 ### Tokens creation
-The server authentication is managed by API keys. So, if you want to interact with Intel Owl, you have to create one or more unprivileged users from the Django Admin Interface and then generate a token for those users.
+The server authentication is managed by API tokens. So, if you want to interact with Intel Owl, you have to create one or more unprivileged users from the Django Admin Interface and then generate a token for those users.
 Afterwards you can leverage the created tokens with the Intel Owl Client.
+
+## Analyzers customization
+You can create new analyzers based on already existing modules by changing the configuration values inside `configuration/analyzer_config.json`. This file is mounted as a docker volume, so you won't need to rebuild the image.
+
+You may want to change this configuration to add new analyzers or to change the configuration of some of them. The name of the analyzers can be changed at every moment based on your wishes.
+
+The following are all the keys that you can change without touching the source code:
+* `disabled`: you can choose to disable certain analyzers, then they won't appear in the dropdown list and won't run if requested.
+* `leaks_info`: if set, in the case you specify via the API that a resource is sensitive, the specific analyzer won't be executed
+* `external_service`: if set, in the case you specify via the API to exclude external services, the specific analyzer won't be executed
+* `supported_filetypes`: can be populated as a list. If set, if you ask to analyze a file with a different mimetype from the ones you specified, it won't be executed
+* `not_supported_filetypes`: can be populated as a list. If set, if you ask to analyze a file with a mimetype from the ones you specified, it won't be executed
+* `observable_supported`: can be populated as a list. If set, if you ask to analyze an observable that is not in this list, it won't be executed. Valid values are: `ip`, `domain`, `url`, `hash`, `generic`.
+* `soft_time_limit`: this is the maximum time (in seconds) of execution for an analyzer. Once reached, the task will be killed (or managed in the code by a custom Exception). Default 300s
+* `queue`: this takes effects only when [multi-queue](Advanced-Usage.html#multi-queue) is enabled. Choose which celery worker would execute the task: `local` (ideal for tasks that leverage local applications like Yara), `long` (ideal for long tasks) or `default` (ideal for simple webAPI-based analyzers).
+
+##### Example: add an analyzer configuration for your own Yara signatures
+```json
+    "Yara_Scan_Custom_Signatures": {
+        "type": "file",
+        "python_module": "yara.Yara",
+        "description": "Executes Yara with custom signatures",
+        "config": {
+            "directories_with_rules": ["/opt/deploy/yara/custom_signatures"]
+        }
+    }
+```
+
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+Changing other keys can and will break the analyzer. In that case, you should think about create a new python module or to modify an existing one.
+</div>
+
+## Connectors customization
+Connectors being optional are `disabled` by default. You can enable them by changing the configuration values inside `configuration/connector_config.json`. This file is mounted as a docker volume, so you won't need to rebuild the image.
+
+The following are all the keys that you can change without touching the source code:
+* `disabled`: (similar to analyzers) use this to enable/disable certain connectors, the enabled connectors are called after successful analysis.
+* `soft_time_limit`: (similar to analyzers) this is the maximum time (in seconds) of execution for an connector. Once reached, the task will be killed (or managed in the **code** by a custom Exception). Default 300s
+* `queue`: (similar to analyzers) this takes effects only when [multi-queue](Advanced-Usage.html#multi-queue) is enabled. Choose which celery worker would execute the task: `local` (ideal for tasks that leverage local applications), `long` (ideal for long tasks) or `default` (ideal for simple webAPI-based connectors).
+
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+Changing other keys can and will break the connector. In that case, you should think about create a new python module or to modify an existing one.
+</div>
+
 
 ## Available Analyzers
 
 ### Get all available analyzers
-You can programmatically retrieve all the available analyzers with the official client [PyIntelOwl](https://github.com/intelowlproject/pyintelowl).
+You can programmatically retrieve all the available analyzers with the official client [PyIntelOwl](https://github.com/intelowlproject/pyintelowl) using the following command:
+```bash
+$ pyintelowl get-analyzer-config
+```
 
 ### Analyzers list
 
@@ -154,57 +203,31 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * `OpenCTI`: scan an observable on an OpenCTI instance
 * `Intezer_Get`: check if an analysis related to a hash is available in [Intezer](https://analyze.intezer.com/))
 * `MWDB_Get`: [mwdblib](https://mwdb.readthedocs.io/en/latest/) Retrieve malware file analysis by hash from repository maintained by CERT Polska MWDB.
+* `YETI` (Your Everyday Threat Intelligence): scan an observable on a YETI instance.
 
 #### Generic analyzers (email, phone number, etc.; anything really)
-Some Analyzers require details other than just IP, URL, Domain etc... We classified them as Generic Analyzers. Since the type of field is not known, there is a format for strings to be followed.
+Some analyzers require details other than just IP, URL, Domain etc... We classified them as Generic Analyzers. Since the type of field is not known, there is a format for strings to be followed.
 * `EmailRep`: search an email address on emailrep.io
 * `WiGLE`: Maps and database of 802.11 wireless networks, with statistics, submitted by wardrivers, netstumblers, and net huggers.
 * `CRXcavator`: scans a chrome extension against crxcavator.io
 * `Darksearch_Query`: Search a keyword against darksearch.io's search API. It's possible to make complex queries using boolean logic. For example, `OSINT AND CTI OR intelowl NOT hack` is a valid observable name.
 * `Dehashed_Search`: Query any observable/keyword against https://dehashed.com's search API.
 
-#### [Additional analyzers](https://intelowl.readthedocs.io/en/develop/Advanced-Usage.html#optional-analyzers) that can be enabled per your wish.
+#### Extra analyzers
 
-## Analyzers customization
-You can create new analyzers based on already existing modules by changing the configuration values inside `configuration/analyzer_config.json`. This file is mounted as a docker volume, so you won't need to rebuild the image.
-
-The following are all the keys that you can change without touching the source code:
-* `disabled`: you can choose to disable certain analyzers, then they won't appear in the dropdown list and won't run if requested.
-* `leaks_info`: if set, in the case you specify via the API that a resource is sensitive, the specific analyzer won't be executed
-* `external_service`: if set, in the case you specify via the API to exclude external services, the specific analyzer won't be executed
-* `supported_filetypes`: can be populated as a list. If set, if you ask to analyze a file with a different mimetype from the ones you specified, it won't be executed
-* `not_supported_filetypes`: can be populated as a list. If set, if you ask to analyze a file with a mimetype from the ones you specified, it won't be executed
-* `observable_supported`: can be populated as a list. If set, if you ask to analyze an observable that is not in this list, it won't be executed. Valid values are: `ip`, `domain`, `url`, `hash`, `generic`.
-* `soft_time_limit`: this is the maximum time (in seconds) of execution for an analyzer. Once reached, the task will be killed (or managed in the code by a custom Exception). Default 300s
-* `queue`: this takes effects only when [multi-queue](https://intelowl.readthedocs.io/en/develop/Advanced-Usage.html#multi-queue) is enabled. Choose which celery worker would execute the task: `local` (ideal for tasks that leverage local applications like Yara), `long` (ideal for long tasks) or `default` (ideal for simple webAPI-based analyzers).
-
-Also, you can change the name of every available analyzer as you wish.
-
-Changing other keys will break the analyzer. In that case, you should think about create a new python module or to modify an existing one.
-
-To contribute to the project, see [Contribute](./Contribute.md)
+[Additional analyzers](Advanced-Usage.html#optional-analyzers) that can be enabled per your wish.
 
 ## Available Connectors
 
 ### Get all available connectors
-You can programmatically retrieve all the available connectors with the official client [PyIntelOwl](https://github.com/intelowlproject/pyintelowl).
+You can programmatically retrieve all the available connectors with the official client [PyIntelOwl](https://github.com/intelowlproject/pyintelowl) using the following command:
+```bash
+$ pyintelowl get-connector-config
+```
 
 ### Connectors list
 
 The following is the list of the available connectors:
 * `MISP`: automatically creates an event on your MISP instance, linking the successful analysis on IntelOwl.
 * `OpenCTI`: automatically creates an observable and a linked report on your OpenCTI instance, linking the the successful analysis on IntelOwl.
-
-## Connectors customization
-Connectors being optional are `disabled` by default. You can enable them by changing the configuration values inside `configuration/connector_config.json`. This file is mounted as a docker volume, so you won't need to rebuild the image.
-
-The following are all the keys that you can change without touching the source code:
-* `disabled`: (similar to analyzers) use this to enable/disable certain connectors, the enabled connectors are called after successful analysis.
-* `soft_time_limit`: (similar to analyzers) this is the maximum time (in seconds) of execution for an connector. Once reached, the task will be killed (or managed in the **code** by a custom Exception). Default 300s
-* `queue`: (similar to analyzers) this takes effects only when [multi-queue](https://intelowl.readthedocs.io/en/develop/Advanced-Usage.html#multi-queue) is enabled. Choose which celery worker would execute the task: `local` (ideal for tasks that leverage local applications), `long` (ideal for long tasks) or `default` (ideal for simple webAPI-based connectors).
-
-Also, you can change the name of every available connector as you wish.
-
-Changing other keys will break the connector. In that case, you should think about create a new python module or to modify an existing one.
-
-To contribute to the project, see [Contribute](./Contribute.md)
+* `YETI`: YETI = Your Everyday Threat Intelligence. find or create observable on YETI, linking the successful analysis on IntelOwl.

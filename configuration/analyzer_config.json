@@ -738,6 +738,38 @@
       }
     }
   },
+  "HashLookupServer_Get_Observable": {
+    "type": "observable",
+    "python_module": "hashlookup.HashLookupServer",
+    "description": "check if a md5 or sha1 is available in the database of known file hosted by CIRCL",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": [
+      "hash"
+    ],
+    "config": {
+      "soft_time_limit": 20,
+      "queue": "default",
+      "hashlookup_server": ""
+    },
+    "secrets": {}
+  },
+  "HashLookupServer_Get_File": {
+    "type": "file",
+    "python_module": "hashlookup.HashLookupServer",
+    "description": "check if a md5 or sha1 is available in the database of known file hosted by CIRCL",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "run_hash": true,
+    "config": {
+      "soft_time_limit": 400,
+      "queue": "default",
+      "hashlookup_server": ""
+    },
+    "secrets": {}
+  },
   "HoneyDB": {
     "type": "observable",
     "python_module": "honeydb.HoneyDB",

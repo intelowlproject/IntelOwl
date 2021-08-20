@@ -128,7 +128,7 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * `MWDB_Scan`: [mwdblib](https://mwdb.readthedocs.io/en/latest/) Retrieve malware file analysis from repository maintained by CERT Polska MWDB.
 * `Qiling`: [Qiling](https://github.com/qilingframework/qiling) qiling binary emulation.
 * `Malpedia_Scan`: scan a binary or a zip file (pwd:infected) against all the yara rules available in [Malpedia](https://malpedia.caad.fkie.fraunhofer.de/)
-
+* `HashLookupServer_Get_File`: check if a md5 or sha1 is available in the database of [known file hosted by CIRCL](https://github.com/adulau/hashlookup-server)
 
 #### Observable analyzers (ip, domain, url, hash)
 * `VirusTotal_v3_Get_Observable`: search an observable in the VirusTotal DB
@@ -204,6 +204,7 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * `Intezer_Get`: check if an analysis related to a hash is available in [Intezer](https://analyze.intezer.com/))
 * `MWDB_Get`: [mwdblib](https://mwdb.readthedocs.io/en/latest/) Retrieve malware file analysis by hash from repository maintained by CERT Polska MWDB.
 * `YETI` (Your Everyday Threat Intelligence): scan an observable on a YETI instance.
+* `HashLookupServer_Get_Observable`: check if a md5 or sha1 is available in the database of [known file hosted by CIRCL](https://github.com/adulau/hashlookup-server)
 
 #### Generic analyzers (email, phone number, etc.; anything really)
 Some analyzers require details other than just IP, URL, Domain etc... We classified them as Generic Analyzers. Since the type of field is not known, there is a format for strings to be followed.

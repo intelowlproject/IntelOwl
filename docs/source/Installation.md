@@ -67,7 +67,7 @@ All these components are managed via docker-compose.
 - [Environment configuration (required)](#environment-configuration-required)
 - [Database configuration (required)](#database-configuration-required)
 - [Web server configuration (optional)](#web-server-configuration-optional)
-- [Analyzers configuration (optional)](#analyzers-configuration-optional)
+- [Analyzers configuration (optional)](#analyzers-or-connectors-configuration-optional)
 
 Open a terminal and execute below commands to construct new environment files from provided templates.
 
@@ -179,38 +179,15 @@ There are 3 options to execute the web server:
     After the configuration is done, you can add the option `--traefik` while executing the [`start.py`](#run)
 
 
-### Analyzers configuration (optional)
-In the file `configuration/analyzers_config.json` there is the configuration for all the available analyzers you can run.
-For a complete list of all current available analyzer please look at: [Usage](./Usage.md#available-analyzers)
+### Analyzers or connectors configuration (optional)
 
-You may want to change this configuration to add new analyzers or to change the configuration of some of them.
-
-The name of the analyzers can be changed at every moment based on your wishes.
-You just need to remember that it's important that you keep at least the following keys in the analyzers dictionaries to let them run correctly:
-* `type`: can be `file` or `observable`. It specifies what the analyzer should analyze
-* `python_module`: path to the analyzer class
+Refer to [Analyzers customization](Usage.html#analyzers-customization) and [Connectors customization](Usage.html#connectors-customization).
 
 <div class="admonition hint">
 <p class="admonition-title">Hint</p>
-You can see the full list of all available analyzers in the <a href="Usage.html#available-analyzers">Usage.html</a> or <a href="https://intelowlclient.firebaseapp.com/pages/connectors">Live Demo</a>.
+You can see the full list of all available analyzers and connectors in the <a href="Usage.html#available-analyzers">Usage.html</a> or <a href="https://intelowlclient.firebaseapp.com/pages/analyzers/table">Live Demo</a>.
 </div>
 
-<div class="admonition hint">
-<p class="admonition-title">Hint</p>
-Some analyzers are kept optional and can easily be enabled. Refer to <a href="Advanced-Usage.html#optional-analyzers">this</a> part of the docs.
-</div>
-
-### Connectors configuration (optional)
-In the file `configuration/connectors_config.json` there is the configuration for all the available connectors you can configure.
-For a complete list of all current available connectors please look at: [Usage](./Usage.md#available-connectors)
-
-Connectors being optional are disabled by default, change this configuration to enable them; add new connectors or customize them.
-The name of the connectors can be changed at every moment based on your wishes.
-
-<div class="admonition hint">
-<p class="admonition-title">Hint</p>
-You can see the full list of all available connectors in the <a href="Usage.html#available-connectors">Usage.html</a> or <a href="https://intelowlclient.firebaseapp.com/pages/connectors">Live Demo</a>.
-</div>
 
 ## AWS support
 At the moment there's a basic support for some of the AWS services. More is coming in the future. 
@@ -251,9 +228,6 @@ The CLI provides the primitives to correctly build, run or stop the containers f
 <li>It is possible to insert an optional docker argument that the CLI will pass to <code>docker-compose</code></li>
 </ul>
 </div>
-
-
-
 
 Now that you have completed different configurations, starting the containers is as simple as invoking:
 

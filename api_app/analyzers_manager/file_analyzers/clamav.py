@@ -1,55 +1,27 @@
-import subprocess
-import logging
-from shutil import which
-import pyclamd
+# This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
+# See the file 'LICENSE' for copying permission.
 
-from api_app.exceptions import AnalyzerRunException
-from api_app.analyzers_manager.classes import FileAnalyzer
+from api_app.analyzers_manager.classes import FileAnalyzer, DockerBasedAnalyzer
 
 
-logger = logging.getLogger(__name__)
-
-
-class ClamAV(FileAnalyzer):
-    command: str = "clamd"
-    update_database_command: str = "freshclam"
+class ClamAV(FileAnalyzer, DockerBasedAnalyzer):
+    name: str = "ClamAV"
+    url: str = "http://static_analyzers:4002/clamav"
+    # interval between http request polling
+    poll_distance: int = 10
+    # http request polling max number of tries
+    max_tries: int = 60
+    # here, max_tries * poll_distance = 10 minutes
+    timeout: int = 60 * 9
+    # whereas subprocess timeout is kept as 60 * 9 = 9 minutes
 
     def run(self):
-        if not which(self.update_database_command):
-            logger.warning("Skipping Database updates: freshclam not installed")
+        # get binary
+        binary = self.read_file_bytes()
+        # make request data
+        fname = str(self.filename).replace("/", "_").replace(" ", "_")
+        args = [f"@{fname}"]
+        req_data = {"args": args, "timeout": self.timeout}
+        req_files = {fname: binary}
 
-        if not which(self.command):
-            raise AnalyzerRunException("clamav not installed!")
-
-        # Update database if needed and run ClamAV Daemon
-        args = [self.update_database_command, "&&", self.command]
-
-        process = subprocess.Popen(
-            args,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-        )
-        stdout, stderr = process.communicate()
-        logger.warning(stderr.decode("utf-8"))
-
-        try:
-            cd = pyclamd.ClamdUnixSocket()
-            # Test if server is reachable
-            cd.ping()
-        except pyclamd.ConnectionError:
-            cd = pyclamd.ClamdNetworkSocket()
-            try:
-                cd.ping()
-            except pyclamd.ConnectionError:
-                raise AnalyzerRunException(
-                    "couldn't connect to clamd server by unix or network socket"
-                )
-
-        try:
-            report = cd.scan_stream(self.read_file_bytes())
-        except pyclamd.BufferTooLongError as e:
-            raise AnalyzerRunException(f"file buffer size exceeds clamd limits: {e}")
-        except pyclamd.ConnectionError as e:
-            raise AnalyzerRunException(f"communication issue with clamd: {e}")
-
-        return {"data": report}
+        return self._docker_run(req_data, req_files)

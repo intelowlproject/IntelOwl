@@ -53,6 +53,12 @@ RUN apt-get remove -y wget git \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
+# Permission juggling for ClamAV Analyzer
+RUN mkdir /var/run/clamav && \
+    chown static_analyzers-user:static_analyzers-user /var/run/clamav && \
+    chmod 750 /var/run/clamav
+
+EXPOSE 3310
 # Serve Flask application using gunicorn
 EXPOSE 4002
 ENTRYPOINT ["./entrypoint.sh"]

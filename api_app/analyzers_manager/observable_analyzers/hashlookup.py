@@ -1,15 +1,12 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-import logging
 from pyhashlookup import Hashlookup
 
 from api_app.analyzers_manager import classes
 from api_app.exceptions import AnalyzerRunException
 
 from tests.mock_utils import if_mock_connections, patch, MockResponseNoOp
-
-logger = logging.getLogger(__name__)
 
 
 class HashLookupServer(classes.ObservableAnalyzer):
@@ -33,8 +30,6 @@ class HashLookupServer(classes.ObservableAnalyzer):
             raise AnalyzerRunException(
                 "hashes that are not md5 or sha1 are not supported by the service"
             )
-
-        logger.info(result)
 
         return result
 

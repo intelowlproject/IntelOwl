@@ -2884,6 +2884,44 @@
     },
     "secrets": {}
   },
+  "YETI": {
+    "type": "observable",
+    "python_module": "yeti.YETI",
+    "description": "scan an observable on a custom YETI instance",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": [
+      "ip",
+      "domain",
+      "url",
+      "hash",
+      "generic"
+    ],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default",
+      "verify_ssl": true,
+      "regex": false,
+      "results_count": 50
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "YETI_KEY",
+        "type": "string",
+        "required": true,
+        "default": null,
+        "description": "API key for your YETI instance"
+      },
+      "url_key_name": {
+        "env_var_key": "YETI_URL",
+        "type": "string",
+        "required": true,
+        "default": null,
+        "description": "API URL of your YETI instance"
+      }
+    }
+  },
   "ZoomEye": {
     "type": "observable",
     "python_module": "zoomeye.ZoomEye",

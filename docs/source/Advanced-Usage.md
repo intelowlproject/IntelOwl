@@ -221,6 +221,8 @@ Connectors by nature are designed to run independently after each analysis. Ther
     * `ssl_verify`: (default `true`), enable SSL certificate server verification. Change this if your OpenCTI instance has not SSL enabled.
     * `proxies`: (`http` and `https`, default `""`) use these options to pass your request through a proxy server.
     * `tlp` (Traffic Light Protocol): (default - `type`: white, `color`: #ffffff, `x_opencti_order`: 1) change this as per your organization's threat sharing conventions.
+* `YETI`:
+    * `verify_ssl`: (default `true`), enable SSL certificate server verification. Change this if your YETI instance has not SSL enabled.
 
 ## Elastic Search
 

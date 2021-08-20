@@ -1,6 +1,6 @@
 {
   "MISP": {
-    "disabled": false,
+    "disabled": true,
     "description": "automatically creates an event on your MISP instance, linking the analysis the successful analysis on IntelOwl",
     "python_module": "misp.MISP",
     "config": {
@@ -28,7 +28,7 @@
     }
   },
   "OpenCTI": {
-    "disabled": false,
+    "disabled": true,
     "description": "automatically creates an observable and a linked report on your OpenCTI instance, linking the the successful analysis on IntelOwl",
     "python_module": "opencti.OpenCTI",
     "config": {
@@ -59,6 +59,32 @@
         "required": true,
         "default": null,
         "description": "URL of your OpenCTI instance"
+      }
+    }
+  },
+  "YETI": {
+    "disabled": true,
+    "description": "find or create observable on YETI, linking the successful analysis on IntelOwl.",
+    "python_module": "yeti.YETI",
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default",
+      "verify_ssl": true
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "CONNECTOR_YETI_KEY",
+        "type": "string",
+        "required": true,
+        "default": null,
+        "description": "API key for your YETI instance"
+      },
+      "url_key_name": {
+        "env_var_key": "CONNECTOR_YETI_URL",
+        "type": "string",
+        "required": true,
+        "default": null,
+        "description": "API URL of your YETI instance"
       }
     }
   }

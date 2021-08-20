@@ -132,7 +132,7 @@ In the `env_file_app`, configure different variables as explained below.
 * `CONNECTOR_OPENCTI_KEY`: your own OpenCTI instance key to use with `OpenCTI` connector
 * `CONNECTOR_OPENCTI_URL`: your own OpenCTI instance URL to use with `OpenCTI` connector
 * `CONNECTOR_YETI_KEY`: your own YETI instance key to use with `YETI` connector
-* `CONNECTOR_YETI_URL`: your own YETI instance URL to use with `YETI` connector
+* `CONNECTOR_YETI_URL`: your own YETI instance API URL to use with `YETI` connector
 
 **Advanced** additional configuration:
 * `OLD_JOBS_RETENTION_DAYS`: Database retention for analysis results (default: 3 days). Change this if you want to keep your old analysis longer in the database.

@@ -27,6 +27,23 @@ STATUS = [
 ]
 
 
+class TLP(models.TextChoices):
+    WHITE = "WHITE"
+    GREEN = "GREEN"
+    AMBER = "AMBER"
+    RED = "RED"
+
+    @classmethod
+    def get_priority(cls, tlp):
+        order = {
+            cls.WHITE: 0,
+            cls.GREEN: 1,
+            cls.AMBER: 2,
+            cls.RED: 3,
+        }
+        return order.get(tlp, None)
+
+
 class Tag(models.Model):
     label = models.CharField(max_length=50, blank=False, null=False, unique=True)
     color = models.CharField(max_length=7, blank=False, null=False, unique=True)
@@ -45,6 +62,9 @@ class Job(models.Model):
                 ]
             ),
         ]
+
+    # constants
+    TLP = TLP
 
     source = models.CharField(max_length=50, blank=False, default="none")
     is_sample = models.BooleanField(blank=False, default=False)
@@ -68,8 +88,7 @@ class Job(models.Model):
     )
     received_request_time = models.DateTimeField(auto_now_add=True)
     finished_analysis_time = models.DateTimeField(blank=True, null=True)
-    force_privacy = models.BooleanField(blank=False, default=False)
-    disable_external_analyzers = models.BooleanField(blank=False, default=False)
+    tlp = models.CharField(max_length=8, choices=TLP.choices, default=TLP.WHITE)
     errors = pg_fields.ArrayField(
         models.CharField(max_length=900), blank=True, default=list, null=True
     )

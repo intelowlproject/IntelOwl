@@ -8,7 +8,7 @@ from rest_framework import serializers
 from rest_flex_fields import FlexFieldsModelSerializer
 from rest_framework_guardian.serializers import ObjectPermissionsAssignmentMixin
 
-from api_app.models import Job, Tag
+from api_app.models import Job, TLP, Tag
 from .helpers import calculate_mimetype
 from .analyzers_manager.serializers import AnalyzerReportSerializer
 from .connectors_manager.serializers import ConnectorReportSerializer
@@ -120,18 +120,18 @@ class _AbstractJobCreateSerializer(
     )
     analyzers_requested = serializers.ListField(default=list)
     run_all_available_analyzers = serializers.BooleanField(default=False)
-    private = serializers.BooleanField(default=False)
 
     def get_permissions_map(self, created) -> dict:
         """
         * 'view' permission is applied to all the groups the requesting user belongs to
-        if private is True.
+        if job is private (tlp - RED, AMBER).
         * 'delete' permission is only given to the user who created the job
         * 'change' permission is given to
         """
         current_user = self.context["request"].user
         usr_groups = current_user.groups.all()
-        if self.validated_data["private"]:
+        tlp = self.validated_data.get("tlp", TLP.WHITE).upper()
+        if tlp == TLP.RED or tlp == TLP.AMBER:
             view_grps = usr_groups
         else:
             view_grps = Group.objects.all()
@@ -167,7 +167,6 @@ class _AbstractJobCreateSerializer(
 
     def create(self, validated_data) -> Job:
         # fields `tags_id` are not there in `Job` model.
-        validated_data.pop("private", None)
         tags = validated_data.pop("tags_id", None)
         job = Job.objects.create(**validated_data)
         if tags:
@@ -194,8 +193,7 @@ class FileAnalysisSerializer(_AbstractJobCreateSerializer):
             "source",
             "is_sample",
             "md5",
-            "force_privacy",
-            "disable_external_analyzers",
+            "tlp",
             "file",
             "file_name",
             "file_mimetype",
@@ -203,7 +201,6 @@ class FileAnalysisSerializer(_AbstractJobCreateSerializer):
             "runtime_configuration",
             "analyzers_requested",
             "tags_id",
-            "private",
         )
 
     def validate(self, attrs):
@@ -229,13 +226,11 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
             "source",
             "is_sample",
             "md5",
-            "force_privacy",
-            "disable_external_analyzers",
+            "tlp",
             "observable_name",
             "observable_classification",
             "run_all_available_analyzers",
             "runtime_configuration",
             "analyzers_requested",
             "tags_id",
-            "private",
         )

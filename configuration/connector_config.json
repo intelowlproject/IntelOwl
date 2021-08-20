@@ -3,6 +3,7 @@
     "disabled": true,
     "description": "automatically creates an event on your MISP instance, linking the analysis the successful analysis on IntelOwl",
     "python_module": "misp.MISP",
+    "maximum_tlp": "WHITE",
     "config": {
       "soft_time_limit": 30,
       "queue": "default",
@@ -31,6 +32,7 @@
     "disabled": true,
     "description": "automatically creates an observable and a linked report on your OpenCTI instance, linking the the successful analysis on IntelOwl",
     "python_module": "opencti.OpenCTI",
+    "maximum_tlp": "WHITE",
     "config": {
       "soft_time_limit": 30,
       "queue": "default",
@@ -66,6 +68,7 @@
     "disabled": true,
     "description": "find or create observable on YETI, linking the successful analysis on IntelOwl.",
     "python_module": "yeti.YETI",
+    "maximum_tlp": "WHITE",
     "config": {
       "soft_time_limit": 30,
       "queue": "default",

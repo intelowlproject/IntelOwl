@@ -231,3 +231,29 @@ The following is the list of the available connectors:
 * `MISP`: automatically creates an event on your MISP instance, linking the successful analysis on IntelOwl.
 * `OpenCTI`: automatically creates an observable and a linked report on your OpenCTI instance, linking the the successful analysis on IntelOwl.
 * `YETI`: YETI = Your Everyday Threat Intelligence. find or create observable on YETI, linking the successful analysis on IntelOwl.
+
+## Connectors customization
+Connectors being optional are `disabled` by default. You can enable them by changing the configuration values inside `configuration/connector_config.json`. This file is mounted as a docker volume, so you won't need to rebuild the image.
+
+The following are all the keys that you can change without touching the source code:
+* `disabled`: (similar to analyzers) use this to enable/disable certain connectors, the enabled connectors are called after successful analysis.
+* `soft_time_limit`: (similar to analyzers) this is the maximum time (in seconds) of execution for an connector. Once reached, the task will be killed (or managed in the **code** by a custom Exception). Default 300s
+* `queue`: (similar to analyzers) this takes effects only when [multi-queue](https://intelowl.readthedocs.io/en/develop/Advanced-Usage.html#multi-queue) is enabled. Choose which celery worker would execute the task: `local` (ideal for tasks that leverage local applications), `long` (ideal for long tasks) or `default` (ideal for simple webAPI-based connectors).
+* `maximum_tlp` (default `WHITE`, choices `WHITE`, `GREEN`, `AMBER`, `RED`): specify with the maximum TLP of the analysis upto which the connector is allowed to run. (e.g. if `maximum_tlp` is `GREEN`, it would run for analysis with TLPs `WHITE` and `GREEN`). To learn more about TLPs see [TLP Support](./Usage.md#tlp-support).
+
+Also, you can change the name of every available connector as you wish.
+
+Changing other keys will break the connector. In that case, you should think about create a new python module or to modify an existing one.
+
+To contribute to the project, see [Contribute](./Contribute.md)
+
+## TLP Support
+IntelOwl supports the `Traffic Light Protocol` (`TLP`) to facilitate sharing of job analysis results.
+
+Following are the indicators available when requesting an analysis (in the order of increasing sharing restrictions):
+1. `WHITE`: no restriction
+2. `GREEN`: disable analyzers that could impact privacy
+3. `AMBER`: disable analyzers that could impact privacy and limit view permissions to my group
+4. `RED`: disable analyzers that could impact privacy, limit view permissions to my group and do not use any external service
+
+These indicators when used with `maximum_tlp` (option available in connectors), give you the control of what information is shared to the external platforms.

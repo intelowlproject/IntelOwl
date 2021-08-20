@@ -13,7 +13,7 @@ from intel_owl.celery import app as celery_app
 from .classes import BaseAnalyzerMixin, DockerBasedAnalyzer
 from .models import AnalyzerReport
 from .dataclasses import AnalyzerConfig
-from ..models import Job
+from ..models import Job, TLP
 from ..helpers import get_now
 from ..exceptions import AlreadyFailedJobException, NotRunnableAnalyzer
 
@@ -30,6 +30,7 @@ def filter_analyzers(serialized_data: Dict, warnings: List) -> List[str]:
     cleaned_analyzer_list = []
     selected_analyzers = []
     analyzers_requested = serialized_data["analyzers_requested"]
+    tlp = serialized_data.get("tlp", TLP.WHITE).upper()
 
     # run all analyzers ?
     run_all = serialized_data.get("run_all_available_analyzers", False)
@@ -81,14 +82,11 @@ def filter_analyzers(serialized_data: Dict, warnings: List) -> List[str]:
                         f"type {serialized_data['observable_classification']}."
                     )
 
-            if serialized_data["force_privacy"] and config.leaks_info:
+            if tlp != TLP.WHITE and config.leaks_info:
                 raise NotRunnableAnalyzer(
                     f"{a_name} won't be run because it leaks info externally."
                 )
-            if (
-                serialized_data["disable_external_analyzers"]
-                and config.external_service
-            ):
+            if tlp == TLP.RED and config.external_service:
                 raise NotRunnableAnalyzer(
                     f"{a_name} won't be run because you filtered external analyzers."
                 )

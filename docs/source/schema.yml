@@ -651,6 +651,9 @@ components:
         leaks_info:
           type: boolean
           default: false
+        docker_based:
+          type: boolean
+          default: false
         run_hash:
           type: boolean
           default: false
@@ -766,9 +769,12 @@ components:
               items:
                 type: string
           readOnly: true
+        maximum_tlp:
+          $ref: '#/components/schemas/MaximumTlpEnum'
       required:
       - config
       - disabled
+      - maximum_tlp
       - name
       - python_module
       - verification
@@ -814,10 +820,8 @@ components:
         md5:
           type: string
           maxLength: 32
-        force_privacy:
-          type: boolean
-        disable_external_analyzers:
-          type: boolean
+        tlp:
+          $ref: '#/components/schemas/TlpEnum'
         file:
           type: string
           format: uri
@@ -840,9 +844,6 @@ components:
             type: integer
             writeOnly: true
           writeOnly: true
-        private:
-          type: boolean
-          default: false
       required:
       - file
       - file_name
@@ -944,10 +945,8 @@ components:
           type: string
           format: date-time
           nullable: true
-        force_privacy:
-          type: boolean
-        disable_external_analyzers:
-          type: boolean
+        tlp:
+          $ref: '#/components/schemas/TlpEnum'
         errors:
           type: array
           items:
@@ -1006,6 +1005,13 @@ components:
       - no_of_connectors_executed
       - process_time
       - tags
+    MaximumTlpEnum:
+      enum:
+      - WHITE
+      - GREEN
+      - AMBER
+      - RED
+      type: string
     ObservableAnalysis:
       type: object
       description: |-
@@ -1021,10 +1027,8 @@ components:
         md5:
           type: string
           maxLength: 32
-        force_privacy:
-          type: boolean
-        disable_external_analyzers:
-          type: boolean
+        tlp:
+          $ref: '#/components/schemas/TlpEnum'
         observable_name:
           type: string
         observable_classification:
@@ -1046,9 +1050,6 @@ components:
             type: integer
             writeOnly: true
           writeOnly: true
-        private:
-          type: boolean
-          default: false
       required:
       - id
       - md5
@@ -1138,6 +1139,13 @@ components:
       - color
       - id
       - label
+    TlpEnum:
+      enum:
+      - WHITE
+      - GREEN
+      - AMBER
+      - RED
+      type: string
     TypeEnum:
       enum:
       - file

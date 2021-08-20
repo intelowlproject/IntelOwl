@@ -50,6 +50,5 @@ class JobDocument(Document):
             "run_all_available_analyzers",
             "received_request_time",
             "finished_analysis_time",
-            "force_privacy",
-            "disable_external_analyzers",
+            "tlp",
         ]

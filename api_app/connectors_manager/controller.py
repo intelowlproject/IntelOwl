@@ -58,7 +58,7 @@ def start_connectors(
         if not cc.is_ready_to_use and not settings.TEST_MODE:
             continue
 
-        # check if minimum tlp allows running
+        # check if job's tlp allows running
         # e.g. if connector_tlp is GREEN(1), run for job_tlp WHITE(0) & GREEN(1) only
         if TLP.get_priority(job.tlp) > TLP.get_priority(cc.maximum_tlp):
             continue

@@ -769,9 +769,12 @@ components:
               items:
                 type: string
           readOnly: true
+        maximum_tlp:
+          $ref: '#/components/schemas/MaximumTlpEnum'
       required:
       - config
       - disabled
+      - maximum_tlp
       - name
       - python_module
       - verification
@@ -1002,6 +1005,13 @@ components:
       - no_of_connectors_executed
       - process_time
       - tags
+    MaximumTlpEnum:
+      enum:
+      - WHITE
+      - GREEN
+      - AMBER
+      - RED
+      type: string
     ObservableAnalysis:
       type: object
       description: |-

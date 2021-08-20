@@ -13,6 +13,7 @@ __all__ = ["ConnectorConfig"]
 
 @dataclasses.dataclass
 class ConnectorConfig(AbstractConfig):
+    maximum_tlp: str
 
     serializer_class = ConnectorConfigSerializer
 

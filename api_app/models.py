@@ -33,6 +33,16 @@ class TLP(models.TextChoices):
     AMBER = "AMBER"
     RED = "RED"
 
+    @classmethod
+    def get_priority(cls, tlp):
+        order = {
+            cls.WHITE: 0,
+            cls.GREEN: 1,
+            cls.AMBER: 2,
+            cls.RED: 3,
+        }
+        return order.get(tlp, None)
+
 
 class Tag(models.Model):
     label = models.CharField(max_length=50, blank=False, null=False, unique=True)

@@ -9,6 +9,7 @@ from celery import uuid, group
 
 from django.conf import settings
 from django.utils.module_loading import import_string
+from api_app.models import TLP, Job
 from .dataclasses import ConnectorConfig
 from .models import ConnectorReport
 from .classes import Connector
@@ -47,11 +48,19 @@ def start_connectors(
             if name in connector_names
         }
 
+    # get job
+    job = Job.objects.get(pk=job_id)
+
     # loop over and create task signatures
     for connector_name, cc in connectors_config.items():
 
         # if disabled or unconfigured (this check is bypassed in TEST_MODE)
         if not cc.is_ready_to_use and not settings.TEST_MODE:
+            continue
+
+        # check if minimum tlp allows running
+        # e.g. if connector_tlp is GREEN(1), run for job_tlp WHITE(0) & GREEN(1) only
+        if TLP.get_priority(job.tlp) > TLP.get_priority(cc.maximum_tlp):
             continue
 
         # get runtime_configuration if any specified for this analyzer

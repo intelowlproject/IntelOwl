@@ -7,7 +7,7 @@ ENV LOG_PATH /var/log/intel_owl/static_analyzers
 RUN apt-get update \
     && apt-get install -y --no-install-recommends wget git libssl1.1 swig g++ make libssl-dev libmagic1 \
     libboost-regex-dev libboost-program-options-dev libboost-system-dev libboost-filesystem-dev build-essential cmake \
-    && rm -rf /var/lib/apt/lists/* \
+    clamav clamdscan clamav-daemon clamav-freshclam && rm -rf /var/lib/apt/lists/* \
     && pip3 install --upgrade pip
 
 # Add a new low-privileged user
@@ -57,6 +57,11 @@ RUN apt-get remove -y wget git \
 RUN mkdir /var/run/clamav && \
     chown static_analyzers-user:static_analyzers-user /var/run/clamav && \
     chmod 750 /var/run/clamav
+
+# Updating configuration
+RUN sed -i 's/^Foreground .*$/Foreground true/g' /etc/clamav/clamd.conf && \
+    echo "TCPSocket 3310" >> /etc/clamav/clamd.conf && \
+    sed -i 's/^Foreground .*$/Foreground true/g' /etc/clamav/freshclam.conf
 
 EXPOSE 3310
 # Serve Flask application using gunicorn

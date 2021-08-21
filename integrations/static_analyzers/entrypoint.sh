@@ -3,7 +3,7 @@ mkdir -p ${LOG_PATH}
 touch ${LOG_PATH}/gunicorn_access.log ${LOG_PATH}/gunicorn_errors.log
 chown -R static_analyzers-user:static_analyzers-user ${LOG_PATH}
 su static_analyzers-user -s /bin/bash
-clamd
+freshclam && clamd
 exec gunicorn 'app:app' \
     --bind '0.0.0.0:4002' \
     --user static_analyzers-user \

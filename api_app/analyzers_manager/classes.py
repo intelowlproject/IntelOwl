@@ -1,7 +1,6 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-from django.conf import settings
 import time
 import logging
 import requests
@@ -23,6 +22,7 @@ from tests.mock_utils import (
     mocked_docker_analyzer_get,
     mocked_docker_analyzer_post,
 )
+from django.conf import settings
 
 logger = logging.getLogger(__name__)
 

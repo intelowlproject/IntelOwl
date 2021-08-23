@@ -5,17 +5,15 @@ do
     echo "Waiting for server volume..."
 done
 
-USER="${FLOWER_USER:=flower}"
-PASSWORD="${FLOWER_PWD:=flower}"
 echo "------------------------------"
 echo "DEBUG:  ${DEBUG}"
 echo "DJANGO_TEST_SERVER: ${DJANGO_TEST_SERVER}"
 echo "------------------------------"
 
-CMD="/usr/local/bin/celery  -A intel_owl.celery --broker $BROKER_URL flower --broker_api=http://guest:guest@rabbitmq:15672/api/"
-htpasswd -cb .htpasswd ${USER} ${PASSWORD}
+CMD="/usr/local/bin/celery -A intel_owl.celery --broker ${BROKER_URL} flower --broker_api=http://guest:guest@rabbitmq:15672/api/"
+htpasswd -cb /opt/deploy/shared_htpasswd/.htpasswd ${FLOWER_USER} ${FLOWER_PWD}
 
-if [[ $DEBUG == "True" ]] && [[ $DJANGO_TEST_SERVER == "True" ]];
+if [[ ${DEBUG} == "True" ]] && [[ ${DJANGO_TEST_SERVER} == "True" ]];
 then
     ${CMD} --debug
 else

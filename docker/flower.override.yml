@@ -2,7 +2,7 @@ version: "3"
 
 services:
   rabbitmq:
-    image: library/rabbitmq:3.8-management-alpine
+    image: library/rabbitmq:3.9-management-alpine
     container_name: intelowl_rabbitmq
     logging:
       driver: none
@@ -16,7 +16,7 @@ services:
     stop_grace_period: 3m
     volumes:
       - generic_logs:/var/log/intel_owl
-      - ./.htpasswd:/opt/deploy/.htpasswd
+      - shared_htpasswd:/opt/deploy/shared_htpasswd
     expose:
       - "5555"
     depends_on:
@@ -28,8 +28,11 @@ services:
 
   nginx:
     volumes:
-      - ./.htpasswd:/etc/nginx/.htpasswd
+      - shared_htpasswd:/etc/nginx/shared/
     ports:
       - "5555:5555"
     depends_on:
-      - flower
+      - rabbitmq
+
+volumes:
+  shared_htpasswd:

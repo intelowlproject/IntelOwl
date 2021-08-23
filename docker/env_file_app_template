@@ -102,5 +102,5 @@ BROKER_URL=amqp://guest:guest@rabbitmq:5672
 BACKEND_URL=rpc://guest:guest@rabbitmq:5672
 RABBITMQ_DEFAULT_USER=guest
 RABBITMQ_DEFAULT_PASS=guest
-FLOWER_USER=guest
-FLOWER_PWD=guest
+FLOWER_USER=flower
+FLOWER_PWD=flower

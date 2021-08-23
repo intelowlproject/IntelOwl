@@ -359,13 +359,12 @@ If you want to leverage it, you should add the option `--flower` when starting t
 ```bash
 python3 start.py prod --flower up
 ```
-The flower interface is available at port 5555: to change the credentials for its access, update the environment variables
+The flower interface is available at port 5555: to set the credentials for its access, update the environment variables
 ```bash
 FLOWER_USER
 FLOWER_PWD
 ```
-or change the `.htpasswd` file that is created in the `docker` directory.
-Default credentials are `guest:guest`
+or change the `.htpasswd` file that is created in the `docker` directory in the `intelowl_flower` container.
 
 ## AWS support
 At the moment there's a basic support for some of the AWS services. More is coming in the future. 

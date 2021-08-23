@@ -45,7 +45,7 @@ services:
       - uwsgi
 
   rabbitmq:
-    image: library/rabbitmq:3.8-alpine
+    image: library/rabbitmq:3.9-alpine
     container_name: intelowl_rabbitmq
     logging:
       driver: none

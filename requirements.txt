@@ -1,6 +1,7 @@
 boto3==1.18.7
 celery==5.1.2
 checkdmarc==4.4.1
+darksearch==2.1.2
 dataclasses==0.6
 Django==3.2.5
 django-auth-ldap==2.4.0
@@ -14,9 +15,11 @@ dnstwist==20201228
 ppdeep>=20200505
 drf-spectacular==0.17.3
 easygui==0.98.2
+flower==1.0.0
 GitPython==3.1.18
 google>=3.0.0
 google-cloud-webrisk==1.4.1
+intezer-sdk==1.4.5.1
 maxminddb==2.0.3
 mwdblib==3.4.0
 oletools==0.60
@@ -25,6 +28,7 @@ peepdf-fork==0.4.3
 pdfid==1.0.4
 pefile-fork==2020.12.16
 psycopg2-binary==2.9.1
+pycti==4.5.5
 pydeep==0.4
 PyExifTool==0.4.9
 pyhashlookup==0.9
@@ -39,10 +43,6 @@ requests==2.25.1
 speakeasy-emulator==1.5.3
 uWSGI==2.0.19.1
 yara-python==4.1.0
-darksearch==2.1.2
-flower==1.0.0
-pycti==4.5.5
-intezer-sdk==1.4.5.1
 
 git+https://github.com/DissectMalware/xlrd2.git@a666cd8fb4dba4e2898f4f33ee4da515ba91d9b2
 git+https://github.com/DissectMalware/pyxlsb2.git@8cc2ee6c7176a6808f9058fda9b235d10a7b7a47

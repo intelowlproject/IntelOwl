@@ -21,6 +21,7 @@ path_mapping = {
     "custom": "docker/custom.override.yml",
     "traefik": "docker/traefik.override.yml",
     "multi_queue": "docker/multi-queue.override.yml",
+    "flower": "docker/flower.override.yml",
 }
 # to fix the box-js folder name
 path_mapping.update(
@@ -91,6 +92,12 @@ def start():
         help="Uses the traefik.override.yml compose file",
     )
     parser.add_argument(
+        "--flower",
+        required=False,
+        action="store_true",
+        help="Uses the flower.override.yml compose file",
+    )
+    parser.add_argument(
         "--custom",
         required=False,
         action="store_true",
@@ -128,7 +135,7 @@ def start():
         else:
             compose_files.append(path_mapping[args.mode])
     # upgrades
-    for key in ["traefik", "multi_queue", "custom"]:
+    for key in ["traefik", "multi_queue", "custom", "flower"]:
         if args.__dict__[key]:
             compose_files.append(path_mapping[key])
     # additional integrations

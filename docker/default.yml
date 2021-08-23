@@ -34,8 +34,8 @@ services:
     restart: unless-stopped
     hostname: nginx
     volumes:
-      - ../configuration/nginx_errors.conf:/etc/nginx/nginx_errors.conf
-      - ../configuration/nginx_http.conf:/etc/nginx/conf.d/default.conf
+      - ../configuration/nginx/errors.conf:/etc/nginx/errors.conf
+      - ../configuration/nginx/http.conf:/etc/nginx/conf.d/default.conf
       - nginx_logs:/var/log/nginx
       - static_content:/var/www/static
     ports:
@@ -45,7 +45,7 @@ services:
       - uwsgi
 
   rabbitmq:
-    image: library/rabbitmq:3.8-alpine
+    image: library/rabbitmq:3.9-alpine
     container_name: intelowl_rabbitmq
     logging:
       driver: none
@@ -70,7 +70,7 @@ services:
     container_name: intelowl_celery_worker_default
     restart: unless-stopped
     stop_grace_period: 3m
-    command: /usr/local/bin/celery -A intel_owl.celery worker -n worker_default --uid www-data --gid www-data --time-limit=10000 --pidfile= -Ofair -Q default
+    command: /usr/local/bin/celery -A intel_owl.celery worker -n worker_default --uid www-data --gid www-data --time-limit=10000 --pidfile= -Ofair -Q default -E
     volumes:
       - ../configuration/analyzer_config.json:/opt/deploy/configuration/analyzer_config.json
       - generic_logs:/var/log/intel_owl

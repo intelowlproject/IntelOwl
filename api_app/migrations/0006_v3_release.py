@@ -7,21 +7,48 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api_app', '0005_auto_20210610_1028'),
+        ("api_app", "0005_auto_20210610_1028"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='job',
-            name='analysis_reports',
+            model_name="job",
+            name="analysis_reports",
         ),
         migrations.RemoveField(
-            model_name='job',
-            name='runtime_configuration',
+            model_name="job",
+            name="runtime_configuration",
+        ),
+        migrations.RemoveField(
+            model_name="job",
+            name="disable_external_analyzers",
+        ),
+        migrations.RemoveField(
+            model_name="job",
+            name="force_privacy",
         ),
         migrations.AddField(
-            model_name='job',
-            name='connectors_to_execute',
-            field=django.contrib.postgres.fields.ArrayField(base_field=models.CharField(max_length=128), blank=True, default=list, size=None),
+            model_name="job",
+            name="connectors_to_execute",
+            field=django.contrib.postgres.fields.ArrayField(
+                base_field=models.CharField(max_length=128),
+                blank=True,
+                default=list,
+                size=None,
+            ),
+        ),
+        migrations.AddField(
+            model_name="job",
+            name="tlp",
+            field=models.CharField(
+                choices=[
+                    ("WHITE", "White"),
+                    ("GREEN", "Green"),
+                    ("AMBER", "Amber"),
+                    ("RED", "Red"),
+                ],
+                default="WHITE",
+                max_length=8,
+            ),
         ),
     ]

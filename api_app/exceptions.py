@@ -18,9 +18,9 @@ class AlreadyFailedJobException(Exception):
     pass
 
 
-class AnalyzerRunNotImplemented(Exception):
-    def __init__(self, analyzer_name):
-        self.analyzer_name = analyzer_name
+class ConnectorConfigurationException(Exception):
+    pass
 
-    def __repr__(self):
-        return f"run() is not implemented for analyzer {self.analyzer_name}."
+
+class ConnectorRunException(Exception):
+    pass

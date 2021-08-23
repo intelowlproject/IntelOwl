@@ -23,6 +23,7 @@ PROJECT_LOCATION = "/opt/deploy/intel_owl"
 MEDIA_ROOT = "/opt/deploy/files_required"
 DISABLE_LOGGING_TEST = os.environ.get("DISABLE_LOGGING_TEST", False) == "True"
 MOCK_CONNECTIONS = os.environ.get("MOCK_CONNECTIONS", False) == "True"
+TEST_MODE = MOCK_CONNECTIONS
 LDAP_ENABLED = os.environ.get("LDAP_ENABLED", False) == "True"
 LOCAL_STORAGE = os.environ.get("LOCAL_STORAGE", "True") == "True"
 
@@ -68,11 +69,17 @@ if not AWS_IAM_ACCESS:
     AWS_ACCESS_KEY_ID = secrets.get_secret("AWS_ACCESS_KEY_ID")
     AWS_SECRET_ACCESS_KEY = secrets.get_secret("AWS_SECRET_ACCESS_KEY")
 
+# used for generating links to web client e.g. job results page
+WEB_CLIENT_DOMAIN = secrets.get_secret("INTELOWL_WEB_CLIENT_DOMAIN")
+
 # Security Stuff
 HTTPS_ENABLED = os.environ.get("HTTPS_ENABLED", "not_enabled")
 if HTTPS_ENABLED == "enabled":
     CSRF_COOKIE_SECURE = True
     SESSION_COOKIE_SECURE = True
+    WEB_CLIENT_URL = f"https://{WEB_CLIENT_DOMAIN}"
+else:
+    WEB_CLIENT_URL = f"http://{WEB_CLIENT_DOMAIN}"
 
 SESSION_COOKIE_SAMESITE = "Strict"
 CSRF_COOKIE_SAMESITE = "Strict"
@@ -94,8 +101,9 @@ INSTALLED_APPS = [
     "durin",
     "guardian",
     "api_app.apps.ApiAppConfig",
+    "api_app.analyzers_manager.apps.AnalyzersManagerConfig",
+    "api_app.connectors_manager.apps.ConnectorsManagerConfig",
     "django_elasticsearch_dsl",
-    "django_nose",
     "drf_spectacular",
 ]
 
@@ -141,7 +149,11 @@ REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
-TEST_RUNNER = "django_nose.NoseTestSuiteRunner"
+# DRF Spectacular
+SPECTACULAR_SETTINGS = {
+    "TITLE": "IntelOwl API specification",
+    "VERSION": "2.5.0",
+}
 
 # Django-Rest-Durin
 REST_DURIN = {
@@ -191,6 +203,8 @@ else:
 CELERY_BROKER_URL = secrets.get_secret("CELERY_BROKER_URL")
 CELERY_QUEUES = os.environ.get("CELERY_QUEUES", "default").split(",")
 
+# AWS
+AWS_SECRETS = os.environ.get("AWS_SECRETS", False) == "True"
 AWS_SQS = os.environ.get("AWS_SQS", False) == "True"
 
 # Django Guardian

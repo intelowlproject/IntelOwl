@@ -15,7 +15,7 @@ RUN useradd -ms /bin/bash static_analyzers-user
 
 # Install capa
 WORKDIR ${PROJECT_PATH}
-RUN pip3 install --no-cache-dir flare-capa==1.6.3 \
+RUN pip3 install --no-cache-dir flare-capa==2.0.0 \
     && git clone --depth 1 https://github.com/fireeye/capa-rules.git
 
 # Install FLOSS nightly binary

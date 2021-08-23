@@ -6,14 +6,12 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-        ('api_app', '0001_initial')
-    ]
+    dependencies = [("api_app", "0001_initial")]
 
     operations = [
         migrations.AddField(
-            model_name='job',
-            name='runtime_configuration',
-            field=jsonb.JSONField(default=dict, null=False, blank=True)
-        ),
+            model_name="job",
+            name="runtime_configuration",
+            field=jsonb.JSONField(default=dict, null=False, blank=True),
+        )
     ]

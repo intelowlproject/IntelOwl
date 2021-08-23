@@ -1,0 +1,94 @@
+{
+  "MISP": {
+    "disabled": true,
+    "description": "automatically creates an event on your MISP instance, linking the analysis the successful analysis on IntelOwl",
+    "python_module": "misp.MISP",
+    "maximum_tlp": "WHITE",
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default",
+      "ssl_check": true,
+      "debug": false,
+      "tlp": "white"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "CONNECTOR_MISP_KEY",
+        "type": "string",
+        "required": true,
+        "default": null,
+        "description": "API key for your MISP instance"
+      },
+      "url_key_name": {
+        "env_var_key": "CONNECTOR_MISP_URL",
+        "type": "string",
+        "required": true,
+        "default": null,
+        "description": "URL of your MISP instance"
+      }
+    }
+  },
+  "OpenCTI": {
+    "disabled": true,
+    "description": "automatically creates an observable and a linked report on your OpenCTI instance, linking the the successful analysis on IntelOwl",
+    "python_module": "opencti.OpenCTI",
+    "maximum_tlp": "WHITE",
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default",
+      "ssl_verify": true,
+      "proxies": {
+        "http": "",
+        "https": ""
+      },
+      "tlp": {
+        "type": "white",
+        "color": "#ffffff",
+        "x_opencti_order": 1
+      }
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "CONNECTOR_OPENCTI_KEY",
+        "type": "string",
+        "required": true,
+        "default": null,
+        "description": "API key for your OpenCTI instance"
+      },
+      "url_key_name": {
+        "env_var_key": "CONNECTOR_OPENCTI_URL",
+        "type": "string",
+        "required": true,
+        "default": null,
+        "description": "URL of your OpenCTI instance"
+      }
+    }
+  },
+  "YETI": {
+    "disabled": true,
+    "description": "find or create observable on YETI, linking the successful analysis on IntelOwl.",
+    "python_module": "yeti.YETI",
+    "maximum_tlp": "WHITE",
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default",
+      "verify_ssl": true
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "CONNECTOR_YETI_KEY",
+        "type": "string",
+        "required": true,
+        "default": null,
+        "description": "API key for your YETI instance"
+      },
+      "url_key_name": {
+        "env_var_key": "CONNECTOR_YETI_URL",
+        "type": "string",
+        "required": true,
+        "default": null,
+        "description": "API URL of your YETI instance"
+      }
+    }
+  }
+}

@@ -24,9 +24,6 @@
 - Run tests from the project directory:
 `docker exec -ti intelowl_uwsgi python3 manage.py test tests`
 
-- Run only a specific test: (example "test_checkdmarc") (note the `:` after the module name)
-`docker exec -ti intelowl_uwsgi python3 manage.py test tests.test_observables:DomainAnalyzersTests.test_checkdmarc`
-
 - Rebuild the local image after changes were made:
 `python3 start.py test build` or `docker-compose -f docker/default.yml -f docker/test.override.yml build`
     

@@ -4,6 +4,7 @@
 import logging
 
 from django.contrib.auth import login, logout
+from drf_spectacular.extensions import OpenApiAuthenticationExtension
 from durin import views as durin_views
 from durin.models import Client
 
@@ -14,8 +15,9 @@ logger = logging.getLogger(__name__)
 
 
 class LoginView(durin_views.LoginView):
-    def get_client_obj(self, request):
-        return Client.objects.get(name="web-browser")
+    def get_client_obj(self, request) -> Client:
+        client, _created = Client.objects.get_or_create(name="web-browser")
+        return client
 
     def post(self, request, *args, **kwargs):
         response = super(LoginView, self).post(request, *args, **kwargs)
@@ -42,3 +44,16 @@ class LogoutView(durin_views.LogoutView):
             except Exception:
                 logger.exception(f"administrator: '{uname}' session logout failed.")
         return super(LogoutView, self).post(request, format=None)
+
+
+class DurinAuthenticationScheme(OpenApiAuthenticationExtension):
+    target_class = "durin.auth.CachedTokenAuthentication"
+    name = "durinAuth"
+
+    def get_security_definition(self, auto_schema):
+        return {
+            "type": "apiKey",
+            "in": "header",
+            "name": "Authorization",
+            "description": "Token-based authentication with required prefix: Token",
+        }

@@ -49,9 +49,6 @@ services:
     container_name: intelowl_rabbitmq
     logging:
       driver: none
-    expose:
-      - "15672"
-
 
   celery_beat:
     image: intelowlproject/intelowl:${INTELOWL_TAG_VERSION}

@@ -12,6 +12,10 @@ RUN mkdir -p ${LOG_PATH} \
     ${LOG_PATH}/uwsgi \
     /opt/deploy/files_required /opt/deploy/yara /opt/deploy/configuration
 
+# install required packages. some notes about:
+# python3-psycopg2 is required to use PostgresSQL with Django
+# osslsigncode is required to run the signature verification analyzer
+# apache2-utils is required to execute htpasswd
 RUN apt-get update \
     && apt-get install -y --no-install-recommends apt-utils libsasl2-dev libssl-dev \
     vim libldap2-dev python-dev libfuzzy-dev net-tools python3-psycopg2 git osslsigncode apache2-utils \

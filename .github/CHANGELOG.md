@@ -2,6 +2,43 @@
 
 [**Upgrade Guide**](https://intelowl.readthedocs.io/en/latest/Installation.html#update-to-the-most-recent-version)
 
+## [v3.0.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v3.0.0)
+- **TLP Support**: Standardized threat-sharing using Traffic Light Protocol or `TLP`, thereby deprecating the use of booleans `force_privacy`, `disable_external_analyzers` and `private`. See [TLP Support](https://intelowl.readthedocs.io/en/master/Usage.html#tlp-support).
+- **New class of plugins called _Connectors_**
+  - Connectors are designed to run after every successful analysis which makes them suitable for automated threat-sharing. Built to support integration with other SIEM/SOAR projects specifically aimed at Threat Sharing Platforms. See [Available Connectors](https://intelowl.readthedocs.io/en/master/Usage.html#available-connectors).
+  - Connectors being optional are `disabled` by default. Similar to analyzers, they can be configured and customized using `connector_config.json`. Retrieve current state of `connector_config.json` using:
+    * GUI: View all connectors in table format.
+    * PyIntelOwl: `IntelOwl.get_connector_configs`
+    * CLI: `$ pyintelowl get-connector-config`
+    * API: `GET /api/get_connector_configs`
+  - Added `connector_reports` to Job.
+  - **New Inbuilt Connectors** for threat-sharing
+    * `MISP` connector: automatically creates an event on your MISP instance.
+    * `OpenCTI` connector: automatically creates an observable and a linked report on your OpenCTI instance.
+    * `YETI` connector: find/create an observable on YETI.
+- **New Inbuilt Analyzers:**
+  - New `OpenCTI` analyzer: scan an observable on an OpenCTI instance.
+  - New `Intezer_Get` analyzer: check if an analysis related to a hash is available in [Intezer](https://analyze.intezer.com/))
+  - New `MWDB_Get` analyzer: [mwdblib](https://mwdb.readthedocs.io/en/latest/) Retrieve malware file analysis by hash from repository maintained by CERT Polska MWDB.
+  - New `YETI` analyzer (YETI = Your Everyday Threat Intelligence): scan an observable on a YETI instance.
+  - New `HashLookupServer_Get_Observable` analyzer: check if a md5 or sha1 is available in the database of [known file hosted by CIRCL](https://github.com/adulau/hashlookup-server)
+- Added `kill`, `retry` and `healthcheck` features to analyzers and connectors:
+  - `kill` feature to stop a plugin whose status is `running`/`pending`: 
+     * GUI: Buttons on reports table on job result page.
+     * PyIntelOwl: `IntelOwl.kill_analyzer` and `IntelOwl.kill_connector` function.
+     * CLI: `$ pyintelowl jobs kill-analyzer <job_id> <analyzer_name>` and `$ pyintelowl jobs kill-connector <job_id> <connector_name>`
+     * API: `PATCH /api/job/{job_id}/analyzer/{analyzer_name}/kill` and `PATCH /api/job/{job_id}/connector/{connector_name}/kill`
+  - `retry` feature to retry a plugin whose status is `failed`/`killed`: 
+     * GUI: Buttons on reports table on job result page.
+     * PyIntelOwl: `IntelOwl.retry_analyzer` and `IntelOwl.retry_connector` function,
+     * CLI: `$ pyintelowl jobs retry-analyzer <job_id> <analyzer_name>` and `$ pyintelowl jobs retry-connector <job_id> <connector_name>`
+     * API: `PATCH /api/job/{job_id}/analyzer/{analyzer_name}/retry` and `PATCH /api/job/{job_id}/connector/{connector_name}/retry`
+  - `healthcheck` feature to check if docker container or external platform associated with an analyzer or connector respectively are up or not: 
+     * GUI: Buttons on analyzers table and connectors table.
+     * PyIntelOwl: `IntelOwl.analyzer_healthcheck` and `IntelOwl.connector_healthcheck` function.
+     * CLI: `$ pyintelowl analyzer-healthcheck <analyzer_name>` and `$ pyintelowl connector-healthcheck <connector_name>`
+     * API: `GET /api/analyzer/{analyzer_name}/healthcheck` and `GET /api /connector/{connector_name}/healthcheck`
+
 ## [v2.5.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v2.5.0)
 **New Inbuilt Analyzers:**
 - New `Dehashed_Search` analyzer: Query any observable/keyword against Dehashed's search API (https://dehashed.com).

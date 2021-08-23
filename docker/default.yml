@@ -34,8 +34,8 @@ services:
     restart: unless-stopped
     hostname: nginx
     volumes:
-      - ../configuration/nginx_errors.conf:/etc/nginx/nginx_errors.conf
-      - ../configuration/nginx_http.conf:/etc/nginx/conf.d/default.conf
+      - ../configuration/nginx/errors.conf:/etc/nginx/errors.conf
+      - ../configuration/nginx/http.conf:/etc/nginx/conf.d/default.conf
       - nginx_logs:/var/log/nginx
       - static_content:/var/www/static
     ports:

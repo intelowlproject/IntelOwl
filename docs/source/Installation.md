@@ -149,7 +149,7 @@ If you prefer to use an external PostgreSQL instance, you should just remove the
 
 ### Web server configuration (optional)
 Intel Owl provides basic configuration for:
-* Nginx (`configuration/intel_owl_nginx_http`)
+* Nginx (`configuration/nginx/http.conf`)
 * Uwsgi (`configuration/intel_owl.ini`)
 
 In case you enable HTTPS, remember to set the environment variable `HTTPS_ENABLED` as "enabled" to increment the security of the application.
@@ -162,13 +162,15 @@ There are 3 options to execute the web server:
 
 - **HTTPS with your own certificate**
 
-    The project provides a template file to configure Nginx to serve HTTPS: `configuration/intel_owl_nginx_https`.
+    The project provides a template file to configure Nginx to serve HTTPS: `configuration/nginx/https.conf`.
 
     You should change `ssl_certificate`, `ssl_certificate_key` and `server_name` in that file.
 
-    Then you should modify the `nginx` service configuration in `docker/default.yml`:
-    * change `intel_owl_nginx_http` with `intel_owl_nginx_https`
+    Then you should modify the `nginx` service configuration in `docker/default.ylm`:
+    * change `http.conf` with `https.conf`
     * in `volumes` add the option for mounting the directory that hosts your certificate and your certificate key.
+  
+    Plus, if you use [Flower](Advanced-Usage.html#queue-customization), you should change in the `docker/flower.override.yml` the `flower_http.conf` with `flower_https.conf`.
 
 - **HTTPS with Let's Encrypt**
 

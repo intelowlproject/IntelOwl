@@ -155,20 +155,27 @@ class FileAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
     """
 
     md5: str
-    filepath: str
     filename: str
     file_mimetype: str
 
     def read_file_bytes(self) -> bytes:
         return self._job.file.read()
 
+    @property
+    def filepath(self) -> str:
+        if not self.__filepath:
+            self.__filepath = self._job.file.storage.retrieve(
+                name=self.filename, analyzer=self.analyzer_name
+            )
+        return self.__filepath
+
     def __post__init__(self):
         self.md5 = self._job.md5
         self.filename = self._job.file_name
-
-        self.filepath = self._job.file.storage.retrieve(
-            name=self.filename, analyzer=self.analyzer_name
-        )
+        # this is updated in the filepath property, like a cache decorator.
+        #  if the filepath is requested, it means that the analyzer download the file from aws
+        #  because it require a path and it needs to be deleted
+        self.__filepath = None
         self.file_mimetype = self._job.file_mimetype
         return super(FileAnalyzer, self).__post__init__()
 
@@ -184,8 +191,7 @@ class FileAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
         # We delete the file only if we have single copy for analyzer
         # and the file has been saved locally.
         # Otherwise we would remove the single file that we have on the server
-
-        if not settings.LOCAL_STORAGE and self._filepath is not None:
+        if not settings.LOCAL_STORAGE and self.__filepath is not None:
             import os
 
             os.remove(self.filepath)

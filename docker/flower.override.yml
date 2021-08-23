@@ -1,0 +1,33 @@
+version: "3"
+
+services:
+  rabbitmq:
+    image: library/rabbitmq:3.8-management
+    container_name: intelowl_rabbitmq
+    logging:
+      driver: none
+
+  flower:
+    image: intelowlproject/intelowl:${INTELOWL_TAG_VERSION}
+    container_name: intelowl_flower
+    restart: unless-stopped
+    stop_grace_period: 3m
+    volumes:
+      - generic_logs:/var/log/intel_owl
+      - ./.htpasswd:/opt/deploy/.htpasswd
+    expose:
+      - "5555"
+    depends_on:
+      - rabbitmq
+    entrypoint:
+      - ./docker/entrypoint_flower.sh
+    env_file:
+      - env_file_app
+
+  nginx:
+    volumes:
+      - ./.htpasswd:/etc/nginx/.htpasswd
+    ports:
+      - "5555:5555"
+    depends_on:
+      - flower

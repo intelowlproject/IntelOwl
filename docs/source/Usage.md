@@ -248,6 +248,24 @@ Changing other keys will break the connector. In that case, you should think abo
 
 To contribute to the project, see [Contribute](./Contribute.md)
 
+## Managing Analyzers and Connectors
+All plugins i.e. analyzers and connectors have `kill` and `retry` actions. In addition to that, all docker-based analyzers and connectors have a health check action to check if their associated instances are up or not. 
+- `kill` feature to stop a plugin whose status is `running`/`pending`: 
+   * GUI: Buttons on reports table on job result page.
+   * PyIntelOwl: `IntelOwl.kill_analyzer` and `IntelOwl.kill_connector` function.
+   * CLI: `$ pyintelowl jobs kill-analyzer <job_id> <analyzer_name>` and `$ pyintelowl jobs kill-connector <job_id> <connector_name>`
+   * API: `PATCH /api/job/{job_id}/analyzer/{analyzer_name}/kill` and `PATCH /api/job/{job_id}/connector/{connector_name}/kill`
+- `retry` feature to retry a plugin whose status is `failed`/`killed`: 
+   * GUI: Buttons on reports table on job result page.
+   * PyIntelOwl: `IntelOwl.retry_analyzer` and `IntelOwl.retry_connector` function,
+   * CLI: `$ pyintelowl jobs retry-analyzer <job_id> <analyzer_name>` and `$ pyintelowl jobs retry-connector <job_id> <connector_name>`
+   * API: `PATCH /api/job/{job_id}/analyzer/{analyzer_name}/retry` and `PATCH /api/job/{job_id}/connector/{connector_name}/retry`
+- `healthcheck` feature to check if docker container or external platform associated with an analyzer or connector respectively are up or not: 
+   * GUI: Buttons on analyzers table and connectors table.
+   * PyIntelOwl: `IntelOwl.analyzer_healthcheck` and `IntelOwl.connector_healthcheck` function.
+   * CLI: `$ pyintelowl analyzer-healthcheck <analyzer_name>` and `$ pyintelowl connector-healthcheck <connector_name>`
+   * API: `GET /api/analyzer/{analyzer_name}/healthcheck` and `GET /api /connector/{connector_name}/healthcheck`
+
 ## TLP Support
 IntelOwl supports the `Traffic Light Protocol` (`TLP`) to facilitate sharing of job analysis results.
 

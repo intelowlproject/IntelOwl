@@ -22,22 +22,7 @@
   - New `MWDB_Get` analyzer: [mwdblib](https://mwdb.readthedocs.io/en/latest/) Retrieve malware file analysis by hash from repository maintained by CERT Polska MWDB.
   - New `YETI` analyzer (YETI = Your Everyday Threat Intelligence): scan an observable on a YETI instance.
   - New `HashLookupServer_Get_Observable` analyzer: check if a md5 or sha1 is available in the database of [known file hosted by CIRCL](https://github.com/adulau/hashlookup-server)
-- Added `kill`, `retry` and `healthcheck` features to analyzers and connectors:
-  - `kill` feature to stop a plugin whose status is `running`/`pending`: 
-     * GUI: Buttons on reports table on job result page.
-     * PyIntelOwl: `IntelOwl.kill_analyzer` and `IntelOwl.kill_connector` function.
-     * CLI: `$ pyintelowl jobs kill-analyzer <job_id> <analyzer_name>` and `$ pyintelowl jobs kill-connector <job_id> <connector_name>`
-     * API: `PATCH /api/job/{job_id}/analyzer/{analyzer_name}/kill` and `PATCH /api/job/{job_id}/connector/{connector_name}/kill`
-  - `retry` feature to retry a plugin whose status is `failed`/`killed`: 
-     * GUI: Buttons on reports table on job result page.
-     * PyIntelOwl: `IntelOwl.retry_analyzer` and `IntelOwl.retry_connector` function,
-     * CLI: `$ pyintelowl jobs retry-analyzer <job_id> <analyzer_name>` and `$ pyintelowl jobs retry-connector <job_id> <connector_name>`
-     * API: `PATCH /api/job/{job_id}/analyzer/{analyzer_name}/retry` and `PATCH /api/job/{job_id}/connector/{connector_name}/retry`
-  - `healthcheck` feature to check if docker container or external platform associated with an analyzer or connector respectively are up or not: 
-     * GUI: Buttons on analyzers table and connectors table.
-     * PyIntelOwl: `IntelOwl.analyzer_healthcheck` and `IntelOwl.connector_healthcheck` function.
-     * CLI: `$ pyintelowl analyzer-healthcheck <analyzer_name>` and `$ pyintelowl connector-healthcheck <connector_name>`
-     * API: `GET /api/analyzer/{analyzer_name}/healthcheck` and `GET /api /connector/{connector_name}/healthcheck`
+- Added `kill`, `retry` and `healthcheck` features to analyzers and connectors. See [Managing analyzers or connectors](https://intelowl.readthedocs.io/en/master/Usage.html#managing-analyzers-or-connectors).
 
 ## [v2.5.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v2.5.0)
 **New Inbuilt Analyzers:**

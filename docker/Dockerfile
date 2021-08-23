@@ -1,4 +1,4 @@
-FROM python:3.8
+FROM python:3.8-buster
 
 ENV PYTHONUNBUFFERED 1
 ENV DJANGO_SETTINGS_MODULE intel_owl.settings
@@ -14,8 +14,7 @@ RUN mkdir -p ${LOG_PATH} \
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends apt-utils libsasl2-dev libssl-dev \
-    vim libldap2-dev python-dev libfuzzy-dev net-tools python-psycopg2 git osslsigncode \
-    apache2-utils \
+    vim libldap2-dev python-dev libfuzzy-dev net-tools python3-psycopg2 git osslsigncode apache2-utils \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 RUN pip3 install --upgrade pip
@@ -38,7 +37,7 @@ RUN touch ${LOG_PATH}/django/api_app.log ${LOG_PATH}/django/api_app_errors.log \
     && rm -rf /root/.local
 
 # download yara rules and quark engine rules
-RUN api_app/script_analyzers/repo_downloader.sh
+RUN api_app/analyzers_manager/repo_downloader.sh
 
 # this is because botocore points to legacy endpoints
 # more info: https://stackoverflow.com/questions/41062055/celery-4-0-0-amazon-sqs-credential-should-be-scoped-to-a-valid-region-not

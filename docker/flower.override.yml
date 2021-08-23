@@ -2,7 +2,7 @@ version: "3"
 
 services:
   rabbitmq:
-    image: library/rabbitmq:3.8-management
+    image: library/rabbitmq:3.8-management-alpine
     container_name: intelowl_rabbitmq
     logging:
       driver: none

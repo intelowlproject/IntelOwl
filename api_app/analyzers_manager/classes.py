@@ -173,8 +173,8 @@ class FileAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
         self.md5 = self._job.md5
         self.filename = self._job.file_name
         # this is updated in the filepath property, like a cache decorator.
-        #  if the filepath is requested, it means that the analyzer download the file from aws
-        #  because it require a path and it needs to be deleted
+        #  if the filepath is requested, it means that the analyzer download
+        #  the file from aws because it require a path and it needs to be deleted
         self.__filepath = None
         self.file_mimetype = self._job.file_mimetype
         return super(FileAnalyzer, self).__post__init__()

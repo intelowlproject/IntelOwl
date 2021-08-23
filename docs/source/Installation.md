@@ -189,29 +189,6 @@ You can see the full list of all available analyzers and connectors in the <a hr
 </div>
 
 
-## AWS support
-At the moment there's a basic support for some of the AWS services. More is coming in the future. 
-
-#### Secrets
-If you would like to run this project on AWS, I'd suggest you to use the "Secrets Manager" to store your credentials. In this way your secrets would be better protected.
-
-This project supports this kind of configuration. Instead of adding the variables to the environment file, you should just add them with the same name on the AWS Secrets Manager and Intel Owl will fetch them transparently.
-
-Obviously, you should have created and managed the permissions in AWS in advance and accordingly to your infrastructure requirements.
-
-Also, you need to set the environment variable `AWS_SECRETS` to `True` to enable this mode.
-
-You can customize the AWS Region changing the environment variable `AWS_REGION`.
-
-#### SQS
-If you like, you could use AWS SQS instead of Rabbit-MQ to manage your queues.
-In that case, you should change the parameter `BROKER_URL` to `sqs://` and give your instances on AWS the proper permissions to access it.
-
-Also, you need to set the environment variable `AWS_SQS` to `True` to activate the additional required settings.
-
-#### ... More coming
-
-
 ## Run
 
 <div class="admonition note">

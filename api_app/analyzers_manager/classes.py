@@ -167,8 +167,8 @@ class FileAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
         self.filename = self._job.file_name
 
         self.filepath = self.job_object.file.storage.retrieve(
-                name=self.job_object.file.name, analyzer=self.analyzer_name
-            )
+            name=self.job_object.file.name, analyzer=self.analyzer_name
+        )
         self.file_mimetype = self._job.file_mimetype
         return super(FileAnalyzer, self).__post__init__()
 

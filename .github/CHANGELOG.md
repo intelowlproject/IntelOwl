@@ -3,25 +3,24 @@
 [**Upgrade Guide**](https://intelowl.readthedocs.io/en/latest/Installation.html#update-to-the-most-recent-version)
 
 ## [v3.0.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v3.0.0)
-- **TLP Support**: Standardized threat-sharing using Traffic Light Protocol or `TLP`, thereby deprecating the use of booleans `force_privacy`, `disable_external_analyzers` and `private`. See [TLP Support](https://intelowl.readthedocs.io/en/master/Usage.html#tlp-support).
-- **New class of plugins called _Connectors_**
+**TLP Support**: Standardized threat-sharing using Traffic Light Protocol or `TLP`, thereby deprecating the use of booleans `force_privacy`, `disable_external_analyzers` and `private`. See [TLP Support](https://intelowl.readthedocs.io/en/master/Usage.html#tlp-support).
+
+**New class of plugins called _Connectors_**
   - Connectors are designed to run after every successful analysis which makes them suitable for automated threat-sharing. Built to support integration with other SIEM/SOAR projects specifically aimed at Threat Sharing Platforms. See [Available Connectors](https://intelowl.readthedocs.io/en/master/Usage.html#available-connectors).
-  - Connectors being optional are `disabled` by default. Similar to analyzers, they can be configured and customized using `connector_config.json`. Retrieve current state of `connector_config.json` using:
-    * GUI: View all connectors in table format.
-    * PyIntelOwl: `IntelOwl.get_connector_configs`
-    * CLI: `$ pyintelowl get-connector-config`
-    * API: `GET /api/get_connector_configs`
-  - Added `connector_reports` to Job.
+
   - **New Inbuilt Connectors** for threat-sharing
     * `MISP` connector: automatically creates an event on your MISP instance.
     * `OpenCTI` connector: automatically creates an observable and a linked report on your OpenCTI instance.
     * `YETI` connector: find/create an observable on YETI.
-- **New Inbuilt Analyzers:**
+
+**New Inbuilt Analyzers:**
   - New `OpenCTI` analyzer: scan an observable on an OpenCTI instance.
   - New `Intezer_Get` analyzer: check if an analysis related to a hash is available in [Intezer](https://analyze.intezer.com/))
   - New `MWDB_Get` analyzer: [mwdblib](https://mwdb.readthedocs.io/en/latest/) Retrieve malware file analysis by hash from repository maintained by CERT Polska MWDB.
   - New `YETI` analyzer (YETI = Your Everyday Threat Intelligence): scan an observable on a YETI instance.
   - New `HashLookupServer_Get_Observable` analyzer: check if a md5 or sha1 is available in the database of [known file hosted by CIRCL](https://github.com/adulau/hashlookup-server)
+
+**Others:**
 - Added `kill`, `retry` and `healthcheck` features to analyzers and connectors. See [Managing analyzers or connectors](https://intelowl.readthedocs.io/en/master/Usage.html#managing-analyzers-or-connectors).
 
 ## [v2.5.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v2.5.0)

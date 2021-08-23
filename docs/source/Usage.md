@@ -219,6 +219,7 @@ Some analyzers require details other than just IP, URL, Domain etc... We classif
 [Additional analyzers](Advanced-Usage.html#optional-analyzers) that can be enabled per your wish.
 
 ## Available Connectors
+Connectors are designed to run after every successful analysis which makes them suitable for automated threat-sharing. They support integration with other SIEM/SOAR projects, specifically aimed at Threat Sharing Platforms.
 
 ### Get all available connectors
 You can programmatically retrieve all the available connectors with the official client [PyIntelOwl](https://github.com/intelowlproject/pyintelowl) using the following command:

@@ -13,9 +13,8 @@ services:
       - env_file_app_ci
 
   nginx:
-    image: library/nginx:1.19-alpine
     volumes:
-      - ../configuration/nginx_http.conf:/etc/nginx/conf.d/default.conf
+      - ../configuration/nginx/http.conf:/etc/nginx/conf.d/default.conf
 
   celery_beat:
     build:

@@ -28,7 +28,7 @@ services:
 
   nginx:
     volumes:
-      - shared_htpasswd:/etc/nginx/shared/
+      - shared_htpasswd:/etc/nginx/shared
       - ../configuration/nginx/flower_http.conf:/etc/nginx/conf.d/flower.conf
     ports:
       - "5555:5555"

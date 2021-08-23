@@ -26,7 +26,6 @@ MOCK_CONNECTIONS = os.environ.get("MOCK_CONNECTIONS", False) == "True"
 TEST_MODE = MOCK_CONNECTIONS
 LDAP_ENABLED = os.environ.get("LDAP_ENABLED", False) == "True"
 LOCAL_STORAGE = os.environ.get("LOCAL_STORAGE", "True") == "True"
-
 # Storage settings
 if LOCAL_STORAGE:
 
@@ -36,7 +35,6 @@ if LOCAL_STORAGE:
             return self.path(name)
 
     DEFAULT_FILE_STORAGE = "intel_owl.settings.FileSystemStorageWrapper"
-    STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
 else:
     from storages.backends.s3boto3 import S3Boto3Storage
 
@@ -60,7 +58,6 @@ else:
             return _path
 
     DEFAULT_FILE_STORAGE = "intel_owl.settings.S3Boto3StorageWrapper"
-    STATICFILES_STORAGE = "storages.backends.s3boto3.S3StaticStorage"
     AWS_STORAGE_BUCKET_NAME = secrets.get_secret("AWS_STORAGE_BUCKET_NAME")
 
 # AWS settings
@@ -94,7 +91,6 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
-    "django.contrib.staticfiles",
     "django.contrib.postgres",
     # DRF
     "rest_framework",
@@ -250,13 +246,6 @@ USE_L10N = True
 
 USE_TZ = True
 
-
-# Static files (CSS, JavaScript, Images)
-
-STATIC_URL = "/static/"
-STATIC_ROOT = os.path.join(BASE_DIR, "static/")
-
-STATICFILES_DIRS = (os.path.join(BASE_DIR, "static_intel/"),)
 
 INFO_OR_DEBUG_LEVEL = "DEBUG" if DEBUG else "INFO"
 LOGGING = {

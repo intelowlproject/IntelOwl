@@ -36,6 +36,8 @@ class CuckooAnalysis(FileAnalyzer):
         self.max_get_tries = params.get("max_poll_tries", 20)
 
     def run(self):
+        if not self.cuckoo_url:
+            raise AnalyzerConfigurationException("cuckoo URL missing")
         binary = self.read_file_bytes()
         if not binary:
             raise AnalyzerRunException("is the binary empty?!")

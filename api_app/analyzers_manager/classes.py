@@ -22,6 +22,7 @@ from tests.mock_utils import (
     mocked_docker_analyzer_get,
     mocked_docker_analyzer_post,
 )
+from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
@@ -154,17 +155,27 @@ class FileAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
     """
 
     md5: str
-    filepath: str
     filename: str
     file_mimetype: str
 
     def read_file_bytes(self) -> bytes:
         return self._job.file.read()
 
+    @property
+    def filepath(self) -> str:
+        if not self.__filepath:
+            self.__filepath = self._job.file.storage.retrieve(
+                file=self._job.file, analyzer=self.analyzer_name
+            )
+        return self.__filepath
+
     def __post__init__(self):
         self.md5 = self._job.md5
-        self.filepath = self._job.file.path
         self.filename = self._job.file_name
+        # this is updated in the filepath property, like a cache decorator.
+        # if the filepath is requested, it means that the analyzer downloads...
+        # ...the file from AWS because it requires a path and it needs to be deleted
+        self.__filepath = None
         self.file_mimetype = self._job.file_mimetype
         return super(FileAnalyzer, self).__post__init__()
 
@@ -177,6 +188,13 @@ class FileAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
 
     def after_run(self):
         super().after_run()
+        # We delete the file only if we have single copy for analyzer
+        # and the file has been saved locally.
+        # Otherwise we would remove the single file that we have on the server
+        if not settings.LOCAL_STORAGE and self.__filepath is not None:
+            import os
+
+            os.remove(self.filepath)
         logger.info(
             f"FINISHED analyzer: {self.__repr__()} -> "
             f"File: ({self.filename}, md5: {self.md5})"

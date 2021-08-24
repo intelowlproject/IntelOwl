@@ -1,7 +1,6 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-import os
 import hashlib
 
 from django.db import models
@@ -142,7 +141,7 @@ class Job(models.Model):
 
 
 @receiver(pre_delete, sender=Job)
-def delete_file(sender, instance, **kwargs):
+def delete_file(sender, instance: Job, **kwargs):
     if instance.file:
-        if os.path.isfile(instance.file.path):
-            os.remove(instance.file.path)
+        if instance.file:
+            instance.file.delete()

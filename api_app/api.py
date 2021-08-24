@@ -173,7 +173,7 @@ def ask_analysis_availability(request):
         serializer.is_valid(raise_exception=True)
         serialized_data = serializer.validated_data
 
-        analyzers_needed_list = serialized_data.pop("analyzers_needed", [])
+        analyzers_needed_list = serialized_data.pop("analyzers", [])
         run_all_available_analyzers = serialized_data.pop(
             "run_all_available_analyzers", False
         )

@@ -53,7 +53,7 @@ class JobAvailabilitySerializer(serializers.ModelSerializer):
         fields = "__all__"
 
     md5 = serializers.CharField(max_length=128, required=True)
-    analyzers_needed = serializers.ListField(default=list)
+    analyzers = serializers.ListField(default=list)
     run_all_available_analyzers = serializers.BooleanField(default=False)
     running_only = serializers.BooleanField(default=False)
 
@@ -63,6 +63,20 @@ class JobAvailabilitySerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(
                     "Atleast one of `analyzers_needed` "
                     "and `run_all_available_analyzers` should be provided."
+                )
+
+        if data.get("run_all_available_analyzers", False):
+            if data.get("analyzers_needed", []):
+                raise serializers.ValidationError(
+                    "analyzers_needed has to be empty if "
+                    "run_all_available_analyzers is True."
+                )
+
+        if data.get("analyzers_needed", []):
+            if data.get("run_all_available_analyzers", False):
+                raise serializers.ValidationError(
+                    "run_all_available_analyzers has to be False "
+                    "if analyzers_needed is not empty"
                 )
 
         return data

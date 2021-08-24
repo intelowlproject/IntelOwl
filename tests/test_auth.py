@@ -19,7 +19,7 @@ class TestUserAuth(TestCase):
         username = "john.doe"
         email = "john.doe@example.com"
         password = "hunter2"
-        cls.user = User.objects.create_user(username, email, password)
+        cls.user = User.objects.create_superuser(username, email, password)
         cls.creds = {
             "username": username,
             "password": password,

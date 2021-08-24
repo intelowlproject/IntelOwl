@@ -64,8 +64,7 @@ class JobAvailabilitySerializer(serializers.ModelSerializer):
                     "Atleast one of `analyzers_needed` "
                     "and `run_all_available_analyzers` should be provided."
                 )
-
-        if data.get("run_all_available_analyzers", False):
+        else:
             if data.get("analyzers_needed", []):
                 raise serializers.ValidationError(
                     "analyzers_needed has to be empty if "

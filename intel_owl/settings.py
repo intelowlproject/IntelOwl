@@ -52,15 +52,18 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.postgres",
+    # celery, elasticsearch
+    "django_celery_results",
+    "django_elasticsearch_dsl",
     # DRF
     "rest_framework",
     "durin",
     "guardian",
+    "drf_spectacular",
+    # intelowl apps
     "api_app.apps.ApiAppConfig",
     "api_app.analyzers_manager.apps.AnalyzersManagerConfig",
     "api_app.connectors_manager.apps.ConnectorsManagerConfig",
-    "django_elasticsearch_dsl",
-    "drf_spectacular",
 ]
 
 MIDDLEWARE = [
@@ -157,7 +160,7 @@ else:
     }
 
 BROKER_URL = secrets.get_secret("BROKER_URL", "amqp://guest:guest@rabbitmq:5672")
-BACKEND_URL = secrets.get_secret("BACKEND_URL", "rpc://guest:guest@rabbitmq:5672")
+RESULT_BACKEND = "django-db"
 CELERY_QUEUES = os.environ.get("CELERY_QUEUES", "default").split(",")
 
 # AWS

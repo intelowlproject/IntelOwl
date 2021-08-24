@@ -14,15 +14,16 @@ INTELOWL_WEB_CLIENT_DOMAIN=localhost
 LOCAL_STORAGE=True
 
 # AWS
+## S3 storage
 AWS_STORAGE_BUCKET_NAME=
-AWS_IAM_ACCESS = False
+AWS_IAM_ACCESS=False
+### to use if no IAM credentials are provided
+AWS_ACCESS_KEY_ID=
+AWS_SECRET_ACCESS_KEY=
+## secrets, broker and region
 AWS_SECRETS=False
 AWS_SQS=False
 AWS_REGION=eu-central-1
-## to use if no IAM credentials are provide
-AWS_ACCESS_KEY_ID=
-AWS_SECRET_ACCESS_KEY=
-
 
 # Elastic Search Configuration
 ELASTICSEARCH_ENABLED=False
@@ -93,6 +94,7 @@ CUCKOO_URL=
 MISP_URL=
 FIRST_MISP_URL=
 VT_NOTIFY_URL=
+OPENCTI_URL=
 OPENCTI_URL=
 YETI_URL=
 CONNECTOR_MISP_URL=

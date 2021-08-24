@@ -14,6 +14,17 @@ Standardized threat-sharing using Traffic Light Protocol or `TLP`, thereby depre
   * `OpenCTI` connector: automatically creates an observable and a linked report on your OpenCTI instance.
   * `YETI` connector: find/create an observable on YETI.
 
+**New Analyzers/Connectors Config Format:**
+  - New `connectors_config.json` file for storing Connectors related configuration info.
+  - Split `additional_config_params` key into `config` and `secrets`:
+    - `config`: Includes general config params - `soft_time_limit`, `queue` as well as [Analyzer](https://github.com/intelowlproject/IntelOwl/blob/f3e22e372f00bf9f4901bb1d13c8316cddb3be09/docs/source/Usage.md#analyzers-customization)/[Connector](https://github.com/intelowlproject/IntelOwl/blob/f3e22e372f00bf9f4901bb1d13c8316cddb3be09/docs/source/Usage.md#connectors-customization) specific params.
+    - `secrets`: Stores Analyzer/Connector specific secrets like API Key name along with the secret's type and description.
+  - Secrets are now verified - with a dynamic `verification` key storing configuration status and errors, if any. Misconfigured analyzers/connectors are disabled automatically.
+
+**API changes:**
+  - Split `/api/send_analysis_request` into `/api/analyze_file` and `/api/analyze_observable` 
+  - Updated endpoint for downloading job sample: `/api/jobs/{id}/download_sample`
+
 **New Inbuilt Analyzers:**
 - New `OpenCTI` analyzer: scan an observable on an OpenCTI instance.
 - New `Intezer_Get` analyzer: check Managing Analyzers and Connectorsif an analysis related to a hash is available in [Intezer](https://analyze.intezer.com/))
@@ -21,8 +32,14 @@ Standardized threat-sharing using Traffic Light Protocol or `TLP`, thereby depre
 - New `YETI` analyzer (YETI = Your Everyday Threat Intelligence): scan an observable on a YETI instance.
 - New `HashLookupServer_Get_Observable` analyzer: check if a md5 or sha1 is available in the database of [known file hosted by CIRCL](https://github.com/adulau/hashlookup-server)
 
+**Analyzer Improvements & Fixes:**
+  - Fixed `Tranco` Analyzer pointing to the wrong `python_module`
+  - Removed `CirclePDNS` default value in `env_file_app_template`
+  - New configuration options: `include_behaviour_summary` for behavioral analysis and `include_sigma_analyses` for sigma analysis report of the file in VirusTotalv3 Analyzer. See [Customize Analyzers](https://github.com/intelowlproject/IntelOwl/blob/f3e22e372f00bf9f4901bb1d13c8316cddb3be09/docs/source/Advanced-Usage.md#customize-analyzer-execution-at-time-of-request)
+
 **Others:**
 - Added `kill`, `retry` and `healthcheck` features to analyzers and connectors. See [Managing Analyzers and Connectors](https://intelowl.readthedocs.io/en/master/Usage.html#managing-analyzers-and-connectors).
+
 
 ## [v2.5.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v2.5.0)
 **New Inbuilt Analyzers:**

@@ -39,17 +39,17 @@ class ApiViewTests(TestCase):
     def test_ask_analysis_availability(self):
         md5 = os.environ.get("TEST_MD5", "446c5fbb11b9ce058450555c1c27153c")
         analyzers_needed = ["Fortiguard", "CIRCLPassiveDNS"]
-        params = {"md5": md5, "analyzers_needed": analyzers_needed}
+        data = {"md5": md5, "analyzers": analyzers_needed}
         response = self.client.post(
-            "/api/ask_analysis_availability", params, format="json"
+            "/api/ask_analysis_availability", data, format="json"
         )
         self.assertEqual(response.status_code, 200)
 
     def test_ask_analysis_availability_run_all_analyzers(self):
         md5 = os.environ.get("TEST_MD5", "446c5fbb11b9ce058450555c1c27153c")
-        params = {"md5": md5, "run_all_available_analyzers": True}
+        data = {"md5": md5, "run_all_available_analyzers": True}
         response = self.client.post(
-            "/api/ask_analysis_availability", params, format="json"
+            "/api/ask_analysis_availability", data, format="json"
         )
         self.assertEqual(response.status_code, 200)
 

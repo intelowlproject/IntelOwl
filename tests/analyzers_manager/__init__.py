@@ -3,6 +3,7 @@
 
 import hashlib
 import time
+import os
 
 from unittest import SkipTest
 from django.test import TransactionTestCase
@@ -24,7 +25,7 @@ class _AbstractAnalyzersScriptTestCase(TransactionTestCase):
     test_job: Job
     analyzer_configs: dict
     runtime_configuration: dict
-    filtered_analyzers_dictlist: list
+    analyzers_to_test: list
 
     @classmethod
     def get_params(cls):
@@ -47,6 +48,12 @@ class _AbstractAnalyzersScriptTestCase(TransactionTestCase):
     def setUp(self):
         # analyzer config
         self.analyzer_configs = AnalyzerConfig.all()
+        analyzers_to_test = os.environ.get("TEST_ANALYZERS", "").split(",")
+        self.analyzers_to_test = (
+            analyzers_to_test
+            if len(analyzers_to_test) and len(analyzers_to_test[0])
+            else []
+        )
         return super().setUp()
 
     def tearDown(self):
@@ -179,16 +186,17 @@ class _ObservableAnalyzersScriptsTestCase(_AbstractAnalyzersScriptTestCase):
             params["observable_name"].encode("utf-8")
         ).hexdigest()
         self.test_job = Job(**params)
-        # filter analyzers list
-        filtered_analyzers_list: list = [
-            config
-            for config in self.analyzer_configs.values()
-            if config.is_observable_type_supported(params["observable_classification"])
-        ]
-        self.test_job.analyzers_to_execute = [
-            config.name for config in filtered_analyzers_list
-        ]
-        # self.test_job.analyzers_to_execute = ["Darksearch_Query"]
+        # overwrite if not set in env var
+        if len(self.analyzers_to_test):
+            self.test_job.analyzers_to_execute = self.analyzers_to_test
+        else:
+            self.test_job.analyzers_to_execute = [
+                config.name
+                for config in self.analyzer_configs.values()
+                if config.is_observable_type_supported(
+                    params["observable_classification"]
+                )
+            ]
         # save job
         self.test_job.save()
 
@@ -231,6 +239,9 @@ class _FileAnalyzersScriptsTestCase(_AbstractAnalyzersScriptTestCase):
         params = self.get_params()
         # save job instance
         self.test_job = Job(**params)
+        # overwrite if set in env var
+        if len(self.analyzers_to_test):
+            self.test_job.analyzers_to_execute = self.analyzers_to_test
         self._read_file_save_job(filename=params["file_name"])
 
     def _read_file_save_job(self, filename: str):

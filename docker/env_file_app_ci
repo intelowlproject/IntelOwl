@@ -9,6 +9,18 @@ DB_NAME=intel_owl_db
 # Config variables
 OLD_JOBS_RETENTION_DAYS=2
 INTELOWL_WEB_CLIENT_DOMAIN=localhost
+# Storage
+LOCAL_STORAGE=True
+
+# AWS
+AWS_STORAGE_BUCKET_NAME=
+AWS_IAM_ACCESS = False
+AWS_SECRETS=False
+AWS_SQS=False
+AWS_REGION=eu-central-1
+## to use if no IAM credentials are provide
+AWS_ACCESS_KEY_ID=
+AWS_SECRET_ACCESS_KEY=
 
 # Elastic Search Configuration
 ELASTICSEARCH_ENABLED=False
@@ -86,8 +98,5 @@ DISABLE_LOGGING_TEST=True
 MOCK_CONNECTIONS=True
 CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672
 HTTPS_ENABLED=not_enabled
-AWS_SECRETS=False
-AWS_SQS=False
-AWS_REGION=eu-central-1
 DJANGO_SETTINGS_MODULE=intel_owl.settings
 COVERAGE_PROCESS_START=.coveragerc

@@ -2,8 +2,9 @@
 mkdir -p ${LOG_PATH}
 touch ${LOG_PATH}/gunicorn_access.log ${LOG_PATH}/gunicorn_errors.log
 chown -R static_analyzers-user:static_analyzers-user ${LOG_PATH}
+# start clam service itself and the updated in the background as daemon
 su static_analyzers-user -s /bin/bash
-freshclam && clamd
+freshclam -d && clamd
 exec gunicorn 'app:app' \
     --bind '0.0.0.0:4002' \
     --user static_analyzers-user \

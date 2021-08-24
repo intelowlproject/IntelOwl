@@ -8,12 +8,11 @@ class ClamAV(FileAnalyzer, DockerBasedAnalyzer):
     name: str = "ClamAV"
     url: str = "http://static_analyzers:4002/clamav"
     # interval between http request polling
-    poll_distance: int = 10
+    poll_distance: int = 3
     # http request polling max number of tries
-    max_tries: int = 60
-    # here, max_tries * poll_distance = 10 minutes
-    timeout: int = 60 * 9
-    # whereas subprocess timeout is kept as 60 * 9 = 9 minutes
+    max_tries: int = 5
+    # timeout limit
+    timeout: int = 15
 
     def run(self):
         # get binary

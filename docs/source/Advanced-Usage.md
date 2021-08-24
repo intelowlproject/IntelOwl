@@ -385,3 +385,10 @@ If you like, you could use AWS SQS instead of Rabbit-MQ to manage your queues.
 In that case, you should change the parameter `BROKER_URL` to `sqs://` and give your instances on AWS the proper permissions to access it.
 
 Also, you need to set the environment variable `AWS_SQS` to `True` to activate the additional required settings.
+
+#### S3
+If you prefer to use S3 to store the samples, instead of a local storage, you can now do it.  
+
+First, you need to configuration the environment variable `LOCAL_STORAGE` to `True` to enable it and set `AWS_STORAGE_BUCKET_NAME` to the proper AWS bucket.
+Then you have to add some credentials for AWS: if you have IntelOwl on AWS, you can use IAM credentials:
+to allow that just set `AWS_IAM_ACCESS` to `True`. If that is not the case, you have to set both `AWS_ACESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` 

@@ -17,7 +17,7 @@ Standardized threat-sharing using Traffic Light Protocol or `TLP`, thereby depre
 **New Analyzers/Connectors Config Format:**
   - New `connectors_config.json` file for storing Connectors related configuration info.
   - Split `additional_config_params` key into `config` and `secrets`:
-    - `config`: Includes general config params - `soft_time_limit`, `queue` as well as [Analyzer](https://github.com/intelowlproject/IntelOwl/blob/f3e22e372f00bf9f4901bb1d13c8316cddb3be09/docs/source/Usage.md#analyzers-customization)/[Connector](https://github.com/intelowlproject/IntelOwl/blob/f3e22e372f00bf9f4901bb1d13c8316cddb3be09/docs/source/Usage.md#connectors-customization) specific params.
+    - `config`: Includes general config params - `soft_time_limit`, `queue` as well as [Analyzer](https://intelowl.readthedocs.io/en/master/Usage.html#analyzers-customization)/[Connector](https://intelowl.readthedocs.io/en/master/Usage.html#connectors-customization) specific params.
     - `secrets`: Stores Analyzer/Connector specific secrets like API Key name along with the secret's type and description.
   - Secrets are now verified - with a dynamic `verification` key storing configuration status and errors, if any. Misconfigured analyzers/connectors are disabled automatically.
 
@@ -35,7 +35,7 @@ Standardized threat-sharing using Traffic Light Protocol or `TLP`, thereby depre
 **Analyzer Improvements & Fixes:**
   - Fixed `Tranco` Analyzer pointing to the wrong `python_module`
   - Removed `CirclePDNS` default value in `env_file_app_template`
-  - New configuration options: `include_behaviour_summary` for behavioral analysis and `include_sigma_analyses` for sigma analysis report of the file in VirusTotalv3 Analyzer. See [Customize Analyzers](https://github.com/intelowlproject/IntelOwl/blob/f3e22e372f00bf9f4901bb1d13c8316cddb3be09/docs/source/Advanced-Usage.md#customize-analyzer-execution-at-time-of-request)
+  - New configuration options: `include_behaviour_summary` for behavioral analysis and `include_sigma_analyses` for sigma analysis report of the file in VirusTotalv3 Analyzer. See [Customize Analyzers](https://intelowl.readthedocs.io/en/master/Advanced-Usage.html#customize-analyzer-execution-at-time-of-request)
 
 **Others:**
 - Added `kill`, `retry` and `healthcheck` features to analyzers and connectors. See [Managing Analyzers and Connectors](https://intelowl.readthedocs.io/en/master/Usage.html#managing-analyzers-and-connectors).

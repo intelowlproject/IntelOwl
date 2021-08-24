@@ -15,13 +15,13 @@
 
 **New Inbuilt Analyzers:**
   - New `OpenCTI` analyzer: scan an observable on an OpenCTI instance.
-  - New `Intezer_Get` analyzer: check if an analysis related to a hash is available in [Intezer](https://analyze.intezer.com/))
+  - New `Intezer_Get` analyzer: check Managing Analyzers and Connectorsif an analysis related to a hash is available in [Intezer](https://analyze.intezer.com/))
   - New `MWDB_Get` analyzer: [mwdblib](https://mwdb.readthedocs.io/en/latest/) Retrieve malware file analysis by hash from repository maintained by CERT Polska MWDB.
   - New `YETI` analyzer (YETI = Your Everyday Threat Intelligence): scan an observable on a YETI instance.
   - New `HashLookupServer_Get_Observable` analyzer: check if a md5 or sha1 is available in the database of [known file hosted by CIRCL](https://github.com/adulau/hashlookup-server)
 
 **Others:**
-- Added `kill`, `retry` and `healthcheck` features to analyzers and connectors. See [Managing analyzers or connectors](https://intelowl.readthedocs.io/en/master/Usage.html#managing-analyzers-or-connectors).
+- Added `kill`, `retry` and `healthcheck` features to analyzers and connectors. See [Managing Analyzers and Connectors](https://intelowl.readthedocs.io/en/master/Usage.html#managing-analyzers-and-connectors).
 
 ## [v2.5.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v2.5.0)
 **New Inbuilt Analyzers:**

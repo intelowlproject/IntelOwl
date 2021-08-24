@@ -91,5 +91,5 @@ AWS_REGION=eu-central-1
 DJANGO_SETTINGS_MODULE=intel_owl.settings
 COVERAGE_PROCESS_START=.coveragerc
 
+# broker configuration
 BROKER_URL=amqp://guest:guest@rabbitmq:5672
-BACKEND_URL=rpc://guest:guest@rabbitmq:5672

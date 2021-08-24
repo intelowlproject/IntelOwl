@@ -23,4 +23,9 @@ class ClamAV(FileAnalyzer, DockerBasedAnalyzer):
         req_data = {"args": args, "timeout": self.timeout}
         req_files = {fname: binary}
 
-        return self._docker_run(req_data, req_files)
+        report = self._docker_run(req_data, req_files)
+
+        ok = "OK" in report
+        found = ""  # todo: parse using regex to get name
+
+        return {"ok": ok, "found": found}

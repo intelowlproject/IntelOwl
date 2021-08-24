@@ -156,12 +156,12 @@ def _analysis_request(
         ),
     },
 )
-@api_view(["GET"])
+@api_view(["POST"])
 @permission_required_or_403("api_app.view_job")
 def ask_analysis_availability(request):
     source = str(request.user)
     try:
-        data_received = request.query_params
+        data_received = request.data
         logger.info(
             f"ask_analysis_availability received request from {source}."
             f"Data: {dict(data_received)}"

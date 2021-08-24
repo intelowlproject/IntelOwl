@@ -165,7 +165,7 @@ class FileAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
     def filepath(self) -> str:
         if not self.__filepath:
             self.__filepath = self._job.file.storage.retrieve(
-                name=self.filename, analyzer=self.analyzer_name
+                file=self._job.file, analyzer=self.analyzer_name
             )
         return self.__filepath
 

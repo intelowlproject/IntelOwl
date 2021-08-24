@@ -2,18 +2,19 @@
 # See the file 'LICENSE' for copying permission.
 
 from __future__ import absolute_import, unicode_literals
-from intel_owl.settings import (
-    CELERY_QUEUES,
-    BROKER_URL,
-    BACKEND_URL,
-    AWS_SQS,
-    TEST_MODE,
-)
 import os
-
 from celery import Celery
 from celery.schedules import crontab
 from kombu import Exchange, Queue
+
+from .settings import (
+    CELERY_QUEUES,
+    BROKER_URL,
+    RESULT_BACKEND,
+    AWS_SQS,
+    TEST_MODE,
+)
+
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "intel_owl.settings")
 
@@ -34,7 +35,7 @@ app.conf.update(
     ],
     task_time_limit=1800,
     broker_url=BROKER_URL,
-    result_backend=BACKEND_URL,
+    result_backend=RESULT_BACKEND,
     accept_content=["application/json"],
     task_serializer="json",
     result_serializer="json",

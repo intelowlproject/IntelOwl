@@ -59,19 +59,19 @@ class JobAvailabilitySerializer(serializers.ModelSerializer):
 
     def validate(self, data) -> dict:
         if not data.get("run_all_available_analyzers", False):
-            if not data.get("analyzers_needed", []):
+            if not data.get("analyzers", []):
                 raise serializers.ValidationError(
-                    "Atleast one of `analyzers_needed` "
+                    "Atleast one of `analyzers` "
                     "and `run_all_available_analyzers` should be provided."
                 )
         else:
-            if data.get("analyzers_needed", []):
+            if data.get("analyzers", []):
                 raise serializers.ValidationError(
-                    "analyzers_needed has to be empty if "
+                    "analyzers has to be empty if "
                     "run_all_available_analyzers is True."
                 )
 
-        if data.get("analyzers_needed", []):
+        if data.get("analyzers", []):
             if data.get("run_all_available_analyzers", False):
                 raise serializers.ValidationError(
                     "run_all_available_analyzers has to be False "

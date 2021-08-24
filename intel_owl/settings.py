@@ -196,7 +196,8 @@ else:
         "default": {"hosts": ""},
     }
 
-CELERY_BROKER_URL = secrets.get_secret("CELERY_BROKER_URL")
+BROKER_URL = secrets.get_secret("BROKER_URL", "amqp://guest:guest@rabbitmq:5672")
+BACKEND_URL = secrets.get_secret("BACKEND_URL", "rpc://guest:guest@rabbitmq:5672")
 CELERY_QUEUES = os.environ.get("CELERY_QUEUES", "default").split(",")
 
 # AWS

@@ -2,7 +2,13 @@
 # See the file 'LICENSE' for copying permission.
 
 from __future__ import absolute_import, unicode_literals
-from intel_owl.settings import CELERY_QUEUES, CELERY_BROKER_URL, AWS_SQS, TEST_MODE
+from intel_owl.settings import (
+    CELERY_QUEUES,
+    BROKER_URL,
+    BACKEND_URL,
+    AWS_SQS,
+    TEST_MODE,
+)
 import os
 
 from celery import Celery
@@ -27,8 +33,8 @@ app.conf.update(
         for key in CELERY_QUEUES
     ],
     task_time_limit=1800,
-    broker_url=CELERY_BROKER_URL,
-    result_backend=CELERY_BROKER_URL,
+    broker_url=BROKER_URL,
+    result_backend=BACKEND_URL,
     accept_content=["application/json"],
     task_serializer="json",
     result_serializer="json",

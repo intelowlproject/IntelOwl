@@ -312,12 +312,6 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
             Dict: Final analysis results
         """
 
-        # handle in case this is a test
-        if settings.TEST_MODE:
-            # only happens in case of testing
-            self.report.status = self.report.Status.SUCCESS
-            return {}
-
         # step #1: request new analysis
         args = req_data.get("args", [])
         logger.debug(f"Making request with arguments: {args} <- {self.__repr__()}")
@@ -381,6 +375,8 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
         ```
         whenever multiple analyzers with same parent class were being called.
         """
+        # no need to sleep during tests
+        self.poll_distance = 0
         patches.append(
             if_mock_connections(
                 patch(

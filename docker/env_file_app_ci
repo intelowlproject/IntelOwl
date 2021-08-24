@@ -96,7 +96,9 @@ CONNECTOR_YETI_URL=http://fake_url.com
 DEBUG=True
 DISABLE_LOGGING_TEST=True
 MOCK_CONNECTIONS=True
-CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672
 HTTPS_ENABLED=not_enabled
 DJANGO_SETTINGS_MODULE=intel_owl.settings
 COVERAGE_PROCESS_START=.coveragerc
+
+BROKER_URL=amqp://guest:guest@rabbitmq:5672
+BACKEND_URL=rpc://guest:guest@rabbitmq:5672

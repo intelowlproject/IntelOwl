@@ -10,20 +10,21 @@ from django.utils import timezone
 from django.utils.functional import cached_property
 from django.dispatch import receiver
 
+from api_app.core.models import Status as ReportStatus
+
 
 def file_directory_path(instance, filename):
     now = timezone.now().strftime("%Y_%m_%d_%H_%M_%S")
     return f"job_{now}_{filename}"
 
 
-STATUS = [
-    ("pending", "pending"),
-    ("running", "running"),
-    ("reported_without_fails", "reported_without_fails"),
-    ("reported_with_fails", "reported_with_fails"),
-    ("failed", "failed"),
-    ("killed", "killed"),
-]
+class Status(models.TextChoices):
+    PENDING = "pending", "pending"
+    RUNNING = "running", "running"
+    REPORTED_WITHOUT_FAILS = "reported_without_fails", "reported_without_fails"
+    REPORTED_WITH_FAILS = "reported_with_fails", "reported_with_fails"
+    KILLED = "killed", "killed"
+    FAILED = "failed", "failed"
 
 
 class TLP(models.TextChoices):
@@ -64,6 +65,7 @@ class Job(models.Model):
 
     # constants
     TLP = TLP
+    Status = Status
 
     source = models.CharField(max_length=50, blank=False, default="none")
     is_sample = models.BooleanField(blank=False, default=False)
@@ -73,7 +75,7 @@ class Job(models.Model):
     file_name = models.CharField(max_length=512, blank=True)
     file_mimetype = models.CharField(max_length=80, blank=True)
     status = models.CharField(
-        max_length=32, blank=False, choices=STATUS, default="pending"
+        max_length=32, blank=False, choices=Status.choices, default="pending"
     )
     analyzers_requested = pg_fields.ArrayField(
         models.CharField(max_length=128), blank=True, default=list
@@ -118,11 +120,9 @@ class Job(models.Model):
             self.save(update_fields=["errors"])
 
     def get_analyzer_reports_stats(self) -> dict:
-        from api_app.core.models import AbstractReport
-
         aggregators = {
             s.lower(): models.Count("status", filter=models.Q(status=s))
-            for s in AbstractReport.Status.values
+            for s in ReportStatus.values
         }
         return self.analyzer_reports.aggregate(
             all=models.Count("status"),
@@ -130,11 +130,9 @@ class Job(models.Model):
         )
 
     def get_connector_reports_stats(self) -> dict:
-        from api_app.core.models import AbstractReport
-
         aggregators = {
             s.lower(): models.Count("status", filter=models.Q(status=s))
-            for s in AbstractReport.Status.values
+            for s in ReportStatus.values
         }
         return self.connector_reports.aggregate(
             all=models.Count("status"),

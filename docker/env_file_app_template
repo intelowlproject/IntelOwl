@@ -104,7 +104,12 @@ DEBUG=False
 LDAP_ENABLED=False
 DISABLE_LOGGING_TEST=False
 MOCK_CONNECTIONS=False
-CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672
 DB_NAME=intel_owl_db
 HTTPS_ENABLED=not_enabled
-
+# broker configuration
+BROKER_URL=amqp://guest:guest@rabbitmq:5672
+BACKEND_URL=rpc://guest:guest@rabbitmq:5672
+RABBITMQ_DEFAULT_USER=guest
+RABBITMQ_DEFAULT_PASS=guest
+FLOWER_USER=flower
+FLOWER_PWD=flower

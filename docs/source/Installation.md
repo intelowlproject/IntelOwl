@@ -149,7 +149,7 @@ If you prefer to use an external PostgreSQL instance, you should just remove the
 
 ### Web server configuration (optional)
 Intel Owl provides basic configuration for:
-* Nginx (`configuration/intel_owl_nginx_http`)
+* Nginx (`configuration/nginx/http.conf`)
 * Uwsgi (`configuration/intel_owl.ini`)
 
 In case you enable HTTPS, remember to set the environment variable `HTTPS_ENABLED` as "enabled" to increment the security of the application.
@@ -162,13 +162,15 @@ There are 3 options to execute the web server:
 
 - **HTTPS with your own certificate**
 
-    The project provides a template file to configure Nginx to serve HTTPS: `configuration/intel_owl_nginx_https`.
+    The project provides a template file to configure Nginx to serve HTTPS: `configuration/nginx/https.conf`.
 
     You should change `ssl_certificate`, `ssl_certificate_key` and `server_name` in that file.
 
-    Then you should modify the `nginx` service configuration in `docker/default.yml`:
-    * change `intel_owl_nginx_http` with `intel_owl_nginx_https`
+    Then you should modify the `nginx` service configuration in `docker/default.ylm`:
+    * change `http.conf` with `https.conf`
     * in `volumes` add the option for mounting the directory that hosts your certificate and your certificate key.
+  
+    Plus, if you use [Flower](Advanced-Usage.html#queue-customization), you should change in the `docker/flower.override.yml` the `flower_http.conf` with `flower_https.conf`.
 
 - **HTTPS with Let's Encrypt**
 
@@ -187,29 +189,6 @@ Refer to [Analyzers customization](Usage.html#analyzers-customization) and [Conn
 <p class="admonition-title">Hint</p>
 You can see the full list of all available analyzers and connectors in the <a href="Usage.html#available-analyzers">Usage.html</a> or <a href="https://intelowlclient.firebaseapp.com/pages/analyzers/table">Live Demo</a>.
 </div>
-
-
-## AWS support
-At the moment there's a basic support for some of the AWS services. More is coming in the future. 
-
-#### Secrets
-If you would like to run this project on AWS, I'd suggest you to use the "Secrets Manager" to store your credentials. In this way your secrets would be better protected.
-
-This project supports this kind of configuration. Instead of adding the variables to the environment file, you should just add them with the same name on the AWS Secrets Manager and Intel Owl will fetch them transparently.
-
-Obviously, you should have created and managed the permissions in AWS in advance and accordingly to your infrastructure requirements.
-
-Also, you need to set the environment variable `AWS_SECRETS` to `True` to enable this mode.
-
-You can customize the AWS Region changing the environment variable `AWS_REGION`.
-
-#### SQS
-If you like, you could use AWS SQS instead of Rabbit-MQ to manage your queues.
-In that case, you should change the parameter `CELERY_BROKER_URL` to `sqs://` and give your instances on AWS the proper permissions to access it.
-
-Also, you need to set the environment variable `AWS_SQS` to `True` to activate the additional required settings.
-
-#### ... More coming
 
 
 ## Run

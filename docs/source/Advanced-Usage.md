@@ -16,8 +16,11 @@ This page includes details about some advanced features that Intel Owl provides 
   - [Authentication options](#authentication-options)
       - [LDAP](#ldap)
   - [Google Kubernetes Engine deployment](#google-kubernetes-engine-deployment)
-  - [Multi Queue](#multi-queue)
-      - [Queue Customization](#queue-customization)
+  - [Queues](#queues)
+    - [Multi Queue](#multi-queue)
+    - [Queue Customization](#queue-customization)
+    - [Queue Monitoring](#queue-monitoring)
+  - [AWS Support](#aws-support)
 
 
 ## Optional Analyzers
@@ -330,7 +333,9 @@ Refer to the following blog post for an example on how to deploy IntelOwl on Goo
 
 [Deploying Intel-Owl on GKE](https://mostwanted002.cf/post/intel-owl-gke/) by [Mayank Malik](https://twitter.com/_mostwanted002_).
 
-## Multi Queue
+## Queues
+
+#### Multi Queue
 IntelOwl provides an additional [multi-queue.override.yml](https://github.com/intelowlproject/IntelOwl/blob/master/docker/multi-queue.override.yml) compose file allowing IntelOwl users to better scale with the performance of their own architecture.
 
 If you want to leverage it, you should add the option `--multi-queue` when starting the project. Example:
@@ -347,3 +352,36 @@ Moreover IntelOwl requires that the name of the workers are provided in the `doc
 
 One can customize what analyzer should use what queue by specifying so in the analyzer entry in the [analyzer_config.json](https://github.com/intelowlproject/IntelOwl/blob/master/configuration/analyzer_config.json) configuration file. If no queue(s) are provided, the `default` queue will be selected.
  
+#### Queue monitoring
+IntelOwl provides an additional [flower.override.yml](https://github.com/intelowlproject/IntelOwl/blob/master/docker/flower.override.yml) compose file allowing IntelOwl users to use [Flower](https://flower.readthedocs.io/) features to monitor and manage queues and tasks
+
+If you want to leverage it, you should add the option `--flower` when starting the project. Example:
+```bash
+python3 start.py prod --flower up
+```
+The flower interface is available at port 5555: to set the credentials for its access, update the environment variables
+```bash
+FLOWER_USER
+FLOWER_PWD
+```
+or change the `.htpasswd` file that is created in the `docker` directory in the `intelowl_flower` container.
+
+## AWS support
+At the moment there's a basic support for some of the AWS services. More is coming in the future. 
+
+#### Secrets
+If you would like to run this project on AWS, I'd suggest you to use the "Secrets Manager" to store your credentials. In this way your secrets would be better protected.
+
+This project supports this kind of configuration. Instead of adding the variables to the environment file, you should just add them with the same name on the AWS Secrets Manager and Intel Owl will fetch them transparently.
+
+Obviously, you should have created and managed the permissions in AWS in advance and accordingly to your infrastructure requirements.
+
+Also, you need to set the environment variable `AWS_SECRETS` to `True` to enable this mode.
+
+You can customize the AWS Region changing the environment variable `AWS_REGION`.
+
+#### SQS
+If you like, you could use AWS SQS instead of Rabbit-MQ to manage your queues.
+In that case, you should change the parameter `BROKER_URL` to `sqs://` and give your instances on AWS the proper permissions to access it.
+
+Also, you need to set the environment variable `AWS_SQS` to `True` to activate the additional required settings.

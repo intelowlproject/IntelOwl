@@ -21,7 +21,6 @@ from ..exceptions import AlreadyFailedJobException, NotRunnableAnalyzer
 logger = logging.getLogger(__name__)
 
 # constants
-ALL_ANALYZERS = "__all__"
 DEFAULT_QUEUE = "default"
 
 
@@ -122,7 +121,7 @@ def start_analyzers(
 
     # get job
     job = Job.objects.get(pk=job_id)
-    job.update_status("running")  # set job status to running
+    job.update_status(Job.Status.RUNNING)  # set job status to running
 
     # loop over and create task signatures
     for a_name in analyzers_to_execute:
@@ -181,10 +180,10 @@ def start_analyzers(
 
 def job_cleanup(job: Job) -> None:
     logger.info(f"[STARTING] job_cleanup for <-- {job.__repr__()}.")
-    status_to_set = "running"
+    status_to_set = job.Status.RUNNING
 
     try:
-        if job.status == "failed":
+        if job.status == job.Status.FAILED:
             raise AlreadyFailedJobException()
 
         stats = job.get_analyzer_reports_stats()
@@ -193,15 +192,15 @@ def job_cleanup(job: Job) -> None:
 
         if len(job.analyzers_to_execute) == stats["all"]:
             if stats["running"] > 0 or stats["pending"] > 0:
-                status_to_set = "running"
+                status_to_set = job.Status.RUNNING
             elif stats["success"] == stats["all"]:
-                status_to_set = "reported_without_fails"
+                status_to_set = job.Status.REPORTED_WITHOUT_FAILS
             elif stats["failed"] == stats["all"]:
-                status_to_set = "failed"
+                status_to_set = job.Status.FAILED
             elif stats["failed"] >= 1 or stats["killed"] >= 1:
-                status_to_set = "reported_with_fails"
+                status_to_set = job.Status.REPORTED_WITH_FAILS
             elif stats["killed"] == stats["all"]:
-                status_to_set = "killed"
+                status_to_set = job.Status.KILLED
 
     except AlreadyFailedJobException:
         logger.error(
@@ -213,13 +212,15 @@ def job_cleanup(job: Job) -> None:
         job.append_error(str(e), save=False)
 
     finally:
-        if not (job.status == "failed" and job.finished_analysis_time):
+        if not (job.status == job.Status.FAILED and job.finished_analysis_time):
             job.finished_analysis_time = get_now()
         job.status = status_to_set
         job.save(update_fields=["status", "errors", "finished_analysis_time"])
 
 
-def set_failed_analyzer(job_id: int, name: str, err_msg, **report_defaults):
+def set_failed_analyzer(
+    job_id: int, name: str, err_msg, **report_defaults
+) -> AnalyzerReport:
     status = AnalyzerReport.Status.FAILED
     logger.warning(
         f"(job: #{job_id}, analyzer:{name}) -> set as {status}. " f"Error: {err_msg}"
@@ -254,7 +255,7 @@ def run_analyzer(
     return report
 
 
-def post_all_analyzers_finished(job_id: int):
+def post_all_analyzers_finished(job_id: int) -> None:
     """
     Callback fn that is executed after all analyzers have finished.
     """
@@ -266,11 +267,13 @@ def post_all_analyzers_finished(job_id: int):
     job_cleanup(job)
     # fire connectors when job finishes with success
     # avoid re-triggering of connectors (case: recurring analyzer run)
-    if job.status == "reported_without_fails" and not len(job.connectors_to_execute):
+    if job.status == Job.Status.REPORTED_WITHOUT_FAILS and not len(
+        job.connectors_to_execute
+    ):
         tasks.on_job_success.apply_async(args=[job_id])
 
 
-def kill_ongoing_analysis(job: Job):
+def kill_ongoing_analysis(job: Job) -> None:
     """
     Terminates the analyzer tasks that are currently in running state.
     """

@@ -1,10 +1,14 @@
-#!/bin/sh
+#!/bin/bash
 mkdir -p ${LOG_PATH}
 touch ${LOG_PATH}/gunicorn_access.log ${LOG_PATH}/gunicorn_errors.log
 chown -R static_analyzers-user:static_analyzers-user ${LOG_PATH}
-# start clam service itself and the updated in the background as daemon
+# clamav processes
+freshclam # download db for first time
+freshclam -d & # run updater in bg
+clamd --debug & # run daemon in bg
+# change user
 su static_analyzers-user -s /bin/bash
-freshclam -d && clamd
+# start flask server
 exec gunicorn 'app:app' \
     --bind '0.0.0.0:4002' \
     --user static_analyzers-user \

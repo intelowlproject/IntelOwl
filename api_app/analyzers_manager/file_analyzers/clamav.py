@@ -26,6 +26,7 @@ class ClamAV(FileAnalyzer, DockerBasedAnalyzer):
         report = self._docker_run(req_data, req_files)
 
         ok = "OK" in report
-        found = ""  # todo: parse using regex to get name
+        val = report.split("\n")[0].split()[1]
+        found = None if val == "OK" else val
 
-        return {"ok": ok, "found": found}
+        return {"ok": ok, "found": found, "raw_report": report}

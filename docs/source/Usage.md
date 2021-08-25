@@ -81,41 +81,41 @@ $ pyintelowl get-analyzer-config
 The following is the list of the available analyzers you can run out-of-the-box:
 
 #### File analyzers:
-* `File_Info`: static generic File analysis
-* `PDF_Info`: static PDF analysis (peepdf + pdfid)
-* `Rtf_Info`: static RTF analysis (Oletools)
-* `Doc_Info`: static generic document analysis (Oletools)
-* `Doc_Info_Experimental`: static document analysis with new features to analyze XLM macros, encrypted macros and more
+* `File_Info`: static generic File analysis (hashes, magic and [exiftool](https://exiftool.org/))
+* `PDF_Info`: static PDF analysis ([peepdf](https://github.com/jesparza/peepdf) + [pdfid](https://github.com/mlodic/pdfid))
+* `Rtf_Info`: static RTF analysis ([Oletools](https://github.com/decalage2/oletools))
+* `Doc_Info`: static generic document analysis ([Oletools](https://github.com/decalage2/oletools))
 * `Xlm_Macro_Deobfuscator`: [XlmMacroDeobfuscator](https://github.com/DissectMalware/XLMMacroDeobfuscator) deobfuscate xlm macros
-* `PE_Info`: static PE analysis (pefile)
-* `Signature_Info`: PE signature extractor
-* `Speakeasy`: Speakeasy binary emulation
+* `Doc_Info_Experimental`: static document analysis with new features to analyze XLM macros, encrypted macros and more (combination of Oletools and XLMMacroDeobfuscator)
+* `PE_Info`: static PE analysis with [pefile](https://github.com/mlodic/pefile)
+* `Signature_Info`: PE signature extractor with [osslsigncode](https://github.com/mtrojnar/osslsigncode)
+* `Speakeasy`: [FireEye Speakeasy](https://github.com/fireeye/speakeasy) binary emulation
 * `Strings_Info_Classic`: strings extraction
 * `Strings_Info_ML`: strings extraction plus strings ranking based on Machine Learning. Leverages [Stringsifter](https://github.com/fireeye/stringsifter)
 * `VirusTotal_v3_Get_File_And_Scan`: check file hash on VirusTotal. If not already available, send the sample and perform a scan
 * `VirusTotal_v3_Get_File`: check only the file hash on VirusTotal (this analyzer is disabled by default to avoid multiple unwanted queries. You have to change that flag [in the config]((https://github.com/intelowlproject/IntelOwl/blob/master/configuration/analyzer_config.json)) to use it)
 * `VirusTotal_v2_Get_File`: check file hash on VirusTotal using old API endpoints (this analyzer is disabled by default. You have to change that flag [in the config]((https://github.com/intelowlproject/IntelOwl/blob/master/configuration/analyzer_config.json)) to use it)
 * `VirusTotal_v2_Scan_File`: scan a file on VirusTotal using old API endpoints (this analyzer is disabled by default. You have to change that flag [in the config]((https://github.com/intelowlproject/IntelOwl/blob/master/configuration/analyzer_config.json)) to use it)
-* `Intezer Scan`: scan a file on Intezer
+* `Intezer Scan`: scan a file on [Intezer](https://analyze.intezer.com/). Register for a free community account [here](https://analyze.intezer.com/sign-in)
 * `Cuckoo_Scan`: scan a file on Cuckoo (this analyzer is disabled by default. You have to change that flag [in the config]((https://github.com/intelowlproject/IntelOwl/blob/master/configuration/analyzer_config.json)) to use it)
-* `HybridAnalysis_Get_File`: check file hash on HybridAnalysis sandbox reports
+* `HybridAnalysis_Get_File`: check file hash on [HybridAnalysis](https://www.hybrid-analysis.com/) sandbox reports
 * `OTX_Check_Hash`: check file hash on [Alienvault OTX](https://otx.alienvault.com/)
 * `MISP_Check_Hash`: check a file hash on a MISP instance
 * `MISPFIRST_Check_Hash`: check a file hash on the FIRST MISP instance
-* `Yara_Scan_Community`: scan a file with community yara rules
-* `Yara_Scan_Dail_Ioc`: scan a file with StrangerealIntel Daily IOC yara rules
-* `Yara_Scan_Florian`: scan a file with Neo23x0 yara rules
-* `Yara_Scan_Intezer`: scan a file with Intezer yara rules
-* `Yara_Scan_Inquest`: scan a file with Inquest yara rules
-* `Yara_Scan_McAfee`: scan a file with McAfee yara rules
-* `Yara_Scan_Samir`: scan a file with Samir Threat Hunting yara rules
-* `Yara_Scan_Stratosphere`: scan a file with Stratosphere yara rules
+* `Yara_Scan_Community`: scan a file with the [community yara rules](https://github.com/Yara-Rules/rules)
+* `Yara_Scan_Dail_Ioc`: scan a file with [StrangerealIntel](https://github.com/StrangerealIntel) Daily IOC yara rules
+* `Yara_Scan_Florian`: scan a file with [Neo23x0 yara rules](https://github.com/Neo23x0/signature-base)
+* `Yara_Scan_Intezer`: scan a file with [Intezer yara rules](https://github.com/intezer/yara-rules)
+* `Yara_Scan_Inquest`: scan a file with [Inquest yara rules](https://github.com/InQuest/yara-rules)
+* `Yara_Scan_McAfee`: scan a file with [McAfee yara rules](https://github.com/advanced-threat-research/Yara-Rules)
+* `Yara_Scan_Samir`: scan a file with [Samir Threat Hunting yara rules](https://github.com/sbousseaden/YaraHunts)
+* `Yara_Scan_Stratosphere`: scan a file with [Stratosphere yara rules](https://github.com/stratosphereips/yara-rules)
 * `Yara_Scan_FireEye`: scan a file with FireEye yara rules
-* `Yara_Scan_ReversingLabs`: scan a file with ReversingLabs yara rules
+* `Yara_Scan_ReversingLabs`: scan a file with [ReversingLabs yara rules](https://github.com/reversinglabs/reversinglabs-yara-rules)
 * `Yara_Scan_Custom_Signatures`: scan a file with your own added signatures
-* `MalwareBazaar_Get_File`: Check if a particular malware sample is known to MalwareBazaar
-* `PEframe_Scan`: Perform static analysis on Portable Executable malware and malicious MS Office documents.
-* `Cymru_Hash_Registry_Get_File`: Check if a particular file is known to be malware by Team Cymru
+* `MalwareBazaar_Get_File`: Check if a particular malware sample is known to [MalwareBazaar](https://bazaar.abuse.ch/)
+* `PEframe_Scan`: Perform static analysis on Portable Executable malware and malicious MS Office documents with [PeFrame](https://github.com/guelfoweb/peframe)
+* `Cymru_Hash_Registry_Get_File`: Check if a particular file is known to be malware by [Team Cymru](https://team-cymru.com/community-services/mhr/)
 * `Thug_HTML_Info`: Perform hybrid dynamic/static analysis on a HTML file using [Thug low-interaction honeyclient](https://thug-honeyclient.readthedocs.io/)
 * `Capa_Info`: [Capa](https://github.com/fireeye/capa) detects capabilities in executable files
 * `BoxJS_Scan_Javascript`: [Box-JS](https://github.com/CapacitorSet/box-js) is a tool for studying JavaScript malware.
@@ -133,52 +133,52 @@ The following is the list of the available analyzers you can run out-of-the-box:
 #### Observable analyzers (ip, domain, url, hash)
 * `VirusTotal_v3_Get_Observable`: search an observable in the VirusTotal DB
 * `VirusTotal_v2_Get_Observable`: search an observable in the VirusTotal DB using the old API endpoints (this analyzer is disabled by default. You have to change that flag [in the config]((https://github.com/intelowlproject/IntelOwl/blob/master/configuration/analyzer_config.json)) to use it)
-* `HybridAnalysis_Get_Observable`: search an observable in the HybridAnalysis sandbox reports
+* `HybridAnalysis_Get_Observable`: search an observable in the [HybridAnalysis](https://www.hybrid-analysis.com/) sandbox reports
 * `OTXQuery`: scan an observable on [Alienvault OTX](https://otx.alienvault.com/)
-* `TalosReputation`: check an IP reputation from Talos
-* `Stratosphere_Blacklist`: Cross-reference an IP from blacklists maintained by Stratosphere Labs
+* `TalosReputation`: check an IP reputation from [Talos](https://talosintelligence.com/reputation_center/)
+* `Stratosphere_Blacklist`: Cross-reference an IP from blacklists maintained by [Stratosphere Labs](https://www.stratosphereips.org/attacker-ip-prioritization-blacklist)
 * `Robtex_Forward_PDNS_Query`: scan a domain against the Robtex Passive DNS DB
 * `Robtex_Reverse_PDNS_Query`: scan an IP against the Robtex Passive DNS DB
 * `Robtex_IP_Query`: get IP info from Robtex
 * `GoogleSafebrowsing`: Scan an observable against GoogleSafeBrowsing DB
 * `GoogleWebRisk`: Scan an observable against WebRisk API (Commercial version of Google Safe Browsing). Check the [docs]((https://intelowl.readthedocs.io/en/develop/Advanced-Usage.html#analyzers-with-special-configuration)) to enable this properly
-* `GreyNoiseCommunity`: scan an IP against the Community Greynoise API (no API key required)
-* `GreyNoise`: scan an IP against the Greynoise API (requires API key)
+* `GreyNoiseCommunity`: scan an IP against the [Community Greynoise API](https://www.greynoise.io/) (no API key required)
+* `GreyNoise`: scan an IP against the [Greynoise](https://www.greynoise.io/) API (requires API key)
 * `CIRCLPassiveDNS`: scan an observable against the CIRCL Passive DNS DB
 * `CIRCLPassiveSSL`: scan an observable against the CIRCL Passive SSL DB
 * `MaxMindGeoIP`: extract GeoIP info for an observable
-* `AbuseIPDB`: check if an ip was reported on AbuseIPDB
-* `Fortiguard`: scan an observable with the Fortiguard URL Analyzer
+* `AbuseIPDB`: check if an ip was reported on [AbuseIPDB](https://www.abuseipdb.com/)
+* `Fortiguard`: scan an observable with the [Fortiguard URL Analyzer](https://www.fortiguard.com/webfilter)
 * `TorProject`: check if an IP is a Tor Exit Node
 * `MISP`: scan an observable on a MISP instance
 * `MISPFIRST`: scan an observable on the FIRST MISP instance
-* `DNSDB`: scan an observable against the Passive DNS Farsight Database (support both v1 and v2 versions)
-* `Shodan_Search`: scan an IP against Shodan Search API
-* `Shodan_Honeyscore`: scan an IP against Shodan Honeyscore API
+* `DNSDB`: scan an observable against the [Passive DNS Farsight Database](https://www.farsightsecurity.com/solutions/dnsdb/) (support both v1 and v2 versions)
+* `Shodan_Search`: scan an IP against [Shodan](https://www.shodan.io/) Search API
+* `Shodan_Honeyscore`: scan an IP against [Shodan](https://www.shodan.io/) Honeyscore API
+* `HoneyDB_Get`: [HoneyDB](https://honeydb.io/) IP lookup service
 * `HoneyDB_Scan_Twitter`: scan an IP against HoneyDB.io's Twitter Threat Feed
-* `HoneyDB_Get`: HoneyDB IP lookup service
 * `Hunter`: Scans a domain name and returns set of data about the organisation, the email address found and additional information about the people owning those email addresses.
-* `Censys_Search`: scan an IP address against Censys View API
-* `MalwareBazaar_Get_Observable`: Check if a particular malware hash is known to MalwareBazaar
+* `Censys_Search`: scan an IP address against [Censys](https://censys.io/) View API
+* `MalwareBazaar_Get_Observable`: Check if a particular malware hash is known to [MalwareBazaar](https://bazaar.abuse.ch/)
 * `MalwareBazaar_Google_Observable`: Check if a particular IP, domain or url is known to MalwareBazaar using google search
-* `ONYPHE`: search an observable in ONYPHE
-* `Threatminer_PDNS`: retrieve PDNS data from Threatminer API
+* `ONYPHE`: search an observable in [ONYPHE](https://www.onyphe.io/)
+* `Threatminer_PDNS`: retrieve PDNS data from [Threatminer](https://www.threatminer.org/) API
 * `Threatminer_Reports_Tagging`: retrieve reports from Threatminer API
 * `Threatminer_Subdomains`: retrieve subdomains from Threatminer API
-* `URLhaus`: Query a domain or URL against URLhaus API.
+* `URLhaus`: Query a domain or URL against [URLhaus](https://urlhaus.abuse.ch/) API.
 * `Google_DNS`: Retrieve current domain resolution with Google DoH (DNS over HTTPS)
 * `CloudFlare_DNS`: Retrieve current domain resolution with CloudFlare DoH (DNS over HTTPS)
 * `CloudFlare_Malicious_Detector`: Leverages CloudFlare DoH to check if a domain is related to malware
 * `Classic_DNS`: Retrieve current domain resolution with default DNS
 * `Auth0`: scan an IP against the Auth0 API
-* `Securitytrails_IP_Neighbours`: scan an IP against securitytrails API for neighbour IPs
-* `Securitytrails_Details`: scan a domain against securitytrails API for general details
-* `Securitytrails_Subdomains`: scan a domain against securitytrails API for subdomains
-* `Securitytrails_Tags`: scan a domain against securitytrails API for tags
-* `Securitytrails_History_WHOIS`: scan a domain against securitytrails API for historical WHOIS
-* `Securitytrails_History_DNS`: scan a domain against securitytrails API for historical DNS
-* `Cymru_Hash_Registry_Get_Observable`: Check if a particular hash is available in the malware hash registry of Team Cymru
-* `Tranco`: Check if a domain is in the latest Tranco ranking top sites list
+* `Securitytrails_IP_Neighbours`: scan an IP against [Securitytrails](https://securitytrails.com/) API for neighbour IPs
+* `Securitytrails_Details`: scan a domain against Securitytrails API for general details
+* `Securitytrails_Subdomains`: scan a domain against Securitytrails API for subdomains
+* `Securitytrails_Tags`: scan a domain against Securitytrails API for tags
+* `Securitytrails_History_WHOIS`: scan a domain against Securitytrails API for historical WHOIS
+* `Securitytrails_History_DNS`: scan a domain against Securitytrails API for historical DNS
+* `Cymru_Hash_Registry_Get_Observable`: Check if a particular hash is available in the malware hash registry of [Team Cymru](https://team-cymru.com/community-services/mhr/)
+* `Tranco`: Check if a domain is in the latest [Tranco](https://tranco-list.eu/) ranking top sites list
 * `Thug_URL_Info`: Perform hybrid dynamic/static analysis on a URL using [Thug low-interaction honeyclient](https://thug-honeyclient.readthedocs.io/)
 * `Pulsedive_Active_IOC`: Scan indicators and retrieve results from [Pulsedive's API](https://pulsedive.com/api/).
 * `CheckDMARC`: An SPF and DMARC DNS records validator for domains.
@@ -200,10 +200,10 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * `SSAPINet`: get a screenshot of a web page using [screenshotapi.net](https://screenshotapi.net/) (external source); additional config options can be added to `extra_api_params` [in the config](https://github.com/intelowlproject/IntelOwl/blob/master/configuration/analyzer_config.json).
 * `FireHol_IPList`: check if an IP is in [FireHol's IPList](https://iplists.firehol.org/)
 * `ThreatFox`: search for an IOC in [ThreatFox](https://threatfox.abuse.ch/api/)'s database
-* `OpenCTI`: scan an observable on an OpenCTI instance
-* `Intezer_Get`: check if an analysis related to a hash is available in [Intezer](https://analyze.intezer.com/))
+* `OpenCTI`: scan an observable on an [OpenCTI](https://github.com/OpenCTI-Platform/opencti) instance
+* `Intezer_Get`: check if an analysis related to a hash is available in [Intezer](https://analyze.intezer.com/). Register for a free community account [here](https://analyze.intezer.com/sign-in).
 * `MWDB_Get`: [mwdblib](https://mwdb.readthedocs.io/en/latest/) Retrieve malware file analysis by hash from repository maintained by CERT Polska MWDB.
-* `YETI` (Your Everyday Threat Intelligence): scan an observable on a YETI instance.
+* `YETI` (Your Everyday Threat Intelligence): scan an observable on a [YETI](https://github.com/yeti-platform/yeti) instance.
 * `HashLookupServer_Get_Observable`: check if a md5 or sha1 is available in the database of [known file hosted by CIRCL](https://github.com/adulau/hashlookup-server)
 
 #### Generic analyzers (email, phone number, etc.; anything really)

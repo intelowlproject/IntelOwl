@@ -58,12 +58,6 @@ RUN mkdir /var/run/clamav && \
     chown static_analyzers-user:static_analyzers-user /var/run/clamav && \
     chmod 750 /var/run/clamav
 
-# Updating configuration
-RUN sed -i 's/^Foreground .*$/Foreground true/g' /etc/clamav/clamd.conf && \
-    echo "TCPSocket 3310" >> /etc/clamav/clamd.conf && \
-    sed -i 's/^Foreground .*$/Foreground true/g' /etc/clamav/freshclam.conf
-
-EXPOSE 3310
 # Serve Flask application using gunicorn
 EXPOSE 4002
 ENTRYPOINT ["./entrypoint.sh"]

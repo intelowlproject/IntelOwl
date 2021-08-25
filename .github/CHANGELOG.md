@@ -24,6 +24,7 @@ Standardized threat-sharing using Traffic Light Protocol or `TLP`, thereby depre
 **API changes:**
   - Split `/api/send_analysis_request` into `/api/analyze_file` and `/api/analyze_observable` 
   - Updated endpoint for downloading job sample: `/api/jobs/{id}/download_sample`
+  - Updated `/api/ask_analysis_availability` to be `POST` endpoint
 
 **New Inbuilt Analyzers:**
 - New `OpenCTI` analyzer: scan an observable on an OpenCTI instance.
@@ -31,6 +32,7 @@ Standardized threat-sharing using Traffic Light Protocol or `TLP`, thereby depre
 - New `MWDB_Get` analyzer: [mwdblib](https://mwdb.readthedocs.io/en/latest/) Retrieve malware file analysis by hash from repository maintained by CERT Polska MWDB.
 - New `YETI` analyzer (YETI = Your Everyday Threat Intelligence): scan an observable on a YETI instance.
 - New `HashLookupServer_Get_Observable` and `HashLookupServer_Get_File` analyzers: check if a md5 or sha1 is available in the database of [known file hosted by CIRCL](https://github.com/adulau/hashlookup-server)
+- New `ClamAV` analyzer: scan files for viruses/malwares/trojans using [ClamAV antivirus engine](https://docs.clamav.net/)
 
 **Analyzer Improvements & Fixes:**
   - Fixed `Tranco` Analyzer pointing to the wrong `python_module`

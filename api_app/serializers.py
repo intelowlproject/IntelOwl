@@ -43,6 +43,44 @@ class TagSerializer(ObjectPermissionsAssignmentMixin, serializers.ModelSerialize
         }
 
 
+class JobAvailabilitySerializer(serializers.ModelSerializer):
+    """
+    Serializer for ask_analysis_availability
+    """
+
+    class Meta:
+        model = Job
+        fields = "__all__"
+
+    md5 = serializers.CharField(max_length=128, required=True)
+    analyzers = serializers.ListField(default=list)
+    run_all_available_analyzers = serializers.BooleanField(default=False)
+    running_only = serializers.BooleanField(default=False)
+
+    def validate(self, data) -> dict:
+        if not data.get("run_all_available_analyzers", False):
+            if not data.get("analyzers", []):
+                raise serializers.ValidationError(
+                    "Atleast one of `analyzers` "
+                    "and `run_all_available_analyzers` should be provided."
+                )
+        else:
+            if data.get("analyzers", []):
+                raise serializers.ValidationError(
+                    "analyzers has to be empty if "
+                    "run_all_available_analyzers is True."
+                )
+
+        if data.get("analyzers", []):
+            if data.get("run_all_available_analyzers", False):
+                raise serializers.ValidationError(
+                    "run_all_available_analyzers has to be False "
+                    "if analyzers_needed is not empty"
+                )
+
+        return data
+
+
 class JobListSerializer(serializers.ModelSerializer):
     """
     Job model's list serializer.

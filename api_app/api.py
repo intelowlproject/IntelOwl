@@ -156,43 +156,29 @@ def _analysis_request(
         ),
     },
 )
-@api_view(["GET"])
+@api_view(["POST"])
 @permission_required_or_403("api_app.view_job")
 def ask_analysis_availability(request):
     source = str(request.user)
-    analyzers_needed_list = []
-    run_all_available_analyzers = False
     try:
-        data_received = request.query_params
+        data_received = request.data
         logger.info(
             f"ask_analysis_availability received request from {source}."
             f"Data: {dict(data_received)}"
         )
 
-        if "md5" not in data_received:
-            return Response({"error": "800"}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = serializers.JobAvailabilitySerializer(
+            data=data_received, context={"request": request}
+        )
+        serializer.is_valid(raise_exception=True)
+        serialized_data = serializer.validated_data
 
-        if (
-            "analyzers_needed" not in data_received
-            and "run_all_available_analyzers" not in data_received
-        ):
-            return Response({"error": "801"}, status=status.HTTP_400_BAD_REQUEST)
-
-        if (
-            "run_all_available_analyzers" in data_received
-            and data_received["run_all_available_analyzers"]
-        ):
-            run_all_available_analyzers = True
-        if not run_all_available_analyzers:
-            if "analyzers_needed" not in data_received:
-                return Response({"error": "802"}, status=status.HTTP_400_BAD_REQUEST)
-            analyzers_needed_list = data_received["analyzers_needed"].split(",")
-
-        running_only = False
-        if "running_only" in data_received:
-            running_only = True
-
-        md5 = data_received["md5"]
+        analyzers_needed_list = serialized_data.pop("analyzers", [])
+        run_all_available_analyzers = serialized_data.pop(
+            "run_all_available_analyzers", False
+        )
+        running_only = serialized_data.pop("running_only", False)
+        md5 = serialized_data["md5"]
 
         if running_only:
             statuses_to_check = ["running"]

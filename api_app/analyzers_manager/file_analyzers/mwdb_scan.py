@@ -34,33 +34,57 @@ class MWDB_Scan(FileAnalyzer):
         self.max_tries = params.get("max_tries", 50)
         self.poll_distance = 5
 
+        self.mwdb = mwdblib.MWDB(api_key=self.__api_key)
+
     def file_analysis(self, file_info):
         return "karton" in file_info.metakeys.keys()
+
+    def adjust_relations(self, base, key, recursive=True):
+        new_relation = []
+        for relation in base[key]:
+            logger.error(relation)
+            if relation["type"] == "file":
+                new_relation.append(self.mwdb.query_file(relation["id"]).data)
+            elif relation["type"] == "static_config":
+                new_relation.append(self.mwdb.query_config(relation["id"]).data)
+        base[key] = new_relation
+        # HERE WE GO
+        if recursive:
+            for new_base in base[key]:
+                if base["type"] == "file":
+
+                    # otherwise we have an infinite loop
+                    if key == "parents":
+                        self.adjust_relations(new_base, key="parents", recursive=True)
+                        self.adjust_relations(new_base, key="children", recursive=False)
+                    elif key == "children":
+                        self.adjust_relations(new_base, key="parents", recursive=True)
+                        self.adjust_relations(new_base, key="children", recursive=False)
 
     def run(self):
         result = {}
         binary = self.read_file_bytes()
         query = str(hashlib.sha256(binary).hexdigest())
 
-        mwdb = mwdblib.MWDB(api_key=self.__api_key)
-
         if self.upload_file:
             logger.info(f"mwdb_scan uploading sample: {self.md5}")
-            file_object = mwdb.upload_file(query, binary, private=self.private, public=self.public)
+            file_object = self.mwdb.upload_file(
+                query, binary, private=self.private, public=self.public
+            )
             file_object.flush()
             for _try in range(self.max_tries):
                 logger.info(
                     f"mwdb_scan sample: {self.md5} polling for result try #{_try + 1}"
                 )
                 time.sleep(self.poll_distance)
-                file_info = mwdb.query_file(file_object.data["id"])
+                file_info = self.mwdb.query_file(file_object.data["id"])
                 if self.file_analysis(file_info):
                     break
             if not self.file_analysis(file_info):
                 raise AnalyzerRunException("max retry attempts exceeded")
         else:
             try:
-                file_info = mwdb.query_file(query)
+                file_info = self.mwdb.query_file(query)
             except Exception as exc:
                 err_msg = (
                     "Error: File not found in the MWDB. Set 'upload_file=true' "
@@ -71,10 +95,12 @@ class MWDB_Scan(FileAnalyzer):
                 self.report.errors.append(err_msg)
                 result["not_found"] = True
                 return result
+        # adding information about the children and parents
+        self.adjust_relations(file_info.data, "parents", True)
+        self.adjust_relations(file_info.data, "children", True)
 
         result.update(
             data=file_info.data,
-            metakeys=file_info.metakeys,
             permalink=f"https://mwdb.cert.pl/file/{query}",
         )
 

@@ -259,8 +259,9 @@
     "python_module": "clamav.ClamAV",
     "description": "scan files using ClamAV virus scanning engine",
     "disabled": false,
-    "external_service": true,
     "leaks_info": false,
+    "external_service": false,
+    "docker_based": true,
     "config": {
       "soft_time_limit": 50,
       "queue": "default"

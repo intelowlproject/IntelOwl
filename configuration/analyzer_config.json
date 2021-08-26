@@ -254,6 +254,19 @@
       }
     }
   },
+  "ClamAV":{
+    "type": "file",
+    "python_module": "clamav.ClamAV",
+    "description": "scan files using ClamAV virus scanning engine",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "config": {
+      "soft_time_limit": 50,
+      "queue": "default"
+    },
+    "secrets": {}
+  },
   "CRXcavator": {
     "type": "observable",
     "python_module": "crxcavator.CRXcavator",

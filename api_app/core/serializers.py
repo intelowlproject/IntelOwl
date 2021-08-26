@@ -56,20 +56,7 @@ class SecretSerializer(rfs.Serializer):
     key_name = rfs.CharField(max_length=128)
     env_var_key = rfs.CharField(max_length=128)
     type = rfs.ChoiceField(choices=TYPE_CHOICES)
-    required = rfs.BooleanField()
-    default = BaseField(allow_null=True, required=True)
     description = rfs.CharField(allow_blank=True, required=False, max_length=512)
-
-    def validate(self, data):
-        default, secret_type = data["default"], data["type"]
-        if default is not None and type(default) is not type(secret_type):
-            validation_error = {
-                data["key_name"]: {
-                    "default": f"should be of type {secret_type}, got {type(default)}"
-                }
-            }
-            raise rfs.ValidationError(validation_error)
-        return data
 
 
 class AbstractConfigSerializer(rfs.Serializer):
@@ -131,19 +118,18 @@ class AbstractConfigSerializer(rfs.Serializer):
     def _check_secrets(self, secrets):
         errors = {}
         for key_name, secret_dict in secrets.items():
-            if secret_dict.get("required", False):
-                # check if set and correct data type
-                secret_val = secrets_store.get_secret(secret_dict["env_var_key"])
-                if not secret_val:
-                    errors[key_name] = f"'{key_name}': not set"
-                elif secret_val and not isinstance(
-                    secret_val, DATA_TYPE_MAPPING[secret_dict["type"]]
-                ):
-                    errors[key_name] = "'%s': expected %s got %s" % (
-                        key_name,
-                        secret_dict["type"],
-                        type(secret_val),
-                    )
+            # check if set and correct data type
+            secret_val = secrets_store.get_secret(secret_dict["env_var_key"])
+            if not secret_val:
+                errors[key_name] = f"'{key_name}': not set"
+            elif secret_val and not isinstance(
+                secret_val, DATA_TYPE_MAPPING[secret_dict["type"]]
+            ):
+                errors[key_name] = "'%s': expected %s got %s" % (
+                    key_name,
+                    secret_dict["type"],
+                    type(secret_val),
+                )
 
         return errors
 

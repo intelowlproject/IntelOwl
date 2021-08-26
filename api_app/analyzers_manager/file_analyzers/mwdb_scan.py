@@ -15,7 +15,10 @@ logger = logging.getLogger(__name__)
 
 
 def mocked_mwdb_response(*args, **kwargs):
-    attrs = {"data": {"id": "id_test"}, "metakeys": {"karton": "test_analysis"}}
+    attrs = {
+        "data": {"id": "id_test", "children": [], "parents": []},
+        "metakeys": {"karton": "test_analysis"},
+    }
     fileInfo = MagicMock()
     fileInfo.configure_mock(**attrs)
     QueryResponse = MagicMock()
@@ -33,8 +36,6 @@ class MWDB_Scan(FileAnalyzer):
         self.public = not self.private
         self.max_tries = params.get("max_tries", 50)
         self.poll_distance = 5
-
-        self.mwdb = mwdblib.MWDB(api_key=self.__api_key)
 
     def file_analysis(self, file_info):
         return "karton" in file_info.metakeys.keys()
@@ -65,6 +66,7 @@ class MWDB_Scan(FileAnalyzer):
         result = {}
         binary = self.read_file_bytes()
         query = str(hashlib.sha256(binary).hexdigest())
+        self.mwdb = mwdblib.MWDB(api_key=self.__api_key)
 
         if self.upload_file:
             logger.info(f"mwdb_scan uploading sample: {self.md5}")

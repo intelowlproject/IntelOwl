@@ -29,6 +29,8 @@ class MWDB_Scan(FileAnalyzer):
     def set_params(self, params):
         self.__api_key = self._secrets["api_key_name"]
         self.upload_file = params.get("upload_file", False)
+        self.private = params.get("private", True)
+        self.public = not self.private
         self.max_tries = params.get("max_tries", 50)
         self.poll_distance = 5
 
@@ -44,7 +46,7 @@ class MWDB_Scan(FileAnalyzer):
 
         if self.upload_file:
             logger.info(f"mwdb_scan uploading sample: {self.md5}")
-            file_object = mwdb.upload_file(query, binary)
+            file_object = mwdb.upload_file(query, binary, private=self.private, public=self.public)
             file_object.flush()
             for _try in range(self.max_tries):
                 logger.info(

@@ -342,7 +342,7 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
         try:
             report = json.loads(report)
         except json.JSONDecodeError:
-            raise AnalyzerRunException(str(err))
+            pass
 
         return report
 

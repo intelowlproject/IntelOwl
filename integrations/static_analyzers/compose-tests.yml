@@ -17,5 +17,11 @@ services:
       - env_file_integrations
     volumes:
       - generic_logs:/var/log/intel_owl
+      - clam:/var/lib/clamav
+      - ../integrations/static_analyzers/clamav_config/clamd.conf:/etc/clamav/clamd.conf
+      - ../integrations/static_analyzers/clamav_config/freshclam.conf:/etc/clamav/freshclam.conf
     depends_on:
       - uwsgi
+
+volumes:
+  clam:

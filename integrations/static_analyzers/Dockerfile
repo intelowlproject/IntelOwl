@@ -7,7 +7,7 @@ ENV LOG_PATH /var/log/intel_owl/static_analyzers
 RUN apt-get update \
     && apt-get install -y --no-install-recommends wget git libssl1.1 swig g++ make libssl-dev libmagic1 \
     libboost-regex-dev libboost-program-options-dev libboost-system-dev libboost-filesystem-dev build-essential cmake \
-    && rm -rf /var/lib/apt/lists/* \
+    clamav clamdscan clamav-daemon clamav-freshclam && rm -rf /var/lib/apt/lists/* \
     && pip3 install --upgrade pip
 
 # Add a new low-privileged user
@@ -48,10 +48,15 @@ RUN pip3 install -r requirements.txt --no-cache-dir \
     && chown -R static_analyzers-user:static_analyzers-user . \
     && chmod +x entrypoint.sh stringsifter_wrapper.py
 
-# not needed anymore
+# deps not needed anymore
 RUN apt-get remove -y wget git \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
+
+# Permission juggling for ClamAV Analyzer
+RUN mkdir /var/run/clamav && \
+    chown static_analyzers-user:static_analyzers-user /var/run/clamav && \
+    chmod 750 /var/run/clamav
 
 # Serve Flask application using gunicorn
 EXPOSE 4002

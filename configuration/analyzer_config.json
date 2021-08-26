@@ -254,6 +254,20 @@
       }
     }
   },
+  "ClamAV":{
+    "type": "file",
+    "python_module": "clamav.ClamAV",
+    "description": "scan files using ClamAV virus scanning engine",
+    "disabled": false,
+    "leaks_info": false,
+    "external_service": false,
+    "docker_based": true,
+    "config": {
+      "soft_time_limit": 50,
+      "queue": "default"
+    },
+    "secrets": {}
+  },
   "CRXcavator": {
     "type": "observable",
     "python_module": "crxcavator.CRXcavator",
@@ -906,7 +920,7 @@
   "Intezer_Get": {
     "type": "observable",
     "python_module": "intezer_get.IntezerGet",
-    "description": "check if an hash was analyzed on Intezer",
+    "description": "check if an hash was analyzed on Intezer. Register for a free community account here: https://analyze.intezer.com/sign-in",
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
@@ -930,7 +944,7 @@
   "Intezer_Scan": {
     "type": "file",
     "python_module": "intezer_scan.IntezerScan",
-    "description": "scan a file on Intezer",
+    "description": "Scan a file on Intezer. Register for a free community account here: https://analyze.intezer.com/sign-in",
     "disabled": false,
     "external_service": true,
     "leaks_info": true,
@@ -2820,7 +2834,7 @@
   "Yara_Scan_Intezer": {
     "type": "file",
     "python_module": "yara_scan.YaraScan",
-    "description": "scan a file with Intezer yara rules",
+    "description": "Scan a file with Intezer yara rules: https://github.com/intezer/yara-rules",
     "disabled": false,
     "external_service": false,
     "leaks_info": false,

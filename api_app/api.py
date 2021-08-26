@@ -160,67 +160,59 @@ def _analysis_request(
 @permission_required_or_403("api_app.view_job")
 def ask_analysis_availability(request):
     source = str(request.user)
-    try:
-        data_received = request.data
-        logger.info(
-            f"ask_analysis_availability received request from {source}."
-            f"Data: {dict(data_received)}"
+    data_received = request.data
+    logger.info(
+        f"ask_analysis_availability received request from {source}."
+        f"Data: {dict(data_received)}"
+    )
+
+    serializer = serializers.JobAvailabilitySerializer(
+        data=data_received, context={"request": request}
+    )
+    serializer.is_valid(raise_exception=True)
+    serialized_data = serializer.validated_data
+
+    analyzers_needed_list = serialized_data.pop("analyzers", [])
+    run_all_available_analyzers = serialized_data.pop(
+        "run_all_available_analyzers", False
+    )
+    running_only = serialized_data.pop("running_only", False)
+    md5 = serialized_data["md5"]
+
+    if running_only:
+        statuses_to_check = ["running"]
+    else:
+        statuses_to_check = ["running", "reported_without_fails"]
+
+    if run_all_available_analyzers:
+        query = (
+            Q(md5=md5)
+            & Q(status__in=statuses_to_check)
+            & Q(run_all_available_analyzers=True)
+        )
+    else:
+        query = (
+            Q(md5=md5)
+            & Q(status__in=statuses_to_check)
+            & Q(analyzers_to_execute__contains=analyzers_needed_list)
         )
 
-        serializer = serializers.JobAvailabilitySerializer(
-            data=data_received, context={"request": request}
-        )
-        serializer.is_valid(raise_exception=True)
-        serialized_data = serializer.validated_data
+    last_job_for_md5_set = models.Job.objects.filter(query).order_by(
+        "-received_request_time"
+    )
+    if last_job_for_md5_set:
+        last_job_for_md5 = last_job_for_md5_set[0]
+        response_dict = {
+            "status": last_job_for_md5.status,
+            "job_id": str(last_job_for_md5.id),
+            "analyzers_to_execute": last_job_for_md5.analyzers_to_execute,
+        }
+    else:
+        response_dict = {"status": "not_available"}
 
-        analyzers_needed_list = serialized_data.pop("analyzers", [])
-        run_all_available_analyzers = serialized_data.pop(
-            "run_all_available_analyzers", False
-        )
-        running_only = serialized_data.pop("running_only", False)
-        md5 = serialized_data["md5"]
+    logger.debug(response_dict)
 
-        if running_only:
-            statuses_to_check = ["running"]
-        else:
-            statuses_to_check = ["running", "reported_without_fails"]
-
-        if run_all_available_analyzers:
-            query = (
-                Q(md5=md5)
-                & Q(status__in=statuses_to_check)
-                & Q(run_all_available_analyzers=True)
-            )
-        else:
-            query = (
-                Q(md5=md5)
-                & Q(status__in=statuses_to_check)
-                & Q(analyzers_to_execute__contains=analyzers_needed_list)
-            )
-
-        last_job_for_md5_set = models.Job.objects.filter(query).order_by(
-            "-received_request_time"
-        )
-        if last_job_for_md5_set:
-            last_job_for_md5 = last_job_for_md5_set[0]
-            response_dict = {
-                "status": last_job_for_md5.status,
-                "job_id": str(last_job_for_md5.id),
-                "analyzers_to_execute": last_job_for_md5.analyzers_to_execute,
-            }
-        else:
-            response_dict = {"status": "not_available"}
-
-        logger.debug(response_dict)
-
-        return Response(response_dict, status=status.HTTP_200_OK)
-
-    except Exception as e:
-        logger.exception(f"ask_analysis_availability requester:{source} error:{e}.")
-        return Response(
-            {"detail": "error in ask_analysis_availability. Check logs."},
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        )
+    return Response(response_dict, status=status.HTTP_200_OK)
 
 
 @add_docs(

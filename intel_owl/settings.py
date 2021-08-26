@@ -302,6 +302,15 @@ LOGGING = {
             "maxBytes": 20 * 1024 * 1024,
             "backupCount": 6,
         },
+        # 500 errors are handled by this in the same log file of the others API errors
+        "django_unhandled_errors": {
+            "level": "ERROR",
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": f"{DJANGO_LOG_DIRECTORY}/api_app_errors.log",
+            "formatter": "stdfmt",
+            "maxBytes": 20 * 1024 * 1024,
+            "backupCount": 6,
+        },
     },
     "loggers": {
         "api_app": {
@@ -317,6 +326,11 @@ LOGGING = {
         "django_auth_ldap": {
             "handlers": ["django_auth_ldap"],
             "level": INFO_OR_DEBUG_LEVEL,
+            "propagate": True,
+        },
+        "django": {
+            "handlers": ["django_unhandled_errors"],
+            "level": "ERROR",
             "propagate": True,
         },
     },

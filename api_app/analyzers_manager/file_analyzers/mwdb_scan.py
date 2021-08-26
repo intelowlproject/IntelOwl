@@ -43,7 +43,6 @@ class MWDB_Scan(FileAnalyzer):
     def adjust_relations(self, base, key, recursive=True):
         new_relation = []
         for relation in base[key]:
-            logger.error(relation)
             if relation["type"] == "file":
                 new_relation.append(self.mwdb.query_file(relation["id"]).data)
             elif relation["type"] == "static_config":

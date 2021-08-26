@@ -15,15 +15,11 @@
       "api_key_name": {
         "env_var_key": "CONNECTOR_MISP_KEY",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": "API key for your MISP instance"
       },
       "url_key_name": {
         "env_var_key": "CONNECTOR_MISP_URL",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": "URL of your MISP instance"
       }
     }
@@ -51,15 +47,11 @@
       "api_key_name": {
         "env_var_key": "CONNECTOR_OPENCTI_KEY",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": "API key for your OpenCTI instance"
       },
       "url_key_name": {
         "env_var_key": "CONNECTOR_OPENCTI_URL",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": "URL of your OpenCTI instance"
       }
     }
@@ -78,15 +70,11 @@
       "api_key_name": {
         "env_var_key": "CONNECTOR_YETI_KEY",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": "API key for your YETI instance"
       },
       "url_key_name": {
         "env_var_key": "CONNECTOR_YETI_URL",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": "API URL of your YETI instance"
       }
     }

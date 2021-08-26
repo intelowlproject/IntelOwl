@@ -83,11 +83,7 @@ class AbstractConfig:
         else:
             _filtered_secrets = self.secrets
         for key_name, secret_dict in _filtered_secrets.items():
-            secret_val = secrets_store.get_secret(secret_dict["env_var_key"])
-            if secret_val:
-                secrets[key_name] = secret_val
-            else:
-                secrets[key_name] = secret_dict["default"]
+            secrets[key_name] = secrets_store.get_secret(secret_dict["env_var_key"])
 
         return secrets
 

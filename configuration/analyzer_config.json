@@ -1305,6 +1305,7 @@
       "soft_time_limit": 400,
       "queue": "default",
       "upload_file": true,
+      "private": false,
       "max_tries": 50
     },
     "secrets": {

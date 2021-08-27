@@ -79,8 +79,8 @@ paths:
                 $ref: '#/components/schemas/PluginHealthCheckSuccessResponse'
           description: ''
   /api/ask_analysis_availability:
-    get:
-      operationId: ask_analysis_availability_retrieve
+    post:
+      operationId: ask_analysis_availability_create
       description: |2-
 
             This is useful to avoid repeating the same analysis multiple times.
@@ -922,8 +922,12 @@ components:
           type: string
           maxLength: 80
         status:
-          $ref: '#/components/schemas/StatusA27Enum'
+          $ref: '#/components/schemas/StatusFefEnum'
         analyzers_requested:
+          type: array
+          items:
+            type: string
+        connectors_requested:
           type: array
           items:
             type: string
@@ -983,7 +987,7 @@ components:
           type: string
           maxLength: 80
         status:
-          $ref: '#/components/schemas/StatusA27Enum'
+          $ref: '#/components/schemas/StatusFefEnum'
         tags:
           type: array
           items:
@@ -1111,14 +1115,14 @@ components:
       - SUCCESS
       - KILLED
       type: string
-    StatusA27Enum:
+    StatusFefEnum:
       enum:
       - pending
       - running
       - reported_without_fails
       - reported_with_fails
-      - failed
       - killed
+      - failed
       type: string
     Tag:
       type: object

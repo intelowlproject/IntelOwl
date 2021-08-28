@@ -2060,6 +2060,33 @@
     },
     "secrets": {}
   },
+  "Spyse":{
+    "type": "observable",
+    "python_module": "spyse.Spyse",
+    "description": "scans Domains and IPs for a registered API provided by spyse",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": [
+      "ip",
+      "domain",
+      "generic"
+    ],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default",
+      "spyse_analysis": "search"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "SPYSE_KEY",
+        "type": "string",
+        "required": true,
+        "default": null,
+        "description": ""
+      }
+    }
+  },
   "SSAPINet": {
     "type": "observable",
     "python_module": "ss_api_net.SSAPINet",

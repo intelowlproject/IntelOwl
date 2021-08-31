@@ -122,8 +122,14 @@ class JobListSerializer(serializers.ModelSerializer):
         return f"{n1}/{n2}"
 
     def get_no_of_connectors_executed(self, obj: Job) -> str:
-        n1 = obj.connector_reports.count()
-        n2 = len(obj.connectors_to_execute)
+        n1 = len(obj.connectors_to_execute)
+        n2 = len(obj.connectors_requested)
+        # no connectors triggered or requested
+        if not n1 and not n2:
+            return "-"
+        # no specific connectors requested but triggered as default action
+        elif n1 and not n2:
+            return f"{n1}/-"
         return f"{n1}/{n2}"
 
 
@@ -157,6 +163,7 @@ class _AbstractJobCreateSerializer(
         required=False, default={}, write_only=True
     )
     analyzers_requested = serializers.ListField(default=list)
+    connectors_requested = serializers.ListField(default=list)
     run_all_available_analyzers = serializers.BooleanField(default=False)
 
     def get_permissions_map(self, created) -> dict:
@@ -238,6 +245,7 @@ class FileAnalysisSerializer(_AbstractJobCreateSerializer):
             "run_all_available_analyzers",
             "runtime_configuration",
             "analyzers_requested",
+            "connectors_requested",
             "tags_id",
         )
 
@@ -270,5 +278,6 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
             "run_all_available_analyzers",
             "runtime_configuration",
             "analyzers_requested",
+            "connectors_requested",
             "tags_id",
         )

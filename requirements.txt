@@ -15,7 +15,7 @@ django-storages==1.11.1
 dnspython==2.1.0
 dnstwist==20201228
 ppdeep>=20200505
-drf-spectacular==0.17.3
+drf-spectacular==0.18.0
 easygui==0.98.2
 flower==1.0.0
 GitPython==3.1.18

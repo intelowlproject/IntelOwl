@@ -91,25 +91,13 @@ class JobListSerializer(serializers.ModelSerializer):
         return round(t.total_seconds(), 2)
 
     def get_no_of_analyzers_executed(self, obj: Job) -> str:
-        n1 = len(obj.analyzers_to_execute)
-        n2 = len(obj.analyzers_requested)
-        # no connectors triggered or requested
-        if not n1 and not n2:
-            return "-"
-        # no specific connectors requested but triggered as default action
-        elif n1 and not n2:
-            return f"{n1}/-"
+        n1 = len(obj.analyzers_to_execute) or "-"
+        n2 = len(obj.analyzers_requested) or "-"
         return f"{n1}/{n2}"
 
     def get_no_of_connectors_executed(self, obj: Job) -> str:
-        n1 = len(obj.connectors_to_execute)
-        n2 = len(obj.connectors_requested)
-        # no connectors triggered or requested
-        if not n1 and not n2:
-            return "-"
-        # no specific connectors requested but triggered as default action
-        elif n1 and not n2:
-            return f"{n1}/-"
+        n1 = len(obj.connectors_to_execute) or "-"
+        n2 = len(obj.connectors_requested) or "-"
         return f"{n1}/{n2}"
 
 

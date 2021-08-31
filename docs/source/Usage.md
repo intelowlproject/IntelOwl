@@ -77,7 +77,6 @@ $ pyintelowl get-analyzer-config
 ```
 
 ### Analyzers list
-
 The following is the list of the available analyzers you can run out-of-the-box:
 
 #### File analyzers:
@@ -229,7 +228,6 @@ $ pyintelowl get-connector-config
 ```
 
 ### Connectors list
-
 The following is the list of the available connectors:
 * `MISP`: automatically creates an event on your MISP instance, linking the successful analysis on IntelOwl.
 * `OpenCTI`: automatically creates an observable and a linked report on your OpenCTI instance, linking the the successful analysis on IntelOwl.

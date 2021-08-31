@@ -47,7 +47,7 @@ class ApiViewTests(TestCase):
 
     def test_ask_analysis_availability_run_all_analyzers(self):
         md5 = os.environ.get("TEST_MD5", "446c5fbb11b9ce058450555c1c27153c")
-        data = {"md5": md5, "run_all_available_analyzers": True}
+        data = {"md5": md5, "analyzers": []}
         response = self.client.post(
             "/api/ask_analysis_availability", data, format="json"
         )
@@ -228,7 +228,8 @@ class JobViewsetTests(TestCase):
                 "md5": os.environ.get("TEST_MD5"),
                 "observable_classification": "ip",
                 "is_sample": False,
-                "run_all_available_analyzers": True,
+                "analyzers_requested": [],
+                "connectors_requested": [],
             }
         )
 

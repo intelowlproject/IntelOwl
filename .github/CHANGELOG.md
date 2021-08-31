@@ -6,10 +6,10 @@
 
 > Note: This is a major release with MANY breaking changes.
 
-**TLP Support**
-Standardized threat-sharing using Traffic Light Protocol or `TLP`, thereby deprecating the use of booleans `force_privacy`, `disable_external_analyzers` and `private`. See [TLP Support](https://intelowl.readthedocs.io/en/master/Usage.html#tlp-support). This makes the analysis form much less complex than before.
+**TLP Support:**
+- Standardized threat-sharing using Traffic Light Protocol or `TLP`, thereby deprecating the use of booleans `force_privacy`, `disable_external_analyzers` and `private`. See [TLP Support](https://intelowl.readthedocs.io/en/master/Usage.html#tlp-support). This makes the analysis form much less complex than before.
 
-**New class of plugins called _Connectors_**
+**New class of plugins called _Connectors_:**
 - Connectors are designed to run after every successful analysis which makes them suitable for automated threat-sharing. Built to support integration with other SIEM/SOAR projects specifically aimed at Threat Sharing Platforms. See [Available Connectors](https://intelowl.readthedocs.io/en/master/Usage.html#available-connectors).
 - Newly added connectors for threat-sharing:
   * `MISP` connector: automatically creates an event on your MISP instance.

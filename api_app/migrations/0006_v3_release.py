@@ -13,6 +13,10 @@ class Migration(migrations.Migration):
         migrations.RemoveField(model_name="job", name="disable_external_analyzers"),
         migrations.RemoveField(model_name="job", name="force_privacy"),
         migrations.RemoveField(model_name="job", name="runtime_configuration"),
+        migrations.RemoveField(
+            model_name="job",
+            name="run_all_available_analyzers",
+        ),
         migrations.AddField(
             model_name="job",
             name="connectors_requested",

@@ -4,6 +4,8 @@
 
 ## [v3.0.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v3.0.0)
 
+> Note: This is a major release with MANY breaking changes.
+
 **TLP Support**
 Standardized threat-sharing using Traffic Light Protocol or `TLP`, thereby deprecating the use of booleans `force_privacy`, `disable_external_analyzers` and `private`. See [TLP Support](https://intelowl.readthedocs.io/en/master/Usage.html#tlp-support).
 
@@ -27,12 +29,12 @@ Standardized threat-sharing using Traffic Light Protocol or `TLP`, thereby depre
 - New `MWDB_Get` analyzer: [mwdblib](https://mwdb.readthedocs.io/en/latest/) Retrieve malware file analysis by hash from repository maintained by CERT Polska MWDB.
 - New `YETI` analyzer (YETI = Your Everyday Threat Intelligence): scan an observable on a YETI instance.
 - New `HashLookupServer_Get_Observable` and `HashLookupServer_Get_File` analyzers: check if a md5 or sha1 is available in the database of [known file hosted by CIRCL](https://github.com/adulau/hashlookup-server)
-- New `ClamAV` analyzer: scan files for viruses/malwares/trojans using [ClamAV antivirus engine](https://docs.clamav.net/)
+- New `ClamAV` analyzer: scan files for viruses/malwares/trojans using [ClamAV antivirus engine](https://docs.clamav.net/).
 
 **Analyzer Improvements & Fixes:**
   - Fixed `Tranco` Analyzer pointing to the wrong `python_module`
   - Removed `CirclePDNS` default value in `env_file_app_template`
-  - New configuration options: `include_behaviour_summary` for behavioral analysis and `include_sigma_analyses` for sigma analysis report of the file in VirusTotalv3 Analyzer. See [Customize Analyzers](https://intelowl.readthedocs.io/en/master/Advanced-Usage.html#customize-analyzer-execution-at-time-of-request)
+  - VirusTotal v3: New configuration options: `include_behaviour_summary` for behavioral analysis and `include_sigma_analyses` for sigma analysis report of the file. See [Customize Analyzers](https://intelowl.readthedocs.io/en/master/Advanced-Usage.html#customize-analyzer-execution-at-time-of-request).
 
 **Others:**
 - Split `/api/send_analysis_request` into `/api/analyze_file` and `/api/analyze_observable` 

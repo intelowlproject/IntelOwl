@@ -47,7 +47,6 @@ class JobDocument(Document):
         # The fields of the model you want to be indexed in Elasticsearch
         fields = [
             "is_sample",
-            "run_all_available_analyzers",
             "received_request_time",
             "finished_analysis_time",
             "tlp",

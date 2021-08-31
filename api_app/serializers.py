@@ -54,31 +54,7 @@ class JobAvailabilitySerializer(serializers.ModelSerializer):
 
     md5 = serializers.CharField(max_length=128, required=True)
     analyzers = serializers.ListField(default=list)
-    run_all_available_analyzers = serializers.BooleanField(default=False)
     running_only = serializers.BooleanField(default=False)
-
-    def validate(self, data) -> dict:
-        if not data.get("run_all_available_analyzers", False):
-            if not data.get("analyzers", []):
-                raise serializers.ValidationError(
-                    "Atleast one of `analyzers` "
-                    "and `run_all_available_analyzers` should be provided."
-                )
-        else:
-            if data.get("analyzers", []):
-                raise serializers.ValidationError(
-                    "analyzers has to be empty if "
-                    "run_all_available_analyzers is True."
-                )
-
-        if data.get("analyzers", []):
-            if data.get("run_all_available_analyzers", False):
-                raise serializers.ValidationError(
-                    "run_all_available_analyzers has to be False "
-                    "if analyzers_needed is not empty"
-                )
-
-        return data
 
 
 class JobListSerializer(serializers.ModelSerializer):
@@ -115,10 +91,14 @@ class JobListSerializer(serializers.ModelSerializer):
         return round(t.total_seconds(), 2)
 
     def get_no_of_analyzers_executed(self, obj: Job) -> str:
-        if obj.run_all_available_analyzers:
-            return "all available analyzers"
         n1 = len(obj.analyzers_to_execute)
         n2 = len(obj.analyzers_requested)
+        # no connectors triggered or requested
+        if not n1 and not n2:
+            return "-"
+        # no specific connectors requested but triggered as default action
+        elif n1 and not n2:
+            return f"{n1}/-"
         return f"{n1}/{n2}"
 
     def get_no_of_connectors_executed(self, obj: Job) -> str:
@@ -164,7 +144,6 @@ class _AbstractJobCreateSerializer(
     )
     analyzers_requested = serializers.ListField(default=list)
     connectors_requested = serializers.ListField(default=list)
-    run_all_available_analyzers = serializers.BooleanField(default=False)
 
     def get_permissions_map(self, created) -> dict:
         """
@@ -193,20 +172,6 @@ class _AbstractJobCreateSerializer(
         if runtime_conf and isinstance(runtime_conf, list):
             runtime_conf = json.loads(runtime_conf[0])
         data["runtime_configuration"] = runtime_conf
-
-        run_all_available_analyzers = data["run_all_available_analyzers"]
-        analyzers_requested = data["analyzers_requested"]
-        if not run_all_available_analyzers and not len(analyzers_requested):
-            raise serializers.ValidationError(
-                "Atleast one of `analyzers_requested` "
-                "and `run_all_available_analyzers` should be provided."
-            )
-
-        if run_all_available_analyzers and len(analyzers_requested):
-            raise serializers.ValidationError(
-                "`analyzers_requested` and `run_all_available_analyzers`"
-                "cannot be used together."
-            )
 
         return data
 
@@ -242,7 +207,6 @@ class FileAnalysisSerializer(_AbstractJobCreateSerializer):
             "file",
             "file_name",
             "file_mimetype",
-            "run_all_available_analyzers",
             "runtime_configuration",
             "analyzers_requested",
             "connectors_requested",
@@ -282,7 +246,6 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
             "tlp",
             "observable_name",
             "observable_classification",
-            "run_all_available_analyzers",
             "runtime_configuration",
             "analyzers_requested",
             "connectors_requested",

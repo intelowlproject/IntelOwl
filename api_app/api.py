@@ -27,7 +27,6 @@ from guardian.decorators import permission_required_or_403
 from rest_framework_guardian.filters import ObjectPermissionsFilter
 from drf_spectacular.utils import (
     extend_schema as add_docs,
-    OpenApiParameter,
     inline_serializer,
 )
 from drf_spectacular.types import OpenApiTypes
@@ -107,32 +106,7 @@ def _analysis_request(
     status "running" or "reported_without_fails"
     Also, you need to specify the analyzers needed because, otherwise, it is
     highly probable that you won't get all the results that you expect""",
-    parameters=[
-        OpenApiParameter(
-            name="md5",
-            type=OpenApiTypes.STR,
-            description="md5 of the sample or observable to look for",
-        ),
-        OpenApiParameter(
-            name="analyzers_needed",
-            type=OpenApiTypes.OBJECT,
-            description="""
-            Specify analyzers needed.
-            It requires either this or run_all_available_analyzers""",
-        ),
-        OpenApiParameter(
-            name="run_all_available_analyzers",
-            type=OpenApiTypes.BOOL,
-            description="If we are looking for an analysis executed with this flag set",
-        ),
-        OpenApiParameter(
-            name="running_only",
-            type=OpenApiTypes.BOOL,
-            description="""
-            Check only for running analysis,
-            default False, any value is True""",
-        ),
-    ],
+    request=serializers.JobAvailabilitySerializer,
     responses={
         200: inline_serializer(
             name="AskAnalysisAvailabilitySuccessResponse",
@@ -142,27 +116,14 @@ def _analysis_request(
                 "analyzers_to_execute": OpenApiTypes.OBJECT,
             },
         ),
-        400: inline_serializer(
-            name="AskAnalysisAvailabilityInsufficientDataResponse",
-            fields={
-                "error": rfs.StringRelatedField(),
-            },
-        ),
-        500: inline_serializer(
-            name="AskAnalysisAvailabilityErrorResponse",
-            fields={
-                "detail": rfs.StringRelatedField(),
-            },
-        ),
     },
 )
 @api_view(["POST"])
 @permission_required_or_403("api_app.view_job")
 def ask_analysis_availability(request):
-    source = str(request.user)
     data_received = request.data
     logger.info(
-        f"ask_analysis_availability received request from {source}."
+        f"ask_analysis_availability received request from {str(request.user)}."
         f"Data: {dict(data_received)}"
     )
 
@@ -172,42 +133,41 @@ def ask_analysis_availability(request):
     serializer.is_valid(raise_exception=True)
     serialized_data = serializer.validated_data
 
-    analyzers_needed_list = serialized_data.pop("analyzers", [])
-    run_all_available_analyzers = serialized_data.pop(
-        "run_all_available_analyzers", False
+    analyzers, running_only, md5 = (
+        serialized_data["analyzers"],
+        serialized_data["running_only"],
+        serialized_data["md5"],
     )
-    running_only = serialized_data.pop("running_only", False)
-    md5 = serialized_data["md5"]
 
     if running_only:
-        statuses_to_check = ["running"]
+        statuses_to_check = [models.Status.RUNNING]
     else:
-        statuses_to_check = ["running", "reported_without_fails"]
+        statuses_to_check = [
+            models.Status.RUNNING,
+            models.Status.REPORTED_WITHOUT_FAILS,
+        ]
 
-    if run_all_available_analyzers:
+    if len(analyzers) == 0:
         query = (
-            Q(md5=md5)
-            & Q(status__in=statuses_to_check)
-            & Q(run_all_available_analyzers=True)
+            Q(md5=md5) & Q(status__in=statuses_to_check) & Q(analyzers_requested__len=0)
         )
     else:
         query = (
             Q(md5=md5)
             & Q(status__in=statuses_to_check)
-            & Q(analyzers_to_execute__contains=analyzers_needed_list)
+            & Q(analyzers_to_execute__contains=analyzers)
         )
 
-    last_job_for_md5_set = models.Job.objects.filter(query).order_by(
-        "-received_request_time"
-    )
-    if last_job_for_md5_set:
-        last_job_for_md5 = last_job_for_md5_set[0]
+    try:
+        last_job_for_md5 = models.Job.objects.filter(query).latest(
+            "received_request_time"
+        )
         response_dict = {
             "status": last_job_for_md5.status,
             "job_id": str(last_job_for_md5.id),
             "analyzers_to_execute": last_job_for_md5.analyzers_to_execute,
         }
-    else:
+    except models.Job.DoesNotExist:
         response_dict = {"status": "not_available"}
 
     logger.debug(response_dict)

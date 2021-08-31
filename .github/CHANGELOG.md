@@ -6,6 +6,10 @@
 
 > Note: This is a major release with MANY breaking changes.
 
+**Notes:**
+- Update PyIntelOwl to version [4.0.0](https://github.com/intelowlproject/pyintelowl/blob/master/.github/CHANGELOG.md#400).
+- If you made any change to the `analyzer_config.json` then you will need to merge the changes manually because of the new format.
+
 **Features:**
 - Plugins (analyzers/connectors) that are not properly configured will not run even if requested. They will be marked as disabled from the dropdown on the analysis form and as a bonus you can also see if and why a plugin is not configured on the GUI tables. 
 - Added `kill`, `retry` and `healthcheck` features to analyzers and connectors. See [Managing Analyzers and Connectors](https://intelowl.readthedocs.io/en/master/Usage.html#managing-analyzers-and-connectors).
@@ -24,7 +28,7 @@
 **New Analyzers Config Format:**
 - The `additional_config_params` was split into `config` and `secrets`:
   - `config`: Includes general config params - `soft_time_limit`, `queue` as well as [Analyzer](https://intelowl.readthedocs.io/en/master/Usage.html#analyzers-customization) or [Connector](https://intelowl.readthedocs.io/en/master/Usage.html#connectors-customization) specific params.
-  - `secrets`: Stores Analyzer or Connector specific secrets like API Key name along with the secret's type and description.
+  - `secrets`: Stores plugin specific secrets like API Key name along with the secret's type and description.
 
 **New Inbuilt Analyzers/ Fixes to existing:**
 - New `OpenCTI` analyzer: scan an observable on an OpenCTI instance.

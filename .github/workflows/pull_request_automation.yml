@@ -3,6 +3,11 @@ name: Build & Tests
 on:
   pull_request:
     branches: [ master, develop, develop-2 ]
+    paths-ignore:
+        - "**.md"
+        - "docs/**"
+        - "static_intel/**"
+        - "integrations/**"
 
 jobs:
   build:

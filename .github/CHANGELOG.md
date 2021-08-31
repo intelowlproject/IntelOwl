@@ -6,7 +6,9 @@
 
 > Note: This is a major release with MANY breaking changes.
 
-**TLP Support:**
+**Features:**
+- Plugins (analyzers/connectors) that are not properly configured will not run even if requested. They will be marked as disabled from the dropdown on the analysis form and as a bonus you can also see if and why a plugin is not configured on the GUI tables. (See in action in [live demo](https://intelowlclient.firebaseapp.com/pages/connectors).
+- Added `kill`, `retry` and `healthcheck` features to analyzers and connectors. See [Managing Analyzers and Connectors](https://intelowl.readthedocs.io/en/master/Usage.html#managing-analyzers-and-connectors).
 - Standardized threat-sharing using Traffic Light Protocol or `TLP`, thereby deprecating the use of booleans `force_privacy`, `disable_external_analyzers` and `private`. See [TLP Support](https://intelowl.readthedocs.io/en/master/Usage.html#tlp-support). This makes the analysis form much less complex than before.
 
 **New class of plugins called _Connectors_:**
@@ -15,14 +17,12 @@
   * `MISP`: automatically creates an event on your MISP instance.
   * `OpenCTI`: automatically creates an observable and a linked report on your OpenCTI instance.
   * `YETI`: find/create an observable on YETI.
-
-**New Analyzers/Connectors Config Format:**
 - New `connectors_config.json` file for storing Connectors related configuration info.
+
+**New Analyzers Config Format:**
 - The `additional_config_params` was split into `config` and `secrets`:
   - `config`: Includes general config params - `soft_time_limit`, `queue` as well as [Analyzer](https://intelowl.readthedocs.io/en/master/Usage.html#analyzers-customization) or [Connector](https://intelowl.readthedocs.io/en/master/Usage.html#connectors-customization) specific params.
   - `secrets`: Stores Analyzer or Connector specific secrets like API Key name along with the secret's type and description.
-- Plugins (Analyzers or connectors) that are not properly configured will not run even if requested. They are disabled from the dropdown on the analysis form and as a bonus you can also see why a plugin is not configured on the GUI tables.
-- Added `kill`, `retry` and `healthcheck` features to analyzers and connectors. See [Managing Analyzers and Connectors](https://intelowl.readthedocs.io/en/master/Usage.html#managing-analyzers-and-connectors).
 
 **New Inbuilt Analyzers/ Fixes to existing:**
 - New `OpenCTI` analyzer: scan an observable on an OpenCTI instance.

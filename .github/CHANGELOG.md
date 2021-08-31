@@ -3,8 +3,8 @@
 [**Upgrade Guide**](https://intelowl.readthedocs.io/en/latest/Installation.html#update-to-the-most-recent-version)
 
 ## [v3.0.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v3.0.0)
-**TLP Support**
 
+**TLP Support**
 Standardized threat-sharing using Traffic Light Protocol or `TLP`, thereby deprecating the use of booleans `force_privacy`, `disable_external_analyzers` and `private`. See [TLP Support](https://intelowl.readthedocs.io/en/master/Usage.html#tlp-support).
 
 **New class of plugins called _Connectors_**
@@ -21,11 +21,6 @@ Standardized threat-sharing using Traffic Light Protocol or `TLP`, thereby depre
     - `secrets`: Stores Analyzer/Connector specific secrets like API Key name along with the secret's type and description.
   - Secrets are now verified - with a dynamic `verification` key storing configuration status and errors, if any. Misconfigured analyzers/connectors are disabled automatically.
 
-**API changes:**
-  - Split `/api/send_analysis_request` into `/api/analyze_file` and `/api/analyze_observable` 
-  - Updated endpoint for downloading job sample: `/api/jobs/{id}/download_sample`
-  - Updated `/api/ask_analysis_availability` to be `POST` endpoint
-
 **New Inbuilt Analyzers:**
 - New `OpenCTI` analyzer: scan an observable on an OpenCTI instance.
 - New `Intezer_Get` analyzer: check Managing Analyzers and Connectorsif an analysis related to a hash is available in [Intezer](https://analyze.intezer.com/))
@@ -40,6 +35,9 @@ Standardized threat-sharing using Traffic Light Protocol or `TLP`, thereby depre
   - New configuration options: `include_behaviour_summary` for behavioral analysis and `include_sigma_analyses` for sigma analysis report of the file in VirusTotalv3 Analyzer. See [Customize Analyzers](https://intelowl.readthedocs.io/en/master/Advanced-Usage.html#customize-analyzer-execution-at-time-of-request)
 
 **Others:**
+- Split `/api/send_analysis_request` into `/api/analyze_file` and `/api/analyze_observable` 
+- Updated endpoint for downloading job sample: `/api/jobs/{id}/download_sample`
+- Updated `/api/ask_analysis_availability` to be `POST` endpoint
 - Added `kill`, `retry` and `healthcheck` features to analyzers and connectors. See [Managing Analyzers and Connectors](https://intelowl.readthedocs.io/en/master/Usage.html#managing-analyzers-and-connectors).
 
 

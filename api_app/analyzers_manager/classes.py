@@ -342,6 +342,7 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
         try:
             report = json.loads(report)
         except json.JSONDecodeError:
+            # because report may also be a str only. Example: clamav.
             pass
 
         return report

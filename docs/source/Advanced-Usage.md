@@ -219,7 +219,7 @@ Some analyzers could require a special configuration:
 You should follow the [official guide](https://cloud.google.com/web-risk/docs/quickstart) for creating the key.
 Then you can copy the generated JSON key file in the directory `configuration` of the project and change its name to `service_account_keyfile.json`.
 This is the default configuration. If you want to customize the name or the location of the file, you can change the environment variable `GOOGLE_APPLICATION_CREDENTIALS` in the `env_file_app` file.
-* `ClamAV`: this Docker-based analyzer using `clamd` daemon as it's scanner, communicating with `clamdscan` utility to scan files. The daemon requires 3 different configuration files: `clamd.conf`(daemon's config), `freshclam.conf`(virus database updater's config) and `clamav-milter.conf`(clamav-milter's config). These files are mounted as docker volumes and hence, can be edited by the user as per needs.
+* `ClamAV`: this Docker-based analyzer using `clamd` daemon as it's scanner, communicating with `clamdscan` utility to scan files. The daemon requires 2 different configuration files: `clamd.conf` (daemon's config) and `freshclam.conf` (virus database updater's config).
 
 ## Customization options for connectors
 Connectors by nature are designed to run independently after each analysis. There is no option to dynamically supply a `runtime_configuration` like analyzers, however you can always change the `configuration/connectors_config.json` as you wish with the following options:

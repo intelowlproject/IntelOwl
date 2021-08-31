@@ -257,6 +257,13 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
     observable_classification = serializers.CharField(required=True)
     is_sample = serializers.HiddenField(default=False)
 
+    def validate_observable_name(self, observable_name: str):
+        """
+        Force lowercase in ``observable_name``.
+        Ref: https://github.com/intelowlproject/IntelOwl/issues/658.
+        """
+        return observable_name.lower()
+
     class Meta:
         model = Job
         fields = (

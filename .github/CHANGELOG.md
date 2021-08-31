@@ -12,9 +12,9 @@
 **New class of plugins called _Connectors_:**
 - Connectors are designed to run after every successful analysis which makes them suitable for automated threat-sharing. Built to support integration with other SIEM/SOAR projects specifically aimed at Threat Sharing Platforms. See [Available Connectors](https://intelowl.readthedocs.io/en/master/Usage.html#available-connectors).
 - Newly added connectors for threat-sharing:
-  * `MISP` connector: automatically creates an event on your MISP instance.
-  * `OpenCTI` connector: automatically creates an observable and a linked report on your OpenCTI instance.
-  * `YETI` connector: find/create an observable on YETI.
+  * `MISP`: automatically creates an event on your MISP instance.
+  * `OpenCTI`: automatically creates an observable and a linked report on your OpenCTI instance.
+  * `YETI`: find/create an observable on YETI.
 
 **New Analyzers/Connectors Config Format:**
 - New `connectors_config.json` file for storing Connectors related configuration info.

@@ -235,17 +235,14 @@ Connectors by nature are designed to run independently after each analysis. Ther
     * `verify_ssl`: (default `true`), enable SSL certificate server verification. Change this if your YETI instance has not SSL enabled.
 
 ## Elastic Search
-
 Intel Owl makes use of [django-elasticsearch-dsl](https://django-elasticsearch-dsl.readthedocs.io/en/latest/about.html) to index Job results into elasticsearch. The `save` and `delete` operations are auto-synced so you always have the latest data in ES.
 
 In the `env_file_app_template`, you'd see various elasticsearch related environment variables. The user should spin their own Elastic Search instance and configure these variables.
 
 #### Kibana
-
 Intel Owl provides a saved configuration (with example dashboard and visualizations) for Kibana. It can be downloaded from [here](https://github.com/intelowlproject/IntelOwl/blob/develop/configuration/Kibana-Saved-Conf.ndjson) and can be imported into Kibana.
 
 #### Example Configuration
-
 1. Setup [Elastic Search and Kibana](https://hub.docker.com/r/nshou/elasticsearch-kibana/) and say it is running in a docker service with name `elk` on port `9200` which is exposed to the shared docker network.
 2. In the `env_file_app`, we set `ELASTICSEARCH_ENABLED` to `True` and `ELASTICSEARCH_HOST` to `elk:9200`.
 3. In the `Dockerfile`, set the correct version in `ELASTICSEARCH_DSL_VERSION` [depending on the version](https://django-elasticsearch-dsl.readthedocs.io/en/latest/about.html#features) of our elasticsearch server. Default value is `7.1.4`.

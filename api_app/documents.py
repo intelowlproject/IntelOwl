@@ -9,16 +9,15 @@ from .models import Job
 @registry.register_document
 class JobDocument(Document):
     # Object/List fields
-    analyzers_requested = fields.ListField(fields.KeywordField())
     analyzers_to_execute = fields.ListField(fields.KeywordField())
-    analysis_reports = fields.ObjectField()
+    connectors_to_execute = fields.ListField(fields.KeywordField())
     # Normal fields
     errors = fields.TextField()
-    runtime_configuration = fields.ObjectField()
     # Keyword fields to allow aggregations/vizualizations
     source = fields.KeywordField()
-    md5 = fields.KeywordField()
     status = fields.KeywordField()
+    md5 = fields.KeywordField()
+    tlp = fields.KeywordField()
     observable_name = fields.KeywordField()
     observable_classification = fields.KeywordField()
     file_name = fields.KeywordField()
@@ -27,15 +26,26 @@ class JobDocument(Document):
     tags = fields.NestedField(
         properties={"label": fields.KeywordField(), "color": fields.TextField()}
     )
-
-    def prepare_runtime_configuration(self, instance):
-        return instance.runtime_configuration
-
-    def prepare_analysis_reports(self, instance):
-        """
-        https://github.com/django-es/django-elasticsearch-dsl/issues/36
-        """
-        return instance.analysis_reports
+    analyzer_reports = fields.NestedField(
+        properties={
+            "name": fields.KeywordField(),
+            "status": fields.KeywordField(),
+            "report": fields.ObjectField(),
+            "errors": fields.TextField(),
+            "start_time": fields.DateField(),
+            "end_time": fields.DateField(),
+        }
+    )
+    connector_reports = fields.NestedField(
+        properties={
+            "name": fields.KeywordField(),
+            "status": fields.KeywordField(),
+            "report": fields.ObjectField(),
+            "errors": fields.TextField(),
+            "start_time": fields.DateField(),
+            "end_time": fields.DateField(),
+        }
+    )
 
     class Index:
         # Name of the Elasticsearch index
@@ -49,5 +59,4 @@ class JobDocument(Document):
             "is_sample",
             "received_request_time",
             "finished_analysis_time",
-            "tlp",
         ]

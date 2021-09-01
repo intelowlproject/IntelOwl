@@ -28,15 +28,17 @@ def filter_analyzers(serialized_data: Dict, warnings: List) -> List[str]:
     # init empty list
     cleaned_analyzer_list = []
     selected_analyzers = []
-    analyzers_requested = serialized_data["analyzers_requested"]
-    tlp = serialized_data.get("tlp", TLP.WHITE).upper()
 
-    # run all analyzers ?
-    run_all = serialized_data.get("run_all_available_analyzers", False)
+    # get values from serializer
+    analyzers_requested = serialized_data.get("analyzers_requested", [])
+    tlp = serialized_data.get("tlp", TLP.WHITE).upper()
 
     # read config
     analyzer_dataclasses = AnalyzerConfig.all()
     all_analyzer_names = list(analyzer_dataclasses.keys())
+
+    # run all analyzers ?
+    run_all = len(analyzers_requested) == 0
     if run_all:
         # select all
         selected_analyzers.extend(all_analyzer_names)
@@ -46,9 +48,11 @@ def filter_analyzers(serialized_data: Dict, warnings: List) -> List[str]:
 
     for a_name in selected_analyzers:
         try:
-            found = a_name not in all_analyzer_names
-            if not run_all and found:
-                raise NotRunnableAnalyzer(f"{a_name} not available in configuration")
+            if not run_all:
+                if a_name not in all_analyzer_names:
+                    raise NotRunnableAnalyzer(
+                        f"{a_name} not available in configuration"
+                    )
 
             config = analyzer_dataclasses[a_name]
 

@@ -83,9 +83,16 @@ def run_connector(job_id: int, config_dict: dict, report_defaults: dict):
 
 @app.task(name="on_job_success", soft_time_limit=500)
 def on_job_success(job_id: int):
-    # run all connectors
-    connectors_task_id_map = connectors_controller.start_connectors(job_id)
+    # run all or requested connectors
+    job = Job.objects.only("id", "connectors_to_execute", "connectors_requested").get(
+        pk=job_id
+    )
+    args = (
+        [job_id, job.connectors_requested]
+        if len(job.connectors_requested)
+        else [job_id]
+    )
+    connectors_task_id_map = connectors_controller.start_connectors(*args)
     # update connectors_to_execute field
-    job = Job.objects.only("id", "connectors_to_execute").get(pk=job_id)
     job.connectors_to_execute = list(connectors_task_id_map.keys())
     job.save(update_fields=["connectors_to_execute"])

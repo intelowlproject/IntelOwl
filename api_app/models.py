@@ -80,7 +80,9 @@ class Job(models.Model):
     analyzers_requested = pg_fields.ArrayField(
         models.CharField(max_length=128), blank=True, default=list
     )
-    run_all_available_analyzers = models.BooleanField(blank=False, default=False)
+    connectors_requested = pg_fields.ArrayField(
+        models.CharField(max_length=128), blank=True, default=list
+    )
     analyzers_to_execute = pg_fields.ArrayField(
         models.CharField(max_length=128), blank=True, default=list
     )

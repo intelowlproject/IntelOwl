@@ -92,6 +92,7 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
+    "django.contrib.staticfiles",
     "django.contrib.postgres",
     # celery, elasticsearch
     "django_celery_results",
@@ -252,6 +253,14 @@ USE_L10N = True
 USE_TZ = True
 
 
+# Static files (CSS, JavaScript, Images)
+
+STATIC_URL = "/static/"
+STATIC_ROOT = os.path.join(BASE_DIR, "static/")
+
+STATICFILES_DIRS = (os.path.join(BASE_DIR, "static_intel/"),)
+
+
 INFO_OR_DEBUG_LEVEL = "DEBUG" if DEBUG else "INFO"
 LOGGING = {
     "version": 1,
@@ -302,6 +311,15 @@ LOGGING = {
             "maxBytes": 20 * 1024 * 1024,
             "backupCount": 6,
         },
+        # 500 errors are handled by this in the same log file of the others API errors
+        "django_unhandled_errors": {
+            "level": "ERROR",
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": f"{DJANGO_LOG_DIRECTORY}/api_app_errors.log",
+            "formatter": "stdfmt",
+            "maxBytes": 20 * 1024 * 1024,
+            "backupCount": 6,
+        },
     },
     "loggers": {
         "api_app": {
@@ -317,6 +335,11 @@ LOGGING = {
         "django_auth_ldap": {
             "handlers": ["django_auth_ldap"],
             "level": INFO_OR_DEBUG_LEVEL,
+            "propagate": True,
+        },
+        "django": {
+            "handlers": ["django_unhandled_errors"],
+            "level": "ERROR",
             "propagate": True,
         },
     },

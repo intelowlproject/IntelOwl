@@ -43,6 +43,20 @@ class TagSerializer(ObjectPermissionsAssignmentMixin, serializers.ModelSerialize
         }
 
 
+class JobAvailabilitySerializer(serializers.ModelSerializer):
+    """
+    Serializer for ask_analysis_availability
+    """
+
+    class Meta:
+        model = Job
+        fields = "__all__"
+
+    md5 = serializers.CharField(max_length=128, required=True)
+    analyzers = serializers.ListField(default=list)
+    running_only = serializers.BooleanField(default=False)
+
+
 class JobListSerializer(serializers.ModelSerializer):
     """
     Job model's list serializer.
@@ -77,15 +91,13 @@ class JobListSerializer(serializers.ModelSerializer):
         return round(t.total_seconds(), 2)
 
     def get_no_of_analyzers_executed(self, obj: Job) -> str:
-        if obj.run_all_available_analyzers:
-            return "all available analyzers"
-        n1 = len(obj.analyzers_to_execute)
-        n2 = len(obj.analyzers_requested)
+        n1 = len(obj.analyzers_to_execute) or "-"
+        n2 = len(obj.analyzers_requested) or "-"
         return f"{n1}/{n2}"
 
     def get_no_of_connectors_executed(self, obj: Job) -> str:
-        n1 = obj.connector_reports.count()
-        n2 = len(obj.connectors_to_execute)
+        n1 = len(obj.connectors_to_execute) or "-"
+        n2 = len(obj.connectors_requested) or "-"
         return f"{n1}/{n2}"
 
 
@@ -119,7 +131,7 @@ class _AbstractJobCreateSerializer(
         required=False, default={}, write_only=True
     )
     analyzers_requested = serializers.ListField(default=list)
-    run_all_available_analyzers = serializers.BooleanField(default=False)
+    connectors_requested = serializers.ListField(default=list)
 
     def get_permissions_map(self, created) -> dict:
         """
@@ -148,20 +160,6 @@ class _AbstractJobCreateSerializer(
         if runtime_conf and isinstance(runtime_conf, list):
             runtime_conf = json.loads(runtime_conf[0])
         data["runtime_configuration"] = runtime_conf
-
-        run_all_available_analyzers = data["run_all_available_analyzers"]
-        analyzers_requested = data["analyzers_requested"]
-        if not run_all_available_analyzers and not len(analyzers_requested):
-            raise serializers.ValidationError(
-                "Atleast one of `analyzers_requested` "
-                "and `run_all_available_analyzers` should be provided."
-            )
-
-        if run_all_available_analyzers and len(analyzers_requested):
-            raise serializers.ValidationError(
-                "`analyzers_requested` and `run_all_available_analyzers`"
-                "cannot be used together."
-            )
 
         return data
 
@@ -197,9 +195,9 @@ class FileAnalysisSerializer(_AbstractJobCreateSerializer):
             "file",
             "file_name",
             "file_mimetype",
-            "run_all_available_analyzers",
             "runtime_configuration",
             "analyzers_requested",
+            "connectors_requested",
             "tags_id",
         )
 
@@ -219,6 +217,13 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
     observable_classification = serializers.CharField(required=True)
     is_sample = serializers.HiddenField(default=False)
 
+    def validate_observable_name(self, observable_name: str):
+        """
+        Force lowercase in ``observable_name``.
+        Ref: https://github.com/intelowlproject/IntelOwl/issues/658.
+        """
+        return observable_name.lower()
+
     class Meta:
         model = Job
         fields = (
@@ -229,8 +234,8 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
             "tlp",
             "observable_name",
             "observable_classification",
-            "run_all_available_analyzers",
             "runtime_configuration",
             "analyzers_requested",
+            "connectors_requested",
             "tags_id",
         )

@@ -94,3 +94,6 @@ shell2http.register_command(
 
 # with this, we can make http calls to the endpoint: /manalyze
 shell2http.register_command(endpoint="manalyze", command_name="/usr/local/bin/manalyze")
+
+# with this, we can make http calls to the endpoint: /clamav
+shell2http.register_command(endpoint="clamav", command_name="clamdscan")

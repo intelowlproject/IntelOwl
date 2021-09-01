@@ -37,8 +37,6 @@
       "api_key_name": {
         "env_var_key": "ABUSEIPDB_KEY",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": ""
       }
     }
@@ -61,8 +59,6 @@
       "api_key_name": {
         "env_var_key": "AUTH0_KEY",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": ""
       }
     }
@@ -121,8 +117,6 @@
       "pdns_credentials": {
         "env_var_key": "CIRCL_CREDENTIALS",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": ""
       }
     }
@@ -145,8 +139,6 @@
       "pdns_credentials": {
         "env_var_key": "CIRCL_CREDENTIALS",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": ""
       }
     }
@@ -241,18 +233,28 @@
       "api_id_name": {
         "env_var_key": "CENSYS_API_ID",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": ""
       },
       "api_secret_name": {
         "env_var_key": "CENSYS_API_SECRET",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": ""
       }
     }
+  },
+  "ClamAV":{
+    "type": "file",
+    "python_module": "clamav.ClamAV",
+    "description": "scan files using ClamAV virus scanning engine",
+    "disabled": false,
+    "leaks_info": false,
+    "external_service": false,
+    "docker_based": true,
+    "config": {
+      "soft_time_limit": 50,
+      "queue": "default"
+    },
+    "secrets": {}
   },
   "CRXcavator": {
     "type": "observable",
@@ -287,15 +289,11 @@
       "api_key_name": {
         "env_var_key": "CUCKOO_API_KEY",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": ""
       },
       "url_key_name": {
         "env_var_key": "CUCKOO_URL",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": ""
       }
     }
@@ -376,8 +374,6 @@
       "api_key_name": {
         "env_var_key": "DEHASHED_AUTH_KEY",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": ""
       }
     }
@@ -404,8 +400,6 @@
       "api_key_name": {
         "env_var_key": "DNSDB_KEY",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": ""
       }
     }
@@ -511,8 +505,6 @@
       "api_key_name": {
         "env_var_key": "EMAILREP_KEY",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": ""
       }
     }
@@ -631,8 +623,6 @@
       "api_key_name": {
         "env_var_key": "GOOGLE_APPLICATION_CREDENTIALS",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": ""
       }
     }
@@ -657,8 +647,6 @@
       "api_key_name": {
         "env_var_key": "GSF_KEY",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": ""
       }
     }
@@ -682,8 +670,6 @@
       "api_key_name": {
         "env_var_key": "GREYNOISE_API_KEY",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": ""
       }
     }
@@ -707,8 +693,6 @@
       "api_key_name": {
         "env_var_key": "GREYNOISE_API_KEY",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": ""
       }
     }
@@ -732,8 +716,6 @@
       "api_key_name": {
         "env_var_key": "GREYNOISE_API_KEY",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": ""
       }
     }
@@ -789,15 +771,11 @@
       "api_key_name": {
         "env_var_key": "HONEYDB_API_KEY",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": ""
       },
       "api_id_name": {
         "env_var_key": "HONEYDB_API_ID",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": ""
       }
     }
@@ -820,8 +798,6 @@
       "api_key_name": {
         "env_var_key": "HUNTER_API_KEY",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": ""
       }
     }
@@ -842,8 +818,6 @@
       "api_key_name": {
         "env_var_key": "HA_KEY",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": ""
       }
     }
@@ -869,8 +843,6 @@
       "api_key_name": {
         "env_var_key": "HA_KEY",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": ""
       }
     }
@@ -897,8 +869,6 @@
       "api_key_name": {
         "env_var_key": "INTELX_API_KEY",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": ""
       }
     }
@@ -921,8 +891,6 @@
       "api_key_name": {
         "env_var_key": "INTEZER_KEY",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": ""
       }
     }
@@ -968,8 +936,6 @@
       "api_key_name": {
         "env_var_key": "INTEZER_KEY",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": ""
       }
     }
@@ -997,8 +963,6 @@
       "api_key_name": {
         "env_var_key": "INQUEST_API_KEY",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": ""
       }
     }
@@ -1026,8 +990,6 @@
       "api_key_name": {
         "env_var_key": "INQUEST_API_KEY",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": ""
       }
     }
@@ -1055,8 +1017,6 @@
       "api_key_name": {
         "env_var_key": "INQUEST_API_KEY",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": ""
       }
     }
@@ -1079,8 +1039,6 @@
       "api_key_name": {
         "env_var_key": "IPINFO_KEY",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": ""
       }
     }
@@ -1124,15 +1082,11 @@
       "api_key_name": {
         "env_var_key": "MISP_KEY",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": ""
       },
       "url_key_name": {
         "env_var_key": "MISP_URL",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": ""
       }
     }
@@ -1158,15 +1112,11 @@
       "api_key_name": {
         "env_var_key": "FIRST_MISP_API",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": ""
       },
       "url_key_name": {
         "env_var_key": "FIRST_MISP_URL",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": ""
       }
     }
@@ -1187,15 +1137,11 @@
       "api_key_name": {
         "env_var_key": "FIRST_MISP_API",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": ""
       },
       "url_key_name": {
         "env_var_key": "FIRST_MISP_URL",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": ""
       }
     }
@@ -1216,15 +1162,11 @@
       "api_key_name": {
         "env_var_key": "MISP_KEY",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": ""
       },
       "url_key_name": {
         "env_var_key": "MISP_URL",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": ""
       }
     }
@@ -1256,8 +1198,6 @@
       "api_key_name": {
         "env_var_key": "MALPEDIA_KEY",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": ""
       }
     }
@@ -1328,8 +1268,6 @@
       "api_key_name": {
         "env_var_key": "MAXMIND_KEY",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": ""
       }
     }
@@ -1352,8 +1290,6 @@
       "api_key_name": {
         "env_var_key": "MWDB_KEY",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": ""
       }
     }
@@ -1369,14 +1305,13 @@
       "soft_time_limit": 400,
       "queue": "default",
       "upload_file": true,
+      "private": false,
       "max_tries": 50
     },
     "secrets": {
       "api_key_name": {
         "env_var_key": "MWDB_KEY",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": ""
       }
     }
@@ -1401,8 +1336,6 @@
       "api_key_name": {
         "env_var_key": "ONYPHE_KEY",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": ""
       }
     }
@@ -1434,15 +1367,11 @@
       "api_key_name": {
         "env_var_key": "OPENCTI_KEY",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": "API key for your OpenCTI instance"
       },
       "url_key_name": {
         "env_var_key": "OPENCTI_URL",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": "URL of your OpenCTI instance"
       }
     }
@@ -1469,8 +1398,6 @@
       "api_key_name": {
         "env_var_key": "OTX_KEY",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": ""
       }
     }
@@ -1492,8 +1419,6 @@
       "api_key_name": {
         "env_var_key": "OTX_KEY",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": ""
       }
     }
@@ -1565,8 +1490,6 @@
       "api_key_name": {
         "env_var_key": "PHISHTANK_API_KEY",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": ""
       }
     }
@@ -1593,8 +1516,6 @@
       "api_key_name": {
         "env_var_key": "PULSEDIVE_API_KEY",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": ""
       }
     }
@@ -1844,8 +1765,6 @@
       "api_key_name": {
         "env_var_key": "SECURITYTRAILS_KEY",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": ""
       }
     }
@@ -1870,8 +1789,6 @@
       "api_key_name": {
         "env_var_key": "SECURITYTRAILS_KEY",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": ""
       }
     }
@@ -1896,8 +1813,6 @@
       "api_key_name": {
         "env_var_key": "SECURITYTRAILS_KEY",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": ""
       }
     }
@@ -1920,8 +1835,6 @@
       "api_key_name": {
         "env_var_key": "SECURITYTRAILS_KEY",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": ""
       }
     }
@@ -1946,8 +1859,6 @@
       "api_key_name": {
         "env_var_key": "SECURITYTRAILS_KEY",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": ""
       }
     }
@@ -1972,8 +1883,6 @@
       "api_key_name": {
         "env_var_key": "SECURITYTRAILS_KEY",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": ""
       }
     }
@@ -1997,8 +1906,6 @@
       "api_key_name": {
         "env_var_key": "SHODAN_KEY",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": ""
       }
     }
@@ -2022,8 +1929,6 @@
       "api_key_name": {
         "env_var_key": "SHODAN_KEY",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": ""
       }
     }
@@ -2111,8 +2016,6 @@
       "api_key_name": {
         "env_var_key": "SSAPINET_KEY",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": ""
       }
     }
@@ -2356,8 +2259,6 @@
       "api_key_name": {
         "env_var_key": "TRIAGE_KEY",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": ""
       }
     }
@@ -2379,8 +2280,6 @@
       "api_key_name": {
         "env_var_key": "TRIAGE_KEY",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": ""
       }
     }
@@ -2405,8 +2304,6 @@
       "api_key_name": {
         "env_var_key": "UNPAC_ME_API_KEY",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": ""
       }
     }
@@ -2448,8 +2345,6 @@
       "api_key_name": {
         "env_var_key": "URLSCAN_API_KEY",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": ""
       }
     }
@@ -2476,8 +2371,6 @@
       "api_key_name": {
         "env_var_key": "URLSCAN_API_KEY",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": ""
       }
     }
@@ -2498,8 +2391,6 @@
       "api_key_name": {
         "env_var_key": "VT_KEY",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": ""
       }
     }
@@ -2525,8 +2416,6 @@
       "api_key_name": {
         "env_var_key": "VT_KEY",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": ""
       }
     }
@@ -2546,15 +2435,11 @@
       "api_key_name": {
         "env_var_key": "VT_KEY",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": ""
       },
       "url_key_name": {
         "env_var_key": "VT_NOTIFY_URL",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": ""
       }
     }
@@ -2578,8 +2463,6 @@
       "api_key_name": {
         "env_var_key": "VT_KEY",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": ""
       }
     }
@@ -2604,8 +2487,6 @@
       "api_key_name": {
         "env_var_key": "VT_KEY",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": ""
       }
     }
@@ -2631,8 +2512,6 @@
       "api_key_name": {
         "env_var_key": "VT_KEY",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": ""
       }
     }
@@ -2656,8 +2535,6 @@
       "api_key_name": {
         "env_var_key": "WHOISXMLAPI_KEY",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": ""
       }
     }
@@ -2681,8 +2558,6 @@
       "api_key_name": {
         "env_var_key": "WIGLE_KEY",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": ""
       }
     }
@@ -2707,15 +2582,11 @@
       "api_key_name": {
         "env_var_key": "XFORCE_KEY",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": ""
       },
       "api_password_name": {
         "env_var_key": "XFORCE_PASSWORD",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": ""
       }
     }
@@ -2968,15 +2839,11 @@
       "api_key_name": {
         "env_var_key": "YETI_KEY",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": "API key for your YETI instance"
       },
       "url_key_name": {
         "env_var_key": "YETI_URL",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": "API URL of your YETI instance"
       }
     }
@@ -3005,8 +2872,6 @@
       "api_key_name": {
         "env_var_key": "ZOOMEYE_KEY",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": ""
       }
     }

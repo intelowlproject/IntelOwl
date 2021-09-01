@@ -79,8 +79,8 @@ paths:
                 $ref: '#/components/schemas/PluginHealthCheckSuccessResponse'
           description: ''
   /api/ask_analysis_availability:
-    get:
-      operationId: ask_analysis_availability_retrieve
+    post:
+      operationId: ask_analysis_availability_create
       description: |2-
 
             This is useful to avoid repeating the same analysis multiple times.
@@ -88,36 +88,20 @@ paths:
             status "running" or "reported_without_fails"
             Also, you need to specify the analyzers needed because, otherwise, it is
             highly probable that you won't get all the results that you expect
-      parameters:
-      - in: query
-        name: analyzers_needed
-        schema:
-          type: object
-          additionalProperties: {}
-        description: |2-
-
-                      Specify analyzers needed.
-                      It requires either this or run_all_available_analyzers
-      - in: query
-        name: md5
-        schema:
-          type: string
-        description: md5 of the sample or observable to look for
-      - in: query
-        name: run_all_available_analyzers
-        schema:
-          type: boolean
-        description: If we are looking for an analysis executed with this flag set
-      - in: query
-        name: running_only
-        schema:
-          type: boolean
-        description: |2-
-
-                      Check only for running analysis,
-                      default False, any value is True
       tags:
       - ask_analysis_availability
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JobAvailability'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/JobAvailability'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/JobAvailability'
+        required: true
       security:
       - durinAuth: []
       responses:
@@ -126,18 +110,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AskAnalysisAvailabilitySuccessResponse'
-          description: ''
-        '400':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AskAnalysisAvailabilityInsufficientDataResponse'
-          description: ''
-        '500':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AskAnalysisAvailabilityErrorResponse'
           description: ''
   /api/auth/login:
     post:
@@ -710,22 +682,6 @@ components:
       - name
       - process_time
       - status
-    AskAnalysisAvailabilityErrorResponse:
-      type: object
-      properties:
-        detail:
-          type: string
-          readOnly: true
-      required:
-      - detail
-    AskAnalysisAvailabilityInsufficientDataResponse:
-      type: object
-      properties:
-        error:
-          type: string
-          readOnly: true
-      required:
-      - error
     AskAnalysisAvailabilitySuccessResponse:
       type: object
       properties:
@@ -827,15 +783,15 @@ components:
           format: uri
         file_name:
           type: string
-        run_all_available_analyzers:
-          type: boolean
-          default: false
         runtime_configuration:
           type: object
           additionalProperties: {}
           writeOnly: true
           default: {}
         analyzers_requested:
+          type: array
+          items: {}
+        connectors_requested:
           type: array
           items: {}
         tags_id:
@@ -922,13 +878,15 @@ components:
           type: string
           maxLength: 80
         status:
-          $ref: '#/components/schemas/StatusA27Enum'
+          $ref: '#/components/schemas/StatusFefEnum'
         analyzers_requested:
           type: array
           items:
             type: string
-        run_all_available_analyzers:
-          type: boolean
+        connectors_requested:
+          type: array
+          items:
+            type: string
         analyzers_to_execute:
           type: array
           items:
@@ -959,6 +917,83 @@ components:
       - md5
       - received_request_time
       - tags
+    JobAvailability:
+      type: object
+      description: Serializer for ask_analysis_availability
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        md5:
+          type: string
+          maxLength: 128
+        analyzers:
+          type: array
+          items: {}
+        running_only:
+          type: boolean
+          default: false
+        source:
+          type: string
+          maxLength: 50
+        is_sample:
+          type: boolean
+        observable_name:
+          type: string
+          maxLength: 512
+        observable_classification:
+          type: string
+          maxLength: 12
+        file_name:
+          type: string
+          maxLength: 512
+        file_mimetype:
+          type: string
+          maxLength: 80
+        status:
+          $ref: '#/components/schemas/StatusFefEnum'
+        analyzers_requested:
+          type: array
+          items:
+            type: string
+        connectors_requested:
+          type: array
+          items:
+            type: string
+        analyzers_to_execute:
+          type: array
+          items:
+            type: string
+        connectors_to_execute:
+          type: array
+          items:
+            type: string
+        received_request_time:
+          type: string
+          format: date-time
+          readOnly: true
+        finished_analysis_time:
+          type: string
+          format: date-time
+          nullable: true
+        tlp:
+          $ref: '#/components/schemas/TlpEnum'
+        errors:
+          type: array
+          items:
+            type: string
+          nullable: true
+        file:
+          type: string
+          format: uri
+        tags:
+          type: array
+          items:
+            type: integer
+      required:
+      - id
+      - md5
+      - received_request_time
     JobList:
       type: object
       description: |-
@@ -983,7 +1018,7 @@ components:
           type: string
           maxLength: 80
         status:
-          $ref: '#/components/schemas/StatusA27Enum'
+          $ref: '#/components/schemas/StatusFefEnum'
         tags:
           type: array
           items:
@@ -1033,15 +1068,15 @@ components:
           type: string
         observable_classification:
           type: string
-        run_all_available_analyzers:
-          type: boolean
-          default: false
         runtime_configuration:
           type: object
           additionalProperties: {}
           writeOnly: true
           default: {}
         analyzers_requested:
+          type: array
+          items: {}
+        connectors_requested:
           type: array
           items: {}
         tags_id:
@@ -1111,14 +1146,14 @@ components:
       - SUCCESS
       - KILLED
       type: string
-    StatusA27Enum:
+    StatusFefEnum:
       enum:
       - pending
       - running
       - reported_without_fails
       - reported_with_fails
-      - failed
       - killed
+      - failed
       type: string
     Tag:
       type: object

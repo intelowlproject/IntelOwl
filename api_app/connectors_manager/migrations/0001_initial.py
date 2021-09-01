@@ -11,26 +11,64 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('api_app', '0006_v3_release'),
+        ("api_app", "0006_v3_release"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='ConnectorReport',
+            name="ConnectorReport",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=128)),
-                ('status', models.CharField(choices=[('FAILED', 'Failed'), ('PENDING', 'Pending'), ('RUNNING', 'Running'), ('SUCCESS', 'Success'), ('KILLED', 'Killed')], max_length=50)),
-                ('report', models.JSONField(default=dict)),
-                ('errors', django.contrib.postgres.fields.ArrayField(base_field=models.CharField(max_length=512), blank=True, default=list, size=None)),
-                ('runtime_configuration', models.JSONField(blank=True, default=dict, null=True)),
-                ('start_time', models.DateTimeField(default=django.utils.timezone.now)),
-                ('end_time', models.DateTimeField(default=django.utils.timezone.now)),
-                ('task_id', models.UUIDField()),
-                ('job', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='connector_reports', to='api_app.job')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=128)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("FAILED", "Failed"),
+                            ("PENDING", "Pending"),
+                            ("RUNNING", "Running"),
+                            ("SUCCESS", "Success"),
+                            ("KILLED", "Killed"),
+                        ],
+                        max_length=50,
+                    ),
+                ),
+                ("report", models.JSONField(default=dict)),
+                (
+                    "errors",
+                    django.contrib.postgres.fields.ArrayField(
+                        base_field=models.CharField(max_length=512),
+                        blank=True,
+                        default=list,
+                        size=None,
+                    ),
+                ),
+                (
+                    "runtime_configuration",
+                    models.JSONField(blank=True, default=dict, null=True),
+                ),
+                ("start_time", models.DateTimeField(default=django.utils.timezone.now)),
+                ("end_time", models.DateTimeField(default=django.utils.timezone.now)),
+                ("task_id", models.UUIDField()),
+                (
+                    "job",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="connector_reports",
+                        to="api_app.job",
+                    ),
+                ),
             ],
             options={
-                'unique_together': {('name', 'job')},
+                "unique_together": {("name", "job")},
             },
         ),
     ]

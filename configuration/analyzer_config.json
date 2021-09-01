@@ -1968,7 +1968,7 @@
   "Spyse":{
     "type": "observable",
     "python_module": "spyse.Spyse",
-    "description": "scans Domains and IPs for a registered API provided by spyse",
+    "description": "scan domains, IPs and emails using spyse.com's API",
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
@@ -1979,15 +1979,12 @@
     ],
     "config": {
       "soft_time_limit": 30,
-      "queue": "default",
-      "spyse_analysis": "search"
+      "queue": "default"
     },
     "secrets": {
       "api_key_name": {
         "env_var_key": "SPYSE_KEY",
         "type": "string",
-        "required": true,
-        "default": null,
         "description": ""
       }
     }

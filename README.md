@@ -122,7 +122,7 @@ This project was created and will be upgraded thanks to the following organizati
 Since its birth, this project has been participating in the [Google Summer of Code](https://summerofcode.withgoogle.com/) (GSoC) under the Honeynet Project!
 
 Project Summaries and/or in-development projects:
-* 2020: [Eshaan Bansal](https://twitter.com/mask0fmydisguis): [IntelOwl Work Product](https://www.honeynet.org/2020/08/26/gsoc-2020-work-product%e2%80%8a-%e2%80%8aintel-owl/)
+* 2020: [Eshaan Bansal](https://twitter.com/eshaan7_): [IntelOwl Work Product](https://www.honeynet.org/2020/08/26/gsoc-2020-work-product%e2%80%8a-%e2%80%8aintel-owl/)
 * 2021: 
   * [Sarthak Khattar](https://twitter.com/Mr_Momo07): [IntelOwl Improvements](https://www.honeynet.org/2021/08/20/gsoc-2021-project-summary-intelowl-improvements/)
   * [Shubham Pandey](https://twitter.com/imshubham31): [IntelOwl Connectors Manager and Integrations](https://www.honeynet.org/2021/08/20/gsoc-2021-project-summary-intelowl-connectors-manager-and-integrations/)
@@ -136,4 +136,4 @@ In 2021 IntelOwl joined the official [Docker Open Source Program](https://www.do
 
 Feel free to contact the main developers at any time in Twitter:
 - [Matteo Lodi](https://twitter.com/matte_lodi): Author and creator
-- [Eshaan Bansal](https://twitter.com/mask0fmydisguis): Principal maintainer
+- [Eshaan Bansal](https://twitter.com/eshaan7_): Principal maintainer

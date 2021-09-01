@@ -32,7 +32,7 @@
 
 **New Inbuilt Analyzers/ Fixes to existing:**
 - New `OpenCTI` analyzer: scan an observable on an OpenCTI instance.
-- New `Intezer_Get` analyzer: check Managing Analyzers and Connectorsif an analysis related to a hash is available in [Intezer](https://analyze.intezer.com/))
+- New `Intezer_Get` analyzer: check Managing Analyzers and Connectors if an analysis related to a hash is available in [Intezer](https://analyze.intezer.com/)
 - New `MWDB_Get` analyzer: [mwdblib](https://mwdb.readthedocs.io/en/latest/) Retrieve malware file analysis by hash from repository maintained by CERT Polska MWDB.
 - New `YETI` analyzer (YETI = Your Everyday Threat Intelligence): scan an observable on a YETI instance.
 - New `HashLookupServer_Get_Observable` and `HashLookupServer_Get_File` analyzers: check if a md5 or sha1 is available in the database of [known file hosted by CIRCL](https://github.com/adulau/hashlookup-server)

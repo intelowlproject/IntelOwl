@@ -13,12 +13,10 @@ class Spyse(classes.ObservableAnalyzer):
     base_url: str = "https://api.spyse.com/v4/data/"
 
     def set_params(self, params):
-        self.analysis_type = params.get("search")
         self.__api_key = self._secrets["api_key_name"]
 
     def run(self):
-        if self.analysis_type == "search":
-            params = {"key": self.__api_key}
+        params = {"key": self.__api_key}
         if self.observable_classification == self.ObservableTypes.DOMAIN:
             uri = f"domain/{self.observable_name}"
         elif self.observable_classification == self.ObservableTypes.IP:

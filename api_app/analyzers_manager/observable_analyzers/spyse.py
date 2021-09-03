@@ -29,6 +29,11 @@ class Spyse(classes.ObservableAnalyzer):
                     f"{self.observable_name} not supported."
                     "Please enter a valid email address."
                 )
+        else:
+            raise AnalyzerRunException(
+                f"{self.observable_classification} not supported."
+                "Supported are: IP, domain and generic."
+            )
 
         try:
             response = requests.get(self.base_url + uri, params=params)

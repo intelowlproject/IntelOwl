@@ -10,7 +10,7 @@ There are multiple ways to interact with the Intel Owl APIs,
     - Inbuilt Web interface with dashboard, visualizations of analysis data, easy to use forms for requesting
     new analysis, tags management and more features
     - [Live Demo](https://intelowlclient.firebaseapp.com/)
-    - Built with Angular 9+ and available on [Github](https://github.com/intelowlproject/intelowl-ng).
+    - Built with Angular 10+ and available on [GitHub](https://github.com/intelowlproject/intelowl-ng).
 
 2. pyIntelOwl (CLI/SDK)
 
@@ -18,9 +18,12 @@ There are multiple ways to interact with the Intel Owl APIs,
     - Can be used as a library for your own python projects or...
     - directly via the command line interface.
 
-### Tokens creation
+<div class="admonition hint">
+<p class="admonition-title">Hint: Tokens Creation</p>
 The server authentication is managed by API tokens. So, if you want to interact with Intel Owl, you have to create one or more unprivileged users from the Django Admin Interface and then generate a token for those users.
 Afterwards you can leverage the created tokens with the Intel Owl Client.
+</div>
+
 
 ## Analyzers customization
 You can create new analyzers based on already existing modules by changing the configuration values inside `configuration/analyzer_config.json`. This file is mounted as a docker volume, so you won't need to rebuild the image.
@@ -60,12 +63,44 @@ Connectors being optional are `disabled` by default. You can enable them by chan
 The following are all the keys that you can change without touching the source code:
 * `disabled`: (similar to analyzers) use this to enable/disable certain connectors, the enabled connectors are called after successful analysis.
 * `soft_time_limit`: (similar to analyzers) this is the maximum time (in seconds) of execution for an connector. Once reached, the task will be killed (or managed in the **code** by a custom Exception). Default 300s
-* `queue`: (similar to analyzers) this takes effects only when [multi-queue](Advanced-Usage.html#multi-queue) is enabled. Choose which celery worker would execute the task: `local` (ideal for tasks that leverage local applications), `long` (ideal for long tasks) or `default` (ideal for simple webAPI-based connectors).
+* `queue`: (similar to analyzers) this takes effects only when [multi-queue](https://intelowl.readthedocs.io/en/develop/Advanced-Usage.html#multi-queue) is enabled. Choose which celery worker would execute the task: `local` (ideal for tasks that leverage local applications), `long` (ideal for long tasks) or `default` (ideal for simple webAPI-based connectors).
+* `maximum_tlp` (default `WHITE`, choices `WHITE`, `GREEN`, `AMBER`, `RED`): specify with the maximum TLP of the analysis upto which the connector is allowed to run. (e.g. if `maximum_tlp` is `GREEN`, it would run for analysis with TLPs `WHITE` and `GREEN`). To learn more about TLPs see [TLP Support](./Usage.md#tlp-support).
 
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 Changing other keys can and will break the connector. In that case, you should think about create a new python module or to modify an existing one.
 </div>
+
+
+## Managing Analyzers and Connectors
+All plugins i.e. analyzers and connectors have `kill` and `retry` actions. In addition to that, all docker-based analyzers and connectors have a health check action to check if their associated instances are up or not. 
+- `kill` feature to stop a plugin whose status is `running`/`pending`: 
+   * GUI: Buttons on reports table on job result page.
+   * PyIntelOwl: `IntelOwl.kill_analyzer` and `IntelOwl.kill_connector` function.
+   * CLI: `$ pyintelowl jobs kill-analyzer <job_id> <analyzer_name>` and `$ pyintelowl jobs kill-connector <job_id> <connector_name>`
+   * API: `PATCH /api/job/{job_id}/analyzer/{analyzer_name}/kill` and `PATCH /api/job/{job_id}/connector/{connector_name}/kill`
+- `retry` feature to retry a plugin whose status is `failed`/`killed`: 
+   * GUI: Buttons on reports table on job result page.
+   * PyIntelOwl: `IntelOwl.retry_analyzer` and `IntelOwl.retry_connector` function,
+   * CLI: `$ pyintelowl jobs retry-analyzer <job_id> <analyzer_name>` and `$ pyintelowl jobs retry-connector <job_id> <connector_name>`
+   * API: `PATCH /api/job/{job_id}/analyzer/{analyzer_name}/retry` and `PATCH /api/job/{job_id}/connector/{connector_name}/retry`
+- `healthcheck` feature to check if docker container or external platform associated with an analyzer or connector respectively are up or not: 
+   * GUI: Buttons on analyzers table and connectors table.
+   * PyIntelOwl: `IntelOwl.analyzer_healthcheck` and `IntelOwl.connector_healthcheck` function.
+   * CLI: `$ pyintelowl analyzer-healthcheck <analyzer_name>` and `$ pyintelowl connector-healthcheck <connector_name>`
+   * API: `GET /api/analyzer/{analyzer_name}/healthcheck` and `GET /api /connector/{connector_name}/healthcheck`
+
+
+## TLP Support
+IntelOwl supports the `Traffic Light Protocol` (`TLP`) to facilitate sharing of job analysis results.
+
+Following are the indicators available when requesting an analysis (in the order of increasing sharing restrictions):
+1. `WHITE`: no restriction
+2. `GREEN`: disable analyzers that could impact privacy
+3. `AMBER`: disable analyzers that could impact privacy and limit view permissions to my group
+4. `RED`: disable analyzers that could impact privacy, limit view permissions to my group and do not use any external service
+
+These indicators when used with `maximum_tlp` (option available in connectors), give you the control of what information is shared to the external platforms.
 
 
 ## Available Analyzers
@@ -215,8 +250,8 @@ Some analyzers require details other than just IP, URL, Domain etc... We classif
 * `Dehashed_Search`: Query any observable/keyword against https://dehashed.com's search API.
 
 #### Extra analyzers
-
 [Additional analyzers](Advanced-Usage.html#optional-analyzers) that can be enabled per your wish.
+
 
 ## Available Connectors
 Connectors are designed to run after every successful analysis which makes them suitable for automated threat-sharing. They support integration with other SIEM/SOAR projects, specifically aimed at Threat Sharing Platforms.
@@ -233,46 +268,5 @@ The following is the list of the available connectors:
 * `OpenCTI`: automatically creates an observable and a linked report on your OpenCTI instance, linking the the successful analysis on IntelOwl.
 * `YETI`: YETI = Your Everyday Threat Intelligence. find or create observable on YETI, linking the successful analysis on IntelOwl.
 
-## Connectors customization
-Connectors being optional are `disabled` by default. You can enable them by changing the configuration values inside `configuration/connector_config.json`. This file is mounted as a docker volume, so you won't need to rebuild the image.
-
-The following are all the keys that you can change without touching the source code:
-* `disabled`: (similar to analyzers) use this to enable/disable certain connectors, the enabled connectors are called after successful analysis.
-* `soft_time_limit`: (similar to analyzers) this is the maximum time (in seconds) of execution for an connector. Once reached, the task will be killed (or managed in the **code** by a custom Exception). Default 300s
-* `queue`: (similar to analyzers) this takes effects only when [multi-queue](https://intelowl.readthedocs.io/en/develop/Advanced-Usage.html#multi-queue) is enabled. Choose which celery worker would execute the task: `local` (ideal for tasks that leverage local applications), `long` (ideal for long tasks) or `default` (ideal for simple webAPI-based connectors).
-* `maximum_tlp` (default `WHITE`, choices `WHITE`, `GREEN`, `AMBER`, `RED`): specify with the maximum TLP of the analysis upto which the connector is allowed to run. (e.g. if `maximum_tlp` is `GREEN`, it would run for analysis with TLPs `WHITE` and `GREEN`). To learn more about TLPs see [TLP Support](./Usage.md#tlp-support).
-
-Also, you can change the name of every available connector as you wish.
-
-Changing other keys will break the connector. In that case, you should think about create a new python module or to modify an existing one.
 
 To contribute to the project, see [Contribute](./Contribute.md)
-
-## Managing Analyzers and Connectors
-All plugins i.e. analyzers and connectors have `kill` and `retry` actions. In addition to that, all docker-based analyzers and connectors have a health check action to check if their associated instances are up or not. 
-- `kill` feature to stop a plugin whose status is `running`/`pending`: 
-   * GUI: Buttons on reports table on job result page.
-   * PyIntelOwl: `IntelOwl.kill_analyzer` and `IntelOwl.kill_connector` function.
-   * CLI: `$ pyintelowl jobs kill-analyzer <job_id> <analyzer_name>` and `$ pyintelowl jobs kill-connector <job_id> <connector_name>`
-   * API: `PATCH /api/job/{job_id}/analyzer/{analyzer_name}/kill` and `PATCH /api/job/{job_id}/connector/{connector_name}/kill`
-- `retry` feature to retry a plugin whose status is `failed`/`killed`: 
-   * GUI: Buttons on reports table on job result page.
-   * PyIntelOwl: `IntelOwl.retry_analyzer` and `IntelOwl.retry_connector` function,
-   * CLI: `$ pyintelowl jobs retry-analyzer <job_id> <analyzer_name>` and `$ pyintelowl jobs retry-connector <job_id> <connector_name>`
-   * API: `PATCH /api/job/{job_id}/analyzer/{analyzer_name}/retry` and `PATCH /api/job/{job_id}/connector/{connector_name}/retry`
-- `healthcheck` feature to check if docker container or external platform associated with an analyzer or connector respectively are up or not: 
-   * GUI: Buttons on analyzers table and connectors table.
-   * PyIntelOwl: `IntelOwl.analyzer_healthcheck` and `IntelOwl.connector_healthcheck` function.
-   * CLI: `$ pyintelowl analyzer-healthcheck <analyzer_name>` and `$ pyintelowl connector-healthcheck <connector_name>`
-   * API: `GET /api/analyzer/{analyzer_name}/healthcheck` and `GET /api /connector/{connector_name}/healthcheck`
-
-## TLP Support
-IntelOwl supports the `Traffic Light Protocol` (`TLP`) to facilitate sharing of job analysis results.
-
-Following are the indicators available when requesting an analysis (in the order of increasing sharing restrictions):
-1. `WHITE`: no restriction
-2. `GREEN`: disable analyzers that could impact privacy
-3. `AMBER`: disable analyzers that could impact privacy and limit view permissions to my group
-4. `RED`: disable analyzers that could impact privacy, limit view permissions to my group and do not use any external service
-
-These indicators when used with `maximum_tlp` (option available in connectors), give you the control of what information is shared to the external platforms.

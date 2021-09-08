@@ -6,7 +6,7 @@ import sys
 import json
 import logging
 import hashlib
-from typing import List, TypedDict
+from typing import List, TypedDict, Optional
 
 from django.conf import settings
 from rest_framework import serializers as rfs
@@ -17,19 +17,10 @@ from intel_owl import secrets as secrets_store
 
 logger = logging.getLogger(__name__)
 
-DATA_TYPE_MAPPING = {
-    "number": (
-        int,
-        float,
-    ),
-    "string": str,
-    "bool": bool,
-}
-
 
 class ConfigVerificationType(TypedDict):
     configured: bool
-    error_message: str
+    error_message: Optional[str]
     missing_secrets: List[str]
 
 
@@ -47,15 +38,8 @@ class SecretSerializer(rfs.Serializer):
     Used for `analyzer_config.json` and `connector_config.json` files.
     """
 
-    TYPE_CHOICES = (
-        ("number", "number"),
-        ("string", "string"),
-        ("bool", "bool"),
-    )
-
     key_name = rfs.CharField(max_length=128)
     env_var_key = rfs.CharField(max_length=128)
-    type = rfs.ChoiceField(choices=TYPE_CHOICES)
     description = rfs.CharField(allow_blank=True, required=False, max_length=512)
 
 
@@ -88,19 +72,33 @@ class AbstractConfigSerializer(rfs.Serializer):
 
     def get_verification(self, raw_instance) -> ConfigVerificationType:
         # raw instance because input is json and not django model object
-        errors = self._check_secrets(raw_instance["secrets"])
-        missing_secrets = list(errors.keys())
+        # get all missing secrets
+        secrets = raw_instance["secrets"]
+        missing_secrets = []
+        for key_name, secret_dict in secrets.items():
+            # check if available in environment
+            secret_val = secrets_store.get_secret(
+                secret_dict["env_var_key"], default=None
+            )
+            if not secret_val:
+                missing_secrets.append(key_name)
+
         num_missing_secrets = len(missing_secrets)
-        num_total_secrets = len(raw_instance["secrets"].keys())
-        final_err_msg = ";".join(errors.values())
-        final_err_msg += "; (%d of %d satisfied)" % (
-            num_total_secrets - num_missing_secrets,
-            num_total_secrets,
-        )
+        if num_missing_secrets:
+            configured = False
+            num_total_secrets = len(secrets.keys())
+            error_message = "(%s) not set; (%d of %d satisfied)" % (
+                ",".join(missing_secrets),
+                num_total_secrets - num_missing_secrets,
+                num_total_secrets,
+            )
+        else:
+            configured = True
+            error_message = None
 
         return {
-            "configured": num_missing_secrets == 0,
-            "error_message": final_err_msg,
+            "configured": configured,
+            "error_message": error_message,
             "missing_secrets": missing_secrets,
         }
 
@@ -115,23 +113,6 @@ class AbstractConfigSerializer(rfs.Serializer):
         return secrets
 
     # utility methods
-    def _check_secrets(self, secrets):
-        errors = {}
-        for key_name, secret_dict in secrets.items():
-            # check if set and correct data type
-            secret_val = secrets_store.get_secret(secret_dict["env_var_key"])
-            if not secret_val:
-                errors[key_name] = f"'{key_name}': not set"
-            elif secret_val and not isinstance(
-                secret_val, DATA_TYPE_MAPPING[secret_dict["type"]]
-            ):
-                errors[key_name] = "'%s': expected %s got %s" % (
-                    key_name,
-                    secret_dict["type"],
-                    type(secret_val),
-                )
-
-        return errors
 
     @classmethod
     def _get_config_path(cls) -> str:

@@ -6,10 +6,7 @@
     "maximum_tlp": "WHITE",
     "config": {
       "soft_time_limit": 30,
-      "queue": "default",
-      "ssl_check": true,
-      "debug": false,
-      "tlp": "white"
+      "queue": "default"
     },
     "secrets": {
       "api_key_name": {
@@ -20,6 +17,23 @@
         "env_var_key": "CONNECTOR_MISP_URL",
         "description": "URL of your MISP instance"
       }
+    },
+    "params": {
+      "ssl_check": {
+        "value": true,
+        "type": "bool",
+        "description": ""
+      },
+      "debug": {
+        "value": false,
+        "type": "bool",
+        "description": ""
+      },
+      "tlp": {
+        "value": "white",
+        "type": "str",
+        "description": ""
+      }
     }
   },
   "OpenCTI": {
@@ -29,17 +43,7 @@
     "maximum_tlp": "WHITE",
     "config": {
       "soft_time_limit": 30,
-      "queue": "default",
-      "ssl_verify": true,
-      "proxies": {
-        "http": "",
-        "https": ""
-      },
-      "tlp": {
-        "type": "white",
-        "color": "#ffffff",
-        "x_opencti_order": 1
-      }
+      "queue": "default"
     },
     "secrets": {
       "api_key_name": {
@@ -50,6 +54,30 @@
         "env_var_key": "CONNECTOR_OPENCTI_URL",
         "description": "URL of your OpenCTI instance"
       }
+    },
+    "params": {
+      "ssl_verify": {
+        "value": true,
+        "type": "bool",
+        "description": ""
+      },
+      "proxies": {
+        "value": {
+          "http": "",
+          "https": ""
+        },
+        "type": "dict",
+        "description": ""
+      },
+      "tlp": {
+        "value": {
+          "type": "white",
+          "color": "#ffffff",
+          "x_opencti_order": 1
+        },
+        "type": "dict",
+        "description": ""
+      }
     }
   },
   "YETI": {
@@ -59,8 +87,7 @@
     "maximum_tlp": "WHITE",
     "config": {
       "soft_time_limit": 30,
-      "queue": "default",
-      "verify_ssl": true
+      "queue": "default"
     },
     "secrets": {
       "api_key_name": {
@@ -70,6 +97,13 @@
       "url_key_name": {
         "env_var_key": "CONNECTOR_YETI_URL",
         "description": "API URL of your YETI instance"
+      }
+    },
+    "params": {
+      "verify_ssl": {
+        "value": true,
+        "type": "bool",
+        "description": ""
       }
     }
   }

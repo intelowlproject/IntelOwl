@@ -205,7 +205,7 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * `YETI` (Your Everyday Threat Intelligence): scan an observable on a [YETI](https://github.com/yeti-platform/yeti) instance.
 * `HashLookupServer_Get_Observable`: check if a md5 or sha1 is available in the database of [known file hosted by CIRCL](https://github.com/adulau/hashlookup-server)
 * `ClamAV`: scan a file via the [ClamAV AntiVirus Engine](https://www.clamav.net/)
-* `Spyse`: scan domains, IPs and emails using [spyse](https://spyse.com/)'s API
+* `Spyse`: Scan domains, IPs, emails and CVEs using Spyse's API. Register [here](https://spyse.com/user/registration).
 
 #### Generic analyzers (email, phone number, etc.; anything really)
 Some analyzers require details other than just IP, URL, Domain etc... We classified them as Generic Analyzers. Since the type of field is not known, there is a format for strings to be followed.

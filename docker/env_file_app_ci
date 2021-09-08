@@ -28,6 +28,7 @@ ELASTICSEARCH_HOST=
 ELASTICSEARCH_NO_OF_SHARDS=1
 ELASTICSEARCH_NO_OF_REPLICAS=0
 
+# analyzers secrets (optional)
 IPINFO_KEY=test
 SHODAN_KEY=test
 ABUSEIPDB_KEY=test
@@ -69,6 +70,9 @@ MALPEDIA_KEY=test
 DEHASHED_AUTH_KEY=email@example.com:verysecureapikey
 OPENCTI_KEY=test
 YETI_KEY=test
+SPYSE_API_KEY=test
+
+# connectors secrets (optional)
 CONNECTOR_MISP_KEY=test
 CONNECTOR_OPENCTI_KEY=test
 CONNECTOR_YETI_KEY=test

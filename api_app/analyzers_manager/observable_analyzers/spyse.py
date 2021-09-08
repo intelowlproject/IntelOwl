@@ -6,6 +6,7 @@ import re
 from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager import classes
 
+from intel_owl.consts import REGEX_EMAIL, REGEX_CVE
 from tests.mock_utils import if_mock_connections, patch, MockResponse
 
 
@@ -15,28 +16,37 @@ class Spyse(classes.ObservableAnalyzer):
     def set_params(self, params):
         self.__api_key = self._secrets["api_key_name"]
 
-    def run(self):
-        params = {"key": self.__api_key}
+    def __build_spyse_api_uri(self) -> str:
         if self.observable_classification == self.ObservableTypes.DOMAIN:
-            uri = f"domain/{self.observable_name}"
+            endpoint = "domain"
         elif self.observable_classification == self.ObservableTypes.IP:
-            uri = f"ip/{self.observable_name}"
+            endpoint = "ip"
         elif self.observable_classification == self.ObservableTypes.GENERIC:
-            if re.match(r"^[\w\.\+\-]+\@[\w]+\.[a-z]{2,3}$", self.observable_name):
-                uri = f"email/{self.observable_name}"
+            # it may be email
+            if re.match(REGEX_EMAIL, self.observable_name):
+                endpoint = "email"
+            # it may be cve
+            if re.match(REGEX_CVE, self.observable_name):
+                endpoint = "cve"
             else:
                 raise AnalyzerRunException(
-                    f"{self.observable_name} not supported."
-                    "Please enter a valid email address."
+                    f"{self.analyzer_name} with `generic` supports email and CVE only."
                 )
         else:
             raise AnalyzerRunException(
                 f"{self.observable_classification} not supported."
                 "Supported are: IP, domain and generic."
             )
+        return f"{self.base_url}/{endpoint}/{self.observable_name}"
 
+    def run(self):
+        headers = {
+            "Accept": "application/json",
+            "Authorization": f"Bearer {self.__api_key}",
+        }
+        api_uri = self.__build_spyse_api_uri()
         try:
-            response = requests.get(self.base_url + uri, params=params)
+            response = requests.get(api_uri, headers=headers)
             response.raise_for_status()
         except requests.RequestException as e:
             raise AnalyzerRunException(e)

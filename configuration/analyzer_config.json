@@ -1968,7 +1968,7 @@
   "Spyse":{
     "type": "observable",
     "python_module": "spyse.Spyse",
-    "description": "scan domains, IPs and emails using spyse.com's API",
+    "description": "scan domains, IPs, emails and CVEs using Spyse.com's API. Register here: https://spyse.com/user/registration",
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
@@ -1983,9 +1983,9 @@
     },
     "secrets": {
       "api_key_name": {
-        "env_var_key": "SPYSE_KEY",
+        "env_var_key": "SPYSE_API_KEY",
         "type": "string",
-        "description": ""
+        "description": "Spyse.com API key"
       }
     }
   },

@@ -31,6 +31,7 @@
   - `secrets`: Stores plugin specific secrets like API Key name along with the secret's type and description.
 
 **New Inbuilt Analyzers/ Fixes to existing:**
+- New `Spyse` analyzer: Scan domains, IPs, emails and CVEs using Spyse's API. Register [here](https://spyse.com/user/registration).
 - New `OpenCTI` analyzer: scan an observable on an OpenCTI instance.
 - New `Intezer_Get` analyzer: check Managing Analyzers and Connectors if an analysis related to a hash is available in [Intezer](https://analyze.intezer.com/)
 - New `MWDB_Get` analyzer: [mwdblib](https://mwdb.readthedocs.io/en/latest/) Retrieve malware file analysis by hash from repository maintained by CERT Polska MWDB.

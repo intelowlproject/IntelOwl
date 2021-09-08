@@ -1910,6 +1910,30 @@
     },
     "secrets": {}
   },
+  "Spyse":{
+    "type": "observable",
+    "python_module": "spyse.Spyse",
+    "description": "Scan domains, IPs, emails and CVEs using Spyse.com's API. Register here: https://spyse.com/user/registration",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": [
+      "ip",
+      "domain",
+      "generic"
+    ],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "SPYSE_API_KEY",
+        "type": "string",
+        "description": "Spyse API token"
+      }
+    }
+  },
   "SSAPINet": {
     "type": "observable",
     "python_module": "ss_api_net.SSAPINet",

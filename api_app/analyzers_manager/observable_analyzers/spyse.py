@@ -26,7 +26,7 @@ class Spyse(classes.ObservableAnalyzer):
             if re.match(REGEX_EMAIL, self.observable_name):
                 endpoint = "email"
             # it may be cve
-            if re.match(REGEX_CVE, self.observable_name):
+            elif re.match(REGEX_CVE, self.observable_name):
                 endpoint = "cve"
             else:
                 raise AnalyzerRunException(

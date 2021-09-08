@@ -8,7 +8,7 @@
 
 **Notes:**
 - Update PyIntelOwl to version [4.0.0](https://github.com/intelowlproject/pyintelowl/blob/master/.github/CHANGELOG.md#400).
-- If you made any change to the `analyzer_config.json` then you will need to merge the changes manually because of the new format.
+- If you modified your local `analyzer_config.json` file, then you will need to merge the changes manually because of the new format.
 
 **Features:**
 - Plugins (analyzers/connectors) that are not properly configured will not run even if requested. They will be marked as disabled from the dropdown on the analysis form and as a bonus you can also see if and why a plugin is not configured on the GUI tables. 

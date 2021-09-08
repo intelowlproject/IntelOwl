@@ -92,15 +92,18 @@ class AbstractConfigSerializer(rfs.Serializer):
         missing_secrets = list(errors.keys())
         num_missing_secrets = len(missing_secrets)
         num_total_secrets = len(raw_instance["secrets"].keys())
-        final_err_msg = ";".join(errors.values())
-        final_err_msg += "; (%d of %d satisfied)" % (
-            num_total_secrets - num_missing_secrets,
-            num_total_secrets,
-        )
+        if num_missing_secrets:
+            error_message = ";".join(errors.values())
+            error_message += "; (%d of %d satisfied)" % (
+                num_total_secrets - num_missing_secrets,
+                num_total_secrets,
+            )
+        else:
+            error_message = None
 
         return {
             "configured": num_missing_secrets == 0,
-            "error_message": final_err_msg,
+            "error_message": error_message,
             "missing_secrets": missing_secrets,
         }
 

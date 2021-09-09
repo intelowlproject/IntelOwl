@@ -10,6 +10,7 @@ from rest_framework.exceptions import ValidationError
 
 from intel_owl.celery import app as celery_app
 
+from api_app.core.consts import DEFAULT_QUEUE
 from .classes import BaseAnalyzerMixin, DockerBasedAnalyzer
 from .models import AnalyzerReport
 from .dataclasses import AnalyzerConfig
@@ -19,9 +20,6 @@ from ..exceptions import AlreadyFailedJobException, NotRunnableAnalyzer
 
 
 logger = logging.getLogger(__name__)
-
-# constants
-DEFAULT_QUEUE = "default"
 
 
 def filter_analyzers(serialized_data: Dict, warnings: List) -> List[str]:
@@ -137,30 +135,24 @@ def start_analyzers(
             continue
 
         # get runtime_configuration if any specified for this analyzer
-        runtime_conf = runtime_configuration.get(a_name, {})
-
-        # merge runtime_conf
-        config.config = {
-            **config.config,
-            **runtime_conf,
-        }
+        runtime_params = runtime_configuration.get(a_name, {})
         # gen new task_id
         task_id = uuid()
         # construct arguments
         args = [
             job_id,
             config.asdict(),
-            {"runtime_configuration": runtime_conf, "task_id": task_id},
+            {"runtime_configuration": runtime_params, "task_id": task_id},
         ]
         # get celery queue
-        queue = config.params.queue
+        queue = config.config.queue
         if queue not in settings.CELERY_QUEUES:
             logger.warning(
                 f"Analyzer {a_name} has a wrong queue." f" Setting to `{DEFAULT_QUEUE}`"
             )
             queue = DEFAULT_QUEUE
         # get soft_time_limit
-        soft_time_limit = config.params.soft_time_limit
+        soft_time_limit = config.config.soft_time_limit
         # create task signature and add to list
         task_signatures.append(
             tasks.run_analyzer.signature(
@@ -241,20 +233,20 @@ def set_failed_analyzer(
 def run_analyzer(
     job_id: int, config_dict: dict, report_defaults: dict
 ) -> AnalyzerReport:
-    config = AnalyzerConfig.from_dict(config_dict)
+    aconfig = AnalyzerConfig.from_dict(config_dict)
     klass: BaseAnalyzerMixin = None
     report: AnalyzerReport = None
     try:
-        cls_path = config.get_full_import_path()
+        cls_path = aconfig.get_full_import_path()
         try:
             klass = import_string(cls_path)
         except ImportError:
             raise Exception(f"Class: {cls_path} couldn't be imported")
         # else
-        instance = klass(config=config, job_id=job_id, report_defaults=report_defaults)
+        instance = klass(config=aconfig, job_id=job_id, report_defaults=report_defaults)
         report = instance.start()
     except Exception as e:
-        report = set_failed_analyzer(job_id, config.name, str(e), **report_defaults)
+        report = set_failed_analyzer(job_id, aconfig.name, str(e), **report_defaults)
 
     return report
 

@@ -39,12 +39,17 @@ class Plugin(metaclass=ABCMeta):
 
     @property
     def _params(self) -> dict:
-        return self._config.config
+        default_params = {
+            name: param.value for name, param in self._config.params.items()
+        }
+        runtime_params = self.report_defaults["runtime_configuration"]
+        # overwrite default with runtime
+        return {**default_params, **runtime_params}
 
     def set_params(self, params: dict):
         """
-        method which receives the parse config["config"] dict.
-        This is called inside `start` and serves as a post `__init__` hook.
+        Method which receives the parsed `config["params"]` dict.
+        This is called inside `__post__init__`.
         """
 
     @abstractmethod

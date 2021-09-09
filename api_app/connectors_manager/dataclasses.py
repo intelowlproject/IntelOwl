@@ -21,6 +21,12 @@ class ConnectorConfig(AbstractConfig):
         return f"api_app.connectors_manager.connectors.{self.python_module}"
 
     @classmethod
+    def from_dict(cls, data: dict) -> "ConnectorConfig":
+        return cls(**data)
+
+    # orm methods
+
+    @classmethod
     def get(cls, connector_name: str) -> typing.Optional["ConnectorConfig"]:
         """
         Returns config dataclass by connector_name if found, else None
@@ -32,12 +38,13 @@ class ConnectorConfig(AbstractConfig):
         return cls.from_dict(config_dict)
 
     @classmethod
-    def from_dict(cls, data: dict) -> "ConnectorConfig":
-        return cls(**data)
-
-    @classmethod
     def all(cls) -> typing.Dict[str, "ConnectorConfig"]:
         return {
             name: cls.from_dict(attrs)
             for name, attrs in cls.serializer_class.read_and_verify_config().items()
         }
+
+    @classmethod
+    def filter(cls, names: typing.List[str]) -> typing.Dict[str, "ConnectorConfig"]:
+        all_connector_configs = cls.all()
+        return {name: cc for name, cc in all_connector_configs.items() if name in names}

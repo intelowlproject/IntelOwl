@@ -13,6 +13,7 @@ from rest_framework import serializers as rfs
 from cache_memoize import cache_memoize
 
 from intel_owl import secrets as secrets_store
+from .consts import DATATYPE_CHOICES
 
 
 logger = logging.getLogger(__name__)
@@ -32,13 +33,43 @@ class BaseField(rfs.Field):
         return data
 
 
-class SecretSerializer(rfs.Serializer):
+class _ConfigSerializer(rfs.Serializer):
     """
-    A base serializer class for validating `secrets`.
+    To validate `config` attr.
     Used for `analyzer_config.json` and `connector_config.json` files.
     """
 
-    key_name = rfs.CharField(max_length=128)
+    queue = rfs.CharField(required=True)
+    soft_time_limit = rfs.IntegerField(required=True)
+
+
+class _ParamSerializer(rfs.Serializer):
+    """
+    To validate `params` attr.
+    Used for `analyzer_config.json` and `connector_config.json` files.
+    """
+
+    value = BaseField()
+    type = rfs.ChoiceField(choices=DATATYPE_CHOICES)
+    description = rfs.CharField(allow_blank=True, required=True, max_length=512)
+
+    def validate(self, attrs):
+        value_type: str = type(attrs["value"]).__name__
+        expected_type: str = attrs["type"]
+        if value_type != expected_type:
+            raise rfs.ValidationError(
+                f"Invalid value type. {value_type} != {expected_type}"
+            )
+        return super().validate(attrs)
+
+
+class _SecretSerializer(rfs.Serializer):
+    """
+    To validate `secrets` attr.
+    Used for `analyzer_config.json` and `connector_config.json` files.
+    """
+
+    # key_name = rfs.CharField(max_length=128)
     env_var_key = rfs.CharField(max_length=128)
     description = rfs.CharField(allow_blank=True, required=False, max_length=512)
 
@@ -54,13 +85,15 @@ class AbstractConfigSerializer(rfs.Serializer):
     # sentinel/ flag
     _is_valid_flag = False
 
-    # common fields
+    # common basic fields
     name = rfs.CharField(required=True)
     python_module = rfs.CharField(required=True, max_length=128)
     disabled = rfs.BooleanField(required=True)
-    config = rfs.JSONField(required=True)
-    secrets = rfs.JSONField(required=False)
     description = rfs.CharField(allow_blank=True, required=False)
+    # common custom fields
+    config = _ConfigSerializer()
+    secrets = rfs.DictField(child=_SecretSerializer())
+    params = rfs.DictField(child=_ParamSerializer())
     # automatically populated fields
     verification = rfs.SerializerMethodField()
 
@@ -101,16 +134,6 @@ class AbstractConfigSerializer(rfs.Serializer):
             "error_message": error_message,
             "missing_secrets": missing_secrets,
         }
-
-    def validate_secrets(self, secrets):
-        # items in JSON file are in key-value format,
-        # but we need a list of objects instead
-        data = [
-            {"key_name": key, **secret_dict} for key, secret_dict in secrets.items()
-        ]
-        serializer = SecretSerializer(data=data, many=True)
-        serializer.is_valid(raise_exception=True)
-        return secrets
 
     # utility methods
 

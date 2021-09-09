@@ -13,7 +13,7 @@ from rest_framework import serializers as rfs
 from cache_memoize import cache_memoize
 
 from intel_owl import secrets as secrets_store
-from .consts import DATATYPE_CHOICES
+from intel_owl.consts import PARAM_DATATYPE_CHOICES
 
 
 logger = logging.getLogger(__name__)
@@ -50,12 +50,12 @@ class _ParamSerializer(rfs.Serializer):
     """
 
     value = BaseField()
-    type = rfs.ChoiceField(choices=DATATYPE_CHOICES)
+    type = rfs.ChoiceField(choices=PARAM_DATATYPE_CHOICES)
     description = rfs.CharField(allow_blank=True, required=True, max_length=512)
 
     def validate(self, attrs):
-        value_type: str = type(attrs["value"]).__name__
-        expected_type: str = attrs["type"]
+        value_type = type(attrs["value"]).__name__
+        expected_type = attrs["type"]
         if value_type != expected_type:
             raise rfs.ValidationError(
                 f"Invalid value type. {value_type} != {expected_type}"

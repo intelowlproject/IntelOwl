@@ -5,7 +5,11 @@ import typing
 import dataclasses
 
 from intel_owl import secrets as secrets_store
-from .consts import DEFAULT_QUEUE, DEFAULT_SOFT_TIME_LIMIT, DATATYPE_CHOICES
+from intel_owl.consts import (
+    DEFAULT_QUEUE,
+    DEFAULT_SOFT_TIME_LIMIT,
+    PARAM_DATATYPE_CHOICES,
+)
 
 
 @dataclasses.dataclass
@@ -24,7 +28,7 @@ class _Config:
 @dataclasses.dataclass
 class _Param:
     value: typing.Any
-    type: typing.Literal[DATATYPE_CHOICES]
+    type: typing.Literal[PARAM_DATATYPE_CHOICES]
     description: str
 
 
@@ -71,6 +75,10 @@ class AbstractConfig:
     @property
     def is_ready_to_use(self) -> bool:
         return not self.disabled and self.verification.configured
+
+    @property
+    def param_values(self) -> dict:
+        return {name: param.value for name, param in self.params.items()}
 
     def _read_secrets(self, secrets_filter=[]) -> typing.Dict[str, str]:
         """

@@ -9,8 +9,8 @@ from django.conf import settings
 from rest_framework.exceptions import ValidationError
 
 from intel_owl.celery import app as celery_app
+from intel_owl.consts import DEFAULT_QUEUE
 
-from api_app.core.consts import DEFAULT_QUEUE
 from .classes import BaseAnalyzerMixin, DockerBasedAnalyzer
 from .models import AnalyzerReport
 from .dataclasses import AnalyzerConfig

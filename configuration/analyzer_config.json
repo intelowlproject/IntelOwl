@@ -3075,7 +3075,7 @@
         "description": "If the sample is not already in VT, send the sample and perform a scan"
       },
       "force_active_scan_if_old": {
-        "value": true,
+        "value": false,
         "type": "bool",
         "description": "If the sample is old, it would be rescanned"
       },

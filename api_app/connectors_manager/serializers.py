@@ -45,4 +45,6 @@ class ConnectorReportSerializer(rfs.ModelSerializer):
             "errors",
             "process_time",
             "start_time",
+            "end_time",
+            "runtime_configuration",
         )

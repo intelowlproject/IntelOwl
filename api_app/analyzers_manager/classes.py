@@ -195,6 +195,7 @@ class FileAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
             import os
 
             os.remove(self.filepath)
+
         logger.info(
             f"FINISHED analyzer: {self.__repr__()} -> "
             f"File: ({self.filename}, md5: {self.md5})"

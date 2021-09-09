@@ -24,6 +24,7 @@ class AnalyzerReportSerializer(rfs.ModelSerializer):
             "process_time",
             "start_time",
             "end_time",
+            "runtime_configuration",
         )
 
 

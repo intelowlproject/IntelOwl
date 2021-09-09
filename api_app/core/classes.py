@@ -39,9 +39,7 @@ class Plugin(metaclass=ABCMeta):
 
     @property
     def _params(self) -> dict:
-        default_params = {
-            name: param.value for name, param in self._config.params.items()
-        }
+        default_params = self._config.param_values
         runtime_params = self.report_defaults["runtime_configuration"]
         # overwrite default with runtime
         return {**default_params, **runtime_params}

@@ -167,7 +167,7 @@
       "query_type": {
         "value": "A",
         "type": "str",
-        "description": ""
+        "description": "Query type against the chosen DNS resolver."
       }
     }
   },
@@ -281,7 +281,7 @@
   "CRXcavator": {
     "type": "observable",
     "python_module": "crxcavator.CRXcavator",
-    "description": "scans a chrome extension against crxcavator.io",
+    "description": "Scans a chrome extension against crxcavator.io service. Every Chrome-Extension has a unique alpha=numeric identifier. That's the only Input necessary. Eg: `Norton Safe Search Enhanced`'s identifier is `eoigllimhcllmhedfbmahegmoakcdakd`.",
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
@@ -396,7 +396,7 @@
   "Dehashed_Search": {
     "type": "observable",
     "python_module": "dehashed.DehashedSearch",
-    "description": "Query against https://dehashed.com's search API",
+    "description": "Query against Dehashed's search API. For configuration, refer to the 'Sizing & Pagination' section in [dehashed docs](https://www.dehashed.com/docs).",
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
@@ -414,26 +414,26 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "DEHASHED_AUTH_KEY",
-        "description": ""
+        "description": "Combination of your dehashed account's email and API key. Format: `email:api-key`."
       }
     },
     "params": {
       "size": {
         "value": 100,
         "type": "int",
-        "description": ""
+        "description": "Numer of records fetched. Recommend change to a large value."
       },
       "pages": {
         "value": 1,
         "type": "int",
-        "description": ""
+        "description": "Number of pages fetched. Recommend to keep at 1 only to save on credits."
       }
     }
   },
   "DNSDB": {
     "type": "observable",
     "python_module": "dnsdb.DNSdb",
-    "description": "scan an observable against the Passive DNS Farsight Database (support both v1 and v2 versions)",
+    "description": "Scan an observable against the Passive DNS Farsight Database (support both v1 and v2 versions). Official [API docs](https://docs.dnsdb.info/dnsdb-apiv2/).",
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
@@ -456,12 +456,32 @@
       "server": {
         "value": "api.dnsdb.info",
         "type": "str",
-        "description": ""
+        "description": "DNSDB server."
       },
       "api_version": {
         "value": 2,
         "type": "int",
-        "description": ""
+        "description": "API version of DNSDB (options: `1` and `2`)."
+      },
+      "rrtype": {
+        "value": "",
+        "type": "str",
+        "description": "DNS query type."
+      },
+      "limit": {
+        "value": 10000,
+        "type": "int",
+        "description": "Maximum number of results to retrieve."
+      },
+      "time": {
+        "value": {
+          "first_before": "",
+          "first_after": "",
+          "last_before": "", 
+          "last_after": ""
+        },
+        "type": "dict",
+        "description": "Time range"
       }
     }
   },
@@ -485,17 +505,22 @@
       "tld": {
         "value": true,
         "type": "bool",
-        "description": ""
+        "description": "Check for domains with different TLDs by supplying a dictionary file."
+      },
+      "tld_dict": {
+        "value": "abused_tlds.dict",
+        "type": "str",
+        "description": "Dictionary to use with `tld` argument (`common_tlds.dict/abused_tlds.dict`)."
       },
       "mxcheck": {
         "value": true,
         "type": "bool",
-        "description": ""
+        "description": "Find suspicious mail servers and flag them with SPYING-MX string."
       },
       "ssdeep": {
         "value": true,
         "type": "bool",
-        "description": ""
+        "description": "Enable fuzzy hashing - compare HTML content of original domain with a potentially malicious one and determine similarity."
       }
     }
   },
@@ -529,7 +554,13 @@
       "queue": "local"
     },
     "secrets": {},
-    "params": {}
+    "params": {
+      "additional_passwords_to_check": {
+        "value": [],
+        "type": "list",
+        "description": "List of passwords to try when decrypting the document"
+      }
+    }
   },
   "Doc_Info_Experimental": {
     "type": "file",
@@ -566,6 +597,11 @@
         "value": true,
         "type": "bool",
         "description": ""
+      },
+      "additional_passwords_to_check": {
+        "value": [],
+        "type": "list",
+        "description": "List of passwords to try when decrypting the document"
       }
     }
   },
@@ -608,7 +644,7 @@
   "FireHol_IPList": {
     "type": "observable",
     "python_module": "firehol_iplist.FireHol_IPList",
-    "description": "check if an IP is in FireHol's IPList",
+    "description": "Check if an IP is in FireHol's IPList. Refer to [FireHol's IPList](https://iplists.firehol.org/).",
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
@@ -626,7 +662,7 @@
           "firehol_level1.netset"
         ],
         "type": "list",
-        "description": ""
+        "description": "A list of firehol list names."
       }
     }
   },
@@ -705,7 +741,7 @@
       "query_type": {
         "value": "A",
         "type": "str",
-        "description": ""
+        "description": "Query type against the chosen DNS resolver."
       }
     }
   },
@@ -860,7 +896,7 @@
       "hashlookup_server": {
         "value": "",
         "type": "str",
-        "description": ""
+        "description": "custom hashlookup-server"
       }
     }
   },
@@ -881,7 +917,7 @@
       "hashlookup_server": {
         "value": "",
         "type": "str",
-        "description": ""
+        "description": "custom hashlookup-server"
       }
     }
   },
@@ -913,7 +949,7 @@
       "honeydb_analysis": {
         "value": "all",
         "type": "str",
-        "description": ""
+        "description": "Choose which endpoint to query from the HoneyDB service (options are: `all`, `scan_twitter`, `ip_query`, `ip_history`, `internet_scanner`, `ip_info`)"
       }
     }
   },
@@ -1081,7 +1117,7 @@
       "upload_file": {
         "value": true,
         "type": "bool",
-        "description": ""
+        "description": "Uploads the analyzed file to Intezer in case an analysis of that file is not available in that platform."
       },
       "disable_dynamic_unpacking": {
         "value": false,
@@ -1262,7 +1298,12 @@
       "ssl_check": {
         "value": true,
         "type": "bool",
-        "description": ""
+        "description": "Enable SSL certificate server verification. Change this if your MISP instance has not SSL enabled"
+      },
+      "debug": {
+        "value": false,
+        "type": "bool",
+        "description": "Enable debug logs."
       }
     }
   },
@@ -1490,7 +1531,7 @@
       "upload_file": {
         "value": true,
         "type": "bool",
-        "description": ""
+        "description": "Uploads the file to repository."
       },
       "private": {
         "value": false,
@@ -1500,7 +1541,7 @@
       "max_tries": {
         "value": 50,
         "type": "int",
-        "description": ""
+        "description": "Number of retries to perform for polling analysis results."
       }
     }
   },
@@ -1559,7 +1600,7 @@
       "ssl_verify": {
         "value": true,
         "type": "bool",
-        "description": ""
+        "description": "Enable SSL certificate server verification. Change this if your OpenCTI instance has not SSL enabled."
       },
       "proxies": {
         "value": {
@@ -1567,12 +1608,12 @@
           "https": ""
         },
         "type": "dict",
-        "description": ""
+        "description": "Use these options to pass your request through a proxy server."
       },
       "exact_search": {
         "value": false,
         "type": "bool",
-        "description": ""
+        "description": "Use this if you want exact matches only for the observables returned."
       }
     }
   },
@@ -1776,22 +1817,22 @@
       "os": {
         "value": "windows",
         "type": "str",
-        "description": ""
+        "description": "Change operating system for the emulation."
       },
       "arch": {
         "value": "x86",
         "type": "str",
-        "description": ""
+        "description": "Change system architecture for the emulation."
       },
       "profile": {
-        "value": null,
-        "type": "NoneType",
-        "description": ""
+        "value": "",
+        "type": "str",
+        "description": "Add a Qiling [profile](https://docs.qiling.io/en/latest/profile/)."
       },
       "shellcode": {
         "value": false,
         "type": "bool",
-        "description": ""
+        "description": "true if the file is a shellcode."
       }
     }
   },
@@ -1815,22 +1856,22 @@
       "os": {
         "value": "windows",
         "type": "str",
-        "description": ""
+        "description": "Change operating system for the emulation."
       },
       "arch": {
         "value": "x86",
         "type": "str",
-        "description": ""
+        "description": "Change system architecture for the emulation."
       },
       "profile": {
-        "value": null,
-        "type": "NoneType",
-        "description": ""
+        "value": "",
+        "type": "str",
+        "description": "Add a Qiling [profile](https://docs.qiling.io/en/latest/profile/)."
       },
       "shellcode": {
         "value": true,
         "type": "bool",
-        "description": ""
+        "description": "true if the file is a shellcode."
       }
     }
   },
@@ -1855,22 +1896,22 @@
       "os": {
         "value": "linux",
         "type": "str",
-        "description": ""
+        "description": "Change operating system for the emulation."
       },
       "arch": {
         "value": "x86",
         "type": "str",
-        "description": ""
+        "description": "Change system architecture for the emulation."
       },
       "profile": {
-        "value": null,
-        "type": "NoneType",
-        "description": ""
+        "value": "",
+        "type": "str",
+        "description": "Add a Qiling [profile](https://docs.qiling.io/en/latest/profile/)."
       },
       "shellcode": {
         "value": false,
         "type": "bool",
-        "description": ""
+        "description": "true if the file is a shellcode."
       }
     }
   },
@@ -1894,22 +1935,22 @@
       "os": {
         "value": "linux",
         "type": "str",
-        "description": ""
+        "description": "Change operating system for the emulation "
       },
       "arch": {
         "value": "x86",
         "type": "str",
-        "description": ""
+        "description": "Change system architecture for the emulation."
       },
       "profile": {
-        "value": null,
-        "type": "NoneType",
-        "description": ""
+        "value": "",
+        "type": "str",
+        "description": "Add a Qiling [profile](https://docs.qiling.io/en/latest/profile/)."
       },
       "shellcode": {
         "value": true,
         "type": "bool",
-        "description": ""
+        "description": "true if the file is a shellcode."
       }
     }
   },
@@ -1933,7 +1974,7 @@
       "query_type": {
         "value": "A",
         "type": "str",
-        "description": ""
+        "description": "Query type against the chosen DNS resolver."
       }
     }
   },
@@ -2367,7 +2408,7 @@
   "SSAPINet": {
     "type": "observable",
     "python_module": "ss_api_net.SSAPINet",
-    "description": "get a screenshot of a web page using screenshotapi.net (external source)",
+    "description": "Get a screenshot of a web page using screenshotapi.net. For configuration, Refer to the [docs](https://screenshotapi.net/documentation).",
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
@@ -2388,24 +2429,27 @@
       "use_proxy": {
         "value": false,
         "type": "bool",
-        "description": ""
+        "description": "Use the `use_proxy` and `proxy` options to pass your request through a proxy server."
       },
       "proxy": {
         "value": "",
         "type": "str",
-        "description": ""
+        "description": "Use the `use_proxy` and `proxy` options to pass your request through a proxy server."
       },
       "output": {
         "value": "image",
         "type": "str",
-        "description": ""
+        "description": "Specify output type (options: `image` i.e. raw base64 encoded image, `json` i.e. containing link)"
       },
       "extra_api_params": {
         "value": {
-          "full_page": true
+          "full_page": true,
+          "fresh": false,
+          "lazy_load": false,
+          "destroy_screenshot": false
         },
         "type": "dict",
-        "description": ""
+        "description": "Refer to their docs](https://screenshotapi.net/documentation)."
       }
     }
   },
@@ -2590,7 +2634,7 @@
   "Thug_HTML_Info": {
     "type": "file",
     "python_module": "thug_file.ThugFile",
-    "description": "Perform hybrid dynamic/static analysis on a saved HTML page",
+    "description": "Perform hybrid dynamic/static analysis on a saved HTML page. For configuration, refer to [thug's usage docs](https://buffer.github.io/thug/doc/usage.html#basic-usage).",
     "disabled": false,
     "external_service": false,
     "leaks_info": false,
@@ -2607,32 +2651,32 @@
       "dom_events": {
         "value": "click,mouseover",
         "type": "str",
-        "description": ""
+        "description": "See [Thug docs: dom events handling](https://buffer.github.io/thug/doc/usage.html#dom-events-handling)."
       },
       "use_proxy": {
         "value": false,
         "type": "bool",
-        "description": ""
+        "description": "option `-p`"
       },
       "proxy": {
         "value": "",
         "type": "str",
-        "description": ""
+        "description": "option `-p`"
       },
       "enable_image_processing_analysis": {
         "value": true,
         "type": "bool",
-        "description": ""
+        "description": "option `-a`"
       },
       "enable_awis": {
         "value": true,
         "type": "bool",
-        "description": ""
+        "description": "option `-E`"
       },
       "user_agent": {
         "value": "winxpie60",
         "type": "str",
-        "description": ""
+        "description": "See [Thug docs: browser personality](https://buffer.github.io/thug/doc/usage.html#browser-personality)."
       }
     }
   },
@@ -2657,32 +2701,32 @@
       "dom_events": {
         "value": "click,mouseover",
         "type": "str",
-        "description": ""
+        "description": "See [Thug docs: dom events handling](https://buffer.github.io/thug/doc/usage.html#dom-events-handling)."
       },
       "use_proxy": {
         "value": false,
         "type": "bool",
-        "description": ""
+        "description": "option `-p`"
       },
       "proxy": {
         "value": "",
         "type": "str",
-        "description": ""
+        "description": "option `-p`"
       },
       "enable_image_processing_analysis": {
         "value": true,
         "type": "bool",
-        "description": ""
+        "description": "option `-a`"
       },
       "enable_awis": {
         "value": true,
         "type": "bool",
-        "description": ""
+        "description": "option `-E`"
       },
       "user_agent": {
         "value": "winxpie60",
         "type": "str",
-        "description": ""
+        "description": "See [Thug docs: browser personality](https://buffer.github.io/thug/doc/usage.html#browser-personality)."
       }
     }
   },
@@ -2746,17 +2790,17 @@
       "endpoint": {
         "value": "public",
         "type": "str",
-        "description": ""
-      },
-      "analysis_type": {
-        "value": "search",
-        "type": "str",
-        "description": ""
+        "description": "Choose whether to query on the public or the private endpoint of triage (options: `private`, `public`)."
       },
       "report_type": {
         "value": "overview",
         "type": "str",
-        "description": ""
+        "description": "Determines how detailed the final report will be (options: `overview`, `complete`)."
+      },
+      "analysis_type": {
+        "value": "search",
+        "type": "str",
+        "description": "Choose whether to search for existing observable reports or upload for scanning via URL (options: `search` and `submit`)."
       }
     }
   },
@@ -2781,12 +2825,12 @@
       "endpoint": {
         "value": "public",
         "type": "str",
-        "description": ""
+        "description": "Choose whether to query on the public or the private endpoint of triage (options: `private`, `public`)."
       },
       "report_type": {
         "value": "overview",
         "type": "str",
-        "description": ""
+        "description": "Determines how detailed the final report will be (options: `overview`, `complete`)."
       }
     }
   },
@@ -2996,12 +3040,12 @@
       "include_behaviour_summary": {
         "value": true,
         "type": "bool",
-        "description": ""
+        "description": "Include a summary of behavioral analysis reports alongside default scan report"
       },
       "include_sigma_analyses": {
         "value": true,
         "type": "bool",
-        "description": ""
+        "description": "Include sigma analysis report alongside default scan report"
       }
     }
   },
@@ -3028,17 +3072,22 @@
       "force_active_scan": {
         "value": true,
         "type": "bool",
-        "description": ""
+        "description": "If the sample is not already in VT, send the sample and perform a scan"
+      },
+      "force_active_scan_if_old": {
+        "value": true,
+        "type": "bool",
+        "description": "If the sample is old, it would be rescanned"
       },
       "include_behaviour_summary": {
         "value": true,
         "type": "bool",
-        "description": ""
+        "description": "Include a summary of behavioral analysis reports alongside default scan report"
       },
       "include_sigma_analyses": {
         "value": true,
         "type": "bool",
-        "description": ""
+        "description": "Include sigma analysis report alongside default scan report"
       }
     }
   },
@@ -3093,7 +3142,7 @@
   "WiGLE": {
     "type": "observable",
     "python_module": "wigle.WiGLE",
-    "description": "Maps and database of 802.11 wireless networks, with statistics, submitted by wardrivers, netstumblers, and net huggers.",
+    "description": "Maps and database of 802.11 wireless networks, with statistics, submitted by wardrivers, netstumblers, and net huggers. Also, the string to be passed in input field of generic analyzers have a format. Different variables are separated by semicolons(`;`) and the field-name and value are separated by equals sign(`=`). Example string for search_type `CDMA Network` is `sid=12345;nid=12345;bsid=12345`.",
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
@@ -3114,7 +3163,7 @@
       "search_type": {
         "value": "WiFi Network",
         "type": "str",
-        "description": ""
+        "description": "Corresponds to different routes mentioned in [docs](https://api.wigle.net/swagger#/v3_ALPHA). (options: `WiFi Network`, `CDMA Network`, `Bluetooth Network`, `GSM/LTE/WCDMA Network`)."
       }
     }
   },
@@ -3515,24 +3564,24 @@
       "verify_ssl": {
         "value": true,
         "type": "bool",
-        "description": ""
+        "description": "Enable SSL certificate server verification. Change this if your YETI instance has not SSL enabled."
       },
       "regex": {
         "value": false,
         "type": "bool",
-        "description": ""
+        "description": "Use this if you are searching for observables using a regex."
       },
       "results_count": {
         "value": 50,
         "type": "int",
-        "description": ""
+        "description": "Use this to limit the maximum number of results obtained from a search."
       }
     }
   },
   "ZoomEye": {
     "type": "observable",
     "python_module": "zoomeye.ZoomEye",
-    "description": "Cyberspace Search Engine recording information of devices, websites, services and components etc..",
+    "description": "Cyberspace Search Engine recording information of devices, websites, services, components etc. [Host search: docs](https://www.zoomeye.org/doc#host-search).",
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
@@ -3554,27 +3603,27 @@
       "search_type": {
         "value": "host",
         "type": "str",
-        "description": ""
+        "description": "Choose among `host`, `web`, `both` (both is only available to ZoomEye VIP users)."
       },
       "query": {
         "value": "",
         "type": "str",
-        "description": ""
+        "description": "Follow according to docs, but omit `ip`, `hostname`. Eg: `city:biejing port:21`."
       },
       "page": {
         "value": 1,
         "type": "int",
-        "description": ""
+        "description": "Page number to fetch."
       },
       "facets": {
         "value": "",
         "type": "str",
-        "description": ""
+        "description": "A comma-separated list of properties to get summary information on query. Eg: `facets:app,os`."
       },
       "history": {
         "value": true,
         "type": "bool",
-        "description": ""
+        "description": "To query the history data."
       }
     }
   }

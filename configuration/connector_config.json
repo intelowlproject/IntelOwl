@@ -1,7 +1,7 @@
 {
   "MISP": {
     "disabled": true,
-    "description": "automatically creates an event on your MISP instance, linking the analysis the successful analysis on IntelOwl",
+    "description": "Automatically creates an event on your MISP instance, linking the analysis the successful analysis on IntelOwl",
     "python_module": "misp.MISP",
     "maximum_tlp": "WHITE",
     "config": {
@@ -22,23 +22,23 @@
       "ssl_check": {
         "value": true,
         "type": "bool",
-        "description": ""
+        "description": "Enable SSL certificate server verification. Change this if your MISP instance has not SSL enabled."
       },
       "debug": {
         "value": false,
         "type": "bool",
-        "description": ""
+        "description": "Enable debug logs."
       },
       "tlp": {
         "value": "white",
         "type": "str",
-        "description": ""
+        "description": "Change this as per your organization's threat sharing conventions."
       }
     }
   },
   "OpenCTI": {
     "disabled": true,
-    "description": "automatically creates an observable and a linked report on your OpenCTI instance, linking the the successful analysis on IntelOwl",
+    "description": "Automatically creates an observable and a linked report on your OpenCTI instance, linking the the successful analysis on IntelOwl",
     "python_module": "opencti.OpenCTI",
     "maximum_tlp": "WHITE",
     "config": {
@@ -59,7 +59,7 @@
       "ssl_verify": {
         "value": true,
         "type": "bool",
-        "description": ""
+        "description": "Enable SSL certificate server verification. Change this if your OpenCTI instance has not SSL enabled."
       },
       "proxies": {
         "value": {
@@ -67,7 +67,7 @@
           "https": ""
         },
         "type": "dict",
-        "description": ""
+        "description": "Use these options to pass your request through a proxy server."
       },
       "tlp": {
         "value": {
@@ -76,7 +76,7 @@
           "x_opencti_order": 1
         },
         "type": "dict",
-        "description": ""
+        "description": "Change this as per your organization's threat sharing conventions."
       }
     }
   },
@@ -103,7 +103,7 @@
       "verify_ssl": {
         "value": true,
         "type": "bool",
-        "description": ""
+        "description": "Enable SSL certificate server verification. Change this if your YETI instance has not SSL enabled."
       }
     }
   }

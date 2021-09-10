@@ -39,14 +39,10 @@ def start_connectors(
     task_signatures = []
 
     # get connectors config
-    connectors_config = ConnectorConfig.all()
-    if not connector_names == ALL_CONNECTORS:
-        # filter/ select only the ones that were specified
-        connectors_config = {
-            name: cc
-            for name, cc in connectors_config.items()
-            if name in connector_names
-        }
+    if connector_names == ALL_CONNECTORS:
+        connectors_config = ConnectorConfig.all()
+    else:
+        connectors_config = ConnectorConfig.filter(names=connector_names)
 
     # get job
     job = Job.objects.get(pk=job_id)
@@ -64,22 +60,17 @@ def start_connectors(
             continue
 
         # get runtime_configuration if any specified for this analyzer
-        runtime_conf = runtime_configuration.get(connector_name, {})
-        # merge runtime_conf
-        cc.config = {
-            **cc.config,
-            **runtime_conf,
-        }
+        runtime_params = runtime_configuration.get(connector_name, {})
         # gen a new task_id
         task_id = uuid()
         # construct args
         args = [
             job_id,
             cc.asdict(),
-            {"runtime_configuration": runtime_conf, "task_id": task_id},
+            {"runtime_configuration": runtime_params, "task_id": task_id},
         ]
         # get celery queue
-        queue = cc.params.queue
+        queue = cc.config.queue
         if queue not in settings.CELERY_QUEUES:
             logger.error(
                 f"Connector {connector_name} has a wrong queue."
@@ -87,7 +78,7 @@ def start_connectors(
             )
             queue = DEFAULT_QUEUE
         # get soft_time_limit
-        soft_time_limit = cc.params.soft_time_limit
+        soft_time_limit = cc.config.soft_time_limit
         # add to map
         connectors_task_id_map[connector_name] = task_id
         # create task signature and add to list

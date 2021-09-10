@@ -7,8 +7,7 @@ There are multiple ways to interact with the Intel Owl APIs,
 
 1. IntelOwl-ng (Web Interface)
 
-    - Inbuilt Web interface with dashboard, visualizations of analysis data, easy to use forms for requesting
-    new analysis, tags management and more features
+    - Inbuilt Web interface with dashboard, visualizations of analysis data, easy to use forms for requesting new analysis, tags management and more features
     - [Live Demo](https://intelowlclient.firebaseapp.com/)
     - Built with Angular 10+ and available on [GitHub](https://github.com/intelowlproject/intelowl-ng).
 
@@ -40,6 +39,8 @@ The following are all the keys that you can change without touching the source c
 * `soft_time_limit`: this is the maximum time (in seconds) of execution for an analyzer. Once reached, the task will be killed (or managed in the code by a custom Exception). Default 300s
 * `queue`: this takes effects only when [multi-queue](Advanced-Usage.html#multi-queue) is enabled. Choose which celery worker would execute the task: `local` (ideal for tasks that leverage local applications like Yara), `long` (ideal for long tasks) or `default` (ideal for simple webAPI-based analyzers).
 
+> You can also modify analyzer specific parameters from the configuration file or even at the time of requesting an analysis. See [Customize analyzer execution at time of request](./Advanced-Usage.md#customize-analyzer-execution-at-time-of-request).
+
 ##### Example: add an analyzer configuration for your own Yara signatures
 ```json
     "Yara_Scan_Custom_Signatures": {
@@ -47,6 +48,10 @@ The following are all the keys that you can change without touching the source c
         "python_module": "yara.Yara",
         "description": "Executes Yara with custom signatures",
         "config": {
+            "queue": "default",
+            "soft_time_limit": 100,
+        },
+        "params": {
             "directories_with_rules": ["/opt/deploy/yara/custom_signatures"]
         }
     }
@@ -54,7 +59,7 @@ The following are all the keys that you can change without touching the source c
 
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-Changing other keys can and will break the analyzer. In that case, you should think about create a new python module or to modify an existing one.
+Changing other keys can and will break the analyzer. In that case, you should think about duplicating an analyzer entry or python module with your changes.
 </div>
 
 ## Connectors customization
@@ -63,30 +68,34 @@ Connectors being optional are `disabled` by default. You can enable them by chan
 The following are all the keys that you can change without touching the source code:
 * `disabled`: (similar to analyzers) use this to enable/disable certain connectors, the enabled connectors are called after successful analysis.
 * `soft_time_limit`: (similar to analyzers) this is the maximum time (in seconds) of execution for an connector. Once reached, the task will be killed (or managed in the **code** by a custom Exception). Default 300s
-* `queue`: (similar to analyzers) this takes effects only when [multi-queue](https://intelowl.readthedocs.io/en/develop/Advanced-Usage.html#multi-queue) is enabled. Choose which celery worker would execute the task: `local` (ideal for tasks that leverage local applications), `long` (ideal for long tasks) or `default` (ideal for simple webAPI-based connectors).
+* `queue`: (similar to analyzers) this takes effects only when [multi-queue](./Advanced-Usage.md#multi-queue) is enabled. Choose which celery worker would execute the task: `local` (ideal for tasks that leverage local applications), `long` (ideal for long tasks) or `default` (ideal for simple webAPI-based connectors).
 * `maximum_tlp` (default `WHITE`, choices `WHITE`, `GREEN`, `AMBER`, `RED`): specify with the maximum TLP of the analysis upto which the connector is allowed to run. (e.g. if `maximum_tlp` is `GREEN`, it would run for analysis with TLPs `WHITE` and `GREEN`). To learn more about TLPs see [TLP Support](./Usage.md#tlp-support).
 
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-Changing other keys can and will break the connector. In that case, you should think about create a new python module or to modify an existing one.
+Changing other keys can and will break the connector. In that case, you should think about duplicating an analyzer entry or python module with your changes.
 </div>
 
 
 ## Managing Analyzers and Connectors
 All plugins i.e. analyzers and connectors have `kill` and `retry` actions. In addition to that, all docker-based analyzers and connectors have a health check action to check if their associated instances are up or not. 
-- `kill` feature to stop a plugin whose status is `running`/`pending`: 
+
+- **kill**
+   To stop a plugin whose status is `running`/`pending`: 
    * GUI: Buttons on reports table on job result page.
    * PyIntelOwl: `IntelOwl.kill_analyzer` and `IntelOwl.kill_connector` function.
    * CLI: `$ pyintelowl jobs kill-analyzer <job_id> <analyzer_name>` and `$ pyintelowl jobs kill-connector <job_id> <connector_name>`
    * API: `PATCH /api/job/{job_id}/analyzer/{analyzer_name}/kill` and `PATCH /api/job/{job_id}/connector/{connector_name}/kill`
-- `retry` feature to retry a plugin whose status is `failed`/`killed`: 
+- **retry**
+   To retry a plugin whose status is `failed`/`killed`: 
    * GUI: Buttons on reports table on job result page.
    * PyIntelOwl: `IntelOwl.retry_analyzer` and `IntelOwl.retry_connector` function,
    * CLI: `$ pyintelowl jobs retry-analyzer <job_id> <analyzer_name>` and `$ pyintelowl jobs retry-connector <job_id> <connector_name>`
    * API: `PATCH /api/job/{job_id}/analyzer/{analyzer_name}/retry` and `PATCH /api/job/{job_id}/connector/{connector_name}/retry`
-- `healthcheck` feature to check if docker container or external platform associated with an analyzer or connector respectively are up or not: 
+- **healthcheck** 
+   To check if docker container or external platform associated with an analyzer or connector respectively are up or not: 
    * GUI: Buttons on analyzers table and connectors table.
-   * PyIntelOwl: `IntelOwl.analyzer_healthcheck` and `IntelOwl.connector_healthcheck` function.
+   * PyIntelOwl: `IntelOwl.analyzer_healthcheck` and `IntelOwl.connector_healthcheck` methods.
    * CLI: `$ pyintelowl analyzer-healthcheck <analyzer_name>` and `$ pyintelowl connector-healthcheck <connector_name>`
    * API: `GET /api/analyzer/{analyzer_name}/healthcheck` and `GET /api /connector/{connector_name}/healthcheck`
 
@@ -240,6 +249,7 @@ The following is the list of the available analyzers you can run out-of-the-box:
 * `YETI` (Your Everyday Threat Intelligence): scan an observable on a [YETI](https://github.com/yeti-platform/yeti) instance.
 * `HashLookupServer_Get_Observable`: check if a md5 or sha1 is available in the database of [known file hosted by CIRCL](https://github.com/adulau/hashlookup-server)
 * `ClamAV`: scan a file via the [ClamAV AntiVirus Engine](https://www.clamav.net/)
+* `Spyse`: Scan domains, IPs, emails and CVEs using Spyse's API. Register [here](https://spyse.com/user/registration).
 
 #### Generic analyzers (email, phone number, etc.; anything really)
 Some analyzers require details other than just IP, URL, Domain etc... We classified them as Generic Analyzers. Since the type of field is not known, there is a format for strings to be followed.

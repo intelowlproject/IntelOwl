@@ -212,7 +212,7 @@ class _FileAnalyzersScriptsTestCase(_AbstractAnalyzersScriptTestCase):
             "max_tries": 1,
             "poll_distance": 1,
             "force_active_scan": True,
-            "force_active_file_scan_if_old": True,
+            "force_active_scan_if_old": False,
         },
         "Cuckoo_Scan": {"max_poll_tries": 1, "max_post_tries": 1},
         "PEframe_Scan": {"max_tries": 1},

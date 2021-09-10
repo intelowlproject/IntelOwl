@@ -6,30 +6,22 @@ import sys
 import json
 import logging
 import hashlib
-from typing import List, TypedDict
+from typing import List, TypedDict, Optional
 
 from django.conf import settings
 from rest_framework import serializers as rfs
 from cache_memoize import cache_memoize
 
 from intel_owl import secrets as secrets_store
+from intel_owl.consts import PARAM_DATATYPE_CHOICES
 
 
 logger = logging.getLogger(__name__)
 
-DATA_TYPE_MAPPING = {
-    "number": (
-        int,
-        float,
-    ),
-    "string": str,
-    "bool": bool,
-}
-
 
 class ConfigVerificationType(TypedDict):
     configured: bool
-    error_message: str
+    error_message: Optional[str]
     missing_secrets: List[str]
 
 
@@ -41,21 +33,44 @@ class BaseField(rfs.Field):
         return data
 
 
-class SecretSerializer(rfs.Serializer):
+class _ConfigSerializer(rfs.Serializer):
     """
-    A base serializer class for validating `secrets`.
+    To validate `config` attr.
     Used for `analyzer_config.json` and `connector_config.json` files.
     """
 
-    TYPE_CHOICES = (
-        ("number", "number"),
-        ("string", "string"),
-        ("bool", "bool"),
-    )
+    queue = rfs.CharField(required=True)
+    soft_time_limit = rfs.IntegerField(required=True)
 
-    key_name = rfs.CharField(max_length=128)
+
+class _ParamSerializer(rfs.Serializer):
+    """
+    To validate `params` attr.
+    Used for `analyzer_config.json` and `connector_config.json` files.
+    """
+
+    value = BaseField()
+    type = rfs.ChoiceField(choices=PARAM_DATATYPE_CHOICES)
+    description = rfs.CharField(allow_blank=True, required=True, max_length=512)
+
+    def validate(self, attrs):
+        value_type = type(attrs["value"]).__name__
+        expected_type = attrs["type"]
+        if value_type != expected_type:
+            raise rfs.ValidationError(
+                f"Invalid value type. {value_type} != {expected_type}"
+            )
+        return super().validate(attrs)
+
+
+class _SecretSerializer(rfs.Serializer):
+    """
+    To validate `secrets` attr.
+    Used for `analyzer_config.json` and `connector_config.json` files.
+    """
+
+    # key_name = rfs.CharField(max_length=128)
     env_var_key = rfs.CharField(max_length=128)
-    type = rfs.ChoiceField(choices=TYPE_CHOICES)
     description = rfs.CharField(allow_blank=True, required=False, max_length=512)
 
 
@@ -70,13 +85,15 @@ class AbstractConfigSerializer(rfs.Serializer):
     # sentinel/ flag
     _is_valid_flag = False
 
-    # common fields
+    # common basic fields
     name = rfs.CharField(required=True)
     python_module = rfs.CharField(required=True, max_length=128)
     disabled = rfs.BooleanField(required=True)
-    config = rfs.JSONField(required=True)
-    secrets = rfs.JSONField(required=False)
     description = rfs.CharField(allow_blank=True, required=False)
+    # common custom fields
+    config = _ConfigSerializer()
+    secrets = rfs.DictField(child=_SecretSerializer())
+    params = rfs.DictField(child=_ParamSerializer())
     # automatically populated fields
     verification = rfs.SerializerMethodField()
 
@@ -88,53 +105,51 @@ class AbstractConfigSerializer(rfs.Serializer):
 
     def get_verification(self, raw_instance) -> ConfigVerificationType:
         # raw instance because input is json and not django model object
-        errors = self._check_secrets(raw_instance["secrets"])
-        missing_secrets = list(errors.keys())
+        # get all missing secrets
+        secrets = raw_instance["secrets"]
+        missing_secrets = []
+        for key_name, secret_dict in secrets.items():
+            # check if available in environment
+            secret_val = secrets_store.get_secret(
+                secret_dict["env_var_key"], default=None
+            )
+            if not secret_val:
+                missing_secrets.append(key_name)
+
         num_missing_secrets = len(missing_secrets)
+<<<<<<< HEAD
         num_total_secrets = len(raw_instance["secrets"].keys())
         if num_missing_secrets:
             error_message = ";".join(errors.values())
             error_message += "; (%d of %d satisfied)" % (
+=======
+        if num_missing_secrets:
+            configured = False
+            num_total_secrets = len(secrets.keys())
+            error_message = "(%s) not set; (%d of %d satisfied)" % (
+                ",".join(missing_secrets),
+>>>>>>> origin/develop
                 num_total_secrets - num_missing_secrets,
                 num_total_secrets,
             )
         else:
+<<<<<<< HEAD
             error_message = None
 
         return {
             "configured": num_missing_secrets == 0,
+=======
+            configured = True
+            error_message = None
+
+        return {
+            "configured": configured,
+>>>>>>> origin/develop
             "error_message": error_message,
             "missing_secrets": missing_secrets,
         }
 
-    def validate_secrets(self, secrets):
-        # items in JSON file are in key-value format,
-        # but we need a list of objects instead
-        data = [
-            {"key_name": key, **secret_dict} for key, secret_dict in secrets.items()
-        ]
-        serializer = SecretSerializer(data=data, many=True)
-        serializer.is_valid(raise_exception=True)
-        return secrets
-
     # utility methods
-    def _check_secrets(self, secrets):
-        errors = {}
-        for key_name, secret_dict in secrets.items():
-            # check if set and correct data type
-            secret_val = secrets_store.get_secret(secret_dict["env_var_key"])
-            if not secret_val:
-                errors[key_name] = f"'{key_name}': not set"
-            elif secret_val and not isinstance(
-                secret_val, DATA_TYPE_MAPPING[secret_dict["type"]]
-            ):
-                errors[key_name] = "'%s': expected %s got %s" % (
-                    key_name,
-                    secret_dict["type"],
-                    type(secret_val),
-                )
-
-        return errors
 
     @classmethod
     def _get_config_path(cls) -> str:

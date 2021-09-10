@@ -57,10 +57,10 @@ class DNSdb(classes.ObservableAnalyzer):
         self._rrtype = params.get("rrtype", "")
         self._query_type = params.get("query_type", "domain")
         self._limit = params.get("limit", 10000)
-        self._time_first_before = params.get("time_first_before", "")
-        self._time_first_after = params.get("time_first_after", "")
-        self._time_last_before = params.get("time_last_before", "")
-        self._time_last_after = params.get("time_last_after", "")
+        self._time_first_before = params.get("time", {}).get("first_before", "")
+        self._time_first_after = params.get("time", {}).get("first_after", "")
+        self._time_last_before = params.get("time", {}).get("last_before", "")
+        self._time_last_after = params.get("time", {}).get("last_after", "")
         self.no_results_found = False
 
     def run(self):

@@ -17,7 +17,8 @@
       "soft_time_limit": 400,
       "queue": "default"
     },
-    "secrets": {}
+    "secrets": {},
+    "params": {}
   },
   "AbuseIPDB": {
     "type": "observable",
@@ -36,10 +37,10 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "ABUSEIPDB_KEY",
-        "type": "string",
         "description": ""
       }
-    }
+    },
+    "params": {}
   },
   "Auth0": {
     "type": "observable",
@@ -58,10 +59,10 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "AUTH0_KEY",
-        "type": "string",
         "description": ""
       }
-    }
+    },
+    "params": {}
   },
   "BoxJS_Scan_JavaScript": {
     "type": "file",
@@ -80,7 +81,8 @@
       "soft_time_limit": 400,
       "queue": "default"
     },
-    "secrets": {}
+    "secrets": {},
+    "params": {}
   },
   "CheckDMARC": {
     "type": "observable",
@@ -96,7 +98,8 @@
       "soft_time_limit": 30,
       "queue": "default"
     },
-    "secrets": {}
+    "secrets": {},
+    "params": {}
   },
   "CIRCLPassiveDNS": {
     "type": "observable",
@@ -116,10 +119,10 @@
     "secrets": {
       "pdns_credentials": {
         "env_var_key": "CIRCL_CREDENTIALS",
-        "type": "string",
         "description": ""
       }
-    }
+    },
+    "params": {}
   },
   "CIRCLPassiveSSL": {
     "type": "observable",
@@ -138,10 +141,10 @@
     "secrets": {
       "pdns_credentials": {
         "env_var_key": "CIRCL_CREDENTIALS",
-        "type": "string",
         "description": ""
       }
-    }
+    },
+    "params": {}
   },
   "Classic_DNS": {
     "type": "observable",
@@ -157,10 +160,16 @@
     ],
     "config": {
       "soft_time_limit": 30,
-      "queue": "default",
-      "query_type": "A"
+      "queue": "default"
     },
-    "secrets": {}
+    "secrets": {},
+    "params": {
+      "query_type": {
+        "value": "A",
+        "type": "str",
+        "description": "Query type against the chosen DNS resolver."
+      }
+    }
   },
   "CloudFlare_DNS": {
     "type": "observable",
@@ -175,10 +184,16 @@
     ],
     "config": {
       "soft_time_limit": 30,
-      "queue": "default",
-      "query_type": "A"
+      "queue": "default"
     },
-    "secrets": {}
+    "secrets": {},
+    "params": {
+      "query_type": {
+        "value": "A",
+        "type": "str",
+        "description": ""
+      }
+    }
   },
   "CloudFlare_Malicious_Detector": {
     "type": "observable",
@@ -195,7 +210,8 @@
       "soft_time_limit": 30,
       "queue": "default"
     },
-    "secrets": {}
+    "secrets": {},
+    "params": {}
   },
   "Capa_Info": {
     "type": "file",
@@ -212,7 +228,8 @@
       "soft_time_limit": 500,
       "queue": "long"
     },
-    "secrets": {}
+    "secrets": {},
+    "params": {}
   },
   "Censys_Search": {
     "type": "observable",
@@ -226,23 +243,27 @@
     ],
     "config": {
       "soft_time_limit": 30,
-      "queue": "default",
-      "censys_analysis": "search"
+      "queue": "default"
     },
     "secrets": {
       "api_id_name": {
         "env_var_key": "CENSYS_API_ID",
-        "type": "string",
         "description": ""
       },
       "api_secret_name": {
         "env_var_key": "CENSYS_API_SECRET",
-        "type": "string",
+        "description": ""
+      }
+    },
+    "params": {
+      "censys_analysis": {
+        "value": "search",
+        "type": "str",
         "description": ""
       }
     }
   },
-  "ClamAV":{
+  "ClamAV": {
     "type": "file",
     "python_module": "clamav.ClamAV",
     "description": "scan files using ClamAV virus scanning engine",
@@ -254,12 +275,13 @@
       "soft_time_limit": 50,
       "queue": "default"
     },
-    "secrets": {}
+    "secrets": {},
+    "params": {}
   },
   "CRXcavator": {
     "type": "observable",
     "python_module": "crxcavator.CRXcavator",
-    "description": "scans a chrome extension against crxcavator.io",
+    "description": "Scans a chrome extension against crxcavator.io service. Every Chrome-Extension has a unique alpha=numeric identifier. That's the only Input necessary. Eg: `Norton Safe Search Enhanced`'s identifier is `eoigllimhcllmhedfbmahegmoakcdakd`.",
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
@@ -270,7 +292,8 @@
       "soft_time_limit": 30,
       "queue": "default"
     },
-    "secrets": {}
+    "secrets": {},
+    "params": {}
   },
   "Cuckoo_Scan": {
     "type": "file",
@@ -281,19 +304,27 @@
     "leaks_info": false,
     "config": {
       "soft_time_limit": 500,
-      "queue": "long",
-      "max_post_tries": 5,
-      "max_poll_tries": 20
+      "queue": "long"
     },
     "secrets": {
       "api_key_name": {
         "env_var_key": "CUCKOO_API_KEY",
-        "type": "string",
         "description": ""
       },
       "url_key_name": {
         "env_var_key": "CUCKOO_URL",
-        "type": "string",
+        "description": ""
+      }
+    },
+    "params": {
+      "max_post_tries": {
+        "value": 5,
+        "type": "int",
+        "description": ""
+      },
+      "max_poll_tries": {
+        "value": 20,
+        "type": "int",
         "description": ""
       }
     }
@@ -310,7 +341,8 @@
       "soft_time_limit": 50,
       "queue": "default"
     },
-    "secrets": {}
+    "secrets": {},
+    "params": {}
   },
   "Cymru_Hash_Registry_Get_Observable": {
     "type": "observable",
@@ -326,7 +358,8 @@
       "soft_time_limit": 50,
       "queue": "default"
     },
-    "secrets": {}
+    "secrets": {},
+    "params": {}
   },
   "Darksearch_Query": {
     "type": "observable",
@@ -344,16 +377,26 @@
     ],
     "config": {
       "soft_time_limit": 50,
-      "queue": "long",
-      "pages": 10,
-      "proxies": {}
+      "queue": "long"
     },
-    "secrets": {}
+    "secrets": {},
+    "params": {
+      "pages": {
+        "value": 10,
+        "type": "int",
+        "description": ""
+      },
+      "proxies": {
+        "value": {},
+        "type": "dict",
+        "description": ""
+      }
+    }
   },
   "Dehashed_Search": {
     "type": "observable",
     "python_module": "dehashed.DehashedSearch",
-    "description": "Query against https://dehashed.com's search API",
+    "description": "Query against Dehashed's search API. For configuration, refer to the 'Sizing & Pagination' section in [dehashed docs](https://www.dehashed.com/docs).",
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
@@ -366,22 +409,31 @@
     ],
     "config": {
       "soft_time_limit": 50,
-      "queue": "long",
-      "size": 100,
-      "pages": 1
+      "queue": "long"
     },
     "secrets": {
       "api_key_name": {
         "env_var_key": "DEHASHED_AUTH_KEY",
-        "type": "string",
-        "description": ""
+        "description": "Combination of your dehashed account's email and API key. Format: `email:api-key`."
+      }
+    },
+    "params": {
+      "size": {
+        "value": 100,
+        "type": "int",
+        "description": "Numer of records fetched. Recommend change to a large value."
+      },
+      "pages": {
+        "value": 1,
+        "type": "int",
+        "description": "Number of pages fetched. Recommend to keep at 1 only to save on credits."
       }
     }
   },
   "DNSDB": {
     "type": "observable",
     "python_module": "dnsdb.DNSdb",
-    "description": "scan an observable against the Passive DNS Farsight Database (support both v1 and v2 versions)",
+    "description": "Scan an observable against the Passive DNS Farsight Database (support both v1 and v2 versions). Official [API docs](https://docs.dnsdb.info/dnsdb-apiv2/).",
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
@@ -392,15 +444,44 @@
     ],
     "config": {
       "soft_time_limit": 30,
-      "queue": "default",
-      "server": "api.dnsdb.info",
-      "api_version": 2
+      "queue": "default"
     },
     "secrets": {
       "api_key_name": {
         "env_var_key": "DNSDB_KEY",
-        "type": "string",
         "description": ""
+      }
+    },
+    "params": {
+      "server": {
+        "value": "api.dnsdb.info",
+        "type": "str",
+        "description": "DNSDB server."
+      },
+      "api_version": {
+        "value": 2,
+        "type": "int",
+        "description": "API version of DNSDB (options: `1` and `2`)."
+      },
+      "rrtype": {
+        "value": "",
+        "type": "str",
+        "description": "DNS query type."
+      },
+      "limit": {
+        "value": 10000,
+        "type": "int",
+        "description": "Maximum number of results to retrieve."
+      },
+      "time": {
+        "value": {
+          "first_before": "",
+          "first_after": "",
+          "last_before": "", 
+          "last_after": ""
+        },
+        "type": "dict",
+        "description": "Time range"
       }
     }
   },
@@ -417,12 +498,31 @@
     ],
     "config": {
       "soft_time_limit": 300,
-      "queue": "default",
-      "tld": true,
-      "mxcheck": true,
-      "ssdeep": true
+      "queue": "default"
     },
-    "secrets": {}
+    "secrets": {},
+    "params": {
+      "tld": {
+        "value": true,
+        "type": "bool",
+        "description": "Check for domains with different TLDs by supplying a dictionary file."
+      },
+      "tld_dict": {
+        "value": "abused_tlds.dict",
+        "type": "str",
+        "description": "Dictionary to use with `tld` argument (`common_tlds.dict/abused_tlds.dict`)."
+      },
+      "mxcheck": {
+        "value": true,
+        "type": "bool",
+        "description": "Find suspicious mail servers and flag them with SPYING-MX string."
+      },
+      "ssdeep": {
+        "value": true,
+        "type": "bool",
+        "description": "Enable fuzzy hashing - compare HTML content of original domain with a potentially malicious one and determine similarity."
+      }
+    }
   },
   "Doc_Info": {
     "type": "file",
@@ -453,7 +553,14 @@
       "soft_time_limit": 30,
       "queue": "local"
     },
-    "secrets": {}
+    "secrets": {},
+    "params": {
+      "additional_passwords_to_check": {
+        "value": [],
+        "type": "list",
+        "description": "List of passwords to try when decrypting the document"
+      }
+    }
   },
   "Doc_Info_Experimental": {
     "type": "file",
@@ -482,10 +589,21 @@
     ],
     "config": {
       "soft_time_limit": 30,
-      "queue": "local",
-      "experimental": true
+      "queue": "local"
     },
-    "secrets": {}
+    "secrets": {},
+    "params": {
+      "experimental": {
+        "value": true,
+        "type": "bool",
+        "description": ""
+      },
+      "additional_passwords_to_check": {
+        "value": [],
+        "type": "list",
+        "description": "List of passwords to try when decrypting the document"
+      }
+    }
   },
   "EmailRep": {
     "type": "observable",
@@ -504,10 +622,10 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "EMAILREP_KEY",
-        "type": "string",
         "description": ""
       }
-    }
+    },
+    "params": {}
   },
   "File_Info": {
     "type": "file",
@@ -520,12 +638,13 @@
       "soft_time_limit": 30,
       "queue": "local"
     },
-    "secrets": {}
+    "secrets": {},
+    "params": {}
   },
   "FireHol_IPList": {
     "type": "observable",
     "python_module": "firehol_iplist.FireHol_IPList",
-    "description": "check if an IP is in FireHol's IPList",
+    "description": "Check if an IP is in FireHol's IPList. Refer to [FireHol's IPList](https://iplists.firehol.org/).",
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
@@ -534,12 +653,18 @@
     ],
     "config": {
       "soft_time_limit": 180,
-      "queue": "default",
-      "list_names": [
-        "firehol_level1.netset"
-      ]
+      "queue": "default"
     },
-    "secrets": {}
+    "secrets": {},
+    "params": {
+      "list_names": {
+        "value": [
+          "firehol_level1.netset"
+        ],
+        "type": "list",
+        "description": "A list of firehol list names."
+      }
+    }
   },
   "Floss": {
     "type": "file",
@@ -554,19 +679,29 @@
     ],
     "config": {
       "soft_time_limit": 500,
-      "queue": "default",
+      "queue": "default"
+    },
+    "secrets": {},
+    "params": {
       "max_no_of_strings": {
-        "stack_strings": 1000,
-        "static_strings": 1000,
-        "decoded_strings": 1000
+        "value": {
+          "stack_strings": 1000,
+          "static_strings": 1000,
+          "decoded_strings": 1000
+        },
+        "type": "dict",
+        "description": ""
       },
       "rank_strings": {
-        "stack_strings": false,
-        "static_strings": false,
-        "decoded_strings": false
+        "value": {
+          "stack_strings": false,
+          "static_strings": false,
+          "decoded_strings": false
+        },
+        "type": "dict",
+        "description": ""
       }
-    },
-    "secrets": {}
+    }
   },
   "Fortiguard": {
     "type": "observable",
@@ -583,7 +718,8 @@
       "soft_time_limit": 30,
       "queue": "default"
     },
-    "secrets": {}
+    "secrets": {},
+    "params": {}
   },
   "Google_DNS": {
     "type": "observable",
@@ -598,10 +734,16 @@
     ],
     "config": {
       "soft_time_limit": 30,
-      "queue": "default",
-      "query_type": "A"
+      "queue": "default"
     },
-    "secrets": {}
+    "secrets": {},
+    "params": {
+      "query_type": {
+        "value": "A",
+        "type": "str",
+        "description": "Query type against the chosen DNS resolver."
+      }
+    }
   },
   "GoogleWebRisk": {
     "type": "observable",
@@ -622,10 +764,10 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "GOOGLE_APPLICATION_CREDENTIALS",
-        "type": "string",
         "description": ""
       }
-    }
+    },
+    "params": {}
   },
   "GoogleSafebrowsing": {
     "type": "observable",
@@ -646,10 +788,10 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "GSF_KEY",
-        "type": "string",
         "description": ""
       }
-    }
+    },
+    "params": {}
   },
   "GreyNoise": {
     "type": "observable",
@@ -663,13 +805,18 @@
     ],
     "config": {
       "soft_time_limit": 30,
-      "queue": "default",
-      "greynoise_api_version": "v2"
+      "queue": "default"
     },
     "secrets": {
       "api_key_name": {
         "env_var_key": "GREYNOISE_API_KEY",
-        "type": "string",
+        "description": ""
+      }
+    },
+    "params": {
+      "greynoise_api_version": {
+        "value": "v2",
+        "type": "str",
         "description": ""
       }
     }
@@ -686,13 +833,18 @@
     ],
     "config": {
       "soft_time_limit": 30,
-      "queue": "default",
-      "greynoise_api_version": "v3"
+      "queue": "default"
     },
     "secrets": {
       "api_key_name": {
         "env_var_key": "GREYNOISE_API_KEY",
-        "type": "string",
+        "description": ""
+      }
+    },
+    "params": {
+      "greynoise_api_version": {
+        "value": "v3",
+        "type": "str",
         "description": ""
       }
     }
@@ -709,13 +861,18 @@
     ],
     "config": {
       "soft_time_limit": 30,
-      "queue": "default",
-      "greynoise_api_version": "v1"
+      "queue": "default"
     },
     "secrets": {
       "api_key_name": {
         "env_var_key": "GREYNOISE_API_KEY",
-        "type": "string",
+        "description": ""
+      }
+    },
+    "params": {
+      "greynoise_api_version": {
+        "value": "v1",
+        "type": "str",
         "description": ""
       }
     }
@@ -732,10 +889,16 @@
     ],
     "config": {
       "soft_time_limit": 20,
-      "queue": "default",
-      "hashlookup_server": ""
+      "queue": "default"
     },
-    "secrets": {}
+    "secrets": {},
+    "params": {
+      "hashlookup_server": {
+        "value": "",
+        "type": "str",
+        "description": "custom hashlookup-server"
+      }
+    }
   },
   "HashLookupServer_Get_File": {
     "type": "file",
@@ -747,10 +910,16 @@
     "run_hash": true,
     "config": {
       "soft_time_limit": 400,
-      "queue": "default",
-      "hashlookup_server": ""
+      "queue": "default"
     },
-    "secrets": {}
+    "secrets": {},
+    "params": {
+      "hashlookup_server": {
+        "value": "",
+        "type": "str",
+        "description": "custom hashlookup-server"
+      }
+    }
   },
   "HoneyDB": {
     "type": "observable",
@@ -764,19 +933,23 @@
     ],
     "config": {
       "soft_time_limit": 200,
-      "queue": "default",
-      "honeydb_analysis": "all"
+      "queue": "default"
     },
     "secrets": {
       "api_key_name": {
         "env_var_key": "HONEYDB_API_KEY",
-        "type": "string",
         "description": ""
       },
       "api_id_name": {
         "env_var_key": "HONEYDB_API_ID",
-        "type": "string",
         "description": ""
+      }
+    },
+    "params": {
+      "honeydb_analysis": {
+        "value": "all",
+        "type": "str",
+        "description": "Choose which endpoint to query from the HoneyDB service (options are: `all`, `scan_twitter`, `ip_query`, `ip_history`, `internet_scanner`, `ip_info`)"
       }
     }
   },
@@ -797,10 +970,10 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "HUNTER_API_KEY",
-        "type": "string",
         "description": ""
       }
-    }
+    },
+    "params": {}
   },
   "HybridAnalysis_Get_File": {
     "type": "file",
@@ -817,10 +990,10 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "HA_KEY",
-        "type": "string",
         "description": ""
       }
-    }
+    },
+    "params": {}
   },
   "HybridAnalysis_Get_Observable": {
     "type": "observable",
@@ -842,10 +1015,10 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "HA_KEY",
-        "type": "string",
         "description": ""
       }
-    }
+    },
+    "params": {}
   },
   "IntelX_Phonebook": {
     "type": "observable",
@@ -862,13 +1035,18 @@
     ],
     "config": {
       "soft_time_limit": 45,
-      "queue": "default",
-      "rows_limit": 100
+      "queue": "default"
     },
     "secrets": {
       "api_key_name": {
         "env_var_key": "INTELX_API_KEY",
-        "type": "string",
+        "description": ""
+      }
+    },
+    "params": {
+      "rows_limit": {
+        "value": 100,
+        "type": "int",
         "description": ""
       }
     }
@@ -890,10 +1068,10 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "INTEZER_KEY",
-        "type": "string",
         "description": ""
       }
-    }
+    },
+    "params": {}
   },
   "Intezer_Scan": {
     "type": "file",
@@ -927,15 +1105,28 @@
     ],
     "config": {
       "soft_time_limit": 300,
-      "queue": "long",
-      "upload_file": true,
-      "disable_dynamic_unpacking": false,
-      "disable_static_unpacking": false
+      "queue": "long"
     },
     "secrets": {
       "api_key_name": {
         "env_var_key": "INTEZER_KEY",
-        "type": "string",
+        "description": ""
+      }
+    },
+    "params": {
+      "upload_file": {
+        "value": true,
+        "type": "bool",
+        "description": "Uploads the analyzed file to Intezer in case an analysis of that file is not available in that platform."
+      },
+      "disable_dynamic_unpacking": {
+        "value": false,
+        "type": "bool",
+        "description": ""
+      },
+      "disable_static_unpacking": {
+        "value": false,
+        "type": "bool",
         "description": ""
       }
     }
@@ -956,13 +1147,18 @@
     ],
     "config": {
       "soft_time_limit": 300,
-      "queue": "default",
-      "inquest_analysis": "iocdb_search"
+      "queue": "default"
     },
     "secrets": {
       "api_key_name": {
         "env_var_key": "INQUEST_API_KEY",
-        "type": "string",
+        "description": ""
+      }
+    },
+    "params": {
+      "inquest_analysis": {
+        "value": "iocdb_search",
+        "type": "str",
         "description": ""
       }
     }
@@ -983,13 +1179,18 @@
     ],
     "config": {
       "soft_time_limit": 300,
-      "queue": "default",
-      "inquest_analysis": "repdb_search"
+      "queue": "default"
     },
     "secrets": {
       "api_key_name": {
         "env_var_key": "INQUEST_API_KEY",
-        "type": "string",
+        "description": ""
+      }
+    },
+    "params": {
+      "inquest_analysis": {
+        "value": "repdb_search",
+        "type": "str",
         "description": ""
       }
     }
@@ -1010,13 +1211,18 @@
     ],
     "config": {
       "soft_time_limit": 300,
-      "queue": "default",
-      "inquest_analysis": "dfi_search"
+      "queue": "default"
     },
     "secrets": {
       "api_key_name": {
         "env_var_key": "INQUEST_API_KEY",
-        "type": "string",
+        "description": ""
+      }
+    },
+    "params": {
+      "inquest_analysis": {
+        "value": "dfi_search",
+        "type": "str",
         "description": ""
       }
     }
@@ -1038,10 +1244,10 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "IPINFO_KEY",
-        "type": "string",
         "description": ""
       }
-    }
+    },
+    "params": {}
   },
   "Manalyze": {
     "type": "file",
@@ -1058,7 +1264,8 @@
       "soft_time_limit": 720,
       "queue": "default"
     },
-    "secrets": {}
+    "secrets": {},
+    "params": {}
   },
   "MISP": {
     "type": "observable",
@@ -1075,19 +1282,28 @@
     ],
     "config": {
       "soft_time_limit": 30,
-      "queue": "default",
-      "ssl_check": true
+      "queue": "default"
     },
     "secrets": {
       "api_key_name": {
         "env_var_key": "MISP_KEY",
-        "type": "string",
         "description": ""
       },
       "url_key_name": {
         "env_var_key": "MISP_URL",
-        "type": "string",
         "description": ""
+      }
+    },
+    "params": {
+      "ssl_check": {
+        "value": true,
+        "type": "bool",
+        "description": "Enable SSL certificate server verification. Change this if your MISP instance has not SSL enabled"
+      },
+      "debug": {
+        "value": false,
+        "type": "bool",
+        "description": "Enable debug logs."
       }
     }
   },
@@ -1111,15 +1327,14 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "FIRST_MISP_API",
-        "type": "string",
         "description": ""
       },
       "url_key_name": {
         "env_var_key": "FIRST_MISP_URL",
-        "type": "string",
         "description": ""
       }
-    }
+    },
+    "params": {}
   },
   "MISPFIRST_Check_Hash": {
     "type": "file",
@@ -1136,15 +1351,14 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "FIRST_MISP_API",
-        "type": "string",
         "description": ""
       },
       "url_key_name": {
         "env_var_key": "FIRST_MISP_URL",
-        "type": "string",
         "description": ""
       }
-    }
+    },
+    "params": {}
   },
   "MISP_Check_Hash": {
     "type": "file",
@@ -1161,15 +1375,14 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "MISP_KEY",
-        "type": "string",
         "description": ""
       },
       "url_key_name": {
         "env_var_key": "MISP_URL",
-        "type": "string",
         "description": ""
       }
-    }
+    },
+    "params": {}
   },
   "Malpedia_Scan": {
     "type": "file",
@@ -1197,10 +1410,10 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "MALPEDIA_KEY",
-        "type": "string",
         "description": ""
       }
-    }
+    },
+    "params": {}
   },
   "MalwareBazaar_Get_File": {
     "type": "file",
@@ -1214,7 +1427,8 @@
       "soft_time_limit": 50,
       "queue": "default"
     },
-    "secrets": {}
+    "secrets": {},
+    "params": {}
   },
   "MalwareBazaar_Get_Observable": {
     "type": "observable",
@@ -1230,7 +1444,8 @@
       "soft_time_limit": 50,
       "queue": "default"
     },
-    "secrets": {}
+    "secrets": {},
+    "params": {}
   },
   "MalwareBazaar_Google_Observable": {
     "type": "observable",
@@ -1248,7 +1463,8 @@
       "soft_time_limit": 100,
       "queue": "default"
     },
-    "secrets": {}
+    "secrets": {},
+    "params": {}
   },
   "MaxMindGeoIP": {
     "type": "observable",
@@ -1267,10 +1483,10 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "MAXMIND_KEY",
-        "type": "string",
         "description": ""
       }
-    }
+    },
+    "params": {}
   },
   "MWDB_Get": {
     "type": "observable",
@@ -1289,10 +1505,10 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "MWDB_KEY",
-        "type": "string",
         "description": ""
       }
-    }
+    },
+    "params": {}
   },
   "MWDB_Scan": {
     "type": "file",
@@ -1303,16 +1519,29 @@
     "leaks_info": true,
     "config": {
       "soft_time_limit": 400,
-      "queue": "default",
-      "upload_file": true,
-      "private": false,
-      "max_tries": 50
+      "queue": "default"
     },
     "secrets": {
       "api_key_name": {
         "env_var_key": "MWDB_KEY",
-        "type": "string",
         "description": ""
+      }
+    },
+    "params": {
+      "upload_file": {
+        "value": true,
+        "type": "bool",
+        "description": "Uploads the file to repository."
+      },
+      "private": {
+        "value": false,
+        "type": "bool",
+        "description": ""
+      },
+      "max_tries": {
+        "value": 50,
+        "type": "int",
+        "description": "Number of retries to perform for polling analysis results."
       }
     }
   },
@@ -1335,10 +1564,10 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "ONYPHE_KEY",
-        "type": "string",
         "description": ""
       }
-    }
+    },
+    "params": {}
   },
   "OpenCTI": {
     "type": "observable",
@@ -1355,24 +1584,36 @@
     ],
     "config": {
       "soft_time_limit": 30,
-      "queue": "default",
-      "ssl_verify": true,
-      "proxies": {
-        "http": "",
-        "https": ""
-      },
-      "exact_search": false
+      "queue": "default"
     },
     "secrets": {
       "api_key_name": {
         "env_var_key": "OPENCTI_KEY",
-        "type": "string",
         "description": "API key for your OpenCTI instance"
       },
       "url_key_name": {
         "env_var_key": "OPENCTI_URL",
-        "type": "string",
         "description": "URL of your OpenCTI instance"
+      }
+    },
+    "params": {
+      "ssl_verify": {
+        "value": true,
+        "type": "bool",
+        "description": "Enable SSL certificate server verification. Change this if your OpenCTI instance has not SSL enabled."
+      },
+      "proxies": {
+        "value": {
+          "http": "",
+          "https": ""
+        },
+        "type": "dict",
+        "description": "Use these options to pass your request through a proxy server."
+      },
+      "exact_search": {
+        "value": false,
+        "type": "bool",
+        "description": "Use this if you want exact matches only for the observables returned."
       }
     }
   },
@@ -1391,13 +1632,18 @@
     ],
     "config": {
       "soft_time_limit": 40,
-      "queue": "default",
-      "verbose": false
+      "queue": "default"
     },
     "secrets": {
       "api_key_name": {
         "env_var_key": "OTX_KEY",
-        "type": "string",
+        "description": ""
+      }
+    },
+    "params": {
+      "verbose": {
+        "value": false,
+        "type": "bool",
         "description": ""
       }
     }
@@ -1412,13 +1658,18 @@
     "run_hash": true,
     "config": {
       "soft_time_limit": 40,
-      "queue": "default",
-      "verbose": false
+      "queue": "default"
     },
     "secrets": {
       "api_key_name": {
         "env_var_key": "OTX_KEY",
-        "type": "string",
+        "description": ""
+      }
+    },
+    "params": {
+      "verbose": {
+        "value": false,
+        "type": "bool",
         "description": ""
       }
     }
@@ -1437,7 +1688,8 @@
       "soft_time_limit": 30,
       "queue": "local"
     },
-    "secrets": {}
+    "secrets": {},
+    "params": {}
   },
   "PE_Info": {
     "type": "file",
@@ -1453,7 +1705,8 @@
       "soft_time_limit": 30,
       "queue": "local"
     },
-    "secrets": {}
+    "secrets": {},
+    "params": {}
   },
   "PEframe_Scan": {
     "type": "file",
@@ -1470,7 +1723,8 @@
       "soft_time_limit": 500,
       "queue": "local"
     },
-    "secrets": {}
+    "secrets": {},
+    "params": {}
   },
   "Phishtank": {
     "type": "observable",
@@ -1489,10 +1743,10 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "PHISHTANK_API_KEY",
-        "type": "string",
         "description": ""
       }
-    }
+    },
+    "params": {}
   },
   "Pulsedive_Active_IOC": {
     "type": "observable",
@@ -1509,13 +1763,18 @@
     ],
     "config": {
       "soft_time_limit": 100,
-      "queue": "default",
-      "active_scan": true
+      "queue": "default"
     },
     "secrets": {
       "api_key_name": {
         "env_var_key": "PULSEDIVE_API_KEY",
-        "type": "string",
+        "description": ""
+      }
+    },
+    "params": {
+      "active_scan": {
+        "value": true,
+        "type": "bool",
         "description": ""
       }
     }
@@ -1535,7 +1794,8 @@
       "soft_time_limit": 320,
       "queue": "local"
     },
-    "secrets": {}
+    "secrets": {},
+    "params": {}
   },
   "Qiling_Windows": {
     "type": "file",
@@ -1550,13 +1810,31 @@
     ],
     "config": {
       "soft_time_limit": 120,
-      "queue": "long",
-      "os": "windows",
-      "arch": "x86",
-      "profile": null,
-      "shellcode": false
+      "queue": "long"
     },
-    "secrets": {}
+    "secrets": {},
+    "params": {
+      "os": {
+        "value": "windows",
+        "type": "str",
+        "description": "Change operating system for the emulation."
+      },
+      "arch": {
+        "value": "x86",
+        "type": "str",
+        "description": "Change system architecture for the emulation."
+      },
+      "profile": {
+        "value": "",
+        "type": "str",
+        "description": "Add a Qiling [profile](https://docs.qiling.io/en/latest/profile/)."
+      },
+      "shellcode": {
+        "value": false,
+        "type": "bool",
+        "description": "true if the file is a shellcode."
+      }
+    }
   },
   "Qiling_Windows_Shellcode": {
     "type": "file",
@@ -1571,13 +1849,31 @@
     ],
     "config": {
       "soft_time_limit": 120,
-      "queue": "long",
-      "os": "windows",
-      "arch": "x86",
-      "profile": null,
-      "shellcode": true
+      "queue": "long"
     },
-    "secrets": {}
+    "secrets": {},
+    "params": {
+      "os": {
+        "value": "windows",
+        "type": "str",
+        "description": "Change operating system for the emulation."
+      },
+      "arch": {
+        "value": "x86",
+        "type": "str",
+        "description": "Change system architecture for the emulation."
+      },
+      "profile": {
+        "value": "",
+        "type": "str",
+        "description": "Add a Qiling [profile](https://docs.qiling.io/en/latest/profile/)."
+      },
+      "shellcode": {
+        "value": true,
+        "type": "bool",
+        "description": "true if the file is a shellcode."
+      }
+    }
   },
   "Qiling_Linux": {
     "type": "file",
@@ -1593,13 +1889,31 @@
     ],
     "config": {
       "soft_time_limit": 120,
-      "queue": "long",
-      "os": "linux",
-      "arch": "x86",
-      "profile": null,
-      "shellcode": false
+      "queue": "long"
     },
-    "secrets": {}
+    "secrets": {},
+    "params": {
+      "os": {
+        "value": "linux",
+        "type": "str",
+        "description": "Change operating system for the emulation."
+      },
+      "arch": {
+        "value": "x86",
+        "type": "str",
+        "description": "Change system architecture for the emulation."
+      },
+      "profile": {
+        "value": "",
+        "type": "str",
+        "description": "Add a Qiling [profile](https://docs.qiling.io/en/latest/profile/)."
+      },
+      "shellcode": {
+        "value": false,
+        "type": "bool",
+        "description": "true if the file is a shellcode."
+      }
+    }
   },
   "Qiling_Linux_Shellcode": {
     "type": "file",
@@ -1614,13 +1928,31 @@
     ],
     "config": {
       "soft_time_limit": 120,
-      "queue": "long",
-      "os": "linux",
-      "arch": "x86",
-      "profile": null,
-      "shellcode": true
+      "queue": "long"
     },
-    "secrets": {}
+    "secrets": {},
+    "params": {
+      "os": {
+        "value": "linux",
+        "type": "str",
+        "description": "Change operating system for the emulation "
+      },
+      "arch": {
+        "value": "x86",
+        "type": "str",
+        "description": "Change system architecture for the emulation."
+      },
+      "profile": {
+        "value": "",
+        "type": "str",
+        "description": "Add a Qiling [profile](https://docs.qiling.io/en/latest/profile/)."
+      },
+      "shellcode": {
+        "value": true,
+        "type": "bool",
+        "description": "true if the file is a shellcode."
+      }
+    }
   },
   "Quad9_DNS": {
     "type": "observable",
@@ -1635,10 +1967,16 @@
     ],
     "config": {
       "soft_time_limit": 30,
-      "queue": "default",
-      "query_type": "A"
+      "queue": "default"
     },
-    "secrets": {}
+    "secrets": {},
+    "params": {
+      "query_type": {
+        "value": "A",
+        "type": "str",
+        "description": "Query type against the chosen DNS resolver."
+      }
+    }
   },
   "Quad9_Malicious_Detector": {
     "type": "observable",
@@ -1655,7 +1993,8 @@
       "soft_time_limit": 30,
       "queue": "default"
     },
-    "secrets": {}
+    "secrets": {},
+    "params": {}
   },
   "Quark_Engine_APK": {
     "type": "file",
@@ -1674,7 +2013,8 @@
       "soft_time_limit": 120,
       "queue": "long"
     },
-    "secrets": {}
+    "secrets": {},
+    "params": {}
   },
   "Robtex_Forward_PDNS_Query": {
     "type": "observable",
@@ -1689,10 +2029,16 @@
     ],
     "config": {
       "soft_time_limit": 30,
-      "queue": "default",
-      "robtex_analysis": "forward_pdns"
+      "queue": "default"
     },
-    "secrets": {}
+    "secrets": {},
+    "params": {
+      "robtex_analysis": {
+        "value": "forward_pdns",
+        "type": "str",
+        "description": ""
+      }
+    }
   },
   "Robtex_IP_Query": {
     "type": "observable",
@@ -1706,10 +2052,16 @@
     ],
     "config": {
       "soft_time_limit": 30,
-      "queue": "default",
-      "robtex_analysis": "ip_query"
+      "queue": "default"
     },
-    "secrets": {}
+    "secrets": {},
+    "params": {
+      "robtex_analysis": {
+        "value": "ip_query",
+        "type": "str",
+        "description": ""
+      }
+    }
   },
   "Robtex_Reverse_PDNS_Query": {
     "type": "observable",
@@ -1723,10 +2075,16 @@
     ],
     "config": {
       "soft_time_limit": 30,
-      "queue": "default",
-      "robtex_analysis": "reverse_pdns"
+      "queue": "default"
     },
-    "secrets": {}
+    "secrets": {},
+    "params": {
+      "robtex_analysis": {
+        "value": "reverse_pdns",
+        "type": "str",
+        "description": ""
+      }
+    }
   },
   "Rtf_Info": {
     "type": "file",
@@ -1743,7 +2101,8 @@
       "soft_time_limit": 30,
       "queue": "default"
     },
-    "secrets": {}
+    "secrets": {},
+    "params": {}
   },
   "Securitytrails_Details": {
     "type": "observable",
@@ -1757,14 +2116,23 @@
     ],
     "config": {
       "soft_time_limit": 30,
-      "queue": "default",
-      "securitytrails_analysis": "current",
-      "securitytrails_current_type": "details"
+      "queue": "default"
     },
     "secrets": {
       "api_key_name": {
         "env_var_key": "SECURITYTRAILS_KEY",
-        "type": "string",
+        "description": ""
+      }
+    },
+    "params": {
+      "securitytrails_analysis": {
+        "value": "current",
+        "type": "str",
+        "description": ""
+      },
+      "securitytrails_current_type": {
+        "value": "details",
+        "type": "str",
         "description": ""
       }
     }
@@ -1781,14 +2149,23 @@
     ],
     "config": {
       "soft_time_limit": 30,
-      "queue": "default",
-      "securitytrails_analysis": "history",
-      "securitytrails_history_analysis": "dns"
+      "queue": "default"
     },
     "secrets": {
       "api_key_name": {
         "env_var_key": "SECURITYTRAILS_KEY",
-        "type": "string",
+        "description": ""
+      }
+    },
+    "params": {
+      "securitytrails_analysis": {
+        "value": "history",
+        "type": "str",
+        "description": ""
+      },
+      "securitytrails_history_analysis": {
+        "value": "dns",
+        "type": "str",
         "description": ""
       }
     }
@@ -1805,14 +2182,23 @@
     ],
     "config": {
       "soft_time_limit": 30,
-      "queue": "default",
-      "securitytrails_analysis": "history",
-      "securitytrails_history_analysis": "whois"
+      "queue": "default"
     },
     "secrets": {
       "api_key_name": {
         "env_var_key": "SECURITYTRAILS_KEY",
-        "type": "string",
+        "description": ""
+      }
+    },
+    "params": {
+      "securitytrails_analysis": {
+        "value": "history",
+        "type": "str",
+        "description": ""
+      },
+      "securitytrails_history_analysis": {
+        "value": "whois",
+        "type": "str",
         "description": ""
       }
     }
@@ -1834,10 +2220,10 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "SECURITYTRAILS_KEY",
-        "type": "string",
         "description": ""
       }
-    }
+    },
+    "params": {}
   },
   "Securitytrails_Subdomains": {
     "type": "observable",
@@ -1851,14 +2237,23 @@
     ],
     "config": {
       "soft_time_limit": 30,
-      "queue": "default",
-      "securitytrails_analysis": "current",
-      "securitytrails_current_type": "subdomains"
+      "queue": "default"
     },
     "secrets": {
       "api_key_name": {
         "env_var_key": "SECURITYTRAILS_KEY",
-        "type": "string",
+        "description": ""
+      }
+    },
+    "params": {
+      "securitytrails_analysis": {
+        "value": "current",
+        "type": "str",
+        "description": ""
+      },
+      "securitytrails_current_type": {
+        "value": "subdomains",
+        "type": "str",
         "description": ""
       }
     }
@@ -1875,14 +2270,23 @@
     ],
     "config": {
       "soft_time_limit": 30,
-      "queue": "default",
-      "securitytrails_analysis": "current",
-      "securitytrails_current_type": "tags"
+      "queue": "default"
     },
     "secrets": {
       "api_key_name": {
         "env_var_key": "SECURITYTRAILS_KEY",
-        "type": "string",
+        "description": ""
+      }
+    },
+    "params": {
+      "securitytrails_analysis": {
+        "value": "current",
+        "type": "str",
+        "description": ""
+      },
+      "securitytrails_current_type": {
+        "value": "tags",
+        "type": "str",
         "description": ""
       }
     }
@@ -1899,13 +2303,18 @@
     ],
     "config": {
       "soft_time_limit": 30,
-      "queue": "default",
-      "shodan_analysis": "honeyscore"
+      "queue": "default"
     },
     "secrets": {
       "api_key_name": {
         "env_var_key": "SHODAN_KEY",
-        "type": "string",
+        "description": ""
+      }
+    },
+    "params": {
+      "shodan_analysis": {
+        "value": "honeyscore",
+        "type": "str",
         "description": ""
       }
     }
@@ -1922,13 +2331,18 @@
     ],
     "config": {
       "soft_time_limit": 30,
-      "queue": "default",
-      "shodan_analysis": "search"
+      "queue": "default"
     },
     "secrets": {
       "api_key_name": {
         "env_var_key": "SHODAN_KEY",
-        "type": "string",
+        "description": ""
+      }
+    },
+    "params": {
+      "shodan_analysis": {
+        "value": "search",
+        "type": "str",
         "description": ""
       }
     }
@@ -1947,7 +2361,8 @@
       "soft_time_limit": 30,
       "queue": "local"
     },
-    "secrets": {}
+    "secrets": {},
+    "params": {}
   },
   "SpeakEasy": {
     "type": "file",
@@ -1963,12 +2378,37 @@
       "soft_time_limit": 120,
       "queue": "long"
     },
-    "secrets": {}
+    "secrets": {},
+    "params": {}
+  },
+  "Spyse": {
+    "type": "observable",
+    "python_module": "spyse.Spyse",
+    "description": "Scan domains, IPs, emails and CVEs using Spyse.com's API. Register here: https://spyse.com/user/registration",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": [
+      "ip",
+      "domain",
+      "generic"
+    ],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "SPYSE_API_KEY",
+        "description": "Spyse API token"
+      }
+    },
+    "params": {}
   },
   "SSAPINet": {
     "type": "observable",
     "python_module": "ss_api_net.SSAPINet",
-    "description": "get a screenshot of a web page using screenshotapi.net (external source)",
+    "description": "Get a screenshot of a web page using screenshotapi.net. For configuration, Refer to the [docs](https://screenshotapi.net/documentation).",
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
@@ -1977,19 +2417,39 @@
     ],
     "config": {
       "soft_time_limit": 300,
-      "queue": "default",
-      "use_proxy": false,
-      "proxy": "",
-      "output": "image",
-      "extra_api_params": {
-        "full_page": true
-      }
+      "queue": "default"
     },
     "secrets": {
       "api_key_name": {
         "env_var_key": "SSAPINET_KEY",
-        "type": "string",
         "description": ""
+      }
+    },
+    "params": {
+      "use_proxy": {
+        "value": false,
+        "type": "bool",
+        "description": "Use the `use_proxy` and `proxy` options to pass your request through a proxy server."
+      },
+      "proxy": {
+        "value": "",
+        "type": "str",
+        "description": "Use the `use_proxy` and `proxy` options to pass your request through a proxy server."
+      },
+      "output": {
+        "value": "image",
+        "type": "str",
+        "description": "Specify output type (options: `image` i.e. raw base64 encoded image, `json` i.e. containing link)"
+      },
+      "extra_api_params": {
+        "value": {
+          "full_page": true,
+          "fresh": false,
+          "lazy_load": false,
+          "destroy_screenshot": false
+        },
+        "type": "dict",
+        "description": "Refer to their docs](https://screenshotapi.net/documentation)."
       }
     }
   },
@@ -2003,11 +2463,21 @@
     "docker_based": true,
     "config": {
       "soft_time_limit": 70,
-      "queue": "local",
-      "max_number_of_strings": 300,
-      "rank_strings": false
+      "queue": "local"
     },
-    "secrets": {}
+    "secrets": {},
+    "params": {
+      "max_number_of_strings": {
+        "value": 300,
+        "type": "int",
+        "description": ""
+      },
+      "rank_strings": {
+        "value": false,
+        "type": "bool",
+        "description": ""
+      }
+    }
   },
   "Strings_Info_ML": {
     "type": "file",
@@ -2019,11 +2489,21 @@
     "docker_based": true,
     "config": {
       "soft_time_limit": 70,
-      "queue": "local",
-      "max_number_of_strings": 200,
-      "rank_strings": true
+      "queue": "local"
     },
-    "secrets": {}
+    "secrets": {},
+    "params": {
+      "max_number_of_strings": {
+        "value": 200,
+        "type": "int",
+        "description": ""
+      },
+      "rank_strings": {
+        "value": true,
+        "type": "bool",
+        "description": ""
+      }
+    }
   },
   "Stratosphere_Blacklist": {
     "type": "observable",
@@ -2039,7 +2519,8 @@
       "soft_time_limit": 120,
       "queue": "default"
     },
-    "secrets": {}
+    "secrets": {},
+    "params": {}
   },
   "TalosReputation": {
     "type": "observable",
@@ -2055,7 +2536,8 @@
       "soft_time_limit": 30,
       "queue": "default"
     },
-    "secrets": {}
+    "secrets": {},
+    "params": {}
   },
   "ThreatFox": {
     "type": "observable",
@@ -2075,7 +2557,8 @@
       "soft_time_limit": 30,
       "queue": "default"
     },
-    "secrets": {}
+    "secrets": {},
+    "params": {}
   },
   "Threatminer_PDNS": {
     "type": "observable",
@@ -2090,10 +2573,16 @@
     ],
     "config": {
       "soft_time_limit": 30,
-      "queue": "default",
-      "rt_value": 2
+      "queue": "default"
     },
-    "secrets": {}
+    "secrets": {},
+    "params": {
+      "rt_value": {
+        "value": 2,
+        "type": "int",
+        "description": ""
+      }
+    }
   },
   "Threatminer_Reports_Tagging": {
     "type": "observable",
@@ -2108,10 +2597,16 @@
     ],
     "config": {
       "soft_time_limit": 30,
-      "queue": "default",
-      "rt_value": 6
+      "queue": "default"
     },
-    "secrets": {}
+    "secrets": {},
+    "params": {
+      "rt_value": {
+        "value": 6,
+        "type": "int",
+        "description": ""
+      }
+    }
   },
   "Threatminer_Subdomains": {
     "type": "observable",
@@ -2125,15 +2620,21 @@
     ],
     "config": {
       "soft_time_limit": 30,
-      "queue": "default",
-      "rt_value": 5
+      "queue": "default"
     },
-    "secrets": {}
+    "secrets": {},
+    "params": {
+      "rt_value": {
+        "value": 5,
+        "type": "int",
+        "description": ""
+      }
+    }
   },
   "Thug_HTML_Info": {
     "type": "file",
     "python_module": "thug_file.ThugFile",
-    "description": "Perform hybrid dynamic/static analysis on a saved HTML page",
+    "description": "Perform hybrid dynamic/static analysis on a saved HTML page. For configuration, refer to [thug's usage docs](https://buffer.github.io/thug/doc/usage.html#basic-usage).",
     "disabled": false,
     "external_service": false,
     "leaks_info": false,
@@ -2143,15 +2644,41 @@
     ],
     "config": {
       "soft_time_limit": 600,
-      "queue": "long",
-      "dom_events": "click,mouseover",
-      "use_proxy": false,
-      "proxy": "",
-      "enable_image_processing_analysis": true,
-      "enable_awis": true,
-      "user_agent": "winxpie60"
+      "queue": "long"
     },
-    "secrets": {}
+    "secrets": {},
+    "params": {
+      "dom_events": {
+        "value": "click,mouseover",
+        "type": "str",
+        "description": "See [Thug docs: dom events handling](https://buffer.github.io/thug/doc/usage.html#dom-events-handling)."
+      },
+      "use_proxy": {
+        "value": false,
+        "type": "bool",
+        "description": "option `-p`"
+      },
+      "proxy": {
+        "value": "",
+        "type": "str",
+        "description": "option `-p`"
+      },
+      "enable_image_processing_analysis": {
+        "value": true,
+        "type": "bool",
+        "description": "option `-a`"
+      },
+      "enable_awis": {
+        "value": true,
+        "type": "bool",
+        "description": "option `-E`"
+      },
+      "user_agent": {
+        "value": "winxpie60",
+        "type": "str",
+        "description": "See [Thug docs: browser personality](https://buffer.github.io/thug/doc/usage.html#browser-personality)."
+      }
+    }
   },
   "Thug_URL_Info": {
     "type": "observable",
@@ -2167,15 +2694,41 @@
     ],
     "config": {
       "soft_time_limit": 600,
-      "queue": "local",
-      "dom_events": "click,mouseover",
-      "use_proxy": false,
-      "proxy": "",
-      "enable_image_processing_analysis": true,
-      "enable_awis": true,
-      "user_agent": "winxpie60"
+      "queue": "local"
     },
-    "secrets": {}
+    "secrets": {},
+    "params": {
+      "dom_events": {
+        "value": "click,mouseover",
+        "type": "str",
+        "description": "See [Thug docs: dom events handling](https://buffer.github.io/thug/doc/usage.html#dom-events-handling)."
+      },
+      "use_proxy": {
+        "value": false,
+        "type": "bool",
+        "description": "option `-p`"
+      },
+      "proxy": {
+        "value": "",
+        "type": "str",
+        "description": "option `-p`"
+      },
+      "enable_image_processing_analysis": {
+        "value": true,
+        "type": "bool",
+        "description": "option `-a`"
+      },
+      "enable_awis": {
+        "value": true,
+        "type": "bool",
+        "description": "option `-E`"
+      },
+      "user_agent": {
+        "value": "winxpie60",
+        "type": "str",
+        "description": "See [Thug docs: browser personality](https://buffer.github.io/thug/doc/usage.html#browser-personality)."
+      }
+    }
   },
   "TorProject": {
     "type": "observable",
@@ -2191,7 +2744,8 @@
       "soft_time_limit": 30,
       "queue": "default"
     },
-    "secrets": {}
+    "secrets": {},
+    "params": {}
   },
   "Tranco": {
     "type": "observable",
@@ -2208,7 +2762,8 @@
       "soft_time_limit": 30,
       "queue": "default"
     },
-    "secrets": {}
+    "secrets": {},
+    "params": {}
   },
   "Triage_Search": {
     "type": "observable",
@@ -2223,16 +2778,29 @@
     ],
     "config": {
       "soft_time_limit": 300,
-      "queue": "default",
-      "endpoint": "public",
-      "analysis_type": "search",
-      "report_type": "overview"
+      "queue": "default"
     },
     "secrets": {
       "api_key_name": {
         "env_var_key": "TRIAGE_KEY",
-        "type": "string",
         "description": ""
+      }
+    },
+    "params": {
+      "endpoint": {
+        "value": "public",
+        "type": "str",
+        "description": "Choose whether to query on the public or the private endpoint of triage (options: `private`, `public`)."
+      },
+      "report_type": {
+        "value": "overview",
+        "type": "str",
+        "description": "Determines how detailed the final report will be (options: `overview`, `complete`)."
+      },
+      "analysis_type": {
+        "value": "search",
+        "type": "str",
+        "description": "Choose whether to search for existing observable reports or upload for scanning via URL (options: `search` and `submit`)."
       }
     }
   },
@@ -2245,15 +2813,24 @@
     "leaks_info": false,
     "config": {
       "soft_time_limit": 300,
-      "queue": "long",
-      "endpoint": "public",
-      "report_type": "overview"
+      "queue": "long"
     },
     "secrets": {
       "api_key_name": {
         "env_var_key": "TRIAGE_KEY",
-        "type": "string",
         "description": ""
+      }
+    },
+    "params": {
+      "endpoint": {
+        "value": "public",
+        "type": "str",
+        "description": "Choose whether to query on the public or the private endpoint of triage (options: `private`, `public`)."
+      },
+      "report_type": {
+        "value": "overview",
+        "type": "str",
+        "description": "Determines how detailed the final report will be (options: `overview`, `complete`)."
       }
     }
   },
@@ -2269,14 +2846,23 @@
     ],
     "config": {
       "soft_time_limit": 400,
-      "queue": "long",
-      "private": false,
-      "max_tries": 30
+      "queue": "long"
     },
     "secrets": {
       "api_key_name": {
         "env_var_key": "UNPAC_ME_API_KEY",
-        "type": "string",
+        "description": ""
+      }
+    },
+    "params": {
+      "private": {
+        "value": false,
+        "type": "bool",
+        "description": ""
+      },
+      "max_tries": {
+        "value": 30,
+        "type": "int",
         "description": ""
       }
     }
@@ -2296,7 +2882,8 @@
       "soft_time_limit": 50,
       "queue": "default"
     },
-    "secrets": {}
+    "secrets": {},
+    "params": {}
   },
   "UrlScan_Submit_Result": {
     "type": "observable",
@@ -2310,14 +2897,23 @@
     ],
     "config": {
       "soft_time_limit": 100,
-      "queue": "default",
-      "visibility": "private",
-      "urlscan_analysis": "submit_result"
+      "queue": "default"
     },
     "secrets": {
       "api_key_name": {
         "env_var_key": "URLSCAN_API_KEY",
-        "type": "string",
+        "description": ""
+      }
+    },
+    "params": {
+      "visibility": {
+        "value": "private",
+        "type": "str",
+        "description": ""
+      },
+      "urlscan_analysis": {
+        "value": "submit_result",
+        "type": "str",
         "description": ""
       }
     }
@@ -2337,13 +2933,18 @@
     ],
     "config": {
       "soft_time_limit": 100,
-      "queue": "default",
-      "urlscan_analysis": "search"
+      "queue": "default"
     },
     "secrets": {
       "api_key_name": {
         "env_var_key": "URLSCAN_API_KEY",
-        "type": "string",
+        "description": ""
+      }
+    },
+    "params": {
+      "urlscan_analysis": {
+        "value": "search",
+        "type": "str",
         "description": ""
       }
     }
@@ -2363,10 +2964,10 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "VT_KEY",
-        "type": "string",
         "description": ""
       }
-    }
+    },
+    "params": {}
   },
   "VirusTotal_v2_Get_Observable": {
     "type": "observable",
@@ -2388,10 +2989,10 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "VT_KEY",
-        "type": "string",
         "description": ""
       }
-    }
+    },
+    "params": {}
   },
   "VirusTotal_v2_Scan_File": {
     "type": "file",
@@ -2407,15 +3008,14 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "VT_KEY",
-        "type": "string",
         "description": ""
       },
       "url_key_name": {
         "env_var_key": "VT_NOTIFY_URL",
-        "type": "string",
         "description": ""
       }
-    }
+    },
+    "params": {}
   },
   "VirusTotal_v3_Get_File": {
     "type": "file",
@@ -2428,15 +3028,24 @@
     "run_hash_type": "sha256",
     "config": {
       "soft_time_limit": 40,
-      "queue": "default",
-      "include_behaviour_summary": true,
-      "include_sigma_analyses": true
+      "queue": "default"
     },
     "secrets": {
       "api_key_name": {
         "env_var_key": "VT_KEY",
-        "type": "string",
         "description": ""
+      }
+    },
+    "params": {
+      "include_behaviour_summary": {
+        "value": true,
+        "type": "bool",
+        "description": "Include a summary of behavioral analysis reports alongside default scan report"
+      },
+      "include_sigma_analyses": {
+        "value": true,
+        "type": "bool",
+        "description": "Include sigma analysis report alongside default scan report"
       }
     }
   },
@@ -2451,16 +3060,34 @@
     "run_hash_type": "sha256",
     "config": {
       "soft_time_limit": 500,
-      "queue": "default",
-      "force_active_scan": true,
-      "include_behaviour_summary": true,
-      "include_sigma_analyses": true
+      "queue": "default"
     },
     "secrets": {
       "api_key_name": {
         "env_var_key": "VT_KEY",
-        "type": "string",
         "description": ""
+      }
+    },
+    "params": {
+      "force_active_scan": {
+        "value": true,
+        "type": "bool",
+        "description": "If the sample is not already in VT, send the sample and perform a scan"
+      },
+      "force_active_scan_if_old": {
+        "value": false,
+        "type": "bool",
+        "description": "If the sample is old, it would be rescanned"
+      },
+      "include_behaviour_summary": {
+        "value": true,
+        "type": "bool",
+        "description": "Include a summary of behavioral analysis reports alongside default scan report"
+      },
+      "include_sigma_analyses": {
+        "value": true,
+        "type": "bool",
+        "description": "Include sigma analysis report alongside default scan report"
       }
     }
   },
@@ -2484,10 +3111,10 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "VT_KEY",
-        "type": "string",
         "description": ""
       }
-    }
+    },
+    "params": {}
   },
   "Whoisxmlapi": {
     "type": "observable",
@@ -2507,15 +3134,15 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "WHOISXMLAPI_KEY",
-        "type": "string",
         "description": ""
       }
-    }
+    },
+    "params": {}
   },
   "WiGLE": {
     "type": "observable",
     "python_module": "wigle.WiGLE",
-    "description": "Maps and database of 802.11 wireless networks, with statistics, submitted by wardrivers, netstumblers, and net huggers.",
+    "description": "Maps and database of 802.11 wireless networks, with statistics, submitted by wardrivers, netstumblers, and net huggers. Also, the string to be passed in input field of generic analyzers have a format. Different variables are separated by semicolons(`;`) and the field-name and value are separated by equals sign(`=`). Example string for search_type `CDMA Network` is `sid=12345;nid=12345;bsid=12345`.",
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
@@ -2524,14 +3151,19 @@
     ],
     "config": {
       "soft_time_limit": 30,
-      "queue": "default",
-      "search_type": "WiFi Network"
+      "queue": "default"
     },
     "secrets": {
       "api_key_name": {
         "env_var_key": "WIGLE_KEY",
-        "type": "string",
         "description": ""
+      }
+    },
+    "params": {
+      "search_type": {
+        "value": "WiFi Network",
+        "type": "str",
+        "description": "Corresponds to different routes mentioned in [docs](https://api.wigle.net/swagger#/v3_ALPHA). (options: `WiFi Network`, `CDMA Network`, `Bluetooth Network`, `GSM/LTE/WCDMA Network`)."
       }
     }
   },
@@ -2554,15 +3186,14 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "XFORCE_KEY",
-        "type": "string",
         "description": ""
       },
       "api_password_name": {
         "env_var_key": "XFORCE_PASSWORD",
-        "type": "string",
         "description": ""
       }
-    }
+    },
+    "params": {}
   },
   "Xlm_Macro_Deobfuscator": {
     "type": "file",
@@ -2584,14 +3215,20 @@
     ],
     "config": {
       "soft_time_limit": 30,
-      "queue": "default",
-      "passwords_to_check": [
-        "agenzia",
-        "inps",
-        "coronavirus"
-      ]
+      "queue": "default"
     },
-    "secrets": {}
+    "secrets": {},
+    "params": {
+      "passwords_to_check": {
+        "value": [
+          "agenzia",
+          "inps",
+          "coronavirus"
+        ],
+        "type": "list",
+        "description": ""
+      }
+    }
   },
   "Yara_Scan_Community": {
     "type": "file",
@@ -2602,12 +3239,18 @@
     "leaks_info": false,
     "config": {
       "soft_time_limit": 60,
-      "queue": "local",
-      "directories_with_rules": [
-        "/opt/deploy/yara/rules"
-      ]
+      "queue": "local"
     },
-    "secrets": {}
+    "secrets": {},
+    "params": {
+      "directories_with_rules": {
+        "value": [
+          "/opt/deploy/yara/rules"
+        ],
+        "type": "list",
+        "description": ""
+      }
+    }
   },
   "Yara_Scan_Daily_Ioc": {
     "type": "file",
@@ -2618,16 +3261,30 @@
     "leaks_info": false,
     "config": {
       "soft_time_limit": 60,
-      "queue": "default",
-      "git_repo_main_dir": [
-        "/opt/deploy/yara/daily_ioc_rules"
-      ],
-      "directories_with_rules": [
-        "/opt/deploy/yara/daily_ioc_rules"
-      ],
-      "recursive": true
+      "queue": "default"
     },
-    "secrets": {}
+    "secrets": {},
+    "params": {
+      "git_repo_main_dir": {
+        "value": [
+          "/opt/deploy/yara/daily_ioc_rules"
+        ],
+        "type": "list",
+        "description": ""
+      },
+      "directories_with_rules": {
+        "value": [
+          "/opt/deploy/yara/daily_ioc_rules"
+        ],
+        "type": "list",
+        "description": ""
+      },
+      "recursive": {
+        "value": true,
+        "type": "bool",
+        "description": ""
+      }
+    }
   },
   "Yara_Scan_FireEye": {
     "type": "file",
@@ -2638,16 +3295,30 @@
     "leaks_info": false,
     "config": {
       "soft_time_limit": 60,
-      "queue": "local",
-      "git_repo_main_dir": [
-        "/opt/deploy/yara/fireeye_rules"
-      ],
-      "directories_with_rules": [
-        "/opt/deploy/yara/fireeye_rules/rules"
-      ],
-      "recursive": true
+      "queue": "local"
     },
-    "secrets": {}
+    "secrets": {},
+    "params": {
+      "git_repo_main_dir": {
+        "value": [
+          "/opt/deploy/yara/fireeye_rules"
+        ],
+        "type": "list",
+        "description": ""
+      },
+      "directories_with_rules": {
+        "value": [
+          "/opt/deploy/yara/fireeye_rules/rules"
+        ],
+        "type": "list",
+        "description": ""
+      },
+      "recursive": {
+        "value": true,
+        "type": "bool",
+        "description": ""
+      }
+    }
   },
   "Yara_Scan_Florian": {
     "type": "file",
@@ -2658,15 +3329,25 @@
     "leaks_info": false,
     "config": {
       "soft_time_limit": 60,
-      "queue": "default",
-      "git_repo_main_dir": [
-        "/opt/deploy/yara/signature-base"
-      ],
-      "directories_with_rules": [
-        "/opt/deploy/yara/signature-base/yara"
-      ]
+      "queue": "default"
     },
-    "secrets": {}
+    "secrets": {},
+    "params": {
+      "git_repo_main_dir": {
+        "value": [
+          "/opt/deploy/yara/signature-base"
+        ],
+        "type": "list",
+        "description": ""
+      },
+      "directories_with_rules": {
+        "value": [
+          "/opt/deploy/yara/signature-base/yara"
+        ],
+        "type": "list",
+        "description": ""
+      }
+    }
   },
   "Yara_Scan_Inquest": {
     "type": "file",
@@ -2677,16 +3358,30 @@
     "leaks_info": false,
     "config": {
       "soft_time_limit": 60,
-      "queue": "local",
-      "git_repo_main_dir": [
-        "/opt/deploy/yara/inquest_rules"
-      ],
-      "directories_with_rules": [
-        "/opt/deploy/yara/inquest_rules"
-      ],
-      "recursive": false
+      "queue": "local"
     },
-    "secrets": {}
+    "secrets": {},
+    "params": {
+      "git_repo_main_dir": {
+        "value": [
+          "/opt/deploy/yara/inquest_rules"
+        ],
+        "type": "list",
+        "description": ""
+      },
+      "directories_with_rules": {
+        "value": [
+          "/opt/deploy/yara/inquest_rules"
+        ],
+        "type": "list",
+        "description": ""
+      },
+      "recursive": {
+        "value": false,
+        "type": "bool",
+        "description": ""
+      }
+    }
   },
   "Yara_Scan_Intezer": {
     "type": "file",
@@ -2697,12 +3392,18 @@
     "leaks_info": false,
     "config": {
       "soft_time_limit": 60,
-      "queue": "local",
-      "directories_with_rules": [
-        "/opt/deploy/yara/intezer_rules"
-      ]
+      "queue": "local"
     },
-    "secrets": {}
+    "secrets": {},
+    "params": {
+      "directories_with_rules": {
+        "value": [
+          "/opt/deploy/yara/intezer_rules"
+        ],
+        "type": "list",
+        "description": ""
+      }
+    }
   },
   "Yara_Scan_McAfee": {
     "type": "file",
@@ -2713,20 +3414,30 @@
     "leaks_info": false,
     "config": {
       "soft_time_limit": 60,
-      "queue": "local",
-      "git_repo_main_dir": [
-        "/opt/deploy/yara/mcafee_rules"
-      ],
-      "directories_with_rules": [
-        "/opt/deploy/yara/mcafee_rules/APT",
-        "/opt/deploy/yara/mcafee_rules/RAT",
-        "/opt/deploy/yara/mcafee_rules/malware",
-        "/opt/deploy/yara/mcafee_rules/miners",
-        "/opt/deploy/yara/mcafee_rules/ransomware",
-        "/opt/deploy/yara/mcafee_rules/stealer"
-      ]
+      "queue": "local"
     },
-    "secrets": {}
+    "secrets": {},
+    "params": {
+      "git_repo_main_dir": {
+        "value": [
+          "/opt/deploy/yara/mcafee_rules"
+        ],
+        "type": "list",
+        "description": ""
+      },
+      "directories_with_rules": {
+        "value": [
+          "/opt/deploy/yara/mcafee_rules/APT",
+          "/opt/deploy/yara/mcafee_rules/RAT",
+          "/opt/deploy/yara/mcafee_rules/malware",
+          "/opt/deploy/yara/mcafee_rules/miners",
+          "/opt/deploy/yara/mcafee_rules/ransomware",
+          "/opt/deploy/yara/mcafee_rules/stealer"
+        ],
+        "type": "list",
+        "description": ""
+      }
+    }
   },
   "Yara_Scan_ReversingLabs": {
     "type": "file",
@@ -2737,16 +3448,30 @@
     "leaks_info": false,
     "config": {
       "soft_time_limit": 60,
-      "queue": "local",
-      "git_repo_main_dir": [
-        "/opt/deploy/yara/reversinglabs_rules"
-      ],
-      "directories_with_rules": [
-        "/opt/deploy/yara/reversinglabs_rules/yara"
-      ],
-      "recursive": true
+      "queue": "local"
     },
-    "secrets": {}
+    "secrets": {},
+    "params": {
+      "git_repo_main_dir": {
+        "value": [
+          "/opt/deploy/yara/reversinglabs_rules"
+        ],
+        "type": "list",
+        "description": ""
+      },
+      "directories_with_rules": {
+        "value": [
+          "/opt/deploy/yara/reversinglabs_rules/yara"
+        ],
+        "type": "list",
+        "description": ""
+      },
+      "recursive": {
+        "value": true,
+        "type": "bool",
+        "description": ""
+      }
+    }
   },
   "Yara_Scan_Samir": {
     "type": "file",
@@ -2757,15 +3482,25 @@
     "leaks_info": false,
     "config": {
       "soft_time_limit": 60,
-      "queue": "local",
-      "git_repo_main_dir": [
-        "/opt/deploy/yara/samir_rules"
-      ],
-      "directories_with_rules": [
-        "/opt/deploy/yara/samir_rules"
-      ]
+      "queue": "local"
     },
-    "secrets": {}
+    "secrets": {},
+    "params": {
+      "git_repo_main_dir": {
+        "value": [
+          "/opt/deploy/yara/samir_rules"
+        ],
+        "type": "list",
+        "description": ""
+      },
+      "directories_with_rules": {
+        "value": [
+          "/opt/deploy/yara/samir_rules"
+        ],
+        "type": "list",
+        "description": ""
+      }
+    }
   },
   "Yara_Scan_Stratosphere": {
     "type": "file",
@@ -2776,16 +3511,26 @@
     "leaks_info": false,
     "config": {
       "soft_time_limit": 60,
-      "queue": "local",
-      "git_repo_main_dir": [
-        "/opt/deploy/yara/stratosphere_rules"
-      ],
-      "directories_with_rules": [
-        "/opt/deploy/yara/stratosphere_rules/malware",
-        "/opt/deploy/yara/stratosphere_rules/protocols"
-      ]
+      "queue": "local"
     },
-    "secrets": {}
+    "secrets": {},
+    "params": {
+      "git_repo_main_dir": {
+        "value": [
+          "/opt/deploy/yara/stratosphere_rules"
+        ],
+        "type": "list",
+        "description": ""
+      },
+      "directories_with_rules": {
+        "value": [
+          "/opt/deploy/yara/stratosphere_rules/malware",
+          "/opt/deploy/yara/stratosphere_rules/protocols"
+        ],
+        "type": "list",
+        "description": ""
+      }
+    }
   },
   "YETI": {
     "type": "observable",
@@ -2803,28 +3548,40 @@
     ],
     "config": {
       "soft_time_limit": 30,
-      "queue": "default",
-      "verify_ssl": true,
-      "regex": false,
-      "results_count": 50
+      "queue": "default"
     },
     "secrets": {
       "api_key_name": {
         "env_var_key": "YETI_KEY",
-        "type": "string",
         "description": "API key for your YETI instance"
       },
       "url_key_name": {
         "env_var_key": "YETI_URL",
-        "type": "string",
         "description": "API URL of your YETI instance"
+      }
+    },
+    "params": {
+      "verify_ssl": {
+        "value": true,
+        "type": "bool",
+        "description": "Enable SSL certificate server verification. Change this if your YETI instance has not SSL enabled."
+      },
+      "regex": {
+        "value": false,
+        "type": "bool",
+        "description": "Use this if you are searching for observables using a regex."
+      },
+      "results_count": {
+        "value": 50,
+        "type": "int",
+        "description": "Use this to limit the maximum number of results obtained from a search."
       }
     }
   },
   "ZoomEye": {
     "type": "observable",
     "python_module": "zoomeye.ZoomEye",
-    "description": "Cyberspace Search Engine recording information of devices, websites, services and components etc..",
+    "description": "Cyberspace Search Engine recording information of devices, websites, services, components etc. [Host search: docs](https://www.zoomeye.org/doc#host-search).",
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
@@ -2834,18 +3591,39 @@
     ],
     "config": {
       "soft_time_limit": 60,
-      "queue": "default",
-      "search_type": "host",
-      "query": "",
-      "page": 1,
-      "facets": "",
-      "history": true
+      "queue": "default"
     },
     "secrets": {
       "api_key_name": {
         "env_var_key": "ZOOMEYE_KEY",
-        "type": "string",
         "description": ""
+      }
+    },
+    "params": {
+      "search_type": {
+        "value": "host",
+        "type": "str",
+        "description": "Choose among `host`, `web`, `both` (both is only available to ZoomEye VIP users)."
+      },
+      "query": {
+        "value": "",
+        "type": "str",
+        "description": "Follow according to docs, but omit `ip`, `hostname`. Eg: `city:biejing port:21`."
+      },
+      "page": {
+        "value": 1,
+        "type": "int",
+        "description": "Page number to fetch."
+      },
+      "facets": {
+        "value": "",
+        "type": "str",
+        "description": "A comma-separated list of properties to get summary information on query. Eg: `facets:app,os`."
+      },
+      "history": {
+        "value": true,
+        "type": "bool",
+        "description": "To query the history data."
       }
     }
   }

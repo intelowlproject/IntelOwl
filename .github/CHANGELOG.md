@@ -5,6 +5,8 @@
 ## [v3.0.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v3.0.0)
 
 > Note: This is a major release with MANY breaking changes.
+> ✒️ [Link]() to the blogpost announcing the release and summary of top new features.
+> 💻 GUI changes can be seen in action on the [demo](https://intelowlclient.firebaseapp.com/pages/connectors).
 
 **Notes:**
 - Update PyIntelOwl to version [4.0.0](https://github.com/intelowlproject/pyintelowl/blob/master/.github/CHANGELOG.md#400).
@@ -13,9 +15,8 @@
 **Features:**
 - Plugins (analyzers/connectors) that are not properly configured will not run even if requested. They will be marked as disabled from the dropdown on the analysis form and as a bonus you can also see if and why a plugin is not configured on the GUI tables. 
 - Added `kill`, `retry` and `healthcheck` features to analyzers and connectors. See [Managing Analyzers and Connectors](https://intelowl.readthedocs.io/en/master/Usage.html#managing-analyzers-and-connectors).
-- Standardized threat-sharing using Traffic Light Protocol or `TLP`, thereby deprecating the use of booleans `force_privacy`, `disable_external_analyzers` and `private`. See [TLP Support](https://intelowl.readthedocs.io/en/master/Usage.html#tlp-support). This makes the analysis form much less complex than before.
+- Standardized threat-sharing using Traffic Light Protocol or `TLP`, thereby deprecating the use of booleans `force_privacy`, `disable_external_analyzers` and `private`. See [TLP Support](https://intelowl.readthedocs.io/en/master/Usage.html#tlp-support). This makes the analysis form much more easier to use than before.
 
-> GUI changes can be seen in action on the [demo](https://intelowlclient.firebaseapp.com/pages/connectors).
 
 **New class of plugins called _Connectors_:**
 - Connectors are designed to run after every successful analysis which makes them suitable for automated threat-sharing. Built to support integration with other SIEM/SOAR projects specifically aimed at Threat Sharing Platforms. See [Available Connectors](https://intelowl.readthedocs.io/en/master/Usage.html#available-connectors).
@@ -23,14 +24,15 @@
   * `MISP`: automatically creates an event on your MISP instance.
   * `OpenCTI`: automatically creates an observable and a linked report on your OpenCTI instance.
   * `YETI`: find/create an observable on YETI.
-- New `connectors_config.json` file for storing Connectors related configuration info.
+- New `connectors_config.json` file for storing connectors related configuration.
 
-**New Analyzers Config Format:**
-- The `additional_config_params` was split into `config` and `secrets`:
-  - `config`: Includes general config params - `soft_time_limit`, `queue` as well as [Analyzer](https://intelowl.readthedocs.io/en/master/Usage.html#analyzers-customization) or [Connector](https://intelowl.readthedocs.io/en/master/Usage.html#connectors-customization) specific params.
-  - `secrets`: Stores plugin specific secrets like API Key name along with the secret's type and description.
+**New analyzers configuration format:**
+- The `additional_config_params` attribute was split into the following 3 individual attributes.
+  - `config`: Includes common parameters - `queue` and `soft_time_limit`.
+  - `params`: Includes default value, datatype and description for each [Analyzer](https://intelowl.readthedocs.io/en/master/Usage.html#analyzers-customization) or [Connector](https://intelowl.readthedocs.io/en/master/Usage.html#connectors-customization) specific parameters that modify runtime behaviour.
+  - `secrets`: Includes analyzer or connector specific secrets (e.g. API Key) name along with the secret's description. All secrets are required.
 
-**New Inbuilt Analyzers/ Fixes to existing:**
+**New inbuilt analyzers/fixes to existing:**
 - New `Spyse` analyzer: Scan domains, IPs, emails and CVEs using Spyse's API. Register [here](https://spyse.com/user/registration).
 - New `OpenCTI` analyzer: scan an observable on an OpenCTI instance.
 - New `Intezer_Get` analyzer: check Managing Analyzers and Connectors if an analysis related to a hash is available in [Intezer](https://analyze.intezer.com/)

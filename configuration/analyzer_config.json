@@ -364,7 +364,7 @@
   "Darksearch_Query": {
     "type": "observable",
     "python_module": "darksearch.DarkSearchQuery",
-    "description": "Query against https://darksearch.io/api/search API",
+    "description": "Query against [darksearch](https://darksearch.io/api/search)'s API",
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
@@ -1054,7 +1054,7 @@
   "Intezer_Get": {
     "type": "observable",
     "python_module": "intezer_get.IntezerGet",
-    "description": "check if an hash was analyzed on Intezer. Register for a free community account here: https://analyze.intezer.com/sign-in",
+    "description": "check if an hash was analyzed on Intezer. Register for a free community account [here](https://analyze.intezer.com/sign-in).",
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
@@ -1076,7 +1076,7 @@
   "Intezer_Scan": {
     "type": "file",
     "python_module": "intezer_scan.IntezerScan",
-    "description": "Scan a file on Intezer. Register for a free community account here: https://analyze.intezer.com/sign-in",
+    "description": "Scan a file on Intezer. Register for a free community account [here](https://analyze.intezer.com/sign-in).",
     "disabled": false,
     "external_service": true,
     "leaks_info": true,
@@ -2384,7 +2384,7 @@
   "Spyse": {
     "type": "observable",
     "python_module": "spyse.Spyse",
-    "description": "Scan domains, IPs, emails and CVEs using Spyse.com's API. Register here: https://spyse.com/user/registration",
+    "description": "Scan domains, IPs, emails and CVEs using Spyse.com's API. Register [here](https://spyse.com/user/registration).",
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
@@ -3386,7 +3386,7 @@
   "Yara_Scan_Intezer": {
     "type": "file",
     "python_module": "yara_scan.YaraScan",
-    "description": "Scan a file with Intezer yara rules: https://github.com/intezer/yara-rules",
+    "description": "Scan a file with Intezer yara rules ([github](https://github.com/intezer/yara-rules)).",
     "disabled": false,
     "external_service": false,
     "leaks_info": false,

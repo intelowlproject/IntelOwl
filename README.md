@@ -57,7 +57,7 @@ You can see the full list of all available analyzers in the [documentation](http
 | Free modules that require additional configuration | - Cuckoo (requires at least one working Cuckoo instance)<br/>  - MISP (requires at least one working MISP instance)<br/>  - Yara (Community, Neo23x0, Intezer, McAfee rules are already available. There's the chance to add your own rules)                                                                   |
 
 ## Premium support 
-<img src="static_intel/xscode-banner.png" width=500 height=150 alt="Get Support"/><br/>
+<img src="static_intel/xscode-banner.png" width="600" height="120" alt="xscode: Get Support"/><br/>
 _For urgent issues and priority support, visit [https://xscode.com/intelowlproject/IntelOwl](https://xscode.com/intelowlproject/IntelOwl)._
 
 ## Legal notice

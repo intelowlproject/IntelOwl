@@ -2,6 +2,57 @@
 
 [**Upgrade Guide**](https://intelowl.readthedocs.io/en/latest/Installation.html#update-to-the-most-recent-version)
 
+## [v3.0.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v3.0.0)
+
+> Note: This is a major release with MANY breaking changes.
+> ✒️ [Link]() to the blogpost announcing the release and summary of top new features.
+> 💻 GUI changes can be seen in action on the [demo](https://intelowlclient.firebaseapp.com/pages/connectors).
+
+**Notes:**
+- Update PyIntelOwl to version [4.0.0](https://github.com/intelowlproject/pyintelowl/blob/master/.github/CHANGELOG.md#400).
+- If you modified your local `analyzer_config.json` file, then you will need to merge the changes manually because of the new format.
+
+**Features:**
+- Plugins (analyzers/connectors) that are not properly configured will not run even if requested. They will be marked as disabled from the dropdown on the analysis form and as a bonus you can also see if and why a plugin is not configured on the GUI tables. 
+- Added `kill`, `retry` and `healthcheck` features to analyzers and connectors. See [Managing Analyzers and Connectors](https://intelowl.readthedocs.io/en/master/Usage.html#managing-analyzers-and-connectors).
+- Standardized threat-sharing using Traffic Light Protocol or `TLP`, thereby deprecating the use of booleans `force_privacy`, `disable_external_analyzers` and `private`. See [TLP Support](https://intelowl.readthedocs.io/en/master/Usage.html#tlp-support). This makes the analysis form much more easier to use than before.
+
+
+**New class of plugins called _Connectors_:**
+- Connectors are designed to run after every successful analysis which makes them suitable for automated threat-sharing. Built to support integration with other SIEM/SOAR projects specifically aimed at Threat Sharing Platforms. See [Available Connectors](https://intelowl.readthedocs.io/en/master/Usage.html#available-connectors).
+- Newly added connectors for threat-sharing:
+  * `MISP`: automatically creates an event on your MISP instance.
+  * `OpenCTI`: automatically creates an observable and a linked report on your OpenCTI instance.
+  * `YETI`: find/create an observable on YETI.
+- New `connectors_config.json` file for storing connectors related configuration.
+
+**New analyzers configuration format:**
+- The `additional_config_params` attribute was split into the following 3 individual attributes.
+  - `config`: Includes common parameters - `queue` and `soft_time_limit`.
+  - `params`: Includes default value, datatype and description for each [Analyzer](https://intelowl.readthedocs.io/en/master/Usage.html#analyzers-customization) or [Connector](https://intelowl.readthedocs.io/en/master/Usage.html#connectors-customization) specific parameters that modify runtime behaviour.
+  - `secrets`: Includes analyzer or connector specific secrets (e.g. API Key) name along with the secret's description. All secrets are required.
+
+**New inbuilt analyzers/fixes to existing:**
+- New `Spyse` analyzer: Scan domains, IPs, emails and CVEs using Spyse's API. Register [here](https://spyse.com/user/registration).
+- New `OpenCTI` analyzer: scan an observable on an OpenCTI instance.
+- New `Intezer_Get` analyzer: check Managing Analyzers and Connectors if an analysis related to a hash is available in [Intezer](https://analyze.intezer.com/)
+- New `MWDB_Get` analyzer: [mwdblib](https://mwdb.readthedocs.io/en/latest/) Retrieve malware file analysis by hash from repository maintained by CERT Polska MWDB.
+- New `YETI` analyzer (YETI = Your Everyday Threat Intelligence): scan an observable on a YETI instance.
+- New `HashLookupServer_Get_Observable` and `HashLookupServer_Get_File` analyzers: check if a md5 or sha1 is available in the database of [known file hosted by CIRCL](https://github.com/adulau/hashlookup-server)
+- New `ClamAV` analyzer: scan files for viruses/malwares/trojans using [ClamAV antivirus engine](https://docs.clamav.net/).
+- Fixed `Tranco` Analyzer pointing to the wrong `python_module`
+- Removed `CirclePDNS` default value in `env_file_app_template`
+- VirusTotal v3: New configuration options: `include_behaviour_summary` for behavioral analysis and `include_sigma_analyses` for sigma analysis report of the file. See [Customize Analyzers](https://intelowl.readthedocs.io/en/master/Advanced-Usage.html#customize-analyzer-execution-at-time-of-request).
+
+**REST API changes:**
+- The `/api/send_analysis_request` endpoint was split into two individual endpoints, namely, `/api/analyze_file` and `/api/analyze_observable` to allow for various improvements.
+- Updated endpoint for downloading job sample: `/api/jobs/{id}/download_sample`
+- Updated `/api/ask_analysis_availability` to be a `POST` endpoint to allow for various improvements.
+
+**Misc:**
+- Updated the elasticsearch mapping for `Job` model along with updated [Saved Object](https://github.com/intelowlproject/IntelOwl/blob/master/configuration/Kibana-Saved-Conf.ndjson) for Kibana.
+
+
 ## [v2.5.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v2.5.0)
 **New Inbuilt Analyzers:**
 - New `Dehashed_Search` analyzer: Query any observable/keyword against Dehashed's search API (https://dehashed.com).

@@ -117,34 +117,20 @@ class AbstractConfigSerializer(rfs.Serializer):
                 missing_secrets.append(key_name)
 
         num_missing_secrets = len(missing_secrets)
-<<<<<<< HEAD
-        num_total_secrets = len(raw_instance["secrets"].keys())
-        if num_missing_secrets:
-            error_message = ";".join(errors.values())
-            error_message += "; (%d of %d satisfied)" % (
-=======
         if num_missing_secrets:
             configured = False
             num_total_secrets = len(secrets.keys())
             error_message = "(%s) not set; (%d of %d satisfied)" % (
                 ",".join(missing_secrets),
->>>>>>> origin/develop
                 num_total_secrets - num_missing_secrets,
                 num_total_secrets,
             )
         else:
-<<<<<<< HEAD
-            error_message = None
-
-        return {
-            "configured": num_missing_secrets == 0,
-=======
             configured = True
             error_message = None
 
         return {
             "configured": configured,
->>>>>>> origin/develop
             "error_message": error_message,
             "missing_secrets": missing_secrets,
         }

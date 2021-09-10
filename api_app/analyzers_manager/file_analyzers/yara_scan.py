@@ -113,10 +113,10 @@ class YaraScan(FileAnalyzer):
         found_yara_dirs = []
         for analyzer_name, ac in analyzer_config.items():
             if analyzer_name.startswith("Yara_Scan"):
-                yara_dirs = ac.config.get("git_repo_main_dir", [])
+                yara_dirs = ac.param_values.get("git_repo_main_dir", [])
                 if not yara_dirs:
                     # fall back to required key
-                    yara_dirs = ac.config.get("directories_with_rules", [])
+                    yara_dirs = ac.param_values.get("directories_with_rules", [])
                     found_yara_dirs.extend(yara_dirs)
                 # customize it as you wish
                 for yara_dir in yara_dirs:

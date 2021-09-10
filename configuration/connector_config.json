@@ -1,15 +1,12 @@
 {
   "MISP": {
     "disabled": true,
-    "description": "automatically creates an event on your MISP instance, linking the analysis the successful analysis on IntelOwl",
+    "description": "Automatically creates an event on your MISP instance, linking the analysis the successful analysis on IntelOwl",
     "python_module": "misp.MISP",
     "maximum_tlp": "WHITE",
     "config": {
       "soft_time_limit": 30,
-      "queue": "default",
-      "ssl_check": true,
-      "debug": false,
-      "tlp": "white"
+      "queue": "default"
     },
     "secrets": {
       "api_key_name": {
@@ -20,26 +17,33 @@
         "env_var_key": "CONNECTOR_MISP_URL",
         "description": "URL of your MISP instance"
       }
+    },
+    "params": {
+      "ssl_check": {
+        "value": true,
+        "type": "bool",
+        "description": "Enable SSL certificate server verification. Change this if your MISP instance has not SSL enabled."
+      },
+      "debug": {
+        "value": false,
+        "type": "bool",
+        "description": "Enable debug logs."
+      },
+      "tlp": {
+        "value": "white",
+        "type": "str",
+        "description": "Change this as per your organization's threat sharing conventions."
+      }
     }
   },
   "OpenCTI": {
     "disabled": true,
-    "description": "automatically creates an observable and a linked report on your OpenCTI instance, linking the the successful analysis on IntelOwl",
+    "description": "Automatically creates an observable and a linked report on your OpenCTI instance, linking the the successful analysis on IntelOwl",
     "python_module": "opencti.OpenCTI",
     "maximum_tlp": "WHITE",
     "config": {
       "soft_time_limit": 30,
-      "queue": "default",
-      "ssl_verify": true,
-      "proxies": {
-        "http": "",
-        "https": ""
-      },
-      "tlp": {
-        "type": "white",
-        "color": "#ffffff",
-        "x_opencti_order": 1
-      }
+      "queue": "default"
     },
     "secrets": {
       "api_key_name": {
@@ -50,6 +54,30 @@
         "env_var_key": "CONNECTOR_OPENCTI_URL",
         "description": "URL of your OpenCTI instance"
       }
+    },
+    "params": {
+      "ssl_verify": {
+        "value": true,
+        "type": "bool",
+        "description": "Enable SSL certificate server verification. Change this if your OpenCTI instance has not SSL enabled."
+      },
+      "proxies": {
+        "value": {
+          "http": "",
+          "https": ""
+        },
+        "type": "dict",
+        "description": "Use these options to pass your request through a proxy server."
+      },
+      "tlp": {
+        "value": {
+          "type": "white",
+          "color": "#ffffff",
+          "x_opencti_order": 1
+        },
+        "type": "dict",
+        "description": "Change this as per your organization's threat sharing conventions."
+      }
     }
   },
   "YETI": {
@@ -59,8 +87,7 @@
     "maximum_tlp": "WHITE",
     "config": {
       "soft_time_limit": 30,
-      "queue": "default",
-      "verify_ssl": true
+      "queue": "default"
     },
     "secrets": {
       "api_key_name": {
@@ -70,6 +97,13 @@
       "url_key_name": {
         "env_var_key": "CONNECTOR_YETI_URL",
         "description": "API URL of your YETI instance"
+      }
+    },
+    "params": {
+      "verify_ssl": {
+        "value": true,
+        "type": "bool",
+        "description": "Enable SSL certificate server verification. Change this if your YETI instance has not SSL enabled."
       }
     }
   }

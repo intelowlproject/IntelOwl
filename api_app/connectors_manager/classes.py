@@ -60,7 +60,6 @@ class Connector(Plugin):
         """
         basic health check: if instance is up or not (timeout - 10s)
         """
-
         health_status, url = None, None
         cc = ConnectorConfig.get(connector_name)
         if cc is not None:

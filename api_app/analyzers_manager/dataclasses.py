@@ -52,6 +52,12 @@ class AnalyzerConfig(AbstractConfig):
             return f"api_app.analyzers_manager.file_analyzers.{self.python_module}"
 
     @classmethod
+    def from_dict(cls, data: dict) -> "AnalyzerConfig":
+        return cls(**data)
+
+    # orm methods
+
+    @classmethod
     def get(cls, analyzer_name: str) -> typing.Optional["AnalyzerConfig"]:
         """
         Returns config dataclass by analyzer_name if found, else None
@@ -63,12 +69,13 @@ class AnalyzerConfig(AbstractConfig):
         return cls.from_dict(config_dict)
 
     @classmethod
-    def from_dict(cls, data: dict) -> "AnalyzerConfig":
-        return cls(**data)
-
-    @classmethod
     def all(cls) -> typing.Dict[str, "AnalyzerConfig"]:
         return {
             name: cls.from_dict(attrs)
             for name, attrs in AnalyzerConfigSerializer.read_and_verify_config().items()
         }
+
+    @classmethod
+    def filter(cls, names: typing.List[str]) -> typing.Dict[str, "AnalyzerConfig"]:
+        all_analyzer_config = cls.all()
+        return {name: ac for name, ac in all_analyzer_config.items() if name in names}

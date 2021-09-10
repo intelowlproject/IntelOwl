@@ -109,8 +109,8 @@ Some analyzers and connectors provide the chance to customize the performed anal
 - You can set a custom default values by changing their `value` attribute directly from the configuration files.
 - You can choose to provide runtime configuration when requesting an analysis that will be merged with the default overriding it. This override is done only for the specific analysis.
 
-<div class="admonition hint">
-<p class="admonition-title">Hint</p>
+<div class="admonition info">
+<p class="admonition-title">Info</p>
 Connectors parameters can only be changed from it's configuration file, not at the time of analysis request.
 </div>
 

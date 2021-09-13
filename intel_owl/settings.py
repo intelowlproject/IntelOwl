@@ -5,6 +5,7 @@
 import os
 from datetime import timedelta
 
+from django.core.files.storage import FileSystemStorage
 from django.core.management.utils import get_random_secret_key
 
 from intel_owl import secrets
@@ -22,13 +23,61 @@ PROJECT_LOCATION = "/opt/deploy/intel_owl"
 MEDIA_ROOT = "/opt/deploy/files_required"
 DISABLE_LOGGING_TEST = os.environ.get("DISABLE_LOGGING_TEST", False) == "True"
 MOCK_CONNECTIONS = os.environ.get("MOCK_CONNECTIONS", False) == "True"
+TEST_MODE = MOCK_CONNECTIONS
 LDAP_ENABLED = os.environ.get("LDAP_ENABLED", False) == "True"
+LOCAL_STORAGE = os.environ.get("LOCAL_STORAGE", "True") == "True"
+# Storage settings
+if LOCAL_STORAGE:
+
+    class FileSystemStorageWrapper(FileSystemStorage):
+        def retrieve(self, file, analyzer):
+            # we have one single sample for every analyzer
+            return file.path
+
+    DEFAULT_FILE_STORAGE = "intel_owl.settings.FileSystemStorageWrapper"
+else:
+    from storages.backends.s3boto3 import S3Boto3Storage
+
+    class S3Boto3StorageWrapper(S3Boto3Storage):
+        def retrieve(self, file, analyzer):
+            # FIXME we can optimize this a lot.
+            #  Right now we are doing an http request FOR analyzer. We can have a
+            #  proxy that will store the content and then save it locally
+
+            # The idea is to download the file in MEDIA_ROOT/analyzer/namefile if it does not exist
+            path_dir = os.path.join(MEDIA_ROOT, analyzer)
+            name = file.file_name
+            _path = os.path.join(path_dir, name)
+            if not os.path.exists(_path):
+                os.makedirs(path_dir, exist_ok=True)
+                assert self.exists(name)
+                with self.open(name) as s3_file_object:
+                    content = s3_file_object.read()
+                    s3_file_object.seek(0)
+                    with open(_path, "wb") as local_file_object:
+                        local_file_object.write(content)
+            return _path
+
+    DEFAULT_FILE_STORAGE = "intel_owl.settings.S3Boto3StorageWrapper"
+    AWS_STORAGE_BUCKET_NAME = secrets.get_secret("AWS_STORAGE_BUCKET_NAME")
+
+# AWS settings
+AWS_IAM_ACCESS = os.environ.get("AWS_IAM_ACCESS", False) == "True"
+if not AWS_IAM_ACCESS:
+    AWS_ACCESS_KEY_ID = secrets.get_secret("AWS_ACCESS_KEY_ID")
+    AWS_SECRET_ACCESS_KEY = secrets.get_secret("AWS_SECRET_ACCESS_KEY")
+
+# used for generating links to web client e.g. job results page
+WEB_CLIENT_DOMAIN = secrets.get_secret("INTELOWL_WEB_CLIENT_DOMAIN")
 
 # Security Stuff
 HTTPS_ENABLED = os.environ.get("HTTPS_ENABLED", "not_enabled")
 if HTTPS_ENABLED == "enabled":
     CSRF_COOKIE_SECURE = True
     SESSION_COOKIE_SECURE = True
+    WEB_CLIENT_URL = f"https://{WEB_CLIENT_DOMAIN}"
+else:
+    WEB_CLIENT_URL = f"http://{WEB_CLIENT_DOMAIN}"
 
 SESSION_COOKIE_SAMESITE = "Strict"
 CSRF_COOKIE_SAMESITE = "Strict"
@@ -45,14 +94,18 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.postgres",
+    # celery, elasticsearch
+    "django_celery_results",
+    "django_elasticsearch_dsl",
     # DRF
     "rest_framework",
     "durin",
     "guardian",
-    "api_app.apps.ApiAppConfig",
-    "django_elasticsearch_dsl",
-    "django_nose",
     "drf_spectacular",
+    # intelowl apps
+    "api_app.apps.ApiAppConfig",
+    "api_app.analyzers_manager.apps.AnalyzersManagerConfig",
+    "api_app.connectors_manager.apps.ConnectorsManagerConfig",
 ]
 
 MIDDLEWARE = [
@@ -97,7 +150,11 @@ REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
-TEST_RUNNER = "django_nose.NoseTestSuiteRunner"
+# DRF Spectacular
+SPECTACULAR_SETTINGS = {
+    "TITLE": "IntelOwl API specification",
+    "VERSION": "2.5.0",
+}
 
 # Django-Rest-Durin
 REST_DURIN = {
@@ -144,9 +201,12 @@ else:
         "default": {"hosts": ""},
     }
 
-CELERY_BROKER_URL = secrets.get_secret("CELERY_BROKER_URL")
+BROKER_URL = secrets.get_secret("BROKER_URL", "amqp://guest:guest@rabbitmq:5672")
+RESULT_BACKEND = "django-db"
 CELERY_QUEUES = os.environ.get("CELERY_QUEUES", "default").split(",")
 
+# AWS
+AWS_SECRETS = os.environ.get("AWS_SECRETS", False) == "True"
 AWS_SQS = os.environ.get("AWS_SQS", False) == "True"
 
 # Django Guardian
@@ -200,6 +260,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, "static/")
 
 STATICFILES_DIRS = (os.path.join(BASE_DIR, "static_intel/"),)
 
+
 INFO_OR_DEBUG_LEVEL = "DEBUG" if DEBUG else "INFO"
 LOGGING = {
     "version": 1,
@@ -250,6 +311,15 @@ LOGGING = {
             "maxBytes": 20 * 1024 * 1024,
             "backupCount": 6,
         },
+        # 500 errors are handled by this in the same log file of the others API errors
+        "django_unhandled_errors": {
+            "level": "ERROR",
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": f"{DJANGO_LOG_DIRECTORY}/api_app_errors.log",
+            "formatter": "stdfmt",
+            "maxBytes": 20 * 1024 * 1024,
+            "backupCount": 6,
+        },
     },
     "loggers": {
         "api_app": {
@@ -265,6 +335,11 @@ LOGGING = {
         "django_auth_ldap": {
             "handlers": ["django_auth_ldap"],
             "level": INFO_OR_DEBUG_LEVEL,
+            "propagate": True,
+        },
+        "django": {
+            "handlers": ["django_unhandled_errors"],
+            "level": "ERROR",
             "propagate": True,
         },
     },

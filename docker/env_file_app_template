@@ -8,6 +8,22 @@ DB_PASSWORD=password
 # Additional Config variables
 # jobs older than this would be flushed from the database periodically. Default: 3 days
 OLD_JOBS_RETENTION_DAYS=3
+# used for generating links to web client e.g. job results page; Default: localhost
+INTELOWL_WEB_CLIENT_DOMAIN=localhost
+# Storage
+LOCAL_STORAGE=True
+
+# AWS
+## S3 storage
+AWS_STORAGE_BUCKET_NAME=
+AWS_IAM_ACCESS=False
+### to use if no IAM credentials are provided
+AWS_ACCESS_KEY_ID=
+AWS_SECRET_ACCESS_KEY=
+## secrets, broker and region
+AWS_SECRETS=False
+AWS_SQS=False
+AWS_REGION=eu-central-1
 
 # Elastic Search Configuration
 ELASTICSEARCH_ENABLED=False
@@ -16,7 +32,7 @@ ELASTICSEARCH_HOST=
 ELASTICSEARCH_NO_OF_SHARDS=1
 ELASTICSEARCH_NO_OF_REPLICAS=0
 
-# Optional API keys
+# analyzers secrets (optional)
 CUCKOO_API_KEY=
 SHODAN_KEY=
 ABUSEIPDB_KEY=
@@ -24,7 +40,8 @@ AUTH0_KEY=
 SECURITYTRAILS_KEY=
 GSF_KEY=
 OTX_KEY=
-CIRCL_CREDENTIALS=user|pass
+# Format: user|pass
+CIRCL_CREDENTIALS=
 VT_KEY=
 HA_KEY=
 INTEZER_KEY=
@@ -59,6 +76,14 @@ GOOGLE_APPLICATION_CREDENTIALS=/opt/deploy/intel_owl/configuration/service_accou
 MALPEDIA_KEY=
 # DEHASHED_AUTH_KEY format is `email:api-key`
 DEHASHED_AUTH_KEY=
+OPENCTI_KEY=
+YETI_KEY=
+SPYSE_API_KEY=
+
+# connectors secrets (optional)
+CONNECTOR_MISP_KEY=
+CONNECTOR_OPENCTI_KEY=
+CONNECTOR_YETI_KEY=
 
 # Test tokens
 TEST_JOB_ID=1
@@ -72,15 +97,23 @@ CUCKOO_URL=
 MISP_URL=
 FIRST_MISP_URL=
 VT_NOTIFY_URL=
+OPENCTI_URL=
+OPENCTI_URL=
+YETI_URL=
+CONNECTOR_MISP_URL=
+CONNECTOR_OPENCTI_URL=
+CONNECTOR_YETI_URL=
 
 # other variables
 DEBUG=False
 LDAP_ENABLED=False
 DISABLE_LOGGING_TEST=False
 MOCK_CONNECTIONS=False
-CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672
 DB_NAME=intel_owl_db
 HTTPS_ENABLED=not_enabled
-AWS_SECRETS=False
-AWS_SQS=False
-AWS_REGION=eu-central-1
+# broker configuration
+BROKER_URL=amqp://guest:guest@rabbitmq:5672
+RABBITMQ_DEFAULT_USER=guest
+RABBITMQ_DEFAULT_PASS=guest
+FLOWER_USER=flower
+FLOWER_PWD=flower

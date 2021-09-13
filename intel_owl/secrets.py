@@ -63,14 +63,14 @@ def aws_get_secret(secret_name):
     return secret
 
 
-def get_secret(secret_name):
+def get_secret(secret_name, default=""):
     """
     first check the secret in the environment
     then try to find the secret in AWS Secret Manager
     """
-    secret = os.environ.get(secret_name, "")
-    aws_secrets = os.environ.get("AWS_SECRETS", False)
-    if not secret and aws_secrets:
+    secret = os.environ.get(secret_name, default)
+    aws_secrets_enabled = os.environ.get("AWS_SECRETS", False) == "True"
+    if not secret and aws_secrets_enabled:
         try:
             secret = aws_get_secret(secret_name)
         except RetrieveSecretException as e:

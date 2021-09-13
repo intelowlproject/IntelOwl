@@ -2,12 +2,19 @@
 # See the file 'LICENSE' for copying permission.
 
 from __future__ import absolute_import, unicode_literals
-from intel_owl.settings import CELERY_QUEUES, CELERY_BROKER_URL, AWS_SQS
 import os
-
 from celery import Celery
 from celery.schedules import crontab
 from kombu import Exchange, Queue
+
+from .settings import (
+    CELERY_QUEUES,
+    BROKER_URL,
+    RESULT_BACKEND,
+    AWS_SQS,
+    TEST_MODE,
+)
+
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "intel_owl.settings")
 
@@ -15,23 +22,22 @@ app = Celery("intel_owl")
 
 app.autodiscover_tasks()
 
-app.conf.task_default_queue = "default"
-
-app.conf.task_queues = [
-    Queue(
-        key,
-        Exchange(key),
-        routing_key=key,
-    )
-    for key in CELERY_QUEUES
-]
 
 app.conf.update(
+    task_default_queue="default",
+    task_queues=[
+        Queue(
+            key,
+            Exchange(key),
+            routing_key=key,
+        )
+        for key in CELERY_QUEUES
+    ],
     task_time_limit=1800,
-    broker_url=CELERY_BROKER_URL,
+    broker_url=BROKER_URL,
+    result_backend=RESULT_BACKEND,
     accept_content=["application/json"],
     task_serializer="json",
-    ignore_result=True,
     result_serializer="json",
     imports=("intel_owl.tasks",),
     worker_redirect_stdouts=False,
@@ -43,6 +49,8 @@ app.conf.update(
     worker_max_tasks_per_child=200,
     # value is in kilobytes
     worker_max_memory_per_child=4000,
+    # required for code-coverage to work properly in tests
+    task_always_eager=TEST_MODE,
 )
 
 if AWS_SQS:

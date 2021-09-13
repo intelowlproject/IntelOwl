@@ -67,7 +67,7 @@ All these components are managed via docker-compose.
 - [Environment configuration (required)](#environment-configuration-required)
 - [Database configuration (required)](#database-configuration-required)
 - [Web server configuration (optional)](#web-server-configuration-optional)
-- [Analyzers configuration (optional)](#analyzers-configuration-optional)
+- [Analyzers configuration (optional)](#analyzers-or-connectors-configuration-optional)
 
 Open a terminal and execute below commands to construct new environment files from provided templates.
 
@@ -86,6 +86,7 @@ In the `env_file_app`, configure different variables as explained below.
 
 **Strongly recommended** variable to set:
 * `DJANGO_SECRET`: random 50 chars key, must be unique. If you do not provide one, Intel Owl will automatically set a new secret on every run.
+* `INTELOWL_WEB_CLIENT_DOMAIN` (example: `localhost`/`mywebsite.com`): the web domain of your instance, this is used for generating links to analysis results.
 
 **Optional** variables needed to enable specific analyzers:
 * `ABUSEIPDB_KEY`: AbuseIPDB API key
@@ -120,6 +121,19 @@ In the `env_file_app`, configure different variables as explained below.
 * `MWDB_KEY`: API key for [MWDB](https://mwdb.cert.pl/)
 * `SSAPINET_KEY`: screenshotapi.net ([docs](https://screenshotapi.net/documentation))
 * `MALPEDIA_KEY`: MALPEDIA API KEY ([docs](https://malpedia.caad.fkie.fraunhofer.de/usage/api))
+* `OPENCTI_KEY`: your own OpenCTI instance key
+* `OPENCTI_URL`: your own OpenCTI instance URL
+* `YETI_KEY`: your own YETI instance key
+* `YETI_URL`: your own YETI instance URL
+* `SPYSE_API_KEY`: [Spyse](https://spyse.com/) API key. Register here: https://spyse.com/user/registration"
+
+**Optional** variables needed to work with specific connectors:
+* `CONNECTOR_MISP_KEY`: your own MISP instance key to use with `MISP` connector
+* `CONNECTOR_MISP_URL`: your own MISP instance URL to use with `MISP` connector
+* `CONNECTOR_OPENCTI_KEY`: your own OpenCTI instance key to use with `OpenCTI` connector
+* `CONNECTOR_OPENCTI_URL`: your own OpenCTI instance URL to use with `OpenCTI` connector
+* `CONNECTOR_YETI_KEY`: your own YETI instance key to use with `YETI` connector
+* `CONNECTOR_YETI_URL`: your own YETI instance API URL to use with `YETI` connector
 
 **Advanced** additional configuration:
 * `OLD_JOBS_RETENTION_DAYS`: Database retention for analysis results (default: 3 days). Change this if you want to keep your old analysis longer in the database.
@@ -136,7 +150,7 @@ If you prefer to use an external PostgreSQL instance, you should just remove the
 
 ### Web server configuration (optional)
 Intel Owl provides basic configuration for:
-* Nginx (`configuration/intel_owl_nginx_http`)
+* Nginx (`configuration/nginx/http.conf`)
 * Uwsgi (`configuration/intel_owl.ini`)
 
 In case you enable HTTPS, remember to set the environment variable `HTTPS_ENABLED` as "enabled" to increment the security of the application.
@@ -149,13 +163,15 @@ There are 3 options to execute the web server:
 
 - **HTTPS with your own certificate**
 
-    The project provides a template file to configure Nginx to serve HTTPS: `configuration/intel_owl_nginx_https`.
+    The project provides a template file to configure Nginx to serve HTTPS: `configuration/nginx/https.conf`.
 
     You should change `ssl_certificate`, `ssl_certificate_key` and `server_name` in that file.
 
-    Then you should modify the `nginx` service configuration in `docker/default.yml`:
-    * change `intel_owl_nginx_http` with `intel_owl_nginx_https`
+    Then you should modify the `nginx` service configuration in `docker/default.ylm`:
+    * change `http.conf` with `https.conf`
     * in `volumes` add the option for mounting the directory that hosts your certificate and your certificate key.
+  
+    Plus, if you use [Flower](Advanced-Usage.html#queue-customization), you should change in the `docker/flower.override.yml` the `flower_http.conf` with `flower_https.conf`.
 
 - **HTTPS with Let's Encrypt**
 
@@ -166,49 +182,14 @@ There are 3 options to execute the web server:
     After the configuration is done, you can add the option `--traefik` while executing the [`start.py`](#run)
 
 
-### Analyzers configuration (optional)
-In the file `configuration/analyzers_config.json` there is the configuration for all the available analyzers you can run.
-For a complete list of all current available analyzer please look at: [Usage](./Usage.md)
+### Analyzers or connectors configuration (optional)
 
-You may want to change this configuration to add new analyzers or to change the configuration of some of them.
-
-The name of the analyzers can be changed at every moment based on your wishes.
-You just need to remember that it's important that you keep at least the following keys in the analyzers dictionaries to let them run correctly:
-* `type`: can be `file` or `observable`. It specifies what the analyzer should analyze
-* `python_module`: path to the analyzer class
-
+Refer to [Analyzers customization](Usage.html#analyzers-customization) and [Connectors customization](Usage.html#connectors-customization).
 
 <div class="admonition hint">
 <p class="admonition-title">Hint</p>
-You can see the full list of all available analyzers in the <a href="Usage.html#available-analyzers">Usage.html</a> or <a href="https://intelowlclient.firebaseapp.com/pages/analyzers/table">Live Demo</a>.
+You can see the full list of all available analyzers and connectors in the <a href="Usage.html#available-analyzers">Usage.html</a> or <a href="https://intelowlclient.firebaseapp.com/pages/analyzers/table">Live Demo</a>.
 </div>
-
-<div class="admonition hint">
-<p class="admonition-title">Hint</p>
-Some analyzers are kept optional and can easily be enabled. Refer to <a href="Advanced-Usage.html#optional-analyzers">this</a> part of the docs.
-</div>
-
-## AWS support
-At the moment there's a basic support for some of the AWS services. More is coming in the future. 
-
-#### Secrets
-If you would like to run this project on AWS, I'd suggest you to use the "Secrets Manager" to store your credentials. In this way your secrets would be better protected.
-
-This project supports this kind of configuration. Instead of adding the variables to the environment file, you should just add them with the same name on the AWS Secrets Manager and Intel Owl will fetch them transparently.
-
-Obviously, you should have created and managed the permissions in AWS in advance and accordingly to your infrastructure requirements.
-
-Also, you need to set the environment variable `AWS_SECRETS` to `True` to enable this mode.
-
-You can customize the AWS Region changing the environment variable `AWS_REGION`.
-
-#### SQS
-If you like, you could use AWS SQS instead of Rabbit-MQ to manage your queues.
-In that case, you should change the parameter `CELERY_BROKER_URL` to `sqs://` and give your instances on AWS the proper permissions to access it.
-
-Also, you need to set the environment variable `AWS_SQS` to `True` to activate the additional required settings.
-
-#### ... More coming
 
 
 ## Run
@@ -227,9 +208,6 @@ The CLI provides the primitives to correctly build, run or stop the containers f
 <li>It is possible to insert an optional docker argument that the CLI will pass to <code>docker-compose</code></li>
 </ul>
 </div>
-
-
-
 
 Now that you have completed different configurations, starting the containers is as simple as invoking:
 

@@ -5,6 +5,7 @@ This page includes details about some advanced features that Intel Owl provides 
 - [Advanced Usage](#advanced-usage)
   - [Optional Analyzers](#optional-analyzers)
   - [Customize analyzer execution at time of request](#customize-analyzer-execution-at-time-of-request)
+        - [View and understand different parameters](#view-and-understand-different-parameters)
         - [from the GUI](#from-the-gui)
         - [from Pyintelowl](#from-pyintelowl)
   - [Analyzers with special configuration](#analyzers-with-special-configuration)
@@ -15,8 +16,14 @@ This page includes details about some advanced features that Intel Owl provides 
   - [Authentication options](#authentication-options)
       - [LDAP](#ldap)
   - [Google Kubernetes Engine deployment](#google-kubernetes-engine-deployment)
-  - [Multi Queue](#multi-queue)
+  - [Queues](#queues)
+      - [Multi Queue](#multi-queue)
       - [Queue Customization](#queue-customization)
+      - [Queue monitoring](#queue-monitoring)
+  - [AWS support](#aws-support)
+      - [Secrets](#secrets)
+      - [SQS](#sqs)
+      - [S3](#s3)
 
 
 ## Optional Analyzers
@@ -37,7 +44,7 @@ table, th, td {
   </tr>
   <tr>
     <td>Static Analyzers</td>
-    <td><code>PEframe_Scan</code>, <code>Capa_Info</code>, <code>Floss</code>, <code>Strings_Info_Classic</code>, <code>Strings_Info_ML</code>, <code>Manalyze</code></td>
+    <td><code>PEframe_Scan</code>, <code>Capa_Info</code>, <code>Floss</code>, <code>Strings_Info_Classic</code>, <code>Strings_Info_ML</code>, <code>Manalyze</code>, <code>ClamAV</code></td>
     <td>
     <ul>
       <li>Capa detects capabilities in executable files</li>
@@ -45,6 +52,7 @@ table, th, td {
       <li>FLOSS automatically deobfuscate strings from malware binaries</li>
       <li>String_Info_Classic extracts human-readable strings where as ML version of it ranks them</li>
       <li>Manalyze statically analyzes PE (Portable-Executable) files in-depth</li>
+      <li>ClamAV antivirus engine scans files for trojans, viruses, malwares using a multi-threaded daemon</li>
       </ul>
     </td>
   </tr>
@@ -96,82 +104,25 @@ python3 start.py prod --qiling up
 ```
 
 ## Customize analyzer execution at time of request
-Some analyzers provide the chance to customize the performed analysis based on options that are different for each analyzer. This is configurable via the `CUSTOM ANALYZERS CONFIGURATION` button on the scan form or you can pass these values as a dictionary when using the pyintelowl client.
+Some analyzers and connectors provide the chance to customize the performed analysis based on parameters (`params` attr in the configuration file) that are different for each analyzer. 
 
-List of some of the analyzers with optional configuration:
-* `VirusTotal_v3_Get_File*`:
-    * `force_active_scan` (default False): if the sample is not already in VT, send the sample and perform a scan
-    * `force_active_scan_if_old` (default False): if the sample is old, it would be rescanned
-* `MISP`:
-    * `ssl_check`: (default True), enable SSL certificate server verification. Change this if your MISP instance has not SSL enabled
-    * `debug`: (default False) enable debug logs
-* `Doc_Info*`:
-    * `additional_passwords_to_check`: list of passwords to try when decrypting the document
-* `Thug_URL_Info` and `Thug_HTML_Info` ((defaults can be seen here [analyzer_config.json](https://github.com/intelowlproject/IntelOwl/blob/master/configuration/analyzer_config.json)):
-    * `dom_events`: see [Thug doc: dom events handling](https://buffer.github.io/thug/doc/usage.html#dom-events-handling)
-    * `use_proxy` and `proxy`: see [Thug doc: option -p](https://buffer.github.io/thug/doc/usage.html#basic-usage)
-    * `enable_image_processing_analysis`: see [Thug doc: option -a](https://buffer.github.io/thug/doc/usage.html#basic-usage)
-    * `enable_awis`: see [Thug doc: option -E](https://buffer.github.io/thug/doc/usage.html#basic-usage)
-    * `user_agent`: see [Thug doc: browser personality](https://buffer.github.io/thug/doc/usage.html#browser-personality)
-* `DNSDB` (defaults can be seen here [dnsdb.py](https://github.com/intelowlproject/IntelOwl/blob/master/api_app/script_analyzers/observable_analyzers/dnsdb.py)), Official [API docs](https://docs.dnsdb.info/dnsdb-apiv2/):
-    * `server`: DNSDB server
-    * `api_version`: API version of DNSDB
-    * `rrtype`: DNS query type
-    * `limit`: maximum number of results to retrieve
-    * `time_first_before`, `time_first_after`, `time_last_before`, `time_last_after`
-* `*_DNS` (all DNS resolvers analyzers):
-    * `query_type`: query type against the chosen DNS resolver, default is "A"
-* `DNStwist`:
-    * `ssdeep` (default False): enable fuzzy hashing - compare HTML content of original domain with a potentially malicious one and determine similarity.
-    * `mxcheck` (default False): find suspicious mail servers and flag them with SPYING-MX string.
-    * `tld` (default False): check for domains with different TLDs by supplying a dictionary file.
-    * `tld_dict` (default abused_tlds.dict): dictionary to use with tld argument. (common_tlds.dict/abused_tlds.dict)
-* `ZoomEye`:
-  * `search_type` (defualt host) Choose among `host`, `web`, `both` (both is only available to ZoomEye VIP users)
-  * `query`: Follow according to [docs](https://www.zoomeye.org/doc#host-search), but omit `ip`, `hostname`. Eg: `"query": "city:biejing port:21"`
-  * `facets`(default: Empty string): A comma-separated list of properties to get summary information on query. Eg: `"facets:app,os"`
-  * `page`(default 1): The page number to paging
-  * `history`(default True): To query the history data. 
-* `MWDB_Scan`:
-    * `upload_file` (default False): Uploads the file to repository.
-    * `max_tries` (default 50): Number of retries to perform for polling analysis results.
-* `Triage_Scan` and `Triage_Search`:
-  * `endpoint` (default public): choose whether to query on the public or the private endpoint of triage.
-  * `report_type` (default overview): determines how detailed the final report will be. (overview/complete)
-* `Triage_Search`:
-  * `analysis_type` (default search): choose whether to search for existing observable reports or upload for scanning via URL. (search/submit)
-* `Qiling`:
-  * `arch`(default x86): change system architecture for the emulation 
-  * `os`(default windows or linux): change operating system for the emulation 
-  * `profile`(default none): add a Qiling [profile](https://docs.qiling.io/en/latest/profile/)
-  * `shellcode`(default false): true if the file is a shellcode 
-* `WiGLE`:
-  * `search_type` (default `WiFi Network`). Supported are: `WiFi Network`, `CDMA Network`, `Bluetooth Network`, `GSM/LTE/WCDMA Network`
-  * Above mentioned `search_type` is just different routes mentioned in [docs](https://api.wigle.net/swagger#/v3_ALPHA). Also, the string to be passed in input field of generic analyzers have a format. Different variables are separated by semicolons(`;`) and the field-name and value are separated by equals sign(`=`). Example string for search_type `CDMA Network` is `sid=12345;nid=12345;bsid=12345`
-* `CRXcavator`:
-  * Every Chrome-Extension has a unique alpha=numeric identifier. That's the only Input necessary. Eg: `Norton Safe Search Enhanced`'s identifier is `eoigllimhcllmhedfbmahegmoakcdakd`.
-* `SSAPINet`:
-  *  `use_proxy` (default `false`) and `proxy` (default `""`) - use these options to pass your request through a proxy server.
-  *  `output` (default `"image"`) (available options `"image"`, `"json"`) - this specifies whether the result would be a raw image or json (containing link to the image stored on their server).
-  *  `extra_api_params` (default `{"full_page": true}`) - all other parameters provided by the API can be added here as an object (dictionary). Some of the params available are: 
-     * `full_page` (default `true`) - if `true`, takes screenshot of the entire webpage.
-     * `fresh` (default `false`) - if `true`, forces a fresh screenshot instead of a cached one.
-     * `lazy_load` (default `false`) - if `true`, their browser will scroll down the entire page so that all content is loaded.
-     * `destroy_screenshot` (default `false`) - if `true` the screenshot is not stored on their servers. Please make sure to use `output` parameter with value `image`, so you don't lose the screenshot, as the image link provided in the `json` result would work only once.
-     
-     Refer to the [docs](https://screenshotapi.net/documentation) for a reference to what other parameters are and their default values.
-* `FireHol_IPList`:
-  * `list_names`: Add [FireHol's IPList](https://iplists.firehol.org/) names as comma separated values in `list_names` array.
-* `Honey_DB`:
-  * `honeydb_analysis`(default `all`): choose which endpoint to query from the HoneyDB service (options are `scan_twitter`, `ip_query`, `ip_history`, `internet_scanner`, `ip_info`)
-* `Dehashed_Search`
-  * `size` and `pages` can be configured. It's recommended to make `size` a high value but keep `page` to 1 only to save on credits.
-  * Refer to the "Sizing & Pagination" section in [dehashed docs](https://www.dehashed.com/docs)
+- You can set a custom default values by changing their `value` attribute directly from the configuration files.
+- You can choose to provide runtime configuration when requesting an analysis that will be merged with the default overriding it. This override is done only for the specific analysis.
 
-There are two ways to do this:
+<div class="admonition info">
+<p class="admonition-title">Info</p>
+Connectors parameters can only be changed from it's configuration file, not at the time of analysis request.
+</div>
+
+
+##### View and understand different parameters
+
+To see the list of these parameters:
+- You can view the "Analyzers Table", [here](https://intelowlclient.firebaseapp.com/pages/analyzers/table).
+- You can view the raw JSON configuration file, [here](https://github.com/intelowlproject/IntelOwl/blob/master/configuration/analyzer_config.json).
 
 ##### from the GUI
-You can click on "**Custom analyzer configuration**" button and add the runtime configuration in the form of a dictionary.
+You can click on "**CUSTOMIZE ANALYZERS PARAMETERS**" button and add the runtime configuration in the form of a dictionary.
 Example:
 ```javascript
 "VirusTotal_v3_Get_File": {
@@ -197,19 +148,17 @@ Some analyzers could require a special configuration:
 You should follow the [official guide](https://cloud.google.com/web-risk/docs/quickstart) for creating the key.
 Then you can copy the generated JSON key file in the directory `configuration` of the project and change its name to `service_account_keyfile.json`.
 This is the default configuration. If you want to customize the name or the location of the file, you can change the environment variable `GOOGLE_APPLICATION_CREDENTIALS` in the `env_file_app` file.
+* `ClamAV`: this Docker-based analyzer using `clamd` daemon as it's scanner, communicating with `clamdscan` utility to scan files. The daemon requires 2 different configuration files: `clamd.conf`(daemon's config) and `freshclam.conf` (virus database updater's config). These files are mounted as docker volumes and hence, can be edited by the user as per needs.
 
 ## Elastic Search
-
 Intel Owl makes use of [django-elasticsearch-dsl](https://django-elasticsearch-dsl.readthedocs.io/en/latest/about.html) to index Job results into elasticsearch. The `save` and `delete` operations are auto-synced so you always have the latest data in ES.
 
 In the `env_file_app_template`, you'd see various elasticsearch related environment variables. The user should spin their own Elastic Search instance and configure these variables.
 
 #### Kibana
-
-Intel Owl provides a saved configuration (with example dashboard and visualizations) for Kibana. It can be downloaded from [here](https://github.com/intelowlproject/IntelOwl/blob/develop/configuration/Kibana-Saved-Conf.ndjson) and can be imported into Kibana.
+Intel Owl provides a Kibana's "Saved Object" configuration (with example dashboard and visualizations). It can be downloaded from [here](https://github.com/intelowlproject/IntelOwl/blob/develop/configuration/Kibana-Saved-Conf.ndjson) and can be imported into Kibana by going to the "Saved Objects" panel (http://localhost:5601/app/management/kibana/objects).
 
 #### Example Configuration
-
 1. Setup [Elastic Search and Kibana](https://hub.docker.com/r/nshou/elasticsearch-kibana/) and say it is running in a docker service with name `elk` on port `9200` which is exposed to the shared docker network.
 2. In the `env_file_app`, we set `ELASTICSEARCH_ENABLED` to `True` and `ELASTICSEARCH_HOST` to `elk:9200`.
 3. In the `Dockerfile`, set the correct version in `ELASTICSEARCH_DSL_VERSION` [depending on the version](https://django-elasticsearch-dsl.readthedocs.io/en/latest/about.html#features) of our elasticsearch server. Default value is `7.1.4`.
@@ -302,7 +251,9 @@ Refer to the following blog post for an example on how to deploy IntelOwl on Goo
 
 [Deploying Intel-Owl on GKE](https://mostwanted002.cf/post/intel-owl-gke/) by [Mayank Malik](https://twitter.com/_mostwanted002_).
 
-## Multi Queue
+## Queues
+
+#### Multi Queue
 IntelOwl provides an additional [multi-queue.override.yml](https://github.com/intelowlproject/IntelOwl/blob/master/docker/multi-queue.override.yml) compose file allowing IntelOwl users to better scale with the performance of their own architecture.
 
 If you want to leverage it, you should add the option `--multi-queue` when starting the project. Example:
@@ -319,3 +270,43 @@ Moreover IntelOwl requires that the name of the workers are provided in the `doc
 
 One can customize what analyzer should use what queue by specifying so in the analyzer entry in the [analyzer_config.json](https://github.com/intelowlproject/IntelOwl/blob/master/configuration/analyzer_config.json) configuration file. If no queue(s) are provided, the `default` queue will be selected.
  
+#### Queue monitoring
+IntelOwl provides an additional [flower.override.yml](https://github.com/intelowlproject/IntelOwl/blob/master/docker/flower.override.yml) compose file allowing IntelOwl users to use [Flower](https://flower.readthedocs.io/) features to monitor and manage queues and tasks
+
+If you want to leverage it, you should add the option `--flower` when starting the project. Example:
+```bash
+python3 start.py prod --flower up
+```
+The flower interface is available at port 5555: to set the credentials for its access, update the environment variables
+```bash
+FLOWER_USER
+FLOWER_PWD
+```
+or change the `.htpasswd` file that is created in the `docker` directory in the `intelowl_flower` container.
+
+## AWS support
+At the moment there's a basic support for some of the AWS services. More is coming in the future. 
+
+#### Secrets
+If you would like to run this project on AWS, I'd suggest you to use the "Secrets Manager" to store your credentials. In this way your secrets would be better protected.
+
+This project supports this kind of configuration. Instead of adding the variables to the environment file, you should just add them with the same name on the AWS Secrets Manager and Intel Owl will fetch them transparently.
+
+Obviously, you should have created and managed the permissions in AWS in advance and accordingly to your infrastructure requirements.
+
+Also, you need to set the environment variable `AWS_SECRETS` to `True` to enable this mode.
+
+You can customize the AWS Region changing the environment variable `AWS_REGION`.
+
+#### SQS
+If you like, you could use AWS SQS instead of Rabbit-MQ to manage your queues.
+In that case, you should change the parameter `BROKER_URL` to `sqs://` and give your instances on AWS the proper permissions to access it.
+
+Also, you need to set the environment variable `AWS_SQS` to `True` to activate the additional required settings.
+
+#### S3
+If you prefer to use S3 to store the samples, instead of a local storage, you can now do it.  
+
+First, you need to configure the environment variable `LOCAL_STORAGE` to `False` to enable it and set `AWS_STORAGE_BUCKET_NAME` to the proper AWS bucket.
+Then you have to add some credentials for AWS: if you have IntelOwl deployed on the AWS infrastructure, you can use IAM credentials:
+to allow that just set `AWS_IAM_ACCESS` to `True`. If that is not the case, you have to set both `AWS_ACESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`

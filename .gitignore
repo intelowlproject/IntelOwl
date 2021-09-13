@@ -11,3 +11,4 @@ intel_owl_test_env/
 compose-elk.yml
 docs/build/
 configuration/service_account_keyfile.json
+coverage_reports/

@@ -57,7 +57,7 @@ You can see the full list of all available analyzers in the [documentation](http
 | Free modules that require additional configuration | - Cuckoo (requires at least one working Cuckoo instance)<br/>  - MISP (requires at least one working MISP instance)<br/>  - Yara (Community, Neo23x0, Intezer, McAfee rules are already available. There's the chance to add your own rules)                                                                   |
 
 ## Premium support 
-<img src="static_intel/xscode-banner.png" width=500 height=150 alt="Get Support"/><br/>
+<img src="static_intel/xscode-banner.png" width="600" height="120" alt="xscode: Get Support"/><br/>
 _For urgent issues and priority support, visit [https://xscode.com/intelowlproject/IntelOwl](https://xscode.com/intelowlproject/IntelOwl)._
 
 ## Legal notice
@@ -103,6 +103,9 @@ license terms.
 [Manalyze](https://github.com/JusticeRage/Manalyze),
 [Qiling](https://github.com/qilingframework/qiling),
 [Renderton](https://github.com/GoogleChrome/rendertron/blob/main/LICENSE)
+[PyCTI](https://github.com/OpenCTI-Platform/client-python/blob/master/LICENSE),
+[PyHashlookup](https://github.com/CIRCL/PyHashlookup),
+[PyPDNS](https://github.com/CIRCL/PyPDNS)
 
 ## Acknowledgments
 
@@ -116,10 +119,13 @@ This project was created and will be upgraded thanks to the following organizati
 #### The Honeynet Project
 <a href="https://www.honeynet.org"> <img style="border: 0.2px solid black" width=115 height=150 src="static_intel/honeynet_logo.png" alt="Honeynet.org logo"> </a>
 
-Since its birth, this project has been participating in the Google Summer of Code (GSoC) under the Honeynet Project!
+Since its birth, this project has been participating in the [Google Summer of Code](https://summerofcode.withgoogle.com/) (GSoC) under the Honeynet Project!
 
-* 2020: a lot of [new features](https://www.honeynet.org/gsoc/gsoc-2020/google-summer-of-code-2020-project-ideas/#intel-owl-improvements) were developed by [Eshaan Bansal](https://twitter.com/mask0fmydisguis).
-* 2021: [Sarthak Khattar](https://twitter.com/Mr_Momo07) and [Shubham Pandey](https://twitter.com/imshubham31) are working on these [Projects](https://www.honeynet.org/gsoc/gsoc-2021/google-summer-of-code-2021-project-ideas/)
+Project Summaries and/or in-development projects:
+* 2020: [Eshaan Bansal](https://twitter.com/eshaan7_): [IntelOwl Work Product](https://www.honeynet.org/2020/08/26/gsoc-2020-work-product%e2%80%8a-%e2%80%8aintel-owl/)
+* 2021: 
+  * [Sarthak Khattar](https://twitter.com/Mr_Momo07): [IntelOwl Improvements](https://www.honeynet.org/2021/08/20/gsoc-2021-project-summary-intelowl-improvements/)
+  * [Shubham Pandey](https://twitter.com/imshubham31): [IntelOwl Connectors Manager and Integrations](https://www.honeynet.org/2021/08/20/gsoc-2021-project-summary-intelowl-connectors-manager-and-integrations/)
 
 Stay tuned for the upcoming GSoC! Join the [Honeynet Slack chat](https://gsoc-slack.honeynet.org/) for more info.
 
@@ -130,4 +136,4 @@ In 2021 IntelOwl joined the official [Docker Open Source Program](https://www.do
 
 Feel free to contact the main developers at any time in Twitter:
 - [Matteo Lodi](https://twitter.com/matte_lodi): Author and creator
-- [Eshaan Bansal](https://twitter.com/mask0fmydisguis): Principal maintainer
+- [Eshaan Bansal](https://twitter.com/eshaan7_): Principal maintainer

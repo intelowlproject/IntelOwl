@@ -1,221 +1,536 @@
 {
   "APKiD_Scan_APK_DEX_JAR": {
     "type": "file",
+    "python_module": "apkid.APKiD",
+    "description": "APKiD identifies many compilers, packers, obfuscators, and other weird stuff from an APK or DEX file.",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
+    "docker_based": true,
     "supported_filetypes": [
       "application/zip",
       "application/java-archive",
       "application/vnd.android.package-archive",
       "application/x-dex"
     ],
-    "python_module": "apkid.APKiD",
-    "description": "APKiD identifies many compilers, packers, obfuscators, and other weird stuff from an APK or DEX file.",
-    "soft_time_limit": 400
+    "config": {
+      "soft_time_limit": 400,
+      "queue": "default"
+    },
+    "secrets": {},
+    "params": {}
   },
   "AbuseIPDB": {
     "type": "observable",
-    "observable_supported": ["ip"],
-    "external_service": true,
-    "description": "check if an ip was reported on AbuseIPDB",
-    "requires_configuration": true,
     "python_module": "abuseipdb.AbuseIPDB",
-    "soft_time_limit": 30
-  },
-  "Auth0": {
-    "type": "observable",
+    "description": "check if an ip was reported on AbuseIPDB",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
     "observable_supported": [
       "ip"
     ],
-    "external_service": true,
-    "description": "scan an IP against the Auth0 API",
-    "requires_configuration": true,
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "ABUSEIPDB_KEY",
+        "description": ""
+      }
+    },
+    "params": {}
+  },
+  "Auth0": {
+    "type": "observable",
     "python_module": "auth0.Auth0",
-    "soft_time_limit": 30
+    "description": "scan an IP against the Auth0 API",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": [
+      "ip"
+    ],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "AUTH0_KEY",
+        "description": ""
+      }
+    },
+    "params": {}
   },
   "BoxJS_Scan_JavaScript": {
     "type": "file",
+    "python_module": "boxjs_scan.BoxJS",
+    "description": "A tool for studying JavaScript malware",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
+    "docker_based": true,
     "supported_filetypes": [
       "application/x-javascript",
       "application/javascript",
       "text/javascript"
     ],
-    "python_module": "boxjs_scan.BoxJS",
-    "description": "A tool for studying JavaScript malware",
-    "soft_time_limit": 400
+    "config": {
+      "soft_time_limit": 400,
+      "queue": "default"
+    },
+    "secrets": {},
+    "params": {}
   },
   "CheckDMARC": {
     "type": "observable",
-    "observable_supported": ["domain"],
-    "description": "An SPF and DMARC DNS records validator",
     "python_module": "checkdmarc.CheckDMARC",
-    "soft_time_limit": 30
+    "description": "An SPF and DMARC DNS records validator",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
+    "observable_supported": [
+      "domain"
+    ],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {},
+    "params": {}
   },
   "CIRCLPassiveDNS": {
     "type": "observable",
-    "observable_supported": ["domain","url"],
-    "external_service": true,
-    "description": "scan an observable against the CIRCL Passive DNS DB",
-    "requires_configuration": true,
     "python_module": "circl_pdns.CIRCL_PDNS",
-    "soft_time_limit": 30
+    "description": "scan an observable against the CIRCL Passive DNS DB",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": [
+      "domain",
+      "url"
+    ],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {
+      "pdns_credentials": {
+        "env_var_key": "CIRCL_CREDENTIALS",
+        "description": ""
+      }
+    },
+    "params": {}
   },
   "CIRCLPassiveSSL": {
     "type": "observable",
-    "observable_supported": ["ip"],
-    "external_service": true,
-    "description": "scan an observable against the CIRCL Passive SSL DB",
-    "requires_configuration": true,
     "python_module": "circl_pssl.CIRCL_PSSL",
-    "soft_time_limit": 30
+    "description": "scan an observable against the CIRCL Passive SSL DB",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": [
+      "ip"
+    ],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {
+      "pdns_credentials": {
+        "env_var_key": "CIRCL_CREDENTIALS",
+        "description": ""
+      }
+    },
+    "params": {}
   },
   "Classic_DNS": {
     "type": "observable",
-    "observable_supported": ["ip", "domain", "url"],
-    "external_service": true,
-    "description": "Retrieve current domain resolution with default DNS",
-    "soft_time_limit": 30,
     "python_module": "dns.dns_resolvers.classic_dns_resolver.ClassicDNSResolver",
-    "additional_config_params": {
-      "query_type": "A"
+    "description": "Retrieve current domain resolution with default DNS",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": [
+      "ip",
+      "domain",
+      "url"
+    ],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {},
+    "params": {
+      "query_type": {
+        "value": "A",
+        "type": "str",
+        "description": "Query type against the chosen DNS resolver."
+      }
     }
   },
   "CloudFlare_DNS": {
     "type": "observable",
-    "observable_supported": ["domain", "url"],
-    "external_service": true,
-    "description": "Retrieve current domain resolution with CloudFlare DoH (DNS over HTTPS)",
-    "soft_time_limit": 30,
     "python_module": "dns.dns_resolvers.cloudflare_dns_resolver.CloudFlareDNSResolver",
-    "additional_config_params": {
-      "query_type": "A"
+    "description": "Retrieve current domain resolution with CloudFlare DoH (DNS over HTTPS)",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": [
+      "domain",
+      "url"
+    ],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {},
+    "params": {
+      "query_type": {
+        "value": "A",
+        "type": "str",
+        "description": ""
+      }
     }
   },
   "CloudFlare_Malicious_Detector": {
     "type": "observable",
-    "observable_supported": ["domain", "url"],
-    "external_service": true,
+    "python_module": "dns.dns_malicious_detectors.cloudflare_malicious_detector.CloudFlareMaliciousDetector",
     "description": "Scan an observable against CloudFlare DB",
-    "soft_time_limit": 30,
-    "python_module": "dns.dns_malicious_detectors.cloudflare_malicious_detector.CloudFlareMaliciousDetector"
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": [
+      "domain",
+      "url"
+    ],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {},
+    "params": {}
   },
   "Capa_Info": {
     "type": "file",
-    "supported_filetypes": ["application/x-dosexec"],
     "python_module": "capa_info.CapaInfo",
     "description": "capa detects capabilities in executable files",
-    "soft_time_limit": 500,
-    "queue": "long"
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
+    "docker_based": true,
+    "supported_filetypes": [
+      "application/x-dosexec"
+    ],
+    "config": {
+      "soft_time_limit": 500,
+      "queue": "long"
+    },
+    "secrets": {},
+    "params": {}
   },
   "Censys_Search": {
     "type": "observable",
-    "observable_supported": ["ip"],
-    "external_service": true,
-    "description": "scan an IP address against Censys View API",
-    "requires_configuration": true,
     "python_module": "censys.Censys",
-    "additional_config_params": {
-      "censys_analysis": "search"
+    "description": "scan an IP address against Censys View API",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": [
+      "ip"
+    ],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
     },
-    "soft_time_limit": 30
+    "secrets": {
+      "api_id_name": {
+        "env_var_key": "CENSYS_API_ID",
+        "description": ""
+      },
+      "api_secret_name": {
+        "env_var_key": "CENSYS_API_SECRET",
+        "description": ""
+      }
+    },
+    "params": {
+      "censys_analysis": {
+        "value": "search",
+        "type": "str",
+        "description": ""
+      }
+    }
+  },
+  "ClamAV": {
+    "type": "file",
+    "python_module": "clamav.ClamAV",
+    "description": "scan files using ClamAV virus scanning engine",
+    "disabled": false,
+    "leaks_info": false,
+    "external_service": false,
+    "docker_based": true,
+    "config": {
+      "soft_time_limit": 50,
+      "queue": "default"
+    },
+    "secrets": {},
+    "params": {}
   },
   "CRXcavator": {
     "type": "observable",
+    "python_module": "crxcavator.CRXcavator",
+    "description": "Scans a chrome extension against crxcavator.io service. Every Chrome-Extension has a unique alpha=numeric identifier. That's the only Input necessary. Eg: `Norton Safe Search Enhanced`'s identifier is `eoigllimhcllmhedfbmahegmoakcdakd`.",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
     "observable_supported": [
       "generic"
     ],
-    "external_service": true,
-    "description": "scans a chrome extension against crxcavator.io",
-    "requires_configuration": false,
-    "python_module": "crxcavator.CRXcavator",
-    "soft_time_limit": 30
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {},
+    "params": {}
   },
   "Cuckoo_Scan": {
     "type": "file",
-    "disabled": false,
-    "description": "scan a file on a Cuckoo instance",
-    "requires_configuration": true,
     "python_module": "cuckoo_scan.CuckooAnalysis",
-    "additional_config_params": {
-      "api_key_name": "CUCKOO_API_KEY",
-      "max_post_tries": 5,
-      "max_poll_tries": 20
+    "description": "scan a file on a Cuckoo instance",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
+    "config": {
+      "soft_time_limit": 500,
+      "queue": "long"
     },
-    "soft_time_limit": 500,
-    "queue": "long"
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "CUCKOO_API_KEY",
+        "description": ""
+      },
+      "url_key_name": {
+        "env_var_key": "CUCKOO_URL",
+        "description": ""
+      }
+    },
+    "params": {
+      "max_post_tries": {
+        "value": 5,
+        "type": "int",
+        "description": ""
+      },
+      "max_poll_tries": {
+        "value": 20,
+        "type": "int",
+        "description": ""
+      }
+    }
   },
   "Cymru_Hash_Registry_Get_File": {
     "type": "file",
-    "run_hash": true,
-    "external_service": true,
-    "description": "Check if a particular file is known to be malware by Team Cymru",
     "python_module": "cymru.Cymru",
-    "soft_time_limit": 50
+    "description": "Check if a particular file is known to be malware by Team Cymru",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "run_hash": true,
+    "config": {
+      "soft_time_limit": 50,
+      "queue": "default"
+    },
+    "secrets": {},
+    "params": {}
   },
   "Cymru_Hash_Registry_Get_Observable": {
     "type": "observable",
-    "observable_supported": ["hash"],
-    "external_service": true,
-    "description": "Check if a particular hash is available in the malware hash registry of Team Cymru",
     "python_module": "cymru.Cymru",
-    "soft_time_limit": 50
+    "description": "Check if a particular hash is available in the malware hash registry of Team Cymru",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": [
+      "hash"
+    ],
+    "config": {
+      "soft_time_limit": 50,
+      "queue": "default"
+    },
+    "secrets": {},
+    "params": {}
   },
   "Darksearch_Query": {
     "type": "observable",
-    "observable_supported": ["ip", "url", "domain", "hash", "generic"],
-    "external_service": true,
-    "description": "Query against https://darksearch.io/api/search API",
     "python_module": "darksearch.DarkSearchQuery",
-    "soft_time_limit": 50,
-    "queue": "long",
-    "additional_config_params": {
-      "pages": 10,
-      "proxies": {}
+    "description": "Query against [darksearch](https://darksearch.io/api/search)'s API",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": [
+      "ip",
+      "url",
+      "domain",
+      "hash",
+      "generic"
+    ],
+    "config": {
+      "soft_time_limit": 50,
+      "queue": "long"
+    },
+    "secrets": {},
+    "params": {
+      "pages": {
+        "value": 10,
+        "type": "int",
+        "description": ""
+      },
+      "proxies": {
+        "value": {},
+        "type": "dict",
+        "description": ""
+      }
     }
   },
   "Dehashed_Search": {
     "type": "observable",
-    "observable_supported": ["ip", "url", "domain", "hash", "generic"],
-    "external_service": true,
-    "description": "Query against https://dehashed.com's search API",
     "python_module": "dehashed.DehashedSearch",
-    "soft_time_limit": 50,
-    "queue": "long",
-    "additional_config_params": {
-      "api_key_name": "DEHASHED_AUTH_KEY",
-      "size": 100,
-      "pages": 1
+    "description": "Query against Dehashed's search API. For configuration, refer to the 'Sizing & Pagination' section in [dehashed docs](https://www.dehashed.com/docs).",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": [
+      "ip",
+      "url",
+      "domain",
+      "hash",
+      "generic"
+    ],
+    "config": {
+      "soft_time_limit": 50,
+      "queue": "long"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "DEHASHED_AUTH_KEY",
+        "description": "Combination of your dehashed account's email and API key. Format: `email:api-key`."
+      }
+    },
+    "params": {
+      "size": {
+        "value": 100,
+        "type": "int",
+        "description": "Numer of records fetched. Recommend change to a large value."
+      },
+      "pages": {
+        "value": 1,
+        "type": "int",
+        "description": "Number of pages fetched. Recommend to keep at 1 only to save on credits."
+      }
     }
   },
   "DNSDB": {
     "type": "observable",
+    "python_module": "dnsdb.DNSdb",
+    "description": "Scan an observable against the Passive DNS Farsight Database (support both v1 and v2 versions). Official [API docs](https://docs.dnsdb.info/dnsdb-apiv2/).",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
     "observable_supported": [
       "domain",
       "url",
       "ip"
     ],
-    "external_service": true,
-    "description": "scan an observable against the Passive DNS Farsight Database (support both v1 and v2 versions)",
-    "requires_configuration": true,
-    "python_module": "dnsdb.DNSdb",
-    "soft_time_limit": 30,
-    "additional_config_params": {
-      "server": "api.dnsdb.info",
-      "api_version": 2
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "DNSDB_KEY",
+        "description": ""
+      }
+    },
+    "params": {
+      "server": {
+        "value": "api.dnsdb.info",
+        "type": "str",
+        "description": "DNSDB server."
+      },
+      "api_version": {
+        "value": 2,
+        "type": "int",
+        "description": "API version of DNSDB (options: `1` and `2`)."
+      },
+      "rrtype": {
+        "value": "",
+        "type": "str",
+        "description": "DNS query type."
+      },
+      "limit": {
+        "value": 10000,
+        "type": "int",
+        "description": "Maximum number of results to retrieve."
+      },
+      "time": {
+        "value": {
+          "first_before": "",
+          "first_after": "",
+          "last_before": "", 
+          "last_after": ""
+        },
+        "type": "dict",
+        "description": "Time range"
+      }
     }
   },
   "DNStwist": {
     "type": "observable",
+    "python_module": "dnstwist.DNStwist",
+    "description": "scans for potentially malicious permutations of a domain name",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
     "observable_supported": [
       "domain",
       "url"
     ],
-    "external_service": true,
-    "description": "scans for potentially malicious permutations of a domain name",
-    "python_module": "dnstwist.DNStwist",
-    "additional_config_params": {
+    "config": {
+      "soft_time_limit": 300,
+      "queue": "default"
+    },
+    "secrets": {},
+    "params": {
+      "tld": {
+        "value": true,
+        "type": "bool",
+        "description": "Check for domains with different TLDs by supplying a dictionary file."
+      },
+      "tld_dict": {
+        "value": "abused_tlds.dict",
+        "type": "str",
+        "description": "Dictionary to use with `tld` argument (`common_tlds.dict/abused_tlds.dict`)."
+      },
+      "mxcheck": {
+        "value": true,
+        "type": "bool",
+        "description": "Find suspicious mail servers and flag them with SPYING-MX string."
+      },
+      "ssdeep": {
+        "value": true,
+        "type": "bool",
+        "description": "Enable fuzzy hashing - compare HTML content of original domain with a potentially malicious one and determine similarity."
+      }
     }
   },
   "Doc_Info": {
     "type": "file",
+    "python_module": "doc_info.DocInfo",
+    "description": "static generic document analysis (Oletools)",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
     "supported_filetypes": [
       "application/msword",
       "application/vnd.ms-office",
@@ -234,13 +549,26 @@
       "application/zip",
       "application/encrypted"
     ],
-    "description": "static generic document analysis (Oletools)",
-    "python_module": "doc_info.DocInfo",
-    "soft_time_limit": 30,
-    "queue": "local"
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "local"
+    },
+    "secrets": {},
+    "params": {
+      "additional_passwords_to_check": {
+        "value": [],
+        "type": "list",
+        "description": "List of passwords to try when decrypting the document"
+      }
+    }
   },
   "Doc_Info_Experimental": {
     "type": "file",
+    "python_module": "doc_info.DocInfo",
+    "description": "static document analysis with new features to analyze XLM macros, encrypted macros and more",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
     "supported_filetypes": [
       "application/msword",
       "application/vnd.ms-office",
@@ -259,340 +587,810 @@
       "application/zip",
       "application/encrypted"
     ],
-    "description": "static document analysis with new features to analyze XLM macros, encrypted macros and more",
-    "python_module": "doc_info.DocInfo",
-    "additional_config_params": {
-      "experimental": true
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "local"
     },
-    "soft_time_limit": 30,
-    "queue": "local"
+    "secrets": {},
+    "params": {
+      "experimental": {
+        "value": true,
+        "type": "bool",
+        "description": ""
+      },
+      "additional_passwords_to_check": {
+        "value": [],
+        "type": "list",
+        "description": "List of passwords to try when decrypting the document"
+      }
+    }
   },
   "EmailRep": {
     "type": "observable",
-    "observable_supported": ["generic"],
-    "external_service": true,
-    "description": "Get email reputation from emailrep.io",
     "python_module": "emailrep.EmailRep",
-    "additional_config_params": {
-      "api_key_name": "EMAILREP_KEY"
+    "description": "Get email reputation from emailrep.io",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": [
+      "generic"
+    ],
+    "config": {
+      "soft_time_limit": 50,
+      "queue": "default"
     },
-    "soft_time_limit": 50
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "EMAILREP_KEY",
+        "description": ""
+      }
+    },
+    "params": {}
   },
   "File_Info": {
     "type": "file",
-    "description": "basic static analysis, extracts metadata and hashes",
     "python_module": "file_info.FileInfo",
-    "soft_time_limit": 30,
-    "queue": "local"
+    "description": "basic static analysis, extracts metadata and hashes",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "local"
+    },
+    "secrets": {},
+    "params": {}
   },
   "FireHol_IPList": {
     "type": "observable",
-    "observable_supported": ["ip"],
-    "external_service": true,
-    "description": "check if an IP is in FireHol's IPList",
     "python_module": "firehol_iplist.FireHol_IPList",
-    "additional_config_params": {
-      "list_names": ["firehol_level1.netset"]
+    "description": "Check if an IP is in FireHol's IPList. Refer to [FireHol's IPList](https://iplists.firehol.org/).",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": [
+      "ip"
+    ],
+    "config": {
+      "soft_time_limit": 180,
+      "queue": "default"
     },
-    "soft_time_limit": 180
+    "secrets": {},
+    "params": {
+      "list_names": {
+        "value": [
+          "firehol_level1.netset"
+        ],
+        "type": "list",
+        "description": "A list of firehol list names."
+      }
+    }
   },
   "Floss": {
     "type": "file",
-    "supported_filetypes": ["application/x-dosexec"],
     "python_module": "floss.Floss",
-    "additional_config_params": {
-     "max_no_of_strings": {
-       "stack_strings": 1000,
-       "static_strings": 1000,
-       "decoded_strings": 1000
-     },
-     "rank_strings": {
-      "stack_strings": false,
-      "static_strings": false,
-      "decoded_strings": false
-     }
-    },
     "description": "Advanced String Extraction by FireEye",
-    "soft_time_limit": 500
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
+    "docker_based": true,
+    "supported_filetypes": [
+      "application/x-dosexec"
+    ],
+    "config": {
+      "soft_time_limit": 500,
+      "queue": "default"
+    },
+    "secrets": {},
+    "params": {
+      "max_no_of_strings": {
+        "value": {
+          "stack_strings": 1000,
+          "static_strings": 1000,
+          "decoded_strings": 1000
+        },
+        "type": "dict",
+        "description": ""
+      },
+      "rank_strings": {
+        "value": {
+          "stack_strings": false,
+          "static_strings": false,
+          "decoded_strings": false
+        },
+        "type": "dict",
+        "description": ""
+      }
+    }
   },
   "Fortiguard": {
     "type": "observable",
+    "python_module": "fortiguard.Fortiguard",
+    "description": "scan an observable with the Fortiguard URL Analyzer",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
     "observable_supported": [
       "domain",
       "url"
     ],
-    "external_service": true,
-    "description": "scan an observable with the Fortiguard URL Analyzer",
-    "python_module": "fortiguard.Fortiguard",
-    "soft_time_limit": 30
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {},
+    "params": {}
   },
   "Google_DNS": {
     "type": "observable",
-    "observable_supported": ["domain", "url"],
-    "external_service": true,
-    "description": "Retrieve current domain resolution with Google DoH (DNS over HTTPS)",
-    "soft_time_limit": 30,
     "python_module": "dns.dns_resolvers.google_dns_resolver.GoogleDNSResolver",
-    "additional_config_params": {
-      "query_type": "A"
+    "description": "Retrieve current domain resolution with Google DoH (DNS over HTTPS)",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": [
+      "domain",
+      "url"
+    ],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {},
+    "params": {
+      "query_type": {
+        "value": "A",
+        "type": "str",
+        "description": "Query type against the chosen DNS resolver."
+      }
     }
   },
   "GoogleWebRisk": {
     "type": "observable",
-    "observable_supported": ["ip", "domain", "url"],
-    "external_service": true,
+    "python_module": "dns.dns_malicious_detectors.google_webrisk.WebRisk",
     "description": "Scan an observable against Web Risk API",
-    "requires_configuration": true,
-    "soft_time_limit": 20,
-    "python_module": "dns.dns_malicious_detectors.google_webrisk.WebRisk"
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": [
+      "ip",
+      "domain",
+      "url"
+    ],
+    "config": {
+      "soft_time_limit": 20,
+      "queue": "default"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "GOOGLE_APPLICATION_CREDENTIALS",
+        "description": ""
+      }
+    },
+    "params": {}
   },
   "GoogleSafebrowsing": {
     "type": "observable",
-    "observable_supported": ["ip", "domain", "url"],
-    "external_service": true,
+    "python_module": "dns.dns_malicious_detectors.googlesf.GoogleSF",
     "description": "Scan an observable against GoogleSafeBrowsing DB",
-    "requires_configuration": true,
-    "soft_time_limit": 30,
-    "python_module": "dns.dns_malicious_detectors.googlesf.GoogleSF"
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": [
+      "ip",
+      "domain",
+      "url"
+    ],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "GSF_KEY",
+        "description": ""
+      }
+    },
+    "params": {}
   },
   "GreyNoise": {
     "type": "observable",
-    "observable_supported": ["ip"],
-    "external_service": true,
-    "description": "scan an IP against the Greynoise API (requires API key)",
-    "requires_configuration": true,
     "python_module": "greynoise.GreyNoise",
-    "additional_config_params": {
-      "greynoise_api_version": "v2",
-      "api_key_name": "GREYNOISE_API_KEY"
+    "description": "scan an IP against the Greynoise API (requires API key)",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": [
+      "ip"
+    ],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
     },
-    "soft_time_limit": 30
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "GREYNOISE_API_KEY",
+        "description": ""
+      }
+    },
+    "params": {
+      "greynoise_api_version": {
+        "value": "v2",
+        "type": "str",
+        "description": ""
+      }
+    }
   },
   "GreyNoiseCommunity": {
     "type": "observable",
+    "python_module": "greynoise.GreyNoise",
+    "description": "scan an IP against the Community Greynoise API",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
     "observable_supported": [
       "ip"
     ],
-    "external_service": true,
-    "description": "scan an IP against the Community Greynoise API",
-    "python_module": "greynoise.GreyNoise",
-    "additional_config_params": {
-      "greynoise_api_version": "v3"
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
     },
-    "soft_time_limit": 30
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "GREYNOISE_API_KEY",
+        "description": ""
+      }
+    },
+    "params": {
+      "greynoise_api_version": {
+        "value": "v3",
+        "type": "str",
+        "description": ""
+      }
+    }
   },
   "GreyNoiseAlpha": {
     "type": "observable",
+    "python_module": "greynoise.GreyNoise",
+    "description": "scan an IP against the Alpha Greynoise API (no API key required)",
+    "disabled": true,
+    "external_service": true,
+    "leaks_info": false,
     "observable_supported": [
       "ip"
     ],
-    "external_service": true,
-    "disabled": true,
-    "description": "scan an IP against the Alpha Greynoise API (no API key required)",
-    "python_module": "greynoise.GreyNoise",
-    "additional_config_params": {
-      "greynoise_api_version": "v1"
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
     },
-    "soft_time_limit": 30
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "GREYNOISE_API_KEY",
+        "description": ""
+      }
+    },
+    "params": {
+      "greynoise_api_version": {
+        "value": "v1",
+        "type": "str",
+        "description": ""
+      }
+    }
+  },
+  "HashLookupServer_Get_Observable": {
+    "type": "observable",
+    "python_module": "hashlookup.HashLookupServer",
+    "description": "check if a md5 or sha1 is available in the database of known file hosted by CIRCL",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": [
+      "hash"
+    ],
+    "config": {
+      "soft_time_limit": 20,
+      "queue": "default"
+    },
+    "secrets": {},
+    "params": {
+      "hashlookup_server": {
+        "value": "",
+        "type": "str",
+        "description": "custom hashlookup-server"
+      }
+    }
+  },
+  "HashLookupServer_Get_File": {
+    "type": "file",
+    "python_module": "hashlookup.HashLookupServer",
+    "description": "check if a md5 or sha1 is available in the database of known file hosted by CIRCL",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "run_hash": true,
+    "config": {
+      "soft_time_limit": 400,
+      "queue": "default"
+    },
+    "secrets": {},
+    "params": {
+      "hashlookup_server": {
+        "value": "",
+        "type": "str",
+        "description": "custom hashlookup-server"
+      }
+    }
   },
   "HoneyDB": {
     "type": "observable",
+    "python_module": "honeydb.HoneyDB",
+    "description": "HoneyDB IP lookup service",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
     "observable_supported": [
       "ip"
     ],
-    "external_service": true,
-    "description": "HoneyDB IP lookup service",
-    "requires_configuration": true,
-    "python_module": "honeydb.HoneyDB",
-    "additional_config_params": {
-      "api_key_name": "HONEYDB_API_KEY",
-      "api_id_name": "HONEYDB_API_ID",
-      "honeydb_analysis": "all"
+    "config": {
+      "soft_time_limit": 200,
+      "queue": "default"
     },
-    "soft_time_limit": 200
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "HONEYDB_API_KEY",
+        "description": ""
+      },
+      "api_id_name": {
+        "env_var_key": "HONEYDB_API_ID",
+        "description": ""
+      }
+    },
+    "params": {
+      "honeydb_analysis": {
+        "value": "all",
+        "type": "str",
+        "description": "Choose which endpoint to query from the HoneyDB service (options are: `all`, `scan_twitter`, `ip_query`, `ip_history`, `internet_scanner`, `ip_info`)"
+      }
+    }
   },
   "Hunter": {
     "type": "observable",
+    "python_module": "hunter.Hunter",
+    "description": "Scans a domain name and returns set of data about the organisation, the email address found and additional information about the people owning those email addresses",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
     "observable_supported": [
       "domain"
     ],
-    "external_service": true,
-    "description": "Scans a domain name and returns set of data about the organisation, the email address found and additional information about the people owning those email addresses",
-    "requires_configuration": true,
-    "python_module": "hunter.Hunter",
-    "additional_config_params": {
-      "api_key_name": "HUNTER_API_KEY"
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
     },
-    "soft_time_limit": 30
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "HUNTER_API_KEY",
+        "description": ""
+      }
+    },
+    "params": {}
   },
   "HybridAnalysis_Get_File": {
     "type": "file",
-    "external_service": true,
-    "run_hash": true,
-    "description": "check file hash on HybridAnalysis sandbox reports",
-    "requires_configuration": true,
     "python_module": "ha_get.HybridAnalysisGet",
-    "soft_time_limit": 30
+    "description": "check file hash on HybridAnalysis sandbox reports",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "run_hash": true,
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "HA_KEY",
+        "description": ""
+      }
+    },
+    "params": {}
   },
   "HybridAnalysis_Get_Observable": {
     "type": "observable",
+    "python_module": "ha_get.HybridAnalysisGet",
+    "description": "search an observable in the HybridAnalysis sandbox reports",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
     "observable_supported": [
       "ip",
       "domain",
       "url",
       "hash"
     ],
-    "external_service": true,
-    "description": "search an observable in the HybridAnalysis sandbox reports",
-    "requires_configuration": true,
-    "python_module": "ha_get.HybridAnalysisGet",
-    "soft_time_limit": 30
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "HA_KEY",
+        "description": ""
+      }
+    },
+    "params": {}
   },
   "IntelX_Phonebook": {
     "type": "observable",
+    "python_module": "intelx.IntelX",
+    "description": "Phonebook alike search against IntelX API",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
     "observable_supported": [
       "ip",
       "url",
       "domain",
       "hash"
     ],
-    "description": "Phonebook alike search against IntelX API",
-    "external_service": true,
-    "requires_configuration": true,
-    "python_module": "intelx.IntelX",
-    "additional_config_params": {
-      "api_key_name": "INTELX_API_KEY",
-      "rows_limit": 100
+    "config": {
+      "soft_time_limit": 45,
+      "queue": "default"
     },
-    "soft_time_limit": 45
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "INTELX_API_KEY",
+        "description": ""
+      }
+    },
+    "params": {
+      "rows_limit": {
+        "value": 100,
+        "type": "int",
+        "description": ""
+      }
+    }
+  },
+  "Intezer_Get": {
+    "type": "observable",
+    "python_module": "intezer_get.IntezerGet",
+    "description": "check if an hash was analyzed on Intezer. Register for a free community account [here](https://analyze.intezer.com/sign-in).",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": [
+      "hash"
+    ],
+    "config": {
+      "soft_time_limit": 100,
+      "queue": "default"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "INTEZER_KEY",
+        "description": ""
+      }
+    },
+    "params": {}
   },
   "Intezer_Scan": {
     "type": "file",
-    "external_service": true,
-    "supported_filetypes": [
-      "application/x-dosexec"
-    ],
-    "leaks_info": true,
-    "description": "scan a file on Intezer",
-    "requires_configuration": true,
     "python_module": "intezer_scan.IntezerScan",
-    "soft_time_limit": 180,
-    "queue": "long"
+    "description": "Scan a file on Intezer. Register for a free community account [here](https://analyze.intezer.com/sign-in).",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": true,
+    "supported_filetypes": [
+      "application/x-dosexec",
+      "application/x-executable",
+      "application/zip",
+      "application/java-archive",
+      "application/vnd.android.package-archive",
+      "application/x-dex",
+      "application/msword",
+      "application/vnd.ms-office",
+      "application/vnd.ms-excel.addin.macroEnabled",
+      "application/x-mspublisher",
+      "application/vnd.ms-powerpoint",
+      "application/vnd.ms-excel",
+      "application/vnd.ms-excel.sheet.macroEnabled.12",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+      "text/x-ms-iqy",
+      "application/excel",
+      "text/xml",
+      "application/xml",
+      "application/encrypted"
+    ],
+    "config": {
+      "soft_time_limit": 300,
+      "queue": "long"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "INTEZER_KEY",
+        "description": ""
+      }
+    },
+    "params": {
+      "upload_file": {
+        "value": true,
+        "type": "bool",
+        "description": "Uploads the analyzed file to Intezer in case an analysis of that file is not available in that platform."
+      },
+      "disable_dynamic_unpacking": {
+        "value": false,
+        "type": "bool",
+        "description": ""
+      },
+      "disable_static_unpacking": {
+        "value": false,
+        "type": "bool",
+        "description": ""
+      }
+    }
   },
-"InQuest_IOCdb": {
-  "type": "observable",
-  "observable_supported": ["ip", "url", "domain", "hash", "generic"],
-  "external_service": true,
-  "description": "Indicators of Compromise Database - search IOCdb",
-  "requires_configuration": true,
-  "python_module": "inquest.InQuest",
-  "additional_config_params": {
-    "api_key_name": "INQUEST_API_KEY",
-    "inquest_analysis" : "iocdb_search"
-  }
-},
-"InQuest_REPdb": {
-  "type": "observable",
-  "observable_supported": ["ip", "url", "domain", "hash", "generic"],
-  "external_service": true,
-  "description": "Reputation Database - search REPdb",
-  "requires_configuration": true,
-  "python_module": "inquest.InQuest",
-  "additional_config_params": {
-    "api_key_name": "INQUEST_API_KEY",
-    "inquest_analysis" : "repdb_search"
-  }
-},
-"InQuest_DFI": {
-  "type": "observable",
-  "observable_supported": ["ip", "url", "domain", "hash", "generic"],
-  "external_service": true,
-  "description": "Deep File Inspection - search dfi",
-  "requires_configuration": true,
-  "python_module": "inquest.InQuest",
-  "additional_config_params": {
-    "api_key_name": "INQUEST_API_KEY",
-    "inquest_analysis" : "dfi_search"
-  }
-},
+  "InQuest_IOCdb": {
+    "type": "observable",
+    "python_module": "inquest.InQuest",
+    "description": "Indicators of Compromise Database - search IOCdb",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": [
+      "ip",
+      "url",
+      "domain",
+      "hash",
+      "generic"
+    ],
+    "config": {
+      "soft_time_limit": 300,
+      "queue": "default"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "INQUEST_API_KEY",
+        "description": ""
+      }
+    },
+    "params": {
+      "inquest_analysis": {
+        "value": "iocdb_search",
+        "type": "str",
+        "description": ""
+      }
+    }
+  },
+  "InQuest_REPdb": {
+    "type": "observable",
+    "python_module": "inquest.InQuest",
+    "description": "Reputation Database - search REPdb",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": [
+      "ip",
+      "url",
+      "domain",
+      "hash",
+      "generic"
+    ],
+    "config": {
+      "soft_time_limit": 300,
+      "queue": "default"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "INQUEST_API_KEY",
+        "description": ""
+      }
+    },
+    "params": {
+      "inquest_analysis": {
+        "value": "repdb_search",
+        "type": "str",
+        "description": ""
+      }
+    }
+  },
+  "InQuest_DFI": {
+    "type": "observable",
+    "python_module": "inquest.InQuest",
+    "description": "Deep File Inspection - search dfi",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": [
+      "ip",
+      "url",
+      "domain",
+      "hash",
+      "generic"
+    ],
+    "config": {
+      "soft_time_limit": 300,
+      "queue": "default"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "INQUEST_API_KEY",
+        "description": ""
+      }
+    },
+    "params": {
+      "inquest_analysis": {
+        "value": "dfi_search",
+        "type": "str",
+        "description": ""
+      }
+    }
+  },
   "IPInfo": {
     "type": "observable",
-    "observable_supported": ["ip"],
-    "external_service": true,
-    "description": "Brief Information regarding given IP",
-    "requires_configuration": true,
     "python_module": "ipinfo.IPInfo",
-    "additional_config_params": {
-      "api_key_name": "IPINFO_KEY"
+    "description": "Brief Information regarding given IP",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": [
+      "ip"
+    ],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
     },
-    "soft_time_limit": 30
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "IPINFO_KEY",
+        "description": ""
+      }
+    },
+    "params": {}
   },
   "Manalyze": {
     "type": "file",
-    "supported_filetypes": ["application/x-dosexec"],
-    "description": "A static analyzer for PE files",
     "python_module": "manalyze.Manalyze",
-    "soft_time_limit": 720
+    "description": "A static analyzer for PE files",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
+    "docker_based": true,
+    "supported_filetypes": [
+      "application/x-dosexec"
+    ],
+    "config": {
+      "soft_time_limit": 720,
+      "queue": "default"
+    },
+    "secrets": {},
+    "params": {}
   },
   "MISP": {
     "type": "observable",
+    "python_module": "misp.MISP",
+    "description": "scan an observable on a custom MISP instance",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
     "observable_supported": [
       "ip",
       "domain",
       "url",
       "hash"
     ],
-    "external_service": true,
-    "description": "scan an observable on a custom MISP instance",
-    "requires_configuration": true,
-    "python_module": "misp.MISP",
-    "additional_config_params": {
-      "api_key_name": "MISP_KEY",
-      "url_key_name": "MISP_URL",
-      "ssl_check": true
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
     },
-    "soft_time_limit": 30
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "MISP_KEY",
+        "description": ""
+      },
+      "url_key_name": {
+        "env_var_key": "MISP_URL",
+        "description": ""
+      }
+    },
+    "params": {
+      "ssl_check": {
+        "value": true,
+        "type": "bool",
+        "description": "Enable SSL certificate server verification. Change this if your MISP instance has not SSL enabled"
+      },
+      "debug": {
+        "value": false,
+        "type": "bool",
+        "description": "Enable debug logs."
+      }
+    }
   },
   "MISPFIRST": {
     "type": "observable",
+    "python_module": "misp.MISP",
+    "description": "scan an observable on the FIRST MISP instance",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
     "observable_supported": [
       "ip",
       "domain",
       "url",
       "hash"
     ],
-    "external_service": true,
-    "description": "scan an observable on the FIRST MISP instance",
-    "requires_configuration": true,
-    "python_module": "misp.MISP",
-    "additional_config_params": {
-      "api_key_name": "FIRST_MISP_API",
-      "url_key_name": "FIRST_MISP_URL"
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
     },
-    "soft_time_limit": 30
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "FIRST_MISP_API",
+        "description": ""
+      },
+      "url_key_name": {
+        "env_var_key": "FIRST_MISP_URL",
+        "description": ""
+      }
+    },
+    "params": {}
   },
   "MISPFIRST_Check_Hash": {
     "type": "file",
-    "run_hash": true,
-    "description": "check a file hash on the FIRST MISP instance",
-    "requires_configuration": true,
     "python_module": "misp.MISP",
-    "additional_config_params": {
-      "api_key_name": "FIRST_MISP_API",
-      "url_key_name": "FIRST_MISP_URL"
+    "description": "check a file hash on the FIRST MISP instance",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
+    "run_hash": true,
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
     },
-    "soft_time_limit": 30
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "FIRST_MISP_API",
+        "description": ""
+      },
+      "url_key_name": {
+        "env_var_key": "FIRST_MISP_URL",
+        "description": ""
+      }
+    },
+    "params": {}
   },
   "MISP_Check_Hash": {
     "type": "file",
-    "run_hash": true,
-    "description": "check a file hash on a MISP instance",
-    "requires_configuration": true,
     "python_module": "misp.MISP",
-    "soft_time_limit": 30
+    "description": "check a file hash on a MISP instance",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
+    "run_hash": true,
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "MISP_KEY",
+        "description": ""
+      },
+      "url_key_name": {
+        "env_var_key": "MISP_URL",
+        "description": ""
+      }
+    },
+    "params": {}
   },
   "Malpedia_Scan": {
     "type": "file",
+    "python_module": "malpedia_scan.MalpediaScan",
+    "description": "scan a binary or a zip file (pwd:infected) against all the yara rules available in Malpedia",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
     "supported_filetypes": [
       "application/x-binary",
       "application/x-dosexec",
@@ -605,866 +1403,1805 @@
       "application/x-compressed",
       "multipart/x-zip"
     ],
-    "description": "scan a binary or a zip file (pwd:infected) against all the yara rules available in Malpedia",
-    "python_module": "malpedia_scan.MalpediaScan",
-    "requires_configuration": true,
-    "external_service": true,
-    "additional_config_params": {
-      "api_key_name": "MALPEDIA_KEY"
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "long"
     },
-    "soft_time_limit": 30,
-    "queue": "long"
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "MALPEDIA_KEY",
+        "description": ""
+      }
+    },
+    "params": {}
   },
   "MalwareBazaar_Get_File": {
     "type": "file",
-    "run_hash": true,
-    "external_service": true,
-    "description": "Check if a particular malware sample is known to MalwareBazaar",
     "python_module": "mb_get.MB_GET",
-    "soft_time_limit": 50
+    "description": "Check if a particular malware sample is known to MalwareBazaar",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "run_hash": true,
+    "config": {
+      "soft_time_limit": 50,
+      "queue": "default"
+    },
+    "secrets": {},
+    "params": {}
   },
   "MalwareBazaar_Get_Observable": {
     "type": "observable",
+    "python_module": "mb_get.MB_GET",
+    "description": "Check if a particular malware hash is known to MalwareBazaar",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
     "observable_supported": [
       "hash"
     ],
-    "external_service": true,
-    "description": "Check if a particular malware hash is known to MalwareBazaar",
-    "python_module": "mb_get.MB_GET",
-    "soft_time_limit": 50
+    "config": {
+      "soft_time_limit": 50,
+      "queue": "default"
+    },
+    "secrets": {},
+    "params": {}
   },
   "MalwareBazaar_Google_Observable": {
     "type": "observable",
+    "python_module": "mb_google.MB_GOOGLE",
+    "description": "Check if a particular IP, domain or url is known to MalwareBazaar using google search",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
     "observable_supported": [
       "ip",
       "domain",
       "url"
     ],
-    "external_service": true,
-    "description": "Check if a particular IP, domain or url is known to MalwareBazaar using google search",
-    "python_module": "mb_google.MB_GOOGLE",
-    "soft_time_limit": 50
+    "config": {
+      "soft_time_limit": 100,
+      "queue": "default"
+    },
+    "secrets": {},
+    "params": {}
   },
   "MaxMindGeoIP": {
     "type": "observable",
-    "observable_supported": ["ip"],
-    "description": "extract GeoIP info for an IP",
     "python_module": "maxmind.Maxmind",
-    "soft_time_limit": 30
+    "description": "extract GeoIP info for an IP",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
+    "observable_supported": [
+      "ip"
+    ],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "MAXMIND_KEY",
+        "description": ""
+      }
+    },
+    "params": {}
+  },
+  "MWDB_Get": {
+    "type": "observable",
+    "python_module": "mwdb_get.MWDBGet",
+    "description": "check if an hash was analyzed on MWDB",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": [
+      "hash"
+    ],
+    "config": {
+      "soft_time_limit": 20,
+      "queue": "default"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "MWDB_KEY",
+        "description": ""
+      }
+    },
+    "params": {}
   },
   "MWDB_Scan": {
     "type": "file",
+    "python_module": "mwdb_scan.MWDB_Scan",
     "description": "Scan a file against MWDB by Cert Polska",
-    "requires_configuration": true,
+    "disabled": false,
     "external_service": true,
     "leaks_info": true,
-    "python_module": "mwdb_scan.MWDB_Scan",
-    "additional_config_params": {
-      "api_key_name": "MWDB_KEY",
-      "upload_file": false,
-      "max_tries": 50
+    "config": {
+      "soft_time_limit": 400,
+      "queue": "default"
     },
-    "soft_time_limit": 400
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "MWDB_KEY",
+        "description": ""
+      }
+    },
+    "params": {
+      "upload_file": {
+        "value": true,
+        "type": "bool",
+        "description": "Uploads the file to repository."
+      },
+      "private": {
+        "value": false,
+        "type": "bool",
+        "description": ""
+      },
+      "max_tries": {
+        "value": 50,
+        "type": "int",
+        "description": "Number of retries to perform for polling analysis results."
+      }
+    }
   },
   "ONYPHE": {
     "type": "observable",
+    "python_module": "onyphe.Onyphe",
+    "description": "search an observable in the ONYPHE",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
     "observable_supported": [
       "ip",
       "domain",
       "url"
     ],
-    "external_service": true,
-    "description": "search an observable in the ONYPHE",
-    "requires_configuration": true,
-    "python_module": "onyphe.Onyphe",
-    "additional_config_params": {
-      "api_key_name": "ONYPHE_KEY"
+    "config": {
+      "soft_time_limit": 50,
+      "queue": "default"
     },
-    "soft_time_limit": 50
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "ONYPHE_KEY",
+        "description": ""
+      }
+    },
+    "params": {}
+  },
+  "OpenCTI": {
+    "type": "observable",
+    "python_module": "opencti.OpenCTI",
+    "description": "scan an observable on a custom OpenCTI instance",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": [
+      "ip",
+      "domain",
+      "url",
+      "hash"
+    ],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "OPENCTI_KEY",
+        "description": "API key for your OpenCTI instance"
+      },
+      "url_key_name": {
+        "env_var_key": "OPENCTI_URL",
+        "description": "URL of your OpenCTI instance"
+      }
+    },
+    "params": {
+      "ssl_verify": {
+        "value": true,
+        "type": "bool",
+        "description": "Enable SSL certificate server verification. Change this if your OpenCTI instance has not SSL enabled."
+      },
+      "proxies": {
+        "value": {
+          "http": "",
+          "https": ""
+        },
+        "type": "dict",
+        "description": "Use these options to pass your request through a proxy server."
+      },
+      "exact_search": {
+        "value": false,
+        "type": "bool",
+        "description": "Use this if you want exact matches only for the observables returned."
+      }
+    }
   },
   "OTXQuery": {
     "type": "observable",
+    "python_module": "otx.OTX",
+    "description": "scan an observable on Alienvault OTX",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
     "observable_supported": [
       "ip",
       "domain",
       "url",
       "hash"
     ],
-    "external_service": true,
-    "description": "scan an observable on Alienvault OTX",
-    "requires_configuration": true,
-    "python_module": "otx.OTX",
-    "additional_config_params": {
-      "verbose": false
+    "config": {
+      "soft_time_limit": 40,
+      "queue": "default"
     },
-    "soft_time_limit": 40
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "OTX_KEY",
+        "description": ""
+      }
+    },
+    "params": {
+      "verbose": {
+        "value": false,
+        "type": "bool",
+        "description": ""
+      }
+    }
   },
   "OTX_Check_Hash": {
     "type": "file",
-    "external_service": true,
-    "run_hash": true,
-    "description": "check file hash on OTX Alienvault",
-    "requires_configuration": true,
     "python_module": "otx.OTX",
-    "additional_config_params": {
-      "verbose": false
+    "description": "check file hash on OTX Alienvault",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "run_hash": true,
+    "config": {
+      "soft_time_limit": 40,
+      "queue": "default"
     },
-    "soft_time_limit": 40
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "OTX_KEY",
+        "description": ""
+      }
+    },
+    "params": {
+      "verbose": {
+        "value": false,
+        "type": "bool",
+        "description": ""
+      }
+    }
   },
   "PDF_Info": {
     "type": "file",
+    "python_module": "pdf_info.PDFInfo",
+    "description": "static PDF analysis (peepdf + pdfid)",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
     "supported_filetypes": [
       "application/pdf"
     ],
-    "description": "static PDF analysis (peepdf + pdfid)",
-    "python_module": "pdf_info.PDFInfo",
-    "soft_time_limit": 30,
-    "queue": "local"
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "local"
+    },
+    "secrets": {},
+    "params": {}
   },
   "PE_Info": {
     "type": "file",
+    "python_module": "pe_info.PEInfo",
+    "description": "static PE analysis (pefile)",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
     "supported_filetypes": [
       "application/x-dosexec"
     ],
-    "description": "static PE analysis (pefile)",
-    "python_module": "pe_info.PEInfo",
-    "soft_time_limit": 30,
-    "queue": "local"
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "local"
+    },
+    "secrets": {},
+    "params": {}
   },
   "PEframe_Scan": {
     "type": "file",
+    "python_module": "peframe.PEframe",
+    "description": "Perform static analysis on Portable Executable malware and malicious MS Office documents",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
+    "docker_based": true,
     "supported_filetypes": [
       "application/x-dosexec"
     ],
-    "python_module": "peframe.PEframe",
-    "description": "Perform static analysis on Portable Executable malware and malicious MS Office documents",
-    "soft_time_limit": 500,
-    "queue": "local"
+    "config": {
+      "soft_time_limit": 500,
+      "queue": "local"
+    },
+    "secrets": {},
+    "params": {}
   },
   "Phishtank": {
     "type": "observable",
-    "observable_supported": ["url"],
-    "external_service": true,
-    "soft_time_limit": 100,
-    "description": "Check if url is verified in Phishtank API",
     "python_module": "phishtank.Phishtank",
-    "additional_config_params": {
-      "api_key_name": "PHISHTANK_API_KEY"
-    }
+    "description": "Check if url is verified in Phishtank API",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": [
+      "url"
+    ],
+    "config": {
+      "soft_time_limit": 100,
+      "queue": "default"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "PHISHTANK_API_KEY",
+        "description": ""
+      }
+    },
+    "params": {}
   },
   "Pulsedive_Active_IOC": {
     "type": "observable",
+    "python_module": "pulsedive.Pulsedive",
+    "description": "Scan indicators and retrieve results from Pulsedive's API",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
     "observable_supported": [
       "ip",
       "domain",
       "url",
       "hash"
     ],
-    "external_service": true,
-    "description": "Scan indicators and retrieve results from Pulsedive's API",
-    "python_module": "pulsedive.Pulsedive",
-    "additional_config_params": {
-      "api_key_name": "PULSEDIVE_API_KEY",
-      "active_scan": true
+    "config": {
+      "soft_time_limit": 100,
+      "queue": "default"
     },
-    "soft_time_limit": 100
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "PULSEDIVE_API_KEY",
+        "description": ""
+      }
+    },
+    "params": {
+      "active_scan": {
+        "value": true,
+        "type": "bool",
+        "description": ""
+      }
+    }
   },
   "Rendertron": {
     "type": "observable",
+    "python_module": "rendertron.Rendertron",
+    "description": "get screenshot of a web page using rendertron (puppeteer)",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
+    "docker_based": true,
     "observable_supported": [
       "url"
     ],
-    "description": "get screenshot of a web page using rendertron (puppeteer)",
-    "python_module": "rendertron.Rendertron",
-    "requires_configuration": true,
-    "additional_config_params": {},
-    "soft_time_limit": 320,
-    "queue": "local"
+    "config": {
+      "soft_time_limit": 320,
+      "queue": "local"
+    },
+    "secrets": {},
+    "params": {}
   },
   "Qiling_Windows": {
     "type": "file",
+    "python_module": "qiling.Qiling",
+    "description": "Qiling PE emulation",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
+    "docker_based": true,
     "supported_filetypes": [
       "application/x-dosexec"
     ],
-    "external_service": false,
-    "description": "Qiling PE emulation",
-    "soft_time_limit": 120,
-    "python_module": "qiling.Qiling",
-    "additional_config_params": {
-      "os": "windows",
-      "arch": "x86",
-      "profile": null,
-      "shellcode": false
+    "config": {
+      "soft_time_limit": 120,
+      "queue": "long"
     },
-    "queue": "long"
+    "secrets": {},
+    "params": {
+      "os": {
+        "value": "windows",
+        "type": "str",
+        "description": "Change operating system for the emulation."
+      },
+      "arch": {
+        "value": "x86",
+        "type": "str",
+        "description": "Change system architecture for the emulation."
+      },
+      "profile": {
+        "value": "",
+        "type": "str",
+        "description": "Add a Qiling [profile](https://docs.qiling.io/en/latest/profile/)."
+      },
+      "shellcode": {
+        "value": false,
+        "type": "bool",
+        "description": "true if the file is a shellcode."
+      }
+    }
   },
   "Qiling_Windows_Shellcode": {
     "type": "file",
+    "python_module": "qiling.Qiling",
+    "description": "Qiling windows shellcode emulation",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
+    "docker_based": true,
     "supported_filetypes": [
       "application/octet-stream"
     ],
-    "external_service": false,
-    "description": "Qiling windows shellcode emulation",
-    "soft_time_limit": 120,
-    "python_module": "qiling.Qiling",
-    "additional_config_params": {
-      "os": "windows",
-      "arch": "x86",
-      "profile": null,
-      "shellcode": true
+    "config": {
+      "soft_time_limit": 120,
+      "queue": "long"
     },
-    "queue": "long"
+    "secrets": {},
+    "params": {
+      "os": {
+        "value": "windows",
+        "type": "str",
+        "description": "Change operating system for the emulation."
+      },
+      "arch": {
+        "value": "x86",
+        "type": "str",
+        "description": "Change system architecture for the emulation."
+      },
+      "profile": {
+        "value": "",
+        "type": "str",
+        "description": "Add a Qiling [profile](https://docs.qiling.io/en/latest/profile/)."
+      },
+      "shellcode": {
+        "value": true,
+        "type": "bool",
+        "description": "true if the file is a shellcode."
+      }
+    }
   },
-    "Qiling_Linux": {
+  "Qiling_Linux": {
     "type": "file",
-      "supported_filetypes": [
+    "python_module": "qiling.Qiling",
+    "description": "Qiling ELF emulation",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
+    "docker_based": true,
+    "supported_filetypes": [
       "application/x-sharedlib",
       "application/x-executable"
     ],
-    "external_service": false,
-    "description": "Qiling ELF emulation",
-    "soft_time_limit": 120,
-    "python_module": "qiling.Qiling",
-    "additional_config_params": {
-      "os": "linux",
-      "arch": "x86",
-      "profile": null,
-      "shellcode": false
+    "config": {
+      "soft_time_limit": 120,
+      "queue": "long"
     },
-    "queue": "long"
+    "secrets": {},
+    "params": {
+      "os": {
+        "value": "linux",
+        "type": "str",
+        "description": "Change operating system for the emulation."
+      },
+      "arch": {
+        "value": "x86",
+        "type": "str",
+        "description": "Change system architecture for the emulation."
+      },
+      "profile": {
+        "value": "",
+        "type": "str",
+        "description": "Add a Qiling [profile](https://docs.qiling.io/en/latest/profile/)."
+      },
+      "shellcode": {
+        "value": false,
+        "type": "bool",
+        "description": "true if the file is a shellcode."
+      }
+    }
   },
-    "Qiling_Linux_Shellcode": {
+  "Qiling_Linux_Shellcode": {
     "type": "file",
-      "supported_filetypes": [
+    "python_module": "qiling.Qiling",
+    "description": "Qiling linux shellcode emulation",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
+    "docker_based": true,
+    "supported_filetypes": [
       "application/octet-stream"
     ],
-    "external_service": false,
-    "description": "Qiling linux shellcode emulation",
-    "soft_time_limit": 120,
-    "python_module": "qiling.Qiling",
-    "additional_config_params": {
-      "os": "linux",
-      "arch": "x86",
-      "profile": null,
-      "shellcode": true
+    "config": {
+      "soft_time_limit": 120,
+      "queue": "long"
     },
-    "queue": "long"
+    "secrets": {},
+    "params": {
+      "os": {
+        "value": "linux",
+        "type": "str",
+        "description": "Change operating system for the emulation "
+      },
+      "arch": {
+        "value": "x86",
+        "type": "str",
+        "description": "Change system architecture for the emulation."
+      },
+      "profile": {
+        "value": "",
+        "type": "str",
+        "description": "Add a Qiling [profile](https://docs.qiling.io/en/latest/profile/)."
+      },
+      "shellcode": {
+        "value": true,
+        "type": "bool",
+        "description": "true if the file is a shellcode."
+      }
+    }
   },
   "Quad9_DNS": {
     "type": "observable",
-    "observable_supported": ["domain", "url"],
-    "external_service": true,
-    "description": "Retrieve current domain resolution with Quad9 DoH (DNS over HTTPS)",
-    "soft_time_limit": 30,
     "python_module": "dns.dns_resolvers.quad9_dns_resolver.Quad9DNSResolver",
-    "additional_config_params": {
-      "query_type": "A"
+    "description": "Retrieve current domain resolution with Quad9 DoH (DNS over HTTPS)",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": [
+      "domain",
+      "url"
+    ],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {},
+    "params": {
+      "query_type": {
+        "value": "A",
+        "type": "str",
+        "description": "Query type against the chosen DNS resolver."
+      }
     }
   },
   "Quad9_Malicious_Detector": {
     "type": "observable",
-    "observable_supported": ["domain", "url"],
-    "external_service": true,
+    "python_module": "dns.dns_malicious_detectors.quad9_malicious_detector.Quad9MaliciousDetector",
     "description": "Check if a domain or an url is marked as malicious in Quad9 database",
-    "soft_time_limit": 30,
-    "python_module": "dns.dns_malicious_detectors.quad9_malicious_detector.Quad9MaliciousDetector"
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": [
+      "domain",
+      "url"
+    ],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {},
+    "params": {}
   },
   "Quark_Engine_APK": {
     "type": "file",
+    "python_module": "quark_engine.QuarkEngine",
+    "description": "An Obfuscation-Neglect Android Malware Scoring System",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
     "supported_filetypes": [
       "application/zip",
       "application/java-archive",
       "application/vnd.android.package-archive",
       "application/x-dex"
     ],
-    "python_module": "quark_engine.QuarkEngine",
-    "description": "An Obfuscation-Neglect Android Malware Scoring System",
-    "soft_time_limit": 120,
-    "queue": "long"
+    "config": {
+      "soft_time_limit": 120,
+      "queue": "long"
+    },
+    "secrets": {},
+    "params": {}
   },
   "Robtex_Forward_PDNS_Query": {
     "type": "observable",
+    "python_module": "robtex.Robtex",
+    "description": "scan a domain against the Robtex Passive DNS DB",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
     "observable_supported": [
       "domain",
       "url"
     ],
-    "external_service": true,
-    "description": "scan a domain against the Robtex Passive DNS DB",
-    "python_module": "robtex.Robtex",
-    "additional_config_params": {
-      "robtex_analysis": "forward_pdns"
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
     },
-    "soft_time_limit": 30
+    "secrets": {},
+    "params": {
+      "robtex_analysis": {
+        "value": "forward_pdns",
+        "type": "str",
+        "description": ""
+      }
+    }
   },
   "Robtex_IP_Query": {
     "type": "observable",
+    "python_module": "robtex.Robtex",
+    "description": "get IP info from Robtex",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
     "observable_supported": [
       "ip"
     ],
-    "external_service": true,
-    "description": "get IP info from Robtex",
-    "python_module": "robtex.Robtex",
-    "additional_config_params": {
-      "robtex_analysis": "ip_query"
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
     },
-    "soft_time_limit": 30
+    "secrets": {},
+    "params": {
+      "robtex_analysis": {
+        "value": "ip_query",
+        "type": "str",
+        "description": ""
+      }
+    }
   },
   "Robtex_Reverse_PDNS_Query": {
     "type": "observable",
+    "python_module": "robtex.Robtex",
+    "description": "scan an IP against the Robtex Passive DNS DB",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
     "observable_supported": [
       "ip"
     ],
-    "external_service": true,
-    "description": "scan an IP against the Robtex Passive DNS DB",
-    "python_module": "robtex.Robtex",
-    "additional_config_params": {
-      "robtex_analysis": "reverse_pdns"
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
     },
-    "soft_time_limit": 30
+    "secrets": {},
+    "params": {
+      "robtex_analysis": {
+        "value": "reverse_pdns",
+        "type": "str",
+        "description": ""
+      }
+    }
   },
   "Rtf_Info": {
     "type": "file",
+    "python_module": "rtf_info.RTFInfo",
+    "description": "static RTF analysis (Oletools)",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
     "supported_filetypes": [
       "text/rtf",
       "application/rtf"
     ],
-    "description": "static RTF analysis (Oletools)",
-    "python_module": "rtf_info.RTFInfo",
-    "soft_time_limit": 30
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {},
+    "params": {}
   },
   "Securitytrails_Details": {
     "type": "observable",
+    "python_module": "securitytrails.SecurityTrails",
+    "description": "scan a domain against securitytrails API for general details",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
     "observable_supported": [
       "domain"
     ],
-    "external_service": true,
-    "description": "scan a domain against securitytrails API for general details",
-    "requires_configuration": true,
-    "python_module": "securitytrails.SecurityTrails",
-    "additional_config_params": {
-      "securitytrails_analysis": "current",
-      "securitytrails_current_type": "details"
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
     },
-    "soft_time_limit": 30
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "SECURITYTRAILS_KEY",
+        "description": ""
+      }
+    },
+    "params": {
+      "securitytrails_analysis": {
+        "value": "current",
+        "type": "str",
+        "description": ""
+      },
+      "securitytrails_current_type": {
+        "value": "details",
+        "type": "str",
+        "description": ""
+      }
+    }
   },
   "Securitytrails_History_DNS": {
     "type": "observable",
+    "python_module": "securitytrails.SecurityTrails",
+    "description": "scan a domain against securitytrails API for historical DNS",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
     "observable_supported": [
       "domain"
     ],
-    "external_service": true,
-    "description": "scan a domain against securitytrails API for historical DNS",
-    "requires_configuration": true,
-    "python_module": "securitytrails.SecurityTrails",
-    "additional_config_params": {
-      "securitytrails_analysis": "history",
-      "securitytrails_history_analysis": "dns"
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
     },
-    "soft_time_limit": 30
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "SECURITYTRAILS_KEY",
+        "description": ""
+      }
+    },
+    "params": {
+      "securitytrails_analysis": {
+        "value": "history",
+        "type": "str",
+        "description": ""
+      },
+      "securitytrails_history_analysis": {
+        "value": "dns",
+        "type": "str",
+        "description": ""
+      }
+    }
   },
   "Securitytrails_History_WHOIS": {
     "type": "observable",
+    "python_module": "securitytrails.SecurityTrails",
+    "description": "scan a domain against securitytrails API for historical WHOIS",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
     "observable_supported": [
       "domain"
     ],
-    "external_service": true,
-    "description": "scan a domain against securitytrails API for historical WHOIS",
-    "requires_configuration": true,
-    "python_module": "securitytrails.SecurityTrails",
-    "additional_config_params": {
-      "securitytrails_analysis": "history",
-      "securitytrails_history_analysis": "whois"
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
     },
-    "soft_time_limit": 30
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "SECURITYTRAILS_KEY",
+        "description": ""
+      }
+    },
+    "params": {
+      "securitytrails_analysis": {
+        "value": "history",
+        "type": "str",
+        "description": ""
+      },
+      "securitytrails_history_analysis": {
+        "value": "whois",
+        "type": "str",
+        "description": ""
+      }
+    }
   },
   "Securitytrails_IP_Neighbours": {
     "type": "observable",
+    "python_module": "securitytrails.SecurityTrails",
+    "description": "scan an IP against securitytrails API for neighbour IPs",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
     "observable_supported": [
       "ip"
     ],
-    "external_service": true,
-    "description": "scan an IP against securitytrails API for neighbour IPs",
-    "requires_configuration": true,
-    "python_module": "securitytrails.SecurityTrails",
-    "soft_time_limit": 30
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "SECURITYTRAILS_KEY",
+        "description": ""
+      }
+    },
+    "params": {}
   },
   "Securitytrails_Subdomains": {
     "type": "observable",
+    "python_module": "securitytrails.SecurityTrails",
+    "description": "scan a domain against securitytrails API for subdomains",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
     "observable_supported": [
       "domain"
     ],
-    "external_service": true,
-    "description": "scan a domain against securitytrails API for subdomains",
-    "requires_configuration": true,
-    "python_module": "securitytrails.SecurityTrails",
-    "additional_config_params": {
-      "securitytrails_analysis": "current",
-      "securitytrails_current_type": "subdomains"
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
     },
-    "soft_time_limit": 30
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "SECURITYTRAILS_KEY",
+        "description": ""
+      }
+    },
+    "params": {
+      "securitytrails_analysis": {
+        "value": "current",
+        "type": "str",
+        "description": ""
+      },
+      "securitytrails_current_type": {
+        "value": "subdomains",
+        "type": "str",
+        "description": ""
+      }
+    }
   },
   "Securitytrails_Tags": {
     "type": "observable",
+    "python_module": "securitytrails.SecurityTrails",
+    "description": "scan a domain against securitytrails API for tags",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
     "observable_supported": [
       "domain"
     ],
-    "external_service": true,
-    "description": "scan a domain against securitytrails API for tags",
-    "requires_configuration": true,
-    "python_module": "securitytrails.SecurityTrails",
-    "additional_config_params": {
-      "securitytrails_analysis": "current",
-      "securitytrails_current_type": "tags"
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
     },
-    "soft_time_limit": 30
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "SECURITYTRAILS_KEY",
+        "description": ""
+      }
+    },
+    "params": {
+      "securitytrails_analysis": {
+        "value": "current",
+        "type": "str",
+        "description": ""
+      },
+      "securitytrails_current_type": {
+        "value": "tags",
+        "type": "str",
+        "description": ""
+      }
+    }
   },
   "Shodan_Honeyscore": {
     "type": "observable",
+    "python_module": "shodan.Shodan",
+    "description": "scan an IP against Shodan Honeyscore API",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
     "observable_supported": [
       "ip"
     ],
-    "external_service": true,
-    "description": "scan an IP against Shodan Honeyscore API",
-    "requires_configuration": true,
-    "python_module": "shodan.Shodan",
-    "additional_config_params": {
-      "shodan_analysis": "honeyscore"
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
     },
-    "soft_time_limit": 30
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "SHODAN_KEY",
+        "description": ""
+      }
+    },
+    "params": {
+      "shodan_analysis": {
+        "value": "honeyscore",
+        "type": "str",
+        "description": ""
+      }
+    }
   },
   "Shodan_Search": {
     "type": "observable",
+    "python_module": "shodan.Shodan",
+    "description": "scan an IP against Shodan Search API",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
     "observable_supported": [
       "ip"
     ],
-    "external_service": true,
-    "description": "scan an IP against Shodan Search API",
-    "requires_configuration": true,
-    "python_module": "shodan.Shodan",
-    "additional_config_params": {
-      "shodan_analysis": "search"
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
     },
-    "soft_time_limit": 30
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "SHODAN_KEY",
+        "description": ""
+      }
+    },
+    "params": {
+      "shodan_analysis": {
+        "value": "search",
+        "type": "str",
+        "description": ""
+      }
+    }
   },
   "Signature_Info": {
     "type": "file",
+    "python_module": "signature_info.SignatureInfo",
+    "description": "PE signature extractor",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
     "supported_filetypes": [
       "application/x-dosexec"
     ],
-    "description": "PE signature extractor",
-    "python_module": "signature_info.SignatureInfo",
-    "soft_time_limit": 30,
-    "queue": "local"
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "local"
+    },
+    "secrets": {},
+    "params": {}
   },
   "SpeakEasy": {
     "type": "file",
+    "python_module": "speakeasy_emulation.SpeakEasy",
+    "description": "speakeasy emulation report",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
     "supported_filetypes": [
       "application/x-dosexec"
     ],
-    "description": "speakeasy emulation report",
-    "python_module": "speakeasy_emulation.SpeakEasy",
-    "soft_time_limit": 120,
-    "queue": "long"
+    "config": {
+      "soft_time_limit": 120,
+      "queue": "long"
+    },
+    "secrets": {},
+    "params": {}
+  },
+  "Spyse": {
+    "type": "observable",
+    "python_module": "spyse.Spyse",
+    "description": "Scan domains, IPs, emails and CVEs using Spyse.com's API. Register [here](https://spyse.com/user/registration).",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": [
+      "ip",
+      "domain",
+      "generic"
+    ],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "SPYSE_API_KEY",
+        "description": "Spyse API token"
+      }
+    },
+    "params": {}
   },
   "SSAPINet": {
     "type": "observable",
+    "python_module": "ss_api_net.SSAPINet",
+    "description": "Get a screenshot of a web page using screenshotapi.net. For configuration, Refer to the [docs](https://screenshotapi.net/documentation).",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
     "observable_supported": [
       "url"
     ],
-    "external_service": true,
-    "description": "get a screenshot of a web page using screenshotapi.net (external source)",
-    "requires_configuration": true,
-    "python_module": "ss_api_net.SSAPINet",
-    "soft_time_limit": 300,
-    "additional_config_params": {
-      "api_key_name": "SSAPINET_KEY",
-      "use_proxy": false,
-      "proxy": "",
-      "output": "image",
-      "extra_api_params" : {
-        "full_page": true
+    "config": {
+      "soft_time_limit": 300,
+      "queue": "default"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "SSAPINET_KEY",
+        "description": ""
+      }
+    },
+    "params": {
+      "use_proxy": {
+        "value": false,
+        "type": "bool",
+        "description": "Use the `use_proxy` and `proxy` options to pass your request through a proxy server."
+      },
+      "proxy": {
+        "value": "",
+        "type": "str",
+        "description": "Use the `use_proxy` and `proxy` options to pass your request through a proxy server."
+      },
+      "output": {
+        "value": "image",
+        "type": "str",
+        "description": "Specify output type (options: `image` i.e. raw base64 encoded image, `json` i.e. containing link)"
+      },
+      "extra_api_params": {
+        "value": {
+          "full_page": true,
+          "fresh": false,
+          "lazy_load": false,
+          "destroy_screenshot": false
+        },
+        "type": "dict",
+        "description": "Refer to their docs](https://screenshotapi.net/documentation)."
       }
     }
   },
   "Strings_Info_Classic": {
     "type": "file",
-    "description": "strings extraction",
     "python_module": "strings_info.StringsInfo",
-    "additional_config_params": {
-      "max_number_of_strings": 300,
-      "rank_strings": false
+    "description": "strings extraction",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
+    "docker_based": true,
+    "config": {
+      "soft_time_limit": 70,
+      "queue": "local"
     },
-    "soft_time_limit": 70,
-    "queue": "local"
+    "secrets": {},
+    "params": {
+      "max_number_of_strings": {
+        "value": 300,
+        "type": "int",
+        "description": ""
+      },
+      "rank_strings": {
+        "value": false,
+        "type": "bool",
+        "description": ""
+      }
+    }
   },
   "Strings_Info_ML": {
     "type": "file",
-    "description": "strings extraction plus strings ranking based on Machine Learning. Leverages Fireeye's Stringsifter",
     "python_module": "strings_info.StringsInfo",
-    "additional_config_params": {
-      "max_number_of_strings": 200,
-      "rank_strings": true
+    "description": "strings extraction plus strings ranking based on Machine Learning. Leverages Fireeye's Stringsifter",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
+    "docker_based": true,
+    "config": {
+      "soft_time_limit": 70,
+      "queue": "local"
     },
-    "soft_time_limit": 70,
-    "queue": "local"
+    "secrets": {},
+    "params": {
+      "max_number_of_strings": {
+        "value": 200,
+        "type": "int",
+        "description": ""
+      },
+      "rank_strings": {
+        "value": true,
+        "type": "bool",
+        "description": ""
+      }
+    }
   },
   "Stratosphere_Blacklist": {
     "type": "observable",
+    "python_module": "stratosphere.Stratos",
+    "description": "Cross refernce an IP in blacklist provided by Stratosphere lab",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
     "observable_supported": [
       "ip"
     ],
-    "description": "Cross refernce an IP in blacklist provided by Stratosphere lab",
-    "python_module": "stratosphere.Stratos",
-    "soft_time_limit": 120
+    "config": {
+      "soft_time_limit": 120,
+      "queue": "default"
+    },
+    "secrets": {},
+    "params": {}
   },
   "TalosReputation": {
     "type": "observable",
+    "python_module": "talos.Talos",
+    "description": "check an IP reputation from Talos downloaded IP list",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
     "observable_supported": [
       "ip"
     ],
-    "external_service": true,
-    "description": "check an IP reputation from Talos downloaded IP list",
-    "python_module": "talos.Talos",
-    "soft_time_limit": 30
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {},
+    "params": {}
   },
   "ThreatFox": {
     "type": "observable",
-    "observable_supported": ["ip", "url", "domain", "hash", "generic"],
-    "external_service": true,
-    "description": "search for an IOC in ThreatFox's database",
     "python_module": "threatfox.ThreatFox",
-    "soft_time_limit": 30
+    "description": "search for an IOC in ThreatFox's database",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": [
+      "ip",
+      "url",
+      "domain",
+      "hash",
+      "generic"
+    ],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {},
+    "params": {}
   },
   "Threatminer_PDNS": {
     "type": "observable",
+    "python_module": "threatminer.Threatminer",
+    "description": "retrieve PDNS data from Threatminer API",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
     "observable_supported": [
       "ip",
       "domain"
     ],
-    "external_service": true,
-    "description": "retrieve PDNS data from Threatminer API",
-    "python_module": "threatminer.Threatminer",
-    "additional_config_params": {
-      "rt_value": 2
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
     },
-    "soft_time_limit": 30
+    "secrets": {},
+    "params": {
+      "rt_value": {
+        "value": 2,
+        "type": "int",
+        "description": ""
+      }
+    }
   },
   "Threatminer_Reports_Tagging": {
     "type": "observable",
+    "python_module": "threatminer.Threatminer",
+    "description": "retrieve reports from Threatminer API",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
     "observable_supported": [
       "ip",
       "domain"
     ],
-    "external_service": true,
-    "description": "retrieve reports from Threatminer API",
-    "python_module": "threatminer.Threatminer",
-    "additional_config_params": {
-      "rt_value": 6
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
     },
-    "soft_time_limit": 30
+    "secrets": {},
+    "params": {
+      "rt_value": {
+        "value": 6,
+        "type": "int",
+        "description": ""
+      }
+    }
   },
   "Threatminer_Subdomains": {
     "type": "observable",
+    "python_module": "threatminer.Threatminer",
+    "description": "retrieve subdomains from Threatminer API",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
     "observable_supported": [
       "domain"
     ],
-    "external_service": true,
-    "description": "retrieve subdomains from Threatminer API",
-    "python_module": "threatminer.Threatminer",
-    "additional_config_params": {
-      "rt_value": 5
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
     },
-    "soft_time_limit": 30
+    "secrets": {},
+    "params": {
+      "rt_value": {
+        "value": 5,
+        "type": "int",
+        "description": ""
+      }
+    }
   },
   "Thug_HTML_Info": {
     "type": "file",
+    "python_module": "thug_file.ThugFile",
+    "description": "Perform hybrid dynamic/static analysis on a saved HTML page. For configuration, refer to [thug's usage docs](https://buffer.github.io/thug/doc/usage.html#basic-usage).",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
+    "docker_based": true,
     "supported_filetypes": [
       "text/html"
     ],
-    "description": "Perform hybrid dynamic/static analysis on a saved HTML page",
-    "python_module": "thug_file.ThugFile",
-    "requires_configuration": true,
-    "additional_config_params": {
-      "dom_events": "click,mouseover",
-      "use_proxy": false,
-      "proxy": "",
-      "enable_image_processing_analysis": true,
-      "enable_awis": true,
-      "user_agent": "winxpie60"
+    "config": {
+      "soft_time_limit": 600,
+      "queue": "long"
     },
-    "soft_time_limit": 600,
-    "queue": "long"
+    "secrets": {},
+    "params": {
+      "dom_events": {
+        "value": "click,mouseover",
+        "type": "str",
+        "description": "See [Thug docs: dom events handling](https://buffer.github.io/thug/doc/usage.html#dom-events-handling)."
+      },
+      "use_proxy": {
+        "value": false,
+        "type": "bool",
+        "description": "option `-p`"
+      },
+      "proxy": {
+        "value": "",
+        "type": "str",
+        "description": "option `-p`"
+      },
+      "enable_image_processing_analysis": {
+        "value": true,
+        "type": "bool",
+        "description": "option `-a`"
+      },
+      "enable_awis": {
+        "value": true,
+        "type": "bool",
+        "description": "option `-E`"
+      },
+      "user_agent": {
+        "value": "winxpie60",
+        "type": "str",
+        "description": "See [Thug docs: browser personality](https://buffer.github.io/thug/doc/usage.html#browser-personality)."
+      }
+    }
   },
   "Thug_URL_Info": {
     "type": "observable",
+    "python_module": "thug_url.ThugUrl",
+    "description": "Perform hybrid dynamic/static analysis on a URL",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
+    "docker_based": true,
     "observable_supported": [
       "domain",
       "url"
     ],
-    "description": "Perform hybrid dynamic/static analysis on a URL",
-    "python_module": "thug_url.ThugUrl",
-    "requires_configuration": true,
-    "additional_config_params": {
-      "dom_events": "click,mouseover",
-      "use_proxy": false,
-      "proxy": "",
-      "enable_image_processing_analysis": true,
-      "enable_awis": true,
-      "user_agent": "winxpie60"
+    "config": {
+      "soft_time_limit": 600,
+      "queue": "local"
     },
-    "soft_time_limit": 600,
-    "queue": "local"
+    "secrets": {},
+    "params": {
+      "dom_events": {
+        "value": "click,mouseover",
+        "type": "str",
+        "description": "See [Thug docs: dom events handling](https://buffer.github.io/thug/doc/usage.html#dom-events-handling)."
+      },
+      "use_proxy": {
+        "value": false,
+        "type": "bool",
+        "description": "option `-p`"
+      },
+      "proxy": {
+        "value": "",
+        "type": "str",
+        "description": "option `-p`"
+      },
+      "enable_image_processing_analysis": {
+        "value": true,
+        "type": "bool",
+        "description": "option `-a`"
+      },
+      "enable_awis": {
+        "value": true,
+        "type": "bool",
+        "description": "option `-E`"
+      },
+      "user_agent": {
+        "value": "winxpie60",
+        "type": "str",
+        "description": "See [Thug docs: browser personality](https://buffer.github.io/thug/doc/usage.html#browser-personality)."
+      }
+    }
   },
   "TorProject": {
     "type": "observable",
+    "python_module": "tor.Tor",
+    "description": "check if an IP is a Tor Exit Node",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
     "observable_supported": [
       "ip"
     ],
-    "external_service": true,
-    "description": "check if an IP is a Tor Exit Node",
-    "python_module": "tor.Tor",
-    "soft_time_limit": 30
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {},
+    "params": {}
   },
   "Tranco": {
     "type": "observable",
+    "python_module": "tranco.Tranco",
+    "description": "check if a domain is in the last Tranco ranking top sites list",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
     "observable_supported": [
       "domain",
       "url"
     ],
-    "external_service": true,
-    "description": "check if a domain is in the last Tranco ranking top sites list",
-    "python_module": "tor.Tor",
-    "soft_time_limit": 30
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {},
+    "params": {}
   },
   "Triage_Search": {
     "type": "observable",
+    "python_module": "triage_search.TriageSearch",
+    "description": "analyze a url sample using triage sandbox environment",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
     "observable_supported": [
       "url",
       "hash"
     ],
-    "description": "analyze a url sample using triage sandbox environment",
-    "python_module": "triage_search.TriageSearch",
-    "requires_configuration": true,
-    "external_service": true,
-    "additional_config_params": {
-      "api_key_name": "TRIAGE_KEY",
-      "endpoint": "public",
-      "analysis_type": "search",
-      "report_type": "overview"
+    "config": {
+      "soft_time_limit": 300,
+      "queue": "default"
     },
-    "soft_time_limit": 300
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "TRIAGE_KEY",
+        "description": ""
+      }
+    },
+    "params": {
+      "endpoint": {
+        "value": "public",
+        "type": "str",
+        "description": "Choose whether to query on the public or the private endpoint of triage (options: `private`, `public`)."
+      },
+      "report_type": {
+        "value": "overview",
+        "type": "str",
+        "description": "Determines how detailed the final report will be (options: `overview`, `complete`)."
+      },
+      "analysis_type": {
+        "value": "search",
+        "type": "str",
+        "description": "Choose whether to search for existing observable reports or upload for scanning via URL (options: `search` and `submit`)."
+      }
+    }
   },
   "Triage_Scan": {
     "type": "file",
-    "description": "leverage Triage sandbox environment to scan various files",
     "python_module": "triage_scan.TriageScanFile",
-    "requires_configuration": true,
+    "description": "leverage Triage sandbox environment to scan various files",
+    "disabled": false,
     "external_service": true,
-    "additional_config_params": {
-      "api_key_name": "TRIAGE_KEY",
-      "endpoint": "public",
-      "report_type": "overview"
+    "leaks_info": false,
+    "config": {
+      "soft_time_limit": 300,
+      "queue": "long"
     },
-    "soft_time_limit": 300,
-    "queue": "long"
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "TRIAGE_KEY",
+        "description": ""
+      }
+    },
+    "params": {
+      "endpoint": {
+        "value": "public",
+        "type": "str",
+        "description": "Choose whether to query on the public or the private endpoint of triage (options: `private`, `public`)."
+      },
+      "report_type": {
+        "value": "overview",
+        "type": "str",
+        "description": "Determines how detailed the final report will be (options: `overview`, `complete`)."
+      }
+    }
   },
   "UnpacMe_EXE_Unpacker": {
     "type": "file",
+    "python_module": "unpac_me.UnpacMe",
+    "description": "UnpacMe unpacker",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": true,
     "supported_filetypes": [
       "application/x-dosexec"
     ],
-    "description": "UnpacMe unpacker",
-    "external_service": true,
-    "leaks_info": true,
-    "python_module": "unpac_me.UnpacMe",
-    "additional_config_params": {
-      "api_key_name": "UNPAC_ME_API_KEY",
-      "private": false,
-      "max_tries": 30
+    "config": {
+      "soft_time_limit": 400,
+      "queue": "long"
     },
-    "soft_time_limit": 400,
-    "queue": "long"
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "UNPAC_ME_API_KEY",
+        "description": ""
+      }
+    },
+    "params": {
+      "private": {
+        "value": false,
+        "type": "bool",
+        "description": ""
+      },
+      "max_tries": {
+        "value": 30,
+        "type": "int",
+        "description": ""
+      }
+    }
   },
   "URLhaus": {
     "type": "observable",
+    "python_module": "urlhaus.URLHaus",
+    "description": "Query a domain or URL against URLhaus API",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
     "observable_supported": [
       "domain",
       "url"
     ],
-    "external_service": true,
-    "description": "Query a domain or URL against URLhaus API",
-    "python_module": "urlhaus.URLHaus",
-    "soft_time_limit": 50
+    "config": {
+      "soft_time_limit": 50,
+      "queue": "default"
+    },
+    "secrets": {},
+    "params": {}
   },
   "UrlScan_Submit_Result": {
     "type": "observable",
+    "python_module": "urlscan.UrlScan",
+    "description": "Submit & retrieve result of a URL against URLScan API",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
     "observable_supported": [
       "url"
     ],
-    "external_service": true,
-    "description": "Submit & retrieve result of a URL against URLScan API",
-    "requires_configuration": true,
-    "python_module": "urlscan.UrlScan",
-    "additional_config_params": {
-      "api_key_name": "URLSCAN_API_KEY",
-      "visibility": "private",
-      "urlscan_analysis": "submit_result"
+    "config": {
+      "soft_time_limit": 100,
+      "queue": "default"
     },
-    "soft_time_limit": 100
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "URLSCAN_API_KEY",
+        "description": ""
+      }
+    },
+    "params": {
+      "visibility": {
+        "value": "private",
+        "type": "str",
+        "description": ""
+      },
+      "urlscan_analysis": {
+        "value": "submit_result",
+        "type": "str",
+        "description": ""
+      }
+    }
   },
   "UrlScan_Search": {
     "type": "observable",
+    "python_module": "urlscan.UrlScan",
+    "description": "Search an IP/domain/url/hash against URLScan API",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
     "observable_supported": [
       "ip",
       "domain",
       "url",
       "hash"
     ],
-    "external_service": true,
-    "description": "Search an IP/domain/url/hash against URLScan API",
-    "requires_configuration": true,
-    "python_module": "urlscan.UrlScan",
-    "additional_config_params": {
-      "api_key_name": "URLSCAN_API_KEY",
-      "urlscan_analysis": "search"
+    "config": {
+      "soft_time_limit": 100,
+      "queue": "default"
     },
-    "soft_time_limit": 100
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "URLSCAN_API_KEY",
+        "description": ""
+      }
+    },
+    "params": {
+      "urlscan_analysis": {
+        "value": "search",
+        "type": "str",
+        "description": ""
+      }
+    }
   },
   "VirusTotal_v2_Get_File": {
     "type": "file",
-    "external_service": true,
-    "disabled": true,
-    "run_hash": true,
-    "description": "check file hash on VirusTotal using old API endpoints",
-    "requires_configuration": true,
     "python_module": "vt2_get.VirusTotalv2",
-    "additional_config_params": {
-      "api_key_name": "VT_KEY"
+    "description": "check file hash on VirusTotal using old API endpoints",
+    "disabled": true,
+    "external_service": true,
+    "leaks_info": false,
+    "run_hash": true,
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
     },
-    "soft_time_limit": 30
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "VT_KEY",
+        "description": ""
+      }
+    },
+    "params": {}
   },
   "VirusTotal_v2_Get_Observable": {
     "type": "observable",
+    "python_module": "vt2_get.VirusTotalv2",
+    "description": "search an observable in the VirusTotal DB using the old API endpoints",
+    "disabled": true,
+    "external_service": true,
+    "leaks_info": false,
     "observable_supported": [
       "ip",
       "domain",
       "url",
       "hash"
     ],
-    "external_service": true,
-    "disabled": true,
-    "description": "search an observable in the VirusTotal DB using the old API endpoints",
-    "requires_configuration": true,
-    "python_module": "vt2_get.VirusTotalv2",
-    "additional_config_params": {
-      "api_key_name": "VT_KEY"
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
     },
-    "soft_time_limit": 30
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "VT_KEY",
+        "description": ""
+      }
+    },
+    "params": {}
   },
   "VirusTotal_v2_Scan_File": {
     "type": "file",
-    "external_service": true,
-    "disabled": true,
-    "leaks_info": true,
-    "description": "scan a file on VirusTotal using old API endpoints",
-    "requires_configuration": true,
     "python_module": "vt2_scan.VirusTotalv2ScanFile",
-    "additional_config_params": {
-      "api_key_name": "VT_KEY"
+    "description": "scan a file on VirusTotal using old API endpoints",
+    "disabled": true,
+    "external_service": true,
+    "leaks_info": true,
+    "config": {
+      "soft_time_limit": 400,
+      "queue": "default"
     },
-    "soft_time_limit": 400
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "VT_KEY",
+        "description": ""
+      },
+      "url_key_name": {
+        "env_var_key": "VT_NOTIFY_URL",
+        "description": ""
+      }
+    },
+    "params": {}
   },
   "VirusTotal_v3_Get_File": {
     "type": "file",
-    "external_service": true,
-    "disabled": true,
-    "run_hash": true,
+    "python_module": "vt.vt3_get.VirusTotalv3",
     "description": "check file hash on VirusTotal",
-    "requires_configuration": true,
-    "python_module": "vt3_get.VirusTotalv3",
-    "additional_config_params": {
-      "api_key_name": "VT_KEY"
+    "disabled": true,
+    "external_service": true,
+    "leaks_info": false,
+    "run_hash": true,
+    "run_hash_type": "sha256",
+    "config": {
+      "soft_time_limit": 40,
+      "queue": "default"
     },
-    "soft_time_limit": 40
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "VT_KEY",
+        "description": ""
+      }
+    },
+    "params": {
+      "include_behaviour_summary": {
+        "value": true,
+        "type": "bool",
+        "description": "Include a summary of behavioral analysis reports alongside default scan report"
+      },
+      "include_sigma_analyses": {
+        "value": true,
+        "type": "bool",
+        "description": "Include sigma analysis report alongside default scan report"
+      }
+    }
   },
   "VirusTotal_v3_Get_File_And_Scan": {
     "type": "file",
+    "python_module": "vt.vt3_get.VirusTotalv3",
+    "description": "check file hash on VirusTotal. If not already available, send the sample and perform a new scan",
+    "disabled": false,
     "external_service": true,
     "leaks_info": true,
     "run_hash": true,
-    "description": "check file hash on VirusTotal. If not already available, send the sample and perform a new scan",
-    "requires_configuration": true,
-    "python_module": "vt3_get.VirusTotalv3",
-    "additional_config_params": {
-      "api_key_name": "VT_KEY",
-      "force_active_scan": true
+    "run_hash_type": "sha256",
+    "config": {
+      "soft_time_limit": 500,
+      "queue": "default"
     },
-    "soft_time_limit": 500
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "VT_KEY",
+        "description": ""
+      }
+    },
+    "params": {
+      "force_active_scan": {
+        "value": true,
+        "type": "bool",
+        "description": "If the sample is not already in VT, send the sample and perform a scan"
+      },
+      "force_active_scan_if_old": {
+        "value": false,
+        "type": "bool",
+        "description": "If the sample is old, it would be rescanned"
+      },
+      "include_behaviour_summary": {
+        "value": true,
+        "type": "bool",
+        "description": "Include a summary of behavioral analysis reports alongside default scan report"
+      },
+      "include_sigma_analyses": {
+        "value": true,
+        "type": "bool",
+        "description": "Include sigma analysis report alongside default scan report"
+      }
+    }
   },
   "VirusTotal_v3_Get_Observable": {
     "type": "observable",
+    "python_module": "vt.vt3_get.VirusTotalv3",
+    "description": "search an observable in the VirusTotal DB",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
     "observable_supported": [
       "ip",
       "domain",
       "url",
       "hash"
     ],
-    "external_service": true,
-    "description": "search an observable in the VirusTotal DB",
-    "requires_configuration": true,
-    "python_module": "vt3_get.VirusTotalv3",
-    "additional_config_params": {
-      "api_key_name": "VT_KEY"
+    "config": {
+      "soft_time_limit": 40,
+      "queue": "default"
     },
-    "soft_time_limit": 40
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "VT_KEY",
+        "description": ""
+      }
+    },
+    "params": {}
   },
   "Whoisxmlapi": {
     "type": "observable",
+    "python_module": "whoisxmlapi.Whoisxmlapi",
+    "description": "the WHOIS record data, of a domain name, an IP address, or an email address",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
     "observable_supported": [
       "ip",
       "domain"
     ],
-    "external_service": true,
-    "description": "the WHOIS record data, of a domain name, an IP address, or an email address",
-    "requires_configuration": true,
-    "python_module": "whoisxmlapi.Whoisxmlapi",
-    "additional_config_params": {
-      "api_key_name": "WHOISXMLAPI_KEY"
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
     },
-    "soft_time_limit": 30
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "WHOISXMLAPI_KEY",
+        "description": ""
+      }
+    },
+    "params": {}
   },
   "WiGLE": {
     "type": "observable",
-    "observable_supported": ["generic"],
-    "external_service": true,
-    "description": "Maps and database of 802.11 wireless networks, with statistics, submitted by wardrivers, netstumblers, and net huggers.",
-    "requires_configuration": true,
     "python_module": "wigle.WiGLE",
-    "additional_config_params": {
-      "api_key_name": "WIGLE_KEY",
-      "search_type": "WiFi Network"
+    "description": "Maps and database of 802.11 wireless networks, with statistics, submitted by wardrivers, netstumblers, and net huggers. Also, the string to be passed in input field of generic analyzers have a format. Different variables are separated by semicolons(`;`) and the field-name and value are separated by equals sign(`=`). Example string for search_type `CDMA Network` is `sid=12345;nid=12345;bsid=12345`.",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": [
+      "generic"
+    ],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
     },
-    "soft_time_limit": 30
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "WIGLE_KEY",
+        "description": ""
+      }
+    },
+    "params": {
+      "search_type": {
+        "value": "WiFi Network",
+        "type": "str",
+        "description": "Corresponds to different routes mentioned in [docs](https://api.wigle.net/swagger#/v3_ALPHA). (options: `WiFi Network`, `CDMA Network`, `Bluetooth Network`, `GSM/LTE/WCDMA Network`)."
+      }
+    }
   },
   "XForceExchange": {
     "type": "observable",
+    "python_module": "xforce.XForce",
+    "description": "scan an observable on IBM X-Force Exchange.",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
     "observable_supported": [
       "ip",
       "hash",
       "url"
     ],
-    "external_service": true,
-    "description": "scan an observable on IBM X-Force Exchange.",
-    "requires_configuration": true,
-    "python_module": "xforce.XForce",
-    "soft_time_limit": 30,
-    "additional_config_params": {
-      "api_key_name": "XFORCE_KEY",
-      "api_password_name": "XFORCE_PASSWORD"
-    }
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "XFORCE_KEY",
+        "description": ""
+      },
+      "api_password_name": {
+        "env_var_key": "XFORCE_PASSWORD",
+        "description": ""
+      }
+    },
+    "params": {}
   },
   "Xlm_Macro_Deobfuscator": {
     "type": "file",
+    "python_module": "xlm_macro_deobfuscator.XlmMacroDeobfuscator",
+    "description": "Xlm macro deobfuscator",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
     "supported_filetypes": [
       "application/vnd.ms-excel.addin.macroEnabled",
       "application/x-mspublisher",
@@ -1476,165 +3213,418 @@
       "application/xml",
       "application/encrypted"
     ],
-    "description": "Xlm macro deobfuscator",
-    "python_module": "xlm_macro_deobfuscator.XlmMacroDeobfuscator",
-    "additional_config_params": {
-      "passwords_to_check": [
-        "agenzia",
-        "inps",
-        "coronavirus"
-      ]
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
     },
-    "soft_time_limit": 30
+    "secrets": {},
+    "params": {
+      "passwords_to_check": {
+        "value": [
+          "agenzia",
+          "inps",
+          "coronavirus"
+        ],
+        "type": "list",
+        "description": ""
+      }
+    }
   },
   "Yara_Scan_Community": {
     "type": "file",
-    "description": "scan a file with community yara rules",
     "python_module": "yara_scan.YaraScan",
-    "soft_time_limit": 60,
-    "additional_config_params": {
-      "directories_with_rules": ["/opt/deploy/yara/rules"]
+    "description": "scan a file with community yara rules",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
+    "config": {
+      "soft_time_limit": 60,
+      "queue": "local"
     },
-    "queue": "local"
+    "secrets": {},
+    "params": {
+      "directories_with_rules": {
+        "value": [
+          "/opt/deploy/yara/rules"
+        ],
+        "type": "list",
+        "description": ""
+      }
+    }
   },
   "Yara_Scan_Daily_Ioc": {
     "type": "file",
-    "description": "scan a file with StrangerealIntel daily IOC yara rules",
     "python_module": "yara_scan.YaraScan",
-    "soft_time_limit": 60,
-    "additional_config_params": {
-      "git_repo_main_dir": ["/opt/deploy/yara/daily_ioc_rules"],
-      "directories_with_rules": ["/opt/deploy/yara/daily_ioc_rules"],
-      "recursive": true
+    "description": "scan a file with StrangerealIntel daily IOC yara rules",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
+    "config": {
+      "soft_time_limit": 60,
+      "queue": "default"
+    },
+    "secrets": {},
+    "params": {
+      "git_repo_main_dir": {
+        "value": [
+          "/opt/deploy/yara/daily_ioc_rules"
+        ],
+        "type": "list",
+        "description": ""
+      },
+      "directories_with_rules": {
+        "value": [
+          "/opt/deploy/yara/daily_ioc_rules"
+        ],
+        "type": "list",
+        "description": ""
+      },
+      "recursive": {
+        "value": true,
+        "type": "bool",
+        "description": ""
+      }
     }
   },
   "Yara_Scan_FireEye": {
     "type": "file",
-    "description": "scan a file with FireEye yara rules",
     "python_module": "yara_scan.YaraScan",
-    "soft_time_limit": 60,
-    "queue": "local",
-    "additional_config_params": {
-      "git_repo_main_dir": ["/opt/deploy/yara/fireeye_rules"],
-      "directories_with_rules": [
-        "/opt/deploy/yara/fireeye_rules/rules"
-      ],
-      "recursive": true
+    "description": "scan a file with FireEye yara rules",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
+    "config": {
+      "soft_time_limit": 60,
+      "queue": "local"
+    },
+    "secrets": {},
+    "params": {
+      "git_repo_main_dir": {
+        "value": [
+          "/opt/deploy/yara/fireeye_rules"
+        ],
+        "type": "list",
+        "description": ""
+      },
+      "directories_with_rules": {
+        "value": [
+          "/opt/deploy/yara/fireeye_rules/rules"
+        ],
+        "type": "list",
+        "description": ""
+      },
+      "recursive": {
+        "value": true,
+        "type": "bool",
+        "description": ""
+      }
     }
   },
   "Yara_Scan_Florian": {
     "type": "file",
-    "description": "scan a file with Neo23x0 yara rules",
     "python_module": "yara_scan.YaraScan",
-    "soft_time_limit": 60,
-    "queue":  "default",
-    "additional_config_params": {
-      "git_repo_main_dir": ["/opt/deploy/yara/signature-base"],
-      "directories_with_rules": ["/opt/deploy/yara/signature-base/yara"]
+    "description": "scan a file with Neo23x0 yara rules",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
+    "config": {
+      "soft_time_limit": 60,
+      "queue": "default"
+    },
+    "secrets": {},
+    "params": {
+      "git_repo_main_dir": {
+        "value": [
+          "/opt/deploy/yara/signature-base"
+        ],
+        "type": "list",
+        "description": ""
+      },
+      "directories_with_rules": {
+        "value": [
+          "/opt/deploy/yara/signature-base/yara"
+        ],
+        "type": "list",
+        "description": ""
+      }
     }
   },
   "Yara_Scan_Inquest": {
     "type": "file",
-    "description": "scan a file with Inquest yara rules",
     "python_module": "yara_scan.YaraScan",
-    "soft_time_limit": 60,
-    "queue": "local",
-    "additional_config_params": {
-      "git_repo_main_dir": [
-        "/opt/deploy/yara/inquest_rules"
-      ],
-      "directories_with_rules": [
-        "/opt/deploy/yara/inquest_rules"
-      ],
-      "recursive": false
+    "description": "scan a file with Inquest yara rules",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
+    "config": {
+      "soft_time_limit": 60,
+      "queue": "local"
+    },
+    "secrets": {},
+    "params": {
+      "git_repo_main_dir": {
+        "value": [
+          "/opt/deploy/yara/inquest_rules"
+        ],
+        "type": "list",
+        "description": ""
+      },
+      "directories_with_rules": {
+        "value": [
+          "/opt/deploy/yara/inquest_rules"
+        ],
+        "type": "list",
+        "description": ""
+      },
+      "recursive": {
+        "value": false,
+        "type": "bool",
+        "description": ""
+      }
     }
   },
   "Yara_Scan_Intezer": {
     "type": "file",
-    "description": "scan a file with Intezer yara rules",
     "python_module": "yara_scan.YaraScan",
-    "soft_time_limit": 60,
-    "queue": "local",
-    "additional_config_params": {
-      "directories_with_rules": [
-        "/opt/deploy/yara/intezer_rules"
-      ]
+    "description": "Scan a file with Intezer yara rules ([github](https://github.com/intezer/yara-rules)).",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
+    "config": {
+      "soft_time_limit": 60,
+      "queue": "local"
+    },
+    "secrets": {},
+    "params": {
+      "directories_with_rules": {
+        "value": [
+          "/opt/deploy/yara/intezer_rules"
+        ],
+        "type": "list",
+        "description": ""
+      }
     }
   },
   "Yara_Scan_McAfee": {
     "type": "file",
-    "description": "scan a file with McAfee yara rules",
     "python_module": "yara_scan.YaraScan",
-    "soft_time_limit": 60,
-    "queue": "local",
-    "additional_config_params": {
-      "git_repo_main_dir": [
-        "/opt/deploy/yara/mcafee_rules"
-      ],
-      "directories_with_rules": [
-        "/opt/deploy/yara/mcafee_rules/APT",
-        "/opt/deploy/yara/mcafee_rules/RAT",
-        "/opt/deploy/yara/mcafee_rules/malware",
-        "/opt/deploy/yara/mcafee_rules/miners",
-        "/opt/deploy/yara/mcafee_rules/ransomware",
-        "/opt/deploy/yara/mcafee_rules/stealer"
-      ]
+    "description": "scan a file with McAfee yara rules",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
+    "config": {
+      "soft_time_limit": 60,
+      "queue": "local"
+    },
+    "secrets": {},
+    "params": {
+      "git_repo_main_dir": {
+        "value": [
+          "/opt/deploy/yara/mcafee_rules"
+        ],
+        "type": "list",
+        "description": ""
+      },
+      "directories_with_rules": {
+        "value": [
+          "/opt/deploy/yara/mcafee_rules/APT",
+          "/opt/deploy/yara/mcafee_rules/RAT",
+          "/opt/deploy/yara/mcafee_rules/malware",
+          "/opt/deploy/yara/mcafee_rules/miners",
+          "/opt/deploy/yara/mcafee_rules/ransomware",
+          "/opt/deploy/yara/mcafee_rules/stealer"
+        ],
+        "type": "list",
+        "description": ""
+      }
     }
   },
   "Yara_Scan_ReversingLabs": {
     "type": "file",
-    "description": "scan a file with ReversingLabs yara rules",
     "python_module": "yara_scan.YaraScan",
-    "soft_time_limit": 60,
-    "queue": "local",
-    "additional_config_params": {
-      "git_repo_main_dir": ["/opt/deploy/yara/reversinglabs_rules"],
-      "directories_with_rules": [
-        "/opt/deploy/yara/reversinglabs_rules/yara"
-      ],
-      "recursive": true
+    "description": "scan a file with ReversingLabs yara rules",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
+    "config": {
+      "soft_time_limit": 60,
+      "queue": "local"
+    },
+    "secrets": {},
+    "params": {
+      "git_repo_main_dir": {
+        "value": [
+          "/opt/deploy/yara/reversinglabs_rules"
+        ],
+        "type": "list",
+        "description": ""
+      },
+      "directories_with_rules": {
+        "value": [
+          "/opt/deploy/yara/reversinglabs_rules/yara"
+        ],
+        "type": "list",
+        "description": ""
+      },
+      "recursive": {
+        "value": true,
+        "type": "bool",
+        "description": ""
+      }
     }
   },
   "Yara_Scan_Samir": {
     "type": "file",
-    "description": "scan a file with Samir Threat Hunting yara rules",
     "python_module": "yara_scan.YaraScan",
-    "soft_time_limit": 60,
-    "queue": "local",
-    "additional_config_params": {
-      "git_repo_main_dir": ["/opt/deploy/yara/samir_rules"],
-      "directories_with_rules": ["/opt/deploy/yara/samir_rules"]
+    "description": "scan a file with Samir Threat Hunting yara rules",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
+    "config": {
+      "soft_time_limit": 60,
+      "queue": "local"
+    },
+    "secrets": {},
+    "params": {
+      "git_repo_main_dir": {
+        "value": [
+          "/opt/deploy/yara/samir_rules"
+        ],
+        "type": "list",
+        "description": ""
+      },
+      "directories_with_rules": {
+        "value": [
+          "/opt/deploy/yara/samir_rules"
+        ],
+        "type": "list",
+        "description": ""
+      }
     }
   },
   "Yara_Scan_Stratosphere": {
     "type": "file",
-    "description": "scan a file with Stratosphere yara rules",
     "python_module": "yara_scan.YaraScan",
-    "soft_time_limit": 60,
-    "queue": "local",
-    "additional_config_params": {
-      "git_repo_main_dir": ["/opt/deploy/yara/stratosphere_rules"],
-      "directories_with_rules": [
-        "/opt/deploy/yara/stratosphere_rules/malware",
-        "/opt/deploy/yara/stratosphere_rules/protocols"
-      ]
+    "description": "scan a file with Stratosphere yara rules",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
+    "config": {
+      "soft_time_limit": 60,
+      "queue": "local"
+    },
+    "secrets": {},
+    "params": {
+      "git_repo_main_dir": {
+        "value": [
+          "/opt/deploy/yara/stratosphere_rules"
+        ],
+        "type": "list",
+        "description": ""
+      },
+      "directories_with_rules": {
+        "value": [
+          "/opt/deploy/yara/stratosphere_rules/malware",
+          "/opt/deploy/yara/stratosphere_rules/protocols"
+        ],
+        "type": "list",
+        "description": ""
+      }
+    }
+  },
+  "YETI": {
+    "type": "observable",
+    "python_module": "yeti.YETI",
+    "description": "scan an observable on a custom YETI instance",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": [
+      "ip",
+      "domain",
+      "url",
+      "hash",
+      "generic"
+    ],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "YETI_KEY",
+        "description": "API key for your YETI instance"
+      },
+      "url_key_name": {
+        "env_var_key": "YETI_URL",
+        "description": "API URL of your YETI instance"
+      }
+    },
+    "params": {
+      "verify_ssl": {
+        "value": true,
+        "type": "bool",
+        "description": "Enable SSL certificate server verification. Change this if your YETI instance has not SSL enabled."
+      },
+      "regex": {
+        "value": false,
+        "type": "bool",
+        "description": "Use this if you are searching for observables using a regex."
+      },
+      "results_count": {
+        "value": 50,
+        "type": "int",
+        "description": "Use this to limit the maximum number of results obtained from a search."
+      }
     }
   },
   "ZoomEye": {
     "type": "observable",
-    "observable_supported": ["ip", "domain"],
-    "requires_configuration": true,
-    "external_service": true,
-    "description": "Cyberspace Search Engine recording information of devices, websites, services and components etc..",
     "python_module": "zoomeye.ZoomEye",
-    "additional_config_params": {
-      "api_key_name": "ZOOMEYE_KEY",
-      "search_type": "host",
-      "query": "",
-      "page": 1,
-      "facets": "",
-      "history": true
+    "description": "Cyberspace Search Engine recording information of devices, websites, services, components etc. [Host search: docs](https://www.zoomeye.org/doc#host-search).",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": [
+      "ip",
+      "domain"
+    ],
+    "config": {
+      "soft_time_limit": 60,
+      "queue": "default"
     },
-    "soft_time_limit": 60
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "ZOOMEYE_KEY",
+        "description": ""
+      }
+    },
+    "params": {
+      "search_type": {
+        "value": "host",
+        "type": "str",
+        "description": "Choose among `host`, `web`, `both` (both is only available to ZoomEye VIP users)."
+      },
+      "query": {
+        "value": "",
+        "type": "str",
+        "description": "Follow according to docs, but omit `ip`, `hostname`. Eg: `city:biejing port:21`."
+      },
+      "page": {
+        "value": 1,
+        "type": "int",
+        "description": "Page number to fetch."
+      },
+      "facets": {
+        "value": "",
+        "type": "str",
+        "description": "A comma-separated list of properties to get summary information on query. Eg: `facets:app,os`."
+      },
+      "history": {
+        "value": true,
+        "type": "bool",
+        "description": "To query the history data."
+      }
+    }
   }
 }

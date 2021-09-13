@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: IntelOwl API specification
-  version: 2.5.0
+  version: 3.0.0
 paths:
   /api/analyze_file:
     post:
@@ -596,14 +596,18 @@ components:
           maxLength: 128
         disabled:
           type: boolean
-        config:
-          type: object
-          additionalProperties: {}
-        secrets:
-          type: object
-          additionalProperties: {}
         description:
           type: string
+        config:
+          $ref: '#/components/schemas/_Config'
+        secrets:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/_Secret'
+        params:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/_Param'
         verification:
           type: object
           properties:
@@ -611,13 +615,14 @@ components:
               type: boolean
             error_message:
               type: string
+              nullable: true
             missing_secrets:
               type: array
               items:
                 type: string
           readOnly: true
         type:
-          $ref: '#/components/schemas/TypeEnum'
+          $ref: '#/components/schemas/AnalyzerConfigTypeEnum'
         external_service:
           type: boolean
         leaks_info:
@@ -649,9 +654,16 @@ components:
       - disabled
       - external_service
       - name
+      - params
       - python_module
+      - secrets
       - type
       - verification
+    AnalyzerConfigTypeEnum:
+      enum:
+      - file
+      - observable
+      type: string
     AnalyzerReport:
       type: object
       description: AnalyzerReport model's serializer.
@@ -678,6 +690,10 @@ components:
         end_time:
           type: string
           format: date-time
+        runtime_configuration:
+          type: object
+          additionalProperties: {}
+          nullable: true
       required:
       - name
       - process_time
@@ -705,14 +721,18 @@ components:
           maxLength: 128
         disabled:
           type: boolean
-        config:
-          type: object
-          additionalProperties: {}
-        secrets:
-          type: object
-          additionalProperties: {}
         description:
           type: string
+        config:
+          $ref: '#/components/schemas/_Config'
+        secrets:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/_Secret'
+        params:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/_Param'
         verification:
           type: object
           properties:
@@ -720,6 +740,7 @@ components:
               type: boolean
             error_message:
               type: string
+              nullable: true
             missing_secrets:
               type: array
               items:
@@ -732,7 +753,9 @@ components:
       - disabled
       - maximum_tlp
       - name
+      - params
       - python_module
+      - secrets
       - verification
     ConnectorReport:
       type: object
@@ -757,6 +780,13 @@ components:
         start_time:
           type: string
           format: date-time
+        end_time:
+          type: string
+          format: date-time
+        runtime_configuration:
+          type: object
+          additionalProperties: {}
+          nullable: true
       required:
       - name
       - process_time
@@ -1181,11 +1211,59 @@ components:
       - AMBER
       - RED
       type: string
-    TypeEnum:
+    _Config:
+      type: object
+      description: |-
+        To validate `config` attr.
+        Used for `analyzer_config.json` and `connector_config.json` files.
+      properties:
+        queue:
+          type: string
+        soft_time_limit:
+          type: integer
+      required:
+      - queue
+      - soft_time_limit
+    _Param:
+      type: object
+      description: |-
+        To validate `params` attr.
+        Used for `analyzer_config.json` and `connector_config.json` files.
+      properties:
+        value:
+          type: string
+        type:
+          $ref: '#/components/schemas/_ParamTypeEnum'
+        description:
+          type: string
+          maxLength: 512
+      required:
+      - description
+      - type
+      - value
+    _ParamTypeEnum:
       enum:
-      - file
-      - observable
+      - int
+      - float
+      - str
+      - bool
+      - list
+      - dict
       type: string
+    _Secret:
+      type: object
+      description: |-
+        To validate `secrets` attr.
+        Used for `analyzer_config.json` and `connector_config.json` files.
+      properties:
+        env_var_key:
+          type: string
+          maxLength: 128
+        description:
+          type: string
+          maxLength: 512
+      required:
+      - env_var_key
   securitySchemes:
     durinAuth:
       type: apiKey

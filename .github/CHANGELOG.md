@@ -5,7 +5,9 @@
 ## [v3.0.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v3.0.0)
 
 > Note: This is a major release with MANY breaking changes.
-> ✒️ [Link]() to the blogpost announcing the release and summary of top new features.
+>
+> ✒️ [Link](https://www.honeynet.org/2021/09/13/intel-owl-release-v3-0-0/) to the blogpost announcing the release and summary of top new features.
+>
 > 💻 GUI changes can be seen in action on the [demo](https://intelowlclient.firebaseapp.com/pages/connectors).
 
 **Notes:**

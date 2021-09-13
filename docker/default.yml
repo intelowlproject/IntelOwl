@@ -29,7 +29,11 @@ services:
       - postgres
 
   nginx:
-    image: intelowlproject/intelowl_nginx:${INTELOWL_TAG_VERSION}
+    build:
+      context: .
+      dockerfile: docker/Dockerfile_nginx
+      args:
+        INTELOWL_NG_TAG_VERSION: ${INTELOWL_NG_TAG_VERSION}
     container_name: intelowl_nginx
     restart: unless-stopped
     hostname: nginx

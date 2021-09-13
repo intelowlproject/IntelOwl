@@ -1,5 +1,5 @@
 # Stage 1: Get build artifacts from intelowl-ng
-ARG INTELOWL_NG_TAG_VERSION="v3.0.0"
+ARG INTELOWL_NG_TAG_VERSION
 FROM intelowlproject/intelowl_ng:${INTELOWL_NG_TAG_VERSION} AS angular-prod-build
 
 # Stage 2: Inject the build artifacts into nginx container

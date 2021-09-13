@@ -30,7 +30,7 @@ services:
 
   nginx:
     build:
-      context: .
+      context: ..
       dockerfile: docker/Dockerfile_nginx
       args:
         INTELOWL_NG_TAG_VERSION: ${INTELOWL_NG_TAG_VERSION}

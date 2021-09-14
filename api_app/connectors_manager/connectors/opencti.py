@@ -152,7 +152,9 @@ class OpenCTI(classes.Connector):
             x_opencti_report_status=2,  # Analyzed
         )
         # Create the external reference
-        external_reference = pycti.ExternalReference(self.opencti_instance).create(
+        external_reference = pycti.ExternalReference(
+            self.opencti_instance, None
+        ).create(
             source_name="IntelOwl Analysis",
             description="View analysis report on the IntelOwl instance",
             url=f"{settings.WEB_CLIENT_URL}/pages/scan/result/{self.job_id}",

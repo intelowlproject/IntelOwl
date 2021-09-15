@@ -6,7 +6,7 @@ import time
 import requests
 import logging
 
-from api_app.exceptions import AnalyzerRunException
+from api_app.exceptions import AnalyzerRunException, AnalyzerConfigurationException
 from api_app.analyzers_manager.classes import FileAnalyzer
 
 from tests.mock_utils import patch, if_mock_connections, MockResponse

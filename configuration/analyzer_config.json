@@ -836,7 +836,12 @@
     "observable_supported": [
       "ip"
     ],
-    "secrets": {},
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "GREYNOISE_API_KEY",
+        "description": ""
+      }
+    },
     "config": {
       "soft_time_limit": 30,
       "queue": "default"

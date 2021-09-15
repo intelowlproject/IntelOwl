@@ -36,6 +36,7 @@ class _Param:
 class _Secret:
     env_var_key: str
     description: str
+    required: bool
 
 
 @dataclasses.dataclass
@@ -95,7 +96,9 @@ class AbstractConfig:
         else:
             _filtered_secrets = self.secrets
         for key_name, secret in _filtered_secrets.items():
-            secrets[key_name] = secrets_store.get_secret(secret.env_var_key)
+            secrets[key_name] = secrets_store.get_secret(
+                secret.env_var_key, default=None
+            )
 
         return secrets
 

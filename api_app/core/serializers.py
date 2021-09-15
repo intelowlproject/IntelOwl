@@ -69,9 +69,9 @@ class _SecretSerializer(rfs.Serializer):
     Used for `analyzer_config.json` and `connector_config.json` files.
     """
 
-    # key_name = rfs.CharField(max_length=128)
-    env_var_key = rfs.CharField(max_length=128)
-    description = rfs.CharField(allow_blank=True, required=False, max_length=512)
+    env_var_key = rfs.CharField(required=True, max_length=128)
+    description = rfs.CharField(required=True, allow_blank=True, max_length=512)
+    required = rfs.BooleanField(required=True)
 
 
 class AbstractConfigSerializer(rfs.Serializer):
@@ -103,18 +103,16 @@ class AbstractConfigSerializer(rfs.Serializer):
             self._is_valid_flag = True
         return ret
 
-    def get_verification(self, raw_instance) -> ConfigVerificationType:
+    def get_verification(self, raw_instance: dict) -> ConfigVerificationType:
         # raw instance because input is json and not django model object
         # get all missing secrets
         secrets = raw_instance["secrets"]
         missing_secrets = []
-        for key_name, secret_dict in secrets.items():
+        for s_key, s_dict in secrets.items():
             # check if available in environment
-            secret_val = secrets_store.get_secret(
-                secret_dict["env_var_key"], default=None
-            )
-            if not secret_val:
-                missing_secrets.append(key_name)
+            secret_val = secrets_store.get_secret(s_dict["env_var_key"], default=None)
+            if not secret_val and s_dict["required"]:
+                missing_secrets.append(s_key)
 
         num_missing_secrets = len(missing_secrets)
         if num_missing_secrets:

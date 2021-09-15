@@ -482,6 +482,11 @@
         },
         "type": "dict",
         "description": "Time range"
+      },
+      "query_type": {
+        "value": "domain",
+        "type": "int",
+        "description": "Query type. Options: domain (default), rrname-wildcard-left, rrname-wildcard-right, names, rdata-wildcard-left, rdata-wildcard-right"
       }
     }
   },

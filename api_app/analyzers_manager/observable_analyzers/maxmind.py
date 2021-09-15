@@ -42,8 +42,11 @@ class Maxmind(classes.ObservableAnalyzer):
                 error_message = f"Invalid database error: {e}"
                 logger.exception(error_message)
                 maxmind_result = {"error": error_message}
-            logger.info(maxmind_result)
-            maxmind_final_result.update(maxmind_result)
+            logger.info(f"maxmind result: {maxmind_result}")
+            if maxmind_result:
+                maxmind_final_result.update(maxmind_result)
+            else:
+                logger.warning("maxmind result not available")
 
         return maxmind_final_result
 

@@ -37,7 +37,8 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "ABUSEIPDB_KEY",
-        "description": ""
+        "description": "",
+        "required": true
       }
     },
     "params": {}
@@ -59,7 +60,8 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "AUTH0_KEY",
-        "description": ""
+        "description": "",
+        "required": true
       }
     },
     "params": {}
@@ -119,7 +121,8 @@
     "secrets": {
       "pdns_credentials": {
         "env_var_key": "CIRCL_CREDENTIALS",
-        "description": ""
+        "description": "Template to use: `<user>|<pwd>`.",
+        "required": true
       }
     },
     "params": {}
@@ -141,7 +144,8 @@
     "secrets": {
       "pdns_credentials": {
         "env_var_key": "CIRCL_CREDENTIALS",
-        "description": ""
+        "description": "Template to use: `<user>|<pwd>`.",
+        "required": true
       }
     },
     "params": {}
@@ -248,11 +252,13 @@
     "secrets": {
       "api_id_name": {
         "env_var_key": "CENSYS_API_ID",
-        "description": ""
+        "description": "",
+        "required": true
       },
       "api_secret_name": {
         "env_var_key": "CENSYS_API_SECRET",
-        "description": ""
+        "description": "",
+        "required": true
       }
     },
     "params": {
@@ -309,11 +315,13 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "CUCKOO_API_KEY",
-        "description": ""
+        "description": "",
+        "required": false
       },
       "url_key_name": {
         "env_var_key": "CUCKOO_URL",
-        "description": ""
+        "description": "",
+        "required": true
       }
     },
     "params": {
@@ -414,7 +422,8 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "DEHASHED_AUTH_KEY",
-        "description": "Combination of your dehashed account's email and API key. Format: `email:api-key`."
+        "description": "Combination of your dehashed account's email and API key. Format: `email:api-key`.",
+        "required": true
       }
     },
     "params": {
@@ -449,7 +458,8 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "DNSDB_KEY",
-        "description": ""
+        "description": "",
+        "required": true
       }
     },
     "params": {
@@ -477,7 +487,7 @@
         "value": {
           "first_before": "",
           "first_after": "",
-          "last_before": "", 
+          "last_before": "",
           "last_after": ""
         },
         "type": "dict",
@@ -627,7 +637,8 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "EMAILREP_KEY",
-        "description": ""
+        "description": "",
+        "required": true
       }
     },
     "params": {}
@@ -769,7 +780,8 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "GOOGLE_APPLICATION_CREDENTIALS",
-        "description": ""
+        "description": "",
+        "required": true
       }
     },
     "params": {}
@@ -793,7 +805,8 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "GSF_KEY",
-        "description": ""
+        "description": "",
+        "required": true
       }
     },
     "params": {}
@@ -815,14 +828,15 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "GREYNOISE_API_KEY",
-        "description": ""
+        "description": "",
+        "required": true
       }
     },
     "params": {
       "greynoise_api_version": {
         "value": "v2",
         "type": "str",
-        "description": ""
+        "description": "[GreyNoise Enterprise API](https://docs.greynoise.io/docs/using-the-greynoise-api)"
       }
     }
   },
@@ -839,7 +853,8 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "GREYNOISE_API_KEY",
-        "description": ""
+        "description": "",
+        "required": false
       }
     },
     "config": {
@@ -850,7 +865,7 @@
       "greynoise_api_version": {
         "value": "v3",
         "type": "str",
-        "description": ""
+        "description": "[GreyNoise Community API](https://docs.greynoise.io/docs/using-the-greynoise-community-api)"
       }
     }
   },
@@ -873,7 +888,7 @@
       "greynoise_api_version": {
         "value": "v1",
         "type": "str",
-        "description": ""
+        "description": "GreyNoise Alpha API"
       }
     }
   },
@@ -938,11 +953,13 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "HONEYDB_API_KEY",
-        "description": ""
+        "description": "",
+        "required": true
       },
       "api_id_name": {
         "env_var_key": "HONEYDB_API_ID",
-        "description": ""
+        "description": "",
+        "required": true
       }
     },
     "params": {
@@ -970,7 +987,8 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "HUNTER_API_KEY",
-        "description": ""
+        "description": "",
+        "required": true
       }
     },
     "params": {}
@@ -990,7 +1008,8 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "HA_KEY",
-        "description": ""
+        "description": "",
+        "required": true
       }
     },
     "params": {}
@@ -1015,7 +1034,8 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "HA_KEY",
-        "description": ""
+        "description": "",
+        "required": true
       }
     },
     "params": {}
@@ -1040,7 +1060,8 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "INTELX_API_KEY",
-        "description": ""
+        "description": "",
+        "required": true
       }
     },
     "params": {
@@ -1068,7 +1089,8 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "INTEZER_KEY",
-        "description": ""
+        "description": "",
+        "required": true
       }
     },
     "params": {}
@@ -1110,7 +1132,8 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "INTEZER_KEY",
-        "description": ""
+        "description": "",
+        "required": true
       }
     },
     "params": {
@@ -1152,7 +1175,8 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "INQUEST_API_KEY",
-        "description": ""
+        "description": "",
+        "required": false
       }
     },
     "params": {
@@ -1184,7 +1208,8 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "INQUEST_API_KEY",
-        "description": ""
+        "description": "",
+        "required": false
       }
     },
     "params": {
@@ -1216,7 +1241,8 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "INQUEST_API_KEY",
-        "description": ""
+        "description": "",
+        "required": false
       }
     },
     "params": {
@@ -1244,7 +1270,8 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "IPINFO_KEY",
-        "description": ""
+        "description": "",
+        "required": true
       }
     },
     "params": {}
@@ -1287,11 +1314,13 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "MISP_KEY",
-        "description": ""
+        "description": "",
+        "required": true
       },
       "url_key_name": {
         "env_var_key": "MISP_URL",
-        "description": ""
+        "description": "",
+        "required": true
       }
     },
     "params": {
@@ -1327,11 +1356,13 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "FIRST_MISP_API",
-        "description": ""
+        "description": "",
+        "required": true
       },
       "url_key_name": {
         "env_var_key": "FIRST_MISP_URL",
-        "description": ""
+        "description": "",
+        "required": true
       }
     },
     "params": {}
@@ -1351,11 +1382,13 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "FIRST_MISP_API",
-        "description": ""
+        "description": "",
+        "required": true
       },
       "url_key_name": {
         "env_var_key": "FIRST_MISP_URL",
-        "description": ""
+        "description": "",
+        "required": true
       }
     },
     "params": {}
@@ -1375,11 +1408,13 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "MISP_KEY",
-        "description": ""
+        "description": "",
+        "required": true
       },
       "url_key_name": {
         "env_var_key": "MISP_URL",
-        "description": ""
+        "description": "",
+        "required": true
       }
     },
     "params": {}
@@ -1410,7 +1445,8 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "MALPEDIA_KEY",
-        "description": ""
+        "description": "",
+        "required": true
       }
     },
     "params": {}
@@ -1483,7 +1519,8 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "MAXMIND_KEY",
-        "description": ""
+        "description": "",
+        "required": true
       }
     },
     "params": {}
@@ -1505,7 +1542,8 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "MWDB_KEY",
-        "description": ""
+        "description": "",
+        "required": true
       }
     },
     "params": {}
@@ -1524,7 +1562,8 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "MWDB_KEY",
-        "description": ""
+        "description": "",
+        "required": true
       }
     },
     "params": {
@@ -1564,7 +1603,8 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "ONYPHE_KEY",
-        "description": ""
+        "description": "",
+        "required": true
       }
     },
     "params": {}
@@ -1589,11 +1629,13 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "OPENCTI_KEY",
-        "description": "API key for your OpenCTI instance"
+        "description": "API key for your OpenCTI instance",
+        "required": true
       },
       "url_key_name": {
         "env_var_key": "OPENCTI_URL",
-        "description": "URL of your OpenCTI instance"
+        "description": "URL of your OpenCTI instance",
+        "required": true
       }
     },
     "params": {
@@ -1637,7 +1679,8 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "OTX_KEY",
-        "description": ""
+        "description": "",
+        "required": true
       }
     },
     "params": {
@@ -1663,7 +1706,8 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "OTX_KEY",
-        "description": ""
+        "description": "",
+        "required": true
       }
     },
     "params": {
@@ -1729,7 +1773,7 @@
   "Phishtank": {
     "type": "observable",
     "python_module": "phishtank.Phishtank",
-    "description": "Check if url is verified in Phishtank API",
+    "description": "Check if url is verified in [Phishtank](https://phishtank.com/) API.",
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
@@ -1743,7 +1787,8 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "PHISHTANK_API_KEY",
-        "description": ""
+        "description": "Optional API key.",
+        "required": false
       }
     },
     "params": {}
@@ -1768,7 +1813,8 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "PULSEDIVE_API_KEY",
-        "description": ""
+        "description": "Optional API key.",
+        "required": false
       }
     },
     "params": {
@@ -2121,7 +2167,8 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "SECURITYTRAILS_KEY",
-        "description": ""
+        "description": "",
+        "required": true
       }
     },
     "params": {
@@ -2154,7 +2201,8 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "SECURITYTRAILS_KEY",
-        "description": ""
+        "description": "",
+        "required": true
       }
     },
     "params": {
@@ -2187,7 +2235,8 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "SECURITYTRAILS_KEY",
-        "description": ""
+        "description": "",
+        "required": true
       }
     },
     "params": {
@@ -2220,7 +2269,8 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "SECURITYTRAILS_KEY",
-        "description": ""
+        "description": "",
+        "required": true
       }
     },
     "params": {}
@@ -2242,7 +2292,8 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "SECURITYTRAILS_KEY",
-        "description": ""
+        "description": "",
+        "required": true
       }
     },
     "params": {
@@ -2275,7 +2326,8 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "SECURITYTRAILS_KEY",
-        "description": ""
+        "description": "",
+        "required": true
       }
     },
     "params": {
@@ -2308,7 +2360,8 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "SHODAN_KEY",
-        "description": ""
+        "description": "",
+        "required": true
       }
     },
     "params": {
@@ -2336,7 +2389,8 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "SHODAN_KEY",
-        "description": ""
+        "description": "",
+        "required": true
       }
     },
     "params": {
@@ -2400,7 +2454,8 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "SPYSE_API_KEY",
-        "description": "Spyse API token"
+        "description": "Spyse API token",
+        "required": true
       }
     },
     "params": {}
@@ -2422,7 +2477,8 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "SSAPINET_KEY",
-        "description": ""
+        "description": "",
+        "required": true
       }
     },
     "params": {
@@ -2783,7 +2839,8 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "TRIAGE_KEY",
-        "description": ""
+        "description": "",
+        "required": true
       }
     },
     "params": {
@@ -2818,7 +2875,8 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "TRIAGE_KEY",
-        "description": ""
+        "description": "",
+        "required": true
       }
     },
     "params": {
@@ -2851,7 +2909,8 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "UNPAC_ME_API_KEY",
-        "description": ""
+        "description": "",
+        "required": true
       }
     },
     "params": {
@@ -2888,7 +2947,7 @@
   "UrlScan_Submit_Result": {
     "type": "observable",
     "python_module": "urlscan.UrlScan",
-    "description": "Submit & retrieve result of a URL against URLScan API",
+    "description": "Submit & retrieve result of a URL against [URLScan API](https://urlscan.io/docs/api/).",
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
@@ -2902,7 +2961,8 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "URLSCAN_API_KEY",
-        "description": ""
+        "description": "API key is mandatory for submit.",
+        "required": true
       }
     },
     "params": {
@@ -2921,7 +2981,7 @@
   "UrlScan_Search": {
     "type": "observable",
     "python_module": "urlscan.UrlScan",
-    "description": "Search an IP/domain/url/hash against URLScan API",
+    "description": "Search an IP/domain/url/hash against [URLScan API](https://urlscan.io/docs/api/).",
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
@@ -2938,7 +2998,8 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "URLSCAN_API_KEY",
-        "description": ""
+        "description": "API key is optional for search.",
+        "required": false
       }
     },
     "params": {
@@ -2964,7 +3025,8 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "VT_KEY",
-        "description": ""
+        "description": "",
+        "required": true
       }
     },
     "params": {}
@@ -2989,7 +3051,8 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "VT_KEY",
-        "description": ""
+        "description": "",
+        "required": true
       }
     },
     "params": {}
@@ -3008,11 +3071,13 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "VT_KEY",
-        "description": ""
+        "description": "",
+        "required": true
       },
       "url_key_name": {
         "env_var_key": "VT_NOTIFY_URL",
-        "description": ""
+        "description": "",
+        "required": true
       }
     },
     "params": {}
@@ -3033,7 +3098,8 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "VT_KEY",
-        "description": ""
+        "description": "",
+        "required": true
       }
     },
     "params": {
@@ -3065,7 +3131,8 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "VT_KEY",
-        "description": ""
+        "description": "",
+        "required": true
       }
     },
     "params": {
@@ -3111,7 +3178,8 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "VT_KEY",
-        "description": ""
+        "description": "",
+        "required": true
       }
     },
     "params": {}
@@ -3134,7 +3202,8 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "WHOISXMLAPI_KEY",
-        "description": ""
+        "description": "",
+        "required": true
       }
     },
     "params": {}
@@ -3156,7 +3225,8 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "WIGLE_KEY",
-        "description": ""
+        "description": "",
+        "required": true
       }
     },
     "params": {
@@ -3186,11 +3256,13 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "XFORCE_KEY",
-        "description": ""
+        "description": "",
+        "required": true
       },
       "api_password_name": {
         "env_var_key": "XFORCE_PASSWORD",
-        "description": ""
+        "description": "",
+        "required": true
       }
     },
     "params": {}
@@ -3553,11 +3625,13 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "YETI_KEY",
-        "description": "API key for your YETI instance"
+        "description": "API key for your YETI instance",
+        "required": true
       },
       "url_key_name": {
         "env_var_key": "YETI_URL",
-        "description": "API URL of your YETI instance"
+        "description": "API URL of your YETI instance",
+        "required": true
       }
     },
     "params": {
@@ -3596,7 +3670,8 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "ZOOMEYE_KEY",
-        "description": ""
+        "description": "",
+        "required": true
       }
     },
     "params": {

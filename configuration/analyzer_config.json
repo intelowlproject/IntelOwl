@@ -482,6 +482,11 @@
         },
         "type": "dict",
         "description": "Time range"
+      },
+      "query_type": {
+        "value": "domain",
+        "type": "str",
+        "description": "Query type. Options: domain (default), rrname-wildcard-left, rrname-wildcard-right, names, rdata-wildcard-left, rdata-wildcard-right"
       }
     }
   },
@@ -831,15 +836,15 @@
     "observable_supported": [
       "ip"
     ],
-    "config": {
-      "soft_time_limit": 30,
-      "queue": "default"
-    },
     "secrets": {
       "api_key_name": {
         "env_var_key": "GREYNOISE_API_KEY",
         "description": ""
       }
+    },
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
     },
     "params": {
       "greynoise_api_version": {
@@ -859,15 +864,10 @@
     "observable_supported": [
       "ip"
     ],
+    "secrets": {},
     "config": {
       "soft_time_limit": 30,
       "queue": "default"
-    },
-    "secrets": {
-      "api_key_name": {
-        "env_var_key": "GREYNOISE_API_KEY",
-        "description": ""
-      }
     },
     "params": {
       "greynoise_api_version": {

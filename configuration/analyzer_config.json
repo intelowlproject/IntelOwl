@@ -840,12 +840,6 @@
       "soft_time_limit": 30,
       "queue": "default"
     },
-    "secrets": {
-      "api_key_name": {
-        "env_var_key": "GREYNOISE_API_KEY",
-        "description": ""
-      }
-    },
     "params": {
       "greynoise_api_version": {
         "value": "v3",
@@ -867,12 +861,6 @@
     "config": {
       "soft_time_limit": 30,
       "queue": "default"
-    },
-    "secrets": {
-      "api_key_name": {
-        "env_var_key": "GREYNOISE_API_KEY",
-        "description": ""
-      }
     },
     "params": {
       "greynoise_api_version": {

@@ -836,6 +836,7 @@
     "observable_supported": [
       "ip"
     ],
+    "secrets": {},
     "config": {
       "soft_time_limit": 30,
       "queue": "default"
@@ -858,6 +859,7 @@
     "observable_supported": [
       "ip"
     ],
+    "secrets": {},
     "config": {
       "soft_time_limit": 30,
       "queue": "default"

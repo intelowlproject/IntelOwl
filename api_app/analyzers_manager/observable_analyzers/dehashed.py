@@ -32,7 +32,7 @@ class DehashedSearch(ObservableAnalyzer):
         self.__auth = self._secrets["api_key_name"]
         if not self.__auth:
             raise AnalyzerConfigurationException(
-                f"No secret retrieved for `{self.api_key_name}`"
+                "No secret retrieved for `api_key_name`."
             )
 
         # try to identify search operator

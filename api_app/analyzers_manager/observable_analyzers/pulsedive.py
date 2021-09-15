@@ -27,6 +27,7 @@ class Pulsedive(ObservableAnalyzer):
     def run(self):
         result = {}
         self.default_param = ""
+        # optional API key
         if not self.__api_key:
             warning = "No API key retrieved"
             logger.info(

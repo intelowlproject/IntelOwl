@@ -25,6 +25,7 @@ class Phishtank(ObservableAnalyzer):
             "url": base64.b64encode(self.observable_name.encode("utf-8")),
             "format": "json",
         }
+        # optional API key
         if not self.__api_key:
             logger.warning(f"{self.__repr__()} -> Continuing w/o API key..")
         else:

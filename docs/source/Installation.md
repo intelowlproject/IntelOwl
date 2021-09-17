@@ -167,7 +167,7 @@ There are 3 options to execute the web server:
 
     You should change `ssl_certificate`, `ssl_certificate_key` and `server_name` in that file.
 
-    Then you should modify the `nginx` service configuration in `docker/default.ylm`:
+    Then you should modify the `nginx` service configuration in `docker/default.yml`:
     * change `http.conf` with `https.conf`
     * in `volumes` add the option for mounting the directory that hosts your certificate and your certificate key.
   

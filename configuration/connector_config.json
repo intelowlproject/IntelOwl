@@ -11,11 +11,13 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "CONNECTOR_MISP_KEY",
-        "description": "API key for your MISP instance"
+        "description": "API key for your MISP instance",
+        "required": true
       },
       "url_key_name": {
         "env_var_key": "CONNECTOR_MISP_URL",
-        "description": "URL of your MISP instance"
+        "description": "URL of your MISP instance",
+        "required": true
       }
     },
     "params": {
@@ -48,11 +50,13 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "CONNECTOR_OPENCTI_KEY",
-        "description": "API key for your OpenCTI instance"
+        "description": "API key for your OpenCTI instance",
+        "required": true
       },
       "url_key_name": {
         "env_var_key": "CONNECTOR_OPENCTI_URL",
-        "description": "URL of your OpenCTI instance"
+        "description": "URL of your OpenCTI instance",
+        "required": true
       }
     },
     "params": {
@@ -92,11 +96,13 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "CONNECTOR_YETI_KEY",
-        "description": "API key for your YETI instance"
+        "description": "API key for your YETI instance",
+        "required": true
       },
       "url_key_name": {
         "env_var_key": "CONNECTOR_YETI_URL",
-        "description": "API URL of your YETI instance"
+        "description": "API URL of your YETI instance",
+        "required": true
       }
     },
     "params": {

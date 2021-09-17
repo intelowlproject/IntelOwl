@@ -29,7 +29,7 @@ Intel Owl is an Open Source Intelligence, or OSINT solution to get threat intell
 - This application is built to **scale out** and to **speed up the retrieval of threat info**.
 - It can be integrated easily in your stack of security tools ([pyintelowl](https://github.com/intelowlproject/pyintelowl)) to automate common jobs usually performed, for instance, by SOC analysts manually.
 - Intel Owl is composed of **analyzers** that can be run to retrieve data from external sources (like VirusTotal or AbuseIPDB) or to generate intel from internal analyzers (like Yara or Oletools)
-- API written in Django and Python 3.8.
+- API written in Django and Python 3.9.
 - Inbuilt frontend client: **[IntelOwl-ng](https://github.com/intelowlproject/IntelOwl-ng)** provides features such as dashboard, visualizations of analysis data, easy to use forms for requesting new analysis, etc. [Live Demo](https://intelowlclient.firebaseapp.com/).
 
 ## Documentation
@@ -42,6 +42,7 @@ Documentation about IntelOwl installation, usage, configuration and contribution
 
 To know more about the project and it's growth over time, you may be interested in reading the following:
 
+- [Honeynet: v3.0.0 Announcement](https://www.honeynet.org/2021/09/13/intel-owl-release-v3-0-0/)
 - [Intel Owl on Daily Swig](https://portswigger.net/daily-swig/intel-owl-osint-tool-automates-the-intel-gathering-process-using-a-single-api)
 - [Honeynet: v1.0.0 Announcement](https://www.honeynet.org/?p=7558)
 - [Certego Blog: First announcement](https://www.certego.net/en/news/new-year-new-tool-intel-owl/)

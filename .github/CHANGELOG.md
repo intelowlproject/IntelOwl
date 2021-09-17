@@ -2,6 +2,16 @@
 
 [**Upgrade Guide**](https://intelowl.readthedocs.io/en/latest/Installation.html#update-to-the-most-recent-version)
 
+## [v3.0.1](https://github.com/intelowlproject/IntelOwl/releases/tag/v3.0.1)
+
+This is a minor patch release.
+
+- Bug Fix: Add `required` boolean attribute to `secrets` dict of configuration files. (Issue [#702](https://github.com/intelowlproject/IntelOwl/issues/702)).
+- Bug Fix: Some fixes and adjusts in documentation.
+- Analyzer adjusts: DNSdb, cuckoo, maxmind, greynoise analyzers.
+- Deps: Bump some requirements.
+
+
 ## [v3.0.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v3.0.0)
 
 > Note: This is a major release with MANY breaking changes.

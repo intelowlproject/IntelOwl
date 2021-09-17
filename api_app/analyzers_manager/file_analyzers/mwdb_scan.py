@@ -6,6 +6,8 @@ import time
 import mwdblib
 import logging
 
+from requests import HTTPError
+
 from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager.classes import FileAnalyzer
 
@@ -86,16 +88,11 @@ class MWDB_Scan(FileAnalyzer):
         else:
             try:
                 file_info = self.mwdb.query_file(query)
-            except Exception as exc:
-                err_msg = (
-                    "Error: File not found in the MWDB. Set 'upload_file=true' "
-                    "if you want to upload and poll results. "
-                )
-                logger.error((str(exc), err_msg))
-                self.report.errors.append(str(exc))
-                self.report.errors.append(err_msg)
+            except HTTPError:
                 result["not_found"] = True
                 return result
+            else:
+                result["not_found"] = False
         # adding information about the children and parents
         self.adjust_relations(file_info.data, "parents", True)
         self.adjust_relations(file_info.data, "children", True)

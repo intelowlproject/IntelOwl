@@ -44,6 +44,7 @@ class InQuest(ObservableAnalyzer):
     def run(self):
         result = {}
         headers = {"Content-Type": "application/json"}
+        # optional API key
         if self.__api_key:
             headers["Authorization"] = self.__api_key
         else:

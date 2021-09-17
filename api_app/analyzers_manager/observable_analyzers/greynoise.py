@@ -26,8 +26,8 @@ class GreyNoise(classes.ObservableAnalyzer):
 
         elif self.api_version == "v2":
             url = f"{self.base_url}/v2/noise/context/{self.observable_name}"
+            # API key is mandatory
             api_key = self._secrets["api_key_name"]
-
             headers = {"Accept": "application/json", "key": api_key}
             response = requests.get(url, headers=headers)
             response.raise_for_status()

@@ -17,6 +17,9 @@ class MB_GET(classes.ObservableAnalyzer):
 
     @classmethod
     def query_mb_api(cls, observable_name: str) -> dict:
+        """
+        This is in a ``classmethod`` so it can be reused in ``MB_GOOGLE``.
+        """
         post_data = {"query": "get_info", "hash": observable_name}
 
         response = requests.post(cls.url, data=post_data)

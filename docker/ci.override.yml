@@ -13,6 +13,9 @@ services:
       - env_file_app_ci
 
   nginx:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile_nginx
     volumes:
       - ../configuration/nginx/http.conf:/etc/nginx/conf.d/default.conf
 

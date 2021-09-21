@@ -22,7 +22,7 @@ GitPython==3.1.18
 google>=3.0.0
 google-cloud-webrisk==1.4.1
 intezer-sdk==1.4.5.1
-maxminddb==2.0.3
+maxminddb==2.1.0
 mwdblib==3.4.0
 oletools==0.60
 OTXv2==1.5.12

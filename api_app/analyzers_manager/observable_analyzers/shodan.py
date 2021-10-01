@@ -27,7 +27,7 @@ class Shodan(classes.ObservableAnalyzer):
             uri = f"labs/honeyscore/{self.observable_name}"
         else:
             raise AnalyzerConfigurationException(
-                f"analysis type: '{self.analysis_type}' not suported."
+                f"analysis type: '{self.analysis_type}' not supported."
                 "Supported are: 'search', 'honeyscore'."
             )
 

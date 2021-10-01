@@ -12,7 +12,7 @@ In some systems you could find pre-installed older versions. Please check this a
 <p class="admonition-title">Note</p>
 <ul>
 <li>The project uses public docker image that is available on <a href="https://hub.docker.com/repository/docker/intelowlproject/intelowl">Docker Hub</a></li>
-<li>IntelOwl is tested and supported to work in a Linux-based OS. It <i>may</i> also run on windows, but that is not officialy supported yet.</li>
+<li>IntelOwl is tested and supported to work in a Linux-based OS. It <i>may</i> also run on windows, but that is not officially supported yet.</li>
 </ul>
 </div>
 

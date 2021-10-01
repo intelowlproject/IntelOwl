@@ -129,7 +129,7 @@ class CuckooAnalysis(FileAnalyzer):
         )
         json_response = response.json()
 
-        # extract most IOCs as possibile from signatures data reports
+        # extract most IOCs as possible from signatures data reports
         signatures = json_response.get("signatures", [])
         list_description_signatures = []
         list_detailed_signatures = []

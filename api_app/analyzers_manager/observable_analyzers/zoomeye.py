@@ -44,7 +44,7 @@ class ZoomEye(classes.ObservableAnalyzer):
             self.url += f"ip={self.observable_name}"
         else:
             raise AnalyzerConfigurationException(
-                f"search type: '{self.search_type}' not suported."
+                f"search type: '{self.search_type}' not supported."
                 "Supported are: 'host', 'web', 'both'"
             )
 

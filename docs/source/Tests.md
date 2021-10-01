@@ -62,7 +62,7 @@ $ docker/scripts/coverage_test.sh tests.test_api tests.test_auth # dotted paths
 Syntax:
 
 ```bash
-$ docker/scripts/test_analyzers.sh <analyzer_class> <comma_seperated_analyzer_names>
+$ docker/scripts/test_analyzers.sh <analyzer_class> <comma_separated_analyzer_names>
 ```
 
 Examples:

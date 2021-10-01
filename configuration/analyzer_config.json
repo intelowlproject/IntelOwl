@@ -430,7 +430,7 @@
       "size": {
         "value": 100,
         "type": "int",
-        "description": "Numer of records fetched. Recommend change to a large value."
+        "description": "Number of records fetched. Recommend change to a large value."
       },
       "pages": {
         "value": 1,
@@ -2564,7 +2564,7 @@
   "Stratosphere_Blacklist": {
     "type": "observable",
     "python_module": "stratosphere.Stratos",
-    "description": "Cross refernce an IP in blacklist provided by Stratosphere lab",
+    "description": "Cross reference an IP in blacklist provided by Stratosphere lab",
     "disabled": false,
     "external_service": false,
     "leaks_info": false,
@@ -3683,7 +3683,7 @@
       "query": {
         "value": "",
         "type": "str",
-        "description": "Follow according to docs, but omit `ip`, `hostname`. Eg: `city:biejing port:21`."
+        "description": "Follow according to docs, but omit `ip`, `hostname`. Eg: `city:beijing port:21`."
       },
       "page": {
         "value": 1,

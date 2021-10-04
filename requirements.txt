@@ -15,14 +15,14 @@ django-storages==1.11.1
 dnspython==2.1.0
 dnstwist==20201228
 ppdeep>=20200505
-drf-spectacular==0.18.2
+drf-spectacular==0.19.0
 easygui==0.98.2
 flower==1.0.0
 GitPython==3.1.18
 google>=3.0.0
 google-cloud-webrisk==1.4.1
 intezer-sdk==1.4.5.1
-maxminddb==2.1.0
+maxminddb==2.2.0
 mwdblib==3.4.0
 oletools==0.60
 OTXv2==1.5.12

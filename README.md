@@ -57,70 +57,28 @@ You can see the full list of all available analyzers in the [documentation](http
 | External services                                  | - GreyNoise v2<br/> - Intezer Scan<br/>  - VirusTotal v2+v3<br/>  - HybridAnalysis<br/>  - Censys.io<br/>  - Shodan<br/>  - AlienVault OTX<br/>  - Threatminer<br/>  - Abuse.ch<br/>  - many more..                                                                                                            |
 | Free modules that require additional configuration | - Cuckoo (requires at least one working Cuckoo instance)<br/>  - MISP (requires at least one working MISP instance)<br/>  - Yara (Community, Neo23x0, Intezer, McAfee rules are already available. There's the chance to add your own rules)                                                                   |
 
-## Premium support 
-<img src="static_intel/xscode-banner.png" width="600" height="120" alt="xscode: Get Support"/><br/>
-_For urgent issues and priority support, visit [https://xscode.com/intelowlproject/IntelOwl](https://xscode.com/intelowlproject/IntelOwl)._
 
-## Legal notice
 
-You as a user of this project must review, accept and comply with the license
-terms of each downloaded/installed package listed below. By proceeding with the
-installation, you are accepting the license terms of each package, and
-acknowledging that your use of each package will be subject to its respective
-license terms.
 
-[osslsigncode](https://github.com/develar/osslsigncode),
-[PyExifTool](https://github.com/sylikc/pyexiftool),
-[Exiftool package](https://exiftool.org/#license),
-[stringsifter](https://github.com/fireeye/stringsifter),
-[peepdf](https://github.com/jesparza/peepdf),
-[pefile](https://github.com/erocarrera/pefile),
-[oletools](https://github.com/decalage2/oletools),
-[XLMMacroDeobfuscator](https://github.com/DissectMalware/XLMMacroDeobfuscator),
-[MaxMind-DB-Reader-python](https://github.com/maxmind/MaxMind-DB-Reader-python),
-[pysafebrowsing](https://github.com/Te-k/pysafebrowsing),
-[google-web-risk](https://github.com/googleapis/python-webrisk),
-[PyMISP](https://github.com/MISP/PyMISP),
-[OTX-Python-SDK](https://github.com/AlienVault-OTX/OTX-Python-SDK),
-[yara-python](https://github.com/VirusTotal/yara-python),
-[GitPython](https://github.com/gitpython-developers/GitPython),
-[Yara community rules](https://github.com/Yara-Rules),
-[StrangerealIntel Daily Ioc Yara rules](https://github.com/StrangerealIntel/DailyIOC),
-[Neo23x0 Yara rules](https://github.com/Neo23x0/signature-base),
-[Intezer Yara rules](https://github.com/intezer/yara-rules),
-[McAfee Yara rules](https://github.com/advanced-threat-research/Yara-Rules),
-[Stratosphere Yara rules](https://github.com/stratosphereips/yara-rules),
-[FireEye Yara rules](https://github.com/fireeye/red_team_tool_countermeasures),
-[ReversingLabs Yara rules](https://github.com/reversinglabs/reversinglabs-yara-rules),
-[Samir Yara rules](https://github.com/sbousseaden/YaraHunts),
-[InQuest Yara rules](https://github.com/InQuest/yara-rules),
-[APKiD](https://github.com/rednaga/APKiD/blob/master/LICENSE.COMMERCIAL),
-[Box-JS](https://github.com/CapacitorSet/box-js/blob/master/LICENSE),
-[Capa](https://github.com/fireeye/capa/blob/master/LICENSE.txt),
-[Quark-Engine](https://github.com/quark-engine/quark-engine),
-[IntelX](https://intelx.io/terms-of-service),
-[Speakeasy](https://github.com/fireeye/speakeasy),
-[Checkdmarc](https://github.com/domainaware/checkdmarc),
-[Manalyze](https://github.com/JusticeRage/Manalyze),
-[Qiling](https://github.com/qilingframework/qiling),
-[Renderton](https://github.com/GoogleChrome/rendertron/blob/main/LICENSE)
-[PyCTI](https://github.com/OpenCTI-Platform/client-python/blob/master/LICENSE),
-[PyHashlookup](https://github.com/CIRCL/PyHashlookup),
-[PyPDNS](https://github.com/CIRCL/PyPDNS)
+## Partnerships and sponsors
 
-## Acknowledgments
+We have an official sponsorship program for companies and individuals. For more details on how to join the list below, see the page: [Partnership and sponsors](https://github.com/certego/IntelOwl/blob/master/.github/partnership_and_sponsors.md)
 
-### Sponsors
-
-This project was created and will be upgraded thanks to the following organizations:
+<h3>GOLD</h3>
 
 #### Certego
-<a href="https://www.certego.net"> <img style="margin-right: 2px" width=176 height=50 src="static_intel/Certego.png" alt="Certego Logo"/> </a>
+<a href="https://www.certego.net"> <img style="margin-right: 2px" width=176 height=50 src="static_intel/Certego.png" alt="Certego Logo"/></a>
+
+Certego is a MSSP and Threat Intelligence Provider based in Italy. 
+
+Without Certego, IntelOwl would have not been born. Also, thanks to this company, it is constantly maintained and updated.
 
 #### The Honeynet Project
 <a href="https://www.honeynet.org"> <img style="border: 0.2px solid black" width=115 height=150 src="static_intel/honeynet_logo.png" alt="Honeynet.org logo"> </a>
 
-Since its birth, this project has been participating in the [Google Summer of Code](https://summerofcode.withgoogle.com/) (GSoC) under the Honeynet Project!
+The Honeynet Project is a non-profit organization working on creating open source cyber security tools and sharing knowledge about cyber threats.
+
+Since its birth, thanks to this organization, this project has been participating in the [Google Summer of Code](https://summerofcode.withgoogle.com/) (GSoC)!
 
 Project Summaries and/or in-development projects:
 * 2020: [Eshaan Bansal](https://twitter.com/eshaan7_): [IntelOwl Work Product](https://www.honeynet.org/2020/08/26/gsoc-2020-work-product%e2%80%8a-%e2%80%8aintel-owl/)
@@ -128,10 +86,23 @@ Project Summaries and/or in-development projects:
   * [Sarthak Khattar](https://twitter.com/Mr_Momo07): [IntelOwl Improvements](https://www.honeynet.org/2021/08/20/gsoc-2021-project-summary-intelowl-improvements/)
   * [Shubham Pandey](https://twitter.com/imshubham31): [IntelOwl Connectors Manager and Integrations](https://www.honeynet.org/2021/08/20/gsoc-2021-project-summary-intelowl-connectors-manager-and-integrations/)
 
-Stay tuned for the upcoming GSoC! Join the [Honeynet Slack chat](https://gsoc-slack.honeynet.org/) for more info.
+If you are interested to be the next GSOC student for IntelOwl, join the [Honeynet Slack chat](https://gsoc-slack.honeynet.org/) for more info.
+
+### BRONZE
+#### Tines
+<a href="https://www.tines.com"> <img style="border: 0.2px solid black" src="static_intel/tines_logo.png" alt="Tines logo"> </a>
+
+Tines is an automation platform designed to allow anyone to automate any manual task, regardless of complexity.
+
+An official integration with IntelOwl will come soon.
 
 #### Docker
-In 2021 IntelOwl joined the official [Docker Open Source Program](https://www.docker.com/blog/expanded-support-for-open-source-software-projects/)
+<a href="https://www.docker.com"> <img style="border: 0.2px solid black" src="static_intel/docker_logo.png" alt="Docker logo"> </a>
+
+In 2021 IntelOwl joined the official [Docker Open Source Program](https://www.docker.com/blog/expanded-support-for-open-source-software-projects/). This allows IntelOwl developers to easily manage Docker images and focus on writing the code.
+
+### IRON
+If you are an individual who love this project and wants to thanks us with a little contribution, we would be happy to list you here in the README as a public acknowledgment
 
 ## About the author and maintainers
 

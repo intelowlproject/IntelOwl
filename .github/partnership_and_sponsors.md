@@ -18,4 +18,4 @@ For BRONZE, SILVER and GOLD sponsorship we ask those interested to contact us vi
 
 Contributions are accepted via Liberapay. 
 
-<a href="https://liberapay.com/mlodic/donate"><img alt="Donate using Liberapay" src="https://liberapay.com/assets/widgets/donate.svg"></a>
+<a href="https://liberapay.com/intelowlproject/donate"><img alt="Donate using Liberapay" src="https://liberapay.com/assets/widgets/donate.svg"></a>

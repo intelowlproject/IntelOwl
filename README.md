@@ -21,14 +21,16 @@ Do you want to get **threat intelligence data** about a malware, an IP or a doma
 
 You are in the right place!
 
-Intel Owl is an Open Source Intelligence, or OSINT solution to get threat intelligence data about a specific file, an IP or a domain from a single API at scale. It integrates a number of analyzers available online and is for everyone who needs a single point to query for info about a specific file or observable.
+Intel Owl is an Open Source Intelligence, or OSINT solution to get threat intelligence data about a specific file, an IP or a domain from a single API at scale. It integrates a number of analyzers available online and a lot of cutting-edge malware analysis tools. It is for everyone who needs a single point to query for info about a specific file or observable.
 
 ### Features
 
 - Provides enrichment of threat intel for malware as well as observables (IP, Domain, URL and hash).
 - This application is built to **scale out** and to **speed up the retrieval of threat info**.
 - It can be integrated easily in your stack of security tools ([pyintelowl](https://github.com/intelowlproject/pyintelowl)) to automate common jobs usually performed, for instance, by SOC analysts manually.
-- Intel Owl is composed of **analyzers** that can be run to retrieve data from external sources (like VirusTotal or AbuseIPDB) or to generate intel from internal analyzers (like Yara or Oletools)
+- Intel Owl is composed of:
+  - **analyzers** that can be run to retrieve data from external sources (like VirusTotal or AbuseIPDB) or to generate intel from internal analyzers (like Yara or Oletools)
+  - **connectors** that can be run to export data to external platforms
 - API written in Django and Python 3.9.
 - Inbuilt frontend client: **[IntelOwl-ng](https://github.com/intelowlproject/IntelOwl-ng)** provides features such as dashboard, visualizations of analysis data, easy to use forms for requesting new analysis, etc. [Live Demo](https://intelowlclient.firebaseapp.com/).
 
@@ -54,29 +56,29 @@ You can see the full list of all available analyzers in the [documentation](http
 | Type                                               | Analyzers Available                                                                                                                                                                                                                                                                                            |
 |----------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | Inbuilt modules                                    | - Static Document, RTF, PDF, PE, Generic File Analysis<br/> - Strings analysis with ML<br/> - PE Emulation with Speakeasy<br/> - PE Signature verification<br/> - PE Capabilities Extraction<br/> - Emulated Javascript Analysis<br/> - Android Malware Analysis<br/> - SPF and DMARC Validator<br/> - more... |
-| External services                                  | - GreyNoise v2<br/> - Intezer Scan<br/>  - VirusTotal v2+v3<br/>  - HybridAnalysis<br/>  - Censys.io<br/>  - Shodan<br/>  - AlienVault OTX<br/>  - Threatminer<br/>  - Abuse.ch<br/>  - many more..                                                                                                            |
-| Free modules that require additional configuration | - Cuckoo (requires at least one working Cuckoo instance)<br/>  - MISP (requires at least one working MISP instance)<br/>  - Yara (Community, Neo23x0, Intezer, McAfee rules are already available. There's the chance to add your own rules)                                                                   |
+| External services                                  | - GreyNoise v2<br/> - Intezer<br/>  - VirusTotal v2+v3<br/>  - HybridAnalysis<br/>  - Censys.io<br/>  - Shodan<br/>  - AlienVault OTX<br/>  - Intelligence_X<br/>  - Abuse.ch MalwareBazaar/Threatfox<br/>  - many more..                                                                                                            |
+| Free modules that require additional configuration | - Cuckoo (requires at least one working Cuckoo instance)<br/>  - MISP (requires at least one working MISP instance)<br/>  - Yara (a lot of public rules area available. There's also the chance to add your own rules)                                                                   |
 
 
 
 
 ## Partnerships and sponsors
 
-We have an official sponsorship program for companies and individuals. For more details on how to join the list below, see the page: [Partnership and sponsors](https://github.com/certego/IntelOwl/blob/master/.github/partnership_and_sponsors.md)
+We have an official sponsorship program for companies and individuals. For more details on how to join the list below, read the page: [Partnership and sponsors](https://github.com/certego/IntelOwl/blob/master/.github/partnership_and_sponsors.md)
 
 <h3>GOLD</h3>
 
 #### Certego
 <a href="https://www.certego.net"> <img style="margin-right: 2px" width=176 height=50 src="static_intel/Certego.png" alt="Certego Logo"/></a>
 
-Certego is a MSSP and Threat Intelligence Provider based in Italy. 
+[Certego](https://www.certego.net) is a MSSP and Threat Intelligence Provider based in Italy. 
 
 Without Certego, IntelOwl would have not been born. Also, thanks to this company, it is constantly maintained and updated.
 
 #### The Honeynet Project
-<a href="https://www.honeynet.org"> <img style="border: 0.2px solid black" width=115 height=150 src="static_intel/honeynet_logo.png" alt="Honeynet.org logo"> </a>
+<a href="https://www.honeynet.org"> <img style="border: 0.2px solid black" width=100 height=131 src="static_intel/honeynet_logo.png" alt="Honeynet.org logo"> </a>
 
-The Honeynet Project is a non-profit organization working on creating open source cyber security tools and sharing knowledge about cyber threats.
+[The Honeynet Project](https://www.honeynet.org) is a non-profit organization working on creating open source cyber security tools and sharing knowledge about cyber threats.
 
 Since its birth, thanks to this organization, this project has been participating in the [Google Summer of Code](https://summerofcode.withgoogle.com/) (GSoC)!
 
@@ -90,14 +92,14 @@ If you are interested to be the next GSOC student for IntelOwl, join the [Honeyn
 
 ### BRONZE
 #### Tines
-<a href="https://www.tines.com"> <img style="border: 0.2px solid black" src="static_intel/tines_logo.png" alt="Tines logo"> </a>
+<a href="https://www.tines.com"> <img style="border: 0.2px solid black" width=219 height=100 src="static_intel/tines_logo.png" alt="Tines logo"> </a>
 
-Tines is an automation platform designed to allow anyone to automate any manual task, regardless of complexity.
+[Tines](https://www.tines.com) is an automation platform designed to allow anyone to automate any manual task, regardless of complexity.
 
 An official integration with IntelOwl will come soon.
 
 #### Docker
-<a href="https://www.docker.com"> <img style="border: 0.2px solid black" src="static_intel/docker_logo.png" alt="Docker logo"> </a>
+<a href="https://www.docker.com"> <img style="border: 0.2px solid black" width=194 height=50 src="static_intel/docker_logo.png" alt="Docker logo"> </a>
 
 In 2021 IntelOwl joined the official [Docker Open Source Program](https://www.docker.com/blog/expanded-support-for-open-source-software-projects/). This allows IntelOwl developers to easily manage Docker images and focus on writing the code.
 

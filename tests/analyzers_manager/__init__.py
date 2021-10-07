@@ -126,10 +126,10 @@ class _AbstractAnalyzersScriptTestCase(TransactionTestCase):
                 )
                 self.fail()
             # check analyzers status
-            if status not in ["running", "pending"]:
+            if status not in [Job.Status.PENDING, Job.Status.RUNNING]:
                 self.assertEqual(
                     status,
-                    "reported_without_fails",
+                    Job.Status.REPORTED_WITHOUT_FAILS,
                     msg="`test_job` status must be success",
                 )
                 self.assertEqual(

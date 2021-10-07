@@ -82,10 +82,10 @@ def run_connector(job_id: int, config_dict: dict, report_defaults: dict):
 
 @app.task(name="start_connectors", soft_time_limit=100)
 def start_connectors(
-    job_id: int, connectors_to_execute: list, runtime_configuration: dict
+    job_id: int,
+    connectors_to_execute: list,
+    runtime_configuration: dict,
 ):
     connectors_controller.start_connectors(
-        job_id=job_id,
-        connectors_to_execute=connectors_to_execute,
-        runtime_configuration=runtime_configuration,
+        job_id, connectors_to_execute, runtime_configuration
     )

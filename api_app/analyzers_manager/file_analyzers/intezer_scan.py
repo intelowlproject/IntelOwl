@@ -3,6 +3,7 @@
 
 from datetime import timedelta
 
+import intezer_sdk.consts
 from intezer_sdk import api as intezer_api, errors as intezer_errors
 from intezer_sdk.analysis import Analysis
 
@@ -31,6 +32,7 @@ class IntezerScan(FileAnalyzer):
         result = {}
 
         try:
+            intezer_sdk.consts.USER_AGENT = "IntelOwl"
             # run analysis by hash
             hash_result = self.__intezer_analysis(file_hash=self.md5)
             result.update(hash_result, hash_found=True)

@@ -6,6 +6,8 @@
 import logging
 import ipaddress
 import re
+
+from hashlib import md5
 from magic import from_buffer as magic_from_buffer
 
 from django.utils import timezone
@@ -40,6 +42,53 @@ def calculate_mimetype(file_pointer, file_name) -> str:
         mimetype = magic_from_buffer(buffer, mime=True)
 
     return mimetype
+
+
+def calculate_observable_classification(value: str) -> str:
+    """Returns observable classification for the given value.\n
+    Only following types are supported:
+    ip, domain, url, hash (md5, sha1, sha256), generic (if no match)
+
+    Args:
+        value (str):
+            observable value
+    Returns:
+        str: one of `ip`, `url`, `domain`, `hash` or 'generic'.
+    """
+    try:
+        ipaddress.ip_address(value)
+    except ValueError:
+        if re.match(
+            r"^(?:ht|f)tps?://[a-z\d-]{1,63}(?:\.[a-z\d-]{1,63})+"
+            r"(?:/[a-z\d-]{1,63})*(?:\.\w+)?",
+            value,
+        ):
+            classification = "url"
+        elif re.match(r"^(\.)?[a-z\d-]{1,63}(\.[a-z\d-]{1,63})+$", value):
+            classification = "domain"
+        elif (
+            re.match(r"^[a-f\d]{32}$", value)
+            or re.match(r"^[a-f\d]{40}$", value)
+            or re.match(r"^[a-f\d]{64}$", value)
+            or re.match(r"^[A-F\d]{32}$", value)
+            or re.match(r"^[A-F\d]{40}$", value)
+            or re.match(r"^[A-F\d]{64}$", value)
+        ):
+            classification = "hash"
+        else:
+            classification = "generic"
+            logger.info(
+                "Couldn't detect observable classification, setting as 'generic'..."
+            )
+    else:
+        # its a simple IP
+        classification = "ip"
+
+    return classification
+
+
+def calculate_md5(value) -> str:
+    return md5(str(value).encode("utf-8")).hexdigest()
 
 
 def get_ip_version(ip_value):

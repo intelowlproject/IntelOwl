@@ -14,6 +14,7 @@ from intel_owl.tasks import start_analyzers
 from api_app.models import Job
 from api_app.core.models import AbstractReport
 from api_app.analyzers_manager.dataclasses import AnalyzerConfig
+from api_app.connectors_manager.dataclasses import ConnectorConfig
 
 
 class _AbstractAnalyzersScriptTestCase(TransactionTestCase):
@@ -26,12 +27,16 @@ class _AbstractAnalyzersScriptTestCase(TransactionTestCase):
     analyzer_configs: dict
     runtime_configuration: dict
     analyzers_to_test: list
+    analyzer_configs = AnalyzerConfig.all()
+    connector_configs = ConnectorConfig.all()
 
     @classmethod
     def get_params(cls):
         return {
             "source": "test",
-            "analyzers_requested": ["test"],
+            "analyzers_requested": [],
+            "connectors_requested": [],
+            "connectors_to_execute": cls.connector_configs.keys(),
         }
 
     @classmethod
@@ -46,8 +51,6 @@ class _AbstractAnalyzersScriptTestCase(TransactionTestCase):
             return super(_AbstractAnalyzersScriptTestCase, cls).setUpClass()
 
     def setUp(self):
-        # analyzer config
-        self.analyzer_configs = AnalyzerConfig.all()
         analyzers_to_test = os.environ.get("TEST_ANALYZERS", "").split(",")
         self.analyzers_to_test = (
             analyzers_to_test
@@ -105,6 +108,10 @@ class _AbstractAnalyzersScriptTestCase(TransactionTestCase):
                 f"\n>>> connector_reports:{connectors_stats} ",
                 f"\n>>> Running/Pending analyzers: {running_or_pending_analyzers}",
                 f"\n>>> Running/Pending connectors: {running_or_pending_connectors}",
+            )
+            print(
+                self.test_job.connectors_requested,
+                self.test_job.connectors_to_execute,
             )
             # fail immediately if any analyzer or connector failed
             if analyzers_stats["failed"] > 0 or connectors_stats["failed"] > 0:

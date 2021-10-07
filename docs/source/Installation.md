@@ -11,8 +11,9 @@ In some systems you could find pre-installed older versions. Please check this a
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <ul>
-<li>The project uses public docker image that is available on <a href="https://hub.docker.com/repository/docker/intelowlproject/intelowl">Docker Hub</a></li>
+<li>The project uses public docker images that are available on <a href="https://hub.docker.com/repository/docker/intelowlproject/intelowl">Docker Hub</a></li>
 <li>IntelOwl is tested and supported to work in a Linux-based OS. It <i>may</i> also run on windows, but that is not officially supported yet.</li>
+<li>Before installing remember that you must comply with the <a href="https://github.com/certego/IntelOwl/blob/master/LICENSE">LICENSE</a> and the <a href="https://github.com/certego/IntelOwl/blob/master/.github/legal_notice.md">Legal Terms</a></li>
 </ul>
 </div>
 

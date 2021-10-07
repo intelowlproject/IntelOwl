@@ -1,12 +1,10 @@
 <img src="static_intel/intel_owl_positive.png" width=547 height=150 alt="Intel Owl"/>
 
-
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/intelowlproject/IntelOwl)](https://github.com/intelowlproject/IntelOwl/releases)
 [![GitHub Repo stars](https://img.shields.io/github/stars/intelowlproject/IntelOwl?style=social)](https://github.com/intelowlproject/IntelOwl/stargazers)
 [![Docker](https://img.shields.io/docker/pulls/intelowlproject/intelowl)](https://hub.docker.com/repository/docker/intelowlproject/intelowl)
 [![Twitter Follow](https://img.shields.io/twitter/follow/intel_owl?style=social)](https://twitter.com/intel_owl)
 [![Official Site](https://img.shields.io/badge/official-site-blue)](https://intelowlproject.github.io)
-
 
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/intelowlproject/IntelOwl.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/intelowlproject/IntelOwl/context:python)
 [![CodeFactor](https://www.codefactor.io/repository/github/intelowlproject/intelowl/badge)](https://www.codefactor.io/repository/github/intelowlproject/intelowl)
@@ -14,21 +12,22 @@
 [![codecov](https://codecov.io/gh/intelowlproject/IntelOwl/branch/master/graph/badge.svg?token=R097M4TYA6)](https://codecov.io/gh/intelowlproject/IntelOwl)
 [![Build & Tests](https://github.com/intelowlproject/IntelOwl/workflows/Build%20&%20Tests/badge.svg)](https://github.com/intelowlproject/IntelOwl/actions)
 
-
 # Intel Owl
 
 Do you want to get **threat intelligence data** about a malware, an IP or a domain? Do you want to get this kind of data from multiple sources at the same time using **a single API request**?
 
 You are in the right place!
 
-Intel Owl is an Open Source Intelligence, or OSINT solution to get threat intelligence data about a specific file, an IP or a domain from a single API at scale. It integrates a number of analyzers available online and is for everyone who needs a single point to query for info about a specific file or observable.
+Intel Owl is an Open Source Intelligence, or OSINT solution to get threat intelligence data about a specific file, an IP or a domain from a single API at scale. It integrates a number of analyzers available online and a lot of cutting-edge malware analysis tools. It is for everyone who needs a single point to query for info about a specific file or observable.
 
 ### Features
 
 - Provides enrichment of threat intel for malware as well as observables (IP, Domain, URL and hash).
 - This application is built to **scale out** and to **speed up the retrieval of threat info**.
 - It can be integrated easily in your stack of security tools ([pyintelowl](https://github.com/intelowlproject/pyintelowl)) to automate common jobs usually performed, for instance, by SOC analysts manually.
-- Intel Owl is composed of **analyzers** that can be run to retrieve data from external sources (like VirusTotal or AbuseIPDB) or to generate intel from internal analyzers (like Yara or Oletools)
+- Intel Owl is composed of:
+  - **analyzers** that can be run to retrieve data from external sources (like VirusTotal or AbuseIPDB) or to generate intel from internal analyzers (like Yara or Oletools)
+  - **connectors** that can be run to export data to external platforms
 - API written in Django and Python 3.9.
 - Inbuilt frontend client: **[IntelOwl-ng](https://github.com/intelowlproject/IntelOwl-ng)** provides features such as dashboard, visualizations of analysis data, easy to use forms for requesting new analysis, etc. [Live Demo](https://intelowlclient.firebaseapp.com/).
 
@@ -52,89 +51,65 @@ To know more about the project and it's growth over time, you may be interested 
 You can see the full list of all available analyzers in the [documentation](https://intelowl.readthedocs.io/en/latest/Usage.html#available-analyzers) or [live demo](https://intelowlclient.firebaseapp.com/pages/analyzers/table).
 
 | Type                                               | Analyzers Available                                                                                                                                                                                                                                                                                            |
-|----------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| -------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Inbuilt modules                                    | - Static Document, RTF, PDF, PE, Generic File Analysis<br/> - Strings analysis with ML<br/> - PE Emulation with Speakeasy<br/> - PE Signature verification<br/> - PE Capabilities Extraction<br/> - Emulated Javascript Analysis<br/> - Android Malware Analysis<br/> - SPF and DMARC Validator<br/> - more... |
-| External services                                  | - GreyNoise v2<br/> - Intezer Scan<br/>  - VirusTotal v2+v3<br/>  - HybridAnalysis<br/>  - Censys.io<br/>  - Shodan<br/>  - AlienVault OTX<br/>  - Threatminer<br/>  - Abuse.ch<br/>  - many more..                                                                                                            |
-| Free modules that require additional configuration | - Cuckoo (requires at least one working Cuckoo instance)<br/>  - MISP (requires at least one working MISP instance)<br/>  - Yara (Community, Neo23x0, Intezer, McAfee rules are already available. There's the chance to add your own rules)                                                                   |
+| External services                                  | - GreyNoise v2<br/> - Intezer<br/> - VirusTotal v2+v3<br/> - HybridAnalysis<br/> - Censys.io<br/> - Shodan<br/> - AlienVault OTX<br/> - Intelligence_X<br/> - Abuse.ch MalwareBazaar/Threatfox<br/> - many more..                                                                                              |
+| Free modules that require additional configuration | - Cuckoo (requires at least one working Cuckoo instance)<br/> - MISP (requires at least one working MISP instance)<br/> - Yara (a lot of public rules area available. There's also the chance to add your own rules)                                                                                           |
 
-## Premium support 
-<img src="static_intel/xscode-banner.png" width="600" height="120" alt="xscode: Get Support"/><br/>
-_For urgent issues and priority support, visit [https://xscode.com/intelowlproject/IntelOwl](https://xscode.com/intelowlproject/IntelOwl)._
+## Partnerships and sponsors
 
-## Legal notice
+We have an official sponsorship program for companies, organizations and individuals who support IntelOwl development. For more details on how to join the list below, read the page: [Partnership and sponsors](https://github.com/certego/IntelOwl/blob/master/.github/partnership_and_sponsors.md).
 
-You as a user of this project must review, accept and comply with the license
-terms of each downloaded/installed package listed below. By proceeding with the
-installation, you are accepting the license terms of each package, and
-acknowledging that your use of each package will be subject to its respective
-license terms.
-
-[osslsigncode](https://github.com/develar/osslsigncode),
-[PyExifTool](https://github.com/sylikc/pyexiftool),
-[Exiftool package](https://exiftool.org/#license),
-[stringsifter](https://github.com/fireeye/stringsifter),
-[peepdf](https://github.com/jesparza/peepdf),
-[pefile](https://github.com/erocarrera/pefile),
-[oletools](https://github.com/decalage2/oletools),
-[XLMMacroDeobfuscator](https://github.com/DissectMalware/XLMMacroDeobfuscator),
-[MaxMind-DB-Reader-python](https://github.com/maxmind/MaxMind-DB-Reader-python),
-[pysafebrowsing](https://github.com/Te-k/pysafebrowsing),
-[google-web-risk](https://github.com/googleapis/python-webrisk),
-[PyMISP](https://github.com/MISP/PyMISP),
-[OTX-Python-SDK](https://github.com/AlienVault-OTX/OTX-Python-SDK),
-[yara-python](https://github.com/VirusTotal/yara-python),
-[GitPython](https://github.com/gitpython-developers/GitPython),
-[Yara community rules](https://github.com/Yara-Rules),
-[StrangerealIntel Daily Ioc Yara rules](https://github.com/StrangerealIntel/DailyIOC),
-[Neo23x0 Yara rules](https://github.com/Neo23x0/signature-base),
-[Intezer Yara rules](https://github.com/intezer/yara-rules),
-[McAfee Yara rules](https://github.com/advanced-threat-research/Yara-Rules),
-[Stratosphere Yara rules](https://github.com/stratosphereips/yara-rules),
-[FireEye Yara rules](https://github.com/fireeye/red_team_tool_countermeasures),
-[ReversingLabs Yara rules](https://github.com/reversinglabs/reversinglabs-yara-rules),
-[Samir Yara rules](https://github.com/sbousseaden/YaraHunts),
-[InQuest Yara rules](https://github.com/InQuest/yara-rules),
-[APKiD](https://github.com/rednaga/APKiD/blob/master/LICENSE.COMMERCIAL),
-[Box-JS](https://github.com/CapacitorSet/box-js/blob/master/LICENSE),
-[Capa](https://github.com/fireeye/capa/blob/master/LICENSE.txt),
-[Quark-Engine](https://github.com/quark-engine/quark-engine),
-[IntelX](https://intelx.io/terms-of-service),
-[Speakeasy](https://github.com/fireeye/speakeasy),
-[Checkdmarc](https://github.com/domainaware/checkdmarc),
-[Manalyze](https://github.com/JusticeRage/Manalyze),
-[Qiling](https://github.com/qilingframework/qiling),
-[Renderton](https://github.com/GoogleChrome/rendertron/blob/main/LICENSE)
-[PyCTI](https://github.com/OpenCTI-Platform/client-python/blob/master/LICENSE),
-[PyHashlookup](https://github.com/CIRCL/PyHashlookup),
-[PyPDNS](https://github.com/CIRCL/PyPDNS)
-
-## Acknowledgments
-
-### Sponsors
-
-This project was created and will be upgraded thanks to the following organizations:
+### GOLD
 
 #### Certego
-<a href="https://www.certego.net"> <img style="margin-right: 2px" width=176 height=50 src="static_intel/Certego.png" alt="Certego Logo"/> </a>
+
+<a href="https://www.certego.net"> <img style="margin-right: 2px" width=176 height=50 src="static_intel/Certego.png" alt="Certego Logo"/></a>
+
+[Certego](https://www.certego.net) is a MSSP and Threat Intelligence Provider based in Italy.
+
+Without Certego, IntelOwl would have not been born. Also, thanks to this company, it is constantly maintained and updated.
 
 #### The Honeynet Project
-<a href="https://www.honeynet.org"> <img style="border: 0.2px solid black" width=115 height=150 src="static_intel/honeynet_logo.png" alt="Honeynet.org logo"> </a>
 
-Since its birth, this project has been participating in the [Google Summer of Code](https://summerofcode.withgoogle.com/) (GSoC) under the Honeynet Project!
+<a href="https://www.honeynet.org"> <img style="border: 0.2px solid black" width=100 height=131 src="static_intel/honeynet_logo.png" alt="Honeynet.org logo"> </a>
+
+[The Honeynet Project](https://www.honeynet.org) is a non-profit organization working on creating open source cyber security tools and sharing knowledge about cyber threats.
+
+Since its birth, thanks to this organization, this project has been participating in the [Google Summer of Code](https://summerofcode.withgoogle.com/) (GSoC)!
 
 Project Summaries and/or in-development projects:
-* 2020: [Eshaan Bansal](https://twitter.com/eshaan7_): [IntelOwl Work Product](https://www.honeynet.org/2020/08/26/gsoc-2020-work-product%e2%80%8a-%e2%80%8aintel-owl/)
-* 2021: 
-  * [Sarthak Khattar](https://twitter.com/Mr_Momo07): [IntelOwl Improvements](https://www.honeynet.org/2021/08/20/gsoc-2021-project-summary-intelowl-improvements/)
-  * [Shubham Pandey](https://twitter.com/imshubham31): [IntelOwl Connectors Manager and Integrations](https://www.honeynet.org/2021/08/20/gsoc-2021-project-summary-intelowl-connectors-manager-and-integrations/)
 
-Stay tuned for the upcoming GSoC! Join the [Honeynet Slack chat](https://gsoc-slack.honeynet.org/) for more info.
+- 2020: [Eshaan Bansal](https://twitter.com/eshaan7_): [IntelOwl Work Product](https://www.honeynet.org/2020/08/26/gsoc-2020-work-product%e2%80%8a-%e2%80%8aintel-owl/)
+- 2021:
+  - [Sarthak Khattar](https://twitter.com/Mr_Momo07): [IntelOwl Improvements](https://www.honeynet.org/2021/08/20/gsoc-2021-project-summary-intelowl-improvements/)
+  - [Shubham Pandey](https://twitter.com/imshubham31): [IntelOwl Connectors Manager and Integrations](https://www.honeynet.org/2021/08/20/gsoc-2021-project-summary-intelowl-connectors-manager-and-integrations/)
+
+If you are interested in being the next GSoC student for IntelOwl, join the [Honeynet Slack chat](https://gsoc-slack.honeynet.org/) for more info.
+
+### BRONZE
+
+#### Tines
+
+<a href="https://www.tines.com"> <img style="border: 0.2px solid black" width=219 height=100 src="static_intel/tines_logo.png" alt="Tines logo"> </a>
+
+[Tines](https://www.tines.com) is an automation platform designed to allow anyone to automate any manual task, regardless of complexity.
+
+An official integration with IntelOwl will come soon.
 
 #### Docker
-In 2021 IntelOwl joined the official [Docker Open Source Program](https://www.docker.com/blog/expanded-support-for-open-source-software-projects/)
+
+<a href="https://www.docker.com"> <img style="border: 0.2px solid black" width=194 height=50 src="static_intel/docker_logo.png" alt="Docker logo"> </a>
+
+In 2021 IntelOwl joined the official [Docker Open Source Program](https://www.docker.com/blog/expanded-support-for-open-source-software-projects/). This allows IntelOwl developers to easily manage Docker images and focus on writing the code.
+
+### IRON
+
+If you are an individual who likes this project and wants to thank us with a little contribution, we would be happy to list you here in the README as a public acknowledgment.
 
 ## About the author and maintainers
 
-Feel free to contact the main developers at any time in Twitter:
+Feel free to contact the main developers at any time on twitter:
+
 - [Matteo Lodi](https://twitter.com/matte_lodi): Author and creator
 - [Eshaan Bansal](https://twitter.com/eshaan7_): Principal maintainer

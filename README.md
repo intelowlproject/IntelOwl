@@ -93,7 +93,7 @@ If you are interested in being the next GSoC student for IntelOwl, join the [Hon
 
 <a href="https://www.tines.com"> <img style="border: 0.2px solid black" width=219 height=100 src="static_intel/tines_logo.png" alt="Tines logo"> </a>
 
-[Tines](https://www.tines.com) is an automation platform designed to allow anyone to automate any manual task, regardless of complexity.
+[Tines](https://www.tines.com) is no-code automation for security teams. Build powerful, reliable workflows without a development team.
 
 An official integration with IntelOwl will come soon.
 

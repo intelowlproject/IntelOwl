@@ -23,22 +23,34 @@ logger = logging.getLogger(__name__)
 def filter_connectors(serialized_data: Dict, warnings: List[str]) -> List[str]:
     # init empty list
     cleaned_connectors_list = []
+    selected_connectors = []
 
     # get values from serializer
     connectors_requested = serialized_data.get("connectors_requested", [])
     tlp = serialized_data.get("tlp", TLP.WHITE).upper()
 
+    # read config
+    connector_dataclasses = ConnectorConfig.all()
+    all_connector_names = list(connector_dataclasses.keys())
+
     # run all connectors ?
     run_all = len(connectors_requested) == 0
     if run_all:
         # select all
-        selected_connectors = ConnectorConfig.all()
+        selected_connectors.extend(all_connector_names)
     else:
         # select the ones requested
-        selected_connectors = ConnectorConfig.filter(names=connectors_requested)
+        selected_connectors.extend(connectors_requested)
 
-    for c_name, cc in selected_connectors.items():
+    for c_name in selected_connectors:
         try:
+            if not run_all:
+                if c_name not in all_connector_names:
+                    raise NotRunnableConnector(
+                        f"{c_name} won't run: not available in configuration"
+                    )
+
+            cc = connector_dataclasses[c_name]
 
             if not cc.is_ready_to_use:  # check configured/disabled
                 raise NotRunnableConnector(

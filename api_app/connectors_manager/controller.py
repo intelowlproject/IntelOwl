@@ -9,6 +9,7 @@ from django.conf import settings
 from django.utils.module_loading import import_string
 from rest_framework.exceptions import ValidationError
 
+from intel_owl.consts import DEFAULT_QUEUE
 from api_app.models import TLP
 from api_app.exceptions import NotRunnableConnector
 from .dataclasses import ConnectorConfig
@@ -17,10 +18,6 @@ from .classes import Connector
 
 
 logger = logging.getLogger(__name__)
-
-
-# constants
-DEFAULT_QUEUE = "default"
 
 
 def filter_connectors(serialized_data: Dict, warnings: List[str]) -> List[str]:
@@ -42,20 +39,21 @@ def filter_connectors(serialized_data: Dict, warnings: List[str]) -> List[str]:
 
     for c_name, cc in selected_connectors.items():
         try:
-            if not cc.is_ready_to_use:
+
+            if not cc.is_ready_to_use:  # check configured/disabled
                 raise NotRunnableConnector(
-                    f"{c_name} is disabled or unconfigured, won't be run."
+                    f"{c_name} won't run: is disabled or unconfigured"
                 )
 
-            # check if job's tlp allows running
-            # e.g. if connector_tlp is GREEN(1),
-            # run for job_tlp WHITE(0) & GREEN(1) only
-            if TLP.get_priority(tlp) > TLP.get_priority(cc.maximum_tlp):
+            if TLP.get_priority(tlp) > TLP.get_priority(
+                cc.maximum_tlp
+            ):  # check if job's tlp allows running
+                # e.g. if connector_tlp is GREEN(1),
+                # run for job_tlp WHITE(0) & GREEN(1) only
                 raise NotRunnableConnector(
-                    f"{c_name}: job.tlp ('{tlp}') > maximum_tlp ('{cc.maximum_tlp}')"
-                    ", won't be run"
+                    f"{c_name} won't run: "
+                    f"job.tlp ('{tlp}') > maximum_tlp ('{cc.maximum_tlp}')"
                 )
-
         except NotRunnableConnector as e:
             if run_all:
                 # in this case, they are not warnings but expected and wanted behavior

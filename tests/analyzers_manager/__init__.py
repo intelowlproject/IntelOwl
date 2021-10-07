@@ -90,12 +90,21 @@ class _AbstractAnalyzersScriptTestCase(TransactionTestCase):
                     ]
                 ).values_list("name", flat=True)
             )
+            running_or_pending_connectors = list(
+                self.test_job.connector_reports.filter(
+                    status__in=[
+                        AbstractReport.Status.PENDING,
+                        AbstractReport.Status.RUNNING,
+                    ]
+                ).values_list("name", flat=True)
+            )
             print(
                 f"[REPORT] (poll #{i})",
                 f"\n>>> Job:{self.test_job.pk}, status:'{status}'",
                 f"\n>>> analyzer_reports:{analyzers_stats}",
                 f"\n>>> connector_reports:{connectors_stats} ",
                 f"\n>>> Running/Pending analyzers: {running_or_pending_analyzers}",
+                f"\n>>> Running/Pending connectors: {running_or_pending_connectors}",
             )
             # fail immediately if any analyzer or connector failed
             if analyzers_stats["failed"] > 0 or connectors_stats["failed"] > 0:

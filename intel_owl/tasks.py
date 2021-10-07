@@ -66,8 +66,8 @@ def start_analyzers(
 
 
 @app.task(name="post_all_analyzers_finished", soft_time_limit=100)
-def post_all_analyzers_finished(job_id: int):
-    analyzers_controller.post_all_analyzers_finished(job_id)
+def post_all_analyzers_finished(job_id: int, runtime_configuration: dict):
+    analyzers_controller.post_all_analyzers_finished(job_id, runtime_configuration)
 
 
 @app.task(name="run_analyzer", soft_time_limit=500)

@@ -6,6 +6,10 @@ class NotRunnableAnalyzer(Exception):
     pass
 
 
+class NotRunnableConnector(Exception):
+    pass
+
+
 class AnalyzerConfigurationException(Exception):
     pass
 

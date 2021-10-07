@@ -3,7 +3,6 @@
 
 import json
 import logging
-from typing import List
 
 from django.contrib.auth.models import Group
 from rest_framework import serializers

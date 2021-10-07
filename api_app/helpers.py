@@ -44,7 +44,7 @@ def calculate_mimetype(file_pointer, file_name) -> str:
     return mimetype
 
 
-def calculate_observable_classification(value):
+def calculate_observable_classification(value: str) -> str:
     """Returns observable classification for the given value.\n
     Only following types are supported:
     ip, domain, url, hash (md5, sha1, sha256), generic (if no match)
@@ -52,11 +52,6 @@ def calculate_observable_classification(value):
     Args:
         value (str):
             observable value
-
-    Raises:
-        IntelOwlClientException:
-            if value type is not recognized
-
     Returns:
         str: one of `ip`, `url`, `domain`, `hash` or 'generic'.
     """
@@ -92,7 +87,7 @@ def calculate_observable_classification(value):
     return classification
 
 
-def calculate_md5(value):
+def calculate_md5(value) -> str:
     return md5(str(value).encode("utf-8")).hexdigest()
 
 

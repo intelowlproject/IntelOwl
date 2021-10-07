@@ -188,7 +188,7 @@ class FileAnalysisSerializer(_AbstractJobCreateSerializer):
 
     file = serializers.FileField(required=True)
     file_name = serializers.CharField(required=True)
-    file_mimetype = serializers.HiddenField(default=None)
+    file_mimetype = serializers.CharField(required=False)
     md5 = serializers.CharField(required=False)
     is_sample = serializers.HiddenField(default=True)
 
@@ -209,11 +209,11 @@ class FileAnalysisSerializer(_AbstractJobCreateSerializer):
             "tags_id",
         )
 
-    def validate(self, attrs):
-        super(FileAnalysisSerializer, self).validate(attrs)
+    def validate(self, attrs: dict) -> dict:
+        attrs = super(FileAnalysisSerializer, self).validate(attrs)
         logger.debug(f"before attrs: {attrs}")
         attrs["file_mimetype"] = calculate_mimetype(attrs["file"], attrs["file_name"])
-        if not attrs.get("md5", ""):
+        if not attrs.get("md5", None):
             attrs["md5"] = calculate_md5(attrs["file"])
         logger.debug(f"after attrs: {attrs}")
         return attrs
@@ -246,15 +246,15 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
             "tags_id",
         )
 
-    def validate(self, attrs):
-        super(ObservableAnalysisSerializer, self).validate(attrs)
+    def validate(self, attrs: dict) -> dict:
+        attrs = super(ObservableAnalysisSerializer, self).validate(attrs)
         logger.debug(f"before attrs: {attrs}")
         attrs["observable_name"] = attrs["observable_name"].lower()
-        if not attrs.get("observable_classification", ""):
+        if not attrs.get("observable_classification", None):
             attrs["observable_classification"] = calculate_observable_classification(
                 attrs["observable_name"]
             )
-        if not attrs.get("md5", ""):
+        if not attrs.get("md5", None):
             attrs["md5"] = calculate_md5(attrs["observable_name"])
         logger.debug(f"after attrs: {attrs}")
         return attrs

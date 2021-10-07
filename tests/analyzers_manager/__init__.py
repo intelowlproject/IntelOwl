@@ -110,10 +110,6 @@ class _AbstractAnalyzersScriptTestCase(TransactionTestCase):
                 f"\n>>> Running/Pending analyzers: {running_or_pending_analyzers}",
                 f"\n>>> Running/Pending connectors: {running_or_pending_connectors}",
             )
-            print(
-                self.test_job.connectors_requested,
-                self.test_job.connectors_to_execute,
-            )
             # fail immediately if any analyzer or connector failed
             if analyzers_stats["failed"] > 0 or connectors_stats["failed"] > 0:
                 failed_analyzers = [

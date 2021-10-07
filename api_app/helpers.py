@@ -6,6 +6,7 @@
 import logging
 import ipaddress
 import re
+import random
 
 from hashlib import md5
 from magic import from_buffer as magic_from_buffer
@@ -21,6 +22,12 @@ def get_now_str():
 
 def get_now():
     return timezone.now()
+
+
+def gen_random_colorhex() -> str:
+    # flake8: noqa
+    r = lambda: random.randint(0, 255)
+    return "#%02X%02X%02X" % (r(), r(), r())
 
 
 def calculate_mimetype(file_pointer, file_name) -> str:

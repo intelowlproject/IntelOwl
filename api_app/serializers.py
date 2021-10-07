@@ -11,6 +11,7 @@ from rest_framework_guardian.serializers import ObjectPermissionsAssignmentMixin
 
 from api_app.models import Job, TLP, Tag
 from .helpers import (
+    gen_random_colorhex,
     calculate_mimetype,
     calculate_observable_classification,
     calculate_md5,
@@ -131,9 +132,7 @@ class _AbstractJobCreateSerializer(
     Base Serializer for Job create().
     """
 
-    tags_id = serializers.PrimaryKeyRelatedField(
-        many=True, write_only=True, queryset=Tag.objects.all()
-    )
+    tags_labels = serializers.ListField(default=list)
     runtime_configuration = serializers.JSONField(
         required=False, default={}, write_only=True
     )
@@ -161,18 +160,25 @@ class _AbstractJobCreateSerializer(
             "change_job": [*usr_groups],
         }
 
-    def validate(self, data) -> dict:
+    def validate(self, attrs: dict) -> dict:
         # check and validate runtime_configuration
-        runtime_conf = data.get("runtime_configuration", {})
+        runtime_conf = attrs.get("runtime_configuration", {})
         if runtime_conf and isinstance(runtime_conf, list):
             runtime_conf = json.loads(runtime_conf[0])
-        data["runtime_configuration"] = runtime_conf
+        attrs["runtime_configuration"] = runtime_conf
 
-        return data
+        return attrs
 
-    def create(self, validated_data) -> Job:
-        # fields `tags_id` are not there in `Job` model.
-        tags = validated_data.pop("tags_id", None)
+    def create(self, validated_data: dict) -> Job:
+        # create ``Tag`` objects from tags_labels
+        tags_labels = validated_data.pop("tags_labels", None)
+        tags = [
+            Tag.objects.get_or_create(
+                label=label, defaults={"color": gen_random_colorhex()}
+            )[0]
+            for label in tags_labels
+        ]
+
         job = Job.objects.create(**validated_data)
         if tags:
             job.tags.set(tags)
@@ -206,7 +212,7 @@ class FileAnalysisSerializer(_AbstractJobCreateSerializer):
             "runtime_configuration",
             "analyzers_requested",
             "connectors_requested",
-            "tags_id",
+            "tags_labels",
         )
 
     def validate(self, attrs: dict) -> dict:
@@ -243,7 +249,7 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
             "runtime_configuration",
             "analyzers_requested",
             "connectors_requested",
-            "tags_id",
+            "tags_labels",
         )
 
     def validate(self, attrs: dict) -> dict:

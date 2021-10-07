@@ -150,9 +150,10 @@ class ApiViewTests(TestCase):
             "analyzers_requested": analyzers_requested,
             "md5": md5,
             "observable_classification": observable_classification,
+            "tags_labels": ["test1", "test2"],
         }
 
-        response = self.client.post("/api/analyze_observable", data)
+        response = self.client.post("/api/analyze_observable", data, format="json")
         content = response.json()
         msg = (response.status_code, content)
         self.assertEqual(response.status_code, 200, msg=msg)
@@ -163,11 +164,14 @@ class ApiViewTests(TestCase):
         self.assertEqual(observable_classification, job.observable_classification)
         self.assertEqual(md5, job.md5)
         self.assertListEqual(analyzers_requested, job.analyzers_requested)
+        self.assertListEqual(
+            data["tags_labels"], list(job.tags.values_list("label", flat=True))
+        )
 
     def test_analyze_observable_ip(self):
         data = self.analyze_observable_ip_data.copy()
 
-        response = self.client.post("/api/analyze_observable", data)
+        response = self.client.post("/api/analyze_observable", data, format="json")
         content = response.json()
         msg = (response.status_code, content)
         self.assertEqual(response.status_code, 200, msg=msg)
@@ -191,7 +195,7 @@ class ApiViewTests(TestCase):
             "observable_classification"
         )
 
-        response = self.client.post("/api/analyze_observable", data)
+        response = self.client.post("/api/analyze_observable", data, format="json")
         content = response.json()
         msg = (response.status_code, content)
         self.assertEqual(response.status_code, 200, msg=msg)

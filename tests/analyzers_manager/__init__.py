@@ -22,13 +22,14 @@ class _AbstractAnalyzersScriptTestCase(TransactionTestCase):
     # constants
     TIMEOUT_SECONDS: int = 60 * 5  # 5 minutes
     SLEEP_SECONDS: int = 5  # 5 seconds
+    analyzer_configs = AnalyzerConfig.all()
+    connector_configs = ConnectorConfig.all()
 
+    # attrs
     test_job: Job
     analyzer_configs: dict
     runtime_configuration: dict
     analyzers_to_test: list
-    analyzer_configs = AnalyzerConfig.all()
-    connector_configs = ConnectorConfig.all()
 
     @classmethod
     def get_params(cls):

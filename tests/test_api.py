@@ -153,7 +153,7 @@ class ApiViewTests(TestCase):
             "tags_labels": ["test1", "test2"],
         }
 
-        response = self.client.post("/api/analyze_observable", data)
+        response = self.client.post("/api/analyze_observable", data, format="json")
         content = response.json()
         msg = (response.status_code, content)
         self.assertEqual(response.status_code, 200, msg=msg)
@@ -171,7 +171,7 @@ class ApiViewTests(TestCase):
     def test_analyze_observable_ip(self):
         data = self.analyze_observable_ip_data.copy()
 
-        response = self.client.post("/api/analyze_observable", data)
+        response = self.client.post("/api/analyze_observable", data, format="json")
         content = response.json()
         msg = (response.status_code, content)
         self.assertEqual(response.status_code, 200, msg=msg)
@@ -195,7 +195,7 @@ class ApiViewTests(TestCase):
             "observable_classification"
         )
 
-        response = self.client.post("/api/analyze_observable", data)
+        response = self.client.post("/api/analyze_observable", data, format="json")
         content = response.json()
         msg = (response.status_code, content)
         self.assertEqual(response.status_code, 200, msg=msg)

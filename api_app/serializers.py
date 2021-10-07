@@ -52,24 +52,6 @@ class TagSerializer(ObjectPermissionsAssignmentMixin, serializers.ModelSerialize
         }
 
 
-class _TagGetOrCreateRelatedField(serializers.SlugRelatedField):
-    def __init__(self, **kwargs):
-        super(_TagGetOrCreateRelatedField, self).__init__(
-            slug_field="label", many=True, queryset=Tag.objects.all(), **kwargs
-        )
-
-    def to_internal_value(self, data: List[str]) -> List[Tag]:
-        try:
-            return [
-                Tag.objects.get_or_create(
-                    label=label, defaults={"color": gen_random_colorhex()}
-                )[0]
-                for label in data
-            ]
-        except (TypeError, ValueError):
-            self.fail("invalid")
-
-
 class JobAvailabilitySerializer(serializers.ModelSerializer):
     """
     Serializer for ask_analysis_availability
@@ -151,7 +133,7 @@ class _AbstractJobCreateSerializer(
     Base Serializer for Job create().
     """
 
-    tags_labels = _TagGetOrCreateRelatedField(required=False, write_only=True)
+    tags_labels = serializers.ListField(default=list)
     runtime_configuration = serializers.JSONField(
         required=False, default={}, write_only=True
     )
@@ -189,8 +171,15 @@ class _AbstractJobCreateSerializer(
         return attrs
 
     def create(self, validated_data: dict) -> Job:
-        # fields `tags_id` are not there in `Job` model.
-        tags = validated_data.pop("tags_labels", None)
+        # create ``Tag`` objects from tags_labels
+        tags_labels = validated_data.pop("tags_labels", None)
+        tags = [
+            Tag.objects.get_or_create(
+                label=label, defaults={"color": gen_random_colorhex()}
+            )[0]
+            for label in tags_labels
+        ]
+
         job = Job.objects.create(**validated_data)
         if tags:
             job.tags.set(tags)

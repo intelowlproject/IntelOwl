@@ -4,12 +4,7 @@
 import logging
 from typing import Union
 
-from intel_owl.celery import app as celery_app
-from api_app import models, serializers, permissions
-from .analyzers_manager import controller as analyzers_controller
-
 from wsgiref.util import FileWrapper
-
 from django.utils.decorators import method_decorator
 from django.http import HttpResponse
 from django.db.models import Q
@@ -30,6 +25,11 @@ from drf_spectacular.utils import (
     inline_serializer,
 )
 from drf_spectacular.types import OpenApiTypes
+
+from intel_owl.celery import app as celery_app
+from api_app import models, serializers, permissions
+from .analyzers_manager import controller as analyzers_controller
+from .connectors_manager import controller as connectors_controller
 
 
 logger = logging.getLogger(__name__)
@@ -65,8 +65,17 @@ def _analysis_request(
     if not cleaned_analyzer_list:
         raise ValidationError({"detail": "No Analyzers can be run after filtering."})
 
+    cleaned_connectors_list = connectors_controller.filter_connectors(
+        serialized_data,
+        warnings,
+    )
+
     # save the arrived data plus new params into a new job object
-    job = serializer.save(source=source, analyzers_to_execute=cleaned_analyzer_list)
+    job = serializer.save(
+        source=source,
+        analyzers_to_execute=cleaned_analyzer_list,
+        connectors_to_execute=cleaned_connectors_list,
+    )
 
     logger.info(f"New Job added to queue <- {repr(job)}.")
 
@@ -87,6 +96,7 @@ def _analysis_request(
         "job_id": job.pk,
         "warnings": warnings,
         "analyzers_running": cleaned_analyzer_list,
+        "connectors_running": cleaned_connectors_list,
     }
 
     logger.debug(response_dict)

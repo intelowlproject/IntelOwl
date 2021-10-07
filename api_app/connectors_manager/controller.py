@@ -2,65 +2,110 @@
 # See the file 'LICENSE' for copying permission.
 
 import logging
-from typing import Union, List, Dict
-
-from rest_framework.exceptions import ValidationError
+from typing import List, Dict
 from celery import uuid, group
 
 from django.conf import settings
 from django.utils.module_loading import import_string
-from api_app.models import TLP, Job
+from rest_framework.exceptions import ValidationError
+
+from intel_owl.consts import DEFAULT_QUEUE
+from api_app.models import TLP
+from api_app.exceptions import NotRunnableConnector
 from .dataclasses import ConnectorConfig
 from .models import ConnectorReport
 from .classes import Connector
 
+
 logger = logging.getLogger(__name__)
 
 
-# constants
-ALL_CONNECTORS = "__all__"
-DEFAULT_QUEUE = "default"
+def filter_connectors(serialized_data: Dict, warnings: List[str]) -> List[str]:
+    # init empty list
+    cleaned_connectors_list = []
+    selected_connectors = []
+
+    # get values from serializer
+    connectors_requested = serialized_data.get("connectors_requested", [])
+    tlp = serialized_data.get("tlp", TLP.WHITE).upper()
+
+    # read config
+    connector_dataclasses = ConnectorConfig.all()
+    all_connector_names = list(connector_dataclasses.keys())
+
+    # run all connectors ?
+    run_all = len(connectors_requested) == 0
+    if run_all:
+        # select all
+        selected_connectors.extend(all_connector_names)
+    else:
+        # select the ones requested
+        selected_connectors.extend(connectors_requested)
+
+    for c_name in selected_connectors:
+        try:
+            cc = connector_dataclasses.get(c_name, None)
+
+            if not cc:
+                if not run_all:
+                    raise NotRunnableConnector(
+                        f"{c_name} won't run: not available in configuration"
+                    )
+                # don't add warning if run_all
+                continue
+
+            if not cc.is_ready_to_use:  # check configured/disabled
+                raise NotRunnableConnector(
+                    f"{c_name} won't run: is disabled or unconfigured"
+                )
+
+            if TLP.get_priority(tlp) > TLP.get_priority(
+                cc.maximum_tlp
+            ):  # check if job's tlp allows running
+                # e.g. if connector_tlp is GREEN(1),
+                # run for job_tlp WHITE(0) & GREEN(1) only
+                raise NotRunnableConnector(
+                    f"{c_name} won't run: "
+                    f"job.tlp ('{tlp}') > maximum_tlp ('{cc.maximum_tlp}')"
+                )
+        except NotRunnableConnector as e:
+            if run_all:
+                # in this case, they are not warnings but expected and wanted behavior
+                logger.debug(e)
+            else:
+                logger.warning(e)
+                warnings.append(str(e))
+        else:
+            cleaned_connectors_list.append(c_name)
+
+    return cleaned_connectors_list
 
 
 def start_connectors(
     job_id: int,
-    connector_names: Union[List, str] = ALL_CONNECTORS,
+    connectors_to_execute: List[str],
     runtime_configuration: Dict[str, Dict] = None,
-) -> Dict[str, str]:
+) -> None:
     from intel_owl import tasks
 
     # we should not use mutable objects as default to avoid unexpected issues
     if runtime_configuration is None:
         runtime_configuration = {}
 
-    # mapping of connector name and task_id
-    connectors_task_id_map = {}
     # to store the celery task signatures
     task_signatures = []
 
     # get connectors config
-    if connector_names == ALL_CONNECTORS:
-        connectors_config = ConnectorConfig.all()
-    else:
-        connectors_config = ConnectorConfig.filter(names=connector_names)
-
-    # get job
-    job = Job.objects.get(pk=job_id)
+    connector_dataclasses = ConnectorConfig.filter(names=connectors_to_execute)
 
     # loop over and create task signatures
-    for connector_name, cc in connectors_config.items():
-
+    for c_name, cc in connector_dataclasses.items():
         # if disabled or unconfigured (this check is bypassed in TEST_MODE)
         if not cc.is_ready_to_use and not settings.TEST_MODE:
             continue
 
-        # check if job's tlp allows running
-        # e.g. if connector_tlp is GREEN(1), run for job_tlp WHITE(0) & GREEN(1) only
-        if TLP.get_priority(job.tlp) > TLP.get_priority(cc.maximum_tlp):
-            continue
-
         # get runtime_configuration if any specified for this analyzer
-        runtime_params = runtime_configuration.get(connector_name, {})
+        runtime_params = runtime_configuration.get(c_name, {})
         # gen a new task_id
         task_id = uuid()
         # construct args
@@ -73,14 +118,12 @@ def start_connectors(
         queue = cc.config.queue
         if queue not in settings.CELERY_QUEUES:
             logger.error(
-                f"Connector {connector_name} has a wrong queue."
+                f"Connector {c_name} has a wrong queue."
                 f" Setting to `{DEFAULT_QUEUE}`"
             )
             queue = DEFAULT_QUEUE
         # get soft_time_limit
         soft_time_limit = cc.config.soft_time_limit
-        # add to map
-        connectors_task_id_map[connector_name] = task_id
         # create task signature and add to list
         task_signatures.append(
             tasks.run_connector.signature(
@@ -98,7 +141,7 @@ def start_connectors(
     mygroup = group(task_signatures)
     mygroup()
 
-    return connectors_task_id_map
+    return None
 
 
 def set_failed_connector(

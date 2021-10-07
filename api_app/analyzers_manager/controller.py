@@ -46,17 +46,19 @@ def filter_analyzers(serialized_data: Dict, warnings: List) -> List[str]:
 
     for a_name in selected_analyzers:
         try:
-            if not run_all:
-                if a_name not in all_analyzer_names:
-                    raise NotRunnableAnalyzer(
-                        f"{a_name} not available in configuration"
-                    )
+            config = analyzer_dataclasses.get(a_name, None)
 
-            config = analyzer_dataclasses[a_name]
+            if not config:
+                if not run_all:
+                    raise NotRunnableAnalyzer(
+                        f"{a_name} won't run: not available in configuration"
+                    )
+                # don't add warning if run_all
+                continue
 
             if not config.is_ready_to_use:
                 raise NotRunnableAnalyzer(
-                    f"{a_name} is disabled or unconfigured, won't be run."
+                    f"{a_name} won't run: is disabled or unconfigured"
                 )
 
             if serialized_data["is_sample"]:
@@ -168,7 +170,9 @@ def start_analyzers(
     # also link the callback to be executed
     # canvas docs: https://docs.celeryproject.org/en/stable/userguide/canvas.html
     runner = chord(task_signatures)
-    cb_signature = tasks.post_all_analyzers_finished.signature([job.pk], immutable=True)
+    cb_signature = tasks.post_all_analyzers_finished.signature(
+        [job.pk, runtime_configuration], immutable=True
+    )
     runner(cb_signature)
 
     return None
@@ -251,7 +255,7 @@ def run_analyzer(
     return report
 
 
-def post_all_analyzers_finished(job_id: int) -> None:
+def post_all_analyzers_finished(job_id: int, runtime_configuration: dict) -> None:
     """
     Callback fn that is executed after all analyzers have finished.
     """
@@ -263,10 +267,12 @@ def post_all_analyzers_finished(job_id: int) -> None:
     job_cleanup(job)
     # fire connectors when job finishes with success
     # avoid re-triggering of connectors (case: recurring analyzer run)
-    if job.status == Job.Status.REPORTED_WITHOUT_FAILS and not len(
-        job.connectors_to_execute
+    if job.status == Job.Status.REPORTED_WITHOUT_FAILS and (
+        len(job.connectors_to_execute) > 0 and job.connector_reports.count() == 0
     ):
-        tasks.on_job_success.apply_async(args=[job_id])
+        tasks.start_connectors.apply_async(
+            args=[job_id, job.connectors_to_execute, runtime_configuration]
+        )
 
 
 def kill_ongoing_analysis(job: Job) -> None:

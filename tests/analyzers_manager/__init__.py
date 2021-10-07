@@ -14,6 +14,7 @@ from intel_owl.tasks import start_analyzers
 from api_app.models import Job
 from api_app.core.models import AbstractReport
 from api_app.analyzers_manager.dataclasses import AnalyzerConfig
+from api_app.connectors_manager.dataclasses import ConnectorConfig
 
 
 class _AbstractAnalyzersScriptTestCase(TransactionTestCase):
@@ -21,7 +22,10 @@ class _AbstractAnalyzersScriptTestCase(TransactionTestCase):
     # constants
     TIMEOUT_SECONDS: int = 60 * 5  # 5 minutes
     SLEEP_SECONDS: int = 5  # 5 seconds
+    analyzer_configs = AnalyzerConfig.all()
+    connector_configs = ConnectorConfig.all()
 
+    # attrs
     test_job: Job
     analyzer_configs: dict
     runtime_configuration: dict
@@ -31,7 +35,9 @@ class _AbstractAnalyzersScriptTestCase(TransactionTestCase):
     def get_params(cls):
         return {
             "source": "test",
-            "analyzers_requested": ["test"],
+            "analyzers_requested": [],
+            "connectors_requested": [],
+            "connectors_to_execute": list(cls.connector_configs.keys()),
         }
 
     @classmethod
@@ -46,8 +52,6 @@ class _AbstractAnalyzersScriptTestCase(TransactionTestCase):
             return super(_AbstractAnalyzersScriptTestCase, cls).setUpClass()
 
     def setUp(self):
-        # analyzer config
-        self.analyzer_configs = AnalyzerConfig.all()
         analyzers_to_test = os.environ.get("TEST_ANALYZERS", "").split(",")
         self.analyzers_to_test = (
             analyzers_to_test
@@ -90,12 +94,21 @@ class _AbstractAnalyzersScriptTestCase(TransactionTestCase):
                     ]
                 ).values_list("name", flat=True)
             )
+            running_or_pending_connectors = list(
+                self.test_job.connector_reports.filter(
+                    status__in=[
+                        AbstractReport.Status.PENDING,
+                        AbstractReport.Status.RUNNING,
+                    ]
+                ).values_list("name", flat=True)
+            )
             print(
                 f"[REPORT] (poll #{i})",
                 f"\n>>> Job:{self.test_job.pk}, status:'{status}'",
                 f"\n>>> analyzer_reports:{analyzers_stats}",
                 f"\n>>> connector_reports:{connectors_stats} ",
                 f"\n>>> Running/Pending analyzers: {running_or_pending_analyzers}",
+                f"\n>>> Running/Pending connectors: {running_or_pending_connectors}",
             )
             # fail immediately if any analyzer or connector failed
             if analyzers_stats["failed"] > 0 or connectors_stats["failed"] > 0:
@@ -117,10 +130,10 @@ class _AbstractAnalyzersScriptTestCase(TransactionTestCase):
                 )
                 self.fail()
             # check analyzers status
-            if status not in ["running", "pending"]:
+            if status not in [Job.Status.PENDING, Job.Status.RUNNING]:
                 self.assertEqual(
                     status,
-                    "reported_without_fails",
+                    Job.Status.REPORTED_WITHOUT_FAILS,
                     msg="`test_job` status must be success",
                 )
                 self.assertEqual(

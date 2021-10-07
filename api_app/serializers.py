@@ -3,6 +3,7 @@
 
 import json
 import logging
+from typing import List
 
 from django.contrib.auth.models import Group
 from rest_framework import serializers
@@ -11,6 +12,7 @@ from rest_framework_guardian.serializers import ObjectPermissionsAssignmentMixin
 
 from api_app.models import Job, TLP, Tag
 from .helpers import (
+    gen_random_colorhex,
     calculate_mimetype,
     calculate_observable_classification,
     calculate_md5,
@@ -48,6 +50,24 @@ class TagSerializer(ObjectPermissionsAssignmentMixin, serializers.ModelSerialize
             "change_tag": user_grps,
             "delete_tag": user_grps,
         }
+
+
+class _TagGetOrCreateRelatedField(serializers.SlugRelatedField):
+    def __init__(self, **kwargs):
+        super(_TagGetOrCreateRelatedField, self).__init__(
+            slug_field="label", many=True, queryset=Tag.objects.all(), **kwargs
+        )
+
+    def to_internal_value(self, data: List[str]) -> List[Tag]:
+        try:
+            return [
+                Tag.objects.get_or_create(
+                    label=label, defaults={"color": gen_random_colorhex()}
+                )[0]
+                for label in data
+            ]
+        except (TypeError, ValueError):
+            self.fail("invalid")
 
 
 class JobAvailabilitySerializer(serializers.ModelSerializer):
@@ -131,9 +151,7 @@ class _AbstractJobCreateSerializer(
     Base Serializer for Job create().
     """
 
-    tags_id = serializers.PrimaryKeyRelatedField(
-        many=True, write_only=True, queryset=Tag.objects.all()
-    )
+    tags_labels = _TagGetOrCreateRelatedField(required=False, write_only=True)
     runtime_configuration = serializers.JSONField(
         required=False, default={}, write_only=True
     )
@@ -161,18 +179,18 @@ class _AbstractJobCreateSerializer(
             "change_job": [*usr_groups],
         }
 
-    def validate(self, data) -> dict:
+    def validate(self, attrs: dict) -> dict:
         # check and validate runtime_configuration
-        runtime_conf = data.get("runtime_configuration", {})
+        runtime_conf = attrs.get("runtime_configuration", {})
         if runtime_conf and isinstance(runtime_conf, list):
             runtime_conf = json.loads(runtime_conf[0])
-        data["runtime_configuration"] = runtime_conf
+        attrs["runtime_configuration"] = runtime_conf
 
-        return data
+        return attrs
 
-    def create(self, validated_data) -> Job:
+    def create(self, validated_data: dict) -> Job:
         # fields `tags_id` are not there in `Job` model.
-        tags = validated_data.pop("tags_id", None)
+        tags = validated_data.pop("tags_labels", None)
         job = Job.objects.create(**validated_data)
         if tags:
             job.tags.set(tags)
@@ -206,7 +224,7 @@ class FileAnalysisSerializer(_AbstractJobCreateSerializer):
             "runtime_configuration",
             "analyzers_requested",
             "connectors_requested",
-            "tags_id",
+            "tags_labels",
         )
 
     def validate(self, attrs: dict) -> dict:
@@ -243,7 +261,7 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
             "runtime_configuration",
             "analyzers_requested",
             "connectors_requested",
-            "tags_id",
+            "tags_labels",
         )
 
     def validate(self, attrs: dict) -> dict:

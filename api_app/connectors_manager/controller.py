@@ -44,13 +44,15 @@ def filter_connectors(serialized_data: Dict, warnings: List[str]) -> List[str]:
 
     for c_name in selected_connectors:
         try:
-            if not run_all:
-                if c_name not in all_connector_names:
+            cc = connector_dataclasses.get(c_name, None)
+
+            if not cc:
+                if not run_all:
                     raise NotRunnableConnector(
                         f"{c_name} won't run: not available in configuration"
                     )
-
-            cc = connector_dataclasses[c_name]
+                # don't add warning if run_all
+                continue
 
             if not cc.is_ready_to_use:  # check configured/disabled
                 raise NotRunnableConnector(

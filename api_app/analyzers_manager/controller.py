@@ -46,17 +46,19 @@ def filter_analyzers(serialized_data: Dict, warnings: List) -> List[str]:
 
     for a_name in selected_analyzers:
         try:
-            if not run_all:
-                if a_name not in all_analyzer_names:
-                    raise NotRunnableAnalyzer(
-                        f"{a_name} not available in configuration"
-                    )
+            config = analyzer_dataclasses.get(a_name, None)
 
-            config = analyzer_dataclasses[a_name]
+            if not config:
+                if not run_all:
+                    raise NotRunnableAnalyzer(
+                        f"{a_name} won't run: not available in configuration"
+                    )
+                # don't add warning if run_all
+                continue
 
             if not config.is_ready_to_use:
                 raise NotRunnableAnalyzer(
-                    f"{a_name} is disabled or unconfigured, won't be run."
+                    f"{a_name} won't run: is disabled or unconfigured"
                 )
 
             if serialized_data["is_sample"]:

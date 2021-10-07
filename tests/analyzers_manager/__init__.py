@@ -37,7 +37,7 @@ class _AbstractAnalyzersScriptTestCase(TransactionTestCase):
             "source": "test",
             "analyzers_requested": [],
             "connectors_requested": [],
-            "connectors_to_execute": cls.connector_configs.keys(),
+            "connectors_to_execute": list(cls.connector_configs.keys()),
         }
 
     @classmethod

@@ -95,7 +95,7 @@ If you are interested in being the next GSoC student for IntelOwl, join the [Hon
 
 [Tines](https://www.tines.com) is no-code automation for security teams. Build powerful, reliable workflows without a development team.
 
-IntelOwl is officially integrated in Tines. Read everything about this partnership [in the Tines' blog](https://tines-com.webflow.io/blog/announcing-our-sponsorship-of-intel-owl)
+IntelOwl is officially integrated in Tines. Read everything about this partnership [in the Tines' blog](https://www.tines.com/blog/announcing-our-sponsorship-of-intel-owl)
 
 #### Docker
 

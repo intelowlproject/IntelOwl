@@ -190,7 +190,7 @@ def ask_analysis_availability(request):
     request=serializers.FileAnalysisSerializer,
     responses={
         200: inline_serializer(
-            "AnalysisResponseSerializer",
+            "FileAnalysisResponseSerializer",
             fields={
                 "status": rfs.StringRelatedField(),
                 "job_id": rfs.IntegerField(),
@@ -212,7 +212,7 @@ def analyze_file(request):
     request=serializers.ObservableAnalysisSerializer,
     responses={
         200: inline_serializer(
-            "AnalysisResponseSerializer",
+            "ObservableAnalysisResponseSerializer",
             fields={
                 "status": rfs.StringRelatedField(),
                 "job_id": rfs.IntegerField(),

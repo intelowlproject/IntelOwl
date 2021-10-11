@@ -190,12 +190,13 @@ def ask_analysis_availability(request):
     request=serializers.FileAnalysisSerializer,
     responses={
         200: inline_serializer(
-            "FileAnalysisResponseSerializer",
+            "AnalysisResponseSerializer",
             fields={
                 "status": rfs.StringRelatedField(),
                 "job_id": rfs.IntegerField(),
                 "warnings": OpenApiTypes.OBJECT,
                 "analyzers_running": OpenApiTypes.OBJECT,
+                "connectors_running": OpenApiTypes.OBJECT,
             },
         ),
     },
@@ -211,12 +212,13 @@ def analyze_file(request):
     request=serializers.ObservableAnalysisSerializer,
     responses={
         200: inline_serializer(
-            "ObservableAnalysisResponseSerializer",
+            "AnalysisResponseSerializer",
             fields={
                 "status": rfs.StringRelatedField(),
                 "job_id": rfs.IntegerField(),
                 "warnings": OpenApiTypes.OBJECT,
                 "analyzers_running": OpenApiTypes.OBJECT,
+                "connectors_running": OpenApiTypes.OBJECT,
             },
         ),
     },

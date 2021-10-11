@@ -34,7 +34,7 @@ __all__ = [
 class TagSerializer(ObjectPermissionsAssignmentMixin, serializers.ModelSerializer):
     class Meta:
         model = Tag
-        fields = "__all__"
+        fields = serializers.ALL_FIELDS
 
     def get_permissions_map(self, created):
         """
@@ -58,7 +58,7 @@ class JobAvailabilitySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Job
-        fields = "__all__"
+        fields = serializers.ALL_FIELDS
 
     md5 = serializers.CharField(max_length=128, required=True)
     analyzers = serializers.ListField(default=list)
@@ -138,6 +138,7 @@ class _AbstractJobCreateSerializer(
     )
     analyzers_requested = serializers.ListField(default=list)
     connectors_requested = serializers.ListField(default=list)
+    md5 = serializers.HiddenField(default=None)
 
     def get_permissions_map(self, created) -> dict:
         """
@@ -195,7 +196,6 @@ class FileAnalysisSerializer(_AbstractJobCreateSerializer):
     file = serializers.FileField(required=True)
     file_name = serializers.CharField(required=True)
     file_mimetype = serializers.CharField(required=False)
-    md5 = serializers.CharField(required=False)
     is_sample = serializers.HiddenField(default=True)
 
     class Meta:
@@ -218,9 +218,10 @@ class FileAnalysisSerializer(_AbstractJobCreateSerializer):
     def validate(self, attrs: dict) -> dict:
         attrs = super(FileAnalysisSerializer, self).validate(attrs)
         logger.debug(f"before attrs: {attrs}")
+        # calculate ``file_mimetype``
         attrs["file_mimetype"] = calculate_mimetype(attrs["file"], attrs["file_name"])
-        if not attrs.get("md5", None):
-            attrs["md5"] = calculate_md5(attrs["file"])
+        # calculate ``md5``
+        attrs["md5"] = calculate_md5(attrs["file"])
         logger.debug(f"after attrs: {attrs}")
         return attrs
 
@@ -233,7 +234,6 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
 
     observable_name = serializers.CharField(required=True)
     observable_classification = serializers.CharField(required=False)
-    md5 = serializers.CharField(required=False)
     is_sample = serializers.HiddenField(default=False)
 
     class Meta:
@@ -255,12 +255,15 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
     def validate(self, attrs: dict) -> dict:
         attrs = super(ObservableAnalysisSerializer, self).validate(attrs)
         logger.debug(f"before attrs: {attrs}")
+        # force lowercase in ``observable_name``.
+        # Ref: https://github.com/intelowlproject/IntelOwl/issues/658
         attrs["observable_name"] = attrs["observable_name"].lower()
+        # calculate ``observable_classification``
         if not attrs.get("observable_classification", None):
             attrs["observable_classification"] = calculate_observable_classification(
                 attrs["observable_name"]
             )
-        if not attrs.get("md5", None):
-            attrs["md5"] = calculate_md5(attrs["observable_name"])
+        # calculate ``md5``
+        attrs["md5"] = calculate_md5(attrs["observable_name"])
         logger.debug(f"after attrs: {attrs}")
         return attrs

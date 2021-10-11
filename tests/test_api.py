@@ -25,10 +25,9 @@ class ApiViewTests(TestCase):
         self.client = APIClient()
         self.client.force_authenticate(user=self.superuser)
 
-        uploaded_file, md5 = self.__get_test_file("file.exe")
+        self.uploaded_file, self.file_md5 = self.__get_test_file("file.exe")
         self.analyze_file_data = {
-            "file": uploaded_file,
-            "md5": md5,
+            "file": self.uploaded_file,
             "analyzers_requested": [
                 "File_Info",
                 "PE_Info",
@@ -37,14 +36,15 @@ class ApiViewTests(TestCase):
             "file_mimetype": "application/x-dosexec",
         }
 
-        observable_name = os.environ.get("TEST_IP", "8.8.8.8")
-        md5 = hashlib.md5(observable_name.encode("utf-8")).hexdigest()
+        self.observable_name = os.environ.get("TEST_IP", "8.8.8.8")
+        self.observable_md5 = hashlib.md5(
+            self.observable_name.encode("utf-8")
+        ).hexdigest()
         self.analyze_observable_ip_data = {
-            "observable_name": observable_name,
+            "observable_name": self.observable_name,
             "analyzers_requested": [
                 "IPInfo",
             ],
-            "md5": md5,
             "observable_classification": "ip",
         }
 
@@ -68,7 +68,7 @@ class ApiViewTests(TestCase):
         )
         self.assertEqual(response.status_code, 200)
 
-    def test_ask_analysis_availability_run_all_analyzers(self):
+    def test_ask_analysis_availability__run_all_analyzers(self):
         md5 = os.environ.get("TEST_MD5", "446c5fbb11b9ce058450555c1c27153c")
         data = {"md5": md5, "analyzers": []}
         response = self.client.post(
@@ -76,7 +76,7 @@ class ApiViewTests(TestCase):
         )
         self.assertEqual(response.status_code, 200)
 
-    def test_analyze_file_corrupted_sample(self):
+    def test_analyze_file__corrupted_sample(self):
         analyzers_requested = [
             "File_Info",
         ]
@@ -86,7 +86,6 @@ class ApiViewTests(TestCase):
         data = {
             "file": uploaded_file,
             "analyzers_requested": analyzers_requested,
-            "md5": md5,
             "file_name": file_name,
             "file_mimetype": file_mimetype,
         }
@@ -103,7 +102,7 @@ class ApiViewTests(TestCase):
         self.assertEqual(md5, job.md5)
         self.assertListEqual(analyzers_requested, job.analyzers_requested)
 
-    def test_analyze_file_sample(self):
+    def test_analyze_file__exe(self):
         data = self.analyze_file_data.copy()
         response = self.client.post("/api/analyze_file", data, format="multipart")
         content = response.json()
@@ -114,13 +113,13 @@ class ApiViewTests(TestCase):
         job = models.Job.objects.get(pk=job_id)
         self.assertEqual(response.status_code, 200, msg=msg)
         self.assertEqual(data["file_name"], job.file_name, msg=msg)
-        self.assertEqual(data["md5"], job.md5, msg=msg)
         self.assertEqual(data["file_mimetype"], job.file_mimetype, msg=msg)
         self.assertListEqual(
             data["analyzers_requested"], job.analyzers_requested, msg=msg
         )
+        self.assertEqual(self.file_md5, job.md5, msg=msg)
 
-    def test_analyze_file_sample_dont_pass(self):
+    def test_analyze_file__guess_optional(self):
         data = self.analyze_file_data.copy()
         file_mimetype = data.pop("file_mimetype")  # let server guess it
 
@@ -132,13 +131,13 @@ class ApiViewTests(TestCase):
         job_id = int(content["job_id"])
         job = models.Job.objects.get(pk=job_id)
         self.assertEqual(data["file_name"], job.file_name, msg=msg)
-        self.assertEqual(data["md5"], job.md5, msg=msg)
         self.assertListEqual(
             data["analyzers_requested"], job.analyzers_requested, msg=msg
         )
         self.assertEqual(file_mimetype, job.file_mimetype, msg=msg)
+        self.assertEqual(self.file_md5, job.md5, msg=msg)
 
-    def test_analyze_observable_domain(self):
+    def test_analyze_observable__domain(self):
         analyzers_requested = [
             "Fortiguard",
         ]
@@ -148,7 +147,6 @@ class ApiViewTests(TestCase):
         data = {
             "observable_name": observable_name,
             "analyzers_requested": analyzers_requested,
-            "md5": md5,
             "observable_classification": observable_classification,
             "tags_labels": ["test1", "test2"],
         }
@@ -168,7 +166,7 @@ class ApiViewTests(TestCase):
             data["tags_labels"], list(job.tags.values_list("label", flat=True))
         )
 
-    def test_analyze_observable_ip(self):
+    def test_analyze_observable__ip(self):
         data = self.analyze_observable_ip_data.copy()
 
         response = self.client.post("/api/analyze_observable", data, format="json")
@@ -185,15 +183,13 @@ class ApiViewTests(TestCase):
         self.assertEqual(
             data["observable_classification"], job.observable_classification, msg=msg
         )
-        self.assertEqual(data["md5"], job.md5, msg=msg)
+        self.assertEqual(self.observable_md5, job.md5, msg=msg)
 
-    def test_analyze_observable_no_pass(self):
+    def test_analyze_observable__guess_optional(self):
         data = self.analyze_observable_ip_data.copy()
-        # dont pass md5 and observable_classification
-        # let the server calc/guess it
-        md5, observable_classification = data.pop("md5"), data.pop(
+        observable_classification = data.pop(
             "observable_classification"
-        )
+        )  # let the server calc it
 
         response = self.client.post("/api/analyze_observable", data, format="json")
         content = response.json()
@@ -209,7 +205,7 @@ class ApiViewTests(TestCase):
         self.assertEqual(
             observable_classification, job.observable_classification, msg=msg
         )
-        self.assertEqual(md5, job.md5, msg=msg)
+        self.assertEqual(self.observable_md5, job.md5, msg=msg)
 
     def test_download_sample_200(self):
         self.assertEqual(models.Job.objects.count(), 0)

@@ -7,8 +7,8 @@ import logging
 import ipaddress
 import re
 import random
+import hashlib
 
-from hashlib import md5
 from magic import from_buffer as magic_from_buffer
 
 from django.utils import timezone
@@ -95,7 +95,7 @@ def calculate_observable_classification(value: str) -> str:
 
 
 def calculate_md5(value) -> str:
-    return md5(str(value).encode("utf-8")).hexdigest()
+    return hashlib.md5(value).hexdigest()
 
 
 def get_ip_version(ip_value):

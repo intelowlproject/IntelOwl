@@ -28,7 +28,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FileAnalysisResponse'
+                $ref: '#/components/schemas/AnalysisResponse'
           description: ''
   /api/analyze_observable:
     post:
@@ -55,7 +55,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ObservableAnalysisResponse'
+                $ref: '#/components/schemas/AnalysisResponse'
           description: ''
   /api/analyzer/{name}/healthcheck:
     get:
@@ -593,6 +593,28 @@ paths:
           description: No response body
 components:
   schemas:
+    AnalysisResponse:
+      type: object
+      properties:
+        job_id:
+          type: integer
+        status:
+          type: string
+        warnings:
+          type: array
+          items: {}
+        analyzers_running:
+          type: array
+          items: {}
+        connectors_running:
+          type: array
+          items: {}
+      required:
+      - analyzers_running
+      - connectors_running
+      - job_id
+      - status
+      - warnings
     AnalyzerConfig:
       type: object
       description: Serializer for `analyzer_config.json`.
@@ -840,17 +862,6 @@ components:
       - file
       - file_name
       - id
-    FileAnalysisResponse:
-      type: object
-      properties:
-        status:
-          type: string
-          readOnly: true
-        job_id:
-          type: integer
-      required:
-      - job_id
-      - status
     GetAnalyzerConfigsFailedResponse:
       type: object
       properties:
@@ -1126,17 +1137,6 @@ components:
       required:
       - id
       - observable_name
-    ObservableAnalysisResponse:
-      type: object
-      properties:
-        status:
-          type: string
-          readOnly: true
-        job_id:
-          type: integer
-      required:
-      - job_id
-      - status
     ObservableSupportedEnum:
       enum:
       - ip

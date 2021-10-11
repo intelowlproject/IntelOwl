@@ -1,6 +1,7 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
+from hashlib import new
 import json
 import logging
 
@@ -221,7 +222,8 @@ class FileAnalysisSerializer(_AbstractJobCreateSerializer):
         # calculate ``file_mimetype``
         attrs["file_mimetype"] = calculate_mimetype(attrs["file"], attrs["file_name"])
         # calculate ``md5``
-        attrs["md5"] = calculate_md5(attrs["file"])
+        file_buffer = attrs["file"].read()
+        attrs["md5"] = calculate_md5(file_buffer)
         logger.debug(f"after attrs: {attrs}")
         return attrs
 
@@ -264,6 +266,6 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
                 attrs["observable_name"]
             )
         # calculate ``md5``
-        attrs["md5"] = calculate_md5(attrs["observable_name"])
+        attrs["md5"] = calculate_md5(attrs["observable_name"].encode("utf-8"))
         logger.debug(f"after attrs: {attrs}")
         return attrs

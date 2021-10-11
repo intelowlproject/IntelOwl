@@ -2,6 +2,31 @@
 
 [**Upgrade Guide**](https://intelowl.readthedocs.io/en/latest/Installation.html#update-to-the-most-recent-version)
 
+## [v3.1.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v3.1.0)
+
+> 🎉 We are glad to welcome [Tines](https://tines.com) as a new sponsor for IntelOwl. Read everything about this partnership [in the Tines' blog](https://www.tines.com/blog/announcing-our-sponsorship-of-intel-owl).
+
+**Notes:**
+
+- Update PyIntelOwl to version [4.1.0](https://github.com/intelowlproject/pyintelowl/blob/master/.github/CHANGELOG.md#410).
+- Introducing IntelOwl Official [Parternship & Sponsorship Tiers](https://github.com/intelowlproject/IntelOwl/blob/master/.github/partnership_and_sponsors.md).
+- IntelOwl now has an official integration in [Tines](https://tines.com) templates.
+
+**REST API changes:**
+
+- `/api/analyze_file` and `/api/analyze_observable`:
+  - Request Body:
+    - deprecate `md5` attribute. Will now be calculated on server.
+    - deprecate `tags_id` attribute in favor of `tags_labels`. Previously, the `tags_id` attribute would accept a list of tag indices, now the `tags_labels` accepts a list of tag labels (non-existing `Tag` objects are created automatically with a randomly generated color).
+    - `observable_classification` attribute is now optional. If not passed, the application tries to guess the correct classification using regular expressions.
+  - Response Body: now also returns a `connectors_running` attribute that is a list of connectors executed for the specific job.
+
+**Misc:**
+
+- Added default parameters to `entrypoint_flower.sh` to allow retrocompatibility.
+- Fixes in documentation.
+- Bump some dependencies.
+
 ## [v3.0.1](https://github.com/intelowlproject/IntelOwl/releases/tag/v3.0.1)
 
 This is a minor patch release.
@@ -10,7 +35,6 @@ This is a minor patch release.
 - Bug Fix: Some fixes and adjusts in documentation.
 - Analyzer adjusts: DNSdb, cuckoo, maxmind, greynoise analyzers.
 - Deps: Bump some requirements.
-
 
 ## [v3.0.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v3.0.0)
 
@@ -21,30 +45,34 @@ This is a minor patch release.
 > 💻 GUI changes can be seen in action on the [demo](https://intelowlclient.firebaseapp.com/pages/connectors).
 
 **Notes:**
+
 - Update PyIntelOwl to version [4.0.0](https://github.com/intelowlproject/pyintelowl/blob/master/.github/CHANGELOG.md#400).
 - If you modified your local `analyzer_config.json` file, then you will need to merge the changes manually because of the new format.
 
 **Features:**
-- Plugins (analyzers/connectors) that are not properly configured will not run even if requested. They will be marked as disabled from the dropdown on the analysis form and as a bonus you can also see if and why a plugin is not configured on the GUI tables. 
+
+- Plugins (analyzers/connectors) that are not properly configured will not run even if requested. They will be marked as disabled from the dropdown on the analysis form and as a bonus you can also see if and why a plugin is not configured on the GUI tables.
 - Added `kill`, `retry` and `healthcheck` features to analyzers and connectors. See [Managing Analyzers and Connectors](https://intelowl.readthedocs.io/en/master/Usage.html#managing-analyzers-and-connectors).
 - Standardized threat-sharing using Traffic Light Protocol or `TLP`, thereby deprecating the use of booleans `force_privacy`, `disable_external_analyzers` and `private`. See [TLP Support](https://intelowl.readthedocs.io/en/master/Usage.html#tlp-support). This makes the analysis form much more easier to use than before.
 
-
 **New class of plugins called _Connectors_:**
+
 - Connectors are designed to run after every successful analysis which makes them suitable for automated threat-sharing. Built to support integration with other SIEM/SOAR projects specifically aimed at Threat Sharing Platforms. See [Available Connectors](https://intelowl.readthedocs.io/en/master/Usage.html#available-connectors).
 - Newly added connectors for threat-sharing:
-  * `MISP`: automatically creates an event on your MISP instance.
-  * `OpenCTI`: automatically creates an observable and a linked report on your OpenCTI instance.
-  * `YETI`: find/create an observable on YETI.
+  - `MISP`: automatically creates an event on your MISP instance.
+  - `OpenCTI`: automatically creates an observable and a linked report on your OpenCTI instance.
+  - `YETI`: find/create an observable on YETI.
 - New `connectors_config.json` file for storing connectors related configuration.
 
 **New analyzers configuration format:**
+
 - The `additional_config_params` attribute was split into the following 3 individual attributes.
   - `config`: Includes common parameters - `queue` and `soft_time_limit`.
   - `params`: Includes default value, datatype and description for each [Analyzer](https://intelowl.readthedocs.io/en/master/Usage.html#analyzers-customization) or [Connector](https://intelowl.readthedocs.io/en/master/Usage.html#connectors-customization) specific parameters that modify runtime behaviour.
   - `secrets`: Includes analyzer or connector specific secrets (e.g. API Key) name along with the secret's description. All secrets are required.
 
 **New inbuilt analyzers/fixes to existing:**
+
 - New `Spyse` analyzer: Scan domains, IPs, emails and CVEs using Spyse's API. Register [here](https://spyse.com/user/registration).
 - New `OpenCTI` analyzer: scan an observable on an OpenCTI instance.
 - New `Intezer_Get` analyzer: check Managing Analyzers and Connectors if an analysis related to a hash is available in [Intezer](https://analyze.intezer.com/)
@@ -57,52 +85,61 @@ This is a minor patch release.
 - VirusTotal v3: New configuration options: `include_behaviour_summary` for behavioral analysis and `include_sigma_analyses` for sigma analysis report of the file. See [Customize Analyzers](https://intelowl.readthedocs.io/en/master/Advanced-Usage.html#customize-analyzer-execution-at-time-of-request).
 
 **REST API changes:**
+
 - The `/api/send_analysis_request` endpoint was split into two individual endpoints, namely, `/api/analyze_file` and `/api/analyze_observable` to allow for various improvements.
 - Updated endpoint for downloading job sample: `/api/jobs/{id}/download_sample`
 - Updated `/api/ask_analysis_availability` to be a `POST` endpoint to allow for various improvements.
 
 **Misc:**
+
 - Updated the elasticsearch mapping for `Job` model along with updated [Saved Object](https://github.com/intelowlproject/IntelOwl/blob/master/configuration/Kibana-Saved-Conf.ndjson) for Kibana.
 
-
 ## [v2.5.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v2.5.0)
+
 **New Inbuilt Analyzers:**
+
 - New `Dehashed_Search` analyzer: Query any observable/keyword against Dehashed's search API (https://dehashed.com).
 
 **Analyzer Improvements & Fixes:**
+
 - Improvements in the `cuckoo_scan.py`, `file_info.py`, `abuseipdb.py`, and `otx.py`.
 - Fix: Exiftool download link was broken (Issue [#507](https://github.com/intelowlproject/IntelOwl/issues/507))
 
 **Other:**
+
 - as always: fixes, tweaks and dependencies upgrades.
 
 **Important Notes:**
+
 - This is the last stable release in the v2.x pipeline. The next release of IntelOwl, v3.0, will bring exciting new features and breaking changes. Some things that we have in the works:
-  * A new class of plugins called _Connectors_ to allow integration with other SIEM/SOAR projects specifically aimed at Threat Sharing Platforms. 
-  * Support for MISP and Open-CTI.
-  * automatically disabling of unconfigured analyzers
-  * ...and much more
-- IntelOwl joined the official [Docker Open Source Program](https://www.docker.com/blog/expanded-support-for-open-source-software-projects/). :tada: 
+  - A new class of plugins called _Connectors_ to allow integration with other SIEM/SOAR projects specifically aimed at Threat Sharing Platforms.
+  - Support for MISP and Open-CTI.
+  - automatically disabling of unconfigured analyzers
+  - ...and much more
+- IntelOwl joined the official [Docker Open Source Program](https://www.docker.com/blog/expanded-support-for-open-source-software-projects/). :tada:
 
 ## [v2.4.2](https://github.com/intelowlproject/IntelOwl/releases/tag/v2.4.2)
+
 - darksearch.io search API analyzer
 - improved abuseipdb analyzer to show matched categories in a human readable form too
-- improved HoneyDB analyzer 
+- improved HoneyDB analyzer
 - as always: fixes, tweaks and dependencies upgrades.
 
 ## [v2.4.1](https://github.com/intelowlproject/IntelOwl/releases/tag/v2.4.1)
+
 A lot of different fixes, tweaks and dependencies upgrades. Also the documentation was updated
 
 ## [v2.4.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v2.4.0)
 
 We welcome new GSoC students ([Sarthak Khattar](https://twitter.com/Mr_Momo07) and [Shubham Pandey](https://twitter.com/imshubham31)) in the Organization!
 
-
 Main updates:
+
 - new release of the official GUI [IntelOwl-Ng](https://github.com/intelowlproject/IntelOwl-ng/releases/tag/v2.1.0)
 - added [Malpedia](https://malpedia.caad.fkie.fraunhofer.de) analyzer
 
 Then a lot of maintenance and overall project stability issues solved:
+
 - removed `eventlet` broken dependency
 - bumped new versions of a lot of dependencies
 - Improved "Installation" and "Contribute" documentation
@@ -112,11 +149,13 @@ Then a lot of maintenance and overall project stability issues solved:
 - other little refactors and fixes
 
 ## [v2.3.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v2.3.0)
+
 - Added [API documentation](https://intelowl.readthedocs.io) with both [Redoc](https://github.com/Redocly/redoc) and [OpenAPI](https://github.com/OAI/OpenAPI-Specification) Format
 
 **NEW INBUILT ANALYZERS:**
+
 - added [ThreatFox Abuse.ch](https://threatfox.abuse.ch) analyzer for observables
-- added [GreyNoise Community](https://developer.greynoise.io/reference/community-api) analyzer for IP addresses 
+- added [GreyNoise Community](https://developer.greynoise.io/reference/community-api) analyzer for IP addresses
 - added [FireHol](http://iplists.firehol.org/) analyzer to detect malicious IP addresses
 - added [SSAPINet](https://screenshotapi.net) analyzer to capture a screenshot of a web page
 - added optional [Google Rendertron](https://github.com/GoogleChrome/rendertron) analyzer to capture a screenshot of a web page without using an external source (this won't leak the URL externally like the previous one)
@@ -124,47 +163,54 @@ Then a lot of maintenance and overall project stability issues solved:
 - added [Google Web Risk](https://cloud.google.com/web-risk) analyzer, an alternative of GoogleSafeBrowsing for commercial purposes
 
 **Others:**
+
 - A lot of dependency upgrades and clean up of unnecessary ones
 - refactor to some APIs + added tests for untested APIs
 - adjustments to MISP, OTX and Cymru analyzers
 
 ## [v2.2.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v2.2.0)
+
 - IntelOwl has **brand new project logos**. Thanks to @Certego.
- 
+
 **New Features:**
+
 - Introduced the possibility to enable/disable SSL check while connecting to a MISP platform. Thanks to @raw-data.
-- Users can now request to kill a job whose status is `running`. 
-   * GUI: Button on job result page.
-   * PyIntelOwl: `IntelOwl.kill_running_job` function
-   * CLI: `$ pyintelowl jobs kill <id>`
-   * API: `PATCH /api/jobs/{id}/kill`
+- Users can now request to kill a job whose status is `running`.
+  - GUI: Button on job result page.
+  - PyIntelOwl: `IntelOwl.kill_running_job` function
+  - CLI: `$ pyintelowl jobs kill <id>`
+  - API: `PATCH /api/jobs/{id}/kill`
 - Users can now delete a job.
-   * GUI: Button on job result page.
-   * PyIntelOwl: `IntelOwl.delete_job_by_id` function
-   * CLI: `$ pyintelowl jobs rm <id>`
-   * API: `DELETE /api/jobs/{id}`
- - Users can now delete a tag from the command line/pyintelowl (Eg: `$ pyintelowl tags rm <id>`). (Before, it was only possible from the web GUI or direct HTTP call.)
+  - GUI: Button on job result page.
+  - PyIntelOwl: `IntelOwl.delete_job_by_id` function
+  - CLI: `$ pyintelowl jobs rm <id>`
+  - API: `DELETE /api/jobs/{id}`
+- Users can now delete a tag from the command line/pyintelowl (Eg: `$ pyintelowl tags rm <id>`). (Before, it was only possible from the web GUI or direct HTTP call.)
 
 **Others:**
+
 - Deprecate `ask_analysis_result` API.
 - Update permission section of docs
 
-
 ## [v2.1.1](https://github.com/intelowlproject/IntelOwl/releases/tag/v2.1.1)
+
 **FIXES/IMPROVEMENTS/Dependency upgrades**
+
 - now `start.py` works with the most recent 1.28.2 version of docker-compose
 - updated Django, Yara and Speakeasy to most recent versions
 
-
 ## [v2.1.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v2.1.0)
+
 **IMPORTANT FIX**
 We changed `docker-compose` file names for optional analyzers. In the `v.2.0.0` this broke Docker Hub builds, causing them to fail. Please upgrade to this version to be able to use the optional analyzers again.
 
 **NEW INBUILT ANALYZERS:**
+
 - added [CRXCavator](https://crxcavator.io/) analyzer for malicious Chrome extensions
 - added [CERT Polska MWDB](https://mwdb.cert.pl) analyzer for malicious files
 
 **FIXES/IMPROVEMENTS/Dependency upgrades:**
+
 - updated `Quark_Engine` to last version and fixed rules
 - `Maxmind` analyzer now retrieves City data too
 - fixes for `Qiling` analyzer
@@ -172,7 +218,9 @@ We changed `docker-compose` file names for optional analyzers. In the `v.2.0.0` 
 - adjusts to auto-build, PR template and documentation
 
 ## [v2.0.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v2.0.0)
+
 **BREAKING CHANGES:**
+
 - moved docker and docker-compose files under `docker/` folder.
 - users upgrading from previous versions need to manually move `env_file_app`, `env_file_postgres` and `env_file_integrations` files under `docker/`.
 - users are to use the new [start.py](https://intelowl.readthedocs.io/en/stable/Installation.html#run) method to build or start IntelOwl containers
@@ -181,10 +229,11 @@ We changed `docker-compose` file names for optional analyzers. In the `v.2.0.0` 
   - [`PeFrame`](https://github.com/guelfoweb/peframe)
   - `Strings_Info_Classic` (based on [flarestrings](https://github.com/fireeye/stringsifter))
   - `Strings_Info_ML` (based on [stringsifter](https://github.com/fireeye/stringsifter))
-    
+
 Please see [docs](https://intelowl.readthedocs.io/en/stable/Advanced-Usage.html#optional-analyzers) to understand how to enable these optional analyzers
 
 **NEW INBUILT ANALYZERS:**
+
 - added [Qiling](https://github.com/qilingframework/qiling) file analyzer. This is an optional analyzer (see [docs](https://intelowl.readthedocs.io/en/stable/Advanced-Usage.html#optional-analyzers) to understand how to activate it).
 - added [Stratosphere blacklists](https://www.stratosphereips.org/attacker-ip-prioritization-blacklist) analyzer
 - added [FireEye Red Team Tool Countermeasures](https://github.com/fireeye/red_team_tool_countermeasures) Yara rules analyzer
@@ -193,26 +242,28 @@ Please see [docs](https://intelowl.readthedocs.io/en/stable/Advanced-Usage.html#
 - added [InQuest](https://labs.inquest.net) analyzer
 - added [WiGLE](api.wigle.net) analyzer
 - new analyzers were added to the `static_analyzers` optional docker container (see [docs](https://intelowl.readthedocs.io/en/stable/Advanced-Usage.html#optional-analyzers) to understand how to activate it).
-  -  [`FireEye Floss`](https://github.com/fireeye/flare-floss) strings analysis.
-  -  [`Manalyze`](https://github.com/JusticeRage/Manalyze) file analyzer
+  - [`FireEye Floss`](https://github.com/fireeye/flare-floss) strings analysis.
+  - [`Manalyze`](https://github.com/JusticeRage/Manalyze) file analyzer
 
 **FIXES/IMPROVEMENTS/Dependency upgrades:**
+
 - upgraded main Dockerfile to python 3.8
 - added support for the `generic` observable type. In this way it is possible to build analyzers that can analyze everything and not only IPs, domains, URLs or hashes
 - added [Multi-queue](https://intelowl.readthedocs.io/en/stable/Advanced-Usage.html#multi-queue) option to optimize usage of Celery queues. This is intended for advanced users.
 - updated GUI to new [IntelOwl-ng](https://github.com/intelowlproject/IntelOwl-ng/releases/tag/v1.7.0) version
 - upgraded [Speakeasy](https://github.com/fireeye/speakeasy), [Quark-Engine](https://github.com/quark-engine/quark-engine) and [Dnstwist](https://github.com/elceef/dnstwist) analyzers to last versions
 - moved from Travis CI to Github CI
-- added [CodeCov](https://about.codecov.io/) coverage support (*so we will be improving the test coverage shortly*)
-- moved PEFile library pointer to a forked [pip repo](https://pypi.org/project/pefile-fork/) that contains some fixes.  
+- added [CodeCov](https://about.codecov.io/) coverage support (_so we will be improving the test coverage shortly_)
+- moved PEFile library pointer to a forked [pip repo](https://pypi.org/project/pefile-fork/) that contains some fixes.
 - fix to log directiories that could result in some optional analyzers to break
 - added milliseconds to logs
 
-
 ## [v1.9.1](https://github.com/intelowlproject/IntelOwl/releases/tag/v1.9.1)
+
 This version was released earlier to fix installation problems triggered by the new version of `pip` (`peepdf`package was incompatible and had to be changed).
 
 **NEW INBUILT ANALYZERS:**
+
 - Added **MalwareBazaar_Google_Observable** analyzer: Check if a particular IP, domain or url is known to [MalwareBazaar](https://bazaar.abuse.ch) using google search
 - Added [InQuest YARA rules](https://github.com/InQuest/yara-rules) analyzer.
 - Added [StrangerealIntel Daily Ioc Yara rules](https://github.com/StrangerealIntel/DailyIOC) analyzer.
@@ -228,7 +279,9 @@ This version was released earlier to fix installation problems triggered by the 
 - removed nginx banner
 
 ## [v1.9.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v1.9.0)
+
 **NEW INBUILT ANALYZERS:**
+
 - Added [Triage](https://tria.ge) file analyzer.
 - Added [Zoomeye](https://www.zoomeye.org) analyzer.
 - Added [Dnstwist](https://github.com/elceef/dnstwist) analyzers.
@@ -247,17 +300,18 @@ This version was released earlier to fix installation problems triggered by the 
 ## [v1.8.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v1.8.0)
 
 **BREAKING CHANGE:**
-- New Token authentication method using the django-rest-durin package. When upgrading IntelOwl to `v1.8.0`, pyintelowl users must upgrade it too to `v2.0.0`. Also, pyintelowl users must create a new valid Token to interact with IntelOwl. More details, [here](https://github.com/intelowlproject/pyintelowl#generate-api-key).
-- Many analyzer variants for VirusTotal and Thug have been removed from `analyzer_config.json` file. 
-Explanation at [#224](https://github.com/intelowlproject/IntelOwl/issues/224). With added docs on how to use custom analyzer configuration at runtime.
-- Other analyzers were renamed due to better clarity and format:
-    * `ActiveDNS_Classic` -> `Classic_DNS`
-    * `ActiveDNS_CloudFlare` -> `CloudFlare_DNS`
-    * `ActiveDNS_CloudFlare_Malware` -> `CloudFlare_Malicious_Detector`
-    * `ActiveDNS_Google` -> `Google_DNS`
 
+- New Token authentication method using the django-rest-durin package. When upgrading IntelOwl to `v1.8.0`, pyintelowl users must upgrade it too to `v2.0.0`. Also, pyintelowl users must create a new valid Token to interact with IntelOwl. More details, [here](https://github.com/intelowlproject/pyintelowl#generate-api-key).
+- Many analyzer variants for VirusTotal and Thug have been removed from `analyzer_config.json` file.
+  Explanation at [#224](https://github.com/intelowlproject/IntelOwl/issues/224). With added docs on how to use custom analyzer configuration at runtime.
+- Other analyzers were renamed due to better clarity and format:
+  - `ActiveDNS_Classic` -> `Classic_DNS`
+  - `ActiveDNS_CloudFlare` -> `CloudFlare_DNS`
+  - `ActiveDNS_CloudFlare_Malware` -> `CloudFlare_Malicious_Detector`
+  - `ActiveDNS_Google` -> `Google_DNS`
 
 **NEW INBUILT ANALYZERS:**
+
 - Added [URLScan](https://urlscan.io/about-api) analyzer.
 - Added [Quad9](https://www.quad9.net/) analyzers (DNS + Malicious_Detector).
 - Added [Phishtank](http://phishtank.org/) analyzer.
@@ -279,18 +333,20 @@ Explanation at [#224](https://github.com/intelowlproject/IntelOwl/issues/224). W
 ## [v1.7.1](https://github.com/intelowlproject/IntelOwl/releases/tag/v1.7.1)
 
 Improvements to recent malicious document analysis:
-* Added [XLMMacroDeobfuscator](https://github.com/DissectMalware/XLMMacroDeobfuscator) analyzer, refer #196 thanks to @0ssigeno 
-* Updated oletools to last available changes
+
+- Added [XLMMacroDeobfuscator](https://github.com/DissectMalware/XLMMacroDeobfuscator) analyzer, refer #196 thanks to @0ssigeno
+- Updated oletools to last available changes
 
 Other:
-* updated black to 20.8b1 and little fix in the docs
+
+- updated black to 20.8b1 and little fix in the docs
 
 ## [v1.7.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v1.7.0)
 
 - 3 new analyzers which can be used out of the box:
-   * `UnpacMe_EXE_Unpacker`: [UnpacMe](https://www.unpac.me/) is an automated malware unpacking service. (Thanks to @0ssigeno)
-   * `CheckDMARC`: [checdmarc](https://github.com/domainaware/checkdmarc) provides SPF and DMARC DNS records validator for domains. (Thanks to @goodlandsecurity)
-   * `Whoisxmlapi`: Fetch WHOIS record data, of a domain name, an IP address, or an email address. (Thanks to @tamthaitu) 
+  - `UnpacMe_EXE_Unpacker`: [UnpacMe](https://www.unpac.me/) is an automated malware unpacking service. (Thanks to @0ssigeno)
+  - `CheckDMARC`: [checdmarc](https://github.com/domainaware/checkdmarc) provides SPF and DMARC DNS records validator for domains. (Thanks to @goodlandsecurity)
+  - `Whoisxmlapi`: Fetch WHOIS record data, of a domain name, an IP address, or an email address. (Thanks to @tamthaitu)
 - Some fixes to Cymru Malware and VT2 analyzers.
 - Now you or your organization can get paid support/extra features/custom integrations for IntelOwl via xscode platform. [Details](https://xscode.com/intelowlproject/IntelOwl).
 
@@ -302,13 +358,14 @@ Please see [v1.6.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v1.
 
 ## [v1.6.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v1.6.0)
 
-* added new analyzer for [FireEye speakeasy](https://github.com/fireeye/speakeasy)
-* updated [FireEye Capa](https://github.com/fireeye/capa) to 1.1.0
-* updated docs, including instructions for [Remnux](https://docs.remnux.org) users and a new ["How to use pyintelowl" video](https://www.youtube.com/watch?v=fpd6Kt9EZdI).
+- added new analyzer for [FireEye speakeasy](https://github.com/fireeye/speakeasy)
+- updated [FireEye Capa](https://github.com/fireeye/capa) to 1.1.0
+- updated docs, including instructions for [Remnux](https://docs.remnux.org) users and a new ["How to use pyintelowl" video](https://www.youtube.com/watch?v=fpd6Kt9EZdI).
 
 ## [v1.5.1](https://github.com/intelowlproject/IntelOwl/releases/tag/v1.5.1)
 
 Patch after **v1.5.0**.
+
 - Fixed `runtime_configuration` JSON serialization bug when requesting file scan.
 
 ## [v1.5.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v1.5.0)
@@ -316,21 +373,24 @@ Patch after **v1.5.0**.
 > This release contains a bug that was fixed in v1.5.1. We recommend cloning the `master` branch.
 
 **Features:**
+
 - Ability to pass a JSON field `runtime_configuration` for dynamic configuration per scan request. [Demo GIF](https://imgur.com/5sxp9JP).
 - IntelligenceX's phonebook API for observables.
 - Increased JWT token lifetime for webapp. ([Ref.](https://github.com/intelowlproject/IntelOwl/issues/163#issuecomment-678223186)).
 
 **Breaking Changes:**
+
 - Moved `ldap_config.py` under `configuration/` directory. If you were using LDAP before this release, please refer the [updated docs](https://intelowl.readthedocs.io/en/develop/Advanced-Usage.html#ldap).
 
 **Fixes:**
+
 - Updates and fixes to: `Doc_info`, `PE_Info`, `VirusTotal` v3 and `Shodan_Honeyscore` analyzers.
 - Added migration files for DB.
 
 ## [v1.4.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v1.4.0)
 
 - Inbuilt Integration for [Pulsedive](pulsedive.com/) analyzer for IP, URL, Domain and Hash observables. Works without API key with rate limit of 30 requests/minute.
-- Inbuilt integration for Integrated [Quark-engine](https://github.com/quark-engine/quark-engine) for APKs - *An Obfuscation-Neglect Android Malware Scoring System*.
+- Inbuilt integration for Integrated [Quark-engine](https://github.com/quark-engine/quark-engine) for APKs - _An Obfuscation-Neglect Android Malware Scoring System_.
 - Increase `max_length` for `file_mimetype` column. Thanks to @skygrip for the report.
 - Index the fields that are used in `ask_analysis_availability` for faster fetching.
 - Update LDAP documentation, add section about GKE deployments.
@@ -338,6 +398,5 @@ Patch after **v1.5.0**.
 - Fixed: `active_dns` now returns proper result.
 - The base docker image is now based on Python 3.7.
 - Refactor test cases/classes to reduce duplicate code.
-
 
 _For version prior to `v1.4.0`, you can directly refer to the releases tab._

@@ -222,7 +222,7 @@ class FileAnalysisSerializer(_AbstractJobCreateSerializer):
         # calculate ``file_mimetype``
         attrs["file_mimetype"] = calculate_mimetype(attrs["file"], attrs["file_name"])
         # calculate ``md5``
-        file_buffer = attrs["file"].read()
+        file_buffer = attrs["file"].file.read()
         attrs["md5"] = calculate_md5(file_buffer)
         logger.debug(f"after attrs: {attrs}")
         return attrs

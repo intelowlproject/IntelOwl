@@ -91,18 +91,23 @@ def _analysis_request(
             ),
         )
 
-    response_dict = {
-        "status": "accepted",
-        "job_id": job.pk,
-        "warnings": warnings,
-        "analyzers_running": cleaned_analyzer_list,
-        "connectors_running": cleaned_connectors_list,
-    }
+    ser = serializers.AnalysisResponseSerializer(
+        data={
+            "status": "accepted",
+            "job_id": job.pk,
+            "warnings": warnings,
+            "analyzers_running": cleaned_analyzer_list,
+            "connectors_running": cleaned_connectors_list,
+        }
+    )
+    ser.is_valid(raise_exception=True)
+
+    response_dict = ser.data
 
     logger.debug(response_dict)
 
     return Response(
-        serializers.AnalysisResponseSerializer(data=response_dict).data,
+        response_dict,
         status=status.HTTP_200_OK,
     )
 

@@ -28,6 +28,7 @@ __all__ = [
     "JobSerializer",
     "FileAnalysisSerializer",
     "ObservableAnalysisSerializer",
+    "AnalysisResponseSerializer",
 ]
 
 
@@ -221,7 +222,9 @@ class FileAnalysisSerializer(_AbstractJobCreateSerializer):
         # calculate ``file_mimetype``
         attrs["file_mimetype"] = calculate_mimetype(attrs["file"], attrs["file_name"])
         # calculate ``md5``
-        file_buffer = attrs["file"].file.read()
+        file_obj = attrs["file"].file
+        file_obj.seek(0)
+        file_buffer = file_obj.read()
         attrs["md5"] = calculate_md5(file_buffer)
         logger.debug(f"after attrs: {attrs}")
         return attrs
@@ -268,3 +271,11 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
         attrs["md5"] = calculate_md5(attrs["observable_name"].encode("utf-8"))
         logger.debug(f"after attrs: {attrs}")
         return attrs
+
+
+class AnalysisResponseSerializer(serializers.Serializer):
+    job_id = serializers.IntegerField()
+    status = serializers.CharField()
+    warnings = serializers.ListField()
+    analyzers_running = serializers.ListField()
+    connectors_running = serializers.ListField()

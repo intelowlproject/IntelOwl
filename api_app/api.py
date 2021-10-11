@@ -102,8 +102,9 @@ def _analysis_request(
     logger.debug(response_dict)
 
     return Response(
-        response_dict, status=status.HTTP_200_OK
-    )  # lgtm [py/stack-trace-exposure]
+        serializers.AnalysisResponseSerializer(data=response_dict).data,
+        status=status.HTTP_200_OK,
+    )
 
 
 """ REST API endpoints """
@@ -188,18 +189,7 @@ def ask_analysis_availability(request):
 @add_docs(
     description="This endpoint allows to start a Job related to a file",
     request=serializers.FileAnalysisSerializer,
-    responses={
-        200: inline_serializer(
-            "FileAnalysisResponseSerializer",
-            fields={
-                "status": rfs.StringRelatedField(),
-                "job_id": rfs.IntegerField(),
-                "warnings": OpenApiTypes.OBJECT,
-                "analyzers_running": OpenApiTypes.OBJECT,
-                "connectors_running": OpenApiTypes.OBJECT,
-            },
-        ),
-    },
+    responses={200: serializers.AnalysisResponseSerializer},
 )
 @api_view(["POST"])
 @permission_required_or_403("api_app.add_job")
@@ -210,18 +200,7 @@ def analyze_file(request):
 @add_docs(
     description="This endpoint allows to start a Job related to an observable",
     request=serializers.ObservableAnalysisSerializer,
-    responses={
-        200: inline_serializer(
-            "ObservableAnalysisResponseSerializer",
-            fields={
-                "status": rfs.StringRelatedField(),
-                "job_id": rfs.IntegerField(),
-                "warnings": OpenApiTypes.OBJECT,
-                "analyzers_running": OpenApiTypes.OBJECT,
-                "connectors_running": OpenApiTypes.OBJECT,
-            },
-        ),
-    },
+    responses={200: serializers.AnalysisResponseSerializer},
 )
 @api_view(["POST"])
 @permission_required_or_403("api_app.add_job")

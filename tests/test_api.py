@@ -25,6 +25,29 @@ class ApiViewTests(TestCase):
         self.client = APIClient()
         self.client.force_authenticate(user=self.superuser)
 
+        self.uploaded_file, self.file_md5 = self.__get_test_file("file.exe")
+        self.analyze_file_data = {
+            "file": self.uploaded_file,
+            "analyzers_requested": [
+                "File_Info",
+                "PE_Info",
+            ],
+            "file_name": "file.exe",
+            "file_mimetype": "application/x-dosexec",
+        }
+
+        self.observable_name = os.environ.get("TEST_IP", "8.8.8.8")
+        self.observable_md5 = hashlib.md5(
+            self.observable_name.encode("utf-8")
+        ).hexdigest()
+        self.analyze_observable_ip_data = {
+            "observable_name": self.observable_name,
+            "analyzers_requested": [
+                "IPInfo",
+            ],
+            "observable_classification": "ip",
+        }
+
     @staticmethod
     def __get_test_file(fname):
         floc = f"{settings.PROJECT_LOCATION}/test_files/{fname}"
@@ -45,7 +68,7 @@ class ApiViewTests(TestCase):
         )
         self.assertEqual(response.status_code, 200)
 
-    def test_ask_analysis_availability_run_all_analyzers(self):
+    def test_ask_analysis_availability__run_all_analyzers(self):
         md5 = os.environ.get("TEST_MD5", "446c5fbb11b9ce058450555c1c27153c")
         data = {"md5": md5, "analyzers": []}
         response = self.client.post(
@@ -53,126 +76,136 @@ class ApiViewTests(TestCase):
         )
         self.assertEqual(response.status_code, 200)
 
-    def test_analyze_file_corrupted_sample(self):
+    def test_analyze_file__corrupted_sample(self):
         analyzers_requested = [
             "File_Info",
-            "PE_Info",
-            "Strings_Info_Classic",
-            "Signature_Info",
         ]
-        filename = "non_valid_pe.exe"
-        uploaded_file, md5 = self.__get_test_file(filename)
+        file_name = "non_valid_pe.exe"
+        uploaded_file, md5 = self.__get_test_file(file_name)
+        file_mimetype = "application/x-dosexec"
         data = {
-            "md5": md5,
-            "analyzers_requested": analyzers_requested,
-            "is_sample": True,
-            "file_name": filename,
-            "file_mimetype": "application/x-dosexec",
             "file": uploaded_file,
-        }
-        response = self.client.post("/api/analyze_file", data, format="multipart")
-        self.assertEqual(response.status_code, 200)
-
-    def test_analyze_file_sample(self):
-        analyzers_requested = [
-            "Yara_Scan",
-            "HybridAnalysis_Get_File",
-            "Cuckoo_ScanClassic",
-            "Intezer_Scan",
-            "VirusTotal_v3_Get_File",
-            "VirusTotal_v3_Scan_File",
-            "File_Info",
-            "PE_Info",
-            "Doc_Info",
-            "PDF_Info",
-            "Strings_Info_Classic",
-            "Strings_Info_ML",
-            "MalwareBazaar_Get_File",
-        ]
-        filename = "file.exe"
-        uploaded_file, md5 = self.__get_test_file(filename)
-        data = {
-            "md5": md5,
             "analyzers_requested": analyzers_requested,
-            "is_sample": True,
-            "file_name": filename,
-            "file_mimetype": "application/x-dosexec",
-            "file": uploaded_file,
+            "file_name": file_name,
+            "file_mimetype": file_mimetype,
         }
-        response = self.client.post("/api/analyze_file", data, format="multipart")
-        self.assertEqual(response.status_code, 200)
 
-    def test_analyze_observable_domain(self):
+        response = self.client.post("/api/analyze_file", data, format="multipart")
+        content = response.json()
+        msg = (response.status_code, content)
+        self.assertEqual(response.status_code, 200, msg=msg)
+
+        job_id = int(content["job_id"])
+        job = models.Job.objects.get(pk=job_id)
+        self.assertEqual(file_name, job.file_name)
+        self.assertEqual(file_mimetype, job.file_mimetype)
+        self.assertEqual(md5, job.md5)
+        self.assertListEqual(analyzers_requested, job.analyzers_requested)
+
+    def test_analyze_file__exe(self):
+        data = self.analyze_file_data.copy()
+        response = self.client.post("/api/analyze_file", data, format="multipart")
+        content = response.json()
+        msg = (response.status_code, content)
+        self.assertEqual(response.status_code, 200, msg=msg)
+
+        job_id = int(content["job_id"])
+        job = models.Job.objects.get(pk=job_id)
+        self.assertEqual(response.status_code, 200, msg=msg)
+        self.assertEqual(data["file_name"], job.file_name, msg=msg)
+        self.assertEqual(data["file_mimetype"], job.file_mimetype, msg=msg)
+        self.assertListEqual(
+            data["analyzers_requested"], job.analyzers_requested, msg=msg
+        )
+        self.assertEqual(self.file_md5, job.md5, msg=msg)
+
+    def test_analyze_file__guess_optional(self):
+        data = self.analyze_file_data.copy()
+        file_mimetype = data.pop("file_mimetype")  # let server guess it
+
+        response = self.client.post("/api/analyze_file", data, format="multipart")
+        content = response.json()
+        msg = (response.status_code, content)
+        self.assertEqual(response.status_code, 200, msg=msg)
+
+        job_id = int(content["job_id"])
+        job = models.Job.objects.get(pk=job_id)
+        self.assertEqual(data["file_name"], job.file_name, msg=msg)
+        self.assertListEqual(
+            data["analyzers_requested"], job.analyzers_requested, msg=msg
+        )
+        self.assertEqual(file_mimetype, job.file_mimetype, msg=msg)
+        self.assertEqual(self.file_md5, job.md5, msg=msg)
+
+    def test_analyze_observable__domain(self):
         analyzers_requested = [
             "Fortiguard",
-            "CIRCLPassiveDNS",
-            "Securitytrails_History_WHOIS",
-            "Securitytrails_History_DNS",
-            "Securitytrails_Tags",
-            "Securitytrails_Subdomains",
-            "Securitytrails_Details",
-            "GoogleSafebrowsing",
-            "Robtex_Forward_PDNS_Query",
-            "OTXQuery",
-            "VirusTotal_v3_Get_Observable",
-            "HybridAnalysis_Get_Observable",
-            "Threatminer_PDNS",
-            "Threatminer_Reports_Tagging",
-            "Threatminer_Subdomains",
-            "ONYPHE",
-            "URLhaus",
-            "Pulsedive_Active_IOC",
         ]
         observable_name = os.environ.get("TEST_DOMAIN", "google.com")
         md5 = hashlib.md5(observable_name.encode("utf-8")).hexdigest()
+        observable_classification = "domain"
         data = {
-            "md5": md5,
-            "analyzers_requested": analyzers_requested,
-            "is_sample": False,
             "observable_name": observable_name,
-            "observable_classification": "domain",
+            "analyzers_requested": analyzers_requested,
+            "observable_classification": observable_classification,
+            "tags_labels": ["test1", "test2"],
         }
-        response = self.client.post("/api/analyze_observable", data)
-        self.assertEqual(response.status_code, 200)
 
-    def test_analyze_observable_ip(self):
-        analyzers_requested = [
-            "TorProject",
-            "AbuseIPDB",
-            "Auth0",
-            "Securitytrails_IP_Neighbours",
-            "Shodan_Search",
-            "Shodan_Honeyscore",
-            "MaxMindGeoIP",
-            "CIRCLPassiveSSL",
-            "GreyNoiseCommunity",
-            "GreyNoise",
-            "GoogleSafebrowsing",
-            "Robtex_IP_Query",
-            "Robtex_Reverse_PDNS_Query",
-            "TalosReputation",
-            "OTXQuery",
-            "VirusTotal_Get_v2_Observable",
-            "HybridAnalysis_Get_Observable",
-            "Hunter",
-            "Threatminer_Reports_Tagging",
-            "Threatminer_PDNS",
-            "ONYPHE",
-            "HoneyDB_Scan_Twitter",
-            "HoneyDB_Get",
-            "Pulsedive_Active_IOC",
-        ]
-        observable_name = os.environ.get("TEST_IP", "8.8.8.8")
-        md5 = hashlib.md5(observable_name.encode("utf-8")).hexdigest()
-        data = {
-            "md5": md5,
-            "analyzers_requested": analyzers_requested,
-            "is_sample": False,
-            "observable_name": observable_name,
-            "observable_classification": "ip",
-        }
-        response = self.client.post("/api/analyze_observable", data)
-        self.assertEqual(response.status_code, 200)
+        response = self.client.post("/api/analyze_observable", data, format="json")
+        content = response.json()
+        msg = (response.status_code, content)
+        self.assertEqual(response.status_code, 200, msg=msg)
+
+        job_id = int(content["job_id"])
+        job = models.Job.objects.get(pk=job_id)
+        self.assertEqual(observable_name, job.observable_name)
+        self.assertEqual(observable_classification, job.observable_classification)
+        self.assertEqual(md5, job.md5)
+        self.assertListEqual(analyzers_requested, job.analyzers_requested)
+        self.assertListEqual(
+            data["tags_labels"], list(job.tags.values_list("label", flat=True))
+        )
+
+    def test_analyze_observable__ip(self):
+        data = self.analyze_observable_ip_data.copy()
+
+        response = self.client.post("/api/analyze_observable", data, format="json")
+        content = response.json()
+        msg = (response.status_code, content)
+        self.assertEqual(response.status_code, 200, msg=msg)
+
+        job_id = int(content["job_id"])
+        job = models.Job.objects.get(pk=job_id)
+        self.assertEqual(data["observable_name"], job.observable_name, msg=msg)
+        self.assertListEqual(
+            data["analyzers_requested"], job.analyzers_requested, msg=msg
+        )
+        self.assertEqual(
+            data["observable_classification"], job.observable_classification, msg=msg
+        )
+        self.assertEqual(self.observable_md5, job.md5, msg=msg)
+
+    def test_analyze_observable__guess_optional(self):
+        data = self.analyze_observable_ip_data.copy()
+        observable_classification = data.pop(
+            "observable_classification"
+        )  # let the server calc it
+
+        response = self.client.post("/api/analyze_observable", data, format="json")
+        content = response.json()
+        msg = (response.status_code, content)
+        self.assertEqual(response.status_code, 200, msg=msg)
+
+        job_id = int(content["job_id"])
+        job = models.Job.objects.get(pk=job_id)
+        self.assertEqual(data["observable_name"], job.observable_name, msg=msg)
+        self.assertListEqual(
+            data["analyzers_requested"], job.analyzers_requested, msg=msg
+        )
+        self.assertEqual(
+            observable_classification, job.observable_classification, msg=msg
+        )
+        self.assertEqual(self.observable_md5, job.md5, msg=msg)
 
     def test_download_sample_200(self):
         self.assertEqual(models.Job.objects.count(), 0)

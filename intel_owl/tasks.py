@@ -7,7 +7,6 @@ from guardian import utils
 
 from intel_owl.celery import app
 from api_app import crons
-from api_app.models import Job
 from api_app.analyzers_manager import controller as analyzers_controller
 from api_app.connectors_manager import controller as connectors_controller
 
@@ -67,8 +66,8 @@ def start_analyzers(
 
 
 @app.task(name="post_all_analyzers_finished", soft_time_limit=100)
-def post_all_analyzers_finished(job_id: int):
-    analyzers_controller.post_all_analyzers_finished(job_id)
+def post_all_analyzers_finished(job_id: int, runtime_configuration: dict):
+    analyzers_controller.post_all_analyzers_finished(job_id, runtime_configuration)
 
 
 @app.task(name="run_analyzer", soft_time_limit=500)
@@ -81,18 +80,12 @@ def run_connector(job_id: int, config_dict: dict, report_defaults: dict):
     connectors_controller.run_connector(job_id, config_dict, report_defaults)
 
 
-@app.task(name="on_job_success", soft_time_limit=500)
-def on_job_success(job_id: int):
-    # run all or requested connectors
-    job = Job.objects.only("id", "connectors_to_execute", "connectors_requested").get(
-        pk=job_id
+@app.task(name="start_connectors", soft_time_limit=100)
+def start_connectors(
+    job_id: int,
+    connectors_to_execute: list,
+    runtime_configuration: dict,
+):
+    connectors_controller.start_connectors(
+        job_id, connectors_to_execute, runtime_configuration
     )
-    args = (
-        [job_id, job.connectors_requested]
-        if len(job.connectors_requested)
-        else [job_id]
-    )
-    connectors_task_id_map = connectors_controller.start_connectors(*args)
-    # update connectors_to_execute field
-    job.connectors_to_execute = list(connectors_task_id_map.keys())
-    job.save(update_fields=["connectors_to_execute"])

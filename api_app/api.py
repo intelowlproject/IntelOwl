@@ -4,12 +4,7 @@
 import logging
 from typing import Union
 
-from intel_owl.celery import app as celery_app
-from api_app import models, serializers, permissions
-from .analyzers_manager import controller as analyzers_controller
-
 from wsgiref.util import FileWrapper
-
 from django.utils.decorators import method_decorator
 from django.http import HttpResponse
 from django.db.models import Q
@@ -30,6 +25,11 @@ from drf_spectacular.utils import (
     inline_serializer,
 )
 from drf_spectacular.types import OpenApiTypes
+
+from intel_owl.celery import app as celery_app
+from api_app import models, serializers, permissions
+from .analyzers_manager import controller as analyzers_controller
+from .connectors_manager import controller as connectors_controller
 
 
 logger = logging.getLogger(__name__)
@@ -65,8 +65,17 @@ def _analysis_request(
     if not cleaned_analyzer_list:
         raise ValidationError({"detail": "No Analyzers can be run after filtering."})
 
+    cleaned_connectors_list = connectors_controller.filter_connectors(
+        serialized_data,
+        warnings,
+    )
+
     # save the arrived data plus new params into a new job object
-    job = serializer.save(source=source, analyzers_to_execute=cleaned_analyzer_list)
+    job = serializer.save(
+        source=source,
+        analyzers_to_execute=cleaned_analyzer_list,
+        connectors_to_execute=cleaned_connectors_list,
+    )
 
     logger.info(f"New Job added to queue <- {repr(job)}.")
 
@@ -82,18 +91,25 @@ def _analysis_request(
             ),
         )
 
-    response_dict = {
-        "status": "accepted",
-        "job_id": job.pk,
-        "warnings": warnings,
-        "analyzers_running": cleaned_analyzer_list,
-    }
+    ser = serializers.AnalysisResponseSerializer(
+        data={
+            "status": "accepted",
+            "job_id": job.pk,
+            "warnings": warnings,
+            "analyzers_running": cleaned_analyzer_list,
+            "connectors_running": cleaned_connectors_list,
+        }
+    )
+    ser.is_valid(raise_exception=True)
+
+    response_dict = ser.data
 
     logger.debug(response_dict)
 
     return Response(
-        response_dict, status=status.HTTP_200_OK
-    )  # lgtm [py/stack-trace-exposure]
+        response_dict,
+        status=status.HTTP_200_OK,
+    )
 
 
 """ REST API endpoints """
@@ -178,17 +194,7 @@ def ask_analysis_availability(request):
 @add_docs(
     description="This endpoint allows to start a Job related to a file",
     request=serializers.FileAnalysisSerializer,
-    responses={
-        200: inline_serializer(
-            "FileAnalysisResponseSerializer",
-            fields={
-                "status": rfs.StringRelatedField(),
-                "job_id": rfs.IntegerField(),
-                "warnings": OpenApiTypes.OBJECT,
-                "analyzers_running": OpenApiTypes.OBJECT,
-            },
-        ),
-    },
+    responses={200: serializers.AnalysisResponseSerializer},
 )
 @api_view(["POST"])
 @permission_required_or_403("api_app.add_job")
@@ -199,17 +205,7 @@ def analyze_file(request):
 @add_docs(
     description="This endpoint allows to start a Job related to an observable",
     request=serializers.ObservableAnalysisSerializer,
-    responses={
-        200: inline_serializer(
-            "ObservableAnalysisResponseSerializer",
-            fields={
-                "status": rfs.StringRelatedField(),
-                "job_id": rfs.IntegerField(),
-                "warnings": OpenApiTypes.OBJECT,
-                "analyzers_running": OpenApiTypes.OBJECT,
-            },
-        ),
-    },
+    responses={200: serializers.AnalysisResponseSerializer},
 )
 @api_view(["POST"])
 @permission_required_or_403("api_app.add_job")

@@ -2,6 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 
 import json
+import logging
 
 from django.contrib.auth.models import Group
 from rest_framework import serializers
@@ -9,9 +10,16 @@ from rest_flex_fields import FlexFieldsModelSerializer
 from rest_framework_guardian.serializers import ObjectPermissionsAssignmentMixin
 
 from api_app.models import Job, TLP, Tag
-from .helpers import calculate_mimetype
+from .helpers import (
+    gen_random_colorhex,
+    calculate_mimetype,
+    calculate_observable_classification,
+    calculate_md5,
+)
 from .analyzers_manager.serializers import AnalyzerReportSerializer
 from .connectors_manager.serializers import ConnectorReportSerializer
+
+logger = logging.getLogger(__name__)
 
 
 __all__ = [
@@ -20,13 +28,14 @@ __all__ = [
     "JobSerializer",
     "FileAnalysisSerializer",
     "ObservableAnalysisSerializer",
+    "AnalysisResponseSerializer",
 ]
 
 
 class TagSerializer(ObjectPermissionsAssignmentMixin, serializers.ModelSerializer):
     class Meta:
         model = Tag
-        fields = "__all__"
+        fields = serializers.ALL_FIELDS
 
     def get_permissions_map(self, created):
         """
@@ -50,7 +59,7 @@ class JobAvailabilitySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Job
-        fields = "__all__"
+        fields = serializers.ALL_FIELDS
 
     md5 = serializers.CharField(max_length=128, required=True)
     analyzers = serializers.ListField(default=list)
@@ -124,14 +133,13 @@ class _AbstractJobCreateSerializer(
     Base Serializer for Job create().
     """
 
-    tags_id = serializers.PrimaryKeyRelatedField(
-        many=True, write_only=True, queryset=Tag.objects.all()
-    )
+    tags_labels = serializers.ListField(default=list)
     runtime_configuration = serializers.JSONField(
         required=False, default={}, write_only=True
     )
     analyzers_requested = serializers.ListField(default=list)
     connectors_requested = serializers.ListField(default=list)
+    md5 = serializers.HiddenField(default=None)
 
     def get_permissions_map(self, created) -> dict:
         """
@@ -154,18 +162,25 @@ class _AbstractJobCreateSerializer(
             "change_job": [*usr_groups],
         }
 
-    def validate(self, data) -> dict:
+    def validate(self, attrs: dict) -> dict:
         # check and validate runtime_configuration
-        runtime_conf = data.get("runtime_configuration", {})
+        runtime_conf = attrs.get("runtime_configuration", {})
         if runtime_conf and isinstance(runtime_conf, list):
             runtime_conf = json.loads(runtime_conf[0])
-        data["runtime_configuration"] = runtime_conf
+        attrs["runtime_configuration"] = runtime_conf
 
-        return data
+        return attrs
 
-    def create(self, validated_data) -> Job:
-        # fields `tags_id` are not there in `Job` model.
-        tags = validated_data.pop("tags_id", None)
+    def create(self, validated_data: dict) -> Job:
+        # create ``Tag`` objects from tags_labels
+        tags_labels = validated_data.pop("tags_labels", None)
+        tags = [
+            Tag.objects.get_or_create(
+                label=label, defaults={"color": gen_random_colorhex()}
+            )[0]
+            for label in tags_labels
+        ]
+
         job = Job.objects.create(**validated_data)
         if tags:
             job.tags.set(tags)
@@ -181,7 +196,7 @@ class FileAnalysisSerializer(_AbstractJobCreateSerializer):
 
     file = serializers.FileField(required=True)
     file_name = serializers.CharField(required=True)
-    file_mimetype = serializers.HiddenField(default=None)
+    file_mimetype = serializers.CharField(required=False)
     is_sample = serializers.HiddenField(default=True)
 
     class Meta:
@@ -198,12 +213,20 @@ class FileAnalysisSerializer(_AbstractJobCreateSerializer):
             "runtime_configuration",
             "analyzers_requested",
             "connectors_requested",
-            "tags_id",
+            "tags_labels",
         )
 
-    def validate(self, attrs):
-        super(FileAnalysisSerializer, self).validate(attrs)
+    def validate(self, attrs: dict) -> dict:
+        attrs = super(FileAnalysisSerializer, self).validate(attrs)
+        logger.debug(f"before attrs: {attrs}")
+        # calculate ``file_mimetype``
         attrs["file_mimetype"] = calculate_mimetype(attrs["file"], attrs["file_name"])
+        # calculate ``md5``
+        file_obj = attrs["file"].file
+        file_obj.seek(0)
+        file_buffer = file_obj.read()
+        attrs["md5"] = calculate_md5(file_buffer)
+        logger.debug(f"after attrs: {attrs}")
         return attrs
 
 
@@ -214,15 +237,8 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
     """
 
     observable_name = serializers.CharField(required=True)
-    observable_classification = serializers.CharField(required=True)
+    observable_classification = serializers.CharField(required=False)
     is_sample = serializers.HiddenField(default=False)
-
-    def validate_observable_name(self, observable_name: str):
-        """
-        Force lowercase in ``observable_name``.
-        Ref: https://github.com/intelowlproject/IntelOwl/issues/658.
-        """
-        return observable_name.lower()
 
     class Meta:
         model = Job
@@ -237,5 +253,29 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
             "runtime_configuration",
             "analyzers_requested",
             "connectors_requested",
-            "tags_id",
+            "tags_labels",
         )
+
+    def validate(self, attrs: dict) -> dict:
+        attrs = super(ObservableAnalysisSerializer, self).validate(attrs)
+        logger.debug(f"before attrs: {attrs}")
+        # force lowercase in ``observable_name``.
+        # Ref: https://github.com/intelowlproject/IntelOwl/issues/658
+        attrs["observable_name"] = attrs["observable_name"].lower()
+        # calculate ``observable_classification``
+        if not attrs.get("observable_classification", None):
+            attrs["observable_classification"] = calculate_observable_classification(
+                attrs["observable_name"]
+            )
+        # calculate ``md5``
+        attrs["md5"] = calculate_md5(attrs["observable_name"].encode("utf-8"))
+        logger.debug(f"after attrs: {attrs}")
+        return attrs
+
+
+class AnalysisResponseSerializer(serializers.Serializer):
+    job_id = serializers.IntegerField()
+    status = serializers.CharField()
+    warnings = serializers.ListField()
+    analyzers_running = serializers.ListField()
+    connectors_running = serializers.ListField()

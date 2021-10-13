@@ -122,7 +122,7 @@ class Maxmind(classes.ObservableAnalyzer):
 
     @classmethod
     def _monkeypatch(cls):
-        # completely skip because doesnt work without connection.
+        # completely skip because does not work without connection.
         patches = [if_mock_connections(patch.object(cls, "run", return_value={}))]
         return super()._monkeypatch(patches=patches)
 

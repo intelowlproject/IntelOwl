@@ -49,7 +49,7 @@ class WiGLE(classes.ObservableAnalyzer):
                 )
             else:
                 raise AnalyzerConfigurationException(
-                    f"search type: '{self.search_type}' not suported."
+                    f"search type: '{self.search_type}' not supported."
                     "Supported are: 'WiFi Network', 'CDMA Network', "
                     "'Bluetooth Network', 'GSM/LTE/WCDMA Network'"
                 )

@@ -39,16 +39,6 @@ class MockResponseNoOp:
         return {}
 
 
-# it is optional to mock requests
-def if_mock(decorators: list):
-    def apply_all(f):
-        for d in reversed(decorators):
-            f = d(f)
-        return f
-
-    return apply_all if settings.MOCK_CONNECTIONS else lambda x: x
-
-
 def if_mock_connections(*decorators):
     def apply_all(f):
         for d in reversed(decorators):

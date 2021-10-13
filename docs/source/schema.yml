@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: IntelOwl API specification
-  version: 3.0.1
+  version: 3.1.0
 paths:
   /api/analyze_file:
     post:
@@ -28,7 +28,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FileAnalysisResponse'
+                $ref: '#/components/schemas/AnalysisResponse'
           description: ''
   /api/analyze_observable:
     post:
@@ -55,7 +55,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ObservableAnalysisResponse'
+                $ref: '#/components/schemas/AnalysisResponse'
           description: ''
   /api/analyzer/{name}/healthcheck:
     get:
@@ -230,12 +230,14 @@ paths:
       - in: path
         name: job_id
         schema:
-          type: integer
+          type: string
+          pattern: \d+
         required: true
       - in: path
         name: name
         schema:
           type: string
+          pattern: \w+
         required: true
       tags:
       - job
@@ -252,12 +254,14 @@ paths:
       - in: path
         name: job_id
         schema:
-          type: integer
+          type: string
+          pattern: \d+
         required: true
       - in: path
         name: name
         schema:
           type: string
+          pattern: \w+
         required: true
       tags:
       - job
@@ -274,12 +278,14 @@ paths:
       - in: path
         name: job_id
         schema:
-          type: integer
+          type: string
+          pattern: \d+
         required: true
       - in: path
         name: name
         schema:
           type: string
+          pattern: \w+
         required: true
       tags:
       - job
@@ -296,12 +302,14 @@ paths:
       - in: path
         name: job_id
         schema:
-          type: integer
+          type: string
+          pattern: \d+
         required: true
       - in: path
         name: name
         schema:
           type: string
+          pattern: \w+
         required: true
       tags:
       - job
@@ -585,6 +593,28 @@ paths:
           description: No response body
 components:
   schemas:
+    AnalysisResponse:
+      type: object
+      properties:
+        job_id:
+          type: integer
+        status:
+          type: string
+        warnings:
+          type: array
+          items: {}
+        analyzers_running:
+          type: array
+          items: {}
+        connectors_running:
+          type: array
+          items: {}
+      required:
+      - analyzers_running
+      - connectors_running
+      - job_id
+      - status
+      - warnings
     AnalyzerConfig:
       type: object
       description: Serializer for `analyzer_config.json`.
@@ -680,6 +710,7 @@ components:
           type: array
           items:
             type: string
+            maxLength: 512
         process_time:
           type: number
           format: float
@@ -773,6 +804,7 @@ components:
           type: array
           items:
             type: string
+            maxLength: 512
         process_time:
           type: number
           format: float
@@ -803,15 +835,14 @@ components:
         source:
           type: string
           maxLength: 50
-        md5:
-          type: string
-          maxLength: 32
         tlp:
           $ref: '#/components/schemas/TlpEnum'
         file:
           type: string
           format: uri
         file_name:
+          type: string
+        file_mimetype:
           type: string
         runtime_configuration:
           type: object
@@ -824,29 +855,13 @@ components:
         connectors_requested:
           type: array
           items: {}
-        tags_id:
+        tags_labels:
           type: array
-          items:
-            type: integer
-            writeOnly: true
-          writeOnly: true
+          items: {}
       required:
       - file
       - file_name
       - id
-      - md5
-      - tags_id
-    FileAnalysisResponse:
-      type: object
-      properties:
-        status:
-          type: string
-          readOnly: true
-        job_id:
-          type: integer
-      required:
-      - job_id
-      - status
     GetAnalyzerConfigsFailedResponse:
       type: object
       properties:
@@ -913,18 +928,22 @@ components:
           type: array
           items:
             type: string
+            maxLength: 128
         connectors_requested:
           type: array
           items:
             type: string
+            maxLength: 128
         analyzers_to_execute:
           type: array
           items:
             type: string
+            maxLength: 128
         connectors_to_execute:
           type: array
           items:
             type: string
+            maxLength: 128
         received_request_time:
           type: string
           format: date-time
@@ -939,6 +958,7 @@ components:
           type: array
           items:
             type: string
+            maxLength: 900
           nullable: true
       required:
       - analyzer_reports
@@ -986,18 +1006,22 @@ components:
           type: array
           items:
             type: string
+            maxLength: 128
         connectors_requested:
           type: array
           items:
             type: string
+            maxLength: 128
         analyzers_to_execute:
           type: array
           items:
             type: string
+            maxLength: 128
         connectors_to_execute:
           type: array
           items:
             type: string
+            maxLength: 128
         received_request_time:
           type: string
           format: date-time
@@ -1012,6 +1036,7 @@ components:
           type: array
           items:
             type: string
+            maxLength: 900
           nullable: true
         file:
           type: string
@@ -1089,9 +1114,6 @@ components:
         source:
           type: string
           maxLength: 50
-        md5:
-          type: string
-          maxLength: 32
         tlp:
           $ref: '#/components/schemas/TlpEnum'
         observable_name:
@@ -1109,29 +1131,12 @@ components:
         connectors_requested:
           type: array
           items: {}
-        tags_id:
+        tags_labels:
           type: array
-          items:
-            type: integer
-            writeOnly: true
-          writeOnly: true
+          items: {}
       required:
       - id
-      - md5
-      - observable_classification
       - observable_name
-      - tags_id
-    ObservableAnalysisResponse:
-      type: object
-      properties:
-        status:
-          type: string
-          readOnly: true
-        job_id:
-          type: integer
-      required:
-      - job_id
-      - status
     ObservableSupportedEnum:
       enum:
       - ip
@@ -1262,8 +1267,12 @@ components:
         description:
           type: string
           maxLength: 512
+        required:
+          type: boolean
       required:
+      - description
       - env_var_key
+      - required
   securitySchemes:
     durinAuth:
       type: apiKey

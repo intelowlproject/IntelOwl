@@ -159,7 +159,7 @@ class Plugin(metaclass=ABCMeta):
 
     def __post__init__(self) -> None:
         """
-        Hook for post `__init__` processsing.
+        Hook for post `__init__` processing.
         Always call `super().__post__init__()` if overwritten in subclass.
         """
         # init report

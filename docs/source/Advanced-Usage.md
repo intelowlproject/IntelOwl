@@ -176,7 +176,7 @@ Intel Owl provides a Kibana's "Saved Object" configuration (with example dashboa
 The application makes use of [Django's built-in permissions system](https://docs.djangoproject.com/en/3.0/topics/auth/default/#permissions-and-authorization). It provides a way to assign permissions to specific users and groups of users.
 
 As an administrator here's what you need to know,
-- Each user should belong to atleast a single group and permissions should be assigned to these groups. Please refrain from assigning user level permissions.
+- Each user should belong to at least a single group and permissions should be assigned to these groups. Please refrain from assigning user level permissions.
 - When you create a first normal user, a group with name `DefaultGlobal` is created with all permissions granted. Every new user automatically gets added to this group.
    - This is done because most admins won't need to deal with user permissions and this way, they don't have to.
    - If you don't want a global group (with all permissions) but custom groups with custom permissions,

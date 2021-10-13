@@ -213,7 +213,7 @@ class DocInfo(FileAnalyzer):
                 logger.info(f"experimental XLM macro analysis failed. Exception: {e}")
             else:
                 logger.debug(
-                    f"experimental XLM macro analysis succeded. "
+                    f"experimental XLM macro analysis succeeded. "
                     f"Binary to analyze: {parsed_file}"
                 )
                 if parsed_file:

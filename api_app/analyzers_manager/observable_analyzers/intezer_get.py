@@ -3,6 +3,7 @@
 
 from datetime import timedelta
 
+import intezer_sdk.consts
 from intezer_sdk import api as intezer_api, errors as intezer_errors
 from intezer_sdk.analysis import Analysis
 
@@ -26,6 +27,7 @@ class IntezerGet(ObservableAnalyzer):
         result = {}
 
         try:
+            intezer_sdk.consts.USER_AGENT = "IntelOwl"
             # run analysis
             analysis = Analysis(file_hash=self.observable_name)
             analysis.send(wait=False)

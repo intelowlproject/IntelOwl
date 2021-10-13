@@ -28,7 +28,7 @@ class InQuest(ObservableAnalyzer):
         hash_type = hash_lengths.get(len(self.observable_name), None)
         if not hash_type:
             raise AnalyzerRunException(
-                f"Given Hash: '{hash}' is not suported."
+                f"Given Hash: '{hash}' is not supported."
                 "Supported hash types are: 'md5', 'sha1', 'sha256', 'sha512'."
             )
         return hash_type
@@ -93,7 +93,7 @@ class InQuest(ObservableAnalyzer):
 
         else:
             raise AnalyzerConfigurationException(
-                f"analysis type: '{self.analysis_type}' not suported."
+                f"analysis type: '{self.analysis_type}' not supported."
                 "Supported are: 'dfi_search', 'iocdb_search', 'repdb_search'."
             )
 

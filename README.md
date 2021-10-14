@@ -91,9 +91,9 @@ If you are interested in being the next GSoC student for IntelOwl, join the [Hon
 
 #### Tines
 
-<a href="https://www.tines.com"> <img style="border: 0.2px solid black" width=219 height=100 src="static_intel/tines_logo.png" alt="Tines logo"> </a>
+<a href="https://www.tines.com/?utm_source=oss&utm_medium=sponsorship&utm_campaign=intelowl"> <img style="border: 0.2px solid black" width=219 height=100 src="static_intel/tines_logo.png" alt="Tines logo"> </a>
 
-[Tines](https://www.tines.com) is no-code automation for security teams. Build powerful, reliable workflows without a development team.
+[Tines](https://www.tines.com/?utm_source=oss&utm_medium=sponsorship&utm_campaign=intelowl) is no-code automation for security teams. Build powerful, reliable workflows without a development team.
 
 IntelOwl is officially integrated in Tines. Read everything about this partnership [in the Tines' blog](https://www.tines.com/blog/announcing-our-sponsorship-of-intel-owl)
 

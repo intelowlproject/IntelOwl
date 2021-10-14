@@ -4,7 +4,7 @@
 
 ## [v3.1.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v3.1.0)
 
-> 🎉 We are glad to welcome [Tines](https://tines.com) as a new sponsor for IntelOwl. Read everything about this partnership [in the Tines' blog](https://www.tines.com/blog/announcing-our-sponsorship-of-intel-owl).
+> 🎉 We are glad to welcome [Tines](https://www.tines.com/?utm_source=oss&utm_medium=sponsorship&utm_campaign=intelowl) as a new sponsor for IntelOwl. Read everything about this partnership [in the Tines' blog](https://www.tines.com/blog/announcing-our-sponsorship-of-intel-owl).
 
 **Notes:**
 

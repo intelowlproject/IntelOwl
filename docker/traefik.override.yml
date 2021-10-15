@@ -1,4 +1,4 @@
-version: '3'
+version: '3.8'
 
 services:
   traefik:
@@ -22,7 +22,6 @@ services:
     volumes:
       - "./letsencrypt:/letsencrypt"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
-
 
   nginx:
     depends_on:

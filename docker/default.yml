@@ -1,4 +1,4 @@
-version: '3'
+version: '3.8'
 
 services:
   postgres:
@@ -14,8 +14,7 @@ services:
     container_name: intelowl_uwsgi
     volumes:
       - ../configuration/intel_owl.ini:/etc/uwsgi/sites/intel_owl.ini # uwsgi configuration file
-      - ../configuration/analyzer_config.json:/opt/deploy/configuration/analyzer_config.json
-      - ../configuration/ldap_config.py:/opt/deploy/configuration/ldap_config.py
+      - ../configuration:/opt/deploy/intel_owl/configuration
       - generic_logs:/var/log/intel_owl
       - static_content:/opt/deploy/intel_owl/static
       - shared_files:/opt/deploy/files_required
@@ -56,7 +55,7 @@ services:
     restart: unless-stopped
     command: /usr/local/bin/celery -A intel_owl.celery beat --uid www-data --gid www-data --pidfile= --schedule=/tmp/celerybeat-schedule
     volumes:
-      - ../configuration/analyzer_config.json:/opt/deploy/configuration/analyzer_config.json
+      - ../configuration:/opt/deploy/intel_owl/configuration
       - generic_logs:/var/log/intel_owl
       - shared_files:/opt/deploy/files_required
     env_file:
@@ -64,6 +63,7 @@ services:
     depends_on:
       - rabbitmq
       - postgres
+      - uwsgi
 
   celery_worker_default:
     image: intelowlproject/intelowl:${INTELOWL_TAG_VERSION}
@@ -72,7 +72,7 @@ services:
     stop_grace_period: 3m
     command: /usr/local/bin/celery -A intel_owl.celery worker -n worker_default --uid www-data --gid www-data --time-limit=10000 --pidfile= -Ofair -Q default -E
     volumes:
-      - ../configuration/analyzer_config.json:/opt/deploy/configuration/analyzer_config.json
+      - ../configuration:/opt/deploy/intel_owl/configuration
       - generic_logs:/var/log/intel_owl
       - shared_files:/opt/deploy/files_required
     logging:
@@ -85,6 +85,7 @@ services:
     depends_on:
       - rabbitmq
       - postgres
+      - uwsgi
 
 
 volumes:

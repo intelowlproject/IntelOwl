@@ -11,7 +11,7 @@ django-cache-memoize==0.1.9
 djangorestframework==3.12.4
 drf-flex-fields==0.9.1
 djangorestframework-guardian==0.3.0
-django-storages==1.11.1
+django-storages==1.12.1
 dnspython==2.1.0
 dnstwist==20201228
 ppdeep>=20200505

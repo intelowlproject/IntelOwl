@@ -20,7 +20,7 @@ easygui==0.98.2
 flower==1.0.0
 GitPython==3.1.18
 google>=3.0.0
-google-cloud-webrisk==1.4.1
+google-cloud-webrisk==1.6.0
 intezer-sdk==1.4.5.1
 maxminddb==2.2.0
 mwdblib==3.4.0

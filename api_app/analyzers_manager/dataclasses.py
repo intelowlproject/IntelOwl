@@ -4,25 +4,30 @@ import typing
 import dataclasses
 
 from api_app.core.dataclasses import AbstractConfig
-from .constants import TypeChoices, HashChoices, ObservableTypes
+from .constants import TypeChoices, HashChoices
 from .serializers import AnalyzerConfigSerializer
 
-__all__ = ["AnalyzerConfig"]
+__all__ = [
+    "AnalyzerConfig",
+]
 
 
 @dataclasses.dataclass
 class AnalyzerConfig(AbstractConfig):
+
     # Required fields
-    type: typing.Literal[TypeChoices.values]
+    type: typing.Literal["file", "observable"]
     supported_filetypes: typing.List[str]
     not_supported_filetypes: typing.List[str]
-    observable_supported: typing.List[typing.Literal[ObservableTypes.values]]
+    observable_supported: typing.List[
+        typing.Literal["ip", "url", "domain", "hash", "generic"]
+    ]
     # Optional Fields
     external_service: bool = False
     leaks_info: bool = False
     docker_based: bool = False
     run_hash: bool = False
-    run_hash_type: typing.Literal[HashChoices.values] = HashChoices.MD5
+    run_hash_type: typing.Literal["md5", "sha256"] = HashChoices.MD5
 
     # utils
 
@@ -38,9 +43,12 @@ class AnalyzerConfig(AbstractConfig):
         return observable_classification in self.observable_supported
 
     def is_filetype_supported(self, file_mimetype: str) -> bool:
+        if not self.supported_filetypes and not self.not_supported_filetypes:
+            # base case: empty lists means supports all
+            return True
         return (
             file_mimetype in self.supported_filetypes
-            or file_mimetype not in self.not_supported_filetypes
+            and file_mimetype not in self.not_supported_filetypes
         )
 
     def get_full_import_path(self) -> str:

@@ -677,7 +677,7 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "DRAGONFLY_API_KEY",
-        "description": "A valid Dragonfly API key. Generate [here](https://dragonfly.certego.net/me/sessions).",
+        "description": "Dragonfly API key. Generate [here](https://dragonfly.certego.net/me/sessions).",
         "required": true
       },
       "url_key_name": {

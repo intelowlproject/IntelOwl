@@ -54,7 +54,9 @@ class DragonflyEmulation(FileAnalyzer):
             raise AnalyzerRunException(str(exc))
 
     def __upload(self) -> int:
-        "Submit sample for analysis and return analysis_id"
+        """
+        Submit sample for analysis and return analysis_id
+        """
         response = self.df.Analysis.create(
             data=self.df.Analysis.CreateAnalysisRequestBody(
                 **self.analysis_options,
@@ -65,6 +67,9 @@ class DragonflyEmulation(FileAnalyzer):
         return response.data["id"]
 
     def __poll_status(self, analysis_id: int) -> None:
+        """
+        Poll for analysis status until it finishes.
+        """
         for chance in range(self.max_tries):
             time.sleep(self.poll_distance)
             logger.info(
@@ -83,6 +88,9 @@ class DragonflyEmulation(FileAnalyzer):
                 break
 
     def __fetch_and_build_result(self, analysis_id: int) -> dict:
+        """
+        Retrieve analysis and corresponding report objects
+        """
         # fetch analysis object
         response = self.df.Analysis.retrieve(
             object_id=analysis_id,

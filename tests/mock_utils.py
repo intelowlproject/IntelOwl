@@ -13,11 +13,15 @@ from django.conf import settings
 
 # class for mocking responses
 class MockResponse:
-    def __init__(self, json_data, status_code, text="", content=b""):
+    def __init__(
+        self, json_data, status_code, text="", content=b"", url="", headers=None
+    ):
         self.json_data = json_data
         self.status_code = status_code
         self.text = text
         self.content = content
+        self.url = url
+        self.headers = headers or {}
 
     def json(self):
         return self.json_data

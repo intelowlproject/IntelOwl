@@ -88,7 +88,7 @@ After having written the new python module, you have to remember to:
 
   <div class="admonition note">
   <p class="admonition-title">Note</p>
-  Please see [Analyzers customization section](./Usage.md#analyzers-customization) to get the explanation of the other available keys.
+  Please see <a href="Usage.html#analyzers-customization">Analyzers customization section</a> to get the explanation of the other available keys.
   </div>
 
 3. Add the new analyzer in the lists in the docs: [Usage](./Usage.md). Also, if the analyzer provides additional optional configuration, add the available options here: [Advanced-Usage](./Advanced-Usage.md)

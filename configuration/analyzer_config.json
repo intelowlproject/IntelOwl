@@ -284,6 +284,21 @@
     "secrets": {},
     "params": {}
   },
+  "CryptoScamDB_CheckAPI": {
+    "type": "observable",
+    "python_module": "cryptoscamdb.CryptoScamDB",
+    "description": "Scan a cryptocurrency address, IP address, domain or ENS name against the [CryptoScamDB](https://cryptoscamdb.org/) API.",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": ["ip", "domain", "generic"],
+    "config": {
+      "soft_time_limit": 300,
+      "queue": "long"
+    },
+    "secrets": {},
+    "params": {}
+  },
   "CRXcavator": {
     "type": "observable",
     "python_module": "crxcavator.CRXcavator",

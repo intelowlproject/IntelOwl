@@ -635,6 +635,58 @@
       }
     }
   },
+  "Dragonfly_Emulation": {
+    "type": "file",
+    "python_module": "dragonfly.DragonflyEmulation",
+    "description": "Emulate malware against [Dragonfly](https://dragonfly.certego.net) sandbox by [Certego S.R.L](https://certego.net).",
+    "supported_filetypes": ["application/x-dosexec", "application/octet-stream"],
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "config": {
+      "soft_time_limit": 400,
+      "queue": "long"
+    },
+    "params": {
+      "profiles": {
+        "value": [1, 2],
+        "type": "list",
+        "description": "List of profile indices for emulators. Refer to [profiles list](https://dragonfly.certego.net/dashboard/profiles)."
+      },
+      "operating_system": {
+        "value": "",
+        "type": "str",
+        "description": "Enum: `WINDOW`|`LINUX`| or leave blank string for automatic detection"
+      },
+      "root": {
+        "value": false,
+        "type": "bool",
+        "description": "If `true`, emulate with root permissions"
+      },
+      "allow_actions": {
+        "value": false,
+        "type": "bool",
+        "description": "If `true`, run actions when a rule matches"
+      },
+      "private": {
+        "value": false,
+        "type": "bool",
+        "description": "If `true`, mark the analysis as private so it's accessible to you and members within your organization only"
+      }
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "DRAGONFLY_API_KEY",
+        "description": "A valid Dragonfly API key. Generate [here](https://dragonfly.certego.net/me/sessions).",
+        "required": true
+      },
+      "url_key_name": {
+        "env_var_key": "DRAGONFLY_API_URL",
+        "description": "Dragonfly instance URL. Don't change this.",
+        "required": true
+      }
+    }
+  },
   "EmailRep": {
     "type": "observable",
     "python_module": "emailrep.EmailRep",

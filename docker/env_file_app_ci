@@ -71,6 +71,7 @@ DEHASHED_AUTH_KEY=email@example.com:verysecureapikey
 OPENCTI_KEY=test
 YETI_KEY=test
 SPYSE_API_KEY=test
+DRAGONFLY_API_KEY=test
 
 # connectors secrets (optional)
 CONNECTOR_MISP_KEY=test
@@ -95,6 +96,7 @@ YETI_URL=http://fake_url.com
 CONNECTOR_MISP_URL=http://fake_url.com
 CONNECTOR_OPENCTI_URL=http://fake_url.com
 CONNECTOR_YETI_URL=http://fake_url.com
+DRAGONFLY_API_URL=http://fake_url.com
 
 # other variables
 DEBUG=True

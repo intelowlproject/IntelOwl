@@ -2,6 +2,26 @@
 
 [**Upgrade Guide**](https://intelowl.readthedocs.io/en/latest/Installation.html#update-to-the-most-recent-version)
 
+## [v3.2.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v3.2.0)
+
+> Dragonfly is a new public service by [Certego](https://certego.net?utm_source=intelowl) developed by the same team behind IntelOwl. [Sign up](https://dragonfly.certego.net/register?utm_source=intelowl) today on Dragonfly for free access!
+
+**New Analyzers:**
+
+- `CryptoScamDB_CheckAPI`: Scan a cryptocurrency address, IP address, domain or ENS name against the [CryptoScamDB](https://cryptoscamdb.org/) API.
+- `Dragonfly_Emulation`: Emulate and analyze malware in a customizable manner with [Dragonfly](https://dragonfly.certego.net/?utm_source=intelowl) sandbox.
+
+**Bug Fixes:**
+
+- Fixed [743](https://github.com/intelowlproject/IntelOwl/issues/743): File mime_type identification error. Thanks to @OG-Sadpanda for the report.
+
+**Other:**
+
+- Extended docker bind mount to all configuration files
+- Added new `test.flower.override.yml` and `test.multi-queue.override.yml` docker-compose files for flower and multi_queue options in test (local) mode.
+- Bump docker-compose file versions to 3.8
+- Bump some python dependencies
+
 ## [v3.1.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v3.1.0)
 
 > 🎉 We are glad to welcome [Tines](https://www.tines.com/?utm_source=oss&utm_medium=sponsorship&utm_campaign=intelowl) as a new sponsor for IntelOwl. Read everything about this partnership [in the Tines' blog](https://www.tines.com/blog/announcing-our-sponsorship-of-intel-owl).

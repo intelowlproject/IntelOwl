@@ -7,7 +7,8 @@
 **New Analyzers:**
 
 - `CryptoScamDB_CheckAPI`: Scan a cryptocurrency address, IP address, domain or ENS name against the [CryptoScamDB](https://cryptoscamdb.org/) API.
-- `Dragonfly_Emulation`: Emulate and analyze malware in a customizable manner with [Dragonfly](https://dragonfly.certego.net/?utm_source=intelowl) sandbox. (Dragonfly is a new public service by [Certego](https://certego.net?utm_source=intelowl) developed by the same team behind IntelOwl. [Sign up](https://dragonfly.certego.net/register?utm_source=intelowl) today on Dragonfly for free access!)
+- `Dragonfly_Emulation`: Emulate and analyze malware in a customizable manner with [Dragonfly](https://dragonfly.certego.net/?utm_source=intelowl) sandbox.
+  > Dragonfly is a new public service by [Certego](https://certego.net?utm_source=intelowl) developed by the same team behind IntelOwl. [Sign up](https://dragonfly.certego.net/register?utm_source=intelowl) today on Dragonfly for free access!
 
 **Bug Fixes:**
 

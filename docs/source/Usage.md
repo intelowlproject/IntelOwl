@@ -171,6 +171,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `Qiling`: [Qiling](https://github.com/qilingframework/qiling) qiling binary emulation.
 * `Malpedia_Scan`: scan a binary or a zip file (pwd:infected) against all the yara rules available in [Malpedia](https://malpedia.caad.fkie.fraunhofer.de/)
 * `HashLookupServer_Get_File`: check if a md5 or sha1 is available in the database of [known file hosted by CIRCL](https://github.com/adulau/hashlookup-server)
+* `Dragonfly_Emulation`: Emulate malware against [Dragonfly](https://dragonfly.certego.net) sandbox by [Certego S.R.L](https://certego.net).
 
 ##### Observable analyzers (ip, domain, url, hash)
 * `VirusTotal_v3_Get_Observable`: search an observable in the VirusTotal DB
@@ -257,6 +258,7 @@ Some analyzers require details other than just IP, URL, Domain, etc. We classifi
 * `CRXcavator`: scans a chrome extension against crxcavator.io
 * `Darksearch_Query`: Search a keyword against darksearch.io's search API. It's possible to make complex queries using boolean logic. For example, `OSINT AND CTI OR intelowl NOT hack` is a valid observable name.
 * `Dehashed_Search`: Query any observable/keyword against https://dehashed.com's search API.
+* `CryptoScamDB_CheckAPI`: Scan a cryptocurrency address, IP address, domain or ENS name against the [CryptoScamDB](https://cryptoscamdb.org/) API.
 
 ##### Extra analyzers
 [Additional analyzers](Advanced-Usage.html#optional-analyzers) that can be enabled per your wish.

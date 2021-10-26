@@ -53,22 +53,24 @@ You can see the full list of all available analyzers in the [documentation](http
 | Type                                               | Analyzers Available                                                                                                                                                                                                                                                                                            |
 | -------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Inbuilt modules                                    | - Static Document, RTF, PDF, PE, Generic File Analysis<br/> - Strings analysis with ML<br/> - PE Emulation with Speakeasy<br/> - PE Signature verification<br/> - PE Capabilities Extraction<br/> - Emulated Javascript Analysis<br/> - Android Malware Analysis<br/> - SPF and DMARC Validator<br/> - more... |
-| External services                                  | - GreyNoise v2<br/> - Intezer<br/> - VirusTotal v2+v3<br/> - HybridAnalysis<br/> - Censys.io<br/> - Shodan<br/> - AlienVault OTX<br/> - Intelligence_X<br/> - Abuse.ch MalwareBazaar/Threatfox<br/> - many more..                                                                                              |
+| External services                                  | - <a href="https://dragonfly.certego.net" target="_blank">Dragonfly malware sandbox</a><br/> - GreyNoise v2<br/> - Intezer<br/> - VirusTotal v2+v3<br/> - HybridAnalysis<br/> - Censys.io<br/> - Shodan<br/> - AlienVault OTX<br/> - Intelligence_X<br/> - Abuse.ch MalwareBazaar/Threatfox<br/> - many more.. |
 | Free modules that require additional configuration | - Cuckoo (requires at least one working Cuckoo instance)<br/> - MISP (requires at least one working MISP instance)<br/> - Yara (a lot of public rules area available. There's also the chance to add your own rules)                                                                                           |
 
 ## Partnerships and sponsors
 
 We have an official sponsorship program for companies, organizations and individuals who support IntelOwl development. For more details on how to join the list below, read the page: [Partnership and sponsors](https://github.com/certego/IntelOwl/blob/master/.github/partnership_and_sponsors.md).
 
-### GOLD
+### 🥇 GOLD
 
 #### Certego
 
-<a href="https://www.certego.net"> <img style="margin-right: 2px" width=176 height=50 src="static_intel/Certego.png" alt="Certego Logo"/></a>
+<a href="https://certego.net/?utm_source=intelowl"> <img style="margin-right: 2px" width=176 height=50 src="static_intel/Certego.png" alt="Certego Logo"/></a>
 
-[Certego](https://www.certego.net) is a MSSP and Threat Intelligence Provider based in Italy.
+[Certego](https://certego.net/?utm_source=intelowl) is a MSSP and Threat Intelligence Provider based in Italy.
 
-Without Certego, IntelOwl would have not been born. Also, thanks to this company, it is constantly maintained and updated.
+IntelOwl was born out of Certego's Threat intelligence R&D division and is constantly maintained and updated thanks to them.
+
+> [Dragonfly](https://dragonfly.certego.net/?utm_source=intelowl), an automated sandbox to emulate and analyze malware, is a new public service by Certego developed by the same team behind IntelOwl. It is now available as the `Dragonfly_Emulation` analyzer in IntelOwl. [Sign up](https://dragonfly.certego.net/register?utm_source=intelowl) on Dragonfly today for free access!
 
 #### The Honeynet Project
 
@@ -87,7 +89,7 @@ Project Summaries and/or in-development projects:
 
 If you are interested in being the next GSoC student for IntelOwl, join the [Honeynet Slack chat](https://gsoc-slack.honeynet.org/) for more info.
 
-### BRONZE
+### 🥉 BRONZE
 
 #### Tines
 
@@ -103,9 +105,9 @@ IntelOwl is officially integrated in Tines. Read everything about this partnersh
 
 In 2021 IntelOwl joined the official [Docker Open Source Program](https://www.docker.com/blog/expanded-support-for-open-source-software-projects/). This allows IntelOwl developers to easily manage Docker images and focus on writing the code.
 
-### IRON
+### 🤝 IRON
 
-If you are an individual who likes this project and wants to thank us with a little contribution, we would be happy to list you here in the README as a public acknowledgment.
+If you are an individual who likes this project and want to thank us with a little contribution, we would be happy to list you here in the README as a public acknowledgment.
 
 ## About the author and maintainers
 

@@ -21,7 +21,9 @@ path_mapping = {
     "custom": "docker/custom.override.yml",
     "traefik": "docker/traefik.override.yml",
     "multi_queue": "docker/multi-queue.override.yml",
+    "test_multi_queue": "docker/test.multi-queue.override.yml",
     "flower": "docker/flower.override.yml",
+    "test_flower": "docker/test.flower.override.yml",
 }
 # to fix the box-js folder name
 path_mapping.update(
@@ -138,6 +140,11 @@ def start():
     for key in ["traefik", "multi_queue", "custom", "flower"]:
         if args.__dict__[key]:
             compose_files.append(path_mapping[key])
+    # additional compose files for tests
+    if args.mode == "test":
+        for key in ["multi_queue", "flower"]:
+            if args.__dict__[key]:
+                compose_files.append(path_mapping["test_" + key])
     # additional integrations
     for key in docker_analyzers:
         if args.__dict__[key]:

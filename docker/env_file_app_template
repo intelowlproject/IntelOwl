@@ -79,6 +79,8 @@ DEHASHED_AUTH_KEY=
 OPENCTI_KEY=
 YETI_KEY=
 SPYSE_API_KEY=
+DRAGONFLY_API_KEY=
+DRAGONFLY_API_URL=https://dragonfly.certego.net
 
 # connectors secrets (optional)
 CONNECTOR_MISP_KEY=

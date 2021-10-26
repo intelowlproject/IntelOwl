@@ -1,4 +1,4 @@
-version: '3'
+version: '3.8'
 
 services:
   uwsgi:
@@ -13,7 +13,7 @@ services:
     stop_grace_period: 3m
     command: /usr/local/bin/celery -A intel_owl.celery worker -n worker_local --uid www-data --time-limit=10000 --gid www-data --pidfile= -Ofair -Q local -E
     volumes:
-      - ../configuration/analyzer_config.json:/opt/deploy/configuration/analyzer_config.json
+      - ../configuration:/opt/deploy/intel_owl/configuration
       - generic_logs:/var/log/intel_owl
       - shared_files:/opt/deploy/files_required
     env_file:
@@ -21,6 +21,7 @@ services:
     depends_on:
       - rabbitmq
       - postgres
+      - uwsgi
 
   celery_worker_long:
     image: intelowlproject/intelowl:${INTELOWL_TAG_VERSION}
@@ -29,7 +30,7 @@ services:
     stop_grace_period: 3m
     command: /usr/local/bin/celery -A intel_owl.celery worker -n worker_long --uid www-data --gid www-data --time-limit=40000 --pidfile= -Ofair -Q long -E
     volumes:
-      - ../configuration/analyzer_config.json:/opt/deploy/configuration/analyzer_config.json
+      - ../configuration:/opt/deploy/intel_owl/configuration
       - generic_logs:/var/log/intel_owl
       - shared_files:/opt/deploy/files_required
     env_file:
@@ -37,4 +38,5 @@ services:
     depends_on:
       - rabbitmq
       - postgres
+      - uwsgi
 

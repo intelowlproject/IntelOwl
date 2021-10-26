@@ -1,10 +1,11 @@
-version: '3'
+version: '3.8'
 
 services:
   uwsgi:
     build:
       context: ..
       dockerfile: docker/Dockerfile
+    image: intelowlproject/intelowl:test
     volumes:
       - ../:/opt/deploy/intel_owl
     environment:
@@ -16,3 +17,9 @@ services:
       dockerfile: docker/Dockerfile_nginx
       args:
         INTELOWL_NG_TAG_VERSION: ${INTELOWL_NG_TAG_VERSION}
+
+  celery_beat:
+    image: intelowlproject/intelowl:test
+
+  celery_worker_default:
+    image: intelowlproject/intelowl:test

@@ -1,0 +1,8 @@
+version: '3.8'
+
+services:
+  celery_worker_local:
+    image: intelowlproject/intelowl:test
+
+  celery_worker_long:
+    image: intelowlproject/intelowl:test

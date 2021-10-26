@@ -53,6 +53,7 @@ class EXEAnalyzersTestCase(_FileAnalyzersScriptsTestCase):
                 "MISP_Check_Hash",
                 "MalwareBazaar_Get_File",
                 "OTX_Check_Hash",
+                "Dragonfly_Emulation",
             ],
         }
 

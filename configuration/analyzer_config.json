@@ -651,7 +651,7 @@
       "profiles": {
         "value": [1, 2],
         "type": "list",
-        "description": "List of profile indices for emulators. Refer to [profiles list](https://dragonfly.certego.net/dashboard/profiles)."
+        "description": "List of profile indices for emulators. Refer to [profiles list](https://dragonfly.certego.net/dashboard/profiles?utm_source=intelowl)."
       },
       "operating_system": {
         "value": "",
@@ -677,7 +677,7 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "DRAGONFLY_API_KEY",
-        "description": "Dragonfly API key. Generate [here](https://dragonfly.certego.net/me/sessions).",
+        "description": "Dragonfly API key. Generate [here](https://dragonfly.certego.net/me/sessions?utm_source=intelowl).",
         "required": true
       },
       "url_key_name": {
@@ -1142,7 +1142,7 @@
   "Intezer_Get": {
     "type": "observable",
     "python_module": "intezer_get.IntezerGet",
-    "description": "check if an hash was analyzed on Intezer. Register for a free community account [here](https://analyze.intezer.com/sign-in).",
+    "description": "check if an hash was analyzed on Intezer. Register for a free community account [here](https://analyze.intezer.com/sign-in?utm_source=IntelOwl).",
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
@@ -1165,7 +1165,7 @@
   "Intezer_Scan": {
     "type": "file",
     "python_module": "intezer_scan.IntezerScan",
-    "description": "Scan a file on Intezer. Register for a free community account [here](https://analyze.intezer.com/sign-in).",
+    "description": "Scan a file on Intezer. Register for a free community account [here](https://analyze.intezer.com/sign-in?utm_source=IntelOwl).",
     "disabled": false,
     "external_service": true,
     "leaks_info": true,

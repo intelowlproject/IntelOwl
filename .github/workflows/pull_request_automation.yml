@@ -40,6 +40,9 @@ jobs:
     - name: "Lint with flake8 (PEP8 enforcer + linter)"
       run: |
         sudo docker exec intelowl_uwsgi flake8 . --count
+    - name: "Isort check"
+      run: |
+        sudo docker exec intelowl_uwsgi isort . --profile black --filter-files --check-only --diff
     - name: "Test: API"
       run: |
         sudo docker/scripts/coverage_test.sh tests.test_api tests.test_auth

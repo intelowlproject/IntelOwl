@@ -2,6 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 
 import logging
+
 import peepdf
 from pdfid import pdfid
 

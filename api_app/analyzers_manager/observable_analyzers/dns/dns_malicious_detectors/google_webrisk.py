@@ -8,12 +8,11 @@ from os.path import exists
 from google.cloud.webrisk_v1.services.web_risk_service import WebRiskServiceClient
 from google.cloud.webrisk_v1.types import ThreatType
 
-from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.observable_analyzers.dns.dns_responses import (
     malicious_detector_response,
 )
-
+from api_app.exceptions import AnalyzerRunException
 from tests.mock_utils import if_mock_connections, patch
 
 logger = logging.getLogger(__name__)

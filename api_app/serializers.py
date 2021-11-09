@@ -5,19 +5,20 @@ import json
 import logging
 
 from django.contrib.auth.models import Group
-from rest_framework import serializers
 from rest_flex_fields import FlexFieldsModelSerializer
+from rest_framework import serializers
 from rest_framework_guardian.serializers import ObjectPermissionsAssignmentMixin
 
-from api_app.models import Job, TLP, Tag
-from .helpers import (
-    gen_random_colorhex,
-    calculate_mimetype,
-    calculate_observable_classification,
-    calculate_md5,
-)
+from api_app.models import TLP, Job, Tag
+
 from .analyzers_manager.serializers import AnalyzerReportSerializer
 from .connectors_manager.serializers import ConnectorReportSerializer
+from .helpers import (
+    calculate_md5,
+    calculate_mimetype,
+    calculate_observable_classification,
+    gen_random_colorhex,
+)
 
 logger = logging.getLogger(__name__)
 

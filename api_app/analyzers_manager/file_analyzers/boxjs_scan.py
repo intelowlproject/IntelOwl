@@ -1,7 +1,7 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-from api_app.analyzers_manager.classes import FileAnalyzer, DockerBasedAnalyzer
+from api_app.analyzers_manager.classes import DockerBasedAnalyzer, FileAnalyzer
 
 
 class BoxJS(FileAnalyzer, DockerBasedAnalyzer):

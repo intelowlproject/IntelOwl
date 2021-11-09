@@ -3,17 +3,14 @@
 
 import logging
 from typing import Optional
+
 import requests
 
-from ..exceptions import (
-    ConnectorConfigurationException,
-    ConnectorRunException,
-)
-
 from api_app.core.classes import Plugin
-from .models import ConnectorReport
-from .dataclasses import ConnectorConfig
 
+from ..exceptions import ConnectorConfigurationException, ConnectorRunException
+from .dataclasses import ConnectorConfig
+from .models import ConnectorReport
 
 logger = logging.getLogger(__name__)
 

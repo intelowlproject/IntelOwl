@@ -5,8 +5,8 @@ import dataclasses
 import typing
 
 from api_app.core.dataclasses import AbstractConfig
-from .serializers import ConnectorConfigSerializer
 
+from .serializers import ConnectorConfigSerializer
 
 __all__ = ["ConnectorConfig"]
 

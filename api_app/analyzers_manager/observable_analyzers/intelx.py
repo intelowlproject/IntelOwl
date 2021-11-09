@@ -1,13 +1,13 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-import requests
 import time
 
-from api_app.exceptions import AnalyzerRunException
-from api_app.analyzers_manager.classes import ObservableAnalyzer
+import requests
 
-from tests.mock_utils import if_mock_connections, patch, MockResponse
+from api_app.analyzers_manager.classes import ObservableAnalyzer
+from api_app.exceptions import AnalyzerRunException
+from tests.mock_utils import MockResponse, if_mock_connections, patch
 
 
 class IntelX(ObservableAnalyzer):

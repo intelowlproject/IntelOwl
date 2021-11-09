@@ -2,20 +2,16 @@
 # See the file 'LICENSE' for copying permission.
 
 from __future__ import absolute_import, unicode_literals
+
 from celery import shared_task
 from guardian import utils
 
-from intel_owl.celery import app
 from api_app import crons
 from api_app.analyzers_manager import controller as analyzers_controller
-from api_app.connectors_manager import controller as connectors_controller
-
 from api_app.analyzers_manager.file_analyzers import yara_scan
-from api_app.analyzers_manager.observable_analyzers import (
-    maxmind,
-    talos,
-    tor,
-)
+from api_app.analyzers_manager.observable_analyzers import maxmind, talos, tor
+from api_app.connectors_manager import controller as connectors_controller
+from intel_owl.celery import app
 
 
 @shared_task(soft_time_limit=200)

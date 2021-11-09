@@ -1,11 +1,11 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-import boto3
 import base64
-import os
 import logging
+import os
 
+import boto3
 from botocore.exceptions import ClientError, NoCredentialsError
 
 

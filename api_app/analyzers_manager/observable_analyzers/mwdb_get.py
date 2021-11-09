@@ -1,13 +1,13 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-import mwdblib
 import logging
+
+import mwdblib
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
 from api_app.analyzers_manager.file_analyzers.mwdb_scan import mocked_mwdb_response
-
-from tests.mock_utils import patch, if_mock_connections
+from tests.mock_utils import if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 

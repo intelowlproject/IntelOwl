@@ -3,34 +3,30 @@
 
 import logging
 from typing import Union
-
 from wsgiref.util import FileWrapper
-from django.utils.decorators import method_decorator
-from django.http import HttpResponse
-from django.db.models import Q
-from django.conf import settings
-from rest_framework.response import Response
-from rest_framework import serializers as rfs
-from rest_framework import status, viewsets, mixins
-from rest_framework.decorators import api_view, action
-from rest_framework.permissions import DjangoObjectPermissions
-from rest_framework.exceptions import (
-    ValidationError,
-    PermissionDenied,
-)
-from guardian.decorators import permission_required_or_403
-from rest_framework_guardian.filters import ObjectPermissionsFilter
-from drf_spectacular.utils import (
-    extend_schema as add_docs,
-    inline_serializer,
-)
-from drf_spectacular.types import OpenApiTypes
 
+from django.conf import settings
+from django.db.models import Q
+from django.http import HttpResponse
+from django.utils.decorators import method_decorator
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema as add_docs
+from drf_spectacular.utils import inline_serializer
+from guardian.decorators import permission_required_or_403
+from rest_framework import mixins
+from rest_framework import serializers as rfs
+from rest_framework import status, viewsets
+from rest_framework.decorators import action, api_view
+from rest_framework.exceptions import PermissionDenied, ValidationError
+from rest_framework.permissions import DjangoObjectPermissions
+from rest_framework.response import Response
+from rest_framework_guardian.filters import ObjectPermissionsFilter
+
+from api_app import models, permissions, serializers
 from intel_owl.celery import app as celery_app
-from api_app import models, serializers, permissions
+
 from .analyzers_manager import controller as analyzers_controller
 from .connectors_manager import controller as connectors_controller
-
 
 logger = logging.getLogger(__name__)
 

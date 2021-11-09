@@ -4,9 +4,9 @@
 from django.utils.module_loading import import_string
 from rest_framework import serializers as rfs
 
-
 from api_app.core.serializers import AbstractConfigSerializer
 from api_app.models import TLP
+
 from .models import ConnectorReport
 
 

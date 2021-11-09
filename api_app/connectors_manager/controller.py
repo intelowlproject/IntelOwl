@@ -2,20 +2,20 @@
 # See the file 'LICENSE' for copying permission.
 
 import logging
-from typing import List, Dict
-from celery import uuid, group
+from typing import Dict, List
 
+from celery import group, uuid
 from django.conf import settings
 from django.utils.module_loading import import_string
 from rest_framework.exceptions import ValidationError
 
-from intel_owl.consts import DEFAULT_QUEUE
-from api_app.models import TLP
 from api_app.exceptions import NotRunnableConnector
+from api_app.models import TLP
+from intel_owl.consts import DEFAULT_QUEUE
+
+from .classes import Connector
 from .dataclasses import ConnectorConfig
 from .models import ConnectorReport
-from .classes import Connector
-
 
 logger = logging.getLogger(__name__)
 

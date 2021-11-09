@@ -2,9 +2,11 @@
 # See the file 'LICENSE' for copying permission.
 
 import logging
-from XLMMacroDeobfuscator.deobfuscator import process_file
-from api_app.analyzers_manager.classes import FileAnalyzer
+
 from celery.exceptions import SoftTimeLimitExceeded
+from XLMMacroDeobfuscator.deobfuscator import process_file
+
+from api_app.analyzers_manager.classes import FileAnalyzer
 
 logger = logging.getLogger(__name__)
 

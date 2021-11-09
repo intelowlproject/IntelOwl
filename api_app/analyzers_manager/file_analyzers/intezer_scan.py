@@ -4,13 +4,13 @@
 from datetime import timedelta
 
 import intezer_sdk.consts
-from intezer_sdk import api as intezer_api, errors as intezer_errors
+from intezer_sdk import api as intezer_api
+from intezer_sdk import errors as intezer_errors
 from intezer_sdk.analysis import Analysis
 
-from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager.classes import FileAnalyzer
-
-from tests.mock_utils import patch, if_mock_connections
+from api_app.exceptions import AnalyzerRunException
+from tests.mock_utils import if_mock_connections, patch
 
 
 class IntezerScan(FileAnalyzer):

@@ -2,13 +2,12 @@
 # See the file 'LICENSE' for copying permission.
 
 import logging
-
-from subprocess import Popen, DEVNULL, PIPE
+from subprocess import DEVNULL, PIPE, Popen
 
 from celery.exceptions import SoftTimeLimitExceeded
 
-from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager.classes import FileAnalyzer
+from api_app.exceptions import AnalyzerRunException
 
 logger = logging.getLogger(__name__)
 

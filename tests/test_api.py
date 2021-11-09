@@ -4,10 +4,10 @@
 import hashlib
 import os
 
-from django.contrib.auth.models import User
-from django.test import TestCase
-from django.core.files.uploadedfile import SimpleUploadedFile
 from django.conf import settings
+from django.contrib.auth.models import User
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.test import TestCase
 from rest_framework.test import APIClient
 
 from api_app import models

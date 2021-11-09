@@ -5,8 +5,7 @@ from pyhashlookup import Hashlookup
 
 from api_app.analyzers_manager import classes
 from api_app.exceptions import AnalyzerRunException
-
-from tests.mock_utils import if_mock_connections, patch, MockResponseNoOp
+from tests.mock_utils import MockResponseNoOp, if_mock_connections, patch
 
 
 class HashLookupServer(classes.ObservableAnalyzer):

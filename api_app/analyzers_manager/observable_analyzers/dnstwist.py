@@ -1,16 +1,15 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-import subprocess
 import json
 import logging
-
+import subprocess
+from ipaddress import AddressValueError, IPv4Address
 from shutil import which
 from urllib.parse import urlparse
-from ipaddress import AddressValueError, IPv4Address
 
-from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager import classes
+from api_app.exceptions import AnalyzerRunException
 
 logger = logging.getLogger(__name__)
 

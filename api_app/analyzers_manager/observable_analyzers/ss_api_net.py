@@ -1,13 +1,13 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-import requests
 import base64
 
-from api_app.exceptions import AnalyzerRunException, AnalyzerConfigurationException
-from api_app.analyzers_manager import classes
+import requests
 
-from tests.mock_utils import if_mock_connections, patch, MockResponse
+from api_app.analyzers_manager import classes
+from api_app.exceptions import AnalyzerConfigurationException, AnalyzerRunException
+from tests.mock_utils import MockResponse, if_mock_connections, patch
 
 
 class SSAPINet(classes.ObservableAnalyzer):

@@ -3,15 +3,16 @@
 
 """Default DNS resolutions"""
 
-import logging
 import ipaddress
+import logging
 import socket
-import dns.resolver
 from urllib.parse import urlparse
 
-from api_app.analyzers_manager import classes
-from ..dns_responses import dns_resolver_response
+import dns.resolver
 
+from api_app.analyzers_manager import classes
+
+from ..dns_responses import dns_resolver_response
 
 logger = logging.getLogger(__name__)
 

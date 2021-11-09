@@ -7,7 +7,6 @@
 # forked repository: https://github.com/mlodic/oletools
 
 import logging
-
 from re import sub
 
 from oletools import mraptor
@@ -18,8 +17,8 @@ from api_app.analyzers_manager.classes import FileAnalyzer
 logger = logging.getLogger(__name__)
 
 try:
-    from XLMMacroDeobfuscator.xls_wrapper_2 import XLSWrapper2
     from XLMMacroDeobfuscator.deobfuscator import show_cells
+    from XLMMacroDeobfuscator.xls_wrapper_2 import XLSWrapper2
 except Exception as e:
     logger.exception(e)
 

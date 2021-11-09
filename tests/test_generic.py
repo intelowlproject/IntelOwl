@@ -5,13 +5,12 @@ import os
 
 from django.test import TestCase
 
+from api_app import crons
 from api_app.analyzers_manager.file_analyzers import yara_scan
 from api_app.analyzers_manager.observable_analyzers import maxmind, talos, tor
 
-from api_app import crons
-
-from .mock_utils import if_mock_connections, patch, skip, MockResponse
 from . import get_logger
+from .mock_utils import MockResponse, if_mock_connections, patch, skip
 
 logger = get_logger()
 

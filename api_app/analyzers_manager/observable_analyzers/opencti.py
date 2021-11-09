@@ -1,12 +1,11 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-from pycti.api.opencti_api_client import File
 import pycti
+from pycti.api.opencti_api_client import File
 
-from tests.mock_utils import patch, if_mock_connections
 from api_app.analyzers_manager import classes
-
+from tests.mock_utils import if_mock_connections, patch
 
 # for lighter output (credits: Cortex-Analyzers/opencti)
 RESULT_TRIM_MAP = {

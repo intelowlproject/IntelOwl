@@ -1,14 +1,13 @@
-from abc import ABCMeta, abstractmethod
-from api_app.models import Job
-from api_app.core.models import AbstractReport
-from api_app.analyzers_manager.constants import ObservableTypes
 import logging
+from abc import ABCMeta, abstractmethod
 
 from django.contrib.auth.models import User
 from django.test import TestCase
 from rest_framework.test import APIClient
 
-
+from api_app.analyzers_manager.constants import ObservableTypes
+from api_app.core.models import AbstractReport
+from api_app.models import Job
 from intel_owl import settings
 
 

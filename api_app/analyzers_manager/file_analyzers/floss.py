@@ -2,7 +2,8 @@
 # See the file 'LICENSE' for copying permission.
 
 from json import dumps as json_dumps
-from api_app.analyzers_manager.classes import FileAnalyzer, DockerBasedAnalyzer
+
+from api_app.analyzers_manager.classes import DockerBasedAnalyzer, FileAnalyzer
 
 
 class Floss(FileAnalyzer, DockerBasedAnalyzer):

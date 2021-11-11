@@ -7,6 +7,7 @@ from urllib.parse import urlparse
 import requests
 
 from api_app.analyzers_manager import classes
+from api_app.exceptions import AnalyzerRunException
 from tests.mock_utils import MockResponse, if_mock_connections, patch
 
 
@@ -25,6 +26,11 @@ class Fortiguard(classes.ObservableAnalyzer):
 
         category_match = re.search(pattern, str(response.content), flags=0)
         dict_response = {"category": category_match.group(1) if category_match else ""}
+        if dict_response["category"] == "Symfony":
+            # this is caused by their backend when fails. dk why
+            raise AnalyzerRunException(
+                "Fail in Fortiguard backend. They display 'Symfony' as a category"
+            )
         return dict_response
 
     @classmethod

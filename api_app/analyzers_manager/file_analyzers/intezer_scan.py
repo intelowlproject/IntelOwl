@@ -36,12 +36,14 @@ class IntezerScan(FileAnalyzer):
             # run analysis by hash
             hash_result = self.__intezer_analysis(file_hash=self.md5)
             result.update(hash_result, hash_found=True)
-        except intezer_errors.HashDoesNotExistError as e:
-            if not self.upload_file:
-                raise AnalyzerRunException(e)
-            # else, run analysis by file
-            file_result = self.__intezer_analysis(file_stream=self.read_file_bytes())
-            result.update(file_result, hash_found=False)
+        except intezer_errors.HashDoesNotExistError:
+            result.update(hash_found=False)
+            if self.upload_file:
+                # run analysis by file
+                file_result = self.__intezer_analysis(
+                    file_stream=self.read_file_bytes()
+                )
+                result.update(file_result, hash_found=False)
         except intezer_errors.IntezerError as e:
             raise AnalyzerRunException(e)
 

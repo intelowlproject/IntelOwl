@@ -37,6 +37,8 @@ class IntezerGet(ObservableAnalyzer):
                 timeout=timedelta(seconds=self.timeout),
             )
             result.update(analysis.result(), hash_found=True)
+        except intezer_errors.HashDoesNotExistError:
+            result.update(hash_found=False)
         except intezer_errors.IntezerError as e:
             raise AnalyzerRunException(e)
 

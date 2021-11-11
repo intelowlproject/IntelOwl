@@ -46,7 +46,7 @@ else:
 
             # The idea is to download the file in MEDIA_ROOT/analyzer/namefile if it does not exist
             path_dir = os.path.join(MEDIA_ROOT, analyzer)
-            name = file.file_name
+            name = file.name
             _path = os.path.join(path_dir, name)
             if not os.path.exists(_path):
                 os.makedirs(path_dir, exist_ok=True)

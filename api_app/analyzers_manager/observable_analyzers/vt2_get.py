@@ -66,4 +66,11 @@ def vt_get_report(api_key, observable_name, obs_clsfn):
     except requests.RequestException as e:
         raise AnalyzerRunException(e)
 
-    return response.json()
+    try:
+        return_item = response.json()
+    except Exception as e:
+        raise AnalyzerRunException(
+            f"Response is not a JSON!? Response type:{response.text} Error:{e}"
+        )
+
+    return return_item

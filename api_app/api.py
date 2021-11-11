@@ -44,7 +44,8 @@ def _analysis_request(
     source = str(request.user)
     data_received = request.data
     logger.info(
-        f"analyze_file received request from {source}." f"Data:{dict(data_received)}."
+        f"_analysis_request received request from {source}."
+        f"Data:{dict(data_received)}."
     )
 
     # serialize request data and validate

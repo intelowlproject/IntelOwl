@@ -25,6 +25,7 @@ logger = logging.getLogger(__name__)
 
 __all__ = [
     "TagSerializer",
+    "JobAvailabilitySerializer",
     "JobListSerializer",
     "JobSerializer",
     "FileAnalysisSerializer",
@@ -65,7 +66,7 @@ class JobAvailabilitySerializer(serializers.ModelSerializer):
     md5 = serializers.CharField(max_length=128, required=True)
     analyzers = serializers.ListField(default=list)
     running_only = serializers.BooleanField(default=False, required=False)
-    minutes_ago = serializers.IntegerField(required=False)
+    minutes_ago = serializers.IntegerField(default=None, required=False)
 
 
 class JobListSerializer(serializers.ModelSerializer):

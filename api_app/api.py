@@ -129,7 +129,6 @@ def _analysis_request(
                 "status": rfs.StringRelatedField(),
                 "job_id": rfs.StringRelatedField(),
                 "analyzers_to_execute": OpenApiTypes.OBJECT,
-                "minutes_ago": rfs.IntegerField(),
             },
         ),
     },
@@ -153,7 +152,7 @@ def ask_analysis_availability(request):
         serialized_data["analyzers"],
         serialized_data["running_only"],
         serialized_data["md5"],
-        serialized_data.get("minutes_ago"),
+        serialized_data["minutes_ago"],
     )
 
     if running_only:

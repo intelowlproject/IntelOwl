@@ -2,6 +2,27 @@
 
 [**Upgrade Guide**](https://intelowl.readthedocs.io/en/latest/Installation.html#update-to-the-most-recent-version)
 
+## [v3.2.1](https://github.com/intelowlproject/IntelOwl/releases/tag/v3.2.1)
+
+> Update PyIntelOwl to version [4.1.3](https://github.com/intelowlproject/pyintelowl/blob/master/.github/CHANGELOG.md#413).
+
+**REST API changes**:
+
+- New parameter `minutes_ago` in the `/api/ask_analysis_availability` endpoint.
+
+**Bug Fixes:**
+
+- Fix AWS S3 storage not working for file analysis.
+- Fix in intezer analyzers to correctly manage HashDoesNotExistError error
+- Fix in `Fortiguard` analyzer.
+- Temporary disable `Quark_Engine_APK` analyzer in CI tests because of [quark-engine/quark-engine#286](https://github.com/quark-engine/quark-engine/issues/286).
+
+**Other:**
+
+- Updated to python 3.9 in CI.
+- Uniform docker-compose version in all docker-compose files.
+- Use isort to sort import statements.
+
 ## [v3.2.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v3.2.0)
 
 **New Analyzers:**

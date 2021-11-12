@@ -2,6 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 
 import logging
+from datetime import timedelta
 from typing import Union
 from wsgiref.util import FileWrapper
 
@@ -23,6 +24,7 @@ from rest_framework.response import Response
 from rest_framework_guardian.filters import ObjectPermissionsFilter
 
 from api_app import models, permissions, serializers
+from api_app.helpers import get_now
 from intel_owl.celery import app as celery_app
 
 from .analyzers_manager import controller as analyzers_controller
@@ -127,6 +129,7 @@ def _analysis_request(
                 "status": rfs.StringRelatedField(),
                 "job_id": rfs.StringRelatedField(),
                 "analyzers_to_execute": OpenApiTypes.OBJECT,
+                "minutes_ago": rfs.IntegerField(),
             },
         ),
     },
@@ -146,10 +149,11 @@ def ask_analysis_availability(request):
     serializer.is_valid(raise_exception=True)
     serialized_data = serializer.validated_data
 
-    analyzers, running_only, md5 = (
+    analyzers, running_only, md5, minutes_ago = (
         serialized_data["analyzers"],
         serialized_data["running_only"],
         serialized_data["md5"],
+        serialized_data.get("minutes_ago"),
     )
 
     if running_only:
@@ -170,6 +174,10 @@ def ask_analysis_availability(request):
             & Q(status__in=statuses_to_check)
             & Q(analyzers_to_execute__contains=analyzers)
         )
+
+    if minutes_ago:
+        minutes_ago_time = get_now() - timedelta(minutes=minutes_ago)
+        query = query & Q(received_request_time__gte=minutes_ago_time)
 
     try:
         last_job_for_md5 = models.Job.objects.filter(query).latest(

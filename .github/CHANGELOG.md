@@ -2,6 +2,27 @@
 
 [**Upgrade Guide**](https://intelowl.readthedocs.io/en/latest/Installation.html#update-to-the-most-recent-version)
 
+## [v3.2.1](https://github.com/intelowlproject/IntelOwl/releases/tag/v3.2.1)
+
+> Update PyIntelOwl to version [4.1.3](https://github.com/intelowlproject/pyintelowl/blob/master/.github/CHANGELOG.md#413).
+
+**REST API changes**:
+
+- New parameter `minutes_ago` in the `/api/ask_analysis_availability` endpoint.
+
+**Bug Fixes:**
+
+- Fix AWS S3 storage not working for file analysis.
+- Fix in intezer analyzers to correctly manage HashDoesNotExistError error
+- Fix in `Fortiguard` analyzer.
+- Temporary disable `Quark_Engine_APK` analyzer in CI tests because of [quark-engine/quark-engine#286](https://github.com/quark-engine/quark-engine/issues/286).
+
+**Other:**
+
+- Updated to python 3.9 in CI.
+- Uniform docker-compose version in all docker-compose files.
+- Use isort to sort import statements.
+
 ## [v3.2.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v3.2.0)
 
 **New Analyzers:**
@@ -94,7 +115,7 @@ This is a minor patch release.
 
 - New `Spyse` analyzer: Scan domains, IPs, emails and CVEs using Spyse's API. Register [here](https://spyse.com/user/registration).
 - New `OpenCTI` analyzer: scan an observable on an OpenCTI instance.
-- New `Intezer_Get` analyzer: check Managing Analyzers and Connectors if an analysis related to a hash is available in [Intezer](https://analyze.intezer.com/)
+- New `Intezer_Get` analyzer: check Managing Analyzers and Connectors if an analysis related to a hash is available in [Intezer](https://analyze.intezer.com/?utm_source=IntelOwl)
 - New `MWDB_Get` analyzer: [mwdblib](https://mwdb.readthedocs.io/en/latest/) Retrieve malware file analysis by hash from repository maintained by CERT Polska MWDB.
 - New `YETI` analyzer (YETI = Your Everyday Threat Intelligence): scan an observable on a YETI instance.
 - New `HashLookupServer_Get_Observable` and `HashLookupServer_Get_File` analyzers: check if a md5 or sha1 is available in the database of [known file hosted by CIRCL](https://github.com/adulau/hashlookup-server)

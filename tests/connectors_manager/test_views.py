@@ -1,9 +1,8 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-from api_app.connectors_manager.serializers import ConnectorConfigSerializer
 from api_app.connectors_manager.models import ConnectorReport
-
+from api_app.connectors_manager.serializers import ConnectorConfigSerializer
 
 from .. import CustomAPITestCase, PluginActionViewsetTestCase
 

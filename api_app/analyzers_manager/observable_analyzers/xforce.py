@@ -1,14 +1,14 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-import requests
-from requests.auth import HTTPBasicAuth
 from urllib.parse import quote_plus
 
-from api_app.exceptions import AnalyzerRunException
-from api_app.analyzers_manager import classes
+import requests
+from requests.auth import HTTPBasicAuth
 
-from tests.mock_utils import if_mock_connections, patch, MockResponse
+from api_app.analyzers_manager import classes
+from api_app.exceptions import AnalyzerRunException
+from tests.mock_utils import MockResponse, if_mock_connections, patch
 
 
 class XForce(classes.ObservableAnalyzer):

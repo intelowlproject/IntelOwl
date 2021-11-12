@@ -7,9 +7,9 @@
 # forked repository: https://github.com/mlodic/pefile
 
 import logging
-import pefile
-
 from datetime import datetime
+
+import pefile
 
 from api_app.analyzers_manager.classes import FileAnalyzer
 

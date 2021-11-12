@@ -1,12 +1,11 @@
 import logging
 import time
+
 from pydragonfly import Dragonfly, DragonflyException, TParams
 
 from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.exceptions import AnalyzerRunException
-
-from tests.mock_utils import if_mock_connections, patch, MockResponse
-
+from tests.mock_utils import MockResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 

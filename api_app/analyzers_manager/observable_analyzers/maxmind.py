@@ -2,21 +2,20 @@
 # See the file 'LICENSE' for copying permission.
 
 import datetime
-import os
 import logging
+import os
 import shutil
 import tarfile
 import traceback
+
 import maxminddb
 import requests
-
 from django.conf import settings
-from intel_owl import secrets
 
-from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager import classes
-
-from tests.mock_utils import patch, if_mock_connections
+from api_app.exceptions import AnalyzerRunException
+from intel_owl import secrets
+from tests.mock_utils import if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 

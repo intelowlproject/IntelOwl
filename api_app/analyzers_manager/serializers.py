@@ -5,8 +5,9 @@ from django.utils.module_loading import import_string
 from rest_framework import serializers as rfs
 
 from api_app.core.serializers import AbstractConfigSerializer
+
+from .constants import HashChoices, ObservableTypes, TypeChoices
 from .models import AnalyzerReport
-from .constants import TypeChoices, HashChoices, ObservableTypes
 
 
 class AnalyzerReportSerializer(rfs.ModelSerializer):

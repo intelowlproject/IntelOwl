@@ -1,12 +1,13 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
+import json
+import logging
+
 # system imports
 import os
-import logging
-import json
-import shutil
 import secrets
+import shutil
 
 # web imports
 from flask import Flask, safe_join

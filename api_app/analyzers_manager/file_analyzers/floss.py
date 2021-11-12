@@ -2,7 +2,8 @@
 # See the file 'LICENSE' for copying permission.
 
 from json import dumps as json_dumps
-from api_app.analyzers_manager.classes import FileAnalyzer, DockerBasedAnalyzer
+
+from api_app.analyzers_manager.classes import DockerBasedAnalyzer, FileAnalyzer
 
 
 class Floss(FileAnalyzer, DockerBasedAnalyzer):
@@ -14,8 +15,10 @@ class Floss(FileAnalyzer, DockerBasedAnalyzer):
     # http request polling max number of tries
     max_tries: int = 60
     # here, max_tries * poll_distance = 10 minutes
-    timeout: int = 60 * 9
     # whereas subprocess timeout is kept as 60 * 9 = 9 minutes
+    timeout: int = 60 * 9
+    # this is retrieved with bash command `getconf ARG_MAX`
+    OS_MAX_ARGS: int = 2097152
 
     def set_params(self, params):
         self.max_no_of_strings = params.get(
@@ -41,16 +44,20 @@ class Floss(FileAnalyzer, DockerBasedAnalyzer):
         req_files = {fname: binary}
         result = self._docker_run(req_data, req_files)
         result["exceeded_max_number_of_strings"] = {}
-
+        # we are changing the endpoint of _docker_run to stringsifter
         self.url = self.ranking_url
+
         for key in self.max_no_of_strings.keys():
             if self.rank_strings[key]:
+                strings = json_dumps(result["strings"][key])
+                # 4 is the number of arguments that we are already passing
+                analyzable_strings = strings[: self.OS_MAX_ARGS - 5]
                 args = [
                     "rank_strings",
                     "--limit",
                     str(self.max_no_of_strings[key]),
                     "--strings",
-                    json_dumps(result["strings"][key]),
+                    analyzable_strings,
                 ]
                 req_data = {"args": args, "timeout": self.timeout}
                 result["strings"][key] = self._docker_run(req_data)

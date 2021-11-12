@@ -2,13 +2,14 @@
 # See the file 'LICENSE' for copying permission.
 
 import base64
-import time
-import requests
 import logging
+import time
 from datetime import datetime, timedelta
 
-from api_app.exceptions import AnalyzerRunException
+import requests
+
 from api_app.analyzers_manager.classes import BaseAnalyzerMixin
+from api_app.exceptions import AnalyzerRunException
 
 logger = logging.getLogger(__name__)
 

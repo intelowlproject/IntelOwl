@@ -3,7 +3,7 @@
 
 import base64
 
-from api_app.analyzers_manager.classes import ObservableAnalyzer, DockerBasedAnalyzer
+from api_app.analyzers_manager.classes import DockerBasedAnalyzer, ObservableAnalyzer
 from api_app.exceptions import AnalyzerRunException
 
 

@@ -3,18 +3,18 @@
 
 import logging
 
-from rest_framework import generics, status
-from rest_framework.response import Response
+from drf_spectacular.utils import extend_schema as add_docs
+from drf_spectacular.utils import inline_serializer
+from rest_framework import generics
 from rest_framework import serializers as rfs
+from rest_framework import status
+from rest_framework.response import Response
 
 from api_app.core.views import PluginActionViewSet, PluginHealthCheckAPI
-from .serializers import ConnectorConfigSerializer
-from .models import ConnectorReport
+
 from . import controller as connectors_controller
-from drf_spectacular.utils import (
-    extend_schema as add_docs,
-    inline_serializer,
-)
+from .models import ConnectorReport
+from .serializers import ConnectorConfigSerializer
 
 logger = logging.getLogger(__name__)
 

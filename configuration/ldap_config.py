@@ -5,8 +5,7 @@
 # https://intelowl.readthedocs.io/en/latest/Installation.html
 
 import ldap
-from django_auth_ldap.config import LDAPSearch, GroupOfNamesType
-
+from django_auth_ldap.config import GroupOfNamesType, LDAPSearch
 
 # Baseline configuration.
 AUTH_LDAP_SERVER_URI = "ldap://ldap.example.com"

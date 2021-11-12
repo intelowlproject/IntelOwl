@@ -2,16 +2,15 @@
 # See the file 'LICENSE' for copying permission.
 
 import hashlib
-import time
-import mwdblib
 import logging
+import time
 
+import mwdblib
 from requests import HTTPError
 
-from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager.classes import FileAnalyzer
-
-from tests.mock_utils import patch, if_mock_connections, MagicMock
+from api_app.exceptions import AnalyzerRunException
+from tests.mock_utils import MagicMock, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 

@@ -3,15 +3,14 @@
 
 # general helper functions used by the Django API
 
-import logging
-import ipaddress
-import re
-import random
 import hashlib
-
-from magic import from_buffer as magic_from_buffer
+import ipaddress
+import logging
+import random
+import re
 
 from django.utils import timezone
+from magic import from_buffer as magic_from_buffer
 
 logger = logging.getLogger(__name__)
 

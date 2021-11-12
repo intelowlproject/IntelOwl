@@ -1,9 +1,9 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
+from django.contrib.postgres import fields as pg_fields
 from django.db import models
 from django.utils import timezone
-from django.contrib.postgres import fields as pg_fields
 
 
 class Status(models.TextChoices):

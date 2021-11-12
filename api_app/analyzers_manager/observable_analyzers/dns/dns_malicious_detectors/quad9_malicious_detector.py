@@ -3,14 +3,15 @@
 
 """Check if the domains is reported as malicious in Quad9 database"""
 
-import requests
 from urllib.parse import urlparse
 
-from api_app.exceptions import AnalyzerRunException
-from api_app.analyzers_manager import classes
-from ..dns_responses import malicious_detector_response
+import requests
 
-from tests.mock_utils import if_mock_connections, patch, MockResponse
+from api_app.analyzers_manager import classes
+from api_app.exceptions import AnalyzerRunException
+from tests.mock_utils import MockResponse, if_mock_connections, patch
+
+from ..dns_responses import malicious_detector_response
 
 
 class Quad9MaliciousDetector(classes.ObservableAnalyzer):

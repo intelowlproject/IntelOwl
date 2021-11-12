@@ -3,9 +3,9 @@
 
 import requests
 
-from tests.mock_utils import MockResponse, patch, if_mock_connections
 from api_app.analyzers_manager import classes
 from api_app.exceptions import AnalyzerRunException
+from tests.mock_utils import MockResponse, if_mock_connections, patch
 
 
 class YETI(classes.ObservableAnalyzer):

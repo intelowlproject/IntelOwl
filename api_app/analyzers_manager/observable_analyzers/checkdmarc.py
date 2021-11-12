@@ -1,8 +1,8 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-import subprocess
 import json
+import subprocess
 from shutil import which
 
 from api_app.analyzers_manager import classes

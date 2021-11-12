@@ -1,28 +1,25 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-import time
-import logging
-import requests
 import json
+import logging
+import time
 from abc import ABCMeta
 
-from api_app.exceptions import (
-    AnalyzerRunException,
-    AnalyzerConfigurationException,
-)
+import requests
+from django.conf import settings
+
 from api_app.core.classes import Plugin
-
-from .models import AnalyzerReport
-from .constants import HashChoices, ObservableTypes, TypeChoices
-
+from api_app.exceptions import AnalyzerConfigurationException, AnalyzerRunException
 from tests.mock_utils import (
     if_mock_connections,
-    patch,
     mocked_docker_analyzer_get,
     mocked_docker_analyzer_post,
+    patch,
 )
-from django.conf import settings
+
+from .constants import HashChoices, ObservableTypes, TypeChoices
+from .models import AnalyzerReport
 
 logger = logging.getLogger(__name__)
 

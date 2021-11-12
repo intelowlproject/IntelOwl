@@ -62,7 +62,7 @@ class ApiViewTests(TestCase):
     def test_ask_analysis_availability(self):
         md5 = os.environ.get("TEST_MD5", "446c5fbb11b9ce058450555c1c27153c")
         analyzers_needed = ["Fortiguard", "CIRCLPassiveDNS"]
-        data = {"md5": md5, "analyzers": analyzers_needed}
+        data = {"md5": md5, "analyzers": analyzers_needed, "minutes_ago": 1}
         response = self.client.post(
             "/api/ask_analysis_availability", data, format="json"
         )

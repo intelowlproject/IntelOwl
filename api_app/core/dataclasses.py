@@ -1,8 +1,8 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
-from abc import abstractmethod
-import typing
 import dataclasses
+import typing
+from abc import abstractmethod
 
 from intel_owl import secrets as secrets_store
 from intel_owl.consts import (

@@ -1,14 +1,15 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-import os
 import logging
+import os
+from datetime import date, datetime
+
 import requests
 
-from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager import classes
+from api_app.exceptions import AnalyzerRunException
 from intel_owl import settings
-from datetime import datetime, date
 
 logger = logging.getLogger(__name__)
 

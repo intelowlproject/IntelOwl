@@ -1,10 +1,11 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-import logging
 import hashlib
-import pydeep
+import logging
+
 import magic
+import pydeep
 from exiftool import ExifTool
 
 from api_app.analyzers_manager.classes import FileAnalyzer

@@ -2,6 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 
 import logging
+
 import peepdf
 from pdfid import pdfid
 
@@ -44,6 +45,11 @@ class PDFInfo(FileAnalyzer):
                     peepdf_analysis.append(version_dict)
 
             self.results["peepdf"] = peepdf_analysis
+        except TypeError as e:
+            # rc4Key = rc4Key[:keyLength]
+            # TypeError: slice indices must be integers or None or
+            # have an __index__ method
+            self.results["peepdf"]["error"] = str(e)
         except Exception as e:
             logger.exception(e)
             self.results["peepdf"]["error"] = str(e)

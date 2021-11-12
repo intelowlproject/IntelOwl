@@ -2,19 +2,14 @@
 # See the file 'LICENSE' for copying permission.
 
 from __future__ import absolute_import, unicode_literals
+
 import os
+
 from celery import Celery
 from celery.schedules import crontab
 from kombu import Exchange, Queue
 
-from .settings import (
-    CELERY_QUEUES,
-    BROKER_URL,
-    RESULT_BACKEND,
-    AWS_SQS,
-    TEST_MODE,
-)
-
+from .settings import AWS_SQS, BROKER_URL, CELERY_QUEUES, RESULT_BACKEND, TEST_MODE
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "intel_owl.settings")
 

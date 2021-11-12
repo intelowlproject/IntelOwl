@@ -3,14 +3,15 @@
 
 """Quad9 DNS resolutions"""
 
+from urllib.parse import urlparse
+
 import requests
 
-from urllib.parse import urlparse
-from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager import classes
-from ..dns_responses import dns_resolver_response
+from api_app.exceptions import AnalyzerRunException
+from tests.mock_utils import MockResponse, if_mock_connections, patch
 
-from tests.mock_utils import if_mock_connections, patch, MockResponse
+from ..dns_responses import dns_resolver_response
 
 
 class Quad9DNSResolver(classes.ObservableAnalyzer):

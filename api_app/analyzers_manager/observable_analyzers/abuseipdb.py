@@ -4,8 +4,7 @@
 import requests
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
-
-from tests.mock_utils import if_mock_connections, patch, MockResponse
+from tests.mock_utils import MockResponse, if_mock_connections, patch
 
 
 class AbuseIPDB(ObservableAnalyzer):

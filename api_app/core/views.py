@@ -1,25 +1,20 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-from abc import ABCMeta, abstractmethod
 import logging
+from abc import ABCMeta, abstractmethod
 
-from rest_framework import viewsets, status
-from rest_framework.decorators import action
-from rest_framework.exceptions import (
-    ValidationError,
-    NotFound,
-    PermissionDenied,
-)
-from rest_framework.response import Response
+from drf_spectacular.utils import extend_schema as add_docs
+from drf_spectacular.utils import inline_serializer
 from rest_framework import serializers as rfs
-from drf_spectacular.utils import (
-    extend_schema as add_docs,
-    inline_serializer,
-)
+from rest_framework import status, viewsets
+from rest_framework.decorators import action
+from rest_framework.exceptions import NotFound, PermissionDenied, ValidationError
+from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from intel_owl.celery import app as celery_app
+
 from .models import AbstractReport
 
 logger = logging.getLogger(__name__)

@@ -1,17 +1,16 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-import os
 import logging
-from typing import Tuple, List
+import os
+from typing import List, Tuple
 
 import yara
-
 from git import Repo
 
-from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.analyzers_manager.dataclasses import AnalyzerConfig
+from api_app.exceptions import AnalyzerRunException
 
 logger = logging.getLogger(__name__)
 

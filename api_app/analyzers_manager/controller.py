@@ -3,21 +3,21 @@
 
 import logging
 from typing import Dict, List
-from celery import uuid, chord
-from django.utils.module_loading import import_string
+
+from celery import chord, uuid
 from django.conf import settings
+from django.utils.module_loading import import_string
 from rest_framework.exceptions import ValidationError
 
 from intel_owl.celery import app as celery_app
 from intel_owl.consts import DEFAULT_QUEUE
 
-from .classes import BaseAnalyzerMixin, DockerBasedAnalyzer
-from .models import AnalyzerReport
-from .dataclasses import AnalyzerConfig
-from ..models import Job, TLP
-from ..helpers import get_now
 from ..exceptions import AlreadyFailedJobException, NotRunnableAnalyzer
-
+from ..helpers import get_now
+from ..models import TLP, Job
+from .classes import BaseAnalyzerMixin, DockerBasedAnalyzer
+from .dataclasses import AnalyzerConfig
+from .models import AnalyzerReport
 
 logger = logging.getLogger(__name__)
 

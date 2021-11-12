@@ -2,9 +2,9 @@
 # See the file 'LICENSE' for copying permission.
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
-from .vt3_base import VirusTotalv3AnalyzerMixin
+from tests.mock_utils import MockResponse, if_mock_connections, patch
 
-from tests.mock_utils import if_mock_connections, patch, MockResponse
+from .vt3_base import VirusTotalv3AnalyzerMixin
 
 
 class VirusTotalv3(ObservableAnalyzer, VirusTotalv3AnalyzerMixin):

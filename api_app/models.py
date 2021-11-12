@@ -3,12 +3,12 @@
 
 import hashlib
 
+from django.contrib.postgres import fields as pg_fields
 from django.db import models
 from django.db.models.signals import pre_delete
-from django.contrib.postgres import fields as pg_fields
+from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.functional import cached_property
-from django.dispatch import receiver
 
 from api_app.core.models import Status as ReportStatus
 

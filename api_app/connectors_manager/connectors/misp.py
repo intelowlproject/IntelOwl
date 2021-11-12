@@ -1,15 +1,14 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-from django.conf import settings
-
-import pymisp
 from typing import List
 
-from tests.mock_utils import patch, if_mock_connections
-from api_app.connectors_manager.classes import Connector
-from api_app import helpers
+import pymisp
+from django.conf import settings
 
+from api_app import helpers
+from api_app.connectors_manager.classes import Connector
+from tests.mock_utils import if_mock_connections, patch
 
 INTELOWL_MISP_TYPE_MAP = {
     "ip": "ip-src",

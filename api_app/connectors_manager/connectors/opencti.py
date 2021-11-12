@@ -1,15 +1,13 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-from django.conf import settings
-
-from pycti.api.opencti_api_client import File
 import pycti
+from django.conf import settings
+from pycti.api.opencti_api_client import File
 
-from tests.mock_utils import patch, if_mock_connections
 from api_app import helpers
 from api_app.connectors_manager import classes
-
+from tests.mock_utils import if_mock_connections, patch
 
 INTELOWL_OPENCTI_TYPE_MAP = {
     "ip": {

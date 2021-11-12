@@ -1,14 +1,14 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-import time
 import logging
+import time
+
 import requests
 
-from api_app.exceptions import AnalyzerRunException, AnalyzerConfigurationException
 from api_app.analyzers_manager import classes
-
-from tests.mock_utils import patch, if_mock_connections, MockResponse
+from api_app.exceptions import AnalyzerConfigurationException, AnalyzerRunException
+from tests.mock_utils import MockResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 

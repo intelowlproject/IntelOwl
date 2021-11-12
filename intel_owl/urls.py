@@ -2,8 +2,8 @@
 # See the file 'LICENSE' for copying permission.
 
 from django.contrib import admin
-from django.views.generic.base import RedirectView
 from django.urls import include, path
+from django.views.generic.base import RedirectView
 
 urlpatterns = [
     path("", RedirectView.as_view(pattern_name="admin", permanent=False)),

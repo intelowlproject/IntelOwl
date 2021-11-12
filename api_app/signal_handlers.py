@@ -1,10 +1,10 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-from django.db.models.signals import post_save
-from django.dispatch import receiver
 from django.conf import settings
 from django.contrib.auth.models import Group
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from guardian.shortcuts import assign_perm
 
 

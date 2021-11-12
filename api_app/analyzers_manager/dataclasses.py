@@ -1,10 +1,11 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
-import typing
 import dataclasses
+import typing
 
 from api_app.core.dataclasses import AbstractConfig
-from .constants import TypeChoices, HashChoices
+
+from .constants import HashChoices, TypeChoices
 from .serializers import AnalyzerConfigSerializer
 
 __all__ = [

@@ -1,12 +1,11 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-import socket
 import logging
+import socket
 
-from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager.classes import ObservableAnalyzer
-
+from api_app.exceptions import AnalyzerRunException
 
 logger = logging.getLogger(__name__)
 

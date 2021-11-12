@@ -3,11 +3,9 @@
 
 import requests
 
-from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager import classes
-
-from tests.mock_utils import if_mock_connections, patch, MockResponse
-
+from api_app.exceptions import AnalyzerRunException
+from tests.mock_utils import MockResponse, if_mock_connections, patch
 
 vt_base = "https://www.virustotal.com/vtapi/v2/"
 
@@ -68,4 +66,11 @@ def vt_get_report(api_key, observable_name, obs_clsfn):
     except requests.RequestException as e:
         raise AnalyzerRunException(e)
 
-    return response.json()
+    try:
+        return_item = response.json()
+    except Exception as e:
+        raise AnalyzerRunException(
+            f"Response is not a JSON!? Response type:{response.text} Error:{e}"
+        )
+
+    return return_item

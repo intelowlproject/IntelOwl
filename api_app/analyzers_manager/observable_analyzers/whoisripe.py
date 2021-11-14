@@ -12,15 +12,14 @@ class Whoisripeapi(classes.ObservableAnalyzer):
     url: str = "https://rest.db.ripe.net/search.json"
 
     def run(self):
-        if self.observable_classification == self.ObservableTypes.IP:
-            params = {
-                "query-string" : self.observable_name
-            }
+        params = {
+            "query-string" : self.observable_name
+        }
 
-            response = requests.get(self.url, params = params)
-            response.raise_for_status()
+        response = requests.get(self.url, params = params)
+        response.raise_for_status()
 
-            return response.json()
+        return response.json()
         
     @classmethod
     def _monkeypatch(cls):

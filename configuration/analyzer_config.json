@@ -69,7 +69,7 @@
   "BitcoinAbuse" : {
     "type" : "observable",
     "python_module" : "bitcoinabuse.BitcoinAbuseAPI",
-    "description" : "Check bitcoin address using bitcoinabuse.com API to know if they were reported as a scammer before to bitcoinabuse's public database.",
+    "description" : "Check a BTC address against bitcoinabuse.com, a public database of BTC addresses used by hackers and criminals.",
     "disabled" : false,
     "external_service" : true,
     "leaks_info" : false,

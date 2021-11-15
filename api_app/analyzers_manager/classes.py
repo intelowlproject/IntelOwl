@@ -5,6 +5,7 @@ import json
 import logging
 import time
 from abc import ABCMeta
+from typing import Tuple
 
 import requests
 from django.conf import settings
@@ -222,7 +223,7 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
     poll_distance: int
 
     @staticmethod
-    def __raise_in_case_bad_request(name, resp, params_to_check=["key"]):
+    def __raise_in_case_bad_request(name, resp, params_to_check=["key"]) -> bool:
         """
         Raises:
             :class: `AnalyzerRunException`, if bad status code or no key in response
@@ -253,12 +254,12 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
         return True
 
     @staticmethod
-    def __query_for_result(url, key):
+    def __query_for_result(url: str, key: str) -> Tuple[int, dict]:
         headers = {"Accept": "application/json"}
         resp = requests.get(f"{url}?key={key}", headers=headers)
         return resp.status_code, resp.json()
 
-    def __poll_for_result(self, req_key):
+    def __poll_for_result(self, req_key: str) -> dict:
         got_result = False
         json_data = {}
         for chance in range(self.max_tries):
@@ -285,14 +286,14 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
             raise AnalyzerRunException("max polls tried without getting any result.")
         return json_data
 
-    def _raise_container_not_running(self):
+    def _raise_container_not_running(self) -> None:
         raise AnalyzerConfigurationException(
             f"{self.name} docker container is not running.\n"
             f"You have to enable it using the appropriate "
             f"parameter when executing start.py."
         )
 
-    def _docker_run(self, req_data, req_files=None):
+    def _docker_run(self, req_data: dict, req_files: dict = None) -> dict:
         """
         Helper function that takes of care of requesting new analysis,
         reading response, polling for result and exception handling for a
@@ -311,6 +312,7 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
         """
 
         # step #1: request new analysis
+        req_data = {**req_data, "force_unique_key": True}
         args = req_data.get("args", [])
         logger.debug(f"Making request with arguments: {args} <- {self.__repr__()}")
         try:

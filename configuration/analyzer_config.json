@@ -3275,10 +3275,10 @@
     },
     "params": {}
   },
- "Whoisripe" : {
+ "WhoIs_RipeDB_Search" : {
     "type": "observable",
-    "python_module" : "whoisripe.Whoisripeapi",
-    "description" : "The WHOIS record data of an IP address using RIPE API",
+    "python_module" : "whoisripe.WhoIsRipeAPI",
+    "description" : "Fetch whois record data of an IP address from Ripe DB using their [search API](https://github.com/RIPE-NCC/whois/wiki/WHOIS-REST-API-search)",
     "disabled" : false,
     "external_service" : true,
     "leaks_info" : false,

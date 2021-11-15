@@ -2,8 +2,10 @@
 # See the file 'LICENSE' for copying permission.
 
 import requests
+
 from api_app.analyzers_manager import classes
-from tests.mock_utils import MockResponse, if_mock_connections, patch
+
+from tests.mock_utils import if_mock_connections, patch, MockResponse
 
 
 class WhoIsRipeAPI(classes.ObservableAnalyzer):

@@ -66,6 +66,29 @@
     },
     "params": {}
   },
+  "BitcoinAbuse" : {
+    "type" : "observable",
+    "python_module" : "bitcoinabuse.BitcoinAbuseAPI",
+    "description" : "Check bitcoin address using bitcoinabuse.com API to know if they were reported as a scammer before to bitcoinabuse's public database.",
+    "disabled" : false,
+    "external_service" : true,
+    "leaks_info" : false,
+    "observable_supported" : [
+      "hash"
+    ],
+    "config" : {
+      "soft_time_limit" : 30,
+      "queue" : "default"
+    },
+    "secrets" : {
+      "api_key_name" : {
+        "env_var_key" : "BITCOINABUSE_KEY",
+        "description" : "",
+        "required" : true
+      }
+    },
+    "params" : {}
+  },
   "BoxJS_Scan_JavaScript": {
     "type": "file",
     "python_module": "boxjs_scan.BoxJS",

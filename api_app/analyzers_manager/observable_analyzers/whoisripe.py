@@ -5,7 +5,7 @@ import requests
 
 from api_app.analyzers_manager import classes
 
-from tests.mock_utils import if_mock_connections, patch, MockResponse
+from tests.mock_utils import if_mock_connections, MockResponse, patch
 
 
 class WhoIsRipeAPI(classes.ObservableAnalyzer):

@@ -66,6 +66,29 @@
     },
     "params": {}
   },
+  "BitcoinAbuse" : {
+    "type" : "observable",
+    "python_module" : "bitcoinabuse.BitcoinAbuseAPI",
+    "description" : "Check a BTC address against bitcoinabuse.com, a public database of BTC addresses used by hackers and criminals.",
+    "disabled" : false,
+    "external_service" : true,
+    "leaks_info" : false,
+    "observable_supported" : [
+      "hash"
+    ],
+    "config" : {
+      "soft_time_limit" : 30,
+      "queue" : "default"
+    },
+    "secrets" : {
+      "api_key_name" : {
+        "env_var_key" : "BITCOINABUSE_KEY",
+        "description" : "",
+        "required" : true
+      }
+    },
+    "params" : {}
+  },
   "BoxJS_Scan_JavaScript": {
     "type": "file",
     "python_module": "boxjs_scan.BoxJS",

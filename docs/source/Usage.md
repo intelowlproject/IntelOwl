@@ -180,6 +180,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `OTXQuery`: scan an observable on [Alienvault OTX](https://otx.alienvault.com/)
 * `TalosReputation`: check an IP reputation from [Talos](https://talosintelligence.com/reputation_center/)
 * `Stratosphere_Blacklist`: Cross-reference an IP from blacklists maintained by [Stratosphere Labs](https://www.stratosphereips.org/attacker-ip-prioritization-blacklist)
+* `BitcoinAbuse` : Check a BTC address against bitcoinabuse.com, a public database of BTC addresses used by hackers and criminals.
 * `Robtex_Forward_PDNS_Query`: scan a domain against the Robtex Passive DNS DB
 * `Robtex_Reverse_PDNS_Query`: scan an IP against the Robtex Passive DNS DB
 * `Robtex_IP_Query`: get IP info from Robtex

@@ -3298,6 +3298,23 @@
     },
     "params": {}
   },
+ "WhoIs_RipeDB_Search" : {
+    "type": "observable",
+    "python_module" : "whoisripe.WhoIsRipeAPI",
+    "description" : "Fetch whois record data of an IP address from Ripe DB using their [search API](https://github.com/RIPE-NCC/whois/wiki/WHOIS-REST-API-search)",
+    "disabled" : false,
+    "external_service" : true,
+    "leaks_info" : false,
+    "observable_supported" : [
+      "ip"
+    ],
+    "config" : {
+      "soft_time_limit" : 30,
+      "queue" : "default"
+    },
+    "secrets" : {},
+    "params" : {}
+  },
   "WiGLE": {
     "type": "observable",
     "python_module": "wigle.WiGLE",

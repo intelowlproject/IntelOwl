@@ -6,7 +6,6 @@ from api_app.analyzers_manager.constants import ObservableTypes
 
 from . import _ObservableAnalyzersScriptsTestCase
 
-
 # Observable Analyzer Test Cases
 
 

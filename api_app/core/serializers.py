@@ -1,20 +1,19 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-import os
-import sys
+import hashlib
 import json
 import logging
-import hashlib
-from typing import List, TypedDict, Optional
+import os
+import sys
+from typing import List, Optional, TypedDict
 
+from cache_memoize import cache_memoize
 from django.conf import settings
 from rest_framework import serializers as rfs
-from cache_memoize import cache_memoize
 
 from intel_owl import secrets as secrets_store
 from intel_owl.consts import PARAM_DATATYPE_CHOICES
-
 
 logger = logging.getLogger(__name__)
 

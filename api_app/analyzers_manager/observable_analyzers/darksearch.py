@@ -1,8 +1,8 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-from tests.mock_utils import if_mock_connections, patch
 from api_app.analyzers_manager.classes import ObservableAnalyzer
+from tests.mock_utils import if_mock_connections, patch
 
 
 class DarkSearchQuery(ObservableAnalyzer):

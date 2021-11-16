@@ -6,8 +6,9 @@ for observable analyzers, if can customize the behavior based on:
 MOCK_CONNECTIONS to True -> connections to external analyzers are faked
 """
 
-from unittest import skipIf, skip  # noqa: F401
-from unittest.mock import patch, MagicMock  # noqa: F401
+from unittest import skip, skipIf  # noqa: F401
+from unittest.mock import MagicMock, patch  # noqa: F401
+
 from django.conf import settings
 
 

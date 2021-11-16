@@ -3,10 +3,9 @@
 
 import requests
 
-from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager.classes import FileAnalyzer
-
-from tests.mock_utils import patch, if_mock_connections, MockResponse
+from api_app.exceptions import AnalyzerRunException
+from tests.mock_utils import MockResponse, if_mock_connections, patch
 
 
 class MalpediaScan(FileAnalyzer):

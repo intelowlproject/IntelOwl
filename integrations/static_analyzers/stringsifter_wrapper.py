@@ -5,7 +5,7 @@
 
 import json
 from argparse import ArgumentParser
-from subprocess import Popen, PIPE
+from subprocess import PIPE, Popen
 
 parser = ArgumentParser()
 sub_parser = parser.add_subparsers()

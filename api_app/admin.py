@@ -2,7 +2,6 @@
 # See the file 'LICENSE' for copying permission.
 
 from django.contrib import admin
-
 from durin.admin import AuthTokenAdmin
 from durin.models import AuthToken, Client
 from guardian.admin import GuardedModelAdmin

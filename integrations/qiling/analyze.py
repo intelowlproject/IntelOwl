@@ -4,10 +4,11 @@
 # See the file 'LICENSE' for copying permission.
 
 import json
+import logging
 from argparse import ArgumentParser
+
 from qiling import Qiling
 from qiling.extensions.report import generate_report
-import logging
 
 BASE_PATH = "/opt/deploy"
 logger = logging.getLogger(__name__)

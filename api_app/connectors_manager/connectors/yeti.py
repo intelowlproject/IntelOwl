@@ -1,13 +1,12 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
+import requests
 from django.conf import settings
 
-import requests
-
-from tests.mock_utils import MockResponse, patch, if_mock_connections
 from api_app.connectors_manager import classes
 from api_app.exceptions import ConnectorRunException
+from tests.mock_utils import MockResponse, if_mock_connections, patch
 
 
 class YETI(classes.Connector):

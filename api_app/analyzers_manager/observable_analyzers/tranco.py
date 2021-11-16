@@ -1,12 +1,12 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-import requests
 from urllib.parse import urlparse
 
-from api_app.analyzers_manager import classes
+import requests
 
-from tests.mock_utils import if_mock_connections, patch, MockResponse
+from api_app.analyzers_manager import classes
+from tests.mock_utils import MockResponse, if_mock_connections, patch
 
 
 class Tranco(classes.ObservableAnalyzer):

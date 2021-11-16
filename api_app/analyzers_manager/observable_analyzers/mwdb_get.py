@@ -1,13 +1,13 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-import mwdblib
 import logging
+
+import mwdblib
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
 from api_app.analyzers_manager.file_analyzers.mwdb_scan import mocked_mwdb_response
-
-from tests.mock_utils import patch, if_mock_connections
+from tests.mock_utils import if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
@@ -20,15 +20,15 @@ class MWDBGet(ObservableAnalyzer):
         mwdb = mwdblib.MWDB(api_key=self.__api_key)
 
         result = {}
-        file_info = None
         try:
             file_info = mwdb.query_file(self.observable_name)
+        except mwdblib.exc.ObjectNotFoundError:
+            result["not_found"] = True
         except Exception as exc:
             logger.exception(exc)
             self.report.errors.append(str(exc))
             result["not_found"] = True
-
-        if file_info:
+        else:
             result["data"]: file_info.data
             result["metakeys"]: file_info.metakeys
             result["permalink"] = f"https://mwdb.cert.pl/file/{self.observable_name}"

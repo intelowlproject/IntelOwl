@@ -4,9 +4,10 @@
 import datetime
 import logging
 
-from .models import Job
-from .helpers import get_now
 from intel_owl import secrets
+
+from .helpers import get_now
+from .models import Job
 
 logger = logging.getLogger(__name__)
 

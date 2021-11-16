@@ -4,15 +4,15 @@
 """CloudFlare DNS resolutions"""
 
 import logging
+from urllib.parse import urlparse
+
 import requests
 
-from urllib.parse import urlparse
-from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager import classes
+from api_app.exceptions import AnalyzerRunException
+from tests.mock_utils import MockResponse, if_mock_connections, patch
+
 from ..dns_responses import dns_resolver_response
-
-from tests.mock_utils import if_mock_connections, patch, MockResponse
-
 
 logger = logging.getLogger(__name__)
 

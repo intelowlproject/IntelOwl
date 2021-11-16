@@ -7,10 +7,9 @@ from urllib.parse import urlparse
 import requests
 from dateutil import parser as dateutil_parser
 
-from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager import classes
-
-from tests.mock_utils import if_mock_connections, patch, MockResponse
+from api_app.exceptions import AnalyzerRunException
+from tests.mock_utils import MockResponse, if_mock_connections, patch
 
 _query_types = [
     "domain",

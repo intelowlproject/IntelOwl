@@ -19,7 +19,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
-        python-version: 3.8
+        python-version: 3.9
     - name: Before Install
       run: |
         sudo apt-get update
@@ -40,6 +40,9 @@ jobs:
     - name: "Lint with flake8 (PEP8 enforcer + linter)"
       run: |
         sudo docker exec intelowl_uwsgi flake8 . --count
+    - name: "Isort check"
+      run: |
+        sudo docker exec intelowl_uwsgi isort . --profile black --filter-files --check-only --diff --skip configuration/ldap_config.py
     - name: "Test: API"
       run: |
         sudo docker/scripts/coverage_test.sh tests.test_api tests.test_auth

@@ -3,18 +3,18 @@
 
 import logging
 
-from rest_framework import generics, status
-from rest_framework.response import Response
+from drf_spectacular.utils import extend_schema as add_docs
+from drf_spectacular.utils import inline_serializer
+from rest_framework import generics
 from rest_framework import serializers as BaseSerializer
+from rest_framework import status
+from rest_framework.response import Response
 
 from api_app.core.views import PluginActionViewSet, PluginHealthCheckAPI
-from .serializers import AnalyzerConfigSerializer
+
 from . import controller as analyzers_controller
 from .models import AnalyzerReport
-from drf_spectacular.utils import (
-    extend_schema as add_docs,
-    inline_serializer,
-)
+from .serializers import AnalyzerConfigSerializer
 
 logger = logging.getLogger(__name__)
 

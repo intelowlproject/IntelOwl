@@ -1,13 +1,14 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-import requests
 import re
-from api_app.exceptions import AnalyzerRunException
-from api_app.analyzers_manager import classes
 
-from intel_owl.consts import REGEX_EMAIL, REGEX_CVE
-from tests.mock_utils import if_mock_connections, patch, MockResponse
+import requests
+
+from api_app.analyzers_manager import classes
+from api_app.exceptions import AnalyzerRunException
+from intel_owl.consts import REGEX_CVE, REGEX_EMAIL
+from tests.mock_utils import MockResponse, if_mock_connections, patch
 
 
 class Spyse(classes.ObservableAnalyzer):

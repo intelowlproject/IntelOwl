@@ -1,9 +1,10 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
+import logging
+
 # system imports
 import os
-import logging
 
 # web imports
 from flask import Flask

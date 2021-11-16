@@ -4,13 +4,13 @@
 from datetime import timedelta
 
 import intezer_sdk.consts
-from intezer_sdk import api as intezer_api, errors as intezer_errors
+from intezer_sdk import api as intezer_api
+from intezer_sdk import errors as intezer_errors
 from intezer_sdk.analysis import Analysis
 
-from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager.classes import FileAnalyzer
-
-from tests.mock_utils import patch, if_mock_connections
+from api_app.exceptions import AnalyzerRunException
+from tests.mock_utils import if_mock_connections, patch
 
 
 class IntezerScan(FileAnalyzer):
@@ -36,12 +36,14 @@ class IntezerScan(FileAnalyzer):
             # run analysis by hash
             hash_result = self.__intezer_analysis(file_hash=self.md5)
             result.update(hash_result, hash_found=True)
-        except intezer_errors.HashDoesNotExistError as e:
-            if not self.upload_file:
-                raise AnalyzerRunException(e)
-            # else, run analysis by file
-            file_result = self.__intezer_analysis(file_stream=self.read_file_bytes())
-            result.update(file_result, hash_found=False)
+        except intezer_errors.HashDoesNotExistError:
+            result.update(hash_found=False)
+            if self.upload_file:
+                # run analysis by file
+                file_result = self.__intezer_analysis(
+                    file_stream=self.read_file_bytes()
+                )
+                result.update(file_result, hash_found=False)
         except intezer_errors.IntezerError as e:
             raise AnalyzerRunException(e)
 

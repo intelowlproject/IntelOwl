@@ -2,19 +2,19 @@
 # See the file 'LICENSE' for copying permission.
 
 import hashlib
-import time
 import os
-
+import time
 from unittest import SkipTest
-from django.test import TransactionTestCase
-from django.core.files import File
-from django.conf import settings
 
-from intel_owl.tasks import start_analyzers
-from api_app.models import Job
-from api_app.core.models import AbstractReport
+from django.conf import settings
+from django.core.files import File
+from django.test import TransactionTestCase
+
 from api_app.analyzers_manager.dataclasses import AnalyzerConfig
 from api_app.connectors_manager.dataclasses import ConnectorConfig
+from api_app.core.models import AbstractReport
+from api_app.models import Job
+from intel_owl.tasks import start_analyzers
 
 
 class _AbstractAnalyzersScriptTestCase(TransactionTestCase):

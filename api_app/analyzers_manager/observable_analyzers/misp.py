@@ -2,12 +2,12 @@
 # See the file 'LICENSE' for copying permission.
 
 import datetime
+
 import pymisp
 
-from api_app.exceptions import AnalyzerRunException
 from api_app.analyzers_manager import classes
-
-from tests.mock_utils import if_mock_connections, patch, MockResponseNoOp
+from api_app.exceptions import AnalyzerRunException
+from tests.mock_utils import MockResponseNoOp, if_mock_connections, patch
 
 
 class MISP(classes.ObservableAnalyzer):

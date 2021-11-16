@@ -9,9 +9,9 @@
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/intelowlproject/IntelOwl.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/intelowlproject/IntelOwl/context:python)
 [![CodeFactor](https://www.codefactor.io/repository/github/intelowlproject/intelowl/badge)](https://www.codefactor.io/repository/github/intelowlproject/intelowl)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![codecov](https://codecov.io/gh/intelowlproject/IntelOwl/branch/master/graph/badge.svg?token=R097M4TYA6)](https://codecov.io/gh/intelowlproject/IntelOwl)
+[![Imports: isort](https://img.shields.io/badge/%20imports-isort-%231674b1?style=flat&labelColor=ef8336)](https://pycqa.github.io/isort/)
 [![Build & Tests](https://github.com/intelowlproject/IntelOwl/workflows/Build%20&%20Tests/badge.svg)](https://github.com/intelowlproject/IntelOwl/actions)
-
+[![codecov](https://codecov.io/gh/intelowlproject/IntelOwl/branch/master/graph/badge.svg?token=R097M4TYA6)](https://codecov.io/gh/intelowlproject/IntelOwl)
 # Intel Owl
 
 Do you want to get **threat intelligence data** about a malware, an IP or a domain? Do you want to get this kind of data from multiple sources at the same time using **a single API request**?
@@ -31,9 +31,7 @@ Intel Owl is an Open Source Intelligence, or OSINT solution to get threat intell
 - API written in Django and Python 3.9.
 - Inbuilt frontend client: **[IntelOwl-ng](https://github.com/intelowlproject/IntelOwl-ng)** provides features such as dashboard, visualizations of analysis data, easy to use forms for requesting new analysis, etc. [Live Demo](https://intelowlclient.firebaseapp.com/).
 
-## Documentation
-
-[![Documentation Status](https://readthedocs.org/projects/intelowl/badge/?version=latest)](https://intelowl.readthedocs.io/en/latest/?badge=latest)
+## Documentation [![Documentation Status](https://readthedocs.org/projects/intelowl/badge/?version=latest)](https://intelowl.readthedocs.io/en/latest/?badge=latest)
 
 Documentation about IntelOwl installation, usage, configuration and contribution can be found at https://intelowl.readthedocs.io/.
 
@@ -53,7 +51,7 @@ You can see the full list of all available analyzers in the [documentation](http
 | Type                                               | Analyzers Available                                                                                                                                                                                                                                                                                            |
 | -------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Inbuilt modules                                    | - Static Document, RTF, PDF, PE, Generic File Analysis<br/> - Strings analysis with ML<br/> - PE Emulation with Speakeasy<br/> - PE Signature verification<br/> - PE Capabilities Extraction<br/> - Emulated Javascript Analysis<br/> - Android Malware Analysis<br/> - SPF and DMARC Validator<br/> - more... |
-| External services                                  | - <a href="https://dragonfly.certego.net" target="_blank">Dragonfly malware sandbox</a><br/> - GreyNoise v2<br/> - Intezer<br/> - VirusTotal v2+v3<br/> - HybridAnalysis<br/> - Censys.io<br/> - Shodan<br/> - AlienVault OTX<br/> - Intelligence_X<br/> - Abuse.ch MalwareBazaar/Threatfox<br/> - many more.. |
+| External services                                  | - <a href="https://dragonfly.certego.net?utm_source=intelowl" target="_blank">Dragonfly malware sandbox</a><br/> - <a href="https://docs.greynoise.io/docs/3rd-party-integrations" target="_blank"> GreyNoise v2</a><br/> - <a href="https://analyze.intezer.com/?utm_source=IntelOwl" target="_blank"> Intezer</a><br/> - VirusTotal v2+v3<br/> - HybridAnalysis<br/> - <a href="https://urlscan.io/docs/integrations/" target="_blank">URLscan</a><br/> - Shodan<br/> - AlienVault OTX<br/> - <a href="https://intelx.io/integrations" target="_blank">Intelligence_X</a><br/> - Abuse.ch <a href="https://bazaar.abuse.ch/about/" target="_blank">MalwareBazaar</a>/<a href="https://threatfox.abuse.ch/about/" target="_blank">Threatfox</a><br/> - many more.. |
 | Free modules that require additional configuration | - Cuckoo (requires at least one working Cuckoo instance)<br/> - MISP (requires at least one working MISP instance)<br/> - Yara (a lot of public rules area available. There's also the chance to add your own rules)                                                                                           |
 
 ## Partnerships and sponsors

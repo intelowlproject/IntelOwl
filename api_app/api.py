@@ -2,35 +2,33 @@
 # See the file 'LICENSE' for copying permission.
 
 import logging
+from datetime import timedelta
 from typing import Union
-
 from wsgiref.util import FileWrapper
-from django.utils.decorators import method_decorator
-from django.http import HttpResponse
-from django.db.models import Q
-from django.conf import settings
-from rest_framework.response import Response
-from rest_framework import serializers as rfs
-from rest_framework import status, viewsets, mixins
-from rest_framework.decorators import api_view, action
-from rest_framework.permissions import DjangoObjectPermissions
-from rest_framework.exceptions import (
-    ValidationError,
-    PermissionDenied,
-)
-from guardian.decorators import permission_required_or_403
-from rest_framework_guardian.filters import ObjectPermissionsFilter
-from drf_spectacular.utils import (
-    extend_schema as add_docs,
-    inline_serializer,
-)
-from drf_spectacular.types import OpenApiTypes
 
+from django.conf import settings
+from django.db.models import Q
+from django.http import HttpResponse
+from django.utils.decorators import method_decorator
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema as add_docs
+from drf_spectacular.utils import inline_serializer
+from guardian.decorators import permission_required_or_403
+from rest_framework import mixins
+from rest_framework import serializers as rfs
+from rest_framework import status, viewsets
+from rest_framework.decorators import action, api_view
+from rest_framework.exceptions import PermissionDenied, ValidationError
+from rest_framework.permissions import DjangoObjectPermissions
+from rest_framework.response import Response
+from rest_framework_guardian.filters import ObjectPermissionsFilter
+
+from api_app import models, permissions, serializers
+from api_app.helpers import get_now
 from intel_owl.celery import app as celery_app
-from api_app import models, serializers, permissions
+
 from .analyzers_manager import controller as analyzers_controller
 from .connectors_manager import controller as connectors_controller
-
 
 logger = logging.getLogger(__name__)
 
@@ -48,7 +46,8 @@ def _analysis_request(
     source = str(request.user)
     data_received = request.data
     logger.info(
-        f"analyze_file received request from {source}." f"Data:{dict(data_received)}."
+        f"_analysis_request received request from {source}."
+        f"Data:{dict(data_received)}."
     )
 
     # serialize request data and validate
@@ -149,10 +148,11 @@ def ask_analysis_availability(request):
     serializer.is_valid(raise_exception=True)
     serialized_data = serializer.validated_data
 
-    analyzers, running_only, md5 = (
+    analyzers, running_only, md5, minutes_ago = (
         serialized_data["analyzers"],
         serialized_data["running_only"],
         serialized_data["md5"],
+        serialized_data["minutes_ago"],
     )
 
     if running_only:
@@ -173,6 +173,10 @@ def ask_analysis_availability(request):
             & Q(status__in=statuses_to_check)
             & Q(analyzers_to_execute__contains=analyzers)
         )
+
+    if minutes_ago:
+        minutes_ago_time = get_now() - timedelta(minutes=minutes_ago)
+        query = query & Q(received_request_time__gte=minutes_ago_time)
 
     try:
         last_job_for_md5 = models.Job.objects.filter(query).latest(

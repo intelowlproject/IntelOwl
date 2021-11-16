@@ -5,14 +5,13 @@ from django.urls import include, path
 from rest_framework import routers
 
 from .api import (
-    ask_analysis_availability,
+    JobViewSet,
+    TagViewSet,
     analyze_file,
     analyze_observable,
-    TagViewSet,
-    JobViewSet,
+    ask_analysis_availability,
 )
 from .auth import LoginView, LogoutView
-
 
 # Routers provide an easy way of automatically determining the URL conf.
 router = routers.DefaultRouter(trailing_slash=False)

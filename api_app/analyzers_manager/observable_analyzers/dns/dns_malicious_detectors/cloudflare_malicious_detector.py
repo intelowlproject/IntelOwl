@@ -30,10 +30,12 @@ class CloudFlareMaliciousDetector(classes.ObservableAnalyzer):
             params = {
                 "name": observable,
                 "type": "A",
-                "ct": "application/dns-json",
             }
+            headers = {"accept": "application/dns-json"}
             response = requests.get(
-                "https://security.cloudflare-dns.com/dns-query", params=params
+                "https://security.cloudflare-dns.com/dns-query",
+                params=params,
+                headers=headers,
             )
             response.raise_for_status()
             response_dict = response.json()

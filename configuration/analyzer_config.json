@@ -1860,6 +1860,31 @@
     "secrets": {},
     "params": {}
   },
+  "Phishstats": {
+    "type": "observable",
+    "python_module": "phishstats.PhishStats",
+    "description": "check if the observable is a phishing site",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": true,
+    "observable_supported": [
+      "ip"
+    ],
+    "config": {
+      "soft_time_limit": 100,
+      "queue": "long"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "PHISTATS_API_KEY",
+        "type": "string",
+        "default": null,
+        "description": "Optional API key for Phishstats.",
+        "required": false
+      }
+    },
+    "params": {}
+  },
   "Phishtank": {
     "type": "observable",
     "python_module": "phishtank.Phishtank",

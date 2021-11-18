@@ -15,8 +15,7 @@ class PhishStats(ObservableAnalyzer):
     def __build_phishstats_url(self) -> str:
         if self.observable_classification == self.ObservableTypes.IP:
             return self.base_url.format(input=self.observable_name)
-        else:
-            raise AnalyzerRunException("PhishStats only works with IP addresses")
+        raise AnalyzerRunException("PhishStats only works with IP addresses")
 
     def run(self):
         api_uri = self.__build_phishstats_url()

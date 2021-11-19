@@ -1,3 +1,6 @@
+# This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
+# See the file 'LICENSE' for copying permission.
+
 import requests
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer

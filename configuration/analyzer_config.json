@@ -1881,7 +1881,7 @@
   "Phishstats": {
     "type": "observable",
     "python_module": "phishstats.PhishStats",
-    "description": "check if the observable is a phishing site",
+    "description": "Search PhishStats API to determine if an IP/URL/domain is malicious.",
     "disabled": false,
     "external_service": true,
     "leaks_info": true,
@@ -1892,15 +1892,7 @@
       "soft_time_limit": 100,
       "queue": "long"
     },
-    "secrets": {
-      "api_key_name": {
-        "env_var_key": "PHISTATS_API_KEY",
-        "type": "string",
-        "default": null,
-        "description": "Optional API key for Phishstats.",
-        "required": false
-      }
-    },
+    "secrets": {},
     "params": {}
   },
   "Phishtank": {

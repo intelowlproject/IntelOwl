@@ -13,12 +13,22 @@ class PhishStats(ObservableAnalyzer):
     Analyzer that uses PhishStats API to check if the observable is a phishing site.
     """
 
-    base_url: str = "https://phishstats.info:2096/api/phishing?_where=(ip,eq,{input})"
+    base_url: str = "https://phishstats.info:2096/api/"
 
     def __build_phishstats_url(self) -> str:
         if self.observable_classification == self.ObservableTypes.IP:
-            return self.base_url.format(input=self.observable_name)
-        raise AnalyzerRunException("PhishStats only works with IP addresses")
+            endpoint = "phishing?_where=(ip,eq,{input})"
+            return f"{self.base_url}/{endpoint.format(input=self.observable_name)}"
+        elif self.observable_classification == self.ObservableTypes.URL:
+            endpoint = "phishing?_where=(url,like,~{input}~)&_sort=-id"
+            domain = self.observable_name.split("/")[2]
+            name = domain.split(".")[0]
+            return f"{self.base_url}/{endpoint.format(input=name)}"
+        elif self.observable_classification == self.ObservableTypes.DOMAIN:
+            endpoint = "phishing?_where=(url,like,~{input}~)&_sort=-id"
+            domain = self.observable_name.split(".")[0]
+            return f"{self.base_url}/{endpoint.format(input=domain)}"
+        raise AnalyzerRunException("PhishStats only works with IP, Domain and Gennric")
 
     def run(self):
         api_uri = self.__build_phishstats_url()

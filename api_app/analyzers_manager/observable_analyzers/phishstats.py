@@ -18,17 +18,19 @@ class PhishStats(ObservableAnalyzer):
     def __build_phishstats_url(self) -> str:
         if self.observable_classification == self.ObservableTypes.IP:
             endpoint = "phishing?_where=(ip,eq,{input})"
-            return f"{self.base_url}/{endpoint.format(input=self.observable_name)}"
+            name = self.observable_name
         elif self.observable_classification == self.ObservableTypes.URL:
             endpoint = "phishing?_where=(url,like,~{input}~)&_sort=-id"
             domain = self.observable_name.split("/")[2]
             name = domain.split(".")[0]
-            return f"{self.base_url}/{endpoint.format(input=name)}"
         elif self.observable_classification == self.ObservableTypes.DOMAIN:
             endpoint = "phishing?_where=(url,like,~{input}~)&_sort=-id"
-            domain = self.observable_name.split(".")[0]
-            return f"{self.base_url}/{endpoint.format(input=domain)}"
-        raise AnalyzerRunException("PhishStats only works with IP, Domain and Gennric")
+            name = self.observable_name.split(".")[0]
+        else:
+            raise AnalyzerRunException(
+                "PhishStats only works with IP, Domain and Gennric"
+            )
+        return f"{self.base_url}/{endpoint.format(input=name)}"
 
     def run(self):
         api_uri = self.__build_phishstats_url()

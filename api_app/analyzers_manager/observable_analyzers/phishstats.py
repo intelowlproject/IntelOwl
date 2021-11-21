@@ -24,7 +24,10 @@ class PhishStats(ObservableAnalyzer):
             name = self.observable_name
         elif self.observable_classification == self.ObservableTypes.DOMAIN:
             endpoint = "phishing?_where=(url,like,~{input}~)&_sort=-date"
-            name = self.observable_name.split(".")[0]
+            name = self.observable_name
+        elif self.observable_classification == self.ObservableTypes.GENERIC:
+            endpoint = "phishing?_where=(title,like,~{input}~)&_sort=-date"
+            name = self.observable_name
         else:
             raise AnalyzerRunException(
                 "PhishStats only works with IP, Domain and Gennric"

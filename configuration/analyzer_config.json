@@ -1886,10 +1886,10 @@
     "external_service": true,
     "leaks_info": true,
     "observable_supported": [
-      "ip", "url", "domain"
+      "ip", "url", "domain", "generic"
     ],
     "config": {
-      "soft_time_limit": 30,
+      "soft_time_limit": 100,
       "queue": "long"
     },
     "secrets": {},

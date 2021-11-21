@@ -17,14 +17,13 @@ class PhishStats(ObservableAnalyzer):
 
     def __build_phishstats_url(self) -> str:
         if self.observable_classification == self.ObservableTypes.IP:
-            endpoint = "phishing?_where=(ip,eq,{input})"
+            endpoint = "phishing?_where=(ip,eq,{input})&_sort=-date"
             name = self.observable_name
         elif self.observable_classification == self.ObservableTypes.URL:
-            endpoint = "phishing?_where=(url,like,~{input}~)&_sort=-id"
-            domain = self.observable_name.split("/")[2]
-            name = domain.split(".")[0]
+            endpoint = "phishing?_where=(url,like,~{input}~)&_sort=-date"
+            name = self.observable_name
         elif self.observable_classification == self.ObservableTypes.DOMAIN:
-            endpoint = "phishing?_where=(url,like,~{input}~)&_sort=-id"
+            endpoint = "phishing?_where=(url,like,~{input}~)&_sort=-date"
             name = self.observable_name.split(".")[0]
         else:
             raise AnalyzerRunException(

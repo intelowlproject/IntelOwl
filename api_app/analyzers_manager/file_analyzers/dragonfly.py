@@ -138,7 +138,8 @@ class DragonflyEmulation(FileAnalyzer):
                 patch(
                     "requests.Session.request",
                     side_effect=[
-                        MockResponse({"id": 1}, 201),  # __upload
+                        MockResponse({"id": 1}, 201),  # __upload; sample ID
+                        MockResponse({"id": 1}, 201),  # __upload; analysis ID
                         MockResponse(
                             {"id": 1, "status": "ANALYZED"}, 200
                         ),  # __poll_status

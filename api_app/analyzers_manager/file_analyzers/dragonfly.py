@@ -1,5 +1,6 @@
 import logging
 import time
+from copy import deepcopy
 
 from pydragonfly import Dragonfly, DragonflyException, TParams
 
@@ -115,7 +116,7 @@ class DragonflyEmulation(FileAnalyzer):
                 expand=["reports", "reports.profile"],
             ),
         )
-        analysis = response.data.copy()
+        analysis = deepcopy(response.data)
 
         # fetch matched_rules for corresponding report objects
         for idx in range(len(analysis["reports"])):

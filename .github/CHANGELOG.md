@@ -2,6 +2,25 @@
 
 [**Upgrade Guide**](https://intelowl.readthedocs.io/en/latest/Installation.html#update-to-the-most-recent-version)
 
+## [v3.2.2](https://github.com/intelowlproject/IntelOwl/releases/tag/v3.2.2)
+
+**Notes:**
+
+- The `Dragonfly_Emulation` analyzer will not work without this update.
+
+**New Analyzers:**
+
+- `BitcoinAbuse`: Check a BTC address against bitcoinabuse.com, a public database of BTC addresses used by hackers and criminals.
+- `Phishstats`: Search [PhishStats](https://phishstats.info) API to determine if an IP/URL/domain/generic is malicious.
+- `WhoIs_RipeDB_Search`: Fetch whois record data of an IP address from Ripe DB using their [search API](https://github.com/RIPE-NCC/whois/wiki/WHOIS-REST-API-search).
+
+**Fixes & Improvements:**
+
+- Bump `pydragonfly` dependency for `Dragonfly_Emulation` analyzer.
+- Fixes in cloudfare based analyzers.
+- Populate `not_supported_filetypes` field in `HashLookupServer_Get_File` analyzer.
+- Use `force_unique_key` parameter in all docker based analyzers to prevent trivial errors.
+
 ## [v3.2.1](https://github.com/intelowlproject/IntelOwl/releases/tag/v3.2.1)
 
 > Update PyIntelOwl to version [4.1.3](https://github.com/intelowlproject/pyintelowl/blob/master/.github/CHANGELOG.md#413).

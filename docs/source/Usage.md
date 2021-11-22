@@ -231,6 +231,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `UrlScan_Search`: Search an IP/domain/url/hash against [URLScan](https://urlscan.io) API
 * `UrlScan_Submit_Result`: Submit & retrieve result of an URL against [URLScan](https://urlscan.io) API
 * `Phishtank`: Search an url against [Phishtank](https://phishtank.org/api_info.php) API
+* `Phishstats`: Search [PhishStats API](https://phishstats.info/) to determine if an IP/URL/domain is malicious.
 * `Quad9_DNS`: Retrieve current domain resolution with Quad9 DoH (DNS over HTTPS)
 * `Quad9_Malicious_Detector`: Leverages Quad9 DoH to check if a domain is related to malware
 * `DNStwist`: Scan a url/domain to find potentially malicious permutations via dns fuzzing. [dnstwist repo](https://github.com/elceef/dnstwist) 

@@ -1878,6 +1878,23 @@
     "secrets": {},
     "params": {}
   },
+  "Phishstats": {
+    "type": "observable",
+    "python_module": "phishstats.PhishStats",
+    "description": "Search PhishStats API to determine if an IP/URL/domain is malicious.",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": true,
+    "observable_supported": [
+      "ip", "url", "domain", "generic"
+    ],
+    "config": {
+      "soft_time_limit": 100,
+      "queue": "long"
+    },
+    "secrets": {},
+    "params": {}
+  },
   "Phishtank": {
     "type": "observable",
     "python_module": "phishtank.Phishtank",

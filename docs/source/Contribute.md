@@ -7,7 +7,7 @@ Intel Owl was designed to ease the addition of new analyzers/connectors. With a 
 > Wish to contribute to the python client ? See [pyintelowl](https://github.com/intelowlproject/pyintelowl).
 
 ## Code Style
-Keeping to a consistent code style throughout the project makes it easier to contribute and collaborate. We make use of [`psf/black`](https://github.com/psf/black) for code formatting and [`flake8`](https://flake8.pycqa.org) for style guides.
+Keeping to a consistent code style throughout the project makes it easier to contribute and collaborate. We make use of [`psf/black`](https://github.com/psf/black) and [isort](https://pycqa.github.io/isort/) for code formatting and [`flake8`](https://flake8.pycqa.org) for style guides.
 
 ## How to start (Setup project and development instance)
 Please create a new branch based on the **develop** branch that contains the most recent changes. This is mandatory.

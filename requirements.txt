@@ -1,5 +1,5 @@
-boto3==1.18.7
-celery==5.1.2
+boto3==1.20.6
+celery==5.2.1
 django-celery-results==2.2.0
 checkdmarc==4.4.1
 darksearch==2.1.2
@@ -15,7 +15,7 @@ django-storages==1.12.1
 dnspython==2.1.0
 dnstwist==20201228
 ppdeep>=20200505
-drf-spectacular==0.20.1
+drf-spectacular==0.21.0
 easygui==0.98.2
 flower==1.0.0
 GitPython==3.1.18
@@ -44,7 +44,7 @@ requests==2.26.0
 speakeasy-emulator==1.5.3
 uWSGI==2.0.19.1
 yara-python==4.1.0
-pydragonfly==0.0.1
+pydragonfly==0.0.2
 
 git+https://github.com/DissectMalware/xlrd2.git@a666cd8fb4dba4e2898f4f33ee4da515ba91d9b2
 git+https://github.com/DissectMalware/pyxlsb2.git@8cc2ee6c7176a6808f9058fda9b235d10a7b7a47

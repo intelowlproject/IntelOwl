@@ -66,6 +66,29 @@
     },
     "params": {}
   },
+  "BitcoinAbuse" : {
+    "type" : "observable",
+    "python_module" : "bitcoinabuse.BitcoinAbuseAPI",
+    "description" : "Check a BTC address against bitcoinabuse.com, a public database of BTC addresses used by hackers and criminals.",
+    "disabled" : false,
+    "external_service" : true,
+    "leaks_info" : false,
+    "observable_supported" : [
+      "hash"
+    ],
+    "config" : {
+      "soft_time_limit" : 30,
+      "queue" : "default"
+    },
+    "secrets" : {
+      "api_key_name" : {
+        "env_var_key" : "BITCOINABUSE_KEY",
+        "description" : "",
+        "required" : true
+      }
+    },
+    "params" : {}
+  },
   "BoxJS_Scan_JavaScript": {
     "type": "file",
     "python_module": "boxjs_scan.BoxJS",
@@ -990,6 +1013,24 @@
     "external_service": true,
     "leaks_info": false,
     "run_hash": true,
+    "not_supported_filetypes": [
+      "application/msword",
+      "application/vnd.ms-office",
+      "application/vnd.ms-excel.addin.macroEnabled",
+      "application/x-mspublisher",
+      "application/vnd.ms-powerpoint",
+      "application/vnd.ms-excel",
+      "application/vnd.ms-excel.sheet.macroEnabled.12",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+      "text/x-ms-iqy",
+      "application/excel",
+      "text/xml",
+      "application/xml",
+      "application/zip",
+      "application/encrypted"
+    ],
     "config": {
       "soft_time_limit": 400,
       "queue": "default"
@@ -1833,6 +1874,23 @@
     "config": {
       "soft_time_limit": 500,
       "queue": "local"
+    },
+    "secrets": {},
+    "params": {}
+  },
+  "Phishstats": {
+    "type": "observable",
+    "python_module": "phishstats.PhishStats",
+    "description": "Search PhishStats API to determine if an IP/URL/domain is malicious.",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": true,
+    "observable_supported": [
+      "ip", "url", "domain", "generic"
+    ],
+    "config": {
+      "soft_time_limit": 100,
+      "queue": "long"
     },
     "secrets": {},
     "params": {}
@@ -3274,6 +3332,23 @@
       }
     },
     "params": {}
+  },
+ "WhoIs_RipeDB_Search" : {
+    "type": "observable",
+    "python_module" : "whoisripe.WhoIsRipeAPI",
+    "description" : "Fetch whois record data of an IP address from Ripe DB using their [search API](https://github.com/RIPE-NCC/whois/wiki/WHOIS-REST-API-search)",
+    "disabled" : false,
+    "external_service" : true,
+    "leaks_info" : false,
+    "observable_supported" : [
+      "ip"
+    ],
+    "config" : {
+      "soft_time_limit" : 30,
+      "queue" : "default"
+    },
+    "secrets" : {},
+    "params" : {}
   },
   "WiGLE": {
     "type": "observable",

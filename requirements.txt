@@ -45,7 +45,4 @@ speakeasy-emulator==1.5.3
 uWSGI==2.0.19.1
 yara-python==4.1.0
 pydragonfly==0.0.2
-
-git+https://github.com/DissectMalware/xlrd2.git@a666cd8fb4dba4e2898f4f33ee4da515ba91d9b2
-git+https://github.com/DissectMalware/pyxlsb2.git@8cc2ee6c7176a6808f9058fda9b235d10a7b7a47
-git+https://github.com/DissectMalware/XLMMacroDeobfuscator.git@2f1894a3bd61b92f53a5d6a4af73f9f052f24d71
+XLMMacroDeobfuscator==0.2.0

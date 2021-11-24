@@ -41,7 +41,7 @@ pysafebrowsing==0.1.1
 PySocks==1.7.1
 quark-engine==21.10.2
 requests==2.26.0
-speakeasy-emulator==1.5.3
+speakeasy-emulator==1.5.9
 uWSGI==2.0.19.1
 yara-python==4.1.0
 pydragonfly==0.0.2

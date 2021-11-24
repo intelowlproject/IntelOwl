@@ -44,5 +44,5 @@ requests==2.26.0
 speakeasy-emulator==1.5.9
 uWSGI==2.0.19.1
 yara-python==4.1.0
-pydragonfly==0.0.2
+pydragonfly==0.0.3
 XLMMacroDeobfuscator==0.2.0

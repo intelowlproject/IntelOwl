@@ -772,6 +772,21 @@
       }
     }
   },
+  "Filescan": {
+    "type": "file",
+    "python_module": "filescan.FileScan",
+    "description": "Check Filescan",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "config": {
+      "soft_time_limit": 180,
+      "queue": "default"
+    },
+    "secrets": {},
+    "params": {
+    }
+  },
   "Floss": {
     "type": "file",
     "python_module": "floss.Floss",

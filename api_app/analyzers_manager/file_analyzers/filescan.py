@@ -45,6 +45,8 @@ class FileScan(FileAnalyzer):
             response = self.session.post(
                 self.request_url + "api/scan/file", files=files
             )
+            upl = response.status_code
+            logger.info(f"UPLOAD CODE: {upl}")
             if response.status_code != 200:
                 logger.info(f"Error: {response.status_code}")
                 time.sleep(5)
@@ -55,9 +57,10 @@ class FileScan(FileAnalyzer):
         if post_sucess:
             json_response = response.json()
             self.task_id = json_response["flow_id"]
+            logger.info(f"TASK ID: {self.task_id}")
         else:
             raise AnalyzerRunException(
-                "failed max tries to post file to cuckoo for analysis"
+                "failed max tries to post file to Filescan for analysis"
             )
 
     def __filescan_poll_result(self):
@@ -65,13 +68,19 @@ class FileScan(FileAnalyzer):
             f"polling result for ({self.filename},{self.md5}), task_id: {self.task_id}"
         )
         # get_sucess = False
-        for chance in range(self.max_get_tries):
+        for chance in range(4):
             logger.info(
                 f"polling request #{chance+1} for file ({self.filename}, {self.md5})"
             )
-            url = self.request_url + "api/scan/" + str(self.task_id) + "report"
+            url = self.request_url + "api/scan/" + str(self.task_id) + "/report"
             response = self.session.get(url)
+            logger.info(f"REQUEST URL IS: {url}")
             json_response = response.json()
+            logger.info(f"RESPONSE OBTAINED: {json_response}")
+            resu = response.status_code
+            logger.info(f"RESPONSE CODE: {resu}")
+            status = json_response.get("allFinished")
+            logger.info(f"Result for Request: {status}")
             # logger.info(json_response)
             # get_sucess = True
             return json_response

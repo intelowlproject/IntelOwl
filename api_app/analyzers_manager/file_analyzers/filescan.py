@@ -19,17 +19,18 @@ class FileScan(FileAnalyzer):
         self.session = requests.Session()
         self.request_url = "https://www.filescan.io/"
         self.task_id = 0
+        self.poll_distance = 10
         self.result = {}
         self.max_post_tries = params.get("max_post_tries", 5)
-        self.max_get_tries = params.get("max_poll_tries", 20)
+        self.max_get_tries = 30
 
     def run(self):
         binary = self.read_file_bytes()
         if not binary:
             raise AnalyzerRunException("File is empty")
         self.__filescan_request_scan(binary)
-        # self.____filescan_poll_result()
-        result = self.__filescan_poll_result()
+        self.__poll_status()
+        result = self.__fetch_and_build_result()
         return result
 
     def __filescan_request_scan(self, binary):
@@ -57,33 +58,40 @@ class FileScan(FileAnalyzer):
         if post_sucess:
             json_response = response.json()
             self.task_id = json_response["flow_id"]
+            # self.task_id = "619f8affb71ceed41530067b"
             logger.info(f"TASK ID: {self.task_id}")
         else:
             raise AnalyzerRunException(
                 "failed max tries to post file to Filescan for analysis"
             )
 
-    def __filescan_poll_result(self):
-        logger.info(
-            f"polling result for ({self.filename},{self.md5}), task_id: {self.task_id}"
-        )
-        # get_sucess = False
-        for chance in range(4):
-            logger.info(
-                f"polling request #{chance+1} for file ({self.filename}, {self.md5})"
-            )
+    def __poll_status(self):
+        for chance in range(self.max_get_tries):
+            time.sleep(self.poll_distance)
             url = self.request_url + "api/scan/" + str(self.task_id) + "/report"
+            logger.info(f"Polling #try{chance+1}")
             response = self.session.get(url)
-            logger.info(f"REQUEST URL IS: {url}")
             json_response = response.json()
-            logger.info(f"RESPONSE OBTAINED: {json_response}")
-            resu = response.status_code
-            logger.info(f"RESPONSE CODE: {resu}")
             status = json_response.get("allFinished")
-            logger.info(f"Result for Request: {status}")
-            # logger.info(json_response)
-            # get_sucess = True
-            return json_response
+            logger.info(f"CURRENT STATUS: {status}")
+            if str(status) == "True":
+                break
+
+    def __fetch_and_build_result(self):
+        url = self.request_url + "api/scan/" + str(self.task_id) + "/report"
+        response = self.session.get(url)
+        logger.info(f"REQUEST URL IS: {url}")
+        json_response = response.json()
+        logger.info(f"RESPONSE OBTAINED: {json_response}")
+        ty = type(json_response)
+        logger.info(f"RESPONSE TYPE: {ty}")
+        resu = response.status_code
+        logger.info(f"RESPONSE CODE: {resu}")
+        status = json_response.get("allFinished")
+        logger.info(f"Result for Request: {status}")
+        # logger.info(json_response)
+        # get_sucess = True
+        return json_response
 
     @classmethod
     def _monkeypatch(cls):

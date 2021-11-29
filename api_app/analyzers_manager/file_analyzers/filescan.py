@@ -14,83 +14,47 @@ logger = logging.getLogger(__name__)
 
 
 class FileScan(FileAnalyzer):
+    """Filescan Class"""
+
     def set_params(self, params):
         self.upload_file = params.get("upload_file", True)
         self.session = requests.Session()
-        self.request_url = "https://www.filescan.io/"
-        self.task_id = 0
+        self.max_tries = 30
         self.poll_distance = 10
-        self.result = {}
-        self.max_post_tries = params.get("max_post_tries", 5)
-        self.max_get_tries = 30
+        self.request_url = "https://www.filescan.io/"
 
     def run(self):
         binary = self.read_file_bytes()
         if not binary:
             raise AnalyzerRunException("File is empty")
-        self.__filescan_request_scan(binary)
-        self.__poll_status()
-        result = self.__fetch_and_build_result()
+        task_id = self.__filescan_request_scan(binary)
+        result = self.__poll_status(task_id)
         return result
 
-    def __filescan_request_scan(self, binary):
+    def __filescan_request_scan(self, binary) -> int:
         logger.info(f"Requesting Scan for: ({self.filename}), {self.md5}")
-
         name_to_send = self.filename if self.upload_file else self.md5
         files = {"file": (name_to_send, binary)}
-        post_sucess = False
-        for chance in range(self.max_post_tries):
-            logger.info(
-                f"#{chance} for file analysis  of ({self.filename}), {self.md5}"
-            )
-            response = self.session.post(
-                self.request_url + "api/scan/file", files=files
-            )
-            upl = response.status_code
-            logger.info(f"UPLOAD CODE: {upl}")
-            if response.status_code != 200:
-                logger.info(f"Error: {response.status_code}")
-                time.sleep(5)
-                continue
-            else:
-                post_sucess = True
-                break
-        if post_sucess:
-            json_response = response.json()
-            self.task_id = json_response["flow_id"]
-            # self.task_id = "619f8affb71ceed41530067b"
-            logger.info(f"TASK ID: {self.task_id}")
+        logger.info(f"Uploading for file analysis  of ({self.filename}), {self.md5}")
+        response = self.session.post(self.request_url + "api/scan/file", files=files)
+        if response.status_code != 200:
+            logger.info(f"Error: {response.status_code}")
+            raise AnalyzerRunException("Error Uploading File for Scan")
         else:
-            raise AnalyzerRunException(
-                "failed max tries to post file to Filescan for analysis"
-            )
+            json_response = response.json()
+            task_id = json_response["flow_id"]
+            return task_id
 
-    def __poll_status(self):
-        for chance in range(self.max_get_tries):
+    def __poll_status(self, task_id: int) -> dict:
+        for chance in range(self.max_tries):
             time.sleep(self.poll_distance)
-            url = self.request_url + "api/scan/" + str(self.task_id) + "/report"
+            url = self.request_url + "api/scan/" + str(task_id) + "/report"
             logger.info(f"Polling #try{chance+1}")
             response = self.session.get(url)
             json_response = response.json()
             status = json_response.get("allFinished")
-            logger.info(f"CURRENT STATUS: {status}")
             if str(status) == "True":
                 break
-
-    def __fetch_and_build_result(self):
-        url = self.request_url + "api/scan/" + str(self.task_id) + "/report"
-        response = self.session.get(url)
-        logger.info(f"REQUEST URL IS: {url}")
-        json_response = response.json()
-        logger.info(f"RESPONSE OBTAINED: {json_response}")
-        ty = type(json_response)
-        logger.info(f"RESPONSE TYPE: {ty}")
-        resu = response.status_code
-        logger.info(f"RESPONSE CODE: {resu}")
-        status = json_response.get("allFinished")
-        logger.info(f"Result for Request: {status}")
-        # logger.info(json_response)
-        # get_sucess = True
         return json_response
 
     @classmethod

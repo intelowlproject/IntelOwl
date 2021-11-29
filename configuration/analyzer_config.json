@@ -775,17 +775,16 @@
   "Filescan": {
     "type": "file",
     "python_module": "filescan.FileScan",
-    "description": "Check Filescan",
+    "description": "Upload any file to scan for viruses in the content using File Scan API",
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
     "config": {
       "soft_time_limit": 180,
-      "queue": "default"
+      "queue": "long"
     },
     "secrets": {},
-    "params": {
-    }
+    "params": {}
   },
   "Floss": {
     "type": "file",

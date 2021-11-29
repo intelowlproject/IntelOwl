@@ -40,10 +40,9 @@ class FileScan(FileAnalyzer):
         if response.status_code != 200:
             logger.info(f"Error: {response.status_code}")
             raise AnalyzerRunException("Error Uploading File for Scan")
-        else:
-            json_response = response.json()
-            task_id = json_response["flow_id"]
-            return task_id
+        json_response = response.json()
+        task_id = json_response["flow_id"]
+        return task_id
 
     def __poll_status(self, task_id: int) -> dict:
         for chance in range(self.max_tries):

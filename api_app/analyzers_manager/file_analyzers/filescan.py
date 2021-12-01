@@ -17,7 +17,6 @@ class FileScan(FileAnalyzer):
     """Filescan Class"""
 
     def set_params(self, params):
-        self.upload_file = params.get("upload_file", True)
         self.session = requests.Session()
         self.max_tries = 30
         self.poll_distance = 10
@@ -32,13 +31,11 @@ class FileScan(FileAnalyzer):
         return result
 
     def __filescan_request_scan(self, binary) -> int:
-        logger.info(f"Requesting Scan for: ({self.filename}), {self.md5}")
-        name_to_send = self.filename if self.upload_file else self.md5
+        name_to_send = self.filename
         files = {"file": (name_to_send, binary)}
         logger.info(f"Uploading for file analysis  of ({self.filename}), {self.md5}")
         response = self.session.post(self.request_url + "api/scan/file", files=files)
         if response.status_code != 200:
-            logger.info(f"Error: {response.status_code}")
             raise AnalyzerRunException("Error Uploading File for Scan")
         json_response = response.json()
         task_id = json_response["flow_id"]
@@ -51,8 +48,7 @@ class FileScan(FileAnalyzer):
             logger.info(f"Polling #try{chance+1}")
             response = self.session.get(url)
             json_response = response.json()
-            status = json_response.get("allFinished")
-            if str(status) == "True":
+            if json_response["allFinished"]:
                 break
         return json_response
 

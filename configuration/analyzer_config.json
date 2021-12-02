@@ -774,7 +774,7 @@
   },
   "FileScan_Upload_File": {
     "type": "file",
-    "python_module": "filescan.FileScan",
+    "python_module": "filescan.FileScanUpload",
     "description": "Extract IoCs from executable files, documents and scripts via [FileScan.io API](https://www.filescan.io/api/docs).",
     "disabled": false,
     "external_service": true,

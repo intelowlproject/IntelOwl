@@ -13,8 +13,8 @@ from tests.mock_utils import MockResponse, if_mock_connections, patch
 logger = logging.getLogger(__name__)
 
 
-class FileScan(FileAnalyzer):
-    """Filescan Class"""
+class FileScanUpload(FileAnalyzer):
+    """FileScan_Upload_File analyzer"""
 
     def set_params(self, params):
         self.session = requests.Session()
@@ -33,7 +33,6 @@ class FileScan(FileAnalyzer):
     def __filescan_request_scan(self, binary) -> int:
         name_to_send = self.filename
         files = {"file": (name_to_send, binary)}
-        logger.info(f"Uploading for file analysis  of ({self.filename}), {self.md5}")
         response = self.session.post(self.request_url + "api/scan/file", files=files)
         if response.status_code != 200:
             raise AnalyzerRunException("Error Uploading File for Scan")
@@ -46,7 +45,20 @@ class FileScan(FileAnalyzer):
             time.sleep(self.poll_distance)
             url = self.request_url + "api/scan/" + str(task_id) + "/report"
             logger.info(f"Polling #try{chance+1}")
-            response = self.session.get(url)
+            response = self.session.get(
+                url,
+                params={
+                    "filter": [
+                        "general",
+                        "wi:all",
+                        "o:all",
+                        "finalVerdict",
+                        "dr:all",
+                        "f:all",
+                        "fd:all",
+                    ]
+                },
+            )
             json_response = response.json()
             if json_response["allFinished"]:
                 break
@@ -58,11 +70,11 @@ class FileScan(FileAnalyzer):
             if_mock_connections(
                 patch(
                     "requests.Session.get",
-                    return_value=MockResponse({"task": {"status": "reported"}}, 200),
+                    return_value=MockResponse({"allFinished": True}, 200),
                 ),
                 patch(
                     "requests.Session.post",
-                    return_value=MockResponse({}, 200),
+                    return_value=MockResponse({"flow_id": 1}, 200),
                 ),
             )
         ]

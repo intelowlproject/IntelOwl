@@ -1826,6 +1826,23 @@
       }
     }
   },
+  "PassiveDNS" : {
+    "type" : "observable",
+    "python_module" : "passivedns.passiveDNS",
+    "description" : "Look up the PDNS information of a domain using the PassiveDNS API.",
+    "disabled" : false,
+    "external_service" : true,
+    "leaks_info" : false,
+    "observable_supported": [
+      "domain"
+    ],
+    "config" : {
+      "soft_time_limit" : 30,
+      "queue" : "default"
+    },
+    "secrets" : {},
+    "params" : {}
+  },
   "PDF_Info": {
     "type": "file",
     "python_module": "pdf_info.PDFInfo",

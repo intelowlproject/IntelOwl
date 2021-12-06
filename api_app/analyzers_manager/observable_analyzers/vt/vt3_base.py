@@ -18,8 +18,10 @@ class VirusTotalv3AnalyzerMixin(BaseAnalyzerMixin):
     base_url = "https://www.virustotal.com/api/v3/"
 
     def set_params(self, params):
-        self.max_tries = params.get("max_tries", 100)
-        self.poll_distance = params.get("poll_distance", 5)
+        # CARE!!!! VT is normally used with paid quotas!!!
+        # Do not change these values without knowing what you are doing!
+        self.max_tries = params.get("max_tries", 10)
+        self.poll_distance = params.get("poll_distance", 30)
         self.include_behaviour_summary = params.get("include_behaviour_summary", False)
         self.include_sigma_analyses = params.get("include_sigma_analyses", False)
         self.force_active_scan = params.get("force_active_scan", False)
@@ -92,9 +94,12 @@ class VirusTotalv3AnalyzerMixin(BaseAnalyzerMixin):
                                 f"We will force the analysis again"
                             )
                             # the "rescan" option will burn quotas.
+                            # We should reduce the polling at the minimum
                             result = self._vt_scan_file(
                                 observable_name,
                                 rescan_instead=True,
+                                max_tries=2,
+                                poll_distance=120,
                             )
                             already_done_active_scan_because_report_was_old = True
                         else:
@@ -135,10 +140,13 @@ class VirusTotalv3AnalyzerMixin(BaseAnalyzerMixin):
         return result
 
     def _vt_scan_file(
-        self,
-        md5: str,
-        rescan_instead: bool = False,
+        self, md5: str, rescan_instead: bool = False, max_tries=None, poll_distance=None
     ) -> dict:
+        # This can be overwritten to allow different configurations
+        # Do not change this if you do not know what you are doing.
+        # This impacts paid quota usage
+        max_tries = max_tries if max_tries else self.max_tries
+        poll_distance = poll_distance if poll_distance else self.poll_distance
         try:
             binary = self._job.file.read()
         except Exception:
@@ -171,8 +179,8 @@ class VirusTotalv3AnalyzerMixin(BaseAnalyzerMixin):
         # max 5 minutes waiting
         got_result = False
         uri = f"analyses/{scan_id}"
-        for chance in range(self.max_tries):
-            time.sleep(self.poll_distance)
+        for chance in range(max_tries):
+            time.sleep(poll_distance)
             try:
                 response = requests.get(self.base_url + uri, headers=self.headers)
                 response.raise_for_status()

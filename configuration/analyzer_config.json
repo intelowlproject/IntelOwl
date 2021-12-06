@@ -1840,22 +1840,34 @@
       }
     }
   },
-  "PassiveDNS" : {
+  "Mnemonic_PassiveDNS" : {
     "type" : "observable",
-    "python_module" : "passivedns.passiveDNS",
-    "description" : "Look up the PDNS information of a domain using the PassiveDNS API.",
+    "python_module" : "mnemonic_pdns.passiveDNS",
+    "description" : "Look up the PDNS information of a domain or IP address using the PassiveDNS API.",
     "disabled" : false,
     "external_service" : true,
     "leaks_info" : false,
     "observable_supported": [
-      "domain"
+      "domain",
+      "ip"
     ],
     "config" : {
       "soft_time_limit" : 30,
       "queue" : "default"
     },
     "secrets" : {},
-    "params" : {}
+    "params" : {
+      "cofformat" : {
+        "value" : true,
+        "type" : "bool",
+        "description" : "Use the cof format endpoint."
+      },
+      "limit" : {
+        "value" : 100,
+        "type" : "int",
+        "description" : ""
+      }
+    }
   },
   "PDF_Info": {
     "type": "file",

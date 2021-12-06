@@ -230,7 +230,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `WhoIs_RipeDB_Search` : Fetch whois record data of an IP address from Ripe DB using their [search API](https://github.com/RIPE-NCC/whois/wiki/WHOIS-REST-API-search) (no API key required)
 * `UrlScan_Search`: Search an IP/domain/url/hash against [URLScan](https://urlscan.io) API
 * `UrlScan_Submit_Result`: Submit & retrieve result of an URL against [URLScan](https://urlscan.io) API
-* `PassiveDNS` : Look up the DNS information of a domain using the [PassiveDNS](https://docs.mnemonic.no/display/public/API/PassiveDNS+Integration+Guide) API.
+* `Mnemonic_PassiveDNS` : Look up the PDNS information of a domain or IP address using the [PassiveDNS](https://docs.mnemonic.no/display/public/API/PassiveDNS+Integration+Guide) API.
 * `Phishtank`: Search an url against [Phishtank](https://phishtank.org/api_info.php) API
 * `Phishstats`: Search [PhishStats API](https://phishstats.info/) to determine if an IP/URL/domain is malicious.
 * `Quad9_DNS`: Retrieve current domain resolution with Quad9 DoH (DNS over HTTPS)

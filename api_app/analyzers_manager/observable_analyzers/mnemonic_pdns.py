@@ -1,6 +1,8 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
+import json
+
 import requests
 
 from api_app.analyzers_manager import classes
@@ -11,14 +13,28 @@ from tests.mock_utils import MockResponse, if_mock_connections, patch
 class passiveDNS(classes.ObservableAnalyzer):
     base_url: str = "https://api.mnemonic.no/pdns/v3/"
 
+    def set_params(self, params):
+        self._cofformat = params.get("cofformat", True)
+        self._limit = params.get("limit", 100)
+
     def run(self):
+        if self._cofformat:
+            self.base_url += "cof/"
         try:
-            response = requests.get(self.base_url + self.observable_name)
+            response = requests.get(
+                self.base_url + self.observable_name, data={"limit": self._limit}
+            )
             response.raise_for_status()
         except requests.RequestException as e:
             raise AnalyzerRunException(e)
 
-        result = response.json()
+        if self._cofformat:
+            result = []
+            for i in response.text.splitlines():
+                result.append(json.loads(i))
+        else:
+            result = response.json()
+
         return result
 
     @classmethod

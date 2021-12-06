@@ -772,6 +772,20 @@
       }
     }
   },
+  "FileScan_Upload_File": {
+    "type": "file",
+    "python_module": "filescan.FileScanUpload",
+    "description": "Extract IoCs from executable files, documents and scripts via [FileScan.io API](https://www.filescan.io/api/docs).",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "config": {
+      "soft_time_limit": 180,
+      "queue": "long"
+    },
+    "secrets": {},
+    "params": {}
+  },
   "Floss": {
     "type": "file",
     "python_module": "floss.Floss",

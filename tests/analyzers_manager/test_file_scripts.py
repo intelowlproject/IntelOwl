@@ -54,6 +54,7 @@ class EXEAnalyzersTestCase(_FileAnalyzersScriptsTestCase):
                 "MalwareBazaar_Get_File",
                 "OTX_Check_Hash",
                 "Dragonfly_Emulation",
+                "FileScan_Upload_File",
             ],
         }
 

@@ -139,7 +139,7 @@ class DragonflyEmulation(FileAnalyzer):
                     "requests.Session.request",
                     side_effect=[
                         MockResponse(
-                            {"id": 1, "malware_type": "DLL"}, 201
+                            {"id": 1, "malware_type": "PE"}, 201
                         ),  # __upload; sample ID
                         MockResponse({"id": 1}, 201),  # __upload; analysis ID
                         MockResponse(

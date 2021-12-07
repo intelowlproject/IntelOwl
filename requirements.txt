@@ -33,7 +33,7 @@ psycopg2-binary==2.9.1
 pycti==5.0.1
 pydeep==0.4
 PyExifTool==0.4.9
-pyhashlookup==0.9
+pyhashlookup==1.1.1
 pymisp==2.4.144
 pypdns==1.5.2
 pypssl==2.2

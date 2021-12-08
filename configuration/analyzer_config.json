@@ -3196,6 +3196,20 @@
     },
     "params": {}
   },
+  "Virushee_File_Scan":{
+    "type": "file",
+    "python_module": "virushee.Virushee",
+    "description": "Scan a File using VirusHee API",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "config": {
+      "soft_time_limit": 180,
+      "queue": "long"
+    },
+    "secrets": {},
+    "params": {}
+  },
   "VirusTotal_v2_Scan_File": {
     "type": "file",
     "python_module": "vt2_scan.VirusTotalv2ScanFile",

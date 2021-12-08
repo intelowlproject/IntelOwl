@@ -797,15 +797,16 @@
       "url",
       "domain",
       "ip",
-      "generic"
+      "generic",
+      "hash"
     ],
     "config": {
-      "soft_time_limit": 180,
+      "soft_time_limit": 60,
       "queue": "long"
     },
     "secrets": {},
     "params": {}
-  },
+    },
   "Floss": {
     "type": "file",
     "python_module": "floss.Floss",

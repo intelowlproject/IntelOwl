@@ -17,63 +17,65 @@ class FileScanUpload(FileAnalyzer):
     """FileScan_Upload_File analyzer"""
 
     def set_params(self, params):
-        self.session = requests.Session()
         self.max_tries = 30
         self.poll_distance = 10
-        self.request_url = "https://www.filescan.io/"
+        self.base_url = "https://www.filescan.io/api"
 
     def run(self):
+        task_id = self.__upload_file_for_scan()
+        report = self.__fetch_report(task_id)
+        return report
+
+    def __upload_file_for_scan(self) -> int:
         binary = self.read_file_bytes()
         if not binary:
             raise AnalyzerRunException("File is empty")
-        task_id = self.__filescan_request_scan(binary)
-        result = self.__poll_status(task_id)
-        return result
-
-    def __filescan_request_scan(self, binary) -> int:
-        name_to_send = self.filename
-        files = {"file": (name_to_send, binary)}
-        response = self.session.post(self.request_url + "api/scan/file", files=files)
-        if response.status_code != 200:
-            raise AnalyzerRunException("Error Uploading File for Scan")
-        json_response = response.json()
-        task_id = json_response["flow_id"]
-        return task_id
-
-    def __poll_status(self, task_id: int) -> dict:
-        for chance in range(self.max_tries):
-            time.sleep(self.poll_distance)
-            url = self.request_url + "api/scan/" + str(task_id) + "/report"
-            logger.info(f"Polling #try{chance+1}")
-            response = self.session.get(
-                url,
-                params={
-                    "filter": [
-                        "general",
-                        "wi:all",
-                        "o:all",
-                        "finalVerdict",
-                        "dr:all",
-                        "f:all",
-                        "fd:all",
-                    ]
-                },
+        try:
+            response = requests.post(
+                self.base_url + "/scan/file", files={"file": (self.filename, binary)}
             )
-            json_response = response.json()
-            if json_response["allFinished"]:
+            response.raise_for_status()
+        except requests.RequestException as e:
+            raise AnalyzerRunException(e)
+
+        return response.json()["flow_id"]
+
+    def __fetch_report(self, task_id: int) -> dict:
+        report = {}
+        url = f"{self.base_url}/scan/{task_id}/report"
+        params = {
+            "filter": [
+                "general",
+                "wi:all",
+                "o:all",
+                "finalVerdict",
+                "dr:all",
+                "f:all",
+                "fd:all",
+            ]
+        }
+        obj_repr = self.__repr__()
+
+        for chance in range(self.max_tries):
+            logger.info(f"[POLLING] {obj_repr} -> #{chance + 1}/{self.max_tries}")
+            response = requests.get(url, params=params)
+            report = response.json()
+            if report["allFinished"]:
                 break
-        return json_response
+            time.sleep(self.poll_distance)
+
+        return report
 
     @classmethod
     def _monkeypatch(cls):
         patches = [
             if_mock_connections(
                 patch(
-                    "requests.Session.get",
+                    "requests.get",
                     return_value=MockResponse({"allFinished": True}, 200),
                 ),
                 patch(
-                    "requests.Session.post",
+                    "requests.post",
                     return_value=MockResponse({"flow_id": 1}, 200),
                 ),
             )

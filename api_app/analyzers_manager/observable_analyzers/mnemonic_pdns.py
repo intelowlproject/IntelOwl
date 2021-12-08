@@ -2,7 +2,6 @@
 # See the file 'LICENSE' for copying permission.
 
 import json
-
 import requests
 
 from api_app.analyzers_manager import classes
@@ -10,11 +9,11 @@ from api_app.exceptions import AnalyzerRunException
 from tests.mock_utils import MockResponse, if_mock_connections, patch
 
 
-class passiveDNS(classes.ObservableAnalyzer):
+class MnemonicPassiveDNS(classes.ObservableAnalyzer):
     base_url: str = "https://api.mnemonic.no/pdns/v3/"
 
     def set_params(self, params):
-        self._cofformat = params.get("cofformat", True)
+        self._cofformat = params.get("cof_format", True)
         self._limit = params.get("limit", 100)
 
     def run(self):

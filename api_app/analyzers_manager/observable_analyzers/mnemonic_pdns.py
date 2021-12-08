@@ -2,6 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 
 import json
+
 import requests
 
 from api_app.analyzers_manager import classes
@@ -28,9 +29,8 @@ class MnemonicPassiveDNS(classes.ObservableAnalyzer):
             raise AnalyzerRunException(e)
 
         if self._cofformat:
-            result = []
-            for i in response.text.splitlines():
-                result.append(json.loads(i))
+            result = [json.loads(line) for line in response.text.splitlines()]
+
         else:
             result = response.json()
 

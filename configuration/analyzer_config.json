@@ -3124,7 +3124,8 @@
     "leaks_info": false,
     "observable_supported": [
       "domain",
-      "url"
+      "url",
+      "ip"
     ],
     "config": {
       "soft_time_limit": 50,

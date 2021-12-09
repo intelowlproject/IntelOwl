@@ -1840,6 +1840,35 @@
       }
     }
   },
+  "Mnemonic_PassiveDNS" : {
+    "type" : "observable",
+    "python_module" : "mnemonic_pdns.MnemonicPassiveDNS",
+    "description" : "Look up a domain or IP using the [Mnemonic PassiveDNS public API](https://docs.mnemonic.no/display/public/API/Passive+DNS+Overview).",
+    "disabled" : false,
+    "external_service" : true,
+    "leaks_info" : false,
+    "observable_supported": [
+      "domain",
+      "ip"
+    ],
+    "config" : {
+      "soft_time_limit" : 60,
+      "queue" : "long"
+    },
+    "secrets" : {},
+    "params" : {
+      "cof_format" : {
+        "value" : true,
+        "type" : "bool",
+        "description" : "Return result in the PassiveDNS [Common Output Format](https://datatracker.ietf.org/doc/draft-dulaunoy-dnsop-passive-dns-cof/)."
+      },
+      "limit" : {
+        "value" : 1000,
+        "type" : "int",
+        "description" : "Number of records to fetch."
+      }
+    }
+  },
   "PDF_Info": {
     "type": "file",
     "python_module": "pdf_info.PDFInfo",

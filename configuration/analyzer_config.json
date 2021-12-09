@@ -786,6 +786,27 @@
     "secrets": {},
     "params": {}
   },
+  "FileScan_Search": {
+    "type": "observable",
+    "python_module": "filescan_search.FileScanSearch",
+    "description": "Finds reports and uploaded files by various tokens, like hash, filename, verdict, IOCs etc via [FileScan.io API](https://www.filescan.io/api/docs).",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": [
+      "url",
+      "domain",
+      "ip",
+      "generic",
+      "hash"
+    ],
+    "config": {
+      "soft_time_limit": 60,
+      "queue": "long"
+    },
+    "secrets": {},
+    "params": {}
+    },
   "Floss": {
     "type": "file",
     "python_module": "floss.Floss",

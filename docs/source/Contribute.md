@@ -6,6 +6,20 @@ Intel Owl was designed to ease the addition of new analyzers/connectors. With a 
 
 > Wish to contribute to the python client ? See [pyintelowl](https://github.com/intelowlproject/pyintelowl).
 
+
+## Rules
+Intel Owl welcomes contributors from anywhere and from any kind of education or skill level. We strive to create a community of developers that is welcoming, friendly and right.
+
+For this reason it is important to follow some easy rules based on a simple but important concept: **Respect**.
+
+* Before starting to work on an issue, you need to get the approval of one of the maintainers. Therefore please ask to be assigned to an issue. If you do not that but you still raise a PR for that issue, your PR can be rejected. This is a form of respect for both the maintainers and the other contributors who could have already started to work on the same problem.
+
+* When you ask to be assigned to an issue, it means that you are ready to work on it. When you get assigned, take the lock and then you disappear, you are not respecting the maintainers and the other contributors who could be able to work on that. So, after having been assigned, you have a week of time to deliver your first *draft* PR. After that time has passed without any notice, you will be unassigned.
+
+* Before asking questions regarding how the project works, please read *through all the documentation* and install the project on your own local machine to try it and understand how it basically works. This is a form of respect to the maintainers.
+
+Also, we recommend raising a draft PR early with incomplete changes. This way you can continue working on the same and we can track your progress and actively review and help.
+
 ## Code Style
 Keeping to a consistent code style throughout the project makes it easier to contribute and collaborate. We make use of [`psf/black`](https://github.com/psf/black) and [isort](https://pycqa.github.io/isort/) for code formatting and [`flake8`](https://flake8.pycqa.org) for style guides.
 
@@ -151,17 +165,23 @@ After having written the new python module, you have to remember to:
 
 ## Create a pull request
 
+### Remember!!!
+Please create pull requests only for the branch **develop**. That code will be pushed to master only on a new release.
+
+Also remember to pull the most recent changes available in the **develop** branch before submitting your PR. If your PR has merge conflicts caused by this behavior, it won't be accepted.
+
 ### Install testing requirements
 Run `pip install -r test-requirements.txt` to install the requirements to validate your code. 
 
 #### Pass linting and tests
-1. Run `psf/black` to lint the files automatically and then `flake8` to check:
+1. Run `psf/black` to lint the files automatically, then `flake8` to check and `isort`:
  
  (if you installed `pre-commit` this is performed automatically at every commit)
 
 ```bash
 $ black . --exclude "migrations|venv"
 $ flake8 . --show-source --statistics
+$ isort --profile black --filter-files --skip venv
 ```
 
   if flake8 shows any errors, fix them.
@@ -196,8 +216,3 @@ If everything is working, before submitting your pull request, please squash you
 * Then you have to force push the final, squashed commit: `git push --force-with-lease origin`.
 
 Squashing commits can be a tricky process but once you figure it out, it's really helpful and keeps our repo concise and clean.
-
-#### Remember!!!
-Please create pull requests only for the branch **develop**. That code will be pushed to master only on a new release.
-
-Also remember to pull the most recent changes available in the **develop** branch before submitting your PR. If your PR has merge conflicts caused by this behavior, it won't be accepted.

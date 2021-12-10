@@ -33,6 +33,7 @@ class EXEAnalyzersTestCase(_FileAnalyzersScriptsTestCase):
                 "Floss",
                 "Manalyze",
                 "MWDB_Scan",
+                "Yara_Scan_ATM_MALWARE",
                 "Yara_Scan_Community",
                 "Yara_Scan_Daily_Ioc",
                 "Yara_Scan_FireEye",

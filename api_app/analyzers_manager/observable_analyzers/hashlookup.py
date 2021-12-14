@@ -1,7 +1,7 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-from pyhashlookup import Hashlookup
+from pyhashlookup import Hashlookup, PyHashlookupError
 
 from api_app.analyzers_manager import classes
 from api_app.exceptions import AnalyzerRunException
@@ -19,16 +19,10 @@ class HashLookupServer(classes.ObservableAnalyzer):
             # the library maintains the default URL
             hashlookup_instance = Hashlookup()
 
-        # lookup
-        hash_length = len(self.observable_name)
-        if hash_length == 32:
-            result = hashlookup_instance.md5_lookup(self.observable_name)
-        elif hash_length == 40:
-            result = hashlookup_instance.sha1_lookup(self.observable_name)
-        else:
-            raise AnalyzerRunException(
-                "hashes that are not md5 or sha1 are not supported by the service"
-            )
+        try:
+            result = hashlookup_instance.lookup(self.observable_name)
+        except PyHashlookupError as e:
+            raise AnalyzerRunException(e)
 
         return result
 

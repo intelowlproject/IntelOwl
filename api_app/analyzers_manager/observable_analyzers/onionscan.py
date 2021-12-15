@@ -1,3 +1,6 @@
+"""
+This IntelOwl module adds onionscan utility support to scan tor .onion domains.
+"""
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
@@ -13,7 +16,11 @@ from api_app.exceptions import AnalyzerRunException
 
 
 class OnionScan(classes.ObservableAnalyzer):
-    onionscan_binary: str = "onionscan"
+    """
+        Scans domains with onionscan for misconfigurations and leaks
+    """
+    onionscan_binary: str = "/opt/deploy/onionscan/onionscan"
+    # default target protonmail website
     target = "https://protonmailrmez3lotccipshtkleegetolb73fuirgj7r4o4vfu7ozyd.onion/"
 
 
@@ -30,8 +37,10 @@ class OnionScan(classes.ObservableAnalyzer):
             Run Onionscan against target onion url
         """
         # Check for onionscan binary in path/pwd.
+        if which("onionscan"):
+            self.onionscan_binary = "onionscan"
         if not which(self.onionscan_binary):
-            raise AnalyzerRunException("onionscan binary not in path / working directory!")
+            raise AnalyzerRunException("onionscan is not installed!")
         # Open a pipe to onionscan process
         command = "%s --%s %s" % (self.onionscan_binary, "jsonReport", self.target)
         process = subprocess.Popen(

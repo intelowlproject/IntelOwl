@@ -82,3 +82,10 @@ wget "https://exiftool.org/Image-ExifTool-$version.tar.gz"
 gzip -dc "Image-ExifTool-$version.tar.gz" | tar -xf -
 cd "Image-ExifTool-$version"
 chown -R www-data:www-data /opt/deploy/exiftool_download
+
+
+# Download Onionscan
+mkdir -p /opt/deploy/onionscan
+cd /opt/deploy/onionscan
+wget "https://github.com/CypherpunkSamurai/onion-scan-binaries/raw/master/onionscan_linux_x64" -O onionscan
+chmod +x onionscan

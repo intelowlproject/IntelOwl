@@ -14,24 +14,23 @@ from api_app.exceptions import AnalyzerRunException
 
 class OnionScan(classes.ObservableAnalyzer):
     """
-        Scans domains with onionscan for misconfigurations and leaks
+    Scans domains with onionscan for misconfigurations and leaks
     """
+
     onionscan_binary: str = "/opt/deploy/onionscan/onionscan"
     # default target protonmail website
     target = "https://protonmailrmez3lotccipshtkleegetolb73fuirgj7r4o4vfu7ozyd.onion/"
 
-
     def set_params(self, params):
         """
-            params:
-                - "target" : "target url for onionscan" (default protonmail)
+        params:
+            - "target" : "target url for onionscan" (default protonmail)
         """
         self.target = params.get("target", self.target)
 
-
     def run(self):
         """
-            Run Onionscan against target onion url
+        Run Onionscan against target onion url
         """
         # Check for onionscan binary in path/pwd.
         if which("onionscan"):

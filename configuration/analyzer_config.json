@@ -3509,6 +3509,40 @@
       }
     }
   },
+  "Yara_Scan_ATM_MALWARE": {
+    "type": "file",
+    "python_module": "yara_scan.YaraScan",
+    "description": "scan a file with ATM Malware yara rules",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
+    "config": {
+      "soft_time_limit": 60,
+      "queue": "local"
+    },
+    "secrets": {},
+    "params": {
+      "git_repo_main_dir": {
+        "value": [
+          "/opt/deploy/yara/atm_malware_rules"
+        ],
+        "type": "list",
+        "description": ""
+      },
+      "directories_with_rules": {
+        "value": [
+          "/opt/deploy/yara/atm_malware_rules"
+        ],
+        "type": "list",
+        "description": ""
+      },
+      "recursive": {
+        "value": true,
+        "type": "bool",
+        "description": ""
+      }
+    }
+  },
   "Yara_Scan_Community": {
     "type": "file",
     "python_module": "yara_scan.YaraScan",

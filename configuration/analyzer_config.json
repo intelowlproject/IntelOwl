@@ -3531,7 +3531,7 @@
       },
       "directories_with_rules": {
         "value": [
-          "/opt/deploy/yara/atm_malware_rules/yara"
+          "/opt/deploy/yara/atm_malware_rules"
         ],
         "type": "list",
         "description": ""

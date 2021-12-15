@@ -35,6 +35,7 @@ git clone --depth 1 https://github.com/fireeye/red_team_tool_countermeasures fir
 
 # ATM Malware
 git clone --depth 1 https://github.com/fboldewin/YARA-rules atm_malware_rules
+rm -fr atm_malware_rules/*.md
 
 # Yara community rules
 git clone --depth 1 https://github.com/Yara-Rules/rules.git

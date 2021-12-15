@@ -8,9 +8,6 @@ import json
 import subprocess
 from shutil import which
 
-# multi platform support
-from sys import platform
-
 from api_app.analyzers_manager import classes
 from api_app.exceptions import AnalyzerRunException
 

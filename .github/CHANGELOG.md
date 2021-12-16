@@ -2,6 +2,17 @@
 
 [**Upgrade Guide**](https://intelowl.readthedocs.io/en/latest/Installation.html#update-to-the-most-recent-version)
 
+## [v3.2.3](https://github.com/intelowlproject/IntelOwl/releases/tag/v3.2.3)
+
+**New Analyzers:**
+
+- `Yara_Scan_ATM_MALWARE`: analyze your files with the rules from this [repo](https://github.com/fboldewin/YARA-rules)
+
+**Fixes & Improvements:**
+
+- `HashLookupServer_*` analyzers now correctly support sha256 hashes
+- adjustments in the documentation
+
 ## [v3.2.2](https://github.com/intelowlproject/IntelOwl/releases/tag/v3.2.2)
 
 **Notes:**

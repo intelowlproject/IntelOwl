@@ -38,9 +38,9 @@ class OnionScan(classes.ObservableAnalyzer):
         if not which(self.onionscan_binary):
             raise AnalyzerRunException("onionscan is not installed!")
         # Open a pipe to onionscan process
-        command = "%s --%s %s" % (self.onionscan_binary, "jsonReport", self.target)
+        command = f"{self.onionscan_binary} --jsonReport {self.target}"
         process = subprocess.Popen(
-            [command, self.observable_name],
+            command.split(),
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
@@ -50,5 +50,8 @@ class OnionScan(classes.ObservableAnalyzer):
         onionscan_stdout = stdout.decode("utf-8"), stderr
         onionscan_report = onionscan_stdout[0]
         # load stdout json and return to user
-        onionscan_json_report = json.loads(onionscan_report)
+        try:
+            onionscan_json_report = json.loads(onionscan_report)
+        except Exception as e:
+            raise AnalyzerRunException(f"unable to read response json. Error: {e}")
         return onionscan_json_report

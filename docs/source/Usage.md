@@ -196,6 +196,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `AbuseIPDB`: check if an ip was reported on [AbuseIPDB](https://www.abuseipdb.com/)
 * `Fortiguard`: scan an observable with the [Fortiguard URL Analyzer](https://www.fortiguard.com/webfilter)
 * `TorProject`: check if an IP is a Tor Exit Node
+* `OnionScan`: check a Tor domain for misconfigurations and info leaks.
 * `MISP`: scan an observable on a MISP instance
 * `MISPFIRST`: scan an observable on the FIRST MISP instance
 * `DNSDB`: scan an observable against the [Passive DNS Farsight Database](https://www.farsightsecurity.com/solutions/dnsdb/) (support both v1 and v2 versions)

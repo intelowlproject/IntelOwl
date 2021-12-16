@@ -38,6 +38,10 @@ git clone --depth 1 https://github.com/StrangerealIntel/DailyIOC daily_ioc_rules
 # FireEye
 git clone --depth 1 https://github.com/fireeye/red_team_tool_countermeasures fireeye_rules
 
+# ATM Malware
+git clone --depth 1 https://github.com/fboldewin/YARA-rules atm_malware_rules
+rm -fr atm_malware_rules/*.md
+
 # Yara community rules
 git clone --depth 1 https://github.com/Yara-Rules/rules.git
 community_yara_index="/opt/deploy/yara/rules/index.yar"

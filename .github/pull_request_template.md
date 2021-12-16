@@ -15,7 +15,8 @@ Please delete options that are not relevant.
 
 # Checklist
 
-- [ ] The pull request is for the branch develop
+- [ ] I have read and understood the rules about [how to Contribute](https://intelowl.readthedocs.io/en/latest/Contribute.html) to this project
+- [ ] The pull request is for the branch `develop`
 - [ ] A new analyzer or connector was added, in which case:
     - [ ] [Usage](https://github.com/intelowlproject/IntelOwl/blob/master/docs/source/Usage.md) file was updated.
     - [ ] [Advanced-Usage](./Advanced-Usage.md) was updated (in case the analyzer/connector provides additional optional configuration).
@@ -24,8 +25,7 @@ Please delete options that are not relevant.
     - [ ] If a File analyzer was added, it's name was explicitly defined in [test_file_scripts.py](https://github.com/intelowlproject/IntelOwl/blob/master/tests/analyzers_manager/test_file_scripts.py) (not required for Observable Analyzers).
 - [ ] If external libraries/packages with restrictive licenses were used, they were added in the [Legal Notice](https://github.com/certego/IntelOwl/blob/master/.github/legal_notice.md) section.
 - [ ] The tests gave 0 errors.
-- [ ] `Black` gave 0 errors.
-- [ ] `Flake` gave 0 errors.
+- [ ] Linters (`Black`, `Flake`, `Isort`) gave 0 errors. If you have correctly installed [pre-commit](https://intelowl.readthedocs.io/en/latest/Contribute.html#how-to-start-setup-project-and-development-instance), it does these checks and adjustments on your behalf.
 - [ ] The commits were squashed into a single one (optional, they will be squashed anyway by the maintainer)
   
 ### Important Rules

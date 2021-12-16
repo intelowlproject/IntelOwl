@@ -2997,7 +2997,7 @@
     "python_module": "onionscan.OnionScan",
     "description": "check a Tor .onion domain for privacy misconfigurations and info leaks.",
     "disabled": false,
-    "external_service": true,
+    "external_service": false,
     "leaks_info": false,
     "observable_supported": [
       "domain"

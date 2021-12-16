@@ -19,18 +19,18 @@ class OnionScan(classes.ObservableAnalyzer):
 
     onionscan_binary: str = "/opt/deploy/onionscan/onionscan"
     # default target protonmail website
-    target = "https://protonmailrmez3lotccipshtkleegetolb73fuirgj7r4o4vfu7ozyd.onion/"
+    target = "protonmailrmez3lotccipshtkleegetolb73fuirgj7r4o4vfu7ozyd.onion/"
 
     def set_params(self, params):
         """
         params:
-            - "target" : "target url for onionscan" (default protonmail)
+            - "target" : "target domain for onionscan" (default protonmail)
         """
         self.target = params.get("target", self.target)
 
     def run(self):
         """
-        Run Onionscan against target onion url
+        Run Onionscan against target onion domain
         """
         # Check for onionscan binary in path/pwd.
         if which("onionscan"):

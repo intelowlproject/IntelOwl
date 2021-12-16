@@ -7,6 +7,13 @@
 # Example: you may want to add a new repository. Add the clone here
 # Example: you may want to remove some of the rules available in the downloaded repositories. Remove them here.
 
+
+# Install pre-bundled Onionscan (linux-amd64)
+mkdir -p /opt/deploy/onionscan
+cp ./configuration/onionscan /opt/deploy/onionscan/ 
+chmod +x /opt/deploy/onionscan/onionscan
+
+
 cd /opt/deploy/yara
 
 # Intezer rules
@@ -82,10 +89,3 @@ wget "https://exiftool.org/Image-ExifTool-$version.tar.gz"
 gzip -dc "Image-ExifTool-$version.tar.gz" | tar -xf -
 cd "Image-ExifTool-$version"
 chown -R www-data:www-data /opt/deploy/exiftool_download
-
-
-# Download Onionscan
-mkdir -p /opt/deploy/onionscan
-cd /opt/deploy/onionscan
-wget "https://github.com/CypherpunkSamurai/onion-scan-binaries/raw/master/onionscan_linux_x64" -O onionscan
-chmod +x onionscan

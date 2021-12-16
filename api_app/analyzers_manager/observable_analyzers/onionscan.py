@@ -17,9 +17,9 @@ class OnionScan(classes.ObservableAnalyzer):
     Scans domains with onionscan for misconfigurations and leaks
     """
 
-    onionscan_binary: str = "/opt/deploy/onionscan/onionscan"
+    onionscan_binary: str = "/opt/deploy/bundled/onionscan"
     # default target protonmail website
-    target = "protonmailrmez3lotccipshtkleegetolb73fuirgj7r4o4vfu7ozyd.onion/"
+    target = "protonmailrmez3lotccipshtkleegetolb73fuirgj7r4o4vfu7ozyd.onion"
 
     def set_params(self, params):
         """

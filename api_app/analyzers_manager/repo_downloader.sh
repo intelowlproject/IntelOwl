@@ -9,9 +9,7 @@
 
 
 # Install pre-bundled Onionscan (linux-amd64)
-mkdir -p /opt/deploy/onionscan
-cp ./configuration/onionscan /opt/deploy/onionscan/ 
-chmod +x /opt/deploy/onionscan/onionscan
+chmod +x /opt/deploy/bundled/onionscan
 
 
 cd /opt/deploy/yara

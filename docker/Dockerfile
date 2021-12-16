@@ -41,6 +41,7 @@ RUN touch ${LOG_PATH}/django/api_app.log ${LOG_PATH}/django/api_app_errors.log \
     && rm -rf /root/.local
 
 # download yara rules and quark engine rules
+ADD configuration/bundled /opt/deploy/bundled
 RUN api_app/analyzers_manager/repo_downloader.sh
 
 # this is because botocore points to legacy endpoints

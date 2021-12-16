@@ -33,6 +33,7 @@ class EXEAnalyzersTestCase(_FileAnalyzersScriptsTestCase):
                 "Floss",
                 "Manalyze",
                 "MWDB_Scan",
+                "Yara_Scan_ATM_MALWARE",
                 "Yara_Scan_Community",
                 "Yara_Scan_Daily_Ioc",
                 "Yara_Scan_FireEye",
@@ -54,6 +55,7 @@ class EXEAnalyzersTestCase(_FileAnalyzersScriptsTestCase):
                 "MalwareBazaar_Get_File",
                 "OTX_Check_Hash",
                 "Dragonfly_Emulation",
+                "FileScan_Upload_File",
             ],
         }
 
@@ -142,7 +144,5 @@ class APKAnalyzersTestCase(_FileAnalyzersScriptsTestCase):
             **super().get_params(),
             "file_name": "sample.apk",
             "file_mimetype": "application/vnd.android.package-archive",
-            "analyzers_to_execute": ["APKiD_Scan_APK_DEX_JAR"],
-            # todo re-add test for quark-engine
-            # "analyzers_to_execute": ["APKiD_Scan_APK_DEX_JAR", "Quark_Engine_APK"],
+            "analyzers_to_execute": ["APKiD_Scan_APK_DEX_JAR", "Quark_Engine_APK"],
         }

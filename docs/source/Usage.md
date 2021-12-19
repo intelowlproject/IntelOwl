@@ -48,14 +48,22 @@ You can also modify analyzer specific parameters from the configuration file or 
 ```json
     "Yara_Scan_Custom_Signatures": {
         "type": "file",
-        "python_module": "yara.Yara",
+        "python_module": "yara_scan.YaraScan",
         "description": "Executes Yara with custom signatures",
+        "disabled": false,
+        "external_service": false,
+        "leaks_info": false,
+        "secrets": {},
         "config": {
-            "queue": "default",
-            "soft_time_limit": 100,
+              "queue": "default",
+              "soft_time_limit": 100
         },
         "params": {
-            "directories_with_rules": ["/opt/deploy/yara/custom_signatures"]
+              "directories_with_rules": {
+              "value": ["/opt/deploy/yara/custom_ruleset"],
+              "type": "list",
+              "description": ""
+            }
         }
     }
 ```

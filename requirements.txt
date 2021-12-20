@@ -46,3 +46,4 @@ uWSGI==2.0.19.1
 yara-python==4.1.0
 pydragonfly==0.0.3
 XLMMacroDeobfuscator==0.2.3
+xlrd2==1.3.4 

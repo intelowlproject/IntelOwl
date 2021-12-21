@@ -1,6 +1,3 @@
-"""
-This IntelOwl module adds onionscan utility support to scan tor .onion domains.
-"""
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
@@ -11,22 +8,25 @@ from shutil import which
 from api_app.analyzers_manager import classes
 from api_app.exceptions import AnalyzerRunException
 
+# celery exceptions
+from celery.exceptions import SoftTimeLimitExceeded
+
+# test mocks
+from tests.mock_utils import MockResponse, if_mock_connections, patch
+
 
 class OnionScan(classes.ObservableAnalyzer):
     """
-    Scans domains with onionscan for misconfigurations and leaks
+    check a .onion domain for privacy misconfigurations and info leaks.
     """
 
     onionscan_binary: str = "/opt/deploy/bundled/onionscan"
-    # default target protonmail website
-    target = "protonmailrmez3lotccipshtkleegetolb73fuirgj7r4o4vfu7ozyd.onion"
+    _verbose: bool = True
+    _tor_proxy_address: str = None
 
     def set_params(self, params):
-        """
-        params:
-            - "target" : "target domain for onionscan" (default protonmail)
-        """
-        self.target = params.get("target", self.target)
+        self._verbose = params.get("verbose", True)
+        self._tor_proxy_address = params.get("torProxyAddress", None)
 
     def run(self):
         """
@@ -37,21 +37,49 @@ class OnionScan(classes.ObservableAnalyzer):
             self.onionscan_binary = "onionscan"
         if not which(self.onionscan_binary):
             raise AnalyzerRunException("onionscan is not installed!")
+        # Generate the subprocess command args
+        command = [self.onionscan_binary, "--jsonReport", self.observable_name]
+        if self._verbose:
+            command.append("--verbose")
+        if self._tor_proxy_address != "":
+            command.append(f"--torProxyAddress={self._tor_proxy_address}")
         # Open a pipe to onionscan process
-        command = f"{self.onionscan_binary} --jsonReport {self.target}"
-        process = subprocess.Popen(
-            command.split(),
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-        )
-        process.wait()
-        # read std with utf-8 encoding
-        stdout, stderr = process.communicate()
-        onionscan_stdout = stdout.decode("utf-8"), stderr
-        onionscan_report = onionscan_stdout[0]
-        # load stdout json and return to user
         try:
-            onionscan_json_report = json.loads(onionscan_report)
-        except Exception as e:
-            raise AnalyzerRunException(f"unable to read response json. Error: {e}")
-        return onionscan_json_report
+            process = subprocess.Popen(
+                command,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            )
+            # read all std communication
+            outs, errs = [std.decode("utf-8") for std in process.communicate()]
+            if errs != "":
+                raise AnalyzerRunException(f"onionscan error: {str(errs)}.")
+            # load stdout json and return to user
+            onionscan_json_report = {}
+            try:
+                onionscan_json_report = json.loads(outs)
+                # return report to user
+                return onionscan_json_report
+            except Exception as e:
+                # handle json read error
+                raise AnalyzerRunException(
+                    f"unable to read response json. error: {str(e)}"
+                )
+        except subprocess.SubprocessError as exc:
+            # handle error in running subprocess
+            raise AnalyzerRunException(
+                f"error spwaning onionscan process. error: {str(exc)}"
+            )
+        except SoftTimeLimitExceeded as exc:
+            # handle celery timeout
+            self._handle_exception(exc)
+            if process:
+                process.kill()
+
+    @classmethod
+    def _monkeypatch(cls):
+        patches = [
+            patch("subprocess.Popen", returncode=0),
+            patch("subprocess.Popen.communicate", return_value=(str({"test":"ok"}),""))
+        ]
+        return super()._monkeypatch(patches=patches)

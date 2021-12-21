@@ -2992,10 +2992,10 @@
     "secrets": {},
     "params": {}
   },
-  "OnionScan": {
+  "onionscan": {
     "type": "observable",
     "python_module": "onionscan.OnionScan",
-    "description": "check a Tor .onion domain for privacy misconfigurations and info leaks.",
+    "description": "check a .onion domain for privacy misconfigurations and info leaks.",
     "disabled": false,
     "external_service": false,
     "leaks_info": false,
@@ -3007,7 +3007,18 @@
       "queue": "default"
     },
     "secrets": {},
-    "params": {}
+    "params": {
+      "verbose": {
+        "value": true,
+        "type": "bool",
+        "description": "Verbose output"
+      },
+      "torProxyAddress" : {
+        "value": "",
+        "type": "str",
+        "description": "Tor proxy address"
+      }
+    }
   },
   "Tranco": {
     "type": "observable",

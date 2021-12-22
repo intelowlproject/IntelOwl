@@ -2,6 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 
 import json
+import logging
 import subprocess
 from shutil import which
 
@@ -13,6 +14,19 @@ from api_app.exceptions import AnalyzerRunException
 
 # test mocks
 from tests.mock_utils import patch
+
+logger = logging.getLogger(__name__)
+
+
+class MockPopen(object):
+
+    def __init__(self, stdout=b'{}', stderr=b'',returncode=0):
+        self.stdout = stdout
+        self.stderr = stderr
+        self.returncode = returncode
+
+    def communicate(self):
+        return self.stdout, self.stderr
 
 
 class OnionScan(classes.ObservableAnalyzer):
@@ -55,7 +69,7 @@ class OnionScan(classes.ObservableAnalyzer):
             if errs != "":
                 raise AnalyzerRunException(f"onionscan error: {str(errs)}.")
             # load stdout json and return to user
-            onionscan_json_report = {}
+            logger.info("onionscan output: \n%s" % outs)
             try:
                 onionscan_json_report = json.loads(outs)
                 # return report to user
@@ -79,9 +93,6 @@ class OnionScan(classes.ObservableAnalyzer):
     @classmethod
     def _monkeypatch(cls):
         patches = [
-            patch("subprocess.Popen", returncode=0),
-            patch(
-                "subprocess.Popen.communicate", return_value=(str({"test": "ok"}), "")
-            ),
+            patch("subprocess.Popen", return_value=MockPopen())
         ]
         return super()._monkeypatch(patches=patches)

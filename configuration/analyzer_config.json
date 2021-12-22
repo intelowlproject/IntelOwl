@@ -2992,7 +2992,7 @@
     "secrets": {},
     "params": {}
   },
-  "onionscan": {
+  "Onionscan": {
     "type": "observable",
     "python_module": "onionscan.OnionScan",
     "description": "check a .onion domain for privacy misconfigurations and info leaks.",

@@ -5,14 +5,14 @@ import json
 import subprocess
 from shutil import which
 
-from api_app.analyzers_manager import classes
-from api_app.exceptions import AnalyzerRunException
-
 # celery exceptions
 from celery.exceptions import SoftTimeLimitExceeded
 
+from api_app.analyzers_manager import classes
+from api_app.exceptions import AnalyzerRunException
+
 # test mocks
-from tests.mock_utils import MockResponse, if_mock_connections, patch
+from tests.mock_utils import patch
 
 
 class OnionScan(classes.ObservableAnalyzer):
@@ -80,6 +80,8 @@ class OnionScan(classes.ObservableAnalyzer):
     def _monkeypatch(cls):
         patches = [
             patch("subprocess.Popen", returncode=0),
-            patch("subprocess.Popen.communicate", return_value=(str({"test":"ok"}),""))
+            patch(
+                "subprocess.Popen.communicate", return_value=(str({"test": "ok"}), "")
+            ),
         ]
         return super()._monkeypatch(patches=patches)

@@ -46,5 +46,6 @@ uWSGI==2.0.19.1
 yara-python==4.1.0
 pydragonfly==0.0.3
 XLMMacroDeobfuscator==0.2.3
-# this is required because XLMMacroDeobfuscator does not pin xlrd2
+# this is required because XLMMacroDeobfuscator does not pin xlrd2 and pyxlsb2 packages
+pyxlsb2==0.0.8
 xlrd2==1.3.4 

@@ -26,9 +26,18 @@ class Virushee(FileAnalyzer):
         binary = self.read_file_bytes()
         if not binary:
             raise AnalyzerRunException("File is empty")
+        hash_exist = self.is_hash_avaliable()
         task_id = self.__upload_file(binary)
         result = self.__poll_status(task_id)
         return result
+
+    def is_hash_avaliable(self) -> bool:
+        api_endpoint = f"file/hash/{self.md5}"
+        api_url = self.request_url + api_endpoint
+        response = self.session.get(api_url)
+        if response.status_code == 200:
+            return True
+        return False
 
     def __upload_file(self, binary) -> str:
         name_to_send = self.filename if self.filename else self.md5

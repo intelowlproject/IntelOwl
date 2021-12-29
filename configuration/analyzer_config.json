@@ -3253,7 +3253,7 @@
     "description": "Scan a File using VirusHee API",
     "disabled": false,
     "external_service": true,
-    "leaks_info": false,
+    "leaks_info": true,
     "config": {
       "soft_time_limit": 180,
       "queue": "long"

@@ -2,6 +2,28 @@
 
 [**Upgrade Guide**](https://intelowl.readthedocs.io/en/latest/Installation.html#update-to-the-most-recent-version)
 
+## [v3.2.3](https://github.com/intelowlproject/IntelOwl/releases/tag/v3.2.3)
+
+**New Analyzers:**
+
+- `Mnemonic_PassiveDNS`: Look up a domain or IP using the [Mnemonic PassiveDNS public API](https://docs.mnemonic.no/display/public/API/Passive+DNS+Overview).
+- `FileScan_Search`: Finds reports and uploaded files by various tokens, like hash, filename, verdict, IOCs etc via [FileScan.io API](https://www.filescan.io/api/docs)
+- `FileScan_Upload_File`: Upload your file to extract IoCs from executable files, documents and scripts via [FileScan.io API](https://www.filescan.io/api/docs)
+- `Yara_Scan_ATM_MALWARE`: analyze your files with the rules from this [repo](https://github.com/fboldewin/YARA-rules)
+
+**Fixes & Improvements:**
+
+- `HashLookupServer_*` analyzers now correctly support sha256 hashes
+- added IP addresses support to `URLhaus` analyzer
+- fixed `VirusTotal` analyzers to reduce quota consumption
+- fixed `Dragonfly_Emulation` and `Quark_Engine_APK` analyzer
+- updated `dnstwist`, `XLMMacroDeobfuscator` and other dependencies upgrades
+- adjustments in the PR template
+
+**For IntelOwl Contributors**
+
+We updated the documentation on how to [Contribute](https://intelowl.readthedocs.io/en/latest/Contribute.html#rules). Please read through them if interested in contributing in the project.
+
 ## [v3.2.2](https://github.com/intelowlproject/IntelOwl/releases/tag/v3.2.2)
 
 **Notes:**

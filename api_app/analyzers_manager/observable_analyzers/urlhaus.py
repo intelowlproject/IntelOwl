@@ -13,7 +13,10 @@ class URLHaus(classes.ObservableAnalyzer):
 
     def run(self):
         headers = {"Accept": "application/json"}
-        if self.observable_classification == self.ObservableTypes.DOMAIN:
+        if self.observable_classification in [
+            self.ObservableTypes.DOMAIN,
+            self.ObservableTypes.IP,
+        ]:
             uri = "host/"
             post_data = {"host": self.observable_name}
         elif self.observable_classification == self.ObservableTypes.URL:
@@ -22,7 +25,6 @@ class URLHaus(classes.ObservableAnalyzer):
         else:
             raise AnalyzerRunException(
                 f"not supported observable type {self.observable_classification}."
-                f" Supported are: domain and url."
             )
 
         try:

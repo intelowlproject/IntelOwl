@@ -4,7 +4,7 @@ django-celery-results==2.2.0
 checkdmarc==4.4.1
 darksearch==2.1.2
 dataclasses==0.6
-Django==3.2.5
+Django==3.2.10
 django-auth-ldap==3.0.0
 django-rest-durin==0.3.0
 django-cache-memoize==0.1.9
@@ -13,7 +13,7 @@ drf-flex-fields==0.9.1
 djangorestframework-guardian==0.3.0
 django-storages==1.12.1
 dnspython==2.1.0
-dnstwist==20201228
+dnstwist==20211204
 ppdeep>=20200505
 drf-spectacular==0.21.0
 easygui==0.98.2
@@ -33,7 +33,7 @@ psycopg2-binary==2.9.1
 pycti==5.0.1
 pydeep==0.4
 PyExifTool==0.4.9
-pyhashlookup==0.9
+pyhashlookup==1.1.1
 pymisp==2.4.144
 pypdns==1.5.2
 pypssl==2.2
@@ -45,4 +45,4 @@ speakeasy-emulator==1.5.9
 uWSGI==2.0.19.1
 yara-python==4.1.0
 pydragonfly==0.0.3
-XLMMacroDeobfuscator==0.2.0
+XLMMacroDeobfuscator==0.2.3

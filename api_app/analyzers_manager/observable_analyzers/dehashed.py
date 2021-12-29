@@ -24,7 +24,7 @@ class DehashedSearch(ObservableAnalyzer):
     base_url: str = "https://api.dehashed.com/"
 
     def set_params(self, params):
-        self.size = params.get("size", 100)
+        self.size = params.get("size", 1000)
         self.pages = params.get("pages", 1)
 
     def run(self):
@@ -73,7 +73,7 @@ class DehashedSearch(ObservableAnalyzer):
             {
                 "Accept": "application/json",
                 "Authorization": f"Basic {auth_b64}",
-                "User-Agent": "IntelOwl v2",
+                "User-Agent": "IntelOwl",
             }
         )
         url = f"{self.base_url}search?query={value}&size={self.size}"

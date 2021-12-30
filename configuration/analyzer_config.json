@@ -3259,7 +3259,13 @@
       "queue": "long"
     },
     "secrets": {},
-    "params": {}
+    "params": {
+      "force_scan": {
+        "value": false,
+        "type": "bool",
+        "description": "Force a scan even if the file hash already exists."
+      }
+    }
   },
   "VirusTotal_v2_Scan_File": {
     "type": "file",

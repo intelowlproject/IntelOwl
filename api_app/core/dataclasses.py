@@ -89,7 +89,7 @@ class AbstractConfig:
         if secrets_filter is None:
             secrets_filter = []
         secrets = {}
-        if len(secrets_filter):
+        if secrets_filter:
             _filtered_secrets = {
                 key_name: self.secrets[key_name]
                 for key_name in self.secrets.keys()

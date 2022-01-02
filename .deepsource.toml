@@ -24,3 +24,8 @@ enabled = true
 [[transformers]]
 name = "isort"
 enabled = true
+
+test_patterns = [
+  "tests/**",
+  "test_*.py"
+]

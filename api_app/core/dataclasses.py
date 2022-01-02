@@ -87,7 +87,7 @@ class AbstractConfig:
         filter_secrets: filter specific secrets or not (default: return all)
         """
         secrets = {}
-        if len(secrets_filter):
+        if secrets_filter:
             _filtered_secrets = {
                 key_name: self.secrets[key_name]
                 for key_name in self.secrets.keys()

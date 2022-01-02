@@ -66,6 +66,6 @@ class Floss(FileAnalyzer, DockerBasedAnalyzer):
                     len(result.get("strings", {}).get(key, []))
                     > self.max_no_of_strings[key]
                 ):
-                    result["strings"][key] = [s for s in result["strings"][key]]
+                    result["strings"][key] = list(result["strings"][key])
                     result["exceeded_max_number_of_strings"][key] = True
         return result

@@ -151,7 +151,7 @@ def start():
             compose_files.append(path_mapping[key + test_appendix])
     if args.all_analyzers:
         compose_files.extend(
-            [analyzer for analyzer in path_mapping[f"all_analyzers{test_appendix}"]]
+            list(path_mapping[f"all_analyzers{test_appendix}"])
         )
     # construct final command
     base_command = [

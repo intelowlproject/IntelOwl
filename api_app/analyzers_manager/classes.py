@@ -327,7 +327,8 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
             self._raise_container_not_running()
 
         # step #2: raise AnalyzerRunException in case of error
-        assert self.__raise_in_case_bad_request(self.name, resp1)
+        if not self.__raise_in_case_bad_request(self.name, resp1):
+            raise AssertionError
 
         # step #3: if no error, continue and try to fetch result
         key = resp1.json().get("key")
@@ -366,7 +367,8 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
             self._raise_container_not_running()
 
         # step #2: raise AnalyzerRunException in case of error
-        assert self.__raise_in_case_bad_request(self.name, resp, params_to_check=[])
+        if not self.__raise_in_case_bad_request(self.name, resp, params_to_check=[]):
+            raise AssertionError
         return resp
 
     def _monkeypatch(self, patches: list = None):

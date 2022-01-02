@@ -12,4 +12,15 @@ name = "docker"
 enabled = true
 
   [analyzers.meta]
-  dockerfile_paths = ["docker/Dockerfile*"]
+  dockerfile_paths = [
+    "docker/Dockerfile",
+    "docker/Dockerfile_nginx"
+  ]
+
+[[transformers]]
+name = "black"
+enabled = true
+
+[[transformers]]
+name = "isort"
+enabled = true

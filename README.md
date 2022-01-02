@@ -12,6 +12,7 @@
 [![Imports: isort](https://img.shields.io/badge/%20imports-isort-%231674b1?style=flat&labelColor=ef8336)](https://pycqa.github.io/isort/)
 [![Build & Tests](https://github.com/intelowlproject/IntelOwl/workflows/Build%20&%20Tests/badge.svg)](https://github.com/intelowlproject/IntelOwl/actions)
 [![codecov](https://codecov.io/gh/intelowlproject/IntelOwl/branch/master/graph/badge.svg?token=R097M4TYA6)](https://codecov.io/gh/intelowlproject/IntelOwl)
+[![DeepSource](https://deepsource.io/gh/intelowlproject/IntelOwl.svg/?label=resolved+issues&show_trend=true&token=BSvKHrnk875Y0Bykb79GNo8w)](https://deepsource.io/gh/intelowlproject/IntelOwl/?ref=repository-badge)
 # Intel Owl
 
 Do you want to get **threat intelligence data** about a malware, an IP or a domain? Do you want to get this kind of data from multiple sources at the same time using **a single API request**?

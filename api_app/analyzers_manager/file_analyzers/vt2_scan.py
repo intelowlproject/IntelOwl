@@ -76,7 +76,7 @@ class VirusTotalv2ScanFile(classes.FileAnalyzer):
             # response code -2 means the we still have to wait
             if response_code == -2:
                 continue
-            elif response_code == 1:
+            if response_code == 1:
                 logger.info(
                     f"vt2 polling result retrievd correctly for job_id #{self.job_id}"
                 )

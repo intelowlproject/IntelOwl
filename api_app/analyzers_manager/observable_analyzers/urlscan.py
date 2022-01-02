@@ -72,9 +72,8 @@ class UrlScan(ObservableAnalyzer):
             resp = self.session.get(url)
             if resp.status_code == 404:
                 continue
-            else:
-                result = resp.json()
-                break
+            result = resp.json()
+            break
         return result
 
     def __urlscan_search(self):

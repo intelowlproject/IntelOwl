@@ -70,9 +70,8 @@ class CuckooAnalysis(FileAnalyzer):
                 )
                 time.sleep(5)
                 continue
-            else:
-                post_success = True
-                break
+            post_success = True
+            break
 
         if post_success:
             json_response = response.json()

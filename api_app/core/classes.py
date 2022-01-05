@@ -151,10 +151,12 @@ class Plugin(metaclass=ABCMeta):
         self.report.status = self.report.Status.FAILED
 
     @classmethod
-    def _monkeypatch(cls, patches: list = []) -> None:
+    def _monkeypatch(cls, patches: list = None) -> None:
         """
         Hook to monkey-patch class for testing purposes.
         """
+        if patches is None:
+            patches = []
         for mock_fn in patches:
             cls.start = mock_fn(cls.start)
 

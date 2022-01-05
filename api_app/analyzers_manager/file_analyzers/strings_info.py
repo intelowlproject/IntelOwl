@@ -39,7 +39,7 @@ class StringsInfo(FileAnalyzer, DockerBasedAnalyzer):
         result = self._docker_run(req_data, req_files)
         exceed_max_strings = len(result) > self.max_no_of_strings
         if exceed_max_strings:
-            result = [s for s in result[: self.max_no_of_strings]]
+            result = list(result[: self.max_no_of_strings])
         if self.rank_strings:
             args = [
                 "rank_strings",

@@ -29,10 +29,7 @@ class AbuseIPDB(ObservableAnalyzer):
         for report in reports:
             report["categories_human_readable"] = []
             for category in report.get("categories", []):
-                if category in mapping:
-                    category_human_readable = mapping[category]
-                else:
-                    category_human_readable = "unknown category"
+                category_human_readable = mapping.get(category, "unknown category")
                 report["categories_human_readable"].append(category_human_readable)
 
         result["permalink"] = f"https://www.abuseipdb.com/check/{self.observable_name}"

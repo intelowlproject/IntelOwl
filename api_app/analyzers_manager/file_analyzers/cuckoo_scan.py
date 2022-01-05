@@ -70,9 +70,8 @@ class CuckooAnalysis(FileAnalyzer):
                 )
                 time.sleep(5)
                 continue
-            else:
-                post_success = True
-                break
+            post_success = True
+            break
 
         if post_success:
             json_response = response.json()
@@ -191,9 +190,7 @@ class CuckooAnalysis(FileAnalyzer):
         list_potentially_malicious_urls = list(set(list_potentially_malicious_urls))
 
         # get suricata alerts if available
-        suricata_alerts = [
-            alert for alert in json_response.get("suricata", {}).get("alerts", [])
-        ]
+        suricata_alerts = list(json_response.get("suricata", {}).get("alerts", []))
 
         # get network data
         network_data = json_response.get("network", {})
@@ -233,7 +230,7 @@ class CuckooAnalysis(FileAnalyzer):
         anomaly = behavior.get("anomaly", {})
         debug = json_response.get("debug", {})
         file_data = json_response.get("target", {}).get("file", {})
-        file_type = "".join([f_type for f_type in file_data.get("type", "")])
+        file_type = "".join(list(file_data.get("type", "")))
         yara = [yara_match["name"] for yara_match in file_data.get("yara", [])]
 
         result = {

@@ -26,29 +26,23 @@ class Virushee(FileAnalyzer):
         binary = self.read_file_bytes()
         if not binary:
             raise AnalyzerRunException("File is empty")
-        logger.info(f"FORCEE SCAN VAR: {self.to_force_scan}")
-        if self.to_force_scan:
-            task_id = self.__upload_file(binary)
-            result = self.__poll_status(task_id)
-            return result
-        hash_exist = self.is_hash_avaliable()
-        if hash_exist:
-            return hash_exist
+        if not self.to_force_scan:
+            hash_result = self.__check_report_for_hash()
+            if hash_result:
+                return hash_result
         task_id = self.__upload_file(binary)
         result = self.__poll_status(task_id)
         return result
 
-    def is_hash_avaliable(self):
-        logger.info(f"CECKING IF HASH AVB")
+    def __check_report_for_hash(self):
         api_url = f"{self.request_url}file/hash/{self.md5}"
-        response = self.session.get(api_url)
-        if response.status_code == 200:
-            json_response = response.json()
-            return json_response
-        return False
+        try:
+            response = requests.get(api_url)
+            response.raise_for_status()
+        except:
+            return None
 
     def __upload_file(self, binary) -> str:
-        logger.info(f"UPLOADING FILE FOR ANALYSIS")
         name_to_send = self.filename if self.filename else self.md5
         files = {"file": (name_to_send, binary)}
         upload_url = self.request_url + "file/upload"
@@ -64,14 +58,18 @@ class Virushee(FileAnalyzer):
             logger.info(f"Polling #try{chance+1}")
             time.sleep(self.poll_distance)
             request_url = self.request_url + "file/task/" + task_id
+            try:
+                response = self.session.get(request_url)
+                response.raise_for_status()
+            except:
+                continue
             response = self.session.get(request_url)
-            json_response = response.json()
             if response.status_code == 422:
                 raise AnalyzerRunException(
                     "Virushee API returned an error: " + response.text
                 )
             if response.status_code == 200:
-                return json_response
+                return response.json()
 
     @classmethod
     def _monkeypatch(cls):

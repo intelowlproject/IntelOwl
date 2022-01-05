@@ -3247,10 +3247,10 @@
     },
     "params": {}
   },
-  "Virushee_File_Scan":{
+  "Virushee_UploadFile":{
     "type": "file",
     "python_module": "virushee.Virushee",
-    "description": "Scan a File using VirusHee API",
+    "description": "Check file hash and upload file sample for analysis. [Virushee API](https://api.virushee.com/).",
     "disabled": false,
     "external_service": true,
     "leaks_info": true,
@@ -3263,7 +3263,7 @@
       "force_scan": {
         "value": false,
         "type": "bool",
-        "description": "Force a scan even if the file hash already exists."
+        "description": "If true, always upload file for analysis skipping the hash check."
       }
     }
   },

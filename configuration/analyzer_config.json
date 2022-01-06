@@ -3255,7 +3255,7 @@
     "external_service": true,
     "leaks_info": true,
     "config": {
-      "soft_time_limit": 180,
+      "soft_time_limit": 300,
       "queue": "long"
     },
     "secrets": {},

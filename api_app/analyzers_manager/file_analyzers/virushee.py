@@ -5,7 +5,7 @@ import logging
 import time
 
 import requests
-
+from typing import Optional
 from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.exceptions import AnalyzerRunException
 from tests.mock_utils import MockResponse, if_mock_connections, patch
@@ -34,12 +34,12 @@ class Virushee(FileAnalyzer):
         result = self.__poll_status(task_id)
         return result
 
-    def __check_report_for_hash(self):
+    def __check_report_for_hash(self) -> Optional[dict]:
         api_url = f"{self.request_url}file/hash/{self.md5}"
         try:
             response = requests.get(api_url)
             response.raise_for_status()
-        except:
+        except requests.RequestException:
             return None
 
     def __upload_file(self, binary) -> str:
@@ -54,22 +54,19 @@ class Virushee(FileAnalyzer):
         return response.json()["task"]
 
     def __poll_status(self, task_id: str) -> dict:
-        for chance in range(self.max_tries):
+        request_url = f"{self.request_url}file/task/{task_id}"
+        chance = 0
+        while True:
             logger.info(f"Polling #try{chance+1}")
             time.sleep(self.poll_distance)
-            request_url = self.request_url + "file/task/" + task_id
             try:
                 response = self.session.get(request_url)
                 response.raise_for_status()
-            except:
+            except requests.RequestException as exc:
+                raise AnalyzerRunException(exc)
+            if response.status_code == 202:
                 continue
-            response = self.session.get(request_url)
-            if response.status_code == 422:
-                raise AnalyzerRunException(
-                    "Virushee API returned an error: " + response.text
-                )
-            if response.status_code == 200:
-                return response.json()
+            return response.json()
 
     @classmethod
     def _monkeypatch(cls):
@@ -84,6 +81,10 @@ class Virushee(FileAnalyzer):
                     return_value=MockResponse(
                         {"task": "80ca33ee-2df2-489a-9444-886db9abc5f0"}, 201
                     ),
+                ),
+                patch(
+                    "requests.Session.get",
+                    return_value=MockResponse({"message": "hash_found"}, 200),
                 ),
             )
         ]

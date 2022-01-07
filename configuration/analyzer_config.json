@@ -258,7 +258,7 @@
     "secrets": {},
     "params": {}
   },
-  "CapeSanbox" : {
+  "CapeSandbox" : {
     "type" : "file",
     "python_module" : "cape_sandbox.CAPEsandbox",
     "description" : "Automatic scan of suspicious files using CapeSandbox API",

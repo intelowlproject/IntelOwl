@@ -258,6 +258,34 @@
     "secrets": {},
     "params": {}
   },
+  "CapeSanbox" : {
+    "type" : "file",
+    "python_module" : "cape_sandbox.CAPEsandbox",
+    "description" : "Automatic scan of suspicious files using CapeSandbox API",
+    "disabled" : false,
+    "external_service" : false,
+    "leaks_info" : true,
+    "docker_based" : false,
+    "config" : {
+      "soft_time_limit" : 500,
+      "queue" : "long"
+    },
+    "secrets" : {
+      "token" : {
+        "env_var_key" : "CAPESANDBOX_KEY",
+        "description" : "",
+        "required" : true
+      }
+    },
+    "params" : {
+      "VM_NAME" : {
+        "value": "win7x64_8",
+        "type": "str",
+        "description": "The VM to be used in the analysis."
+      }
+    }
+    
+  },
   "Censys_Search": {
     "type": "observable",
     "python_module": "censys.Censys",

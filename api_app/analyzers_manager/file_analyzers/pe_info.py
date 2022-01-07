@@ -7,9 +7,13 @@
 # forked repository: https://github.com/mlodic/pefile
 
 import logging
+import os
 from datetime import datetime
 
+import lief
 import pefile
+import pyimpfuzzy
+from PIL import Image
 
 from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.exceptions import AnalyzerRunException
@@ -31,11 +35,9 @@ class WinPEhasher:
         Return Dhashicon of the exe
         """
         try:
-            import os
-
-            import lief
-            from PIL import Image
-
+            # this code was implemented from
+            # https://github.com/fr0gger/SuperPeHasher/commit/e9b753bf52d4e48dda2da0b7801075be4037a161#diff-2bb2d2d4d25fef20a893a4e93e96c9b8c0b0c6d5791fc14594cc9dd5cbf40b41
+            #
             # config
             hash_size = 8
             # extract icon
@@ -65,8 +67,6 @@ class WinPEhasher:
                     decimal_value = 0
             os.remove(icon_path)
             return "".join(icon_hash)
-        except ImportError:
-            raise ImportError("please run pip -r requirements.txt")
         except Exception as e:
             raise AnalyzerRunException(f"pe_info:winpe_hasher gave errors. {str(e)}")
 
@@ -75,12 +75,11 @@ class WinPEhasher:
         Calculate impfuzzy hash and return
         """
         try:
-            import pyimpfuzzy
-
+            # this code was implemented from
+            # https://github.com/JPCERTCC/impfuzzy
+            #
             impfuzzyhash = pyimpfuzzy.get_impfuzzy(self.file_path)
             return str(impfuzzyhash)
-        except ImportError:
-            raise ImportError("please run pip -r requirements.txt")
         except Exception as e:
             raise AnalyzerRunException(f"pe_info:winpe_hasher gave errors. {str(e)}")
 

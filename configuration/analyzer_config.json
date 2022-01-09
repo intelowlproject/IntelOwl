@@ -263,7 +263,7 @@
     "python_module" : "cape_sandbox.CAPEsandbox",
     "description" : "Automatic scan of suspicious files using CapeSandbox API",
     "disabled" : false,
-    "external_service" : false,
+    "external_service" : true,
     "leaks_info" : true,
     "docker_based" : false,
     "config" : {
@@ -275,8 +275,13 @@
         "env_var_key" : "CAPESANDBOX_KEY",
         "description" : "",
         "required" : true
-      }
-    },
+      },
+    "url_key_name": {
+      "env_var_key": "CAPESANDBOX_URL",
+      "description": "URL for the CapeSandbox instance. If none provided, It uses the API provided by CAPESandbox by default.",
+      "required": true
+    }
+  },
     "params" : {
       "VM_NAME" : {
         "value": "win7x64_8",

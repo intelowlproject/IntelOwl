@@ -92,7 +92,7 @@ class CAPEsandbox(FileAnalyzer):
             responded_json = r.json()
             error = responded_json.get("error")
             data = responded_json.get("data")
-            if not error and (data == "reported" or data == "completed"):
+            if not error and (data in ("reported", "completed")):
                 report_url = (
                     self.BASE_URL
                     + "/apiv2/tasks/get/report/"

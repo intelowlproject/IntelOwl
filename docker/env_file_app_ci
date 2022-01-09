@@ -89,7 +89,7 @@ TEST_MD5=446c5fbb11b9ce058450555c1c27153c
 TEST_GENERIC=email@example.com
 
 # URLs
-CAPESANDBOX_URL=http://fake_url.com
+CAPESANDBOX_URL=https://www.capesandbox.com
 CUCKOO_URL=http://fake_url.com
 MISP_URL=http://fake_url.com
 FIRST_MISP_URL=http://fake_url.com

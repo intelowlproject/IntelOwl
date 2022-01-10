@@ -124,6 +124,10 @@ class CAPEsandbox(FileAnalyzer):
                     "requests.get",
                     return_value=MockResponse({}, 200),
                 ),
+                patch(
+                    "requests.post",
+                    return_value=MockResponse({}, 200),
+                ),
             )
         ]
         return super()._monkeypatch(patches=patches)

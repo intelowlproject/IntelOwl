@@ -3,9 +3,10 @@
 
 import logging
 import time
+from typing import Optional
 
 import requests
-from typing import Optional
+
 from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.exceptions import AnalyzerRunException
 from tests.mock_utils import MockResponse, if_mock_connections, patch

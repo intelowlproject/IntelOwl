@@ -12,6 +12,7 @@ from tests.mock_utils import MockResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
+
 class Virushee(FileAnalyzer):
     """Analyze a file against Virushee API"""
 
@@ -88,8 +89,10 @@ class Virushee(FileAnalyzer):
                 ),
                 patch(
                     "requests.Session.get",
-                    return_value=MockResponse({"message":"invalid_analysis_task"}, 404),
-                )
+                    return_value=MockResponse(
+                        {"message": "invalid_analysis_task"}, 404
+                    ),
+                ),
             )
         ]
         return super()._monkeypatch(patches=patches)

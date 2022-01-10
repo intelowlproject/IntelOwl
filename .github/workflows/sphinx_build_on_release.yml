@@ -1,6 +1,6 @@
 name: Sphinx Build on Release
 
-on: release
+on: push
 
 jobs:
   build:
@@ -16,11 +16,6 @@ jobs:
       - name: Install docs requirements
         run: |
           pip install -r docs/source/requirements.txt
-
-      # Why do we have to do this?
-      - name: Install additional requirements
-        run: |
-          pip install recommonmark
 
       - name: Build docs
         run: |

@@ -48,7 +48,7 @@ class _AbstractAnalyzersScriptTestCase(TransactionTestCase):
             _FileAnalyzersScriptsTestCase,
         ]:
             raise SkipTest(f"{cls.__name__} is an abstract base class.")
-        return super(_AbstractAnalyzersScriptTestCase, cls).setUpClass()
+        return super().setUpClass()
 
     def setUp(self):
         analyzers_to_test = os.environ.get("TEST_ANALYZERS", "").split(",")

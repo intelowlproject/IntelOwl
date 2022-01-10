@@ -84,8 +84,12 @@ class Virushee(FileAnalyzer):
                 ),
                 patch(
                     "requests.Session.get",
-                    return_value=MockResponse({"message": "hash_found"}, 200),
+                    return_value=MockResponse({"message": "analysis_in_progress"}, 202),
                 ),
+                patch(
+                    "requests.Session.get",
+                    return_value=MockResponse({"message":"invalid_analysis_task"}, 404),
+                )
             )
         ]
         return super()._monkeypatch(patches=patches)

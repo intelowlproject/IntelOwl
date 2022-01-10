@@ -122,11 +122,23 @@ class CAPEsandbox(FileAnalyzer):
             if_mock_connections(
                 patch(
                     "requests.get",
-                    return_value=MockResponse({}, 200),
+                    return_value=MockResponse(
+                        {"error": False, "data": "completed"}, 200
+                    ),
                 ),
                 patch(
                     "requests.post",
-                    return_value=MockResponse({}, 200),
+                    return_value=MockResponse(
+                        {
+                            "error": False,
+                            "data": {
+                                "task_ids": [1234],
+                            },
+                            "errors": [],
+                            "url": ["http://fake_url.com/submit/status/1234/"],
+                        },
+                        200,
+                    ),
                 ),
             )
         ]

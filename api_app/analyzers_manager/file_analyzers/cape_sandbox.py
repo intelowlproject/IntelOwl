@@ -74,7 +74,7 @@ class CAPEsandbox(FileAnalyzer):
 
             return self.to_respond
 
-        raise response_json
+        return response_json
 
     def __poll_for_result(
         self,

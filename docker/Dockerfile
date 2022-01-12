@@ -7,6 +7,8 @@ ENV LOG_PATH /var/log/intel_owl
 ENV ELASTICSEARCH_DSL_VERSION 7.2.0
 ENV watch_logs_cmd "watch -n1 tail -n10 /var/log/intel_owl/django/api_app.log"
 
+ARG DEVELOPMENT=false
+
 RUN mkdir -p ${LOG_PATH} \
     ${LOG_PATH}/django \
     ${LOG_PATH}/uwsgi \
@@ -40,8 +42,9 @@ RUN touch ${LOG_PATH}/django/api_app.log ${LOG_PATH}/django/api_app_errors.log \
     # this is cause stringstifer creates this directory during the build and cause celery to crash
     && rm -rf /root/.local
 
-# download yara rules and quark engine rules
-RUN api_app/analyzers_manager/repo_downloader.sh
+# download yara rules and quark engine rules if not in development mode
+RUN if [ $DEVELOPMENT = "true" ]; then echo "Skipping repo_downloader.sh in DEVELOPMENT mode"; \
+    else api_app/analyzers_manager/repo_downloader.sh; fi
 
 # this is because botocore points to legacy endpoints
 # more info: https://stackoverflow.com/questions/41062055/celery-4-0-0-amazon-sqs-credential-should-be-scoped-to-a-valid-region-not

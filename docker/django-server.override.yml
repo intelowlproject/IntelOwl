@@ -5,6 +5,8 @@ services:
     build:
       context: ..
       dockerfile: docker/Dockerfile
+      args:
+        DEVELOPMENT: true
     volumes:
       - ../:/opt/deploy/intel_owl
     environment:

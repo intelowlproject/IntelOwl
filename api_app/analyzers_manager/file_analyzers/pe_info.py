@@ -42,15 +42,21 @@ class WinPEhasher:
             hash_size = 8
             # extract icon
             icon_path = self.file_path + ".ico"
-            binary = lief.parse(self.file_path).resources_manager
-            ico = binary.icons[0]
-            ico.save(icon_path)
+            binary = lief.parse(self.file_path)
+            if binary is None:
+                # Invalid PE file
+                return "PE_Info.WinPEhasher.dhashicon:invalid_pe_file"
+            # extracting icon and saves in a temp file
+            binres = binary.resources_manager
+            if not binres.has_type(lief.PE.RESOURCE_TYPES.ICON):
+                return "PE_Info.WinPEhasher.dhashicon:no_icon_res"
+            ico = binres.icons
+            ico[0].save(icon_path)
             # resize
             exe_icon = Image.open(icon_path)
             exe_icon = exe_icon.convert("L").resize(
                 (hash_size + 1, hash_size), Image.ANTIALIAS
             )
-            # diff and hash
             diff = []
             for row in range(hash_size):
                 for col in range(hash_size):
@@ -63,12 +69,14 @@ class WinPEhasher:
                 if value:
                     decimal_value += 2 ** (index % 8)
                 if (index % 8) == 7:
-                    icon_hash.append(hex(decimal_value))[2:].rjust(2, "0")
+                    icon_hash.append(hex(decimal_value)[2:].rjust(2, "0"))
                     decimal_value = 0
             os.remove(icon_path)
             return "".join(icon_hash)
         except Exception as e:
-            raise AnalyzerRunException(f"pe_info:winpe_hasher gave errors. {str(e)}")
+            raise AnalyzerRunException(
+                f"pe_info.winpe_hasher.dhashicon gave errors. {str(e)}"
+            )
 
     def impfuzzy(self):
         """
@@ -80,8 +88,12 @@ class WinPEhasher:
             #
             impfuzzyhash = pyimpfuzzy.get_impfuzzy(self.file_path)
             return str(impfuzzyhash)
+        except pyimpfuzzy.pefile.PEFormatError:
+            return "PE_Info.WinPEhasher.impfuzzy:invalid_nt_headers"
         except Exception as e:
-            raise AnalyzerRunException(f"pe_info:winpe_hasher gave errors. {str(e)}")
+            raise AnalyzerRunException(
+                f"pe_info.winpe_hasher.impfuzzy gave errors. {str(e)}"
+            )
 
 
 class PEInfo(FileAnalyzer):

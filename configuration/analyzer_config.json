@@ -2992,6 +2992,35 @@
     "secrets": {},
     "params": {}
   },
+  "Onionscan": {
+    "type": "observable",
+    "python_module": "onionscan.Onionscan",
+    "description": "Scans TOR .onion domains for privacy leaks and information disclosures.",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
+    "docker_based": true,
+    "observable_supported": [
+      "domain"
+    ],
+    "config": {
+      "soft_time_limit": 1600,
+      "queue": "default"
+    },
+    "secrets": {},
+    "params": {
+      "verbose": {
+        "value": true,
+        "type": "bool",
+        "description": "Verbose output"
+      },
+      "torProxyAddress" : {
+        "value": "",
+        "type": "str",
+        "description": "Tor proxy address"
+      }
+    }
+  },
   "Tranco": {
     "type": "observable",
     "python_module": "tranco.Tranco",

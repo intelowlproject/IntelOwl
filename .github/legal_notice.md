@@ -44,4 +44,5 @@ license terms.
 [Renderton](https://github.com/GoogleChrome/rendertron/blob/main/LICENSE)
 [PyCTI](https://github.com/OpenCTI-Platform/client-python/blob/master/LICENSE),
 [PyHashlookup](https://github.com/CIRCL/PyHashlookup),
-[PyPDNS](https://github.com/CIRCL/PyPDNS)
+[PyPDNS](https://github.com/CIRCL/PyPDNS),
+[Onionscan](https://github.com/s-rah/onionscan)

@@ -7,6 +7,7 @@ import subprocess
 docker_analyzers = [
     "thug",
     "apk_analyzers",
+    "tor_analyzers",
     "box_js",
     "rendertron",
     "static_analyzers",

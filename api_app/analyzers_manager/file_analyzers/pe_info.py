@@ -24,11 +24,12 @@ logger = logging.getLogger(__name__)
 class WinPEhasher:
     file_path: str
 
-    def __init__(self, file_path: str) -> None:
+    def __init__(self, file_path: str, parent=None) -> None:
         """
         Init a WinPE instance and load the exe file
         """
         self.file_path = file_path
+        self.parent = parent
 
     def dhashicon(self) -> str:
         """
@@ -45,11 +46,14 @@ class WinPEhasher:
             binary = lief.parse(self.file_path)
             if binary is None:
                 # Invalid PE file
-                return "PE_Info.WinPEhasher.dhashicon:invalid_pe_file"
+                self._warn_error("PE_Info.WinPEhasher.dhashicon: invalid_nt_file")
+                return ""
             # extracting icon and saves in a temp file
             binres = binary.resources_manager
             if not binres.has_type(lief.PE.RESOURCE_TYPES.ICON):
-                return "PE_Info.WinPEhasher.dhashicon:no_icon_res"
+                # no icon resources in file
+                self._warn_error("PE_Info.WinPEhasher.dhashicon: no_icon_res")
+                return ""
             ico = binres.icons
             ico[0].save(icon_path)
             # resize
@@ -89,11 +93,16 @@ class WinPEhasher:
             impfuzzyhash = pyimpfuzzy.get_impfuzzy(self.file_path)
             return str(impfuzzyhash)
         except pyimpfuzzy.pefile.PEFormatError:
-            return "PE_Info.WinPEhasher.impfuzzy:invalid_nt_headers"
+            self._warn_error("PE_Info.WinPEhasher.impfuzzy: invalid_nt_headers")
         except Exception as e:
             raise AnalyzerRunException(
                 f"pe_info.winpe_hasher.impfuzzy gave errors. {str(e)}"
             )
+
+    def _warn_error(self, warning_message):
+        logger.warning(warning_message)
+        if self.parent:
+            self.parent.report.errors.append(warning_message)
 
 
 class PEInfo(FileAnalyzer):
@@ -151,7 +160,7 @@ class PEInfo(FileAnalyzer):
                 pe.OPTIONAL_HEADER.MinorOperatingSystemVersion,
             )
 
-            winpe_hasher = WinPEhasher(self.filepath)
+            winpe_hasher = WinPEhasher(self.filepath, self)
             results["dhashicon_hash"] = winpe_hasher.dhashicon()
             results["impfuzzy_hash"] = winpe_hasher.impfuzzy()
 

@@ -39,6 +39,7 @@ pypdns==1.5.2
 pypssl==2.2
 pysafebrowsing==0.1.1
 PySocks==1.7.1
+python-dotenv==0.19.2
 quark-engine==22.1.1
 requests==2.26.0
 speakeasy-emulator==1.5.9
@@ -48,4 +49,4 @@ pydragonfly==0.0.3
 XLMMacroDeobfuscator==0.2.3
 # this is required because XLMMacroDeobfuscator does not pin xlrd2 and pyxlsb2 packages
 pyxlsb2==0.0.8
-xlrd2==1.3.4 
+xlrd2==1.3.4

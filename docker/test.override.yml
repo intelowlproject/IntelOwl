@@ -6,7 +6,7 @@ services:
       context: ..
       dockerfile: docker/Dockerfile
       args:
-        DEVELOPMENT: true
+        REPO_DOWNLOADER_ENABLED: ${REPO_DOWNLOADER_ENABLED}
     image: intelowlproject/intelowl:test
     volumes:
       - ../:/opt/deploy/intel_owl

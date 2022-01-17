@@ -1,5 +1,5 @@
 boto3==1.20.6
-celery==5.2.1
+celery==5.2.2
 django-celery-results==2.2.0
 checkdmarc==4.4.1
 darksearch==2.1.2
@@ -39,7 +39,8 @@ pypdns==1.5.2
 pypssl==2.2
 pysafebrowsing==0.1.1
 PySocks==1.7.1
-quark-engine==21.11.2
+python-dotenv==0.19.2
+quark-engine==22.1.1
 requests==2.26.0
 speakeasy-emulator==1.5.9
 uWSGI==2.0.19.1

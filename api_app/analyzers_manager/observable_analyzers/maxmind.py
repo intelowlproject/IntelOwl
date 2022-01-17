@@ -25,7 +25,6 @@ db_names = ["GeoLite2-Country.mmdb", "GeoLite2-City.mmdb"]
 class Maxmind(classes.ObservableAnalyzer):
     def set_params(self, params):
         self.params = params
-        self.__api_key = self._secrets["api_key_name"]
 
     def run(self):
         maxmind_final_result = {}

@@ -38,6 +38,9 @@ source venv/bin/activate
 # from the project base directory
 pip install pre-commit
 pre-commit install
+
+# create .env file for controlling repo_downloader.sh
+cp docker/.env.start.test.template docker/.env.start.test
 ```
 
 Now, you can execute IntelOwl in development mode by selecting the mode `test` while launching the startup script:

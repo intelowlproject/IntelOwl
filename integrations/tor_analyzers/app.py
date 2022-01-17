@@ -16,7 +16,7 @@ from flask_shell2http import Shell2HTTP
 logger = logging.getLogger("flask_shell2http")
 # logger config
 formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-log_level = os.getenv("LOG_LEVEL", logging.INFO)
+log_level = os.getenv("LOG_LEVEL", "20")
 log_path = os.getenv("LOG_PATH", "/var/log/intel_owl/tor_analyzers")
 # create new file handlers, files are created if doesn't already exists
 fh = logging.FileHandler(f"{log_path}/tor_analyzers.log")

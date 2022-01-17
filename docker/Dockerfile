@@ -7,6 +7,8 @@ ENV LOG_PATH /var/log/intel_owl
 ENV ELASTICSEARCH_DSL_VERSION 7.2.0
 ENV watch_logs_cmd "watch -n1 tail -n10 /var/log/intel_owl/django/api_app.log"
 
+ARG REPO_DOWNLOADER_ENABLED=true
+
 RUN mkdir -p ${LOG_PATH} \
     ${LOG_PATH}/django \
     ${LOG_PATH}/uwsgi \

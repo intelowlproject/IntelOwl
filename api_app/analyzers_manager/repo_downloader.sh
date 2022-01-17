@@ -7,6 +7,10 @@
 # Example: you may want to add a new repository. Add the clone here
 # Example: you may want to remove some of the rules available in the downloaded repositories. Remove them here.
 
+
+# This script can be disabled during development using REPO_DOWNLOADER_ENABLED=true env variable
+if [ "$REPO_DOWNLOADER_ENABLED" = "false" ]; then echo "Skipping repo_downloader.sh in DEVELOPMENT mode"; exit 0;  fi
+
 cd /opt/deploy/yara
 
 # Intezer rules

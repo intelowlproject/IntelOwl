@@ -4,6 +4,8 @@
 import argparse
 import subprocess
 
+from dotenv import load_dotenv
+
 docker_analyzers = [
     "thug",
     "apk_analyzers",
@@ -151,6 +153,9 @@ def start():
             compose_files.append(path_mapping[key + test_appendix])
     if args.all_analyzers:
         compose_files.extend(list(path_mapping[f"all_analyzers{test_appendix}"]))
+
+    # load relevant .env file
+    load_dotenv("docker/.env" + test_appendix)
     # construct final command
     base_command = [
         "docker-compose",

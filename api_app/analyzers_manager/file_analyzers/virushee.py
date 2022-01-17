@@ -19,6 +19,13 @@ class Virushee(FileAnalyzer):
 
     def set_params(self, params):
         self.session = requests.Session()
+        api_key = self._secrets["api_key_name"]
+        if not api_key:
+            logger.info(
+                f"{self.__repr__()}, (md5: {self.md5}) -> Continuing w/o API key.."
+            )
+        else:
+            self.session.headers["Authorization"] = f"Bearer {api_key}"
         self.max_tries = 30
         self.poll_distance = 10
         self.request_url = "https://api.virushee.com/"

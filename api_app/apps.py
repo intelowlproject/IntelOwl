@@ -9,5 +9,4 @@ class ApiAppConfig(AppConfig):
 
     def ready(self):
         # flake8: noqa
-        import api_app.signal_handlers as signals
         from api_app.auth import DurinAuthenticationScheme

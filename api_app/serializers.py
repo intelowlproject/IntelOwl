@@ -4,12 +4,13 @@
 import json
 import logging
 
+from certego_saas.models import User
+from certego_saas.user.serializers import (
+    UserAccessSerializer as CertegoUserAccessSerializer,
+)
 from django.contrib.auth.models import Group
-from rest_flex_fields import FlexFieldsModelSerializer
-from rest_framework import serializers
-from rest_framework_guardian.serializers import ObjectPermissionsAssignmentMixin
-
-from api_app.models import TLP, Job, Tag
+from durin.serializers import UserSerializer
+from rest_framework import serializers as rfs
 
 from .analyzers_manager.serializers import AnalyzerReportSerializer
 from .connectors_manager.serializers import ConnectorReportSerializer
@@ -19,6 +20,7 @@ from .helpers import (
     calculate_observable_classification,
     gen_random_colorhex,
 )
+from .models import TLP, Job, Tag
 
 logger = logging.getLogger(__name__)
 
@@ -31,13 +33,16 @@ __all__ = [
     "FileAnalysisSerializer",
     "ObservableAnalysisSerializer",
     "AnalysisResponseSerializer",
+    "UserAccessSerializer",
 ]
 
+# intelowl
 
-class TagSerializer(ObjectPermissionsAssignmentMixin, serializers.ModelSerializer):
+
+class TagSerializer(rfs.ModelSerializer):
     class Meta:
         model = Tag
-        fields = serializers.ALL_FIELDS
+        fields = rfs.ALL_FIELDS
 
     def get_permissions_map(self, created):
         """
@@ -54,22 +59,22 @@ class TagSerializer(ObjectPermissionsAssignmentMixin, serializers.ModelSerialize
         }
 
 
-class JobAvailabilitySerializer(serializers.ModelSerializer):
+class JobAvailabilitySerializer(rfs.ModelSerializer):
     """
     Serializer for ask_analysis_availability
     """
 
     class Meta:
         model = Job
-        fields = serializers.ALL_FIELDS
+        fields = rfs.ALL_FIELDS
 
-    md5 = serializers.CharField(max_length=128, required=True)
-    analyzers = serializers.ListField(default=list)
-    running_only = serializers.BooleanField(default=False, required=False)
-    minutes_ago = serializers.IntegerField(default=None, required=False)
+    md5 = rfs.CharField(max_length=128, required=True)
+    analyzers = rfs.ListField(default=list)
+    running_only = rfs.BooleanField(default=False, required=False)
+    minutes_ago = rfs.IntegerField(default=None, required=False)
 
 
-class JobListSerializer(serializers.ModelSerializer):
+class JobListSerializer(rfs.ModelSerializer):
     """
     Job model's list serializer.
     Used for list()
@@ -77,24 +82,11 @@ class JobListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Job
-        fields = (
-            "id",
-            "is_sample",
-            "observable_name",
-            "observable_classification",
-            "file_name",
-            "file_mimetype",
-            "status",
-            "tags",
-            "process_time",
-            "no_of_analyzers_executed",
-            "no_of_connectors_executed",
-        )
+        exclude = ("file",)
 
+    user = UserSerializer()
     tags = TagSerializer(many=True, read_only=True)
-    process_time = serializers.SerializerMethodField()
-    no_of_analyzers_executed = serializers.SerializerMethodField()
-    no_of_connectors_executed = serializers.SerializerMethodField()
+    process_time = rfs.SerializerMethodField()
 
     def get_process_time(self, obj: Job) -> float:
         if not obj.finished_analysis_time:
@@ -102,47 +94,41 @@ class JobListSerializer(serializers.ModelSerializer):
         t = obj.finished_analysis_time - obj.received_request_time
         return round(t.total_seconds(), 2)
 
-    def get_no_of_analyzers_executed(self, obj: Job) -> str:
-        n1 = len(obj.analyzers_to_execute) or "-"
-        n2 = len(obj.analyzers_requested) or "-"
-        return f"{n1}/{n2}"
 
-    def get_no_of_connectors_executed(self, obj: Job) -> str:
-        n1 = len(obj.connectors_to_execute) or "-"
-        n2 = len(obj.connectors_requested) or "-"
-        return f"{n1}/{n2}"
-
-
-class JobSerializer(FlexFieldsModelSerializer):
+class JobSerializer(rfs.ModelSerializer):
     """
     Job model's serializer.
     Used for retrieve()
     """
 
-    tags = TagSerializer(many=True, read_only=True)
-    analyzer_reports = AnalyzerReportSerializer(many=True, read_only=True)
-    connector_reports = ConnectorReportSerializer(many=True, read_only=True)
-
     class Meta:
         model = Job
         exclude = ("file",)
 
+    user = UserSerializer()
+    tags = TagSerializer(many=True, read_only=True)
+    process_time = rfs.SerializerMethodField()
 
-class _AbstractJobCreateSerializer(
-    serializers.ModelSerializer,
-    ObjectPermissionsAssignmentMixin,
-):
+    analyzer_reports = AnalyzerReportSerializer(many=True, read_only=True)
+    connector_reports = ConnectorReportSerializer(many=True, read_only=True)
+
+    def get_process_time(self, obj: Job) -> float:
+        if not obj.finished_analysis_time:
+            return None
+        t = obj.finished_analysis_time - obj.received_request_time
+        return round(t.total_seconds(), 2)
+
+
+class _AbstractJobCreateSerializer(rfs.ModelSerializer):
     """
     Base Serializer for Job create().
     """
 
-    tags_labels = serializers.ListField(default=list)
-    runtime_configuration = serializers.JSONField(
-        required=False, default={}, write_only=True
-    )
-    analyzers_requested = serializers.ListField(default=list)
-    connectors_requested = serializers.ListField(default=list)
-    md5 = serializers.HiddenField(default=None)
+    tags_labels = rfs.ListField(default=list)
+    runtime_configuration = rfs.JSONField(required=False, default={}, write_only=True)
+    analyzers_requested = rfs.ListField(default=list)
+    connectors_requested = rfs.ListField(default=list)
+    md5 = rfs.HiddenField(default=None)
 
     def get_permissions_map(self, created) -> dict:
         """
@@ -197,16 +183,16 @@ class FileAnalysisSerializer(_AbstractJobCreateSerializer):
     Used for create()
     """
 
-    file = serializers.FileField(required=True)
-    file_name = serializers.CharField(required=True)
-    file_mimetype = serializers.CharField(required=False)
-    is_sample = serializers.HiddenField(default=True)
+    file = rfs.FileField(required=True)
+    file_name = rfs.CharField(required=True)
+    file_mimetype = rfs.CharField(required=False)
+    is_sample = rfs.HiddenField(default=True)
 
     class Meta:
         model = Job
         fields = (
             "id",
-            "source",
+            "user",
             "is_sample",
             "md5",
             "tlp",
@@ -239,15 +225,15 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
     Used for create()
     """
 
-    observable_name = serializers.CharField(required=True)
-    observable_classification = serializers.CharField(required=False)
-    is_sample = serializers.HiddenField(default=False)
+    observable_name = rfs.CharField(required=True)
+    observable_classification = rfs.CharField(required=False)
+    is_sample = rfs.HiddenField(default=False)
 
     class Meta:
         model = Job
         fields = (
             "id",
-            "source",
+            "user",
             "is_sample",
             "md5",
             "tlp",
@@ -276,9 +262,45 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
         return attrs
 
 
-class AnalysisResponseSerializer(serializers.Serializer):
-    job_id = serializers.IntegerField()
-    status = serializers.CharField()
-    warnings = serializers.ListField()
-    analyzers_running = serializers.ListField()
-    connectors_running = serializers.ListField()
+class AnalysisResponseSerializer(rfs.Serializer):
+    job_id = rfs.IntegerField()
+    status = rfs.CharField()
+    warnings = rfs.ListField()
+    analyzers_running = rfs.ListField()
+    connectors_running = rfs.ListField()
+
+
+# certego saas
+
+
+class _AccessSerializer(rfs.ModelSerializer):
+    class Meta:
+        model = User
+        fields = (
+            "total_submissions",
+            "month_submissions",
+        )
+
+    # User <-> Job stats
+    total_submissions = rfs.SerializerMethodField()
+    month_submissions = rfs.SerializerMethodField()
+
+    def get_total_submissions(self, obj: User) -> int:
+        return Job.user_total_submissions(obj)
+
+    def get_month_submissions(self, obj: User) -> int:
+        return Job.user_month_submissions(obj)
+
+
+class UserAccessSerializer(CertegoUserAccessSerializer):
+    class Meta:
+        model = User
+        fields = (
+            "user",
+            "access",
+        )
+
+    access = rfs.SerializerMethodField()
+
+    def get_access(self, obj: User) -> dict:
+        return _AccessSerializer(instance=obj).data

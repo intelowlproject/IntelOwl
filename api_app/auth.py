@@ -4,6 +4,7 @@
 import logging
 
 from django.contrib.auth import login, logout
+from django_user_agents.utils import get_user_agent
 from drf_spectacular.extensions import OpenApiAuthenticationExtension
 from durin import views as durin_views
 from durin.models import Client
@@ -16,7 +17,9 @@ logger = logging.getLogger(__name__)
 
 class LoginView(durin_views.LoginView):
     def get_client_obj(self, request) -> Client:
-        client, _created = Client.objects.get_or_create(name="web-browser")
+        user_agent = get_user_agent(request)
+        client_name = str(user_agent)
+        client, _ = Client.objects.get_or_create(name=client_name)
         return client
 
     def post(self, request, *args, **kwargs):
@@ -44,6 +47,14 @@ class LogoutView(durin_views.LogoutView):
             except Exception:
                 logger.exception(f"administrator: '{uname}' session logout failed.")
         return super(LogoutView, self).post(request, format=None)
+
+
+class APIAccessTokenView(durin_views.APIAccessTokenView):
+    pass
+
+
+class TokenSessionsViewSet(durin_views.TokenSessionsViewSet):
+    pass
 
 
 class DurinAuthenticationScheme(OpenApiAuthenticationExtension):

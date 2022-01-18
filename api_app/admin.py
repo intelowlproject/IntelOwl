@@ -1,35 +1,54 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
+from certego_saas.user.admin import AbstractUserAdmin
+from certego_saas.user.models import User
+from django.conf import settings
 from django.contrib import admin
 from durin.admin import AuthTokenAdmin
 from durin.models import AuthToken, Client
-from guardian.admin import GuardedModelAdmin
 
 from .models import Job, Tag
 
 
-class JobAdminView(GuardedModelAdmin):
+@admin.register(User)
+class UserAdminView(AbstractUserAdmin):
+    pass
+
+
+@admin.register(Job)
+class JobAdminView(admin.ModelAdmin):
     list_display = (
         "id",
         "status",
-        "source",
+        "user",
         "observable_name",
         "observable_classification",
         "file_name",
         "file_mimetype",
         "received_request_time",
     )
-    list_display_link = ("id", "status")
-    search_fields = ("source", "md5", "observable_name")
+    list_display_link = (
+        "id",
+        "user",
+        "status",
+    )
+    search_fields = (
+        "md5",
+        "observable_name",
+        "file_name",
+    )
 
 
-class TagAdminView(GuardedModelAdmin):
+@admin.register(Tag)
+class TagAdminView(admin.ModelAdmin):
     list_display = ("id", "label", "color")
     search_fields = ("label", "color")
 
 
-# Auth Token stuff
+# durin app (AuthToken model) customization
+
+
 class CustomAuthTokenAdmin(AuthTokenAdmin):
     """
     Custom admin view for AuthToken model
@@ -59,12 +78,12 @@ class CustomAuthTokenAdmin(AuthTokenAdmin):
         return False
 
     def save_model(self, request, obj, form, change):
-        obj.client = Client.objects.get(name="pyintelowl")
+        obj.client = Client.objects.get(
+            name=settings.REST_DURIN["API_ACCESS_CLIENT_NAME"]
+        )
         super(CustomAuthTokenAdmin, self).save_model(request, obj, form, change)
 
 
-admin.site.register(Job, JobAdminView)
-admin.site.register(Tag, TagAdminView)
 # Unregister Client admin view
 admin.site.unregister(Client)
 # Unregister the default admin view for AuthToken

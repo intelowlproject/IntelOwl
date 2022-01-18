@@ -15,6 +15,8 @@ class AnalyzerReportSerializer(rfs.ModelSerializer):
     AnalyzerReport model's serializer.
     """
 
+    type = rfs.CharField(default="analyzer")
+
     class Meta:
         model = AnalyzerReport
         fields = (
@@ -26,6 +28,7 @@ class AnalyzerReportSerializer(rfs.ModelSerializer):
             "start_time",
             "end_time",
             "runtime_configuration",
+            "type",
         )
 
 
@@ -56,7 +59,7 @@ class AnalyzerConfigSerializer(AbstractConfigSerializer):
         default=[],
     )
 
-    def validate_python_module(self, python_module: str):
+    def validate_python_module(self, python_module: str) -> str:
         if self.initial_data["type"] == self.TypeChoices.OBSERVABLE or (
             self.initial_data["type"] == self.TypeChoices.FILE
             and self.initial_data.get("run_hash", False)

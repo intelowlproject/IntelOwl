@@ -4,54 +4,59 @@
 import logging
 from datetime import timedelta
 from typing import Union
-from wsgiref.util import FileWrapper
 
+from certego_saas.ext.helpers import cache_action_response, parse_humanized_range
+from certego_saas.ext.mixins import SerializerActionMixin
+from certego_saas.ext.viewsets import ReadAndDeleteOnlyViewSet
 from django.conf import settings
-from django.db.models import Q
-from django.http import HttpResponse
-from django.utils.decorators import method_decorator
+from django.db.models import Count, Q
+from django.db.models.functions import Trunc
+from django.http import FileResponse
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema as add_docs
 from drf_spectacular.utils import inline_serializer
-from guardian.decorators import permission_required_or_403
-from rest_framework import mixins
 from rest_framework import serializers as rfs
 from rest_framework import status, viewsets
 from rest_framework.decorators import action, api_view
-from rest_framework.exceptions import PermissionDenied, ValidationError
-from rest_framework.permissions import DjangoObjectPermissions
+from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
-from rest_framework_guardian.filters import ObjectPermissionsFilter
 
-from api_app import models, permissions, serializers
-from api_app.helpers import get_now
 from intel_owl.celery import app as celery_app
 
 from .analyzers_manager import controller as analyzers_controller
+from .analyzers_manager.constants import ObservableTypes
 from .connectors_manager import controller as connectors_controller
+from .filters import JobFilter
+from .helpers import get_now
+from .models import Job, Status, Tag
+from .serializers import (
+    AnalysisResponseSerializer,
+    FileAnalysisSerializer,
+    JobAvailabilitySerializer,
+    JobListSerializer,
+    JobSerializer,
+    ObservableAnalysisSerializer,
+    TagSerializer,
+)
 
 logger = logging.getLogger(__name__)
 
 
 def _analysis_request(
     request,
-    serializer_class: Union[
-        serializers.FileAnalysisSerializer, serializers.ObservableAnalysisSerializer
-    ],
+    serializer_class: Union[FileAnalysisSerializer, ObservableAnalysisSerializer],
 ):
     """
     Prepare and send file/observable for analysis
     """
     warnings = []
-    source = str(request.user)
-    data_received = request.data
     logger.info(
-        f"_analysis_request received request from {source}."
-        f"Data:{dict(data_received)}."
+        f"_analysis_request received request from {request.user}."
+        f"Data:{dict(request.data)}."
     )
 
     # serialize request data and validate
-    serializer = serializer_class(data=data_received, context={"request": request})
+    serializer = serializer_class(data=request.data, context={"request": request})
     serializer.is_valid(raise_exception=True)
 
     serialized_data = serializer.validated_data
@@ -71,7 +76,7 @@ def _analysis_request(
 
     # save the arrived data plus new params into a new job object
     job = serializer.save(
-        source=source,
+        user=request.user,
         analyzers_to_execute=cleaned_analyzer_list,
         connectors_to_execute=cleaned_connectors_list,
     )
@@ -79,7 +84,7 @@ def _analysis_request(
     logger.info(f"New Job added to queue <- {repr(job)}.")
 
     # Check if task is test or not
-    if not settings.TEST_MODE:
+    if not settings.STAGE_CI:
         # fire celery task
         celery_app.send_task(
             "start_analyzers",
@@ -90,7 +95,7 @@ def _analysis_request(
             ),
         )
 
-    ser = serializers.AnalysisResponseSerializer(
+    ser = AnalysisResponseSerializer(
         data={
             "status": "accepted",
             "job_id": job.pk,
@@ -121,7 +126,7 @@ def _analysis_request(
     status "running" or "reported_without_fails"
     Also, you need to specify the analyzers needed because, otherwise, it is
     highly probable that you won't get all the results that you expect""",
-    request=serializers.JobAvailabilitySerializer,
+    request=JobAvailabilitySerializer,
     responses={
         200: inline_serializer(
             name="AskAnalysisAvailabilitySuccessResponse",
@@ -134,7 +139,6 @@ def _analysis_request(
     },
 )
 @api_view(["POST"])
-@permission_required_or_403("api_app.view_job")
 def ask_analysis_availability(request):
     data_received = request.data
     logger.info(
@@ -142,7 +146,7 @@ def ask_analysis_availability(request):
         f"Data: {dict(data_received)}"
     )
 
-    serializer = serializers.JobAvailabilitySerializer(
+    serializer = JobAvailabilitySerializer(
         data=data_received, context={"request": request}
     )
     serializer.is_valid(raise_exception=True)
@@ -156,11 +160,11 @@ def ask_analysis_availability(request):
     )
 
     if running_only:
-        statuses_to_check = [models.Status.RUNNING]
+        statuses_to_check = [Status.RUNNING]
     else:
         statuses_to_check = [
-            models.Status.RUNNING,
-            models.Status.REPORTED_WITHOUT_FAILS,
+            Status.RUNNING,
+            Status.REPORTED_WITHOUT_FAILS,
         ]
 
     if len(analyzers) == 0:
@@ -179,15 +183,13 @@ def ask_analysis_availability(request):
         query = query & Q(received_request_time__gte=minutes_ago_time)
 
     try:
-        last_job_for_md5 = models.Job.objects.filter(query).latest(
-            "received_request_time"
-        )
+        last_job_for_md5 = Job.objects.filter(query).latest("received_request_time")
         response_dict = {
             "status": last_job_for_md5.status,
             "job_id": str(last_job_for_md5.id),
             "analyzers_to_execute": last_job_for_md5.analyzers_to_execute,
         }
-    except models.Job.DoesNotExist:
+    except Job.DoesNotExist:
         response_dict = {"status": "not_available"}
 
     logger.debug(response_dict)
@@ -197,24 +199,22 @@ def ask_analysis_availability(request):
 
 @add_docs(
     description="This endpoint allows to start a Job related to a file",
-    request=serializers.FileAnalysisSerializer,
-    responses={200: serializers.AnalysisResponseSerializer},
+    request=FileAnalysisSerializer,
+    responses={200: AnalysisResponseSerializer},
 )
 @api_view(["POST"])
-@permission_required_or_403("api_app.add_job")
 def analyze_file(request):
-    return _analysis_request(request, serializers.FileAnalysisSerializer)
+    return _analysis_request(request, FileAnalysisSerializer)
 
 
 @add_docs(
     description="This endpoint allows to start a Job related to an observable",
-    request=serializers.ObservableAnalysisSerializer,
-    responses={200: serializers.AnalysisResponseSerializer},
+    request=ObservableAnalysisSerializer,
+    responses={200: AnalysisResponseSerializer},
 )
 @api_view(["POST"])
-@permission_required_or_403("api_app.add_job")
 def analyze_observable(request):
-    return _analysis_request(request, serializers.ObservableAnalysisSerializer)
+    return _analysis_request(request, ObservableAnalysisSerializer)
 
 
 @add_docs(
@@ -223,34 +223,20 @@ def analyze_observable(request):
     Requires authentication.
     """
 )
-class JobViewSet(
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.DestroyModelMixin,
-    viewsets.GenericViewSet,
-):
+class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
     queryset = (
-        models.Job.objects.prefetch_related("tags")
-        .order_by("-received_request_time")
-        .all()
+        Job.objects.prefetch_related("tags").order_by("-received_request_time").all()
     )
-    serializer_class = serializers.JobSerializer
+    serializer_class = JobSerializer
     serializer_action_classes = {
-        "list": serializers.JobListSerializer,
+        "retrieve": JobSerializer,
+        "list": JobListSerializer,
     }
-    permission_classes = (permissions.ExtendedObjectPermissions,)
-    filter_backends = (ObjectPermissionsFilter,)
-
-    def get_serializer_class(self, *args, **kwargs):
-        """
-        Instantiate the list of serializers per action from class attribute
-        (must be defined).
-        """
-        kwargs["partial"] = True
-        try:
-            return self.serializer_action_classes[self.action]
-        except (KeyError, AttributeError):
-            return super(JobViewSet, self).get_serializer_class()
+    filter_class = JobFilter
+    ordering_fields = [
+        "received_request_time",
+        "finished_analysis_time",
+    ]
 
     @add_docs(
         description="Kill running job by closing celery tasks and marking as killed",
@@ -260,11 +246,6 @@ class JobViewSet(
         },
     )
     @action(detail=True, methods=["patch"])
-    @method_decorator(
-        [
-            permission_required_or_403("api_app.change_job"),
-        ]
-    )
     def kill(self, request, pk=None):
         logger.info(
             f"kill running job received request from {str(request.user)} "
@@ -273,8 +254,6 @@ class JobViewSet(
 
         # get job object or raise 404
         job = self.get_object()
-        if not request.user.has_perm("api_app.change_job", job):
-            raise PermissionDenied()
 
         # check if job running
         if job.status != "running":
@@ -287,9 +266,9 @@ class JobViewSet(
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @add_docs(
-        description="Download a sample from a given Job ID.",
+        description="Download file/sample associated with a job",
         request=None,
-        responses={200: OpenApiTypes(7), 400: None},
+        responses={200: OpenApiTypes.BINARY, 400: None},
     )
     @action(detail=True, methods=["get"])
     def download_sample(self, request, pk=None):
@@ -302,18 +281,146 @@ class JobViewSet(
         # get job object
         job = self.get_object()
 
-        # check permission
-        if not request.user.has_perm("api_app.view_job", job):
-            raise PermissionDenied()
-
         # make sure it is a sample
         if not job.is_sample:
             raise ValidationError(
                 {"detail": "Requested job does not have a sample associated with it."}
             )
-        response = HttpResponse(FileWrapper(job.file), content_type=job.file_mimetype)
-        response["Content-Disposition"] = f"attachment; filename={job.file_name}"
-        return response
+        return FileResponse(
+            job.file,
+            filename=job.file_name,
+            content_type=job.file_mimetype,
+            as_attachment=True,
+        )
+
+    @action(
+        url_path="aggregate/status",
+        detail=False,
+        methods=["GET"],
+    )
+    @cache_action_response(timeout=60 * 5)
+    def aggregate_status(self, request):
+        annotations = {
+            key.lower(): Count("status", filter=Q(status=key))
+            for key in Job.Status.values
+        }
+        return self.__aggregation_response_static(annotations)
+
+    @action(
+        url_path="aggregate/type",
+        detail=False,
+        methods=["GET"],
+    )
+    @cache_action_response(timeout=60 * 5)
+    def aggregate_type(self, request):
+        annotations = {
+            "file": Count("is_sample", filter=Q(is_sample=True)),
+            "observable": Count("is_sample", filter=Q(is_sample=False)),
+        }
+        return self.__aggregation_response_static(annotations)
+
+    @action(
+        url_path="aggregate/observable_classification",
+        detail=False,
+        methods=["GET"],
+    )
+    @cache_action_response(timeout=60 * 5)
+    def aggregate_observable_classification(self, request):
+        annotations = {
+            oc.lower(): Count(
+                "observable_classification", filter=Q(observable_classification=oc)
+            )
+            for oc in ObservableTypes.values
+        }
+        return self.__aggregation_response_static(annotations)
+
+    @action(
+        url_path="aggregate/file_mimetype",
+        detail=False,
+        methods=["GET"],
+    )
+    @cache_action_response(timeout=60 * 5)
+    def aggregate_file_mimetype(self, request):
+        return self.__aggregation_response_dynamic("file_mimetype")
+
+    @action(
+        url_path="aggregate/observable_name",
+        detail=False,
+        methods=["GET"],
+    )
+    @cache_action_response(timeout=60 * 5)
+    def aggregate_observable_name(self, request):
+        return self.__aggregation_response_dynamic("observable_name", False)
+
+    @action(
+        url_path="aggregate/file_name",
+        detail=False,
+        methods=["GET"],
+    )
+    @cache_action_response(timeout=60 * 5)
+    def aggregate_file_name(self, request):
+        return self.__aggregation_response_dynamic("file_name", False)
+
+    def __aggregation_response_static(self, annotations: dict):
+        delta, basis = self.__parse_range(self.request)
+        qs = (
+            Job.objects.filter(received_request_time__gte=delta)
+            .annotate(date=Trunc("received_request_time", basis))
+            .values("date")
+            .annotate(**annotations)
+        )
+        return Response(qs)
+
+    def __aggregation_response_dynamic(
+        self, field_name: str, group_by_date: bool = True, limit: int = 5
+    ):
+        delta, basis = self.__parse_range(self.request)
+
+        most_frequent_values = (
+            Job.objects.filter(received_request_time__gte=delta)
+            .exclude(**{f"{field_name}__isnull": True})
+            .exclude(**{f"{field_name}__exact": ""})
+            .annotate(count=Count(field_name))
+            .distinct()
+            .order_by("-count")[:limit]
+            .values_list(field_name, flat=True)
+        )
+
+        if len(most_frequent_values):
+            annotations = {
+                val: Count(field_name, filter=Q(**{field_name: val}))
+                for val in most_frequent_values
+            }
+            if group_by_date:
+                aggregation = (
+                    Job.objects.filter(received_request_time__gte=delta)
+                    .annotate(date=Trunc("received_request_time", basis))
+                    .values("date")
+                    .annotate(**annotations)
+                )
+            else:
+                aggregation = Job.objects.filter(
+                    received_request_time__gte=delta
+                ).aggregate(**annotations)
+        else:
+            aggregation = {}
+
+        return Response(
+            {
+                "values": most_frequent_values,
+                "aggregation": aggregation,
+            }
+        )
+
+    @staticmethod
+    def __parse_range(request):
+        try:
+            range_str = request.GET["range"]
+        except KeyError:
+            # default
+            range_str = "7d"
+
+        return parse_humanized_range(range_str)
 
 
 @add_docs(
@@ -323,6 +430,6 @@ class JobViewSet(
     POST/PUT/DELETE requires model/object level permission."""
 )
 class TagViewSet(viewsets.ModelViewSet):
-    queryset = models.Tag.objects.all()
-    serializer_class = serializers.TagSerializer
-    permission_classes = (DjangoObjectPermissions,)
+    queryset = Tag.objects.all()
+    serializer_class = TagSerializer
+    pagination_class = None

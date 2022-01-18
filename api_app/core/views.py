@@ -9,7 +9,7 @@ from drf_spectacular.utils import inline_serializer
 from rest_framework import serializers as rfs
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from rest_framework.exceptions import NotFound, PermissionDenied, ValidationError
+from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -68,8 +68,6 @@ class PluginActionViewSet(viewsets.ViewSet, metaclass=ABCMeta):
     def kill(self, request, job_id, name):
         # get report object or raise 404
         report = self.get_object(job_id, name)
-        if not request.user.has_perm("api_app.change_job", report.job):
-            raise PermissionDenied()
         if report.status not in [
             AbstractReport.Status.RUNNING,
             AbstractReport.Status.PENDING,
@@ -90,8 +88,6 @@ class PluginActionViewSet(viewsets.ViewSet, metaclass=ABCMeta):
     def retry(self, request, job_id, name):
         # get report object or raise 404
         report = self.get_object(job_id, name)
-        if not request.user.has_perm("api_app.change_job", report.job):
-            raise PermissionDenied()
         if report.status not in [
             AbstractReport.Status.FAILED,
             AbstractReport.Status.KILLED,

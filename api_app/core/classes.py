@@ -168,7 +168,7 @@ class Plugin(metaclass=ABCMeta):
         # set params
         self.set_params(self._params)
         # monkeypatch if in test suite
-        if settings.TEST_MODE:
+        if settings.STAGE_CI:
             self._monkeypatch()
 
     def __init__(

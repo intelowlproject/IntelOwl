@@ -3,9 +3,10 @@
 
 import hashlib
 
+from certego_saas.models import User
+from django.conf import settings
 from django.contrib.postgres import fields as pg_fields
 from django.db import models
-from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.functional import cached_property
@@ -67,7 +68,11 @@ class Job(models.Model):
     TLP = TLP
     Status = Status
 
-    source = models.CharField(max_length=50, blank=False, default="none")
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        null=True,  # for backwards compatibility
+    )
     is_sample = models.BooleanField(blank=False, default=False)
     md5 = models.CharField(max_length=32, blank=False)
     observable_name = models.CharField(max_length=512, blank=True)
@@ -141,8 +146,29 @@ class Job(models.Model):
             **aggregators,
         )
 
+    # user methods
 
-@receiver(pre_delete, sender=Job)
+    @classmethod
+    def user_total_submissions(cls, user: User) -> int:
+        return user.job_set.count()
+
+    @classmethod
+    def user_month_submissions(cls, user: User) -> int:
+        """
+        Excludes failed submissions.
+        """
+        return (
+            user.job_set.filter(
+                received_request_time__gte=timezone.now().replace(
+                    day=1, hour=0, minute=0, second=0, microsecond=0
+                )
+            )
+            .exclude(status=cls.Status.FAILED)
+            .count()
+        )
+
+
+@receiver(models.signals.pre_delete, sender=Job)
 def delete_file(sender, instance: Job, **kwargs):
     if instance.file:
         if instance.file:

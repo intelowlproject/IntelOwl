@@ -1,0 +1,78 @@
+{
+  "name": "intelowl",
+  "version": "0.1.0",
+  "private": true,
+  "proxy": "http://localhost:80/",
+  "husky": {
+    "hooks": {
+      "pre-commit": "pretty-quick --staged"
+    }
+  },
+  "dependencies": {
+    "@certego/certego-ui": "0.0.8",
+    "@craco/craco": "^6.4.2",
+    "axios": "^0.21.4",
+    "axios-hooks": "^2.7.0",
+    "bootstrap": "~4.6.0",
+    "classnames": "^2.3.1",
+    "formik": "^2.2.9",
+    "formstrap": "^1.1.3",
+    "md5": "^2.3.0",
+    "moment": "^2.29.1",
+    "node-sass": "^6.0.1",
+    "prop-types": "^15.7.2",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-ga4": "^1.4.0",
+    "react-icons": "^4.3.1",
+    "react-markdown": "^7.1.1",
+    "react-moment": "^1.1.1",
+    "react-router-dom": "^5.3.0",
+    "react-scripts": "^4.0.3",
+    "react-table": "^7.7.0",
+    "react-use": "^17.3.1",
+    "reactstrap": "^8.10.0",
+    "reactstrap-confirm": "^1.3.2",
+    "recharts": "^2.1.5",
+    "zustand": "^3.6.7"
+  },
+  "scripts": {
+    "analyze": "source-map-explorer 'build/static/js/*.js'",
+    "start": "craco start",
+    "build": "GENERATE_SOURCEMAP=false craco build",
+    "build:sourcemap": "craco build",
+    "test": "craco test",
+    "eject": "craco eject",
+    "lint": "eslint src/ --fix --ext .js,.jsx",
+    "prettier:write": "prettier --write .",
+    "prettier:check": "prettier --check .",
+    "pretty-quick": "pretty-quick --staged"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@welldone-software/why-did-you-render": "^6.2.3",
+    "babel-eslint": "^10.1.0",
+    "eslint": "^7.32.0",
+    "eslint-config-airbnb": "^19.0.2",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-import": "^2.25.3",
+    "eslint-plugin-jsx-a11y": "^6.5.1",
+    "eslint-plugin-react": "^7.27.1",
+    "eslint-plugin-react-hooks": "^4.3.0",
+    "husky": "^7.0.2",
+    "prettier": "2.4.1",
+    "pretty-quick": "^3.1.2",
+    "source-map-explorer": "^2.5.2"
+  }
+}

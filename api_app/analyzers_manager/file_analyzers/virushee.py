@@ -84,7 +84,7 @@ class VirusheeFileUpload(FileAnalyzer):
 
     @classmethod
     def _monkeypatch(cls):
-        cls.poll_distance = 1  # for tests
+        cls.poll_distance = 0  # for tests
         patches = [
             if_mock_connections(
                 patch(

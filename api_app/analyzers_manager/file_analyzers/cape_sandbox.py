@@ -1,4 +1,5 @@
 import time
+from django.http import response
 
 import requests
 
@@ -8,107 +9,120 @@ from tests.mock_utils import MockResponse, if_mock_connections, patch
 
 class CAPEsandbox(FileAnalyzer):
     max_tries: int = 25
-    to_respond = {}
+    poll_distance = 30
 
     def set_params(self, params):
-        self.__token = self._secrets["token"]
+        self.__token = self._secrets["api_key_name"]
         self.__vm_name = params.get("VM_NAME", "win7x64_8")
-        self.BASE_URL = self._secrets.get("url_key_name", "https://www.capesandbox.com")
+        self.__base_url = self._secrets.get(
+            "url_key_name", "https://www.capesandbox.com"
+        )
+        self.__session = requests.Session()
+        self.__session.headers = {
+                "Authorization": f"Token {self.__token}",
+            }
 
     def run(self):
-        API_URL: str = self.BASE_URL + "/apiv2/tasks/create/file/"
-        self.headers = {
-            "Authorization": f"Token {self.__token}",
-        }
-
-        files = {
-            "file": (self.filename, self.read_file_bytes()),
-        }
-
-        data = {"machine": self.__vm_name}
+        api_url: str = self.__base_url + "/apiv2/tasks/create/file/"
+        to_respond = {}
 
         try:
-            response = requests.post(
-                API_URL, headers=self.headers, files=files, data=data
+            response = self.__session.post(
+                api_url,
+                files={
+                    "file": (self.filename, self.read_file_bytes()),
+                },
+                data={"machine": self.__vm_name},
             )
-            response_json = response.json()
             response.raise_for_status()
         except requests.RequestException as e:
             raise AnalyzerRunException(e)
 
-        # since not None == True as well. This is a more precise way.
+        response_json = response.json()
+
         if response_json.get("error") is False:
-            self.to_respond["result_url"] = response_json.get("url")
-            self.task_id = response_json.get("data").get("task_ids")[0]
-            self.status_api = self.BASE_URL + "/apiv2/tasks/status/" + str(self.task_id)
-            result = self.__poll_for_result()
-            return result
+            to_respond["result_url"] = response_json.get("url")
+            task_id = response_json.get("data").get("task_ids")[0]
+            result = self.__poll_for_result(task_id = task_id)
+            to_respond["response"] = result
+            return to_respond
 
         elif (
             list(response_json.get("errors")[0].values())[0]
             == "Not unique, as unique option set on submit or in conf/web.conf"
         ):
-            db_search_url = self.BASE_URL + "/apiv2/tasks/search/md5/" + self.md5
 
-            try:
-                q = requests.get(db_search_url, headers=self.headers)
-                q.raise_for_status()
-
-            except requests.RequestException as e:
-                raise AnalyzerRunException(e)
-
-            status_id = str(q.json().get("data")[0].get("id"))
-            gui_report_url = self.BASE_URL + "/analysis/" + status_id
+            status_id = self.__search_by_md5()
+            gui_report_url = self.__base_url + "/analysis/" + status_id
             report_url = (
-                self.BASE_URL + "/apiv2/tasks/get/report/" + status_id + "/json"
+                self.__base_url + "/apiv2/tasks/get/report/" + status_id + "/json"
             )
-            self.to_respond["result_url"] = gui_report_url
+            to_respond["result_url"] = gui_report_url
 
             try:
-                final_request = requests.get(report_url, headers=self.headers)
+                final_request = self.__session.get(report_url,)
             except requests.RequestException as e:
                 raise AnalyzerRunException(e)
 
             final_json = final_request.json()
-            self.to_respond["response"] = final_json
+            to_respond["response"] = final_json
 
-            return self.to_respond
+            return to_respond
 
         return response_json
+    
+    def __search_by_md5(self,):
+        db_search_url = self.__base_url + "/apiv2/tasks/search/md5/" + self.md5
+
+        try:
+            q = self.__session.get(db_search_url)
+            q.raise_for_status()
+
+        except requests.RequestException as e:
+            raise AnalyzerRunException(e)
+
+        status_id = str(q.json().get("data")[0].get("id"))
+
+        return status_id
+
 
     def __poll_for_result(
-        self,
+        self, task_id,
     ):
+        status_api = (
+                self.__base_url + "/apiv2/tasks/status/" + str(task_id)
+            )
         for i in range(self.max_tries):
             try:
-                r = requests.get(self.status_api, headers=self.headers)
-                r.raise_for_status()
-            except requests.RequestException as e:
+                r = self.__session.get(status_api)
                 if r.status_code == 429:
-                    time.sleep(30)
+                    time.sleep(self.poll_distance)
                 else:
-                    raise AnalyzerRunException(e)
+                    r.raise_for_status()
+            except requests.RequestException as e:
+                raise AnalyzerRunException(e)
 
             responded_json = r.json()
             error = responded_json.get("error")
             data = responded_json.get("data")
             if not error and (data in ("reported", "completed")):
                 report_url = (
-                    self.BASE_URL
+                    self.__base_url
                     + "/apiv2/tasks/get/report/"
-                    + str(self.task_id)
+                    + str(task_id)
                     + "/json"
                 )
                 try:
-                    final_request = requests.get(report_url, headers=self.headers)
+                    final_request = self.__session.get(report_url,)
+                    final_request.raise_for_status()
                 except requests.RequestException as e:
                     raise AnalyzerRunException(e)
 
                 final_json = final_request.json()
 
                 if final_json.get("error"):
-                    self.to_respond["response"] = final_json
-                    return self.to_respond
+                    response_ = final_json
+                    return response_
 
             elif error:
                 raise AnalyzerRunException(error)

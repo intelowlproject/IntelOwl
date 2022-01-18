@@ -5,12 +5,14 @@ import hashlib
 import os
 
 from django.conf import settings
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from rest_framework.test import APIClient
 
 from api_app import models
+
+User = get_user_model()
 
 
 class ApiViewTests(TestCase):
@@ -242,134 +244,3 @@ class ApiViewTests(TestCase):
             {"detail": "Requested job does not have a sample associated with it."},
             response.json(),
         )
-
-
-class JobViewsetTests(TestCase):
-    @classmethod
-    def setUpClass(cls):
-        super(JobViewsetTests, cls).setUpClass()
-        cls.superuser = User.objects.create_superuser(
-            username="test", email="test@intelowl.com", password="test"
-        )
-
-    def setUp(self):
-        self.client = APIClient()
-        self.client.force_authenticate(user=self.superuser)
-        self.job, _ = models.Job.objects.get_or_create(
-            **{
-                "observable_name": os.environ.get("TEST_IP"),
-                "md5": os.environ.get("TEST_MD5"),
-                "observable_classification": "ip",
-                "is_sample": False,
-                "analyzers_requested": [],
-                "connectors_requested": [],
-            }
-        )
-
-    def test_list_all_jobs(self):
-        response = self.client.get("/api/jobs")
-        self.assertEqual(response.status_code, 200)
-
-    def test_get_job_by_id_200(self):
-        response = self.client.get(f"/api/jobs/{self.job.id}")
-        self.assertEqual(response.status_code, 200)
-
-    def test_get_job_by_id_404(self):
-        # requesting for an ID that we know does not exist in DB
-        response = self.client.get("/api/jobs/999")
-        self.assertEqual(response.status_code, 404)
-
-    def test_delete_job_by_id_204(self):
-        self.assertEqual(models.Job.objects.count(), 1)
-        response = self.client.delete(f"/api/jobs/{self.job.id}")
-        self.assertEqual(response.status_code, 204)
-        self.assertEqual(models.Job.objects.count(), 0)
-
-    def test_delete_job_by_id_404(self):
-        self.assertEqual(models.Job.objects.count(), 1)
-        # requesting for an ID that we know does not exist in DB
-        response = self.client.delete("/api/jobs/999")
-        self.assertEqual(response.status_code, 404)
-        self.assertEqual(models.Job.objects.count(), 1)
-
-    def test_kill_job_by_id_204(self):
-        job = models.Job.objects.create(status="running")
-        self.assertEqual(job.status, "running")
-        response = self.client.patch(f"/api/jobs/{job.id}/kill")
-        self.assertEqual(response.status_code, 204)
-        job.refresh_from_db()
-        self.assertEqual(job.status, "killed")
-
-    def test_kill_job_by_id_404(self):
-        response = self.client.patch("/api/jobs/999/kill")
-        self.assertEqual(response.status_code, 404)
-
-    def test_kill_job_by_id_400(self):
-        # create a new job whose status is not "running"
-        job = models.Job.objects.create(status="reported_without_fails")
-        self.assertEqual(job.status, "reported_without_fails")
-        response = self.client.patch(f"/api/jobs/{job.id}/kill")
-        self.assertDictEqual(response.json(), {"detail": "Job is not running"})
-        self.assertEqual(response.status_code, 400)
-
-
-class TagViewsetTests(TestCase):
-    @classmethod
-    def setUpClass(cls):
-        super(TagViewsetTests, cls).setUpClass()
-        cls.superuser = User.objects.create_superuser(
-            username="test", email="test@intelowl.com", password="test"
-        )
-
-    def setUp(self):
-        self.client = APIClient()
-        self.client.force_authenticate(user=self.superuser)
-        self.tag, _ = models.Tag.objects.get_or_create(
-            label="testlabel1", color="#FF5733"
-        )
-
-    def test_create_new_tag(self):
-        self.assertEqual(models.Tag.objects.count(), 1)
-        data = {"label": "testlabel2", "color": "#91EE28"}
-        response = self.client.post("/api/tags", data)
-        self.assertEqual(response.status_code, 201)
-        self.assertDictContainsSubset(data, response.json())
-        self.assertEqual(models.Tag.objects.count(), 2)
-
-    def test_list_all_tags(self):
-        response = self.client.get("/api/tags")
-        self.assertEqual(response.status_code, 200)
-
-    def test_get_tag_by_id_200(self):
-        response = self.client.get(f"/api/tags/{self.tag.id}")
-        self.assertEqual(response.status_code, 200)
-
-    def test_get_tag_by_id_404(self):
-        # requesting for an ID that we know does not exist in DB
-        response = self.client.get("/api/tags/999")
-        self.assertEqual(response.status_code, 404)
-
-    def test_update_tag_by_id_200(self):
-        new_data = {"label": "newTestLabel", "color": "#765A54"}
-        response = self.client.put(f"/api/tags/{self.tag.id}", new_data)
-        self.assertDictContainsSubset(new_data, response.json())
-        self.assertEqual(response.status_code, 200)
-
-    def test_update_tag_by_id_404(self):
-        new_data = {"label": "newTestLabel", "color": "#765A54"}
-        # requesting for an ID that we know does not exist in DB
-        response = self.client.put("/api/tags/999", new_data)
-        self.assertEqual(response.status_code, 404)
-
-    def test_delete_tag_by_id_404(self):
-        self.assertEqual(models.Tag.objects.count(), 1)
-        # requesting for an ID that we know does not exist in DB
-        response = self.client.delete("/api/tags/999")
-        self.assertEqual(response.status_code, 404)
-        self.assertEqual(models.Tag.objects.count(), 1)
-
-    def test_delete_tag_by_id_204(self):
-        self.assertEqual(models.Tag.objects.count(), 1)
-        response = self.client.delete(f"/api/tags/{self.tag.id}")
-        self.assertEqual(response.status_code, 204)
-        self.assertEqual(models.Tag.objects.count(), 0)

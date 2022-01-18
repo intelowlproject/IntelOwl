@@ -1,7 +1,7 @@
 import logging
 from abc import ABCMeta, abstractmethod
 
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.test import TestCase
 from rest_framework.test import APIClient
 
@@ -9,6 +9,8 @@ from api_app.analyzers_manager.constants import ObservableTypes
 from api_app.core.models import AbstractReport
 from api_app.models import Job
 from intel_owl import settings
+
+User = get_user_model()
 
 
 def get_logger() -> logging.Logger:
@@ -65,7 +67,7 @@ class PluginActionViewsetTestCase(metaclass=ABCMeta):
 
     def test_kill_plugin_204(self):
         response = self.client.patch(
-            f"/api/job/{self.report.job_id}/{self.plugin_type}/{self.plugin_name}/kill"
+            f"/api/jobs/{self.report.job_id}/{self.plugin_type}/{self.plugin_name}/kill"
         )
         self.assertEqual(response.status_code, 204)
         self.report.refresh_from_db()
@@ -73,7 +75,7 @@ class PluginActionViewsetTestCase(metaclass=ABCMeta):
 
     def test_kill_plugin_404(self):
         response = self.client.patch(
-            f"/api/job/{self.report.job_id}/{self.plugin_type}/PLUGIN_404/kill"
+            f"/api/jobs/{self.report.job_id}/{self.plugin_type}/PLUGIN_404/kill"
         )
         self.assertEqual(response.status_code, 404)
 
@@ -81,7 +83,7 @@ class PluginActionViewsetTestCase(metaclass=ABCMeta):
         # create a new report whose status is not "running"/"pending"
         _report = self.init_report(status=AbstractReport.Status.SUCCESS)
         response = self.client.patch(
-            f"/api/job/{_report.job_id}/{self.plugin_type}/{self.plugin_name}/kill"
+            f"/api/jobs/{_report.job_id}/{self.plugin_type}/{self.plugin_name}/kill"
         )
         self.assertEqual(response.status_code, 400)
         self.assertDictEqual(
@@ -92,13 +94,13 @@ class PluginActionViewsetTestCase(metaclass=ABCMeta):
         # create new report with status failed
         _report = self.init_report(status=AbstractReport.Status.FAILED)
         response = self.client.patch(
-            f"/api/job/{_report.job_id}/{self.plugin_type}/{self.plugin_name}/retry"
+            f"/api/jobs/{_report.job_id}/{self.plugin_type}/{self.plugin_name}/retry"
         )
         self.assertEqual(response.status_code, 204)
 
     def test_retry_plugin_404(self):
         response = self.client.patch(
-            f"/api/job/{self.report.job_id}/{self.plugin_type}/PLUGIN_404/retry"
+            f"/api/jobs/{self.report.job_id}/{self.plugin_type}/PLUGIN_404/retry"
         )
         self.assertEqual(response.status_code, 404)
 
@@ -106,7 +108,7 @@ class PluginActionViewsetTestCase(metaclass=ABCMeta):
         # create a new report whose status is not "failed"/"killed"
         _report = self.init_report(status=AbstractReport.Status.SUCCESS)
         response = self.client.patch(
-            f"/api/job/{_report.job_id}/{self.plugin_type}/{self.plugin_name}/retry"
+            f"/api/jobs/{_report.job_id}/{self.plugin_type}/{self.plugin_name}/retry"
         )
         self.assertEqual(response.status_code, 400)
         self.assertDictEqual(

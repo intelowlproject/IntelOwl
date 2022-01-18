@@ -182,7 +182,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `HashLookupServer_Get_File`: check if a md5 or sha1 is available in the database of [known file hosted by CIRCL](https://github.com/adulau/hashlookup-server)
 * `FileScan_Upload_File`: Upload your file to extract IoCs from executable files, documents and scripts via [FileScan.io API](https://www.filescan.io/api/docs).
 * `Dragonfly_Emulation`: Emulate malware against [Dragonfly](https://dragonfly.certego.net?utm_source=intelowl) sandbox by [Certego S.R.L](https://certego.net?utm_source=intelowl).
-* `Virushee_UploadFile` : Check file hash and upload file sample for analysis. [Virushee API](https://api.virushee.com/)
+* `Virushee_UploadFile` : Check file hash and upload file sample for analysis. [Virushee API](https://api.virushee.com/).
 
 ##### Observable analyzers (ip, domain, url, hash)
 * `VirusTotal_v3_Get_Observable`: search an observable in the VirusTotal DB

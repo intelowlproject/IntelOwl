@@ -8,7 +8,7 @@ class Onionscan(ObservableAnalyzer, DockerBasedAnalyzer):
     name: str = "Onionscan"
     url: str = "http://tor_analyzers:4004/onionscan"
     # http request polling max number of tries
-    max_tries: int = 48
+    max_tries: int = 60
     # interval between http request polling (in seconds)
     poll_distance: int = 10
     verbose = True

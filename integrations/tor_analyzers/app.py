@@ -41,8 +41,5 @@ app.config.update(CONFIG)
 executor = Executor(app)
 shell2http = Shell2HTTP(app, executor)
 
-# binary paths
-onionscan_binary = "./bundled/onionscan"
-
 # with this, we can make http calls to the endpoint: /onionscan
-shell2http.register_command(endpoint="onionscan", command_name=onionscan_binary)
+shell2http.register_command(endpoint="onionscan", command_name="./bundled/onionscan")

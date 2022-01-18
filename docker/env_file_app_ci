@@ -100,6 +100,7 @@ CONNECTOR_YETI_URL=http://fake_url.com
 DRAGONFLY_API_URL=http://fake_url.com
 
 # other variables
+STAGE="ci"
 DEBUG=True
 DISABLE_LOGGING_TEST=True
 MOCK_CONNECTIONS=True

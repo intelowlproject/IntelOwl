@@ -1,4 +1,19 @@
+# Stage 1: Frontend 
+FROM node:lts-alpine3.14 as frontend-build
+
+WORKDIR /
+# copy react source code
+COPY frontend/ .
+# install and build
+RUN npm install npm@latest -g
+RUN npm install
+
+RUN PUBLIC_URL=/static/reactapp/ npm run build
+
+# Stage 2: Backend
 FROM python:3.9.7-buster
+
+COPY --from=frontend-build /build /var/www/reactapp
 
 ENV PYTHONUNBUFFERED 1
 ENV DJANGO_SETTINGS_MODULE intel_owl.settings

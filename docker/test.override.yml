@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   uwsgi:
@@ -15,8 +15,6 @@ services:
     build:
       context: ..
       dockerfile: docker/Dockerfile_nginx
-      args:
-        INTELOWL_NG_TAG_VERSION: ${INTELOWL_NG_TAG_VERSION}
 
   celery_beat:
     image: intelowlproject/intelowl:test

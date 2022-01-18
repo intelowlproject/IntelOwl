@@ -43,12 +43,12 @@ jobs:
     - name: "Isort check"
       run: |
         sudo docker exec intelowl_uwsgi isort . --profile black --filter-files --check-only --diff --skip configuration/ldap_config.py
-    - name: "Test: API"
+    - name: "Test: api_app"
       run: |
-        sudo docker/scripts/coverage_test.sh tests.test_api tests.test_auth
+        sudo docker/scripts/coverage_test.sh tests.api_app
     - name: "Test: Cron"
       run: |
-        sudo docker/scripts/coverage_test.sh tests.test_generic
+        sudo docker/scripts/coverage_test.sh tests.test_crons
     - name: "Test: Connectors Manager"
       run: |
         sudo docker/scripts/coverage_test.sh tests.connectors_manager

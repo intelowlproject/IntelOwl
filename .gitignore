@@ -12,3 +12,6 @@ compose-elk.yml
 docs/build/
 configuration/service_account_keyfile.json
 coverage_reports/
+node_modules/
+frontend/.env
+frontend/public/env.js

@@ -75,17 +75,16 @@ class VirusheeFileUpload(FileAnalyzer):
                 response.raise_for_status()
             except requests.RequestException as exc:
                 raise AnalyzerRunException(str(exc))
-            if response.status_code == 202:
-                time.sleep(self.poll_distance)
-                continue
-            elif response.status_code == 200:
-                response_json = response.json()
+            response_json = response.json()
+            if response.status_code == 200:
                 break
+            time.sleep(self.poll_distance)
 
         return response_json
 
     @classmethod
     def _monkeypatch(cls):
+        cls.poll_distance = 1  # for tests
         patches = [
             if_mock_connections(
                 patch(
@@ -94,9 +93,7 @@ class VirusheeFileUpload(FileAnalyzer):
                 ),
                 patch(
                     "requests.Session.post",
-                    return_value=MockResponse(
-                        {"task": "80ca33ee-2df2-489a-9444-886db9abc5f0"}, 201
-                    ),
+                    return_value=MockResponse({"task": "123-456-789"}, 201),
                 ),
                 patch(
                     "requests.Session.get",

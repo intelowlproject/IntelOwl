@@ -3249,7 +3249,7 @@
   },
   "Virushee_UploadFile":{
     "type": "file",
-    "python_module": "virushee.Virushee",
+    "python_module": "virushee.VirusheeFileUpload",
     "description": "Check file hash and upload file sample for analysis. [Virushee API](https://api.virushee.com/).",
     "disabled": false,
     "external_service": true,
@@ -3258,7 +3258,13 @@
       "soft_time_limit": 300,
       "queue": "long"
     },
-    "secrets": {},
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "VIRUSHEE_API_KEY",
+        "description": "[virushee docs](https://api.virushee.com/#section/Authentication)",
+        "required": false
+      }
+    },
     "params": {
       "force_scan": {
         "value": false,

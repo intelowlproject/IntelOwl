@@ -1,5 +1,4 @@
 import time
-from django.http import response
 
 import requests
 
@@ -19,8 +18,8 @@ class CAPEsandbox(FileAnalyzer):
         )
         self.__session = requests.Session()
         self.__session.headers = {
-                "Authorization": f"Token {self.__token}",
-            }
+            "Authorization": f"Token {self.__token}",
+        }
 
     def run(self):
         api_url: str = self.__base_url + "/apiv2/tasks/create/file/"
@@ -43,7 +42,7 @@ class CAPEsandbox(FileAnalyzer):
         if response_json.get("error") is False:
             to_respond["result_url"] = response_json.get("url")
             task_id = response_json.get("data").get("task_ids")[0]
-            result = self.__poll_for_result(task_id = task_id)
+            result = self.__poll_for_result(task_id=task_id)
             to_respond["response"] = result
             return to_respond
 
@@ -60,7 +59,9 @@ class CAPEsandbox(FileAnalyzer):
             to_respond["result_url"] = gui_report_url
 
             try:
-                final_request = self.__session.get(report_url,)
+                final_request = self.__session.get(
+                    report_url,
+                )
             except requests.RequestException as e:
                 raise AnalyzerRunException(e)
 
@@ -70,8 +71,10 @@ class CAPEsandbox(FileAnalyzer):
             return to_respond
 
         return response_json
-    
-    def __search_by_md5(self,):
+
+    def __search_by_md5(
+        self,
+    ):
         db_search_url = self.__base_url + "/apiv2/tasks/search/md5/" + self.md5
 
         try:
@@ -85,13 +88,11 @@ class CAPEsandbox(FileAnalyzer):
 
         return status_id
 
-
     def __poll_for_result(
-        self, task_id,
+        self,
+        task_id,
     ):
-        status_api = (
-                self.__base_url + "/apiv2/tasks/status/" + str(task_id)
-            )
+        status_api = self.__base_url + "/apiv2/tasks/status/" + str(task_id)
         for i in range(self.max_tries):
             try:
                 r = self.__session.get(status_api)
@@ -113,7 +114,9 @@ class CAPEsandbox(FileAnalyzer):
                     + "/json"
                 )
                 try:
-                    final_request = self.__session.get(report_url,)
+                    final_request = self.__session.get(
+                        report_url,
+                    )
                     final_request.raise_for_status()
                 except requests.RequestException as e:
                     raise AnalyzerRunException(e)

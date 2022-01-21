@@ -128,6 +128,7 @@ In the `env_file_app`, configure different variables as explained below.
 * `YETI_URL`: your own YETI instance URL
 * `SPYSE_API_KEY`: [Spyse](https://spyse.com/) API key. Register here: https://spyse.com/user/registration"
 * `DRAGONFLY_API_KEY`: Dragonfly API key. Register [here](https://dragonfly.certego.net/register?utm_source=intelowl).
+* `VIRUSHEE_API_KEY`: Virushee API key. ([docs](https://api.virushee.com/))
 
 **Optional** variables needed to work with specific connectors:
 * `CONNECTOR_MISP_KEY`: your own MISP instance key to use with `MISP` connector

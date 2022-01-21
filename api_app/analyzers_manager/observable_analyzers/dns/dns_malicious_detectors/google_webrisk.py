@@ -46,7 +46,7 @@ class WebRisk(classes.ObservableAnalyzer):
 
         threat_types = threats_found.threat_types
 
-        malicious = True if threat_types else False
+        malicious = bool(threat_types)
         web_risk_result = malicious_detector_response(self.observable_name, malicious)
         # append extra data
         if malicious:

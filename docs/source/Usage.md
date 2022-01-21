@@ -48,14 +48,22 @@ You can also modify analyzer specific parameters from the configuration file or 
 ```json
     "Yara_Scan_Custom_Signatures": {
         "type": "file",
-        "python_module": "yara.Yara",
+        "python_module": "yara_scan.YaraScan",
         "description": "Executes Yara with custom signatures",
+        "disabled": false,
+        "external_service": false,
+        "leaks_info": false,
+        "secrets": {},
         "config": {
-            "queue": "default",
-            "soft_time_limit": 100,
+              "queue": "default",
+              "soft_time_limit": 100
         },
         "params": {
-            "directories_with_rules": ["/opt/deploy/yara/custom_signatures"]
+              "directories_with_rules": {
+              "value": ["/opt/deploy/yara/custom_ruleset"],
+              "type": "list",
+              "description": ""
+            }
         }
     }
 ```
@@ -174,6 +182,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `HashLookupServer_Get_File`: check if a md5 or sha1 is available in the database of [known file hosted by CIRCL](https://github.com/adulau/hashlookup-server)
 * `FileScan_Upload_File`: Upload your file to extract IoCs from executable files, documents and scripts via [FileScan.io API](https://www.filescan.io/api/docs).
 * `Dragonfly_Emulation`: Emulate malware against [Dragonfly](https://dragonfly.certego.net?utm_source=intelowl) sandbox by [Certego S.R.L](https://certego.net?utm_source=intelowl).
+* `Virushee_UploadFile`: Check file hash and upload file sample for analysis on [Virushee API](https://api.virushee.com/).
 
 ##### Observable analyzers (ip, domain, url, hash)
 * `VirusTotal_v3_Get_Observable`: search an observable in the VirusTotal DB
@@ -257,6 +266,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `ClamAV`: scan a file via the [ClamAV AntiVirus Engine](https://www.clamav.net/)
 * `Spyse`: Scan domains, IPs, emails and CVEs using Spyse's API. Register [here](https://spyse.com/user/registration).
 * `FileScan_Search`: Finds reports and uploaded files by various tokens, like hash, filename, verdict, IOCs etc via [FileScan.io  API](https://www.filescan.io/api/docs).
+* `Virushee_CheckHash`: Search for a previous analysis of a file by its hash (SHA256/SHA1/MD5) on [Virushee API](https://api.virushee.com/).
 
 ##### Generic analyzers (email, phone number, etc.; anything really)
 Some analyzers require details other than just IP, URL, Domain, etc. We classified them as `generic` Analyzers. Since the type of field is not known, there is a format for strings to be followed.

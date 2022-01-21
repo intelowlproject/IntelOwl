@@ -1,8 +1,6 @@
 import logging
-import time
-from copy import deepcopy
 
-from pydragonfly import Dragonfly, DragonflyException, TParams
+from pydragonfly import Dragonfly, DragonflyException
 
 from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.exceptions import AnalyzerRunException
@@ -39,17 +37,11 @@ class DragonflyEmulation(FileAnalyzer):
             # 1. upload sample for analysis
             logger.info(f"({repr(self)}) -> uploading file...")
             analysis_id = self.__upload()
-            # 2. wait for analysis to finish
+            # 2. fetch and build full report
             logger.info(
-                f"({repr(self)}) -> analysis_id: #{analysis_id} -> starting polling..."
+                f"({repr(self)}, analysis_id: #{analysis_id}) -> poll & fetch result..."
             )
-            self.__poll_status(analysis_id)
-            # 3. fetch and build full report
-            logger.info(
-                f"({repr(self)}) -> analysis_id: #{analysis_id} -> fetching report..."
-            )
-            result = self.__fetch_and_build_result(analysis_id)
-            return result
+            return self.__poll_and_fetch_result(analysis_id)
         except DragonflyException as exc:
             raise AnalyzerRunException(str(exc))
 
@@ -66,73 +58,22 @@ class DragonflyEmulation(FileAnalyzer):
         )
         return response.data["id"]
 
-    def __poll_status(self, analysis_id: int) -> None:
-        """
-        Poll for analysis status until it finishes.
-        """
-        for chance in range(self.max_tries):
-            time.sleep(self.poll_distance)
-            logger.info(
-                f"({self.__repr__()}) -> POLLING: try#{chance + 1}."
-                f"...starting the query..."
-            )
-            response = self.df.Analysis.retrieve(
-                object_id=analysis_id, params=TParams(fields=["id", "status"])
-            )
-            status = response.data.get("status", False)
-            logger.info(
-                f"({self.__repr__()}) -> POLLING: try#{chance + 1}."
-                f"...status: '{status}'"
-            )
-            if status in ["FAILED", "ANALYZED", "REVOKED"]:
-                break
-
-    def __fetch_and_build_result(self, analysis_id: int) -> dict:
+    def __poll_and_fetch_result(self, analysis_id: int) -> dict:
         """
         Retrieve analysis and corresponding report objects
         """
-        # fetch analysis object
-        response = self.df.Analysis.retrieve(
-            object_id=analysis_id,
-            params=TParams(
-                fields=[
-                    "id",
-                    "created_at",
-                    "evaluation",
-                    "status",
-                    "weight",
-                    "malware_families",
-                    "malware_behaviours",
-                    "api_url",
-                    "gui_url",
-                    "sample",
-                    "reports.id",
-                    "reports.weight",
-                    "reports.status",
-                    "reports.evaluation",
-                    "reports.error",
-                    "reports.profile",
-                ],
-                expand=["reports", "reports.profile"],
-            ),
+        result_obj = self.df.analysis_result(
+            analysis_id=analysis_id,
+            waiting_time=self.poll_distance,
+            max_wait_cycle=self.max_tries,
         )
-        analysis = deepcopy(response.data)
 
-        # fetch matched_rules for corresponding report objects
-        for idx in range(len(analysis["reports"])):
-            report_id = analysis["reports"][idx]["id"]
-            _resp = self.df.Report.matched_rules(
-                object_id=report_id
-            )  # fetch matched_rules
-            analysis["reports"][idx]["matched_rules"] = [
-                {field: rule[field] for field in ["id", "rule", "weight", "matches"]}
-                for rule in _resp.data
-            ]  # filter out the fields we need
-
-        return analysis
+        return result_obj.asdict()
 
     @classmethod
     def _monkeypatch(cls):
+        cls.max_tries = 0  # for test
+        cls.poll_distance = 0  # for test
         patches = [
             if_mock_connections(
                 patch(
@@ -143,15 +84,42 @@ class DragonflyEmulation(FileAnalyzer):
                         ),  # __upload; sample ID
                         MockResponse({"id": 1}, 201),  # __upload; analysis ID
                         MockResponse(
-                            {"id": 1, "status": "ANALYZED"}, 200
-                        ),  # __poll_status
-                        MockResponse(
-                            {"id": 1, "status": "ANALYZED", "reports": [{"id": 1}]}, 200
-                        ),  # __fetch_and_build_result
+                            {
+                                "id": 1,
+                                "created_at": "2022-01-17T12:07:55.446274Z",
+                                "status": "ANALYZED",
+                                "evaluation": "MALICIOUS",
+                                "weight": 120,
+                                "malware_families": ["Ransomware", "Trojan"],
+                                "mitre_techniques": [
+                                    {
+                                        "tid": "tactic_tid",
+                                        "name": "test_tactic",
+                                        "techniques": [
+                                            {
+                                                "tid": "technique_tid",
+                                                "name": "test_technique",
+                                            }
+                                        ],
+                                    }
+                                ],
+                                "sample": {"id": 1, "filename": "test"},
+                                "reports": [
+                                    {
+                                        "id": 1,
+                                        "error": "Internal error",
+                                        "profile": {"id": 1, "filename": "test.ql"},
+                                    },
+                                ],
+                                "gui_url": "dragonfly.certego.net/analysis/1",
+                                "api_url": "dragonfly.certego.net/api/analysis/1",
+                            },
+                            200,
+                        ),  # __poll_and_fetch_result; Analysis.retrieve
                         MockResponse(
                             [{"id": 1, "rule": "testrule", "weight": 0, "matches": []}],
                             200,
-                        ),  # __fetch_and_build_result
+                        ),  # __poll_and_fetch_result; Report.matched_rules
                     ],
                 )
             )

@@ -50,7 +50,8 @@ else:
             _path = os.path.join(path_dir, name)
             if not os.path.exists(_path):
                 os.makedirs(path_dir, exist_ok=True)
-                assert self.exists(name)
+                if not self.exists(name):
+                    raise AssertionError
                 with self.open(name) as s3_file_object:
                     content = s3_file_object.read()
                     s3_file_object.seek(0)
@@ -153,7 +154,7 @@ REST_FRAMEWORK = {
 # DRF Spectacular
 SPECTACULAR_SETTINGS = {
     "TITLE": "IntelOwl API specification",
-    "VERSION": "3.2.3",
+    "VERSION": "3.2.4",
 }
 
 # Django-Rest-Durin

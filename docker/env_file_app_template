@@ -82,6 +82,7 @@ SPYSE_API_KEY=
 DRAGONFLY_API_KEY=
 DRAGONFLY_API_URL=https://dragonfly.certego.net
 BITCOINABUSE_KEY=
+VIRUSHEE_API_KEY=
 
 # connectors secrets (optional)
 CONNECTOR_MISP_KEY=

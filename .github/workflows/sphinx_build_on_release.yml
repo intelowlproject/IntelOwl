@@ -1,0 +1,25 @@
+name: Sphinx Build on Release
+
+on:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - name: Install docs requirements
+        run: |
+          pip install -r docs/source/requirements.txt
+
+      - name: Build docs
+        run: |
+          make -C docs html

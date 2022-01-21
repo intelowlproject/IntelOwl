@@ -3250,7 +3250,7 @@
   "Virushee_CheckHash":{
     "type": "observable",
     "python_module": "virushee.VirusheeCheckHash",
-    "description": "Check file status by SHA256 / SHA1 / MD5 hash [Virushee API](https://api.virushee.com/).",
+    "description": "Search for a previous analysis of a file by its hash (SHA256/SHA1/MD5) on [Virushee API](https://api.virushee.com/).",
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
@@ -3271,7 +3271,7 @@
   "Virushee_UploadFile":{
     "type": "file",
     "python_module": "virushee.VirusheeFileUpload",
-    "description": "Check file hash and upload file sample for analysis. [Virushee API](https://api.virushee.com/).",
+    "description": "Check file hash and upload file sample for analysis on [Virushee API](https://api.virushee.com/).",
     "disabled": false,
     "external_service": true,
     "leaks_info": true,

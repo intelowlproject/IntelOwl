@@ -86,6 +86,7 @@ class DragonflyEmulation(FileAnalyzer):
                         MockResponse(
                             {
                                 "id": 1,
+                                "created_at": "2022-01-17T12:07:55.446274Z",
                                 "status": "ANALYZED",
                                 "evaluation": "MALICIOUS",
                                 "weight": 120,

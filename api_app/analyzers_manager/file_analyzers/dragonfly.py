@@ -94,12 +94,10 @@ class DragonflyEmulation(FileAnalyzer):
                                     {
                                         "tid": "tactic_tid",
                                         "name": "test_tactic",
-                                        "description": "test",
                                         "techniques": [
                                             {
                                                 "tid": "technique_tid",
                                                 "name": "test_technique",
-                                                "description": "test",
                                             }
                                         ],
                                     }

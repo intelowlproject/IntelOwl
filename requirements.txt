@@ -41,7 +41,7 @@ pysafebrowsing==0.1.1
 PySocks==1.7.1
 python-dotenv==0.19.2
 quark-engine==22.1.1
-requests==2.26.0
+requests==2.27.1
 speakeasy-emulator==1.5.9
 uWSGI==2.0.19.1
 yara-python==4.1.0

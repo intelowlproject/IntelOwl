@@ -3247,6 +3247,27 @@
     },
     "params": {}
   },
+  "Virushee_CheckHash":{
+    "type": "observable",
+    "python_module": "virushee.VirusheeCheckHash",
+    "description": "Check file status by SHA256 / SHA1 / MD5 hash [Virushee API](https://api.virushee.com/).",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": ["hash"],
+    "config": {
+      "soft_time_limit": 60,
+      "queue": "long"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "VIRUSHEE_API_KEY",
+        "description": "[virushee docs](https://api.virushee.com/#section/Authentication)",
+        "required": false
+      }
+    },
+    "params": {}
+  },
   "Virushee_UploadFile":{
     "type": "file",
     "python_module": "virushee.VirusheeFileUpload",

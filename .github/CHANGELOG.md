@@ -2,6 +2,25 @@
 
 [**Upgrade Guide**](https://intelowl.readthedocs.io/en/latest/Installation.html#update-to-the-most-recent-version)
 
+## [v3.2.4](https://github.com/intelowlproject/IntelOwl/releases/tag/v3.2.4)
+
+**Notes:**
+
+- The `Dragonfly_Emulation` analyzer will stop working without this update. Note that the output format (report JSON attributes) of this analyzer has had changes as well.
+
+**New Analyzers:**
+
+- `Virushee_UploadFile`: Check file hash and upload file sample for analysis on [Virushee API](https://api.virushee.com/).
+- `Virushee_CheckHash`: Search for a previous analysis of a file by its hash (SHA256/SHA1/MD5) on [Virushee API](https://api.virushee.com/).
+  > Setting the `VIRUSHEE_API_KEY` is optional to use these analyzers.
+
+**Other:**
+
+- A lot of code cleanliness. Thanks to @deepsource-autofix[bot].
+- Make the `repo_downloader.sh` step optional during development using the `.env.start.test.template` file.
+- Bump `pydragonfly` dependency for `Dragonfly_Emulation` analyzer.
+- Bump some python dependencies.
+
 ## [v3.2.3](https://github.com/intelowlproject/IntelOwl/releases/tag/v3.2.3)
 
 **New Analyzers:**

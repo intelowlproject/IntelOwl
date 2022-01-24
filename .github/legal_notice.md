@@ -21,6 +21,7 @@ license terms.
 [OTX-Python-SDK](https://github.com/AlienVault-OTX/OTX-Python-SDK),
 [yara-python](https://github.com/VirusTotal/yara-python),
 [GitPython](https://github.com/gitpython-developers/GitPython),
+[Malpedia Yara rules](https://github.com/malpedia/signator-rules),
 [ATM Malware Yara rules](https://github.com/fboldewin/YARA-rules),
 [Yara community rules](https://github.com/Yara-Rules),
 [StrangerealIntel Daily Ioc Yara rules](https://github.com/StrangerealIntel/DailyIOC),

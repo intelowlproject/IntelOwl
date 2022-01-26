@@ -155,7 +155,7 @@ def start():
         compose_files.extend(list(path_mapping[f"all_analyzers{test_appendix}"]))
 
     # load relevant .env file
-    load_dotenv("docker/.env" + test_appendix)
+    load_dotenv("docker/.env.start" + test_appendix)
     # construct final command
     base_command = [
         "docker-compose",

@@ -13,7 +13,7 @@ drf-flex-fields==0.9.1
 django-radius==1.5.0
 djangorestframework-guardian==0.3.0
 django-storages==1.12.1
-dnspython==2.1.0
+dnspython==2.2.0
 dnstwist==20211204
 ppdeep>=20200505
 drf-spectacular==0.21.0

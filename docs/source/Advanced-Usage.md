@@ -246,6 +246,22 @@ How to configure and enable LDAP on Intel Owl?
   Finally, you can restart the application with `docker-compose up`
 
 
+#### RADIUS Authentication
+
+IntelOwl leverages [Django-radius](https://github.com/robgolding/django-radius) to perform authentication
+via RADIUS server.
+
+How to configure and enable RADIUS authentication on Intel Owl?
+
+1. Change the values with your RADIUS auth configuration inside `configuration/radius_config.py`. This file is mounted as a
+   docker volume, so you won't need to rebuild the image.
+
+> For more details on how to configure this file, check the [official documentation](https://github.com/robgolding/django-radius) of the django-radius library.
+
+2. Once you have done that, you have to set the environment variable `RADIUS_AUTH_ENABLED` as `True` in the environment
+   configuration file `env_file_app`. Finally, you can restart the application with `docker-compose up`
+
+
 ## Google Kubernetes Engine deployment
 Refer to the following blog post for an example on how to deploy IntelOwl on Google Kubernetes Engine:
 

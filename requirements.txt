@@ -10,6 +10,7 @@ django-rest-durin==0.3.0
 django-cache-memoize==0.1.9
 djangorestframework==3.13.1
 drf-flex-fields==0.9.1
+django-radius==1.5.0
 djangorestframework-guardian==0.3.0
 django-storages==1.12.1
 dnspython==2.1.0

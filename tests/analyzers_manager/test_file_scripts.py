@@ -57,6 +57,7 @@ class EXEAnalyzersTestCase(_FileAnalyzersScriptsTestCase):
                 "OTX_Check_Hash",
                 "Dragonfly_Emulation",
                 "FileScan_Upload_File",
+                "Virushee_UploadFile",
             ],
         }
 

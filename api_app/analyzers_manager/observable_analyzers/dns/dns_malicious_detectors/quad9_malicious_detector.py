@@ -61,7 +61,7 @@ class Quad9MaliciousDetector(classes.ObservableAnalyzer):
         except requests.RequestException as e:
             raise AnalyzerRunException(e)
 
-        return True if quad9_response.json().get("Answer", None) else False
+        return bool(quad9_response.json().get("Answer", None))
 
     def _google_dns_query(self, observable) -> bool:
         """Perform a DNS query with Google service, return True if Google answer the
@@ -81,7 +81,7 @@ class Quad9MaliciousDetector(classes.ObservableAnalyzer):
         except requests.RequestException as e:
             raise AnalyzerRunException(e)
 
-        return True if google_response.json().get("Answer", None) else False
+        return bool(google_response.json().get("Answer", None))
 
     @classmethod
     def _monkeypatch(cls):

@@ -27,7 +27,7 @@ AWS_REGION=eu-central-1
 
 # Elastic Search Configuration
 ELASTICSEARCH_ENABLED=False
-ELASTICSEARCH_HOST=
+ELASTICSEARCH_HOST=elasticsearch:9200
 # consult to: https://django-elasticsearch-dsl.readthedocs.io/en/latest/settings.html
 ELASTICSEARCH_NO_OF_SHARDS=1
 ELASTICSEARCH_NO_OF_REPLICAS=0

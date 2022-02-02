@@ -138,13 +138,13 @@ class CAPEsandbox(FileAnalyzer):
         patches = [
             if_mock_connections(
                 patch(
-                    "requests.get",
+                    "Session.get",
                     return_value=MockResponse(
                         {"error": False, "data": "completed"}, 200
                     ),
                 ),
                 patch(
-                    "requests.post",
+                    "Session.post",
                     return_value=MockResponse(
                         {
                             "error": False,

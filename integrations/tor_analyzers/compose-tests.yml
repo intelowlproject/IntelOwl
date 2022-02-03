@@ -12,7 +12,7 @@ services:
     container_name: intelowl_tor_analyzers
     restart: unless-stopped
     expose:
-      - "4004"
+      - "4001"
     env_file:
       - env_file_integrations
     volumes:

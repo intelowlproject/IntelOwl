@@ -6,7 +6,7 @@ from api_app.analyzers_manager.classes import DockerBasedAnalyzer, ObservableAna
 
 class Onionscan(ObservableAnalyzer, DockerBasedAnalyzer):
     name: str = "Onionscan"
-    url: str = "http://tor_analyzers:4004/onionscan"
+    url: str = "http://tor_analyzers:4001/onionscan"
     # http request polling max number of tries
     max_tries: int = 60
     # interval between http request polling (in seconds)

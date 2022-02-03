@@ -37,5 +37,5 @@ COPY bundled bundled
 RUN chmod 755 -R bundled
 
 # Serve Flask application using gunicorn
-EXPOSE 4004
+EXPOSE 4001
 ENTRYPOINT ["./entrypoint.sh"]

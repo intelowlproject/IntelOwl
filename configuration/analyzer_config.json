@@ -266,7 +266,7 @@
     "leaks_info": true,
     "docker_based": false,
     "config": {
-      "soft_time_limit": 500,
+      "soft_time_limit": 1000,
       "queue": "long"
     },
     "secrets": {
@@ -286,6 +286,16 @@
         "value": "win7x64_8",
         "type": "str",
         "description": "The VM to be used in the analysis."
+      },
+      "max_tries": {
+        "value": 50,
+        "type": "int",
+        "description": "Number of max tries while trying to poll the CAPESandbox API."
+      },
+      "poll_distance": {
+        "value": 30,
+        "type": "int",
+        "description": "Seconds to wait before moving on to the next poll attempt."
       }
     }
   },

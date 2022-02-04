@@ -1,3 +1,4 @@
+import logging
 import time
 
 import requests
@@ -5,14 +6,15 @@ import requests
 from api_app.analyzers_manager.classes import AnalyzerRunException, FileAnalyzer
 from tests.mock_utils import MockResponse, if_mock_connections, patch
 
+logger = logging.getLogger(__name__)
+
 
 class CAPEsandbox(FileAnalyzer):
-    max_tries: int = 25
-    poll_distance = 30
-
     def set_params(self, params):
         self.__token = self._secrets["api_key_name"]
         self.__vm_name = params.get("VM_NAME", "win7x64_8")
+        self.max_tries = params.get("max_tries", 50)
+        self.poll_distance = params.get("poll_distance", 30)
         self.__base_url = self._secrets.get(
             "url_key_name", "https://www.capesandbox.com"
         )
@@ -37,6 +39,7 @@ class CAPEsandbox(FileAnalyzer):
         except requests.RequestException as e:
             raise AnalyzerRunException(e)
 
+        logger.info(f"[INFO] (Job: {self.job_id} -> Uploaded the file to CAPESandbox")
         response_json = response.json()
 
         if response_json.get("error") is False:
@@ -51,8 +54,36 @@ class CAPEsandbox(FileAnalyzer):
             == "Not unique, as unique option set on submit or in conf/web.conf"
         ):
 
+            """
+                The above response is only returned when a sample that has been already
+                uploaded once is uploaded again.
+
+                If it has been then we can just check it's
+                report by querying the CAPESandbox API with the md5 hash of
+                the file.
+
+                If it exists in their database and is readable by us,
+                the following code further fetches it's information.
+                response_json in this case should look somewhat like this:
+
+            {
+                'error': True,
+                'error_value': 'Error adding task to database',
+                'errors': [{
+                    'filename.exe':
+                        'Not unique, as unique option set on submit or in conf/web.conf'
+                }]
+            }
+            """
+
+            logger.info(
+                f"[INFO] (Job: {self.job_id} -> "
+                "File uploaded is already present in the database. "
+                "Querying its information through it's md5 hash.."
+            )
+
             status_id = self.__search_by_md5()
-            gui_report_url = self.__base_url + "/analysis/" + status_id
+            gui_report_url = self.__base_url + "/submit/status/" + status_id
             report_url = (
                 self.__base_url + "/apiv2/tasks/get/report/" + status_id + "/json"
             )
@@ -68,13 +99,11 @@ class CAPEsandbox(FileAnalyzer):
             final_json = final_request.json()
             to_respond["response"] = final_json
 
-            return to_respond
+            response_json = to_respond
 
         return response_json
 
-    def __search_by_md5(
-        self,
-    ):
+    def __search_by_md5(self) -> str:
         db_search_url = self.__base_url + "/apiv2/tasks/search/md5/" + self.md5
 
         try:
@@ -84,29 +113,60 @@ class CAPEsandbox(FileAnalyzer):
         except requests.RequestException as e:
             raise AnalyzerRunException(e)
 
-        status_id = str(q.json().get("data")[0].get("id"))
+        data_list = q.json().get("data")
+        if data_list:
+            status_id_int = data_list[0].get("id")
+            status_id = str(status_id_int)
+            return status_id
 
-        return status_id
+        raise AnalyzerRunException(
+            "'data' key in response isn't populated as expected."
+        )
 
     def __poll_for_result(
         self,
         task_id,
-    ):
+    ) -> dict:
         status_api = self.__base_url + "/apiv2/tasks/status/" + str(task_id)
         for i in range(self.max_tries):
+            logger.info(
+                f"[POLLING] (Job: {self.job_id} -> "
+                f"CAPEsandbox __poll_for_result #{i + 1}/{self.max_tries}"
+            )
             try:
                 r = self.__session.get(status_api)
                 if r.status_code == 429:
+                    logger.info(
+                        f"[INFO] (Job: {self.job_id} -> "
+                        "Rate limited by CAPESandbox API. "
+                        f"Sleeping for {self.poll_distance} seconds."
+                    )
                     time.sleep(self.poll_distance)
                 else:
                     r.raise_for_status()
             except requests.RequestException as e:
-                raise AnalyzerRunException(e)
+                if i == self.max_tries - 1:
+                    raise AnalyzerRunException(e)
+                    # ^ Unhandled exception at the last trial raised.
+                logger.info(
+                    f"[WARNING] (Job: {self.job_id} -> "
+                    f"Unhandled exception at poll attempt number: "
+                    f"{i}/{self.max_tries}. Ignoring and proceeding.."
+                )
 
             responded_json = r.json()
             error = responded_json.get("error")
             data = responded_json.get("data")
-            if not error and (data in ("reported", "completed")):
+
+            logger.info(
+                f"[INFO] (Job: {self.job_id} -> "
+                f"Status of the CAPESandbox task: {data}"
+            )
+
+            if error:
+                raise AnalyzerRunException(error)
+
+            elif data in ("reported", "completed"):
                 report_url = (
                     self.__base_url
                     + "/apiv2/tasks/get/report/"
@@ -122,16 +182,26 @@ class CAPEsandbox(FileAnalyzer):
                     raise AnalyzerRunException(e)
 
                 final_json = final_request.json()
+                response_ = final_json
+                return response_
 
-                if final_json.get("error"):
-                    response_ = final_json
-                    return response_
+            elif data in ("pending", "running", "processing"):
+                if i == self.max_tries - 1:
+                    raise AnalyzerRunException(f"Task still {data}. Polling has ended.")
+                    """
+                        At times, What I have noticed is that
+                        CAPESandbox likes to leave your submission pending.
+                        It has a proper pending queue.
 
-            elif error:
-                raise AnalyzerRunException(error)
-
-            elif data == "running":
-                time.sleep(30)
+                        Usually the status changes like this:
+                        pending -> running -> processing -> completed -> reported
+                    """
+                logger.info(
+                    f"[INFO] (Job: {self.job_id} ->"
+                    f"Poll number {i + 1}/{self.max_tries} completed."
+                    f"Sleeping for {self.poll_distance} seconds before next attempt."
+                )
+                time.sleep(self.poll_distance)
 
     @classmethod
     def _monkeypatch(cls):

@@ -159,8 +159,9 @@ In the `env_file_app_template`, you'd see various elasticsearch related environm
 Intel Owl provides a Kibana's "Saved Object" configuration (with example dashboard and visualizations). It can be downloaded from [here](https://github.com/intelowlproject/IntelOwl/blob/develop/configuration/Kibana-Saved-Conf.ndjson) and can be imported into Kibana by going to the "Saved Objects" panel (http://localhost:5601/app/management/kibana/objects).
 
 #### Example Configuration
-1. Setup [Elastic Search and Kibana](https://hub.docker.com/r/nshou/elasticsearch-kibana/) and say it is running in a docker service with name `elk` on port `9200` which is exposed to the shared docker network.
-2. In the `env_file_app`, we set `ELASTICSEARCH_ENABLED` to `True` and `ELASTICSEARCH_HOST` to `elk:9200`.
+1. Setup [Elastic Search and Kibana](https://hub.docker.com/r/nshou/elasticsearch-kibana/) and say it is running in a docker service with name `elasticsearch` on port `9200` which is exposed to the shared docker network.
+   (Alternatively, you can spin up a local Elastic Search instance, by appending ```--elastic``` to the ```python3 start.py ...``` command. Note that the local Elastic Search instance consumes large amount of memory, and hence having >=16GB is recommended.))
+2. In the `env_file_app`, we set `ELASTICSEARCH_ENABLED` to `True` and `ELASTICSEARCH_HOST` to `elasticsearch:9200`.
 3. In the `Dockerfile`, set the correct version in `ELASTICSEARCH_DSL_VERSION` [depending on the version](https://django-elasticsearch-dsl.readthedocs.io/en/latest/about.html#features) of our elasticsearch server. Default value is `7.1.4`.
 4. Rebuild the docker images with `docker-compose build` (required only if `ELASTICSEARCH_DSL_VERSION` was changed)
 5. Now start the docker containers and execute,
@@ -170,6 +171,7 @@ Intel Owl provides a Kibana's "Saved Object" configuration (with example dashboa
   ```
 
   This will build and populate all existing job objects into the `jobs` index.
+
 
 
 ## Django Groups & Permissions

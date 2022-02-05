@@ -26,6 +26,7 @@ path_mapping = {
     "test_multi_queue": "docker/test.multi-queue.override.yml",
     "flower": "docker/flower.override.yml",
     "test_flower": "docker/test.flower.override.yml",
+    "elastic": "docker/elasticsearch.override.yml",
 }
 # to fix the box-js folder name
 path_mapping.update(
@@ -114,11 +115,21 @@ def start():
         help="While using 'test' mode, this allows to use the default"
         " Django server instead of Uwsgi",
     )
+    parser.add_argument(
+        "--elastic",
+        required=False,
+        action="store_true",
+        help="This spins up Elasticsearch"
+        "and Kibana on your machine (might need >=16GB of RAM)",
+    )
+
     args, unknown = parser.parse_known_args()
     # logic
     test_appendix = ""
     if args.mode == "test":
         test_appendix = ".test"
+    # load relevant .env file
+    load_dotenv("docker/.env.start" + test_appendix)
     docker_flags = [
         args.__dict__[docker_analyzer] for docker_analyzer in docker_analyzers
     ]
@@ -138,6 +149,8 @@ def start():
             compose_files.append(path_mapping["django_server"])
         else:
             compose_files.append(path_mapping[args.mode])
+    if args.__dict__["elastic"]:
+        compose_files.append(path_mapping["elastic"])
     # upgrades
     for key in ["traefik", "multi_queue", "custom", "flower"]:
         if args.__dict__[key]:
@@ -154,8 +167,6 @@ def start():
     if args.all_analyzers:
         compose_files.extend(list(path_mapping[f"all_analyzers{test_appendix}"]))
 
-    # load relevant .env file
-    load_dotenv("docker/.env.start" + test_appendix)
     # construct final command
     base_command = [
         "docker-compose",

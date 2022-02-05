@@ -14,7 +14,7 @@ django-radius==1.5.0
 djangorestframework-guardian==0.3.0
 django-storages==1.12.1
 dnspython==2.2.0
-dnstwist==20211204
+dnstwist==20220131
 ppdeep>=20200505
 drf-spectacular==0.21.0
 easygui==0.98.2
@@ -24,7 +24,7 @@ google>=3.0.0
 google-cloud-webrisk==1.6.0
 intezer-sdk==1.6
 maxminddb==2.2.0
-mwdblib==3.4.0
+mwdblib==4.0.0
 oletools==0.60
 OTXv2==1.5.12
 peepdf-fork==0.4.3

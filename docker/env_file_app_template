@@ -98,7 +98,7 @@ TEST_URL=https://www.google.com/search?test
 TEST_MD5=446c5fbb11b9ce058450555c1c27153c
 
 # URLs
-CAPESANDBOX_URL=https://www.capesandbox.com
+CAPESANDBOX_URL=
 CUCKOO_URL=
 MISP_URL=
 FIRST_MISP_URL=

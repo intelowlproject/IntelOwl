@@ -5,6 +5,7 @@ The project leverages `docker-compose` with a custom python script so you need t
 * [docker](https://docs.docker.com/get-docker/) - v1.13.0+
 * [docker-compose](https://docs.docker.com/compose/install/) - v1.23.2+
 * [python](https://www.python.org/) - v3.6+
+* There are additional python dependencies (mentioned in the `pre-requirements.txt` file) that can be installed using the `initialize.sh` script.
 
 In some systems you could find pre-installed older versions. Please check this and install a supported version before attempting the installation. Otherwise it would fail.
 
@@ -18,9 +19,11 @@ In some systems you could find pre-installed older versions. Please check this a
 </div>
 
 ## TL;DR
-Obviously we strongly suggest to read through all the page to configure IntelOwl in the most appropriate way.
+Obviously we strongly suggest reading through all the page to configure IntelOwl in the most appropriate way.
 
 However, if you feel lazy, you could just install and test IntelOwl with the following steps. Be sure to run `docker` and `python` commands with `sudo` if permissions/roles have not been set
+
+**Note:** We've added a new script `initialize.sh` that will check compatibility with your system and attempt to install the required dependencies.
 
 ```bash
 # clone the IntelOwl project repository
@@ -35,6 +38,7 @@ cp env_file_integrations_template env_file_integrations
 
 # start the app
 cd ..
+./initialize.sh
 python3 start.py prod up
 
 # create a super user 
@@ -77,6 +81,8 @@ cd docker/
 cp env_file_app_template env_file_app
 cp env_file_postgres_template env_file_postgres
 cp env_file_integrations_template env_file_integrations
+cd ..
+./initialize.sh
 ```
 
 ### Environment configuration (required)

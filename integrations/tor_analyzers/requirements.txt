@@ -1,0 +1,2 @@
+Flask-Shell2HTTP~=1.8.0
+gunicorn~=20.1.0

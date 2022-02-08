@@ -50,6 +50,18 @@ updates:
         update-types: [ "version-update:semver-patch" ]
 
   - package-ecosystem: "docker"
+    directory: "/integrations/tor_analyzers"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+    target-branch: "dependabot-validation"
+    ignore:
+      # ignore all patch updates since we are using ~=
+      # this does not work for security updates
+      - dependency-name: "*"
+        update-types: [ "version-update:semver-patch" ]
+
+  - package-ecosystem: "docker"
     directory: "/integrations/box-js"
     schedule:
       interval: "weekly"

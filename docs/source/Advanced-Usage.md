@@ -72,6 +72,11 @@ table, th, td {
     <td>identifies many compilers, packers, obfuscators, and other weird stuff from an APK or DEX file</td>
   </tr>
   <tr>
+    <td>TOR Analyzers</td>
+    <td><code>Onionscan</code></td>
+    <td>Scans TOR .onion domains for privacy leaks and information disclosures.</td>
+  </tr>
+  <tr>
     <td>Qiling</td>
     <td><code>Qiling_Windows</code>
     <code>Qiling_Windows_Shellcode</code>

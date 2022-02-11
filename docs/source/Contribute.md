@@ -176,7 +176,7 @@ Please create pull requests only for the branch **develop**. That code will be p
 Also remember to pull the most recent changes available in the **develop** branch before submitting your PR. If your PR has merge conflicts caused by this behavior, it won't be accepted.
 
 ### Install testing requirements
-Run `pip install -r test-requirements.txt` to install the requirements to validate your code. 
+Run `pip install -r requirements/test-requirements.txt` to install the requirements to validate your code. 
 
 #### Pass linting and tests
 1. Run `psf/black` to lint the files automatically, then `flake8` to check and `isort`:

@@ -5,7 +5,7 @@ The project leverages `docker-compose` with a custom python script so you need t
 * [docker](https://docs.docker.com/get-docker/) - v1.13.0+
 * [docker-compose](https://docs.docker.com/compose/install/) - v1.23.2+
 * [python](https://www.python.org/) - v3.6+
-* There are additional python dependencies (mentioned in the `pre-requirements.txt` file) that can be installed using the `initialize.sh` script.
+* There are additional python dependencies (mentioned in the `requirements/pre-requirements.txt` file) that can be installed using the `initialize.sh` script.
 
 In some systems you could find pre-installed older versions. Please check this and install a supported version before attempting the installation. Otherwise it would fail.
 

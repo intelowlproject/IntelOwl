@@ -126,7 +126,7 @@ else
 fi
 
 echo "Installing python dependencies using pip..."
-pip3 install -r pre-requirements.txt
+pip3 install -r requirements/pre-requirements.txt
 
 echo "Looks like you're ready to go!"
 echo "Now you can start IntelOwl by running the start.py file (eg: \`python3 start.py prod up\` for production environment)"

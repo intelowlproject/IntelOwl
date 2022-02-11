@@ -21,6 +21,18 @@ from api_app.exceptions import AnalyzerRunException
 logger = logging.getLogger(__name__)
 
 
+class WinPEhasher_NT_Header_Error(AnalyzerRunException):
+    """
+    Class that resembles a NT Header exception (invalid PE File) for WinPEhasher
+    """
+
+
+class WinPEhasher_No_Icon_Error(AnalyzerRunException):
+    """
+    Class that resembles a No Icon resource exception for WinPEhasher dhashicon
+    """
+
+
 class WinPEhasher:
     file_path: str
 
@@ -35,52 +47,45 @@ class WinPEhasher:
         """
         Return Dhashicon of the exe
         """
-        try:
-            # this code was implemented from
-            # https://github.com/fr0gger/SuperPeHasher/commit/e9b753bf52d4e48dda2da0b7801075be4037a161#diff-2bb2d2d4d25fef20a893a4e93e96c9b8c0b0c6d5791fc14594cc9dd5cbf40b41
-            #
-            # config
-            hash_size = 8
-            # extract icon
-            icon_path = self.file_path + ".ico"
-            binary = lief.parse(self.file_path)
-            if binary is None:
-                # Invalid PE file
-                self._warn_error("PE_Info.WinPEhasher.dhashicon: invalid_nt_file")
-                return ""
-            # extracting icon and saves in a temp file
-            binres = binary.resources_manager
-            if not binres.has_type(lief.PE.RESOURCE_TYPES.ICON):
-                # no icon resources in file
-                self._warn_error("PE_Info.WinPEhasher.dhashicon: no_icon_res")
-                return ""
-            ico = binres.icons
-            ico[0].save(icon_path)
-            # resize
-            exe_icon = Image.open(icon_path)
-            exe_icon = exe_icon.convert("L").resize(
-                (hash_size + 1, hash_size), Image.ANTIALIAS
-            )
-            diff = []
-            for row in range(hash_size):
-                for col in range(hash_size):
-                    left = exe_icon.getpixel((col, row))
-                    right = exe_icon.getpixel((col + 1, row))
-                    diff.append(left > right)
-            decimal_value = 0
-            icon_hash = []
-            for index, value in enumerate(diff):
-                if value:
-                    decimal_value += 2 ** (index % 8)
-                if (index % 8) == 7:
-                    icon_hash.append(hex(decimal_value)[2:].rjust(2, "0"))
-                    decimal_value = 0
-            os.remove(icon_path)
-            return "".join(icon_hash)
-        except Exception as e:
-            raise AnalyzerRunException(
-                f"pe_info.winpe_hasher.dhashicon gave errors. {str(e)}"
-            )
+        # this code was implemented from
+        # https://github.com/fr0gger/SuperPeHasher/commit/e9b753bf52d4e48dda2da0b7801075be4037a161#diff-2bb2d2d4d25fef20a893a4e93e96c9b8c0b0c6d5791fc14594cc9dd5cbf40b41
+        #
+        # config
+        hash_size = 8
+        # extract icon
+        icon_path = self.file_path + ".ico"
+        binary = lief.parse(self.file_path)
+        if binary is None:
+            # Invalid PE file
+            raise WinPEhasher_NT_Header_Error()
+        # extracting icon and saves in a temp file
+        binres = binary.resources_manager
+        if not binres.has_type(lief.PE.RESOURCE_TYPES.ICON):
+            # no icon resources in file
+            raise WinPEhasher_No_Icon_Error()
+        ico = binres.icons
+        ico[0].save(icon_path)
+        # resize
+        exe_icon = Image.open(icon_path)
+        exe_icon = exe_icon.convert("L").resize(
+            (hash_size + 1, hash_size), Image.ANTIALIAS
+        )
+        diff = []
+        for row in range(hash_size):
+            for col in range(hash_size):
+                left = exe_icon.getpixel((col, row))
+                right = exe_icon.getpixel((col + 1, row))
+                diff.append(left > right)
+        decimal_value = 0
+        icon_hash = []
+        for index, value in enumerate(diff):
+            if value:
+                decimal_value += 2 ** (index % 8)
+            if (index % 8) == 7:
+                icon_hash.append(hex(decimal_value)[2:].rjust(2, "0"))
+                decimal_value = 0
+        os.remove(icon_path)
+        return "".join(icon_hash)
 
     def impfuzzy(self):
         """
@@ -93,16 +98,7 @@ class WinPEhasher:
             impfuzzyhash = pyimpfuzzy.get_impfuzzy(self.file_path)
             return str(impfuzzyhash)
         except pyimpfuzzy.pefile.PEFormatError:
-            self._warn_error("PE_Info.WinPEhasher.impfuzzy: invalid_nt_headers")
-        except Exception as e:
-            raise AnalyzerRunException(
-                f"pe_info.winpe_hasher.impfuzzy gave errors. {str(e)}"
-            )
-
-    def _warn_error(self, warning_message):
-        logger.warning(warning_message)
-        if self.parent:
-            self.parent.report.errors.append(warning_message)
+            raise WinPEhasher_NT_Header_Error()
 
 
 class PEInfo(FileAnalyzer):
@@ -160,9 +156,15 @@ class PEInfo(FileAnalyzer):
                 pe.OPTIONAL_HEADER.MinorOperatingSystemVersion,
             )
 
-            winpe_hasher = WinPEhasher(self.filepath, self)
-            results["dhashicon_hash"] = winpe_hasher.dhashicon()
-            results["impfuzzy_hash"] = winpe_hasher.impfuzzy()
+            # Try using WinPEhasher on the PE file
+            try:
+                winpe_hasher = WinPEhasher(self.filepath, self)
+                results["dhashicon_hash"] = winpe_hasher.dhashicon()
+                results["impfuzzy_hash"] = winpe_hasher.impfuzzy()
+            except Exception() as e:
+                logger.info(
+                    f"Exception while running WinPEhasher. Error: {str(e)}.",
+                )
 
             results["entrypoint"] = hex(pe.OPTIONAL_HEADER.AddressOfEntryPoint)
 

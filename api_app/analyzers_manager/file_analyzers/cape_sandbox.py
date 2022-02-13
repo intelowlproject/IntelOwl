@@ -48,7 +48,6 @@ class CAPEsandbox(FileAnalyzer):
             task_id = response_json.get("data").get("task_ids")[0]
             result = self.__poll_for_result(task_id=task_id)
             to_respond["response"] = result
-            response_json = to_respond
 
             logger.info(
                 f"Job: {self.job_id} -> "
@@ -102,12 +101,9 @@ class CAPEsandbox(FileAnalyzer):
             except requests.RequestException as e:
                 raise AnalyzerRunException(e)
 
-            final_json = final_request.json()
-            to_respond["response"] = final_json
+            to_respond["response"] = final_request.json()
 
-            response_json = to_respond
-
-        return response_json
+        return to_respond
 
     def __search_by_md5(self) -> str:
         db_search_url = self.__base_url + "/apiv2/tasks/search/md5/" + self.md5
@@ -140,7 +136,7 @@ class CAPEsandbox(FileAnalyzer):
 
             logger.info(
                 f" Job: {self.job_id} -> "
-                f"starting poll number #{i + 1}/{self.max_tries}"
+                f"Starting poll number #{i + 1}/{self.max_tries}"
             )
             try:
                 r = self.__session.get(status_api)

@@ -249,7 +249,9 @@
     "leaks_info": false,
     "docker_based": true,
     "supported_filetypes": [
-      "application/x-dosexec"
+      "application/x-dosexec",
+      "application/x-sharedlib",
+      "application/x-executable"
     ],
     "config": {
       "soft_time_limit": 500,

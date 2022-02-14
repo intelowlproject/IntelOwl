@@ -15,8 +15,9 @@ RUN useradd -ms /bin/bash static_analyzers-user
 
 # Install capa
 WORKDIR ${PROJECT_PATH}
-# flare-capa package is in requirements.txt
-RUN git clone --depth 1 https://github.com/fireeye/capa-rules.git
+RUN git clone --depth 1 https://github.com/mandiant/capa.git \
+    && pip install -e capa --no-cache-dir
+RUN git clone --depth 1 https://github.com/mandiant/capa-rules.git
 
 # Install FLOSS nightly binary
 RUN wget -q -O floss-linux https://s3.amazonaws.com/build-artifacts.floss.flare.fireeye.com/travis/linux/dist/floss \

@@ -62,27 +62,25 @@ class CAPEsandbox(FileAnalyzer):
             == "Not unique, as unique option set on submit or in conf/web.conf"
         ):
 
-            """
-                The above response is only returned when a sample that has been already
-                uploaded once is uploaded again.
+            #    The above response is only returned when a sample that has been already
+            #    uploaded once is uploaded again.
 
-                If it has been then we can just check it's
-                report by querying the CAPESandbox API with the md5 hash of
-                the file.
+            #    If it has been then we can just check it's
+            #    report by querying the CAPESandbox API with the md5 hash of
+            #    the file.
 
-                If it exists in their database and is readable by us,
-                the following code further fetches it's information.
-                response_json in this case should look somewhat like this:
+            #    If it exists in their database and is readable by us,
+            #    the following code further fetches it's information.
+            #    response_json in this case should look somewhat like this:
 
-            {
-                'error': True,
-                'error_value': 'Error adding task to database',
-                'errors': [{
-                    'filename.exe':
-                        'Not unique, as unique option set on submit or in conf/web.conf'
-                }]
-            }
-            """
+            # {
+            #    'error': True,
+            #    'error_value': 'Error adding task to database',
+            #    'errors': [{
+            #        'filename.exe':
+            #           'Not unique, as unique option set on submit or in conf/web.conf'
+            #    }]
+            # }
 
             logger.info(
                 f"Job: {self.job_id} -> "

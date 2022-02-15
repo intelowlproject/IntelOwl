@@ -31,6 +31,7 @@ ELASTICSEARCH_NO_OF_REPLICAS=0
 # analyzers secrets (optional)
 IPINFO_KEY=test
 SHODAN_KEY=test
+CAPESANDBOX_KEY=test
 ABUSEIPDB_KEY=test
 AUTH0_KEY=test
 SECURITYTRAILS_KEY=test
@@ -89,6 +90,7 @@ TEST_MD5=446c5fbb11b9ce058450555c1c27153c
 TEST_GENERIC=email@example.com
 
 # URLs
+CAPESANDBOX_URL=http://fake_url.com
 CUCKOO_URL=http://fake_url.com
 MISP_URL=http://fake_url.com
 FIRST_MISP_URL=http://fake_url.com

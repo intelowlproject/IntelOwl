@@ -29,6 +29,7 @@ class EXEAnalyzersTestCase(_FileAnalyzersScriptsTestCase):
                 "UnpacMe_EXE_Unpacker",
                 "PEframe_Scan",
                 "Capa_Info",
+                "CapeSandbox",
                 "Triage_Scan",
                 "Floss",
                 "Manalyze",

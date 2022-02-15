@@ -10,6 +10,9 @@ logger = logging.getLogger(__name__)
 
 
 class CAPEsandbox(FileAnalyzer):
+    class ContinuePolling(Exception):
+        pass
+
     def set_params(self, params):
         self.__token = self._secrets["api_key_name"]
         self.__vm_name = params.get("VM_NAME", "win7x64_8")
@@ -129,93 +132,81 @@ class CAPEsandbox(FileAnalyzer):
         self,
         task_id,
     ) -> dict:
-        error_in_poll = False
+        results = None
         status_api = self.__base_url + "/apiv2/tasks/status/" + str(task_id)
-        for i in range(self.max_tries):
-            error_details = None
-
-            logger.info(
-                f" Job: {self.job_id} -> "
-                f"Starting poll number #{i + 1}/{self.max_tries}"
-            )
+        for try_ in range(self.max_tries):
+            attempt = try_ + 1
             try:
-                r = self.__session.get(status_api)
-                if r.status_code == 429:
-                    logger.info(
-                        f"Job: {self.job_id} -> "
-                        "Rate limited by CAPESandbox API. "
-                        f"Sleeping for {self.poll_distance} seconds."
-                    )
-
-                else:
-                    r.raise_for_status()
-
-                error_in_poll = False
-
-            except requests.RequestException as e:
-                error_in_poll = True
-                error_details = e
-
-                logger.exception(
-                    f"Job: {self.job_id} -> "
-                    f"Exception at poll attempt number: "
-                    f"#{i}/{self.max_tries} : {e}"
-                    " Ignoring and proceeding.."
-                )
-                logger.error(e)
-
-            responded_json = r.json()
-            error = responded_json.get("error")
-            data = responded_json.get("data")
-
-            logger.info(
-                f"Job: {self.job_id} -> " f"Status of the CAPESandbox task: {data}"
-            )
-
-            if error:
-                raise AnalyzerRunException(error)
-
-            elif data in ("pending", "running", "processing"):
-                error_details = f"Task still {data}. Polling has ended."
-
-            elif data in ("reported", "completed"):
-                report_url = (
-                    self.__base_url
-                    + "/apiv2/tasks/get/report/"
-                    + str(task_id)
-                    + "/json"
+                logger.info(
+                    f" Job: {self.job_id} -> "
+                    f"Starting poll number #{attempt}/{self.max_tries}"
                 )
                 try:
-                    final_request = self.__session.get(
-                        report_url,
-                    )
-                    final_request.raise_for_status()
+                    request = self.__session.get(status_api)
+                    # 429 Rate Limit is caught by the raise_for_status
+                    request.raise_for_status()
                 except requests.RequestException as e:
-                    raise AnalyzerRunException(e)
+                    raise self.ContinuePolling(f"RequestException {e}")
+
+                # in case the request was ok
+                responded_json = request.json()
+                error = responded_json.get("error")
+                data = responded_json.get("data")
 
                 logger.info(
-                    f" Job: {self.job_id} ->"
-                    f"Poll number #{i + 1}/{self.max_tries} fetched"
-                    " the results of the analysis."
-                    " stopping polling.."
+                    f"Job: {self.job_id} -> " f"Status of the CAPESandbox task: {data}"
                 )
 
-                final_json = final_request.json()
-                return final_json
+                if error:
+                    raise AnalyzerRunException(error)
 
-            logger.info(
-                f"Job: {self.job_id} -> "
-                f"Analysis status: {data}. "
-                f"Sleeping for {self.poll_distance} seconds before next attempt."
-            )
-            time.sleep(self.poll_distance)
+                if data in ("pending", "running", "processing"):
+                    raise self.ContinuePolling(f"Task still {data}")
 
-        if error_in_poll:
-            """
-            Only triggered if there is an exception in the
-            very last poll.
-            """
-            raise AnalyzerRunException(error_details)
+                if data in ("reported", "completed"):
+                    report_url = (
+                        self.__base_url
+                        + "/apiv2/tasks/get/report/"
+                        + str(task_id)
+                        + "/json"
+                    )
+                    try:
+                        final_request = self.__session.get(
+                            report_url,
+                        )
+                        final_request.raise_for_status()
+                    except requests.RequestException as e:
+                        raise AnalyzerRunException(e)
+
+                    logger.info(
+                        f" Job: {self.job_id} ->"
+                        f"Poll number #{attempt}/{self.max_tries} fetched"
+                        " the results of the analysis."
+                        " stopping polling.."
+                    )
+
+                    results = final_request.json()
+                    break
+
+                else:
+                    raise AnalyzerRunException(
+                        f"status {data} was unexpected. Check the code"
+                    )
+
+            except self.ContinuePolling as e:
+                logger.info(
+                    f"Job: {self.job_id} -> "
+                    f"Continuing the poll at attempt number: "
+                    f"#{attempt}/{self.max_tries} : {e}"
+                    f"Sleeping for {self.poll_distance} seconds."
+                )
+                last_try = self.max_tries - 1
+                if try_ != last_try:  # avoiding useless last sleep
+                    time.sleep(self.poll_distance)
+
+        if not results:
+            raise AnalyzerRunException(f"{self.job_id} poll ended without results")
+        return results
 
     @classmethod
     def _monkeypatch(cls):

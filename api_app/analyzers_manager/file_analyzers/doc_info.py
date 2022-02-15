@@ -10,6 +10,7 @@ import logging
 from re import sub
 
 from oletools import mraptor
+from oletools.msodde import process_maybe_encrypted as msodde_process_maybe_encrypted
 from oletools.olevba import VBA_Parser
 
 from api_app.analyzers_manager.classes import FileAnalyzer
@@ -133,6 +134,19 @@ class DocInfo(FileAnalyzer):
                 self.vbaparser.close()
 
         results["olevba"] = self.olevba_results
+
+        try:
+            msodde_result = msodde_process_maybe_encrypted(
+                self.filepath, self.passwords_to_check
+            )
+        except Exception as e:
+            error_message = f"job_id {self.job_id} msodde parser failed. Error: {e}"
+            logger.exception(error_message)
+            self.report.errors.append(error_message)
+            self.report.save()
+            msodde_result = f"Error: {e}"
+
+        results["msodde"] = msodde_result
 
         return results
 

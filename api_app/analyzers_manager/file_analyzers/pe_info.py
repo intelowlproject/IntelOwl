@@ -12,8 +12,77 @@ from datetime import datetime
 import pefile
 
 from api_app.analyzers_manager.classes import FileAnalyzer
+from api_app.exceptions import AnalyzerRunException
 
 logger = logging.getLogger(__name__)
+
+
+class WinPEhasher:
+    file_path: str
+
+    def __init__(self, file_path: str) -> None:
+        """
+        Init a WinPE instance and load the exe file
+        """
+        self.file_path = file_path
+
+    def dhashicon(self) -> str:
+        """
+        Return Dhashicon of the exe
+        """
+        try:
+            import os
+
+            import lief
+            from PIL import Image
+
+            # config
+            hash_size = 8
+            # extract icon
+            icon_path = self.file_path + ".ico"
+            binary = lief.parse(self.file_path).resources_manager
+            ico = binary.icons[0]
+            ico.save(icon_path)
+            # resize
+            exe_icon = Image.open(icon_path)
+            exe_icon = exe_icon.convert("L").resize(
+                (hash_size + 1, hash_size), Image.ANTIALIAS
+            )
+            # diff and hash
+            diff = []
+            for row in range(hash_size):
+                for col in range(hash_size):
+                    left = exe_icon.getpixel((col, row))
+                    right = exe_icon.getpixel((col + 1, row))
+                    diff.append(left > right)
+            decimal_value = 0
+            icon_hash = []
+            for index, value in enumerate(diff):
+                if value:
+                    decimal_value += 2 ** (index % 8)
+                if (index % 8) == 7:
+                    icon_hash.append(hex(decimal_value))[2:].rjust(2, "0")
+                    decimal_value = 0
+            os.remove(icon_path)
+            return "".join(icon_hash)
+        except ImportError:
+            raise ImportError("please run pip -r requirements.txt")
+        except Exception as e:
+            raise AnalyzerRunException(f"pe_info:winpe_hasher gave errors. {str(e)}")
+
+    def impfuzzy(self):
+        """
+        Calculate impfuzzy hash and return
+        """
+        try:
+            import pyimpfuzzy
+
+            impfuzzyhash = pyimpfuzzy.get_impfuzzy(self.file_path)
+            return str(impfuzzyhash)
+        except ImportError:
+            raise ImportError("please run pip -r requirements.txt")
+        except Exception as e:
+            raise AnalyzerRunException(f"pe_info:winpe_hasher gave errors. {str(e)}")
 
 
 class PEInfo(FileAnalyzer):
@@ -70,6 +139,10 @@ class PEInfo(FileAnalyzer):
                 pe.OPTIONAL_HEADER.MajorOperatingSystemVersion,
                 pe.OPTIONAL_HEADER.MinorOperatingSystemVersion,
             )
+
+            winpe_hasher = WinPEhasher(self.filepath)
+            results["dhashicon_hash"] = winpe_hasher.dhashicon()
+            results["impfuzzy_hash"] = winpe_hasher.impfuzzy()
 
             results["entrypoint"] = hex(pe.OPTIONAL_HEADER.AddressOfEntryPoint)
 

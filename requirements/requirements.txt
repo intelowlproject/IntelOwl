@@ -23,6 +23,7 @@ GitPython==3.1.18
 google>=3.0.0
 google-cloud-webrisk==1.6.0
 intezer-sdk==1.6
+lief==0.11.5
 maxminddb==2.2.0
 mwdblib==4.0.0
 oletools==0.60
@@ -30,11 +31,13 @@ OTXv2==1.5.12
 peepdf-fork==0.4.3
 pdfid==1.0.4
 pefile-fork==2020.12.16
+Pillow==9.0.0
 psycopg2-binary==2.9.1
 pycti==5.1.4
 pydeep==0.4
 PyExifTool==0.4.9
 pyhashlookup==1.1.1
+pyimpfuzzy==0.5
 pymisp==2.4.144
 pypdns==1.5.2
 pypssl==2.2

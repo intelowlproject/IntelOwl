@@ -65,8 +65,7 @@ class CuckooAnalysis(FileAnalyzer):
             )
             if response.status_code != 200:
                 logger.info(
-                    "failed post to start cuckoo analysis, status code {}"
-                    "".format(response.status_code)
+                    f"failed post to start cuckoo analysis, status code {response.status_code}"
                 )
                 time.sleep(5)
                 continue

@@ -194,7 +194,7 @@ class CAPEsandbox(FileAnalyzer):
             except self.ContinuePolling as e:
                 logger.info(
                     f"Job: {self.job_id} -> "
-                    f"Continuing the poll at attempt number: "
+                    "Continuing the poll at attempt number: "
                     f"#{attempt}/{self.max_tries}. {e}. "
                     f"Sleeping for {self.poll_distance} seconds."
                 )

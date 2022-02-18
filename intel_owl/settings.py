@@ -155,7 +155,7 @@ REST_FRAMEWORK = {
 # DRF Spectacular
 SPECTACULAR_SETTINGS = {
     "TITLE": "IntelOwl API specification",
-    "VERSION": "3.2.4",
+    "VERSION": "3.2.5",
 }
 
 # Django-Rest-Durin

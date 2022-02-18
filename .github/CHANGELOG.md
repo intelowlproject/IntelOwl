@@ -2,6 +2,15 @@
 
 [**Upgrade Guide**](https://intelowl.readthedocs.io/en/latest/Installation.html#update-to-the-most-recent-version)
 
+## [v3.2.5](https://github.com/intelowlproject/IntelOwl/releases/tag/v3.2.5)
+
+**Notes:**
+
+**New Analyzers:**
+
+**Other:**
+
+
 ## [v3.2.4](https://github.com/intelowlproject/IntelOwl/releases/tag/v3.2.4)
 
 **Notes:**

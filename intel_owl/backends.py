@@ -8,4 +8,4 @@ class CustomRADIUSBackend(RADIUSRealmBackend):
         if GET_SERVER_CUSTOMISED:
             return custom_get_server(self, realm)
         else:
-            return super(CustomRADIUSBackend, self).get_server(realm)
+            return super().get_server(realm)

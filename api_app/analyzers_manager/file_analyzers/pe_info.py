@@ -16,24 +16,21 @@ import pyimpfuzzy
 from PIL import Image
 
 from api_app.analyzers_manager.classes import FileAnalyzer
-from api_app.exceptions import AnalyzerRunException
 
 logger = logging.getLogger(__name__)
 
 
-class WinPEhasher_NT_Header_Error(AnalyzerRunException):
-    """
-    Class that resembles a NT Header exception (invalid PE File) for WinPEhasher
-    """
-
-
-class WinPEhasher_No_Icon_Error(AnalyzerRunException):
-    """
-    Class that resembles a No Icon resource exception for WinPEhasher dhashicon
-    """
-
-
 class WinPEhasher:
+    class WinPEhasher_NT_Header_Error(Exception):
+        """
+        Class that resembles a NT Header exception (invalid PE File) for WinPEhasher
+        """
+
+    class WinPEhasher_No_Icon_Error(Exception):
+        """
+        Class that resembles a No Icon resource exception for WinPEhasher dhashicon
+        """
+
     file_path: str
 
     def __init__(self, file_path: str, parent=None) -> None:
@@ -57,12 +54,12 @@ class WinPEhasher:
         binary = lief.parse(self.file_path)
         if binary is None:
             # Invalid PE file
-            raise WinPEhasher_NT_Header_Error()
+            raise self.WinPEhasher_NT_Header_Error()
         # extracting icon and saves in a temp file
         binres = binary.resources_manager
         if not binres.has_type(lief.PE.RESOURCE_TYPES.ICON):
             # no icon resources in file
-            raise WinPEhasher_No_Icon_Error()
+            raise self.WinPEhasher_No_Icon_Error()
         ico = binres.icons
         ico[0].save(icon_path)
         # resize
@@ -98,7 +95,7 @@ class WinPEhasher:
             impfuzzyhash = pyimpfuzzy.get_impfuzzy(self.file_path)
             return str(impfuzzyhash)
         except pyimpfuzzy.pefile.PEFormatError:
-            raise WinPEhasher_NT_Header_Error()
+            raise self.WinPEhasher_NT_Header_Error()
 
 
 class PEInfo(FileAnalyzer):
@@ -162,7 +159,7 @@ class PEInfo(FileAnalyzer):
                 results["dhashicon_hash"] = winpe_hasher.dhashicon()
                 results["impfuzzy_hash"] = winpe_hasher.impfuzzy()
             except Exception() as e:
-                logger.info(
+                logger.warning(
                     f"Exception while running WinPEhasher. Error: {str(e)}.",
                 )
 

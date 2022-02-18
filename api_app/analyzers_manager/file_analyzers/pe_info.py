@@ -20,82 +20,16 @@ from api_app.analyzers_manager.classes import FileAnalyzer
 logger = logging.getLogger(__name__)
 
 
-class WinPEhasher:
-    class WinPEhasher_NT_Header_Error(Exception):
-        """
-        Class that resembles a NT Header exception (invalid PE File) for WinPEhasher
-        """
+class NT_Header_Error(Exception):
+    """
+    Class that resembles a NT Header exception (invalid PE File) for WinPEhasher
+    """
 
-    class WinPEhasher_No_Icon_Error(Exception):
-        """
-        Class that resembles a No Icon resource exception for WinPEhasher dhashicon
-        """
 
-    file_path: str
-
-    def __init__(self, file_path: str, parent=None) -> None:
-        """
-        Init a WinPE instance and load the exe file
-        """
-        self.file_path = file_path
-        self.parent = parent
-
-    def dhashicon(self) -> str:
-        """
-        Return Dhashicon of the exe
-        """
-        # this code was implemented from
-        # https://github.com/fr0gger/SuperPeHasher/commit/e9b753bf52d4e48dda2da0b7801075be4037a161#diff-2bb2d2d4d25fef20a893a4e93e96c9b8c0b0c6d5791fc14594cc9dd5cbf40b41
-        #
-        # config
-        hash_size = 8
-        # extract icon
-        icon_path = self.file_path + ".ico"
-        binary = lief.parse(self.file_path)
-        if binary is None:
-            # Invalid PE file
-            raise self.WinPEhasher_NT_Header_Error()
-        # extracting icon and saves in a temp file
-        binres = binary.resources_manager
-        if not binres.has_type(lief.PE.RESOURCE_TYPES.ICON):
-            # no icon resources in file
-            raise self.WinPEhasher_No_Icon_Error()
-        ico = binres.icons
-        ico[0].save(icon_path)
-        # resize
-        exe_icon = Image.open(icon_path)
-        exe_icon = exe_icon.convert("L").resize(
-            (hash_size + 1, hash_size), Image.ANTIALIAS
-        )
-        diff = []
-        for row in range(hash_size):
-            for col in range(hash_size):
-                left = exe_icon.getpixel((col, row))
-                right = exe_icon.getpixel((col + 1, row))
-                diff.append(left > right)
-        decimal_value = 0
-        icon_hash = []
-        for index, value in enumerate(diff):
-            if value:
-                decimal_value += 2 ** (index % 8)
-            if (index % 8) == 7:
-                icon_hash.append(hex(decimal_value)[2:].rjust(2, "0"))
-                decimal_value = 0
-        os.remove(icon_path)
-        return "".join(icon_hash)
-
-    def impfuzzy(self):
-        """
-        Calculate impfuzzy hash and return
-        """
-        try:
-            # this code was implemented from
-            # https://github.com/JPCERTCC/impfuzzy
-            #
-            impfuzzyhash = pyimpfuzzy.get_impfuzzy(self.file_path)
-            return str(impfuzzyhash)
-        except pyimpfuzzy.pefile.PEFormatError:
-            raise self.WinPEhasher_NT_Header_Error()
+class No_Icon_Error(Exception):
+    """
+    Class that resembles a No Icon resource exception for WinPEhasher dhashicon
+    """
 
 
 class PEInfo(FileAnalyzer):
@@ -153,15 +87,8 @@ class PEInfo(FileAnalyzer):
                 pe.OPTIONAL_HEADER.MinorOperatingSystemVersion,
             )
 
-            # Try using WinPEhasher on the PE file
-            try:
-                winpe_hasher = WinPEhasher(self.filepath, self)
-                results["dhashicon_hash"] = winpe_hasher.dhashicon()
-                results["impfuzzy_hash"] = winpe_hasher.impfuzzy()
-            except Exception() as e:
-                logger.warning(
-                    f"Exception while running WinPEhasher. Error: {str(e)}.",
-                )
+            results["dhashicon_hash"] = self._dhashicon()
+            results["impfuzzy_hash"] = self._impfuzzy()
 
             results["entrypoint"] = hex(pe.OPTIONAL_HEADER.AddressOfEntryPoint)
 
@@ -212,3 +139,65 @@ class PEInfo(FileAnalyzer):
             self.report.save()
 
         return results
+
+    def _dhashicon(self) -> str:
+        """
+        Return Dhashicon of the exe
+        """
+        # this code was implemented from
+        # https://github.com/fr0gger/SuperPeHasher/commit/e9b753bf52d4e48dda2da0b7801075be4037a161#diff-2bb2d2d4d25fef20a893a4e93e96c9b8c0b0c6d5791fc14594cc9dd5cbf40b41
+        # config
+        dhashicon = None
+        try:
+            hash_size = 8
+            # extract icon
+            icon_path = self.filepath + ".ico"
+            binary = lief.parse(self.filepath)
+            if binary is None:
+                # Invalid PE file
+                raise NT_Header_Error("binary is None")
+            # extracting icon and saves in a temp file
+            binres = binary.resources_manager
+            if not binres.has_type(lief.PE.RESOURCE_TYPES.ICON):
+                # no icon resources in file
+                raise No_Icon_Error("no icon resource in file")
+            ico = binres.icons
+            ico[0].save(icon_path)
+            # resize
+            exe_icon = Image.open(icon_path)
+            exe_icon = exe_icon.convert("L").resize(
+                (hash_size + 1, hash_size), Image.ANTIALIAS
+            )
+            diff = []
+            for row in range(hash_size):
+                for col in range(hash_size):
+                    left = exe_icon.getpixel((col, row))
+                    right = exe_icon.getpixel((col + 1, row))
+                    diff.append(left > right)
+            decimal_value = 0
+            icon_hash = []
+            for index, value in enumerate(diff):
+                if value:
+                    decimal_value += 2 ** (index % 8)
+                if (index % 8) == 7:
+                    icon_hash.append(hex(decimal_value)[2:].rjust(2, "0"))
+                    decimal_value = 0
+            os.remove(icon_path)
+            dhashicon = "".join(icon_hash)
+        except Exception as e:
+            logger.warning(e)
+        return dhashicon
+
+    def _impfuzzy(self):
+        """
+        Calculate impfuzzy hash and return
+        """
+        impfuzzyhash = None
+        try:
+            # this code was implemented from
+            # https://github.com/JPCERTCC/impfuzzy
+            #
+            impfuzzyhash = str(pyimpfuzzy.get_impfuzzy(self.filepath))
+        except Exception as e:
+            logger.warning(e)
+        return impfuzzyhash

@@ -2,13 +2,23 @@
 
 [**Upgrade Guide**](https://intelowl.readthedocs.io/en/latest/Installation.html#update-to-the-most-recent-version)
 
-## [v3.2.5](https://github.com/intelowlproject/IntelOwl/releases/tag/v3.2.5)
+## [v3.3.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v3.3.0)
 
 **Notes:**
+- Added helper script that checks and installs [initial requirements](https://intelowl.readthedocs.io/en/develop/Installation.html#requirements). (`initialize.sh`)
+- Added [RADIUS authentication support](https://intelowl.readthedocs.io/en/latest/Advanced-Usage.html#radius-authentication)
 
-**New Analyzers:**
+**New/Improved Analyzers:**
+- Added a new optional [Docker Analyzer](https://intelowl.readthedocs.io/en/develop/Advanced-Usage.html#optional-analyzers) running [Onionscan](https://github.com/s-rah/onionscan)
+- Added [CAPE Sandbox](https://capesandbox.com/) file analyzer
+- `Doc_Info` analyzer now runs [msodde](https://github.com/decalage2/oletools/wiki/msodde) together with `olevba` and `XMLMacroDeobfuscator`
+- `PE_Info` analyzer now calculates [impfuzzy](https://github.com/JPCERTCC/impfuzzy) and [dashicon](https://github.com/fr0gger/SuperPeHasher) hashes too.
 
 **Other:**
+- Added option to run ElasticSearch/Kibana together with IntelOwl with option `--elastic`. Check the [doc here](https://intelowl.readthedocs.io/en/latest/Advanced-Usage.html#example-configuration)
+- Security: Patched Django Critical Bug + Added Brute Force protection to the Admin page
+- Generic bug fixing and other maintenance work
+- Bump some python dependencies
 
 
 ## [v3.2.4](https://github.com/intelowlproject/IntelOwl/releases/tag/v3.2.4)

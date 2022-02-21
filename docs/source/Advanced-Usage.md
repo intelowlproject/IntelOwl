@@ -15,6 +15,7 @@ This page includes details about some advanced features that Intel Owl provides 
   - [Django Groups & Permissions](#django-groups--permissions)
   - [Authentication options](#authentication-options)
       - [LDAP](#ldap)
+      - [RADIUS](#radius-authentication)
   - [Google Kubernetes Engine deployment](#google-kubernetes-engine-deployment)
   - [Queues](#queues)
       - [Multi Queue](#multi-queue)

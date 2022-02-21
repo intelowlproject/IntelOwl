@@ -43,8 +43,8 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y --no-install-recommends apt-utils libsasl2-dev libssl-dev libldap2-dev python-dev libfuzzy-dev net-tools git osslsigncode exiftool
         python -m pip install --upgrade pip
-        if [ -f requirements.txt ];
-        then pip install -r requirements.txt;
+        if [ -f requirements/requirements.txt ];
+        then pip install -r requirements/requirements.txt;
         fi
         # Set the `CODEQL-PYTHON` environment variable to the Python executable
         # that includes the dependencies
@@ -59,7 +59,7 @@ jobs:
         # to auto-install Python dependencies
         setup-python-dependencies: false
         # If you wish to specify custom queries, you can do so here or in a config file.
-        # By default, queries listed here will override any specified in a config file. 
+        # By default, queries listed here will override any specified in a config file.
         # Prefix the list here with "+" to use these queries and those in the config file.
         # queries: ./path/to/local/query, your-org/your-repo/queries@main
 

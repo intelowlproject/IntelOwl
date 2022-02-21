@@ -1,2 +1,3 @@
 Flask-Shell2HTTP~=1.8.0
 gunicorn~=20.1.0
+stringsifter~=2.20201202

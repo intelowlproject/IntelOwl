@@ -31,9 +31,9 @@ jobs:
       run: |
         sudo docker-compose -f docker/default.yml -f docker/ci.override.yml build
         sudo docker-compose -f docker/default.yml -f docker/ci.override.yml up -d
-    - name: "Install test-requirements.txt inside docker container"
+    - name: "Install requirements/test-requirements.txt inside docker container"
       run: |
-        sudo docker exec intelowl_uwsgi pip3 install --no-cache-dir --compile -r test-requirements.txt
+        sudo docker exec intelowl_uwsgi pip3 install --no-cache-dir --compile -r requirements/test-requirements.txt
     - name: "Check Black code Style"
       run: |
         sudo docker exec intelowl_uwsgi black . --check --exclude "migrations|venv"

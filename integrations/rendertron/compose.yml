@@ -12,4 +12,4 @@ services:
     expose:
       - "4006"
     security_opt:
-      - seccomp:"integrations/rendertron/seccomp/chrome.json"
+      - seccomp:"../integrations/rendertron/seccomp/chrome.json"

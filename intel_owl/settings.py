@@ -25,6 +25,7 @@ DISABLE_LOGGING_TEST = os.environ.get("DISABLE_LOGGING_TEST", False) == "True"
 MOCK_CONNECTIONS = os.environ.get("MOCK_CONNECTIONS", False) == "True"
 TEST_MODE = MOCK_CONNECTIONS
 LDAP_ENABLED = os.environ.get("LDAP_ENABLED", False) == "True"
+RADIUS_AUTH_ENABLED = os.environ.get("RADIUS_AUTH_ENABLED", False) == "True"
 LOCAL_STORAGE = os.environ.get("LOCAL_STORAGE", "True") == "True"
 # Storage settings
 if LOCAL_STORAGE:
@@ -154,7 +155,7 @@ REST_FRAMEWORK = {
 # DRF Spectacular
 SPECTACULAR_SETTINGS = {
     "TITLE": "IntelOwl API specification",
-    "VERSION": "3.2.4",
+    "VERSION": "3.3.0",
 }
 
 # Django-Rest-Durin
@@ -222,6 +223,11 @@ if LDAP_ENABLED:
     from configuration.ldap_config import *  # lgtm [py/polluting-import]
 
     AUTHENTICATION_BACKENDS.append("django_auth_ldap.backend.LDAPBackend")
+
+if RADIUS_AUTH_ENABLED:
+    from configuration.radius_config import *  # lgtm [py/polluting-import]
+
+    AUTHENTICATION_BACKENDS.append("intel_owl.backends.CustomRADIUSBackend")
 
 # Password validation
 

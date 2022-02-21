@@ -15,8 +15,9 @@ RUN useradd -ms /bin/bash static_analyzers-user
 
 # Install capa
 WORKDIR ${PROJECT_PATH}
-RUN pip3 install --no-cache-dir flare-capa==2.0.0 \
-    && git clone --depth 1 https://github.com/fireeye/capa-rules.git
+RUN git clone --depth 1 https://github.com/mandiant/capa.git \
+    && pip install -e capa --no-cache-dir
+RUN git clone --depth 1 https://github.com/mandiant/capa-rules.git
 
 # Install FLOSS nightly binary
 RUN wget -q -O floss-linux https://s3.amazonaws.com/build-artifacts.floss.flare.fireeye.com/travis/linux/dist/floss \
@@ -29,9 +30,6 @@ RUN git clone --depth 1 https://github.com/guelfoweb/peframe.git
 RUN cd peframe && rm -rf .git && pip3 install -r requirements.txt --no-cache-dir \
     && python3 setup.py install \
     && rm -rf ./peframe
-
-# Install stringsifter
-RUN pip3 install --no-cache-dir stringsifter==2.20201202
 
 # Install and build Manalyze
 RUN git clone https://github.com/JusticeRage/Manalyze.git \

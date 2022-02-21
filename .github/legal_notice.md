@@ -12,6 +12,8 @@ license terms.
 [stringsifter](https://github.com/fireeye/stringsifter),
 [peepdf](https://github.com/jesparza/peepdf),
 [pefile](https://github.com/erocarrera/pefile),
+[impfuzzy](https://github.com/JPCERTCC/impfuzzy),
+[Dhashicon - SuperPeHasher](https://github.com/fr0gger/SuperPeHasher),
 [oletools](https://github.com/decalage2/oletools),
 [XLMMacroDeobfuscator](https://github.com/DissectMalware/XLMMacroDeobfuscator),
 [MaxMind-DB-Reader-python](https://github.com/maxmind/MaxMind-DB-Reader-python),
@@ -44,4 +46,5 @@ license terms.
 [Renderton](https://github.com/GoogleChrome/rendertron/blob/main/LICENSE)
 [PyCTI](https://github.com/OpenCTI-Platform/client-python/blob/master/LICENSE),
 [PyHashlookup](https://github.com/CIRCL/PyHashlookup),
-[PyPDNS](https://github.com/CIRCL/PyPDNS)
+[PyPDNS](https://github.com/CIRCL/PyPDNS),
+[Onionscan](https://github.com/s-rah/onionscan)

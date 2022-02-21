@@ -1,5 +1,10 @@
 version = 1
 
+test_patterns = [
+  "tests/**",
+  "test_*.py"
+]
+
 [[analyzers]]
 name = "python"
 enabled = true
@@ -24,8 +29,3 @@ enabled = true
 [[transformers]]
 name = "isort"
 enabled = true
-
-test_patterns = [
-  "tests/**",
-  "test_*.py"
-]

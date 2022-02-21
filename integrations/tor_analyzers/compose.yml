@@ -1,0 +1,19 @@
+# IMPORTANT: The version must match the version of docker-compose.yml
+---
+version: '3.8'
+
+# All additional integrations should be added following this format only.
+
+services:
+  tor_analyzers:
+    image: intelowlproject/intelowl_tor_analyzers:${INTELOWL_TAG_VERSION}
+    container_name: intelowl_tor_analyzers
+    restart: unless-stopped
+    expose:
+      - "4001"
+    env_file:
+      - env_file_integrations
+    volumes:
+      - generic_logs:/var/log/intel_owl
+    depends_on:
+      - uwsgi

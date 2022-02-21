@@ -28,7 +28,7 @@ class ClassicDNSResolver(classes.ObservableAnalyzer):
         if self.observable_classification == self.ObservableTypes.IP:
             try:
                 ipaddress.ip_address(self.observable_name)
-                hostname, alias, ip = socket.gethostbyaddr(self.observable_name)
+                hostname, alias, _ = socket.gethostbyaddr(self.observable_name)
                 if alias:
                     resolutions.extend(alias)
                 if hostname:

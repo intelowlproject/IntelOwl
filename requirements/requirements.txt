@@ -29,7 +29,7 @@ mwdblib==4.0.0
 oletools==0.60
 OTXv2==1.5.12
 peepdf-fork==0.4.3
-pdfid==1.0.4
+pdfid==1.1.0
 pefile-fork==2020.12.16
 Pillow==9.0.0
 psycopg2-binary==2.9.1

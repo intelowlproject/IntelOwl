@@ -62,7 +62,7 @@ We have an official sponsorship program for companies, organizations and individ
 
 #### Certego
 
-<a href="https://certego.net/?utm_source=intelowl"> <img style="margin-right: 2px" width=176 height=50 src="static_intel/Certego.png" alt="Certego Logo"/></a>
+<a href="https://certego.net/?utm_source=intelowl"> <img style="margin-right: 2px" width=190 height=54 src="static_intel/Certego.png" alt="Certego Logo"/></a>
 
 [Certego](https://certego.net/?utm_source=intelowl) is a MSSP and Threat Intelligence Provider based in Italy.
 
@@ -72,7 +72,7 @@ IntelOwl was born out of Certego's Threat intelligence R&D division and is const
 
 #### The Honeynet Project
 
-<a href="https://www.honeynet.org"> <img style="border: 0.2px solid black" width=100 height=131 src="static_intel/honeynet_logo.png" alt="Honeynet.org logo"> </a>
+<a href="https://www.honeynet.org"> <img style="border: 0.2px solid black" width=125 height=125 src="static_intel/honeynet_logo.png" alt="Honeynet.org logo"> </a>
 
 [The Honeynet Project](https://www.honeynet.org) is a non-profit organization working on creating open source cyber security tools and sharing knowledge about cyber threats.
 
@@ -84,10 +84,14 @@ Project Summaries and/or in-development projects:
 - 2021:
   - [Sarthak Khattar](https://twitter.com/Mr_Momo07): [IntelOwl Improvements](https://www.honeynet.org/2021/08/20/gsoc-2021-project-summary-intelowl-improvements/)
   - [Shubham Pandey](https://twitter.com/imshubham31): [IntelOwl Connectors Manager and Integrations](https://www.honeynet.org/2021/08/20/gsoc-2021-project-summary-intelowl-connectors-manager-and-integrations/)
+- 2022: [List of project ideas](https://www.honeynet.org/gsoc/gsoc-2022/google-summer-of-code-2022-project-ideas/)
 
 If you are interested in being the next GSoC developer for IntelOwl, join the [Honeynet Slack chat](https://gsoc-slack.honeynet.org/) for more info.
 
 (Plus we have just started a new project called [GreedyBear](https://github.com/honeynet/GreedyBear) that will be proposed to the GSoC too.)
+### 🥈 SILVER
+
+#### Milton Security
 
 ### 🥉 BRONZE
 

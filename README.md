@@ -101,7 +101,7 @@ If you are interested in being the next GSoC developer for IntelOwl, join the [H
 
 #### Tines
 
-<a href="https://www.tines.com/?utm_source=oss&utm_medium=sponsorship&utm_campaign=intelowl"> <img style="border: 0.2px solid black" width=170 height=78 src="static_intel/tines_logo.png" alt="Tines logo"> </a>
+<a href="https://www.tines.com/?utm_source=oss&utm_medium=sponsorship&utm_campaign=intelowl"> <img style="border: 0.2px solid black" width=120 height=55 src="static_intel/tines_logo.png" alt="Tines logo"> </a>
 
 [Tines](https://www.tines.com/?utm_source=oss&utm_medium=sponsorship&utm_campaign=intelowl) is no-code automation for security teams. Build powerful, reliable workflows without a development team.
 
@@ -109,7 +109,7 @@ IntelOwl is officially integrated in Tines. Read everything about this partnersh
 
 #### Docker
 
-<a href="https://www.docker.com"> <img style="border: 0.2px solid black" width=194 height=50 src="static_intel/docker_logo.png" alt="Docker logo"> </a>
+<a href="https://www.docker.com"> <img style="border: 0.2px solid black" width=120 height=31 src="static_intel/docker_logo.png" alt="Docker logo"> </a>
 
 In 2021 IntelOwl joined the official [Docker Open Source Program](https://www.docker.com/blog/expanded-support-for-open-source-software-projects/). This allows IntelOwl developers to easily manage Docker images and focus on writing the code.
 

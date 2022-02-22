@@ -15,12 +15,22 @@ class CapaInfo(FileAnalyzer, DockerBasedAnalyzer):
     timeout: int = 60 * 9
     # whereas subprocess timeout is kept as 60 * 9 = 9 minutes
 
+    def set_params(self, params):
+        self.args = []
+        arch = params.get("arch", "64")
+        if arch != "64":
+            arch = "32"
+        shellcode = params.get("shellcode", False)
+        if shellcode:
+            self.args.append("-f")
+            self.args.append("sc" + arch)
+
     def run(self):
         # get binary
         binary = self.read_file_bytes()
         # make request data
         fname = str(self.filename).replace("/", "_").replace(" ", "_")
-        args = [f"@{fname}", "-j"]
+        args = [f"@{fname}", "-j", *self.args]
         req_data = {"args": args, "timeout": self.timeout}
         req_files = {fname: binary}
 

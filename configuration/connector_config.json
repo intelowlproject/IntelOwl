@@ -1,7 +1,7 @@
 {
   "MISP": {
     "disabled": true,
-    "description": "Automatically creates an event on your MISP instance, linking the analysis the successful analysis on IntelOwl",
+    "description": "Automatically creates an event on your MISP instance, linking the successful analysis on IntelOwl",
     "python_module": "misp.MISP",
     "maximum_tlp": "WHITE",
     "config": {
@@ -40,7 +40,7 @@
   },
   "OpenCTI": {
     "disabled": true,
-    "description": "Automatically creates an observable and a linked report on your OpenCTI instance, linking the the successful analysis on IntelOwl",
+    "description": "Automatically creates an observable and a linked report on your OpenCTI instance, linking the successful analysis on IntelOwl",
     "python_module": "opencti.OpenCTI",
     "maximum_tlp": "WHITE",
     "config": {

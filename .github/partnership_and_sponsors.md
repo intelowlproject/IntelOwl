@@ -8,11 +8,10 @@ For this reason we have launched an official program for partnerships and sponso
 
 There are 4 level of contributions that you may apply for:
 
-* <b>IRON</b> (For individuals only): with just 5$ a month, we will be happy to add your name in the README in the [dedicated section](https://github.com/certego/IntelOwl/blob/master/README.md#IRON) and solve priority issues and problems you may find while using IntelOwl
+* <b>IRON</b> (For individuals only): with just few dollars a month, we will be happy to add your name in the README in the [dedicated section](https://github.com/certego/IntelOwl/blob/master/README.md#IRON) and solve priority issues and problems you may find while using IntelOwl.
 * <b>BRONZE</b>: Basic plan for companies. Logo, link to homepage and name of the company written in the README. Priority for issues and new features
 * <b>SILVER</b>: Additional space in the README and/or documentation to explain use cases of the sponsor (link to articles, etc)
 * <b>GOLD</b>: This is for those who wants to be directly involved in the evolution, future and direction of the project.
-
 
 For BRONZE, SILVER and GOLD sponsorship we ask those interested to contact us via [Twitter](https://twitter.com/intel_owl) to discuss the terms and conditions.
 

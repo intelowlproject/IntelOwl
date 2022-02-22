@@ -14,8 +14,8 @@ class Qiling(FileAnalyzer, DockerBasedAnalyzer):
 
     def set_params(self, params):
         self.args = []
-        os = params.get("os", "x86")
-        arch = params.get("arch", "windows")
+        os = params.get("os", "windows")
+        arch = params.get("arch", "x86")
         self.args.extend([os] + [arch])
         shellcode = params.get("shellcode", False)
         if shellcode:

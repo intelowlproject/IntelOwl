@@ -62,7 +62,7 @@ We have an official sponsorship program for companies, organizations and individ
 
 #### Certego
 
-<a href="https://certego.net/?utm_source=intelowl"> <img style="margin-right: 2px" width=190 height=54 src="static_intel/Certego.png" alt="Certego Logo"/></a>
+<a href="https://certego.net/?utm_source=intelowl"> <img style="margin-right: 2px" width=250 height=71 src="static_intel/Certego.png" alt="Certego Logo"/></a>
 
 [Certego](https://certego.net/?utm_source=intelowl) is a MSSP and Threat Intelligence Provider based in Italy.
 
@@ -92,6 +92,10 @@ If you are interested in being the next GSoC developer for IntelOwl, join the [H
 ### 🥈 SILVER
 
 #### Milton Security
+
+<a href="https://www.miltonsecurity.com?utm_source=intelowl"> <img style="border: 0.2px solid black" width=120 height=38 src="static_intel/milton_logo.png" alt="Milton Security logo"> </a>
+
+[Milton Security](https://www.miltonsecurity.com?utm_source=intelowl)  is a Service Disabled Veteran Owned Small Business that provides effective Threat Hunting and Incident Response to organizations around the globe 24*7
 
 ### 🥉 BRONZE
 

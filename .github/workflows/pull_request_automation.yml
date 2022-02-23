@@ -27,9 +27,9 @@ jobs:
         cp docker/env_file_app_template docker/env_file_app
         cp docker/env_file_postgres_template docker/env_file_postgres
         sudo chmod u+x docker/scripts/coverage_test.sh
-        pip3 install -r requirements/pre-requirements.txt
     - name: "Build and run containers"
       run: |
+        sudo pip3 install -r requirements/pre-requirements.txt
         sudo python3 start.py ci --all_analyzers up --build -d
     - name: "Install requirements/test-requirements.txt inside docker container"
       run: |

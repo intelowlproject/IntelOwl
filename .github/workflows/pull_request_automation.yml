@@ -16,11 +16,11 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Set up Python
+    - name: "Set up Python"
       uses: actions/setup-python@v2
       with:
         python-version: 3.9
-    - name: Before Install
+    - name: "Before Install"
       run: |
         sudo apt-get update
         unzip -P infected tests/test_files.zip -d .
@@ -29,8 +29,7 @@ jobs:
         sudo chmod u+x docker/scripts/coverage_test.sh
     - name: "Build and run containers"
       run: |
-        sudo docker-compose -f docker/default.yml -f docker/ci.override.yml build
-        sudo docker-compose -f docker/default.yml -f docker/ci.override.yml up -d
+        sudo python3 start.py ci --all_analyzers up --build -d
     - name: "Install requirements/test-requirements.txt inside docker container"
       run: |
         sudo docker exec intelowl_uwsgi pip3 install --no-cache-dir --compile -r requirements/test-requirements.txt
@@ -66,7 +65,7 @@ jobs:
         sudo docker exec intelowl_uwsgi coverage combine
         sudo docker exec intelowl_uwsgi coverage xml
         sudo docker cp intelowl_uwsgi:/opt/deploy/intel_owl/coverage.xml coverage.xml
-    - name: Upload coverage to Codecov
+    - name: "Upload coverage to Codecov"
       uses: codecov/codecov-action@v2.1.0
       with:
         files: ./coverage.xml

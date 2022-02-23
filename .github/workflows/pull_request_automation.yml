@@ -24,12 +24,16 @@ jobs:
       run: |
         sudo apt-get update
         unzip -P infected tests/test_files.zip -d .
+        # to do only in Master
+        # cp docker/.env.start.test.template docker/.env.start.test
         cp docker/env_file_app_template docker/env_file_app
         cp docker/env_file_postgres_template docker/env_file_postgres
+        # to do only in Master
         cp docker/env_file_integrations_template docker/env_file_integrations
         sudo chmod u+x docker/scripts/coverage_test.sh
     - name: "Build and run containers"
       run: |
+        # to do "--all_analyzers" only in Master
         sudo pip3 install -r requirements/pre-requirements.txt
         sudo python3 start.py --all_analyzers ci up --build -d
     - name: "Install requirements/test-requirements.txt inside docker container"

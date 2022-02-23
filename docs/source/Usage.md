@@ -155,6 +155,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `MISP_Check_Hash`: check a file hash on a MISP instance
 * `MISPFIRST_Check_Hash`: check a file hash on the FIRST MISP instance
 * `Yara_Scan_ATM_MALWARE`: scan a file with the [ATM malware yara rules](https://github.com/fboldewin/YARA-rules)
+* `Yara_Scan_MALPEDIA`: scan a file with the [MALPEDIA yara rules](https://github.com/malpedia/signator-rules)
 * `Yara_Scan_Community`: scan a file with the [community yara rules](https://github.com/Yara-Rules/rules)
 * `Yara_Scan_Dail_Ioc`: scan a file with [StrangerealIntel](https://github.com/StrangerealIntel) Daily IOC yara rules
 * `Yara_Scan_Florian`: scan a file with [Neo23x0 yara rules](https://github.com/Neo23x0/signature-base)

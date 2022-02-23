@@ -12,7 +12,6 @@ logger = logging.getLogger(__name__)
 
 
 class SpeakEasy(FileAnalyzer):
-
     def set_params(self, params):
         self.raw_offset = params.get("raw_offset", 0x0)
         self.arch = params.get("arch", "x64")
@@ -23,7 +22,7 @@ class SpeakEasy(FileAnalyzer):
         s = speakeasy.Speakeasy()
         if self.shellcode:
             arch = e_arch.ARCH_AMD64
-            if self.arch == 'x86':
+            if self.arch == "x86":
                 arch = e_arch.ARCH_X86
             sc_addr = s.load_shellcode(self.filepath, arch)
             s.run_shellcode(sc_addr, offset=self.raw_offset or 0)

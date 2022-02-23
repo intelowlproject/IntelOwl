@@ -167,11 +167,11 @@ def start():
     for key in docker_analyzers:
         if args.__dict__[key]:
             compose_files.append(path_mapping[key])
-            if is_test:
+            if is_test or args.mode == "ci":
                 compose_files.append(path_mapping[key + test_appendix])
     if args.all_analyzers:
         compose_files.extend(list(path_mapping["all_analyzers"]))
-        if is_test:
+        if is_test or args.mode == "ci":
             compose_files.extend(list(path_mapping[f"all_analyzers{test_appendix}"]))
 
     # construct final command

@@ -259,6 +259,34 @@
     "secrets": {},
     "params": {}
   },
+  "Capa_Info_Shellcode": {
+    "type": "file",
+    "python_module": "capa_info.CapaInfo",
+    "description": "capa detects capabilities in shellcode files",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
+    "supported_filetypes": [
+      "application/octet-stream"
+    ],
+    "config": {
+      "soft_time_limit": 500,
+      "queue": "long"
+    },
+    "secrets": {},
+    "params": {
+      "arch": {
+        "value": "64",
+        "type": "str",
+        "description": "Change system architecture for the shellcode (32 or 64)."
+      },
+      "shellcode": {
+        "value": true,
+        "type": "bool",
+        "description": "true if the file is a shellcode."
+      }
+    }
+  },
   "CapeSandbox": {
     "type": "file",
     "python_module": "cape_sandbox.CAPEsandbox",
@@ -869,7 +897,8 @@
     "leaks_info": false,
     "docker_based": true,
     "supported_filetypes": [
-      "application/x-dosexec"
+      "application/x-dosexec",
+      "application/octet-stream"
     ],
     "config": {
       "soft_time_limit": 500,
@@ -2679,6 +2708,39 @@
     },
     "secrets": {},
     "params": {}
+  },
+  "SpeakEasy_Shellcode": {
+    "type": "file",
+    "python_module": "speakeasy_emulation.SpeakEasy",
+    "description": "speakeasy emulation shellcode report",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
+    "supported_filetypes": [
+      "application/octet-stream"
+    ],
+    "config": {
+      "soft_time_limit": 120,
+      "queue": "long"
+    },
+    "secrets": {},
+    "params": {
+      "arch": {
+        "value": "x64",
+        "type": "str",
+        "description": "Change system architecture for the shellcode (x86 or x64)."
+      },
+      "shellcode": {
+        "value": true,
+        "type": "bool",
+        "description": "true if the file is a shellcode."
+      },
+      "raw_offset": {
+        "value": 0,
+        "type": "int",
+        "description": "Offset to start emulating."
+      }
+    }
   },
   "Spyse": {
     "type": "observable",

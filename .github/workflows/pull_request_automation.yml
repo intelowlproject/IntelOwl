@@ -26,6 +26,7 @@ jobs:
         unzip -P infected tests/test_files.zip -d .
         cp docker/env_file_app_template docker/env_file_app
         cp docker/env_file_postgres_template docker/env_file_postgres
+        cp docker/env_file_integrations_template docker/env_file_integrations
         sudo chmod u+x docker/scripts/coverage_test.sh
     - name: "Build and run containers"
       run: |

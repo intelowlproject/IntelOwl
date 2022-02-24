@@ -41,6 +41,8 @@ class CronTests(TestCase):
         db_file_path = tor.Tor.updater()
         self.assertTrue(os.path.exists(db_file_path))
 
+
+class CronTestsYara(TestCase):
     def test_yara_updater(self):
         file_paths = yara_scan.YaraScan.yara_update_repos()
         for file_path in file_paths:

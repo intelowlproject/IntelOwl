@@ -106,7 +106,7 @@ jobs:
           docker ps -a
 
        - name: Setup coverage
-        run: |
+         run: |
           docker exec intelowl_uwsgi pip3 install coverage
 
       - name: "Test: API"

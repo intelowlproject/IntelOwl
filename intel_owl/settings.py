@@ -351,3 +351,5 @@ LOGGING = {
         },
     },
 }
+
+TEST_RUNNER = "quokka.test_runner.MyTestRunner"

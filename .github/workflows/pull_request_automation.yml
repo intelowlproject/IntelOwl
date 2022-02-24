@@ -83,6 +83,7 @@ jobs:
       - name: Startup script requirements
         run: |
           pip3 install -r requirements/pre-requirements.txt
+          pip3 install -r requirements/build-requirements.txt
 
       - name: Startup script launch (Slow)
         if: contains(github.base_ref, 'master')
@@ -103,6 +104,10 @@ jobs:
       - name: Docker debug
         run: |
           docker ps -a
+
+       - name: Setup coverage
+        run: |
+          docker exec intelowl_uwsgi pip3 install coverage
 
       - name: "Test: API"
         run: |

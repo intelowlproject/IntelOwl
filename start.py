@@ -128,7 +128,7 @@ def start():
     # logic
     test_appendix = ""
     is_test = False
-    if args.mode == "test":
+    if args.mode in ["test", "ci"]:
         is_test = True
         test_appendix = ".test"
     # load relevant .env file
@@ -167,11 +167,11 @@ def start():
     for key in docker_analyzers:
         if args.__dict__[key]:
             compose_files.append(path_mapping[key])
-            if is_test or args.mode == "ci":
+            if is_test:
                 compose_files.append(path_mapping[key + test_appendix])
     if args.all_analyzers:
         compose_files.extend(list(path_mapping["all_analyzers"]))
-        if is_test or args.mode == "ci":
+        if is_test:
             compose_files.extend(list(path_mapping[f"all_analyzers{test_appendix}"]))
 
     # construct final command

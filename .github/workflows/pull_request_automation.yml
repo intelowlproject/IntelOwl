@@ -83,7 +83,6 @@ jobs:
     - name: Startup script requirements
       run: |
         pip3 install -r requirements/pre-requirements.txt
-        pip3 install -r requirements/build-requirements.txt
 
     - name: Startup script launch (Slow)
       if: contains(github.base_ref, 'master')

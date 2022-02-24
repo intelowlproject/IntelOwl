@@ -352,4 +352,4 @@ LOGGING = {
     },
 }
 
-TEST_RUNNER = "quokka.test_runner.MyTestRunner"
+TEST_RUNNER = "intel_owl.test_runner.MyTestRunner"

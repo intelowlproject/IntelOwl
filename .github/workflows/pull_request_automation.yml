@@ -87,6 +87,7 @@ jobs:
     - name: Startup script launch (Slow)
       if: contains(github.base_ref, 'master')
       run: |
+        cp docker/env_file_integrations_template docker/env_file_integrations
         python3 start.py --all_analyzers ci up --build -d
       env:
         DOCKER_BUILDKIT: 1
@@ -94,8 +95,6 @@ jobs:
     - name: Startup script launch (Fast)
       if: contains(github.base_ref, 'develop')
       run: |
-        cp docker/.env.start.test.template docker/.env.start.test
-        cp docker/env_file_integrations_template docker/env_file_integrations
         python3 start.py ci up --build -d
       env:
         DOCKER_BUILDKIT: 1

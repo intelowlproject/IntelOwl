@@ -10,63 +10,139 @@ on:
         - "integrations/**"
 
 jobs:
-  build:
-
+  linters:
     runs-on: ubuntu-latest
+    if: "!contains(github.head_ref, 'dependabot')"
 
     steps:
-    - uses: actions/checkout@v2
+    - name: Checkout IntelOwl
+      uses: actions/checkout@v2
+
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
         python-version: 3.9
-    - name: Before Install
+
+    - name: Install Dependencies
       run: |
-        sudo apt-get update
+        pip3 install --upgrade pip
+        pip3 install -r requirements/test-requirements.txt
+
+    - name: Black formatter
+      run: |
+        black . --check --diff --exclude "migrations|venv"
+
+    - name: Lint with flake8 (PEP8 enforcer + linter)
+      run: |
+        flake8 . --config=.flake8 --show-source
+
+    - name: isort
+      run: |
+        isort . --profile black --filter-files --check-only --diff --skip configuration/ldap_config.py
+
+  dependabot:
+    runs-on: ubuntu-latest
+    if: contains(github.head_ref, 'dependabot')
+
+    steps:
+    - name: Debug
+      run: |
+        echo ${{ github.head_ref }}
+        echo ${{ contains(github.head_ref, 'dependabot') }} | cat
+
+    - name: Checkout IntelOwl
+      uses: actions/checkout@v2
+
+    - name: Docker
+      run: |
+        docker-compose -f docker/default.yml -f docker/ci.override.yml up --build -d
+      env:
+        DOCKER_BUILDKIT: 1
+
+  tests:
+    runs-on: ubuntu-latest
+    needs: linters
+    if: "!contains(github.head_ref, 'dependabot')"
+
+    steps:
+    - name: Cancel Previous Runs
+      uses: styfle/cancel-workflow-action@0.9.1
+      with:
+        access_token: ${{ github.token }}
+
+    - name: Checkout IntelOwl
+      uses: actions/checkout@v2
+
+    - name: Prepare Launch
+      run: |
         unzip -P infected tests/test_files.zip -d .
         cp docker/env_file_app_template docker/env_file_app
         cp docker/env_file_postgres_template docker/env_file_postgres
-        sudo chmod u+x docker/scripts/coverage_test.sh
-    - name: "Build and run containers"
+        chmod u+x docker/scripts/coverage_test.sh
+
+    - name: Startup script requirements
       run: |
-        sudo docker-compose -f docker/default.yml -f docker/ci.override.yml build
-        sudo docker-compose -f docker/default.yml -f docker/ci.override.yml up -d
-    - name: "Install requirements/test-requirements.txt inside docker container"
+        pip3 install -r requirements/pre-requirements.txt
+
+    - name: Startup script launch (Slow)
+      if: contains(github.base_ref, 'master')
       run: |
-        sudo docker exec intelowl_uwsgi pip3 install --no-cache-dir --compile -r requirements/test-requirements.txt
-    - name: "Check Black code Style"
+        cp docker/env_file_integrations_template docker/env_file_integrations
+        python3 start.py --all_analyzers ci up --build -d
+      env:
+        DOCKER_BUILDKIT: 1
+
+    - name: Startup script launch (Fast)
+      if: contains(github.base_ref, 'develop')
       run: |
-        sudo docker exec intelowl_uwsgi black . --check --exclude "migrations|venv"
-    - name: "Lint with flake8 (PEP8 enforcer + linter)"
+        python3 start.py ci up --build -d
+      env:
+        DOCKER_BUILDKIT: 1
+
+    - name: Docker debug
       run: |
-        sudo docker exec intelowl_uwsgi flake8 . --count
-    - name: "Isort check"
+        docker ps -a
+
+    - name: Setup coverage
       run: |
-        sudo docker exec intelowl_uwsgi isort . --profile black --filter-files --check-only --diff --skip configuration/ldap_config.py
+       docker exec intelowl_uwsgi pip3 install coverage
+
     - name: "Test: API"
       run: |
-        sudo docker/scripts/coverage_test.sh tests.test_api tests.test_auth
+        docker/scripts/coverage_test.sh tests.test_api tests.test_auth
+
     - name: "Test: Cron"
       run: |
-        sudo docker/scripts/coverage_test.sh tests.test_generic
+        docker/scripts/coverage_test.sh tests.test_generic.CronTests
+
+    - name: "Test: Cron Yara"
+      if: contains(github.base_ref, 'master')
+      run: |
+        docker/scripts/coverage_test.sh tests.test_generic.CronTestsYara
+
     - name: "Test: Connectors Manager"
       run: |
-        sudo docker/scripts/coverage_test.sh tests.connectors_manager
+        docker/scripts/coverage_test.sh tests.connectors_manager
+
     - name: "Test: Analyzers Manager (views, serializers)"
       run: |
-        sudo docker/scripts/coverage_test.sh tests.analyzers_manager.test_views tests.analyzers_manager.test_serializers
+        docker/scripts/coverage_test.sh tests.analyzers_manager.test_views tests.analyzers_manager.test_serializers
+
     - name: "Test: Analyzers Manager (observable analyzers)"
       run: |
-        sudo docker/scripts/coverage_test.sh tests.analyzers_manager.test_observable_scripts
+        docker/scripts/coverage_test.sh tests.analyzers_manager.test_observable_scripts
+
     - name: "Test: Analyzers Manager (file analyzers)"
       run: |
-        sudo docker/scripts/coverage_test.sh tests.analyzers_manager.test_file_scripts
+        docker/scripts/coverage_test.sh tests.analyzers_manager.test_file_scripts
+
     - name: "Coverage: generate xml and transfer from docker container to host"
       run: |
-        sudo docker exec intelowl_uwsgi coverage combine
-        sudo docker exec intelowl_uwsgi coverage xml
-        sudo docker cp intelowl_uwsgi:/opt/deploy/intel_owl/coverage.xml coverage.xml
-    - name: Upload coverage to Codecov
+        docker exec intelowl_uwsgi coverage combine
+        docker exec intelowl_uwsgi coverage xml
+        docker cp intelowl_uwsgi:/opt/deploy/intel_owl/coverage.xml coverage.xml
+
+    - name: "Upload coverage to Codecov"
       uses: codecov/codecov-action@v2.1.0
       with:
         files: ./coverage.xml

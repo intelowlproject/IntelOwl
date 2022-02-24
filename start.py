@@ -127,7 +127,9 @@ def start():
     args, unknown = parser.parse_known_args()
     # logic
     test_appendix = ""
-    if args.mode == "test":
+    is_test = False
+    if args.mode in ["test", "ci"]:
+        is_test = True
         test_appendix = ".test"
     # load relevant .env file
     load_dotenv("docker/.env.start" + test_appendix)
@@ -164,9 +166,13 @@ def start():
     # additional integrations
     for key in docker_analyzers:
         if args.__dict__[key]:
-            compose_files.append(path_mapping[key + test_appendix])
+            compose_files.append(path_mapping[key])
+            if is_test:
+                compose_files.append(path_mapping[key + test_appendix])
     if args.all_analyzers:
-        compose_files.extend(list(path_mapping[f"all_analyzers{test_appendix}"]))
+        compose_files.extend(list(path_mapping["all_analyzers"]))
+        if is_test:
+            compose_files.extend(list(path_mapping[f"all_analyzers{test_appendix}"]))
 
     # construct final command
     base_command = [

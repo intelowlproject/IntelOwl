@@ -351,3 +351,5 @@ LOGGING = {
         },
     },
 }
+
+TEST_RUNNER = "intel_owl.test_runner.MyTestRunner"

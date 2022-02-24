@@ -10,8 +10,8 @@ from django.test.runner import DiscoverRunner
 
 class TimedTextTestResult(TextTestResult):
     def __init__(self, *args, **kwargs):
-        super(TimedTextTestResult, self).__init__(*args, **kwargs)
-        self.clocks = dict()
+        super().__init__(*args, **kwargs)
+        self.clocks = {}
 
     def startTest(self, test):
         self.clocks[test] = time()

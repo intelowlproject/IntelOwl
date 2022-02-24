@@ -61,8 +61,8 @@ jobs:
 
   tests:
     runs-on: ubuntu-latest
-    needs: linters
     if: "!contains(github.head_ref, 'dependabot')"
+    needs: linters
 
     steps:
       - name: Cancel Previous Runs

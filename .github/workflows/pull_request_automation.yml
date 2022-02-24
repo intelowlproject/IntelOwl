@@ -78,16 +78,16 @@ jobs:
           unzip -P infected tests/test_files.zip -d .
           cp docker/env_file_app_template docker/env_file_app
           cp docker/env_file_postgres_template docker/env_file_postgres      
-          sudo chmod u+x docker/scripts/coverage_test.sh
+          chmod u+x docker/scripts/coverage_test.sh
 
       - name: Startup script requirements
         run: |
-          sudo pip3 install -r requirements/pre-requirements.txt
+          pip3 install -r requirements/pre-requirements.txt
 
       - name: Startup script launch (Slow)
         if: contains(github.base_ref, 'master')
         run: |
-          sudo python3 start.py --all_analyzers ci up --build -d
+          python3 start.py --all_analyzers ci up --build -d
         env:
           DOCKER_BUILDKIT: 1
 
@@ -96,7 +96,7 @@ jobs:
         run: |
           cp docker/.env.start.test.template docker/.env.start.test
           cp docker/env_file_integrations_template docker/env_file_integrations
-          sudo python3 start.py ci up --build -d
+          python3 start.py ci up --build -d
         env:
           DOCKER_BUILDKIT: 1
 

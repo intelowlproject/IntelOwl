@@ -115,11 +115,6 @@ jobs:
       run: |
         docker/scripts/coverage_test.sh tests.test_generic.CronTests
 
-    - name: "Test: Cron Yara"
-      if: contains(github.base_ref, 'master')
-      run: |
-        docker/scripts/coverage_test.sh tests.test_generic.CronTestsYara
-
     - name: "Test: Connectors Manager"
       run: |
         docker/scripts/coverage_test.sh tests.connectors_manager

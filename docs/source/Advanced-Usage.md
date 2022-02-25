@@ -5,9 +5,9 @@ This page includes details about some advanced features that Intel Owl provides 
 - [Advanced Usage](#advanced-usage)
   - [Optional Analyzers](#optional-analyzers)
   - [Customize analyzer execution at time of request](#customize-analyzer-execution-at-time-of-request)
-        - [View and understand different parameters](#view-and-understand-different-parameters)
-        - [from the GUI](#from-the-gui)
-        - [from Pyintelowl](#from-pyintelowl)
+      - [View and understand different parameters](#view-and-understand-different-parameters)
+      - [from the GUI](#from-the-gui)
+      - [from Pyintelowl](#from-pyintelowl)
   - [Analyzers with special configuration](#analyzers-with-special-configuration)
   - [Elastic Search](#elastic-search)
       - [Kibana](#kibana)
@@ -44,8 +44,22 @@ table, th, td {
     <th>Description</th>
   </tr>
   <tr>
-    <td>Static Analyzers</td>
-    <td><code>PEframe_Scan</code>, <code>Capa_Info</code>, <code>Floss</code>, <code>Strings_Info_Classic</code>, <code>Strings_Info_ML</code>, <code>Manalyze</code>, <code>ClamAV</code></td>
+    <td>Malware Tools Analyzers</td>
+    <td><code>PEframe_Scan</code>, 
+    <code>Capa_Info</code>,
+    <code>Floss</code>,
+    <code>Strings_Info_Classic</code>,
+    <code>Strings_Info_ML</code>,
+    <code>Manalyze</code>,
+    <code>ClamAV</code>,
+    <code>Thug_URL_Info</code>,
+    <code>Thug_HTML_Info</code>,
+    <code>BoxJS_Scan_JavaScript</code>,
+    <code>APKiD_Scan_APK_DEX_JAR</code>,
+    <code>Qiling_Windows</code>,
+    <code>Qiling_Windows_Shellcode</code>,
+    <code>Qiling_Linux</code>,
+    <code>Qiling_Linux_Shellcode</code></td>
     <td>
     <ul>
       <li>Capa detects capabilities in executable files</li>
@@ -54,42 +68,22 @@ table, th, td {
       <li>String_Info_Classic extracts human-readable strings where as ML version of it ranks them</li>
       <li>Manalyze statically analyzes PE (Portable-Executable) files in-depth</li>
       <li>ClamAV antivirus engine scans files for trojans, viruses, malwares using a multi-threaded daemon</li>
+      <li>Thug performs hybrid dynamic/static analysis on a URL or HTML page.</li>
+      <li>Box-JS is a tool for studying JavaScript malware</li>
+      <li>APKiD identifies many compilers, packers, obfuscators, and other weird stuff from an APK or DEX file</li>
+      <li>Qiling is a tool for emulating the execution of a binary file or a shellcode.
+     It requires the configuration of its rootfs, and the optional configuration of profiles.
+     The rootfs can be copied from the <a href="https://github.com/qilingframework/qiling/tree/master/examples/rootfs"> Qiling project</a>: please remember that Windows dll <b> must</b> be manually added for license reasons.
+     Qiling provides a <a href="https://github.com/qilingframework/qiling/blob/master/examples/scripts/dllscollector.bat"> DllCollector</a> to retrieve dlls from your licensed Windows. 
+     <a href="https://docs.qiling.io/en/latest/profile/"> Profiles </a> must be placed in the <code>profiles</code> subfolder
+     </li>
       </ul>
     </td>
-  </tr>
-  <tr>
-    <td>Thug</td>
-    <td><code>Thug_URL_Info</code>, <code>Thug_HTML_Info</code></td>
-    <td>performs hybrid dynamic/static analysis on a URL or HTML page.</td>
-  </tr>
-  <tr>
-    <td>Box-JS</td>
-    <td><code>BoxJS_Scan_JavaScript</code></td>
-    <td>tool for studying JavaScript malware</td>
-  </tr>
-  <tr>
-    <td>APK Analyzers</td>
-    <td><code>APKiD_Scan_APK_DEX_JAR</code></td>
-    <td>identifies many compilers, packers, obfuscators, and other weird stuff from an APK or DEX file</td>
   </tr>
   <tr>
     <td>TOR Analyzers</td>
     <td><code>Onionscan</code></td>
     <td>Scans TOR .onion domains for privacy leaks and information disclosures.</td>
-  </tr>
-  <tr>
-    <td>Qiling</td>
-    <td><code>Qiling_Windows</code>
-    <code>Qiling_Windows_Shellcode</code>
-    <code>Qiling_Linux</code>
-    <code>Qiling_Linux_Shellcode</code>
-    </td>
-    <td>Tool for emulate the execution of a binary file or a shellcode.
-     It requires the configuration of its rootfs, and the optional configuration of profiles.
-     The rootfs can be copied from the <a href="https://github.com/qilingframework/qiling/tree/master/examples/rootfs"> Qiling project</a>: please remember that Windows dll <b> must</b> be manually added for license reasons.
-     Qiling provides a <a href="https://github.com/qilingframework/qiling/blob/master/examples/scripts/dllscollector.bat"> DllCollector</a> to retrieve dlls from your licensed Windows. 
-     <a href="https://docs.qiling.io/en/latest/profile/"> Profiles </a> must be placed in the <code>profiles</code> subfolder
-     </td>
   </tr>
   <tr>
     <td>Renderton</td>
@@ -106,7 +100,7 @@ python3 start.py prod --all_analyzers up
 
 Otherwise you can enable just one of the cited integration by using the related option. Example:
 ```bash
-python3 start.py prod --qiling up
+python3 start.py prod --tor_analyzers up
 ```
 
 ## Customize analyzer execution at time of request

@@ -265,8 +265,6 @@ USE_TZ = True
 STATIC_URL = "/static/"
 STATIC_ROOT = os.path.join(BASE_DIR, "static/")
 
-STATICFILES_DIRS = (os.path.join(BASE_DIR, "static_intel/"),)
-
 
 INFO_OR_DEBUG_LEVEL = "DEBUG" if DEBUG else "INFO"
 LOGGING = {

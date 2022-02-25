@@ -6,7 +6,7 @@ from api_app.analyzers_manager.classes import DockerBasedAnalyzer, FileAnalyzer
 
 class CapaInfo(FileAnalyzer, DockerBasedAnalyzer):
     name: str = "Capa"
-    url: str = "http://static_analyzers:4002/capa"
+    url: str = "http://malware_tools_analyzers:4002/capa"
     # interval between http request polling
     poll_distance: int = 10
     # http request polling max number of tries

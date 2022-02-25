@@ -10,6 +10,6 @@ services:
     container_name: intelowl_rendertron
     restart: unless-stopped
     expose:
-      - "4006"
+      - "4003"
     security_opt:
       - seccomp:./integrations/rendertron/seccomp/chrome.json

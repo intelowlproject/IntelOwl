@@ -10,7 +10,7 @@ from ..observable_analyzers.thug_url import ThugUrl
 
 class ThugFile(FileAnalyzer, DockerBasedAnalyzer):
     name: str = "Thug"
-    url: str = "http://thug:4001/thug"
+    url: str = "http://malware_tools_analyzers:4002/thug"
     # http request polling max number of tries
     max_tries: int = 15
     # interval between http request polling (in secs)

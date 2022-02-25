@@ -7,13 +7,9 @@ import subprocess
 from dotenv import load_dotenv
 
 docker_analyzers = [
-    "thug",
-    "apk_analyzers",
     "tor_analyzers",
-    "box_js",
     "rendertron",
-    "static_analyzers",
-    "qiling",
+    "malware_tools_analyzers",
 ]
 
 path_mapping = {

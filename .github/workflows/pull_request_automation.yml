@@ -6,7 +6,6 @@ on:
     paths-ignore:
         - "**.md"
         - "docs/**"
-        - "static_intel/**"
         - "integrations/**"
 
 jobs:

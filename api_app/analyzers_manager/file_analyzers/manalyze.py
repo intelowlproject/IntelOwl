@@ -6,7 +6,7 @@ from api_app.analyzers_manager.classes import DockerBasedAnalyzer, FileAnalyzer
 
 class Manalyze(FileAnalyzer, DockerBasedAnalyzer):
     name: str = "Manalyze"
-    url: str = "http://static_analyzers:4002/manalyze"
+    url: str = "http://malware_tools_analyzers:4002/manalyze"
     # interval between http request polling
     poll_distance: int = 10
     # http request polling max number of tries

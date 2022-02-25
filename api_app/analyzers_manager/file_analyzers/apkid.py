@@ -6,7 +6,7 @@ from api_app.analyzers_manager.classes import DockerBasedAnalyzer, FileAnalyzer
 
 class APKiD(FileAnalyzer, DockerBasedAnalyzer):
     name: str = "apk_analyzers"
-    url: str = "http://apk_analyzers:4004/apkid"
+    url: str = "http://malware_tools_analyzers:4002/apkid"
     # http request polling max number of tries
     max_tries: int = 10
     # interval between http request polling (in secs)

@@ -37,7 +37,7 @@ class EXEAnalyzersTestCase(_FileAnalyzersScriptsTestCase):
                 "Yara_Scan_ATM_MALWARE",
                 "Yara_Scan_Community",
                 "Yara_Scan_Daily_Ioc",
-                "Yara_Scan_FireEye",
+                "Yara_Scan_Mandiant",
                 "Yara_Scan_Florian",
                 "Yara_Scan_Inquest",
                 "Yara_Scan_Intezer",

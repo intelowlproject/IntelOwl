@@ -2695,7 +2695,7 @@
   "SpeakEasy": {
     "type": "file",
     "python_module": "speakeasy_emulation.SpeakEasy",
-    "description": "speakeasy emulation report",
+    "description": "SpeakEasy emulation report by Mandiant",
     "disabled": false,
     "external_service": false,
     "leaks_info": false,
@@ -2712,7 +2712,7 @@
   "SpeakEasy_Shellcode": {
     "type": "file",
     "python_module": "speakeasy_emulation.SpeakEasy",
-    "description": "speakeasy emulation shellcode report",
+    "description": "SpeakEasy emulation shellcode report by Mandiant",
     "disabled": false,
     "external_service": false,
     "leaks_info": false,
@@ -3827,10 +3827,10 @@
       }
     }
   },
-  "Yara_Scan_FireEye": {
+  "Yara_Scan_Mandiant": {
     "type": "file",
     "python_module": "yara_scan.YaraScan",
-    "description": "scan a file with FireEye yara rules",
+    "description": "scan a file with Mandiant yara rules",
     "disabled": false,
     "external_service": false,
     "leaks_info": false,
@@ -3842,14 +3842,14 @@
     "params": {
       "git_repo_main_dir": {
         "value": [
-          "/opt/deploy/yara/fireeye_rules"
+          "/opt/deploy/yara/mandiant_rules"
         ],
         "type": "list",
         "description": ""
       },
       "directories_with_rules": {
         "value": [
-          "/opt/deploy/yara/fireeye_rules/rules"
+          "/opt/deploy/yara/mandiant_rules/rules"
         ],
         "type": "list",
         "description": ""

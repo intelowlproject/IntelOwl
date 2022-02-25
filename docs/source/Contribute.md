@@ -159,7 +159,7 @@ After having written the new python module, you have to remember to:
   Remember to set at least:
   * `python_module`: name of the task that the connector must launch
   * `description`: little description of the connector
-  * `maximum_tlp`: maximum TLP of the analysis upto which the connector is allowed to run.
+  * `maximum_tlp`: maximum TLP of the analysis up to which the connector is allowed to run.
   
   Similar to analyzers, the `config` can be used in case the new connector uses specific configuration arguments and `secrets` can be used to declare any secrets the connector requires in order to run (Example: API Key).
 

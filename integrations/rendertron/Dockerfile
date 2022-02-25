@@ -44,7 +44,7 @@ RUN git clone https://github.com/GoogleChrome/rendertron.git ./
 COPY config.json ./
 RUN npm install && npm run build
 
-ENV PORT 4006
-EXPOSE 4006
+ENV PORT 4003
+EXPOSE 4003
 
 CMD [ "npm", "start" ]

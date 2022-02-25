@@ -75,7 +75,7 @@ The following are all the keys that you can change without touching the source c
 * `disabled`: _similar to analyzers_
 * `soft_time_limit`: _similar to analyzers_
 * `queue`: _similar to analyzers_
-* `maximum_tlp` (default `WHITE`, choices `WHITE`, `GREEN`, `AMBER`, `RED`): specify with the maximum TLP of the analysis upto which the connector is allowed to run. (e.g. if `maximum_tlp` is `GREEN`, it would run for analysis with TLPs `WHITE` and `GREEN`). To learn more about TLPs see [TLP Support](./Usage.md#tlp-support).
+* `maximum_tlp` (default `WHITE`, choices `WHITE`, `GREEN`, `AMBER`, `RED`): specify the maximum TLP of the analysis up to which the connector is allowed to run. (e.g. if `maximum_tlp` is `GREEN`, it would run for analysis with TLPs `WHITE` and `GREEN`). To learn more about TLPs see [TLP Support](./Usage.md#tlp-support).
 
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
@@ -139,9 +139,9 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `Doc_Info_Experimental`: static document analysis with new features to analyze XLM macros, encrypted macros and more (combination of Oletools and XLMMacroDeobfuscator)
 * `PE_Info`: static PE analysis with [pefile](https://github.com/mlodic/pefile)
 * `Signature_Info`: PE signature extractor with [osslsigncode](https://github.com/mtrojnar/osslsigncode)
-* `Speakeasy`: [FireEye Speakeasy](https://github.com/mandiant/speakeasy) binary emulation
-* `SpeakEasy_Shellcode`: [FireEye Speakeasy](https://github.com/mandiant/speakeasy) shellcode emulation
-* `Floss`: [FireEye Floss](https://github.com/mandiant/flare-floss) Obfuscated String Solver in files
+* `Speakeasy`: [Mandiant Speakeasy](https://github.com/mandiant/speakeasy) binary emulation
+* `SpeakEasy_Shellcode`: [Mandiant Speakeasy](https://github.com/mandiant/speakeasy) shellcode emulation
+* `Floss`: [Mandiant Floss](https://github.com/mandiant/flare-floss) Obfuscated String Solver in files
 * `Strings_Info_Classic`: strings extraction
 * `Strings_Info_ML`: strings extraction plus strings ranking based on Machine Learning. Leverages [Stringsifter](https://github.com/fireeye/stringsifter)
 * `VirusTotal_v3_Get_File_And_Scan`: check file hash on VirusTotal. If not already available, send the sample and perform a scan

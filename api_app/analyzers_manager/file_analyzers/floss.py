@@ -8,8 +8,8 @@ from api_app.analyzers_manager.classes import DockerBasedAnalyzer, FileAnalyzer
 
 class Floss(FileAnalyzer, DockerBasedAnalyzer):
     name: str = "Floss"
-    url: str = "http://static_analyzers:4002/floss"
-    ranking_url: str = "http://static_analyzers:4002/stringsifter"
+    url: str = "http://malware_tools_analyzers:4002/floss"
+    ranking_url: str = "http://malware_tools_analyzers:4002/stringsifter"
     # interval between http request polling
     poll_distance: int = 10
     # http request polling max number of tries

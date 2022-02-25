@@ -45,25 +45,29 @@ table, th, td {
   </tr>
   <tr>
     <td>Malware Tools Analyzers</td>
-    <td><code>PEframe_Scan</code>, 
-    <code>Capa_Info</code>,
-    <code>Floss</code>,
-    <code>Strings_Info_Classic</code>,
-    <code>Strings_Info_ML</code>,
-    <code>Manalyze</code>,
-    <code>ClamAV</code>,
-    <code>Thug_URL_Info</code>,
-    <code>Thug_HTML_Info</code>,
-    <code>BoxJS_Scan_JavaScript</code>,
-    <code>APKiD_Scan_APK_DEX_JAR</code>,
-    <code>Qiling_Windows</code>,
-    <code>Qiling_Windows_Shellcode</code>,
-    <code>Qiling_Linux</code>,
-    <code>Qiling_Linux_Shellcode</code></td>
+    <td>
+      <ul>
+      <li><code>PEframe_Scan</code></li>
+      <li><code>Capa_Info</code></li>
+      <li><code>Floss</code></li>
+      <li><code>Strings_Info_Classic</code>,
+      <code>Strings_Info_ML</code></li>
+      <li><code>Manalyze</code></li>
+      <li><code>ClamAV</code></li>
+      <li><code>Thug_URL_Info</code>,
+      <code>Thug_HTML_Info</code></li>
+      <li><code>BoxJS_Scan_JavaScript</code></li>
+      <li><code>APKiD_Scan_APK_DEX_JAR</code></li>
+      <li><code>Qiling_Windows</code>,
+      <code>Qiling_Windows_Shellcode</code>,
+      <code>Qiling_Linux</code>,
+      <code>Qiling_Linux_Shellcode</code></li>
+     </ul>
+    </td>
     <td>
     <ul>
-      <li>Capa detects capabilities in executable files</li>
       <li>PEFrame performs static analysis on Portable Executable malware and malicious MS Office documents</li>
+      <li>Capa detects capabilities in executable files</li>
       <li>FLOSS automatically deobfuscate strings from malware binaries</li>
       <li>String_Info_Classic extracts human-readable strings where as ML version of it ranks them</li>
       <li>Manalyze statically analyzes PE (Portable-Executable) files in-depth</li>

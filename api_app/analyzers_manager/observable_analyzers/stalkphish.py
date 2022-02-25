@@ -21,14 +21,14 @@ class Stalkphish(classes.ObservableAnalyzer):
         }
         obs_clsfn = self.observable_classification
 
-        if obs_clsfn == self.ObservableTypes.DOMAIN:
+        if obs_clsfn in [
+            self.ObservableTypes.DOMAIN,
+            self.ObservableTypes.URL,
+            self.ObservableTypes.GENERIC,
+        ]:
             uri = f"search/url/{self.observable_name}"
         elif obs_clsfn == self.ObservableTypes.IP:
             uri = f"search/ipv4/{self.observable_name}"
-        elif obs_clsfn == self.ObservableTypes.URL:
-            uri = f"search/url/{self.observable_name}"
-        elif obs_clsfn == self.ObservableTypes.GENERIC:
-            uri = f"search/url/{self.observable_name}"
         else:
             raise AnalyzerRunException(
                 f"not supported observable type {obs_clsfn}."

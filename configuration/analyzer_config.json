@@ -2816,6 +2816,32 @@
       }
     }
   },
+  "Stalkphish": {
+    "type": "observable",
+    "python_module": "stalkphish.Stalkphish",
+    "description": "Check in url or ipv4 if string exists in [Stalkphish.io](https://www.stalkphish.io/) API.",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": [
+      "url",
+      "ip",
+      "domain",
+      "generic"
+    ],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "STALKPHISH_KEY",
+        "description": "API key.",
+        "required": true
+      }
+    },
+    "params": {}
+  },
   "Strings_Info_Classic": {
     "type": "file",
     "python_module": "strings_info.StringsInfo",

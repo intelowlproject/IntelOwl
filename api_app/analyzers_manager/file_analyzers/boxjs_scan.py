@@ -6,7 +6,7 @@ from api_app.analyzers_manager.classes import DockerBasedAnalyzer, FileAnalyzer
 
 class BoxJS(FileAnalyzer, DockerBasedAnalyzer):
     name: str = "box-js"
-    url: str = "http://boxjs:4003/boxjs"
+    url: str = "http://malware_tools_analyzers:4002/boxjs"
     # http request polling max number of tries
     max_tries: int = 5
     # interval between http request polling (in secs)

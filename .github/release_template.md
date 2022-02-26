@@ -1,5 +1,6 @@
 # Checklist for creating a new release
 
+- [ ] (optional) If we changed/added Docker Analyzers, we need to configure Docker Hub properly.
 - [ ] Update `CHANGELOG.md` for the new version
 - [ ] Change version number in `conf.py`, `.env`,  `settings.SPECTACULAR_SETTINGS`, `Dockerfile_nginx` and `schema.yml`
 - [ ] Verify CI Tests

@@ -14,6 +14,7 @@ docker_analyzers = [
     "rendertron",
     "static_analyzers",
     "qiling",
+    "cyberchef",
 ]
 
 path_mapping = {

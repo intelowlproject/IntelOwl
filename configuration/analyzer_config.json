@@ -450,6 +450,38 @@
       }
     }
   },
+  "CyberChef": {
+    "type": "observable",
+    "python_module": "cyberchef.CyberChef",
+    "description": "scan a string against CyberChef",
+    "disabled": false,
+    "observable_supported": [
+      "generic"
+    ],
+    "external_service": true,
+    "config": {
+      "soft_time_limit": 50,
+      "queue": "long"
+    },
+    "secrets": {},
+    "params": {
+      "predefined_recipe_name": {
+        "value": "to decimal",
+        "type": "str",
+        "description": "Name of pre-defined recipe to use."
+      },
+      "custom_recipe": {
+        "value": [],
+        "type": "list",
+        "description": "Custom recipe to use (instead of a predefined one). NOTE: This is only read if predefined_recipe_name is blank"
+      },
+      "output_type": {
+        "value": "",
+        "type": "str",
+        "description": "Output type of the recipe. Leave blank to use default"
+      }
+    }
+  },
   "Cymru_Hash_Registry_Get_File": {
     "type": "file",
     "python_module": "cymru.Cymru",

@@ -1,0 +1,56 @@
+name: Publish node.js package to npm whenever a tag is pushed to master
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [10.x, 12.x]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+    - run: npm install
+    - run: npm run build --if-present
+    - run: npm run lint-test
+    - run: npm test
+
+  create-release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Create release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: ${{ github.ref }}
+          draft: false
+          prerelease: false
+
+  publish-npm:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 10
+          registry-url: https://registry.npmjs.org/
+      - run: npm ci
+      - run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.npm_token}}

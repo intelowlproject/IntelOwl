@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  cyberchef-server:
+    build:
+      context: ../integrations/cyberchef
+      dockerfile: Dockerfile
+    container_name: intelowl_cyberchef
+    restart: unless-stopped
+    expose:
+      - '3000'
+    depends_on:
+      - uwsgi

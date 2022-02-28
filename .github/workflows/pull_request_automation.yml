@@ -54,6 +54,8 @@ jobs:
 
     - name: Docker
       run: |
+        cp docker/env_file_app_template docker/env_file_app
+        cp docker/env_file_postgres_template docker/env_file_postgres
         docker-compose -f docker/default.yml -f docker/ci.override.yml up --build -d
       env:
         DOCKER_BUILDKIT: 1

@@ -9,7 +9,7 @@ from api_app.exceptions import AnalyzerRunException
 
 class Rendertron(ObservableAnalyzer, DockerBasedAnalyzer):
     name: str = "Rendertron"
-    url: str = "http://rendertron:4006/screenshot/"
+    url: str = "http://rendertron:4003/screenshot/"
 
     def run(self):
         self.url = self.url + self.observable_name

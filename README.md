@@ -1,4 +1,4 @@
-<img src="static_intel/intel_owl_positive.png" width=547 height=150 alt="Intel Owl"/>
+<img src="docs/static/intel_owl_positive.png" width=547 height=150 alt="Intel Owl"/>
 
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/intelowlproject/IntelOwl)](https://github.com/intelowlproject/IntelOwl/releases)
 [![GitHub Repo stars](https://img.shields.io/github/stars/intelowlproject/IntelOwl?style=social)](https://github.com/intelowlproject/IntelOwl/stargazers)
@@ -62,7 +62,7 @@ We have an official sponsorship program for companies, organizations and individ
 
 #### Certego
 
-<a href="https://certego.net/?utm_source=intelowl"> <img style="margin-right: 2px" width=250 height=71 src="static_intel/Certego.png" alt="Certego Logo"/></a>
+<a href="https://certego.net/?utm_source=intelowl"> <img style="margin-right: 2px" width=250 height=71 src="docs/static/Certego.png" alt="Certego Logo"/></a>
 
 [Certego](https://certego.net/?utm_source=intelowl) is a MSSP and Threat Intelligence Provider based in Italy.
 
@@ -72,7 +72,7 @@ IntelOwl was born out of Certego's Threat intelligence R&D division and is const
 
 #### The Honeynet Project
 
-<a href="https://www.honeynet.org"> <img style="border: 0.2px solid black" width=125 height=125 src="static_intel/honeynet_logo.png" alt="Honeynet.org logo"> </a>
+<a href="https://www.honeynet.org"> <img style="border: 0.2px solid black" width=125 height=125 src="docs/static/honeynet_logo.png" alt="Honeynet.org logo"> </a>
 
 [The Honeynet Project](https://www.honeynet.org) is a non-profit organization working on creating open source cyber security tools and sharing knowledge about cyber threats.
 
@@ -93,7 +93,7 @@ If you are interested in being the next GSoC developer for IntelOwl, join the [H
 
 #### Milton Security
 
-<a href="https://www.miltonsecurity.com?utm_source=intelowl"> <img style="border: 0.2px solid black" width=120 height=38 src="static_intel/milton_logo.png" alt="Milton Security logo"> </a>
+<a href="https://www.miltonsecurity.com?utm_source=intelowl"> <img style="border: 0.2px solid black" width=120 height=38 src="docs/static/milton_logo.png" alt="Milton Security logo"> </a>
 
 [Milton Security](https://www.miltonsecurity.com?utm_source=intelowl)  is a Service Disabled Veteran Owned Small Business that provides effective Threat Hunting and Incident Response to organizations around the globe 24*7
 
@@ -101,7 +101,7 @@ If you are interested in being the next GSoC developer for IntelOwl, join the [H
 
 #### Tines
 
-<a href="https://www.tines.com/?utm_source=oss&utm_medium=sponsorship&utm_campaign=intelowl"> <img style="border: 0.2px solid black" width=120 height=55 src="static_intel/tines_logo.png" alt="Tines logo"> </a>
+<a href="https://www.tines.com/?utm_source=oss&utm_medium=sponsorship&utm_campaign=intelowl"> <img style="border: 0.2px solid black" width=120 height=55 src="docs/static/tines_logo.png" alt="Tines logo"> </a>
 
 [Tines](https://www.tines.com/?utm_source=oss&utm_medium=sponsorship&utm_campaign=intelowl) is no-code automation for security teams. Build powerful, reliable workflows without a development team.
 
@@ -109,7 +109,7 @@ IntelOwl is officially integrated in Tines. Read everything about this partnersh
 
 #### Docker
 
-<a href="https://www.docker.com"> <img style="border: 0.2px solid black" width=120 height=31 src="static_intel/docker_logo.png" alt="Docker logo"> </a>
+<a href="https://www.docker.com"> <img style="border: 0.2px solid black" width=120 height=31 src="docs/static/docker_logo.png" alt="Docker logo"> </a>
 
 In 2021 IntelOwl joined the official [Docker Open Source Program](https://www.docker.com/blog/expanded-support-for-open-source-software-projects/). This allows IntelOwl developers to easily manage Docker images and focus on writing the code.
 

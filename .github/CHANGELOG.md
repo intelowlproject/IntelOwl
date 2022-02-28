@@ -2,6 +2,23 @@
 
 [**Upgrade Guide**](https://intelowl.readthedocs.io/en/latest/Installation.html#update-to-the-most-recent-version)
 
+## [v3.3.1](https://github.com/intelowlproject/IntelOwl/releases/tag/v3.3.1)
+
+**Notes:**
+- BREAKING CHANGE:
+  - We merged some additional Docker Analyzers (`thug`, `static_analyzers`, `apk_analyzers`, `box-js` and `qiling`) into a single container called `malware_tools_analyzers`. In this way, the IntelOwl configuration with all those Malware Analyzers is a lot lighter than before. Just run `--malware_tools_analyzers` as a single option to leverage all those additional analyzers.
+- fixed `--all_analyzers` and `--tor_analyzers` options not working.
+
+**New/Improved Analyzers:**
+- Added option to run shellcodes with Mandiant tools (Floss, SpeakEasy and Capa)
+- Minor fix to [Qiling](https://github.com/qilingframework/qiling) Analyzers
+- Added new Observable Analyzer for [Stalkphish](https://stalkphish.io)
+- Added new Yara Analyzer for [Malpedia](https://malpedia.caad.fkie.fraunhofer.de/) Rules
+
+**Other:**
+- Added Issue Templates
+- Renewed PR automation to better detect possible bugs in deployments and to improve performance
+
 ## [v3.3.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v3.3.0)
 
 **Notes:**

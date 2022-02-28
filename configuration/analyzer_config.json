@@ -259,6 +259,34 @@
     "secrets": {},
     "params": {}
   },
+  "Capa_Info_Shellcode": {
+    "type": "file",
+    "python_module": "capa_info.CapaInfo",
+    "description": "capa detects capabilities in shellcode files",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
+    "supported_filetypes": [
+      "application/octet-stream"
+    ],
+    "config": {
+      "soft_time_limit": 500,
+      "queue": "long"
+    },
+    "secrets": {},
+    "params": {
+      "arch": {
+        "value": "64",
+        "type": "str",
+        "description": "Change system architecture for the shellcode (32 or 64)."
+      },
+      "shellcode": {
+        "value": true,
+        "type": "bool",
+        "description": "true if the file is a shellcode."
+      }
+    }
+  },
   "CapeSandbox": {
     "type": "file",
     "python_module": "cape_sandbox.CAPEsandbox",
@@ -869,7 +897,8 @@
     "leaks_info": false,
     "docker_based": true,
     "supported_filetypes": [
-      "application/x-dosexec"
+      "application/x-dosexec",
+      "application/octet-stream"
     ],
     "config": {
       "soft_time_limit": 500,
@@ -2666,7 +2695,7 @@
   "SpeakEasy": {
     "type": "file",
     "python_module": "speakeasy_emulation.SpeakEasy",
-    "description": "speakeasy emulation report",
+    "description": "SpeakEasy emulation report by Mandiant",
     "disabled": false,
     "external_service": false,
     "leaks_info": false,
@@ -2679,6 +2708,39 @@
     },
     "secrets": {},
     "params": {}
+  },
+  "SpeakEasy_Shellcode": {
+    "type": "file",
+    "python_module": "speakeasy_emulation.SpeakEasy",
+    "description": "SpeakEasy emulation shellcode report by Mandiant",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
+    "supported_filetypes": [
+      "application/octet-stream"
+    ],
+    "config": {
+      "soft_time_limit": 120,
+      "queue": "long"
+    },
+    "secrets": {},
+    "params": {
+      "arch": {
+        "value": "x64",
+        "type": "str",
+        "description": "Change system architecture for the shellcode (x86 or x64)."
+      },
+      "shellcode": {
+        "value": true,
+        "type": "bool",
+        "description": "true if the file is a shellcode."
+      },
+      "raw_offset": {
+        "value": 0,
+        "type": "int",
+        "description": "Offset to start emulating."
+      }
+    }
   },
   "Spyse": {
     "type": "observable",
@@ -2753,6 +2815,32 @@
         "description": "Refer to their docs](https://screenshotapi.net/documentation)."
       }
     }
+  },
+  "Stalkphish": {
+    "type": "observable",
+    "python_module": "stalkphish.Stalkphish",
+    "description": "Check in url or ipv4 if string exists in [Stalkphish.io](https://www.stalkphish.io/) API.",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": [
+      "url",
+      "ip",
+      "domain",
+      "generic"
+    ],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "STALKPHISH_KEY",
+        "description": "API key.",
+        "required": true
+      }
+    },
+    "params": {}
   },
   "Strings_Info_Classic": {
     "type": "file",
@@ -3641,6 +3729,40 @@
       }
     }
   },
+  "Yara_Scan_MALPEDIA": {
+    "type": "file",
+    "python_module": "yara_scan.YaraScan",
+    "description": "scan a file with Malpedia yara rules. (disabled due to high resource usage)",
+    "disabled": true,
+    "external_service": false,
+    "leaks_info": false,
+    "config": {
+      "soft_time_limit": 60,
+      "queue": "local"
+    },
+    "secrets": {},
+    "params": {
+      "git_repo_main_dir": {
+        "value": [
+          "/opt/deploy/yara/malpedia_rules"
+        ],
+        "type": "list",
+        "description": ""
+      },
+      "directories_with_rules": {
+        "value": [
+          "/opt/deploy/yara/malpedia_rules"
+        ],
+        "type": "list",
+        "description": ""
+      },
+      "recursive": {
+        "value": true,
+        "type": "bool",
+        "description": ""
+      }
+    }
+  },
   "Yara_Scan_ATM_MALWARE": {
     "type": "file",
     "python_module": "yara_scan.YaraScan",
@@ -3731,10 +3853,10 @@
       }
     }
   },
-  "Yara_Scan_FireEye": {
+  "Yara_Scan_Mandiant": {
     "type": "file",
     "python_module": "yara_scan.YaraScan",
-    "description": "scan a file with FireEye yara rules",
+    "description": "scan a file with Mandiant yara rules",
     "disabled": false,
     "external_service": false,
     "leaks_info": false,
@@ -3746,14 +3868,14 @@
     "params": {
       "git_repo_main_dir": {
         "value": [
-          "/opt/deploy/yara/fireeye_rules"
+          "/opt/deploy/yara/mandiant_rules"
         ],
         "type": "list",
         "description": ""
       },
       "directories_with_rules": {
         "value": [
-          "/opt/deploy/yara/fireeye_rules/rules"
+          "/opt/deploy/yara/mandiant_rules/rules"
         ],
         "type": "list",
         "description": ""

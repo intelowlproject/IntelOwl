@@ -75,6 +75,7 @@ SPYSE_API_KEY=test
 DRAGONFLY_API_KEY=test
 BITCOINABUSE_KEY=test
 VIRUSHEE_API_KEY=test
+STALKPHISH_KEY=test
 
 # connectors secrets (optional)
 CONNECTOR_MISP_KEY=test

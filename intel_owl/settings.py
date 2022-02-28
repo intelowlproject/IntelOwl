@@ -155,7 +155,7 @@ REST_FRAMEWORK = {
 # DRF Spectacular
 SPECTACULAR_SETTINGS = {
     "TITLE": "IntelOwl API specification",
-    "VERSION": "3.3.0",
+    "VERSION": "3.3.1",
 }
 
 # Django-Rest-Durin
@@ -265,8 +265,6 @@ USE_TZ = True
 STATIC_URL = "/static/"
 STATIC_ROOT = os.path.join(BASE_DIR, "static/")
 
-STATICFILES_DIRS = (os.path.join(BASE_DIR, "static_intel/"),)
-
 
 INFO_OR_DEBUG_LEVEL = "DEBUG" if DEBUG else "INFO"
 LOGGING = {
@@ -351,3 +349,5 @@ LOGGING = {
         },
     },
 }
+
+TEST_RUNNER = "intel_owl.test_runner.MyTestRunner"

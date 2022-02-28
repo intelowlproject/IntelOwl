@@ -35,11 +35,15 @@ git clone --depth 1 https://github.com/InQuest/yara-rules inquest_rules
 git clone --depth 1 https://github.com/StrangerealIntel/DailyIOC daily_ioc_rules
 
 # FireEye
-git clone --depth 1 https://github.com/fireeye/red_team_tool_countermeasures fireeye_rules
+git clone --depth 1 https://github.com/mandiant/red_team_tool_countermeasures mandiant_rules
 
 # ATM Malware
 git clone --depth 1 https://github.com/fboldewin/YARA-rules atm_malware_rules
 rm -fr atm_malware_rules/*.md
+
+# Malpedia yara rules
+git clone --depth 1 --filter=blob:none  --sparse https://github.com/malpedia/signator-rules malpedia_rules
+(cd malpedia_rules && git sparse-checkout set rules && mv rules/*.yar . && rm rules -fr)
 
 # Yara community rules
 git clone --depth 1 https://github.com/Yara-Rules/rules.git

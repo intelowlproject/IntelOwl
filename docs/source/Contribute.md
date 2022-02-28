@@ -26,7 +26,8 @@ For this reason it is important to follow some easy rules based on a simple but 
 Keeping to a consistent code style throughout the project makes it easier to contribute and collaborate. We make use of [`psf/black`](https://github.com/psf/black) and [isort](https://pycqa.github.io/isort/) for code formatting and [`flake8`](https://flake8.pycqa.org) for style guides.
 
 ## How to start (Setup project and development instance)
-Please create a new branch based on the **develop** branch that contains the most recent changes. This is mandatory.
+Create a personal fork of the project on Github.
+The, please create a new branch based on the **develop** branch that contains the most recent changes. This is mandatory.
 
 `git checkout -b myfeature develop`
 
@@ -158,7 +159,7 @@ After having written the new python module, you have to remember to:
   Remember to set at least:
   * `python_module`: name of the task that the connector must launch
   * `description`: little description of the connector
-  * `maximum_tlp`: maximum TLP of the analysis upto which the connector is allowed to run.
+  * `maximum_tlp`: maximum TLP of the analysis up to which the connector is allowed to run.
   
   Similar to analyzers, the `config` can be used in case the new connector uses specific configuration arguments and `secrets` can be used to declare any secrets the connector requires in order to run (Example: API Key).
 

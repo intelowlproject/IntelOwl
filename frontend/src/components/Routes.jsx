@@ -9,7 +9,7 @@ const publicRoutesLazy = [
   {
     path: "/",
     exact: true,
-    component: React.lazy(() => import("./Home/Home")),
+    component: React.lazy(() => import("./home/Home")),
   },
 ];
 
@@ -18,7 +18,7 @@ const noAuthRoutesLazy = [
   {
     path: "/login",
     exact: true,
-    component: React.lazy(() => import("./auth/public/Login")),
+    component: React.lazy(() => import("./auth/Login")),
   },
 ];
 
@@ -28,7 +28,7 @@ const authRoutesLazy = [
   {
     path: "/logout",
     exact: true,
-    component: React.lazy(() => import("./auth/public/Logout")),
+    component: React.lazy(() => import("./auth/Logout")),
   },
   /* User/Organization */
   {
@@ -46,12 +46,12 @@ const authRoutesLazy = [
   {
     path: "/jobs",
     exact: true,
-    component: React.lazy(() => import("./jobs/JobsTable")),
+    component: React.lazy(() => import("./jobs/table/JobsTable")),
   },
   {
     path: "/jobs/:id",
     exact: true,
-    component: React.lazy(() => import("./jobs/JobResult")),
+    component: React.lazy(() => import("./jobs/result/JobResult")),
   },
   /* Plugins */
   {

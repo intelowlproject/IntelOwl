@@ -3,14 +3,12 @@
 
 import json
 import logging
+from typing import Dict
 
-from certego_saas.models import User
-from certego_saas.user.serializers import (
-    UserAccessSerializer as CertegoUserAccessSerializer,
-)
-from django.contrib.auth.models import Group
 from durin.serializers import UserSerializer
 from rest_framework import serializers as rfs
+
+from certego_saas.apps.organization.permissions import IsObjectOwnerOrSameOrgPermission
 
 from .analyzers_manager.serializers import AnalyzerReportSerializer
 from .connectors_manager.serializers import ConnectorReportSerializer
@@ -20,7 +18,7 @@ from .helpers import (
     calculate_observable_classification,
     gen_random_colorhex,
 )
-from .models import TLP, Job, Tag
+from .models import Job, Tag
 
 logger = logging.getLogger(__name__)
 
@@ -33,30 +31,13 @@ __all__ = [
     "FileAnalysisSerializer",
     "ObservableAnalysisSerializer",
     "AnalysisResponseSerializer",
-    "UserAccessSerializer",
 ]
-
-# intelowl
 
 
 class TagSerializer(rfs.ModelSerializer):
     class Meta:
         model = Tag
         fields = rfs.ALL_FIELDS
-
-    def get_permissions_map(self, created):
-        """
-        'change' and 'delete' permission
-        is applied to all the groups the requesting user belongs to.
-        But everyone has 'view' permission.
-        """
-        current_user = self.context["request"].user
-        user_grps = [*current_user.groups.all()]
-
-        return {
-            "change_tag": user_grps,
-            "delete_tag": user_grps,
-        }
 
 
 class JobAvailabilitySerializer(rfs.ModelSerializer):
@@ -74,54 +55,19 @@ class JobAvailabilitySerializer(rfs.ModelSerializer):
     minutes_ago = rfs.IntegerField(default=None, required=False)
 
 
-class JobListSerializer(rfs.ModelSerializer):
+class _AbstractJobViewSerializer(rfs.ModelSerializer):
     """
-    Job model's list serializer.
-    Used for list()
+    Base Serializer for ``Job`` model's ``retrieve()`` and ``list()``.
     """
-
-    class Meta:
-        model = Job
-        exclude = ("file",)
 
     user = UserSerializer()
     tags = TagSerializer(many=True, read_only=True)
-    process_time = rfs.SerializerMethodField()
-
-    def get_process_time(self, obj: Job) -> float:
-        if not obj.finished_analysis_time:
-            return None
-        t = obj.finished_analysis_time - obj.received_request_time
-        return round(t.total_seconds(), 2)
-
-
-class JobSerializer(rfs.ModelSerializer):
-    """
-    Job model's serializer.
-    Used for retrieve()
-    """
-
-    class Meta:
-        model = Job
-        exclude = ("file",)
-
-    user = UserSerializer()
-    tags = TagSerializer(many=True, read_only=True)
-    process_time = rfs.SerializerMethodField()
-
-    analyzer_reports = AnalyzerReportSerializer(many=True, read_only=True)
-    connector_reports = ConnectorReportSerializer(many=True, read_only=True)
-
-    def get_process_time(self, obj: Job) -> float:
-        if not obj.finished_analysis_time:
-            return None
-        t = obj.finished_analysis_time - obj.received_request_time
-        return round(t.total_seconds(), 2)
+    process_time = rfs.FloatField()
 
 
 class _AbstractJobCreateSerializer(rfs.ModelSerializer):
     """
-    Base Serializer for Job create().
+    Base Serializer for ``Job`` model's ``create()``.
     """
 
     tags_labels = rfs.ListField(default=list)
@@ -129,27 +75,6 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
     analyzers_requested = rfs.ListField(default=list)
     connectors_requested = rfs.ListField(default=list)
     md5 = rfs.HiddenField(default=None)
-
-    def get_permissions_map(self, created) -> dict:
-        """
-        * 'view' permission is applied to all the groups the requesting user belongs to
-        if job is private (tlp - RED, AMBER).
-        * 'delete' permission is only given to the user who created the job
-        * 'change' permission is given to
-        """
-        current_user = self.context["request"].user
-        usr_groups = current_user.groups.all()
-        tlp = self.validated_data.get("tlp", TLP.WHITE).upper()
-        if tlp == TLP.RED or tlp == TLP.AMBER:
-            view_grps = usr_groups
-        else:
-            view_grps = Group.objects.all()
-
-        return {
-            "view_job": [*view_grps],
-            "delete_job": [*usr_groups],
-            "change_job": [*usr_groups],
-        }
 
     def validate(self, attrs: dict) -> dict:
         # check and validate runtime_configuration
@@ -177,10 +102,44 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         return job
 
 
+class JobListSerializer(_AbstractJobViewSerializer):
+    """
+    Used for ``list()``.
+    """
+
+    class Meta:
+        model = Job
+        exclude = ("file",)
+
+
+class JobSerializer(_AbstractJobViewSerializer):
+    """
+    Used for ``retrieve()``
+    """
+
+    class Meta:
+        model = Job
+        exclude = ("file",)
+
+    analyzer_reports = AnalyzerReportSerializer(many=True, read_only=True)
+    connector_reports = ConnectorReportSerializer(many=True, read_only=True)
+    permissions = rfs.SerializerMethodField()
+
+    def get_permissions(self, obj: Job) -> Dict[str, bool]:
+        request = self.context.get("request", None)
+        view = self.context.get("view", None)
+        if request and view:
+            has_perm = IsObjectOwnerOrSameOrgPermission().has_object_permission(
+                request, view, obj
+            )
+            return {"kill": has_perm, "delete": has_perm}
+        return {}
+
+
 class FileAnalysisSerializer(_AbstractJobCreateSerializer):
     """
-    Job model's serializer for File Analysis.
-    Used for create()
+    ``Job`` model's serializer for File Analysis.
+    Used for ``create()``.
     """
 
     file = rfs.FileField(required=True)
@@ -221,8 +180,8 @@ class FileAnalysisSerializer(_AbstractJobCreateSerializer):
 
 class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
     """
-    Job model's serializer for Observable Analysis.
-    Used for create()
+    ``Job`` model's serializer for Observable Analysis.
+    Used for ``create()``.
     """
 
     observable_name = rfs.CharField(required=True)
@@ -268,39 +227,3 @@ class AnalysisResponseSerializer(rfs.Serializer):
     warnings = rfs.ListField()
     analyzers_running = rfs.ListField()
     connectors_running = rfs.ListField()
-
-
-# certego saas
-
-
-class _AccessSerializer(rfs.ModelSerializer):
-    class Meta:
-        model = User
-        fields = (
-            "total_submissions",
-            "month_submissions",
-        )
-
-    # User <-> Job stats
-    total_submissions = rfs.SerializerMethodField()
-    month_submissions = rfs.SerializerMethodField()
-
-    def get_total_submissions(self, obj: User) -> int:
-        return Job.user_total_submissions(obj)
-
-    def get_month_submissions(self, obj: User) -> int:
-        return Job.user_month_submissions(obj)
-
-
-class UserAccessSerializer(CertegoUserAccessSerializer):
-    class Meta:
-        model = User
-        fields = (
-            "user",
-            "access",
-        )
-
-    access = rfs.SerializerMethodField()
-
-    def get_access(self, obj: User) -> dict:
-        return _AccessSerializer(instance=obj).data

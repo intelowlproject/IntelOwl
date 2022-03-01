@@ -223,11 +223,13 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
     poll_distance: int
 
     @staticmethod
-    def __raise_in_case_bad_request(name, resp, params_to_check=["key"]) -> bool:
+    def __raise_in_case_bad_request(name, resp, params_to_check=None) -> bool:
         """
         Raises:
             :class: `AnalyzerRunException`, if bad status code or no key in response
         """
+        if params_to_check is None:
+            params_to_check = ["key"]
         # different error messages for different cases
         if resp.status_code == 404:
             raise AnalyzerConfigurationException(
@@ -325,7 +327,8 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
             self._raise_container_not_running()
 
         # step #2: raise AnalyzerRunException in case of error
-        assert self.__raise_in_case_bad_request(self.name, resp1)
+        if not self.__raise_in_case_bad_request(self.name, resp1):
+            raise AssertionError
 
         # step #3: if no error, continue and try to fetch result
         key = resp1.json().get("key")
@@ -364,10 +367,11 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
             self._raise_container_not_running()
 
         # step #2: raise AnalyzerRunException in case of error
-        assert self.__raise_in_case_bad_request(self.name, resp, params_to_check=[])
+        if not self.__raise_in_case_bad_request(self.name, resp, params_to_check=[]):
+            raise AssertionError
         return resp
 
-    def _monkeypatch(self, patches: list = []):
+    def _monkeypatch(self, patches: list = None):
         """
         Here, `_monkeypatch` is an instance method and not a class method.
         This is because when defined with `@classmethod`, we were getting the error
@@ -376,6 +380,8 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
         ```
         whenever multiple analyzers with same parent class were being called.
         """
+        if patches is None:
+            patches = []
         # no need to sleep during tests
         self.poll_distance = 0
         patches.append(

@@ -1,3 +1,6 @@
 sphinx_rtd_theme==0.5.2
 sphinxcontrib-openapi==0.7.0
 sphinxcontrib-redoc==1.6.0
+# this is to fix this bug https://github.com/Tribler/tribler/issues/6624
+mistune==0.8.4
+recommonmark==0.7.1

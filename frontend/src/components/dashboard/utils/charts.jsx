@@ -23,7 +23,7 @@ import {
 
 // constants
 const colors = getRandomColorsArray(10, true);
-  
+
 // bar charts
 
 export const JobStatusBarChart = React.memo(() => {

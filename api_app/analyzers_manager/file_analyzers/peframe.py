@@ -6,7 +6,7 @@ from api_app.analyzers_manager.classes import DockerBasedAnalyzer, FileAnalyzer
 
 class PEframe(FileAnalyzer, DockerBasedAnalyzer):
     name: str = "PEframe"
-    url: str = "http://static_analyzers:4002/peframe"
+    url: str = "http://malware_tools_analyzers:4002/peframe"
     # http request polling max number of tries
     max_tries: int = 25
     # interval between http request polling

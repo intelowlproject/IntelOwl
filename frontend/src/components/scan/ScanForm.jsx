@@ -13,15 +13,14 @@ import {
   MultiSelectDropdownInput
 } from "@certego/certego-ui";
 
-import { useQuotaBadge } from "../auth";
+import { useQuotaBadge } from "../../hooks";
+import { usePluginConfigurationStore } from "../../stores";
 import {
   TLP_CHOICES,
   TLP_DESCRIPTION_MAP,
   OBSERVABLE_TYPES
 } from "../../constants";
-import TLPTag from "../common/TLPTag";
-import markdownToHtml from "../common/markdownToHtml";
-import usePluginConfigurationStore from "../../stores/usePluginConfigurationStore";
+import { TLPTag, markdownToHtml } from "../common";
 import {
   RuntimeConfigurationModal,
   RecentScans,
@@ -241,13 +240,6 @@ export default function ScanForm() {
         <TotalBadge className="ml-2 mr-3 text-larger" />
         <QuotaInfoIcon />
       </ContentSection>
-      {/* Relevant links */}
-      <small className="text-light">
-        Out of limits?{" "}
-        <Link to="/plans" className="link-ul-primary ml-2">
-          Upgrade now!
-        </Link>
-      </small>
       {/* Form */}
       <ContentSection id="ScanForm" className="mt-3 bg-body shadow">
         <h3 className="font-weight-bold">

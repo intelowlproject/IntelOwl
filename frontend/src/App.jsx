@@ -4,9 +4,9 @@ import React from "react";
 import { BrowserRouter } from "react-router-dom";
 
 // layout
-import AppHeader from "./components/layouts/AppHeader";
-import AppMain from "./components/layouts/AppMain";
-import AppFooter from "./components/layouts/AppFooter";
+import AppHeader from "./layouts/AppHeader";
+import AppMain from "./layouts/AppMain";
+import AppFooter from "./layouts/AppFooter";
 
 function App() {
   console.debug("App rendered!");

@@ -57,8 +57,7 @@ class AnalyzerConfig(AbstractConfig):
             return (
                 f"api_app.analyzers_manager.observable_analyzers.{self.python_module}"
             )
-        else:
-            return f"api_app.analyzers_manager.file_analyzers.{self.python_module}"
+        return f"api_app.analyzers_manager.file_analyzers.{self.python_module}"
 
     @classmethod
     def from_dict(cls, data: dict) -> "AnalyzerConfig":

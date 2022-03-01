@@ -9,9 +9,4 @@ services:
     build:
       context: ../integrations/rendertron
       dockerfile: Dockerfile
-    container_name: intelowl_rendertron
-    restart: unless-stopped
-    expose:
-      - "4006"
-    security_opt:
-      - seccomp:"integrations/rendertron/seccomp/chrome.json"
+    image: intelowlproject/intelowl_rendertron:test

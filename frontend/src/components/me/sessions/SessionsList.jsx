@@ -41,7 +41,14 @@ export default function SessionsList() {
       render={() => (
         <ol>
           {tokenSessions.map(
-            ({ id, client, created, expiry, is_current: isCurrent, }) => (
+            ({
+              id,
+              client,
+              created,
+              expiry,
+              has_expired: hasExpired,
+              is_current: isCurrent,
+            }) => (
               <li key={`sessionslist-${id}`}>
                 <Row className="mb-3 d-flex flex-wrap">
                   <Col sm={6} xl={4}>
@@ -65,11 +72,16 @@ export default function SessionsList() {
                       id={`sessionslist-${id}__expires`}
                       value={expiry}
                       title="Session expiry date"
-                      fromNowDuring
+                      fromNow
                     />
+                    {hasExpired && (
+                      <Badge color="danger" className="ml-2">
+                        expired
+                      </Badge>
+                    )}
                   </Col>
                   {/* Actions */}
-                  <Col sm={6} xl={1}>
+                  <Col sm={6} xl={1} className="text-center">
                     {!isCurrent ? (
                       <IconButton
                         id={`sessionslist-${id}__revoke-btn`}

@@ -84,7 +84,7 @@ const useAuthStore = create((set, get) => ({
         true,
         1000
       );
-      return setTimeout(get().logoutUser, 500);
+      return setTimeout(get().service.logoutUser, 500);
     },
   },
 }));

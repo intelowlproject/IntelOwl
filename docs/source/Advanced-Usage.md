@@ -5,9 +5,9 @@ This page includes details about some advanced features that Intel Owl provides 
 - [Advanced Usage](#advanced-usage)
   - [Optional Analyzers](#optional-analyzers)
   - [Customize analyzer execution at time of request](#customize-analyzer-execution-at-time-of-request)
-        - [View and understand different parameters](#view-and-understand-different-parameters)
-        - [from the GUI](#from-the-gui)
-        - [from Pyintelowl](#from-pyintelowl)
+      - [View and understand different parameters](#view-and-understand-different-parameters)
+      - [from the GUI](#from-the-gui)
+      - [from Pyintelowl](#from-pyintelowl)
   - [Analyzers with special configuration](#analyzers-with-special-configuration)
   - [Elastic Search](#elastic-search)
       - [Kibana](#kibana)
@@ -15,6 +15,7 @@ This page includes details about some advanced features that Intel Owl provides 
   - [Django Groups & Permissions](#django-groups--permissions)
   - [Authentication options](#authentication-options)
       - [LDAP](#ldap)
+      - [RADIUS](#radius-authentication)
   - [Google Kubernetes Engine deployment](#google-kubernetes-engine-deployment)
   - [Queues](#queues)
       - [Multi Queue](#multi-queue)
@@ -43,47 +44,50 @@ table, th, td {
     <th>Description</th>
   </tr>
   <tr>
-    <td>Static Analyzers</td>
-    <td><code>PEframe_Scan</code>, <code>Capa_Info</code>, <code>Floss</code>, <code>Strings_Info_Classic</code>, <code>Strings_Info_ML</code>, <code>Manalyze</code>, <code>ClamAV</code></td>
+    <td>Malware Tools Analyzers</td>
+    <td>
+      <ul>
+      <li><code>PEframe_Scan</code></li>
+      <li><code>Capa_Info</code></li>
+      <li><code>Floss</code></li>
+      <li><code>Strings_Info_Classic</code>,
+      <code>Strings_Info_ML</code></li>
+      <li><code>Manalyze</code></li>
+      <li><code>ClamAV</code></li>
+      <li><code>Thug_URL_Info</code>,
+      <code>Thug_HTML_Info</code></li>
+      <li><code>BoxJS_Scan_JavaScript</code></li>
+      <li><code>APKiD_Scan_APK_DEX_JAR</code></li>
+      <li><code>Qiling_Windows</code>,
+      <code>Qiling_Windows_Shellcode</code>,
+      <code>Qiling_Linux</code>,
+      <code>Qiling_Linux_Shellcode</code></li>
+     </ul>
+    </td>
     <td>
     <ul>
-      <li>Capa detects capabilities in executable files</li>
       <li>PEFrame performs static analysis on Portable Executable malware and malicious MS Office documents</li>
+      <li>Capa detects capabilities in executable files</li>
       <li>FLOSS automatically deobfuscate strings from malware binaries</li>
       <li>String_Info_Classic extracts human-readable strings where as ML version of it ranks them</li>
       <li>Manalyze statically analyzes PE (Portable-Executable) files in-depth</li>
       <li>ClamAV antivirus engine scans files for trojans, viruses, malwares using a multi-threaded daemon</li>
-      </ul>
-    </td>
-  </tr>
-  <tr>
-    <td>Thug</td>
-    <td><code>Thug_URL_Info</code>, <code>Thug_HTML_Info</code></td>
-    <td>performs hybrid dynamic/static analysis on a URL or HTML page.</td>
-  </tr>
-  <tr>
-    <td>Box-JS</td>
-    <td><code>BoxJS_Scan_JavaScript</code></td>
-    <td>tool for studying JavaScript malware</td>
-  </tr>
-  <tr>
-    <td>APK Analyzers</td>
-    <td><code>APKiD_Scan_APK_DEX_JAR</code></td>
-    <td>identifies many compilers, packers, obfuscators, and other weird stuff from an APK or DEX file</td>
-  </tr>
-  <tr>
-    <td>Qiling</td>
-    <td><code>Qiling_Windows</code>
-    <code>Qiling_Windows_Shellcode</code>
-    <code>Qiling_Linux</code>
-    <code>Qiling_Linux_Shellcode</code>
-    </td>
-    <td>Tool for emulate the execution of a binary file or a shellcode.
+      <li>Thug performs hybrid dynamic/static analysis on a URL or HTML page.</li>
+      <li>Box-JS is a tool for studying JavaScript malware</li>
+      <li>APKiD identifies many compilers, packers, obfuscators, and other weird stuff from an APK or DEX file</li>
+      <li>Qiling is a tool for emulating the execution of a binary file or a shellcode.
      It requires the configuration of its rootfs, and the optional configuration of profiles.
      The rootfs can be copied from the <a href="https://github.com/qilingframework/qiling/tree/master/examples/rootfs"> Qiling project</a>: please remember that Windows dll <b> must</b> be manually added for license reasons.
      Qiling provides a <a href="https://github.com/qilingframework/qiling/blob/master/examples/scripts/dllscollector.bat"> DllCollector</a> to retrieve dlls from your licensed Windows. 
      <a href="https://docs.qiling.io/en/latest/profile/"> Profiles </a> must be placed in the <code>profiles</code> subfolder
-     </td>
+     </li>
+      </ul>
+    </td>
+  </tr>
+  <tr>
+    <td>TOR Analyzers</td>
+    <td><code>Onionscan</code></td>
+    <td>Scans TOR .onion domains for privacy leaks and information disclosures.</td>
   </tr>
   <tr>
     <td>Renderton</td>
@@ -100,7 +104,7 @@ python3 start.py prod --all_analyzers up
 
 Otherwise you can enable just one of the cited integration by using the related option. Example:
 ```bash
-python3 start.py prod --qiling up
+python3 start.py prod --tor_analyzers up
 ```
 
 ## Customize analyzer execution at time of request
@@ -159,8 +163,9 @@ In the `env_file_app_template`, you'd see various elasticsearch related environm
 Intel Owl provides a Kibana's "Saved Object" configuration (with example dashboard and visualizations). It can be downloaded from [here](https://github.com/intelowlproject/IntelOwl/blob/develop/configuration/Kibana-Saved-Conf.ndjson) and can be imported into Kibana by going to the "Saved Objects" panel (http://localhost:5601/app/management/kibana/objects).
 
 #### Example Configuration
-1. Setup [Elastic Search and Kibana](https://hub.docker.com/r/nshou/elasticsearch-kibana/) and say it is running in a docker service with name `elk` on port `9200` which is exposed to the shared docker network.
-2. In the `env_file_app`, we set `ELASTICSEARCH_ENABLED` to `True` and `ELASTICSEARCH_HOST` to `elk:9200`.
+1. Setup [Elastic Search and Kibana](https://hub.docker.com/r/nshou/elasticsearch-kibana/) and say it is running in a docker service with name `elasticsearch` on port `9200` which is exposed to the shared docker network.
+   (Alternatively, you can spin up a local Elastic Search instance, by appending ```--elastic``` to the ```python3 start.py ...``` command. Note that the local Elastic Search instance consumes large amount of memory, and hence having >=16GB is recommended.))
+2. In the `env_file_app`, we set `ELASTICSEARCH_ENABLED` to `True` and `ELASTICSEARCH_HOST` to `elasticsearch:9200`.
 3. In the `Dockerfile`, set the correct version in `ELASTICSEARCH_DSL_VERSION` [depending on the version](https://django-elasticsearch-dsl.readthedocs.io/en/latest/about.html#features) of our elasticsearch server. Default value is `7.1.4`.
 4. Rebuild the docker images with `docker-compose build` (required only if `ELASTICSEARCH_DSL_VERSION` was changed)
 5. Now start the docker containers and execute,
@@ -170,6 +175,7 @@ Intel Owl provides a Kibana's "Saved Object" configuration (with example dashboa
   ```
 
   This will build and populate all existing job objects into the `jobs` index.
+
 
 
 ## Django Groups & Permissions
@@ -244,6 +250,22 @@ How to configure and enable LDAP on Intel Owl?
 
 2. Once you have done that, you have to set the environment variable `LDAP_ENABLED` as `True` in the environment configuration file `env_file_app`.
   Finally, you can restart the application with `docker-compose up`
+
+
+#### RADIUS Authentication
+
+IntelOwl leverages [Django-radius](https://github.com/robgolding/django-radius) to perform authentication
+via RADIUS server.
+
+How to configure and enable RADIUS authentication on Intel Owl?
+
+1. Change the values with your RADIUS auth configuration inside `configuration/radius_config.py`. This file is mounted as a
+   docker volume, so you won't need to rebuild the image.
+
+> For more details on how to configure this file, check the [official documentation](https://github.com/robgolding/django-radius) of the django-radius library.
+
+2. Once you have done that, you have to set the environment variable `RADIUS_AUTH_ENABLED` as `True` in the environment
+   configuration file `env_file_app`. Finally, you can restart the application with `docker-compose up`
 
 
 ## Google Kubernetes Engine deployment

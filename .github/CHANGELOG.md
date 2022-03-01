@@ -2,6 +2,83 @@
 
 [**Upgrade Guide**](https://intelowl.readthedocs.io/en/latest/Installation.html#update-to-the-most-recent-version)
 
+## [v3.3.1](https://github.com/intelowlproject/IntelOwl/releases/tag/v3.3.1)
+
+**Notes:**
+- BREAKING CHANGE:
+  - We merged some additional Docker Analyzers (`thug`, `static_analyzers`, `apk_analyzers`, `box-js` and `qiling`) into a single container called `malware_tools_analyzers`. In this way, the IntelOwl configuration with all those Malware Analyzers is a lot lighter than before. Just run `--malware_tools_analyzers` as a single option to leverage all those additional analyzers.
+- fixed `--all_analyzers` and `--tor_analyzers` options not working.
+
+**New/Improved Analyzers:**
+- Added option to run shellcodes with Mandiant tools (Floss, SpeakEasy and Capa)
+- Minor fix to [Qiling](https://github.com/qilingframework/qiling) Analyzers
+- Added new Observable Analyzer for [Stalkphish](https://stalkphish.io)
+- Added new Yara Analyzer for [Malpedia](https://malpedia.caad.fkie.fraunhofer.de/) Rules
+
+**Other:**
+- Added Issue Templates
+- Renewed PR automation to better detect possible bugs in deployments and to improve performance
+
+## [v3.3.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v3.3.0)
+
+**Notes:**
+- Added helper script that checks and installs [initial requirements](https://intelowl.readthedocs.io/en/develop/Installation.html#requirements). (`initialize.sh`)
+- Added [RADIUS authentication support](https://intelowl.readthedocs.io/en/latest/Advanced-Usage.html#radius-authentication)
+
+**New/Improved Analyzers:**
+- Added a new optional [Docker Analyzer](https://intelowl.readthedocs.io/en/develop/Advanced-Usage.html#optional-analyzers) running [Onionscan](https://github.com/s-rah/onionscan)
+- Added [CAPE Sandbox](https://capesandbox.com/) file analyzer
+- `Doc_Info` analyzer now runs [msodde](https://github.com/decalage2/oletools/wiki/msodde) together with `olevba` and `XMLMacroDeobfuscator`
+- `PE_Info` analyzer now calculates [impfuzzy](https://github.com/JPCERTCC/impfuzzy) and [dashicon](https://github.com/fr0gger/SuperPeHasher) hashes too.
+
+**Other:**
+- Added option to run ElasticSearch/Kibana together with IntelOwl with option `--elastic`. Check the [doc here](https://intelowl.readthedocs.io/en/latest/Advanced-Usage.html#example-configuration)
+- Security: Patched Django Critical Bug + Added Brute Force protection to the Admin page
+- Generic bug fixing and other maintenance work
+- Bump some python dependencies
+
+
+## [v3.2.4](https://github.com/intelowlproject/IntelOwl/releases/tag/v3.2.4)
+
+**Notes:**
+
+- The `Dragonfly_Emulation` analyzer will stop working without this update. Note that the output format (report JSON attributes) of this analyzer has had changes as well.
+
+**New Analyzers:**
+
+- `Virushee_UploadFile`: Check file hash and upload file sample for analysis on [Virushee API](https://api.virushee.com/).
+- `Virushee_CheckHash`: Search for a previous analysis of a file by its hash (SHA256/SHA1/MD5) on [Virushee API](https://api.virushee.com/).
+  > Setting the `VIRUSHEE_API_KEY` is optional to use these analyzers.
+
+**Other:**
+
+- A lot of code cleanliness. Thanks to @deepsource-autofix[bot].
+- Make the `repo_downloader.sh` step optional during development using the `.env.start.test.template` file.
+- Bump `pydragonfly` dependency for `Dragonfly_Emulation` analyzer.
+- Bump some python dependencies.
+
+## [v3.2.3](https://github.com/intelowlproject/IntelOwl/releases/tag/v3.2.3)
+
+**New Analyzers:**
+
+- `Mnemonic_PassiveDNS`: Look up a domain or IP using the [Mnemonic PassiveDNS public API](https://docs.mnemonic.no/display/public/API/Passive+DNS+Overview).
+- `FileScan_Search`: Finds reports and uploaded files by various tokens, like hash, filename, verdict, IOCs etc via [FileScan.io API](https://www.filescan.io/api/docs)
+- `FileScan_Upload_File`: Upload your file to extract IoCs from executable files, documents and scripts via [FileScan.io API](https://www.filescan.io/api/docs)
+- `Yara_Scan_ATM_MALWARE`: analyze your files with the rules from this [repo](https://github.com/fboldewin/YARA-rules)
+
+**Fixes & Improvements:**
+
+- `HashLookupServer_*` analyzers now correctly support sha256 hashes
+- added IP addresses support to `URLhaus` analyzer
+- fixed `VirusTotal` analyzers to reduce quota consumption
+- fixed `Dragonfly_Emulation` and `Quark_Engine_APK` analyzer
+- updated `dnstwist`, `XLMMacroDeobfuscator` and other dependencies upgrades
+- adjustments in the PR template
+
+**For IntelOwl Contributors**
+
+We updated the documentation on how to [Contribute](https://intelowl.readthedocs.io/en/latest/Contribute.html#rules). Please read through them if interested in contributing in the project.
+
 ## [v3.2.2](https://github.com/intelowlproject/IntelOwl/releases/tag/v3.2.2)
 
 **Notes:**

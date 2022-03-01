@@ -6,7 +6,7 @@ from api_app.analyzers_manager.classes import DockerBasedAnalyzer, FileAnalyzer
 
 class Qiling(FileAnalyzer, DockerBasedAnalyzer):
     name: str = "Qiling"
-    url: str = "http://qiling:4005/qiling"
+    url: str = "http://malware_tools_analyzers:4002/qiling"
     # http request polling max number of tries
     max_tries: int = 15
     # interval between http request polling (in secs)
@@ -14,8 +14,8 @@ class Qiling(FileAnalyzer, DockerBasedAnalyzer):
 
     def set_params(self, params):
         self.args = []
-        os = params.get("os", "x86")
-        arch = params.get("arch", "windows")
+        os = params.get("os", "windows")
+        arch = params.get("arch", "x86")
         self.args.extend([os] + [arch])
         shellcode = params.get("shellcode", False)
         if shellcode:

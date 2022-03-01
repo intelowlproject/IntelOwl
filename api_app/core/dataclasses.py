@@ -81,13 +81,15 @@ class AbstractConfig:
     def param_values(self) -> dict:
         return {name: param.value for name, param in self.params.items()}
 
-    def _read_secrets(self, secrets_filter=[]) -> typing.Dict[str, str]:
+    def _read_secrets(self, secrets_filter=None) -> typing.Dict[str, str]:
         """
         Returns a dict of `secret_key: secret_value` mapping.
         filter_secrets: filter specific secrets or not (default: return all)
         """
+        if secrets_filter is None:
+            secrets_filter = []
         secrets = {}
-        if len(secrets_filter):
+        if secrets_filter:
             _filtered_secrets = {
                 key_name: self.secrets[key_name]
                 for key_name in self.secrets.keys()

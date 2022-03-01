@@ -66,28 +66,28 @@
     },
     "params": {}
   },
-  "BitcoinAbuse" : {
-    "type" : "observable",
-    "python_module" : "bitcoinabuse.BitcoinAbuseAPI",
-    "description" : "Check a BTC address against bitcoinabuse.com, a public database of BTC addresses used by hackers and criminals.",
-    "disabled" : false,
-    "external_service" : true,
-    "leaks_info" : false,
-    "observable_supported" : [
+  "BitcoinAbuse": {
+    "type": "observable",
+    "python_module": "bitcoinabuse.BitcoinAbuseAPI",
+    "description": "Check a BTC address against bitcoinabuse.com, a public database of BTC addresses used by hackers and criminals.",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": [
       "hash"
     ],
-    "config" : {
-      "soft_time_limit" : 30,
-      "queue" : "default"
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
     },
-    "secrets" : {
-      "api_key_name" : {
-        "env_var_key" : "BITCOINABUSE_KEY",
-        "description" : "",
-        "required" : true
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "BITCOINABUSE_KEY",
+        "description": "",
+        "required": true
       }
     },
-    "params" : {}
+    "params": {}
   },
   "BoxJS_Scan_JavaScript": {
     "type": "file",
@@ -247,9 +247,10 @@
     "disabled": false,
     "external_service": false,
     "leaks_info": false,
-    "docker_based": true,
     "supported_filetypes": [
-      "application/x-dosexec"
+      "application/x-dosexec",
+      "application/x-sharedlib",
+      "application/x-executable"
     ],
     "config": {
       "soft_time_limit": 500,
@@ -257,6 +258,76 @@
     },
     "secrets": {},
     "params": {}
+  },
+  "Capa_Info_Shellcode": {
+    "type": "file",
+    "python_module": "capa_info.CapaInfo",
+    "description": "capa detects capabilities in shellcode files",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
+    "supported_filetypes": [
+      "application/octet-stream"
+    ],
+    "config": {
+      "soft_time_limit": 500,
+      "queue": "long"
+    },
+    "secrets": {},
+    "params": {
+      "arch": {
+        "value": "64",
+        "type": "str",
+        "description": "Change system architecture for the shellcode (32 or 64)."
+      },
+      "shellcode": {
+        "value": true,
+        "type": "bool",
+        "description": "true if the file is a shellcode."
+      }
+    }
+  },
+  "CapeSandbox": {
+    "type": "file",
+    "python_module": "cape_sandbox.CAPEsandbox",
+    "description": "Automatic scan of suspicious files using CapeSandbox API",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": true,
+    "docker_based": false,
+    "config": {
+      "soft_time_limit": 1000,
+      "queue": "long"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "CAPESANDBOX_KEY",
+        "description": "",
+        "required": true
+      },
+      "url_key_name": {
+        "env_var_key": "CAPESANDBOX_URL",
+        "description": "URL for the CapeSandbox instance. If none provided, It uses the API provided by CAPESandbox by default.",
+        "required": true
+      }
+    },
+    "params": {
+      "VM_NAME": {
+        "value": "win7x64_8",
+        "type": "str",
+        "description": "The VM to be used in the analysis."
+      },
+      "max_tries": {
+        "value": 50,
+        "type": "int",
+        "description": "Number of max tries while trying to poll the CAPESandbox API."
+      },
+      "poll_distance": {
+        "value": 30,
+        "type": "int",
+        "description": "Seconds to wait before moving on to the next poll attempt."
+      }
+    }
   },
   "Censys_Search": {
     "type": "observable",
@@ -314,7 +385,11 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": ["ip", "domain", "generic"],
+    "observable_supported": [
+      "ip",
+      "domain",
+      "generic"
+    ],
     "config": {
       "soft_time_limit": 300,
       "queue": "long"
@@ -662,7 +737,10 @@
     "type": "file",
     "python_module": "dragonfly.DragonflyEmulation",
     "description": "Emulate malware against [Dragonfly](https://dragonfly.certego.net/?utm_source=intelowl) sandbox by [Certego S.R.L](https://certego.net).",
-    "supported_filetypes": ["application/x-dosexec", "application/octet-stream"],
+    "supported_filetypes": [
+      "application/x-dosexec",
+      "application/octet-stream"
+    ],
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
@@ -672,7 +750,10 @@
     },
     "params": {
       "profiles": {
-        "value": [1, 2],
+        "value": [
+          1,
+          2
+        ],
         "type": "list",
         "description": "List of profile indices for emulators. Refer to [profiles list](https://dragonfly.certego.net/dashboard/profiles?utm_source=intelowl)."
       },
@@ -772,6 +853,41 @@
       }
     }
   },
+  "FileScan_Upload_File": {
+    "type": "file",
+    "python_module": "filescan.FileScanUpload",
+    "description": "Extract IoCs from executable files, documents and scripts via [FileScan.io API](https://www.filescan.io/api/docs).",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "config": {
+      "soft_time_limit": 180,
+      "queue": "long"
+    },
+    "secrets": {},
+    "params": {}
+  },
+  "FileScan_Search": {
+    "type": "observable",
+    "python_module": "filescan_search.FileScanSearch",
+    "description": "Finds reports and uploaded files by various tokens, like hash, filename, verdict, IOCs etc via [FileScan.io API](https://www.filescan.io/api/docs).",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": [
+      "url",
+      "domain",
+      "ip",
+      "generic",
+      "hash"
+    ],
+    "config": {
+      "soft_time_limit": 60,
+      "queue": "long"
+    },
+    "secrets": {},
+    "params": {}
+  },
   "Floss": {
     "type": "file",
     "python_module": "floss.Floss",
@@ -781,7 +897,8 @@
     "leaks_info": false,
     "docker_based": true,
     "supported_filetypes": [
-      "application/x-dosexec"
+      "application/x-dosexec",
+      "application/octet-stream"
     ],
     "config": {
       "soft_time_limit": 500,
@@ -1826,6 +1943,35 @@
       }
     }
   },
+  "Mnemonic_PassiveDNS": {
+    "type": "observable",
+    "python_module": "mnemonic_pdns.MnemonicPassiveDNS",
+    "description": "Look up a domain or IP using the [Mnemonic PassiveDNS public API](https://docs.mnemonic.no/display/public/API/Passive+DNS+Overview).",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": [
+      "domain",
+      "ip"
+    ],
+    "config": {
+      "soft_time_limit": 60,
+      "queue": "long"
+    },
+    "secrets": {},
+    "params": {
+      "cof_format": {
+        "value": true,
+        "type": "bool",
+        "description": "Return result in the PassiveDNS [Common Output Format](https://datatracker.ietf.org/doc/draft-dulaunoy-dnsop-passive-dns-cof/)."
+      },
+      "limit": {
+        "value": 1000,
+        "type": "int",
+        "description": "Number of records to fetch."
+      }
+    }
+  },
   "PDF_Info": {
     "type": "file",
     "python_module": "pdf_info.PDFInfo",
@@ -1886,7 +2032,10 @@
     "external_service": true,
     "leaks_info": true,
     "observable_supported": [
-      "ip", "url", "domain", "generic"
+      "ip",
+      "url",
+      "domain",
+      "generic"
     ],
     "config": {
       "soft_time_limit": 100,
@@ -2546,7 +2695,7 @@
   "SpeakEasy": {
     "type": "file",
     "python_module": "speakeasy_emulation.SpeakEasy",
-    "description": "speakeasy emulation report",
+    "description": "SpeakEasy emulation report by Mandiant",
     "disabled": false,
     "external_service": false,
     "leaks_info": false,
@@ -2559,6 +2708,39 @@
     },
     "secrets": {},
     "params": {}
+  },
+  "SpeakEasy_Shellcode": {
+    "type": "file",
+    "python_module": "speakeasy_emulation.SpeakEasy",
+    "description": "SpeakEasy emulation shellcode report by Mandiant",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
+    "supported_filetypes": [
+      "application/octet-stream"
+    ],
+    "config": {
+      "soft_time_limit": 120,
+      "queue": "long"
+    },
+    "secrets": {},
+    "params": {
+      "arch": {
+        "value": "x64",
+        "type": "str",
+        "description": "Change system architecture for the shellcode (x86 or x64)."
+      },
+      "shellcode": {
+        "value": true,
+        "type": "bool",
+        "description": "true if the file is a shellcode."
+      },
+      "raw_offset": {
+        "value": 0,
+        "type": "int",
+        "description": "Offset to start emulating."
+      }
+    }
   },
   "Spyse": {
     "type": "observable",
@@ -2633,6 +2815,32 @@
         "description": "Refer to their docs](https://screenshotapi.net/documentation)."
       }
     }
+  },
+  "Stalkphish": {
+    "type": "observable",
+    "python_module": "stalkphish.Stalkphish",
+    "description": "Check in url or ipv4 if string exists in [Stalkphish.io](https://www.stalkphish.io/) API.",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": [
+      "url",
+      "ip",
+      "domain",
+      "generic"
+    ],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "STALKPHISH_KEY",
+        "description": "API key.",
+        "required": true
+      }
+    },
+    "params": {}
   },
   "Strings_Info_Classic": {
     "type": "file",
@@ -2928,6 +3136,35 @@
     "secrets": {},
     "params": {}
   },
+  "Onionscan": {
+    "type": "observable",
+    "python_module": "onionscan.Onionscan",
+    "description": "Scans TOR .onion domains for privacy leaks and information disclosures.",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
+    "docker_based": true,
+    "observable_supported": [
+      "domain"
+    ],
+    "config": {
+      "soft_time_limit": 720,
+      "queue": "default"
+    },
+    "secrets": {},
+    "params": {
+      "verbose": {
+        "value": true,
+        "type": "bool",
+        "description": "Verbose output"
+      },
+      "torProxyAddress" : {
+        "value": "",
+        "type": "str",
+        "description": "Tor proxy address"
+      }
+    }
+  },
   "Tranco": {
     "type": "observable",
     "python_module": "tranco.Tranco",
@@ -3060,7 +3297,8 @@
     "leaks_info": false,
     "observable_supported": [
       "domain",
-      "url"
+      "url",
+      "ip"
     ],
     "config": {
       "soft_time_limit": 50,
@@ -3181,6 +3419,53 @@
       }
     },
     "params": {}
+  },
+  "Virushee_CheckHash":{
+    "type": "observable",
+    "python_module": "virushee.VirusheeCheckHash",
+    "description": "Search for a previous analysis of a file by its hash (SHA256/SHA1/MD5) on [Virushee API](https://api.virushee.com/).",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": ["hash"],
+    "config": {
+      "soft_time_limit": 60,
+      "queue": "long"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "VIRUSHEE_API_KEY",
+        "description": "[virushee docs](https://api.virushee.com/#section/Authentication)",
+        "required": false
+      }
+    },
+    "params": {}
+  },
+  "Virushee_UploadFile":{
+    "type": "file",
+    "python_module": "virushee.VirusheeFileUpload",
+    "description": "Check file hash and upload file sample for analysis on [Virushee API](https://api.virushee.com/).",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": true,
+    "config": {
+      "soft_time_limit": 300,
+      "queue": "long"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "VIRUSHEE_API_KEY",
+        "description": "[virushee docs](https://api.virushee.com/#section/Authentication)",
+        "required": false
+      }
+    },
+    "params": {
+      "force_scan": {
+        "value": false,
+        "type": "bool",
+        "description": "If true, always upload file for analysis skipping the hash check."
+      }
+    }
   },
   "VirusTotal_v2_Scan_File": {
     "type": "file",
@@ -3333,22 +3618,22 @@
     },
     "params": {}
   },
- "WhoIs_RipeDB_Search" : {
+  "WhoIs_RipeDB_Search": {
     "type": "observable",
-    "python_module" : "whoisripe.WhoIsRipeAPI",
-    "description" : "Fetch whois record data of an IP address from Ripe DB using their [search API](https://github.com/RIPE-NCC/whois/wiki/WHOIS-REST-API-search)",
-    "disabled" : false,
-    "external_service" : true,
-    "leaks_info" : false,
-    "observable_supported" : [
+    "python_module": "whoisripe.WhoIsRipeAPI",
+    "description": "Fetch whois record data of an IP address from Ripe DB using their [search API](https://github.com/RIPE-NCC/whois/wiki/WHOIS-REST-API-search)",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": [
       "ip"
     ],
-    "config" : {
-      "soft_time_limit" : 30,
-      "queue" : "default"
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
     },
-    "secrets" : {},
-    "params" : {}
+    "secrets": {},
+    "params": {}
   },
   "WiGLE": {
     "type": "observable",
@@ -3444,6 +3729,74 @@
       }
     }
   },
+  "Yara_Scan_MALPEDIA": {
+    "type": "file",
+    "python_module": "yara_scan.YaraScan",
+    "description": "scan a file with Malpedia yara rules. (disabled due to high resource usage)",
+    "disabled": true,
+    "external_service": false,
+    "leaks_info": false,
+    "config": {
+      "soft_time_limit": 60,
+      "queue": "local"
+    },
+    "secrets": {},
+    "params": {
+      "git_repo_main_dir": {
+        "value": [
+          "/opt/deploy/yara/malpedia_rules"
+        ],
+        "type": "list",
+        "description": ""
+      },
+      "directories_with_rules": {
+        "value": [
+          "/opt/deploy/yara/malpedia_rules"
+        ],
+        "type": "list",
+        "description": ""
+      },
+      "recursive": {
+        "value": true,
+        "type": "bool",
+        "description": ""
+      }
+    }
+  },
+  "Yara_Scan_ATM_MALWARE": {
+    "type": "file",
+    "python_module": "yara_scan.YaraScan",
+    "description": "scan a file with ATM Malware yara rules",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
+    "config": {
+      "soft_time_limit": 60,
+      "queue": "local"
+    },
+    "secrets": {},
+    "params": {
+      "git_repo_main_dir": {
+        "value": [
+          "/opt/deploy/yara/atm_malware_rules"
+        ],
+        "type": "list",
+        "description": ""
+      },
+      "directories_with_rules": {
+        "value": [
+          "/opt/deploy/yara/atm_malware_rules"
+        ],
+        "type": "list",
+        "description": ""
+      },
+      "recursive": {
+        "value": true,
+        "type": "bool",
+        "description": ""
+      }
+    }
+  },
   "Yara_Scan_Community": {
     "type": "file",
     "python_module": "yara_scan.YaraScan",
@@ -3500,10 +3853,10 @@
       }
     }
   },
-  "Yara_Scan_FireEye": {
+  "Yara_Scan_Mandiant": {
     "type": "file",
     "python_module": "yara_scan.YaraScan",
-    "description": "scan a file with FireEye yara rules",
+    "description": "scan a file with Mandiant yara rules",
     "disabled": false,
     "external_service": false,
     "leaks_info": false,
@@ -3515,14 +3868,14 @@
     "params": {
       "git_repo_main_dir": {
         "value": [
-          "/opt/deploy/yara/fireeye_rules"
+          "/opt/deploy/yara/mandiant_rules"
         ],
         "type": "list",
         "description": ""
       },
       "directories_with_rules": {
         "value": [
-          "/opt/deploy/yara/fireeye_rules/rules"
+          "/opt/deploy/yara/mandiant_rules/rules"
         ],
         "type": "list",
         "description": ""

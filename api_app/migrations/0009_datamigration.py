@@ -20,5 +20,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(create_apiaccess_client_for_durin),
+        migrations.RunPython(
+            create_apiaccess_client_for_durin, migrations.RunPython.noop
+        ),
     ]

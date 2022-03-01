@@ -1,0 +1,12 @@
+# IMPORTANT: The version must match the version of docker-compose.yml
+---
+version: '3.8'
+
+# All additional integrations should be added following this format only.
+
+services:
+  tor_analyzers:
+    build:
+      context: ../integrations/tor_analyzers
+      dockerfile: Dockerfile
+    image: intelowlproject/intelowl_tor_analyzers:test

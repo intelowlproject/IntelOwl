@@ -1,0 +1,66 @@
+# django libs
+Django==3.2.12
+django-auth-ldap==4.0.0
+django-radius==1.5.0
+django-filter==21.1
+django-storages==1.12.3
+django-celery-beat==2.2.1
+django-celery-results==2.2.0
+
+# django rest framework libs
+djangorestframework==3.13.1
+drf-flex-fields==0.9.6
+djangorestframework-filters==1.0.0.dev2
+drf-spectacular==0.21.2
+
+uWSGI==2.0.20
+whitenoise==6.0.0
+git+https://github.com/certego/certego-saas.git@4e0bfe4070c747262e21ae9bbce0adb9a4dabbea#egg=certego_saas
+git+https://github.com/jazzband/django-silk.git#egg=django-silk
+
+# infra
+requests==2.27.1
+boto3==1.21.0
+celery==5.2.2
+dataclasses==0.6
+flower==1.0.0
+
+# plugins
+GitPython==3.1.26
+checkdmarc==4.4.1
+darksearch==2.1.2
+dnspython==2.2.0
+dnstwist==20220131
+ppdeep>=20200505
+easygui==0.98.2
+google>=3.0.0
+google-cloud-webrisk==1.7.0
+intezer-sdk==1.6
+lief==0.11.5
+maxminddb==2.2.0
+mwdblib==4.1.0
+oletools==0.60
+OTXv2==1.5.12
+peepdf-fork==0.4.3
+pdfid==1.1.0
+pefile-fork==2020.12.16
+Pillow==9.0.0
+psycopg2-binary==2.9.1
+pycti==5.1.4
+pydeep==0.4
+PyExifTool==0.5.0
+pyhashlookup==1.1.1
+pyimpfuzzy==0.5
+pymisp==2.4.144
+pypdns==1.5.2
+pypssl==2.2
+pysafebrowsing==0.1.1
+PySocks==1.7.1
+quark-engine==22.2.1
+speakeasy-emulator==1.5.9
+yara-python==4.1.0
+pydragonfly==0.1.0
+XLMMacroDeobfuscator[secure]==0.2.3
+# this is required because XLMMacroDeobfuscator does not pin xlrd2 and pyxlsb2 packages
+pyxlsb2==0.0.8
+xlrd2==1.3.4

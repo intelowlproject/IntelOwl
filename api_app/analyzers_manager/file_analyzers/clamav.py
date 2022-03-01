@@ -6,7 +6,7 @@ from api_app.analyzers_manager.classes import DockerBasedAnalyzer, FileAnalyzer
 
 class ClamAV(FileAnalyzer, DockerBasedAnalyzer):
     name: str = "ClamAV"
-    url: str = "http://static_analyzers:4002/clamav"
+    url: str = "http://malware_tools_analyzers:4002/clamav"
     # interval between http request polling
     poll_distance: int = 3
     # http request polling max number of tries
@@ -25,8 +25,8 @@ class ClamAV(FileAnalyzer, DockerBasedAnalyzer):
 
         report = self._docker_run(req_data, req_files)
 
-        ok = "OK" in report
-        val = report.split("\n")[0].split()[1]
-        found = None if val == "OK" else val
+        clean = "OK" in report
+        signature = report.split("\n")[0].split()[1]
+        detection = None if signature == "OK" else signature
 
-        return {"ok": ok, "found": found, "raw_report": report}
+        return {"clean": clean, "detection": detection, "raw_report": report}

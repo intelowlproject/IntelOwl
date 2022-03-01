@@ -11,7 +11,7 @@ RUN npm install
 RUN PUBLIC_URL=/static/reactapp/ npm run build
 
 # Stage 2: Backend
-FROM python:3.9.7-buster
+FROM python:3.9.9-buster
 
 COPY --from=frontend-build /build /var/www/reactapp
 
@@ -21,6 +21,8 @@ ENV PYTHONPATH /opt/deploy/intel_owl
 ENV LOG_PATH /var/log/intel_owl
 ENV ELASTICSEARCH_DSL_VERSION 7.2.0
 ENV watch_logs_cmd "watch -n1 tail -n10 /var/log/intel_owl/django/api_app.log"
+
+ARG REPO_DOWNLOADER_ENABLED=true
 
 RUN mkdir -p ${LOG_PATH} \
     ${LOG_PATH}/django \
@@ -38,8 +40,8 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 RUN pip3 install --upgrade pip
 
-COPY requirements.txt $PYTHONPATH/requirements.txt
-COPY test-requirements.txt $PYTHONPATH/test-requirements.txt
+COPY requirements/requirements.txt $PYTHONPATH/requirements.txt
+COPY requirements/test-requirements.txt $PYTHONPATH/test-requirements.txt
 WORKDIR $PYTHONPATH
 
 RUN pip3 install --no-cache-dir --compile -r requirements.txt

@@ -21,9 +21,10 @@ agg_file_name_uri = reverse("jobs-aggregate-file-name")
 
 class JobViewsetTests(CustomAPITestCase):
     def setUp(self):
-        super(JobViewsetTests, self).setUp()
+        super().setUp()
         self.job, _ = Job.objects.get_or_create(
             **{
+                "user": self.superuser,
                 "is_sample": False,
                 "observable_name": os.environ.get("TEST_IP"),
                 "md5": os.environ.get("TEST_MD5"),
@@ -34,6 +35,7 @@ class JobViewsetTests(CustomAPITestCase):
         )
         self.job2, _ = Job.objects.get_or_create(
             **{
+                "user": self.superuser,
                 "is_sample": True,
                 "md5": "test.file",
                 "file_name": "test.file",
@@ -83,10 +85,12 @@ class JobViewsetTests(CustomAPITestCase):
         self.assertEqual(job.status, Job.Status.REPORTED_WITHOUT_FAILS)
         uri = reverse("jobs-kill", args=[job.pk])
         response = self.client.patch(uri)
+        content = response.json()
+        msg = (response, content)
         self.assertDictEqual(
-            response.json()["errors"], {"detail": "Job is not running"}
+            content["errors"], {"detail": "Job is not running"}, msg=msg
         )
-        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.status_code, 400, msg=msg)
 
     def test_agg_status_200(self):
         resp = self.client.get(agg_status_uri)

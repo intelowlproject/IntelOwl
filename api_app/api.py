@@ -5,9 +5,6 @@ import logging
 from datetime import timedelta
 from typing import Union
 
-from certego_saas.ext.helpers import cache_action_response, parse_humanized_range
-from certego_saas.ext.mixins import SerializerActionMixin
-from certego_saas.ext.viewsets import ReadAndDeleteOnlyViewSet
 from django.conf import settings
 from django.db.models import Count, Q
 from django.db.models.functions import Trunc
@@ -21,6 +18,10 @@ from rest_framework.decorators import action, api_view
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
+from certego_saas.apps.organization.permissions import IsObjectOwnerOrSameOrgPermission
+from certego_saas.ext.helpers import cache_action_response, parse_humanized_range
+from certego_saas.ext.mixins import SerializerActionMixin
+from certego_saas.ext.viewsets import ReadAndDeleteOnlyViewSet
 from intel_owl.celery import app as celery_app
 
 from .analyzers_manager import controller as analyzers_controller
@@ -28,7 +29,7 @@ from .analyzers_manager.constants import ObservableTypes
 from .connectors_manager import controller as connectors_controller
 from .filters import JobFilter
 from .helpers import get_now
-from .models import Job, Status, Tag
+from .models import TLP, Job, Status, Tag
 from .serializers import (
     AnalysisResponseSerializer,
     FileAnalysisSerializer,
@@ -238,6 +239,33 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
         "finished_analysis_time",
     ]
 
+    def get_permissions(self):
+        permissions = super().get_permissions()
+        if self.action in ["destroy", "kill"]:
+            permissions.append(IsObjectOwnerOrSameOrgPermission())
+        return permissions
+
+    def get_queryset(self):
+        """
+        User has access to:
+        - jobs with TLP = WHITE or GREEN
+        - jobs with TLP = AMBER or RED and
+        created by a member of their organization.
+        """
+        queryset = super().get_queryset()
+        user = self.request.user
+        if user.has_membership():
+            user_query = Q(user=user) | Q(
+                user__membership__organization_id=user.membership.organization_id
+            )
+        else:
+            user_query = Q(user=user)
+        query = Q(tlp__in=[TLP.WHITE, TLP.GREEN]) | (
+            Q(tlp__in=[TLP.AMBER, TLP.RED]) & (user_query)
+        )
+        queryset = queryset.filter(query)
+        return queryset
+
     @add_docs(
         description="Kill running job by closing celery tasks and marking as killed",
         request=None,
@@ -361,7 +389,7 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
     def aggregate_file_name(self, request):
         return self.__aggregation_response_dynamic("file_name", False)
 
-    def __aggregation_response_static(self, annotations: dict):
+    def __aggregation_response_static(self, annotations: dict) -> Response:
         delta, basis = self.__parse_range(self.request)
         qs = (
             Job.objects.filter(received_request_time__gte=delta)
@@ -373,7 +401,7 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
 
     def __aggregation_response_dynamic(
         self, field_name: str, group_by_date: bool = True, limit: int = 5
-    ):
+    ) -> Response:
         delta, basis = self.__parse_range(self.request)
 
         most_frequent_values = (
@@ -425,9 +453,9 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
 
 @add_docs(
     description="""
-    REST endpoint to pefrom CRUD operations on Job tags.
+    REST endpoint to pefrom CRUD operations on ``Tag`` model.
     Requires authentication.
-    POST/PUT/DELETE requires model/object level permission."""
+    """
 )
 class TagViewSet(viewsets.ModelViewSet):
     queryset = Tag.objects.all()

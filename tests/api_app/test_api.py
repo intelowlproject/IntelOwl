@@ -3,6 +3,7 @@
 
 import hashlib
 import os
+from typing import Tuple
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -51,7 +52,7 @@ class ApiViewTests(TestCase):
         }
 
     @staticmethod
-    def __get_test_file(fname):
+    def __get_test_file(fname: str) -> Tuple[SimpleUploadedFile, str]:
         floc = f"{settings.PROJECT_LOCATION}/test_files/{fname}"
         with open(floc, "rb") as f:
             binary = f.read()
@@ -227,7 +228,7 @@ class ApiViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
             response.get("Content-Disposition"),
-            f"attachment; filename={job.file_name}",
+            f'attachment; filename="{job.file_name}"',
         )
 
     def test_download_sample_404(self):
@@ -239,8 +240,11 @@ class ApiViewTests(TestCase):
         # requesting for job where is_sample=False
         job = models.Job.objects.create(is_sample=False)
         response = self.client.get(f"/api/jobs/{job.id}/download_sample")
-        self.assertEqual(response.status_code, 400)
+        content = response.json()
+        msg = (response, content)
+        self.assertEqual(response.status_code, 400, msg=msg)
         self.assertDictContainsSubset(
             {"detail": "Requested job does not have a sample associated with it."},
-            response.json(),
+            content["errors"],
+            msg=msg,
         )

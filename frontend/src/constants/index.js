@@ -20,8 +20,8 @@ export const TLP_DESCRIPTION_MAP = {
   WHITE: "TLP: use all analyzers",
   GREEN: "TLP: disable analyzers that could impact privacy",
   AMBER:
-    "TLP: disable analyzers that could impact privacy and limit view permissions to my group",
-  RED: "TLP: disable analyzers that could impact privacy, limit view permissions to my group and do not use any external service",
+    "TLP: disable analyzers that could impact privacy and limit access to my organization",
+  RED: "TLP: disable analyzers that could impact privacy, limit access to my organization and do not use any external service",
 };
 export const JOB_STATUS_COLOR_MAP = {
   pending: "light",

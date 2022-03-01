@@ -132,7 +132,11 @@ class JobSerializer(_AbstractJobViewSerializer):
             has_perm = IsObjectOwnerOrSameOrgPermission().has_object_permission(
                 request, view, obj
             )
-            return {"kill": has_perm, "delete": has_perm}
+            return {
+                "kill": has_perm,
+                "delete": has_perm,
+                "plugin_actions": has_perm,
+            }
         return {}
 
 

@@ -9,7 +9,6 @@ django-celery-results==2.2.0
 
 # django rest framework libs
 djangorestframework==3.13.1
-drf-flex-fields==0.9.6
 djangorestframework-filters==1.0.0.dev2
 drf-spectacular==0.21.2
 

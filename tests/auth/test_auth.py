@@ -1,11 +1,12 @@
 from unittest import TestCase
 
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.test import tag
 from durin.models import AuthToken, Client
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
 
+User = get_user_model()
 login_uri = reverse("auth_login")
 logout_uri = reverse("auth_logout")
 

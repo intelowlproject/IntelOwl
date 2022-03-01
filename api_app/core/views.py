@@ -13,6 +13,7 @@ from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from certego_saas.apps.organization.permissions import IsObjectOwnerOrSameOrgPermission
 from intel_owl.celery import app as celery_app
 
 from .models import AbstractReport
@@ -20,22 +21,29 @@ from .models import AbstractReport
 logger = logging.getLogger(__name__)
 
 
-class PluginActionViewSet(viewsets.ViewSet, metaclass=ABCMeta):
+class PluginActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
+
+    permission_classes = [
+        IsObjectOwnerOrSameOrgPermission,
+    ]
+
     @property
     @abstractmethod
     def report_model(self):
         raise NotImplementedError()
 
-    def get_object(self, job_id, name):
+    def get_object(self, job_id: int, name: str) -> AbstractReport:
         """
         overrides drf's get_object
         get plugin report object by name and job_id
         """
         try:
-            return self.report_model.objects.get(
+            obj = self.report_model.objects.get(
                 job_id=job_id,
                 name=name,
             )
+            self.check_object_permissions(self.request, obj)
+            return obj
         except self.report_model.DoesNotExist:
             raise NotFound()
 
@@ -102,7 +110,7 @@ class PluginActionViewSet(viewsets.ViewSet, metaclass=ABCMeta):
 
 
 @add_docs(
-    description="Health Check: if instance associated with plugin is up or not",
+    description="Health Check: if server instance associated with plugin is up or not",
     request=None,
     responses={
         200: inline_serializer(
@@ -115,7 +123,7 @@ class PluginActionViewSet(viewsets.ViewSet, metaclass=ABCMeta):
 )
 class PluginHealthCheckAPI(APIView, metaclass=ABCMeta):
     @abstractmethod
-    def perform_healthcheck(self, plugin_name):
+    def perform_healthcheck(self, plugin_name: str) -> bool:
         raise NotImplementedError()
 
     def get(self, request, name):

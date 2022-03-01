@@ -27,7 +27,7 @@ def set_permissions(directory):
                 for file in os.listdir(directory):
                     try:
                         os.chown(os.path.join(directory, file), uid, gid)
-                    except PermissionError:
+                    except PermissionError:  # lgtm [py/empty-except]
                         pass
             else:
                 os.chown(directory, uid, gid)

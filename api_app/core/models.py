@@ -36,6 +36,10 @@ class AbstractReport(models.Model):
 
     # properties
     @property
+    def user(self) -> models.Model:
+        return self.job.user
+
+    @property
     def process_time(self) -> float:
         secs = (self.end_time - self.start_time).total_seconds()
         return round(secs, 2)

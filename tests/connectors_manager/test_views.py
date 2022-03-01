@@ -18,23 +18,26 @@ class ConnectorAppViewsTestCase(CustomAPITestCase):
 
     def test_connector_healthcheck_200(self):
         response = self.client.get("/api/connector/OpenCTI/healthcheck")
-        self.assertEqual(response.status_code, 200)
+        content = response.json()
+        msg = (response, content)
+
+        self.assertEqual(response.status_code, 200, msg=msg)
 
     def test_connector_healthcheck_400(self):
         response = self.client.get("/api/connector/connector404/healthcheck")
-        self.assertEqual(response.status_code, 400)
-        self.assertDictEqual(response.json(), {"detail": "Connector doesn't exist"})
+        content = response.json()
+        msg = (response, content)
+
+        self.assertEqual(response.status_code, 400, msg=msg)
+        self.assertDictEqual(
+            content["errors"], {"detail": "Connector doesn't exist"}, msg=msg
+        )
 
 
 class ConnectorActionViewSetTests(CustomAPITestCase, PluginActionViewsetTestCase):
-    @classmethod
-    def setUpClass(cls):
-        super(ConnectorActionViewSetTests, cls).setUpClass()
-
-    def setUp(self):
-        super(ConnectorActionViewSetTests, self).setUp()
-        self.report = self.init_report()
-        self.plugin_type = "connector"
+    @property
+    def plugin_type(self):
+        return "connector"
 
     @property
     def report_model(self):

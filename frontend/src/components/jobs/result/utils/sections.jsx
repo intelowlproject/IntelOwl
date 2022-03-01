@@ -64,16 +64,18 @@ export function JobActionsBar({ job, }) {
 
   return (
     <ContentSection className="d-inline-flex">
-      <IconButton
-        id="deletejobbtn"
-        Icon={() => <MdDeleteOutline className="text-danger" />}
-        size="sm"
-        color="darker"
-        className="mr-2"
-        onClick={onDeleteBtnClick}
-        title="Delete Job"
-        titlePlacement="top"
-      />
+      {job.permissions?.delete && (
+        <IconButton
+          id="deletejobbtn"
+          Icon={() => <MdDeleteOutline className="text-danger" />}
+          size="sm"
+          color="darker"
+          className="mr-2"
+          onClick={onDeleteBtnClick}
+          title="Delete Job"
+          titlePlacement="top"
+        />
+      )}
       {job?.is_sample && (
         <Button
           size="sm"
@@ -197,15 +199,17 @@ export function JobIsRunningAlert({ job, }) {
           This job is currently <strong className="text-accent">running</strong>
           .
         </h6>
-        <IconButton
-          id="jobisrunningalert-iconbutton"
-          Icon={MdPauseCircleOutline}
-          size="xs"
-          title="Stop Job Process"
-          color="danger"
-          titlePlacement="top"
-          onClick={() => killJob(job.id)}
-        />
+        {job.permissions?.kill && (
+          <IconButton
+            id="jobisrunningalert-iconbutton"
+            Icon={MdPauseCircleOutline}
+            size="xs"
+            title="Stop Job Process"
+            color="danger"
+            titlePlacement="top"
+            onClick={() => killJob(job.id)}
+          />
+        )}
         <div className="text-gray">
           The page will auto-refresh once the analysis completes. You can either
           wait here or come back later and check.

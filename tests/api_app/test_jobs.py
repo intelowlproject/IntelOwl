@@ -70,27 +70,53 @@ class JobViewsetTests(CustomAPITestCase):
         self.assertEqual(response.status_code, 204)
         self.assertEqual(Job.objects.count(), 1)
 
+    def test_delete_403(self):
+        # create a new job which does not belong to authed user
+        job = Job.objects.create(status=Job.Status.REPORTED_WITHOUT_FAILS)
+        response = self.client.delete(f"{jobs_list_uri}/{job.id}")
+        content = response.json()
+        msg = (response, content, "PermissionDenied")
+
+        self.assertEqual(response.status_code, 403, msg=msg)
+
+    # @action endpoints
+
     def test_kill_204(self):
-        job = Job.objects.create(status=Job.Status.RUNNING)
+        job = Job.objects.create(status=Job.Status.RUNNING, user=self.superuser)
         self.assertEqual(job.status, Job.Status.RUNNING)
         uri = reverse("jobs-kill", args=[job.pk])
         response = self.client.patch(uri)
-        self.assertEqual(response.status_code, 204)
         job.refresh_from_db()
+
+        self.assertEqual(response.status_code, 204)
         self.assertEqual(job.status, Job.Status.KILLED)
 
     def test_kill_400(self):
         # create a new job whose status is not "running"
-        job = Job.objects.create(status=Job.Status.REPORTED_WITHOUT_FAILS)
-        self.assertEqual(job.status, Job.Status.REPORTED_WITHOUT_FAILS)
+        job = Job.objects.create(
+            status=Job.Status.REPORTED_WITHOUT_FAILS, user=self.superuser
+        )
         uri = reverse("jobs-kill", args=[job.pk])
         response = self.client.patch(uri)
         content = response.json()
         msg = (response, content)
+
+        self.assertEqual(response.status_code, 400, msg=msg)
         self.assertDictEqual(
             content["errors"], {"detail": "Job is not running"}, msg=msg
         )
-        self.assertEqual(response.status_code, 400, msg=msg)
+
+    def test_kill_403(self):
+        # create a new job which does not belong to authed user
+        job = Job.objects.create(status=Job.Status.RUNNING)
+        uri = reverse("jobs-kill", args=[job.pk])
+        response = self.client.patch(uri)
+        content = response.json()
+        msg = (response, content, "PermissionDenied")
+
+        self.assertEqual(response.status_code, 403, msg=msg)
+
+    # aggregation endpoints
 
     def test_agg_status_200(self):
         resp = self.client.get(agg_status_uri)

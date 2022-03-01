@@ -24,36 +24,37 @@ const tableProps = {
       accessor: (r) => r,
       maxWidth: 60,
       disableSortBy: true,
-      Cell: ({ value: plugin, customProps: { jobId, refetch, }, }) => (
+      Cell: ({ value: plugin, customProps: { job, refetch, }, }) => (
         <div className="d-flex-center">
-          {["running", "pending"].includes(plugin.status.toLowerCase()) && (
-            <IconButton
-              id={`killplugin-${plugin.name}`}
-              Icon={MdPauseCircleOutline}
-              onClick={() =>
-                killPlugin(jobId, plugin.type, plugin.name).then(refetch)
-              }
-              color="accent"
-              size="xs"
-              title={`Kill ${plugin.type} run`}
-              titlePlacement="top"
-              className="mr-2 border-0"
-            />
-          )}
-          {["failed", "killed"].includes(plugin.status.toLowerCase()) && (
-            <IconButton
-              id={`retryplugin-${plugin.name}`}
-              Icon={MdOutlineRefresh}
-              onClick={() =>
-                retryPlugin(jobId, plugin.type, plugin.name).then(refetch)
-              }
-              color="light"
-              size="xs"
-              title={`Retry ${plugin.type} run`}
-              titlePlacement="top"
-              className="border-0"
-            />
-          )}
+          {job.permissions?.plugin_actions === true &&
+            ["running", "pending"].includes(plugin.status.toLowerCase()) &&
+            (
+              <IconButton
+                id={`killplugin-${plugin.name}`}
+                Icon={MdPauseCircleOutline}
+                onClick={() =>
+                  killPlugin(job.id, plugin.type, plugin.name).then(refetch)
+                }
+                color="accent"
+                size="xs"
+                title={`Kill ${plugin.type} run`}
+                titlePlacement="top"
+                className="mr-2 border-0"
+              />
+            )[("failed", "killed")].includes(plugin.status.toLowerCase()) && (
+              <IconButton
+                id={`retryplugin-${plugin.name}`}
+                Icon={MdOutlineRefresh}
+                onClick={() =>
+                  retryPlugin(job.id, plugin.type, plugin.name).then(refetch)
+                }
+                color="light"
+                size="xs"
+                title={`Retry ${plugin.type} run`}
+                titlePlacement="top"
+                className="border-0"
+              />
+            )}
         </div>
       ),
     },
@@ -64,42 +65,39 @@ const tableProps = {
       Cell: ({ value, }) => <StatusTag status={value} />,
       Filter: SelectOptionsFilter,
       selectOptions: PLUGIN_STATUSES,
-      maxWidth: 75,
+      maxWidth: 50,
     },
     {
       Header: "Name",
       id: "name",
       accessor: "name",
       Filter: DefaultColumnFilter,
-      minWidth: 200,
+      maxWidth: 300,
     },
-
     {
       Header: "Process Time (s)",
       id: "process_time",
       accessor: "process_time",
-      maxWidth: 100,
+      maxWidth: 75,
     },
     {
-      Header: "Start Time",
-      id: "start_time",
-      accessor: "start_time",
-      Cell: ({ value, }) => (
-        <Moment date={value} format="h:mm A MMM Do, YYYY Z" />
+      Header: "Running Time",
+      id: "running_time",
+      accessor: (r) => r,
+      disableSortBy: true,
+      maxWidth: 125,
+      Cell: ({ value: plugin, }) => (
+        <div>
+          <Moment date={plugin?.start_time} format="hh:mm:ss a" />
+          &nbsp;<span className="font-weight-bold text-muted">-</span>&nbsp;
+          <Moment date={plugin?.end_time} format="hh:mm:ss a" />
+          &nbsp;
+          <Moment date={plugin?.end_time} format="(Z)" />
+        </div>
       ),
-      maxWidth: 150,
-    },
-    {
-      Header: "End Time",
-      id: "end_time",
-      accessor: "end_time",
-      Cell: ({ value, }) => (
-        <Moment date={value} format="h:mm A MMM Do, YYYY Z" />
-      ),
-      maxWidth: 150,
     },
   ],
-  config: { enableExpanded: true, },
+  config: { enableExpanded: true, enableFlexLayout: true, },
   initialState: {
     pageSize: 10,
     sortBy: [
@@ -129,7 +127,7 @@ export function AnalyzersReportTable({ job, refetch, }) {
   return (
     <DataTable
       data={job?.analyzer_reports}
-      customProps={{ jobId: job.id, refetch, }}
+      customProps={{ job, refetch, }}
       {...tableProps}
     />
   );
@@ -139,7 +137,7 @@ export function ConnectorsReportTable({ job, refetch, }) {
   return (
     <DataTable
       data={job?.connector_reports}
-      customProps={{ jobId: job.id, refetch, }}
+      customProps={{ job, refetch, }}
       {...tableProps}
     />
   );

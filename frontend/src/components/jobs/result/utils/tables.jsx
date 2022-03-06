@@ -27,8 +27,7 @@ const tableProps = {
       Cell: ({ value: plugin, customProps: { job, refetch, }, }) => (
         <div className="d-flex-center">
           {job.permissions?.plugin_actions === true &&
-            ["running", "pending"].includes(plugin.status.toLowerCase()) &&
-            (
+            ["running", "pending"].includes(plugin.status.toLowerCase()) && (
               <IconButton
                 id={`killplugin-${plugin.name}`}
                 Icon={MdPauseCircleOutline}
@@ -41,7 +40,9 @@ const tableProps = {
                 titlePlacement="top"
                 className="mr-2 border-0"
               />
-            )[("failed", "killed")].includes(plugin.status.toLowerCase()) && (
+            )}
+          {job.permissions?.plugin_actions === true &&
+            ["failed", "killed"].includes(plugin.status.toLowerCase()) && (
               <IconButton
                 id={`retryplugin-${plugin.name}`}
                 Icon={MdOutlineRefresh}

@@ -6,7 +6,7 @@ import { ContentSection } from "@certego/certego-ui";
 
 import SessionsList from "./SessionsList";
 import APIAccess from "./APIAccess";
-import { INTELOWL_DOCS_URL } from "../../../constants/environment";
+import { PYINTELOWL_GH_URL } from "../../../constants/environment";
 
 export default function Sessions() {
   console.debug("Sessions rendered!");
@@ -24,7 +24,7 @@ export default function Sessions() {
           <span>
             You can generate an API key to access IntelOwl's RESTful API.&nbsp;
             <a
-              href={`${INTELOWL_DOCS_URL}Usage.html#client`}
+              href={PYINTELOWL_GH_URL}
               target="_blank"
               rel="noreferrer"
               className="link-primary"

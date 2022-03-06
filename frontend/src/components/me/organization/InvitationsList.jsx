@@ -1,6 +1,5 @@
 import React from "react";
 import { Alert, Row, Col, ButtonGroup } from "reactstrap";
-import { Link as RRLink } from "react-router-dom";
 import { IoMdCheckmark, IoMdClose } from "react-icons/io";
 import useTitle from "react-use/lib/useTitle";
 
@@ -17,6 +16,7 @@ import {
   acceptInvitation,
   declineInvitation
 } from "./api";
+import { INTELOWL_DOCS_URL } from "../../../constants/environment";
 
 export default function InvitationsList() {
   console.debug("InvitationsList rendered!");
@@ -60,9 +60,14 @@ export default function InvitationsList() {
         <Alert color="secondary" className="mx-auto">
           <span>
             Being part of an organization has many perks.&nbsp;
-            <RRLink to="/faq#org-perks" className="link-primary">
+            <a
+              href={`${INTELOWL_DOCS_URL}Advanced-Usage.html#organizations-and-data-sharing`}
+              target="_blank"
+              rel="noreferrer"
+              className="link-primary"
+            >
               Learn more
-            </RRLink>
+            </a>
             .
           </span>
         </Alert>

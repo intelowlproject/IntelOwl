@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  cyberchef-server:
+    image: intelowlproject/cyberchef:${INTELOWL_TAG_VERSION}
+    container_name: intelowl_cyberchef
+    restart: unless-stopped
+    expose:
+      - '3000'
+    depends_on:
+      - uwsgi

@@ -10,6 +10,7 @@ docker_analyzers = [
     "tor_analyzers",
     "rendertron",
     "malware_tools_analyzers",
+    "cyberchef",
 ]
 
 path_mapping = {

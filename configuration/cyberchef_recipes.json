@@ -1,0 +1,10 @@
+{
+    "to decimal": [
+        {
+            "op": "To Decimal",
+            "args": [
+                "Space", false
+            ]
+        }
+    ]
+}

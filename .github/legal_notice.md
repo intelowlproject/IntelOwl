@@ -48,4 +48,5 @@ license terms.
 [PyCTI](https://github.com/OpenCTI-Platform/client-python/blob/master/LICENSE),
 [PyHashlookup](https://github.com/CIRCL/PyHashlookup),
 [PyPDNS](https://github.com/CIRCL/PyPDNS),
-[Onionscan](https://github.com/s-rah/onionscan)
+[Onionscan](https://github.com/s-rah/onionscan),
+[CyberChef-server](https://github.com/gchq/CyberChef-server/blob/master/LICENSE)

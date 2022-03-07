@@ -2,10 +2,8 @@ import os
 
 from ._util import set_permissions
 
-__all__ = ["CACHES"]
-
-
-DEFAULT_CACHE = "/tmp/dj_cache_intelowl_default"
+MEDIA_ROOT = "/opt/deploy/files_required"
+DEFAULT_CACHE = f"{MEDIA_ROOT}/dj_cache_intelowl_default"
 
 CACHES = {
     "default": {

@@ -22,7 +22,7 @@ services:
     depends_on:
       - rabbitmq
     entrypoint:
-      - ./docker/entrypoint_flower.sh
+      - ./docker/entrypoints/flower.sh
     env_file:
       - env_file_app
 

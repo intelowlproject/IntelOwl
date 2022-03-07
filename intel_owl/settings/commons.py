@@ -5,7 +5,6 @@ from ._util import get_secret
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = get_secret("DEBUG", False) == "True" or get_secret("DEBUG", False) is True
 
-MEDIA_ROOT = "/opt/deploy/files_required"
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = Path(__file__).parent.parent.parent
 BASE_STATIC_PATH = BASE_DIR / "static"

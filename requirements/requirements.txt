@@ -33,7 +33,7 @@ pdfid==1.1.0
 pefile-fork==2020.12.16
 Pillow==9.0.0
 psycopg2-binary==2.9.1
-pycti==5.2.1
+pycti==5.1.2
 pydeep==0.4
 PyExifTool==0.5.0
 pyhashlookup==1.1.1

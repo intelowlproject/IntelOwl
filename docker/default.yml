@@ -24,6 +24,7 @@ services:
       - "8001"
     env_file:
       - env_file_app
+      - .env
     depends_on:
       - postgres
 
@@ -35,6 +36,7 @@ services:
     volumes:
       - ../configuration/nginx/errors.conf:/etc/nginx/errors.conf
       - ../configuration/nginx/http.conf:/etc/nginx/conf.d/default.conf
+      - ../configuration/nginx/locations.conf:/etc/nginx/locations.conf
       - nginx_logs:/var/log/nginx
       - static_content:/var/www/static
     ports:

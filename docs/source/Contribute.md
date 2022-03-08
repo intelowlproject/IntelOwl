@@ -2,7 +2,7 @@
 
 Intel Owl was designed to ease the addition of new analyzers/connectors. With a simple python script you can integrate your own engine or integrate an external service in a short time.
 
-> Wish to contribute to the web interface ? See [IntelOwl-ng](https://github.com/intelowlproject/IntelOwl-ng).
+> Wish to contribute to the web interface ? See [Frontend ReadMe](https://github.com/intelowlproject/IntelOwl/blob/master/frontend/README.md).
 
 > Wish to contribute to the python client ? See [pyintelowl](https://github.com/intelowlproject/pyintelowl).
 

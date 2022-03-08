@@ -1,6 +1,6 @@
 boto3==1.21.0
-celery==5.2.2
-django-celery-results==2.2.0
+celery==5.2.3
+django-celery-results==2.3.0
 checkdmarc==4.4.1
 darksearch==2.1.2
 dataclasses==0.6

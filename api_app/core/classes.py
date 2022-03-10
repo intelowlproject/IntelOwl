@@ -36,7 +36,7 @@ class Plugin(metaclass=ABCMeta):
 
     @cached_property
     def _secrets(self) -> dict:
-        return self._config._read_secrets()
+        return self._config.read_secrets()
 
     @property
     def _params(self) -> dict:

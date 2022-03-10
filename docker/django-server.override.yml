@@ -2,20 +2,9 @@ version: '3.8'
 
 services:
   uwsgi:
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile
-      args:
-        REPO_DOWNLOADER_ENABLED: ${REPO_DOWNLOADER_ENABLED}
-    volumes:
-      - ../:/opt/deploy/intel_owl
     environment:
-      - DEBUG=True
       - DJANGO_TEST_SERVER=True
 
   nginx:
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile_nginx
     volumes:
-      - ../configuration/nginx/local.conf:/etc/nginx/conf.d/default.conf
+      - ../configuration/nginx/django_server.conf:/etc/nginx/conf.d/default.conf

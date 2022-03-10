@@ -67,6 +67,10 @@ def start():
 
     # integrations
     parser.add_argument(
+        "--project_name", required=False, help="project name", default="intel_owl"
+    )
+    # integrations
+    parser.add_argument(
         "--all_analyzers",
         required=False,
         action="store_true",
@@ -174,7 +178,7 @@ def start():
     base_command = [
         "docker-compose",
         "-p",
-        "intel_owl",
+        args.project_name,
         "--project-directory",
         "docker",
     ]

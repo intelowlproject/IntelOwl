@@ -162,8 +162,6 @@ def run_connector(
     job_id: int, config_dict: dict, report_defaults: dict
 ) -> ConnectorReport:
     config = ConnectorConfig.from_dict(config_dict)
-    klass: Connector = None
-    report: ConnectorReport = None
     try:
         cls_path = config.get_full_import_path()
         try:
@@ -190,7 +188,6 @@ def run_healthcheck(connector_name: str) -> bool:
     except ImportError:
         raise Exception(f"Class: {cls_path} couldn't be imported")
 
-    status = None
     try:
         status = klass.health_check(connector_name)
     except NotImplementedError:

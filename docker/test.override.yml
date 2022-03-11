@@ -17,6 +17,7 @@ services:
     build:
       context: ..
       dockerfile: docker/Dockerfile_nginx
+    image: intelowlproject/intelowl_nginx:test
 
   celery_beat:
     image: intelowlproject/intelowl:test

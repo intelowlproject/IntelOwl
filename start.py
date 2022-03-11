@@ -145,13 +145,10 @@ def start():
     # default file
     compose_files = [path_mapping["default"]]
     # mode
-    if args.mode == "ci":
+    if is_test:
         compose_files.append(path_mapping[args.mode])
-    elif args.mode == "test":
         if args.__dict__["django_server"]:
             compose_files.append(path_mapping["django_server"])
-        else:
-            compose_files.append(path_mapping[args.mode])
     if args.__dict__["elastic"]:
         compose_files.append(path_mapping["elastic"])
     # upgrades

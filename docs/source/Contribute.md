@@ -40,7 +40,7 @@ source venv/bin/activate
 pip install pre-commit
 pre-commit install
 
-# create .env file for controlling repo_downloader.sh
+# create .env file for controlling repo_downloader.sh (to speed up image builds during development)
 cp docker/.env.start.test.template docker/.env.start.test
 ```
 

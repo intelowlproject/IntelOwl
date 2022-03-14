@@ -12,6 +12,8 @@ import re
 from django.utils import timezone
 from magic import from_buffer as magic_from_buffer
 
+from intel_owl.consts import ObservableClassification
+
 logger = logging.getLogger(__name__)
 
 
@@ -66,29 +68,28 @@ def calculate_observable_classification(value: str) -> str:
     except ValueError:
         if re.match(
             r"^(?:ht|f)tps?://[a-z\d-]{1,63}(?:\.[a-z\d-]{1,63})+"
-            r"(?:/[a-z\d-]{1,63})*(?:\.\w+)?",
+            r"(?:/[a-zA-Z\d-]{1,63})*(?:\.\w+)?",
             value,
         ):
-            classification = "url"
-        elif re.match(r"^(\.)?[a-z\d-]{1,63}(\.[a-z\d-]{1,63})+$", value):
-            classification = "domain"
-        elif (
-            re.match(r"^[a-f\d]{32}$", value)
-            or re.match(r"^[a-f\d]{40}$", value)
-            or re.match(r"^[a-f\d]{64}$", value)
-            or re.match(r"^[A-F\d]{32}$", value)
-            or re.match(r"^[A-F\d]{40}$", value)
-            or re.match(r"^[A-F\d]{64}$", value)
+            classification = ObservableClassification.URL.value
+        elif re.match(
+            r"^(\.)?[a-z\d-]{1,63}(\.[a-z\d-]{1,63})+$", value, re.IGNORECASE
         ):
-            classification = "hash"
+            classification = ObservableClassification.DOMAIN.value
+        elif (
+            re.match(r"^[a-f\d]{32}$", value, re.IGNORECASE)
+            or re.match(r"^[a-f\d]{40}$", value, re.IGNORECASE)
+            or re.match(r"^[a-f\d]{64}$", value, re.IGNORECASE)
+        ):
+            classification = ObservableClassification.HASH.value
         else:
-            classification = "generic"
+            classification = ObservableClassification.GENERIC.value
             logger.info(
                 "Couldn't detect observable classification, setting as 'generic'..."
             )
     else:
-        # its a simple IP
-        classification = "ip"
+        # it's a simple IP
+        classification = ObservableClassification.IP.value
 
     return classification
 

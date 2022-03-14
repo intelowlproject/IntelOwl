@@ -9,6 +9,7 @@ from durin.serializers import UserSerializer
 from rest_framework import serializers as rfs
 
 from certego_saas.apps.organization.permissions import IsObjectOwnerOrSameOrgPermission
+from intel_owl.consts import ObservableClassification
 
 from .analyzers_manager.serializers import AnalyzerReportSerializer
 from .connectors_manager.serializers import ConnectorReportSerializer
@@ -211,14 +212,15 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
     def validate(self, attrs: dict) -> dict:
         attrs = super(ObservableAnalysisSerializer, self).validate(attrs)
         logger.debug(f"before attrs: {attrs}")
-        # force lowercase in ``observable_name``.
-        # Ref: https://github.com/intelowlproject/IntelOwl/issues/658
-        attrs["observable_name"] = attrs["observable_name"].lower()
         # calculate ``observable_classification``
         if not attrs.get("observable_classification", None):
             attrs["observable_classification"] = calculate_observable_classification(
                 attrs["observable_name"]
             )
+        if attrs["observable_classification"] == ObservableClassification.HASH.value:
+            # force lowercase in ``observable_name``.
+            # Ref: https://github.com/intelowlproject/IntelOwl/issues/658
+            attrs["observable_name"] = attrs["observable_name"].lower()
         # calculate ``md5``
         attrs["md5"] = calculate_md5(attrs["observable_name"].encode("utf-8"))
         logger.debug(f"after attrs: {attrs}")

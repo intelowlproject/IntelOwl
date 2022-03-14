@@ -64,7 +64,7 @@ We have an official sponsorship program for companies, organizations and individ
 
 <a href="https://certego.net/?utm_source=intelowl"> <img style="margin-right: 2px" width=250 height=71 src="docs/static/Certego.png" alt="Certego Logo"/></a>
 
-[Certego](https://certego.net/?utm_source=intelowl) is the best MDR (Managed Detection and Response) and Threat Intelligence Provider based in Italy.
+[Certego](https://certego.net/?utm_source=intelowl) is a MDR (Managed Detection and Response) and Threat Intelligence Provider based in Italy.
 
 IntelOwl was born out of Certego's Threat intelligence R&D division and is constantly maintained and updated thanks to them.
 

@@ -285,6 +285,7 @@ Some analyzers require details other than just IP, URL, Domain, etc. We classifi
 * `Darksearch_Query`: Search a keyword against darksearch.io's search API. It's possible to make complex queries using boolean logic. For example, `OSINT AND CTI OR intelowl NOT hack` is a valid observable name.
 * `Dehashed_Search`: Query any observable/keyword against https://dehashed.com's search API.
 * `CryptoScamDB_CheckAPI`: Scan a cryptocurrency address, IP address, domain or ENS name against the [CryptoScamDB](https://cryptoscamdb.org/) API.
+* `CyberChef`: Run a query on a [CyberChef server](https://github.com/gchq/CyberChef-server) using pre-defined or custom recipes.
 
 ##### Extra analyzers
 [Additional analyzers](Advanced-Usage.html#optional-analyzers) that can be enabled per your wish.

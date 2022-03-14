@@ -450,6 +450,38 @@
       }
     }
   },
+  "CyberChef": {
+    "type": "observable",
+    "python_module": "cyberchef.CyberChef",
+    "description": "Bake an input with a selected CyberChef Recipe",
+    "disabled": false,
+    "observable_supported": [
+      "generic"
+    ],
+    "external_service": false,
+    "config": {
+      "soft_time_limit": 50,
+      "queue": "long"
+    },
+    "secrets": {},
+    "params": {
+      "recipe_name": {
+        "value": "to decimal",
+        "type": "str",
+        "description": "Name of pre-defined recipe to use."
+      },
+      "recipe_code": {
+        "value": [],
+        "type": "list",
+        "description": "Custom recipe to use (instead of a predefined one). [Here](https://github.com/mattnotmax/cyberchef-recipes) are some sample recipes. NOTE: This is only read if recipe_name is blank"
+      },
+      "output_type": {
+        "value": "",
+        "type": "str",
+        "description": "Output type of the recipe. Leave blank to use default. Available output types are listed [here](https://github.com/gchq/CyberChef/wiki/Adding-a-new-operation#data-types)"
+      }
+    }
+  },
   "Cymru_Hash_Registry_Get_File": {
     "type": "file",
     "python_module": "cymru.Cymru",

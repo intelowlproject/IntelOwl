@@ -1,0 +1,8 @@
+version: '3.8'
+
+services:
+  cyberchef-server:
+    build:
+      context: ../integrations/cyberchef
+      dockerfile: Dockerfile
+    image: intelowlproject/cyberchef:test

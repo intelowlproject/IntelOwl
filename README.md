@@ -100,7 +100,7 @@ If you are interested in being the next GSoC developer for IntelOwl, join the [H
 ### 🥉 BRONZE
 
 #### LimaCharlie
-<a href="https://limacharlie.io/?utm_source=intelowl&utm_medium=banner"> <img style="border: 0.2px solid black" width=281 height=55 src="docs/static/limacharlie_logo.png" alt="LimaCharlie logo"> </a>
+<a href="https://limacharlie.io/?utm_source=intelowl&utm_medium=banner"> <img style="border: 0.2px solid black" width=194 height=38 src="docs/static/limacharlie_logo.png" alt="LimaCharlie logo"> </a>
 
 [LimaCharlie](https://limacharlie.io/?utm_source=intelowl&utm_medium=banner) gives security teams full control over how they manage their security infrastructure. Get full visibility into your coverage, build what you want, control your data, get the security capabilities you need, for however long you need them, and pay only for what you use.
 

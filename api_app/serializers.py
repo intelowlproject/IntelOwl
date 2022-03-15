@@ -217,7 +217,10 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
             attrs["observable_classification"] = calculate_observable_classification(
                 attrs["observable_name"]
             )
-        if attrs["observable_classification"] == ObservableClassification.HASH.value:
+        if attrs["observable_classification"] in [
+            ObservableClassification.HASH.value,
+            ObservableClassification.DOMAIN.value,
+        ]:
             # force lowercase in ``observable_name``.
             # Ref: https://github.com/intelowlproject/IntelOwl/issues/658
             attrs["observable_name"] = attrs["observable_name"].lower()

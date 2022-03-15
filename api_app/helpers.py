@@ -72,15 +72,14 @@ def calculate_observable_classification(value: str) -> str:
             value,
         ):
             classification = ObservableClassification.URL.value
-        elif re.match(r"^(\.)?[a-z\d-]{1,63}(\.[a-z\d-]{1,63})+$", value):
+        elif re.match(
+            r"^(\.)?[a-z\d-]{1,63}(\.[a-z\d-]{1,63})+$", value, re.IGNORECASE
+        ):
             classification = ObservableClassification.DOMAIN.value
         elif (
-            re.match(r"^[a-f\d]{32}$", value)
-            or re.match(r"^[a-f\d]{40}$", value)
-            or re.match(r"^[a-f\d]{64}$", value)
-            or re.match(r"^[A-F\d]{32}$", value)
-            or re.match(r"^[A-F\d]{40}$", value)
-            or re.match(r"^[A-F\d]{64}$", value)
+            re.match(r"^[a-f\d]{32}$", value, re.IGNORECASE)
+            or re.match(r"^[a-f\d]{40}$", value, re.IGNORECASE)
+            or re.match(r"^[a-f\d]{64}$", value, re.IGNORECASE)
         ):
             classification = ObservableClassification.HASH.value
         else:

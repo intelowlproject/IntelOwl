@@ -35,7 +35,8 @@ class Floss(FileAnalyzer, DockerBasedAnalyzer):
         binary = self.read_file_bytes()
         # make request data
         fname = str(self.filename).replace("/", "_").replace(" ", "_")
-        args = [f"@{fname}", f"--output-json=/tmp/{fname}.json"]
+        # * enabling expert mode by passig the -x flag in the args array
+        args = [f"@{fname}", "-x", f"--output-json=/tmp/{fname}.json"]
         req_data = {
             "args": args,
             "timeout": self.timeout,

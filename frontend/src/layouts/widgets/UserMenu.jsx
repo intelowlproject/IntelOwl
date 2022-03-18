@@ -41,7 +41,7 @@ export default function UserMenu(props) {
         >{`${user?.full_name} (${user.username})`}</DropdownItem>
         <DropdownItem divider />
         {/* Django Admin Interface */}
-        <DropdownItem tag={RRNavLink} to="/admin/">
+        <DropdownItem tag={RRNavLink} to="/admin/" target="_blank">
           <IoMdSettings className="mr-2" />
           Django Admin Interface
         </DropdownItem>

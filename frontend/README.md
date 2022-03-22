@@ -49,14 +49,24 @@ src/                                      source code
 
 ## Local Development Environment
 
-The frontend inside the docker containers does not hot-reload so
-you need to start a npm dev server on your host machine when doing development on the frontend.
+The frontend inside the docker containers does not hot-reload, so
+you need to use `CRA dev server` on your host machine to serve pages when doing development on the frontend, using docker nginx only as API source.
 
-- (required) Inject `env.js` using a symbolic link,
+- Start IntelOwl containers (see [docs](https://intelowl.readthedocs.io/en/latest/Installation.html)). Original dockerized app is accessible on `http://localhost:80`
 
+- Install npm packages locally
 ```bash
-$/home/user/IntelOwl: ln -s docker/env.js frontend/public/env.js
+cd ./frontend && npm install
+```  
+
+- Start CRA dev server:
+```bash
+npm start
 ```
+
+- Now you can access the auto-reloading frontend on `http://localhost:3000`. It acts as proxy for API requests to original app web server.
+
+- JS app main configs are available in `package.json`, `craco.config.js` and `enviroments.js`.
 
 - (optional) Use local build of `certego-ui` package so it can also hot-reload. This is useful when you want to make changes in certego-ui and rapidly test them with IntelOwl. Refer [here](https://github.com/certego/certego-ui#use-local-build-of-certego-ui-with-hot-reload-for-faster-development) for setup instructions.
 

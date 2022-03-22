@@ -5,11 +5,10 @@ Intel Owl main objective is to provide a single API interface to query in order 
 
 There are multiple ways to interact with the Intel Owl APIs,
 
-1. IntelOwl-ng (Web Interface)
+1. Web Interface
 
-    - Inbuilt Web interface with dashboard, visualizations of analysis data, easy to use forms for requesting new analysis, tags management and more features
-    - [Live Demo](https://intelowlclient.firebaseapp.com/)
-    - Built with Angular 10+ and available on [GitHub](https://github.com/intelowlproject/intelowl-ng).
+    - Built-in Web interface with dashboard, visualizations of analysis data, easy to use forms for requesting new analysis, tags management and more features
+    - Built with [Create React App](https://create-react-app.dev/) and based on [certego-ui](https://github.com/certego/certego-ui).
 
 2. pyIntelOwl (CLI/SDK)
 

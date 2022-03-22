@@ -53,8 +53,8 @@ There is a <a href="https://www.youtube.com/watch?v=GuEhqQJSQAs" target="_blank"
 </div>
 
 ## Deployment Components
-IntelOwl is composed of various different services, namely:
-* Angular: Frontend ([IntelOwl-ng](https://github.com/intelowlproject/IntelOwl-ng))
+IntelOwl is composed of various different technologies, namely:
+* React: Frontend, with [certego-ui](https://github.com/certego/certego-ui)
 * Django: Backend
 * PostgreSQL: Database
 * Rabbit-MQ: Message Broker

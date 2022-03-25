@@ -2,6 +2,23 @@
 
 [**Upgrade Guide**](https://intelowl.readthedocs.io/en/latest/Installation.html#update-to-the-most-recent-version)
 
+## [v3.3.2](https://github.com/intelowlproject/IntelOwl/releases/tag/v3.3.2)
+**Notes:**
+
+We are proud to announce two new sponsorships today!
+   - [Milton Security](https://www.miltonsecurity.com?utm_source=intelowl)
+   - [LimaCharlie](https://limacharlie.io/blog/limacharlie-sponsors-intel-owl/?utm_source=intelowl&utm_medium=banner)
+
+If you are interested in helping the project through a donation, read [here](https://github.com/intelowlproject/IntelOwl/blob/master/.github/partnership_and_sponsors.md) how you can do it!
+
+**New/Improved Analyzers:**
+- New [CyberChef](https://gchq.githuba.io/CyberChef/) Analyzer! Run your own recipes in IntelOwl! Check the [docs](https://intelowl.readthedocs.io/en/develop/Advanced-Usage.html#cyberchef)!
+
+**Other:**
+- fixes: [#931](https://github.com/intelowlproject/IntelOwl/issues/931)
+- several dependecies upgrades
+
+
 ## [v3.3.1](https://github.com/intelowlproject/IntelOwl/releases/tag/v3.3.1)
 
 **Notes:**

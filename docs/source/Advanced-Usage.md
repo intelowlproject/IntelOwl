@@ -8,6 +8,7 @@ This page includes details about some advanced features that Intel Owl provides 
       - [View and understand different parameters](#view-and-understand-different-parameters)
       - [from the GUI](#from-the-gui)
       - [from Pyintelowl](#from-pyintelowl)
+      - [CyberChef](#cyberchef)
   - [Analyzers with special configuration](#analyzers-with-special-configuration)
   - [Elastic Search](#elastic-search)
       - [Kibana](#kibana)
@@ -94,6 +95,11 @@ table, th, td {
     <td><code>Renderton</code></td>
     <td>get screenshot of a web page using rendertron (a headless chrome solution using puppeteer). Configuration variables have to be included in the `config.json`, see <a href="https://github.com/GoogleChrome/rendertron#config"> config options of renderton </a>. To use a proxy, include an argument <code>--proxy-server=YOUR_PROXY_SERVER</code> in <code>puppeteerArgs</code>.</td>
   </tr>
+  <tr>
+    <td>CyberChef</td>
+    <td><code>CyberChef</code></td>
+    <td>Run a transformation on a <a href="https://github.com/gchq/CyberChef-server">CyberChef server</a> using pre-defined or custom recipes(rules that describe how the input has to be transformed). Check further instructions <a href="#cyberchef">here</a></td>
+  </tr>
 </table>
 
 
@@ -106,6 +112,7 @@ Otherwise you can enable just one of the cited integration by using the related 
 ```bash
 python3 start.py prod --tor_analyzers up
 ```
+
 
 ## Customize analyzer execution at time of request
 Some analyzers and connectors provide the chance to customize the performed analysis based on parameters (`params` attr in the configuration file) that are different for each analyzer. 
@@ -145,6 +152,23 @@ runtime_configuration = {
 }
 pyintelowl_client.send_file_analysis_request(..., runtime_configuration=runtime_configuration)
 ```
+
+#### CyberChef
+
+You can either use pre-defined recipes or create your own as
+explained [here](https://github.com/gchq/CyberChef-server#features).
+
+To use a pre-defined recipe, set the `predefined_recipe_name` argument to the name of the recipe as
+defined [here](#pre-defined-recipes). Else, leave the `predefined_recipe_name` argument empty and set
+the `custom_recipe` argument to the contents of
+the [recipe](https://github.com/gchq/CyberChef-server#example-one-operation-non-default-arguments-by-name) you want to
+use.
+
+Additionally, you can also (optionally) set the `output_type` argument.
+
+##### Pre-defined recipes
+
+- "to decimal": `[{"op": "To Decimal", "args": ["Space", False]}]`
 
 ## Analyzers with special configuration
 Some analyzers could require a special configuration:

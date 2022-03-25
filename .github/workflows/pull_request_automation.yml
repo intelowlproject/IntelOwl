@@ -15,10 +15,10 @@ jobs:
 
     steps:
     - name: Checkout IntelOwl
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v3.0.0
       with:
         python-version: 3.9
 
@@ -50,10 +50,12 @@ jobs:
         echo ${{ contains(github.head_ref, 'dependabot') }} | cat
 
     - name: Checkout IntelOwl
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Docker
       run: |
+        cp docker/env_file_app_template docker/env_file_app
+        cp docker/env_file_postgres_template docker/env_file_postgres
         docker-compose -f docker/default.yml -f docker/ci.override.yml up --build -d
       env:
         DOCKER_BUILDKIT: 1
@@ -70,7 +72,7 @@ jobs:
         access_token: ${{ github.token }}
 
     - name: Checkout IntelOwl
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Prepare Launch
       run: |

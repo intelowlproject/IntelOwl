@@ -64,7 +64,7 @@ We have an official sponsorship program for companies, organizations and individ
 
 <a href="https://certego.net/?utm_source=intelowl"> <img style="margin-right: 2px" width=250 height=71 src="docs/static/Certego.png" alt="Certego Logo"/></a>
 
-[Certego](https://certego.net/?utm_source=intelowl) is a MSSP and Threat Intelligence Provider based in Italy.
+[Certego](https://certego.net/?utm_source=intelowl) is a MDR (Managed Detection and Response) and Threat Intelligence Provider based in Italy.
 
 IntelOwl was born out of Certego's Threat intelligence R&D division and is constantly maintained and updated thanks to them.
 
@@ -99,13 +99,20 @@ If you are interested in being the next GSoC developer for IntelOwl, join the [H
 
 ### 🥉 BRONZE
 
+#### LimaCharlie
+<a href="https://limacharlie.io/?utm_source=intelowl&utm_medium=banner"> <img style="border: 0.2px solid black" width=194 height=38 src="docs/static/limacharlie_logo.png" alt="LimaCharlie logo"> </a>
+
+[LimaCharlie](https://limacharlie.io/?utm_source=intelowl&utm_medium=banner) gives security teams full control over how they manage their security infrastructure. Get full visibility into your coverage, build what you want, control your data, get the security capabilities you need, for however long you need them, and pay only for what you use.
+
+Read everything about this partnership [in the LimaCharlie's blog](https://limacharlie.io/blog/limacharlie-sponsors-intel-owl/?utm_source=intelowl&utm_medium=banner).
+
 #### Tines
 
 <a href="https://www.tines.com/?utm_source=oss&utm_medium=sponsorship&utm_campaign=intelowl"> <img style="border: 0.2px solid black" width=120 height=55 src="docs/static/tines_logo.png" alt="Tines logo"> </a>
 
 [Tines](https://www.tines.com/?utm_source=oss&utm_medium=sponsorship&utm_campaign=intelowl) is no-code automation for security teams. Build powerful, reliable workflows without a development team.
 
-IntelOwl is officially integrated in Tines. Read everything about this partnership [in the Tines' blog](https://www.tines.com/blog/announcing-our-sponsorship-of-intel-owl?utm_source=oss&utm_medium=sponsorship&utm_campaign=intelowl)
+IntelOwl is officially integrated in Tines. Read everything about this partnership [in the Tines' blog](https://www.tines.com/blog/announcing-our-sponsorship-of-intel-owl?utm_source=oss&utm_medium=sponsorship&utm_campaign=intelowl).
 
 #### Docker
 

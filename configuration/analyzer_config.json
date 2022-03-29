@@ -3706,10 +3706,11 @@
     "observable_supported": [
       "ip",
       "hash",
+      "domain",
       "url"
     ],
     "config": {
-      "soft_time_limit": 30,
+      "soft_time_limit": 60,
       "queue": "default"
     },
     "secrets": {

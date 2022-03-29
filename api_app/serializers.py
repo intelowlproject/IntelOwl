@@ -10,8 +10,8 @@ from rest_framework import serializers
 from rest_framework_guardian.serializers import ObjectPermissionsAssignmentMixin
 
 from api_app.models import TLP, Job, Tag
-from intel_owl.consts import ObservableClassification
 
+from .analyzers_manager.constants import ObservableTypes
 from .analyzers_manager.serializers import AnalyzerReportSerializer
 from .connectors_manager.serializers import ConnectorReportSerializer
 from .helpers import (
@@ -269,8 +269,8 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
                 attrs["observable_name"]
             )
         if attrs["observable_classification"] in [
-            ObservableClassification.HASH.value,
-            ObservableClassification.DOMAIN.value,
+            ObservableTypes.HASH,
+            ObservableTypes.DOMAIN,
         ]:
             # force lowercase in ``observable_name``.
             # Ref: https://github.com/intelowlproject/IntelOwl/issues/658

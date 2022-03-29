@@ -7,16 +7,16 @@ import pymisp
 from django.conf import settings
 
 from api_app import helpers
+from api_app.analyzers_manager.constants import ObservableTypes
 from api_app.connectors_manager.classes import Connector
-from intel_owl.consts import ObservableClassification
 from tests.mock_utils import if_mock_connections, patch
 
 INTELOWL_MISP_TYPE_MAP = {
-    ObservableClassification.IP.value: "ip-src",
-    ObservableClassification.DOMAIN.value: "domain",
-    ObservableClassification.URL.value: "url",
+    ObservableTypes.IP: "ip-src",
+    ObservableTypes.DOMAIN: "domain",
+    ObservableTypes.URL: "url",
     # "hash" (checked from helpers.get_hash_type)
-    ObservableClassification.GENERIC.value: "text",  # misc field, so keeping text
+    ObservableTypes.GENERIC: "text",  # misc field, so keeping text
     "file": "filename|md5",
 }
 
@@ -59,7 +59,7 @@ class MISP(Connector):
         else:
             _type = self._job.observable_classification
             value = self._job.observable_name
-            if _type == ObservableClassification.HASH.value:
+            if _type == ObservableTypes.HASH:
                 matched_type = helpers.get_hash_type(value)
                 matched_type.replace("-", "")  # convert sha-x to shax
                 _type = matched_type if matched_type is not None else "text"

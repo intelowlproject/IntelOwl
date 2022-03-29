@@ -9,8 +9,8 @@ import requests
 from requests.structures import CaseInsensitiveDict
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
+from api_app.analyzers_manager.constants import ObservableTypes
 from api_app.exceptions import AnalyzerConfigurationException, AnalyzerRunException
-from intel_owl.consts import ObservableClassification
 from tests.mock_utils import MockResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
@@ -54,13 +54,13 @@ class DehashedSearch(ObservableAnalyzer):
 
     def __identify_search_operator(self) -> str:
         operator = "name"
-        if self.observable_classification == ObservableClassification.IP.value:
+        if self.observable_classification == ObservableTypes.IP:
             operator = "ip_address"
-        elif self.observable_classification == ObservableClassification.DOMAIN.value:
+        elif self.observable_classification == ObservableTypes.DOMAIN:
             operator = "domain"
-        elif self.observable_classification == ObservableClassification.URL.value:
+        elif self.observable_classification == ObservableTypes.URL:
             operator = "domain"
-        elif self.observable_classification == ObservableClassification.GENERIC.value:
+        elif self.observable_classification == ObservableTypes.GENERIC:
             if re.match(r"^[\w\.\+\-]+\@[\w]+\.[a-z]{2,3}$", self.observable_name):
                 operator = "email"
 

@@ -6,20 +6,20 @@ from django.conf import settings
 from pycti.api.opencti_api_client import File
 
 from api_app import helpers
+from api_app.analyzers_manager.constants import ObservableTypes
 from api_app.connectors_manager import classes
-from intel_owl.consts import ObservableClassification
 from tests.mock_utils import if_mock_connections, patch
 
 INTELOWL_OPENCTI_TYPE_MAP = {
-    ObservableClassification.IP.value: {
+    ObservableTypes.IP: {
         "v4": "ipv4-addr",
         "v6": "ipv6-addr",
     },
-    ObservableClassification.DOMAIN.value: "domain-name",
-    ObservableClassification.URL.value: "url",
+    ObservableTypes.DOMAIN: "domain-name",
+    ObservableTypes.URL: "url",
     # type hash is missing because it is combined with "file"
     # "generic" is misc field, so keeping text
-    ObservableClassification.GENERIC.value: "x-opencti-text",
+    ObservableTypes.GENERIC: "x-opencti-text",
     "file": "file",  # hashes: md5, sha-1, sha-256
 }
 
@@ -37,7 +37,7 @@ class OpenCTI(classes.Connector):
     def get_observable_type(self) -> str:
         if self._job.is_sample:
             obs_type = INTELOWL_OPENCTI_TYPE_MAP["file"]
-        elif self._job.observable_classification == ObservableClassification.HASH.value:
+        elif self._job.observable_classification == ObservableTypes.HASH:
             matched_hash_type = helpers.get_hash_type(self._job.observable_name)
             if matched_hash_type in [
                 "md5",
@@ -46,19 +46,15 @@ class OpenCTI(classes.Connector):
             ]:  # sha-512 not supported
                 obs_type = INTELOWL_OPENCTI_TYPE_MAP["file"]
             else:
-                obs_type = INTELOWL_OPENCTI_TYPE_MAP[
-                    ObservableClassification.GENERIC.value
-                ]  # text
-        elif self._job.observable_classification == ObservableClassification.IP.value:
+                obs_type = INTELOWL_OPENCTI_TYPE_MAP[ObservableTypes.GENERIC]  # text
+        elif self._job.observable_classification == ObservableTypes.IP:
             ip_version = helpers.get_ip_version(self._job.observable_name)
             if ip_version == 4 or ip_version == 6:
-                obs_type = INTELOWL_OPENCTI_TYPE_MAP[ObservableClassification.IP.value][
+                obs_type = INTELOWL_OPENCTI_TYPE_MAP[ObservableTypes.IP][
                     f"v{ip_version}"
                 ]  # v4/v6
             else:
-                obs_type = INTELOWL_OPENCTI_TYPE_MAP[
-                    ObservableClassification.GENERIC.value
-                ]  # text
+                obs_type = INTELOWL_OPENCTI_TYPE_MAP[ObservableTypes.GENERIC]  # text
         else:
             obs_type = INTELOWL_OPENCTI_TYPE_MAP[self._job.observable_classification]
 
@@ -74,7 +70,7 @@ class OpenCTI(classes.Connector):
                 "sha-256": self._job.sha256,
             }
         elif (
-            self._job.observable_classification == ObservableClassification.HASH.value
+            self._job.observable_classification == ObservableTypes.HASH
             and observable_data["type"] == "file"
         ):
             # add hash instead of value

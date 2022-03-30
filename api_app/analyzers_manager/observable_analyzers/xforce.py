@@ -12,7 +12,7 @@ from tests.mock_utils import MockResponse, if_mock_connections, patch
 
 
 class XForce(classes.ObservableAnalyzer):
-    base_url: str = "https://api.xforce.ibmcloud.com"
+    base_url: str = "https://api.xforce.ibmcloud.com/api"
 
     def set_params(self, params):
         self.__api_key = self._secrets["api_key_name"]
@@ -20,6 +20,7 @@ class XForce(classes.ObservableAnalyzer):
 
     def run(self):
         auth = HTTPBasicAuth(self.__api_key, self.__api_password)
+        headers = {"Accept": "application/json"}
 
         endpoints = self._get_endpoints()
         result = {}
@@ -30,7 +31,7 @@ class XForce(classes.ObservableAnalyzer):
                 else:
                     observable_to_check = self.observable_name
                 url = f"{self.base_url}/{endpoint}/{observable_to_check}"
-                response = requests.get(url, auth=auth)
+                response = requests.get(url, auth=auth, headers=headers)
                 response.raise_for_status()
             except requests.RequestException as e:
                 raise AnalyzerRunException(e)
@@ -49,7 +50,10 @@ class XForce(classes.ObservableAnalyzer):
             endpoints = ["ipr", "ipr/history", "ipr/malware"]
         elif self.observable_classification == self.ObservableTypes.HASH:
             endpoints = ["malware"]
-        elif self.observable_classification == self.ObservableTypes.URL:
+        elif self.observable_classification in [
+            self.ObservableTypes.URL,
+            self.ObservableTypes.DOMAIN,
+        ]:
             endpoints = ["url", "url/history", "url/malware"]
         else:
             raise AnalyzerRunException(

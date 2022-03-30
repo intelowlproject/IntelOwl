@@ -12,7 +12,7 @@ import re
 from django.utils import timezone
 from magic import from_buffer as magic_from_buffer
 
-from intel_owl.consts import ObservableClassification
+from api_app.analyzers_manager.constants import ObservableTypes
 
 logger = logging.getLogger(__name__)
 
@@ -71,25 +71,25 @@ def calculate_observable_classification(value: str) -> str:
             r"(?:/[a-zA-Z\d-]{1,63})*(?:\.\w+)?",
             value,
         ):
-            classification = ObservableClassification.URL.value
+            classification = ObservableTypes.URL
         elif re.match(
             r"^(\.)?[a-z\d-]{1,63}(\.[a-z\d-]{1,63})+$", value, re.IGNORECASE
         ):
-            classification = ObservableClassification.DOMAIN.value
+            classification = ObservableTypes.DOMAIN
         elif (
             re.match(r"^[a-f\d]{32}$", value, re.IGNORECASE)
             or re.match(r"^[a-f\d]{40}$", value, re.IGNORECASE)
             or re.match(r"^[a-f\d]{64}$", value, re.IGNORECASE)
         ):
-            classification = ObservableClassification.HASH.value
+            classification = ObservableTypes.HASH
         else:
-            classification = ObservableClassification.GENERIC.value
+            classification = ObservableTypes.GENERIC
             logger.info(
                 "Couldn't detect observable classification, setting as 'generic'..."
             )
     else:
         # it's a simple IP
-        classification = ObservableClassification.IP.value
+        classification = ObservableTypes.IP
 
     return classification
 

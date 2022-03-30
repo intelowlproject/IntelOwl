@@ -31,11 +31,12 @@ darksearch==2.1.2
 dnspython==2.2.0
 dnstwist==20220131
 ppdeep>=20200505
+drf-spectacular==0.22.0
 easygui==0.98.2
 google>=3.0.0
 google-cloud-webrisk==1.7.0
 intezer-sdk==1.6
-lief==0.11.5
+lief==0.12.0
 maxminddb==2.2.0
 mwdblib==4.1.0
 oletools==0.60
@@ -55,7 +56,8 @@ pypdns==1.5.2
 pypssl==2.2
 pysafebrowsing==0.1.1
 PySocks==1.7.1
-quark-engine==22.2.1
+quark-engine==22.3.1
+requests==2.27.1
 speakeasy-emulator==1.5.9
 yara-python==4.1.0
 pydragonfly==0.1.0

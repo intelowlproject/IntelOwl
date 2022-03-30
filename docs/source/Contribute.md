@@ -169,6 +169,18 @@ After having written the new python module, you have to remember to:
 3. Add the new connector in the lists in the docs: [Usage](./Usage.md). Also, if the connector provides additional optional configuration, add the available options here: [Advanced-Usage](./Advanced-Usage.md)
 4. Follow steps 4-5 of [How to add a new analyzer](./Contribute.md#how-to-add-a-new-analyzer)
 
+#### Modifying functionalities of the Certego packages
+Since v4, IntelOwl leverages some packages from Certego:
+
+- [certego-saas](https://github.com/certego/certego-saas) that integrates some common reusable Django applications and tools that can be used for generic services.
+- [certego-ui](https://github.com/certego/certego-ui) that contains reusable React components for the UI.
+
+If you need to modify the behavior or add feature to those packages, please follow the same rules for IntelOwl and request a Pull Request there. The same maintainers of IntelOwl will answer to you.
+
+Follow these guides to understand how to start to contribute to them while developing for IntelOwl:
+- *certego-saas*: create a fork, commit your changes in your local repo, then change the commit hash to the last one you made in the [requirements file](https://github.com/intelowlproject/IntelOwl/blob/master/requirements/requirements.txt). Ultimately re-build the project
+- *certego-ui*: [Frontend doc]((https://github.com/intelowlproject/IntelOwl/blob/master/frontend/README.md))
+
 ## Create a pull request
 
 ### Remember!!!

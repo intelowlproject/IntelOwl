@@ -453,7 +453,7 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
 
 @add_docs(
     description="""
-    REST endpoint to pefrom CRUD operations on ``Tag`` model.
+    REST endpoint to perform CRUD operations on ``Tag`` model.
     Requires authentication.
     """
 )

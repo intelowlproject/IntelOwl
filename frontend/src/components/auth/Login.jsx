@@ -110,6 +110,9 @@ export default function Login() {
                     label="Show password"
                     className="mt-2 form-control-sm d-flex-start-center"
                   />
+                  <span className="text-muted">
+                    Don't have an account? Contact the administrator for access.
+                  </span>
                 </FormGroup>
                 {/* Submit */}
                 <FormGroup className="d-flex-center">

@@ -14,8 +14,13 @@ drf-spectacular==0.22.0
 
 uWSGI==2.0.20
 whitenoise==6.0.0
-git+https://github.com/certego/certego-saas.git@4e0bfe4070c747262e21ae9bbce0adb9a4dabbea#egg=certego_saas
 git+https://github.com/jazzband/django-silk.git#egg=django-silk
+
+certego-saas==0.1.0
+# While developing for certego-saas, comment the previous line.
+# Then, add a line like the one below to your forked repo and your most recent commit
+# In this way you can test your changes directly in IntelOwl with the complete application
+#git+https://github.com/certego/certego-saas.git@4e0bfe4070c747262e21ae9bbce0adb9a4dabbea#egg=certego_saas
 
 # infra
 requests==2.27.1

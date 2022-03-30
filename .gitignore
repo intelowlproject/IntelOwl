@@ -15,4 +15,5 @@ coverage_reports/
 node_modules/
 frontend/.env
 frontend/public/env.js
-/docker/.env.start.test
+docker/.env.start.test
+docker/.version

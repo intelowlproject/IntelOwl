@@ -5,7 +5,6 @@ import { FaTwitter } from "react-icons/fa";
 import { Toaster, ScrollToTopButton, useToastr } from "@certego/certego-ui";
 
 import {
-  ENV,
   VERSION,
   INTELOWL_TWITTER_ACCOUNT
 } from "../constants/environment";
@@ -36,7 +35,7 @@ function AppFooter() {
           className="d-flex-center flex-column flex-lg-row text-center lead"
         >
           <Col className="text-muted small">
-            {ENV} ({VERSION})
+            {VERSION}
           </Col>
         </Row>
         <Row
@@ -46,7 +45,7 @@ function AppFooter() {
         >
           <Col>
             <a
-              href={`https://twitter.com/${INTELOWL_TWITTER_ACCOUNT}?ref_src=twsrc%5Etfw`}
+              href={`https://twitter.com/${INTELOWL_TWITTER_ACCOUNT}`}
               target="_blank"
               rel="noopener noreferrer"
               className="ml-md-2 twitter-follow-button"

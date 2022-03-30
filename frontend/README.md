@@ -83,7 +83,7 @@ For 2 reasons:
 
 ### Dependabot
 
-We have depandabot enabled for the React.js frontend application. The updates are scheduled for once a week.
+We have dependabot enabled for the React.js frontend application. The updates are scheduled for once a week.
 
 ### External Docs
 

@@ -9,6 +9,26 @@ on:
         - "integrations/**"
 
 jobs:
+
+  detect-changes:
+    name: Detect changes
+    runs-on: ubuntu-latest
+    outputs:
+      frontend: ${{steps.diff_check.outputs.frontend}}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.base_ref }}
+      - uses: actions/checkout@v3
+        with:
+          clean: false
+      - name: Generate diffs
+        id: diff_check
+        run: |
+          git branch -a --list | cat
+          FRONTEND_CHANGES=$(git diff --compact-summary origin/${{ github.base_ref }} -- frontend/* | wc -l)
+          echo "::set-output name=frontend::$FRONTEND_CHANGES"
+
   linters:
     runs-on: ubuntu-latest
 
@@ -37,6 +57,13 @@ jobs:
     - name: isort
       run: |
         isort . --profile black --filter-files --check-only --diff --skip configuration/ldap_config.py
+
+    - name: Check migrations status
+      # if makemigrations fails there is a problem with migration status
+      # we are only interested in stderr output
+      run: |
+        export DJANGO_SETTINGS_MODULE=service_portal.settings
+        PYTHONPATH=. django-admin makemigrations --dry-run >/dev/null
 
   tests:
     runs-on: ubuntu-latest
@@ -125,3 +152,41 @@ jobs:
         files: ./coverage.xml
         fail_ci_if_error: true
         verbose: true
+
+  frontend-tests:
+    name: Run test for frontend
+    runs-on: ubuntu-latest
+    needs: [ 'detect-changes' ]
+    if: ${{ needs.detect-changes.outputs.frontend > 0 }}
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up NodeJS
+        uses: actions/setup-node@v3
+        with:
+          node-version: 12
+      - name: Cache node modules
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: npm-build-${{ hashFiles('frontend/package-lock.json') }}
+          restore-keys: |
+            npm-build-${{ hashFiles('frontend/package-lock.json') }}
+            npm-build-
+            npm
+      - name: Install dependencies
+        run: |
+          npm i --no-optional --no-audit --no-fund
+        working-directory: ./frontend
+      - name: Lint with eslint
+        run: |
+          npm run lint
+        working-directory: ./frontend
+      - name: Lint with stylelint
+        run: |
+          npm run lint-sass
+        working-directory: ./frontend
+      - name: Test with Jest
+        run: |
+          npm run test
+        working-directory: ./frontend

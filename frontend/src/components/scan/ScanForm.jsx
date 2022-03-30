@@ -58,11 +58,11 @@ const checkChoices = [
   {
     value: "check_all",
     label:
-      "Check if similar analysis already exists as running or reported_without_fails",
+      "Do not execute if a similar analysis is currently running or reported without fails",
   },
   {
     value: "running_only",
-    label: "Check if similar analysis is currently running",
+    label: "Do not execute if a similar analysis is currently running",
   },
   {
     value: "force_new",

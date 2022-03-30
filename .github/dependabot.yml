@@ -1,7 +1,7 @@
 version: 2
 updates:
   - package-ecosystem: "pip"
-    directory: "/"
+    directory: "/requirements"
     schedule:
       interval: "weekly"
       day: "tuesday"
@@ -24,6 +24,13 @@ updates:
       # this does not work for security updates
       - dependency-name: "*"
         update-types: [ "version-update:semver-patch" ]
+
+  - package-ecosystem: "npm"
+    directory: "/frontend"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+    target-branch: "develop"
 
   - package-ecosystem: "docker"
     directory: "/docker"

@@ -12,15 +12,22 @@ services:
       - ../:/opt/deploy/intel_owl
     environment:
       - DEBUG=True
+      - DJANGO_TEST_SERVER=True
 
   nginx:
     build:
       context: ..
       dockerfile: docker/Dockerfile_nginx
     image: intelowlproject/intelowl_nginx:test
+    volumes:
+      - ../configuration/nginx/django_server.conf:/etc/nginx/conf.d/default.conf
 
   celery_beat:
     image: intelowlproject/intelowl:test
+    volumes:
+      - ../:/opt/deploy/intel_owl
 
   celery_worker_default:
     image: intelowlproject/intelowl:test
+    volumes:
+      - ../:/opt/deploy/intel_owl

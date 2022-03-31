@@ -120,11 +120,11 @@ const jobTableColumns = [
           <div className="d-flex flex-column align-items-start">
             <span>
               {job.analyzers_to_execute.length}/
-              {job.analyzers_requested.length || "-"} analyzers
+              {job.analyzers_requested.length || "all"} analyzers
             </span>
             <span>
               {job.connectors_to_execute.length}/
-              {job.connectors_requested.length || "-"} connectors
+              {job.connectors_requested.length || "all"} connectors
             </span>
           </div>
         ),

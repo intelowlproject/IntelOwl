@@ -17,7 +17,6 @@ path_mapping = {
     "default": "docker/default.yml",
     "test": "docker/test.override.yml",
     "ci": "docker/ci.override.yml",
-    "django_server": "docker/django-server.override.yml",
     "custom": "docker/custom.override.yml",
     "traefik": "docker/traefik.override.yml",
     "multi_queue": "docker/multi-queue.override.yml",
@@ -111,13 +110,6 @@ def start():
         help="Uses custom.override.yml to leverage your customized configuration",
     )
     parser.add_argument(
-        "--django-server",
-        required=False,
-        action="store_true",
-        help="While using 'test' mode, this allows to use the default"
-        " Django server instead of Uwsgi",
-    )
-    parser.add_argument(
         "--elastic",
         required=False,
         action="store_true",
@@ -148,8 +140,6 @@ def start():
     # mode
     if is_test:
         compose_files.append(path_mapping[args.mode])
-        if args.__dict__["django_server"]:
-            compose_files.append(path_mapping["django_server"])
     if args.__dict__["elastic"]:
         compose_files.append(path_mapping["elastic"])
     # upgrades

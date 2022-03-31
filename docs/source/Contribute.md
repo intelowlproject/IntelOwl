@@ -46,24 +46,21 @@ cp docker/.env.start.test.template docker/.env.start.test
 
 Now, you can execute IntelOwl in development mode by selecting the mode `test` while launching the startup script:
 ```bash
-python3 start.py test --django-server up
+python3 start.py test up
 ```
-Every time you perform a change, you should rebuild the containers to have it reflected in the server:
+Every time you perform a change, you should perform an operation to reflect the changes into the application:
+
+1. if you changed either the frontend code or the python requirements, restart the application and re-build the images. This is the slowest process. You can always choose this way but it would waste a lot of time.
 ```bash
-python3 start.py test down
-python3 start.py test up --build
+python3 start.py test down && python3 start.py test up --build
+```
+2. if you changed either analyzers or connectors or anything that is executed asynchronously by the "celery" containers, you just need to restart the application because we leverage Docker bind volumes that will reflect the changes to the containers. This saves the time of the build
+```bash
+python3 start.py test down && python3 start.py test up
 ```
 
-<div class="admonition hint">
-<p class="admonition-title">Hint</p>
-<ul>
-  <li>
-  With the <code>--django-server</code> changes will be instantly reflected to the application server without having to rebuild the docker images.
-  </li>
-  <li>
-  However remember that the changes won't be automatically reflected to other containers running the python code like the "celery" ones (that IntelOwl uses to execute analyzers). This means that you still need to rebuild everything when, for example, when you change or create an analyzer.
-  </li>
-</div>
+3. if you made changes to either the API or anything that is executed only by the application server, changes will be instantly reflected and you don't need to do anything. This is thanks to the Django Development server that is executed instead of `uwsgi` while using the `test` mode
+
 
 ## How to add a new analyzer
 You may want to look at a few existing examples to start to build a new one, such as:

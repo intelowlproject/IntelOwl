@@ -25,7 +25,7 @@ REST_FRAMEWORK = {
 
 # Django-Rest-Durin
 REST_DURIN = {
-    "DEFAULT_TOKEN_TTL": timedelta(days=31),
+    "DEFAULT_TOKEN_TTL": timedelta(days=14),
     "TOKEN_CHARACTER_LENGTH": 32,
     "USER_SERIALIZER": "certego_saas.user.serializers.UserSerializer",
     "AUTH_HEADER_PREFIX": "Token",
@@ -35,7 +35,7 @@ REST_DURIN = {
     "API_ACCESS_EXCLUDE_FROM_SESSIONS": True,
     "API_ACCESS_RESPONSE_INCLUDE_TOKEN": True,
     # not part of durin but used in data migration
-    "API_ACCESS_CLIENT_TOKEN_TTL": timedelta(days=365),
+    "API_ACCESS_CLIENT_TOKEN_TTL": timedelta(days=3650),
 }
 
 # drf-spectacular

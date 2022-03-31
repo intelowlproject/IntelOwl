@@ -62,8 +62,6 @@ class CustomAuthTokenAdmin(AuthTokenAdmin):
         super().save_model(request, obj, form, change)
 
 
-# Unregister Client admin view
-admin.site.unregister(Client)
 # Unregister the default admin view for AuthToken
 admin.site.unregister(AuthToken)
 # Register our custom admin view for AuthToken

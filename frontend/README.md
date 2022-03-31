@@ -18,7 +18,7 @@ public/                                   public static assets
 |- index.html/                            root HTML file
 src/                                      source code
 |- components/                            pages and components
-|  |- auth/                               `api_app.auth` (login, logout pages)
+|  |- auth/                               `api_app.authentication` (login, logout pages)
 |  |- common/                             small re-usable components
 |  |- dashboard/                          dashboard page and charts
 |  |- home/                               landing/home page

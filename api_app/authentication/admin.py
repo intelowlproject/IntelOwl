@@ -14,7 +14,14 @@ from certego_saas.user.models import User
 
 @admin.register(User)
 class UserAdminView(AbstractUserAdmin):
-    pass
+    list_display = (
+        "username",
+        "email",
+        "first_name",
+        "last_name",
+        "is_active",
+        "is_staff",
+    )
 
 
 # durin app (AuthToken model) customization

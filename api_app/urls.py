@@ -29,7 +29,7 @@ urlpatterns = [
     path("", include("api_app.analyzers_manager.urls")),
     path("", include("api_app.connectors_manager.urls")),
     # auth
-    path("auth/", include("api_app.auth.urls")),
+    path("auth/", include("api_app.authentication.urls")),
     # certego_saas:
     # default apps (user),
     path("", include("certego_saas.urls")),

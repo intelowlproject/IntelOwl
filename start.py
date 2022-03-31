@@ -111,6 +111,12 @@ def start():
         help="Uses custom.override.yml to leverage your customized configuration",
     )
     parser.add_argument(
+        "--debug-build",
+        required=False,
+        action="store_true",
+        help="see more verbose output from the build, for debug purposes",
+    )
+    parser.add_argument(
         "--elastic",
         required=False,
         action="store_true",
@@ -179,6 +185,8 @@ def start():
         command = base_command + [args.docker_command] + unknown
         env = os.environ.copy()
         env["DOCKER_BUILDKIT"] = "1"
+        if args.debug_build:
+            env["BUILDKIT_PROGRESS"] = "plain"
         subprocess.run(command, env=env)
     except KeyboardInterrupt:
         print(

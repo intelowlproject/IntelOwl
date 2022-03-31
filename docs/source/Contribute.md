@@ -50,16 +50,16 @@ python3 start.py test up
 ```
 Every time you perform a change, you should perform an operation to reflect the changes into the application:
 
-1. if you changed either the frontend code or the python requirements, restart the application and re-build the images. This is the slowest process. You can always choose this way but it would waste a lot of time.
+* if you changed either the frontend code or the python requirements, restart the application and re-build the images. This is the slowest process. You can always choose this way but it would waste a lot of time.
 ```bash
 python3 start.py test down && python3 start.py test up --build
 ```
-2. if you changed either analyzers or connectors or anything that is executed asynchronously by the "celery" containers, you just need to restart the application because we leverage Docker bind volumes that will reflect the changes to the containers. This saves the time of the build
+* if you changed either analyzers or connectors or anything that is executed asynchronously by the "celery" containers, you just need to restart the application because we leverage Docker bind volumes that will reflect the changes to the containers. This saves the time of the build
 ```bash
 python3 start.py test down && python3 start.py test up
 ```
 
-3. if you made changes to either the API or anything that is executed only by the application server, changes will be instantly reflected and you don't need to do anything. This is thanks to the Django Development server that is executed instead of `uwsgi` while using the `test` mode
+* if you made changes to either the API or anything that is executed only by the application server, changes will be instantly reflected and you don't need to do anything. This is thanks to the Django Development server that is executed instead of `uwsgi` while using the `test` mode
 
 
 ## How to add a new analyzer

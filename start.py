@@ -2,6 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 
 import argparse
+import os
 import subprocess
 
 from dotenv import load_dotenv
@@ -176,7 +177,9 @@ def start():
     # we use try/catch to mimick docker-compose's behaviour of handling CTRL+C event
     try:
         command = base_command + [args.docker_command] + unknown
-        subprocess.run(command)
+        env = os.environ.copy()
+        env["DOCKER_BUILDKIT"] = "1"
+        subprocess.run(command, env=env)
     except KeyboardInterrupt:
         print(
             "---- removing the containers, please wait... ",

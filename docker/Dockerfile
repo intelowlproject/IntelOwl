@@ -25,6 +25,7 @@ ENV ELASTICSEARCH_DSL_VERSION 7.2.0
 ENV watch_logs_cmd "watch -n1 tail -n10 /var/log/intel_owl/django/api_app.log"
 
 ARG REPO_DOWNLOADER_ENABLED=true
+ARG WATCHMAN=false
 
 RUN mkdir -p ${LOG_PATH} \
     ${LOG_PATH}/django \
@@ -58,6 +59,8 @@ RUN touch ${LOG_PATH}/django/api_app.log ${LOG_PATH}/django/api_app_errors.log \
     && chown -R www-data:www-data ${LOG_PATH} /opt/deploy/ \
     # this is cause stringstifer creates this directory during the build and cause celery to crash
     && rm -rf /root/.local
+
+RUN docker/scripts/watchman_install.sh
 
 # download yara rules and quark engine rules
 RUN api_app/analyzers_manager/repo_downloader.sh

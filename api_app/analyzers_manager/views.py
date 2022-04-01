@@ -45,9 +45,6 @@ class AnalyzerListAPI(APIView):
     )
     def get(self, request, *args, **kwargs):
         try:
-            logger.info(
-                f"get_analyzer_configs received request from {str(request.user)}."
-            )
             ac = self.serializer_class.read_and_verify_config()
             return Response(ac, status=status.HTTP_200_OK)
         except Exception as e:

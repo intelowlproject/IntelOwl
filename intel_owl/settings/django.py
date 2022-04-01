@@ -12,6 +12,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "certego_saas.ext.middlewares.LogMiddleware",  # custom
 ]
 
 ROOT_URLCONF = "intel_owl.urls"

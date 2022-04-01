@@ -43,9 +43,6 @@ class ConnectorListAPI(APIView):
     )
     def get(self, request, *args, **kwargs):
         try:
-            logger.info(
-                f"get_connector_configs received request from {str(request.user)}."
-            )
             cc = self.serializer_class.read_and_verify_config()
             return Response(cc, status=status.HTTP_200_OK)
         except Exception as e:

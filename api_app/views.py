@@ -52,7 +52,7 @@ def _analysis_request(
     """
     warnings = []
     logger.info(
-        f"_analysis_request received request from {request.user}."
+        f"_analysis_request {serializer_class} received request from {request.user}."
         f"Data:{dict(request.data)}."
     )
 
@@ -275,11 +275,6 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
     )
     @action(detail=True, methods=["patch"])
     def kill(self, request, pk=None):
-        logger.info(
-            f"kill running job received request from {str(request.user)} "
-            f"-- (job_id:{pk})."
-        )
-
         # get job object or raise 404
         job = self.get_object()
 

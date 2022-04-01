@@ -65,6 +65,22 @@ LOGGING = {
             "maxBytes": 20 * 1024 * 1024,
             "backupCount": 6,
         },
+        "certego_saas": {
+            "level": INFO_OR_DEBUG_LEVEL,
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": f"{DJANGO_LOG_DIRECTORY}/api_app.log",
+            "formatter": "stdfmt",
+            "maxBytes": 20 * 1024 * 1024,
+            "backupCount": 6,
+        },
+        "certego_saas_errors": {
+            "level": INFO_OR_DEBUG_LEVEL,
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": f"{DJANGO_LOG_DIRECTORY}/api_app_errors.log",
+            "formatter": "stdfmt",
+            "maxBytes": 20 * 1024 * 1024,
+            "backupCount": 6,
+        },
     },
     "loggers": {
         "api_app": {
@@ -85,6 +101,11 @@ LOGGING = {
         "django": {
             "handlers": ["django_unhandled_errors"],
             "level": "ERROR",
+            "propagate": True,
+        },
+        "certego_saas": {
+            "handlers": ["certego_saas", "certego_saas_errors"],
+            "level": INFO_OR_DEBUG_LEVEL,
             "propagate": True,
         },
     },

@@ -43,13 +43,15 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 RUN pip3 install --upgrade pip
 
-COPY requirements/requirements.txt $PYTHONPATH/requirements.txt
-COPY requirements/test-requirements.txt $PYTHONPATH/test-requirements.txt
+COPY requirements/project-requirements.txt $PYTHONPATH/project-requirements.txt
 WORKDIR $PYTHONPATH
 
-RUN pip3 install --no-cache-dir --compile -r requirements.txt
+RUN pip3 install --no-cache-dir --compile -r project-requirements.txt
 # install elasticsearch-dsl's appropriate version as specified by user
 RUN pip3 install --no-cache-dir django-elasticsearch-dsl==${ELASTICSEARCH_DSL_VERSION}
+
+COPY requirements/certego-requirements.txt $PYTHONPATH/certego-requirements.txt
+RUN pip3 install --no-cache-dir --compile -r certego-requirements.txt
 
 COPY . $PYTHONPATH
 

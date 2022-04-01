@@ -74,6 +74,9 @@ class PluginActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
     )
     @action(detail=False, methods=["patch"])
     def kill(self, request, job_id, name):
+        logger.info(
+            f"kill request from user {request.user} for job_id {job_id}, name {name}"
+        )
         # get report object or raise 404
         report = self.get_object(job_id, name)
         if report.status not in [
@@ -94,6 +97,9 @@ class PluginActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
     )
     @action(detail=False, methods=["patch"])
     def retry(self, request, job_id, name):
+        logger.info(
+            f"retry request from user {request.user} for job_id {job_id}, name {name}"
+        )
         # get report object or raise 404
         report = self.get_object(job_id, name)
         if report.status not in [
@@ -127,5 +133,6 @@ class PluginHealthCheckAPI(APIView, metaclass=ABCMeta):
         raise NotImplementedError()
 
     def get(self, request, name):
+        logger.info(f"get healthcheck from user {request.user}, name {name}")
         health_status = self.perform_healthcheck(name)
         return Response(data={"status": health_status}, status=status.HTTP_200_OK)

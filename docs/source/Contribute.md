@@ -175,7 +175,7 @@ Since v4, IntelOwl leverages some packages from Certego:
 If you need to modify the behavior or add feature to those packages, please follow the same rules for IntelOwl and request a Pull Request there. The same maintainers of IntelOwl will answer to you.
 
 Follow these guides to understand how to start to contribute to them while developing for IntelOwl:
-- *certego-saas*: create a fork, commit your changes in your local repo, then change the commit hash to the last one you made in the [requirements file](https://github.com/intelowlproject/IntelOwl/blob/master/requirements/requirements.txt). Ultimately re-build the project
+- *certego-saas*: create a fork, commit your changes in your local repo, then change the commit hash to the last one you made in the [requirements file](https://github.com/intelowlproject/IntelOwl/blob/master/requirements/certego-requirements.txt). Ultimately re-build the project
 - *certego-ui*: [Frontend doc]((https://github.com/intelowlproject/IntelOwl/blob/master/frontend/README.md))
 
 ## Create a pull request

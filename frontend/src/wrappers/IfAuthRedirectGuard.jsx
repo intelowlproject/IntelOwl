@@ -6,7 +6,7 @@ import useSearchParam from "react-use/lib/useSearchParam";
 import { useAuthStore } from "../stores";
 
 /*
-Wrapper for Routes which should be accesible only to a non-authenticated user
+Wrapper for Routes which should be accessible only to a non-authenticated user
 */
 export default function IfAuthRedirectGuard({ children, }) {
   // store

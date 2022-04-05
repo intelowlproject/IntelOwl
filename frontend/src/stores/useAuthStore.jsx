@@ -10,7 +10,7 @@ import useRecentScansStore from "./useRecentScansStore";
 const onLogout = useRecentScansStore.getState().clear;
 const TOKEN_STORAGE_KEY = "INTELOWL_AUTH_TOKEN";
 
-// hook/ store
+// hook/ store see: https://github.com/pmndrs/zustand
 const useAuthStore = create((set, get) => ({
   loading: false,
   token: localStorage.getItem(TOKEN_STORAGE_KEY) || null,

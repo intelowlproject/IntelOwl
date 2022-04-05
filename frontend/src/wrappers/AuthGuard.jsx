@@ -7,7 +7,7 @@ import { FallBackLoading, addToast } from "@certego/certego-ui";
 import { useAuthStore } from "../stores";
 
 /*
-Wrapper for Routes which should be accesible only to a authenticated user
+Wrapper for Routes which should be accessible only to a authenticated user
 */
 export default function AuthGuard({ children, }) {
   // store

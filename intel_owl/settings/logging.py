@@ -74,7 +74,7 @@ LOGGING = {
             "backupCount": 6,
         },
         "certego_saas_errors": {
-            "level": INFO_OR_DEBUG_LEVEL,
+            "level": "ERROR",
             "class": "logging.handlers.RotatingFileHandler",
             "filename": f"{DJANGO_LOG_DIRECTORY}/api_app_errors.log",
             "formatter": "stdfmt",

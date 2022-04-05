@@ -102,7 +102,7 @@ const tableProps = {
   initialState: {
     pageSize: 10,
     sortBy: [
-      { id: "status", desc: false, },
+      { id: "status", desc: true, },
       { id: "name", desc: true, },
     ],
   },

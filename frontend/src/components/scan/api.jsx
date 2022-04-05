@@ -14,12 +14,12 @@ import useRecentScansStore from "../../stores/useRecentScansStore";
 
 const { append: appendToRecentScans, } = useRecentScansStore.getState();
 
-async function createJob(formValues) {
+export async function createJob(formValues) {
   try {
     // check existing
     if (formValues.check !== "force_new") {
-      const exists = await _askAnalysisAvailability(formValues);
-      if (exists) return;
+      const jobId = await _askAnalysisAvailability(formValues);
+      if (jobId) return Promise.resolve(jobId);
     }
     // new scan
     const resp =
@@ -56,12 +56,18 @@ async function createJob(formValues) {
         true,
         10000
       );
-    } else {
-      addToast("Failed!", respData?.message, "danger");
+      return Promise.resolve(jobId);
     }
+
+    // else
+    addToast("Failed!", respData?.message, "danger");
+    const error = new Error(`job status ${respData.status}`);
+    return Promise.reject(error);
+
   } catch (e) {
-    addToast("Failed!", e.parsedMsg, "danger");
-  }
+      addToast("Failed!", e.parsedMsg, "danger");
+      return Promise.reject(e);
+   }
 }
 
 async function _askAnalysisAvailability(formValues) {
@@ -79,12 +85,12 @@ async function _askAnalysisAvailability(formValues) {
     const response = await axios.post(ASK_ANALYSIS_AVAILABILITY_URI, body);
     const answer = response.data;
     if (answer.status === "not_available") {
-      return false;
+      return 0;
     }
     const jobId = parseInt(answer.job_id, 10);
     appendToRecentScans(jobId, "secondary");
     addToast(`Found similar scan with job ID #${jobId}`, null, "info");
-    return true;
+    return jobId;
   } catch (e) {
     return Promise.reject(e);
   }
@@ -122,5 +128,3 @@ async function _analyzeFile(formValues) {
   }
   return axios.post(ANALYZE_FILE_URI, body);
 }
-
-export { createJob };

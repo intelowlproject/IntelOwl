@@ -1,7 +1,7 @@
 import React from "react";
 import { FormGroup, Label, Container, Col, FormText } from "reactstrap";
 import { Submit, CustomInput as FormInput } from "formstrap";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import { Form, Formik } from "formik";
 import useTitle from "react-use/lib/useTitle";
 import { MdEdit } from "react-icons/md";
@@ -121,6 +121,9 @@ export default function ScanForm() {
   // page title
   useTitle("IntelOwl | Scan", { restoreOnUnmount: true, });
 
+  // router history
+  const history = useHistory();
+
   // use custom hooks
   const [{ MonthBadge, TotalBadge, QuotaInfoIcon, }, refetchQuota, quota] =
     useQuotaBadge();
@@ -225,11 +228,20 @@ export default function ScanForm() {
         analyzers: values.analyzers.map((x) => x.value),
         connectors: values.connectors.map((x) => x.value),
       };
-      await createJob(formValues);
-      refetchQuota();
-      formik.setSubmitting(false);
+      try {
+        const jobId = await createJob(formValues);
+        setTimeout(
+          () => history.push(`/jobs/${jobId}`),
+          1000
+        );
+      } catch (e) {
+        // handled inside createJob
+      } finally {
+        refetchQuota();
+        formik.setSubmitting(false);
+      }
     },
-    [refetchQuota]
+    [history, refetchQuota]
   );
 
   return (

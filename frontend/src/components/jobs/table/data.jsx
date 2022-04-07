@@ -47,6 +47,21 @@ const jobTableColumns = [
     maxWidth: 125,
   },
   {
+    Header: "User",
+    id: "user",
+    accessor: "user.username",
+    Cell: ({ value, row: { original: job, }, }) => (
+      <SlicedText
+        id={`table-user-${job?.id}`}
+        key={`table-user-${job?.id}`}
+        value={value}
+      />
+    ),
+    disableSortBy: true,
+    Filter: DefaultColumnFilter,
+    minWidth: 125,
+  },
+  {
     Header: "Name",
     id: "name",
     accessor: (r) => r.observable_name || r.file_name,
@@ -74,7 +89,7 @@ const jobTableColumns = [
     ),
     disableSortBy: true,
     Filter: DefaultColumnFilter,
-    minWidth: 200,
+    minWidth: 175,
   },
   {
     Header: "Settings",
@@ -86,7 +101,7 @@ const jobTableColumns = [
         disableSortBy: true,
         Filter: SelectOptionsFilter,
         selectOptions: ALL_CLASSIFICATIONS,
-        minWidth: 175,
+        minWidth: 125,
       },
       {
         Header: "TLP",
@@ -96,7 +111,7 @@ const jobTableColumns = [
         disableSortBy: true,
         Filter: SelectOptionsFilter,
         selectOptions: TLP_CHOICES,
-        minWidth: 175,
+        minWidth: 125,
       },
       {
         Header: "Tags",
@@ -113,7 +128,7 @@ const jobTableColumns = [
         disableSortBy: true,
         Filter: DefaultColumnFilter,
         filterValueAccessorFn: (tags) => tags.map((t) => t.label),
-        minWidth: 200,
+        minWidth: 150,
       },
     ],
   },
@@ -137,14 +152,14 @@ const jobTableColumns = [
           </div>
         ),
         disableSortBy: true,
-        maxWidth: 150,
+        maxWidth: 175,
       },
       {
         Header: "Process Time (s)",
         id: "process_time",
         accessor: "process_time",
         disableSortBy: true,
-        maxWidth: 150,
+        maxWidth: 125,
       },
       {
         Header: "Status",
@@ -154,7 +169,7 @@ const jobTableColumns = [
         disableSortBy: true,
         Filter: SelectOptionsFilter,
         selectOptions: JOB_STATUSES,
-        minWidth: 220,
+        minWidth: 225,
       },
     ],
   },

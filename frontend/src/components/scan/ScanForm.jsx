@@ -18,7 +18,8 @@ import { usePluginConfigurationStore } from "../../stores";
 import {
   TLP_CHOICES,
   TLP_DESCRIPTION_MAP,
-  OBSERVABLE_TYPES
+  OBSERVABLE_TYPES,
+  ALL_CLASSIFICATIONS
 } from "../../constants";
 import { TLPTag, markdownToHtml } from "../common";
 import {
@@ -268,7 +269,7 @@ export default function ScanForm() {
           {(formik) => (
             <Form>
               <FormGroup className="content-section bg-darker d-flex-center flex-wrap">
-                {[...OBSERVABLE_TYPES, "file"].map((ch) => (
+                {ALL_CLASSIFICATIONS.map((ch) => (
                   <FormInput
                     inline
                     key={`classification__${ch}`}

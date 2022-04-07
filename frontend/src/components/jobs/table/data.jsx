@@ -11,7 +11,7 @@ import {
 } from "@certego/certego-ui";
 
 import { JobTag, StatusTag, TLPTag } from "../../common";
-import { JOB_STATUSES, TLP_CHOICES } from "../../../constants";
+import { JOB_STATUSES, TLP_CHOICES, ALL_CLASSIFICATIONS } from "../../../constants";
 
 const jobTableColumns = [
   {
@@ -50,6 +50,13 @@ const jobTableColumns = [
     Header: "Name",
     id: "name",
     accessor: (r) => r.observable_name || r.file_name,
+    Cell: ({ value, row: { original: job, }, }) => (
+      <SlicedText
+        id={`table-name-${job?.id}`}
+        key={`table-name-${job?.id}`}
+        value={value}
+      />
+    ),
     disableSortBy: true,
     Filter: DefaultColumnFilter,
     minWidth: 175,
@@ -77,7 +84,8 @@ const jobTableColumns = [
         id: "type",
         accessor: (r) => r.observable_classification || r.file_mimetype,
         disableSortBy: true,
-        Filter: SelectColumnFilter,
+        Filter: SelectOptionsFilter,
+        selectOptions: ALL_CLASSIFICATIONS,
         minWidth: 175,
       },
       {
@@ -103,7 +111,7 @@ const jobTableColumns = [
             />
           )),
         disableSortBy: true,
-        Filter: SelectColumnFilter,
+        Filter: DefaultColumnFilter,
         filterValueAccessorFn: (tags) => tags.map((t) => t.label),
         minWidth: 200,
       },

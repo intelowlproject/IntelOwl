@@ -82,8 +82,18 @@ const analyzersTableColumns = [
   {
     Header: "Supported types",
     id: "supported_types",
-    accessor: (r) =>
-      r.type === "observable" ? r.observable_supported : r.supported_filetypes,
+    accessor: (r) => {
+        let supported;
+        if (r.type === "observable"){
+            supported = r.observable_supported;
+        } else {
+            supported = r.supported_filetypes;
+        }
+        console.log(supported);
+        if (supported.length === 0){supported.push("everything");}
+        console.log(supported);
+        return supported;
+    },
     Cell: ({ value, }) => (
       <ul className="d-flex flex-column align-items-start">
         {value?.map((v) => (

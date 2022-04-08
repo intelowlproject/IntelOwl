@@ -135,7 +135,7 @@ export function PluginVerificationIcon({ pluginName, verification, }) {
         placement="top"
         fade={false}
         innerClassName={classnames(
-          "text-left text-nowrap mw-fit-content border border-darker",
+          "text-left text-nowrap md-fit-content border border-darker",
           {
             "bg-success text-darker": verification?.configured,
             "bg-danger text-darker": !verification?.configured,

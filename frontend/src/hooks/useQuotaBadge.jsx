@@ -11,7 +11,7 @@ export default function useQuotaBadge() {
     React.useCallback((s) => [s.access, s.service.fetchUserAccess], [])
   );
 
-  const quota = access; // alias for backwards compatability
+  const quota = access; // alias for backwards compatibility
 
   // callbacks
   const MonthBadge = React.useCallback(

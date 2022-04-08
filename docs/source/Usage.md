@@ -18,7 +18,12 @@ There are multiple ways to interact with the Intel Owl APIs,
 
 <div class="admonition hint">
 <p class="admonition-title">Hint: Tokens Creation</p>
-The server authentication is managed by API tokens. So, if you want to interact with Intel Owl, you have to create one or more unprivileged users from the Django Admin Interface and then generate a token for those users.
+The server authentication is managed by API tokens. So, if you want to interact with Intel Owl, you have two ways to do that:
+<ul>
+<li>If you are a normal user, you can go to the "API Access/Sessions" section of the GUI and create a Token there.</li>
+<li>If you are an administrator of IntelOwl, you can create one or more unprivileged users from the Django Admin Interface and then generate a token for those users.
+</li>
+</ul>
 Afterwards you can leverage the created tokens with the Intel Owl Client.
 </div>
 

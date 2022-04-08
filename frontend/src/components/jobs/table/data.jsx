@@ -11,7 +11,7 @@ import {
 } from "@certego/certego-ui";
 
 import { JobTag, StatusTag, TLPTag } from "../../common";
-import { JOB_STATUSES, TLP_CHOICES } from "../../../constants";
+import { JOB_STATUSES, TLP_CHOICES, ALL_CLASSIFICATIONS } from "../../../constants";
 
 const jobTableColumns = [
   {
@@ -47,9 +47,31 @@ const jobTableColumns = [
     maxWidth: 125,
   },
   {
+    Header: "User",
+    id: "user",
+    accessor: "user.username",
+    Cell: ({ value, row: { original: job, }, }) => (
+      <SlicedText
+        id={`table-user-${job?.id}`}
+        key={`table-user-${job?.id}`}
+        value={value}
+      />
+    ),
+    disableSortBy: true,
+    Filter: DefaultColumnFilter,
+    minWidth: 125,
+  },
+  {
     Header: "Name",
     id: "name",
     accessor: (r) => r.observable_name || r.file_name,
+    Cell: ({ value, row: { original: job, }, }) => (
+      <SlicedText
+        id={`table-name-${job?.id}`}
+        key={`table-name-${job?.id}`}
+        value={value}
+      />
+    ),
     disableSortBy: true,
     Filter: DefaultColumnFilter,
     minWidth: 175,
@@ -67,7 +89,7 @@ const jobTableColumns = [
     ),
     disableSortBy: true,
     Filter: DefaultColumnFilter,
-    minWidth: 200,
+    minWidth: 175,
   },
   {
     Header: "Settings",
@@ -77,8 +99,9 @@ const jobTableColumns = [
         id: "type",
         accessor: (r) => r.observable_classification || r.file_mimetype,
         disableSortBy: true,
-        Filter: SelectColumnFilter,
-        minWidth: 175,
+        Filter: SelectOptionsFilter,
+        selectOptions: ALL_CLASSIFICATIONS,
+        minWidth: 125,
       },
       {
         Header: "TLP",
@@ -88,7 +111,7 @@ const jobTableColumns = [
         disableSortBy: true,
         Filter: SelectOptionsFilter,
         selectOptions: TLP_CHOICES,
-        minWidth: 175,
+        minWidth: 125,
       },
       {
         Header: "Tags",
@@ -103,9 +126,9 @@ const jobTableColumns = [
             />
           )),
         disableSortBy: true,
-        Filter: SelectColumnFilter,
+        Filter: DefaultColumnFilter,
         filterValueAccessorFn: (tags) => tags.map((t) => t.label),
-        minWidth: 200,
+        minWidth: 150,
       },
     ],
   },
@@ -129,14 +152,14 @@ const jobTableColumns = [
           </div>
         ),
         disableSortBy: true,
-        maxWidth: 150,
+        maxWidth: 175,
       },
       {
         Header: "Process Time (s)",
         id: "process_time",
         accessor: "process_time",
         disableSortBy: true,
-        maxWidth: 150,
+        maxWidth: 125,
       },
       {
         Header: "Status",
@@ -146,7 +169,7 @@ const jobTableColumns = [
         disableSortBy: true,
         Filter: SelectOptionsFilter,
         selectOptions: JOB_STATUSES,
-        minWidth: 220,
+        minWidth: 225,
       },
     ],
   },

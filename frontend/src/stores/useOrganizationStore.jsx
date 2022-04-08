@@ -79,7 +79,7 @@ const useOrganizationStore = create((set, get) => ({
     try {
       // API call
       const resp = await axios.get(
-        `${BASE_URI_ORG}?expand=members&fields=members"`
+        `${BASE_URI_ORG}?expand=members&fields=members`
       );
       const { members, } = resp.data;
       // update members key

@@ -188,7 +188,13 @@ Some analyzers could require a special configuration:
 
 ## Organizations and data sharing
 
-Jobs with either AMBER or RED TLP value will be accessible to only members within the same organization.
+Organizations are a great way to share data and analysis only with the members of your team. Invite the people you work with in your organization!
+
+By default, analysis (jobs) are executed with a level of TLP that is WHITE. This means that these jobs are public and every IntelOwl user can see them.
+Thanks to the "Organization" feature, you can restrict the people who can see the analysis that you made.
+
+How you can do that?
+Jobs with either AMBER or RED TLP value will be accessible to only members within the same organization. You can select the TLP for the analysis at the time of request.
 
 ## Elastic Search
 

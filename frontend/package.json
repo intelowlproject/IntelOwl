@@ -9,7 +9,7 @@
     }
   },
   "dependencies": {
-    "@certego/certego-ui": "0.0.8",
+    "@certego/certego-ui": "0.0.9",
     "@craco/craco": "^6.4.2",
     "axios": "^0.24.0",
     "axios-hooks": "^3.0.0",

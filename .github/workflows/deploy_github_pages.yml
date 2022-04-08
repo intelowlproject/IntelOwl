@@ -1,7 +1,7 @@
 name: Build and Deploy
 on:
   push:
-    branches: [dev-v4]
+    branches: [dev-v4, github_pages]
 
 jobs:
   build-and-deploy:

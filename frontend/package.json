@@ -43,6 +43,7 @@
     "build:sourcemap": "craco build",
     "test": "craco test",
     "eject": "craco eject",
+    "predeploy": "cd frontend && npm install && npm run build",
     "lint": "eslint src/ --fix --ext .js,.jsx",
     "prettier:write": "prettier --write .",
     "prettier:check": "prettier --check .",

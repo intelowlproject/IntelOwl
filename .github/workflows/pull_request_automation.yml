@@ -164,7 +164,7 @@ jobs:
     - name: Set up NodeJS
       uses: actions/setup-node@v3
       with:
-        node-version: 12
+        node-version: 15
     - name: Cache node modules
       uses: actions/cache@v3
       with:

@@ -16,142 +16,142 @@ jobs:
     outputs:
       frontend: ${{steps.diff_check.outputs.frontend}}
     steps:
-      - uses: actions/checkout@v3
-        with:
-          ref: ${{ github.base_ref }}
-      - uses: actions/checkout@v3
-        with:
-          clean: false
-      - name: Generate diffs
-        id: diff_check
-        run: |
-          git branch -a --list | cat
-          FRONTEND_CHANGES=$(git diff --compact-summary origin/${{ github.base_ref }} -- frontend/* | wc -l)
-          echo "::set-output name=frontend::$FRONTEND_CHANGES"
+    - uses: actions/checkout@v3
+      with:
+        ref: ${{ github.base_ref }}
+    - uses: actions/checkout@v3
+      with:
+        clean: false
+    - name: Generate diffs
+      id: diff_check
+      run: |
+        git branch -a --list | cat
+        FRONTEND_CHANGES=$(git diff --compact-summary origin/${{ github.base_ref }} -- frontend/* | wc -l)
+        echo "::set-output name=frontend::$FRONTEND_CHANGES"
 
   linters:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout IntelOwl
-        uses: actions/checkout@v3
+    - name: Checkout IntelOwl
+      uses: actions/checkout@v3
 
-      - name: Set up Python
-        uses: actions/setup-python@v3.0.0
-        with:
-          python-version: 3.9
+    - name: Set up Python
+      uses: actions/setup-python@v3.0.0
+      with:
+        python-version: 3.9
 
-      - name: Install Dependencies
-        run: |
-          pip3 install --upgrade pip
-          pip3 install -r requirements/test-requirements.txt
+    - name: Install Dependencies
+      run: |
+        pip3 install --upgrade pip
+        pip3 install -r requirements/test-requirements.txt
 
-      - name: Black formatter
-        run: |
-          black . --check --diff --exclude "migrations|venv"
+    - name: Black formatter
+      run: |
+        black . --check --diff --exclude "migrations|venv"
 
-      - name: Lint with flake8 (PEP8 enforcer + linter)
-        run: |
-          flake8 . --config=.flake8 --show-source
+    - name: Lint with flake8 (PEP8 enforcer + linter)
+      run: |
+        flake8 . --config=.flake8 --show-source
 
-      - name: isort
-        run: |
-          isort . --profile black --filter-files --check-only --diff --skip configuration/ldap_config.py
+    - name: isort
+      run: |
+        isort . --profile black --filter-files --check-only --diff --skip configuration/ldap_config.py
 
-      - name: Check migrations status
-        run: |
-          export DJANGO_SETTINGS_MODULE=service_portal.settings
-          PYTHONPATH=. django-admin makemigrations --dry-run >/dev/null
+    - name: Check migrations status
+      run: |
+        export DJANGO_SETTINGS_MODULE=service_portal.settings
+        PYTHONPATH=. django-admin makemigrations --dry-run >/dev/null
 
   backend-tests:
     runs-on: ubuntu-latest
     needs: linters
 
     steps:
-      - name: Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.9.1
-        with:
-          access_token: ${{ github.token }}
+    - name: Cancel Previous Runs
+      uses: styfle/cancel-workflow-action@0.9.1
+      with:
+        access_token: ${{ github.token }}
 
-      - name: Checkout IntelOwl
-        uses: actions/checkout@v3
+    - name: Checkout IntelOwl
+      uses: actions/checkout@v3
 
-      - name: Prepare Launch
-        run: |
-          unzip -P infected tests/test_files.zip -d .
-          cp docker/env_file_app_template docker/env_file_app
-          cp docker/env_file_postgres_template docker/env_file_postgres
-          chmod u+x docker/scripts/coverage_test.sh
+    - name: Prepare Launch
+      run: |
+        unzip -P infected tests/test_files.zip -d .
+        cp docker/env_file_app_template docker/env_file_app
+        cp docker/env_file_postgres_template docker/env_file_postgres
+        chmod u+x docker/scripts/coverage_test.sh
 
-      - name: Startup script requirements
-        run: |
-          pip3 install -r requirements/pre-requirements.txt
+    - name: Startup script requirements
+      run: |
+        pip3 install -r requirements/pre-requirements.txt
 
-      - name: Startup script launch (Slow)
-        if: contains(github.base_ref, 'master')
-        run: |
-          cp docker/env_file_integrations_template docker/env_file_integrations
-          python3 start.py --all_analyzers ci up --build -d
-        env:
-          DOCKER_BUILDKIT: 1
-          BUILDKIT_PROGRESS: "plain"
+    - name: Startup script launch (Slow)
+      if: contains(github.base_ref, 'master')
+      run: |
+        cp docker/env_file_integrations_template docker/env_file_integrations
+        python3 start.py --all_analyzers ci up --build -d
+      env:
+        DOCKER_BUILDKIT: 1
+        BUILDKIT_PROGRESS: "plain"
 
-      - name: Startup script launch (Fast)
-        if: "!contains(github.base_ref, 'master')"
-        run: |
-          python3 start.py ci up --build -d
-        env:
-          DOCKER_BUILDKIT: 1
-          BUILDKIT_PROGRESS: "plain"
+    - name: Startup script launch (Fast)
+      if: "!contains(github.base_ref, 'master')"
+      run: |
+        python3 start.py ci up --build -d
+      env:
+        DOCKER_BUILDKIT: 1
+        BUILDKIT_PROGRESS: "plain"
 
-      - name: Docker debug
-        run: |
-          docker ps -a
+    - name: Docker debug
+      run: |
+        docker ps -a
 
-      - name: Setup coverage
-        run: |
-          docker exec intelowl_uwsgi pip3 install coverage
+    - name: Setup coverage
+      run: |
+        docker exec intelowl_uwsgi pip3 install coverage
 
-      - name: "Test: api_app"
-        run: |
-          docker/scripts/coverage_test.sh tests.api_app
+    - name: "Test: api_app"
+      run: |
+        docker/scripts/coverage_test.sh tests.api_app
 
-      - name: "Test: auth"
-        run: |
-          docker/scripts/coverage_test.sh tests.auth
+    - name: "Test: auth"
+      run: |
+        docker/scripts/coverage_test.sh tests.auth
 
-      - name: "Test: Cron"
-        run: |
-          docker/scripts/coverage_test.sh tests.test_crons
+    - name: "Test: Cron"
+      run: |
+        docker/scripts/coverage_test.sh tests.test_crons
 
-      - name: "Test: Connectors Manager (views, serializers)"
-        run: |
-          docker/scripts/coverage_test.sh tests.connectors_manager
+    - name: "Test: Connectors Manager (views, serializers)"
+      run: |
+        docker/scripts/coverage_test.sh tests.connectors_manager
 
-      - name: "Test: Analyzers Manager (views, serializers)"
-        run: |
-          docker/scripts/coverage_test.sh tests.analyzers_manager.test_views tests.analyzers_manager.test_serializers
+    - name: "Test: Analyzers Manager (views, serializers)"
+      run: |
+        docker/scripts/coverage_test.sh tests.analyzers_manager.test_views tests.analyzers_manager.test_serializers
 
-      - name: "Test: Analyzers Manager (observable analyzers)"
-        run: |
-          docker/scripts/coverage_test.sh tests.analyzers_manager.test_observable_scripts
+    - name: "Test: Analyzers Manager (observable analyzers)"
+      run: |
+        docker/scripts/coverage_test.sh tests.analyzers_manager.test_observable_scripts
 
-      - name: "Test: Analyzers Manager (file analyzers)"
-        run: |
-          docker/scripts/coverage_test.sh tests.analyzers_manager.test_file_scripts
+    - name: "Test: Analyzers Manager (file analyzers)"
+      run: |
+        docker/scripts/coverage_test.sh tests.analyzers_manager.test_file_scripts
 
-      - name: "Coverage: generate xml and transfer from docker container to host"
-        run: |
-          docker exec intelowl_uwsgi coverage combine
-          docker exec intelowl_uwsgi coverage xml
-          docker cp intelowl_uwsgi:/opt/deploy/intel_owl/coverage.xml coverage.xml
+    - name: "Coverage: generate xml and transfer from docker container to host"
+      run: |
+        docker exec intelowl_uwsgi coverage combine
+        docker exec intelowl_uwsgi coverage xml
+        docker cp intelowl_uwsgi:/opt/deploy/intel_owl/coverage.xml coverage.xml
 
-      - name: "Upload coverage to Codecov"
-        uses: codecov/codecov-action@v2.1.0
-        with:
-          files: ./coverage.xml
-          fail_ci_if_error: true
-          verbose: true
+    - name: "Upload coverage to Codecov"
+      uses: codecov/codecov-action@v2.1.0
+      with:
+        files: ./coverage.xml
+        fail_ci_if_error: true
+        verbose: true
 
   frontend-tests:
     name: Run test for frontend
@@ -160,33 +160,33 @@ jobs:
     if: ${{ needs.detect-changes.outputs.frontend > 0 }}
 
     steps:
-      - uses: actions/checkout@v3
-      - name: Set up NodeJS
-        uses: actions/setup-node@v3
-        with:
-          node-version: 12
-      - name: Cache node modules
-        uses: actions/cache@v3
-        with:
-          path: ~/.npm
-          key: npm-build-${{ hashFiles('frontend/package-lock.json') }}
-          restore-keys: |
-            npm-build-${{ hashFiles('frontend/package-lock.json') }}
-            npm-build-
-            npm
-      - name: Install dependencies
-        run: |
-          npm i --no-optional --no-audit --no-fund
-        working-directory: ./frontend
-      - name: Lint with eslint
-        run: |
-          npm run lint
-        working-directory: ./frontend
-      - name: Lint with stylelint
-        run: |
-          npm run lint-sass
-        working-directory: ./frontend
-      - name: Test with Jest
-        run: |
-          npm run test
-        working-directory: ./frontend
+    - uses: actions/checkout@v3
+    - name: Set up NodeJS
+      uses: actions/setup-node@v3
+      with:
+        node-version: 12
+    - name: Cache node modules
+      uses: actions/cache@v3
+      with:
+        path: ~/.npm
+        key: npm-build-${{ hashFiles('frontend/package-lock.json') }}
+        restore-keys: |
+          npm-build-${{ hashFiles('frontend/package-lock.json') }}
+          npm-build-
+          npm
+    - name: Install dependencies
+      run: |
+        npm i --no-optional --no-audit --no-fund
+      working-directory: ./frontend
+    - name: Lint with eslint
+      run: |
+        npm run lint
+      working-directory: ./frontend
+    - name: Lint with stylelint
+      run: |
+        npm run lint-sass
+      working-directory: ./frontend
+    - name: Test with Jest
+      run: |
+        npm run test
+      working-directory: ./frontend

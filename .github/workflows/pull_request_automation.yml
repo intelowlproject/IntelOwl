@@ -59,15 +59,13 @@ jobs:
         isort . --profile black --filter-files --check-only --diff --skip configuration/ldap_config.py
 
     - name: Check migrations status
-      # if makemigrations fails there is a problem with migration status
-      # we are only interested in stderr output
       run: |
         export DJANGO_SETTINGS_MODULE=service_portal.settings
         PYTHONPATH=. django-admin makemigrations --dry-run >/dev/null
 
   tests:
     runs-on: ubuntu-latest
-    needs: linters
+    needs: [ 'linters' ]
 
     steps:
       - name: Cancel Previous Runs

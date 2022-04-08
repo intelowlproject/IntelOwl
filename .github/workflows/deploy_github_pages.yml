@@ -17,7 +17,8 @@ jobs:
         run: |
           cd frontend
           npm install
-          npm run build
+          npm install env-cmd --save
+          npm run build:pages
 
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@v4.3.0

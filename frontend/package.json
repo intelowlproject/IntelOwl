@@ -42,6 +42,7 @@
     "start": "craco start",
     "build": "GENERATE_SOURCEMAP=false craco build",
     "build:sourcemap": "craco build",
+    "build:pages": "env-cmd -f .env.pages npm run build",
     "test": "craco test",
     "eject": "craco eject",
     "lint": "eslint src/ --fix --ext .js,.jsx",

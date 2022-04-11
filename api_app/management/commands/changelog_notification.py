@@ -21,8 +21,10 @@ class Command(BaseCommand):
         self.html: str
 
     def add_arguments(self, parser):
-        parser.add_argument("path",  type=str)
-        parser.add_argument("--release", nargs="?", type=str, default=r"[0-9].[0-9].[0-9]")
+        parser.add_argument("path", type=str)
+        parser.add_argument(
+            "--release", nargs="?", type=str, default=r"[0-9].[0-9].[0-9]"
+        )
         parser.add_argument(
             "--force", action=argparse.BooleanOptionalAction, default=False
         )
@@ -35,9 +37,9 @@ class Command(BaseCommand):
             raise FileNotFoundError(f"File {path} not found")
         self.markdown = open(path, "r", encoding="utf-8").read()
 
-    def _set_last_release(self, release_regex:str):
+    def _set_last_release(self, release_regex: str):
         self.last_version = re.findall(release_regex, self.markdown)[0]
-        last_content = re.split(fr"##\s{release_regex}", self.markdown)[1]
+        last_content = re.split(rf"##\s{release_regex}", self.markdown)[1]
         # we want the entire link
         self.last_release = f"{self.last_version}{last_content}"
         # remove [ ]
@@ -46,21 +48,21 @@ class Command(BaseCommand):
     def _create_notification(self, force: bool = False) -> Tuple[Notification, bool]:
         title = f"New changes in {self.last_version}"
         if force:
-            return Notification.objects.create(
-                title=title,
-                body=self.last_release
-            ), True
+            return (
+                Notification.objects.create(title=title, body=self.last_release),
+                True,
+            )
         try:
             return Notification.objects.get(title__contains=title), False
         except Notification.DoesNotExist:
-            return Notification.objects.create(
-                title=title,
-                body=self.last_release
-            ), True
+            return (
+                Notification.objects.create(title=title, body=self.last_release),
+                True,
+            )
 
     def handle(self, *args, **options):
         self._read_file(options["path"])
-        self._set_last_release(fr'\[v{options["release"]}\]')
+        self._set_last_release(rf'\[v{options["release"]}\]')
         self.stdout.write(self.style.SUCCESS(f"Latest version: {self.last_version}"))
         if options["debug"]:
             self.stdout.write(f"Content:\n{self.last_release}")
@@ -70,6 +72,13 @@ class Command(BaseCommand):
         notification, result = self._create_notification(options["force"])
         if result:
             self.stdout.write(
-                self.style.SUCCESS(f"New notification created with success for version {self.last_version}"))
+                self.style.SUCCESS(
+                    f"New notification created with success for version {self.last_version}"
+                )
+            )
         else:
-            self.stdout.write(self.style.ERROR(f"Notification already exists for version {self.last_version}"))
+            self.stdout.write(
+                self.style.ERROR(
+                    f"Notification already exists for version {self.last_version}"
+                )
+            )

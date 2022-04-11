@@ -63,3 +63,4 @@ XLMMacroDeobfuscator[secure]==0.2.3
 # this is required because XLMMacroDeobfuscator does not pin xlrd2 and pyxlsb2 packages
 pyxlsb2==0.0.8
 xlrd2==1.3.4
+Markdown==3.3.6

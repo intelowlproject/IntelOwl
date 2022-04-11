@@ -23,7 +23,9 @@ echo "------------------------------"
 
 if [[ $DEBUG == "True" ]] && [[ $DJANGO_TEST_SERVER == "True" ]];
 then
+    python manage.py changelog_notification ".github/CHANGELOG.md" --debug
     python manage.py runserver 0.0.0.0:8001
 else
+    python manage.py changelog_notification ".github/CHANGELOG.md"
     /usr/local/bin/uwsgi --ini /etc/uwsgi/sites/intel_owl.ini
 fi

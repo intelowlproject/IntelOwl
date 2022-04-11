@@ -19,7 +19,6 @@ class Command(BaseCommand):
         self.last_version: str
         self.last_content: str
         self.html: str
-        self.notification_created: bool = False
 
     def add_arguments(self, parser):
         parser.add_argument("path",  type=str)

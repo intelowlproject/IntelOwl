@@ -201,10 +201,13 @@ Jobs with either AMBER or RED TLP value will be accessible to only members withi
 
 IntelOwl integrated the notification system from the certego_saas package, allowing the admins to create notification that every user will be able to see.
 
-In the notification body it is possible to write even html syntax, allowing to embed images, links, etc.
+It is possible to create a new notification from the django admin interface:
+in body it is possible to even use html syntax, allowing to embed images, links, etc;
+in the app_name field, please remember to use `intelowl` as the app name.
 
-Moreover, everytime a new release is available, it will automatically create a new notification,
-having as content the latest changes described in the [CHANGELOG.md](https://github.com/intelowlproject/IntelOwl/blob/master/.github/CHANGELOG.md).
+Everytime a new release is installed, once the backend goes up it will automatically create a new notification,
+having as content the latest changes described in the [CHANGELOG.md](https://github.com/intelowlproject/IntelOwl/blob/master/.github/CHANGELOG.md),
+allowing the users to keep track of the changes inside intelowl itself.
 
 
 ## Elastic Search

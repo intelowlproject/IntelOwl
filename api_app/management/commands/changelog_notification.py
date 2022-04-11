@@ -49,14 +49,18 @@ class Command(BaseCommand):
         title = f"New changes in {self.last_version}"
         if force:
             return (
-                Notification.objects.create(title=title, body=self.last_release),
+                Notification.objects.create(
+                    appname="INTELOWL", title=title, body=self.html
+                ),
                 True,
             )
         try:
             return Notification.objects.get(title__contains=title), False
         except Notification.DoesNotExist:
             return (
-                Notification.objects.create(title=title, body=self.last_release),
+                Notification.objects.create(
+                    appname="INTELOWL", title=title, body=self.html
+                ),
                 True,
             )
 
@@ -73,12 +77,13 @@ class Command(BaseCommand):
         if result:
             self.stdout.write(
                 self.style.SUCCESS(
-                    f"New notification created with success for version {self.last_version}"
+                    f"New notification created with success"
+                    f" for version {self.last_version}"
                 )
             )
         else:
             self.stdout.write(
                 self.style.ERROR(
-                    f"Notification already exists for version {self.last_version}"
+                    f"Notification already exists" f" for version {self.last_version}"
                 )
             )

@@ -1,10 +1,11 @@
 import argparse
 import os
+import re
 from typing import Tuple
 
-from django.core.management.base import BaseCommand
 import markdown
-import re
+from django.core.management.base import BaseCommand
+
 from certego_saas.apps.notifications.models import Notification
 
 

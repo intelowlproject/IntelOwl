@@ -43,6 +43,134 @@
     },
     "params": {}
   },
+   "Anomali_Threatstream_Confidence": {
+    "type": "observable",
+    "python_module": "threatstream.Threatstream",
+    "disabled":false,
+    "description": "Analyzer for threatstream API Confidence, give max, average and min confidence of entries for an observable",
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": ["ip", "domain", "url", "hash", "generic"],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {
+      "api_user_name": {
+        "env_var_key": "ANOMALI_THREATSTREAM_API_USER",
+        "type": "string",
+        "required": true,
+        "default": null,
+        "description": "API USER for Anomali Threatstream"
+      },
+      "api_key_name": {
+        "env_var_key": "ANOMALI_THREATSTREAM_API_KEY",
+        "type": "string",
+        "required": true,
+        "default": null,
+        "description": "API Key for Anomali Threatstream"
+      }
+    },
+	"params": {
+      "threatstream_analysis": {
+        "value": "confidence",
+        "type": "str",
+        "description": "API in threatstream called is Confidence one"
+      }
+    }
+  },
+  "Anomali_Threatstream_Intelligence": {
+    "type": "observable",
+    "python_module": "threatstream.Threatstream",
+    "disabled":false,
+    "description": "Analyzer for threatstream API Intelligence (main threat intelligence information)",
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": ["ip", "domain", "url", "hash", "generic"],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {
+      "api_user_name": {
+        "env_var_key": "ANOMALI_THREATSTREAM_API_USER",
+        "type": "string",
+        "required": true,
+        "default": null,
+        "description": "API USER for Anomali Threatstream"
+      },
+      "api_key_name": {
+        "env_var_key": "ANOMALI_THREATSTREAM_API_KEY",
+        "type": "string",
+        "required": true,
+        "default": null,
+        "description": "API Key for Anomali Threatstream"
+      }
+    },
+	"params": {
+      "threatstream_analysis": {
+        "value": "intelligence",
+        "type": "str",
+        "description": "API in threatstream called is Intelligence one"
+      },
+      "limit": {
+        "value": "100",
+        "type": "str",
+        "description": "Number of maximal entries returned"
+      },
+      "must_active": {
+        "value": true,
+        "type": "bool",
+        "description": "Only return active entries"
+      },
+      "minimal_confidence": {
+        "value": "0",
+        "type": "str",
+        "description": "Minimal Confidence filter"
+      },
+      "modified_after": {
+        "value": "1900-10-02T20:44:35",
+        "type": "str",
+        "description": "Filter on entries modified after a specific date. Date must be specified in this format: YYYYMMDDThhmmss where T denotes the start of the value for time, in UTC time. For example, 2014-10-02T20:44:35."
+      }
+    }
+  },
+  "Anomali_Threatstream_PassiveDNS": {
+    "type": "observable",
+    "python_module": "threatstream.Threatstream",
+    "disabled":false,
+    "description": "Return information from passive dns of Anomali.",
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": ["ip", "domain"],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {
+      "api_user_name": {
+        "env_var_key": "ANOMALI_THREATSTREAM_API_USER",
+        "type": "string",
+        "required": true,
+        "default": null,
+        "description": "API USER for Anomali Threatstream"
+      },
+      "api_key_name": {
+        "env_var_key": "ANOMALI_THREATSTREAM_API_KEY",
+        "type": "string",
+        "required": true,
+        "default": null,
+        "description": "API Key for Anomali Threatstream"
+      }
+    },
+	"params": {
+      "threatstream_analysis": {
+        "value": "passive_dns",
+        "type": "str",
+        "description": "API in threatstream called is passive_dns one"
+      }
+    }
+  },
   "Auth0": {
     "type": "observable",
     "python_module": "auth0.Auth0",
@@ -1297,10 +1425,10 @@
     },
     "params": {}
   },
-  "IntelX_Phonebook": {
+  "IntelX_Intelligent_Search": {
     "type": "observable",
     "python_module": "intelx.IntelX",
-    "description": "Phonebook alike search against IntelX API",
+    "description": "Intelligent search against IntelX API",
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
@@ -1308,7 +1436,8 @@
       "ip",
       "url",
       "domain",
-      "hash"
+      "hash",
+      "generic"
     ],
     "config": {
       "soft_time_limit": 45,
@@ -1322,10 +1451,63 @@
       }
     },
     "params": {
+      "query_type": {
+        "value": "intelligent",
+        "type": "str",
+        "description": "Query Type. Choose between 'playbook' and 'intelligent'"
+      },
       "rows_limit": {
-        "value": 100,
+        "value": 1000,
         "type": "int",
-        "description": ""
+        "description": "max number of results to retrieve"
+      },
+      "datefrom": {
+        "value": "",
+        "type": "str",
+        "description": "use this in combination with 'dateto' to filter the query"
+      },
+      "dateto": {
+        "value": "",
+        "type": "str",
+        "description": "use this in combination with 'datefrom' to filter the query"
+      }
+    }
+  },
+  "IntelX_Phonebook": {
+    "type": "observable",
+    "python_module": "intelx.IntelX",
+    "description": "Phonebook alike search against IntelX API",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": [
+      "ip",
+      "url",
+      "domain",
+      "hash",
+      "generic"
+    ],
+    "config": {
+      "soft_time_limit": 45,
+      "queue": "default"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "INTELX_API_KEY",
+        "description": "",
+        "required": true
+      }
+    },
+    "params": {
+      "query_type": {
+        "value": "phonebook",
+        "type": "str",
+        "description": "Query Type. Choose between 'playbook' and 'intelligent'"
+      },
+      "rows_limit": {
+        "value": 1000,
+        "type": "int",
+        "description": "max number of results to retrieve"
       }
     }
   },

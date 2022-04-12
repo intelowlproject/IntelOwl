@@ -178,9 +178,6 @@ class _ObservableAnalyzersScriptsTestCase(_AbstractAnalyzersScriptTestCase):
             "max_tries": 1,
             "poll_distance": 1,
         },
-        "IntelX_Phonebook": {
-            "timeout": -5,
-        },
     }
 
     @classmethod

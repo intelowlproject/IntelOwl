@@ -58,11 +58,6 @@ jobs:
       run: |
         isort . --profile black --filter-files --check-only --diff --skip configuration/ldap_config.py
 
-    - name: Check migrations status
-      run: |
-        export DJANGO_SETTINGS_MODULE=intel_owl.settings
-        PYTHONPATH=. django-admin makemigrations --dry-run >/dev/null
-
   backend-tests:
     runs-on: ubuntu-latest
     needs: linters

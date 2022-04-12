@@ -60,7 +60,7 @@ jobs:
 
     - name: Check migrations status
       run: |
-        export DJANGO_SETTINGS_MODULE=service_portal.settings
+        export DJANGO_SETTINGS_MODULE=intel_owl.settings
         PYTHONPATH=. django-admin makemigrations --dry-run >/dev/null
 
   backend-tests:

@@ -1297,10 +1297,10 @@
     },
     "params": {}
   },
-  "IntelX_Phonebook": {
+  "IntelX_Intelligent_Search": {
     "type": "observable",
     "python_module": "intelx.IntelX",
-    "description": "Phonebook alike search against IntelX API",
+    "description": "Intelligent search against IntelX API",
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
@@ -1308,7 +1308,8 @@
       "ip",
       "url",
       "domain",
-      "hash"
+      "hash",
+      "generic"
     ],
     "config": {
       "soft_time_limit": 45,
@@ -1322,10 +1323,63 @@
       }
     },
     "params": {
+      "query_type": {
+        "value": "intelligent",
+        "type": "str",
+        "description": "Query Type. Choose between 'playbook' and 'intelligent'"
+      },
       "rows_limit": {
-        "value": 100,
+        "value": 1000,
         "type": "int",
-        "description": ""
+        "description": "max number of results to retrieve"
+      },
+      "datefrom": {
+        "value": "",
+        "type": "str",
+        "description": "use this in combination with 'dateto' to filter the query"
+      },
+      "dateto": {
+        "value": "",
+        "type": "str",
+        "description": "use this in combination with 'datefrom' to filter the query"
+      }
+    }
+  },
+  "IntelX_Phonebook": {
+    "type": "observable",
+    "python_module": "intelx.IntelX",
+    "description": "Phonebook alike search against IntelX API",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": [
+      "ip",
+      "url",
+      "domain",
+      "hash",
+      "generic"
+    ],
+    "config": {
+      "soft_time_limit": 45,
+      "queue": "default"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "INTELX_API_KEY",
+        "description": "",
+        "required": true
+      }
+    },
+    "params": {
+      "query_type": {
+        "value": "phonebook",
+        "type": "str",
+        "description": "Query Type. Choose between 'playbook' and 'intelligent'"
+      },
+      "rows_limit": {
+        "value": 1000,
+        "type": "int",
+        "description": "max number of results to retrieve"
       }
     }
   },

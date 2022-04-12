@@ -11,6 +11,7 @@ This page includes details about some advanced features that Intel Owl provides 
       - [CyberChef](#cyberchef)
   - [Analyzers with special configuration](#analyzers-with-special-configuration)
   - [Organizations and data sharing](#organizations-and-data-sharing)
+  - [Notifications](#notifications)
   - [Elastic Search](#elastic-search)
     - [Kibana](#kibana)
     - [Example Configuration](#example-configuration)
@@ -195,6 +196,19 @@ Thanks to the "Organization" feature, you can restrict the people who can see th
 
 How you can do that?
 Jobs with either AMBER or RED TLP value will be accessible to only members within the same organization. You can select the TLP for the analysis at the time of request.
+
+## Notifications
+
+IntelOwl integrated the notification system from the certego_saas package, allowing the admins to create notification that every user will be able to see.
+
+It is possible to create a new notification from the django admin interface:
+in body it is possible to even use html syntax, allowing to embed images, links, etc;
+in the app_name field, please remember to use `intelowl` as the app name.
+
+Everytime a new release is installed, once the backend goes up it will automatically create a new notification,
+having as content the latest changes described in the [CHANGELOG.md](https://github.com/intelowlproject/IntelOwl/blob/master/.github/CHANGELOG.md),
+allowing the users to keep track of the changes inside intelowl itself.
+
 
 ## Elastic Search
 

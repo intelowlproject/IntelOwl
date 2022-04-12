@@ -1,6 +1,5 @@
 .gitignore
 .git
-.github
 .vscode
 .lgtm.yml
 __pycache__

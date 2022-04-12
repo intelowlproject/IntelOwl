@@ -65,7 +65,7 @@ class IntelX(ObservableAnalyzer):
 
         if not json_data:
             raise AnalyzerRunException(
-                f"reached max tries for IntelX analysis,"
+                "reached max tries for IntelX analysis,"
                 f" observable {self.observable_name}"
             )
 

@@ -11,6 +11,7 @@ import AppFooter from "./layouts/AppFooter";
 function App() {
   console.debug("App rendered!");
 
+  // this is to allow different deployments, like the frontend-only deploy for Github Pages
   const basename = document.querySelector("base")?.getAttribute("href") ?? "/"
 
   return (

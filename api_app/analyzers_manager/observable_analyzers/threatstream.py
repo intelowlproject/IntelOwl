@@ -20,6 +20,7 @@ class Threatstream(classes.ObservableAnalyzer):
 
     def run(self):
         params = {}
+        uri = ""
         if self.analysis_type == "intelligence":
             self.active = None
             if self.must_active:
@@ -38,8 +39,13 @@ class Threatstream(classes.ObservableAnalyzer):
         elif self.analysis_type == "passive_dns":
             if self.observable_classification == self.ObservableTypes.IP:
                 uri = f"v1/pdns/ip/{self.observable_name}"
-            if self.observable_classification == self.ObservableTypes.DOMAIN:
+            elif self.observable_classification == self.ObservableTypes.DOMAIN:
                 uri = f"v1/pdns/domain/{self.observable_name}"
+            else:
+                raise AnalyzerConfigurationException(
+                    f"Observable {self.observable_classification} not supported."
+                    "Currently supported are: ip, domain."
+                )
         else:
             raise AnalyzerConfigurationException(
                 f"Analysis type: {self.analysis_type} not supported."

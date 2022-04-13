@@ -71,7 +71,7 @@
         "description": "API Key for Anomali Threatstream"
       }
     },
-	"params": {
+     "params": {
       "threatstream_analysis": {
         "value": "confidence",
         "type": "str",
@@ -107,7 +107,7 @@
         "description": "API Key for Anomali Threatstream"
       }
     },
-	"params": {
+    "params": {
       "threatstream_analysis": {
         "value": "intelligence",
         "type": "str",
@@ -119,7 +119,7 @@
         "description": "Number of maximal entries returned"
       },
       "must_active": {
-        "value": true,
+        "value": false,
         "type": "bool",
         "description": "Only return active entries"
       },
@@ -163,7 +163,7 @@
         "description": "API Key for Anomali Threatstream"
       }
     },
-	"params": {
+    "params": {
       "threatstream_analysis": {
         "value": "passive_dns",
         "type": "str",

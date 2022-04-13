@@ -149,7 +149,6 @@ jobs:
         verbose: true
 
   frontend-tests:
-    name: Run test for frontend
     runs-on: ubuntu-latest
     needs: [ 'detect-changes' ]
     if: ${{ needs.detect-changes.outputs.frontend > 0 }}

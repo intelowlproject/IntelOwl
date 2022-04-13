@@ -11,7 +11,7 @@ import AppFooter from "./layouts/AppFooter";
 function App() {
   console.debug("App rendered!");
 
-  const basename = document.querySelector('base')?.getAttribute('href') ?? '/'
+  const basename = document.querySelector("base")?.getAttribute("href") ?? "/"
 
   return (
     <BrowserRouter basename={basename}>

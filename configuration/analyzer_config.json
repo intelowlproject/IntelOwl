@@ -1772,6 +1772,26 @@
         "value": false,
         "type": "bool",
         "description": "Enable debug logs."
+      },
+      "from_days": {
+        "value": 90,
+        "type": "int",
+        "description": "Check only events created in the past X days. 0 for no filter"
+      },
+      "limit": {
+        "value": 50,
+        "type": "int",
+        "description": "Limit the number of results returned"
+      },
+      "filter_on_type": {
+        "value": true,
+        "type": "bool",
+        "description": "Filter the search on the type of the observable."
+      },
+      "enforce_warninglist": {
+        "value": true,
+        "type": "bool",
+        "description": "Remove any attributes from the result that would cause a hit on a warninglist entry."
       }
     }
   },

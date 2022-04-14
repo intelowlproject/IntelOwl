@@ -1,7 +1,7 @@
 name: Build and Deploy
 on:
   push:
-    branches: [master]
+    branches: [dev-v4]
 
 jobs:
   build-and-deploy:
@@ -17,8 +17,7 @@ jobs:
         run: |
           cd frontend
           npm install
-          npm install env-cmd --save
-          npm run build:pages
+          npm run build
 
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@v4.3.0

@@ -6,7 +6,7 @@ import datetime
 import pymisp
 
 from api_app.analyzers_manager import classes
-from api_app.exceptions import AnalyzerRunException
+from api_app.exceptions import AnalyzerConfigurationException, AnalyzerRunException
 from tests.mock_utils import MockResponseNoOp, if_mock_connections, patch
 
 
@@ -42,6 +42,25 @@ class MISP(classes.ObservableAnalyzer):
             params["type_attribute"] = [self.observable_classification]
             if self.observable_classification == self.ObservableTypes.HASH:
                 params["type_attribute"] = ["md5", "sha1", "sha256"]
+            if self.observable_classification == self.ObservableTypes.IP:
+                params["type_attribute"] = [
+                    "ip-dst",
+                    "ip-src",
+                    "ip-src|port",
+                    "ip-dst|port",
+                    "domain|ip",
+                ]
+            elif self.observable_classification == self.ObservableTypes.DOMAIN:
+                params["type_attribute"] = [self.observable_classification, "domain|ip"]
+            elif self.observable_classification == self.ObservableTypes.HASH:
+                params["type_attribute"] = ["md5", "sha1", "sha256"]
+            elif self.observable_classification == self.ObservableTypes.URL:
+                params["type_attribute"] = [self.observable_classification]
+            else:
+                raise AnalyzerConfigurationException(
+                    f"Observable {self.observable_classification} not supported."
+                    "Currently supported are: ip, domain, hash, url."
+                )
         result_search = misp_instance.search(**params)
         if isinstance(result_search, dict):
             errors = result_search.get("errors", [])

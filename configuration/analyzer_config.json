@@ -4000,7 +4000,11 @@
       },
       "directories_with_rules": {
         "value": [
-          "/opt/deploy/yara/bartblaze_rules/rules"
+          "/opt/deploy/yara/bartblaze_rules/rules/APT",
+          "/opt/deploy/yara/bartblaze_rules/rules/crimeware",
+          "/opt/deploy/yara/bartblaze_rules/rules/generic",
+          "/opt/deploy/yara/bartblaze_rules/rules/hacktools",
+          "/opt/deploy/yara/bartblaze_rules/rules/ransomware"
         ],
         "type": "list",
         "description": ""

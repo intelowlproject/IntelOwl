@@ -3991,6 +3991,13 @@
     },
     "secrets": {},
     "params": {
+      "git_repo_main_dir": {
+        "value": [
+          "/opt/deploy/yara/bartblaze_rules"
+        ],
+        "type": "list",
+        "description": ""
+      },
       "directories_with_rules": {
         "value": [
           "/opt/deploy/yara/bartblaze_rules/rules"

@@ -3944,6 +3944,118 @@
       }
     }
   },
+  "Yara_Scan_ATM_MALWARE": {
+    "type": "file",
+    "python_module": "yara_scan.YaraScan",
+    "description": "scan a file with ATM Malware yara rules ([github](https://github.com/fboldewin/YARA-rules))",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
+    "config": {
+      "soft_time_limit": 60,
+      "queue": "local"
+    },
+    "secrets": {},
+    "params": {
+      "git_repo_main_dir": {
+        "value": [
+          "/opt/deploy/yara/atm_malware_rules"
+        ],
+        "type": "list",
+        "description": ""
+      },
+      "directories_with_rules": {
+        "value": [
+          "/opt/deploy/yara/atm_malware_rules"
+        ],
+        "type": "list",
+        "description": ""
+      },
+      "recursive": {
+        "value": true,
+        "type": "bool",
+        "description": ""
+      }
+    }
+  },
+  "Yara_Scan_Bartblaze": {
+    "type": "file",
+    "python_module": "yara_scan.YaraScan",
+    "description": "Scan a file with Intezer yara rules ([github](https://github.com/bartblaze/Yara-rules)).",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
+    "config": {
+      "soft_time_limit": 60,
+      "queue": "local"
+    },
+    "secrets": {},
+    "params": {
+      "directories_with_rules": {
+        "value": [
+          "/opt/deploy/yara/bartblaze_rules/rules"
+        ],
+        "type": "list",
+        "description": ""
+      }
+    }
+  },
+  "Yara_Scan_Community": {
+    "type": "file",
+    "python_module": "yara_scan.YaraScan",
+    "description": "scan a file with community yara rules ([github](https://github.com/Yara-Rules/rules.git))",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
+    "config": {
+      "soft_time_limit": 60,
+      "queue": "local"
+    },
+    "secrets": {},
+    "params": {
+      "directories_with_rules": {
+        "value": [
+          "/opt/deploy/yara/rules"
+        ],
+        "type": "list",
+        "description": ""
+      }
+    }
+  },
+  "Yara_Scan_Daily_Ioc": {
+    "type": "file",
+    "python_module": "yara_scan.YaraScan",
+    "description": "scan a file with StrangerealIntel daily IOC yara rules ([github](https://github.com/StrangerealIntel/DailyIOC))",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
+    "config": {
+      "soft_time_limit": 60,
+      "queue": "default"
+    },
+    "secrets": {},
+    "params": {
+      "git_repo_main_dir": {
+        "value": [
+          "/opt/deploy/yara/daily_ioc_rules"
+        ],
+        "type": "list",
+        "description": ""
+      },
+      "directories_with_rules": {
+        "value": [
+          "/opt/deploy/yara/daily_ioc_rules"
+        ],
+        "type": "list",
+        "description": ""
+      },
+      "recursive": {
+        "value": true,
+        "type": "bool",
+        "description": ""
+      }
+    }
+  },
   "Yara_Scan_MALPEDIA": {
     "type": "file",
     "python_module": "yara_scan.YaraScan",
@@ -3978,100 +4090,10 @@
       }
     }
   },
-  "Yara_Scan_ATM_MALWARE": {
-    "type": "file",
-    "python_module": "yara_scan.YaraScan",
-    "description": "scan a file with ATM Malware yara rules",
-    "disabled": false,
-    "external_service": false,
-    "leaks_info": false,
-    "config": {
-      "soft_time_limit": 60,
-      "queue": "local"
-    },
-    "secrets": {},
-    "params": {
-      "git_repo_main_dir": {
-        "value": [
-          "/opt/deploy/yara/atm_malware_rules"
-        ],
-        "type": "list",
-        "description": ""
-      },
-      "directories_with_rules": {
-        "value": [
-          "/opt/deploy/yara/atm_malware_rules"
-        ],
-        "type": "list",
-        "description": ""
-      },
-      "recursive": {
-        "value": true,
-        "type": "bool",
-        "description": ""
-      }
-    }
-  },
-  "Yara_Scan_Community": {
-    "type": "file",
-    "python_module": "yara_scan.YaraScan",
-    "description": "scan a file with community yara rules",
-    "disabled": false,
-    "external_service": false,
-    "leaks_info": false,
-    "config": {
-      "soft_time_limit": 60,
-      "queue": "local"
-    },
-    "secrets": {},
-    "params": {
-      "directories_with_rules": {
-        "value": [
-          "/opt/deploy/yara/rules"
-        ],
-        "type": "list",
-        "description": ""
-      }
-    }
-  },
-  "Yara_Scan_Daily_Ioc": {
-    "type": "file",
-    "python_module": "yara_scan.YaraScan",
-    "description": "scan a file with StrangerealIntel daily IOC yara rules",
-    "disabled": false,
-    "external_service": false,
-    "leaks_info": false,
-    "config": {
-      "soft_time_limit": 60,
-      "queue": "default"
-    },
-    "secrets": {},
-    "params": {
-      "git_repo_main_dir": {
-        "value": [
-          "/opt/deploy/yara/daily_ioc_rules"
-        ],
-        "type": "list",
-        "description": ""
-      },
-      "directories_with_rules": {
-        "value": [
-          "/opt/deploy/yara/daily_ioc_rules"
-        ],
-        "type": "list",
-        "description": ""
-      },
-      "recursive": {
-        "value": true,
-        "type": "bool",
-        "description": ""
-      }
-    }
-  },
   "Yara_Scan_Mandiant": {
     "type": "file",
     "python_module": "yara_scan.YaraScan",
-    "description": "scan a file with Mandiant yara rules",
+    "description": "scan a file with Mandiant yara rules ([github](https://github.com/mandiant/red_team_tool_countermeasures))",
     "disabled": false,
     "external_service": false,
     "leaks_info": false,
@@ -4105,7 +4127,7 @@
   "Yara_Scan_Florian": {
     "type": "file",
     "python_module": "yara_scan.YaraScan",
-    "description": "scan a file with Neo23x0 yara rules",
+    "description": "scan a file with Neo23x0 yara rules ([github](https://github.com/Neo23x0/signature-base.git))",
     "disabled": false,
     "external_service": false,
     "leaks_info": false,
@@ -4134,7 +4156,7 @@
   "Yara_Scan_Inquest": {
     "type": "file",
     "python_module": "yara_scan.YaraScan",
-    "description": "scan a file with Inquest yara rules",
+    "description": "scan a file with Inquest yara rules ([github](https://github.com/InQuest/yara-rules))",
     "disabled": false,
     "external_service": false,
     "leaks_info": false,
@@ -4187,44 +4209,10 @@
       }
     }
   },
-  "Yara_Scan_McAfee": {
-    "type": "file",
-    "python_module": "yara_scan.YaraScan",
-    "description": "scan a file with McAfee yara rules",
-    "disabled": false,
-    "external_service": false,
-    "leaks_info": false,
-    "config": {
-      "soft_time_limit": 60,
-      "queue": "local"
-    },
-    "secrets": {},
-    "params": {
-      "git_repo_main_dir": {
-        "value": [
-          "/opt/deploy/yara/mcafee_rules"
-        ],
-        "type": "list",
-        "description": ""
-      },
-      "directories_with_rules": {
-        "value": [
-          "/opt/deploy/yara/mcafee_rules/APT",
-          "/opt/deploy/yara/mcafee_rules/RAT",
-          "/opt/deploy/yara/mcafee_rules/malware",
-          "/opt/deploy/yara/mcafee_rules/miners",
-          "/opt/deploy/yara/mcafee_rules/ransomware",
-          "/opt/deploy/yara/mcafee_rules/stealer"
-        ],
-        "type": "list",
-        "description": ""
-      }
-    }
-  },
   "Yara_Scan_ReversingLabs": {
     "type": "file",
     "python_module": "yara_scan.YaraScan",
-    "description": "scan a file with ReversingLabs yara rules",
+    "description": "scan a file with ReversingLabs yara rules ([github](https://github.com/reversinglabs/reversinglabs-yara-rules))",
     "disabled": false,
     "external_service": false,
     "leaks_info": false,
@@ -4258,7 +4246,7 @@
   "Yara_Scan_Samir": {
     "type": "file",
     "python_module": "yara_scan.YaraScan",
-    "description": "scan a file with Samir Threat Hunting yara rules",
+    "description": "scan a file with Samir Threat Hunting yara rules ([github](hhttps://github.com/sbousseaden/YaraHunts))",
     "disabled": false,
     "external_service": false,
     "leaks_info": false,
@@ -4287,7 +4275,7 @@
   "Yara_Scan_Stratosphere": {
     "type": "file",
     "python_module": "yara_scan.YaraScan",
-    "description": "scan a file with Stratosphere yara rules",
+    "description": "scan a file with Stratosphere yara rules ([github](https://github.com/stratosphereips/yara-rules))",
     "disabled": false,
     "external_service": false,
     "leaks_info": false,
@@ -4308,6 +4296,40 @@
         "value": [
           "/opt/deploy/yara/stratosphere_rules/malware",
           "/opt/deploy/yara/stratosphere_rules/protocols"
+        ],
+        "type": "list",
+        "description": ""
+      }
+    }
+  },
+  "Yara_Scan_Trellix": {
+    "type": "file",
+    "python_module": "yara_scan.YaraScan",
+    "description": "scan a file with Trellix yara rules ([github](https://github.com/advanced-threat-research/Yara-Rules))",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
+    "config": {
+      "soft_time_limit": 60,
+      "queue": "local"
+    },
+    "secrets": {},
+    "params": {
+      "git_repo_main_dir": {
+        "value": [
+          "/opt/deploy/yara/trellix_rules"
+        ],
+        "type": "list",
+        "description": ""
+      },
+      "directories_with_rules": {
+        "value": [
+          "/opt/deploy/yara/trellix_rules/APT",
+          "/opt/deploy/yara/trellix_rules/RAT",
+          "/opt/deploy/yara/trellix_rules/malware",
+          "/opt/deploy/yara/trellix_rules/miners",
+          "/opt/deploy/yara/trellix_rules/ransomware",
+          "/opt/deploy/yara/trellix_rules/stealer"
         ],
         "type": "list",
         "description": ""

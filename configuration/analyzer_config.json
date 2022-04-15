@@ -3587,53 +3587,6 @@
       }
     }
   },
-  "VirusTotal_v2_Get_File": {
-    "type": "file",
-    "python_module": "vt2_get.VirusTotalv2",
-    "description": "check file hash on VirusTotal using old API endpoints",
-    "disabled": true,
-    "external_service": true,
-    "leaks_info": false,
-    "run_hash": true,
-    "config": {
-      "soft_time_limit": 30,
-      "queue": "default"
-    },
-    "secrets": {
-      "api_key_name": {
-        "env_var_key": "VT_KEY",
-        "description": "",
-        "required": true
-      }
-    },
-    "params": {}
-  },
-  "VirusTotal_v2_Get_Observable": {
-    "type": "observable",
-    "python_module": "vt2_get.VirusTotalv2",
-    "description": "search an observable in the VirusTotal DB using the old API endpoints",
-    "disabled": true,
-    "external_service": true,
-    "leaks_info": false,
-    "observable_supported": [
-      "ip",
-      "domain",
-      "url",
-      "hash"
-    ],
-    "config": {
-      "soft_time_limit": 30,
-      "queue": "default"
-    },
-    "secrets": {
-      "api_key_name": {
-        "env_var_key": "VT_KEY",
-        "description": "",
-        "required": true
-      }
-    },
-    "params": {}
-  },
   "Virushee_CheckHash":{
     "type": "observable",
     "python_module": "virushee.VirusheeCheckHash",
@@ -3681,9 +3634,56 @@
       }
     }
   },
+  "VirusTotal_v2_Get_File": {
+    "type": "file",
+    "python_module": "vt.vt2_get.VirusTotalv2",
+    "description": "check file hash on VirusTotal using old API endpoints",
+    "disabled": true,
+    "external_service": true,
+    "leaks_info": false,
+    "run_hash": true,
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "VT_KEY",
+        "description": "",
+        "required": true
+      }
+    },
+    "params": {}
+  },
+  "VirusTotal_v2_Get_Observable": {
+    "type": "observable",
+    "python_module": "vt.vt2_get.VirusTotalv2",
+    "description": "search an observable in the VirusTotal DB using the old API endpoints",
+    "disabled": true,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": [
+      "ip",
+      "domain",
+      "url",
+      "hash"
+    ],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "VT_KEY",
+        "description": "",
+        "required": true
+      }
+    },
+    "params": {}
+  },
   "VirusTotal_v2_Scan_File": {
     "type": "file",
-    "python_module": "vt2_scan.VirusTotalv2ScanFile",
+    "python_module": "vt.vt2_scan.VirusTotalv2ScanFile",
     "description": "scan a file on VirusTotal using old API endpoints",
     "disabled": true,
     "external_service": true,
@@ -3769,6 +3769,11 @@
         "value": false,
         "type": "bool",
         "description": "If the sample is old, it would be rescanned"
+      },
+      "days_to_say_that_a_scan_is_old": {
+        "value": 30,
+        "type": "int",
+        "description": "How many days are required to consider a scan old to force rescan"
       },
       "include_behaviour_summary": {
         "value": true,

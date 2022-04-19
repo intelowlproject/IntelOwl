@@ -81,15 +81,16 @@ After having written the new python module, you have to remember to:
       "type": "file", // or "observable"
       "python_module": "<module_name>.<class_name>",
       "description": "very cool analyzer",
+      "disabled": false,
       "external_service": true,
-      "leaks_info": true
+      "leaks_info": true,
       "run_hash": true, // required only for file analyzer
       "observable_supported": ["ip", "domain", "url", "hash", "generic"], // required only for observable analyzer
       "supported_filetypes": ["application/javascript"], // required only for file analyzer
       "config": {
         "soft_time_limit": 100,
         "queue": "long",
-      }
+      },
       "secrets": {
         "api_key_name": {
           "env_var_key": "ANALYZER_SPECIAL_KEY",
@@ -111,7 +112,7 @@ After having written the new python module, you have to remember to:
   Please see <a href="Usage.html#analyzers-customization">Analyzers customization section</a> to get the explanation of the other available keys.
   </div>
 
-3. Add the new analyzer in the lists in the docs: [Usage](./Usage.md). Also, if the analyzer provides additional optional configuration, add the available options here: [Advanced-Usage](./Advanced-Usage.md)
+3. Add the new analyzer in the lists in the docs: [Usage](./Usage.md). Also, if the analyzer provides additional optional configuration, add the available options here: [Advanced-Usage](./Advanced-Usage.html#analyzers-with-special-configuration)
 
 4. Ultimately, add the required secrets in the files `docker/env_file_app_template`, `docker/env_file_app_ci` and in the `docs/Installation.md`.
 

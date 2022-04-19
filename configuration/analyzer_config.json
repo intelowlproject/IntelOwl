@@ -3813,6 +3813,33 @@
     },
     "params": {}
   },
+  "VirusTotal_v3_Intelligence_Search": {
+    "type": "observable",
+    "python_module": "vt.vt3_intelligence_search.VirusTotalv3Intelligence",
+    "description": "perform an advanced query through VirusTotal Intelligence. This is a premium feature only",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": ["generic"],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "VT_INTELLIGENCE_KEY",
+        "required": true,
+        "description": "API Key for the analyzer. You need to have a premium license with VT."
+      }
+    },
+    "params": {
+      "limit": {
+        "value": 300,
+        "type": "int",
+        "description": "max number of results to retrieve"
+      }
+    }
+  },
   "Whoisxmlapi": {
     "type": "observable",
     "python_module": "whoisxmlapi.Whoisxmlapi",

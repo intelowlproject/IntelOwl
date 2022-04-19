@@ -95,9 +95,9 @@ class VirusTotalv3AnalyzerMixin(BaseAnalyzerMixin):
                         if some_days_ago > scan_date_time:
                             logger.info(
                                 f"hash {observable_name} found on VT with AV reports"
-                                f" and scan is older than"
+                                " and scan is older than"
                                 f" {self.days_to_say_that_a_scan_is_old} days.\n"
-                                f"We will force the analysis again"
+                                "We will force the analysis again"
                             )
                             # the "rescan" option will burn quotas.
                             # We should reduce the polling at the minimum

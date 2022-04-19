@@ -26,6 +26,9 @@ class VirusTotalv3AnalyzerMixin(BaseAnalyzerMixin):
         self.include_sigma_analyses = params.get("include_sigma_analyses", False)
         self.force_active_scan = params.get("force_active_scan", False)
         self.force_active_scan_if_old = params.get("force_active_scan_if_old", False)
+        self.days_to_say_that_a_scan_is_old = params.get(
+            "days_to_say_that_a_scan_is_old", 30
+        )
 
     @property
     def headers(self) -> dict:
@@ -86,12 +89,15 @@ class VirusTotalv3AnalyzerMixin(BaseAnalyzerMixin):
                     ):
                         scan_date = attributes.get("last_analysis_date", 0)
                         scan_date_time = datetime.fromtimestamp(scan_date)
-                        thirty_days_ago = datetime.utcnow() - timedelta(days=30)
-                        if thirty_days_ago > scan_date_time:
+                        some_days_ago = datetime.utcnow() - timedelta(
+                            days=self.days_to_say_that_a_scan_is_old
+                        )
+                        if some_days_ago > scan_date_time:
                             logger.info(
                                 f"hash {observable_name} found on VT with AV reports"
-                                f" and scan is older than 30 days.\n"
-                                f"We will force the analysis again"
+                                " and scan is older than"
+                                f" {self.days_to_say_that_a_scan_is_old} days.\n"
+                                "We will force the analysis again"
                             )
                             # the "rescan" option will burn quotas.
                             # We should reduce the polling at the minimum

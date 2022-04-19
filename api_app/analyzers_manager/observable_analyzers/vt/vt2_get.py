@@ -16,7 +16,9 @@ class VirusTotalv2(classes.ObservableAnalyzer):
         self.__api_key = self._secrets["api_key_name"]
 
     def run(self):
-        resp = vt_get_report(self.__api_key, self.observable_name)
+        resp = vt_get_report(
+            self.__api_key, self.observable_name, self.observable_classification
+        )
 
         resp_code = resp.get("response_code", 1)
         verbose_msg = resp.get("verbose_msg", "")

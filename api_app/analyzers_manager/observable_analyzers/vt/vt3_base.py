@@ -29,10 +29,63 @@ class VirusTotalv3AnalyzerMixin(BaseAnalyzerMixin):
         self.days_to_say_that_a_scan_is_old = params.get(
             "days_to_say_that_a_scan_is_old", 30
         )
+        self.reliationships_to_request = params.get("reliationships_to_request", [])
+        self.reliationships_elements = params.get("reliationships_elements", 1)
 
     @property
     def headers(self) -> dict:
         return {"x-apikey": self._secrets["api_key_name"]}
+
+    def _get_relationship_limit(self, relationship):
+        # by default, just extract the first element
+        limit = self.reliationships_elements
+        # resolutions data can be more valuable and it is not lot of data
+        if relationship == "resolutions":
+            limit = 40
+        return limit
+
+    def _vt_get_relationships(
+        self,
+        observable_name: str,
+        relationships_requested: list,
+        uri: str,
+        result: dict,
+    ):
+        try:
+            # skip relationship request if something went wrong
+            if "error" not in result:
+                relationships_in_results = result.get("data", {}).get(
+                    "relationships", {}
+                )
+                for relationship in self.reliationships_to_request:
+                    if relationship not in relationships_requested:
+                        result[relationship] = {
+                            "error": "not supported, review configuration."
+                        }
+                    else:
+                        found_data = relationships_in_results.get(relationship, {}).get(
+                            "data", []
+                        )
+                        if found_data:
+                            logger.info(
+                                f"found data in relationship {relationship} "
+                                f"for observable {observable_name}."
+                                " Requesting additional information about"
+                            )
+                            rel_uri = (
+                                uri + f"/{relationship}"
+                                f"?limit={self._get_relationship_limit(relationship)}"
+                            )
+                            logger.debug(f"requesting uri: {rel_uri}")
+                            response = requests.get(
+                                self.base_url + rel_uri, headers=self.headers
+                            )
+                            result[relationship] = response.json()
+        except Exception as e:
+            logger.error(
+                f"something went wrong when extracting relationships"
+                f" for observable {observable_name}: {e}"
+            )
 
     def _vt_get_report(
         self,
@@ -41,7 +94,9 @@ class VirusTotalv3AnalyzerMixin(BaseAnalyzerMixin):
     ) -> dict:
         result = {}
         already_done_active_scan_because_report_was_old = False
-        params, uri = self._get_requests_params_and_uri(obs_clfn, observable_name)
+        params, uri, relationships_requested = self._get_requests_params_and_uri(
+            obs_clfn, observable_name
+        )
         for chance in range(self.max_tries):
             try:
                 logger.info(
@@ -60,6 +115,7 @@ class VirusTotalv3AnalyzerMixin(BaseAnalyzerMixin):
 
             result = response.json()
 
+            # if it is not a file, we don't need to perform any scan
             if obs_clfn != self.ObservableTypes.HASH:
                 break
 
@@ -142,6 +198,11 @@ class VirusTotalv3AnalyzerMixin(BaseAnalyzerMixin):
         # Include sigma analysis report, if flag enabled
         if self.include_sigma_analyses:
             result["sigma_analyses"] = self._fetch_sigma_analyses(observable_name)
+
+        if self.reliationships_to_request:
+            self._vt_get_relationships(
+                observable_name, relationships_requested, uri, result
+            )
 
         return result
 
@@ -244,62 +305,75 @@ class VirusTotalv3AnalyzerMixin(BaseAnalyzerMixin):
         return response.json()
 
     @classmethod
+    def _get_relationship_for_classification(cls, obs_clfn: str):
+        # reference: https://developers.virustotal.com/reference/metadata
+        if obs_clfn == cls.ObservableTypes.DOMAIN:
+            relationships = [
+                "communicating_files",
+                "historical_whois",
+                "referrer_files",
+                "resolutions",
+                "siblings",
+                "subdomains",
+                "collections",
+                "historical_ssl_certificates",
+            ]
+        elif obs_clfn == cls.ObservableTypes.IP:
+            relationships = [
+                "communicating_files",
+                "historical_whois",
+                "referrer_files",
+                "resolutions",
+                "collections",
+                "historical_ssl_certificates",
+            ]
+        elif obs_clfn == cls.ObservableTypes.URL:
+            relationships = [
+                "last_serving_ip_address",
+                "collections",
+                "network_location",
+            ]
+        elif obs_clfn == cls.ObservableTypes.HASH:
+            relationships = [
+                "behaviours",
+                "bundled_files",
+                "comments",
+                "contacted_domains",
+                "contacted_ips",
+                "contacted_urls",
+                "execution_parents",
+                "pe_resource_parents",
+                "votes",
+                "distributors",
+                "pe_resource_children",
+                "dropped_files",
+                "collections",
+            ]
+        else:
+            raise AnalyzerRunException(
+                f"Not supported observable type {obs_clfn}. "
+                "Supported are: hash, ip, domain and url."
+            )
+        return relationships
+
+    @classmethod
     def _get_requests_params_and_uri(cls, obs_clfn: str, observable_name: str):
         params = {}
         # in this way, you just retrieved metadata about relationships
         # if you like to get all the data about specific relationships,...
         # ..you should perform another query
         # check vt3 API docs for further info
+        relationships_requested = cls._get_relationship_for_classification(obs_clfn)
         if obs_clfn == cls.ObservableTypes.DOMAIN:
-            relationships_requested = [
-                "communicating_files",
-                "downloaded_files",
-                "historical_whois",
-                "referrer_files",
-                "resolutions",
-                "siblings",
-                "subdomains",
-                "urls",
-            ]
             uri = f"domains/{observable_name}"
         elif obs_clfn == cls.ObservableTypes.IP:
-            relationships_requested = [
-                "communicating_files",
-                "downloaded_files",
-                "historical_whois",
-                "referrer_files",
-                "resolutions",
-                "urls",
-            ]
             uri = f"ip_addresses/{observable_name}"
         elif obs_clfn == cls.ObservableTypes.URL:
-            relationships_requested = [
-                "downloaded_files",
-                "analyses",
-                "last_serving_ip_address",
-                "redirecting_urls",
-                "submissions",
-            ]
             url_id = (
                 base64.urlsafe_b64encode(observable_name.encode()).decode().strip("=")
             )
             uri = f"urls/{url_id}"
         elif obs_clfn == cls.ObservableTypes.HASH:
-            relationships_requested = [
-                "behaviours",
-                "bundled_files",
-                "comments",
-                "compressed_parents",
-                "contacted_domains",
-                "contacted_ips",
-                "contacted_urls",
-                "execution_parents",
-                "itw_urls",
-                "overlay_parents",
-                "pcap_parents",
-                "pe_resource_parents",
-                "votes",
-            ]
             uri = f"files/{observable_name}"
         else:
             raise AnalyzerRunException(
@@ -308,6 +382,9 @@ class VirusTotalv3AnalyzerMixin(BaseAnalyzerMixin):
             )
 
         if relationships_requested:
+            # this won't cost additional quota
+            # it just helps to understand if there is something to look for there
+            # so, if there is, we can make API requests without wasting quotas
             params["relationships"] = ",".join(relationships_requested)
 
-        return params, uri
+        return params, uri, relationships_requested

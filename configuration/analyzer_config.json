@@ -3747,15 +3747,35 @@
       }
     },
     "params": {
-      "include_behaviour_summary": {
-        "value": true,
+      "force_active_scan_if_old": {
+        "value": false,
         "type": "bool",
-        "description": "Include a summary of behavioral analysis reports alongside default scan report"
+        "description": "If the sample is old, it would be rescanned. This will cost additional quota."
+      },
+      "days_to_say_that_a_scan_is_old": {
+        "value": 30,
+        "type": "int",
+        "description": "How many days are required to consider a scan old to force rescan"
+      },
+      "include_behaviour_summary": {
+        "value": false,
+        "type": "bool",
+        "description": "Include a summary of behavioral analysis reports alongside default scan report. This will cost additional quota."
       },
       "include_sigma_analyses": {
-        "value": true,
+        "value": false,
         "type": "bool",
-        "description": "Include sigma analysis report alongside default scan report"
+        "description": "Include sigma analysis report alongside default scan report. This will cost additional quota."
+      },
+      "reliationships_to_request": {
+        "value": [],
+        "type": "list",
+        "description": "Include a list of relationships to request if available. Full list [here](https://developers.virustotal.com/reference/metadata). This will cost additional quota."
+      },
+      "reliationships_elements": {
+        "value": 1,
+        "type": "int",
+        "description": "Number of elements to retrieve for each relationships"
       }
     }
   },
@@ -3786,9 +3806,9 @@
         "description": "If the sample is not already in VT, send the sample and perform a scan"
       },
       "force_active_scan_if_old": {
-        "value": false,
+        "value": true,
         "type": "bool",
-        "description": "If the sample is old, it would be rescanned"
+        "description": "If the sample is old, it would be rescanned. This will cost additional quota."
       },
       "days_to_say_that_a_scan_is_old": {
         "value": 30,
@@ -3798,12 +3818,22 @@
       "include_behaviour_summary": {
         "value": true,
         "type": "bool",
-        "description": "Include a summary of behavioral analysis reports alongside default scan report"
+        "description": "Include a summary of behavioral analysis reports alongside default scan report. This will cost additional quota."
       },
       "include_sigma_analyses": {
         "value": true,
         "type": "bool",
-        "description": "Include sigma analysis report alongside default scan report"
+        "description": "Include sigma analysis report alongside default scan report. This will cost additional quota."
+      },
+      "reliationships_to_request": {
+        "value": [],
+        "type": "list",
+        "description": "Include a list of relationships to request if available. This will cost additional quota."
+      },
+      "reliationships_elements": {
+        "value": 1,
+        "type": "int",
+        "description": "Number of elements to retrieve for each relationships"
       }
     }
   },
@@ -3831,7 +3861,18 @@
         "required": true
       }
     },
-    "params": {}
+    "params": {
+      "reliationships_to_request": {
+        "value": [],
+        "type": "list",
+        "description": "Include a list of relationships to request if available. This will cost additional quota."
+      },
+      "reliationships_elements": {
+        "value": 1,
+        "type": "int",
+        "description": "Number of elements to retrieve for each relationships"
+      }
+    }
   },
   "VirusTotal_v3_Intelligence_Search": {
     "type": "observable",

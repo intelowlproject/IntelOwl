@@ -117,9 +117,6 @@ class VirusTotalv3AnalyzerMixin(BaseAnalyzerMixin):
 
             # if it is not a file, we don't need to perform any scan
             if obs_clfn != self.ObservableTypes.HASH:
-                self._vt_get_relationships(
-                    observable_name, relationships_requested, uri, result
-                )
                 break
 
             # this is an option to force active scan...
@@ -201,6 +198,11 @@ class VirusTotalv3AnalyzerMixin(BaseAnalyzerMixin):
         # Include sigma analysis report, if flag enabled
         if self.include_sigma_analyses:
             result["sigma_analyses"] = self._fetch_sigma_analyses(observable_name)
+
+        if self.reliationships_to_request:
+            self._vt_get_relationships(
+                observable_name, relationships_requested, uri, result
+            )
 
         return result
 

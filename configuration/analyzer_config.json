@@ -893,6 +893,49 @@
       }
     }
   },
+  "DocGuard_Get": {
+    "type": "observable",
+    "python_module": "docguard_get.DocGuard_Hash",
+    "description": "check if an hash was analyzed on DocGuard. [DocGuard](https://www.docguard.io)",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": [
+      "hash"
+    ],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "DOCGUARD_KEY",
+        "description": "",
+        "required": false
+      }
+    },
+    "params": {}
+  },
+  "DocGuard_Upload_File": {
+    "type": "file",
+    "python_module": "docguard.DocGuardUpload",
+    "description": "Analyze files in seconds. [DocGuard](https://www.docguard.io) Please register and use api-key to your privacy",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "config": {
+      "soft_time_limit": 180,
+      "queue": "long"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "DOCGUARD_KEY",
+        "description": "",
+        "required": false
+      }
+    },
+    "params": {}
+  },
   "Dragonfly_Emulation": {
     "type": "file",
     "python_module": "dragonfly.DragonflyEmulation",

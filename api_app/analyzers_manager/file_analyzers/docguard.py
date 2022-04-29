@@ -21,7 +21,6 @@ class DocGuardUpload(FileAnalyzer):
 
     def run(self):
         headers = {}
-	# optional API key
         if self.__api_key:
             headers["x-api-key"] = self.__api_key
         else:

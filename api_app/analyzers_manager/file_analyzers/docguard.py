@@ -12,7 +12,6 @@ logger = logging.getLogger(__name__)
 
 
 class DocGuardUpload(FileAnalyzer):
-
     def set_params(self, params):
         self.__api_key = self._secrets["api_key_name"]
         self.base_url = "https://api.docguard.io:8443/api"
@@ -33,7 +32,9 @@ class DocGuardUpload(FileAnalyzer):
             raise AnalyzerRunException("File is empty")
         try:
             response = requests.post(
-                self.base_url + "/FileAnalyzing/AnalyzeFile", headers=headers, files={"file": (self.filename, binary)}
+                self.base_url + "/FileAnalyzing/AnalyzeFile",
+                headers=headers,
+                files={"file": (self.filename, binary)},
             )
             response.raise_for_status()
         except requests.RequestException as e:

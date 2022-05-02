@@ -116,7 +116,7 @@ jobs:
         docker cp intelowl_uwsgi:/opt/deploy/intel_owl/coverage.xml coverage.xml
 
     - name: "Upload coverage to Codecov"
-      uses: codecov/codecov-action@v3.0.0
+      uses: codecov/codecov-action@v3.1.0
       with:
         files: ./coverage.xml
         fail_ci_if_error: true

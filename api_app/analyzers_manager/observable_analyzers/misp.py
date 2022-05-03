@@ -20,6 +20,7 @@ class MISP(classes.ObservableAnalyzer):
         self.filter_on_type = params.get("filter_on_type", True)
         self.__url_name = self._secrets["url_key_name"]
         self.__api_key = self._secrets["api_key_name"]
+        self.strict_search = params.get("strict_search", True)
 
     def run(self):
         misp_instance = pymisp.PyMISP(
@@ -32,10 +33,14 @@ class MISP(classes.ObservableAnalyzer):
         now = datetime.datetime.now()
         date_from = now - datetime.timedelta(days=self.from_days)
         params = {
-            "value": self.observable_name,
             "limit": self.limit,
             "enforce_warninglist": self.enforce_warninglist,
         }
+        if self.strict_search:
+            params["value"] = self.observable_name
+        else:
+            string_wildcard = f"%{self.observable_name}%"
+            params["searchall"] = string_wildcard
         if self.from_days != 0:
             params["date_from"] = date_from.strftime("%Y-%m-%d %H:%M:%S")
         if self.filter_on_type:
@@ -56,10 +61,12 @@ class MISP(classes.ObservableAnalyzer):
                 params["type_attribute"] = ["md5", "sha1", "sha256"]
             elif self.observable_classification == self.ObservableTypes.URL:
                 params["type_attribute"] = [self.observable_classification]
+            elif self.observable_classification == self.ObservableTypes.GENERIC:
+                pass
             else:
                 raise AnalyzerConfigurationException(
                     f"Observable {self.observable_classification} not supported."
-                    "Currently supported are: ip, domain, hash, url."
+                    "Currently supported are: ip, domain, hash, url, generic."
                 )
         result_search = misp_instance.search(**params)
         if isinstance(result_search, dict):

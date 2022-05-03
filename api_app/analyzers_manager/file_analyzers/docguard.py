@@ -2,6 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 
 import logging
+
 import requests
 
 from api_app.analyzers_manager.classes import FileAnalyzer

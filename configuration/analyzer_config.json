@@ -1744,7 +1744,8 @@
       "ip",
       "domain",
       "url",
-      "hash"
+      "hash",
+      "generic"
     ],
     "config": {
       "soft_time_limit": 30,
@@ -1792,6 +1793,11 @@
         "value": true,
         "type": "bool",
         "description": "Remove any attributes from the result that would cause a hit on a warninglist entry."
+      },
+      "strict_search": {
+        "value": true,
+        "type": "bool",
+        "description": "Search strictly on the observable value (True) or search on attributes containing observable value (False)"
       }
     }
   },

@@ -899,7 +899,7 @@
     "description": "check if an hash was analyzed on DocGuard. [DocGuard](https://www.docguard.io)",
     "disabled": false,
     "external_service": true,
-    "leaks_info": false,
+    "leaks_info": true,
     "observable_supported": [
       "hash"
     ],
@@ -922,7 +922,7 @@
     "description": "Analyze files in seconds. [DocGuard](https://www.docguard.io) Please register and use api-key to your privacy",
     "disabled": false,
     "external_service": true,
-    "leaks_info": false,
+    "leaks_info": true,
     "config": {
       "soft_time_limit": 180,
       "queue": "long"

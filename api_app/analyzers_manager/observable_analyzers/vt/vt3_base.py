@@ -83,7 +83,7 @@ class VirusTotalv3AnalyzerMixin(BaseAnalyzerMixin):
                             result[relationship] = response.json()
         except Exception as e:
             logger.error(
-                f"something went wrong when extracting relationships"
+                "something went wrong when extracting relationships"
                 f" for observable {observable_name}: {e}"
             )
 

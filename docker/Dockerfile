@@ -47,7 +47,7 @@ RUN api_app/analyzers_manager/repo_downloader.sh
 
 # this is because botocore points to legacy endpoints
 # more info: https://stackoverflow.com/questions/41062055/celery-4-0-0-amazon-sqs-credential-should-be-scoped-to-a-valid-region-not
-RUN sed -i "s/{region}.queue/sqs.{region}/g" $(find / -name endpoints.json 2>/dev/null | head -n 1)
+RUN sed -i "s/{region}.queue/sqs.{region}/g" "$(find / -name endpoints.json 2>/dev/null | head -n 1)"
 
 # quarkengine calls
 # HOME_DIR = f"{Path.home()}/.quark-engine/"

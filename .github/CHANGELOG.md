@@ -2,6 +2,22 @@
 
 [**Upgrade Guide**](https://intelowl.readthedocs.io/en/latest/Installation.html#update-to-the-most-recent-version)
 
+## [v3.4.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v3.4.0)
+**New/Improved Analyzers:**
+- Improved MISP analyzer: more options and fixed a bug (#979, #1000)
+- Improved VT3 analyzers: now it is possible to extract relationships data + the analyzers are optimized to reduce the number of queries and save quota (#988)
+- New [VirusTotal_v3_Intelligence_Search](https://developers.virustotal.com/reference/search) for premium users (#981)
+- New [Yara_Scan_Bartblaze](https://github.com/bartblaze/Yara-rules) analyzer
+- New [DocGuard](docguard.io) analyzer (#990)
+- New [Anomali ThreatStream](threatstream.com) analyzer for premium users (#976)
+- New [IntelX_Intelligent_Search](intelx.io) analyzer (it comes to complete the IntelX endpoints already available) (#974)
+
+**Other:**
+- some fixes #952, #938
+- adjusted PR automation
+- a lot of dependencies upgrades
+- renamed `Yara_Scan_McAfee` analyzer to `Yara_Scan_Trellix` and `Virushee_UploadFile` to `Virushee_Upload_File`
+
 ## [v3.3.2](https://github.com/intelowlproject/IntelOwl/releases/tag/v3.3.2)
 **Notes:**
 
@@ -16,7 +32,7 @@ If you are interested in helping the project through a donation, read [here](htt
 
 **Other:**
 - fixes: [#931](https://github.com/intelowlproject/IntelOwl/issues/931)
-- several dependecies upgrades
+- several dependencies upgrades
 
 
 ## [v3.3.1](https://github.com/intelowlproject/IntelOwl/releases/tag/v3.3.1)

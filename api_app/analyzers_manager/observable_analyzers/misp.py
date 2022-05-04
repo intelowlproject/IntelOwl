@@ -6,7 +6,7 @@ import datetime
 import pymisp
 
 from api_app.analyzers_manager import classes
-from api_app.exceptions import AnalyzerRunException
+from api_app.exceptions import AnalyzerConfigurationException, AnalyzerRunException
 from tests.mock_utils import MockResponseNoOp, if_mock_connections, patch
 
 
@@ -14,8 +14,13 @@ class MISP(classes.ObservableAnalyzer):
     def set_params(self, params):
         self.ssl_check = params.get("ssl_check", True)
         self.debug = params.get("debug", False)
+        self.from_days = params.get("from_days", 90)
+        self.limit = params.get("limit", 50)
+        self.enforce_warninglist = params.get("enforce_warninglist", True)
+        self.filter_on_type = params.get("filter_on_type", True)
         self.__url_name = self._secrets["url_key_name"]
         self.__api_key = self._secrets["api_key_name"]
+        self.strict_search = params.get("strict_search", True)
 
     def run(self):
         misp_instance = pymisp.PyMISP(
@@ -25,21 +30,44 @@ class MISP(classes.ObservableAnalyzer):
             debug=self.debug,
             timeout=5,
         )
-
-        # we check only for events not older than 90 days and max 50 results
         now = datetime.datetime.now()
-        date_from = now - datetime.timedelta(days=90)
+        date_from = now - datetime.timedelta(days=self.from_days)
         params = {
-            # even if docs say to use "values",...
-            # .. at the moment it works correctly only with "value"
-            "value": self.observable_name,
-            "type_attribute": [self.observable_classification],
-            "date_from": date_from.strftime("%Y-%m-%d %H:%M:%S"),
-            "limit": 50,
-            "enforce_warninglist": True,
+            "limit": self.limit,
+            "enforce_warninglist": self.enforce_warninglist,
         }
-        if self.observable_classification == self.ObservableTypes.HASH:
-            params["type_attribute"] = ["md5", "sha1", "sha256"]
+        if self.strict_search:
+            params["value"] = self.observable_name
+        else:
+            string_wildcard = f"%{self.observable_name}%"
+            params["searchall"] = string_wildcard
+        if self.from_days != 0:
+            params["date_from"] = date_from.strftime("%Y-%m-%d %H:%M:%S")
+        if self.filter_on_type:
+            params["type_attribute"] = [self.observable_classification]
+            if self.observable_classification == self.ObservableTypes.HASH:
+                params["type_attribute"] = ["md5", "sha1", "sha256"]
+            if self.observable_classification == self.ObservableTypes.IP:
+                params["type_attribute"] = [
+                    "ip-dst",
+                    "ip-src",
+                    "ip-src|port",
+                    "ip-dst|port",
+                    "domain|ip",
+                ]
+            elif self.observable_classification == self.ObservableTypes.DOMAIN:
+                params["type_attribute"] = [self.observable_classification, "domain|ip"]
+            elif self.observable_classification == self.ObservableTypes.HASH:
+                params["type_attribute"] = ["md5", "sha1", "sha256"]
+            elif self.observable_classification == self.ObservableTypes.URL:
+                params["type_attribute"] = [self.observable_classification]
+            elif self.observable_classification == self.ObservableTypes.GENERIC:
+                pass
+            else:
+                raise AnalyzerConfigurationException(
+                    f"Observable {self.observable_classification} not supported."
+                    "Currently supported are: ip, domain, hash, url, generic."
+                )
         result_search = misp_instance.search(**params)
         if isinstance(result_search, dict):
             errors = result_search.get("errors", [])

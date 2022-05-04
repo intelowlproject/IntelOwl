@@ -11,14 +11,13 @@ on:
 jobs:
   linters:
     runs-on: ubuntu-latest
-    if: "!contains(github.head_ref, 'dependabot')"
 
     steps:
     - name: Checkout IntelOwl
       uses: actions/checkout@v3
 
     - name: Set up Python
-      uses: actions/setup-python@v3.0.0
+      uses: actions/setup-python@v3.1.0
       with:
         python-version: 3.9
 
@@ -39,31 +38,9 @@ jobs:
       run: |
         isort . --profile black --filter-files --check-only --diff --skip configuration/ldap_config.py
 
-  dependabot:
-    runs-on: ubuntu-latest
-    if: contains(github.head_ref, 'dependabot')
-
-    steps:
-    - name: Debug
-      run: |
-        echo ${{ github.head_ref }}
-        echo ${{ contains(github.head_ref, 'dependabot') }} | cat
-
-    - name: Checkout IntelOwl
-      uses: actions/checkout@v3
-
-    - name: Docker
-      run: |
-        cp docker/env_file_app_template docker/env_file_app
-        cp docker/env_file_postgres_template docker/env_file_postgres
-        docker-compose -f docker/default.yml -f docker/ci.override.yml up --build -d
-      env:
-        DOCKER_BUILDKIT: 1
-
   tests:
     runs-on: ubuntu-latest
     needs: linters
-    if: "!contains(github.head_ref, 'dependabot')"
 
     steps:
     - name: Cancel Previous Runs
@@ -139,7 +116,7 @@ jobs:
         docker cp intelowl_uwsgi:/opt/deploy/intel_owl/coverage.xml coverage.xml
 
     - name: "Upload coverage to Codecov"
-      uses: codecov/codecov-action@v2.1.0
+      uses: codecov/codecov-action@v3.1.0
       with:
         files: ./coverage.xml
         fail_ci_if_error: true

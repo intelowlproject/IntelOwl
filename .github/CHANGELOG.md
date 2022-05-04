@@ -63,7 +63,7 @@ If you are interested in helping the project through a donation, read [here](htt
 
 **New Analyzers:**
 
-- `Virushee_UploadFile`: Check file hash and upload file sample for analysis on [Virushee API](https://api.virushee.com/).
+- `Virushee_Upload_File`: Check file hash and upload file sample for analysis on [Virushee API](https://api.virushee.com/).
 - `Virushee_CheckHash`: Search for a previous analysis of a file by its hash (SHA256/SHA1/MD5) on [Virushee API](https://api.virushee.com/).
   > Setting the `VIRUSHEE_API_KEY` is optional to use these analyzers.
 

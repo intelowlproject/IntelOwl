@@ -893,6 +893,67 @@
       }
     }
   },
+  "DocGuard_Get": {
+    "type": "observable",
+    "python_module": "docguard_get.DocGuard_Hash",
+    "description": "check if an hash was analyzed on DocGuard. [DocGuard](https://www.docguard.io)",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": [
+      "hash"
+    ],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "DOCGUARD_KEY",
+        "description": "",
+        "required": false
+      }
+    },
+    "params": {}
+  },
+  "DocGuard_Upload_File": {
+    "type": "file",
+    "python_module": "docguard.DocGuardUpload",
+    "description": "Analyze office files in seconds. [DocGuard](https://www.docguard.io) Please register and use api-key to your privacy",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": true,
+    "supported_filetypes": [
+      "application/msword",
+      "application/vnd.ms-office",
+      "application/vnd.ms-excel.addin.macroEnabled",
+      "application/x-mspublisher",
+      "application/vnd.ms-powerpoint",
+      "application/vnd.ms-excel",
+      "application/vnd.ms-excel.sheet.macroEnabled.12",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+      "text/x-ms-iqy",
+      "application/excel",
+      "text/xml",
+      "application/xml",
+      "application/zip",
+      "application/encrypted"
+    ],
+    "config": {
+      "soft_time_limit": 180,
+      "queue": "long"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "DOCGUARD_KEY",
+        "description": "",
+        "required": false
+      }
+    },
+    "params": {}
+  },
   "Dragonfly_Emulation": {
     "type": "file",
     "python_module": "dragonfly.DragonflyEmulation",
@@ -3634,7 +3695,7 @@
     },
     "params": {}
   },
-  "Virushee_UploadFile":{
+  "Virushee_Upload_File":{
     "type": "file",
     "python_module": "virushee.VirusheeFileUpload",
     "description": "Check file hash and upload file sample for analysis on [Virushee API](https://api.virushee.com/).",

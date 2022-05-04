@@ -29,8 +29,8 @@ class VirusTotalv3AnalyzerMixin(BaseAnalyzerMixin):
         self.days_to_say_that_a_scan_is_old = params.get(
             "days_to_say_that_a_scan_is_old", 30
         )
-        self.reliationships_to_request = params.get("reliationships_to_request", [])
-        self.reliationships_elements = params.get("reliationships_elements", 1)
+        self.relationships_to_request = params.get("relationships_to_request", [])
+        self.relationships_elements = params.get("relationships_elements", 1)
 
     @property
     def headers(self) -> dict:
@@ -38,7 +38,7 @@ class VirusTotalv3AnalyzerMixin(BaseAnalyzerMixin):
 
     def _get_relationship_limit(self, relationship):
         # by default, just extract the first element
-        limit = self.reliationships_elements
+        limit = self.relationships_elements
         # resolutions data can be more valuable and it is not lot of data
         if relationship == "resolutions":
             limit = 40
@@ -57,7 +57,7 @@ class VirusTotalv3AnalyzerMixin(BaseAnalyzerMixin):
                 relationships_in_results = result.get("data", {}).get(
                     "relationships", {}
                 )
-                for relationship in self.reliationships_to_request:
+                for relationship in self.relationships_to_request:
                     if relationship not in relationships_requested:
                         result[relationship] = {
                             "error": "not supported, review configuration."
@@ -191,15 +191,45 @@ class VirusTotalv3AnalyzerMixin(BaseAnalyzerMixin):
         if already_done_active_scan_because_report_was_old:
             result["performed_rescan_because_report_was_old"] = True
 
-        # Include behavioral report, if flag enabled
-        if self.include_behaviour_summary:
-            result["behaviour_summary"] = self._fetch_behaviour_summary(observable_name)
+        if obs_clfn == self.ObservableTypes.HASH:
 
-        # Include sigma analysis report, if flag enabled
-        if self.include_sigma_analyses:
-            result["sigma_analyses"] = self._fetch_sigma_analyses(observable_name)
+            # Include behavioral report, if flag enabled
+            if self.include_behaviour_summary:
+                sandbox_analysis = (
+                    result.get("data", {})
+                    .get("relationships", {})
+                    .get("behaviours", {})
+                    .get("data", [])
+                )
+                if sandbox_analysis:
+                    logger.info(
+                        f"found {len(sandbox_analysis)} sandbox analysis"
+                        f" for {observable_name},"
+                        " requesting the additional details"
+                    )
+                    result["behaviour_summary"] = self._fetch_behaviour_summary(
+                        observable_name
+                    )
 
-        if self.reliationships_to_request:
+            # Include sigma analysis report, if flag enabled
+            if self.include_sigma_analyses:
+                sigma_analysis = (
+                    result.get("data", {})
+                    .get("relationships", {})
+                    .get("sigma_analysis", {})
+                    .get("data", [])
+                )
+                if sigma_analysis:
+                    logger.info(
+                        f"found {len(sigma_analysis)} sigma analysis"
+                        f" for {observable_name},"
+                        " requesting the additional details"
+                    )
+                    result["sigma_analyses"] = self._fetch_sigma_analyses(
+                        observable_name
+                    )
+
+        if self.relationships_to_request:
             self._vt_get_relationships(
                 observable_name, relationships_requested, uri, result
             )
@@ -335,7 +365,9 @@ class VirusTotalv3AnalyzerMixin(BaseAnalyzerMixin):
             ]
         elif obs_clfn == cls.ObservableTypes.HASH:
             relationships = [
+                # behaviors is necessary to check if there are sandbox analysis
                 "behaviours",
+                "sigma_analysis",
                 "bundled_files",
                 "comments",
                 "contacted_domains",

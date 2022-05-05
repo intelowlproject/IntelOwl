@@ -4069,7 +4069,7 @@
   "XForceExchange": {
     "type": "observable",
     "python_module": "xforce.XForce",
-    "description": "scan an observable on IBM X-Force Exchange.",
+    "description": "scan an observable on IBM X-Force Exchange",
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
@@ -4095,7 +4095,13 @@
         "required": true
       }
     },
-    "params": {}
+    "params": {
+      "malware_only": {
+        "value": false,
+        "type": "bool",
+        "description": "Performs lookup only against 'malware' endpoints to save some quota"
+      }
+    }
   },
   "Xlm_Macro_Deobfuscator": {
     "type": "file",

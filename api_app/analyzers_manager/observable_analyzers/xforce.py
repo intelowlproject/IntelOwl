@@ -17,6 +17,7 @@ class XForce(classes.ObservableAnalyzer):
     def set_params(self, params):
         self.__api_key = self._secrets["api_key_name"]
         self.__api_password = self._secrets["api_password_name"]
+        self.malware_only = params.get("malware_only", False)
 
     def run(self):
         auth = HTTPBasicAuth(self.__api_key, self.__api_password)
@@ -45,16 +46,20 @@ class XForce(classes.ObservableAnalyzer):
         :return: API endpoints
         :rtype: list
         """
-
+        print(f"malware only {self.malware_only}")
         if self.observable_classification == self.ObservableTypes.IP:
-            endpoints = ["ipr", "ipr/history", "ipr/malware"]
+            endpoints = ["ipr/malware"]
+            if not self.malware_only:
+                endpoints.extend(["ipr", "ipr/history"])
         elif self.observable_classification == self.ObservableTypes.HASH:
             endpoints = ["malware"]
         elif self.observable_classification in [
             self.ObservableTypes.URL,
             self.ObservableTypes.DOMAIN,
         ]:
-            endpoints = ["url", "url/history", "url/malware"]
+            endpoints = ["url/malware"]
+            if not self.malware_only:
+                endpoints.extend(["url", "url/history"])
         else:
             raise AnalyzerRunException(
                 f"{self.observable_classification} not supported"

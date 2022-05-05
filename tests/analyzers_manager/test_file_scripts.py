@@ -59,6 +59,7 @@ class EXEAnalyzersTestCase(_FileAnalyzersScriptsTestCase):
                 "Dragonfly_Emulation",
                 "FileScan_Upload_File",
                 "Virushee_Upload_File",
+                "DocGuard_Upload_File",
             ],
         }
 

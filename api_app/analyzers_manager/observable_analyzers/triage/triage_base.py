@@ -35,6 +35,7 @@ class TriageMixin(BaseAnalyzerMixin):
         self.analysis_type = params.get("analysis_type", "search")
 
         self.final_report = {}
+        self.response = None
 
     def run(self):
         # this should be implemented by the extended classes
@@ -48,11 +49,11 @@ class TriageMixin(BaseAnalyzerMixin):
             self._session = session
         return self._session
 
-    def manage_submission_response(self, response):
-        if response.status_code != 200:
+    def manage_submission_response(self):
+        if self.response.status_code != 200:
             raise AnalyzerRunException("max retry attempts exceeded")
 
-        sample_id = response.json().get("id", None)
+        sample_id = self.response.json().get("id", None)
         if sample_id is None:
             raise AnalyzerRunException("error sending sample")
 

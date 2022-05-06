@@ -24,16 +24,15 @@ class TriageScanFile(FileAnalyzer, TriageMixin):
         }
 
         logger.info(f"triage md5 {self.md5} sending sample for analysis")
-        response = None
         for _try in range(self.max_tries):
             logger.info(f"triage md5 {self.md5} polling for result try #{_try + 1}")
-            response = self.session.post(self.base_url + "samples", files=files)
-            if response.status_code == 200:
+            self.response = self.session.post(self.base_url + "samples", files=files)
+            if self.response.status_code == 200:
                 break
             time.sleep(self.poll_distance)
 
-        if response:
-            self.manage_submission_response(response)
+        if self.response:
+            self.manage_submission_response()
         else:
             raise AnalyzerRunException(f"response not available for {self.md5}")
 

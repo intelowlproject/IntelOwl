@@ -35,26 +35,25 @@ class TriageSearch(ObservableAnalyzer, TriageMixin):
             query = f"{self.observable_classification}:{self.observable_name}"
         params = {"query": query}
 
-        response = self.session.get(self.base_url + "search", params=params)
+        self.response = self.session.get(self.base_url + "search", params=params)
 
-        self.final_report = response
+        self.final_report = self.response
 
     def __triage_submit(self):
         data = {"kind": "url", "url": f"{self.observable_name}"}
 
         logger.info(f"triage {self.observable_name} sending URL for analysis")
-        response = None
         for _try in range(self.max_tries):
             logger.info(
                 f"triage {self.observable_name} polling for result try #{_try + 1}"
             )
-            response = self.session.post(self.base_url + "samples", json=data)
-            if response.status_code == 200:
+            self.response = self.session.post(self.base_url + "samples", json=data)
+            if self.response.status_code == 200:
                 break
             time.sleep(self.poll_distance)
 
-        if response:
-            self.manage_submission_response(response)
+        if self.response:
+            self.manage_submission_response()
         else:
             raise AnalyzerRunException(
                 f"response not available for {self.observable_name}"

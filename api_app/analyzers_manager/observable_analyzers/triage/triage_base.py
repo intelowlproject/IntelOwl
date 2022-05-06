@@ -36,6 +36,10 @@ class TriageMixin(BaseAnalyzerMixin):
 
         self.final_report = {}
 
+    def run(self):
+        # this should be implemented by the extended classes
+        pass
+
     @property
     def session(self):
         if not hasattr(self, "_session"):

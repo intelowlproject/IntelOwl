@@ -37,6 +37,8 @@ class TriageScanFile(FileAnalyzer, TriageMixin):
         else:
             raise AnalyzerRunException(f"response not available for {self.md5}")
 
+        return self.final_report
+
     @classmethod
     def _monkeypatch(cls):
         patches = [

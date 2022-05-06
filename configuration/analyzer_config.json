@@ -3494,7 +3494,7 @@
   },
   "Triage_Hash": {
     "type": "observable",
-    "python_module": "triage_search.TriageSearch",
+    "python_module": "triage.triage_search.TriageSearch",
     "description": "lookup a file hash in Triage public sandbox Database",
     "disabled": false,
     "external_service": true,
@@ -3533,11 +3533,11 @@
   },
   "Triage_URL": {
     "type": "observable",
-    "python_module": "triage_search.TriageSearch",
+    "python_module": "triage.triage_search.TriageSearch",
     "description": "analyze an URL using triage sandbox environment",
     "disabled": false,
     "external_service": true,
-    "leaks_info": false,
+    "leaks_info": true,
     "observable_supported": [
       "url"
     ],
@@ -3576,7 +3576,7 @@
     "description": "leverage Triage sandbox environment to scan various files",
     "disabled": false,
     "external_service": true,
-    "leaks_info": false,
+    "leaks_info": true,
     "config": {
       "soft_time_limit": 300,
       "queue": "long"

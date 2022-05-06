@@ -26,7 +26,7 @@ class TriageMixin(BaseAnalyzerMixin):
         self.report_type = params.get("report_type", "overview")
         if self.report_type not in ["overview", "complete"]:
             raise AnalyzerConfigurationException(
-                f"report_type must be 'overview' or 'complete' "
+                "report_type must be 'overview' or 'complete' "
                 f"but it is '{self.report_type}'"
             )
         self.max_tries = params.get("max_tries", 200)

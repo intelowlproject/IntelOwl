@@ -3492,15 +3492,16 @@
     "secrets": {},
     "params": {}
   },
-  "Triage_Hash": {
+  "Triage_Search": {
     "type": "observable",
     "python_module": "triage.triage_search.TriageSearch",
-    "description": "lookup a file hash in Triage public sandbox Database",
+    "description": "lookup a file hash or an URL in Triage public sandbox Database",
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
     "observable_supported": [
-      "hash"
+      "hash",
+      "url"
     ],
     "config": {
       "soft_time_limit": 300,
@@ -3531,7 +3532,7 @@
       }
     }
   },
-  "Triage_URL": {
+  "Triage_Scan_URL": {
     "type": "observable",
     "python_module": "triage.triage_search.TriageSearch",
     "description": "analyze an URL using triage sandbox environment",

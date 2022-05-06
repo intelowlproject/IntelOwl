@@ -45,7 +45,10 @@ class TriageMixin(BaseAnalyzerMixin):
     def session(self):
         if not hasattr(self, "_session"):
             session = requests.Session()
-            session.headers = {"Authorization": f"Bearer {self.__api_key}"}
+            session.headers = {
+                "Authorization": f"Bearer {self.__api_key}",
+                "User-Agent": "IntelOwl",
+            }
             self._session = session
         return self._session
 

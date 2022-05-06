@@ -5,6 +5,7 @@ import logging
 import time
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
+from api_app.analyzers_manager.constants import ObservableTypes
 from api_app.analyzers_manager.observable_analyzers.triage.triage_base import (
     TriageMixin,
 )
@@ -37,10 +38,13 @@ class TriageSearch(ObservableAnalyzer, TriageMixin):
 
         self.response = self.session.get(self.base_url + "search", params=params)
 
-        self.final_report = self.response
+        self.final_report = self.response.json()
 
     def __triage_submit(self):
-        data = {"kind": "url", "url": f"{self.observable_name}"}
+        data = {
+            "kind": ObservableTypes.URL,
+            ObservableTypes.URL: f"{self.observable_name}",
+        }
 
         logger.info(f"triage {self.observable_name} sending URL for analysis")
         for _try in range(self.max_tries):

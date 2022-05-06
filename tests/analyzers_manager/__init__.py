@@ -170,9 +170,7 @@ class _ObservableAnalyzersScriptsTestCase(_AbstractAnalyzersScriptTestCase):
     # define runtime configs
     runtime_configuration = {
         "Triage_Search": {
-            "analysis_type": "submit",
             "max_tries": 1,
-            "endpoint": "public",
         },
         "VirusTotal_v3_Get_Observable": {
             "max_tries": 1,

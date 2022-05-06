@@ -3494,14 +3494,14 @@
   },
   "Triage_Search": {
     "type": "observable",
-    "python_module": "triage_search.TriageSearch",
-    "description": "analyze a url sample using triage sandbox environment",
+    "python_module": "triage.triage_search.TriageSearch",
+    "description": "lookup a file hash or an URL in Triage public sandbox Database",
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
     "observable_supported": [
-      "url",
-      "hash"
+      "hash",
+      "url"
     ],
     "config": {
       "soft_time_limit": 300,
@@ -3532,13 +3532,52 @@
       }
     }
   },
+  "Triage_Scan_URL": {
+    "type": "observable",
+    "python_module": "triage.triage_search.TriageSearch",
+    "description": "analyze an URL using triage sandbox environment",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": true,
+    "observable_supported": [
+      "url"
+    ],
+    "config": {
+      "soft_time_limit": 300,
+      "queue": "default"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "TRIAGE_KEY",
+        "description": "",
+        "required": true
+      }
+    },
+    "params": {
+      "endpoint": {
+        "value": "public",
+        "type": "str",
+        "description": "Choose whether to query on the public or the private endpoint of triage (options: `private`, `public`)."
+      },
+      "report_type": {
+        "value": "overview",
+        "type": "str",
+        "description": "Determines how detailed the final report will be (options: `overview`, `complete`)."
+      },
+      "analysis_type": {
+        "value": "submit",
+        "type": "str",
+        "description": "Choose whether to search for existing observable reports or upload for scanning via URL (options: `search` and `submit`)."
+      }
+    }
+  },
   "Triage_Scan": {
     "type": "file",
     "python_module": "triage_scan.TriageScanFile",
     "description": "leverage Triage sandbox environment to scan various files",
     "disabled": false,
     "external_service": true,
-    "leaks_info": false,
+    "leaks_info": true,
     "config": {
       "soft_time_limit": 300,
       "queue": "long"

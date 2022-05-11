@@ -12,7 +12,8 @@ from tests.mock_utils import MockResponse, if_mock_connections, patch
 
 
 class XForce(classes.ObservableAnalyzer):
-    base_url: str = "https://api.xforce.ibmcloud.com/api"
+    base_url: str = "https://exchange.xforce.ibmcloud.com/api"
+    web_url: str = "https://exchange.xforce.ibmcloud.com"
 
     def set_params(self, params):
         self.__api_key = self._secrets["api_key_name"]
@@ -38,6 +39,13 @@ class XForce(classes.ObservableAnalyzer):
                 raise AnalyzerRunException(e)
 
             result[endpoint] = response.json()
+            path = self.observable_classification
+            if self.observable_classification == self.ObservableTypes.DOMAIN:
+                path = self.ObservableTypes.URL
+            elif self.observable_classification == self.ObservableTypes.HASH:
+                path = "malware"
+            result[endpoint]["link"] = f"{self.web_url}/{path}/{observable_to_check}"
+
         return result
 
     def _get_endpoints(self):

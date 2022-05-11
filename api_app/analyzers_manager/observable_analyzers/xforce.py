@@ -54,20 +54,20 @@ class XForce(classes.ObservableAnalyzer):
         :return: API endpoints
         :rtype: list
         """
-        print(f"malware only {self.malware_only}")
+        endpoints = []
         if self.observable_classification == self.ObservableTypes.IP:
-            endpoints = ["ipr/malware"]
             if not self.malware_only:
                 endpoints.extend(["ipr", "ipr/history"])
+            endpoints.append("ipr/malware")
         elif self.observable_classification == self.ObservableTypes.HASH:
-            endpoints = ["malware"]
+            endpoints.append("malware")
         elif self.observable_classification in [
             self.ObservableTypes.URL,
             self.ObservableTypes.DOMAIN,
         ]:
-            endpoints = ["url/malware"]
             if not self.malware_only:
                 endpoints.extend(["url", "url/history"])
+            endpoints.append("url/malware")
         else:
             raise AnalyzerRunException(
                 f"{self.observable_classification} not supported"

@@ -12,7 +12,8 @@ from tests.mock_utils import MockResponse, if_mock_connections, patch
 
 
 class XForce(classes.ObservableAnalyzer):
-    base_url: str = "https://api.xforce.ibmcloud.com/api"
+    base_url: str = "https://exchange.xforce.ibmcloud.com/api"
+    web_url: str = "https://exchange.xforce.ibmcloud.com"
 
     def set_params(self, params):
         self.__api_key = self._secrets["api_key_name"]
@@ -33,11 +34,22 @@ class XForce(classes.ObservableAnalyzer):
                     observable_to_check = self.observable_name
                 url = f"{self.base_url}/{endpoint}/{observable_to_check}"
                 response = requests.get(url, auth=auth, headers=headers)
-                response.raise_for_status()
+                if response.status_code == 404:
+                    result["found"] = False
+                else:
+                    response.raise_for_status()
+                result[endpoint] = response.json()
+                path = self.observable_classification
+                if self.observable_classification == self.ObservableTypes.DOMAIN:
+                    path = self.ObservableTypes.URL
+                elif self.observable_classification == self.ObservableTypes.HASH:
+                    path = "malware"
+                result[endpoint][
+                    "link"
+                ] = f"{self.web_url}/{path}/{observable_to_check}"
             except requests.RequestException as e:
                 raise AnalyzerRunException(e)
 
-            result[endpoint] = response.json()
         return result
 
     def _get_endpoints(self):
@@ -46,20 +58,20 @@ class XForce(classes.ObservableAnalyzer):
         :return: API endpoints
         :rtype: list
         """
-        print(f"malware only {self.malware_only}")
+        endpoints = []
         if self.observable_classification == self.ObservableTypes.IP:
-            endpoints = ["ipr/malware"]
             if not self.malware_only:
                 endpoints.extend(["ipr", "ipr/history"])
+            endpoints.append("ipr/malware")
         elif self.observable_classification == self.ObservableTypes.HASH:
-            endpoints = ["malware"]
+            endpoints.append("malware")
         elif self.observable_classification in [
             self.ObservableTypes.URL,
             self.ObservableTypes.DOMAIN,
         ]:
-            endpoints = ["url/malware"]
             if not self.malware_only:
                 endpoints.extend(["url", "url/history"])
+            endpoints.append("url/malware")
         else:
             raise AnalyzerRunException(
                 f"{self.observable_classification} not supported"

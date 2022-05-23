@@ -6,7 +6,7 @@ import useTitle from "react-use/lib/useTitle";
 import {
   ContentSection,
   IconButton,
-  MomentHoverable,
+  DateHoverable,
   useAxiosComponentLoader
 } from "@certego/certego-ui";
 
@@ -84,27 +84,27 @@ export default function InvitationsList() {
                     <li key={`invlist-${id}`}>
                       <Row className="mb-3">
                         <Col sm={6} xl={2}>
-                          <small className="text-muted mr-1">
+                          <small className="text-muted me-1">
                             Organization
                           </small>
                           &nbsp;
                           {organization?.name}
                         </Col>
                         <Col sm={6} xl={2}>
-                          <small className="text-muted mr-1">Invited by</small>
+                          <small className="text-muted me-1">Invited by</small>
                           &nbsp;
                           {organization?.owner?.username}
                         </Col>
                         <Col sm={6} xl={2}>
-                          <small className="text-muted mr-1">
+                          <small className="text-muted me-1">
                             No. of Members
                           </small>
                           &nbsp;
                           {organization?.members_count}
                         </Col>
                         <Col sm={6} xl={2}>
-                          <small className="text-muted mr-1">Received</small>
-                          <MomentHoverable
+                          <small className="text-muted me-1">Received</small>
+                          <DateHoverable
                             id={`invlist-${id}`}
                             value={invitedAt}
                             format="h:mm A MMM Do, YYYY"

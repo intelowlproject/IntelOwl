@@ -44,7 +44,13 @@ python3 start.py prod up
 # create a super user 
 docker exec -ti intelowl_uwsgi python3 manage.py createsuperuser
 
-# now the app is running on http://localhost:80
+# now the backend is running on http://localhost:80
+
+# run frontend
+cd frontend/
+npm i
+npm start
+# now the froentd is running on http://localhost:3001
 ```
 
 <div class="admonition hint">
@@ -54,7 +60,7 @@ There is a <a href="https://www.youtube.com/watch?v=GuEhqQJSQAs" target="_blank"
 
 ## Deployment Components
 IntelOwl is composed of various different technologies, namely:
-* React: Frontend, with [certego-ui](https://github.com/certego/certego-ui)
+* React: Frontend, using [CRA](https://create-react-app.dev/) and [certego-ui](https://github.com/certego/certego-ui)
 * Django: Backend
 * PostgreSQL: Database
 * Rabbit-MQ: Message Broker

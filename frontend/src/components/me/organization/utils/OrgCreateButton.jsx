@@ -1,7 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Col, FormGroup, Label } from "reactstrap";
-import { Submit, CustomInput as FormInput } from "formstrap";
+import { Col, FormGroup, Label, Button, Spinner, Input } from "reactstrap";
 import { Form, Formik } from "formik";
 import { IoMdPersonAdd } from "react-icons/io";
 
@@ -52,35 +51,39 @@ function OrganizationCreateForm({ onFormSubmit, }) {
       initialValues={initialValues}
       validate={onValidate}
       onSubmit={onSubmit}
-      validateOnMount
+      validateOnChange
     >
       {(formik) => (
         <Form className="mx-2 my-3">
           <FormGroup row className="d-flex flex-wrap">
-            <Col md={3}>
-              <Label className="required" htmlFor="name">
-                Organization Name
-              </Label>
-            </Col>
+            <Label
+              className="required"
+              for="orgforminput-name"
+              md={3}
+            >
+              Organization Name
+            </Label>
             <Col md={6}>
-              <FormInput
+              <Input
                 autoFocus
                 id="orgforminput-name"
                 type="text"
                 name="name"
-                className="form-control form-control-sm"
+                bsSize="sm"
+                onChange={formik.handleChange}
               />
             </Col>
             <Col md={2}>
-              <Submit
+              <Button
+                type="submit"
                 id="orgforminput-submit"
                 disabled={!(formik.isValid || formik.isSubmitting)}
-                withSpinner
                 color="darker"
                 size="sm"
+                md={2}
               >
-                {!formik.isSubmitting && "Create"}
-              </Submit>
+                {formik.isSubmitting && <Spinner  size="sm" />}Create
+              </Button>
             </Col>
           </FormGroup>
         </Form>
@@ -97,7 +100,7 @@ function OrgCreateButton({ onCreate, }) {
       popOverPlacement="bottom"
       Icon={() => (
         <span>
-          <IoMdPersonAdd className="mr-1" /> Create a new organization
+          <IoMdPersonAdd className="me-1" /> Create a new organization
         </span>
       )}
       Form={OrganizationCreateForm}

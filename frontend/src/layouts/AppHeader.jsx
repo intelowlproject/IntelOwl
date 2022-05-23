@@ -5,7 +5,6 @@ import {
   Navbar,
   NavItem,
   Collapse,
-  Container,
   NavbarBrand,
   NavbarToggler
 } from "reactstrap";
@@ -29,27 +28,27 @@ import { useAuthStore } from "../stores";
 const authLinks = (
   <>
     <NavItem>
-      <NavLink className="d-flex-start-center" exact to="/dashboard">
+      <NavLink className="d-flex-start-center" end to="/dashboard">
         <GoDashboard />
-        <span className="ml-1">Dashboard</span>
+        <span className="ms-1">Dashboard</span>
       </NavLink>
     </NavItem>
     <NavItem>
-      <NavLink className="d-flex-start-center" exact to="/jobs">
+      <NavLink className="d-flex-start-center" end to="/jobs">
         <RiFileListFill />
-        <span className="ml-1">Jobs</span>
+        <span className="ms-1">Jobs</span>
       </NavLink>
     </NavItem>
     <NavItem>
       <NavLink className="d-flex-start-center" to="/plugins">
         <RiPlugFill />
-        <span className="ml-1">Plugins</span>
+        <span className="ms-1">Plugins</span>
       </NavLink>
     </NavItem>
     <NavItem>
-      <NavLink className="d-flex-start-center" exact to="/scan">
+      <NavLink className="d-flex-start-center" end to="/scan">
         <SiHackaday />
-        <span className="ml-1">Scan</span>
+        <span className="ms-1">Scan</span>
       </NavLink>
     </NavItem>
   </>
@@ -60,8 +59,7 @@ const guestLinks = (
     <RRNavLink
       id="login-btn"
       className="btn btn-sm btn-accent-2"
-      isActive={() => false}
-      exact
+      end
       to="/login"
     >
       Login
@@ -78,7 +76,7 @@ const rightLinks = (
       rel="noopener noreferrer"
     >
       <RiBookReadFill />
-      <span className="ml-1">Docs</span>
+      <span className="ms-1">Docs</span>
     </a>
   </NavItem>
 );
@@ -95,46 +93,44 @@ function AppHeader() {
   );
 
   return (
-    <>
+    <header className="fixed-top">
       {/* top loading bar */}
       <AxiosLoadingBar axiosInstance={axios} />
       {/* nav bar */}
       <Navbar dark expand="lg">
-        <Container fluid className="px-1 px-lg-5">
-          <NavbarBrand tag={RRNavLink} to="/">
-            <img
-              src={`${PUBLIC_URL}/logo-negative.png`}
-              width="128"
-              alt="IntelOwl logo"
-            />
-          </NavbarBrand>
-          <NavbarToggler onClick={(e) => setIsOpen(!isOpen)} />
-          <Collapse navbar isOpen={isOpen}>
-            {/* Navbar Left Side */}
-            <Nav navbar>
-              <NavItem>
-                <NavLink className="d-flex-start-center" exact to="/">
-                  <MdHome />
-                  <span className="ml-1">Home</span>
-                </NavLink>
+        <NavbarBrand tag={RRNavLink} to="/">
+          <img
+            src={`${PUBLIC_URL}/logo-negative.png`}
+            width="128"
+            alt="IntelOwl logo"
+          />
+        </NavbarBrand>
+        <NavbarToggler onClick={(e) => setIsOpen(!isOpen)} />
+        <Collapse navbar isOpen={isOpen}>
+          {/* Navbar Left Side */}
+          <Nav navbar>
+            <NavItem>
+              <NavLink className="d-flex-start-center" end to="/">
+                <MdHome />
+                <span className="ms-1">Home</span>
+              </NavLink>
+            </NavItem>
+            {isAuthenticated && authLinks}
+          </Nav>
+          {/* Navbar Right Side */}
+          <Nav navbar className="ms-auto d-flex align-items-center">
+            {rightLinks}
+            {/* Notifications Popover */}
+            {isAuthenticated && (
+              <NavItem className="me-lg-3">
+                <NotificationPopoverButton />
               </NavItem>
-              {isAuthenticated && authLinks}
-            </Nav>
-            {/* Navbar Right Side */}
-            <Nav navbar className="ml-auto d-flex align-items-center">
-              {rightLinks}
-              {/* Notifications Popover */}
-              {isAuthenticated && (
-                <NavItem className="mr-lg-3">
-                  <NotificationPopoverButton />
-                </NavItem>
-              )}
-              {!isAuthenticated ? guestLinks : <UserMenu />}
-            </Nav>
-          </Collapse>
-        </Container>
+            )}
+            {!isAuthenticated ? guestLinks : <UserMenu />}
+          </Nav>
+        </Collapse>
       </Navbar>
-    </>
+    </header>
   );
 }
 

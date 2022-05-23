@@ -31,7 +31,7 @@ The, please create a new branch based on the **develop** branch that contains th
 
 `git checkout -b myfeature develop`
 
-Then we strongly suggest to configure [pre-commit](https://github.com/pre-commit/pre-commit) to force linters on every commits you perform:
+Then we strongly suggest to configure [pre-commit](https://github.com/pre-commit/pre-commit) to force linters on every commits you perform
 ```bash
 # create virtualenv to host pre-commit installation
 python3 -m venv venv
@@ -44,13 +44,14 @@ pre-commit install
 cp docker/.env.start.test.template docker/.env.start.test
 ```
 
+### Backend
 Now, you can execute IntelOwl in development mode by selecting the mode `test` while launching the startup script:
 ```bash
 python3 start.py test up
 ```
 Every time you perform a change, you should perform an operation to reflect the changes into the application:
 
-* if you changed either the frontend code or the python requirements, restart the application and re-build the images. This is the slowest process. You can always choose this way but it would waste a lot of time.
+* if you changed either the code or the python requirements, restart the application and re-build the images. This is the slowest process. You can always choose this way but it would waste a lot of time.
 ```bash
 python3 start.py test down && python3 start.py test up --build
 ```
@@ -61,6 +62,20 @@ python3 start.py test down && python3 start.py test up
 
 * if you made changes to either the API or anything that is executed only by the application server, changes will be instantly reflected and you don't need to do anything. This is thanks to the Django Development server that is executed instead of `uwsgi` while using the `test` mode
 
+### Frontend
+To start frontend in develop mode, you can execute the startup npm script within the folder `frontend`:
+```bash
+cd frontend/
+npm i
+npm start
+```
+
+* if you prefer developing side-by-side with a local version of `certego-ui`, please take a look to [npm link](https://docs.npmjs.com/cli/v8/commands/npm-link). Remember to start certego-ui without installing peer dependencies:
+```bash
+cd ../certego-ui/
+npm i --legacy-peer-deps
+npm start
+```
 
 ## How to add a new analyzer
 You may want to look at a few existing examples to start to build a new one, such as:
@@ -177,6 +192,8 @@ If you need to modify the behavior or add feature to those packages, please foll
 Follow these guides to understand how to start to contribute to them while developing for IntelOwl:
 - *certego-saas*: create a fork, commit your changes in your local repo, then change the commit hash to the last one you made in the [requirements file](https://github.com/intelowlproject/IntelOwl/blob/master/requirements/certego-requirements.txt). Ultimately re-build the project
 - *certego-ui*: [Frontend doc]((https://github.com/intelowlproject/IntelOwl/blob/master/frontend/README.md))
+
+
 
 ## Create a pull request
 

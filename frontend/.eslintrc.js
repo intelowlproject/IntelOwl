@@ -6,6 +6,8 @@ module.exports = {
   extends: [
     "plugin:react/recommended",
     "plugin:react-hooks/recommended",
+    "plugin:import/recommended",
+    "plugin:jsx-a11y/recommended",
     "airbnb",
     "prettier",
   ],
@@ -13,8 +15,7 @@ module.exports = {
     ecmaFeatures: {
       jsx: true,
     },
-    ecmaVersion: 12,
-    sourceType: "module",
+    ecmaVersion: 2021,
   },
   rules: {
     "no-console": "off",

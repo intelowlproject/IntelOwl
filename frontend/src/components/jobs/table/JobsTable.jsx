@@ -1,5 +1,5 @@
 import React from "react";
-import { Container, Row } from "reactstrap";
+import { Container, Row, Col } from "reactstrap";
 import useTitle from "react-use/lib/useTitle";
 
 import {
@@ -51,25 +51,28 @@ export default function JobsTable() {
   return (
     <Container fluid>
       {/* Basic */}
-      <Row className="d-flex-start-center flex-column flex-lg-row mb-2">
-        <h1>
-          Jobs History&nbsp;
-          <small className="text-muted">{data?.count} total</small>
-        </h1>
-        <ElasticTimePicker
-          className="ml-auto"
-          size="sm"
-          defaultSelected={range}
-          onChange={onTimeIntervalChange}
-        />
+      <Row className="mb-2">
+        <Col>
+          <h1>
+            Jobs History&nbsp;<small className="text-muted">{data?.count} total</small>
+          </h1>
+        </Col>
+        <Col className="align-self-center">
+          <ElasticTimePicker
+            className="float-end"
+            size="sm"
+            defaultSelected={range}
+            onChange={onTimeIntervalChange}
+          />
+        </Col>
       </Row>
       {/* Actions */}
-      <Row className="px-3 bg-dark d-flex justify-content-end align-items-center">
+      <div className="px-3 bg-dark d-flex justify-content-end align-items-center">
         <TableHintIcon />
-        <SyncButton onClick={refetch} className="ml-auto m-0 py-1" />
-      </Row>
+        <SyncButton onClick={refetch} className="ms-auto m-0 py-1" />
+      </div>
       {/* Table */}
-      <Row>{tableNode}</Row>
+      {tableNode}
     </Container>
   );
 }

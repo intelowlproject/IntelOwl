@@ -1,7 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Col, FormGroup, Label } from "reactstrap";
-import { Submit, CustomInput as FormInput } from "formstrap";
+import { Col, FormGroup, Label, Button, Spinner, Input } from "reactstrap";
 import { Form, Formik } from "formik";
 import { IoMdPersonAdd } from "react-icons/io";
 
@@ -52,35 +51,38 @@ function InvitationForm({ onFormSubmit, }) {
       initialValues={initialValues}
       validate={onValidate}
       onSubmit={onSubmit}
-      validateOnMount
+      validateOnChange
     >
       {(formik) => (
         <Form className="mx-2 my-3">
           <FormGroup row className="d-flex flex-wrap">
-            <Col md={4}>
-              <Label className="required" htmlFor="username">
-                User's username
-              </Label>
-            </Col>
+            <Label
+              className="required"
+              for="forminput-username"
+              md={4}
+            >
+              User's username
+            </Label>
             <Col md={5}>
-              <FormInput
+              <Input
                 autoFocus
                 id="forminput-username"
                 type="text"
                 name="username"
-                className="form-control form-control-sm"
+                onChange={formik.handleChange}
               />
             </Col>
             <Col md={2}>
-              <Submit
+              <Button
+                type="submit"
                 id="forminput-submit"
                 disabled={!(formik.isValid || formik.isSubmitting)}
-                withSpinner
                 color="darker"
                 size="sm"
+                md={2}
               >
-                {!formik.isSubmitting && "Send"}
-              </Submit>
+                {formik.isSubmitting && <Spinner  size="sm" />}Send
+              </Button>
             </Col>
           </FormGroup>
         </Form>
@@ -95,7 +97,7 @@ function InviteButton({ onCreate, }) {
     <PopupFormButton
       id="invitationform-icon"
       title="Invite User"
-      titlePlacement="right-start"
+      titlePlacement="right"
       Icon={IoMdPersonAdd}
       Form={InvitationForm}
       onFormSuccess={onCreate}

@@ -3,15 +3,15 @@ import { Alert, Row, Col, ButtonGroup } from "reactstrap";
 import { MdVisibility, MdVisibilityOff } from "react-icons/md";
 import { VscDebugDisconnect } from "react-icons/vsc";
 import { IoMdAdd } from "react-icons/io";
-import confirm from "reactstrap-confirm";
 
 import {
   ContentSection,
   ErrorAlert,
   IconButton,
-  MomentHoverable,
+  DateHoverable,
   CopyToClipboardButton,
-  useAxiosComponentLoader
+  useAxiosComponentLoader,
+  confirm
 } from "@certego/certego-ui";
 
 import { APIACCESS_BASE_URI, createNewToken, deleteToken } from "./api";
@@ -37,7 +37,7 @@ export default function APIAccess() {
     const answer = await confirm({
       message: (
         <div>
-          <p className="text-warning font-italic">
+          <p className="text-warning fst-italic">
             Note: This is an irreversible operation.
           </p>
           <p>
@@ -66,10 +66,10 @@ export default function APIAccess() {
       render={() => (
         <>
           {/* API key details */}
-          <Row noGutters className="d-flex ">
+          <Row className="d-flex g-0">
             <Col sm={6} lg={3}>
-              <small className="text-muted mr-1">Created</small>
-              <MomentHoverable
+              <small className="text-muted me-1">Created</small>
+              <DateHoverable
                 id="apikey__created"
                 value={respData?.created}
                 format="h:mm A MMM Do, YYYY"
@@ -78,8 +78,8 @@ export default function APIAccess() {
               />
             </Col>
             <Col sm={6} lg={3}>
-              <small className="text-muted mr-1">Expires</small>
-              <MomentHoverable
+              <small className="text-muted me-1">Expires</small>
+              <DateHoverable
                 id="apikey__expires"
                 value={respData?.expiry}
                 title="Session expiry date"
@@ -88,7 +88,7 @@ export default function APIAccess() {
             </Col>
           </Row>
           {/* API key toggler */}
-          <Row noGutters className="mt-4 d-flex">
+          <Row className="mt-4 d-flex g-0">
             <Col md={8} lg={5} className="mx-auto">
               <ContentSection className="bg-darker d-flex-center flex-nowrap">
                 {tokenVisible ? (
@@ -104,12 +104,12 @@ export default function APIAccess() {
                     tokentokentokentokentokentoken
                   </div>
                 )}
-                <ButtonGroup className="ml-auto" size="sm">
+                <ButtonGroup className="ms-auto" size="sm">
                   <IconButton
                     id="toggle-show-apikey-btn"
                     color="dark"
                     title={tokenVisible ? "Hide API key" : "Show API Key"}
-                    className="ml-2 border border-dark"
+                    className="ms-2 border border-dark"
                     Icon={tokenVisible ? MdVisibility : MdVisibilityOff}
                     onClick={() => setTokenVisible((s) => !s)}
                   />

@@ -1,60 +1,44 @@
-import React from "react";
-import { Route, Switch } from "react-router-dom";
-
-// lib
+import React, { Suspense } from "react";
+import { useRoutes, Outlet } from "react-router-dom";
 import { FallBackLoading } from "@certego/certego-ui";
 
 // wrapper
-import AuthGuard from "../wrappers/AuthGuard";
-import IfAuthRedirectGuard from "../wrappers/IfAuthRedirectGuard";
 import withAuth from "../wrappers/withAuth";
 
-// routes
-import {
-  publicRoutesLazy,
-  noAuthRoutesLazy,
-  authRoutesLazy
-} from "../components/Routes";
+// layout
+import {publicRoutesLazy, noAuthRoutesLazy, authRoutesLazy } from "../components/Routes";
+import AppHeader from "./AppHeader";
 
-function AppMain() {
-  console.debug("AppMain rendered!");
+const NoMatch = React.lazy(() => import("./NoMatch"));
 
+function Layout() {
   return (
-    <React.Suspense fallback={<FallBackLoading />}>
-      <Switch>
-        {/* Public Routes */}
-        {publicRoutesLazy.map((routeProps) => (
-          <Route key={routeProps.path} {...routeProps} />
-        ))}
-        {/* No Auth Public Routes */}
-        {noAuthRoutesLazy.map(({ component: Component, ...routeProps }) => (
-          <Route
-            key={routeProps.path}
-            render={(props) => (
-              <IfAuthRedirectGuard>
-                <Component {...props} />
-              </IfAuthRedirectGuard>
-            )}
-            {...routeProps}
-          />
-        ))}
-        {/* Auth routes */}
-        {authRoutesLazy.map(({ component: Component, ...routeProps }) => (
-          <Route
-            key={routeProps.path}
-            render={(props) => (
-              <AuthGuard>
-                <Component {...props} />
-              </AuthGuard>
-            )}
-            {...routeProps}
-          />
-        ))}
-        {/* 404 */}
-        <Route component={React.lazy(() => import("./NoMatch"))} />
-      </Switch>
-    </React.Suspense>
+    <>
+      <AppHeader />
+      <main role="main" className="px-1 px-md-5 mx-auto">
+        <Outlet />
+      </main>
+    </>
   );
 }
 
-export default withAuth(AppMain);
+function AppMain() {
+  const AuthLayout = withAuth(Layout);
+  const routes = useRoutes([
+    {
+      path: "/",
+      element: <AuthLayout />,
+      children: [...publicRoutesLazy, ...noAuthRoutesLazy, ...authRoutesLazy],
+    }, {
+      path: "*",
+      element:
+        <Suspense fallback={<FallBackLoading />}>
+          <NoMatch />
+        </Suspense>,
+    },
+  ]);
+
+  return routes;
+}
+
+export default AppMain;

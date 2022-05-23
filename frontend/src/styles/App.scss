@@ -1,20 +1,6 @@
 // lib
 @import "@certego/certego-ui/src/styles/root.scss";
 
-:root {
-  /* bootstrap overwrite */
-  --primary: #{$primary} !important;
-  --secondary: #{$secondary} !important;
-  --tertiary: #{$tertiary} !important;
-  --dark: #{$dark} !important;
-  --light: #{$light} !important;
-  --info: #{$info} !important;
-  --body-bg: #{$body-bg} !important;
-  --gray: #{$gray} !important;
-  --dark-bluish-grey: #{$dark-bluish-grey} !important;
-  --light-bluish-grey: #{$light-bluish-grey} !important;
-}
-
 // App.jsx
 * {
   scroll-margin-top: 75px !important;
@@ -115,7 +101,7 @@ section#app-toasts {
   }
 }
 
-.badge-top-right-corner {
+.badge-top-end-corner {
   top: -1.25em;
   right: 0.75em;
   font-size: x-small;
@@ -125,7 +111,7 @@ section#app-toasts {
 
 /* Media queries */
 
-@include media-breakpoint-down(sm) {
+@include media-breakpoint-down(md) {
   #home__bgImg {
     left: -5px !important;
     // fixed -> parallax effect

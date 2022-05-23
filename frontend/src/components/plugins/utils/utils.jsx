@@ -25,11 +25,11 @@ export function PluginInfoCard({ pluginInfo, }) {
     <Card className="flat border-dark h-100 w-100">
       <CardHeader className="d-flex align-items-center bg-body p-2 h5">
         <span>{pluginInfo?.name}</span>
-        <code className="ml-1 font-italic small">
+        <code className="ms-1 fst-italic small">
           ( {pluginInfo?.python_module} )
         </code>
         {pluginInfo?.maximum_tlp && (
-          <TLPTag className="ml-auto mr-0" value={pluginInfo.maximum_tlp} />
+          <TLPTag className="ms-auto me-0" value={pluginInfo.maximum_tlp} />
         )}
       </CardHeader>
       <CardBody className="bg-darker border-top border-tertiary">
@@ -135,7 +135,7 @@ export function PluginVerificationIcon({ pluginName, verification, }) {
         placement="top"
         fade={false}
         innerClassName={classnames(
-          "text-left text-nowrap md-fit-content border border-darker",
+          "text-start text-nowrap md-fit-content border border-darker",
           {
             "bg-success text-darker": verification?.configured,
             "bg-danger text-darker": !verification?.configured,

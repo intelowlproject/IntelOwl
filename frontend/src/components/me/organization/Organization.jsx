@@ -1,41 +1,48 @@
-import React from "react";
+import React, { Suspense } from "react";
 import PropTypes from "prop-types";
 import { SiMinutemailer } from "react-icons/si";
 import { BsPeopleFill } from "react-icons/bs";
 
-import { RouterTabs } from "@certego/certego-ui";
+import { RouterTabs, FallBackLoading } from "@certego/certego-ui";
 import { Container } from "reactstrap";
+
+const MyOrgPage = React.lazy(() => import("./MyOrgPage"));
+const InvitationsList = React.lazy(() => import("./InvitationsList"));
+
+const routes = [
+  {
+    key: "organization-myorg",
+    location: "myorg",
+    Title: () => (
+      <span>
+        <BsPeopleFill className="me-2" />
+        Organization
+      </span>
+    ),
+    Component: () => (
+      <Suspense fallback={<FallBackLoading />}>
+        <MyOrgPage />
+      </Suspense>
+    ),
+  },
+  {
+    key: "organization-invitations",
+    location: "invitations",
+    Title: () => (
+      <span>
+        <SiMinutemailer />&nbsp;Invitations
+      </span>
+    ),
+    Component: () => (
+      <Suspense fallback={<FallBackLoading />}>
+        <InvitationsList />
+      </Suspense>
+    ),
+  },
+];
 
 export default function Organization({ match, }) {
   console.debug("Organization rendered!");
-
-  const routes = React.useMemo(
-    () => [
-      {
-        key: "organization-myorg",
-        location: { pathname: `${match.url}/myorg`, },
-        Title: () => (
-          <span>
-            <BsPeopleFill className="mr-2" />
-            Organization
-          </span>
-        ),
-        Component: React.lazy(() => import("./MyOrgPage")),
-      },
-      {
-        key: "organization-invitations",
-        location: { pathname: `${match.url}/invitations`, },
-        Title: () => (
-          <span>
-            <SiMinutemailer className="mr-2" />
-            Invitations
-          </span>
-        ),
-        Component: React.lazy(() => import("./InvitationsList")),
-      },
-    ],
-    [match.url]
-  );
 
   return (
     <Container fluid>

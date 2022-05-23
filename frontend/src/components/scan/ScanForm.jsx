@@ -1,7 +1,6 @@
 import React from "react";
-import { FormGroup, Label, Container, Col, FormText } from "reactstrap";
-import { Submit, CustomInput as FormInput } from "formstrap";
-import { Link, useHistory } from "react-router-dom";
+import { FormGroup, Label, Container, Col, FormText, Input, Spinner, Button } from "reactstrap";
+import { useNavigate } from "react-router-dom";
 import { Form, Formik } from "formik";
 import useTitle from "react-use/lib/useTitle";
 import { MdEdit } from "react-icons/md";
@@ -122,8 +121,8 @@ export default function ScanForm() {
   // page title
   useTitle("IntelOwl | Scan", { restoreOnUnmount: true, });
 
-  // router history
-  const history = useHistory();
+  // router navigation
+  const navigate = useNavigate();
 
   // use custom hooks
   const [{ MonthBadge, TotalBadge, QuotaInfoIcon, }, refetchQuota, quota] =
@@ -143,7 +142,7 @@ export default function ScanForm() {
             <div className="d-flex justify-content-start align-items-start flex-column">
               <div className="d-flex justify-content-start align-items-baseline flex-column">
                 <div>{v.name}&nbsp;</div>
-                <div className="small text-left text-muted">
+                <div className="small text-start text-muted">
                   {markdownToHtml(v.description)}
                 </div>
               </div>
@@ -172,7 +171,7 @@ export default function ScanForm() {
             <div className="d-flex justify-content-start align-items-start flex-column">
               <div className="d-flex justify-content-start align-items-baseline flex-column">
                 <div>{v.name}&nbsp;</div>
-                <div className="small text-left text-muted">
+                <div className="small text-start text-muted">
                   {markdownToHtml(v.description)}
                 </div>
               </div>
@@ -232,7 +231,7 @@ export default function ScanForm() {
       try {
         const jobId = await createJob(formValues);
         setTimeout(
-          () => history.push(`/jobs/${jobId}`),
+          () => navigate(`/jobs/${jobId}`),
           1000
         );
       } catch (e) {
@@ -242,20 +241,20 @@ export default function ScanForm() {
         formik.setSubmitting(false);
       }
     },
-    [history, refetchQuota]
+    [navigate, refetchQuota]
   );
 
   return (
     <Container className="col-lg-12 col-xl-7">
       {/* Quota badges */}
       <ContentSection className="bg-body mb-2 d-flex-center">
-        <MonthBadge className="mr-2 text-larger" />
-        <TotalBadge className="ml-2 mr-3 text-larger" />
+        <MonthBadge className="me-2 text-larger" />
+        <TotalBadge className="ms-2 me-3 text-larger" />
         <QuotaInfoIcon />
       </ContentSection>
       {/* Form */}
       <ContentSection id="ScanForm" className="mt-3 bg-body shadow">
-        <h3 className="font-weight-bold">
+        <h3 className="fw-bold">
           Scan&nbsp;
           {classification === "file" ? "File" : "Observable"}
         </h3>
@@ -264,79 +263,93 @@ export default function ScanForm() {
           initialValues={initialValues}
           validate={onValidate}
           onSubmit={onSubmit}
-          validateOnMount
+          validateOnChange
         >
           {(formik) => (
             <Form>
-              <FormGroup className="content-section bg-darker d-flex-center flex-wrap">
                 {ALL_CLASSIFICATIONS.map((ch) => (
-                  <FormInput
-                    inline
+                  <FormGroup check inline
                     key={`classification__${ch}`}
-                    id={`classification__${ch}`}
-                    type="radio"
-                    name="classification"
-                    label={ch}
-                    value={ch}
-                    onClick={() => {
-                      setClassification(ch);
-                      formik.setFieldValue("analyzers", []); // reset
-                    }}
-                  />
+                  >
+                    <Input
+                      id={`classification__${ch}`}
+                      type="radio"
+                      name="classification"
+                      value={ch}
+                      onClick={() => {
+                        setClassification(ch);
+                        formik.setFieldValue("analyzers", []); // reset
+                      }}
+                    />
+                    <Label check>
+                      {ch}
+                    </Label>
+                  </FormGroup>
                 ))}
-              </FormGroup>
               {OBSERVABLE_TYPES.includes(formik.values.classification) ? (
                 <FormGroup row>
-                  <Label className="required" sm={4} htmlFor="observable_name">
+                  <Label
+                    className="required"
+                    sm={4}
+                    for="observable_name"
+                  >
                     Observable Value
                   </Label>
                   <Col sm={8}>
-                    <FormInput
+                    <Input
                       type="text"
+                      id="observable_name"
                       name="observable_name"
-                      className="form-control input-dark"
+                      className="input-dark"
                       {...observableType2PropsMap[formik.values.classification]}
                     />
                   </Col>
                 </FormGroup>
               ) : (
                 <FormGroup row>
-                  <Label className="required" sm={4} htmlFor="file">
+                  <Label className="required" sm={4} for="file">
                     File
                   </Label>
                   <Col sm={8}>
-                    <FormInput type="file" name="file" className="input-dark" />
+                    <Input
+                      type="file"
+                      id="file"
+                      name="file"
+                      className="input-dark" />
                   </Col>
                 </FormGroup>
               )}
               <FormGroup row>
-                <Label sm={4} htmlFor="analyzers">
+                <Label sm={4} for="analyzers">
                   Select Analyzers
                 </Label>
-                <Loader
-                  loading={pluginsLoading}
-                  error={pluginsError}
-                  render={() => (
-                    <Col sm={8}>
-                      <MultiSelectDropdownInput
-                        options={analyzersOptions}
-                        value={formik.values.analyzers}
-                        onChange={(v) => formik.setFieldValue("analyzers", v)}
-                        // controlShouldRenderValue={false}
-                      />
-                      <FormText>
-                        Default: all configured analyzers are triggered.
-                      </FormText>
-                    </Col>
-                  )}
-                />
+                <Col sm={8}>
+                  <Loader
+                    loading={pluginsLoading}
+                    error={pluginsError}
+                    render={() => (
+                      <>
+                        <MultiSelectDropdownInput
+                          options={analyzersOptions}
+                          value={formik.values.analyzers}
+                          onChange={(v) => formik.setFieldValue("analyzers", v)}
+                          // controlShouldRenderValue={false}
+                        />
+                        <FormText>
+                          Default: all configured analyzers are triggered.
+                        </FormText>
+                      </>
+                    )}
+                  />
+                </Col>
               </FormGroup>
               <FormGroup row>
-                <Label sm={4} htmlFor="connectors">
+                <Label sm={4} for="connectors">
                   Select Connectors
                 </Label>
+                <Col sm={8}>
                 {!(pluginsLoading || pluginsError) && (
-                  <Col sm={8}>
+                  <>
                     <MultiSelectDropdownInput
                       options={connectorOptions}
                       value={formik.values.connectors}
@@ -345,11 +358,12 @@ export default function ScanForm() {
                     <FormText>
                       Default: all configured connectors are triggered.
                     </FormText>
-                  </Col>
+                  </>
                 )}
+                </Col>
               </FormGroup>
               <FormGroup row>
-                <Label sm={4} htmlFor="runtime_configuration">
+                <Label sm={4} for="scanform-runtimeconf-editbtn">
                   Runtime Configuration
                 </Label>
                 <Col sm={8}>
@@ -378,20 +392,27 @@ export default function ScanForm() {
                 </Col>
               </FormGroup>
               <FormGroup row>
-                <Label sm={4} htmlFor="tlp">
+                <Label sm={4}>
                   TLP
                 </Label>
                 <Col sm={8}>
                   {TLP_CHOICES.map((ch) => (
-                    <FormInput
-                      inline
+                    <FormGroup inline check
                       key={`tlpchoice__${ch}`}
-                      id={`tlpchoice__${ch}`}
-                      type="radio"
-                      name="tlp"
-                      label={<TLPTag value={ch} />}
-                      value={ch}
-                    />
+                    >
+                      <Label check
+                        for={`tlpchoice__${ch}`}
+                      >
+                        <TLPTag value={ch} />
+                      </Label>
+                      <Input
+                        id={`tlpchoice__${ch}`}
+                        type="radio"
+                        name="tlp"
+                        value={ch}
+                        onChange={formik.handleChange}
+                      />
+                    </FormGroup>
                   ))}
                   <FormText>
                     {TLP_DESCRIPTION_MAP[formik.values.tlp].replace(
@@ -402,7 +423,7 @@ export default function ScanForm() {
                 </Col>
               </FormGroup>
               <FormGroup row>
-                <Label sm={4} htmlFor="tags">
+                <Label sm={4} id="scanform-tagselectinput">
                   Tags
                 </Label>
                 <Col sm={8}>
@@ -416,40 +437,46 @@ export default function ScanForm() {
                 </Col>
               </FormGroup>
               <FormGroup row className="mt-2">
-                <Label sm={4} htmlFor="check">
+                <Label sm={4}>
                   Extra configuration
                 </Label>
                 <Col sm={8}>
                   {checkChoices.map((ch) => (
-                    <FormInput
+                    <FormGroup check
                       key={`checkchoice__${ch.value}`}
-                      id={`checkchoice__${ch.value}`}
-                      type="radio"
-                      name="check"
-                      label={ch.label}
-                      value={ch.value}
-                    />
+                    >
+                      <Input
+                        id={`checkchoice__${ch.value}`}
+                        type="radio"
+                        name="check"
+                        value={ch.value}
+                        onChange={formik.handleChange}
+                      />
+                      <Label check
+                        for={`checkchoice__${ch.value}`}
+                      >
+                        {ch.label}
+                      </Label>
+                    </FormGroup>
                   ))}
                 </Col>
               </FormGroup>
-              <FormGroup row className="mt-5">
-                <Submit
-                  disabled={!(formik.isValid || formik.isSubmitting)}
-                  withSpinner
-                  color="primary"
-                  size="lg"
-                  outline
-                  className="mx-auto rounded-0"
-                >
-                  {!formik.isSubmitting && "Start Scan"}
-                </Submit>
-              </FormGroup>
+              <Button
+                type="submit"
+                disabled={!(formik.isValid || formik.isSubmitting)}
+                color="primary"
+                size="lg"
+                outline
+                className="mx-auto rounded-0"
+              >
+                {formik.isSubmitting && <Spinner  size="sm" />}Start Scan
+              </Button>
             </Form>
           )}
         </Formik>
       </ContentSection>
       {/* Recent Scans */}
-      <h6 className="font-weight-bold">Recent Scans</h6>
+      <h6 className="fw-bold">Recent Scans</h6>
       <RecentScans />
     </Container>
   );

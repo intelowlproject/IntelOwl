@@ -1,13 +1,12 @@
 /* eslint-disable react/prop-types */
 import React from "react";
-import Moment from "react-moment";
 
 import {
   DefaultColumnFilter,
   SelectOptionsFilter,
   LinkOpenViewIcon,
   SlicedText,
-  SelectColumnFilter
+  DateHoverable
 } from "@certego/certego-ui";
 
 import { JobTag, StatusTag, TLPTag } from "../../common";
@@ -33,7 +32,10 @@ const jobTableColumns = [
     id: "received_request_time",
     accessor: "received_request_time",
     Cell: ({ value, }) => (
-      <Moment fromNow withTitle date={value} titleFormat="Do MMMM YYYY" />
+      <DateHoverable ago
+        value={value}
+        showFormat="PPP"
+      />
     ),
     maxWidth: 125,
   },
@@ -42,7 +44,10 @@ const jobTableColumns = [
     id: "finished_analysis_time",
     accessor: "finished_analysis_time",
     Cell: ({ value, }) => (
-      <Moment fromNow withTitle date={value} titleFormat="Do MMMM YYYY" />
+      <DateHoverable ago
+        value={value}
+        showFormat="PPP"
+      />
     ),
     maxWidth: 125,
   },
@@ -59,7 +64,6 @@ const jobTableColumns = [
     ),
     disableSortBy: true,
     Filter: DefaultColumnFilter,
-    minWidth: 125,
   },
   {
     Header: "Name",
@@ -74,7 +78,6 @@ const jobTableColumns = [
     ),
     disableSortBy: true,
     Filter: DefaultColumnFilter,
-    minWidth: 175,
   },
   {
     Header: "MD5",
@@ -89,7 +92,6 @@ const jobTableColumns = [
     ),
     disableSortBy: true,
     Filter: DefaultColumnFilter,
-    minWidth: 175,
   },
   {
     Header: "Settings",
@@ -101,7 +103,6 @@ const jobTableColumns = [
         disableSortBy: true,
         Filter: SelectOptionsFilter,
         selectOptions: ALL_CLASSIFICATIONS,
-        minWidth: 125,
       },
       {
         Header: "TLP",
@@ -111,7 +112,6 @@ const jobTableColumns = [
         disableSortBy: true,
         Filter: SelectOptionsFilter,
         selectOptions: TLP_CHOICES,
-        minWidth: 125,
       },
       {
         Header: "Tags",
@@ -122,13 +122,12 @@ const jobTableColumns = [
             <JobTag
               key={`jobtable-tags-${tag.label}`}
               tag={tag}
-              className="ml-2"
+              className="ms-2"
             />
           )),
         disableSortBy: true,
         Filter: DefaultColumnFilter,
         filterValueAccessorFn: (tags) => tags.map((t) => t.label),
-        minWidth: 150,
       },
     ],
   },
@@ -169,7 +168,6 @@ const jobTableColumns = [
         disableSortBy: true,
         Filter: SelectOptionsFilter,
         selectOptions: JOB_STATUSES,
-        minWidth: 225,
       },
     ],
   },

@@ -41,15 +41,14 @@ export default function NotificationPopoverButton() {
         Icon={IoMdNotifications}
       />
       {unreadNotifs?.length > 0 && (
-        <Badge color="accent" className="badge-top-right-corner">
+        <Badge color="accent" className="badge-top-end-corner">
           {unreadNotifs?.length}
         </Badge>
       )}
       <UncontrolledPopover
-        target="notifications-btn-iconbtn"
+        target="notifications-btn"
         trigger="click"
         placement="bottom-end"
-        positionFixed
         popperClassName="notifications-popover"
       >
         <Tabs

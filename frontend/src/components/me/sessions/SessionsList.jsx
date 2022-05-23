@@ -4,7 +4,7 @@ import { VscDebugDisconnect } from "react-icons/vsc";
 
 import {
   IconButton,
-  MomentHoverable,
+  DateHoverable,
   useAxiosComponentLoader
 } from "@certego/certego-ui";
 
@@ -52,13 +52,13 @@ export default function SessionsList() {
               <li key={`sessionslist-${id}`}>
                 <Row className="mb-3 d-flex flex-wrap">
                   <Col sm={6} xl={4}>
-                    <small className="text-muted mr-1">Device</small>
+                    <small className="text-muted me-1">Device</small>
                     &nbsp;
                     {client}
                   </Col>
                   <Col sm={6} xl={4}>
-                    <small className="text-muted mr-1">Created</small>
-                    <MomentHoverable
+                    <small className="text-muted me-1">Created</small>
+                    <DateHoverable
                       id={`sessionslist-${id}__created`}
                       value={created}
                       format="h:mm A MMM Do, YYYY"
@@ -67,15 +67,15 @@ export default function SessionsList() {
                     />
                   </Col>
                   <Col sm={6} xl={3}>
-                    <small className="text-muted mr-1">Expires</small>
-                    <MomentHoverable
+                    <small className="text-muted me-1">Expires</small>
+                    <DateHoverable
                       id={`sessionslist-${id}__expires`}
                       value={expiry}
                       title="Session expiry date"
                       fromNow
                     />
                     {hasExpired && (
-                      <Badge color="danger" className="ml-2">
+                      <Badge color="danger" className="ms-2">
                         expired
                       </Badge>
                     )}

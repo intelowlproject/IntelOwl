@@ -127,13 +127,13 @@ export default function RuntimeConfigurationModal(props) {
               onClick={saveAndCloseModal}
               size="sm"
               color="info"
-              className="ml-2"
+              className="ms-2"
             >
               Save & Close
             </Button>
           </div>
         </ContentSection>
-        <ContentSection className="ml-2 bg-darker">
+        <ContentSection className="ms-2 bg-darker">
           {Object.entries(combinedParamsMap).map(([name, params]) => (
             <div key={`editruntimeconf__${name}`}>
               <h6 className="text-secondary">{name}</h6>
@@ -151,7 +151,7 @@ export default function RuntimeConfigurationModal(props) {
                   ))}
                 </ul>
               ) : (
-                <span className="text-muted font-italic">null</span>
+                <span className="text-muted fst-italic">null</span>
               )}
             </div>
           ))}

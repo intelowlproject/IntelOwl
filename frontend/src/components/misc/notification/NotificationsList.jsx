@@ -6,10 +6,9 @@ import {
   ListGroupItemHeading,
   ListGroupItemText
 } from "reactstrap";
-import Moment from "react-moment";
 import { IoCheckmarkDoneSharp } from "react-icons/io5";
 
-import { ContentSection, IconButton } from "@certego/certego-ui";
+import { ContentSection, IconButton, DateHoverable } from "@certego/certego-ui";
 
 import { notificationMarkAsRead } from "./api";
 
@@ -38,14 +37,15 @@ export default function NotificationsList({ notifications, refetchFn, }) {
             <ListGroupItemHeading className="text-info">
               {notif?.title}
             </ListGroupItemHeading>
-            <small className="ml-auto text-muted">
-              <Moment
-                date={notif?.created_at}
-                format="hh:mm ddd DD MMM YYYY (Z)"
+            <small className="ms-auto text-muted">
+              <DateHoverable
+                value={notif?.created_at}
+                format="p P (z)"
               />
             </small>
           </div>
           <ListGroupItemText
+          className="text-light"
             dangerouslySetInnerHTML={{ __html: notif?.body, }}
           />
           <div className="d-flex">
@@ -54,7 +54,7 @@ export default function NotificationsList({ notifications, refetchFn, }) {
                 size="xs"
                 Icon={IoCheckmarkDoneSharp}
                 title="mark as read"
-                className="ml-auto text-success"
+                className="ms-auto text-success"
                 color="dark"
                 outline
                 onClick={() => markAsReadCb(notif?.id)}

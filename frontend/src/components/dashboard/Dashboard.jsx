@@ -42,18 +42,15 @@ export default function Dashboard() {
 
   return (
     <Container fluid id="Dashboard">
-      <Row
-        noGutters
-        className="d-flex align-items-baseline flex-column flex-lg-row mb-2"
-      >
-        <h3 className="font-weight-bold">Dashboard</h3>
+      <div className="g-0 d-flex align-items-baseline flex-column flex-lg-row mb-2">
+        <h3 className="fw-bold">Dashboard</h3>
         <ElasticTimePicker
-          className="ml-auto"
+          className="ms-auto"
           size="sm"
           defaultSelected={range}
           onChange={onTimeIntervalChange}
         />
-      </Row>
+      </div>
       <Row className="d-flex flex-wrap flex-lg-nowrap">
         {charts1.map(([id, header, Component], i) => (
           <Col key={id} md={12} lg={i === 0 ? 6 : 3}>

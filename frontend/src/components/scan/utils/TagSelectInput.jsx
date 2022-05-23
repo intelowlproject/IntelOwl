@@ -1,7 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Button, ButtonGroup, Fade } from "reactstrap";
-import { Submit, CustomInput as FormInput } from "formstrap";
+import { Button, ButtonGroup, Fade, Spinner, Input } from "reactstrap";
 import { Form, Formik } from "formik";
 import { MdCheck, MdClose, MdEdit } from "react-icons/md";
 
@@ -151,40 +150,42 @@ function TagForm(props) {
   return (
     <Fade>
       <Formik
-        validateOnMount
         validate={onFormValidate}
         initialValues={tagToEdit}
         onSubmit={onFormSubmit}
+        validateOnChange
         {...rest}
       >
         {(formik) => (
-          <Form className="d-flex justify-content-start align-items-center">
-            <FormInput
+          <Form inline
+            className="d-flex justify-content-start align-items-center">
+            <Input
               autoFocus
-              inline
               type="text"
-              withFeedback={false}
               tabIndex="0"
               name="label"
               placeholder="label"
-              className="form-control form-control-sm w-100 bg-dark border-0 rounded-0"
+              bsSize="sm"
+              className="w-100 bg-dark border-0 rounded-0"
+              onChange={formik.handleChange}
             />
-            <FormInput
-              inline
+            <Input
               type="color"
               name="color"
-              className="form-control form-control-sm w-33 bg-dark border-0 rounded-0"
+              bsSize="sm"
+              className="w-33 bg-dark border-0 rounded-0"
+              onChange={formik.handleChange}
             />
-            <ButtonGroup className="ml-1">
-              <Submit
-                withSpinner
+            <ButtonGroup className="ms-1">
+              <Button
+                type="submit"
                 disabled={!(formik.isValid || formik.isSubmitting)}
                 color="tertiary"
                 size="xs"
                 onClick={formik.handleSubmit}
               >
-                {!formik.isSubmitting && <MdCheck />}
-              </Submit>
+                {formik.isSubmitting ? <Spinner /> : <MdCheck />}
+              </Button>
               <Button
                 disabled={formik.isSubmitting}
                 color="tertiary"

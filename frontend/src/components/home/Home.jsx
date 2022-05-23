@@ -68,7 +68,7 @@ export default function Home() {
         <ContentSection>
           {blogPosts.map(({ title, subText, date, link, }) => (
             <ContentSection key={title} className="border-dark bg-body">
-              <small className="text-muted float-right">{date}</small>
+              <small className="text-muted float-end">{date}</small>
               <h5 className="text-secondary">{title}</h5>
               <p className="mb-2 text-muted">{subText}</p>
               <a

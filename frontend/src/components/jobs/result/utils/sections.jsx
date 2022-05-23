@@ -1,14 +1,14 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { Button, ListGroup, ListGroupItem, Badge, Fade } from "reactstrap";
-import { useHistory } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { VscGlobe, VscFile, VscJson } from "react-icons/vsc";
 import { FaFileDownload } from "react-icons/fa";
 import { MdDeleteOutline, MdPauseCircleOutline } from "react-icons/md";
 
 import {
   ContentSection,
-  MomentHoverable,
+  DateHoverable,
   SocialShareBtn,
   IconAlert,
   IconButton,
@@ -20,14 +20,14 @@ import { downloadJobSample, deleteJob, killJob } from "../api";
 
 export function JobActionsBar({ job, }) {
   // routers
-  const history = useHistory();
+  const navigate = useNavigate();
 
   // callbacks
   const onDeleteBtnClick = async () => {
     const success = await deleteJob(job.id);
     if (!success) return;
     addToast("Redirecting...", null, "secondary");
-    setTimeout(history.goBack, 250);
+    setTimeout(()=>navigate(-1), 250);
   };
   const onDownloadSampleBtnClick = async () => {
     const blob = await downloadJobSample(job.id);
@@ -70,7 +70,7 @@ export function JobActionsBar({ job, }) {
           Icon={() => <MdDeleteOutline className="text-danger" />}
           size="sm"
           color="darker"
-          className="mr-2"
+          className="me-2"
           onClick={onDeleteBtnClick}
           title="Delete Job"
           titlePlacement="top"
@@ -80,7 +80,7 @@ export function JobActionsBar({ job, }) {
         <Button
           size="sm"
           color="darker"
-          className="mr-2"
+          className="me-2"
           onClick={onDownloadSampleBtnClick}
         >
           <FaFileDownload />
@@ -108,20 +108,20 @@ export function JobInfoCard({ job, }) {
         <div className="d-flex-start-start">
           <h3>
             {job.is_sample ? (
-              <VscFile className="mr-1" />
+              <VscFile className="me-1" />
             ) : (
-              <VscGlobe className="mr-1" />
+              <VscGlobe className="me-1" />
             )}
             {job.is_sample ? job.file_name : job.observable_name}
           </h3>
-          <Badge className="ml-1 float-right" color="info">
+          <Badge className="ms-1 float-end" color="info">
             {job.is_sample
               ? `file: ${job.file_mimetype}`
               : job.observable_classification}
           </Badge>
         </div>
       </ContentSection>
-      <ContentSection className="border-top-0 bg-body pl-0 pr-1 py-1">
+      <ContentSection className="border-top-0 bg-body ps-0 pe-1 py-1">
         <ListGroup
           horizontal
           className="align-items-start flex-wrap flex-lg-nowrap"
@@ -134,7 +134,7 @@ export function JobInfoCard({ job, }) {
             ["Process Time (s)", job.process_time],
             [
               "Start Time",
-              <MomentHoverable
+              <DateHoverable
                 id={`overview-received_request_time__${job.id}`}
                 value={job.received_request_time}
                 format="h:mm A MMM Do, YYYY"
@@ -142,7 +142,7 @@ export function JobInfoCard({ job, }) {
             ],
             [
               "End Time",
-              <MomentHoverable
+              <DateHoverable
                 id={`overview-finished_analysis_time__${job.id}`}
                 value={job.finished_analysis_time}
                 format="h:mm A MMM Do, YYYY"
@@ -150,7 +150,7 @@ export function JobInfoCard({ job, }) {
             ],
           ].map(([key, value]) => (
             <ListGroupItem key={key}>
-              <small className="font-weight-bold">{key}</small>
+              <small className="fw-bold">{key}</small>
               <div className="bg-dark p-1">{value}</div>
             </ListGroupItem>
           ))}
@@ -163,7 +163,7 @@ export function JobInfoCard({ job, }) {
             [
               "Tags",
               job.tags.map((tag) => (
-                <JobTag key={tag.label} tag={tag} className="mr-2" />
+                <JobTag key={tag.label} tag={tag} className="me-2" />
               )),
             ],
             [
@@ -177,7 +177,7 @@ export function JobInfoCard({ job, }) {
             ],
           ].map(([key, value]) => (
             <ListGroupItem key={key}>
-              <small className="font-weight-bold">{key}</small>
+              <small className="fw-bold">{key}</small>
               <div className="bg-dark p-1">{value}</div>
             </ListGroupItem>
           ))}

@@ -72,7 +72,7 @@ export default function APIAccess() {
               <DateHoverable
                 id="apikey__created"
                 value={respData?.created}
-                format="h:mm A MMM Do, yyyy"
+                format="hh:mm a MMM do, yyyy"
                 title="Session create date"
                 showAgo
               />
@@ -82,8 +82,9 @@ export default function APIAccess() {
               <DateHoverable
                 id="apikey__expires"
                 value={respData?.expiry}
+                format="hh:mm a MMM do, yyyy"
                 title="Session expiry date"
-                fromNowDuring
+                showAgo
               />
             </Col>
           </Row>

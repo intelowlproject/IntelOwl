@@ -137,7 +137,7 @@ export function JobInfoCard({ job, }) {
               <DateHoverable
                 id={`overview-received_request_time__${job.id}`}
                 value={job.received_request_time}
-                format="h:mm A MMM Do, yyyy"
+                format="hh:mm a MMM do, yyyy"
               />,
             ],
             [
@@ -145,7 +145,7 @@ export function JobInfoCard({ job, }) {
               <DateHoverable
                 id={`overview-finished_analysis_time__${job.id}`}
                 value={job.finished_analysis_time}
-                format="h:mm A MMM Do, yyyy"
+                format="hh:mm a MMM do, yyyy"
               />,
             ],
           ].map(([key, value]) => (

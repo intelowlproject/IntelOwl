@@ -256,7 +256,7 @@ export default function ScanForm() {
       <ContentSection id="ScanForm" className="mt-3 bg-body shadow">
         <h3 className="fw-bold">
           Scan&nbsp;
-          {classification === "file" ? "File" : "Observable"}
+          {classification === "file" ? "Files" : "Observables"}
         </h3>
         <hr />
         <Formik

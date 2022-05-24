@@ -61,7 +61,7 @@ export default function SessionsList() {
                     <DateHoverable
                       id={`sessionslist-${id}__created`}
                       value={created}
-                      format="h:mm A MMM Do, yyyy"
+                      format="hh:mm a MMM do, yyyy"
                       title="Session create date"
                       showAgo
                     />
@@ -72,7 +72,8 @@ export default function SessionsList() {
                       id={`sessionslist-${id}__expires`}
                       value={expiry}
                       title="Session expiry date"
-                      fromNow
+                      format="hh:mm a MMM do, yyyy"
+                      showAgo
                     />
                     {hasExpired && (
                       <Badge color="danger" className="ms-2">

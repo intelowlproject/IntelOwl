@@ -100,7 +100,7 @@ function AppHeader() {
       <Navbar dark expand="lg">
         <NavbarBrand tag={RRNavLink} to="/">
           <img
-            src={`${PUBLIC_URL}/logo-negative.png`}
+            src={`${PUBLIC_URL}/logo-negative-reduced.png`}
             width="128"
             alt="IntelOwl logo"
           />

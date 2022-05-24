@@ -3,19 +3,22 @@ import PropTypes from "prop-types";
 import useAxios from "axios-hooks";
 import useTitle from "react-use/lib/useTitle";
 import useInterval from "react-use/lib/useInterval";
+import { useParams } from "react-router-dom";
 
 import { Loader } from "@certego/certego-ui";
 import { JOB_BASE_URI } from "../../../constants/api";
 import { JobOverview } from "./utils";
 
-export default function JobResult({ match, }) {
+export default function JobResult() {
   console.debug("JobResult rendered!");
 
   // local state
   const [initialLoading, setInitialLoading] = React.useState(true);
 
   // from props
-  const jobId = match.params.id;
+  const params = useParams();
+  const jobId = params.id;
+  console.log(jobId);
 
   // API
   const [{ data: job, loading, error, }, refetch] = useAxios({
@@ -54,13 +57,3 @@ export default function JobResult({ match, }) {
     />
   );
 }
-
-JobResult.propTypes = {
-  match: PropTypes.shape({
-    url: PropTypes.string.isRequired,
-    path: PropTypes.string.isRequired,
-    params: PropTypes.shape({
-      id: PropTypes.string.isRequired,
-    }),
-  }).isRequired,
-};

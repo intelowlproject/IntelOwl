@@ -6,6 +6,7 @@ import {
   DropdownItem
 } from "reactstrap";
 import { BsPeopleFill } from "react-icons/bs";
+import { FiLogOut } from "react-icons/fi";
 import { IoMdKey, IoMdSettings } from "react-icons/io";
 
 import { UserBubble, DropdownNavLink } from "@certego/certego-ui";
@@ -34,7 +35,7 @@ export default function UserMenu(props) {
         data-bs-popper
       >
         <DropdownItem text >
-          {`${user?.full_name} (${user?.username})`}
+          logged in as <b>{`${user?.username}`}</b>
         </DropdownItem>
         <DropdownItem divider />
         {/* Django Admin Interface */}
@@ -51,7 +52,7 @@ export default function UserMenu(props) {
         </DropdownNavLink>
         <DropdownItem divider />
         <DropdownNavLink to="/logout">
-          Logout
+          <FiLogOut className="me-2" /> Logout
         </DropdownNavLink>
       </DropdownMenu>
     </UncontrolledDropdown>

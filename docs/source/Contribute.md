@@ -121,9 +121,6 @@ npm i
 npm start
 ```
 
-
-
-
 ## How to add a new analyzer
 You may want to look at a few existing examples to start to build a new one, such as:
 - [shodan.py](https://github.com/intelowlproject/IntelOwl/blob/develop/api_app/analyzers_manager/observable_analyzers/shodan.py), if you are creating an observable analyzer

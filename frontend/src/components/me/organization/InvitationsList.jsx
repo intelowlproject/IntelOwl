@@ -107,7 +107,7 @@ export default function InvitationsList() {
                           <DateHoverable
                             id={`invlist-${id}`}
                             value={invitedAt}
-                            format="h:mm A MMM Do, yyyy"
+                            format="hh:mm a MMM do, yyyy"
                             title="Invite sent date"
                           />
                         </Col>

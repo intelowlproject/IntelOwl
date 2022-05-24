@@ -61,7 +61,7 @@ export default function SessionsList() {
                     <DateHoverable
                       id={`sessionslist-${id}__created`}
                       value={created}
-                      format="h:mm A MMM Do, YYYY"
+                      format="h:mm A MMM Do, yyyy"
                       title="Session create date"
                       showAgo
                     />

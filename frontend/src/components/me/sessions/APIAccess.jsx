@@ -72,7 +72,7 @@ export default function APIAccess() {
               <DateHoverable
                 id="apikey__created"
                 value={respData?.created}
-                format="h:mm A MMM Do, YYYY"
+                format="h:mm A MMM Do, yyyy"
                 title="Session create date"
                 showAgo
               />

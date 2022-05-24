@@ -55,7 +55,7 @@ export function OrgInfoCard() {
               id="org-created_at"
               fromNow
               value={establishedAt}
-              format="Do MMMM YYYY"
+              format="Do MMMM yyyy"
               className="text-info"
             />
           )}

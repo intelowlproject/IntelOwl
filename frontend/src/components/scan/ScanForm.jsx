@@ -263,7 +263,7 @@ export default function ScanForm() {
           initialValues={initialValues}
           validate={onValidate}
           onSubmit={onSubmit}
-          validateOnChange
+          validateOnMount
         >
           {(formik) => (
             <Form>
@@ -271,6 +271,7 @@ export default function ScanForm() {
                   <FormGroup check inline
                     key={`classification__${ch}`}
                   >
+                  <Col sm={{ span:8, offset:2, }}>
                     <Input
                       id={`classification__${ch}`}
                       type="radio"
@@ -284,18 +285,19 @@ export default function ScanForm() {
                     <Label check>
                       {ch}
                     </Label>
+                  </Col>
                   </FormGroup>
                 ))}
               {OBSERVABLE_TYPES.includes(formik.values.classification) ? (
                 <FormGroup row>
                   <Label
                     className="required"
-                    sm={4}
+                    sm={3}
                     for="observable_name"
                   >
                     Observable Value
                   </Label>
-                  <Col sm={8}>
+                  <Col sm={9}>
                     <Input
                       type="text"
                       id="observable_name"
@@ -307,10 +309,10 @@ export default function ScanForm() {
                 </FormGroup>
               ) : (
                 <FormGroup row>
-                  <Label className="required" sm={4} for="file">
+                  <Label className="required" sm={3} for="file">
                     File
                   </Label>
-                  <Col sm={8}>
+                  <Col sm={9}>
                     <Input
                       type="file"
                       id="file"
@@ -320,10 +322,10 @@ export default function ScanForm() {
                 </FormGroup>
               )}
               <FormGroup row>
-                <Label sm={4} for="analyzers">
+                <Label sm={3} for="analyzers">
                   Select Analyzers
                 </Label>
-                <Col sm={8}>
+                <Col sm={9}>
                   <Loader
                     loading={pluginsLoading}
                     error={pluginsError}
@@ -344,10 +346,10 @@ export default function ScanForm() {
                 </Col>
               </FormGroup>
               <FormGroup row>
-                <Label sm={4} for="connectors">
+                <Label sm={3} for="connectors">
                   Select Connectors
                 </Label>
-                <Col sm={8}>
+                <Col sm={9}>
                 {!(pluginsLoading || pluginsError) && (
                   <>
                     <MultiSelectDropdownInput
@@ -363,10 +365,10 @@ export default function ScanForm() {
                 </Col>
               </FormGroup>
               <FormGroup row>
-                <Label sm={4} for="scanform-runtimeconf-editbtn">
+                <Label sm={3} for="scanform-runtimeconf-editbtn">
                   Runtime Configuration
                 </Label>
-                <Col sm={8}>
+                <Col sm={9}>
                   <IconButton
                     id="scanform-runtimeconf-editbtn"
                     Icon={MdEdit}
@@ -392,10 +394,10 @@ export default function ScanForm() {
                 </Col>
               </FormGroup>
               <FormGroup row>
-                <Label sm={4}>
+                <Label sm={3}>
                   TLP
                 </Label>
-                <Col sm={8}>
+                <Col sm={9}>
                   {TLP_CHOICES.map((ch) => (
                     <FormGroup inline check
                       key={`tlpchoice__${ch}`}
@@ -423,10 +425,10 @@ export default function ScanForm() {
                 </Col>
               </FormGroup>
               <FormGroup row>
-                <Label sm={4} id="scanform-tagselectinput">
+                <Label sm={3} id="scanform-tagselectinput">
                   Tags
                 </Label>
-                <Col sm={8}>
+                <Col sm={9}>
                   <TagSelectInput
                     id="scanform-tagselectinput"
                     selectedTags={formik.values.tags}
@@ -437,10 +439,10 @@ export default function ScanForm() {
                 </Col>
               </FormGroup>
               <FormGroup row className="mt-2">
-                <Label sm={4}>
+                <Label sm={3}>
                   Extra configuration
                 </Label>
-                <Col sm={8}>
+                <Col sm={9}>
                   {checkChoices.map((ch) => (
                     <FormGroup check
                       key={`checkchoice__${ch.value}`}
@@ -461,16 +463,18 @@ export default function ScanForm() {
                   ))}
                 </Col>
               </FormGroup>
-              <Button
-                type="submit"
-                disabled={!(formik.isValid || formik.isSubmitting)}
-                color="primary"
-                size="lg"
-                outline
-                className="mx-auto rounded-0"
-              >
-                {formik.isSubmitting && <Spinner  size="sm" />}Start Scan
-              </Button>
+              <FormGroup row className="mt-2">
+                  <Button
+                    type="submit"
+                    disabled={!(formik.isValid || formik.isSubmitting)}
+                    color="primary"
+                    size="lg"
+                    outline
+                    className="mx-auto rounded-0 col-sm-2 order-sm-5"
+                  >
+                    {formik.isSubmitting && <Spinner  size="sm" />}Start Scan
+                  </Button>
+              </FormGroup>
             </Form>
           )}
         </Formik>

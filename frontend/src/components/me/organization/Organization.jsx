@@ -41,7 +41,7 @@ const routes = [
   },
 ];
 
-export default function Organization({ match, }) {
+export default function Organization() {
   console.debug("Organization rendered!");
 
   return (
@@ -50,9 +50,3 @@ export default function Organization({ match, }) {
     </Container>
   );
 }
-
-Organization.propTypes = {
-  match: PropTypes.shape({
-    url: PropTypes.string.isRequired,
-  }).isRequired,
-};

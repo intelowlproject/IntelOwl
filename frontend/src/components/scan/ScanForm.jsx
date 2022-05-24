@@ -1,7 +1,7 @@
 import React from "react";
-import { FormGroup, Label, Container, Col, FormText, Input, Spinner, Button } from "reactstrap";
+import { FormFeedback, FormGroup, Label, Container, Col, FormText, Input, Spinner, Button } from "reactstrap";
 import { useNavigate } from "react-router-dom";
-import { Form, Formik } from "formik";
+import { ErrorMessage, Field, Form, Formik } from "formik";
 import useTitle from "react-use/lib/useTitle";
 import { MdEdit } from "react-icons/md";
 
@@ -94,7 +94,7 @@ const observableType2PropsMap = {
 };
 const initialValues = {
   classification: "ip",
-  observable_name: undefined,
+  observable_name: "",
   file: undefined,
   analyzers: [],
   connectors: [],
@@ -272,7 +272,8 @@ export default function ScanForm() {
                     key={`classification__${ch}`}
                   >
                   <Col sm={{ span:8, offset:2, }}>
-                    <Input
+                    <Field
+                      as={Input}
                       id={`classification__${ch}`}
                       type="radio"
                       name="classification"
@@ -298,13 +299,16 @@ export default function ScanForm() {
                     Observable Value
                   </Label>
                   <Col sm={9}>
-                    <Input
+                    <Field
+                      as={Input}
                       type="text"
                       id="observable_name"
                       name="observable_name"
                       className="input-dark"
+                      invalid={formik.errors.observable_name && formik.touched.observable_name}
                       {...observableType2PropsMap[formik.values.classification]}
                     />
+                    <ErrorMessage component={FormFeedback} name="observable_name" />
                   </Col>
                 </FormGroup>
               ) : (
@@ -313,7 +317,8 @@ export default function ScanForm() {
                     File
                   </Label>
                   <Col sm={9}>
-                    <Input
+                    <Field
+                      as={Input}
                       type="file"
                       id="file"
                       name="file"
@@ -343,6 +348,7 @@ export default function ScanForm() {
                       </>
                     )}
                   />
+                  <ErrorMessage component={FormFeedback} name="analyzers" />
                 </Col>
               </FormGroup>
               <FormGroup row>
@@ -362,6 +368,7 @@ export default function ScanForm() {
                     </FormText>
                   </>
                 )}
+                <ErrorMessage component={FormFeedback} name="connectors" />
                 </Col>
               </FormGroup>
               <FormGroup row>
@@ -407,11 +414,13 @@ export default function ScanForm() {
                       >
                         <TLPTag value={ch} />
                       </Label>
-                      <Input
+                      <Field
+                        as={Input}
                         id={`tlpchoice__${ch}`}
                         type="radio"
                         name="tlp"
                         value={ch}
+                        invalid={formik.errors.tlp && formik.touched.tlp}
                         onChange={formik.handleChange}
                       />
                     </FormGroup>
@@ -422,6 +431,7 @@ export default function ScanForm() {
                       ""
                     )}
                   </FormText>
+                  <ErrorMessage component={FormFeedback} name="tlp" />
                 </Col>
               </FormGroup>
               <FormGroup row>
@@ -447,7 +457,8 @@ export default function ScanForm() {
                     <FormGroup check
                       key={`checkchoice__${ch.value}`}
                     >
-                      <Input
+                      <Field
+                        as={Input}
                         id={`checkchoice__${ch.value}`}
                         type="radio"
                         name="check"

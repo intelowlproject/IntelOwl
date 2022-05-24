@@ -150,8 +150,8 @@ export function JobInfoCard({ job, }) {
             ],
           ].map(([key, value]) => (
             <ListGroupItem key={key}>
-              <small className="fw-bold">{key}</small>
-              <div className="bg-dark p-1">{value}</div>
+              <small className="fw-bold text-light">{key}</small>
+              <div className="bg-dark p-1 text-light">{value}</div>
             </ListGroupItem>
           ))}
         </ListGroup>
@@ -177,7 +177,7 @@ export function JobInfoCard({ job, }) {
             ],
           ].map(([key, value]) => (
             <ListGroupItem key={key}>
-              <small className="fw-bold">{key}</small>
+              <small className="fw-bold text-light">{key}</small>
               <div className="bg-dark p-1">{value}</div>
             </ListGroupItem>
           ))}

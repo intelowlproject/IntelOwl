@@ -77,7 +77,7 @@ const observableType2PropsMap = {
   },
   url: {
     placeholder: "http://example.com/",
-    pattern: "(www.|http://|https://).*",
+    pattern: "(.+://).*",
   },
   domain: {
     placeholder: "scanme.org",

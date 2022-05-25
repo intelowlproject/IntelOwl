@@ -12,6 +12,7 @@ import {
   JOB_TYPE_COLOR_MAP,
   OBSERVABLE_CLASSIFICATION_COLOR_MAP
 } from "../../../constants";
+
 import {
   JOB_AGG_STATUS_URI,
   JOB_AGG_TYPE_URI,

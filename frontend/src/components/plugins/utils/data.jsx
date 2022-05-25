@@ -91,7 +91,7 @@ const analyzersTableColumns = [
     },
     Cell: ({ value, }) => (
       <ul className="d-flex flex-column align-items-start">
-        {value?.map((v) => (
+        {value?.sort().map((v) => (
           <li key={v}>{v}</li>
         ))}
       </ul>

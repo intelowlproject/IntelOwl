@@ -94,7 +94,7 @@ To install the `certego-ui` library, please take a look to [npm link](https://do
 git clone https://github.com/certego/certego-ui.git
 # change directory to the folder where you have the cloned the library
 cd certego-ui/
-# install
+# install, without peer deps (to use packages of IntelOwl)
 npm i --legacy-peer-deps
 # create link to the project (this will globally install this package)
 sudo npm link

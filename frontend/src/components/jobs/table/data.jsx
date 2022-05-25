@@ -34,7 +34,7 @@ const jobTableColumns = [
     Cell: ({ value, }) => (
       <DateHoverable ago
         value={value}
-        showFormat="PPP"
+        Format="hh:mm:ss a MMM do, yyyy"
       />
     ),
     maxWidth: 125,
@@ -46,7 +46,7 @@ const jobTableColumns = [
     Cell: ({ value, }) => (
       <DateHoverable ago
         value={value}
-        showFormat="PPP"
+        format="hh:mm:ss a MMM do, yyyy"
       />
     ),
     maxWidth: 125,

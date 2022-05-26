@@ -18,7 +18,6 @@ export default function JobResult() {
   // from props
   const params = useParams();
   const jobId = params.id;
-  console.log(jobId);
 
   // API
   const [{ data: job, loading, error, }, refetch] = useAxios({

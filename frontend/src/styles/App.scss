@@ -89,6 +89,11 @@ section#app-toasts {
   }
 }
 
+.notifications-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
 .twitter-follow-button {
   @extend .btn;
   @extend .btn-xs;

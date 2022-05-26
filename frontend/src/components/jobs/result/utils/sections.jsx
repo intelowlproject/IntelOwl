@@ -142,11 +142,12 @@ export function JobInfoCard({ job, }) {
             ],
             [
               "End Time",
+              job.finished_analysis_time ?
               <DateHoverable
                 id={`overview-finished_analysis_time__${job.id}`}
                 value={job.finished_analysis_time}
                 format="hh:mm:ss a MMM do, yyyy"
-              />,
+              /> : "-",
             ],
           ].map(([key, value]) => (
             <ListGroupItem key={key}>

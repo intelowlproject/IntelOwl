@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Button, ButtonGroup, Fade, Spinner, Input } from "reactstrap";
-import { Form, Formik } from "formik";
+import { Button, ButtonGroup, Fade, Spinner, Input, FormFeedback } from "reactstrap";
+import { Formik, Field, ErrorMessage } from "formik";
 import { MdCheck, MdClose, MdEdit } from "react-icons/md";
 
 import {
@@ -17,9 +17,9 @@ import useTagsStore from "../../../stores/useTagsStore";
 const onFormValidate = (values) => {
   const errors = {};
   if (!values.label) {
-    errors.label = "This field is required.";
+    errors.label = "Required";
   } else if (values.label.length < 4) {
-    errors.label = "This field must be at least 4 characters long";
+    errors.label = "Min length 4";
   }
   return errors;
 };
@@ -157,24 +157,27 @@ function TagForm(props) {
         {...rest}
       >
         {(formik) => (
-          <Form inline
-            className="d-flex justify-content-start align-items-center">
-            <Input
-              autoFocus
-              type="text"
-              tabIndex="0"
-              name="label"
-              placeholder="label"
-              bsSize="sm"
-              className="w-100 bg-dark border-0 rounded-0"
-              onChange={formik.handleChange}
-            />
-            <Input
+          <div className="d-flex align-items-end">
+            <div>
+              <Field
+                as={Input}
+                autoFocus
+                type="text"
+                tabIndex="0"
+                name="label"
+                placeholder="label"
+                bsSize="sm"
+                invalid={formik.errors.label && formik.touched.label}
+                className="w-100 bg-dark border-0 rounded-0"
+              />
+              <ErrorMessage component={FormFeedback} name="label" />
+            </div>
+            <Field
+              as={Input}
               type="color"
               name="color"
               bsSize="sm"
               className="w-33 bg-dark border-0 rounded-0"
-              onChange={formik.handleChange}
             />
             <ButtonGroup className="ms-1">
               <Button
@@ -195,7 +198,7 @@ function TagForm(props) {
                 <MdClose />
               </Button>
             </ButtonGroup>
-          </Form>
+          </div>
         )}
       </Formik>
     </Fade>

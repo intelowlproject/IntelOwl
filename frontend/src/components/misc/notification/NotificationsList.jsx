@@ -26,7 +26,7 @@ export default function NotificationsList({ notifications, refetchFn, }) {
   );
 
   return notifications.length > 0 ? (
-    <ListGroup>
+    <ListGroup className="notifications-list">
       {notifications.map((notif) => (
         <ListGroupItem
           tag={ContentSection}

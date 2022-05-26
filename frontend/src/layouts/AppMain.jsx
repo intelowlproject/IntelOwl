@@ -1,6 +1,9 @@
 import React, { Suspense } from "react";
 import { useRoutes, Outlet } from "react-router-dom";
-import { FallBackLoading } from "@certego/certego-ui";
+import PropTypes from "prop-types";
+import { ErrorBoundary } from "react-error-boundary";
+import { Row, Col } from "reactstrap";
+import { FallBackLoading, ErrorAlert } from "@certego/certego-ui";
 
 // wrapper
 import withAuth from "../wrappers/withAuth";
@@ -11,12 +14,36 @@ import AppHeader from "./AppHeader";
 
 const NoMatch = React.lazy(() => import("./NoMatch"));
 
+function ErrorHandler({error,}) {
+  return (
+    <Row>
+      <Col>
+        <ErrorAlert
+          className="mt-5"
+          error={{
+            response: {
+              statusText: "Something went wrong. Please reload browser.",
+            },
+            parsedMsg: error.message,
+          }}
+        />
+      </Col>
+    </Row>
+  )
+}
+
+ErrorHandler.propTypes = {
+  error: PropTypes.object.isRequired,
+};
+
 function Layout() {
   return (
     <>
       <AppHeader />
       <main role="main" className="px-1 px-md-5 mx-auto">
-        <Outlet />
+        <ErrorBoundary FallbackComponent={ErrorHandler}>
+          <Outlet />
+        </ErrorBoundary>
       </main>
     </>
   );

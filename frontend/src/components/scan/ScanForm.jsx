@@ -95,7 +95,7 @@ const observableType2PropsMap = {
 const initialValues = {
   classification: "ip",
   observable_name: "",
-  file: undefined,
+  file: "",
   analyzers: [],
   connectors: [],
   tlp: "WHITE",
@@ -267,28 +267,30 @@ export default function ScanForm() {
         >
           {(formik) => (
             <Form>
-                {ALL_CLASSIFICATIONS.map((ch) => (
-                  <FormGroup check inline
-                    key={`classification__${ch}`}
-                  >
-                  <Col sm={{ span:8, offset:2, }}>
-                    <Field
-                      as={Input}
-                      id={`classification__${ch}`}
-                      type="radio"
-                      name="classification"
-                      value={ch}
-                      onClick={() => {
-                        setClassification(ch);
-                        formik.setFieldValue("analyzers", []); // reset
-                      }}
-                    />
-                    <Label check>
-                      {ch}
-                    </Label>
-                  </Col>
-                  </FormGroup>
-                ))}
+                <FormGroup className="d-flex justify-content-center">
+                    {ALL_CLASSIFICATIONS.map((ch) => (
+                      <FormGroup check inline
+                        key={`classification__${ch}`}
+                      >
+                      <Col>
+                        <Field
+                          as={Input}
+                          id={`classification__${ch}`}
+                          type="radio"
+                          name="classification"
+                          value={ch}
+                          onClick={() => {
+                            setClassification(ch);
+                            formik.setFieldValue("analyzers", []); // reset
+                          }}
+                        />
+                        <Label check>
+                          {ch}
+                        </Label>
+                      </Col>
+                      </FormGroup>
+                    ))}
+                </FormGroup>
               {OBSERVABLE_TYPES.includes(formik.values.classification) ? (
                 <FormGroup row>
                   <Label
@@ -317,11 +319,11 @@ export default function ScanForm() {
                     File
                   </Label>
                   <Col sm={9}>
-                    <Field
-                      as={Input}
+                    <Input
                       type="file"
                       id="file"
                       name="file"
+                      onChange={event => formik.setFieldValue("file", event.currentTarget.files[0])}
                       className="input-dark" />
                   </Col>
                 </FormGroup>

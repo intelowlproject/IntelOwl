@@ -44,6 +44,7 @@ const jobTableColumns = [
     id: "finished_analysis_time",
     accessor: "finished_analysis_time",
     Cell: ({ value, }) => (
+      value && 
       <DateHoverable ago
         value={value}
         format="hh:mm:ss a MMM do, yyyy"

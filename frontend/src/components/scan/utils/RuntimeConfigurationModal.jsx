@@ -92,13 +92,14 @@ export default function RuntimeConfigurationModal(props) {
       zIndex="1050"
       size="xl"
       isOpen={isOpen}
+      toggle={toggle}
       keyboard={false}
       scrollable
       backdrop="static"
       labelledBy="Edit Runtime Configuration"
       {...rest}
     >
-      <ModalHeader className="bg-tertiary">
+      <ModalHeader className="bg-tertiary" toggle={toggle}>
         Edit Runtime Configuration
       </ModalHeader>
       <ModalBody className="d-flex-start-start bg-body">

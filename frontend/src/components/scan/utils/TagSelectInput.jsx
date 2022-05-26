@@ -111,7 +111,7 @@ export default function TagSelectInput(props) {
           onChange={onChange}
           onCreateOption={onCreateOption}
           isSearchable={!tagToEdit}
-          onMenuClose={() => setTagToEdit(undefined)}
+          menuIsOpen={tagToEdit ? true : undefined}
           formatCreateLabel={(inputVal) => (
             <span>
               Create New Tag: &nbsp;

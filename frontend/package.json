@@ -37,9 +37,12 @@
     "eject": "react-scripts eject",
     "lint": "eslint src/ --ext .js,.jsx",
     "lint:fix": "npm run lint -- --fix",
+    "lint-sass": "stylelint \"src/styles/*.{css,scss}\"",
+    "lint-sass:fix": "npm run lint-sass -- --fix",
     "prettier:write": "prettier --write .",
     "prettier:check": "prettier --check .",
-    "pretty-quick": "pretty-quick --staged"
+    "prettier:eslint-config-prettier": "eslint-config-prettier index.jsx",
+    "prettier:stylelint-check": "stylelint-config-prettier-check"
   },
   "browserslist": {
     "production": [
@@ -62,9 +65,10 @@
     "eslint-plugin-jsx-a11y": "^6.5.1",
     "eslint-plugin-react": "^7.27.1",
     "eslint-plugin-react-hooks": "^4.3.0",
-    "husky": "^8.0.1",
     "prettier": "^2.6.2",
-    "pretty-quick": "^3.1.2",
-    "sass": "^1.51.0"
+    "sass": "^1.51.0",
+    "stylelint": "^14.8.5",
+    "stylelint-config-prettier": "^9.0.3",
+    "stylelint-config-standard-scss": "^4.0.0"
   }
 }

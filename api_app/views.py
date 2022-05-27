@@ -1,6 +1,6 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
-
+import copy
 import logging
 from datetime import timedelta
 from typing import Union
@@ -43,21 +43,14 @@ from .serializers import (
 logger = logging.getLogger(__name__)
 
 
-def _analysis_request(
-    request,
+def _process_analysis_request(
+    data: dict,
+    user,
     serializer_class: Union[FileAnalysisSerializer, ObservableAnalysisSerializer],
+    warnings: list,
 ):
-    """
-    Prepare and send file/observable for analysis
-    """
-    warnings = []
-    logger.info(
-        f"_analysis_request {serializer_class} received request from {request.user}."
-        f"Data:{dict(request.data)}."
-    )
-
     # serialize request data and validate
-    serializer = serializer_class(data=request.data, context={"request": request})
+    serializer = serializer_class(data=data)
     serializer.is_valid(raise_exception=True)
 
     serialized_data = serializer.validated_data
@@ -77,7 +70,7 @@ def _analysis_request(
 
     # save the arrived data plus new params into a new job object
     job = serializer.save(
-        user=request.user,
+        user=user,
         analyzers_to_execute=cleaned_analyzer_list,
         connectors_to_execute=cleaned_connectors_list,
     )
@@ -107,12 +100,69 @@ def _analysis_request(
     )
     ser.is_valid(raise_exception=True)
 
-    response_dict = ser.data
+    return ser.data
+
+
+def _individual_analysis_request(
+    request,
+    serializer_class: Union[FileAnalysisSerializer, ObservableAnalysisSerializer],
+):
+    """
+    Prepare and send file/observable for analysis
+    """
+    warnings = []
+    logger.info(
+        f"_individual_analysis_request {serializer_class} "
+        f"received request from {request.user}."
+        f"Data:{dict(request.data)}."
+    )
+
+    response_dict = _process_analysis_request(
+        request.data, request.user, serializer_class, warnings
+    )
 
     logger.debug(response_dict)
 
     return Response(
         response_dict,
+        status=status.HTTP_200_OK,
+    )
+
+
+def _multiple_analysis_requests(
+    request,
+    serializer_class: Union[FileAnalysisSerializer, ObservableAnalysisSerializer],
+):
+    """
+    Prepare and send multiple files/observables for analysis
+    """
+    warnings = []
+    logger.info(
+        f"_multiple_analysis_request {serializer_class} "
+        f"received request from {request.user}."
+        f"Data:{dict(request.data)}."
+    )
+    responses = []
+
+    common_data = dict(request.data)
+    common_data.pop("observables", None)
+    for classification, name in request.data.get("observables"):
+        data = copy.deepcopy(common_data)
+        data["observable_name"] = name
+        data["observable_classification"] = classification
+        responses.append(
+            _process_analysis_request(data, request.user, serializer_class, warnings)
+        )
+
+    logger.debug(responses)
+
+    payload = {
+        "count": len(responses),
+        "results": responses,
+    }
+
+    return Response(
+        payload,
         status=status.HTTP_200_OK,
     )
 
@@ -205,7 +255,7 @@ def ask_analysis_availability(request):
 )
 @api_view(["POST"])
 def analyze_file(request):
-    return _analysis_request(request, FileAnalysisSerializer)
+    return _individual_analysis_request(request, FileAnalysisSerializer)
 
 
 @add_docs(
@@ -215,7 +265,16 @@ def analyze_file(request):
 )
 @api_view(["POST"])
 def analyze_observable(request):
-    return _analysis_request(request, ObservableAnalysisSerializer)
+    return _individual_analysis_request(request, ObservableAnalysisSerializer)
+
+
+# @add_docs(
+#     description="This endpoint allows to start Jobs related to multiple observables",
+#     request=ObservableAnalysisSerializer,
+# )
+@api_view(["POST"])
+def analyze_multiple_observables(request):
+    return _multiple_analysis_requests(request, ObservableAnalysisSerializer)
 
 
 @add_docs(

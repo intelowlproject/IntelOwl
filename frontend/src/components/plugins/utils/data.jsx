@@ -5,7 +5,7 @@ import {
   DefaultColumnFilter,
   SelectOptionsFilter,
   BooleanIcon,
-  SelectColumnFilter
+  SelectColumnFilter,
 } from "@certego/certego-ui";
 
 import { TLP_CHOICES } from "../../../constants";
@@ -13,7 +13,7 @@ import { markdownToHtml, TLPTag } from "../../common";
 import {
   PluginHealthCheckButton,
   PluginInfoPopoverIcon,
-  PluginVerificationIcon
+  PluginVerificationIcon,
 } from "./utils";
 
 const pluginTableColumns = [
@@ -21,7 +21,7 @@ const pluginTableColumns = [
     Header: "Info",
     id: "info",
     accessor: (r) => r,
-    Cell: ({ value, }) => <PluginInfoPopoverIcon pluginInfo={value} />,
+    Cell: ({ value }) => <PluginInfoPopoverIcon pluginInfo={value} />,
     disableSortBy: true,
     maxWidth: 80,
   },
@@ -35,7 +35,7 @@ const pluginTableColumns = [
     Header: "Active",
     id: "active",
     accessor: (r) => !r.disabled,
-    Cell: ({ value, }) => <BooleanIcon withColors truthy={value} />,
+    Cell: ({ value }) => <BooleanIcon withColors truthy={value} />,
     Filter: SelectOptionsFilter,
     selectOptions: ["true", "false"],
     disableSortBy: true,
@@ -45,7 +45,7 @@ const pluginTableColumns = [
     Header: "Configured",
     id: "configured",
     accessor: "verification.configured",
-    Cell: ({ row: { original, }, }) => (
+    Cell: ({ row: { original } }) => (
       <PluginVerificationIcon
         pluginName={original?.name}
         verification={original?.verification}
@@ -64,7 +64,7 @@ const analyzersTableColumns = [
     Header: "Description",
     id: "description",
     accessor: "description",
-    Cell: ({ value, }) => <span>{markdownToHtml(value)}</span>,
+    Cell: ({ value }) => <span>{markdownToHtml(value)}</span>,
     disableSortBy: true,
     Filter: DefaultColumnFilter,
   },
@@ -80,16 +80,18 @@ const analyzersTableColumns = [
     Header: "Supported types",
     id: "supported_types",
     accessor: (r) => {
-        let supported;
-        if (r.type === "observable"){
-            supported = r.observable_supported;
-        } else {
-            supported = r.supported_filetypes;
-        }
-        if (supported.length === 0){supported.push("everything");}
-        return supported;
+      let supported;
+      if (r.type === "observable") {
+        supported = r.observable_supported;
+      } else {
+        supported = r.supported_filetypes;
+      }
+      if (supported.length === 0) {
+        supported.push("everything");
+      }
+      return supported;
     },
-    Cell: ({ value, }) => (
+    Cell: ({ value }) => (
       <ul className="d-flex flex-column align-items-start">
         {value?.sort().map((v) => (
           <li key={v}>{v}</li>
@@ -103,7 +105,7 @@ const analyzersTableColumns = [
     Header: "External Service",
     id: "external_service",
     accessor: "external_service",
-    Cell: ({ value, }) => <BooleanIcon withColors truthy={value} />,
+    Cell: ({ value }) => <BooleanIcon withColors truthy={value} />,
     Filter: SelectOptionsFilter,
     selectOptions: ["true", "false"],
     disableSortBy: true,
@@ -113,7 +115,7 @@ const analyzersTableColumns = [
     Header: "Leaks Info",
     id: "leaks_info",
     accessor: "leaks_info",
-    Cell: ({ value, }) => <BooleanIcon withColors truthy={value} />,
+    Cell: ({ value }) => <BooleanIcon withColors truthy={value} />,
     Filter: SelectOptionsFilter,
     selectOptions: ["true", "false"],
     disableSortBy: true,
@@ -124,7 +126,7 @@ const analyzersTableColumns = [
     id: "health_check",
     accessor: (r) => r,
     disableSortBy: true,
-    Cell: ({ value, }) =>
+    Cell: ({ value }) =>
       value?.docker_based && (
         <PluginHealthCheckButton
           pluginName={value.name}
@@ -141,7 +143,7 @@ const connectorTableColumns = [
     Header: "Description",
     id: "description",
     accessor: "description",
-    Cell: ({ value, }) => <span>{markdownToHtml(value)}</span>,
+    Cell: ({ value }) => <span>{markdownToHtml(value)}</span>,
     disableSortBy: true,
     Filter: DefaultColumnFilter,
   },
@@ -149,7 +151,7 @@ const connectorTableColumns = [
     Header: "Maximum TLP",
     id: "maximum_tlp",
     accessor: "maximum_tlp",
-    Cell: ({ value, }) => <TLPTag value={value} />,
+    Cell: ({ value }) => <TLPTag value={value} />,
     Filter: SelectOptionsFilter,
     selectOptions: TLP_CHOICES,
   },
@@ -158,7 +160,7 @@ const connectorTableColumns = [
     id: "health_check",
     accessor: (r) => r,
     disableSortBy: true,
-    Cell: ({ value, }) => (
+    Cell: ({ value }) => (
       <PluginHealthCheckButton
         pluginName={value?.name}
         pluginType="connector"

@@ -46,5 +46,5 @@ export {
   SESSIONS_BASE_URI,
   createNewToken,
   deleteToken,
-  deleteTokenById
+  deleteTokenById,
 };

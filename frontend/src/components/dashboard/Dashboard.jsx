@@ -5,7 +5,7 @@ import useTitle from "react-use/lib/useTitle";
 import {
   ElasticTimePicker,
   SmallInfoCard,
-  useTimePickerStore
+  useTimePickerStore,
 } from "@certego/certego-ui";
 
 import {
@@ -14,7 +14,7 @@ import {
   JobObsClassificationBarChart,
   JobFileMimetypeBarChart,
   JobObsNamePieChart,
-  JobFileNamePieChart
+  JobFileNamePieChart,
 } from "./utils/charts";
 
 const charts1 = [
@@ -35,10 +35,10 @@ const charts2 = [
 export default function Dashboard() {
   console.debug("Dashboard rendered!");
 
-  const { range, onTimeIntervalChange, } = useTimePickerStore();
+  const { range, onTimeIntervalChange } = useTimePickerStore();
 
   // page title
-  useTitle("IntelOwl | Dashboard", { restoreOnUnmount: true, });
+  useTitle("IntelOwl | Dashboard", { restoreOnUnmount: true });
 
   return (
     <Container fluid id="Dashboard">
@@ -62,13 +62,13 @@ export default function Dashboard() {
                   <Component />
                 </div>
               }
-              style={{ minHeight: 360, }}
+              style={{ minHeight: 360 }}
             />
           </Col>
         ))}
       </Row>
       <Row className="d-flex flex-wrap flex-lg-nowrap mt-4">
-        {charts2.map(([id, header, Component], i) => (
+        {charts2.map(([id, header, Component]) => (
           <Col key={id} md={12} lg={4}>
             <SmallInfoCard
               id={id}
@@ -78,7 +78,7 @@ export default function Dashboard() {
                   <Component />
                 </div>
               }
-              style={{ minHeight: 360, }}
+              style={{ minHeight: 360 }}
             />
           </Col>
         ))}

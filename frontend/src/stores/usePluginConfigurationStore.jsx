@@ -6,7 +6,7 @@ import { addToast } from "@certego/certego-ui";
 import {
   API_BASE_URI,
   ANALYZERS_CONFIG_URI,
-  CONNECTORS_CONFIG_URI
+  CONNECTORS_CONFIG_URI,
 } from "../constants/api";
 
 const usePluginConfigurationStore = create((set, get) => ({
@@ -23,7 +23,7 @@ const usePluginConfigurationStore = create((set, get) => ({
   },
   retrieveAnalyzersConfiguration: async () => {
     try {
-      set({ loading: true, });
+      set({ loading: true });
       const resp = await axios.get(ANALYZERS_CONFIG_URI);
       set({
         analyzersJSON: resp.data,
@@ -31,12 +31,12 @@ const usePluginConfigurationStore = create((set, get) => ({
         loading: false,
       });
     } catch (e) {
-      set({ error: e, loading: false, });
+      set({ error: e, loading: false });
     }
   },
   retrieveConnectorsConfiguration: async () => {
     try {
-      set({ loading: true, });
+      set({ loading: true });
       const resp = await axios.get(CONNECTORS_CONFIG_URI);
       set({
         connectorsJSON: resp.data,
@@ -44,7 +44,7 @@ const usePluginConfigurationStore = create((set, get) => ({
         loading: false,
       });
     } catch (e) {
-      set({ error: e, loading: false, });
+      set({ error: e, loading: false });
     }
   },
   checkPluginHealth: async (pluginType, PluginName) => {

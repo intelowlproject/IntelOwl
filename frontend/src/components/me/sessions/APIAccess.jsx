@@ -11,10 +11,19 @@ import {
   DateHoverable,
   CopyToClipboardButton,
   useAxiosComponentLoader,
-  confirm
+  confirm,
 } from "@certego/certego-ui";
 
 import { APIACCESS_BASE_URI, createNewToken, deleteToken } from "./api";
+
+function GenerateIcon() {
+  return (
+    <span>
+      Generate&nbsp;
+      <IoMdAdd />
+    </span>
+  );
+}
 
 export default function APIAccess() {
   console.debug("APIAccess rendered!");
@@ -41,8 +50,8 @@ export default function APIAccess() {
             Note: This is an irreversible operation.
           </p>
           <p>
-            Once deleted, you cannot use this API key to access IntelOwl's API.
-            However, you will be able to generate a new one.
+            Once deleted, you cannot use this API key to access IntelOwl&apos;s
+            API. However, you will be able to generate a new one.
           </p>
           Are you sure you wish to proceed ?
         </div>
@@ -130,7 +139,7 @@ export default function APIAccess() {
         </>
       )}
       // Error render (we catch 404 which means no API key exists)
-      renderError={({ error, }) =>
+      renderError={({ error }) =>
         error?.response?.status === 404 ? (
           <Alert color="dark" className="col-md-6 col-lg-3 mx-auto text-center">
             <h5 className="text-warning">No active API key</h5>
@@ -140,12 +149,7 @@ export default function APIAccess() {
               title="Click to generate new API key"
               titlePlacement="bottom"
               size="sm"
-              Icon={() => (
-                <span>
-                  Generate&nbsp;
-                  <IoMdAdd />
-                </span>
-              )}
+              Icon={GenerateIcon}
               onClick={createTokenCb}
             />
           </Alert>

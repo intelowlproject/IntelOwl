@@ -6,11 +6,15 @@ import {
   SelectOptionsFilter,
   LinkOpenViewIcon,
   SlicedText,
-  DateHoverable
+  DateHoverable,
 } from "@certego/certego-ui";
 
 import { JobTag, StatusTag, TLPTag } from "../../common";
-import { JOB_STATUSES, TLP_CHOICES, ALL_CLASSIFICATIONS } from "../../../constants";
+import {
+  JOB_STATUSES,
+  TLP_CHOICES,
+  ALL_CLASSIFICATIONS,
+} from "../../../constants";
 
 const jobTableColumns = [
   {
@@ -19,7 +23,7 @@ const jobTableColumns = [
     accessor: "id",
     maxWidth: 50,
     disableSortBy: true,
-    Cell: ({ value: id, }) => (
+    Cell: ({ value: id }) => (
       <LinkOpenViewIcon
         id={id}
         href={`/jobs/${id}`}
@@ -31,11 +35,8 @@ const jobTableColumns = [
     Header: "Created",
     id: "received_request_time",
     accessor: "received_request_time",
-    Cell: ({ value, }) => (
-      <DateHoverable ago
-        value={value}
-        format="hh:mm:ss a MMM do, yyyy"
-      />
+    Cell: ({ value }) => (
+      <DateHoverable ago value={value} format="hh:mm:ss a MMM do, yyyy" />
     ),
     maxWidth: 125,
   },
@@ -43,20 +44,17 @@ const jobTableColumns = [
     Header: "Finished",
     id: "finished_analysis_time",
     accessor: "finished_analysis_time",
-    Cell: ({ value, }) => (
-      value && 
-      <DateHoverable ago
-        value={value}
-        format="hh:mm:ss a MMM do, yyyy"
-      />
-    ),
+    Cell: ({ value }) =>
+      value && (
+        <DateHoverable ago value={value} format="hh:mm:ss a MMM do, yyyy" />
+      ),
     maxWidth: 125,
   },
   {
     Header: "User",
     id: "user",
     accessor: "user.username",
-    Cell: ({ value, row: { original: job, }, }) => (
+    Cell: ({ value, row: { original: job } }) => (
       <SlicedText
         id={`table-user-${job?.id}`}
         key={`table-user-${job?.id}`}
@@ -70,7 +68,7 @@ const jobTableColumns = [
     Header: "Name",
     id: "name",
     accessor: (r) => r.observable_name || r.file_name,
-    Cell: ({ value, row: { original: job, }, }) => (
+    Cell: ({ value, row: { original: job } }) => (
       <SlicedText
         id={`table-name-${job?.id}`}
         key={`table-name-${job?.id}`}
@@ -84,7 +82,7 @@ const jobTableColumns = [
     Header: "MD5",
     id: "md5",
     accessor: "md5",
-    Cell: ({ value, row: { original: job, }, }) => (
+    Cell: ({ value, row: { original: job } }) => (
       <SlicedText
         id={`table-md5-${job?.id}`}
         key={`table-md5-${job?.id}`}
@@ -109,7 +107,7 @@ const jobTableColumns = [
         Header: "TLP",
         id: "tlp",
         accessor: "tlp",
-        Cell: ({ value, }) => <TLPTag value={value} />,
+        Cell: ({ value }) => <TLPTag value={value} />,
         disableSortBy: true,
         Filter: SelectOptionsFilter,
         selectOptions: TLP_CHOICES,
@@ -118,7 +116,7 @@ const jobTableColumns = [
         Header: "Tags",
         id: "tags",
         accessor: "tags",
-        Cell: ({ value, }) =>
+        Cell: ({ value }) =>
           value.map((tag) => (
             <JobTag
               key={`jobtable-tags-${tag.label}`}
@@ -139,7 +137,7 @@ const jobTableColumns = [
         Header: "Plugins Executed",
         id: "plugins",
         accessor: (r) => r,
-        Cell: ({ value: job, }) => (
+        Cell: ({ value: job }) => (
           <div className="d-flex flex-column align-items-start">
             <span>
               {job.analyzers_to_execute.length}/
@@ -165,7 +163,7 @@ const jobTableColumns = [
         Header: "Status",
         id: "status",
         accessor: "status",
-        Cell: ({ value, }) => <StatusTag status={value} />,
+        Cell: ({ value }) => <StatusTag status={value} />,
         disableSortBy: true,
         Filter: SelectOptionsFilter,
         selectOptions: JOB_STATUSES,

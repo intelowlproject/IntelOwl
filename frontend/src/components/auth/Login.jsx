@@ -1,5 +1,12 @@
 import React from "react";
-import { FormGroup, Label, Container, Input, Row, Spinner, Button } from "reactstrap";
+import {
+  FormGroup,
+  Label,
+  Container,
+  Input,
+  Spinner,
+  Button,
+} from "reactstrap";
 import { Form, Formik } from "formik";
 import useTitle from "react-use/lib/useTitle";
 
@@ -30,7 +37,7 @@ export default function Login() {
   console.debug("Login rendered!");
 
   // page title
-  useTitle("IntelOwl | Login", { restoreOnUnmount: true, });
+  useTitle("IntelOwl | Login", { restoreOnUnmount: true });
 
   // local state
   const [passwordShown, setPasswordShown] = React.useState(false);
@@ -42,7 +49,7 @@ export default function Login() {
 
   // callbacks
   const onSubmit = React.useCallback(
-    async (values, formik) => {
+    async (values, _formik) => {
       try {
         await loginUser(values);
       } catch (e) {
@@ -76,9 +83,7 @@ export default function Login() {
               <Form>
                 {/* username */}
                 <FormGroup>
-                  <Label for="LoginForm__username">
-                    Username
-                  </Label>
+                  <Label for="LoginForm__username">Username</Label>
                   <Input
                     id="LoginForm__username"
                     type="text"
@@ -90,9 +95,7 @@ export default function Login() {
                 </FormGroup>
                 {/* password */}
                 <FormGroup>
-                  <Label for="LoginForm__password">
-                    Password
-                  </Label>
+                  <Label for="LoginForm__password">Password</Label>
                   <Input
                     id="LoginForm__password"
                     type={passwordShown ? "text" : "password"}
@@ -102,20 +105,18 @@ export default function Login() {
                     onChange={formik.handleChange}
                   />
                 </FormGroup>
-                <FormGroup check
-                >
+                <FormGroup check>
                   <Input
                     id="LoginForm__showPassword"
                     type="checkbox"
                     defaultChecked={passwordShown}
                     onChange={() => setPasswordShown(!passwordShown)}
                   />
-                  <Label check>
-                    Show password
-                  </Label>
+                  <Label check>Show password</Label>
                 </FormGroup>
                 <div className="text-muted mb-3">
-                  Don't have an account? Contact the administrator for access.
+                  Don&apos;t have an account? Contact the administrator for
+                  access.
                 </div>
                 {/* Submit */}
                 <FormGroup className="d-flex-center">

@@ -45,7 +45,7 @@ export default function Home() {
   return (
     <>
       {/* BG Image */}
-      <Container fluid id="home__bgImg" style={{ backgroundImage: logoBgImg, }}>
+      <Container fluid id="home__bgImg" style={{ backgroundImage: logoBgImg }}>
         <h2
           id="home__versionText"
           className="text-accent"
@@ -57,16 +57,18 @@ export default function Home() {
       {/* Content */}
       <Container id="home__content" className="mt-2">
         <ContentSection className="bg-body shadow lead">
-        Intel Owl is an Open Source Intelligence, or OSINT solution to get threat intelligence
-        data about a specific file, an IP or a domain from a single API at scale. It integrates
-        a number of analyzers available online and a lot of cutting-edge malware analysis tools.
-        It is for everyone who needs a single point to query for info about a specific file or observable.
+          Intel Owl is an Open Source Intelligence, or OSINT solution to get
+          threat intelligence data about a specific file, an IP or a domain from
+          a single API at scale. It integrates a number of analyzers available
+          online and a lot of cutting-edge malware analysis tools. It is for
+          everyone who needs a single point to query for info about a specific
+          file or observable.
         </ContentSection>
         <br />
         {/* blogposts */}
         <h5 className="text-gradient">IntelOwl News</h5>
         <ContentSection>
-          {blogPosts.map(({ title, subText, date, link, }) => (
+          {blogPosts.map(({ title, subText, date, link }) => (
             <ContentSection key={title} className="border-dark bg-body">
               <small className="text-muted float-end">{date}</small>
               <h5 className="text-secondary">{title}</h5>

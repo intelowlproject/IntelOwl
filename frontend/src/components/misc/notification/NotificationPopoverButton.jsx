@@ -12,7 +12,7 @@ export default function NotificationPopoverButton() {
   const [unreadNotifs, Loader1, refetch1] = useAxiosComponentLoader(
     {
       url: NOTIFICATION_BASE_URI,
-      params: { page_size: 4, read: false, },
+      params: { page_size: 4, read: false },
     },
     (respData) => respData?.results
   );
@@ -20,7 +20,7 @@ export default function NotificationPopoverButton() {
   const [readNotifs, Loader2, refetch2] = useAxiosComponentLoader(
     {
       url: NOTIFICATION_BASE_URI,
-      params: { page_size: 4, read: true, },
+      params: { page_size: 4, read: true },
     },
     (respData) => respData?.results
   );

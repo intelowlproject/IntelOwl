@@ -9,7 +9,7 @@ import {
   DefaultColumnFilter,
   IconButton,
   SelectOptionsFilter,
-  DateHoverable
+  DateHoverable,
 } from "@certego/certego-ui";
 
 import { StatusTag } from "../../../common";
@@ -24,7 +24,7 @@ const tableProps = {
       accessor: (r) => r,
       maxWidth: 60,
       disableSortBy: true,
-      Cell: ({ value: plugin, customProps: { job, refetch, }, }) => (
+      Cell: ({ value: plugin, customProps: { job, refetch } }) => (
         <div className="d-flex-center">
           {job.permissions?.plugin_actions === true &&
             ["running", "pending"].includes(plugin.status.toLowerCase()) && (
@@ -63,7 +63,7 @@ const tableProps = {
       Header: "Status",
       id: "status",
       accessor: "status",
-      Cell: ({ value, }) => <StatusTag status={value} />,
+      Cell: ({ value }) => <StatusTag status={value} />,
       Filter: SelectOptionsFilter,
       selectOptions: PLUGIN_STATUSES,
       maxWidth: 50,
@@ -87,7 +87,7 @@ const tableProps = {
       accessor: (r) => r,
       disableSortBy: true,
       maxWidth: 125,
-      Cell: ({ value: plugin, }) => (
+      Cell: ({ value: plugin }) => (
         <div>
           <DateHoverable noHover value={plugin?.start_time} format="pp" />
           &nbsp;<span className="fw-bold text-muted">-</span>&nbsp;
@@ -98,15 +98,15 @@ const tableProps = {
       ),
     },
   ],
-  config: { enableExpanded: true, enableFlexLayout: true, },
+  config: { enableExpanded: true, enableFlexLayout: true },
   initialState: {
     pageSize: 10,
     sortBy: [
-      { id: "status", desc: true, },
-      { id: "name", desc: true, },
+      { id: "status", desc: true },
+      { id: "name", desc: true },
     ],
   },
-  SubComponent: ({ row, }) => (
+  SubComponent: ({ row }) => (
     <CustomJsonInput
       viewOnly
       confirmGood={false}
@@ -124,21 +124,21 @@ const tableProps = {
   ),
 };
 
-export function AnalyzersReportTable({ job, refetch, }) {
+export function AnalyzersReportTable({ job, refetch }) {
   return (
     <DataTable
       data={job?.analyzer_reports}
-      customProps={{ job, refetch, }}
+      customProps={{ job, refetch }}
       {...tableProps}
     />
   );
 }
 
-export function ConnectorsReportTable({ job, refetch, }) {
+export function ConnectorsReportTable({ job, refetch }) {
   return (
     <DataTable
       data={job?.connector_reports}
-      customProps={{ job, refetch, }}
+      customProps={{ job, refetch }}
       {...tableProps}
     />
   );

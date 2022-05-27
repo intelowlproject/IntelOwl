@@ -7,14 +7,14 @@ import {
   ContentSection,
   IconButton,
   DateHoverable,
-  useAxiosComponentLoader
+  useAxiosComponentLoader,
 } from "@certego/certego-ui";
 
 import { InvitationStatusBadge } from "./utils";
 import {
   BASE_URI_INVITATION,
   acceptInvitation,
-  declineInvitation
+  declineInvitation,
 } from "./api";
 import { INTELOWL_DOCS_URL } from "../../../constants/environment";
 
@@ -80,7 +80,7 @@ export default function InvitationsList() {
             invitations?.length ? (
               <ol>
                 {invitations.map(
-                  ({ id, organization, status, created_at: invitedAt, }) => (
+                  ({ id, organization, status, created_at: invitedAt }) => (
                     <li key={`invlist-${id}`}>
                       <Row className="mb-3">
                         <Col sm={6} xl={2}>

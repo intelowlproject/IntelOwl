@@ -1,5 +1,4 @@
 import React, { Suspense } from "react";
-import PropTypes from "prop-types";
 import { SiMinutemailer } from "react-icons/si";
 import { BsPeopleFill } from "react-icons/bs";
 
@@ -30,7 +29,8 @@ const routes = [
     location: "invitations",
     Title: () => (
       <span>
-        <SiMinutemailer />&nbsp;Invitations
+        <SiMinutemailer />
+        &nbsp;Invitations
       </span>
     ),
     Component: () => (

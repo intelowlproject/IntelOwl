@@ -5,7 +5,7 @@ import { Button } from "reactstrap";
 import useRecentScansStore from "../../../stores/useRecentScansStore";
 
 export default function RecentScans() {
-  const { jobIdStatusMap, } = useRecentScansStore();
+  const { jobIdStatusMap } = useRecentScansStore();
 
   const navigate = useNavigate();
 

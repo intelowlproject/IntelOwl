@@ -7,7 +7,7 @@ import {
   SyncButton,
   TableHintIcon,
   useDataTable,
-  useTimePickerStore
+  useTimePickerStore,
 } from "@certego/certego-ui";
 
 import { JOB_BASE_URI } from "../../../constants/api";
@@ -29,10 +29,10 @@ export default function JobsTable() {
   console.debug("JobsTable rendered!");
 
   // page title
-  useTitle("IntelOwl | Jobs History", { restoreOnUnmount: true, });
+  useTitle("IntelOwl | Jobs History", { restoreOnUnmount: true });
 
   // consume zustand store
-  const { range, fromTimeIsoStr, onTimeIntervalChange, } = useTimePickerStore();
+  const { range, fromTimeIsoStr, onTimeIntervalChange } = useTimePickerStore();
 
   // API/ Table
   const [data, tableNode, refetch] = useDataTable(
@@ -54,7 +54,8 @@ export default function JobsTable() {
       <Row className="mb-2">
         <Col>
           <h1>
-            Jobs History&nbsp;<small className="text-muted">{data?.count} total</small>
+            Jobs History&nbsp;
+            <small className="text-muted">{data?.count} total</small>
           </h1>
         </Col>
         <Col className="align-self-center">

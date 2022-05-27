@@ -4,7 +4,7 @@ import {
   ListGroup,
   ListGroupItem,
   ListGroupItemHeading,
-  ListGroupItemText
+  ListGroupItemText,
 } from "reactstrap";
 import { IoCheckmarkDoneSharp } from "react-icons/io5";
 
@@ -12,7 +12,7 @@ import { ContentSection, IconButton, DateHoverable } from "@certego/certego-ui";
 
 import { notificationMarkAsRead } from "./api";
 
-export default function NotificationsList({ notifications, refetchFn, }) {
+export default function NotificationsList({ notifications, refetchFn }) {
   const markAsReadCb = React.useCallback(
     async (notifId) => {
       try {
@@ -38,15 +38,12 @@ export default function NotificationsList({ notifications, refetchFn, }) {
               {notif?.title}
             </ListGroupItemHeading>
             <small className="ms-auto text-muted">
-              <DateHoverable
-                value={notif?.created_at}
-                format="p P (z)"
-              />
+              <DateHoverable value={notif?.created_at} format="p P (z)" />
             </small>
           </div>
           <ListGroupItemText
-          className="text-light"
-            dangerouslySetInnerHTML={{ __html: notif?.body, }}
+            className="text-light"
+            dangerouslySetInnerHTML={{ __html: notif?.body }}
           />
           <div className="d-flex">
             {notif?.read === false && (

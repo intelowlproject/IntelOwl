@@ -8,7 +8,7 @@ import { useAuthStore } from "../stores";
 /*
 Wrapper for Routes which should be accessible only to a non-authenticated user
 */
-export default function IfAuthRedirectGuard({ children, }) {
+export default function IfAuthRedirectGuard({ children }) {
   // store
   const [loading, isAuthenticated] = useAuthStore(
     React.useCallback((s) => [s.loading, s.isAuthenticated()], [])

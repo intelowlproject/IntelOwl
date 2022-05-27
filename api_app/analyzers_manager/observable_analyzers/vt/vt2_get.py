@@ -4,6 +4,7 @@
 import requests
 
 from api_app.analyzers_manager import classes
+from api_app.analyzers_manager.constants import ObservableTypes
 from api_app.exceptions import AnalyzerRunException
 from tests.mock_utils import MockResponse, if_mock_connections, patch
 
@@ -41,16 +42,16 @@ class VirusTotalv2(classes.ObservableAnalyzer):
 
 def vt_get_report(api_key, observable_name, obs_clsfn):
     params = {"apikey": api_key}
-    if obs_clsfn == "domain":
+    if obs_clsfn == ObservableTypes.DOMAIN:
         params["domain"] = observable_name
         uri = "domain/report"
-    elif obs_clsfn == "ip":
+    elif obs_clsfn == ObservableTypes.IP:
         params["ip"] = observable_name
         uri = "ip-address/report"
-    elif obs_clsfn == "url":
+    elif obs_clsfn == ObservableTypes.URL:
         params["resource"] = observable_name
         uri = "url/report"
-    elif obs_clsfn == "hash":
+    elif obs_clsfn == ObservableTypes.HASH:
         params["resource"] = observable_name
         params["allinfo"] = 1
         uri = "file/report"

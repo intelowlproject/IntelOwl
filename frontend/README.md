@@ -68,18 +68,11 @@ npm start
 
 - Now you can access the auto-reloading frontend on `http://localhost:3000`. It acts as proxy for API requests to original app web server.
 
-- JS app main configs are available in `package.json`, `craco.config.js` and `enviroments.js`.
+- JS app main configs are available in `package.json` and `enviroments.js`.
 
 - (optional) Use local build of `certego-ui` package so it can also hot-reload. This is useful when you want to make changes in certego-ui and rapidly test them with IntelOwl. Refer [here](https://github.com/certego/certego-ui#use-local-build-of-certego-ui-with-hot-reload-for-faster-development) for setup instructions.
 
 ## Miscellaneous
-
-### Why do we need the `@craco/craco` package ?
-
-For 2 reasons:
-
-- Required for using [@welldone-software/why-did-you-render](https://github.com/welldone-software/why-did-you-render) package which helps us identify whether the pure components are actually working as intended or not.
-- Required for using local build of `certego-ui` package. If you see line 38 onwards in the `craco.config.js` file there exists some package aliases to avoid conflicts in dependencies that are common in IntelOwl frontend and certego-ui.
 
 ### Dependabot
 

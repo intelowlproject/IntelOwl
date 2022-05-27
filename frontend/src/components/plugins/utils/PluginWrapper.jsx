@@ -48,7 +48,7 @@ export default function PluginWrapper({ heading, stateSelector, columns, }) {
     <Container fluid>
       {/* Heading */}
       <Row className="d-flex-start-center mb-2">
-        <Col className="pl-0">
+        <Col className="ps-0">
           <h1>
             {heading}&nbsp;
             <small className="text-muted">{dataList?.length} total</small>
@@ -75,7 +75,7 @@ export default function PluginWrapper({ heading, stateSelector, columns, }) {
               className: "text-light",
             }}
           />
-          <SyncButton onClick={refetch} className="ml-2" />
+          <SyncButton onClick={refetch} className="ms-2" />
         </Col>
       </Row>
       {/* Table/Card View */}

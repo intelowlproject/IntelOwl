@@ -1,7 +1,6 @@
 /* eslint-disable react/prop-types */
 import React from "react";
 import PropTypes from "prop-types";
-import Moment from "react-moment";
 import { MdOutlineRefresh, MdPauseCircleOutline } from "react-icons/md";
 
 import {
@@ -9,7 +8,8 @@ import {
   DataTable,
   DefaultColumnFilter,
   IconButton,
-  SelectOptionsFilter
+  SelectOptionsFilter,
+  DateHoverable
 } from "@certego/certego-ui";
 
 import { StatusTag } from "../../../common";
@@ -38,7 +38,7 @@ const tableProps = {
                 size="xs"
                 title={`Kill ${plugin.type} run`}
                 titlePlacement="top"
-                className="mr-2 border-0"
+                className="me-2 border-0"
               />
             )}
           {job.permissions?.plugin_actions === true &&
@@ -89,11 +89,11 @@ const tableProps = {
       maxWidth: 125,
       Cell: ({ value: plugin, }) => (
         <div>
-          <Moment date={plugin?.start_time} format="hh:mm:ss a" />
-          &nbsp;<span className="font-weight-bold text-muted">-</span>&nbsp;
-          <Moment date={plugin?.end_time} format="hh:mm:ss a" />
+          <DateHoverable noHover value={plugin?.start_time} format="pp" />
+          &nbsp;<span className="fw-bold text-muted">-</span>&nbsp;
+          <DateHoverable noHover value={plugin?.end_time} format="pp" />
           &nbsp;
-          <Moment date={plugin?.end_time} format="(Z)" />
+          <DateHoverable noHover value={plugin?.end_time} format="(z)" />
         </div>
       ),
     },

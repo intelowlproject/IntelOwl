@@ -1,10 +1,9 @@
 /* eslint-disable no-restricted-globals */
 import React from "react";
 import axios from "axios";
-import confirm from "reactstrap-confirm";
 import { IoMdWarning } from "react-icons/io";
 
-import { addToast } from "@certego/certego-ui";
+import { addToast, confirm } from "@certego/certego-ui";
 
 import { JOB_BASE_URI } from "../../../constants/api";
 
@@ -14,13 +13,13 @@ const areYouSureConfirmDialog = (opName) =>
     title: (
       <div className="d-flex-start-center">
         <IoMdWarning className="text-warning" />
-        <span className="ml-1">Confirm</span>
+        <span className="ms-1">Confirm</span>
       </div>
     ),
     message: (
       <div className="text-wrap">
         <h6 className="text-muted">Operation:</h6>
-        <h6 className="text-center text-ul font-italic">{opName}</h6>
+        <h6 className="text-center text-ul fst-italic">{opName}</h6>
         <hr className="bg-dark" />
         <span className="">Are you sure ?</span>
       </div>

@@ -27,7 +27,6 @@ export async function createJob(formValues) {
         ? await _analyzeFile(formValues)
         : await _analyzeObservable(formValues);
 
-    console.log(resp);
     const respData = resp.data;
     // handle response/error
     if (respData.status === "accepted" || respData.status === "running") {
@@ -65,6 +64,7 @@ export async function createJob(formValues) {
     return Promise.reject(error);
 
   } catch (e) {
+      console.error(e);
       addToast("Failed!", e.parsedMsg, "danger");
       return Promise.reject(e);
    }

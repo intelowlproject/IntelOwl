@@ -7,6 +7,7 @@ export default function JobTag(props) {
 
   return (
     <Badge
+      color={null}
       style={{
         backgroundColor: tag.color,
       }}

@@ -13,14 +13,14 @@ export default function JobOverview({ isRunningJob, job, refetch, }) {
     () => [
       <div className="d-flex-center">
         <strong>Analyzers Report</strong>
-        <Badge className="ml-2">
+        <Badge className="ms-2">
           {job.analyzers_to_execute?.length} /&nbsp;
           {job.analyzers_requested?.length || "all"}
         </Badge>
       </div>,
       <div className="d-flex-center">
         <strong>Connectors Report</strong>
-        <Badge className="ml-2">
+        <Badge className="ms-2">
           {job.connectors_to_execute?.length} /&nbsp;
           {job.connectors_requested?.length || "all"}
         </Badge>
@@ -38,11 +38,11 @@ export default function JobOverview({ isRunningJob, job, refetch, }) {
 
   return (
     <Container fluid>
-      <Row noGutters className="d-flex-between-end">
+      <Row className="g-0 d-flex-between-end">
         <Col>
           <GoBackButton onlyIcon color="gray" />
           <h2>
-            <span className="mr-2 text-secondary">Job #{job.id}</span>
+            <span className="me-2 text-secondary">Job #{job.id}</span>
             <StatusIcon status={job.status} className="small" />
           </h2>
         </Col>
@@ -50,7 +50,7 @@ export default function JobOverview({ isRunningJob, job, refetch, }) {
           <JobActionsBar job={job} />
         </Col>
       </Row>
-      <Row noGutters>
+      <Row className="g-0">
         <Col>
           <JobInfoCard job={job} />
         </Col>
@@ -60,7 +60,7 @@ export default function JobOverview({ isRunningJob, job, refetch, }) {
           <JobIsRunningAlert job={job} />
         </Row>
       )}
-      <Row noGutters className="mt-3">
+      <Row className="g-0 mt-3">
         <Col>
           <Tabs
             tabTitles={tabTitles}

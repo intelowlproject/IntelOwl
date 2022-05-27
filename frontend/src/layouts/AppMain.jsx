@@ -1,60 +1,71 @@
-import React from "react";
-import { Route, Switch } from "react-router-dom";
-
-// lib
-import { FallBackLoading } from "@certego/certego-ui";
+import React, { Suspense } from "react";
+import { useRoutes, Outlet } from "react-router-dom";
+import PropTypes from "prop-types";
+import { ErrorBoundary } from "react-error-boundary";
+import { Row, Col } from "reactstrap";
+import { FallBackLoading, ErrorAlert } from "@certego/certego-ui";
 
 // wrapper
-import AuthGuard from "../wrappers/AuthGuard";
-import IfAuthRedirectGuard from "../wrappers/IfAuthRedirectGuard";
 import withAuth from "../wrappers/withAuth";
 
-// routes
-import {
-  publicRoutesLazy,
-  noAuthRoutesLazy,
-  authRoutesLazy
-} from "../components/Routes";
+// layout
+import {publicRoutesLazy, noAuthRoutesLazy, authRoutesLazy } from "../components/Routes";
+import AppHeader from "./AppHeader";
 
-function AppMain() {
-  console.debug("AppMain rendered!");
+const NoMatch = React.lazy(() => import("./NoMatch"));
 
+function ErrorHandler({error,}) {
   return (
-    <React.Suspense fallback={<FallBackLoading />}>
-      <Switch>
-        {/* Public Routes */}
-        {publicRoutesLazy.map((routeProps) => (
-          <Route key={routeProps.path} {...routeProps} />
-        ))}
-        {/* No Auth Public Routes */}
-        {noAuthRoutesLazy.map(({ component: Component, ...routeProps }) => (
-          <Route
-            key={routeProps.path}
-            render={(props) => (
-              <IfAuthRedirectGuard>
-                <Component {...props} />
-              </IfAuthRedirectGuard>
-            )}
-            {...routeProps}
-          />
-        ))}
-        {/* Auth routes */}
-        {authRoutesLazy.map(({ component: Component, ...routeProps }) => (
-          <Route
-            key={routeProps.path}
-            render={(props) => (
-              <AuthGuard>
-                <Component {...props} />
-              </AuthGuard>
-            )}
-            {...routeProps}
-          />
-        ))}
-        {/* 404 */}
-        <Route component={React.lazy(() => import("./NoMatch"))} />
-      </Switch>
-    </React.Suspense>
+    <Row>
+      <Col>
+        <ErrorAlert
+          className="mt-5"
+          error={{
+            response: {
+              statusText: "Something went wrong. Please reload browser.",
+            },
+            parsedMsg: error.message,
+          }}
+        />
+      </Col>
+    </Row>
+  )
+}
+
+ErrorHandler.propTypes = {
+  error: PropTypes.object.isRequired,
+};
+
+function Layout() {
+  return (
+    <>
+      <AppHeader />
+      <main role="main" className="px-1 px-md-5 mx-auto">
+        <ErrorBoundary FallbackComponent={ErrorHandler}>
+          <Outlet />
+        </ErrorBoundary>
+      </main>
+    </>
   );
 }
 
-export default withAuth(AppMain);
+function AppMain() {
+  const AuthLayout = withAuth(Layout);
+  const routes = useRoutes([
+    {
+      path: "/",
+      element: <AuthLayout />,
+      children: [...publicRoutesLazy, ...noAuthRoutesLazy, ...authRoutesLazy],
+    }, {
+      path: "*",
+      element:
+        <Suspense fallback={<FallBackLoading />}>
+          <NoMatch />
+        </Suspense>,
+    },
+  ]);
+
+  return routes;
+}
+
+export default AppMain;

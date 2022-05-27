@@ -1,15 +1,15 @@
 import React from "react";
 import {
-  Dropdown,
+  UncontrolledDropdown,
   DropdownToggle,
   DropdownMenu,
   DropdownItem
 } from "reactstrap";
-import { NavLink as RRNavLink } from "react-router-dom";
 import { BsPeopleFill } from "react-icons/bs";
+import { FiLogOut } from "react-icons/fi";
 import { IoMdKey, IoMdSettings } from "react-icons/io";
 
-import { UserBubble } from "@certego/certego-ui";
+import { UserBubble, DropdownNavLink } from "@certego/certego-ui";
 
 import { useAuthStore } from "../../stores";
 
@@ -18,16 +18,11 @@ import { useAuthStore } from "../../stores";
  * @param props
  */
 export default function UserMenu(props) {
-  // state
-  const [isDropdownOpen, setDropdownOpen] = React.useState(false);
-
   // auth store
   const user = useAuthStore(React.useCallback((s) => s.user, []));
 
   return (
-    <Dropdown
-      isOpen={isDropdownOpen}
-      toggle={() => setDropdownOpen((ps) => !ps)}
+    <UncontrolledDropdown
       nav
       inNavbar
       {...props}
@@ -35,39 +30,31 @@ export default function UserMenu(props) {
       <DropdownToggle nav className="text-center">
         <UserBubble size="sm" userInfo={user} />
       </DropdownToggle>
-      <DropdownMenu right className="bg-dark">
-        <DropdownItem
-          text
-        >{`${user?.full_name} (${user.username})`}</DropdownItem>
+      <DropdownMenu end
+        className="bg-dark"
+        data-bs-popper
+      >
+        <DropdownItem text >
+          logged in as <b>{`${user?.username}`}</b>
+        </DropdownItem>
         <DropdownItem divider />
         {/* Django Admin Interface */}
-        <DropdownItem tag={RRNavLink} to="/admin/" target="_blank">
-          <IoMdSettings className="mr-2" />
-          Django Admin Interface
-        </DropdownItem>
+        <DropdownNavLink to="/admin/" target="_blank">
+          <IoMdSettings className="me-2" /> Django Admin Interface
+        </DropdownNavLink>
         {/* Invitations */}
-        <DropdownItem
-          tag={RRNavLink}
-          to="/me/organization"
-          activeClassName="nav-link-active"
-        >
-          <BsPeopleFill className="mr-2" />
-          Organization
-        </DropdownItem>
+        <DropdownNavLink to="/me/organization">
+          <BsPeopleFill className="me-2" /> Organization
+        </DropdownNavLink>
         {/* API Access/Sessions */}
-        <DropdownItem
-          tag={RRNavLink}
-          to="/me/sessions"
-          activeClassName="nav-link-active"
-        >
-          <IoMdKey className="mr-2" />
-          API Access/ Sessions
-        </DropdownItem>
+        <DropdownNavLink to="/me/sessions">
+          <IoMdKey className="me-2" /> API Access/ Sessions
+        </DropdownNavLink>
         <DropdownItem divider />
-        <DropdownItem tag={RRNavLink} exact to="/logout" isActive={() => false}>
-          Logout
-        </DropdownItem>
+        <DropdownNavLink to="/logout">
+          <FiLogOut className="me-2" /> Logout
+        </DropdownNavLink>
       </DropdownMenu>
-    </Dropdown>
+    </UncontrolledDropdown>
   );
 }

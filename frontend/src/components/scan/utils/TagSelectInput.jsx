@@ -1,8 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Button, ButtonGroup, Fade } from "reactstrap";
-import { Submit, CustomInput as FormInput } from "formstrap";
-import { Form, Formik } from "formik";
+import { Button, ButtonGroup, Fade, Spinner, Input, FormFeedback } from "reactstrap";
+import { Formik, Field, ErrorMessage } from "formik";
 import { MdCheck, MdClose, MdEdit } from "react-icons/md";
 
 import {
@@ -18,9 +17,9 @@ import useTagsStore from "../../../stores/useTagsStore";
 const onFormValidate = (values) => {
   const errors = {};
   if (!values.label) {
-    errors.label = "This field is required.";
+    errors.label = "Required";
   } else if (values.label.length < 4) {
-    errors.label = "This field must be at least 4 characters long";
+    errors.label = "Min length 4";
   }
   return errors;
 };
@@ -112,7 +111,7 @@ export default function TagSelectInput(props) {
           onChange={onChange}
           onCreateOption={onCreateOption}
           isSearchable={!tagToEdit}
-          onMenuClose={() => setTagToEdit(undefined)}
+          menuIsOpen={tagToEdit ? true : undefined}
           formatCreateLabel={(inputVal) => (
             <span>
               Create New Tag: &nbsp;
@@ -151,40 +150,45 @@ function TagForm(props) {
   return (
     <Fade>
       <Formik
-        validateOnMount
         validate={onFormValidate}
         initialValues={tagToEdit}
         onSubmit={onFormSubmit}
+        validateOnChange
         {...rest}
       >
         {(formik) => (
-          <Form className="d-flex justify-content-start align-items-center">
-            <FormInput
-              autoFocus
-              inline
-              type="text"
-              withFeedback={false}
-              tabIndex="0"
-              name="label"
-              placeholder="label"
-              className="form-control form-control-sm w-100 bg-dark border-0 rounded-0"
-            />
-            <FormInput
-              inline
+          <div className="d-flex align-items-end">
+            <div>
+              <Field
+                as={Input}
+                autoFocus
+                type="text"
+                tabIndex="0"
+                name="label"
+                placeholder="label"
+                bsSize="sm"
+                invalid={formik.errors.label && formik.touched.label}
+                className="w-100 bg-dark border-0 rounded-0"
+              />
+              <ErrorMessage component={FormFeedback} name="label" />
+            </div>
+            <Field
+              as={Input}
               type="color"
               name="color"
-              className="form-control form-control-sm w-33 bg-dark border-0 rounded-0"
+              bsSize="sm"
+              className="w-33 bg-dark border-0 rounded-0"
             />
-            <ButtonGroup className="ml-1">
-              <Submit
-                withSpinner
+            <ButtonGroup className="ms-1">
+              <Button
+                type="submit"
                 disabled={!(formik.isValid || formik.isSubmitting)}
                 color="tertiary"
                 size="xs"
                 onClick={formik.handleSubmit}
               >
-                {!formik.isSubmitting && <MdCheck />}
-              </Submit>
+                {formik.isSubmitting ? <Spinner /> : <MdCheck />}
+              </Button>
               <Button
                 disabled={formik.isSubmitting}
                 color="tertiary"
@@ -194,7 +198,7 @@ function TagForm(props) {
                 <MdClose />
               </Button>
             </ButtonGroup>
-          </Form>
+          </div>
         )}
       </Formik>
     </Fade>

@@ -30,7 +30,6 @@ const pluginTableColumns = [
     id: "name",
     accessor: "name",
     Filter: DefaultColumnFilter,
-    minWidth: 315,
   },
   {
     Header: "Active",
@@ -68,7 +67,6 @@ const analyzersTableColumns = [
     Cell: ({ value, }) => <span>{markdownToHtml(value)}</span>,
     disableSortBy: true,
     Filter: DefaultColumnFilter,
-    minWidth: 320,
   },
   {
     Header: "Type",
@@ -77,7 +75,6 @@ const analyzersTableColumns = [
     disableSortBy: true,
     Filter: SelectOptionsFilter,
     selectOptions: ["observable", "file"],
-    minWidth: 160,
   },
   {
     Header: "Supported types",
@@ -89,21 +86,18 @@ const analyzersTableColumns = [
         } else {
             supported = r.supported_filetypes;
         }
-        console.log(supported);
         if (supported.length === 0){supported.push("everything");}
-        console.log(supported);
         return supported;
     },
     Cell: ({ value, }) => (
       <ul className="d-flex flex-column align-items-start">
-        {value?.map((v) => (
+        {value?.sort().map((v) => (
           <li key={v}>{v}</li>
         ))}
       </ul>
     ),
     disableSortBy: true,
     Filter: SelectColumnFilter,
-    minWidth: 350,
   },
   {
     Header: "External Service",
@@ -150,7 +144,6 @@ const connectorTableColumns = [
     Cell: ({ value, }) => <span>{markdownToHtml(value)}</span>,
     disableSortBy: true,
     Filter: DefaultColumnFilter,
-    minWidth: 875,
   },
   {
     Header: "Maximum TLP",
@@ -159,7 +152,6 @@ const connectorTableColumns = [
     Cell: ({ value, }) => <TLPTag value={value} />,
     Filter: SelectOptionsFilter,
     selectOptions: TLP_CHOICES,
-    minWidth: 175,
   },
   {
     Header: "Health Check",

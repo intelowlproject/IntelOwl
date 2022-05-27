@@ -46,7 +46,7 @@ export default function useQuotaBadge() {
           target="quota-info-icon"
           placement="right"
           fade={false}
-          innerClassName="p-2 border border-info text-left text-nowrap md-fit-content"
+          innerClassName="p-2 border border-info text-start text-nowrap md-fit-content"
         >
           Your Submissions Quota.
           <ul>

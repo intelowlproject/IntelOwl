@@ -2,9 +2,11 @@
 
 Intel Owl was designed to ease the addition of new analyzers/connectors. With a simple python script you can integrate your own engine or integrate an external service in a short time.
 
-> Wish to contribute to the web interface ? See [Frontend ReadMe](https://github.com/intelowlproject/IntelOwl/blob/master/frontend/README.md).
+> Wish to contribute to the Python client ? See [pyintelowl](https://github.com/intelowlproject/pyintelowl).
 
-> Wish to contribute to the python client ? See [pyintelowl](https://github.com/intelowlproject/pyintelowl).
+> Wish to contribute to the GO client ? See [go-intelowl](https://github.com/intelowlproject/go-intelowl).
+
+>Wish to contribute to the official IntelOwl Site ? See [intelowlproject.github.io](https://github.com/intelowlproject/intelowlproject.github.io).
 
 
 ## Rules
@@ -31,7 +33,7 @@ The, please create a new branch based on the **develop** branch that contains th
 
 `git checkout -b myfeature develop`
 
-Then we strongly suggest to configure [pre-commit](https://github.com/pre-commit/pre-commit) to force linters on every commits you perform:
+Then we strongly suggest to configure [pre-commit](https://github.com/pre-commit/pre-commit) to force linters on every commits you perform
 ```bash
 # create virtualenv to host pre-commit installation
 python3 -m venv venv
@@ -44,13 +46,14 @@ pre-commit install
 cp docker/.env.start.test.template docker/.env.start.test
 ```
 
+### Backend
 Now, you can execute IntelOwl in development mode by selecting the mode `test` while launching the startup script:
 ```bash
 python3 start.py test up
 ```
 Every time you perform a change, you should perform an operation to reflect the changes into the application:
 
-* if you changed either the frontend code or the python requirements, restart the application and re-build the images. This is the slowest process. You can always choose this way but it would waste a lot of time.
+* if you changed the python requirements, restart the application and re-build the images. This is the slowest process. You can always choose this way but it would waste a lot of time.
 ```bash
 python3 start.py test down && python3 start.py test up --build
 ```
@@ -61,6 +64,62 @@ python3 start.py test down && python3 start.py test up
 
 * if you made changes to either the API or anything that is executed only by the application server, changes will be instantly reflected and you don't need to do anything. This is thanks to the Django Development server that is executed instead of `uwsgi` while using the `test` mode
 
+### Frontend
+To start the frontend in "develop" mode, you can execute the startup npm script within the folder `frontend`:
+```bash
+cd frontend/
+# Install
+npm i
+# Start 
+DANGEROUSLY_DISABLE_HOST_CHECK=true npm start
+# See https://create-react-app.dev/docs/proxying-api-requests-in-development/#invalid-host-header-errors-after-configuring-proxy for why we use that flag in development mode
+```
+
+Most of the time you would need to test the changes you made together with the backend. In that case, you would need to run the backend locally too:
+```commandline
+python3 start.py prod up
+```
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul>
+<li>Running `prod` would be faster because you would leverage the official images and you won't need to build the backend locally. In case you would need to test backend changes too at the same time, please use `test` and refer to the previous section of the documentation.</li>
+<li>This works thanks to the directive `proxy` in the `frontend/package.json` configuration</li>
+</ul>
+</div>
+
+#### Certego-UI
+The IntelOwl Frontend is tightly linked to the [`certego-ui`](https://github.com/certego/certego-ui) library. Most of the React components are imported from there. Because of this, it may happen that, during development, you would need to work on that library too.
+To install the `certego-ui` library, please take a look to [npm link](https://docs.npmjs.com/cli/v8/commands/npm-link) and remember to start certego-ui without installing peer dependencies (to avoid conflicts with IntelOwl dependencies): 
+```bash
+git clone https://github.com/certego/certego-ui.git
+# change directory to the folder where you have the cloned the library
+cd certego-ui/
+# install, without peer deps (to use packages of IntelOwl)
+npm i --legacy-peer-deps
+# create link to the project (this will globally install this package)
+sudo npm link
+# compile the library
+npm start
+```
+Then, open another command line tab, create a link in the `frontend` to the `certego-ui` and re-install and re-start the frontend application (see previous section):
+```bash
+cd frontend/
+npm link @certego/certego-ui
+```
+This trick will allow you to see reflected every changes you make in the `certego-ui` directly in the running `frontend` application.
+
+##### Example application
+The `certego-ui` application comes with an example project that showcases the components that you can re-use and import to other projects, like IntelOwl:
+```bash
+# To have the Example application working correctly, be sure to have installed `certego-ui` *without* the `--legacy-peer-deps` option and having it started in another command line
+cd certego-ui/
+npm i
+npm start
+# go to another tab
+cd certego-ui/example/
+npm i
+npm start
+```
 
 ## How to add a new analyzer
 You may want to look at a few existing examples to start to build a new one, such as:
@@ -177,6 +236,8 @@ If you need to modify the behavior or add feature to those packages, please foll
 Follow these guides to understand how to start to contribute to them while developing for IntelOwl:
 - *certego-saas*: create a fork, commit your changes in your local repo, then change the commit hash to the last one you made in the [requirements file](https://github.com/intelowlproject/IntelOwl/blob/master/requirements/certego-requirements.txt). Ultimately re-build the project
 - *certego-ui*: [Frontend doc]((https://github.com/intelowlproject/IntelOwl/blob/master/frontend/README.md))
+
+
 
 ## Create a pull request
 

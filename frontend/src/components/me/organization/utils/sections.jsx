@@ -3,13 +3,12 @@ import { Alert, Row, Col, Fade, ButtonGroup, Badge } from "reactstrap";
 import { SiMinutemailer } from "react-icons/si";
 import { MdEdit, MdDelete } from "react-icons/md";
 import { FaUserFriends, FaUserEdit, FaUserMinus } from "react-icons/fa";
-import Moment from "react-moment";
-import confirm from "reactstrap-confirm";
 
 import {
   ContentSection,
-  MomentHoverable,
-  IconButton
+  DateHoverable,
+  IconButton,
+  confirm
 } from "@certego/certego-ui";
 
 import { useOrganizationStore } from "../../../../stores";
@@ -43,20 +42,20 @@ export function OrgInfoCard() {
       <section className="border border-dark p-3">
         {/* Owner */}
         <div>
-          <small className="text-muted mr-2">Owner: </small>
+          <small className="text-dark me-2"><b>Owner:</b></small>
           <span className="text-info">
             {owner?.full_name} <small>(@{owner?.username})</small>
           </span>
         </div>
         {/* Established */}
         <div>
-          <small className="text-muted mr-2">Established: </small>
+          <small className="text-dark me-2"><b>Established:</b></small>
           {establishedAt && (
-            <MomentHoverable
+            <DateHoverable
               id="org-created_at"
               fromNow
               value={establishedAt}
-              format="Do MMMM YYYY"
+              format="do MMMM yyyy"
               className="text-info"
             />
           )}
@@ -173,7 +172,7 @@ export function MembersList() {
   // UI
   return (
     <Fade>
-      <FaUserFriends size="16px" className="float-left text-secondary" />
+      <FaUserFriends size="16px" className="float-start text-secondary" />
       <ContentSection className="bg-body border border-dark">
         {/* Header */}
         <section className="h3 d-flex justify-content-between align-items-end flex-column flex-sm-row">
@@ -226,19 +225,19 @@ export function MembersList() {
               {sortedMembers.map(
                 ({ username, full_name: fullName, joined, }) => (
                   <li key={`memberlist-${username}`}>
-                    <div className="d-flex flex-wrap">
+                    <Row>
                       <Col sm={5} title="Name and Username">
                         {fullName}&nbsp;
                         <span className="text-muted">(@{username})</span>
                       </Col>
                       <Col sm={5} title="Joining Date">
-                        <Moment
+                        <DateHoverable
                           date={joined}
-                          format="Do MMMM YYYY"
+                          format="PPP"
                           className="text-secondary user-select-none"
                         />
                       </Col>
-                      <Col sm={2} className="text-right">
+                      <Col sm={2} className="text-end">
                         {owner?.username !== username ? (
                           showActions && (
                             <FaUserMinus
@@ -251,7 +250,7 @@ export function MembersList() {
                           <Badge color="info">admin</Badge>
                         )}
                       </Col>
-                    </div>
+                    </Row>
                   </li>
                 )
               )}
@@ -287,7 +286,7 @@ export function PendingInvitationsList() {
 
   return (
     <Fade>
-      <SiMinutemailer size="16px" className="float-left text-secondary" />
+      <SiMinutemailer size="16px" className="float-start text-secondary" />
       <ContentSection className="bg-body border border-dark">
         {/* Header */}
         <section className="h3 d-flex justify-content-between align-items-end flex-column flex-sm-row">
@@ -325,9 +324,9 @@ export function PendingInvitationsList() {
                   <div className="d-flex flex-wrap">
                     <Col sm={6}>{user?.username}</Col>
                     <Col sm={5}>
-                      <Moment
+                      <DateHoverable
                         date={invitedAt}
-                        format="Do MMMM YYYY"
+                        format="PPP"
                         className="text-secondary user-select-none"
                         title="Invite sent date"
                       />

@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Redirect, useLocation } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 
 import { FallBackLoading, addToast } from "@certego/certego-ui";
 
@@ -31,8 +31,7 @@ export default function AuthGuard({ children, }) {
 
   if (!isAuthenticated && !loading) {
     return (
-      <Redirect
-        push
+      <Navigate
         to={{
           pathname: didJustLogout ? "/" : "/login",
           search: didJustLogout ? undefined : `?next=${location.pathname}`,

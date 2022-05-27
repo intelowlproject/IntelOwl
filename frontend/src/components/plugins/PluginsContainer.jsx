@@ -1,46 +1,47 @@
-import React from "react";
+import React, { Suspense } from "react";
 import PropTypes from "prop-types";
 import { AiOutlineApi } from "react-icons/ai";
 import { TiFlowChildren } from "react-icons/ti";
 
-import { RouterTabs } from "@certego/certego-ui";
+import { RouterTabs, FallBackLoading } from "@certego/certego-ui";
 
-export default function PluginsContainer({ match, }) {
+const Analyzers = React.lazy(() => import("./utils/Analyzers"));
+const Connectors = React.lazy(() => import("./utils/Connectors"));
+
+const routes = [
+  {
+    key: "plugins-analyzers",
+    location: "analyzers",
+    Title: () => (
+      <span>
+        <AiOutlineApi />&nbsp;Analyzers
+      </span>
+    ),
+    Component: () => (
+      <Suspense fallback={<FallBackLoading />}>
+        <Analyzers />
+      </Suspense>
+    ),
+  },
+  {
+    key: "plugins-connectors",
+    location: "connectors",
+    Title: () => (
+      <span>
+        <TiFlowChildren />&nbsp;Connectors
+      </span>
+    ),
+    Component: () => (
+      <Suspense fallback={<FallBackLoading />}>
+        <Connectors />
+      </Suspense>
+    ),
+  },
+];
+
+export default function PluginsContainer() {
   console.debug("PluginsContainer rendered!");
-
-  const routes = React.useMemo(
-    () => [
-      {
-        key: "plugins-analyzers",
-        location: { pathname: `${match.url}/analyzers`, },
-        Title: () => (
-          <span>
-            <AiOutlineApi />
-            &nbsp;Analyzers
-          </span>
-        ),
-        Component: React.lazy(() => import("./utils/Analyzers")),
-      },
-      {
-        key: "plugins-connectors",
-        location: { pathname: `${match.url}/connectors`, },
-        Title: () => (
-          <span>
-            <TiFlowChildren />
-            &nbsp;Connectors
-          </span>
-        ),
-        Component: React.lazy(() => import("./utils/Connectors")),
-      },
-    ],
-    [match.url]
-  );
 
   return <RouterTabs routes={routes} />;
 }
 
-PluginsContainer.propTypes = {
-  match: PropTypes.shape({
-    url: PropTypes.string.isRequired,
-  }).isRequired,
-};

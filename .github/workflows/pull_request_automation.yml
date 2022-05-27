@@ -176,11 +176,8 @@ jobs:
       run: |
         npm run lint
       working-directory: ./frontend
-    - name: Lint with stylelint
-      run: |
-        npm run lint-sass
-      working-directory: ./frontend
-    - name: Test with Jest
-      run: |
-        npm run test
-      working-directory: ./frontend
+# no tests are implemented right now
+#    - name: Test with Jest
+#      run: |
+#        npm run test
+#      working-directory: ./frontend

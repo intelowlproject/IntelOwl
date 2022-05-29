@@ -75,7 +75,7 @@ class _SecretSerializer(rfs.Serializer):
 
 class AbstractConfigSerializer(rfs.Serializer):
     """
-    Abstract serializer for `analyzer_config.json` and `connector_config.json` files.
+    Abstract serializer for `analyzer_config.json`, `connector_config.json` and `playbook_config.json` files.
     """
 
     # constants

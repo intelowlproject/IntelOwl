@@ -8,7 +8,7 @@ import {
   CardHeader,
   CardBody,
   Badge,
-  UncontrolledPopover
+  UncontrolledPopover,
 } from "reactstrap";
 import { RiHeartPulseLine } from "react-icons/ri";
 import { MdInfo } from "react-icons/md";
@@ -18,9 +18,9 @@ import { IconButton, BooleanIcon } from "@certego/certego-ui";
 import { markdownToHtml, TLPTag } from "../../common";
 import { usePluginConfigurationStore } from "../../../stores";
 
-const { checkPluginHealth, } = usePluginConfigurationStore.getState();
+const { checkPluginHealth } = usePluginConfigurationStore.getState();
 
-export function PluginInfoCard({ pluginInfo, }) {
+export function PluginInfoCard({ pluginInfo }) {
   return (
     <Card className="flat border-dark h-100 w-100">
       <CardHeader className="d-flex align-items-center bg-body p-2 h5">
@@ -105,7 +105,7 @@ export function PluginInfoCard({ pluginInfo, }) {
   );
 }
 
-export function PluginInfoPopoverIcon({ pluginInfo, }) {
+export function PluginInfoPopoverIcon({ pluginInfo }) {
   return (
     <div>
       <MdInfo
@@ -115,7 +115,7 @@ export function PluginInfoPopoverIcon({ pluginInfo, }) {
       />
       <UncontrolledPopover
         trigger="hover"
-        delay={{ show: 0, hide: 500, }}
+        delay={{ show: 0, hide: 500 }}
         target={`table-infoicon__${pluginInfo.name}`}
         popperClassName="p-0 w-33"
       >
@@ -125,7 +125,7 @@ export function PluginInfoPopoverIcon({ pluginInfo, }) {
   );
 }
 
-export function PluginVerificationIcon({ pluginName, verification, }) {
+export function PluginVerificationIcon({ pluginName, verification }) {
   const divId = `table-pluginverificationicon__${pluginName}`;
   return (
     <span id={divId}>
@@ -150,7 +150,11 @@ export function PluginVerificationIcon({ pluginName, verification, }) {
   );
 }
 
-export function PluginHealthCheckButton({ pluginName, pluginType, }) {
+function PluginHealthSpinner() {
+  return <Spinner type="ripple" size="sm" className="text-darker" />;
+}
+
+export function PluginHealthCheckButton({ pluginName, pluginType }) {
   const [isLoading, setIsLoading] = React.useState(false);
   const [isHealthy, setIsHealthy] = React.useState(undefined);
 
@@ -167,11 +171,7 @@ export function PluginHealthCheckButton({ pluginName, pluginType, }) {
         id={`table-pluginhealthcheckbtn__${pluginName}`}
         color="info"
         size="sm"
-        Icon={
-          !isLoading
-            ? RiHeartPulseLine
-            : () => <Spinner type="ripple" size="sm" className="text-darker" />
-        }
+        Icon={!isLoading ? RiHeartPulseLine : PluginHealthSpinner}
         title={!isLoading ? "perform health check" : "please wait..."}
         onClick={onClick}
         titlePlacement="top"

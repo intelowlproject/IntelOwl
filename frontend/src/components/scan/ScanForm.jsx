@@ -1,5 +1,15 @@
 import React from "react";
-import { FormFeedback, FormGroup, Label, Container, Col, FormText, Input, Spinner, Button } from "reactstrap";
+import {
+  FormFeedback,
+  FormGroup,
+  Label,
+  Container,
+  Col,
+  FormText,
+  Input,
+  Spinner,
+  Button,
+} from "reactstrap";
 import { useNavigate } from "react-router-dom";
 import { ErrorMessage, Field, Form, Formik } from "formik";
 import useTitle from "react-use/lib/useTitle";
@@ -9,7 +19,7 @@ import {
   ContentSection,
   IconButton,
   Loader,
-  MultiSelectDropdownInput
+  MultiSelectDropdownInput,
 } from "@certego/certego-ui";
 
 import { useQuotaBadge } from "../../hooks";
@@ -18,13 +28,13 @@ import {
   TLP_CHOICES,
   TLP_DESCRIPTION_MAP,
   OBSERVABLE_TYPES,
-  ALL_CLASSIFICATIONS
+  ALL_CLASSIFICATIONS,
 } from "../../constants";
 import { TLPTag, markdownToHtml } from "../common";
 import {
   RuntimeConfigurationModal,
   RecentScans,
-  TagSelectInput
+  TagSelectInput,
 } from "./utils";
 import { createJob } from "./api";
 
@@ -119,13 +129,13 @@ export default function ScanForm() {
   );
 
   // page title
-  useTitle("IntelOwl | Scan", { restoreOnUnmount: true, });
+  useTitle("IntelOwl | Scan", { restoreOnUnmount: true });
 
   // router navigation
   const navigate = useNavigate();
 
   // use custom hooks
-  const [{ MonthBadge, TotalBadge, QuotaInfoIcon, }, refetchQuota, quota] =
+  const [{ MonthBadge, TotalBadge, QuotaInfoIcon }, refetchQuota, _quota] =
     useQuotaBadge();
 
   // API/ store
@@ -230,10 +240,7 @@ export default function ScanForm() {
       };
       try {
         const jobId = await createJob(formValues);
-        setTimeout(
-          () => navigate(`/jobs/${jobId}`),
-          1000
-        );
+        setTimeout(() => navigate(`/jobs/${jobId}`), 1000);
       } catch (e) {
         // handled inside createJob
       } finally {
@@ -267,37 +274,29 @@ export default function ScanForm() {
         >
           {(formik) => (
             <Form>
-                <FormGroup className="d-flex justify-content-center">
-                    {ALL_CLASSIFICATIONS.map((ch) => (
-                      <FormGroup check inline
-                        key={`classification__${ch}`}
-                      >
-                      <Col>
-                        <Field
-                          as={Input}
-                          id={`classification__${ch}`}
-                          type="radio"
-                          name="classification"
-                          value={ch}
-                          onClick={() => {
-                            setClassification(ch);
-                            formik.setFieldValue("analyzers", []); // reset
-                          }}
-                        />
-                        <Label check>
-                          {ch}
-                        </Label>
-                      </Col>
-                      </FormGroup>
-                    ))}
-                </FormGroup>
+              <FormGroup className="d-flex justify-content-center">
+                {ALL_CLASSIFICATIONS.map((ch) => (
+                  <FormGroup check inline key={`classification__${ch}`}>
+                    <Col>
+                      <Field
+                        as={Input}
+                        id={`classification__${ch}`}
+                        type="radio"
+                        name="classification"
+                        value={ch}
+                        onClick={() => {
+                          setClassification(ch);
+                          formik.setFieldValue("analyzers", []); // reset
+                        }}
+                      />
+                      <Label check>{ch}</Label>
+                    </Col>
+                  </FormGroup>
+                ))}
+              </FormGroup>
               {OBSERVABLE_TYPES.includes(formik.values.classification) ? (
                 <FormGroup row>
-                  <Label
-                    className="required"
-                    sm={3}
-                    for="observable_name"
-                  >
+                  <Label className="required" sm={3} for="observable_name">
                     Observable Value
                   </Label>
                   <Col sm={9}>
@@ -307,10 +306,16 @@ export default function ScanForm() {
                       id="observable_name"
                       name="observable_name"
                       className="input-dark"
-                      invalid={formik.errors.observable_name && formik.touched.observable_name}
+                      invalid={
+                        formik.errors.observable_name &&
+                        formik.touched.observable_name
+                      }
                       {...observableType2PropsMap[formik.values.classification]}
                     />
-                    <ErrorMessage component={FormFeedback} name="observable_name" />
+                    <ErrorMessage
+                      component={FormFeedback}
+                      name="observable_name"
+                    />
                   </Col>
                 </FormGroup>
               ) : (
@@ -323,8 +328,14 @@ export default function ScanForm() {
                       type="file"
                       id="file"
                       name="file"
-                      onChange={event => formik.setFieldValue("file", event.currentTarget.files[0])}
-                      className="input-dark" />
+                      onChange={(event) =>
+                        formik.setFieldValue(
+                          "file",
+                          event.currentTarget.files[0]
+                        )
+                      }
+                      className="input-dark"
+                    />
                   </Col>
                 </FormGroup>
               )}
@@ -358,19 +369,19 @@ export default function ScanForm() {
                   Select Connectors
                 </Label>
                 <Col sm={9}>
-                {!(pluginsLoading || pluginsError) && (
-                  <>
-                    <MultiSelectDropdownInput
-                      options={connectorOptions}
-                      value={formik.values.connectors}
-                      onChange={(v) => formik.setFieldValue("connectors", v)}
-                    />
-                    <FormText>
-                      Default: all configured connectors are triggered.
-                    </FormText>
-                  </>
-                )}
-                <ErrorMessage component={FormFeedback} name="connectors" />
+                  {!(pluginsLoading || pluginsError) && (
+                    <>
+                      <MultiSelectDropdownInput
+                        options={connectorOptions}
+                        value={formik.values.connectors}
+                        onChange={(v) => formik.setFieldValue("connectors", v)}
+                      />
+                      <FormText>
+                        Default: all configured connectors are triggered.
+                      </FormText>
+                    </>
+                  )}
+                  <ErrorMessage component={FormFeedback} name="connectors" />
                 </Col>
               </FormGroup>
               <FormGroup row>
@@ -403,17 +414,11 @@ export default function ScanForm() {
                 </Col>
               </FormGroup>
               <FormGroup row>
-                <Label sm={3}>
-                  TLP
-                </Label>
+                <Label sm={3}>TLP</Label>
                 <Col sm={9}>
                   {TLP_CHOICES.map((ch) => (
-                    <FormGroup inline check
-                      key={`tlpchoice__${ch}`}
-                    >
-                      <Label check
-                        for={`tlpchoice__${ch}`}
-                      >
+                    <FormGroup inline check key={`tlpchoice__${ch}`}>
+                      <Label check for={`tlpchoice__${ch}`}>
                         <TLPTag value={ch} />
                       </Label>
                       <Field
@@ -451,14 +456,10 @@ export default function ScanForm() {
                 </Col>
               </FormGroup>
               <FormGroup row className="mt-2">
-                <Label sm={3}>
-                  Extra configuration
-                </Label>
+                <Label sm={3}>Extra configuration</Label>
                 <Col sm={9}>
                   {checkChoices.map((ch) => (
-                    <FormGroup check
-                      key={`checkchoice__${ch.value}`}
-                    >
+                    <FormGroup check key={`checkchoice__${ch.value}`}>
                       <Field
                         as={Input}
                         id={`checkchoice__${ch.value}`}
@@ -467,9 +468,7 @@ export default function ScanForm() {
                         value={ch.value}
                         onChange={formik.handleChange}
                       />
-                      <Label check
-                        for={`checkchoice__${ch.value}`}
-                      >
+                      <Label check for={`checkchoice__${ch.value}`}>
                         {ch.label}
                       </Label>
                     </FormGroup>
@@ -477,16 +476,16 @@ export default function ScanForm() {
                 </Col>
               </FormGroup>
               <FormGroup row className="mt-2">
-                  <Button
-                    type="submit"
-                    disabled={!(formik.isValid || formik.isSubmitting)}
-                    color="primary"
-                    size="lg"
-                    outline
-                    className="mx-auto rounded-0 col-sm-2 order-sm-5"
-                  >
-                    {formik.isSubmitting && <Spinner  size="sm" />}Start Scan
-                  </Button>
+                <Button
+                  type="submit"
+                  disabled={!(formik.isValid || formik.isSubmitting)}
+                  color="primary"
+                  size="lg"
+                  outline
+                  className="mx-auto rounded-0 col-sm-2 order-sm-5"
+                >
+                  {formik.isSubmitting && <Spinner size="sm" />}Start Scan
+                </Button>
               </FormGroup>
             </Form>
           )}

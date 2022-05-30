@@ -1,13 +1,11 @@
 import React from "react";
-import { BrowserRouter} from "react-router-dom";
+import { BrowserRouter } from "react-router-dom";
 
 // layout
 import AppMain from "./layouts/AppMain";
 import AppFooter from "./layouts/AppFooter";
 
-
 function App() {
-
   return (
     <BrowserRouter>
       <AppMain />

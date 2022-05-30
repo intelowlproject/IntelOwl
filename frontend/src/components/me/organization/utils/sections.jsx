@@ -8,7 +8,7 @@ import {
   ContentSection,
   DateHoverable,
   IconButton,
-  confirm
+  confirm,
 } from "@certego/certego-ui";
 
 import { useOrganizationStore } from "../../../../stores";
@@ -16,14 +16,14 @@ import {
   deleteInvitation,
   deleteOrganization,
   removeMemberFromOrg,
-  leaveOrganization
+  leaveOrganization,
 } from "../api";
 import InviteButton from "./InviteButton";
 
 export function OrgInfoCard() {
   // consume store
   const {
-    organization: { name, owner, establishedAt, },
+    organization: { name, owner, establishedAt },
   } = useOrganizationStore(
     React.useCallback(
       (state) => ({
@@ -42,14 +42,18 @@ export function OrgInfoCard() {
       <section className="border border-dark p-3">
         {/* Owner */}
         <div>
-          <small className="text-dark me-2"><b>Owner:</b></small>
+          <small className="text-dark me-2">
+            <b>Owner:</b>
+          </small>
           <span className="text-info">
             {owner?.full_name} <small>(@{owner?.username})</small>
           </span>
         </div>
         {/* Established */}
         <div>
-          <small className="text-dark me-2"><b>Established:</b></small>
+          <small className="text-dark me-2">
+            <b>Established:</b>
+          </small>
           {establishedAt && (
             <DateHoverable
               id="org-created_at"
@@ -68,7 +72,7 @@ export function OrgInfoCard() {
 export function MembersList() {
   // consume store
   const {
-    organization: { owner, name: orgName, },
+    organization: { owner, name: orgName },
     members,
     membersCount,
     fetchAll,
@@ -151,8 +155,9 @@ export function MembersList() {
     const answer = await confirm({
       message: (
         <p>
-          Organization "<u>{orgName}</u>" will be deleted along with every
-          membership (user memberships, not user accounts) and invitations too.
+          Organization &quot;<u>{orgName}</u>&quot; will be deleted along with
+          every membership (user memberships, not user accounts) and invitations
+          too.
           <br />
           <span className="text-warning">
             Are you sure you wish to proceed?
@@ -223,7 +228,7 @@ export function MembersList() {
           {sortedMembers?.length && (
             <ol>
               {sortedMembers.map(
-                ({ username, full_name: fullName, joined, }) => (
+                ({ username, full_name: fullName, joined }) => (
                   <li key={`memberlist-${username}`}>
                     <Row>
                       <Col sm={5} title="Name and Username">
@@ -264,7 +269,7 @@ export function MembersList() {
 
 export function PendingInvitationsList() {
   // consume store
-  const { pendingInvitations, refetchInvs, isUserOwner, } = useOrganizationStore(
+  const { pendingInvitations, refetchInvs, isUserOwner } = useOrganizationStore(
     React.useCallback(
       (state) => ({
         pendingInvitations: state.pendingInvitations,
@@ -319,7 +324,7 @@ export function PendingInvitationsList() {
         <section>
           {pendingInvitations?.length ? (
             <ol>
-              {pendingInvitations.map(({ id, user, created_at: invitedAt, }) => (
+              {pendingInvitations.map(({ id, user, created_at: invitedAt }) => (
                 <li key={`pendinvinvlist-${id}`}>
                   <div className="d-flex flex-wrap">
                     <Col sm={6}>{user?.username}</Col>

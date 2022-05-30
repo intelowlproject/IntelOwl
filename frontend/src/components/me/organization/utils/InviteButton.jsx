@@ -29,7 +29,7 @@ const onValidate = (values) => {
 };
 
 // Invitation Form
-function InvitationForm({ onFormSubmit, }) {
+function InvitationForm({ onFormSubmit }) {
   console.debug("InvitationForm rendered!");
 
   const onSubmit = React.useCallback(
@@ -56,12 +56,8 @@ function InvitationForm({ onFormSubmit, }) {
       {(formik) => (
         <Form className="mx-2 my-3">
           <FormGroup row className="d-flex flex-wrap">
-            <Label
-              className="required"
-              for="forminput-username"
-              md={4}
-            >
-              User's username
+            <Label className="required" for="forminput-username" md={4}>
+              User&apos;s username
             </Label>
             <Col md={5}>
               <Input
@@ -81,7 +77,7 @@ function InvitationForm({ onFormSubmit, }) {
                 size="sm"
                 md={2}
               >
-                {formik.isSubmitting && <Spinner  size="sm" />}Send
+                {formik.isSubmitting && <Spinner size="sm" />}Send
               </Button>
             </Col>
           </FormGroup>
@@ -92,7 +88,7 @@ function InvitationForm({ onFormSubmit, }) {
 }
 
 // Popover Button for invitation form
-function InviteButton({ onCreate, }) {
+function InviteButton({ onCreate }) {
   return (
     <PopupFormButton
       id="invitationform-icon"

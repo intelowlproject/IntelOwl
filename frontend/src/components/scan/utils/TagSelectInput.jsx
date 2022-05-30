@@ -1,13 +1,20 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Button, ButtonGroup, Fade, Spinner, Input, FormFeedback } from "reactstrap";
+import {
+  Button,
+  ButtonGroup,
+  Fade,
+  Spinner,
+  Input,
+  FormFeedback,
+} from "reactstrap";
 import { Formik, Field, ErrorMessage } from "formik";
 import { MdCheck, MdClose, MdEdit } from "react-icons/md";
 
 import {
   Loader,
   MultiSelectCreatableInput,
-  addToast
+  addToast,
 } from "@certego/certego-ui";
 
 import JobTag from "../../common/JobTag";
@@ -24,8 +31,17 @@ const onFormValidate = (values) => {
   return errors;
 };
 
+// components
+function TagNew(inputVal) {
+  return (
+    <span>
+      Create New Tag: &nbsp;
+      <JobTag tag={{ label: inputVal, color: "#1655D3" }} />
+    </span>
+  );
+}
 export default function TagSelectInput(props) {
-  const { selectedTags, setSelectedTags, ...rest } = props;
+  const { selectedTags, setSelectedTags } = props;
 
   // local state
   const [tagToEdit, setTagToEdit] = React.useState(undefined);
@@ -84,13 +100,13 @@ export default function TagSelectInput(props) {
       const newTag = await createTag(inputVal, "#1655D3");
       setSelectedTags([
         ...selectedTags,
-        { value: newTag, label: <JobTag tag={newTag} />, },
+        { value: newTag, label: <JobTag tag={newTag} /> },
       ]);
     } catch (e) {
       addToast("Failed!", e.parsedMsg.toString(), "danger");
     }
   };
-  const onChange = (selectedOpts, { action, }) => {
+  const onChange = (selectedOpts, { action }) => {
     if (action === "select-option" || action === "deselect-option") {
       setSelectedTags(selectedOpts);
     } else if (action === "clear") {
@@ -112,12 +128,7 @@ export default function TagSelectInput(props) {
           onCreateOption={onCreateOption}
           isSearchable={!tagToEdit}
           menuIsOpen={tagToEdit ? true : undefined}
-          formatCreateLabel={(inputVal) => (
-            <span>
-              Create New Tag: &nbsp;
-              <JobTag tag={{ label: inputVal, color: "#1655D3", }} />
-            </span>
-          )}
+          formatCreateLabel={TagNew}
         />
       )}
     />
@@ -216,5 +227,5 @@ TagForm.propTypes = {
 };
 
 TagForm.defaultProps = {
-  tagToEdit: { label: undefined, color: "#ffffff", },
+  tagToEdit: { label: undefined, color: "#ffffff" },
 };

@@ -14,16 +14,16 @@ const TOKEN_STORAGE_KEY = "INTELOWL_AUTH_TOKEN";
 const useAuthStore = create((set, get) => ({
   loading: false,
   token: localStorage.getItem(TOKEN_STORAGE_KEY) || null,
-  user: { full_name: "", first_name: "", last_name: "", email: "", },
+  user: { full_name: "", first_name: "", last_name: "", email: "" },
   access: null,
   isAuthenticated: () => !!get().token,
   updateToken: (newValue) => {
     localStorage.setItem(TOKEN_STORAGE_KEY, newValue.toString());
-    set({ token: newValue, });
+    set({ token: newValue });
   },
   deleteToken: () => {
     localStorage.removeItem(TOKEN_STORAGE_KEY);
-    set({ token: null, });
+    set({ token: null });
   },
   service: {
     fetchUserAccess: async () => {
@@ -45,7 +45,7 @@ const useAuthStore = create((set, get) => ({
     },
     loginUser: async (body) => {
       try {
-        set({ loading: true, });
+        set({ loading: true });
         const resp = await axios.post(`${AUTH_BASE_URI}/login`, body, {
           certegoUIenableProgressBar: false,
         });
@@ -58,14 +58,14 @@ const useAuthStore = create((set, get) => ({
         addToast("Login failed!", err.parsedMsg, "danger", true);
         return Promise.reject(err);
       } finally {
-        set({ loading: false, });
+        set({ loading: false });
       }
     },
     logoutUser: async () => {
-      set({ loading: true, });
+      set({ loading: true });
       const onLogoutCb = () => {
         get().deleteToken();
-        set({ loading: false, });
+        set({ loading: false });
         onLogout();
         addToast("Logged out!", null, "info");
       };

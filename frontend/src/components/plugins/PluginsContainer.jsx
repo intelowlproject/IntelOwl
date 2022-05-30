@@ -1,5 +1,4 @@
 import React, { Suspense } from "react";
-import PropTypes from "prop-types";
 import { AiOutlineApi } from "react-icons/ai";
 import { TiFlowChildren } from "react-icons/ti";
 
@@ -14,7 +13,8 @@ const routes = [
     location: "analyzers",
     Title: () => (
       <span>
-        <AiOutlineApi />&nbsp;Analyzers
+        <AiOutlineApi />
+        &nbsp;Analyzers
       </span>
     ),
     Component: () => (
@@ -28,7 +28,8 @@ const routes = [
     location: "connectors",
     Title: () => (
       <span>
-        <TiFlowChildren />&nbsp;Connectors
+        <TiFlowChildren />
+        &nbsp;Connectors
       </span>
     ),
     Component: () => (
@@ -44,4 +45,3 @@ export default function PluginsContainer() {
 
   return <RouterTabs routes={routes} />;
 }
-

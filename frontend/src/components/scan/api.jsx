@@ -8,11 +8,11 @@ import { ContentSection, readFileAsync, addToast } from "@certego/certego-ui";
 import {
   ANALYZE_OBSERVABLE_URI,
   ANALYZE_FILE_URI,
-  ASK_ANALYSIS_AVAILABILITY_URI
+  ASK_ANALYSIS_AVAILABILITY_URI,
 } from "../../constants/api";
 import useRecentScansStore from "../../stores/useRecentScansStore";
 
-const { append: appendToRecentScans, } = useRecentScansStore.getState();
+const { append: appendToRecentScans } = useRecentScansStore.getState();
 
 export async function createJob(formValues) {
   try {
@@ -62,12 +62,11 @@ export async function createJob(formValues) {
     addToast("Failed!", respData?.message, "danger");
     const error = new Error(`job status ${respData.status}`);
     return Promise.reject(error);
-
   } catch (e) {
-      console.error(e);
-      addToast("Failed!", e.parsedMsg, "danger");
-      return Promise.reject(e);
-   }
+    console.error(e);
+    addToast("Failed!", e.parsedMsg, "danger");
+    return Promise.reject(e);
+  }
 }
 
 async function _askAnalysisAvailability(formValues) {

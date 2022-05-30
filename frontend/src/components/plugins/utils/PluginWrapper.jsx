@@ -9,7 +9,7 @@ import {
   DataTable,
   TableHintIcon,
   SyncButton,
-  ButtonSelect
+  ButtonSelect,
 } from "@certego/certego-ui";
 
 import { PluginInfoCard } from "./utils";
@@ -19,9 +19,9 @@ import { usePluginConfigurationStore } from "../../../stores";
 const tableConfig = {};
 const tableInitialState = {
   pageSize: 6,
-  sortBy: [{ id: "name", desc: false, }],
+  sortBy: [{ id: "name", desc: false }],
 };
-function TableBodyComponent({ page, }) {
+function TableBodyComponent({ page }) {
   return (
     <ContentSection className="bg-body d-flex flex-wrap">
       {page.map((row) => (
@@ -33,7 +33,7 @@ function TableBodyComponent({ page, }) {
   );
 }
 
-export default function PluginWrapper({ heading, stateSelector, columns, }) {
+export default function PluginWrapper({ heading, stateSelector, columns }) {
   // local state
   const [viewType, setViewType] = React.useState("Table");
 
@@ -42,7 +42,7 @@ export default function PluginWrapper({ heading, stateSelector, columns, }) {
     usePluginConfigurationStore(stateSelector);
 
   // page title
-  useTitle(`IntelOwl | ${heading}`, { restoreOnUnmount: true, });
+  useTitle(`IntelOwl | ${heading}`, { restoreOnUnmount: true });
 
   return (
     <Container fluid>

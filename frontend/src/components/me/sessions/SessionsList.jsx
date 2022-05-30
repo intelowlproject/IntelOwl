@@ -5,7 +5,7 @@ import { VscDebugDisconnect } from "react-icons/vsc";
 import {
   IconButton,
   DateHoverable,
-  useAxiosComponentLoader
+  useAxiosComponentLoader,
 } from "@certego/certego-ui";
 
 import { SESSIONS_BASE_URI, deleteTokenById } from "./api";

@@ -22,7 +22,8 @@ export default function Sessions() {
       <Row className="my-4">
         <Alert color="secondary" className="mx-3 mx-md-auto text-center">
           <span>
-            You can generate an API key to access IntelOwl's RESTful API.&nbsp;
+            You can generate an API key to access IntelOwl&apos;s RESTful
+            API.&nbsp;
             <a
               href={PYINTELOWL_GH_URL}
               target="_blank"

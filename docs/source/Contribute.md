@@ -64,6 +64,12 @@ python3 start.py test down && python3 start.py test up
 
 * if you made changes to either the API or anything that is executed only by the application server, changes will be instantly reflected and you don't need to do anything. This is thanks to the Django Development server that is executed instead of `uwsgi` while using the `test` mode
 
+#### NOTE about documentation:
+If you made any changes to an existing model/serializer/view, please run the following command to generate a new version of the API schema and docs:
+```bash
+docker exec -it intelowl_uwsgi python manage.py spectacular --file docs/source/schema.yml && make html
+```
+
 ### Frontend
 To start the frontend in "develop" mode, you can execute the startup npm script within the folder `frontend`:
 ```bash

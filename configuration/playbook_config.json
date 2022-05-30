@@ -4,7 +4,7 @@
         "description": "Fetch basic info for an IP",
         "python_module": "ip_basic_info.IPBasicInfo",
         "analyzers": {
-            "AbuseIPDB": null,
+            "AbuseIPDB": {},
             "Shodan": {
                 "include_honeyscore": true
             },

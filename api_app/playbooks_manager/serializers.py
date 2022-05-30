@@ -19,11 +19,11 @@ class PlaybookConfigSerializer(AbstractConfigSerializer):
 
     # Required fields
     description = rfs.CharField()
-    analyzers = rfs.DictField(child=_ParamSerializer())
+    analyzers = rfs.DictField(child=rfs.DictField())
     # The idea here is, Every child should be forwarded
     # As a param.
 
-    connectors = rfs.DictField(child=_ParamSerializer())
+    connectors = rfs.DictField(child=rfs.DictField())
     # Same idea applies here.
 
     # Optional Fields

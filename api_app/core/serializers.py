@@ -75,7 +75,7 @@ class _SecretSerializer(rfs.Serializer):
 
 class AbstractConfigSerializer(rfs.Serializer):
     """
-    Abstract serializer for `analyzer_config.json`, `connector_config.json` and `playbook_config.json` files.
+    Abstract serializer for `analyzer_config.json` and `connector_config.json`.
     """
 
     # constants
@@ -187,3 +187,15 @@ class AbstractConfigSerializer(rfs.Serializer):
             raise rfs.ValidationError(serializer_errors)
 
         return config_dict
+
+class AbstractConfigSerializer2(AbstractConfigSerializer):
+    name = rfs.CharField(required=True)
+
+    python_module = rfs.CharField(required=False, max_length=128)
+    disabled = rfs.BooleanField(required=False)
+    description = rfs.CharField(allow_blank=True)
+    # Configurations
+    config = rfs.CharField(required=False)
+    params = rfs.CharField(required=False)
+
+    

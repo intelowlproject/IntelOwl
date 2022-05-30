@@ -17,6 +17,10 @@ class PlaybookConfigSerializer(AbstractConfigSerializer):
     """
     CONFIG_FILE_NAME = "playbook_config.json"
 
+    config = None
+    params = None
+    secrets = None
+
     # Required fields
     description = rfs.CharField()
     analyzers = rfs.DictField(child=rfs.DictField())

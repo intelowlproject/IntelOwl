@@ -1,8 +1,8 @@
 {
     "IP_BASIC_INFO": {
-        "supports": ["ip"],
         "description": "Fetch basic info for an IP",
-        "python_module": "ip_basic_info.IPBasicInfo",
+        "supports": ["ip"],
+        "disabled": true,
         "analyzers": {
             "AbuseIPDB": {},
             "Shodan": {

@@ -12,13 +12,19 @@ from .serializers import PlaybookConfigSerializer
 __all__ = ["PlaybookConfig"]
 
 @dataclasses.dataclass
-class PlaybookConfig(AbstractConfig):
+class PlaybookConfig:
+    name: str
     description: str
+    supports: typing.List[str]
+    disabled: bool
     analyzers: typing.Dict[str, typing.Any]
     connectors: typing.Dict[str, typing.Any]
-    supports: typing.List[str]
 
     serializer_class = PlaybookConfigSerializer
+
+    @property
+    def is_ready_to_use(self) -> bool:
+        return not self.disabled
 
     @classmethod
     def from_dict(cls, data: dict) -> "PlaybookConfig":

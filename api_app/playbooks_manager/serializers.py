@@ -23,11 +23,7 @@ class PlaybookConfigSerializer(AbstractConfigSerializer):
     # Required fields
     description = rfs.CharField()
     analyzers = rfs.DictField(child=rfs.DictField())
-    # The idea here is, Every child should be forwarded
-    # As a param.
-
     connectors = rfs.DictField(child=rfs.DictField())
-    # Same idea applies here.
 
     # Optional Fields
     supports = rfs.ListField(

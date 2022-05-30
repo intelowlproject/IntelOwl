@@ -13,11 +13,14 @@ if [ "$REPO_DOWNLOADER_ENABLED" = "false" ]; then echo "Skipping repo_downloader
 
 cd /opt/deploy/yara
 
+# bartblaze rules
+git clone --depth 1 https://github.com/bartblaze/Yara-rules bartblaze_rules
+
 # Intezer rules
 git clone --depth 1 https://github.com/intezer/yara-rules intezer_rules
 
-# McAfee rules
-git clone --depth 1 https://github.com/advanced-threat-research/Yara-Rules mcafee_rules
+# Trellix (ex McAfee) rules
+git clone --depth 1 https://github.com/advanced-threat-research/Yara-Rules trellix_rules
 
 # Stratosphere rules
 git clone --depth 1 https://github.com/stratosphereips/yara-rules stratosphere_rules

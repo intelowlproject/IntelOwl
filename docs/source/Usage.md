@@ -152,13 +152,14 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `VirusTotal_v3_Get_File`: check only the file hash on VirusTotal (this analyzer is disabled by default to avoid multiple unwanted queries. You have to change that flag [in the config]((https://github.com/intelowlproject/IntelOwl/blob/master/configuration/analyzer_config.json)) to use it)
 * `VirusTotal_v2_Get_File`: check file hash on VirusTotal using old API endpoints (this analyzer is disabled by default. You have to change that flag [in the config]((https://github.com/intelowlproject/IntelOwl/blob/master/configuration/analyzer_config.json)) to use it)
 * `VirusTotal_v2_Scan_File`: scan a file on VirusTotal using old API endpoints (this analyzer is disabled by default. You have to change that flag [in the config]((https://github.com/intelowlproject/IntelOwl/blob/master/configuration/analyzer_config.json)) to use it)
-* `Intezer Scan`: scan a file on [Intezer](https://analyze.intezer.com/?utm_source=IntelOwl). Register for a free community account [here](https://analyze.intezer.com/sign-in?utm_source=IntelOwl)
+* `Intezer_Scan`: scan a file on [Intezer](https://analyze.intezer.com/?utm_source=IntelOwl). Register for a free community account [here](https://analyze.intezer.com/sign-in?utm_source=IntelOwl)
 * `Cuckoo_Scan`: scan a file on Cuckoo (this analyzer is disabled by default. You have to change that flag [in the config]((https://github.com/intelowlproject/IntelOwl/blob/master/configuration/analyzer_config.json)) to use it)
 * `HybridAnalysis_Get_File`: check file hash on [HybridAnalysis](https://www.hybrid-analysis.com/) sandbox reports
 * `OTX_Check_Hash`: check file hash on [Alienvault OTX](https://otx.alienvault.com/)
 * `MISP_Check_Hash`: check a file hash on a MISP instance
 * `MISPFIRST_Check_Hash`: check a file hash on the FIRST MISP instance
 * `Yara_Scan_ATM_MALWARE`: scan a file with the [ATM malware yara rules](https://github.com/fboldewin/YARA-rules)
+* `Yara_Scan_Bartblaze`: scan a file with [bartblaze yara rules](https://github.com/bartblaze/Yara-rules)
 * `Yara_Scan_MALPEDIA`: scan a file with the [MALPEDIA yara rules](https://github.com/malpedia/signator-rules)
 * `Yara_Scan_Community`: scan a file with the [community yara rules](https://github.com/Yara-Rules/rules)
 * `Yara_Scan_Dail_Ioc`: scan a file with [StrangerealIntel](https://github.com/StrangerealIntel) Daily IOC yara rules
@@ -181,7 +182,6 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `BoxJS_Scan_Javascript`: [Box-JS](https://github.com/CapacitorSet/box-js) is a tool for studying JavaScript malware.
 * `APKiD_Scan_APK_DEX_JAR`: [APKiD](https://github.com/rednaga/APKiD) identifies many compilers, packers, obfuscators, and other weird stuff from an APK or DEX file.
 * `Quark_Engine_APK`: [Quark Engine](https://github.com/quark-engine/quark-engine) is an Obfuscation-Neglect Android Malware Scoring System.
-* `IntelX_Phonebook`: [IntelligenceX](https://intelx.io/) is a search engine and data archive. Fetches emails, urls, domains associated with an observable.
 * `UnpacMe_EXE_Unpacker`: [UnpacMe](https://www.unpac.me/) is an automated malware unpacking service
 * `Triage_Scan`: leverage [Triage](https://tria.ge) sandbox environment to scan various files
 * `Manalyze`: [Manalyze](https://github.com/JusticeRage/Manalyze) performs static analysis on PE executables to detect undesirable behavior.
@@ -194,7 +194,8 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `HashLookupServer_Get_File`: check if a md5 or sha1 is available in the database of [known file hosted by CIRCL](https://github.com/adulau/hashlookup-server)
 * `FileScan_Upload_File`: Upload your file to extract IoCs from executable files, documents and scripts via [FileScan.io API](https://www.filescan.io/api/docs).
 * `Dragonfly_Emulation`: Emulate malware against [Dragonfly](https://dragonfly.certego.net?utm_source=intelowl) sandbox by [Certego S.R.L](https://certego.net?utm_source=intelowl).
-* `Virushee_UploadFile`: Check file hash and upload file sample for analysis on [Virushee API](https://api.virushee.com/).
+* `Virushee_Upload_File`: Check file hash and upload file sample for analysis on [Virushee API](https://api.virushee.com/).
+* `DocGuard_Upload_File`: Analyze office files in seconds. [DocGuard](https://www.docguard.io).
 
 ##### Observable analyzers (ip, domain, url, hash)
 * `VirusTotal_v3_Get_Observable`: search an observable in the VirusTotal DB
@@ -280,6 +281,8 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `Spyse`: Scan domains, IPs, emails and CVEs using Spyse's API. Register [here](https://spyse.com/user/registration).
 * `FileScan_Search`: Finds reports and uploaded files by various tokens, like hash, filename, verdict, IOCs etc via [FileScan.io  API](https://www.filescan.io/api/docs).
 * `Virushee_CheckHash`: Search for a previous analysis of a file by its hash (SHA256/SHA1/MD5) on [Virushee API](https://api.virushee.com/).
+* `Anomali_Threatstream_PassiveDNS`: Return information from passive dns of Anomali. On [Anomali Threatstream](https://www.anomali.com/products/threatstream) PassiveDNS Api. 
+* `DocGuard_Get`: check if an hash was analyzed on DocGuard. [DocGuard](https://www.docguard.io)
 
 ##### Generic analyzers (email, phone number, etc.; anything really)
 Some analyzers require details other than just IP, URL, Domain, etc. We classified them as `generic` Analyzers. Since the type of field is not known, there is a format for strings to be followed.
@@ -290,6 +293,12 @@ Some analyzers require details other than just IP, URL, Domain, etc. We classifi
 * `Dehashed_Search`: Query any observable/keyword against https://dehashed.com's search API.
 * `CryptoScamDB_CheckAPI`: Scan a cryptocurrency address, IP address, domain or ENS name against the [CryptoScamDB](https://cryptoscamdb.org/) API.
 * `CyberChef`: Run a query on a [CyberChef server](https://github.com/gchq/CyberChef-server) using pre-defined or custom recipes.
+* `IntelX_Phonebook`: [IntelligenceX](https://intelx.io/) is a search engine and data archive. Fetches emails, urls, domains associated with an observable or a generic string.
+* `IntelX_Intelligent_Search`: [IntelligenceX](https://intelx.io/) is a search engine and data archive. Fetches emails, urls, domains associated with an observable or a generic string.
+* `Anomali_Threatstream_Confidence`: Give max, average and minimum confidence of maliciousness for an observable. On [Anomali Threatstream](https://www.anomali.com/products/threatstream) Confidence API.
+* `Anomali_Threatstream_Intelligence`: Search for threat intelligence information about an observable. On [Anomali Threatstream](https://www.anomali.com/products/threatstream) Intelligence API. 
+* `VirusTotal_v3_Intelligence_Search`: Perform advanced queries with [VirusTotal Intelligence](https://developers.virustotal.com/reference/intelligence-search) (requires paid plan)
+* `MISP`: scan an observable on a MISP instance
 
 ##### Extra analyzers
 [Additional analyzers](Advanced-Usage.html#optional-analyzers) that can be enabled per your wish.

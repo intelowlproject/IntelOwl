@@ -43,6 +43,134 @@
     },
     "params": {}
   },
+   "Anomali_Threatstream_Confidence": {
+    "type": "observable",
+    "python_module": "threatstream.Threatstream",
+    "disabled":false,
+    "description": "Analyzer for threatstream API Confidence, give max, average and min confidence of entries for an observable",
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": ["ip", "domain", "url", "hash", "generic"],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {
+      "api_user_name": {
+        "env_var_key": "ANOMALI_THREATSTREAM_API_USER",
+        "type": "string",
+        "required": true,
+        "default": null,
+        "description": "API USER for Anomali Threatstream"
+      },
+      "api_key_name": {
+        "env_var_key": "ANOMALI_THREATSTREAM_API_KEY",
+        "type": "string",
+        "required": true,
+        "default": null,
+        "description": "API Key for Anomali Threatstream"
+      }
+    },
+     "params": {
+      "threatstream_analysis": {
+        "value": "confidence",
+        "type": "str",
+        "description": "API in threatstream called is Confidence one"
+      }
+    }
+  },
+  "Anomali_Threatstream_Intelligence": {
+    "type": "observable",
+    "python_module": "threatstream.Threatstream",
+    "disabled":false,
+    "description": "Analyzer for threatstream API Intelligence (main threat intelligence information)",
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": ["ip", "domain", "url", "hash", "generic"],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {
+      "api_user_name": {
+        "env_var_key": "ANOMALI_THREATSTREAM_API_USER",
+        "type": "string",
+        "required": true,
+        "default": null,
+        "description": "API USER for Anomali Threatstream"
+      },
+      "api_key_name": {
+        "env_var_key": "ANOMALI_THREATSTREAM_API_KEY",
+        "type": "string",
+        "required": true,
+        "default": null,
+        "description": "API Key for Anomali Threatstream"
+      }
+    },
+    "params": {
+      "threatstream_analysis": {
+        "value": "intelligence",
+        "type": "str",
+        "description": "API in threatstream called is Intelligence one"
+      },
+      "limit": {
+        "value": "100",
+        "type": "str",
+        "description": "Number of maximal entries returned"
+      },
+      "must_active": {
+        "value": false,
+        "type": "bool",
+        "description": "Only return active entries"
+      },
+      "minimal_confidence": {
+        "value": "0",
+        "type": "str",
+        "description": "Minimal Confidence filter"
+      },
+      "modified_after": {
+        "value": "1900-10-02T20:44:35",
+        "type": "str",
+        "description": "Filter on entries modified after a specific date. Date must be specified in this format: YYYYMMDDThhmmss where T denotes the start of the value for time, in UTC time. For example, 2014-10-02T20:44:35."
+      }
+    }
+  },
+  "Anomali_Threatstream_PassiveDNS": {
+    "type": "observable",
+    "python_module": "threatstream.Threatstream",
+    "disabled":false,
+    "description": "Return information from passive dns of Anomali.",
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": ["ip", "domain"],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {
+      "api_user_name": {
+        "env_var_key": "ANOMALI_THREATSTREAM_API_USER",
+        "type": "string",
+        "required": true,
+        "default": null,
+        "description": "API USER for Anomali Threatstream"
+      },
+      "api_key_name": {
+        "env_var_key": "ANOMALI_THREATSTREAM_API_KEY",
+        "type": "string",
+        "required": true,
+        "default": null,
+        "description": "API Key for Anomali Threatstream"
+      }
+    },
+    "params": {
+      "threatstream_analysis": {
+        "value": "passive_dns",
+        "type": "str",
+        "description": "API in threatstream called is passive_dns one"
+      }
+    }
+  },
   "Auth0": {
     "type": "observable",
     "python_module": "auth0.Auth0",
@@ -707,7 +835,9 @@
       "text/xml",
       "application/xml",
       "application/zip",
-      "application/encrypted"
+      "application/encrypted",
+      "text/plain",
+      "test/csv"
     ],
     "config": {
       "soft_time_limit": 30,
@@ -745,7 +875,9 @@
       "text/xml",
       "application/xml",
       "application/zip",
-      "application/encrypted"
+      "application/encrypted",
+      "text/plain",
+      "test/csv"
     ],
     "config": {
       "soft_time_limit": 30,
@@ -764,6 +896,69 @@
         "description": "List of passwords to try when decrypting the document"
       }
     }
+  },
+  "DocGuard_Get": {
+    "type": "observable",
+    "python_module": "docguard_get.DocGuard_Hash",
+    "description": "check if an hash was analyzed on DocGuard. [DocGuard](https://www.docguard.io)",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": [
+      "hash"
+    ],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "DOCGUARD_KEY",
+        "description": "",
+        "required": false
+      }
+    },
+    "params": {}
+  },
+  "DocGuard_Upload_File": {
+    "type": "file",
+    "python_module": "docguard.DocGuardUpload",
+    "description": "Analyze office files in seconds. [DocGuard](https://www.docguard.io) Please register and use api-key to your privacy",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": true,
+    "supported_filetypes": [
+      "application/msword",
+      "application/vnd.ms-office",
+      "application/vnd.ms-excel.addin.macroEnabled",
+      "application/x-mspublisher",
+      "application/vnd.ms-powerpoint",
+      "application/vnd.ms-excel",
+      "application/vnd.ms-excel.sheet.macroEnabled.12",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+      "text/x-ms-iqy",
+      "application/excel",
+      "text/xml",
+      "application/xml",
+      "application/zip",
+      "application/encrypted",
+      "text/plain",
+      "test/csv"
+    ],
+    "config": {
+      "soft_time_limit": 180,
+      "queue": "long"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "DOCGUARD_KEY",
+        "description": "",
+        "required": false
+      }
+    },
+    "params": {}
   },
   "Dragonfly_Emulation": {
     "type": "file",
@@ -1297,10 +1492,10 @@
     },
     "params": {}
   },
-  "IntelX_Phonebook": {
+  "IntelX_Intelligent_Search": {
     "type": "observable",
     "python_module": "intelx.IntelX",
-    "description": "Phonebook alike search against IntelX API",
+    "description": "Intelligent search against IntelX API",
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
@@ -1308,7 +1503,8 @@
       "ip",
       "url",
       "domain",
-      "hash"
+      "hash",
+      "generic"
     ],
     "config": {
       "soft_time_limit": 45,
@@ -1322,10 +1518,63 @@
       }
     },
     "params": {
+      "query_type": {
+        "value": "intelligent",
+        "type": "str",
+        "description": "Query Type. Choose between 'playbook' and 'intelligent'"
+      },
       "rows_limit": {
-        "value": 100,
+        "value": 1000,
         "type": "int",
-        "description": ""
+        "description": "max number of results to retrieve"
+      },
+      "datefrom": {
+        "value": "",
+        "type": "str",
+        "description": "use this in combination with 'dateto' to filter the query"
+      },
+      "dateto": {
+        "value": "",
+        "type": "str",
+        "description": "use this in combination with 'datefrom' to filter the query"
+      }
+    }
+  },
+  "IntelX_Phonebook": {
+    "type": "observable",
+    "python_module": "intelx.IntelX",
+    "description": "Phonebook alike search against IntelX API",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": [
+      "ip",
+      "url",
+      "domain",
+      "hash",
+      "generic"
+    ],
+    "config": {
+      "soft_time_limit": 45,
+      "queue": "default"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "INTELX_API_KEY",
+        "description": "",
+        "required": true
+      }
+    },
+    "params": {
+      "query_type": {
+        "value": "phonebook",
+        "type": "str",
+        "description": "Query Type. Choose between 'playbook' and 'intelligent'"
+      },
+      "rows_limit": {
+        "value": 1000,
+        "type": "int",
+        "description": "max number of results to retrieve"
       }
     }
   },
@@ -1380,7 +1629,9 @@
       "application/excel",
       "text/xml",
       "application/xml",
-      "application/encrypted"
+      "application/encrypted",
+      "text/plain",
+      "text/csv"
     ],
     "config": {
       "soft_time_limit": 300,
@@ -1562,7 +1813,8 @@
       "ip",
       "domain",
       "url",
-      "hash"
+      "hash",
+      "generic"
     ],
     "config": {
       "soft_time_limit": 30,
@@ -1590,6 +1842,31 @@
         "value": false,
         "type": "bool",
         "description": "Enable debug logs."
+      },
+      "from_days": {
+        "value": 90,
+        "type": "int",
+        "description": "Check only events created in the past X days. 0 for no filter"
+      },
+      "limit": {
+        "value": 50,
+        "type": "int",
+        "description": "Limit the number of results returned"
+      },
+      "filter_on_type": {
+        "value": true,
+        "type": "bool",
+        "description": "Filter the search on the type of the observable."
+      },
+      "enforce_warninglist": {
+        "value": true,
+        "type": "bool",
+        "description": "Remove any attributes from the result that would cause a hit on a warninglist entry."
+      },
+      "strict_search": {
+        "value": true,
+        "type": "bool",
+        "description": "Search strictly on the observable value (True) or search on attributes containing observable value (False)"
       }
     }
   },
@@ -3217,14 +3494,14 @@
   },
   "Triage_Search": {
     "type": "observable",
-    "python_module": "triage_search.TriageSearch",
-    "description": "analyze a url sample using triage sandbox environment",
+    "python_module": "triage.triage_search.TriageSearch",
+    "description": "lookup a file hash or an URL in Triage public sandbox Database",
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
     "observable_supported": [
-      "url",
-      "hash"
+      "hash",
+      "url"
     ],
     "config": {
       "soft_time_limit": 300,
@@ -3255,13 +3532,52 @@
       }
     }
   },
+  "Triage_Scan_URL": {
+    "type": "observable",
+    "python_module": "triage.triage_search.TriageSearch",
+    "description": "analyze an URL using triage sandbox environment",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": true,
+    "observable_supported": [
+      "url"
+    ],
+    "config": {
+      "soft_time_limit": 300,
+      "queue": "default"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "TRIAGE_KEY",
+        "description": "",
+        "required": true
+      }
+    },
+    "params": {
+      "endpoint": {
+        "value": "public",
+        "type": "str",
+        "description": "Choose whether to query on the public or the private endpoint of triage (options: `private`, `public`)."
+      },
+      "report_type": {
+        "value": "overview",
+        "type": "str",
+        "description": "Determines how detailed the final report will be (options: `overview`, `complete`)."
+      },
+      "analysis_type": {
+        "value": "submit",
+        "type": "str",
+        "description": "Choose whether to search for existing observable reports or upload for scanning via URL (options: `search` and `submit`)."
+      }
+    }
+  },
   "Triage_Scan": {
     "type": "file",
     "python_module": "triage_scan.TriageScanFile",
     "description": "leverage Triage sandbox environment to scan various files",
     "disabled": false,
     "external_service": true,
-    "leaks_info": false,
+    "leaks_info": true,
     "config": {
       "soft_time_limit": 300,
       "queue": "long"
@@ -3405,53 +3721,6 @@
       }
     }
   },
-  "VirusTotal_v2_Get_File": {
-    "type": "file",
-    "python_module": "vt2_get.VirusTotalv2",
-    "description": "check file hash on VirusTotal using old API endpoints",
-    "disabled": true,
-    "external_service": true,
-    "leaks_info": false,
-    "run_hash": true,
-    "config": {
-      "soft_time_limit": 30,
-      "queue": "default"
-    },
-    "secrets": {
-      "api_key_name": {
-        "env_var_key": "VT_KEY",
-        "description": "",
-        "required": true
-      }
-    },
-    "params": {}
-  },
-  "VirusTotal_v2_Get_Observable": {
-    "type": "observable",
-    "python_module": "vt2_get.VirusTotalv2",
-    "description": "search an observable in the VirusTotal DB using the old API endpoints",
-    "disabled": true,
-    "external_service": true,
-    "leaks_info": false,
-    "observable_supported": [
-      "ip",
-      "domain",
-      "url",
-      "hash"
-    ],
-    "config": {
-      "soft_time_limit": 30,
-      "queue": "default"
-    },
-    "secrets": {
-      "api_key_name": {
-        "env_var_key": "VT_KEY",
-        "description": "",
-        "required": true
-      }
-    },
-    "params": {}
-  },
   "Virushee_CheckHash":{
     "type": "observable",
     "python_module": "virushee.VirusheeCheckHash",
@@ -3473,7 +3742,7 @@
     },
     "params": {}
   },
-  "Virushee_UploadFile":{
+  "Virushee_Upload_File":{
     "type": "file",
     "python_module": "virushee.VirusheeFileUpload",
     "description": "Check file hash and upload file sample for analysis on [Virushee API](https://api.virushee.com/).",
@@ -3499,9 +3768,56 @@
       }
     }
   },
+  "VirusTotal_v2_Get_File": {
+    "type": "file",
+    "python_module": "vt.vt2_get.VirusTotalv2",
+    "description": "check file hash on VirusTotal using old API endpoints",
+    "disabled": true,
+    "external_service": true,
+    "leaks_info": false,
+    "run_hash": true,
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "VT_KEY",
+        "description": "",
+        "required": true
+      }
+    },
+    "params": {}
+  },
+  "VirusTotal_v2_Get_Observable": {
+    "type": "observable",
+    "python_module": "vt.vt2_get.VirusTotalv2",
+    "description": "search an observable in the VirusTotal DB using the old API endpoints",
+    "disabled": true,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": [
+      "ip",
+      "domain",
+      "url",
+      "hash"
+    ],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "VT_KEY",
+        "description": "",
+        "required": true
+      }
+    },
+    "params": {}
+  },
   "VirusTotal_v2_Scan_File": {
     "type": "file",
-    "python_module": "vt2_scan.VirusTotalv2ScanFile",
+    "python_module": "vt.vt2_scan.VirusTotalv2ScanFile",
     "description": "scan a file on VirusTotal using old API endpoints",
     "disabled": true,
     "external_service": true,
@@ -3545,15 +3861,35 @@
       }
     },
     "params": {
-      "include_behaviour_summary": {
-        "value": true,
+      "force_active_scan_if_old": {
+        "value": false,
         "type": "bool",
-        "description": "Include a summary of behavioral analysis reports alongside default scan report"
+        "description": "If the sample is old, it would be rescanned. This will cost additional quota."
+      },
+      "days_to_say_that_a_scan_is_old": {
+        "value": 30,
+        "type": "int",
+        "description": "How many days are required to consider a scan old to force rescan"
+      },
+      "include_behaviour_summary": {
+        "value": false,
+        "type": "bool",
+        "description": "Include a summary of behavioral analysis reports alongside default scan report. This will cost additional quota."
       },
       "include_sigma_analyses": {
-        "value": true,
+        "value": false,
         "type": "bool",
-        "description": "Include sigma analysis report alongside default scan report"
+        "description": "Include sigma analysis report alongside default scan report. This will cost additional quota."
+      },
+      "relationships_to_request": {
+        "value": [],
+        "type": "list",
+        "description": "Include a list of relationships to request if available. Full list [here](https://developers.virustotal.com/reference/metadata). This will cost additional quota."
+      },
+      "relationships_elements": {
+        "value": 1,
+        "type": "int",
+        "description": "Number of elements to retrieve for each relationships"
       }
     }
   },
@@ -3584,19 +3920,34 @@
         "description": "If the sample is not already in VT, send the sample and perform a scan"
       },
       "force_active_scan_if_old": {
-        "value": false,
+        "value": true,
         "type": "bool",
-        "description": "If the sample is old, it would be rescanned"
+        "description": "If the sample is old, it would be rescanned. This will cost additional quota."
+      },
+      "days_to_say_that_a_scan_is_old": {
+        "value": 30,
+        "type": "int",
+        "description": "How many days are required to consider a scan old to force rescan"
       },
       "include_behaviour_summary": {
         "value": true,
         "type": "bool",
-        "description": "Include a summary of behavioral analysis reports alongside default scan report"
+        "description": "Include a summary of behavioral analysis reports alongside default scan report. This will cost additional quota."
       },
       "include_sigma_analyses": {
         "value": true,
         "type": "bool",
-        "description": "Include sigma analysis report alongside default scan report"
+        "description": "Include sigma analysis report alongside default scan report. This will cost additional quota."
+      },
+      "relationships_to_request": {
+        "value": [],
+        "type": "list",
+        "description": "Include a list of relationships to request if available. This will cost additional quota."
+      },
+      "relationships_elements": {
+        "value": 1,
+        "type": "int",
+        "description": "Number of elements to retrieve for each relationships"
       }
     }
   },
@@ -3624,7 +3975,65 @@
         "required": true
       }
     },
-    "params": {}
+    "params": {
+      "force_active_scan_if_old": {
+        "value": false,
+        "type": "bool",
+        "description": "If you submitted an hash and the sample is old, it would be rescanned. This will cost additional quota."
+      },
+      "days_to_say_that_a_scan_is_old": {
+        "value": 30,
+        "type": "int",
+        "description": "How many days are required to consider a scan old to force rescan"
+      },
+      "include_behaviour_summary": {
+        "value": false,
+        "type": "bool",
+        "description": "If you submitted an hash, include a summary of behavioral analysis reports alongside default scan report. This will cost additional quota."
+      },
+      "include_sigma_analyses": {
+        "value": false,
+        "type": "bool",
+        "description": "If you submitted an hash, include sigma analysis report alongside default scan report. This will cost additional quota."
+      },
+      "relationships_to_request": {
+        "value": [],
+        "type": "list",
+        "description": "Include a list of relationships to request if available. This will cost additional quota."
+      },
+      "relationships_elements": {
+        "value": 1,
+        "type": "int",
+        "description": "Number of elements to retrieve for each relationships"
+      }
+    }
+  },
+  "VirusTotal_v3_Intelligence_Search": {
+    "type": "observable",
+    "python_module": "vt.vt3_intelligence_search.VirusTotalv3Intelligence",
+    "description": "perform an advanced query through VirusTotal Intelligence. This is a premium feature only",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": ["generic"],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "VT_INTELLIGENCE_KEY",
+        "required": true,
+        "description": "API Key for the analyzer. You need to have a premium license with VT."
+      }
+    },
+    "params": {
+      "limit": {
+        "value": 300,
+        "type": "int",
+        "description": "max number of results to retrieve"
+      }
+    }
   },
   "Whoisxmlapi": {
     "type": "observable",
@@ -3699,7 +4108,7 @@
   "XForceExchange": {
     "type": "observable",
     "python_module": "xforce.XForce",
-    "description": "scan an observable on IBM X-Force Exchange.",
+    "description": "scan an observable on IBM X-Force Exchange",
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
@@ -3725,7 +4134,13 @@
         "required": true
       }
     },
-    "params": {}
+    "params": {
+      "malware_only": {
+        "value": false,
+        "type": "bool",
+        "description": "Performs lookup only against 'malware' endpoints to save some quota"
+      }
+    }
   },
   "Xlm_Macro_Deobfuscator": {
     "type": "file",
@@ -3758,6 +4173,129 @@
           "coronavirus"
         ],
         "type": "list",
+        "description": ""
+      }
+    }
+  },
+  "Yara_Scan_ATM_MALWARE": {
+    "type": "file",
+    "python_module": "yara_scan.YaraScan",
+    "description": "scan a file with ATM Malware yara rules ([github](https://github.com/fboldewin/YARA-rules))",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
+    "config": {
+      "soft_time_limit": 60,
+      "queue": "local"
+    },
+    "secrets": {},
+    "params": {
+      "git_repo_main_dir": {
+        "value": [
+          "/opt/deploy/yara/atm_malware_rules"
+        ],
+        "type": "list",
+        "description": ""
+      },
+      "directories_with_rules": {
+        "value": [
+          "/opt/deploy/yara/atm_malware_rules"
+        ],
+        "type": "list",
+        "description": ""
+      },
+      "recursive": {
+        "value": true,
+        "type": "bool",
+        "description": ""
+      }
+    }
+  },
+  "Yara_Scan_Bartblaze": {
+    "type": "file",
+    "python_module": "yara_scan.YaraScan",
+    "description": "Scan a file with Intezer yara rules ([github](https://github.com/bartblaze/Yara-rules)).",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
+    "config": {
+      "soft_time_limit": 60,
+      "queue": "local"
+    },
+    "secrets": {},
+    "params": {
+      "git_repo_main_dir": {
+        "value": [
+          "/opt/deploy/yara/bartblaze_rules"
+        ],
+        "type": "list",
+        "description": ""
+      },
+      "directories_with_rules": {
+        "value": [
+          "/opt/deploy/yara/bartblaze_rules/rules/APT",
+          "/opt/deploy/yara/bartblaze_rules/rules/crimeware",
+          "/opt/deploy/yara/bartblaze_rules/rules/generic",
+          "/opt/deploy/yara/bartblaze_rules/rules/hacktools",
+          "/opt/deploy/yara/bartblaze_rules/rules/ransomware"
+        ],
+        "type": "list",
+        "description": ""
+      }
+    }
+  },
+  "Yara_Scan_Community": {
+    "type": "file",
+    "python_module": "yara_scan.YaraScan",
+    "description": "scan a file with community yara rules ([github](https://github.com/Yara-Rules/rules.git))",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
+    "config": {
+      "soft_time_limit": 60,
+      "queue": "local"
+    },
+    "secrets": {},
+    "params": {
+      "directories_with_rules": {
+        "value": [
+          "/opt/deploy/yara/rules"
+        ],
+        "type": "list",
+        "description": ""
+      }
+    }
+  },
+  "Yara_Scan_Daily_Ioc": {
+    "type": "file",
+    "python_module": "yara_scan.YaraScan",
+    "description": "scan a file with StrangerealIntel daily IOC yara rules ([github](https://github.com/StrangerealIntel/DailyIOC))",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
+    "config": {
+      "soft_time_limit": 60,
+      "queue": "default"
+    },
+    "secrets": {},
+    "params": {
+      "git_repo_main_dir": {
+        "value": [
+          "/opt/deploy/yara/daily_ioc_rules"
+        ],
+        "type": "list",
+        "description": ""
+      },
+      "directories_with_rules": {
+        "value": [
+          "/opt/deploy/yara/daily_ioc_rules"
+        ],
+        "type": "list",
+        "description": ""
+      },
+      "recursive": {
+        "value": true,
+        "type": "bool",
         "description": ""
       }
     }
@@ -3796,100 +4334,10 @@
       }
     }
   },
-  "Yara_Scan_ATM_MALWARE": {
-    "type": "file",
-    "python_module": "yara_scan.YaraScan",
-    "description": "scan a file with ATM Malware yara rules",
-    "disabled": false,
-    "external_service": false,
-    "leaks_info": false,
-    "config": {
-      "soft_time_limit": 60,
-      "queue": "local"
-    },
-    "secrets": {},
-    "params": {
-      "git_repo_main_dir": {
-        "value": [
-          "/opt/deploy/yara/atm_malware_rules"
-        ],
-        "type": "list",
-        "description": ""
-      },
-      "directories_with_rules": {
-        "value": [
-          "/opt/deploy/yara/atm_malware_rules"
-        ],
-        "type": "list",
-        "description": ""
-      },
-      "recursive": {
-        "value": true,
-        "type": "bool",
-        "description": ""
-      }
-    }
-  },
-  "Yara_Scan_Community": {
-    "type": "file",
-    "python_module": "yara_scan.YaraScan",
-    "description": "scan a file with community yara rules",
-    "disabled": false,
-    "external_service": false,
-    "leaks_info": false,
-    "config": {
-      "soft_time_limit": 60,
-      "queue": "local"
-    },
-    "secrets": {},
-    "params": {
-      "directories_with_rules": {
-        "value": [
-          "/opt/deploy/yara/rules"
-        ],
-        "type": "list",
-        "description": ""
-      }
-    }
-  },
-  "Yara_Scan_Daily_Ioc": {
-    "type": "file",
-    "python_module": "yara_scan.YaraScan",
-    "description": "scan a file with StrangerealIntel daily IOC yara rules",
-    "disabled": false,
-    "external_service": false,
-    "leaks_info": false,
-    "config": {
-      "soft_time_limit": 60,
-      "queue": "default"
-    },
-    "secrets": {},
-    "params": {
-      "git_repo_main_dir": {
-        "value": [
-          "/opt/deploy/yara/daily_ioc_rules"
-        ],
-        "type": "list",
-        "description": ""
-      },
-      "directories_with_rules": {
-        "value": [
-          "/opt/deploy/yara/daily_ioc_rules"
-        ],
-        "type": "list",
-        "description": ""
-      },
-      "recursive": {
-        "value": true,
-        "type": "bool",
-        "description": ""
-      }
-    }
-  },
   "Yara_Scan_Mandiant": {
     "type": "file",
     "python_module": "yara_scan.YaraScan",
-    "description": "scan a file with Mandiant yara rules",
+    "description": "scan a file with Mandiant yara rules ([github](https://github.com/mandiant/red_team_tool_countermeasures))",
     "disabled": false,
     "external_service": false,
     "leaks_info": false,
@@ -3923,7 +4371,7 @@
   "Yara_Scan_Florian": {
     "type": "file",
     "python_module": "yara_scan.YaraScan",
-    "description": "scan a file with Neo23x0 yara rules",
+    "description": "scan a file with Neo23x0 yara rules ([github](https://github.com/Neo23x0/signature-base.git))",
     "disabled": false,
     "external_service": false,
     "leaks_info": false,
@@ -3952,7 +4400,7 @@
   "Yara_Scan_Inquest": {
     "type": "file",
     "python_module": "yara_scan.YaraScan",
-    "description": "scan a file with Inquest yara rules",
+    "description": "scan a file with Inquest yara rules ([github](https://github.com/InQuest/yara-rules))",
     "disabled": false,
     "external_service": false,
     "leaks_info": false,
@@ -4005,44 +4453,10 @@
       }
     }
   },
-  "Yara_Scan_McAfee": {
-    "type": "file",
-    "python_module": "yara_scan.YaraScan",
-    "description": "scan a file with McAfee yara rules",
-    "disabled": false,
-    "external_service": false,
-    "leaks_info": false,
-    "config": {
-      "soft_time_limit": 60,
-      "queue": "local"
-    },
-    "secrets": {},
-    "params": {
-      "git_repo_main_dir": {
-        "value": [
-          "/opt/deploy/yara/mcafee_rules"
-        ],
-        "type": "list",
-        "description": ""
-      },
-      "directories_with_rules": {
-        "value": [
-          "/opt/deploy/yara/mcafee_rules/APT",
-          "/opt/deploy/yara/mcafee_rules/RAT",
-          "/opt/deploy/yara/mcafee_rules/malware",
-          "/opt/deploy/yara/mcafee_rules/miners",
-          "/opt/deploy/yara/mcafee_rules/ransomware",
-          "/opt/deploy/yara/mcafee_rules/stealer"
-        ],
-        "type": "list",
-        "description": ""
-      }
-    }
-  },
   "Yara_Scan_ReversingLabs": {
     "type": "file",
     "python_module": "yara_scan.YaraScan",
-    "description": "scan a file with ReversingLabs yara rules",
+    "description": "scan a file with ReversingLabs yara rules ([github](https://github.com/reversinglabs/reversinglabs-yara-rules))",
     "disabled": false,
     "external_service": false,
     "leaks_info": false,
@@ -4076,7 +4490,7 @@
   "Yara_Scan_Samir": {
     "type": "file",
     "python_module": "yara_scan.YaraScan",
-    "description": "scan a file with Samir Threat Hunting yara rules",
+    "description": "scan a file with Samir Threat Hunting yara rules ([github](hhttps://github.com/sbousseaden/YaraHunts))",
     "disabled": false,
     "external_service": false,
     "leaks_info": false,
@@ -4105,7 +4519,7 @@
   "Yara_Scan_Stratosphere": {
     "type": "file",
     "python_module": "yara_scan.YaraScan",
-    "description": "scan a file with Stratosphere yara rules",
+    "description": "scan a file with Stratosphere yara rules ([github](https://github.com/stratosphereips/yara-rules))",
     "disabled": false,
     "external_service": false,
     "leaks_info": false,
@@ -4126,6 +4540,40 @@
         "value": [
           "/opt/deploy/yara/stratosphere_rules/malware",
           "/opt/deploy/yara/stratosphere_rules/protocols"
+        ],
+        "type": "list",
+        "description": ""
+      }
+    }
+  },
+  "Yara_Scan_Trellix": {
+    "type": "file",
+    "python_module": "yara_scan.YaraScan",
+    "description": "scan a file with Trellix yara rules ([github](https://github.com/advanced-threat-research/Yara-Rules))",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
+    "config": {
+      "soft_time_limit": 60,
+      "queue": "local"
+    },
+    "secrets": {},
+    "params": {
+      "git_repo_main_dir": {
+        "value": [
+          "/opt/deploy/yara/trellix_rules"
+        ],
+        "type": "list",
+        "description": ""
+      },
+      "directories_with_rules": {
+        "value": [
+          "/opt/deploy/yara/trellix_rules/APT",
+          "/opt/deploy/yara/trellix_rules/RAT",
+          "/opt/deploy/yara/trellix_rules/malware",
+          "/opt/deploy/yara/trellix_rules/miners",
+          "/opt/deploy/yara/trellix_rules/ransomware",
+          "/opt/deploy/yara/trellix_rules/stealer"
         ],
         "type": "list",
         "description": ""

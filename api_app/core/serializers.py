@@ -105,7 +105,7 @@ class AbstractConfigSerializer(rfs.Serializer):
     def get_verification(self, raw_instance: dict) -> ConfigVerificationType:
         # raw instance because input is json and not django model object
         # get all missing secrets
-        secrets = raw_instance["secrets"]
+        secrets = raw_instance.get("secrets", {})
         missing_secrets = []
         for s_key, s_dict in secrets.items():
             # check if available in environment
@@ -187,15 +187,3 @@ class AbstractConfigSerializer(rfs.Serializer):
             raise rfs.ValidationError(serializer_errors)
 
         return config_dict
-
-class AbstractConfigSerializer2(AbstractConfigSerializer):
-    name = rfs.CharField(required=True)
-
-    python_module = rfs.CharField(required=False, max_length=128)
-    disabled = rfs.BooleanField(required=False)
-    description = rfs.CharField(allow_blank=True)
-    # Configurations
-    config = rfs.CharField(required=False)
-    params = rfs.CharField(required=False)
-
-    

@@ -14,8 +14,8 @@ __all__ = ["PlaybookConfig"]
 @dataclasses.dataclass
 class PlaybookConfig(AbstractConfig):
     description: str
-    analyzers: typing.Dict[str]
-    connectors: typing.Dict[str]
+    analyzers: typing.Dict[str, typing.Any]
+    connectors: typing.Dict[str, typing.Any]
     supports: typing.List[str]
 
     serializer_class = PlaybookConfigSerializer

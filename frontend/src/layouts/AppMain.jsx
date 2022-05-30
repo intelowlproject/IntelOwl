@@ -9,12 +9,16 @@ import { FallBackLoading, ErrorAlert } from "@certego/certego-ui";
 import withAuth from "../wrappers/withAuth";
 
 // layout
-import {publicRoutesLazy, noAuthRoutesLazy, authRoutesLazy } from "../components/Routes";
+import {
+  publicRoutesLazy,
+  noAuthRoutesLazy,
+  authRoutesLazy,
+} from "../components/Routes";
 import AppHeader from "./AppHeader";
 
 const NoMatch = React.lazy(() => import("./NoMatch"));
 
-function ErrorHandler({error,}) {
+function ErrorHandler({ error }) {
   return (
     <Row>
       <Col>
@@ -29,7 +33,7 @@ function ErrorHandler({error,}) {
         />
       </Col>
     </Row>
-  )
+  );
 }
 
 ErrorHandler.propTypes = {
@@ -56,12 +60,14 @@ function AppMain() {
       path: "/",
       element: <AuthLayout />,
       children: [...publicRoutesLazy, ...noAuthRoutesLazy, ...authRoutesLazy],
-    }, {
+    },
+    {
       path: "*",
-      element:
+      element: (
         <Suspense fallback={<FallBackLoading />}>
           <NoMatch />
-        </Suspense>,
+        </Suspense>
+      ),
     },
   ]);
 

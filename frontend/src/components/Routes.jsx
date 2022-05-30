@@ -15,7 +15,6 @@ const PluginsContainer = React.lazy(() => import("./plugins/PluginsContainer"));
 const Dashboard = React.lazy(() => import("./dashboard/Dashboard"));
 const ScanForm = React.lazy(() => import("./scan/ScanForm"));
 
-
 /*
 lazy imports to enable code splitting
 */
@@ -24,102 +23,112 @@ lazy imports to enable code splitting
 const publicRoutesLazy = [
   {
     index: true,
-    element: 
+    element: (
       <Suspense fallback={<FallBackLoading />}>
         <Home />
-      </Suspense>,
+      </Suspense>
+    ),
   },
-].map(r => ({ ...r, element:
-  <Suspense fallback={<FallBackLoading />}>
-    {r.element}
-  </Suspense>,})
-);
+].map((r) => ({
+  ...r,
+  element: <Suspense fallback={<FallBackLoading />}>{r.element}</Suspense>,
+}));
 
 // no auth public components
 const noAuthRoutesLazy = [
   {
     path: "/login",
-    element:<Login />,
+    element: <Login />,
   },
-].map(r => ({ ...r, element:
-  <IfAuthRedirectGuard>
-    <Suspense fallback={<FallBackLoading />}>
-      {r.element}
-    </Suspense>
-  </IfAuthRedirectGuard>,})
-);
+].map((r) => ({
+  ...r,
+  element: (
+    <IfAuthRedirectGuard>
+      <Suspense fallback={<FallBackLoading />}>{r.element}</Suspense>
+    </IfAuthRedirectGuard>
+  ),
+}));
 
 // auth components
 const authRoutesLazy = [
   /* auth */
   {
     path: "/logout",
-    element: 
+    element: (
       <Suspense fallback={<FallBackLoading />}>
         <Logout />
-      </Suspense>,
+      </Suspense>
+    ),
   },
   /* User/Organization */
   {
     path: "/me/organization/*",
-    element: 
-    <Suspense fallback={<FallBackLoading />}>
-      <Organization />
-    </Suspense>,
+    element: (
+      <Suspense fallback={<FallBackLoading />}>
+        <Organization />
+      </Suspense>
+    ),
   },
   /* API Access/Sessions Management */
   {
     path: "/me/sessions",
-    element: 
-    <Suspense fallback={<FallBackLoading />}>
-      <Sessions />
-    </Suspense>,
+    element: (
+      <Suspense fallback={<FallBackLoading />}>
+        <Sessions />
+      </Suspense>
+    ),
   },
   /* Jobs */
   {
     path: "/jobs",
-    element: 
-    <Suspense fallback={<FallBackLoading />}>
-      <JobsTable />
-    </Suspense>,
+    element: (
+      <Suspense fallback={<FallBackLoading />}>
+        <JobsTable />
+      </Suspense>
+    ),
   },
   {
     path: "/jobs/:id",
-    element: 
-    <Suspense fallback={<FallBackLoading />}>
-      <JobResult />
-    </Suspense>,
+    element: (
+      <Suspense fallback={<FallBackLoading />}>
+        <JobResult />
+      </Suspense>
+    ),
   },
   /* Plugins */
   {
     path: "/plugins/*",
-    element: 
-    <Suspense fallback={<FallBackLoading />}>
-      <PluginsContainer />
-    </Suspense>,
+    element: (
+      <Suspense fallback={<FallBackLoading />}>
+        <PluginsContainer />
+      </Suspense>
+    ),
   },
   /* Dashboard */
   {
     path: "/dashboard",
-    element: 
-    <Suspense fallback={<FallBackLoading />}>
-      <Dashboard />
-    </Suspense>,
+    element: (
+      <Suspense fallback={<FallBackLoading />}>
+        <Dashboard />
+      </Suspense>
+    ),
   },
   /* Scan */
   {
     path: "/scan",
-    element: 
+    element: (
       <Suspense fallback={<FallBackLoading />}>
         <ScanForm />
-      </Suspense>,
+      </Suspense>
+    ),
   },
-].map(r => ({ ...r, element:
-  <AuthGuard>
-    <Suspense fallback={<FallBackLoading />}>
-      {r.element}
-    </Suspense>
-  </AuthGuard>,})
-);
+].map((r) => ({
+  ...r,
+  element: (
+    <AuthGuard>
+      <Suspense fallback={<FallBackLoading />}>{r.element}</Suspense>
+    </AuthGuard>
+  ),
+}));
 
 export { publicRoutesLazy, noAuthRoutesLazy, authRoutesLazy };

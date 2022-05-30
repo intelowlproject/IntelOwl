@@ -7,7 +7,7 @@ function NoMatch() {
   console.debug("NoMatch rendered!");
 
   // page title
-  useTitle("IntelOwl | 404: Not Found", { restoreOnUnmount: true, });
+  useTitle("IntelOwl | 404: Not Found", { restoreOnUnmount: true });
 
   return (
     <Container className="d-flex flex-column center">

@@ -4,7 +4,7 @@ import { Badge, UncontrolledTooltip } from "reactstrap";
 import {
   TLP_CHOICES,
   TLP_COLOR_MAP,
-  TLP_DESCRIPTION_MAP
+  TLP_DESCRIPTION_MAP,
 } from "../../constants";
 
 export default function TLPTag(props) {
@@ -12,7 +12,7 @@ export default function TLPTag(props) {
   const badgeId = `tlptag-badge__${value}`;
   const color = TLP_COLOR_MAP?.[value] || "#dfe1e2";
   const tooltipText = TLP_DESCRIPTION_MAP?.[value] || "invalid";
-  
+
   return value ? (
     <Badge
       id={badgeId}

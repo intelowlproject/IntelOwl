@@ -26,9 +26,25 @@ repos:
     hooks:
       - id: eslint
         additional_dependencies:
+          - eslint@8.16.0
           - eslint-config-airbnb@19.0.4
           - eslint-config-prettier@8.5.0
           - eslint-plugin-import@2.26.0
           - eslint-plugin-jsx-a11y@6.5.1
           - eslint-plugin-react@7.30.0
           - eslint-plugin-react-hooks@4.5.0
+        args: ["frontend/src/", "--ext", ".js,.jsx", "--fix"]
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v2.6.2
+    hooks:
+      - id: prettier
+        args: ["frontend/"]
+  - repo: https://github.com/awebdeveloper/pre-commit-stylelint
+    rev: 0.0.2
+    hooks:
+      - id: stylelint
+        additional_dependencies:
+          - stylelint@14.8.5
+          - stylelint-config-prettier@9.0.3
+          - stylelint-config-standard-scss@4.0.0
+        args: ['"frontend/src/styles/*.{css,scss}"', "--fix"]

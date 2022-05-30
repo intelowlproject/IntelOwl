@@ -9,7 +9,7 @@ import {
   OrgInfoCard,
   MembersList,
   PendingInvitationsList,
-  OrgCreateButton
+  OrgCreateButton,
 } from "./utils";
 
 export default function MyOrgPage() {
@@ -45,7 +45,7 @@ export default function MyOrgPage() {
     `IntelOwl | Organization ${
       organization?.name ? `(${organization?.name})` : ""
     } `,
-    { restoreOnUnmount: true, }
+    { restoreOnUnmount: true }
   );
 
   return (
@@ -68,7 +68,7 @@ export default function MyOrgPage() {
           </Col>
         </Row>
       )}
-      renderError={({ error, }) => (
+      renderError={({ error }) => (
         <Row>
           {error?.response?.status === 404 ? (
             <Alert color="secondary" className="mt-3 mx-auto">

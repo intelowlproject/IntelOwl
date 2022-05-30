@@ -12,13 +12,17 @@ import {
   SocialShareBtn,
   IconAlert,
   IconButton,
-  addToast
+  addToast,
 } from "@certego/certego-ui";
 
 import { JobTag, StatusTag, TLPTag } from "../../../common";
 import { downloadJobSample, deleteJob, killJob } from "../api";
 
-export function JobActionsBar({ job, }) {
+function DeleteIcon() {
+  return <MdDeleteOutline className="text-danger" />;
+}
+
+export function JobActionsBar({ job }) {
   // routers
   const navigate = useNavigate();
 
@@ -27,7 +31,7 @@ export function JobActionsBar({ job, }) {
     const success = await deleteJob(job.id);
     if (!success) return;
     addToast("Redirecting...", null, "secondary");
-    setTimeout(()=>navigate(-1), 250);
+    setTimeout(() => navigate(-1), 250);
   };
   const onDownloadSampleBtnClick = async () => {
     const blob = await downloadJobSample(job.id);
@@ -67,7 +71,7 @@ export function JobActionsBar({ job, }) {
       {job.permissions?.delete && (
         <IconButton
           id="deletejobbtn"
-          Icon={() => <MdDeleteOutline className="text-danger" />}
+          Icon={DeleteIcon}
           size="sm"
           color="darker"
           className="me-2"
@@ -101,7 +105,7 @@ export function JobActionsBar({ job, }) {
   );
 }
 
-export function JobInfoCard({ job, }) {
+export function JobInfoCard({ job }) {
   return (
     <>
       <ContentSection className="mb-0 bg-darker d-flex-center">
@@ -142,12 +146,15 @@ export function JobInfoCard({ job, }) {
             ],
             [
               "End Time",
-              job.finished_analysis_time ?
-              <DateHoverable
-                id={`overview-finished_analysis_time__${job.id}`}
-                value={job.finished_analysis_time}
-                format="hh:mm:ss a MMM do, yyyy"
-              /> : "-",
+              job.finished_analysis_time ? (
+                <DateHoverable
+                  id={`overview-finished_analysis_time__${job.id}`}
+                  value={job.finished_analysis_time}
+                  format="hh:mm:ss a MMM do, yyyy"
+                />
+              ) : (
+                "-"
+              ),
             ],
           ].map(([key, value]) => (
             <ListGroupItem key={key}>
@@ -188,7 +195,7 @@ export function JobInfoCard({ job, }) {
   );
 }
 
-export function JobIsRunningAlert({ job, }) {
+export function JobIsRunningAlert({ job }) {
   return (
     <Fade className="d-flex-center mx-auto">
       <IconAlert

@@ -8,7 +8,7 @@ import { AnalyzersReportTable, ConnectorsReportTable } from "./tables";
 import { JobInfoCard, JobIsRunningAlert, JobActionsBar } from "./sections";
 import { StatusIcon } from "../../../common";
 
-export default function JobOverview({ isRunningJob, job, refetch, }) {
+export default function JobOverview({ isRunningJob, job, refetch }) {
   const tabTitles = React.useMemo(
     () => [
       <div className="d-flex-center">

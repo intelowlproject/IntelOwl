@@ -3,25 +3,25 @@ import axios from "axios";
 
 import { TAG_BASE_URI } from "../constants/api";
 
-const useTagsStore = create((set, get) => ({
+const useTagsStore = create((set, _get) => ({
   loading: true,
   error: null,
   tags: [],
   list: async () => {
     try {
-      set({ loading: true, });
+      set({ loading: true });
       const resp = await axios.get(TAG_BASE_URI);
       set({
         tags: resp.data,
         loading: false,
       });
     } catch (e) {
-      set({ error: e, loading: false, });
+      set({ error: e, loading: false });
     }
   },
   create: async (label, color) => {
     try {
-      const resp = await axios.post(TAG_BASE_URI, { label, color, });
+      const resp = await axios.post(TAG_BASE_URI, { label, color });
       set((state) => ({
         ...state,
         tags: [...state.tags, resp.data],

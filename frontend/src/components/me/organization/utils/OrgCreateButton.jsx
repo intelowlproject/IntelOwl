@@ -29,7 +29,7 @@ const onValidate = (values) => {
 };
 
 // Organization Create Form
-function OrganizationCreateForm({ onFormSubmit, }) {
+function OrganizationCreateForm({ onFormSubmit }) {
   console.debug("OrganizationCreateForm rendered!");
 
   const onSubmit = React.useCallback(
@@ -56,11 +56,7 @@ function OrganizationCreateForm({ onFormSubmit, }) {
       {(formik) => (
         <Form className="mx-2 my-3">
           <FormGroup row className="d-flex flex-wrap">
-            <Label
-              className="required"
-              for="orgforminput-name"
-              md={3}
-            >
+            <Label className="required" for="orgforminput-name" md={3}>
               Organization Name
             </Label>
             <Col md={6}>
@@ -82,7 +78,7 @@ function OrganizationCreateForm({ onFormSubmit, }) {
                 size="sm"
                 md={2}
               >
-                {formik.isSubmitting && <Spinner  size="sm" />}Create
+                {formik.isSubmitting && <Spinner size="sm" />}Create
               </Button>
             </Col>
           </FormGroup>
@@ -92,17 +88,21 @@ function OrganizationCreateForm({ onFormSubmit, }) {
   );
 }
 
+function OrgCreateIcon() {
+  return (
+    <span>
+      <IoMdPersonAdd className="me-1" /> Create a new organization
+    </span>
+  );
+}
+
 // Popover Button for organization create form
-function OrgCreateButton({ onCreate, }) {
+function OrgCreateButton({ onCreate }) {
   return (
     <PopupFormButton
       id="orgcreateform-icon"
       popOverPlacement="bottom"
-      Icon={() => (
-        <span>
-          <IoMdPersonAdd className="me-1" /> Create a new organization
-        </span>
-      )}
+      Icon={OrgCreateIcon}
       Form={OrganizationCreateForm}
       onFormSuccess={onCreate}
       size="md"

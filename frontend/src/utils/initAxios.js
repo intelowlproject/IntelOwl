@@ -21,7 +21,7 @@ export default function initAxios() {
   // request interceptor
   axios.interceptors.request.use((req) => {
     // filter requests deciding whether to inject token or not
-    const { token, } = useAuthStore.getState();
+    const { token } = useAuthStore.getState();
     if (token && shouldInjectToken(req.url)) {
       req.headers.Authorization = `Token ${token}`;
     }
@@ -35,7 +35,7 @@ export default function initAxios() {
         return Promise.reject(error);
       }
       const err = error;
-      const { response, } = err;
+      const { response } = err;
       // add custom parsed message
       const errField =
         response.data?.errors?.non_field_errors ||
@@ -51,7 +51,7 @@ export default function initAxios() {
       }
       // force logout
       if (response?.status === 401 && !response.config.url.includes("logout")) {
-        const { service, } = useAuthStore.getState();
+        const { service } = useAuthStore.getState();
         service.forceLogout();
       }
       return Promise.reject(err);

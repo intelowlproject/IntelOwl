@@ -6,7 +6,7 @@ import {
   NavItem,
   Collapse,
   NavbarBrand,
-  NavbarToggler
+  NavbarToggler,
 } from "reactstrap";
 import { NavLink as RRNavLink } from "react-router-dom";
 import { GoDashboard } from "react-icons/go";
@@ -105,7 +105,7 @@ function AppHeader() {
             alt="IntelOwl logo"
           />
         </NavbarBrand>
-        <NavbarToggler onClick={(e) => setIsOpen(!isOpen)} />
+        <NavbarToggler onClick={() => setIsOpen(!isOpen)} />
         <Collapse navbar isOpen={isOpen}>
           {/* Navbar Left Side */}
           <Nav navbar>

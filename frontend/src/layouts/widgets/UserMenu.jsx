@@ -3,7 +3,7 @@ import {
   UncontrolledDropdown,
   DropdownToggle,
   DropdownMenu,
-  DropdownItem
+  DropdownItem,
 } from "reactstrap";
 import { BsPeopleFill } from "react-icons/bs";
 import { FiLogOut } from "react-icons/fi";
@@ -22,19 +22,12 @@ export default function UserMenu(props) {
   const user = useAuthStore(React.useCallback((s) => s.user, []));
 
   return (
-    <UncontrolledDropdown
-      nav
-      inNavbar
-      {...props}
-    >
+    <UncontrolledDropdown nav inNavbar {...props}>
       <DropdownToggle nav className="text-center">
         <UserBubble size="sm" userInfo={user} />
       </DropdownToggle>
-      <DropdownMenu end
-        className="bg-dark"
-        data-bs-popper
-      >
-        <DropdownItem text >
+      <DropdownMenu end className="bg-dark" data-bs-popper>
+        <DropdownItem text>
           logged in as <b>{`${user?.username}`}</b>
         </DropdownItem>
         <DropdownItem divider />

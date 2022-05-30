@@ -4,10 +4,7 @@ import { FaTwitter } from "react-icons/fa";
 
 import { Toaster, ScrollToTopButton, useToastr } from "@certego/certego-ui";
 
-import {
-  VERSION,
-  INTELOWL_TWITTER_ACCOUNT
-} from "../constants/environment";
+import { VERSION, INTELOWL_TWITTER_ACCOUNT } from "../constants/environment";
 
 // constants
 const selector = (state) => state.toasts;
@@ -34,9 +31,7 @@ function AppFooter() {
             lg={8}
             className="g-0 d-flex-center flex-column flex-lg-row text-center lead"
           >
-            <Col className="text-muted small">
-              {VERSION}
-            </Col>
+            <Col className="text-muted small">{VERSION}</Col>
           </Row>
           <Row
             md={12}

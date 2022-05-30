@@ -4,13 +4,13 @@ import { Bar } from "recharts";
 import {
   getRandomColorsArray,
   AnyChartWidget,
-  PieChartWidget
+  PieChartWidget,
 } from "@certego/certego-ui";
 
 import {
   JOB_STATUS_COLOR_MAP,
   JOB_TYPE_COLOR_MAP,
-  OBSERVABLE_CLASSIFICATION_COLOR_MAP
+  OBSERVABLE_CLASSIFICATION_COLOR_MAP,
 } from "../../../constants";
 
 import {
@@ -19,7 +19,7 @@ import {
   JOB_AGG_OBS_CLASSIFICATION_URI,
   JOB_AGG_FILE_MIMETYPE_URI,
   JOB_AGG_OBS_NAME_URI,
-  JOB_AGG_FILE_NAME_URI
+  JOB_AGG_FILE_NAME_URI,
 } from "../../../constants/api";
 
 // constants
@@ -96,7 +96,7 @@ export const JobFileMimetypeBarChart = React.memo(() => {
       url: JOB_AGG_FILE_MIMETYPE_URI,
       accessorFnAggregation: (d) => d?.aggregation,
       componentsFn: (respData) => {
-        const { values: mtList, } = respData;
+        const { values: mtList } = respData;
         if (!mtList || !mtList?.length) return null;
         return mtList.map((mc, i) => (
           <Bar

@@ -39,7 +39,7 @@ export default function useQuotaBadge() {
   );
 
   const QuotaInfoIcon = React.useCallback(
-    (props) => (
+    () => (
       <>
         <MdInfoOutline id="quota-info-icon" />
         <UncontrolledTooltip
@@ -50,7 +50,7 @@ export default function useQuotaBadge() {
         >
           Your Submissions Quota.
           <ul>
-            <li>Month submissions doesn't include failed analysis.</li>
+            <li>Month submissions doesn&apos;t include failed analysis.</li>
             <li>Total submissions includes all analysis made by you ever.</li>
           </ul>
         </UncontrolledTooltip>
@@ -59,5 +59,5 @@ export default function useQuotaBadge() {
     []
   );
 
-  return [{ MonthBadge, TotalBadge, QuotaInfoIcon, }, fetchUserAccess, quota];
+  return [{ MonthBadge, TotalBadge, QuotaInfoIcon }, fetchUserAccess, quota];
 }

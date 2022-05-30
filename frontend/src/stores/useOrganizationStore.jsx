@@ -3,7 +3,7 @@ import axios from "axios";
 
 import { BASE_URI_ORG } from "../constants/api";
 
-const useOrganizationStore = create((set, get) => ({
+const useOrganizationStore = create((set, _get) => ({
   loading: true,
   error: null,
   isUserOwner: false,
@@ -14,7 +14,7 @@ const useOrganizationStore = create((set, get) => ({
   fetchAll: async () => {
     try {
       // set loading
-      set({ loading: true, });
+      set({ loading: true });
       // API call
       const resp = await axios.get(
         `${BASE_URI_ORG}?expand=members,pending_invitations`
@@ -45,7 +45,7 @@ const useOrganizationStore = create((set, get) => ({
       });
     } catch (e) {
       // update error
-      set({ loading: false, error: e, });
+      set({ loading: false, error: e });
     }
   },
   fetchOnlyBasicInfo: async () => {
@@ -72,7 +72,7 @@ const useOrganizationStore = create((set, get) => ({
       });
     } catch (e) {
       // update error
-      set({ error: e, });
+      set({ error: e });
     }
   },
   refetchMembers: async () => {
@@ -81,12 +81,12 @@ const useOrganizationStore = create((set, get) => ({
       const resp = await axios.get(
         `${BASE_URI_ORG}?expand=members&fields=members`
       );
-      const { members, } = resp.data;
+      const { members } = resp.data;
       // update members key
-      set({ members, });
+      set({ members });
     } catch (e) {
       // update error
-      set({ error: e, });
+      set({ error: e });
     }
   },
   refetchInvs: async () => {
@@ -95,12 +95,12 @@ const useOrganizationStore = create((set, get) => ({
       const resp = await axios.get(
         `${BASE_URI_ORG}?expand=pending_invitations&fields=pending_invitations`
       );
-      const { pending_invitations: pendingInvitations, } = resp.data;
+      const { pending_invitations: pendingInvitations } = resp.data;
       // update pendingInvitations key
-      set({ pendingInvitations, });
+      set({ pendingInvitations });
     } catch (e) {
       // update error
-      set({ error: e, });
+      set({ error: e });
     }
   },
 }));

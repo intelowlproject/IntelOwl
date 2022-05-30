@@ -145,5 +145,5 @@ export {
   sendInvite,
   acceptInvitation,
   declineInvitation,
-  deleteInvitation
+  deleteInvitation,
 };

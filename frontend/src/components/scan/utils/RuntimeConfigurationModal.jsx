@@ -22,14 +22,14 @@ export default function RuntimeConfigurationModal(props) {
   const combinedParamsMap = React.useMemo(
     () => ({
       ...formik.values.analyzers.reduce(
-        (acc, { value: name, }) => ({
+        (acc, { value: name }) => ({
           ...acc,
           [name]: analyzersJSON?.[name].params,
         }),
         {}
       ),
       ...formik.values.connectors.reduce(
-        (acc, { value: name, }) => ({
+        (acc, { value: name }) => ({
           ...acc,
           [name]: connectorsJSON?.[name].params,
         }),
@@ -50,7 +50,7 @@ export default function RuntimeConfigurationModal(props) {
         (acc, [name, params]) => ({
           ...acc,
           [name]: Object.entries(params).reduce(
-            (acc2, [pName, { value, }]) => ({
+            (acc2, [pName, { value }]) => ({
               ...acc2,
               [pName]: value,
             }),
@@ -77,7 +77,7 @@ export default function RuntimeConfigurationModal(props) {
         (acc, [name, params]) =>
           Object.keys(params).length > 0 &&
           JSON.stringify(defaultNameParamsMap[name]) !== JSON.stringify(params)
-            ? { ...acc, [name]: params, }
+            ? { ...acc, [name]: params }
             : acc,
         {}
       );

@@ -43,7 +43,7 @@ pypdns==1.5.2
 pypssl==2.2
 pysafebrowsing==0.1.1
 PySocks==1.7.1
-quark-engine==22.4.1
+quark-engine==22.5.1
 requests==2.27.1
 speakeasy-emulator==1.5.9
 uWSGI==2.0.19.1

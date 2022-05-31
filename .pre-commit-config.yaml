@@ -33,12 +33,13 @@ repos:
           - eslint-plugin-jsx-a11y@6.5.1
           - eslint-plugin-react@7.30.0
           - eslint-plugin-react-hooks@4.5.0
-        args: ["frontend/src/", "--ext", ".js,.jsx", "--fix"]
+        args: ["--fix"]
+        files: frontend/src/
   - repo: https://github.com/pre-commit/mirrors-prettier
     rev: v2.6.2
     hooks:
       - id: prettier
-        args: ["frontend/"]
+        files: frontend/src/
   - repo: https://github.com/awebdeveloper/pre-commit-stylelint
     rev: 0.0.2
     hooks:
@@ -47,4 +48,5 @@ repos:
           - stylelint@14.8.5
           - stylelint-config-prettier@9.0.3
           - stylelint-config-standard-scss@4.0.0
-        args: ['"frontend/src/styles/*.{css,scss}"', "--fix"]
+        args: ["--fix"]
+        files: frontend/src/styles/.*(css|scss)$

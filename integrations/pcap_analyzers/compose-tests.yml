@@ -1,0 +1,8 @@
+version: "3.8"
+
+services:
+  pcap_analyzers:
+    build:
+      context: ../integrations/pcap_analyzers
+      dockerfile: Dockerfile
+    image: intelowlproject/intelowl_pcap_analyzers:test

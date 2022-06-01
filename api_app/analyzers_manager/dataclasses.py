@@ -44,8 +44,16 @@ class AnalyzerConfig(AbstractConfig):
         return observable_classification in self.observable_supported
 
     def is_filetype_supported(self, file_mimetype: str) -> bool:
+        # PCAPs are not classic files. They should not leverage the default behavior.
+        # We should execute them only if the analyzer specifically support them.
+        special_pcap_mimetype = "application/vnd.tcpdump.pcap"
+        if (
+            file_mimetype == special_pcap_mimetype
+            and special_pcap_mimetype not in self.supported_filetypes
+        ):
+            return False
+        # base case: empty lists means supports all
         if not self.supported_filetypes and not self.not_supported_filetypes:
-            # base case: empty lists means supports all
             return True
         return (
             file_mimetype in self.supported_filetypes

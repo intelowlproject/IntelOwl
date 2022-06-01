@@ -25,10 +25,13 @@ class PlaybookConfig:
     @property
     def is_ready_to_use(self) -> bool:
         return not self.disabled
-
+    
     @classmethod
     def from_dict(cls, data: dict) -> "PlaybookConfig":
-        return cls(*data)
+        new_data = data
+        new_data.pop("verification")
+        new_data.pop("python_module")
+        return cls(**new_data)
 
     # orm methods
     @classmethod

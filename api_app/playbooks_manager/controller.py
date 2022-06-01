@@ -11,7 +11,7 @@ from rest_framework.exceptions import ValidationError
 from api_app.analyzers_manager.dataclasses import AnalyzerConfig
 from api_app.connectors_manager.dataclasses import ConnectorConfig
 
-from api_app.exceptions import NotRunnablePlaybook
+from api_app.exceptions import NotRunnableAnalyzer, NotRunnableConnector, NotRunnablePlaybook
 from api_app.models import TLP
 from intel_owl.consts import DEFAULT_QUEUE
 
@@ -80,7 +80,11 @@ def start_playbooks(
 ) -> None:
     from intel_owl import tasks
 
+    analyzers_to_run = {}
+    connectors_to_run = {}
     # we should not use mutable objects as default to avoid unexpected issues
+    print(runtime_configuration)
+    print(playbooks_to_execute)
     if runtime_configuration is None:
         runtime_configuration = {}
     
@@ -105,11 +109,124 @@ def start_playbooks(
         # get runtime_configuration if any specified for this playbook
         runtime_params = runtime_configuration.get(p_name, {})
         # gen a new task_id
-        task_id = uuid()
-        
+        # Now fetch analyzers and connectors to execute for that playbook
+        # and run them below, by fetching their default configurations
+        # From their respective config files.
+        analyzers = pp.get("analyzers")
+        connectors = pp.get("connectors")
 
-        
-        
+        for a_name, a_params in analyzers:
+            aa = AnalyzerConfig.get(a_name)
+            try:
+                if aa is None:
+                    raise NotRunnableAnalyzer(
+                        f"{a_name} won't run: not available in configuration"
+                    )
+                    continue
+            
+                if not aa.is_ready_to_use:
+                    raise NotRunnableAnalyzer(
+                        f"{a_name} won't run: is disabled or unconfigured"
+                    )
+                    continue
+                args = [
+                        job_id,
+                        aa.asdict(),
+                        {"runtime_configuration": a_params, "task_id": task_id},
+                    ]
+                task_id = uuid()
+                analyzers_to_run[a_name] = dict(
+                    args=args
+                )
+                # get celery queue
+                queue = aa.config.queue
+                if queue not in settings.CELERY_QUEUES:
+                    logger.error(
+                        f"Analyzer {a_name} has a wrong queue."
+                        f"Setting to `{DEFAULT_QUEUE}`"
+                    )
+                    queue = DEFAULT_QUEUE
+                # get soft_time_limit
+                soft_time_limit = aa.config.soft_time_limit
+                task_signatures.append(
+                    tasks.run_analyzer.signature(
+                        args,
+                        {},
+                        queue=queue,
+                        soft_time_limit=soft_time_limit,
+                        task_id=task_id,
+                        ignore_result=True, # since we are using group and not chord
+                    )
+                )
 
-   
-    
+            except NotRunnableAnalyzer as e:
+                logger.warning(e)
+        
+        for c_name, c_params in connectors:
+            cc = ConnectorConfig.get(c_name)
+            try:
+                if cc is None:
+                    raise NotRunnableConnector(
+                        f"{c_name} won't run: not available in configuration"
+                    )
+                    continue
+                # if disabled or unconfigured (this check is bypassed in STAGE_CI)
+                if not cc.is_ready_to_use and not settings.STAGE_CI:
+                    raise NotRunnableAnalyzer(
+                        f"{c_name} won't run: is disabled or unconfigured"
+                    )
+                    continue
+                        # get celery queue
+                task_id = uuid()
+                args = [
+                    job_id,
+                    cc.asdict(),
+                    {"runtime_configuration": c_params, "task_id": task_id},
+                ]
+                connectors_to_run[c_name] = dict(
+                    args=args
+                )
+                queue = cc.config.queue
+                if queue not in settings.CELERY_QUEUES:
+                    logger.error(
+                        f"Connector {c_name} has a wrong queue."
+                        f" Setting to `{DEFAULT_QUEUE}`"
+                    )
+                queue = DEFAULT_QUEUE
+                # get soft_time_limit
+                soft_time_limit = cc.config.soft_time_limit
+                # create task signature and add to list
+                task_signatures.append(
+                tasks.run_connector.signature(
+                        args,
+                        {},
+                        queue=queue,
+                        soft_time_limit=soft_time_limit,
+                        task_id=task_id,
+                        ignore_result=True,  # since we are using group and not chord
+                    )
+                )
+
+            except NotRunnableConnector as e:
+                logger.warning(e)
+    mygroup = group(task_signatures)
+    mygroup()
+
+    return None
+
+
+def set_failed_playbook(
+    job_id: str,
+    name: str,
+    err_msg: str, 
+    **report_defaults
+) -> PlaybookReport:
+    status = PlaybookReport.status.FAILED
+    logger.warning(f"({name}, job_id #{job_id}) -> set as {status}. Error: {err_msg}")
+    report, _ = PlaybookReport.objects.get_or_create(
+        job_id=job_id, name=name, defaults=report_defaults
+    )
+    report.status = status
+    report.errors.append(err_msg)
+    report.save()
+    return report

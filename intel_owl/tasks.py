@@ -10,6 +10,7 @@ from api_app.analyzers_manager import controller as analyzers_controller
 from api_app.analyzers_manager.file_analyzers import yara_scan
 from api_app.analyzers_manager.observable_analyzers import maxmind, talos, tor
 from api_app.connectors_manager import controller as connectors_controller
+from api_app.playbooks_manager import controller as playbooks_controller
 from intel_owl.celery import app
 
 
@@ -78,4 +79,14 @@ def start_connectors(
 ):
     connectors_controller.start_connectors(
         job_id, connectors_to_execute, runtime_configuration
+    )
+
+@app.task(name="start_playbooks", soft_time_limit=500)
+def start_playbooks(
+    job_id: int,
+    playbooks_to_execute: list,
+    runtime_configuration: dict
+):
+    playbooks_controller.start_playbooks(
+        job_id, playbooks_to_execute, runtime_configuration
     )

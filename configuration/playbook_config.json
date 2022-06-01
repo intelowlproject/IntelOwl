@@ -8,7 +8,7 @@
             "Shodan": {
                 "include_honeyscore": true
             },
-            "FireHol_IPList": null
+            "FireHol_IPList": {}
         },
         "connectors": {
             "MISP": {

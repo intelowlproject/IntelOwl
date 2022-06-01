@@ -17,6 +17,4 @@ urlpatterns = [
     path("get_playbook_configs", PlaybookListAPI.as_view()),
     # Viewsets
     path(r"", include(router.urls)),
-
 ]
-

@@ -30,7 +30,7 @@ class PlaybookListAPI(APIView):
     serializer_class = PlaybookConfigSerializer
 
     @add_docs(
-        description="Get and parse the `connector_config.json` file,",
+        description="Get and parse the `playbook_config.json` file,",
         parameters=[],
         responses={
             200: PlaybookConfigSerializer,

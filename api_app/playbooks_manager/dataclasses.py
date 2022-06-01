@@ -4,9 +4,6 @@
 import dataclasses
 import typing
 
-from api_app.core.dataclasses import _Param, _Secret
-
-from api_app.core.dataclasses import AbstractConfig
 from .serializers import PlaybookConfigSerializer
 
 __all__ = ["PlaybookConfig"]

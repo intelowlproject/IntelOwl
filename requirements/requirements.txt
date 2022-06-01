@@ -1,11 +1,11 @@
-boto3==1.22.0
+boto3==1.23.1
 celery==5.2.2
 django-celery-results==2.2.0
 checkdmarc==4.4.1
 darksearch==2.1.2
 dataclasses==0.6
 Django==3.2.13
-django-auth-ldap==4.0.0
+django-auth-ldap==4.1.0
 django-rest-durin==0.3.0
 django-cache-memoize==0.1.9
 djangorestframework==3.13.1
@@ -33,7 +33,7 @@ pdfid==1.1.0
 pefile-fork==2020.12.16
 Pillow==9.1.0
 psycopg2-binary==2.9.1
-pycti==5.2.1
+pycti==5.3.0
 pydeep==0.4
 PyExifTool==0.5.0
 pyhashlookup==1.1.1
@@ -43,7 +43,7 @@ pypdns==1.5.2
 pypssl==2.2
 pysafebrowsing==0.1.1
 PySocks==1.7.1
-quark-engine==22.4.1
+quark-engine==22.5.1
 requests==2.27.1
 speakeasy-emulator==1.5.9
 uWSGI==2.0.19.1

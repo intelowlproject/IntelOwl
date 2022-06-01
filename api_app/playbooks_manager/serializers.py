@@ -4,9 +4,9 @@
 from django.utils.module_loading import import_string
 from rest_framework import serializers as rfs
 
-from api_app.analyzers_manager.constants import HashChoices, ObservableTypes, TypeChoices
+from api_app.analyzers_manager.constants import ObservableTypes
 
-from api_app.core.serializers import AbstractConfigSerializer, _ParamSerializer
+from api_app.core.serializers import AbstractConfigSerializer
 from api_app.models import TLP
 
 
@@ -20,6 +20,8 @@ class PlaybookConfigSerializer(AbstractConfigSerializer):
     config = {}
     params = {}
     secrets = {}
+    python_module = ""
+    
     # Required fields
     description = rfs.CharField()
     analyzers = rfs.DictField(child=rfs.DictField())

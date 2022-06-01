@@ -7,6 +7,7 @@ import logging
 # system imports
 import os
 import secrets
+import shutil
 import time
 
 # web imports
@@ -51,41 +52,43 @@ def intercept_suricata_result(context, future: Future) -> None:
     # 1. get current result object
     res = future.result()
     # 2. dir from which we will read final analysis result
-    eve_json_file = context.get("read_result_from", None)
-    if not eve_json_file:
+    directory = context.get("read_result_from", None)
+    if not directory:
         res["error"] += ", No specified file to read result from"
         if res.get("returncode", -1) == 0:
             res["returncode"] = -1
     else:
         max_tries = 60
         poll_interval = 2
+        res["report"] = {"data": []}
         for try_ in range(max_tries):
             try:
-                with open(eve_json_file, "r+") as fp:
-                    try:
-                        res["report"] = json.load(fp)
-                    except json.JSONDecodeError:
-                        res["report"] = fp.read()
+                with open(f"{directory}/eve.json", "r") as fp:
+                    for line in fp:
+                        try:
+                            res["report"]["data"].append(json.loads(line))
+                        except json.JSONDecodeError as e:
+                            logger.debug(e)
+                            res["report"]["data"].append(fp.read())
                     # this means that Suricata has finished its computation
-                    # todo check ID in the report and remove that part in the file
-                    if res.get("report"):
-                        res
-                        logger.info("report empty, waiting")
+                    if res["report"].get("data"):
+                        logger.info("report found, stop the loop")
                         break
             except Exception as e:
                 res["error"] += str(e)
                 logger.exception(e)
+            logger.debug("report empty, waiting")
             time.sleep(poll_interval)
-
-    logger.error("result")
-    logger.error(res)
 
     # 3. set final result after modifications
     future._result = res
 
+    # 4 remove the log file
+    shutil.rmtree(directory)
+
 
 shell2http.register_command(
     endpoint="suricata",
-    command_name="./upload_pcap.sh",
+    command_name="./check_pcap.sh",
     callback_fn=intercept_suricata_result,
 )

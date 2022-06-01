@@ -78,7 +78,6 @@ outputs:
   - eve-log:
       enabled: yes
       filetype: regular
-      filename: /tmp/eve.json
       filemode: 666
       # Enable for multi-threaded eve.json output; output files are amended with
       # with an identifier, e.g., eve.9.json
@@ -99,7 +98,7 @@ outputs:
       # to make the id less predictable.
 
       # enable/disable the community id feature.
-      community-id: true
+      community-id: false
       # Seed value for the ID output. Valid values are 0-65535.
       community-id-seed: 0
 

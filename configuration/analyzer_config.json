@@ -2979,7 +2979,13 @@
       "queue": "local"
     },
     "secrets": {},
-    "params": {}
+    "params": {
+      "verbose": {
+        "value": true,
+        "type": "bool",
+        "description": "Set this to True to increment verbosity about each generated alert (specifically the payload data)"
+      }
+    }
   },
   "TalosReputation": {
     "type": "observable",

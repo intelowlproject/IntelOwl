@@ -5,7 +5,6 @@ chown -R pcap_analyzers-user:pcap_analyzers-user ${LOG_PATH}
 su pcap_analyzers-user -s /bin/bash
 suricata-update update-sources
 suricata-update
-suricata --runmode=single -r /pcap/ --pcap-file-continuous --pcap-file-delete &
 exec gunicorn 'app:app' \
     --bind '0.0.0.0:4004' \
     --user ${USER} \

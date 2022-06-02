@@ -25,6 +25,7 @@ class PlaybookConfig:
     
     @classmethod
     def from_dict(cls, data: dict) -> "PlaybookConfig":
+        data.pop("verification")
         return cls(**data)
 
     # orm methods

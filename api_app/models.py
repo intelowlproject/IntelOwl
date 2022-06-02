@@ -89,10 +89,16 @@ class Job(models.Model):
     connectors_requested = pg_fields.ArrayField(
         models.CharField(max_length=128), blank=True, default=list
     )
+    playbooks_requested = pg_fields.ArrayField(
+        models.CharField(max_length=128), blank=True, default=list
+    )
     analyzers_to_execute = pg_fields.ArrayField(
         models.CharField(max_length=128), blank=True, default=list
     )
     connectors_to_execute = pg_fields.ArrayField(
+        models.CharField(max_length=128), blank=True, default=list
+    )
+    playbooks_to_execute = pg_fields.ArrayField(
         models.CharField(max_length=128), blank=True, default=list
     )
     received_request_time = models.DateTimeField(auto_now_add=True)

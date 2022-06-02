@@ -21,6 +21,7 @@ class PlaybookConfigSerializer(AbstractConfigSerializer):
     params = {}
     secrets = {}
     python_module = ""
+    verification = {}
     
     # Required fields
     description = rfs.CharField()

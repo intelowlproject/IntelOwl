@@ -18,5 +18,16 @@
                 "ssl_verify": true
             }
         }
+     }, 
+     "IP_FREE_STUFF": {
+        "description": "IP free collection",
+        "supports": ["ip"],
+        "disabled": true,
+        "analyzers": {
+            "Classic_DNS": {},
+            "CryptoScamDB_CheckAPI": {}
+
+        },
+        "connectors": {}
      }
 }

@@ -2,7 +2,7 @@
     "IP_BASIC_INFO": {
         "description": "Fetch basic info for an IP",
         "supports": ["ip"],
-        "disabled": true,
+        "disabled": false,
         "analyzers": {
             "AbuseIPDB": {},
             "Shodan": {
@@ -22,7 +22,7 @@
      "IP_FREE_STUFF": {
         "description": "IP free collection",
         "supports": ["ip"],
-        "disabled": true,
+        "disabled": false,
         "analyzers": {
             "Classic_DNS": {},
             "CryptoScamDB_CheckAPI": {}

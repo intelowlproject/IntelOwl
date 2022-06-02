@@ -166,6 +166,7 @@ class FileAnalysisSerializer(_AbstractJobCreateSerializer):
             "runtime_configuration",
             "analyzers_requested",
             "connectors_requested",
+            "playbooks_requested",
             "tags_labels",
         )
 
@@ -206,6 +207,7 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
             "runtime_configuration",
             "analyzers_requested",
             "connectors_requested",
+            "playbooks_requested",
             "tags_labels",
         )
 

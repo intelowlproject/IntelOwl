@@ -27,6 +27,7 @@ from intel_owl.celery import app as celery_app
 from .analyzers_manager import controller as analyzers_controller
 from .analyzers_manager.constants import ObservableTypes
 from .connectors_manager import controller as connectors_controller
+from .playbooks_manager import controller as playbooks_controller
 from .filters import JobFilter
 from .helpers import get_now
 from .models import TLP, Job, Status, Tag
@@ -74,12 +75,18 @@ def _analysis_request(
         serialized_data,
         warnings,
     )
+    
+    cleaned_playbooks_list = playbooks_controller.filter_playbooks(
+        serialized_data,
+        warnings
+    )
 
     # save the arrived data plus new params into a new job object
     job = serializer.save(
         user=request.user,
         analyzers_to_execute=cleaned_analyzer_list,
         connectors_to_execute=cleaned_connectors_list,
+        playbooks_to_execute=cleaned_playbooks_list
     )
 
     logger.info(f"New Job added to queue <- {repr(job)}.")
@@ -93,6 +100,15 @@ def _analysis_request(
                 job_id=job.pk,
                 analyzers_to_execute=cleaned_analyzer_list,
                 runtime_configuration=runtime_configuration,
+            ),
+        )
+
+        celery_app.send_task(
+            "start_playbooks",
+            kwargs=dict(
+                job_id=job.pk,
+                playbooks_to_execute=cleaned_playbooks_list,
+                runtime_configuration=runtime_configuration
             ),
         )
 

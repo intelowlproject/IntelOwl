@@ -119,6 +119,7 @@ def _analysis_request(
             "warnings": warnings,
             "analyzers_running": cleaned_analyzer_list,
             "connectors_running": cleaned_connectors_list,
+            "playbooks_running": cleaned_playbooks_list
         }
     )
     ser.is_valid(raise_exception=True)
@@ -220,7 +221,7 @@ def ask_analysis_availability(request):
     responses={200: AnalysisResponseSerializer},
 )
 @api_view(["POST"])
-def analyze_file(request):
+def analyze_file(request): 
     return _analysis_request(request, FileAnalysisSerializer)
 
 

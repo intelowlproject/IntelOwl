@@ -238,3 +238,4 @@ class AnalysisResponseSerializer(rfs.Serializer):
     warnings = rfs.ListField()
     analyzers_running = rfs.ListField()
     connectors_running = rfs.ListField()
+    playbooks_running = rfs.ListField()

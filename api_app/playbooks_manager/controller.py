@@ -180,7 +180,7 @@ def start_playbooks(
                     continue
                 # if disabled or unconfigured (this check is bypassed in STAGE_CI)
                 if not cc.is_ready_to_use and not settings.STAGE_CI:
-                    raise NotRunnableAnalyzer(
+                    raise NotRunnableConnector(
                         f"{c_name} won't run: is disabled or unconfigured"
                     )
                     continue

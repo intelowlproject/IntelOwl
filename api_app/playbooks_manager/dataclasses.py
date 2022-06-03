@@ -48,5 +48,5 @@ class PlaybookConfig:
 
     @classmethod
     def filter(cls, names: typing.List[str]) -> typing.Dict[str, "PlaybookConfig"]:
-        all_connector_configs = cls.all()
-        return {name: cc for name, cc in all_connector_configs.items() if name in names}
+        all_playbook_configs = cls.all()
+        return {name: cc for name, cc in all_playbook_configs.items() if name in names}

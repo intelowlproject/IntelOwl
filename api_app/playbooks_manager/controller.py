@@ -100,8 +100,10 @@ def start_playbooks(
     all_analyzer_names = list(analyzer_dataclasses.keys())
     all_connector_names = list(connector_dataclasses.keys())
     
+    playbooks = playbook_dataclasses.items()
     # loop over and create task signatures
-    for p_name, pp in playbook_dataclasses.items():
+    for p_name in playbooks:
+        pp = playbooks.get(p_name)
         # if disabled or unconfigured (this check is bypassed in STAGE_CI)
         if not pp.is_ready_to_use and not settings.STAGE_CI:
             continue
@@ -112,11 +114,12 @@ def start_playbooks(
         # Now fetch analyzers and connectors to execute for that playbook
         # and run them below, by fetching their default configurations
         # From their respective config files.
-        analyzers = pp.get("analyzers")
-        connectors = pp.get("connectors")
+        analyzers = pp.analyzers
+        connectors = pp.connectors
 
-        for a_name, a_params in analyzers:
+        for a_name in analyzers:
             aa = AnalyzerConfig.get(a_name)
+            a_params = analyzers.get(a_name)
             try:
                 if aa is None:
                     raise NotRunnableAnalyzer(
@@ -162,8 +165,10 @@ def start_playbooks(
             except NotRunnableAnalyzer as e:
                 logger.warning(e)
         
-        for c_name, c_params in connectors:
+        for c_name in connectors:
             cc = ConnectorConfig.get(c_name)
+            c_params = connectors.get(c_name)
+            
             try:
                 if cc is None:
                     raise NotRunnableConnector(

@@ -102,8 +102,9 @@ def start_playbooks(
     
     playbooks = list(playbook_dataclasses.items())
     # loop over and create task signatures
-    for p_name in playbooks:
-        pp = playbooks.get(p_name)
+    for p_dict in playbooks:
+        p_name = p_dict[0]
+        pp = p_dict[1]
         # if disabled or unconfigured (this check is bypassed in STAGE_CI)
         if not pp.is_ready_to_use and not settings.STAGE_CI:
             continue

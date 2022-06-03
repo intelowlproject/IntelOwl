@@ -8,6 +8,7 @@ from api_app.analyzers_manager.constants import ObservableTypes
 
 from api_app.core.serializers import AbstractConfigSerializer
 from api_app.models import TLP
+from api_app.playbooks_manager.models import PlaybookReport
 
 
 
@@ -36,4 +37,23 @@ class PlaybookConfigSerializer(AbstractConfigSerializer):
     )
 
 
+class PlaybookReportSerializer(rfs.ModelSerializer):
+    """
+    PlaybookReport model's serializer.
+    """
 
+    type = rfs.CharField(default="playbook")
+
+    class Meta:
+        model = PlaybookReport
+        fields = (
+            "name",
+            "status",
+            "report",
+            "errors",
+            "process_time",
+            "start_time",
+            "end_time",
+            "runtime_configuration",
+            "type",
+        )

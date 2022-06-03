@@ -1,17 +1,20 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
-
+import copy
 import json
 import logging
 from typing import Dict
 
 from durin.serializers import UserSerializer
 from rest_framework import serializers as rfs
+from rest_framework.exceptions import ValidationError
 
 from certego_saas.apps.organization.permissions import IsObjectOwnerOrSameOrgPermission
 
+from .analyzers_manager import controller as analyzers_controller
 from .analyzers_manager.constants import ObservableTypes
 from .analyzers_manager.serializers import AnalyzerReportSerializer
+from .connectors_manager import controller as connectors_controller
 from .connectors_manager.serializers import ConnectorReportSerializer
 from .helpers import (
     calculate_md5,
@@ -22,7 +25,6 @@ from .helpers import (
 from .models import Job, Tag
 
 logger = logging.getLogger(__name__)
-
 
 __all__ = [
     "TagSerializer",
@@ -83,7 +85,20 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         if runtime_conf and isinstance(runtime_conf, list):
             runtime_conf = json.loads(runtime_conf[0])
         attrs["runtime_configuration"] = runtime_conf
+        return attrs
 
+    @staticmethod
+    def filter_analyzers_and_connectors(attrs: dict) -> dict:
+        warnings = []
+        attrs["analyzers_to_execute"] = analyzers_controller.filter_analyzers(
+            attrs,
+            warnings,
+        )
+
+        attrs["connectors_to_execute"] = connectors_controller.filter_connectors(
+            attrs,
+            warnings,
+        )
         return attrs
 
     def create(self, validated_data: dict) -> Job:
@@ -179,8 +194,46 @@ class FileAnalysisSerializer(_AbstractJobCreateSerializer):
         file_obj.seek(0)
         file_buffer = file_obj.read()
         attrs["md5"] = calculate_md5(file_buffer)
+        self.filter_analyzers_and_connectors(attrs)
         logger.debug(f"after attrs: {attrs}")
         return attrs
+
+
+class MultipleObservableAnalysisSerializer(rfs.ListSerializer):
+    """
+    ``Job`` model's serializer for Multiple Observable Analysis.
+    Used for ``create()``.
+    """
+
+    def update(self, instance, validated_data):
+        raise NotImplementedError("This serializer does not support update().")
+
+    child = None
+    many = True
+    observables = rfs.ListField(required=True)
+
+    def to_internal_value(self, data):
+        ret = []
+        errors = []
+
+        common_data = dict(data)
+        common_data.pop("observables", None)
+        for classification, name in data.get("observables"):
+            item = copy.deepcopy(common_data)
+            item["observable_name"] = name
+            item["observable_classification"] = classification
+            try:
+                validated = self.child.run_validation(item)
+            except ValidationError as exc:
+                errors.append(exc.detail)
+            else:
+                ret.append(validated)
+                errors.append({})
+
+        if any(errors):
+            raise ValidationError(errors)
+
+        return ret
 
 
 class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
@@ -208,6 +261,7 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
             "connectors_requested",
             "tags_labels",
         )
+        list_serializer_class = MultipleObservableAnalysisSerializer
 
     def validate(self, attrs: dict) -> dict:
         attrs = super(ObservableAnalysisSerializer, self).validate(attrs)
@@ -226,6 +280,7 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
             attrs["observable_name"] = attrs["observable_name"].lower()
         # calculate ``md5``
         attrs["md5"] = calculate_md5(attrs["observable_name"].encode("utf-8"))
+        self.filter_analyzers_and_connectors(attrs)
         logger.debug(f"after attrs: {attrs}")
         return attrs
 

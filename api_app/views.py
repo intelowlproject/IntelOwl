@@ -26,7 +26,6 @@ from intel_owl.celery import app as celery_app
 
 from .analyzers_manager import controller as analyzers_controller
 from .analyzers_manager.constants import ObservableTypes
-from .connectors_manager import controller as connectors_controller
 from .filters import JobFilter
 from .helpers import get_now
 from .models import TLP, Job, Status, Tag
@@ -57,30 +56,18 @@ def _analysis_request(
     )
 
     # serialize request data and validate
-    serializer = serializer_class(data=request.data, context={"request": request})
+    serializer = serializer_class(data=request.data)
     serializer.is_valid(raise_exception=True)
 
     serialized_data = serializer.validated_data
     runtime_configuration = serialized_data.pop("runtime_configuration", {})
 
-    cleaned_analyzer_list = analyzers_controller.filter_analyzers(
-        serialized_data,
-        warnings,
-    )
-    if not cleaned_analyzer_list:
-        raise ValidationError({"detail": "No Analyzers can be run after filtering."})
-
-    cleaned_connectors_list = connectors_controller.filter_connectors(
-        serialized_data,
-        warnings,
-    )
-
     # save the arrived data plus new params into a new job object
     job = serializer.save(
         user=request.user,
-        analyzers_to_execute=cleaned_analyzer_list,
-        connectors_to_execute=cleaned_connectors_list,
     )
+    cleaned_analyzer_list = serialized_data.get("analyzers_to_execute")
+    cleaned_connectors_list = serialized_data.get("connectors_to_execute")
 
     logger.info(f"New Job added to queue <- {repr(job)}.")
 
@@ -108,6 +95,79 @@ def _analysis_request(
     ser.is_valid(raise_exception=True)
 
     response_dict = ser.data
+
+    logger.debug(response_dict)
+
+    return Response(
+        response_dict,
+        status=status.HTTP_200_OK,
+    )
+
+
+def _multi_observable_analysis_request(
+    request,
+    serializer_class: ObservableAnalysisSerializer,
+):
+    """
+    Prepare and send multiple observables for analysis
+    """
+    warnings = []
+    logger.info(
+        f"_analysis_request {serializer_class} received request from {request.user}."
+        f"Data:{dict(request.data)}."
+    )
+
+    # serialize request data and validate
+    serializer = serializer_class(data=request.data, many=True)
+    serializer.is_valid(raise_exception=True)
+
+    serialized_data = serializer.validated_data
+    print(serialized_data)
+    runtime_configurations = [
+        data.pop("runtime_configuration", {}) for data in serialized_data
+    ]
+
+    # save the arrived data plus new params into a new job object
+    jobs = serializer.save(
+        user=request.user,
+    )
+
+    logger.info(f"New Jobs added to queue <- {repr(jobs)}.")
+
+    # Check if task is test or not
+    if not settings.STAGE_CI:
+        # fire celery task
+        for job_index in range(len(jobs)):
+            job = jobs[job_index]
+            runtime_configuration = runtime_configurations[job_index]
+            celery_app.send_task(
+                "start_analyzers",
+                kwargs=dict(
+                    job_id=job.pk,
+                    analyzers_to_execute=job.analyzers_to_execute,
+                    runtime_configuration=runtime_configuration,
+                ),
+            )
+
+    ser = AnalysisResponseSerializer(
+        data=[
+            {
+                "status": "accepted",
+                "job_id": job.pk,
+                "warnings": warnings,
+                "analyzers_running": job.analyzers_to_execute,
+                "connectors_running": job.connectors_to_execute,
+            }
+            for job in jobs
+        ],
+        many=True,
+    )
+    ser.is_valid(raise_exception=True)
+
+    response_dict = {
+        "count": len(ser.data),
+        "results": ser.data,
+    }
 
     logger.debug(response_dict)
 
@@ -209,13 +269,24 @@ def analyze_file(request):
 
 
 @add_docs(
-    description="This endpoint allows to start a Job related to an observable",
+    description="This endpoint allows to start a Job related to an observable. "
+    "Retained for compatibility",
     request=ObservableAnalysisSerializer,
     responses={200: AnalysisResponseSerializer},
 )
 @api_view(["POST"])
 def analyze_observable(request):
     return _analysis_request(request, ObservableAnalysisSerializer)
+
+
+@add_docs(
+    description="This endpoint allows to start Jobs related to multiple observables",
+    request=ObservableAnalysisSerializer,
+    responses={200: AnalysisResponseSerializer},
+)
+@api_view(["POST"])
+def analyze_multiple_observables(request):
+    return _multi_observable_analysis_request(request, ObservableAnalysisSerializer)
 
 
 @add_docs(

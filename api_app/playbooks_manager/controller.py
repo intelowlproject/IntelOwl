@@ -118,6 +118,8 @@ def start_playbooks(
         analyzers = pp.analyzers
         connectors = pp.connectors
 
+        
+
         for a_name in analyzers:
             aa = AnalyzerConfig.get(a_name)
             a_params = analyzers.get(a_name)
@@ -133,12 +135,12 @@ def start_playbooks(
                         f"{a_name} won't run: is disabled or unconfigured"
                     )
                     continue
+                task_id = uuid()
                 args = [
                         job_id,
                         aa.asdict(),
                         {"runtime_configuration": a_params, "task_id": task_id},
                     ]
-                task_id = uuid()
                 analyzers_to_run[a_name] = dict(
                     args=args
                 )

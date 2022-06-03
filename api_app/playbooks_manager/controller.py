@@ -100,7 +100,7 @@ def start_playbooks(
     all_analyzer_names = list(analyzer_dataclasses.keys())
     all_connector_names = list(connector_dataclasses.keys())
     
-    playbooks = playbook_dataclasses.items()
+    playbooks = list(playbook_dataclasses.items())
     # loop over and create task signatures
     for p_name in playbooks:
         pp = playbooks.get(p_name)
@@ -168,7 +168,7 @@ def start_playbooks(
         for c_name in connectors:
             cc = ConnectorConfig.get(c_name)
             c_params = connectors.get(c_name)
-            
+
             try:
                 if cc is None:
                     raise NotRunnableConnector(

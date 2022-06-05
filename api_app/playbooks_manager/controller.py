@@ -6,18 +6,13 @@ from typing import Dict, List
 
 from celery import group, uuid
 from django.conf import settings
-from django.utils.module_loading import import_string
-from rest_framework.exceptions import ValidationError
 from api_app.analyzers_manager.dataclasses import AnalyzerConfig
 from api_app.connectors_manager.dataclasses import ConnectorConfig
 
 from api_app.exceptions import NotRunnableAnalyzer, NotRunnableConnector, NotRunnablePlaybook
-from api_app.models import TLP
 from intel_owl.consts import DEFAULT_QUEUE
 
-from .classes import Playbook
 from .dataclasses import PlaybookConfig
-from .models import PlaybookReport
 
 logger = logging.getLogger(__name__)
 
@@ -26,16 +21,17 @@ def filter_playbooks(serialized_data: Dict, warnings: List[str]) -> List[str]:
     # init empty list
     cleaned_playbook_list = []
     selected_playbooks = []
+    analyzers_to_be_run = []
+    connectors_to_be_run = []
 
     # get values from serializer
     playbooks_requested = serialized_data.get("playbooks_requested", [])
-    tlp = serialized_data.get("tlp", TLP.WHITE).upper()
-
+    
     # read config
     playbook_dataclasses = PlaybookConfig.all()
     all_playbook_names = list(playbook_dataclasses.keys())
 
-    # run all connectors ?
+    # run all playbooks; Might just remove this for now.
     run_all = len(playbooks_requested) == 0
     if run_all:
         # select all
@@ -43,11 +39,12 @@ def filter_playbooks(serialized_data: Dict, warnings: List[str]) -> List[str]:
     else:
         # select the ones requested
         selected_playbooks.extend(playbooks_requested)
-    
+        
     for p_name in selected_playbooks:
         try:
             pp = playbook_dataclasses.get(p_name, None)
-            
+            analyzers_to_be_run.extend(pp.analyzers)
+            connectors_to_be_run.extend(pp.connectors)
             if not pp:
                 if not run_all:
                     raise NotRunnablePlaybook(
@@ -58,7 +55,7 @@ def filter_playbooks(serialized_data: Dict, warnings: List[str]) -> List[str]:
                 raise NotRunnablePlaybook(
                     f"{p_name} won't run: is disabled or unconfigured"
                 )
-            
+
         except NotRunnablePlaybook as e:
             if run_all:
                 # in this case, they are not warnings but expected and wanted behavior
@@ -66,39 +63,30 @@ def filter_playbooks(serialized_data: Dict, warnings: List[str]) -> List[str]:
             else:
                 logger.warning(e)
                 warnings.append(str(e))
+            logger.warning(e)
+            warnings.append(str(e))
 
         else:
             cleaned_playbook_list.append(p_name)
-    
-    return cleaned_playbook_list
+    analyzers_to_be_run = list(set(analyzers_to_be_run))
+    connectors_to_be_run = list(set(connectors_to_be_run))
+    return cleaned_playbook_list, analyzers_to_be_run, connectors_to_be_run
 
 
 def start_playbooks(
     job_id: int,
     playbooks_to_execute: List[str],
-    runtime_configuration: Dict[str, Dict] = None
 ) -> None:
     from intel_owl import tasks
 
-    analyzers_to_run = {}
-    connectors_to_run = {}
-    # we should not use mutable objects as default to avoid unexpected issues
-    print(runtime_configuration)
-    print(playbooks_to_execute)
-    if runtime_configuration is None:
-        runtime_configuration = {}
-    
     # to store the celery task signatures
     task_signatures = []
 
     # get playbook config
     playbook_dataclasses = PlaybookConfig.filter(names=playbooks_to_execute)
 
-    analyzer_dataclasses = AnalyzerConfig.all()
-    connector_dataclasses = ConnectorConfig.all()
-
-    all_analyzer_names = list(analyzer_dataclasses.keys())
-    all_connector_names = list(connector_dataclasses.keys())
+    analyzers_used = []
+    connectors_used = []
     
     playbooks = list(playbook_dataclasses.items())
     # loop over and create task signatures
@@ -108,21 +96,19 @@ def start_playbooks(
         # if disabled or unconfigured (this check is bypassed in STAGE_CI)
         if not pp.is_ready_to_use and not settings.STAGE_CI:
             continue
-        
-        # get runtime_configuration if any specified for this playbook
-        runtime_params = runtime_configuration.get(p_name, {})
-        # gen a new task_id
+
         # Now fetch analyzers and connectors to execute for that playbook
         # and run them below, by fetching their default configurations
         # From their respective config files.
         analyzers = pp.analyzers
         connectors = pp.connectors
 
-        
-
         for a_name in analyzers:
+            if a_name in analyzers_used:
+                continue
             aa = AnalyzerConfig.get(a_name)
             a_params = analyzers.get(a_name)
+
             try:
                 if aa is None:
                     raise NotRunnableAnalyzer(
@@ -135,15 +121,15 @@ def start_playbooks(
                         f"{a_name} won't run: is disabled or unconfigured"
                     )
                     continue
+                analyzers_used.append(a_name)
                 task_id = uuid()
                 args = [
                         job_id,
                         aa.asdict(),
                         {"runtime_configuration": a_params, "task_id": task_id},
+                        p_name
                     ]
-                analyzers_to_run[a_name] = dict(
-                    args=args
-                )
+
                 # get celery queue
                 queue = aa.config.queue
                 if queue not in settings.CELERY_QUEUES:
@@ -169,6 +155,8 @@ def start_playbooks(
                 logger.warning(e)
         
         for c_name in connectors:
+            if c_name in connectors_used:
+                continue
             cc = ConnectorConfig.get(c_name)
             c_params = connectors.get(c_name)
 
@@ -177,23 +165,22 @@ def start_playbooks(
                     raise NotRunnableConnector(
                         f"{c_name} won't run: not available in configuration"
                     )
-                    continue
+                    
                 # if disabled or unconfigured (this check is bypassed in STAGE_CI)
                 if not cc.is_ready_to_use and not settings.STAGE_CI:
                     raise NotRunnableConnector(
                         f"{c_name} won't run: is disabled or unconfigured"
                     )
-                    continue
-                        # get celery queue
+                    
+                connectors_used.append(c_name)
                 task_id = uuid()
                 args = [
                     job_id,
                     cc.asdict(),
-                    {"runtime_configuration": c_params, "task_id": task_id},
+                    {"runtime_configuration": c_params, "task_id": task_id, "parent_playbook": p_name},
                 ]
-                connectors_to_run[c_name] = dict(
-                    args=args
-                )
+
+                # get celery queue
                 queue = cc.config.queue
                 if queue not in settings.CELERY_QUEUES:
                     logger.error(
@@ -221,20 +208,3 @@ def start_playbooks(
     mygroup()
 
     return None
-
-
-def set_failed_playbook(
-    job_id: str,
-    name: str,
-    err_msg: str, 
-    **report_defaults
-) -> PlaybookReport:
-    status = PlaybookReport.status.FAILED
-    logger.warning(f"({name}, job_id #{job_id}) -> set as {status}. Error: {err_msg}")
-    report, _ = PlaybookReport.objects.get_or_create(
-        job_id=job_id, name=name, defaults=report_defaults
-    )
-    report.status = status
-    report.errors.append(err_msg)
-    report.save()
-    return report

@@ -4,17 +4,10 @@
 from django.urls import include, path
 from rest_framework import routers
 
-from .views import PlaybookActionViewSet, PlaybookListAPI
-
-# Routers provide an easy way of automatically determining the URL conf.
-router = routers.DefaultRouter(trailing_slash=False)
-router.register(
-    r"jobs/(?P<job_id>\d+)/playbook/(?P<name>\w+)",
-    PlaybookActionViewSet,
-)
+from .views import PlaybookListAPI, analyze_file, analyze_observable
 
 urlpatterns = [
     path("get_playbook_configs", PlaybookListAPI.as_view()),
-    # Viewsets
-    path(r"", include(router.urls)),
+    path("playbook/analyze_file", analyze_file),
+    path("playbook/analyze_observable", analyze_observable),
 ]

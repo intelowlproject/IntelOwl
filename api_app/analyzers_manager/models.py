@@ -12,7 +12,7 @@ class AnalyzerReport(AbstractReport):
     )
 
     class Meta:
-        unique_together = [("job")]
+        unique_together = [("name", "job")]
 
     def __str__(self):
         return f"AnalyzerReport(job:#{self.job_id}, {self.analyzer_name})"

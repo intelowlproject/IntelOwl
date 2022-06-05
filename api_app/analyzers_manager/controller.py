@@ -19,6 +19,8 @@ from .classes import BaseAnalyzerMixin, DockerBasedAnalyzer
 from .dataclasses import AnalyzerConfig
 from .models import AnalyzerReport
 
+from api_app.playbooks_manager.dataclasses import PlaybookConfig
+
 logger = logging.getLogger(__name__)
 
 
@@ -26,9 +28,23 @@ def filter_analyzers(serialized_data: Dict, warnings: List) -> List[str]:
     # init empty list
     cleaned_analyzer_list = []
     selected_analyzers = []
+    analyzers_in_playbooks_requested = []
 
     # get values from serializer
     analyzers_requested = serialized_data.get("analyzers_requested", [])
+    playbooks_requested = serialized_data.get("playbooks_requested", [])
+
+    # move this to the playbook part
+    for p_name in playbooks_requested:
+        playbook = PlaybookConfig.get(p_name)
+        if playbook is None:
+            continue
+            # ignoring garbage playbooks here, because
+            # Playbooks would anyway get verified later.
+        
+        analyzers_in_playbooks_requested.extend(playbook.analyzers)
+    analyzers_in_playbooks_requested = set(analyzers_in_playbooks_requested)
+
     tlp = serialized_data.get("tlp", TLP.WHITE).upper()
 
     # read config
@@ -42,7 +58,8 @@ def filter_analyzers(serialized_data: Dict, warnings: List) -> List[str]:
         selected_analyzers.extend(all_analyzer_names)
     else:
         # select the ones requested
-        selected_analyzers.extend(analyzers_requested)
+        selected_analyzers = list(set(analyzers_requested) - analyzers_in_playbooks_requested)
+
 
     for a_name in selected_analyzers:
         try:
@@ -235,7 +252,7 @@ def set_failed_analyzer(
 
 
 def run_analyzer(
-    job_id: int, config_dict: dict, report_defaults: dict
+    job_id: int, config_dict: dict, report_defaults: dict, parent_playbook=None
 ) -> AnalyzerReport:
     aconfig = AnalyzerConfig.from_dict(config_dict)
     klass: BaseAnalyzerMixin = None
@@ -248,7 +265,7 @@ def run_analyzer(
             raise Exception(f"Class: {cls_path} couldn't be imported")
         # else
         instance = klass(config=aconfig, job_id=job_id, report_defaults=report_defaults)
-        report = instance.start()
+        report = instance.start(parent_playbook=parent_playbook)
     except Exception as e:
         report = set_failed_analyzer(job_id, aconfig.name, str(e), **report_defaults)
 

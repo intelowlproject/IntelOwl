@@ -4,7 +4,6 @@
 import json
 import logging
 from typing import Dict
-from api_app.playbooks_manager.serializers import PlaybookReportSerializer
 
 from durin.serializers import UserSerializer
 from rest_framework import serializers as rfs
@@ -125,8 +124,7 @@ class JobSerializer(_AbstractJobViewSerializer):
 
     analyzer_reports = AnalyzerReportSerializer(many=True, read_only=True)
     connector_reports = ConnectorReportSerializer(many=True, read_only=True)
-    playbook_reports = PlaybookReportSerializer(many=True, read_only=True)
-    
+
     permissions = rfs.SerializerMethodField()
 
     def get_permissions(self, obj: Job) -> Dict[str, bool]:
@@ -208,6 +206,8 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
             "observable_name",
             "observable_classification",
             "runtime_configuration",
+            "run_all_analyzers",
+            "run_all_playbooks",
             "analyzers_requested",
             "connectors_requested",
             "playbooks_requested",
@@ -241,4 +241,3 @@ class AnalysisResponseSerializer(rfs.Serializer):
     warnings = rfs.ListField()
     analyzers_running = rfs.ListField()
     connectors_running = rfs.ListField()
-    playbooks_running = rfs.ListField()

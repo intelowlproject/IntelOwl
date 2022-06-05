@@ -68,6 +68,7 @@ def _analysis_request(
         serialized_data,
         warnings,
     )
+
     if not cleaned_analyzer_list:
         raise ValidationError({"detail": "No Analyzers can be run after filtering."})
 
@@ -75,18 +76,12 @@ def _analysis_request(
         serialized_data,
         warnings,
     )
-    
-    cleaned_playbooks_list = playbooks_controller.filter_playbooks(
-        serialized_data,
-        warnings
-    )
 
     # save the arrived data plus new params into a new job object
     job = serializer.save(
         user=request.user,
         analyzers_to_execute=cleaned_analyzer_list,
         connectors_to_execute=cleaned_connectors_list,
-        playbooks_to_execute=cleaned_playbooks_list
     )
 
     logger.info(f"New Job added to queue <- {repr(job)}.")
@@ -102,16 +97,6 @@ def _analysis_request(
                 runtime_configuration=runtime_configuration,
             ),
         )
-
-        celery_app.send_task(
-            "start_playbooks",
-            kwargs=dict(
-                job_id=job.pk,
-                playbooks_to_execute=cleaned_playbooks_list,
-                runtime_configuration=runtime_configuration
-            ),
-        )
-
     ser = AnalysisResponseSerializer(
         data={
             "status": "accepted",
@@ -119,7 +104,6 @@ def _analysis_request(
             "warnings": warnings,
             "analyzers_running": cleaned_analyzer_list,
             "connectors_running": cleaned_connectors_list,
-            "playbooks_running": cleaned_playbooks_list
         }
     )
     ser.is_valid(raise_exception=True)

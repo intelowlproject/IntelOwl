@@ -83,6 +83,10 @@ class Job(models.Model):
     status = models.CharField(
         max_length=32, blank=False, choices=Status.choices, default="pending"
     )
+
+    run_all_analyzers = models.BooleanField(default=False)
+    run_all_playbooks = models.BooleanField(default=False)
+    
     analyzers_requested = pg_fields.ArrayField(
         models.CharField(max_length=128), blank=True, default=list
     )
@@ -94,6 +98,7 @@ class Job(models.Model):
     )
     analyzers_to_execute = pg_fields.ArrayField(
         models.CharField(max_length=128), blank=True, default=list
+
     )
     connectors_to_execute = pg_fields.ArrayField(
         models.CharField(max_length=128), blank=True, default=list
@@ -101,6 +106,7 @@ class Job(models.Model):
     playbooks_to_execute = pg_fields.ArrayField(
         models.CharField(max_length=128), blank=True, default=list
     )
+
     received_request_time = models.DateTimeField(auto_now_add=True)
     finished_analysis_time = models.DateTimeField(blank=True, null=True)
     tlp = models.CharField(max_length=8, choices=TLP.choices, default=TLP.WHITE)

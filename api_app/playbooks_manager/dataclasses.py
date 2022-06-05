@@ -8,6 +8,8 @@ from .serializers import PlaybookConfigSerializer
 
 __all__ = ["PlaybookConfig"]
 
+# Try to see if your changes in serializers helps with the changeshere (make them)
+
 @dataclasses.dataclass
 class PlaybookConfig:
     name: str

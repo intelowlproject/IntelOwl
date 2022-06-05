@@ -45,7 +45,15 @@ export async function createJob(formValues) {
               <strong>Connectors:</strong>&nbsp;
               {respData.connectors_running.join(", ")}
             </ContentSection>
+            
           )}
+          {respData.playbooks_running.length > 0 && (
+            <ContentSection className="text-light">
+              <strong>Playbooks:</strong>&nbsp;
+              {respData.playbooks_running.join(", ")}
+            </ContentSection>
+          )}
+          
           {respData.warnings.length > 0 && (
             <ContentSection className="bg-accent text-darker">
               <strong>Warnings:</strong>&nbsp;{respData.warnings.join(", ")}

@@ -62,8 +62,8 @@ def post_all_analyzers_finished(job_id: int, runtime_configuration: dict):
 
 
 @app.task(name="run_analyzer", soft_time_limit=500)
-def run_analyzer(job_id: int, config_dict: dict, report_defaults: dict):
-    analyzers_controller.run_analyzer(job_id, config_dict, report_defaults)
+def run_analyzer(job_id: int, config_dict: dict, report_defaults: dict, parent_playbook=None):
+    analyzers_controller.run_analyzer(job_id, config_dict, report_defaults, parent_playbook)
 
 
 @app.task(name="run_connector", soft_time_limit=500)
@@ -85,8 +85,7 @@ def start_connectors(
 def start_playbooks(
     job_id: int,
     playbooks_to_execute: list,
-    runtime_configuration: dict
 ):
     playbooks_controller.start_playbooks(
-        job_id, playbooks_to_execute, runtime_configuration
+        job_id, playbooks_to_execute
     )

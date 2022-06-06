@@ -94,7 +94,10 @@ def _analysis_request(
     )
     ser.is_valid(raise_exception=True)
 
-    response_dict = ser.data
+    response_dict = {
+        "count": 1,
+        "results": [ser.data],
+    }
 
     logger.debug(response_dict)
 

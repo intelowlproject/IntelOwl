@@ -6,7 +6,7 @@ export const JOB_BASE_URI = `${API_BASE_URI}/jobs`;
 export const TAG_BASE_URI = `${API_BASE_URI}/tags`;
 export const ASK_ANALYSIS_AVAILABILITY_URI = `${API_BASE_URI}/ask_analysis_availability`;
 export const ANALYZE_FILE_URI = `${API_BASE_URI}/analyze_file`;
-export const ANALYZE_OBSERVABLE_URI = `${API_BASE_URI}/analyze_observable`;
+export const ANALYZE_MULTIPLE_OBSERVABLE_URI = `${API_BASE_URI}/analyze_multiple_observables`;
 export const ANALYZERS_CONFIG_URI = `${API_BASE_URI}/get_analyzer_configs`;
 export const CONNECTORS_CONFIG_URI = `${API_BASE_URI}/get_connector_configs`;
 

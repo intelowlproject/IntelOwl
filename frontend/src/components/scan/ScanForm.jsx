@@ -1,17 +1,19 @@
 import React from "react";
+import { BsFillTrashFill, BsFillPlusCircleFill } from "react-icons/bs";
 import {
   FormFeedback,
   FormGroup,
   Label,
   Container,
   Col,
+  Row,
   FormText,
   Input,
   Spinner,
   Button,
 } from "reactstrap";
 import { useNavigate } from "react-router-dom";
-import { ErrorMessage, Field, Form, Formik } from "formik";
+import { ErrorMessage, Field, Form, Formik, FieldArray } from "formik";
 import useTitle from "react-use/lib/useTitle";
 import { MdEdit } from "react-icons/md";
 
@@ -104,7 +106,7 @@ const observableType2PropsMap = {
 };
 const initialValues = {
   classification: "ip",
-  observable_name: "",
+  observable_names: [""],
   file: "",
   analyzers: [],
   connectors: [],
@@ -213,15 +215,23 @@ export default function ScanForm() {
         if (!values.file) {
           errors.file = "required";
         }
-      } else if (values.observable_name) {
-        const pattern = RegExp(
-          observableType2PropsMap[values.classification].pattern
+      } else if (values.observable_names) {
+        const ObservableNamesErrors = values.observable_names.map(
+          (ObservableName) => {
+            const pattern = RegExp(
+              observableType2PropsMap[values.classification].pattern
+            );
+            if (!pattern.test(ObservableName)) {
+              return `invalid ${values.classification}`;
+            }
+            return null;
+          }
         );
-        if (!pattern.test(values.observable_name)) {
-          errors.observable_name = `invalid ${values.classification}`;
-        }
+
+        if (ObservableNamesErrors.some((e) => e))
+          errors.observable_names = ObservableNamesErrors;
       } else {
-        errors.observable_name = "required";
+        errors.observable_names = "required";
       }
       if (!TLP_CHOICES.includes(values.tlp)) {
         errors.tlp = "Invalid choice";
@@ -239,8 +249,8 @@ export default function ScanForm() {
         connectors: values.connectors.map((x) => x.value),
       };
       try {
-        const jobId = await createJob(formValues);
-        setTimeout(() => navigate(`/jobs/${jobId}`), 1000);
+        await createJob(formValues);
+        setTimeout(() => navigate(`/jobs/`), 1000);
       } catch (e) {
         // handled inside createJob
       } finally {
@@ -295,29 +305,67 @@ export default function ScanForm() {
                 ))}
               </FormGroup>
               {OBSERVABLE_TYPES.includes(formik.values.classification) ? (
-                <FormGroup row>
-                  <Label className="required" sm={3} for="observable_name">
-                    Observable Value
-                  </Label>
-                  <Col sm={9}>
-                    <Field
-                      as={Input}
-                      type="text"
-                      id="observable_name"
-                      name="observable_name"
-                      className="input-dark"
-                      invalid={
-                        formik.errors.observable_name &&
-                        formik.touched.observable_name
-                      }
-                      {...observableType2PropsMap[formik.values.classification]}
-                    />
-                    <ErrorMessage
-                      component={FormFeedback}
-                      name="observable_name"
-                    />
-                  </Col>
-                </FormGroup>
+                <FieldArray
+                  name="observable_names"
+                  render={(arrayHelpers) => (
+                    <FormGroup row>
+                      <Label className="required" sm={3} for="observable_name">
+                        Observable Value(s)
+                      </Label>
+                      <Col sm={9}>
+                        {formik.values.observable_names &&
+                        formik.values.observable_names.length > 0
+                          ? formik.values.observable_names.map(
+                              (name, index) => (
+                                <Row
+                                  className="py-2"
+                                  key={`observable_names.${index + 0}`}
+                                >
+                                  <Col sm={11}>
+                                    <Field
+                                      as={Input}
+                                      type="text"
+                                      id={`observable_names.${index}`}
+                                      name={`observable_names.${index}`}
+                                      className="input-dark"
+                                      invalid={
+                                        formik.errors.observable_names[index] &&
+                                        formik.touched.observable_names[index]
+                                      }
+                                      {...observableType2PropsMap[
+                                        formik.values.classification
+                                      ]}
+                                    />
+                                    <ErrorMessage
+                                      component={FormFeedback}
+                                      name={`observable_names.${index}`}
+                                    />
+                                  </Col>
+                                  <Button
+                                    color="primary"
+                                    className="mx-auto rounded-1 text-larger col-sm-1"
+                                    onClick={() => arrayHelpers.remove(index)}
+                                  >
+                                    <BsFillTrashFill />
+                                  </Button>
+                                </Row>
+                              )
+                            )
+                          : null}
+                        <Row className="mb-2 mt-0 pt-0">
+                          <Button
+                            color="primary"
+                            size="sm"
+                            className="mx-auto rounded-1 mx-auto col-sm-auto"
+                            onClick={() => arrayHelpers.push("")}
+                          >
+                            <BsFillPlusCircleFill /> Add new value
+                          </Button>
+                        </Row>
+                      </Col>
+                    </FormGroup>
+                  )}
+                />
               ) : (
                 <FormGroup row>
                   <Label className="required" sm={3} for="file">

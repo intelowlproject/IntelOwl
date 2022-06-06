@@ -3,7 +3,7 @@
 import copy
 import json
 import logging
-from typing import Dict
+from typing import Dict, List
 
 from durin.serializers import UserSerializer
 from rest_framework import serializers as rfs
@@ -11,18 +11,19 @@ from rest_framework.exceptions import ValidationError
 
 from certego_saas.apps.organization.permissions import IsObjectOwnerOrSameOrgPermission
 
-from .analyzers_manager import controller as analyzers_controller
 from .analyzers_manager.constants import ObservableTypes
+from .analyzers_manager.dataclasses import AnalyzerConfig
 from .analyzers_manager.serializers import AnalyzerReportSerializer
-from .connectors_manager import controller as connectors_controller
+from .connectors_manager.dataclasses import ConnectorConfig
 from .connectors_manager.serializers import ConnectorReportSerializer
+from .exceptions import NotRunnableAnalyzer, NotRunnableConnector
 from .helpers import (
     calculate_md5,
     calculate_mimetype,
     calculate_observable_classification,
     gen_random_colorhex,
 )
-from .models import Job, Tag
+from .models import TLP, Job, Tag
 
 logger = logging.getLogger(__name__)
 
@@ -79,6 +80,10 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
     connectors_requested = rfs.ListField(default=list)
     md5 = rfs.HiddenField(default=None)
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.warnings = []
+
     def validate(self, attrs: dict) -> dict:
         # check and validate runtime_configuration
         runtime_conf = attrs.get("runtime_configuration", {})
@@ -88,22 +93,181 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         return attrs
 
     @staticmethod
-    def filter_analyzers_and_connectors(attrs: dict) -> dict:
+    def filter_analyzers(serialized_data: Dict, warnings: List) -> List[str]:
+        # init empty list
+        cleaned_analyzer_list = []
+        selected_analyzers = []
+
+        # get values from serializer
+        analyzers_requested = serialized_data.get("analyzers_requested", [])
+        tlp = serialized_data.get("tlp", TLP.WHITE).upper()
+
+        # read config
+        analyzer_dataclasses = AnalyzerConfig.all()
+        all_analyzer_names = list(analyzer_dataclasses.keys())
+
+        # run all analyzers ?
+        run_all = len(analyzers_requested) == 0
+        if run_all:
+            # select all
+            selected_analyzers.extend(all_analyzer_names)
+        else:
+            # select the ones requested
+            selected_analyzers.extend(analyzers_requested)
+
+        for a_name in selected_analyzers:
+            try:
+                config = analyzer_dataclasses.get(a_name, None)
+
+                if not config:
+                    if not run_all:
+                        raise NotRunnableAnalyzer(
+                            f"{a_name} won't run: not available in configuration"
+                        )
+                    # don't add warning if run_all
+                    continue
+
+                if not config.is_ready_to_use:
+                    raise NotRunnableAnalyzer(
+                        f"{a_name} won't run: is disabled or unconfigured"
+                    )
+
+                if serialized_data["is_sample"]:
+                    if not config.is_type_file:
+                        raise NotRunnableAnalyzer(
+                            f"{a_name} won't be run because does not support files."
+                        )
+                    if not config.is_filetype_supported(
+                        serialized_data["file_mimetype"]
+                    ):
+                        raise NotRunnableAnalyzer(
+                            f"{a_name} won't be run because mimetype "
+                            f"{serialized_data['file_mimetype']} is not supported."
+                        )
+                else:
+                    if not config.is_type_observable:
+                        raise NotRunnableAnalyzer(
+                            f"{a_name} won't be run because "
+                            f"it does not support observable."
+                        )
+
+                    if not config.is_observable_type_supported(
+                        serialized_data["observable_classification"]
+                    ):
+                        raise NotRunnableAnalyzer(
+                            f"{a_name} won't be run because "
+                            f"it does not support observable type "
+                            f"{serialized_data['observable_classification']}."
+                        )
+
+                if tlp != TLP.WHITE and config.leaks_info:
+                    raise NotRunnableAnalyzer(
+                        f"{a_name} won't be run because it leaks info externally."
+                    )
+                if tlp == TLP.RED and config.external_service:
+                    raise NotRunnableAnalyzer(
+                        f"{a_name} won't be run because you"
+                        f" filtered external analyzers."
+                    )
+            except NotRunnableAnalyzer as e:
+                if run_all:
+                    # in this case, they are not warnings but
+                    # expected and wanted behavior
+                    logger.debug(e)
+                else:
+                    logger.warning(e)
+                    warnings.append(str(e))
+            else:
+                cleaned_analyzer_list.append(a_name)
+
+        return cleaned_analyzer_list
+
+    @staticmethod
+    def filter_connectors(serialized_data: Dict, warnings: List[str]) -> List[str]:
+        # init empty list
+        cleaned_connectors_list = []
+        selected_connectors = []
+
+        # get values from serializer
+        connectors_requested = serialized_data.get("connectors_requested", [])
+        tlp = serialized_data.get("tlp", TLP.WHITE).upper()
+
+        # read config
+        connector_dataclasses = ConnectorConfig.all()
+        all_connector_names = list(connector_dataclasses.keys())
+
+        # run all connectors ?
+        run_all = len(connectors_requested) == 0
+        if run_all:
+            # select all
+            selected_connectors.extend(all_connector_names)
+        else:
+            # select the ones requested
+            selected_connectors.extend(connectors_requested)
+
+        for c_name in selected_connectors:
+            try:
+                cc = connector_dataclasses.get(c_name, None)
+
+                if not cc:
+                    if not run_all:
+                        raise NotRunnableConnector(
+                            f"{c_name} won't run: not available in configuration"
+                        )
+                    # don't add warning if run_all
+                    continue
+
+                if not cc.is_ready_to_use:  # check configured/disabled
+                    raise NotRunnableConnector(
+                        f"{c_name} won't run: is disabled or unconfigured"
+                    )
+
+                if TLP.get_priority(tlp) > TLP.get_priority(
+                    cc.maximum_tlp
+                ):  # check if job's tlp allows running
+                    # e.g. if connector_tlp is GREEN(1),
+                    # run for job_tlp WHITE(0) & GREEN(1) only
+                    raise NotRunnableConnector(
+                        f"{c_name} won't run: "
+                        f"job.tlp ('{tlp}') > maximum_tlp ('{cc.maximum_tlp}')"
+                    )
+            except NotRunnableConnector as e:
+                if run_all:
+                    # in this case, they are not warnings but
+                    # expected and wanted behavior
+                    logger.debug(e)
+                else:
+                    logger.warning(e)
+                    warnings.append(str(e))
+            else:
+                cleaned_connectors_list.append(c_name)
+
+        return cleaned_connectors_list
+
+    def filter_analyzers_and_connectors(self, attrs: dict) -> dict:
         warnings = []
-        attrs["analyzers_to_execute"] = analyzers_controller.filter_analyzers(
+        attrs["analyzers_to_execute"] = self.filter_analyzers(
             attrs,
             warnings,
         )
 
-        attrs["connectors_to_execute"] = connectors_controller.filter_connectors(
+        if not attrs["analyzers_to_execute"]:
+            raise ValidationError(
+                {"detail": "No Analyzers can be run after filtering."}
+            )
+
+        attrs["connectors_to_execute"] = self.filter_connectors(
             attrs,
             warnings,
         )
+
+        attrs["warnings"] = warnings
         return attrs
 
     def create(self, validated_data: dict) -> Job:
         # create ``Tag`` objects from tags_labels
         tags_labels = validated_data.pop("tags_labels", None)
+        validated_data.pop("warnings")
         tags = [
             Tag.objects.get_or_create(
                 label=label, defaults={"color": gen_random_colorhex()}
@@ -205,21 +369,26 @@ class MultipleObservableAnalysisSerializer(rfs.ListSerializer):
     Used for ``create()``.
     """
 
+    def __init__(self, *args, **kwargs):
+        super(MultipleObservableAnalysisSerializer, self).__init__(*args, **kwargs)
+        self.warnings = []
+
     def update(self, instance, validated_data):
         raise NotImplementedError("This serializer does not support update().")
 
-    child = None
-    many = True
     observables = rfs.ListField(required=True)
 
     def to_internal_value(self, data):
         ret = []
         errors = []
 
-        common_data = dict(data)
-        common_data.pop("observables", None)
         for classification, name in data.get("observables"):
-            item = copy.deepcopy(common_data)
+
+            # `deepcopy` here ensures that this code doesn't
+            # break even if new fields are added in future
+            item = copy.deepcopy(data)
+
+            item.pop("observables", None)
             item["observable_name"] = name
             item["observable_classification"] = classification
             try:
@@ -288,6 +457,6 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
 class AnalysisResponseSerializer(rfs.Serializer):
     job_id = rfs.IntegerField()
     status = rfs.CharField()
-    warnings = rfs.ListField()
+    warnings = rfs.ListField(required=False)
     analyzers_running = rfs.ListField()
     connectors_running = rfs.ListField()

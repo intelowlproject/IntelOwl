@@ -111,7 +111,6 @@ def _multi_observable_analysis_request(
     """
     Prepare and send multiple observables for analysis
     """
-    warnings = []
     logger.info(
         f"_analysis_request {serializer_class} received request from {request.user}."
         f"Data:{dict(request.data)}."
@@ -138,8 +137,7 @@ def _multi_observable_analysis_request(
     if not settings.STAGE_CI:
         # fire celery task
         for index, job in enumerate(jobs):
-
-            runtime_configuration = runtime_configurations[job_index]
+            runtime_configuration = runtime_configurations[index]
             celery_app.send_task(
                 "start_analyzers",
                 kwargs=dict(
@@ -154,11 +152,11 @@ def _multi_observable_analysis_request(
             {
                 "status": "accepted",
                 "job_id": job.pk,
-                "warnings": warnings,
+                "warnings": serialized_data[index]["warnings"],
                 "analyzers_running": job.analyzers_to_execute,
                 "connectors_running": job.connectors_to_execute,
             }
-            for job in jobs
+            for index, job in enumerate(jobs)
         ],
         many=True,
     )

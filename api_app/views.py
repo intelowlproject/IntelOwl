@@ -206,54 +206,63 @@ def ask_analysis_availability(request):
     )
 
     serializer = JobAvailabilitySerializer(
-        data=data_received, context={"request": request}
+        data=data_received, context={"request": request}, many=True
     )
     serializer.is_valid(raise_exception=True)
     serialized_data = serializer.validated_data
 
-    analyzers, running_only, md5, minutes_ago = (
-        serialized_data["analyzers"],
-        serialized_data["running_only"],
-        serialized_data["md5"],
-        serialized_data["minutes_ago"],
-    )
+    response = []
 
-    if running_only:
-        statuses_to_check = [Status.RUNNING]
-    else:
-        statuses_to_check = [
-            Status.RUNNING,
-            Status.REPORTED_WITHOUT_FAILS,
-        ]
-
-    if len(analyzers) == 0:
-        query = (
-            Q(md5=md5) & Q(status__in=statuses_to_check) & Q(analyzers_requested__len=0)
-        )
-    else:
-        query = (
-            Q(md5=md5)
-            & Q(status__in=statuses_to_check)
-            & Q(analyzers_to_execute__contains=analyzers)
+    for element in serialized_data:
+        analyzers, running_only, md5, minutes_ago = (
+            element["analyzers"],
+            element["running_only"],
+            element["md5"],
+            element["minutes_ago"],
         )
 
-    if minutes_ago:
-        minutes_ago_time = get_now() - timedelta(minutes=minutes_ago)
-        query = query & Q(received_request_time__gte=minutes_ago_time)
+        if running_only:
+            statuses_to_check = [Status.RUNNING]
+        else:
+            statuses_to_check = [
+                Status.RUNNING,
+                Status.REPORTED_WITHOUT_FAILS,
+            ]
 
-    try:
-        last_job_for_md5 = Job.objects.filter(query).latest("received_request_time")
-        response_dict = {
-            "status": last_job_for_md5.status,
-            "job_id": str(last_job_for_md5.id),
-            "analyzers_to_execute": last_job_for_md5.analyzers_to_execute,
-        }
-    except Job.DoesNotExist:
-        response_dict = {"status": "not_available"}
+        if len(analyzers) == 0:
+            query = (
+                Q(md5=md5)
+                & Q(status__in=statuses_to_check)
+                & Q(analyzers_requested__len=0)
+            )
+        else:
+            query = (
+                Q(md5=md5)
+                & Q(status__in=statuses_to_check)
+                & Q(analyzers_to_execute__contains=analyzers)
+            )
 
-    logger.debug(response_dict)
+        if minutes_ago:
+            minutes_ago_time = get_now() - timedelta(minutes=minutes_ago)
+            query = query & Q(received_request_time__gte=minutes_ago_time)
 
-    return Response(response_dict, status=status.HTTP_200_OK)
+        try:
+            last_job_for_md5 = Job.objects.filter(query).latest("received_request_time")
+            response_dict = {
+                "status": last_job_for_md5.status,
+                "job_id": str(last_job_for_md5.id),
+                "analyzers_to_execute": last_job_for_md5.analyzers_to_execute,
+            }
+        except Job.DoesNotExist:
+            response_dict = {"status": "not_available"}
+        response.append(response_dict)
+
+    payload = {
+        "count": len(response),
+        "results": response,
+    }
+    logger.debug(payload)
+    return Response(payload, status=status.HTTP_200_OK)
 
 
 @add_docs(

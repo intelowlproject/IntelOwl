@@ -50,6 +50,14 @@ class ApiViewTests(TestCase):
             ],
             "observable_classification": "ip",
         }
+        self.mixed_observable_data = {
+            "observables": [["ip", "8.8.8.8"], ["domain", "example.com"]],
+            "analyzers_requested": ["Classic_DNS", "Robtex_IP_Query"],
+            "connectors_requested": [],
+            "tlp": "WHITE",
+            "runtime_configuration": {},
+            "tags_labels": [],
+        }
 
     @staticmethod
     def __get_test_file(fname: str) -> Tuple[SimpleUploadedFile, str]:
@@ -209,6 +217,34 @@ class ApiViewTests(TestCase):
             observable_classification, job.observable_classification, msg=msg
         )
         self.assertEqual(self.observable_md5, job.md5, msg=msg)
+
+    def test_analyze_multiple_observables(self):
+        data = self.mixed_observable_data.copy()
+
+        response = self.client.post(
+            "/api/analyze_multiple_observables", data, format="json"
+        )
+        contents = response.json()
+        msg = (response.status_code, contents)
+        self.assertEqual(response.status_code, 200, msg=msg)
+
+        content = contents["results"][0]
+
+        job_id = int(content["job_id"])
+        job = models.Job.objects.get(pk=job_id)
+        self.assertEqual(data["observables"][0][1], job.observable_name, msg=msg)
+        self.assertListEqual(
+            data["analyzers_requested"], job.analyzers_requested, msg=msg
+        )
+
+        content = contents["results"][1]
+
+        job_id = int(content["job_id"])
+        job = models.Job.objects.get(pk=job_id)
+        self.assertEqual(data["observables"][1][1], job.observable_name, msg=msg)
+        self.assertListEqual(
+            [data["analyzers_requested"][0]], job.analyzers_requested, msg=msg
+        )
 
     def test_download_sample_200(self):
         self.assertEqual(models.Job.objects.count(), 0)

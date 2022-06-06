@@ -137,7 +137,7 @@ def _multi_observable_analysis_request(
     # Check if task is test or not
     if not settings.STAGE_CI:
         # fire celery task
-        for job_index in range(len(jobs)):
+        for index, job in enumerate(jobs):
             job = jobs[job_index]
             runtime_configuration = runtime_configurations[job_index]
             celery_app.send_task(

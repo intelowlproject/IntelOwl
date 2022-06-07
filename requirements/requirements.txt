@@ -4,7 +4,7 @@ django-celery-results==2.2.0
 checkdmarc==4.4.1
 darksearch==2.1.2
 dataclasses==0.6
-Django==3.2.13
+Django==4.0.5
 django-auth-ldap==4.1.0
 django-rest-durin==0.3.0
 django-cache-memoize==0.1.9

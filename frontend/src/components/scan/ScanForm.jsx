@@ -215,7 +215,9 @@ export default function ScanForm() {
         if (!values.file) {
           errors.file = "required";
         }
-      } else if (values.observable_names) {
+      } else if (values.observable_names && values.observable_names.length) {
+        // We iterate over observable_names and test each one against the regex pattern,
+        // storing the results (or null otherwise) in ObservableNamesErrors
         const ObservableNamesErrors = values.observable_names.map(
           (ObservableName) => {
             const pattern = RegExp(
@@ -228,10 +230,11 @@ export default function ScanForm() {
           }
         );
 
+        // We check if any of the ObservableNamesErrors is not null
         if (ObservableNamesErrors.some((e) => e))
           errors.observable_names = ObservableNamesErrors;
       } else {
-        errors.no_observables = "required";
+        errors.no_observables = "Atleast one observable is required";
       }
       if (!TLP_CHOICES.includes(values.tlp)) {
         errors.tlp = "Invalid choice";
@@ -317,6 +320,9 @@ export default function ScanForm() {
                         Observable Value(s)
                       </Label>
                       <Col sm={9}>
+                        <div className="invalid-feedback d-block">
+                          {formik.errors.no_observables}
+                        </div>
                         {formik.values.observable_names &&
                         formik.values.observable_names.length > 0
                           ? formik.values.observable_names.map(

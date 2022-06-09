@@ -106,7 +106,7 @@ const observableType2PropsMap = {
 };
 const initialValues = {
   classification: "ip",
-  observable_names: [],
+  observable_names: [""],
   file: "",
   analyzers: [],
   connectors: [],
@@ -222,18 +222,24 @@ export default function ScanForm() {
               observableType2PropsMap[values.classification].pattern
             );
             if (!pattern.test(ObservableName)) {
-              return `invalid ${values.classification}`;
+              return [ObservableName, `invalid ${values.classification}`];
             }
-            return null;
+            return [null, null];
           }
         );
-        // If at least an observable is not valid, block the request completely
-        if (ObservableNamesErrors.some((e) => e))
-          errors.observable_names = ObservableNamesErrors.filter(
-            (e) => e !== null
-          ).join();
+        const observableErrors = {};
+        for (let i = 0; i < ObservableNamesErrors.length; i += 1) {
+          // not null
+          const [name, message] = ObservableNamesErrors[i];
+          if (message) {
+            observableErrors[name] = message;
+          }
+        }
+        if (Object.keys(observableErrors).length !== 0) {
+          errors.observable_names = observableErrors;
+        }
       } else {
-        errors.observable_names = "required";
+        errors.no_observables = "required";
       }
       if (!TLP_CHOICES.includes(values.tlp)) {
         errors.tlp = "Invalid choice";
@@ -336,8 +342,10 @@ export default function ScanForm() {
                                       name={`observable_names.${index}`}
                                       className="input-dark"
                                       invalid={
-                                        formik.errors.observable_names[index] &&
-                                        formik.touched.observable_names[index]
+                                        formik.errors.observable_names &&
+                                        Boolean(
+                                          formik.errors.observable_names[name]
+                                        )
                                       }
                                       {...observableType2PropsMap[
                                         formik.values.classification

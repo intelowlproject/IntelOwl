@@ -222,22 +222,14 @@ export default function ScanForm() {
               observableType2PropsMap[values.classification].pattern
             );
             if (!pattern.test(ObservableName)) {
-              return [ObservableName, `invalid ${values.classification}`];
+              return `invalid ${values.classification}`;
             }
-            return [null, null];
+            return null;
           }
         );
-        const observableErrors = {};
-        for (let i = 0; i < ObservableNamesErrors.length; i += 1) {
-          // not null
-          const [name, message] = ObservableNamesErrors[i];
-          if (message) {
-            observableErrors[name] = message;
-          }
-        }
-        if (Object.keys(observableErrors).length !== 0) {
-          errors.observable_names = observableErrors;
-        }
+
+        if (ObservableNamesErrors.some((e) => e))
+          errors.observable_names = ObservableNamesErrors;
       } else {
         errors.no_observables = "required";
       }
@@ -248,7 +240,6 @@ export default function ScanForm() {
     },
     [pluginsError]
   );
-
   const onSubmit = React.useCallback(
     async (values, formik) => {
       const formValues = {
@@ -344,8 +335,10 @@ export default function ScanForm() {
                                       invalid={
                                         formik.errors.observable_names &&
                                         Boolean(
-                                          formik.errors.observable_names[name]
-                                        )
+                                          formik.errors.observable_names[index]
+                                        ) &&
+                                        formik.touched.observable_names &&
+                                        formik.touched.observable_names[index]
                                       }
                                       {...observableType2PropsMap[
                                         formik.values.classification

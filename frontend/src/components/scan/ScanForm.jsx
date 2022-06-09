@@ -106,7 +106,7 @@ const observableType2PropsMap = {
 };
 const initialValues = {
   classification: "ip",
-  observable_names: [""],
+  observable_names: [],
   file: "",
   analyzers: [],
   connectors: [],
@@ -227,9 +227,11 @@ export default function ScanForm() {
             return null;
           }
         );
-
+        // If at least an observable is not valid, block the request completely
         if (ObservableNamesErrors.some((e) => e))
-          errors.observable_names = ObservableNamesErrors;
+          errors.observable_names = ObservableNamesErrors.filter(
+            (e) => e !== null
+          ).join();
       } else {
         errors.observable_names = "required";
       }
@@ -240,6 +242,7 @@ export default function ScanForm() {
     },
     [pluginsError]
   );
+
   const onSubmit = React.useCallback(
     async (values, formik) => {
       const formValues = {
@@ -249,8 +252,12 @@ export default function ScanForm() {
         connectors: values.connectors.map((x) => x.value),
       };
       try {
-        await createJob(formValues);
-        setTimeout(() => navigate(`/jobs/`), 1000);
+        const jobIds = await createJob(formValues);
+        if (jobIds.length > 1) {
+          setTimeout(() => navigate(`/jobs/`), 1000);
+        } else {
+          setTimeout(() => navigate(`/jobs/${jobIds[0]}`), 1000);
+        }
       } catch (e) {
         // handled inside createJob
       } finally {

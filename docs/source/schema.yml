@@ -55,7 +55,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/EnvelopedAnalysisResponseList'
+                $ref: '#/components/schemas/MultiAnalysisResponseList'
           description: ''
   /api/analyze_observable:
     post:
@@ -139,6 +139,41 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AskAnalysisAvailabilitySuccessResponse'
+          description: ''
+  /api/ask_multi_analysis_availability:
+    post:
+      operationId: ask_multi_analysis_availability_create
+      description: |2-
+
+            This is useful to avoid repeating the same analysis multiple times.
+            By default this API checks if there are existing analysis related to the md5 in
+            status "running" or "reported_without_fails"
+            Also, you need to specify the analyzers needed because, otherwise, it is
+            highly probable that you won't get all the results that you expect.
+            NOTE: This API is similar to ask_analysis_availability, but it allows multiple
+            md5s to be checked at the same time.
+      tags:
+      - ask_multi_analysis_availability
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MultiJobAvailabilityList'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/MultiJobAvailabilityList'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/MultiJobAvailabilityList'
+        required: true
+      security:
+      - durinAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AskAnalysisAvailabilitySuccessResponseList'
           description: ''
   /api/auth/apiaccess:
     get:
@@ -1514,6 +1549,18 @@ components:
       required:
       - job_id
       - status
+    AskAnalysisAvailabilitySuccessResponseList:
+      type: object
+      properties:
+        count:
+          type: integer
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/AskAnalysisAvailabilitySuccessResponse'
+      required:
+      - count
+      - results
     ConnectorConfig:
       type: object
       description: Serializer for `connector_config.json`.
@@ -1603,18 +1650,6 @@ components:
       - name
       - process_time
       - status
-    EnvelopedAnalysisResponseList:
-      type: object
-      properties:
-        count:
-          type: boolean
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/AnalysisResponse'
-      required:
-      - count
-      - results
     FileAnalysis:
       type: object
       description: |-
@@ -1966,6 +2001,30 @@ components:
       - AMBER
       - RED
       type: string
+    MultiAnalysisResponseList:
+      type: object
+      properties:
+        count:
+          type: boolean
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/AnalysisResponse'
+      required:
+      - count
+      - results
+    MultiJobAvailabilityList:
+      type: object
+      properties:
+        count:
+          type: boolean
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/JobAvailability'
+      required:
+      - count
+      - results
     Notification:
       type: object
       properties:

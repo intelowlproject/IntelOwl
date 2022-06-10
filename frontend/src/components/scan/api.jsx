@@ -8,7 +8,7 @@ import { ContentSection, readFileAsync, addToast } from "@certego/certego-ui";
 import {
   ANALYZE_MULTIPLE_OBSERVABLE_URI,
   ANALYZE_FILE_URI,
-  ASK_ANALYSIS_AVAILABILITY_URI,
+  ASK_MULTI_ANALYSIS_AVAILABILITY_URI,
 } from "../../constants/api";
 import useRecentScansStore from "../../stores/useRecentScansStore";
 
@@ -116,7 +116,10 @@ async function _askAnalysisAvailability(formValues) {
   }
 
   try {
-    const response = await axios.post(ASK_ANALYSIS_AVAILABILITY_URI, payload);
+    const response = await axios.post(
+      ASK_MULTI_ANALYSIS_AVAILABILITY_URI,
+      payload
+    );
     const answer = response.data.results;
     if (answer.some((x) => x.status === "not_available")) {
       return 0;

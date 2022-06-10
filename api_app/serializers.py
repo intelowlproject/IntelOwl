@@ -449,7 +449,7 @@ class AnalysisResponseSerializer(rfs.Serializer):
 
 
 def multi_result_enveloper(serializer_class, many):
-    component_name = "Enveloped{}{}".format(
+    component_name = "Multi{}{}".format(
         serializer_class.__name__.replace("Serializer", ""),
         "List" if many else "",
     )

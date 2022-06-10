@@ -182,39 +182,14 @@ def _multi_observable_analysis_request(
     # )
 
 
-""" REST API endpoints """
-
-
-@add_docs(
-    description="""
-    This is useful to avoid repeating the same analysis multiple times.
-    By default this API checks if there are existing analysis related to the md5 in
-    status "running" or "reported_without_fails"
-    Also, you need to specify the analyzers needed because, otherwise, it is
-    highly probable that you won't get all the results that you expect""",
-    request=JobAvailabilitySerializer,
-    responses={
-        200: inline_serializer(
-            name="AskAnalysisAvailabilitySuccessResponse",
-            fields={
-                "status": rfs.StringRelatedField(),
-                "job_id": rfs.StringRelatedField(),
-                "analyzers_to_execute": OpenApiTypes.OBJECT,
-            },
-        ),
-    },
-)
-@api_view(["POST"])
-def ask_analysis_availability(request):
-    data_received = request.data
+def _multi_analysis_availability(user, data):
+    data_received = data
     logger.info(
-        f"ask_analysis_availability received request from {str(request.user)}."
+        f"ask_analysis_availability received request from {str(user)}."
         f"Data: {dict(data_received)}"
     )
 
-    serializer = JobAvailabilitySerializer(
-        data=data_received, context={"request": request}, many=True
-    )
+    serializer = JobAvailabilitySerializer(data=data_received, many=True)
     serializer.is_valid(raise_exception=True)
     serialized_data = serializer.validated_data
 
@@ -269,7 +244,75 @@ def ask_analysis_availability(request):
         "results": response,
     }
     logger.debug(payload)
-    return Response(payload, status=status.HTTP_200_OK)
+    return payload
+
+
+""" REST API endpoints """
+
+
+@add_docs(
+    description="""
+    This is useful to avoid repeating the same analysis multiple times.
+    By default this API checks if there are existing analysis related to the md5 in
+    status "running" or "reported_without_fails"
+    Also, you need to specify the analyzers needed because, otherwise, it is
+    highly probable that you won't get all the results that you expect""",
+    request=JobAvailabilitySerializer,
+    responses={
+        200: inline_serializer(
+            name="AskAnalysisAvailabilitySuccessResponse",
+            fields={
+                "status": rfs.StringRelatedField(),
+                "job_id": rfs.StringRelatedField(),
+                "analyzers_to_execute": OpenApiTypes.OBJECT,
+            },
+        ),
+    },
+)
+@api_view(["POST"])
+def ask_analysis_availability(request):
+    response = _multi_analysis_availability(request.user, [request.data])["results"][0]
+    return Response(
+        response,
+        status=status.HTTP_200_OK,
+    )
+
+
+@add_docs(
+    description="""
+    This is useful to avoid repeating the same analysis multiple times.
+    By default this API checks if there are existing analysis related to the md5 in
+    status "running" or "reported_without_fails"
+    Also, you need to specify the analyzers needed because, otherwise, it is
+    highly probable that you won't get all the results that you expect.
+    NOTE: This API is similar to ask_analysis_availability, but it allows multiple
+    md5s to be checked at the same time.""",
+    request=multi_result_enveloper(JobAvailabilitySerializer, many=True),
+    responses={
+        200: inline_serializer(
+            name="AskAnalysisAvailabilitySuccessResponseList",
+            fields={
+                "count": rfs.IntegerField(),
+                "results": inline_serializer(
+                    name="AskAnalysisAvailabilitySuccessResponse",
+                    fields={
+                        "status": rfs.StringRelatedField(),
+                        "job_id": rfs.StringRelatedField(),
+                        "analyzers_to_execute": OpenApiTypes.OBJECT,
+                    },
+                    many=True,
+                ),
+            },
+        ),
+    },
+)
+@api_view(["POST"])
+def ask_multi_analysis_availability(request):
+    response = _multi_analysis_availability(request.user, request.data)
+    return Response(
+        response,
+        status=status.HTTP_200_OK,
+    )
 
 
 @add_docs(

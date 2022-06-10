@@ -92,6 +92,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         if runtime_conf and isinstance(runtime_conf, list):
             runtime_conf = json.loads(runtime_conf[0])
         attrs["runtime_configuration"] = runtime_conf
+        self.filter_analyzers_and_connectors(attrs)
         return attrs
 
     def filter_analyzers(self, serialized_data: Dict) -> List[str]:
@@ -133,6 +134,15 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
                         f"{a_name} won't run: is disabled or unconfigured"
                     )
 
+                if tlp != TLP.WHITE and config.leaks_info:
+                    raise NotRunnableAnalyzer(
+                        f"{a_name} won't be run because it leaks info externally."
+                    )
+                if tlp == TLP.RED and config.external_service:
+                    raise NotRunnableAnalyzer(
+                        f"{a_name} won't be run because you"
+                        f" filtered external analyzers."
+                    )
                 if serialized_data["is_sample"]:
                     if not config.is_type_file:
                         raise NotRunnableAnalyzer(
@@ -160,16 +170,6 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
                             f"it does not support observable type "
                             f"{serialized_data['observable_classification']}."
                         )
-
-                if tlp != TLP.WHITE and config.leaks_info:
-                    raise NotRunnableAnalyzer(
-                        f"{a_name} won't be run because it leaks info externally."
-                    )
-                if tlp == TLP.RED and config.external_service:
-                    raise NotRunnableAnalyzer(
-                        f"{a_name} won't be run because you"
-                        f" filtered external analyzers."
-                    )
             except NotRunnableAnalyzer as e:
                 if run_all:
                     # in this case, they are not warnings but
@@ -252,6 +252,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         attrs["analyzers_to_execute"] = self.filter_analyzers(attrs)
         attrs["connectors_to_execute"] = self.filter_connectors(attrs)
         attrs["warnings"] = self.filter_warnings
+        self.filter_warnings = []
         return attrs
 
     def create(self, validated_data: dict) -> Job:
@@ -339,7 +340,6 @@ class FileAnalysisSerializer(_AbstractJobCreateSerializer):
         )
 
     def validate(self, attrs: dict) -> dict:
-        attrs = super(FileAnalysisSerializer, self).validate(attrs)
         logger.debug(f"before attrs: {attrs}")
         # calculate ``file_mimetype``
         attrs["file_mimetype"] = calculate_mimetype(attrs["file"], attrs["file_name"])
@@ -348,9 +348,58 @@ class FileAnalysisSerializer(_AbstractJobCreateSerializer):
         file_obj.seek(0)
         file_buffer = file_obj.read()
         attrs["md5"] = calculate_md5(file_buffer)
-        self.filter_analyzers_and_connectors(attrs)
+        attrs = super(FileAnalysisSerializer, self).validate(attrs)
         logger.debug(f"after attrs: {attrs}")
         return attrs
+
+    def filter_analyzers(self, serialized_data: Dict) -> List[str]:
+        cleaned_analyzer_list = []
+
+        # get values from serializer
+        partially_filtered_analyzers = super(
+            FileAnalysisSerializer, self
+        ).filter_analyzers(serialized_data)
+
+        # read config
+        analyzer_dataclasses = AnalyzerConfig.all()
+
+        run_all = len(serialized_data.get("analyzers_requested", [])) == 0
+
+        for a_name in partially_filtered_analyzers:
+            try:
+                config = analyzer_dataclasses.get(a_name, None)
+                if serialized_data["is_sample"]:
+                    if not config.is_type_file:
+                        raise NotRunnableAnalyzer(
+                            f"{a_name} won't be run because does not support files."
+                        )
+                    if not config.is_filetype_supported(
+                        serialized_data["file_mimetype"]
+                    ):
+                        raise NotRunnableAnalyzer(
+                            f"{a_name} won't be run because mimetype "
+                            f"{serialized_data['file_mimetype']} is not supported."
+                        )
+                else:
+                    raise ValidationError(
+                        f"{a_name} won't be run because is_sample is False."
+                    )
+            except NotRunnableAnalyzer as e:
+                if run_all:
+                    # in this case, they are not warnings but
+                    # expected and wanted behavior
+                    logger.debug(e)
+                else:
+                    logger.warning(e)
+                    self.filter_warnings.append(str(e))
+            else:
+                cleaned_analyzer_list.append(a_name)
+
+        if len(cleaned_analyzer_list) == 0:
+            raise ValidationError(
+                {"detail": "No Analyzers can be run after filtering."}
+            )
+        return cleaned_analyzer_list
 
 
 class MultipleObservableAnalysisSerializer(rfs.ListSerializer):
@@ -420,7 +469,6 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
         list_serializer_class = MultipleObservableAnalysisSerializer
 
     def validate(self, attrs: dict) -> dict:
-        attrs = super(ObservableAnalysisSerializer, self).validate(attrs)
         logger.debug(f"before attrs: {attrs}")
         # calculate ``observable_classification``
         if not attrs.get("observable_classification", None):
@@ -436,9 +484,61 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
             attrs["observable_name"] = attrs["observable_name"].lower()
         # calculate ``md5``
         attrs["md5"] = calculate_md5(attrs["observable_name"].encode("utf-8"))
-        self.filter_analyzers_and_connectors(attrs)
+        attrs = super(ObservableAnalysisSerializer, self).validate(attrs)
         logger.debug(f"after attrs: {attrs}")
         return attrs
+
+    def filter_analyzers(self, serialized_data: Dict) -> List[str]:
+        cleaned_analyzer_list = []
+
+        # get values from serializer
+        partially_filtered_analyzers = super(
+            ObservableAnalysisSerializer, self
+        ).filter_analyzers(serialized_data)
+
+        # read config
+        analyzer_dataclasses = AnalyzerConfig.all()
+
+        run_all = len(serialized_data.get("analyzers_requested", [])) == 0
+
+        for a_name in partially_filtered_analyzers:
+            try:
+                config = analyzer_dataclasses.get(a_name, None)
+                if serialized_data["is_sample"]:
+                    raise ValidationError(
+                        f"{a_name} won't be run because is_sample is True."
+                    )
+                else:
+                    if not config.is_type_observable:
+                        raise NotRunnableAnalyzer(
+                            f"{a_name} won't be run because "
+                            f"it does not support observable."
+                        )
+
+                    if not config.is_observable_type_supported(
+                        serialized_data["observable_classification"]
+                    ):
+                        raise NotRunnableAnalyzer(
+                            f"{a_name} won't be run because "
+                            f"it does not support observable type "
+                            f"{serialized_data['observable_classification']}."
+                        )
+            except NotRunnableAnalyzer as e:
+                if run_all:
+                    # in this case, they are not warnings but
+                    # expected and wanted behavior
+                    logger.debug(e)
+                else:
+                    logger.warning(e)
+                    self.filter_warnings.append(str(e))
+            else:
+                cleaned_analyzer_list.append(a_name)
+
+        if len(cleaned_analyzer_list) == 0:
+            raise ValidationError(
+                {"detail": "No Analyzers can be run after filtering."}
+            )
+        return cleaned_analyzer_list
 
 
 class AnalysisResponseSerializer(rfs.Serializer):

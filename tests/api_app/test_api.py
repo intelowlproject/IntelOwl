@@ -236,6 +236,9 @@ class ApiViewTests(TestCase):
         self.assertListEqual(
             data["analyzers_requested"], job.analyzers_requested, msg=msg
         )
+        self.assertListEqual(
+            data["analyzers_requested"], job.analyzers_to_execute, msg=msg
+        )
 
         content = contents["results"][1]
 
@@ -243,7 +246,7 @@ class ApiViewTests(TestCase):
         job = models.Job.objects.get(pk=job_id)
         self.assertEqual(data["observables"][1][1], job.observable_name, msg=msg)
         self.assertListEqual(
-            [data["analyzers_requested"][0]], job.analyzers_requested, msg=msg
+            [data["analyzers_requested"][0]], job.analyzers_to_execute, msg=msg
         )
 
     def test_download_sample_200(self):

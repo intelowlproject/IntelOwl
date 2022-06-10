@@ -176,10 +176,6 @@ def _multi_observable_analysis_request(
     logger.debug(response_dict)
 
     return response_dict
-    # return Response(
-    #     response_dict,
-    #     status=status.HTTP_200_OK,
-    # )
 
 
 def _multi_analysis_availability(user, data):
@@ -336,7 +332,7 @@ def analyze_observable(request):
     data = dict(request.data)
     try:
         data["observables"] = [
-            [data.pop("observable_classification"), data.pop("observable_name")]
+            [data.pop("observable_classification", ""), data.pop("observable_name")]
         ]
     except KeyError:
         raise ValidationError(

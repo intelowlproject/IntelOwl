@@ -376,7 +376,8 @@ class MultipleObservableAnalysisSerializer(rfs.ListSerializer):
 
             item.pop("observables", None)
             item["observable_name"] = name
-            item["observable_classification"] = classification
+            if classification:
+                item["observable_classification"] = classification
             try:
                 validated = self.child.run_validation(item)
             except ValidationError as exc:

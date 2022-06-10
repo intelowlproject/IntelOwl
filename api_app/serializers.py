@@ -82,7 +82,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.warnings = []
+        self.filter_warnings = []
 
     def validate(self, attrs: dict) -> dict:
         # check and validate runtime_configuration
@@ -92,8 +92,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         attrs["runtime_configuration"] = runtime_conf
         return attrs
 
-    @staticmethod
-    def filter_analyzers(serialized_data: Dict, warnings: List) -> List[str]:
+    def filter_analyzers(self, serialized_data: Dict) -> List[str]:
         # init empty list
         cleaned_analyzer_list = []
         selected_analyzers = []
@@ -176,14 +175,17 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
                     logger.debug(e)
                 else:
                     logger.warning(e)
-                    warnings.append(str(e))
+                    self.filter_warnings.append(str(e))
             else:
                 cleaned_analyzer_list.append(a_name)
 
+        if len(cleaned_analyzer_list) == 0:
+            raise ValidationError(
+                {"detail": "No Analyzers can be run after filtering."}
+            )
         return cleaned_analyzer_list
 
-    @staticmethod
-    def filter_connectors(serialized_data: Dict, warnings: List[str]) -> List[str]:
+    def filter_connectors(self, serialized_data: Dict) -> List[str]:
         # init empty list
         cleaned_connectors_list = []
         selected_connectors = []
@@ -238,30 +240,16 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
                     logger.debug(e)
                 else:
                     logger.warning(e)
-                    warnings.append(str(e))
+                    self.filter_warnings.append(str(e))
             else:
                 cleaned_connectors_list.append(c_name)
 
         return cleaned_connectors_list
 
     def filter_analyzers_and_connectors(self, attrs: dict) -> dict:
-        warnings = []
-        attrs["analyzers_to_execute"] = self.filter_analyzers(
-            attrs,
-            warnings,
-        )
-
-        if not attrs["analyzers_to_execute"]:
-            raise ValidationError(
-                {"detail": "No Analyzers can be run after filtering."}
-            )
-
-        attrs["connectors_to_execute"] = self.filter_connectors(
-            attrs,
-            warnings,
-        )
-
-        attrs["warnings"] = warnings
+        attrs["analyzers_to_execute"] = self.filter_analyzers(attrs)
+        attrs["connectors_to_execute"] = self.filter_connectors(attrs)
+        attrs["warnings"] = self.filter_warnings
         return attrs
 
     def create(self, validated_data: dict) -> Job:
@@ -368,10 +356,6 @@ class MultipleObservableAnalysisSerializer(rfs.ListSerializer):
     ``Job`` model's serializer for Multiple Observable Analysis.
     Used for ``create()``.
     """
-
-    def __init__(self, *args, **kwargs):
-        super(MultipleObservableAnalysisSerializer, self).__init__(*args, **kwargs)
-        self.warnings = []
 
     def update(self, instance, validated_data):
         raise NotImplementedError("This serializer does not support update().")

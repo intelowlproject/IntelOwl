@@ -3,7 +3,7 @@
 
 import logging
 from datetime import timedelta
-from typing import Union
+from typing import Type
 
 from django.conf import settings
 from django.db.models import Count, Q
@@ -37,21 +37,23 @@ from .serializers import (
     JobSerializer,
     ObservableAnalysisSerializer,
     TagSerializer,
+    multi_result_enveloper,
 )
 
 logger = logging.getLogger(__name__)
 
 
-def _analysis_request(
+def _file_analysis_request(
     request,
-    serializer_class: Union[FileAnalysisSerializer, ObservableAnalysisSerializer],
+    serializer_class: Type[FileAnalysisSerializer],
 ):
     """
-    Prepare and send file/observable for analysis
+    Prepare and send file/observable for analysis.
     """
     warnings = []
     logger.info(
-        f"_analysis_request {serializer_class} received request from {request.user}."
+        f"_file_analysis_request {serializer_class} received "
+        f"request from {request.user}."
         f"Data:{dict(request.data)}."
     )
 
@@ -108,30 +110,31 @@ def _analysis_request(
 
 
 def _multi_observable_analysis_request(
-    request,
-    serializer_class: ObservableAnalysisSerializer,
+    user,
+    data,
+    serializer_class: Type[ObservableAnalysisSerializer],
 ):
     """
     Prepare and send multiple observables for analysis
     """
     logger.info(
-        f"_analysis_request {serializer_class} received request from {request.user}."
-        f"Data:{dict(request.data)}."
+        f"_multi_observable_analysis_request {serializer_class} "
+        f"received request from {user}."
+        f"Data:{dict(data)}."
     )
 
     # serialize request data and validate
-    serializer = serializer_class(data=request.data, many=True)
+    serializer = serializer_class(data=data, many=True)
     serializer.is_valid(raise_exception=True)
 
     serialized_data = serializer.validated_data
-    print(serialized_data)
     runtime_configurations = [
         data.pop("runtime_configuration", {}) for data in serialized_data
     ]
 
     # save the arrived data plus new params into a new job object
     jobs = serializer.save(
-        user=request.user,
+        user=user,
     )
 
     logger.info(f"New Jobs added to queue <- {repr(jobs)}.")
@@ -172,10 +175,11 @@ def _multi_observable_analysis_request(
 
     logger.debug(response_dict)
 
-    return Response(
-        response_dict,
-        status=status.HTTP_200_OK,
-    )
+    return response_dict
+    # return Response(
+    #     response_dict,
+    #     status=status.HTTP_200_OK,
+    # )
 
 
 """ REST API endpoints """
@@ -275,7 +279,7 @@ def ask_analysis_availability(request):
 )
 @api_view(["POST"])
 def analyze_file(request):
-    return _analysis_request(request, FileAnalysisSerializer)
+    return _file_analysis_request(request, FileAnalysisSerializer)
 
 
 @add_docs(
@@ -286,17 +290,38 @@ def analyze_file(request):
 )
 @api_view(["POST"])
 def analyze_observable(request):
-    return _analysis_request(request, ObservableAnalysisSerializer)
+    data = dict(request.data)
+    try:
+        data["observables"] = [
+            [data.pop("observable_classification"), data.pop("observable_name")]
+        ]
+    except KeyError:
+        raise ValidationError(
+            "You need to specify the observable name and classification"
+        )
+    response = _multi_observable_analysis_request(
+        request.user, data, ObservableAnalysisSerializer
+    )["results"][0]
+    return Response(
+        response,
+        status=status.HTTP_200_OK,
+    )
 
 
 @add_docs(
     description="This endpoint allows to start Jobs related to multiple observables",
     request=ObservableAnalysisSerializer,
-    responses={200: AnalysisResponseSerializer},
+    responses={200: multi_result_enveloper(AnalysisResponseSerializer, True)},
 )
 @api_view(["POST"])
 def analyze_multiple_observables(request):
-    return _multi_observable_analysis_request(request, ObservableAnalysisSerializer)
+    response_dict = _multi_observable_analysis_request(
+        request.user, request.data, ObservableAnalysisSerializer
+    )
+    return Response(
+        response_dict,
+        status=status.HTTP_200_OK,
+    )
 
 
 @add_docs(

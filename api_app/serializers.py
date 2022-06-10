@@ -5,6 +5,7 @@ import json
 import logging
 from typing import Dict, List
 
+from drf_spectacular.utils import extend_schema_serializer
 from durin.serializers import UserSerializer
 from rest_framework import serializers as rfs
 from rest_framework.exceptions import ValidationError
@@ -35,6 +36,7 @@ __all__ = [
     "FileAnalysisSerializer",
     "ObservableAnalysisSerializer",
     "AnalysisResponseSerializer",
+    "multi_result_enveloper",
 ]
 
 
@@ -444,3 +446,17 @@ class AnalysisResponseSerializer(rfs.Serializer):
     warnings = rfs.ListField(required=False)
     analyzers_running = rfs.ListField()
     connectors_running = rfs.ListField()
+
+
+def multi_result_enveloper(serializer_class, many):
+    component_name = "Enveloped{}{}".format(
+        serializer_class.__name__.replace("Serializer", ""),
+        "List" if many else "",
+    )
+
+    @extend_schema_serializer(many=False, component_name=component_name)
+    class EnvelopeSerializer(rfs.Serializer):
+        count = rfs.BooleanField()  # No. of items in the results list
+        results = serializer_class(many=many)
+
+    return EnvelopeSerializer

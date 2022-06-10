@@ -104,7 +104,7 @@ def _file_analysis_request(
     logger.debug(response_dict)
 
     return Response(
-        response_dict,
+        ser.data,
         status=status.HTTP_200_OK,
     )
 
@@ -182,7 +182,7 @@ def _multi_analysis_availability(user, data):
     data_received = data
     logger.info(
         f"ask_analysis_availability received request from {str(user)}."
-        f"Data: {dict(data_received)}"
+        f"Data: {list(data_received)}"
     )
 
     serializer = JobAvailabilitySerializer(data=data_received, many=True)

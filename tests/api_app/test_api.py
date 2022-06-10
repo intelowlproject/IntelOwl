@@ -119,7 +119,6 @@ class ApiViewTests(TestCase):
         content = response.json()
         msg = (response.status_code, content)
         self.assertEqual(response.status_code, 200, msg=msg)
-
         job_id = int(content["job_id"])
         job = models.Job.objects.get(pk=job_id)
         self.assertEqual(response.status_code, 200, msg=msg)

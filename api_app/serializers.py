@@ -5,6 +5,7 @@ import json
 import logging
 from typing import Dict, List
 
+from django.http import QueryDict
 from drf_spectacular.utils import extend_schema_serializer
 from durin.serializers import UserSerializer
 from rest_framework import serializers as rfs
@@ -311,6 +312,54 @@ class JobSerializer(_AbstractJobViewSerializer):
         return {}
 
 
+class MultipleFileAnalysisSerializer(rfs.ListSerializer):
+    """
+    ``Job`` model's serializer for Multiple File Analysis.
+    Used for ``create()``.
+    """
+
+    def update(self, instance, validated_data):
+        raise NotImplementedError("This serializer does not support update().")
+
+    files = rfs.ListField(child=rfs.FileField(required=True), required=True)
+
+    file_names = rfs.ListField(child=rfs.CharField(required=True), required=True)
+
+    file_mimetypes = rfs.ListField(
+        child=rfs.CharField(required=True, allow_blank=True), required=False
+    )
+
+    def to_internal_value(self, data: QueryDict):
+        ret = []
+        errors = []
+
+        for index, file in enumerate(data.getlist("files")):
+            # `deepcopy` here ensures that this code doesn't
+            # break even if new fields are added in future
+            item = data.copy()
+
+            item.pop("files")
+            item.pop("file_names")
+            item.pop("file_mimetypes", None)
+
+            item["file"] = file
+            item["file_name"] = data.getlist("file_names")[index]
+            if data.get("file_mimetypes", False):
+                item["file_mimetype"] = data["file_mimetypes"][index]
+            try:
+                validated = self.child.run_validation(item)
+            except ValidationError as exc:
+                errors.append(exc.detail)
+            else:
+                ret.append(validated)
+                errors.append({})
+
+        if any(errors):
+            raise ValidationError(errors)
+
+        return ret
+
+
 class FileAnalysisSerializer(_AbstractJobCreateSerializer):
     """
     ``Job`` model's serializer for File Analysis.
@@ -338,6 +387,7 @@ class FileAnalysisSerializer(_AbstractJobCreateSerializer):
             "connectors_requested",
             "tags_labels",
         )
+        list_serializer_class = MultipleFileAnalysisSerializer
 
     def validate(self, attrs: dict) -> dict:
         logger.debug(f"before attrs: {attrs}")

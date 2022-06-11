@@ -3,12 +3,12 @@
 
 import logging
 from datetime import timedelta
-from typing import Type
+from typing import Type, Union
 
 from django.conf import settings
 from django.db.models import Count, Q
 from django.db.models.functions import Trunc
-from django.http import FileResponse
+from django.http import FileResponse, QueryDict
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema as add_docs
 from drf_spectacular.utils import inline_serializer
@@ -43,84 +43,20 @@ from .serializers import (
 logger = logging.getLogger(__name__)
 
 
-def _file_analysis_request(
-    request,
-    serializer_class: Type[FileAnalysisSerializer],
-):
-    """
-    Prepare and send file/observable for analysis.
-    """
-    warnings = []
-    logger.info(
-        f"_file_analysis_request {serializer_class} received "
-        f"request from {request.user}."
-        f"Data:{dict(request.data)}."
-    )
-
-    # serialize request data and validate
-    serializer = serializer_class(data=request.data)
-    serializer.is_valid(raise_exception=True)
-
-    serialized_data = serializer.validated_data
-    runtime_configuration = serialized_data.pop("runtime_configuration", {})
-
-    # save the arrived data plus new params into a new job object
-    job = serializer.save(
-        user=request.user,
-    )
-    cleaned_analyzer_list = serialized_data.get("analyzers_to_execute")
-    cleaned_connectors_list = serialized_data.get("connectors_to_execute")
-
-    logger.info(f"New Job added to queue <- {repr(job)}.")
-
-    # Check if task is test or not
-    if not settings.STAGE_CI:
-        # fire celery task
-        celery_app.send_task(
-            "start_analyzers",
-            kwargs=dict(
-                job_id=job.pk,
-                analyzers_to_execute=cleaned_analyzer_list,
-                runtime_configuration=runtime_configuration,
-            ),
-        )
-
-    ser = AnalysisResponseSerializer(
-        data={
-            "status": "accepted",
-            "job_id": job.pk,
-            "warnings": warnings,
-            "analyzers_running": cleaned_analyzer_list,
-            "connectors_running": cleaned_connectors_list,
-        }
-    )
-    ser.is_valid(raise_exception=True)
-
-    response_dict = {
-        "count": 1,
-        "results": [ser.data],
-    }
-
-    logger.debug(response_dict)
-
-    return Response(
-        ser.data,
-        status=status.HTTP_200_OK,
-    )
-
-
-def _multi_observable_analysis_request(
+def _multi_analysis_request(
     user,
-    data,
-    serializer_class: Type[ObservableAnalysisSerializer],
+    data: Union[QueryDict, dict],
+    serializer_class: Union[
+        Type[ObservableAnalysisSerializer], Type[FileAnalysisSerializer]
+    ],
 ):
     """
     Prepare and send multiple observables for analysis
     """
     logger.info(
-        f"_multi_observable_analysis_request {serializer_class} "
+        f"_multi_analysis_request {serializer_class} "
         f"received request from {user}."
-        f"Data:{dict(data)}."
+        f"Data:{data}."
     )
 
     # serialize request data and validate
@@ -311,14 +247,39 @@ def ask_multi_analysis_availability(request):
     )
 
 
-@add_docs(
-    description="This endpoint allows to start a Job related to a file",
-    request=FileAnalysisSerializer,
-    responses={200: AnalysisResponseSerializer},
-)
 @api_view(["POST"])
 def analyze_file(request):
-    return _file_analysis_request(request, FileAnalysisSerializer)
+    data: QueryDict = request.data.copy()
+    try:
+        data["files"] = data.pop("file")[0]
+        data["file_names"] = data.pop("file_name")[0]
+    except KeyError:
+        raise ValidationError("File and file_name are required fields")
+    if data.get("file_mimetype", False):
+        data["file_mimetypes"] = data.pop("file_mimetype")[0]
+    response = _multi_analysis_request(request.user, data, FileAnalysisSerializer)[
+        "results"
+    ][0]
+    return Response(
+        response,
+        status=status.HTTP_200_OK,
+    )
+
+
+@add_docs(
+    description="This endpoint allows to start Jobs related to multiple observables",
+    request=FileAnalysisSerializer,
+    responses={200: multi_result_enveloper(AnalysisResponseSerializer, True)},
+)
+@api_view(["POST"])
+def analyze_multiple_files(request):
+    response_dict = _multi_analysis_request(
+        request.user, request.data, FileAnalysisSerializer
+    )
+    return Response(
+        response_dict,
+        status=status.HTTP_200_OK,
+    )
 
 
 @add_docs(
@@ -338,7 +299,7 @@ def analyze_observable(request):
         raise ValidationError(
             "You need to specify the observable name and classification"
         )
-    response = _multi_observable_analysis_request(
+    response = _multi_analysis_request(
         request.user, data, ObservableAnalysisSerializer
     )["results"][0]
     return Response(
@@ -354,7 +315,7 @@ def analyze_observable(request):
 )
 @api_view(["POST"])
 def analyze_multiple_observables(request):
-    response_dict = _multi_observable_analysis_request(
+    response_dict = _multi_analysis_request(
         request.user, request.data, ObservableAnalysisSerializer
     )
     return Response(

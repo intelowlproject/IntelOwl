@@ -54,6 +54,7 @@ const stateSelector = (state) => [
   state.error,
   groupAnalyzers(state.analyzers),
   state.connectors,
+  state.playbooks,
 ];
 const checkChoices = [
   {
@@ -99,6 +100,7 @@ const initialValues = {
   file: undefined,
   analyzers: [],
   connectors: [],
+  playbooks: [],
   tlp: "WHITE",
   runtime_configuration: {},
   tags: [],
@@ -130,7 +132,7 @@ export default function ScanForm() {
     useQuotaBadge();
 
   // API/ store
-  const [pluginsLoading, pluginsError, analyzersGrouped, connectors] =
+  const [pluginsLoading, pluginsError, analyzersGrouped, connectors, playbooks] =
     usePluginConfigurationStore(stateSelector);
 
   const analyzersOptions = React.useMemo(
@@ -192,6 +194,30 @@ export default function ScanForm() {
     [connectors]
   );
 
+  const playbookOptions = React.useMemo(
+    () => 
+      playbooks
+        .map((v) => ({
+          value: v.name,
+          label: (
+            <div className="d-flex justify-content-start align-items-start flex-column">
+              <div className="d-flex justify-content-start align-items-baseline flex-column">
+                <div>{v.name}&nbsp;</div>
+                <div className="small text-left text-muted">
+                  {markdownToHtml(v.description)}
+                </div>
+              </div>
+            </div>
+          ),
+          labelDisplay: v.name,
+        }))
+        .sort((a, b) =>
+          // eslint-disable-next-line no-nested-ternary
+          a.isDisabled === b.isDisabled ? 0 : a.isDisabled ? 1 : -1
+        ),
+    [playbooks]
+  )
+
   // callbacks
   const onValidate = React.useCallback(
     (values) => {
@@ -199,6 +225,7 @@ export default function ScanForm() {
       if (pluginsError) {
         errors.analyzers = pluginsError;
         errors.connectors = pluginsError;
+        errors.playbooks = pluginsError;
       }
       if (values.classification === "file") {
         if (!values.file) {
@@ -221,6 +248,12 @@ export default function ScanForm() {
     },
     [pluginsError]
   );
+
+  const playbooksSelectedTrigger=(v, formik)=> {
+    formik.setFieldValue("playbooks", v); 
+    console.log(formik.values)
+  }
+  
   const onSubmit = React.useCallback(
     async (values, formik) => {
       const formValues = {
@@ -228,13 +261,19 @@ export default function ScanForm() {
         tags_labels: values.tags.map((optTag) => optTag.value.label),
         analyzers: values.analyzers.map((x) => x.value),
         connectors: values.connectors.map((x) => x.value),
+        playbooks: values.playbooks.map((x) => x.value),
       };
       try {
-        const jobId = await createJob(formValues);
-        setTimeout(
-          () => history.push(`/jobs/${jobId}`),
-          1000
-        );
+        const jobIds = await createJob(formValues);
+        for (let i = 0; i <= jobIds; i += 1) {
+          const jobId = jobIds[i];
+          if (jobId !== undefined) {
+            setTimeout(
+              () => history.push(`/jobs/${jobId}`),
+              1000
+            );
+          }
+        }
       } catch (e) {
         // handled inside createJob
       } finally {
@@ -244,7 +283,7 @@ export default function ScanForm() {
     },
     [history, refetchQuota]
   );
-
+    
   return (
     <Container className="col-lg-12 col-xl-7">
       {/* Quota badges */}
@@ -347,6 +386,20 @@ export default function ScanForm() {
                     </FormText>
                   </Col>
                 )}
+              </FormGroup> 
+              <FormGroup row>
+                <Label sm={4} htmlFor="playbooks">
+                  Select Playbooks
+                </Label>
+                {!(pluginsLoading || pluginsError) && (
+                  <Col sm={8}>
+                    <MultiSelectDropdownInput
+                      options={playbookOptions}
+                      value={formik.values.playbooks}
+                      onChange={(v) => playbooksSelectedTrigger(v, formik)}
+                    />
+                  </Col>
+                )}
               </FormGroup>
               <FormGroup row>
                 <Label sm={4} htmlFor="runtime_configuration">
@@ -362,8 +415,10 @@ export default function ScanForm() {
                     color="tertiary"
                     disabled={
                       !(
-                        formik.values.analyzers.length > 0 ||
-                        formik.values.connectors.length > 0
+                        (
+                          formik.values.analyzers.length > 0 ||
+                          formik.values.connectors.length > 0
+                        )
                       )
                     }
                     onClick={toggleModal}

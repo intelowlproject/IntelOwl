@@ -9,6 +9,7 @@ export const ANALYZE_FILE_URI = `${API_BASE_URI}/analyze_file`;
 export const ANALYZE_OBSERVABLE_URI = `${API_BASE_URI}/analyze_observable`;
 export const ANALYZERS_CONFIG_URI = `${API_BASE_URI}/get_analyzer_configs`;
 export const CONNECTORS_CONFIG_URI = `${API_BASE_URI}/get_connector_configs`;
+export const PLAYBOOKS_CONFIG_URI = `${API_BASE_URI}/get_playbook_configs`;
 
 export const JOB_AGG_STATUS_URI = `${JOB_BASE_URI}/aggregate/status`;
 export const JOB_AGG_TYPE_URI = `${JOB_BASE_URI}/aggregate/type`;

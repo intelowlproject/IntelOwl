@@ -333,17 +333,23 @@ class MultipleFileAnalysisSerializer(rfs.ListSerializer):
         ret = []
         errors = []
 
+        if data.getlist("file_names", False) and len(data.getlist("file_names")) != len(
+            data.getlist("files")
+        ):
+            raise ValidationError("file_names and files must have the same length.")
+
         for index, file in enumerate(data.getlist("files")):
             # `deepcopy` here ensures that this code doesn't
             # break even if new fields are added in future
             item = data.copy()
 
             item.pop("files")
-            item.pop("file_names")
+            item.pop("file_names", None)
             item.pop("file_mimetypes", None)
 
             item["file"] = file
-            item["file_name"] = data.getlist("file_names")[index]
+            if data.getlist("file_names", False):
+                item["file_name"] = data.getlist("file_names")[index]
             if data.get("file_mimetypes", False):
                 item["file_mimetype"] = data["file_mimetypes"][index]
             try:
@@ -367,7 +373,7 @@ class FileAnalysisSerializer(_AbstractJobCreateSerializer):
     """
 
     file = rfs.FileField(required=True)
-    file_name = rfs.CharField(required=True)
+    file_name = rfs.CharField(required=False)
     file_mimetype = rfs.CharField(required=False)
     is_sample = rfs.HiddenField(default=True)
 
@@ -392,6 +398,8 @@ class FileAnalysisSerializer(_AbstractJobCreateSerializer):
     def validate(self, attrs: dict) -> dict:
         logger.debug(f"before attrs: {attrs}")
         # calculate ``file_mimetype``
+        if "file_name" not in attrs:
+            attrs["file_name"] = attrs["file"].name
         attrs["file_mimetype"] = calculate_mimetype(attrs["file"], attrs["file_name"])
         # calculate ``md5``
         file_obj = attrs["file"].file

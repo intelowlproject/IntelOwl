@@ -252,9 +252,10 @@ def analyze_file(request):
     data: QueryDict = request.data.copy()
     try:
         data["files"] = data.pop("file")[0]
-        data["file_names"] = data.pop("file_name")[0]
     except KeyError:
-        raise ValidationError("File and file_name are required fields")
+        raise ValidationError("`file` is a required field")
+    if data.getlist("file_name", False):
+        data["file_names"] = data.pop("file_name")[0]
     if data.get("file_mimetype", False):
         data["file_mimetypes"] = data.pop("file_mimetype")[0]
     response = _multi_analysis_request(request.user, data, FileAnalysisSerializer)[

@@ -142,7 +142,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
                 if tlp == TLP.RED and config.external_service:
                     raise NotRunnableAnalyzer(
                         f"{a_name} won't be run because you"
-                        f" filtered external analyzers."
+                        " filtered external analyzers."
                     )
                 if serialized_data["is_sample"]:
                     if not config.is_type_file:
@@ -160,7 +160,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
                     if not config.is_type_observable:
                         raise NotRunnableAnalyzer(
                             f"{a_name} won't be run because "
-                            f"it does not support observable."
+                            "it does not support observable."
                         )
 
                     if not config.is_observable_type_supported(
@@ -168,7 +168,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
                     ):
                         raise NotRunnableAnalyzer(
                             f"{a_name} won't be run because "
-                            f"it does not support observable type "
+                            "it does not support observable type "
                             f"{serialized_data['observable_classification']}."
                         )
             except NotRunnableAnalyzer as e:
@@ -410,7 +410,7 @@ class FileAnalysisSerializer(_AbstractJobCreateSerializer):
         file_obj.seek(0)
         file_buffer = file_obj.read()
         attrs["md5"] = calculate_md5(file_buffer)
-        attrs = super(FileAnalysisSerializer, self).validate(attrs)
+        attrs = super().validate(attrs)
         logger.debug(f"after attrs: {attrs}")
         return attrs
 
@@ -418,9 +418,7 @@ class FileAnalysisSerializer(_AbstractJobCreateSerializer):
         cleaned_analyzer_list = []
 
         # get values from serializer
-        partially_filtered_analyzers = super(
-            FileAnalysisSerializer, self
-        ).filter_analyzers(serialized_data)
+        partially_filtered_analyzers = super().filter_analyzers(serialized_data)
 
         # read config
         analyzer_dataclasses = AnalyzerConfig.all()
@@ -546,7 +544,7 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
             attrs["observable_name"] = attrs["observable_name"].lower()
         # calculate ``md5``
         attrs["md5"] = calculate_md5(attrs["observable_name"].encode("utf-8"))
-        attrs = super(ObservableAnalysisSerializer, self).validate(attrs)
+        attrs = super().validate(attrs)
         logger.debug(f"after attrs: {attrs}")
         return attrs
 
@@ -554,9 +552,7 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
         cleaned_analyzer_list = []
 
         # get values from serializer
-        partially_filtered_analyzers = super(
-            ObservableAnalysisSerializer, self
-        ).filter_analyzers(serialized_data)
+        partially_filtered_analyzers = super().filter_analyzers(serialized_data)
 
         # read config
         analyzer_dataclasses = AnalyzerConfig.all()
@@ -574,7 +570,7 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
                     if not config.is_type_observable:
                         raise NotRunnableAnalyzer(
                             f"{a_name} won't be run because "
-                            f"it does not support observable."
+                            "it does not support observable."
                         )
 
                     if not config.is_observable_type_supported(
@@ -582,7 +578,7 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
                     ):
                         raise NotRunnableAnalyzer(
                             f"{a_name} won't be run because "
-                            f"it does not support observable type "
+                            "it does not support observable type "
                             f"{serialized_data['observable_classification']}."
                         )
             except NotRunnableAnalyzer as e:
@@ -612,9 +608,9 @@ class AnalysisResponseSerializer(rfs.Serializer):
 
 
 def multi_result_enveloper(serializer_class, many):
-    component_name = "Multi{}{}".format(
-        serializer_class.__name__.replace("Serializer", ""),
-        "List" if many else "",
+    component_name = (
+        f'Multi{serializer_class.__name__.replace("Serializer", "")}'
+        f'{"List" if many else ""}'
     )
 
     @extend_schema_serializer(many=False, component_name=component_name)

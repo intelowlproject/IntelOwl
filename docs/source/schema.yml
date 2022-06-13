@@ -6,9 +6,19 @@ paths:
   /api/analyze_file:
     post:
       operationId: analyze_file_create
-      description: This endpoint allows to start a Job related to a file
       tags:
       - analyze_file
+      security:
+      - durinAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/analyze_multiple_files:
+    post:
+      operationId: analyze_multiple_files_create
+      description: This endpoint allows to start Jobs related to multiple observables
+      tags:
+      - analyze_multiple_files
       requestBody:
         content:
           application/json:
@@ -28,7 +38,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AnalysisResponse'
+                $ref: '#/components/schemas/MultiAnalysisResponseList'
           description: ''
   /api/analyze_multiple_observables:
     post:
@@ -1687,7 +1697,6 @@ components:
           items: {}
       required:
       - file
-      - file_name
       - id
     GetAnalyzerConfigsFailedResponse:
       type: object

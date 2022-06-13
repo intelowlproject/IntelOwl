@@ -28,16 +28,16 @@ class ApiViewTests(TestCase):
         self.client = APIClient()
         self.client.force_authenticate(user=self.superuser)
 
-        self.uploaded_file, self.file_md5 = self.__get_test_file("file.exe")
-        self.analyze_file_data = {
-            "file": self.uploaded_file,
-            "analyzers_requested": [
-                "File_Info",
-                "PE_Info",
-            ],
-            "file_name": "file.exe",
-            "file_mimetype": "application/x-dosexec",
-        }
+        # self.uploaded_file, self.file_md5 = self.__get_test_file("file.exe")
+        # self.analyze_file_data = {
+        #     "file": self.uploaded_file,
+        #     "analyzers_requested": [
+        #         "File_Info",
+        #         "PE_Info",
+        #     ],
+        #     "file_name": "file.exe",
+        #     "file_mimetype": "application/x-dosexec",
+        # }
 
         self.observable_name = os.environ.get("TEST_IP", "8.8.8.8")
         self.observable_md5 = hashlib.md5(
@@ -286,3 +286,36 @@ class ApiViewTests(TestCase):
             content["errors"],
             msg=msg,
         )
+
+    def test_no_analyzers(self):
+        data = self.mixed_observable_data.copy()
+        data["analyzers_requested"] = data["analyzers_requested"][1:]
+        response = self.client.post(
+            "/api/analyze_multiple_observables", data, format="json"
+        )
+        contents = response.json()
+        msg = (response.status_code, contents)
+        self.assertEqual(response.status_code, 400, msg=msg)
+
+    def test_incorrect_tlp(self):
+        data = self.mixed_observable_data.copy()
+        data["tlp"] = "incorrect"
+        response = self.client.post(
+            "/api/analyze_multiple_observables", data, format="json"
+        )
+        contents = response.json()
+        msg = (response.status_code, contents)
+        self.assertEqual(response.status_code, 400, msg=msg)
+        error = contents["errors"][0]
+        self.assertEqual(error["tlp"][0], '"incorrect" is not a valid choice.', msg=msg)
+        error = contents["errors"][1]
+        self.assertEqual(error["tlp"][0], '"incorrect" is not a valid choice.', msg=msg)
+
+    def test_ask_multi_analysis_availability(self):
+        md5 = os.environ.get("TEST_MD5", "446c5fbb11b9ce058450555c1c27153c")
+        analyzers_needed = ["Fortiguard", "CIRCLPassiveDNS"]
+        data = [{"md5": md5, "analyzers": analyzers_needed, "minutes_ago": 1}]
+        response = self.client.post(
+            "/api/ask_analysis_availability", data, format="json"
+        )
+        self.assertEqual(response.status_code, 200)

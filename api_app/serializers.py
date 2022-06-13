@@ -338,14 +338,18 @@ class MultipleFileAnalysisSerializer(rfs.ListSerializer):
         ):
             raise ValidationError("file_names and files must have the same length.")
 
+        try:
+            base_data: QueryDict = data.copy()
+        except TypeError:  # https://code.djangoproject.com/ticket/29510
+            base_data: QueryDict = QueryDict(mutable=True)
+            for key, value_list in data.lists():
+                if key not in ["files", "file_names", "file_mimetypes"]:
+                    base_data.setlist(key, copy.deepcopy(value_list))
+
         for index, file in enumerate(data.getlist("files")):
             # `deepcopy` here ensures that this code doesn't
             # break even if new fields are added in future
-            item = data.copy()
-
-            item.pop("files")
-            item.pop("file_names", None)
-            item.pop("file_mimetypes", None)
+            item = base_data.copy()
 
             item["file"] = file
             if data.getlist("file_names", False):

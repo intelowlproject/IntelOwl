@@ -7,8 +7,8 @@ import { ContentSection, readFileAsync, addToast } from "@certego/certego-ui";
 
 import {
   ANALYZE_MULTIPLE_OBSERVABLE_URI,
-  ANALYZE_FILE_URI,
   ASK_MULTI_ANALYSIS_AVAILABILITY_URI,
+  ANALYZE_MULTIPLE_FILES_URI,
 } from "../../constants/api";
 import useRecentScansStore from "../../stores/useRecentScansStore";
 
@@ -94,14 +94,19 @@ async function _askAnalysisAvailability(formValues) {
   const payload = [];
 
   if (formValues.classification === "file") {
-    const body = {
-      analyzers: formValues.analyzers,
-      md5: md5(await readFileAsync(formValues.file)),
-    };
-    if (formValues.check === "running_only") {
-      body.running_only = "True";
-    }
-    payload.push(body);
+    const promises = [];
+    Array.from(formValues.files).forEach((file) => {
+      const body = {
+        analyzers: formValues.analyzers,
+        md5: md5(readFileAsync(file)),
+      };
+      promises.push(body.md5);
+      if (formValues.check === "running_only") {
+        body.running_only = "True";
+      }
+      payload.push(body);
+    });
+    await Promise.all(promises);
   } else {
     formValues.observable_names.forEach((ObservableName) => {
       const body = {
@@ -157,8 +162,9 @@ async function _analyzeObservable(formValues) {
 
 async function _analyzeFile(formValues) {
   const body = new FormData();
-  body.append("file", formValues.file, formValues.file.name);
-  body.append("file_name", formValues.file.name);
+  Array.from(formValues.files).forEach((file) => {
+    body.append("files", file, file.name);
+  });
   formValues.tags_labels.map((x) => body.append("tags_labels", x));
   formValues.analyzers.map((x) => body.append("analyzers_requested", x));
   formValues.connectors.map((x) => body.append("connectors_requested", x));
@@ -172,5 +178,5 @@ async function _analyzeFile(formValues) {
       JSON.stringify(formValues.runtime_configuration)
     );
   }
-  return axios.post(ANALYZE_FILE_URI, body);
+  return axios.post(ANALYZE_MULTIPLE_FILES_URI, body);
 }

@@ -107,7 +107,7 @@ const observableType2PropsMap = {
 const initialValues = {
   classification: "ip",
   observable_names: [""],
-  file: "",
+  files: [],
   analyzers: [],
   connectors: [],
   tlp: "WHITE",
@@ -212,8 +212,8 @@ export default function ScanForm() {
         errors.connectors = pluginsError;
       }
       if (values.classification === "file") {
-        if (!values.file) {
-          errors.file = "required";
+        if (!values.files || values.files.length === 0) {
+          errors.files = "required";
         }
       } else if (values.observable_names && values.observable_names.length) {
         // We iterate over observable_names and test each one against the regex pattern,
@@ -382,21 +382,19 @@ export default function ScanForm() {
                 />
               ) : (
                 <FormGroup row>
-                  <Label className="required" sm={3} for="file">
-                    File
+                  <Label className="required" sm={3} for="files">
+                    File(s)
                   </Label>
                   <Col sm={9}>
                     <Input
                       type="file"
                       id="file"
-                      name="file"
+                      name="files"
                       onChange={(event) =>
-                        formik.setFieldValue(
-                          "file",
-                          event.currentTarget.files[0]
-                        )
+                        formik.setFieldValue("files", event.currentTarget.files)
                       }
                       className="input-dark"
+                      multiple
                     />
                   </Col>
                 </FormGroup>

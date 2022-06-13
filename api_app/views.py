@@ -2,6 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 
 import logging
+from copy import deepcopy
 from datetime import timedelta
 from typing import Type, Union
 
@@ -249,7 +250,15 @@ def ask_multi_analysis_availability(request):
 
 @api_view(["POST"])
 def analyze_file(request):
-    data: QueryDict = request.data.copy()
+    try:
+        data: QueryDict = request.data.copy()
+    except TypeError:  # https://code.djangoproject.com/ticket/29510
+        data: QueryDict = QueryDict(mutable=True)
+        for key, value_list in request.data.lists():
+            if key == "file":
+                data.setlist(key, value_list)
+            else:
+                data.setlist(key, deepcopy(value_list))
     try:
         data["files"] = data.pop("file")[0]
     except KeyError:

@@ -28,16 +28,16 @@ class ApiViewTests(TestCase):
         self.client = APIClient()
         self.client.force_authenticate(user=self.superuser)
 
-        # self.uploaded_file, self.file_md5 = self.__get_test_file("file.exe")
-        # self.analyze_file_data = {
-        #     "file": self.uploaded_file,
-        #     "analyzers_requested": [
-        #         "File_Info",
-        #         "PE_Info",
-        #     ],
-        #     "file_name": "file.exe",
-        #     "file_mimetype": "application/x-dosexec",
-        # }
+        self.uploaded_file, self.file_md5 = self.__get_test_file("file.exe")
+        self.analyze_file_data = {
+            "file": self.uploaded_file,
+            "analyzers_requested": [
+                "File_Info",
+                "PE_Info",
+            ],
+            "file_name": "file.exe",
+            "file_mimetype": "application/x-dosexec",
+        }
 
         self.observable_name = os.environ.get("TEST_IP", "8.8.8.8")
         self.observable_md5 = hashlib.md5(
@@ -316,6 +316,6 @@ class ApiViewTests(TestCase):
         analyzers_needed = ["Fortiguard", "CIRCLPassiveDNS"]
         data = [{"md5": md5, "analyzers": analyzers_needed, "minutes_ago": 1}]
         response = self.client.post(
-            "/api/ask_analysis_availability", data, format="json"
+            "/api/ask_multi_analysis_availability", data, format="json"
         )
         self.assertEqual(response.status_code, 200)

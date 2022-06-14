@@ -1245,6 +1245,35 @@
     },
     "params": {}
   },
+  "GreedyBear": {
+    "type": "observable",
+    "python_module": "greedybear.GreedyBear",
+    "description": "scan an IP against the Greedy Bear API",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": [
+      "ip"
+    ],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "GREEDYBEAR_API_KEY",
+        "description": "",
+        "required": true
+      }
+    },
+    "params": {
+      "url": {
+        "value": "https://greedybear.honeynet.org/api/enrichment",
+        "type": "str",
+        "description": "URL for the request"
+      }
+    }
+  },
   "GreyNoise": {
     "type": "observable",
     "python_module": "greynoise.GreyNoise",

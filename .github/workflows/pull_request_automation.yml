@@ -89,6 +89,7 @@ jobs:
         env:
           DOCKER_BUILDKIT: 1
           BUILDKIT_PROGRESS: "plain"
+          STAGE: "ci"
 
       - name: Startup script launch (Fast)
         if: "!contains(github.base_ref, 'master')"
@@ -97,6 +98,7 @@ jobs:
         env:
           DOCKER_BUILDKIT: 1
           BUILDKIT_PROGRESS: "plain"
+          STAGE: "ci"
 
       - name: Docker debug
         run: |

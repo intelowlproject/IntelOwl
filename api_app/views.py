@@ -85,7 +85,9 @@ def _analysis_request(
     logger.info(f"New Job added to queue <- {repr(job)}.")
 
     # Check if task is test or not
-    if not settings.STAGE_CI:
+    if settings.STAGE_CI:
+        logger.info("skipping analysis start cause we are in CI")
+    else:
         # fire celery task
         celery_app.send_task(
             "start_analyzers",

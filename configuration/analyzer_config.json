@@ -1248,7 +1248,7 @@
   "GreedyBear": {
     "type": "observable",
     "python_module": "greedybear.GreedyBear",
-    "description": "scan an IP or a domain against the Greedy Bear API",
+    "description": "scan an IP or a domain against the [GreedyBear](https://www.honeynet.org/2021/12/27/new-project-available-greedybear/) service",
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
@@ -1262,7 +1262,7 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "GREEDYBEAR_API_KEY",
-        "description": "",
+        "description": "API key required for authentication",
         "required": true
       }
     },

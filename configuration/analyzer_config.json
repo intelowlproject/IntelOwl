@@ -1248,12 +1248,12 @@
   "GreedyBear": {
     "type": "observable",
     "python_module": "greedybear.GreedyBear",
-    "description": "scan an IP against the Greedy Bear API",
+    "description": "scan an IP or a domain against the Greedy Bear API",
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
     "observable_supported": [
-      "ip"
+      "ip", "domain"
     ],
     "config": {
       "soft_time_limit": 30,
@@ -1268,9 +1268,9 @@
     },
     "params": {
       "url": {
-        "value": "https://greedybear.honeynet.org/api/enrichment",
+        "value": "https://greedybear.honeynet.org",
         "type": "str",
-        "description": "URL for the request"
+        "description": "URL of the GreedyBear instance you want to connect to"
       }
     }
   },

@@ -10,7 +10,7 @@ from tests.mock_utils import MockResponse, if_mock_connections, patch
 class GreedyBear(ObservableAnalyzer):
     def set_params(self, params):
         self.__api_key = self._secrets["api_key_name"]
-        self.url = params.get("url", "https://greedybear.honeynet.org/api/enrichment")
+        self.url = params.get("url", "https://greedybear.honeynet.org")
 
     def run(self):
         headers = {
@@ -20,7 +20,8 @@ class GreedyBear(ObservableAnalyzer):
         params_ = {
             "query": self.observable_name,
         }
-        response = requests.get(self.url, params=params_, headers=headers)
+        uri = "/api/enrichment"
+        response = requests.get(self.url + uri, params=params_, headers=headers)
         response.raise_for_status()
 
         result = response.json()

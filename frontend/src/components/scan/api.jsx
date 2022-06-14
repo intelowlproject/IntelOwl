@@ -6,9 +6,9 @@ import md5 from "md5";
 import { ContentSection, readFileAsync, addToast } from "@certego/certego-ui";
 
 import {
-  ANALYZE_OBSERVABLE_URI,
-  ANALYZE_FILE_URI,
-  ASK_ANALYSIS_AVAILABILITY_URI,
+  ANALYZE_MULTIPLE_OBSERVABLE_URI,
+  ASK_MULTI_ANALYSIS_AVAILABILITY_URI,
+  ANALYZE_MULTIPLE_FILES_URI,
 } from "../../constants/api";
 import useRecentScansStore from "../../stores/useRecentScansStore";
 
@@ -27,27 +27,48 @@ export async function createJob(formValues) {
         ? await _analyzeFile(formValues)
         : await _analyzeObservable(formValues);
 
-    const respData = resp.data;
+    const respData = resp.data.results;
+    const analyzersRunning = new Set();
+    const connectorsRunning = new Set();
+    const warnings = [];
+    respData.forEach((x) => {
+      if (x.analyzers_running)
+        x.analyzers_running.forEach((analyzer) =>
+          analyzersRunning.add(analyzer)
+        );
+      if (x.connectors_running)
+        x.connectors_running.forEach((connector) =>
+          connectorsRunning.add(connector)
+        );
+      if (x.warnings) warnings.push(...x.warnings);
+    });
     // handle response/error
-    if (respData.status === "accepted" || respData.status === "running") {
-      const jobId = parseInt(respData.job_id, 10);
-      appendToRecentScans(jobId, "success");
+    if (
+      respData.every(
+        (element) =>
+          element.status === "accepted" || element.status === "running"
+      )
+    ) {
+      const jobIds = respData.map((x) => parseInt(x.job_id, 10));
+      jobIds.forEach((jobId) => {
+        appendToRecentScans(jobId, "success");
+      });
       addToast(
-        `Created new Job with ID #${jobId}!`,
+        `Created new Job with ID(s) #${jobIds.join(", ")}!`,
         <div>
           <ContentSection className="text-light">
             <strong>Analyzers:</strong>&nbsp;
-            {respData.analyzers_running?.join(", ")}
+            {Array.from(analyzersRunning)?.join(", ")}
           </ContentSection>
-          {respData.connectors_running.length > 0 && (
+          {connectorsRunning.length > 0 && (
             <ContentSection className="text-light">
               <strong>Connectors:</strong>&nbsp;
-              {respData.connectors_running.join(", ")}
+              {Array.from(connectorsRunning).join(", ")}
             </ContentSection>
           )}
-          {respData.warnings.length > 0 && (
+          {warnings.length > 0 && (
             <ContentSection className="bg-accent text-darker">
-              <strong>Warnings:</strong>&nbsp;{respData.warnings.join(", ")}
+              <strong>Warnings:</strong>&nbsp;{warnings.join(", ")}
             </ContentSection>
           )}
         </div>,
@@ -55,7 +76,7 @@ export async function createJob(formValues) {
         true,
         10000
       );
-      return Promise.resolve(jobId);
+      return Promise.resolve(jobIds);
     }
 
     // else
@@ -70,48 +91,80 @@ export async function createJob(formValues) {
 }
 
 async function _askAnalysisAvailability(formValues) {
-  const body = {
-    analyzers: formValues.analyzers,
-    md5:
-      formValues.classification === "file"
-        ? md5(await readFileAsync(formValues.file))
-        : md5(formValues.observable_name),
-  };
-  if (formValues.check === "running_only") {
-    body.running_only = "True";
+  const payload = [];
+
+  if (formValues.classification === "file") {
+    const promises = [];
+    Array.from(formValues.files).forEach((file) => {
+      const body = {
+        analyzers: formValues.analyzers,
+        md5: md5(readFileAsync(file)),
+      };
+      promises.push(body.md5);
+      if (formValues.check === "running_only") {
+        body.running_only = "True";
+      }
+      payload.push(body);
+    });
+    await Promise.all(promises);
+  } else {
+    formValues.observable_names.forEach((ObservableName) => {
+      const body = {
+        analyzers: formValues.analyzers,
+        md5: md5(ObservableName),
+      };
+      if (formValues.check === "running_only") {
+        body.running_only = "True";
+      }
+      payload.push(body);
+    });
   }
+
   try {
-    const response = await axios.post(ASK_ANALYSIS_AVAILABILITY_URI, body);
-    const answer = response.data;
-    if (answer.status === "not_available") {
+    const response = await axios.post(
+      ASK_MULTI_ANALYSIS_AVAILABILITY_URI,
+      payload
+    );
+    const answer = response.data.results;
+    if (answer.some((x) => x.status === "not_available")) {
       return 0;
     }
-    const jobId = parseInt(answer.job_id, 10);
-    appendToRecentScans(jobId, "secondary");
-    addToast(`Found similar scan with job ID #${jobId}`, null, "info");
-    return jobId;
+    const jobIds = answer.map((x) => x.job_id);
+    jobIds.forEach((jobId) => {
+      appendToRecentScans(jobId, "secondary");
+    });
+    addToast(
+      `Found similar scan with job ID(s) #${jobIds.join(", ")}`,
+      null,
+      "info"
+    );
+    return jobIds;
   } catch (e) {
     return Promise.reject(e);
   }
 }
 
 async function _analyzeObservable(formValues) {
+  const observables = [];
+  formValues.observable_names.forEach((ObservableName) => {
+    observables.push([formValues.classification, ObservableName]);
+  });
   const body = {
-    observable_name: formValues.observable_name,
-    observable_classification: formValues.classification,
+    observables,
     analyzers_requested: formValues.analyzers,
     connectors_requested: formValues.connectors,
     tlp: formValues.tlp,
     runtime_configuration: formValues.runtime_configuration,
     tags_labels: formValues.tags_labels,
   };
-  return axios.post(ANALYZE_OBSERVABLE_URI, body);
+  return axios.post(ANALYZE_MULTIPLE_OBSERVABLE_URI, body);
 }
 
 async function _analyzeFile(formValues) {
   const body = new FormData();
-  body.append("file", formValues.file, formValues.file.name);
-  body.append("file_name", formValues.file.name);
+  Array.from(formValues.files).forEach((file) => {
+    body.append("files", file, file.name);
+  });
   formValues.tags_labels.map((x) => body.append("tags_labels", x));
   formValues.analyzers.map((x) => body.append("analyzers_requested", x));
   formValues.connectors.map((x) => body.append("connectors_requested", x));
@@ -125,5 +178,5 @@ async function _analyzeFile(formValues) {
       JSON.stringify(formValues.runtime_configuration)
     );
   }
-  return axios.post(ANALYZE_FILE_URI, body);
+  return axios.post(ANALYZE_MULTIPLE_FILES_URI, body);
 }

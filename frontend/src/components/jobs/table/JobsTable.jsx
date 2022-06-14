@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Container, Row, Col } from "reactstrap";
 import useTitle from "react-use/lib/useTitle";
 
@@ -47,6 +47,10 @@ export default function JobsTable() {
     },
     toPassTableProps
   );
+
+  useEffect(() => {
+    refetch();
+  }, []);
 
   return (
     <Container fluid>

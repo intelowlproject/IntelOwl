@@ -29,6 +29,7 @@ class ApiViewTests(TestCase):
         self.client.force_authenticate(user=self.superuser)
 
         self.uploaded_file, self.file_md5 = self.__get_test_file("file.exe")
+        self.uploaded_file2, self.file_md52 = self.__get_test_file("file.exe")
         self.analyze_file_data = {
             "file": self.uploaded_file,
             "analyzers_requested": [
@@ -38,6 +39,23 @@ class ApiViewTests(TestCase):
             "file_name": "file.exe",
             "file_mimetype": "application/x-dosexec",
         }
+
+        self.analyze_multiple_files_data = {
+            "files": [self.uploaded_file, self.uploaded_file2],
+            "analyzers_requested": [
+                "File_Info",
+                "PE_Info",
+            ],
+            "file_mimetypes": [
+                "application/x-dosexec",
+                "application/x-dosexec",
+            ],
+        }
+
+        self.analyze_multiple_files_filenames = [
+            "file.exe",
+            "file.exe",
+        ]
 
         self.observable_name = os.environ.get("TEST_IP", "8.8.8.8")
         self.observable_md5 = hashlib.md5(
@@ -49,6 +67,18 @@ class ApiViewTests(TestCase):
                 "IPInfo",
             ],
             "observable_classification": "ip",
+        }
+        self.mixed_observable_data = {
+            "observables": [
+                ["ip", "8.8.8.8"],
+                ["domain", "example.com"],
+                ["ip", "8.8.2.2"],
+            ],
+            "analyzers_requested": ["Classic_DNS", "Robtex_IP_Query"],
+            "connectors_requested": [],
+            "tlp": "WHITE",
+            "runtime_configuration": {},
+            "tags_labels": [],
         }
 
     @staticmethod
@@ -111,7 +141,6 @@ class ApiViewTests(TestCase):
         content = response.json()
         msg = (response.status_code, content)
         self.assertEqual(response.status_code, 200, msg=msg)
-
         job_id = int(content["job_id"])
         job = models.Job.objects.get(pk=job_id)
         self.assertEqual(response.status_code, 200, msg=msg)
@@ -210,6 +239,37 @@ class ApiViewTests(TestCase):
         )
         self.assertEqual(self.observable_md5, job.md5, msg=msg)
 
+    def test_analyze_multiple_observables(self):
+        data = self.mixed_observable_data.copy()
+
+        response = self.client.post(
+            "/api/analyze_multiple_observables", data, format="json"
+        )
+        contents = response.json()
+        msg = (response.status_code, contents)
+        self.assertEqual(response.status_code, 200, msg=msg)
+
+        content = contents["results"][0]
+
+        job_id = int(content["job_id"])
+        job = models.Job.objects.get(pk=job_id)
+        self.assertEqual(data["observables"][0][1], job.observable_name, msg=msg)
+        self.assertListEqual(
+            data["analyzers_requested"], job.analyzers_requested, msg=msg
+        )
+        self.assertListEqual(
+            data["analyzers_requested"], job.analyzers_to_execute, msg=msg
+        )
+
+        content = contents["results"][1]
+
+        job_id = int(content["job_id"])
+        job = models.Job.objects.get(pk=job_id)
+        self.assertEqual(data["observables"][1][1], job.observable_name, msg=msg)
+        self.assertListEqual(
+            [data["analyzers_requested"][0]], job.analyzers_to_execute, msg=msg
+        )
+
     def test_download_sample_200(self):
         self.assertEqual(models.Job.objects.count(), 0)
         filename = "file.exe"
@@ -248,3 +308,81 @@ class ApiViewTests(TestCase):
             content["errors"],
             msg=msg,
         )
+
+    def test_no_analyzers(self):
+        data = self.mixed_observable_data.copy()
+        data["analyzers_requested"] = data["analyzers_requested"][1:]
+        response = self.client.post(
+            "/api/analyze_multiple_observables", data, format="json"
+        )
+        contents = response.json()
+        msg = (response.status_code, contents)
+        self.assertEqual(response.status_code, 400, msg=msg)
+
+    def test_incorrect_tlp(self):
+        data = self.mixed_observable_data.copy()
+        data["tlp"] = "incorrect"
+        response = self.client.post(
+            "/api/analyze_multiple_observables", data, format="json"
+        )
+        contents = response.json()
+        msg = (response.status_code, contents)
+        self.assertEqual(response.status_code, 400, msg=msg)
+        error = contents["errors"][0]
+        self.assertEqual(error["tlp"][0], '"incorrect" is not a valid choice.', msg=msg)
+        error = contents["errors"][1]
+        self.assertEqual(error["tlp"][0], '"incorrect" is not a valid choice.', msg=msg)
+
+    def test_ask_multi_analysis_availability(self):
+        md5 = os.environ.get("TEST_MD5", "446c5fbb11b9ce058450555c1c27153c")
+        analyzers_needed = ["Fortiguard", "CIRCLPassiveDNS"]
+        data = [{"md5": md5, "analyzers": analyzers_needed, "minutes_ago": 1}]
+        response = self.client.post(
+            "/api/ask_multi_analysis_availability", data, format="json"
+        )
+        self.assertEqual(response.status_code, 200)
+
+    def test_analyze_multiple_files__exe(self):
+        data = self.analyze_multiple_files_data.copy()
+        response = self.client.post(
+            "/api/analyze_multiple_files", data, format="multipart"
+        )
+        contents = response.json()
+        msg = (response.status_code, contents)
+        self.assertEqual(response.status_code, 200, msg=msg)
+        self.assertEqual(contents["count"], len(data["files"]), msg=msg)
+        for index, content in enumerate(contents["results"]):
+            job_id = int(content["job_id"])
+            job = models.Job.objects.get(pk=job_id)
+            self.assertEqual(response.status_code, 200, msg=msg)
+            self.assertEqual(
+                self.analyze_multiple_files_filenames[index], job.file_name, msg=msg
+            )
+            self.assertListEqual(
+                data["analyzers_requested"], job.analyzers_requested, msg=msg
+            )
+            self.assertEqual(self.file_md5, job.md5, msg=msg)
+            self.assertEqual(data["file_mimetypes"][index], job.file_mimetype, msg=msg)
+
+    def test_analyze_multiple_files__guess_optional(self):
+        data = self.analyze_multiple_files_data.copy()
+        file_mimetypes = data.pop("file_mimetypes")
+        response = self.client.post(
+            "/api/analyze_multiple_files", data, format="multipart"
+        )
+        contents = response.json()
+        msg = (response.status_code, contents)
+        self.assertEqual(response.status_code, 200, msg=msg)
+        self.assertEqual(contents["count"], len(data["files"]), msg=msg)
+        for index, content in enumerate(contents["results"]):
+            job_id = int(content["job_id"])
+            job = models.Job.objects.get(pk=job_id)
+            self.assertEqual(response.status_code, 200, msg=msg)
+            self.assertEqual(
+                self.analyze_multiple_files_filenames[index], job.file_name, msg=msg
+            )
+            self.assertListEqual(
+                data["analyzers_requested"], job.analyzers_requested, msg=msg
+            )
+            self.assertEqual(self.file_md5, job.md5, msg=msg)
+            self.assertEqual(file_mimetypes[index], job.file_mimetype, msg=msg)

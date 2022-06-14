@@ -1245,6 +1245,35 @@
     },
     "params": {}
   },
+  "GreedyBear": {
+    "type": "observable",
+    "python_module": "greedybear.GreedyBear",
+    "description": "scan an IP or a domain against the [GreedyBear](https://www.honeynet.org/2021/12/27/new-project-available-greedybear/) service",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": [
+      "ip", "domain"
+    ],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "GREEDYBEAR_API_KEY",
+        "description": "API key required for authentication",
+        "required": true
+      }
+    },
+    "params": {
+      "url": {
+        "value": "https://greedybear.honeynet.org",
+        "type": "str",
+        "description": "URL of the GreedyBear instance you want to connect to"
+      }
+    }
+  },
   "GreyNoise": {
     "type": "observable",
     "python_module": "greynoise.GreyNoise",

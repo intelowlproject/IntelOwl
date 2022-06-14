@@ -77,7 +77,9 @@ def _multi_analysis_request(
     logger.info(f"New Jobs added to queue <- {repr(jobs)}.")
 
     # Check if task is test or not
-    if not settings.STAGE_CI:
+    if settings.STAGE_CI:
+        logger.info("skipping analysis start cause we are in CI")
+    else:
         # fire celery task
         for index, job in enumerate(jobs):
             runtime_configuration = runtime_configurations[index]

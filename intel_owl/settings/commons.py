@@ -11,7 +11,7 @@ BASE_STATIC_PATH = BASE_DIR / "static"
 
 # test / ci
 MOCK_CONNECTIONS = get_secret("MOCK_CONNECTIONS", False) == "True"
-STAGE = get_secret("STAGE", "ci")
+STAGE = get_secret("STAGE", "local")
 STAGE_PRODUCTION = STAGE == "production"
 STAGE_STAGING = STAGE == "staging"
 STAGE_LOCAL = STAGE == "local"

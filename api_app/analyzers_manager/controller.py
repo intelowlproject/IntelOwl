@@ -50,6 +50,7 @@ def start_analyzers(
 
         # if disabled or unconfigured (this check is bypassed in STAGE_CI)
         if not config.is_ready_to_use and not settings.STAGE_CI:
+            logger.info(f"skipping execution of analyzer {a_name}, job_id {job_id}")
             continue
 
         # get runtime_configuration if any specified for this analyzer

@@ -358,11 +358,11 @@ class ApiViewTests(TestCase):
             self.assertEqual(
                 self.analyze_multiple_files_filenames[index], job.file_name, msg=msg
             )
-            self.assertEqual(data["file_mimetype"], job.file_mimetype, msg=msg)
             self.assertListEqual(
                 data["analyzers_requested"], job.analyzers_requested, msg=msg
             )
             self.assertEqual(self.file_md5, job.md5, msg=msg)
+            self.assertEqual(data["file_mimetypes"][index], job.file_mimetype, msg=msg)
 
     def test_analyze_multiple_files__guess_optional(self):
         data = self.analyze_multiple_files_data.copy()
@@ -381,7 +381,6 @@ class ApiViewTests(TestCase):
             self.assertEqual(
                 self.analyze_multiple_files_filenames[index], job.file_name, msg=msg
             )
-            self.assertEqual(data["file_mimetype"], job.file_mimetype, msg=msg)
             self.assertListEqual(
                 data["analyzers_requested"], job.analyzers_requested, msg=msg
             )

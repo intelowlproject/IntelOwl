@@ -13,9 +13,12 @@ class GreedyBear(ObservableAnalyzer):
         self.url = params.get("url", "https://greedybear.honeynet.org/api/enrichment")
 
     def run(self):
-        headers = {"Key": self.__api_key, "Accept": "application/json"}
+        headers = {
+            "Authorization": "Token " + self.__api_key,
+            "Accept": "application/json",
+        }
         params_ = {
-            "ipAddress": self.observable_name,
+            "query": self.observable_name,
         }
         response = requests.get(self.url, params=params_, headers=headers)
         response.raise_for_status()

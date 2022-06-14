@@ -144,33 +144,6 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
                         f"{a_name} won't be run because you"
                         " filtered external analyzers."
                     )
-                if serialized_data["is_sample"]:
-                    if not config.is_type_file:
-                        raise NotRunnableAnalyzer(
-                            f"{a_name} won't be run because does not support files."
-                        )
-                    if not config.is_filetype_supported(
-                        serialized_data["file_mimetype"]
-                    ):
-                        raise NotRunnableAnalyzer(
-                            f"{a_name} won't be run because mimetype "
-                            f"{serialized_data['file_mimetype']} is not supported."
-                        )
-                else:
-                    if not config.is_type_observable:
-                        raise NotRunnableAnalyzer(
-                            f"{a_name} won't be run because "
-                            "it does not support observable."
-                        )
-
-                    if not config.is_observable_type_supported(
-                        serialized_data["observable_classification"]
-                    ):
-                        raise NotRunnableAnalyzer(
-                            f"{a_name} won't be run because "
-                            "it does not support observable type "
-                            f"{serialized_data['observable_classification']}."
-                        )
             except NotRunnableAnalyzer as e:
                 if run_all:
                     # in this case, they are not warnings but

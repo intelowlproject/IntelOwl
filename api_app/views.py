@@ -294,7 +294,7 @@ def analyze_multiple_files(request):
 
 @add_docs(
     description="This endpoint allows to start a Job related to an observable. "
-    "Retained for compatibility",
+    "Retained for retro-compatibility",
     request=ObservableAnalysisSerializer,
     responses={200: AnalysisResponseSerializer},
 )

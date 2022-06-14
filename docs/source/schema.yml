@@ -71,7 +71,7 @@ paths:
     post:
       operationId: analyze_observable_create
       description: This endpoint allows to start a Job related to an observable. Retained
-        for compatibility
+        for retro-compatibility
       tags:
       - analyze_observable
       requestBody:

@@ -1,4 +1,4 @@
-FROM python:3.9.9-buster
+FROM python:3.10.5-buster
 
 ENV PYTHONUNBUFFERED 1
 ENV DJANGO_SETTINGS_MODULE intel_owl.settings

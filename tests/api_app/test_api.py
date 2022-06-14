@@ -52,6 +52,11 @@ class ApiViewTests(TestCase):
             ],
         }
 
+        self.analyze_multiple_files_filenames = [
+            "file.exe",
+            "file.exe",
+        ]
+
         self.observable_name = os.environ.get("TEST_IP", "8.8.8.8")
         self.observable_md5 = hashlib.md5(
             self.observable_name.encode("utf-8")
@@ -346,16 +351,18 @@ class ApiViewTests(TestCase):
         msg = (response.status_code, contents)
         self.assertEqual(response.status_code, 200, msg=msg)
         self.assertEqual(contents["count"], len(data["files"]), msg=msg)
-        for content in contents["results"]:
+        for index, content in enumerate(contents["results"]):
             job_id = int(content["job_id"])
             job = models.Job.objects.get(pk=job_id)
             self.assertEqual(response.status_code, 200, msg=msg)
-            self.assertEqual(data["file_name"], job.file_name, msg=msg)
-            self.assertEqual(data["file_mimetype"], job.file_mimetype, msg=msg)
+            self.assertEqual(
+                self.analyze_multiple_files_filenames[index], job.file_name, msg=msg
+            )
             self.assertListEqual(
                 data["analyzers_requested"], job.analyzers_requested, msg=msg
             )
             self.assertEqual(self.file_md5, job.md5, msg=msg)
+            self.assertEqual(data["file_mimetypes"][index], job.file_mimetype, msg=msg)
 
     def test_analyze_multiple_files__guess_optional(self):
         data = self.analyze_multiple_files_data.copy()
@@ -371,8 +378,9 @@ class ApiViewTests(TestCase):
             job_id = int(content["job_id"])
             job = models.Job.objects.get(pk=job_id)
             self.assertEqual(response.status_code, 200, msg=msg)
-            self.assertEqual(data["file_name"], job.file_name, msg=msg)
-            self.assertEqual(data["file_mimetype"], job.file_mimetype, msg=msg)
+            self.assertEqual(
+                self.analyze_multiple_files_filenames[index], job.file_name, msg=msg
+            )
             self.assertListEqual(
                 data["analyzers_requested"], job.analyzers_requested, msg=msg
             )

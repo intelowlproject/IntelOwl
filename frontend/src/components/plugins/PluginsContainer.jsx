@@ -32,6 +32,17 @@ export default function PluginsContainer({ match, }) {
         ),
         Component: React.lazy(() => import("./utils/Connectors")),
       },
+      {
+        key: "plugins-playbooks",
+        location: { pathname: `${match.url}/playbooks`, },
+        Title: () => (
+          <span>
+            <TiFlowChildren />
+            &nbsp;Playbooks
+          </span>
+        ),
+        Component: React.lazy(() => import("./utils/Playbooks")),
+      },
     ],
     [match.url]
   );

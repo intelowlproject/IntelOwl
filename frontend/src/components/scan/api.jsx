@@ -29,7 +29,6 @@ export async function createJob(formValues) {
       formValues.classification === "file"
         ? await _analyzeFile(formValues)
         : await _analyzeObservable(formValues);
-
     
     const respArray = [respAnalyzersAndConnectors.data, respPlaybooks.data];
     console.log(respArray);
@@ -102,21 +101,25 @@ async function _askAnalysisAvailability(formValues) {
         ? md5(await readFileAsync(formValues.file))
         : md5(formValues.observable_name),
   };
+
   if (formValues.check === "running_only") {
     body.running_only = "True";
   }
+
   try {
     const response = await axios.post(ASK_ANALYSIS_AVAILABILITY_URI, body);
     const answer = response.data;
     if (answer.status === "not_available") {
       return 0;
     }
+
     const jobId = parseInt(answer.job_id, 10);
     appendToRecentScans(jobId, "secondary");
     addToast(`Found similar scan with job ID #${jobId}`, null, "info");
     return jobId;
+    
   } catch (e) {
-    return Promise.reject(e);
+      return Promise.reject(e);
   }
 }
 
@@ -147,6 +150,7 @@ async function _analyzeObservable(formValues) {
   if (formValues.playbooks.length !== 0) {
     respPlaybooks = _startPlaybook(formValues);
   }
+
   const body = {
     observable_name: formValues.observable_name,
     observable_classification: formValues.classification,
@@ -156,6 +160,7 @@ async function _analyzeObservable(formValues) {
     runtime_configuration: formValues.runtime_configuration,
     tags_labels: formValues.tags_labels,
   };
+
   const respAnalyzersAndConnectors = axios.post(ANALYZE_OBSERVABLE_URI, body);
   return [respAnalyzersAndConnectors, respPlaybooks];
 }

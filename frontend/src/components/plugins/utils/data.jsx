@@ -176,4 +176,73 @@ const connectorTableColumns = [
   },
 ];
 
-export { analyzersTableColumns, connectorTableColumns };
+const playbookTableColumns = [
+  ...pluginTableColumns,
+  {
+    Header: "Description",
+    id: "description",
+    accessor: "description",
+    Cell: ({ value, }) => <span>{markdownToHtml(value)}</span>,
+    disableSortBy: true,
+    Filter: DefaultColumnFilter,
+    minWidth: 875,
+  },
+  {
+    Header: "Supported types",
+    id: "supported_types",
+    accessor: (r) => {
+        let supported;
+        if (r.type === "observable"){
+            supported = r.observable_supported;
+        } else {
+            supported = r.supported_filetypes;
+        }
+        console.log(supported);
+        if (supported.length === 0){supported.push("everything");}
+        console.log(supported);
+        return supported;
+    },
+    Cell: ({ value, }) => (
+      <ul className="d-flex flex-column align-items-start">
+        {value?.map((v) => (
+          <li key={v}>{v}</li>
+        ))}
+      </ul>
+    ),
+    disableSortBy: true,
+    Filter: SelectColumnFilter,
+    minWidth: 350,
+  },
+  {
+    Header: "Analyzers",
+    id: "analyzers",
+    disableSortBy: true,
+    Filter: DefaultColumnFilter,
+    accessor: (r) => (r.analyzers),
+    Cell: ({value, }) => (
+      <ul className="d-flex flex-column align-items-start">
+      {value?.map((v) => (
+        <li key={v}>{v}</li>
+      ))}
+    </ul>
+    ),
+    minWidth: 350,
+  },
+  {
+    Header: "Connectors",
+    id: "connectors",
+    disableSortBy: true,
+    Filter: DefaultColumnFilter,
+    accessor: (r) => (r.connectors),
+    Cell: ({value, }) => (
+      <ul className="d-flex flex-column align-items-start">
+      {value?.map((v) => (
+        <li key={v}>{v}</li>
+      ))}
+    </ul>
+    ),
+    minWidth: 350,
+  }
+]
+
+export { analyzersTableColumns, connectorTableColumns, playbookTableColumns };

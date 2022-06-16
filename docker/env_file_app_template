@@ -80,6 +80,8 @@ SSAPINET_KEY=
 GOOGLE_APPLICATION_CREDENTIALS=/opt/deploy/intel_owl/configuration/service_account_keyfile.json
 MALPEDIA_KEY=
 GREEDYBEAR_API_KEY=
+MALPEDIA_TOKEN=
+YARA_KEY=
 # DEHASHED_AUTH_KEY format is `email:api-key`
 DEHASHED_AUTH_KEY=
 OPENCTI_KEY=

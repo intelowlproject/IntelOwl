@@ -4206,6 +4206,82 @@
       }
     }
   },
+  "Yara_File_Scan": {
+    "type": "file",
+    "python_module": "yara_file_scan.YaraFileScan",
+    "description": "scan a file against public and non-public YARA and ClamAV signatures",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "supported_filetypes": [
+      "application/x-binary",
+      "application/x-dosexec",
+      "application/x-executable",
+      "application/x-macbinary",
+      "application/mac-binary",
+      "application/octet-stream",
+      "application/zip",
+      "application/x-zip-compressed",
+      "application/x-compressed",
+      "multipart/x-zip"
+    ],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "long"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "YARA_KEY",
+        "description": "Optional identifier to associate this submission with",
+        "required": false
+      }
+    },
+    "params": {
+      "clamav_scan": {
+        "value": 1,
+        "type": "int",
+        "description": "Defines whether to scan the file with ClamAV. Possible values: 0 or 1."
+      },
+      "unpack": {
+        "value": 0,
+        "type": "int",
+        "description": "Defines whether to unpack the file. Possible values: 0 or 1."
+      },
+      "share_file": {
+        "value": 0,
+        "type": "int",
+        "description": "Defines whether the file is public and may be shared with 3rd parties. Possible values: 0 or 1."
+      }
+    }
+  },
+  "Yara_Generics": {
+    "type": "observable",
+    "python_module": "yara_generics.YaraGenerics",
+    "description": "lookup a YARA rule (default), ClamAV rule, imphash, TLSH, telfhash or icon_dash in YARAify",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": [
+      "generic"
+    ],
+    "config": {
+      "soft_time_limit": 300,
+      "queue": "default"
+    },
+    "secrets": {},
+    "params": {
+      "query": {
+        "value": "get_yara",
+        "type": "str",
+        "description": "using: 'get_yara' for YARA rule (default), 'get_clamav' for ClamAV signature, 'get_imphash' for imphash, 'get_tlsh' for TLSH, 'get_telfhash' for telfhash or 'get_dhash_icon' for icon_dash"
+      },
+      "result_max": {
+        "value": "25",
+        "type": "str",
+        "description": "Max number of results you want to display (default: 25, max: 1'000)"
+      }
+    }
+  },
   "Yara_Scan_ATM_MALWARE": {
     "type": "file",
     "python_module": "yara_scan.YaraScan",
@@ -4608,6 +4684,29 @@
         "description": ""
       }
     }
+  },
+  "Yara_Search": {
+    "type": "observable",
+    "python_module": "yara_search.YaraSearch",
+    "description": "lookup a file hash in YARAify",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": [
+      "hash"
+    ],
+    "config": {
+      "soft_time_limit": 300,
+      "queue": "default"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "MALPEDIA_TOKEN",
+        "description": "If you provide your malpedia-token, you will receive results from public AND non-public YARA rules.",
+        "required": false
+      }
+    },
+    "params": {}
   },
   "YETI": {
     "type": "observable",

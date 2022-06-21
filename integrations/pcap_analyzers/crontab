@@ -1,3 +1,2 @@
 # once a day
 0 0 * * * suricata-update update-sources 2>&1 >> /var/log/cron.log && suricata-update 2>&1 >> /var/log/cron.log
-a

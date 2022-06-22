@@ -9,7 +9,7 @@ from typing import Dict
 import requests
 
 from api_app.analyzers_manager.classes import FileAnalyzer
-from api_app.analyzers_manager.observable_analyzers.yara_search import YaraSearch
+from api_app.analyzers_manager.observable_analyzers.yaraify import YARAify
 from tests.mock_utils import MockResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)

@@ -8,13 +8,13 @@ import requests
 
 from typing import Dict
 from api_app.analyzers_manager.classes import FileAnalyzer
-from api_app.analyzers_manager.observable_analyzers.yara_search import YaraSearch
+from api_app.analyzers_manager.observable_analyzers.yaraify import YARAify
 
 from tests.mock_utils import MockResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
-class YaraFileScan(FileAnalyzer, YaraSearch):
+class YARAifyFileScan(FileAnalyzer, YARAify):
     def set_params(self, params):
         self.url: str = "https://yaraify-api.abuse.ch/api/v1/"
         self.__api_key_identifier = self._secrets["api_key_identifier"]

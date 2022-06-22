@@ -42,7 +42,6 @@ def maxmind_updater():
 @shared_task(soft_time_limit=60)
 def yara_updater():
     yara_scan.YaraScan.yara_update_repos()
-    yara_scan.YaraScan.yara_update_url()
 
 
 @app.task(name="start_analyzers", soft_time_limit=100)

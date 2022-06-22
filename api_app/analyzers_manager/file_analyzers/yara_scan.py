@@ -115,38 +115,29 @@ class YaraScan(FileAnalyzer):
         found_yara_dirs = []
         for analyzer_name, ac in analyzer_config.items():
             if analyzer_name.startswith("Yara_Scan"):
-                yara_dirs = ac.param_values.get("git_repo_main_dir", [])
-                if not yara_dirs:
-                    # fall back to required key
+                if analyzer_name == "Yara_Scan_YARAify_Rules":
                     yara_dirs = ac.param_values.get("directories_with_rules", [])
                     found_yara_dirs.extend(yara_dirs)
-                # customize it as you wish
-                for yara_dir in yara_dirs:
-                    if os.path.isdir(yara_dir):
-                        repo = Repo(yara_dir)            
-                        o = repo.remotes.origin
-                        o.pull()
-                        logger.info(f"pull repo on {yara_dir} dir")
-                    else:
-                        logger.warning(f"yara dir {yara_dir} does not exist")
-
+                    yara_urls = ac.param_values.get("url", [])
+                    for yara_url in yara_urls:
+                        dir = "/opt/deploy/yara/yaraify_rules/rules"
+                        response = requests.get(yara_url, stream =True)
+                        zipfile_ = zipfile.ZipFile(io.BytesIO(response.content))
+                        zipfile_.extractall(dir)
+                        logger.info(f"download {yara_url}")
+                else:
+                    yara_dirs = ac.param_values.get("git_repo_main_dir", [])
+                    if not yara_dirs:
+                        # fall back to required key
+                        yara_dirs = ac.param_values.get("directories_with_rules", [])
+                    found_yara_dirs.extend(yara_dirs)
+                    # customize it as you wish
+                    for yara_dir in yara_dirs:
+                        if os.path.isdir(yara_dir):
+                            repo = Repo(yara_dir)            
+                            o = repo.remotes.origin
+                            o.pull()
+                            logger.info(f"pull repo on {yara_dir} dir")
+                        else:
+                            logger.warning(f"yara dir {yara_dir} does not exist")
         return found_yara_dirs
-
-    @staticmethod
-    def yara_update_url():
-        logger.info("started downloading rules from YARAhub")
-        analyzer_config = AnalyzerConfig.all()
-        for analyzer_name, ac in analyzer_config.items():
-            yara_dirs = ac.param_values.get("directories_with_rules", [])
-            if analyzer_name.startswith("Yara_Scan"):
-                yara_urls = ac.param_values.get("url", [])
-                for yara_url in yara_urls:
-                    dir = "/opt/deploy/yara/yaraify_rules/rules"
-
-                    response = requests.get(yara_url, stream =True)
-                    zipfile_ = zipfile.ZipFile(io.BytesIO(response.content))
-                    zipfile_.extractall(dir)
-
-                    logger.info(f"download {yara_url}")
-                           
-        return yara_dirs

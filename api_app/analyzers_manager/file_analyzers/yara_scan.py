@@ -4,10 +4,10 @@
 import io
 import logging
 import os
-from typing import List, Tuple
-import requests
 import zipfile
+from typing import List, Tuple
 
+import requests
 import yara
 from git import Repo
 
@@ -141,3 +141,4 @@ class YaraScan(FileAnalyzer):
                         else:
                             logger.warning(f"yara dir {yara_dir} does not exist")
         return found_yara_dirs
+

@@ -4,10 +4,10 @@
 import io
 import logging
 import os
-from typing import List, Tuple
-import requests
 import zipfile
+from typing import List, Tuple
 
+import requests
 import yara
 from git import Repo
 
@@ -123,7 +123,7 @@ class YaraScan(FileAnalyzer):
                 # customize it as you wish
                 for yara_dir in yara_dirs:
                     if os.path.isdir(yara_dir):
-                        repo = Repo(yara_dir)            
+                        repo = Repo(yara_dir)
                         o = repo.remotes.origin
                         o.pull()
                         logger.info(f"pull repo on {yara_dir} dir")
@@ -143,10 +143,10 @@ class YaraScan(FileAnalyzer):
                 for yara_url in yara_urls:
                     dir = "/opt/deploy/yara/yaraify_rules/rules"
 
-                    response = requests.get(yara_url, stream =True)
+                    response = requests.get(yara_url, stream=True)
                     zipfile_ = zipfile.ZipFile(io.BytesIO(response.content))
                     zipfile_.extractall(dir)
 
                     logger.info(f"download {yara_url}")
-                           
+
         return yara_dirs

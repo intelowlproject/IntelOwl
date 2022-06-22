@@ -2,6 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 
 import json
+
 import requests
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer

@@ -3,8 +3,9 @@
 
 
 import json
-import requests
 import logging
+
+import requests
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
 from api_app.exceptions import AnalyzerRunException
@@ -12,22 +13,22 @@ from tests.mock_utils import MockResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
+
 class YaraSearch(ObservableAnalyzer):
-        
     def run(self):
         self.url: str = "https://yaraify-api.abuse.ch/api/v1/"
         self.query = "lookup_hash"
         self.search_term = self.observable_name
-        
+
         return self.scan()
-              
+
     def scan(self):
         self.__api_key = self._secrets["api_key_name"]
 
         data = {
-            'query': self.query,
-            'search_term' : self.search_term,
-            'malpedia-token' : self.__api_key
+            "query": self.query,
+            "search_term": self.search_term,
+            "malpedia-token": self.__api_key,
         }
 
         json_data = json.dumps(data)

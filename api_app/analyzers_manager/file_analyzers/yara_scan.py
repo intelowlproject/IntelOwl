@@ -121,7 +121,7 @@ class YaraScan(FileAnalyzer):
                     yara_urls = ac.param_values.get("url", [])
                     for yara_url in yara_urls:
                         dir = "/opt/deploy/yara/yaraify_rules/rules"
-                        response = requests.get(yara_url, stream =True)
+                        response = requests.get(yara_url, stream=True)
                         zipfile_ = zipfile.ZipFile(io.BytesIO(response.content))
                         zipfile_.extractall(dir)
                         logger.info(f"download {yara_url}")
@@ -134,11 +134,10 @@ class YaraScan(FileAnalyzer):
                     # customize it as you wish
                     for yara_dir in yara_dirs:
                         if os.path.isdir(yara_dir):
-                            repo = Repo(yara_dir)            
+                            repo = Repo(yara_dir)
                             o = repo.remotes.origin
                             o.pull()
                             logger.info(f"pull repo on {yara_dir} dir")
                         else:
                             logger.warning(f"yara dir {yara_dir} does not exist")
         return found_yara_dirs
-

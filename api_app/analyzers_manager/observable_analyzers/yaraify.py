@@ -48,7 +48,6 @@ class YARAify(ObservableAnalyzer):
         result = response.json()
         return result
 
-
     @classmethod
     def _monkeypatch(cls):
         patches = [

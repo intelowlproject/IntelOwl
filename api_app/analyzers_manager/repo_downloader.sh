@@ -97,3 +97,11 @@ wget "https://exiftool.org/Image-ExifTool-$version.tar.gz"
 gzip -dc "Image-ExifTool-$version.tar.gz" | tar -xf -
 cd "Image-ExifTool-$version"
 chown -R www-data:www-data /opt/deploy/exiftool_download
+
+#Download YARAify rules
+cd /opt/deploy/yara
+mkdir yaraify_rules
+cd yaraify_rules
+curl https://yaraify-api.abuse.ch/download/yaraify-rules.zip --output yaraify-rules.zip
+unzip yaraify-rules.zip -d rules
+chown -R www-data:www-data /opt/deploy/yara/yaraify_rules

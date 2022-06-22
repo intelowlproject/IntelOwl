@@ -1,9 +1,12 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
+import io
 import logging
 import os
 from typing import List, Tuple
+import requests
+import zipfile
 
 import yara
 from git import Repo
@@ -120,7 +123,7 @@ class YaraScan(FileAnalyzer):
                 # customize it as you wish
                 for yara_dir in yara_dirs:
                     if os.path.isdir(yara_dir):
-                        repo = Repo(yara_dir)
+                        repo = Repo(yara_dir)            
                         o = repo.remotes.origin
                         o.pull()
                         logger.info(f"pull repo on {yara_dir} dir")
@@ -128,3 +131,22 @@ class YaraScan(FileAnalyzer):
                         logger.warning(f"yara dir {yara_dir} does not exist")
 
         return found_yara_dirs
+
+    @staticmethod
+    def yara_update_url():
+        logger.info("started downloading rules from YARAhub")
+        analyzer_config = AnalyzerConfig.all()
+        for analyzer_name, ac in analyzer_config.items():
+            yara_dirs = ac.param_values.get("directories_with_rules", [])
+            if analyzer_name.startswith("Yara_Scan"):
+                yara_urls = ac.param_values.get("url", [])
+                for yara_url in yara_urls:
+                    dir = "/opt/deploy/yara/yaraify_rules/rules"
+
+                    response = requests.get(yara_url, stream =True)
+                    zipfile_ = zipfile.ZipFile(io.BytesIO(response.content))
+                    zipfile_.extractall(dir)
+
+                    logger.info(f"download {yara_url}")
+                           
+        return yara_dirs

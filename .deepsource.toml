@@ -21,11 +21,3 @@ enabled = true
     "docker/Dockerfile",
     "docker/Dockerfile_nginx"
   ]
-
-[[transformers]]
-name = "black"
-enabled = true
-
-[[transformers]]
-name = "isort"
-enabled = true

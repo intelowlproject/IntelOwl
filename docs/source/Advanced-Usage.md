@@ -5,10 +5,10 @@ This page includes details about some advanced features that Intel Owl provides 
 - [Advanced Usage](#advanced-usage)
   - [Optional Analyzers](#optional-analyzers)
   - [Customize analyzer execution at time of request](#customize-analyzer-execution-at-time-of-request)
-      - [View and understand different parameters](#view-and-understand-different-parameters)
-      - [from the GUI](#from-the-gui)
-      - [from Pyintelowl](#from-pyintelowl)
-      - [CyberChef](#cyberchef)
+    - [View and understand different parameters](#view-and-understand-different-parameters)
+    - [from the GUI](#from-the-gui)
+    - [from Pyintelowl](#from-pyintelowl)
+    - [CyberChef](#cyberchef)
   - [Analyzers with special configuration](#analyzers-with-special-configuration)
   - [Organizations and data sharing](#organizations-and-data-sharing)
   - [Notifications](#notifications)
@@ -115,7 +115,6 @@ Otherwise you can enable just one of the cited integration by using the related 
 python3 start.py prod --tor_analyzers up
 ```
 
-
 ## Customize analyzer execution at time of request
 
 Some analyzers and connectors provide the chance to customize the performed analysis based on parameters (`params` attr in the configuration file) that are different for each analyzer.
@@ -185,7 +184,10 @@ Some analyzers could require a special configuration:
   You should follow the [official guide](https://cloud.google.com/web-risk/docs/quickstart) for creating the key.
   Then you can copy the generated JSON key file in the directory `configuration` of the project and change its name to `service_account_keyfile.json`.
   This is the default configuration. If you want to customize the name or the location of the file, you can change the environment variable `GOOGLE_APPLICATION_CREDENTIALS` in the `env_file_app` file.
-- `ClamAV`: this Docker-based analyzer using `clamd` daemon as it's scanner, communicating with `clamdscan` utility to scan files. The daemon requires 2 different configuration files: `clamd.conf`(daemon's config) and `freshclam.conf` (virus database updater's config). These files are mounted as docker volumes and hence, can be edited by the user as per needs.
+- `ClamAV`: this Docker-based analyzer using `clamd` daemon as it's scanner, communicating with `clamdscan` utility to scan files. The daemon requires 2 different configuration files: `clamd.conf`(daemon's config) and `freshclam.conf` (virus database updater's config). These files are mounted as docker volumes in `/integrations/malware_tools_analyzers/clamav` and hence, can be edited by the user as per needs, without restarting the application.
+- `Suricata`: you can customize the behavior of Suricata because IntelOwl mounts the following 2 folders as docker volumes (so you can change its content at runtime without restarting the application):
+  - `/integrations/pcap_analyzers/config/suricata/rules`: here there are Suricata rules. You can change the `custom.rules` files to add your own rules at any time.
+  - `/integrations/pcap_analyzers/config/suricata/etc`: here there are Suricata configuration files. Change it based on your wish
 
 ## Organizations and data sharing
 
@@ -208,7 +210,6 @@ in the app_name field, please remember to use `intelowl` as the app name.
 Everytime a new release is installed, once the backend goes up it will automatically create a new notification,
 having as content the latest changes described in the [CHANGELOG.md](https://github.com/intelowlproject/IntelOwl/blob/master/.github/CHANGELOG.md),
 allowing the users to keep track of the changes inside intelowl itself.
-
 
 ## Elastic Search
 

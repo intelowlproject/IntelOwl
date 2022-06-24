@@ -38,6 +38,7 @@ class Suricata(FileAnalyzer, DockerBasedAnalyzer):
             signature = detection.get("alert", {}).get("signature")
             if signature:
                 signatures.append(signature)
-        report["signatures"] = signatures
+        # remove duplicates
+        report["signatures"] = list(set(signatures))
 
         return report

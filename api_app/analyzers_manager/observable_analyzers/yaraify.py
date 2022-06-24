@@ -2,11 +2,13 @@
 # See the file 'LICENSE' for copying permission.
 
 import json
+
 import requests
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
 from api_app.exceptions import AnalyzerRunException
 from tests.mock_utils import MockResponse, if_mock_connections, patch
+
 
 class YARAify(ObservableAnalyzer):
     def set_params(self, params):
@@ -26,7 +28,7 @@ class YARAify(ObservableAnalyzer):
         else:
             self.__api_key = self._secrets["api_key_name"]
             self.data["malpedia-token"] = self.__api_key
-        
+
         self.data["query"] = self.query
 
     def run(self):

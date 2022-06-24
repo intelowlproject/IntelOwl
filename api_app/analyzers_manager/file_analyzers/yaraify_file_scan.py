@@ -14,6 +14,7 @@ from tests.mock_utils import MockResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
+
 class YARAifyFileScan(FileAnalyzer, YARAify):
     def set_params(self, params):
         YARAify.set_params(self, params)

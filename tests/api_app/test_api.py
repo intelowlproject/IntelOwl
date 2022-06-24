@@ -79,6 +79,33 @@ class ApiViewTests(TestCase):
         )
         self.assertEqual(response.status_code, 200)
 
+    def test_analyze_file__pcap(self):
+        # with noone, only the PCAP analyzers should be executed
+        analyzers_requested = []
+        file_name = "example.exe"
+        uploaded_file, md5 = self.__get_test_file(file_name)
+        file_mimetype = "application/vnd.tcpdump.pcap"
+        data = {
+            "file": uploaded_file,
+            "analyzers_requested": analyzers_requested,
+            "file_name": file_name,
+            "file_mimetype": file_mimetype,
+        }
+
+        response = self.client.post("/api/analyze_file", data, format="multipart")
+        content = response.json()
+        msg = (response.status_code, content)
+        self.assertEqual(response.status_code, 200, msg=msg)
+
+        job_id = int(content["job_id"])
+        job = models.Job.objects.get(pk=job_id)
+        self.assertEqual(file_name, job.file_name)
+        self.assertEqual(file_mimetype, job.file_mimetype)
+        self.assertEqual(md5, job.md5)
+        self.assertListEqual(analyzers_requested, job.analyzers_requested)
+        # there is only Suricata right now
+        self.assertListEqual(["Suricata"], job.analyzers_to_execute)
+
     def test_analyze_file__corrupted_sample(self):
         analyzers_requested = [
             "File_Info",

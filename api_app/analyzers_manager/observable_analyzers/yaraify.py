@@ -2,42 +2,35 @@
 # See the file 'LICENSE' for copying permission.
 
 import json
-
 import requests
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
 from api_app.exceptions import AnalyzerRunException
 from tests.mock_utils import MockResponse, if_mock_connections, patch
 
-
 class YARAify(ObservableAnalyzer):
     def set_params(self, params):
+        self.url: str = "https://yaraify-api.abuse.ch/api/v1/"
         self.search_term = self.observable_name
 
-        if self.observable_classification == self.ObservableTypes.HASH:
-            self.query = "lookup_hash"
-        else:
-            self.query = params.get("query", "get_yara")
-            self.result_max = params.get("result_max", "25")
-
-    def run(self):
-        self.url: str = "https://yaraify-api.abuse.ch/api/v1/"
-
-        return self.scan()
-
-    def scan(self):
-        data = {
-            "query": self.query,
+        self.data = {
             "search_term": self.search_term,
         }
 
+        self.query: str = "lookup_hash"
+
         if self.observable_classification == self.ObservableTypes.GENERIC:
-            data["result_max"] = self.result_max
+            self.query: str = params.get("query", "get_yara")
+            self.result_max: int = params.get("result_max", 25)
+            self.data["result_max"] = self.result_max
         else:
             self.__api_key = self._secrets["api_key_name"]
-            data["malpedia-token"] = self.__api_key
+            self.data["malpedia-token"] = self.__api_key
+        
+        self.data["query"] = self.query
 
-        json_data = json.dumps(data)
+    def run(self):
+        json_data = json.dumps(self.data)
 
         try:
             response = requests.post(self.url, data=json_data)

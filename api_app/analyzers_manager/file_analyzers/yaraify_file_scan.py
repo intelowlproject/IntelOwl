@@ -14,15 +14,16 @@ from tests.mock_utils import MockResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
-
 class YARAifyFileScan(FileAnalyzer, YARAify):
     def set_params(self, params):
-        self.url: str = "https://yaraify-api.abuse.ch/api/v1/"
+        YARAify.set_params(self, params)
+        self.search_term = self.md5
+        self.data["search_term"] = self.search_term
         self.__api_key_identifier = self._secrets["api_key_identifier"]
 
-        self.clamav_scan = params.get("clamav_scan", 1)
-        self.unpack = params.get("unpack", 0)
-        self.share_file = params.get("share_file", 0)
+        self.clamav_scan: int = params.get("clamav_scan", 1)
+        self.unpack: int = params.get("unpack", 0)
+        self.share_file: int = params.get("share_file", 0)
 
         self.max_tries = 200
         self.poll_distance = 3
@@ -31,7 +32,7 @@ class YARAifyFileScan(FileAnalyzer, YARAify):
         name_to_send = self.filename if self.filename else self.md5
         file = self.read_file_bytes()
 
-        hash_scan = self.before_file_scan(self.md5)
+        hash_scan = YARAify.run(self)
         query_status = hash_scan.get("query_status")
 
         if query_status == "ok":
@@ -61,12 +62,6 @@ class YARAifyFileScan(FileAnalyzer, YARAify):
 
         result = response.json()
         return result
-
-    def before_file_scan(self, hash) -> Dict:
-        self.search_term = hash
-        self.query = "lookup_hash"
-
-        return self.scan()
 
     @classmethod
     def _monkeypatch(cls):

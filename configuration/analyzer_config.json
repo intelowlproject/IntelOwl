@@ -4668,8 +4668,8 @@
         "description": "using: 'get_yara' for YARA rule (default), 'get_clamav' for ClamAV signature, 'get_imphash' for imphash, 'get_tlsh' for TLSH, 'get_telfhash' for telfhash or 'get_dhash_icon' for icon_dash"
       },
       "result_max": {
-        "value": "25",
-        "type": "str",
+        "value": 25,
+        "type": "int",
         "description": "Max number of results you want to display (default: 25, max: 1'000)"
       }
     }

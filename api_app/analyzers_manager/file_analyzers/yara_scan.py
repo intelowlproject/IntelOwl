@@ -120,11 +120,10 @@ class YaraScan(FileAnalyzer):
                     yara_dirs = ac.param_values.get("directories_with_rules", [])
                 yara_urls = ac.param_values.get("url", [])
                 if yara_urls:
-                    dir = "/opt/deploy/yara/yaraify_rules/rules"
-                    for yara_url in yara_urls:
+                    for yara_url, yara_dir in zip(yara_urls, yara_dirs):
                         response = requests.get(yara_url, stream=True)
                         zipfile_ = zipfile.ZipFile(io.BytesIO(response.content))
-                        zipfile_.extractall(dir)
+                        zipfile_.extractall(yara_dir)
                         logger.info(f"download {yara_url}")
                 else:
                     for yara_dir in yara_dirs:

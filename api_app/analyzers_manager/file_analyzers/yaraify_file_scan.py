@@ -18,7 +18,6 @@ class YARAifyFileScan(FileAnalyzer, YARAify):
     def set_params(self, params):
         YARAify.set_params(self, params)
         self.search_term = self.md5
-        self.data["search_term"] = self.search_term
         self.__api_key_identifier = self._secrets["api_key_identifier"]
 
         self.clamav_scan: int = params.get("clamav_scan", 1)

@@ -4,7 +4,7 @@
   "private": true,
   "proxy": "http://localhost:80/",
   "dependencies": {
-    "@certego/certego-ui": "^0.1.0",
+    "@certego/certego-ui": "^0.1.1",
     "axios": "^0.27.2",
     "axios-hooks": "^3.0.4",
     "bootstrap": "^5.1.3",

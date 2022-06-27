@@ -26,7 +26,7 @@ log_path = os.getenv("LOG_PATH", "/var/log/intel_owl/pcap_analyzers")
 fh = logging.FileHandler(f"{log_path}/pcap_analyzers.log")
 fh.setFormatter(formatter)
 fh.setLevel(log_level)
-fh_err = logging.FileHandler(f"{log_path}/pcap_analyzers.log")
+fh_err = logging.FileHandler(f"{log_path}/pcap_analyzers_errors.log")
 fh_err.setFormatter(formatter)
 fh_err.setLevel(logging.ERROR)
 # add the handlers to the logger
@@ -76,9 +76,11 @@ def intercept_suricata_result(context, future: Future) -> None:
                         break
             except Exception as e:
                 res["error"] += str(e)
-                logger.exception(e)
+                logger.warning(e, stack_info=True)
             logger.debug("report empty, waiting")
             time.sleep(poll_interval)
+        if not res["report"]["data"]:
+            logger.error(f"no data extracted. Errors: {res['error']}")
 
     # 3. set final result after modifications
     future._result = res
@@ -89,6 +91,6 @@ def intercept_suricata_result(context, future: Future) -> None:
 
 shell2http.register_command(
     endpoint="suricata",
-    command_name="./check_pcap.sh",
+    command_name="python3 check_pcap.py",
     callback_fn=intercept_suricata_result,
 )

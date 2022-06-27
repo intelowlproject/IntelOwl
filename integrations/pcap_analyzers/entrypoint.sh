@@ -7,6 +7,7 @@ suricata-update update-sources
 suricata-update
 crond
 crontab /etc/cron.d/suricata
+suricata --unix-socket=/tmp/suricata.socket &
 exec gunicorn 'app:app' \
     --bind '0.0.0.0:4004' \
     --user ${USER} \

@@ -3,7 +3,7 @@ ARG INTELOWL_NG_TAG_VERSION="v3.1.0"
 FROM intelowlproject/intelowl_ng:${INTELOWL_NG_TAG_VERSION} AS angular-prod-build
 
 # Stage 2: Inject the build artifacts into nginx container
-FROM library/nginx:1.21-alpine
+FROM library/nginx:1.23.0-alpine
 
 COPY --from=angular-prod-build /usr/src/app/dist /var/www/angular_build
 

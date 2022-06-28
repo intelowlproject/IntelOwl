@@ -4623,7 +4623,7 @@
         "required": false
       },
       "api_key_identifier": {
-        "env_var_key": "YARA_KEY",
+        "env_var_key": "YARAIFY_KEY",
         "description": "Optional identifier to associate this submission with",
         "required": false
       }

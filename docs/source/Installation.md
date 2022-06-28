@@ -144,7 +144,7 @@ In the `env_file_app`, configure different variables as explained below.
 * `STALKPHISH_KEY`: Stalkphish.io API key. [Register here](https://www.stalkphish.io/accounts/register/).
 * `GREEDYBEAR_API_KEY`: GreedyBear API key
 * `MALPEDIA_TOKEN`: your own Malpedia token
-* `YARA_KEY`: YARAify identifier ([docs](https://yaraify.abuse.ch/api/#identifiers))
+* `YARAIFY_KEY`: YARAify identifier ([docs](https://yaraify.abuse.ch/api/#identifiers))
 
 **Optional** variables needed to work with specific connectors:
 * `CONNECTOR_MISP_KEY`: your own MISP instance key to use with `MISP` connector

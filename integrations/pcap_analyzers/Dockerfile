@@ -7,11 +7,11 @@ RUN useradd -ms /bin/bash ${USER}
 
 # Build Flask REST API
 WORKDIR ${PROJECT_PATH}/pcap_analyzers-flask
-COPY app.py requirements.txt entrypoint.sh check_pcap.py ./
+COPY app.py requirements.txt entrypoint.sh ./
+COPY check_pcap.py update_signatures.sh /
 COPY crontab /etc/cron.d/suricata
 RUN pip3 install -r requirements.txt --no-cache-dir \
     && chown -R ${USER}:${USER} . /etc/suricata /var/lib/suricata \
-    && chmod +x entrypoint.sh \
     && touch /var/log/cron.log \
     && chmod 0644 /etc/cron.d/suricata /var/log/cron.log
 

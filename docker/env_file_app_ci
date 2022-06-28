@@ -79,6 +79,8 @@ BITCOINABUSE_KEY=test
 VIRUSHEE_API_KEY=test
 STALKPHISH_KEY=test
 GREEDYBEAR_API_KEY=test
+MALPEDIA_TOKEN=test
+YARAIFY_KEY=test
 
 # connectors secrets (optional)
 CONNECTOR_MISP_KEY=test

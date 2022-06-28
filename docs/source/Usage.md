@@ -158,9 +158,9 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `OTX_Check_Hash`: check file hash on [Alienvault OTX](https://otx.alienvault.com/)
 * `MISP_Check_Hash`: check a file hash on a MISP instance
 * `MISPFIRST_Check_Hash`: check a file hash on the FIRST MISP instance
+* `YARAify_File_Scan`: scan a file against public and non-public YARA and ClamAV signatures
 * `Yara_Scan_ATM_MALWARE`: scan a file with the [ATM malware yara rules](https://github.com/fboldewin/YARA-rules)
 * `Yara_Scan_Bartblaze`: scan a file with [bartblaze yara rules](https://github.com/bartblaze/Yara-rules)
-* `Yara_Scan_MALPEDIA`: scan a file with the [MALPEDIA yara rules](https://github.com/malpedia/signator-rules)
 * `Yara_Scan_Community`: scan a file with the [community yara rules](https://github.com/Yara-Rules/rules)
 * `Yara_Scan_Dail_Ioc`: scan a file with [StrangerealIntel](https://github.com/StrangerealIntel) Daily IOC yara rules
 * `Yara_Scan_Florian`: scan a file with [Neo23x0 yara rules](https://github.com/Neo23x0/signature-base)
@@ -172,6 +172,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `Yara_Scan_FireEye`: scan a file with FireEye yara rules
 * `Yara_Scan_ReversingLabs`: scan a file with [ReversingLabs yara rules](https://github.com/reversinglabs/reversinglabs-yara-rules)
 * `Yara_Scan_Custom_Signatures`: scan a file with your own added signatures
+* `Yara_Scan_YARAify_Rules`: scan a file with YARAify rules [YARAify rules](https://yaraify.abuse.ch/api/#download-yara-package)
 * `MalwareBazaar_Get_File`: Check if a particular malware sample is known to [MalwareBazaar](https://bazaar.abuse.ch/)
 * `PEframe_Scan`: Perform static analysis on Portable Executable malware and malicious MS Office documents with [PeFrame](https://github.com/guelfoweb/peframe)
 * `Cymru_Hash_Registry_Get_File`: Check if a particular file is known to be malware by [Team Cymru](https://team-cymru.com/community-services/mhr/)
@@ -284,6 +285,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `Virushee_CheckHash`: Search for a previous analysis of a file by its hash (SHA256/SHA1/MD5) on [Virushee API](https://api.virushee.com/).
 * `Anomali_Threatstream_PassiveDNS`: Return information from passive dns of Anomali. On [Anomali Threatstream](https://www.anomali.com/products/threatstream) PassiveDNS Api. 
 * `DocGuard_Get`: check if an hash was analyzed on DocGuard. [DocGuard](https://www.docguard.io)
+* `YARAify_Search`: lookup a file hash in YARAify
 
 ##### Generic analyzers (email, phone number, etc.; anything really)
 Some analyzers require details other than just IP, URL, Domain, etc. We classified them as `generic` Analyzers. Since the type of field is not known, there is a format for strings to be followed.
@@ -300,6 +302,7 @@ Some analyzers require details other than just IP, URL, Domain, etc. We classifi
 * `Anomali_Threatstream_Intelligence`: Search for threat intelligence information about an observable. On [Anomali Threatstream](https://www.anomali.com/products/threatstream) Intelligence API. 
 * `VirusTotal_v3_Intelligence_Search`: Perform advanced queries with [VirusTotal Intelligence](https://developers.virustotal.com/reference/intelligence-search) (requires paid plan)
 * `MISP`: scan an observable on a MISP instance
+* `YARAify_Generics`: lookup a YARA rule (default), ClamAV rule, imphash, TLSH, telfhash or icon_dash in YARAify
 
 ##### Extra analyzers
 [Additional analyzers](Advanced-Usage.html#optional-analyzers) that can be enabled per your wish.

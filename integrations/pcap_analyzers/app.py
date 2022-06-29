@@ -54,7 +54,7 @@ def intercept_suricata_result(context, future: Future) -> None:
             res["returncode"] = -1
     else:
         res["report"] = {"data": []}
-        with open(f"{directory}/eve.json", "r") as fp:
+        with open(f"{directory}/eve.json", "r", encoding="utf_8") as fp:
             for line in fp:
                 try:
                     res["report"]["data"].append(json.loads(line))

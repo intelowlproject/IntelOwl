@@ -8,7 +8,6 @@ import os
 # system imports
 import secrets
 import shutil
-import time
 
 # web imports
 from flask import Flask
@@ -54,29 +53,14 @@ def intercept_suricata_result(context, future: Future) -> None:
         if res.get("returncode", -1) == 0:
             res["returncode"] = -1
     else:
-        max_tries = 60
-        poll_interval = 2
         res["report"] = {"data": []}
-        for try_ in range(max_tries):
-            try:
-                with open(f"{directory}/eve.json", "r") as fp:
-                    for line in fp:
-                        try:
-                            res["report"]["data"].append(json.loads(line))
-                        except json.JSONDecodeError as e:
-                            logger.debug(e)
-                            res["report"]["data"].append(fp.read())
-                    # this means that Suricata has finished its computation
-                    if res["report"].get("data"):
-                        logger.info("report found, stop the loop")
-                        break
-            except Exception as e:
-                res["error"] += str(e)
-                logger.warning(e, stack_info=True)
-            logger.debug("report empty, waiting")
-            time.sleep(poll_interval)
-        if not res["report"]["data"]:
-            logger.error(f"no data extracted. Errors: {res['error']}")
+        with open(f"{directory}/eve.json", "r") as fp:
+            for line in fp:
+                try:
+                    res["report"]["data"].append(json.loads(line))
+                except json.JSONDecodeError as e:
+                    logger.debug(e)
+                    res["report"]["data"].append(fp.read())
 
     # 3. set final result after modifications
     future._result = res

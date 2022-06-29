@@ -22,7 +22,7 @@ class Suricata(FileAnalyzer, DockerBasedAnalyzer):
         binary = self.read_file_bytes()
         # make request data
         fname = str(self.filename).replace("/", "_").replace(" ", "_")
-        args = [f"@{fname}", f"{self.md5}", "verbose" if self.verbose else ""]
+        args = [f"@{fname}", f"{self.md5}"]
         # the result file is the same one that should be configured in suricata.yml
         req_data = {
             "args": args,

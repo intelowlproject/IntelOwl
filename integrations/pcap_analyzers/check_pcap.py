@@ -5,7 +5,6 @@ import json
 import logging
 import os
 import select
-import shutil
 import time
 from socket import AF_UNIX, socket
 
@@ -40,43 +39,37 @@ class Suricata:
             parser = argparse.ArgumentParser()
             parser.add_argument("filename", type=str)
             parser.add_argument("file_md5", type=str)
-            parser.add_argument("verbose", type=bool)
             args = parser.parse_args()
             logger.info(
-                f"received args: filename: {args.filename}, "
-                f"md5: {args.file_md5}, verbose: {args.verbose}"
+                f"received args: filename: {args.filename}, " f"md5: {args.file_md5}"
             )
             filename = str(args.filename)
-            logger.info(f"filename type {type(filename)}")
 
             analysis_dir = f"/tmp/eve_{args.file_md5}"
-            if os.path.exists(analysis_dir):
-                raise Exception(
-                    f"the analysis dir {analysis_dir} should not already exist"
-                )
-            os.mkdir(analysis_dir)
+            os.mkdir(analysis_dir, 0o777)
+            # this analysis dir is removed in the interception function in app.py
 
             # this must be the same name chosen for the Suricata Socket
             self.s.connect("/tmp/suricata.socket")
             self.s.settimeout(10)
 
-            logger.info("send version")
+            logger.info(f"send version, md5 {args.file_md5}")
             self.s.send(bytes(json.dumps({"version": "0.2"}), "iso-8859-1"))
-            logger.info("receiving result")
+            logger.info(f"receiving result, md5 {args.file_md5}")
             ready = select.select([self.s], [], [], 600)
             if ready[0]:
                 cmdret = self._json_recv()
             else:
-                raise Exception("unable to get message")
+                raise Exception(f"unable to get message, md5 {args.file_md5}")
             logger.info(f"result received: {cmdret}")
             if cmdret["return"] == "NOK":
-                raise Exception(f"error: {cmdret['message']}")
+                raise Exception(f"error: {cmdret['message']}, , md5 {args.file_md5}")
 
-            logger.info("send pcap file")
+            # https://suricata.readthedocs.io/en/latest/unix-socket.html
+            logger.info(f"send pcap file, md5 {args.file_md5}")
             cmdmsg = {
                 "command": "pcap-file",
-                "arguments": {"output-dir": analysis_dir},
-                "filename": filename,
+                "arguments": {"output-dir": analysis_dir, "filename": filename},
             }
             cmdstr = json.dumps(cmdmsg) + "\n"
             self.s.send(
@@ -85,17 +78,22 @@ class Suricata:
                     "iso-8859-1",
                 )
             )
-
-            logger.info("receiving result")
+            logger.info(f"receiving result, md5 {args.file_md5}")
             ready = select.select([self.s], [], [], 600)
             if ready[0]:
                 cmdret = self._json_recv()
             else:
-                raise Exception("unable to get message")
+                raise Exception(f"unable to get message, md5 {args.file_md5}")
             logger.info(f"result received: {cmdret}")
 
-            # todo manage verbose
-            shutil.rmtree(analysis_dir)
+            # waiting for eve.json to be populated
+            max_tries = 10
+            polling_time = 1
+            for try_ in range(max_tries):
+                if os.path.exists(analysis_dir + "/eve.json"):
+                    break
+                time.sleep(polling_time)
+
             self.s.close()
         except Exception as e:
             logger.exception(e)

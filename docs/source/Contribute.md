@@ -105,6 +105,7 @@ python3 start.py prod up
 <ul>
 <li>Running `prod` would be faster because you would leverage the official images and you won't need to build the backend locally. In case you would need to test backend changes too at the same time, please use `test` and refer to the previous section of the documentation.</li>
 <li>This works thanks to the directive `proxy` in the `frontend/package.json` configuration</li>
+<li>It may happen that the backend build does not work due to incompatibility between the frontend version you are testing with the current complete IntelOwl version you are running. In those cases, considering that you don't need to build the frontend together with the backend because you are already testing it separately, we suggest to remove the first build step (the frontend part) from the main Dockerfile temporarily and build IntelOwl with only the backend. In this way there won't be conflict issues.</li>
 </ul>
 </div>
 

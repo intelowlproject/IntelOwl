@@ -12,98 +12,14 @@ from rest_framework.exceptions import ValidationError
 from intel_owl.celery import app as celery_app
 from intel_owl.consts import DEFAULT_QUEUE
 
-from ..exceptions import AlreadyFailedJobException, NotRunnableAnalyzer
+from ..exceptions import AlreadyFailedJobException
 from ..helpers import get_now
-from ..models import TLP, Job
+from ..models import Job
 from .classes import BaseAnalyzerMixin, DockerBasedAnalyzer
 from .dataclasses import AnalyzerConfig
 from .models import AnalyzerReport
 
 logger = logging.getLogger(__name__)
-
-
-def filter_analyzers(serialized_data: Dict, warnings: List) -> List[str]:
-    # init empty list
-    cleaned_analyzer_list = []
-    selected_analyzers = []
-
-    # get values from serializer
-    analyzers_requested = serialized_data.get("analyzers_requested", [])
-    tlp = serialized_data.get("tlp", TLP.WHITE).upper()
-
-    # read config
-    analyzer_dataclasses = AnalyzerConfig.all()
-    all_analyzer_names = list(analyzer_dataclasses.keys())
-
-    # run all analyzers ?
-    run_all = len(analyzers_requested) == 0
-    if run_all:
-        # select all
-        selected_analyzers.extend(all_analyzer_names)
-    else:
-        # select the ones requested
-        selected_analyzers.extend(analyzers_requested)
-
-    for a_name in selected_analyzers:
-        try:
-            config = analyzer_dataclasses.get(a_name, None)
-
-            if not config:
-                if not run_all:
-                    raise NotRunnableAnalyzer(
-                        f"{a_name} won't run: not available in configuration"
-                    )
-                # don't add warning if run_all
-                continue
-
-            if not config.is_ready_to_use:
-                raise NotRunnableAnalyzer(
-                    f"{a_name} won't run: is disabled or unconfigured"
-                )
-
-            if serialized_data["is_sample"]:
-                if not config.is_type_file:
-                    raise NotRunnableAnalyzer(
-                        f"{a_name} won't be run because does not support files."
-                    )
-                if not config.is_filetype_supported(serialized_data["file_mimetype"]):
-                    raise NotRunnableAnalyzer(
-                        f"{a_name} won't be run because mimetype "
-                        f"{serialized_data['file_mimetype']} is not supported."
-                    )
-            else:
-                if not config.is_type_observable:
-                    raise NotRunnableAnalyzer(
-                        f"{a_name} won't be run because does not support observable."
-                    )
-
-                if not config.is_observable_type_supported(
-                    serialized_data["observable_classification"]
-                ):
-                    raise NotRunnableAnalyzer(
-                        f"{a_name} won't be run because does not support observable  "
-                        f"type {serialized_data['observable_classification']}."
-                    )
-
-            if tlp != TLP.WHITE and config.leaks_info:
-                raise NotRunnableAnalyzer(
-                    f"{a_name} won't be run because it leaks info externally."
-                )
-            if tlp == TLP.RED and config.external_service:
-                raise NotRunnableAnalyzer(
-                    f"{a_name} won't be run because you filtered external analyzers."
-                )
-        except NotRunnableAnalyzer as e:
-            if run_all:
-                # in this case, they are not warnings but expected and wanted behavior
-                logger.debug(e)
-            else:
-                logger.warning(e)
-                warnings.append(str(e))
-        else:
-            cleaned_analyzer_list.append(a_name)
-
-    return cleaned_analyzer_list
 
 
 def start_analyzers(
@@ -134,6 +50,7 @@ def start_analyzers(
 
         # if disabled or unconfigured (this check is bypassed in STAGE_CI)
         if not config.is_ready_to_use and not settings.STAGE_CI:
+            logger.info(f"skipping execution of analyzer {a_name}, job_id {job_id}")
             continue
 
         # get runtime_configuration if any specified for this analyzer

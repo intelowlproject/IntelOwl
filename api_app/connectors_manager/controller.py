@@ -9,8 +9,6 @@ from django.conf import settings
 from django.utils.module_loading import import_string
 from rest_framework.exceptions import ValidationError
 
-from api_app.exceptions import NotRunnableConnector
-from api_app.models import TLP
 from intel_owl.consts import DEFAULT_QUEUE
 
 from .classes import Connector
@@ -18,67 +16,6 @@ from .dataclasses import ConnectorConfig
 from .models import ConnectorReport
 
 logger = logging.getLogger(__name__)
-
-
-def filter_connectors(serialized_data: Dict, warnings: List[str]) -> List[str]:
-    # init empty list
-    cleaned_connectors_list = []
-    selected_connectors = []
-
-    # get values from serializer
-    connectors_requested = serialized_data.get("connectors_requested", [])
-    tlp = serialized_data.get("tlp", TLP.WHITE).upper()
-
-    # read config
-    connector_dataclasses = ConnectorConfig.all()
-    all_connector_names = list(connector_dataclasses.keys())
-
-    # run all connectors ?
-    run_all = len(connectors_requested) == 0
-    if run_all:
-        # select all
-        selected_connectors.extend(all_connector_names)
-    else:
-        # select the ones requested
-        selected_connectors.extend(connectors_requested)
-
-    for c_name in selected_connectors:
-        try:
-            cc = connector_dataclasses.get(c_name, None)
-
-            if not cc:
-                if not run_all:
-                    raise NotRunnableConnector(
-                        f"{c_name} won't run: not available in configuration"
-                    )
-                # don't add warning if run_all
-                continue
-
-            if not cc.is_ready_to_use:  # check configured/disabled
-                raise NotRunnableConnector(
-                    f"{c_name} won't run: is disabled or unconfigured"
-                )
-
-            if TLP.get_priority(tlp) > TLP.get_priority(
-                cc.maximum_tlp
-            ):  # check if job's tlp allows running
-                # e.g. if connector_tlp is GREEN(1),
-                # run for job_tlp WHITE(0) & GREEN(1) only
-                raise NotRunnableConnector(
-                    f"{c_name} won't run: "
-                    f"job.tlp ('{tlp}') > maximum_tlp ('{cc.maximum_tlp}')"
-                )
-        except NotRunnableConnector as e:
-            if run_all:
-                # in this case, they are not warnings but expected and wanted behavior
-                logger.debug(e)
-            else:
-                logger.warning(e)
-                warnings.append(str(e))
-        else:
-            cleaned_connectors_list.append(c_name)
-
-    return cleaned_connectors_list
 
 
 def start_connectors(

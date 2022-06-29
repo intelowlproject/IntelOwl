@@ -4,7 +4,7 @@ import PropTypes from "prop-types";
 import { MdOutlineRefresh, MdPauseCircleOutline } from "react-icons/md";
 
 import {
-  CustomJsonInput,
+  NewJsonRenderer,
   DataTable,
   DefaultColumnFilter,
   IconButton,
@@ -107,19 +107,17 @@ const tableProps = {
     ],
   },
   SubComponent: ({ row }) => (
-    <CustomJsonInput
-      viewOnly
-      confirmGood={false}
-      onChange={() => null}
+    <NewJsonRenderer
+      collapsed={2}
+      onEdit={() => null}
       key={row.id}
       id={`jobreport-jsoninput-${row.id}`}
-      placeholder={{
+      jsonData={{
         report: row.original?.report,
         errors: row.original?.errors,
         runtime_configuration: row.original?.runtime_configuration,
       }}
-      height="50vh"
-      width="90vw"
+      style={{ height: "50vh", width: "90vw", overflow: "scroll" }}
     />
   ),
 };

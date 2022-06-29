@@ -1,4 +1,5 @@
-# Stage 1: Frontend 
+# Stage 1: Frontend
+# Remove this part if it is conflicting with the frontend you are currently testing
 FROM node:lts-alpine3.14 as frontend-build
 
 WORKDIR /

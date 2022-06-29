@@ -2,13 +2,14 @@
 # See the file 'LICENSE' for copying permission.
 
 import logging
+from copy import deepcopy
 from datetime import timedelta
-from typing import Union
+from typing import Type, Union
 
 from django.conf import settings
 from django.db.models import Count, Q
 from django.db.models.functions import Trunc
-from django.http import FileResponse
+from django.http import FileResponse, QueryDict
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema as add_docs
 from drf_spectacular.utils import inline_serializer
@@ -26,7 +27,6 @@ from intel_owl.celery import app as celery_app
 
 from .analyzers_manager import controller as analyzers_controller
 from .analyzers_manager.constants import ObservableTypes
-from .connectors_manager import controller as connectors_controller
 from .filters import JobFilter
 from .helpers import get_now
 from .models import TLP, Job, Status, Tag
@@ -38,83 +38,148 @@ from .serializers import (
     JobSerializer,
     ObservableAnalysisSerializer,
     TagSerializer,
+    multi_result_enveloper,
 )
 
 logger = logging.getLogger(__name__)
 
 
-def _analysis_request(
-    request,
-    serializer_class: Union[FileAnalysisSerializer, ObservableAnalysisSerializer],
+def _multi_analysis_request(
+    user,
+    data: Union[QueryDict, dict],
+    serializer_class: Union[
+        Type[ObservableAnalysisSerializer], Type[FileAnalysisSerializer]
+    ],
 ):
     """
-    Prepare and send file/observable for analysis
+    Prepare and send multiple observables for analysis
     """
-    warnings = []
     logger.info(
-        f"_analysis_request {serializer_class} received request from {request.user}."
-        f"Data:{dict(request.data)}."
+        f"_multi_analysis_request {serializer_class} "
+        f"received request from {user}."
+        f"Data:{data}."
     )
 
     # serialize request data and validate
-    serializer = serializer_class(data=request.data, context={"request": request})
+    serializer = serializer_class(data=data, many=True)
     serializer.is_valid(raise_exception=True)
 
     serialized_data = serializer.validated_data
-    runtime_configuration = serialized_data.pop("runtime_configuration", {})
-
-    cleaned_analyzer_list = analyzers_controller.filter_analyzers(
-        serialized_data,
-        warnings,
-    )
-    if not cleaned_analyzer_list:
-        raise ValidationError({"detail": "No Analyzers can be run after filtering."})
-
-    cleaned_connectors_list = connectors_controller.filter_connectors(
-        serialized_data,
-        warnings,
-    )
+    runtime_configurations = [
+        data.pop("runtime_configuration", {}) for data in serialized_data
+    ]
 
     # save the arrived data plus new params into a new job object
-    job = serializer.save(
-        user=request.user,
-        analyzers_to_execute=cleaned_analyzer_list,
-        connectors_to_execute=cleaned_connectors_list,
+    jobs = serializer.save(
+        user=user,
     )
 
-    logger.info(f"New Job added to queue <- {repr(job)}.")
+    logger.info(f"New Jobs added to queue <- {repr(jobs)}.")
 
     # Check if task is test or not
-    if not settings.STAGE_CI:
+    if settings.STAGE_CI:
+        logger.info("skipping analysis start cause we are in CI")
+    else:
         # fire celery task
-        celery_app.send_task(
-            "start_analyzers",
-            kwargs=dict(
-                job_id=job.pk,
-                analyzers_to_execute=cleaned_analyzer_list,
-                runtime_configuration=runtime_configuration,
-            ),
-        )
+        for index, job in enumerate(jobs):
+            runtime_configuration = runtime_configurations[index]
+            celery_app.send_task(
+                "start_analyzers",
+                kwargs=dict(
+                    job_id=job.pk,
+                    analyzers_to_execute=job.analyzers_to_execute,
+                    runtime_configuration=runtime_configuration,
+                ),
+            )
 
     ser = AnalysisResponseSerializer(
-        data={
-            "status": "accepted",
-            "job_id": job.pk,
-            "warnings": warnings,
-            "analyzers_running": cleaned_analyzer_list,
-            "connectors_running": cleaned_connectors_list,
-        }
+        data=[
+            {
+                "status": "accepted",
+                "job_id": job.pk,
+                "warnings": serialized_data[index]["warnings"],
+                "analyzers_running": job.analyzers_to_execute,
+                "connectors_running": job.connectors_to_execute,
+            }
+            for index, job in enumerate(jobs)
+        ],
+        many=True,
     )
     ser.is_valid(raise_exception=True)
 
-    response_dict = ser.data
+    response_dict = {
+        "count": len(ser.data),
+        "results": ser.data,
+    }
 
     logger.debug(response_dict)
 
-    return Response(
-        response_dict,
-        status=status.HTTP_200_OK,
+    return response_dict
+
+
+def _multi_analysis_availability(user, data):
+    data_received = data
+    logger.info(
+        f"ask_analysis_availability received request from {str(user)}."
+        f"Data: {list(data_received)}"
     )
+
+    serializer = JobAvailabilitySerializer(data=data_received, many=True)
+    serializer.is_valid(raise_exception=True)
+    serialized_data = serializer.validated_data
+
+    response = []
+
+    for element in serialized_data:
+        analyzers, running_only, md5, minutes_ago = (
+            element["analyzers"],
+            element["running_only"],
+            element["md5"],
+            element["minutes_ago"],
+        )
+
+        if running_only:
+            statuses_to_check = [Status.RUNNING]
+        else:
+            statuses_to_check = [
+                Status.RUNNING,
+                Status.REPORTED_WITHOUT_FAILS,
+            ]
+
+        if len(analyzers) == 0:
+            query = (
+                Q(md5=md5)
+                & Q(status__in=statuses_to_check)
+                & Q(analyzers_requested__len=0)
+            )
+        else:
+            query = (
+                Q(md5=md5)
+                & Q(status__in=statuses_to_check)
+                & Q(analyzers_to_execute__contains=analyzers)
+            )
+
+        if minutes_ago:
+            minutes_ago_time = get_now() - timedelta(minutes=minutes_ago)
+            query = query & Q(received_request_time__gte=minutes_ago_time)
+
+        try:
+            last_job_for_md5 = Job.objects.filter(query).latest("received_request_time")
+            response_dict = {
+                "status": last_job_for_md5.status,
+                "job_id": str(last_job_for_md5.id),
+                "analyzers_to_execute": last_job_for_md5.analyzers_to_execute,
+            }
+        except Job.DoesNotExist:
+            response_dict = {"status": "not_available"}
+        response.append(response_dict)
+
+    payload = {
+        "count": len(response),
+        "results": response,
+    }
+    logger.debug(payload)
+    return payload
 
 
 """ REST API endpoints """
@@ -141,81 +206,134 @@ def _analysis_request(
 )
 @api_view(["POST"])
 def ask_analysis_availability(request):
-    data_received = request.data
-    logger.info(
-        f"ask_analysis_availability received request from {str(request.user)}."
-        f"Data: {dict(data_received)}"
+    response = _multi_analysis_availability(request.user, [request.data])["results"][0]
+    return Response(
+        response,
+        status=status.HTTP_200_OK,
     )
-
-    serializer = JobAvailabilitySerializer(
-        data=data_received, context={"request": request}
-    )
-    serializer.is_valid(raise_exception=True)
-    serialized_data = serializer.validated_data
-
-    analyzers, running_only, md5, minutes_ago = (
-        serialized_data["analyzers"],
-        serialized_data["running_only"],
-        serialized_data["md5"],
-        serialized_data["minutes_ago"],
-    )
-
-    if running_only:
-        statuses_to_check = [Status.RUNNING]
-    else:
-        statuses_to_check = [
-            Status.RUNNING,
-            Status.REPORTED_WITHOUT_FAILS,
-        ]
-
-    if len(analyzers) == 0:
-        query = (
-            Q(md5=md5) & Q(status__in=statuses_to_check) & Q(analyzers_requested__len=0)
-        )
-    else:
-        query = (
-            Q(md5=md5)
-            & Q(status__in=statuses_to_check)
-            & Q(analyzers_to_execute__contains=analyzers)
-        )
-
-    if minutes_ago:
-        minutes_ago_time = get_now() - timedelta(minutes=minutes_ago)
-        query = query & Q(received_request_time__gte=minutes_ago_time)
-
-    try:
-        last_job_for_md5 = Job.objects.filter(query).latest("received_request_time")
-        response_dict = {
-            "status": last_job_for_md5.status,
-            "job_id": str(last_job_for_md5.id),
-            "analyzers_to_execute": last_job_for_md5.analyzers_to_execute,
-        }
-    except Job.DoesNotExist:
-        response_dict = {"status": "not_available"}
-
-    logger.debug(response_dict)
-
-    return Response(response_dict, status=status.HTTP_200_OK)
 
 
 @add_docs(
-    description="This endpoint allows to start a Job related to a file",
-    request=FileAnalysisSerializer,
-    responses={200: AnalysisResponseSerializer},
+    description="""
+    This is useful to avoid repeating the same analysis multiple times.
+    By default this API checks if there are existing analysis related to the md5 in
+    status "running" or "reported_without_fails"
+    Also, you need to specify the analyzers needed because, otherwise, it is
+    highly probable that you won't get all the results that you expect.
+    NOTE: This API is similar to ask_analysis_availability, but it allows multiple
+    md5s to be checked at the same time.""",
+    request=multi_result_enveloper(JobAvailabilitySerializer, many=True),
+    responses={
+        200: inline_serializer(
+            name="AskAnalysisAvailabilitySuccessResponseList",
+            fields={
+                "count": rfs.IntegerField(),
+                "results": inline_serializer(
+                    name="AskAnalysisAvailabilitySuccessResponse",
+                    fields={
+                        "status": rfs.StringRelatedField(),
+                        "job_id": rfs.StringRelatedField(),
+                        "analyzers_to_execute": OpenApiTypes.OBJECT,
+                    },
+                    many=True,
+                ),
+            },
+        ),
+    },
 )
 @api_view(["POST"])
+def ask_multi_analysis_availability(request):
+    response = _multi_analysis_availability(request.user, request.data)
+    return Response(
+        response,
+        status=status.HTTP_200_OK,
+    )
+
+
+@api_view(["POST"])
 def analyze_file(request):
-    return _analysis_request(request, FileAnalysisSerializer)
+    try:
+        data: QueryDict = request.data.copy()
+    except TypeError:  # https://code.djangoproject.com/ticket/29510
+        data: QueryDict = QueryDict(mutable=True)
+        for key, value_list in request.data.lists():
+            if key == "file":
+                data.setlist(key, value_list)
+            else:
+                data.setlist(key, deepcopy(value_list))
+    try:
+        data["files"] = data.pop("file")[0]
+    except KeyError:
+        raise ValidationError("`file` is a required field")
+    if data.getlist("file_name", False):
+        data["file_names"] = data.pop("file_name")[0]
+    if data.get("file_mimetype", False):
+        data["file_mimetypes"] = data.pop("file_mimetype")[0]
+    response = _multi_analysis_request(request.user, data, FileAnalysisSerializer)[
+        "results"
+    ][0]
+    return Response(
+        response,
+        status=status.HTTP_200_OK,
+    )
 
 
 @add_docs(
-    description="This endpoint allows to start a Job related to an observable",
+    description="This endpoint allows to start Jobs related to multiple observables",
+    request=FileAnalysisSerializer,
+    responses={200: multi_result_enveloper(AnalysisResponseSerializer, True)},
+)
+@api_view(["POST"])
+def analyze_multiple_files(request):
+    response_dict = _multi_analysis_request(
+        request.user, request.data, FileAnalysisSerializer
+    )
+    return Response(
+        response_dict,
+        status=status.HTTP_200_OK,
+    )
+
+
+@add_docs(
+    description="This endpoint allows to start a Job related to an observable. "
+    "Retained for retro-compatibility",
     request=ObservableAnalysisSerializer,
     responses={200: AnalysisResponseSerializer},
 )
 @api_view(["POST"])
 def analyze_observable(request):
-    return _analysis_request(request, ObservableAnalysisSerializer)
+    data = dict(request.data)
+    try:
+        data["observables"] = [
+            [data.pop("observable_classification", ""), data.pop("observable_name")]
+        ]
+    except KeyError:
+        raise ValidationError(
+            "You need to specify the observable name and classification"
+        )
+    response = _multi_analysis_request(
+        request.user, data, ObservableAnalysisSerializer
+    )["results"][0]
+    return Response(
+        response,
+        status=status.HTTP_200_OK,
+    )
+
+
+@add_docs(
+    description="This endpoint allows to start Jobs related to multiple observables",
+    request=ObservableAnalysisSerializer,
+    responses={200: multi_result_enveloper(AnalysisResponseSerializer, True)},
+)
+@api_view(["POST"])
+def analyze_multiple_observables(request):
+    response_dict = _multi_analysis_request(
+        request.user, request.data, ObservableAnalysisSerializer
+    )
+    return Response(
+        response_dict,
+        status=status.HTTP_200_OK,
+    )
 
 
 @add_docs(

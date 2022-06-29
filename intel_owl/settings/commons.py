@@ -11,14 +11,14 @@ BASE_STATIC_PATH = BASE_DIR / "static"
 
 # test / ci
 MOCK_CONNECTIONS = get_secret("MOCK_CONNECTIONS", False) == "True"
-STAGE = get_secret("STAGE", "ci")
+STAGE = get_secret("STAGE", "local")
 STAGE_PRODUCTION = STAGE == "production"
 STAGE_STAGING = STAGE == "staging"
 STAGE_LOCAL = STAGE == "local"
 STAGE_CI = STAGE == "ci"
 
 
-VERSION = "3.3.2"
+VERSION = "3.4.0"
 PUBLIC_DEPLOYMENT = get_secret("PUBLIC_DEPLOYMENT", "True") == "True"
 PROJECT_LOCATION = "/opt/deploy/intel_owl"
 

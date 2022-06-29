@@ -8,8 +8,11 @@ from .views import (
     JobViewSet,
     TagViewSet,
     analyze_file,
+    analyze_multiple_files,
+    analyze_multiple_observables,
     analyze_observable,
     ask_analysis_availability,
+    ask_multi_analysis_availability,
 )
 
 # Routers provide an easy way of automatically determining the URL conf.
@@ -21,8 +24,11 @@ router.register(r"jobs", JobViewSet, basename="jobs")
 urlpatterns = [
     # standalone endpoints
     path("ask_analysis_availability", ask_analysis_availability),
+    path("ask_multi_analysis_availability", ask_multi_analysis_availability),
     path("analyze_file", analyze_file),
+    path("analyze_multiple_files", analyze_multiple_files),
     path("analyze_observable", analyze_observable),
+    path("analyze_multiple_observables", analyze_multiple_observables),
     # router viewsets
     path("", include(router.urls)),
     # Plugins (analyzers_manager, connectors_manager)

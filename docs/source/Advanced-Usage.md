@@ -194,6 +194,7 @@ Some analyzers could require a special configuration:
   - `/integrations/pcap_analyzers/config/suricata/rules`: here there are Suricata rules. You can change the `custom.rules` files to add your own rules at any time. Once you made this change, you need to either restart IntelOwl or (this is faster) run a new analysis with the Suricata analyzer and set the parameter `reload_rules` to True.
   - `/integrations/pcap_analyzers/config/suricata/etc`: here there are Suricata configuration files. Change it based on your wish. Restart IntelOwl to see the changes applied.
 
+
 ## Organizations and data sharing
 
 Organizations are a great way to share data and analysis only with the members of your team. Invite the people you work with in your organization!

@@ -3004,7 +3004,7 @@
     "docker_based": true,
     "supported_filetypes": ["application/vnd.tcpdump.pcap"],
     "config": {
-      "soft_time_limit": 120,
+      "soft_time_limit": 30,
       "queue": "local"
     },
     "secrets": {},

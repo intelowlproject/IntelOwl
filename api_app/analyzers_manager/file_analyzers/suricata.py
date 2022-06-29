@@ -37,7 +37,7 @@ class Suricata(FileAnalyzer, DockerBasedAnalyzer):
 
         report = self._docker_run(req_data, req_files)
         # normalize signatures to facilitate analysis
-        for detection in report["data"]:
+        for detection in report.get("data", []):
             alert = detection.get("alert", {})
             signature_name = alert.get("signature")
             if signature_name not in self.signatures:

@@ -62,7 +62,6 @@ class EXEAnalyzersTestCase(_FileAnalyzersScriptsTestCase):
                 "FileScan_Upload_File",
                 "Virushee_Upload_File",
                 "DocGuard_Upload_File",
-                "Suricata",
             ],
         }
 

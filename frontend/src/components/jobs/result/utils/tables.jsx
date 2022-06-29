@@ -108,7 +108,7 @@ const tableProps = {
   },
   SubComponent: ({ row }) => (
     <NewJsonRenderer
-      collapsed={2}
+      collapsed={1}
       onEdit={() => null}
       key={row.id}
       id={`jobreport-jsoninput-${row.id}`}

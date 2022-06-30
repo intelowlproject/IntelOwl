@@ -29,7 +29,7 @@ copyright = "2021, Matteo Lodi"
 author = "Matteo Lodi"
 
 # The full version, including alpha/beta/rc tags
-release = "v3.4.1"
+release = "v4.0.0"
 
 
 # -- General configuration ---------------------------------------------------

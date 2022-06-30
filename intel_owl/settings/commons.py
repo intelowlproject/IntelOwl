@@ -18,7 +18,7 @@ STAGE_LOCAL = STAGE == "local"
 STAGE_CI = STAGE == "ci"
 
 
-VERSION = "3.4.0"
+VERSION = "4.0.0"
 PUBLIC_DEPLOYMENT = get_secret("PUBLIC_DEPLOYMENT", "True") == "True"
 PROJECT_LOCATION = "/opt/deploy/intel_owl"
 

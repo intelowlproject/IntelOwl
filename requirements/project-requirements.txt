@@ -1,5 +1,5 @@
 # django libs
-Django==3.2.12
+uDjango==3.2.13
 django-auth-ldap==4.0.0
 django-radius==1.5.0
 django-filter==21.1
@@ -20,6 +20,8 @@ git+https://github.com/jazzband/django-silk.git#egg=django-silk
 boto3==1.21.0
 celery==5.2.2
 dataclasses==0.6
+# https://github.com/advisories/GHSA-q4qm-xhf9-4p8f
+# unpatched CVE: noproblem, we just use this for debugging purposes
 flower==1.0.0
 
 # plugins

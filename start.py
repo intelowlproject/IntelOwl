@@ -198,8 +198,7 @@ def start():
         repo = Repo(current_dir)
         git = repo.git
         git.config("--global", "--add", "safe.directory", current_dir)
-        git.fetch("--all", "--tags")
-        git.checkout(f"tags/v{current_version}", "-b master")
+        git.checkout(f"tags/v{current_version}")
 
     # construct final command
     base_command = [

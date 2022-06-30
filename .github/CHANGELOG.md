@@ -14,7 +14,7 @@ The overall user feeling should be drastically improved. We hope you'll enjoy th
 
 While developing the new GUI, our main goal was to at least provide the same features that were available before. Anyway, we had the chance to add some important features:
 
-- A new way to manage users and their permissions: the "Organization" feature. Please refer to the [docs here]((https://intelowl.readthedocs.io/en/latest/Usage.md#organizations-and-user-management)).
+- A new way to manage users and their permissions: the "Organization" feature. Please refer to the [docs here](https://intelowl.readthedocs.io/en/latest/Usage.md#organizations-and-user-management).
 - A notification mechanism was added. Please refer to the [docs here](https://intelowl.readthedocs.io/en/latest/Usage.md#notifications).
 - Now it is possible to do more advanced lookups through the Jobs History and have an overall better way to filter them.
 - A new "API Access/Sessions" section was added to facilitate the management of API tokens and User sessions.

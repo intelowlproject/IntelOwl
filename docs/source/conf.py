@@ -25,7 +25,7 @@ directives.register_directive("code", CodeBlock)
 # -- Project information -----------------------------------------------------
 
 project = "IntelOwl"
-copyright = "2021, Matteo Lodi"
+copyright = "2022, Matteo Lodi"
 author = "Matteo Lodi"
 
 # The full version, including alpha/beta/rc tags

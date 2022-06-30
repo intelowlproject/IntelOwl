@@ -47,7 +47,7 @@ Once an invite has sent, the invited user has to login, go to the "Organization"
 ## Notifications
 Since IntelOwl v4, there is a Notifications button available on the top right of the page:
 
-<img style="border: 0.2px solid black" width=120 height=110 src="docs/static/notifications.png">
+<img style="border: 0.2px solid black" width=220 height=210 src="../static/notifications.png">
 
 There you can read notifications provided by either your administration or the IntelOwl Maintainers.
 
@@ -232,7 +232,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `Dragonfly_Emulation`: Emulate malware against [Dragonfly](https://dragonfly.certego.net?utm_source=intelowl) sandbox by [Certego S.R.L](https://certego.net?utm_source=intelowl).
 * `Virushee_Upload_File`: Check file hash and upload file sample for analysis on [Virushee API](https://api.virushee.com/).
 * `DocGuard_Upload_File`: Analyze office files in seconds. [DocGuard](https://www.docguard.io).
-*`Suricata`: Analyze PCAPs with open IDS signatures with [Suricata engine](https://github.com/OISF/suricata)
+* `Suricata`: Analyze PCAPs with open IDS signatures with [Suricata engine](https://github.com/OISF/suricata)
 
 ##### Observable analyzers (ip, domain, url, hash)
 * `VirusTotal_v3_Get_Observable`: search an observable in the VirusTotal DB

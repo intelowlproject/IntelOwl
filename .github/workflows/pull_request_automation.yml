@@ -22,11 +22,11 @@ jobs:
         with:
           clean: false
       - name: Generate diffs
-        id: diff_check
         run: |
           git branch -a --list | cat
           FRONTEND_CHANGES=$(git diff --compact-summary origin/${{ github.base_ref }} -- frontend/* | wc -l)
           echo "::set-output name=frontend::$FRONTEND_CHANGES"
+        id: diff_check
 
   linters:
     runs-on: ubuntu-latest
@@ -35,10 +35,10 @@ jobs:
       - name: Checkout IntelOwl
         uses: actions/checkout@v3
 
-    - name: Set up Python
-      uses: actions/setup-python@v4.0.0
-      with:
-        python-version: 3.9
+      - name: Set up Python
+        uses: actions/setup-python@v4.0.0
+        with:
+          python-version: 3.9
 
       - name: Install Dependencies
         run: |

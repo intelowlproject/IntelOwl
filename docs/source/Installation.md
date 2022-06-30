@@ -239,7 +239,7 @@ You can add the parameter `-d` to run the application in the background.
 <div class="admonition hint">
 <p class="admonition-title">Hint</p>
 Starting from IntelOwl 4.0.0, with the startup script you can select which version of IntelOwl you want to run (`--version`).
-This  can be helpful to keep using old versions in case of retrocompatibility issues
+This  can be helpful to keep using old versions in case of retrocompatibility issues. The `--version` parameter checks out the Git Repository to the Tag of the version that you have chosen. This means that if you checkout to a v3.x.x version, you won't have the `--version` parameter anymore so you would need to manually checkout back to the `master` branch to use newer versions.
 </div>
 
 ### Stop

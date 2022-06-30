@@ -236,6 +236,12 @@ $ python3 start.py prod up
 
 You can add the parameter `-d` to run the application in the background.
 
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+Starting from IntelOwl 4.0.0, with the startup script you can select which version of IntelOwl you want to run (`--version`).
+This  can be helpful to keep using old versions in case of retrocompatibility issues. The `--version` parameter checks out the Git Repository to the Tag of the version that you have chosen. This means that if you checkout to a v3.x.x version, you won't have the `--version` parameter anymore so you would need to manually checkout back to the `master` branch to use newer versions.
+</div>
+
 ### Stop
 To stop the application you have to:
 * if executed without `-d` parameter: press `CTRL+C` 
@@ -256,16 +262,14 @@ Then you can add other users directly from the Django Admin Interface after havi
 
 Refer to [this](./Advanced-Usage.html#django-groups-permissions) section of the docs.
 
-## Extras
+## Update and Re-build
 
-### Deploy on Remnux
-[Remnux](https://remnux.org/) is a Linux Toolkit for Malware Analysis.
+### Rebuilding the project / Creating custom docker build
+If you make some code changes and you like to rebuild the project, follow these steps:
 
-IntelOwl and Remnux have the same goal: save the time of people who need to perform malware analysis or info gathering.
-
-Therefore we suggest [Remnux](https://docs.remnux.org/) users to install IntelOwl to leverage all the tools provided by both projects in a unique environment.
-
-To do that, you can follow the same steps detailed [above](https://intelowl.readthedocs.io/en/latest/Installation.html#tl-dr) for the installation of IntelOwl.
+1. `python3 start.py test build --tag=<your_tag> .` to build the new docker image.
+2. Add this new image tag in the `docker/test.override.yml` file.
+3. Start the containers with `python3 start.py test up --build`.
 
 ### Update to the most recent version
 To update the project with the most recent available code you have to follow these steps:
@@ -273,16 +277,25 @@ To update the project with the most recent available code you have to follow the
 ```bash
 $ cd <your_intel_owl_directory> # go into the project directory
 $ git pull # pull new changes
-$ python3 start.py prod stop # kill the currently running IntelOwl containers 
-$ python3 start.py prod up --build # restart the IntelOwl application
+$ python3 start.py prod down # kill and destroy the currently running IntelOwl containers 
+$ python3 start.py prod up # restart the IntelOwl application
 ```
 
-### Rebuilding the project/ Creating custom docker build
-If you make some code changes and you like to rebuild the project, follow these steps:
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+Major versions of IntelOwl are usually incompatible from one another.
+Maintainers strive to keep the upgrade between major version easy but it's not always like that.
+Below you can find the additional process required to upgrade from each major versions.
+</div>
 
-1. `python3 start.py test build --tag=<your_tag> .` to build the new docker image.
-2. Add this new image tag in the `docker/test.override.yml` file.
-3. Start the containers with `python3 start.py test up --build`.
+### Updating to >=4.0.0(rc) from a 3.x.x version
+Right now there is an open [issue](https://github.com/intelowlproject/IntelOwl/issues/934) regarding the chance to provide a script for migrate the Users DB to the new IntelOwl v4 schema.
+IntelOwl v4 introduced some major changes regarding the permission management, allowing an easier way to manage users and visibility. But that did break the previous available DB.
+So, while we find time and effort to develop this script, to migrate to the the new major version you would need to delete your DB. To do that, you would need to delete your volumes and start the application from scratch.
+```commandline
+python3 start.py prod down -v
+```
+
 
 ### Updating to >=2.0.0 from a 1.x.x version
 Users upgrading from previous versions need to manually move `env_file_app`, `env_file_postgres` and `env_file_integrations` files under the new `docker` directory.

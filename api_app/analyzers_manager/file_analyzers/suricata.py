@@ -71,7 +71,7 @@ class Suricata(FileAnalyzer, DockerBasedAnalyzer):
             self._add_item_to_signatures(dest_port, "dest_ports", signature_name)
 
         report["signatures"] = self.signatures
-        if not self.extended_logs:
+        if not self.extended_logs and "data" in report:
             del report["data"]
 
         return report

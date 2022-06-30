@@ -19,7 +19,7 @@ class ConnectorConfigSerializer(AbstractConfigSerializer):
 
     CONFIG_FILE_NAME = "connector_config.json"
 
-    def validate_python_module(self, python_module: str):
+    def validate_python_module(self, python_module: str) -> str:
         clspath = f"api_app.connectors_manager.connectors.{python_module}"
         try:
             import_string(clspath)
@@ -36,6 +36,8 @@ class ConnectorReportSerializer(rfs.ModelSerializer):
     ConnectorReport model's serializer.
     """
 
+    type = rfs.CharField(default="connector")
+
     class Meta:
         model = ConnectorReport
         fields = (
@@ -47,4 +49,5 @@ class ConnectorReportSerializer(rfs.ModelSerializer):
             "start_time",
             "end_time",
             "runtime_configuration",
+            "type",
         )

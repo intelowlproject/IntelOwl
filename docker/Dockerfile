@@ -1,4 +1,22 @@
+# Stage 1: Frontend
+# Remove this part if it is conflicting with the frontend you are currently testing
+FROM node:lts-alpine3.14 as frontend-build
+
+WORKDIR /
+# copy react source code
+COPY frontend/ .
+# copy version file as an env file
+COPY docker/.version .env.local
+# install and build
+RUN npm install npm@latest -g
+RUN npm install
+
+RUN PUBLIC_URL=/static/reactapp/ npm run build
+
+# Stage 2: Backend
 FROM python:3.9.9-buster
+
+COPY --from=frontend-build /build /var/www/reactapp
 
 ENV PYTHONUNBUFFERED 1
 ENV DJANGO_SETTINGS_MODULE intel_owl.settings
@@ -8,6 +26,7 @@ ENV ELASTICSEARCH_DSL_VERSION 7.2.0
 ENV watch_logs_cmd "watch -n1 tail -n10 /var/log/intel_owl/django/api_app.log"
 
 ARG REPO_DOWNLOADER_ENABLED=true
+ARG WATCHMAN=false
 
 RUN mkdir -p ${LOG_PATH} \
     ${LOG_PATH}/django \
@@ -25,13 +44,15 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 RUN pip3 install --upgrade pip
 
-COPY requirements/requirements.txt $PYTHONPATH/requirements.txt
-COPY requirements/test-requirements.txt $PYTHONPATH/test-requirements.txt
+COPY requirements/project-requirements.txt $PYTHONPATH/project-requirements.txt
 WORKDIR $PYTHONPATH
 
-RUN pip3 install --no-cache-dir --compile -r requirements.txt
+RUN pip3 install --no-cache-dir --compile -r project-requirements.txt
 # install elasticsearch-dsl's appropriate version as specified by user
 RUN pip3 install --no-cache-dir django-elasticsearch-dsl==${ELASTICSEARCH_DSL_VERSION}
+
+COPY requirements/certego-requirements.txt $PYTHONPATH/certego-requirements.txt
+RUN pip3 install --no-cache-dir --compile -r certego-requirements.txt
 
 COPY . $PYTHONPATH
 
@@ -41,6 +62,8 @@ RUN touch ${LOG_PATH}/django/api_app.log ${LOG_PATH}/django/api_app_errors.log \
     && chown -R www-data:www-data ${LOG_PATH} /opt/deploy/ \
     # this is cause stringstifer creates this directory during the build and cause celery to crash
     && rm -rf /root/.local
+
+RUN docker/scripts/watchman_install.sh
 
 # download yara rules and quark engine rules
 RUN api_app/analyzers_manager/repo_downloader.sh

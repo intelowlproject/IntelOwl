@@ -29,8 +29,8 @@ class MWDBGet(ObservableAnalyzer):
             self.report.errors.append(str(exc))
             result["not_found"] = True
         else:
-            result["data"]: file_info.data
-            result["metakeys"]: file_info.metakeys
+            result["data"] = file_info.data
+            result["attributes"] = file_info.attributes
             result["permalink"] = f"https://mwdb.cert.pl/file/{self.observable_name}"
 
         return result

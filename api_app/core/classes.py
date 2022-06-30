@@ -36,7 +36,7 @@ class Plugin(metaclass=ABCMeta):
 
     @cached_property
     def _secrets(self) -> dict:
-        return self._config._read_secrets()
+        return self._config.read_secrets()
 
     @property
     def _params(self) -> dict:
@@ -170,7 +170,7 @@ class Plugin(metaclass=ABCMeta):
         # set params
         self.set_params(self._params)
         # monkeypatch if in test suite
-        if settings.TEST_MODE:
+        if settings.STAGE_CI:
             self._monkeypatch()
 
     def __init__(

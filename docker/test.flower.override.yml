@@ -3,3 +3,5 @@ version: '3.8'
 services:
   flower:
     image: intelowlproject/intelowl:test
+    volumes:
+      - ../:/opt/deploy/intel_owl

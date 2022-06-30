@@ -6,9 +6,19 @@ paths:
   /api/analyze_file:
     post:
       operationId: analyze_file_create
-      description: This endpoint allows to start a Job related to a file
       tags:
       - analyze_file
+      security:
+      - durinAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/analyze_multiple_files:
+    post:
+      operationId: analyze_multiple_files_create
+      description: This endpoint allows to start Jobs related to multiple observables
+      tags:
+      - analyze_multiple_files
       requestBody:
         content:
           application/json:
@@ -28,12 +38,40 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AnalysisResponse'
+                $ref: '#/components/schemas/MultiAnalysisResponseList'
+          description: ''
+  /api/analyze_multiple_observables:
+    post:
+      operationId: analyze_multiple_observables_create
+      description: This endpoint allows to start Jobs related to multiple observables
+      tags:
+      - analyze_multiple_observables
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ObservableAnalysis'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ObservableAnalysis'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ObservableAnalysis'
+        required: true
+      security:
+      - durinAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MultiAnalysisResponseList'
           description: ''
   /api/analyze_observable:
     post:
       operationId: analyze_observable_create
-      description: This endpoint allows to start a Job related to an observable
+      description: This endpoint allows to start a Job related to an observable. Retained
+        for retro-compatibility
       tags:
       - analyze_observable
       requestBody:
@@ -60,7 +98,8 @@ paths:
   /api/analyzer/{name}/healthcheck:
     get:
       operationId: analyzer_healthcheck_retrieve
-      description: 'Health Check: if instance associated with plugin is up or not'
+      description: 'Health Check: if server instance associated with plugin is up
+        or not'
       parameters:
       - in: path
         name: name
@@ -111,6 +150,112 @@ paths:
               schema:
                 $ref: '#/components/schemas/AskAnalysisAvailabilitySuccessResponse'
           description: ''
+  /api/ask_multi_analysis_availability:
+    post:
+      operationId: ask_multi_analysis_availability_create
+      description: |2-
+
+            This is useful to avoid repeating the same analysis multiple times.
+            By default this API checks if there are existing analysis related to the md5 in
+            status "running" or "reported_without_fails"
+            Also, you need to specify the analyzers needed because, otherwise, it is
+            highly probable that you won't get all the results that you expect.
+            NOTE: This API is similar to ask_analysis_availability, but it allows multiple
+            md5s to be checked at the same time.
+      tags:
+      - ask_multi_analysis_availability
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MultiJobAvailabilityList'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/MultiJobAvailabilityList'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/MultiJobAvailabilityList'
+        required: true
+      security:
+      - durinAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AskAnalysisAvailabilitySuccessResponseList'
+          description: ''
+  /api/auth/apiaccess:
+    get:
+      operationId: auth_apiaccess_retrieve
+      description: |-
+        Durin's APIAccessTokenView.
+
+        - ``GET`` -> get token-client pair info
+        - ``POST`` -> create and get token-client pair info
+        - ``DELETE`` -> delete existing API access token
+
+        .. versionadded:: 1.0.0
+      tags:
+      - auth
+      security:
+      - durinAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIAccessToken'
+          description: ''
+    post:
+      operationId: auth_apiaccess_create
+      description: |-
+        Durin's APIAccessTokenView.
+
+        - ``GET`` -> get token-client pair info
+        - ``POST`` -> create and get token-client pair info
+        - ``DELETE`` -> delete existing API access token
+
+        .. versionadded:: 1.0.0
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/APIAccessToken'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/APIAccessToken'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/APIAccessToken'
+      security:
+      - durinAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIAccessToken'
+          description: ''
+    delete:
+      operationId: auth_apiaccess_destroy
+      description: |-
+        Durin's APIAccessTokenView.
+
+        - ``GET`` -> get token-client pair info
+        - ``POST`` -> create and get token-client pair info
+        - ``DELETE`` -> delete existing API access token
+
+        .. versionadded:: 1.0.0
+      tags:
+      - auth
+      security:
+      - durinAuth: []
+      responses:
+        '204':
+          description: No response body
   /api/auth/login:
     post:
       operationId: auth_login_create
@@ -149,13 +294,70 @@ paths:
         :returns: 204 (No content)
       tags:
       - auth
+      security:
+      - durinAuth: []
       responses:
         '200':
+          description: No response body
+  /api/auth/sessions:
+    get:
+      operationId: auth_sessions_list
+      description: |-
+        Durin's TokenSessionsViewSet.
+
+        - Returns list of active sessions of authed user.
+        - Only ``list()`` and ``delete()`` operations.
+
+        .. versionadded:: 1.0.0
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      tags:
+      - auth
+      security:
+      - durinAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TokenSessions'
+          description: ''
+  /api/auth/sessions/{id}:
+    delete:
+      operationId: auth_sessions_destroy
+      description: |-
+        Durin's TokenSessionsViewSet.
+
+        - Returns list of active sessions of authed user.
+        - Only ``list()`` and ``delete()`` operations.
+
+        .. versionadded:: 1.0.0
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this auth token.
+        required: true
+      tags:
+      - auth
+      security:
+      - durinAuth: []
+      responses:
+        '204':
           description: No response body
   /api/connector/{name}/healthcheck:
     get:
       operationId: connector_healthcheck_retrieve
-      description: 'Health Check: if instance associated with plugin is up or not'
+      description: 'Health Check: if server instance associated with plugin is up
+        or not'
       parameters:
       - in: path
         name: name
@@ -175,10 +377,10 @@ paths:
           description: ''
   /api/get_analyzer_configs:
     get:
-      operationId: get_analyzer_configs_list
+      operationId: get_analyzer_configs_retrieve
       description: |2-
 
-                Get the uploaded analyzer configuration,
+                Get and parse the `analyzer_config.json` file,
                 can be useful if you want to choose the analyzers programmatically
       tags:
       - get_analyzer_configs
@@ -189,9 +391,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/AnalyzerConfig'
+                $ref: '#/components/schemas/AnalyzerConfig'
           description: ''
         '500':
           content:
@@ -201,8 +401,8 @@ paths:
           description: ''
   /api/get_connector_configs:
     get:
-      operationId: get_connector_configs_list
-      description: Get the uploaded connector configuration
+      operationId: get_connector_configs_retrieve
+      description: Get and parse the `connector_config.json` file,
       tags:
       - get_connector_configs
       security:
@@ -212,9 +412,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/ConnectorConfig'
+                $ref: '#/components/schemas/ConnectorConfig'
           description: ''
         '500':
           content:
@@ -222,107 +420,132 @@ paths:
               schema:
                 $ref: '#/components/schemas/GetConnectorConfigsFailedResponse'
           description: ''
-  /api/job/{job_id}/analyzer/{name}/kill:
-    patch:
-      operationId: job_analyzer_kill_partial_update
-      description: Kill running plugin by closing celery task and marking as killed
-      parameters:
-      - in: path
-        name: job_id
-        schema:
-          type: string
-          pattern: \d+
-        required: true
-      - in: path
-        name: name
-        schema:
-          type: string
-          pattern: \w+
-        required: true
-      tags:
-      - job
-      security:
-      - durinAuth: []
-      responses:
-        '204':
-          description: No response body
-  /api/job/{job_id}/analyzer/{name}/retry:
-    patch:
-      operationId: job_analyzer_retry_partial_update
-      description: Retry a plugin run if it failed/was killed previously
-      parameters:
-      - in: path
-        name: job_id
-        schema:
-          type: string
-          pattern: \d+
-        required: true
-      - in: path
-        name: name
-        schema:
-          type: string
-          pattern: \w+
-        required: true
-      tags:
-      - job
-      security:
-      - durinAuth: []
-      responses:
-        '204':
-          description: No response body
-  /api/job/{job_id}/connector/{name}/kill:
-    patch:
-      operationId: job_connector_kill_partial_update
-      description: Kill running plugin by closing celery task and marking as killed
-      parameters:
-      - in: path
-        name: job_id
-        schema:
-          type: string
-          pattern: \d+
-        required: true
-      - in: path
-        name: name
-        schema:
-          type: string
-          pattern: \w+
-        required: true
-      tags:
-      - job
-      security:
-      - durinAuth: []
-      responses:
-        '204':
-          description: No response body
-  /api/job/{job_id}/connector/{name}/retry:
-    patch:
-      operationId: job_connector_retry_partial_update
-      description: Retry a plugin run if it failed/was killed previously
-      parameters:
-      - in: path
-        name: job_id
-        schema:
-          type: string
-          pattern: \d+
-        required: true
-      - in: path
-        name: name
-        schema:
-          type: string
-          pattern: \w+
-        required: true
-      tags:
-      - job
-      security:
-      - durinAuth: []
-      responses:
-        '204':
-          description: No response body
   /api/jobs:
     get:
       operationId: jobs_list
       description: "\n    REST endpoint to fetch list of jobs or retrieve/delete a\
         \ job with job ID.\n    Requires authentication.\n    "
+      parameters:
+      - name: file_mimetype
+        required: false
+        in: query
+        description: file_mimetype
+        schema:
+          type: string
+      - name: file_name
+        required: false
+        in: query
+        description: file_name
+        schema:
+          type: string
+      - name: finished_analysis_time__gte
+        required: false
+        in: query
+        description: finished_analysis_time__gte
+        schema:
+          type: string
+      - name: finished_analysis_time__lte
+        required: false
+        in: query
+        description: finished_analysis_time__lte
+        schema:
+          type: string
+      - name: is_sample
+        required: false
+        in: query
+        description: is_sample
+        schema:
+          type: string
+      - name: md5
+        required: false
+        in: query
+        description: md5
+        schema:
+          type: string
+      - name: name
+        required: false
+        in: query
+        description: name
+        schema:
+          type: string
+      - name: observable_classification
+        required: false
+        in: query
+        description: observable_classification
+        schema:
+          type: string
+      - name: observable_name
+        required: false
+        in: query
+        description: observable_name
+        schema:
+          type: string
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: received_request_time__gte
+        required: false
+        in: query
+        description: received_request_time__gte
+        schema:
+          type: string
+      - name: received_request_time__lte
+        required: false
+        in: query
+        description: received_request_time__lte
+        schema:
+          type: string
+      - name: status
+        required: false
+        in: query
+        description: status
+        schema:
+          type: string
+          enum:
+          - pending
+          - running
+          - reported_without_fails
+          - reported_with_fails
+          - killed
+          - failed
+      - name: tags
+        required: false
+        in: query
+        description: tags
+        schema:
+          type: string
+      - name: tlp
+        required: false
+        in: query
+        description: tlp
+        schema:
+          type: string
+          enum:
+          - WHITE
+          - GREEN
+          - AMBER
+          - RED
+      - name: type
+        required: false
+        in: query
+        description: type
+        schema:
+          type: string
       tags:
       - jobs
       security:
@@ -332,10 +555,104 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/JobList'
+                $ref: '#/components/schemas/PaginatedJobListList'
           description: ''
+  /api/jobs/{job_id}/analyzer/{name}/kill:
+    patch:
+      operationId: jobs_analyzer_kill_partial_update
+      description: Kill running plugin by closing celery task and marking as killed
+      parameters:
+      - in: path
+        name: job_id
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      - in: path
+        name: name
+        schema:
+          type: string
+          pattern: ^\w+$
+        required: true
+      tags:
+      - jobs
+      security:
+      - durinAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/jobs/{job_id}/analyzer/{name}/retry:
+    patch:
+      operationId: jobs_analyzer_retry_partial_update
+      description: Retry a plugin run if it failed/was killed previously
+      parameters:
+      - in: path
+        name: job_id
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      - in: path
+        name: name
+        schema:
+          type: string
+          pattern: ^\w+$
+        required: true
+      tags:
+      - jobs
+      security:
+      - durinAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/jobs/{job_id}/connector/{name}/kill:
+    patch:
+      operationId: jobs_connector_kill_partial_update
+      description: Kill running plugin by closing celery task and marking as killed
+      parameters:
+      - in: path
+        name: job_id
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      - in: path
+        name: name
+        schema:
+          type: string
+          pattern: ^\w+$
+        required: true
+      tags:
+      - jobs
+      security:
+      - durinAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/jobs/{job_id}/connector/{name}/retry:
+    patch:
+      operationId: jobs_connector_retry_partial_update
+      description: Retry a plugin run if it failed/was killed previously
+      parameters:
+      - in: path
+        name: job_id
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      - in: path
+        name: name
+        schema:
+          type: string
+          pattern: ^\w+$
+        required: true
+      tags:
+      - jobs
+      security:
+      - durinAuth: []
+      responses:
+        '204':
+          description: No response body
   /api/jobs/{id}:
     get:
       operationId: jobs_retrieve
@@ -380,7 +697,7 @@ paths:
   /api/jobs/{id}/download_sample:
     get:
       operationId: jobs_download_sample_retrieve
-      description: Download a sample from a given Job ID.
+      description: Download file/sample associated with a job
       parameters:
       - in: path
         name: id
@@ -420,14 +737,481 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/jobs/aggregate/file_mimetype:
+    get:
+      operationId: jobs_aggregate_file_mimetype_retrieve
+      description: "\n    REST endpoint to fetch list of jobs or retrieve/delete a\
+        \ job with job ID.\n    Requires authentication.\n    "
+      tags:
+      - jobs
+      security:
+      - durinAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'
+          description: ''
+  /api/jobs/aggregate/file_name:
+    get:
+      operationId: jobs_aggregate_file_name_retrieve
+      description: "\n    REST endpoint to fetch list of jobs or retrieve/delete a\
+        \ job with job ID.\n    Requires authentication.\n    "
+      tags:
+      - jobs
+      security:
+      - durinAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'
+          description: ''
+  /api/jobs/aggregate/observable_classification:
+    get:
+      operationId: jobs_aggregate_observable_classification_retrieve
+      description: "\n    REST endpoint to fetch list of jobs or retrieve/delete a\
+        \ job with job ID.\n    Requires authentication.\n    "
+      tags:
+      - jobs
+      security:
+      - durinAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'
+          description: ''
+  /api/jobs/aggregate/observable_name:
+    get:
+      operationId: jobs_aggregate_observable_name_retrieve
+      description: "\n    REST endpoint to fetch list of jobs or retrieve/delete a\
+        \ job with job ID.\n    Requires authentication.\n    "
+      tags:
+      - jobs
+      security:
+      - durinAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'
+          description: ''
+  /api/jobs/aggregate/status:
+    get:
+      operationId: jobs_aggregate_status_retrieve
+      description: "\n    REST endpoint to fetch list of jobs or retrieve/delete a\
+        \ job with job ID.\n    Requires authentication.\n    "
+      tags:
+      - jobs
+      security:
+      - durinAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'
+          description: ''
+  /api/jobs/aggregate/type:
+    get:
+      operationId: jobs_aggregate_type_retrieve
+      description: "\n    REST endpoint to fetch list of jobs or retrieve/delete a\
+        \ job with job ID.\n    Requires authentication.\n    "
+      tags:
+      - jobs
+      security:
+      - durinAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'
+          description: ''
+  /api/me/access:
+    get:
+      operationId: me_access_retrieve
+      description: "\n    Returns user's access information.\n    "
+      tags:
+      - me
+      security:
+      - durinAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserAccess'
+          description: ''
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIException'
+          description: ''
+  /api/me/invitations:
+    get:
+      operationId: me_invitations_list
+      description: Only ``list()`` and ``destroy()`` actions.
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      tags:
+      - me
+      security:
+      - durinAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/InvitationsList'
+          description: ''
+  /api/me/invitations/{id}:
+    delete:
+      operationId: me_invitations_destroy
+      description: Only ``list()`` and ``destroy()`` actions.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this invitation.
+        required: true
+      tags:
+      - me
+      security:
+      - durinAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/me/invitations/{id}/accept:
+    post:
+      operationId: me_invitations_accept_create
+      description: Accept an invitation by ID.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this invitation.
+        required: true
+      tags:
+      - me
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InvitationsList'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/InvitationsList'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/InvitationsList'
+        required: true
+      security:
+      - durinAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvitationsList'
+          description: ''
+  /api/me/invitations/{id}/decline:
+    post:
+      operationId: me_invitations_decline_create
+      description: Decline an invitation by ID.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this invitation.
+        required: true
+      tags:
+      - me
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InvitationsList'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/InvitationsList'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/InvitationsList'
+        required: true
+      security:
+      - durinAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvitationsList'
+          description: ''
+  /api/me/organization:
+    get:
+      operationId: me_organization_list
+      description: Get organization.
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      tags:
+      - me
+      security:
+      - durinAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Organization'
+          description: ''
+    post:
+      operationId: me_organization_create
+      description: Create new organization.
+      tags:
+      - me
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Organization'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Organization'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Organization'
+        required: true
+      security:
+      - durinAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Organization'
+          description: ''
+  /api/me/organization/invite:
+    post:
+      operationId: me_organization_invite_create
+      description: |-
+        Invite user to organization (accessible only to the organization owner).
+
+        ``POST ~/organization/invite``.
+      tags:
+      - me
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Organization'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Organization'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Organization'
+        required: true
+      security:
+      - durinAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Organization'
+          description: ''
+  /api/me/organization/leave:
+    post:
+      operationId: me_organization_leave_create
+      description: |-
+        Leave organization (accessible only to members).
+
+        ``POST ~/organization/leave``.
+      tags:
+      - me
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Organization'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Organization'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Organization'
+        required: true
+      security:
+      - durinAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Organization'
+          description: ''
+  /api/me/organization/remove_member:
+    post:
+      operationId: me_organization_remove_member_create
+      description: |-
+        Remove user's membership from organization (accessible only to the organization owner).
+
+        ``POST ~/organization/remove_member``.
+      tags:
+      - me
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Organization'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Organization'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Organization'
+        required: true
+      security:
+      - durinAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Organization'
+          description: ''
+  /api/notification:
+    get:
+      operationId: notification_list
+      description: Only ``list()`` and ``retrieve()`` actions.
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: read
+        required: false
+        in: query
+        description: read
+        schema:
+          type: string
+      tags:
+      - notification
+      security:
+      - durinAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedNotificationList'
+          description: ''
+  /api/notification/{id}:
+    get:
+      operationId: notification_retrieve
+      description: Only ``list()`` and ``retrieve()`` actions.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this notification.
+        required: true
+      tags:
+      - notification
+      security:
+      - durinAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+          description: ''
+  /api/notification/{id}/mark-as-read:
+    post:
+      operationId: notification_mark_as_read_create
+      description: Only ``list()`` and ``retrieve()`` actions.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this notification.
+        required: true
+      tags:
+      - notification
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Notification'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Notification'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Notification'
+        required: true
+      security:
+      - durinAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+          description: ''
   /api/tags:
     get:
       operationId: tags_list
-      description: |2-
-
-            REST endpoint to pefrom CRUD operations on Job tags.
-            Requires authentication.
-            POST/PUT/DELETE requires model/object level permission.
+      description: "\n    REST endpoint to perform CRUD operations on ``Tag`` model.\n\
+        \    Requires authentication.\n    "
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
       tags:
       - tags
       security:
@@ -443,11 +1227,8 @@ paths:
           description: ''
     post:
       operationId: tags_create
-      description: |2-
-
-            REST endpoint to pefrom CRUD operations on Job tags.
-            Requires authentication.
-            POST/PUT/DELETE requires model/object level permission.
+      description: "\n    REST endpoint to perform CRUD operations on ``Tag`` model.\n\
+        \    Requires authentication.\n    "
       tags:
       - tags
       requestBody:
@@ -474,11 +1255,8 @@ paths:
   /api/tags/{id}:
     get:
       operationId: tags_retrieve
-      description: |2-
-
-            REST endpoint to pefrom CRUD operations on Job tags.
-            Requires authentication.
-            POST/PUT/DELETE requires model/object level permission.
+      description: "\n    REST endpoint to perform CRUD operations on ``Tag`` model.\n\
+        \    Requires authentication.\n    "
       parameters:
       - in: path
         name: id
@@ -499,11 +1277,8 @@ paths:
           description: ''
     put:
       operationId: tags_update
-      description: |2-
-
-            REST endpoint to pefrom CRUD operations on Job tags.
-            Requires authentication.
-            POST/PUT/DELETE requires model/object level permission.
+      description: "\n    REST endpoint to perform CRUD operations on ``Tag`` model.\n\
+        \    Requires authentication.\n    "
       parameters:
       - in: path
         name: id
@@ -536,11 +1311,8 @@ paths:
           description: ''
     patch:
       operationId: tags_partial_update
-      description: |2-
-
-            REST endpoint to pefrom CRUD operations on Job tags.
-            Requires authentication.
-            POST/PUT/DELETE requires model/object level permission.
+      description: "\n    REST endpoint to perform CRUD operations on ``Tag`` model.\n\
+        \    Requires authentication.\n    "
       parameters:
       - in: path
         name: id
@@ -572,11 +1344,8 @@ paths:
           description: ''
     delete:
       operationId: tags_destroy
-      description: |2-
-
-            REST endpoint to pefrom CRUD operations on Job tags.
-            Requires authentication.
-            POST/PUT/DELETE requires model/object level permission.
+      description: "\n    REST endpoint to perform CRUD operations on ``Tag`` model.\n\
+        \    Requires authentication.\n    "
       parameters:
       - in: path
         name: id
@@ -593,6 +1362,49 @@ paths:
           description: No response body
 components:
   schemas:
+    APIAccessToken:
+      type: object
+      description: |-
+        Used in :class:`durin.views.APIAccessTokenView`.
+
+        .. versionadded:: 1.0.0
+      properties:
+        client:
+          type: string
+          readOnly: true
+        created:
+          type: string
+          format: date-time
+          readOnly: true
+        expiry:
+          type: string
+          format: date-time
+          readOnly: true
+        has_expired:
+          type: boolean
+          readOnly: true
+        expires_in_str:
+          type: string
+          readOnly: true
+        token:
+          type: string
+          readOnly: true
+          description: Token is auto-generated on save.
+      required:
+      - client
+      - created
+      - expires_in_str
+      - expiry
+      - has_expired
+      - token
+    APIException:
+      type: object
+      properties:
+        errors:
+          type: object
+          additionalProperties: {}
+      required:
+      - errors
     AnalysisResponse:
       type: object
       properties:
@@ -614,7 +1426,6 @@ components:
       - connectors_running
       - job_id
       - status
-      - warnings
     AnalyzerConfig:
       type: object
       description: Serializer for `analyzer_config.json`.
@@ -650,6 +1461,10 @@ components:
               type: array
               items:
                 type: string
+          required:
+          - configured
+          - error_message
+          - missing_secrets
           readOnly: true
         type:
           $ref: '#/components/schemas/AnalyzerConfigTypeEnum'
@@ -725,6 +1540,9 @@ components:
           type: object
           additionalProperties: {}
           nullable: true
+        type:
+          type: string
+          default: analyzer
       required:
       - name
       - process_time
@@ -741,6 +1559,18 @@ components:
       required:
       - job_id
       - status
+    AskAnalysisAvailabilitySuccessResponseList:
+      type: object
+      properties:
+        count:
+          type: integer
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/AskAnalysisAvailabilitySuccessResponse'
+      required:
+      - count
+      - results
     ConnectorConfig:
       type: object
       description: Serializer for `connector_config.json`.
@@ -776,6 +1606,10 @@ components:
               type: array
               items:
                 type: string
+          required:
+          - configured
+          - error_message
+          - missing_secrets
           readOnly: true
         maximum_tlp:
           $ref: '#/components/schemas/MaximumTlpEnum'
@@ -819,6 +1653,9 @@ components:
           type: object
           additionalProperties: {}
           nullable: true
+        type:
+          type: string
+          default: connector
       required:
       - name
       - process_time
@@ -826,15 +1663,15 @@ components:
     FileAnalysis:
       type: object
       description: |-
-        Job model's serializer for File Analysis.
-        Used for create()
+        ``Job`` model's serializer for File Analysis.
+        Used for ``create()``.
       properties:
         id:
           type: integer
           readOnly: true
-        source:
-          type: string
-          maxLength: 50
+        user:
+          type: integer
+          nullable: true
         tlp:
           $ref: '#/components/schemas/TlpEnum'
         file:
@@ -860,7 +1697,6 @@ components:
           items: {}
       required:
       - file
-      - file_name
       - id
     GetAnalyzerConfigsFailedResponse:
       type: object
@@ -878,20 +1714,52 @@ components:
           readOnly: true
       required:
       - error
-    Job:
+    InvitationsList:
       type: object
       description: |-
-        Job model's serializer.
-        Used for retrieve()
+        A ModelSerializer that takes additional arguments for
+        "fields", "omit" and "expand" in order to
+        control which fields are displayed, and whether to replace simple
+        values with complex, nested serializations
       properties:
         id:
           type: integer
           readOnly: true
+        organization:
+          $ref: '#/components/schemas/Organization'
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        status:
+          $ref: '#/components/schemas/InvitationsListStatusEnum'
+      required:
+      - created_at
+      - id
+      - organization
+    InvitationsListStatusEnum:
+      enum:
+      - pending
+      - accepted
+      - declined
+      type: string
+    Job:
+      type: object
+      description: Used for ``retrieve()``
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        user:
+          $ref: '#/components/schemas/User'
         tags:
           type: array
           items:
             $ref: '#/components/schemas/Tag'
           readOnly: true
+        process_time:
+          type: number
+          format: double
         analyzer_reports:
           type: array
           items:
@@ -902,9 +1770,11 @@ components:
           items:
             $ref: '#/components/schemas/ConnectorReport'
           readOnly: true
-        source:
-          type: string
-          maxLength: 50
+        permissions:
+          type: object
+          additionalProperties:
+            type: boolean
+          readOnly: true
         is_sample:
           type: boolean
         md5:
@@ -965,8 +1835,11 @@ components:
       - connector_reports
       - id
       - md5
+      - permissions
+      - process_time
       - received_request_time
       - tags
+      - user
     JobAvailability:
       type: object
       description: Serializer for ask_analysis_availability
@@ -983,9 +1856,8 @@ components:
         running_only:
           type: boolean
           default: false
-        source:
-          type: string
-          maxLength: 50
+        minutes_ago:
+          type: integer
         is_sample:
           type: boolean
         observable_name:
@@ -1041,6 +1913,9 @@ components:
         file:
           type: string
           format: uri
+        user:
+          type: integer
+          nullable: true
         tags:
           type: array
           items:
@@ -1051,15 +1926,26 @@ components:
       - received_request_time
     JobList:
       type: object
-      description: |-
-        Job model's list serializer.
-        Used for list()
+      description: Used for ``list()``.
       properties:
         id:
           type: integer
           readOnly: true
+        user:
+          $ref: '#/components/schemas/User'
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/Tag'
+          readOnly: true
+        process_time:
+          type: number
+          format: double
         is_sample:
           type: boolean
+        md5:
+          type: string
+          maxLength: 32
         observable_name:
           type: string
           maxLength: 512
@@ -1074,27 +1960,49 @@ components:
           maxLength: 80
         status:
           $ref: '#/components/schemas/StatusFefEnum'
-        tags:
+        analyzers_requested:
           type: array
           items:
-            $ref: '#/components/schemas/Tag'
-          readOnly: true
-        process_time:
-          type: number
-          format: float
-          readOnly: true
-        no_of_analyzers_executed:
+            type: string
+            maxLength: 128
+        connectors_requested:
+          type: array
+          items:
+            type: string
+            maxLength: 128
+        analyzers_to_execute:
+          type: array
+          items:
+            type: string
+            maxLength: 128
+        connectors_to_execute:
+          type: array
+          items:
+            type: string
+            maxLength: 128
+        received_request_time:
           type: string
+          format: date-time
           readOnly: true
-        no_of_connectors_executed:
+        finished_analysis_time:
           type: string
-          readOnly: true
+          format: date-time
+          nullable: true
+        tlp:
+          $ref: '#/components/schemas/TlpEnum'
+        errors:
+          type: array
+          items:
+            type: string
+            maxLength: 900
+          nullable: true
       required:
       - id
-      - no_of_analyzers_executed
-      - no_of_connectors_executed
+      - md5
       - process_time
+      - received_request_time
       - tags
+      - user
     MaximumTlpEnum:
       enum:
       - WHITE
@@ -1102,18 +2010,66 @@ components:
       - AMBER
       - RED
       type: string
-    ObservableAnalysis:
+    MultiAnalysisResponseList:
       type: object
-      description: |-
-        Job model's serializer for Observable Analysis.
-        Used for create()
+      properties:
+        count:
+          type: boolean
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/AnalysisResponse'
+      required:
+      - count
+      - results
+    MultiJobAvailabilityList:
+      type: object
+      properties:
+        count:
+          type: boolean
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/JobAvailability'
+      required:
+      - count
+      - results
+    Notification:
+      type: object
       properties:
         id:
           type: integer
           readOnly: true
-        source:
+        title:
           type: string
-          maxLength: 50
+          maxLength: 128
+        body:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        read:
+          type: boolean
+          readOnly: true
+      required:
+      - body
+      - created_at
+      - id
+      - read
+      - title
+    ObservableAnalysis:
+      type: object
+      description: |-
+        ``Job`` model's serializer for Observable Analysis.
+        Used for ``create()``.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        user:
+          type: integer
+          nullable: true
         tlp:
           $ref: '#/components/schemas/TlpEnum'
         observable_name:
@@ -1145,11 +2101,56 @@ components:
       - hash
       - generic
       type: string
-    PatchedTag:
+    Organization:
       type: object
       description: |-
-        A serializer mixin that provides an easy way to assign permissions
-        to given users and/or group when an object is created or updated.
+        A ModelSerializer that takes additional arguments for
+        "fields", "omit" and "expand" in order to
+        control which fields are displayed, and whether to replace simple
+        values with complex, nested serializations
+      properties:
+        members_count:
+          type: integer
+          readOnly: true
+        owner:
+          allOf:
+          - $ref: '#/components/schemas/_UserMember'
+          readOnly: true
+        name:
+          type: string
+          maxLength: 32
+      required:
+      - members_count
+      - name
+      - owner
+    PaginatedJobListList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        total_pages:
+          type: integer
+          example: 5
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/JobList'
+    PaginatedNotificationList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        total_pages:
+          type: integer
+          example: 5
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Notification'
+    PatchedTag:
+      type: object
       properties:
         id:
           type: integer
@@ -1192,9 +2193,6 @@ components:
       type: string
     Tag:
       type: object
-      description: |-
-        A serializer mixin that provides an easy way to assign permissions
-        to given users and/or group when an object is created or updated.
       properties:
         id:
           type: integer
@@ -1216,6 +2214,75 @@ components:
       - AMBER
       - RED
       type: string
+    TokenSessions:
+      type: object
+      description: |-
+        Used in :class:`durin.views.TokenSessionsViewSet`.
+
+        .. versionadded:: 1.0.0
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        client:
+          type: string
+          readOnly: true
+        created:
+          type: string
+          format: date-time
+          readOnly: true
+        expiry:
+          type: string
+          format: date-time
+          readOnly: true
+        has_expired:
+          type: boolean
+          readOnly: true
+        is_current:
+          type: boolean
+          readOnly: true
+        expires_in_str:
+          type: string
+      required:
+      - client
+      - created
+      - expires_in_str
+      - expiry
+      - has_expired
+      - id
+      - is_current
+    User:
+      type: object
+      properties:
+        username:
+          type: string
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+      required:
+      - username
+    UserAccess:
+      type: object
+      description: |-
+        Used by :class:`~.views.UserAccessView`.
+
+        Ideally, this serializer should be extended inside your
+        service's source code adding user relevant information
+        and then point to it with the
+        ``USER_ACCESS_SERIALIZER`` settings variable.
+      properties:
+        user:
+          type: object
+          additionalProperties: {}
+          readOnly: true
+        access:
+          type: object
+          additionalProperties: {}
+          readOnly: true
+      required:
+      - access
+      - user
     _Config:
       type: object
       description: |-
@@ -1273,6 +2340,25 @@ components:
       - description
       - env_var_key
       - required
+    _UserMember:
+      type: object
+      description: |-
+        A ModelSerializer that takes additional arguments for
+        "fields", "omit" and "expand" in order to
+        control which fields are displayed, and whether to replace simple
+        values with complex, nested serializations
+      properties:
+        username:
+          type: string
+        full_name:
+          type: string
+        joined:
+          type: string
+          format: date-time
+      required:
+      - full_name
+      - joined
+      - username
   securitySchemes:
     durinAuth:
       type: apiKey

@@ -13,33 +13,38 @@ class PhishStats(ObservableAnalyzer):
     Analyzer that uses PhishStats API to check if the observable is a phishing site.
     """
 
-    base_url: str = "https://phishstats.info:2096/api/"
+    base_url: str = "https://phishstats.info:2096/api"
 
     def __build_phishstats_url(self) -> str:
         if self.observable_classification == self.ObservableTypes.IP:
-            endpoint = "phishing?_where=(ip,eq,{input})&_sort=-date"
+            endpoint = f"phishing?_where=(ip,eq,{self.observable_name})&_sort=-date"
         elif self.observable_classification == self.ObservableTypes.URL:
-            endpoint = "phishing?_where=(url,like,~{input}~)&_sort=-date"
+            endpoint = (
+                f"phishing?_where=(url,like,~{self.observable_name}~)&_sort=-date"
+            )
         elif self.observable_classification == self.ObservableTypes.DOMAIN:
-            endpoint = "phishing?_where=(url,like,~{input}~)&_sort=-date"
+            endpoint = (
+                f"phishing?_where=(url,like,~{self.observable_name}~)&_sort=-date"
+            )
         elif self.observable_classification == self.ObservableTypes.GENERIC:
-            endpoint = "phishing?_where=(title,like,~{input}~)&_sort=-date"
+            endpoint = (
+                f"phishing?_where=(title,like,~{self.observable_name}~)&_sort=-date"
+            )
         else:
             raise AnalyzerRunException(
                 "Phishstats require either of IP, URL, Domain or Generic"
             )
-        return f"{self.base_url}/{endpoint.format(input=self.observable_name)}"
+        return f"{self.base_url}/{endpoint}"
 
     def run(self):
-        api_uri = self.__build_phishstats_url()
+        api_url = self.__build_phishstats_url()
         try:
-            response = requests.get(api_uri)
+            response = requests.get(api_url)
             response.raise_for_status()
         except requests.RequestException as e:
             raise AnalyzerRunException(e)
 
-        result = response.json()
-        return result
+        return {"api_url": api_url, "results": response.json()}
 
     @classmethod
     def _monkeypatch(cls):

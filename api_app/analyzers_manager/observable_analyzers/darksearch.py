@@ -2,19 +2,24 @@
 # See the file 'LICENSE' for copying permission.
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
+from api_app.exceptions import AnalyzerRunException
 from tests.mock_utils import if_mock_connections, patch
 
 
 class DarkSearchQuery(ObservableAnalyzer):
     def set_params(self, params):
-        self.num_pages = int(params.get("pages", 5))
+        self.num_pages = params.get("pages", 5)
         self.proxies = params.get("proxies", None)
 
     def run(self):
-        from darksearch import Client
+        from darksearch import Client, DarkSearchException
 
-        c = Client(proxies=self.proxies)
-        responses = c.search(self.observable_name, pages=self.num_pages)
+        try:
+            c = Client(proxies=self.proxies)
+            responses = c.search(self.observable_name, pages=self.num_pages)
+        except DarkSearchException as exc:
+            raise AnalyzerRunException(f"{exc.__class__.__name__}: {str(exc)}")
+
         result = {
             "total": responses[0]["total"],
             "total_pages": responses[0]["last_page"],

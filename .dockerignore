@@ -4,11 +4,17 @@
 .lgtm.yml
 __pycache__
 venv/
+**/build
 .env
 docker/env_file_*
 docker/custom.override.yml
+**/docker-compose.*
 docs/
+frontend/node_modules
+frontend/dist
+frontend/build
 integrations/
 docker-compose*
 *.quark.log
 .pre-commit-config.yaml
+.ipython/

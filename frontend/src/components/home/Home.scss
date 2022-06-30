@@ -1,0 +1,30 @@
+// Home.jsx
+
+@import url("https://fonts.googleapis.com/css?family=Pacifico:400");
+
+html {
+  overflow-x: hidden;
+}
+
+#home__bgImg {
+  background-color: #000;
+  position: relative;
+  height: 20vh;
+  width: 100vw;
+  top: -25px;
+  left: -50px;
+  opacity: 1;
+  background-position: center;
+  background-size: 35%;
+  background-repeat: no-repeat;
+  min-height: 100% !important;
+}
+
+#home__versionText {
+  position: absolute;
+  top: 10%;
+  left: 70%;
+  font-family: Pacifico;
+  transform: rotate(335deg) !important;
+  -ms-transform: rotate(335deg) !important;
+}

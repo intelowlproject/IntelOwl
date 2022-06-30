@@ -12,4 +12,8 @@ compose-elk.yml
 docs/build/
 configuration/service_account_keyfile.json
 coverage_reports/
-/docker/.env.start.test
+docker/.env.start.test
+.ipython
+.subversion
+.bash_history
+.cache

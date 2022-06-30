@@ -78,6 +78,9 @@ DRAGONFLY_API_KEY=test
 BITCOINABUSE_KEY=test
 VIRUSHEE_API_KEY=test
 STALKPHISH_KEY=test
+GREEDYBEAR_API_KEY=test
+MALPEDIA_TOKEN=test
+YARAIFY_KEY=test
 
 # connectors secrets (optional)
 CONNECTOR_MISP_KEY=test
@@ -106,6 +109,7 @@ CONNECTOR_YETI_URL=http://fake_url.com
 DRAGONFLY_API_URL=http://fake_url.com
 
 # other variables
+STAGE="ci"
 DEBUG=True
 DISABLE_LOGGING_TEST=True
 MOCK_CONNECTIONS=True

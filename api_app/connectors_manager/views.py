@@ -5,12 +5,12 @@ import logging
 
 from drf_spectacular.utils import extend_schema as add_docs
 from drf_spectacular.utils import inline_serializer
-from rest_framework import generics
 from rest_framework import serializers as rfs
 from rest_framework import status
 from rest_framework.response import Response
 
 from api_app.core.views import PluginActionViewSet, PluginHealthCheckAPI
+from certego_saas.ext.views import APIView
 
 from . import controller as connectors_controller
 from .models import ConnectorReport
@@ -19,12 +19,19 @@ from .serializers import ConnectorConfigSerializer
 logger = logging.getLogger(__name__)
 
 
-class ConnectorListAPI(generics.ListAPIView):
+__all__ = [
+    "ConnectorListAPI",
+    "ConnectorActionViewSet",
+    "ConnectorHealthCheckAPI",
+]
+
+
+class ConnectorListAPI(APIView):
 
     serializer_class = ConnectorConfigSerializer
 
     @add_docs(
-        description="Get the uploaded connector configuration",
+        description="Get and parse the `connector_config.json` file,",
         parameters=[],
         responses={
             200: ConnectorConfigSerializer,
@@ -35,15 +42,7 @@ class ConnectorListAPI(generics.ListAPIView):
         },
     )
     def get(self, request, *args, **kwargs):
-        # @extend_schema needs to be applied to the entrypoint method of the view
-        # `list` call is proxied through the entrypoint `get`
-        return super().get(request, *args, **kwargs)
-
-    def list(self, request):
         try:
-            logger.info(
-                f"get_connector_configs received request from {str(request.user)}."
-            )
             cc = self.serializer_class.read_and_verify_config()
             return Response(cc, status=status.HTTP_200_OK)
         except Exception as e:
@@ -73,5 +72,5 @@ class ConnectorActionViewSet(PluginActionViewSet):
 
 
 class ConnectorHealthCheckAPI(PluginHealthCheckAPI):
-    def perform_healthcheck(self, connector_name):
+    def perform_healthcheck(self, connector_name: str) -> bool:
         return connectors_controller.run_healthcheck(connector_name)

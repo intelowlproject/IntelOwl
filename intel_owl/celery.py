@@ -7,9 +7,8 @@ import os
 
 from celery import Celery
 from celery.schedules import crontab
+from django.conf import settings
 from kombu import Exchange, Queue
-
-from .settings import AWS_SQS, BROKER_URL, CELERY_QUEUES, RESULT_BACKEND, TEST_MODE
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "intel_owl.settings")
 
@@ -26,11 +25,11 @@ app.conf.update(
             Exchange(key),
             routing_key=key,
         )
-        for key in CELERY_QUEUES
+        for key in settings.CELERY_QUEUES
     ],
     task_time_limit=1800,
-    broker_url=BROKER_URL,
-    result_backend=RESULT_BACKEND,
+    broker_url=settings.BROKER_URL,
+    result_backend=settings.RESULT_BACKEND,
     accept_content=["application/json"],
     task_serializer="json",
     result_serializer="json",
@@ -45,10 +44,10 @@ app.conf.update(
     # value is in kilobytes
     worker_max_memory_per_child=4000,
     # required for code-coverage to work properly in tests
-    task_always_eager=TEST_MODE,
+    task_always_eager=settings.STAGE_CI,
 )
 
-if AWS_SQS:
+if settings.AWS_SQS:
     # this is for AWS SQS support
     app.conf.update(
         broker_transport_options={
@@ -60,12 +59,6 @@ if AWS_SQS:
     )
 
 app.conf.beat_schedule = {
-    # execute daily at midnight to cleanup orphaned obj permissions
-    "clean_orphan_obj_perms": {
-        "task": "intel_owl.tasks.clean_orphan_obj_perms",
-        "schedule": crontab(minute=0, hour=0),
-        "options": {"queue": "default"},
-    },
     # execute sometimes to cleanup old jobs
     "remove_old_jobs": {
         "task": "intel_owl.tasks.remove_old_jobs",

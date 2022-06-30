@@ -1,6 +1,27 @@
 # Changelog
 
 [**Upgrade Guide**](https://intelowl.readthedocs.io/en/latest/Installation.html#update-to-the-most-recent-version)
+## [v3.4.1](https://github.com/intelowlproject/IntelOwl/releases/tag/v3.4.1)
+**Notes:**
+
+We are proud to announce that we have selected 3 contributors for the upcoming [Google Summer of Code](https://summerofcode.withgoogle.com/)!
+
+IntelOwlProject will run their projects under the umbrella of [The Honeynet Project](https://www.honeynet.org/), like the previous years.
+
+The contributors are going to have 3 intense months of work: with the help of the IntelOwl maintainers, they'll bring new functionalities to the project!
+
+- [Aditya Narayan Sinha](https://twitter.com/0x0elliot): "Creating Playbooks for IntelOwl"
+- [Aditya Pratap Singh](https://twitter.com/devmrfitz): "IntelOwl v4 improvements"
+- [Hussain Khan](https://twitter.com/Hussain41099635): "IntelOwl Go Client"
+
+We are also moving forward to release the next major version (v4). We just need to work on some update scripts.
+
+**Fixes/Adjustments:**
+* Add support for ".csv" file in all the Analyzers for documents
+* Refactored `Triage` analyzers
+* Fixes: #951, #1004, #1003
+* usual dependencies upgrades
+
 
 ## [v3.4.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v3.4.0)
 **New/Improved Analyzers:**

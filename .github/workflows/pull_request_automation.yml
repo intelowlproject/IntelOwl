@@ -35,10 +35,10 @@ jobs:
       - name: Checkout IntelOwl
         uses: actions/checkout@v3
 
-      - name: Set up Python
-        uses: actions/setup-python@v3.1.0
-        with:
-          python-version: 3.9
+    - name: Set up Python
+      uses: actions/setup-python@v4.0.0
+      with:
+        python-version: 3.9
 
       - name: Install Dependencies
         run: |

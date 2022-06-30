@@ -84,11 +84,15 @@ Project Summaries and/or in-development projects:
 - 2021:
   - [Sarthak Khattar](https://twitter.com/Mr_Momo07): [IntelOwl Improvements](https://www.honeynet.org/2021/08/20/gsoc-2021-project-summary-intelowl-improvements/)
   - [Shubham Pandey](https://twitter.com/imshubham31): [IntelOwl Connectors Manager and Integrations](https://www.honeynet.org/2021/08/20/gsoc-2021-project-summary-intelowl-connectors-manager-and-integrations/)
-- 2022: [List of project ideas](https://www.honeynet.org/gsoc/gsoc-2022/google-summer-of-code-2022-project-ideas/)
+- 2022: We have selected 3 contributors for this year! The projects' results are published in September 2022!
+  - [Aditya Narayan Sinha](https://twitter.com/0x0elliot): "Creating Playbooks for IntelOwl"
+  - [Aditya Pratap Singh](https://twitter.com/devmrfitz): "IntelOwl v4 improvements"
+  - [Hussain Khan](https://twitter.com/Hussain41099635): "IntelOwl Go Client"
 
-If you are interested in being the next GSoC developer for IntelOwl, join the [Honeynet Slack chat](https://gsoc-slack.honeynet.org/) for more info.
+If you are interested in being the next GSoC developer for IntelOwl, join the [Honeynet Slack chat](https://gsoc-slack.honeynet.org/) for more info. This is also the place where the majority of the development discussion happens, so feel free to join, have a look and ask questions about the project.
 
-(Plus we have just started a new project called [GreedyBear](https://github.com/honeynet/GreedyBear) that will be proposed to the GSoC too.)
+(Plus we have just started a new project called [GreedyBear](https://github.com/honeynet/GreedyBear) that will be proposed to the GSoC too starting from 2022)
+
 ### 🥈 SILVER
 
 #### Milton Security

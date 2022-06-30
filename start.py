@@ -3,9 +3,18 @@
 
 import argparse
 import os
+import re
 import subprocess
 
-from dotenv import load_dotenv
+try:
+    from dotenv import load_dotenv
+    from git import Repo
+except ImportError:
+    print(
+        "you must install the Python requirements."
+        " See: https://intelowl.readthedocs.io/en/latest/Installation.html"
+    )
+    exit(2)
 
 docker_analyzers = [
     "tor_analyzers",
@@ -47,6 +56,12 @@ path_mapping["all_analyzers.test"] = [
 ]
 
 
+def version_regex(arg_value, pat=re.compile(r"^[3-4]\.[0-9]{1,2}.[0-9]{1,2}$")):
+    if not pat.match(arg_value):
+        raise argparse.ArgumentTypeError
+    return arg_value
+
+
 def start():
     parser = argparse.ArgumentParser()
     # mandatory arguments
@@ -70,6 +85,13 @@ def start():
     # integrations
     parser.add_argument(
         "--project_name", required=False, help="project name", default="intel_owl"
+    )
+    parser.add_argument(
+        "--version",
+        required=False,
+        type=version_regex,
+        help="choose the version you would like to install (>=3.0.0)."
+        " Works only in 'prod' mode",
     )
     # integrations
     parser.add_argument(
@@ -169,6 +191,13 @@ def start():
         compose_files.extend(list(path_mapping["all_analyzers"]))
         if is_test:
             compose_files.extend(list(path_mapping[f"all_analyzers{test_appendix}"]))
+
+    current_version = "3.4.1"
+    if args.mode == "prod" and args.version != current_version:
+        repo = Repo(os.getcwd())
+        o = repo.remotes.origin
+        o.fetch("--all", "--tags")
+        o.checkout(f"tags/v{current_version}", "-b master")
 
     # construct final command
     base_command = [

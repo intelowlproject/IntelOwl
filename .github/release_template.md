@@ -2,7 +2,7 @@
 
 - [ ] (optional) If we changed/added Docker Analyzers, we need to configure Docker Hub / Dependabot properly.
 - [ ] Update `CHANGELOG.md` for the new version
-- [ ] Change version number in `conf.py`, `.env`, `docker/.version`, `settings.commons.py` and `schema.yml`
+- [ ] Change version number in `conf.py`, `.env`, `docker/.version`, `settings.commons.py`, `schema.yml` and `start.py`
 - [ ] Verify CI Tests
 - [ ] Create release for the branch `develop`. [Automate.io](https://automate.io/app/bots/list) should automatically create [Twitter](https://twitter.com/intel_owl) and [Linkedin](https://www.linkedin.com/in/matteo-lodi-90/) posts.
       Write the following statement there (change the version number):

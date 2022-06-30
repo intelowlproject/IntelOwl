@@ -88,7 +88,7 @@ class Suricata:
         cmdret = None
         data = ""
         max_tries = 20
-        for try_ in range(max_tries):
+        for _ in range(max_tries):
             received = self.s.recv(1024).decode("iso-8859-1")
             if not received:
                 break

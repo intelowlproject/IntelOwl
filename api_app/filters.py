@@ -21,12 +21,14 @@ class JobFilter(filters.FilterSet):
     type = filters.CharFilter(method="filter_for_type")
     name = filters.CharFilter(method="filter_for_name")
 
-    def filter_for_type(self, queryset, value, _type, *args, **kwargs):
+    @staticmethod
+    def filter_for_type(queryset, value, _type, *args, **kwargs):
         if _type in ObservableTypes.values:
             return queryset.filter(observable_classification=_type)
         return queryset.filter(file_mimetype__icontains=_type)
 
-    def filter_for_name(self, queryset, value, name, *args, **kwargs):
+    @staticmethod
+    def filter_for_name(queryset, value, name, *args, **kwargs):
         return queryset.filter(
             Q(observable_name__icontains=name) | Q(file_name__icontains=name)
         )

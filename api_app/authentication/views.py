@@ -16,7 +16,8 @@ logger = logging.getLogger(__name__)
 
 
 class LoginView(durin_views.LoginView):
-    def get_client_obj(self, request) -> Client:
+    @staticmethod
+    def get_client_obj(request) -> Client:
         user_agent = get_user_agent(request)
         client_name = str(user_agent)
         client, _ = Client.objects.get_or_create(name=client_name)
@@ -57,7 +58,8 @@ class DurinAuthenticationScheme(OpenApiAuthenticationExtension):
     target_class = "durin.auth.CachedTokenAuthentication"
     name = "durinAuth"
 
-    def get_security_definition(self, auto_schema):
+    @staticmethod
+    def get_security_definition(auto_schema):
         return {
             "type": "apiKey",
             "in": "header",

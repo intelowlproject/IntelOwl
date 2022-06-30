@@ -21,7 +21,8 @@ LOCAL_STORAGE = get_secret("LOCAL_STORAGE", "True") == "True"
 if LOCAL_STORAGE:
 
     class FileSystemStorageWrapper(FileSystemStorage):
-        def retrieve(self, file, analyzer):
+        @staticmethod
+        def retrieve(file, analyzer):
             # we have one single sample for every analyzer
             return file.path
 

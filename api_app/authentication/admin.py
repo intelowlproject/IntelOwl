@@ -52,7 +52,8 @@ class CustomAuthTokenAdmin(AuthTokenAdmin):
             ]
         return super().get_fieldsets(request, obj)
 
-    def has_change_permission(self, *args, **kwargs):
+    @staticmethod
+    def has_change_permission(*args, **kwargs):
         return False
 
     def save_model(self, request, obj, form, change):

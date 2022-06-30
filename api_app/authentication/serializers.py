@@ -27,10 +27,12 @@ class _AccessSerializer(rfs.ModelSerializer):
     total_submissions = rfs.SerializerMethodField()
     month_submissions = rfs.SerializerMethodField()
 
-    def get_total_submissions(self, obj: User) -> int:
+    @staticmethod
+    def get_total_submissions(obj: User) -> int:
         return Job.user_total_submissions(obj)
 
-    def get_month_submissions(self, obj: User) -> int:
+    @staticmethod
+    def get_month_submissions(obj: User) -> int:
         return Job.user_month_submissions(obj)
 
 
@@ -44,5 +46,6 @@ class UserAccessSerializer(CertegoUserAccessSerializer):
 
     access = rfs.SerializerMethodField()
 
-    def get_access(self, obj: User) -> dict:
+    @staticmethod
+    def get_access(obj: User) -> dict:
         return _AccessSerializer(instance=obj).data

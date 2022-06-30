@@ -23,7 +23,7 @@ export default function Sessions() {
         <Alert color="secondary" className="mx-3 mx-md-auto text-center">
           <span>
             You can generate an API key to access IntelOwl&apos;s RESTful
-            API.&nbsp;
+            API.&nbsp; Take a look to the available Python and Go clients:
             <a
               href={PYINTELOWL_GH_URL}
               target="_blank"

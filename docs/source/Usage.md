@@ -28,6 +28,31 @@ The server authentication is managed by API tokens. So, if you want to interact 
 Afterwards you can leverage the created tokens with the Intel Owl Client.
 </div>
 
+## Organizations and User management
+Starting from IntelOwl v4, a new "Organization" section is available on the GUI. This section substitute the previous permission management via Django Admin and aims to provide an easier way to manage users and visibility.
+
+### Multi Tenancy
+Thanks to the "Organization" feature, IntelOwl can be used by multiple SOCs, companies, etc...very easily.
+Right now it works very simply: only users in the same organization can see analysis of one another. An user can belong to an organization only.
+
+#### Manage organizations
+You can create a new organization by going to the "Organization" section, available under the Dropdown menu you cand find under the username.
+
+Once you create an organization, you are the unique Administrator of that organization. So you are the only one who can delete the organization, remove users and send invitations to other users.
+
+#### Accept Invites
+Once an invite has sent, the invited user has to login, go to the "Organization" section and accept the invite there. Afterwards the Administrator will be able to see the user in his "Organization" section.
+
+
+## Notifications
+Since IntelOwl v4, there is a Notifications button available on the top right of the page:
+
+<img style="border: 0.2px solid black" width=120 height=110 src="docs/static/notifications.png">
+
+There you can read notifications provided by either your administration or the IntelOwl Maintainers.
+
+As an Admin, if you want to add a notification to have it sent to all the users, you have to login to the Django Admin interface, go to the "Notifications" section and add it there.
+
 ## Analyzers customization
 
 You can create new analyzers based on already existing modules by changing the configuration values inside `configuration/analyzer_config.json`. This file is mounted as a docker volume, so you won't need to rebuild the image.

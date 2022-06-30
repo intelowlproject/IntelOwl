@@ -12,6 +12,12 @@ const versionText = VERSION;
 const logoBgImg = `url('${PUBLIC_URL}/logo-negative.png')`;
 const blogPosts = [
   {
+    title: "IntelOwl: Release v4.0.0",
+    subText: "Certego Blog: v4.0.0 Announcement",
+    date: "1st July 2022",
+    link: "https://www.certego.net/en/news/intel-owl-release-v4-0-0/",
+  },
+  {
     title: "IntelOwl: Release v3.0.0",
     subText: "Honeynet Blog: v3.0.0 Announcement",
     date: "13th September 2021",
@@ -23,12 +29,6 @@ const blogPosts = [
     subText: "Daily Swig: Interview with Matteo Lodi and Eshaan Bansal",
     date: "18th August 2020",
     link: "https://portswigger.net/daily-swig/intel-owl-osint-tool-automates-the-intel-gathering-process-using-a-single-api",
-  },
-  {
-    title: "IntelOwl: Release v1.0.0",
-    subText: "Honeynet Blog: v1.0.0 Announcement",
-    date: "5th July 2020",
-    link: "https://www.honeynet.org/2020/07/05/intel-owl-release-v1-0-0/",
   },
   {
     title: "New year, new tool: Intel Owl",

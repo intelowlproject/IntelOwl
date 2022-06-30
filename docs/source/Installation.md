@@ -257,10 +257,7 @@ This is a destructive operation but can be useful to start again the project fro
 ### Users creation
 You may want to run `docker exec -ti intelowl_uwsgi python3 manage.py createsuperuser` after first run to create a superuser.
 Then you can add other users directly from the Django Admin Interface after having logged with the superuser account.
-
-### Django Groups & Permissions settings
-
-Refer to [this](./Advanced-Usage.html#django-groups-permissions) section of the docs.
+To manage users, organizations and their visibility please refer to this [section](/Usage.md#organizations-and-user-management)
 
 ## Update and Re-build
 
@@ -288,13 +285,14 @@ Maintainers strive to keep the upgrade between major version easy but it's not a
 Below you can find the additional process required to upgrade from each major versions.
 </div>
 
-### Updating to >=4.0.0(rc) from a 3.x.x version
+### Updating to >=4.0.0 from a 3.x.x version
 Right now there is an open [issue](https://github.com/intelowlproject/IntelOwl/issues/934) regarding the chance to provide a script for migrate the Users DB to the new IntelOwl v4 schema.
 IntelOwl v4 introduced some major changes regarding the permission management, allowing an easier way to manage users and visibility. But that did break the previous available DB.
 So, while we find time and effort to develop this script, to migrate to the the new major version you would need to delete your DB. To do that, you would need to delete your volumes and start the application from scratch.
 ```commandline
 python3 start.py prod down -v
 ```
+Please be aware that, while this can be an important effort to manage, the v4 IntelOwl provides a easier way to add, invite and manage users from the application itself. See [the Organization section](./Usage.md#organizations-and-user-management).
 
 
 ### Updating to >=2.0.0 from a 1.x.x version

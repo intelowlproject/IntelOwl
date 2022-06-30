@@ -76,7 +76,7 @@ export default function MyOrgPage() {
                 <h5 className="text-warning text-center">
                   You are not a member of any organization.
                 </h5>
-                <p>
+                <p className="text-center">
                   You can choose to create a new organization or join an
                   existing one by asking an organization owner to send you an
                   invitation.

@@ -16,7 +16,9 @@ except ImportError:
     )
     exit(2)
 
-docker_analyzers = [
+CURRENT_VERSION = "3.4.1"
+
+DOCKER_ANALYZERS = [
     "tor_analyzers",
     "rendertron",
     "malware_tools_analyzers",
@@ -24,7 +26,7 @@ docker_analyzers = [
     "pcap_analyzers",
 ]
 
-path_mapping = {
+PATH_MAPPING = {
     "default": "docker/default.yml",
     "test": "docker/test.override.yml",
     "ci": "docker/ci.override.yml",
@@ -37,22 +39,22 @@ path_mapping = {
     "elastic": "docker/elasticsearch.override.yml",
 }
 # to fix the box-js folder name
-path_mapping.update(
+PATH_MAPPING.update(
     {
         name: f"integrations/{name.replace('box_js', 'box-js')}/compose.yml"
-        for name in docker_analyzers
+        for name in DOCKER_ANALYZERS
     }
 )
-path_mapping.update(
+PATH_MAPPING.update(
     {
         name
         + ".test": f"integrations/{name.replace('box_js', 'box-js')}/compose-tests.yml"
-        for name in docker_analyzers
+        for name in DOCKER_ANALYZERS
     }
 )
-path_mapping["all_analyzers"] = [path_mapping[key] for key in docker_analyzers]
-path_mapping["all_analyzers.test"] = [
-    path_mapping[key + ".test"] for key in docker_analyzers
+PATH_MAPPING["all_analyzers"] = [PATH_MAPPING[key] for key in DOCKER_ANALYZERS]
+PATH_MAPPING["all_analyzers.test"] = [
+    PATH_MAPPING[key + ".test"] for key in DOCKER_ANALYZERS
 ]
 
 
@@ -90,6 +92,7 @@ def start():
         "--version",
         required=False,
         type=version_regex,
+        default=CURRENT_VERSION,
         help="choose the version you would like to install (>=3.0.0)."
         " Works only in 'prod' mode",
     )
@@ -100,7 +103,7 @@ def start():
         action="store_true",
         help="Uses every integration",
     )
-    for integration in docker_analyzers:
+    for integration in DOCKER_ANALYZERS:
         parser.add_argument(
             f"--{integration}",
             required=False,
@@ -157,7 +160,7 @@ def start():
     # load relevant .env file
     load_dotenv("docker/.env.start" + test_appendix)
     docker_flags = [
-        args.__dict__[docker_analyzer] for docker_analyzer in docker_analyzers
+        args.__dict__[docker_analyzer] for docker_analyzer in DOCKER_ANALYZERS
     ]
     if args.all_analyzers and any(docker_flags):
         parser.error(
@@ -166,34 +169,33 @@ def start():
         )
         return
     # default file
-    compose_files = [path_mapping["default"]]
+    compose_files = [PATH_MAPPING["default"]]
     # mode
     if is_test:
-        compose_files.append(path_mapping[args.mode])
+        compose_files.append(PATH_MAPPING[args.mode])
     if args.__dict__["elastic"]:
-        compose_files.append(path_mapping["elastic"])
+        compose_files.append(PATH_MAPPING["elastic"])
     # upgrades
     for key in ["traefik", "multi_queue", "custom", "flower"]:
         if args.__dict__[key]:
-            compose_files.append(path_mapping[key])
+            compose_files.append(PATH_MAPPING[key])
     # additional compose files for tests
     if args.mode == "test":
         for key in ["multi_queue", "flower"]:
             if args.__dict__[key]:
-                compose_files.append(path_mapping["test_" + key])
+                compose_files.append(PATH_MAPPING["test_" + key])
     # additional integrations
-    for key in docker_analyzers:
+    for key in DOCKER_ANALYZERS:
         if args.__dict__[key]:
-            compose_files.append(path_mapping[key])
+            compose_files.append(PATH_MAPPING[key])
             if is_test:
-                compose_files.append(path_mapping[key + test_appendix])
+                compose_files.append(PATH_MAPPING[key + test_appendix])
     if args.all_analyzers:
-        compose_files.extend(list(path_mapping["all_analyzers"]))
+        compose_files.extend(list(PATH_MAPPING["all_analyzers"]))
         if is_test:
-            compose_files.extend(list(path_mapping[f"all_analyzers{test_appendix}"]))
+            compose_files.extend(list(PATH_MAPPING[f"all_analyzers{test_appendix}"]))
 
-    current_version = "3.4.1"
-    if args.mode == "prod" and args.version != current_version:
+    if args.mode == "prod" and args.version != CURRENT_VERSION:
         current_dir = os.getcwd()
         repo = Repo(current_dir)
         git = repo.git

@@ -236,6 +236,12 @@ $ python3 start.py prod up
 
 You can add the parameter `-d` to run the application in the background.
 
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+Starting from IntelOwl 4.0.0, with the startup script you can select which version of IntelOwl you want to run (`--version`).
+This  can be helpful to keep using old versions in case of retrocompatibility issues
+</div>
+
 ### Stop
 To stop the application you have to:
 * if executed without `-d` parameter: press `CTRL+C` 

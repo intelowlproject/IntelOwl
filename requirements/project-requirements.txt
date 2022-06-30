@@ -17,7 +17,6 @@ whitenoise==6.0.0
 git+https://github.com/jazzband/django-silk.git#egg=django-silk
 
 # infra
-requests==2.27.1
 boto3==1.21.0
 celery==5.2.2
 dataclasses==0.6

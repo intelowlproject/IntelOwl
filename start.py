@@ -194,8 +194,10 @@ def start():
 
     current_version = "3.4.1"
     if args.mode == "prod" and args.version != current_version:
-        repo = Repo(os.getcwd())
+        current_dir = os.getcwd()
+        repo = Repo(current_dir)
         git = repo.git
+        git.config("--global", "--add", "safe.directory", current_dir)
         git.fetch("--all", "--tags")
         git.checkout(f"tags/v{current_version}", "-b master")
 

@@ -195,9 +195,9 @@ def start():
     current_version = "3.4.1"
     if args.mode == "prod" and args.version != current_version:
         repo = Repo(os.getcwd())
-        o = repo.remotes.origin
-        o.fetch("--all", "--tags")
-        o.checkout(f"tags/v{current_version}", "-b master")
+        git = repo.git
+        git.fetch("--all", "--tags")
+        git.checkout(f"tags/v{current_version}", "-b master")
 
     # construct final command
     base_command = [

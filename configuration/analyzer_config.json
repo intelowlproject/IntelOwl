@@ -27,9 +27,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "ip"
-    ],
+    "observable_supported": ["ip"],
     "config": {
       "soft_time_limit": 30,
       "queue": "default"
@@ -43,10 +41,10 @@
     },
     "params": {}
   },
-   "Anomali_Threatstream_Confidence": {
+  "Anomali_Threatstream_Confidence": {
     "type": "observable",
     "python_module": "threatstream.Threatstream",
-    "disabled":false,
+    "disabled": false,
     "description": "Analyzer for threatstream API Confidence, give max, average and min confidence of entries for an observable",
     "external_service": true,
     "leaks_info": false,
@@ -71,7 +69,7 @@
         "description": "API Key for Anomali Threatstream"
       }
     },
-     "params": {
+    "params": {
       "threatstream_analysis": {
         "value": "confidence",
         "type": "str",
@@ -82,7 +80,7 @@
   "Anomali_Threatstream_Intelligence": {
     "type": "observable",
     "python_module": "threatstream.Threatstream",
-    "disabled":false,
+    "disabled": false,
     "description": "Analyzer for threatstream API Intelligence (main threat intelligence information)",
     "external_service": true,
     "leaks_info": false,
@@ -138,7 +136,7 @@
   "Anomali_Threatstream_PassiveDNS": {
     "type": "observable",
     "python_module": "threatstream.Threatstream",
-    "disabled":false,
+    "disabled": false,
     "description": "Return information from passive dns of Anomali.",
     "external_service": true,
     "leaks_info": false,
@@ -178,9 +176,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "ip"
-    ],
+    "observable_supported": ["ip"],
     "config": {
       "soft_time_limit": 30,
       "queue": "default"
@@ -201,9 +197,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "hash"
-    ],
+    "observable_supported": ["hash"],
     "config": {
       "soft_time_limit": 30,
       "queue": "default"
@@ -244,9 +238,7 @@
     "disabled": false,
     "external_service": false,
     "leaks_info": false,
-    "observable_supported": [
-      "domain"
-    ],
+    "observable_supported": ["domain"],
     "config": {
       "soft_time_limit": 30,
       "queue": "default"
@@ -261,10 +253,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "domain",
-      "url"
-    ],
+    "observable_supported": ["domain", "url"],
     "config": {
       "soft_time_limit": 30,
       "queue": "default"
@@ -285,9 +274,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "ip"
-    ],
+    "observable_supported": ["ip"],
     "config": {
       "soft_time_limit": 30,
       "queue": "default"
@@ -308,11 +295,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "ip",
-      "domain",
-      "url"
-    ],
+    "observable_supported": ["ip", "domain", "url"],
     "config": {
       "soft_time_limit": 30,
       "queue": "default"
@@ -333,10 +316,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "domain",
-      "url"
-    ],
+    "observable_supported": ["domain", "url"],
     "config": {
       "soft_time_limit": 30,
       "queue": "default"
@@ -357,10 +337,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "domain",
-      "url"
-    ],
+    "observable_supported": ["domain", "url"],
     "config": {
       "soft_time_limit": 30,
       "queue": "default"
@@ -394,9 +371,7 @@
     "disabled": false,
     "external_service": false,
     "leaks_info": false,
-    "supported_filetypes": [
-      "application/octet-stream"
-    ],
+    "supported_filetypes": ["application/octet-stream"],
     "config": {
       "soft_time_limit": 500,
       "queue": "long"
@@ -464,9 +439,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "ip"
-    ],
+    "observable_supported": ["ip"],
     "config": {
       "soft_time_limit": 30,
       "queue": "default"
@@ -513,11 +486,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "ip",
-      "domain",
-      "generic"
-    ],
+    "observable_supported": ["ip", "domain", "generic"],
     "config": {
       "soft_time_limit": 300,
       "queue": "long"
@@ -532,9 +501,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "generic"
-    ],
+    "observable_supported": ["generic"],
     "config": {
       "soft_time_limit": 30,
       "queue": "default"
@@ -583,9 +550,7 @@
     "python_module": "cyberchef.CyberChef",
     "description": "Bake an input with a selected CyberChef Recipe",
     "disabled": false,
-    "observable_supported": [
-      "generic"
-    ],
+    "observable_supported": ["generic"],
     "external_service": false,
     "config": {
       "soft_time_limit": 50,
@@ -632,9 +597,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "hash"
-    ],
+    "observable_supported": ["hash"],
     "config": {
       "soft_time_limit": 50,
       "queue": "default"
@@ -649,13 +612,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "ip",
-      "url",
-      "domain",
-      "hash",
-      "generic"
-    ],
+    "observable_supported": ["ip", "url", "domain", "hash", "generic"],
     "config": {
       "soft_time_limit": 50,
       "queue": "long"
@@ -681,13 +638,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "ip",
-      "url",
-      "domain",
-      "hash",
-      "generic"
-    ],
+    "observable_supported": ["ip", "url", "domain", "hash", "generic"],
     "config": {
       "soft_time_limit": 50,
       "queue": "long"
@@ -719,11 +670,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "domain",
-      "url",
-      "ip"
-    ],
+    "observable_supported": ["domain", "url", "ip"],
     "config": {
       "soft_time_limit": 30,
       "queue": "default"
@@ -780,10 +727,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "domain",
-      "url"
-    ],
+    "observable_supported": ["domain", "url"],
     "config": {
       "soft_time_limit": 300,
       "queue": "default"
@@ -904,9 +848,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "hash"
-    ],
+    "observable_supported": ["hash"],
     "config": {
       "soft_time_limit": 30,
       "queue": "default"
@@ -977,10 +919,7 @@
     },
     "params": {
       "profiles": {
-        "value": [
-          1,
-          2
-        ],
+        "value": [1, 2],
         "type": "list",
         "description": "List of profile indices for emulators. Refer to [profiles list](https://dragonfly.certego.net/dashboard/profiles?utm_source=intelowl)."
       },
@@ -1025,9 +964,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "generic"
-    ],
+    "observable_supported": ["generic"],
     "config": {
       "soft_time_limit": 50,
       "queue": "default"
@@ -1062,9 +999,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "ip"
-    ],
+    "observable_supported": ["ip"],
     "config": {
       "soft_time_limit": 180,
       "queue": "default"
@@ -1072,9 +1007,7 @@
     "secrets": {},
     "params": {
       "list_names": {
-        "value": [
-          "firehol_level1.netset"
-        ],
+        "value": ["firehol_level1.netset"],
         "type": "list",
         "description": "A list of firehol list names."
       }
@@ -1101,13 +1034,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "url",
-      "domain",
-      "ip",
-      "generic",
-      "hash"
-    ],
+    "observable_supported": ["url", "domain", "ip", "generic", "hash"],
     "config": {
       "soft_time_limit": 60,
       "queue": "long"
@@ -1160,10 +1087,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "domain",
-      "url"
-    ],
+    "observable_supported": ["domain", "url"],
     "config": {
       "soft_time_limit": 30,
       "queue": "default"
@@ -1178,10 +1102,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "domain",
-      "url"
-    ],
+    "observable_supported": ["domain", "url"],
     "config": {
       "soft_time_limit": 30,
       "queue": "default"
@@ -1202,11 +1123,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "ip",
-      "domain",
-      "url"
-    ],
+    "observable_supported": ["ip", "domain", "url"],
     "config": {
       "soft_time_limit": 20,
       "queue": "default"
@@ -1227,11 +1144,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "ip",
-      "domain",
-      "url"
-    ],
+    "observable_supported": ["ip", "domain", "url"],
     "config": {
       "soft_time_limit": 30,
       "queue": "default"
@@ -1281,9 +1194,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "ip"
-    ],
+    "observable_supported": ["ip"],
     "config": {
       "soft_time_limit": 30,
       "queue": "default"
@@ -1310,9 +1221,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "ip"
-    ],
+    "observable_supported": ["ip"],
     "secrets": {
       "api_key_name": {
         "env_var_key": "GREYNOISE_API_KEY",
@@ -1339,9 +1248,7 @@
     "disabled": true,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "ip"
-    ],
+    "observable_supported": ["ip"],
     "secrets": {},
     "config": {
       "soft_time_limit": 30,
@@ -1362,9 +1269,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "hash"
-    ],
+    "observable_supported": ["hash"],
     "config": {
       "soft_time_limit": 20,
       "queue": "default"
@@ -1424,9 +1329,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "ip"
-    ],
+    "observable_supported": ["ip"],
     "config": {
       "soft_time_limit": 200,
       "queue": "default"
@@ -1458,9 +1361,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "domain"
-    ],
+    "observable_supported": ["domain"],
     "config": {
       "soft_time_limit": 30,
       "queue": "default"
@@ -1502,12 +1403,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "ip",
-      "domain",
-      "url",
-      "hash"
-    ],
+    "observable_supported": ["ip", "domain", "url", "hash"],
     "config": {
       "soft_time_limit": 30,
       "queue": "default"
@@ -1528,13 +1424,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "ip",
-      "url",
-      "domain",
-      "hash",
-      "generic"
-    ],
+    "observable_supported": ["ip", "url", "domain", "hash", "generic"],
     "config": {
       "soft_time_limit": 45,
       "queue": "default"
@@ -1576,13 +1466,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "ip",
-      "url",
-      "domain",
-      "hash",
-      "generic"
-    ],
+    "observable_supported": ["ip", "url", "domain", "hash", "generic"],
     "config": {
       "soft_time_limit": 45,
       "queue": "default"
@@ -1614,9 +1498,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "hash"
-    ],
+    "observable_supported": ["hash"],
     "config": {
       "soft_time_limit": 100,
       "queue": "default"
@@ -1698,13 +1580,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "ip",
-      "url",
-      "domain",
-      "hash",
-      "generic"
-    ],
+    "observable_supported": ["ip", "url", "domain", "hash", "generic"],
     "config": {
       "soft_time_limit": 300,
       "queue": "default"
@@ -1731,13 +1607,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "ip",
-      "url",
-      "domain",
-      "hash",
-      "generic"
-    ],
+    "observable_supported": ["ip", "url", "domain", "hash", "generic"],
     "config": {
       "soft_time_limit": 300,
       "queue": "default"
@@ -1764,13 +1634,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "ip",
-      "url",
-      "domain",
-      "hash",
-      "generic"
-    ],
+    "observable_supported": ["ip", "url", "domain", "hash", "generic"],
     "config": {
       "soft_time_limit": 300,
       "queue": "default"
@@ -1797,9 +1661,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "ip"
-    ],
+    "observable_supported": ["ip"],
     "config": {
       "soft_time_limit": 30,
       "queue": "default"
@@ -1821,9 +1683,7 @@
     "external_service": false,
     "leaks_info": false,
     "docker_based": true,
-    "supported_filetypes": [
-      "application/x-dosexec"
-    ],
+    "supported_filetypes": ["application/x-dosexec"],
     "config": {
       "soft_time_limit": 720,
       "queue": "default"
@@ -1838,13 +1698,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "ip",
-      "domain",
-      "url",
-      "hash",
-      "generic"
-    ],
+    "observable_supported": ["ip", "domain", "url", "hash", "generic"],
     "config": {
       "soft_time_limit": 30,
       "queue": "default"
@@ -1906,12 +1760,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "ip",
-      "domain",
-      "url",
-      "hash"
-    ],
+    "observable_supported": ["ip", "domain", "url", "hash"],
     "config": {
       "soft_time_limit": 30,
       "queue": "default"
@@ -2036,9 +1885,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "hash"
-    ],
+    "observable_supported": ["hash"],
     "config": {
       "soft_time_limit": 50,
       "queue": "default"
@@ -2053,11 +1900,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "ip",
-      "domain",
-      "url"
-    ],
+    "observable_supported": ["ip", "domain", "url"],
     "config": {
       "soft_time_limit": 100,
       "queue": "default"
@@ -2072,9 +1915,7 @@
     "disabled": false,
     "external_service": false,
     "leaks_info": false,
-    "observable_supported": [
-      "ip"
-    ],
+    "observable_supported": ["ip"],
     "config": {
       "soft_time_limit": 30,
       "queue": "default"
@@ -2095,9 +1936,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "hash"
-    ],
+    "observable_supported": ["hash"],
     "config": {
       "soft_time_limit": 20,
       "queue": "default"
@@ -2154,11 +1993,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "ip",
-      "domain",
-      "url"
-    ],
+    "observable_supported": ["ip", "domain", "url"],
     "config": {
       "soft_time_limit": 50,
       "queue": "default"
@@ -2179,12 +2014,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "ip",
-      "domain",
-      "url",
-      "hash"
-    ],
+    "observable_supported": ["ip", "domain", "url", "hash"],
     "config": {
       "soft_time_limit": 30,
       "queue": "default"
@@ -2229,12 +2059,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "ip",
-      "domain",
-      "url",
-      "hash"
-    ],
+    "observable_supported": ["ip", "domain", "url", "hash"],
     "config": {
       "soft_time_limit": 40,
       "queue": "default"
@@ -2288,10 +2113,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "domain",
-      "ip"
-    ],
+    "observable_supported": ["domain", "ip"],
     "config": {
       "soft_time_limit": 60,
       "queue": "long"
@@ -2317,9 +2139,7 @@
     "disabled": false,
     "external_service": false,
     "leaks_info": false,
-    "supported_filetypes": [
-      "application/pdf"
-    ],
+    "supported_filetypes": ["application/pdf"],
     "config": {
       "soft_time_limit": 30,
       "queue": "local"
@@ -2334,9 +2154,7 @@
     "disabled": false,
     "external_service": false,
     "leaks_info": false,
-    "supported_filetypes": [
-      "application/x-dosexec"
-    ],
+    "supported_filetypes": ["application/x-dosexec"],
     "config": {
       "soft_time_limit": 30,
       "queue": "local"
@@ -2352,9 +2170,7 @@
     "external_service": false,
     "leaks_info": false,
     "docker_based": true,
-    "supported_filetypes": [
-      "application/x-dosexec"
-    ],
+    "supported_filetypes": ["application/x-dosexec"],
     "config": {
       "soft_time_limit": 500,
       "queue": "local"
@@ -2369,12 +2185,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": true,
-    "observable_supported": [
-      "ip",
-      "url",
-      "domain",
-      "generic"
-    ],
+    "observable_supported": ["ip", "url", "domain", "generic"],
     "config": {
       "soft_time_limit": 100,
       "queue": "long"
@@ -2389,9 +2200,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "url"
-    ],
+    "observable_supported": ["url"],
     "config": {
       "soft_time_limit": 100,
       "queue": "default"
@@ -2412,12 +2221,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "ip",
-      "domain",
-      "url",
-      "hash"
-    ],
+    "observable_supported": ["ip", "domain", "url", "hash"],
     "config": {
       "soft_time_limit": 100,
       "queue": "default"
@@ -2445,9 +2249,7 @@
     "external_service": false,
     "leaks_info": false,
     "docker_based": true,
-    "observable_supported": [
-      "url"
-    ],
+    "observable_supported": ["url"],
     "config": {
       "soft_time_limit": 320,
       "queue": "local"
@@ -2463,9 +2265,7 @@
     "external_service": false,
     "leaks_info": false,
     "docker_based": true,
-    "supported_filetypes": [
-      "application/x-dosexec"
-    ],
+    "supported_filetypes": ["application/x-dosexec"],
     "config": {
       "soft_time_limit": 120,
       "queue": "long"
@@ -2502,9 +2302,7 @@
     "external_service": false,
     "leaks_info": false,
     "docker_based": true,
-    "supported_filetypes": [
-      "application/octet-stream"
-    ],
+    "supported_filetypes": ["application/octet-stream"],
     "config": {
       "soft_time_limit": 120,
       "queue": "long"
@@ -2581,9 +2379,7 @@
     "external_service": false,
     "leaks_info": false,
     "docker_based": true,
-    "supported_filetypes": [
-      "application/octet-stream"
-    ],
+    "supported_filetypes": ["application/octet-stream"],
     "config": {
       "soft_time_limit": 120,
       "queue": "long"
@@ -2619,10 +2415,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "domain",
-      "url"
-    ],
+    "observable_supported": ["domain", "url"],
     "config": {
       "soft_time_limit": 30,
       "queue": "default"
@@ -2643,10 +2436,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "domain",
-      "url"
-    ],
+    "observable_supported": ["domain", "url"],
     "config": {
       "soft_time_limit": 30,
       "queue": "default"
@@ -2681,10 +2471,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "domain",
-      "url"
-    ],
+    "observable_supported": ["domain", "url"],
     "config": {
       "soft_time_limit": 30,
       "queue": "default"
@@ -2705,9 +2492,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "ip"
-    ],
+    "observable_supported": ["ip"],
     "config": {
       "soft_time_limit": 30,
       "queue": "default"
@@ -2728,9 +2513,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "ip"
-    ],
+    "observable_supported": ["ip"],
     "config": {
       "soft_time_limit": 30,
       "queue": "default"
@@ -2751,10 +2534,7 @@
     "disabled": false,
     "external_service": false,
     "leaks_info": false,
-    "supported_filetypes": [
-      "text/rtf",
-      "application/rtf"
-    ],
+    "supported_filetypes": ["text/rtf", "application/rtf"],
     "config": {
       "soft_time_limit": 30,
       "queue": "default"
@@ -2769,9 +2549,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "domain"
-    ],
+    "observable_supported": ["domain"],
     "config": {
       "soft_time_limit": 30,
       "queue": "default"
@@ -2803,9 +2581,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "domain"
-    ],
+    "observable_supported": ["domain"],
     "config": {
       "soft_time_limit": 30,
       "queue": "default"
@@ -2837,9 +2613,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "domain"
-    ],
+    "observable_supported": ["domain"],
     "config": {
       "soft_time_limit": 30,
       "queue": "default"
@@ -2871,9 +2645,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "ip"
-    ],
+    "observable_supported": ["ip"],
     "config": {
       "soft_time_limit": 30,
       "queue": "default"
@@ -2894,9 +2666,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "domain"
-    ],
+    "observable_supported": ["domain"],
     "config": {
       "soft_time_limit": 30,
       "queue": "default"
@@ -2928,9 +2698,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "domain"
-    ],
+    "observable_supported": ["domain"],
     "config": {
       "soft_time_limit": 30,
       "queue": "default"
@@ -2962,9 +2730,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "ip"
-    ],
+    "observable_supported": ["ip"],
     "config": {
       "soft_time_limit": 30,
       "queue": "default"
@@ -2991,9 +2757,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "ip"
-    ],
+    "observable_supported": ["ip"],
     "config": {
       "soft_time_limit": 30,
       "queue": "default"
@@ -3020,9 +2784,7 @@
     "disabled": false,
     "external_service": false,
     "leaks_info": false,
-    "supported_filetypes": [
-      "application/x-dosexec"
-    ],
+    "supported_filetypes": ["application/x-dosexec"],
     "config": {
       "soft_time_limit": 30,
       "queue": "local"
@@ -3037,9 +2799,7 @@
     "disabled": false,
     "external_service": false,
     "leaks_info": false,
-    "supported_filetypes": [
-      "application/x-dosexec"
-    ],
+    "supported_filetypes": ["application/x-dosexec"],
     "config": {
       "soft_time_limit": 120,
       "queue": "long"
@@ -3054,9 +2814,7 @@
     "disabled": false,
     "external_service": false,
     "leaks_info": false,
-    "supported_filetypes": [
-      "application/octet-stream"
-    ],
+    "supported_filetypes": ["application/octet-stream"],
     "config": {
       "soft_time_limit": 120,
       "queue": "long"
@@ -3087,11 +2845,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "ip",
-      "domain",
-      "generic"
-    ],
+    "observable_supported": ["ip", "domain", "generic"],
     "config": {
       "soft_time_limit": 30,
       "queue": "default"
@@ -3112,9 +2866,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "url"
-    ],
+    "observable_supported": ["url"],
     "config": {
       "soft_time_limit": 300,
       "queue": "default"
@@ -3161,12 +2913,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "url",
-      "ip",
-      "domain",
-      "generic"
-    ],
+    "observable_supported": ["url", "ip", "domain", "generic"],
     "config": {
       "soft_time_limit": 30,
       "queue": "default"
@@ -3239,15 +2986,40 @@
     "disabled": false,
     "external_service": false,
     "leaks_info": false,
-    "observable_supported": [
-      "ip"
-    ],
+    "observable_supported": ["ip"],
     "config": {
       "soft_time_limit": 120,
       "queue": "default"
     },
     "secrets": {},
     "params": {}
+  },
+  "Suricata": {
+    "type": "file",
+    "python_module": "suricata.Suricata",
+    "description": "PCAP analysis with Suricata rules",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
+    "docker_based": true,
+    "supported_filetypes": ["application/vnd.tcpdump.pcap"],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "local"
+    },
+    "secrets": {},
+    "params": {
+      "reload_rules": {
+        "value": false,
+        "type": "bool",
+        "description": "Set this to True to force the reload of Rules. Useful in case you just added new custom rules and want to test them. By default the Rules are updated only once a day at UTC 00:00"
+      },
+      "extended_logs": {
+        "value": false,
+        "type": "bool",
+        "description": "Set this to True to get all the raw logs generated by Suricata"
+      }
+    }
   },
   "TalosReputation": {
     "type": "observable",
@@ -3256,9 +3028,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "ip"
-    ],
+    "observable_supported": ["ip"],
     "config": {
       "soft_time_limit": 30,
       "queue": "default"
@@ -3273,13 +3043,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "ip",
-      "url",
-      "domain",
-      "hash",
-      "generic"
-    ],
+    "observable_supported": ["ip", "url", "domain", "hash", "generic"],
     "config": {
       "soft_time_limit": 30,
       "queue": "default"
@@ -3294,10 +3058,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "ip",
-      "domain"
-    ],
+    "observable_supported": ["ip", "domain"],
     "config": {
       "soft_time_limit": 30,
       "queue": "default"
@@ -3318,10 +3079,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "ip",
-      "domain"
-    ],
+    "observable_supported": ["ip", "domain"],
     "config": {
       "soft_time_limit": 30,
       "queue": "default"
@@ -3342,9 +3100,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "domain"
-    ],
+    "observable_supported": ["domain"],
     "config": {
       "soft_time_limit": 30,
       "queue": "default"
@@ -3366,9 +3122,7 @@
     "external_service": false,
     "leaks_info": false,
     "docker_based": true,
-    "supported_filetypes": [
-      "text/html"
-    ],
+    "supported_filetypes": ["text/html"],
     "config": {
       "soft_time_limit": 600,
       "queue": "long"
@@ -3415,10 +3169,7 @@
     "external_service": false,
     "leaks_info": false,
     "docker_based": true,
-    "observable_supported": [
-      "domain",
-      "url"
-    ],
+    "observable_supported": ["domain", "url"],
     "config": {
       "soft_time_limit": 600,
       "queue": "local"
@@ -3464,9 +3215,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "ip"
-    ],
+    "observable_supported": ["ip"],
     "config": {
       "soft_time_limit": 30,
       "queue": "default"
@@ -3482,9 +3231,7 @@
     "external_service": false,
     "leaks_info": false,
     "docker_based": true,
-    "observable_supported": [
-      "domain"
-    ],
+    "observable_supported": ["domain"],
     "config": {
       "soft_time_limit": 720,
       "queue": "default"
@@ -3496,7 +3243,7 @@
         "type": "bool",
         "description": "Verbose output"
       },
-      "torProxyAddress" : {
+      "torProxyAddress": {
         "value": "",
         "type": "str",
         "description": "Tor proxy address"
@@ -3510,10 +3257,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "domain",
-      "url"
-    ],
+    "observable_supported": ["domain", "url"],
     "config": {
       "soft_time_limit": 30,
       "queue": "default"
@@ -3528,10 +3272,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "hash",
-      "url"
-    ],
+    "observable_supported": ["hash", "url"],
     "config": {
       "soft_time_limit": 300,
       "queue": "default"
@@ -3568,9 +3309,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": true,
-    "observable_supported": [
-      "url"
-    ],
+    "observable_supported": ["url"],
     "config": {
       "soft_time_limit": 300,
       "queue": "default"
@@ -3638,9 +3377,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": true,
-    "supported_filetypes": [
-      "application/x-dosexec"
-    ],
+    "supported_filetypes": ["application/x-dosexec"],
     "config": {
       "soft_time_limit": 400,
       "queue": "long"
@@ -3672,11 +3409,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "domain",
-      "url",
-      "ip"
-    ],
+    "observable_supported": ["domain", "url", "ip"],
     "config": {
       "soft_time_limit": 50,
       "queue": "default"
@@ -3691,9 +3424,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "url"
-    ],
+    "observable_supported": ["url"],
     "config": {
       "soft_time_limit": 100,
       "queue": "default"
@@ -3725,12 +3456,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "ip",
-      "domain",
-      "url",
-      "hash"
-    ],
+    "observable_supported": ["ip", "domain", "url", "hash"],
     "config": {
       "soft_time_limit": 100,
       "queue": "default"
@@ -3750,7 +3476,7 @@
       }
     }
   },
-  "Virushee_CheckHash":{
+  "Virushee_CheckHash": {
     "type": "observable",
     "python_module": "virushee.VirusheeCheckHash",
     "description": "Search for a previous analysis of a file by its hash (SHA256/SHA1/MD5) on [Virushee API](https://api.virushee.com/).",
@@ -3771,7 +3497,7 @@
     },
     "params": {}
   },
-  "Virushee_Upload_File":{
+  "Virushee_Upload_File": {
     "type": "file",
     "python_module": "virushee.VirusheeFileUpload",
     "description": "Check file hash and upload file sample for analysis on [Virushee API](https://api.virushee.com/).",
@@ -3825,12 +3551,7 @@
     "disabled": true,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "ip",
-      "domain",
-      "url",
-      "hash"
-    ],
+    "observable_supported": ["ip", "domain", "url", "hash"],
     "config": {
       "soft_time_limit": 30,
       "queue": "default"
@@ -3987,12 +3708,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "ip",
-      "domain",
-      "url",
-      "hash"
-    ],
+    "observable_supported": ["ip", "domain", "url", "hash"],
     "config": {
       "soft_time_limit": 40,
       "queue": "default"
@@ -4071,10 +3787,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "ip",
-      "domain"
-    ],
+    "observable_supported": ["ip", "domain"],
     "config": {
       "soft_time_limit": 30,
       "queue": "default"
@@ -4095,9 +3808,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "ip"
-    ],
+    "observable_supported": ["ip"],
     "config": {
       "soft_time_limit": 30,
       "queue": "default"
@@ -4112,9 +3823,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "generic"
-    ],
+    "observable_supported": ["generic"],
     "config": {
       "soft_time_limit": 30,
       "queue": "default"
@@ -4141,12 +3850,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "ip",
-      "hash",
-      "domain",
-      "url"
-    ],
+    "observable_supported": ["ip", "hash", "domain", "url"],
     "config": {
       "soft_time_limit": 60,
       "queue": "default"
@@ -4196,11 +3900,7 @@
     "secrets": {},
     "params": {
       "passwords_to_check": {
-        "value": [
-          "agenzia",
-          "inps",
-          "coronavirus"
-        ],
+        "value": ["agenzia", "inps", "coronavirus"],
         "type": "list",
         "description": ""
       }
@@ -4220,16 +3920,12 @@
     "secrets": {},
     "params": {
       "git_repo_main_dir": {
-        "value": [
-          "/opt/deploy/yara/atm_malware_rules"
-        ],
+        "value": ["/opt/deploy/yara/atm_malware_rules"],
         "type": "list",
         "description": ""
       },
       "directories_with_rules": {
-        "value": [
-          "/opt/deploy/yara/atm_malware_rules"
-        ],
+        "value": ["/opt/deploy/yara/atm_malware_rules"],
         "type": "list",
         "description": ""
       },
@@ -4254,9 +3950,7 @@
     "secrets": {},
     "params": {
       "git_repo_main_dir": {
-        "value": [
-          "/opt/deploy/yara/bartblaze_rules"
-        ],
+        "value": ["/opt/deploy/yara/bartblaze_rules"],
         "type": "list",
         "description": ""
       },
@@ -4287,9 +3981,7 @@
     "secrets": {},
     "params": {
       "directories_with_rules": {
-        "value": [
-          "/opt/deploy/yara/rules"
-        ],
+        "value": ["/opt/deploy/yara/rules"],
         "type": "list",
         "description": ""
       }
@@ -4309,16 +4001,12 @@
     "secrets": {},
     "params": {
       "git_repo_main_dir": {
-        "value": [
-          "/opt/deploy/yara/daily_ioc_rules"
-        ],
+        "value": ["/opt/deploy/yara/daily_ioc_rules"],
         "type": "list",
         "description": ""
       },
       "directories_with_rules": {
-        "value": [
-          "/opt/deploy/yara/daily_ioc_rules"
-        ],
+        "value": ["/opt/deploy/yara/daily_ioc_rules"],
         "type": "list",
         "description": ""
       },
@@ -4343,16 +4031,12 @@
     "secrets": {},
     "params": {
       "git_repo_main_dir": {
-        "value": [
-          "/opt/deploy/yara/mandiant_rules"
-        ],
+        "value": ["/opt/deploy/yara/mandiant_rules"],
         "type": "list",
         "description": ""
       },
       "directories_with_rules": {
-        "value": [
-          "/opt/deploy/yara/mandiant_rules/rules"
-        ],
+        "value": ["/opt/deploy/yara/mandiant_rules/rules"],
         "type": "list",
         "description": ""
       },
@@ -4377,16 +4061,12 @@
     "secrets": {},
     "params": {
       "git_repo_main_dir": {
-        "value": [
-          "/opt/deploy/yara/signature-base"
-        ],
+        "value": ["/opt/deploy/yara/signature-base"],
         "type": "list",
         "description": ""
       },
       "directories_with_rules": {
-        "value": [
-          "/opt/deploy/yara/signature-base/yara"
-        ],
+        "value": ["/opt/deploy/yara/signature-base/yara"],
         "type": "list",
         "description": ""
       }
@@ -4406,16 +4086,12 @@
     "secrets": {},
     "params": {
       "git_repo_main_dir": {
-        "value": [
-          "/opt/deploy/yara/inquest_rules"
-        ],
+        "value": ["/opt/deploy/yara/inquest_rules"],
         "type": "list",
         "description": ""
       },
       "directories_with_rules": {
-        "value": [
-          "/opt/deploy/yara/inquest_rules"
-        ],
+        "value": ["/opt/deploy/yara/inquest_rules"],
         "type": "list",
         "description": ""
       },
@@ -4440,9 +4116,7 @@
     "secrets": {},
     "params": {
       "directories_with_rules": {
-        "value": [
-          "/opt/deploy/yara/intezer_rules"
-        ],
+        "value": ["/opt/deploy/yara/intezer_rules"],
         "type": "list",
         "description": ""
       }
@@ -4462,16 +4136,12 @@
     "secrets": {},
     "params": {
       "git_repo_main_dir": {
-        "value": [
-          "/opt/deploy/yara/reversinglabs_rules"
-        ],
+        "value": ["/opt/deploy/yara/reversinglabs_rules"],
         "type": "list",
         "description": ""
       },
       "directories_with_rules": {
-        "value": [
-          "/opt/deploy/yara/reversinglabs_rules/yara"
-        ],
+        "value": ["/opt/deploy/yara/reversinglabs_rules/yara"],
         "type": "list",
         "description": ""
       },
@@ -4496,16 +4166,12 @@
     "secrets": {},
     "params": {
       "git_repo_main_dir": {
-        "value": [
-          "/opt/deploy/yara/samir_rules"
-        ],
+        "value": ["/opt/deploy/yara/samir_rules"],
         "type": "list",
         "description": ""
       },
       "directories_with_rules": {
-        "value": [
-          "/opt/deploy/yara/samir_rules"
-        ],
+        "value": ["/opt/deploy/yara/samir_rules"],
         "type": "list",
         "description": ""
       }
@@ -4525,9 +4191,7 @@
     "secrets": {},
     "params": {
       "git_repo_main_dir": {
-        "value": [
-          "/opt/deploy/yara/stratosphere_rules"
-        ],
+        "value": ["/opt/deploy/yara/stratosphere_rules"],
         "type": "list",
         "description": ""
       },
@@ -4555,9 +4219,7 @@
     "secrets": {},
     "params": {
       "git_repo_main_dir": {
-        "value": [
-          "/opt/deploy/yara/trellix_rules"
-        ],
+        "value": ["/opt/deploy/yara/trellix_rules"],
         "type": "list",
         "description": ""
       },
@@ -4704,13 +4366,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "ip",
-      "domain",
-      "url",
-      "hash",
-      "generic"
-    ],
+    "observable_supported": ["ip", "domain", "url", "hash", "generic"],
     "config": {
       "soft_time_limit": 30,
       "queue": "default"
@@ -4752,10 +4408,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": [
-      "ip",
-      "domain"
-    ],
+    "observable_supported": ["ip", "domain"],
     "config": {
       "soft_time_limit": 60,
       "queue": "default"

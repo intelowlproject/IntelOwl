@@ -10,7 +10,7 @@ updates:
       # ignore all patch updates since we are using ~=
       # this does not work for security updates
       - dependency-name: "*"
-        update-types: [ "version-update:semver-patch" ]
+        update-types: ["version-update:semver-patch"]
 
   # the requirements are the same among all the integrations for now so one of them is enough
   - package-ecosystem: "pip"
@@ -23,7 +23,7 @@ updates:
       # ignore all patch updates since we are using ~=
       # this does not work for security updates
       - dependency-name: "*"
-        update-types: [ "version-update:semver-patch" ]
+        update-types: ["version-update:semver-patch"]
 
   - package-ecosystem: "npm"
     directory: "/frontend"
@@ -42,7 +42,7 @@ updates:
       # ignore all patch updates since we are using ~=
       # this does not work for security updates
       - dependency-name: "*"
-        update-types: [ "version-update:semver-patch" ]
+        update-types: ["version-update:semver-patch"]
 
   - package-ecosystem: "docker"
     directory: "/integrations/tor_analyzers"
@@ -54,7 +54,7 @@ updates:
       # ignore all patch updates since we are using ~=
       # this does not work for security updates
       - dependency-name: "*"
-        update-types: [ "version-update:semver-patch" ]
+        update-types: ["version-update:semver-patch"]
 
   - package-ecosystem: "docker"
     directory: "/integrations/rendertron"
@@ -66,7 +66,19 @@ updates:
       # ignore all patch updates since we are using ~=
       # this does not work for security updates
       - dependency-name: "*"
-        update-types: [ "version-update:semver-patch" ]
+        update-types: ["version-update:semver-patch"]
+
+  - package-ecosystem: "docker"
+    directory: "/integrations/pcap_analyzers"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+    target-branch: "dependabot-validation"
+    ignore:
+      # ignore all patch updates since we are using ~=
+      # this does not work for security updates
+      - dependency-name: "*"
+        update-types: ["version-update:semver-patch"]
 
   - package-ecosystem: "docker"
     directory: "/integrations/malware_tools_analyzers"
@@ -78,7 +90,7 @@ updates:
       # ignore all patch updates since we are using ~=
       # this does not work for security updates
       - dependency-name: "*"
-        update-types: [ "version-update:semver-patch" ]
+        update-types: ["version-update:semver-patch"]
 
   - package-ecosystem: "github-actions"
     directory: "/"
@@ -90,4 +102,4 @@ updates:
       # ignore all patch updates since we are using ~=
       # this does not work for security updates
       - dependency-name: "*"
-        update-types: [ "version-update:semver-patch" ]
+        update-types: ["version-update:semver-patch"]

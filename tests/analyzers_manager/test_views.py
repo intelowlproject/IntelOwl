@@ -17,7 +17,7 @@ class AnalyzerAppViewsTestCase(CustomAPITestCase):
         )
 
     def test_analyzer_healthcheck_200(self):
-        response = self.client.get("/api/analyzer/Rendertron/healthcheck")
+        response = self.client.get("/api/analyzer/ClamAV/healthcheck")
         content = response.json()
         msg = (response, content)
 

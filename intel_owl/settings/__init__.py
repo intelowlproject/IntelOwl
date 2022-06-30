@@ -2,7 +2,6 @@
 # See the file 'LICENSE' for copying permission.
 
 # flake8: noqa
-import os
 
 from intel_owl import secrets
 

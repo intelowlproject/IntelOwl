@@ -1,0 +1,3 @@
+# remember to keep the newline otherwise the Cron breaks
+# once a day
+0 0 * * * /update_signatures.sh 2>&1 >> /var/log/cron.log

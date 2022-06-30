@@ -1,0 +1,21 @@
+# IMPORTANT: The version must match the version of docker-compose.yml
+---
+version: "3.8"
+
+# All additional integrations should be added following this format only.
+
+services:
+  pcap_analyzers:
+    image: intelowlproject/intelowl_pcap_analyzers:${INTELOWL_TAG_VERSION}
+    container_name: intelowl_pcap_analyzers
+    restart: unless-stopped
+    expose:
+      - "4004"
+    env_file:
+      - env_file_integrations
+    volumes:
+      - generic_logs:/var/log/intel_owl
+      - ../integrations/pcap_analyzers/config/suricata/etc:/etc/suricata:ro
+      - ../integrations/pcap_analyzers/config/suricata/rules:/var/lib/suricata/rules/
+    depends_on:
+      - uwsgi

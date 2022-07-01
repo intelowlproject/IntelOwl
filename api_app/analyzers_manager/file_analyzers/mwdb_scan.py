@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 def mocked_mwdb_response(*args, **kwargs):
     attrs = {
         "data": {"id": "id_test", "children": [], "parents": []},
-        "metakeys": {"karton": "test_analysis"},
+        "attributes": {"karton": "test_analysis"},
     }
     fileInfo = MagicMock()
     fileInfo.configure_mock(**attrs)

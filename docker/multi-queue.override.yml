@@ -11,11 +11,12 @@ services:
     container_name: intelowl_celery_worker_local
     restart: unless-stopped
     stop_grace_period: 3m
-    command: /usr/local/bin/celery -A intel_owl.celery worker -n worker_local --uid www-data --time-limit=10000 --gid www-data --pidfile= -Ofair -Q local -E
     volumes:
       - ../configuration:/opt/deploy/intel_owl/configuration
       - generic_logs:/var/log/intel_owl
       - shared_files:/opt/deploy/files_required
+    entrypoint:
+      - ./docker/entrypoints/celery_local.sh
     env_file:
       - env_file_app
     depends_on:
@@ -28,11 +29,12 @@ services:
     container_name: intelowl_celery_worker_long
     restart: unless-stopped
     stop_grace_period: 3m
-    command: /usr/local/bin/celery -A intel_owl.celery worker -n worker_long --uid www-data --gid www-data --time-limit=40000 --pidfile= -Ofair -Q long -E
     volumes:
       - ../configuration:/opt/deploy/intel_owl/configuration
       - generic_logs:/var/log/intel_owl
       - shared_files:/opt/deploy/files_required
+    entrypoint:
+      - ./docker/entrypoints/celery_long.sh
     env_file:
       - env_file_app
     depends_on:

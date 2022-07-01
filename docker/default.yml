@@ -19,11 +19,12 @@ services:
       - static_content:/opt/deploy/intel_owl/static
       - shared_files:/opt/deploy/files_required
     entrypoint:
-      - ./docker/entrypoint_uwsgi.sh
+      - ./docker/entrypoints/uwsgi.sh
     expose:
       - "8001"
     env_file:
       - env_file_app
+      - .env
     depends_on:
       - postgres
 
@@ -35,6 +36,7 @@ services:
     volumes:
       - ../configuration/nginx/errors.conf:/etc/nginx/errors.conf
       - ../configuration/nginx/http.conf:/etc/nginx/conf.d/default.conf
+      - ../configuration/nginx/locations.conf:/etc/nginx/locations.conf
       - nginx_logs:/var/log/nginx
       - static_content:/var/www/static
     ports:
@@ -53,11 +55,12 @@ services:
     image: intelowlproject/intelowl:${INTELOWL_TAG_VERSION}
     container_name: intelowl_celery_beat
     restart: unless-stopped
-    command: /usr/local/bin/celery -A intel_owl.celery beat --uid www-data --gid www-data --pidfile= --schedule=/tmp/celerybeat-schedule
     volumes:
       - ../configuration:/opt/deploy/intel_owl/configuration
       - generic_logs:/var/log/intel_owl
       - shared_files:/opt/deploy/files_required
+    entrypoint:
+      - ./docker/entrypoints/celery_beat.sh
     env_file:
       - env_file_app
     depends_on:
@@ -70,11 +73,12 @@ services:
     container_name: intelowl_celery_worker_default
     restart: unless-stopped
     stop_grace_period: 3m
-    command: /usr/local/bin/celery -A intel_owl.celery worker -n worker_default --uid www-data --gid www-data --time-limit=10000 --pidfile= -Ofair -Q default -E
     volumes:
       - ../configuration:/opt/deploy/intel_owl/configuration
       - generic_logs:/var/log/intel_owl
       - shared_files:/opt/deploy/files_required
+    entrypoint:
+      - ./docker/entrypoints/celery_default.sh
     logging:
       driver: "json-file"
       options:

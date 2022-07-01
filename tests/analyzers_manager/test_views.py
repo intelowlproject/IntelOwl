@@ -17,29 +17,38 @@ class AnalyzerAppViewsTestCase(CustomAPITestCase):
         )
 
     def test_analyzer_healthcheck_200(self):
-        response = self.client.get("/api/analyzer/Rendertron/healthcheck")
-        self.assertEqual(response.status_code, 200)
+        response = self.client.get("/api/analyzer/ClamAV/healthcheck")
+        content = response.json()
+        msg = (response, content)
+
+        self.assertEqual(response.status_code, 200, msg=msg)
 
     def test_analyzer_healthcheck_400(self):
-        # non docker analyzer
+        # non docker based analyzer
         response = self.client.get("/api/analyzer/MISP/healthcheck")
-        self.assertEqual(response.status_code, 400)
-        self.assertDictEqual(response.json(), {"detail": "No healthcheck implemented"})
-        # non existing analyzer
+        content = response.json()
+        msg = (response, content)
+
+        self.assertEqual(response.status_code, 400, msg=msg)
+        self.assertDictEqual(
+            content["errors"], {"detail": "No healthcheck implemented"}, msg=msg
+        )
+
+        # non-existing analyzer
         response = self.client.get("/api/analyzer/Analyzer404/healthcheck")
-        self.assertEqual(response.status_code, 400)
-        self.assertDictEqual(response.json(), {"detail": "Analyzer doesn't exist"})
+        content = response.json()
+        msg = (response, content)
+
+        self.assertEqual(response.status_code, 400, msg=msg)
+        self.assertDictEqual(
+            content["errors"], {"detail": "Analyzer doesn't exist"}, msg=msg
+        )
 
 
 class AnalyzerActionViewSetTests(CustomAPITestCase, PluginActionViewsetTestCase):
-    @classmethod
-    def setUpClass(cls):
-        super(AnalyzerActionViewSetTests, cls).setUpClass()
-
-    def setUp(self):
-        super(AnalyzerActionViewSetTests, self).setUp()
-        self.report = self.init_report()
-        self.plugin_type = "analyzer"
+    @property
+    def plugin_type(self):
+        return "analyzer"
 
     @property
     def report_model(self):

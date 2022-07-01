@@ -44,7 +44,13 @@ python3 start.py prod up
 # create a super user 
 docker exec -ti intelowl_uwsgi python3 manage.py createsuperuser
 
-# now the app is running on http://localhost:80
+# now the backend is running on http://localhost:80
+
+# run frontend
+cd frontend/
+npm i
+npm start
+# now the froentd is running on http://localhost:3001
 ```
 
 <div class="admonition hint">
@@ -53,8 +59,8 @@ There is a <a href="https://www.youtube.com/watch?v=GuEhqQJSQAs" target="_blank"
 </div>
 
 ## Deployment Components
-IntelOwl is composed of various different services, namely:
-* Angular: Frontend ([IntelOwl-ng](https://github.com/intelowlproject/IntelOwl-ng))
+IntelOwl is composed of various different technologies, namely:
+* React: Frontend, using [CRA](https://create-react-app.dev/) and [certego-ui](https://github.com/certego/certego-ui)
 * Django: Backend
 * PostgreSQL: Database
 * Rabbit-MQ: Message Broker
@@ -136,6 +142,9 @@ In the `env_file_app`, configure different variables as explained below.
 * `DRAGONFLY_API_KEY`: Dragonfly API key. Register [here](https://dragonfly.certego.net/register?utm_source=intelowl).
 * `VIRUSHEE_API_KEY`: Virushee API key. ([docs](https://api.virushee.com/))
 * `STALKPHISH_KEY`: Stalkphish.io API key. [Register here](https://www.stalkphish.io/accounts/register/).
+* `GREEDYBEAR_API_KEY`: GreedyBear API key
+* `MALPEDIA_TOKEN`: your own Malpedia token
+* `YARAIFY_KEY`: YARAify identifier ([docs](https://yaraify.abuse.ch/api/#identifiers))
 
 **Optional** variables needed to work with specific connectors:
 * `CONNECTOR_MISP_KEY`: your own MISP instance key to use with `MISP` connector
@@ -196,11 +205,6 @@ There are 3 options to execute the web server:
 
 Refer to [Analyzers customization](Usage.html#analyzers-customization) and [Connectors customization](Usage.html#connectors-customization).
 
-<div class="admonition hint">
-<p class="admonition-title">Hint</p>
-You can see the full list of all available analyzers and connectors in the <a href="Usage.html#available-analyzers">Usage.html</a> or <a href="https://intelowlclient.firebaseapp.com/pages/analyzers/table">Live Demo</a>.
-</div>
-
 
 ## Run
 
@@ -227,6 +231,12 @@ $ python3 start.py prod up
 
 You can add the parameter `-d` to run the application in the background.
 
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+Starting from IntelOwl 4.0.0, with the startup script you can select which version of IntelOwl you want to run (<code>--version</code>).
+This  can be helpful to keep using old versions in case of retrocompatibility issues. The <code>--version</code> parameter checks out the Git Repository to the Tag of the version that you have chosen. This means that if you checkout to a v3.x.x version, you won't have the <code>--version</code> parameter anymore so you would need to manually checkout back to the <code>master</code> branch to use newer versions.
+</div>
+
 ### Stop
 To stop the application you have to:
 * if executed without `-d` parameter: press `CTRL+C` 
@@ -242,21 +252,16 @@ This is a destructive operation but can be useful to start again the project fro
 ### Users creation
 You may want to run `docker exec -ti intelowl_uwsgi python3 manage.py createsuperuser` after first run to create a superuser.
 Then you can add other users directly from the Django Admin Interface after having logged with the superuser account.
+To manage users, organizations and their visibility please refer to this [section](/Usage.md#organizations-and-user-management)
 
-### Django Groups & Permissions settings
+## Update and Re-build
 
-Refer to [this](./Advanced-Usage.html#django-groups-permissions) section of the docs.
+### Rebuilding the project / Creating custom docker build
+If you make some code changes and you like to rebuild the project, follow these steps:
 
-## Extras
-
-### Deploy on Remnux
-[Remnux](https://remnux.org/) is a Linux Toolkit for Malware Analysis.
-
-IntelOwl and Remnux have the same goal: save the time of people who need to perform malware analysis or info gathering.
-
-Therefore we suggest [Remnux](https://docs.remnux.org/) users to install IntelOwl to leverage all the tools provided by both projects in a unique environment.
-
-To do that, you can follow the same steps detailed [above](https://intelowl.readthedocs.io/en/latest/Installation.html#tl-dr) for the installation of IntelOwl.
+1. `python3 start.py test build --tag=<your_tag> .` to build the new docker image.
+2. Add this new image tag in the `docker/test.override.yml` file.
+3. Start the containers with `python3 start.py test up --build`.
 
 ### Update to the most recent version
 To update the project with the most recent available code you have to follow these steps:
@@ -264,16 +269,26 @@ To update the project with the most recent available code you have to follow the
 ```bash
 $ cd <your_intel_owl_directory> # go into the project directory
 $ git pull # pull new changes
-$ python3 start.py prod stop # kill the currently running IntelOwl containers 
-$ python3 start.py prod up --build # restart the IntelOwl application
+$ python3 start.py prod down # kill and destroy the currently running IntelOwl containers 
+$ python3 start.py prod up # restart the IntelOwl application
 ```
 
-### Rebuilding the project/ Creating custom docker build
-If you make some code changes and you like to rebuild the project, follow these steps:
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+Major versions of IntelOwl are usually incompatible from one another.
+Maintainers strive to keep the upgrade between major version easy but it's not always like that.
+Below you can find the additional process required to upgrade from each major versions.
+</div>
 
-1. `python3 start.py test build --tag=<your_tag> .` to build the new docker image.
-2. Add this new image tag in the `docker/test.override.yml` file.
-3. Start the containers with `python3 start.py test up --build`.
+### Updating to >=4.0.0 from a 3.x.x version
+Right now there is an open [issue](https://github.com/intelowlproject/IntelOwl/issues/934) regarding the chance to provide a script for migrate the Users DB to the new IntelOwl v4 schema.
+IntelOwl v4 introduced some major changes regarding the permission management, allowing an easier way to manage users and visibility. But that did break the previous available DB.
+So, while we find time and effort to develop this script, to migrate to the the new major version you would need to delete your DB. To do that, you would need to delete your volumes and start the application from scratch.
+```commandline
+python3 start.py prod down -v
+```
+Please be aware that, while this can be an important effort to manage, the v4 IntelOwl provides a easier way to add, invite and manage users from the application itself. See [the Organization section](./Usage.md#organizations-and-user-management).
+
 
 ### Updating to >=2.0.0 from a 1.x.x version
 Users upgrading from previous versions need to manually move `env_file_app`, `env_file_postgres` and `env_file_integrations` files under the new `docker` directory.

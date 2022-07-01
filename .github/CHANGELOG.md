@@ -1,6 +1,41 @@
 # Changelog
 
-[**Upgrade Guide**](https://intelowl.readthedocs.io/en/latest/Installation.html#update-to-the-most-recent-version)
+[**Upgrade Guide**](https://intelowl.readthedocs.io/en/latest/Installation.md#update-to-the-most-recent-version)
+## [v4.0.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v4.0.0)
+**Notes:**
+
+After months of work, we are finally ready to move forward and anticipate the new major 4.0.0 release for IntelOwl!
+
+The GUI was completely rewritten by one of our maintainer, [Eshaan Bansal](https://twitter.com/eshaan7_), in ReactJS, and the code included in the main IntelOwl repository. This was possible thanks to the effort put in place by [Certego](https://www.certego.net/) in supporting the maintainers.
+
+The overall user feeling should be drastically improved. We hope you'll enjoy the new appearance of IntelOwl! Please try it out and provide us feedback!
+
+**NEW FEATURES**
+
+While developing the new GUI, our main goal was to at least provide the same features that were available before. Anyway, we had the chance to add some important features:
+
+- A new way to manage users and their permissions: the "Organization" feature. Please refer to the [docs here](https://intelowl.readthedocs.io/en/latest/Usage.md#organizations-and-user-management).
+- A notification mechanism was added. Please refer to the [docs here](https://intelowl.readthedocs.io/en/latest/Usage.md#notifications).
+- Now it is possible to do more advanced lookups through the Jobs History and have an overall better way to filter them.
+- A new "API Access/Sessions" section was added to facilitate the management of API tokens and User sessions.
+- Now it is possible to submit multiple observables / files at the same time.
+
+**RETROCOMPATIBILITY INFO AND HOW TO UPDATE**
+
+Please refer to the [**Upgrade Guide**](https://intelowl.readthedocs.io/en/latest/Installation.html#update-and-re-build)
+
+**New/Improved Analyzers:**
+- Added an analyzer which supports the new service provided for free by [The Honeynet Project](https://www.honeynet.org/2021/12/27/new-project-available-greedybear/): [GreedyBear](https://github.com/honeynet/GreedyBear) 
+- Added 3 new analyzers for the new service from Abuse.ch: [YARAify](https://yaraify.abuse.ch/)
+- Added support for PCAP files and a new analyzer for [Suricata](https://suricata.io/) which allows to analyze PCAPs with IDS rules very fast and at scale.
+
+**Other:**
+
+- improved and updated the overall documentation (in particular the [Contribute](https://intelowl.readthedocs.io/en/latest/Contribute.md) section) to help the developers to start to work on the project
+- added DOCKER BUILDKIT, `--debug-build` and Watchman dependency to speed up development
+- now the Backend and the Frontend are respectively highly dependant from 2 new open source projects created by [Certego](https://www.certego.net/), [certego-saas](https://github.com/certego/certego-saas) and [certego-ui](https://github.com/certego/certego-ui).
+- a lot of dependencies upgrade, in particular in the new ReactJS Frontend.
+
 ## [v3.4.1](https://github.com/intelowlproject/IntelOwl/releases/tag/v3.4.1)
 **Notes:**
 

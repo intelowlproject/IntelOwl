@@ -35,7 +35,7 @@ jobs:
         fetch-depth: 2
 
     - name: Set up Python
-      uses: actions/setup-python@v3.1.0
+      uses: actions/setup-python@v4.0.0
       with:
         python-version: '3.9'
     - name: Install dependencies
@@ -43,8 +43,11 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y --no-install-recommends apt-utils libsasl2-dev libssl-dev libldap2-dev python-dev libfuzzy-dev net-tools git osslsigncode exiftool
         python -m pip install --upgrade pip
-        if [ -f requirements/requirements.txt ];
-        then pip install -r requirements/requirements.txt;
+        if [ -f requirements/project-requirements.txt ];
+        then pip install -r requirements/project-requirements.txt;
+        fi
+        if [ -f requirements/certego-requirements.txt ];
+        then pip install -r requirements/certego-requirements.txt;
         fi
         # Set the `CODEQL-PYTHON` environment variable to the Python executable
         # that includes the dependencies

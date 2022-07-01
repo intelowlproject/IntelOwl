@@ -2,11 +2,17 @@
 # See the file 'LICENSE' for copying permission.
 
 from django.contrib import admin
-from django.urls import include, path
-from django.views.generic.base import RedirectView
+from django.shortcuts import render
+from django.urls import include, path, re_path
+
+
+def render_reactapp(request):
+    return render(request, "index.html")
+
 
 urlpatterns = [
-    path("", RedirectView.as_view(pattern_name="admin", permanent=False)),
     path("admin/", admin.site.urls, name="admin"),
     path("api/", include("api_app.urls")),
+    re_path(r"^(?!api)$", render_reactapp),
+    re_path(r"^(?!api)(?:.*)/?$", render_reactapp),
 ]

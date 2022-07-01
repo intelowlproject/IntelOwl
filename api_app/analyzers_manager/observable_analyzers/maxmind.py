@@ -70,7 +70,7 @@ class Maxmind(classes.ObservableAnalyzer):
 
             tar_db_path = f"/tmp/{db_name_wo_ext}.tar.gz"
             with open(tar_db_path, "wb") as f:
-                f.write(r.content)
+                f.write(r.content)  # lgtm [py/clear-text-storage-sensitive-data]
 
             tf = tarfile.open(tar_db_path)
             directory_to_extract_files = settings.MEDIA_ROOT

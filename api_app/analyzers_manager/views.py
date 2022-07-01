@@ -5,12 +5,12 @@ import logging
 
 from drf_spectacular.utils import extend_schema as add_docs
 from drf_spectacular.utils import inline_serializer
-from rest_framework import generics
 from rest_framework import serializers as BaseSerializer
 from rest_framework import status
 from rest_framework.response import Response
 
 from api_app.core.views import PluginActionViewSet, PluginHealthCheckAPI
+from certego_saas.ext.views import APIView
 
 from . import controller as analyzers_controller
 from .models import AnalyzerReport
@@ -19,13 +19,20 @@ from .serializers import AnalyzerConfigSerializer
 logger = logging.getLogger(__name__)
 
 
-class AnalyzerListAPI(generics.ListAPIView):
+__all__ = [
+    "AnalyzerListAPI",
+    "AnalyzerActionViewSet",
+    "AnalyzerHealthCheckAPI",
+]
+
+
+class AnalyzerListAPI(APIView):
 
     serializer_class = AnalyzerConfigSerializer
 
     @add_docs(
         description="""
-        Get the uploaded analyzer configuration,
+        Get and parse the `analyzer_config.json` file,
         can be useful if you want to choose the analyzers programmatically""",
         parameters=[],
         responses={
@@ -37,15 +44,7 @@ class AnalyzerListAPI(generics.ListAPIView):
         },
     )
     def get(self, request, *args, **kwargs):
-        # @extend_schema needs to be applied to the entrypoint method of the view
-        # `list` call is proxied through the entrypoint `get`
-        return super().get(request, *args, **kwargs)
-
-    def list(self, request):
         try:
-            logger.info(
-                f"get_analyzer_configs received request from {str(request.user)}."
-            )
             ac = self.serializer_class.read_and_verify_config()
             return Response(ac, status=status.HTTP_200_OK)
         except Exception as e:
@@ -78,5 +77,5 @@ class AnalyzerActionViewSet(PluginActionViewSet):
 
 
 class AnalyzerHealthCheckAPI(PluginHealthCheckAPI):
-    def perform_healthcheck(self, analyzer_name) -> bool:
+    def perform_healthcheck(self, analyzer_name: str) -> bool:
         return analyzers_controller.run_healthcheck(analyzer_name)

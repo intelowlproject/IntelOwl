@@ -32,10 +32,10 @@ class Connector(Plugin):
         return ConnectorReport
 
     def get_exceptions_to_catch(self) -> list:
-        return (
+        return [
             ConnectorConfigurationException,
             ConnectorRunException,
-        )
+        ]
 
     def get_error_message(self, err, is_base_err=False):
         return (
@@ -58,19 +58,19 @@ class Connector(Plugin):
         basic health check: if instance is up or not (timeout - 10s)
         """
         health_status, url = None, None
+        # todo this is already done by the caller, to optimize this
         cc = ConnectorConfig.get(connector_name)
         if cc is not None:
-            url = cc._read_secrets(secrets_filter="url_key_name").get(
+            url = cc.read_secrets(secrets_filter="url_key_name").get(
                 "url_key_name", None
             )
-
-        if url is not None:
-            try:
-                requests.head(url, timeout=10)
-                health_status = True
-            except requests.exceptions.ConnectionError:
-                health_status = False
-            except requests.exceptions.Timeout:
-                health_status = False
+            if url is not None:
+                try:
+                    requests.head(url, timeout=10)
+                    health_status = True
+                except requests.exceptions.ConnectionError:
+                    health_status = False
+                except requests.exceptions.Timeout:
+                    health_status = False
 
         return health_status

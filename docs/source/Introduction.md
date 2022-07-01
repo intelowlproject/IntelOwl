@@ -8,13 +8,13 @@ Main features:
 
 * modern Django-Python application: easy to understand and write code upon it
 * it can get data from multiple sources with a single API request
-* more than 100 available analyzers that you can use to generate or retrieve data about a suspicious file or observable (IP, domain, …)
-* built-in Web Interface: **[IntelOwl-ng](https://github.com/intelowlproject/IntelOwl-ng)** provides features such as dashboard, visualizations of analysis data, easy to use forms for requesting new analysis and more.
+* more than 150 available analyzers that you can use to generate or retrieve data about a suspicious file or observable (IP, domain, …)
+* built-in Web Interface, written in React, provides features such as dashboard, visualizations of analysis data, easy to use forms for requesting new analysis and more.
 * official library and CLI client available on GitHub: [PyIntelOwl](https://github.com/intelowlproject/pyintelowl)
 * built-in support for integration with other SIEM/SOAR projects using connectors, specifically aimed at Threat Sharing Platforms.
 * easily integrable with other tools thanks to the REST API framework and to the PyIntelOwl library.
 * easily and completely customizable, both the APIs and the analyzers
-* early compatibility with some of the AWS services. More in the future.
+* compatibility with some of the AWS services. More in the future.
 * fast and reliable deploy: clone the project, set up the configuration and then you are ready to run it via docker-compose
 
 

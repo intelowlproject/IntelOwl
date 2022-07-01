@@ -34,6 +34,7 @@ class EXEAnalyzersTestCase(_FileAnalyzersScriptsTestCase):
                 "Floss",
                 "Manalyze",
                 "MWDB_Scan",
+                "YARAify_File_Scan",
                 "Yara_Scan_ATM_MALWARE",
                 "Yara_Scan_Bartblaze",
                 "Yara_Scan_Community",
@@ -44,6 +45,7 @@ class EXEAnalyzersTestCase(_FileAnalyzersScriptsTestCase):
                 "Yara_Scan_Intezer",
                 "Yara_Scan_Trellix",
                 "Yara_Scan_ReversingLabs",
+                "Yara_Scan_YARAify_Rules",
                 "Yara_Scan_Samir",
                 "Yara_Scan_Stratosphere",
                 "VirusTotal_v2_Get_File",
@@ -149,4 +151,15 @@ class APKAnalyzersTestCase(_FileAnalyzersScriptsTestCase):
             "file_name": "sample.apk",
             "file_mimetype": "application/vnd.android.package-archive",
             "analyzers_to_execute": ["APKiD_Scan_APK_DEX_JAR", "Quark_Engine_APK"],
+        }
+
+
+class PCAPAnalyzersTestCase(_FileAnalyzersScriptsTestCase):
+    @classmethod
+    def get_params(cls):
+        return {
+            **super().get_params(),
+            "file_name": "example.pcap",
+            "file_mimetype": "application/vnd.tcpdump.pcap",
+            "analyzers_to_execute": ["Suricata"],
         }

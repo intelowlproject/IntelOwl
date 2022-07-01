@@ -34,7 +34,6 @@ class _AbstractAnalyzersScriptTestCase(TransactionTestCase):
     @classmethod
     def get_params(cls):
         return {
-            "source": "test",
             "analyzers_requested": [],
             "connectors_requested": [],
             "connectors_to_execute": list(cls.connector_configs.keys()),

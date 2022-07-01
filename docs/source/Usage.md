@@ -1,43 +1,74 @@
 # Usage
 
 ## Client
+
 Intel Owl main objective is to provide a single API interface to query in order to retrieve threat intelligence at scale.
 
 There are multiple ways to interact with the Intel Owl APIs,
 
-1. IntelOwl-ng (Web Interface)
+1. Web Interface
 
-    - Inbuilt Web interface with dashboard, visualizations of analysis data, easy to use forms for requesting new analysis, tags management and more features
-    - [Live Demo](https://intelowlclient.firebaseapp.com/)
-    - Built with Angular 10+ and available on [GitHub](https://github.com/intelowlproject/intelowl-ng).
+   - Built-in Web interface with dashboard, visualizations of analysis data, easy to use forms for requesting new analysis, tags management and more features
+   - Built with [Create React App](https://create-react-app.dev/) and based on [certego-ui](https://github.com/certego/certego-ui).
 
 2. pyIntelOwl (CLI/SDK)
 
-    - Official client that is available at: [PyIntelOwl](https://github.com/intelowlproject/pyintelowl),
-    - Can be used as a library for your own python projects or...
-    - directly via the command line interface.
+   - Official client that is available at: [PyIntelOwl](https://github.com/intelowlproject/pyintelowl),
+   - Can be used as a library for your own python projects or...
+   - directly via the command line interface.
 
 <div class="admonition hint">
 <p class="admonition-title">Hint: Tokens Creation</p>
-The server authentication is managed by API tokens. So, if you want to interact with Intel Owl, you have to create one or more unprivileged users from the Django Admin Interface and then generate a token for those users.
+The server authentication is managed by API tokens. So, if you want to interact with Intel Owl, you have two ways to do that:
+<ul>
+<li>If you are a normal user, you can go to the "API Access/Sessions" section of the GUI and create a Token there.</li>
+<li>If you are an administrator of IntelOwl, you can create one or more unprivileged users from the Django Admin Interface and then generate a token for those users.
+</li>
+</ul>
 Afterwards you can leverage the created tokens with the Intel Owl Client.
 </div>
 
+## Organizations and User management
+Starting from IntelOwl v4, a new "Organization" section is available on the GUI. This section substitute the previous permission management via Django Admin and aims to provide an easier way to manage users and visibility.
+
+### Multi Tenancy
+Thanks to the "Organization" feature, IntelOwl can be used by multiple SOCs, companies, etc...very easily.
+Right now it works very simply: only users in the same organization can see analysis of one another. An user can belong to an organization only.
+
+#### Manage organizations
+You can create a new organization by going to the "Organization" section, available under the Dropdown menu you cand find under the username.
+
+Once you create an organization, you are the unique Administrator of that organization. So you are the only one who can delete the organization, remove users and send invitations to other users.
+
+#### Accept Invites
+Once an invite has sent, the invited user has to login, go to the "Organization" section and accept the invite there. Afterwards the Administrator will be able to see the user in his "Organization" section.
+
+
+## Notifications
+Since IntelOwl v4, there is a Notifications button available on the top right of the page:
+
+<img style="border: 0.2px solid black" width=220 height=210 src="../static/notifications.png">
+
+There you can read notifications provided by either your administration or the IntelOwl Maintainers.
+
+As an Admin, if you want to add a notification to have it sent to all the users, you have to login to the Django Admin interface, go to the "Notifications" section and add it there.
 
 ## Analyzers customization
+
 You can create new analyzers based on already existing modules by changing the configuration values inside `configuration/analyzer_config.json`. This file is mounted as a docker volume, so you won't need to rebuild the image.
 
 You may want to change this configuration to add new analyzers or to change the configuration of some of them. The name of the analyzers can be changed at every moment based on your wishes.
 
 The following are all the keys that you can change without touching the source code:
-* `disabled`: you can choose to disable certain analyzers, then they won't appear in the dropdown list and won't run if requested.
-* `leaks_info`: if set, in the case you specify via the API that a resource is sensitive, the specific analyzer won't be executed
-* `external_service`: if set, in the case you specify via the API to exclude external services, the specific analyzer won't be executed
-* `supported_filetypes`: can be populated as a list. If set, if you ask to analyze a file with a different mimetype from the ones you specified, it won't be executed
-* `not_supported_filetypes`: can be populated as a list. If set, if you ask to analyze a file with a mimetype from the ones you specified, it won't be executed
-* `observable_supported`: can be populated as a list. If set, if you ask to analyze an observable that is not in this list, it won't be executed. Valid values are: `ip`, `domain`, `url`, `hash`, `generic`.
-* `soft_time_limit`: this is the maximum time (in seconds) of execution for an analyzer. Once reached, the task will be killed (or managed in the code by a custom Exception). Default `300`.
-* `queue`: this takes effects only when [multi-queue](Advanced-Usage.html#multi-queue) is enabled. Choose which celery worker would execute the task: `local` (ideal for tasks that leverage local applications like Yara), `long` (ideal for long tasks) or `default` (ideal for simple webAPI-based analyzers).
+
+- `disabled`: you can choose to disable certain analyzers, then they won't appear in the dropdown list and won't run if requested.
+- `leaks_info`: if set, in the case you specify via the API that a resource is sensitive, the specific analyzer won't be executed
+- `external_service`: if set, in the case you specify via the API to exclude external services, the specific analyzer won't be executed
+- `supported_filetypes`: can be populated as a list. If set, if you ask to analyze a file with a different mimetype from the ones you specified, it won't be executed
+- `not_supported_filetypes`: can be populated as a list. If set, if you ask to analyze a file with a mimetype from the ones you specified, it won't be executed
+- `observable_supported`: can be populated as a list. If set, if you ask to analyze an observable that is not in this list, it won't be executed. Valid values are: `ip`, `domain`, `url`, `hash`, `generic`.
+- `soft_time_limit`: this is the maximum time (in seconds) of execution for an analyzer. Once reached, the task will be killed (or managed in the code by a custom Exception). Default `300`.
+- `queue`: this takes effects only when [multi-queue](Advanced-Usage.html#multi-queue) is enabled. Choose which celery worker would execute the task: `local` (ideal for tasks that leverage local applications like Yara), `long` (ideal for long tasks) or `default` (ideal for simple webAPI-based analyzers).
 
 <div class="admonition hint">
 <p class="admonition-title">Hint: Advanced Configuration</p>
@@ -45,6 +76,7 @@ You can also modify analyzer specific parameters from the configuration file or 
 </div>
 
 ##### Example: add an analyzer configuration for your own Yara signatures
+
 ```json
     "Yara_Scan_Custom_Signatures": {
         "type": "file",
@@ -69,50 +101,58 @@ You can also modify analyzer specific parameters from the configuration file or 
 ```
 
 ## Connectors customization
+
 Connectors being optional are `disabled` by default. You can enable them by changing the configuration values inside `configuration/connector_config.json`. This file is mounted as a docker volume, so you won't need to rebuild the image.
 
 The following are all the keys that you can change without touching the source code:
-* `disabled`: _similar to analyzers_
-* `soft_time_limit`: _similar to analyzers_
-* `queue`: _similar to analyzers_
-* `maximum_tlp` (default `WHITE`, choices `WHITE`, `GREEN`, `AMBER`, `RED`): specify the maximum TLP of the analysis up to which the connector is allowed to run. (e.g. if `maximum_tlp` is `GREEN`, it would run for analysis with TLPs `WHITE` and `GREEN`). To learn more about TLPs see [TLP Support](./Usage.md#tlp-support).
+
+- `disabled`: _similar to analyzers_
+- `soft_time_limit`: _similar to analyzers_
+- `queue`: _similar to analyzers_
+- `maximum_tlp` (default `WHITE`, choices `WHITE`, `GREEN`, `AMBER`, `RED`): specify the maximum TLP of the analysis up to which the connector is allowed to run. (e.g. if `maximum_tlp` is `GREEN`, it would run for analysis with TLPs `WHITE` and `GREEN`). To learn more about TLPs see [TLP Support](./Usage.md#tlp-support).
 
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 Changing other keys can break an analyzer or connector. In that case, you should think about duplicating the configuration entry or python module with your changes.
 </div>
 
-
 ## Managing Analyzers and Connectors
-All plugins i.e. analyzers and connectors have `kill` and `retry` actions. In addition to that, all docker-based analyzers and connectors have a `healthcheck` action to check if their associated instances are up or not. 
+
+All plugins i.e. analyzers and connectors have `kill` and `retry` actions. In addition to that, all docker-based analyzers and connectors have a `healthcheck` action to check if their associated instances are up or not.
 
 - **kill:**
 
-   To stop a plugin whose status is `running`/`pending`: 
-   * GUI: Buttons on reports table on job result page.
-   * PyIntelOwl: `IntelOwl.kill_analyzer` and `IntelOwl.kill_connector` function.
-   * CLI: `$ pyintelowl jobs kill-analyzer <job_id> <analyzer_name>` and `$ pyintelowl jobs kill-connector <job_id> <connector_name>`
-   * API: `PATCH /api/job/{job_id}/analyzer/{analyzer_name}/kill` and `PATCH /api/job/{job_id}/connector/{connector_name}/kill`
+  To stop a plugin whose status is `running`/`pending`:
+
+  - GUI: Buttons on reports table on job result page.
+  - PyIntelOwl: `IntelOwl.kill_analyzer` and `IntelOwl.kill_connector` function.
+  - CLI: `$ pyintelowl jobs kill-analyzer <job_id> <analyzer_name>` and `$ pyintelowl jobs kill-connector <job_id> <connector_name>`
+  - API: `PATCH /api/job/{job_id}/analyzer/{analyzer_name}/kill` and `PATCH /api/job/{job_id}/connector/{connector_name}/kill`
+
 - **retry:**
 
-   To retry a plugin whose status is `failed`/`killed`: 
-   * GUI: Buttons on reports table on job result page.
-   * PyIntelOwl: `IntelOwl.retry_analyzer` and `IntelOwl.retry_connector` function,
-   * CLI: `$ pyintelowl jobs retry-analyzer <job_id> <analyzer_name>` and `$ pyintelowl jobs retry-connector <job_id> <connector_name>`
-   * API: `PATCH /api/job/{job_id}/analyzer/{analyzer_name}/retry` and `PATCH /api/job/{job_id}/connector/{connector_name}/retry`
+  To retry a plugin whose status is `failed`/`killed`:
+
+  - GUI: Buttons on reports table on job result page.
+  - PyIntelOwl: `IntelOwl.retry_analyzer` and `IntelOwl.retry_connector` function,
+  - CLI: `$ pyintelowl jobs retry-analyzer <job_id> <analyzer_name>` and `$ pyintelowl jobs retry-connector <job_id> <connector_name>`
+  - API: `PATCH /api/job/{job_id}/analyzer/{analyzer_name}/retry` and `PATCH /api/job/{job_id}/connector/{connector_name}/retry`
+
 - **healthcheck:**
 
-   To check if docker container or external platform associated with an analyzer or connector respectively are up or not: 
-   * GUI: Buttons on analyzers table and connectors table.
-   * PyIntelOwl: `IntelOwl.analyzer_healthcheck` and `IntelOwl.connector_healthcheck` methods.
-   * CLI: `$ pyintelowl analyzer-healthcheck <analyzer_name>` and `$ pyintelowl connector-healthcheck <connector_name>`
-   * API: `GET /api/analyzer/{analyzer_name}/healthcheck` and `GET /api /connector/{connector_name}/healthcheck`
+  To check if docker container or external platform associated with an analyzer or connector respectively are up or not:
 
+  - GUI: Buttons on analyzers table and connectors table.
+  - PyIntelOwl: `IntelOwl.analyzer_healthcheck` and `IntelOwl.connector_healthcheck` methods.
+  - CLI: `$ pyintelowl analyzer-healthcheck <analyzer_name>` and `$ pyintelowl connector-healthcheck <connector_name>`
+  - API: `GET /api/analyzer/{analyzer_name}/healthcheck` and `GET /api /connector/{connector_name}/healthcheck`
 
 ## TLP Support
+
 IntelOwl supports the **Traffic Light Protocol** (TLP) to facilitate sharing of job analysis results.
 
 Following are the indicators available when requesting an analysis (in the order of increasing sharing restrictions):
+
 1. `WHITE`: no restriction
 2. `GREEN`: disable analyzers that could impact privacy
 3. `AMBER`: disable analyzers that could impact privacy and limit view permissions to my group
@@ -120,13 +160,12 @@ Following are the indicators available when requesting an analysis (in the order
 
 These indicators when used with `maximum_tlp` (option available in connectors), give you the control of what information is shared to the external platforms.
 
-
 ## Available Analyzers
 
 ### Analyzers list
-The following is the list of the available analyzers you can run out-of-the-box. You can also navigate the same list via the,
 
-- [live demo](https://intelowlclient.firebaseapp.com/pages/analyzers/table) for better UX.
+The following is the list of the available analyzers you can run out-of-the-box. You can also navigate the same list via the
+
 - [pyintelowl](https://github.com/intelowlproject/pyintelowl): `$ pyintelowl get-analyzer-config`
 
 ##### File analyzers:
@@ -154,9 +193,9 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `OTX_Check_Hash`: check file hash on [Alienvault OTX](https://otx.alienvault.com/)
 * `MISP_Check_Hash`: check a file hash on a MISP instance
 * `MISPFIRST_Check_Hash`: check a file hash on the FIRST MISP instance
+* `YARAify_File_Scan`: scan a file against public and non-public YARA and ClamAV signatures
 * `Yara_Scan_ATM_MALWARE`: scan a file with the [ATM malware yara rules](https://github.com/fboldewin/YARA-rules)
 * `Yara_Scan_Bartblaze`: scan a file with [bartblaze yara rules](https://github.com/bartblaze/Yara-rules)
-* `Yara_Scan_MALPEDIA`: scan a file with the [MALPEDIA yara rules](https://github.com/malpedia/signator-rules)
 * `Yara_Scan_Community`: scan a file with the [community yara rules](https://github.com/Yara-Rules/rules)
 * `Yara_Scan_Dail_Ioc`: scan a file with [StrangerealIntel](https://github.com/StrangerealIntel) Daily IOC yara rules
 * `Yara_Scan_Florian`: scan a file with [Neo23x0 yara rules](https://github.com/Neo23x0/signature-base)
@@ -168,6 +207,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `Yara_Scan_FireEye`: scan a file with FireEye yara rules
 * `Yara_Scan_ReversingLabs`: scan a file with [ReversingLabs yara rules](https://github.com/reversinglabs/reversinglabs-yara-rules)
 * `Yara_Scan_Custom_Signatures`: scan a file with your own added signatures
+* `Yara_Scan_YARAify_Rules`: scan a file with YARAify rules [YARAify rules](https://yaraify.abuse.ch/api/#download-yara-package)
 * `MalwareBazaar_Get_File`: Check if a particular malware sample is known to [MalwareBazaar](https://bazaar.abuse.ch/)
 * `PEframe_Scan`: Perform static analysis on Portable Executable malware and malicious MS Office documents with [PeFrame](https://github.com/guelfoweb/peframe)
 * `Cymru_Hash_Registry_Get_File`: Check if a particular file is known to be malware by [Team Cymru](https://team-cymru.com/community-services/mhr/)
@@ -192,6 +232,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `Dragonfly_Emulation`: Emulate malware against [Dragonfly](https://dragonfly.certego.net?utm_source=intelowl) sandbox by [Certego S.R.L](https://certego.net?utm_source=intelowl).
 * `Virushee_Upload_File`: Check file hash and upload file sample for analysis on [Virushee API](https://api.virushee.com/).
 * `DocGuard_Upload_File`: Analyze office files in seconds. [DocGuard](https://www.docguard.io).
+* `Suricata`: Analyze PCAPs with open IDS signatures with [Suricata engine](https://github.com/OISF/suricata)
 
 ##### Observable analyzers (ip, domain, url, hash)
 * `VirusTotal_v3_Get_Observable`: search an observable in the VirusTotal DB
@@ -206,6 +247,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `Robtex_IP_Query`: get IP info from Robtex
 * `GoogleSafebrowsing`: Scan an observable against GoogleSafeBrowsing DB
 * `GoogleWebRisk`: Scan an observable against WebRisk API (Commercial version of Google Safe Browsing). Check the [docs](https://intelowl.readthedocs.io/en/develop/Advanced-Usage.html#analyzers-with-special-configuration) to enable this properly
+* `GreedyBear`: scan an IP or a domain against the [GreedyBear](https://greedybear.honeynet.org/) API (requires API key)
 * `GreyNoiseCommunity`: scan an IP against the [Community Greynoise API](https://www.greynoise.io/) (no API key required)
 * `GreyNoise`: scan an IP against the [Greynoise](https://www.greynoise.io/) API (requires API key)
 * `CIRCLPassiveDNS`: scan an observable against the CIRCL Passive DNS DB
@@ -279,8 +321,10 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `Virushee_CheckHash`: Search for a previous analysis of a file by its hash (SHA256/SHA1/MD5) on [Virushee API](https://api.virushee.com/).
 * `Anomali_Threatstream_PassiveDNS`: Return information from passive dns of Anomali. On [Anomali Threatstream](https://www.anomali.com/products/threatstream) PassiveDNS Api. 
 * `DocGuard_Get`: check if an hash was analyzed on DocGuard. [DocGuard](https://www.docguard.io)
+* `YARAify_Search`: lookup a file hash in [Abuse.ch YARAify](https://yaraify.abuse.ch/)
 
 ##### Generic analyzers (email, phone number, etc.; anything really)
+
 Some analyzers require details other than just IP, URL, Domain, etc. We classified them as `generic` Analyzers. Since the type of field is not known, there is a format for strings to be followed.
 * `EmailRep`: search an email address on emailrep.io
 * `WiGLE`: Maps and database of 802.11 wireless networks, with statistics, submitted by wardrivers, netstumblers, and net huggers.
@@ -295,25 +339,26 @@ Some analyzers require details other than just IP, URL, Domain, etc. We classifi
 * `Anomali_Threatstream_Intelligence`: Search for threat intelligence information about an observable. On [Anomali Threatstream](https://www.anomali.com/products/threatstream) Intelligence API. 
 * `VirusTotal_v3_Intelligence_Search`: Perform advanced queries with [VirusTotal Intelligence](https://developers.virustotal.com/reference/intelligence-search) (requires paid plan)
 * `MISP`: scan an observable on a MISP instance
+* `YARAify_Generics`: lookup a YARA rule (default), ClamAV rule, imphash, TLSH, telfhash or icon_dash in [YARAify]((https://yaraify.abuse.ch/))
 
 ##### Extra analyzers
-[Additional analyzers](Advanced-Usage.html#optional-analyzers) that can be enabled per your wish.
 
+[Some analyzers are optional](Advanced-Usage.html#optional-analyzers) and need to be enabled explicitly.
 
 ## Available Connectors
+
 Connectors are designed to run after every successful analysis which makes them suitable for automated threat-sharing. They support integration with other SIEM/SOAR projects, specifically aimed at Threat Sharing Platforms.
 
 ### Connectors list
-The following is the list of the available connectors. You can also navigate the same list via the,
 
-- [live demo](https://intelowlclient.firebaseapp.com/pages/connectors/table) for better UX.
+The following is the list of the available connectors. You can also navigate the same list via the
+
 - [pyintelowl](https://github.com/intelowlproject/pyintelowl): `$ pyintelowl get-connector-config`
-
 
 * `MISP`: automatically creates an event on your MISP instance, linking the successful analysis on IntelOwl.
 * `OpenCTI`: automatically creates an observable and a linked report on your OpenCTI instance, linking the the successful analysis on IntelOwl.
 * `YETI`: YETI = Your Everyday Threat Intelligence. find or create observable on YETI, linking the successful analysis on IntelOwl.
 
---------------------
+---
 
 To contribute to the project, see [Contribute](./Contribute.md).

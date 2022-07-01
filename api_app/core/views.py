@@ -9,10 +9,11 @@ from drf_spectacular.utils import inline_serializer
 from rest_framework import serializers as rfs
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from rest_framework.exceptions import NotFound, PermissionDenied, ValidationError
+from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from certego_saas.apps.organization.permissions import IsObjectOwnerOrSameOrgPermission
 from intel_owl.celery import app as celery_app
 
 from .models import AbstractReport
@@ -20,22 +21,29 @@ from .models import AbstractReport
 logger = logging.getLogger(__name__)
 
 
-class PluginActionViewSet(viewsets.ViewSet, metaclass=ABCMeta):
+class PluginActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
+
+    permission_classes = [
+        IsObjectOwnerOrSameOrgPermission,
+    ]
+
     @property
     @abstractmethod
     def report_model(self):
         raise NotImplementedError()
 
-    def get_object(self, job_id, name):
+    def get_object(self, job_id: int, name: str) -> AbstractReport:
         """
         overrides drf's get_object
         get plugin report object by name and job_id
         """
         try:
-            return self.report_model.objects.get(
+            obj = self.report_model.objects.get(
                 job_id=job_id,
                 name=name,
             )
+            self.check_object_permissions(self.request, obj)
+            return obj
         except self.report_model.DoesNotExist:
             raise NotFound()
 
@@ -66,10 +74,11 @@ class PluginActionViewSet(viewsets.ViewSet, metaclass=ABCMeta):
     )
     @action(detail=False, methods=["patch"])
     def kill(self, request, job_id, name):
+        logger.info(
+            f"kill request from user {request.user} for job_id {job_id}, name {name}"
+        )
         # get report object or raise 404
         report = self.get_object(job_id, name)
-        if not request.user.has_perm("api_app.change_job", report.job):
-            raise PermissionDenied()
         if report.status not in [
             AbstractReport.Status.RUNNING,
             AbstractReport.Status.PENDING,
@@ -88,10 +97,11 @@ class PluginActionViewSet(viewsets.ViewSet, metaclass=ABCMeta):
     )
     @action(detail=False, methods=["patch"])
     def retry(self, request, job_id, name):
+        logger.info(
+            f"retry request from user {request.user} for job_id {job_id}, name {name}"
+        )
         # get report object or raise 404
         report = self.get_object(job_id, name)
-        if not request.user.has_perm("api_app.change_job", report.job):
-            raise PermissionDenied()
         if report.status not in [
             AbstractReport.Status.FAILED,
             AbstractReport.Status.KILLED,
@@ -106,7 +116,7 @@ class PluginActionViewSet(viewsets.ViewSet, metaclass=ABCMeta):
 
 
 @add_docs(
-    description="Health Check: if instance associated with plugin is up or not",
+    description="Health Check: if server instance associated with plugin is up or not",
     request=None,
     responses={
         200: inline_serializer(
@@ -119,9 +129,10 @@ class PluginActionViewSet(viewsets.ViewSet, metaclass=ABCMeta):
 )
 class PluginHealthCheckAPI(APIView, metaclass=ABCMeta):
     @abstractmethod
-    def perform_healthcheck(self, plugin_name):
+    def perform_healthcheck(self, plugin_name: str) -> bool:
         raise NotImplementedError()
 
     def get(self, request, name):
+        logger.info(f"get healthcheck from user {request.user}, name {name}")
         health_status = self.perform_healthcheck(name)
         return Response(data={"status": health_status}, status=status.HTTP_200_OK)

@@ -1,10 +1,13 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
+import io
 import logging
 import os
+import zipfile
 from typing import List, Tuple
 
+import requests
 import yara
 from git import Repo
 
@@ -114,17 +117,22 @@ class YaraScan(FileAnalyzer):
             if analyzer_name.startswith("Yara_Scan"):
                 yara_dirs = ac.param_values.get("git_repo_main_dir", [])
                 if not yara_dirs:
-                    # fall back to required key
                     yara_dirs = ac.param_values.get("directories_with_rules", [])
-                    found_yara_dirs.extend(yara_dirs)
-                # customize it as you wish
-                for yara_dir in yara_dirs:
-                    if os.path.isdir(yara_dir):
-                        repo = Repo(yara_dir)
-                        o = repo.remotes.origin
-                        o.pull()
-                        logger.info(f"pull repo on {yara_dir} dir")
-                    else:
-                        logger.warning(f"yara dir {yara_dir} does not exist")
-
+                yara_urls = ac.param_values.get("url", [])
+                if yara_urls:
+                    for yara_url, yara_dir in zip(yara_urls, yara_dirs):
+                        response = requests.get(yara_url, stream=True)
+                        zipfile_ = zipfile.ZipFile(io.BytesIO(response.content))
+                        zipfile_.extractall(yara_dir)
+                        logger.info(f"download {yara_url}")
+                else:
+                    for yara_dir in yara_dirs:
+                        if os.path.isdir(yara_dir):
+                            repo = Repo(yara_dir)
+                            o = repo.remotes.origin
+                            o.pull()
+                            logger.info(f"pull repo on {yara_dir} dir")
+                        else:
+                            logger.warning(f"yara dir {yara_dir} does not exist")
+                found_yara_dirs.extend(yara_dirs)
         return found_yara_dirs

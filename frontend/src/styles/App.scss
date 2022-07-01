@@ -1,0 +1,153 @@
+// lib
+@import "@certego/certego-ui/src/styles/root";
+
+// App.jsx
+* {
+  scroll-margin-top: 75px !important;
+  scroll-behavior: smooth !important;
+}
+
+main {
+  min-height: 85vh !important;
+}
+
+footer {
+  left: 0;
+  bottom: 0;
+  width: 100%;
+}
+
+section.fixed-bottom {
+  margin-bottom: 7.5rem;
+}
+
+#app-toasts {
+  z-index: 9999 !important;
+}
+
+// commons/
+
+.severity,
+.status-tag {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  font-weight: $font-weight-bold;
+  height: 1.5rem;
+  font-size: smaller;
+  color: $black;
+
+  &.sm {
+    width: 1.7rem;
+    font-size: smaller;
+  }
+
+  &.md {
+    width: 3rem;
+    font-size: $font-size-base * 1.5;
+  }
+
+  &.lg {
+    width: auto;
+    font-size: $font-size-base * 1.3;
+  }
+
+  &.fill-container {
+    width: auto !important;
+    padding: 0.6rem 0.3rem;
+  }
+}
+
+// extra/
+
+.cookiealert {
+  z-index: 99999 !important;
+  opacity: 1 !important;
+  border-radius: 0;
+  color: $white;
+  background-color: $black;
+  border: 1px solid $accent-2;
+}
+
+// misc/
+
+#feedbackform-popover {
+  width: 500px;
+  min-width: 175px;
+  min-height: 50px;
+}
+
+.notifications-popover {
+  width: 500px;
+  background-color: $dark;
+
+  .nav-tabs {
+    background-color: $dark;
+
+    .nav-item {
+      .nav-link.active {
+        color: $info;
+        border-bottom: 1px solid $info;
+      }
+    }
+  }
+}
+
+.notifications-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.twitter-follow-button {
+  /* stylelint-disable scss/at-extend-no-missing-placeholder */
+  @extend .btn;
+  @extend .btn-xs;
+  /* stylelint-enable scss/at-extend-no-missing-placeholder */
+
+  background-color: #1da1f2;
+  color: $light;
+  font-weight: 450;
+
+  &:hover {
+    background-color: shade-color(#1da1f2, 20%);
+    color: $light !important;
+  }
+}
+
+.badge-top-end-corner {
+  top: -1.25em;
+  right: 0.75em;
+  font-size: x-small;
+  position: relative;
+  vertical-align: baseline;
+}
+
+/* Media queries */
+
+@include media-breakpoint-down(md) {
+  /* stylelint-disable-next-line selector-id-pattern */
+  #home__bgImg {
+    left: -5px !important;
+
+    // fixed -> parallax effect
+    // scroll -> normal
+    background-attachment: scroll !important;
+  }
+
+  /* stylelint-disable-next-line selector-id-pattern */
+  #home__mainText {
+    .glitch {
+      display: none;
+    }
+  }
+}
+
+.tooltip-inner {
+  max-width: 100% !important;
+}
+
+.dropdown-divider {
+  border-top: 3px solid rgba(0, 0, 0, 30%);
+}

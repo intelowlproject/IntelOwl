@@ -13,7 +13,7 @@ djangorestframework-filters==1.0.0.dev2
 drf-spectacular==0.22.0
 
 uWSGI==2.0.20
-whitenoise==6.0.0
+whitenoise==6.2.0
 git+https://github.com/jazzband/django-silk.git#egg=django-silk
 
 # infra

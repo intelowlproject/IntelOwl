@@ -58,7 +58,7 @@ PySocks==1.7.1
 quark-engine==22.6.1
 requests==2.28.0
 speakeasy-emulator==1.5.9
-yara-python==4.1.0
+yara-python==4.2.0
 pydragonfly==0.1.0
 XLMMacroDeobfuscator[secure]==0.2.3
 # this is required because XLMMacroDeobfuscator does not pin xlrd2 and pyxlsb2 packages

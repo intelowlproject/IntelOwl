@@ -6,6 +6,7 @@ import logging
 
 import magic
 import pydeep
+import tlsh
 from exiftool import ExifTool
 
 from api_app.analyzers_manager.classes import FileAnalyzer
@@ -33,6 +34,11 @@ class FileInfo(FileAnalyzer):
         results["sha1"] = hashlib.sha1(binary).hexdigest()
         results["sha256"] = hashlib.sha256(binary).hexdigest()
         results["ssdeep"] = pydeep.hash_file(self.filepath).decode()
+        tlsh_hash = tlsh.hash(binary)
+        if tlsh_hash == "TNULL":
+            logger.warning(f"TLSH hash is NULL for {self.filepath}")
+        else:
+            results["tlsh"] = tlsh_hash
 
         try:
             with ExifTool(self.exiftool_path) as et:

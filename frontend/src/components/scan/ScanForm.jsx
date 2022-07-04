@@ -135,6 +135,16 @@ export default function ScanForm() {
   const [pluginsLoading, pluginsError, analyzersGrouped, connectors, playbooks] =
     usePluginConfigurationStore(stateSelector);
 
+  let selectAllAnalyzers = false;
+
+  const analyzersSelectAllHandleChange =(e, formik)=> {
+    console.log(e.target.checked, e.target);
+
+    selectAllAnalyzers = e.target.checked;
+
+    formik.setFieldValue("allAnalyzersSelected", selectAllAnalyzers);
+  }
+  
   const analyzersOptions = React.useMemo(
     () =>
       analyzersGrouped[classification]
@@ -283,7 +293,7 @@ export default function ScanForm() {
     },
     [history, refetchQuota]
   );
-    
+
   return (
     <Container className="col-lg-12 col-xl-7">
       {/* Quota badges */}
@@ -360,16 +370,30 @@ export default function ScanForm() {
                       <MultiSelectDropdownInput
                         options={analyzersOptions}
                         value={formik.values.analyzers}
+                        disabled={selectAllAnalyzers}
                         onChange={(v) => formik.setFieldValue("analyzers", v)}
                         // controlShouldRenderValue={false}
                       />
-                      <FormText>
-                        Default: all configured analyzers are triggered.
-                      </FormText>
                     </Col>
                   )}
                 />
               </FormGroup>
+              
+              <FormGroup row>
+                <Label sm={4}>
+                  Select all analyzers:
+                </Label>
+                <Loader
+                  loading={pluginsLoading}
+                  error={pluginsError}
+                  render={() => (
+                    <Col sm={8}>
+                      <input type="checkbox" onChange={(e) => analyzersSelectAllHandleChange(e, formik)} className="input-dark" />
+                    </Col>
+                  )}
+                />
+              </FormGroup>
+
               <FormGroup row>
                 <Label sm={4} htmlFor="connectors">
                   Select Connectors

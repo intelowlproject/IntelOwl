@@ -34,11 +34,7 @@ class FileInfo(FileAnalyzer):
         results["sha1"] = hashlib.sha1(binary).hexdigest()
         results["sha256"] = hashlib.sha256(binary).hexdigest()
         results["ssdeep"] = pydeep.hash_file(self.filepath).decode()
-        tlsh_hash = tlsh.hash(binary)
-        if tlsh_hash == "TNULL":
-            logger.warning(f"TLSH hash is NULL for {self.filepath}")
-        else:
-            results["tlsh"] = tlsh_hash
+        results["tlsh"] = tlsh.hash(binary)
 
         try:
             with ExifTool(self.exiftool_path) as et:

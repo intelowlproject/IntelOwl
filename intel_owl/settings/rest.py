@@ -27,7 +27,7 @@ REST_FRAMEWORK = {
 REST_DURIN = {
     "DEFAULT_TOKEN_TTL": timedelta(days=14),
     "TOKEN_CHARACTER_LENGTH": 32,
-    "USER_SERIALIZER": "certego_saas.user.serializers.UserSerializer",
+    "USER_SERIALIZER": "certego_saas.app.user.serializers.UserSerializer",
     "AUTH_HEADER_PREFIX": "Token",
     "TOKEN_CACHE_TIMEOUT": 300,  # 5 minutes
     "REFRESH_TOKEN_ON_LOGIN": True,

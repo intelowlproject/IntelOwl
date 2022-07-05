@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     # certego libs
     "durin",
     "certego_saas",
+    "certego_saas.apps.user",
     "certego_saas.apps.notifications",
     "certego_saas.apps.organization",
     # intelowl apps

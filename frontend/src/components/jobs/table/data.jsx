@@ -149,6 +149,11 @@ const jobTableColumns = [
               {job.connectors_to_execute.length}/
               {job.connectors_requested.length || "all"} connectors
             </span>
+
+            <span>
+              {job.playbooks_to_execute.length}/
+              {job.playbooks_to_execute.length || "all"} playbooks
+            </span>
           </div>
         ),
         disableSortBy: true,

@@ -60,6 +60,19 @@ const tableProps = {
       ),
     },
     {
+      Header: "Playbook",
+      id: "playbook",
+      accessor: "parent_playbook",
+      Cell: ({ value, }) => {
+        if (value != null) {
+          return <span>{value}</span>
+        }
+        return <span />
+      },
+      Filter: DefaultColumnFilter,
+      maxWidth: 300,      
+    },
+    {
       Header: "Status",
       id: "status",
       accessor: "status",

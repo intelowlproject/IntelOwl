@@ -25,9 +25,11 @@ export function PluginInfoCard({ pluginInfo, }) {
     <Card className="flat border-dark h-100 w-100">
       <CardHeader className="d-flex align-items-center bg-body p-2 h5">
         <span>{pluginInfo?.name}</span>
-        <code className="ml-1 font-italic small">
-          ( {pluginInfo?.python_module} )
-        </code>
+        {pluginInfo.python_module &&
+          <code className="ml-1 font-italic small">
+            ( {pluginInfo?.python_module} )
+          </code>
+        }
         {pluginInfo?.maximum_tlp && (
           <TLPTag className="ml-auto mr-0" value={pluginInfo.maximum_tlp} />
         )}
@@ -38,68 +40,124 @@ export function PluginInfoCard({ pluginInfo, }) {
           <p>{markdownToHtml(pluginInfo?.description)}</p>
         </div>
         <div>
-          <h6 className="text-secondary">Configuration</h6>
-          <ul>
-            {Object.entries(pluginInfo?.config).map(([key, value]) => (
-              <li
-                key={`plugininfocard-configuration__${pluginInfo?.name}-${key}`}
-              >
-                <span>{key}: </span>
-                <code>{JSON.stringify(value, null, 2)}</code>
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div>
-          <h6 className="text-secondary">Parameters</h6>
-          <ul>
-            {Object.entries(pluginInfo?.params).map(([key, value]) => (
-              <li key={`plugininfocard-params__${pluginInfo?.name}-${key}`}>
-                <span>{key}: </span>
-                <code>{JSON.stringify(value.value, null, 2)}</code>
-                &nbsp;
-                <em className="text-muted">({value.type})</em>
-                <dd className="text-muted">
-                  {markdownToHtml(value.description)}
-                </dd>
-              </li>
-            ))}
-          </ul>
-        </div>
-        <h6 className="text-secondary">Secrets</h6>
-        <ul>
-          {Object.entries(pluginInfo?.secrets).map(([key, value]) => (
-            <li key={`plugininfocard-secrets__${pluginInfo?.name}-${key}`}>
-              <span>
-                {key}
-                &nbsp; (<code className="small">{value.env_var_key}</code>)
-                &nbsp;
-                {value.required && (
-                  <Badge size="sm" color="info" className="user-select-none">
-                    required
-                  </Badge>
+              <div>
+              {pluginInfo.config && <h6 className="text-secondary">Configuration</h6>}
+                <ul>
+                  {pluginInfo.config &&
+                    Object.entries(pluginInfo?.config).map(([key, value]) => (
+                      <li
+                        key={`plugininfocard-configuration__${pluginInfo?.name}-${key}`}
+                      >
+                        <span>{key}: </span>
+                        <code>{JSON.stringify(value, null, 2)}</code>
+                      </li>
+                    ))}
+                </ul>
+              </div>
+              <div>
+                {pluginInfo?.params && <h6 className="text-secondary">Parameters</h6>}
+                <ul>
+                  {pluginInfo?.params &&
+                    Object.entries(pluginInfo?.params).map(([key, value]) => (
+                      <li key={`plugininfocard-params__${pluginInfo?.name}-${key}`}>
+                        <span>{key}: </span>
+                        <code>{JSON.stringify(value.value, null, 2)}</code>
+                        &nbsp;
+                        <em className="text-muted">({value.type})</em>
+                        <dd className="text-muted">
+                          {markdownToHtml(value.description)}
+                        </dd>
+                      </li>
+                    ))
+                  }
+                </ul>
+              </div>
+              {pluginInfo?.secrets && <h6 className="text-secondary">Secrets</h6>}
+              <ul>
+                {pluginInfo.secrets &&
+                  Object.entries(pluginInfo?.secrets).map(([key, value]) => (
+                    <li key={`plugininfocard-secrets__${pluginInfo?.name}-${key}`}>
+                      <span>
+                        {key}
+                        &nbsp; (<code className="small">{value.env_var_key}</code>)
+                        &nbsp;
+                        {value.required && (
+                          <Badge size="sm" color="info" className="user-select-none">
+                            required
+                          </Badge>
+                      )}
+                    </span>
+                    <dd className="text-muted">
+                      {markdownToHtml(value.description)}
+                    </dd>
+                  </li>
+                ))}
+              </ul>
+              {pluginInfo?.verification &&
+                <div>
+                <h6 className="text-secondary">
+                  Verification &nbsp;
+                  <PluginVerificationIcon
+                    pluginName={pluginInfo?.name}
+                    verification={pluginInfo?.verification}
+                  />
+                </h6>
+                {pluginInfo?.verification?.error_message && (
+                  <div className="text-danger">
+                    {pluginInfo?.verification?.error_message}
+                  </div>
                 )}
-              </span>
-              <dd className="text-muted">
-                {markdownToHtml(value.description)}
-              </dd>
-            </li>
-          ))}
-        </ul>
-        <div>
-          <h6 className="text-secondary">
-            Verification &nbsp;
-            <PluginVerificationIcon
-              pluginName={pluginInfo?.name}
-              verification={pluginInfo?.verification}
-            />
-          </h6>
-          {pluginInfo?.verification?.error_message && (
-            <div className="text-danger">
-              {pluginInfo?.verification?.error_message}
-            </div>
-          )}
+                </div>
+              }
         </div>
+          {pluginInfo?.analyzers &&
+            <div>
+              <h6 className="text-secondary">
+                Analyzers &nbsp;
+              </h6>
+              <ul>
+                {Object.entries(pluginInfo?.analyzers).map(([key, value]) => (
+                  <li key={`plugininfocard-analyzer__${pluginInfo?.name}-${key}`}>
+                    <span>
+                      {key}
+                    </span>
+                    {(Object.keys(pluginInfo?.analyzers[key]).length === 0) &&
+                      <ul>
+                        <li>
+                          <code>{JSON.stringify(value, null, 2)}</code>
+                        </li>
+                      </ul>
+                    }
+                  </li>
+                ))
+                }
+              </ul>
+            </div>
+          }
+          {pluginInfo?.connectors &&
+            <div>
+            <h6 className="text-secondary">
+              Connectors &nbsp;
+            </h6>
+            <ul>
+              {Object.entries(pluginInfo?.connectors).map(([key, value]) => (
+                <li key={`plugininfocard-connector__${pluginInfo?.name}-${key}`}>
+                  <span>
+                    {key}
+                  </span>
+                  {(Object.keys(pluginInfo?.connectors[key]).length === 0) &&
+                    <ul>
+                      <li>
+                        <code>{JSON.stringify(value, null, 2)}</code>
+                      </li>
+                    </ul>
+                  }
+                </li>
+              ))
+              }
+            </ul>
+          </div>
+          }
       </CardBody>
     </Card>
   );

@@ -42,6 +42,10 @@ const pluginTableColumns = [
     disableSortBy: true,
     maxWidth: 115,
   },
+];
+
+const analyzersTableColumns = [
+  ...pluginTableColumns,
   {
     Header: "Configured",
     id: "configured",
@@ -57,10 +61,6 @@ const pluginTableColumns = [
     disableSortBy: true,
     maxWidth: 115,
   },
-];
-
-const analyzersTableColumns = [
-  ...pluginTableColumns,
   {
     Header: "Description",
     id: "description",
@@ -144,6 +144,21 @@ const analyzersTableColumns = [
 const connectorTableColumns = [
   ...pluginTableColumns,
   {
+    Header: "Configured",
+    id: "configured",
+    accessor: "verification.configured",
+    Cell: ({ row: { original, }, }) => (
+      <PluginVerificationIcon
+        pluginName={original?.name}
+        verification={original?.verification}
+      />
+    ),
+    Filter: SelectOptionsFilter,
+    selectOptions: ["true", "false"],
+    disableSortBy: true,
+    maxWidth: 115,
+  },
+  {
     Header: "Description",
     id: "description",
     accessor: "description",
@@ -188,49 +203,13 @@ const playbookTableColumns = [
     minWidth: 875,
   },
   {
-    Header: "Supported types",
-    id: "supported_types",
+    Header: "Supports",
+    id: "supports",
     accessor: "supports",
-    Cell: ({ value, }) => (
-      <ul className="d-flex flex-column align-items-start">
-        {value?.map((v) => (
-          <li key={v}>{v}</li>
-        ))}
-      </ul>
-    ),
-    disableSortBy: true,
-    Filter: SelectColumnFilter,
-    minWidth: 350,
-  },
-  {
-    Header: "Analyzers",
-    id: "analyzers",
+    Cell: ({ value, }) => <code>{JSON.stringify(value, null, 2)}</code>,
     disableSortBy: true,
     Filter: DefaultColumnFilter,
-    accessor: "analyzers",
-    Cell: ({value, }) => (
-      <ul className="d-flex flex-column align-items-start">
-        {value?.map((v) => (
-          <li key={v}>{v}</li>
-        ))}
-      </ul>
-    ),
-    minWidth: 350,
-  },
-  {
-    Header: "Connectors",
-    id: "connectors",
-    disableSortBy: true,
-    Filter: DefaultColumnFilter,
-    accessor: "connectors",
-    Cell: ({value, }) => (
-      <ul className="d-flex flex-column align-items-start">
-        {value?.map((v) => (
-          <li key={v}>{v}</li>
-        ))}
-      </ul>
-    ),
-    minWidth: 350,
+    minWidth: 125,
   }
 ]
 

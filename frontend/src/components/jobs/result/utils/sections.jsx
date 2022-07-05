@@ -15,7 +15,7 @@ import {
   addToast
 } from "@certego/certego-ui";
 
-import { JobTag, StatusTag, TLPTag } from "../../../common";
+import { JobTag, PlaybookTag, StatusTag, TLPTag } from "../../../common";
 import { downloadJobSample, deleteJob, killJob } from "../api";
 
 export function JobActionsBar({ job, }) {
@@ -175,6 +175,12 @@ export function JobInfoCard({ job, }) {
                 hidden={!job.errors.length}
               />,
             ],
+            [
+              "Playbook(s)",
+              job.playbooks_to_execute.map((playbook) => (
+                <PlaybookTag key={playbook} playbook={playbook} className="mr-2" />
+              )),
+            ]
           ].map(([key, value]) => (
             <ListGroupItem key={key}>
               <small className="font-weight-bold">{key}</small>

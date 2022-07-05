@@ -83,9 +83,6 @@ class Job(models.Model):
     status = models.CharField(
         max_length=32, blank=False, choices=Status.choices, default="pending"
     )
-
-    run_all_analyzers = models.BooleanField(default=False)
-    run_all_playbooks = models.BooleanField(default=False)
     
     analyzers_requested = pg_fields.ArrayField(
         models.CharField(max_length=128), blank=True, default=list

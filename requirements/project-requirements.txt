@@ -22,7 +22,7 @@ celery==5.2.2
 dataclasses==0.6
 # https://github.com/advisories/GHSA-q4qm-xhf9-4p8f
 # unpatched CVE: noproblem, we just use this for debugging purposes
-flower==1.0.0
+flower==1.1.0
 
 # plugins
 GitPython==3.1.26

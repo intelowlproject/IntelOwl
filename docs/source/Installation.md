@@ -36,21 +36,20 @@ cp env_file_app_template env_file_app
 cp env_file_postgres_template env_file_postgres
 cp env_file_integrations_template env_file_integrations
 
-# start the app
+# verify installed dependencies
 cd ..
 ./initialize.sh
+
+# start the app
 python3 start.py prod up
 
+# now the application is running on http://localhost:80
 # create a super user 
 docker exec -ti intelowl_uwsgi python3 manage.py createsuperuser
 
-# now the backend is running on http://localhost:80
+# now you can login with the created user form http://localhost:80
 
-# run frontend
-cd frontend/
-npm i
-npm start
-# now the froentd is running on http://localhost:3001
+# Have fun!
 ```
 
 <div class="admonition hint">

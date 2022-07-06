@@ -43,7 +43,7 @@ OTXv2==1.5.12
 peepdf-fork==0.4.3
 pdfid==1.1.0
 pefile==2022.5.30
-Pillow==9.1.1
+Pillow==9.2.0
 psycopg2-binary==2.9.1
 pycti==5.3.0
 pydeep==0.4

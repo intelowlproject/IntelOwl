@@ -3,7 +3,7 @@
 
 from rest_framework import serializers as rfs
 
-from certego_saas.app.user.serializers import (
+from certego_saas.apps.user.serializers import (
     UserAccessSerializer as CertegoUserAccessSerializer,
 )
 from certego_saas.models import User

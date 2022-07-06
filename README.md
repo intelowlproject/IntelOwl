@@ -39,6 +39,7 @@ Documentation about IntelOwl installation, usage, configuration and contribution
 
 To know more about the project and it's growth over time, you may be interested in reading the following:
 
+- [Certego Blog: v.4.0.0 Announcement](https://www.certego.net/en/news/intel-owl-release-v4-0-0/)
 - [Honeynet: v3.0.0 Announcement](https://www.honeynet.org/2021/09/13/intel-owl-release-v3-0-0/)
 - [Intel Owl on Daily Swig](https://portswigger.net/daily-swig/intel-owl-osint-tool-automates-the-intel-gathering-process-using-a-single-api)
 - [Honeynet: v1.0.0 Announcement](https://www.honeynet.org/?p=7558)

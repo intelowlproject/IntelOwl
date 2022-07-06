@@ -22,7 +22,7 @@
     "react-table": "^7.8.0",
     "react-use": "^17.4.0",
     "reactstrap": "^9.0.3",
-    "recharts": "^2.1.10",
+    "recharts": "^2.1.12",
     "zustand": "^4.0.0-rc.1"
   },
   "scripts": {
@@ -53,16 +53,16 @@
   },
   "devDependencies": {
     "babel-eslint": "^10.1.0",
-    "eslint": "^8.16.0",
+    "eslint": "^8.18.0",
     "eslint-config-airbnb": "^19.0.4",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-import": "^2.26.0",
-    "eslint-plugin-jsx-a11y": "^6.5.1",
+    "eslint-plugin-jsx-a11y": "^6.6.0",
     "eslint-plugin-react": "^7.30.0",
     "eslint-plugin-react-hooks": "^4.5.0",
     "prettier": "^2.6.2",
     "sass": "^1.52.1",
-    "stylelint": "^14.8.5",
+    "stylelint": "^14.9.1",
     "stylelint-config-prettier": "^9.0.3",
     "stylelint-config-standard-scss": "^4.0.0"
   }

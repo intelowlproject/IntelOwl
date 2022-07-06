@@ -355,7 +355,8 @@
     "supported_filetypes": [
       "application/x-dosexec",
       "application/x-sharedlib",
-      "application/x-executable"
+      "application/x-executable",
+      "application/x-elf"
     ],
     "config": {
       "soft_time_limit": 500,
@@ -964,7 +965,11 @@
     "disabled": false,
     "external_service": false,
     "leaks_info": false,
-    "supported_filetypes": ["application/x-sharedlib", "application/x-elf"],
+    "supported_filetypes": [
+      "application/x-sharedlib",
+      "application/x-elf",
+      "application/x-executable"
+    ],
     "config": {
       "soft_time_limit": 30,
       "queue": "local"
@@ -1537,6 +1542,7 @@
     "supported_filetypes": [
       "application/x-dosexec",
       "application/x-executable",
+      "application/x-elf",
       "application/zip",
       "application/java-archive",
       "application/vnd.android.package-archive",
@@ -1857,6 +1863,7 @@
       "application/x-binary",
       "application/x-dosexec",
       "application/x-executable",
+      "application/x-elf",
       "application/x-macbinary",
       "application/mac-binary",
       "application/octet-stream",
@@ -2356,7 +2363,8 @@
     "docker_based": true,
     "supported_filetypes": [
       "application/x-sharedlib",
-      "application/x-executable"
+      "application/x-executable",
+      "application/x-elf"
     ],
     "config": {
       "soft_time_limit": 120,

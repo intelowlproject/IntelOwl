@@ -15,6 +15,7 @@ class EXEAnalyzersTestCase(_FileAnalyzersScriptsTestCase):
             "analyzers_to_execute": [
                 "File_Info",
                 "PE_Info",
+                "ELF_Info",
                 "Signature_Info",
                 "SpeakEasy",
                 "Strings_Info_Classic",
@@ -162,4 +163,15 @@ class PCAPAnalyzersTestCase(_FileAnalyzersScriptsTestCase):
             "file_name": "example.pcap",
             "file_mimetype": "application/vnd.tcpdump.pcap",
             "analyzers_to_execute": ["Suricata"],
+        }
+
+
+class ELFAnalyzersTestCase(_FileAnalyzersScriptsTestCase):
+    @classmethod
+    def get_params(cls):
+        return {
+            **super().get_params(),
+            "file_name": "ping",
+            "file_mimetype": "application/x-sharedlib",
+            "analyzers_to_execute": ["ELF_Info"],
         }

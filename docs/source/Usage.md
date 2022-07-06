@@ -209,7 +209,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `DocGuard_Upload_File`: Analyze office files in seconds. [DocGuard](https://www.docguard.io).
 * `Suricata`: Analyze PCAPs with open IDS signatures with [Suricata engine](https://github.com/OISF/suricata)
 * `Yara_Scan_Custom_Signatures`: scan a file with the Yara rules you added manually in IntelOwl in `/configuration/custom_yara`
-
+* `ELF_Info`: static ELF analysis with [pyelftools](https://github.com/eliben/pyelftools) and [telfhash](https://github.com/trendmicro/telfhash)
 
 ##### Observable analyzers (ip, domain, url, hash)
 * `VirusTotal_v3_Get_Observable`: search an observable in the VirusTotal DB

@@ -957,6 +957,21 @@
       }
     }
   },
+  "ELF_Info": {
+    "type": "file",
+    "python_module": "elf_info.ELFInfo",
+    "description": "static ELF analysis",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
+    "supported_filetypes": ["application/x-sharedlib", "application/x-elf"],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "local"
+    },
+    "secrets": {},
+    "params": {}
+  },
   "EmailRep": {
     "type": "observable",
     "python_module": "emailrep.EmailRep",

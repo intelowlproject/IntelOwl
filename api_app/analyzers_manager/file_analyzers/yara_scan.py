@@ -114,7 +114,10 @@ class YaraScan(FileAnalyzer):
         analyzer_config = AnalyzerConfig.all()
         found_yara_dirs = []
         for analyzer_name, ac in analyzer_config.items():
-            if analyzer_name.startswith("Yara_Scan"):
+            if (
+                analyzer_name.startswith("Yara_Scan")
+                and analyzer_name != "Yara_Scan_Custom_Signatures"
+            ):
                 yara_dirs = ac.param_values.get("git_repo_main_dir", [])
                 if not yara_dirs:
                     yara_dirs = ac.param_values.get("directories_with_rules", [])

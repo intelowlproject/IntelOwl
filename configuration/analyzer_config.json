@@ -3987,6 +3987,26 @@
       }
     }
   },
+  "Yara_Scan_Custom_Signatures": {
+    "type": "file",
+    "python_module": "yara_scan.YaraScan",
+    "description": "scan a file with the Custom Signatures you added in IntelOwl",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
+    "config": {
+      "soft_time_limit": 60,
+      "queue": "default"
+    },
+    "secrets": {},
+    "params": {
+      "directories_with_rules": {
+        "value": ["/opt/deploy/intel_owl/configuration/custom_yara"],
+        "type": "list",
+        "description": "Add your own .yar files in the directory /configuration/custom_yara to use your own rules"
+      }
+    }
+  },
   "Yara_Scan_Daily_Ioc": {
     "type": "file",
     "python_module": "yara_scan.YaraScan",
@@ -4007,36 +4027,6 @@
       },
       "directories_with_rules": {
         "value": ["/opt/deploy/yara/daily_ioc_rules"],
-        "type": "list",
-        "description": ""
-      },
-      "recursive": {
-        "value": true,
-        "type": "bool",
-        "description": ""
-      }
-    }
-  },
-  "Yara_Scan_Mandiant": {
-    "type": "file",
-    "python_module": "yara_scan.YaraScan",
-    "description": "scan a file with Mandiant yara rules ([github](https://github.com/mandiant/red_team_tool_countermeasures))",
-    "disabled": false,
-    "external_service": false,
-    "leaks_info": false,
-    "config": {
-      "soft_time_limit": 60,
-      "queue": "local"
-    },
-    "secrets": {},
-    "params": {
-      "git_repo_main_dir": {
-        "value": ["/opt/deploy/yara/mandiant_rules"],
-        "type": "list",
-        "description": ""
-      },
-      "directories_with_rules": {
-        "value": ["/opt/deploy/yara/mandiant_rules/rules"],
         "type": "list",
         "description": ""
       },
@@ -4068,6 +4058,36 @@
       "directories_with_rules": {
         "value": ["/opt/deploy/yara/signature-base/yara"],
         "type": "list",
+        "description": ""
+      }
+    }
+  },
+  "Yara_Scan_Mandiant": {
+    "type": "file",
+    "python_module": "yara_scan.YaraScan",
+    "description": "scan a file with Mandiant yara rules ([github](https://github.com/mandiant/red_team_tool_countermeasures))",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
+    "config": {
+      "soft_time_limit": 60,
+      "queue": "local"
+    },
+    "secrets": {},
+    "params": {
+      "git_repo_main_dir": {
+        "value": ["/opt/deploy/yara/mandiant_rules"],
+        "type": "list",
+        "description": ""
+      },
+      "directories_with_rules": {
+        "value": ["/opt/deploy/yara/mandiant_rules/rules"],
+        "type": "list",
+        "description": ""
+      },
+      "recursive": {
+        "value": true,
+        "type": "bool",
         "description": ""
       }
     }
@@ -4237,7 +4257,7 @@
       }
     }
   },
-  "Yara_Scan_YARAify_Rules": {
+  "Yara_Scan_YARAify": {
     "type": "file",
     "python_module": "yara_scan.YaraScan",
     "description": "Scan a file with yara rules.",

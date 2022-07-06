@@ -11,6 +11,7 @@ intel_owl_test_env/
 compose-elk.yml
 docs/build/
 configuration/service_account_keyfile.json
+configuration/custom_yara/*
 coverage_reports/
 docker/.env.start.test
 .ipython

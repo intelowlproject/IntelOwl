@@ -4004,6 +4004,11 @@
         "value": ["/opt/deploy/intel_owl/configuration/custom_yara"],
         "type": "list",
         "description": "Add your own .yar files in the directory /configuration/custom_yara to use your own rules"
+      },
+      "update": {
+        "value": false,
+        "type": "bool",
+        "description": "This is set to false because these rules are local so they don't need any update"
       }
     }
   },

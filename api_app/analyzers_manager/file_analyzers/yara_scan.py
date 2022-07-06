@@ -71,7 +71,7 @@ class YaraScan(FileAnalyzer):
 
     def run(self):
         for rulepath in self.directories_with_rules:
-            # you should add a "index.yar" or "index.yas" file
+            # you should add an "index.yar" or "index.yas" file
             # and select only the rules you would like to run
             if os.path.isdir(rulepath):
                 if os.path.isfile(rulepath + "/index.yas"):
@@ -114,9 +114,8 @@ class YaraScan(FileAnalyzer):
         analyzer_config = AnalyzerConfig.all()
         found_yara_dirs = []
         for analyzer_name, ac in analyzer_config.items():
-            if (
-                analyzer_name.startswith("Yara_Scan")
-                and analyzer_name != "Yara_Scan_Custom_Signatures"
+            if analyzer_name.startswith("Yara_Scan") and ac.param_values.get(
+                "update", True
             ):
                 yara_dirs = ac.param_values.get("git_repo_main_dir", [])
                 if not yara_dirs:

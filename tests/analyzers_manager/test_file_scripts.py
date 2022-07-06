@@ -38,7 +38,6 @@ class EXEAnalyzersTestCase(_FileAnalyzersScriptsTestCase):
                 "Yara_Scan_ATM_MALWARE",
                 "Yara_Scan_Bartblaze",
                 "Yara_Scan_Community",
-                "Yara_Scan_Custom_Signatures",
                 "Yara_Scan_Daily_Ioc",
                 "Yara_Scan_Mandiant",
                 "Yara_Scan_Florian",

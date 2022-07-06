@@ -3980,8 +3980,23 @@
     },
     "secrets": {},
     "params": {
-      "directories_with_rules": {
+      "git_repo_main_dir": {
         "value": ["/opt/deploy/yara/rules"],
+        "type": "list",
+        "description": ""
+      },
+      "directories_with_rules": {
+        "value": ["/opt/deploy/yara/rules/antidebug_antivm",
+                  "/opt/deploy/yara/rules/capabilities",
+                  "/opt/deploy/yara/rules/crypto",
+                  "/opt/deploy/yara/rules/cve_rules",
+                  "/opt/deploy/yara/rules/email",
+                  "/opt/deploy/yara/rules/exploit_kits",
+                  "/opt/deploy/yara/rules/maldocs",
+                  "/opt/deploy/yara/rules/malware",
+                  "/opt/deploy/yara/rules/mobile_malware",
+                  "/opt/deploy/yara/rules/packers",
+                  "/opt/deploy/yara/rules/webshells"],
         "type": "list",
         "description": ""
       }

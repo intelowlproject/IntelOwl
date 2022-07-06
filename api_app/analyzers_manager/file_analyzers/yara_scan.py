@@ -117,6 +117,7 @@ class YaraScan(FileAnalyzer):
             if analyzer_name.startswith("Yara_Scan") and ac.param_values.get(
                 "update", True
             ):
+                logger.info(f"working on analyzer {analyzer_name}")
                 yara_dirs = ac.param_values.get("git_repo_main_dir", [])
                 if not yara_dirs:
                     yara_dirs = ac.param_values.get("directories_with_rules", [])
@@ -133,7 +134,7 @@ class YaraScan(FileAnalyzer):
                             repo = Repo(yara_dir)
                             o = repo.remotes.origin
                             o.pull()
-                            logger.info(f"pull repo on {yara_dir} dir")
+                            logger.info(f"pulled repo on {yara_dir} dir")
                         else:
                             logger.warning(f"yara dir {yara_dir} does not exist")
                 found_yara_dirs.extend(yara_dirs)

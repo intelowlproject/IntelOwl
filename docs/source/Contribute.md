@@ -280,7 +280,7 @@ If you need to modify the behavior or add feature to those packages, please foll
 Follow these guides to understand how to start to contribute to them while developing for IntelOwl:
 
 - _certego-saas_: create a fork, commit your changes in your local repo, then change the commit hash to the last one you made in the [requirements file](https://github.com/intelowlproject/IntelOwl/blob/master/requirements/certego-requirements.txt). Ultimately re-build the project
-- _certego-ui_: [Frontend doc](<(https://github.com/intelowlproject/IntelOwl/blob/master/frontend/README.md)>)
+- _certego-ui_: [Frontend doc](./Contribute.md#certego-ui)
 
 ## Create a pull request
 

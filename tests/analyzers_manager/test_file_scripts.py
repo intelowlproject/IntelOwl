@@ -45,7 +45,7 @@ class EXEAnalyzersTestCase(_FileAnalyzersScriptsTestCase):
                 "Yara_Scan_Intezer",
                 "Yara_Scan_Trellix",
                 "Yara_Scan_ReversingLabs",
-                "Yara_Scan_YARAify_Rules",
+                "Yara_Scan_YARAify",
                 "Yara_Scan_Samir",
                 "Yara_Scan_Stratosphere",
                 "VirusTotal_v2_Get_File",

@@ -3980,10 +3980,50 @@
     },
     "secrets": {},
     "params": {
-      "directories_with_rules": {
+      "git_repo_main_dir": {
         "value": ["/opt/deploy/yara/rules"],
         "type": "list",
         "description": ""
+      },
+      "directories_with_rules": {
+        "value": ["/opt/deploy/yara/rules/antidebug_antivm",
+                  "/opt/deploy/yara/rules/capabilities",
+                  "/opt/deploy/yara/rules/crypto",
+                  "/opt/deploy/yara/rules/cve_rules",
+                  "/opt/deploy/yara/rules/email",
+                  "/opt/deploy/yara/rules/exploit_kits",
+                  "/opt/deploy/yara/rules/maldocs",
+                  "/opt/deploy/yara/rules/malware",
+                  "/opt/deploy/yara/rules/mobile_malware",
+                  "/opt/deploy/yara/rules/packers",
+                  "/opt/deploy/yara/rules/webshells"],
+        "type": "list",
+        "description": ""
+      }
+    }
+  },
+  "Yara_Scan_Custom_Signatures": {
+    "type": "file",
+    "python_module": "yara_scan.YaraScan",
+    "description": "scan a file with the Custom Signatures you added in IntelOwl",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
+    "config": {
+      "soft_time_limit": 60,
+      "queue": "default"
+    },
+    "secrets": {},
+    "params": {
+      "directories_with_rules": {
+        "value": ["/opt/deploy/intel_owl/configuration/custom_yara"],
+        "type": "list",
+        "description": "Add your own .yar files in the directory /configuration/custom_yara to use your own rules"
+      },
+      "update": {
+        "value": false,
+        "type": "bool",
+        "description": "This is set to false because these rules are local so they don't need any update"
       }
     }
   },
@@ -4017,6 +4057,31 @@
       }
     }
   },
+  "Yara_Scan_Florian": {
+    "type": "file",
+    "python_module": "yara_scan.YaraScan",
+    "description": "scan a file with Neo23x0 yara rules ([github](https://github.com/Neo23x0/signature-base.git))",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
+    "config": {
+      "soft_time_limit": 60,
+      "queue": "default"
+    },
+    "secrets": {},
+    "params": {
+      "git_repo_main_dir": {
+        "value": ["/opt/deploy/yara/signature-base"],
+        "type": "list",
+        "description": ""
+      },
+      "directories_with_rules": {
+        "value": ["/opt/deploy/yara/signature-base/yara"],
+        "type": "list",
+        "description": ""
+      }
+    }
+  },
   "Yara_Scan_Mandiant": {
     "type": "file",
     "python_module": "yara_scan.YaraScan",
@@ -4043,31 +4108,6 @@
       "recursive": {
         "value": true,
         "type": "bool",
-        "description": ""
-      }
-    }
-  },
-  "Yara_Scan_Florian": {
-    "type": "file",
-    "python_module": "yara_scan.YaraScan",
-    "description": "scan a file with Neo23x0 yara rules ([github](https://github.com/Neo23x0/signature-base.git))",
-    "disabled": false,
-    "external_service": false,
-    "leaks_info": false,
-    "config": {
-      "soft_time_limit": 60,
-      "queue": "default"
-    },
-    "secrets": {},
-    "params": {
-      "git_repo_main_dir": {
-        "value": ["/opt/deploy/yara/signature-base"],
-        "type": "list",
-        "description": ""
-      },
-      "directories_with_rules": {
-        "value": ["/opt/deploy/yara/signature-base/yara"],
-        "type": "list",
         "description": ""
       }
     }
@@ -4237,7 +4277,7 @@
       }
     }
   },
-  "Yara_Scan_YARAify_Rules": {
+  "Yara_Scan_YARAify": {
     "type": "file",
     "python_module": "yara_scan.YaraScan",
     "description": "Scan a file with yara rules.",

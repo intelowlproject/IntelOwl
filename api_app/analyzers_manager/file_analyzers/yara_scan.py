@@ -71,7 +71,7 @@ class YaraScan(FileAnalyzer):
 
     def run(self):
         for rulepath in self.directories_with_rules:
-            # you should add a "index.yar" or "index.yas" file
+            # you should add an "index.yar" or "index.yas" file
             # and select only the rules you would like to run
             if os.path.isdir(rulepath):
                 if os.path.isfile(rulepath + "/index.yas"):
@@ -114,7 +114,10 @@ class YaraScan(FileAnalyzer):
         analyzer_config = AnalyzerConfig.all()
         found_yara_dirs = []
         for analyzer_name, ac in analyzer_config.items():
-            if analyzer_name.startswith("Yara_Scan"):
+            if analyzer_name.startswith("Yara_Scan") and ac.param_values.get(
+                "update", True
+            ):
+                logger.info(f"working on analyzer {analyzer_name}")
                 yara_dirs = ac.param_values.get("git_repo_main_dir", [])
                 if not yara_dirs:
                     yara_dirs = ac.param_values.get("directories_with_rules", [])
@@ -131,7 +134,7 @@ class YaraScan(FileAnalyzer):
                             repo = Repo(yara_dir)
                             o = repo.remotes.origin
                             o.pull()
-                            logger.info(f"pull repo on {yara_dir} dir")
+                            logger.info(f"pulled repo on {yara_dir} dir")
                         else:
                             logger.warning(f"yara dir {yara_dir} does not exist")
                 found_yara_dirs.extend(yara_dirs)

@@ -48,21 +48,6 @@ rm -fr atm_malware_rules/*.md
 git clone --depth 1 https://github.com/Yara-Rules/rules.git
 community_yara_index="/opt/deploy/yara/rules/index.yar"
 
-# remove broken or unwanted rules in Yara community rules
-sed -i "/ELF/d" $community_yara_index
-sed -i "/AZORULT/d" $community_yara_index
-sed -i "/Operation_Blockbuster/d" $community_yara_index
-sed -i "/MALW_ATM_HelloWorld.yar/d" $community_yara_index
-sed -i "/MALW_Furtim/d" $community_yara_index
-sed -i "/MALW_Naspyupdate.yar/d" $community_yara_index
-sed -i "/APT_FIN7.yar/d" $community_yara_index
-sed -i "/MalConfScan.yar/d" $community_yara_index
-sed -i "/RAT_PoetRATPython.yar/d" $community_yara_index
-sed -i "/Email_fake_it_maintenance_bulletin.yar/d" $community_yara_index
-sed -i "/Email_quota_limit_warning.yar/d" $community_yara_index
-sed -i "/RANSOM_acroware.yar/d" $community_yara_index
-sed -i "/TOOLKIT_THOR_HackTools.yar/d" $community_yara_index
-
 # Florian Roth rules
 git clone --depth 1 https://github.com/Neo23x0/signature-base.git
 

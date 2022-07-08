@@ -1,8 +1,8 @@
 # django libs
-Django==3.2.13
-django-auth-ldap==4.0.0
+Django==3.2.14
+django-auth-ldap==4.1.0
 django-radius==1.5.0
-django-filter==21.1
+django-filter==22.1
 django-storages==1.12.3
 django-celery-beat==2.2.1
 django-celery-results==2.2.0
@@ -13,7 +13,7 @@ djangorestframework-filters==1.0.0.dev2
 drf-spectacular==0.22.0
 
 uWSGI==2.0.20
-whitenoise==6.0.0
+whitenoise==6.2.0
 git+https://github.com/jazzband/django-silk.git#egg=django-silk
 
 # infra
@@ -22,7 +22,7 @@ celery==5.2.2
 dataclasses==0.6
 # https://github.com/advisories/GHSA-q4qm-xhf9-4p8f
 # unpatched CVE: noproblem, we just use this for debugging purposes
-flower==1.0.0
+flower==1.1.0
 
 # plugins
 GitPython==3.1.26
@@ -43,10 +43,11 @@ OTXv2==1.5.12
 peepdf-fork==0.4.3
 pdfid==1.1.0
 pefile==2022.5.30
-Pillow==9.1.1
+Pillow==9.2.0
 psycopg2-binary==2.9.1
 pycti==5.3.0
 pydeep==0.4
+pyelftools==0.28
 PyExifTool==0.5.0
 pyhashlookup==1.1.1
 pyimpfuzzy==0.5
@@ -55,10 +56,12 @@ pypdns==1.5.2
 pypssl==2.2
 pysafebrowsing==0.1.1
 PySocks==1.7.1
-quark-engine==22.5.1
+py-tlsh==4.7.2
+quark-engine==22.6.1
 requests==2.28.0
 speakeasy-emulator==1.5.9
-yara-python==4.1.0
+telfhash==0.9.8
+yara-python==4.2.0
 pydragonfly==0.1.0
 XLMMacroDeobfuscator[secure]==0.2.3
 # this is required because XLMMacroDeobfuscator does not pin xlrd2 and pyxlsb2 packages

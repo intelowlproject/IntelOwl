@@ -1,6 +1,20 @@
 # Changelog
 
 [**Upgrade Guide**](https://intelowl.readthedocs.io/en/latest/Installation.md#update-to-the-most-recent-version)
+
+## [v4.0.1](https://github.com/intelowlproject/IntelOwl/releases/tag/v4.0.1)
+
+**New/Improved Analyzers:**
+- added pre-defined `Yara_Scan_Custom_Signatures` analyzer to give the chance to the users to add their own rules directly in IntelOwl.
+- added `ELF_Info` analyzer which parses ELF files.
+- added support for [TLSH](https://github.com/trendmicro/tlsh) hash in `File_Info` and telfhash in `ELF_Info`
+
+**Fixes/Adjustments:**
+- renamed `Yara_Scan_YARAify_Rules` to `Yara_Scan_YARAify`
+- fixed `Yara_Scan_Community` update and extraction process
+- a lot of dependencies upgrades
+- fixed to the docs
+
 ## [v4.0.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v4.0.0)
 **Notes:**
 

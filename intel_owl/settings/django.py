@@ -41,7 +41,7 @@ WSGI_APPLICATION = "intel_owl.wsgi.application"
 
 # Auth
 
-AUTH_USER_MODEL = "certego_saas.User"  # custom user model
+AUTH_USER_MODEL = "certego_saas_user.User"  # custom user model
 
 AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",

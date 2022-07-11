@@ -1,5 +1,5 @@
 import React from "react";
-import { FormGroup, Label, Container, Col, FormText } from "reactstrap";
+import { FormGroup, Label, Container, Col, FormText, Button } from "reactstrap";
 import { Submit, CustomInput as FormInput } from "formstrap";
 import { Link, useHistory } from "react-router-dom";
 import { Form, Formik } from "formik";
@@ -27,7 +27,7 @@ import {
   RecentScans,
   TagSelectInput
 } from "./utils";
-import { createJob } from "./api";
+import { createJob, createPlaybookJob } from "./api";
 
 // constants
 const groupAnalyzers = (analyzersList) => {
@@ -135,15 +135,6 @@ export default function ScanForm() {
   const [pluginsLoading, pluginsError, analyzersGrouped, connectors, playbooks] =
     usePluginConfigurationStore(stateSelector);
 
-  let selectAllAnalyzers = false;
-
-  const analyzersSelectAllHandleChange =(e, formik)=> {
-    console.log(e.target.checked, e.target);
-
-    selectAllAnalyzers = e.target.checked;
-
-    formik.setFieldValue("allAnalyzersSelected", selectAllAnalyzers);
-  }
   
   const analyzersOptions = React.useMemo(
     () =>
@@ -259,10 +250,27 @@ export default function ScanForm() {
     [pluginsError]
   );
 
-  const playbooksSelectedTrigger=(v, formik)=> {
-    formik.setFieldValue("playbooks", v); 
-    console.log(formik.values)
-  }
+  const startPlaybooks = React.useCallback(
+    async (values) => {
+      console.log(values);
+      const formValues = {
+        ...values,
+        playbooks: values.playbooks.map((x) => x.value),
+      };  
+      try {
+        const jobId = await createPlaybookJob(formValues);
+        setTimeout(
+          () => history.push(`/jobs/${jobId}`),
+          1000
+        );
+      } catch (e) {
+        // handled inside createJob
+      } finally {
+        refetchQuota();
+      }
+    },
+    [history, refetchQuota]
+  );
   
   const onSubmit = React.useCallback(
     async (values, formik) => {
@@ -271,19 +279,13 @@ export default function ScanForm() {
         tags_labels: values.tags.map((optTag) => optTag.value.label),
         analyzers: values.analyzers.map((x) => x.value),
         connectors: values.connectors.map((x) => x.value),
-        playbooks: values.playbooks.map((x) => x.value),
       };
       try {
-        const jobIds = await createJob(formValues);
-        for (let i = 0; i <= jobIds; i += 1) {
-          const jobId = jobIds[i];
-          if (jobId !== undefined) {
-            setTimeout(
-              () => history.push(`/jobs/${jobId}`),
-              1000
-            );
-          }
-        }
+        const jobId = await createJob(formValues);
+        setTimeout(
+          () => history.push(`/jobs/${jobId}`),
+          1000
+        );
       } catch (e) {
         // handled inside createJob
       } finally {
@@ -370,25 +372,12 @@ export default function ScanForm() {
                       <MultiSelectDropdownInput
                         options={analyzersOptions}
                         value={formik.values.analyzers}
-                        disabled={selectAllAnalyzers}
                         onChange={(v) => formik.setFieldValue("analyzers", v)}
                         // controlShouldRenderValue={false}
                       />
-                    </Col>
-                  )}
-                />
-              </FormGroup>
-              
-              <FormGroup row>
-                <Label sm={4}>
-                  Select all analyzers:
-                </Label>
-                <Loader
-                  loading={pluginsLoading}
-                  error={pluginsError}
-                  render={() => (
-                    <Col sm={8}>
-                      <input type="checkbox" onChange={(e) => analyzersSelectAllHandleChange(e, formik)} className="input-dark" />
+                      <FormText>
+                        Default: all configured connectors are triggered.
+                      </FormText>
                     </Col>
                   )}
                 />
@@ -410,7 +399,8 @@ export default function ScanForm() {
                     </FormText>
                   </Col>
                 )}
-              </FormGroup> 
+              </FormGroup>
+
               <FormGroup row>
                 <Label sm={4} htmlFor="playbooks">
                   Select Playbooks
@@ -420,11 +410,25 @@ export default function ScanForm() {
                     <MultiSelectDropdownInput
                       options={playbookOptions}
                       value={formik.values.playbooks}
-                      onChange={(v) => playbooksSelectedTrigger(v, formik)}
+                      onChange={(v) => formik.setFieldValue("playbooks", v)}
                     />
+                    <FormText>
+                      Default: all configured playbooks are triggered.
+                    </FormText>
                   </Col>
                 )}
               </FormGroup>
+
+              <FormGroup row>
+                <Label sm={4} htmlFor="launch_playbooks">
+                  Launch Selected Playbooks:
+                </Label>
+
+                <Col sm={8}>
+                  <Button onClick={() => startPlaybooks(formik.values)} variant="primary">Launch Playbooks</Button>
+                </Col>
+              </FormGroup>
+
               <FormGroup row>
                 <Label sm={4} htmlFor="runtime_configuration">
                   Runtime Configuration

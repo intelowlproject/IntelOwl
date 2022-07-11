@@ -206,8 +206,6 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
             "observable_name",
             "observable_classification",
             "runtime_configuration",
-            "run_all_analyzers",
-            "run_all_playbooks",
             "analyzers_requested",
             "connectors_requested",
             "playbooks_requested",

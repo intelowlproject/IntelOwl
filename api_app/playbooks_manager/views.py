@@ -62,7 +62,6 @@ def _analysis_request_playbooks(
         playbooks_to_execute=cleaned_playbooks_list,
     )
 
-
     logger.info(f"New Job added to queue <- {repr(job)}.")
 
     # Check if task is test or not

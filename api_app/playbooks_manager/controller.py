@@ -182,7 +182,8 @@ def start_playbooks(
                 args = [
                     job_id,
                     cc.asdict(),
-                    {"runtime_configuration": c_params, "task_id": task_id, "parent_playbook": p_name},
+                    {"runtime_configuration": c_params, "task_id": task_id},
+                    p_name
                 ]
 
                 # get celery queue
@@ -210,6 +211,20 @@ def start_playbooks(
             except NotRunnableConnector as e:
                 logger.warning(e)
     mygroup = group(task_signatures)
-    mygroup()
+    results = mygroup.apply_async()
+
+    while True:
+        if results.ready():
+            print(results)
+            for result in results:
+                print(result)
+                result_job = result.job
+                status = result_job.status
+                if status == Job.Status.REPORTED_WITH_FAILS:
+                    job.update_status(Job.Status.REPORTED_WITH_FAILS)
+                    break
+
+                job.update_status(Job.Status.REPORTED_WITHOUT_FAILS)
+            break
 
     return None

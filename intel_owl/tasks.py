@@ -67,8 +67,8 @@ def run_analyzer(job_id: int, config_dict: dict, report_defaults: dict, parent_p
 
 
 @app.task(name="run_connector", soft_time_limit=500)
-def run_connector(job_id: int, config_dict: dict, report_defaults: dict):
-    connectors_controller.run_connector(job_id, config_dict, report_defaults)
+def run_connector(job_id: int, config_dict: dict, report_defaults: dict, parent_playbook=None):
+    connectors_controller.run_connector(job_id, config_dict, report_defaults, parent_playbook)
 
 
 @app.task(name="start_connectors", soft_time_limit=100)

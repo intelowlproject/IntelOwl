@@ -4,12 +4,13 @@
 import logging
 from typing import Dict, List
 
-from celery import group, uuid
+from celery import chord, uuid
 from django.conf import settings
 from api_app.analyzers_manager.dataclasses import AnalyzerConfig
 from api_app.connectors_manager.dataclasses import ConnectorConfig
 
-from api_app.exceptions import NotRunnableAnalyzer, NotRunnableConnector, NotRunnablePlaybook
+from api_app.exceptions import AlreadyFailedJobException, NotRunnableAnalyzer, NotRunnableConnector, NotRunnablePlaybook
+from api_app.helpers import get_now
 from ..models import TLP, Job
 from intel_owl.consts import DEFAULT_QUEUE
 
@@ -152,7 +153,6 @@ def start_playbooks(
                         queue=queue,
                         soft_time_limit=soft_time_limit,
                         task_id=task_id,
-                        ignore_result=True, # since we are using group and not chord
                     )
                 )
 
@@ -204,27 +204,68 @@ def start_playbooks(
                         queue=queue,
                         soft_time_limit=soft_time_limit,
                         task_id=task_id,
-                        ignore_result=True,  # since we are using group and not chord
                     )
                 )
 
             except NotRunnableConnector as e:
                 logger.warning(e)
-    mygroup = group(task_signatures)
-    results = mygroup.apply_async()
 
-    while True:
-        if results.ready():
-            print(results)
-            for result in results:
-                print(result)
-                result_job = result.job
-                status = result_job.status
-                if status == Job.Status.REPORTED_WITH_FAILS:
-                    job.update_status(Job.Status.REPORTED_WITH_FAILS)
-                    break
-
-                job.update_status(Job.Status.REPORTED_WITHOUT_FAILS)
-            break
-
+    runner = chord(task_signatures)
+    cb_signature = tasks.post_all_playbooks_finished.signature(
+        [job.pk], immutable=True
+    )
+    runner(cb_signature)
     return None
+
+def job_cleanup(job: Job) -> None:
+    logger.info(f"[STARTING] job_cleanup for <-- {job.__repr__()}.")
+    status_to_set = job.Status.RUNNING
+
+    try:
+        if job.status == job.Status.FAILED:
+            raise AlreadyFailedJobException()
+
+        stats_analyzers = job.get_analyzer_reports_stats()
+        stats_connectors = job.get_connector_reports_stats()
+        stats = {}
+
+        for entry in stats_analyzers:
+            stats[entry] = stats_analyzers.get(entry, 0) + stats_connectors.get(entry, 0)
+
+        logger.info(f"[REPORT] {job.__repr__()}, status:{job.status}, reports:{stats}")
+
+        if stats["running"] > 0 or stats["pending"] > 0:
+            status_to_set = job.Status.RUNNING
+        elif stats["success"] == stats["all"]:
+            status_to_set = job.Status.REPORTED_WITHOUT_FAILS
+        elif stats["failed"] == stats["all"]:
+            status_to_set = job.Status.FAILED
+        elif stats["failed"] >= 1 or stats["killed"] >= 1:
+            status_to_set = job.Status.REPORTED_WITH_FAILS
+        elif stats["killed"] == stats["all"]:
+            status_to_set = job.Status.KILLED
+
+    except AlreadyFailedJobException:
+        logger.error(
+            f"[REPORT] {job.__repr__()}, status: failed. Do not process the report"
+        )
+
+    except Exception as e:
+        logger.exception(f"job_id: {job.pk}, Error: {e}")
+        job.append_error(str(e), save=False)
+
+    finally:
+        if not (job.status == job.Status.FAILED and job.finished_analysis_time):
+            job.finished_analysis_time = get_now()
+        job.status = status_to_set
+        job.save(update_fields=["status", "errors", "finished_analysis_time"])
+
+def post_all_playbooks_finished(job_id: int) -> None:
+    """
+        Callback fn that is executed after all playbooks have finished.
+    """
+
+    # get job instance
+    job = Job.objects.get(pk=job_id)
+    # execute some callbacks
+    job_cleanup(job)

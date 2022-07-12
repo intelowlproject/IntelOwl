@@ -60,6 +60,9 @@ def start_analyzers(
 def post_all_analyzers_finished(job_id: int, runtime_configuration: dict):
     analyzers_controller.post_all_analyzers_finished(job_id, runtime_configuration)
 
+@app.task(name="post_all_playbooks_finished", soft_time_limit=60)
+def post_all_playbooks_finished(job_id: int):
+    playbooks_controller.post_all_playbooks_finished(job_id)
 
 @app.task(name="run_analyzer", soft_time_limit=500)
 def run_analyzer(job_id: int, config_dict: dict, report_defaults: dict, parent_playbook=None):

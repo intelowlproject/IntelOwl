@@ -123,7 +123,8 @@ export function PluginInfoCard({ pluginInfo, }) {
                     </span>
                     {(Object.keys(pluginInfo?.analyzers[key]).length !== 0) &&
                       <ul>
-                        <li>
+                        <b>Parameters:</b>
+                        <li style={{ listStyleType: "square", }}>
                           <code>{JSON.stringify(value, null, 2)}</code>
                         </li>
                       </ul>
@@ -134,7 +135,7 @@ export function PluginInfoCard({ pluginInfo, }) {
               </ul>
             </div>
           }
-          {pluginInfo?.connectors &&
+          {pluginInfo?.connectors !== {} &&
             <div>
             <h6 className="text-secondary">
               Connectors &nbsp;
@@ -145,7 +146,7 @@ export function PluginInfoCard({ pluginInfo, }) {
                   <span>
                     {key}
                   </span>
-                  {(Object.keys(pluginInfo?.connectors[key]).length === 0) &&
+                  {(Object.keys(pluginInfo?.connectors[key]).length !== 0) &&
                     <ul>
                       <li>
                         <code>{JSON.stringify(value, null, 2)}</code>

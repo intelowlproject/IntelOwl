@@ -641,7 +641,7 @@
     "leaks_info": false,
     "observable_supported": ["ip", "url", "domain", "hash", "generic"],
     "config": {
-      "soft_time_limit": 50,
+      "soft_time_limit": 300,
       "queue": "long"
     },
     "secrets": {

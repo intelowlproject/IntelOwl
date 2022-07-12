@@ -102,7 +102,8 @@ class AbstractConfigSerializer(rfs.Serializer):
             self._is_valid_flag = True
         return ret
 
-    def get_verification(self, raw_instance: dict) -> ConfigVerificationType:
+    @staticmethod
+    def get_verification(raw_instance: dict) -> ConfigVerificationType:
         # raw instance because input is json and not django model object
         # get all missing secrets
         secrets = raw_instance["secrets"]

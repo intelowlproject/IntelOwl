@@ -121,7 +121,7 @@ export function PluginInfoCard({ pluginInfo, }) {
                     <span>
                       {key}
                     </span>
-                    {(Object.keys(pluginInfo?.analyzers[key]).length === 0) &&
+                    {(Object.keys(pluginInfo?.analyzers[key]).length !== 0) &&
                       <ul>
                         <li>
                           <code>{JSON.stringify(value, null, 2)}</code>

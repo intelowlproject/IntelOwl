@@ -10,6 +10,7 @@ from api_app.analyzers_manager.dataclasses import AnalyzerConfig
 from api_app.connectors_manager.dataclasses import ConnectorConfig
 
 from api_app.exceptions import NotRunnableAnalyzer, NotRunnableConnector, NotRunnablePlaybook
+from ..models import TLP, Job
 from intel_owl.consts import DEFAULT_QUEUE
 
 from .dataclasses import PlaybookConfig
@@ -84,6 +85,10 @@ def start_playbooks(
 
     # get playbook config
     playbook_dataclasses = PlaybookConfig.filter(names=playbooks_to_execute)
+
+    # get job
+    job = Job.objects.get(pk=job_id)
+    job.update_status(Job.Status.RUNNING)  # set job status to running
 
     analyzers_used = []
     connectors_used = []

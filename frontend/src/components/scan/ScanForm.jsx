@@ -280,7 +280,7 @@ export default function ScanForm() {
         playbooks: values.playbooks.map((x) => x.value),
       };
       const errors = ValidatePlaybooks(values);
-      console.log(errors);
+      
       if (Object.keys(errors).length !== 0) {
         addToast("Failed!", JSON.stringify(errors), "danger");
         return;

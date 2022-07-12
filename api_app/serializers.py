@@ -76,7 +76,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
     analyzers_requested = rfs.ListField(default=list)
     connectors_requested = rfs.ListField(default=list)
     md5 = rfs.HiddenField(default=None)
-
+ 
     def validate(self, attrs: dict) -> dict:
         # check and validate runtime_configuration
         runtime_conf = attrs.get("runtime_configuration", {})

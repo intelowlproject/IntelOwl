@@ -38,7 +38,7 @@ RUN mkdir -p ${LOG_PATH} \
 # osslsigncode is required to run the signature verification analyzer
 # apache2-utils is required to execute htpasswd
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends apt-utils libsasl2-dev libssl-dev \
+    && apt-get install -y --no-install-recommends apt-utils libsasl2-dev libssl-dev netcat \
     vim libldap2-dev python-dev libfuzzy-dev net-tools python3-psycopg2 git osslsigncode apache2-utils \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
@@ -77,3 +77,5 @@ RUN sed -i "s/{region}.queue/sqs.{region}/g" "$(find / -name endpoints.json 2>/d
 # Path(HOME_DIR).mkdir(parents=True, exist_ok=True)
 # so we have to set the home env variable to allow to reate its directory
 ENV HOME ${PYTHONPATH}
+
+HEALTHCHECK --interval=5s --timeout=2s --start-period=20s CMD nc -z localhost 8001 || exit 1

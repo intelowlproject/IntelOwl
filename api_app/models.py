@@ -12,6 +12,7 @@ from django.utils import timezone
 from django.utils.functional import cached_property
 
 from api_app.core.models import Status as ReportStatus
+from certego_saas.apps.organization.organization import Organization
 from certego_saas.models import User
 
 
@@ -181,3 +182,19 @@ def delete_file(sender, instance: Job, **kwargs):
     if instance.file:
         if instance.file:
             instance.file.delete()
+
+
+class CustomConfig(models.Model):
+    class Type(models.IntegerChoices):
+        ANALYZER = 1, "Analyzer"
+        CONNECTOR = 2, "Connector"
+
+    type = models.PositiveSmallIntegerField(choices=Type.choices)
+    attribute = models.CharField(max_length=128, blank=False)
+    value = models.CharField(max_length=128, blank=False)
+    organization = models.ForeignKey(
+        Organization, on_delete=models.CASCADE, blank=True, null=True
+    )
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=False, null=False
+    )

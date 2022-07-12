@@ -5,7 +5,6 @@ services:
     environment:
       - CELERY_QUEUES=default,local,long
 
-
   celery_worker_local:
     image: intelowlproject/intelowl:${INTELOWL_TAG_VERSION}
     container_name: intelowl_celery_worker_local

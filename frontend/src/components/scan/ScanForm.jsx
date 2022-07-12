@@ -10,7 +10,8 @@ import {
   ContentSection,
   IconButton,
   Loader,
-  MultiSelectDropdownInput
+  MultiSelectDropdownInput,
+  addToast
 } from "@certego/certego-ui";
 
 import { useQuotaBadge } from "../../hooks";
@@ -218,7 +219,7 @@ export default function ScanForm() {
         ),
     [playbooks]
   )
-
+  
   // callbacks
   const onValidate = React.useCallback(
     (values) => {
@@ -226,7 +227,6 @@ export default function ScanForm() {
       if (pluginsError) {
         errors.analyzers = pluginsError;
         errors.connectors = pluginsError;
-        errors.playbooks = pluginsError;
       }
       if (values.classification === "file") {
         if (!values.file) {
@@ -250,13 +250,42 @@ export default function ScanForm() {
     [pluginsError]
   );
 
+  function ValidatePlaybooks(values) {
+      const errors = {};
+      if (pluginsError) {
+        errors.playbooks = pluginsError;
+      }
+      if (values.classification === "file") {
+        if (!values.file) {
+          errors.file = "required";
+        }
+      } else if (values.observable_name) {
+        const pattern = RegExp(
+          observableType2PropsMap[values.classification].pattern
+        );
+        if (!pattern.test(values.observable_name)) {
+          errors.observable_name = `invalid ${values.classification}`;
+        }
+      } else {
+        errors.observable_name = "required";
+      }
+      return errors;
+  }
+
   const startPlaybooks = React.useCallback(
     async (values) => {
       console.log(values);
       const formValues = {
         ...values,
         playbooks: values.playbooks.map((x) => x.value),
-      };  
+      };
+      const errors = ValidatePlaybooks(values);
+      console.log(errors);
+      if (Object.keys(errors).length !== 0) {
+        addToast("Failed!", JSON.stringify(errors), "danger");
+        return;
+      }
+
       try {
         const jobId = await createPlaybookJob(formValues);
         setTimeout(
@@ -264,7 +293,7 @@ export default function ScanForm() {
           1000
         );
       } catch (e) {
-        // handled inside createJob
+        // handled inside createPlaybookJob
       } finally {
         refetchQuota();
       }

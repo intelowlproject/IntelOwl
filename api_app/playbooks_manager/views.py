@@ -48,6 +48,8 @@ def _analysis_request_playbooks(
     serializer.is_valid(raise_exception=True)
 
     serialized_data = serializer.validated_data
+    runtime_configuration = serialized_data.pop("runtime_configuration", {})
+
 
     cleaned_playbooks_list, analyzers_to_be_run, connectors_to_be_run = playbooks_controller.filter_playbooks(
         serialized_data,

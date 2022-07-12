@@ -198,3 +198,5 @@ class CustomConfig(models.Model):
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=False, null=False
     )
+    name = models.CharField(max_length=128, blank=False)
+    updated_at = models.DateTimeField(auto_now=True)

@@ -296,7 +296,6 @@ export default function ScanForm() {
 
   const startPlaybooks = React.useCallback(
     async (values) => {
-      console.log(values);
       const formValues = {
         ...values,
         playbooks: values.playbooks.map((x) => x.value),
@@ -309,18 +308,19 @@ export default function ScanForm() {
       }
 
       try {
-        const jobId = await createPlaybookJob(formValues);
-        setTimeout(
-          () => history.push(`/jobs/${jobId}`),
-          1000
-        );
+        const jobIds = await createPlaybookJob(formValues);
+        if (jobIds.length > 1) {
+          setTimeout(() => navigate(`/jobs/`), 1000);
+        } else {
+          setTimeout(() => navigate(`/jobs/${jobIds[0]}`), 1000);
+        }
       } catch (e) {
         // handled inside createPlaybookJob
       } finally {
         refetchQuota();
       }
     },
-    [history, refetchQuota]
+    [navigate, refetchQuota]
   );
   
   const onSubmit = React.useCallback(

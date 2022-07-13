@@ -18,8 +18,6 @@ const { append: appendToRecentScans } = useRecentScansStore.getState();
 export async function createPlaybookJob(formValues) {
   // new scan
   const resp = await _startPlaybook(formValues);
-
-  console.log(resp);
   const respData = resp.data;
   // handle response/error
   if (respData.status === "accepted" || respData.status === "running") {

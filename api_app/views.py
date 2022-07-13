@@ -36,6 +36,8 @@ from .serializers import (
     JobAvailabilitySerializer,
     JobListSerializer,
     JobSerializer,
+    MultipleFileAnalysisSerializer,
+    MultipleObservableAnalysisSerializer,
     ObservableAnalysisSerializer,
     TagSerializer,
     multi_result_enveloper,
@@ -250,6 +252,12 @@ def ask_multi_analysis_availability(request):
     )
 
 
+@add_docs(
+    description="This endpoint allows to start a Job related for a single File."
+    " Retained for retro-compatibility",
+    request=FileAnalysisSerializer,
+    responses={200: AnalysisResponseSerializer},
+)
 @api_view(["POST"])
 def analyze_file(request):
     try:
@@ -279,8 +287,8 @@ def analyze_file(request):
 
 
 @add_docs(
-    description="This endpoint allows to start Jobs related to multiple observables",
-    request=FileAnalysisSerializer,
+    description="This endpoint allows to start Jobs related to multiple Files",
+    request=MultipleFileAnalysisSerializer,
     responses={200: multi_result_enveloper(AnalysisResponseSerializer, True)},
 )
 @api_view(["POST"])
@@ -322,7 +330,7 @@ def analyze_observable(request):
 
 @add_docs(
     description="This endpoint allows to start Jobs related to multiple observables",
-    request=ObservableAnalysisSerializer,
+    request=MultipleObservableAnalysisSerializer,
     responses={200: multi_result_enveloper(AnalysisResponseSerializer, True)},
 )
 @api_view(["POST"])

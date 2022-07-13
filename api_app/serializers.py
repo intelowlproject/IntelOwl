@@ -37,6 +37,8 @@ __all__ = [
     "FileAnalysisSerializer",
     "ObservableAnalysisSerializer",
     "AnalysisResponseSerializer",
+    "MultipleFileAnalysisSerializer",
+    "MultipleObservableAnalysisSerializer",
     "multi_result_enveloper",
 ]
 

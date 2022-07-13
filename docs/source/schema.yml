@@ -40,6 +40,34 @@ paths:
               schema:
                 $ref: '#/components/schemas/MultiAnalysisResponseList'
           description: ''
+  /api/analyze_observable:
+    post:
+      operationId: analyze_observable_create
+      description: This endpoint allows to start a Job related to an observable. Retained
+        for retro-compatibility
+      tags:
+        - analyze_observable
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ObservableAnalysis'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ObservableAnalysis'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ObservableAnalysis'
+        required: true
+      security:
+        - durinAuth: [ ]
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalysisResponse'
+          description: ''
   /api/analyze_multiple_observables:
     post:
       operationId: analyze_multiple_observables_create
@@ -66,34 +94,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MultiAnalysisResponseList'
-          description: ''
-  /api/analyze_observable:
-    post:
-      operationId: analyze_observable_create
-      description: This endpoint allows to start a Job related to an observable. Retained
-        for retro-compatibility
-      tags:
-      - analyze_observable
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ObservableAnalysis'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/ObservableAnalysis'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/ObservableAnalysis'
-        required: true
-      security:
-      - durinAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AnalysisResponse'
           description: ''
   /api/analyzer/{name}/healthcheck:
     get:

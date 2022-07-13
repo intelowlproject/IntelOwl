@@ -9,10 +9,7 @@ import {
   ANALYZE_MULTIPLE_OBSERVABLE_URI,
   ASK_MULTI_ANALYSIS_AVAILABILITY_URI,
   ANALYZE_MULTIPLE_FILES_URI,
-  API_BASE_URI,
-  ANALYZE_OBSERVABLE_URI,
-  ANALYZE_FILE_URI,
-  ASK_ANALYSIS_AVAILABILITY_URI
+  API_BASE_URI
 } from "../../constants/api";
 import useRecentScansStore from "../../stores/useRecentScansStore";
 

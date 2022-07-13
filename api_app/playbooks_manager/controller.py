@@ -93,7 +93,7 @@ def start_playbooks(
 
     analyzers_used = []
     connectors_used = []
-    
+
     playbooks = list(playbook_dataclasses.items())
     # loop over and create task signatures
     for p_dict in playbooks:
@@ -209,6 +209,9 @@ def start_playbooks(
 
             except NotRunnableConnector as e:
                 logger.warning(e)
+
+    job.update_analyzers_to_execute(analyzers_used)
+    job.update_connectors_to_execute(connectors_used)
 
     runner = chord(task_signatures)
     cb_signature = tasks.post_all_playbooks_finished.signature(

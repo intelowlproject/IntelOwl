@@ -19,6 +19,8 @@ from .classes import BaseAnalyzerMixin, DockerBasedAnalyzer
 from .dataclasses import AnalyzerConfig
 from .models import AnalyzerReport
 
+from api_app.playbooks_manager.dataclasses import PlaybookConfig
+
 logger = logging.getLogger(__name__)
 
 
@@ -152,7 +154,7 @@ def set_failed_analyzer(
 
 
 def run_analyzer(
-    job_id: int, config_dict: dict, report_defaults: dict
+    job_id: int, config_dict: dict, report_defaults: dict, parent_playbook=None
 ) -> AnalyzerReport:
     aconfig = AnalyzerConfig.from_dict(config_dict)
     klass: BaseAnalyzerMixin = None
@@ -165,7 +167,7 @@ def run_analyzer(
             raise Exception(f"Class: {cls_path} couldn't be imported")
         # else
         instance = klass(config=aconfig, job_id=job_id, report_defaults=report_defaults)
-        report = instance.start()
+        report = instance.start(parent_playbook=parent_playbook)
     except Exception as e:
         report = set_failed_analyzer(job_id, aconfig.name, str(e), **report_defaults)
 

@@ -5,10 +5,11 @@
 class NotRunnableAnalyzer(Exception):
     pass
 
-
 class NotRunnableConnector(Exception):
     pass
 
+class NotRunnablePlaybook(Exception):
+    pass
 
 class AnalyzerConfigurationException(Exception):
     pass
@@ -28,3 +29,10 @@ class ConnectorConfigurationException(Exception):
 
 class ConnectorRunException(Exception):
     pass
+
+class PlaybookConfigurationException(Exception):
+    pass
+
+class PlaybookRunException(Exception):
+    pass
+

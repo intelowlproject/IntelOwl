@@ -14,6 +14,10 @@ import {
 } from "reactstrap";
 import { useNavigate } from "react-router-dom";
 import { ErrorMessage, Field, Form, Formik, FieldArray } from "formik";
+import { FormGroup, Label, Container, Col, FormText, Button } from "reactstrap";
+import { Submit, CustomInput as FormInput } from "formstrap";
+import { Link, useHistory } from "react-router-dom";
+import { Form, Formik } from "formik";
 import useTitle from "react-use/lib/useTitle";
 import { MdEdit } from "react-icons/md";
 
@@ -22,6 +26,7 @@ import {
   IconButton,
   Loader,
   MultiSelectDropdownInput,
+  addToast
 } from "@certego/certego-ui";
 
 import { useQuotaBadge } from "../../hooks";
@@ -38,7 +43,7 @@ import {
   RecentScans,
   TagSelectInput,
 } from "./utils";
-import { createJob } from "./api";
+import { createJob, createPlaybookJob } from "./api";
 
 // constants
 const groupAnalyzers = (analyzersList) => {
@@ -65,6 +70,7 @@ const stateSelector = (state) => [
   state.error,
   groupAnalyzers(state.analyzers),
   state.connectors,
+  state.playbooks,
 ];
 const checkChoices = [
   {
@@ -110,6 +116,7 @@ const initialValues = {
   files: [],
   analyzers: [],
   connectors: [],
+  playbooks: [],
   tlp: "WHITE",
   runtime_configuration: {},
   tags: [],
@@ -141,9 +148,10 @@ export default function ScanForm() {
     useQuotaBadge();
 
   // API/ store
-  const [pluginsLoading, pluginsError, analyzersGrouped, connectors] =
+  const [pluginsLoading, pluginsError, analyzersGrouped, connectors, playbooks] =
     usePluginConfigurationStore(stateSelector);
 
+  
   const analyzersOptions = React.useMemo(
     () =>
       analyzersGrouped[classification]
@@ -203,6 +211,30 @@ export default function ScanForm() {
     [connectors]
   );
 
+  const playbookOptions = React.useMemo(
+    () => 
+      playbooks
+        .map((v) => ({
+          value: v.name,
+          label: (
+            <div className="d-flex justify-content-start align-items-start flex-column">
+              <div className="d-flex justify-content-start align-items-baseline flex-column">
+                <div>{v.name}&nbsp;</div>
+                <div className="small text-left text-muted">
+                  {markdownToHtml(v.description)}
+                </div>
+              </div>
+            </div>
+          ),
+          labelDisplay: v.name,
+        }))
+        .sort((a, b) =>
+          // eslint-disable-next-line no-nested-ternary
+          a.isDisabled === b.isDisabled ? 0 : a.isDisabled ? 1 : -1
+        ),
+    [playbooks]
+  )
+  
   // callbacks
   const onValidate = React.useCallback(
     (values) => {
@@ -243,6 +275,58 @@ export default function ScanForm() {
     },
     [pluginsError]
   );
+
+  function ValidatePlaybooks(values) {
+      const errors = {};
+      if (pluginsError) {
+        errors.playbooks = pluginsError;
+      }
+      if (values.classification === "file") {
+        if (!values.file) {
+          errors.file = "required";
+        }
+      } else if (values.observable_name) {
+        const pattern = RegExp(
+          observableType2PropsMap[values.classification].pattern
+        );
+        if (!pattern.test(values.observable_name)) {
+          errors.observable_name = `invalid ${values.classification}`;
+        }
+      } else {
+        errors.observable_name = "required";
+      }
+      return errors;
+  }
+
+  const startPlaybooks = React.useCallback(
+    async (values) => {
+      console.log(values);
+      const formValues = {
+        ...values,
+        playbooks: values.playbooks.map((x) => x.value),
+      };
+      const errors = ValidatePlaybooks(values);
+      
+      if (Object.keys(errors).length !== 0) {
+        addToast("Failed!", JSON.stringify(errors), "danger");
+        return;
+      }
+
+      try {
+        const jobId = await createPlaybookJob(formValues);
+        setTimeout(
+          () => history.push(`/jobs/${jobId}`),
+          1000
+        );
+      } catch (e) {
+        // handled inside createPlaybookJob
+      } finally {
+        refetchQuota();
+      }
+    },
+    [history, refetchQuota]
+  );
+  
   const onSubmit = React.useCallback(
     async (values, formik) => {
       const formValues = {
@@ -424,6 +508,7 @@ export default function ScanForm() {
                   <ErrorMessage component={FormFeedback} name="analyzers" />
                 </Col>
               </FormGroup>
+
               <FormGroup row>
                 <Label sm={3} for="connectors">
                   Select Connectors
@@ -444,6 +529,35 @@ export default function ScanForm() {
                   <ErrorMessage component={FormFeedback} name="connectors" />
                 </Col>
               </FormGroup>
+
+              <FormGroup row>
+                <Label sm={4} htmlFor="playbooks">
+                  Select Playbooks
+                </Label>
+                {!(pluginsLoading || pluginsError) && (
+                  <Col sm={8}>
+                    <MultiSelectDropdownInput
+                      options={playbookOptions}
+                      value={formik.values.playbooks}
+                      onChange={(v) => formik.setFieldValue("playbooks", v)}
+                    />
+                    <FormText>
+                      Default: all configured playbooks are triggered.
+                    </FormText>
+                  </Col>
+                )}
+              </FormGroup>
+
+              <FormGroup row>
+                <Label sm={4} htmlFor="launch_playbooks">
+                  Launch Selected Playbooks:
+                </Label>
+
+                <Col sm={8}>
+                  <Button onClick={() => startPlaybooks(formik.values)} variant="primary">Launch Playbooks</Button>
+                </Col>
+              </FormGroup>
+
               <FormGroup row>
                 <Label sm={3} for="scanform-runtimeconf-editbtn">
                   Runtime Configuration
@@ -458,8 +572,10 @@ export default function ScanForm() {
                     color="tertiary"
                     disabled={
                       !(
-                        formik.values.analyzers.length > 0 ||
-                        formik.values.connectors.length > 0
+                        (
+                          formik.values.analyzers.length > 0 ||
+                          formik.values.connectors.length > 0
+                        )
                       )
                     }
                     onClick={toggleModal}

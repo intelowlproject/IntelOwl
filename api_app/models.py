@@ -2,7 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 
 import hashlib
-from typing import Optional
+from typing import List, Optional
 
 from django.conf import settings
 from django.contrib.postgres import fields as pg_fields
@@ -83,18 +83,27 @@ class Job(models.Model):
     status = models.CharField(
         max_length=32, blank=False, choices=Status.choices, default="pending"
     )
+    
     analyzers_requested = pg_fields.ArrayField(
         models.CharField(max_length=128), blank=True, default=list
     )
     connectors_requested = pg_fields.ArrayField(
         models.CharField(max_length=128), blank=True, default=list
     )
+    playbooks_requested = pg_fields.ArrayField(
+        models.CharField(max_length=128), blank=True, default=list
+    )
     analyzers_to_execute = pg_fields.ArrayField(
         models.CharField(max_length=128), blank=True, default=list
+
     )
     connectors_to_execute = pg_fields.ArrayField(
         models.CharField(max_length=128), blank=True, default=list
     )
+    playbooks_to_execute = pg_fields.ArrayField(
+        models.CharField(max_length=128), blank=True, default=list
+    )
+
     received_request_time = models.DateTimeField(auto_now_add=True)
     finished_analysis_time = models.DateTimeField(blank=True, null=True)
     tlp = models.CharField(max_length=8, choices=TLP.choices, default=TLP.WHITE)
@@ -128,6 +137,16 @@ class Job(models.Model):
         self.status = status
         if save:
             self.save(update_fields=["status"])
+    
+    def update_analyzers_to_execute(self, analyzers_to_execute: List, save=True):
+        self.analyzers_to_execute = analyzers_to_execute
+        if save:
+            self.save(update_fields=["analyzers_to_execute"])
+        
+    def update_connectors_to_execute(self, connectors_to_execute: List, save=True):
+        self.connectors_to_execute = connectors_to_execute
+        if save:
+            self.save(update_fields=["connectors_to_execute"])
 
     def append_error(self, err_msg: str, save=True):
         self.errors.append(err_msg)

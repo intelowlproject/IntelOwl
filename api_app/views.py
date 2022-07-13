@@ -27,6 +27,8 @@ from intel_owl.celery import app as celery_app
 
 from .analyzers_manager import controller as analyzers_controller
 from .analyzers_manager.constants import ObservableTypes
+from .connectors_manager import controller as connectors_controller
+from .playbooks_manager import controller as playbooks_controller
 from .filters import JobFilter
 from .helpers import get_now
 from .models import TLP, Job, Status, Tag

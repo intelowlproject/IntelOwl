@@ -112,7 +112,7 @@ class Plugin(metaclass=ABCMeta):
     def get_error_message(self, exc, is_base_err=False):
         return f" {'[Unexpected error]' if is_base_err else '[Error]'}: '{exc}'"
 
-    def start(self, *args, **kwargs) -> AbstractReport:
+    def start(self, parent_playbook=None, *args, **kwargs) -> AbstractReport:
         """
         Entrypoint function to execute the plugin.
         calls `before_run`, `run`, `after_run`
@@ -122,6 +122,7 @@ class Plugin(metaclass=ABCMeta):
             self.before_run()
             _result = self.run()
             self.report.report = _result
+            self.report.parent_playbook = parent_playbook
         except (*self.get_exceptions_to_catch(), SoftTimeLimitExceeded) as e:
             self._handle_exception(e)
         except Exception as e:

@@ -96,7 +96,7 @@ def set_failed_connector(
 
 
 def run_connector(
-    job_id: int, config_dict: dict, report_defaults: dict
+    job_id: int, config_dict: dict, report_defaults: dict, parent_playbook=None
 ) -> ConnectorReport:
     config = ConnectorConfig.from_dict(config_dict)
     try:
@@ -107,7 +107,7 @@ def run_connector(
             raise Exception(f"Class: {cls_path} couldn't be imported")
 
         instance = klass(config=config, job_id=job_id, report_defaults=report_defaults)
-        report = instance.start()
+        report = instance.start(parent_playbook)
     except Exception as e:
         report = set_failed_connector(job_id, config.name, str(e), **report_defaults)
 

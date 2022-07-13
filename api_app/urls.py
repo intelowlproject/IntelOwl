@@ -31,9 +31,10 @@ urlpatterns = [
     path("analyze_multiple_observables", analyze_multiple_observables),
     # router viewsets
     path("", include(router.urls)),
-    # Plugins (analyzers_manager, connectors_manager)
+    # Plugins (analyzers_manager, connectors_manager, playbooks_manager)
     path("", include("api_app.analyzers_manager.urls")),
     path("", include("api_app.connectors_manager.urls")),
+    path("", include("api_app.playbooks_manager.urls")),
     # auth
     path("auth/", include("api_app.authentication.urls")),
     # certego_saas:

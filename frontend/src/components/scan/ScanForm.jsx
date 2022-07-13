@@ -1,5 +1,6 @@
 import React from "react";
 import { BsFillTrashFill, BsFillPlusCircleFill } from "react-icons/bs";
+import { MdEdit } from "react-icons/md";
 import {
   FormFeedback,
   FormGroup,
@@ -14,12 +15,7 @@ import {
 } from "reactstrap";
 import { useNavigate } from "react-router-dom";
 import { ErrorMessage, Field, Form, Formik, FieldArray } from "formik";
-import { FormGroup, Label, Container, Col, FormText, Button } from "reactstrap";
-import { Submit, CustomInput as FormInput } from "formstrap";
-import { Link, useHistory } from "react-router-dom";
-import { Form, Formik } from "formik";
 import useTitle from "react-use/lib/useTitle";
-import { MdEdit } from "react-icons/md";
 
 import {
   ContentSection,

@@ -102,6 +102,10 @@ def start_playbooks(
         # if disabled or unconfigured (this check is bypassed in STAGE_CI)
         if not pp.is_ready_to_use and not settings.STAGE_CI:
             continue
+        
+        logger.info(
+            f"STARTED Playbook: ({p_name}, job_id: #{job_id})"
+        )
 
         # Now fetch analyzers and connectors to execute for that playbook
         # and run them below, by fetching their default configurations
@@ -120,13 +124,12 @@ def start_playbooks(
                     raise NotRunnableAnalyzer(
                         f"{a_name} won't run: not available in configuration"
                     )
-                    continue
-            
+
                 if not aa.is_ready_to_use:
                     raise NotRunnableAnalyzer(
                         f"{a_name} won't run: is disabled or unconfigured"
                     )
-                    continue
+
                 analyzers_used.append(a_name)
                 task_id = uuid()
                 args = [

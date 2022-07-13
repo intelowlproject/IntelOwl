@@ -450,7 +450,7 @@ class MultipleObservableAnalysisSerializer(rfs.ListSerializer):
         ret = []
         errors = []
 
-        for classification, name in data.get("observables"):
+        for classification, name in data.get("observables", []):
 
             # `deepcopy` here ensures that this code doesn't
             # break even if new fields are added in future

@@ -64,13 +64,7 @@ paths:
       description: |-
         This endpoint allows to start Jobs related to multiple observables.
                          Observable parameter must be composed like this:
-                         [(<observable_classification, observable_name), ...]
-      parameters:
-      - in: query
-        name: observables
-        schema:
-          type: object
-          additionalProperties: {}
+                         [(<observable_classification>, <observable_name>), ...]
       tags:
       - analyze_multiple_observables
       requestBody:

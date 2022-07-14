@@ -250,6 +250,12 @@ def ask_multi_analysis_availability(request):
     )
 
 
+@add_docs(
+    description="This endpoint allows to start a Job related for a single File."
+    " Retained for retro-compatibility",
+    request=FileAnalysisSerializer,
+    responses={200: AnalysisResponseSerializer},
+)
 @api_view(["POST"])
 def analyze_file(request):
     try:
@@ -279,8 +285,20 @@ def analyze_file(request):
 
 
 @add_docs(
-    description="This endpoint allows to start Jobs related to multiple observables",
-    request=FileAnalysisSerializer,
+    description="This endpoint allows to start Jobs related to multiple Files",
+    # It should be better to link the doc to the related MultipleFileAnalysisSerializer.
+    # It is not straightforward because you can't just add a class
+    # which extends a ListSerializer.
+    # Follow this doc to try to find a fix:
+    # https://drf-spectacular.readthedocs.io/en/latest/customization.html#declare-serializer-magic-with-openapiserializerextension
+    request=inline_serializer(
+        name="MultipleFilesSerializer",
+        fields={
+            "files": rfs.ListField(child=rfs.FileField()),
+            "file_names": rfs.ListField(child=rfs.CharField()),
+            "file_mimetypes": rfs.ListField(child=rfs.CharField()),
+        },
+    ),
     responses={200: multi_result_enveloper(AnalysisResponseSerializer, True)},
 )
 @api_view(["POST"])
@@ -321,8 +339,17 @@ def analyze_observable(request):
 
 
 @add_docs(
-    description="This endpoint allows to start Jobs related to multiple observables",
-    request=ObservableAnalysisSerializer,
+    description="""This endpoint allows to start Jobs related to multiple observables.
+                 Observable parameter must be composed like this:
+                 [(<observable_classification>, <observable_name>), ...]""",
+    request=inline_serializer(
+        name="MultipleObservableSerializer",
+        fields={
+            "observables": rfs.ListField(
+                child=rfs.ListField(max_length=2, min_length=2)
+            )
+        },
+    ),
     responses={200: multi_result_enveloper(AnalysisResponseSerializer, True)},
 )
 @api_view(["POST"])

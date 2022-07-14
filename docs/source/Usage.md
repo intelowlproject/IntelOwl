@@ -47,7 +47,7 @@ Once an invite has sent, the invited user has to login, go to the "Organization"
 ## Notifications
 Since IntelOwl v4, there is a Notifications button available on the top right of the page:
 
-<img style="border: 0.2px solid black" width=220 height=210 src="https://github.com/intelowlproject/IntelOwl/blob/master/docs/static/notifications.png">
+<img style="border: 0.2px solid black" width=220 height=210 src="https://raw.githubusercontent.com/intelowlproject/IntelOwl/master/docs/static/notifications.png">
 
 There you can read notifications provided by either your administration or the IntelOwl Maintainers.
 

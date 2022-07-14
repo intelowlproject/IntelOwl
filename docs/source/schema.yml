@@ -6,19 +6,10 @@ paths:
   /api/analyze_file:
     post:
       operationId: analyze_file_create
+      description: This endpoint allows to start a Job related for a single File.
+        Retained for retro-compatibility
       tags:
       - analyze_file
-      security:
-      - durinAuth: []
-      responses:
-        '200':
-          description: No response body
-  /api/analyze_multiple_files:
-    post:
-      operationId: analyze_multiple_files_create
-      description: This endpoint allows to start Jobs related to multiple observables
-      tags:
-      - analyze_multiple_files
       requestBody:
         content:
           application/json:
@@ -31,6 +22,58 @@ paths:
             schema:
               $ref: '#/components/schemas/FileAnalysis'
         required: true
+      security:
+      - durinAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalysisResponse'
+          description: ''
+  /api/analyze_multiple_files:
+    post:
+      operationId: analyze_multiple_files_create
+      description: This endpoint allows to start Jobs related to multiple Files
+      parameters:
+      - in: query
+        name: file_mimetypes
+        schema:
+          type: object
+          additionalProperties: {}
+      - in: query
+        name: file_names
+        schema:
+          type: object
+          additionalProperties: {}
+      - in: query
+        name: files
+        schema:
+          type: object
+          additionalProperties: {}
+      tags:
+      - analyze_multiple_files
+      security:
+      - durinAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MultiAnalysisResponseList'
+          description: ''
+  /api/analyze_multiple_observables:
+    post:
+      operationId: analyze_multiple_observables_create
+      description: This endpoint allows to start Jobs related to multiple observables
+      parameters:
+      - in: query
+        name: observables
+        schema:
+          type: object
+          additionalProperties: {}
+      tags:
+      - analyze_multiple_observables
       security:
       - durinAuth: []
       responses:
@@ -46,34 +89,7 @@ paths:
       description: This endpoint allows to start a Job related to an observable. Retained
         for retro-compatibility
       tags:
-        - analyze_observable
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ObservableAnalysis'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/ObservableAnalysis'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/ObservableAnalysis'
-        required: true
-      security:
-        - durinAuth: [ ]
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AnalysisResponse'
-          description: ''
-  /api/analyze_multiple_observables:
-    post:
-      operationId: analyze_multiple_observables_create
-      description: This endpoint allows to start Jobs related to multiple observables
-      tags:
-      - analyze_multiple_observables
+      - analyze_observable
       requestBody:
         content:
           application/json:
@@ -93,7 +109,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MultiAnalysisResponseList'
+                $ref: '#/components/schemas/AnalysisResponse'
           description: ''
   /api/analyzer/{name}/healthcheck:
     get:
@@ -402,7 +418,7 @@ paths:
   /api/get_connector_configs:
     get:
       operationId: get_connector_configs_retrieve
-      description: Get and parse the `connector_config.json` file,
+      description: Get and parse the `connector_config.json` file
       tags:
       - get_connector_configs
       security:
@@ -426,60 +442,6 @@ paths:
       description: "\n    REST endpoint to fetch list of jobs or retrieve/delete a\
         \ job with job ID.\n    Requires authentication.\n    "
       parameters:
-      - name: file_mimetype
-        required: false
-        in: query
-        description: file_mimetype
-        schema:
-          type: string
-      - name: file_name
-        required: false
-        in: query
-        description: file_name
-        schema:
-          type: string
-      - name: finished_analysis_time__gte
-        required: false
-        in: query
-        description: finished_analysis_time__gte
-        schema:
-          type: string
-      - name: finished_analysis_time__lte
-        required: false
-        in: query
-        description: finished_analysis_time__lte
-        schema:
-          type: string
-      - name: is_sample
-        required: false
-        in: query
-        description: is_sample
-        schema:
-          type: string
-      - name: md5
-        required: false
-        in: query
-        description: md5
-        schema:
-          type: string
-      - name: name
-        required: false
-        in: query
-        description: name
-        schema:
-          type: string
-      - name: observable_classification
-        required: false
-        in: query
-        description: observable_classification
-        schema:
-          type: string
-      - name: observable_name
-        required: false
-        in: query
-        description: observable_name
-        schema:
-          type: string
       - name: ordering
         required: false
         in: query
@@ -498,54 +460,6 @@ paths:
         description: Number of results to return per page.
         schema:
           type: integer
-      - name: received_request_time__gte
-        required: false
-        in: query
-        description: received_request_time__gte
-        schema:
-          type: string
-      - name: received_request_time__lte
-        required: false
-        in: query
-        description: received_request_time__lte
-        schema:
-          type: string
-      - name: status
-        required: false
-        in: query
-        description: status
-        schema:
-          type: string
-          enum:
-          - pending
-          - running
-          - reported_without_fails
-          - reported_with_fails
-          - killed
-          - failed
-      - name: tags
-        required: false
-        in: query
-        description: tags
-        schema:
-          type: string
-      - name: tlp
-        required: false
-        in: query
-        description: tlp
-        schema:
-          type: string
-          enum:
-          - WHITE
-          - GREEN
-          - AMBER
-          - RED
-      - name: type
-        required: false
-        in: query
-        description: type
-        schema:
-          type: string
       tags:
       - jobs
       security:
@@ -1127,12 +1041,6 @@ paths:
         description: Number of results to return per page.
         schema:
           type: integer
-      - name: read
-        required: false
-        in: query
-        description: read
-        schema:
-          type: string
       tags:
       - notification
       security:

@@ -11,6 +11,7 @@ from django.db.models import Count, Q
 from django.db.models.functions import Trunc
 from django.http import FileResponse, QueryDict
 from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import OpenApiParameter
 from drf_spectacular.utils import extend_schema as add_docs
 from drf_spectacular.utils import inline_serializer
 from rest_framework import serializers as rfs
@@ -36,8 +37,6 @@ from .serializers import (
     JobAvailabilitySerializer,
     JobListSerializer,
     JobSerializer,
-    MultipleFileAnalysisSerializer,
-    MultipleObservableAnalysisSerializer,
     ObservableAnalysisSerializer,
     TagSerializer,
     multi_result_enveloper,
@@ -288,7 +287,11 @@ def analyze_file(request):
 
 @add_docs(
     description="This endpoint allows to start Jobs related to multiple Files",
-    request=MultipleFileAnalysisSerializer,
+    parameters=[
+        OpenApiParameter("files", OpenApiTypes.OBJECT),
+        OpenApiParameter("file_names", OpenApiTypes.OBJECT),
+        OpenApiParameter("file_mimetypes", OpenApiTypes.OBJECT),
+    ],
     responses={200: multi_result_enveloper(AnalysisResponseSerializer, True)},
 )
 @api_view(["POST"])
@@ -330,7 +333,7 @@ def analyze_observable(request):
 
 @add_docs(
     description="This endpoint allows to start Jobs related to multiple observables",
-    request=MultipleObservableAnalysisSerializer,
+    parameters=[OpenApiParameter("observables", OpenApiTypes.OBJECT)],
     responses={200: multi_result_enveloper(AnalysisResponseSerializer, True)},
 )
 @api_view(["POST"])

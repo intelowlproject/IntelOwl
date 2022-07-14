@@ -35,24 +35,20 @@ paths:
     post:
       operationId: analyze_multiple_files_create
       description: This endpoint allows to start Jobs related to multiple Files
-      parameters:
-      - in: query
-        name: file_mimetypes
-        schema:
-          type: object
-          additionalProperties: {}
-      - in: query
-        name: file_names
-        schema:
-          type: object
-          additionalProperties: {}
-      - in: query
-        name: files
-        schema:
-          type: object
-          additionalProperties: {}
       tags:
       - analyze_multiple_files
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MultipleFiles'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/MultipleFiles'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/MultipleFiles'
+        required: true
       security:
       - durinAuth: []
       responses:
@@ -65,7 +61,10 @@ paths:
   /api/analyze_multiple_observables:
     post:
       operationId: analyze_multiple_observables_create
-      description: This endpoint allows to start Jobs related to multiple observables
+      description: |-
+        This endpoint allows to start Jobs related to multiple observables.
+                         Observable parameter must be composed like this:
+                         [(<observable_classification, observable_name), ...]
       parameters:
       - in: query
         name: observables
@@ -74,6 +73,18 @@ paths:
           additionalProperties: {}
       tags:
       - analyze_multiple_observables
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MultipleObservable'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/MultipleObservable'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/MultipleObservable'
+        required: true
       security:
       - durinAuth: []
       responses:
@@ -1942,6 +1953,38 @@ components:
       required:
       - count
       - results
+    MultipleFiles:
+      type: object
+      properties:
+        files:
+          type: array
+          items:
+            type: string
+            format: uri
+        file_names:
+          type: array
+          items:
+            type: string
+        file_mimetypes:
+          type: array
+          items:
+            type: string
+      required:
+      - file_mimetypes
+      - file_names
+      - files
+    MultipleObservable:
+      type: object
+      properties:
+        observables:
+          type: array
+          items:
+            type: array
+            items: {}
+            maxItems: 2
+            minItems: 2
+      required:
+      - observables
     Notification:
       type: object
       properties:

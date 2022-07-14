@@ -287,11 +287,19 @@ def analyze_file(request):
 
 @add_docs(
     description="This endpoint allows to start Jobs related to multiple Files",
-    parameters=[
-        OpenApiParameter("files", OpenApiTypes.OBJECT),
-        OpenApiParameter("file_names", OpenApiTypes.OBJECT),
-        OpenApiParameter("file_mimetypes", OpenApiTypes.OBJECT),
-    ],
+    # It should be better to link the doc to the related MultipleFileAnalysisSerializer.
+    # It is not straightforward because you can't just add a class
+    # which extends a ListSerializer.
+    # Follow this doc to try to find a fix:
+    # https://drf-spectacular.readthedocs.io/en/latest/customization.html#declare-serializer-magic-with-openapiserializerextension
+    request=inline_serializer(
+        name="MultipleFilesSerializer",
+        fields={
+            "files": rfs.ListField(child=rfs.FileField()),
+            "file_names": rfs.ListField(child=rfs.CharField()),
+            "file_mimetypes": rfs.ListField(child=rfs.CharField()),
+        },
+    ),
     responses={200: multi_result_enveloper(AnalysisResponseSerializer, True)},
 )
 @api_view(["POST"])
@@ -332,8 +340,18 @@ def analyze_observable(request):
 
 
 @add_docs(
-    description="This endpoint allows to start Jobs related to multiple observables",
+    description="""This endpoint allows to start Jobs related to multiple observables.
+                 Observable parameter must be composed like this:
+                 [(<observable_classification, observable_name), ...]""",
     parameters=[OpenApiParameter("observables", OpenApiTypes.OBJECT)],
+    request=inline_serializer(
+        name="MultipleObservableSerializer",
+        fields={
+            "observables": rfs.ListField(
+                child=rfs.ListField(max_length=2, min_length=2)
+            )
+        },
+    ),
     responses={200: multi_result_enveloper(AnalysisResponseSerializer, True)},
 )
 @api_view(["POST"])

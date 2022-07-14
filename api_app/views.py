@@ -11,7 +11,6 @@ from django.db.models import Count, Q
 from django.db.models.functions import Trunc
 from django.http import FileResponse, QueryDict
 from drf_spectacular.types import OpenApiTypes
-from drf_spectacular.utils import OpenApiParameter
 from drf_spectacular.utils import extend_schema as add_docs
 from drf_spectacular.utils import inline_serializer
 from rest_framework import serializers as rfs
@@ -342,8 +341,7 @@ def analyze_observable(request):
 @add_docs(
     description="""This endpoint allows to start Jobs related to multiple observables.
                  Observable parameter must be composed like this:
-                 [(<observable_classification, observable_name), ...]""",
-    parameters=[OpenApiParameter("observables", OpenApiTypes.OBJECT)],
+                 [(<observable_classification>, <observable_name>), ...]""",
     request=inline_serializer(
         name="MultipleObservableSerializer",
         fields={

@@ -61,6 +61,7 @@ const groupAnalyzers = (analyzersList) => {
   });
   return grouped;
 };
+
 const stateSelector = (state) => [
   state.loading,
   state.error,
@@ -147,7 +148,6 @@ export default function ScanForm() {
   const [pluginsLoading, pluginsError, analyzersGrouped, connectors, playbooks] =
     usePluginConfigurationStore(stateSelector);
 
-  
   const analyzersOptions = React.useMemo(
     () =>
       analyzersGrouped[classification]
@@ -209,7 +209,7 @@ export default function ScanForm() {
 
   const playbookOptions = React.useMemo(
     () => 
-      playbooks
+    filterPlaybooks(playbooks, classification)
         .map((v) => ({
           value: v.name,
           label: (
@@ -228,7 +228,7 @@ export default function ScanForm() {
           // eslint-disable-next-line no-nested-ternary
           a.isDisabled === b.isDisabled ? 0 : a.isDisabled ? 1 : -1
         ),
-    [playbooks]
+    [playbooks, classification]
   )
   
   // callbacks
@@ -278,19 +278,31 @@ export default function ScanForm() {
         errors.playbooks = pluginsError;
       }
       if (values.classification === "file") {
-        if (!values.file) {
-          errors.file = "required";
+        if (!values.files) {
+          errors.files = "required";
         }
-      } else if (values.observable_name) {
-        const pattern = RegExp(
-          observableType2PropsMap[values.classification].pattern
+      } else if (values.observable_names && values.observable_names.length) {
+        // We iterate over observable_names and test each one against the regex pattern,
+        // storing the results (or null otherwise) in ObservableNamesErrors
+        const ObservableNamesErrors = values.observable_names.map(
+          (ObservableName) => {
+            const pattern = RegExp(
+              observableType2PropsMap[values.classification].pattern
+            );
+            if (!pattern.test(ObservableName)) {
+              return `invalid ${values.classification}`;
+            }
+            return null;
+          }
         );
-        if (!pattern.test(values.observable_name)) {
-          errors.observable_name = `invalid ${values.classification}`;
-        }
+
+        // We check if any of the ObservableNamesErrors is not null
+        if (ObservableNamesErrors.some((e) => e))
+          errors.observable_names = ObservableNamesErrors;
       } else {
-        errors.observable_name = "required";
+        errors.no_observables = "Atleast one observable is required";
       }
+
       return errors;
   }
 

@@ -29,27 +29,29 @@ __all__ = [
     "PlaybookListAPI",
 ]
 
-def _analysis_request_playbooks(
+def _multi_analysis_request_playbooks(
     request,
     serializer_class:  Union[FileAnalysisSerializer, ObservableAnalysisSerializer],
 ):
     """
-    Prepare and send file/observable for running playbooks
+    Prepare and send multiple files/observables for running playbooks
     """
 
     warnings = []
     logger.info(
-        f"_analysis_request {serializer_class} received request from {request.user}."
-        f"Data:{dict(request.data)}."
+        f"_multi_analysis_request {serializer_class} "
+        f"received request from {request.user}."
+        f"Data:{request.data}."
     )
 
     # serialize request data and validate
-    serializer = serializer_class(data=request.data, context={"request": request})
+    serializer = serializer_class(data=request.data, context={"request": request}, many=True)
     serializer.is_valid(raise_exception=True)
 
     serialized_data = serializer.validated_data
-    runtime_configuration = serialized_data.pop("runtime_configuration", {})
-
+    runtime_configurations = [
+        data.pop("runtime_configuration", {}) for data in serialized_data
+    ]
 
     cleaned_playbooks_list, analyzers_to_be_run, connectors_to_be_run = playbooks_controller.filter_playbooks(
         serialized_data,
@@ -57,25 +59,28 @@ def _analysis_request_playbooks(
     )
 
     # save the arrived data plus new params into a new job object
-    job = serializer.save(
+    jobs = serializer.save(
         user=request.user,
         playbooks_to_execute=cleaned_playbooks_list,
     )
 
-    logger.info(f"New Job added to queue <- {repr(job)}.")
+    logger.info(f"New Job added to queue <- {repr(jobs)}.")
 
     # Check if task is test or not
     if not settings.STAGE_CI:
         # fire celery task
-        celery_app.send_task(
-            "start_playbooks",
-            kwargs=dict(
-                job_id=job.pk,
-                playbooks_to_execute=cleaned_playbooks_list,
-            ),
-        )
+
+        for index, job in enumerate(jobs):
+            celery_app.send_task(
+                "start_playbooks",
+                kwargs=dict(
+                    job_id=job.pk,
+                    playbooks_to_execute=cleaned_playbooks_list,
+                ),
+            )
+
     ser = PlaybookAnalysisResponseSerializer(
-        data={
+        data=[{
             "status": "accepted",
             "job_id": job.pk,
             "warnings": warnings,
@@ -83,10 +88,15 @@ def _analysis_request_playbooks(
             "analyzers_running": analyzers_to_be_run,
             "connectors_running": connectors_to_be_run
         }
+        for index, job in enumerate(jobs)
+    ],
     )
     ser.is_valid(raise_exception=True)
 
-    response_dict = ser.data
+    response_dict = {
+        "count": len(ser.data),
+        "results": ser.data,
+    }
 
     logger.debug(response_dict)
 
@@ -101,8 +111,8 @@ def _analysis_request_playbooks(
     responses={200: PlaybookAnalysisResponseSerializer},
 )
 @api_view(["POST"])
-def analyze_file(request): 
-    return _analysis_request_playbooks(request, FileAnalysisSerializer)
+def analyze_multiple_files(request): 
+    return _multi_analysis_request_playbooks(request, FileAnalysisSerializer)
 
 
 @add_docs(
@@ -111,8 +121,8 @@ def analyze_file(request):
     responses={200: PlaybookAnalysisResponseSerializer},
 )
 @api_view(["POST"])
-def analyze_observable(request):
-    return _analysis_request_playbooks(request, ObservableAnalysisSerializer)
+def analyze_multiple_observables(request):
+    return _multi_analysis_request_playbooks(request, ObservableAnalysisSerializer)
 
 
 class PlaybookListAPI(APIView):

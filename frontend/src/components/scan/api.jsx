@@ -220,9 +220,15 @@ async function _analyzeFile(formValues) {
 }
 
 async function _startPlaybook(formValues) {
+  const observables = [];
+  formValues.observable_names.forEach((ObservableName) => {
+    observables.push([formValues.classification, ObservableName]);
+  });
+
   if (formValues.observable_classification === "file") {
     const playbookURI = `${API_BASE_URI}/playbook/analyze_file`;
     const body = new FormData();
+    body.append("observable_names", formValues.observable_names);
     body.append("file", formValues.file, formValues.file.name);
     body.append("file_name", formValues.file.name);
     formValues.tags_labels.map((x) => body.append("tags_labels", x));
@@ -232,7 +238,7 @@ async function _startPlaybook(formValues) {
 
   const playbookURI = `${API_BASE_URI}/playbook/analyze_observable`;
   const body = {
-    observable_name: formValues.observable_name,
+    observable_names: formValues.observable_names,
     observable_classification: formValues.classification,
     playbooks_requested: formValues.playbooks,
     tags_labels: formValues.tags_labels,

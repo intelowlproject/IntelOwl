@@ -64,7 +64,7 @@ class Connector(Plugin):
             url = cc.read_secrets(secrets_filter="url_key_name").get(
                 "url_key_name", None
             )
-            if url is not None:
+            if url and url.startswith("http://"):
                 try:
                     requests.head(url, timeout=10)
                     health_status = True

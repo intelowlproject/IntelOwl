@@ -28,10 +28,11 @@ from intel_owl.celery import app as celery_app
 from .analyzers_manager import controller as analyzers_controller
 from .analyzers_manager.constants import ObservableTypes
 from .filters import JobFilter
-from .helpers import get_now
-from .models import TLP, Job, Status, Tag
+from .helpers import get_custom_config_as_dict, get_now
+from .models import TLP, CustomConfig, Job, Status, Tag
 from .serializers import (
     AnalysisResponseSerializer,
+    CustomConfigSerializer,
     FileAnalysisSerializer,
     JobAvailabilitySerializer,
     JobListSerializer,
@@ -82,7 +83,19 @@ def _multi_analysis_request(
     else:
         # fire celery task
         for index, job in enumerate(jobs):
-            runtime_configuration = runtime_configurations[index]
+            runtime_configuration = {}
+
+            for analyzer in job.analyzers_to_execute:
+                # Appending custom config to runtime configuration
+                config = get_custom_config_as_dict(
+                    user, CustomConfig.Type.ANALYZER, name=analyzer
+                ).get(analyzer, {})
+                if analyzer in runtime_configurations[index]:
+                    config = config | runtime_configurations[index][analyzer]
+                if config:
+                    runtime_configuration[analyzer] = config
+            print(runtime_configuration, type(job.analyzers_to_execute[0]))
+
             celery_app.send_task(
                 "start_analyzers",
                 kwargs=dict(
@@ -574,3 +587,37 @@ class TagViewSet(viewsets.ModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
     pagination_class = None
+
+
+class UserCustomConfigViewSet(viewsets.ModelViewSet):
+    queryset = CustomConfig.objects.filter(organization__isnull=True)
+    serializer_class = CustomConfigSerializer
+
+    def get_queryset(self):
+        return self.queryset.filter(owner=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user, organization=None)
+
+    def perform_update(self, serializer):
+        serializer.save(owner=self.request.user, organization=None)
+
+    # check for duplicate CustomConfig
+    def create(self, request, *args, **kwargs):
+        try:
+            CustomConfig.objects.get(
+                owner=request.user,
+                name=request.data["name"],
+                organization=None,
+                attribute=request.data["attribute"],
+                type=request.data["type"],
+            )
+        except CustomConfig.DoesNotExist:
+            return super().create(request, *args, **kwargs)
+        else:
+            raise ValidationError(
+                {
+                    "detail": "A custom config for this entity "
+                    "already exists with same scope."
+                }
+            )

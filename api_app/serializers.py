@@ -5,11 +5,13 @@ import json
 import logging
 from typing import Dict, List
 
+from django.contrib.auth import get_user_model
 from django.http import QueryDict
 from drf_spectacular.utils import extend_schema_serializer
 from durin.serializers import UserSerializer
 from rest_framework import serializers as rfs
 from rest_framework.exceptions import ValidationError
+from rest_framework.relations import PrimaryKeyRelatedField
 
 from certego_saas.apps.organization.permissions import IsObjectOwnerOrSameOrgPermission
 
@@ -25,7 +27,7 @@ from .helpers import (
     calculate_observable_classification,
     gen_random_colorhex,
 )
-from .models import TLP, Job, Tag
+from .models import TLP, CustomConfig, Job, Tag
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +40,10 @@ __all__ = [
     "ObservableAnalysisSerializer",
     "AnalysisResponseSerializer",
     "multi_result_enveloper",
+    "CustomConfigSerializer",
 ]
+
+User = get_user_model()
 
 
 class TagSerializer(rfs.ModelSerializer):
@@ -592,3 +597,74 @@ def multi_result_enveloper(serializer_class, many):
         results = serializer_class(many=many)
 
     return EnvelopeSerializer
+
+
+class CustomConfigSerializer(rfs.ModelSerializer):
+    owner = PrimaryKeyRelatedField(queryset=User.objects.all(), required=False)
+
+    def validate_value(self, value):
+        try:
+            json.loads(value)
+        except json.JSONDecodeError:
+            raise ValidationError("Value is not JSON-compliant.")
+        return value
+
+    def validate(self, attrs):
+        super().validate(attrs)
+        if attrs["type"] == CustomConfig.Type.ANALYZER:
+            if attrs["name"] not in AnalyzerConfig.all():
+                raise ValidationError(f"Analyzer {attrs['name']} does not exist.")
+
+            if attrs["attribute"] not in AnalyzerConfig.all()[attrs["name"]].params:
+                raise ValidationError(
+                    f"Analyzer {attrs['name']} does not "
+                    f"have attribute {attrs['attribute']}."
+                )
+            if not isinstance(
+                json.loads(attrs["value"]),
+                type(
+                    AnalyzerConfig.all()[attrs["name"]].params[attrs["attribute"]].value
+                ),
+            ):
+                expected_type = type(
+                    AnalyzerConfig.all()[attrs["name"]].params[attrs["attribute"]].value
+                )
+                raise ValidationError(
+                    f"Analyzer {attrs['name']} attribute "
+                    f"{attrs['attribute']} has wrong type "
+                    f"{type(json.loads(attrs['value']))}. Expected: "
+                    f"{expected_type}."
+                )
+        elif attrs["type"] == CustomConfig.Type.CONNECTOR:
+            if attrs["name"] not in ConnectorConfig.all():
+                raise ValidationError(f"Connector {attrs['name']} does not exist.")
+
+            if attrs["attribute"] not in ConnectorConfig.all()[attrs["name"]].params:
+                raise ValidationError(
+                    f"Connector {attrs['name']} does not have "
+                    f"attribute {attrs['attribute']}."
+                )
+            if isinstance(
+                json.loads(attrs["value"]),
+                type(
+                    ConnectorConfig.all()[attrs["name"]]
+                    .params[attrs["attribute"]]
+                    .value
+                ),
+            ):
+                expected_type = type(
+                    ConnectorConfig.all()[attrs["name"]]
+                    .params[attrs["attribute"]]
+                    .value
+                )
+                raise ValidationError(
+                    f"Connector {attrs['name']} attribute "
+                    f"{attrs['attribute']} has wrong type "
+                    f"{type(json.loads(attrs['value']))}. Expected: "
+                    f"{expected_type}."
+                )
+        return attrs
+
+    class Meta:
+        model = CustomConfig
+        fields = rfs.ALL_FIELDS

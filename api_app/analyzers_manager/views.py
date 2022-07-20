@@ -12,7 +12,6 @@ from rest_framework.response import Response
 from api_app.core.views import PluginActionViewSet, PluginHealthCheckAPI
 from certego_saas.ext.views import APIView
 
-from ..helpers import get_custom_config_as_dict
 from ..models import CustomConfig
 from . import controller as analyzers_controller
 from .models import AnalyzerReport
@@ -48,7 +47,7 @@ class AnalyzerListAPI(APIView):
     def get(self, request, *args, **kwargs):
         try:
             ac = self.serializer_class.read_and_verify_config()
-            custom_configs = get_custom_config_as_dict(
+            custom_configs = CustomConfig.get_as_dict(
                 request.user, CustomConfig.Type.ANALYZER
             )
             for analyzer in ac.values():

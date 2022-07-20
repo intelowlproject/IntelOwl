@@ -2,6 +2,8 @@
 # See the file 'LICENSE' for copying permission.
 
 import hashlib
+import json
+import logging
 from typing import Optional
 
 from django.conf import settings
@@ -12,8 +14,11 @@ from django.utils import timezone
 from django.utils.functional import cached_property
 
 from api_app.core.models import Status as ReportStatus
+from certego_saas.apps.organization.membership import Membership
 from certego_saas.apps.organization.organization import Organization
 from certego_saas.models import User
+
+logger = logging.getLogger(__name__)
 
 
 def file_directory_path(instance, filename):
@@ -200,3 +205,50 @@ class CustomConfig(models.Model):
     )
     name = models.CharField(max_length=128, blank=False)
     updated_at = models.DateTimeField(auto_now=True)
+
+    @classmethod
+    def get_as_dict(cls, user, entity_type, name=None) -> dict:
+        """
+        Returns custom config as dict
+        """
+        result = {}
+
+        # Since, user-level custom configs should override organization-level configs,
+        # we need to get the organization-level configs, if any, first.
+        try:
+            membership = Membership.objects.get(user=user)
+            custom_configs = cls.objects.filter(
+                organization=membership.organization,
+                type=entity_type,
+            )
+            if name is not None:
+                custom_configs = custom_configs.filter(name=name)
+            for custom_config in custom_configs:
+                custom_config: CustomConfig
+                if custom_config.name not in result:
+                    result[custom_config.name] = {}
+                result[custom_config.name][custom_config.attribute] = json.loads(
+                    custom_config.value
+                )
+        except Membership.DoesNotExist:
+            # If user is not a member of any organization, we don't need to do anything.
+            pass
+        logger.debug(f"Organization level CustomConfig: {result}")
+
+        custom_configs = cls.objects.filter(
+            type=entity_type,
+            owner=user,
+        )
+        if name is not None:
+            custom_configs = custom_configs.filter(name=name)
+        for custom_config in custom_configs:
+            custom_config: CustomConfig
+            if custom_config.name not in result:
+                result[custom_config.name] = {}
+            result[custom_config.name][custom_config.attribute] = json.loads(
+                custom_config.value
+            )
+
+        logger.debug(f"Final CustomConfig: {result}")
+
+        return result

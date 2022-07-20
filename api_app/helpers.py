@@ -5,7 +5,6 @@
 
 import hashlib
 import ipaddress
-import json
 import logging
 import random
 import re
@@ -14,8 +13,6 @@ from django.utils import timezone
 from magic import from_buffer as magic_from_buffer
 
 from api_app.analyzers_manager.constants import ObservableTypes
-from api_app.models import CustomConfig
-from certego_saas.apps.organization.membership import Membership
 
 logger = logging.getLogger(__name__)
 
@@ -133,43 +130,3 @@ def get_hash_type(hash_value):
             detected_hash_type = hash_type
             break
     return detected_hash_type  # stays None if no matches
-
-
-def get_custom_config_as_dict(user, entity_type, name=None) -> dict:
-    """
-    Returns custom config as dict
-    """
-    result = {}
-    try:
-        membership = Membership.objects.get(user=user)
-        custom_configs = CustomConfig.objects.filter(
-            organization=membership.organization,
-            type=entity_type,
-        )
-        if name is not None:
-            custom_configs = custom_configs.filter(name=name)
-        for custom_config in custom_configs:
-            custom_config: CustomConfig
-            if custom_config.name not in result:
-                result[custom_config.name] = {}
-            result[custom_config.name][custom_config.attribute] = json.loads(
-                custom_config.value
-            )
-    except Membership.DoesNotExist:
-        pass
-
-    custom_configs = CustomConfig.objects.filter(
-        type=entity_type,
-        owner=user,
-    )
-    if name is not None:
-        custom_configs = custom_configs.filter(name=name)
-    for custom_config in custom_configs:
-        custom_config: CustomConfig
-        if custom_config.name not in result:
-            result[custom_config.name] = {}
-        result[custom_config.name][custom_config.attribute] = json.loads(
-            custom_config.value
-        )
-
-    return result

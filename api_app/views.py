@@ -28,7 +28,7 @@ from intel_owl.celery import app as celery_app
 from .analyzers_manager import controller as analyzers_controller
 from .analyzers_manager.constants import ObservableTypes
 from .filters import JobFilter
-from .helpers import get_custom_config_as_dict, get_now
+from .helpers import get_now
 from .models import TLP, CustomConfig, Job, Status, Tag
 from .serializers import (
     AnalysisResponseSerializer,
@@ -87,14 +87,14 @@ def _multi_analysis_request(
 
             for analyzer in job.analyzers_to_execute:
                 # Appending custom config to runtime configuration
-                config = get_custom_config_as_dict(
+                config = CustomConfig.get_as_dict(
                     user, CustomConfig.Type.ANALYZER, name=analyzer
                 ).get(analyzer, {})
                 if analyzer in runtime_configurations[index]:
                     config = config | runtime_configurations[index][analyzer]
                 if config:
                     runtime_configuration[analyzer] = config
-            print(runtime_configuration, type(job.analyzers_to_execute[0]))
+            logger.debug(runtime_configuration, type(job.analyzers_to_execute[0]))
 
             celery_app.send_task(
                 "start_analyzers",

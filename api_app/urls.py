@@ -5,9 +5,9 @@ from django.urls import include, path
 from rest_framework import routers
 
 from .views import (
+    CustomConfigViewSet,
     JobViewSet,
     TagViewSet,
-    UserCustomConfigViewSet,
     analyze_file,
     analyze_multiple_files,
     analyze_multiple_observables,
@@ -20,9 +20,7 @@ from .views import (
 router = routers.DefaultRouter(trailing_slash=False)
 router.register(r"tags", TagViewSet, basename="tags")
 router.register(r"jobs", JobViewSet, basename="jobs")
-router.register(
-    r"user-custom-config", UserCustomConfigViewSet, basename="user-custom-config"
-)
+router.register(r"custom-config", CustomConfigViewSet, basename="custom-config")
 
 # These come after /api/..
 urlpatterns = [

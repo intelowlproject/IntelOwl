@@ -7,7 +7,7 @@ from datetime import timedelta
 from typing import Type, Union
 
 from django.conf import settings
-from django.db.models import Count, Q
+from django.db.models import Count, Q, QuerySet
 from django.db.models.functions import Trunc
 from django.http import FileResponse, QueryDict
 from drf_spectacular.types import OpenApiTypes
@@ -17,8 +17,10 @@ from rest_framework import serializers as rfs
 from rest_framework import status, viewsets
 from rest_framework.decorators import action, api_view
 from rest_framework.exceptions import ValidationError
+from rest_framework.request import Request
 from rest_framework.response import Response
 
+from certego_saas.apps.organization.membership import Membership
 from certego_saas.apps.organization.permissions import IsObjectOwnerOrSameOrgPermission
 from certego_saas.ext.helpers import cache_action_response, parse_humanized_range
 from certego_saas.ext.mixins import SerializerActionMixin
@@ -589,35 +591,38 @@ class TagViewSet(viewsets.ModelViewSet):
     pagination_class = None
 
 
-class UserCustomConfigViewSet(viewsets.ModelViewSet):
-    queryset = CustomConfig.objects.filter(organization__isnull=True)
+class CustomConfigViewSet(viewsets.ModelViewSet):
+    queryset = CustomConfig.objects.order_by("id")
     serializer_class = CustomConfigSerializer
 
     def get_queryset(self):
-        return self.queryset.filter(owner=self.request.user)
+        # Initializing empty queryset
+        result = QuerySet()
 
-    def perform_create(self, serializer):
-        serializer.save(owner=self.request.user, organization=None)
-
-    def perform_update(self, serializer):
-        serializer.save(owner=self.request.user, organization=None)
-
-    # check for duplicate CustomConfig
-    def create(self, request, *args, **kwargs):
-        try:
-            CustomConfig.objects.get(
-                owner=request.user,
-                name=request.data["name"],
-                organization=None,
-                attribute=request.data["attribute"],
-                type=request.data["type"],
+        # Adding CustomConfigs for user's organization, if any
+        membership = Membership.objects.filter(
+            user=self.request.user, organization__isnull=False
+        )
+        if membership.exists():
+            result = result | CustomConfig.objects.filter(
+                organization=membership[0].organization
             )
-        except CustomConfig.DoesNotExist:
-            return super().create(request, *args, **kwargs)
-        else:
-            raise ValidationError(
-                {
-                    "detail": "A custom config for this entity "
-                    "already exists with same scope."
-                }
-            )
+
+        # Adding CustomConfigs for user
+        result = result | CustomConfig.objects.filter(owner=self.request.user)
+
+        return result.order_by("id")
+
+    def create(self, request: Request, *args, **kwargs):
+        if isinstance(request.data, QueryDict):
+            # Making QueryDict mutable to pass owner into the serializer
+            request._full_data = request.data.copy()
+        request.data["owner"] = request.user.id
+        return super().create(request, *args, **kwargs)
+
+    def update(self, request: Request, *args, **kwargs):
+        if isinstance(request.data, QueryDict):
+            # Making QueryDict mutable to pass owner into the serializer
+            request._full_data = request.data.copy()
+        request.data["owner"] = request.user.id
+        return super().update(request, *args, **kwargs)

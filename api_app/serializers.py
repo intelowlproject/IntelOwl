@@ -11,8 +11,8 @@ from drf_spectacular.utils import extend_schema_serializer
 from durin.serializers import UserSerializer
 from rest_framework import serializers as rfs
 from rest_framework.exceptions import ValidationError
-from rest_framework.relations import PrimaryKeyRelatedField
 
+from certego_saas.apps.organization.membership import Membership
 from certego_saas.apps.organization.permissions import IsObjectOwnerOrSameOrgPermission
 
 from .analyzers_manager.constants import ObservableTypes
@@ -600,8 +600,6 @@ def multi_result_enveloper(serializer_class, many):
 
 
 class CustomConfigSerializer(rfs.ModelSerializer):
-    owner = PrimaryKeyRelatedField(queryset=User.objects.all(), required=False)
-
     def validate_value(self, value):
         try:
             json.loads(value)
@@ -611,58 +609,62 @@ class CustomConfigSerializer(rfs.ModelSerializer):
 
     def validate(self, attrs):
         super().validate(attrs)
+
+        # check if owner is admin of organization
+        if attrs.get("organization", None):
+            # check if the user is owner of the organization
+            membership = Membership.objects.filter(
+                user=attrs.get("owner"),
+                organization=attrs.get("organization"),
+                is_owner=True,
+            )
+            if not membership.exists():
+                raise ValidationError("User is not owner of the organization.")
+
+        config = None
+        category = None
         if attrs["type"] == CustomConfig.Type.ANALYZER:
-            if attrs["name"] not in AnalyzerConfig.all():
-                raise ValidationError(f"Analyzer {attrs['name']} does not exist.")
-
-            if attrs["attribute"] not in AnalyzerConfig.all()[attrs["name"]].params:
-                raise ValidationError(
-                    f"Analyzer {attrs['name']} does not "
-                    f"have attribute {attrs['attribute']}."
-                )
-            if not isinstance(
-                json.loads(attrs["value"]),
-                type(
-                    AnalyzerConfig.all()[attrs["name"]].params[attrs["attribute"]].value
-                ),
-            ):
-                expected_type = type(
-                    AnalyzerConfig.all()[attrs["name"]].params[attrs["attribute"]].value
-                )
-                raise ValidationError(
-                    f"Analyzer {attrs['name']} attribute "
-                    f"{attrs['attribute']} has wrong type "
-                    f"{type(json.loads(attrs['value']))}. Expected: "
-                    f"{expected_type}."
-                )
+            config = AnalyzerConfig
+            category = "Analyzer"
         elif attrs["type"] == CustomConfig.Type.CONNECTOR:
-            if attrs["name"] not in ConnectorConfig.all():
-                raise ValidationError(f"Connector {attrs['name']} does not exist.")
+            config = ConnectorConfig
+            category = "Connector"
 
-            if attrs["attribute"] not in ConnectorConfig.all()[attrs["name"]].params:
-                raise ValidationError(
-                    f"Connector {attrs['name']} does not have "
-                    f"attribute {attrs['attribute']}."
-                )
-            if isinstance(
-                json.loads(attrs["value"]),
-                type(
-                    ConnectorConfig.all()[attrs["name"]]
-                    .params[attrs["attribute"]]
-                    .value
-                ),
-            ):
-                expected_type = type(
-                    ConnectorConfig.all()[attrs["name"]]
-                    .params[attrs["attribute"]]
-                    .value
-                )
-                raise ValidationError(
-                    f"Connector {attrs['name']} attribute "
-                    f"{attrs['attribute']} has wrong type "
-                    f"{type(json.loads(attrs['value']))}. Expected: "
-                    f"{expected_type}."
-                )
+        if attrs["name"] not in config.all():
+            raise ValidationError(f"{category} {attrs['name']} does not exist.")
+
+        if attrs["attribute"] not in config.all()[attrs["name"]].params:
+            raise ValidationError(
+                f"{category} {attrs['name']} does not "
+                f"have attribute {attrs['attribute']}."
+            )
+
+        # Check if the type of value is valid for the attribute.
+        # NOTE: json.loads is used as it allows us to store all
+        # valid value types into a StringField
+        if not isinstance(
+            json.loads(attrs["value"]),
+            type(config.all()[attrs["name"]].params[attrs["attribute"]].value),
+        ):
+            expected_type = type(
+                config.all()[attrs["name"]].params[attrs["attribute"]].value
+            )
+            raise ValidationError(
+                f"{category} {attrs['name']} attribute "
+                f"{attrs['attribute']} has wrong type "
+                f"{type(json.loads(attrs['value'])).__name__}. Expected: "
+                f"{expected_type.__name__}."
+            )
+
+        if self.instance is None:
+            try:
+                params = attrs.copy()
+                params.pop("value")
+                print("params:", params)
+                self.instance = CustomConfig.objects.get(**params)
+                logger.info(f"CustomConfig {self.instance} found. Will be updated.")
+            except CustomConfig.DoesNotExist:
+                pass
         return attrs
 
     class Meta:

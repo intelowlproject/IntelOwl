@@ -9,6 +9,7 @@ from typing import Optional
 from django.conf import settings
 from django.contrib.postgres import fields as pg_fields
 from django.db import models
+from django.db.models import QuerySet
 from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.functional import cached_property
@@ -211,36 +212,28 @@ class CustomConfig(models.Model):
         """
         Returns custom config as dict
         """
-        result = {}
+        custom_configs = QuerySet(cls)
 
         # Since, user-level custom configs should override organization-level configs,
         # we need to get the organization-level configs, if any, first.
         try:
             membership = Membership.objects.get(user=user)
-            custom_configs = cls.objects.filter(
+            custom_configs = custom_configs | cls.objects.filter(
                 organization=membership.organization,
                 type=entity_type,
             )
-            if name is not None:
-                custom_configs = custom_configs.filter(name=name)
-            for custom_config in custom_configs:
-                custom_config: CustomConfig
-                if custom_config.name not in result:
-                    result[custom_config.name] = {}
-                result[custom_config.name][custom_config.attribute] = json.loads(
-                    custom_config.value
-                )
         except Membership.DoesNotExist:
             # If user is not a member of any organization, we don't need to do anything.
             pass
-        logger.debug(f"Organization level CustomConfig: {result}")
 
-        custom_configs = cls.objects.filter(
+        custom_configs = custom_configs | cls.objects.filter(
             type=entity_type,
             owner=user,
         )
         if name is not None:
             custom_configs = custom_configs.filter(name=name)
+
+        result = {}
         for custom_config in custom_configs:
             custom_config: CustomConfig
             if custom_config.name not in result:

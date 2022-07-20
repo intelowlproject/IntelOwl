@@ -5,7 +5,7 @@ import json
 import logging
 from typing import Dict, List
 
-from django.contrib.auth import get_user_model
+# from django.contrib.auth import get_user_model
 from django.http import QueryDict
 from drf_spectacular.utils import extend_schema_serializer
 from durin.serializers import UserSerializer
@@ -43,7 +43,7 @@ __all__ = [
     "CustomConfigSerializer",
 ]
 
-User = get_user_model()
+# User = get_user_model()
 
 
 class TagSerializer(rfs.ModelSerializer):
@@ -664,6 +664,7 @@ class CustomConfigSerializer(rfs.ModelSerializer):
                 self.instance = CustomConfig.objects.get(**params)
                 logger.info(f"CustomConfig {self.instance} found. Will be updated.")
             except CustomConfig.DoesNotExist:
+                # No matching CustomConfig was found. A new entry will be created.
                 pass
         return attrs
 

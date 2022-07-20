@@ -594,10 +594,11 @@ class TagViewSet(viewsets.ModelViewSet):
 class CustomConfigViewSet(viewsets.ModelViewSet):
     queryset = CustomConfig.objects.order_by("id")
     serializer_class = CustomConfigSerializer
+    pagination_class = None
 
     def get_queryset(self):
         # Initializing empty queryset
-        result = QuerySet()
+        result = QuerySet(CustomConfig)
 
         # Adding CustomConfigs for user's organization, if any
         membership = Membership.objects.filter(

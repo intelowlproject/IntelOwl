@@ -1,5 +1,5 @@
 import { useAxiosComponentLoader } from "@certego/certego-ui";
-import { ErrorMessage, Field, FieldArray, Form, Formik } from "formik";
+import { Field, FieldArray, Form, Formik } from "formik";
 import React from "react";
 import { MdCancel } from "react-icons/md";
 import {
@@ -8,15 +8,7 @@ import {
   BsFillPlusCircleFill,
   BsFillTrashFill,
 } from "react-icons/bs";
-import {
-  Button,
-  Col,
-  Container,
-  FormFeedback,
-  FormGroup,
-  Input,
-  Row,
-} from "reactstrap";
+import { Button, Col, Container, FormGroup, Input, Row } from "reactstrap";
 import useTitle from "react-use/lib/useTitle";
 import { usePluginConfigurationStore } from "../../../stores";
 import {
@@ -51,7 +43,7 @@ export default function Config() {
       <Loader
         render={() => (
           <Formik initialValues={{ config: respData }} onSubmit={null}>
-            {({ values, errors, touched, setFieldValue }) => (
+            {({ values, setFieldValue }) => (
               <Form>
                 <FieldArray name="config">
                   {({ remove, push }) => (
@@ -148,18 +140,6 @@ export default function Config() {
                                       name={`config.${index}.value`}
                                       className={disabledSuffix}
                                       disabled={!item.edit}
-                                      invalid={
-                                        errors.observable_names &&
-                                        Boolean(
-                                          errors.observable_names[index]
-                                        ) &&
-                                        touched.observable_names &&
-                                        touched.observable_names[index]
-                                      }
-                                    />
-                                    <ErrorMessage
-                                      component={FormFeedback}
-                                      name={`observable_names.${index}`}
                                     />
                                   </Col>
                                   <Button

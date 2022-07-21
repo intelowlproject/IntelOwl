@@ -26,14 +26,6 @@ import {
   updateCustomConfig,
 } from "./api";
 
-const parsePlugins = (pluginList) => {
-  const result = {};
-  pluginList.forEach((obj) => {
-    result[obj.name] = obj;
-  });
-  return result;
-};
-
 export default function Config() {
   console.debug("Config rendered!");
 
@@ -42,8 +34,8 @@ export default function Config() {
   });
 
   const [analyzers, connectors] = usePluginConfigurationStore((state) => [
-    parsePlugins(state.analyzers),
-    parsePlugins(state.connectors),
+    state.analyzersJSON,
+    state.connectorsJSON,
   ]);
 
   const [respData, Loader, refetch] = useAxiosComponentLoader(

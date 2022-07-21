@@ -2,7 +2,6 @@
 # See the file 'LICENSE' for copying permission.
 
 import hashlib
-import json
 import logging
 from typing import Optional
 
@@ -191,13 +190,13 @@ def delete_file(sender, instance: Job, **kwargs):
 
 
 class CustomConfig(models.Model):
-    class PluginType(models.IntegerChoices):
-        ANALYZER = 1, "Analyzer"
-        CONNECTOR = 2, "Connector"
+    class PluginType(models.TextChoices):
+        ANALYZER = "1", "Analyzer"
+        CONNECTOR = "2", "Connector"
 
-    type = models.PositiveSmallIntegerField(choices=PluginType.choices)
+    type = models.CharField(choices=PluginType.choices, max_length=2)
     attribute = models.CharField(max_length=128, blank=False)
-    value = models.CharField(max_length=128, blank=False)
+    value = models.JSONField(blank=False)
     organization = models.ForeignKey(
         Organization, on_delete=models.CASCADE, blank=True, null=True
     )
@@ -255,9 +254,9 @@ class CustomConfig(models.Model):
             custom_config: CustomConfig
             if custom_config.plugin_name not in result:
                 result[custom_config.plugin_name] = {}
-            result[custom_config.plugin_name][custom_config.attribute] = json.loads(
-                custom_config.value
-            )
+            result[custom_config.plugin_name][
+                custom_config.attribute
+            ] = custom_config.value
 
         logger.debug(f"Final CustomConfig: {result}")
 

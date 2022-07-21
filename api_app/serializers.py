@@ -5,7 +5,6 @@ import json
 import logging
 from typing import Dict, List
 
-# from django.contrib.auth import get_user_model
 from django.http import QueryDict
 from drf_spectacular.utils import extend_schema_serializer
 from durin.serializers import UserSerializer
@@ -13,6 +12,9 @@ from rest_framework import serializers as rfs
 from rest_framework.exceptions import ValidationError
 
 from certego_saas.apps.organization.membership import Membership
+
+# from django.contrib.auth import get_user_model
+from certego_saas.apps.organization.organization import Organization
 from certego_saas.apps.organization.permissions import IsObjectOwnerOrSameOrgPermission
 
 from .analyzers_manager.constants import ObservableTypes
@@ -600,6 +602,14 @@ def multi_result_enveloper(serializer_class, many):
 
 
 class CustomConfigSerializer(rfs.ModelSerializer):
+    # certego_saas does not expose organization.id to frontend
+    organization = rfs.SlugRelatedField(
+        allow_null=True,
+        slug_field="name",
+        queryset=Organization.objects.all(),
+        required=False,
+    )
+
     class Meta:
         model = CustomConfig
         fields = rfs.ALL_FIELDS
@@ -665,7 +675,6 @@ class CustomConfigSerializer(rfs.ModelSerializer):
                 f"{expected_type.__name__}."
             )
 
-        # TODO: Verify that PATCH requests aren't getting blocked
         if self.instance is None:
             params = attrs.copy()
             params.pop("value")

@@ -191,11 +191,11 @@ def delete_file(sender, instance: Job, **kwargs):
 
 
 class CustomConfig(models.Model):
-    class Type(models.IntegerChoices):
+    class PluginType(models.IntegerChoices):
         ANALYZER = 1, "Analyzer"
         CONNECTOR = 2, "Connector"
 
-    type = models.PositiveSmallIntegerField(choices=Type.choices)
+    type = models.PositiveSmallIntegerField(choices=PluginType.choices)
     attribute = models.CharField(max_length=128, blank=False)
     value = models.CharField(max_length=128, blank=False)
     organization = models.ForeignKey(

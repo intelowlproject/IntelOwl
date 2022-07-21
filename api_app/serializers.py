@@ -629,10 +629,10 @@ class CustomConfigSerializer(rfs.ModelSerializer):
                 )
                 raise ValidationError("User is not owner of the organization.")
 
-        if attrs["type"] == CustomConfig.Type.ANALYZER:
+        if attrs["type"] == CustomConfig.PluginType.ANALYZER:
             config = AnalyzerConfig
             category = "Analyzer"
-        elif attrs["type"] == CustomConfig.Type.CONNECTOR:
+        elif attrs["type"] == CustomConfig.PluginType.CONNECTOR:
             config = ConnectorConfig
             category = "Connector"
         else:

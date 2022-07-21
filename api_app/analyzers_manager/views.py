@@ -48,7 +48,7 @@ class AnalyzerListAPI(APIView):
         try:
             ac = self.serializer_class.read_and_verify_config()
             custom_configs = CustomConfig.get_as_dict(
-                request.user, CustomConfig.Type.ANALYZER
+                request.user, CustomConfig.PluginType.ANALYZER
             )
             for analyzer in ac.values():
                 if analyzer["name"] in custom_configs:

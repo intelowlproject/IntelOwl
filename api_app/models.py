@@ -207,6 +207,23 @@ class CustomConfig(models.Model):
     plugin_name = models.CharField(max_length=128, blank=False)
     updated_at = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["type", "attribute", "organization", "owner"],
+                name="unique_custom_config_entry",
+            )
+        ]
+
+        indexes = [
+            models.Index(
+                fields=["owner", "type"],
+            ),
+            models.Index(
+                fields=["type", "organization"],
+            ),
+        ]
+
     @classmethod
     def get_as_dict(cls, user, entity_type, plugin_name=None) -> dict:
         """

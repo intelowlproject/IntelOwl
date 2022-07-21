@@ -4,8 +4,6 @@ import { addToast } from "@certego/certego-ui";
 
 import { CUSTOM_CONFIG_URI } from "../../../constants/api";
 
-// API Access
-
 async function createCustomConfig(data) {
   try {
     const resp = await axios.post(CUSTOM_CONFIG_URI, data);

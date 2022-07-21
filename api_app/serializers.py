@@ -639,12 +639,12 @@ class CustomConfigSerializer(rfs.ModelSerializer):
             logger.error(f"Unknown custom config type: {attrs['type']}")
             raise ValidationError("Invalid type.")
 
-        if attrs["name"] not in config.all():
-            raise ValidationError(f"{category} {attrs['name']} does not exist.")
+        if attrs["plugin_name"] not in config.all():
+            raise ValidationError(f"{category} {attrs['plugin_name']} does not exist.")
 
-        if attrs["attribute"] not in config.all()[attrs["name"]].params:
+        if attrs["attribute"] not in config.all()[attrs["plugin_name"]].params:
             raise ValidationError(
-                f"{category} {attrs['name']} does not "
+                f"{category} {attrs['plugin_name']} does not "
                 f"have attribute {attrs['attribute']}."
             )
 
@@ -653,13 +653,13 @@ class CustomConfigSerializer(rfs.ModelSerializer):
         # valid value types into a StringField
         if not isinstance(
             json.loads(attrs["value"]),
-            type(config.all()[attrs["name"]].params[attrs["attribute"]].value),
+            type(config.all()[attrs["plugin_name"]].params[attrs["attribute"]].value),
         ):
             expected_type = type(
-                config.all()[attrs["name"]].params[attrs["attribute"]].value
+                config.all()[attrs["plugin_name"]].params[attrs["attribute"]].value
             )
             raise ValidationError(
-                f"{category} {attrs['name']} attribute "
+                f"{category} {attrs['plugin_name']} attribute "
                 f"{attrs['attribute']} has wrong type "
                 f"{type(json.loads(attrs['value'])).__name__}. Expected: "
                 f"{expected_type.__name__}."

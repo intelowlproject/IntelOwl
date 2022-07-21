@@ -204,11 +204,11 @@ class CustomConfig(models.Model):
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=False, null=False
     )
-    name = models.CharField(max_length=128, blank=False)
+    plugin_name = models.CharField(max_length=128, blank=False)
     updated_at = models.DateTimeField(auto_now=True)
 
     @classmethod
-    def get_as_dict(cls, user, entity_type, name=None) -> dict:
+    def get_as_dict(cls, user, entity_type, plugin_name=None) -> dict:
         """
         Returns custom config as dict
         """
@@ -230,15 +230,15 @@ class CustomConfig(models.Model):
             type=entity_type,
             owner=user,
         )
-        if name is not None:
-            custom_configs = custom_configs.filter(name=name)
+        if plugin_name is not None:
+            custom_configs = custom_configs.filter(plugin_name=plugin_name)
 
         result = {}
         for custom_config in custom_configs:
             custom_config: CustomConfig
-            if custom_config.name not in result:
-                result[custom_config.name] = {}
-            result[custom_config.name][custom_config.attribute] = json.loads(
+            if custom_config.plugin_name not in result:
+                result[custom_config.plugin_name] = {}
+            result[custom_config.plugin_name][custom_config.attribute] = json.loads(
                 custom_config.value
             )
 

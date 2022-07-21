@@ -90,7 +90,7 @@ def _multi_analysis_request(
             for analyzer in job.analyzers_to_execute:
                 # Appending custom config to runtime configuration
                 config = CustomConfig.get_as_dict(
-                    user, CustomConfig.PluginType.ANALYZER, name=analyzer
+                    user, CustomConfig.PluginType.ANALYZER, plugin_name=analyzer
                 ).get(analyzer, {})
                 if analyzer in runtime_configurations[index]:
                     config |= runtime_configurations[index][analyzer]

@@ -665,13 +665,13 @@ class CustomConfigSerializer(rfs.ModelSerializer):
                 f"{expected_type.__name__}."
             )
 
+        # TODO: Verify that PATCH requests aren't getting blocked
         if self.instance is None:
-            try:
-                params = attrs.copy()
-                params.pop("value")
-                self.instance = CustomConfig.objects.get(**params)
-                logger.info(f"CustomConfig {self.instance} found. Will be updated.")
-            except CustomConfig.DoesNotExist:
-                # No matching CustomConfig was found. A new entry will be created.
-                pass
+            params = attrs.copy()
+            params.pop("value")
+            if CustomConfig.objects.filter(**params).exists():
+                raise ValidationError(
+                    f"{category} {attrs['plugin_name']} "
+                    f"attribute {attrs['attribute']} already exists."
+                )
         return attrs

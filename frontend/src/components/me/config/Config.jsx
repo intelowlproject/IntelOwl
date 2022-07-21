@@ -59,8 +59,6 @@ export default function Config() {
                       <Col>
                         {values.config && values.config.length > 0
                           ? values.config.map((item, index) => {
-                              // eslint-disable-next-line no-console
-                              console.log("hi", item);
                               let plugins;
                               let attributeList = [];
                               if (item.type === "1") {
@@ -70,8 +68,6 @@ export default function Config() {
                               } else {
                                 plugins = {};
                               }
-                              // eslint-disable-next-line no-console
-                              console.log(item.plugin_name, plugins, analyzers);
                               if (
                                 item.plugin_name !== "-1" &&
                                 plugins[item.plugin_name]
@@ -114,7 +110,10 @@ export default function Config() {
                                         ---Select Name---
                                       </option>
                                       {Object.values(plugins).map((plugin) => (
-                                        <option value={plugin.name}>
+                                        <option
+                                          value={plugin.name}
+                                          key={plugin.name}
+                                        >
                                           {plugin.name}
                                         </option>
                                       ))}
@@ -132,7 +131,10 @@ export default function Config() {
                                         ---Select Attribute---
                                       </option>
                                       {attributeList.map((attribute) => (
-                                        <option value={attribute}>
+                                        <option
+                                          value={attribute}
+                                          key={attribute}
+                                        >
                                           {attribute}
                                         </option>
                                       ))}

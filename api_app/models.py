@@ -218,7 +218,7 @@ class CustomConfig(models.Model):
         # we need to get the organization-level configs, if any, first.
         try:
             membership = Membership.objects.get(user=user)
-            custom_configs = custom_configs | cls.objects.filter(
+            custom_configs |= cls.objects.filter(
                 organization=membership.organization,
                 type=entity_type,
             )
@@ -226,7 +226,7 @@ class CustomConfig(models.Model):
             # If user is not a member of any organization, we don't need to do anything.
             pass
 
-        custom_configs = custom_configs | cls.objects.filter(
+        custom_configs |= cls.objects.filter(
             type=entity_type,
             owner=user,
         )

@@ -93,10 +93,10 @@ def _multi_analysis_request(
                     user, CustomConfig.Type.ANALYZER, name=analyzer
                 ).get(analyzer, {})
                 if analyzer in runtime_configurations[index]:
-                    config = config | runtime_configurations[index][analyzer]
+                    config |= runtime_configurations[index][analyzer]
                 if config:
                     runtime_configuration[analyzer] = config
-            logger.debug(runtime_configuration, type(job.analyzers_to_execute[0]))
+            logger.debug(f"New value of runtime_configuration: {runtime_configuration}")
 
             celery_app.send_task(
                 "start_analyzers",
@@ -605,12 +605,12 @@ class CustomConfigViewSet(viewsets.ModelViewSet):
             user=self.request.user, organization__isnull=False
         )
         if membership.exists():
-            result = result | CustomConfig.objects.filter(
+            result |= CustomConfig.objects.filter(
                 organization=membership[0].organization
             )
 
         # Adding CustomConfigs for user
-        result = result | CustomConfig.objects.filter(owner=self.request.user)
+        result |= CustomConfig.objects.filter(owner=self.request.user)
 
         return result.order_by("id")
 

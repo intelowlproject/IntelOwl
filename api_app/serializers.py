@@ -600,6 +600,10 @@ def multi_result_enveloper(serializer_class, many):
 
 
 class CustomConfigSerializer(rfs.ModelSerializer):
+    class Meta:
+        model = CustomConfig
+        fields = rfs.ALL_FIELDS
+
     def validate_value(self, value):
         try:
             json.loads(value)
@@ -619,16 +623,21 @@ class CustomConfigSerializer(rfs.ModelSerializer):
                 is_owner=True,
             )
             if not membership.exists():
+                logger.warning(
+                    f"User {attrs.get('owner')} is not owner of "
+                    f"organization {attrs.get('organization')}."
+                )
                 raise ValidationError("User is not owner of the organization.")
 
-        config = None
-        category = None
         if attrs["type"] == CustomConfig.Type.ANALYZER:
             config = AnalyzerConfig
             category = "Analyzer"
         elif attrs["type"] == CustomConfig.Type.CONNECTOR:
             config = ConnectorConfig
             category = "Connector"
+        else:
+            logger.error(f"Unknown custom config type: {attrs['type']}")
+            raise ValidationError("Invalid type.")
 
         if attrs["name"] not in config.all():
             raise ValidationError(f"{category} {attrs['name']} does not exist.")
@@ -660,14 +669,9 @@ class CustomConfigSerializer(rfs.ModelSerializer):
             try:
                 params = attrs.copy()
                 params.pop("value")
-                print("params:", params)
                 self.instance = CustomConfig.objects.get(**params)
                 logger.info(f"CustomConfig {self.instance} found. Will be updated.")
             except CustomConfig.DoesNotExist:
                 # No matching CustomConfig was found. A new entry will be created.
                 pass
         return attrs
-
-    class Meta:
-        model = CustomConfig
-        fields = rfs.ALL_FIELDS

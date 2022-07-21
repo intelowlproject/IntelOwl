@@ -47,16 +47,7 @@ class AnalyzerListAPI(APIView):
     def get(self, request, *args, **kwargs):
         try:
             ac = self.serializer_class.read_and_verify_config()
-            custom_configs = CustomConfig.get_as_dict(
-                request.user, CustomConfig.PluginType.ANALYZER
-            )
-            for analyzer in ac.values():
-                if analyzer["name"] in custom_configs:
-                    for param in analyzer["params"]:
-                        if param in custom_configs[analyzer["name"]]:
-                            analyzer["params"][param]["value"] = custom_configs[
-                                analyzer["name"]
-                            ][param]
+            CustomConfig.apply(ac, request.user, CustomConfig.PluginType.ANALYZER)
             return Response(ac, status=status.HTTP_200_OK)
         except Exception as e:
             logger.exception(

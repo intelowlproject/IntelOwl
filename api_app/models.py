@@ -261,3 +261,14 @@ class CustomConfig(models.Model):
         logger.debug(f"Final CustomConfig: {result}")
 
         return result
+
+    @classmethod
+    def apply(cls, initial_config, user, plugin_type):
+        custom_configs = CustomConfig.get_as_dict(user, plugin_type)
+        for plugin in initial_config.values():
+            if plugin["name"] in custom_configs:
+                for param in plugin["params"]:
+                    if param in custom_configs[plugin["name"]]:
+                        plugin["params"][param]["value"] = custom_configs[
+                            plugin["name"]
+                        ][param]

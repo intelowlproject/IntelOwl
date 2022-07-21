@@ -96,6 +96,14 @@ def _multi_analysis_request(
                     config |= runtime_configurations[index][analyzer]
                 if config:
                     runtime_configuration[analyzer] = config
+            for connector in job.connectors_to_execute:
+                config = CustomConfig.get_as_dict(
+                    user, CustomConfig.PluginType.CONNECTOR, plugin_name=connector
+                ).get(connector, {})
+                if connector in runtime_configurations[index]:
+                    config |= runtime_configurations[index][connector]
+                if config:
+                    runtime_configuration[connector] = config
             logger.debug(f"New value of runtime_configuration: {runtime_configuration}")
 
             celery_app.send_task(

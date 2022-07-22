@@ -27,8 +27,8 @@ def filter_playbooks(serialized_data: Dict, warnings: List[str]) -> List[str]:
     connectors_to_be_run = []
 
     # get values from serializer
-    playbooks_requested = serialized_data.get("playbooks_requested", [])
-    
+    playbooks_requested = serialized_data[0].get("playbooks_requested", [])
+
     # read config
     playbook_dataclasses = PlaybookConfig.all()
     all_playbook_names = list(playbook_dataclasses.keys())

@@ -1,4 +1,4 @@
-import { useAxiosComponentLoader } from "@certego/certego-ui";
+import { addToast, useAxiosComponentLoader } from "@certego/certego-ui";
 import { Field, FieldArray, Form, Formik } from "formik";
 import React from "react";
 import { MdCancel } from "react-icons/md";
@@ -17,6 +17,40 @@ import {
   deleteCustomConfig,
   updateCustomConfig,
 } from "./api";
+
+function isJSON(str) {
+  if (str === '""') return true;
+  try {
+    return Boolean(JSON.parse(str) && !!str);
+  } catch (e) {
+    return false;
+  }
+}
+
+function isValidConfig(item) {
+  if (!item.type) {
+    addToast("Invalid config!", "Please select a type", "danger", true);
+    return false;
+  }
+  if (!item.plugin_name) {
+    addToast("Invalid config!", "Please select a plugin", "danger", true);
+    return false;
+  }
+  if (!item.attribute) {
+    addToast("Invalid config!", "Please select an attribute", "danger", true);
+    return false;
+  }
+  if (!isJSON(item.value)) {
+    addToast(
+      "Invalid config!",
+      "Please enter a JSON-compliant value",
+      "danger",
+      true
+    );
+    return false;
+  }
+  return true;
+}
 
 export default function Config() {
   console.debug("Config rendered!");
@@ -60,10 +94,7 @@ export default function Config() {
                               } else {
                                 plugins = {};
                               }
-                              if (
-                                item.plugin_name !== "-1" &&
-                                plugins[item.plugin_name]
-                              )
+                              if (item.plugin_name && plugins[item.plugin_name])
                                 attributeList = Object.keys(
                                   plugins[item.plugin_name].params
                                 );
@@ -83,7 +114,7 @@ export default function Config() {
                                       disabled={!item.edit}
                                       name={`config[${index}].type`}
                                     >
-                                      <option value="-1">
+                                      <option value="">
                                         ---Select Type---
                                       </option>
                                       <option value="1">Analyzer</option>
@@ -98,7 +129,7 @@ export default function Config() {
                                       disabled={!item.edit}
                                       name={`config[${index}].plugin_name`}
                                     >
-                                      <option value="-1">
+                                      <option value="">
                                         ---Select Name---
                                       </option>
                                       {Object.values(plugins).map((plugin) => (
@@ -119,7 +150,7 @@ export default function Config() {
                                       disabled={!item.edit}
                                       name={`config[${index}].attribute`}
                                     >
-                                      <option value="-1">
+                                      <option value="">
                                         ---Select Attribute---
                                       </option>
                                       {attributeList.map((attribute) => (
@@ -147,6 +178,8 @@ export default function Config() {
                                     className="mx-2 rounded-1 text-larger col-auto"
                                     onClick={() => {
                                       if (item.edit) {
+                                        if (!isValidConfig(item)) return;
+
                                         if (item.create)
                                           createCustomConfig(item).then(() => {
                                             setFieldValue(

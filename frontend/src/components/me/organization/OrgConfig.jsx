@@ -22,6 +22,7 @@ import {
   LoadingBoundary,
   ErrorAlert,
   useAxiosComponentLoader,
+  addToast,
 } from "@certego/certego-ui";
 import { CUSTOM_CONFIG_URI } from "../../../constants/api";
 
@@ -35,6 +36,40 @@ import {
   updateCustomConfig,
 } from "../config/api";
 import { OrgCreateButton } from "./utils";
+
+function isJSON(str) {
+  if (str === '""') return true;
+  try {
+    return Boolean(JSON.parse(str) && !!str);
+  } catch (e) {
+    return false;
+  }
+}
+
+function isValidConfig(item) {
+  if (!item.type) {
+    addToast("Invalid config!", "Please select a type", "danger", true);
+    return false;
+  }
+  if (!item.plugin_name) {
+    addToast("Invalid config!", "Please select a plugin", "danger", true);
+    return false;
+  }
+  if (!item.attribute) {
+    addToast("Invalid config!", "Please select an attribute", "danger", true);
+    return false;
+  }
+  if (!isJSON(item.value)) {
+    addToast(
+      "Invalid config!",
+      "Please enter a JSON-compliant value",
+      "danger",
+      true
+    );
+    return false;
+  }
+  return true;
+}
 
 export default function OrgConfig() {
   console.debug("OrgConfigPage rendered!");
@@ -129,7 +164,7 @@ export default function OrgConfig() {
                                     plugins = {};
                                   }
                                   if (
-                                    item.plugin_name !== "-1" &&
+                                    item.plugin_name &&
                                     plugins[item.plugin_name]
                                   )
                                     attributeList = Object.keys(
@@ -151,7 +186,7 @@ export default function OrgConfig() {
                                           disabled={!item.edit}
                                           name={`config[${index}].type`}
                                         >
-                                          <option value="-1">
+                                          <option value="">
                                             ---Select Type---
                                           </option>
                                           <option value="1">Analyzer</option>
@@ -166,7 +201,7 @@ export default function OrgConfig() {
                                           disabled={!item.edit}
                                           name={`config[${index}].plugin_name`}
                                         >
-                                          <option value="-1">
+                                          <option value="">
                                             ---Select Name---
                                           </option>
                                           {Object.values(plugins).map(
@@ -189,7 +224,7 @@ export default function OrgConfig() {
                                           disabled={!item.edit}
                                           name={`config[${index}].attribute`}
                                         >
-                                          <option value="-1">
+                                          <option value="">
                                             ---Select Attribute---
                                           </option>
                                           {attributeList.map((attribute) => (
@@ -217,6 +252,7 @@ export default function OrgConfig() {
                                         className="mx-2 rounded-1 text-larger col-auto"
                                         onClick={() => {
                                           if (item.edit) {
+                                            if (!isValidConfig(item)) return;
                                             if (item.create)
                                               createCustomConfig({
                                                 ...item,

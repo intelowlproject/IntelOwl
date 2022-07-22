@@ -678,6 +678,8 @@ class CustomConfigSerializer(rfs.ModelSerializer):
         if self.instance is None:
             params = attrs.copy()
             params.pop("value")
+            if "organization" not in params:
+                params["organization__isnull"] = True
             if CustomConfig.objects.filter(**params).exists():
                 raise ValidationError(
                     f"{category} {attrs['plugin_name']} "

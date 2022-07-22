@@ -226,19 +226,19 @@ async function _startPlaybook(formValues) {
   });
 
   if (formValues.observable_classification === "file") {
-    const playbookURI = `${API_BASE_URI}/playbook/analyze_file`;
+    const playbookURI = `${API_BASE_URI}/playbook/analyze_multiple_files`;
     const body = new FormData();
-    body.append("observable_names", formValues.observable_names);
-    body.append("file", formValues.file, formValues.file.name);
-    body.append("file_name", formValues.file.name);
+    Array.from(formValues.files).forEach((file) => {
+      body.append("files", file, file.name);
+    });
     formValues.tags_labels.map((x) => body.append("tags_labels", x));
     formValues.connectors.map((x) => body.append("playbooks_requested", x));
     return axios.post(playbookURI, body);
   }
 
-  const playbookURI = `${API_BASE_URI}/playbook/analyze_observable`;
+  const playbookURI = `${API_BASE_URI}/playbook/analyze_multiple_observables`;
   const body = {
-    observable_names: formValues.observable_names,
+    observables,
     observable_classification: formValues.classification,
     playbooks_requested: formValues.playbooks,
     tags_labels: formValues.tags_labels,

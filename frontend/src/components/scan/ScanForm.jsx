@@ -62,6 +62,7 @@ const groupAnalyzers = (analyzersList) => {
   return grouped;
 };
 
+
 const stateSelector = (state) => [
   state.loading,
   state.error,
@@ -209,7 +210,7 @@ export default function ScanForm() {
 
   const playbookOptions = React.useMemo(
     () => 
-    filterPlaybooks(playbooks, classification)
+    playbooks
         .map((v) => ({
           value: v.name,
           label: (

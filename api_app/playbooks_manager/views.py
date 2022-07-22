@@ -90,6 +90,7 @@ def _multi_analysis_request_playbooks(
         }
         for index, job in enumerate(jobs)
     ],
+    many=True
     )
     ser.is_valid(raise_exception=True)
 

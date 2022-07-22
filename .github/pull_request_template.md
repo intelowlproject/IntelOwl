@@ -25,7 +25,6 @@ Please delete options that are not relevant.
 - [ ] If external libraries/packages with restrictive licenses were used, they were added in the [Legal Notice](https://github.com/certego/IntelOwl/blob/master/.github/legal_notice.md) section.
 - [ ] The tests gave 0 errors.
 - [ ] Linters (`Black`, `Flake`, `Isort`) gave 0 errors. If you have correctly installed [pre-commit](https://intelowl.readthedocs.io/en/latest/Contribute.html#how-to-start-setup-project-and-development-instance), it does these checks and adjustments on your behalf.
-- [ ] The commits were squashed into a single one (optional, they will be squashed anyway by the maintainer)
 - [ ] If changes were made to an existing model/serializer/view, the docs were updated and regenerated (check [CONTRIBUTE.md](./Contribute.md)).
 
 ### Important Rules

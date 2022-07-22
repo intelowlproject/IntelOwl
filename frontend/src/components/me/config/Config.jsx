@@ -27,7 +27,7 @@ function isJSON(str) {
   }
 }
 
-function isValidConfig(item) {
+export function isValidConfig(item) {
   if (!item.type) {
     addToast("Invalid config!", "Please select a type", "danger", true);
     return false;
@@ -52,6 +52,17 @@ function isValidConfig(item) {
   return true;
 }
 
+export function filterEmptyParams(plugins) {
+  const objectFilter = (obj, predicate) =>
+    Object.keys(obj)
+      .filter((key) => predicate(obj[key]))
+      .reduce((res, key) => Object.assign(res, { [key]: obj[key] }), {});
+  return objectFilter(
+    plugins,
+    (item) => item.params && Object.keys(item.params).length > 0
+  );
+}
+
 export default function Config() {
   console.debug("Config rendered!");
 
@@ -60,8 +71,8 @@ export default function Config() {
   });
 
   const [analyzers, connectors] = usePluginConfigurationStore((state) => [
-    state.analyzersJSON,
-    state.connectorsJSON,
+    filterEmptyParams(state.analyzersJSON),
+    filterEmptyParams(state.connectorsJSON),
   ]);
 
   const [respData, Loader, refetch] = useAxiosComponentLoader(

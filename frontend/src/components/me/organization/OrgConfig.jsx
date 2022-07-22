@@ -22,7 +22,6 @@ import {
   LoadingBoundary,
   ErrorAlert,
   useAxiosComponentLoader,
-  addToast,
 } from "@certego/certego-ui";
 import { CUSTOM_CONFIG_URI } from "../../../constants/api";
 
@@ -35,41 +34,8 @@ import {
   deleteCustomConfig,
   updateCustomConfig,
 } from "../config/api";
+import { filterEmptyParams, isValidConfig } from "../config/Config";
 import { OrgCreateButton } from "./utils";
-
-function isJSON(str) {
-  if (str === '""') return true;
-  try {
-    return Boolean(JSON.parse(str) && !!str);
-  } catch (e) {
-    return false;
-  }
-}
-
-function isValidConfig(item) {
-  if (!item.type) {
-    addToast("Invalid config!", "Please select a type", "danger", true);
-    return false;
-  }
-  if (!item.plugin_name) {
-    addToast("Invalid config!", "Please select a plugin", "danger", true);
-    return false;
-  }
-  if (!item.attribute) {
-    addToast("Invalid config!", "Please select an attribute", "danger", true);
-    return false;
-  }
-  if (!isJSON(item.value)) {
-    addToast(
-      "Invalid config!",
-      "Please enter a JSON-compliant value",
-      "danger",
-      true
-    );
-    return false;
-  }
-  return true;
-}
 
 export default function OrgConfig() {
   console.debug("OrgConfigPage rendered!");
@@ -109,8 +75,8 @@ export default function OrgConfig() {
   );
 
   const [analyzers, connectors] = usePluginConfigurationStore((state) => [
-    state.analyzersJSON,
-    state.connectorsJSON,
+    filterEmptyParams(state.analyzersJSON),
+    filterEmptyParams(state.connectorsJSON),
   ]);
 
   const [respData, Loader, refetch] = useAxiosComponentLoader(

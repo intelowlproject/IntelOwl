@@ -599,6 +599,12 @@ class TagViewSet(viewsets.ModelViewSet):
     pagination_class = None
 
 
+@add_docs(
+    description="""
+    REST endpoint to fetch list of CustomConfigs or retrieve/delete a CustomConfig.
+    Requires authentication. Allows access to only authorized CustomConfigs.
+    """
+)
 class CustomConfigViewSet(viewsets.ModelViewSet):
     queryset = CustomConfig.objects.order_by("id")
     serializer_class = CustomConfigSerializer

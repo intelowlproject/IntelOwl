@@ -27,8 +27,7 @@ class PlaybookConfig:
     
     @classmethod
     def from_dict(cls, data: dict) -> "PlaybookConfig":
-        data.pop("python_module")
-        data.pop("verification")
+        [data.pop(key) for key in ["config", "verification", "secrets", "params", "python_module"]]
         return cls(**data)
 
     # orm methods

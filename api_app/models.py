@@ -195,15 +195,21 @@ class CustomConfig(models.Model):
         CONNECTOR = "2", "Connector"
 
     type = models.CharField(choices=PluginType.choices, max_length=2)
-    attribute = models.CharField(max_length=128, blank=False)
+    attribute = models.CharField(max_length=128)
     value = models.JSONField(blank=False)
     organization = models.ForeignKey(
-        Organization, on_delete=models.CASCADE, blank=True, null=True
+        Organization,
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+        related_name="custom_configs",
     )
     owner = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=False, null=False
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="custom_configs",
     )
-    plugin_name = models.CharField(max_length=128, blank=False)
+    plugin_name = models.CharField(max_length=128)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:

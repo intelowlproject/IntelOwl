@@ -1,9 +1,8 @@
+(Please add to the PR name the issue that this PR would close if merged by using a [Github](https://docs.github.com/en/issues/tracking-your-work-with-issues/linking-a-pull-request-to-an-issue) keyword. Example: `closes #999`)
+
 # Description
 
 Please include a summary of the change.
-
-## Related issues
-Please add related issues.
 
 ## Type of change
 

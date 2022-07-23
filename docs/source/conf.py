@@ -59,7 +59,7 @@ exclude_patterns = []
 
 redoc = [
     {
-        "name": "IntelOwl Redoc",
+        "name": "API Docs",
         "page": "Redoc",
         "spec": "schema.yml",
         "opts": {"suppress-warnings": True, "hide-hostname": True},

@@ -21,21 +21,34 @@ export async function createPlaybookJob(formValues) {
   const respData = resp.data;
   // handle response/error
   if (respData.status === "accepted" || respData.status === "running") {
-    const jobId = parseInt(respData.job_id, 10);
-    appendToRecentScans(jobId, "success");
+    const jobIds = respData.map((x) => parseInt(x.job_id, 10));
+    const playbooksRunning = new Set();
+    const warnings = [];
+    respData.forEach((x) => {
+      if (x.analyzers_running)
+        x.playbooks_running.forEach((playbook) =>
+          playbooksRunning.add(playbook)
+        );
+        if (x.warnings) warnings.push(...x.warnings);
+        }  
+      )
+
+    jobIds.forEach((jobId) => {
+      appendToRecentScans(jobId, "success");
+    });
     addToast(
-      `Created new Job with ID #${jobId}!`,
+      `Created new Job with ID #${jobIds.join(", ")}!`,
       <div>
-        {respData.playbooks_running.length > 0 && (
+        {playbooksRunning.length > 0 && (
           <ContentSection className="text-light">
             <strong>Playbooks:</strong>&nbsp;
-            {respData.playbooks_running.join(", ")}
+            {Array.from(playbooksRunning)?.join(", ")}
           </ContentSection>
         )}
 
-        {respData.warnings.length > 0 && (
+        {warnings.length > 0 && (
           <ContentSection className="bg-accent text-darker">
-            <strong>Warnings:</strong>&nbsp;{respData.warnings.join(", ")}
+            <strong>Warnings:</strong>&nbsp;{warnings.join(", ")}
           </ContentSection>
         )}
       </div>,

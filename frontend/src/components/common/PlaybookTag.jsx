@@ -7,7 +7,7 @@ export default function PlaybookTag(props) {
 
   return (
     <Badge
-      color="light"
+      color="black"
       {...rest}
     >
       {playbook}

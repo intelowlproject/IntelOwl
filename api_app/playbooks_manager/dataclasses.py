@@ -10,6 +10,7 @@ __all__ = ["PlaybookConfig"]
 
 # Try to see if your changes in serializers helps with the changeshere (make them)
 
+
 @dataclasses.dataclass
 class PlaybookConfig:
     name: str
@@ -24,10 +25,11 @@ class PlaybookConfig:
     @property
     def is_ready_to_use(self) -> bool:
         return not self.disabled
-    
+
     @classmethod
     def from_dict(cls, data: dict) -> "PlaybookConfig":
-        [data.pop(key) for key in ["config", "verification", "secrets", "params", "python_module"]]
+        keys_to_pop = ["config", "verification", "secrets", "params", "python_module"]
+        [data.pop(key) for key in keys_to_pop]
         return cls(**data)
 
     # orm methods

@@ -1,8 +1,7 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-from django.urls import include, path
-from rest_framework import routers
+from django.urls import path
 
 from .views import PlaybookListAPI, analyze_multiple_files, analyze_multiple_observables
 

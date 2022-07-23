@@ -7,7 +7,7 @@ from typing import Union
 
 from django.conf import settings
 from intel_owl.celery import app as celery_app
-from api_app.serializers import AnalysisResponseSerializer, FileAnalysisSerializer, ObservableAnalysisSerializer
+from api_app.serializers import FileAnalysisSerializer, ObservableAnalysisSerializer
 from .serializers import PlaybookAnalysisResponseSerializer
 from drf_spectacular.utils import extend_schema as add_docs
 from drf_spectacular.utils import inline_serializer
@@ -29,9 +29,10 @@ __all__ = [
     "PlaybookListAPI",
 ]
 
+
 def _multi_analysis_request_playbooks(
     request,
-    serializer_class:  Union[FileAnalysisSerializer, ObservableAnalysisSerializer],
+    serializer_class: Union[FileAnalysisSerializer, ObservableAnalysisSerializer],
 ):
     """
     Prepare and send multiple files/observables for running playbooks
@@ -45,18 +46,24 @@ def _multi_analysis_request_playbooks(
     )
 
     # serialize request data and validate
-    serializer = serializer_class(data=request.data, context={"request": request}, many=True)
+    serializer = serializer_class(
+        data=request.data,
+        context={"request": request},
+        many=True
+    )
+
     serializer.is_valid(raise_exception=True)
 
     serialized_data = serializer.validated_data
-    runtime_configurations = [
+    [
         data.pop("runtime_configuration", {}) for data in serialized_data
     ]
 
-    cleaned_playbooks_list, analyzers_to_be_run, connectors_to_be_run = playbooks_controller.filter_playbooks(
-        serialized_data,
-        warnings
-    )
+    cleaned_playbooks_list, analyzers_to_be_run, connectors_to_be_run = (
+        playbooks_controller.filter_playbooks(
+            serialized_data,
+            warnings
+        ))
 
     # save the arrived data plus new params into a new job object
     jobs = serializer.save(
@@ -88,9 +95,9 @@ def _multi_analysis_request_playbooks(
             "analyzers_running": analyzers_to_be_run,
             "connectors_running": connectors_to_be_run
         }
-        for index, job in enumerate(jobs)
-    ],
-    many=True
+            for index, job in enumerate(jobs)
+        ],
+        many=True
     )
     ser.is_valid(raise_exception=True)
 
@@ -105,6 +112,7 @@ def _multi_analysis_request_playbooks(
         response_dict,
         status=status.HTTP_200_OK,
     )
+
 
 @add_docs(
     description="This endpoint allows to start a Job related to a file",

@@ -9,9 +9,11 @@ from django.conf import settings
 from api_app.analyzers_manager.dataclasses import AnalyzerConfig
 from api_app.connectors_manager.dataclasses import ConnectorConfig
 
-from api_app.exceptions import AlreadyFailedJobException, NotRunnableAnalyzer, NotRunnableConnector, NotRunnablePlaybook
+from api_app.exceptions import AlreadyFailedJobException, NotRunnableAnalyzer,  \
+    NotRunnableConnector, NotRunnablePlaybook
+
 from api_app.helpers import get_now
-from ..models import TLP, Job
+from ..models import Job
 from intel_owl.consts import DEFAULT_QUEUE
 
 from .dataclasses import PlaybookConfig
@@ -133,11 +135,11 @@ def start_playbooks(
                 analyzers_used.append(a_name)
                 task_id = uuid()
                 args = [
-                        job_id,
-                        aa.asdict(),
-                        {"runtime_configuration": a_params, "task_id": task_id},
-                        p_name
-                    ]
+                    job_id,
+                    aa.asdict(),
+                    {"runtime_configuration": a_params, "task_id": task_id},
+                    p_name
+                ]
 
                 # get celery queue
                 queue = aa.config.queue
@@ -201,7 +203,7 @@ def start_playbooks(
                 soft_time_limit = cc.config.soft_time_limit
                 # create task signature and add to list
                 task_signatures.append(
-                tasks.run_connector.signature(
+                    tasks.run_connector.signature(
                         args,
                         {},
                         queue=queue,
@@ -223,6 +225,7 @@ def start_playbooks(
     runner(cb_signature)
     return None
 
+
 def job_cleanup(job: Job) -> None:
     logger.info(f"[STARTING] job_cleanup for <-- {job.__repr__()}.")
     status_to_set = job.Status.RUNNING
@@ -236,7 +239,9 @@ def job_cleanup(job: Job) -> None:
         stats = {}
 
         for entry in stats_analyzers:
-            stats[entry] = stats_analyzers.get(entry, 0) + stats_connectors.get(entry, 0)
+            stats[entry] = (
+                stats_analyzers.get(entry, 0) + stats_connectors.get(entry, 0)
+            )
 
         logger.info(f"[REPORT] {job.__repr__()}, status:{job.status}, reports:{stats}")
 
@@ -265,6 +270,7 @@ def job_cleanup(job: Job) -> None:
             job.finished_analysis_time = get_now()
         job.status = status_to_set
         job.save(update_fields=["status", "errors", "finished_analysis_time"])
+
 
 def post_all_playbooks_finished(job_id: int) -> None:
     """

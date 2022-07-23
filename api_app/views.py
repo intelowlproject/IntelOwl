@@ -7,7 +7,7 @@ from datetime import timedelta
 from typing import Type, Union
 
 from django.conf import settings
-from django.db.models import Count, Q, QuerySet
+from django.db.models import Count, Q
 from django.db.models.functions import Trunc
 from django.http import FileResponse, QueryDict
 from drf_spectacular.types import OpenApiTypes
@@ -80,7 +80,7 @@ def _multi_analysis_request(
     logger.info(f"New Jobs added to queue <- {repr(jobs)}.")
 
     # Check if task is test or not
-    if settings.STAGE_CI:
+    if settings.STAGE_CI and not settings.FORCE_SCHEDULE_JOBS:
         logger.info("skipping analysis start cause we are in CI")
     else:
         # fire celery task
@@ -612,7 +612,7 @@ class CustomConfigViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         # Initializing empty queryset
-        result = QuerySet(CustomConfig)
+        result = CustomConfig.objects.none()
 
         # Adding CustomConfigs for user's organization, if any
         membership = Membership.objects.filter(

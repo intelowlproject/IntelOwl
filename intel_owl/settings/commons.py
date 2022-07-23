@@ -17,6 +17,8 @@ STAGE_STAGING = STAGE == "staging"
 STAGE_LOCAL = STAGE == "local"
 STAGE_CI = STAGE == "ci"
 
+# Overridden in test_custom_config
+FORCE_SCHEDULE_JOBS = False
 
 VERSION = "4.0.1"
 PUBLIC_DEPLOYMENT = get_secret("PUBLIC_DEPLOYMENT", "True") == "True"

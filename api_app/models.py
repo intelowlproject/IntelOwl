@@ -8,7 +8,6 @@ from typing import Optional
 from django.conf import settings
 from django.contrib.postgres import fields as pg_fields
 from django.db import models
-from django.db.models import QuerySet
 from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.functional import cached_property
@@ -234,7 +233,7 @@ class CustomConfig(models.Model):
         """
         Returns custom config as dict
         """
-        custom_configs = QuerySet(cls)
+        custom_configs = cls.objects.none()
 
         # Since, user-level custom configs should override organization-level configs,
         # we need to get the organization-level configs, if any, first.

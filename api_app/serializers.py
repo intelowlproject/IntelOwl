@@ -9,7 +9,7 @@ from django.http import QueryDict
 from drf_spectacular.utils import extend_schema_serializer
 from durin.serializers import UserSerializer
 from rest_framework import serializers as rfs
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import PermissionDenied, ValidationError
 
 from certego_saas.apps.organization.membership import Membership
 
@@ -616,10 +616,9 @@ class CustomConfigSerializer(rfs.ModelSerializer):
 
     def validate_value(self, value):
         try:
-            json.loads(value)
+            return json.loads(value)
         except json.JSONDecodeError:
             raise ValidationError("Value is not JSON-compliant.")
-        return value
 
     def validate(self, attrs):
         super().validate(attrs)
@@ -637,7 +636,7 @@ class CustomConfigSerializer(rfs.ModelSerializer):
                     f"User {attrs.get('owner')} is not owner of "
                     f"organization {attrs.get('organization')}."
                 )
-                raise ValidationError("User is not owner of the organization.")
+                raise PermissionDenied("User is not owner of the organization.")
 
         if attrs["type"] == CustomConfig.PluginType.ANALYZER:
             config = AnalyzerConfig
@@ -662,7 +661,7 @@ class CustomConfigSerializer(rfs.ModelSerializer):
         # NOTE: json.loads is used as it allows us to store all
         # valid value types into a StringField
         if not isinstance(
-            json.loads(attrs["value"]),
+            attrs["value"],
             type(config.all()[attrs["plugin_name"]].params[attrs["attribute"]].value),
         ):
             expected_type = type(

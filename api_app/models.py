@@ -260,9 +260,16 @@ class CustomConfig(models.Model):
             custom_config: CustomConfig
             if custom_config.plugin_name not in result:
                 result[custom_config.plugin_name] = {}
-            result[custom_config.plugin_name][
-                custom_config.attribute
-            ] = custom_config.value
+
+            # This `if` condition ensures that only a user-level config
+            # overrides an organization-level config.
+            if (
+                custom_config.attribute not in result[custom_config.plugin_name]
+                or custom_config.organization is None
+            ):
+                result[custom_config.plugin_name][
+                    custom_config.attribute
+                ] = custom_config.value
 
         logger.debug(f"Final CustomConfig: {result}")
 

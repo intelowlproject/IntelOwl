@@ -56,7 +56,7 @@ export async function createPlaybookJob(formValues) {
       true,
       10000
     );
-    return Promise.resolve(jobId);
+    return Promise.resolve(jobIds);
   }
   // else
   addToast("Failed!", respData?.message, "danger");

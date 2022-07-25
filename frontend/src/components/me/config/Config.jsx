@@ -70,17 +70,30 @@ export default function Config() {
     restoreOnUnmount: true,
   });
 
-  const [analyzers, connectors] = usePluginConfigurationStore((state) => [
+  const [
+    analyzers,
+    connectors,
+    retrieveAnalyzersConfiguration,
+    retrieveConnectorsConfiguration,
+  ] = usePluginConfigurationStore((state) => [
     filterEmptyParams(state.analyzersJSON),
     filterEmptyParams(state.connectorsJSON),
+    state.retrieveAnalyzersConfiguration,
+    state.retrieveConnectorsConfiguration,
   ]);
 
-  const [respData, Loader, refetch] = useAxiosComponentLoader(
+  const [respData, Loader, refetchConfig] = useAxiosComponentLoader(
     {
       url: CUSTOM_CONFIG_URI,
     },
     (resp) => resp.filter((item) => !item.organization)
   );
+
+  const refetchAll = () => {
+    refetchConfig();
+    retrieveAnalyzersConfiguration();
+    retrieveConnectorsConfiguration();
+  };
 
   return (
     <Container>
@@ -201,7 +214,7 @@ export default function Config() {
                                               `config.${index}.create`,
                                               false
                                             );
-                                            refetch();
+                                            refetchAll();
                                           });
                                         else
                                           updateCustomConfig(
@@ -212,6 +225,7 @@ export default function Config() {
                                               `config.${index}.edit`,
                                               false
                                             );
+                                            refetchAll();
                                           });
                                       } else
                                         setFieldValue(
@@ -230,7 +244,7 @@ export default function Config() {
                                     <Button
                                       color="primary"
                                       className="mx-2 rounded-1 text-larger col-auto"
-                                      onClick={refetch}
+                                      onClick={refetchAll}
                                     >
                                       <MdCancel />
                                     </Button>
@@ -241,9 +255,10 @@ export default function Config() {
                                     onClick={() => {
                                       if (item.create) remove(index);
                                       else
-                                        deleteCustomConfig(item.id).then(() =>
-                                          remove(index)
-                                        );
+                                        deleteCustomConfig(item.id).then(() => {
+                                          remove(index);
+                                          refetchAll();
+                                        });
                                     }}
                                   >
                                     <BsFillTrashFill />

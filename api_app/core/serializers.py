@@ -175,20 +175,19 @@ class AbstractConfigSerializer(rfs.Serializer):
         if plugin_name in visited:
             raise RuntimeError(f"Circular dependency detected in {cls} config")
         visited.add(plugin_name)
+        result = config_dict[plugin_name]
         if plugin_name not in config_dict:
             raise RuntimeError(
                 f"Plugin {plugin_name} not found in {cls} config "
                 "but referenced in extends"
             )
         if "extends" in config_dict[plugin_name]:
-            temp = config_dict[plugin_name]
-            parent_plugin = temp.pop("extends")
-            config_dict[plugin_name] = deepcopy(
-                cls._complete_config(config_dict, parent_plugin, visited)
-            )
-            for key in temp:
-                config_dict[plugin_name][key] = temp[key]
-        return config_dict[plugin_name]
+            parent_plugin = config_dict[plugin_name]["extends"]
+            result = deepcopy(cls._complete_config(config_dict, parent_plugin, visited))
+            for key in config_dict[plugin_name]:
+                if key != "extends":
+                    result[key] = config_dict[plugin_name][key]
+        return result
 
     @classmethod
     @cache_memoize(
@@ -202,7 +201,7 @@ class AbstractConfigSerializer(rfs.Serializer):
         """
         config_dict = cls._read_config()
         for plugin in config_dict:
-            cls._complete_config(config_dict, plugin, set())
+            config_dict[plugin] = cls._complete_config(config_dict, plugin, set())
         serializer_errors = {}
         for key, config in config_dict.items():
             new_config = {"name": key, **config}

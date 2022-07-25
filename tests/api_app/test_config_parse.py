@@ -2,26 +2,17 @@
 # See the file 'LICENSE' for copying permission.
 import random
 from hashlib import md5
+from unittest.mock import Mock, patch
 
 from django.test import TestCase
 
 from api_app.core.serializers import AbstractConfigSerializer
 
 
-class ModAbstractConfigSerializer(AbstractConfigSerializer):
-    input_config = None
-
-    @classmethod
-    def _md5_config_file(cls) -> str:
-        return md5(str(random.random()).encode("utf-8")).hexdigest()
-
-    @classmethod
-    def _read_config(cls):
-        return cls.input_config
-
-
 class ConfigParseTests(TestCase):
-    def test_extends(self):
+    @patch("api_app.core.serializers.AbstractConfigSerializer._md5_config_file")
+    @patch("api_app.core.serializers.AbstractConfigSerializer._read_config")
+    def test_extends(self, mock_read_config: Mock, mock_md5_config_file: Mock):
         sample_analyzer_config = {
             "Shodan_Honeyscore": {
                 "type": "observable",
@@ -69,9 +60,15 @@ class ConfigParseTests(TestCase):
         }
         pre_parsed_sample_config["Shodan_Search"].pop("extends")
 
-        ModAbstractConfigSerializer.input_config = sample_analyzer_config
-        parsed_config = ModAbstractConfigSerializer.read_and_verify_config()
+        mock_read_config.return_value = sample_analyzer_config
+        mock_md5_config_file.return_value = md5(
+            str(random.random()).encode("utf-8")
+        ).hexdigest()
+        parsed_config = AbstractConfigSerializer.read_and_verify_config()
 
-        ModAbstractConfigSerializer.input_config = pre_parsed_sample_config
-        expected_config = ModAbstractConfigSerializer.read_and_verify_config()
+        mock_read_config.return_value = pre_parsed_sample_config
+        mock_md5_config_file.return_value = md5(
+            str(random.random()).encode("utf-8")
+        ).hexdigest()
+        expected_config = AbstractConfigSerializer.read_and_verify_config()
         self.assertDictEqual(parsed_config, expected_config)

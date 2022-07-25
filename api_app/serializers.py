@@ -10,6 +10,7 @@ from drf_spectacular.utils import extend_schema_serializer
 from durin.serializers import UserSerializer
 from rest_framework import serializers as rfs
 from rest_framework.exceptions import PermissionDenied, ValidationError
+from rest_framework.fields import empty
 
 from certego_saas.apps.organization.membership import Membership
 
@@ -602,6 +603,17 @@ def multi_result_enveloper(serializer_class, many):
 
 
 class CustomConfigSerializer(rfs.ModelSerializer):
+    class CustomJSONField(rfs.JSONField):
+        def run_validation(self, data=empty):
+            value = super().run_validation(data)
+            try:
+                return json.loads(value)
+            except json.JSONDecodeError:
+                raise ValidationError("Value is not JSON-compliant.")
+
+        def to_representation(self, value):
+            return json.dumps(super().to_representation(value))
+
     # certego_saas does not expose organization.id to frontend
     organization = rfs.SlugRelatedField(
         allow_null=True,
@@ -610,15 +622,11 @@ class CustomConfigSerializer(rfs.ModelSerializer):
         required=False,
     )
 
+    value = CustomJSONField()
+
     class Meta:
         model = CustomConfig
         fields = rfs.ALL_FIELDS
-
-    def validate_value(self, value):
-        try:
-            return json.loads(value)
-        except json.JSONDecodeError:
-            raise ValidationError("Value is not JSON-compliant.")
 
     def validate(self, attrs):
         super().validate(attrs)

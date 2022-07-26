@@ -678,7 +678,7 @@ class CustomConfigSerializer(rfs.ModelSerializer):
             raise ValidationError(
                 f"{category} {attrs['plugin_name']} attribute "
                 f"{attrs['attribute']} has wrong type "
-                f"{type(json.loads(attrs['value'])).__name__}. Expected: "
+                f"{type(attrs['value']).__name__}. Expected: "
                 f"{expected_type.__name__}."
             )
 

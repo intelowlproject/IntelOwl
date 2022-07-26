@@ -197,6 +197,58 @@ class CustomConfigTests(CustomAPITestCase):
         except CustomConfig.DoesNotExist:
             raise Exception(f"CustomConfig not created: {msg}")
 
+    def test_self_create_incorrect_type_config(self):
+        response = self.standard_user_client.post(
+            custom_config_uri,
+            {
+                "type": CustomConfig.PluginType.ANALYZER,
+                "plugin_name": "Classic_DNS",
+                "attribute": "query_type",
+                "value": "99",
+            },
+            format="json",
+        )
+        content = response.json()
+        msg = (response, content)
+        self.assertEqual(response.status_code, 400, msg=msg)
+        self.assertFalse(
+            CustomConfig.objects.filter(
+                **{
+                    "type": CustomConfig.PluginType.ANALYZER,
+                    "plugin_name": "Classic_DNS",
+                    "attribute": "query_type",
+                    "owner": self.standard_user,
+                }
+            ).exists(),
+            msg="CustomConfig created for incorrect type value",
+        )
+
+    def test_self_create_invalid_config(self):
+        response = self.standard_user_client.post(
+            custom_config_uri,
+            {
+                "type": CustomConfig.PluginType.ANALYZER,
+                "plugin_name": "Classic_DNS",
+                "attribute": "query_type",
+                "value": '"99',
+            },
+            format="json",
+        )
+        content = response.json()
+        msg = (response, content)
+        self.assertEqual(response.status_code, 400, msg=msg)
+        self.assertFalse(
+            CustomConfig.objects.filter(
+                **{
+                    "type": CustomConfig.PluginType.ANALYZER,
+                    "plugin_name": "Classic_DNS",
+                    "attribute": "query_type",
+                    "owner": self.standard_user,
+                }
+            ).exists(),
+            msg="CustomConfig created for invalid value",
+        )
+
     def test_self_update_org_config(self):
         config = CustomConfig.objects.get(
             type=CustomConfig.PluginType.ANALYZER,

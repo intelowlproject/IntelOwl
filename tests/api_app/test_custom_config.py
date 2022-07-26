@@ -13,6 +13,7 @@ from ..celery_tester import task_queue
 
 custom_config_uri = reverse("custom-config-list")
 analyze_multiple_observables_uri = reverse("analyze_multiple_observables")
+get_analyzer_configs_uri = reverse("get_analyzer_configs")
 
 
 @override_settings(FORCE_SCHEDULE_JOBS=True)
@@ -258,3 +259,15 @@ class CustomConfigTests(CustomAPITestCase):
             owner=self.standard_user,
         )
         self.assertFalse(config.exists(), msg="Org config created by non-owner")
+
+    def test_custom_config_apply(self):
+        response = self.client.get(get_analyzer_configs_uri)
+        self.assertEqual(response.status_code, 200)
+        content = response.json()
+        self.assertIn("Classic_DNS", content)
+        self.assertIn("params", content["Classic_DNS"])
+        self.assertIn("query_type", content["Classic_DNS"]["params"])
+        self.assertIn("value", content["Classic_DNS"]["params"]["query_type"])
+        self.assertEqual(
+            content["Classic_DNS"]["params"]["query_type"]["value"], "CNAME"
+        )

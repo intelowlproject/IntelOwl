@@ -75,17 +75,30 @@ export default function OrgConfig() {
     { restoreOnUnmount: true }
   );
 
-  const [analyzers, connectors] = usePluginConfigurationStore((state) => [
+  const [
+    analyzers,
+    connectors,
+    retrieveAnalyzersConfiguration,
+    retrieveConnectorsConfiguration,
+  ] = usePluginConfigurationStore((state) => [
     filterEmptyParams(state.analyzersJSON),
     filterEmptyParams(state.connectorsJSON),
+    state.retrieveAnalyzersConfiguration,
+    state.retrieveConnectorsConfiguration,
   ]);
 
-  const [respData, Loader, refetch] = useAxiosComponentLoader(
+  const [respData, Loader, refetchConfig] = useAxiosComponentLoader(
     {
       url: CUSTOM_CONFIG_URI,
     },
     (resp) => resp.filter((item) => item.organization)
   );
+
+  const refetchAll = () => {
+    refetchConfig();
+    retrieveAnalyzersConfiguration();
+    retrieveConnectorsConfiguration();
+  };
 
   const NewOrg = (
     <Alert color="secondary" className="mt-3 mx-auto">
@@ -236,7 +249,7 @@ export default function OrgConfig() {
                                                     `config.${index}.create`,
                                                     false
                                                   );
-                                                  refetch();
+                                                  refetchAll();
                                                 });
                                               else
                                                 updateCustomConfig(
@@ -247,6 +260,7 @@ export default function OrgConfig() {
                                                     `config.${index}.edit`,
                                                     false
                                                   );
+                                                  refetchAll();
                                                 });
                                             } else
                                               setFieldValue(
@@ -265,7 +279,7 @@ export default function OrgConfig() {
                                           <Button
                                             color="primary"
                                             className="mx-2 rounded-1 text-larger col-auto"
-                                            onClick={refetch}
+                                            onClick={refetchAll}
                                           >
                                             <MdCancel />
                                           </Button>
@@ -277,7 +291,10 @@ export default function OrgConfig() {
                                             if (item.create) remove(index);
                                             else
                                               deleteCustomConfig(item.id).then(
-                                                () => remove(index)
+                                                () => {
+                                                  remove(index);
+                                                  refetchAll();
+                                                }
                                               );
                                           }}
                                         >

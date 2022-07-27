@@ -53,14 +53,9 @@ export function isValidConfig(item) {
 }
 
 export function filterEmptyParams(plugins) {
-  const objectFilter = (obj, predicate) =>
-    Object.keys(obj)
-      .filter((key) => predicate(obj[key]))
-      .reduce((res, key) => Object.assign(res, { [key]: obj[key] }), {});
-  return objectFilter(
-    plugins,
-    (item) => item.params && Object.keys(item.params).length > 0
-  );
+  return Object.keys(plugins)
+  .filter((key) => obj[key].params && Object.keys(obj[key].params).length > 0)
+  .reduce((res, key) => Object.assign(res, { [key]: obj[key] }), {})
 }
 
 export default function Config() {
@@ -69,6 +64,10 @@ export default function Config() {
   useTitle("IntelOwl | Config", {
     restoreOnUnmount: true,
   });
+  const plugins = {
+    "a": {"params": []},
+    "b": {"params": [5]},
+  }
 
   const [
     analyzers,

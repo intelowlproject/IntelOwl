@@ -110,6 +110,7 @@ export default function Config() {
                           ? configurations.config.map((plugin, index) => {
                               let plugins;
                               let attributeList = [];
+                              let placeholder = "";
                               if (plugin.type === "1") {
                                 plugins = analyzers;
                               } else if (plugin.type === "2") {
@@ -121,6 +122,21 @@ export default function Config() {
                                 attributeList = Object.keys(
                                   plugins[plugin.plugin_name].params
                                 );
+                              if (plugin.attribute && plugins[plugin.plugin_name]["params"][plugin.attribute]) {
+                                const type = plugins[plugin.plugin_name]["params"][plugin.attribute].type;
+                                if (type === "str")
+                                  placeholder = "\"string\"";
+                                else if (type === "int")
+                                  placeholder = "1234";
+                                else if (type === "float")
+                                  placeholder = "12.34";
+                                else if (type === "bool")
+                                  placeholder = "true";
+                                else if (type === "json")
+                                  placeholder = "{\"key\": \"value\"}";
+                                else if (type === "list")
+                                  placeholder = "[]";
+                              }
                               const disabledSuffix = plugin.edit
                                 ? " input-dark "
                                 : " disabled text-dark input-secondary ";
@@ -194,6 +210,7 @@ export default function Config() {
                                       name={`config.${index}.value`}
                                       className={disabledSuffix}
                                       disabled={!plugin.edit}
+                                      placeholder={placeholder}
                                     />
                                   </Col>
                                   <Button

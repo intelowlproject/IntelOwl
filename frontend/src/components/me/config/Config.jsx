@@ -1,14 +1,14 @@
 import { addToast, useAxiosComponentLoader } from "@certego/certego-ui";
 import { Field, FieldArray, Form, Formik } from "formik";
 import React from "react";
-import { MdCancel } from "react-icons/md";
 import {
   BsFillCheckSquareFill,
   BsFillPencilFill,
   BsFillPlusCircleFill,
   BsFillTrashFill,
 } from "react-icons/bs";
-import { Button, Col, Container, FormGroup, Input, Row } from "reactstrap";
+import { MdCancel } from "react-icons/md";
+import { Row, Col, Container, FormGroup, Input, Button } from "reactstrap";
 import useTitle from "react-use/lib/useTitle";
 import { usePluginConfigurationStore } from "../../../stores";
 import {
@@ -54,8 +54,11 @@ export function isValidConfig(item) {
 
 export function filterEmptyParams(plugins) {
   return Object.keys(plugins)
-  .filter((key) => obj[key].params && Object.keys(obj[key].params).length > 0)
-  .reduce((res, key) => Object.assign(res, { [key]: obj[key] }), {})
+    .filter(
+      (key) =>
+        plugins[key].params && Object.keys(plugins[key].params).length > 0
+    )
+    .reduce((res, key) => Object.assign(res, { [key]: plugins[key] }), {});
 }
 
 export default function Config() {
@@ -64,10 +67,6 @@ export default function Config() {
   useTitle("IntelOwl | Config", {
     restoreOnUnmount: true,
   });
-  const plugins = {
-    "a": {"params": []},
-    "b": {"params": [5]},
-  }
 
   const [
     analyzers,
@@ -100,13 +99,14 @@ export default function Config() {
       <Loader
         render={() => (
           <Formik initialValues={{ config: respData }} onSubmit={null}>
-            {({ configurations, setFieldValue }) => (
+            {({ values: configurations, setFieldValue }) => (
               <Form>
                 <FieldArray name="config">
                   {({ remove, push }) => (
                     <FormGroup row>
                       <Col>
-                        {configurations.config && configurations.config.length > 0
+                        {configurations.config &&
+                        configurations.config.length > 0
                           ? configurations.config.map((plugin, index) => {
                               let plugins;
                               let attributeList = [];
@@ -118,24 +118,32 @@ export default function Config() {
                               } else {
                                 plugins = {};
                               }
-                              if (plugin.plugin_name && plugins[plugin.plugin_name])
+                              if (
+                                plugin.plugin_name &&
+                                plugins[plugin.plugin_name]
+                              )
                                 attributeList = Object.keys(
                                   plugins[plugin.plugin_name].params
                                 );
-                              if (plugin.attribute && plugins[plugin.plugin_name]["params"][plugin.attribute]) {
-                                const type = plugins[plugin.plugin_name]["params"][plugin.attribute].type;
-                                if (type === "str")
-                                  placeholder = "\"string\"";
-                                else if (type === "int")
-                                  placeholder = "1234";
+                              if (
+                                attributeList.length > 0 &&
+                                plugin.attribute &&
+                                plugins[plugin.plugin_name].params[
+                                  plugin.attribute
+                                ]
+                              ) {
+                                const { type } =
+                                  plugins[plugin.plugin_name].params[
+                                    plugin.attribute
+                                  ];
+                                if (type === "str") placeholder = '"string"';
+                                else if (type === "int") placeholder = "1234";
                                 else if (type === "float")
                                   placeholder = "12.34";
-                                else if (type === "bool")
-                                  placeholder = "true";
+                                else if (type === "bool") placeholder = "true";
                                 else if (type === "json")
-                                  placeholder = "{\"key\": \"value\"}";
-                                else if (type === "list")
-                                  placeholder = "[]";
+                                  placeholder = '{"key": "value"}';
+                                else if (type === "list") placeholder = "[]";
                               }
                               const disabledSuffix = plugin.edit
                                 ? " input-dark "
@@ -171,14 +179,16 @@ export default function Config() {
                                       <option value="">
                                         ---Select Name---
                                       </option>
-                                      {Object.values(plugins).map((plugin) => (
-                                        <option
-                                          value={plugin.name}
-                                          key={plugin.name}
-                                        >
-                                          {plugin.name}
-                                        </option>
-                                      ))}
+                                      {Object.values(plugins).map(
+                                        (pluginElement) => (
+                                          <option
+                                            value={pluginElement.name}
+                                            key={pluginElement.name}
+                                          >
+                                            {pluginElement.name}
+                                          </option>
+                                        )
+                                      )}
                                     </Field>
                                   </Col>
 
@@ -221,17 +231,19 @@ export default function Config() {
                                         if (!isValidConfig(plugin)) return;
 
                                         if (plugin.create)
-                                          createCustomConfig(plugin).then(() => {
-                                            setFieldValue(
-                                              `config.${index}.edit`,
-                                              false
-                                            );
-                                            setFieldValue(
-                                              `config.${index}.create`,
-                                              false
-                                            );
-                                            refetchAll();
-                                          });
+                                          createCustomConfig(plugin).then(
+                                            () => {
+                                              setFieldValue(
+                                                `config.${index}.edit`,
+                                                false
+                                              );
+                                              setFieldValue(
+                                                `config.${index}.create`,
+                                                false
+                                              );
+                                              refetchAll();
+                                            }
+                                          );
                                         else
                                           updateCustomConfig(
                                             plugin,
@@ -271,10 +283,12 @@ export default function Config() {
                                     onClick={() => {
                                       if (plugin.create) remove(index);
                                       else
-                                        deleteCustomConfig(plugin.id).then(() => {
-                                          remove(index);
-                                          refetchAll();
-                                        });
+                                        deleteCustomConfig(plugin.id).then(
+                                          () => {
+                                            remove(index);
+                                            refetchAll();
+                                          }
+                                        );
                                     }}
                                   >
                                     <BsFillTrashFill />

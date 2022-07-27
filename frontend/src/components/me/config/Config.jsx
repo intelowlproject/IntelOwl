@@ -100,28 +100,28 @@ export default function Config() {
       <Loader
         render={() => (
           <Formik initialValues={{ config: respData }} onSubmit={null}>
-            {({ values, setFieldValue }) => (
+            {({ configurations, setFieldValue }) => (
               <Form>
                 <FieldArray name="config">
                   {({ remove, push }) => (
                     <FormGroup row>
                       <Col>
-                        {values.config && values.config.length > 0
-                          ? values.config.map((item, index) => {
+                        {configurations.config && configurations.config.length > 0
+                          ? configurations.config.map((plugin, index) => {
                               let plugins;
                               let attributeList = [];
-                              if (item.type === "1") {
+                              if (plugin.type === "1") {
                                 plugins = analyzers;
-                              } else if (item.type === "2") {
+                              } else if (plugin.type === "2") {
                                 plugins = connectors;
                               } else {
                                 plugins = {};
                               }
-                              if (item.plugin_name && plugins[item.plugin_name])
+                              if (plugin.plugin_name && plugins[plugin.plugin_name])
                                 attributeList = Object.keys(
-                                  plugins[item.plugin_name].params
+                                  plugins[plugin.plugin_name].params
                                 );
-                              const disabledSuffix = item.edit
+                              const disabledSuffix = plugin.edit
                                 ? " input-dark "
                                 : " disabled text-dark input-secondary ";
 
@@ -134,7 +134,7 @@ export default function Config() {
                                     <Field
                                       as="select"
                                       className={`form-select ${disabledSuffix}`}
-                                      disabled={!item.edit}
+                                      disabled={!plugin.edit}
                                       name={`config[${index}].type`}
                                     >
                                       <option value="">
@@ -149,7 +149,7 @@ export default function Config() {
                                     <Field
                                       as="select"
                                       className={`form-select ${disabledSuffix}`}
-                                      disabled={!item.edit}
+                                      disabled={!plugin.edit}
                                       name={`config[${index}].plugin_name`}
                                     >
                                       <option value="">
@@ -170,7 +170,7 @@ export default function Config() {
                                     <Field
                                       as="select"
                                       className={`form-select ${disabledSuffix}`}
-                                      disabled={!item.edit}
+                                      disabled={!plugin.edit}
                                       name={`config[${index}].attribute`}
                                     >
                                       <option value="">
@@ -193,18 +193,18 @@ export default function Config() {
                                       type="text"
                                       name={`config.${index}.value`}
                                       className={disabledSuffix}
-                                      disabled={!item.edit}
+                                      disabled={!plugin.edit}
                                     />
                                   </Col>
                                   <Button
                                     color="primary"
                                     className="mx-2 rounded-1 text-larger col-auto"
                                     onClick={() => {
-                                      if (item.edit) {
-                                        if (!isValidConfig(item)) return;
+                                      if (plugin.edit) {
+                                        if (!isValidConfig(plugin)) return;
 
-                                        if (item.create)
-                                          createCustomConfig(item).then(() => {
+                                        if (plugin.create)
+                                          createCustomConfig(plugin).then(() => {
                                             setFieldValue(
                                               `config.${index}.edit`,
                                               false
@@ -217,8 +217,8 @@ export default function Config() {
                                           });
                                         else
                                           updateCustomConfig(
-                                            item,
-                                            item.id
+                                            plugin,
+                                            plugin.id
                                           ).then(() => {
                                             setFieldValue(
                                               `config.${index}.edit`,
@@ -233,13 +233,13 @@ export default function Config() {
                                         );
                                     }}
                                   >
-                                    {item.edit ? (
+                                    {plugin.edit ? (
                                       <BsFillCheckSquareFill />
                                     ) : (
                                       <BsFillPencilFill />
                                     )}
                                   </Button>
-                                  {item.edit && !item.create ? (
+                                  {plugin.edit && !plugin.create ? (
                                     <Button
                                       color="primary"
                                       className="mx-2 rounded-1 text-larger col-auto"
@@ -252,9 +252,9 @@ export default function Config() {
                                     color="primary"
                                     className="mx-2 rounded-1 text-larger col-auto"
                                     onClick={() => {
-                                      if (item.create) remove(index);
+                                      if (plugin.create) remove(index);
                                       else
-                                        deleteCustomConfig(item.id).then(() => {
+                                        deleteCustomConfig(plugin.id).then(() => {
                                           remove(index);
                                           refetchAll();
                                         });

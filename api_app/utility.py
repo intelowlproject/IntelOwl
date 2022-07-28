@@ -5,7 +5,6 @@ from django.conf import settings
 from api_app.connectors_manager.dataclasses import ConnectorConfig
 from api_app.helpers import get_now
 
-from intel_owl import tasks
 from api_app.analyzers_manager.dataclasses import AnalyzerConfig
 from api_app.exceptions import AlreadyFailedJobException, NotRunnableAnalyzer
 from api_app.models import Job
@@ -20,6 +19,7 @@ def stack_analyzers(
     analyzers_to_execute: List[str],
     runtime_configuration: Dict[str, Dict] = None,
 ) -> Tuple[List[Signature], List[str]]:
+    from intel_owl import tasks
 
     # to store the celery task signatures
     task_signatures = []
@@ -84,6 +84,8 @@ def stack_connectors(
     connectors_to_execute: List[str],
     runtime_configuration: Dict[str, Dict] = None,
 ) -> Tuple[List[Signature], List[str]]:
+    from intel_owl import tasks
+
     # to store the celery task signatures
     task_signatures = []
 

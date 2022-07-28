@@ -2,77 +2,17 @@
 # See the file 'LICENSE' for copying permission.
 
 import logging
-from typing import Dict, List, Tuple
-
-from celery import group, uuid
-from django.conf import settings
+from typing import Dict, List
 from django.utils.module_loading import import_string
 from rest_framework.exceptions import ValidationError
-from api_app.connectors_manager import connectors
-from intel_owl import tasks
-from celery.canvas import Signature
 
-from intel_owl.consts import DEFAULT_QUEUE
+from api_app.helpers import stack_connectors
 
 from .classes import Connector
 from .dataclasses import ConnectorConfig
 from .models import ConnectorReport
 
 logger = logging.getLogger(__name__)
-
-def stack_connectors(
-    job_id: int,
-    connectors_to_execute: List[str],
-    runtime_configuration: Dict[str, Dict] = None,
-) -> Tuple[List[Signature], List[str]]:
-    # to store the celery task signatures
-    task_signatures = []
-
-    connectors_used = []
-
-    # get connectors config
-    connector_dataclasses = ConnectorConfig.filter(names=connectors_to_execute)
-
-    # loop over and create task signatures
-    for c_name, cc in connector_dataclasses.items():
-        # if disabled or unconfigured (this check is bypassed in STAGE_CI)
-        if not cc.is_ready_to_use and not settings.STAGE_CI:
-            continue
-
-        # get runtime_configuration if any specified for this analyzer
-        runtime_params = runtime_configuration.get(c_name, {})
-        # gen a new task_id
-        task_id = uuid()
-        # construct args
-        args = [
-            job_id,
-            cc.asdict(),
-            {"runtime_configuration": runtime_params, "task_id": task_id},
-        ]
-        # get celery queue
-        queue = cc.config.queue
-        if queue not in settings.CELERY_QUEUES:
-            logger.error(
-                f"Connector {c_name} has a wrong queue."
-                f" Setting to `{DEFAULT_QUEUE}`"
-            )
-            queue = DEFAULT_QUEUE
-        # get soft_time_limit
-        soft_time_limit = cc.config.soft_time_limit
-        # create task signature and add to list
-        task_signatures.append(
-            tasks.run_connector.signature(
-                args,
-                {},
-                queue=queue,
-                soft_time_limit=soft_time_limit,
-                task_id=task_id,
-                ignore_result=True,  # since we are using group and not chord
-            )
-        )
-        connectors_used.append(c_name)
-    
-    return task_signatures, connectors_used
 
 
 def start_connectors(

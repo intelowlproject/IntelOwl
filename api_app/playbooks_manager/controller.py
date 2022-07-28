@@ -6,9 +6,10 @@ from typing import Dict, List, Tuple
 
 from celery import chord
 from django.conf import settings
-from api_app.analyzers_manager.controller import job_cleanup, stack_analyzers
 
-from api_app.connectors_manager.controller import stack_connectors
+from ..analyzers_manager.controller import job_cleanup, stack_analyzers
+from ..connectors_manager.controller import stack_connectors
+
 from api_app.exceptions import (
     NotRunnablePlaybook,
 )

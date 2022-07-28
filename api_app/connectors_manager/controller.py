@@ -3,10 +3,11 @@
 
 import logging
 from typing import Dict, List
+from celery import group
 from django.utils.module_loading import import_string
 from rest_framework.exceptions import ValidationError
 
-from api_app.helpers import stack_connectors
+from api_app.utility import stack_connectors
 
 from .classes import Connector
 from .dataclasses import ConnectorConfig

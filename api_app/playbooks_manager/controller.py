@@ -7,12 +7,10 @@ from typing import Dict, List, Tuple
 from celery import chord
 from django.conf import settings
 
-from ..analyzers_manager.controller import job_cleanup, stack_analyzers
-from ..connectors_manager.controller import stack_connectors
-
 from api_app.exceptions import (
     NotRunnablePlaybook,
 )
+from ..utility import job_cleanup, stack_analyzers, stack_connectors
 
 from ..models import Job
 from .dataclasses import PlaybookConfig

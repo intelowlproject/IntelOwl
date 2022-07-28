@@ -4,7 +4,6 @@
 import logging
 from typing import Union
 
-from django.conf import settings
 from drf_spectacular.utils import extend_schema as add_docs
 from drf_spectacular.utils import inline_serializer
 from rest_framework import serializers as rfs
@@ -14,9 +13,7 @@ from rest_framework.response import Response
 
 from api_app.serializers import FileAnalysisSerializer, ObservableAnalysisSerializer
 from certego_saas.ext.views import APIView
-from intel_owl.celery import app as celery_app
 
-from . import controller as playbooks_controller
 from .serializers import PlaybookAnalysisResponseSerializer, PlaybookConfigSerializer
 from ..views import _multi_analysis_request
 

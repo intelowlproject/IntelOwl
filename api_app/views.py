@@ -78,7 +78,6 @@ def _multi_analysis_request(
         valid_playbook_list, analyzers_to_be_run, connectors_to_be_run, warnings = (
             playbooks_controller.filter_playbooks(
                 serialized_data,
-                warnings
             ))
 
     # save the arrived data plus new params into a new job object

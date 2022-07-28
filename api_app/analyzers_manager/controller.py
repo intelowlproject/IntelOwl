@@ -2,11 +2,9 @@
 # See the file 'LICENSE' for copying permission.
 
 import logging
-from typing import Dict, List, Tuple
+from typing import Dict, List
 
-from celery import chord, uuid
-from celery.canvas import Signature
-from django.conf import settings
+from celery import chord
 from api_app.utility import job_cleanup, stack_analyzers
 from intel_owl import tasks
 from django.utils.module_loading import import_string

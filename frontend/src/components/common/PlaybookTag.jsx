@@ -6,10 +6,7 @@ export default function PlaybookTag(props) {
   const { playbook, ...rest } = props;
 
   return (
-    <Badge
-      color="black"
-      {...rest}
-    >
+    <Badge color="black" {...rest}>
       {playbook}
     </Badge>
   );

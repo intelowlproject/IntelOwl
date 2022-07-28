@@ -43,7 +43,7 @@ INSTALLED_APPS = [
     "api_app.authentication",
     "api_app.analyzers_manager",
     "api_app.connectors_manager",
-    "api_app.playbooks_manager"
+    "api_app.playbooks_manager",
 ]
 
 

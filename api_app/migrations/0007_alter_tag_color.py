@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api_app', '0006_v3_release'),
+        ("api_app", "0006_v3_release"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='tag',
-            name='color',
+            model_name="tag",
+            name="color",
             field=models.CharField(max_length=7),
         ),
     ]

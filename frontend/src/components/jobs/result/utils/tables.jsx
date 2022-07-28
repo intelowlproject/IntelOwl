@@ -63,14 +63,14 @@ const tableProps = {
       Header: "Playbook",
       id: "playbook",
       accessor: "parent_playbook",
-      Cell: ({ value, }) => {
+      Cell: ({ value }) => {
         if (value != null) {
-          return <span>{value}</span>
+          return <span>{value}</span>;
         }
-        return <span />
+        return <span />;
       },
       Filter: DefaultColumnFilter,
-      maxWidth: 300,      
+      maxWidth: 300,
     },
     {
       Header: "Status",

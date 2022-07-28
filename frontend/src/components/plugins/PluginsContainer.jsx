@@ -50,10 +50,10 @@ const routes = [
     ),
     Component: () => (
       <Suspense fallback={<FallBackLoading />}>
-          <Playbooks />
+        <Playbooks />
       </Suspense>
     ),
-  }
+  },
 ];
 
 export default function PluginsContainer() {

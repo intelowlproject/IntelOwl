@@ -29,7 +29,7 @@ class AnalyzerReportSerializer(rfs.ModelSerializer):
             "end_time",
             "runtime_configuration",
             "type",
-            "parent_playbook"
+            "parent_playbook",
         )
 
 

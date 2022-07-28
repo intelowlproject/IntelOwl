@@ -2,25 +2,23 @@
 # See the file 'LICENSE' for copying permission.
 
 import logging
-
 from typing import Union
 
 from django.conf import settings
-from intel_owl.celery import app as celery_app
-from api_app.serializers import FileAnalysisSerializer, ObservableAnalysisSerializer
-from .serializers import PlaybookAnalysisResponseSerializer
 from drf_spectacular.utils import extend_schema as add_docs
 from drf_spectacular.utils import inline_serializer
-from rest_framework.decorators import api_view
-
-from certego_saas.ext.views import APIView
-
 from rest_framework import serializers as rfs
 from rest_framework import status
+from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from .serializers import PlaybookConfigSerializer
+from api_app.serializers import FileAnalysisSerializer, ObservableAnalysisSerializer
+from certego_saas.ext.views import APIView
+from intel_owl.celery import app as celery_app
+
 from . import controller as playbooks_controller
+from .serializers import PlaybookAnalysisResponseSerializer, PlaybookConfigSerializer
+from ..views import _multi_analysis_request
 
 logger = logging.getLogger(__name__)
 
@@ -37,80 +35,11 @@ def _multi_analysis_request_playbooks(
     """
     Prepare and send multiple files/observables for running playbooks
     """
-
-    warnings = []
-    logger.info(
-        f"_multi_analysis_request {serializer_class} "
-        f"received request from {request.user}."
-        f"Data:{request.data}."
-    )
-
-    # serialize request data and validate
-    serializer = serializer_class(
-        data=request.data,
-        context={"request": request},
-        many=True
-    )
-
-    serializer.is_valid(raise_exception=True)
-
-    serialized_data = serializer.validated_data
-    [
-        data.pop("runtime_configuration", {}) for data in serialized_data
-    ]
-
-    cleaned_playbooks_list, analyzers_to_be_run, connectors_to_be_run = (
-        playbooks_controller.filter_playbooks(
-            serialized_data,
-            warnings
-        ))
-
-    # save the arrived data plus new params into a new job object
-    jobs = serializer.save(
+    return _multi_analysis_request(
         user=request.user,
-        playbooks_to_execute=cleaned_playbooks_list,
-    )
-
-    logger.info(f"New Job added to queue <- {repr(jobs)}.")
-
-    # Check if task is test or not
-    if not settings.STAGE_CI:
-        # fire celery task
-
-        for index, job in enumerate(jobs):
-            celery_app.send_task(
-                "start_playbooks",
-                kwargs=dict(
-                    job_id=job.pk,
-                    playbooks_to_execute=cleaned_playbooks_list,
-                ),
-            )
-
-    ser = PlaybookAnalysisResponseSerializer(
-        data=[{
-            "status": "accepted",
-            "job_id": job.pk,
-            "warnings": warnings,
-            "playbooks_running": cleaned_playbooks_list,
-            "analyzers_running": analyzers_to_be_run,
-            "connectors_running": connectors_to_be_run
-        }
-            for index, job in enumerate(jobs)
-        ],
-        many=True
-    )
-    ser.is_valid(raise_exception=True)
-
-    response_dict = {
-        "count": len(ser.data),
-        "results": ser.data,
-    }
-
-    logger.debug(response_dict)
-
-    return Response(
-        response_dict,
-        status=status.HTTP_200_OK,
+        data=request.data,
+        serializer_class=serializer_class,
+        playbook_scan=True,
     )
 
 
@@ -120,7 +49,7 @@ def _multi_analysis_request_playbooks(
     responses={200: PlaybookAnalysisResponseSerializer},
 )
 @api_view(["POST"])
-def analyze_multiple_files(request): 
+def analyze_multiple_files(request):
     return _multi_analysis_request_playbooks(request, FileAnalysisSerializer)
 
 

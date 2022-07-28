@@ -3,6 +3,7 @@
 
 import dataclasses
 import typing
+import inspect
 
 from .serializers import PlaybookConfigSerializer
 
@@ -26,11 +27,20 @@ class PlaybookConfig:
     def is_ready_to_use(self) -> bool:
         return not self.disabled
 
-    @classmethod
-    def from_dict(cls, data: dict) -> "PlaybookConfig":
-        keys_to_pop = ["config", "verification", "secrets", "params", "python_module"]
-        [data.pop(key) for key in keys_to_pop]
-        return cls(**data)
+    def filter_unwhitelisted_keys(self, data: dict) -> typing.Dict:
+        cleaned_data = data
+
+        signature = inspect.signature(self.__init__)
+        whitelist = [parameter for parameter in signature.parameters]
+        whitelist.pop("self")
+
+        [cleaned_data.pop(key) for key in cleaned_data if key not in whitelist]
+
+        return cleaned_data
+
+    def from_dict(self, cls, data: dict) -> "PlaybookConfig":
+        cleaned_data = self.filter_unwhitelisted_keys(data=data)
+        return cls(**cleaned_data)
 
     # orm methods
     @classmethod

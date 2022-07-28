@@ -2,12 +2,15 @@
 # See the file 'LICENSE' for copying permission.
 
 import logging
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 from celery import group, uuid
 from django.conf import settings
 from django.utils.module_loading import import_string
 from rest_framework.exceptions import ValidationError
+from api_app.connectors_manager import connectors
+from intel_owl import tasks
+from celery.canvas import Signature
 
 from intel_owl.consts import DEFAULT_QUEUE
 
@@ -17,20 +20,15 @@ from .models import ConnectorReport
 
 logger = logging.getLogger(__name__)
 
-
-def start_connectors(
+def stack_connectors(
     job_id: int,
     connectors_to_execute: List[str],
     runtime_configuration: Dict[str, Dict] = None,
-) -> None:
-    from intel_owl import tasks
-
-    # we should not use mutable objects as default to avoid unexpected issues
-    if runtime_configuration is None:
-        runtime_configuration = {}
-
+) -> Tuple[List[Signature], List[str]]:
     # to store the celery task signatures
     task_signatures = []
+
+    connectors_used = []
 
     # get connectors config
     connector_dataclasses = ConnectorConfig.filter(names=connectors_to_execute)
@@ -72,6 +70,28 @@ def start_connectors(
                 ignore_result=True,  # since we are using group and not chord
             )
         )
+        connectors_used.append(c_name)
+    
+    return task_signatures, connectors_used
+
+
+def start_connectors(
+    job_id: int,
+    connectors_to_execute: List[str],
+    runtime_configuration: Dict[str, Dict] = None,
+) -> None:
+
+    # we should not use mutable objects as default to avoid unexpected issues
+    if runtime_configuration is None:
+        runtime_configuration = {}
+
+    cleaned_result = stack_connectors(
+        job_id=job_id,
+        connectors_to_execute=connectors_to_execute,
+        runtime_configuration=runtime_configuration,
+    )
+
+    task_signatures = cleaned_result[0]
 
     # fire the connectors in a grouped celery task
     # https://docs.celeryproject.org/en/stable/userguide/canvas.html

@@ -9,7 +9,7 @@ import {
   ANALYZE_MULTIPLE_OBSERVABLE_URI,
   ASK_MULTI_ANALYSIS_AVAILABILITY_URI,
   ANALYZE_MULTIPLE_FILES_URI,
-  API_BASE_URI
+  API_BASE_URI,
 } from "../../constants/api";
 import useRecentScansStore from "../../stores/useRecentScansStore";
 
@@ -29,9 +29,8 @@ export async function createPlaybookJob(formValues) {
         x.playbooks_running.forEach((playbook) =>
           playbooksRunning.add(playbook)
         );
-        if (x.warnings) warnings.push(...x.warnings);
-        }  
-      )
+      if (x.warnings) warnings.push(...x.warnings);
+    });
 
     jobIds.forEach((jobId) => {
       appendToRecentScans(jobId, "success");
@@ -115,7 +114,6 @@ export async function createJob(formValues) {
               <strong>Connectors:</strong>&nbsp;
               {Array.from(connectorsRunning).join(", ")}
             </ContentSection>
-            
           )}
           {warnings.length > 0 && (
             <ContentSection className="bg-accent text-darker">

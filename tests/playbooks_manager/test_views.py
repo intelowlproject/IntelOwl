@@ -8,7 +8,7 @@ from .. import CustomAPITestCase
 
 class PlaybookAppViewsTestCase(CustomAPITestCase):
     def test_get_playbook_config(self):
-        response = self.client.get("/api/get/get_playbook_configs")
+        response = self.client.get("/api/get_playbook_configs")
         self.assertEqual(response.status_code, 200)
         self.assertNotEqual(response.json(), {})
         self.assertDictEqual(

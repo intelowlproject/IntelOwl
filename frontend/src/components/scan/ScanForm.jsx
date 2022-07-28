@@ -22,7 +22,7 @@ import {
   IconButton,
   Loader,
   MultiSelectDropdownInput,
-  addToast
+  addToast,
 } from "@certego/certego-ui";
 
 import { useQuotaBadge } from "../../hooks";
@@ -61,7 +61,6 @@ const groupAnalyzers = (analyzersList) => {
   });
   return grouped;
 };
-
 
 const stateSelector = (state) => [
   state.loading,
@@ -146,8 +145,13 @@ export default function ScanForm() {
     useQuotaBadge();
 
   // API/ store
-  const [pluginsLoading, pluginsError, analyzersGrouped, connectors, playbooks] =
-    usePluginConfigurationStore(stateSelector);
+  const [
+    pluginsLoading,
+    pluginsError,
+    analyzersGrouped,
+    connectors,
+    playbooks,
+  ] = usePluginConfigurationStore(stateSelector);
 
   const analyzersOptions = React.useMemo(
     () =>
@@ -209,8 +213,8 @@ export default function ScanForm() {
   );
 
   const playbookOptions = React.useMemo(
-    () => 
-    playbooks
+    () =>
+      playbooks
         .map((v) => ({
           value: v.name,
           label: (
@@ -230,8 +234,8 @@ export default function ScanForm() {
           a.isDisabled === b.isDisabled ? 0 : a.isDisabled ? 1 : -1
         ),
     [playbooks, classification]
-  )
-  
+  );
+
   // callbacks
   const onValidate = React.useCallback(
     (values) => {
@@ -274,37 +278,37 @@ export default function ScanForm() {
   );
 
   function ValidatePlaybooks(values) {
-      const errors = {};
-      if (pluginsError) {
-        errors.playbooks = pluginsError;
+    const errors = {};
+    if (pluginsError) {
+      errors.playbooks = pluginsError;
+    }
+    if (values.classification === "file") {
+      if (!values.files) {
+        errors.files = "required";
       }
-      if (values.classification === "file") {
-        if (!values.files) {
-          errors.files = "required";
-        }
-      } else if (values.observable_names && values.observable_names.length) {
-        // We iterate over observable_names and test each one against the regex pattern,
-        // storing the results (or null otherwise) in ObservableNamesErrors
-        const ObservableNamesErrors = values.observable_names.map(
-          (ObservableName) => {
-            const pattern = RegExp(
-              observableType2PropsMap[values.classification].pattern
-            );
-            if (!pattern.test(ObservableName)) {
-              return `invalid ${values.classification}`;
-            }
-            return null;
+    } else if (values.observable_names && values.observable_names.length) {
+      // We iterate over observable_names and test each one against the regex pattern,
+      // storing the results (or null otherwise) in ObservableNamesErrors
+      const ObservableNamesErrors = values.observable_names.map(
+        (ObservableName) => {
+          const pattern = RegExp(
+            observableType2PropsMap[values.classification].pattern
+          );
+          if (!pattern.test(ObservableName)) {
+            return `invalid ${values.classification}`;
           }
-        );
+          return null;
+        }
+      );
 
-        // We check if any of the ObservableNamesErrors is not null
-        if (ObservableNamesErrors.some((e) => e))
-          errors.observable_names = ObservableNamesErrors;
-      } else {
-        errors.no_observables = "Atleast one observable is required";
-      }
+      // We check if any of the ObservableNamesErrors is not null
+      if (ObservableNamesErrors.some((e) => e))
+        errors.observable_names = ObservableNamesErrors;
+    } else {
+      errors.no_observables = "Atleast one observable is required";
+    }
 
-      return errors;
+    return errors;
   }
 
   const startPlaybooks = React.useCallback(
@@ -314,7 +318,7 @@ export default function ScanForm() {
         playbooks: values.playbooks.map((x) => x.value),
       };
       const errors = ValidatePlaybooks(values);
-      
+
       if (Object.keys(errors).length !== 0) {
         addToast("Failed!", JSON.stringify(errors), "danger");
         return;
@@ -335,7 +339,7 @@ export default function ScanForm() {
     },
     [navigate, refetchQuota]
   );
-  
+
   const onSubmit = React.useCallback(
     async (values, formik) => {
       const formValues = {
@@ -563,7 +567,12 @@ export default function ScanForm() {
                 </Label>
 
                 <Col sm={8}>
-                  <Button onClick={() => startPlaybooks(formik.values)} variant="primary">Launch Playbooks</Button>
+                  <Button
+                    onClick={() => startPlaybooks(formik.values)}
+                    variant="primary"
+                  >
+                    Launch Playbooks
+                  </Button>
                 </Col>
               </FormGroup>
 
@@ -581,10 +590,8 @@ export default function ScanForm() {
                     color="tertiary"
                     disabled={
                       !(
-                        (
-                          formik.values.analyzers.length > 0 ||
-                          formik.values.connectors.length > 0
-                        )
+                        formik.values.analyzers.length > 0 ||
+                        formik.values.connectors.length > 0
                       )
                     }
                     onClick={toggleModal}

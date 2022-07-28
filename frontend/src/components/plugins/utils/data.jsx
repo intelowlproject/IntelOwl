@@ -143,7 +143,7 @@ const connectorTableColumns = [
     Header: "Configured",
     id: "configured",
     accessor: "verification.configured",
-    Cell: ({ row: { original, }, }) => (
+    Cell: ({ row: { original } }) => (
       <PluginVerificationIcon
         pluginName={original?.name}
         verification={original?.verification}
@@ -191,7 +191,7 @@ const playbookTableColumns = [
     Header: "Description",
     id: "description",
     accessor: "description",
-    Cell: ({ value, }) => <span>{markdownToHtml(value)}</span>,
+    Cell: ({ value }) => <span>{markdownToHtml(value)}</span>,
     disableSortBy: true,
     Filter: DefaultColumnFilter,
     minWidth: 875,
@@ -200,11 +200,11 @@ const playbookTableColumns = [
     Header: "Supports",
     id: "supports",
     accessor: "supports",
-    Cell: ({ value, }) => <code>{JSON.stringify(value, null, 2)}</code>,
+    Cell: ({ value }) => <code>{JSON.stringify(value, null, 2)}</code>,
     disableSortBy: true,
     Filter: DefaultColumnFilter,
     minWidth: 125,
-  }
-]
+  },
+];
 
 export { analyzersTableColumns, connectorTableColumns, playbookTableColumns };

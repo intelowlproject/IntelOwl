@@ -7,7 +7,7 @@ import {
   API_BASE_URI,
   ANALYZERS_CONFIG_URI,
   CONNECTORS_CONFIG_URI,
-  PLAYBOOKS_CONFIG_URI
+  PLAYBOOKS_CONFIG_URI,
 } from "../constants/api";
 
 const usePluginConfigurationStore = create((set, get) => ({
@@ -53,15 +53,15 @@ const usePluginConfigurationStore = create((set, get) => ({
   },
   retrievePlaybooksConfiguration: async () => {
     try {
-      set({ loading: true, });
+      set({ loading: true });
       const resp = await axios.get(PLAYBOOKS_CONFIG_URI);
-      set ({
+      set({
         playbooksJSON: resp.data,
         playbooks: Object.values(resp.data),
         loading: false,
       });
     } catch (e) {
-      set({ error: e, loading: false, });
+      set({ error: e, loading: false });
     }
   },
   checkPluginHealth: async (pluginType, PluginName) => {

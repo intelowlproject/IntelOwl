@@ -10,6 +10,7 @@ from django.conf import settings
 from django.db.models import Count, Q
 from django.db.models.functions import Trunc
 from django.http import FileResponse, QueryDict
+from api_app.playbooks_manager.serializers import PlaybookAnalysisResponseSerializer
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema as add_docs
 from drf_spectacular.utils import inline_serializer
@@ -26,9 +27,8 @@ from certego_saas.ext.viewsets import ReadAndDeleteOnlyViewSet
 from intel_owl.celery import app as celery_app
 
 from .analyzers_manager import controller as analyzers_controller
-from .analyzers_manager.constants import ObservableTypes
-from .connectors_manager import controller as connectors_controller
 from .playbooks_manager import controller as playbooks_controller
+from .analyzers_manager.constants import ObservableTypes
 from .filters import JobFilter
 from .helpers import get_now
 from .models import TLP, Job, Status, Tag
@@ -52,10 +52,13 @@ def _multi_analysis_request(
     serializer_class: Union[
         Type[ObservableAnalysisSerializer], Type[FileAnalysisSerializer]
     ],
+    playbook_scan=False,
 ):
     """
     Prepare and send multiple observables for analysis
     """
+    warnings = []
+    valid_playbook_list = []
     logger.info(
         f"_multi_analysis_request {serializer_class} "
         f"received request from {user}."
@@ -71,9 +74,17 @@ def _multi_analysis_request(
         data.pop("runtime_configuration", {}) for data in serialized_data
     ]
 
+    if playbook_scan:
+        valid_playbook_list, analyzers_to_be_run, connectors_to_be_run, warnings = (
+            playbooks_controller.filter_playbooks(
+                serialized_data,
+                warnings
+            ))
+
     # save the arrived data plus new params into a new job object
     jobs = serializer.save(
         user=user,
+        playbooks_to_execute=valid_playbook_list,
     )
 
     logger.info(f"New Jobs added to queue <- {repr(jobs)}.")
@@ -84,29 +95,56 @@ def _multi_analysis_request(
     else:
         # fire celery task
         for index, job in enumerate(jobs):
-            runtime_configuration = runtime_configurations[index]
-            celery_app.send_task(
-                "start_analyzers",
-                kwargs=dict(
-                    job_id=job.pk,
-                    analyzers_to_execute=job.analyzers_to_execute,
-                    runtime_configuration=runtime_configuration,
-                ),
-            )
+            if playbook_scan:
+                celery_app.send_task(
+                    "start_playbooks",
+                    kwargs=dict(
+                        job_id=job.pk,
+                        playbooks_to_execute=valid_playbook_list,
+                    ),
+                )
 
-    ser = AnalysisResponseSerializer(
+            else:
+                runtime_configuration = runtime_configurations[index]
+                celery_app.send_task(
+                    "start_analyzers",
+                    kwargs=dict(
+                        job_id=job.pk,
+                        analyzers_to_execute=job.analyzers_to_execute,
+                        runtime_configuration=runtime_configuration,
+                    ),
+                )
+    if playbook_scan:
+        ser = PlaybookAnalysisResponseSerializer(
         data=[
             {
                 "status": "accepted",
                 "job_id": job.pk,
-                "warnings": serialized_data[index]["warnings"],
-                "analyzers_running": job.analyzers_to_execute,
-                "connectors_running": job.connectors_to_execute,
+                "warnings": warnings,
+                "playbooks_running": valid_playbook_list,
+                "analyzers_running": analyzers_to_be_run,
+                "connectors_running": connectors_to_be_run,
             }
             for index, job in enumerate(jobs)
-        ],
-        many=True,
-    )
+            ],
+            many=True,
+        )
+
+    else:
+        ser = AnalysisResponseSerializer(
+            data=[
+                {
+                    "status": "accepted",
+                    "job_id": job.pk,
+                    "warnings": serialized_data[index]["warnings"],
+                    "analyzers_running": job.analyzers_to_execute,
+                    "connectors_running": job.connectors_to_execute,
+                }
+                for index, job in enumerate(jobs)
+            ],
+            many=True,
+        )
+
     ser.is_valid(raise_exception=True)
 
     response_dict = {

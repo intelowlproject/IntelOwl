@@ -1,6 +1,6 @@
 # Tests
 
-IntelOwl makes use of the django testing framework and the `unittest` library for unit testing of the API endpoints and End-to-End testing of the analyzers and connectors.
+IntelOwl makes use of the django testing framework and the `unittest` library for unit testing of the API endpoints and End-to-End testing of the analyzers, connectors and playbooks.
 
 ### Configuration
 - In the encrypted folder `test_files.zip` (password: "infected") there are some real malware samples that you can use for testing purposes.

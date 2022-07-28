@@ -2,43 +2,37 @@
 # See the file 'LICENSE' for copying permission.
 
 import logging
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 from celery import chord, uuid
+from celery.canvas import Signature
 from django.conf import settings
+from intel_owl import tasks
 from django.utils.module_loading import import_string
 from rest_framework.exceptions import ValidationError
 
 from intel_owl.celery import app as celery_app
 from intel_owl.consts import DEFAULT_QUEUE
 
-from ..exceptions import AlreadyFailedJobException
+from ..exceptions import AlreadyFailedJobException, NotRunnableAnalyzer
 from ..helpers import get_now
 from ..models import Job
 from .classes import BaseAnalyzerMixin, DockerBasedAnalyzer
 from .dataclasses import AnalyzerConfig
 from .models import AnalyzerReport
 
-from api_app.playbooks_manager.dataclasses import PlaybookConfig
-
 logger = logging.getLogger(__name__)
 
-
-def start_analyzers(
+def stack_analyzers(
     job_id: int,
     analyzers_to_execute: List[str],
     runtime_configuration: Dict[str, Dict] = None,
-) -> None:
-    from intel_owl import tasks
-
-    # we should not use mutable objects as default to avoid unexpected issues
-    if runtime_configuration is None:
-        runtime_configuration = {}
+) -> Tuple[List[Signature], List[str]]:
 
     # to store the celery task signatures
     task_signatures = []
+    analyzers_used = []
 
-    # get analyzer config
     analyzer_dataclasses = AnalyzerConfig.all()
 
     # get job
@@ -48,7 +42,11 @@ def start_analyzers(
     # loop over and create task signatures
     for a_name in analyzers_to_execute:
         # get corresponding dataclass
-        config = analyzer_dataclasses[a_name]
+        config = analyzer_dataclasses.get(a_name, None)
+        if config is None:
+            raise NotRunnableAnalyzer(
+                        f"{a_name} won't run: not available in configuration"
+            )
 
         # if disabled or unconfigured (this check is bypassed in STAGE_CI)
         if not config.is_ready_to_use and not settings.STAGE_CI:
@@ -84,13 +82,35 @@ def start_analyzers(
                 task_id=task_id,
             )
         )
+        analyzers_used.append(a_name)
+
+    return task_signatures, analyzers_used
+
+
+def start_analyzers(
+    job_id: int,
+    analyzers_to_execute: List[str],
+    runtime_configuration: Dict[str, Dict] = None,
+) -> None:
+
+    # we should not use mutable objects as default to avoid unexpected issues
+    if runtime_configuration is None:
+        runtime_configuration = {}
+    
+    cleaned_result = stack_analyzers(
+        job_id=job_id,
+        analyzers_to_execute=analyzers_to_execute,
+        runtime_configuration=runtime_configuration,
+    )
+
+    task_signatures = cleaned_result[0]
 
     # fire the analyzers in a grouped celery task
     # also link the callback to be executed
     # canvas docs: https://docs.celeryproject.org/en/stable/userguide/canvas.html
     runner = chord(task_signatures)
     cb_signature = tasks.post_all_analyzers_finished.signature(
-        [job.pk, runtime_configuration], immutable=True
+        [job_id, runtime_configuration], immutable=True
     )
     runner(cb_signature)
 

@@ -134,7 +134,8 @@ export function Config({ configFilter, additionalConfigData }) {
                               else if (type === "bool") placeholder = "true";
                               else if (type === "json")
                                 placeholder = '{"key": "value"}';
-                              else if (type === "list") placeholder = "[]";
+                              else if (type === "list") placeholder = "[...]";
+                              else if (type === "dict") placeholder = "{...}";
                             }
                             const disabledSuffix = plugin.edit
                               ? " input-dark "

@@ -11,7 +11,6 @@ __all__ = ["PlaybookConfig"]
 
 # Try to see if your changes in serializers helps with the changeshere (make them)
 
-
 @dataclasses.dataclass
 class PlaybookConfig:
     name: str
@@ -27,10 +26,11 @@ class PlaybookConfig:
     def is_ready_to_use(self) -> bool:
         return not self.disabled
 
-    def filter_unwhitelisted_keys(self, data: dict) -> typing.Dict:
+    @classmethod    
+    def filter_unwhitelisted_keys(cls, data: dict) -> typing.Dict:
         cleaned_data = data
 
-        signature = inspect.signature(self.__init__)
+        signature = inspect.signature(PlaybookConfig.__init__)
         whitelist = [parameter for parameter in signature.parameters]
         whitelist.pop("self")
 
@@ -38,8 +38,10 @@ class PlaybookConfig:
 
         return cleaned_data
 
-    def from_dict(self, cls, data: dict) -> "PlaybookConfig":
-        cleaned_data = self.filter_unwhitelisted_keys(data=data)
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "PlaybookConfig":
+        cleaned_data = cls.filter_unwhitelisted_keys(data=data)
         return cls(**cleaned_data)
 
     # orm methods

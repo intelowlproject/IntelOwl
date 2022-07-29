@@ -75,7 +75,7 @@ def _multi_analysis_request(
     ]
 
     if playbook_scan:
-        valid_playbook_list, analyzers_to_be_run, connectors_to_be_run, warnings = (
+        valid_playbook_list, warnings = (
             playbooks_controller.filter_playbooks(
                 serialized_data,
             ))
@@ -121,8 +121,8 @@ def _multi_analysis_request(
                 "job_id": job.pk,
                 "warnings": warnings,
                 "playbooks_running": valid_playbook_list,
-                "analyzers_running": analyzers_to_be_run,
-                "connectors_running": connectors_to_be_run,
+                "analyzers_running": job.analyzers_to_execute,
+                "connectors_running": job.connectors_to_execute,
             }
             for index, job in enumerate(jobs)
             ],

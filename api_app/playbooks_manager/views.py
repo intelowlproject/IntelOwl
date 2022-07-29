@@ -32,13 +32,17 @@ def _multi_analysis_request_playbooks(
     """
     Prepare and send multiple files/observables for running playbooks
     """
-    return _multi_analysis_request(
+    response = _multi_analysis_request(
         user=request.user,
         data=request.data,
         serializer_class=serializer_class,
         playbook_scan=True,
-    )
+    )["results"][0]
 
+    return Response(
+        response,
+        status=status.HTTP_200_OK,
+    )
 
 @add_docs(
     description="This endpoint allows to start a Job related to a file",

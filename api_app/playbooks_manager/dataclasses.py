@@ -28,13 +28,13 @@ class PlaybookConfig:
 
     @classmethod    
     def filter_unwhitelisted_keys(cls, data: dict) -> typing.Dict:
-        cleaned_data = data
+        keys = data.keys()
 
         signature = inspect.signature(PlaybookConfig.__init__)
         whitelist = [parameter for parameter in signature.parameters]
         whitelist.pop(0)
 
-        [cleaned_data.pop(key) for key in data if key not in whitelist]
+        cleaned_data = {key:data[key] for key in keys if key not in whitelist}
 
         return cleaned_data
 

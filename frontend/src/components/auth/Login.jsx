@@ -1,4 +1,5 @@
 import React from "react";
+import { useSearchParams } from "react-router-dom";
 import {
   FormGroup,
   Label,
@@ -47,6 +48,8 @@ export default function Login() {
     React.useCallback((s) => s.service.loginUser, [])
   );
 
+  const updateToken = useAuthStore(React.useCallback((s) => s.updateToken, []));
+
   // callbacks
   const onSubmit = React.useCallback(
     async (values, _formik) => {
@@ -58,6 +61,9 @@ export default function Login() {
     },
     [loginUser]
   );
+
+  const [searchParams] = useSearchParams();
+  if (searchParams.get("token")) updateToken(searchParams.get("token"));
 
   return (
     <ContentSection className="bg-body">
@@ -132,6 +138,15 @@ export default function Login() {
               </Form>
             )}
           </Formik>
+
+          {/*  Google login button */}
+          <div className="text-muted mb-3">
+            <a href="http://localhost/api/auth/google">
+              <Button color="primary" outline>
+                Login with Google
+              </Button>
+            </a>
+          </div>
         </ContentSection>
       </Container>
     </ContentSection>

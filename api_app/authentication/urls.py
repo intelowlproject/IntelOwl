@@ -4,7 +4,14 @@
 from django.urls import include, path
 from rest_framework import routers
 
-from .views import APIAccessTokenView, LoginView, LogoutView, TokenSessionsViewSet
+from .views import (
+    APIAccessTokenView,
+    GoogleLoginCallbackView,
+    LoginView,
+    LogoutView,
+    TokenSessionsViewSet,
+    google_login,
+)
 
 router = routers.DefaultRouter(trailing_slash=False)
 router.register(r"sessions", TokenSessionsViewSet, basename="auth_tokensessions")
@@ -14,5 +21,7 @@ urlpatterns = [
     path("login", LoginView.as_view(), name="auth_login"),
     path("logout", LogoutView.as_view(), name="auth_logout"),
     path("apiaccess", APIAccessTokenView.as_view(), name="auth_apiaccess"),
+    path("google", google_login, name="auth_google_login"),
+    path("google-callback", GoogleLoginCallbackView.as_view(), name="google_auth"),
     path("", include(router.urls)),
 ]

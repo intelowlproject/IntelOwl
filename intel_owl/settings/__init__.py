@@ -14,7 +14,6 @@ if not AWS_IAM_ACCESS:
     AWS_ACCESS_KEY_ID = secrets.get_secret("AWS_ACCESS_KEY_ID")
     AWS_SECRET_ACCESS_KEY = secrets.get_secret("AWS_SECRET_ACCESS_KEY")
 
-
 # Application definition
 INSTALLED_APPS = [
     # default
@@ -45,8 +44,8 @@ INSTALLED_APPS = [
     "api_app.connectors_manager",
 ]
 
-
 # inject from other modules
+from .auth import *  # lgtm [py/polluting-import]
 from .cache import *  # lgtm [py/polluting-import]
 from .certego import *  # lgtm [py/polluting-import]
 from .commons import *  # lgtm [py/polluting-import]

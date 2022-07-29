@@ -34,7 +34,7 @@ class PlaybookConfig:
         whitelist = [parameter for parameter in signature.parameters]
         whitelist.pop(0)
 
-        cleaned_data = {key:data[key] for key in keys if key not in whitelist}
+        cleaned_data = {key:data[key] for key in keys if key in whitelist}
 
         return cleaned_data
 

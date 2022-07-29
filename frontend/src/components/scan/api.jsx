@@ -21,7 +21,6 @@ export async function createPlaybookJob(formValues) {
   const respData = resp.data;
   // handle response/error
   if (respData.status === "accepted" || respData.status === "running") {
-    const jobIds = respData.map((x) => parseInt(x.job_id, 10));
     const playbooksRunning = new Set();
     const warnings = [];
     respData.forEach((x) => {
@@ -32,11 +31,8 @@ export async function createPlaybookJob(formValues) {
       if (x.warnings) warnings.push(...x.warnings);
     });
 
-    jobIds.forEach((jobId) => {
-      appendToRecentScans(jobId, "success");
-    });
     addToast(
-      `Created new Job with ID #${jobIds.join(", ")}!`,
+      `Created new Job with ID #${jobId}!`,
       <div>
         {playbooksRunning.length > 0 && (
           <ContentSection className="text-light">
@@ -55,7 +51,7 @@ export async function createPlaybookJob(formValues) {
       true,
       10000
     );
-    return Promise.resolve(jobIds);
+    return Promise.resolve([jobId]);
   }
   // else
   addToast("Failed!", respData?.message, "danger");

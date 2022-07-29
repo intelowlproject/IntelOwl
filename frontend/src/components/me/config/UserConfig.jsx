@@ -56,10 +56,15 @@ export function isValidConfig(item) {
 export function filterEmptyParams(plugins) {
   return Object.keys(plugins)
     .filter(
-      (key) =>
-        plugins[key].params && Object.keys(plugins[key].params).length > 0
+      (pluginName) =>
+        plugins[pluginName].params &&
+        Object.keys(plugins[pluginName].params).length > 0
     )
-    .reduce((res, key) => Object.assign(res, { [key]: plugins[key] }), {});
+    .reduce(
+      (filteredPlugins, key) =>
+        Object.assign(filteredPlugins, { [key]: plugins[key] }),
+      {}
+    );
 }
 
 export function Config({ configFilter, additionalConfigData }) {
@@ -100,16 +105,15 @@ export function Config({ configFilter, additionalConfigData }) {
                     <Col>
                       {configurations.config && configurations.config.length > 0
                         ? configurations.config.map((plugin, index) => {
-                            let plugins;
+                            let plugins = {};
                             let attributeList = [];
                             let placeholder = "";
                             if (plugin.type === "1") {
                               plugins = analyzers;
                             } else if (plugin.type === "2") {
                               plugins = connectors;
-                            } else {
-                              plugins = {};
                             }
+
                             if (
                               plugin.plugin_name &&
                               plugins[plugin.plugin_name]

@@ -10,12 +10,16 @@ from django.conf import settings
 from api_app.exceptions import (
     NotRunnablePlaybook,
 )
-from ..utility import job_cleanup, stack_analyzers, stack_connectors
+from ..utility import job_cleanup, runnable_connectors, stack_analyzers, stack_connectors, runnable_analyzers
 
 from ..models import Job
 from .dataclasses import PlaybookConfig
 
 logger = logging.getLogger(__name__)
+
+
+def runnable_analyzers(analyzer_list: List) -> List:
+    return [analyzer for analyzer in analyzer_list if analyzer]
 
 
 def filter_playbooks(serialized_data: Dict) -> Tuple[List[str]]:
@@ -45,8 +49,6 @@ def filter_playbooks(serialized_data: Dict) -> Tuple[List[str]]:
     for p_name in selected_playbooks:
         try:
             pp = playbook_dataclasses.get(p_name, None)
-            analyzers_to_be_run.extend(pp.analyzers)
-            connectors_to_be_run.extend(pp.connectors)
             if not pp:
                 if not run_all:
                     raise NotRunnablePlaybook(
@@ -57,6 +59,12 @@ def filter_playbooks(serialized_data: Dict) -> Tuple[List[str]]:
                 raise NotRunnablePlaybook(
                     f"{p_name} won't run: not configured"
                 )
+
+            playbook_analyzers = runnable_analyzers(pp.analyzers)
+            playbook_connectors = runnable_connectors(pp.connectors)
+            analyzers_to_be_run.extend(playbook_analyzers)
+            connectors_to_be_run.extend(playbook_connectors)
+
         except NotRunnablePlaybook as e:
             if run_all:
                 # in this case, they are not warnings but expected and wanted behavior
@@ -69,8 +77,6 @@ def filter_playbooks(serialized_data: Dict) -> Tuple[List[str]]:
 
         else:
             valid_playbook_list.append(p_name)
-    analyzers_to_be_run = list(set(analyzers_to_be_run))
-    connectors_to_be_run = list(set(connectors_to_be_run))
     return valid_playbook_list, analyzers_to_be_run, connectors_to_be_run, warnings
 
 def start_playbooks(

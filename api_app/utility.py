@@ -14,6 +14,21 @@ from celery.canvas import Signature
 
 logger = logging.getLogger(__name__)
 
+def runnable_analyzers(
+    analyzers_to_execute: List[str]
+) -> List[str]:
+    analyzer_dataclass = AnalyzerConfig.all()
+    return [analyzer for analyzer in analyzers_to_execute if analyzer_dataclass.get(analyzer)]
+
+def runnable_connectors(
+    connectors_to_execute: List[str]
+) -> List[str]:
+    connector_dataclass = ConnectorConfig.all()
+    return [
+        connector for connector in connectors_to_execute if connector_dataclass.get(connector).is_ready_to_use
+    ]
+
+
 def stack_analyzers(
     job_id: int,
     analyzers_to_execute: List[str],
@@ -25,6 +40,8 @@ def stack_analyzers(
     task_signatures = []
     analyzers_used = []
 
+    analyzers_to_run = runnable_analyzers(analyzers_to_execute=analyzers_to_execute)
+
     analyzer_dataclasses = AnalyzerConfig.all()
 
     # get job
@@ -32,13 +49,9 @@ def stack_analyzers(
     job.update_status(Job.Status.RUNNING)  # set job status to running
 
     # loop over and create task signatures
-    for a_name in analyzers_to_execute:
+    for a_name in analyzers_to_run:
         # get corresponding dataclass
         config = analyzer_dataclasses.get(a_name, None)
-        if config is None:
-            raise NotRunnableAnalyzer(
-                        f"{a_name} won't run: not available in configuration"
-            )
 
         # if disabled or unconfigured (this check is bypassed in STAGE_CI)
         if not config.is_ready_to_use and not settings.STAGE_CI:
@@ -90,14 +103,15 @@ def stack_connectors(
     task_signatures = []
 
     connectors_used = []
+    connectors_to_run = runnable_connectors(connectors_to_execute)
 
     # get connectors config
-    connector_dataclasses = ConnectorConfig.filter(names=connectors_to_execute)
+    connector_dataclasses = ConnectorConfig.filter(names=connectors_to_run)
 
     # loop over and create task signatures
     for c_name, cc in connector_dataclasses.items():
         # if disabled or unconfigured (this check is bypassed in STAGE_CI)
-        if not cc.is_ready_to_use and not settings.STAGE_CI:
+        if not settings.STAGE_CI:
             continue
 
         # get runtime_configuration if any specified for this analyzer

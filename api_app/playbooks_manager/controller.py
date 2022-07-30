@@ -17,11 +17,6 @@ from .dataclasses import PlaybookConfig
 
 logger = logging.getLogger(__name__)
 
-
-def runnable_analyzers(analyzer_list: List) -> List:
-    return [analyzer for analyzer in analyzer_list if analyzer]
-
-
 def filter_playbooks(serialized_data: Dict) -> Tuple[List[str]]:
     # init empty list
     valid_playbook_list = []
@@ -123,7 +118,7 @@ def start_playbooks(
 
         task_signatures_connectors, connectors_used = stack_connectors(
             job_id=job_id,
-            connectors_to_execute=list(connectors.key()),
+            connectors_to_execute=list(connectors.keys()),
         )
 
         final_analyzers_used.extend(analyzers_used)

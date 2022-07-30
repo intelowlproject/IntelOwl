@@ -23,6 +23,7 @@ export async function createPlaybookJob(formValues) {
   if (respData.status === "accepted" || respData.status === "running") {
     const playbooksRunning = new Set();
     const warnings = [];
+    const jobId = respData.job_id;
     respData.forEach((x) => {
       if (x.analyzers_running)
         x.playbooks_running.forEach((playbook) =>

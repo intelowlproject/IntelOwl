@@ -22,6 +22,8 @@ def filter_playbooks(serialized_data: Dict) -> Tuple[List[str]]:
     # init empty list
     valid_playbook_list = []
     selected_playbooks = []
+    analyzers_to_be_run = []
+    connectors_to_be_run = []
     warnings = []
 
     # get values from serializer
@@ -43,6 +45,8 @@ def filter_playbooks(serialized_data: Dict) -> Tuple[List[str]]:
     for p_name in selected_playbooks:
         try:
             pp = playbook_dataclasses.get(p_name, None)
+            analyzers_to_be_run.extend(pp.analyzers)
+            connectors_to_be_run.extend(pp.connectors)
             if not pp:
                 if not run_all:
                     raise NotRunnablePlaybook(
@@ -53,7 +57,6 @@ def filter_playbooks(serialized_data: Dict) -> Tuple[List[str]]:
                 raise NotRunnablePlaybook(
                     f"{p_name} won't run: not configured"
                 )
-
         except NotRunnablePlaybook as e:
             if run_all:
                 # in this case, they are not warnings but expected and wanted behavior
@@ -66,8 +69,9 @@ def filter_playbooks(serialized_data: Dict) -> Tuple[List[str]]:
 
         else:
             valid_playbook_list.append(p_name)
-
-    return valid_playbook_list, warnings
+    analyzers_to_be_run = list(set(analyzers_to_be_run))
+    connectors_to_be_run = list(set(connectors_to_be_run))
+    return valid_playbook_list, analyzers_to_be_run, connectors_to_be_run, warnings
 
 def start_playbooks(
     job_id: int,

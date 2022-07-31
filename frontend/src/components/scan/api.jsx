@@ -31,6 +31,7 @@ export async function createPlaybookJob(formValues) {
         );
       if (x.warnings) warnings.push(...x.warnings);
     });
+    appendToRecentScans(jobId, "success");
 
     addToast(
       `Created new Job with ID #${jobId}!`,

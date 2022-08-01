@@ -2,6 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 
 import hashlib
+import logging
 from typing import Optional
 
 from django.conf import settings
@@ -12,7 +13,11 @@ from django.utils import timezone
 from django.utils.functional import cached_property
 
 from api_app.core.models import Status as ReportStatus
+from certego_saas.apps.organization.membership import Membership
+from certego_saas.apps.organization.organization import Organization
 from certego_saas.models import User
+
+logger = logging.getLogger(__name__)
 
 
 def file_directory_path(instance, filename):
@@ -181,3 +186,101 @@ def delete_file(sender, instance: Job, **kwargs):
     if instance.file:
         if instance.file:
             instance.file.delete()
+
+
+class CustomConfig(models.Model):
+    class PluginType(models.TextChoices):
+        ANALYZER = "1", "Analyzer"
+        CONNECTOR = "2", "Connector"
+
+    type = models.CharField(choices=PluginType.choices, max_length=2)
+    attribute = models.CharField(max_length=128)
+    value = models.JSONField(blank=False)
+    organization = models.ForeignKey(
+        Organization,
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+        related_name="custom_configs",
+    )
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="custom_configs",
+    )
+    plugin_name = models.CharField(max_length=128)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["type", "attribute", "organization", "owner"],
+                name="unique_custom_config_entry",
+            )
+        ]
+
+        indexes = [
+            models.Index(
+                fields=["owner", "type"],
+            ),
+            models.Index(
+                fields=["type", "organization"],
+            ),
+        ]
+
+    @classmethod
+    def get_as_dict(cls, user, entity_type, plugin_name=None) -> dict:
+        """
+        Returns custom config as dict
+        """
+        custom_configs = cls.objects.none()
+
+        # Since, user-level custom configs should override organization-level configs,
+        # we need to get the organization-level configs, if any, first.
+        try:
+            membership = Membership.objects.get(user=user)
+            custom_configs |= cls.objects.filter(
+                organization=membership.organization,
+                type=entity_type,
+            )
+        except Membership.DoesNotExist:
+            # If user is not a member of any organization, we don't need to do anything.
+            pass
+
+        custom_configs |= cls.objects.filter(
+            type=entity_type,
+            owner=user,
+        )
+        if plugin_name is not None:
+            custom_configs = custom_configs.filter(plugin_name=plugin_name)
+
+        result = {}
+        for custom_config in custom_configs:
+            custom_config: CustomConfig
+            if custom_config.plugin_name not in result:
+                result[custom_config.plugin_name] = {}
+
+            # This `if` condition ensures that only a user-level config
+            # overrides an organization-level config.
+            if (
+                custom_config.attribute not in result[custom_config.plugin_name]
+                or custom_config.organization is None
+            ):
+                result[custom_config.plugin_name][
+                    custom_config.attribute
+                ] = custom_config.value
+
+        logger.debug(f"Final CustomConfig: {result}")
+
+        return result
+
+    @classmethod
+    def apply(cls, initial_config, user, plugin_type):
+        custom_configs = CustomConfig.get_as_dict(user, plugin_type)
+        for plugin in initial_config.values():
+            if plugin["name"] in custom_configs:
+                for param in plugin["params"]:
+                    if param in custom_configs[plugin["name"]]:
+                        plugin["params"][param]["value"] = custom_configs[
+                            plugin["name"]
+                        ][param]

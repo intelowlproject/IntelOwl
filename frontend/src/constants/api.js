@@ -19,6 +19,7 @@ export const JOB_AGG_FILE_NAME_URI = `${JOB_BASE_URI}/aggregate/file_name`;
 
 // user
 export const USERACCESS_URI = `${API_BASE_URI}/me/access`;
+export const CUSTOM_CONFIG_URI = `${API_BASE_URI}/custom-config`;
 
 // org
 export const BASE_URI_ORG = `${API_BASE_URI}/me/organization`;

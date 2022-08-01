@@ -17,8 +17,10 @@ from rest_framework import serializers as rfs
 from rest_framework import status, viewsets
 from rest_framework.decorators import action, api_view
 from rest_framework.exceptions import ValidationError
+from rest_framework.request import Request
 from rest_framework.response import Response
 
+from certego_saas.apps.organization.membership import Membership
 from certego_saas.apps.organization.permissions import IsObjectOwnerOrSameOrgPermission
 from certego_saas.ext.helpers import cache_action_response, parse_humanized_range
 from certego_saas.ext.mixins import SerializerActionMixin
@@ -29,9 +31,10 @@ from .analyzers_manager import controller as analyzers_controller
 from .analyzers_manager.constants import ObservableTypes
 from .filters import JobFilter
 from .helpers import get_now
-from .models import TLP, Job, Status, Tag
+from .models import TLP, CustomConfig, Job, Status, Tag
 from .serializers import (
     AnalysisResponseSerializer,
+    CustomConfigSerializer,
     FileAnalysisSerializer,
     JobAvailabilitySerializer,
     JobListSerializer,
@@ -77,12 +80,32 @@ def _multi_analysis_request(
     logger.info(f"New Jobs added to queue <- {repr(jobs)}.")
 
     # Check if task is test or not
-    if settings.STAGE_CI:
+    if settings.STAGE_CI and not settings.FORCE_SCHEDULE_JOBS:
         logger.info("skipping analysis start cause we are in CI")
     else:
         # fire celery task
         for index, job in enumerate(jobs):
-            runtime_configuration = runtime_configurations[index]
+            runtime_configuration = {}
+
+            for analyzer in job.analyzers_to_execute:
+                # Appending custom config to runtime configuration
+                config = CustomConfig.get_as_dict(
+                    user, CustomConfig.PluginType.ANALYZER, plugin_name=analyzer
+                ).get(analyzer, {})
+                if analyzer in runtime_configurations[index]:
+                    config |= runtime_configurations[index][analyzer]
+                if config:
+                    runtime_configuration[analyzer] = config
+            for connector in job.connectors_to_execute:
+                config = CustomConfig.get_as_dict(
+                    user, CustomConfig.PluginType.CONNECTOR, plugin_name=connector
+                ).get(connector, {})
+                if connector in runtime_configurations[index]:
+                    config |= runtime_configurations[index][connector]
+                if config:
+                    runtime_configuration[connector] = config
+            logger.debug(f"New value of runtime_configuration: {runtime_configuration}")
+
             celery_app.send_task(
                 "start_analyzers",
                 kwargs=dict(
@@ -601,3 +624,47 @@ class TagViewSet(viewsets.ModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
     pagination_class = None
+
+
+@add_docs(
+    description="""
+    REST endpoint to fetch list of CustomConfigs or retrieve/delete a CustomConfig.
+    Requires authentication. Allows access to only authorized CustomConfigs.
+    """
+)
+class CustomConfigViewSet(viewsets.ModelViewSet):
+    queryset = CustomConfig.objects.order_by("id")
+    serializer_class = CustomConfigSerializer
+    pagination_class = None
+
+    def get_queryset(self):
+        # Initializing empty queryset
+        result = CustomConfig.objects.none()
+
+        # Adding CustomConfigs for user's organization, if any
+        membership = Membership.objects.filter(
+            user=self.request.user, organization__isnull=False
+        )
+        if membership.exists():
+            result |= CustomConfig.objects.filter(
+                organization=membership[0].organization
+            )
+
+        # Adding CustomConfigs for user
+        result |= CustomConfig.objects.filter(owner=self.request.user)
+
+        return result.order_by("id")
+
+    def create(self, request: Request, *args, **kwargs):
+        if isinstance(request.data, QueryDict):
+            # Making QueryDict mutable to pass owner into the serializer
+            request._full_data = request.data.copy()
+        request.data["owner"] = request.user.id
+        return super().create(request, *args, **kwargs)
+
+    def update(self, request: Request, *args, **kwargs):
+        if isinstance(request.data, QueryDict):
+            # Making QueryDict mutable to pass owner into the serializer
+            request._full_data = request.data.copy()
+        request.data["owner"] = request.user.id
+        return super().update(request, *args, **kwargs)

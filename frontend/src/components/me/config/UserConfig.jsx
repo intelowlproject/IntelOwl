@@ -104,33 +104,33 @@ export function Config({ configFilter, additionalConfigData }) {
                   <FormGroup row>
                     <Col>
                       {configurations.config && configurations.config.length > 0
-                        ? configurations.config.map((plugin, index) => {
+                        ? configurations.config.map((configuration, index) => {
                             let plugins = {};
                             let attributeList = [];
                             let placeholder = "";
-                            if (plugin.type === "1") {
+                            if (configuration.type === "1") {
                               plugins = analyzers;
-                            } else if (plugin.type === "2") {
+                            } else if (configuration.type === "2") {
                               plugins = connectors;
                             }
 
                             if (
-                              plugin.plugin_name &&
-                              plugins[plugin.plugin_name]
+                              configuration.plugin_name &&
+                              plugins[configuration.plugin_name]
                             )
                               attributeList = Object.keys(
-                                plugins[plugin.plugin_name].params
+                                plugins[configuration.plugin_name].params
                               );
                             if (
                               attributeList.length > 0 &&
-                              plugin.attribute &&
-                              plugins[plugin.plugin_name].params[
-                                plugin.attribute
+                              configuration.attribute &&
+                              plugins[configuration.plugin_name].params[
+                                configuration.attribute
                               ]
                             ) {
                               const { type } =
-                                plugins[plugin.plugin_name].params[
-                                  plugin.attribute
+                                plugins[configuration.plugin_name].params[
+                                  configuration.attribute
                                 ];
                               if (type === "str") placeholder = '"string"';
                               else if (type === "int") placeholder = "1234";
@@ -141,7 +141,7 @@ export function Config({ configFilter, additionalConfigData }) {
                               else if (type === "list") placeholder = "[...]";
                               else if (type === "dict") placeholder = "{...}";
                             }
-                            const disabledSuffix = plugin.edit
+                            const disabledSuffix = configuration.edit
                               ? " input-dark "
                               : " disabled text-dark input-secondary ";
 
@@ -151,7 +151,7 @@ export function Config({ configFilter, additionalConfigData }) {
                                   <Field
                                     as="select"
                                     className={`form-select ${disabledSuffix}`}
-                                    disabled={!plugin.edit}
+                                    disabled={!configuration.edit}
                                     name={`config[${index}].type`}
                                   >
                                     <option value="">---Select Type---</option>
@@ -164,7 +164,7 @@ export function Config({ configFilter, additionalConfigData }) {
                                   <Field
                                     as="select"
                                     className={`form-select ${disabledSuffix}`}
-                                    disabled={!plugin.edit}
+                                    disabled={!configuration.edit}
                                     name={`config[${index}].plugin_name`}
                                   >
                                     <option value="">---Select Name---</option>
@@ -185,7 +185,7 @@ export function Config({ configFilter, additionalConfigData }) {
                                   <Field
                                     as="select"
                                     className={`form-select ${disabledSuffix}`}
-                                    disabled={!plugin.edit}
+                                    disabled={!configuration.edit}
                                     name={`config[${index}].attribute`}
                                   >
                                     <option value="">
@@ -205,7 +205,7 @@ export function Config({ configFilter, additionalConfigData }) {
                                     type="text"
                                     name={`config.${index}.value`}
                                     className={disabledSuffix}
-                                    disabled={!plugin.edit}
+                                    disabled={!configuration.edit}
                                     placeholder={placeholder}
                                   />
                                 </Col>
@@ -213,12 +213,12 @@ export function Config({ configFilter, additionalConfigData }) {
                                   color="primary"
                                   className="mx-2 rounded-1 text-larger col-auto"
                                   onClick={() => {
-                                    if (plugin.edit) {
-                                      if (!isValidConfig(plugin)) return;
+                                    if (configuration.edit) {
+                                      if (!isValidConfig(configuration)) return;
 
-                                      if (plugin.create)
+                                      if (configuration.create)
                                         createCustomConfig({
-                                          ...plugin,
+                                          ...configuration,
                                           ...additionalConfigData,
                                         }).then(() => {
                                           setFieldValue(
@@ -233,8 +233,8 @@ export function Config({ configFilter, additionalConfigData }) {
                                         });
                                       else
                                         updateCustomConfig(
-                                          plugin,
-                                          plugin.id
+                                          configuration,
+                                          configuration.id
                                         ).then(() => {
                                           setFieldValue(
                                             `config.${index}.edit`,
@@ -249,13 +249,13 @@ export function Config({ configFilter, additionalConfigData }) {
                                       );
                                   }}
                                 >
-                                  {plugin.edit ? (
+                                  {configuration.edit ? (
                                     <BsFillCheckSquareFill />
                                   ) : (
                                     <BsFillPencilFill />
                                   )}
                                 </Button>
-                                {plugin.edit && !plugin.create ? (
+                                {configuration.edit && !configuration.create ? (
                                   <Button
                                     color="primary"
                                     className="mx-2 rounded-1 text-larger col-auto"
@@ -268,12 +268,14 @@ export function Config({ configFilter, additionalConfigData }) {
                                   color="primary"
                                   className="mx-2 rounded-1 text-larger col-auto"
                                   onClick={() => {
-                                    if (plugin.create) remove(index);
+                                    if (configuration.create) remove(index);
                                     else
-                                      deleteCustomConfig(plugin.id).then(() => {
-                                        remove(index);
-                                        refetchAll();
-                                      });
+                                      deleteCustomConfig(configuration.id).then(
+                                        () => {
+                                          remove(index);
+                                          refetchAll();
+                                        }
+                                      );
                                   }}
                                 >
                                   <BsFillTrashFill />

@@ -65,15 +65,3 @@ CELERY_QUEUES = secrets.get_secret("CELERY_QUEUES", "default").split(",")
 # AWS
 AWS_SECRETS = secrets.get_secret("AWS_SECRETS", False) == "True"
 AWS_SQS = secrets.get_secret("AWS_SQS", False) == "True"
-
-# Auth backends
-LDAP_ENABLED = os.environ.get("LDAP_ENABLED", False) == "True"
-RADIUS_AUTH_ENABLED = os.environ.get("RADIUS_AUTH_ENABLED", False) == "True"
-if LDAP_ENABLED:
-    from configuration.ldap_config import *  # lgtm [py/polluting-import]
-
-    AUTHENTICATION_BACKENDS.append("django_auth_ldap.backend.LDAPBackend")
-if RADIUS_AUTH_ENABLED:
-    from configuration.radius_config import *  # lgtm [py/polluting-import]
-
-    AUTHENTICATION_BACKENDS.append("intel_owl.backends.CustomRADIUSBackend")

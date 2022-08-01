@@ -89,10 +89,10 @@ class GoogleLoginCallbackView(LoginView):
         except (
             OAuthError,
             OAuth2Error,
-        ) as error:
-            raise AuthenticationFailed(error)
+        ):
+            # Not giving out the actual error as we risk exposing the client secret
+            raise AuthenticationFailed("OAuth authentication error.")
         user = token.get("userinfo")
-        print(user)
         try:
             return User.objects.get(email=user.get("email"))
         except User.DoesNotExist:

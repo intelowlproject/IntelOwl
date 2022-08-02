@@ -5,8 +5,6 @@
 
 import os
 
-from authlib.integrations.django_client import OAuth
-
 from intel_owl import secrets
 
 AUTH_USER_MODEL = "certego_saas_user.User"  # custom user model
@@ -47,11 +45,3 @@ AUTHLIB_OAUTH_CLIENTS = {
         "client_secret": secrets.get_secret("GOOGLE_CLIENT_SECRET"),
     }
 }
-
-GOOGLE_CONF_URL = "https://accounts.google.com/.well-known/openid-configuration"
-oauth = OAuth()
-oauth.register(
-    name="google",
-    server_metadata_url=GOOGLE_CONF_URL,
-    client_kwargs={"scope": "openid email profile"},
-)

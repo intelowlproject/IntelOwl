@@ -14,7 +14,7 @@ from durin.models import Client
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.reverse import reverse
 
-from intel_owl.settings import oauth
+from .oauth import oauth
 
 logger = logging.getLogger(__name__)
 

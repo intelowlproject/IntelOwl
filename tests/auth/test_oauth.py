@@ -32,12 +32,12 @@ class TestOAuth(CustomOAuthTestCase):
         self.assertListEqual(
             response_redirect_query.get("client_id"),
             [secrets.get_secret("GOOGLE_CLIENT_ID")],
-            msg,
+            msg=msg,
         )
         self.assertListEqual(
             response_redirect_query.get("redirect_uri"),
             [f"http://testserver{self.google_auth_callback_uri}"],
-            msg,
+            msg=msg,
         )
 
     @patch(

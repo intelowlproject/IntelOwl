@@ -77,7 +77,7 @@ class DurinAuthenticationScheme(OpenApiAuthenticationExtension):
 
 
 def google_login(request):
-    redirect_uri = request.build_absolute_uri(reverse("google_auth"))
+    redirect_uri = request.build_absolute_uri(reverse("oauth_google_callback"))
     return oauth.google.authorize_redirect(request, redirect_uri)
 
 

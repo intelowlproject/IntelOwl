@@ -21,7 +21,11 @@ urlpatterns = [
     path("login", LoginView.as_view(), name="auth_login"),
     path("logout", LogoutView.as_view(), name="auth_logout"),
     path("apiaccess", APIAccessTokenView.as_view(), name="auth_apiaccess"),
-    path("google", google_login, name="auth_google_login"),
-    path("google-callback", GoogleLoginCallbackView.as_view(), name="google_auth"),
+    path("google", google_login, name="oauth_google"),
+    path(
+        "google-callback",
+        GoogleLoginCallbackView.as_view(),
+        name="oauth_google_callback",
+    ),
     path("", include(router.urls)),
 ]

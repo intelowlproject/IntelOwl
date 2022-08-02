@@ -141,7 +141,9 @@ export default function Login() {
 
           {/*  Google login button */}
           <div className="text-muted mb-3">
-            <a href="http://localhost/api/auth/google">
+            {/* Uncomment this for local testing */}
+            {/* <a href="http://localhost/api/auth/google"> */}
+            <a href="/api/auth/google">
               <Button color="primary" outline>
                 Login with Google
               </Button>

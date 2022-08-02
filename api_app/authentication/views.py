@@ -104,7 +104,9 @@ class GoogleLoginCallbackView(LoginView):
     def post(self, *args, **kwargs):
         response = super().post(*args, **kwargs)
         token = response.data["token"]
-        return redirect(f"http://localhost:3001/login?token={token}")
+        # Uncomment this for local testing
+        # return redirect(f"http://localhost:3001/login?token={token}")
+        return redirect(self.request.build_absolute_uri(f"/login?token={token}"))
 
     def get_post_response_data(self, request, token_obj) -> dict:
         data = {

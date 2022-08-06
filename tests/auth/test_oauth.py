@@ -29,11 +29,12 @@ class TestOAuth(CustomOAuthTestCase):
         self.assertEqual(response_redirect.netloc, expected_redirect_url.netloc, msg)
         self.assertEqual(response_redirect.path, expected_redirect_url.path, msg)
         response_redirect_query = parse_qs(response_redirect.query)
-        self.assertListEqual(
-            response_redirect_query.get("client_id"),
-            [secrets.get_secret("GOOGLE_CLIENT_ID")],
-            msg=msg,
-        )
+        if secrets.get_secret("GOOGLE_CLIENT_ID"):
+            self.assertListEqual(
+                response_redirect_query.get("client_id"),
+                [secrets.get_secret("GOOGLE_CLIENT_ID")],
+                msg=msg,
+            )
         self.assertListEqual(
             response_redirect_query.get("redirect_uri"),
             [f"http://testserver{self.google_auth_callback_uri}"],

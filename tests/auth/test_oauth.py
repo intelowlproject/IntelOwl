@@ -41,9 +41,7 @@ class TestOAuth(CustomOAuthTestCase):
             msg=msg,
         )
 
-    @patch(
-        "api_app.authentication.views.GoogleLoginCallbackView.validate_and_return_user"
-    )
+    @patch("authentication.views.GoogleLoginCallbackView.validate_and_return_user")
     def test_google_callback(self, mock_validate_and_return_user: Mock):
         mock_validate_and_return_user.return_value = self.user
         response = self.client.get(self.google_auth_callback_uri, follow=False)

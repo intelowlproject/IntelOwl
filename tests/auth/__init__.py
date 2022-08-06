@@ -24,3 +24,7 @@ class CustomOAuthTestCase(TestCase):
         # setup client
         cls.client = APIClient()
         return super().setUpClass()
+    @classmethod
+    def tearDownClass(cls):
+        cls.user.delete()
+        return super().tearDownClass()

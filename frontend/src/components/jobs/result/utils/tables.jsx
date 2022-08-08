@@ -11,6 +11,8 @@ import {
   SelectOptionsFilter,
   DateHoverable,
 } from "@certego/certego-ui";
+import { Button } from "reactstrap";
+import { BsArrowsExpand, BsArrowsCollapse } from "react-icons/bs";
 
 import { StatusTag } from "../../../common";
 import { PLUGIN_STATUSES } from "../../../../constants";
@@ -106,20 +108,32 @@ const tableProps = {
       { id: "name", desc: true },
     ],
   },
-  SubComponent: ({ row }) => (
-    <NewJsonRenderer
-      collapsed={1}
-      onEdit={() => null}
-      key={row.id}
-      id={`jobreport-jsoninput-${row.id}`}
-      jsonData={{
-        report: row.original?.report,
-        errors: row.original?.errors,
-        runtime_configuration: row.original?.runtime_configuration,
-      }}
-      style={{ height: "50vh", width: "90vw", overflow: "scroll" }}
-    />
-  ),
+  SubComponent: ({ row }) => {
+    const [collapsed, setCollapsed] = React.useState(1);
+    return (
+      <div>
+        <Button
+          onClick={() => {
+            setCollapsed(collapsed ? false : 1);
+          }}
+        >
+          {collapsed ? <BsArrowsExpand /> : <BsArrowsCollapse />}
+        </Button>
+        <NewJsonRenderer
+          collapsed={collapsed}
+          onEdit={() => null}
+          key={row.id}
+          id={`jobreport-jsoninput-${row.id}`}
+          jsonData={{
+            report: row.original?.report,
+            errors: row.original?.errors,
+            runtime_configuration: row.original?.runtime_configuration,
+          }}
+          style={{ height: "50vh", width: "90vw", overflow: "scroll" }}
+        />
+      </div>
+    );
+  },
 };
 
 export function AnalyzersReportTable({ job, refetch }) {

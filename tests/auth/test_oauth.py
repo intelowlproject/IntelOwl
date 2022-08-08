@@ -4,8 +4,10 @@ from urllib.parse import parse_qs, urlparse
 from django.contrib.auth import get_user_model
 from django.test import tag
 from durin.models import AuthToken
+from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.reverse import reverse
 
+from authentication.oauth import oauth
 from certego_saas.apps.user.models import User as _UserModel
 from intel_owl import secrets
 
@@ -19,7 +21,21 @@ class TestOAuth(CustomOAuthTestCase):
     google_auth_uri = reverse("oauth_google")
     google_auth_callback_uri = reverse("oauth_google_callback")
 
-    def test_google(self):
+    def test_google_disabled(self):
+        prev_registry = oauth._registry
+        oauth._registry = {}
+        try:
+            self.assertRaisesMessage(
+                AuthenticationFailed,
+                "Google OAuth is not configured",
+                self.client.get,
+                self.google_auth_uri,
+                follow=False,
+            )
+        finally:
+            oauth._registry = prev_registry
+
+    def test_google_enabled(self):
         response = self.client.get(self.google_auth_uri, follow=False)
         msg = response.url
         self.assertEqual(response.status_code, 302, msg)

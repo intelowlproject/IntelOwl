@@ -1,6 +1,5 @@
-from unittest import TestCase
-
 from django.contrib.auth import get_user_model
+from django.test import TestCase
 from rest_framework.test import APIClient
 
 User = get_user_model()
@@ -24,6 +23,7 @@ class CustomOAuthTestCase(TestCase):
         # setup client
         cls.client = APIClient()
         return super().setUpClass()
+
     @classmethod
     def tearDownClass(cls):
         cls.user.delete()

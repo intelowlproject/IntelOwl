@@ -78,7 +78,12 @@ class DurinAuthenticationScheme(OpenApiAuthenticationExtension):
 
 def google_login(request):
     redirect_uri = request.build_absolute_uri(reverse("oauth_google_callback"))
-    return oauth.google.authorize_redirect(request, redirect_uri)
+    try:
+        return oauth.google.authorize_redirect(request, redirect_uri)
+    except AttributeError as error:
+        if "No such client: " in str(error):
+            raise AuthenticationFailed("Google OAuth is not configured.")
+        raise error
 
 
 class GoogleLoginCallbackView(LoginView):

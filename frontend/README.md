@@ -12,13 +12,13 @@ Built with [@certego/certego-ui](https://github.com/certego/certego-ui).
 
 ## Directory Structure
 
-```
+```text
 public/                                   public static assets
 |- icons/                                 icons/favicon
 |- index.html/                            root HTML file
 src/                                      source code
 |- components/                            pages and components
-|  |- auth/                               `api_app.authentication` (login, logout pages)
+|  |- auth/                               `authentication` (login, logout, OAuth pages)
 |  |- common/                             small re-usable components
 |  |- dashboard/                          dashboard page and charts
 |  |- home/                               landing/home page

@@ -5,4 +5,4 @@ from django.apps import AppConfig
 
 
 class ApiAppAuthConfig(AppConfig):
-    name = "api_app.authentication"
+    name = "authentication"

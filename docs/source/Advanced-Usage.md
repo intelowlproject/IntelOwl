@@ -27,6 +27,8 @@ This page includes details about some advanced features that Intel Owl provides 
     - [Secrets](#secrets)
     - [SQS](#sqs)
     - [S3](#s3)
+  - [OAuth support](#oauth-support)
+    - [Google](#google)
 
 ## Optional Analyzers
 
@@ -357,3 +359,11 @@ If you prefer to use S3 to store the samples, instead of a local storage, you ca
 First, you need to configure the environment variable `LOCAL_STORAGE` to `False` to enable it and set `AWS_STORAGE_BUCKET_NAME` to the proper AWS bucket.
 Then you have to add some credentials for AWS: if you have IntelOwl deployed on the AWS infrastructure, you can use IAM credentials:
 to allow that just set `AWS_IAM_ACCESS` to `True`. If that is not the case, you have to set both `AWS_ACESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`
+
+## OAuth support
+
+#### Google
+
+The first step is to create a [Google Cloud Platform](https://cloud.google.com/resource-manager/docs/creating-managing-projects) project, and then [create OAuth credentials for it](https://developers.google.com/workspace/guides/create-credentials#oauth-client-id).
+
+After that, specify the client ID and secret as `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` environment variables.

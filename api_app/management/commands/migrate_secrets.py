@@ -1,3 +1,6 @@
+# This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
+# See the file 'LICENSE' for copying permission.
+
 import os
 
 from django.core.management.base import BaseCommand
@@ -13,13 +16,17 @@ class Command(BaseCommand):
     @staticmethod
     def _migrate_secrets(plugin_list, plugin_type):
         for plugin in plugin_list:
-            for secret_name in plugin["secrets"]:
-                if os.getenv(secret_name):
+            for secret in plugin["secrets"].values():
+                if os.getenv(secret["env_var_key"]):
                     PluginCredential.objects.get_or_create(
-                        attribute=secret_name,
-                        value=os.getenv(secret_name),
+                        attribute=secret["env_var_key"],
+                        value=os.getenv(secret["env_var_key"]),
                         plugin_name=plugin["name"],
                         type=plugin_type,
+                    )
+                    print(
+                        f"Migrated secret {secret['env_var_key']} "
+                        f"for plugin {plugin['name']}"
                     )
 
     def handle(self, *args, **options):
@@ -30,4 +37,8 @@ class Command(BaseCommand):
         self._migrate_secrets(
             ConnectorConfigSerializer.read_and_verify_config().values(),
             PluginCredential.PluginType.CONNECTOR,
+        )
+        print(
+            "Migration complete. Please delete all plugin secrets "
+            "from docker/env_file_app."
         )

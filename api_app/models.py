@@ -296,3 +296,17 @@ class PluginCredential(models.Model):
     value = models.TextField(blank=False)
     updated_at = models.DateTimeField(auto_now=True)
     plugin_name = models.CharField(max_length=128)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["type", "attribute", "plugin_name"],
+                name="unique_plugin_credential_entry",
+            )
+        ]
+
+        indexes = [
+            models.Index(
+                fields=["type", "plugin_name", "attribute"],
+            ),
+        ]

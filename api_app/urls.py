@@ -7,6 +7,7 @@ from rest_framework import routers
 from .views import (
     CustomConfigViewSet,
     JobViewSet,
+    PluginCredentialViewSet,
     TagViewSet,
     analyze_file,
     analyze_multiple_files,
@@ -21,6 +22,9 @@ router = routers.DefaultRouter(trailing_slash=False)
 router.register(r"tags", TagViewSet, basename="tags")
 router.register(r"jobs", JobViewSet, basename="jobs")
 router.register(r"custom-config", CustomConfigViewSet, basename="custom-config")
+router.register(
+    r"plugin-credential", PluginCredentialViewSet, basename="plugin-credential"
+)
 
 # These come after /api/..
 urlpatterns = [

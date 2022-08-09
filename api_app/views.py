@@ -31,7 +31,7 @@ from .analyzers_manager import controller as analyzers_controller
 from .analyzers_manager.constants import ObservableTypes
 from .filters import JobFilter
 from .helpers import get_now
-from .models import TLP, CustomConfig, Job, Status, Tag
+from .models import TLP, CustomConfig, Job, PluginCredential, Status, Tag
 from .serializers import (
     AnalysisResponseSerializer,
     CustomConfigSerializer,
@@ -40,6 +40,7 @@ from .serializers import (
     JobListSerializer,
     JobSerializer,
     ObservableAnalysisSerializer,
+    PluginCredentialSerializer,
     TagSerializer,
     multi_result_enveloper,
 )
@@ -668,3 +669,9 @@ class CustomConfigViewSet(viewsets.ModelViewSet):
             request._full_data = request.data.copy()
         request.data["owner"] = request.user.id
         return super().update(request, *args, **kwargs)
+
+
+class PluginCredentialViewSet(viewsets.ModelViewSet):
+    queryset = PluginCredential.objects.all()
+    serializer_class = PluginCredentialSerializer
+    pagination_class = None

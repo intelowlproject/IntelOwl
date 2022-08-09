@@ -1,11 +1,12 @@
 import React from "react";
+import { FaUserSecret } from "react-icons/fa";
 import {
   UncontrolledDropdown,
   DropdownToggle,
   DropdownMenu,
   DropdownItem,
 } from "reactstrap";
-import { BsPeopleFill } from "react-icons/bs";
+import { BsPeopleFill, BsSliders } from "react-icons/bs";
 import { FiLogOut } from "react-icons/fi";
 import { IoMdKey, IoMdSettings } from "react-icons/io";
 
@@ -45,7 +46,11 @@ export default function UserMenu(props) {
         </DropdownNavLink>
         {/* Your custom configuration */}
         <DropdownNavLink to="/me/config">
-          <IoMdKey className="me-2" /> Your custom config
+          <BsSliders className="me-2" /> Your custom config
+        </DropdownNavLink>
+        {/* Your custom configuration */}
+        <DropdownNavLink to="/me/plugin-secrets">
+          <FaUserSecret className="me-2" /> Plugin secrets
         </DropdownNavLink>
         <DropdownItem divider />
         <DropdownNavLink to="/logout">

@@ -30,7 +30,7 @@ from .helpers import (
     calculate_observable_classification,
     gen_random_colorhex,
 )
-from .models import TLP, CustomConfig, Job, Tag
+from .models import TLP, CustomConfig, Job, PluginCredential, Tag
 
 logger = logging.getLogger(__name__)
 
@@ -684,14 +684,64 @@ class CustomConfigSerializer(rfs.ModelSerializer):
                 f"{expected_type.__name__}."
             )
 
-        if self.instance is None:
-            params = attrs.copy()
-            params.pop("value")
-            if "organization" not in params:
-                params["organization__isnull"] = True
-            if CustomConfig.objects.filter(**params).exists():
-                raise ValidationError(
-                    f"{category} {attrs['plugin_name']} "
-                    f"attribute {attrs['attribute']} already exists."
-                )
+        inclusion_params = attrs.copy()
+        exclusion_params = {}
+        inclusion_params.pop("value")
+        if "organization" not in inclusion_params:
+            inclusion_params["organization__isnull"] = True
+        if self.instance is not None:
+            exclusion_params["id"] = self.instance.id
+        if (
+            PluginCredential.objects.filter(**inclusion_params)
+            .exclude(**exclusion_params)
+            .exists()
+        ):
+            raise ValidationError(
+                f"{category} {attrs['plugin_name']} "
+                f"attribute {attrs['attribute']} already exists."
+            )
+        return attrs
+
+
+class PluginCredentialSerializer(rfs.ModelSerializer):
+    class Meta:
+        model = PluginCredential
+        fields = rfs.ALL_FIELDS
+
+    def validate(self, attrs):
+        super().validate(attrs)
+
+        if attrs["type"] == CustomConfig.PluginType.ANALYZER:
+            config = AnalyzerConfig
+            category = "Analyzer"
+        elif attrs["type"] == CustomConfig.PluginType.CONNECTOR:
+            config = ConnectorConfig
+            category = "Connector"
+        else:
+            logger.error(f"Unknown custom config type: {attrs['type']}")
+            raise ValidationError("Invalid type.")
+
+        if attrs["plugin_name"] not in config.all():
+            raise ValidationError(f"{category} {attrs['plugin_name']} does not exist.")
+
+        if attrs["attribute"] not in config.all()[attrs["plugin_name"]].secrets:
+            raise ValidationError(
+                f"{category} {attrs['plugin_name']} does not "
+                f"have attribute {attrs['attribute']}."
+            )
+
+        inclusion_params = attrs.copy()
+        exclusion_params = {}
+        inclusion_params.pop("value")
+        if self.instance is not None:
+            exclusion_params["id"] = self.instance.id
+        if (
+            PluginCredential.objects.filter(**inclusion_params)
+            .exclude(**exclusion_params)
+            .exists()
+        ):
+            raise ValidationError(
+                f"{category} {attrs['plugin_name']} "
+                f"attribute {attrs['attribute']} already exists."
+            )
         return attrs

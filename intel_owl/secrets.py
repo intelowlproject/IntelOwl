@@ -64,7 +64,7 @@ def aws_get_secret(secret_name):
     return secret
 
 
-def get_secret(secret_name, default=""):
+def get_secret(secret_name, default="", plugin_type=None, plugin_name=None):
     """
     first check the secret in the environment
     then try to find the secret in AWS Secret Manager
@@ -73,8 +73,16 @@ def get_secret(secret_name, default=""):
     try:
         from api_app.models import PluginCredential
 
-        if PluginCredential.objects.filter(name=secret_name).exists():
-            secret = PluginCredential.objects.get(attribute=secret_name).value
+        query = {
+            "attribute": secret_name,
+        }
+        if plugin_type:
+            query["type"] = plugin_type
+        if plugin_name:
+            query["plugin_name"] = plugin_name
+
+        if PluginCredential.objects.filter(**query).exists():
+            secret = PluginCredential.objects.get(**query).value
     except AppRegistryNotReady:
         # This is a Django env var, not analyzer var
         pass

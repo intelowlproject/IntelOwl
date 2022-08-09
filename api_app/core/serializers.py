@@ -117,7 +117,7 @@ class AbstractConfigSerializer(rfs.Serializer):
         for s_key, s_dict in secrets.items():
             # check if available in environment
             secret_val = secrets_store.get_secret(
-                s_dict["env_var_key"],
+                s_key,
                 default=None,
                 plugin_type=self._get_type(),
                 plugin_name=raw_instance["name"],

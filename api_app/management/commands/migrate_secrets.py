@@ -16,10 +16,11 @@ class Command(BaseCommand):
     @staticmethod
     def _migrate_secrets(plugin_list, plugin_type):
         for plugin in plugin_list:
-            for secret in plugin["secrets"].values():
+            for secret_name in plugin["secrets"].keys():
+                secret = plugin["secrets"][secret_name]
                 if os.getenv(secret["env_var_key"]):
                     PluginCredential.objects.get_or_create(
-                        attribute=secret["env_var_key"],
+                        attribute=secret_name,
                         value=os.getenv(secret["env_var_key"]),
                         plugin_name=plugin["name"],
                         type=plugin_type,

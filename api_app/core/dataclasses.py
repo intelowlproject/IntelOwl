@@ -97,10 +97,8 @@ class AbstractConfig:
             }
         else:
             _filtered_secrets = self.secrets
-        for key_name, secret in _filtered_secrets.items():
-            secrets[key_name] = secrets_store.get_secret(
-                secret.env_var_key, default=None
-            )
+        for key_name in _filtered_secrets.keys():
+            secrets[key_name] = secrets_store.get_secret(key_name, default=None)
 
         return secrets
 

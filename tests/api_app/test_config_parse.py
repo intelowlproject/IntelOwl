@@ -2,12 +2,18 @@
 # See the file 'LICENSE' for copying permission.
 from unittest.mock import Mock, patch
 
+from django.core.management import call_command
 from django.test import TestCase
 
 from api_app.analyzers_manager.serializers import AnalyzerConfigSerializer
 
 
 class ConfigParseTests(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        call_command("migrate_secrets")
+
     @patch(
         "api_app.core.serializers.AbstractConfigSerializer._md5_config_file", new=Mock()
     )

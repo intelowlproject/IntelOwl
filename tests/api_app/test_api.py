@@ -8,6 +8,7 @@ from typing import Tuple
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.core.management import call_command
 from django.test import TestCase
 from rest_framework.test import APIClient
 
@@ -20,6 +21,7 @@ class ApiViewTests(TestCase):
     @classmethod
     def setUpClass(cls):
         super(ApiViewTests, cls).setUpClass()
+        call_command("migrate_secrets")
         cls.superuser = User.objects.create_superuser(
             username="test", email="test@intelowl.com", password="test"
         )

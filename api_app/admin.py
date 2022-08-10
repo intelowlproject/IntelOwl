@@ -43,3 +43,7 @@ class PluginCredentialAdminView(admin.ModelAdmin):
         "attribute",
         "plugin_name",
     )
+    list_filter = (
+        "type",
+        "plugin_name",
+    )

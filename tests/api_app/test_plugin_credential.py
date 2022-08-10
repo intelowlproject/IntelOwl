@@ -3,6 +3,7 @@ from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
 
 from api_app.models import CustomConfig, PluginCredential
+from intel_owl.secrets import get_secret
 
 from .. import CustomAPITestCase, User
 
@@ -10,11 +11,14 @@ custom_config_uri = reverse("plugin-credential-list")
 
 
 @tag("plugin_credential")
-class CustomConfigTests(CustomAPITestCase):
+class PluginCredentialTests(CustomAPITestCase):
     def setUp(self):
         super().setUp()
         PluginCredential.objects.all().delete()
-        self.custom_config_su_classic_dns, _ = PluginCredential.objects.get_or_create(
+        (
+            self.plugin_credential_plugin_credential,
+            _,
+        ) = PluginCredential.objects.get_or_create(
             **{
                 "type": CustomConfig.PluginType.ANALYZER,
                 "plugin_name": "GoogleWebRisk",
@@ -73,3 +77,11 @@ class CustomConfigTests(CustomAPITestCase):
                 **self.google_safe_browsing_payload
             ).exists()
         )
+
+    def test_get_secret(self):
+        value = get_secret(
+            self.plugin_credential_plugin_credential.attribute,
+            plugin_type=self.plugin_credential_plugin_credential.type,
+            plugin_name=self.plugin_credential_plugin_credential.plugin_name,
+        )
+        self.assertEqual(value, self.plugin_credential_plugin_credential.value)

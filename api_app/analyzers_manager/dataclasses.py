@@ -12,9 +12,13 @@ __all__ = [
     "AnalyzerConfig",
 ]
 
+from ..models import PluginCredential
+
 
 @dataclasses.dataclass
 class AnalyzerConfig(AbstractConfig):
+    def _get_type(self) -> str:
+        return PluginCredential.PluginType.ANALYZER
 
     # Required fields
     type: typing.Literal["file", "observable"]

@@ -50,6 +50,10 @@ class AbstractConfig:
     config: _Config
     verification: _SecretsVerification
 
+    @abstractmethod
+    def _get_type(self) -> str:
+        raise NotImplementedError()
+
     def __post_init__(self):
         secrets_values = list(self.secrets.values())
         params_values = list(self.params.values())
@@ -98,7 +102,12 @@ class AbstractConfig:
         else:
             _filtered_secrets = self.secrets
         for key_name in _filtered_secrets.keys():
-            secrets[key_name] = secrets_store.get_secret(key_name, default=None)
+            secrets[key_name] = secrets_store.get_secret(
+                key_name,
+                default=None,
+                plugin_type=self._get_type(),
+                plugin_name=self.name,
+            )
 
         return secrets
 

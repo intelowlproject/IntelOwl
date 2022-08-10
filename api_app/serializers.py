@@ -707,6 +707,8 @@ class PluginCredentialSerializer(rfs.ModelSerializer):
     class Meta:
         model = PluginCredential
         fields = rfs.ALL_FIELDS
+        # Secret values can only be read from admin panel
+        extra_kwargs = {"value": {"write_only": True}}
 
     def validate(self, attrs):
         super().validate(attrs)

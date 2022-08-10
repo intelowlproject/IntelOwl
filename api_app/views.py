@@ -17,6 +17,7 @@ from rest_framework import serializers as rfs
 from rest_framework import status, viewsets
 from rest_framework.decorators import action, api_view
 from rest_framework.exceptions import ValidationError
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 
@@ -675,3 +676,8 @@ class PluginCredentialViewSet(viewsets.ModelViewSet):
     queryset = PluginCredential.objects.all()
     serializer_class = PluginCredentialSerializer
     pagination_class = None
+    permission_classes = (
+        (IsAuthenticated,)
+        if settings.NON_ADMIN_CAN_EDIT_PLUGIN_SECRETS
+        else (IsAdminUser,)
+    )

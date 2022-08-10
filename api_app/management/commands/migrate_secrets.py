@@ -13,22 +13,27 @@ from api_app.models import PluginCredential
 class Command(BaseCommand):
     help = "Migrates secrets from env_file_app (pre-v4.0) to database"
 
+    # Explicit function to facilitate testing
     @staticmethod
-    def _migrate_secrets(plugin_list, plugin_type):
+    def _get_env_var(name):
+        return os.getenv(name)
+
+    @classmethod
+    def _migrate_secrets(cls, plugin_list, plugin_type):
         for plugin in plugin_list:
             for secret_name in plugin["secrets"].keys():
                 secret = plugin["secrets"][secret_name]
-                if os.getenv(secret["env_var_key"]):
-                    PluginCredential.objects.get_or_create(
+                if cls._get_env_var(secret["env_var_key"]):
+                    if PluginCredential.objects.get_or_create(
                         attribute=secret_name,
-                        value=os.getenv(secret["env_var_key"]),
+                        value=cls._get_env_var(secret["env_var_key"]),
                         plugin_name=plugin["name"],
                         type=plugin_type,
-                    )
-                    print(
-                        f"Migrated secret {secret['env_var_key']} "
-                        f"for plugin {plugin['name']}"
-                    )
+                    )[1]:
+                        print(
+                            f"Migrated secret {secret['env_var_key']} "
+                            f"for plugin {plugin['name']}"
+                        )
 
     def handle(self, *args, **options):
         self._migrate_secrets(

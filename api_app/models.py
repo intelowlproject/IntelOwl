@@ -293,7 +293,7 @@ class PluginCredential(models.Model):
 
     type = models.CharField(choices=PluginType.choices, max_length=2)
     attribute = models.CharField(max_length=128)
-    value = models.TextField(blank=False)
+    value = models.TextField()
     updated_at = models.DateTimeField(auto_now=True)
     plugin_name = models.CharField(max_length=128)
 

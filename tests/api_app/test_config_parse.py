@@ -4,7 +4,7 @@ from unittest.mock import Mock, patch
 
 from django.test import TestCase
 
-from api_app.core.serializers import AbstractConfigSerializer
+from api_app.analyzers_manager.serializers import AnalyzerConfigSerializer
 
 
 class ConfigParseTests(TestCase):
@@ -104,8 +104,8 @@ class ConfigParseTests(TestCase):
 
         mock_read_config.return_value = sample_analyzer_config
         # _refresh ensures that cache isn't used, if any
-        parsed_config = AbstractConfigSerializer.read_and_verify_config(_refresh=True)
+        parsed_config = AnalyzerConfigSerializer.read_and_verify_config(_refresh=True)
 
         mock_read_config.return_value = pre_parsed_sample_config
-        expected_config = AbstractConfigSerializer.read_and_verify_config(_refresh=True)
+        expected_config = AnalyzerConfigSerializer.read_and_verify_config(_refresh=True)
         self.assertDictEqual(parsed_config, expected_config)

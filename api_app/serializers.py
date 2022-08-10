@@ -692,7 +692,7 @@ class CustomConfigSerializer(rfs.ModelSerializer):
         if self.instance is not None:
             exclusion_params["id"] = self.instance.id
         if (
-            PluginCredential.objects.filter(**inclusion_params)
+            CustomConfig.objects.filter(**inclusion_params)
             .exclude(**exclusion_params)
             .exists()
         ):

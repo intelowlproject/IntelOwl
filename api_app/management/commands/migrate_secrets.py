@@ -19,16 +19,16 @@ class Command(BaseCommand):
             for secret_name in plugin["secrets"].keys():
                 secret = plugin["secrets"][secret_name]
                 if os.getenv(secret["env_var_key"]):
-                    PluginCredential.objects.get_or_create(
+                    if PluginCredential.objects.get_or_create(
                         attribute=secret_name,
                         value=os.getenv(secret["env_var_key"]),
                         plugin_name=plugin["name"],
                         type=plugin_type,
-                    )
-                    print(
-                        f"Migrated secret {secret['env_var_key']} "
-                        f"for plugin {plugin['name']}"
-                    )
+                    )[1]:
+                        print(
+                            f"Migrated secret {secret['env_var_key']} "
+                            f"for plugin {plugin['name']}"
+                        )
 
     def handle(self, *args, **options):
         self._migrate_secrets(

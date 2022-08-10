@@ -161,6 +161,7 @@ export function PluginData({
                                 placeholder = '{"key": "value"}';
                               else if (type === "list") placeholder = "[...]";
                               else if (type === "dict") placeholder = "{...}";
+                              else placeholder = "********";
                             }
                             const disabledSuffix = configuration.edit
                               ? " input-dark "

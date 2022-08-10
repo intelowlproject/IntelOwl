@@ -31,6 +31,8 @@ services:
       - .env
     depends_on:
       - postgres
+    environment:
+      - NO_RUN
 
   nginx:
     image: intelowlproject/intelowl_nginx:${INTELOWL_TAG_VERSION}

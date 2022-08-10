@@ -94,11 +94,18 @@ jobs:
       - name: Startup script launch (Fast)
         if: "!contains(github.base_ref, 'master')"
         run: |
-          python3 start.py ci up --build -d
+          python3 start.py ci build
+          python3 start.py ci run uwsgi
+          python3 start.py ci up -d
         env:
           DOCKER_BUILDKIT: 1
           BUILDKIT_PROGRESS: "plain"
           STAGE: "ci"
+          NO_RUN: "True"
+
+      - name: Move secrets to db
+        run: |
+          docker exec intelowl_uwsgi python3 manage.py migrate_secrets
 
       - name: Docker debug
         run: |
@@ -107,14 +114,6 @@ jobs:
       - name: Setup coverage
         run: |
           docker exec intelowl_uwsgi pip3 install coverage
-
-      - name: Run migrations
-        run: |
-          docker exec intelowl_uwsgi python3 manage.py migrate  
-
-      - name: Move secrets to db
-        run: |
-          docker exec intelowl_uwsgi python3 manage.py migrate_secrets             
 
       - name: "Test: api_app"
         run: |

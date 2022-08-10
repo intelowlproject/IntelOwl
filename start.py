@@ -81,6 +81,7 @@ def start():
             "kill",
             "logs",
             "ps",
+            "run",
         ],
     )
 
@@ -220,6 +221,7 @@ def start():
         env["DOCKER_BUILDKIT"] = "1"
         if args.debug_build:
             env["BUILDKIT_PROGRESS"] = "plain"
+        print(" ".join(command))
         subprocess.run(command, env=env)
     except KeyboardInterrupt:
         print(

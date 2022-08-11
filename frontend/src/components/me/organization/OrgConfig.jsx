@@ -17,6 +17,7 @@ export default function OrgConfig() {
     organization,
     fetchAll,
     isUserOwner,
+    noOrg,
   } = useOrganizationStore(
     React.useCallback(
       (state) => ({
@@ -25,6 +26,7 @@ export default function OrgConfig() {
         organization: state.organization,
         fetchAll: state.fetchAll,
         isUserOwner: state.isUserOwner,
+        noOrg: state.noOrg,
       }),
       []
     )
@@ -32,10 +34,10 @@ export default function OrgConfig() {
 
   // on component mount
   React.useEffect(() => {
-    if (Object.keys(organization).length === 0) {
+    if (Object.keys(organization).length === 0 && !noOrg) {
       fetchAll();
     }
-  }, [organization, fetchAll]);
+  }, [noOrg, organization, fetchAll]);
 
   // page title
   useTitle(

@@ -3,12 +3,11 @@
 from unittest.mock import patch
 
 from django.core.management import call_command
-from django.test import TestCase, tag
+from django.test import TestCase
 
 from api_app.models import PluginCredential
 
 
-@tag("x")
 class ConfigParseTests(TestCase):
     def test_extends(self):
         def _patched_get_env_var(name):

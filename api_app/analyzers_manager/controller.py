@@ -155,8 +155,6 @@ def run_analyzer(
     job_id: int, config_dict: dict, report_defaults: dict
 ) -> AnalyzerReport:
     aconfig = AnalyzerConfig.from_dict(config_dict)
-    klass: BaseAnalyzerMixin = None
-    report: AnalyzerReport = None
     try:
         cls_path = aconfig.get_full_import_path()
         try:

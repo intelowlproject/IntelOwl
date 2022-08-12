@@ -51,6 +51,9 @@ class Maxmind(classes.ObservableAnalyzer):
 
     @classmethod
     def updater(cls, params, db):
+        if not cls.enabled:
+            logger.warning("No running updater for Maxmind, because it is disabled")
+            return
         # FIXME @eshaan7: dont hardcode api key name
         api_key = secrets.get_secret(
             "api_key_name",

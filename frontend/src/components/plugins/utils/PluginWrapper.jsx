@@ -88,42 +88,49 @@ export default function PluginWrapper({ heading, stateSelector, columns }) {
           </span>
         </Col>
         <div className="col-auto">
-          <Col>
-            <Link
-              to="/me/config"
-              style={{ color: "inherit", textDecoration: "inherit" }}
-            >
-              <Row>
-                <Button className="my-2">
-                  <BsSliders className="me-2" /> Your custom config
-                </Button>
-              </Row>
-            </Link>
-            {isUserOwner ? (
+          {isUserOwner ? (
+            <Row>
+              <Col className="mx-2 my-2">
+                <Link
+                  to="/me/organization/config"
+                  style={{ color: "inherit", textDecoration: "inherit" }}
+                >
+                  <Row>
+                    <Button>
+                      <BsPeopleFill className="me-2" /> Organization{" "}
+                      {organization.name}&apos;s custom config
+                    </Button>
+                  </Row>
+                </Link>
+              </Col>
+            </Row>
+          ) : null}
+          <Row>
+            <Col className="mx-2 my-2">
               <Link
-                to="/me/organization/config"
+                to="/me/plugin-secrets"
                 style={{ color: "inherit", textDecoration: "inherit" }}
               >
                 <Row>
                   <Button className="my-2">
-                    <BsPeopleFill className="me-2" /> Organization{" "}
-                    {organization.name}&apos;s custom config
+                    <FaUserSecret className="me-2" /> Plugin Secrets
                   </Button>
                 </Row>
               </Link>
-            ) : null}
-
-            <Link
-              to="/me/plugin-secrets"
-              style={{ color: "inherit", textDecoration: "inherit" }}
-            >
-              <Row>
-                <Button className="my-2">
-                  <FaUserSecret className="me-2" /> Plugin Secrets
-                </Button>
-              </Row>
-            </Link>
-          </Col>
+            </Col>
+            <Col className="mx-2 my-2">
+              <Link
+                to="/me/config"
+                style={{ color: "inherit", textDecoration: "inherit" }}
+              >
+                <Row>
+                  <Button>
+                    <BsSliders className="me-2" /> Your custom config
+                  </Button>
+                </Row>
+              </Link>
+            </Col>
+          </Row>
         </div>
       </Row>
       {/* Actions */}

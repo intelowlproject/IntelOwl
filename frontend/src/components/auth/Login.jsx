@@ -7,6 +7,7 @@ import {
   Input,
   Spinner,
   Button,
+  Row,
 } from "reactstrap";
 import { Form, Formik } from "formik";
 import useTitle from "react-use/lib/useTitle";
@@ -76,7 +77,18 @@ export default function Login() {
           />
         </div>
         <ContentSection>
-          <h3 className="fw-bold">Log In</h3>
+          <Row>
+            <h3 className="fw-bold col-auto me-auto mt-2">Log In</h3>
+            <a href="/api/auth/google" className="col-auto">
+              <button type="button" className="bg-transparent border-0">
+                <img
+                  src={`${PUBLIC_URL}/google-logo.svg`}
+                  alt="Google Logo"
+                  className="img-fluid"
+                />
+              </button>
+            </a>
+          </Row>
           <hr />
           {/* Form */}
           <Formik
@@ -138,17 +150,6 @@ export default function Login() {
               </Form>
             )}
           </Formik>
-
-          {/*  Google login button */}
-          <div className="text-muted mb-3">
-            {/* Uncomment this for local testing */}
-            {/* <a href="http://localhost/api/auth/google"> */}
-            <a href="/api/auth/google">
-              <Button color="primary" outline>
-                Login with Google
-              </Button>
-            </a>
-          </div>
         </ContentSection>
       </Container>
     </ContentSection>

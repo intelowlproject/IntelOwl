@@ -1,4 +1,5 @@
 import React from "react";
+import { AiOutlineInfoCircle } from "react-icons/ai";
 import { useSearchParams } from "react-router-dom";
 import {
   FormGroup,
@@ -8,6 +9,7 @@ import {
   Spinner,
   Button,
   Row,
+  Tooltip,
 } from "reactstrap";
 import { Form, Formik } from "formik";
 import useTitle from "react-use/lib/useTitle";
@@ -37,6 +39,8 @@ const onValidate = (values) => {
 // Component
 export default function Login() {
   console.debug("Login rendered!");
+
+  const [isOpen, setIsOpen] = React.useState(false);
 
   // page title
   useTitle("IntelOwl | Login", { restoreOnUnmount: true });
@@ -79,15 +83,31 @@ export default function Login() {
         <ContentSection>
           <Row>
             <h3 className="fw-bold col-auto me-auto mt-2">Log In</h3>
-            <a href="/api/auth/google" className="col-auto">
-              <button type="button" className="bg-transparent border-0">
+            <div className="col-auto">
+              <a href="/api/auth/google">
                 <img
                   src={`${PUBLIC_URL}/google-logo.svg`}
                   alt="Google Logo"
                   className="img-fluid"
                 />
-              </button>
-            </a>
+              </a>
+              <AiOutlineInfoCircle
+                style={{ "vertical-align": "top" }}
+                id="GoogleInfoTooltip"
+                cursor="pointer"
+              />
+              <Tooltip
+                placement="top"
+                isOpen={isOpen}
+                target="GoogleInfoTooltip"
+                toggle={() => {
+                  setIsOpen(!isOpen);
+                }}
+              >
+                Check the Authentication section in the documentation for
+                enabling Google Authentication.
+              </Tooltip>
+            </div>
           </Row>
           <hr />
           {/* Form */}

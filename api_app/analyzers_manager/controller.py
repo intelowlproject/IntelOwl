@@ -15,7 +15,7 @@ from intel_owl.consts import DEFAULT_QUEUE
 from ..exceptions import AlreadyFailedJobException
 from ..helpers import get_now
 from ..models import Job
-from .classes import BaseAnalyzerMixin, DockerBasedAnalyzer
+from .classes import DockerBasedAnalyzer
 from .dataclasses import AnalyzerConfig
 from .models import AnalyzerReport
 
@@ -67,7 +67,8 @@ def start_analyzers(
         queue = config.config.queue
         if queue not in settings.CELERY_QUEUES:
             logger.warning(
-                f"Analyzer {a_name} has a wrong queue." f" Setting to `{DEFAULT_QUEUE}`"
+                f"Analyzer {a_name} has a wrong queue: {queue}."
+                f" Setting to `{DEFAULT_QUEUE}`"
             )
             queue = DEFAULT_QUEUE
         # get soft_time_limit

@@ -106,9 +106,11 @@ class BaseAnalyzerMixin(Plugin):
     @property
     def enabled(cls):
         from api_app.analyzers_manager.dataclasses import AnalyzerConfig
+
         config = AnalyzerConfig.get(cls.__name__)
         # it is enabled
         return config and not config.disabled
+
 
 class ObservableAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
     """
@@ -149,9 +151,6 @@ class ObservableAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
             f"FINISHED analyzer: {self.__repr__()} -> "
             f"Observable: {self.observable_name}."
         )
-
-
-
 
 
 class FileAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):

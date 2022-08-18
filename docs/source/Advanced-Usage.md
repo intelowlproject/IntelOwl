@@ -16,10 +16,9 @@ This page includes details about some advanced features that Intel Owl provides 
     - [Kibana](#kibana)
     - [Example Configuration](#example-configuration)
   - [Authentication options](#authentication-options)
+    - [OAuth support](#google-oauth2)
     - [LDAP](#ldap)
     - [RADIUS](#radius-authentication)
-    - [OAuth support](#oauth-support)
-      - [Google](#google) 
   - [Google Kubernetes Engine deployment](#google-kubernetes-engine-deployment)
   - [Queues](#queues)
     - [Multi Queue](#multi-queue)
@@ -251,8 +250,19 @@ This will build and populate all existing job objects into the `jobs` index.
 
 IntelOwl provides support for some of the most common authentication methods:
 
+- Google Oauth2
 - LDAP
-- GSuite (work in progress)
+- RADIUS
+
+#### Google OAuth2
+
+The first step is to create a [Google Cloud Platform](https://cloud.google.com/resource-manager/docs/creating-managing-projects) project, and then [create OAuth credentials for it](https://developers.google.com/workspace/guides/create-credentials#oauth-client-id).
+
+After that, specify the client ID and secret as `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` environment variables.
+
+> Note: While configuring Google Auth2 you can choose either to enable access to the all users with a Google Account ("External" mode) or to enable access to only the users of your organization ("Internal" mode).
+> 
+> [Reference](https://support.google.com/cloud/answer/10311615#user-type&zippy=%2Cinternal%2Cexternal)
 
 #### LDAP
 
@@ -282,13 +292,6 @@ How to configure and enable RADIUS authentication on Intel Owl?
 2. Once you have done that, you have to set the environment variable `RADIUS_AUTH_ENABLED` as `True` in the environment
    configuration file `env_file_app`. Finally, you can restart the application with `docker-compose up`
 
-#### OAuth support
-
-##### Google
-
-The first step is to create a [Google Cloud Platform](https://cloud.google.com/resource-manager/docs/creating-managing-projects) project, and then [create OAuth credentials for it](https://developers.google.com/workspace/guides/create-credentials#oauth-client-id).
-
-After that, specify the client ID and secret as `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` environment variables.
 
 ## Google Kubernetes Engine deployment
 

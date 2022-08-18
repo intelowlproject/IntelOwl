@@ -1,3 +1,4 @@
+import axios from "axios";
 import React from "react";
 import { AiOutlineInfoCircle } from "react-icons/ai";
 import { useSearchParams } from "react-router-dom";
@@ -14,7 +15,7 @@ import {
 import { Form, Formik } from "formik";
 import useTitle from "react-use/lib/useTitle";
 
-import { ContentSection } from "@certego/certego-ui";
+import { addToast, ContentSection } from "@certego/certego-ui";
 
 import { PUBLIC_URL } from "../../constants/environment";
 import { useAuthStore } from "../../stores";
@@ -84,7 +85,31 @@ export default function Login() {
           <Row>
             <h3 className="fw-bold col-auto me-auto mt-2">Log In</h3>
             <div className="col-auto">
-              <a href="/api/auth/google">
+              <a
+                href="/api/auth/google"
+                onClick={(e) => {
+                  e.preventDefault();
+                  const url = "/api/auth/google";
+                  axios
+                    .get(url)
+                    .then(() => {
+                      window.location = url;
+                    })
+                    .catch((error) => {
+                      if (
+                        error.response.data.includes("OAuth is not configured.")
+                      )
+                        addToast(
+                          "Login failed!",
+                          "OAuth is not configured. " +
+                            "Check documentation to set it up.",
+                          "danger",
+                          true
+                        );
+                      else throw error;
+                    });
+                }}
+              >
                 <img
                   src={`${PUBLIC_URL}/google-logo.svg`}
                   alt="Google Logo"

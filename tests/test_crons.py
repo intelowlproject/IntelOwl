@@ -48,7 +48,7 @@ class CronTests(TestCase):
     @if_mock_connections(
         patch("requests.get", return_value=MockResponse({}, 200, text="93.95.230.253"))
     )
-    def test_tor_updater(self):
+    def test_tor_updater(self, mock_get=None):
         db_file_path = tor.Tor.updater()
         if tor.Tor.enabled:
             self.assertTrue(os.path.exists(db_file_path))

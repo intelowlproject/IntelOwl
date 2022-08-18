@@ -35,7 +35,9 @@ class CronTests(TestCase):
             else:
                 self.assertIsNone(db_file_path)
 
-    @if_mock_connections(patch("requests.get", return_value=MockResponse({}, 200)))
+    @if_mock_connections(
+        patch("requests.get", return_value=MockResponse({}, 200, text="91.192.100.61"))
+    )
     def test_talos_updater(self, mock_get=None):
         db_file_path = talos.Talos.updater()
         if talos.Talos.enabled:
@@ -43,6 +45,9 @@ class CronTests(TestCase):
         else:
             self.assertIsNone(db_file_path)
 
+    @if_mock_connections(
+        patch("requests.get", return_value=MockResponse({}, 200, text="93.95.230.253"))
+    )
     def test_tor_updater(self):
         db_file_path = tor.Tor.updater()
         if tor.Tor.enabled:

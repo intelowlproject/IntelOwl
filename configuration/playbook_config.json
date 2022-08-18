@@ -1,32 +1,10 @@
 {
-    "IP_BASIC_INFO": {
-        "description": "Fetch basic info for an IP",
+     "FREE_TO_USE_ANALYZERS": {
+        "description": "A playbook containing all free to use analyzers.",
         "supports": ["ip"],
         "disabled": false,
         "analyzers": {
-            "AbuseIPDB": {},
-            "Shodan": {
-                "include_honeyscore": true
-            },
-            "FireHol_IPList": {}
-        },
-        "connectors": {
-            "MISP": {
-                "ssl_check": true
-            },
-            "OpenCTI": {
-                "ssl_verify": true
-            }
-        }
-     }, 
-     "IP_FREE_STUFF": {
-        "description": "IP free collection",
-        "supports": ["ip"],
-        "disabled": false,
-        "analyzers": {
-            "Classic_DNS": {},
-            "CryptoScamDB_CheckAPI": {}
-
+            "Classic_DNS": {}
         },
         "connectors": {}
      }

@@ -18,6 +18,8 @@ This page includes details about some advanced features that Intel Owl provides 
   - [Authentication options](#authentication-options)
     - [LDAP](#ldap)
     - [RADIUS](#radius-authentication)
+    - [OAuth support](#oauth-support)
+      - [Google](#google) 
   - [Google Kubernetes Engine deployment](#google-kubernetes-engine-deployment)
   - [Queues](#queues)
     - [Multi Queue](#multi-queue)
@@ -27,8 +29,6 @@ This page includes details about some advanced features that Intel Owl provides 
     - [Secrets](#secrets)
     - [SQS](#sqs)
     - [S3](#s3)
-  - [OAuth support](#oauth-support)
-    - [Google](#google)
 
 ## Optional Analyzers
 
@@ -282,6 +282,14 @@ How to configure and enable RADIUS authentication on Intel Owl?
 2. Once you have done that, you have to set the environment variable `RADIUS_AUTH_ENABLED` as `True` in the environment
    configuration file `env_file_app`. Finally, you can restart the application with `docker-compose up`
 
+#### OAuth support
+
+##### Google
+
+The first step is to create a [Google Cloud Platform](https://cloud.google.com/resource-manager/docs/creating-managing-projects) project, and then [create OAuth credentials for it](https://developers.google.com/workspace/guides/create-credentials#oauth-client-id).
+
+After that, specify the client ID and secret as `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` environment variables.
+
 ## Google Kubernetes Engine deployment
 
 Refer to the following blog post for an example on how to deploy IntelOwl on Google Kubernetes Engine:
@@ -360,10 +368,3 @@ First, you need to configure the environment variable `LOCAL_STORAGE` to `False`
 Then you have to add some credentials for AWS: if you have IntelOwl deployed on the AWS infrastructure, you can use IAM credentials:
 to allow that just set `AWS_IAM_ACCESS` to `True`. If that is not the case, you have to set both `AWS_ACESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`
 
-## OAuth support
-
-#### Google
-
-The first step is to create a [Google Cloud Platform](https://cloud.google.com/resource-manager/docs/creating-managing-projects) project, and then [create OAuth credentials for it](https://developers.google.com/workspace/guides/create-credentials#oauth-client-id).
-
-After that, specify the client ID and secret as `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` environment variables.

@@ -33,7 +33,11 @@ class Tor(classes.ObservableAnalyzer):
 
         return result
 
-    def _updater(cls):
+    @classmethod
+    def updater(cls):
+        if not cls.enabled:
+            logger.warning("No running updater for Tor, because it is disabled")
+            return
         try:
             logger.info("starting download of db from tor project")
             url = "https://check.torproject.org/exit-addresses"

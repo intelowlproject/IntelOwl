@@ -2,18 +2,12 @@
 # See the file 'LICENSE' for copying permission.
 from unittest.mock import Mock, patch
 
-from django.core.management import call_command
 from django.test import TestCase
 
-from api_app.analyzers_manager.serializers import AnalyzerConfigSerializer
+from api_app.core.serializers import AbstractConfigSerializer
 
 
 class ConfigParseTests(TestCase):
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        call_command("migrate_secrets")
-
     @patch(
         "api_app.core.serializers.AbstractConfigSerializer._md5_config_file", new=Mock()
     )
@@ -110,8 +104,8 @@ class ConfigParseTests(TestCase):
 
         mock_read_config.return_value = sample_analyzer_config
         # _refresh ensures that cache isn't used, if any
-        parsed_config = AnalyzerConfigSerializer.read_and_verify_config(_refresh=True)
+        parsed_config = AbstractConfigSerializer.read_and_verify_config(_refresh=True)
 
         mock_read_config.return_value = pre_parsed_sample_config
-        expected_config = AnalyzerConfigSerializer.read_and_verify_config(_refresh=True)
+        expected_config = AbstractConfigSerializer.read_and_verify_config(_refresh=True)
         self.assertDictEqual(parsed_config, expected_config)

@@ -14,7 +14,6 @@ from django.conf import settings
 
 from api_app.analyzers_manager import classes
 from api_app.exceptions import AnalyzerRunException
-from api_app.models import PluginCredential
 from intel_owl import secrets
 from tests.mock_utils import if_mock_connections, patch
 
@@ -51,15 +50,8 @@ class Maxmind(classes.ObservableAnalyzer):
 
     @classmethod
     def updater(cls, params, db):
-        if not cls.enabled:
-            logger.warning("No running updater for Maxmind, because it is disabled")
-            return
         # FIXME @eshaan7: dont hardcode api key name
-        api_key = secrets.get_secret(
-            "api_key_name",
-            plugin_type=PluginCredential.PluginType.ANALYZER,
-            plugin_name="MaxMindGeoIP",
-        )
+        api_key = secrets.get_secret("MAXMIND_KEY")
         db_location = _get_db_location(db)
         try:
 

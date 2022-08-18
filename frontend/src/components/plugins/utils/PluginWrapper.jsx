@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { BsPeopleFill, BsSliders } from "react-icons/bs";
-import { FaUserSecret } from "react-icons/fa";
+import { BsPeopleFill } from "react-icons/bs";
+import { IoMdKey } from "react-icons/io";
 import { Link } from "react-router-dom";
 import { Container, Col, Row, Button } from "reactstrap";
 import useTitle from "react-use/lib/useTitle";
@@ -95,7 +95,7 @@ export default function PluginWrapper({ heading, stateSelector, columns }) {
             >
               <Row>
                 <Button className="my-2">
-                  <BsSliders className="me-2" /> Your custom config
+                  <IoMdKey className="me-2" /> Your custom config
                 </Button>
               </Row>
             </Link>
@@ -112,17 +112,6 @@ export default function PluginWrapper({ heading, stateSelector, columns }) {
                 </Row>
               </Link>
             ) : null}
-
-            <Link
-              to="/me/plugin-secrets"
-              style={{ color: "inherit", textDecoration: "inherit" }}
-            >
-              <Row>
-                <Button className="my-2">
-                  <FaUserSecret className="me-2" /> Plugin Secrets
-                </Button>
-              </Row>
-            </Link>
           </Col>
         </div>
       </Row>

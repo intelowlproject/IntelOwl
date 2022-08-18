@@ -8,7 +8,6 @@ from unittest import SkipTest
 
 from django.conf import settings
 from django.core.files import File
-from django.core.management import call_command
 from django.test import TransactionTestCase
 
 from api_app.analyzers_manager.dataclasses import AnalyzerConfig
@@ -42,7 +41,6 @@ class _AbstractAnalyzersScriptTestCase(TransactionTestCase):
 
     @classmethod
     def setUpClass(cls):
-        call_command("migrate_secrets")
         if cls in [
             _AbstractAnalyzersScriptTestCase,
             _ObservableAnalyzersScriptsTestCase,

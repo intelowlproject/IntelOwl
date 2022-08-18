@@ -5,7 +5,7 @@ from django.utils.module_loading import import_string
 from rest_framework import serializers as rfs
 
 from api_app.core.serializers import AbstractConfigSerializer
-from api_app.models import TLP, PluginCredential
+from api_app.models import TLP
 
 from .models import ConnectorReport
 
@@ -19,17 +19,14 @@ class ConnectorConfigSerializer(AbstractConfigSerializer):
 
     CONFIG_FILE_NAME = "connector_config.json"
 
-    def _get_type(self):
-        return PluginCredential.PluginType.CONNECTOR
-
     def validate_python_module(self, python_module: str) -> str:
         clspath = f"api_app.connectors_manager.connectors.{python_module}"
         try:
             import_string(clspath)
-        except ImportError as exc:
+        except ImportError:
             raise rfs.ValidationError(
                 f"`python_module` incorrect, {clspath} couldn't be imported"
-            ) from exc
+            )
 
         return python_module
 

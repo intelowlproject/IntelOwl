@@ -2,7 +2,6 @@ import logging
 from abc import ABCMeta, abstractmethod
 
 from django.contrib.auth import get_user_model
-from django.core.management import call_command
 from django.test import TestCase
 from rest_framework.test import APIClient
 
@@ -27,7 +26,6 @@ class CustomAPITestCase(TestCase):
     @classmethod
     def setUpClass(cls):
         super(CustomAPITestCase, cls).setUpClass()
-        call_command("migrate_secrets")
         cls.superuser = User.objects.create_superuser(
             username="test", email="test@intelowl.com", password="test"
         )

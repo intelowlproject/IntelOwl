@@ -33,7 +33,8 @@ class Tor(classes.ObservableAnalyzer):
 
         return result
 
-    def _updater(cls):
+    @staticmethod
+    def updater():
         try:
             logger.info("starting download of db from tor project")
             url = "https://check.torproject.org/exit-addresses"

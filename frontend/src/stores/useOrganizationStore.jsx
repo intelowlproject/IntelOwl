@@ -4,16 +4,14 @@ import axios from "axios";
 import { BASE_URI_ORG } from "../constants/api";
 
 const useOrganizationStore = create((set, _get) => ({
-  loading: false,
+  loading: true,
   error: null,
   isUserOwner: false,
-  noOrg: false,
   organization: {},
   membersCount: undefined,
   members: [],
   pendingInvitations: [],
   fetchAll: async () => {
-    if (_get().loading) return;
     try {
       // set loading
       set({ loading: true });
@@ -44,20 +42,8 @@ const useOrganizationStore = create((set, _get) => ({
         membersCount,
         members,
         pendingInvitations,
-        noOrg: false,
       });
     } catch (e) {
-      // 404 means user is not part of organization
-      if (e.response.status === 404)
-        set({
-          isUserOwner: false,
-          organization: {},
-          membersCount: undefined,
-          members: [],
-          pendingInvitations: [],
-          noOrg: true,
-        });
-
       // update error
       set({ loading: false, error: e });
     }

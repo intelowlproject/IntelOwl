@@ -55,7 +55,7 @@ def start_connectors(
         queue = cc.config.queue
         if queue not in settings.CELERY_QUEUES:
             logger.error(
-                f"Connector {c_name} has a wrong queue: {queue}"
+                f"Connector {c_name} has a wrong queue."
                 f" Setting to `{DEFAULT_QUEUE}`"
             )
             queue = DEFAULT_QUEUE

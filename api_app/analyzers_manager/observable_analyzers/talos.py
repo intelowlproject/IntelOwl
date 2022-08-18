@@ -32,8 +32,11 @@ class Talos(classes.ObservableAnalyzer):
 
         return result
 
-    @staticmethod
-    def updater():
+    @classmethod
+    def updater(cls):
+        if not cls.enabled:
+            logger.warning("No running updater for Talos, because it is disabled")
+            return
         try:
             logger.info("starting download of db from talos")
             url = "https://snort.org/downloads/ip-block-list"

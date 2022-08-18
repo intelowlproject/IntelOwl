@@ -17,6 +17,7 @@ export default function OrgConfig() {
     organization,
     fetchAll,
     isUserOwner,
+    noOrg,
   } = useOrganizationStore(
     React.useCallback(
       (state) => ({
@@ -25,6 +26,7 @@ export default function OrgConfig() {
         organization: state.organization,
         fetchAll: state.fetchAll,
         isUserOwner: state.isUserOwner,
+        noOrg: state.noOrg,
       }),
       []
     )
@@ -32,10 +34,10 @@ export default function OrgConfig() {
 
   // on component mount
   React.useEffect(() => {
-    if (Object.keys(organization).length === 0) {
+    if (Object.keys(organization).length === 0 && !noOrg) {
       fetchAll();
     }
-  }, [organization, fetchAll]);
+  }, [noOrg, organization, fetchAll]);
 
   // page title
   useTitle(
@@ -45,28 +47,29 @@ export default function OrgConfig() {
     { restoreOnUnmount: true }
   );
 
-  const NewOrg = (
-    <Alert color="secondary" className="mt-3 mx-auto">
-      <section>
-        <h5 className="text-warning text-center">
-          You are not owner of any organization.
-        </h5>
-        <p className="text-center">
-          You can choose to create a new organization.
-        </p>
-      </section>
-      <section className="text-center">
-        <OrgCreateButton onCreate={fetchAll} />
-      </section>
-    </Alert>
-  );
-
   return (
     <LoadingBoundary
       loading={loading}
       error={respErr}
       render={() => {
-        if (!isUserOwner) return NewOrg;
+        if (!isUserOwner)
+          return (
+            <Container>
+              <Alert color="secondary" className="mt-3 mx-auto">
+                <section>
+                  <h5 className="text-warning text-center">
+                    You are not owner of any organization.
+                  </h5>
+                  <p className="text-center">
+                    You can choose to create a new organization.
+                  </p>
+                </section>
+                <section className="text-center">
+                  <OrgCreateButton onCreate={fetchAll} />
+                </section>
+              </Alert>
+            </Container>
+          );
         return (
           <Container>
             <h4>{organization.name}&apos;s custom configuration</h4>
@@ -82,7 +85,21 @@ export default function OrgConfig() {
       renderError={({ error }) => (
         <Row>
           {error?.response?.status === 404 ? (
-            <NewOrg />
+            <Container>
+              <Alert color="secondary" className="mt-3 mx-auto">
+                <section>
+                  <h5 className="text-warning text-center">
+                    You are not owner of any organization.
+                  </h5>
+                  <p className="text-center">
+                    You can choose to create a new organization.
+                  </p>
+                </section>
+                <section className="text-center">
+                  <OrgCreateButton onCreate={fetchAll} />
+                </section>
+              </Alert>
+            </Container>
           ) : (
             <ErrorAlert error={error} />
           )}

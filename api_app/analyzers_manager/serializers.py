@@ -5,6 +5,7 @@ from django.utils.module_loading import import_string
 from rest_framework import serializers as rfs
 
 from api_app.core.serializers import AbstractConfigSerializer
+from api_app.models import PluginCredential
 
 from .constants import HashChoices, ObservableTypes, TypeChoices
 from .models import AnalyzerReport
@@ -59,6 +60,9 @@ class AnalyzerConfigSerializer(AbstractConfigSerializer):
         default=[],
     )
 
+    def _get_type(self):
+        return PluginCredential.PluginType.ANALYZER
+
     def validate_python_module(self, python_module: str) -> str:
         if self.initial_data["type"] == self.TypeChoices.OBSERVABLE or (
             self.initial_data["type"] == self.TypeChoices.FILE
@@ -70,9 +74,9 @@ class AnalyzerConfigSerializer(AbstractConfigSerializer):
 
         try:
             import_string(clspath)
-        except ImportError:
+        except ImportError as exc:
             raise rfs.ValidationError(
                 f"`python_module` incorrect, {clspath} couldn't be imported"
-            )
+            ) from exc
 
         return python_module

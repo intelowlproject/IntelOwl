@@ -7,6 +7,7 @@ import os
 
 import boto3
 from botocore.exceptions import ClientError, NoCredentialsError
+from django.core.exceptions import AppRegistryNotReady
 
 
 class RetrieveSecretException(Exception):
@@ -63,12 +64,30 @@ def aws_get_secret(secret_name):
     return secret
 
 
-def get_secret(secret_name, default=""):
+def get_secret(secret_name, default="", plugin_type=None, plugin_name=None):
     """
     first check the secret in the environment
     then try to find the secret in AWS Secret Manager
     """
-    secret = os.environ.get(secret_name, default)
+    secret = default
+    try:
+        from api_app.models import PluginCredential
+
+        query = {
+            "attribute": secret_name,
+        }
+        if plugin_type:
+            query["type"] = plugin_type
+        if plugin_name:
+            query["plugin_name"] = plugin_name
+
+        if PluginCredential.objects.filter(**query).exists():
+            secret = PluginCredential.objects.get(**query).value
+    except AppRegistryNotReady:
+        # This is a Django env var, not analyzer var
+        pass
+    if secret == default:
+        secret = os.environ.get(secret_name, default)
     aws_secrets_enabled = os.environ.get("AWS_SECRETS", False) == "True"
     if not secret and aws_secrets_enabled:
         try:

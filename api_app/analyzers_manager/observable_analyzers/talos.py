@@ -3,7 +3,6 @@
 
 import logging
 import os
-import traceback
 
 import requests
 
@@ -58,7 +57,6 @@ class Talos(classes.ObservableAnalyzer):
             logger.info("ended download of db from talos")
 
         except Exception as e:
-            traceback.print_exc()
             logger.exception(e)
 
         return database_location

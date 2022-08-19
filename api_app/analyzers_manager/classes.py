@@ -107,9 +107,7 @@ class BaseAnalyzerMixin(Plugin):
     def enabled(cls):
         from api_app.analyzers_manager.dataclasses import AnalyzerConfig
 
-        config = AnalyzerConfig.get(cls.__name__)
-        # it is enabled
-        return config and not config.disabled
+        return not AnalyzerConfig.is_disabled(cls.__name__)
 
 
 class ObservableAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):

@@ -14,5 +14,4 @@ Welcome to IntelOwl's documentation!
    Usage
    Advanced-Usage
    Contribute
-   Tests
    Redoc

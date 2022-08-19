@@ -33,6 +33,10 @@ class Maxmind(classes.ObservableAnalyzer):
                 db_location = _get_db_location(db)
                 if not os.path.isfile(db_location):
                     self.updater(self.params, db)
+                if not os.path.exists(db_location):
+                    raise maxminddb.InvalidDatabaseError(
+                        "database location does not exist"
+                    )
                 reader = maxminddb.open_database(db_location)
                 maxmind_result = reader.get(self.observable_name)
                 reader.close()

@@ -30,30 +30,21 @@ class CronTests(TestCase):
     def test_maxmind_updater(self):
         for db in maxmind.db_names:
             db_file_path = maxmind.Maxmind.updater({}, db)
-            if maxmind.Maxmind.enabled:
-                self.assertTrue(os.path.exists(db_file_path))
-            else:
-                self.assertIsNone(db_file_path)
+            self.assertTrue(os.path.exists(db_file_path))
 
     @if_mock_connections(
         patch("requests.get", return_value=MockResponse({}, 200, text="91.192.100.61"))
     )
     def test_talos_updater(self, mock_get=None):
         db_file_path = talos.Talos.updater()
-        if talos.Talos.enabled:
-            self.assertTrue(os.path.exists(db_file_path))
-        else:
-            self.assertIsNone(db_file_path)
+        self.assertTrue(os.path.exists(db_file_path))
 
     @if_mock_connections(
         patch("requests.get", return_value=MockResponse({}, 200, text="93.95.230.253"))
     )
     def test_tor_updater(self, mock_get=None):
         db_file_path = tor.Tor.updater()
-        if tor.Tor.enabled:
-            self.assertTrue(os.path.exists(db_file_path))
-        else:
-            self.assertIsNone(db_file_path)
+        self.assertTrue(os.path.exists(db_file_path))
 
     def test_yara_updater(self):
         file_paths = yara_scan.YaraScan.yara_update_repos()

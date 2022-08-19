@@ -25,7 +25,9 @@ class Talos(classes.ObservableAnalyzer):
             self.updater()
 
         if not os.path.exists(database_location):
-            raise AnalyzerRunException("database location does not exist")
+            raise AnalyzerRunException(
+                f"database location {database_location} does not exist"
+            )
 
         with open(database_location, "r") as f:
             db = f.read()
@@ -67,7 +69,7 @@ class Talos(classes.ObservableAnalyzer):
             if_mock_connections(
                 patch(
                     "requests.get",
-                    return_value=MockResponse({}, 200, text="91.192.100.61"),
+                    return_value=MockResponse({}, 200, content=b"91.192.100.61"),
                 ),
             )
         ]

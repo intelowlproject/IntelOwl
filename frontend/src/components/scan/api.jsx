@@ -22,10 +22,10 @@ export async function createPlaybookJob(formValues) {
   // handle response/error
   if (respData.status === "accepted" || respData.status === "running") {
 
-    appendToRecentScans(respData.jobId, "success");
+    appendToRecentScans(respData.job_id, "success");
 
     addToast(
-      `Created new Job with ID #${respData.jobId}!`,
+      `Created new Job with ID #${respData.job_id}!`,
       <div>
         {respData.playbooks_running > 0 && (
           <ContentSection className="text-light">
@@ -44,7 +44,7 @@ export async function createPlaybookJob(formValues) {
       true,
       10000
     );
-    return Promise.resolve([respData.jobId]);
+    return Promise.resolve([respData.job_id]);
   }
   // else
   addToast("Failed!", respData?.message, "danger");

@@ -21,16 +21,10 @@ export async function createPlaybookJob(formValues) {
   const respData = resp.data;
   // handle response/error
   if (respData.status === "accepted" || respData.status === "running") {
-    const playbooksRunning = new Set();
-    const warnings = [];
+    const playbooksRunning = respData.playbooks_running;
+    const warnings = respData.warnings;
     const jobId = respData.job_id;
-    respData.forEach((x) => {
-      if (x.analyzers_running)
-        x.playbooks_running.forEach((playbook) =>
-          playbooksRunning.add(playbook)
-        );
-      if (x.warnings) warnings.push(...x.warnings);
-    });
+
     appendToRecentScans(jobId, "success");
 
     addToast(
@@ -241,14 +235,13 @@ async function _startPlaybook(formValues) {
       body.append("files", file, file.name);
     });
     formValues.tags_labels.map((x) => body.append("tags_labels", x));
-    formValues.connectors.map((x) => body.append("playbooks_requested", x));
+    formValues.playbooks.map((x) => body.append("playbooks_requested", x));
     return axios.post(playbookURI, body);
   }
 
   const playbookURI = `${API_BASE_URI}/playbook/analyze_multiple_observables`;
   const body = {
     observables,
-    observable_classification: formValues.classification,
     playbooks_requested: formValues.playbooks,
     tags_labels: formValues.tags_labels,
   };

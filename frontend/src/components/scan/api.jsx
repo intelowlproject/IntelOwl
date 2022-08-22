@@ -22,7 +22,7 @@ export async function createPlaybookJob(formValues) {
   // handle response/error
   if (respData.status === "accepted" || respData.status === "running") {
 
-    appendToRecentScans(jobId, "success");
+    appendToRecentScans(respData.jobId, "success");
 
     addToast(
       `Created new Job with ID #${jobId}!`,

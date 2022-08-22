@@ -25,7 +25,7 @@ export async function createPlaybookJob(formValues) {
     appendToRecentScans(respData.jobId, "success");
 
     addToast(
-      `Created new Job with ID #${jobId}!`,
+      `Created new Job with ID #${respData.jobId}!`,
       <div>
         {respData.playbooks_running > 0 && (
           <ContentSection className="text-light">
@@ -44,7 +44,7 @@ export async function createPlaybookJob(formValues) {
       true,
       10000
     );
-    return Promise.resolve([jobId]);
+    return Promise.resolve([respData.jobId]);
   }
   // else
   addToast("Failed!", respData?.message, "danger");

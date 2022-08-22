@@ -21,25 +21,22 @@ export async function createPlaybookJob(formValues) {
   const respData = resp.data;
   // handle response/error
   if (respData.status === "accepted" || respData.status === "running") {
-    const playbooksRunning = respData.playbooks_running;
-    const warnings = respData.warnings;
-    const jobId = respData.job_id;
 
     appendToRecentScans(jobId, "success");
 
     addToast(
       `Created new Job with ID #${jobId}!`,
       <div>
-        {playbooksRunning.length > 0 && (
+        {respData.playbooks_running > 0 && (
           <ContentSection className="text-light">
             <strong>Playbooks:</strong>&nbsp;
-            {Array.from(playbooksRunning)?.join(", ")}
+            {Array.from(respData.playbooks_running)?.join(", ")}
           </ContentSection>
         )}
 
-        {warnings.length > 0 && (
+        {respData.warnings.length > 0 && (
           <ContentSection className="bg-accent text-darker">
-            <strong>Warnings:</strong>&nbsp;{warnings.join(", ")}
+            <strong>Warnings:</strong>&nbsp;{respData.warnings.join(", ")}
           </ContentSection>
         )}
       </div>,

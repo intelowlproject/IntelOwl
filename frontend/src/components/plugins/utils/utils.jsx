@@ -117,7 +117,7 @@ export function PluginInfoCard({ pluginInfo }) {
             </div>
           )}
         </div>
-        {pluginInfo?.analyzers && (
+        {pluginInfo?.analyzers != null && (
           <div>
             <h6 className="text-secondary">Analyzers &nbsp;</h6>
             <ul>
@@ -137,7 +137,7 @@ export function PluginInfoCard({ pluginInfo }) {
             </ul>
           </div>
         )}
-        {pluginInfo?.connectors !== {} && (
+        {pluginInfo?.connectors != null && (
           <div>
             <h6 className="text-secondary">Connectors &nbsp;</h6>
             <ul>

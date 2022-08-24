@@ -5,6 +5,7 @@ from django.urls import include, path
 from rest_framework import routers
 
 from .views import (
+    CustomConfigViewSet,
     JobViewSet,
     TagViewSet,
     analyze_file,
@@ -19,6 +20,7 @@ from .views import (
 router = routers.DefaultRouter(trailing_slash=False)
 router.register(r"tags", TagViewSet, basename="tags")
 router.register(r"jobs", JobViewSet, basename="jobs")
+router.register(r"custom-config", CustomConfigViewSet, basename="custom-config")
 
 # These come after /api/..
 urlpatterns = [
@@ -26,9 +28,15 @@ urlpatterns = [
     path("ask_analysis_availability", ask_analysis_availability),
     path("ask_multi_analysis_availability", ask_multi_analysis_availability),
     path("analyze_file", analyze_file),
-    path("analyze_multiple_files", analyze_multiple_files),
+    path(
+        "analyze_multiple_files", analyze_multiple_files, name="analyze_multiple_files"
+    ),
     path("analyze_observable", analyze_observable),
-    path("analyze_multiple_observables", analyze_multiple_observables),
+    path(
+        "analyze_multiple_observables",
+        analyze_multiple_observables,
+        name="analyze_multiple_observables",
+    ),
     # router viewsets
     path("", include(router.urls)),
     # Plugins (analyzers_manager, connectors_manager, playbooks_manager)
@@ -36,7 +44,7 @@ urlpatterns = [
     path("", include("api_app.connectors_manager.urls")),
     path("", include("api_app.playbooks_manager.urls")),
     # auth
-    path("auth/", include("api_app.authentication.urls")),
+    path("auth/", include("authentication.urls")),
     # certego_saas:
     # default apps (user),
     path("", include("certego_saas.urls")),

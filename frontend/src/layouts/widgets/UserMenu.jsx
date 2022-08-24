@@ -43,6 +43,10 @@ export default function UserMenu(props) {
         <DropdownNavLink to="/me/sessions">
           <IoMdKey className="me-2" /> API Access/ Sessions
         </DropdownNavLink>
+        {/* Your custom configuration */}
+        <DropdownNavLink to="/me/config">
+          <IoMdKey className="me-2" /> Your custom config
+        </DropdownNavLink>
         <DropdownItem divider />
         <DropdownNavLink to="/logout">
           <FiLogOut className="me-2" /> Logout

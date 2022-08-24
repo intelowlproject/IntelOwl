@@ -33,6 +33,10 @@ class Maxmind(classes.ObservableAnalyzer):
                 db_location = _get_db_location(db)
                 if not os.path.isfile(db_location):
                     self.updater(self.params, db)
+                if not os.path.exists(db_location):
+                    raise maxminddb.InvalidDatabaseError(
+                        "database location does not exist"
+                    )
                 reader = maxminddb.open_database(db_location)
                 maxmind_result = reader.get(self.observable_name)
                 reader.close()
@@ -50,6 +54,9 @@ class Maxmind(classes.ObservableAnalyzer):
 
     @classmethod
     def updater(cls, params, db):
+        if not cls.enabled:
+            logger.warning("No running updater for Maxmind, because it is disabled")
+            return
         # FIXME @eshaan7: dont hardcode api key name
         api_key = secrets.get_secret("MAXMIND_KEY")
         db_location = _get_db_location(db)

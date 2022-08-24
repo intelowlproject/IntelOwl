@@ -21,6 +21,7 @@ def start_connectors(
     connectors_to_execute: List[str],
     runtime_configuration: Dict[str, Dict] = None,
 ) -> None:
+    from intel_owl import tasks
 
     # we should not use mutable objects as default to avoid unexpected issues
     if runtime_configuration is None:
@@ -32,7 +33,46 @@ def start_connectors(
         runtime_configuration=runtime_configuration,
     )
 
-    task_signatures = cleaned_result[0]
+    # get connectors config
+    connector_dataclasses = ConnectorConfig.filter(names=connectors_to_execute)
+
+    # loop over and create task signatures
+    for c_name, cc in connector_dataclasses.items():
+        # if disabled or unconfigured (this check is bypassed in STAGE_CI)
+        if not cc.is_ready_to_use and not settings.STAGE_CI:
+            continue
+
+        # get runtime_configuration if any specified for this analyzer
+        runtime_params = runtime_configuration.get(c_name, {})
+        # gen a new task_id
+        task_id = uuid()
+        # construct args
+        args = [
+            job_id,
+            cc.asdict(),
+            {"runtime_configuration": runtime_params, "task_id": task_id},
+        ]
+        # get celery queue
+        queue = cc.config.queue
+        if queue not in settings.CELERY_QUEUES:
+            logger.error(
+                f"Connector {c_name} has a wrong queue."
+                f" Setting to `{DEFAULT_QUEUE}`"
+            )
+            queue = DEFAULT_QUEUE
+        # get soft_time_limit
+        soft_time_limit = cc.config.soft_time_limit
+        # create task signature and add to list
+        task_signatures.append(
+            tasks.run_connector.signature(
+                args,
+                {},
+                queue=queue,
+                soft_time_limit=soft_time_limit,
+                task_id=task_id,
+                ignore_result=True,  # since we are using group and not chord
+            )
+        )
 
     # fire the connectors in a grouped celery task
     # https://docs.celeryproject.org/en/stable/userguide/canvas.html

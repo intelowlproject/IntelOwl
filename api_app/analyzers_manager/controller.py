@@ -13,7 +13,7 @@ from rest_framework.exceptions import ValidationError
 from intel_owl.celery import app as celery_app
 
 from ..models import Job
-from .classes import BaseAnalyzerMixin, DockerBasedAnalyzer
+from .classes import DockerBasedAnalyzer
 from .dataclasses import AnalyzerConfig
 from .models import AnalyzerReport
 
@@ -35,7 +35,53 @@ def start_analyzers(
         runtime_configuration=runtime_configuration,
     )
 
-    task_signatures = cleaned_result[0]
+    # get analyzer config
+    analyzer_dataclasses = AnalyzerConfig.all()
+
+    # get job
+    job = Job.objects.get(pk=job_id)
+    job.update_status(Job.Status.RUNNING)  # set job status to running
+
+    # loop over and create task signatures
+    for a_name in analyzers_to_execute:
+        # get corresponding dataclass
+        config = analyzer_dataclasses[a_name]
+
+        # if disabled or unconfigured (this check is bypassed in STAGE_CI)
+        if not config.is_ready_to_use and not settings.STAGE_CI:
+            logger.info(f"skipping execution of analyzer {a_name}, job_id {job_id}")
+            continue
+
+        # get runtime_configuration if any specified for this analyzer
+        runtime_params = runtime_configuration.get(a_name, {})
+        # gen new task_id
+        task_id = uuid()
+        # construct arguments
+        args = [
+            job_id,
+            config.asdict(),
+            {"runtime_configuration": runtime_params, "task_id": task_id},
+        ]
+        # get celery queue
+        queue = config.config.queue
+        if queue not in settings.CELERY_QUEUES:
+            logger.warning(
+                f"Analyzer {a_name} has a wrong queue: {queue}."
+                f" Setting to `{DEFAULT_QUEUE}`"
+            )
+            queue = DEFAULT_QUEUE
+        # get soft_time_limit
+        soft_time_limit = config.config.soft_time_limit
+        # create task signature and add to list
+        task_signatures.append(
+            tasks.run_analyzer.signature(
+                args,
+                {},
+                queue=queue,
+                soft_time_limit=soft_time_limit,
+                task_id=task_id,
+            )
+        )
 
     # fire the analyzers in a grouped celery task
     # also link the callback to be executed
@@ -69,8 +115,6 @@ def run_analyzer(
     job_id: int, config_dict: dict, report_defaults: dict, parent_playbook=None
 ) -> AnalyzerReport:
     aconfig = AnalyzerConfig.from_dict(config_dict)
-    klass: BaseAnalyzerMixin = None
-    report: AnalyzerReport = None
     try:
         cls_path = aconfig.get_full_import_path()
         try:

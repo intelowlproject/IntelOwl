@@ -1,10 +1,9 @@
-from unittest import TestCase
-
 from django.contrib.auth import get_user_model
 from django.test import tag
 from durin.models import AuthToken, Client
 from rest_framework.reverse import reverse
-from rest_framework.test import APIClient
+
+from . import CustomOAuthTestCase
 
 User = get_user_model()
 login_uri = reverse("auth_login")
@@ -12,22 +11,7 @@ logout_uri = reverse("auth_logout")
 
 
 @tag("api", "user")
-class TestUserAuth(TestCase):
-    @classmethod
-    def setUpClass(cls):
-        # test data
-        username = "john.doe"
-        email = "john.doe@example.com"
-        password = "hunter2"
-        cls.user = User.objects.create_superuser(username, email, password)
-        cls.creds = {
-            "username": username,
-            "password": password,
-        }
-        # setup client
-        cls.client = APIClient()
-        return super().setUpClass()
-
+class TestUserAuth(CustomOAuthTestCase):
     def setUp(self):
         AuthToken.objects.all().delete()
         return super().setUp()

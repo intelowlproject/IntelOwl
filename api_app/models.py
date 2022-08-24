@@ -2,6 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 
 import hashlib
+import logging
 from typing import List, Optional
 
 from django.conf import settings

@@ -63,7 +63,7 @@ def filter_playbooks(serialized_data: Dict) -> Tuple[List]:
             )
 
             connectors_to_be_run.extend(
-                AnalyzerConfig.runnable_connectors(pp.connectors)
+                ConnectorConfig.runnable_connectors(pp.connectors)
             )
 
         except NotRunnablePlaybook as e:

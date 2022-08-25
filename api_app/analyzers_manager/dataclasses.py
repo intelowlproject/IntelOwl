@@ -3,7 +3,7 @@
 import dataclasses
 import typing
 import logging
-import uuid
+from celery import uuid
 from django.conf import settings
 from celery.canvas import Signature
 

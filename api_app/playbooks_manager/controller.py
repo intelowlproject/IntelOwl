@@ -10,14 +10,17 @@ from django.conf import settings
 from api_app.exceptions import (
     NotRunnablePlaybook,
 )
-from ..utility import job_cleanup, runnable_connectors, stack_analyzers, stack_connectors, runnable_analyzers
+
+from api_app.analyzers_manager.dataclasses import AnalyzerConfig
+from api_app.connectors_manager.dataclasses import ConnectorConfig
 
 from ..models import Job
 from .dataclasses import PlaybookConfig
 
 logger = logging.getLogger(__name__)
 
-def filter_playbooks(serialized_data: Dict) -> Tuple[List[str]]:
+
+def filter_playbooks(serialized_data: Dict) -> Tuple[List]:
     # init empty list
     valid_playbook_list = []
     selected_playbooks = []
@@ -55,10 +58,13 @@ def filter_playbooks(serialized_data: Dict) -> Tuple[List[str]]:
                     f"{p_name} won't run: not configured"
                 )
 
-            playbook_analyzers = runnable_analyzers(pp.analyzers)
-            playbook_connectors = runnable_connectors(pp.connectors)
-            analyzers_to_be_run.extend(playbook_analyzers)
-            connectors_to_be_run.extend(playbook_connectors)
+            analyzers_to_be_run.extend(
+                AnalyzerConfig.runnable_analyzers(pp.analyzers)
+            )
+
+            connectors_to_be_run.extend(
+                AnalyzerConfig.runnable_connectors(pp.connectors)
+            )
 
         except NotRunnablePlaybook as e:
             if run_all:
@@ -73,6 +79,7 @@ def filter_playbooks(serialized_data: Dict) -> Tuple[List[str]]:
         else:
             valid_playbook_list.append(p_name)
     return valid_playbook_list, analyzers_to_be_run, connectors_to_be_run, warnings
+
 
 def start_playbooks(
     job_id: int,
@@ -93,11 +100,8 @@ def start_playbooks(
     final_analyzers_used = []
     final_connectors_used = []
 
-    playbooks = list(playbook_dataclasses.items())
     # loop over and create task signatures
-    for p_dict in playbooks:
-        p_name = p_dict[0]
-        pp = p_dict[1]
+    for p_name, pp in playbook_dataclasses.items():
         # if disabled or unconfigured (this check is bypassed in STAGE_CI)
         if not pp.is_ready_to_use and not settings.STAGE_CI:
             continue
@@ -110,13 +114,13 @@ def start_playbooks(
         analyzers = pp.analyzers
         connectors = pp.connectors
 
-        task_signatures_analyzers, analyzers_used = stack_analyzers(
+        task_signatures_analyzers, analyzers_used = AnalyzerConfig.stack_analyzers(
             job_id=job_id,
             analyzers_to_execute=list(analyzers.keys()),
             runtime_configuration=analyzers,
         )
 
-        task_signatures_connectors, connectors_used = stack_connectors(
+        task_signatures_connectors, connectors_used = ConnectorConfig.stack_connectors(
             job_id=job_id,
             connectors_to_execute=list(connectors.keys()),
         )
@@ -147,4 +151,4 @@ def post_all_playbooks_finished(job_id: int) -> None:
     # get job instance
     job = Job.objects.get(pk=job_id)
     # execute some callbacks
-    job_cleanup(job)
+    job.job_cleanup()

@@ -12,7 +12,9 @@ from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.functional import cached_property
 
+from api_app.helpers import get_now
 from api_app.core.models import Status as ReportStatus
+from api_app.exceptions import AlreadyFailedJobException
 from certego_saas.apps.organization.membership import Membership
 from certego_saas.apps.organization.organization import Organization
 from certego_saas.models import User
@@ -129,6 +131,46 @@ class Job(models.Model):
     @cached_property
     def sha1(self) -> str:
         return hashlib.sha1(self.file.read()).hexdigest()
+    
+    def job_cleanup(self) -> None:
+        logger.info(f"[STARTING] job_cleanup for <-- {self.__repr__()}.")
+        status_to_set = self.Status.RUNNING
+
+        try:
+            if self.status == self.Status.FAILED:
+                raise AlreadyFailedJobException()
+
+            stats = self.get_analyzer_reports_stats()
+
+            logger.info(f"[REPORT] {self.__repr__()}, status:{self.status}, reports:{stats}")
+
+            if len(self.analyzers_to_execute) == stats["all"]:
+                if stats["running"] > 0 or stats["pending"] > 0:
+                    status_to_set = self.Status.RUNNING
+                elif stats["success"] == stats["all"]:
+                    status_to_set = self.Status.REPORTED_WITHOUT_FAILS
+                elif stats["failed"] == stats["all"]:
+                    status_to_set = self.Status.FAILED
+                elif stats["failed"] >= 1 or stats["killed"] >= 1:
+                    status_to_set = self.Status.REPORTED_WITH_FAILS
+                elif stats["killed"] == stats["all"]:
+                    status_to_set = self.Status.KILLED
+
+        except AlreadyFailedJobException:
+            logger.error(
+                f"[REPORT] {self.__repr__()}, status: failed. Do not process the report"
+            )
+
+        except Exception as e:
+            logger.exception(f"job_id: {self.pk}, Error: {e}")
+            self.append_error(str(e), save=False)
+
+        finally:
+            if not (self.status == self.Status.FAILED and self.finished_analysis_time):
+                self.finished_analysis_time = get_now()
+            self.status = status_to_set
+            self.save(update_fields=["status", "errors", "finished_analysis_time"])
+
 
     @property
     def process_time(self) -> Optional[float]:

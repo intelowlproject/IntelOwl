@@ -5,7 +5,7 @@ import logging
 from typing import Dict, List
 
 from celery import chord
-from api_app.utility import job_cleanup, stack_analyzers
+# from api_app.utility import job_cleanup, stack_analyzers
 from intel_owl import tasks
 from django.utils.module_loading import import_string
 from rest_framework.exceptions import ValidationError
@@ -29,59 +29,13 @@ def start_analyzers(
     if runtime_configuration is None:
         runtime_configuration = {}
     
-    cleaned_result = stack_analyzers(
+    cleaned_result = AnalyzerConfig.stack_analyzers(
         job_id=job_id,
         analyzers_to_execute=analyzers_to_execute,
         runtime_configuration=runtime_configuration,
     )
 
-    # get analyzer config
-    analyzer_dataclasses = AnalyzerConfig.all()
-
-    # get job
-    job = Job.objects.get(pk=job_id)
-    job.update_status(Job.Status.RUNNING)  # set job status to running
-
-    # loop over and create task signatures
-    for a_name in analyzers_to_execute:
-        # get corresponding dataclass
-        config = analyzer_dataclasses[a_name]
-
-        # if disabled or unconfigured (this check is bypassed in STAGE_CI)
-        if not config.is_ready_to_use and not settings.STAGE_CI:
-            logger.info(f"skipping execution of analyzer {a_name}, job_id {job_id}")
-            continue
-
-        # get runtime_configuration if any specified for this analyzer
-        runtime_params = runtime_configuration.get(a_name, {})
-        # gen new task_id
-        task_id = uuid()
-        # construct arguments
-        args = [
-            job_id,
-            config.asdict(),
-            {"runtime_configuration": runtime_params, "task_id": task_id},
-        ]
-        # get celery queue
-        queue = config.config.queue
-        if queue not in settings.CELERY_QUEUES:
-            logger.warning(
-                f"Analyzer {a_name} has a wrong queue: {queue}."
-                f" Setting to `{DEFAULT_QUEUE}`"
-            )
-            queue = DEFAULT_QUEUE
-        # get soft_time_limit
-        soft_time_limit = config.config.soft_time_limit
-        # create task signature and add to list
-        task_signatures.append(
-            tasks.run_analyzer.signature(
-                args,
-                {},
-                queue=queue,
-                soft_time_limit=soft_time_limit,
-                task_id=task_id,
-            )
-        )
+    task_signatures = cleaned_result[0]
 
     # fire the analyzers in a grouped celery task
     # also link the callback to be executed
@@ -139,7 +93,7 @@ def post_all_analyzers_finished(job_id: int, runtime_configuration: dict) -> Non
     # get job instance
     job = Job.objects.get(pk=job_id)
     # execute some callbacks
-    job_cleanup(job)
+    job.job_cleanup()
     # fire connectors when job finishes with success
     # avoid re-triggering of connectors (case: recurring analyzer run)
     if job.status == Job.Status.REPORTED_WITHOUT_FAILS and (

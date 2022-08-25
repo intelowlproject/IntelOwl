@@ -12,9 +12,9 @@ from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.functional import cached_property
 
-from api_app.helpers import get_now
 from api_app.core.models import Status as ReportStatus
 from api_app.exceptions import AlreadyFailedJobException
+from api_app.helpers import get_now
 from certego_saas.apps.organization.membership import Membership
 from certego_saas.apps.organization.organization import Organization
 from certego_saas.models import User
@@ -131,7 +131,7 @@ class Job(models.Model):
     @cached_property
     def sha1(self) -> str:
         return hashlib.sha1(self.file.read()).hexdigest()
-    
+
     def job_cleanup(self) -> None:
         logger.info(f"[STARTING] job_cleanup for <-- {self.__repr__()}.")
         status_to_set = self.Status.RUNNING
@@ -142,7 +142,9 @@ class Job(models.Model):
 
             stats = self.get_analyzer_reports_stats()
 
-            logger.info(f"[REPORT] {self.__repr__()}, status:{self.status}, reports:{stats}")
+            logger.info(
+                f"[REPORT] {self.__repr__()}, status:{self.status}, reports:{stats}"
+            )
 
             if len(self.analyzers_to_execute) == stats["all"]:
                 if stats["running"] > 0 or stats["pending"] > 0:
@@ -171,7 +173,6 @@ class Job(models.Model):
             self.status = status_to_set
             self.save(update_fields=["status", "errors", "finished_analysis_time"])
 
-
     @property
     def process_time(self) -> Optional[float]:
         if not self.finished_analysis_time:
@@ -194,7 +195,9 @@ class Job(models.Model):
         if save:
             self.save(update_fields=["connectors_to_execute"])
 
-    def update_analyzers_and_connectors_to_execute(self, analyzers_to_execute: List, connectors_to_execute: List):
+    def update_analyzers_and_connectors_to_execute(
+        self, analyzers_to_execute: List, connectors_to_execute: List
+    ):
         self.update_analyzers_to_execute(analyzers_to_execute)
         self.update_connectors_to_execute(connectors_to_execute)
 

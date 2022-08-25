@@ -5,11 +5,11 @@ import logging
 from typing import Dict, List
 
 from celery import chord
-# from api_app.utility import job_cleanup, stack_analyzers
-from intel_owl import tasks
 from django.utils.module_loading import import_string
 from rest_framework.exceptions import ValidationError
 
+# from api_app.utility import job_cleanup, stack_analyzers
+from intel_owl import tasks
 from intel_owl.celery import app as celery_app
 
 from ..models import Job
@@ -18,6 +18,7 @@ from .dataclasses import AnalyzerConfig
 from .models import AnalyzerReport
 
 logger = logging.getLogger(__name__)
+
 
 def start_analyzers(
     job_id: int,
@@ -28,7 +29,7 @@ def start_analyzers(
     # we should not use mutable objects as default to avoid unexpected issues
     if runtime_configuration is None:
         runtime_configuration = {}
-    
+
     cleaned_result = AnalyzerConfig.stack_analyzers(
         job_id=job_id,
         analyzers_to_execute=analyzers_to_execute,

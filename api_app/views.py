@@ -10,7 +10,6 @@ from django.conf import settings
 from django.db.models import Count, Q
 from django.db.models.functions import Trunc
 from django.http import FileResponse, QueryDict
-from api_app.playbooks_manager.serializers import PlaybookAnalysisResponseSerializer
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema as add_docs
 from drf_spectacular.utils import inline_serializer
@@ -21,6 +20,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.request import Request
 from rest_framework.response import Response
 
+from api_app.playbooks_manager.serializers import PlaybookAnalysisResponseSerializer
 from certego_saas.apps.organization.membership import Membership
 from certego_saas.apps.organization.permissions import IsObjectOwnerOrSameOrgPermission
 from certego_saas.ext.helpers import cache_action_response, parse_humanized_range
@@ -29,11 +29,11 @@ from certego_saas.ext.viewsets import ReadAndDeleteOnlyViewSet
 from intel_owl.celery import app as celery_app
 
 from .analyzers_manager import controller as analyzers_controller
-from .playbooks_manager import controller as playbooks_controller
 from .analyzers_manager.constants import ObservableTypes
 from .filters import JobFilter
 from .helpers import get_now
 from .models import TLP, CustomConfig, Job, Status, Tag
+from .playbooks_manager import controller as playbooks_controller
 from .serializers import (
     AnalysisResponseSerializer,
     CustomConfigSerializer,
@@ -78,10 +78,14 @@ def _multi_analysis_request(
     ]
 
     if playbook_scan:
-        valid_playbook_list, analyzers_to_be_run, connectors_to_be_run, warnings = (
-            playbooks_controller.filter_playbooks(
-                serialized_data,
-            ))
+        (
+            valid_playbook_list,
+            analyzers_to_be_run,
+            connectors_to_be_run,
+            warnings,
+        ) = playbooks_controller.filter_playbooks(
+            serialized_data,
+        )
 
     # save the arrived data plus new params into a new job object
     jobs = serializer.save(
@@ -126,7 +130,9 @@ def _multi_analysis_request(
                         config |= runtime_configurations[index][connector]
                     if config:
                         runtime_configuration[connector] = config
-                logger.debug(f"New value of runtime_configuration: {runtime_configuration}")
+                logger.debug(
+                    f"New value of runtime_configuration: {runtime_configuration}"
+                )
 
                 celery_app.send_task(
                     "start_analyzers",
@@ -138,16 +144,16 @@ def _multi_analysis_request(
                 )
     if playbook_scan:
         ser = PlaybookAnalysisResponseSerializer(
-        data=[
-            {
-                "status": "accepted",
-                "job_id": job.pk,
-                "warnings": warnings,
-                "playbooks_running": valid_playbook_list,
-                "analyzers_running": analyzers_to_be_run,
-                "connectors_running": connectors_to_be_run,
-            }
-            for index, job in enumerate(jobs)
+            data=[
+                {
+                    "status": "accepted",
+                    "job_id": job.pk,
+                    "warnings": warnings,
+                    "playbooks_running": valid_playbook_list,
+                    "analyzers_running": analyzers_to_be_run,
+                    "connectors_running": connectors_to_be_run,
+                }
+                for index, job in enumerate(jobs)
             ],
             many=True,
         )

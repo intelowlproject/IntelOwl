@@ -4,9 +4,10 @@
 import dataclasses
 import logging
 import typing
+
 from celery import uuid
-from django.conf import settings
 from celery.canvas import Signature
+from django.conf import settings
 
 from api_app.core.dataclasses import AbstractConfig
 from intel_owl.consts import DEFAULT_QUEUE
@@ -16,6 +17,7 @@ from .serializers import ConnectorConfigSerializer
 __all__ = ["ConnectorConfig"]
 
 logger = logging.getLogger(__name__)
+
 
 @dataclasses.dataclass
 class ConnectorConfig(AbstractConfig):
@@ -57,11 +59,13 @@ class ConnectorConfig(AbstractConfig):
 
     @staticmethod
     def runnable_connectors(
-    connectors_to_execute: typing.List[str]
+        connectors_to_execute: typing.List[str],
     ) -> typing.List[str]:
         connector_dataclass = ConnectorConfig.all()
         return [
-            connector for connector in connectors_to_execute if connector_dataclass.get(connector).is_ready_to_use
+            connector
+            for connector in connectors_to_execute
+            if connector_dataclass.get(connector).is_ready_to_use
         ]
 
     @classmethod
@@ -120,8 +124,5 @@ class ConnectorConfig(AbstractConfig):
                 )
             )
             connectors_used.append(c_name)
-        
+
         return task_signatures, connectors_used
-
-
-

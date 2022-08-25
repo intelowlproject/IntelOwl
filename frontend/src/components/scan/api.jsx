@@ -21,7 +21,6 @@ export async function createPlaybookJob(formValues) {
   const respData = resp.data;
   // handle response/error
   if (respData.status === "accepted" || respData.status === "running") {
-
     appendToRecentScans(respData.job_id, "success");
 
     addToast(

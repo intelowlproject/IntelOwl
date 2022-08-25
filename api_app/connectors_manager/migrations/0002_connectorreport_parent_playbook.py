@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('connectors_manager', '0001_initial'),
+        ("connectors_manager", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='connectorreport',
-            name='parent_playbook',
+            model_name="connectorreport",
+            name="parent_playbook",
             field=models.CharField(max_length=128, null=True),
         ),
     ]

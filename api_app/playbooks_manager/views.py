@@ -14,8 +14,8 @@ from rest_framework.response import Response
 from api_app.serializers import FileAnalysisSerializer, ObservableAnalysisSerializer
 from certego_saas.ext.views import APIView
 
-from .serializers import PlaybookAnalysisResponseSerializer, PlaybookConfigSerializer
 from ..views import _multi_analysis_request
+from .serializers import PlaybookAnalysisResponseSerializer, PlaybookConfigSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -43,6 +43,7 @@ def _multi_analysis_request_playbooks(
         response,
         status=status.HTTP_200_OK,
     )
+
 
 @add_docs(
     description="This endpoint allows to start a Job related to a file",

@@ -11,6 +11,7 @@ import re
 
 from django.utils import timezone
 from magic import from_buffer as magic_from_buffer
+
 from api_app.analyzers_manager.constants import ObservableTypes
 
 logger = logging.getLogger(__name__)

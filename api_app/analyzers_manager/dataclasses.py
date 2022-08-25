@@ -1,11 +1,12 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 import dataclasses
-import typing
 import logging
+import typing
+
 from celery import uuid
-from django.conf import settings
 from celery.canvas import Signature
+from django.conf import settings
 
 from api_app.core.dataclasses import AbstractConfig
 from api_app.models import Job
@@ -112,14 +113,15 @@ class AnalyzerConfig(AbstractConfig):
         all_analyzer_config = cls.all()
         return {name: ac for name, ac in all_analyzer_config.items() if name in names}
 
-    
     @staticmethod
-    def runnable_analyzers(
-        analyzers_to_execute: typing.List[str]
-    ) -> typing.List[str]:
+    def runnable_analyzers(analyzers_to_execute: typing.List[str]) -> typing.List[str]:
         analyzer_dataclass = AnalyzerConfig.all()
-        return [analyzer for analyzer in analyzers_to_execute if analyzer_dataclass.get(analyzer)]
-    
+        return [
+            analyzer
+            for analyzer in analyzers_to_execute
+            if analyzer_dataclass.get(analyzer)
+        ]
+
     @classmethod
     def stack_analyzers(
         cls,
@@ -167,7 +169,8 @@ class AnalyzerConfig(AbstractConfig):
             queue = config.config.queue
             if queue not in settings.CELERY_QUEUES:
                 logger.warning(
-                    f"Analyzer {a_name} has a wrong queue." f" Setting to `{DEFAULT_QUEUE}`"
+                    f"Analyzer {a_name} has a wrong queue."
+                    f" Setting to `{DEFAULT_QUEUE}`"
                 )
                 queue = DEFAULT_QUEUE
             # get soft_time_limit
@@ -185,4 +188,3 @@ class AnalyzerConfig(AbstractConfig):
             analyzers_used.append(a_name)
 
         return task_signatures, analyzers_used
-

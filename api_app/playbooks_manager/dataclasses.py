@@ -2,14 +2,15 @@
 # See the file 'LICENSE' for copying permission.
 
 import dataclasses
-import typing
 import inspect
+import typing
 
 from .serializers import PlaybookConfigSerializer
 
 __all__ = ["PlaybookConfig"]
 
 # Try to see if your changes in serializers helps with the changeshere (make them)
+
 
 @dataclasses.dataclass
 class PlaybookConfig:
@@ -26,7 +27,7 @@ class PlaybookConfig:
     def is_ready_to_use(self) -> bool:
         return not self.disabled
 
-    @classmethod    
+    @classmethod
     def filter_unwhitelisted_keys(cls, data: dict) -> typing.Dict:
         keys = data.keys()
 
@@ -34,10 +35,9 @@ class PlaybookConfig:
         whitelist = [parameter for parameter in signature.parameters]
         whitelist.pop(0)
 
-        cleaned_data = {key:data[key] for key in keys if key in whitelist}
+        cleaned_data = {key: data[key] for key in keys if key in whitelist}
 
         return cleaned_data
-
 
     @classmethod
     def from_dict(cls, data: dict) -> "PlaybookConfig":

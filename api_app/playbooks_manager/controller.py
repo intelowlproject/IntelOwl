@@ -7,12 +7,9 @@ from typing import Dict, List, Tuple
 from celery import chord
 from django.conf import settings
 
-from api_app.exceptions import (
-    NotRunnablePlaybook,
-)
-
 from api_app.analyzers_manager.dataclasses import AnalyzerConfig
 from api_app.connectors_manager.dataclasses import ConnectorConfig
+from api_app.exceptions import NotRunnablePlaybook
 
 from ..models import Job
 from .dataclasses import PlaybookConfig
@@ -54,13 +51,9 @@ def filter_playbooks(serialized_data: Dict) -> Tuple[List]:
                     )
                 continue
             if not pp.is_ready_to_use:
-                raise NotRunnablePlaybook(
-                    f"{p_name} won't run: not configured"
-                )
+                raise NotRunnablePlaybook(f"{p_name} won't run: not configured")
 
-            analyzers_to_be_run.extend(
-                AnalyzerConfig.runnable_analyzers(pp.analyzers)
-            )
+            analyzers_to_be_run.extend(AnalyzerConfig.runnable_analyzers(pp.analyzers))
 
             connectors_to_be_run.extend(
                 ConnectorConfig.runnable_connectors(pp.connectors)
@@ -131,9 +124,8 @@ def start_playbooks(
         task_signatures.extend(task_signatures_analyzers)
         task_signatures.extend(task_signatures_connectors)
 
-
     job.update_analyzers_and_connectors_to_execute(
-        analyzers_to_execute=final_analyzers_used, 
+        analyzers_to_execute=final_analyzers_used,
         connectors_to_execute=final_connectors_used,
     )
 

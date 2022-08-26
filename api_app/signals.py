@@ -8,10 +8,10 @@ from intel_owl.tasks import build_config_cache
 
 from .analyzers_manager.serializers import AnalyzerConfigSerializer
 from .connectors_manager.serializers import ConnectorConfigSerializer
-from .models import PluginCredential
+from .models import PluginConfig
 
 
-@receiver(post_save, sender=PluginCredential)
+@receiver(post_save, sender=PluginConfig)
 def post_save_plugin_credential(*args, **kwargs):
     AnalyzerConfigSerializer.read_and_verify_config.invalidate(AnalyzerConfigSerializer)
     ConnectorConfigSerializer.read_and_verify_config.invalidate(
@@ -20,7 +20,7 @@ def post_save_plugin_credential(*args, **kwargs):
     build_config_cache.delay()
 
 
-@receiver(post_delete, sender=PluginCredential)
+@receiver(post_delete, sender=PluginConfig)
 def post_delete_plugin_credential(*args, **kwargs):
     AnalyzerConfigSerializer.read_and_verify_config.invalidate(AnalyzerConfigSerializer)
     ConnectorConfigSerializer.read_and_verify_config.invalidate(

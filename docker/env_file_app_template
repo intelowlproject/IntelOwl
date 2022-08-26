@@ -13,9 +13,6 @@ INTELOWL_WEB_CLIENT_DOMAIN=localhost
 # Storage
 LOCAL_STORAGE=True
 
-# Allow non-admin users to edit plugin secrets from GUI
-NON_ADMIN_CAN_EDIT_PLUGIN_SECRETS=False
-
 # OAuth2
 GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=

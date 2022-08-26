@@ -7,7 +7,7 @@ from django.core.management.base import BaseCommand
 
 from api_app.analyzers_manager.serializers import AnalyzerConfigSerializer
 from api_app.connectors_manager.serializers import ConnectorConfigSerializer
-from api_app.models import PluginCredential
+from api_app.models import PluginConfig
 
 
 class Command(BaseCommand):
@@ -20,15 +20,22 @@ class Command(BaseCommand):
 
     @classmethod
     def _migrate_secrets(cls, plugin_list, plugin_type):
+        from django.contrib.auth import get_user_model
+
+        User = get_user_model()
+        if not User.objects.filter(is_superuser=True).exists():
+            raise Exception("Superuser must exist for secrets migration")
         for plugin in plugin_list:
             for secret_name in plugin["secrets"].keys():
                 secret = plugin["secrets"][secret_name]
                 if cls._get_env_var(secret["env_var_key"]):
-                    if PluginCredential.objects.get_or_create(
+                    if PluginConfig.objects.get_or_create(
                         attribute=secret_name,
                         value=cls._get_env_var(secret["env_var_key"]),
                         plugin_name=plugin["name"],
                         type=plugin_type,
+                        config_type=PluginConfig.ConfigType.SECRET,
+                        owner=User.objects.filter(is_superuser=True).first(),
                     )[1]:
                         print(
                             f"Migrated secret {secret['env_var_key']} "
@@ -38,11 +45,11 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         self._migrate_secrets(
             AnalyzerConfigSerializer.read_and_verify_config().values(),
-            PluginCredential.PluginType.ANALYZER,
+            PluginConfig.PluginType.ANALYZER,
         )
         self._migrate_secrets(
             ConnectorConfigSerializer.read_and_verify_config().values(),
-            PluginCredential.PluginType.CONNECTOR,
+            PluginConfig.PluginType.CONNECTOR,
         )
         print(
             "Migration complete. Please delete all plugin secrets "

@@ -17,7 +17,6 @@ from rest_framework import serializers as rfs
 from rest_framework import status, viewsets
 from rest_framework.decorators import action, api_view
 from rest_framework.exceptions import ValidationError
-from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 
@@ -32,16 +31,15 @@ from .analyzers_manager import controller as analyzers_controller
 from .analyzers_manager.constants import ObservableTypes
 from .filters import JobFilter
 from .helpers import get_now
-from .models import TLP, CustomConfig, Job, PluginCredential, Status, Tag
+from .models import TLP, Job, PluginConfig, Status, Tag
 from .serializers import (
     AnalysisResponseSerializer,
-    CustomConfigSerializer,
     FileAnalysisSerializer,
     JobAvailabilitySerializer,
     JobListSerializer,
     JobSerializer,
     ObservableAnalysisSerializer,
-    PluginCredentialSerializer,
+    PluginConfigSerializer,
     TagSerializer,
     multi_result_enveloper,
 )
@@ -91,16 +89,16 @@ def _multi_analysis_request(
 
             for analyzer in job.analyzers_to_execute:
                 # Appending custom config to runtime configuration
-                config = CustomConfig.get_as_dict(
-                    user, CustomConfig.PluginType.ANALYZER, plugin_name=analyzer
+                config = PluginConfig.get_as_dict(
+                    user, PluginConfig.PluginType.ANALYZER, plugin_name=analyzer
                 ).get(analyzer, {})
                 if analyzer in runtime_configurations[index]:
                     config |= runtime_configurations[index][analyzer]
                 if config:
                     runtime_configuration[analyzer] = config
             for connector in job.connectors_to_execute:
-                config = CustomConfig.get_as_dict(
-                    user, CustomConfig.PluginType.CONNECTOR, plugin_name=connector
+                config = PluginConfig.get_as_dict(
+                    user, PluginConfig.PluginType.CONNECTOR, plugin_name=connector
                 ).get(connector, {})
                 if connector in runtime_configurations[index]:
                     config |= runtime_configurations[index][connector]
@@ -630,30 +628,34 @@ class TagViewSet(viewsets.ModelViewSet):
 
 @add_docs(
     description="""
-    REST endpoint to fetch list of CustomConfigs or retrieve/delete a CustomConfig.
+    REST endpoint to fetch list of PluginConfig or retrieve/delete a CustomConfig.
     Requires authentication. Allows access to only authorized CustomConfigs.
     """
 )
-class CustomConfigViewSet(viewsets.ModelViewSet):
-    queryset = CustomConfig.objects.order_by("id")
-    serializer_class = CustomConfigSerializer
+class PluginConfigViewSet(viewsets.ModelViewSet):
+    queryset = PluginConfig.objects.filter(
+        config_type=PluginConfig.ConfigType.PARAMETER
+    ).order_by("id")
+    serializer_class = PluginConfigSerializer
     pagination_class = None
 
     def get_queryset(self):
         # Initializing empty queryset
-        result = CustomConfig.objects.none()
+        result = PluginConfig.objects.none()
 
         # Adding CustomConfigs for user's organization, if any
         membership = Membership.objects.filter(
             user=self.request.user, organization__isnull=False
         )
         if membership.exists():
-            result |= CustomConfig.objects.filter(
-                organization=membership[0].organization
+            result |= PluginConfig.objects.filter(
+                organization=membership[0].organization,
             )
 
         # Adding CustomConfigs for user
-        result |= CustomConfig.objects.filter(owner=self.request.user)
+        result |= PluginConfig.objects.filter(
+            owner=self.request.user,
+        )
 
         return result.order_by("id")
 
@@ -670,14 +672,3 @@ class CustomConfigViewSet(viewsets.ModelViewSet):
             request._full_data = request.data.copy()
         request.data["owner"] = request.user.id
         return super().update(request, *args, **kwargs)
-
-
-class PluginCredentialViewSet(viewsets.ModelViewSet):
-    queryset = PluginCredential.objects.all()
-    serializer_class = PluginCredentialSerializer
-    pagination_class = None
-    permission_classes = (
-        (IsAuthenticated,)
-        if settings.NON_ADMIN_CAN_EDIT_PLUGIN_SECRETS
-        else (IsAdminUser,)
-    )

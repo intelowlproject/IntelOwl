@@ -188,12 +188,17 @@ def delete_file(sender, instance: Job, **kwargs):
             instance.file.delete()
 
 
-class CustomConfig(models.Model):
+class PluginConfig(models.Model):
     class PluginType(models.TextChoices):
         ANALYZER = "1", "Analyzer"
         CONNECTOR = "2", "Connector"
 
+    class ConfigType(models.TextChoices):
+        PARAMETER = "1", "Parameter"
+        SECRET = "2", "Secret"
+
     type = models.CharField(choices=PluginType.choices, max_length=2)
+    config_type = models.CharField(choices=ConfigType.choices, max_length=2)
     attribute = models.CharField(max_length=128)
     value = models.JSONField(blank=False)
     organization = models.ForeignKey(
@@ -256,7 +261,7 @@ class CustomConfig(models.Model):
 
         result = {}
         for custom_config in custom_configs:
-            custom_config: CustomConfig
+            custom_config: PluginConfig
             if custom_config.plugin_name not in result:
                 result[custom_config.plugin_name] = {}
 
@@ -276,7 +281,7 @@ class CustomConfig(models.Model):
 
     @classmethod
     def apply(cls, initial_config, user, plugin_type):
-        custom_configs = CustomConfig.get_as_dict(user, plugin_type)
+        custom_configs = PluginConfig.get_as_dict(user, plugin_type)
         for plugin in initial_config.values():
             if plugin["name"] in custom_configs:
                 for param in plugin["params"]:
@@ -284,29 +289,3 @@ class CustomConfig(models.Model):
                         plugin["params"][param]["value"] = custom_configs[
                             plugin["name"]
                         ][param]
-
-
-class PluginCredential(models.Model):
-    class PluginType(models.TextChoices):
-        ANALYZER = "1", "Analyzer"
-        CONNECTOR = "2", "Connector"
-
-    type = models.CharField(choices=PluginType.choices, max_length=2)
-    attribute = models.CharField(max_length=128)
-    value = models.TextField()
-    updated_at = models.DateTimeField(auto_now=True)
-    plugin_name = models.CharField(max_length=128)
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=["type", "attribute", "plugin_name"],
-                name="unique_plugin_credential_entry",
-            )
-        ]
-
-        indexes = [
-            models.Index(
-                fields=["type", "plugin_name", "attribute"],
-            ),
-        ]

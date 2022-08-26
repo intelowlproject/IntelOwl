@@ -5,9 +5,8 @@ from django.urls import include, path
 from rest_framework import routers
 
 from .views import (
-    CustomConfigViewSet,
     JobViewSet,
-    PluginCredentialViewSet,
+    PluginConfigViewSet,
     TagViewSet,
     analyze_file,
     analyze_multiple_files,
@@ -21,10 +20,7 @@ from .views import (
 router = routers.DefaultRouter(trailing_slash=False)
 router.register(r"tags", TagViewSet, basename="tags")
 router.register(r"jobs", JobViewSet, basename="jobs")
-router.register(r"custom-config", CustomConfigViewSet, basename="custom-config")
-router.register(
-    r"plugin-credential", PluginCredentialViewSet, basename="plugin-credential"
-)
+router.register(r"plugin-config", PluginConfigViewSet, basename="plugin-config")
 
 # These come after /api/..
 urlpatterns = [

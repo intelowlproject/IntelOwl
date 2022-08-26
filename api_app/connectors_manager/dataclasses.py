@@ -10,7 +10,7 @@ from .serializers import ConnectorConfigSerializer
 
 __all__ = ["ConnectorConfig"]
 
-from ..models import PluginCredential
+from ..models import PluginConfig
 
 
 @dataclasses.dataclass
@@ -20,7 +20,7 @@ class ConnectorConfig(AbstractConfig):
     serializer_class = ConnectorConfigSerializer
 
     def _get_type(self) -> str:
-        return PluginCredential.PluginType.ANALYZER
+        return PluginConfig.PluginType.ANALYZER
 
     def get_full_import_path(self) -> str:
         return f"api_app.connectors_manager.connectors.{self.python_module}"

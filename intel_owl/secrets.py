@@ -71,7 +71,7 @@ def get_secret(secret_name, default="", plugin_type=None, plugin_name=None):
     """
     secret = default
     try:
-        from api_app.models import PluginCredential
+        from api_app.models import PluginConfig
 
         query = {
             "attribute": secret_name,
@@ -81,8 +81,12 @@ def get_secret(secret_name, default="", plugin_type=None, plugin_name=None):
         if plugin_name:
             query["plugin_name"] = plugin_name
 
-        if PluginCredential.objects.filter(**query).exists():
-            secret = PluginCredential.objects.get(**query).value
+        if PluginConfig.objects.filter(
+            **query, config_type=PluginConfig.ConfigType.SECRET
+        ).exists():
+            secret = PluginConfig.objects.get(
+                **query, config_type=PluginConfig.ConfigType.SECRET
+            ).value
     except AppRegistryNotReady:
         # This is a Django env var, not analyzer var
         pass

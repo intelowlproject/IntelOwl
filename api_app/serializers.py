@@ -30,7 +30,7 @@ from .helpers import (
     calculate_observable_classification,
     gen_random_colorhex,
 )
-from .models import TLP, CustomConfig, Job, PluginCredential, Tag
+from .models import TLP, Job, PluginConfig, Tag
 
 logger = logging.getLogger(__name__)
 
@@ -45,8 +45,9 @@ __all__ = [
     "MultipleFileAnalysisSerializer",
     "MultipleObservableAnalysisSerializer",
     "multi_result_enveloper",
-    "CustomConfigSerializer",
+    "PluginConfigSerializer",
 ]
+
 
 # User = get_user_model()
 
@@ -604,7 +605,7 @@ def multi_result_enveloper(serializer_class, many):
     return EnvelopeSerializer
 
 
-class CustomConfigSerializer(rfs.ModelSerializer):
+class PluginConfigSerializer(rfs.ModelSerializer):
     class CustomJSONField(rfs.JSONField):
         def run_validation(self, data=empty):
             value = super().run_validation(data)
@@ -627,7 +628,7 @@ class CustomConfigSerializer(rfs.ModelSerializer):
     value = CustomJSONField()
 
     class Meta:
-        model = CustomConfig
+        model = PluginConfig
         fields = rfs.ALL_FIELDS
 
     def validate(self, attrs):
@@ -648,10 +649,10 @@ class CustomConfigSerializer(rfs.ModelSerializer):
                 )
                 raise PermissionDenied("User is not owner of the organization.")
 
-        if attrs["type"] == CustomConfig.PluginType.ANALYZER:
+        if attrs["type"] == PluginConfig.PluginType.ANALYZER:
             config = AnalyzerConfig
             category = "Analyzer"
-        elif attrs["type"] == CustomConfig.PluginType.CONNECTOR:
+        elif attrs["type"] == PluginConfig.PluginType.CONNECTOR:
             config = ConnectorConfig
             category = "Connector"
         else:
@@ -661,22 +662,28 @@ class CustomConfigSerializer(rfs.ModelSerializer):
         if attrs["plugin_name"] not in config.all():
             raise ValidationError(f"{category} {attrs['plugin_name']} does not exist.")
 
-        if attrs["attribute"] not in config.all()[attrs["plugin_name"]].params:
-            raise ValidationError(
-                f"{category} {attrs['plugin_name']} does not "
-                f"have attribute {attrs['attribute']}."
-            )
-
+        if attrs["config_type"] == PluginConfig.ConfigType.PARAMETER:
+            if attrs["attribute"] not in config.all()[attrs["plugin_name"]].params:
+                raise ValidationError(
+                    f"{category} {attrs['plugin_name']} does not "
+                    f"have parameter {attrs['attribute']}."
+                )
+        elif attrs["config_type"] == PluginConfig.ConfigType.SECRET:
+            if attrs["attribute"] not in config.all()[attrs["plugin_name"]].secrets:
+                raise ValidationError(
+                    f"{category} {attrs['plugin_name']} does not "
+                    f"have secret {attrs['attribute']}."
+                )
         # Check if the type of value is valid for the attribute.
-        # NOTE: json.loads is used as it allows us to store all
-        # valid value types into a StringField
+        expected_type = (
+            type(config.all()[attrs["plugin_name"]].params[attrs["attribute"]].value)
+            if attrs["config_type"] == PluginConfig.ConfigType.PARAMETER
+            else str
+        )
         if not isinstance(
             attrs["value"],
-            type(config.all()[attrs["plugin_name"]].params[attrs["attribute"]].value),
+            expected_type,
         ):
-            expected_type = type(
-                config.all()[attrs["plugin_name"]].params[attrs["attribute"]].value
-            )
             raise ValidationError(
                 f"{category} {attrs['plugin_name']} attribute "
                 f"{attrs['attribute']} has wrong type "
@@ -692,58 +699,12 @@ class CustomConfigSerializer(rfs.ModelSerializer):
         if self.instance is not None:
             exclusion_params["id"] = self.instance.id
         if (
-            CustomConfig.objects.filter(**inclusion_params)
+            PluginConfig.objects.filter(**inclusion_params)
             .exclude(**exclusion_params)
             .exists()
         ):
             raise ValidationError(
                 f"{category} {attrs['plugin_name']} "
-                f"attribute {attrs['attribute']} already exists."
-            )
-        return attrs
-
-
-class PluginCredentialSerializer(rfs.ModelSerializer):
-    class Meta:
-        model = PluginCredential
-        fields = rfs.ALL_FIELDS
-        # Secret values can only be read from admin panel
-        extra_kwargs = {"value": {"write_only": True}}
-
-    def validate(self, attrs):
-        super().validate(attrs)
-
-        if attrs["type"] == CustomConfig.PluginType.ANALYZER:
-            config = AnalyzerConfig
-            category = "Analyzer"
-        elif attrs["type"] == CustomConfig.PluginType.CONNECTOR:
-            config = ConnectorConfig
-            category = "Connector"
-        else:
-            logger.error(f"Unknown custom config type: {attrs['type']}")
-            raise ValidationError("Invalid type.")
-
-        if attrs["plugin_name"] not in config.all():
-            raise ValidationError(f"{category} {attrs['plugin_name']} does not exist.")
-
-        if attrs["attribute"] not in config.all()[attrs["plugin_name"]].secrets:
-            raise ValidationError(
-                f"{category} {attrs['plugin_name']} does not "
-                f"have attribute {attrs['attribute']}."
-            )
-
-        inclusion_params = attrs.copy()
-        exclusion_params = {}
-        inclusion_params.pop("value")
-        if self.instance is not None:
-            exclusion_params["id"] = self.instance.id
-        if (
-            PluginCredential.objects.filter(**inclusion_params)
-            .exclude(**exclusion_params)
-            .exists()
-        ):
-            raise ValidationError(
-                f"{category} {attrs['plugin_name']} "
-                f"attribute {attrs['attribute']} already exists."
+                f"{self} attribute {attrs['attribute']} already exists."
             )
         return attrs

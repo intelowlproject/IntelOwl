@@ -5,7 +5,7 @@ from django.utils.module_loading import import_string
 from rest_framework import serializers as rfs
 
 from api_app.core.serializers import AbstractConfigSerializer
-from api_app.models import PluginCredential
+from api_app.models import PluginConfig
 
 from .constants import HashChoices, ObservableTypes, TypeChoices
 from .models import AnalyzerReport
@@ -61,7 +61,7 @@ class AnalyzerConfigSerializer(AbstractConfigSerializer):
     )
 
     def _get_type(self):
-        return PluginCredential.PluginType.ANALYZER
+        return PluginConfig.PluginType.ANALYZER
 
     def validate_python_module(self, python_module: str) -> str:
         if self.initial_data["type"] == self.TypeChoices.OBSERVABLE or (

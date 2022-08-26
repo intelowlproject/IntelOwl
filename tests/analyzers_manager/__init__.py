@@ -7,6 +7,7 @@ import time
 from unittest import SkipTest
 
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.core.files import File
 from django.core.management import call_command
 from django.test import TransactionTestCase
@@ -17,9 +18,10 @@ from api_app.core.models import AbstractReport
 from api_app.models import Job
 from intel_owl.tasks import start_analyzers
 
+User = get_user_model()
+
 
 class _AbstractAnalyzersScriptTestCase(TransactionTestCase):
-
     # constants
     TIMEOUT_SECONDS: int = 60 * 5  # 5 minutes
     SLEEP_SECONDS: int = 5  # 5 seconds
@@ -42,6 +44,10 @@ class _AbstractAnalyzersScriptTestCase(TransactionTestCase):
 
     @classmethod
     def setUpClass(cls):
+        super().setUpClass()
+        cls.superuser = User.objects.create_superuser(
+            username="test", email="test@intelowl.com", password="test"
+        )
         call_command("migrate_secrets")
         if cls in [
             _AbstractAnalyzersScriptTestCase,
@@ -49,7 +55,6 @@ class _AbstractAnalyzersScriptTestCase(TransactionTestCase):
             _FileAnalyzersScriptsTestCase,
         ]:
             raise SkipTest(f"{cls.__name__} is an abstract base class.")
-        return super().setUpClass()
 
     def setUp(self):
         analyzers_to_test = os.environ.get("TEST_ANALYZERS", "").split(",")
@@ -167,7 +172,6 @@ class _AbstractAnalyzersScriptTestCase(TransactionTestCase):
 
 
 class _ObservableAnalyzersScriptsTestCase(_AbstractAnalyzersScriptTestCase):
-
     # define runtime configs
     runtime_configuration = {
         "Triage_Search": {
@@ -210,7 +214,6 @@ class _ObservableAnalyzersScriptsTestCase(_AbstractAnalyzersScriptTestCase):
 
 
 class _FileAnalyzersScriptsTestCase(_AbstractAnalyzersScriptTestCase):
-
     # define runtime configs
     runtime_configuration = {
         "VirusTotal_v2_Scan_File": {"wait_for_scan_anyway": True, "max_tries": 1},

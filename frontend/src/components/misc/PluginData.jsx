@@ -155,7 +155,7 @@ export function PluginData({
 
                             return (
                               <Row className="py-2" key={`entry.${index + 0}`}>
-                                <Col>
+                                <Col className="col-2">
                                   <Field
                                     as="select"
                                     className={`form-select ${disabledSuffix}`}
@@ -168,7 +168,7 @@ export function PluginData({
                                   </Field>
                                 </Col>
 
-                                <Col>
+                                <div className="col-auto">
                                   <Field
                                     as="select"
                                     className={`form-select ${disabledSuffix}`}
@@ -187,7 +187,7 @@ export function PluginData({
                                       )
                                     )}
                                   </Field>
-                                </Col>
+                                </div>
 
                                 <Col>
                                   <Field

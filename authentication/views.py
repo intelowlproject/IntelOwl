@@ -11,7 +11,12 @@ from django_user_agents.utils import get_user_agent
 from drf_spectacular.extensions import OpenApiAuthenticationExtension
 from durin import views as durin_views
 from durin.models import Client
+from rest_framework import status
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.exceptions import AuthenticationFailed
+from rest_framework.permissions import AllowAny
+from rest_framework.request import Request
+from rest_framework.response import Response
 from rest_framework.reverse import reverse
 
 from intel_owl.settings import AUTH_USER_MODEL
@@ -78,10 +83,18 @@ class DurinAuthenticationScheme(OpenApiAuthenticationExtension):
         }
 
 
-def google_login(request):
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def google_login(request: Request):
+    """
+    Redirect to Google OAuth login
+    """
     redirect_uri = request.build_absolute_uri(reverse("oauth_google_callback"))
     try:
-        return oauth.google.authorize_redirect(request, redirect_uri)
+        response = oauth.google.authorize_redirect(request, redirect_uri)
+        if request.query_params.get("no_redirect") == "true":
+            return Response(status=status.HTTP_200_OK)
+        return response
     except AttributeError as error:
         if "No such client: " in str(error):
             raise AuthenticationFailed("Google OAuth is not configured.")

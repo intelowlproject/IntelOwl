@@ -1,9 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { BsPeopleFill, BsSliders } from "react-icons/bs";
-import { FaUserSecret } from "react-icons/fa";
-import { Link } from "react-router-dom";
-import { Container, Col, Row, Button } from "reactstrap";
+import { Container, Col, Row } from "reactstrap";
 import useTitle from "react-use/lib/useTitle";
 
 import {
@@ -16,10 +13,7 @@ import {
 } from "@certego/certego-ui";
 
 import { PluginInfoCard } from "./utils";
-import {
-  useOrganizationStore,
-  usePluginConfigurationStore,
-} from "../../../stores";
+import { usePluginConfigurationStore } from "../../../stores";
 
 // table config
 const tableConfig = {};
@@ -47,29 +41,6 @@ export default function PluginWrapper({ heading, stateSelector, columns }) {
   const [loading, error, dataList, refetch] =
     usePluginConfigurationStore(stateSelector);
 
-  // consume organization store
-  const {
-    isUserOwner,
-    organization,
-    fetchAll: fetchAllOrganizations,
-  } = useOrganizationStore(
-    React.useCallback(
-      (state) => ({
-        isUserOwner: state.isUserOwner,
-        fetchAll: state.fetchAll,
-        organization: state.organization,
-      }),
-      []
-    )
-  );
-
-  // on component mount
-  React.useEffect(() => {
-    if (!isUserOwner) {
-      fetchAllOrganizations();
-    }
-  }, [isUserOwner, fetchAllOrganizations]);
-
   // page title
   useTitle(`IntelOwl | ${heading}`, { restoreOnUnmount: true });
 
@@ -87,51 +58,6 @@ export default function PluginWrapper({ heading, stateSelector, columns }) {
             errors if any.
           </span>
         </Col>
-        <div className="col-auto">
-          {isUserOwner ? (
-            <Row>
-              <Col className="mx-2 my-2">
-                <Link
-                  to="/me/organization/config"
-                  style={{ color: "inherit", textDecoration: "inherit" }}
-                >
-                  <Row>
-                    <Button>
-                      <BsPeopleFill className="me-2" /> Organization{" "}
-                      {organization.name}&apos;s custom config
-                    </Button>
-                  </Row>
-                </Link>
-              </Col>
-            </Row>
-          ) : null}
-          <Row>
-            <Col className="mx-2 my-2">
-              <Link
-                to="/me/plugin-secrets"
-                style={{ color: "inherit", textDecoration: "inherit" }}
-              >
-                <Row>
-                  <Button className="my-2">
-                    <FaUserSecret className="me-2" /> Plugin Secrets
-                  </Button>
-                </Row>
-              </Link>
-            </Col>
-            <Col className="mx-2 my-2">
-              <Link
-                to="/me/config"
-                style={{ color: "inherit", textDecoration: "inherit" }}
-              >
-                <Row>
-                  <Button>
-                    <BsSliders className="me-2" /> Your custom config
-                  </Button>
-                </Row>
-              </Link>
-            </Col>
-          </Row>
-        </div>
       </Row>
       {/* Actions */}
       <Row className="bg-dark d-flex-between-center">

@@ -21,6 +21,7 @@ export default function Secrets({ additionalConfigData, filterFunction }) {
           ...additionalConfigData,
           config_type: "2",
         }}
+        dataName="secrets"
       />
     </Container>
   );

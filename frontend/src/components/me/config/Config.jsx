@@ -8,13 +8,17 @@ import {
   updateCustomConfig,
 } from "./api";
 
-export default function Config({ configFilter, additionalConfigData }) {
+export default function Config({
+  configFilter,
+  additionalConfigData,
+  dataName,
+}) {
   return (
     <PluginData
       createPluginData={createCustomConfig}
       updatePluginData={updateCustomConfig}
       deletePluginData={deleteCustomConfig}
-      dataName="params"
+      dataName={dataName}
       valueType="json"
       dataUri={PLUGIN_CONFIG_URI}
       entryFilter={configFilter}
@@ -26,6 +30,7 @@ export default function Config({ configFilter, additionalConfigData }) {
 Config.propTypes = {
   additionalConfigData: PropTypes.object,
   configFilter: PropTypes.func.isRequired,
+  dataName: PropTypes.string.isRequired,
 };
 
 Config.defaultProps = {

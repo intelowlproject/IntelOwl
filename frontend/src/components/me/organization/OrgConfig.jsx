@@ -4,7 +4,7 @@ import useTitle from "react-use/lib/useTitle";
 import { LoadingBoundary, ErrorAlert } from "@certego/certego-ui";
 import { useOrganizationStore } from "../../../stores";
 
-import Config from "../config/Config";
+import ConfigContainer from "../config/ConfigContainer";
 import { OrgCreateButton } from "./utils";
 
 export default function OrgConfig() {
@@ -73,8 +73,8 @@ export default function OrgConfig() {
         return (
           <Container>
             <h4>{organization.name}&apos;s custom configuration</h4>
-            <Config
-              configFilter={(resp) => resp.filter((item) => item.organization)}
+            <ConfigContainer
+              filterFunction={(item) => item.organization}
               additionalConfigData={{
                 organization: organization.name,
               }}

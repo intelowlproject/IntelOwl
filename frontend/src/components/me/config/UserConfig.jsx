@@ -1,7 +1,7 @@
 import React from "react";
 import { Container } from "reactstrap";
 import useTitle from "react-use/lib/useTitle";
-import Config from "./Config";
+import ConfigContainer from "./ConfigContainer";
 
 export default function UserConfig() {
   console.debug("Config rendered!");
@@ -13,9 +13,7 @@ export default function UserConfig() {
   return (
     <Container>
       <h4>Your custom configuration</h4>
-      <Config
-        configFilter={(resp) => resp.filter((item) => !item.organization)}
-      />
+      <ConfigContainer filterFunction={(item) => !item.organization} />
     </Container>
   );
 }

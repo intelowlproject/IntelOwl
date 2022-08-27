@@ -52,20 +52,6 @@ function isValidEntry(item, valueType) {
 }
 
 function filterEmptyData(plugins, dataName) {
-  // eslint-disable-next-line no-console
-  console.log(
-    Object.keys(plugins)
-      .filter(
-        (pluginName) =>
-          plugins[pluginName][dataName] &&
-          Object.keys(plugins[pluginName][dataName]).length > 0
-      )
-      .reduce(
-        (filteredPlugins, key) =>
-          Object.assign(filteredPlugins, { [key]: plugins[key] }),
-        {}
-      )
-  );
   return Object.keys(plugins)
     .filter(
       (pluginName) =>

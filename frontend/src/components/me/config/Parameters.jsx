@@ -21,6 +21,7 @@ export default function Parameters({ additionalConfigData, filterFunction }) {
           ...additionalConfigData,
           config_type: "1",
         }}
+        dataName="params"
       />
     </Container>
   );

@@ -4,7 +4,7 @@ import useTitle from "react-use/lib/useTitle";
 import { LoadingBoundary, ErrorAlert } from "@certego/certego-ui";
 import { useOrganizationStore } from "../../../stores";
 
-import { Config } from "../config/UserConfig";
+import Config from "../config/Config";
 import { OrgCreateButton } from "./utils";
 
 export default function OrgConfig() {

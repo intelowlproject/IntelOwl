@@ -1,5 +1,4 @@
 import React from "react";
-import { FaUserSecret } from "react-icons/fa";
 import {
   UncontrolledDropdown,
   DropdownToggle,
@@ -47,10 +46,6 @@ export default function UserMenu(props) {
         {/* Your custom configuration */}
         <DropdownNavLink to="/me/config">
           <BsSliders className="me-2" /> Your custom config
-        </DropdownNavLink>
-        {/* Your custom configuration */}
-        <DropdownNavLink to="/me/plugin-secrets">
-          <FaUserSecret className="me-2" /> Plugin secrets
         </DropdownNavLink>
         <DropdownItem divider />
         <DropdownNavLink to="/logout">

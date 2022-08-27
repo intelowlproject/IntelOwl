@@ -14,13 +14,15 @@ from durin.models import Client
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.reverse import reverse
 
+from intel_owl.settings import AUTH_USER_MODEL
+
 from .oauth import oauth
 
 logger = logging.getLogger(__name__)
 
 """ Auth API endpoints """
 
-User = get_user_model()
+User: AUTH_USER_MODEL = get_user_model()
 
 
 class LoginView(durin_views.LoginView):
@@ -98,10 +100,15 @@ class GoogleLoginCallbackView(LoginView):
             # Not giving out the actual error as we risk exposing the client secret
             raise AuthenticationFailed("OAuth authentication error.")
         user = token.get("userinfo")
+        user_email = user.get("email")
+        user_name = user.get("name")
         try:
-            return User.objects.get(email=user.get("email"))
+            return User.objects.get(email=user_email)
         except User.DoesNotExist:
-            return None
+            logging.info("[Google Oauth] User does not exist. Creating new user.")
+            return User.objects.create_user(
+                email=user_email, username=user_name, password=None
+            )
 
     def get(self, *args, **kwargs):
         return self.post(*args, **kwargs)

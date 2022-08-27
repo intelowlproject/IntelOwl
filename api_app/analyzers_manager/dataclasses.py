@@ -89,6 +89,15 @@ class AnalyzerConfig(AbstractConfig):
         return cls.from_dict(config_dict)
 
     @classmethod
+    def is_disabled(cls, class_name: str) -> bool:
+        all_analyzer_config = cls.all()
+        for name, ac in all_analyzer_config.items():
+            if ac.python_module.endswith(f".{class_name}"):
+                if not ac.disabled:
+                    return False
+        return True
+
+    @classmethod
     def all(cls) -> typing.Dict[str, "AnalyzerConfig"]:
         return {
             name: cls.from_dict(attrs)

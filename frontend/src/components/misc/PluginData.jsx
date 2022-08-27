@@ -12,6 +12,12 @@ import { MdCancel } from "react-icons/md";
 import { Button, Col, FormGroup, Input, Row } from "reactstrap";
 import { usePluginConfigurationStore } from "../../stores";
 
+const ANALYZER = "1";
+const CONNECTOR = "2";
+
+const PARAMETER = "1";
+const SECRET = "2";
+
 function isJSON(str) {
   try {
     JSON.parse(str); // && !!str
@@ -36,18 +42,6 @@ function isValidEntry(item, valueType) {
   }
   if (!["str", "json"].includes(valueType))
     console.error(`Invalid value type: ${valueType}`);
-
-  if (valueType === "json") {
-    if (!isJSON(item.value)) {
-      addToast(
-        "Invalid entry!",
-        "Please enter a JSON-compliant value",
-        "danger",
-        true
-      );
-      return false;
-    }
-  }
   return true;
 }
 
@@ -91,7 +85,31 @@ export function PluginData({
     {
       url: dataUri,
     },
-    entryFilter
+    (resp) => {
+      let pluginConfigs = entryFilter(resp);
+      if (Object.keys(analyzers).length > 0) {
+        pluginConfigs = pluginConfigs.map((pluginConfig) => {
+          const res = pluginConfig;
+          let plugins;
+          if (res.type === ANALYZER) {
+            plugins = analyzers;
+          } else if (res.type === CONNECTOR) {
+            plugins = connectors;
+          } else {
+            console.error(`Invalid type: ${res.type}`);
+          }
+          if (
+            res.config_type === SECRET ||
+            (res.config_type === PARAMETER &&
+              plugins[res.plugin_name].params[res.attribute].type === "str")
+          ) {
+            res.value = isJSON(res.value) ? JSON.parse(res.value) : res.value;
+          }
+          return res;
+        });
+      }
+      return pluginConfigs;
+    }
   );
 
   const refetchAll = () => {
@@ -226,26 +244,41 @@ export function PluginData({
                                         !isValidEntry(configuration, valueType)
                                       )
                                         return;
-
-                                      if (configuration.create)
-                                        createPluginData({
-                                          ...configuration,
-                                          ...additionalEntryData,
-                                        }).then(() => {
-                                          setFieldValue(
-                                            `entry.${index}.edit`,
-                                            false
-                                          );
-                                          setFieldValue(
-                                            `entry.${index}.create`,
-                                            false
-                                          );
-                                          refetchAll();
-                                        });
+                                      const newConfiguration = {
+                                        ...configuration,
+                                        ...additionalEntryData,
+                                      };
+                                      if (
+                                        newConfiguration.config_type ===
+                                          SECRET ||
+                                        (newConfiguration.config_type ===
+                                          PARAMETER &&
+                                          plugins[newConfiguration.plugin_name]
+                                            .params[newConfiguration.attribute]
+                                            .type === "str")
+                                      ) {
+                                        newConfiguration.value = JSON.stringify(
+                                          newConfiguration.value
+                                        );
+                                      }
+                                      if (newConfiguration.create)
+                                        createPluginData(newConfiguration).then(
+                                          () => {
+                                            setFieldValue(
+                                              `entry.${index}.edit`,
+                                              false
+                                            );
+                                            setFieldValue(
+                                              `entry.${index}.create`,
+                                              false
+                                            );
+                                            refetchAll();
+                                          }
+                                        );
                                       else
                                         updatePluginData(
-                                          configuration,
-                                          configuration.id
+                                          newConfiguration,
+                                          newConfiguration.id
                                         ).then(() => {
                                           setFieldValue(
                                             `entry.${index}.edit`,
@@ -324,7 +357,7 @@ export function PluginData({
 
 PluginData.propTypes = {
   entryFilter: PropTypes.func,
-  additionalEntryData: PropTypes.object,
+  additionalEntryData: PropTypes.object.isRequired,
   dataUri: PropTypes.string.isRequired,
   createPluginData: PropTypes.func.isRequired,
   updatePluginData: PropTypes.func.isRequired,
@@ -335,5 +368,4 @@ PluginData.propTypes = {
 
 PluginData.defaultProps = {
   entryFilter: (x) => x,
-  additionalEntryData: {},
 };

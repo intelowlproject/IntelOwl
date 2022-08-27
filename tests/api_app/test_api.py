@@ -21,10 +21,10 @@ class ApiViewTests(TestCase):
     @classmethod
     def setUpClass(cls):
         super(ApiViewTests, cls).setUpClass()
-        call_command("migrate_secrets")
         cls.superuser = User.objects.create_superuser(
             username="test", email="test@intelowl.com", password="test"
         )
+        call_command("migrate_secrets")
 
     def setUp(self):
         self.client = APIClient()

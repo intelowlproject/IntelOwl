@@ -4,7 +4,7 @@ from urllib.parse import parse_qs, urlparse
 from django.contrib.auth import get_user_model
 from django.test import tag
 from durin.models import AuthToken
-from rest_framework.exceptions import AuthenticationFailed
+from rest_framework import status
 from rest_framework.reverse import reverse
 
 from authentication.oauth import oauth
@@ -25,20 +25,18 @@ class TestOAuth(CustomOAuthTestCase):
         prev_registry = oauth._registry
         oauth._registry = {}
         try:
-            self.assertRaisesMessage(
-                AuthenticationFailed,
-                "Google OAuth is not configured",
-                self.client.get,
-                self.google_auth_uri,
-                follow=False,
+            response = self.client.get(self.google_auth_uri)
+            self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+            self.assertEqual(
+                response.json(), {"detail": "Google OAuth is not configured."}
             )
         finally:
             oauth._registry = prev_registry
 
     def test_google_enabled(self):
         response = self.client.get(self.google_auth_uri, follow=False)
+        self.assertEqual(response.status_code, 302)
         msg = response.url
-        self.assertEqual(response.status_code, 302, msg)
         expected_redirect_url = urlparse("https://accounts.google.com/o/oauth2/v2/auth")
         response_redirect = urlparse(response.url)
         self.assertEqual(response_redirect.scheme, expected_redirect_url.scheme, msg)

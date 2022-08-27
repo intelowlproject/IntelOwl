@@ -98,7 +98,8 @@ export default function Login() {
                     })
                     .catch((error) => {
                       if (
-                        error.response.data.includes("OAuth is not configured.")
+                        error?.response?.status === 401 &&
+                        error.parsedMsg.includes("OAuth is not configured.")
                       )
                         addToast(
                           "Login failed!",

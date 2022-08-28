@@ -165,6 +165,7 @@ class AnalyzerConfig(AbstractConfig):
                 job_id,
                 config.asdict(),
                 {"runtime_configuration": runtime_params, "task_id": task_id},
+                parent_playbook,
             ]
             # get celery queue
             queue = config.config.queue
@@ -184,7 +185,6 @@ class AnalyzerConfig(AbstractConfig):
                     queue=queue,
                     soft_time_limit=soft_time_limit,
                     task_id=task_id,
-                    parent_playbook=parent_playbook,
                 )
             )
             analyzers_used.append(a_name)

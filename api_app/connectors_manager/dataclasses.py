@@ -102,6 +102,7 @@ class ConnectorConfig(AbstractConfig):
                 job_id,
                 cc.asdict(),
                 {"runtime_configuration": runtime_params, "task_id": task_id},
+                parent_playbook,
             ]
             # get celery queue
             queue = cc.config.queue
@@ -122,7 +123,6 @@ class ConnectorConfig(AbstractConfig):
                     soft_time_limit=soft_time_limit,
                     task_id=task_id,
                     ignore_result=True,  # since we are using group and not chord
-                    parent_playbook=None,
                 )
             )
             connectors_used.append(c_name)

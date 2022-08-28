@@ -19,8 +19,8 @@ export async function createPlaybookJob(formValues) {
   // new scan
   const resp =
   formValues.classification === "file"
-    ? await _startPlaybookFiles(formValues)
-    : await _startPlaybookObservables(formValues);
+    ? await _startPlaybookFile(formValues)
+    : await _startPlaybookObservable(formValues);
 
   const respData = resp.data;
   // handle response/error
@@ -222,18 +222,18 @@ async function _analyzeFile(formValues) {
   return axios.post(ANALYZE_MULTIPLE_FILES_URI, body);
 }
 
-async function _startPlaybookFiles(formValues) {
+async function _startPlaybookFile(formValues) {
   const playbookURI = `${API_BASE_URI}/playbook/analyze_multiple_files`;
   const body = new FormData();
   Array.from(formValues.files).forEach((file) => {
     body.append("files", file, file.name);
   });
-  formValues.tags_labels.map((x) => body.append("tags_labels", x));
+  formValues.tags.map((x) => body.append("tags_labels", x));
   formValues.playbooks.map((x) => body.append("playbooks_requested", x));
   return axios.post(playbookURI, body);
 }
 
-async function _startPlaybookObservables(formValues) {
+async function _startPlaybookObservable(formValues) {
   const observables = [];
   formValues.observable_names.forEach((ObservableName) => {
     observables.push([formValues.classification, ObservableName]);

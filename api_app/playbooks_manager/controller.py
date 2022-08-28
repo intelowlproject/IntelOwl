@@ -111,11 +111,13 @@ def start_playbooks(
             job_id=job_id,
             analyzers_to_execute=list(analyzers.keys()),
             runtime_configuration=analyzers,
+            parent_playbook=p_name,
         )
 
         task_signatures_connectors, connectors_used = ConnectorConfig.stack_connectors(
             job_id=job_id,
             connectors_to_execute=list(connectors.keys()),
+            parent_playbook=p_name,            
         )
 
         final_analyzers_used.extend(analyzers_used)

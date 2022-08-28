@@ -74,6 +74,7 @@ class ConnectorConfig(AbstractConfig):
         job_id: int,
         connectors_to_execute: typing.List[str],
         runtime_configuration: typing.Dict[str, typing.Dict] = None,
+        parent_playbook=None,
     ) -> typing.Tuple[typing.List[Signature], typing.List[str]]:
         from intel_owl import tasks
 
@@ -121,6 +122,7 @@ class ConnectorConfig(AbstractConfig):
                     soft_time_limit=soft_time_limit,
                     task_id=task_id,
                     ignore_result=True,  # since we are using group and not chord
+                    parent_playbook=None,
                 )
             )
             connectors_used.append(c_name)

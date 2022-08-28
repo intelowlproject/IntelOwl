@@ -128,6 +128,7 @@ class AnalyzerConfig(AbstractConfig):
         job_id: int,
         analyzers_to_execute: typing.List[str],
         runtime_configuration: typing.Dict[str, typing.Dict] = None,
+        parent_playbook=None,
     ) -> typing.Tuple[typing.List[Signature], typing.List[str]]:
         from intel_owl import tasks
 
@@ -183,6 +184,7 @@ class AnalyzerConfig(AbstractConfig):
                     queue=queue,
                     soft_time_limit=soft_time_limit,
                     task_id=task_id,
+                    parent_playbook=parent_playbook,
                 )
             )
             analyzers_used.append(a_name)

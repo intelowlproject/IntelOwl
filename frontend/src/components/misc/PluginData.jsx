@@ -233,6 +233,12 @@ export function PluginData({
                                     className={disabledSuffix}
                                     disabled={!configuration.edit}
                                     placeholder={placeholder}
+                                    value={
+                                      additionalEntryData.config_type ===
+                                        SECRET && !configuration.edit
+                                        ? "**********"
+                                        : configuration.value
+                                    }
                                   />
                                 </Col>
                                 <Button

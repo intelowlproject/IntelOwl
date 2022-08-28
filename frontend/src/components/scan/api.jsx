@@ -224,7 +224,7 @@ async function _startPlaybook(formValues) {
     observables.push([formValues.classification, ObservableName]);
   });
 
-  if (formValues.observable_classification === "file") {
+  if (formValues.classification === "file") {
     const playbookURI = `${API_BASE_URI}/playbook/analyze_multiple_files`;
     const body = new FormData();
     Array.from(formValues.files).forEach((file) => {

@@ -43,7 +43,7 @@ export default function UserMenu(props) {
         <DropdownNavLink to="/me/sessions">
           <IoMdKey className="me-2" /> API Access/ Sessions
         </DropdownNavLink>
-        {/* Your custom configuration */}
+        {/* Your plugin configuration */}
         <DropdownNavLink to="/me/config">
           <BsSliders className="me-2" /> Your custom config
         </DropdownNavLink>

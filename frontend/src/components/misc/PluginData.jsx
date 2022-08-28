@@ -157,7 +157,11 @@ export function PluginData({
                                 plugins[configuration.plugin_name][dataName][
                                   configuration.attribute
                                 ];
-                              if (type === "str") placeholder = '"string"';
+                              if (
+                                type === "str" ||
+                                additionalEntryData.config_type === SECRET
+                              )
+                                placeholder = "string";
                               else if (type === "int") placeholder = "1234";
                               else if (type === "float") placeholder = "12.34";
                               else if (type === "bool") placeholder = "true";
@@ -165,7 +169,8 @@ export function PluginData({
                                 placeholder = '{"key": "value"}';
                               else if (type === "list") placeholder = "[...]";
                               else if (type === "dict") placeholder = "{...}";
-                              else placeholder = "********";
+                              // Unknown type
+                              else placeholder = "???????";
                             }
                             const disabledSuffix = configuration.edit
                               ? " input-dark "

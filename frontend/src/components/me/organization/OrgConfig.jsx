@@ -72,7 +72,7 @@ export default function OrgConfig() {
           );
         return (
           <Container>
-            <h4>{organization.name}&apos;s custom configuration</h4>
+            <h4>{organization.name}&apos;s plugin configuration</h4>
             <ConfigContainer
               filterFunction={(item) => item.organization}
               additionalConfigData={{

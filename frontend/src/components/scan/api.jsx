@@ -17,7 +17,11 @@ const { append: appendToRecentScans } = useRecentScansStore.getState();
 
 export async function createPlaybookJob(formValues) {
   // new scan
-  const resp = await _startPlaybook(formValues);
+  const resp =
+  formValues.classification === "file"
+    ? await _startPlaybookFiles(formValues)
+    : await _startPlaybookObservables(formValues);
+
   const respData = resp.data;
   // handle response/error
   if (respData.status === "accepted" || respData.status === "running") {
@@ -218,22 +222,22 @@ async function _analyzeFile(formValues) {
   return axios.post(ANALYZE_MULTIPLE_FILES_URI, body);
 }
 
-async function _startPlaybook(formValues) {
+async function _startPlaybookFiles(formValues) {
+  const playbookURI = `${API_BASE_URI}/playbook/analyze_multiple_files`;
+  const body = new FormData();
+  Array.from(formValues.files).forEach((file) => {
+    body.append("files", file, file.name);
+  });
+  formValues.tags_labels.map((x) => body.append("tags_labels", x));
+  formValues.playbooks.map((x) => body.append("playbooks_requested", x));
+  return axios.post(playbookURI, body);
+}
+
+async function _startPlaybookObservables(formValues) {
   const observables = [];
   formValues.observable_names.forEach((ObservableName) => {
     observables.push([formValues.classification, ObservableName]);
   });
-
-  if (formValues.classification === "file") {
-    const playbookURI = `${API_BASE_URI}/playbook/analyze_multiple_files`;
-    const body = new FormData();
-    Array.from(formValues.files).forEach((file) => {
-      body.append("files", file, file.name);
-    });
-    formValues.tags_labels.map((x) => body.append("tags_labels", x));
-    formValues.playbooks.map((x) => body.append("playbooks_requested", x));
-    return axios.post(playbookURI, body);
-  }
 
   const playbookURI = `${API_BASE_URI}/playbook/analyze_multiple_observables`;
   const body = {

@@ -20,3 +20,6 @@ class ObservableTypes(models.TextChoices):
     DOMAIN = "domain"
     HASH = "hash"
     GENERIC = "generic"
+
+class ObservableTypeWithFile(ObservableTypes):
+    FILE = "file"

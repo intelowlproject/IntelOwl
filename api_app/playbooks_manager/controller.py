@@ -117,7 +117,7 @@ def start_playbooks(
         task_signatures_connectors, connectors_used = ConnectorConfig.stack_connectors(
             job_id=job_id,
             connectors_to_execute=list(connectors.keys()),
-            parent_playbook=p_name,            
+            parent_playbook=p_name,
         )
 
         final_analyzers_used.extend(analyzers_used)

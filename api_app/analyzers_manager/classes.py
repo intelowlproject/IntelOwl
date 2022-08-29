@@ -11,7 +11,7 @@ import requests
 from django.conf import settings
 
 from api_app.core.classes import Plugin
-from api_app.exceptions import AnalyzerConfigurationException, AnalyzerRunException
+from api_app.exceptions import AnalyzerConfigurationException, AnalyzerRunException, UnsupportedObservableException
 from tests.mock_utils import (
     if_mock_connections,
     mocked_docker_analyzer_get,
@@ -95,6 +95,19 @@ class BaseAnalyzerMixin(Plugin):
 
     def before_run(self):
         self.report.update_status(status=self.report.Status.RUNNING)
+        job = self._job
+        if job.file:
+            print(self._config)
+            if job.file_mimetype not in self._config.supported_filetypes:
+                raise UnsupportedObservableException(f"Observable {self._job.file_name} is not supported")
+            else:
+                logger.log(f"{job.file_name} is supported by this analyzer.")
+                return
+
+        if job.observable_classification not in self._config.observable_supported:
+            raise UnsupportedObservableException(f"Observable {self._job.observable_name} is not supported")
+
+        logger.log(f"{job.file_name} is supported by this analyzer.")
 
     def after_run(self):
         self.report.report = self._validate_result(self.report.report)

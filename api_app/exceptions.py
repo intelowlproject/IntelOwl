@@ -1,6 +1,8 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
+class UnsupportedObservableException(Exception):
+    pass
 
 class NotRunnableAnalyzer(Exception):
     pass
@@ -16,7 +18,6 @@ class NotRunnablePlaybook(Exception):
 
 class AnalyzerConfigurationException(Exception):
     pass
-
 
 class AnalyzerRunException(Exception):
     pass

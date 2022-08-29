@@ -21,5 +21,10 @@ class ObservableTypes(models.TextChoices):
     HASH = "hash"
     GENERIC = "generic"
 
-class ObservableTypeWithFile(ObservableTypes, models.TextChoices):
+class AllTypes(ObservableTypes, models.TextChoices):
+    IP = "ip"
+    URL = "url"
+    DOMAIN = "domain"
+    HASH = "hash"
+    GENERIC = "generic"
     FILE = "file"

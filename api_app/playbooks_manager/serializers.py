@@ -3,7 +3,7 @@
 
 from rest_framework import serializers as rfs
 
-from api_app.analyzers_manager.constants import ObservableTypeWithFile, ObservableTypes
+from api_app.analyzers_manager.constants import AllTypes
 from api_app.core.serializers import AbstractConfigSerializer
 from api_app.serializers import AnalysisResponseSerializer
 
@@ -29,7 +29,7 @@ class PlaybookConfigSerializer(AbstractConfigSerializer):
 
     # Optional Fields
     supports = rfs.ListField(
-        child=rfs.ChoiceField(choices=ObservableTypeWithFile.values),
+        child=rfs.ChoiceField(choices=AllTypes.values),
         required=False,
         default=[],
     )

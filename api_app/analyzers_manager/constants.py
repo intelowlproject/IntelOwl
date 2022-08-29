@@ -21,5 +21,5 @@ class ObservableTypes(models.TextChoices):
     HASH = "hash"
     GENERIC = "generic"
 
-class ObservableTypeWithFile(ObservableTypes):
+class ObservableTypeWithFile(ObservableTypes, models.TextChoices):
     FILE = "file"

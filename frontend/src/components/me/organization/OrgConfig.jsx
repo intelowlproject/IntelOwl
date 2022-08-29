@@ -52,7 +52,7 @@ export default function OrgConfig() {
       loading={loading}
       error={respErr}
       render={() => {
-        if (!isUserOwner)
+        if (noOrg)
           return (
             <Container>
               <Alert color="secondary" className="mt-3 mx-auto">
@@ -78,6 +78,7 @@ export default function OrgConfig() {
               additionalConfigData={{
                 organization: organization.name,
               }}
+              editable={isUserOwner}
             />
           </Container>
         );

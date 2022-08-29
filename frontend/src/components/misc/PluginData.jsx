@@ -68,6 +68,7 @@ export function PluginData({
   deletePluginData,
   dataName,
   valueType,
+  editable,
 }) {
   const [
     analyzers,
@@ -246,35 +247,42 @@ export function PluginData({
                                     }
                                   />
                                 </Col>
-                                <Button
-                                  color="primary"
-                                  className="mx-2 rounded-1 text-larger col-auto"
-                                  onClick={() => {
-                                    if (configuration.edit) {
-                                      if (
-                                        !isValidEntry(configuration, valueType)
-                                      )
-                                        return;
-                                      const newConfiguration = {
-                                        ...configuration,
-                                        ...additionalEntryData,
-                                      };
-                                      if (
-                                        newConfiguration.config_type ===
-                                          SECRET ||
-                                        (newConfiguration.config_type ===
-                                          PARAMETER &&
-                                          plugins[newConfiguration.plugin_name]
-                                            .params[newConfiguration.attribute]
-                                            .type === "str")
-                                      ) {
-                                        newConfiguration.value = JSON.stringify(
-                                          newConfiguration.value
-                                        );
-                                      }
-                                      if (newConfiguration.create)
-                                        createPluginData(newConfiguration).then(
-                                          () => {
+                                {editable ? (
+                                  <Button
+                                    color="primary"
+                                    className="mx-2 rounded-1 text-larger col-auto"
+                                    onClick={() => {
+                                      if (configuration.edit) {
+                                        if (
+                                          !isValidEntry(
+                                            configuration,
+                                            valueType
+                                          )
+                                        )
+                                          return;
+                                        const newConfiguration = {
+                                          ...configuration,
+                                          ...additionalEntryData,
+                                        };
+                                        if (
+                                          newConfiguration.config_type ===
+                                            SECRET ||
+                                          (newConfiguration.config_type ===
+                                            PARAMETER &&
+                                            plugins[
+                                              newConfiguration.plugin_name
+                                            ].params[newConfiguration.attribute]
+                                              .type === "str")
+                                        ) {
+                                          newConfiguration.value =
+                                            JSON.stringify(
+                                              newConfiguration.value
+                                            );
+                                        }
+                                        if (newConfiguration.create)
+                                          createPluginData(
+                                            newConfiguration
+                                          ).then(() => {
                                             setFieldValue(
                                               `entry.${index}.edit`,
                                               false
@@ -284,32 +292,32 @@ export function PluginData({
                                               false
                                             );
                                             refetchAll();
-                                          }
+                                          });
+                                        else
+                                          updatePluginData(
+                                            newConfiguration,
+                                            newConfiguration.id
+                                          ).then(() => {
+                                            setFieldValue(
+                                              `entry.${index}.edit`,
+                                              false
+                                            );
+                                            refetchAll();
+                                          });
+                                      } else
+                                        setFieldValue(
+                                          `entry.${index}.edit`,
+                                          true
                                         );
-                                      else
-                                        updatePluginData(
-                                          newConfiguration,
-                                          newConfiguration.id
-                                        ).then(() => {
-                                          setFieldValue(
-                                            `entry.${index}.edit`,
-                                            false
-                                          );
-                                          refetchAll();
-                                        });
-                                    } else
-                                      setFieldValue(
-                                        `entry.${index}.edit`,
-                                        true
-                                      );
-                                  }}
-                                >
-                                  {configuration.edit ? (
-                                    <BsFillCheckSquareFill />
-                                  ) : (
-                                    <BsFillPencilFill />
-                                  )}
-                                </Button>
+                                    }}
+                                  >
+                                    {configuration.edit ? (
+                                      <BsFillCheckSquareFill />
+                                    ) : (
+                                      <BsFillPencilFill />
+                                    )}
+                                  </Button>
+                                ) : null}
                                 {configuration.edit && !configuration.create ? (
                                   <Button
                                     color="primary"
@@ -319,41 +327,45 @@ export function PluginData({
                                     <MdCancel />
                                   </Button>
                                 ) : null}
-                                <Button
-                                  color="primary"
-                                  className="mx-2 rounded-1 text-larger col-auto"
-                                  onClick={() => {
-                                    if (configuration.create) remove(index);
-                                    else
-                                      deletePluginData(configuration.id).then(
-                                        () => {
-                                          remove(index);
-                                          refetchAll();
-                                        }
-                                      );
-                                  }}
-                                >
-                                  <BsFillTrashFill />
-                                </Button>
+                                {editable ? (
+                                  <Button
+                                    color="primary"
+                                    className="mx-2 rounded-1 text-larger col-auto"
+                                    onClick={() => {
+                                      if (configuration.create) remove(index);
+                                      else
+                                        deletePluginData(configuration.id).then(
+                                          () => {
+                                            remove(index);
+                                            refetchAll();
+                                          }
+                                        );
+                                    }}
+                                  >
+                                    <BsFillTrashFill />
+                                  </Button>
+                                ) : null}
                               </Row>
                             );
                           })
                         : null}
-                      <Row className="mb-2 mt-0 pt-0">
-                        <Button
-                          color="primary"
-                          size="sm"
-                          className="my-2 mx-auto rounded-1 col-auto"
-                          onClick={() =>
-                            push({
-                              create: true,
-                              edit: true,
-                            })
-                          }
-                        >
-                          <BsFillPlusCircleFill /> Add new entry
-                        </Button>
-                      </Row>
+                      {editable ? (
+                        <Row className="mb-2 mt-0 pt-0">
+                          <Button
+                            color="primary"
+                            size="sm"
+                            className="my-2 mx-auto rounded-1 col-auto"
+                            onClick={() =>
+                              push({
+                                create: true,
+                                edit: true,
+                              })
+                            }
+                          >
+                            <BsFillPlusCircleFill /> Add new entry
+                          </Button>
+                        </Row>
+                      ) : null}
                     </Col>
                   </FormGroup>
                 )}
@@ -375,6 +387,7 @@ PluginData.propTypes = {
   deletePluginData: PropTypes.func.isRequired,
   dataName: PropTypes.string.isRequired,
   valueType: PropTypes.string.isRequired,
+  editable: PropTypes.bool.isRequired,
 };
 
 PluginData.defaultProps = {

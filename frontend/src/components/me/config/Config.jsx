@@ -12,6 +12,7 @@ export default function Config({
   configFilter,
   additionalConfigData,
   dataName,
+  editable,
 }) {
   return (
     <PluginData
@@ -23,6 +24,7 @@ export default function Config({
       dataUri={PLUGIN_CONFIG_URI}
       entryFilter={configFilter}
       additionalEntryData={additionalConfigData}
+      editable={editable}
     />
   );
 }
@@ -31,6 +33,7 @@ Config.propTypes = {
   additionalConfigData: PropTypes.object,
   configFilter: PropTypes.func.isRequired,
   dataName: PropTypes.string.isRequired,
+  editable: PropTypes.bool.isRequired,
 };
 
 Config.defaultProps = {

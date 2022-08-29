@@ -4,7 +4,11 @@ import useTitle from "react-use/lib/useTitle";
 import { Container } from "reactstrap";
 import Config from "./Config";
 
-export default function Secrets({ additionalConfigData, filterFunction }) {
+export default function Secrets({
+  additionalConfigData,
+  filterFunction,
+  editable,
+}) {
   useTitle("IntelOwl | Config", {
     restoreOnUnmount: true,
   });
@@ -22,6 +26,7 @@ export default function Secrets({ additionalConfigData, filterFunction }) {
           config_type: "2",
         }}
         dataName="secrets"
+        editable={editable}
       />
     </Container>
   );
@@ -30,6 +35,7 @@ export default function Secrets({ additionalConfigData, filterFunction }) {
 Secrets.propTypes = {
   additionalConfigData: PropTypes.object,
   filterFunction: PropTypes.func,
+  editable: PropTypes.bool.isRequired,
 };
 
 Secrets.defaultProps = {

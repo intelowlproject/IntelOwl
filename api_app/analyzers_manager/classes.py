@@ -96,18 +96,26 @@ class BaseAnalyzerMixin(Plugin):
     def before_run(self):
         self.report.update_status(status=self.report.Status.RUNNING)
         job = self._job
-        if job.file:
-            print(self._config)
-            if job.file_mimetype not in self._config.supported_filetypes:
+
+        if self._config.type == "file":
+            if not job.file:
+                raise UnsupportedObservableException(
+                    f"No file was given for {self._config.name} file analyzer"
+                )
+
+            elif job.file_mimetype not in self._config.supported_filetypes:
+                self.report.update_status(status=self.report.Status.FAILED)
                 raise UnsupportedObservableException(f"Observable {self._job.file_name} is not supported")
+
             else:
-                logger.log(f"{job.file_name} is supported by this analyzer.")
+                logger.info(f"{job.file_name} is supported by the analyzer {self._config.name}")
                 return
 
-        if job.observable_classification not in self._config.observable_supported:
-            raise UnsupportedObservableException(f"Observable {self._job.observable_name} is not supported")
+        elif job.observable_classification not in self._config.observable_supported:
+            self.report.update_status(status=self.report.Status.FAILED)
+            raise UnsupportedObservableException(f"Observable {job.observable_name} is not supported")
 
-        logger.log(f"{job.file_name} is supported by this analyzer.")
+        logger.info(f"{job.observable_name} is supported by this analyzer {self._config.name}")
 
     def after_run(self):
         self.report.report = self._validate_result(self.report.report)

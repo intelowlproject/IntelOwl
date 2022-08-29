@@ -18,9 +18,9 @@ const { append: appendToRecentScans } = useRecentScansStore.getState();
 export async function createPlaybookJob(formValues) {
   // new scan
   const resp =
-  formValues.classification === "file"
-    ? await _startPlaybookFile(formValues)
-    : await _startPlaybookObservable(formValues);
+    formValues.classification === "file"
+      ? await _startPlaybookFile(formValues)
+      : await _startPlaybookObservable(formValues);
 
   const respData = resp.data;
   // handle response/error

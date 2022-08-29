@@ -21,7 +21,7 @@ class ObservableTypes(models.TextChoices):
     HASH = "hash"
     GENERIC = "generic"
 
-class AllTypes(ObservableTypes, models.TextChoices):
+class AllTypes(models.TextChoices):
     IP = "ip"
     URL = "url"
     DOMAIN = "domain"

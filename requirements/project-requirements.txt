@@ -3,7 +3,7 @@ Django==3.2.14
 django-auth-ldap==4.1.0
 django-radius==1.5.0
 django-filter==22.1
-django-storages==1.12.3
+django-storages==1.13.1
 django-celery-beat==2.2.1
 django-celery-results==2.2.0
 

@@ -35,7 +35,7 @@ ppdeep>=20200505
 easygui==0.98.2
 google>=3.0.0
 google-cloud-webrisk==1.8.1
-intezer-sdk==1.9.0
+intezer-sdk==1.11.1
 lief==0.12.0
 maxminddb==2.2.0
 mwdblib==4.2.1

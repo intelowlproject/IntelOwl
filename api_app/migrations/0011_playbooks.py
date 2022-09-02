@@ -8,6 +8,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("api_app", "0009_datamigration"),
+        ("api_app", "0010_custom_config"),
     ]
 
     operations = [

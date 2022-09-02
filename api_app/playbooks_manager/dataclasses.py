@@ -12,7 +12,7 @@ __all__ = ["PlaybookConfig"]
 # Try to see if your changes in serializers helps with the changeshere (make them)
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True)
 class PlaybookConfig:
     name: str
     description: str

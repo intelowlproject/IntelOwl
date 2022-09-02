@@ -37,7 +37,7 @@ def _multi_analysis_request_playbooks(
         data=request.data,
         serializer_class=serializer_class,
         playbook_scan=True,
-    )["results"][0]
+    )
 
     return Response(
         response,

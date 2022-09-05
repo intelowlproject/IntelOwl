@@ -22,10 +22,9 @@ export async function createPlaybookJob(formValues) {
       ? await _startPlaybookFile(formValues)
       : await _startPlaybookObservable(formValues);
 
-  const results = resp.data.results;
-  const jobIds = results.map((x) => parseInt(x.job_id, 10));
+  const jobIds = resp.data.results.map((x) => parseInt(x.job_id, 10));
 
-  for (const respData of results) {
+  resp.data.results.forEach((respData) => {
     // handle response/error
     if (respData.status === "accepted" || respData.status === "running") {
       appendToRecentScans(respData.job_id, "success");
@@ -56,7 +55,7 @@ export async function createPlaybookJob(formValues) {
     addToast("Failed!", respData?.message, "danger");
     const error = new Error(`job status ${respData.status}`);
     return Promise.reject(error);
-  }
+  });
   return Promise.resolve(jobIds);
 }
 

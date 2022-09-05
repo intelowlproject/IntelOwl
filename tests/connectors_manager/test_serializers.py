@@ -40,7 +40,11 @@ class ConnectorConfigTestCase(TestCase):
 
         config = ConnectorConfigSerializer.read_and_verify_config()
 
-        enabled_connectors = [(i) for i in config if not config[i]["disabled"] and config[i]["verification"]["configured"] ]
+        enabled_connectors = [
+            (i)
+            for i in config
+            if not config[i]["disabled"] and config[i]["verification"]["configured"]
+        ]
 
         serializer = self.serializer_class(data=data, many=True)
         serializer.is_valid(raise_exception=True)
@@ -65,13 +69,4 @@ class ConnectorConfigTestCase(TestCase):
 
             self.assertNotEqual([], signatures)
 
-            self.assertTrue(
-                    set(
-                        enabled_connectors
-                    ).issuperset(set(
-                        connectors_ran
-                    )
-                )
-            )
-
-            
+            self.assertTrue(set(enabled_connectors).issuperset(set(connectors_ran)))

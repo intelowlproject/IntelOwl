@@ -73,9 +73,10 @@ export default function PluginsContainer() {
   }, [isUserOwner, fetchAllOrganizations]);
   const configButtons = (
     <Col className="d-flex justify-content-end">
-      <ContentSection className="d-inline-flex mb-0">
+      <ContentSection className="d-inline-flex mb-0 py-0">
         {isUserOwner ? (
           <Link
+            className="d-flex"
             to="/me/organization/config"
             style={{ color: "inherit", textDecoration: "inherit" }}
           >
@@ -91,6 +92,7 @@ export default function PluginsContainer() {
           </Link>
         ) : null}
         <Link
+          className="d-flex"
           to="/me/config"
           style={{ color: "inherit", textDecoration: "inherit" }}
         >

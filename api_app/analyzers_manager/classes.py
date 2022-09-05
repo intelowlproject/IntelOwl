@@ -14,6 +14,7 @@ from api_app.core.classes import Plugin
 from api_app.exceptions import (
     AnalyzerConfigurationException,
     AnalyzerRunException,
+    UnsupportedFileException,
     UnsupportedObservableException,
 )
 from tests.mock_utils import (
@@ -103,13 +104,13 @@ class BaseAnalyzerMixin(Plugin):
 
         if self._config.type == "file":
             if not job.file:
-                raise UnsupportedObservableException(
+                raise UnsupportedFileException(
                     f"No file was given for {self._config.name} file analyzer"
                 )
 
             elif job.file_mimetype not in self._config.supported_filetypes:
                 self.report.update_status(status=self.report.Status.FAILED)
-                raise UnsupportedObservableException(
+                raise UnsupportedFileException(
                     f"Observable {self._job.file_name} is not supported"
                 )
 

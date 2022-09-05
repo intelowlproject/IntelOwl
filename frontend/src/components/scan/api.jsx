@@ -25,7 +25,7 @@ export async function createPlaybookJob(formValues) {
   const results = resp.data.results;
   const jobIds = results.map((x) => parseInt(x.job_id, 10));
 
-  for (respData of results) {
+  for (const respData of results) {
     // handle response/error
     if (respData.status === "accepted" || respData.status === "running") {
       appendToRecentScans(respData.job_id, "success");

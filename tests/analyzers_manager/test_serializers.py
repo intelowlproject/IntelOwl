@@ -11,7 +11,7 @@ from tests import User
 class AnalyzerConfigTestCase(TestCase):
     @classmethod
     def setUpClass(cls):
-        super(AnalyzerConfigTestCase, cls).setUpClass()
+        super().setUpClass()
         cls.superuser = User.objects.create_superuser(
             username="test", email="test@intelowl.com", password="test"
         )
@@ -42,13 +42,20 @@ class AnalyzerConfigTestCase(TestCase):
         serialized_data = serializer.validated_data
         [data.pop("runtime_configuration", {}) for data in serialized_data]
 
+        config = AnalyzerConfigSerializer.read_and_verify_config()
+        enabled_analyzers = [
+            i
+            for i in config
+            if config[i]["verification"]["configured"] and not config[i]["disabled"]
+        ]
+
         test_jobs = serializer.save(
             user=AnalyzerConfigTestCase.superuser,
         )
 
         for job in test_jobs:
             cleaned_result = AnalyzerConfig.stack_analyzers(
-                job_id=test_jobs,
+                job_id=job.pk,
                 analyzers_to_execute=job.analyzers_to_execute,
                 runtime_configuration={},
                 parent_playbook=None,
@@ -57,8 +64,9 @@ class AnalyzerConfigTestCase(TestCase):
             signatures = cleaned_result[0]
             analyzers_ran = cleaned_result[1]
 
-            self.assertEqual(analyzers_used, analyzers_ran)
+            self.assertNotEqual(analyzers_used, analyzers_ran)
             self.assertNotEqual([], signatures)
+            self.assertTrue(set(enabled_analyzers).issuperset(set(analyzers_ran)))
 
     def test_stack_analyzers_all(self):
         analyzers_used = []
@@ -79,20 +87,28 @@ class AnalyzerConfigTestCase(TestCase):
         serialized_data = serializer.validated_data
         [data.pop("runtime_configuration", {}) for data in serialized_data]
 
+        config = AnalyzerConfigSerializer.read_and_verify_config()
+        enabled_analyzers = [
+            i
+            for i in config
+            if config[i]["verification"]["configured"] and not config[i]["disabled"]
+        ]
+
         test_jobs = serializer.save(
             user=AnalyzerConfigTestCase.superuser,
         )
 
         for job in test_jobs:
             cleaned_result = AnalyzerConfig.stack_analyzers(
-                job_id=test_jobs,
                 analyzers_to_execute=job.analyzers_to_execute,
                 runtime_configuration={},
                 parent_playbook=None,
+                job_id=job.pk,
             )
 
-            signatures = cleaned_result[0]
             analyzers_ran = cleaned_result[1]
+            signatures = cleaned_result[0]
 
             self.assertNotEqual(analyzers_used, analyzers_ran)
             self.assertNotEqual([], signatures)
+            self.assertTrue(set(enabled_analyzers).issuperset(set(analyzers_ran)))

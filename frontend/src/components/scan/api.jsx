@@ -22,37 +22,42 @@ export async function createPlaybookJob(formValues) {
       ? await _startPlaybookFile(formValues)
       : await _startPlaybookObservable(formValues);
 
-  const respData = resp.data;
-  // handle response/error
-  if (respData.status === "accepted" || respData.status === "running") {
-    appendToRecentScans(respData.job_id, "success");
+  const results = resp.data.results;
+  const jobIds = results.map((x) => parseInt(x.job_id, 10));
 
-    addToast(
-      `Created new Job with ID #${respData.job_id}!`,
-      <div>
-        {respData.playbooks_running > 0 && (
-          <ContentSection className="text-light">
-            <strong>Playbooks:</strong>&nbsp;
-            {Array.from(respData.playbooks_running)?.join(", ")}
-          </ContentSection>
-        )}
+  for (respData of results) {
+    // handle response/error
+    if (respData.status === "accepted" || respData.status === "running") {
+      appendToRecentScans(respData.job_id, "success");
 
-        {respData.warnings.length > 0 && (
-          <ContentSection className="bg-accent text-darker">
-            <strong>Warnings:</strong>&nbsp;{respData.warnings.join(", ")}
-          </ContentSection>
-        )}
-      </div>,
-      "success",
-      true,
-      10000
-    );
-    return Promise.resolve([respData.job_id]);
+      addToast(
+        `Created new Job with ID #${respData.job_id}!`,
+        <div>
+          {respData.playbooks_running > 0 && (
+            <ContentSection className="text-light">
+              <strong>Playbooks:</strong>&nbsp;
+              {Array.from(respData.playbooks_running)?.join(", ")}
+            </ContentSection>
+          )}
+
+          {respData.warnings.length > 0 && (
+            <ContentSection className="bg-accent text-darker">
+              <strong>Warnings:</strong>&nbsp;{respData.warnings.join(", ")}
+            </ContentSection>
+          )}
+        </div>,
+        "success",
+        true,
+        10000
+      );
+    }
+
+    // else
+    addToast("Failed!", respData?.message, "danger");
+    const error = new Error(`job status ${respData.status}`);
+    return Promise.reject(error);
   }
-  // else
-  addToast("Failed!", respData?.message, "danger");
-  const error = new Error(`job status ${respData.status}`);
-  return Promise.reject(error);
+  return Promise.resolve(jobIds);
 }
 
 export async function createJob(formValues) {

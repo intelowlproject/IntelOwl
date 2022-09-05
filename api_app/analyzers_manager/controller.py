@@ -8,7 +8,6 @@ from celery import chord
 from django.utils.module_loading import import_string
 from rest_framework.exceptions import ValidationError
 
-# from api_app.utility import job_cleanup, stack_analyzers
 from intel_owl import tasks
 from intel_owl.celery import app as celery_app
 

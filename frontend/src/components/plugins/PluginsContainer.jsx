@@ -71,39 +71,36 @@ export default function PluginsContainer() {
       fetchAllOrganizations();
     }
   }, [isUserOwner, fetchAllOrganizations]);
-
-  return (
-    <>
-      <Col className="d-flex justify-content-end">
-        <ContentSection className="d-inline-flex">
-          {isUserOwner ? (
-            <Link
-              to="/me/organization/config"
-              style={{ color: "inherit", textDecoration: "inherit" }}
-            >
-              <Button
-                size="sm"
-                color="darker"
-                onClick={() => null}
-                className="me-2"
-              >
-                <BsPeopleFill className="me-2" /> Organization{" "}
-                {organization.name}&apos;s plugin config
-              </Button>
-            </Link>
-          ) : null}
+  const configButtons = (
+    <Col className="d-flex justify-content-end">
+      <ContentSection className="d-inline-flex mb-0">
+        {isUserOwner ? (
           <Link
-            to="/me/config"
+            to="/me/organization/config"
             style={{ color: "inherit", textDecoration: "inherit" }}
           >
-            <Button size="sm" color="darker" onClick={() => null}>
-              <BsSliders className="me-2" />
-              Your plugin config
+            <Button
+              size="sm"
+              color="darker"
+              onClick={() => null}
+              className="me-2"
+            >
+              <BsPeopleFill className="me-2" /> Organization {organization.name}
+              &apos;s plugin config
             </Button>
           </Link>
-        </ContentSection>
-      </Col>
-      <RouterTabs routes={routes} />
-    </>
+        ) : null}
+        <Link
+          to="/me/config"
+          style={{ color: "inherit", textDecoration: "inherit" }}
+        >
+          <Button size="sm" color="darker" onClick={() => null}>
+            <BsSliders className="me-2" />
+            Your plugin config
+          </Button>
+        </Link>
+      </ContentSection>
+    </Col>
   );
+  return <RouterTabs routes={routes} extraNavComponent={configButtons} />;
 }

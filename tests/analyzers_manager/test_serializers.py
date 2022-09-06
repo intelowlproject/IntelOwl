@@ -109,6 +109,9 @@ class AnalyzerConfigTestCase(TestCase):
             analyzers_ran = cleaned_result[1]
             signatures = cleaned_result[0]
 
-            self.assertNotEqual(analyzers_used, analyzers_ran)
+            self.assertEqual(analyzers_used, analyzers_ran)
+            # ^ Adding this here because "CLASSIC_DNS"
+            # should be by default activated and working.
+
             self.assertNotEqual([], signatures)
             self.assertTrue(set(enabled_analyzers).issuperset(set(analyzers_ran)))

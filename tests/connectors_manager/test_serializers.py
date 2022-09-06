@@ -64,9 +64,6 @@ class ConnectorConfigTestCase(TestCase):
                 parent_playbook=None,
             )
 
-            signatures = cleaned_result[0]
             connectors_ran = cleaned_result[1]
-
-            self.assertNotEqual([], signatures)
 
             self.assertTrue(set(enabled_connectors).issuperset(set(connectors_ran)))

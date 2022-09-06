@@ -69,7 +69,7 @@ class AnalyzerActionViewSet(PluginActionViewSet):
     def perform_kill(self, report):
         super().perform_kill(report)
         # clean up job
-        job = Job.objects.get(report.job.pk)
+        job = Job.objects.get(report.job.id)
         job.job_cleanup()
 
     def perform_retry(self, report: AnalyzerReport):

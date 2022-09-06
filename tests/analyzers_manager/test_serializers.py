@@ -12,12 +12,12 @@ class AnalyzerConfigTestCase(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.superuser = User.objects.create_superuser(
-            username="test", email="test@intelowl.com", password="test"
-        )
 
     def setUp(self):
         self.serializer_class = ObservableAnalysisSerializer
+        self.superuser = User.objects.create_superuser(
+            username="test", email="test@intelowl.com", password="test"
+        )
 
     def test_config_not_empty(self):
         config = AnalyzerConfigSerializer.read_and_verify_config()
@@ -50,7 +50,7 @@ class AnalyzerConfigTestCase(TestCase):
         ]
 
         test_jobs = serializer.save(
-            user=AnalyzerConfigTestCase.superuser,
+            user=self.superuser,
         )
 
         for job in test_jobs:
@@ -95,7 +95,7 @@ class AnalyzerConfigTestCase(TestCase):
         ]
 
         test_jobs = serializer.save(
-            user=AnalyzerConfigTestCase.superuser,
+            user=self.superuser,
         )
 
         for job in test_jobs:

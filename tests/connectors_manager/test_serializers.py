@@ -12,12 +12,12 @@ class ConnectorConfigTestCase(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.superuser = User.objects.create_superuser(
-            username="test", email="test@intelowl.com", password="test"
-        )
 
     def setUp(self):
         self.serializer_class = ObservableAnalysisSerializer
+        self.superuser = User.objects.create_superuser(
+            username="test", email="test@intelowl.com", password="test"
+        )
 
     def test_config_not_empty(self):
         config = ConnectorConfigSerializer.read_and_verify_config()
@@ -53,7 +53,7 @@ class ConnectorConfigTestCase(TestCase):
         [data.pop("runtime_configuration", {}) for data in serialized_data]
 
         test_jobs = serializer.save(
-            user=ConnectorConfigSerializer.superuser,
+            user=self.superuser,
         )
 
         for job in test_jobs:

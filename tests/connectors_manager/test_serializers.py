@@ -59,7 +59,7 @@ class ConnectorConfigTestCase(TestCase):
         for job in test_jobs:
             cleaned_result = ConnectorConfig.stack_connectors(
                 job_id=job.pk,
-                analyzers_to_execute=job.analyzers_to_execute,
+                connectors_to_execute=job.connectors_to_execute,
                 runtime_configuration={},
                 parent_playbook=None,
             )

@@ -10,7 +10,12 @@ async function createCustomConfig(data) {
     addToast("Data posted successfully", null, "success", true);
     return resp;
   } catch (e) {
-    addToast("Failed!", e.parsedMsg.toString(), "danger", true);
+    if (
+      e?.response.status === 400 &&
+      e.response?.data?.errors?.non_field_errors[0].endsWith("already exists.")
+    )
+      addToast("Failed!", "This config already exists!", "danger", true);
+    else addToast("Failed!", e.parsedMsg.toString(), "danger", true);
     return Promise.reject(e);
   }
 }

@@ -194,7 +194,7 @@ const playbookTableColumns = [
     Cell: ({ value }) => <span>{markdownToHtml(value)}</span>,
     disableSortBy: true,
     Filter: DefaultColumnFilter,
-    minWidth: 600,
+    minWidth: 550,
   },
   {
     Header: "Supports",

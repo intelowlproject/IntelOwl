@@ -119,6 +119,11 @@ export function PluginData({
     retrieveConnectorsConfiguration();
   };
 
+  const maxPluginNameLength = Math.max(
+    ...Object.keys(analyzers).map((pluginName) => pluginName.length),
+    ...Object.keys(connectors).map((pluginName) => pluginName.length)
+  );
+
   return (
     <Loader
       render={() => (
@@ -199,7 +204,19 @@ export function PluginData({
                                     disabled={!configuration.edit}
                                     name={`entry[${index}].plugin_name`}
                                   >
-                                    <option value="">---Select Name---</option>
+                                    <option value="">
+                                      {"-".repeat(
+                                        Math.ceil(
+                                          (maxPluginNameLength - 11) / 2
+                                        )
+                                      )}
+                                      Select Plugin Name
+                                      {"-".repeat(
+                                        Math.ceil(
+                                          (maxPluginNameLength - 11) / 2
+                                        )
+                                      )}
+                                    </option>
                                     {Object.values(plugins).map(
                                       (pluginElement) => (
                                         <option

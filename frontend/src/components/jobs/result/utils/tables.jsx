@@ -60,19 +60,6 @@ const tableProps = {
       ),
     },
     {
-      Header: "Playbook",
-      id: "playbook",
-      accessor: "parent_playbook",
-      Cell: ({ value }) => {
-        if (value != null) {
-          return <span>{value}</span>;
-        }
-        return <span />;
-      },
-      Filter: DefaultColumnFilter,
-      maxWidth: 300,
-    },
-    {
       Header: "Status",
       id: "status",
       accessor: "status",
@@ -136,21 +123,57 @@ const tableProps = {
 };
 
 export function AnalyzersReportTable({ job, refetch }) {
+  let tablePropsFinal = tableProps;
+
+  if (job?.playbooks_to_execute.length > 1) {
+    tablePropsFinal.columns.push({
+      Header: "Playbook",
+      id: "playbook",
+      accessor: "parent_playbook",
+      Cell: ({ value }) => {
+        if (value != null) {
+          return <span>{value}</span>;
+        }
+        return <span />;
+      },
+      Filter: DefaultColumnFilter,
+      maxWidth: 300,
+    });
+  }
+
   return (
     <DataTable
       data={job?.analyzer_reports}
       customProps={{ job, refetch }}
-      {...tableProps}
+      {...tablePropsFinal}
     />
   );
 }
 
 export function ConnectorsReportTable({ job, refetch }) {
+  let tablePropsFinal = tableProps;
+
+  if (job?.playbooks_to_execute.length > 1) {
+    tablePropsFinal.columns.push({
+      Header: "Playbook",
+      id: "playbook",
+      accessor: "parent_playbook",
+      Cell: ({ value }) => {
+        if (value != null) {
+          return <span>{value}</span>;
+        }
+        return <span />;
+      },
+      Filter: DefaultColumnFilter,
+      maxWidth: 300,
+    });
+  }
+
   return (
     <DataTable
       data={job?.connector_reports}
       customProps={{ job, refetch }}
-      {...tableProps}
+      {...tablePropsFinal}
     />
   );
 }

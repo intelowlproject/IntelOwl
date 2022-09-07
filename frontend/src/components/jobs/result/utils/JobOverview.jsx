@@ -15,14 +15,14 @@ export default function JobOverview({ isRunningJob, job, refetch }) {
         <strong>Analyzers Report</strong>
         <Badge className="ms-2">
           {job.analyzers_to_execute?.length} /&nbsp;
-          {job.analyzers_requested?.length || "all"}
+          {job.analyzers_requested?.length}
         </Badge>
       </div>,
       <div className="d-flex-center">
         <strong>Connectors Report</strong>
         <Badge className="ms-2">
           {job.connectors_to_execute?.length} /&nbsp;
-          {job.connectors_requested?.length || "all"}
+          {job.connectors_requested?.length}
         </Badge>
       </div>,
     ],

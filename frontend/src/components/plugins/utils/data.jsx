@@ -194,7 +194,7 @@ const playbookTableColumns = [
     Cell: ({ value }) => <span>{markdownToHtml(value)}</span>,
     disableSortBy: true,
     Filter: DefaultColumnFilter,
-    minWidth: 875,
+    minWidth: 700,
   },
   {
     Header: "Supports",
@@ -203,7 +203,7 @@ const playbookTableColumns = [
     Cell: ({ value }) => <code>{JSON.stringify(value, null, 2)}</code>,
     disableSortBy: true,
     Filter: DefaultColumnFilter,
-    minWidth: 125,
+    minWidth: 250,
   },
 ];
 

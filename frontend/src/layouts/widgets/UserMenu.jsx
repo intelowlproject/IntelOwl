@@ -45,7 +45,7 @@ export default function UserMenu(props) {
         </DropdownNavLink>
         {/* Your plugin configuration */}
         <DropdownNavLink to="/me/config">
-          <BsSliders className="me-2" /> Your custom config
+          <BsSliders className="me-2" /> Your plugin configuration
         </DropdownNavLink>
         <DropdownItem divider />
         <DropdownNavLink to="/logout">

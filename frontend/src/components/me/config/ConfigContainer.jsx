@@ -1,7 +1,7 @@
 import React, { Suspense } from "react";
 import PropTypes from "prop-types";
-import { AiOutlineApi } from "react-icons/ai";
-import { TiFlowChildren } from "react-icons/ti";
+import { AiFillSetting } from "react-icons/ai";
+import { GoGistSecret } from "react-icons/go";
 
 import { RouterTabs, FallBackLoading } from "@certego/certego-ui";
 
@@ -13,7 +13,7 @@ const routes = (filterFunction, additionalConfigData, editable) => [
     location: "parameters",
     Title: () => (
       <span>
-        <AiOutlineApi />
+        <AiFillSetting />
         &nbsp;Parameters
       </span>
     ),
@@ -32,7 +32,7 @@ const routes = (filterFunction, additionalConfigData, editable) => [
     location: "secrets",
     Title: () => (
       <span>
-        <TiFlowChildren />
+        <GoGistSecret />
         &nbsp;Secrets
       </span>
     ),

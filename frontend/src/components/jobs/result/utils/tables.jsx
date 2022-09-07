@@ -122,7 +122,7 @@ const tableProps = {
   ),
 };
 
-const tablePropsPlaybooks = tableProps;
+const tablePropsPlaybooks = JSON.parse(JSON.stringify(tableProps));
 
 tablePropsPlaybooks.columns.push({
   Header: "Playbook",

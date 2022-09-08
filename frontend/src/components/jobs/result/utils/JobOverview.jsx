@@ -10,7 +10,7 @@ import { StatusIcon } from "../../../common";
 
 export default function JobOverview({ isRunningJob, job, refetch }) {
   let AnalyzerDenominator = job.analyzers_requested?.length || "all";
-  let ConnectorDenominator = job.connectors_requested?.length || "all";
+  let ConnectorDenominator = job.connectors_requested?.length;
 
   if (job.playbooks_to_execute?.length > 0) {
     AnalyzerDenominator = job.analyzers_to_execute?.length;

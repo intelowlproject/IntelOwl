@@ -69,6 +69,7 @@ const stateSelector = (state) => [
   state.connectors,
   state.playbooks,
 ];
+
 const checkChoices = [
   {
     value: "check_all",
@@ -107,6 +108,7 @@ const observableType2PropsMap = {
     pattern: ".*",
   },
 };
+
 const initialValues = {
   classification: "ip",
   observable_names: [""],

@@ -2,7 +2,7 @@
   "name": "intelowl",
   "version": "0.1.0",
   "private": true,
-  "proxy": "http://localhost:80/",
+  "proxy": "http://20.163.101.67",
   "dependencies": {
     "@certego/certego-ui": "^0.1.1",
     "axios": "^0.27.2",

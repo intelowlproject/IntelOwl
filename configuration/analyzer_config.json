@@ -1209,7 +1209,7 @@
   },
   "GreyNoise": {
     "type": "observable",
-    "python_module": "greynoise.GreyNoise",
+    "python_module": "greynoiseintel.GreyNoiseAnalyzer",
     "description": "scan an IP against the Greynoise API (requires API key)",
     "disabled": false,
     "external_service": true,
@@ -1236,7 +1236,7 @@
   },
   "GreyNoiseCommunity": {
     "type": "observable",
-    "python_module": "greynoise.GreyNoise",
+    "python_module": "greynoiseintel.GreyNoiseAnalyzer",
     "description": "scan an IP against the Community Greynoise API",
     "disabled": false,
     "external_service": true,
@@ -1258,27 +1258,6 @@
         "value": "v3",
         "type": "str",
         "description": "[GreyNoise Community API](https://docs.greynoise.io/docs/using-the-greynoise-community-api)"
-      }
-    }
-  },
-  "GreyNoiseAlpha": {
-    "type": "observable",
-    "python_module": "greynoise.GreyNoise",
-    "description": "scan an IP against the Alpha Greynoise API (no API key required)",
-    "disabled": true,
-    "external_service": true,
-    "leaks_info": false,
-    "observable_supported": ["ip"],
-    "secrets": {},
-    "config": {
-      "soft_time_limit": 30,
-      "queue": "default"
-    },
-    "params": {
-      "greynoise_api_version": {
-        "value": "v1",
-        "type": "str",
-        "description": "GreyNoise Alpha API"
       }
     }
   },

@@ -143,8 +143,6 @@ export default function ScanForm() {
     [setModalOpen]
   );
 
-  /* eslint-disable no-debugger, no-console */
-
   // page title
   useTitle("IntelOwl | Scan", { restoreOnUnmount: true });
 
@@ -668,9 +666,6 @@ export default function ScanForm() {
               </FormGroup>
               {scanType === scanTypes.playbooks && (
                 <FormGroup row className="col align-self-center">
-                  {/* <Label sm={4} htmlFor="launch_playbooks">
-                    Launch Selected Playbooks:
-                  </Label> */}
                   <Col
                     className="d-flex justify-content-center"
                     style={{ padding: "5px" }}
@@ -738,4 +733,3 @@ export default function ScanForm() {
     </Container>
   );
 }
-/* eslint-disable no-debugger, no-console */

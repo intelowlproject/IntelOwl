@@ -32,6 +32,7 @@ import {
   TLP_DESCRIPTION_MAP,
   OBSERVABLE_TYPES,
   ALL_CLASSIFICATIONS,
+  scanTypes,
 } from "../../constants";
 import { TLPTag, markdownToHtml } from "../common";
 import {
@@ -120,6 +121,7 @@ const initialValues = {
   runtime_configuration: {},
   tags: [],
   check: "check_all",
+  analysisOptionValues: "Analyzer/Connector",
 };
 
 // Component
@@ -130,11 +132,18 @@ export default function ScanForm() {
   const [classification, setClassification] = React.useState(
     initialValues.classification
   );
+
+  const [scanType, setScanType] = React.useState(
+    initialValues.analysisOptionValues
+  );
+
   const [isModalOpen, setModalOpen] = React.useState(false);
   const toggleModal = React.useCallback(
     () => setModalOpen((o) => !o),
     [setModalOpen]
   );
+
+  /* eslint-disable no-debugger, no-console */
 
   // page title
   useTitle("IntelOwl | Scan", { restoreOnUnmount: true });
@@ -391,6 +400,26 @@ export default function ScanForm() {
           {(formik) => (
             <Form>
               <FormGroup className="d-flex justify-content-center">
+                {Object.values(scanTypes).map((type_) => (
+                  <FormGroup check inline key={`analysistype__${type_}`}>
+                    <Col>
+                      <Field
+                        as={Input}
+                        id={`analysistype__${type_}`}
+                        type="radio"
+                        name="analysisOptionValues"
+                        value={type_}
+                        onClick={() => {
+                          setScanType(type_);
+                          formik.setFieldValue("playbooks", []); // reset
+                        }}
+                      />
+                      <Label check>{type_}</Label>
+                    </Col>
+                  </FormGroup>
+                ))}
+              </FormGroup>
+              <FormGroup className="d-flex justify-content-center">
                 {ALL_CLASSIFICATIONS.map((ch) => (
                   <FormGroup check inline key={`classification__${ch}`}>
                     <Col>
@@ -498,143 +527,131 @@ export default function ScanForm() {
                   </Col>
                 </FormGroup>
               )}
-              <FormGroup row>
-                <Label sm={3} for="analyzers">
-                  Select Analyzers
-                </Label>
-                <Col sm={9}>
-                  <Loader
-                    loading={pluginsLoading}
-                    error={pluginsError}
-                    render={() => (
-                      <>
-                        <MultiSelectDropdownInput
-                          options={analyzersOptions}
-                          value={formik.values.analyzers}
-                          onChange={(v) => formik.setFieldValue("analyzers", v)}
-                          // controlShouldRenderValue={false}
-                        />
-                        <FormText>
-                          Default: all configured analyzers are triggered.
-                        </FormText>
-                      </>
-                    )}
-                  />
-                  <ErrorMessage component={FormFeedback} name="analyzers" />
-                </Col>
-              </FormGroup>
-
-              <FormGroup row>
-                <Label sm={3} for="connectors">
-                  Select Connectors
-                </Label>
-                <Col sm={9}>
-                  {!(pluginsLoading || pluginsError) && (
-                    <>
-                      <MultiSelectDropdownInput
-                        options={connectorOptions}
-                        value={formik.values.connectors}
-                        onChange={(v) => formik.setFieldValue("connectors", v)}
-                      />
-                      <FormText>
-                        Default: all configured connectors are triggered.
-                      </FormText>
-                    </>
-                  )}
-                  <ErrorMessage component={FormFeedback} name="connectors" />
-                </Col>
-              </FormGroup>
-
-              <FormGroup row>
-                <Label sm={4} htmlFor="playbooks">
-                  Select Playbooks
-                </Label>
-                {!(pluginsLoading || pluginsError) && (
-                  <Col sm={8}>
-                    <MultiSelectDropdownInput
-                      options={playbookOptions}
-                      value={formik.values.playbooks}
-                      onChange={(v) => formik.setFieldValue("playbooks", v)}
-                    />
-                    <FormText>
-                      Default: all configured playbooks are triggered.
-                    </FormText>
-                  </Col>
-                )}
-              </FormGroup>
-
-              <FormGroup row>
-                <Label sm={4} htmlFor="launch_playbooks">
-                  Launch Selected Playbooks:
-                </Label>
-
-                <Col sm={8}>
-                  <Button
-                    onClick={() => startPlaybooks(formik.values)}
-                    variant="primary"
-                  >
-                    Launch Playbooks
-                  </Button>
-                </Col>
-              </FormGroup>
-
-              <FormGroup row>
-                <Label sm={3} for="scanform-runtimeconf-editbtn">
-                  Runtime Configuration
-                </Label>
-                <Col sm={9}>
-                  <IconButton
-                    id="scanform-runtimeconf-editbtn"
-                    Icon={MdEdit}
-                    title="Edit runtime configuration"
-                    titlePlacement="top"
-                    size="sm"
-                    color="tertiary"
-                    disabled={
-                      !(
-                        formik.values.analyzers.length > 0 ||
-                        formik.values.connectors.length > 0
-                      )
-                    }
-                    onClick={toggleModal}
-                  />
-                  {isModalOpen && (
-                    <RuntimeConfigurationModal
-                      isOpen={isModalOpen}
-                      toggle={toggleModal}
-                      formik={formik}
-                    />
-                  )}
-                </Col>
-              </FormGroup>
-              <FormGroup row>
-                <Label sm={3}>TLP</Label>
-                <Col sm={9}>
-                  {TLP_CHOICES.map((ch) => (
-                    <FormGroup inline check key={`tlpchoice__${ch}`}>
-                      <Label check for={`tlpchoice__${ch}`}>
-                        <TLPTag value={ch} />
+              {scanType === scanTypes.analyzers_and_connectors && (
+                <>
+                  <>
+                    <FormGroup row>
+                      <Label sm={3} for="analyzers">
+                        Select Analyzers
                       </Label>
-                      <Field
-                        as={Input}
-                        id={`tlpchoice__${ch}`}
-                        type="radio"
-                        name="tlp"
-                        value={ch}
-                        invalid={formik.errors.tlp && formik.touched.tlp}
-                        onChange={formik.handleChange}
-                      />
+                      <Col sm={9}>
+                        <Loader
+                          loading={pluginsLoading}
+                          error={pluginsError}
+                          render={() => (
+                            <>
+                              <MultiSelectDropdownInput
+                                options={analyzersOptions}
+                                value={formik.values.analyzers}
+                                onChange={(v) =>
+                                  formik.setFieldValue("analyzers", v)
+                                }
+                              />
+                              <FormText>
+                                Default: all configured analyzers are triggered.
+                              </FormText>
+                            </>
+                          )}
+                        />
+                        <ErrorMessage
+                          component={FormFeedback}
+                          name="analyzers"
+                        />
+                      </Col>
                     </FormGroup>
-                  ))}
-                  <FormText>
-                    {TLP_DESCRIPTION_MAP[formik.values.tlp].replace(
-                      "TLP: ",
-                      ""
-                    )}
-                  </FormText>
-                  <ErrorMessage component={FormFeedback} name="tlp" />
-                </Col>
-              </FormGroup>
+                    <FormGroup row>
+                      <Label sm={3} for="connectors">
+                        Select Connectors
+                      </Label>
+                      <Col sm={9}>
+                        {!(pluginsLoading || pluginsError) && (
+                          <>
+                            <MultiSelectDropdownInput
+                              options={connectorOptions}
+                              value={formik.values.connectors}
+                              onChange={(v) =>
+                                formik.setFieldValue("connectors", v)
+                              }
+                            />
+                            <FormText>
+                              Default: all configured connectors are triggered.
+                            </FormText>
+                          </>
+                        )}
+                        <ErrorMessage
+                          component={FormFeedback}
+                          name="connectors"
+                        />
+                      </Col>
+                    </FormGroup>
+                    <FormGroup row>
+                      <Label sm={3} for="scanform-runtimeconf-editbtn">
+                        Runtime Configuration
+                      </Label>
+                      <Col sm={9}>
+                        <IconButton
+                          id="scanform-runtimeconf-editbtn"
+                          Icon={MdEdit}
+                          title="Edit runtime configuration"
+                          titlePlacement="top"
+                          size="sm"
+                          color="tertiary"
+                          disabled={
+                            !(
+                              formik.values.analyzers.length > 0 ||
+                              formik.values.connectors.length > 0
+                            )
+                          }
+                          onClick={toggleModal}
+                        />
+                        {isModalOpen && (
+                          <RuntimeConfigurationModal
+                            isOpen={isModalOpen}
+                            toggle={toggleModal}
+                            formik={formik}
+                          />
+                        )}
+                      </Col>
+                    </FormGroup>
+                  </>
+                  <FormGroup row className="mt-2">
+                    <Label sm={3}>Extra configuration</Label>
+                    <Col sm={9}>
+                      {checkChoices.map((ch) => (
+                        <FormGroup check key={`checkchoice__${ch.value}`}>
+                          <Field
+                            as={Input}
+                            id={`checkchoice__${ch.value}`}
+                            type="radio"
+                            name="check"
+                            value={ch.value}
+                            onChange={formik.handleChange}
+                          />
+                          <Label check for={`checkchoice__${ch.value}`}>
+                            {ch.label}
+                          </Label>
+                        </FormGroup>
+                      ))}
+                    </Col>
+                  </FormGroup>
+                </>
+              )}
+              {scanType === scanTypes.playbooks && (
+                <FormGroup row>
+                  <Label sm={4} htmlFor="playbooks">
+                    Select Playbooks
+                  </Label>
+                  {!(pluginsLoading || pluginsError) && (
+                    <Col sm={8}>
+                      <MultiSelectDropdownInput
+                        options={playbookOptions}
+                        value={formik.values.playbooks}
+                        onChange={(v) => formik.setFieldValue("playbooks", v)}
+                      />
+                    </Col>
+                  )}
+                </FormGroup>
+              )}
               <FormGroup row>
                 <Label sm={3} id="scanform-tagselectinput">
                   Tags
@@ -649,38 +666,68 @@ export default function ScanForm() {
                   />
                 </Col>
               </FormGroup>
-              <FormGroup row className="mt-2">
-                <Label sm={3}>Extra configuration</Label>
-                <Col sm={9}>
-                  {checkChoices.map((ch) => (
-                    <FormGroup check key={`checkchoice__${ch.value}`}>
-                      <Field
-                        as={Input}
-                        id={`checkchoice__${ch.value}`}
-                        type="radio"
-                        name="check"
-                        value={ch.value}
-                        onChange={formik.handleChange}
-                      />
-                      <Label check for={`checkchoice__${ch.value}`}>
-                        {ch.label}
-                      </Label>
-                    </FormGroup>
-                  ))}
-                </Col>
-              </FormGroup>
-              <FormGroup row className="mt-2">
-                <Button
-                  type="submit"
-                  disabled={!(formik.isValid || formik.isSubmitting)}
-                  color="primary"
-                  size="lg"
-                  outline
-                  className="mx-auto rounded-0 col-sm-2 order-sm-5"
-                >
-                  {formik.isSubmitting && <Spinner size="sm" />}Start Scan
-                </Button>
-              </FormGroup>
+              {scanType === scanTypes.playbooks && (
+                <FormGroup row className="col align-self-center">
+                  {/* <Label sm={4} htmlFor="launch_playbooks">
+                    Launch Selected Playbooks:
+                  </Label> */}
+                  <Col
+                    className="d-flex justify-content-center"
+                    style={{ padding: "5px" }}
+                  >
+                    <Button
+                      onClick={() => startPlaybooks(formik.values)}
+                      variant="primary"
+                    >
+                      Launch Playbooks
+                    </Button>
+                  </Col>
+                </FormGroup>
+              )}
+              {scanType === scanTypes.analyzers_and_connectors && (
+                <>
+                  <FormGroup row>
+                    <Label sm={3}>TLP</Label>
+                    <Col sm={9}>
+                      {TLP_CHOICES.map((ch) => (
+                        <FormGroup inline check key={`tlpchoice__${ch}`}>
+                          <Label check for={`tlpchoice__${ch}`}>
+                            <TLPTag value={ch} />
+                          </Label>
+                          <Field
+                            as={Input}
+                            id={`tlpchoice__${ch}`}
+                            type="radio"
+                            name="tlp"
+                            value={ch}
+                            invalid={formik.errors.tlp && formik.touched.tlp}
+                            onChange={formik.handleChange}
+                          />
+                        </FormGroup>
+                      ))}
+                      <FormText>
+                        {TLP_DESCRIPTION_MAP[formik.values.tlp].replace(
+                          "TLP: ",
+                          ""
+                        )}
+                      </FormText>
+                      <ErrorMessage component={FormFeedback} name="tlp" />
+                    </Col>
+                  </FormGroup>
+                  <FormGroup row className="mt-2">
+                    <Button
+                      type="submit"
+                      disabled={!(formik.isValid || formik.isSubmitting)}
+                      color="primary"
+                      size="lg"
+                      outline
+                      className="mx-auto rounded-0 col-sm-2 order-sm-5"
+                    >
+                      {formik.isSubmitting && <Spinner size="sm" />}Start Scan
+                    </Button>
+                  </FormGroup>
+                </>
+              )}
             </Form>
           )}
         </Formik>
@@ -691,3 +738,4 @@ export default function ScanForm() {
     </Container>
   );
 }
+/* eslint-disable no-debugger, no-console */

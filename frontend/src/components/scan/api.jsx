@@ -22,26 +22,40 @@ export async function createPlaybookJob(formValues) {
       ? await _startPlaybookFile(formValues)
       : await _startPlaybookObservable(formValues);
 
-  const jobIds = resp.data.results.map((x) => parseInt(x.job_id, 10));
+  const playbooksRunning = new Set();
+  const warnings = [];
+  const respData = resp.data.results;
 
-  resp.data.results.forEach((respData) => {
+  respData.forEach((x) => {
+    if (x.playbooks_running)
+      x.playbooks_running.forEach((playbook_) =>
+        playbooksRunning.add(playbook_)
+      );
+    if (x.warnings) warnings.push(...x.warnings);
+  });
+
+  try {
     // handle response/error
-    if (respData.status === "accepted" || respData.status === "running") {
-      appendToRecentScans(respData.job_id, "success");
-
+    if (
+      respData.every(
+        (element) =>
+          element.status === "accepted" || element.status === "running"
+      )
+    ) {
+      const jobIds = respData.map((x) => parseInt(x.job_id, 10));
+      jobIds.forEach((jobId) => {
+        appendToRecentScans(jobId, "success");
+      });
       addToast(
-        `Created new Job with ID #${respData.job_id}!`,
+        `Created new Job with ID(s) #${jobIds.join(", ")}!`,
         <div>
-          {respData.playbooks_running.length > 0 && (
-            <ContentSection className="text-light">
-              <strong>Playbooks:</strong>&nbsp;
-              {Array.from(respData.playbooks_running)?.join(", ")}
-            </ContentSection>
-          )}
-
-          {respData.warnings.length > 0 && (
+          <ContentSection className="text-light">
+            <strong>Playbooks:</strong>&nbsp;
+            {Array.from(playbooksRunning)?.join(", ")}
+          </ContentSection>
+          {warnings.length > 0 && (
             <ContentSection className="bg-accent text-darker">
-              <strong>Warnings:</strong>&nbsp;{respData.warnings.join(", ")}
+              <strong>Warnings:</strong>&nbsp;{warnings.join(", ")}
             </ContentSection>
           )}
         </div>,
@@ -49,13 +63,17 @@ export async function createPlaybookJob(formValues) {
         true,
         10000
       );
-    } else {
-      addToast("Failed!", respData?.message, "danger");
-      const error = new Error(`job status ${respData.status}`);
-      return Promise.reject(error);
+      return Promise.resolve(jobIds);
     }
-  });
-  return Promise.resolve(jobIds);
+    // else
+    addToast("Failed!", respData?.message, "danger");
+    const error = new Error(`job status ${respData.status}`);
+    return Promise.reject(error);
+  } catch (e) {
+    console.error(e);
+    addToast("Failed!", e.parsedMsg, "danger");
+    return Promise.reject(e);
+  }
 }
 
 export async function createJob(formValues) {

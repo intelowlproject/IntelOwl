@@ -38,7 +38,7 @@ export default function JobOverview({ isRunningJob, job, refetch }) {
         </Badge>
       </div>,
     ],
-    [job]
+    [job, AnalyzerDenominator, ConnectorDenominator]
   );
   const tabRenderables = React.useMemo(
     () => [

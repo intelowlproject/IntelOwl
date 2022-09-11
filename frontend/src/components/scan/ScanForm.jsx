@@ -360,6 +360,7 @@ export default function ScanForm() {
 
       try {
         const jobIds = await createPlaybookJob(formValues);
+
         if (jobIds.length > 1) {
           setTimeout(() => navigate(`/jobs/`), 1000);
         } else {
@@ -371,7 +372,7 @@ export default function ScanForm() {
         refetchQuota();
       }
     },
-    [navigate, refetchQuota]
+    [navigate, refetchQuota, ValidatePlaybooks]
   );
 
   const onSubmit = React.useCallback(

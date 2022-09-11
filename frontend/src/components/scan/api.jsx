@@ -32,7 +32,7 @@ export async function createPlaybookJob(formValues) {
       addToast(
         `Created new Job with ID #${respData.job_id}!`,
         <div>
-          {respData.playbooks_running > 0 && (
+          {respData.playbooks_running.length > 0 && (
             <ContentSection className="text-light">
               <strong>Playbooks:</strong>&nbsp;
               {Array.from(respData.playbooks_running)?.join(", ")}
@@ -49,12 +49,11 @@ export async function createPlaybookJob(formValues) {
         true,
         10000
       );
+    } else {
+      addToast("Failed!", respData?.message, "danger");
+      const error = new Error(`job status ${respData.status}`);
+      return Promise.reject(error);
     }
-
-    // else
-    addToast("Failed!", respData?.message, "danger");
-    const error = new Error(`job status ${respData.status}`);
-    return Promise.reject(error);
   });
   return Promise.resolve(jobIds);
 }

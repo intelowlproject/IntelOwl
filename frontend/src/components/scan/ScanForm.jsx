@@ -63,12 +63,36 @@ const groupAnalyzers = (analyzersList) => {
   return grouped;
 };
 
+const groupPlaybooks = (playbooksList) => {
+  const grouped = {
+    ip: [],
+    hash: [],
+    domain: [],
+    url: [],
+    generic: [],
+    file: [],
+  };
+  playbooksList.forEach((obj) => {
+    // filter on basis of type
+    if ("file" in obj.supports) {
+      grouped.file.push(obj);
+    }
+
+    obj.supports.forEach((clsfn) => {
+      if (clsfn !== "file") {
+        grouped[clsfn].push(obj);
+      }
+    });
+  });
+  return grouped;
+};
+
 const stateSelector = (state) => [
   state.loading,
   state.error,
   groupAnalyzers(state.analyzers),
   state.connectors,
-  state.playbooks,
+  groupPlaybooks(state.playbooks),
 ];
 
 const checkChoices = [
@@ -159,7 +183,7 @@ export default function ScanForm() {
     pluginsError,
     analyzersGrouped,
     connectors,
-    playbooks,
+    playbooksGrouped,
   ] = usePluginConfigurationStore(stateSelector);
 
   const analyzersOptions = React.useMemo(
@@ -223,7 +247,7 @@ export default function ScanForm() {
 
   const playbookOptions = React.useMemo(
     () =>
-      playbooks
+      playbooksGrouped[classification]
         .map((v) => ({
           value: v.name,
           label: (
@@ -242,7 +266,7 @@ export default function ScanForm() {
           // eslint-disable-next-line no-nested-ternary
           a.isDisabled === b.isDisabled ? 0 : a.isDisabled ? 1 : -1
         ),
-    [playbooks, classification]
+    [playbooksGrouped, classification]
   );
 
   // callbacks
@@ -326,6 +350,7 @@ export default function ScanForm() {
         ...values,
         playbooks: values.playbooks.map((x) => x.value),
       };
+
       const errors = ValidatePlaybooks(values);
 
       if (Object.keys(errors).length !== 0) {

@@ -26,29 +26,15 @@ def filter_playbooks(serialized_data: Dict) -> Tuple[List]:
     warnings = []
 
     # get values from serializer
-    playbooks_requested = serialized_data[0].get("playbooks_requested", [])
+    selected_playbooks = serialized_data[0].get("playbooks_requested", [])
 
     # read config
     playbook_dataclasses = PlaybookConfig.all()
-    all_playbook_names = list(playbook_dataclasses.keys())
-
-    # run all playbooks; Might just remove this for now.
-    run_all = len(playbooks_requested) == 0
-    if run_all:
-        # select all
-        selected_playbooks.extend(all_playbook_names)
-    else:
-        # select the ones requested
-        selected_playbooks.extend(playbooks_requested)
 
     for p_name in selected_playbooks:
         try:
             pp = playbook_dataclasses.get(p_name, None)
             if not pp:
-                if not run_all:
-                    raise NotRunnablePlaybook(
-                        f"{p_name} won't run: not present in configuration"
-                    )
                 continue
             if not pp.is_ready_to_use:
                 raise NotRunnablePlaybook(f"{p_name} won't run: not configured")
@@ -60,12 +46,6 @@ def filter_playbooks(serialized_data: Dict) -> Tuple[List]:
             )
 
         except NotRunnablePlaybook as e:
-            if run_all:
-                # in this case, they are not warnings but expected and wanted behavior
-                logger.debug(e)
-            else:
-                logger.warning(e)
-                warnings.append(str(e))
             logger.warning(e)
             warnings.append(str(e))
 

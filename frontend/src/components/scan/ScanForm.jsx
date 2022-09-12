@@ -315,6 +315,9 @@ export default function ScanForm() {
     if (pluginsError) {
       errors.playbooks = pluginsError;
     }
+    if (values.playbooks.length === 0) {
+      return `Please select a playbook!`;
+    }
     if (values.classification === "file") {
       if (!values.files) {
         errors.files = "required";

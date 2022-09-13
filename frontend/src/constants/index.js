@@ -63,7 +63,7 @@ export const OBSERVABLE_TYPES = Object.keys(
 );
 
 export const scanTypes = {
-  analyzers_and_connectors: "Analyzer/Connector",
+  analyzers_and_connectors: "Analyzers/Connectors",
   playbooks: "Playbooks",
 };
 

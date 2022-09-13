@@ -145,7 +145,7 @@ const initialValues = {
   runtime_configuration: {},
   tags: [],
   check: "check_all",
-  analysisOptionValues: "Analyzer/Connector",
+  analysisOptionValues: "Analyzers/Connectors",
 };
 
 // Component
@@ -277,6 +277,12 @@ export default function ScanForm() {
         errors.analyzers = pluginsError;
         errors.connectors = pluginsError;
       }
+
+      if (values.analysisOptionValues === scanTypes.playbooks) {
+        if (values.playbooks === []) {
+          return `Select a playbook!`;
+        }
+      }
       if (values.classification === "file") {
         if (!values.files || values.files.length === 0) {
           errors.files = "required";
@@ -380,6 +386,10 @@ export default function ScanForm() {
 
   const onSubmit = React.useCallback(
     async (values, formik) => {
+      if (values.analysisOptionValues === scanTypes.playbooks) {
+        startPlaybooks(values);
+        return;
+      }
       const formValues = {
         ...values,
         tags_labels: values.tags.map((optTag) => optTag.value.label),
@@ -427,26 +437,6 @@ export default function ScanForm() {
           {(formik) => (
             <Form>
               <FormGroup className="d-flex justify-content-center">
-                {Object.values(scanTypes).map((type_) => (
-                  <FormGroup check inline key={`analysistype__${type_}`}>
-                    <Col>
-                      <Field
-                        as={Input}
-                        id={`analysistype__${type_}`}
-                        type="radio"
-                        name="analysisOptionValues"
-                        value={type_}
-                        onClick={() => {
-                          setScanType(type_);
-                          formik.setFieldValue("playbooks", []); // reset
-                        }}
-                      />
-                      <Label check>{type_}</Label>
-                    </Col>
-                  </FormGroup>
-                ))}
-              </FormGroup>
-              <FormGroup className="d-flex justify-content-center">
                 {ALL_CLASSIFICATIONS.map((ch) => (
                   <FormGroup check inline key={`classification__${ch}`}>
                     <Col>
@@ -462,6 +452,30 @@ export default function ScanForm() {
                         }}
                       />
                       <Label check>{ch}</Label>
+                    </Col>
+                  </FormGroup>
+                ))}
+              </FormGroup>
+              <hr style={{ textAlign: "right", margin: "auto 220px" }} />
+              <FormGroup
+                className="d-flex justify-content-center"
+                style={{ marginTop: "10px" }}
+              >
+                {Object.values(scanTypes).map((type_) => (
+                  <FormGroup check inline key={`analysistype__${type_}`}>
+                    <Col>
+                      <Field
+                        as={Input}
+                        id={`analysistype__${type_}`}
+                        type="radio"
+                        name="analysisOptionValues"
+                        value={type_}
+                        onClick={() => {
+                          setScanType(type_);
+                          formik.setFieldValue("playbooks", []); // reset
+                        }}
+                      />
+                      <Label check>{type_}</Label>
                     </Col>
                   </FormGroup>
                 ))}
@@ -494,9 +508,11 @@ export default function ScanForm() {
                                       name={`observable_names.${index}`}
                                       className="input-dark"
                                       invalid={
-                                        formik.errors.observable_names &&
                                         Boolean(
-                                          formik.errors.observable_names[index]
+                                          formik.errors.observable_names &&
+                                            formik.errors.observable_names[
+                                              index
+                                            ]
                                         ) &&
                                         formik.touched.observable_names &&
                                         formik.touched.observable_names[index]
@@ -665,11 +681,11 @@ export default function ScanForm() {
               )}
               {scanType === scanTypes.playbooks && (
                 <FormGroup row>
-                  <Label sm={4} htmlFor="playbooks">
+                  <Label sm={3} htmlFor="playbooks">
                     Select Playbooks
                   </Label>
                   {!(pluginsLoading || pluginsError) && (
-                    <Col sm={8}>
+                    <Col sm={9}>
                       <MultiSelectDropdownInput
                         options={playbookOptions}
                         value={formik.values.playbooks}
@@ -693,7 +709,48 @@ export default function ScanForm() {
                   />
                 </Col>
               </FormGroup>
-              {scanType === scanTypes.playbooks && (
+              <FormGroup row>
+                <Label sm={3}>TLP</Label>
+                <Col sm={9}>
+                  {TLP_CHOICES.map((ch) => (
+                    <FormGroup inline check key={`tlpchoice__${ch}`}>
+                      <Label check for={`tlpchoice__${ch}`}>
+                        <TLPTag value={ch} />
+                      </Label>
+                      <Field
+                        as={Input}
+                        id={`tlpchoice__${ch}`}
+                        type="radio"
+                        name="tlp"
+                        value={ch}
+                        invalid={formik.errors.tlp && formik.touched.tlp}
+                        onChange={formik.handleChange}
+                      />
+                    </FormGroup>
+                  ))}
+                  <FormText>
+                    {TLP_DESCRIPTION_MAP[formik.values.tlp].replace(
+                      "TLP: ",
+                      ""
+                    )}
+                  </FormText>
+                  <ErrorMessage component={FormFeedback} name="tlp" />
+                </Col>
+              </FormGroup>
+
+              <FormGroup row className="mt-2">
+                <Button
+                  type="submit"
+                  disabled={!(formik.isValid || formik.isSubmitting)}
+                  color="primary"
+                  size="lg"
+                  outline
+                  className="mx-auto rounded-0 col-sm-2 order-sm-5"
+                >
+                  {formik.isSubmitting && <Spinner size="sm" />}Start Scan
+                </Button>
+              </FormGroup>
+              {/* {scanType === scanTypes.playbooks && (
                 <FormGroup row className="col align-self-center">
                   <Col
                     className="d-flex justify-content-center"
@@ -707,51 +764,7 @@ export default function ScanForm() {
                     </Button>
                   </Col>
                 </FormGroup>
-              )}
-              {scanType === scanTypes.analyzers_and_connectors && (
-                <>
-                  <FormGroup row>
-                    <Label sm={3}>TLP</Label>
-                    <Col sm={9}>
-                      {TLP_CHOICES.map((ch) => (
-                        <FormGroup inline check key={`tlpchoice__${ch}`}>
-                          <Label check for={`tlpchoice__${ch}`}>
-                            <TLPTag value={ch} />
-                          </Label>
-                          <Field
-                            as={Input}
-                            id={`tlpchoice__${ch}`}
-                            type="radio"
-                            name="tlp"
-                            value={ch}
-                            invalid={formik.errors.tlp && formik.touched.tlp}
-                            onChange={formik.handleChange}
-                          />
-                        </FormGroup>
-                      ))}
-                      <FormText>
-                        {TLP_DESCRIPTION_MAP[formik.values.tlp].replace(
-                          "TLP: ",
-                          ""
-                        )}
-                      </FormText>
-                      <ErrorMessage component={FormFeedback} name="tlp" />
-                    </Col>
-                  </FormGroup>
-                  <FormGroup row className="mt-2">
-                    <Button
-                      type="submit"
-                      disabled={!(formik.isValid || formik.isSubmitting)}
-                      color="primary"
-                      size="lg"
-                      outline
-                      className="mx-auto rounded-0 col-sm-2 order-sm-5"
-                    >
-                      {formik.isSubmitting && <Spinner size="sm" />}Start Scan
-                    </Button>
-                  </FormGroup>
-                </>
-              )}
+              )} */}
             </Form>
           )}
         </Formik>

@@ -141,7 +141,12 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
                     # don't add warning if run_all
                     continue
 
-                if not config.is_ready_to_use:
+                if (
+                    not config.is_ready_to_use
+                    or self.context["plugin_states"]
+                    .filter(plugin_name=a_name, disabled=True)
+                    .exists()
+                ):
                     raise NotRunnableAnalyzer(
                         f"{a_name} won't run: is disabled or unconfigured"
                     )

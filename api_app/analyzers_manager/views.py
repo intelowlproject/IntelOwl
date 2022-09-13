@@ -11,7 +11,7 @@ from rest_framework.response import Response
 from api_app.core.views import PluginActionViewSet, PluginHealthCheckAPI
 from certego_saas.ext.views import APIView
 
-from ..models import PluginConfig
+from ..models import OrganizationPluginState, PluginConfig
 from . import controller as analyzers_controller
 from .models import AnalyzerReport
 from .serializers import AnalyzerConfigSerializer
@@ -47,6 +47,9 @@ class AnalyzerListAPI(APIView):
         try:
             ac = self.serializer_class.read_and_verify_config()
             PluginConfig.apply(ac, request.user, PluginConfig.PluginType.ANALYZER)
+            OrganizationPluginState.apply(
+                ac, request.user, PluginConfig.PluginType.ANALYZER
+            )
             return Response(ac, status=status.HTTP_200_OK)
         except Exception as e:
             logger.exception(

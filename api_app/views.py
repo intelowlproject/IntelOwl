@@ -31,7 +31,7 @@ from .analyzers_manager import controller as analyzers_controller
 from .analyzers_manager.constants import ObservableTypes
 from .filters import JobFilter
 from .helpers import get_now
-from .models import TLP, Job, PluginConfig, Status, Tag
+from .models import TLP, Job, OrganizationPluginState, PluginConfig, Status, Tag
 from .serializers import (
     AnalysisResponseSerializer,
     FileAnalysisSerializer,
@@ -63,8 +63,14 @@ def _multi_analysis_request(
         f"Data:{data}."
     )
 
+    plugin_states = OrganizationPluginState.objects.filter(
+        organization=user.organization,
+    )
+
     # serialize request data and validate
-    serializer = serializer_class(data=data, many=True)
+    serializer = serializer_class(
+        data=data, many=True, context={"plugin_states": plugin_states}
+    )
     serializer.is_valid(raise_exception=True)
 
     serialized_data = serializer.validated_data

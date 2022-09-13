@@ -289,3 +289,42 @@ class PluginConfig(models.Model):
                         plugin["params"][param]["value"] = custom_configs[
                             plugin["name"]
                         ][param]
+
+
+class OrganizationPluginState(models.Model):
+    type = models.CharField(choices=PluginConfig.PluginType.choices, max_length=2)
+    organization = models.ForeignKey(
+        Organization,
+        on_delete=models.CASCADE,
+        related_name="+",
+    )
+    plugin_name = models.CharField(max_length=128)
+    updated_at = models.DateTimeField(auto_now=True)
+    disabled = models.BooleanField(default=False)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["type", "plugin_name", "organization"],
+                name="unique_enabled_plugin_entry",
+            )
+        ]
+
+        indexes = [
+            models.Index(
+                fields=["organization", "type"],
+            ),
+        ]
+
+    @classmethod
+    def apply(cls, initial_config, user, plugin_type):
+        if not user.organization:
+            return
+        custom_configs = OrganizationPluginState.objects.filter(
+            organization=user.organization, type=plugin_type
+        )
+        for plugin in initial_config.values():
+            if custom_configs.filter(plugin_name=plugin["name"]).exists():
+                plugin["disabled"] = custom_configs.get(
+                    plugin_name=plugin["name"]
+                ).disabled

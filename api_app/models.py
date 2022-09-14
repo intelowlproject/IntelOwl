@@ -318,10 +318,10 @@ class OrganizationPluginState(models.Model):
 
     @classmethod
     def apply(cls, initial_config, user, plugin_type):
-        if not user.organization:
+        if not user.membership.organization:
             return
         custom_configs = OrganizationPluginState.objects.filter(
-            organization=user.organization, type=plugin_type
+            organization=user.membership.organization, type=plugin_type
         )
         for plugin in initial_config.values():
             if custom_configs.filter(plugin_name=plugin["name"]).exists():

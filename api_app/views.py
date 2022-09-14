@@ -68,7 +68,7 @@ def _multi_analysis_request(
     )
 
     plugin_states = OrganizationPluginState.objects.filter(
-        organization=user.organization,
+        organization=user.membership.organization,
     )
 
     # serialize request data and validate
@@ -689,10 +689,7 @@ def plugin_disabler(request, plugin_name, plugin_type):
     """
     Disables the plugin with the given name.
     """
-    if not Membership.objects.filter(
-        user=request.user,
-        is_owner=True,
-    ).exists():
+    if not request.user.membership or not request.user.membership.is_owner:
         raise PermissionDenied()
     if request.method == "POST":
         disable = True
@@ -702,7 +699,7 @@ def plugin_disabler(request, plugin_name, plugin_type):
         raise MethodNotAllowed(request.method)
 
     OrganizationPluginState.objects.update_or_create(
-        organization=request.user.organization,
+        organization=request.user.membership.organization,
         plugin_name=plugin_name,
         plugin_type=plugin_type,
         defaults={"disabled": disable},
@@ -712,7 +709,7 @@ def plugin_disabler(request, plugin_name, plugin_type):
 
 @api_view(["GET"])
 def plugin_state_viewer(request):
-    if request.user.organization is None:
+    if request.user.membership.organization is None:
         raise PermissionDenied()
     return Response(
         {
@@ -723,7 +720,7 @@ def plugin_state_viewer(request):
                     "disabled": plugin.enabled,
                 }
                 for plugin in OrganizationPluginState.objects.filter(
-                    organization=request.user.organization
+                    organization=request.user.membership.organization
                 )
             ]
         }

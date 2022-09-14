@@ -16,7 +16,11 @@ from drf_spectacular.utils import inline_serializer
 from rest_framework import serializers as rfs
 from rest_framework import status, viewsets
 from rest_framework.decorators import action, api_view
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import (
+    MethodNotAllowed,
+    PermissionDenied,
+    ValidationError,
+)
 from rest_framework.request import Request
 from rest_framework.response import Response
 
@@ -678,3 +682,49 @@ class PluginConfigViewSet(viewsets.ModelViewSet):
             request._full_data = request.data.copy()
         request.data["owner"] = request.user.id
         return super().update(request, *args, **kwargs)
+
+
+@api_view(["DELETE", "POST"])
+def plugin_disabler(request, plugin_name, plugin_type):
+    """
+    Disables the plugin with the given name.
+    """
+    if not Membership.objects.filter(
+        user=request.user,
+        is_owner=True,
+    ).exists():
+        raise PermissionDenied()
+    if request.method == "POST":
+        disable = True
+    elif request.method == "DELETE":
+        disable = False
+    else:
+        raise MethodNotAllowed(request.method)
+
+    OrganizationPluginState.objects.update_or_create(
+        organization=request.user.organization,
+        plugin_name=plugin_name,
+        plugin_type=plugin_type,
+        defaults={"disabled": disable},
+    )
+    return Response(status=status.HTTP_201_CREATED)
+
+
+@api_view(["GET"])
+def plugin_state_viewer(request):
+    if request.user.organization is None:
+        raise PermissionDenied()
+    return Response(
+        {
+            "plugins": [
+                {
+                    "name": plugin.plugin_name,
+                    "type": plugin.type,
+                    "disabled": plugin.enabled,
+                }
+                for plugin in OrganizationPluginState.objects.filter(
+                    organization=request.user.organization
+                )
+            ]
+        }
+    )

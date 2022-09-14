@@ -14,6 +14,8 @@ from .views import (
     analyze_observable,
     ask_analysis_availability,
     ask_multi_analysis_availability,
+    plugin_disabler,
+    plugin_state_viewer,
 )
 
 # Routers provide an easy way of automatically determining the URL conf.
@@ -51,4 +53,6 @@ urlpatterns = [
     path("", include("certego_saas.apps.notifications.urls")),
     # organization sub-app
     path("me/", include("certego_saas.apps.organization.urls")),
+    path("plugin-disable/<int:type>/<str:plugin_type>/", plugin_disabler),
+    path("plugin-disable/", plugin_state_viewer),
 ]

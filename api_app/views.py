@@ -703,7 +703,7 @@ def plugin_disabler(request, plugin_name, plugin_type):
     OrganizationPluginState.objects.update_or_create(
         organization=request.user.membership.organization,
         plugin_name=plugin_name,
-        plugin_type=plugin_type,
+        type=plugin_type,
         defaults={"disabled": disable},
     )
     return Response(status=status.HTTP_201_CREATED)
@@ -713,17 +713,12 @@ def plugin_disabler(request, plugin_name, plugin_type):
 def plugin_state_viewer(request):
     if not request.user.has_membership():
         raise PermissionDenied()
-    return Response(
-        {
-            "plugins": [
-                {
-                    "name": plugin.plugin_name,
-                    "type": plugin.type,
-                    "disabled": plugin.enabled,
-                }
-                for plugin in OrganizationPluginState.objects.filter(
-                    organization=request.user.membership.organization
-                )
-            ]
+    result = {}
+    for organization_plugin_state in OrganizationPluginState.objects.filter(
+        organization=request.user.membership.organization
+    ):
+        result[organization_plugin_state.plugin_name] = {
+            "disabled": organization_plugin_state.disabled,
+            "plugin_type": organization_plugin_state.type,
         }
-    )
+    return Response(result)

@@ -53,6 +53,6 @@ urlpatterns = [
     path("", include("certego_saas.apps.notifications.urls")),
     # organization sub-app
     path("me/", include("certego_saas.apps.organization.urls")),
+    path("plugin-disable/", plugin_state_viewer, name="plugin_state_viewer"),
     path("plugin-disable/<int:plugin_type>/<str:plugin_name>/", plugin_disabler),
-    path("plugin-disable/", plugin_state_viewer),
 ]

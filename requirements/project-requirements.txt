@@ -1,5 +1,5 @@
 # django libs
-Django==3.2.14
+Django==3.2.15
 django-auth-ldap==4.1.0
 django-radius==1.5.0
 django-filter==22.1
@@ -23,7 +23,7 @@ celery==5.2.3
 dataclasses==0.6
 # https://github.com/advisories/GHSA-q4qm-xhf9-4p8f
 # unpatched CVE: noproblem, we just use this for debugging purposes
-flower==1.1.0
+flower==1.2.0
 
 # plugins
 GitPython==3.1.26

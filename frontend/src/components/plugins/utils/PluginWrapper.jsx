@@ -13,7 +13,10 @@ import {
 } from "@certego/certego-ui";
 
 import { PluginInfoCard } from "./utils";
-import { usePluginConfigurationStore } from "../../../stores";
+import {
+  useOrganizationStore,
+  usePluginConfigurationStore,
+} from "../../../stores";
 
 // table config
 const tableConfig = {};
@@ -33,13 +36,36 @@ function TableBodyComponent({ page }) {
   );
 }
 
-export default function PluginWrapper({ heading, stateSelector, columns }) {
+export default function PluginWrapper({
+  heading,
+  stateSelector,
+  columns,
+  type,
+}) {
   // local state
   const [viewType, setViewType] = React.useState("Table");
 
+  const { pluginsState: organizationPluginsState } = useOrganizationStore(
+    React.useCallback(
+      (state) => ({
+        pluginsState: state.pluginsState,
+      }),
+      []
+    )
+  );
+
   // API/ store
-  const [loading, error, dataList, refetch] =
+  const [loading, error, dataListInitial, refetch] =
     usePluginConfigurationStore(stateSelector);
+
+  const dataList = dataListInitial.map((data) => {
+    const newData = data;
+    newData.orgPluginDisabled =
+      organizationPluginsState[data.name] !== undefined &&
+      organizationPluginsState[data.name].disabled;
+    newData.plugin_type = type;
+    return newData;
+  });
 
   // page title
   useTitle(`IntelOwl | ${heading}`, { restoreOnUnmount: true });
@@ -108,4 +134,5 @@ PluginWrapper.propTypes = {
   heading: PropTypes.string.isRequired,
   stateSelector: PropTypes.func.isRequired,
   columns: PropTypes.array.isRequired,
+  type: PropTypes.number.isRequired,
 };

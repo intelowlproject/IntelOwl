@@ -1,7 +1,7 @@
 import create from "zustand";
 import axios from "axios";
 
-import { BASE_URI_ORG } from "../constants/api";
+import { BASE_URI_ORG, ORG_PLUGIN_DISABLE_URI } from "../constants/api";
 
 const useOrganizationStore = create((set, _get) => ({
   loading: false,
@@ -12,6 +12,7 @@ const useOrganizationStore = create((set, _get) => ({
   membersCount: undefined,
   members: [],
   pendingInvitations: [],
+  pluginsState: {},
   fetchAll: async () => {
     if (_get().loading) return;
     try {
@@ -46,6 +47,12 @@ const useOrganizationStore = create((set, _get) => ({
         pendingInvitations,
         noOrg: false,
       });
+      if (isUserOwner) {
+        const pluginsStateResp = await axios.get(ORG_PLUGIN_DISABLE_URI);
+        set({
+          pluginsState: pluginsStateResp.data,
+        });
+      }
     } catch (e) {
       // 404 means user is not part of organization
       if (e.response.status === 404)

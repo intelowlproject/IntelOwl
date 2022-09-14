@@ -1,3 +1,4 @@
+import axios from "axios";
 import React from "react";
 import PropTypes from "prop-types";
 import classnames from "classnames";
@@ -13,10 +14,14 @@ import {
 import { RiHeartPulseLine } from "react-icons/ri";
 import { MdInfo } from "react-icons/md";
 
-import { IconButton, BooleanIcon } from "@certego/certego-ui";
+import { IconButton, BooleanIcon, InputCheckBox } from "@certego/certego-ui";
+import { ORG_PLUGIN_DISABLE_URI } from "../../../constants/api";
 
 import { markdownToHtml, TLPTag } from "../../common";
-import { usePluginConfigurationStore } from "../../../stores";
+import {
+  useOrganizationStore,
+  usePluginConfigurationStore,
+} from "../../../stores";
 
 const { checkPluginHealth } = usePluginConfigurationStore.getState();
 
@@ -185,6 +190,55 @@ export function PluginHealthCheckButton({ pluginName, pluginType }) {
     </div>
   );
 }
+
+export function OrganizationPluginStateToggle({ disabled, pluginName, type }) {
+  const {
+    isUserOwner,
+    organization,
+    fetchAll: fetchAllOrganizations,
+  } = useOrganizationStore(
+    React.useCallback(
+      (state) => ({
+        fetchAll: state.fetchAll,
+        isUserOwner: state.isUserOwner,
+        organization: state.organization,
+      }),
+      []
+    )
+  );
+  let title = "";
+  if (!organization.name) title = "You're not a part of any organization";
+  else if (!isUserOwner)
+    title = `You're not an owner of your organization - ${organization.name}`;
+
+  return (
+    <div className="d-flex flex-column align-items-center" title={title}>
+      <InputCheckBox
+        checked={!disabled}
+        onChange={async () => {
+          if (disabled)
+            await axios.delete(
+              `${ORG_PLUGIN_DISABLE_URI}/${type}/${pluginName}/`
+            );
+          else
+            await axios.post(
+              `${ORG_PLUGIN_DISABLE_URI}/${type}/${pluginName}/`
+            );
+          fetchAllOrganizations();
+        }}
+        name=""
+        label=""
+        disabled={!organization.name || !isUserOwner}
+      />
+    </div>
+  );
+}
+
+OrganizationPluginStateToggle.propTypes = {
+  disabled: PropTypes.bool.isRequired,
+  pluginName: PropTypes.string.isRequired,
+  type: PropTypes.string.isRequired,
+};
 
 PluginInfoCard.propTypes = {
   pluginInfo: PropTypes.object.isRequired,

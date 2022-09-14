@@ -11,6 +11,7 @@ import {
 import { TLP_CHOICES } from "../../../constants";
 import { markdownToHtml, TLPTag } from "../../common";
 import {
+  OrganizationPluginStateToggle,
   PluginHealthCheckButton,
   PluginInfoPopoverIcon,
   PluginVerificationIcon,
@@ -53,6 +54,19 @@ const pluginTableColumns = [
     ),
     Filter: SelectOptionsFilter,
     selectOptions: ["true", "false"],
+    disableSortBy: true,
+    maxWidth: 115,
+  },
+  {
+    Header: "Enabled for organization",
+    id: "enabled_for_organization",
+    Cell: ({ row: { original } }) => (
+      <OrganizationPluginStateToggle
+        pluginName={original?.name}
+        disabled={original?.orgPluginDisabled}
+        type={original?.plugin_type}
+      />
+    ),
     disableSortBy: true,
     maxWidth: 115,
   },

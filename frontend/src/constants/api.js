@@ -24,6 +24,7 @@ export const PLUGIN_CONFIG_URI = `${API_BASE_URI}/plugin-config`;
 // org
 export const BASE_URI_ORG = `${API_BASE_URI}/me/organization`;
 export const BASE_URI_INVITATION = `${API_BASE_URI}/me/invitations`;
+export const ORG_PLUGIN_DISABLE_URI = `${API_BASE_URI}/plugin-disable`;
 
 // notifications
 export const NOTIFICATION_BASE_URI = `${API_BASE_URI}/notification`;

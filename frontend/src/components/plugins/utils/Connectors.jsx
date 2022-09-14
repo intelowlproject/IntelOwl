@@ -21,6 +21,7 @@ export default function Connectors() {
       heading="Connectors"
       stateSelector={stateSelector}
       columns={connectorTableColumns}
+      type={2}
     />
   );
 }

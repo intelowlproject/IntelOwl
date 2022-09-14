@@ -318,7 +318,7 @@ class OrganizationPluginState(models.Model):
 
     @classmethod
     def apply(cls, initial_config, user, plugin_type):
-        if not user.membership.organization:
+        if not user.has_membership():
             return
         custom_configs = OrganizationPluginState.objects.filter(
             organization=user.membership.organization, type=plugin_type

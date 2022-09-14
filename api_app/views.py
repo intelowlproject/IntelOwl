@@ -67,9 +67,11 @@ def _multi_analysis_request(
         f"Data:{data}."
     )
 
-    plugin_states = OrganizationPluginState.objects.filter(
-        organization=user.membership.organization,
-    )
+    plugin_states = OrganizationPluginState.objects.none()
+    if user.has_membership():
+        plugin_states = OrganizationPluginState.objects.filter(
+            organization=user.membership.organization,
+        )
 
     # serialize request data and validate
     serializer = serializer_class(
@@ -689,7 +691,7 @@ def plugin_disabler(request, plugin_name, plugin_type):
     """
     Disables the plugin with the given name.
     """
-    if not request.user.membership or not request.user.membership.is_owner:
+    if not request.user.has_membership() or not request.user.membership.is_owner:
         raise PermissionDenied()
     if request.method == "POST":
         disable = True
@@ -709,7 +711,7 @@ def plugin_disabler(request, plugin_name, plugin_type):
 
 @api_view(["GET"])
 def plugin_state_viewer(request):
-    if request.user.membership.organization is None:
+    if not request.user.has_membership():
         raise PermissionDenied()
     return Response(
         {

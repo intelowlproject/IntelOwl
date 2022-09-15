@@ -9,7 +9,7 @@ from tests.mock_utils import if_mock_connections, patch
 
 
 class MockGreyNoise:
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         pass
 
     def ip(self, *args, **kwargs):
@@ -25,7 +25,6 @@ class GreyNoiseAnalyzer(classes.ObservableAnalyzer):
         self.max_records_to_retrieve = int(params.get("max_records_to_retrieve", 500))
 
     def run(self):
-
         if self.api_version == "v2":
             try:
                 api_key = self._secrets["api_key_name"]
@@ -36,19 +35,19 @@ class GreyNoiseAnalyzer(classes.ObservableAnalyzer):
                 response |= session.riot(self.observable_name)
             except Exception as e:
                 raise AnalyzerRunException(f"GreyNoise Exception: {e}")
-
         elif self.api_version == "v3":
             try:
                 api_key = self._secrets["api_key_name"]
-                session = GreyNoise(
-                    api_key=api_key,
-                    integration_name="greynoise-community-intelowl-v1.0",
-                    offering="Community",
-                )
+                params = {
+                    "integration_name": "greynoise-community-intelowl-v1.0",
+                    "offering": "Community",
+                }
+                if api_key:
+                    params["api_key"] = api_key
+                session = GreyNoise(**params)
                 response = session.ip(self.observable_name)
             except Exception as e:
                 raise AnalyzerRunException(f"GreyNoise Exception: {e}")
-
         else:
             raise AnalyzerRunException(
                 "Invalid API Version. " "Supported are: v2 (paid), v3 (community)"

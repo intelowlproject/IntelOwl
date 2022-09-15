@@ -8,10 +8,9 @@ COPY frontend/ .
 # copy version file as an env file
 COPY docker/.version .env.local
 # install and build
-RUN npm install npm@latest -g
-RUN npm install
-
-RUN PUBLIC_URL=/static/reactapp/ npm run build
+RUN npm install npm@latest -g \
+    && npm install \
+    && PUBLIC_URL=/static/reactapp/ npm run build
 
 # Stage 2: Backend
 FROM python:3.9.9-buster
@@ -33,7 +32,7 @@ RUN mkdir -p ${LOG_PATH} \
     ${LOG_PATH}/uwsgi \
     /opt/deploy/files_required /opt/deploy/yara /opt/deploy/configuration
 
-# install required packages. some notes about:
+# install required packages. some notes about:o
 # python3-psycopg2 is required to use PostgresSQL with Django
 # osslsigncode is required to run the signature verification analyzer
 # apache2-utils is required to execute htpasswd
@@ -41,18 +40,17 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends apt-utils libsasl2-dev libssl-dev netcat \
     vim libldap2-dev python-dev libfuzzy-dev net-tools python3-psycopg2 git osslsigncode apache2-utils \
     && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
-RUN pip3 install --upgrade pip
+    && rm -rf /var/lib/apt/lists/* \
+    && pip3 install --no-cache-dir --upgrade pip
 
 COPY requirements/project-requirements.txt $PYTHONPATH/project-requirements.txt
+COPY requirements/certego-requirements.txt $PYTHONPATH/certego-requirements.txt
 WORKDIR $PYTHONPATH
 
-RUN pip3 install --no-cache-dir --compile -r project-requirements.txt
-# install elasticsearch-dsl's appropriate version as specified by user
-RUN pip3 install --no-cache-dir django-elasticsearch-dsl==${ELASTICSEARCH_DSL_VERSION}
-
-COPY requirements/certego-requirements.txt $PYTHONPATH/certego-requirements.txt
-RUN pip3 install --no-cache-dir --compile -r certego-requirements.txt
+RUN pip3 install --no-cache-dir --compile -r project-requirements.txt \
+    # install elasticsearch-dsl's appropriate version as specified by user
+    && pip3 install --no-cache-dir django-elasticsearch-dsl==${ELASTICSEARCH_DSL_VERSION} \
+    && pip3 install --no-cache-dir --compile -r certego-requirements.txt
 
 COPY . $PYTHONPATH
 
@@ -61,16 +59,10 @@ RUN touch ${LOG_PATH}/django/api_app.log ${LOG_PATH}/django/api_app_errors.log \
     && touch ${LOG_PATH}/django/django_auth_ldap.log \
     && chown -R www-data:www-data ${LOG_PATH} /opt/deploy/ \
     # this is cause stringstifer creates this directory during the build and cause celery to crash
-    && rm -rf /root/.local
-
-RUN docker/scripts/watchman_install.sh
-
-# download yara rules and quark engine rules
-RUN api_app/analyzers_manager/repo_downloader.sh
-
-# this is because botocore points to legacy endpoints
-# more info: https://stackoverflow.com/questions/41062055/celery-4-0-0-amazon-sqs-credential-should-be-scoped-to-a-valid-region-not
-RUN sed -i "s/{region}.queue/sqs.{region}/g" "$(find / -name endpoints.json 2>/dev/null | head -n 1)"
+    && rm -rf /root/.local \
+    && docker/scripts/watchman_install.sh \
+    # download yara rules and quark engine rules
+    && RUN api_app/analyzers_manager/repo_downloader.sh
 
 # quarkengine calls
 # HOME_DIR = f"{Path.home()}/.quark-engine/"

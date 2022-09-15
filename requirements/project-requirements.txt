@@ -1,11 +1,11 @@
 # django libs
-Django==3.2.14
+Django==3.2.15
 django-auth-ldap==4.1.0
 django-radius==1.5.0
 django-filter==22.1
 django-storages==1.13.1
 django-celery-beat==2.2.1
-django-celery-results==2.2.0
+django-celery-results==2.4.0
 
 # django rest framework libs
 Authlib==1.0.1
@@ -19,11 +19,11 @@ git+https://github.com/jazzband/django-silk.git#egg=django-silk
 
 # infra
 boto3==1.24.52
-celery==5.2.2
+celery==5.2.3
 dataclasses==0.6
 # https://github.com/advisories/GHSA-q4qm-xhf9-4p8f
 # unpatched CVE: noproblem, we just use this for debugging purposes
-flower==1.1.0
+flower==1.2.0
 
 # plugins
 GitPython==3.1.26

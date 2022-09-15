@@ -18,7 +18,7 @@ jobs:
           python-version: 3.9
       - name: Install docs requirements
         run: |
-          pip install -r docs/source/requirements.txt
+          pip install -r requirements/docs-requirements.txt
 
       - name: Build docs
         run: |

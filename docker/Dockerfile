@@ -62,7 +62,7 @@ RUN touch ${LOG_PATH}/django/api_app.log ${LOG_PATH}/django/api_app_errors.log \
     && rm -rf /root/.local \
     && docker/scripts/watchman_install.sh \
     # download yara rules and quark engine rules
-    && RUN api_app/analyzers_manager/repo_downloader.sh
+    && api_app/analyzers_manager/repo_downloader.sh
 
 # quarkengine calls
 # HOME_DIR = f"{Path.home()}/.quark-engine/"

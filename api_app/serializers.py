@@ -620,12 +620,12 @@ class PlaybookBaseSerializer:
                             analyzers_to_be_run.append(analyzer)
                         else:
                             raise NotRunnableAnalyzer(
-                                "{analyzer} won't run: not supported."
+                                f"{analyzer} won't run: not supported."
                             )
 
                 connectors_to_be_run.extend(pp.connectors)
 
-            except NotRunnablePlaybook as e:
+            except (NotRunnablePlaybook, NotRunnableAnalyzer) as e:
                 logger.warning(e)
                 warnings.append(str(e))
 

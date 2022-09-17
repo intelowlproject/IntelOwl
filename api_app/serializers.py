@@ -586,24 +586,7 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
 
 
 class PlaybookBaseSerializer:
-    def validate_(self, attrs: dict) -> dict:
-        analyzers_to_execute = []
-        for playbook in attrs["playbooks_requested"]:
-            playbook_class = PlaybookConfig.get(playbook)
-            for analyzer in playbook_class.analyzers:
-                analyzer_class = AnalyzerConfig.get(analyzer)
-                if analyzer_class.type == "file" and "file" in playbook_class.supports:
-                    analyzers_to_execute.append(analyzer)
-                else:
-                    # this means that analyzer is of type observable
-                    if analyzer_class.is_observable_type_supported(
-                        attrs["observable_classification"]
-                    ):
-                        analyzers_to_execute.append(analyzer)
-        attrs["analyzers_to_execute"] = analyzers_to_execute
-        return attrs
-
-    def filter_playbooks(self, serialized_data: Dict) -> Tuple[List]:
+    def filter_playbooks(self, attrs: Dict) -> Tuple[List]:
         # init empty list
         valid_playbook_list = []
         selected_playbooks = []
@@ -612,7 +595,7 @@ class PlaybookBaseSerializer:
         warnings = []
 
         # get values from serializer
-        selected_playbooks = serialized_data[0].get("playbooks_requested", [])
+        selected_playbooks = attrs.get("playbooks_requested", [])
 
         # read config
         playbook_dataclasses = PlaybookConfig.all()
@@ -625,13 +608,22 @@ class PlaybookBaseSerializer:
                 if not pp.is_ready_to_use:
                     raise NotRunnablePlaybook(f"{p_name} won't run: not configured")
 
-                analyzers_to_be_run.extend(
-                    AnalyzerConfig.runnable_analyzers(pp.analyzers)
-                )
+                for analyzer in pp.analyzers:
+                    analyzer_class = AnalyzerConfig.get(analyzer)
+                    if analyzer_class.type == "file" and "file" in pp.supports:
+                        analyzers_to_be_run.append(analyzer)
+                    else:
+                        # this means that analyzer is of type observable
+                        if analyzer_class.is_observable_type_supported(
+                            attrs["observable_classification"]
+                        ):
+                            analyzers_to_be_run.append(analyzer)
+                        else:
+                            raise NotRunnableAnalyzer(
+                                "{analyzer} won't run: not supported."
+                            )
 
-                connectors_to_be_run.extend(
-                    ConnectorConfig.runnable_connectors(pp.connectors)
-                )
+                connectors_to_be_run.extend(pp.connectors)
 
             except NotRunnablePlaybook as e:
                 logger.warning(e)
@@ -640,7 +632,16 @@ class PlaybookBaseSerializer:
             else:
                 valid_playbook_list.append(p_name)
 
-        return valid_playbook_list
+        attrs["playbooks_requested"] = valid_playbook_list
+        attrs["analyzers_to_execute"] = analyzers_to_be_run
+        attrs["connectors_to_execute"] = connectors_to_be_run
+        attrs["warnings"] = warnings
+
+        return attrs
+
+    def validate_(self, attrs: dict) -> dict:
+        attrs = self.filter_playbooks(attrs)
+        return attrs
 
 
 class PlaybookObservableAnalysisSerializer(

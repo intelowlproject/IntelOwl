@@ -71,7 +71,6 @@ def _multi_analysis_request(
     Prepare and send multiple observables for analysis
     """
     warnings = []
-    valid_playbook_list = []
     logger.info(
         f"_multi_analysis_request {serializer_class} "
         f"received request from {user}."
@@ -90,7 +89,6 @@ def _multi_analysis_request(
     # save the arrived data plus new params into a new job object
     jobs = serializer.save(
         user=user,
-        playbooks_to_execute=valid_playbook_list,
     )
 
     logger.info(f"New Jobs added to queue <- {repr(jobs)}.")
@@ -128,7 +126,7 @@ def _multi_analysis_request(
                     "start_playbooks",
                     kwargs=dict(
                         job_id=job.pk,
-                        playbooks_to_execute=valid_playbook_list,
+                        playbooks_to_execute=jobs.playbooks_requested,
                     ),
                 )
 

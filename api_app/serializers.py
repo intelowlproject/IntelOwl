@@ -665,6 +665,12 @@ class PlaybookObservableAnalysisSerializer(
         )
         list_serializer_class = MultipleObservableAnalysisSerializer
 
+    def validate(self, attrs: dict) -> dict:
+        attrs_ = super().validate_(attrs)
+        attrs_final = super().validate(attrs_)
+
+        return attrs_final
+
 
 class PlaybookFileAnalysisSerializer(PlaybookBaseSerializer, FileAnalysisSerializer):
     class Meta:
@@ -688,8 +694,10 @@ class PlaybookFileAnalysisSerializer(PlaybookBaseSerializer, FileAnalysisSeriali
 
     def validate(self, attrs: dict) -> dict:
         attrs["observable_classification"] = "file"
-        super().validate_(attrs)
-        super().validate(attrs)
+        attrs_ = super().validate_(attrs)
+        attrs_final = super().validate(attrs_)
+
+        return attrs_final
 
 
 class AnalysisResponseSerializer(rfs.Serializer):

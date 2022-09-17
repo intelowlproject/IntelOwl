@@ -643,7 +643,9 @@ class PlaybookBaseSerializer:
         return valid_playbook_list
 
 
-class PlaybookObservableAnalysisSerializer(PlaybookBaseSerializer):
+class PlaybookObservableAnalysisSerializer(
+    PlaybookBaseSerializer, ObservableAnalysisSerializer
+):
     class Meta:
         model = Job
         fields = (

@@ -2,7 +2,6 @@
 # See the file 'LICENSE' for copying permission.
 
 import logging
-from typing import List
 
 from celery import chord
 from django.conf import settings
@@ -18,19 +17,18 @@ logger = logging.getLogger(__name__)
 
 def start_playbooks(
     job_id: int,
-    playbooks_to_execute: List[str],
 ) -> None:
     from intel_owl import tasks
+
+    # get job
+    job = Job.objects.get(pk=job_id)
+    job.update_status(Job.Status.RUNNING)  # set job status to running
 
     # to store the celery task signatures
     task_signatures = []
 
     # get playbook config
-    playbook_dataclasses = PlaybookConfig.filter(names=playbooks_to_execute)
-
-    # get job
-    job = Job.objects.get(pk=job_id)
-    job.update_status(Job.Status.RUNNING)  # set job status to running
+    playbook_dataclasses = PlaybookConfig.filter(names=job.playbooks_requested)
 
     final_analyzers_used = []
     final_connectors_used = []

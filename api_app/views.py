@@ -126,7 +126,6 @@ def _multi_analysis_request(
                     "start_playbooks",
                     kwargs=dict(
                         job_id=job.pk,
-                        playbooks_to_execute=jobs.playbooks_requested,
                     ),
                 )
 

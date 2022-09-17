@@ -605,8 +605,11 @@ class PlaybookBaseSerializer:
                 pp = playbook_dataclasses.get(p_name, None)
                 if not pp:
                     continue
-                if not pp.is_ready_to_use:
+                elif not pp.is_ready_to_use:
                     raise NotRunnablePlaybook(f"{p_name} won't run: not configured")
+
+                else:
+                    valid_playbook_list.append(p_name)
 
                 for analyzer in pp.analyzers:
                     analyzer_class = AnalyzerConfig.get(analyzer)
@@ -628,9 +631,6 @@ class PlaybookBaseSerializer:
             except (NotRunnablePlaybook, NotRunnableAnalyzer) as e:
                 logger.warning(e)
                 warnings.append(str(e))
-
-            else:
-                valid_playbook_list.append(p_name)
 
         attrs["playbooks_requested"] = valid_playbook_list
         attrs["analyzers_to_execute"] = analyzers_to_be_run

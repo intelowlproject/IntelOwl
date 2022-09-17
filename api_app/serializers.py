@@ -687,6 +687,7 @@ class PlaybookFileAnalysisSerializer(PlaybookBaseSerializer, FileAnalysisSeriali
         list_serializer_class = MultipleFileAnalysisSerializer
 
     def validate(self, attrs: dict) -> dict:
+        attrs["observable_classification"] = "file"
         super().validate_(attrs)
         super().validate(attrs)
 

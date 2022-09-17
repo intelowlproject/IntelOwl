@@ -2,56 +2,18 @@
 # See the file 'LICENSE' for copying permission.
 
 import logging
-from typing import Dict, List, Tuple
+from typing import List
 
 from celery import chord
 from django.conf import settings
 
 from api_app.analyzers_manager.dataclasses import AnalyzerConfig
 from api_app.connectors_manager.dataclasses import ConnectorConfig
-from api_app.exceptions import NotRunnablePlaybook
 
 from ..models import Job
 from .dataclasses import PlaybookConfig
 
 logger = logging.getLogger(__name__)
-
-
-def filter_playbooks(serialized_data: Dict) -> Tuple[List]:
-    # init empty list
-    valid_playbook_list = []
-    selected_playbooks = []
-    analyzers_to_be_run = []
-    connectors_to_be_run = []
-    warnings = []
-
-    # get values from serializer
-    selected_playbooks = serialized_data[0].get("playbooks_requested", [])
-
-    # read config
-    playbook_dataclasses = PlaybookConfig.all()
-
-    for p_name in selected_playbooks:
-        try:
-            pp = playbook_dataclasses.get(p_name, None)
-            if not pp:
-                continue
-            if not pp.is_ready_to_use:
-                raise NotRunnablePlaybook(f"{p_name} won't run: not configured")
-
-            analyzers_to_be_run.extend(AnalyzerConfig.runnable_analyzers(pp.analyzers))
-
-            connectors_to_be_run.extend(
-                ConnectorConfig.runnable_connectors(pp.connectors)
-            )
-
-        except NotRunnablePlaybook as e:
-            logger.warning(e)
-            warnings.append(str(e))
-
-        else:
-            valid_playbook_list.append(p_name)
-    return valid_playbook_list, analyzers_to_be_run, connectors_to_be_run, warnings
 
 
 def start_playbooks(
@@ -89,7 +51,7 @@ def start_playbooks(
 
         task_signatures_analyzers, analyzers_used = AnalyzerConfig.stack_analyzers(
             job_id=job_id,
-            analyzers_to_execute=list(analyzers.keys()),
+            analyzers_to_execute=job.analyzers_to_execute,
             runtime_configuration=analyzers,
             parent_playbook=p_name,
         )

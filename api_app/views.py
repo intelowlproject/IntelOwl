@@ -21,6 +21,10 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 
 from api_app.playbooks_manager.serializers import PlaybookAnalysisResponseSerializer
+from api_app.serializers import (
+    PlaybookFileAnalysisSerializer,
+    PlaybookObservableAnalysisSerializer,
+)
 from certego_saas.apps.organization.membership import Membership
 from certego_saas.apps.organization.permissions import IsObjectOwnerOrSameOrgPermission
 from certego_saas.ext.helpers import cache_action_response, parse_humanized_range
@@ -33,7 +37,6 @@ from .analyzers_manager.constants import ObservableTypes
 from .filters import JobFilter
 from .helpers import get_now
 from .models import TLP, CustomConfig, Job, Status, Tag
-from .playbooks_manager import controller as playbooks_controller
 from .serializers import (
     AnalysisResponseSerializer,
     CustomConfigSerializer,
@@ -53,10 +56,17 @@ def _multi_analysis_request(
     user,
     data: Union[QueryDict, dict],
     serializer_class: Union[
-        Type[ObservableAnalysisSerializer], Type[FileAnalysisSerializer]
+        Type[ObservableAnalysisSerializer],
+        Type[FileAnalysisSerializer],
+        Type[PlaybookObservableAnalysisSerializer],
+        Type[PlaybookFileAnalysisSerializer],
     ],
     playbook_scan=False,
 ):
+    # fix validation with the help of playbook serializers
+    # fix runtime configs. no rewrite of code there.
+    # important thing is that the same code is utilised.
+
     """
     Prepare and send multiple observables for analysis
     """
@@ -77,16 +87,6 @@ def _multi_analysis_request(
         data.pop("runtime_configuration", {}) for data in serialized_data
     ]
 
-    if playbook_scan:
-        (
-            valid_playbook_list,
-            analyzers_to_be_run,
-            connectors_to_be_run,
-            warnings,
-        ) = playbooks_controller.filter_playbooks(
-            serialized_data,
-        )
-
     # save the arrived data plus new params into a new job object
     jobs = serializer.save(
         user=user,
@@ -101,6 +101,28 @@ def _multi_analysis_request(
     else:
         # fire celery task
         for index, job in enumerate(jobs):
+            # second critical change
+            runtime_configuration = {}
+
+            for analyzer in job.analyzers_to_execute:
+                # Appending custom config to runtime configuration
+                config = CustomConfig.get_as_dict(
+                    user, CustomConfig.PluginType.ANALYZER, plugin_name=analyzer
+                ).get(analyzer, {})
+                if analyzer in runtime_configurations[index]:
+                    config |= runtime_configurations[index][analyzer]
+                if config:
+                    runtime_configuration[analyzer] = config
+            for connector in job.connectors_to_execute:
+                config = CustomConfig.get_as_dict(
+                    user, CustomConfig.PluginType.CONNECTOR, plugin_name=connector
+                ).get(connector, {})
+                if connector in runtime_configurations[index]:
+                    config |= runtime_configurations[index][connector]
+                if config:
+                    runtime_configuration[connector] = config
+            logger.debug(f"New value of runtime_configuration: {runtime_configuration}")
+
             if playbook_scan:
                 celery_app.send_task(
                     "start_playbooks",
@@ -111,29 +133,6 @@ def _multi_analysis_request(
                 )
 
             else:
-                runtime_configuration = {}
-
-                for analyzer in job.analyzers_to_execute:
-                    # Appending custom config to runtime configuration
-                    config = CustomConfig.get_as_dict(
-                        user, CustomConfig.PluginType.ANALYZER, plugin_name=analyzer
-                    ).get(analyzer, {})
-                    if analyzer in runtime_configurations[index]:
-                        config |= runtime_configurations[index][analyzer]
-                    if config:
-                        runtime_configuration[analyzer] = config
-                for connector in job.connectors_to_execute:
-                    config = CustomConfig.get_as_dict(
-                        user, CustomConfig.PluginType.CONNECTOR, plugin_name=connector
-                    ).get(connector, {})
-                    if connector in runtime_configurations[index]:
-                        config |= runtime_configurations[index][connector]
-                    if config:
-                        runtime_configuration[connector] = config
-                logger.debug(
-                    f"New value of runtime_configuration: {runtime_configuration}"
-                )
-
                 celery_app.send_task(
                     "start_analyzers",
                     kwargs=dict(
@@ -142,6 +141,7 @@ def _multi_analysis_request(
                         runtime_configuration=runtime_configuration,
                     ),
                 )
+
     if playbook_scan:
         ser = PlaybookAnalysisResponseSerializer(
             data=[
@@ -149,9 +149,9 @@ def _multi_analysis_request(
                     "status": "accepted",
                     "job_id": job.pk,
                     "warnings": warnings,
-                    "playbooks_running": valid_playbook_list,
-                    "analyzers_running": analyzers_to_be_run,
-                    "connectors_running": connectors_to_be_run,
+                    "playbooks_running": job.playbooks_requested,
+                    "analyzers_running": job.analyzers_to_execute,
+                    "connectors_running": job.connectors_to_execute,
                 }
                 for index, job in enumerate(jobs)
             ],

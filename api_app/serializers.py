@@ -3,7 +3,7 @@
 import copy
 import json
 import logging
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 from django.http import QueryDict
 from drf_spectacular.utils import extend_schema_serializer
@@ -23,7 +23,7 @@ from .analyzers_manager.dataclasses import AnalyzerConfig
 from .analyzers_manager.serializers import AnalyzerReportSerializer
 from .connectors_manager.dataclasses import ConnectorConfig
 from .connectors_manager.serializers import ConnectorReportSerializer
-from .exceptions import NotRunnableAnalyzer, NotRunnableConnector
+from .exceptions import NotRunnableAnalyzer, NotRunnableConnector, NotRunnablePlaybook
 from .helpers import (
     calculate_md5,
     calculate_mimetype,
@@ -31,6 +31,7 @@ from .helpers import (
     gen_random_colorhex,
 )
 from .models import TLP, CustomConfig, Job, Tag
+from .playbooks_manager.dataclasses import PlaybookConfig
 
 logger = logging.getLogger(__name__)
 
@@ -509,7 +510,6 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
             "runtime_configuration",
             "analyzers_requested",
             "connectors_requested",
-            "playbooks_requested",
             "tags_labels",
         )
         list_serializer_class = MultipleObservableAnalysisSerializer
@@ -583,6 +583,109 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
                 {"detail": "No Analyzers can be run after filtering."}
             )
         return cleaned_analyzer_list
+
+
+class PlaybookBaseSerializer:
+    def validate_(self, attrs: dict) -> dict:
+        analyzers_to_execute = []
+        for playbook in attrs["playbooks_requested"]:
+            playbook_class = PlaybookConfig.get(playbook)
+            for analyzer in playbook_class.analyzers:
+                analyzer_class = AnalyzerConfig.get(analyzer)
+                if analyzer_class.type == "file" and "file" in playbook_class.supports:
+                    analyzers_to_execute.append(analyzer)
+                else:
+                    # this means that analyzer is of type observable
+                    if analyzer_class.is_observable_type_supported(
+                        attrs["observable_classification"]
+                    ):
+                        analyzers_to_execute.append(analyzer)
+        attrs["analyzers_to_execute"] = analyzers_to_execute
+        return attrs
+
+    def filter_playbooks(self, serialized_data: Dict) -> Tuple[List]:
+        # init empty list
+        valid_playbook_list = []
+        selected_playbooks = []
+        analyzers_to_be_run = []
+        connectors_to_be_run = []
+        warnings = []
+
+        # get values from serializer
+        selected_playbooks = serialized_data[0].get("playbooks_requested", [])
+
+        # read config
+        playbook_dataclasses = PlaybookConfig.all()
+
+        for p_name in selected_playbooks:
+            try:
+                pp = playbook_dataclasses.get(p_name, None)
+                if not pp:
+                    continue
+                if not pp.is_ready_to_use:
+                    raise NotRunnablePlaybook(f"{p_name} won't run: not configured")
+
+                analyzers_to_be_run.extend(
+                    AnalyzerConfig.runnable_analyzers(pp.analyzers)
+                )
+
+                connectors_to_be_run.extend(
+                    ConnectorConfig.runnable_connectors(pp.connectors)
+                )
+
+            except NotRunnablePlaybook as e:
+                logger.warning(e)
+                warnings.append(str(e))
+
+            else:
+                valid_playbook_list.append(p_name)
+
+        return valid_playbook_list
+
+
+class PlaybookObservableAnalysisSerializer(PlaybookBaseSerializer):
+    class Meta:
+        model = Job
+        fields = (
+            "id",
+            "user",
+            "is_sample",
+            "md5",
+            "tlp",
+            "observable_name",
+            "observable_classification",
+            "runtime_configuration",
+            "analyzers_requested",
+            "connectors_requested",
+            "playbooks_requested",
+            "tags_labels",
+        )
+        list_serializer_class = MultipleObservableAnalysisSerializer
+
+
+class PlaybookFileAnalysisSerializer(PlaybookBaseSerializer, FileAnalysisSerializer):
+    class Meta:
+        model = Job
+        fields = (
+            "id",
+            "user",
+            "is_sample",
+            "md5",
+            "tlp",
+            "file",
+            "file_name",
+            "file_mimetype",
+            "runtime_configuration",
+            "analyzers_requested",
+            "connectors_requested",
+            "playbooks_requested",
+            "tags_labels",
+        )
+        list_serializer_class = MultipleFileAnalysisSerializer
+
+    def validate(self, attrs: dict) -> dict:
+        super().validate_(attrs)
+        super().validate(attrs)
 
 
 class AnalysisResponseSerializer(rfs.Serializer):

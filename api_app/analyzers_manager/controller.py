@@ -44,6 +44,7 @@ def start_analyzers(
     cb_signature = tasks.post_all_analyzers_finished.signature(
         [job_id, runtime_configuration], immutable=True
     )
+
     runner(cb_signature)
 
     return None

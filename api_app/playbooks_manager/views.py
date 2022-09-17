@@ -11,7 +11,10 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from api_app.serializers import FileAnalysisSerializer, ObservableAnalysisSerializer
+from api_app.serializers import (
+    PlaybookFileAnalysisSerializer,
+    PlaybookObservableAnalysisSerializer,
+)
 from certego_saas.ext.views import APIView
 
 from ..views import _multi_analysis_request
@@ -27,7 +30,9 @@ __all__ = [
 
 def _multi_analysis_request_playbooks(
     request,
-    serializer_class: Union[FileAnalysisSerializer, ObservableAnalysisSerializer],
+    serializer_class: Union[
+        PlaybookFileAnalysisSerializer, PlaybookObservableAnalysisSerializer
+    ],
 ):
     """
     Prepare and send multiple files/observables for running playbooks
@@ -47,22 +52,24 @@ def _multi_analysis_request_playbooks(
 
 @add_docs(
     description="This endpoint allows to start a Job related to a file",
-    request=FileAnalysisSerializer,
+    request=PlaybookFileAnalysisSerializer,
     responses={200: PlaybookAnalysisResponseSerializer},
 )
 @api_view(["POST"])
 def analyze_multiple_files(request):
-    return _multi_analysis_request_playbooks(request, FileAnalysisSerializer)
+    return _multi_analysis_request_playbooks(request, PlaybookFileAnalysisSerializer)
 
 
 @add_docs(
     description="This endpoint allows to start a Job related to an observable",
-    request=ObservableAnalysisSerializer,
+    request=PlaybookObservableAnalysisSerializer,
     responses={200: PlaybookAnalysisResponseSerializer},
 )
 @api_view(["POST"])
 def analyze_multiple_observables(request):
-    return _multi_analysis_request_playbooks(request, ObservableAnalysisSerializer)
+    return _multi_analysis_request_playbooks(
+        request, PlaybookObservableAnalysisSerializer
+    )
 
 
 class PlaybookListAPI(APIView):

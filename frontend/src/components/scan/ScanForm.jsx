@@ -278,11 +278,6 @@ export default function ScanForm() {
         errors.connectors = pluginsError;
       }
 
-      if (values.analysisOptionValues === scanTypes.playbooks) {
-        if (values.playbooks === []) {
-          return `Select a playbook!`;
-        }
-      }
       if (values.classification === "file") {
         if (!values.files || values.files.length === 0) {
           errors.files = "required";

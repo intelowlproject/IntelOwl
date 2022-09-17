@@ -20,7 +20,6 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from .serializers import PlaybookAnalysisResponseSerializer
 from api_app.serializers import (
     PlaybookFileAnalysisSerializer,
     PlaybookObservableAnalysisSerializer,
@@ -45,6 +44,7 @@ from .serializers import (
     JobListSerializer,
     JobSerializer,
     ObservableAnalysisSerializer,
+    PlaybookAnalysisResponseSerializer,
     TagSerializer,
     multi_result_enveloper,
 )

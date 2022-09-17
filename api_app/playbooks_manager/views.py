@@ -11,14 +11,15 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
+from api_app.playbooks_manager.serializers import PlaybookConfigSerializer
 from api_app.serializers import (
+    PlaybookAnalysisResponseSerializer,
     PlaybookFileAnalysisSerializer,
     PlaybookObservableAnalysisSerializer,
 )
 from certego_saas.ext.views import APIView
 
 from ..views import _multi_analysis_request
-from .serializers import PlaybookAnalysisResponseSerializer, PlaybookConfigSerializer
 
 logger = logging.getLogger(__name__)
 

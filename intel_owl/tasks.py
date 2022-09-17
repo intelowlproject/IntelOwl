@@ -98,6 +98,5 @@ def start_connectors(
 @app.task(name="start_playbooks", soft_time_limit=500)
 def start_playbooks(
     job_id: int,
-    playbooks_to_execute: list,
 ):
-    playbooks_controller.start_playbooks(job_id, playbooks_to_execute)
+    playbooks_controller.start_playbooks(job_id)

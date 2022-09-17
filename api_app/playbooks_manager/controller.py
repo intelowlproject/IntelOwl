@@ -28,7 +28,7 @@ def start_playbooks(
     task_signatures = []
 
     # get playbook config
-    playbook_dataclasses = PlaybookConfig.filter(names=job.playbooks_requested)
+    playbook_dataclasses = PlaybookConfig.filter(names=job.playbooks_to_execute)
 
     final_analyzers_used = []
     final_connectors_used = []

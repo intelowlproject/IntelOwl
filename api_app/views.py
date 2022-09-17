@@ -146,7 +146,7 @@ def _multi_analysis_request(
                     "status": "accepted",
                     "job_id": job.pk,
                     "warnings": warnings,
-                    "playbooks_running": job.playbooks_requested,
+                    "playbooks_running": job.playbooks_to_execute,
                     "analyzers_running": job.analyzers_to_execute,
                     "connectors_running": job.connectors_to_execute,
                 }

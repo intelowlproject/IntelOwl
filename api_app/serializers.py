@@ -632,7 +632,8 @@ class PlaybookBaseSerializer:
                 logger.warning(e)
                 warnings.append(str(e))
 
-        attrs["playbooks_requested"] = valid_playbook_list
+        attrs["playbooks_to_execute"] = valid_playbook_list
+        attrs["playbooks_requested"] = selected_playbooks
         attrs["analyzers_to_execute"] = analyzers_to_be_run
         attrs["connectors_to_execute"] = connectors_to_be_run
         attrs["warnings"] = warnings

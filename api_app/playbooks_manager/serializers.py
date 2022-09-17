@@ -5,7 +5,6 @@ from rest_framework import serializers as rfs
 
 from api_app.analyzers_manager.constants import AllTypes
 from api_app.core.serializers import AbstractConfigSerializer
-from api_app.serializers import AnalysisResponseSerializer
 
 
 class PlaybookConfigSerializer(AbstractConfigSerializer):
@@ -33,7 +32,3 @@ class PlaybookConfigSerializer(AbstractConfigSerializer):
         required=False,
         default=[],
     )
-
-
-class PlaybookAnalysisResponseSerializer(AnalysisResponseSerializer):
-    playbooks_running = rfs.ListField()

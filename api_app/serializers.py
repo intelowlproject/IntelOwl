@@ -696,6 +696,10 @@ class AnalysisResponseSerializer(rfs.Serializer):
     connectors_running = rfs.ListField()
 
 
+class PlaybookAnalysisResponseSerializer(AnalysisResponseSerializer):
+    playbooks_running = rfs.ListField()
+
+
 def multi_result_enveloper(serializer_class, many):
     component_name = (
         f'Multi{serializer_class.__name__.replace("Serializer", "")}'

@@ -615,24 +615,28 @@ class PlaybookBaseSerializer:
                 else:
                     valid_playbook_list.append(p_name)
 
-                for analyzer in pp.analyzers:
-                    analyzer_class = AnalyzerConfig.get(analyzer)
-                    if analyzer_class.type == "file" and "file" in pp.supports:
-                        analyzers_to_be_run.append(analyzer)
+                try:
+                    for analyzer in pp.analyzers:
+                        analyzer_class = AnalyzerConfig.get(analyzer)
+                        if analyzer_class.type == "file" and "file" in pp.supports:
+                            analyzers_to_be_run.append(analyzer)
 
-                    # this means that analyzer is of type observable
-                    if analyzer_class.is_observable_type_supported(
-                        attrs["observable_classification"]
-                    ):
-                        analyzers_to_be_run.append(analyzer)
-                    else:
-                        raise NotRunnableAnalyzer(
-                            f"{analyzer} won't run: not supported."
-                        )
+                        # this means that analyzer is of type observable
+                        if analyzer_class.is_observable_type_supported(
+                            attrs["observable_classification"]
+                        ):
+                            analyzers_to_be_run.append(analyzer)
+                        else:
+                            raise NotRunnableAnalyzer(
+                                f"{analyzer} won't run: not supported."
+                            )
+                except (NotRunnableAnalyzer) as e:
+                    # this is expected behaviour
+                    logger.debug("e")
 
                 connectors_to_be_run.extend(pp.connectors)
 
-            except (NotRunnablePlaybook, NotRunnableAnalyzer) as e:
+            except (NotRunnablePlaybook) as e:
                 logger.warning(e)
                 warnings.append(str(e))
 

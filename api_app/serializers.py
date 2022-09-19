@@ -180,6 +180,12 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         selected_connectors = []
 
         connectors_requested = serialized_data.get("connectors_requested", [])
+        run_all = len(connectors_requested) == 0
+
+        if serialized_data.get("playbooks_requested", []):
+            connectors_requested = serialized_data.get("connectors_to_execute", [])
+            run_all = False
+
         tlp = serialized_data.get("tlp", TLP.WHITE).upper()
 
         # read config
@@ -187,7 +193,6 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         all_connector_names = list(connector_dataclasses.keys())
 
         # run all connectors ?
-        run_all = len(connectors_requested) == 0
         if run_all:
             # select all
             selected_connectors.extend(all_connector_names)

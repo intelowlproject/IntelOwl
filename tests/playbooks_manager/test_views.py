@@ -20,7 +20,7 @@ class PlaybookAppViewsTestCase(CustomAPITestCase):
             response.json(), PlaybookConfigSerializer.read_and_verify_config()
         )
 
-    def test_analyze_multiple_observables__all(self):
+    def test_analyze_multiple_all_observables(self):
         ip_observable_name = os.environ.get("TEST_IP", "1.1.1.1")
         url_observable_name = os.environ.get("TEST_URL", "https://google.com")
         domain_observable_name = os.environ.get("TEST_DOMAIN", "google.com")

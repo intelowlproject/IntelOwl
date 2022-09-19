@@ -72,9 +72,10 @@ const groupPlaybooks = (playbooksList) => {
     generic: [],
     file: [],
   };
+
   playbooksList.forEach((obj) => {
     // filter on basis of type
-    if ("file" in obj.supports) {
+    if (obj.supports.includes("file")) {
       grouped.file.push(obj);
     }
 
@@ -385,12 +386,14 @@ export default function ScanForm() {
         startPlaybooks(values);
         return;
       }
+
       const formValues = {
         ...values,
         tags_labels: values.tags.map((optTag) => optTag.value.label),
         analyzers: values.analyzers.map((x) => x.value),
         connectors: values.connectors.map((x) => x.value),
       };
+
       try {
         const jobIds = await createJob(formValues);
         if (jobIds.length > 1) {
@@ -447,30 +450,6 @@ export default function ScanForm() {
                         }}
                       />
                       <Label check>{ch}</Label>
-                    </Col>
-                  </FormGroup>
-                ))}
-              </FormGroup>
-              <hr style={{ textAlign: "right", margin: "auto 220px" }} />
-              <FormGroup
-                className="d-flex justify-content-center"
-                style={{ marginTop: "10px" }}
-              >
-                {Object.values(scanTypes).map((type_) => (
-                  <FormGroup check inline key={`analysistype__${type_}`}>
-                    <Col>
-                      <Field
-                        as={Input}
-                        id={`analysistype__${type_}`}
-                        type="radio"
-                        name="analysisOptionValues"
-                        value={type_}
-                        onClick={() => {
-                          setScanType(type_);
-                          formik.setFieldValue("playbooks", []); // reset
-                        }}
-                      />
-                      <Label check>{type_}</Label>
                     </Col>
                   </FormGroup>
                 ))}
@@ -565,6 +544,30 @@ export default function ScanForm() {
                   </Col>
                 </FormGroup>
               )}
+              <hr style={{ textAlign: "right", margin: "auto 220px" }} />
+              <FormGroup
+                className="d-flex justify-content-center"
+                style={{ marginTop: "10px" }}
+              >
+                {Object.values(scanTypes).map((type_) => (
+                  <FormGroup check inline key={`analysistype__${type_}`}>
+                    <Col>
+                      <Field
+                        as={Input}
+                        id={`analysistype__${type_}`}
+                        type="radio"
+                        name="analysisOptionValues"
+                        value={type_}
+                        onClick={() => {
+                          setScanType(type_);
+                          formik.setFieldValue("playbooks", []); // reset
+                        }}
+                      />
+                      <Label check>{type_}</Label>
+                    </Col>
+                  </FormGroup>
+                ))}
+              </FormGroup>
               {scanType === scanTypes.analyzers_and_connectors && (
                 <>
                   <>

@@ -114,9 +114,6 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
 
         analyzers_requested = serialized_data.get("analyzers_requested", [])
 
-        if serialized_data["playbooks_requested"]:
-            analyzers_requested = serialized_data.get("analyzers_to_execute")
-
         tlp = serialized_data.get("tlp", TLP.WHITE).upper()
 
         # read config
@@ -180,11 +177,6 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         cleaned_connectors_list = []
         selected_connectors = []
 
-        connectors_requested = serialized_data.get("connectors_requested", [])
-
-        if serialized_data["playbooks_requested"]:
-            connectors_requested = serialized_data.get("analyzers_to_execute")
-        
         connectors_requested = serialized_data.get("connectors_requested", [])
         tlp = serialized_data.get("tlp", TLP.WHITE).upper()
 

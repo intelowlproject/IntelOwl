@@ -544,6 +544,9 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
 
         run_all = len(serialized_data.get("analyzers_requested", [])) == 0
 
+        if serialized_data.get("playbooks_requested", []):
+            run_all = False
+
         for a_name in partially_filtered_analyzers:
             try:
                 config = analyzer_dataclasses.get(a_name, None)
@@ -614,16 +617,16 @@ class PlaybookBaseSerializer:
                     analyzer_class = AnalyzerConfig.get(analyzer)
                     if analyzer_class.type == "file" and "file" in pp.supports:
                         analyzers_to_be_run.append(analyzer)
+
+                    # this means that analyzer is of type observable
+                    if analyzer_class.is_observable_type_supported(
+                        attrs["observable_classification"]
+                    ):
+                        analyzers_to_be_run.append(analyzer)
                     else:
-                        # this means that analyzer is of type observable
-                        if analyzer_class.is_observable_type_supported(
-                            attrs["observable_classification"]
-                        ):
-                            analyzers_to_be_run.append(analyzer)
-                        else:
-                            raise NotRunnableAnalyzer(
-                                f"{analyzer} won't run: not supported."
-                            )
+                        raise NotRunnableAnalyzer(
+                            f"{analyzer} won't run: not supported."
+                        )
 
                 connectors_to_be_run.extend(pp.connectors)
 

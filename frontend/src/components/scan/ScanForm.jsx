@@ -745,21 +745,6 @@ export default function ScanForm() {
                   {formik.isSubmitting && <Spinner size="sm" />}Start Scan
                 </Button>
               </FormGroup>
-              {/* {scanType === scanTypes.playbooks && (
-                <FormGroup row className="col align-self-center">
-                  <Col
-                    className="d-flex justify-content-center"
-                    style={{ padding: "5px" }}
-                  >
-                    <Button
-                      onClick={() => startPlaybooks(formik.values)}
-                      variant="primary"
-                    >
-                      Launch Playbooks
-                    </Button>
-                  </Col>
-                </FormGroup>
-              )} */}
             </Form>
           )}
         </Formik>

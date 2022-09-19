@@ -113,6 +113,8 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         selected_analyzers = []
 
         analyzers_requested = serialized_data.get("analyzers_requested", [])
+        if serialized_data.get("playbooks_requested", []):
+            analyzers_requested = serialized_data.get("analyzers_to_execute", [])
 
         tlp = serialized_data.get("tlp", TLP.WHITE).upper()
 

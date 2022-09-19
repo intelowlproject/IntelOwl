@@ -343,3 +343,8 @@ To contribute to the project, see [Contribute](./Contribute.md).
 ### Available Playbooks
 
 Playbooks are designed to be easy to share sequence of running Analyzers/Connectors on a particular kind of observable.
+
+
+
+##### Playbooks:
+* `FREE_TO_USE_ANALYZERS`: A playbook containing all free to use analyzers.

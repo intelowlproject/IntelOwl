@@ -63,6 +63,10 @@ def _multi_analysis_request(
     ],
     playbook_scan=False,
 ):
+    # fix validation with the help of playbook serializers
+    # fix runtime configs. no rewrite of code there.
+    # important thing is that the same code is utilised.
+
     """
     Prepare and send multiple observables for analysis
     """

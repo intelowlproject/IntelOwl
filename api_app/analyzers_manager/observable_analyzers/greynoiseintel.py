@@ -42,7 +42,8 @@ class GreyNoiseAnalyzer(classes.ObservableAnalyzer):
     def _monkeypatch(cls):
         patches = [
             if_mock_connections(
-                patch.object(GreyNoise, "ip", return_value={"noise": True})
+                patch.object(GreyNoise, "ip", return_value={"noise": True}),
+                patch.object(GreyNoise, "riot", return_value={"riot": True}),
             )
         ]
         return super()._monkeypatch(patches=patches)

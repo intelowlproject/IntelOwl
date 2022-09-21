@@ -38,7 +38,7 @@ google-cloud-webrisk==1.8.1
 intezer-sdk==1.11.1
 lief==0.12.0
 maxminddb==2.2.0
-mwdblib==4.2.1
+mwdblib==4.3.0
 oletools==0.60
 OTXv2==1.5.12
 peepdf-fork==0.4.3

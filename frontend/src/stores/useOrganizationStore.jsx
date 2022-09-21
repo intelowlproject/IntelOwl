@@ -47,7 +47,7 @@ const useOrganizationStore = create((set, _get) => ({
         pendingInvitations,
         noOrg: false,
       });
-      if (isUserOwner) {
+      if (name) {
         const pluginsStateResp = await axios.get(ORG_PLUGIN_DISABLE_URI);
         set({
           pluginsState: pluginsStateResp.data,

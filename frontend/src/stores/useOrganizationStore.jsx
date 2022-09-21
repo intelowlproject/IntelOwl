@@ -50,7 +50,7 @@ const useOrganizationStore = create((set, _get) => ({
       if (name) {
         const pluginsStateResp = await axios.get(ORG_PLUGIN_DISABLE_URI);
         set({
-          pluginsState: pluginsStateResp.data,
+          pluginsState: pluginsStateResp.data.data,
         });
       }
     } catch (e) {

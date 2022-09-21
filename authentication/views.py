@@ -9,6 +9,7 @@ from django.contrib.auth import get_user_model, login, logout
 from django.shortcuts import redirect
 from django_user_agents.utils import get_user_agent
 from drf_spectacular.extensions import OpenApiAuthenticationExtension
+from drf_spectacular.utils import extend_schema as add_docs
 from durin import views as durin_views
 from durin.models import Client
 from rest_framework import status
@@ -83,6 +84,9 @@ class DurinAuthenticationScheme(OpenApiAuthenticationExtension):
         }
 
 
+@add_docs(
+    description="""This endpoint redirects to Google OAuth login.""",
+)
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def google_login(request: Request):

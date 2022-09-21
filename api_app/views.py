@@ -686,6 +686,15 @@ class PluginConfigViewSet(viewsets.ModelViewSet):
         return super().update(request, *args, **kwargs)
 
 
+@add_docs(
+    description="""This endpoint allows organization owners to toggle plugin state.""",
+    responses={
+        201: inline_serializer(
+            name="PluginDisablerResponseSerializer",
+            fields={},
+        ),
+    },
+)
 @api_view(["DELETE", "POST"])
 def plugin_disabler(request, plugin_name, plugin_type):
     """
@@ -700,6 +709,10 @@ def plugin_disabler(request, plugin_name, plugin_type):
     else:
         raise MethodNotAllowed(request.method)
 
+    logger.info(
+        f"plugin_disabler: Setting disable to {disable} "
+        f"for plugin {plugin_name} of type {plugin_type}"
+    )
     OrganizationPluginState.objects.update_or_create(
         organization=request.user.membership.organization,
         plugin_name=plugin_name,
@@ -709,15 +722,27 @@ def plugin_disabler(request, plugin_name, plugin_type):
     return Response(status=status.HTTP_201_CREATED)
 
 
+@add_docs(
+    description="""This endpoint allows organization owners
+    and members to view plugin state.""",
+    responses={
+        200: inline_serializer(
+            name="PluginStateViewerResponseSerializer",
+            fields={
+                "data": rfs.JSONField(),
+            },
+        ),
+    },
+)
 @api_view(["GET"])
 def plugin_state_viewer(request):
     if not request.user.has_membership():
         raise PermissionDenied()
-    result = {}
+    result = {"data": {}}
     for organization_plugin_state in OrganizationPluginState.objects.filter(
         organization=request.user.membership.organization
     ):
-        result[organization_plugin_state.plugin_name] = {
+        result["data"][organization_plugin_state.plugin_name] = {
             "disabled": organization_plugin_state.disabled,
             "plugin_type": organization_plugin_state.type,
         }

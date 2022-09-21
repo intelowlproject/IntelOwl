@@ -12,9 +12,13 @@ import {
   UncontrolledPopover,
 } from "reactstrap";
 import { RiHeartPulseLine } from "react-icons/ri";
-import { MdInfo } from "react-icons/md";
+import {
+  MdInfo,
+  MdOutlineCheckCircleOutline,
+  MdOutlineHideSource,
+} from "react-icons/md";
 
-import { IconButton, BooleanIcon, InputCheckBox } from "@certego/certego-ui";
+import { IconButton, BooleanIcon } from "@certego/certego-ui";
 import { ORG_PLUGIN_DISABLE_URI } from "../../../constants/api";
 
 import { markdownToHtml, TLPTag } from "../../common";
@@ -211,30 +215,28 @@ export function OrganizationPluginStateToggle({
       []
     )
   );
-  let title = "";
+  let title = disabled ? "Enable" : "Disable";
   if (!organization.name) title = "You're not a part of any organization";
   else if (!isUserOwner)
     title = `You're not an owner of your organization - ${organization.name}`;
 
+  const onClick = async () => {
+    if (disabled)
+      await axios.delete(`${ORG_PLUGIN_DISABLE_URI}/${type}/${pluginName}/`);
+    else await axios.post(`${ORG_PLUGIN_DISABLE_URI}/${type}/${pluginName}/`);
+    fetchAllOrganizations();
+    refetch();
+  };
   return (
-    <div className="d-flex flex-column align-items-center" title={title}>
-      <InputCheckBox
-        checked={!disabled}
-        onChange={async () => {
-          if (disabled)
-            await axios.delete(
-              `${ORG_PLUGIN_DISABLE_URI}/${type}/${pluginName}/`
-            );
-          else
-            await axios.post(
-              `${ORG_PLUGIN_DISABLE_URI}/${type}/${pluginName}/`
-            );
-          fetchAllOrganizations();
-          refetch();
-        }}
-        name=""
-        label=""
-        disabled={!organization.name || !isUserOwner}
+    <div className="d-flex flex-column align-items-center">
+      <IconButton
+        id={`table-pluginstatebtn__${pluginName}`}
+        color={disabled ? "danger" : "info"}
+        size="sm"
+        Icon={disabled ? MdOutlineHideSource : MdOutlineCheckCircleOutline}
+        title={title}
+        onClick={onClick}
+        titlePlacement="top"
       />
     </div>
   );
@@ -244,6 +246,7 @@ OrganizationPluginStateToggle.propTypes = {
   disabled: PropTypes.bool.isRequired,
   pluginName: PropTypes.string.isRequired,
   type: PropTypes.string.isRequired,
+  refetch: PropTypes.func.isRequired,
 };
 
 PluginInfoCard.propTypes = {

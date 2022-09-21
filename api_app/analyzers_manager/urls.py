@@ -14,7 +14,9 @@ router.register(
 )
 
 urlpatterns = [
-    path("get_analyzer_configs", AnalyzerListAPI.as_view()),
+    path(
+        "get_analyzer_configs", AnalyzerListAPI.as_view(), name="get_analyzer_configs"
+    ),
     path("analyzer/<str:name>/healthcheck", AnalyzerHealthCheckAPI.as_view()),
     # Viewsets
     path(r"", include(router.urls)),

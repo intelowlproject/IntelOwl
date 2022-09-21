@@ -17,8 +17,10 @@ from rest_framework import serializers as rfs
 from rest_framework import status, viewsets
 from rest_framework.decorators import action, api_view
 from rest_framework.exceptions import ValidationError
+from rest_framework.request import Request
 from rest_framework.response import Response
 
+from certego_saas.apps.organization.membership import Membership
 from certego_saas.apps.organization.permissions import IsObjectOwnerOrSameOrgPermission
 from certego_saas.ext.helpers import cache_action_response, parse_humanized_range
 from certego_saas.ext.mixins import SerializerActionMixin
@@ -29,9 +31,10 @@ from .analyzers_manager import controller as analyzers_controller
 from .analyzers_manager.constants import ObservableTypes
 from .filters import JobFilter
 from .helpers import get_now
-from .models import TLP, Job, Status, Tag
+from .models import TLP, CustomConfig, Job, Status, Tag
 from .serializers import (
     AnalysisResponseSerializer,
+    CustomConfigSerializer,
     FileAnalysisSerializer,
     JobAvailabilitySerializer,
     JobListSerializer,
@@ -77,12 +80,32 @@ def _multi_analysis_request(
     logger.info(f"New Jobs added to queue <- {repr(jobs)}.")
 
     # Check if task is test or not
-    if settings.STAGE_CI:
+    if settings.STAGE_CI and not settings.FORCE_SCHEDULE_JOBS:
         logger.info("skipping analysis start cause we are in CI")
     else:
         # fire celery task
         for index, job in enumerate(jobs):
-            runtime_configuration = runtime_configurations[index]
+            runtime_configuration = {}
+
+            for analyzer in job.analyzers_to_execute:
+                # Appending custom config to runtime configuration
+                config = CustomConfig.get_as_dict(
+                    user, CustomConfig.PluginType.ANALYZER, plugin_name=analyzer
+                ).get(analyzer, {})
+                if analyzer in runtime_configurations[index]:
+                    config |= runtime_configurations[index][analyzer]
+                if config:
+                    runtime_configuration[analyzer] = config
+            for connector in job.connectors_to_execute:
+                config = CustomConfig.get_as_dict(
+                    user, CustomConfig.PluginType.CONNECTOR, plugin_name=connector
+                ).get(connector, {})
+                if connector in runtime_configurations[index]:
+                    config |= runtime_configurations[index][connector]
+                if config:
+                    runtime_configuration[connector] = config
+            logger.debug(f"New value of runtime_configuration: {runtime_configuration}")
+
             celery_app.send_task(
                 "start_analyzers",
                 kwargs=dict(
@@ -250,6 +273,12 @@ def ask_multi_analysis_availability(request):
     )
 
 
+@add_docs(
+    description="This endpoint allows to start a Job related for a single File."
+    " Retained for retro-compatibility",
+    request=FileAnalysisSerializer,
+    responses={200: AnalysisResponseSerializer},
+)
 @api_view(["POST"])
 def analyze_file(request):
     try:
@@ -279,8 +308,20 @@ def analyze_file(request):
 
 
 @add_docs(
-    description="This endpoint allows to start Jobs related to multiple observables",
-    request=FileAnalysisSerializer,
+    description="This endpoint allows to start Jobs related to multiple Files",
+    # It should be better to link the doc to the related MultipleFileAnalysisSerializer.
+    # It is not straightforward because you can't just add a class
+    # which extends a ListSerializer.
+    # Follow this doc to try to find a fix:
+    # https://drf-spectacular.readthedocs.io/en/latest/customization.html#declare-serializer-magic-with-openapiserializerextension
+    request=inline_serializer(
+        name="MultipleFilesSerializer",
+        fields={
+            "files": rfs.ListField(child=rfs.FileField()),
+            "file_names": rfs.ListField(child=rfs.CharField()),
+            "file_mimetypes": rfs.ListField(child=rfs.CharField()),
+        },
+    ),
     responses={200: multi_result_enveloper(AnalysisResponseSerializer, True)},
 )
 @api_view(["POST"])
@@ -321,8 +362,17 @@ def analyze_observable(request):
 
 
 @add_docs(
-    description="This endpoint allows to start Jobs related to multiple observables",
-    request=ObservableAnalysisSerializer,
+    description="""This endpoint allows to start Jobs related to multiple observables.
+                 Observable parameter must be composed like this:
+                 [(<observable_classification>, <observable_name>), ...]""",
+    request=inline_serializer(
+        name="MultipleObservableSerializer",
+        fields={
+            "observables": rfs.ListField(
+                child=rfs.ListField(max_length=2, min_length=2)
+            )
+        },
+    ),
     responses={200: multi_result_enveloper(AnalysisResponseSerializer, True)},
 )
 @api_view(["POST"])
@@ -574,3 +624,47 @@ class TagViewSet(viewsets.ModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
     pagination_class = None
+
+
+@add_docs(
+    description="""
+    REST endpoint to fetch list of CustomConfigs or retrieve/delete a CustomConfig.
+    Requires authentication. Allows access to only authorized CustomConfigs.
+    """
+)
+class CustomConfigViewSet(viewsets.ModelViewSet):
+    queryset = CustomConfig.objects.order_by("id")
+    serializer_class = CustomConfigSerializer
+    pagination_class = None
+
+    def get_queryset(self):
+        # Initializing empty queryset
+        result = CustomConfig.objects.none()
+
+        # Adding CustomConfigs for user's organization, if any
+        membership = Membership.objects.filter(
+            user=self.request.user, organization__isnull=False
+        )
+        if membership.exists():
+            result |= CustomConfig.objects.filter(
+                organization=membership[0].organization
+            )
+
+        # Adding CustomConfigs for user
+        result |= CustomConfig.objects.filter(owner=self.request.user)
+
+        return result.order_by("id")
+
+    def create(self, request: Request, *args, **kwargs):
+        if isinstance(request.data, QueryDict):
+            # Making QueryDict mutable to pass owner into the serializer
+            request._full_data = request.data.copy()
+        request.data["owner"] = request.user.id
+        return super().create(request, *args, **kwargs)
+
+    def update(self, request: Request, *args, **kwargs):
+        if isinstance(request.data, QueryDict):
+            # Making QueryDict mutable to pass owner into the serializer
+            request._full_data = request.data.copy()
+        request.data["owner"] = request.user.id
+        return super().update(request, *args, **kwargs)

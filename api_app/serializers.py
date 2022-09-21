@@ -9,8 +9,13 @@ from django.http import QueryDict
 from drf_spectacular.utils import extend_schema_serializer
 from durin.serializers import UserSerializer
 from rest_framework import serializers as rfs
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import PermissionDenied, ValidationError
+from rest_framework.fields import empty
 
+from certego_saas.apps.organization.membership import Membership
+
+# from django.contrib.auth import get_user_model
+from certego_saas.apps.organization.organization import Organization
 from certego_saas.apps.organization.permissions import IsObjectOwnerOrSameOrgPermission
 
 from .analyzers_manager.constants import ObservableTypes
@@ -25,7 +30,7 @@ from .helpers import (
     calculate_observable_classification,
     gen_random_colorhex,
 )
-from .models import TLP, Job, Tag
+from .models import TLP, CustomConfig, Job, Tag
 
 logger = logging.getLogger(__name__)
 
@@ -37,8 +42,13 @@ __all__ = [
     "FileAnalysisSerializer",
     "ObservableAnalysisSerializer",
     "AnalysisResponseSerializer",
+    "MultipleFileAnalysisSerializer",
+    "MultipleObservableAnalysisSerializer",
     "multi_result_enveloper",
+    "CustomConfigSerializer",
 ]
+
+# User = get_user_model()
 
 
 class TagSerializer(rfs.ModelSerializer):
@@ -450,7 +460,7 @@ class MultipleObservableAnalysisSerializer(rfs.ListSerializer):
         ret = []
         errors = []
 
-        for classification, name in data.get("observables"):
+        for classification, name in data.get("observables", []):
 
             # `deepcopy` here ensures that this code doesn't
             # break even if new fields are added in future
@@ -592,3 +602,96 @@ def multi_result_enveloper(serializer_class, many):
         results = serializer_class(many=many)
 
     return EnvelopeSerializer
+
+
+class CustomConfigSerializer(rfs.ModelSerializer):
+    class CustomJSONField(rfs.JSONField):
+        def run_validation(self, data=empty):
+            value = super().run_validation(data)
+            try:
+                return json.loads(value)
+            except json.JSONDecodeError:
+                raise ValidationError("Value is not JSON-compliant.")
+
+        def to_representation(self, value):
+            return json.dumps(super().to_representation(value))
+
+    # certego_saas does not expose organization.id to frontend
+    organization = rfs.SlugRelatedField(
+        allow_null=True,
+        slug_field="name",
+        queryset=Organization.objects.all(),
+        required=False,
+    )
+
+    value = CustomJSONField()
+
+    class Meta:
+        model = CustomConfig
+        fields = rfs.ALL_FIELDS
+
+    def validate(self, attrs):
+        super().validate(attrs)
+
+        # check if owner is admin of organization
+        if attrs.get("organization", None):
+            # check if the user is owner of the organization
+            membership = Membership.objects.filter(
+                user=attrs.get("owner"),
+                organization=attrs.get("organization"),
+                is_owner=True,
+            )
+            if not membership.exists():
+                logger.warning(
+                    f"User {attrs.get('owner')} is not owner of "
+                    f"organization {attrs.get('organization')}."
+                )
+                raise PermissionDenied("User is not owner of the organization.")
+
+        if attrs["type"] == CustomConfig.PluginType.ANALYZER:
+            config = AnalyzerConfig
+            category = "Analyzer"
+        elif attrs["type"] == CustomConfig.PluginType.CONNECTOR:
+            config = ConnectorConfig
+            category = "Connector"
+        else:
+            logger.error(f"Unknown custom config type: {attrs['type']}")
+            raise ValidationError("Invalid type.")
+
+        if attrs["plugin_name"] not in config.all():
+            raise ValidationError(f"{category} {attrs['plugin_name']} does not exist.")
+
+        if attrs["attribute"] not in config.all()[attrs["plugin_name"]].params:
+            raise ValidationError(
+                f"{category} {attrs['plugin_name']} does not "
+                f"have attribute {attrs['attribute']}."
+            )
+
+        # Check if the type of value is valid for the attribute.
+        # NOTE: json.loads is used as it allows us to store all
+        # valid value types into a StringField
+        if not isinstance(
+            attrs["value"],
+            type(config.all()[attrs["plugin_name"]].params[attrs["attribute"]].value),
+        ):
+            expected_type = type(
+                config.all()[attrs["plugin_name"]].params[attrs["attribute"]].value
+            )
+            raise ValidationError(
+                f"{category} {attrs['plugin_name']} attribute "
+                f"{attrs['attribute']} has wrong type "
+                f"{type(attrs['value']).__name__}. Expected: "
+                f"{expected_type.__name__}."
+            )
+
+        if self.instance is None:
+            params = attrs.copy()
+            params.pop("value")
+            if "organization" not in params:
+                params["organization__isnull"] = True
+            if CustomConfig.objects.filter(**params).exists():
+                raise ValidationError(
+                    f"{category} {attrs['plugin_name']} "
+                    f"attribute {attrs['attribute']} already exists."
+                )
+        return attrs

@@ -1,10 +1,13 @@
 version: '3.8'
 
+x-no-healthcheck: &no-healthcheck
+  healthcheck:
+    disable: true
+
 services:
   uwsgi:
     environment:
       - CELERY_QUEUES=default,local,long
-
 
   celery_worker_local:
     image: intelowlproject/intelowl:${INTELOWL_TAG_VERSION}
@@ -23,6 +26,7 @@ services:
       - rabbitmq
       - postgres
       - uwsgi
+    <<: *no-healthcheck
 
   celery_worker_long:
     image: intelowlproject/intelowl:${INTELOWL_TAG_VERSION}
@@ -41,4 +45,5 @@ services:
       - rabbitmq
       - postgres
       - uwsgi
+    <<: *no-healthcheck
 

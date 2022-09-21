@@ -1,6 +1,9 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Container, Col, Row } from "reactstrap";
+import { BsPeopleFill } from "react-icons/bs";
+import { IoMdKey } from "react-icons/io";
+import { Link } from "react-router-dom";
+import { Container, Col, Row, Button } from "reactstrap";
 import useTitle from "react-use/lib/useTitle";
 
 import {
@@ -13,7 +16,10 @@ import {
 } from "@certego/certego-ui";
 
 import { PluginInfoCard } from "./utils";
-import { usePluginConfigurationStore } from "../../../stores";
+import {
+  useOrganizationStore,
+  usePluginConfigurationStore,
+} from "../../../stores";
 
 // table config
 const tableConfig = {};
@@ -41,6 +47,29 @@ export default function PluginWrapper({ heading, stateSelector, columns }) {
   const [loading, error, dataList, refetch] =
     usePluginConfigurationStore(stateSelector);
 
+  // consume organization store
+  const {
+    isUserOwner,
+    organization,
+    fetchAll: fetchAllOrganizations,
+  } = useOrganizationStore(
+    React.useCallback(
+      (state) => ({
+        isUserOwner: state.isUserOwner,
+        fetchAll: state.fetchAll,
+        organization: state.organization,
+      }),
+      []
+    )
+  );
+
+  // on component mount
+  React.useEffect(() => {
+    if (!isUserOwner) {
+      fetchAllOrganizations();
+    }
+  }, [isUserOwner, fetchAllOrganizations]);
+
   // page title
   useTitle(`IntelOwl | ${heading}`, { restoreOnUnmount: true });
 
@@ -58,6 +87,33 @@ export default function PluginWrapper({ heading, stateSelector, columns }) {
             errors if any.
           </span>
         </Col>
+        <div className="col-auto">
+          <Col>
+            <Link
+              to="/me/config"
+              style={{ color: "inherit", textDecoration: "inherit" }}
+            >
+              <Row>
+                <Button className="my-2">
+                  <IoMdKey className="me-2" /> Your custom config
+                </Button>
+              </Row>
+            </Link>
+            {isUserOwner ? (
+              <Link
+                to="/me/organization/config"
+                style={{ color: "inherit", textDecoration: "inherit" }}
+              >
+                <Row>
+                  <Button className="my-2">
+                    <BsPeopleFill className="me-2" /> Organization{" "}
+                    {organization.name}&apos;s custom config
+                  </Button>
+                </Row>
+              </Link>
+            ) : null}
+          </Col>
+        </div>
       </Row>
       {/* Actions */}
       <Row className="bg-dark d-flex-between-center">

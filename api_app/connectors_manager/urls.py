@@ -14,7 +14,11 @@ router.register(
 )
 
 urlpatterns = [
-    path("get_connector_configs", ConnectorListAPI.as_view()),
+    path(
+        "get_connector_configs",
+        ConnectorListAPI.as_view(),
+        name="get_connector_configs",
+    ),
     path("connector/<str:name>/healthcheck", ConnectorHealthCheckAPI.as_view()),
     # Viewsets
     path(r"", include(router.urls)),

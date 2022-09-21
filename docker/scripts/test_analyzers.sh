@@ -46,6 +46,12 @@ case "$analyzerType" in
         "apk")
             testPath="tests.analyzers_manager.test_file_scripts.APKAnalyzersTestCase.test_start_analyzers"
             ;;
+        "pcap")
+            testPath="tests.analyzers_manager.test_file_scripts.PCAPAnalyzersTestCase.test_start_analyzers"
+            ;;
+        "elf")
+            testPath="tests.analyzers_manager.test_file_scripts.ELFAnalyzersTestCase.test_start_analyzers"
+            ;;
         *)
             echo 'error' >&2
             exit 1

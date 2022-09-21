@@ -74,7 +74,7 @@ export default function PluginsContainer() {
   const configButtons = (
     <Col className="d-flex justify-content-end">
       <ContentSection className="d-inline-flex mb-0 py-0">
-        {isUserOwner ? (
+        {organization?.name ? (
           <Link
             className="d-flex"
             to="/me/organization/config"

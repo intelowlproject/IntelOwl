@@ -15,6 +15,8 @@ class ConfigParseTests(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+        if User.objects.filter(username="test").exists():
+            User.objects.get(username="test").delete()
         cls.superuser = User.objects.create_superuser(
             username="test", email="test@intelowl.com", password="test"
         )

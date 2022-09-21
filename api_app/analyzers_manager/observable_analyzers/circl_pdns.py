@@ -53,7 +53,7 @@ class CIRCL_PDNS(classes.ObservableAnalyzer):
     def _monkeypatch(cls):
         patches = [
             if_mock_connections(
-                patch(pypdns.PyPDNS, return_value=MockResponseNoOp({}, 200)),
+                patch("pypdns.PyPDNS", return_value=MockResponseNoOp({}, 200)),
             )
         ]
         return super()._monkeypatch(patches=patches)

@@ -30,7 +30,9 @@ class HashLookupServer(classes.ObservableAnalyzer):
     def _monkeypatch(cls):
         patches = [
             if_mock_connections(
-                patch(Hashlookup, return_value=MockResponseNoOp({}, 200)),
+                patch(
+                    "pyhashlookup.Hashlookup", return_value=MockResponseNoOp({}, 200)
+                ),
             )
         ]
         return super()._monkeypatch(patches=patches)

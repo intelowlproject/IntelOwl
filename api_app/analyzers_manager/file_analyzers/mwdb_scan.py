@@ -108,7 +108,7 @@ class MWDB_Scan(FileAnalyzer):
         patches = [
             if_mock_connections(
                 patch(
-                    mwdblib.MWDB,
+                    "mwdblib.MWDB",
                     side_effect=mocked_mwdb_response,
                 ),
                 patch.object(cls, "file_analysis", return_value=True),

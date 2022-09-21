@@ -1,8 +1,6 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-from darksearch import Client, DarkSearchException
-
 from api_app.analyzers_manager.classes import ObservableAnalyzer
 from api_app.exceptions import AnalyzerRunException
 from tests.mock_utils import if_mock_connections, patch
@@ -14,6 +12,7 @@ class DarkSearchQuery(ObservableAnalyzer):
         self.proxies = params.get("proxies", None)
 
     def run(self):
+        from darksearch import Client, DarkSearchException
 
         try:
             c = Client(proxies=self.proxies)
@@ -37,7 +36,7 @@ class DarkSearchQuery(ObservableAnalyzer):
         patches = [
             if_mock_connections(
                 patch(
-                    Client.search,
+                    "darksearch.Client.search",
                     return_value=[{"total": 1, "last_page": 0, "data": ["test"]}],
                 )
             )

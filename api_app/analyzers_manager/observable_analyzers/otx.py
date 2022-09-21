@@ -5,7 +5,6 @@ from ipaddress import AddressValueError, IPv4Address
 from urllib.parse import urlparse
 
 import OTXv2
-import requests
 
 from api_app.analyzers_manager import classes
 from api_app.exceptions import AnalyzerRunException
@@ -82,9 +81,7 @@ class OTX(classes.ObservableAnalyzer):
     def _monkeypatch(cls):
         patches = [
             if_mock_connections(
-                patch.object(
-                    requests.Session, "get", return_value=MockResponse({}, 200)
-                )
+                patch("requests.Session.get", return_value=MockResponse({}, 200))
             )
         ]
         return super()._monkeypatch(patches=patches)

@@ -124,7 +124,7 @@ class MISP(Connector):
         patches = [
             if_mock_connections(
                 patch(
-                    pymisp.PyMISP,
+                    "pymisp.PyMISP",
                     side_effect=MockPyMISP,
                 )
             )

@@ -40,7 +40,7 @@ class MWDBGet(ObservableAnalyzer):
         patches = [
             if_mock_connections(
                 patch(
-                    mwdblib.MWDB,
+                    "mwdblib.MWDB",
                     side_effect=mocked_mwdb_response,
                 ),
             )

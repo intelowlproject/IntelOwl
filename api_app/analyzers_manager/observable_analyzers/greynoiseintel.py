@@ -5,7 +5,7 @@ from greynoise import GreyNoise
 
 from api_app.analyzers_manager import classes
 from api_app.exceptions import AnalyzerRunException
-from tests.mock_utils import MockResponseNoOp, if_mock_connections, patch
+from tests.mock_utils import if_mock_connections, patch
 
 
 class MockGreyNoise:
@@ -51,9 +51,5 @@ class GreyNoiseAnalyzer(classes.ObservableAnalyzer):
 
     @classmethod
     def _monkeypatch(cls):
-        patches = [
-            if_mock_connections(
-                patch("GreyNoise", return_value=MockResponseNoOp({}, 200))
-            )
-        ]
+        patches = [if_mock_connections(patch("greynoise.GreyNoise", MockGreyNoise()))]
         return super()._monkeypatch(patches=patches)

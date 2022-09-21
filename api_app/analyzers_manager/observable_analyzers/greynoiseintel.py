@@ -5,15 +5,7 @@ from greynoise import GreyNoise
 
 from api_app.analyzers_manager import classes
 from api_app.exceptions import AnalyzerRunException
-from tests.mock_utils import MagicMock, if_mock_connections, patch
-
-
-def mocked_greynoise(*args, **kwargs):
-    QueryResponse = MagicMock()
-    attrs = {"noise": True}
-    QueryResponse.configure_mock(**attrs)
-    Response = MagicMock(return_value=QueryResponse)
-    return Response.return_value
+from tests.mock_utils import if_mock_connections, patch
 
 
 class GreyNoiseAnalyzer(classes.ObservableAnalyzer):
@@ -50,7 +42,7 @@ class GreyNoiseAnalyzer(classes.ObservableAnalyzer):
     def _monkeypatch(cls):
         patches = [
             if_mock_connections(
-                patch("greynoise.GreyNoise", side_effect=mocked_greynoise)
+                patch.object(GreyNoise, "ip", return_value={"noise": True})
             )
         ]
         return super()._monkeypatch(patches=patches)

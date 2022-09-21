@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import { Alert, Row, Container } from "reactstrap";
 import useTitle from "react-use/lib/useTitle";
 import { LoadingBoundary, ErrorAlert } from "@certego/certego-ui";
@@ -73,6 +74,10 @@ export default function OrgConfig() {
         return (
           <Container>
             <h4>{organization.name}&apos;s plugin configuration</h4>
+            <span className="text-muted">
+              Note: Your <Link to="/me/config">plugin configuration</Link>{" "}
+              overrides your organization&apos;s configuration.
+            </span>
             <ConfigContainer
               filterFunction={(item) => item.organization}
               additionalConfigData={{

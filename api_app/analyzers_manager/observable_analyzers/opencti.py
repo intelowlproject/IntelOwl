@@ -87,9 +87,9 @@ class OpenCTI(classes.ObservableAnalyzer):
 
         patches = [
             if_mock_connections(
-                patch("pycti.OpenCTIApiClient", return_value=None),
-                patch("pycti.StixCyberObservable.list", return_value=mock_obs),
-                patch("pycti.Report.list", return_value=mock_report),
+                patch(pycti.OpenCTIApiClient, return_value=None),
+                patch.object(pycti.StixCyberObservable, "list", return_value=mock_obs),
+                patch.object(pycti.Report, "list", return_value=mock_report),
             )
         ]
         return super()._monkeypatch(patches=patches)

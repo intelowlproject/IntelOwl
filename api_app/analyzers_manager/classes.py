@@ -393,12 +393,14 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
         self.poll_distance = 0
         patches.append(
             if_mock_connections(
-                patch(
-                    "requests.get",
+                patch.object(
+                    requests,
+                    "get",
                     side_effect=mocked_docker_analyzer_get,
                 ),
-                patch(
-                    "requests.post",
+                patch.object(
+                    requests,
+                    "post",
                     side_effect=mocked_docker_analyzer_post,
                 ),
             )

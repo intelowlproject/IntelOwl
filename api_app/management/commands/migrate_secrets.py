@@ -22,6 +22,13 @@ class Command(BaseCommand):
     def _migrate_secrets(cls, plugin_list, plugin_type):
         from django.contrib.auth import get_user_model
 
+        if PluginConfig.objects.filter(plugin_type=plugin_type).exists():
+            print(
+                f"Skipping {plugin_type} secrets migration because "
+                "there are already some secrets in the database."
+            )
+            return
+
         User = get_user_model()
         if not User.objects.filter(is_superuser=True).exists():
             raise Exception("Superuser must exist for secrets migration")

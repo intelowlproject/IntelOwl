@@ -8,10 +8,10 @@ django-celery-beat==2.2.1
 django-celery-results==2.4.0
 
 # django rest framework libs
-Authlib==1.0.1
+Authlib==1.1.0
 djangorestframework==3.13.1
 djangorestframework-filters==1.0.0.dev2
-drf-spectacular==0.22.0
+drf-spectacular==0.24.0
 
 uWSGI==2.0.20
 whitenoise==6.2.0
@@ -36,9 +36,9 @@ easygui==0.98.2
 google>=3.0.0
 google-cloud-webrisk==1.8.1
 intezer-sdk==1.11.1
-lief==0.12.0
+lief==0.12.1
 maxminddb==2.2.0
-mwdblib==4.2.1
+mwdblib==4.3.0
 oletools==0.60
 OTXv2==1.5.12
 peepdf-fork==0.4.3

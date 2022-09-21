@@ -8,7 +8,7 @@ COPY frontend/ .
 # copy version file as an env file
 COPY docker/.version .env.local
 # install and build
-RUN npm install npm@latest -g \
+RUN npm install npm@latest --location=global \
     && npm install \
     && PUBLIC_URL=/static/reactapp/ npm run build
 
@@ -60,9 +60,9 @@ RUN touch ${LOG_PATH}/django/api_app.log ${LOG_PATH}/django/api_app_errors.log \
     && chown -R www-data:www-data ${LOG_PATH} /opt/deploy/ \
     # this is cause stringstifer creates this directory during the build and cause celery to crash
     && rm -rf /root/.local \
-    && docker/scripts/watchman_install.sh \
+    && ${PYTHONPATH}/docker/scripts/watchman_install.sh \
     # download yara rules and quark engine rules
-    && api_app/analyzers_manager/repo_downloader.sh
+    && ${PYTHONPATH}/api_app/analyzers_manager/repo_downloader.sh
 
 # quarkengine calls
 # HOME_DIR = f"{Path.home()}/.quark-engine/"

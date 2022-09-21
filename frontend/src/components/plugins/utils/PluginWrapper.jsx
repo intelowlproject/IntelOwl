@@ -64,6 +64,7 @@ export default function PluginWrapper({
       organizationPluginsState[data.name] !== undefined &&
       organizationPluginsState[data.name].disabled;
     newData.plugin_type = type;
+    newData.refetch = refetch;
     return newData;
   });
 

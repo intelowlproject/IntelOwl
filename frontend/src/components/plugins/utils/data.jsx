@@ -64,6 +64,7 @@ const pluginTableColumns = [
       <OrganizationPluginStateToggle
         pluginName={original?.name}
         disabled={original?.orgPluginDisabled}
+        refetch={original?.refetch}
         type={original?.plugin_type}
       />
     ),

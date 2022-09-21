@@ -191,7 +191,12 @@ export function PluginHealthCheckButton({ pluginName, pluginType }) {
   );
 }
 
-export function OrganizationPluginStateToggle({ disabled, pluginName, type }) {
+export function OrganizationPluginStateToggle({
+  disabled,
+  pluginName,
+  type,
+  refetch,
+}) {
   const {
     isUserOwner,
     organization,
@@ -225,6 +230,7 @@ export function OrganizationPluginStateToggle({ disabled, pluginName, type }) {
               `${ORG_PLUGIN_DISABLE_URI}/${type}/${pluginName}/`
             );
           fetchAllOrganizations();
+          refetch();
         }}
         name=""
         label=""

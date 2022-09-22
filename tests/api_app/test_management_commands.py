@@ -33,7 +33,7 @@ class ConfigParseTests(TestCase):
             "api_app.management.commands.migrate_secrets.Command._get_env_var",
             _patched_get_env_var,
         ):
-            call_command("migrate_secrets")
+            call_command("migrate_secrets", True)
         self.assertTrue(
             PluginConfig.objects.filter(
                 attribute="api_key_name",

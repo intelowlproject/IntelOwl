@@ -19,10 +19,10 @@ class Command(BaseCommand):
         return os.getenv(name)
 
     @classmethod
-    def _migrate_secrets(cls, plugin_list, plugin_type):
+    def _migrate_secrets(cls, plugin_list, plugin_type, ignore_check):
         from django.contrib.auth import get_user_model
 
-        if PluginConfig.objects.filter(type=plugin_type).exists():
+        if PluginConfig.objects.filter(type=plugin_type).exists() and not ignore_check:
             print(
                 f"Skipping {plugin_type} secrets migration because "
                 "there are already some secrets in the database."
@@ -49,14 +49,20 @@ class Command(BaseCommand):
                             f"for plugin {plugin['name']}"
                         )
 
+    def add_arguments(self, parser):
+        parser.add_argument("ignore_check", nargs="?", type=bool, default=False)
+
     def handle(self, *args, **options):
+        ignore_check = options["ignore_check"]
         self._migrate_secrets(
             AnalyzerConfigSerializer.read_and_verify_config().values(),
             PluginConfig.PluginType.ANALYZER,
+            ignore_check,
         )
         self._migrate_secrets(
             ConnectorConfigSerializer.read_and_verify_config().values(),
             PluginConfig.PluginType.CONNECTOR,
+            ignore_check,
         )
         print(
             "Migration complete. Please delete all plugin secrets "

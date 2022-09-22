@@ -6,10 +6,11 @@ import os
 from datetime import date, datetime
 
 import requests
+from django.conf import settings
 
 from api_app.analyzers_manager import classes
 from api_app.exceptions import AnalyzerRunException
-from intel_owl import settings
+from tests.mock_utils import MockResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
@@ -85,7 +86,6 @@ class Stratos(classes.ObservableAnalyzer):
             logger.info("ended download of dataset from stratosphere")
 
         except Exception as e:
-            logger.debug("Traceback %s", exc_info=True)
             logger.exception(e)
 
         db_location = [db_loc0, db_loc1, db_loc2]
@@ -112,3 +112,15 @@ class Stratos(classes.ObservableAnalyzer):
             os.remove(db_loc1)
             os.remove(db_loc2)
             self.updater()
+
+    @classmethod
+    def _monkeypatch(cls):
+        patches = [
+            if_mock_connections(
+                patch(
+                    "requests.get",
+                    return_value=MockResponse({}, 200, content=b"7.7.7.7"),
+                ),
+            )
+        ]
+        return super()._monkeypatch(patches=patches)

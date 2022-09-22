@@ -5,10 +5,10 @@ import logging
 import os
 
 import requests
+from django.conf import settings
 
 from api_app.analyzers_manager import classes
 from api_app.exceptions import AnalyzerRunException
-from intel_owl import settings
 from tests.mock_utils import MockResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)

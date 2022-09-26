@@ -120,9 +120,9 @@ class Plugin(metaclass=ABCMeta):
         """
         try:
             self.before_run()
+            self.report.parent_playbook = parent_playbook
             _result = self.run()
             self.report.report = _result
-            self.report.parent_playbook = parent_playbook
         except (*self.get_exceptions_to_catch(), SoftTimeLimitExceeded) as e:
             self._handle_exception(e)
         except Exception as e:

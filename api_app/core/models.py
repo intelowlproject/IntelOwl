@@ -31,7 +31,7 @@ class AbstractReport(models.Model):
     task_id = models.UUIDField()  # tracks celery task id
 
     # If a playbook ran the process
-    parent_playbook = models.CharField(max_length=128, default="", blank=True)
+    parent_playbook = models.CharField(max_length=128, null=True)
 
     # meta
     class Meta:

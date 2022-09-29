@@ -646,6 +646,11 @@ class PlaybookBaseSerializer:
                 logger.warning(e)
                 warnings.append(str(e))
 
+        if len(selected_playbooks) == 0:
+            raise ValidationError(
+                {"detail": "No playbooks can be run after filtering."}
+            )
+
         attrs["playbooks_to_execute"] = valid_playbook_list
         attrs["playbooks_requested"] = selected_playbooks
         attrs["analyzers_to_execute"] = analyzers_to_be_run

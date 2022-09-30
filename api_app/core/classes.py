@@ -112,7 +112,7 @@ class Plugin(metaclass=ABCMeta):
     def get_error_message(self, exc, is_base_err=False):
         return f" {'[Unexpected error]' if is_base_err else '[Error]'}: '{exc}'"
 
-    def start(self, parent_playbook=None, *args, **kwargs) -> AbstractReport:
+    def start(self, *args, parent_playbook=None, **kwargs) -> AbstractReport:
         """
         Entrypoint function to execute the plugin.
         calls `before_run`, `run`, `after_run`

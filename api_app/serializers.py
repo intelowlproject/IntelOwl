@@ -180,6 +180,8 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         selected_connectors = []
 
         connectors_requested = serialized_data.get("connectors_requested", [])
+
+        # run all connectors ?
         run_all = len(connectors_requested) == 0
 
         if serialized_data.get("playbooks_requested", []):

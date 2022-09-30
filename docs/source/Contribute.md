@@ -270,7 +270,7 @@ Please see [Connectors customization section](./Usage.md#connectors-customizatio
 
 ## How to add a new Playbook
 
-You may want to look at the existing [playbook_configuration.json](https://github.com/intelowlproject/IntelOwl/blob/master/configuration/playbook_config.json) file. To set up a new Playbook, Add a new entry to the configuraions file in alphabetical order:
+You may want to look at the existing [playbook_configuration.json](https://github.com/intelowlproject/IntelOwl/blob/master/configuration/playbooks_config.json) file. To set up a new Playbook, Add a new entry to the configuraions file in alphabetical order:
 
 Example:
 

@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 
 def start_playbooks(
     job_id: int,
+    runtime_configuration: dict,
 ) -> None:
     from intel_owl import tasks
 
@@ -44,8 +45,8 @@ def start_playbooks(
         # Now fetch analyzers and connectors to execute for that playbook
         # and run them below, by fetching their default configurations
         # From their respective config files.
-        analyzers = pp.analyzers
-        connectors = pp.connectors
+        analyzers = runtime_configuration if runtime_configuration else pp.analyzers
+        connectors = runtime_configuration if runtime_configuration else pp.connectors
 
         task_signatures_analyzers, analyzers_used = AnalyzerConfig.stack_analyzers(
             job_id=job_id,

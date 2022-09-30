@@ -63,14 +63,9 @@ def _multi_analysis_request(
     ],
     playbook_scan=False,
 ):
-    # fix validation with the help of playbook serializers
-    # fix runtime configs. no rewrite of code there.
-    # important thing is that the same code is utilised.
-
     """
     Prepare and send multiple observables for analysis
     """
-    warnings = []
     logger.info(
         f"_multi_analysis_request {serializer_class} "
         f"received request from {user}."
@@ -126,6 +121,7 @@ def _multi_analysis_request(
                     "start_playbooks",
                     kwargs=dict(
                         job_id=job.pk,
+                        runtime_configurations=runtime_configuration,
                     ),
                 )
 
@@ -139,34 +135,27 @@ def _multi_analysis_request(
                     ),
                 )
 
+    data_ = [
+        {
+            "status": "accepted",
+            "job_id": job.pk,
+            "warnings": serialized_data[index]["warnings"],
+            "analyzers_running": job.analyzers_to_execute,
+            "connectors_running": job.connectors_to_execute,
+        }
+        for index, job in enumerate(jobs)
+    ]
+
     if playbook_scan:
+        [data_.update({"playbooks_running": job.playbooks_to_execute}) for job in jobs]
         ser = PlaybookAnalysisResponseSerializer(
-            data=[
-                {
-                    "status": "accepted",
-                    "job_id": job.pk,
-                    "warnings": warnings,
-                    "playbooks_running": job.playbooks_to_execute,
-                    "analyzers_running": job.analyzers_to_execute,
-                    "connectors_running": job.connectors_to_execute,
-                }
-                for index, job in enumerate(jobs)
-            ],
+            data=data_,
             many=True,
         )
 
     else:
         ser = AnalysisResponseSerializer(
-            data=[
-                {
-                    "status": "accepted",
-                    "job_id": job.pk,
-                    "warnings": serialized_data[index]["warnings"],
-                    "analyzers_running": job.analyzers_to_execute,
-                    "connectors_running": job.connectors_to_execute,
-                }
-                for index, job in enumerate(jobs)
-            ],
+            data=data,
             many=True,
         )
 

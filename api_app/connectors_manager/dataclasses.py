@@ -65,7 +65,7 @@ class ConnectorConfig(AbstractConfig):
         return [
             connector
             for connector in connectors_to_execute
-            if connector_dataclass.get(connector).is_ready_to_use
+            if connector_dataclass.get(connector).is_ready_to_use and settings.STAGE_CI
         ]
 
     @classmethod

@@ -90,7 +90,7 @@ class ConnectorConfig(AbstractConfig):
         # loop over and create task signatures
         for c_name, cc in connector_dataclasses.items():
             # if disabled or unconfigured (this check is bypassed in STAGE_CI)
-            if not settings.STAGE_CI:
+            if not cc.is_ready_to_use and not settings.STAGE_CI:
                 continue
 
             # get runtime_configuration if any specified for this analyzer

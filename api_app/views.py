@@ -147,7 +147,10 @@ def _multi_analysis_request(
     ]
 
     if playbook_scan:
-        [data_.update({"playbooks_running": job.playbooks_to_execute}) for job in jobs]
+        [
+            data_[index].update({"playbooks_running": job.playbooks_to_execute})
+            for index, job in enumerate(jobs)
+        ]
         ser = PlaybookAnalysisResponseSerializer(
             data=data_,
             many=True,

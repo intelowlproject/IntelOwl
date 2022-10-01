@@ -56,7 +56,7 @@ def set_failed_connector(
 
 
 def run_connector(
-    job_id: int, config_dict: dict, report_defaults: dict, parent_playbook=None
+    job_id: int, config_dict: dict, report_defaults: dict, parent_playbook: str = ""
 ) -> ConnectorReport:
     config = ConnectorConfig.from_dict(config_dict)
     try:

@@ -74,7 +74,7 @@ class ConnectorConfig(AbstractConfig):
         job_id: int,
         connectors_to_execute: typing.List[str],
         runtime_configuration: typing.Dict[str, typing.Dict] = None,
-        parent_playbook=None,
+        parent_playbook="",
     ) -> typing.Tuple[typing.List[Signature], typing.List[str]]:
         from intel_owl import tasks
 

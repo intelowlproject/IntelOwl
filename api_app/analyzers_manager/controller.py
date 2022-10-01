@@ -67,7 +67,7 @@ def set_failed_analyzer(
 
 
 def run_analyzer(
-    job_id: int, config_dict: dict, report_defaults: dict, parent_playbook=None
+    job_id: int, config_dict: dict, report_defaults: dict, parent_playbook
 ) -> AnalyzerReport:
     aconfig = AnalyzerConfig.from_dict(config_dict)
     try:

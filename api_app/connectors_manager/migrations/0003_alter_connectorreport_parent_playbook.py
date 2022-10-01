@@ -13,6 +13,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='connectorreport',
             name='parent_playbook',
-            field=models.CharField(null=True, max_length=128),
+            field=models.CharField(blank=True, default='', max_length=128),
         ),
     ]

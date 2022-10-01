@@ -158,7 +158,7 @@ def _multi_analysis_request(
 
     else:
         ser = AnalysisResponseSerializer(
-            data=data,
+            data=data_,
             many=True,
         )
 

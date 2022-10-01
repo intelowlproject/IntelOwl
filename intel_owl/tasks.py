@@ -51,7 +51,7 @@ def start_analyzers(
     analyzers_to_execute: list,
     runtime_configuration: dict,
 ):
-    analyzers_controller.start_analyzers(
+    analyzers_controller.start_anpalyzers(
         job_id, analyzers_to_execute, runtime_configuration
     )
 
@@ -98,5 +98,6 @@ def start_connectors(
 @app.task(name="start_playbooks", soft_time_limit=500)
 def start_playbooks(
     job_id: int,
+    runtime_configuration: dict,
 ):
-    playbooks_controller.start_playbooks(job_id)
+    playbooks_controller.start_playbooks(job_id, runtime_configuration)

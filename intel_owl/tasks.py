@@ -51,7 +51,7 @@ def start_analyzers(
     analyzers_to_execute: list,
     runtime_configuration: dict,
 ):
-    analyzers_controller.start_anpalyzers(
+    analyzers_controller.start_analyzers(
         job_id, analyzers_to_execute, runtime_configuration
     )
 

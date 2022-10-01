@@ -67,6 +67,7 @@ class _AbstractAnalyzersScriptTestCase(TransactionTestCase):
         print(
             f"[REPORT] Job:{self.test_job.pk}, status:'{self.test_job.status}',",
             f"analyzers:{self.test_job.analyzers_to_execute}",
+            f"connectors: {self.test_job.connectors_to_execute}",
         )
 
         # execute analyzers

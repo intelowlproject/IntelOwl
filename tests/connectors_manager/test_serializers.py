@@ -61,7 +61,7 @@ class ConnectorConfigTestCase(TestCase):
                 job_id=job.pk,
                 connectors_to_execute=job.connectors_to_execute,
                 runtime_configuration={},
-                parent_playbook=None,
+                parent_playbook="",
             )
 
             connectors_ran = cleaned_result[1]

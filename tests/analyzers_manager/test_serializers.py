@@ -58,7 +58,7 @@ class AnalyzerConfigTestCase(TestCase):
                 job_id=job.pk,
                 analyzers_to_execute=job.analyzers_to_execute,
                 runtime_configuration={},
-                parent_playbook=None,
+                parent_playbook="",
             )
 
             signatures = cleaned_result[0]

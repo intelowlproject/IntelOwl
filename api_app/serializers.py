@@ -180,11 +180,12 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         selected_connectors = []
 
         connectors_requested = serialized_data.get("connectors_requested", [])
+        playbook_mode = not len(serialized_data.get("playbooks_requested", [])) == 0
 
         # run all connectors ?
         run_all = len(connectors_requested) == 0
 
-        if serialized_data.get("playbooks_requested", []):
+        if playbook_mode:
             connectors_requested = serialized_data.get("connectors_to_execute", [])
             run_all = False
 
@@ -229,7 +230,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
                         f"job.tlp ('{tlp}') > maximum_tlp ('{cc.maximum_tlp}')"
                     )
             except NotRunnableConnector as e:
-                if run_all:
+                if run_all or playbook_mode:
                     # in this case, they are not warnings but
                     # expected and wanted behavior
                     logger.debug(e)
@@ -417,7 +418,12 @@ class FileAnalysisSerializer(_AbstractJobCreateSerializer):
         # read config
         analyzer_dataclasses = AnalyzerConfig.all()
 
+        playbook_mode = not len(serialized_data.get("playbooks_requested", [])) == 0
+
         run_all = len(serialized_data.get("analyzers_requested", [])) == 0
+
+        if playbook_mode:
+            run_all = False
 
         for a_name in partially_filtered_analyzers:
             try:
@@ -439,7 +445,7 @@ class FileAnalysisSerializer(_AbstractJobCreateSerializer):
                         f"{a_name} won't be run because is_sample is False."
                     )
             except NotRunnableAnalyzer as e:
-                if run_all:
+                if run_all or playbook_mode:
                     # in this case, they are not warnings but
                     # expected and wanted behavior
                     logger.debug(e)

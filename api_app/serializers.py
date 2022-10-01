@@ -551,9 +551,11 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
         # read config
         analyzer_dataclasses = AnalyzerConfig.all()
 
+        playbook_mode = not len(serialized_data.get("playbooks_requested", [])) == 0
+
         run_all = len(serialized_data.get("analyzers_requested", [])) == 0
 
-        if serialized_data.get("playbooks_requested", []):
+        if playbook_mode:
             run_all = False
 
         for a_name in partially_filtered_analyzers:
@@ -579,7 +581,7 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
                             f"{serialized_data['observable_classification']}."
                         )
             except NotRunnableAnalyzer as e:
-                if run_all:
+                if run_all or playbook_mode:
                     # in this case, they are not warnings but
                     # expected and wanted behavior
                     logger.debug(e)

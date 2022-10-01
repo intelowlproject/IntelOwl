@@ -103,7 +103,7 @@ class _AbstractAnalyzersScriptTestCase(TransactionTestCase):
             print(
                 f"[REPORT] (poll #{i})",
                 f"\n>>> Job:{self.test_job.pk}, status:'{status}'",
-                f"\n>>> status not in [Job.Status.PENDING, Job.Status.RUNNING] result: {status not in [Job.Status.PENDING, Job.Status.RUNNING]}",
+                f"\n>>> status result: {status not in [Job.Status.PENDING, Job.Status.RUNNING]}",
                 f"\n>>> analyzer_reports:{analyzers_stats}",
                 f"\n>>> connector_reports:{connectors_stats} ",
                 f"\n>>> Running/Pending analyzers: {running_or_pending_analyzers}",

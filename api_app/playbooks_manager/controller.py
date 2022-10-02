@@ -43,8 +43,8 @@ def start_playbooks(
 
         logger.info(f"STARTED Playbook: ({p_name}, job_id: #{job_id})")
 
-        playbook_analyzers = list(pp.analyzers.keys)
-        playbook_connectors = list(pp.connectors.keys)
+        playbook_analyzers = list(pp.analyzers.keys())
+        playbook_connectors = list(pp.connectors.keys())
 
         # Now fetch analyzers and connectors to execute for that playbook
         # and run them below, by fetching their default configurations

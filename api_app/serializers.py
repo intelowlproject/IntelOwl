@@ -663,8 +663,10 @@ class PlaybookBaseSerializer:
 
         attrs["playbooks_to_execute"] = valid_playbook_list
         attrs["playbooks_requested"] = selected_playbooks
-        attrs["analyzers_to_execute"] = analyzers_to_be_run
-        attrs["connectors_to_execute"] = connectors_to_be_run
+
+        # making it so that analyzers and connectors are unique
+        attrs["analyzers_to_execute"] = list(set(analyzers_to_be_run))
+        attrs["connectors_to_execute"] = list(set(connectors_to_be_run))
         attrs["warnings"] = warnings
 
         return attrs

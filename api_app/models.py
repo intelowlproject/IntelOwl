@@ -3,7 +3,7 @@
 
 import hashlib
 import logging
-from typing import List, Optional
+from typing import Optional
 
 from django.conf import settings
 from django.contrib.postgres import fields as pg_fields
@@ -184,22 +184,6 @@ class Job(models.Model):
         self.status = status
         if save:
             self.save(update_fields=["status"])
-
-    def update_analyzers_to_execute(self, analyzers_to_execute: List, save=True):
-        self.analyzers_to_execute = analyzers_to_execute
-        if save:
-            self.save(update_fields=["analyzers_to_execute"])
-
-    def update_connectors_to_execute(self, connectors_to_execute: List, save=True):
-        self.connectors_to_execute = connectors_to_execute
-        if save:
-            self.save(update_fields=["connectors_to_execute"])
-
-    def update_analyzers_and_connectors_to_execute(
-        self, analyzers_to_execute: List, connectors_to_execute: List
-    ):
-        self.update_analyzers_to_execute(analyzers_to_execute)
-        self.update_connectors_to_execute(connectors_to_execute)
 
     def append_error(self, err_msg: str, save=True):
         self.errors.append(err_msg)

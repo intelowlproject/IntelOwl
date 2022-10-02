@@ -186,8 +186,8 @@ class FileAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
         self.file_mimetype = self._job.file_mimetype
         return super(FileAnalyzer, self).__post__init__()
 
-    def before_run(self):
-        super().before_run()
+    def before_run(self, *args, **kwargs):
+        super().before_run(**kwargs)
         logger.info(
             f"STARTED analyzer: {self.__repr__()} -> "
             f"File: ({self.filename}, md5: {self.md5})"

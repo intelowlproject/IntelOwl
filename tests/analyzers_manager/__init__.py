@@ -15,6 +15,7 @@ from api_app.connectors_manager.dataclasses import ConnectorConfig
 from api_app.core.models import AbstractReport
 from api_app.models import Job
 from intel_owl.tasks import start_analyzers
+from tests import PollingFunction
 
 
 class _AbstractAnalyzersScriptTestCase(TransactionTestCase):
@@ -77,93 +78,7 @@ class _AbstractAnalyzersScriptTestCase(TransactionTestCase):
             self.test_job.analyzers_to_execute,
             self.runtime_configuration,
         )
-
-        for i in range(0, int(self.TIMEOUT_SECONDS / self.SLEEP_SECONDS)):
-            time.sleep(self.SLEEP_SECONDS)
-            # reload test_job object
-            self.test_job.refresh_from_db()
-            status = self.test_job.status
-            analyzers_stats = self.test_job.get_analyzer_reports_stats()
-            connectors_stats = self.test_job.get_connector_reports_stats()
-            running_or_pending_analyzers = list(
-                self.test_job.analyzer_reports.filter(
-                    status__in=[
-                        AbstractReport.Status.PENDING,
-                        AbstractReport.Status.RUNNING,
-                    ]
-                ).values_list("name", flat=True)
-            )
-            running_or_pending_connectors = list(
-                self.test_job.connector_reports.filter(
-                    status__in=[
-                        AbstractReport.Status.PENDING,
-                        AbstractReport.Status.RUNNING,
-                    ]
-                ).values_list("name", flat=True)
-            )
-            print(
-                f"[REPORT] (poll #{i})",
-                f"\n>>> Job:{self.test_job.pk}, status:'{status}'",
-                f"\n>>> analyzer_reports:{analyzers_stats}",
-                f"\n>>> connector_reports:{connectors_stats} ",
-                f"\n>>> Running/Pending analyzers: {running_or_pending_analyzers}",
-                f"\n>>> Running/Pending connectors: {running_or_pending_connectors}",
-            )
-            # fail immediately if any analyzer or connector failed
-            if analyzers_stats["failed"] > 0 or connectors_stats["failed"] > 0:
-                failed_analyzers = [
-                    (r.analyzer_name, r.errors)
-                    for r in self.test_job.analyzer_reports.filter(
-                        status=AbstractReport.Status.FAILED
-                    )
-                ]
-                failed_connectors = [
-                    (r.connector_name, r.errors)
-                    for r in self.test_job.connector_reports.filter(
-                        status=AbstractReport.Status.FAILED
-                    )
-                ]
-                print(
-                    f"\n>>> Failed analyzers: {failed_analyzers}",
-                    f"\n>>> Failed connectors: {failed_connectors}",
-                )
-                self.fail()
-            # check analyzers status
-            if status not in [Job.Status.PENDING, Job.Status.RUNNING]:
-                self.assertEqual(
-                    status,
-                    Job.Status.REPORTED_WITHOUT_FAILS,
-                    msg="`test_job` status must be success",
-                )
-                self.assertEqual(
-                    len(self.test_job.analyzers_to_execute),
-                    self.test_job.analyzer_reports.count(),
-                    msg="all analyzer reports must be there",
-                )
-                self.assertEqual(
-                    analyzers_stats["all"],
-                    analyzers_stats["success"],
-                    msg="all `analyzer_reports` status must be `SUCCESS`",
-                )
-                # check connectors status
-                if connectors_stats["all"] > 0 and connectors_stats["running"] == 0:
-                    self.assertEqual(
-                        len(self.test_job.connectors_to_execute),
-                        self.test_job.connector_reports.count(),
-                        "all connector reports must be there",
-                    )
-                    self.assertEqual(
-                        connectors_stats["all"],
-                        connectors_stats["success"],
-                        msg="all `connector_reports` status must be `SUCCESS`.",
-                    )
-                    print(
-                        f"[END] -----{self.__class__.__name__}.test_start_analyzers----"
-                    )
-                    return True
-        # the test should not reach here
-        self.fail("test timed out")
-
+        return PollingFunction(self)
 
 class _ObservableAnalyzersScriptsTestCase(_AbstractAnalyzersScriptTestCase):
 

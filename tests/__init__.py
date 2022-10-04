@@ -1,6 +1,6 @@
 import logging
+import time
 from abc import ABCMeta, abstractmethod
-from time import time
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase

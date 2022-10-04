@@ -47,4 +47,5 @@ class PlaybooksScriptTestCase(TransactionTestCase):
 
         start_playbooks(self.test_job.id, {})
 
-        return PollingFunction(self, "start_playbooks")
+        poll_result = PollingFunction(self, function_name="start_playbooks")
+        return poll_result

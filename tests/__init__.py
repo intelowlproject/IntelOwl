@@ -49,7 +49,7 @@ def PollingFunction(self, function_name):
         )
         condition = analyzers_stats["failed"] > 0 or connectors_stats["failed"] > 0
         # fail immediately if any analyzer or connector failed
-        if function_name == "start_playbook" and not running_or_pending_connectors:
+        if function_name == "start_playbooks" and not running_or_pending_connectors:
             condition = analyzers_stats["failed"] > 0
 
         if condition:

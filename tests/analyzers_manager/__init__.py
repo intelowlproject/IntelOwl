@@ -76,7 +76,8 @@ class _AbstractAnalyzersScriptTestCase(TransactionTestCase):
             self.test_job.analyzers_to_execute,
             self.runtime_configuration,
         )
-        return PollingFunction(self)
+        poll_result = PollingFunction(self, function_name="start_analyzers")
+        return poll_result
 
 
 class _ObservableAnalyzersScriptsTestCase(_AbstractAnalyzersScriptTestCase):

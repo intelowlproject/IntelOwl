@@ -107,6 +107,10 @@ jobs:
       - name: Setup coverage
         run: |
           docker exec intelowl_uwsgi pip3 install coverage
+  
+      - name: "Test: Playbooks Manager"
+        run: |
+          docker/scripts/coverage_test.sh tests.playbooks_manager.test_controller
 
       - name: "Test: api_app"
         run: |
@@ -115,10 +119,6 @@ jobs:
       - name: "Test: auth"
         run: |
           docker/scripts/coverage_test.sh tests.auth
-    
-      - name: "Test: Playbooks Manager"
-        run: |
-          docker/scripts/coverage_test.sh tests.playbooks_manager.test_controller
 
       - name: "Test: Cron"
         run: |

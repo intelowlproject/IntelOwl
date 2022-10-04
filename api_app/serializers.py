@@ -632,16 +632,16 @@ class PlaybookBaseSerializer:
 
                 for analyzer in pp.analyzers:
                     analyzer_class = AnalyzerConfig.get(analyzer)
-
-                    if analyzer_class is None:
-                        raise NotRunnableAnalyzer(
-                            f"Analyzer {analyzer} couldn't be run as it doesn't exist."
-                        )
-
-                    if analyzer_class.type == "file" and "file" in pp.supports:
-                        analyzers_to_be_run.append(analyzer)
-
                     try:
+                        if analyzer_class is None:
+                            raise NotRunnableAnalyzer(
+                                f"Analyzer {analyzer} couldn't be"
+                                " run as it doesn't exist."
+                            )
+
+                        if analyzer_class.type == "file" and "file" in pp.supports:
+                            analyzers_to_be_run.append(analyzer)
+
                         # this means that analyzer is of type observable
                         if analyzer_class.is_observable_type_supported(
                             attrs["observable_classification"]

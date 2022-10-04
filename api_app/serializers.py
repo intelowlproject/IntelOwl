@@ -637,10 +637,9 @@ class PlaybookBaseSerializer:
                             analyzers_to_be_run.append(analyzer)
                     except AttributeError:
                         logger.warning(
-                            "Analyzer not found for playbook\n"
-                            f"Analyzer: {analyzer}"
+                            "Analyzer not found for playbook\n" f"Analyzer: {analyzer}"
                         )
-                        print(                            
+                        print(
                             "Analyzer not found for playbook\n",
                             f"Analyzer: {analyzer}",
                         )

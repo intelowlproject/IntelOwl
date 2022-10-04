@@ -4,7 +4,6 @@
             "APKiD_Scan_APK_DEX_JAR": {},
             "BoxJS_Scan_JavaScript": {},
             "CRXcavator": {},
-            "Capa_Info": {},
             "Capa_Info_Shellcode": {
                 "arch": "64",
                 "shellcode": true
@@ -92,12 +91,6 @@
             "PE_Info": {},
             "PEframe_Scan": {},
             "Phishstats": {},
-            "Qiling_Linux": {
-                "arch": "x86",
-                "os": "linux",
-                "profile": "",
-                "shellcode": false
-            },
             "Qiling_Linux_Shellcode": {
                 "arch": "x86",
                 "os": "linux",
@@ -140,14 +133,6 @@
                 "shellcode": true
             },
             "Stratosphere_Blacklist": {},
-            "Strings_Info_Classic": {
-                "max_number_of_strings": 300,
-                "rank_strings": false
-            },
-            "Strings_Info_ML": {
-                "max_number_of_strings": 200,
-                "rank_strings": true
-            },
             "Suricata": {
                 "extended_logs": false,
                 "reload_rules": false
@@ -232,12 +217,6 @@
                 "git_repo_main_dir": [
                     "/opt/deploy/yara/rules"
                 ]
-            },
-            "Yara_Scan_Custom_Signatures": {
-                "directories_with_rules": [
-                    "/opt/deploy/intel_owl/configuration/custom_yara"
-                ],
-                "update": false
             },
             "Yara_Scan_Daily_Ioc": {
                 "directories_with_rules": [

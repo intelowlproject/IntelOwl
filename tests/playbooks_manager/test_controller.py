@@ -2,6 +2,7 @@ import os
 
 from django.conf import settings
 from django.core.files import File
+from django.http.request import MultiValueDict, QueryDict
 from django.test import TransactionTestCase
 
 from api_app.serializers import (
@@ -12,7 +13,7 @@ from intel_owl.tasks import start_playbooks
 from tests import PollingFunction
 
 
-class PlaybooksScriptTestCase(TransactionTestCase):
+class PlaybooksScriptObservableTestCase(TransactionTestCase):
     # constants
     TIMEOUT_SECONDS: int = 60 * 5  # 5 minutes
     SLEEP_SECONDS: int = 5  # 5 seconds
@@ -26,17 +27,12 @@ class PlaybooksScriptTestCase(TransactionTestCase):
         self.test_job.delete()
         return super().tearDown()
 
-    def _read_file_save_job(self, filename: str):
-        test_file = f"{settings.PROJECT_LOCATION}/test_files/{filename}"
-        with open(test_file, "rb") as f:
-            return File(f)
-
-    def test_start_playbooks_observable(self, *args, **kwargs):
+    def test_start_playbooks(self, *args, **kwargs):
         print(
             "\n[START] -----"
-            f"{self.__class__.__name__}.test_start_playbooks_observable----"
+            f"{self.__class__.__name__}.test_start_playbooks----"
+            f"\nTesting observables"
         )
-
         TEST_IP = os.environ.get("TEST_IP", "1.1.1.1")
 
         data = {
@@ -62,10 +58,15 @@ class PlaybooksScriptTestCase(TransactionTestCase):
         poll_result = PollingFunction(self, function_name="start_playbooks")
         return poll_result
 
-    def test_start_playbooks_file(self, *args, **kwargs):
-        print(
-            "\n[START] -----" f"{self.__class__.__name__}.test_start_playbooks_file----"
-        )
+
+class PlaybooksScriptFileTestCase(PlaybooksScriptObservableTestCase):
+    def _read_file_save_job(self, filename: str):
+        test_file = f"{settings.PROJECT_LOCATION}/test_files/{filename}"
+        with open(test_file, "rb") as f:
+            return File(f)
+
+    def test_start_playbooks(self, *args, **kwargs):
+        print("\n[START] -----" f"{self.__class__.__name__}.test_start_playbooks----")
 
         TEST_FILE = "file.exe"
 
@@ -76,6 +77,9 @@ class PlaybooksScriptTestCase(TransactionTestCase):
             "file_names": [TEST_FILE],
             "playbooks_requested": [self.playbook_to_test],
         }
+
+        qdict = QueryDict("", mutable=True)
+        qdict.update(MultiValueDict(data))
 
         serializer = PlaybookFileAnalysisSerializer(data=data, many=True)
         serializer.is_valid(raise_exception=True)

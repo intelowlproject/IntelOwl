@@ -81,7 +81,7 @@ class PlaybooksScriptFileTestCase(PlaybooksScriptObservableTestCase):
         qdict = QueryDict("", mutable=True)
         qdict.update(MultiValueDict(data))
 
-        serializer = PlaybookFileAnalysisSerializer(data=data, many=True)
+        serializer = PlaybookFileAnalysisSerializer(data=qdict, many=True)
         serializer.is_valid(raise_exception=True)
 
         validated_data = serializer.validated_data

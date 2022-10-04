@@ -9,12 +9,8 @@ from tests import PollingFunction
 
 class PlaybooksScriptTestCase(TransactionTestCase):
     def setUp(self):
-        playbooks_to_test = os.environ.get("TEST_PLAYBOOKS", "").split(",")
-        self.playbooks_to_test = (
-            playbooks_to_test
-            if len(playbooks_to_test) and len(playbooks_to_test[0])
-            else []
-        )
+        playbook_to_test = os.environ.get("TEST_PLAYBOOK", "")
+        self.playbooks_to_test = playbook_to_test
         return super().setUp()
 
     def tearDown(self):
@@ -36,7 +32,7 @@ class PlaybooksScriptTestCase(TransactionTestCase):
 
         print(
             f"\nTesting observables: {data['observables']}",
-            f"\nPlaybooks to run: {self.playbooks_to_test}",
+            f"\nPlaybook to run: {self.playbooks_to_test}",
         )
 
         serializer = PlaybookObservableAnalysisSerializer(data=data, many=True)
@@ -45,14 +41,14 @@ class PlaybooksScriptTestCase(TransactionTestCase):
         validated_data = serializer.validated_data
         [data.pop("runtime_configuration") for data in validated_data]
 
-        self.test_job = serializer.save()
+        self.test_job = serializer.save()[0]
 
         print(
             f"[REPORT] Job:{self.test_job.pk}, status:'{self.test_job.status}',",
             f"Playbooks: {self.test_job.playbooks_to_execute}",
         )
 
-        start_playbooks(self.test_job.id, {})
+        start_playbooks(self.test_job.pk, {})
 
         poll_result = PollingFunction(self, function_name="start_playbooks")
         return poll_result

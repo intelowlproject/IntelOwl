@@ -9,6 +9,7 @@ from rest_framework.test import APIClient
 from api_app.analyzers_manager.constants import ObservableTypes
 from api_app.core.models import AbstractReport
 from api_app.models import Job
+from api_app.playbooks_manager.dataclasses import PlaybookConfig
 from intel_owl import settings
 
 User = get_user_model()
@@ -30,6 +31,7 @@ def PollingFunction(self, function_name):
                 ]
             ).values_list("name", flat=True)
         )
+        all_playbooks_configs = PlaybookConfig.all()
         running_or_pending_connectors = list(
             self.test_job.connector_reports.filter(
                 status__in=[
@@ -48,7 +50,7 @@ def PollingFunction(self, function_name):
         )
         condition = analyzers_stats["failed"] > 0 or connectors_stats["failed"] > 0
         # fail immediately if any analyzer or connector failed
-        if function_name == "start_playbook":
+        if function_name == "start_playbook" and not running_or_pending_connectors:
             condition = analyzers_stats["failed"] > 0
 
         if condition:
@@ -86,8 +88,8 @@ def PollingFunction(self, function_name):
                 analyzers_stats["success"],
                 msg="all `analyzer_reports` status must be `SUCCESS`",
             )
-            
-            if function_name == "start_playbooks":
+
+            if function_name == "start_playbooks" and not running_or_pending_connectors:
                 # since there are no connectors
                 # in FREE_TO_USE_ANALYZERS
                 return True

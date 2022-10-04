@@ -10,7 +10,6 @@
                 "shellcode": true
             },
             "CheckDMARC": {},
-            "ClamAV": {},
             "Classic_DNS": {
                 "query_type": "A"
             },

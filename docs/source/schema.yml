@@ -58,11 +58,38 @@ paths:
               schema:
                 $ref: '#/components/schemas/MultiAnalysisResponseList'
           description: ''
+  /api/playbook/analyze_multiple_files:
+    post:
+      operationId: analyze_multiple_files_create
+      description: This endpoint allows to start playbook Jobs related to multiple Files
+      tags:
+      - playbooks
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MultipleFiles'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/MultipleFiles'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/MultipleFiles'
+        required: true
+      security:
+      - durinAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MultiAnalysisResponsePlaybooksList'
+          description: ''
   /api/analyze_multiple_observables:
     post:
       operationId: analyze_multiple_observables_create
       description: |-
-        This endpoint allows to start Jobs related to multiple observables.
+        This endpoint allows to start playbook Jobs related to multiple observables.
                          Observable parameter must be composed like this:
                          [(<observable_classification>, <observable_name>), ...]
       tags:
@@ -87,6 +114,36 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MultiAnalysisResponseList'
+          description: ''
+  /api/playbook/analyze_multiple_observables:
+    post:
+      operationId: analyze_multiple_observables_create
+      description: |-
+        This endpoint allows to start Jobs related to multiple observables.
+                         Observable parameter must be composed like this:
+                         [(<observable_classification>, <observable_name>), ...]
+      tags:
+      - playbooks
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlaybookObservableAnalysis'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PlaybookObservableAnalysis'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PlaybookObservableAnalysis'
+        required: true
+      security:
+      - durinAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MultiAnalysisResponsePlaybooksList'
           description: ''
   /api/analyze_observable:
     post:
@@ -1339,6 +1396,31 @@ components:
       - connectors_running
       - job_id
       - status
+    PlaybooksAnalysisResponse:
+      type: object
+      properties:
+        job_id:
+          type: integer
+        status:
+          type: string
+        warnings:
+          type: array
+          items: {}
+        analyzers_running:
+          type: array
+          items: {}
+        connectors_running:
+          type: array
+          items: {}
+        playbooks_running:
+          type: array
+          items: {}
+      required:
+      - analyzers_running
+      - connectors_running
+      - playbooks_running
+      - job_id
+      - status
     AnalyzerConfig:
       type: object
       description: Serializer for `analyzer_config.json`.
@@ -1935,6 +2017,18 @@ components:
       required:
       - count
       - results
+    MultiAnalysisResponsePlaybooksList:
+      type: object
+      properties:
+        count:
+          type: boolean
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlaybooksAnalysisResponse'
+      required:
+      - count
+      - results
     MultiJobAvailabilityList:
       type: object
       properties:
@@ -2038,6 +2132,39 @@ components:
       required:
       - id
       - observable_name
+    PlaybookObservableAnalysis:
+      type: object
+      description: |-
+        ``Job`` model's serializer for Observable Analysis.
+        Used for ``create()``.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        tlp:
+          $ref: '#/components/schemas/TlpEnum'
+        observables:
+          type: array
+          items:
+            type: array
+            items: {}
+            maxItems: 2
+            minItems: 2
+        runtime_configuration:
+          type: object
+          additionalProperties: {}
+          writeOnly: true
+          default: {}
+        playbooks_requested:
+          type: array
+          items: {}
+        tags_labels:
+          type: array
+          items: {}
+      required:
+      - id
+      - observable_name
+
     ObservableSupportedEnum:
       enum:
       - ip

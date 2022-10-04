@@ -122,3 +122,6 @@ COVERAGE_PROCESS_START=.coveragerc
 
 # broker configuration
 BROKER_URL=amqp://guest:guest@rabbitmq:5672
+
+# Playbooks
+TEST_PLAYBOOKS=FREE_TO_USE_ANALYZERS

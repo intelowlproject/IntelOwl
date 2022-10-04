@@ -47,21 +47,25 @@ function AppFooter() {
                 <FaTwitter /> Follow @{INTELOWL_TWITTER_ACCOUNT}
               </a>
             </Col>
-            <Col> 
-            <a
+            <Col>
+              <a
                 href="https://www.honeynet.org/gsoc/"
                 target="_blank"
                 rel="noopener noreferrer"
-              > 
-                <FaGoogle /> Honeynet on GSOC</a>
+              >
+                <FaGoogle /> Honeynet on GSOC
+              </a>
             </Col>
-                    <Col> 
-            <a
+            <Col>
+              <a
                 href="https://github.com/intelowlproject"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="ms-md-2 github-button"
-              > <FaGithub /> Connect on Github </a>
+              >
+                {" "}
+                <FaGithub /> Connect on Github{" "}
+              </a>
             </Col>
           </Row>
         </Container>

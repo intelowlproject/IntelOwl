@@ -632,17 +632,14 @@ class PlaybookBaseSerializer:
 
                 for analyzer in pp.analyzers:
                     analyzer_class = AnalyzerConfig.get(analyzer)
-                    try:
-                        if analyzer_class.type == "file" and "file" in pp.supports:
-                            analyzers_to_be_run.append(analyzer)
-                    except AttributeError:
-                        logger.warning(
-                            "Analyzer not found for playbook\n" f"Analyzer: {analyzer}"
+
+                    if analyzer_class is None:
+                        raise NotRunnableAnalyzer(
+                            f"Analyzer {analyzer} couldn't be run as it doesn't exist."
                         )
-                        print(
-                            "Analyzer not found for playbook\n",
-                            f"Analyzer: {analyzer}",
-                        )
+
+                    if analyzer_class.type == "file" and "file" in pp.supports:
+                        analyzers_to_be_run.append(analyzer)
 
                     try:
                         # this means that analyzer is of type observable
@@ -659,7 +656,22 @@ class PlaybookBaseSerializer:
                         # expected and wanted behavior
                         logger.debug(e)
 
-                connectors_to_be_run.extend(pp.connectors)
+                        if analyzer_class is None:
+                            warnings.append(str(e))
+
+                for connector in pp.connectors:
+                    try:
+                        connector_class = ConnectorConfig.get(connector)
+                        if connector_class is None:
+                            raise NotRunnableConnector(
+                                f"Connector {connector} couldn't be run"
+                                " as it doesn't exist."
+                            )
+                    except (NotRunnableConnector) as e:
+                        logger.warning(e)
+                        warnings.append(str(e))
+
+                    connectors_to_be_run.append(connector)
 
             except (NotRunnablePlaybook) as e:
                 logger.warning(e)

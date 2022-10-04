@@ -31,7 +31,7 @@ class PlaybooksScriptObservableTestCase(TransactionTestCase):
         print(
             "\n[START] -----"
             f"{self.__class__.__name__}.test_start_playbooks----"
-            f"\nTesting observables"
+            "\nTesting observables"
         )
         TEST_IP = os.environ.get("TEST_IP", "1.1.1.1")
 
@@ -70,7 +70,11 @@ class PlaybooksScriptFileTestCase(PlaybooksScriptObservableTestCase):
         return super().tearDown()
 
     def test_start_playbooks(self, *args, **kwargs):
-        print("\n[START] -----" f"{self.__class__.__name__}.test_start_playbooks----")
+        print(
+            "\n[START] -----"
+            f"{self.__class__.__name__}.test_start_playbooks----"
+            "\nTesting files"
+        )
 
         TEST_FILE = "file.exe"
 

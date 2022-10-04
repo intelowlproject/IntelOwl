@@ -9,7 +9,7 @@ from tests import PollingFunction
 
 class PlaybooksScriptTestCase(TransactionTestCase):
     def setUp(self):
-        playbook_to_test = os.environ.get("TEST_PLAYBOOK", "").split(",")
+        playbook_to_test = os.environ.get("TEST_PLAYBOOK", "")
         self.playbook_to_test = playbook_to_test
         return super().setUp()
 

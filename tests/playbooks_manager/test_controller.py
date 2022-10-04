@@ -62,8 +62,12 @@ class PlaybooksScriptObservableTestCase(TransactionTestCase):
 class PlaybooksScriptFileTestCase(PlaybooksScriptObservableTestCase):
     def _read_file_save_job(self, filename: str):
         test_file = f"{settings.PROJECT_LOCATION}/test_files/{filename}"
-        with open(test_file, "rb") as f:
-            return File(f)
+        self.f = open(test_file, "rb")
+        return File(self.f)
+
+    def tearDown(self):
+        self.f.close()
+        return super().tearDown()
 
     def test_start_playbooks(self, *args, **kwargs):
         print("\n[START] -----" f"{self.__class__.__name__}.test_start_playbooks----")

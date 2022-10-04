@@ -632,8 +632,18 @@ class PlaybookBaseSerializer:
 
                 for analyzer in pp.analyzers:
                     analyzer_class = AnalyzerConfig.get(analyzer)
-                    if analyzer_class.type == "file" and "file" in pp.supports:
-                        analyzers_to_be_run.append(analyzer)
+                    try:
+                        if analyzer_class.type == "file" and "file" in pp.supports:
+                            analyzers_to_be_run.append(analyzer)
+                    except AttributeError:
+                        logger.warning(
+                            "Analyzer not found for playbook\n"
+                            f"Analyzer: {analyzer}"
+                        )
+                        print(                            
+                            "Analyzer not found for playbook\n",
+                            f"Analyzer: {analyzer}",
+                        )
 
                     try:
                         # this means that analyzer is of type observable

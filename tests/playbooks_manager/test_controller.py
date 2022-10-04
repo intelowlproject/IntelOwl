@@ -22,7 +22,10 @@ class PlaybooksScriptTestCase(TransactionTestCase):
         return super().tearDown()
 
     def test_start_playbooks_observable(self, *args, **kwargs):
-        print(f"\n[START] -----{self.__class__.__name__}.test_start_playbooks----")
+        print(
+            "\n[START] -----"
+            f"{self.__class__.__name__}.test_start_playbooks_observable----"
+        )
 
         TEST_IP = os.environ.get("TEST_IP", "1.1.1.1")
 
@@ -38,6 +41,9 @@ class PlaybooksScriptTestCase(TransactionTestCase):
 
         serializer = PlaybookObservableAnalysisSerializer(data=data, many=True)
         serializer.is_valid(raise_exception=True)
+
+        validated_data = serializer.validated_data
+        [data.pop("runtime_configuration") for data in validated_data]
 
         self.test_job = serializer.save()
 

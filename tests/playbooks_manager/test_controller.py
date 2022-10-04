@@ -31,7 +31,7 @@ class PlaybooksScriptTestCase(TransactionTestCase):
         TEST_IP = os.environ.get("TEST_IP", "1.1.1.1")
 
         data = {
-            "observables": ["ip", TEST_IP],
+            "observables": [["ip", TEST_IP]],
             "playbooks_requested": self.playbooks_to_test,
         }
 

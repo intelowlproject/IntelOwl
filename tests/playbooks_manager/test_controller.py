@@ -2,16 +2,12 @@ import os
 
 from django.test import TransactionTestCase
 
-from api_app.models import Job
 from api_app.serializers import PlaybookObservableAnalysisSerializer
 from intel_owl.tasks import start_playbooks
 from tests import PollingFunction
 
 
 class PlaybooksScriptTestCase(TransactionTestCase):
-    # attrs
-    test_job: Job
-
     def setUp(self):
         playbooks_to_test = os.environ.get("TEST_PLAYBOOKS", "").split(",")
         self.playbooks_to_test = (
@@ -34,6 +30,11 @@ class PlaybooksScriptTestCase(TransactionTestCase):
             "observables": [["ip", TEST_IP]],
             "playbooks_requested": self.playbooks_to_test,
         }
+
+        print(
+            f"\nTesting observables: {data['observables']}",
+            f"\nPlaybooks to run: {self.playbooks_to_test}",
+        )
 
         serializer = PlaybookObservableAnalysisSerializer(data=data, many=True)
         serializer.is_valid(raise_exception=True)

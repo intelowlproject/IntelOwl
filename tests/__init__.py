@@ -9,7 +9,6 @@ from rest_framework.test import APIClient
 from api_app.analyzers_manager.constants import ObservableTypes
 from api_app.core.models import AbstractReport
 from api_app.models import Job
-from api_app.playbooks_manager.dataclasses import PlaybookConfig
 from intel_owl import settings
 
 User = get_user_model()
@@ -31,7 +30,7 @@ def PollingFunction(self, function_name):
                 ]
             ).values_list("name", flat=True)
         )
-        all_playbooks_configs = PlaybookConfig.all()
+
         running_or_pending_connectors = list(
             self.test_job.connector_reports.filter(
                 status__in=[
@@ -106,13 +105,10 @@ def PollingFunction(self, function_name):
                     connectors_stats["success"],
                     msg="all `connector_reports` status must be `SUCCESS`.",
                 )
-                print(
-                    f"[END] -----{self.__class__.__name__}.{function_name}----"
-                )
+                print(f"[END] -----{self.__class__.__name__}.{function_name}----")
                 return True
     # the test should not reach here
     self.fail("test timed out")
-
 
 
 def get_logger() -> logging.Logger:

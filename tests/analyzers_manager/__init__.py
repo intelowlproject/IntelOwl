@@ -3,7 +3,6 @@
 
 import hashlib
 import os
-import time
 from unittest import SkipTest
 
 from django.conf import settings
@@ -12,7 +11,6 @@ from django.test import TransactionTestCase
 
 from api_app.analyzers_manager.dataclasses import AnalyzerConfig
 from api_app.connectors_manager.dataclasses import ConnectorConfig
-from api_app.core.models import AbstractReport
 from api_app.models import Job
 from intel_owl.tasks import start_analyzers
 from tests import PollingFunction
@@ -79,6 +77,7 @@ class _AbstractAnalyzersScriptTestCase(TransactionTestCase):
             self.runtime_configuration,
         )
         return PollingFunction(self)
+
 
 class _ObservableAnalyzersScriptsTestCase(_AbstractAnalyzersScriptTestCase):
 

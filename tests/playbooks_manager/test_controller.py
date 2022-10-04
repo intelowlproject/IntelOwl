@@ -1,15 +1,16 @@
 import os
 
 from django.test import TransactionTestCase
+
 from api_app.models import Job
-from intel_owl.tasks import start_playbooks
 from api_app.serializers import PlaybookObservableAnalysisSerializer
+from intel_owl.tasks import start_playbooks
 from tests import PollingFunction
 
 
 class PlaybooksScriptTestCase(TransactionTestCase):
     # attrs
-    test_job : Job
+    test_job: Job
 
     def setUp(self):
         playbooks_to_test = os.environ.get("TEST_PLAYBOOKS", "").split(",")
@@ -31,7 +32,7 @@ class PlaybooksScriptTestCase(TransactionTestCase):
 
         data = {
             "observables": ["ip", TEST_IP],
-            "playbooks_requested": self.playbooks_to_test
+            "playbooks_requested": self.playbooks_to_test,
         }
 
         serializer = PlaybookObservableAnalysisSerializer(data=data, many=True)
@@ -44,12 +45,6 @@ class PlaybooksScriptTestCase(TransactionTestCase):
             f"Playbooks: {self.test_job.playbooks_to_execute}",
         )
 
-        start_playbooks(
-            self.test_job.id,
-            {}
-        )
+        start_playbooks(self.test_job.id, {})
 
-        return PollingFunction(
-            self,
-            "start_playbooks"
-        )
+        return PollingFunction(self, "start_playbooks")

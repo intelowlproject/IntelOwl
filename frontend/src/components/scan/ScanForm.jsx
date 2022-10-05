@@ -312,42 +312,45 @@ export default function ScanForm() {
     [pluginsError]
   );
 
-  function ValidatePlaybooks(values) {
-    const errors = {};
-    if (pluginsError) {
-      errors.playbooks = pluginsError;
-    }
-    if (values.playbooks.length === 0) {
-      return `Please select a playbook!`;
-    }
-    if (values.classification === "file") {
-      if (!values.files) {
-        errors.files = "required";
+  const ValidatePlaybooks = React.useCallback(
+    (values) => {
+      const errors = {};
+      if (pluginsError) {
+        errors.playbooks = pluginsError;
       }
-    } else if (values.observable_names && values.observable_names.length) {
-      // We iterate over observable_names and test each one against the regex pattern,
-      // storing the results (or null otherwise) in ObservableNamesErrors
-      const ObservableNamesErrors = values.observable_names.map(
-        (ObservableName) => {
-          const pattern = RegExp(
-            observableType2PropsMap[values.classification].pattern
-          );
-          if (!pattern.test(ObservableName)) {
-            return `invalid ${values.classification}`;
-          }
-          return null;
+      if (values.playbooks.length === 0) {
+        return `Please select a playbook!`;
+      }
+      if (values.classification === "file") {
+        if (!values.files) {
+          errors.files = "required";
         }
-      );
+      } else if (values.observable_names && values.observable_names.length) {
+        // We iterate over observable_names and test each one against the regex pattern,
+        // storing the results (or null otherwise) in ObservableNamesErrors
+        const ObservableNamesErrors = values.observable_names.map(
+          (ObservableName) => {
+            const pattern = RegExp(
+              observableType2PropsMap[values.classification].pattern
+            );
+            if (!pattern.test(ObservableName)) {
+              return `invalid ${values.classification}`;
+            }
+            return null;
+          }
+        );
 
-      // We check if any of the ObservableNamesErrors is not null
-      if (ObservableNamesErrors.some((e) => e))
-        errors.observable_names = ObservableNamesErrors;
-    } else {
-      errors.no_observables = "Atleast one observable is required";
-    }
+        // We check if any of the ObservableNamesErrors is not null
+        if (ObservableNamesErrors.some((e) => e))
+          errors.observable_names = ObservableNamesErrors;
+      } else {
+        errors.no_observables = "Atleast one observable is required";
+      }
 
-    return errors;
-  }
+      return errors;
+    },
+    [pluginsError]
+  );
 
   const startPlaybooks = React.useCallback(
     async (values) => {
@@ -408,7 +411,7 @@ export default function ScanForm() {
         formik.setSubmitting(false);
       }
     },
-    [navigate, refetchQuota]
+    [navigate, refetchQuota, startPlaybooks]
   );
 
   return (

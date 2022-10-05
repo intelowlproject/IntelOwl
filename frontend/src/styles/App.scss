@@ -116,6 +116,22 @@ section.fixed-bottom {
   }
 }
 
+.github-button {
+  /* stylelint-disable scss/at-extend-no-missing-placeholder */
+  @extend .btn;
+  @extend .btn-xs;
+  /* stylelint-enable scss/at-extend-no-missing-placeholder */
+
+  background-color: #1da1f2;
+  color: $light;
+  font-weight: 450;
+
+  &:hover {
+    background-color: shade-color(#1da1f2, 20%);
+    color: $light !important;
+  }
+}
+
 .badge-top-end-corner {
   top: -1.25em;
   right: 0.75em;

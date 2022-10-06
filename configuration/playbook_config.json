@@ -4,11 +4,13 @@
             "APKiD_Scan_APK_DEX_JAR": {},
             "BoxJS_Scan_JavaScript": {},
             "CRXcavator": {},
+            "Capa_Info": {},
             "Capa_Info_Shellcode": {
                 "arch": "64",
                 "shellcode": true
             },
             "CheckDMARC": {},
+            "ClamAV": {},
             "Classic_DNS": {
                 "query_type": "A"
             },
@@ -91,6 +93,12 @@
             "PE_Info": {},
             "PEframe_Scan": {},
             "Phishstats": {},
+            "Qiling_Linux": {
+                "arch": "x86",
+                "os": "linux",
+                "profile": "",
+                "shellcode": false
+            },
             "Qiling_Linux_Shellcode": {
                 "arch": "x86",
                 "os": "linux",
@@ -133,6 +141,14 @@
                 "shellcode": true
             },
             "Stratosphere_Blacklist": {},
+            "Strings_Info_Classic": {
+                "max_number_of_strings": 300,
+                "rank_strings": false
+            },
+            "Strings_Info_ML": {
+                "max_number_of_strings": 200,
+                "rank_strings": true
+            },
             "Suricata": {
                 "extended_logs": false,
                 "reload_rules": false
@@ -200,6 +216,30 @@
                     "/opt/deploy/yara/bartblaze_rules"
                 ]
             },
+            "Yara_Scan_Community": {
+                "directories_with_rules": [
+                    "/opt/deploy/yara/rules/antidebug_antivm",
+                    "/opt/deploy/yara/rules/capabilities",
+                    "/opt/deploy/yara/rules/crypto",
+                    "/opt/deploy/yara/rules/cve_rules",
+                    "/opt/deploy/yara/rules/email",
+                    "/opt/deploy/yara/rules/exploit_kits",
+                    "/opt/deploy/yara/rules/maldocs",
+                    "/opt/deploy/yara/rules/malware",
+                    "/opt/deploy/yara/rules/mobile_malware",
+                    "/opt/deploy/yara/rules/packers",
+                    "/opt/deploy/yara/rules/webshells"
+                ],
+                "git_repo_main_dir": [
+                    "/opt/deploy/yara/rules"
+                ]
+            },
+            "Yara_Scan_Custom_Signatures": {
+                "directories_with_rules": [
+                    "/opt/deploy/intel_owl/configuration/custom_yara"
+                ],
+                "update": false
+            },
             "Yara_Scan_Daily_Ioc": {
                 "directories_with_rules": [
                     "/opt/deploy/yara/daily_ioc_rules"
@@ -208,6 +248,14 @@
                     "/opt/deploy/yara/daily_ioc_rules"
                 ],
                 "recursive": true
+            },
+            "Yara_Scan_Florian": {
+                "directories_with_rules": [
+                    "/opt/deploy/yara/signature-base/yara"
+                ],
+                "git_repo_main_dir": [
+                    "/opt/deploy/yara/signature-base"
+                ]
             },
             "Yara_Scan_Inquest": {
                 "directories_with_rules": [
@@ -229,6 +277,15 @@
                 ],
                 "git_repo_main_dir": [
                     "/opt/deploy/yara/mandiant_rules"
+                ],
+                "recursive": true
+            },
+            "Yara_Scan_ReversingLabs": {
+                "directories_with_rules": [
+                    "/opt/deploy/yara/reversinglabs_rules/yara"
+                ],
+                "git_repo_main_dir": [
+                    "/opt/deploy/yara/reversinglabs_rules"
                 ],
                 "recursive": true
             },

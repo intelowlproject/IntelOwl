@@ -356,6 +356,8 @@ export default function ScanForm() {
     async (values) => {
       const formValues = {
         ...values,
+        tlp: values.tlp,
+        tags_labels: values.tags.map((optTag) => optTag.value.label),
         playbooks: values.playbooks.map((x) => x.value),
       };
 
@@ -547,7 +549,7 @@ export default function ScanForm() {
                   </Col>
                 </FormGroup>
               )}
-              <hr style={{ textAlign: "right", margin: "auto 220px" }} />
+              <hr />
               <FormGroup
                 className="d-flex justify-content-center"
                 style={{ marginTop: "10px" }}
@@ -696,6 +698,7 @@ export default function ScanForm() {
                   )}
                 </FormGroup>
               )}
+              <hr />
               <FormGroup row>
                 <Label sm={3} id="scanform-tagselectinput">
                   Tags

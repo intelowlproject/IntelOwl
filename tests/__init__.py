@@ -86,7 +86,7 @@ def PollingFunction(self, function_name):
                     msg="all `analyzer_reports` status must be `SUCCESS`",
                 )
 
-            elif (function_name == "start_playbooks"):
+            elif function_name == "start_playbooks":
                 # it is expected for some
                 # analyzers to fail for the time being
                 # in running playbookstes

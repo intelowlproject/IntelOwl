@@ -69,8 +69,9 @@ def PollingFunction(self, function_name):
                 f"\n>>> Failed analyzers: {failed_analyzers}",
                 f"\n>>> Failed connectors: {failed_connectors}",
             )
-            if function_name == "start_playbooks":
+            if function_name != "start_playbooks":
                 self.fail()
+
 
         # check analyzers status
         if status not in [Job.Status.PENDING, Job.Status.RUNNING]:

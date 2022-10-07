@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('analyzers_manager', '0002_analyzerreport_parent_playbook'),
+        ("analyzers_manager", "0002_analyzerreport_parent_playbook"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='analyzerreport',
-            name='parent_playbook',
-            field=models.CharField(blank=True, default='', max_length=128),
+            model_name="analyzerreport",
+            name="parent_playbook",
+            field=models.CharField(blank=True, default="", max_length=128),
         ),
     ]

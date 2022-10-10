@@ -13,6 +13,8 @@ from django.utils import timezone
 from django.utils.functional import cached_property
 
 from api_app.core.models import Status as ReportStatus
+from api_app.exceptions import AlreadyFailedJobException
+from api_app.helpers import get_now
 from certego_saas.apps.organization.membership import Membership
 from certego_saas.apps.organization.organization import Organization
 from certego_saas.models import User
@@ -88,10 +90,14 @@ class Job(models.Model):
     status = models.CharField(
         max_length=32, blank=False, choices=Status.choices, default="pending"
     )
+
     analyzers_requested = pg_fields.ArrayField(
         models.CharField(max_length=128), blank=True, default=list
     )
     connectors_requested = pg_fields.ArrayField(
+        models.CharField(max_length=128), blank=True, default=list
+    )
+    playbooks_requested = pg_fields.ArrayField(
         models.CharField(max_length=128), blank=True, default=list
     )
     analyzers_to_execute = pg_fields.ArrayField(
@@ -100,6 +106,10 @@ class Job(models.Model):
     connectors_to_execute = pg_fields.ArrayField(
         models.CharField(max_length=128), blank=True, default=list
     )
+    playbooks_to_execute = pg_fields.ArrayField(
+        models.CharField(max_length=128), blank=True, default=list
+    )
+
     received_request_time = models.DateTimeField(auto_now_add=True)
     finished_analysis_time = models.DateTimeField(blank=True, null=True)
     tlp = models.CharField(max_length=8, choices=TLP.choices, default=TLP.WHITE)
@@ -121,6 +131,47 @@ class Job(models.Model):
     @cached_property
     def sha1(self) -> str:
         return hashlib.sha1(self.file.read()).hexdigest()
+
+    def job_cleanup(self) -> None:
+        logger.info(f"[STARTING] job_cleanup for <-- {self.__repr__()}.")
+        status_to_set = self.Status.RUNNING
+
+        try:
+            if self.status == self.Status.FAILED:
+                raise AlreadyFailedJobException()
+
+            stats = self.get_analyzer_reports_stats()
+
+            logger.info(
+                f"[REPORT] {self.__repr__()}, status:{self.status}, reports:{stats}"
+            )
+
+            if len(self.analyzers_to_execute) == stats["all"]:
+                if stats["running"] > 0 or stats["pending"] > 0:
+                    status_to_set = self.Status.RUNNING
+                elif stats["success"] == stats["all"]:
+                    status_to_set = self.Status.REPORTED_WITHOUT_FAILS
+                elif stats["failed"] == stats["all"]:
+                    status_to_set = self.Status.FAILED
+                elif stats["failed"] >= 1 or stats["killed"] >= 1:
+                    status_to_set = self.Status.REPORTED_WITH_FAILS
+                elif stats["killed"] == stats["all"]:
+                    status_to_set = self.Status.KILLED
+
+        except AlreadyFailedJobException:
+            logger.error(
+                f"[REPORT] {self.__repr__()}, status: failed. Do not process the report"
+            )
+
+        except Exception as e:
+            logger.exception(f"job_id: {self.pk}, Error: {e}")
+            self.append_error(str(e), save=False)
+
+        finally:
+            if not (self.status == self.Status.FAILED and self.finished_analysis_time):
+                self.finished_analysis_time = get_now()
+            self.status = status_to_set
+            self.save(update_fields=["status", "errors", "finished_analysis_time"])
 
     @property
     def process_time(self) -> Optional[float]:

@@ -20,3 +20,12 @@ class ObservableTypes(models.TextChoices):
     DOMAIN = "domain"
     HASH = "hash"
     GENERIC = "generic"
+
+
+class AllTypes(models.TextChoices):
+    IP = "ip"
+    URL = "url"
+    DOMAIN = "domain"
+    HASH = "hash"
+    GENERIC = "generic"
+    FILE = "file"

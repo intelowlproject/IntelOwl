@@ -122,7 +122,7 @@ class PluginActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
         200: inline_serializer(
             name="PluginHealthCheckSuccessResponse",
             fields={
-                "status": rfs.NullBooleanField(),
+                "status": rfs.BooleanField(allow_null=True),
             },
         ),
     },

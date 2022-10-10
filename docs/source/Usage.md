@@ -225,7 +225,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `GoogleSafebrowsing`: Scan an observable against GoogleSafeBrowsing DB
 * `GoogleWebRisk`: Scan an observable against WebRisk API (Commercial version of Google Safe Browsing). Check the [docs](https://intelowl.readthedocs.io/en/develop/Advanced-Usage.html#analyzers-with-special-configuration) to enable this properly
 * `GreedyBear`: scan an IP or a domain against the [GreedyBear](https://greedybear.honeynet.org/) API (requires API key)
-* `GreyNoiseCommunity`: scan an IP against the [Community Greynoise API](https://www.greynoise.io/) (no API key required)
+* `GreyNoiseCommunity`: scan an IP against the [Community Greynoise API](https://www.greynoise.io/) (requires API key))
 * `GreyNoise`: scan an IP against the [Greynoise](https://www.greynoise.io/) API (requires API key)
 * `CIRCLPassiveDNS`: scan an observable against the CIRCL Passive DNS DB
 * `CIRCLPassiveSSL`: scan an observable against the CIRCL Passive SSL DB
@@ -339,3 +339,12 @@ The following is the list of the available connectors. You can also navigate the
 ---
 
 To contribute to the project, see [Contribute](./Contribute.md).
+
+### Available Playbooks
+
+Playbooks are designed to be easy to share sequence of running Analyzers/Connectors on a particular kind of observable.
+
+
+
+##### Playbooks:
+* `FREE_TO_USE_ANALYZERS`: A playbook containing all free to use analyzers.

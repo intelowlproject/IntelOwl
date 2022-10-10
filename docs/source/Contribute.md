@@ -1,6 +1,6 @@
 # Contribute
 
-Intel Owl was designed to ease the addition of new analyzers/connectors. With a simple python script you can integrate your own engine or integrate an external service in a short time.
+Intel Owl was designed to ease the addition of new analyzers, connectors and playbooks. With a simple python script you can integrate your own engine or integrate an external service in a short time.
 
 > Wish to contribute to the Python client ? See [pyintelowl](https://github.com/intelowlproject/pyintelowl).
 
@@ -65,7 +65,7 @@ Every time you perform a change, you should perform an operation to reflect the 
 python3 start.py test down && python3 start.py test up --build
 ```
 
-- if you changed either analyzers or connectors or anything that is executed asynchronously by the "celery" containers, you just need to restart the application because we leverage Docker bind volumes that will reflect the changes to the containers. This saves the time of the build
+- if you changed either analyzers, connectors, playbooks or anything that is executed asynchronously by the "celery" containers, you just need to restart the application because we leverage Docker bind volumes that will reflect the changes to the containers. This saves the time of the build
 
 ```bash
 python3 start.py test down && python3 start.py test up
@@ -154,9 +154,10 @@ npm start
 
 You may want to look at a few existing examples to start to build a new one, such as:
 
-- [shodan.py](https://github.com/intelowlproject/IntelOwl/blob/develop/api_app/analyzers_manager/observable_analyzers/shodan.py), if you are creating an observable analyzer
+- [shodan.py](https://github.com/intelowlproject/IntelOwl/blob/develop/api_app/analyzers_manager/observable_analyzers/shodan.py), if you are creating an observable analyzer 
 - [malpedia_scan.py](https://github.com/intelowlproject/IntelOwl/blob/develop/api_app/analyzers_manager/file_analyzers/malpedia_scan.py), if you are creating a file analyzer
 - [peframe.py](https://github.com/intelowlproject/IntelOwl/blob/develop/api_app/analyzers_manager/file_analyzers/peframe.py), if you are creating a [docker based analyzer](#integrating-a-docker-based-analyzer)
+- **Please note:** If the new analyzer that you are adding is free for the user to use, please add it in the `FREE_TO_USE_ANALYZERS` playbook in `playbook_config.json`.
 
 After having written the new python module, you have to remember to:
 
@@ -267,6 +268,35 @@ Please see [Connectors customization section](./Usage.md#connectors-customizatio
 
 3. Add the new connector in the lists in the docs: [Usage](./Usage.md). Also, if the connector provides additional optional configuration, add the available options here: [Advanced-Usage](./Advanced-Usage.md)
 4. Follow steps 4-5 of [How to add a new analyzer](./Contribute.md#how-to-add-a-new-analyzer)
+
+## How to add a new Playbook
+
+You may want to look at the existing [playbook_configuration.json](https://github.com/intelowlproject/IntelOwl/blob/master/configuration/playbooks_config.json) file. To set up a new Playbook, Add a new entry to the configuraions file in alphabetical order:
+
+Example:
+
+```javascript
+"Playbook_Name": {
+    "description": "very cool playbook",
+    "analyzers": {
+            "AbuseIPDB": {},
+            "Shodan": {
+                "include_honeyscore": true
+            },
+            "FireHol_IPList": {}
+    },
+    "connectors": {
+            "MISP": {
+                "ssl_check": true
+            },
+            "OpenCTI": {
+                "ssl_verify": true
+            }
+    }
+},
+```
+
+Here, The parameters for the analyzers and connectors to be used go in as an entry in the dictionary value.
 
 #### Modifying functionalities of the Certego packages
 

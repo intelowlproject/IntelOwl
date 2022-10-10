@@ -43,7 +43,9 @@ class Connector(Plugin):
             f" {'Unexpected error' if is_base_err else 'Connector error'}: '{err}'"
         )
 
-    def before_run(self):
+    def before_run(self, *args, **kwargs):
+        parent_playbook = kwargs.get("parent_playbooks", "")
+        self.add_parent_playbook(parent_playbook=parent_playbook)
         logger.info(f"STARTED connector: {self.__repr__()}")
 
     def after_run(self):

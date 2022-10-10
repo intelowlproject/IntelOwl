@@ -77,7 +77,7 @@ class _SecretSerializer(rfs.Serializer):
 
 class AbstractConfigSerializer(rfs.Serializer):
     """
-    Abstract serializer for `analyzer_config.json` and `connector_config.json` files.
+    Abstract serializer for `analyzer_config.json` and `connector_config.json`.
     """
 
     # constants
@@ -112,7 +112,7 @@ class AbstractConfigSerializer(rfs.Serializer):
     def get_verification(self, raw_instance: dict) -> ConfigVerificationType:
         # raw instance because input is json and not django model object
         # get all missing secrets
-        secrets = raw_instance["secrets"]
+        secrets = raw_instance.get("secrets", {})
         missing_secrets = []
         for s_key, s_dict in secrets.items():
             # check if available in environment

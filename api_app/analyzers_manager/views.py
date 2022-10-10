@@ -11,7 +11,7 @@ from rest_framework.response import Response
 from api_app.core.views import PluginActionViewSet, PluginHealthCheckAPI
 from certego_saas.ext.views import APIView
 
-from ..models import OrganizationPluginState, PluginConfig
+from ..models import Job, OrganizationPluginState, PluginConfig
 from . import controller as analyzers_controller
 from .models import AnalyzerReport
 from .serializers import AnalyzerConfigSerializer
@@ -71,7 +71,8 @@ class AnalyzerActionViewSet(PluginActionViewSet):
     def perform_kill(self, report):
         super().perform_kill(report)
         # clean up job
-        analyzers_controller.job_cleanup(report.job)
+        job = Job.objects.get(id=report.job_id)
+        job.job_cleanup()
 
     def perform_retry(self, report: AnalyzerReport):
         analyzers_to_execute, runtime_configuration = super().perform_retry(report)

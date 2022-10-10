@@ -53,4 +53,5 @@ class ConnectorReportSerializer(rfs.ModelSerializer):
             "end_time",
             "runtime_configuration",
             "type",
+            "parent_playbook",
         )

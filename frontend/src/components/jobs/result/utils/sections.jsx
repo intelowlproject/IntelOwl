@@ -15,7 +15,7 @@ import {
   addToast,
 } from "@certego/certego-ui";
 
-import { JobTag, StatusTag, TLPTag } from "../../../common";
+import { JobTag, PlaybookTag, StatusTag, TLPTag } from "../../../common";
 import { downloadJobSample, deleteJob, killJob } from "../api";
 
 function DeleteIcon() {
@@ -182,6 +182,16 @@ export function JobInfoCard({ job }) {
                 className="text-danger"
                 hidden={!job.errors.length}
               />,
+            ],
+            [
+              "Playbook(s)",
+              job.playbooks_to_execute.map((playbook) => (
+                <PlaybookTag
+                  key={playbook}
+                  playbook={playbook}
+                  className="mr-2"
+                />
+              )),
             ],
           ].map(([key, value]) => (
             <ListGroupItem key={key}>

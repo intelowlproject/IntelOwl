@@ -24,6 +24,10 @@ from rest_framework.exceptions import (
 from rest_framework.request import Request
 from rest_framework.response import Response
 
+from api_app.serializers import (
+    PlaybookFileAnalysisSerializer,
+    PlaybookObservableAnalysisSerializer,
+)
 from certego_saas.apps.organization.membership import Membership
 from certego_saas.apps.organization.permissions import IsObjectOwnerOrSameOrgPermission
 from certego_saas.ext.helpers import cache_action_response, parse_humanized_range
@@ -43,6 +47,7 @@ from .serializers import (
     JobListSerializer,
     JobSerializer,
     ObservableAnalysisSerializer,
+    PlaybookAnalysisResponseSerializer,
     PluginConfigSerializer,
     TagSerializer,
     multi_result_enveloper,
@@ -55,8 +60,12 @@ def _multi_analysis_request(
     user,
     data: Union[QueryDict, dict],
     serializer_class: Union[
-        Type[ObservableAnalysisSerializer], Type[FileAnalysisSerializer]
+        Type[ObservableAnalysisSerializer],
+        Type[FileAnalysisSerializer],
+        Type[PlaybookObservableAnalysisSerializer],
+        Type[PlaybookFileAnalysisSerializer],
     ],
+    playbook_scan=False,
 ):
     """
     Prepare and send multiple observables for analysis
@@ -97,6 +106,7 @@ def _multi_analysis_request(
     else:
         # fire celery task
         for index, job in enumerate(jobs):
+            # second critical change
             runtime_configuration = {}
 
             for analyzer in job.analyzers_to_execute:
@@ -118,28 +128,52 @@ def _multi_analysis_request(
                     runtime_configuration[connector] = config
             logger.debug(f"New value of runtime_configuration: {runtime_configuration}")
 
-            celery_app.send_task(
-                "start_analyzers",
-                kwargs=dict(
-                    job_id=job.pk,
-                    analyzers_to_execute=job.analyzers_to_execute,
-                    runtime_configuration=runtime_configuration,
-                ),
-            )
+            if playbook_scan:
+                celery_app.send_task(
+                    "start_playbooks",
+                    kwargs=dict(
+                        job_id=job.pk,
+                        runtime_configuration=runtime_configuration,
+                    ),
+                )
 
-    ser = AnalysisResponseSerializer(
-        data=[
-            {
-                "status": "accepted",
-                "job_id": job.pk,
-                "warnings": serialized_data[index]["warnings"],
-                "analyzers_running": job.analyzers_to_execute,
-                "connectors_running": job.connectors_to_execute,
-            }
+            else:
+                celery_app.send_task(
+                    "start_analyzers",
+                    kwargs=dict(
+                        job_id=job.pk,
+                        analyzers_to_execute=job.analyzers_to_execute,
+                        runtime_configuration=runtime_configuration,
+                    ),
+                )
+
+    data_ = [
+        {
+            "status": "accepted",
+            "job_id": job.pk,
+            "warnings": serialized_data[index]["warnings"],
+            "analyzers_running": job.analyzers_to_execute,
+            "connectors_running": job.connectors_to_execute,
+        }
+        for index, job in enumerate(jobs)
+    ]
+
+    if playbook_scan:
+        [
+            data_[index].update({"playbooks_running": job.playbooks_to_execute})
             for index, job in enumerate(jobs)
-        ],
-        many=True,
-    )
+        ]
+        ser = PlaybookAnalysisResponseSerializer(
+            data=data_,
+            many=True,
+        )
+
+    else:
+        ser = AnalysisResponseSerializer(
+            data=data_,
+            many=True,
+        )
+
     ser.is_valid(raise_exception=True)
 
     response_dict = {

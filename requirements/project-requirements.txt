@@ -8,10 +8,10 @@ django-celery-beat==2.2.1
 django-celery-results==2.4.0
 
 # django rest framework libs
-Authlib==1.0.1
-djangorestframework==3.13.1
+Authlib==1.1.0
+djangorestframework==3.14.0
 djangorestframework-filters==1.0.0.dev2
-drf-spectacular==0.22.0
+drf-spectacular==0.24.0
 
 uWSGI==2.0.20
 whitenoise==6.2.0
@@ -30,15 +30,15 @@ GitPython==3.1.26
 checkdmarc==4.4.1
 darksearch==2.1.2
 dnspython==2.2.1
-dnstwist==20220131
+dnstwist==20220815
 ppdeep>=20200505
 easygui==0.98.2
 google>=3.0.0
 google-cloud-webrisk==1.8.1
-intezer-sdk==1.11.1
-lief==0.12.0
+intezer-sdk==1.12
+lief==0.12.1
 maxminddb==2.2.0
-mwdblib==4.2.1
+mwdblib==4.3.0
 oletools==0.60
 OTXv2==1.5.12
 peepdf-fork==0.4.3
@@ -58,12 +58,13 @@ pypssl==2.2
 pysafebrowsing==0.1.1
 PySocks==1.7.1
 py-tlsh==4.7.2
-quark-engine==22.6.1
+quark-engine==22.9.1
 requests==2.28.1
 speakeasy-emulator==1.5.9
 telfhash==0.9.8
 yara-python==4.2.0
 pydragonfly==0.1.0
+greynoise==1.3.0
 XLMMacroDeobfuscator[secure]==0.2.3
 # this is required because XLMMacroDeobfuscator does not pin xlrd2 and pyxlsb2 packages
 pyxlsb2==0.0.8

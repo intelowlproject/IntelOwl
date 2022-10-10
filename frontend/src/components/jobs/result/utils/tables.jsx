@@ -122,7 +122,33 @@ const tableProps = {
   ),
 };
 
+const tablePropsPlaybooks = JSON.parse(JSON.stringify(tableProps));
+
+tablePropsPlaybooks.columns.push({
+  Header: "Playbook",
+  id: "playbook",
+  accessor: "parent_playbook",
+  Cell: ({ value }) => {
+    if (value != null) {
+      return <span>{value}</span>;
+    }
+    return <span />;
+  },
+  Filter: DefaultColumnFilter,
+  maxWidth: 300,
+});
+
 export function AnalyzersReportTable({ job, refetch }) {
+  if (job?.playbooks_to_execute.length > 1) {
+    return (
+      <DataTable
+        data={job?.analyzer_reports}
+        customProps={{ job, refetch }}
+        {...tablePropsPlaybooks}
+      />
+    );
+  }
+
   return (
     <DataTable
       data={job?.analyzer_reports}
@@ -133,6 +159,16 @@ export function AnalyzersReportTable({ job, refetch }) {
 }
 
 export function ConnectorsReportTable({ job, refetch }) {
+  if (job?.playbooks_to_execute.length > 1) {
+    return (
+      <DataTable
+        data={job?.connector_reports}
+        customProps={{ job, refetch }}
+        {...tablePropsPlaybooks}
+      />
+    );
+  }
+
   return (
     <DataTable
       data={job?.connector_reports}

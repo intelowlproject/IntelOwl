@@ -14,6 +14,7 @@ import { useOrganizationStore } from "../../stores";
 
 const Analyzers = React.lazy(() => import("./utils/Analyzers"));
 const Connectors = React.lazy(() => import("./utils/Connectors"));
+const Playbooks = React.lazy(() => import("./utils/Playbooks"));
 
 const routes = [
   {
@@ -43,6 +44,21 @@ const routes = [
     Component: () => (
       <Suspense fallback={<FallBackLoading />}>
         <Connectors />
+      </Suspense>
+    ),
+  },
+  {
+    key: "plugins-playbooks",
+    location: "playbooks",
+    Title: () => (
+      <span>
+        <TiFlowChildren />
+        &nbsp;Playbooks
+      </span>
+    ),
+    Component: () => (
+      <Suspense fallback={<FallBackLoading />}>
+        <Playbooks />
       </Suspense>
     ),
   },

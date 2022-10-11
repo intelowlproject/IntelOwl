@@ -8,15 +8,6 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    replaces = [
-        ("api_app", "0010_custom_config"),
-        ("api_app", "0011_customconfig_rename"),
-        ("api_app", "0012_auto_20220826_1635"),
-        ("api_app", "0013_auto_20220912_1151"),
-        ("api_app", "0011_playbooks"),
-        ("api_app", "0014_merge_0011_playbooks_0013_auto_20220912_1151"),
-    ]
-
     dependencies = [
         ("api_app", "0009_datamigration"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),

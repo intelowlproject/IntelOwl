@@ -9,10 +9,72 @@ import {
   ANALYZE_MULTIPLE_OBSERVABLE_URI,
   ASK_MULTI_ANALYSIS_AVAILABILITY_URI,
   ANALYZE_MULTIPLE_FILES_URI,
+  API_BASE_URI,
 } from "../../constants/api";
 import useRecentScansStore from "../../stores/useRecentScansStore";
 
 const { append: appendToRecentScans } = useRecentScansStore.getState();
+
+export async function createPlaybookJob(formValues) {
+  // new scan
+  const resp =
+    formValues.classification === "file"
+      ? await _startPlaybookFile(formValues)
+      : await _startPlaybookObservable(formValues);
+
+  const playbooksRunning = new Set();
+  const warnings = [];
+  const respData = resp.data.results;
+
+  respData.forEach((x) => {
+    if (x.playbooks_running)
+      x.playbooks_running.forEach((playbook_) =>
+        playbooksRunning.add(playbook_)
+      );
+    if (x.warnings) warnings.push(...x.warnings);
+  });
+
+  try {
+    // handle response/error
+    if (
+      respData.every(
+        (element) =>
+          element.status === "accepted" || element.status === "running"
+      )
+    ) {
+      const jobIds = respData.map((x) => parseInt(x.job_id, 10));
+      jobIds.forEach((jobId) => {
+        appendToRecentScans(jobId, "success");
+      });
+      addToast(
+        `Created new Job with ID(s) #${jobIds.join(", ")}!`,
+        <div>
+          <ContentSection className="text-light">
+            <strong>Playbooks:</strong>&nbsp;
+            {Array.from(playbooksRunning)?.join(", ")}
+          </ContentSection>
+          {warnings.length > 0 && (
+            <ContentSection className="bg-accent text-darker">
+              <strong>Warnings:</strong>&nbsp;{warnings.join(", ")}
+            </ContentSection>
+          )}
+        </div>,
+        "success",
+        true,
+        10000
+      );
+      return Promise.resolve(jobIds);
+    }
+    // else
+    addToast("Failed!", respData?.message, "danger");
+    const error = new Error(`job status ${respData.status}`);
+    return Promise.reject(error);
+  } catch (e) {
+    console.error(e);
+    addToast("Failed!", e.parsedMsg, "danger");
+    return Promise.reject(e);
+  }
+}
 
 export async function createJob(formValues) {
   try {
@@ -179,4 +241,31 @@ async function _analyzeFile(formValues) {
     );
   }
   return axios.post(ANALYZE_MULTIPLE_FILES_URI, body);
+}
+
+async function _startPlaybookFile(formValues) {
+  const playbookURI = `${API_BASE_URI}/playbook/analyze_multiple_files`;
+  const body = new FormData();
+  Array.from(formValues.files).forEach((file) => {
+    body.append("files", file, file.name);
+  });
+  formValues.tags.map((x) => body.append("tags_labels", x));
+  formValues.playbooks.map((x) => body.append("playbooks_requested", x));
+  return axios.post(playbookURI, body);
+}
+
+async function _startPlaybookObservable(formValues) {
+  const observables = [];
+  formValues.observable_names.forEach((ObservableName) => {
+    observables.push([formValues.classification, ObservableName]);
+  });
+
+  const playbookURI = `${API_BASE_URI}/playbook/analyze_multiple_observables`;
+  const body = {
+    observables,
+    playbooks_requested: formValues.playbooks,
+    tags_labels: formValues.tags_labels,
+  };
+
+  return axios.post(playbookURI, body);
 }

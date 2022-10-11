@@ -11,6 +11,7 @@ import requests
 from api_app.analyzers_manager import classes
 from api_app.exceptions import AnalyzerRunException
 from intel_owl import settings
+from tests.mock_utils import MockResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
@@ -24,6 +25,11 @@ class Tor(classes.ObservableAnalyzer):
         if not os.path.isfile(database_location):
             self.updater()
 
+        if not os.path.exists(database_location):
+            raise AnalyzerRunException(
+                f"database location {database_location} does not exist"
+            )
+
         with open(database_location, "r") as f:
             db = f.read()
 
@@ -33,8 +39,11 @@ class Tor(classes.ObservableAnalyzer):
 
         return result
 
-    @staticmethod
-    def updater():
+    @classmethod
+    def updater(cls):
+        if not cls.enabled:
+            logger.warning("No running updater for Tor, because it is disabled")
+            return
         try:
             logger.info("starting download of db from tor project")
             url = "https://check.torproject.org/exit-addresses"
@@ -59,3 +68,22 @@ class Tor(classes.ObservableAnalyzer):
             logger.exception(e)
 
         return database_location
+
+    @classmethod
+    def _monkeypatch(cls):
+        patches = [
+            if_mock_connections(
+                patch(
+                    "requests.get",
+                    return_value=MockResponse(
+                        {},
+                        200,
+                        content=b"""ExitNode D2A4BEE6754A9711EB0FAC47F3059BE6FC0D72C7
+Published 2022-08-17 18:11:11
+LastStatus 2022-08-18 14:00:00
+ExitAddress 93.95.230.253 2022-08-18 14:44:33""",
+                    ),
+                ),
+            )
+        ]
+        return super()._monkeypatch(patches=patches)

@@ -8,7 +8,7 @@ import usePluginConfigurationStore from "../../../stores/usePluginConfigurationS
 import markdownToHtml from "../../common/markdownToHtml";
 
 // constants
-const stateSelector = (state) => [state.analyzersJSON, state.connectors.JSON];
+const stateSelector = (state) => [state.analyzersJSON, state.connectorsJSON];
 
 // components
 export default function RuntimeConfigurationModal(props) {

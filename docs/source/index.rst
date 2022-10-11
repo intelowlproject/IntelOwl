@@ -14,15 +14,4 @@ Welcome to IntelOwl's documentation!
    Usage
    Advanced-Usage
    Contribute
-   Tests
-   OpenAPI Doc <OpenAPI>
    Redoc
-
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`

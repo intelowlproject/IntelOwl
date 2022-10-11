@@ -13,12 +13,12 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python
-        uses: actions/setup-python@v4.0.0
+        uses: actions/setup-python@v4.3.0
         with:
           python-version: 3.9
       - name: Install docs requirements
         run: |
-          pip install -r docs/source/requirements.txt
+          pip install -r requirements/docs-requirements.txt
 
       - name: Build docs
         run: |

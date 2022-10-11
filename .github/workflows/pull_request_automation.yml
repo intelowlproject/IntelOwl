@@ -36,7 +36,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Set up Python
-        uses: actions/setup-python@v4.0.0
+        uses: actions/setup-python@v4.3.0
         with:
           python-version: 3.9
 
@@ -63,7 +63,7 @@ jobs:
 
     steps:
       - name: Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.9.1
+        uses: styfle/cancel-workflow-action@0.10.1
         with:
           access_token: ${{ github.token }}
 
@@ -135,6 +135,10 @@ jobs:
       - name: "Test: Analyzers Manager (file analyzers)"
         run: |
           docker/scripts/coverage_test.sh tests.analyzers_manager.test_file_scripts
+
+      - name: "Test: Playbooks Manager"
+        run: |
+          docker/scripts/coverage_test.sh tests.playbooks_manager.test_controller
 
       - name: "Coverage: generate xml and transfer from docker container to host"
         run: |

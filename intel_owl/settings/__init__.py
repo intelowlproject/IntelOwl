@@ -14,7 +14,6 @@ if not AWS_IAM_ACCESS:
     AWS_ACCESS_KEY_ID = secrets.get_secret("AWS_ACCESS_KEY_ID")
     AWS_SECRET_ACCESS_KEY = secrets.get_secret("AWS_SECRET_ACCESS_KEY")
 
-
 # Application definition
 INSTALLED_APPS = [
     # default
@@ -40,13 +39,14 @@ INSTALLED_APPS = [
     "certego_saas.apps.organization",
     # intelowl apps
     "api_app",
-    "api_app.authentication",
+    "authentication",
     "api_app.analyzers_manager",
     "api_app.connectors_manager",
+    "api_app.playbooks_manager",
 ]
 
-
 # inject from other modules
+from .auth import *  # lgtm [py/polluting-import]
 from .cache import *  # lgtm [py/polluting-import]
 from .certego import *  # lgtm [py/polluting-import]
 from .commons import *  # lgtm [py/polluting-import]
@@ -66,15 +66,3 @@ CELERY_QUEUES = secrets.get_secret("CELERY_QUEUES", "default").split(",")
 # AWS
 AWS_SECRETS = secrets.get_secret("AWS_SECRETS", False) == "True"
 AWS_SQS = secrets.get_secret("AWS_SQS", False) == "True"
-
-# Auth backends
-LDAP_ENABLED = os.environ.get("LDAP_ENABLED", False) == "True"
-RADIUS_AUTH_ENABLED = os.environ.get("RADIUS_AUTH_ENABLED", False) == "True"
-if LDAP_ENABLED:
-    from configuration.ldap_config import *  # lgtm [py/polluting-import]
-
-    AUTHENTICATION_BACKENDS.append("django_auth_ldap.backend.LDAPBackend")
-if RADIUS_AUTH_ENABLED:
-    from configuration.radius_config import *  # lgtm [py/polluting-import]
-
-    AUTHENTICATION_BACKENDS.append("intel_owl.backends.CustomRADIUSBackend")

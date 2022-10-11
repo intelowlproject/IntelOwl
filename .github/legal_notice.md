@@ -49,6 +49,7 @@ license terms.
 [PyHashlookup](https://github.com/CIRCL/PyHashlookup),
 [PyPDNS](https://github.com/CIRCL/PyPDNS),
 [Onionscan](https://github.com/s-rah/onionscan),
-[CyberChef-server](https://github.com/gchq/CyberChef-server/blob/master/LICENSE)
-[pyelftools](https://github.com/eliben/pyelftools)
-[telfhash](https://github.com/trendmicro/telfhash)
+[CyberChef-server](https://github.com/gchq/CyberChef-server/blob/master/LICENSE),
+[pyelftools](https://github.com/eliben/pyelftools),
+[telfhash](https://github.com/trendmicro/telfhash),
+[Authlib](https://github.com/lepture/authlib)

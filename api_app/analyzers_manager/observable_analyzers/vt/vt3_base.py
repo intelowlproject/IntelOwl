@@ -367,7 +367,6 @@ class VirusTotalv3AnalyzerMixin(BaseAnalyzerMixin):
             relationships = [
                 # behaviors is necessary to check if there are sandbox analysis
                 "behaviours",
-                "sigma_analysis",
                 "bundled_files",
                 "comments",
                 "contacted_domains",

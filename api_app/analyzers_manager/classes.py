@@ -93,7 +93,9 @@ class BaseAnalyzerMixin(Plugin):
             result = 9223372036854775807
         return result
 
-    def before_run(self):
+    def before_run(self, *args, **kwargs):
+        parent_playbook = kwargs.get("parent_playbook", "")
+        self.add_parent_playbook(parent_playbook=parent_playbook)
         self.report.update_status(status=self.report.Status.RUNNING)
 
     def after_run(self):
@@ -101,6 +103,13 @@ class BaseAnalyzerMixin(Plugin):
 
     def __repr__(self):
         return f"({self.analyzer_name}, job_id: #{self.job_id})"
+
+    @classmethod
+    @property
+    def enabled(cls):
+        from api_app.analyzers_manager.dataclasses import AnalyzerConfig
+
+        return not AnalyzerConfig.is_disabled(cls.__name__)
 
 
 class ObservableAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
@@ -129,8 +138,8 @@ class ObservableAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
             self.observable_classification = self._job.observable_classification
         return super(ObservableAnalyzer, self).__post__init__()
 
-    def before_run(self):
-        super().before_run()
+    def before_run(self, *args, **kwargs):
+        super().before_run(**kwargs)
         logger.info(
             f"STARTED analyzer: {self.__repr__()} -> "
             f"Observable: {self.observable_name}."
@@ -177,8 +186,8 @@ class FileAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
         self.file_mimetype = self._job.file_mimetype
         return super(FileAnalyzer, self).__post__init__()
 
-    def before_run(self):
-        super().before_run()
+    def before_run(self, *args, **kwargs):
+        super().before_run(**kwargs)
         logger.info(
             f"STARTED analyzer: {self.__repr__()} -> "
             f"File: ({self.filename}, md5: {self.md5})"

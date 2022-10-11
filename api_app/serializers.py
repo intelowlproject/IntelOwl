@@ -146,7 +146,8 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
 
                 if (
                     not config.is_ready_to_use
-                    or self.context["plugin_states"]
+                    or "plugin_states" in self.context
+                    and self.context["plugin_states"]
                     .filter(plugin_name=a_name, disabled=True)
                     .exists()
                 ):

@@ -239,12 +239,17 @@ def delete_file(sender, instance: Job, **kwargs):
             instance.file.delete()
 
 
-class CustomConfig(models.Model):
+class PluginConfig(models.Model):
     class PluginType(models.TextChoices):
         ANALYZER = "1", "Analyzer"
         CONNECTOR = "2", "Connector"
 
+    class ConfigType(models.TextChoices):
+        PARAMETER = "1", "Parameter"
+        SECRET = "2", "Secret"
+
     type = models.CharField(choices=PluginType.choices, max_length=2)
+    config_type = models.CharField(choices=ConfigType.choices, max_length=2)
     attribute = models.CharField(max_length=128)
     value = models.JSONField(blank=False)
     organization = models.ForeignKey(
@@ -307,7 +312,7 @@ class CustomConfig(models.Model):
 
         result = {}
         for custom_config in custom_configs:
-            custom_config: CustomConfig
+            custom_config: PluginConfig
             if custom_config.plugin_name not in result:
                 result[custom_config.plugin_name] = {}
 
@@ -327,7 +332,7 @@ class CustomConfig(models.Model):
 
     @classmethod
     def apply(cls, initial_config, user, plugin_type):
-        custom_configs = CustomConfig.get_as_dict(user, plugin_type)
+        custom_configs = PluginConfig.get_as_dict(user, plugin_type)
         for plugin in initial_config.values():
             if plugin["name"] in custom_configs:
                 for param in plugin["params"]:
@@ -335,3 +340,42 @@ class CustomConfig(models.Model):
                         plugin["params"][param]["value"] = custom_configs[
                             plugin["name"]
                         ][param]
+
+
+class OrganizationPluginState(models.Model):
+    type = models.CharField(choices=PluginConfig.PluginType.choices, max_length=2)
+    organization = models.ForeignKey(
+        Organization,
+        on_delete=models.CASCADE,
+        related_name="+",
+    )
+    plugin_name = models.CharField(max_length=128)
+    updated_at = models.DateTimeField(auto_now=True)
+    disabled = models.BooleanField(default=False)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["type", "plugin_name", "organization"],
+                name="unique_enabled_plugin_entry",
+            )
+        ]
+
+        indexes = [
+            models.Index(
+                fields=["organization", "type"],
+            ),
+        ]
+
+    @classmethod
+    def apply(cls, initial_config, user, plugin_type):
+        if not user.has_membership():
+            return
+        custom_configs = OrganizationPluginState.objects.filter(
+            organization=user.membership.organization, type=plugin_type
+        )
+        for plugin in initial_config.values():
+            if custom_configs.filter(plugin_name=plugin["name"]).exists():
+                plugin["disabled"] = custom_configs.get(
+                    plugin_name=plugin["name"]
+                ).disabled

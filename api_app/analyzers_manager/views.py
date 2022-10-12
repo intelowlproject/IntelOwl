@@ -1,6 +1,5 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
-
 import logging
 
 from drf_spectacular.utils import extend_schema as add_docs
@@ -12,7 +11,7 @@ from rest_framework.response import Response
 from api_app.core.views import PluginActionViewSet, PluginHealthCheckAPI
 from certego_saas.ext.views import APIView
 
-from ..models import CustomConfig, Job
+from ..models import Job, OrganizationPluginState, PluginConfig
 from . import controller as analyzers_controller
 from .models import AnalyzerReport
 from .serializers import AnalyzerConfigSerializer
@@ -47,7 +46,10 @@ class AnalyzerListAPI(APIView):
     def get(self, request, *args, **kwargs):
         try:
             ac = self.serializer_class.read_and_verify_config()
-            CustomConfig.apply(ac, request.user, CustomConfig.PluginType.ANALYZER)
+            PluginConfig.apply(ac, request.user, PluginConfig.PluginType.ANALYZER)
+            OrganizationPluginState.apply(
+                ac, request.user, PluginConfig.PluginType.ANALYZER
+            )
             return Response(ac, status=status.HTTP_200_OK)
         except Exception as e:
             logger.exception(

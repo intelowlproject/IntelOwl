@@ -16,6 +16,7 @@ import { Form, Formik } from "formik";
 import useTitle from "react-use/lib/useTitle";
 
 import { addToast, ContentSection } from "@certego/certego-ui";
+import { AUTH_BASE_URI } from "../../constants/api";
 
 import { PUBLIC_URL } from "../../constants/environment";
 import { useAuthStore } from "../../stores";
@@ -86,18 +87,19 @@ export default function Login() {
             <h3 className="fw-bold col-auto me-auto mt-2">Log In</h3>
             <div className="col-auto">
               <a
-                href="/api/auth/google"
+                href={`${AUTH_BASE_URI}/google`}
                 onClick={(e) => {
                   e.preventDefault();
-                  const url = "/api/auth/google";
+                  const url = `${AUTH_BASE_URI}/google`;
                   axios
-                    .get(url)
+                    .get(`${url}?no_redirect=true`)
                     .then(() => {
                       window.location = url;
                     })
                     .catch((error) => {
                       if (
-                        error.response.data.includes("OAuth is not configured.")
+                        error?.response?.status === 401 &&
+                        error.parsedMsg.includes("OAuth is not configured.")
                       )
                         addToast(
                           "Login failed!",

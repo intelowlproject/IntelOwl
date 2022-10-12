@@ -5,8 +5,8 @@ from django.urls import include, path
 from rest_framework import routers
 
 from .views import (
-    CustomConfigViewSet,
     JobViewSet,
+    PluginConfigViewSet,
     TagViewSet,
     analyze_file,
     analyze_multiple_files,
@@ -14,13 +14,15 @@ from .views import (
     analyze_observable,
     ask_analysis_availability,
     ask_multi_analysis_availability,
+    plugin_disabler,
+    plugin_state_viewer,
 )
 
 # Routers provide an easy way of automatically determining the URL conf.
 router = routers.DefaultRouter(trailing_slash=False)
 router.register(r"tags", TagViewSet, basename="tags")
 router.register(r"jobs", JobViewSet, basename="jobs")
-router.register(r"custom-config", CustomConfigViewSet, basename="custom-config")
+router.register(r"plugin-config", PluginConfigViewSet, basename="plugin-config")
 
 # These come after /api/..
 urlpatterns = [
@@ -52,4 +54,6 @@ urlpatterns = [
     path("", include("certego_saas.apps.notifications.urls")),
     # organization sub-app
     path("me/", include("certego_saas.apps.organization.urls")),
+    path("plugin-disable/", plugin_state_viewer, name="plugin_state_viewer"),
+    path("plugin-disable/<int:plugin_type>/<str:plugin_name>/", plugin_disabler),
 ]

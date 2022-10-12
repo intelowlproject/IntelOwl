@@ -191,7 +191,7 @@ export default function ScanForm() {
     () =>
       analyzersGrouped[classification]
         .map((v) => ({
-          isDisabled: !v.verification.configured,
+          isDisabled: !v.verification.configured || v.disabled,
           value: v.name,
           label: (
             <div className="d-flex justify-content-start align-items-start flex-column">
@@ -220,7 +220,7 @@ export default function ScanForm() {
     () =>
       connectors
         .map((v) => ({
-          isDisabled: !v.verification.configured,
+          isDisabled: !v.verification.configured || v.disabled,
           value: v.name,
           label: (
             <div className="d-flex justify-content-start align-items-start flex-column">

@@ -12,6 +12,7 @@ from api_app.core.dataclasses import AbstractConfig
 from api_app.models import Job
 from intel_owl.consts import DEFAULT_QUEUE
 
+from ..models import PluginConfig
 from .constants import HashChoices, TypeChoices
 from .serializers import AnalyzerConfigSerializer
 
@@ -24,6 +25,8 @@ logger = logging.getLogger(__name__)
 
 @dataclasses.dataclass
 class AnalyzerConfig(AbstractConfig):
+    def _get_type(self) -> str:
+        return PluginConfig.PluginType.ANALYZER
 
     # Required fields
     type: typing.Literal["file", "observable"]

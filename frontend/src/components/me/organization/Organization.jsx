@@ -1,6 +1,6 @@
 import React, { Suspense } from "react";
 import { SiMinutemailer } from "react-icons/si";
-import { BsFillKeyFill, BsPeopleFill } from "react-icons/bs";
+import { BsPeopleFill, BsSliders } from "react-icons/bs";
 
 import { RouterTabs, FallBackLoading } from "@certego/certego-ui";
 import { Container } from "reactstrap";
@@ -30,7 +30,7 @@ const routes = [
     location: "config",
     Title: () => (
       <span>
-        <BsFillKeyFill className="me-2" />
+        <BsSliders className="me-2" />
         Organization Config
       </span>
     ),

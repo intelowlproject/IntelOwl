@@ -12,7 +12,7 @@ from rest_framework.response import Response
 from api_app.core.views import PluginActionViewSet, PluginHealthCheckAPI
 from certego_saas.ext.views import APIView
 
-from ..models import CustomConfig
+from ..models import OrganizationPluginState, PluginConfig
 from . import controller as connectors_controller
 from .models import ConnectorReport
 from .serializers import ConnectorConfigSerializer
@@ -45,7 +45,10 @@ class ConnectorListAPI(APIView):
     def get(self, request, *args, **kwargs):
         try:
             cc = self.serializer_class.read_and_verify_config()
-            CustomConfig.apply(cc, request.user, CustomConfig.PluginType.CONNECTOR)
+            PluginConfig.apply(cc, request.user, PluginConfig.PluginType.CONNECTOR)
+            OrganizationPluginState.apply(
+                cc, request.user, PluginConfig.PluginType.CONNECTOR
+            )
             return Response(cc, status=status.HTTP_200_OK)
         except Exception as e:
             logger.exception(

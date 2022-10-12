@@ -11,6 +11,7 @@ OLD_JOBS_RETENTION_DAYS=2
 INTELOWL_WEB_CLIENT_DOMAIN=localhost
 # Storage
 LOCAL_STORAGE=True
+
 # OAuth2
 GOOGLE_CLIENT_ID=test_intelowl.apps.googleusercontent.com
 GOOGLE_CLIENT_SECRET=the_supreme_secret

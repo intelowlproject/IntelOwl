@@ -16,6 +16,8 @@ from .serializers import ConnectorConfigSerializer
 
 __all__ = ["ConnectorConfig"]
 
+from ..models import PluginConfig
+
 logger = logging.getLogger(__name__)
 
 
@@ -24,6 +26,9 @@ class ConnectorConfig(AbstractConfig):
     maximum_tlp: str
 
     serializer_class = ConnectorConfigSerializer
+
+    def _get_type(self) -> str:
+        return PluginConfig.PluginType.ANALYZER
 
     def get_full_import_path(self) -> str:
         return f"api_app.connectors_manager.connectors.{self.python_module}"

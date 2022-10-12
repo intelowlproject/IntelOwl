@@ -6,6 +6,7 @@ import json
 import logging
 import os
 import sys
+from abc import abstractmethod
 from copy import deepcopy
 from typing import List, Optional, TypedDict
 
@@ -104,15 +105,23 @@ class AbstractConfigSerializer(rfs.Serializer):
             self._is_valid_flag = True
         return ret
 
-    @staticmethod
-    def get_verification(raw_instance: dict) -> ConfigVerificationType:
+    @abstractmethod
+    def _get_type(self):
+        raise NotImplementedError()
+
+    def get_verification(self, raw_instance: dict) -> ConfigVerificationType:
         # raw instance because input is json and not django model object
         # get all missing secrets
         secrets = raw_instance.get("secrets", {})
         missing_secrets = []
         for s_key, s_dict in secrets.items():
             # check if available in environment
-            secret_val = secrets_store.get_secret(s_dict["env_var_key"], default=None)
+            secret_val = secrets_store.get_secret(
+                s_key,
+                default=None,
+                plugin_type=self._get_type(),
+                plugin_name=raw_instance["name"],
+            )
             if not secret_val and s_dict["required"]:
                 missing_secrets.append(s_key)
 

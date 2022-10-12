@@ -9,6 +9,7 @@ docker/custom.override.yml
 venv/
 intel_owl_test_env/
 compose-elk.yml
+docs_env/
 docs/build/
 configuration/service_account_keyfile.json
 configuration/custom_yara/*

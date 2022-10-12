@@ -2753,24 +2753,8 @@
     }
   },
   "Shodan_Search": {
-    "type": "observable",
-    "python_module": "shodan.Shodan",
+    "extends": "Shodan_Honeyscore",
     "description": "scan an IP against Shodan Search API",
-    "disabled": false,
-    "external_service": true,
-    "leaks_info": false,
-    "observable_supported": ["ip"],
-    "config": {
-      "soft_time_limit": 30,
-      "queue": "default"
-    },
-    "secrets": {
-      "api_key_name": {
-        "env_var_key": "SHODAN_KEY",
-        "description": "",
-        "required": true
-      }
-    },
     "params": {
       "shodan_analysis": {
         "value": "search",

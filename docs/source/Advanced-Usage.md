@@ -4,7 +4,7 @@ This page includes details about some advanced features that Intel Owl provides 
 
 - [Advanced Usage](#advanced-usage)
   - [Optional Analyzers](#optional-analyzers)
-  - [Customize analyzer execution at time of request](#customize-analyzer-execution-at-time-of-request)
+  - [Customize analyzer execution](#customize-analyzer-execution)
     - [View and understand different parameters](#view-and-understand-different-parameters)
     - [from the GUI](#from-the-gui)
     - [from Pyintelowl](#from-pyintelowl)
@@ -121,16 +121,16 @@ Otherwise you can enable just one of the cited integration by using the related 
 python3 start.py prod --tor_analyzers up
 ```
 
-## Customize analyzer execution at time of request
+## Customize analyzer execution
 
 Some analyzers and connectors provide the chance to customize the performed analysis based on parameters (`params` attr in the configuration file) that are different for each analyzer.
 
-- You can set a custom default values by changing their `value` attribute directly from the configuration files.
+- You can set a custom default values by changing their `value` attribute directly from the configuration files. Since IntelOwl v4, it is possible to change these values directly from the GUI in the section "Your plugin configuration".
 - You can choose to provide runtime configuration when requesting an analysis that will be merged with the default overriding it. This override is done only for the specific analysis.
 
 <div class="admonition info">
 <p class="admonition-title">Info</p>
-Connectors parameters can only be changed from it's configuration file, not at the time of analysis request.
+Connectors parameters can only be changed from either their configuration file or the "Your plugin configuration" section, not at the time of analysis request.
 </div>
 
 ##### View and understand different parameters
@@ -211,11 +211,17 @@ Jobs with either AMBER or RED TLP value will be accessible to only members withi
 
 ## Notifications
 
-IntelOwl integrated the notification system from the certego_saas package, allowing the admins to create notification that every user will be able to see.
+Since v4, IntelOwl integrated the notification system from the `certego_saas` package, allowing the admins to create notification that every user will be able to see.
 
-It is possible to create a new notification from the django admin interface:
-in body it is possible to even use html syntax, allowing to embed images, links, etc;
-in the app_name field, please remember to use `intelowl` as the app name.
+The user would find the Notifications button on the top right of the page:
+
+<img style="border: 0.2px solid black" width=220 height=210 src="https://raw.githubusercontent.com/intelowlproject/IntelOwl/master/docs/static/notifications.png">
+
+There the user can read notifications provided by either the administrators or the IntelOwl Maintainers.
+
+As an Admin, if you want to add a notification to have it sent to all the users, you have to login to the Django Admin interface, go to the "Notifications" section and add it there.
+While adding a new notification, in the `body` section it is possible to even use HTML syntax, allowing to embed images, links, etc;
+in the `app_name field`, please remember to use `intelowl` as the app name.
 
 Everytime a new release is installed, once the backend goes up it will automatically create a new notification,
 having as content the latest changes described in the [CHANGELOG.md](https://github.com/intelowlproject/IntelOwl/blob/master/.github/CHANGELOG.md),

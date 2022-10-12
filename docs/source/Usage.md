@@ -1,5 +1,17 @@
 # Usage
 
+This page includes the most important things to know and understand when using IntelOwl.
+
+- [Client](#client)
+- [Organizations and User Management](#organizations-and-user-management)
+  - [Multi Tenancy](#multi-tenancy)
+- [TLP Support](#tlp-support)
+- [Plugins](#plugins)
+  - [Analyzers](#analyzers)
+  - [Connectors](#connectors)
+  - [Managing Analyzers and Connectors](#managing-analyzers-and-connectors)
+  - [Playbooks](#playbooks)
+
 ## Client
 
 Intel Owl main objective is to provide a single API interface to query in order to retrieve threat intelligence at scale.
@@ -13,9 +25,12 @@ There are multiple ways to interact with the Intel Owl APIs,
 
 2. pyIntelOwl (CLI/SDK)
 
-   - Official client that is available at: [PyIntelOwl](https://github.com/intelowlproject/pyintelowl),
+   - Official Python client that is available at: [PyIntelOwl](https://github.com/intelowlproject/pyintelowl),
    - Can be used as a library for your own python projects or...
    - directly via the command line interface.
+
+3. goIntelOwl (CLI/SDK)
+   - Official GO client that is available at: [go-intelowl](https://github.com/intelowlproject/go-intelowl)
 
 <div class="admonition hint">
 <p class="admonition-title">Hint: Tokens Creation</p>
@@ -44,83 +59,13 @@ Once you create an organization, you are the unique Administrator of that organi
 Once an invite has sent, the invited user has to login, go to the "Organization" section and accept the invite there. Afterwards the Administrator will be able to see the user in his "Organization" section.
 
 
-## Notifications
-Since IntelOwl v4, there is a Notifications button available on the top right of the page:
+#### Plugins Params and Secrets
+From IntelOwl v4.1.0, Plugin Parameters and Secrets can be defined at the organization level, in the dedicated section.
+This allows to share configurations between users of the same org while allowing complete multi-tenancy of the application.
 
-<img style="border: 0.2px solid black" width=220 height=210 src="https://raw.githubusercontent.com/intelowlproject/IntelOwl/master/docs/static/notifications.png">
-
-There you can read notifications provided by either your administration or the IntelOwl Maintainers.
-
-As an Admin, if you want to add a notification to have it sent to all the users, you have to login to the Django Admin interface, go to the "Notifications" section and add it there.
-
-## Analyzers customization
-
-You can create new analyzers based on already existing modules by changing the configuration values inside `configuration/analyzer_config.json`. This file is mounted as a docker volume, so you won't need to rebuild the image.
-
-You may want to change this configuration to add new analyzers or to change the configuration of some of them. The name of the analyzers can be changed at every moment based on your wishes.
-
-The following are all the keys that you can change without touching the source code:
-
-- `disabled`: you can choose to disable certain analyzers, then they won't appear in the dropdown list and won't run if requested.
-- `leaks_info`: if set, in the case you specify via the API that a resource is sensitive, the specific analyzer won't be executed
-- `external_service`: if set, in the case you specify via the API to exclude external services, the specific analyzer won't be executed
-- `supported_filetypes`: can be populated as a list. If set, if you ask to analyze a file with a different mimetype from the ones you specified, it won't be executed
-- `not_supported_filetypes`: can be populated as a list. If set, if you ask to analyze a file with a mimetype from the ones you specified, it won't be executed
-- `observable_supported`: can be populated as a list. If set, if you ask to analyze an observable that is not in this list, it won't be executed. Valid values are: `ip`, `domain`, `url`, `hash`, `generic`.
-- `soft_time_limit`: this is the maximum time (in seconds) of execution for an analyzer. Once reached, the task will be killed (or managed in the code by a custom Exception). Default `300`.
-- `queue`: this takes effects only when [multi-queue](Advanced-Usage.html#multi-queue) is enabled. Choose which celery worker would execute the task: `local` (ideal for tasks that leverage local applications like Yara), `long` (ideal for long tasks) or `default` (ideal for simple webAPI-based analyzers).
-
-<div class="admonition hint">
-<p class="admonition-title">Hint: Advanced Configuration</p>
-You can also modify analyzer specific parameters from the configuration file or even at the time of requesting an analysis. See <a href="./Advanced-Usage.html#customize-analyzer-execution-at-time-of-request">Customize analyzer execution at time of request</a>
-</div>
-
-## Connectors customization
-
-Connectors being optional are `disabled` by default. You can enable them by changing the configuration values inside `configuration/connector_config.json`. This file is mounted as a docker volume, so you won't need to rebuild the image.
-
-The following are all the keys that you can change without touching the source code:
-
-- `disabled`: _similar to analyzers_
-- `soft_time_limit`: _similar to analyzers_
-- `queue`: _similar to analyzers_
-- `maximum_tlp` (default `WHITE`, choices `WHITE`, `GREEN`, `AMBER`, `RED`): specify the maximum TLP of the analysis up to which the connector is allowed to run. (e.g. if `maximum_tlp` is `GREEN`, it would run for analysis with TLPs `WHITE` and `GREEN`). To learn more about TLPs see [TLP Support](./Usage.md#tlp-support).
-
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-Changing other keys can break an analyzer or connector. In that case, you should think about duplicating the configuration entry or python module with your changes.
-</div>
-
-## Managing Analyzers and Connectors
-
-All plugins i.e. analyzers and connectors have `kill` and `retry` actions. In addition to that, all docker-based analyzers and connectors have a `healthcheck` action to check if their associated instances are up or not.
-
-- **kill:**
-
-  To stop a plugin whose status is `running`/`pending`:
-
-  - GUI: Buttons on reports table on job result page.
-  - PyIntelOwl: `IntelOwl.kill_analyzer` and `IntelOwl.kill_connector` function.
-  - CLI: `$ pyintelowl jobs kill-analyzer <job_id> <analyzer_name>` and `$ pyintelowl jobs kill-connector <job_id> <connector_name>`
-  - API: `PATCH /api/job/{job_id}/analyzer/{analyzer_name}/kill` and `PATCH /api/job/{job_id}/connector/{connector_name}/kill`
-
-- **retry:**
-
-  To retry a plugin whose status is `failed`/`killed`:
-
-  - GUI: Buttons on reports table on job result page.
-  - PyIntelOwl: `IntelOwl.retry_analyzer` and `IntelOwl.retry_connector` function,
-  - CLI: `$ pyintelowl jobs retry-analyzer <job_id> <analyzer_name>` and `$ pyintelowl jobs retry-connector <job_id> <connector_name>`
-  - API: `PATCH /api/job/{job_id}/analyzer/{analyzer_name}/retry` and `PATCH /api/job/{job_id}/connector/{connector_name}/retry`
-
-- **healthcheck:**
-
-  To check if docker container or external platform associated with an analyzer or connector respectively are up or not:
-
-  - GUI: Buttons on analyzers table and connectors table.
-  - PyIntelOwl: `IntelOwl.analyzer_healthcheck` and `IntelOwl.connector_healthcheck` methods.
-  - CLI: `$ pyintelowl analyzer-healthcheck <analyzer_name>` and `$ pyintelowl connector-healthcheck <connector_name>`
-  - API: `GET /api/analyzer/{analyzer_name}/healthcheck` and `GET /api /connector/{connector_name}/healthcheck`
+#### Disable Analyzers at Org level
+From IntelOwl v4.1.0, the org admin can disable specific analyzers for all the users in a specific org.
+To do that, org admins needs to go in the "Plugins" section and click the button "Enabled for organization" of the analyzer that they want to disable.
 
 ## TLP Support
 
@@ -135,12 +80,22 @@ Following are the indicators available when requesting an analysis (in the order
 
 These indicators when used with `maximum_tlp` (option available in connectors), give you the control of what information is shared to the external platforms.
 
-## Available Analyzers
+## Plugins
+Plugins are the core modular components of IntelOwl that can be easily added, changed and customized.
+There are 3 types of plugins:
+- [Analyzers](#analyzers)
+- [Connectors](#connectors)
+- [Playbooks](#playbooks)
 
-### Analyzers list
+### Analyzers
+
+Analyzers are the most important plugins in IntelOwl. They allow to perform data extraction on the observables and/or files that you would like to analyze.
+
+#### Analyzers list
 
 The following is the list of the available analyzers you can run out-of-the-box. You can also navigate the same list via the
 
+- Graphical Interface: once your application is up and running, go to the "Plugins" section
 - [pyintelowl](https://github.com/intelowlproject/pyintelowl): `$ pyintelowl get-analyzer-config`
 
 ##### File analyzers:
@@ -322,29 +277,137 @@ Some analyzers require details other than just IP, URL, Domain, etc. We classifi
 
 [Some analyzers are optional](Advanced-Usage.html#optional-analyzers) and need to be enabled explicitly.
 
-## Available Connectors
+#### Analyzers Customization
+You can create new analyzers based on already existing modules by changing the configuration values inside `configuration/analyzer_config.json`. This file is mounted as a docker volume, so you won't need to rebuild the image.
+
+You may want to change this configuration to add new analyzers or to change the configuration of some of them. The name of the analyzers can be changed at every moment based on your wishes.
+
+The following are all the keys that you can change without touching the source code:
+
+- `disabled`: you can choose to disable certain analyzers, then they won't appear in the dropdown list and won't run if requested.
+- `leaks_info`: if set, in the case you specify via the API that a resource is sensitive, the specific analyzer won't be executed
+- `external_service`: if set, in the case you specify via the API to exclude external services, the specific analyzer won't be executed
+- `supported_filetypes`: can be populated as a list. If set, if you ask to analyze a file with a different mimetype from the ones you specified, it won't be executed
+- `not_supported_filetypes`: can be populated as a list. If set, if you ask to analyze a file with a mimetype from the ones you specified, it won't be executed
+- `observable_supported`: can be populated as a list. If set, if you ask to analyze an observable that is not in this list, it won't be executed. Valid values are: `ip`, `domain`, `url`, `hash`, `generic`.
+- `soft_time_limit`: this is the maximum time (in seconds) of execution for an analyzer. Once reached, the task will be killed (or managed in the code by a custom Exception). Default `300`.
+- `queue`: this takes effects only when [multi-queue](Advanced-Usage.html#multi-queue) is enabled. Choose which celery worker would execute the task: `local` (ideal for tasks that leverage local applications like Yara), `long` (ideal for long tasks) or `default` (ideal for simple webAPI-based analyzers).
+
+Sometimes, it may happen that you would like to create a new analyzer very similar to an already existing one. Maybe you would like to just change the description and the default parameters.
+An helpful way to do that without having to copy/pasting the configuration, is to leverage the key `extends`.
+With this key you can create a new analyzer based on an already existing one and define only things that you would like to overwrite.
+Example:
+```
+  "Shodan_Search": {
+    "extends": "Shodan_Honeyscore",
+    "description": "scan an IP against Shodan Search API",
+    "params": {
+      "shodan_analysis": {
+        "value": "search",
+        "type": "str",
+        "description": ""
+      }
+    }
+  }
+```
+
+<div class="admonition hint">
+<p class="admonition-title">Hint: Advanced Configuration</p>
+You can also modify analyzer specific parameters directly from the GUI. See <a href="./Advanced-Usage.html#customize-analyzer-execution">Customize analyzer execution at time of request</a>
+</div>
+
+### Connectors
 
 Connectors are designed to run after every successful analysis which makes them suitable for automated threat-sharing. They support integration with other SIEM/SOAR projects, specifically aimed at Threat Sharing Platforms.
 
-### Connectors list
+#### Connectors list
 
 The following is the list of the available connectors. You can also navigate the same list via the
 
+- Graphical Interface: once your application is up and running, go to the "Plugins" section
 - [pyintelowl](https://github.com/intelowlproject/pyintelowl): `$ pyintelowl get-connector-config`
+
+##### List
 
 * `MISP`: automatically creates an event on your MISP instance, linking the successful analysis on IntelOwl.
 * `OpenCTI`: automatically creates an observable and a linked report on your OpenCTI instance, linking the the successful analysis on IntelOwl.
 * `YETI`: YETI = Your Everyday Threat Intelligence. find or create observable on YETI, linking the successful analysis on IntelOwl.
 
----
+#### Connectors customization
 
-To contribute to the project, see [Contribute](./Contribute.md).
+Connectors being optional are `disabled` by default. You can enable them by changing the configuration values inside `configuration/connector_config.json`. This file is mounted as a docker volume, so you won't need to rebuild the image.
 
-### Available Playbooks
+The following are all the keys that you can change without touching the source code:
+
+- `disabled`: _similar to analyzers_
+- `soft_time_limit`: _similar to analyzers_
+- `queue`: _similar to analyzers_
+- `maximum_tlp` (default `WHITE`, choices `WHITE`, `GREEN`, `AMBER`, `RED`): specify the maximum TLP of the analysis up to which the connector is allowed to run. (e.g. if `maximum_tlp` is `GREEN`, it would run for analysis with TLPs `WHITE` and `GREEN`). To learn more about TLPs see [TLP Support](./Usage.md#tlp-support).
+
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+Changing other keys can break an analyzer or connector. In that case, you should think about duplicating the configuration entry or python module with your changes.
+</div>
+
+### Managing Analyzers and Connectors
+
+All plugins i.e. analyzers and connectors have `kill` and `retry` actions. In addition to that, all docker-based analyzers and connectors have a `healthcheck` action to check if their associated instances are up or not.
+
+- **kill:**
+
+  To stop a plugin whose status is `running`/`pending`:
+
+  - GUI: Buttons on reports table on job result page.
+  - PyIntelOwl: `IntelOwl.kill_analyzer` and `IntelOwl.kill_connector` function.
+  - CLI: `$ pyintelowl jobs kill-analyzer <job_id> <analyzer_name>` and `$ pyintelowl jobs kill-connector <job_id> <connector_name>`
+  - API: `PATCH /api/job/{job_id}/analyzer/{analyzer_name}/kill` and `PATCH /api/job/{job_id}/connector/{connector_name}/kill`
+
+- **retry:**
+
+  To retry a plugin whose status is `failed`/`killed`:
+
+  - GUI: Buttons on reports table on job result page.
+  - PyIntelOwl: `IntelOwl.retry_analyzer` and `IntelOwl.retry_connector` function,
+  - CLI: `$ pyintelowl jobs retry-analyzer <job_id> <analyzer_name>` and `$ pyintelowl jobs retry-connector <job_id> <connector_name>`
+  - API: `PATCH /api/job/{job_id}/analyzer/{analyzer_name}/retry` and `PATCH /api/job/{job_id}/connector/{connector_name}/retry`
+
+- **healthcheck:**
+
+  To check if docker container or external platform associated with an analyzer or connector respectively are up or not:
+
+  - GUI: Buttons on analyzers table and connectors table.
+  - PyIntelOwl: `IntelOwl.analyzer_healthcheck` and `IntelOwl.connector_healthcheck` methods.
+  - CLI: `$ pyintelowl analyzer-healthcheck <analyzer_name>` and `$ pyintelowl connector-healthcheck <connector_name>`
+  - API: `GET /api/analyzer/{analyzer_name}/healthcheck` and `GET /api /connector/{connector_name}/healthcheck`
+
+### Playbooks
 
 Playbooks are designed to be easy to share sequence of running Analyzers/Connectors on a particular kind of observable.
 
+If you want to avoid to re-select/re-configure a particular combiation of analyzers and connectors together every time, you should create a playbook out of it and use it instead. This is time saver.
 
+This is a feature introduced since IntelOwl v4.1.0! Please provide feedback about it!
 
-##### Playbooks:
+#### Playbooks List
+The following is the list of the available playbooks. You can also navigate the same list via the
+
+- Graphical Interface: once your application is up and running, go to the "Plugins" section
+- [pyintelowl](https://github.com/intelowlproject/pyintelowl): `$ pyintelowl get-playbook-config`
+
+##### List
 * `FREE_TO_USE_ANALYZERS`: A playbook containing all free to use analyzers.
+
+#### Playbooks customization
+You can create new analyzers by adding a new entry in the `playbook_config.json` file. That is the only way to do that for now. We are planning to provide more easier way to add new playbooks in the future.
+
+The following are all the keys that you can leverage/change without touching the source code:
+
+- `analyzers`: list of analyzers to execute
+- `connectors`: list of connectors to execute
+- `disabled`: _similar to analyzers_
+- `description`: _similar to analyzers_
+- `supports`: list of observable types or files supported
+
+---
+
+To contribute to the project, see [Contribute](./Contribute.md).

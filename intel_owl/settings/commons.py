@@ -20,7 +20,7 @@ STAGE_CI = STAGE == "ci"
 # Overridden in test_custom_config
 FORCE_SCHEDULE_JOBS = False
 
-VERSION = "4.0.1"
+VERSION = "4.1.0"
 PUBLIC_DEPLOYMENT = get_secret("PUBLIC_DEPLOYMENT", "True") == "True"
 PROJECT_LOCATION = "/opt/deploy/intel_owl"
 

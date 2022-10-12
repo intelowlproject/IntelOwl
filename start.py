@@ -16,7 +16,7 @@ except ImportError:
     )
     exit(2)
 
-CURRENT_VERSION = "4.0.1"
+CURRENT_VERSION = "4.1.0"
 
 DOCKER_ANALYZERS = [
     "tor_analyzers",

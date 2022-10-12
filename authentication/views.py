@@ -40,7 +40,7 @@ class LoginView(durin_views.LoginView):
         return client
 
     def post(self, request, *args, **kwargs):
-        response = super(LoginView, self).post(request, *args, **kwargs)
+        response = super().post(request, *args, **kwargs)
         uname = request.user.username
         logger.info(f"LoginView: received request from '{uname}'.")
         if request.user.is_superuser:
@@ -63,7 +63,7 @@ class LogoutView(durin_views.LogoutView):
                 logger.info(f"administrator: '{uname}' was logged out.")
             except Exception:
                 logger.exception(f"administrator: '{uname}' session logout failed.")
-        return super(LogoutView, self).post(request, format=None)
+        return super().post(request, format=None)
 
 
 APIAccessTokenView = durin_views.APIAccessTokenView

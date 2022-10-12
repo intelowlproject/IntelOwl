@@ -16,4 +16,3 @@ WARNING: The release will be live within an hour!
 - [ ] Wait for [dockerHub](https://hub.docker.com/repository/docker/intelowlproject/intelowl) to finish the builds
 - [ ] Merge the PR to the `master` branch. **Note:** Only use "Merge and commit" as the merge strategy and not "Squash and merge". Using "Squash and merge" makes history between branches misaligned.
 - [ ] Remove the "wait" statement in the release description.
-- [ ] If the analyzer is free, Please add it in the `FREE_TO_USE_ANALYZERS` playbook in `playbook_config.json`

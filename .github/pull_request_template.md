@@ -26,6 +26,7 @@ Please delete options that are not relevant.
 - [ ] The tests gave 0 errors.
 - [ ] Linters (`Black`, `Flake`, `Isort`) gave 0 errors. If you have correctly installed [pre-commit](https://intelowl.readthedocs.io/en/latest/Contribute.html#how-to-start-setup-project-and-development-instance), it does these checks and adjustments on your behalf.
 - [ ] If changes were made to an existing model/serializer/view, the docs were updated and regenerated (check [CONTRIBUTE.md](./Contribute.md)).
+- [ ] If the analyzer is free, Please add it in the `FREE_TO_USE_ANALYZERS` playbook in `playbook_config.json`
 
 ### Important Rules
 - If your changes decrease the overall tests coverage (you will know after the Codecov CI job is done), you should add the required tests to fix the problem

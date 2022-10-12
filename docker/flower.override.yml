@@ -26,6 +26,8 @@ services:
       - ./docker/entrypoints/flower.sh
     env_file:
       - env_file_app
+    healthcheck:
+      disable: true
 
   nginx:
     volumes:

@@ -2,6 +2,33 @@
 
 [**Upgrade Guide**](https://intelowl.readthedocs.io/en/latest/Installation.md#update-to-the-most-recent-version)
 
+## [v4.1.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v4.1.0)
+
+This release marks the end of the Google Summer of Code for this year (2022)!
+Each contributor wrote a blog post regarding his work for IntelOwl during this summer:
+  - [Aditya Narayan Sinha](https://twitter.com/0x0elliot): [Creating Playbooks for IntelOwl](https://www.honeynet.org/2022/10/06/gsoc-2022-project-summary-creating-playbooks-for-intelowl/)
+  - [Aditya Pratap Singh](https://twitter.com/devmrfitz): [IntelOwl v4 improvements](https://www.honeynet.org/2022/09/26/gsoc-2022-project-summary-intelowl-v4-improvements/)
+  - [Hussain Khan](https://twitter.com/Hussain41099635): [IntelOwl Go Client](https://www.honeynet.org/2022/09/06/gsoc-2022-project-summary-intelowl-go-client-go-intelowl/)
+
+I would like to thank them and all the mentors (@sp35, @eshaan7, @0ssigeno, @drosetti) for the efforts put in the place during the last months!
+
+Looking forward for the Google Summer of Code 2023!
+
+**Time savers features**
+- New Plugin Type to allow to easily replicate the same type of analysis without having to select and/or configure groups of analyzers/connectors every time: **Playbooks** ([docs reference](https://intelowl.readthedocs.io/en/latest/Usage.html#playbooks))
+- Default Plugins Parameters can be customized from the GUI and are defined at user/org level instead of globally ([docs reference](https://intelowl.readthedocs.io/en/latest/Advanced-Usage.html#customize-analyzer-execution))
+- Plugins Secrets can now be managed from the GUI and are defined at user/org level instead of globally ([docs reference](https://intelowl.readthedocs.io/en/latest/Installation.html#deprecated-environment-configuration))
+- Organization admins can enable/disable analyzers for all the org ([docs reference](https://intelowl.readthedocs.io/en/latest/Usage.html#multi-tenancy))
+- Google Oauth authentication support ([docs reference](https://intelowl.readthedocs.io/en/latest/Advanced-Usage.html#google-oauth2))
+- Added support for `extends` key to simplify Analyzer configuration and customization ([docs reference](https://intelowl.readthedocs.io/en/latest/Usage.html#analyzers-customization))
+
+**Others**
+- Adjusted default time limits and configuration of some analyzers
+- various fixes and stability contributions
+- a lot of dependencies upgrades
+- other minor updates
+
+
 ## [v4.0.1](https://github.com/intelowlproject/IntelOwl/releases/tag/v4.0.1)
 
 **New/Improved Analyzers:**
@@ -321,7 +348,7 @@ This is a minor patch release.
 - New `ClamAV` analyzer: scan files for viruses/malwares/trojans using [ClamAV antivirus engine](https://docs.clamav.net/).
 - Fixed `Tranco` Analyzer pointing to the wrong `python_module`
 - Removed `CirclePDNS` default value in `env_file_app_template`
-- VirusTotal v3: New configuration options: `include_behaviour_summary` for behavioral analysis and `include_sigma_analyses` for sigma analysis report of the file. See [Customize Analyzers](https://intelowl.readthedocs.io/en/master/Advanced-Usage.html#customize-analyzer-execution-at-time-of-request).
+- VirusTotal v3: New configuration options: `include_behaviour_summary` for behavioral analysis and `include_sigma_analyses` for sigma analysis report of the file. See [Customize Analyzers](https://intelowl.readthedocs.io/en/master/Advanced-Usage.html#customize-analyzer-execution).
 
 **REST API changes:**
 

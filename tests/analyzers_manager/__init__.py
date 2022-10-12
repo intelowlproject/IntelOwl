@@ -3,22 +3,24 @@
 
 import hashlib
 import os
-import time
 from unittest import SkipTest
 
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.core.files import File
+from django.core.management import call_command
 from django.test import TransactionTestCase
 
 from api_app.analyzers_manager.dataclasses import AnalyzerConfig
 from api_app.connectors_manager.dataclasses import ConnectorConfig
-from api_app.core.models import AbstractReport
 from api_app.models import Job
 from intel_owl.tasks import start_analyzers
+from tests import PollingFunction
+
+User = get_user_model()
 
 
 class _AbstractAnalyzersScriptTestCase(TransactionTestCase):
-
     # constants
     TIMEOUT_SECONDS: int = 60 * 5  # 5 minutes
     SLEEP_SECONDS: int = 5  # 5 seconds
@@ -41,13 +43,19 @@ class _AbstractAnalyzersScriptTestCase(TransactionTestCase):
 
     @classmethod
     def setUpClass(cls):
+        super().setUpClass()
+        if User.objects.filter(username="test").exists():
+            User.objects.get(username="test").delete()
+        cls.superuser = User.objects.create_superuser(
+            username="test", email="test@intelowl.com", password="test"
+        )
+        call_command("migrate_secrets")
         if cls in [
             _AbstractAnalyzersScriptTestCase,
             _ObservableAnalyzersScriptsTestCase,
             _FileAnalyzersScriptsTestCase,
         ]:
             raise SkipTest(f"{cls.__name__} is an abstract base class.")
-        return super().setUpClass()
 
     def setUp(self):
         analyzers_to_test = os.environ.get("TEST_ANALYZERS", "").split(",")
@@ -67,6 +75,7 @@ class _AbstractAnalyzersScriptTestCase(TransactionTestCase):
         print(
             f"[REPORT] Job:{self.test_job.pk}, status:'{self.test_job.status}',",
             f"analyzers:{self.test_job.analyzers_to_execute}",
+            f"connectors: {self.test_job.connectors_to_execute}",
         )
 
         # execute analyzers
@@ -76,96 +85,11 @@ class _AbstractAnalyzersScriptTestCase(TransactionTestCase):
             self.test_job.analyzers_to_execute,
             self.runtime_configuration,
         )
-
-        for i in range(0, int(self.TIMEOUT_SECONDS / self.SLEEP_SECONDS)):
-            time.sleep(self.SLEEP_SECONDS)
-            # reload test_job object
-            self.test_job.refresh_from_db()
-            status = self.test_job.status
-            analyzers_stats = self.test_job.get_analyzer_reports_stats()
-            connectors_stats = self.test_job.get_connector_reports_stats()
-            running_or_pending_analyzers = list(
-                self.test_job.analyzer_reports.filter(
-                    status__in=[
-                        AbstractReport.Status.PENDING,
-                        AbstractReport.Status.RUNNING,
-                    ]
-                ).values_list("name", flat=True)
-            )
-            running_or_pending_connectors = list(
-                self.test_job.connector_reports.filter(
-                    status__in=[
-                        AbstractReport.Status.PENDING,
-                        AbstractReport.Status.RUNNING,
-                    ]
-                ).values_list("name", flat=True)
-            )
-            print(
-                f"[REPORT] (poll #{i})",
-                f"\n>>> Job:{self.test_job.pk}, status:'{status}'",
-                f"\n>>> analyzer_reports:{analyzers_stats}",
-                f"\n>>> connector_reports:{connectors_stats} ",
-                f"\n>>> Running/Pending analyzers: {running_or_pending_analyzers}",
-                f"\n>>> Running/Pending connectors: {running_or_pending_connectors}",
-            )
-            # fail immediately if any analyzer or connector failed
-            if analyzers_stats["failed"] > 0 or connectors_stats["failed"] > 0:
-                failed_analyzers = [
-                    (r.analyzer_name, r.errors)
-                    for r in self.test_job.analyzer_reports.filter(
-                        status=AbstractReport.Status.FAILED
-                    )
-                ]
-                failed_connectors = [
-                    (r.connector_name, r.errors)
-                    for r in self.test_job.connector_reports.filter(
-                        status=AbstractReport.Status.FAILED
-                    )
-                ]
-                print(
-                    f"\n>>> Failed analyzers: {failed_analyzers}",
-                    f"\n>>> Failed connectors: {failed_connectors}",
-                )
-                self.fail()
-            # check analyzers status
-            if status not in [Job.Status.PENDING, Job.Status.RUNNING]:
-                self.assertEqual(
-                    status,
-                    Job.Status.REPORTED_WITHOUT_FAILS,
-                    msg="`test_job` status must be success",
-                )
-                self.assertEqual(
-                    len(self.test_job.analyzers_to_execute),
-                    self.test_job.analyzer_reports.count(),
-                    msg="all analyzer reports must be there",
-                )
-                self.assertEqual(
-                    analyzers_stats["all"],
-                    analyzers_stats["success"],
-                    msg="all `analyzer_reports` status must be `SUCCESS`",
-                )
-                # check connectors status
-                if connectors_stats["all"] > 0 and connectors_stats["running"] == 0:
-                    self.assertEqual(
-                        len(self.test_job.connectors_to_execute),
-                        self.test_job.connector_reports.count(),
-                        "all connector reports must be there",
-                    )
-                    self.assertEqual(
-                        connectors_stats["all"],
-                        connectors_stats["success"],
-                        msg="all `connector_reports` status must be `SUCCESS`.",
-                    )
-                    print(
-                        f"[END] -----{self.__class__.__name__}.test_start_analyzers----"
-                    )
-                    return True
-        # the test should not reach here
-        self.fail("test timed out")
+        poll_result = PollingFunction(self, function_name="start_analyzers")
+        return poll_result
 
 
 class _ObservableAnalyzersScriptsTestCase(_AbstractAnalyzersScriptTestCase):
-
     # define runtime configs
     runtime_configuration = {
         "Triage_Search": {
@@ -208,7 +132,6 @@ class _ObservableAnalyzersScriptsTestCase(_AbstractAnalyzersScriptTestCase):
 
 
 class _FileAnalyzersScriptsTestCase(_AbstractAnalyzersScriptTestCase):
-
     # define runtime configs
     runtime_configuration = {
         "VirusTotal_v2_Scan_File": {"wait_for_scan_anyway": True, "max_tries": 1},

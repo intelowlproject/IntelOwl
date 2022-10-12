@@ -12,6 +12,10 @@ INTELOWL_WEB_CLIENT_DOMAIN=localhost
 # Storage
 LOCAL_STORAGE=True
 
+# OAuth2
+GOOGLE_CLIENT_ID=test_intelowl.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=the_supreme_secret
+
 # AWS
 AWS_STORAGE_BUCKET_NAME=
 AWS_IAM_ACCESS = False
@@ -119,3 +123,6 @@ COVERAGE_PROCESS_START=.coveragerc
 
 # broker configuration
 BROKER_URL=amqp://guest:guest@rabbitmq:5672
+
+# Playbooks
+TEST_PLAYBOOK=FREE_TO_USE_ANALYZERS

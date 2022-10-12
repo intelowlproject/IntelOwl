@@ -11,6 +11,7 @@ import {
 import { TLP_CHOICES } from "../../../constants";
 import { markdownToHtml, TLPTag } from "../../common";
 import {
+  OrganizationPluginStateToggle,
   PluginHealthCheckButton,
   PluginInfoPopoverIcon,
   PluginVerificationIcon,
@@ -41,6 +42,10 @@ const pluginTableColumns = [
     disableSortBy: true,
     maxWidth: 115,
   },
+];
+
+const analyzersTableColumns = [
+  ...pluginTableColumns,
   {
     Header: "Configured",
     id: "configured",
@@ -56,10 +61,20 @@ const pluginTableColumns = [
     disableSortBy: true,
     maxWidth: 115,
   },
-];
-
-const analyzersTableColumns = [
-  ...pluginTableColumns,
+  {
+    Header: "Enabled for organization",
+    id: "enabled_for_organization",
+    Cell: ({ row: { original } }) => (
+      <OrganizationPluginStateToggle
+        pluginName={original?.name}
+        disabled={original?.orgPluginDisabled}
+        refetch={original?.refetch}
+        type={original?.plugin_type}
+      />
+    ),
+    disableSortBy: true,
+    maxWidth: 115,
+  },
   {
     Header: "Description",
     id: "description",
@@ -140,6 +155,21 @@ const analyzersTableColumns = [
 const connectorTableColumns = [
   ...pluginTableColumns,
   {
+    Header: "Configured",
+    id: "configured",
+    accessor: "verification.configured",
+    Cell: ({ row: { original } }) => (
+      <PluginVerificationIcon
+        pluginName={original?.name}
+        verification={original?.verification}
+      />
+    ),
+    Filter: SelectOptionsFilter,
+    selectOptions: ["true", "false"],
+    disableSortBy: true,
+    maxWidth: 115,
+  },
+  {
     Header: "Description",
     id: "description",
     accessor: "description",
@@ -170,4 +200,26 @@ const connectorTableColumns = [
   },
 ];
 
-export { analyzersTableColumns, connectorTableColumns };
+const playbookTableColumns = [
+  ...pluginTableColumns,
+  {
+    Header: "Description",
+    id: "description",
+    accessor: "description",
+    Cell: ({ value }) => <span>{markdownToHtml(value)}</span>,
+    disableSortBy: true,
+    Filter: DefaultColumnFilter,
+    minWidth: 300,
+  },
+  {
+    Header: "Supports",
+    id: "supports",
+    accessor: "supports",
+    Cell: ({ value }) => <code>{JSON.stringify(value, null, 2)}</code>,
+    disableSortBy: true,
+    Filter: DefaultColumnFilter,
+    minWidth: 250,
+  },
+];
+
+export { analyzersTableColumns, connectorTableColumns, playbookTableColumns };

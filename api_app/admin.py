@@ -3,7 +3,7 @@
 
 from django.contrib import admin
 
-from .models import Job, Tag
+from .models import Job, PluginConfig, Tag
 
 
 @admin.register(Job)
@@ -34,3 +34,17 @@ class JobAdminView(admin.ModelAdmin):
 class TagAdminView(admin.ModelAdmin):
     list_display = ("id", "label", "color")
     search_fields = ("label", "color")
+
+
+@admin.register(PluginConfig)
+class PluginCredentialAdminView(admin.ModelAdmin):
+    list_display = ("id", "type", "attribute", "plugin_name", "config_type")
+    search_fields = (
+        "attribute",
+        "plugin_name",
+    )
+    list_filter = (
+        "config_type",
+        "type",
+        "plugin_name",
+    )

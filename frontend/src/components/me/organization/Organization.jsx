@@ -1,9 +1,10 @@
 import React, { Suspense } from "react";
 import { SiMinutemailer } from "react-icons/si";
-import { BsPeopleFill } from "react-icons/bs";
+import { BsPeopleFill, BsSliders } from "react-icons/bs";
 
 import { RouterTabs, FallBackLoading } from "@certego/certego-ui";
 import { Container } from "reactstrap";
+import OrgConfig from "./OrgConfig";
 
 const MyOrgPage = React.lazy(() => import("./MyOrgPage"));
 const InvitationsList = React.lazy(() => import("./InvitationsList"));
@@ -21,6 +22,21 @@ const routes = [
     Component: () => (
       <Suspense fallback={<FallBackLoading />}>
         <MyOrgPage />
+      </Suspense>
+    ),
+  },
+  {
+    key: "organization-config",
+    location: "config",
+    Title: () => (
+      <span>
+        <BsSliders className="me-2" />
+        Organization Config
+      </span>
+    ),
+    Component: () => (
+      <Suspense fallback={<FallBackLoading />}>
+        <OrgConfig />
       </Suspense>
     ),
   },

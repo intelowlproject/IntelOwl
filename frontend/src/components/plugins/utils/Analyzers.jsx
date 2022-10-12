@@ -21,6 +21,7 @@ export default function Analyzers() {
       heading="Analyzers"
       stateSelector={stateSelector}
       columns={analyzersTableColumns}
+      type={1}
     />
   );
 }

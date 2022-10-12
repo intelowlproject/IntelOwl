@@ -100,6 +100,18 @@ In the `env_file_app`, configure different variables as explained below.
 * `DJANGO_SECRET`: random 50 chars key, must be unique. If you do not provide one, Intel Owl will automatically set a new secret on every run.
 * `INTELOWL_WEB_CLIENT_DOMAIN` (example: `localhost`/`mywebsite.com`): the web domain of your instance, this is used for generating links to analysis results.
 
+**Optional configuration**:
+* `OLD_JOBS_RETENTION_DAYS`: Database retention for analysis results (default: 3 days). Change this if you want to keep your old analysis longer in the database.
+
+### Deprecated environment configuration
+The following variables are related to the specific services integrated in IntelOwl.
+They are deprecated and will be removed in the future: the new way to configure plugin secrets is to use the `Plugin Secrets` page in the GUI.
+This change not only promotes a better user experience and overall security, but allows to configure these secrets at either user or org level instead of globally.
+
+If you had previously specified any variables in the environment, IntelOwl will migrate those variables for you once you update the software to the v4.1.0 and restart the containers.
+(Under the hood IntelOwl runs `docker exec -ti intelowl_uwsgi python3 manage.py migrate_secrets`). Then you can remove those secrets from the env file.
+
+```text
 **Optional** variables needed to enable specific analyzers:
 * `ABUSEIPDB_KEY`: AbuseIPDB API key
 * `AUTH0_KEY`: Auth0 API Key
@@ -153,9 +165,7 @@ In the `env_file_app`, configure different variables as explained below.
 * `CONNECTOR_YETI_KEY`: your own YETI instance key to use with `YETI` connector
 * `CONNECTOR_YETI_URL`: your own YETI instance API URL to use with `YETI` connector
 
-**Advanced** additional configuration:
-* `OLD_JOBS_RETENTION_DAYS`: Database retention for analysis results (default: 3 days). Change this if you want to keep your old analysis longer in the database.
-
+```
 ### Database configuration (required)
 In the `env_file_postgres`, configure different variables as explained below.
 

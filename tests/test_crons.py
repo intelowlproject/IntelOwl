@@ -32,12 +32,17 @@ class CronTests(TestCase):
             db_file_path = maxmind.Maxmind.updater({}, db)
             self.assertTrue(os.path.exists(db_file_path))
 
-    @if_mock_connections(patch("requests.get", return_value=MockResponse({}, 200)))
+    @if_mock_connections(
+        patch("requests.get", return_value=MockResponse({}, 200, text="91.192.100.61"))
+    )
     def test_talos_updater(self, mock_get=None):
         db_file_path = talos.Talos.updater()
         self.assertTrue(os.path.exists(db_file_path))
 
-    def test_tor_updater(self):
+    @if_mock_connections(
+        patch("requests.get", return_value=MockResponse({}, 200, text="93.95.230.253"))
+    )
+    def test_tor_updater(self, mock_get=None):
         db_file_path = tor.Tor.updater()
         self.assertTrue(os.path.exists(db_file_path))
 

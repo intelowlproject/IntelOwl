@@ -9,24 +9,36 @@ import { JobInfoCard, JobIsRunningAlert, JobActionsBar } from "./sections";
 import { StatusIcon } from "../../../common";
 
 export default function JobOverview({ isRunningJob, job, refetch }) {
+  let AnalyzerDenominator = job.analyzers_requested?.length || "all";
+  let ConnectorDenominator = job.connectors_requested?.length;
+
+  if (job.playbooks_to_execute?.length > 0) {
+    AnalyzerDenominator = job.analyzers_to_execute?.length;
+    if (job.connectors_to_execute?.length === 0) {
+      ConnectorDenominator = "None";
+    } else {
+      ConnectorDenominator = job.connectors_to_execute?.length;
+    }
+  }
+
   const tabTitles = React.useMemo(
     () => [
       <div className="d-flex-center">
         <strong>Analyzers Report</strong>
         <Badge className="ms-2">
           {job.analyzers_to_execute?.length} /&nbsp;
-          {job.analyzers_requested?.length || "all"}
+          {AnalyzerDenominator}
         </Badge>
       </div>,
       <div className="d-flex-center">
         <strong>Connectors Report</strong>
         <Badge className="ms-2">
           {job.connectors_to_execute?.length} /&nbsp;
-          {job.connectors_requested?.length || "all"}
+          {ConnectorDenominator}
         </Badge>
       </div>,
     ],
-    [job]
+    [job, AnalyzerDenominator, ConnectorDenominator]
   );
   const tabRenderables = React.useMemo(
     () => [

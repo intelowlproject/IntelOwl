@@ -1,4 +1,7 @@
+import axios from "axios";
 import React from "react";
+import { AiOutlineInfoCircle } from "react-icons/ai";
+import { useSearchParams } from "react-router-dom";
 import {
   FormGroup,
   Label,
@@ -6,11 +9,14 @@ import {
   Input,
   Spinner,
   Button,
+  Row,
+  Tooltip,
 } from "reactstrap";
 import { Form, Formik } from "formik";
 import useTitle from "react-use/lib/useTitle";
 
-import { ContentSection } from "@certego/certego-ui";
+import { addToast, ContentSection } from "@certego/certego-ui";
+import { AUTH_BASE_URI } from "../../constants/api";
 
 import { PUBLIC_URL } from "../../constants/environment";
 import { useAuthStore } from "../../stores";
@@ -36,6 +42,8 @@ const onValidate = (values) => {
 export default function Login() {
   console.debug("Login rendered!");
 
+  const [isOpen, setIsOpen] = React.useState(false);
+
   // page title
   useTitle("IntelOwl | Login", { restoreOnUnmount: true });
 
@@ -46,6 +54,8 @@ export default function Login() {
   const loginUser = useAuthStore(
     React.useCallback((s) => s.service.loginUser, [])
   );
+
+  const updateToken = useAuthStore(React.useCallback((s) => s.updateToken, []));
 
   // callbacks
   const onSubmit = React.useCallback(
@@ -59,6 +69,9 @@ export default function Login() {
     [loginUser]
   );
 
+  const [searchParams] = useSearchParams();
+  if (searchParams.get("token")) updateToken(searchParams.get("token"));
+
   return (
     <ContentSection className="bg-body">
       <Container className="col-12 col-lg-8 col-xl-4">
@@ -70,7 +83,59 @@ export default function Login() {
           />
         </div>
         <ContentSection>
-          <h3 className="fw-bold">Log In</h3>
+          <Row>
+            <h3 className="fw-bold col-auto me-auto mt-2">Log In</h3>
+            <div className="col-auto">
+              <a
+                href={`${AUTH_BASE_URI}/google`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  const url = `${AUTH_BASE_URI}/google`;
+                  axios
+                    .get(`${url}?no_redirect=true`)
+                    .then(() => {
+                      window.location = url;
+                    })
+                    .catch((error) => {
+                      if (
+                        error?.response?.status === 401 &&
+                        error.parsedMsg.includes("OAuth is not configured.")
+                      )
+                        addToast(
+                          "Login failed!",
+                          "OAuth is not configured. " +
+                            "Check documentation to set it up.",
+                          "danger",
+                          true
+                        );
+                      else throw error;
+                    });
+                }}
+              >
+                <img
+                  src={`${PUBLIC_URL}/google-logo.svg`}
+                  alt="Google Logo"
+                  className="img-fluid"
+                />
+              </a>
+              <AiOutlineInfoCircle
+                style={{ "vertical-align": "top" }}
+                id="GoogleInfoTooltip"
+                cursor="pointer"
+              />
+              <Tooltip
+                placement="top"
+                isOpen={isOpen}
+                target="GoogleInfoTooltip"
+                toggle={() => {
+                  setIsOpen(!isOpen);
+                }}
+              >
+                Check the Authentication section in the documentation for
+                enabling Google Authentication.
+              </Tooltip>
+            </div>
+          </Row>
           <hr />
           {/* Form */}
           <Formik

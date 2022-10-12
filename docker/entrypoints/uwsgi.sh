@@ -14,12 +14,13 @@ python manage.py makemigrations durin
 python manage.py migrate
 
 # Collect static files
-python manage.py collectstatic --noinput  
+python manage.py collectstatic --noinput
 echo "------------------------------"
 echo "DEBUG: " $DEBUG
 echo "DJANGO_TEST_SERVER: " $DJANGO_TEST_SERVER
 echo "------------------------------"
 CHANGELOG_NOTIFICATION_COMMAND='python manage.py changelog_notification .github/CHANGELOG.md INTELOWL --number-of-releases 3'
+python manage.py migrate_secrets
 
 if [[ $DEBUG == "True" ]] && [[ $DJANGO_TEST_SERVER == "True" ]];
 then

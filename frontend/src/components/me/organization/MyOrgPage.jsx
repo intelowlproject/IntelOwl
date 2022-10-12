@@ -21,6 +21,7 @@ export default function MyOrgPage() {
     error: respErr,
     organization,
     fetchAll,
+    noOrg,
   } = useOrganizationStore(
     React.useCallback(
       (state) => ({
@@ -28,6 +29,7 @@ export default function MyOrgPage() {
         error: state.error,
         organization: state.organization,
         fetchAll: state.fetchAll,
+        noOrg: state.noOrg,
       }),
       []
     )
@@ -35,10 +37,10 @@ export default function MyOrgPage() {
 
   // on component mount
   React.useEffect(() => {
-    if (Object.keys(organization).length === 0) {
+    if (Object.keys(organization).length === 0 && !noOrg) {
       fetchAll();
     }
-  }, [organization, fetchAll]);
+  }, [organization, fetchAll, noOrg]);
 
   // page title
   useTitle(

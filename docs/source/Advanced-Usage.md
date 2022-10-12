@@ -4,7 +4,7 @@ This page includes details about some advanced features that Intel Owl provides 
 
 - [Advanced Usage](#advanced-usage)
   - [Optional Analyzers](#optional-analyzers)
-  - [Customize analyzer execution at time of request](#customize-analyzer-execution-at-time-of-request)
+  - [Customize analyzer execution](#customize-analyzer-execution)
     - [View and understand different parameters](#view-and-understand-different-parameters)
     - [from the GUI](#from-the-gui)
     - [from Pyintelowl](#from-pyintelowl)
@@ -16,6 +16,7 @@ This page includes details about some advanced features that Intel Owl provides 
     - [Kibana](#kibana)
     - [Example Configuration](#example-configuration)
   - [Authentication options](#authentication-options)
+    - [OAuth support](#google-oauth2)
     - [LDAP](#ldap)
     - [RADIUS](#radius-authentication)
   - [Google Kubernetes Engine deployment](#google-kubernetes-engine-deployment)
@@ -120,16 +121,16 @@ Otherwise you can enable just one of the cited integration by using the related 
 python3 start.py prod --tor_analyzers up
 ```
 
-## Customize analyzer execution at time of request
+## Customize analyzer execution
 
 Some analyzers and connectors provide the chance to customize the performed analysis based on parameters (`params` attr in the configuration file) that are different for each analyzer.
 
-- You can set a custom default values by changing their `value` attribute directly from the configuration files.
+- You can set a custom default values by changing their `value` attribute directly from the configuration files. Since IntelOwl v4, it is possible to change these values directly from the GUI in the section "Your plugin configuration".
 - You can choose to provide runtime configuration when requesting an analysis that will be merged with the default overriding it. This override is done only for the specific analysis.
 
 <div class="admonition info">
 <p class="admonition-title">Info</p>
-Connectors parameters can only be changed from it's configuration file, not at the time of analysis request.
+Connectors parameters can only be changed from either their configuration file or the "Your plugin configuration" section, not at the time of analysis request.
 </div>
 
 ##### View and understand different parameters
@@ -210,11 +211,17 @@ Jobs with either AMBER or RED TLP value will be accessible to only members withi
 
 ## Notifications
 
-IntelOwl integrated the notification system from the certego_saas package, allowing the admins to create notification that every user will be able to see.
+Since v4, IntelOwl integrated the notification system from the `certego_saas` package, allowing the admins to create notification that every user will be able to see.
 
-It is possible to create a new notification from the django admin interface:
-in body it is possible to even use html syntax, allowing to embed images, links, etc;
-in the app_name field, please remember to use `intelowl` as the app name.
+The user would find the Notifications button on the top right of the page:
+
+<img style="border: 0.2px solid black" width=220 height=210 src="https://raw.githubusercontent.com/intelowlproject/IntelOwl/master/docs/static/notifications.png">
+
+There the user can read notifications provided by either the administrators or the IntelOwl Maintainers.
+
+As an Admin, if you want to add a notification to have it sent to all the users, you have to login to the Django Admin interface, go to the "Notifications" section and add it there.
+While adding a new notification, in the `body` section it is possible to even use HTML syntax, allowing to embed images, links, etc;
+in the `app_name field`, please remember to use `intelowl` as the app name.
 
 Everytime a new release is installed, once the backend goes up it will automatically create a new notification,
 having as content the latest changes described in the [CHANGELOG.md](https://github.com/intelowlproject/IntelOwl/blob/master/.github/CHANGELOG.md),
@@ -249,8 +256,19 @@ This will build and populate all existing job objects into the `jobs` index.
 
 IntelOwl provides support for some of the most common authentication methods:
 
+- Google Oauth2
 - LDAP
-- GSuite (work in progress)
+- RADIUS
+
+#### Google OAuth2
+
+The first step is to create a [Google Cloud Platform](https://cloud.google.com/resource-manager/docs/creating-managing-projects) project, and then [create OAuth credentials for it](https://developers.google.com/workspace/guides/create-credentials#oauth-client-id).
+
+After that, specify the client ID and secret as `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` environment variables.
+
+> Note: While configuring Google Auth2 you can choose either to enable access to the all users with a Google Account ("External" mode) or to enable access to only the users of your organization ("Internal" mode).
+> 
+> [Reference](https://support.google.com/cloud/answer/10311615#user-type&zippy=%2Cinternal%2Cexternal)
 
 #### LDAP
 
@@ -279,6 +297,7 @@ How to configure and enable RADIUS authentication on Intel Owl?
 
 2. Once you have done that, you have to set the environment variable `RADIUS_AUTH_ENABLED` as `True` in the environment
    configuration file `env_file_app`. Finally, you can restart the application with `docker-compose up`
+
 
 ## Google Kubernetes Engine deployment
 
@@ -357,3 +376,4 @@ If you prefer to use S3 to store the samples, instead of a local storage, you ca
 First, you need to configure the environment variable `LOCAL_STORAGE` to `False` to enable it and set `AWS_STORAGE_BUCKET_NAME` to the proper AWS bucket.
 Then you have to add some credentials for AWS: if you have IntelOwl deployed on the AWS infrastructure, you can use IAM credentials:
 to allow that just set `AWS_IAM_ACCESS` to `True`. If that is not the case, you have to set both `AWS_ACESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`
+

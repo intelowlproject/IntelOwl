@@ -14,7 +14,7 @@ const JobResult = React.lazy(() => import("./jobs/result/JobResult"));
 const PluginsContainer = React.lazy(() => import("./plugins/PluginsContainer"));
 const Dashboard = React.lazy(() => import("./dashboard/Dashboard"));
 const ScanForm = React.lazy(() => import("./scan/ScanForm"));
-
+const UserConfig = React.lazy(() => import("./me/config/UserConfig"));
 /*
 lazy imports to enable code splitting
 */
@@ -66,6 +66,15 @@ const authRoutesLazy = [
     element: (
       <Suspense fallback={<FallBackLoading />}>
         <Organization />
+      </Suspense>
+    ),
+  },
+  /* CustomConfig */
+  {
+    path: "/me/config/*",
+    element: (
+      <Suspense fallback={<FallBackLoading />}>
+        <UserConfig />
       </Suspense>
     ),
   },

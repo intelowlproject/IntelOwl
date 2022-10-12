@@ -9,6 +9,7 @@ export const ANALYZE_MULTIPLE_FILES_URI = `${API_BASE_URI}/analyze_multiple_file
 export const ANALYZE_MULTIPLE_OBSERVABLE_URI = `${API_BASE_URI}/analyze_multiple_observables`;
 export const ANALYZERS_CONFIG_URI = `${API_BASE_URI}/get_analyzer_configs`;
 export const CONNECTORS_CONFIG_URI = `${API_BASE_URI}/get_connector_configs`;
+export const PLAYBOOKS_CONFIG_URI = `${API_BASE_URI}/get_playbook_configs`;
 
 export const JOB_AGG_STATUS_URI = `${JOB_BASE_URI}/aggregate/status`;
 export const JOB_AGG_TYPE_URI = `${JOB_BASE_URI}/aggregate/type`;
@@ -19,10 +20,12 @@ export const JOB_AGG_FILE_NAME_URI = `${JOB_BASE_URI}/aggregate/file_name`;
 
 // user
 export const USERACCESS_URI = `${API_BASE_URI}/me/access`;
+export const PLUGIN_CONFIG_URI = `${API_BASE_URI}/plugin-config`;
 
 // org
 export const BASE_URI_ORG = `${API_BASE_URI}/me/organization`;
 export const BASE_URI_INVITATION = `${API_BASE_URI}/me/invitations`;
+export const ORG_PLUGIN_DISABLE_URI = `${API_BASE_URI}/plugin-disable`;
 
 // notifications
 export const NOTIFICATION_BASE_URI = `${API_BASE_URI}/notification`;

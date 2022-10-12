@@ -9,4 +9,5 @@ class ApiAppConfig(AppConfig):
 
     def ready(self):
         # flake8: noqa
-        from api_app.authentication.views import DurinAuthenticationScheme
+        import api_app.signals
+        from authentication.views import DurinAuthenticationScheme

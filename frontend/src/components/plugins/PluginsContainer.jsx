@@ -1,11 +1,20 @@
 import React, { Suspense } from "react";
 import { AiOutlineApi } from "react-icons/ai";
+import { BsPeopleFill, BsSliders } from "react-icons/bs";
 import { TiFlowChildren } from "react-icons/ti";
 
-import { RouterTabs, FallBackLoading } from "@certego/certego-ui";
+import {
+  RouterTabs,
+  FallBackLoading,
+  ContentSection,
+} from "@certego/certego-ui";
+import { Link } from "react-router-dom";
+import { Button, Col } from "reactstrap";
+import { useOrganizationStore } from "../../stores";
 
 const Analyzers = React.lazy(() => import("./utils/Analyzers"));
 const Connectors = React.lazy(() => import("./utils/Connectors"));
+const Playbooks = React.lazy(() => import("./utils/Playbooks"));
 
 const routes = [
   {
@@ -38,10 +47,78 @@ const routes = [
       </Suspense>
     ),
   },
+  {
+    key: "plugins-playbooks",
+    location: "playbooks",
+    Title: () => (
+      <span>
+        <TiFlowChildren />
+        &nbsp;Playbooks
+      </span>
+    ),
+    Component: () => (
+      <Suspense fallback={<FallBackLoading />}>
+        <Playbooks />
+      </Suspense>
+    ),
+  },
 ];
 
 export default function PluginsContainer() {
   console.debug("PluginsContainer rendered!");
+  const {
+    isUserOwner,
+    organization,
+    fetchAll: fetchAllOrganizations,
+  } = useOrganizationStore(
+    React.useCallback(
+      (state) => ({
+        isUserOwner: state.isUserOwner,
+        fetchAll: state.fetchAll,
+        organization: state.organization,
+      }),
+      []
+    )
+  );
 
-  return <RouterTabs routes={routes} />;
+  // on component mount
+  React.useEffect(() => {
+    if (!isUserOwner) {
+      fetchAllOrganizations();
+    }
+  }, [isUserOwner, fetchAllOrganizations]);
+  const configButtons = (
+    <Col className="d-flex justify-content-end">
+      <ContentSection className="d-inline-flex mb-0 py-0">
+        {organization?.name ? (
+          <Link
+            className="d-flex"
+            to="/me/organization/config"
+            style={{ color: "inherit", textDecoration: "inherit" }}
+          >
+            <Button
+              size="sm"
+              color="darker"
+              onClick={() => null}
+              className="me-2"
+            >
+              <BsPeopleFill className="me-2" /> Organization {organization.name}
+              &apos;s plugin config
+            </Button>
+          </Link>
+        ) : null}
+        <Link
+          className="d-flex"
+          to="/me/config"
+          style={{ color: "inherit", textDecoration: "inherit" }}
+        >
+          <Button size="sm" color="darker" onClick={() => null}>
+            <BsSliders className="me-2" />
+            Your plugin config
+          </Button>
+        </Link>
+      </ContentSection>
+    </Col>
+  );
+  return <RouterTabs routes={routes} extraNavComponent={configButtons} />;
 }

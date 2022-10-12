@@ -1,5 +1,6 @@
 import React from "react";
 import { BsFillTrashFill, BsFillPlusCircleFill } from "react-icons/bs";
+import { MdEdit } from "react-icons/md";
 import {
   FormFeedback,
   FormGroup,
@@ -15,13 +16,13 @@ import {
 import { useNavigate } from "react-router-dom";
 import { ErrorMessage, Field, Form, Formik, FieldArray } from "formik";
 import useTitle from "react-use/lib/useTitle";
-import { MdEdit } from "react-icons/md";
 
 import {
   ContentSection,
   IconButton,
   Loader,
   MultiSelectDropdownInput,
+  addToast,
 } from "@certego/certego-ui";
 
 import { useQuotaBadge } from "../../hooks";
@@ -31,6 +32,7 @@ import {
   TLP_DESCRIPTION_MAP,
   OBSERVABLE_TYPES,
   ALL_CLASSIFICATIONS,
+  scanTypes,
 } from "../../constants";
 import { TLPTag, markdownToHtml } from "../common";
 import {
@@ -38,7 +40,7 @@ import {
   RecentScans,
   TagSelectInput,
 } from "./utils";
-import { createJob } from "./api";
+import { createJob, createPlaybookJob } from "./api";
 
 // constants
 const groupAnalyzers = (analyzersList) => {
@@ -60,12 +62,40 @@ const groupAnalyzers = (analyzersList) => {
   });
   return grouped;
 };
+
+const groupPlaybooks = (playbooksList) => {
+  const grouped = {
+    ip: [],
+    hash: [],
+    domain: [],
+    url: [],
+    generic: [],
+    file: [],
+  };
+
+  playbooksList.forEach((obj) => {
+    // filter on basis of type
+    if (obj.supports.includes("file")) {
+      grouped.file.push(obj);
+    }
+
+    obj.supports.forEach((clsfn) => {
+      if (clsfn !== "file") {
+        grouped[clsfn].push(obj);
+      }
+    });
+  });
+  return grouped;
+};
+
 const stateSelector = (state) => [
   state.loading,
   state.error,
   groupAnalyzers(state.analyzers),
   state.connectors,
+  groupPlaybooks(state.playbooks),
 ];
+
 const checkChoices = [
   {
     value: "check_all",
@@ -104,16 +134,19 @@ const observableType2PropsMap = {
     pattern: ".*",
   },
 };
+
 const initialValues = {
   classification: "ip",
   observable_names: [""],
   files: [],
   analyzers: [],
   connectors: [],
+  playbooks: [],
   tlp: "WHITE",
   runtime_configuration: {},
   tags: [],
   check: "check_all",
+  analysisOptionValues: "Analyzers/Connectors",
 };
 
 // Component
@@ -124,6 +157,11 @@ export default function ScanForm() {
   const [classification, setClassification] = React.useState(
     initialValues.classification
   );
+
+  const [scanType, setScanType] = React.useState(
+    initialValues.analysisOptionValues
+  );
+
   const [isModalOpen, setModalOpen] = React.useState(false);
   const toggleModal = React.useCallback(
     () => setModalOpen((o) => !o),
@@ -141,14 +179,19 @@ export default function ScanForm() {
     useQuotaBadge();
 
   // API/ store
-  const [pluginsLoading, pluginsError, analyzersGrouped, connectors] =
-    usePluginConfigurationStore(stateSelector);
+  const [
+    pluginsLoading,
+    pluginsError,
+    analyzersGrouped,
+    connectors,
+    playbooksGrouped,
+  ] = usePluginConfigurationStore(stateSelector);
 
   const analyzersOptions = React.useMemo(
     () =>
       analyzersGrouped[classification]
         .map((v) => ({
-          isDisabled: !v.verification.configured,
+          isDisabled: !v.verification.configured || v.disabled,
           value: v.name,
           label: (
             <div className="d-flex justify-content-start align-items-start flex-column">
@@ -177,7 +220,7 @@ export default function ScanForm() {
     () =>
       connectors
         .map((v) => ({
-          isDisabled: !v.verification.configured,
+          isDisabled: !v.verification.configured || v.disabled,
           value: v.name,
           label: (
             <div className="d-flex justify-content-start align-items-start flex-column">
@@ -203,6 +246,30 @@ export default function ScanForm() {
     [connectors]
   );
 
+  const playbookOptions = React.useMemo(
+    () =>
+      playbooksGrouped[classification]
+        .map((v) => ({
+          value: v.name,
+          label: (
+            <div className="d-flex justify-content-start align-items-start flex-column">
+              <div className="d-flex justify-content-start align-items-baseline flex-column">
+                <div>{v.name}&nbsp;</div>
+                <div className="small text-left text-muted">
+                  {markdownToHtml(v.description)}
+                </div>
+              </div>
+            </div>
+          ),
+          labelDisplay: v.name,
+        }))
+        .sort((a, b) =>
+          // eslint-disable-next-line no-nested-ternary
+          a.isDisabled === b.isDisabled ? 0 : a.isDisabled ? 1 : -1
+        ),
+    [playbooksGrouped, classification]
+  );
+
   // callbacks
   const onValidate = React.useCallback(
     (values) => {
@@ -211,6 +278,7 @@ export default function ScanForm() {
         errors.analyzers = pluginsError;
         errors.connectors = pluginsError;
       }
+
       if (values.classification === "file") {
         if (!values.files || values.files.length === 0) {
           errors.files = "required";
@@ -243,14 +311,94 @@ export default function ScanForm() {
     },
     [pluginsError]
   );
+
+  const ValidatePlaybooks = React.useCallback(
+    (values) => {
+      const errors = {};
+      if (pluginsError) {
+        errors.playbooks = pluginsError;
+      }
+      if (values.playbooks.length === 0) {
+        return `Please select a playbook!`;
+      }
+      if (values.classification === "file") {
+        if (!values.files) {
+          errors.files = "required";
+        }
+      } else if (values.observable_names && values.observable_names.length) {
+        // We iterate over observable_names and test each one against the regex pattern,
+        // storing the results (or null otherwise) in ObservableNamesErrors
+        const ObservableNamesErrors = values.observable_names.map(
+          (ObservableName) => {
+            const pattern = RegExp(
+              observableType2PropsMap[values.classification].pattern
+            );
+            if (!pattern.test(ObservableName)) {
+              return `invalid ${values.classification}`;
+            }
+            return null;
+          }
+        );
+
+        // We check if any of the ObservableNamesErrors is not null
+        if (ObservableNamesErrors.some((e) => e))
+          errors.observable_names = ObservableNamesErrors;
+      } else {
+        errors.no_observables = "Atleast one observable is required";
+      }
+
+      return errors;
+    },
+    [pluginsError]
+  );
+
+  const startPlaybooks = React.useCallback(
+    async (values) => {
+      const formValues = {
+        ...values,
+        tlp: values.tlp,
+        tags_labels: values.tags.map((optTag) => optTag.value.label),
+        playbooks: values.playbooks.map((x) => x.value),
+      };
+
+      const errors = ValidatePlaybooks(values);
+
+      if (Object.keys(errors).length !== 0) {
+        addToast("Failed!", JSON.stringify(errors), "danger");
+        return;
+      }
+
+      try {
+        const jobIds = await createPlaybookJob(formValues);
+
+        if (jobIds.length > 1) {
+          setTimeout(() => navigate(`/jobs/`), 1000);
+        } else {
+          setTimeout(() => navigate(`/jobs/${jobIds[0]}`), 1000);
+        }
+      } catch (e) {
+        // handled inside createPlaybookJob
+      } finally {
+        refetchQuota();
+      }
+    },
+    [navigate, refetchQuota, ValidatePlaybooks]
+  );
+
   const onSubmit = React.useCallback(
     async (values, formik) => {
+      if (values.analysisOptionValues === scanTypes.playbooks) {
+        startPlaybooks(values);
+        return;
+      }
+
       const formValues = {
         ...values,
         tags_labels: values.tags.map((optTag) => optTag.value.label),
         analyzers: values.analyzers.map((x) => x.value),
         connectors: values.connectors.map((x) => x.value),
       };
+
       try {
         const jobIds = await createJob(formValues);
         if (jobIds.length > 1) {
@@ -265,7 +413,7 @@ export default function ScanForm() {
         formik.setSubmitting(false);
       }
     },
-    [navigate, refetchQuota]
+    [navigate, refetchQuota, startPlaybooks]
   );
 
   return (
@@ -339,9 +487,11 @@ export default function ScanForm() {
                                       name={`observable_names.${index}`}
                                       className="input-dark"
                                       invalid={
-                                        formik.errors.observable_names &&
                                         Boolean(
-                                          formik.errors.observable_names[index]
+                                          formik.errors.observable_names &&
+                                            formik.errors.observable_names[
+                                              index
+                                            ]
                                         ) &&
                                         formik.touched.observable_names &&
                                         formik.touched.observable_names[index]
@@ -399,78 +549,168 @@ export default function ScanForm() {
                   </Col>
                 </FormGroup>
               )}
-              <FormGroup row>
-                <Label sm={3} for="analyzers">
-                  Select Analyzers
-                </Label>
-                <Col sm={9}>
-                  <Loader
-                    loading={pluginsLoading}
-                    error={pluginsError}
-                    render={() => (
-                      <>
-                        <MultiSelectDropdownInput
-                          options={analyzersOptions}
-                          value={formik.values.analyzers}
-                          onChange={(v) => formik.setFieldValue("analyzers", v)}
-                          // controlShouldRenderValue={false}
-                        />
-                        <FormText>
-                          Default: all configured analyzers are triggered.
-                        </FormText>
-                      </>
-                    )}
-                  />
-                  <ErrorMessage component={FormFeedback} name="analyzers" />
-                </Col>
-              </FormGroup>
-              <FormGroup row>
-                <Label sm={3} for="connectors">
-                  Select Connectors
-                </Label>
-                <Col sm={9}>
-                  {!(pluginsLoading || pluginsError) && (
-                    <>
-                      <MultiSelectDropdownInput
-                        options={connectorOptions}
-                        value={formik.values.connectors}
-                        onChange={(v) => formik.setFieldValue("connectors", v)}
+              <hr />
+              <FormGroup
+                className="d-flex justify-content-center"
+                style={{ marginTop: "10px" }}
+              >
+                {Object.values(scanTypes).map((type_) => (
+                  <FormGroup check inline key={`analysistype__${type_}`}>
+                    <Col>
+                      <Field
+                        as={Input}
+                        id={`analysistype__${type_}`}
+                        type="radio"
+                        name="analysisOptionValues"
+                        value={type_}
+                        onClick={() => {
+                          setScanType(type_);
+                          formik.setFieldValue("playbooks", []); // reset
+                        }}
                       />
-                      <FormText>
-                        Default: all configured connectors are triggered.
-                      </FormText>
-                    </>
-                  )}
-                  <ErrorMessage component={FormFeedback} name="connectors" />
-                </Col>
+                      <Label check>{type_}</Label>
+                    </Col>
+                  </FormGroup>
+                ))}
               </FormGroup>
+              {scanType === scanTypes.analyzers_and_connectors && (
+                <>
+                  <>
+                    <FormGroup row>
+                      <Label sm={3} for="analyzers">
+                        Select Analyzers
+                      </Label>
+                      <Col sm={9}>
+                        <Loader
+                          loading={pluginsLoading}
+                          error={pluginsError}
+                          render={() => (
+                            <>
+                              <MultiSelectDropdownInput
+                                options={analyzersOptions}
+                                value={formik.values.analyzers}
+                                onChange={(v) =>
+                                  formik.setFieldValue("analyzers", v)
+                                }
+                              />
+                              <FormText>
+                                Default: all configured analyzers are triggered.
+                              </FormText>
+                            </>
+                          )}
+                        />
+                        <ErrorMessage
+                          component={FormFeedback}
+                          name="analyzers"
+                        />
+                      </Col>
+                    </FormGroup>
+                    <FormGroup row>
+                      <Label sm={3} for="connectors">
+                        Select Connectors
+                      </Label>
+                      <Col sm={9}>
+                        {!(pluginsLoading || pluginsError) && (
+                          <>
+                            <MultiSelectDropdownInput
+                              options={connectorOptions}
+                              value={formik.values.connectors}
+                              onChange={(v) =>
+                                formik.setFieldValue("connectors", v)
+                              }
+                            />
+                            <FormText>
+                              Default: all configured connectors are triggered.
+                            </FormText>
+                          </>
+                        )}
+                        <ErrorMessage
+                          component={FormFeedback}
+                          name="connectors"
+                        />
+                      </Col>
+                    </FormGroup>
+                    <FormGroup row>
+                      <Label sm={3} for="scanform-runtimeconf-editbtn">
+                        Runtime Configuration
+                      </Label>
+                      <Col sm={9}>
+                        <IconButton
+                          id="scanform-runtimeconf-editbtn"
+                          Icon={MdEdit}
+                          title="Edit runtime configuration"
+                          titlePlacement="top"
+                          size="sm"
+                          color="tertiary"
+                          disabled={
+                            !(
+                              formik.values.analyzers.length > 0 ||
+                              formik.values.connectors.length > 0
+                            )
+                          }
+                          onClick={toggleModal}
+                        />
+                        {isModalOpen && (
+                          <RuntimeConfigurationModal
+                            isOpen={isModalOpen}
+                            toggle={toggleModal}
+                            formik={formik}
+                          />
+                        )}
+                      </Col>
+                    </FormGroup>
+                  </>
+                  <FormGroup row className="mt-2">
+                    <Label sm={3}>Extra configuration</Label>
+                    <Col sm={9}>
+                      {checkChoices.map((ch) => (
+                        <FormGroup check key={`checkchoice__${ch.value}`}>
+                          <Field
+                            as={Input}
+                            id={`checkchoice__${ch.value}`}
+                            type="radio"
+                            name="check"
+                            value={ch.value}
+                            onChange={formik.handleChange}
+                          />
+                          <Label check for={`checkchoice__${ch.value}`}>
+                            {ch.label}
+                          </Label>
+                        </FormGroup>
+                      ))}
+                    </Col>
+                  </FormGroup>
+                </>
+              )}
+              {scanType === scanTypes.playbooks && (
+                <FormGroup row>
+                  <Label sm={3} htmlFor="playbooks">
+                    Select Playbooks
+                  </Label>
+                  {!(pluginsLoading || pluginsError) && (
+                    <Col sm={9}>
+                      <MultiSelectDropdownInput
+                        options={playbookOptions}
+                        value={formik.values.playbooks}
+                        onChange={(v) => formik.setFieldValue("playbooks", v)}
+                      />
+                    </Col>
+                  )}
+                </FormGroup>
+              )}
+              <hr />
               <FormGroup row>
-                <Label sm={3} for="scanform-runtimeconf-editbtn">
-                  Runtime Configuration
+                <Label sm={3} id="scanform-tagselectinput">
+                  Tags
                 </Label>
                 <Col sm={9}>
-                  <IconButton
-                    id="scanform-runtimeconf-editbtn"
-                    Icon={MdEdit}
-                    title="Edit runtime configuration"
-                    titlePlacement="top"
-                    size="sm"
-                    color="tertiary"
-                    disabled={
-                      !(
-                        formik.values.analyzers.length > 0 ||
-                        formik.values.connectors.length > 0
-                      )
+                  <TagSelectInput
+                    id="scanform-tagselectinput"
+                    selectedTags={formik.values.tags}
+                    setSelectedTags={(v) =>
+                      formik.setFieldValue("tags", v, false)
                     }
-                    onClick={toggleModal}
                   />
-                  {isModalOpen && (
-                    <RuntimeConfigurationModal
-                      isOpen={isModalOpen}
-                      toggle={toggleModal}
-                      formik={formik}
-                    />
-                  )}
                 </Col>
               </FormGroup>
               <FormGroup row>
@@ -501,40 +741,7 @@ export default function ScanForm() {
                   <ErrorMessage component={FormFeedback} name="tlp" />
                 </Col>
               </FormGroup>
-              <FormGroup row>
-                <Label sm={3} id="scanform-tagselectinput">
-                  Tags
-                </Label>
-                <Col sm={9}>
-                  <TagSelectInput
-                    id="scanform-tagselectinput"
-                    selectedTags={formik.values.tags}
-                    setSelectedTags={(v) =>
-                      formik.setFieldValue("tags", v, false)
-                    }
-                  />
-                </Col>
-              </FormGroup>
-              <FormGroup row className="mt-2">
-                <Label sm={3}>Extra configuration</Label>
-                <Col sm={9}>
-                  {checkChoices.map((ch) => (
-                    <FormGroup check key={`checkchoice__${ch.value}`}>
-                      <Field
-                        as={Input}
-                        id={`checkchoice__${ch.value}`}
-                        type="radio"
-                        name="check"
-                        value={ch.value}
-                        onChange={formik.handleChange}
-                      />
-                      <Label check for={`checkchoice__${ch.value}`}>
-                        {ch.label}
-                      </Label>
-                    </FormGroup>
-                  ))}
-                </Col>
-              </FormGroup>
+
               <FormGroup row className="mt-2">
                 <Button
                   type="submit"

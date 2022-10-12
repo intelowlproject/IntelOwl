@@ -1,16 +1,129 @@
 import logging
+import time
 from abc import ABCMeta, abstractmethod
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.core.management import call_command
 from django.test import TestCase
 from rest_framework.test import APIClient
 
 from api_app.analyzers_manager.constants import ObservableTypes
 from api_app.core.models import AbstractReport
 from api_app.models import Job
-from intel_owl import settings
 
 User = get_user_model()
+
+
+def PollingFunction(self, function_name):
+    for i in range(0, int(self.TIMEOUT_SECONDS / self.SLEEP_SECONDS)):
+        time.sleep(self.SLEEP_SECONDS)
+        # reload test_job object
+        self.test_job.refresh_from_db()
+        status = self.test_job.status
+        analyzers_stats = self.test_job.get_analyzer_reports_stats()
+        connectors_stats = self.test_job.get_connector_reports_stats()
+        running_or_pending_analyzers = list(
+            self.test_job.analyzer_reports.filter(
+                status__in=[
+                    AbstractReport.Status.PENDING,
+                    AbstractReport.Status.RUNNING,
+                ]
+            ).values_list("name", flat=True)
+        )
+
+        running_or_pending_connectors = list(
+            self.test_job.connector_reports.filter(
+                status__in=[
+                    AbstractReport.Status.PENDING,
+                    AbstractReport.Status.RUNNING,
+                ]
+            ).values_list("name", flat=True)
+        )
+        print(
+            f"[REPORT] (poll #{i})",
+            f"\n>>> Job:{self.test_job.pk}, status:'{status}'",
+            f"\n>>> analyzer_reports:{analyzers_stats}",
+            f"\n>>> connector_reports:{connectors_stats} ",
+            f"\n>>> Running/Pending analyzers: {running_or_pending_analyzers}",
+            f"\n>>> Running/Pending connectors: {running_or_pending_connectors}",
+        )
+        condition = analyzers_stats["failed"] > 0 or connectors_stats["failed"] > 0
+        # fail immediately if any analyzer or connector failed
+        if function_name == "start_playbooks" and not running_or_pending_connectors:
+            condition = analyzers_stats["failed"] > 0
+
+        if condition:
+            failed_analyzers = [
+                (r.analyzer_name, r.errors)
+                for r in self.test_job.analyzer_reports.filter(
+                    status=AbstractReport.Status.FAILED
+                )
+            ]
+            failed_connectors = [
+                (r.connector_name, r.errors)
+                for r in self.test_job.connector_reports.filter(
+                    status=AbstractReport.Status.FAILED
+                )
+            ]
+            print(
+                f"\n>>> Failed analyzers: {failed_analyzers}",
+                f"\n>>> Failed connectors: {failed_connectors}",
+            )
+            if function_name != "start_playbooks":
+                self.fail()
+
+        # check analyzers status
+        if status not in [Job.Status.PENDING, Job.Status.RUNNING]:
+            if status == Job.Status.REPORTED_WITHOUT_FAILS:
+                self.assertEqual(
+                    status,
+                    Job.Status.REPORTED_WITHOUT_FAILS,
+                    msg="`test_job` status must be success",
+                )
+                self.assertEqual(
+                    analyzers_stats["all"],
+                    analyzers_stats["success"],
+                    msg="all `analyzer_reports` status must be `SUCCESS`",
+                )
+
+            elif function_name == "start_playbooks":
+                # it is expected for some
+                # analyzers to fail for the time being
+                # in running playbookstes
+                self.assertEqual(
+                    status,
+                    Job.Status.REPORTED_WITH_FAILS,
+                    msg="`test_job` status must be success with failed analyzers",
+                )
+
+            self.assertEqual(
+                len(self.test_job.analyzers_to_execute),
+                self.test_job.analyzer_reports.count(),
+                msg="all analyzer reports must be there",
+            )
+
+            if function_name == "start_playbooks" and not running_or_pending_connectors:
+                # since there are no connectors
+                # in FREE_TO_USE_ANALYZERS
+                return True
+
+            # check connectors status
+            if connectors_stats["all"] > 0 and connectors_stats["running"] == 0:
+                self.assertEqual(
+                    len(self.test_job.connectors_to_execute),
+                    self.test_job.connector_reports.count(),
+                    "all connector reports must be there",
+                )
+                self.assertEqual(
+                    connectors_stats["all"],
+                    connectors_stats["success"],
+                    msg="all `connector_reports` status must be `SUCCESS`.",
+                )
+                print(f"[END] -----{self.__class__.__name__}.{function_name}----")
+                return True
+    # the test should not reach here
+    self.fail("test timed out")
 
 
 def get_logger() -> logging.Logger:
@@ -26,9 +139,12 @@ class CustomAPITestCase(TestCase):
     @classmethod
     def setUpClass(cls):
         super(CustomAPITestCase, cls).setUpClass()
+        if User.objects.filter(username="test").exists():
+            User.objects.get(username="test").delete()
         cls.superuser = User.objects.create_superuser(
             username="test", email="test@intelowl.com", password="test"
         )
+        call_command("migrate_secrets")
 
     def setUp(self):
         super(CustomAPITestCase, self).setUp()

@@ -6,6 +6,8 @@ import json
 import logging
 import os
 import sys
+from abc import abstractmethod
+from copy import deepcopy
 from typing import List, Optional, TypedDict
 
 from cache_memoize import cache_memoize
@@ -75,7 +77,7 @@ class _SecretSerializer(rfs.Serializer):
 
 class AbstractConfigSerializer(rfs.Serializer):
     """
-    Abstract serializer for `analyzer_config.json` and `connector_config.json` files.
+    Abstract serializer for `analyzer_config.json` and `connector_config.json`.
     """
 
     # constants
@@ -95,6 +97,7 @@ class AbstractConfigSerializer(rfs.Serializer):
     params = rfs.DictField(child=_ParamSerializer())
     # automatically populated fields
     verification = rfs.SerializerMethodField()
+    extends = rfs.CharField(allow_blank=True, required=False)
 
     def is_valid(self, raise_exception=False):
         ret = super().is_valid(raise_exception=raise_exception)
@@ -102,14 +105,23 @@ class AbstractConfigSerializer(rfs.Serializer):
             self._is_valid_flag = True
         return ret
 
+    @abstractmethod
+    def _get_type(self):
+        raise NotImplementedError()
+
     def get_verification(self, raw_instance: dict) -> ConfigVerificationType:
         # raw instance because input is json and not django model object
         # get all missing secrets
-        secrets = raw_instance["secrets"]
+        secrets = raw_instance.get("secrets", {})
         missing_secrets = []
         for s_key, s_dict in secrets.items():
             # check if available in environment
-            secret_val = secrets_store.get_secret(s_dict["env_var_key"], default=None)
+            secret_val = secrets_store.get_secret(
+                s_key,
+                default=None,
+                plugin_type=self._get_type(),
+                plugin_name=raw_instance["name"],
+            )
             if not secret_val and s_dict["required"]:
                 missing_secrets.append(s_key)
 
@@ -163,6 +175,30 @@ class AbstractConfigSerializer(rfs.Serializer):
         return md5hash
 
     @classmethod
+    def _complete_config(
+        cls, config_dict: dict, plugin_name: str, visited: set
+    ) -> dict:
+        """
+        Completes config by parsing extends configs
+        """
+        if plugin_name in visited:
+            raise RuntimeError(f"Circular dependency detected in {cls} config")
+        visited.add(plugin_name)
+        result = config_dict[plugin_name]
+        if plugin_name not in config_dict:
+            raise RuntimeError(
+                f"Plugin {plugin_name} not found in {cls} config "
+                "but referenced in extends"
+            )
+        if "extends" in config_dict[plugin_name]:
+            parent_plugin = config_dict[plugin_name]["extends"]
+            result = deepcopy(cls._complete_config(config_dict, parent_plugin, visited))
+            for key in config_dict[plugin_name]:
+                if key != "extends":
+                    result[key] = config_dict[plugin_name][key]
+        return result
+
+    @classmethod
     @cache_memoize(
         timeout=sys.maxsize,
         args_rewrite=lambda cls: f"{cls.__name__}-{cls._md5_config_file()}",
@@ -173,6 +209,8 @@ class AbstractConfigSerializer(rfs.Serializer):
         This function is memoized for the md5sum of the JSON file.
         """
         config_dict = cls._read_config()
+        for plugin in config_dict:
+            config_dict[plugin] = cls._complete_config(config_dict, plugin, set())
         serializer_errors = {}
         for key, config in config_dict.items():
             new_config = {"name": key, **config}

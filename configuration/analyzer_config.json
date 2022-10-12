@@ -226,7 +226,7 @@
     ],
     "config": {
       "soft_time_limit": 400,
-      "queue": "default"
+      "queue": "local"
     },
     "secrets": {},
     "params": {}
@@ -475,7 +475,7 @@
     "docker_based": true,
     "config": {
       "soft_time_limit": 50,
-      "queue": "default"
+      "queue": "local"
     },
     "secrets": {},
     "params": {}
@@ -490,7 +490,7 @@
     "observable_supported": ["ip", "domain", "generic"],
     "config": {
       "soft_time_limit": 300,
-      "queue": "long"
+      "queue": "default"
     },
     "secrets": {},
     "params": {}
@@ -555,7 +555,7 @@
     "external_service": false,
     "config": {
       "soft_time_limit": 50,
-      "queue": "long"
+      "queue": "local"
     },
     "secrets": {},
     "params": {
@@ -641,7 +641,7 @@
     "leaks_info": false,
     "observable_supported": ["ip", "url", "domain", "hash", "generic"],
     "config": {
-      "soft_time_limit": 50,
+      "soft_time_limit": 300,
       "queue": "long"
     },
     "secrets": {
@@ -1057,7 +1057,7 @@
     "observable_supported": ["url", "domain", "ip", "generic", "hash"],
     "config": {
       "soft_time_limit": 60,
-      "queue": "long"
+      "queue": "default"
     },
     "secrets": {},
     "params": {}
@@ -1076,7 +1076,7 @@
     ],
     "config": {
       "soft_time_limit": 500,
-      "queue": "default"
+      "queue": "local"
     },
     "secrets": {},
     "params": {
@@ -1209,7 +1209,7 @@
   },
   "GreyNoise": {
     "type": "observable",
-    "python_module": "greynoise.GreyNoise",
+    "python_module": "greynoiseintel.GreyNoiseAnalyzer",
     "description": "scan an IP against the Greynoise API (requires API key)",
     "disabled": false,
     "external_service": true,
@@ -1236,7 +1236,7 @@
   },
   "GreyNoiseCommunity": {
     "type": "observable",
-    "python_module": "greynoise.GreyNoise",
+    "python_module": "greynoiseintel.GreyNoiseAnalyzer",
     "description": "scan an IP against the Community Greynoise API",
     "disabled": false,
     "external_service": true,
@@ -1258,27 +1258,6 @@
         "value": "v3",
         "type": "str",
         "description": "[GreyNoise Community API](https://docs.greynoise.io/docs/using-the-greynoise-community-api)"
-      }
-    }
-  },
-  "GreyNoiseAlpha": {
-    "type": "observable",
-    "python_module": "greynoise.GreyNoise",
-    "description": "scan an IP against the Alpha Greynoise API (no API key required)",
-    "disabled": true,
-    "external_service": true,
-    "leaks_info": false,
-    "observable_supported": ["ip"],
-    "secrets": {},
-    "config": {
-      "soft_time_limit": 30,
-      "queue": "default"
-    },
-    "params": {
-      "greynoise_api_version": {
-        "value": "v1",
-        "type": "str",
-        "description": "GreyNoise Alpha API"
       }
     }
   },
@@ -1330,7 +1309,7 @@
       "application/encrypted"
     ],
     "config": {
-      "soft_time_limit": 400,
+      "soft_time_limit": 40,
       "queue": "default"
     },
     "secrets": {},
@@ -1706,8 +1685,8 @@
     "docker_based": true,
     "supported_filetypes": ["application/x-dosexec"],
     "config": {
-      "soft_time_limit": 720,
-      "queue": "default"
+      "soft_time_limit": 180,
+      "queue": "local"
     },
     "secrets": {},
     "params": {}
@@ -1981,7 +1960,7 @@
     "leaks_info": true,
     "config": {
       "soft_time_limit": 400,
-      "queue": "default"
+      "queue": "long"
     },
     "secrets": {
       "api_key_name": {
@@ -2138,7 +2117,7 @@
     "observable_supported": ["domain", "ip"],
     "config": {
       "soft_time_limit": 60,
-      "queue": "long"
+      "queue": "default"
     },
     "secrets": {},
     "params": {
@@ -2210,7 +2189,7 @@
     "observable_supported": ["ip", "url", "domain", "generic"],
     "config": {
       "soft_time_limit": 100,
-      "queue": "long"
+      "queue": "default"
     },
     "secrets": {},
     "params": {}
@@ -2560,7 +2539,7 @@
     "supported_filetypes": ["text/rtf", "application/rtf"],
     "config": {
       "soft_time_limit": 30,
-      "queue": "default"
+      "queue": "local"
     },
     "secrets": {},
     "params": {}
@@ -2774,24 +2753,8 @@
     }
   },
   "Shodan_Search": {
-    "type": "observable",
-    "python_module": "shodan.Shodan",
+    "extends": "Shodan_Honeyscore",
     "description": "scan an IP against Shodan Search API",
-    "disabled": false,
-    "external_service": true,
-    "leaks_info": false,
-    "observable_supported": ["ip"],
-    "config": {
-      "soft_time_limit": 30,
-      "queue": "default"
-    },
-    "secrets": {
-      "api_key_name": {
-        "env_var_key": "SHODAN_KEY",
-        "description": "",
-        "required": true
-      }
-    },
     "params": {
       "shodan_analysis": {
         "value": "search",
@@ -3257,7 +3220,7 @@
     "observable_supported": ["domain"],
     "config": {
       "soft_time_limit": 720,
-      "queue": "default"
+      "queue": "long"
     },
     "secrets": {},
     "params": {
@@ -3297,7 +3260,7 @@
     "leaks_info": false,
     "observable_supported": ["hash", "url"],
     "config": {
-      "soft_time_limit": 300,
+      "soft_time_limit": 30,
       "queue": "default"
     },
     "secrets": {
@@ -3335,7 +3298,7 @@
     "observable_supported": ["url"],
     "config": {
       "soft_time_limit": 300,
-      "queue": "default"
+      "queue": "long"
     },
     "secrets": {
       "api_key_name": {
@@ -3509,7 +3472,7 @@
     "observable_supported": ["hash"],
     "config": {
       "soft_time_limit": 60,
-      "queue": "long"
+      "queue": "default"
     },
     "secrets": {
       "api_key_name": {
@@ -3623,7 +3586,7 @@
     "run_hash": true,
     "run_hash_type": "sha256",
     "config": {
-      "soft_time_limit": 40,
+      "soft_time_limit": 500,
       "queue": "default"
     },
     "secrets": {
@@ -3733,7 +3696,7 @@
     "leaks_info": false,
     "observable_supported": ["ip", "domain", "url", "hash"],
     "config": {
-      "soft_time_limit": 40,
+      "soft_time_limit": 500,
       "queue": "default"
     },
     "secrets": {
@@ -3918,7 +3881,7 @@
     ],
     "config": {
       "soft_time_limit": 30,
-      "queue": "default"
+      "queue": "local"
     },
     "secrets": {},
     "params": {
@@ -3938,7 +3901,7 @@
     "leaks_info": false,
     "config": {
       "soft_time_limit": 60,
-      "queue": "default"
+      "queue": "local"
     },
     "secrets": {},
     "params": {
@@ -4034,7 +3997,7 @@
     "leaks_info": false,
     "config": {
       "soft_time_limit": 60,
-      "queue": "default"
+      "queue": "local"
     },
     "secrets": {},
     "params": {
@@ -4059,7 +4022,7 @@
     "leaks_info": false,
     "config": {
       "soft_time_limit": 60,
-      "queue": "default"
+      "queue": "local"
     },
     "secrets": {},
     "params": {
@@ -4089,7 +4052,7 @@
     "leaks_info": false,
     "config": {
       "soft_time_limit": 60,
-      "queue": "default"
+      "queue": "local"
     },
     "secrets": {},
     "params": {
@@ -4309,7 +4272,7 @@
     "leaks_info": false,
     "config": {
       "soft_time_limit": 60,
-      "queue": "default"
+      "queue": "local"
     },
     "secrets": {},
     "params": {
@@ -4338,8 +4301,8 @@
     "leaks_info": false,
     "supported_filetypes": [],
     "config": {
-      "soft_time_limit": 30,
-      "queue": "default"
+      "soft_time_limit": 180,
+      "queue": "long"
     },
     "secrets": {
       "api_key_name": {
@@ -4382,7 +4345,7 @@
       "generic"
     ],
     "config": {
-      "soft_time_limit": 300,
+      "soft_time_limit": 30,
       "queue": "default"
     },
     "secrets": {},
@@ -4410,7 +4373,7 @@
       "hash"
     ],
     "config": {
-      "soft_time_limit": 300,
+      "soft_time_limit": 30,
       "queue": "default"
     },
     "secrets": {

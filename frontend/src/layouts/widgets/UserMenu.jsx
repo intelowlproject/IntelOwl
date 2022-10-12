@@ -5,7 +5,7 @@ import {
   DropdownMenu,
   DropdownItem,
 } from "reactstrap";
-import { BsPeopleFill } from "react-icons/bs";
+import { BsPeopleFill, BsSliders } from "react-icons/bs";
 import { FiLogOut } from "react-icons/fi";
 import { IoMdKey, IoMdSettings } from "react-icons/io";
 
@@ -42,6 +42,10 @@ export default function UserMenu(props) {
         {/* API Access/Sessions */}
         <DropdownNavLink to="/me/sessions">
           <IoMdKey className="me-2" /> API Access/ Sessions
+        </DropdownNavLink>
+        {/* Your plugin configuration */}
+        <DropdownNavLink to="/me/config">
+          <BsSliders className="me-2" /> Your plugin configuration
         </DropdownNavLink>
         <DropdownItem divider />
         <DropdownNavLink to="/logout">

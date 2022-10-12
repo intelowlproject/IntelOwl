@@ -16,9 +16,19 @@ from drf_spectacular.utils import inline_serializer
 from rest_framework import serializers as rfs
 from rest_framework import status, viewsets
 from rest_framework.decorators import action, api_view
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import (
+    MethodNotAllowed,
+    PermissionDenied,
+    ValidationError,
+)
+from rest_framework.request import Request
 from rest_framework.response import Response
 
+from api_app.serializers import (
+    PlaybookFileAnalysisSerializer,
+    PlaybookObservableAnalysisSerializer,
+)
+from certego_saas.apps.organization.membership import Membership
 from certego_saas.apps.organization.permissions import IsObjectOwnerOrSameOrgPermission
 from certego_saas.ext.helpers import cache_action_response, parse_humanized_range
 from certego_saas.ext.mixins import SerializerActionMixin
@@ -29,7 +39,7 @@ from .analyzers_manager import controller as analyzers_controller
 from .analyzers_manager.constants import ObservableTypes
 from .filters import JobFilter
 from .helpers import get_now
-from .models import TLP, Job, Status, Tag
+from .models import TLP, Job, OrganizationPluginState, PluginConfig, Status, Tag
 from .serializers import (
     AnalysisResponseSerializer,
     FileAnalysisSerializer,
@@ -37,6 +47,8 @@ from .serializers import (
     JobListSerializer,
     JobSerializer,
     ObservableAnalysisSerializer,
+    PlaybookAnalysisResponseSerializer,
+    PluginConfigSerializer,
     TagSerializer,
     multi_result_enveloper,
 )
@@ -48,8 +60,12 @@ def _multi_analysis_request(
     user,
     data: Union[QueryDict, dict],
     serializer_class: Union[
-        Type[ObservableAnalysisSerializer], Type[FileAnalysisSerializer]
+        Type[ObservableAnalysisSerializer],
+        Type[FileAnalysisSerializer],
+        Type[PlaybookObservableAnalysisSerializer],
+        Type[PlaybookFileAnalysisSerializer],
     ],
+    playbook_scan=False,
 ):
     """
     Prepare and send multiple observables for analysis
@@ -60,8 +76,16 @@ def _multi_analysis_request(
         f"Data:{data}."
     )
 
+    plugin_states = OrganizationPluginState.objects.none()
+    if user.has_membership():
+        plugin_states = OrganizationPluginState.objects.filter(
+            organization=user.membership.organization,
+        )
+
     # serialize request data and validate
-    serializer = serializer_class(data=data, many=True)
+    serializer = serializer_class(
+        data=data, many=True, context={"plugin_states": plugin_states}
+    )
     serializer.is_valid(raise_exception=True)
 
     serialized_data = serializer.validated_data
@@ -77,34 +101,79 @@ def _multi_analysis_request(
     logger.info(f"New Jobs added to queue <- {repr(jobs)}.")
 
     # Check if task is test or not
-    if settings.STAGE_CI:
+    if settings.STAGE_CI and not settings.FORCE_SCHEDULE_JOBS:
         logger.info("skipping analysis start cause we are in CI")
     else:
         # fire celery task
         for index, job in enumerate(jobs):
-            runtime_configuration = runtime_configurations[index]
-            celery_app.send_task(
-                "start_analyzers",
-                kwargs=dict(
-                    job_id=job.pk,
-                    analyzers_to_execute=job.analyzers_to_execute,
-                    runtime_configuration=runtime_configuration,
-                ),
-            )
+            # second critical change
+            runtime_configuration = {}
 
-    ser = AnalysisResponseSerializer(
-        data=[
-            {
-                "status": "accepted",
-                "job_id": job.pk,
-                "warnings": serialized_data[index]["warnings"],
-                "analyzers_running": job.analyzers_to_execute,
-                "connectors_running": job.connectors_to_execute,
-            }
+            for analyzer in job.analyzers_to_execute:
+                # Appending custom config to runtime configuration
+                config = PluginConfig.get_as_dict(
+                    user, PluginConfig.PluginType.ANALYZER, plugin_name=analyzer
+                ).get(analyzer, {})
+                if analyzer in runtime_configurations[index]:
+                    config |= runtime_configurations[index][analyzer]
+                if config:
+                    runtime_configuration[analyzer] = config
+            for connector in job.connectors_to_execute:
+                config = PluginConfig.get_as_dict(
+                    user, PluginConfig.PluginType.CONNECTOR, plugin_name=connector
+                ).get(connector, {})
+                if connector in runtime_configurations[index]:
+                    config |= runtime_configurations[index][connector]
+                if config:
+                    runtime_configuration[connector] = config
+            logger.debug(f"New value of runtime_configuration: {runtime_configuration}")
+
+            if playbook_scan:
+                celery_app.send_task(
+                    "start_playbooks",
+                    kwargs=dict(
+                        job_id=job.pk,
+                        runtime_configuration=runtime_configuration,
+                    ),
+                )
+
+            else:
+                celery_app.send_task(
+                    "start_analyzers",
+                    kwargs=dict(
+                        job_id=job.pk,
+                        analyzers_to_execute=job.analyzers_to_execute,
+                        runtime_configuration=runtime_configuration,
+                    ),
+                )
+
+    data_ = [
+        {
+            "status": "accepted",
+            "job_id": job.pk,
+            "warnings": serialized_data[index]["warnings"],
+            "analyzers_running": job.analyzers_to_execute,
+            "connectors_running": job.connectors_to_execute,
+        }
+        for index, job in enumerate(jobs)
+    ]
+
+    if playbook_scan:
+        [
+            data_[index].update({"playbooks_running": job.playbooks_to_execute})
             for index, job in enumerate(jobs)
-        ],
-        many=True,
-    )
+        ]
+        ser = PlaybookAnalysisResponseSerializer(
+            data=data_,
+            many=True,
+        )
+
+    else:
+        ser = AnalysisResponseSerializer(
+            data=data_,
+            many=True,
+        )
+
     ser.is_valid(raise_exception=True)
 
     response_dict = {
@@ -250,6 +319,12 @@ def ask_multi_analysis_availability(request):
     )
 
 
+@add_docs(
+    description="This endpoint allows to start a Job related for a single File."
+    " Retained for retro-compatibility",
+    request=FileAnalysisSerializer,
+    responses={200: AnalysisResponseSerializer},
+)
 @api_view(["POST"])
 def analyze_file(request):
     try:
@@ -279,8 +354,20 @@ def analyze_file(request):
 
 
 @add_docs(
-    description="This endpoint allows to start Jobs related to multiple observables",
-    request=FileAnalysisSerializer,
+    description="This endpoint allows to start Jobs related to multiple Files",
+    # It should be better to link the doc to the related MultipleFileAnalysisSerializer.
+    # It is not straightforward because you can't just add a class
+    # which extends a ListSerializer.
+    # Follow this doc to try to find a fix:
+    # https://drf-spectacular.readthedocs.io/en/latest/customization.html#declare-serializer-magic-with-openapiserializerextension
+    request=inline_serializer(
+        name="MultipleFilesSerializer",
+        fields={
+            "files": rfs.ListField(child=rfs.FileField()),
+            "file_names": rfs.ListField(child=rfs.CharField()),
+            "file_mimetypes": rfs.ListField(child=rfs.CharField()),
+        },
+    ),
     responses={200: multi_result_enveloper(AnalysisResponseSerializer, True)},
 )
 @api_view(["POST"])
@@ -321,8 +408,17 @@ def analyze_observable(request):
 
 
 @add_docs(
-    description="This endpoint allows to start Jobs related to multiple observables",
-    request=ObservableAnalysisSerializer,
+    description="""This endpoint allows to start Jobs related to multiple observables.
+                 Observable parameter must be composed like this:
+                 [(<observable_classification>, <observable_name>), ...]""",
+    request=inline_serializer(
+        name="MultipleObservableSerializer",
+        fields={
+            "observables": rfs.ListField(
+                child=rfs.ListField(max_length=2, min_length=2)
+            )
+        },
+    ),
     responses={200: multi_result_enveloper(AnalysisResponseSerializer, True)},
 )
 @api_view(["POST"])
@@ -574,3 +670,114 @@ class TagViewSet(viewsets.ModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
     pagination_class = None
+
+
+@add_docs(
+    description="""
+    REST endpoint to fetch list of PluginConfig or retrieve/delete a CustomConfig.
+    Requires authentication. Allows access to only authorized CustomConfigs.
+    """
+)
+class PluginConfigViewSet(viewsets.ModelViewSet):
+    queryset = PluginConfig.objects.filter(
+        config_type=PluginConfig.ConfigType.PARAMETER
+    ).order_by("id")
+    serializer_class = PluginConfigSerializer
+    pagination_class = None
+
+    def get_queryset(self):
+        # Initializing empty queryset
+        result = PluginConfig.objects.none()
+
+        # Adding CustomConfigs for user's organization, if any
+        membership = Membership.objects.filter(
+            user=self.request.user, organization__isnull=False
+        )
+        if membership.exists():
+            result |= PluginConfig.objects.filter(
+                organization=membership[0].organization,
+            )
+
+        # Adding CustomConfigs for user
+        result |= PluginConfig.objects.filter(
+            owner=self.request.user,
+        )
+
+        return result.order_by("id")
+
+    def create(self, request: Request, *args, **kwargs):
+        if isinstance(request.data, QueryDict):
+            # Making QueryDict mutable to pass owner into the serializer
+            request._full_data = request.data.copy()
+        request.data["owner"] = request.user.id
+        return super().create(request, *args, **kwargs)
+
+    def update(self, request: Request, *args, **kwargs):
+        if isinstance(request.data, QueryDict):
+            # Making QueryDict mutable to pass owner into the serializer
+            request._full_data = request.data.copy()
+        request.data["owner"] = request.user.id
+        return super().update(request, *args, **kwargs)
+
+
+@add_docs(
+    description="""This endpoint allows organization owners to toggle plugin state.""",
+    responses={
+        201: inline_serializer(
+            name="PluginDisablerResponseSerializer",
+            fields={},
+        ),
+    },
+)
+@api_view(["DELETE", "POST"])
+def plugin_disabler(request, plugin_name, plugin_type):
+    """
+    Disables the plugin with the given name.
+    """
+    if not request.user.has_membership() or not request.user.membership.is_owner:
+        raise PermissionDenied()
+    if request.method == "POST":
+        disable = True
+    elif request.method == "DELETE":
+        disable = False
+    else:
+        raise MethodNotAllowed(request.method)
+
+    logger.info(
+        f"plugin_disabler: Setting disable to {disable} "
+        f"for plugin {plugin_name} of type {plugin_type}"
+    )
+    OrganizationPluginState.objects.update_or_create(
+        organization=request.user.membership.organization,
+        plugin_name=plugin_name,
+        type=plugin_type,
+        defaults={"disabled": disable},
+    )
+    return Response(status=status.HTTP_201_CREATED)
+
+
+@add_docs(
+    description="""This endpoint allows organization owners
+    and members to view plugin state.""",
+    responses={
+        200: inline_serializer(
+            name="PluginStateViewerResponseSerializer",
+            fields={
+                "data": rfs.JSONField(),
+            },
+        ),
+    },
+)
+@api_view(["GET"])
+def plugin_state_viewer(request):
+    if not request.user.has_membership():
+        raise PermissionDenied()
+    result = {"data": {}}
+    for organization_plugin_state in OrganizationPluginState.objects.filter(
+        organization=request.user.membership.organization
+    ):
+        result["data"][organization_plugin_state.plugin_name] = {
+            "disabled": organization_plugin_state.disabled,
+            "plugin_type": organization_plugin_state.type,
+        }
+    return Response(result)

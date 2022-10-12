@@ -4,7 +4,7 @@
 - [ ] Update `CHANGELOG.md` for the new version
 - [ ] Change version number in `docs/source/conf.py`, `docs/schema.yml`, `docker/.env`, `docker/.version`, `settings.commons.py` and `start.py`
 - [ ] Verify CI Tests
-- [ ] Create release for the branch `develop`. [Automate.io](https://automate.io/app/bots/list) should automatically create [Twitter](https://twitter.com/intel_owl) and [Linkedin](https://www.linkedin.com/in/matteo-lodi-90/) posts.
+- [ ] Create release for the branch `develop`. A Github action should automatically create a [Twitter](https://twitter.com/intel_owl) post.
       Write the following statement there (change the version number):
 
 ```commandline

@@ -1410,8 +1410,7 @@ components:
       - analyzers_running
       - connectors_running
       - job_id
-      - status
-      
+      - status 
     PlaybooksAnalysisResponse:
       type: object
       properties:

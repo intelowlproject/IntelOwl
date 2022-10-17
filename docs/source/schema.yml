@@ -504,15 +504,15 @@ paths:
       description: Get and parse the `playbook_config.json` file
       tags:
         - get_playbook_configs
-        - durinAuth: []
       security:
-        responses:
-          '200':
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/PlaybookConfig'
-            description: ''
+        - durinAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlaybookConfig'
+          description: ''
   /api/jobs:
     get:
       operationId: jobs_list
@@ -2177,6 +2177,8 @@ components:
         name:
           type: string
         python_module:
+          example: ''
+          description: 'Usually empty here. Present here so that support in the future could be provided.'
           type: string
           maxLength: 128
         disabled:
@@ -2184,8 +2186,10 @@ components:
         description:
           type: string
         config:
+          description: 'Usually empty here. Present here so that support in the future could be provided.'
           $ref: '#/components/schemas/_Config'
         secrets:
+          description: 'Usually empty here. Present here so that support in the future could be provided.'
           type: object
           additionalProperties:
             $ref: '#/components/schemas/_Secret'
@@ -2196,6 +2200,7 @@ components:
           type: object
           $ref: '#/components/schemas/PlaybookConnectorsSchema'
         params:
+          description: 'Usually empty here. Present here so that support in the future could be provided.'
           type: object
           additionalProperties:
             $ref: '#/components/schemas/_Param'
@@ -2217,11 +2222,14 @@ components:
           - missing_secrets
           readOnly: true
         supports:
+          description: 'The types of inputs which are supported by this Playbook.'
+          type: array
           $ref: '#/components/schemas/PlaybookConfigSupport'
       required:
       - config
       - disabled
-      - external_service
+      - analyzers
+      - connectors
       - name
       - params
       - python_module

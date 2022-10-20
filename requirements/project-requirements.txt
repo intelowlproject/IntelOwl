@@ -29,7 +29,7 @@ GitPython==3.1.26
 checkdmarc==4.4.1
 darksearch==2.1.2
 dnspython==2.2.1
-dnstwist==20221008
+dnstwist==20221011
 ppdeep>=20200505
 easygui==0.98.2
 google>=3.0.0

@@ -2,6 +2,18 @@
 
 [**Upgrade Guide**](https://intelowl.readthedocs.io/en/latest/Installation.md#update-to-the-most-recent-version)
 
+## [v4.1.1](https://github.com/intelowlproject/IntelOwl/releases/tag/v4.1.1)
+
+With the release we are happy to announce that we have finally deployed a public instance of IntelOwl, thanks to The Honeynet Project, available at https://intelowl.honeynet.org.
+
+The access is not open to prevent abuse. If you are interested in getting access, please contact a member of The Honeynet Project and explain the reasons behind your interest.
+
+Then, this release fixes some important bugs regarding the integration with OpenCTI and all the other optional DockerAnalyzers-based integrations which were not correctly working.
+
+**Others**
+- Several documentation adjustments and updates
+- usual dependencies upgrades
+
 ## [v4.1.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v4.1.0)
 
 This release marks the end of the Google Summer of Code for this year (2022)!

@@ -5,6 +5,7 @@
 [![Docker](https://img.shields.io/docker/pulls/intelowlproject/intelowl)](https://hub.docker.com/repository/docker/intelowlproject/intelowl)
 [![Twitter Follow](https://img.shields.io/twitter/follow/intel_owl?style=social)](https://twitter.com/intel_owl)
 [![Official Site](https://img.shields.io/badge/official-site-blue)](https://intelowlproject.github.io)
+[![Live Demo](https://img.shields.io/badge/live-demo-blue)](https://intelowl.honeynet.org)
 
 [![CodeFactor](https://www.codefactor.io/repository/github/intelowlproject/intelowl/badge)](https://www.codefactor.io/repository/github/intelowlproject/intelowl)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
@@ -78,6 +79,8 @@ IntelOwl was born out of Certego's Threat intelligence R&D division and is const
 
 [The Honeynet Project](https://www.honeynet.org) is a non-profit organization working on creating open source cyber security tools and sharing knowledge about cyber threats.
 
+Thanks to Honeynet, we are hosting a public demo of the application [here](https://intelowl.honeynet.org). If you are interested, please contact a member of Honeynet to get access to the public service.
+
 Since its birth, under the umbrella of this organization, this project has been participating in the [Google Summer of Code](https://summerofcode.withgoogle.com/) (GSoC)!
 
 Project Summaries and/or in-development projects:
@@ -94,7 +97,7 @@ Project Summaries and/or in-development projects:
 
 If you are interested in being the next GSoC developer for IntelOwl, join the [Honeynet Slack chat](https://gsoc-slack.honeynet.org/) for more info. This is also the place where the majority of the development discussion happens, so feel free to join, have a look and ask questions about the project.
 
-(Plus we have just started a new project called [GreedyBear](https://github.com/honeynet/GreedyBear) that will be proposed to the GSoC too starting from 2022)
+(Plus we started a new project called [GreedyBear](https://github.com/honeynet/GreedyBear) that will be proposed to the GSoC too starting from 2022)
 
 ### 🥈 SILVER
 

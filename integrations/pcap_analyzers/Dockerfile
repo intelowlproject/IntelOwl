@@ -5,7 +5,7 @@ ENV PROJECT_PATH /opt/deploy
 ENV LOG_PATH /var/log/intel_owl/pcap_analyzers
 ENV USER pcap_analyzers-user
 # Python 3.8 is required to have Flask work correctly. Base leverage Python 3.6
-RUN dnf -y remove python3 && dnf -y install python3.8 && useradd -ms /bin/bash ${USER}
+RUN dnf -y remove python3 && dnf -y install python3.8 && dnf clean all && useradd -ms /bin/bash ${USER}
 
 # Build Flask REST API
 WORKDIR ${PROJECT_PATH}/pcap_analyzers-flask

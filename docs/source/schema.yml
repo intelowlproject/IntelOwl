@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: IntelOwl API specification
-  version: 4.1.0
+  version: 4.1.1
 paths:
   /api/analyze_file:
     post:
@@ -497,6 +497,21 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/GetConnectorConfigsFailedResponse'
+          description: ''
+  /api/get_playbook_configs:
+    get:
+      operationId:
+      description: Get and parse the `playbook_config.json` file
+      tags:
+        - get_playbook_configs
+      security:
+        - durinAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlaybookConfig'
           description: ''
   /api/jobs:
     get:
@@ -2132,6 +2147,95 @@ components:
       required:
       - id
       - observable_name
+    PlaybookConfigSupport:
+      type: array
+      items:
+        type: string
+      example: ["ip","url","domain","generic","hash","file"]
+    PlaybookAnalyzersSchema:
+      type: object
+      description: |-
+        To validate `analyzers` attr.
+        Used for `playbook_config.json` file.
+      properties:
+        value:
+          type: object
+      example: {"APKiD_Scan_APK_DEX_JAR":{},"BoxJS_Scan_JavaScript":{}, "Classic_DNS": {"query_type": "A"}}
+    PlaybookConnectorsSchema:
+      type: object
+      description: |-
+        To validate `connectors` attr.
+        Used for `playbook_config.json` file.
+      properties:
+        value:
+          type: object
+      example: {"MISP":{},"OpenCTI":{}, "YETI": {}}
+    PlaybookConfig:
+      type: object
+      description: Serializer for `playbook_config.json`.
+      properties:
+        name:
+          type: string
+        python_module:
+          example: ''
+          description: 'Usually empty here. Present here so that support in the future could be provided.'
+          type: string
+          maxLength: 128
+        disabled:
+          type: boolean
+        description:
+          type: string
+        config:
+          description: 'Usually empty here. Present here so that support in the future could be provided.'
+          $ref: '#/components/schemas/_Config'
+        secrets:
+          description: 'Usually empty here. Present here so that support in the future could be provided.'
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/_Secret'
+        analyzers:
+          type: object
+          $ref: '#/components/schemas/PlaybookAnalyzersSchema'
+        connectors:
+          type: object
+          $ref: '#/components/schemas/PlaybookConnectorsSchema'
+        params:
+          description: 'Usually empty here. Present here so that support in the future could be provided.'
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/_Param'
+        verification:
+          type: object
+          properties:
+            configured:
+              type: boolean
+            error_message:
+              type: string
+              nullable: true
+            missing_secrets:
+              type: array
+              items:
+                type: string
+          required:
+          - configured
+          - error_message
+          - missing_secrets
+          readOnly: true
+        supports:
+          description: 'The types of inputs which are supported by this Playbook.'
+          type: array
+          $ref: '#/components/schemas/PlaybookConfigSupport'
+      required:
+      - config
+      - disabled
+      - analyzers
+      - connectors
+      - name
+      - params
+      - python_module
+      - secrets
+      - type
+      - verification
     PlaybookObservableAnalysis:
       type: object
       description: |-

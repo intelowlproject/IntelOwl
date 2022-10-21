@@ -2,11 +2,11 @@
 
 Intel Owl was designed to ease the addition of new analyzers, connectors and playbooks. With a simple python script you can integrate your own engine or integrate an external service in a short time.
 
-> Wish to contribute to the Python client ? See [pyintelowl](https://github.com/intelowlproject/pyintelowl).
+* Wish to contribute to the Python client ? See [pyintelowl](https://github.com/intelowlproject/pyintelowl).
 
-> Wish to contribute to the GO client ? See [go-intelowl](https://github.com/intelowlproject/go-intelowl).
+* Wish to contribute to the GO client ? See [go-intelowl](https://github.com/intelowlproject/go-intelowl).
 
-> Wish to contribute to the official IntelOwl Site ? See [intelowlproject.github.io](https://github.com/intelowlproject/intelowlproject.github.io).
+* Wish to contribute to the official IntelOwl Site ? See [intelowlproject.github.io](https://github.com/intelowlproject/intelowlproject.github.io).
 
 ## Rules
 

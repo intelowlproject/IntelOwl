@@ -266,9 +266,12 @@ The first step is to create a [Google Cloud Platform](https://cloud.google.com/r
 
 After that, specify the client ID and secret as `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` environment variables.
 
-> Note: While configuring Google Auth2 you can choose either to enable access to the all users with a Google Account ("External" mode) or to enable access to only the users of your organization ("Internal" mode).
-> 
-> [Reference](https://support.google.com/cloud/answer/10311615#user-type&zippy=%2Cinternal%2Cexternal)
+
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+While configuring Google Auth2 you can choose either to enable access to the all users with a Google Account ("External" mode) or to enable access to only the users of your organization ("Internal" mode).
+<a href="https://support.google.com/cloud/answer/10311615#user-type&zippy=%2Cinternal%2Cexternal" target="_blank">Reference</a>
+</div>
 
 #### LDAP
 
@@ -278,7 +281,10 @@ How to configure and enable LDAP on Intel Owl?
 
 1. Change the values with your LDAP configuration inside `configuration/ldap_config.py`. This file is mounted as a docker volume, so you won't need to rebuild the image.
 
-> For more details on how to configure this file, check the [official documentation](https://django-auth-ldap.readthedocs.io/en/latest/) of the django-auth-ldap library.
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+For more details on how to configure this file, check the <a href="https://django-auth-ldap.readthedocs.io/en/latest/" target="_blank">official documentation</a> of the django-auth-ldap library.
+</div>
 
 2. Once you have done that, you have to set the environment variable `LDAP_ENABLED` as `True` in the environment configuration file `env_file_app`.
    Finally, you can restart the application with `docker-compose up`
@@ -293,7 +299,10 @@ How to configure and enable RADIUS authentication on Intel Owl?
 1. Change the values with your RADIUS auth configuration inside `configuration/radius_config.py`. This file is mounted as a
    docker volume, so you won't need to rebuild the image.
 
-> For more details on how to configure this file, check the [official documentation](https://github.com/robgolding/django-radius) of the django-radius library.
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+For more details on how to configure this file, check the <a href="https://github.com/robgolding/django-radius" target="_blank">official documentation</a> of the django-radius library.
+</div>
 
 2. Once you have done that, you have to set the environment variable `RADIUS_AUTH_ENABLED` as `True` in the environment
    configuration file `env_file_app`. Finally, you can restart the application with `docker-compose up`

@@ -37,6 +37,7 @@ PATH_MAPPING = {
     "flower": "docker/flower.override.yml",
     "test_flower": "docker/test.flower.override.yml",
     "elastic": "docker/elasticsearch.override.yml",
+    "https": "docker/https.override.yml",
 }
 # to fix the box-js folder name
 PATH_MAPPING.update(
@@ -149,6 +150,13 @@ def start():
         help="This spins up Elasticsearch"
         "and Kibana on your machine (might need >=16GB of RAM)",
     )
+    parser.add_argument(
+        "--https",
+        required=False,
+        action="store_true",
+        help="This leverage the https.override.yml file that can be used "
+        "to host IntelOwl with HTTPS and your own certificate",
+    )
 
     args, unknown = parser.parse_known_args()
     # logic
@@ -175,6 +183,8 @@ def start():
         compose_files.append(PATH_MAPPING[args.mode])
     if args.__dict__["elastic"]:
         compose_files.append(PATH_MAPPING["elastic"])
+    if args.__dict__["https"]:
+        compose_files.append(PATH_MAPPING["https"])
     # upgrades
     for key in ["traefik", "multi_queue", "custom", "flower"]:
         if args.__dict__[key]:

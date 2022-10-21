@@ -37,18 +37,15 @@ PATH_MAPPING = {
     "flower": "docker/flower.override.yml",
     "test_flower": "docker/test.flower.override.yml",
     "elastic": "docker/elasticsearch.override.yml",
+    "https": "docker/https.override.yml",
 }
 # to fix the box-js folder name
 PATH_MAPPING.update(
-    {
-        name: f"integrations/{name.replace('box_js', 'box-js')}/compose.yml"
-        for name in DOCKER_ANALYZERS
-    }
+    {name: f"integrations/{name}/compose.yml" for name in DOCKER_ANALYZERS}
 )
 PATH_MAPPING.update(
     {
-        name
-        + ".test": f"integrations/{name.replace('box_js', 'box-js')}/compose-tests.yml"
+        name + ".test": f"integrations/{name}/compose-tests.yml"
         for name in DOCKER_ANALYZERS
     }
 )
@@ -149,6 +146,13 @@ def start():
         help="This spins up Elasticsearch"
         "and Kibana on your machine (might need >=16GB of RAM)",
     )
+    parser.add_argument(
+        "--https",
+        required=False,
+        action="store_true",
+        help="This leverage the https.override.yml file that can be used "
+        "to host IntelOwl with HTTPS and your own certificate",
+    )
 
     args, unknown = parser.parse_known_args()
     # logic
@@ -175,6 +179,8 @@ def start():
         compose_files.append(PATH_MAPPING[args.mode])
     if args.__dict__["elastic"]:
         compose_files.append(PATH_MAPPING["elastic"])
+    if args.__dict__["https"]:
+        compose_files.append(PATH_MAPPING["https"])
     # upgrades
     for key in ["traefik", "multi_queue", "custom", "flower"]:
         if args.__dict__[key]:
@@ -196,6 +202,10 @@ def start():
             compose_files.extend(list(PATH_MAPPING[f"all_analyzers{test_appendix}"]))
 
     if args.mode == "prod" and args.version != CURRENT_VERSION:
+        print(
+            f"Requested version {args.version} is different "
+            f"from current version {CURRENT_VERSION}"
+        )
         current_dir = os.getcwd()
         repo = Repo(current_dir)
         git = repo.git

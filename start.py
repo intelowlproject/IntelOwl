@@ -41,15 +41,11 @@ PATH_MAPPING = {
 }
 # to fix the box-js folder name
 PATH_MAPPING.update(
-    {
-        name: f"integrations/{name.replace('box_js', 'box-js')}/compose.yml"
-        for name in DOCKER_ANALYZERS
-    }
+    {name: f"integrations/{name}/compose.yml" for name in DOCKER_ANALYZERS}
 )
 PATH_MAPPING.update(
     {
-        name
-        + ".test": f"integrations/{name.replace('box_js', 'box-js')}/compose-tests.yml"
+        name + ".test": f"integrations/{name}/compose-tests.yml"
         for name in DOCKER_ANALYZERS
     }
 )
@@ -206,6 +202,10 @@ def start():
             compose_files.extend(list(PATH_MAPPING[f"all_analyzers{test_appendix}"]))
 
     if args.mode == "prod" and args.version != CURRENT_VERSION:
+        print(
+            f"Requested version {args.version} is different "
+            f"from current version {CURRENT_VERSION}"
+        )
         current_dir = os.getcwd()
         repo = Repo(current_dir)
         git = repo.git

@@ -1,9 +1,11 @@
-FROM jasonish/suricata:6.0.5
+# https://github.com/jasonish/docker-suricata/tree/master/6.0
+FROM jasonish/suricata:6.0
 
 ENV PROJECT_PATH /opt/deploy
 ENV LOG_PATH /var/log/intel_owl/pcap_analyzers
 ENV USER pcap_analyzers-user
-RUN useradd -ms /bin/bash ${USER}
+# Python 3.8 is required to have Flask work correctly. Base leverage Python 3.6
+RUN dnf remove python3 && dnf install python3.8 && useradd -ms /bin/bash ${USER}
 
 # Build Flask REST API
 WORKDIR ${PROJECT_PATH}/pcap_analyzers-flask

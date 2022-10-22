@@ -4,7 +4,6 @@
 import logging
 from copy import deepcopy
 from datetime import timedelta
-from os import stat_result
 from typing import Type, Union
 
 from django.conf import settings
@@ -218,7 +217,7 @@ def _multi_analysis_availability(user, data):
             ]
 
         # this means that the user is trying to
-        # check avaibility of the case where all 
+        # check avaibility of the case where all
         # analyzers were run but no playbooks were
         # triggered.
         if len(analyzers) == 0 and len(playbooks) == 0:
@@ -234,15 +233,10 @@ def _multi_analysis_availability(user, data):
             # since with playbook
             # it is expected behavior
             # for analyzers to often fail
-            statuses_to_check = [
-                Status.RUNNING
-            ]
+            statuses_to_check = [Status.RUNNING]
             if not running_only:
                 statuses_to_check.extend(
-                    [
-                        Status.REPORTED_WITH_FAILS,
-                        Status.REPORTED_WITHOUT_FAILS
-                    ]
+                    [Status.REPORTED_WITH_FAILS, Status.REPORTED_WITHOUT_FAILS]
                 )
             query = (
                 Q(md5=md5)

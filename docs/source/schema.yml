@@ -241,8 +241,13 @@ paths:
             IntelOwl also counts "running" (only if specifically selected), 
             "reported_with_fails" or "reported_without_fails".
 
+            Also, if a playbook parameter is sent which isn't empty with/without an
+            analyzer, it completely ignores the existence of the analyzer paramter
+            and returns matching playbook jobs with the same observable.
+
             Also, you need to specify the analyzers needed because, otherwise, it is
             highly probable that you won't get all the results that you expect.
+
             NOTE: This API is similar to ask_analysis_availability, but it allows multiple
             md5s to be checked at the same time.
       tags:

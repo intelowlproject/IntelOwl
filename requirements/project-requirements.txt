@@ -1,5 +1,5 @@
 # django libs
-Django==3.2.15
+Django==3.2.16
 django-auth-ldap==4.1.0
 django-radius==1.5.0
 django-filter==22.1
@@ -18,7 +18,7 @@ whitenoise==6.2.0
 
 # infra
 boto3==1.24.52
-celery==5.2.3
+celery==5.2.7
 dataclasses==0.6
 # https://github.com/advisories/GHSA-q4qm-xhf9-4p8f
 # unpatched CVE: noproblem, we just use this for debugging purposes
@@ -29,7 +29,7 @@ GitPython==3.1.26
 checkdmarc==4.4.1
 darksearch==2.1.2
 dnspython==2.2.1
-dnstwist==20221008
+dnstwist==20221011
 ppdeep>=20200505
 easygui==0.98.2
 google>=3.0.0

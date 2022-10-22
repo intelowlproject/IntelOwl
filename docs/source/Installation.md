@@ -193,11 +193,9 @@ There are 3 options to execute the web server:
 
     The project provides a template file to configure Nginx to serve HTTPS: `configuration/nginx/https.conf`.
 
-    You should change `ssl_certificate`, `ssl_certificate_key` and `server_name` in that file.
+    You should change `ssl_certificate`, `ssl_certificate_key` and `server_name` in that file and put those required files in the specified locations.
 
-    Then you should modify the `nginx` service configuration in `docker/default.yml`:
-    * change `http.conf` with `https.conf`
-    * in `volumes` add the option for mounting the directory that hosts your certificate and your certificate key.
+    Then you should call the `start.py` script with the parameter `--https` to leverage the right Docker Compose file for HTTPS.
   
     Plus, if you use [Flower](Advanced-Usage.html#queue-customization), you should change in the `docker/flower.override.yml` the `flower_http.conf` with `flower_https.conf`.
 

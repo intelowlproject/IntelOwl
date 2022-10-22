@@ -16,6 +16,12 @@ import useRecentScansStore from "../../stores/useRecentScansStore";
 const { append: appendToRecentScans } = useRecentScansStore.getState();
 
 export async function createPlaybookJob(formValues) {
+  // check existing
+  if (formValues.check !== "force_new") {
+    const jobId = await _askAnalysisAvailability(formValues);
+    if (jobId) return Promise.resolve(jobId);
+  }
+
   // new scan
   const resp =
     formValues.classification === "file"
@@ -83,6 +89,7 @@ export async function createJob(formValues) {
       const jobId = await _askAnalysisAvailability(formValues);
       if (jobId) return Promise.resolve(jobId);
     }
+
     // new scan
     const resp =
       formValues.classification === "file"
@@ -160,6 +167,7 @@ async function _askAnalysisAvailability(formValues) {
     Array.from(formValues.files).forEach((file) => {
       const body = {
         analyzers: formValues.analyzers,
+        playbooks: formValues.playbooks,
         md5: md5(readFileAsync(file)),
       };
       promises.push(body.md5);
@@ -173,6 +181,7 @@ async function _askAnalysisAvailability(formValues) {
     formValues.observable_names.forEach((ObservableName) => {
       const body = {
         analyzers: formValues.analyzers,
+        playbooks: formValues.playbooks,
         md5: md5(ObservableName),
       };
       if (formValues.check === "running_only") {

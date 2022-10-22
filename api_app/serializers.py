@@ -70,6 +70,7 @@ class JobAvailabilitySerializer(rfs.ModelSerializer):
 
     md5 = rfs.CharField(max_length=128, required=True)
     analyzers = rfs.ListField(default=list)
+    playbooks = rfs.ListField(default=list, required=False)
     running_only = rfs.BooleanField(default=False, required=False)
     minutes_ago = rfs.IntegerField(default=None, required=False)
 

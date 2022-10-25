@@ -237,8 +237,8 @@ paths:
             By default this API checks if there are existing analysis related to the md5 in
             status "running" or "reported_without_fails" for analyzer checking.
 
-            However, for status being added in as a factor for Playbooks, 
-            IntelOwl also counts "running" (only if specifically selected), 
+            However, for status being added in as a factor for Playbooks,
+            IntelOwl also counts "running" (only if specifically selected),
             "reported_with_fails" or "reported_without_fails".
 
             Also, if a playbook parameter is sent where it isn't an empty list

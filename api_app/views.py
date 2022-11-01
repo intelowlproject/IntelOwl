@@ -200,7 +200,8 @@ def _multi_analysis_availability(user, data):
     response = []
 
     for element in serialized_data:
-        analyzers, running_only, md5, minutes_ago = (
+        playbooks, analyzers, running_only, md5, minutes_ago = (
+            element["playbooks"],
             element["analyzers"],
             element["running_only"],
             element["md5"],
@@ -215,11 +216,32 @@ def _multi_analysis_availability(user, data):
                 Status.REPORTED_WITHOUT_FAILS,
             ]
 
-        if len(analyzers) == 0:
+        # this means that the user is trying to
+        # check avaibility of the case where all
+        # analyzers were run but no playbooks were
+        # triggered.
+        if len(analyzers) == 0 and len(playbooks) == 0:
             query = (
                 Q(md5=md5)
                 & Q(status__in=statuses_to_check)
                 & Q(analyzers_requested__len=0)
+            )
+
+        # this case is for when
+        # playbooks were triggered
+        elif len(playbooks) != 0:
+            # since with playbook
+            # it is expected behavior
+            # for analyzers to often fail
+            statuses_to_check = [Status.RUNNING]
+            if not running_only:
+                statuses_to_check.extend(
+                    [Status.REPORTED_WITH_FAILS, Status.REPORTED_WITHOUT_FAILS]
+                )
+            query = (
+                Q(md5=md5)
+                & Q(status__in=statuses_to_check)
+                & Q(playbooks_to_execute__contains=playbooks)
             )
         else:
             query = (
@@ -238,6 +260,7 @@ def _multi_analysis_availability(user, data):
                 "status": last_job_for_md5.status,
                 "job_id": str(last_job_for_md5.id),
                 "analyzers_to_execute": last_job_for_md5.analyzers_to_execute,
+                "playbooks_to_execute": last_job_for_md5.playbooks_to_execute,
             }
         except Job.DoesNotExist:
             response_dict = {"status": "not_available"}

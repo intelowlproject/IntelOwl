@@ -70,8 +70,20 @@ class JobAvailabilitySerializer(rfs.ModelSerializer):
 
     md5 = rfs.CharField(max_length=128, required=True)
     analyzers = rfs.ListField(default=list)
+    playbooks = rfs.ListField(default=list, required=False)
     running_only = rfs.BooleanField(default=False, required=False)
     minutes_ago = rfs.IntegerField(default=None, required=False)
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        playbooks = attrs.get("playbooks", [])
+        analyzers = attrs.get("analyzers", [])
+
+        if len(playbooks) != 0 and len(analyzers) != 0:
+            raise rfs.ValidationError(
+                "Either only send the 'playbooks' parameter or the 'analyzers' one."
+            )
+        return attrs
 
 
 class _AbstractJobViewSerializer(rfs.ModelSerializer):

@@ -32,4 +32,6 @@ services:
       - "traefik.http.routers.nginx.rule=Host(`example.com`)"
       - "traefik.http.routers.nginx.entrypoints=websecure"
       - "traefik.http.routers.nginx.tls.certresolver=myresolver"
+    ports:
+      - "443:443"
 

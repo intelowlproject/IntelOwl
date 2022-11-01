@@ -15,6 +15,7 @@ configuration/service_account_keyfile.json
 configuration/custom_yara/*
 coverage_reports/
 docker/.env.start.test
+docker/.env.start
 .ipython
 .subversion
 .bash_history

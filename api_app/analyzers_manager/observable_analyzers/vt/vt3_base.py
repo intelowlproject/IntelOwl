@@ -244,10 +244,6 @@ class VirusTotalv3AnalyzerMixin(BaseAnalyzerMixin):
         # This impacts paid quota usage
         max_tries = max_tries if max_tries else self.max_tries
         poll_distance = poll_distance if poll_distance else self.poll_distance
-        try:
-            binary = self._job.file.read()
-        except Exception:
-            raise AnalyzerRunException("couldn't retrieve the binary to perform a scan")
 
         if rescan_instead:
             logger.info(f"(Job: {self.job_id}, {md5}) -> VT analyzer requested rescan")
@@ -255,6 +251,12 @@ class VirusTotalv3AnalyzerMixin(BaseAnalyzerMixin):
             uri = f"files/{md5}/analyse"
         else:
             logger.info(f"(Job: {self.job_id}, {md5}) -> VT analyzer requested scan")
+            try:
+                binary = self._job.file.read()
+            except Exception:
+                raise AnalyzerRunException(
+                    "IntelOwl error: couldn't retrieve the binary to perform a scan"
+                )
             files = {"file": binary}
             uri = "files"
 

@@ -57,7 +57,7 @@ pypssl==2.2
 pysafebrowsing==0.1.1
 PySocks==1.7.1
 py-tlsh==4.7.2
-quark-engine==22.9.1
+quark-engine==22.10.1
 requests==2.28.1
 speakeasy-emulator==1.5.9
 telfhash==0.9.8

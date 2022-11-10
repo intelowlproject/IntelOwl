@@ -15,7 +15,7 @@ from django.conf import settings
 
 # class for mocking responses
 class MockResponse:
-    @dataclass
+    @dataclass(frozen=True)
     class Request:
         def __init__(self):
             self.url = None

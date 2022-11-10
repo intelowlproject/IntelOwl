@@ -98,22 +98,14 @@ class VirusTotalv3AnalyzerMixin(BaseAnalyzerMixin):
             obs_clfn, observable_name
         )
         for chance in range(self.max_tries):
-            try:
-                logger.info(
-                    f"[POLLING] (Job: {self.job_id}, observable {observable_name}) -> "
-                    f"GET VT/v3/_vt_get_report #{chance + 1}/{self.max_tries}"
-                )
-                response = requests.get(
-                    self.base_url + uri, params=params, headers=self.headers
-                )
-                # this case is not a real error,...
-                # .. it happens when a requested object is not found and that's normal
-                if not response.status_code == 404:
-                    response.raise_for_status()
-            except requests.RequestException as e:
-                raise AnalyzerRunException(e)
+            logger.info(
+                f"[POLLING] (Job: {self.job_id}, observable {observable_name}) -> "
+                f"GET VT/v3/_vt_get_report #{chance + 1}/{self.max_tries}"
+            )
 
-            result = response.json()
+            result, response = self._perform_get_request(
+                uri, ignore_404=True, params=params
+            )
 
             # if it is not a file, we don't need to perform any scan
             if obs_clfn != self.ObservableTypes.HASH:
@@ -255,39 +247,33 @@ class VirusTotalv3AnalyzerMixin(BaseAnalyzerMixin):
                 binary = self._job.file.read()
             except Exception:
                 raise AnalyzerRunException(
-                    "IntelOwl error: couldn't retrieve the binary to perform a scan"
+                    f"IntelOwl error: couldn't retrieve the binary"
+                    f" to perform a scan (Job: {self.job_id}, {md5})"
                 )
             files = {"file": binary}
             uri = "files"
 
-        try:
-            response = requests.post(
-                self.base_url + uri, files=files, headers=self.headers
-            )
-            response.raise_for_status()
-        except requests.RequestException as e:
-            raise AnalyzerRunException(e)
-        result = response.json()
+        result, _ = self._perform_post_request(uri, files=files)
 
         result_data = result.get("data", {})
         scan_id = result_data.get("id", "")
         if not scan_id:
             raise AnalyzerRunException(
-                "no scan_id given by VirusTotal to retrieve the results"
+                f"no scan_id given by VirusTotal to retrieve the results"
+                f" (Job: {self.job_id}, {md5})"
             )
         # max 5 minutes waiting
         got_result = False
         uri = f"analyses/{scan_id}"
         for chance in range(max_tries):
             time.sleep(poll_distance)
-            try:
-                response = requests.get(self.base_url + uri, headers=self.headers)
-                response.raise_for_status()
-            except requests.RequestException as e:
-                raise AnalyzerRunException(e)
-            json_response = response.json()
+            logger.info(
+                f"Started POLLING for Scan results. ScanID {scan_id}"
+                f" (Job: {self.job_id}, {md5})"
+            )
+            result, _ = self._perform_get_request(uri, files=files)
             analysis_status = (
-                json_response.get("data", {}).get("attributes", {}).get("status", "")
+                result.get("data", {}).get("attributes", {}).get("status", "")
             )
             logger.info(
                 f"[POLLING] (Job: {self.job_id}, {md5}) -> "
@@ -308,33 +294,47 @@ class VirusTotalv3AnalyzerMixin(BaseAnalyzerMixin):
         # If it's a new sample, it's free of charge.
         return self._vt_get_report(self.ObservableTypes.HASH, md5)
 
-    def _fetch_behaviour_summary(self, observable_name: str) -> dict:
+    def _perform_get_request(self, uri: str, ignore_404=False, **kwargs):
+        return self._perform_request(uri, method="GET", ignore_404=ignore_404, **kwargs)
+
+    def _perform_post_request(self, uri: str, ignore_404=False, **kwargs):
+        return self._perform_request(
+            uri, method="POST", ignore_404=ignore_404, **kwargs
+        )
+
+    def _perform_request(self, uri: str, method: str, ignore_404=False, **kwargs):
+        error = None
         try:
-            endpoint = f"files/{observable_name}/behaviour_summary"
-            uri = self.base_url + endpoint
-            response = requests.get(uri, headers=self.headers)
-
-            if not response.status_code == 404:
+            url = self.base_url + uri
+            if method == "GET":
+                response = requests.get(url, headers=self.headers, **kwargs)
+            elif method == "POST":
+                response = requests.post(url, headers=self.headers, **kwargs)
+            else:
+                raise NotImplementedError()
+            logger.info(f"requests done to: {response.request.url} ")
+            logger.debug(f"text: {response.text}")
+            result = response.json()
+            # https://developers.virustotal.com/reference/errors
+            error = result.get("error", {})
+            # this case is not a real error,...
+            # .. it happens when a requested object is not found and that's normal
+            if not ignore_404 or not response.status_code == 404:
                 response.raise_for_status()
+        except Exception as e:
+            error_message = f"Raised Error: {e}. Error data: {error}"
+            raise AnalyzerRunException(error_message)
+        return result, response
 
-        except requests.RequestException as e:
-            raise AnalyzerRunException(e)
-
-        return response.json()
+    def _fetch_behaviour_summary(self, observable_name: str) -> dict:
+        endpoint = f"files/{observable_name}/behaviour_summary"
+        result, _ = self._perform_get_request(endpoint, ignore_404=True)
+        return result
 
     def _fetch_sigma_analyses(self, observable_name: str) -> dict:
-        try:
-            endpoint = f"sigma_analyses/{observable_name}"
-            uri = self.base_url + endpoint
-            response = requests.get(uri, headers=self.headers)
-
-            if not response.status_code == 404:
-                response.raise_for_status()
-
-        except requests.RequestException as e:
-            raise AnalyzerRunException(e)
-
-        return response.json()
+        endpoint = f"sigma_analyses/{observable_name}"
+        result, _ = self._perform_get_request(endpoint, ignore_404=True)
+        return result
 
     @classmethod
     def _get_relationship_for_classification(cls, obs_clfn: str):

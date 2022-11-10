@@ -285,28 +285,28 @@ class PluginConfig(models.Model):
         ]
 
     @classmethod
-    def get_as_dict(cls, user, entity_type, plugin_name=None) -> dict:
+    def get_as_dict(cls, user, entity_type, config_type=None, plugin_name=None) -> dict:
         """
         Returns custom config as dict
         """
         custom_configs = cls.objects.none()
+
+        kwargs = {}
+        if config_type:
+            kwargs["config_type"] = config_type
 
         # Since, user-level custom configs should override organization-level configs,
         # we need to get the organization-level configs, if any, first.
         try:
             membership = Membership.objects.get(user=user)
             custom_configs |= cls.objects.filter(
-                organization=membership.organization,
-                type=entity_type,
+                organization=membership.organization, type=entity_type, **kwargs
             )
         except Membership.DoesNotExist:
             # If user is not a member of any organization, we don't need to do anything.
             pass
 
-        custom_configs |= cls.objects.filter(
-            type=entity_type,
-            owner=user,
-        )
+        custom_configs |= cls.objects.filter(owner=user, type=entity_type, **kwargs)
         if plugin_name is not None:
             custom_configs = custom_configs.filter(plugin_name=plugin_name)
 

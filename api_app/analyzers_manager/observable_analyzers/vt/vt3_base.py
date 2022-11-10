@@ -259,7 +259,7 @@ class VirusTotalv3AnalyzerMixin(BaseAnalyzerMixin):
         scan_id = result_data.get("id", "")
         if not scan_id:
             raise AnalyzerRunException(
-                f"no scan_id given by VirusTotal to retrieve the results"
+                "no scan_id given by VirusTotal to retrieve the results"
                 f" (Job: {self.job_id}, {md5})"
             )
         # max 5 minutes waiting

@@ -247,7 +247,7 @@ class VirusTotalv3AnalyzerMixin(BaseAnalyzerMixin):
                 binary = self._job.file.read()
             except Exception:
                 raise AnalyzerRunException(
-                    f"IntelOwl error: couldn't retrieve the binary"
+                    "IntelOwl error: couldn't retrieve the binary"
                     f" to perform a scan (Job: {self.job_id}, {md5})"
                 )
             files = {"file": binary}

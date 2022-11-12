@@ -3,10 +3,16 @@
 
 from django.urls import path
 
-from .views import PlaybookListAPI, analyze_multiple_files, analyze_multiple_observables
+from .views import (
+    PlaybookListAPI,
+    analyze_multiple_files,
+    analyze_multiple_observables,
+    cache_playbook_view,
+)
 
 urlpatterns = [
     path("get_playbook_configs", PlaybookListAPI.as_view()),
     path("playbook/analyze_multiple_files", analyze_multiple_files),
     path("playbook/analyze_multiple_observables", analyze_multiple_observables),
+    path("playbook/cache_playbook", cache_playbook_view),
 ]

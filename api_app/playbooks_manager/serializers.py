@@ -116,14 +116,13 @@ class CachedPlaybooksSerializer(rfs.ModelSerializer):
         connectors = validated_data.get("connectors")
         supports = validated_data.get("supports")
         playbook_description = validated_data.get("description")
-        job_id = validated_data.get("job_id")
+
         playbook = self.Meta.model.objects.create(
             name=playbook_name,
             analyzers={analyzer: {} for analyzer in analyzers},
             connectors={connector: {} for connector in connectors},
             supports=supports,
             description=playbook_description,
-            job=Job.objects.get(pk=job_id),
         )
 
         return playbook

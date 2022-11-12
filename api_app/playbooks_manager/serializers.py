@@ -62,12 +62,10 @@ class CachedPlaybooksSerializer(rfs.ModelSerializer):
 
     def validate(self, attrs: dict) -> dict:
         attrs = super().validate(attrs)
+        print(attrs)
         playbook_name = attrs.get("name")
 
-        try:
-            job_id = attrs.get("job_id")
-        except Exception as e:
-            rfs.ValidationError(e)
+        job_id = attrs.get("job_id")
 
         # it might be safer for us to
         # consider organisational permissions
@@ -108,14 +106,17 @@ class CachedPlaybooksSerializer(rfs.ModelSerializer):
         attrs["connectors"] = connectors
         attrs["supports"] = supports
         attrs["name"] = playbook_name.replace(" ", "_").upper()
+
         return attrs
 
     def create(self, validated_data: dict) -> CachedPlaybook:
-        playbook_name = validated_data.get("playbook_name")
+        playbook_name = validated_data.get("name")
         analyzers = validated_data.get("analyzers")
         connectors = validated_data.get("connectors")
         supports = validated_data.get("supports")
         playbook_description = validated_data.get("description")
+        job_id = validated_data.get("job_id")
+        default = validated_data.get("default")
 
         playbook = self.Meta.model.objects.create(
             name=playbook_name,
@@ -123,6 +124,8 @@ class CachedPlaybooksSerializer(rfs.ModelSerializer):
             connectors={connector: {} for connector in connectors},
             supports=supports,
             description=playbook_description,
+            job=Job.objects.get(pk=job_id),
+            default=default,
         )
 
         return playbook

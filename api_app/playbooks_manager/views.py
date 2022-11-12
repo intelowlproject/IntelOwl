@@ -41,9 +41,9 @@ def _cache_playbook(request, serializer_class: CachedPlaybooksSerializer):
     serializer = serializer_class(data=request.data)
     serializer.is_valid(raise_exception=True)
 
-    playbook = serializer.save()
+    serializer.save()
 
-    return playbook
+    return serializer.data
 
 
 @api_view(["POST"])

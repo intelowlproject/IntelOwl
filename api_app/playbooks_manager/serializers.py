@@ -100,7 +100,7 @@ class CachedPlaybooksSerializer(rfs.ModelSerializer):
             "analyzers",
             "connectors",
             "supports",
-            "default",
+            "disabled",
             "job_id",
         )
 

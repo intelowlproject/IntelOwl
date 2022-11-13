@@ -121,13 +121,13 @@ class PlaybookListAPI(APIView):
     )
     def get(self, request, *args, **kwargs):
         try:
-            pc = self.serializer_class.read_and_verify_config()
+            pc = self.serializer_class.output_with_cached_playbooks()
             return Response(pc, status=status.HTTP_200_OK)
         except Exception as e:
             logger.exception(
                 f"get_playbook_configs requester:{str(request.user)} error:{e}."
             )
             return Response(
-                {"error": "error in get_playbook_configs. Check logs."},
+                {"error": f"error in get_playbook_configs. Check logs. {e}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )

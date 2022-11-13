@@ -27,7 +27,7 @@ class Migration(migrations.Migration):
                 ("analyzers", models.JSONField(default=dict)),
                 ("connectors", models.JSONField(default=dict)),
                 ("supports", models.JSONField(default=list)),
-                ("default", models.BooleanField(default=True)),
+                ("disabled", models.BooleanField(default=True)),
                 (
                     "job",
                     models.ForeignKey(

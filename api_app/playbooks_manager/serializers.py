@@ -1,8 +1,10 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
+import json
 import logging
 
+from django.core import serializers
 from rest_framework import serializers as rfs
 
 from api_app.analyzers_manager.constants import AllTypes
@@ -42,6 +44,48 @@ class PlaybookConfigSerializer(AbstractConfigSerializer):
         default=[],
     )
 
+    @classmethod
+    def _cached_playbooks(cls) -> dict:
+        """
+        Returns config file as `dict`.
+        """
+        config = super()._read_config()
+        # print(config)
+        cached_playbooks = CachedPlaybook.objects.all()
+        cached_serialized_playbooks = serializers.serialize(
+            "json", [obj for obj in cached_playbooks]
+        )
+        cached_playbooks_model_json = json.loads(cached_serialized_playbooks)
+        if len(cached_playbooks_model_json) == 0:
+            # this is for when no playbooks are cached
+            return config
+
+        cached_playbooks_final = {}
+        for playbook in cached_playbooks_model_json:
+            cached_playbooks_final[playbook["pk"]] = playbook["fields"]
+
+        return cached_playbooks_final
+
+    @classmethod
+    def output_with_cached_playbooks(cls) -> dict:
+        original_config_dict = cls.read_and_verify_config()
+        config_dict = cls._cached_playbooks()
+        serializer_errors = {}
+        for key, config in config_dict.items():
+            new_config = {"name": key, **config}
+            serializer = cls(data=new_config)  # lgtm [py/call-to-non-callable]
+            if serializer.is_valid():
+                config_dict[key] = serializer.data
+            else:
+                serializer_errors[key] = serializer.errors
+
+        if bool(serializer_errors):
+            logger.error(f"{cls.__name__} serializer failed: {serializer_errors}")
+            raise rfs.ValidationError(serializer_errors)
+
+        config_dict = config_dict | original_config_dict
+        return config_dict
+
 
 class CachedPlaybooksSerializer(rfs.ModelSerializer):
     job_id = rfs.IntegerField()
@@ -80,7 +124,7 @@ class CachedPlaybooksSerializer(rfs.ModelSerializer):
         connectors = {connector: {} for connector in connectors_used}
 
         supports = []
-        existing_playbooks = PlaybookConfigSerializer._read_config()
+        existing_playbooks = PlaybookConfigSerializer.read_and_verify_config()
         existing_playbooks.get(playbook_name, None)
         if existing_playbooks is not None:
             rfs.ValidationError("Another playbook exists with that name.")
@@ -88,14 +132,17 @@ class CachedPlaybooksSerializer(rfs.ModelSerializer):
         for analyzer_ in analyzers:
             analyzer_checked = analyzer_config.get(analyzer_)
             if analyzer_checked is None:
-                # rfs.ValidationError(f"Invalid analyzer {analyzer_}")
                 logger.log(f"Invalid analyzer {analyzer_}")
             type_ = analyzer_checked.get("type")
             if type_ == "file":
+                if type_ in supports:
+                    continue
                 supports.append(type_)
             else:
                 observable_supported = analyzer_checked.get("observable_supported")
-                supports.extend(observable_supported)
+                for observable_type in observable_supported:
+                    if observable_type not in supports:
+                        supports.append(observable_type)
 
         connector_config = ConnectorConfigSerializer.read_and_verify_config()
         for connector_ in connectors:
@@ -116,7 +163,12 @@ class CachedPlaybooksSerializer(rfs.ModelSerializer):
         supports = validated_data.get("supports")
         playbook_description = validated_data.get("description")
         job_id = validated_data.get("job_id")
-        default = validated_data.get("default")
+        disabled = validated_data.get("disabled")
+
+        job = Job.objects.filter(pk=job_id).first()
+
+        if job is None:
+            rfs.ValidationError(f"Job of {job_id} doesn't exist.")
 
         playbook = self.Meta.model.objects.create(
             name=playbook_name,
@@ -124,8 +176,8 @@ class CachedPlaybooksSerializer(rfs.ModelSerializer):
             connectors={connector: {} for connector in connectors},
             supports=supports,
             description=playbook_description,
-            job=Job.objects.get(pk=job_id),
-            default=default,
+            job=job,
+            disabled=disabled if type(disabled) == bool else True,
         )
 
         return playbook

@@ -15,5 +15,5 @@ class CachedPlaybook(models.Model):
 
     # Optional Fields
     supports = models.JSONField(default=list)
-    default = models.BooleanField(default=True)
+    disabled = models.BooleanField(default=True)
     job = models.ForeignKey(Job, on_delete=models.CASCADE, null=False)

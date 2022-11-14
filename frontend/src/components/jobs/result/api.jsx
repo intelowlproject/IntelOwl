@@ -85,6 +85,36 @@ export async function deleteJob(jobId) {
   return success;
 }
 
+export async function saveJobAsPlaybook(jobId) {
+  const sure = await areYouSureConfirmDialog(`Save Job #${jobId} as playbook?`);
+  if (!sure) return Promise.reject();
+  let success = false;
+  try {
+    const response = await axios.post(
+      `${JOB_BASE_URI}/playbook/cache_playbook`,
+      {
+        //   name: ,
+        //   description: ,
+        // });
+      }
+    );
+
+    success = response.status === 204;
+    if (success) {
+      addToast(<span>Saved Job #${jobId} as Playbook!</span>, null, "info");
+    }
+  } catch (e) {
+    addToast(
+      <span>
+        Failed. Operation: <em>Saving Job #${jobId} as playbook</em>
+      </span>,
+      e.parsedMsg,
+      "warning"
+    );
+  }
+  return success;
+}
+
 export async function killPlugin(jobId, pluginType, pluginName) {
   const sure = await areYouSureConfirmDialog(
     `kill ${pluginType} '${pluginName}'`

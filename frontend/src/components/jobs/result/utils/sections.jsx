@@ -4,7 +4,7 @@ import { Button, ListGroup, ListGroupItem, Badge, Fade } from "reactstrap";
 import { useNavigate } from "react-router-dom";
 import { VscGlobe, VscFile, VscJson } from "react-icons/vsc";
 import { FaFileDownload } from "react-icons/fa";
-import { MdDeleteOutline, MdPauseCircleOutline } from "react-icons/md";
+import { MdDeleteOutline, MdPauseCircleOutline, MdSave } from "react-icons/md";
 
 import {
   ContentSection,
@@ -13,7 +13,10 @@ import {
   IconAlert,
   IconButton,
   addToast,
+  PopupFormButton,
 } from "@certego/certego-ui";
+
+import { SaveAsPlaybookButton } from "./SaveAsPlaybooksForm";
 
 import { JobTag, PlaybookTag, StatusTag, TLPTag } from "../../../common";
 import { downloadJobSample, deleteJob, killJob } from "../api";
@@ -47,6 +50,7 @@ export function JobActionsBar({ job }) {
     // triggers the click event
     fileLink.click();
   };
+
   const onViewRawJsonBtnClick = async () => {
     addToast(
       "Link will be opened in a new tab shortly...",
@@ -80,6 +84,8 @@ export function JobActionsBar({ job }) {
           titlePlacement="top"
         />
       )}
+
+      <SaveAsPlaybookButton />
       {job?.is_sample && (
         <Button
           size="sm"

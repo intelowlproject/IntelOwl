@@ -129,9 +129,7 @@ class CachedPlaybooksSerializer(rfs.ModelSerializer):
         existing_playbook = existing_playbooks.get(playbook_name, {})
 
         if existing_playbook != {}:
-            raise rfs.ValidationError(
-                "Another playbook exists with that name."
-            )
+            raise rfs.ValidationError("Another playbook exists with that name.")
 
         analyzer_config = AnalyzerConfigSerializer.read_and_verify_config()
         for analyzer_ in analyzers:

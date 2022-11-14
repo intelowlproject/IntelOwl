@@ -128,6 +128,6 @@ class PlaybookListAPI(APIView):
                 f"get_playbook_configs requester:{str(request.user)} error:{e}."
             )
             return Response(
-                {"error": f"error in get_playbook_configs. Check logs."},
+                {"error": "error in get_playbook_configs. Check logs."},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )

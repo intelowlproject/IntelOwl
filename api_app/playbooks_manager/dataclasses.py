@@ -60,7 +60,9 @@ class PlaybookConfig:
     def all(cls) -> typing.Dict[str, "PlaybookConfig"]:
         return {
             name: cls.from_dict(attrs)
-            for name, attrs in cls.serializer_class.output_with_cached_playbooks().items()
+            for name, attrs in (
+                cls.serializer_class.output_with_cached_playbooks().items()
+            )
         }
 
     @classmethod

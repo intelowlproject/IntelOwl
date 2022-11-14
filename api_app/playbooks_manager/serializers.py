@@ -124,15 +124,20 @@ class CachedPlaybooksSerializer(rfs.ModelSerializer):
         connectors = {connector: {} for connector in connectors_used}
 
         supports = []
-        existing_playbooks = PlaybookConfigSerializer.read_and_verify_config()
-        existing_playbooks.get(playbook_name, None)
-        if existing_playbooks is not None:
-            rfs.ValidationError("Another playbook exists with that name.")
+        existing_playbooks = PlaybookConfigSerializer.output_with_cached_playbooks()
+
+        existing_playbook = existing_playbooks.get(playbook_name, {})
+
+        if existing_playbook != {}:
+            raise rfs.ValidationError(
+                "Another playbook exists with that name."
+            )
+
         analyzer_config = AnalyzerConfigSerializer.read_and_verify_config()
         for analyzer_ in analyzers:
             analyzer_checked = analyzer_config.get(analyzer_)
             if analyzer_checked is None:
-                logger.log(f"Invalid analyzer {analyzer_}")
+                logger.info(f"Invalid analyzer {analyzer_}")
             type_ = analyzer_checked.get("type")
             if type_ == "file":
                 if type_ in supports:
@@ -148,7 +153,8 @@ class CachedPlaybooksSerializer(rfs.ModelSerializer):
         for connector_ in connectors:
             connector_checked = connector_config.get(connector_)
             if connector_checked is None:
-                rfs.ValidationError(f"Invalid connector {connector_}")
+                logger.info(f"Invalid connector {connector_}")
+
         attrs["analyzers"] = analyzers
         attrs["connectors"] = connectors
         attrs["supports"] = supports
@@ -168,7 +174,7 @@ class CachedPlaybooksSerializer(rfs.ModelSerializer):
         job = Job.objects.filter(pk=job_id).first()
 
         if job is None:
-            rfs.ValidationError(f"Job of {job_id} doesn't exist.")
+            raise rfs.ValidationError(f"Job of {job_id} doesn't exist.")
 
         playbook = self.Meta.model.objects.create(
             name=playbook_name,

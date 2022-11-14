@@ -50,7 +50,7 @@ class PlaybookConfig:
         """
         Returns config dataclass by playbook_name if found, else None
         """
-        all_configs = cls.serializer_class.read_and_verify_config()
+        all_configs = cls.serializer_class.output_with_cached_playbooks()
         config_dict = all_configs.get(playbook_name, None)
         if config_dict is None:
             return None  # not found
@@ -60,7 +60,7 @@ class PlaybookConfig:
     def all(cls) -> typing.Dict[str, "PlaybookConfig"]:
         return {
             name: cls.from_dict(attrs)
-            for name, attrs in cls.serializer_class.read_and_verify_config().items()
+            for name, attrs in cls.serializer_class.output_with_cached_playbooks().items()
         }
 
     @classmethod

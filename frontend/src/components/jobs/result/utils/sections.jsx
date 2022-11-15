@@ -4,7 +4,7 @@ import { Button, ListGroup, ListGroupItem, Badge, Fade } from "reactstrap";
 import { useNavigate } from "react-router-dom";
 import { VscGlobe, VscFile, VscJson } from "react-icons/vsc";
 import { FaFileDownload } from "react-icons/fa";
-import { MdDeleteOutline, MdPauseCircleOutline, MdSave } from "react-icons/md";
+import { MdDeleteOutline, MdPauseCircleOutline } from "react-icons/md";
 
 import {
   ContentSection,
@@ -12,8 +12,7 @@ import {
   SocialShareBtn,
   IconAlert,
   IconButton,
-  addToast,
-  PopupFormButton,
+  addToast
 } from "@certego/certego-ui";
 
 import { SaveAsPlaybookButton } from "./SaveAsPlaybooksForm";
@@ -85,8 +84,7 @@ export function JobActionsBar({ job }) {
         />
       )}
 
-      <SaveAsPlaybookButton
-      />
+      <SaveAsPlaybookButton jobId={job.id} />
       {job?.is_sample && (
         <Button
           size="sm"

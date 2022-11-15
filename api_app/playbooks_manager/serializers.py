@@ -107,8 +107,7 @@ class CachedPlaybooksSerializer(rfs.ModelSerializer):
     def validate(self, attrs: dict) -> dict:
         attrs = super().validate(attrs)
         print(attrs)
-        playbook_name = attrs.get("name")
-
+        playbook_name = attrs["name"].replace(" ", "_").upper()
         job_id = attrs.get("job_id")
 
         # it might be safer for us to
@@ -156,7 +155,7 @@ class CachedPlaybooksSerializer(rfs.ModelSerializer):
         attrs["analyzers"] = analyzers
         attrs["connectors"] = connectors
         attrs["supports"] = supports
-        attrs["name"] = playbook_name.replace(" ", "_").upper()
+        attrs["name"] = playbook_name
 
         return attrs
 
@@ -181,7 +180,7 @@ class CachedPlaybooksSerializer(rfs.ModelSerializer):
             supports=supports,
             description=playbook_description,
             job=job,
-            disabled=disabled if type(disabled) == bool else True,
+            disabled=disabled if type(disabled) == bool else False,
         )
 
         return playbook

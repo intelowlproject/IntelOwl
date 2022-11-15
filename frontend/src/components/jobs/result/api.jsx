@@ -5,7 +5,7 @@ import { IoMdWarning } from "react-icons/io";
 
 import { addToast, confirm } from "@certego/certego-ui";
 
-import { JOB_BASE_URI } from "../../../constants/api";
+import { API_BASE_URI, JOB_BASE_URI } from "../../../constants/api";
 
 // constants
 const areYouSureConfirmDialog = (opName) =>
@@ -85,28 +85,33 @@ export async function deleteJob(jobId) {
   return success;
 }
 
-export async function saveJobAsPlaybook(jobId) {
-  const sure = await areYouSureConfirmDialog(`Save Job #${jobId} as playbook?`);
-  if (!sure) return Promise.reject();
+export async function saveJobAsPlaybook(values) {
   let success = false;
+  const data = {
+    name: values.name,
+    description: values.description,
+    job_id: values.jobId,
+  };
   try {
     const response = await axios.post(
-      `${JOB_BASE_URI}/playbook/cache_playbook`,
-      {
-        //   name: ,
-        //   description: ,
-        // });
-      }
+      `${API_BASE_URI}/playbook/cache_playbook`,
+      data
     );
 
-    success = response.status === 204;
+    success = response.status === 200;
     if (success) {
-      addToast(<span>Saved Job #${jobId} as Playbook!</span>, null, "info");
+      addToast(
+        <span>
+          Saved Job #{values.jobId} as Playbook with name {response.data.name}!
+        </span>,
+        null,
+        "info"
+      );
     }
   } catch (e) {
     addToast(
       <span>
-        Failed. Operation: <em>Saving Job #${jobId} as playbook</em>
+        Failed. Operation: <em>Saving Job #${values.jobId} as playbook</em>
       </span>,
       e.parsedMsg,
       "warning"

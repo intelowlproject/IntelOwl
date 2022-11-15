@@ -50,7 +50,6 @@ class PlaybookConfigSerializer(AbstractConfigSerializer):
         Returns config file as `dict`.
         """
         config = super()._read_config()
-        # print(config)
         cached_playbooks = CachedPlaybook.objects.all()
         cached_serialized_playbooks = serializers.serialize(
             "json", [obj for obj in cached_playbooks]
@@ -106,7 +105,6 @@ class CachedPlaybooksSerializer(rfs.ModelSerializer):
 
     def validate(self, attrs: dict) -> dict:
         attrs = super().validate(attrs)
-        print(attrs)
         playbook_name = attrs["name"].replace(" ", "_").upper()
         job_id = attrs.get("job_id")
 

@@ -12,7 +12,7 @@ import {
   SocialShareBtn,
   IconAlert,
   IconButton,
-  addToast
+  addToast,
 } from "@certego/certego-ui";
 
 import { SaveAsPlaybookButton } from "./SaveAsPlaybooksForm";

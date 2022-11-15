@@ -37,13 +37,7 @@ export function SaveAsPlaybookForm({ onFormSubmit }) {
         await saveJobAsPlaybook(values);
         onFormSubmit();
       } catch (e) {
-        addToast(
-          <span>
-            Error!
-          </span>,
-          e.parsedMsg,
-          "warning"
-        )
+        addToast(<span>Error!</span>, e.parsedMsg, "warning");
       } finally {
         formik.setSubmitting(false);
       }

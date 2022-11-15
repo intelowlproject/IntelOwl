@@ -128,6 +128,6 @@ SaveAsPlaybookForm.propTypes = {
 
 SaveAsPlaybookButton.propTypes = {
   jobId: PropTypes.func.isRequired,
-}
+};
 
 export default SaveAsPlaybookButton;

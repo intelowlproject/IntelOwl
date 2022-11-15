@@ -27,11 +27,13 @@ class Migration(migrations.Migration):
                 ("analyzers", models.JSONField(default=dict)),
                 ("connectors", models.JSONField(default=dict)),
                 ("supports", models.JSONField(default=list)),
-                ("disabled", models.BooleanField(default=True)),
+                ("disabled", models.BooleanField(default=False)),
                 (
                     "job",
                     models.ForeignKey(
-                        on_delete=django.db.models.deletion.CASCADE, to="api_app.job"
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="api_app.job",
+                        related_name="job",
                     ),
                 ),
             ],

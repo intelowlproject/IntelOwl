@@ -85,7 +85,8 @@ export function JobActionsBar({ job }) {
         />
       )}
 
-      <SaveAsPlaybookButton />
+      <SaveAsPlaybookButton
+      />
       {job?.is_sample && (
         <Button
           size="sm"

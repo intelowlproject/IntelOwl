@@ -1,8 +1,8 @@
 import React from "react";
-import PropTypes from "prop-types";
-import { Col, FormGroup, Label, Button, Spinner, Input } from "reactstrap";
+import { Col, FormGroup, Label, Button, Spinner, Input, Row } from "reactstrap";
 import { Form, Formik } from "formik";
 import { IoMdPersonAdd } from "react-icons/io";
+import PropTypes from "prop-types";
 
 import { PopupFormButton } from "@certego/certego-ui";
 
@@ -23,7 +23,7 @@ const onValidate = (values) => {
     errors.name = "This field is required.";
   } else if (values.name.length < minLength) {
     errors.name = `This field must be at least ${minLength} characters long`;
-  } else if (values.username.length >= maxLength) {
+  } else if (values.name.length >= maxLength) {
     errors.name = `This field must be no more than ${maxLength} characters long.`;
   }
   return errors;
@@ -39,7 +39,6 @@ export function SaveAsPlaybookForm({ onFormSubmit }) {
         await saveJobAsPlaybook(values);
         onFormSubmit();
       } catch (e) {
-        // error was handled inside sendInvite
       } finally {
         formik.setSubmitting(false);
       }
@@ -57,29 +56,44 @@ export function SaveAsPlaybookForm({ onFormSubmit }) {
       {(formik) => (
         <Form className="mx-2 my-3">
           <FormGroup row className="d-flex flex-wrap">
-            <Label className="required" for="forminput-username" md={4}>
-              User&apos;s username
-            </Label>
-            <Col md={5}>
-              <Input
-                autoFocus
-                id="forminput-username"
-                type="text"
-                name="username"
-                onChange={formik.handleChange}
-              />
-            </Col>
-            <Col md={2}>
-              <Button
-                type="submit"
-                id="forminput-submit"
-                disabled={!(formik.isValid || formik.isSubmitting)}
-                color="darker"
-                size="sm"
-                md={2}
-              >
-                {formik.isSubmitting && <Spinner size="sm" />}Send
-              </Button>
+            <Col>
+              <div className="p-3">
+                <Label className="required" for="forminput-username" md={12}>
+                  Playbok name
+                </Label>
+                  <Input
+                    autoFocus
+                    id="forminput-name"
+                    type="text"
+                    name="name"
+                    onChange={formik.handleChange}
+                  />
+              </div>
+
+              <div className="p-3">
+                <Label className="required" for="forminput-name" md={12}>
+                  Playbok description
+                </Label>
+                  <Input
+                    autoFocus
+                    id="forminput-description"
+                    type="text"
+                    name="description"
+                    onChange={formik.handleChange}
+                  />
+              </div>
+              <div className="p-3 d-flex justify-content-center">
+                <Button
+                    type="submit"
+                    id="forminput-submit"
+                    disabled={!(formik.isValid || formik.isSubmitting)}
+                    color="darker"
+                    size="sm"
+                    md={2}
+                  >
+                    {formik.isSubmitting && <Spinner size="sm" />}Send
+                  </Button>
+              </div>
             </Col>
           </FormGroup>
         </Form>
@@ -88,24 +102,33 @@ export function SaveAsPlaybookForm({ onFormSubmit }) {
   );
 }
 
-// Popover Button for invitation form
-function SaveAsPlaybookButton({ onCreate }) {
+function SaveAsPlaybookIcon() {
   return (
-        <>
-            <PopupFormButton
-            id="saveasplaybook"
-            title="Save Scan As Playbook"
-            Form={SaveAsPlaybookForm}
-            className="me-2"
-            // onFormSuccess={onCreate}
-            popOverPlacement="bottom"
-            outline
-            color="info" />
-                <MdSave />
-                    &nbsp;Save Scan As Playbook
-            <PopupFormButton />
-        </>
+    <span>
+      <IoMdPersonAdd className="me-2" /> Save As Playbook
+    </span>
   );
+}
+
+export function SaveAsPlaybookButton({ onCreate }) {
+  return (
+            <PopupFormButton
+                id="saveasplaybook"
+                className="me-2"
+                Form={SaveAsPlaybookForm}
+                onFormSuccess={onCreate}
+                Icon={SaveAsPlaybookIcon}
+                popOverPlacement="bottom"
+              />
+  );
+}
+
+SaveAsPlaybookForm.propTypes = {
+  onFormSubmit: PropTypes.func.isRequired,
+}
+
+SaveAsPlaybookForm.propTypes = {
+  onCreate: PropTypes.func.isRequired,
 }
 
 export default SaveAsPlaybookButton;

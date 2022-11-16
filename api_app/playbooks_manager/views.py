@@ -32,13 +32,12 @@ __all__ = [
 ]
 
 
-def _cache_playbook(request, serializer_class: CachedPlaybooksSerializer):
+def _cache_playbook(data, serializer_class: CachedPlaybooksSerializer):
     """
     Cache playbook after a scan
     """
-    logger.info(f"received request from {request.user}." f"Data: {request.data}.")
 
-    serializer = serializer_class(data=request.data)
+    serializer = serializer_class(data=data)
     serializer.is_valid(raise_exception=True)
 
     serializer.save()
@@ -50,8 +49,10 @@ def _cache_playbook(request, serializer_class: CachedPlaybooksSerializer):
 def cache_playbook_view(
     request,
 ):
+    logger.info(f"received request from {request.user}." f"Data: {request.data}.")
+
     response = _cache_playbook(
-        request=request,
+        data=request.data,
         serializer_class=CachedPlaybooksSerializer,
     )
 

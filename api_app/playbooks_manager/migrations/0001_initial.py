@@ -31,7 +31,8 @@ class Migration(migrations.Migration):
                 (
                     "job",
                     models.ForeignKey(
-                        on_delete=django.db.models.deletion.CASCADE,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        null=True,
                         to="api_app.job",
                         related_name="job",
                     ),

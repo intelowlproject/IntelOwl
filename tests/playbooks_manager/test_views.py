@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.test import TransactionTestCase
 
 from api_app.analyzers_manager.serializers import AnalyzerConfigSerializer
@@ -6,12 +5,13 @@ from api_app.playbooks_manager.dataclasses import PlaybookConfig
 from api_app.playbooks_manager.serializers import CachedPlaybooksSerializer
 from api_app.playbooks_manager.views import _cache_playbook
 from api_app.serializers import ObservableAnalysisSerializer
+from tests import User
 
 
 class PlaybookViewTestCase(TransactionTestCase):
     def setUp(self):
         self.analyzer_serializer_class = ObservableAnalysisSerializer
-        self.superuser = settings.AUTH_USER_MODEL.objects.create_superuser(
+        self.superuser = User.objects.create_superuser(
             username="test", email="test@intelowl.com", password="test"
         )
 
@@ -38,6 +38,10 @@ class PlaybookViewTestCase(TransactionTestCase):
         self.test_jobs = serializer.save(
             user=self.superuser,
         )
+
+    def tearDown(self):
+        self.test_job.delete()
+        return super().tearDown()
 
     def test_cache_config(self):
         AnalyzerConfigSerializer

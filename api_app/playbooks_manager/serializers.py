@@ -104,6 +104,9 @@ class CachedPlaybooksSerializer(rfs.ModelSerializer):
         )
 
     def validate(self, attrs: dict) -> dict:
+        # The playbook in the playbook_config.json file is given more
+        # priority if the same named one is ever added back again.
+
         attrs = super().validate(attrs)
         playbook_name = attrs["name"].replace(" ", "_").upper()
         job_id = attrs.get("job_id")

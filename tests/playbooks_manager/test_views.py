@@ -1,5 +1,6 @@
 from django.test import TransactionTestCase
 
+from api_app.analyzers_manager import controller as analyzers_controller
 from api_app.analyzers_manager.serializers import AnalyzerConfigSerializer
 from api_app.playbooks_manager.serializers import CachedPlaybooksSerializer
 from api_app.playbooks_manager.views import _cache_playbook
@@ -51,6 +52,10 @@ class PlaybookViewTestCase(TransactionTestCase):
 
         self.test_job = self.test_jobs[0]
 
+        # kill the ongoing job to not waste any resources.
+        # since a running job isn't required for this scan.
+        analyzers_controller.kill_ongoing_analysis(self.test_job)
+
     def tearDown(self):
         self.test_job.delete()
         return super().tearDown()
@@ -79,5 +84,5 @@ class PlaybookViewTestCase(TransactionTestCase):
         self.assertListEqual(playbook.get("supports"), self.supports)
 
         self.assertEqual(
-            playbook.get("default"), True
+            playbook.get("disabled"), True
         )  # to make sure that they are actually picked up by the frontend

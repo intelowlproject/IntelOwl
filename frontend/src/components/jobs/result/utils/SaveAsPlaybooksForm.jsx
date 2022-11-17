@@ -73,11 +73,11 @@ export function SaveAsPlaybookForm({ onFormSubmit }) {
                 <Label className="required" for="forminput-name" md={12}>
                   Playbook description
                 </Label>
-                <Input
-                  autoFocus
+                <textarea
                   id="forminput-description"
                   type="text"
                   name="description"
+                  style={{ width: "-webkit-fill-available" }}
                   onChange={formik.handleChange}
                 />
               </div>

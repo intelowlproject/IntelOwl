@@ -39,6 +39,8 @@ class PlaybookViewTestCase(TransactionTestCase):
             user=self.superuser,
         )
 
+        self.test_job = self.test_job[0]
+
     def tearDown(self):
         self.test_job.delete()
         return super().tearDown()

@@ -128,7 +128,7 @@ IntelOwl is officially integrated in Tines. Read everything about this partnersh
 
 <a href="https://www.docker.com"> <img style="border: 0.2px solid black" width=120 height=31 src="docs/static/docker_logo.png" alt="Docker logo"> </a>
 
-In 2021 IntelOwl joined the official [Docker Open Source Program](https://www.docker.com/blog/expanded-support-for-open-source-software-projects/). This allows IntelOwl developers to easily manage Docker images and focus on writing the code.
+In 2021 IntelOwl joined the official [Docker Open Source Program](https://www.docker.com/blog/expanded-support-for-open-source-software-projects/). This allows IntelOwl developers to easily manage Docker images and focus on writing the code. You may find the official IntelOwl Docker images [here](https://hub.docker.com/search?q=intelowlproject).
 
 ### 🤝 IRON
 

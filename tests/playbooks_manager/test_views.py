@@ -84,5 +84,5 @@ class PlaybookViewTestCase(TransactionTestCase):
         self.assertListEqual(playbook.get("supports"), self.supports)
 
         self.assertEqual(
-            playbook.get("disabled"), True
+            playbook.get("disabled"), False
         )  # to make sure that they are actually picked up by the frontend

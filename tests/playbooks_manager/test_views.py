@@ -1,7 +1,6 @@
 from django.test import TransactionTestCase
 
 from api_app.analyzers_manager.serializers import AnalyzerConfigSerializer
-from api_app.playbooks_manager.dataclasses import PlaybookConfig
 from api_app.playbooks_manager.serializers import CachedPlaybooksSerializer
 from api_app.playbooks_manager.views import _cache_playbook
 from api_app.serializers import ObservableAnalysisSerializer
@@ -15,6 +14,8 @@ class PlaybookViewTestCase(TransactionTestCase):
     class request:
         data: dict
         user: User
+
+    playbook_name = "TEST_NEW_PLAYBOOK"
 
     def setUp(self):
         self.analyzer_serializer_class = ObservableAnalysisSerializer
@@ -80,8 +81,3 @@ class PlaybookViewTestCase(TransactionTestCase):
         self.assertEqual(
             playbook.get("default"), True
         )  # to make sure that they are actually picked up by the frontend
-        self.playbook_name = playbook.get("name")
-
-    def test_cached_playbook_presence(self):
-        playbook = PlaybookConfig.get(self.playbook_name, None)
-        self.assertNotEqual(playbook, None)

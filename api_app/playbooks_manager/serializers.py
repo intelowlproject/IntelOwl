@@ -12,6 +12,7 @@ from api_app.analyzers_manager.serializers import AnalyzerConfigSerializer
 from api_app.connectors_manager.serializers import ConnectorConfigSerializer
 from api_app.core.serializers import AbstractConfigSerializer
 from api_app.models import Job
+from certego_saas.apps.organization.permissions import IsObjectOwnerOrSameOrgPermission
 
 from .models import CachedPlaybook
 
@@ -111,11 +112,21 @@ class CachedPlaybooksSerializer(rfs.ModelSerializer):
         playbook_name = attrs["name"].replace(" ", "_").upper()
         job_id = attrs.get("job_id")
 
-        # it might be safer for us to
-        # consider organisational permissions
-        # for accessing jobs and saving them as
-        # playbooks.
         job = Job.objects.get(pk=job_id)
+        request = self.context.get("request", None)
+
+        has_perm = IsObjectOwnerOrSameOrgPermission().has_object_permission(
+            request, None, job
+        )
+
+        if not has_perm:
+            # bare in mind that for the time being,
+            # we don't check for which user is querying
+            # /api/get_playbok_configs and thus no filtering
+            # like this would be done on that end.
+            raise rfs.ValidationError(
+                "User doesn't have necessary permissions for this action."
+            )
 
         analyzers_used = job.analyzers_to_execute
         connectors_used = job.connectors_to_execute

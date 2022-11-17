@@ -9,11 +9,20 @@ from tests import User
 
 
 class PlaybookViewTestCase(TransactionTestCase):
+    # the requirement for a request object is necessary
+    # because of how certego SaaS is written. Particularly,
+    # the
+    class request:
+        data: dict
+        user: User
+
     def setUp(self):
         self.analyzer_serializer_class = ObservableAnalysisSerializer
         self.superuser = User.objects.create_superuser(
             username="test", email="test@intelowl.com", password="test"
         )
+
+        self.request.user = self.superuser
 
         analyzers_used = ["Classic_DNS"]
         data = {
@@ -29,7 +38,7 @@ class PlaybookViewTestCase(TransactionTestCase):
 
         self.supports = ["ip", "domain", "url"]
 
-        serializer = self.serializer_class(data=data, many=True)
+        serializer = self.analyzer_serializer_class(data=data, many=True)
         serializer.is_valid(raise_exception=True)
 
         serialized_data = serializer.validated_data
@@ -55,7 +64,12 @@ class PlaybookViewTestCase(TransactionTestCase):
             "description": planned_description,
             "job_id": job.id,
         }
-        playbook = _cache_playbook(data, CachedPlaybooksSerializer)
+
+        self.request.data = data
+
+        playbook = _cache_playbook(
+            request=self.request, serializer_class=CachedPlaybooksSerializer
+        )
 
         self.assertEqual(planned_name, playbook.get("name"))
 

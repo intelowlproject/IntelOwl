@@ -39,7 +39,23 @@
         "required": true
       }
     },
-    "params": {}
+    "params": {
+      "max_age": {
+        "value": 180,
+        "type": "int",
+        "description": "How many days back you want to check for reports. Default 180"
+      },
+      "max_reports": {
+        "value": 200,
+        "type": "int",
+        "description": "How many reports you want to save. Default 200"
+      },
+      "verbose": {
+        "value": true,
+        "type": "bool",
+        "description": "Reports are included in this response if you enable this flag. Omitting the verbose flag will exclude reports and the country name field. If you want to keep your response payloads light, this is recommended"
+      }
+    }
   },
   "Anomali_Threatstream_Confidence": {
     "type": "observable",

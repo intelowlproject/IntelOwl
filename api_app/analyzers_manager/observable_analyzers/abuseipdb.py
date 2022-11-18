@@ -12,13 +12,16 @@ class AbuseIPDB(ObservableAnalyzer):
 
     def set_params(self, params):
         self.__api_key = self._secrets["api_key_name"]
+        self.max_age = params.get("max_age", 180)
+        self.max_reports = params.get("max_reports", 200)
+        self.verbose = params.get("verbose", True)
 
     def run(self):
         headers = {"Key": self.__api_key, "Accept": "application/json"}
         params_ = {
             "ipAddress": self.observable_name,
-            "maxAgeInDays": 180,
-            "verbose": True,
+            "maxAgeInDays": self.max_age,
+            "verbose": self.verbose,
         }
         response = requests.get(self.url, params=params_, headers=headers)
         response.raise_for_status()
@@ -26,13 +29,26 @@ class AbuseIPDB(ObservableAnalyzer):
         result = response.json()
         reports = result.get("data", {}).get("reports", [])
         mapping = self._get_mapping()
+        categories_found = {}
+        # I want to use all the reports to extract the categories numbers
+        # Afterwards we can prune them if they are too much
         for report in reports:
             report["categories_human_readable"] = []
             for category in report.get("categories", []):
                 category_human_readable = mapping.get(category, "unknown category")
                 report["categories_human_readable"].append(category_human_readable)
+                if category_human_readable not in categories_found:
+                    categories_found[category_human_readable] = 1
+                else:
+                    categories_found[category_human_readable] += 1
 
+        # adding items to the base result
+        result["categories_found"] = categories_found
         result["permalink"] = f"https://www.abuseipdb.com/check/{self.observable_name}"
+
+        # limiting output result cause it can be really big
+        if reports:
+            result["data"]["reports"] = result["data"]["reports"][: self.max_reports]
 
         return result
 

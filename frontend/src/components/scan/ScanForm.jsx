@@ -575,109 +575,84 @@ export default function ScanForm() {
               </FormGroup>
               {scanType === scanTypes.analyzers_and_connectors && (
                 <>
-                  <>
-                    <FormGroup row>
-                      <Label sm={3} for="analyzers">
-                        Select Analyzers
-                      </Label>
-                      <Col sm={9}>
-                        <Loader
-                          loading={pluginsLoading}
-                          error={pluginsError}
-                          render={() => (
-                            <>
-                              <MultiSelectDropdownInput
-                                options={analyzersOptions}
-                                value={formik.values.analyzers}
-                                onChange={(v) =>
-                                  formik.setFieldValue("analyzers", v)
-                                }
-                              />
-                              <FormText>
-                                Default: all configured analyzers are triggered.
-                              </FormText>
-                            </>
-                          )}
-                        />
-                        <ErrorMessage
-                          component={FormFeedback}
-                          name="analyzers"
-                        />
-                      </Col>
-                    </FormGroup>
-                    <FormGroup row>
-                      <Label sm={3} for="connectors">
-                        Select Connectors
-                      </Label>
-                      <Col sm={9}>
-                        {!(pluginsLoading || pluginsError) && (
+                  <FormGroup row>
+                    <Label sm={3} for="analyzers">
+                      Select Analyzers
+                    </Label>
+                    <Col sm={9}>
+                      <Loader
+                        loading={pluginsLoading}
+                        error={pluginsError}
+                        render={() => (
                           <>
                             <MultiSelectDropdownInput
-                              options={connectorOptions}
-                              value={formik.values.connectors}
+                              options={analyzersOptions}
+                              value={formik.values.analyzers}
                               onChange={(v) =>
-                                formik.setFieldValue("connectors", v)
+                                formik.setFieldValue("analyzers", v)
                               }
                             />
                             <FormText>
-                              Default: all configured connectors are triggered.
+                              Default: all configured analyzers are triggered.
                             </FormText>
                           </>
                         )}
-                        <ErrorMessage
-                          component={FormFeedback}
-                          name="connectors"
-                        />
-                      </Col>
-                    </FormGroup>
-                    <FormGroup row>
-                      <Label sm={3} for="scanform-runtimeconf-editbtn">
-                        Runtime Configuration
-                      </Label>
-                      <Col sm={9}>
-                        <IconButton
-                          id="scanform-runtimeconf-editbtn"
-                          Icon={MdEdit}
-                          title="Edit runtime configuration"
-                          titlePlacement="top"
-                          size="sm"
-                          color="tertiary"
-                          disabled={
-                            !(
-                              formik.values.analyzers.length > 0 ||
-                              formik.values.connectors.length > 0
-                            )
-                          }
-                          onClick={toggleModal}
-                        />
-                        {isModalOpen && (
-                          <RuntimeConfigurationModal
-                            isOpen={isModalOpen}
-                            toggle={toggleModal}
-                            formik={formik}
-                          />
-                        )}
-                      </Col>
-                    </FormGroup>
-                  </>
-                  <FormGroup row className="mt-2">
-                    <Label sm={3}>Extra configuration</Label>
+                      />
+                      <ErrorMessage component={FormFeedback} name="analyzers" />
+                    </Col>
+                  </FormGroup>
+                  <FormGroup row>
+                    <Label sm={3} for="connectors">
+                      Select Connectors
+                    </Label>
                     <Col sm={9}>
-                      {checkChoices.map((ch) => (
-                        <FormGroup check key={`checkchoice__${ch.value}`}>
-                          <Field
-                            as={Input}
-                            id={`checkchoice__${ch.value}`}
-                            type="radio"
-                            name="check"
-                            value={ch.value}
-                            onChange={formik.handleChange}
+                      {!(pluginsLoading || pluginsError) && (
+                        <>
+                          <MultiSelectDropdownInput
+                            options={connectorOptions}
+                            value={formik.values.connectors}
+                            onChange={(v) =>
+                              formik.setFieldValue("connectors", v)
+                            }
                           />
-                          <Label check for={`checkchoice__${ch.value}`}>
-                            {ch.label}
-                          </Label>
-                        </FormGroup>
-                      ))}
+                          <FormText>
+                            Default: all configured connectors are triggered.
+                          </FormText>
+                        </>
+                      )}
+                      <ErrorMessage
+                        component={FormFeedback}
+                        name="connectors"
+                      />
+                    </Col>
+                  </FormGroup>
+                  <FormGroup row>
+                    <Label sm={3} for="scanform-runtimeconf-editbtn">
+                      Runtime Configuration
+                    </Label>
+                    <Col sm={9}>
+                      <IconButton
+                        id="scanform-runtimeconf-editbtn"
+                        Icon={MdEdit}
+                        title="Edit runtime configuration"
+                        titlePlacement="top"
+                        size="sm"
+                        color="tertiary"
+                        disabled={
+                          !(
+                            formik.values.analyzers.length > 0 ||
+                            formik.values.connectors.length > 0
+                          )
+                        }
+                        onClick={toggleModal}
+                      />
+                      {isModalOpen && (
+                        <RuntimeConfigurationModal
+                          isOpen={isModalOpen}
+                          toggle={toggleModal}
+                          formik={formik}
+                        />
+                      )}
                     </Col>
                   </FormGroup>
                 </>
@@ -698,6 +673,27 @@ export default function ScanForm() {
                   )}
                 </FormGroup>
               )}
+              <FormGroup row className="mt-2">
+                <Label sm={3}>Extra configuration</Label>
+                <Col sm={9}>
+                  {checkChoices.map((ch) => (
+                    <FormGroup check key={`checkchoice__${ch.value}`}>
+                      <Field
+                        as={Input}
+                        id={`checkchoice__${ch.value}`}
+                        type="radio"
+                        name="check"
+                        value={ch.value}
+                        onChange={formik.handleChange}
+                      />
+                      <Label check for={`checkchoice__${ch.value}`}>
+                        {ch.label}
+                      </Label>
+                    </FormGroup>
+                  ))}
+                </Col>
+              </FormGroup>
+
               <hr />
               <FormGroup row>
                 <Label sm={3} id="scanform-tagselectinput">

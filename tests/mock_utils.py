@@ -6,6 +6,7 @@ for observable analyzers, if can customize the behavior based on:
 MOCK_CONNECTIONS to True -> connections to external analyzers are faked
 """
 
+from dataclasses import dataclass
 from unittest import skip, skipIf  # noqa: F401
 from unittest.mock import MagicMock, patch  # noqa: F401
 
@@ -14,6 +15,11 @@ from django.conf import settings
 
 # class for mocking responses
 class MockResponse:
+    @dataclass()
+    class Request:
+        def __init__(self):
+            self.url = None
+
     def __init__(
         self, json_data, status_code, text="", content=b"", url="", headers=None
     ):
@@ -23,6 +29,7 @@ class MockResponse:
         self.content = content
         self.url = url
         self.headers = headers or {}
+        self.request = self.Request()
 
     def json(self):
         return self.json_data

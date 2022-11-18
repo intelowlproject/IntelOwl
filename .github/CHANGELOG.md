@@ -1,6 +1,21 @@
 # Changelog
 
 [**Upgrade Guide**](https://intelowl.readthedocs.io/en/latest/Installation.md#update-to-the-most-recent-version)
+## [v4.1.2](https://github.com/intelowlproject/IntelOwl/releases/tag/v4.1.2)
+
+This version mainly adds quality improvements to the recently released ["Playbook" feature](https://intelowl.readthedocs.io/en/latest/Usage.html#playbooks):
+* Now it is possible to create a new Playbook easily thanks to a proper button in the GUI. In this way you can save your own Playbooks and repeat them.
+* Now Playbooks support the check of already existing similar analysis like normal analysis already do. This saves computational and analysts' time.
+
+Thanks to @0x0elliot for these new features.
+
+**New/Improved Analyzers:**
+* VT analyzer has been fixed and works correctly when performing a "rescan" of a sample.
+* AbuseIPDB analyzer does not show all the reports by default (this could become quite large)
+
+**Others**
+- various fixes and stability contributions
+- a lot of dependencies upgrades
 
 ## [v4.1.1](https://github.com/intelowlproject/IntelOwl/releases/tag/v4.1.1)
 

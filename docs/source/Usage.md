@@ -327,7 +327,7 @@ The following is the list of the available connectors. You can also navigate the
 - Graphical Interface: once your application is up and running, go to the "Plugins" section
 - [pyintelowl](https://github.com/intelowlproject/pyintelowl): `$ pyintelowl get-connector-config`
 
-##### List
+##### List of pre-built Connectors
 
 * `MISP`: automatically creates an event on your MISP instance, linking the successful analysis on IntelOwl.
 * `OpenCTI`: automatically creates an observable and a linked report on your OpenCTI instance, linking the the successful analysis on IntelOwl.
@@ -384,21 +384,21 @@ All plugins i.e. analyzers and connectors have `kill` and `retry` actions. In ad
 
 Playbooks are designed to be easy to share sequence of running Analyzers/Connectors on a particular kind of observable.
 
-If you want to avoid to re-select/re-configure a particular combiation of analyzers and connectors together every time, you should create a playbook out of it and use it instead. This is time saver.
+If you want to avoid to re-select/re-configure a particular combination of analyzers and connectors together every time, you should create a playbook out of it and use it instead. This is time saver.
 
 This is a feature introduced since IntelOwl v4.1.0! Please provide feedback about it!
 
 #### Playbooks List
-The following is the list of the available playbooks. You can also navigate the same list via the
+The following is the list of the available pre-built playbooks. You can also navigate the same list via the
 
 - Graphical Interface: once your application is up and running, go to the "Plugins" section
 - [pyintelowl](https://github.com/intelowlproject/pyintelowl): `$ pyintelowl get-playbook-config`
 
-##### List
+##### List of pre-built playbooks
 * `FREE_TO_USE_ANALYZERS`: A playbook containing all free to use analyzers.
 
 #### Playbooks customization
-You can create new analyzers by adding a new entry in the `playbook_config.json` file. That is the only way to do that for now. We are planning to provide more easier way to add new playbooks in the future.
+You can create new playbooks by adding a new entry in the `playbook_config.json` file.
 
 The following are all the keys that you can leverage/change without touching the source code:
 
@@ -407,6 +407,11 @@ The following are all the keys that you can leverage/change without touching the
 - `disabled`: _similar to analyzers_
 - `description`: _similar to analyzers_
 - `supports`: list of observable types or files supported
+
+Another chance to create a new playbook is to leverage the "Save as Playbook" button that you can find on the top right of the Job Result Page.
+In this way, after you have done an analysis, you can save the configuration of analyzers/connectors for re-use with a single click.
+
+Those are the only ways to do that for now. We are planning to provide more easier ways to add new playbooks in the future.
 
 ---
 

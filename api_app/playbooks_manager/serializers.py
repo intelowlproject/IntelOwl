@@ -122,7 +122,7 @@ class CachedPlaybooksSerializer(rfs.ModelSerializer):
         if not has_perm:
             # bare in mind that for the time being,
             # we don't check for which user is querying
-            # /api/get_playbok_configs and thus no filtering
+            # /api/get_playbook_configs and thus no filtering
             # like this would be done on that end.
             raise rfs.ValidationError(
                 "User doesn't have necessary permissions for this action."

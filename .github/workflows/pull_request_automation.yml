@@ -136,9 +136,9 @@ jobs:
         run: |
           docker/scripts/coverage_test.sh tests.analyzers_manager.test_file_scripts
 
-      - name: "Test: Playbooks Manager"
+      - name: "Test: Playbooks Manager (controllers, views)"
         run: |
-          docker/scripts/coverage_test.sh tests.playbooks_manager.test_controller
+          docker/scripts/coverage_test.sh tests.playbooks_manager.test_controller tests.playbooks_manager.test_views
 
       - name: "Coverage: generate xml and transfer from docker container to host"
         run: |

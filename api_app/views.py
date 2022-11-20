@@ -112,7 +112,10 @@ def _multi_analysis_request(
             for analyzer in job.analyzers_to_execute:
                 # Appending custom config to runtime configuration
                 config = PluginConfig.get_as_dict(
-                    user, PluginConfig.PluginType.ANALYZER, plugin_name=analyzer
+                    user,
+                    PluginConfig.PluginType.ANALYZER,
+                    PluginConfig.ConfigType.PARAMETER,
+                    plugin_name=analyzer,
                 ).get(analyzer, {})
                 if analyzer in runtime_configurations[index]:
                     config |= runtime_configurations[index][analyzer]
@@ -120,7 +123,10 @@ def _multi_analysis_request(
                     runtime_configuration[analyzer] = config
             for connector in job.connectors_to_execute:
                 config = PluginConfig.get_as_dict(
-                    user, PluginConfig.PluginType.CONNECTOR, plugin_name=connector
+                    user,
+                    PluginConfig.PluginType.CONNECTOR,
+                    PluginConfig.ConfigType.PARAMETER,
+                    plugin_name=connector,
                 ).get(connector, {})
                 if connector in runtime_configurations[index]:
                     config |= runtime_configurations[index][connector]

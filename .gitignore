@@ -20,3 +20,4 @@ docker/.env.start
 .subversion
 .bash_history
 .cache
+.google-cookie

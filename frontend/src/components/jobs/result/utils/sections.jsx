@@ -15,6 +15,8 @@ import {
   addToast,
 } from "@certego/certego-ui";
 
+import { SaveAsPlaybookButton } from "./SaveAsPlaybooksForm";
+
 import { JobTag, PlaybookTag, StatusTag, TLPTag } from "../../../common";
 import { downloadJobSample, deleteJob, killJob } from "../api";
 
@@ -47,6 +49,7 @@ export function JobActionsBar({ job }) {
     // triggers the click event
     fileLink.click();
   };
+
   const onViewRawJsonBtnClick = async () => {
     addToast(
       "Link will be opened in a new tab shortly...",
@@ -80,6 +83,8 @@ export function JobActionsBar({ job }) {
           titlePlacement="top"
         />
       )}
+
+      <SaveAsPlaybookButton jobId={job.id} />
       {job?.is_sample && (
         <Button
           size="sm"

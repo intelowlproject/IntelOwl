@@ -11,7 +11,10 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from api_app.playbooks_manager.serializers import PlaybookConfigSerializer
+from api_app.playbooks_manager.serializers import (
+    CachedPlaybooksSerializer,
+    PlaybookConfigSerializer,
+)
 from api_app.serializers import (
     PlaybookAnalysisResponseSerializer,
     PlaybookFileAnalysisSerializer,
@@ -27,6 +30,36 @@ logger = logging.getLogger(__name__)
 __all__ = [
     "PlaybookListAPI",
 ]
+
+
+def _cache_playbook(request, serializer_class: CachedPlaybooksSerializer):
+    """
+    Cache playbook after a scan
+    """
+
+    serializer = serializer_class(data=request.data, context={"request": request})
+    serializer.is_valid(raise_exception=True)
+
+    serializer.save()
+
+    return serializer.data
+
+
+@api_view(["POST"])
+def cache_playbook_view(
+    request,
+):
+    logger.info(f"received request from {request.user}." f"Data: {request.data}.")
+
+    response = _cache_playbook(
+        request=request,
+        serializer_class=CachedPlaybooksSerializer,
+    )
+
+    return Response(
+        response,
+        status=status.HTTP_200_OK,
+    )
 
 
 def _multi_analysis_request_playbooks(
@@ -89,7 +122,7 @@ class PlaybookListAPI(APIView):
     )
     def get(self, request, *args, **kwargs):
         try:
-            pc = self.serializer_class.read_and_verify_config()
+            pc = self.serializer_class.output_with_cached_playbooks()
             return Response(pc, status=status.HTTP_200_OK)
         except Exception as e:
             logger.exception(

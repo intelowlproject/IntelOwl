@@ -4,6 +4,7 @@
 [![GitHub Repo stars](https://img.shields.io/github/stars/intelowlproject/IntelOwl?style=social)](https://github.com/intelowlproject/IntelOwl/stargazers)
 [![Docker](https://img.shields.io/docker/pulls/intelowlproject/intelowl)](https://hub.docker.com/repository/docker/intelowlproject/intelowl)
 [![Twitter Follow](https://img.shields.io/twitter/follow/intel_owl?style=social)](https://twitter.com/intel_owl)
+[![Linkedin](https://img.shields.io/badge/LinkedIn-0077B5?style=flat&logo=linkedin&logoColor=white)](https://www.linkedin.com/company/intelowl/)
 [![Official Site](https://img.shields.io/badge/official-site-blue)](https://intelowlproject.github.io)
 [![Live Demo](https://img.shields.io/badge/live-demo-blue)](https://intelowl.honeynet.org)
 
@@ -59,7 +60,9 @@ You can see the full list of all available analyzers in the [documentation](http
 
 ## Partnerships and sponsors
 
-We have an official sponsorship program for companies, organizations and individuals who support IntelOwl development. For more details on how to join the list below, read the page: [Partnership and sponsors](https://github.com/certego/IntelOwl/blob/master/.github/partnership_and_sponsors.md).
+As open source project maintainers, we strongly rely on external support to get the resources and time to work on keeping the project alive, with a constant release of new features, bug fixes and general improvements.
+
+Because of this, we joined [Open Collective](https://opencollective.com/intelowl-project) to obtain non-profit equal level status which allows the organization to receive and manage donations transparently. Please support IntelOwl and all the community by choosing a plan (BRONZE, SILVER, etc) [here](https://opencollective.com/intelowl-project).
 
 ### 🥇 GOLD
 

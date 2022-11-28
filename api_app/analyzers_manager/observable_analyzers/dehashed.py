@@ -53,6 +53,7 @@ class DehashedSearch(ObservableAnalyzer):
         return {
             "query_value": value,
             "pages_queried": self.pages,
+            "operator": self.operator,
             "entries": entries,
         }
 

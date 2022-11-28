@@ -64,7 +64,7 @@ As open source project maintainers, we strongly rely on external support to get 
 
 Because of this, we joined [Open Collective](https://opencollective.com/intelowl-project) to obtain non-profit equal level status which allows the organization to receive and manage donations transparently. Please support IntelOwl and all the community by choosing a plan (BRONZE, SILVER, etc).
 
-<a href="https://opencollective.com/webpack/donate" target="_blank">
+<a href="https://opencollective.com/intelowl-project/donate" target="_blank">
   <img src="https://opencollective.com/intelowl-project/donate/button@2x.png?color=blue" width=200 />
 </a>
 

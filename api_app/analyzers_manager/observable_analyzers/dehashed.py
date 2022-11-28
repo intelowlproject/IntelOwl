@@ -50,6 +50,11 @@ class DehashedSearch(ObservableAnalyzer):
         # execute searches
         entries = self.__search(value)
 
+        logger.info(
+            f"result for observable {self.observable_name} is: query:"
+            f" {value}, pages {self.pages}, operator: {self.operator}"
+        )
+
         return {
             "query_value": value,
             "pages_queried": self.pages,
@@ -67,8 +72,10 @@ class DehashedSearch(ObservableAnalyzer):
         elif self.observable_classification == ObservableTypes.GENERIC:
             if re.match(r"^[\w\.\+\-]+\@[\w]+\.[a-z]{2,3}$", self.observable_name):
                 self.operator = "email"
-            if re.match(r"\+?\d+", self.observable_name):
+            elif re.match(r"\+?\d+", self.observable_name):
                 self.operator = "phone"
+            elif " " in self.observable_name:
+                self.operator = "name"
 
     def __search(self, value: str) -> list:
         # the API uses basic auth so we need to base64 encode the auth payload

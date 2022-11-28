@@ -677,6 +677,11 @@
         "value": 1,
         "type": "int",
         "description": "Number of pages fetched. Recommend to keep at 1 only to save on credits."
+      },
+      "operator": {
+        "value": "username",
+        "type": "str",
+        "description": "Search Operator to use among (id, email, ip_address, username, password, hashed_password, hash_type, name, vin, address, phone, database_name). Default: username"
       }
     }
   },

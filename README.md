@@ -97,10 +97,13 @@ Project Summaries and/or in-development projects:
   - [Aditya Narayan Sinha](https://twitter.com/0x0elliot): [Creating Playbooks for IntelOwl](https://www.honeynet.org/2022/10/06/gsoc-2022-project-summary-creating-playbooks-for-intelowl/)
   - [Aditya Pratap Singh](https://twitter.com/devmrfitz): [IntelOwl v4 improvements](https://www.honeynet.org/2022/09/26/gsoc-2022-project-summary-intelowl-v4-improvements/)
   - [Hussain Khan](https://twitter.com/Hussain41099635): [IntelOwl Go Client](https://www.honeynet.org/2022/09/06/gsoc-2022-project-summary-intelowl-go-client-go-intelowl/)
+- 2023: you?
 
-If you are interested in being the next GSoC developer for IntelOwl, join the [Honeynet Slack chat](https://gsoc-slack.honeynet.org/) for more info. This is also the place where the majority of the development discussion happens, so feel free to join, have a look and ask questions about the project.
+~~If you are interested in being the next GSoC developer for IntelOwl, join the [Honeynet Slack chat](https://gsoc-slack.honeynet.org/) for more info.~~
 
-(Plus we started a new project called [GreedyBear](https://github.com/honeynet/GreedyBear) that will be proposed to the GSoC too starting from 2022)
+Since 2023 we are proposing IntelOwl and [GreedyBear](https://github.com/honeynet/GreedyBear) to the GSoC under a new non-profit organization called [IntelOwl Project](https://www.linkedin.com/company/intelowl) and not anymore under the Honeynet Project. Because of that, if you are interested in being the next GSoC developer for us, we invite you to join this new [Slack channel](https://intelowlproject.slack.com).
+
+This is also the place where the majority of the development discussion happens, so feel free to join, have a look and ask questions about the project.
 
 ### 🥈 SILVER
 

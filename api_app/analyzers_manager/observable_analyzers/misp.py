@@ -4,6 +4,7 @@
 import datetime
 
 import pymisp
+from django.conf import settings
 
 from api_app.analyzers_manager import classes
 from api_app.exceptions import AnalyzerConfigurationException, AnalyzerRunException
@@ -13,6 +14,7 @@ from tests.mock_utils import MockResponseNoOp, if_mock_connections, patch
 class MISP(classes.ObservableAnalyzer):
     def set_params(self, params):
         self.ssl_check = params.get("ssl_check", True)
+        self.self_signed_certificate = params.get("self_signed_certificate", False)
         self.debug = params.get("debug", False)
         self.from_days = params.get("from_days", 90)
         self.limit = params.get("limit", 50)
@@ -23,10 +25,16 @@ class MISP(classes.ObservableAnalyzer):
         self.strict_search = params.get("strict_search", True)
 
     def run(self):
+        # this allows self-signed certificates to be used
+        ssl_param = (
+            f"{settings.PROJECT_LOCATION}/configuration/misp_ssl.crt"
+            if self.ssl_check and self.self_signed_certificate
+            else self.ssl_check
+        )
         misp_instance = pymisp.PyMISP(
             url=self.__url_name,
             key=self.__api_key,
-            ssl=self.ssl_check,
+            ssl=ssl_param,
             debug=self.debug,
             timeout=5,
         )

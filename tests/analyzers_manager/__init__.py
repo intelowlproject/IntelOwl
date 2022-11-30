@@ -49,7 +49,8 @@ class _AbstractAnalyzersScriptTestCase(TransactionTestCase):
         cls.superuser = User.objects.create_superuser(
             username="test", email="test@intelowl.com", password="test"
         )
-        call_command("migrate_secrets")
+        if not settings.STAGE_CI:
+            call_command("migrate_secrets")
         if cls in [
             _AbstractAnalyzersScriptTestCase,
             _ObservableAnalyzersScriptsTestCase,

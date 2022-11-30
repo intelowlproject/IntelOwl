@@ -2,6 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 from unittest.mock import patch
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.management import call_command
 from django.test import TestCase
@@ -20,7 +21,8 @@ class ConfigParseTests(TestCase):
         cls.superuser = User.objects.create_superuser(
             username="test", email="test@intelowl.com", password="test"
         )
-        call_command("migrate_secrets")
+        if not settings.STAGE_CI:
+            call_command("migrate_secrets")
 
     def test_extends(self):
         def _patched_get_env_var(name):

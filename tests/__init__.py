@@ -144,6 +144,8 @@ class CustomAPITestCase(TestCase):
         cls.superuser = User.objects.create_superuser(
             username="test", email="test@intelowl.com", password="test"
         )
+        # This is the first migrate secrets that is called
+        # during the CI so we need to keep this
         call_command("migrate_secrets")
 
     def setUp(self):

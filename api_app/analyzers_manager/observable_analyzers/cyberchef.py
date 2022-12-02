@@ -3,10 +3,10 @@
 import json
 
 import requests
+from django.conf import settings
 
 from api_app.analyzers_manager.classes import DockerBasedAnalyzer, ObservableAnalyzer
 from api_app.exceptions import AnalyzerRunException
-from intel_owl.settings import PROJECT_LOCATION
 
 
 class CyberChef(ObservableAnalyzer, DockerBasedAnalyzer):
@@ -20,7 +20,9 @@ class CyberChef(ObservableAnalyzer, DockerBasedAnalyzer):
             try:
                 try:
                     with open(
-                        f"{PROJECT_LOCATION}/configuration/{self.config_filename}", "r"
+                        f"{settings.PROJECT_LOCATION}/configuration/"
+                        f"{self.config_filename}",
+                        "r",
                     ) as recipes:
                         parsed_recipes = json.load(recipes)
                         self.recipe = parsed_recipes[self.recipe_name]

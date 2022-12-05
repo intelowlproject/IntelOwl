@@ -45,8 +45,8 @@ export const STATUS_COLORMAP = {
 export const JOB_STATUSES = [
   "pending",
   "running",
-  "reported_with_fails",
-  "reported_without_fails",
+  "reported with fails",
+  "reported without fails",
   "killed",
   "failed",
 ];

@@ -61,6 +61,7 @@ const jobTableColumns = [
         value={value}
       />
     ),
+    maxWidth: 125,
     disableSortBy: true,
     Filter: DefaultColumnFilter,
   },
@@ -75,6 +76,7 @@ const jobTableColumns = [
         value={value}
       />
     ),
+    maxWidth: 125,
     disableSortBy: true,
     Filter: DefaultColumnFilter,
   },
@@ -89,6 +91,7 @@ const jobTableColumns = [
         value={value}
       />
     ),
+    maxWidth: 125,
     disableSortBy: true,
     Filter: DefaultColumnFilter,
   },
@@ -173,6 +176,7 @@ const jobTableColumns = [
         id: "status",
         accessor: "status",
         Cell: ({ value }) => <StatusTag status={value} />,
+        maxWidth: 125,
         disableSortBy: true,
         Filter: SelectOptionsFilter,
         selectOptions: JOB_STATUSES,

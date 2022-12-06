@@ -623,7 +623,7 @@ Patch after **v1.5.0**.
 
 **Fixes:**
 
-- Updates and fixes to: `Doc_info`, `PE_Info`, `VirusTotal` v3 and `Shodan_Honeyscore` analyzers.
+- Updates and fixes to: `Criminalip IP/Domain Search`, `Doc_info`, `PE_Info`, `VirusTotal` v3 and `Shodan_Honeyscore` analyzers.
 - Added migration files for DB.
 
 ## [v1.4.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v1.4.0)

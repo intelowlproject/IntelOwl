@@ -433,6 +433,70 @@
       }
     }
   },
+  "Criminalip_IP_Search": {
+    "type": "observable",
+    "python_module": "criminalip.Criminalip",
+    "description": "scan an IP address against Criminalip View API",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": ["ip"],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {
+      "api_id_name": {
+        "env_var_key": "CRIMINALIP_API_ID",
+        "description": "",
+        "required": true
+      },
+      "api_secret_name": {
+        "env_var_key": "CRIMINALIP_API_SECRET",
+        "description": "",
+        "required": true
+      }
+    },
+    "params": {
+      "criminalip_analysis": {
+        "value": "search",
+        "type": "str",
+        "description": ""
+      }
+    }
+  },
+  "Criminalip_Domain_Search": {
+    "type": "observable",
+    "python_module": "criminalip.Criminalip",
+    "description": "scan an IP address against Criminalip View API",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": ["domain"],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {
+      "api_id_name": {
+        "env_var_key": "CRIMINALIP_API_ID",
+        "description": "",
+        "required": true
+      },
+      "api_secret_name": {
+        "env_var_key": "CRIMINALIP_API_SECRET",
+        "description": "",
+        "required": true
+      }
+    },
+    "params": {
+      "criminalip_analysis": {
+        "value": "search",
+        "type": "str",
+        "description": ""
+      }
+    }
+  },
   "Censys_Search": {
     "type": "observable",
     "python_module": "censys.Censys",

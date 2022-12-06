@@ -103,6 +103,7 @@ In the `env_file_app`, configure different variables as explained below.
 **Optional** variables needed to enable specific analyzers:
 * `ABUSEIPDB_KEY`: AbuseIPDB API key
 * `AUTH0_KEY`: Auth0 API Key
+* `CRIMINALIP_KEY`: Criminalip API Key
 * `SECURITYTRAILS_KEY`: Securitytrails API Key
 * `SHODAN_KEY`: Shodan API key
 * `HUNTER_API_KEY`: Hunter.io API key

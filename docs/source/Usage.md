@@ -236,6 +236,8 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `MISP`: scan an observable on a MISP instance
 * `MISPFIRST`: scan an observable on the FIRST MISP instance
 * `DNSDB`: scan an observable against the [Passive DNS Farsight Database](https://www.farsightsecurity.com/solutions/dnsdb/) (support both v1 and v2 versions)
+* `Criminalip_IP_Search`: scan an Domain against [Criminalip](https://www.Criminalip.io/) [IP Search API](https://www.criminalip.io/developer/api/get-ip-data)
+* `Criminalip_Domain_Search`: scan an IP against [Criminalip](https://www.Criminalip.io/) [Domain Search API](https://www.criminalip.io/developer/api/post-domain-scan)
 * `Shodan_Search`: scan an IP against [Shodan](https://www.shodan.io/) Search API
 * `Shodan_Honeyscore`: scan an IP against [Shodan](https://www.shodan.io/) Honeyscore API
 * `HoneyDB_Get`: [HoneyDB](https://honeydb.io/) IP lookup service

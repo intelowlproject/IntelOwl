@@ -30,6 +30,7 @@ ELASTICSEARCH_NO_OF_REPLICAS=0
 
 # analyzers secrets (optional)
 IPINFO_KEY=test
+CRIMINALIP_KEY=test
 SHODAN_KEY=test
 CAPESANDBOX_KEY=test
 ABUSEIPDB_KEY=test

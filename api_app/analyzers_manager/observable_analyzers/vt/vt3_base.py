@@ -22,8 +22,6 @@ class VirusTotalv3AnalyzerMixin(BaseAnalyzerMixin):
         # Do not change these values without knowing what you are doing!
         self.max_tries = params.get("max_tries", 10)
         self.poll_distance = params.get("poll_distance", 30)
-        self.rescan_max_tries = params.get("rescan_max_tries", 5)
-        self.rescan_poll_distance = params.get("rescan_poll_distance", 120)
         self.include_behaviour_summary = params.get("include_behaviour_summary", False)
         self.include_sigma_analyses = params.get("include_sigma_analyses", False)
         self.force_active_scan = params.get("force_active_scan", False)
@@ -151,13 +149,12 @@ class VirusTotalv3AnalyzerMixin(BaseAnalyzerMixin):
                             )
                             # the "rescan" option will burn quotas.
                             # We should reduce the polling at the minimum
-                            extracted_result = self._vt_scan_file(
-                                observable_name, rescan_instead=True
+                            result = self._vt_scan_file(
+                                observable_name,
+                                rescan_instead=True,
+                                max_tries=2,
+                                poll_distance=120,
                             )
-                            # if we were able to do a successful rescan,
-                            # overwrite old report
-                            if extracted_result:
-                                result = extracted_result
                             already_done_active_scan_because_report_was_old = True
                         else:
                             logger.info(
@@ -231,13 +228,19 @@ class VirusTotalv3AnalyzerMixin(BaseAnalyzerMixin):
 
         return result
 
-    def _vt_scan_file(self, md5: str, rescan_instead: bool = False) -> dict:
+    def _vt_scan_file(
+        self, md5: str, rescan_instead: bool = False, max_tries=None, poll_distance=None
+    ) -> dict:
+        # This can be overwritten to allow different configurations
+        # Do not change this if you do not know what you are doing.
+        # This impacts paid quota usage
+        max_tries = max_tries if max_tries else self.max_tries
+        poll_distance = poll_distance if poll_distance else self.poll_distance
+
         if rescan_instead:
             logger.info(f"(Job: {self.job_id}, {md5}) -> VT analyzer requested rescan")
             files = {}
             uri = f"files/{md5}/analyse"
-            poll_distance = self.rescan_poll_distance
-            max_tries = self.rescan_max_tries
         else:
             logger.info(f"(Job: {self.job_id}, {md5}) -> VT analyzer requested scan")
             try:
@@ -249,8 +252,6 @@ class VirusTotalv3AnalyzerMixin(BaseAnalyzerMixin):
                 )
             files = {"file": binary}
             uri = "files"
-            poll_distance = self.poll_distance
-            max_tries = self.max_tries
 
         result, _ = self._perform_post_request(uri, files=files)
 
@@ -264,13 +265,12 @@ class VirusTotalv3AnalyzerMixin(BaseAnalyzerMixin):
         # max 5 minutes waiting
         got_result = False
         uri = f"analyses/{scan_id}"
-        logger.info(
-            "Starting POLLING for Scan results. "
-            f"Poll Distance {poll_distance}, tries {max_tries}, ScanID {scan_id}"
-            f" (Job: {self.job_id}, {md5})"
-        )
         for chance in range(max_tries):
             time.sleep(poll_distance)
+            logger.info(
+                f"Started POLLING for Scan results. ScanID {scan_id}"
+                f" (Job: {self.job_id}, {md5})"
+            )
             result, _ = self._perform_get_request(uri, files=files)
             analysis_status = (
                 result.get("data", {}).get("attributes", {}).get("status", "")
@@ -284,23 +284,15 @@ class VirusTotalv3AnalyzerMixin(BaseAnalyzerMixin):
                 got_result = True
                 break
 
-        result = {}
-        if got_result:
-            # retrieve the FULL report, not only scans results.
-            # If it's a new sample, it's free of charge.
-            result = self._vt_get_report(self.ObservableTypes.HASH, md5)
-        else:
-            message = (
+        if not got_result and not rescan_instead:
+            raise AnalyzerRunException(
                 f"[POLLING] (Job: {self.job_id}, {md5}) -> "
                 f"max polls tried, no result"
             )
-            # if we tried a rescan, we can still use the old report
-            if rescan_instead:
-                logger.info(message)
-            else:
-                raise AnalyzerRunException(message)
 
-        return result
+        # retrieve the FULL report, not only scans results.
+        # If it's a new sample, it's free of charge.
+        return self._vt_get_report(self.ObservableTypes.HASH, md5)
 
     def _perform_get_request(self, uri: str, ignore_404=False, **kwargs):
         return self._perform_request(uri, method="GET", ignore_404=ignore_404, **kwargs)

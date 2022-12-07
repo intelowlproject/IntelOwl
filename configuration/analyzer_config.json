@@ -3612,7 +3612,7 @@
     "run_hash": true,
     "run_hash_type": "sha256",
     "config": {
-      "soft_time_limit": 500,
+      "soft_time_limit": 800,
       "queue": "default"
     },
     "secrets": {
@@ -3623,10 +3623,30 @@
       }
     },
     "params": {
+      "max_tries": {
+        "value": 10,
+        "type": "int",
+        "description": "How many times we poll the VT API for scan results"
+      },
+      "poll_distance": {
+        "value": 30,
+        "type": "int",
+        "description": "IntelOwl would sleep for this time between each poll to VT APIs"
+      },
       "force_active_scan_if_old": {
         "value": false,
         "type": "bool",
         "description": "If the sample is old, it would be rescanned. This will cost additional quota."
+      },
+      "rescan_max_tries": {
+        "value": 5,
+        "type": "int",
+        "description": "How many times we poll the VT API for RE-scan results (samples already available to VT)"
+      },
+      "rescan_poll_distance": {
+        "value": 120,
+        "type": "int",
+        "description": "IntelOwl would sleep for this time between each poll to VT APIs after having started a RE-scan"
       },
       "days_to_say_that_a_scan_is_old": {
         "value": 30,
@@ -3665,7 +3685,7 @@
     "run_hash": true,
     "run_hash_type": "sha256",
     "config": {
-      "soft_time_limit": 500,
+      "soft_time_limit": 800,
       "queue": "default"
     },
     "secrets": {
@@ -3676,6 +3696,16 @@
       }
     },
     "params": {
+      "max_tries": {
+        "value": 10,
+        "type": "int",
+        "description": "How many times we poll the VT API for scan results"
+      },
+      "poll_distance": {
+        "value": 30,
+        "type": "int",
+        "description": "IntelOwl would sleep for this time between each poll to VT APIs"
+      },
       "force_active_scan": {
         "value": true,
         "type": "bool",
@@ -3685,6 +3715,16 @@
         "value": true,
         "type": "bool",
         "description": "If the sample is old, it would be rescanned. This will cost additional quota."
+      },
+      "rescan_max_tries": {
+        "value": 5,
+        "type": "int",
+        "description": "How many times we poll the VT API for RE-scan results (samples already available to VT)"
+      },
+      "rescan_poll_distance": {
+        "value": 120,
+        "type": "int",
+        "description": "IntelOwl would sleep for this time between each poll to VT APIs after having started a RE-scan"
       },
       "days_to_say_that_a_scan_is_old": {
         "value": 30,
@@ -3722,7 +3762,7 @@
     "leaks_info": false,
     "observable_supported": ["ip", "domain", "url", "hash"],
     "config": {
-      "soft_time_limit": 500,
+      "soft_time_limit": 800,
       "queue": "default"
     },
     "secrets": {
@@ -3733,10 +3773,30 @@
       }
     },
     "params": {
+      "max_tries": {
+        "value": 10,
+        "type": "int",
+        "description": "How many times we poll the VT API for scan results"
+      },
+      "poll_distance": {
+        "value": 30,
+        "type": "int",
+        "description": "IntelOwl would sleep for this time between each poll to VT APIs"
+      },
       "force_active_scan_if_old": {
         "value": false,
         "type": "bool",
         "description": "If you submitted an hash and the sample is old, it would be rescanned. This will cost additional quota."
+      },
+      "rescan_max_tries": {
+        "value": 5,
+        "type": "int",
+        "description": "How many times we poll the VT API for RE-scan results (samples already available to VT)"
+      },
+      "rescan_poll_distance": {
+        "value": 120,
+        "type": "int",
+        "description": "IntelOwl would sleep for this time between each poll to VT APIs after having started a RE-scan"
       },
       "days_to_say_that_a_scan_is_old": {
         "value": 30,

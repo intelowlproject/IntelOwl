@@ -265,7 +265,7 @@ class VirusTotalv3AnalyzerMixin(BaseAnalyzerMixin):
         got_result = False
         uri = f"analyses/{scan_id}"
         logger.info(
-            f"Starting POLLING for Scan results. "
+            "Starting POLLING for Scan results. "
             f"Poll Distance {poll_distance}, tries {max_tries}, ScanID {scan_id}"
             f" (Job: {self.job_id}, {md5})"
         )

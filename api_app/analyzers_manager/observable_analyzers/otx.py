@@ -96,9 +96,6 @@ class OTX(BaseOTX):
     This could be slow in some cases (IPs)
     """
 
-    def set_params(self, params):
-        super(OTX, self).set_params(params)
-
     def run(self):
         otx = OTXv2.OTXv2(self._api_key)
 
@@ -132,7 +129,7 @@ class OTXSection(BaseOTX):
     """This class use an OTX API to download only some data about an Observable"""
 
     def set_params(self, params):
-        super(OTXSection, self).set_params(params)
+        super().set_params(params)
         self.sections = params.get("sections", ["general"])
 
     def run(self):

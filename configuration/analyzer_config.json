@@ -2109,7 +2109,7 @@
   "OTXSection": {
     "type": "observable",
     "python_module": "otx.OTXSection",
-    "description": "scan an observable on Alienvault OTX and get some sections of the data",
+    "description": "scan an observable on Alienvault OTX and get some specific parts of the data",
     "disabled": false,
     "external_service": true,
     "leaks_info": false,

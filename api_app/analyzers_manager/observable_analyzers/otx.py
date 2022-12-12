@@ -60,23 +60,23 @@ class BaseOTX(classes.ObservableAnalyzer, metaclass=ABCMeta):
         return pulse_list
 
     @classmethod
-    def _extract_geo(self, geo_data: dict) -> dict:
+    def _extract_geo(cls, geo_data: dict) -> dict:
         return geo_data
 
     @classmethod
-    def _extract_malware_samples(self, malware_data: dict) -> List[str]:
+    def _extract_malware_samples(cls, malware_data: dict) -> List[str]:
         return [malware.get("hash", "") for malware in malware_data.get("data", [])]
 
     @classmethod
-    def _extract_passive_dns(self, passive_dns_data: dict) -> List[dict]:
+    def _extract_passive_dns(cls, passive_dns_data: dict) -> List[dict]:
         return passive_dns_data.get("passive_dns", [])
 
     @classmethod
-    def _extract_reputation(self, reputation_data: dict):
+    def _extract_reputation(cls, reputation_data: dict):
         return reputation_data.get("reputation", None)
 
     @classmethod
-    def _extract_url_list(self, url_list_data: dict) -> List[dict]:
+    def _extract_url_list(cls, url_list_data: dict) -> List[dict]:
         return url_list_data.get("url_list", [])
 
     def _extract_analysis(self, analysis_data: dict) -> dict:
@@ -163,11 +163,11 @@ class OTXSection(BaseOTX):
                 # and the name of the output field
                 section_extractor_mapping = {
                     "general": (self._extract_pulses, "pulses"),
-                    "geo": (self._extract_geo, "geo"),
-                    "malware": (self._extract_malware_samples, "malware_samples"),
-                    "passive_dns": (self._extract_passive_dns, "passive_dns"),
-                    "reputation": (self._extract_reputation, "reputation"),
-                    "url_list": (self._extract_url_list, "url_list"),
+                    "geo": (OTXSection._extract_geo, "geo"),
+                    "malware": (OTXSection._extract_malware_samples, "malware_samples"),
+                    "passive_dns": (OTXSection._extract_passive_dns, "passive_dns"),
+                    "reputation": (OTXSection._extract_reputation, "reputation"),
+                    "url_list": (OTXSection._extract_url_list, "url_list"),
                     "analysis": (self._extract_analysis, "analysis"),
                 }
                 logger.debug(f"OTX raw data: {details}")

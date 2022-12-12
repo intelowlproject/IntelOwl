@@ -52,33 +52,37 @@ class BaseOTX(classes.ObservableAnalyzer, metaclass=ABCMeta):
         pulse_list = general_data.get("pulse_info", {}).get("pulses", [])
         # for some observables the output could really be overwhelming
         if not self.verbose and pulse_list:
-            pulse_list = pulse_list
+            pulse_list = pulse_list[:20]
         for pulse in pulse_list:
             pulse_id = pulse.get("id", "")
             if pulse_id:
                 pulse["link"] = f"https://otx.alienvault.com/pulse/{pulse_id}"
         return pulse_list
 
+    @classmethod
     def _extract_geo(self, geo_data: dict) -> dict:
         return geo_data
 
+    @classmethod
     def _extract_malware_samples(self, malware_data: dict) -> List[str]:
-        return [d.get("hash", "") for d in malware_data.get("data", [])]
+        return [malware.get("hash", "") for malware in malware_data.get("data", [])]
 
+    @classmethod
     def _extract_passive_dns(self, passive_dns_data: dict) -> List[dict]:
         return passive_dns_data.get("passive_dns", [])
 
+    @classmethod
     def _extract_reputation(self, reputation_data: dict):
         return reputation_data.get("reputation", None)
 
+    @classmethod
     def _extract_url_list(self, url_list_data: dict) -> List[dict]:
         return url_list_data.get("url_list", [])
 
     def _extract_analysis(self, analysis_data: dict) -> dict:
         analysis_result = analysis_data.get("analysis", {})
-        if not self.verbose:
-            if analysis_result and "plugins" in analysis_result:
-                analysis_result["plugins"] = "removed because too long"
+        if not self.verbose and analysis_result and "plugins" in analysis_result:
+            analysis_result["plugins"] = "removed because too long"
         return analysis_result
 
     @classmethod

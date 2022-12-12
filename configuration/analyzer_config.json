@@ -2106,6 +2106,38 @@
       }
     }
   },
+  "OTXSection": {
+    "type": "observable",
+    "python_module": "otx.OTXSection",
+    "description": "scan an observable on Alienvault OTX and get some sections of the data",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": ["ip", "domain", "url", "hash"],
+    "config": {
+      "soft_time_limit": 60,
+      "queue": "default"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "OTX_KEY",
+        "description": "",
+        "required": true
+      }
+    },
+    "params": {
+      "verbose": {
+        "value": false,
+        "type": "bool",
+        "description": ""
+      },
+      "sections": {
+        "value": ["general"],
+        "type": "list",
+        "description": "List of data sections to download"
+      }
+    }
+  },
   "OTX_Check_Hash": {
     "type": "file",
     "python_module": "otx.OTX",

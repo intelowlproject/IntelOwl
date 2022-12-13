@@ -2103,6 +2103,16 @@
         "value": false,
         "type": "bool",
         "description": ""
+      },
+      "sections": {
+        "value": ["general"],
+        "type": "list",
+        "description": "Data are divided into sections, list of sections to download"
+      },
+      "full_analysis": {
+        "value": false,
+        "type": "bool",
+        "description": "download all the available sections for the observable type"
       }
     }
   },

@@ -22,7 +22,7 @@
     "react-table": "^7.8.0",
     "react-use": "^17.4.0",
     "reactstrap": "^9.1.4",
-    "recharts": "^2.1.14",
+    "recharts": "^2.2.0",
     "zustand": "^4.1.5"
   },
   "scripts": {

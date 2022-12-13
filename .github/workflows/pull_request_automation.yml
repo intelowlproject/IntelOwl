@@ -110,6 +110,7 @@ jobs:
 
       - name: Setup Migrate/Populate Secrets
         run: |
+          docker exec intelowl_uwsgi python3 manage.py migrate
           docker exec intelowl_uwsgi python3 manage.py migrate_secrets
 
       - name: "Test: api_app"

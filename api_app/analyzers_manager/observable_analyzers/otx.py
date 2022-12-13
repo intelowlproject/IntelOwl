@@ -1,7 +1,6 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 import logging
-from abc import ABCMeta
 from ipaddress import AddressValueError, IPv4Address
 from typing import List
 from urllib.parse import urlparse
@@ -15,18 +14,24 @@ from tests.mock_utils import MockResponse, if_mock_connections, patch
 logger = logging.getLogger(__name__)
 
 
-class BaseOTX(classes.ObservableAnalyzer, metaclass=ABCMeta):
-    """Class with utilities functions for OTX"""
+class OTX(classes.ObservableAnalyzer):
+    """This class use an OTX API to download data about an observable.
+    Observable's data are divided into sections:
+    It's possible to download only some sections to reduce the wait time:
+    Download all the data is slow with the IP addresses.
+    """
 
     def set_params(self, params):
         self._api_key = self._secrets["api_key_name"]
         self.verbose = params.get("verbose", False)
+        self.sections = params.get("sections", ["general"])
+        self.full_analysis = params.get("full_analysis", False)
 
     def _extract_indicator_type(self) -> "OTXv2.IndicatorTypes":
-        obs_clsf = self.observable_classification
-        if obs_clsf == self.ObservableTypes.IP:
+        observable_classification = self.observable_classification
+        if observable_classification == self.ObservableTypes.IP:
             otx_type = OTXv2.IndicatorTypes.IPv4
-        elif obs_clsf == self.ObservableTypes.URL:
+        elif observable_classification == self.ObservableTypes.URL:
             to_analyze_observable = urlparse(self.observable_name).hostname
 
             try:
@@ -38,13 +43,13 @@ class BaseOTX(classes.ObservableAnalyzer, metaclass=ABCMeta):
 
             if not to_analyze_observable:
                 raise AnalyzerRunException("extracted observable is None")
-        elif obs_clsf == self.ObservableTypes.DOMAIN:
+        elif observable_classification == self.ObservableTypes.DOMAIN:
             otx_type = OTXv2.IndicatorTypes.DOMAIN
-        elif obs_clsf == self.ObservableTypes.HASH:
+        elif observable_classification == self.ObservableTypes.HASH:
             otx_type = OTXv2.IndicatorTypes.FILE_HASH_MD5
         else:
             raise AnalyzerRunException(
-                f"not supported observable classification {obs_clsf}"
+                f"not supported observable classification {observable_classification}"
             )
         return otx_type
 
@@ -85,62 +90,27 @@ class BaseOTX(classes.ObservableAnalyzer, metaclass=ABCMeta):
             analysis_result["plugins"] = "removed because too long"
         return analysis_result
 
-    @classmethod
-    def _monkeypatch(cls):
-        patches = [
-            if_mock_connections(
-                patch("requests.Session.get", return_value=MockResponse({}, 200))
-            )
-        ]
-        return super()._monkeypatch(patches=patches)
-
-
-class OTX(BaseOTX):
-    """This class use an OTX API to download all data about an observable.
-    This could be slow in some cases (IPs)
-    """
-
     def run(self):
         otx = OTXv2.OTXv2(self._api_key)
 
         to_analyze_observable = self.observable_name
         otx_type = self._extract_indicator_type()
 
-        result = {}
-        try:
-            details = otx.get_indicator_details_full(otx_type, to_analyze_observable)
-        except (OTXv2.BadRequest, OTXv2.NotFound) as e:
-            result["error"] = str(e)
-        else:
-            result["pulses"] = self._extract_pulses(details.get("general", {}))
-            result["geo"] = self._extract_geo(details.get("geo", {}))
-            result["malware_samples"] = self._extract_malware_samples(
-                details.get("malware", {})
+        if self.full_analysis:
+            self.sections = otx_type.sections
+
+        # check if all requested sections are available for the observable type
+        not_supported_requested_section_list = list(
+            filter(
+                lambda requested_section: requested_section not in otx_type.sections,
+                self.sections,
             )
-            result["passive_dns"] = self._extract_passive_dns(
-                details.get("passive_dns", {})
+        )
+        if not_supported_requested_section_list:
+            raise AnalyzerRunException(
+                f"Sections: {not_supported_requested_section_list} are not supported "
+                f"for indicator type: {otx_type}"
             )
-            result["reputation"] = self._extract_reputation(
-                details.get("reputation", {})
-            )
-            result["url_list"] = self._extract_url_list(details.get("url_list", {}))
-            result["analysis"] = self._extract_analysis(details.get("analysis", {}))
-
-        return result
-
-
-class OTXSection(BaseOTX):
-    """This class use an OTX API to download only some data about an Observable"""
-
-    def set_params(self, params):
-        super().set_params(params)
-        self.sections = params.get("sections", ["general"])
-
-    def run(self):
-        otx = OTXv2.OTXv2(self._api_key)
-
-        to_analyze_observable = self.observable_name
-        otx_type = self._extract_indicator_type()
 
         result = {}
         for section in self.sections:
@@ -151,23 +121,18 @@ class OTXSection(BaseOTX):
                     section=section,
                 )
             except (OTXv2.BadRequest, OTXv2.NotFound) as e:
-                result["error"] = str(e)
-            except TypeError:
-                result["error"] = (
-                    f"Section {section} is not currently supported "
-                    f"for indicator type: {otx_type}"
-                )
+                raise AnalyzerRunException(e)
             else:
                 # This mapping is used to avoid a verbose elif structure:
                 # Each keyword is mapped in a tuple with the logic to extract the data
                 # and the name of the output field
                 section_extractor_mapping = {
                     "general": (self._extract_pulses, "pulses"),
-                    "geo": (OTXSection._extract_geo, "geo"),
-                    "malware": (OTXSection._extract_malware_samples, "malware_samples"),
-                    "passive_dns": (OTXSection._extract_passive_dns, "passive_dns"),
-                    "reputation": (OTXSection._extract_reputation, "reputation"),
-                    "url_list": (OTXSection._extract_url_list, "url_list"),
+                    "geo": (OTX._extract_geo, "geo"),
+                    "malware": (OTX._extract_malware_samples, "malware_samples"),
+                    "passive_dns": (OTX._extract_passive_dns, "passive_dns"),
+                    "reputation": (OTX._extract_reputation, "reputation"),
+                    "url_list": (OTX._extract_url_list, "url_list"),
                     "analysis": (self._extract_analysis, "analysis"),
                 }
                 logger.debug(f"OTX raw data: {details}")
@@ -179,3 +144,12 @@ class OTXSection(BaseOTX):
                 result[field_name] = data
                 logger.debug(f"result: {result}")
         return result
+
+    @classmethod
+    def _monkeypatch(cls):
+        patches = [
+            if_mock_connections(
+                patch("requests.Session.get", return_value=MockResponse({}, 200))
+            )
+        ]
+        return super()._monkeypatch(patches=patches)

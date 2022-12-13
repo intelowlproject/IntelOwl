@@ -171,7 +171,6 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `VirusTotal_v2_Get_Observable`: search an observable in the VirusTotal DB using the old API endpoints (this analyzer is disabled by default. You have to change that flag [in the config](https://github.com/intelowlproject/IntelOwl/blob/master/configuration/analyzer_config.json) to use it)
 * `HybridAnalysis_Get_Observable`: search an observable in the [HybridAnalysis](https://www.hybrid-analysis.com/) sandbox reports
 * `OTXQuery`: scan an observable on [Alienvault OTX](https://otx.alienvault.com/)
-* `OTXSection`: scan an observable on [Alienvault OTX](https://otx.alienvault.com/) and get some specific parts of the data
 * `TalosReputation`: check an IP reputation from [Talos](https://talosintelligence.com/reputation_center/)
 * `Stratosphere_Blacklist`: Cross-reference an IP from blacklists maintained by [Stratosphere Labs](https://www.stratosphereips.org/attacker-ip-prioritization-blacklist)
 * `BitcoinAbuse` : Check a BTC address against bitcoinabuse.com, a public database of BTC addresses used by hackers and criminals.

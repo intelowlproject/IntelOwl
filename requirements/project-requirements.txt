@@ -17,7 +17,7 @@ uWSGI==2.0.20
 whitenoise==6.2.0
 
 # infra
-boto3==1.24.52
+boto3==1.26.28
 celery==5.2.7
 dataclasses==0.6
 # https://github.com/advisories/GHSA-q4qm-xhf9-4p8f

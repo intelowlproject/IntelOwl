@@ -68,7 +68,7 @@ class ApiViewTests(TestCase):
         self.analyze_observable_ip_data = {
             "observable_name": self.observable_name,
             "analyzers_requested": [
-                "IPInfo",
+                "AbuseIPDB",
             ],
             "observable_classification": "ip",
         }

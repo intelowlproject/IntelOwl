@@ -32,9 +32,7 @@ class Command(BaseCommand):
         User = get_user_model()
         if not User.objects.filter(is_superuser=True).exists():
             if create_superuser:
-                User.objects.create_superuser(
-                    "admin", "admin@myproject.com", "password"
-                )
+                User.objects.create_superuser("test", "test@intelowl.com", "test")
             else:
                 raise Exception("Superuser must exist for secrets migration")
         for plugin in plugin_list:

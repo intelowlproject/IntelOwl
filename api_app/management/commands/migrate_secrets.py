@@ -57,7 +57,7 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument("ignore_check", nargs="?", type=bool, default=False)
         parser.add_argument(
-            "-c", "--create_superuser", action="store_true", type=bool, default=False
+            "-c", "--create_superuser", action="store_true", default=False
         )
 
     def handle(self, *args, **options):

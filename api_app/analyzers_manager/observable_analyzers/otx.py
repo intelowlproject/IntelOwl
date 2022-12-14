@@ -69,8 +69,11 @@ class OTX(classes.ObservableAnalyzer):
         return geo_data
 
     @classmethod
-    def _extract_malware_samples(cls, malware_data: dict) -> List[str]:
-        return [malware.get("hash", "") for malware in malware_data.get("data", [])]
+    def _extract_malware_samples(cls, malware_data: dict) -> List[dict]:
+        return [
+            {"hash": sample.get("hash", ""), "detections": sample.get("detections", {})}
+            for sample in malware_data.get("data", [])
+        ]
 
     @classmethod
     def _extract_passive_dns(cls, passive_dns_data: dict) -> List[dict]:

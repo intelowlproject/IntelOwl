@@ -67,9 +67,7 @@ class ApiViewTests(TestCase):
         ).hexdigest()
         self.analyze_observable_ip_data = {
             "observable_name": self.observable_name,
-            "analyzers_requested": [
-                "AbuseIPDB",
-            ],
+            "analyzers_requested": ["AbuseIPDB", "Stratosphere_Blacklist"],
             "observable_classification": "ip",
         }
         self.mixed_observable_data = {

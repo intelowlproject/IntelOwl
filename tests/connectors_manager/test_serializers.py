@@ -1,23 +1,21 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
-from django.test import TestCase
 
 from api_app.connectors_manager.dataclasses import ConnectorConfig
 from api_app.connectors_manager.serializers import ConnectorConfigSerializer
 from api_app.serializers import ObservableAnalysisSerializer
-from tests import User
+
+from .. import CustomAPITestCase
 
 
-class ConnectorConfigTestCase(TestCase):
+class ConnectorConfigTestCase(CustomAPITestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
 
     def setUp(self):
         self.serializer_class = ObservableAnalysisSerializer
-        self.superuser = User.objects.create_superuser(
-            username="test", email="test@intelowl.com", password="test"
-        )
+        super().setUp()
 
     def test_config_not_empty(self):
         config = ConnectorConfigSerializer.read_and_verify_config()

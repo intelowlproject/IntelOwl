@@ -20,9 +20,11 @@ class PlaybookViewTestCase(TransactionTestCase):
 
     def setUp(self):
         self.analyzer_serializer_class = ObservableAnalysisSerializer
-        self.superuser = User.objects.create_superuser(
-            username="test", email="test@intelowl.com", password="test"
-        )
+        self.superuser = User.objects.filter(username="test")
+        if not self.superuser.exists():
+            self.superuser = User.objects.create_superuser(
+                username="test", email="test@intelowl.com", password="test"
+            )
 
         self.request.user = self.superuser
 

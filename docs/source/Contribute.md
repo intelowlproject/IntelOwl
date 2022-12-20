@@ -298,7 +298,7 @@ Example:
 
 Here, The parameters for the analyzers and connectors to be used go in as an entry in the dictionary value.
 
-#### Modifying functionalities of the Certego packages
+## Modifying functionalities of the Certego packages
 
 Since v4, IntelOwl leverages some packages from Certego:
 

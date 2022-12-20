@@ -4,24 +4,27 @@
 import pypssl
 
 from api_app.analyzers_manager import classes
-from api_app.exceptions import AnalyzerRunException
+from api_app.exceptions import AnalyzerConfigurationException
 from tests.mock_utils import MockResponseNoOp, if_mock_connections, patch
 
 
 class CIRCL_PSSL(classes.ObservableAnalyzer):
     def set_params(self, params):
         self.__credentials = self._secrets["pdns_credentials"]
-
-    def run(self):
-        split_credentials = self.__credentials.split("|")
-        if len(split_credentials) != 2:
-            raise AnalyzerRunException(
+        if not self.__credentials:
+            raise AnalyzerConfigurationException(
+                "No secret retrieved for `pdns_credentials`."
+            )
+        self.__split_credentials = self.__credentials.split("|")
+        if len(self.__split_credentials) != 2:
+            raise AnalyzerConfigurationException(
                 "CIRCL credentials not properly configured."
                 "Template to use: '<user>|<pwd>'"
             )
 
-        user = split_credentials[0]
-        pwd = split_credentials[1]
+    def run(self):
+        user = self.__split_credentials[0]
+        pwd = self.__split_credentials[1]
 
         pssl = pypssl.PyPSSL(basic_auth=(user, pwd))
 

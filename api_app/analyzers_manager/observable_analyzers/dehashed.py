@@ -27,6 +27,7 @@ class DehashedSearch(ObservableAnalyzer):
     def set_params(self, params):
         self.size = params.get("size", 1000)
         self.pages = params.get("pages", 1)
+        self.operator = params.get("operator", "username")
 
     def run(self):
         self.__auth = self._secrets["api_key_name"]
@@ -36,35 +37,45 @@ class DehashedSearch(ObservableAnalyzer):
             )
 
         # try to identify search operator
-        operator = self.__identify_search_operator()
-        if operator:
-            value = f"{operator}:{self.observable_name}"
+        self.__identify_search_operator()
+        if self.operator == "name" and " " in self.observable_name:
+            # this is to allow to do "match_phrase" queries
+            # ex: "John Smith" would match the entire phrase
+            # ex: John Smith would match also John alone
+            cleaned_observable_name = f'"{self.observable_name}"'
         else:
-            # if operator couldn't be identified, we can query without it
-            value = self.observable_name
+            cleaned_observable_name = self.observable_name
+        value = f"{self.operator}:{cleaned_observable_name}"
 
         # execute searches
         entries = self.__search(value)
 
+        logger.info(
+            f"result for observable {self.observable_name} is: query:"
+            f" {value}, pages {self.pages}, operator: {self.operator}"
+        )
+
         return {
             "query_value": value,
             "pages_queried": self.pages,
+            "operator": self.operator,
             "entries": entries,
         }
 
-    def __identify_search_operator(self) -> str:
-        operator = "name"
+    def __identify_search_operator(self):
         if self.observable_classification == ObservableTypes.IP:
-            operator = "ip_address"
+            self.operator = "ip_address"
         elif self.observable_classification == ObservableTypes.DOMAIN:
-            operator = "domain"
+            self.operator = "domain"
         elif self.observable_classification == ObservableTypes.URL:
-            operator = "domain"
+            self.operator = "domain"
         elif self.observable_classification == ObservableTypes.GENERIC:
             if re.match(r"^[\w\.\+\-]+\@[\w]+\.[a-z]{2,3}$", self.observable_name):
-                operator = "email"
-
-        return operator
+                self.operator = "email"
+            elif re.match(r"\+?\d+", self.observable_name):
+                self.operator = "phone"
+            elif " " in self.observable_name:
+                self.operator = "name"
 
     def __search(self, value: str) -> list:
         # the API uses basic auth so we need to base64 encode the auth payload

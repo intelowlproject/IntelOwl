@@ -2,7 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 
 import logging
-from typing import List, Any
+from typing import Any, List
 
 import peepdf
 from pdfid import pdfid
@@ -14,9 +14,8 @@ logger = logging.getLogger(__name__)
 
 
 class PDFInfo(FileAnalyzer):
-
     @staticmethod
-    def flatten(list_of_lists:List[List[Any]]) -> List[Any]:
+    def flatten(list_of_lists: List[List[Any]]) -> List[Any]:
         return [item for sublist in list_of_lists for item in sublist]
 
     def run(self):

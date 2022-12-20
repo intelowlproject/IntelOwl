@@ -44,7 +44,8 @@ class _AbstractAnalyzersScriptTestCase(TransactionTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        if not User.objects.filter(username="test").exists():
+        cls.superuser = User.objects.filter(username="test")
+        if not cls.superuser.exists():
             cls.superuser = User.objects.create_superuser(
                 username="test", email="test@intelowl.com", password="test"
             )
@@ -115,7 +116,8 @@ class _ObservableAnalyzersScriptsTestCase(_AbstractAnalyzersScriptTestCase):
         params["md5"] = hashlib.md5(
             params["observable_name"].encode("utf-8")
         ).hexdigest()
-        self.test_job = Job(**params)
+        User(username="test")
+        self.test_job = Job(user=self.superuser, **params)
         # overwrite if not set in env var
         if len(self.analyzers_to_test):
             self.test_job.analyzers_to_execute = self.analyzers_to_test

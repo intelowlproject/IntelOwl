@@ -2,6 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 
 import logging
+from typing import List, Any
 
 import peepdf
 from pdfid import pdfid
@@ -13,6 +14,11 @@ logger = logging.getLogger(__name__)
 
 
 class PDFInfo(FileAnalyzer):
+
+    @staticmethod
+    def flatten(list_of_lists:List[List[Any]]) -> List[Any]:
+        return [item for sublist in list_of_lists for item in sublist]
+
     def run(self):
         self.results = {"peepdf": {}, "pdfid": {}}
         # the analysis fails only when BOTH fails
@@ -36,8 +42,8 @@ class PDFInfo(FileAnalyzer):
                     version_dict = {
                         "events": version.get("Events", {}),
                         "actions": version.get("Actions", {}),
-                        "urls": version.get("URLs", []),
-                        "uris": version.get("URIs", []),
+                        "urls": self.flatten(pdf.getURLs()),
+                        "uris": self.flatten(pdf.getURIs()),
                         "elements": version.get("Elements", {}),
                         "vulns": version.get("Vulns", []),
                         "objects_with_js_code": version.get("Objects with JS code", []),

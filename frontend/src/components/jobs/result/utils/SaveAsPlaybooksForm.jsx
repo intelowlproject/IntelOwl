@@ -4,16 +4,23 @@ import { Form, Formik } from "formik";
 import { IoMdSave } from "react-icons/io";
 import PropTypes from "prop-types";
 
-import { addToast, PopupFormButton } from "@certego/certego-ui";
+import { addToast, PopupFormButton, Select } from "@certego/certego-ui";
 
 import { saveJobAsPlaybook } from "../api";
 
 // constants
+const organizationModeChoices = [
+  { label: "On", value: true },
+  { label: "Off", value: false },
+]
+
 const initialValues = {
   name: "",
   description: "",
   jobId: "",
+  organization_mode: false
 };
+
 
 // methods
 const onValidate = (values) => {
@@ -81,6 +88,20 @@ export function SaveAsPlaybookForm({ onFormSubmit }) {
                   onChange={formik.handleChange}
                 />
               </div>
+
+              <div className="p-3">
+                <Label className="required" for="forminput-name" md={12}>
+                  Save for the whole Organization
+                </Label>
+
+                <Select
+                    name="organization_mode"
+                    choices={organizationModeChoices}
+                    className="input-dark"
+                />
+
+              </div>
+
               <div className="p-3 d-flex justify-content-center">
                 <Button
                   type="submit"

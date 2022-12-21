@@ -23,6 +23,7 @@ def start_playbooks(
 
     # get job
     job = Job.objects.get(pk=job_id)
+    job_owner = job.user
     job.update_status(Job.Status.RUNNING)  # set job status to running
 
     # to store the celery task signatures
@@ -30,7 +31,10 @@ def start_playbooks(
     final_task_signatures_connectors = []
 
     # get playbook config
-    playbook_dataclasses = PlaybookConfig.filter(names=job.playbooks_to_execute)
+    playbook_dataclasses = PlaybookConfig.filter(
+        names=job.playbooks_to_execute,
+        user=job_owner
+    )
 
     final_analyzers_used = []
     final_connectors_used = []

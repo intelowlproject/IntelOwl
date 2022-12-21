@@ -14,7 +14,7 @@ from rest_framework.fields import empty
 
 from certego_saas.apps.organization.membership import Membership
 
-# from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model
 from certego_saas.apps.organization.organization import Organization
 from certego_saas.apps.organization.permissions import IsObjectOwnerOrSameOrgPermission
 
@@ -33,6 +33,8 @@ from .helpers import (
 from .models import TLP, Job, PluginConfig, Tag
 from .playbooks_manager.dataclasses import PlaybookConfig
 
+User = get_user_model()
+
 logger = logging.getLogger(__name__)
 
 __all__ = [
@@ -49,9 +51,7 @@ __all__ = [
     "PluginConfigSerializer",
 ]
 
-
 # User = get_user_model()
-
 
 class TagSerializer(rfs.ModelSerializer):
     class Meta:
@@ -624,7 +624,7 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
 
 
 class PlaybookBaseSerializer:
-    def filter_playbooks(self, attrs: Dict) -> Tuple[List]:
+    def filter_playbooks(self, attrs: Dict, user: User) -> Tuple[List]:
         # init empty list
         valid_playbook_list = []
         selected_playbooks = []
@@ -636,12 +636,15 @@ class PlaybookBaseSerializer:
         selected_playbooks = attrs.get("playbooks_requested", [])
 
         # read config
-        playbook_dataclasses = PlaybookConfig.all()
+        playbook_dataclasses = PlaybookConfig.all(user=user)
 
         for p_name in selected_playbooks:
             try:
                 pp = playbook_dataclasses.get(p_name, None)
                 if not pp:
+                    logger.log(
+                        f"Playbook {p_name} doesn't exist."
+                    )
                     continue
                 elif not pp.is_ready_to_use:
                     raise NotRunnablePlaybook(f"{p_name} won't run: not configured")
@@ -711,8 +714,8 @@ class PlaybookBaseSerializer:
 
         return attrs
 
-    def validate_(self, attrs: dict) -> dict:
-        attrs = self.filter_playbooks(attrs)
+    def validate_(self, attrs: dict, user) -> dict:
+        attrs = self.filter_playbooks(attrs, user)
         return attrs
 
 
@@ -738,7 +741,8 @@ class PlaybookObservableAnalysisSerializer(
         list_serializer_class = MultipleObservableAnalysisSerializer
 
     def validate(self, attrs: dict) -> dict:
-        attrs_ = super().validate_(attrs)
+        user = self.context.get("user")
+        attrs_ = super().validate_(attrs, user)
         attrs_final = super().validate(attrs_)
 
         return attrs_final
@@ -766,7 +770,8 @@ class PlaybookFileAnalysisSerializer(PlaybookBaseSerializer, FileAnalysisSeriali
 
     def validate(self, attrs: dict) -> dict:
         attrs["observable_classification"] = "file"
-        attrs_ = super().validate_(attrs)
+        user = self.context.get("user")
+        attrs_ = super().validate_(attrs, user)
         attrs_final = super().validate(attrs_)
 
         return attrs_final

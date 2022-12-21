@@ -4,10 +4,13 @@
 import dataclasses
 import inspect
 import typing
+from django.contrib.auth import get_user_model
 
 from .serializers import PlaybookConfigSerializer
 
 __all__ = ["PlaybookConfig"]
+
+User = get_user_model()
 
 # Try to see if your changes in serializers helps with the changeshere (make them)
 
@@ -46,26 +49,26 @@ class PlaybookConfig:
 
     # orm methods
     @classmethod
-    def get(cls, playbook_name: str) -> typing.Optional["PlaybookConfig"]:
+    def get(cls, playbook_name: str, user: User) -> typing.Optional["PlaybookConfig"]:
         """
         Returns config dataclass by playbook_name if found, else None
         """
-        all_configs = cls.serializer_class.output_with_cached_playbooks()
+        all_configs = cls.serializer_class.output_with_cached_playbooks(user=user)
         config_dict = all_configs.get(playbook_name, None)
         if config_dict is None:
             return None  # not found
         return cls.from_dict(config_dict)
 
     @classmethod
-    def all(cls) -> typing.Dict[str, "PlaybookConfig"]:
+    def all(cls, user: User) -> typing.Dict[str, "PlaybookConfig"]:
         return {
             name: cls.from_dict(attrs)
             for name, attrs in (
-                cls.serializer_class.output_with_cached_playbooks().items()
+                cls.serializer_class.output_with_cached_playbooks(user=user).items()
             )
         }
 
     @classmethod
-    def filter(cls, names: typing.List[str]) -> typing.Dict[str, "PlaybookConfig"]:
-        all_playbook_configs = cls.all()
+    def filter(cls, names: typing.List[str], user: User) -> typing.Dict[str, "PlaybookConfig"]:
+        all_playbook_configs = cls.all(user=user)
         return {name: cc for name, cc in all_playbook_configs.items() if name in names}

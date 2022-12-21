@@ -44,7 +44,6 @@ def _cache_playbook(request, serializer_class: CachedPlaybooksSerializer):
 
     return serializer.data
 
-
 @api_view(["POST"])
 def cache_playbook_view(
     request,
@@ -122,9 +121,10 @@ class PlaybookListAPI(APIView):
     )
     def get(self, request, *args, **kwargs):
         try:
-            pc = self.serializer_class.output_with_cached_playbooks()
+            pc = self.serializer_class.output_with_cached_playbooks(user=request.user)
             return Response(pc, status=status.HTTP_200_OK)
         except Exception as e:
+            print(e)
             logger.exception(
                 f"get_playbook_configs requester:{str(request.user)} error:{e}."
             )

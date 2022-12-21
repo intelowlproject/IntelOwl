@@ -2,8 +2,8 @@
 # See the file 'LICENSE' for copying permission.
 
 from django.db import models
-
-from api_app.models import Job
+from django.conf import settings
+from certego_saas.apps.organization.organization import Organization
 
 
 class CachedPlaybook(models.Model):
@@ -17,7 +17,23 @@ class CachedPlaybook(models.Model):
     supports = models.JSONField(default=list)
     disabled = models.BooleanField(default=False)
 
-    # job might not be necessary.
-    job = models.ForeignKey(
-        Job, on_delete=models.SET_NULL, related_name="job", null=True, blank=True
+    # For permissions
+    # if null, organizations would be used for reference.
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        null=True,  # for backwards compatibility
     )
+
+    # if null, organization will not be used for
+    # a reference
+    organization = models.ForeignKey(
+        Organization,
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True, # for backwards compatibility
+    )
+
+    # if both owner and organization would be null, 
+    # it would be assumed that it is meant to be kept
+    # open to all.

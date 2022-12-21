@@ -5,6 +5,7 @@ import json
 import logging
 
 from django.core import serializers
+from django.contrib.auth import get_user_model
 from rest_framework import serializers as rfs
 
 from api_app.analyzers_manager.constants import AllTypes
@@ -17,6 +18,8 @@ from certego_saas.apps.organization.permissions import IsObjectOwnerOrSameOrgPer
 from .models import CachedPlaybook
 
 logger = logging.getLogger(__name__)
+
+User = get_user_model
 
 
 class PlaybookConfigSerializer(AbstractConfigSerializer):
@@ -46,12 +49,15 @@ class PlaybookConfigSerializer(AbstractConfigSerializer):
     )
 
     @classmethod
-    def _cached_playbooks(cls) -> dict:
+    def _cached_playbooks(cls, user: User, show_all=False) -> dict:
         """
         Returns config file as `dict`.
         """
         config = super()._read_config()
+
         cached_playbooks = CachedPlaybook.objects.all()
+        # owner_org = user.membership
+
         cached_serialized_playbooks = serializers.serialize(
             "json", [obj for obj in cached_playbooks]
         )
@@ -62,14 +68,31 @@ class PlaybookConfigSerializer(AbstractConfigSerializer):
 
         cached_playbooks_final = {}
         for playbook in cached_playbooks_model_json:
-            cached_playbooks_final[playbook["pk"]] = playbook["fields"]
+            whitelisted_organization = playbook.get("fields").get("organization")
+            owner = playbook.get("fields").get("owner")
+
+            # when show_all is used, no other factors are considered.
+            # all playbooks are simply listed out.
+            if show_all:
+                cached_playbooks_final[playbook["pk"]] = playbook["fields"]
+                continue
+
+            elif owner is not None and whitelisted_organization is not None:
+                user_org = None
+                if user.has_membership():
+                    user_org = user.membership
+
+                if user == owner or whitelisted_organization == user_org:
+                    cached_playbooks_final[playbook["pk"]] = playbook["fields"]
+            else:
+                cached_playbooks_final[playbook["pk"]] = playbook["fields"]
 
         return cached_playbooks_final
 
     @classmethod
-    def output_with_cached_playbooks(cls) -> dict:
+    def output_with_cached_playbooks(cls, user, show_all=False) -> dict:
         original_config_dict = cls.read_and_verify_config()
-        config_dict = cls._cached_playbooks()
+        config_dict = cls._cached_playbooks(user, show_all=show_all)
         serializer_errors = {}
         for key, config in config_dict.items():
             new_config = {"name": key, **config}
@@ -91,6 +114,7 @@ class CachedPlaybooksSerializer(rfs.ModelSerializer):
     job_id = rfs.IntegerField()
     name = rfs.CharField(max_length=225)
     description = rfs.CharField(max_length=225)
+    organization_mode = rfs.BooleanField(default=False)
 
     class Meta:
         model = CachedPlaybook
@@ -101,6 +125,9 @@ class CachedPlaybooksSerializer(rfs.ModelSerializer):
             "connectors",
             "supports",
             "disabled",
+            "owner",
+            "organization",
+            "organization_mode",
             "job_id",
         )
 
@@ -120,10 +147,6 @@ class CachedPlaybooksSerializer(rfs.ModelSerializer):
         )
 
         if not has_perm:
-            # bare in mind that for the time being,
-            # we don't check for which user is querying
-            # /api/get_playbook_configs and thus no filtering
-            # like this would be done on that end.
             raise rfs.ValidationError(
                 "User doesn't have necessary permissions for this action."
             )
@@ -135,7 +158,10 @@ class CachedPlaybooksSerializer(rfs.ModelSerializer):
         connectors = {connector: {} for connector in connectors_used}
 
         supports = []
-        existing_playbooks = PlaybookConfigSerializer.output_with_cached_playbooks()
+        existing_playbooks = PlaybookConfigSerializer.output_with_cached_playbooks(
+            user=None, 
+            show_all=True
+        )
 
         existing_playbook = existing_playbooks.get(playbook_name, {})
 
@@ -179,11 +205,24 @@ class CachedPlaybooksSerializer(rfs.ModelSerializer):
         playbook_description = validated_data.get("description")
         job_id = validated_data.get("job_id")
         disabled = validated_data.get("disabled")
+        organization_mode = validated_data.get("organization_mode")
+
+        request = self.context.get("request", None)
+        owner = request.user
 
         job = Job.objects.filter(pk=job_id).first()
 
         if job is None:
             raise rfs.ValidationError(f"Job of {job_id} doesn't exist.")
+
+        organization = None
+        if organization_mode and owner.has_membership():
+            organization = request.user.membership
+
+        if organization is None and organization_mode:
+            raise rfs.ValidationError(
+                "Can't use organization mode without user being in an organization!"
+            )
 
         playbook = self.Meta.model.objects.create(
             name=playbook_name,
@@ -191,8 +230,9 @@ class CachedPlaybooksSerializer(rfs.ModelSerializer):
             connectors={connector: {} for connector in connectors},
             supports=supports,
             description=playbook_description,
-            job=job,
             disabled=disabled if type(disabled) == bool else False,
+            owner=owner,
+            organization=organization
         )
 
         return playbook

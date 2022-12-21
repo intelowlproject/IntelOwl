@@ -65,7 +65,7 @@ def _multi_analysis_request(
         Type[PlaybookObservableAnalysisSerializer],
         Type[PlaybookFileAnalysisSerializer],
     ],
-    playbook_scan=False,
+    playbook_scan=False
 ):
     """
     Prepare and send multiple observables for analysis
@@ -84,8 +84,12 @@ def _multi_analysis_request(
 
     # serialize request data and validate
     serializer = serializer_class(
-        data=data, many=True, context={"plugin_states": plugin_states}
+        data=data, many=True, context={
+            "plugin_states": plugin_states,
+            "user": user
+        }
     )
+
     serializer.is_valid(raise_exception=True)
 
     serialized_data = serializer.validated_data

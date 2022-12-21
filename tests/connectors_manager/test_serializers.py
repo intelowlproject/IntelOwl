@@ -54,6 +54,26 @@ class ConnectorConfigTestCase(CustomAPITestCase):
             user=self.superuser,
         )
 
+        from api_app.models import PluginConfig
+
+        configs = PluginConfig.objects.filter(
+            type=PluginConfig.PluginType.CONNECTOR,
+            config_type=PluginConfig.ConfigType.SECRET,
+            owner=self.superuser,
+        )
+        print("printing found config for superuser for connectors")
+        for config in configs:
+            print(f"attribute: {config.attribute}, value: {config.value}")
+
+        configs = PluginConfig.objects.filter(
+            type=PluginConfig.PluginType.ANALYZER,
+            config_type=PluginConfig.ConfigType.SECRET,
+            owner=self.superuser,
+        )
+        print("printing found config for superuser for analyzers")
+        for config in configs:
+            print(f"attribute: {config.attribute}, value: {config.value}")
+
         for job in test_jobs:
             cleaned_result = ConnectorConfig.stack_connectors(
                 job_id=job.pk,

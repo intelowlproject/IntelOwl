@@ -139,7 +139,9 @@ class CustomAPITestCase(TestCase):
     @classmethod
     def setUpClass(cls):
         super(CustomAPITestCase, cls).setUpClass()
-        if not User.objects.filter(username="test").exists():
+        cls.superuser = User.objects.filter(username="test")
+        if not cls.superuser:
+            print("creating superuser")
             cls.superuser = User.objects.create_superuser(
                 username="test", email="test@intelowl.com", password="test"
             )

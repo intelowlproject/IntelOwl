@@ -8,7 +8,7 @@ from api_app.models import PluginConfig
 from certego_saas.apps.organization.membership import Membership
 from certego_saas.apps.organization.organization import Organization
 
-from .. import CustomTestCase, User
+from .. import CustomAPITestCase, User
 from ..celery_tester import task_queue
 
 custom_config_uri = reverse("plugin-config-list")
@@ -17,7 +17,7 @@ get_analyzer_configs_uri = reverse("get_analyzer_configs")
 
 
 @override_settings(FORCE_SCHEDULE_JOBS=True)
-class CustomConfigTests(CustomTestCase):
+class CustomConfigTests(CustomAPITestCase):
     def setUp(self):
         super().setUp()
         self.custom_config_su_classic_dns, _ = PluginConfig.objects.get_or_create(

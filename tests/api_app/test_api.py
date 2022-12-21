@@ -18,6 +18,10 @@ User = get_user_model()
 
 
 class ApiViewTests(CustomAPITestCase):
+    def setUpClass(cls):
+        # we force migration only for the first executed test of all the suite
+        super().setUpClass(force_migrate=True)
+
     def setUp(self):
         self.client = APIClient()
         self.client.force_authenticate(user=self.superuser)

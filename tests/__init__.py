@@ -137,7 +137,7 @@ def get_logger() -> logging.Logger:
 
 class CustomTestCase(TestCase):
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(cls, force_migrate=False):
         super(CustomTestCase, cls).setUpClass()
         cls.superuser = User.objects.filter(username="test")
         if not cls.superuser.exists():
@@ -145,7 +145,7 @@ class CustomTestCase(TestCase):
             cls.superuser = User.objects.create_superuser(
                 username="test", email="test@intelowl.com", password="test"
             )
-        if not settings.STAGE_CI:
+        if not settings.STAGE_CI or force_migrate:
             call_command("migrate_secrets")
 
 

@@ -2,27 +2,16 @@
 # See the file 'LICENSE' for copying permission.
 from unittest.mock import Mock, patch
 
-from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.core.management import call_command
-from django.test import TestCase
 
 from api_app.analyzers_manager.serializers import AnalyzerConfigSerializer
+
+from .. import CustomTestCase
 
 User = get_user_model()
 
 
-class ConfigParseTests(TestCase):
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        if not User.objects.filter(username="test").exists():
-            cls.superuser = User.objects.create_superuser(
-                username="test", email="test@intelowl.com", password="test"
-            )
-        if not settings.STAGE_CI:
-            call_command("migrate_secrets")
-
+class ConfigParseTests(CustomTestCase):
     @patch(
         "api_app.core.serializers.AbstractConfigSerializer._md5_config_file", new=Mock()
     )

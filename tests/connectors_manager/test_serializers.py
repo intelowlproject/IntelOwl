@@ -5,14 +5,10 @@ from api_app.connectors_manager.dataclasses import ConnectorConfig
 from api_app.connectors_manager.serializers import ConnectorConfigSerializer
 from api_app.serializers import ObservableAnalysisSerializer
 
-from .. import CustomAPITestCase
+from .. import CustomTestCase
 
 
-class ConnectorConfigTestCase(CustomAPITestCase):
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-
+class ConnectorConfigTestCase(CustomTestCase):
     def setUp(self):
         self.serializer_class = ObservableAnalysisSerializer
         super().setUp()

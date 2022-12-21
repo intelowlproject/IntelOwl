@@ -8,26 +8,16 @@ from typing import Tuple
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.core.management import call_command
-from django.test import TestCase
 from rest_framework.test import APIClient
 
 from api_app import models
 
+from .. import CustomAPITestCase
+
 User = get_user_model()
 
 
-class ApiViewTests(TestCase):
-    @classmethod
-    def setUpClass(cls):
-        super(ApiViewTests, cls).setUpClass()
-        if not User.objects.filter(username="test").exists():
-            cls.superuser = User.objects.create_superuser(
-                username="test", email="test@intelowl.com", password="test"
-            )
-        # this is the first executed in the CI
-        call_command("migrate_secrets")
-
+class ApiViewTests(CustomAPITestCase):
     def setUp(self):
         self.client = APIClient()
         self.client.force_authenticate(user=self.superuser)

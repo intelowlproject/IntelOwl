@@ -5,10 +5,10 @@ from api_app.analyzers_manager.dataclasses import AnalyzerConfig
 from api_app.analyzers_manager.serializers import AnalyzerConfigSerializer
 from api_app.serializers import ObservableAnalysisSerializer
 
-from .. import CustomAPITestCase
+from .. import CustomTestCase
 
 
-class AnalyzerConfigTestCase(CustomAPITestCase):
+class AnalyzerConfigTestCase(CustomTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()

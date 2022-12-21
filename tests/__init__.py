@@ -150,6 +150,10 @@ class CustomTestCase(TestCase):
 
 
 class CustomAPITestCase(CustomTestCase):
+    @classmethod
+    def setUpClass(cls, force_migrate=False):
+        super(CustomAPITestCase, cls).setUpClass(force_migrate=force_migrate)
+
     def setUp(self):
         super(CustomAPITestCase, self).setUp()
         self.client = APIClient()

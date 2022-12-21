@@ -108,11 +108,6 @@ jobs:
         run: |
           docker exec intelowl_uwsgi pip3 install coverage
 
-      - name: Setup Migrate/Populate Secrets
-        run: |
-          docker exec intelowl_uwsgi python3 manage.py migrate
-          docker exec intelowl_uwsgi python3 manage.py migrate_secrets -c
-
       - name: "Test: api_app"
         run: |
           docker/scripts/coverage_test.sh tests.api_app

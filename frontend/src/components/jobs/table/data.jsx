@@ -1,3 +1,5 @@
+/* eslint-disable camelcase */
+/* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
 import React from "react";
 
@@ -15,6 +17,10 @@ import {
   TLP_CHOICES,
   ALL_CLASSIFICATIONS,
 } from "../../../constants";
+
+
+
+const process_time2 = ((value) => new Date(value * 1000).toISOString().substring(14, 19))
 
 const jobTableColumns = [
   {
@@ -162,9 +168,11 @@ const jobTableColumns = [
         maxWidth: 175,
       },
       {
-        Header: "Process Time (s)",
+        Header: "Process Time (mm:ss)",
         id: "process_time",
         accessor: "process_time",
+        Cell: ({ value }) => <span>{process_time2(value)}</span>,
+
         disableSortBy: true,
         maxWidth: 125,
       },

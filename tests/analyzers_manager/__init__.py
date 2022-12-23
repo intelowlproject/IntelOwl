@@ -3,12 +3,11 @@
 
 import hashlib
 import os
-from unittest import SkipTest, TestCase
+from unittest import SkipTest
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.files import File
-from django.core.management import call_command
 
 from api_app.analyzers_manager.dataclasses import AnalyzerConfig
 from api_app.connectors_manager.dataclasses import ConnectorConfig
@@ -16,10 +15,12 @@ from api_app.models import Job
 from intel_owl.tasks import start_analyzers
 from tests import PollingFunction
 
+from .. import CustomTestCase
+
 User = get_user_model()
 
 
-class _AbstractAnalyzersScriptTestCase(TestCase):
+class _AbstractAnalyzersScriptTestCase(CustomTestCase):
     # constants
     TIMEOUT_SECONDS: int = 60 * 5  # 5 minutes
     SLEEP_SECONDS: int = 5  # 5 seconds
@@ -43,15 +44,6 @@ class _AbstractAnalyzersScriptTestCase(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        try:
-            cls.superuser = User.objects.get(username="test")
-        except User.DoesNotExist:
-            print("creating superuser")
-            cls.superuser = User.objects.create_superuser(
-                username="test", email="test@intelowl.com", password="test"
-            )
-        if not settings.STAGE_CI:
-            call_command("migrate_secrets")
 
         if cls in [
             _AbstractAnalyzersScriptTestCase,

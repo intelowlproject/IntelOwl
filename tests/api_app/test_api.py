@@ -17,12 +17,8 @@ User = get_user_model()
 
 
 class ApiViewTests(CustomAPITestCase):
-    @classmethod
-    def setUpClass(cls):
-        # we force migration only for the first executed test of all the suite
-        super(ApiViewTests, cls).setUpClass(force_migrate=True)
-
     def setUp(self):
+        super(ApiViewTests, self).setUp()
         self.uploaded_file, self.file_md5 = self.__get_test_file("file.exe")
         self.uploaded_file2, self.file_md52 = self.__get_test_file("file.exe")
         self.analyze_file_data = {

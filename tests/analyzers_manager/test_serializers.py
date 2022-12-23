@@ -1,23 +1,21 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
-from django.test import TestCase
 
 from api_app.analyzers_manager.dataclasses import AnalyzerConfig
 from api_app.analyzers_manager.serializers import AnalyzerConfigSerializer
 from api_app.serializers import ObservableAnalysisSerializer
-from tests import User
+
+from .. import CustomTestCase
 
 
-class AnalyzerConfigTestCase(TestCase):
+class AnalyzerConfigTestCase(CustomTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
 
     def setUp(self):
         self.serializer_class = ObservableAnalysisSerializer
-        self.superuser = User.objects.create_superuser(
-            username="test", email="test@intelowl.com", password="test"
-        )
+        super().setUp()
 
     def test_config_not_empty(self):
         config = AnalyzerConfigSerializer.read_and_verify_config()
@@ -52,6 +50,17 @@ class AnalyzerConfigTestCase(TestCase):
         test_jobs = serializer.save(
             user=self.superuser,
         )
+
+        from api_app.models import PluginConfig
+
+        configs = PluginConfig.objects.filter(
+            type=PluginConfig.PluginType.ANALYZER,
+            config_type=PluginConfig.ConfigType.SECRET,
+            owner=self.superuser,
+        )
+        print("printing found config for superuser for analyzers")
+        for config in configs:
+            print(f"attribute: {config.attribute}, value: {config.value}")
 
         for job in test_jobs:
             cleaned_result = AnalyzerConfig.stack_analyzers(
@@ -100,6 +109,17 @@ class AnalyzerConfigTestCase(TestCase):
         test_jobs = serializer.save(
             user=self.superuser,
         )
+
+        from api_app.models import PluginConfig
+
+        configs = PluginConfig.objects.filter(
+            type=PluginConfig.PluginType.ANALYZER,
+            config_type=PluginConfig.ConfigType.SECRET,
+            owner=self.superuser,
+        )
+        print("printing found config for superuser for analyzers")
+        for config in configs:
+            print(f"attribute: {config.attribute}, value: {config.value}")
 
         for job in test_jobs:
             cleaned_result = AnalyzerConfig.stack_analyzers(

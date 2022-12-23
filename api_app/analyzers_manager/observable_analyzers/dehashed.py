@@ -28,14 +28,13 @@ class DehashedSearch(ObservableAnalyzer):
         self.size = params.get("size", 1000)
         self.pages = params.get("pages", 1)
         self.operator = params.get("operator", "username")
-
-    def run(self):
         self.__auth = self._secrets["api_key_name"]
         if not self.__auth:
             raise AnalyzerConfigurationException(
                 "No secret retrieved for `api_key_name`."
             )
 
+    def run(self):
         # try to identify search operator
         self.__identify_search_operator()
         if self.operator == "name" and " " in self.observable_name:

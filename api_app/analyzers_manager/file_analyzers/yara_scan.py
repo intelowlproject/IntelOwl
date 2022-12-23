@@ -133,6 +133,8 @@ class YaraScan(FileAnalyzer):
                         if os.path.isdir(yara_dir):
                             repo = Repo(yara_dir)
                             o = repo.remotes.origin
+                            git = repo.git
+                            git.config("--global", "--add", "safe.directory", yara_dir)
                             o.pull()
                             logger.info(f"pulled repo on {yara_dir} dir")
                         else:

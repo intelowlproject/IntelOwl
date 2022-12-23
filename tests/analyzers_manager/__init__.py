@@ -8,8 +8,6 @@ from unittest import SkipTest
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.files import File
-from django.core.management import call_command
-from django.test import TransactionTestCase
 
 from api_app.analyzers_manager.dataclasses import AnalyzerConfig
 from api_app.connectors_manager.dataclasses import ConnectorConfig
@@ -17,10 +15,12 @@ from api_app.models import Job
 from intel_owl.tasks import start_analyzers
 from tests import PollingFunction
 
+from .. import CustomTestCase
+
 User = get_user_model()
 
 
-class _AbstractAnalyzersScriptTestCase(TransactionTestCase):
+class _AbstractAnalyzersScriptTestCase(CustomTestCase):
     # constants
     TIMEOUT_SECONDS: int = 60 * 5  # 5 minutes
     SLEEP_SECONDS: int = 5  # 5 seconds
@@ -44,12 +44,7 @@ class _AbstractAnalyzersScriptTestCase(TransactionTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        if User.objects.filter(username="test").exists():
-            User.objects.get(username="test").delete()
-        cls.superuser = User.objects.create_superuser(
-            username="test", email="test@intelowl.com", password="test"
-        )
-        call_command("migrate_secrets")
+
         if cls in [
             _AbstractAnalyzersScriptTestCase,
             _ObservableAnalyzersScriptsTestCase,
@@ -115,7 +110,19 @@ class _ObservableAnalyzersScriptsTestCase(_AbstractAnalyzersScriptTestCase):
         params["md5"] = hashlib.md5(
             params["observable_name"].encode("utf-8")
         ).hexdigest()
-        self.test_job = Job(**params)
+        self.test_job = Job(user=self.superuser, **params)
+
+        from api_app.models import PluginConfig
+
+        configs = PluginConfig.objects.filter(
+            type=PluginConfig.PluginType.ANALYZER,
+            config_type=PluginConfig.ConfigType.SECRET,
+            owner=self.superuser,
+        )
+        print("printing found config for superuser")
+        for config in configs:
+            print(f"attribute: {config.attribute}, value: {config.value}")
+
         # overwrite if not set in env var
         if len(self.analyzers_to_test):
             self.test_job.analyzers_to_execute = self.analyzers_to_test

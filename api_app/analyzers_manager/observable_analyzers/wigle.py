@@ -13,6 +13,8 @@ class WiGLE(classes.ObservableAnalyzer):
 
     def set_params(self, params):
         self.__api_key = self._secrets["api_key_name"]
+        if not self.__api_key:
+            raise AnalyzerConfigurationException("API key is required")
         self.search_type = params.get("search_type", "WiFi Network")
 
     def __prepare_args(self):

@@ -8,7 +8,6 @@ from typing import Tuple
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
-from rest_framework.test import APIClient
 
 from api_app import models
 
@@ -24,9 +23,6 @@ class ApiViewTests(CustomAPITestCase):
         super(ApiViewTests, cls).setUpClass(force_migrate=True)
 
     def setUp(self):
-        self.client = APIClient()
-        self.client.force_authenticate(user=self.superuser)
-
         self.uploaded_file, self.file_md5 = self.__get_test_file("file.exe")
         self.uploaded_file2, self.file_md52 = self.__get_test_file("file.exe")
         self.analyze_file_data = {

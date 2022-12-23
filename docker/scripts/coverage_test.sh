@@ -1,3 +1,3 @@
 docker exec intelowl_uwsgi \
     coverage run \
-    manage.py test --keepdb $@
+    manage.py test --keepdb --parallel $@

@@ -3,13 +3,12 @@
 
 import hashlib
 import os
-from unittest import SkipTest
+from unittest import SkipTest, TestCase
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.files import File
 from django.core.management import call_command
-from django.test import TransactionTestCase
 
 from api_app.analyzers_manager.dataclasses import AnalyzerConfig
 from api_app.connectors_manager.dataclasses import ConnectorConfig
@@ -20,7 +19,7 @@ from tests import PollingFunction
 User = get_user_model()
 
 
-class _AbstractAnalyzersScriptTestCase(TransactionTestCase):
+class _AbstractAnalyzersScriptTestCase(TestCase):
     # constants
     TIMEOUT_SECONDS: int = 60 * 5  # 5 minutes
     SLEEP_SECONDS: int = 5  # 5 seconds

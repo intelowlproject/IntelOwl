@@ -112,11 +112,10 @@ export function JobActionsBar({ job }) {
 }
 
 export function JobInfoCard({ job }) {
-  
-  // eslint-disable-next-line camelcase, no-unused-vars
-const process_time2 = new Date(job.process_time * 1000).toISOString().substring(14, 19)
-// eslint-disable-next-line no-console
-console.log(job.process_time)
+  const process_time2 = new Date(job.process_time * 1000)
+    .toISOString()
+    .substring(14, 19);
+
   return (
     <>
       <ContentSection className="mb-0 bg-darker d-flex-center">

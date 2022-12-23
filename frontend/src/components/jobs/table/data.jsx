@@ -18,9 +18,8 @@ import {
   ALL_CLASSIFICATIONS,
 } from "../../../constants";
 
-
-
-const process_time2 = ((value) => new Date(value * 1000).toISOString().substring(14, 19))
+const process_time2 = (value) =>
+  new Date(value * 1000).toISOString().substring(14, 19);
 
 const jobTableColumns = [
   {

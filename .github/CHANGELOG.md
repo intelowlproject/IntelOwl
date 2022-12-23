@@ -1,6 +1,18 @@
 # Changelog
 
 [**Upgrade Guide**](https://intelowl.readthedocs.io/en/latest/Installation.md#update-to-the-most-recent-version)
+## [v4.1.3](https://github.com/intelowlproject/IntelOwl/releases/tag/v4.1.3)
+With this version we officially announce that we have joined [Open Collective](https://opencollective.com/intelowl-project) with the IntelOwl Project!
+
+If you love this project and you would like to help us, we would love to get your support there!
+<a href="https://opencollective.com/intelowl-project/donate" target="_blank">
+  <img src="https://opencollective.com/intelowl-project/donate/button@2x.png?color=blue" width=150 />
+</a>
+
+**New/Improved Analyzers:**
+* adjusted / fixed a lot of popular analyzers like Dehashed, MISP, VirusTotal, Alienvault OTX, PDF_Info and Unpacme
+* fixed --malware_tools_analyzers broken
+
 ## [v4.1.2](https://github.com/intelowlproject/IntelOwl/releases/tag/v4.1.2)
 
 This version mainly adds quality improvements to the recently released ["Playbook" feature](https://intelowl.readthedocs.io/en/latest/Usage.html#playbooks):

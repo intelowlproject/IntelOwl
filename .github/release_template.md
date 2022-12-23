@@ -2,7 +2,7 @@
 
 - [ ] (optional) If we changed/added Docker Analyzers, we need to configure Docker Hub / Dependabot properly.
 - [ ] Update `CHANGELOG.md` for the new version
-- [ ] Change version number in `docs/source/conf.py`, `docs/schema.yml`, `docker/.env`, `docker/.version`, `intel_owl/settings.commons.py` and `start.py`
+- [ ] Change version number in `docs/schema.yml` and `docker/.env`
 - [ ] Verify CI Tests
 - [ ] Create release for the branch `develop`. A Github action should automatically create a [Twitter](https://twitter.com/intel_owl) post.
       Write the following statement there (change the version number):

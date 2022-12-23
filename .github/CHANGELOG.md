@@ -11,7 +11,7 @@ If you love this project and you would like to help us, we would love to get you
 
 **New/Improved Analyzers:**
 * adjusted / fixed a lot of popular analyzers like Dehashed, MISP, VirusTotal, Alienvault OTX, PDF_Info and Unpacme
-
+* fixed --malware_tools_analyzers broken
 
 ## [v4.1.2](https://github.com/intelowlproject/IntelOwl/releases/tag/v4.1.2)
 

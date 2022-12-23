@@ -44,8 +44,9 @@ class _AbstractAnalyzersScriptTestCase(TransactionTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.superuser = User.objects.filter(username="test")
-        if not cls.superuser.exists():
+        try:
+            cls.superuser = User.objects.get(username="test")
+        except User.DoesNotExist:
             print("creating superuser")
             cls.superuser = User.objects.create_superuser(
                 username="test", email="test@intelowl.com", password="test"

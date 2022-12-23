@@ -6,7 +6,7 @@ version: '3.8'
 
 services:
   tor_analyzers:
-    image: intelowlproject/intelowl_tor_analyzers:${INTELOWL_TAG_VERSION}
+    image: intelowlproject/intelowl_tor_analyzers:${REACT_APP_INTELOWL_VERSION}
     container_name: intelowl_tor_analyzers
     restart: unless-stopped
     expose:

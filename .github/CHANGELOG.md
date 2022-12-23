@@ -1,6 +1,10 @@
 # Changelog
 
 [**Upgrade Guide**](https://intelowl.readthedocs.io/en/latest/Installation.md#update-to-the-most-recent-version)
+## [v4.1.3](https://github.com/intelowlproject/IntelOwl/releases/tag/v4.1.3)
+
+
+
 ## [v4.1.2](https://github.com/intelowlproject/IntelOwl/releases/tag/v4.1.2)
 
 This version mainly adds quality improvements to the recently released ["Playbook" feature](https://intelowl.readthedocs.io/en/latest/Usage.html#playbooks):

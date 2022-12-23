@@ -6,7 +6,7 @@ WORKDIR /
 # copy react source code
 COPY frontend/ .
 # copy version file as an env file
-COPY docker/.version .env.local
+COPY docker/.env .env.local
 # install and build
 RUN npm install npm@latest --location=global \
     && npm install \

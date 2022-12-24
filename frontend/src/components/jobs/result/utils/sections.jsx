@@ -112,7 +112,7 @@ export function JobActionsBar({ job }) {
 }
 
 export function JobInfoCard({ job }) {
-  const process_time2 = new Date(job.process_time * 1000)
+  const process_time_mmss = new Date(job.process_time * 1000)
     .toISOString()
     .substring(14, 19);
 
@@ -145,7 +145,7 @@ export function JobInfoCard({ job }) {
             ["TLP", <TLPTag value={job.tlp} />],
             ["User", job.user?.username],
             ["MD5", job.md5],
-            ["Process Time (mm:ss)", process_time2],
+            ["Process Time (mm:ss)", process_time_mmss],
             [
               "Start Time",
               <DateHoverable

@@ -17,7 +17,7 @@ import {
   ALL_CLASSIFICATIONS,
 } from "../../../constants";
 
-const process_time2 = (value) =>
+const process_time_mmss = (value) =>
   new Date(value * 1000).toISOString().substring(14, 19);
 
 const jobTableColumns = [
@@ -169,7 +169,7 @@ const jobTableColumns = [
         Header: "Process Time (mm:ss)",
         id: "process_time",
         accessor: "process_time",
-        Cell: ({ value }) => <span>{process_time2(value)}</span>,
+        Cell: ({ value }) => <span>{process_time_mmss(value)}</span>,
 
         disableSortBy: true,
         maxWidth: 125,

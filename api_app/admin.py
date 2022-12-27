@@ -45,7 +45,7 @@ class PluginCredentialAdminView(admin.ModelAdmin):
         "plugin_name",
         "config_type",
         "organization",
-        "user",
+        "owner",
     )
-    search_fields = ("attribute", "plugin_name", "organization", "user")
-    list_filter = ("config_type", "type", "plugin_name", "organization" "user")
+    search_fields = ("attribute", "plugin_name", "organization", "owner")
+    list_filter = ("config_type", "type", "plugin_name", "organization" "owner")

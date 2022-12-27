@@ -11,7 +11,7 @@ django-celery-results==2.4.0
 Authlib==1.2.0
 djangorestframework==3.14.0
 djangorestframework-filters==1.0.0.dev2
-drf-spectacular==0.24.0
+drf-spectacular==0.25.1
 
 uWSGI==2.0.20
 whitenoise==6.2.0

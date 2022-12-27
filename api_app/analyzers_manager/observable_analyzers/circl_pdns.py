@@ -7,13 +7,17 @@ from urllib.parse import urlparse
 import pypdns
 
 from api_app.analyzers_manager import classes
-from api_app.exceptions import AnalyzerRunException
+from api_app.exceptions import AnalyzerConfigurationException, AnalyzerRunException
 from tests.mock_utils import MockResponseNoOp, if_mock_connections, patch
 
 
 class CIRCL_PDNS(classes.ObservableAnalyzer):
     def set_params(self, params):
         self.__credentials = self._secrets["pdns_credentials"]
+        if not self.__credentials:
+            raise AnalyzerConfigurationException(
+                "No secret retrieved for `pdns_credentials`."
+            )
         self.domain = self.observable_name
         if self.observable_classification == self.ObservableTypes.URL:
             self.domain = urlparse(self.observable_name).hostname

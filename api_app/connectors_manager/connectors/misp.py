@@ -24,6 +24,7 @@ INTELOWL_MISP_TYPE_MAP = {
 class MISP(Connector):
     def set_params(self, params):
         self.ssl_check = params.get("ssl_check", True)
+        self.self_signed_certificate = params.get("self_signed_certificate", False)
         self.debug = params.get("debug", False)
         self.tlp = params.get("tlp", "white")
         self.__url_name = self._secrets["url_key_name"]
@@ -92,10 +93,15 @@ class MISP(Connector):
         return obj
 
     def run(self):
+        ssl_param = (
+            f"{settings.PROJECT_LOCATION}/configuration/misp_ssl.crt"
+            if self.ssl_check and self.self_signed_certificate
+            else self.ssl_check
+        )
         misp_instance = pymisp.PyMISP(
             url=self.__url_name,
             key=self.__api_key,
-            ssl=self.ssl_check,
+            ssl=ssl_param,
             debug=self.debug,
             timeout=5,
         )

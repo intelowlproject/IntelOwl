@@ -12,7 +12,7 @@ from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.observable_analyzers.dns.dns_responses import (
     malicious_detector_response,
 )
-from api_app.exceptions import AnalyzerRunException
+from api_app.exceptions import AnalyzerConfigurationException
 from tests.mock_utils import if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
@@ -23,8 +23,8 @@ class WebRisk(classes.ObservableAnalyzer):
 
     def run(self):
         credentials = self._secrets["api_key_name"]
-        if not exists(credentials):
-            raise AnalyzerRunException(
+        if not credentials or not exists(credentials):
+            raise AnalyzerConfigurationException(
                 f"{credentials} should be an existing file. "
                 "Check the docs on how to add this file to"
                 " properly execute this analyzer"

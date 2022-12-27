@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import React from "react";
 import PropTypes from "prop-types";
 import { Button, ListGroup, ListGroupItem, Badge, Fade } from "reactstrap";
@@ -111,6 +112,10 @@ export function JobActionsBar({ job }) {
 }
 
 export function JobInfoCard({ job }) {
+  const process_time_mmss = new Date(job.process_time * 1000)
+    .toISOString()
+    .substring(14, 19);
+
   return (
     <>
       <ContentSection className="mb-0 bg-darker d-flex-center">
@@ -140,7 +145,7 @@ export function JobInfoCard({ job }) {
             ["TLP", <TLPTag value={job.tlp} />],
             ["User", job.user?.username],
             ["MD5", job.md5],
-            ["Process Time (s)", job.process_time],
+            ["Process Time (mm:ss)", process_time_mmss],
             [
               "Start Time",
               <DateHoverable

@@ -13,6 +13,8 @@ if [ "$REPO_DOWNLOADER_ENABLED" = "false" ]; then echo "Skipping repo_downloader
 
 cd /opt/deploy/yara
 
+git config --global --add safe.directory /opt/deploy/yara
+
 # bartblaze rules
 git clone --depth 1 https://github.com/bartblaze/Yara-rules bartblaze_rules
 

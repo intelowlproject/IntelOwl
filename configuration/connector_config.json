@@ -26,6 +26,11 @@
         "type": "bool",
         "description": "Enable SSL certificate server verification. Change this if your MISP instance has not SSL enabled."
       },
+      "self_signed_certificate": {
+        "value": false,
+        "type": "bool",
+        "description": "If ssl_check and this flag are True, the analyzer will leverage a CA_BUNDLE to authenticate against the MISP instance. IntelOwl will look for it at this path: `<project_location>/configuration/misp_ssl.crt`. Remember that this file should be readable by the application (`www-data` user must read this)"
+      },
       "debug": {
         "value": false,
         "type": "bool",

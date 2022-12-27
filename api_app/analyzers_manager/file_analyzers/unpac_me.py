@@ -21,13 +21,14 @@ class UnpacMe(FileAnalyzer):
         private = params.get("private", False)
         self.private = "private" if private else "public"
         self.__api_key = self._secrets["api_key_name"]
+        self.headers = {"Authorization": f"Key {self.__api_key}"}
         # max no. of tries when polling for result
         self.max_tries = params.get("max_tries", 30)
         # interval b/w HTTP requests when polling
         self.poll_distance = 5
 
     def run(self):
-        self.headers = {"Authorization": "Key %s" % self.__api_key}
+        report = {}
         unpac_id = self._upload()
         logger.info(f"md5 {self.md5} job {self.job_id} uploaded id {unpac_id}")
         for chance in range(self.max_tries):
@@ -37,15 +38,20 @@ class UnpacMe(FileAnalyzer):
                 f" job_id {self.job_id}. starting the query"
             )
             status = self._get_status(unpac_id)
+            logger.info(
+                f"md5 {self.md5} job {self.job_id} id {unpac_id} status {status}"
+            )
             if status == "fail":
-                logger.error(f"md5 {self.md5} job {self.job_id} analysis has failed")
-                raise AnalyzerRunException("failed analysis")
-            if status != "complete":
-                logger.info(
-                    f"md5 {self.md5} job {self.job_id} id {unpac_id} status {status}"
+                raise AnalyzerRunException(
+                    f"failed analysis for {self.md5} job {self.job_id}"
                 )
+            if status == "complete":
+                report = self._get_report(unpac_id)
+                break
+            else:
                 continue
-            return self._get_report(unpac_id)
+
+        return report
 
     def _req_with_checks(self, url, files=None, post=False):
         try:

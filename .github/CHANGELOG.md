@@ -1,6 +1,13 @@
 # Changelog
 
 [**Upgrade Guide**](https://intelowl.readthedocs.io/en/latest/Installation.md#update-to-the-most-recent-version)
+## [v4.1.4](https://github.com/intelowlproject/IntelOwl/releases/tag/v4.1.4)
+With this release we welcome our first sponsor in [Open Collective](https://opencollective.com/intelowl-project): [ThreatHunter.ai](https://threathunter.ai/?utm_source=intelowl)! Thank you for your help!
+
+Moreover this release solves a bug regarding the creation of organization-level secrets which was not possible before.
+
+And this is the last release of this year for us! We will see each other back in 2023!
+
 ## [v4.1.3](https://github.com/intelowlproject/IntelOwl/releases/tag/v4.1.3)
 With this version we officially announce that we have joined [Open Collective](https://opencollective.com/intelowl-project) with the IntelOwl Project!
 

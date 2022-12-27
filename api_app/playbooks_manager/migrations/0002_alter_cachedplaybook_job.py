@@ -7,7 +7,6 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("api_app", "0012_auto_20221227_1543"),
         ("playbooks_manager", "0001_initial"),
     ]
 

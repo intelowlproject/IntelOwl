@@ -25,7 +25,7 @@ class Command(BaseCommand):
             owner=User.objects.get(username=user)
         )
         for plugin in plugins_for_user:
-            plugin.organization = Organization(name=organization)
+            plugin.organization = Organization.objects.get(name=organization)
             plugin.save()
             print(
                 f"migrate secret {plugin.attribute} {plugin.plugin_name}"
@@ -38,6 +38,6 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         user = options["user"]
-        organization = options["org"]
+        organization = options["organization"]
         self._migrate_secrets_to_org(user, organization)
         print("Migration complete")

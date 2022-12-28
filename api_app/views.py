@@ -652,11 +652,16 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
             .values_list(field_name, flat=True)
         )
 
+        logger.info(
+            f"request: {field_name} found most_frequent_values: {most_frequent_values}"
+        )
+
         if len(most_frequent_values):
             annotations = {
                 val: Count(field_name, filter=Q(**{field_name: val}))
                 for val in most_frequent_values
             }
+            logger.info(f"request: {field_name} annotations: {annotations}")
             if group_by_date:
                 aggregation = (
                     Job.objects.filter(received_request_time__gte=delta)

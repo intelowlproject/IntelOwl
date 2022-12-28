@@ -490,7 +490,7 @@
     "external_service": false,
     "docker_based": true,
     "config": {
-      "soft_time_limit": 50,
+      "soft_time_limit": 70,
       "queue": "local"
     },
     "secrets": {},

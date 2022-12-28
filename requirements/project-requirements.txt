@@ -26,7 +26,7 @@ flower==1.2.0
 
 # plugins
 GitPython==3.1.26
-checkdmarc==4.4.1
+checkdmarc==4.5.0
 darksearch==2.1.2
 dnspython==2.2.1
 dnstwist==20221213

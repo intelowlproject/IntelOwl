@@ -270,7 +270,7 @@ class PluginConfig(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=["type", "attribute", "organization", "owner"],
+                fields=["type", "attribute", "organization", "owner", "plugin_name"],
                 name="unique_custom_config_entry",
             )
         ]

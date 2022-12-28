@@ -123,8 +123,10 @@ class OTX(classes.ObservableAnalyzer):
                     indicator=to_analyze_observable,
                     section=section,
                 )
-            except (OTXv2.BadRequest, OTXv2.NotFound) as e:
-                raise AnalyzerRunException(e)
+            except OTXv2.BadRequest as e:
+                raise AnalyzerRunException(f"Error while requesting data to OTX: {e}")
+            except OTXv2.NotFound as e:
+                logger.info(f"{to_analyze_observable} not found: {e}")
             else:
                 # This mapping is used to avoid a verbose elif structure:
                 # Each keyword is mapped in a tuple with the logic to extract the data
@@ -143,7 +145,10 @@ class OTX(classes.ObservableAnalyzer):
                 selected_section_config = section_extractor_mapping[section]
                 data = selected_section_config[0](details)
                 field_name = selected_section_config[1]
-                logger.debug(f"extracted data: {data}, field name: {field_name}")
+                logger.debug(
+                    f"observable {to_analyze_observable} extracted data: {data},"
+                    f" field name: {field_name}"
+                )
                 result[field_name] = data
                 logger.debug(f"result: {result}")
         return result

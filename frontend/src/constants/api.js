@@ -16,7 +16,7 @@ export const JOB_AGG_TYPE_URI = `${JOB_BASE_URI}/aggregate/type`;
 export const JOB_AGG_OBS_CLASSIFICATION_URI = `${JOB_BASE_URI}/aggregate/observable_classification`;
 export const JOB_AGG_FILE_MIMETYPE_URI = `${JOB_BASE_URI}/aggregate/file_mimetype`;
 export const JOB_AGG_OBS_NAME_URI = `${JOB_BASE_URI}/aggregate/observable_name`;
-export const JOB_AGG_FILE_NAME_URI = `${JOB_BASE_URI}/aggregate/file_name`;
+export const JOB_AGG_FILE_MD5_URI = `${JOB_BASE_URI}/aggregate/md5`;
 
 // user
 export const USERACCESS_URI = `${API_BASE_URI}/me/access`;

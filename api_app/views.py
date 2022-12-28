@@ -34,6 +34,7 @@ from certego_saas.ext.helpers import cache_action_response, parse_humanized_rang
 from certego_saas.ext.mixins import SerializerActionMixin
 from certego_saas.ext.viewsets import ReadAndDeleteOnlyViewSet
 from intel_owl.celery import app as celery_app
+from intel_owl.consts import ObservableClassification
 
 from .analyzers_manager import controller as analyzers_controller
 from .analyzers_manager.constants import ObservableTypes
@@ -619,13 +620,14 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
         return self.__aggregation_response_dynamic("observable_name", False)
 
     @action(
-        url_path="aggregate/file_name",
+        url_path="aggregate/md5",
         detail=False,
         methods=["GET"],
     )
     @cache_action_response(timeout=60 * 5)
-    def aggregate_file_name(self, request):
-        return self.__aggregation_response_dynamic("file_name", False)
+    def aggregate_md5(self, request):
+        # this is for file
+        return self.__aggregation_response_dynamic("md5", False)
 
     def __aggregation_response_static(self, annotations: dict) -> Response:
         delta, basis = self.__parse_range(self.request)
@@ -642,10 +644,21 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
     ) -> Response:
         delta, basis = self.__parse_range(self.request)
 
+        filter_kwargs = {"received_request_time__gte": delta}
+        if field_name == "md5":
+            filter_kwargs["is_sample"] = True
+
         most_frequent_values = (
-            Job.objects.filter(received_request_time__gte=delta)
+            Job.objects.filter(**filter_kwargs)
             .exclude(**{f"{field_name}__isnull": True})
             .exclude(**{f"{field_name}__exact": ""})
+            # excluding those because they could lead to SQL query errors
+            .exclude(
+                observable_classification__in=[
+                    ObservableClassification.URL,
+                    ObservableClassification.GENERIC,
+                ]
+            )
             .annotate(count=Count(field_name))
             .distinct()
             .order_by("-count")[:limit]
@@ -661,18 +674,18 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
                 val: Count(field_name, filter=Q(**{field_name: val}))
                 for val in most_frequent_values
             }
-            logger.info(f"request: {field_name} annotations: {annotations}")
+            logger.debug(f"request: {field_name} annotations: {annotations}")
             if group_by_date:
                 aggregation = (
-                    Job.objects.filter(received_request_time__gte=delta)
+                    Job.objects.filter(**filter_kwargs)
                     .annotate(date=Trunc("received_request_time", basis))
                     .values("date")
                     .annotate(**annotations)
                 )
             else:
-                aggregation = Job.objects.filter(
-                    received_request_time__gte=delta
-                ).aggregate(**annotations)
+                aggregation = Job.objects.filter(**filter_kwargs).aggregate(
+                    **annotations
+                )
         else:
             aggregation = {}
 

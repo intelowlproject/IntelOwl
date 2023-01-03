@@ -55,16 +55,23 @@ const authLinks = (
 );
 
 const guestLinks = (
-  <NavItem>
-    <RRNavLink
-      id="login-btn"
-      className="btn btn-sm btn-accent-2"
-      end
-      to="/login"
-    >
-      Login
-    </RRNavLink>
-  </NavItem>
+  <>
+    <NavItem>
+      <RRNavLink id="login-btn" className="btn btn-sm btn-info" end to="/login">
+        Login
+      </RRNavLink>
+    </NavItem>
+    <NavItem className="ms-lg-2">
+      <RRNavLink
+        id="register-btn"
+        className="btn btn-sm btn-accent-2"
+        end
+        to="/register"
+      >
+        Register
+      </RRNavLink>
+    </NavItem>
+  </>
 );
 
 const rightLinks = (

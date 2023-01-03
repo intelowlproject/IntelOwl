@@ -6,6 +6,7 @@ django-filter==22.1
 django-storages==1.13.1
 django-celery-beat==2.4.0
 django-celery-results==2.4.0
+git+https://github.com/cdriehuys/django-rest-email-auth.git@django-bump#egg=django-rest-email-auth
 
 # django rest framework libs
 Authlib==1.1.0

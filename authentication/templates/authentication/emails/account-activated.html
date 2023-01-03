@@ -1,0 +1,23 @@
+{% extends "./base.html" %}
+
+{% block content %}
+  <div>
+    Hello, {{ full_name }}!
+
+    <p>
+      <h2>You've got access! 🎉</h2>
+    </p>
+
+    <p>
+      Your account <strong>@{{ username }}</strong> has been verified by us and you
+      can now
+      <a href="{{ host_uri }}/login" target="_blank">login</a>
+      to and use {{ host_name }}.
+    </p>
+    <p style="font-style: italic">
+      Note: If you believe you received this email in error, please contact us at
+      <a href="mailto:{{ organization_email }}">{{ organization_email }}</a>.
+    </p>
+
+  </div>
+{% endblock %}

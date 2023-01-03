@@ -7,6 +7,8 @@ import IfAuthRedirectGuard from "../wrappers/IfAuthRedirectGuard";
 const Home = React.lazy(() => import("./home/Home"));
 const Login = React.lazy(() => import("./auth/Login"));
 const Logout = React.lazy(() => import("./auth/Logout"));
+const Register = React.lazy(() => import("./auth/Register"));
+const EmailVerification = React.lazy(() => import("./auth/EmailVerification"));
 const Organization = React.lazy(() => import("./me/organization/Organization"));
 const Sessions = React.lazy(() => import("./me/sessions/Sessions"));
 const JobsTable = React.lazy(() => import("./jobs/table/JobsTable"));
@@ -39,6 +41,14 @@ const noAuthRoutesLazy = [
   {
     path: "/login",
     element: <Login />,
+  },
+  {
+    path: "/register",
+    element: <Register />,
+  },
+  {
+    path: "/verify-email",
+    element: <EmailVerification />,
   },
 ].map((r) => ({
   ...r,

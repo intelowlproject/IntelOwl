@@ -1,0 +1,23 @@
+{% extends "./base.html" %} {% block content %}
+<div>
+  Hello!
+
+  <p>
+    Please click the link below to verify your email address on
+    <a href="{{ host_uri }}" target="_blank">{{ host_uri }}</a>
+  </p>
+
+  <div style="border: 1px solid black; padding: 4px">
+    <a href="{{ verification_url }}" target="_blank">{{ verification_url }}</a>
+  </div>
+
+  <p>or, you may also copy and paste directly into your browser's URL bar.</p>
+
+  <pre style="background-color: #eeeeee">{{ verification_url }}</pre>
+
+  <p>
+    <em>Note: This URL is valid only for the next 24 hours.</em>
+  </p>
+
+</div>
+{% endblock %}

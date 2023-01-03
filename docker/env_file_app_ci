@@ -126,3 +126,7 @@ BROKER_URL=amqp://guest:guest@rabbitmq:5672
 
 # Playbooks
 TEST_PLAYBOOK=FREE_TO_USE_ANALYZERS
+
+# drf-recaptcha
+RECAPTCHA_SECRET_KEY_DF_PUBLIC="testkey"
+RECAPTCHA_SECRET_KEY_DF_LOCAL="testkey"

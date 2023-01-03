@@ -2,7 +2,9 @@
 # See the file 'LICENSE' for copying permission.
 
 import logging
+from typing import List
 
+import rest_email_auth.views
 from authlib.integrations.base_client import OAuthError
 from authlib.oauth2 import OAuth2Error
 from django.contrib.auth import get_user_model, login, logout
@@ -20,15 +22,46 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 
+from certego_saas.ext.mixins import RecaptchaV2Mixin
+from certego_saas.ext.throttling import POSTUserRateThrottle
 from intel_owl.settings import AUTH_USER_MODEL
 
 from .oauth import oauth
+from .serializers import (  # LoginSerializer,
+    EmailVerificationSerializer,
+    RegistrationSerializer,
+)
 
 logger = logging.getLogger(__name__)
 
 """ Auth API endpoints """
 
 User: AUTH_USER_MODEL = get_user_model()
+
+
+class EmailVerificationView(rest_email_auth.views.EmailVerificationView):
+    authentication_classes: List = []
+    permission_classes: List = []
+    throttle_classes: List = [POSTUserRateThrottle]
+    serializer_class = EmailVerificationSerializer
+
+
+class RegistrationView(rest_email_auth.views.RegistrationView, RecaptchaV2Mixin):
+    authentication_classes: List = []
+    permission_classes: List = []
+    throttle_classes: List = [POSTUserRateThrottle]
+    serializer_class = RegistrationSerializer
+
+    def get_serializer_class(self):
+        return RegistrationSerializer
+
+
+class ResendVerificationView(
+    rest_email_auth.views.ResendVerificationView, RecaptchaV2Mixin
+):
+    authentication_classes: List = []
+    permission_classes: List = []
+    throttle_classes: List = [POSTUserRateThrottle]
 
 
 class LoginView(durin_views.LoginView):

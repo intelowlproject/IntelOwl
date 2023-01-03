@@ -43,6 +43,9 @@ INSTALLED_APPS = [
     "api_app.analyzers_manager",
     "api_app.connectors_manager",
     "api_app.playbooks_manager",
+    # auth
+    "rest_email_auth",
+    "drf_recaptcha",
 ]
 
 # inject from other modules

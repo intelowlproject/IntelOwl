@@ -21,6 +21,8 @@ import { AUTH_BASE_URI } from "../../constants/api";
 import { PUBLIC_URL } from "../../constants/environment";
 import { useAuthStore } from "../../stores";
 
+import { ResendVerificationEmailButton } from "./utils/utils";
+
 // constants
 const initialValues = {
   username: "",
@@ -198,6 +200,10 @@ export default function Login() {
             )}
           </Formik>
         </ContentSection>
+        {/* popover buttons */}
+        <Row className="d-flex align-items-end flex-column">
+          <ResendVerificationEmailButton />
+        </Row>
       </Container>
     </ContentSection>
   );

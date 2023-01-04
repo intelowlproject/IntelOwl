@@ -262,6 +262,29 @@
     "secrets": {},
     "params": {}
   },
+  "CheckPhish": {
+    "type": "observable",
+    "python_module": "checkphish.CheckPhish",
+    "description": "Scanner to detect phishing and fraudulent sites",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": true,
+    "observable_supported": ["ip", "domain", "url"],
+    "config": {
+      "soft_time_limit": 100,
+      "queue": "long"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "CHECKPHISH_KEY",
+        "type": "string",
+        "required": true,
+        "default": null,
+        "description": "API Key for the analyzer"
+      }
+    },
+    "params": {}
+  },
   "CIRCLPassiveDNS": {
     "type": "observable",
     "python_module": "circl_pdns.CIRCL_PDNS",

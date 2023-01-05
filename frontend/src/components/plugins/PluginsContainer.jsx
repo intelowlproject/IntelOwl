@@ -52,7 +52,7 @@ const routes = [
     location: "playbooks",
     Title: () => (
       <span>
-        <TiFlowChildren />
+        <TiBook />
         &nbsp;Playbooks
       </span>
     ),

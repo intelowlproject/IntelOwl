@@ -1,8 +1,8 @@
 ---
-name: New Analyzer
-about: A new analyzer to integrate with IntelOwl
-title: "[Analyzer]"
-labels: new_analyzer
+name: New Scanner
+about: A new scanner to integrate with IntelOwl
+title: "[Scanner]"
+labels: new_scanner
 assignees: ''
 
 ---
@@ -11,7 +11,7 @@ assignees: ''
 
 ## Link
 
-## Type of analyzer
+## Type of scanner
 **this can be observable, file, and docker**
 
 

@@ -9,7 +9,7 @@ jobs:
     steps:
       - uses: infraway/tweet-action@v1.0.1
         with:
-          status: published #IntelOwl ${{github.ref}}! full changelog here: https://github.com/intelowlproject/IntelOwl/blob/develop/.github/CHANGELOG.md #ThreatIntelligence #CyberSecurity #OpenSource #osint #dfir
+          status: "published #IntelOwl ${{github.ref}}! full changelog here: https://github.com/intelowlproject/IntelOwl/blob/develop/.github/CHANGELOG.md #ThreatIntelligence #CyberSecurity #OpenSource #osint #dfir"
           api_key: ${{ secrets.TWITTER_API_KEY }}
           api_key_secret: ${{ secrets.TWITTER_API_KEY_SECRET }}
           access_token: ${{ secrets.TWITTER_ACCESS_TOKEN }}

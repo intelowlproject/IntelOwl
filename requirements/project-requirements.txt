@@ -43,7 +43,7 @@ OTXv2==1.5.12
 peepdf-fork==0.4.3
 pdfid==1.1.0
 pefile==2022.5.30
-Pillow==9.3.0
+Pillow==9.4.0
 psycopg2-binary==2.9.1
 pycti==5.5.0
 pydeep==0.4
@@ -57,7 +57,7 @@ pypssl==2.2
 pysafebrowsing==0.1.1
 PySocks==1.7.1
 py-tlsh==4.7.2
-quark-engine==22.11.1
+quark-engine==22.12.1
 requests==2.28.1
 speakeasy-emulator==1.5.9
 telfhash==0.9.8

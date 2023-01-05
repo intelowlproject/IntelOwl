@@ -19,7 +19,7 @@ import {
   JOB_AGG_OBS_CLASSIFICATION_URI,
   JOB_AGG_FILE_MIMETYPE_URI,
   JOB_AGG_OBS_NAME_URI,
-  JOB_AGG_FILE_NAME_URI,
+  JOB_AGG_FILE_MD5_URI,
 } from "../../../constants/api";
 
 // constants
@@ -135,12 +135,12 @@ export const JobObsNamePieChart = React.memo(() => {
   return <PieChartWidget {...chartProps} />;
 });
 
-export const JobFileNamePieChart = React.memo(() => {
-  console.debug("JobFileNamePieChart rendered!");
+export const JobFileHashPieChart = React.memo(() => {
+  console.debug("JobFileHashPieChart rendered!");
 
   const chartProps = React.useMemo(
     () => ({
-      url: JOB_AGG_FILE_NAME_URI,
+      url: JOB_AGG_FILE_MD5_URI,
       modifierFn: (respData) =>
         Object.entries(respData?.aggregation).map(([key, val], i) => ({
           name: key.toLowerCase(),

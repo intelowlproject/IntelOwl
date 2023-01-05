@@ -10,9 +10,9 @@ class ClamAV(FileAnalyzer, DockerBasedAnalyzer):
     # interval between http request polling
     poll_distance: int = 3
     # http request polling max number of tries
-    max_tries: int = 5
+    max_tries: int = 20
     # timeout limit
-    timeout: int = 45
+    timeout: int = 30
 
     def run(self):
         # get binary

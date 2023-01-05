@@ -14,13 +14,17 @@ import {
   JobObsClassificationBarChart,
   JobFileMimetypeBarChart,
   JobObsNamePieChart,
-  JobFileNamePieChart,
+  JobFileHashPieChart,
 } from "./utils/charts";
 
 const charts1 = [
   ["JobStatusBarChart", "Job: Status", JobStatusBarChart],
-  ["JobObsNamePieChart", "Job: Frequent Observable Names", JobObsNamePieChart],
-  ["JobFileNamePieChart", "Job: Frequent File Names", JobFileNamePieChart],
+  [
+    "JobObsNamePieChart",
+    "Job: Frequent IPs, Hash & Domains",
+    JobObsNamePieChart,
+  ],
+  ["JobFileHashPieChart", "Job: Frequent Files", JobFileHashPieChart],
 ];
 const charts2 = [
   ["JobTypeBarChart", "Job: Type", JobTypeBarChart],

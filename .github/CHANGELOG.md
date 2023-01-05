@@ -1,6 +1,15 @@
 # Changelog
 
 [**Upgrade Guide**](https://intelowl.readthedocs.io/en/latest/Installation.md#update-to-the-most-recent-version)
+## [v4.1.5](https://github.com/intelowlproject/IntelOwl/releases/tag/v4.1.5)
+With this release we announce that IntelOwl Project will apply as a new Organization in the next [Google Summer of Code](https://summerofcode.withgoogle.com/)!
+
+We have created a dedicated repository with all the info an aspiring contributor would need to participate to the program.
+
+All open source and cyber security fans! We are calling you! Be the next contributor!
+
+(...and under the hood we did some fixes and updates here and there)
+
 ## [v4.1.4](https://github.com/intelowlproject/IntelOwl/releases/tag/v4.1.4)
 With this release we welcome our first sponsor in [Open Collective](https://opencollective.com/intelowl-project): [ThreatHunter.ai](https://threathunter.ai/?utm_source=intelowl)! Thank you for your help!
 

@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: IntelOwl API specification
-  version: 4.1.4
+  version: 4.1.5
 paths:
   /api/analyze_file:
     post:
@@ -753,9 +753,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/Job'
           description: ''
-  /api/jobs/aggregate/file_name:
+  /api/jobs/aggregate/md5:
     get:
-      operationId: jobs_aggregate_file_name_retrieve
+      operationId: jobs_aggregate_md5_retrieve
       description: "\n    REST endpoint to fetch list of jobs or retrieve/delete a\
         \ job with job ID.\n    Requires authentication.\n    "
       tags:

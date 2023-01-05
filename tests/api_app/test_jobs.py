@@ -16,7 +16,7 @@ agg_type_uri = reverse("jobs-aggregate-type")
 agg_observable_classification_uri = reverse("jobs-aggregate-observable-classification")
 agg_file_mimetype_uri = reverse("jobs-aggregate-file-mimetype")
 agg_observable_name_uri = reverse("jobs-aggregate-observable-name")
-agg_file_name_uri = reverse("jobs-aggregate-file-name")
+agg_file_name_uri = reverse("jobs-aggregate-md5")
 
 
 class JobViewsetTests(CustomAPITestCase):

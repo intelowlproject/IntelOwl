@@ -265,7 +265,7 @@
   "CheckPhish": {
     "type": "observable",
     "python_module": "checkphish.CheckPhish",
-    "description": "Scanner to detect phishing and fraudulent sites",
+    "description": "[CheckPhish](https://checkphish.ai/checkphish-api/) can detect phishing and fraudulent sites",
     "disabled": false,
     "external_service": true,
     "leaks_info": true,

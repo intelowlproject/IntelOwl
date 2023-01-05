@@ -9,5 +9,4 @@ export const VERSION = process.env.REACT_APP_INTELOWL_VERSION;
 export const PUBLIC_URL = process.env.PUBLIC_URL;
 
 // runtime env config
-// export const RECAPTCHA_SITEKEY = window.$env.RECAPTCHA_SITEKEY;
-export const RECAPTCHA_SITEKEY = "6LcH8qYbAAAAAGu7TrMGZTMYanTY7HIs8b6VIdj4";
+export const RECAPTCHA_SITEKEY = window.$env.RECAPTCHA_SITEKEY;

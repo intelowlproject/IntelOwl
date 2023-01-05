@@ -38,8 +38,8 @@ INSTALLED_APPS = [
     "certego_saas.apps.notifications",
     "certego_saas.apps.organization",
     # intelowl apps
-    "api_app",
     "authentication",
+    "api_app",
     "api_app.analyzers_manager",
     "api_app.connectors_manager",
     "api_app.playbooks_manager",

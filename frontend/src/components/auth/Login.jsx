@@ -181,10 +181,6 @@ export default function Login() {
                   />
                   <Label check>Show password</Label>
                 </FormGroup>
-                <div className="text-muted mb-3">
-                  Don&apos;t have an account? Contact the administrator for
-                  access.
-                </div>
                 {/* Submit */}
                 <FormGroup className="d-flex-center">
                   <Button
@@ -201,7 +197,7 @@ export default function Login() {
           </Formik>
         </ContentSection>
         {/* popover buttons */}
-        <Row className="d-flex align-items-end flex-column">
+        <Row className="d-flex flex-column align-items-end g-0">
           <ResendVerificationEmailButton />
         </Row>
       </Container>

@@ -2,9 +2,6 @@ from django.conf import settings
 from django.core.validators import MinLengthValidator
 from django.db import models
 
-# from rest_email_auth import app_settings
-# from rest_email_auth.models import EmailConfirmation
-
 __all__ = [
     "UserProfile",
 ]

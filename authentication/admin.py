@@ -12,7 +12,7 @@ from durin.models import AuthToken, Client
 
 from certego_saas.apps.user.admin import AbstractUserAdmin
 from certego_saas.apps.user.models import User
-from intel_owl.settings import HOST_NAME, ORGANIZATION_EMAIL
+from intel_owl.settings import HOST_NAME, HOST_URI, ORGANIZATION_EMAIL
 
 from .models import UserProfile
 
@@ -58,6 +58,7 @@ class UserAdminView(AbstractUserAdmin):
                 context={
                     "full_name": user.get_full_name(),
                     "username": user.get_username(),
+                    "host_uri": HOST_URI,
                     "host_name": HOST_NAME,
                     "organization_email": ORGANIZATION_EMAIL,
                 },
@@ -93,9 +94,9 @@ class UserAdminView(AbstractUserAdmin):
                 context={
                     "full_name": user.get_full_name(),
                     "username": user.get_username(),
-                    # "host_uri": HOST_URI,
-                    # "host_name": HOST_NAME,
-                    # "organization_email": ORGANIZATION_EMAIL,
+                    "host_uri": HOST_URI,
+                    "host_name": HOST_NAME,
+                    "organization_email": ORGANIZATION_EMAIL,
                 },
             )
         number_updated = users.update(is_active=True, approved=True)

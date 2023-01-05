@@ -5,16 +5,20 @@ import { MdInfoOutline } from "react-icons/md";
 import { IoMail } from "react-icons/io5";
 
 import { PopupFormButton } from "@certego/certego-ui";
-
+import { useNavigate } from "react-router-dom";
 import EmailForm from "./EmailForm";
 import { resendVerificationMail } from "../api";
 
 export function AfterRegistrationModalAlert(props) {
   // modal state from props
   const { isOpen, setIsOpen } = props;
+  const navigate = useNavigate();
 
   // callbacks
-  const toggle = React.useCallback(() => setIsOpen((o) => !o), [setIsOpen]);
+  const toggle = React.useCallback(() => {
+    navigate("/");
+    setIsOpen((o) => !o);
+  }, [navigate, setIsOpen]);
 
   return (
     <Modal

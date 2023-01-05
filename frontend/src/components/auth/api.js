@@ -40,28 +40,3 @@ export async function resendVerificationMail(body) {
     return Promise.reject(err);
   }
 }
-
-// export async function requestPasswordReset(body) {
-//   try {
-//     const resp = await axios.post(
-//       `${AUTH_BASE_URI}/request-password-reset`,
-//       body
-//     );
-//     addToast("Email sent!", null, "success");
-//     return resp;
-//   } catch (err) {
-//     addToast("Failed to send email!", err.parsedMsg, "danger", true);
-//     return null;
-//   }
-// }
-
-// export async function resetPassword(body) {
-//   try {
-//     const resp = await axios.post(`${AUTH_BASE_URI}/reset-password`, body);
-//     addToast("Password reset successfully!", null, "success", true);
-//     return resp;
-//   } catch (err) {
-//     addToast("Password reset failed!", err.parsedMsg, "danger", true);
-//     return Promise.reject(err);
-//   }
-// }

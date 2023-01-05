@@ -21,3 +21,4 @@ docker/.env.start
 .bash_history
 .cache
 .google-cookie
+frontend/public/env.js

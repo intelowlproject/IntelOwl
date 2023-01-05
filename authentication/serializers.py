@@ -10,6 +10,7 @@ from api_app.models import Job
 from certego_saas.apps.user.serializers import (
     UserAccessSerializer as CertegoUserAccessSerializer,
 )
+from certego_saas.ext.upload import Slack
 from certego_saas.models import User
 
 from .models import UserProfile
@@ -143,10 +144,31 @@ class EmailVerificationSerializer(
         Confirm the email address matching the confirmation key.
         Then mark user as active.
         """
-        # user = self._confirmation.email.user
+        user = self._confirmation.email.user
         with transaction.atomic():
             super(EmailVerificationSerializer, self).save()
-            # FIXME: https://github.com/certego/Dragonfly/issues/447
-            # Automated verification will be enabled in Beta.
-            # user.is_active = True
-            # user.save(update_fields=("is_active",))
+
+            # Send msg on slack
+        try:
+            userprofile = user.user_profile
+            user_admin_link = (
+                f"https://gomphidae.prod.srvc.eu.certego.sec/admin/api/user/{user.pk}"
+            )
+            userprofile_admin_link = f"""
+                https://gomphidae.prod.srvc.eu.certego.sec/admin/api/userprofile/{userprofile.pk}
+            """
+            slack = Slack()
+            slack.send_message(
+                title="Newly registered user!!",
+                body=f"""
+                    - User(#{user.pk}, {user.username},
+                      {user.email}, <{user_admin_link}|admin link>)
+                    - UserProfile({userprofile.company_name},
+                      {userprofile.company_role},
+                      <{userprofile_admin_link}|admin link>)
+                """,
+            )
+        except Slack.SlackApiError as exc:
+            slack.log.error(
+                f"Slack message failed for user(#{user.pk}) with error: {str(exc)}"
+            )

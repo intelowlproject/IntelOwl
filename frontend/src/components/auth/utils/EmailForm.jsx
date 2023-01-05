@@ -67,7 +67,7 @@ export default function EmailForm({ onFormSubmit, apiCallback, ...restProps }) {
             <ReCAPTCHAInput className="m-3 mx-auto" formik={formik} />
           </FormGroup>
           {/* Submit */}
-          <FormGroup className="d-">
+          <FormGroup className="">
             <Button
               type="submit"
               disabled={!(formik.isValid || formik.isSubmitting)}

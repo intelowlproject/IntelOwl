@@ -99,6 +99,7 @@ In the `env_file_app`, configure different variables as explained below.
 **Strongly recommended** variable to set:
 * `DJANGO_SECRET`: random 50 chars key, must be unique. If you do not provide one, Intel Owl will automatically set a new secret on every run.
 * `INTELOWL_WEB_CLIENT_DOMAIN` (example: `localhost`/`mywebsite.com`): the web domain of your instance, this is used for generating links to analysis results.
+* `DEFAULT_FROM_EMAIL`: email address used for automated correspondence from the site manager
 
 **Optional configuration**:
 * `OLD_JOBS_RETENTION_DAYS`: Database retention for analysis results (default: 3 days). Change this if you want to keep your old analysis longer in the database.

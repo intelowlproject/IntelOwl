@@ -76,6 +76,70 @@ class TestUserAuth(CustomOAuthTestCase):
             AuthToken.objects.count(), 0, "other tokens should remain after logout"
         )
 
+    def test_register_username_taken_400(self):
+        # get current num of users
+        num_users_prev = User.objects.count()
+
+        # In CI, recaptcha protection is disabled so we can pass any value
+        body = {
+            **self.creds,
+            "first_name": "blahblah",
+            "last_name": "blahblah",
+            "email": self.testregisteruser["email"],
+            "recaptcha": "blahblah",
+        }
+
+        response = self.client.post(register_uri, body)
+        content = response.json()
+        msg = (
+            response,
+            content,
+            "self.user already exists so unique username validation will fail.",
+        )
+
+        # response assertions
+        self.assertEqual(400, response.status_code, msg=msg)
+        self.assertIn(
+            "A user with that username already exists.",
+            content["errors"]["username"],
+            msg=msg,
+        )
+        # db assertions
+        self.assertEqual(
+            num_users_prev, User.objects.count(), msg="no new user was created"
+        )
+
+    def test_register_no_email_leak_201(self):
+
+        # base check
+        with self.assertRaises(
+            User.DoesNotExist, msg="testregisteruser doesn't exist right now"
+        ):
+            User.objects.get(username=self.testregisteruser["username"])
+
+        # register new user
+        self.__register_user(body=self.testregisteruser)
+
+        # get current num of users
+        num_users_prev = User.objects.count()
+
+        # 2nd registration for same email returns 201
+        # only as to not leak registered emails
+        body = {
+            "email": self.testregisteruser["email"],
+            "profile": self.testregisteruser["profile"],
+            "username": "blahblah",
+            "first_name": "blahblah",
+            "last_name": "blahblah",
+            "password": "averystrongpassword",
+        }
+        self.__register_user(body=body)
+
+        # db assertions
+        self.assertEqual(
+            num_users_prev, User.objects.count(), msg="no new user was created"
+        )
+
     def test_register_201(self):
         with self.assertRaises(
             User.DoesNotExist, msg="testregisteruser doesn't exist right now"

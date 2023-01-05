@@ -20,7 +20,7 @@ import { ContentSection, Select } from "@certego/certego-ui";
 import { PUBLIC_URL } from "../../constants/environment";
 import { HACKER_MEME_STRING, EMAIL_REGEX } from "../../constants";
 import ReCAPTCHAInput from "./utils/ReCAPTCHAInput";
-// import { AfterRegistrationModalAlert, InviteOnlyAlert } from "./utils/utils";
+import { AfterRegistrationModalAlert, InviteOnlyAlert } from "./utils/utils";
 import { registerUser } from "./api";
 
 // constants
@@ -60,7 +60,7 @@ const initialValues = JSON.parse(
   company_name: "",
   company_role: "",
   twitter_handle: "",
-  discover_from: "",
+  discover_from: "other",
   recaptcha: null,
 };
 
@@ -75,7 +75,7 @@ const onValidate = (values) => {
     } else if (values[field].length > 15) {
       errors[field] = "Must be 15 characters or less";
     } else if (values[field].length < 4) {
-      errors[field] = "Must be 3 characters or more";
+      errors[field] = "Must be 4 characters or more";
     }
   });
   if (
@@ -92,10 +92,10 @@ const onValidate = (values) => {
   ["company_name", "company_role"].forEach((field) => {
     if (!values[field]) {
       errors[field] = "Required";
-    } else if (values[field].length > 31) {
-      errors[field] = "Must be less than 30 characters";
+    } else if (values[field].length > 30) {
+      errors[field] = "Must be 30 characters or less";
     } else if (values[field].length < 3) {
-      errors[field] = "Must be longer than 2 characters";
+      errors[field] = "Must be 3 characters or more";
     }
   });
 
@@ -114,14 +114,14 @@ const onValidate = (values) => {
 
   // password fields
   if (!values.password) {
-    errors.password = "Required.";
+    errors.password = "Required";
   } else if (values.password.length < 8) {
-    errors.password = "Must be more than 8 characters long";
+    errors.password = "Must be 8 characters or more";
   }
   if (!values.confirmPassword) {
-    errors.confirmPassword = "Required.";
+    errors.confirmPassword = "Required";
   } else if (values.confirmPassword.length < 8) {
-    errors.confirmPassword = "Must be more than 8 characters long";
+    errors.confirmPassword = "Must be 8 characters or more";
   }
   if (
     values.password.length > 0 &&
@@ -149,6 +149,7 @@ export default function Register() {
 
   // local state
   const [showModal, setShowModal] = React.useState(false);
+  const [passwordShown, setPasswordShown] = React.useState(false);
 
   console.debug(showModal);
 
@@ -181,12 +182,12 @@ export default function Register() {
 
   return (
     <ContentSection className="bg-body">
-      {/* {showModal && (
+      {showModal && (
         <AfterRegistrationModalAlert
           isOpen={showModal}
           setIsOpen={setShowModal}
         />
-      )} */}
+      )}
       <Container fluid className="col-12">
         {/* IntelOwl Logo */}
         <Row className="g-0 my-2 d-none d-md-flex">
@@ -196,9 +197,9 @@ export default function Register() {
             className="img-fluid w-25 mx-auto"
           />
         </Row>
-        {/* <Row>
+        <Row className="g-0">
           <InviteOnlyAlert />
-        </Row> */}
+        </Row>
         <ContentSection className="col-12 col-lg-10 col-xl-5 mx-auto">
           <Row>
             <h3 className="font-weight-bold">Register</h3>
@@ -229,6 +230,9 @@ export default function Register() {
                       placeholder="Jane"
                       onChange={formik.handleChange}
                     />
+                    {formik.errors.first_name !== "Required" ? (
+                      <div>{formik.errors.first_name}</div>
+                    ) : null}
                   </Col>
                   <Col sm={12} md={6}>
                     <Label
@@ -244,6 +248,9 @@ export default function Register() {
                       placeholder="Doe"
                       onChange={formik.handleChange}
                     />
+                    {formik.errors.last_name !== "Required" ? (
+                      <div>{formik.errors.last_name}</div>
+                    ) : null}
                   </Col>
                 </FormGroup>
                 {/* Email/Username */}
@@ -262,6 +269,9 @@ export default function Register() {
                       placeholder="jane@example.com"
                       onChange={formik.handleChange}
                     />
+                    {formik.errors.email !== "Required" ? (
+                      <div>{formik.errors.email}</div>
+                    ) : null}
                   </Col>
                   <Col sm={12} md={6}>
                     <Label
@@ -278,6 +288,9 @@ export default function Register() {
                       autoComplete="username"
                       onChange={formik.handleChange}
                     />
+                    {formik.errors.username !== "Required" ? (
+                      <div>{formik.errors.username}</div>
+                    ) : null}
                   </Col>
                 </FormGroup>
                 {/* Password */}
@@ -291,13 +304,16 @@ export default function Register() {
                     </Label>
                     <Input
                       name="password"
-                      type="password"
+                      type={passwordShown ? "text" : "password"}
                       className="form-control"
                       placeholder="Create a strong password..."
                       autoComplete="new-password"
                       valid={!formik.errors.password}
                       onChange={formik.handleChange}
                     />
+                    {formik.errors.password !== "Required" ? (
+                      <div>{formik.errors.password}</div>
+                    ) : null}
                   </Col>
                   <Col sm={12} md={6}>
                     <Label
@@ -308,14 +324,26 @@ export default function Register() {
                     </Label>
                     <Input
                       name="confirmPassword"
-                      type="password"
+                      type={passwordShown ? "text" : "password"}
                       className="form-control"
                       placeholder="Re-enter password"
                       autoComplete="new-password"
                       valid={!formik.errors.confirmPassword}
                       onChange={formik.handleChange}
                     />
+                    {formik.errors.confirmPassword !== "Required" ? (
+                      <div>{formik.errors.confirmPassword}</div>
+                    ) : null}
                   </Col>
+                </FormGroup>
+                <FormGroup check>
+                  <Input
+                    id="RegisterForm__showPassword"
+                    type="checkbox"
+                    defaultChecked={passwordShown}
+                    onChange={() => setPasswordShown(!passwordShown)}
+                  />
+                  <Label check>Show password</Label>
                 </FormGroup>
                 <Col sm={12} md={12} className="text-center standout alert">
                   We ask you to provide the following information to better
@@ -337,6 +365,9 @@ export default function Register() {
                       placeholder="E Corp"
                       onChange={formik.handleChange}
                     />
+                    {formik.errors.company_name !== "Required" ? (
+                      <div>{formik.errors.company_name}</div>
+                    ) : null}
                   </Col>
                   <Col sm={12} md={6}>
                     <Label
@@ -352,6 +383,9 @@ export default function Register() {
                       placeholder="Researcher"
                       onChange={formik.handleChange}
                     />
+                    {formik.errors.company_role !== "Required" ? (
+                      <div>{formik.errors.company_role}</div>
+                    ) : null}
                   </Col>
                 </FormGroup>
                 <FormGroup row>

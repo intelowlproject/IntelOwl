@@ -23,6 +23,8 @@ class CachedPlaybook(models.Model):
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         null=True,  # for backwards compatibility
+        blank=True,
+        related_name="cachedplaybook_owner"
     )
 
     # if null, organization will not be used for
@@ -32,6 +34,7 @@ class CachedPlaybook(models.Model):
         on_delete=models.CASCADE,
         blank=True,
         null=True, # for backwards compatibility
+        related_name="cachedplaybook_organization"
     )
 
     # if both owner and organization would be null, 

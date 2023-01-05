@@ -112,8 +112,6 @@ class PlaybookConfigSerializer(AbstractConfigSerializer):
 
 class CachedPlaybooksSerializer(rfs.ModelSerializer):
     job_id = rfs.IntegerField()
-    name = rfs.CharField(max_length=225)
-    description = rfs.CharField(max_length=225)
     organization_mode = rfs.BooleanField(default=False)
 
     class Meta:

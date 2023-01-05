@@ -160,13 +160,12 @@ class EmailVerificationSerializer(
             slack = Slack()
             slack.send_message(
                 title="Newly registered user!!",
-                body=f"""
-                    - User(#{user.pk}, {user.username},
-                      {user.email}, <{user_admin_link}|admin link>)
-                    - UserProfile({userprofile.company_name},
-                      {userprofile.company_role},
-                      <{userprofile_admin_link}|admin link>)
-                """,
+                body=(
+                    f"- User(#{user.pk}, {user.username},"
+                    f"{user.email}, <{user_admin_link}|admin link>)"
+                    f"- UserProfile({userprofile.company_name},"
+                    f"{userprofile.company_role},<{userprofile_admin_link}|admin link>)"
+                ),
             )
         except Slack.SlackApiError as exc:
             slack.log.error(

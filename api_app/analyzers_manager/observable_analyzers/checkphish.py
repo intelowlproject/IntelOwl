@@ -6,7 +6,7 @@ import time
 import requests
 
 from api_app.analyzers_manager import classes
-from api_app.exceptions import AnalyzerRunException
+from api_app.exceptions import AlreadyFailedJobException, AnalyzerRunException
 from tests.mock_utils import MockResponse, if_mock_connections, patch
 
 
@@ -29,30 +29,39 @@ class CheckPhish(classes.ObservableAnalyzer):
         except requests.RequestException as e:
             raise AnalyzerRunException(e)
 
-        result = response.json()
+        job_id = response.json().get("jobID")
+        if job_id is None:
+            raise AlreadyFailedJobException(
+                "Job creation confirmation not recieved from CheckPhish."
+            )
 
-        return self.retrieve_analysis_status(result["jobID"])
+        return self.__poll_analysis_status(job_id)
 
-    def retrieve_analysis_status(self, job_id):
-        try:
-            json_data = {
-                "apiKey": self.__api_key,
-                "jobID": job_id,
-                "insights": True,  # setting "insights" to True adds "screenshot_path"
-                # and "resolved" fields to the response
-            }
+    def __poll_analysis_status(self, job_id):
+        json_data = {
+            "apiKey": self.__api_key,
+            "jobID": job_id,  # Assumption: jobID corresponds to an actual job.
+            # This is always the case when this function is called
+            # in the "run" function.
+            "insights": True,  # setting "insights" to True adds "screenshot_path"
+            # and "resolved" fields to the response
+        }
+        max_polling_times = 10
+        for chance in range(max_polling_times):
+            if chance != 0:
+                time.sleep(0.5)
+            try:
+                response = requests.post(CheckPhish.status_url, json=json_data)
+                response.raise_for_status()
+            except requests.RequestException as e:
+                raise AnalyzerRunException(e)
 
-            response = requests.post(CheckPhish.status_url, json=json_data)
-            response.raise_for_status()
-        except requests.RequestException as e:
-            raise AnalyzerRunException(e)
-
-        result = response.json()
-        if result["status"] != "DONE":
-            time.sleep(0.5)
-            return self.retrieve_analysis_status(job_id)
-
-        return result
+            result = response.json()
+            if not ("status" in result):
+                raise AlreadyFailedJobException(f'Job "{job_id}" not found.')
+            elif result["status"] == "DONE":
+                return result
+        raise AlreadyFailedJobException(f'Job "{job_id}" status retrieval failed.')
 
     @classmethod
     def _monkeypatch(cls):

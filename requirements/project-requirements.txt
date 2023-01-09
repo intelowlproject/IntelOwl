@@ -25,7 +25,7 @@ dataclasses==0.6
 flower==1.2.0
 
 # plugins
-GitPython==3.1.26
+GitPython==3.1.30
 checkdmarc==4.5.0
 darksearch==2.1.2
 dnspython==2.2.1

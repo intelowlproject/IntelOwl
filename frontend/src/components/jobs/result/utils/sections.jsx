@@ -1,3 +1,6 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-console */
+/* eslint-disable react/prop-types */
 /* eslint-disable camelcase */
 import React from "react";
 import PropTypes from "prop-types";
@@ -5,7 +8,11 @@ import { Button, ListGroup, ListGroupItem, Badge, Fade } from "reactstrap";
 import { useNavigate } from "react-router-dom";
 import { VscGlobe, VscFile, VscJson } from "react-icons/vsc";
 import { FaFileDownload } from "react-icons/fa";
-import { MdDeleteOutline, MdPauseCircleOutline } from "react-icons/md";
+import {
+  MdDeleteOutline,
+  MdPauseCircleOutline,
+  MdOutlineRefresh,
+} from "react-icons/md";
 
 import {
   ContentSection,
@@ -19,15 +26,23 @@ import {
 import { SaveAsPlaybookButton } from "./SaveAsPlaybooksForm";
 
 import { JobTag, PlaybookTag, StatusTag, TLPTag } from "../../../common";
-import { downloadJobSample, deleteJob, killJob } from "../api";
+import {
+  downloadJobSample,
+  deleteJob,
+  killJob,
+  retryJob,
+  retryPlugin,
+} from "../api";
 
 function DeleteIcon() {
   return <MdDeleteOutline className="text-danger" />;
 }
 
-export function JobActionsBar({ job }) {
+export function JobActionsBar({ job, refetch }) {
   // routers
   const navigate = useNavigate();
+
+  console.log(job.analyzers_to_execute);
 
   // callbacks
   const onDeleteBtnClick = async () => {
@@ -84,6 +99,21 @@ export function JobActionsBar({ job }) {
           titlePlacement="top"
         />
       )}
+      <IconButton
+        Icon={MdOutlineRefresh}
+        onClick={() => {
+          job.analyzers_to_execute.map((analyzername) => {
+            retryJob(job.id, "analyzer", analyzername).then(refetch);
+            return true;
+          });
+        }}
+        color="light"
+        size="xs"
+        title="run"
+        titlePlacement="top"
+        className="border-0"
+        style={{ marginRight: 10 }}
+      />
 
       <SaveAsPlaybookButton jobId={job.id} />
       {job?.is_sample && (

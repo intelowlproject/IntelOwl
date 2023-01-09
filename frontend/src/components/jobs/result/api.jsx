@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-console */
 /* eslint-disable no-restricted-globals */
 import React from "react";
 import axios from "axios";
@@ -157,6 +159,34 @@ export async function retryPlugin(jobId, pluginType, pluginName) {
     `retry ${pluginType} '${pluginName}'`
   );
   if (!sure) return Promise.reject();
+  let success = false;
+  try {
+    const response = await axios.patch(
+      `${JOB_BASE_URI}/${jobId}/${pluginType}/${pluginName}/retry`
+    );
+    success = true;
+    if (success) {
+      addToast(
+        <span>
+          Retry request sent for {pluginType} <em>{pluginName}</em>
+        </span>,
+        null,
+        "info"
+      );
+    }
+  } catch (e) {
+    addToast(
+      <span>
+        Failed. Operation: retry {pluginType} <em>{pluginName}</em>
+      </span>,
+      e.parsedMsg,
+      "warning"
+    );
+  }
+  return success;
+}
+
+export async function retryJob(jobId, pluginType, pluginName) {
   let success = false;
   try {
     const response = await axios.patch(

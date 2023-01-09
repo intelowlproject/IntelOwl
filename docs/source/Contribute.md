@@ -438,7 +438,7 @@ $ python3 start.py ci up
 3. Here, we simulate the GitHub CI tests locally by running the following 3 tests:
 
 ```bash
-$ docker exec -ti intelowl_uwsgi unzip -P infected tests/test_files.zip
+$ docker exec -ti intelowl_uwsgi unzip -P infected tests/test_files.zip -d test_files
 $ docker exec -ti intelowl_uwsgi python manage.py test tests
 ```
 

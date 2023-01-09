@@ -1,6 +1,3 @@
-/* eslint-disable no-unused-vars */
-/* eslint-disable no-console */
-/* eslint-disable react/prop-types */
 /* eslint-disable camelcase */
 import React from "react";
 import PropTypes from "prop-types";
@@ -26,13 +23,7 @@ import {
 import { SaveAsPlaybookButton } from "./SaveAsPlaybooksForm";
 
 import { JobTag, PlaybookTag, StatusTag, TLPTag } from "../../../common";
-import {
-  downloadJobSample,
-  deleteJob,
-  killJob,
-  retryJob,
-  retryPlugin,
-} from "../api";
+import { downloadJobSample, deleteJob, killJob, retryJob } from "../api";
 
 function DeleteIcon() {
   return <MdDeleteOutline className="text-danger" />;
@@ -41,8 +32,6 @@ function DeleteIcon() {
 export function JobActionsBar({ job, refetch }) {
   // routers
   const navigate = useNavigate();
-
-  console.log(job.analyzers_to_execute);
 
   // callbacks
   const onDeleteBtnClick = async () => {

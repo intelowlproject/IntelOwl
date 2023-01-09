@@ -1,5 +1,3 @@
-/* eslint-disable no-unused-vars */
-/* eslint-disable no-console */
 /* eslint-disable no-restricted-globals */
 import React from "react";
 import axios from "axios";
@@ -164,7 +162,7 @@ export async function retryPlugin(jobId, pluginType, pluginName) {
     const response = await axios.patch(
       `${JOB_BASE_URI}/${jobId}/${pluginType}/${pluginName}/retry`
     );
-    success = true;
+    success = response.status === 204;
     if (success) {
       addToast(
         <span>

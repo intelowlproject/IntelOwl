@@ -13,7 +13,7 @@ RUN npm install npm@latest --location=global \
     && PUBLIC_URL=/static/reactapp/ npm run build
 
 # Stage 2: Backend
-FROM python:3.9.9-buster
+FROM python:3.9.16
 
 COPY --from=frontend-build /build /var/www/reactapp
 
@@ -21,7 +21,7 @@ ENV PYTHONUNBUFFERED 1
 ENV DJANGO_SETTINGS_MODULE intel_owl.settings
 ENV PYTHONPATH /opt/deploy/intel_owl
 ENV LOG_PATH /var/log/intel_owl
-ENV ELASTICSEARCH_DSL_VERSION 7.2.0
+ENV ELASTICSEARCH_DSL_VERSION 7.2.2
 ENV watch_logs_cmd "watch -n1 tail -n10 /var/log/intel_owl/django/api_app.log"
 
 ARG REPO_DOWNLOADER_ENABLED=true

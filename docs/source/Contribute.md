@@ -423,7 +423,7 @@ Run `pip install -r requirements/test-requirements.txt` to install the requireme
 ```bash
 $ black . --exclude "migrations|venv"
 $ flake8 . --show-source --statistics
-$ isort --profile black --filter-files --skip venv
+$ isort . --profile black --filter-files --skip venv
 ```
 
 if flake8 shows any errors, fix them.

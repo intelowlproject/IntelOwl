@@ -14,7 +14,7 @@ djangorestframework-filters==1.0.0.dev2
 drf-spectacular==0.25.1
 
 uWSGI==2.0.20
-whitenoise==6.2.0
+whitenoise==6.3.0
 
 # infra
 boto3==1.24.52

@@ -1,9 +1,13 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
+import logging
+
 from api_app.analyzers_manager.classes import ObservableAnalyzer
 from api_app.exceptions import AnalyzerRunException
 from tests.mock_utils import if_mock_connections, patch
+
+logger = logging.getLogger(__name__)
 
 
 class DarkSearchQuery(ObservableAnalyzer):
@@ -18,6 +22,7 @@ class DarkSearchQuery(ObservableAnalyzer):
             c = Client(proxies=self.proxies)
             responses = c.search(self.observable_name, pages=self.num_pages)
         except DarkSearchException as exc:
+            logger.error(exc)
             raise AnalyzerRunException(f"{exc.__class__.__name__}: {str(exc)}")
 
         result = {

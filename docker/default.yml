@@ -14,7 +14,7 @@ services:
       - ./env_file_postgres
 
   uwsgi:
-    image: intelowlproject/intelowl:${INTELOWL_TAG_VERSION}
+    image: intelowlproject/intelowl:${REACT_APP_INTELOWL_VERSION}
     container_name: intelowl_uwsgi
     volumes:
       - ../configuration/intel_owl.ini:/etc/uwsgi/sites/intel_owl.ini # uwsgi configuration file
@@ -34,7 +34,7 @@ services:
       - postgres
 
   nginx:
-    image: intelowlproject/intelowl_nginx:${INTELOWL_TAG_VERSION}
+    image: intelowlproject/intelowl_nginx:${REACT_APP_INTELOWL_VERSION}
     container_name: intelowl_nginx
     restart: unless-stopped
     hostname: nginx
@@ -58,7 +58,7 @@ services:
       driver: none
 
   celery_beat:
-    image: intelowlproject/intelowl:${INTELOWL_TAG_VERSION}
+    image: intelowlproject/intelowl:${REACT_APP_INTELOWL_VERSION}
     container_name: intelowl_celery_beat
     restart: unless-stopped
     volumes:
@@ -77,7 +77,7 @@ services:
 
 
   celery_worker_default:
-    image: intelowlproject/intelowl:${INTELOWL_TAG_VERSION}
+    image: intelowlproject/intelowl:${REACT_APP_INTELOWL_VERSION}
     container_name: intelowl_celery_worker_default
     restart: unless-stopped
     stop_grace_period: 3m

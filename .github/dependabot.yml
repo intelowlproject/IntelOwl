@@ -11,6 +11,8 @@ updates:
       # this does not work for security updates
       - dependency-name: "*"
         update-types: ["version-update:semver-patch"]
+      - dependency-name: "boto3"
+        update-types: ["version-update:semver-minor"]
 
   # the requirements are the same among all the integrations for now so one of them is enough
   - package-ecosystem: "pip"

@@ -20,7 +20,7 @@ STAGE_CI = STAGE == "ci"
 # Overridden in test_custom_config
 FORCE_SCHEDULE_JOBS = False
 
-VERSION = "4.1.2"
+VERSION = get_secret("REACT_APP_INTELOWL_VERSION", "").replace("v", "")
 PUBLIC_DEPLOYMENT = get_secret("PUBLIC_DEPLOYMENT", "True") == "True"
 PROJECT_LOCATION = "/opt/deploy/intel_owl"
 

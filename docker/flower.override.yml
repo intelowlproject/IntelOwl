@@ -10,7 +10,7 @@ services:
       - "15672"
 
   flower:
-    image: intelowlproject/intelowl:${INTELOWL_TAG_VERSION}
+    image: intelowlproject/intelowl:${REACT_APP_INTELOWL_VERSION}
     container_name: intelowl_flower
     restart: unless-stopped
     stop_grace_period: 3m

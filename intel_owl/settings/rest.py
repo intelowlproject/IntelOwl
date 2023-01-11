@@ -50,7 +50,6 @@ REST_EMAIL_AUTH = {
     "EMAIL_SUBJECT_DUPLICATE": "IntelOwl - Registration Attempt",
     "PATH_TO_VERIFY_EMAIL_TEMPLATE": "authentication/emails/verify-email",
     "PATH_TO_DUPLICATE_EMAIL_TEMPLATE": "authentication/emails/duplicate-email",
-    "PATH_TO_RESET_EMAIL_TEMPLATE": "authentication/emails/reset-password",
 }
 
 # drf-spectacular
@@ -61,9 +60,9 @@ SPECTACULAR_SETTINGS = {
 
 # drf-recaptcha (not used in IntelOwl but required by certego-saas pkg)
 DRF_RECAPTCHA_SECRET_KEY = (
-    str(get_secret("RECAPTCHA_SECRET_KEY_DF_PUBLIC"))
+    str(get_secret("RECAPTCHA_SECRET_KEY_IO_PUBLIC"))
     if PUBLIC_DEPLOYMENT and not DEBUG
-    else str(get_secret("RECAPTCHA_SECRET_KEY_DF_LOCAL"))
+    else str(get_secret("RECAPTCHA_SECRET_KEY_IO_LOCAL"))
 )
 DRF_RECAPTCHA_TESTING = True
 DRF_RECAPTCHA_TESTING_PASS = True

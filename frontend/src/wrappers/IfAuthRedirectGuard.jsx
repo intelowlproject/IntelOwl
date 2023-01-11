@@ -15,10 +15,6 @@ export default function IfAuthRedirectGuard({ children }) {
   );
   const next = useSearchParam("next") || "/";
 
-  console.log(isAuthenticated);
-  console.log(loading);
-  console.log(next);
-
   if (isAuthenticated && !loading) {
     return <Navigate replace to={next} />;
   }

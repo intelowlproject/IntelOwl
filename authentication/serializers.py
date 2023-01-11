@@ -3,8 +3,10 @@
 import logging
 
 import rest_email_auth.serializers
+from django.conf import settings
 from django.db import DatabaseError, transaction
 from rest_framework import serializers as rfs
+from slack_sdk.errors import SlackApiError
 
 from api_app.models import Job
 from certego_saas.apps.user.serializers import (
@@ -12,6 +14,7 @@ from certego_saas.apps.user.serializers import (
 )
 from certego_saas.ext.upload import Slack
 from certego_saas.models import User
+from certego_saas.settings import certego_apps_settings
 
 from .models import UserProfile
 
@@ -19,6 +22,9 @@ logger = logging.getLogger(__name__)
 
 __all__ = [
     "UserAccessSerializer",
+    "UserProfileSerializer",
+    "RegistrationSerializer",
+    "EmailVerificationSerializer",
 ]
 
 
@@ -146,28 +152,32 @@ class EmailVerificationSerializer(
         """
         user = self._confirmation.email.user
         with transaction.atomic():
-            super(EmailVerificationSerializer, self).save()
+            super().save()
 
-            # Send msg on slack
-        try:
-            userprofile = user.user_profile
-            user_admin_link = (
-                f"https://gomphidae.prod.srvc.eu.certego.sec/admin/api/user/{user.pk}"
-            )
-            userprofile_admin_link = f"""
-                https://gomphidae.prod.srvc.eu.certego.sec/admin/api/userprofile/{userprofile.pk}
-            """
-            slack = Slack()
-            slack.send_message(
-                title="Newly registered user!!",
-                body=(
-                    f"- User(#{user.pk}, {user.username},"
-                    f"{user.email}, <{user_admin_link}|admin link>)"
-                    f"- UserProfile({userprofile.company_name},"
-                    f"{userprofile.company_role},<{userprofile_admin_link}|admin link>)"
-                ),
-            )
-        except Slack.SlackApiError as exc:
-            slack.log.error(
-                f"Slack message failed for user(#{user.pk}) with error: {str(exc)}"
-            )
+        # Send msg on slack
+        if certego_apps_settings.SLACK_TOKEN and certego_apps_settings.SLACK_CHANNEL:
+            try:
+                userprofile = user.user_profile
+                user_admin_link = (
+                    f"{settings.WEB_CLIENT_URL}/admin/certego_saas_user/user/{user.pk}"
+                )
+                userprofile_admin_link = (
+                    f"{settings.WEB_CLIENT_URL}"
+                    f"/admin/authentication/userprofile/{userprofile.pk}"
+                )
+                slack = Slack()
+                slack.send_message(
+                    title="Newly registered user!!",
+                    body=(
+                        f"- User(#{user.pk}, {user.username},"
+                        f"{user.email}, <{user_admin_link} |admin link>)\n"
+                        f"- UserProfile({userprofile.company_name},"
+                        f"{userprofile.company_role}, )"
+                        f"<{userprofile_admin_link} |admin link>)"
+                    ),
+                    channel=certego_apps_settings.SLACK_CHANNEL,
+                )
+            except SlackApiError as exc:
+                slack.log.error(
+                    f"Slack message failed for user(#{user.pk}) with error: {str(exc)}"
+                )

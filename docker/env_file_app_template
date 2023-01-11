@@ -12,6 +12,8 @@ OLD_JOBS_RETENTION_DAYS=3
 INTELOWL_WEB_CLIENT_DOMAIN=localhost
 # used for automated correspondence from the site manager
 DEFAULT_FROM_EMAIL=
+# used for correspondence with users
+DEFAULT_EMAIL=
 # Storage
 LOCAL_STORAGE=True
 
@@ -86,6 +88,6 @@ TEST_PLAYBOOK=FREE_TO_USE_ANALYZERS
 
 # drf-recaptcha
 ## localhost, internal deployments
-RECAPTCHA_SECRET_KEY_DF_LOCAL=""
+RECAPTCHA_SECRET_KEY_IO_LOCAL=""
 ## public deployment
-RECAPTCHA_SECRET_KEY_DF_PUBLIC=""
+RECAPTCHA_SECRET_KEY_IO_PUBLIC=""

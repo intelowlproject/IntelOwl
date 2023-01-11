@@ -2,6 +2,8 @@ from ._util import get_secret
 from .commons import AWS_REGION, STAGE_CI, STAGE_LOCAL
 
 DEFAULT_FROM_EMAIL = get_secret("DEFAULT_FROM_EMAIL")
+DEFAULT_EMAIL = get_secret("DEFAULT_EMAIL")
+
 if STAGE_LOCAL:
     # The console backend writes the emails that would be sent to the standard output
     # https://docs.djangoproject.com/en/4.1/topics/email/#console-backend

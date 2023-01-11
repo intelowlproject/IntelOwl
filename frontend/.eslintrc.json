@@ -27,7 +27,12 @@
     "no-undef": "error",
     "no-use-before-define": "off",
     "import/no-unresolved": "off",
-    "no-console": "off",
+    "no-console": [
+      "error",
+      {
+        "allow": ["debug", "error"]
+      }
+    ],
     "no-unused-vars": [
       "error",
       {

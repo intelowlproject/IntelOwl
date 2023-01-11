@@ -75,7 +75,7 @@ npm start
 - (required) Inject `env.js` using a symbolic link,
 
 ```bash
-$/home/user/Dragonfly: ln -s docker/env.js frontend/public/env.js
+$/home/user/IntelOwl: ln -s docker/env.js frontend/public/env.js
 ```
 
 - (optional) Use local build of `certego-ui` package so it can also hot-reload. This is useful when you want to make changes in certego-ui and rapidly test them with IntelOwl. Refer [here](https://github.com/certego/certego-ui#use-local-build-of-certego-ui-with-hot-reload-for-faster-development) for setup instructions.

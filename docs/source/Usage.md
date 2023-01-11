@@ -46,6 +46,12 @@ Afterwards you can leverage the created tokens with the Intel Owl Client.
 ## Organizations and User management
 Starting from IntelOwl v4, a new "Organization" section is available on the GUI. This section substitute the previous permission management via Django Admin and aims to provide an easier way to manage users and visibility.
 
+### Registration
+
+After registration, an email is sent to the user to verify his email address. If necessary, there is a button on the login page to resend the verification email.
+Every user after the registration process will be manually vetted before allowed to use the IntelOwl platform. The registration requests would be handled in the Django Admin page by admins.
+If you have IntelOwl deployed on an AWS instance with an IAM role you can use [SES](Advanced-Usage.html#ses) service.
+
 ### Multi Tenancy
 Thanks to the "Organization" feature, IntelOwl can be used by multiple SOCs, companies, etc...very easily.
 Right now it works very simply: only users in the same organization can see analysis of one another. An user can belong to an organization only.

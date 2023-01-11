@@ -100,9 +100,13 @@ In the `env_file_app`, configure different variables as explained below.
 * `DJANGO_SECRET`: random 50 chars key, must be unique. If you do not provide one, Intel Owl will automatically set a new secret on every run.
 * `INTELOWL_WEB_CLIENT_DOMAIN` (example: `localhost`/`mywebsite.com`): the web domain of your instance, this is used for generating links to analysis results.
 * `DEFAULT_FROM_EMAIL`: email address used for automated correspondence from the site manager
+* `DEFAULT_EMAIL`: email address used for correspondence with users
+* `RECAPTCHA_SITEKEY`: your recaptcha secret key
 
 **Optional configuration**:
 * `OLD_JOBS_RETENTION_DAYS`: Database retention for analysis results (default: 3 days). Change this if you want to keep your old analysis longer in the database.
+* `SLACK_TOKEN`: Slack token of your Slack application that will be used to send/receive notifications
+* `SLACK_CHANNEL`: ID of the Slack channel you want to post the message to
 
 ### Deprecated environment configuration
 The following variables are related to the specific services integrated in IntelOwl.

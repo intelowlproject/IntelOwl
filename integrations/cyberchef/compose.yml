@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   cyberchef-server:
-    image: intelowlproject/intelowl_cyberchef:${INTELOWL_TAG_VERSION}
+    image: intelowlproject/intelowl_cyberchef:${REACT_APP_INTELOWL_VERSION}
     container_name: intelowl_cyberchef
     restart: unless-stopped
     expose:

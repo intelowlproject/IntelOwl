@@ -293,7 +293,7 @@ Below you can find the additional process required to upgrade from each major ve
 </div>
 
 ### Updating to >=4.0.0 from a 3.x.x version
-Right now there is an open [issue](https://github.com/intelowlproject/IntelOwl/issues/934) regarding the chance to provide a script for migrate the Users DB to the new IntelOwl v4 schema.
+Right now there is an [issue](https://github.com/intelowlproject/IntelOwl/issues/934) regarding the chance to provide a script for migrate the Users DB to the new IntelOwl v4 schema.
 IntelOwl v4 introduced some major changes regarding the permission management, allowing an easier way to manage users and visibility. But that did break the previous available DB.
 So, while we find time and effort to develop this script, to migrate to the the new major version you would need to delete your DB. To do that, you would need to delete your volumes and start the application from scratch.
 ```commandline

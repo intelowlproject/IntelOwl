@@ -38,13 +38,14 @@ class TagAdminView(admin.ModelAdmin):
 
 @admin.register(PluginConfig)
 class PluginCredentialAdminView(admin.ModelAdmin):
-    list_display = ("id", "type", "attribute", "plugin_name", "config_type")
-    search_fields = (
+    list_display = (
+        "id",
+        "type",
         "attribute",
         "plugin_name",
-    )
-    list_filter = (
         "config_type",
-        "type",
-        "plugin_name",
+        "organization",
+        "owner",
     )
+    search_fields = ("attribute", "plugin_name", "organization", "owner")
+    list_filter = ("config_type", "type", "plugin_name", "organization", "owner")

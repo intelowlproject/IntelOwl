@@ -6,7 +6,7 @@ WORKDIR /
 # copy react source code
 COPY frontend/ .
 # copy version file as an env file
-COPY docker/.version .env.local
+COPY docker/.env .env.local
 # copy env.js file (also mounted as docker volume)
 COPY docker/env.js public/env.js
 # install and build

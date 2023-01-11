@@ -131,7 +131,7 @@ const observableType2PropsMap = {
   },
   generic: {
     placeholder: "email, phone no., city, country, registry etc.",
-    pattern: ".*",
+    pattern: ".+",
   },
 };
 

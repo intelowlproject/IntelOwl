@@ -8,30 +8,17 @@ from typing import Tuple
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.core.management import call_command
-from django.test import TestCase
-from rest_framework.test import APIClient
 
 from api_app import models
+
+from .. import CustomAPITestCase
 
 User = get_user_model()
 
 
-class ApiViewTests(TestCase):
-    @classmethod
-    def setUpClass(cls):
-        super(ApiViewTests, cls).setUpClass()
-        if User.objects.filter(username="test").exists():
-            User.objects.get(username="test").delete()
-        cls.superuser = User.objects.create_superuser(
-            username="test", email="test@intelowl.com", password="test"
-        )
-        call_command("migrate_secrets")
-
+class ApiViewTests(CustomAPITestCase):
     def setUp(self):
-        self.client = APIClient()
-        self.client.force_authenticate(user=self.superuser)
-
+        super(ApiViewTests, self).setUp()
         self.uploaded_file, self.file_md5 = self.__get_test_file("file.exe")
         self.uploaded_file2, self.file_md52 = self.__get_test_file("file.exe")
         self.analyze_file_data = {
@@ -67,9 +54,7 @@ class ApiViewTests(TestCase):
         ).hexdigest()
         self.analyze_observable_ip_data = {
             "observable_name": self.observable_name,
-            "analyzers_requested": [
-                "IPInfo",
-            ],
+            "analyzers_requested": ["AbuseIPDB", "Stratosphere_Blacklist"],
             "observable_classification": "ip",
         }
         self.mixed_observable_data = {

@@ -135,17 +135,20 @@ def get_logger() -> logging.Logger:
     return logger
 
 
-class CustomAPITestCase(TestCase):
+class CustomTestCase(TestCase):
     @classmethod
-    def setUpClass(cls):
-        super(CustomAPITestCase, cls).setUpClass()
-        if User.objects.filter(username="test").exists():
-            User.objects.get(username="test").delete()
-        cls.superuser = User.objects.create_superuser(
-            username="test", email="test@intelowl.com", password="test"
-        )
-        call_command("migrate_secrets")
+    def setUpTestData(cls):
+        try:
+            cls.superuser = User.objects.get(username="test")
+        except User.DoesNotExist:
+            print("creating superuser")
+            cls.superuser = User.objects.create_superuser(
+                username="test", email="test@intelowl.com", password="test"
+            )
+            call_command("migrate_secrets")
 
+
+class CustomAPITestCase(CustomTestCase):
     def setUp(self):
         super(CustomAPITestCase, self).setUp()
         self.client = APIClient()

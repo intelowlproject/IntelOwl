@@ -16,7 +16,9 @@ except ImportError:
     )
     exit(2)
 
-CURRENT_VERSION = "4.1.2"
+
+load_dotenv("docker/.env")
+CURRENT_VERSION = os.getenv("REACT_APP_INTELOWL_VERSION", "").replace("v", "")
 
 DOCKER_ANALYZERS = [
     "tor_analyzers",

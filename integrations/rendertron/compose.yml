@@ -6,7 +6,7 @@ version: "3.8"
 
 services:
   rendertron:
-    image: intelowlproject/intelowl_rendertron:${INTELOWL_TAG_VERSION}
+    image: intelowlproject/intelowl_rendertron:${REACT_APP_INTELOWL_VERSION}
     container_name: intelowl_rendertron
     restart: unless-stopped
     expose:

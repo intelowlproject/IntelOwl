@@ -6,7 +6,7 @@ version: "3.8"
 
 services:
   pcap_analyzers:
-    image: intelowlproject/intelowl_pcap_analyzers:${INTELOWL_TAG_VERSION}
+    image: intelowlproject/intelowl_pcap_analyzers:${REACT_APP_INTELOWL_VERSION}
     container_name: intelowl_pcap_analyzers
     restart: unless-stopped
     expose:

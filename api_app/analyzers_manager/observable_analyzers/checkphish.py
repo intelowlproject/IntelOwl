@@ -69,15 +69,10 @@ class CheckPhish(classes.ObservableAnalyzer):
             if_mock_connections(
                 patch(
                     "requests.post",
-                    return_value=MockResponse({"jobID": "sample job ID"}, 200),
-                    url=cls.base_url,
-                ),
-            ),
-            if_mock_connections(
-                patch(
-                    "requests.post",
-                    return_value=MockResponse({"status": "DONE"}, 200),
-                    url=cls.status_url,
+                    side_effect=[
+                        MockResponse({"jobID": "sample job ID"}, 200),
+                        MockResponse({"status": "DONE"}, 200),
+                    ],
                 ),
             ),
         ]

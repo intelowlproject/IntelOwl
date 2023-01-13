@@ -25,9 +25,9 @@ def start_connectors(
     if runtime_configuration is None:
         runtime_configuration = {}
 
-    cleaned_result = ConnectorConfig.stack_connectors(
+    cleaned_result = ConnectorConfig.stack(
         job_id=job_id,
-        connectors_to_execute=connectors_to_execute,
+        plugins_to_execute=connectors_to_execute,
         runtime_configuration=runtime_configuration,
     )
 

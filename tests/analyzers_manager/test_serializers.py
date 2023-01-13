@@ -63,9 +63,9 @@ class AnalyzerConfigTestCase(CustomTestCase):
             print(f"attribute: {config.attribute}, value: {config.value}")
 
         for job in test_jobs:
-            cleaned_result = AnalyzerConfig.stack_analyzers(
+            cleaned_result = AnalyzerConfig.stack(
                 job_id=job.pk,
-                analyzers_to_execute=job.analyzers_to_execute,
+                plugins_to_execute=job.analyzers_to_execute,
                 runtime_configuration={},
                 parent_playbook="",
             )
@@ -122,8 +122,8 @@ class AnalyzerConfigTestCase(CustomTestCase):
             print(f"attribute: {config.attribute}, value: {config.value}")
 
         for job in test_jobs:
-            cleaned_result = AnalyzerConfig.stack_analyzers(
-                analyzers_to_execute=job.analyzers_to_execute,
+            cleaned_result = AnalyzerConfig.stack(
+                plugins_to_execute=job.analyzers_to_execute,
                 runtime_configuration={},
                 parent_playbook=None,
                 job_id=job.pk,

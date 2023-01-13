@@ -29,9 +29,9 @@ def start_analyzers(
     if runtime_configuration is None:
         runtime_configuration = {}
 
-    cleaned_result = AnalyzerConfig.stack_analyzers(
+    cleaned_result = AnalyzerConfig.stack(
         job_id=job_id,
-        analyzers_to_execute=analyzers_to_execute,
+        plugins_to_execute=analyzers_to_execute,
         runtime_configuration=runtime_configuration,
     )
 

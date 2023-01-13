@@ -73,16 +73,16 @@ def start_playbooks(
             ):
                 connectors_to_execute.append(connector)
 
-        task_signatures_analyzers, analyzers_used = AnalyzerConfig.stack_analyzers(
+        task_signatures_analyzers, analyzers_used = AnalyzerConfig.stack(
             job_id=job_id,
-            analyzers_to_execute=analyzers_to_execute,
+            plugins_to_execute=analyzers_to_execute,
             runtime_configuration=analyzer_configuration,
             parent_playbook=p_name,
         )
 
-        task_signatures_connectors, connectors_used = ConnectorConfig.stack_connectors(
+        task_signatures_connectors, connectors_used = ConnectorConfig.stack(
             job_id=job_id,
-            connectors_to_execute=connectors_to_execute,
+            plugins_to_execute=connectors_to_execute,
             parent_playbook=p_name,
             runtime_configuration=connector_configuration,
         )

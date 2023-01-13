@@ -14,7 +14,9 @@ class CheckPhish(classes.ObservableAnalyzer):
     base_url: str = "https://developers.checkphish.ai/api/neo/scan"
     status_url: str = base_url + "/status"
 
-    def set_params(self, _params):
+    def set_params(self, params):
+        self.polling_tries = params.get("polling_tries")
+        self.polling_time = params.get("polling_time")
         self.__api_key = self._secrets["api_key_name"]
 
     def run(self):
@@ -46,10 +48,9 @@ class CheckPhish(classes.ObservableAnalyzer):
             "insights": True,  # setting "insights" to True adds "screenshot_path"
             # and "resolved" fields to the response
         }
-        max_polling_times = 10
-        for chance in range(max_polling_times):
+        for chance in range(self.polling_tries):
             if chance != 0:
-                time.sleep(0.5)
+                time.sleep(self.polling_time)
             try:
                 response = requests.post(CheckPhish.status_url, json=json_data)
                 response.raise_for_status()
@@ -57,9 +58,10 @@ class CheckPhish(classes.ObservableAnalyzer):
                 raise AnalyzerRunException(e)
 
             result = response.json()
-            if not ("status" in result):
+            status_json = result.get("status")
+            if status_json is None:
                 raise AlreadyFailedJobException(f'Job "{job_id}" not found.')
-            elif result["status"] == "DONE":
+            elif status_json == "DONE":
                 return result
         raise AlreadyFailedJobException(f'Job "{job_id}" status retrieval failed.')
 

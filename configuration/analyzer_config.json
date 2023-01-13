@@ -283,7 +283,18 @@
         "description": "API Key for the analyzer"
       }
     },
-    "params": {}
+    "params": {
+      "polling_tries": {
+        "value": 10,
+        "type": "int",
+        "description": "How many times we poll the CheckPhish API for scan results"
+      },
+      "polling_time": {
+        "value": 0.5,
+        "type": "float",
+        "description": "IntelOwl would sleep for this time between each poll to ScanPhish APIs"
+      }
+    }
   },
   "CIRCLPassiveDNS": {
     "type": "observable",

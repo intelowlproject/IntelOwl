@@ -34,11 +34,10 @@ RUN mkdir -p ${LOG_PATH} \
 
 # install required packages. some notes about:o
 # python3-psycopg2 is required to use PostgresSQL with Django
-# osslsigncode is required to run the signature verification analyzer
 # apache2-utils is required to execute htpasswd
 RUN apt-get update \
     && apt-get install -y --no-install-recommends apt-utils libsasl2-dev libssl-dev netcat \
-    vim libldap2-dev python-dev libfuzzy-dev net-tools python3-psycopg2 git osslsigncode apache2-utils \
+    vim libldap2-dev python-dev libfuzzy-dev net-tools python3-psycopg2 git apache2-utils \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
     && pip3 install --no-cache-dir --upgrade pip

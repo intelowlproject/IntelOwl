@@ -5,6 +5,7 @@ import logging
 from subprocess import DEVNULL, PIPE, Popen
 
 from celery.exceptions import SoftTimeLimitExceeded
+from django.conf import settings
 
 from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.exceptions import AnalyzerRunException
@@ -22,7 +23,11 @@ class SignatureInfo(FileAnalyzer):
             "corrupted": False,
         }
         try:
-            command = ["osslsigncode", "verify", self.filepath]
+            command = [
+                f"{settings.PROJECT_LOCATION}/docker/bin/osslsigncode",
+                "verify",
+                self.filepath,
+            ]
             p = Popen(command, stdin=DEVNULL, stdout=PIPE, stderr=PIPE)
             (out, err) = p.communicate()
             output = out.decode()

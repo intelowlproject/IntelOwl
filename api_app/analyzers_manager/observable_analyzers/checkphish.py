@@ -15,8 +15,8 @@ class CheckPhish(classes.ObservableAnalyzer):
     status_url: str = base_url + "/status"
 
     def set_params(self, params):
-        self.polling_tries = params.get("polling_tries")
-        self.polling_time = params.get("polling_time")
+        self.polling_tries = params.get("polling_tries", 10)
+        self.polling_time = params.get("polling_time", 0.5)
         self.__api_key = self._secrets["api_key_name"]
 
     def run(self):

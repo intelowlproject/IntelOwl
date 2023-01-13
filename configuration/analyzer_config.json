@@ -292,7 +292,7 @@
       "polling_time": {
         "value": 0.5,
         "type": "float",
-        "description": "IntelOwl would sleep for this time between each poll to ScanPhish APIs"
+        "description": "IntelOwl would sleep for this time between each poll to CheckPhish APIs"
       }
     }
   },

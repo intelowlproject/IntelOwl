@@ -4,12 +4,14 @@
 import logging
 from typing import Dict, List
 
+import typing
 from celery import chord
 from django.utils.module_loading import import_string
 from rest_framework.exceptions import ValidationError
 
 from intel_owl import tasks
 from intel_owl.celery import app as celery_app
+from ..core.classes import Plugin
 
 from ..models import Job
 from .classes import DockerBasedAnalyzer
@@ -126,15 +128,12 @@ def run_healthcheck(analyzer_name: str) -> bool:
     analyzer_config = AnalyzerConfig.get(analyzer_name)
     if analyzer_config is None:
         raise ValidationError({"detail": "Analyzer doesn't exist"})
-    cls_path = analyzer_config.get_full_import_path()
-
-    try:
-        klass: DockerBasedAnalyzer = import_string(cls_path)
-    except ImportError:
-        raise Exception(f"Class: {cls_path} couldn't be imported")
+    class_: typing.Type[Plugin] = analyzer_config.get_class()
+    if not issubclass(class_, DockerBasedAnalyzer):
+        raise ValidationError(f"Plugin {class_.__name__} is not docker based")
 
     # docker analyzers have a common method for health check
-    if not hasattr(klass, "health_check"):
+    if not hasattr(class_, "health_check"):
         raise ValidationError({"detail": "No healthcheck implemented"})
 
-    return klass.health_check()
+    return class_.health_check()

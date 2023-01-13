@@ -9,7 +9,9 @@ import celery
 from celery import uuid
 from celery.canvas import Signature
 from django.conf import settings
+from django.utils.module_loading import import_string
 
+from api_app.core.classes import Plugin
 from api_app.core.serializers import AbstractConfigSerializer
 from api_app.models import Job
 from intel_owl import secrets as secrets_store
@@ -130,6 +132,15 @@ class AbstractConfig:
             )
 
         return secrets
+
+    def get_class(self) -> typing.Type[Plugin]:
+        """
+        raises: ImportError
+        """
+        try:
+            return import_string(self.get_full_import_path())
+        except ImportError:
+            raise ImportError(f"Class: {self.get_full_import_path()} couldn't be imported")
 
     @abstractmethod
     def get_full_import_path(self) -> str:

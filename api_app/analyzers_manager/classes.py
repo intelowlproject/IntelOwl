@@ -417,12 +417,13 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
 
         try:
             requests.head(cls.url, timeout=10)
-            health_status = True
         except requests.exceptions.ConnectionError:
             # status=False, so pass
             pass
         except requests.exceptions.Timeout:
             # status=False, so pass
             pass
+        else:
+            health_status = True
 
         return health_status

@@ -4,8 +4,8 @@
 import logging
 from typing import Dict, List
 
+import typing
 from celery import group
-from django.utils.module_loading import import_string
 from rest_framework.exceptions import ValidationError
 
 from .classes import Connector
@@ -60,16 +60,12 @@ def run_connector(
 ) -> ConnectorReport:
     config = ConnectorConfig.from_dict(config_dict)
     try:
-        cls_path = config.get_full_import_path()
-        try:
-            klass = import_string(cls_path)
-        except ImportError:
-            raise Exception(f"Class: {cls_path} couldn't be imported")
-
-        instance = klass(config=config, job_id=job_id, report_defaults=report_defaults)
-        report = instance.start(parent_playbook)
-    except Exception as e:
+        class_ = config.get_class()
+    except ImportError as e:
         report = set_failed_connector(job_id, config.name, str(e), **report_defaults)
+    else:
+        instance = class_(config=config, job_id=job_id, report_defaults=report_defaults)
+        report = instance.start(parent_playbook)
 
     return report
 
@@ -79,14 +75,10 @@ def run_healthcheck(connector_name: str) -> bool:
     if connector_config is None:
         raise ValidationError({"detail": "Connector doesn't exist"})
 
-    cls_path = connector_config.get_full_import_path()
-    try:
-        klass: Connector = import_string(cls_path)
-    except ImportError:
-        raise Exception(f"Class: {cls_path} couldn't be imported")
+    class_: typing.Type[Connector] = connector_config.get_class()
 
     try:
-        status = klass.health_check(connector_name)
+        status = class_.health_check(connector_name)
     except NotImplementedError:
         raise ValidationError({"detail": "No healthcheck implemented"})
 

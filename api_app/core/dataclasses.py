@@ -11,7 +11,6 @@ from celery.canvas import Signature
 from django.conf import settings
 from django.utils.module_loading import import_string
 
-from api_app.core.classes import Plugin
 from api_app.core.serializers import AbstractConfigSerializer
 from api_app.models import Job
 from intel_owl import secrets as secrets_store
@@ -20,6 +19,10 @@ from intel_owl.consts import (
     DEFAULT_SOFT_TIME_LIMIT,
     PARAM_DATATYPE_CHOICES,
 )
+
+# otherwise we have a recursive import
+if typing.TYPE_CHECKING:
+    from api_app.core.classes import Plugin
 
 logger = getLogger(__name__)
 

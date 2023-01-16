@@ -140,7 +140,9 @@ class AbstractConfig:
         try:
             return import_string(self.get_full_import_path())
         except ImportError:
-            raise ImportError(f"Class: {self.get_full_import_path()} couldn't be imported")
+            raise ImportError(
+                f"Class: {self.get_full_import_path()} couldn't be imported"
+            )
 
     @abstractmethod
     def get_full_import_path(self) -> str:

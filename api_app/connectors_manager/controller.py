@@ -10,7 +10,6 @@ from rest_framework.exceptions import ValidationError
 
 from .classes import Connector
 from .dataclasses import ConnectorConfig
-from .models import ConnectorReport
 
 logger = logging.getLogger(__name__)
 
@@ -39,35 +38,6 @@ def start_connectors(
     mygroup()
 
     return None
-
-
-def set_failed_connector(
-    job_id: int, name: str, err_msg: str, **report_defaults
-) -> ConnectorReport:
-    status = ConnectorReport.Status.FAILED
-    logger.warning(f"({name}, job_id #{job_id}) -> set as {status}. Error: {err_msg}")
-    report, _ = ConnectorReport.objects.get_or_create(
-        job_id=job_id, name=name, defaults=report_defaults
-    )
-    report.status = status
-    report.errors.append(err_msg)
-    report.save()
-    return report
-
-
-def run_connector(
-    job_id: int, config_dict: dict, report_defaults: dict, parent_playbook: str = ""
-) -> ConnectorReport:
-    config = ConnectorConfig.from_dict(config_dict)
-    try:
-        class_ = config.get_class()
-    except ImportError as e:
-        report = set_failed_connector(job_id, config.name, str(e), **report_defaults)
-    else:
-        instance = class_(config=config, job_id=job_id, report_defaults=report_defaults)
-        report = instance.start(parent_playbook)
-
-    return report
 
 
 def run_healthcheck(connector_name: str) -> bool:

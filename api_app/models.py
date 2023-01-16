@@ -12,7 +12,7 @@ from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.functional import cached_property
 
-from api_app.core.models import Status as ReportStatus
+from api_app.core.models import AbstractReport
 from api_app.exceptions import AlreadyFailedJobException
 from api_app.helpers import get_now
 from certego_saas.apps.organization.membership import Membership
@@ -193,7 +193,7 @@ class Job(models.Model):
     def get_analyzer_reports_stats(self) -> dict:
         aggregators = {
             s.lower(): models.Count("status", filter=models.Q(status=s))
-            for s in ReportStatus.values
+            for s in AbstractReport.Status.values
         }
         return self.analyzer_reports.aggregate(
             all=models.Count("status"),
@@ -203,12 +203,32 @@ class Job(models.Model):
     def get_connector_reports_stats(self) -> dict:
         aggregators = {
             s.lower(): models.Count("status", filter=models.Q(status=s))
-            for s in ReportStatus.values
+            for s in AbstractReport.Status.values
         }
         return self.connector_reports.aggregate(
             all=models.Count("status"),
             **aggregators,
         )
+
+    def kill_if_ongoing(self):
+        from intel_owl.celery import app as celery_app
+
+        statuses_to_filter = [
+            AbstractReport.Status.PENDING,
+            AbstractReport.Status.RUNNING,
+        ]
+        qs = self.analyzer_reports.filter(status__in=statuses_to_filter)
+        task_ids_analyzers = list(qs.values_list("task_id", flat=True))
+        qs2 = self.connector_reports.filter(status__in=statuses_to_filter)
+
+        task_ids_connectors = list(qs2.values_list("task_id", flat=True))
+        # kill celery tasks using task ids
+        celery_app.control.revoke(task_ids_analyzers + task_ids_connectors, terminate=True)
+
+        # update report statuses
+        qs.update(status=self.Status.KILLED)
+        # set job status
+        self.update_status("killed")
 
     # user methods
 

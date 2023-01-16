@@ -11,6 +11,7 @@ from celery.canvas import Signature
 from django.conf import settings
 from django.utils.module_loading import import_string
 
+from api_app.core.models import AbstractReport
 from api_app.core.serializers import AbstractConfigSerializer
 from api_app.models import Job
 from intel_owl import secrets as secrets_store
@@ -21,9 +22,6 @@ from intel_owl.consts import (
 )
 
 # otherwise we have a recursive import
-if typing.TYPE_CHECKING:
-    from api_app.core.classes import Plugin
-
 logger = getLogger(__name__)
 
 
@@ -77,6 +75,11 @@ class AbstractConfig:
     @classmethod
     @abstractmethod
     def _get_task(cls) -> celery.Task:
+        raise NotImplementedError()
+
+    @classmethod
+    @abstractmethod
+    def _get_report_model(cls) -> typing.Type[AbstractReport]:
         raise NotImplementedError()
 
     def __post_init__(self):
@@ -136,16 +139,20 @@ class AbstractConfig:
 
         return secrets
 
-    def get_class(self) -> typing.Type[Plugin]:
+    def get_class(self) -> typing.Type:
         """
         raises: ImportError
         """
+        from api_app.core.classes import Plugin
+
         try:
-            return import_string(self.get_full_import_path())
+            res: typing.Type[Plugin] = import_string(self.get_full_import_path())
         except ImportError:
             raise ImportError(
                 f"Class: {self.get_full_import_path()} couldn't be imported"
             )
+        else:
+            return res
 
     @abstractmethod
     def get_full_import_path(self) -> str:
@@ -270,3 +277,24 @@ class AbstractConfig:
             plugins_used.append(plugin_name)
 
         return task_signatures, plugins_used
+
+    def run(
+        self, job_id: int, report_defaults: dict, parent_playbook: str = ""
+    ) -> AbstractReport:
+        try:
+            class_ = self.get_class()
+        except ImportError as e:
+            report = self._get_report_model().get_or_create_failed(
+                job_id, self.name, report_defaults, str(e)
+            )
+        else:
+            instance = class_(
+                config=self, job_id=job_id, report_defaults=report_defaults
+            )
+            try:
+                report = instance.start(parent_playbook=parent_playbook)
+            except Exception as e:
+                report = self._get_report_model().get_or_create_failed(
+                    job_id, self.name, report_defaults, str(e)
+                )
+        return report

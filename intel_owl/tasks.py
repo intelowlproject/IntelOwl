@@ -70,8 +70,11 @@ def post_all_playbooks_finished(job_id: int, connectors_task_signatures: list):
 def run_analyzer(
     job_id: int, config_dict: dict, report_defaults: dict, parent_playbook: str = ""
 ):
-    analyzers_controller.run_analyzer(
-        job_id, config_dict, report_defaults, parent_playbook
+    from api_app.analyzers_manager.dataclasses import AnalyzerConfig
+
+    config = AnalyzerConfig.from_dict(config_dict)
+    config.run(
+        job_id, report_defaults, parent_playbook
     )
 
 
@@ -79,8 +82,11 @@ def run_analyzer(
 def run_connector(
     job_id: int, config_dict: dict, report_defaults: dict, parent_playbook: str = ""
 ):
-    connectors_controller.run_connector(
-        job_id, config_dict, report_defaults, parent_playbook
+    from api_app.connectors_manager.dataclasses import ConnectorConfig
+
+    config = ConnectorConfig.from_dict(config_dict)
+    config.run(
+            job_id, report_defaults, parent_playbook
     )
 
 

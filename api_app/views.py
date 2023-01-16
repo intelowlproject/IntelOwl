@@ -526,10 +526,7 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
         if job.status != "running":
             raise ValidationError({"detail": "Job is not running"})
         # close celery tasks and mark reports as killed
-        analyzers_controller.kill_ongoing_analysis(job)
-        # set job status
-        job.update_status("killed")
-
+        job.kill_if_ongoing()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @add_docs(

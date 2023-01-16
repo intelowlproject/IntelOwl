@@ -56,14 +56,13 @@ class PlaybookViewTestCase(TransactionTestCase):
 
         # kill the ongoing job to not waste any resources.
         # since a running job isn't required for this scan.
-        analyzers_controller.kill_ongoing_analysis(self.test_job)
+        self.test_job.kill_if_ongoing()
 
     def tearDown(self):
         self.test_job.delete()
         return super().tearDown()
 
     def test_cache_config(self):
-        AnalyzerConfigSerializer
         job = self.test_job
         planned_name = "TEST_NEW_PLAYBOOK"
         planned_description = "This is a test description"

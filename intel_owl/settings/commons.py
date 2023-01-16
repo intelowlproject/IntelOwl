@@ -26,3 +26,13 @@ PROJECT_LOCATION = "/opt/deploy/intel_owl"
 
 # used for generating links to web client e.g. job results page
 WEB_CLIENT_DOMAIN = get_secret("INTELOWL_WEB_CLIENT_DOMAIN")
+
+BASE_CONNECTOR_PYTHON_PATH = get_secret(
+    "BASE_CONNECTOR_PYTHON_PATH", "api_app.connectors_manager.connectors"
+)
+BASE_ANALYZER_OBSERVABLE_PYTHON_PATH = get_secret(
+    "", "api_app.analyzers_manager.observable_analyzers"
+)
+BASE_ANALYZER_FILE_PYTHON_PATH = get_secret(
+    "", "api_app.analyzers_manager.file_analyzers"
+)

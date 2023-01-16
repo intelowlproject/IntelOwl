@@ -5,6 +5,8 @@ import dataclasses
 import logging
 import typing
 
+from django.conf import settings
+
 from api_app.core.dataclasses import AbstractConfig
 
 from .serializers import ConnectorConfigSerializer
@@ -28,7 +30,7 @@ class ConnectorConfig(AbstractConfig):
         return PluginConfig.PluginType.CONNECTOR
 
     def get_full_import_path(self) -> str:
-        return f"api_app.connectors_manager.connectors.{self.python_module}"
+        return f"{settings.BASE_CONNECTOR_PYTHON_PATH}.{self.python_module}"
 
     @classmethod
     def _get_task(cls) -> typing.Callable:

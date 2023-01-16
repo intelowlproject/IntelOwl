@@ -4,6 +4,8 @@ import dataclasses
 import logging
 import typing
 
+from django.conf import settings
+
 from api_app.core.dataclasses import AbstractConfig
 
 from ..models import PluginConfig
@@ -78,6 +80,6 @@ class AnalyzerConfig(AbstractConfig):
     def get_full_import_path(self) -> str:
         if self.is_type_observable or (self.is_type_file and self.run_hash):
             return (
-                f"api_app.analyzers_manager.observable_analyzers.{self.python_module}"
+                f"{settings.BASE_ANALYZER_OBSERVABLE_PYTHON_PATH}.{self.python_module}"
             )
-        return f"api_app.analyzers_manager.file_analyzers.{self.python_module}"
+        return f"{settings.BASE_ANALYZER_FILE_PYTHON_PATH}.{self.python_module}"

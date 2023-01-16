@@ -2,17 +2,17 @@
 # See the file 'LICENSE' for copying permission.
 
 import logging
+import typing
 from typing import Dict, List
 
-import typing
 from celery import chord
 from django.utils.module_loading import import_string
 from rest_framework.exceptions import ValidationError
 
 from intel_owl import tasks
 from intel_owl.celery import app as celery_app
-from ..core.classes import Plugin
 
+from ..core.classes import Plugin
 from ..models import Job
 from .classes import DockerBasedAnalyzer
 from .dataclasses import AnalyzerConfig

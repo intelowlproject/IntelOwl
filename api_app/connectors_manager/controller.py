@@ -2,9 +2,9 @@
 # See the file 'LICENSE' for copying permission.
 
 import logging
+import typing
 from typing import Dict, List
 
-import typing
 from celery import group
 from rest_framework.exceptions import ValidationError
 

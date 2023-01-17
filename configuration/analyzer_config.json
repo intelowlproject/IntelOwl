@@ -2838,7 +2838,7 @@
   "Signature_Info": {
     "type": "file",
     "python_module": "signature_info.SignatureInfo",
-    "description": "PE signature extractor",
+    "description": "PE signature extractor with [osslsigncode](https://github.com/mtrojnar/osslsigncode)",
     "disabled": false,
     "external_service": false,
     "leaks_info": false,

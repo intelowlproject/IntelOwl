@@ -11,7 +11,8 @@
       "application/zip",
       "application/java-archive",
       "application/vnd.android.package-archive",
-      "application/x-dex"
+      "application/x-dex",
+      "android_only"
     ],
     "config": {
       "soft_time_limit": 400,
@@ -2527,7 +2528,8 @@
       "application/zip",
       "application/java-archive",
       "application/vnd.android.package-archive",
-      "application/x-dex"
+      "application/x-dex",
+      "android_only"
     ],
     "config": {
       "soft_time_limit": 120,

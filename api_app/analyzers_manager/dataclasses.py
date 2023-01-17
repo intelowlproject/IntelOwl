@@ -2,6 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 import dataclasses
 import logging
+import re
 import typing
 
 from celery import uuid
@@ -21,6 +22,8 @@ __all__ = [
 ]
 
 logger = logging.getLogger(__name__)
+
+REGEX_OFFICE_FILES = "\.[xl|doc]\w{0,3}$"
 
 
 @dataclasses.dataclass
@@ -54,7 +57,7 @@ class AnalyzerConfig(AbstractConfig):
     def is_observable_type_supported(self, observable_classification: str) -> bool:
         return observable_classification in self.observable_supported
 
-    def is_filetype_supported(self, file_mimetype: str) -> bool:
+    def is_filetype_supported(self, file_mimetype: str, file_name: str) -> bool:
         # PCAPs are not classic files. They should not leverage the default behavior.
         # We should execute them only if the analyzer specifically support them.
         special_pcap_mimetype = "application/vnd.tcpdump.pcap"
@@ -63,6 +66,17 @@ class AnalyzerConfig(AbstractConfig):
             and special_pcap_mimetype not in self.supported_filetypes
         ):
             return False
+        # Android only types to filter unwanted zip files
+        if (
+            "android_only" in self.supported_filetypes
+            and file_mimetype == "application/zip"
+        ):
+            if re.search(REGEX_OFFICE_FILES, file_name):
+                logger.info(
+                    f"filtered office file name {file_name}"
+                    f" because the analyzer is android only"
+                )
+                return False
         # base case: empty lists means supports all
         if not self.supported_filetypes and not self.not_supported_filetypes:
             return True

@@ -35,7 +35,7 @@ jobs:
         fetch-depth: 2
 
     - name: Set up Python
-      uses: actions/setup-python@v4.4.0
+      uses: actions/setup-python@v4.5.0
       with:
         python-version: '3.9'
     - name: Install dependencies

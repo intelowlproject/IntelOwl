@@ -2159,7 +2159,7 @@
     "leaks_info": false,
     "run_hash": true,
     "config": {
-      "soft_time_limit": 40,
+      "soft_time_limit": 60,
       "queue": "default"
     },
     "secrets": {
@@ -4091,7 +4091,7 @@
     "external_service": false,
     "leaks_info": false,
     "config": {
-      "soft_time_limit": 60,
+      "soft_time_limit": 120,
       "queue": "local"
     },
     "secrets": {},

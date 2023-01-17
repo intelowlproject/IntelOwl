@@ -74,7 +74,7 @@ class AnalyzerConfig(AbstractConfig):
             if re.search(REGEX_OFFICE_FILES, file_name):
                 logger.info(
                     f"filtered office file name {file_name}"
-                    f" because the analyzer is android only"
+                    " because the analyzer is android only"
                 )
                 return False
         # base case: empty lists means supports all

@@ -21,6 +21,7 @@ class SignatureInfo(FileAnalyzer):
             "no_signature": False,
             "verified": False,
             "corrupted": False,
+            "certificate_has_expired": False,
         }
         try:
             command = [
@@ -51,6 +52,8 @@ class SignatureInfo(FileAnalyzer):
                     results["verified"] = True
                 if "Corrupt PE file" in output:
                     results["corrupted"] = True
+                if "certificate has expired" in output:
+                    results["certificate_has_expired"] = True
             else:
                 raise AnalyzerRunException("osslsigncode gave no output?")
 

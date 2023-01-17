@@ -28,7 +28,7 @@ flower==1.2.0
 GitPython==3.1.30
 checkdmarc==4.5.0
 darksearch==2.1.2
-dnspython==2.2.1
+dnspython==2.3.0
 dnstwist==20221213
 ppdeep>=20200505
 easygui==0.98.2

@@ -2,6 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 
 import logging
+import typing
 
 from drf_spectacular.utils import extend_schema as add_docs
 from drf_spectacular.utils import inline_serializer
@@ -13,7 +14,6 @@ from api_app.core.views import PluginActionViewSet, PluginHealthCheckAPI
 from certego_saas.ext.views import APIView
 
 from ..models import OrganizationPluginState, PluginConfig
-from . import controller as connectors_controller
 from .models import ConnectorReport
 from .serializers import ConnectorConfigSerializer
 
@@ -68,14 +68,27 @@ class ConnectorActionViewSet(PluginActionViewSet):
         return ConnectorReport
 
     def perform_retry(self, report: ConnectorReport):
-        connectors_to_execute, runtime_configuration = super().perform_retry(report)
-        connectors_controller.start_connectors(
-            report.job.id,
-            connectors_to_execute,
-            runtime_configuration,
-        )
+        from intel_owl import tasks
+
+        tasks.run_connector.apply_async(args=[report.job.id, report])
 
 
 class ConnectorHealthCheckAPI(PluginHealthCheckAPI):
     def perform_healthcheck(self, connector_name: str) -> bool:
-        return connectors_controller.run_healthcheck(connector_name)
+        from rest_framework.exceptions import ValidationError
+
+        from api_app.connectors_manager.classes import Connector
+        from api_app.connectors_manager.dataclasses import ConnectorConfig
+
+        connector_config = ConnectorConfig.get(connector_name)
+        if connector_config is None:
+            raise ValidationError({"detail": "Connector doesn't exist"})
+
+        class_: typing.Type[Connector] = connector_config.get_class()
+
+        try:
+            status = class_.health_check(connector_name)
+        except NotImplementedError:
+            raise ValidationError({"detail": "No healthcheck implemented"})
+
+        return status

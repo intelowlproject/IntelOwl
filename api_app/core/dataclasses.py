@@ -204,13 +204,21 @@ class AbstractConfig:
         return True
 
     @classmethod
-    def runnable(cls, plugin_to_execute: typing.List[str]) -> typing.List[str]:
-        plugin_dataclass = cls.all()
-        return [
-            plugin
-            for plugin in plugin_to_execute
-            if plugin_dataclass.get(plugin).is_ready_to_use or settings.STAGE_CI
-        ]
+    def runnable(
+        cls, plugin_to_execute: typing.List[str]
+    ) -> typing.Tuple[typing.List[str], typing.List[str]]:
+        plugin_dataclass = cls.filter(plugin_to_execute)
+        plugins: typing.List[str] = []
+        wrong_plugins: typing.List[str] = []
+        for plugin_name in plugin_to_execute:
+            plugin = plugin_dataclass.get(plugin_name)
+            if not plugin:
+                logger.error(f"There is no {cls.__name__} with name {plugin_name}")
+                wrong_plugins.append(plugin_name)
+            else:
+                if plugin.is_ready_to_use or settings.STAGE_CI:
+                    plugins.append(plugin_name)
+        return plugins, wrong_plugins
 
     @classmethod
     def stack(
@@ -224,11 +232,14 @@ class AbstractConfig:
         task_signatures = []
         plugins_used = []
 
-        plugins_to_run = cls.runnable(plugins_to_execute)
+        plugins_to_run, wrong_plugins = cls.runnable(plugins_to_execute)
 
         plugin_dataclasses = cls.all()
         # get job
         job = Job.objects.get(pk=job_id)
+        # set invalid plugins as errors
+        for plugin in wrong_plugins:
+            job.append_error(f"Unable to find plugin {plugin}")
         job.update_status(Job.Status.RUNNING)  # set job status to running
 
         # loop over and create task signatures

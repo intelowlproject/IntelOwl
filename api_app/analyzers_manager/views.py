@@ -1,6 +1,7 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 import logging
+import typing
 
 from drf_spectacular.utils import extend_schema as add_docs
 from drf_spectacular.utils import inline_serializer
@@ -12,7 +13,7 @@ from api_app.core.views import PluginActionViewSet, PluginHealthCheckAPI
 from certego_saas.ext.views import APIView
 
 from ..models import Job, OrganizationPluginState, PluginConfig
-from . import controller as analyzers_controller
+from .dataclasses import AnalyzerConfig
 from .models import AnalyzerReport
 from .serializers import AnalyzerConfigSerializer
 
@@ -75,12 +76,29 @@ class AnalyzerActionViewSet(PluginActionViewSet):
         job.job_cleanup()
 
     def perform_retry(self, report: AnalyzerReport):
-        analyzers_to_execute, runtime_configuration = super().perform_retry(report)
-        analyzers_controller.start_analyzers(
-            report.job.id, analyzers_to_execute, runtime_configuration
-        )
+        from intel_owl import tasks
+
+        tasks.run_analyzer.apply_async(args=[report.job.id, report])
 
 
 class AnalyzerHealthCheckAPI(PluginHealthCheckAPI):
     def perform_healthcheck(self, analyzer_name: str) -> bool:
-        return analyzers_controller.run_healthcheck(analyzer_name)
+        from rest_framework.exceptions import ValidationError
+
+        from api_app.analyzers_manager.classes import DockerBasedAnalyzer
+        from api_app.core.classes import Plugin
+
+        analyzer_config = AnalyzerConfig.get(analyzer_name)
+        if analyzer_config is None:
+            raise ValidationError({"detail": "Analyzer doesn't exist"})
+
+        class_: typing.Type[Plugin] = analyzer_config.get_class()
+
+        if not issubclass(class_, DockerBasedAnalyzer):
+            raise ValidationError(f"Plugin {class_.__name__} is not docker based")
+
+        # docker analyzers have a common method for health check
+        if not hasattr(class_, "health_check"):
+            raise ValidationError({"detail": "No healthcheck implemented"})
+
+        return class_.health_check()

@@ -33,10 +33,8 @@ from certego_saas.apps.organization.permissions import IsObjectOwnerOrSameOrgPer
 from certego_saas.ext.helpers import cache_action_response, parse_humanized_range
 from certego_saas.ext.mixins import SerializerActionMixin
 from certego_saas.ext.viewsets import ReadAndDeleteOnlyViewSet
-from intel_owl.celery import app as celery_app
 from intel_owl.consts import ObservableClassification
 
-from .analyzers_manager import controller as analyzers_controller
 from .analyzers_manager.constants import ObservableTypes
 from .filters import JobFilter
 from .helpers import get_now
@@ -105,54 +103,48 @@ def _multi_analysis_request(
     if settings.STAGE_CI and not settings.FORCE_SCHEDULE_JOBS:
         logger.info("skipping analysis start cause we are in CI")
     else:
-        # fire celery task
+        from api_app.playbooks_manager.dataclasses import PlaybookConfig
+        from intel_owl import tasks
+
         for index, job in enumerate(jobs):
-            # second critical change
-            runtime_configuration = {}
-
-            for analyzer in job.analyzers_to_execute:
-                # Appending custom config to runtime configuration
-                config = PluginConfig.get_as_dict(
-                    user,
-                    PluginConfig.PluginType.ANALYZER,
-                    PluginConfig.ConfigType.PARAMETER,
-                    plugin_name=analyzer,
-                ).get(analyzer, {})
-                if analyzer in runtime_configurations[index]:
-                    config |= runtime_configurations[index][analyzer]
-                if config:
-                    runtime_configuration[analyzer] = config
-            for connector in job.connectors_to_execute:
-                config = PluginConfig.get_as_dict(
-                    user,
-                    PluginConfig.PluginType.CONNECTOR,
-                    PluginConfig.ConfigType.PARAMETER,
-                    plugin_name=connector,
-                ).get(connector, {})
-                if connector in runtime_configurations[index]:
-                    config |= runtime_configurations[index][connector]
-                if config:
-                    runtime_configuration[connector] = config
-            logger.debug(f"New value of runtime_configuration: {runtime_configuration}")
-
-            if playbook_scan:
-                celery_app.send_task(
-                    "start_playbooks",
-                    kwargs=dict(
-                        job_id=job.pk,
-                        runtime_configuration=runtime_configuration,
-                    ),
-                )
-
-            else:
-                celery_app.send_task(
-                    "start_analyzers",
-                    kwargs=dict(
-                        job_id=job.pk,
-                        analyzers_to_execute=job.analyzers_to_execute,
-                        runtime_configuration=runtime_configuration,
-                    ),
-                )
+            job: Job
+            runtime_configurations = list(runtime_configurations[index])
+            analyzers = [job.analyzers_to_execute]
+            connectors = [job.connectors_to_execute]
+            # case playbooks
+            if not runtime_configurations and job.playbooks_to_execute:
+                runtime_configurations = []
+                analyzers = []
+                connectors = []
+                # this must be done because each analyzer on the playbook
+                # could be executed with a different configuration
+                for playbook in PlaybookConfig.filter(
+                    names=job.playbooks_to_execute
+                ).values():
+                    playbook: PlaybookConfig
+                    if not playbook.is_ready_to_use and not settings.STAGE_CI:
+                        continue
+                    runtime_configurations.append(
+                        playbook.analyzers | playbook.connectors
+                    )
+                    analyzers.append(
+                        [
+                            analyzer
+                            for analyzer in playbook.analyzers.keys()
+                            if analyzer in job.analyzers_to_execute
+                        ]
+                    )
+                    connectors.append(
+                        [
+                            connector
+                            for connector in playbook.connectors.keys()
+                            if connector in job.connectors_to_execute
+                        ]
+                    )
+            # fire celery task
+            tasks.job_pipeline.apply_async(
+                args=[job.pk, runtime_configurations, analyzers, connectors]
+            )
 
     data_ = [
         {

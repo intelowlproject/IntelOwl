@@ -12,7 +12,6 @@ from django.core.files import File
 from api_app.analyzers_manager.dataclasses import AnalyzerConfig
 from api_app.connectors_manager.dataclasses import ConnectorConfig
 from api_app.models import Job
-from intel_owl.tasks import start_analyzers
 from tests import PollingFunction
 
 from .. import CustomTestCase

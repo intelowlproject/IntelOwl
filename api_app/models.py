@@ -3,8 +3,10 @@
 
 import hashlib
 import logging
+import typing
 from typing import Optional
 
+from celery import group
 from django.conf import settings
 from django.contrib.postgres import fields as pg_fields
 from django.db import models
@@ -223,12 +225,99 @@ class Job(models.Model):
 
         task_ids_connectors = list(qs2.values_list("task_id", flat=True))
         # kill celery tasks using task ids
-        celery_app.control.revoke(task_ids_analyzers + task_ids_connectors, terminate=True)
+        celery_app.control.revoke(
+            task_ids_analyzers + task_ids_connectors, terminate=True
+        )
 
         # update report statuses
         qs.update(status=self.Status.KILLED)
         # set job status
         self.update_status("killed")
+
+    def get_runtime_configuration(
+        self,
+        runtime_configuration: typing.Dict,
+        analyzers: typing.List[str],
+        connectors: typing.List[str],
+    ):
+        # in case of key conflict, runtime_configuration is overwritten by the Plugin configuration
+        final_config = {}
+        user = self.user
+        for analyzer in analyzers:
+            # Appending custom config to runtime configuration
+            config = runtime_configuration.get(analyzer, {})
+            config |= PluginConfig.get_as_dict(
+                user,
+                PluginConfig.PluginType.ANALYZER,
+                PluginConfig.ConfigType.PARAMETER,
+                plugin_name=analyzer,
+            ).get(analyzer, {})
+
+            if config:
+                final_config[analyzer] = config
+        for connector in connectors:
+            config = runtime_configuration.get(connector, {})
+            config |= PluginConfig.get_as_dict(
+                user,
+                PluginConfig.PluginType.CONNECTOR,
+                PluginConfig.ConfigType.PARAMETER,
+                plugin_name=connector,
+            ).get(connector, {})
+
+            if config:
+                final_config[connector] = config
+        logger.debug(f"New value of runtime_configuration: {final_config}")
+        return final_config
+
+    def pipeline(
+        self,
+        runtime_configurations: typing.List[typing.Dict],
+        list_analyzers: typing.List[typing.List[str]],
+        list_connectors: typing.List[typing.List[str]],
+    ):
+        from api_app.analyzers_manager.dataclasses import AnalyzerConfig
+        from api_app.connectors_manager.dataclasses import ConnectorConfig
+        from intel_owl import tasks
+        from intel_owl.consts import DEFAULT_QUEUE
+
+        final_analyzer_signatures = []
+        final_connector_signatures = []
+        for config, analyzers, connectors in zip(
+            runtime_configurations, list_analyzers, list_connectors
+        ):
+            config = self.get_runtime_configuration(config, analyzers, connectors)
+
+            analyzer_signatures, _ = AnalyzerConfig.stack(
+                job_id=self.pk,
+                plugins_to_execute=analyzers,
+                runtime_configuration=config,
+            )
+            for signature in analyzer_signatures:
+                if signature not in final_analyzer_signatures:
+                    final_analyzer_signatures.append(signature)
+
+            connector_signatures, _ = ConnectorConfig.stack(
+                job_id=self.pk,
+                plugins_to_execute=connectors,
+                runtime_configuration=config,
+            )
+            for signature in connector_signatures:
+                if signature not in final_connector_signatures:
+                    final_connector_signatures.append(signature)
+
+        runner = (
+            group(final_analyzer_signatures)
+            | tasks.continue_job_pipeline.signature(
+                args=[self.pk],
+                kwargs={},
+                queue=DEFAULT_QUEUE,
+                soft_time_limit=10,
+                immutable=True,
+            )
+            | group(final_connector_signatures)
+        )
+        runner()
+        return
 
     # user methods
 

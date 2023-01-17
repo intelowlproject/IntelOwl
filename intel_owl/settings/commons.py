@@ -18,7 +18,7 @@ STAGE_LOCAL = STAGE == "local"
 STAGE_CI = STAGE == "ci"
 
 # Overridden in test_custom_config
-FORCE_SCHEDULE_JOBS = False
+FORCE_SCHEDULE_JOBS = True
 
 VERSION = get_secret("REACT_APP_INTELOWL_VERSION", "").replace("v", "")
 PUBLIC_DEPLOYMENT = get_secret("PUBLIC_DEPLOYMENT", "True") == "True"

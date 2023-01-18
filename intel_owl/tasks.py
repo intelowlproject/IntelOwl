@@ -58,17 +58,15 @@ def continue_job_pipeline(job_id: int):
         raise ChordError(job.status)
 
 
-@app.task(name="pipeline", soft_time_limit=100)
+@app.task(name="job_pipeline", soft_time_limit=100)
 def job_pipeline(
     job_id: int,
-    runtime_configurations: typing.List[typing.Dict],
-    list_analyzers: typing.List[typing.List[str]],
-    list_connectors: typing.List[typing.List[str]],
+    runtime_configuration: typing.Dict[str, typing.Any],
 ):
     from api_app.models import Job
 
     job = Job.objects.get(pk=job_id)
-    job.pipeline(runtime_configurations, list_analyzers, list_connectors)
+    job.pipeline(runtime_configuration)
 
 
 @app.task(name="run_analyzer", soft_time_limit=500)

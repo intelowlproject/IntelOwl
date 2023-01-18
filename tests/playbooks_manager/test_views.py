@@ -43,9 +43,6 @@ class PlaybookViewTestCase(TransactionTestCase):
         serializer = self.analyzer_serializer_class(data=data, many=True)
         serializer.is_valid(raise_exception=True)
 
-        serialized_data = serializer.validated_data
-        [data.pop("runtime_configuration", {}) for data in serialized_data]
-
         self.test_jobs = serializer.save(
             user=self.superuser,
         )

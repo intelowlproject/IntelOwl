@@ -43,9 +43,6 @@ class ConnectorConfigTestCase(CustomTestCase):
         serializer = self.serializer_class(data=data, many=True)
         serializer.is_valid(raise_exception=True)
 
-        serialized_data = serializer.validated_data
-        [data.pop("runtime_configuration", {}) for data in serialized_data]
-
         test_jobs = serializer.save(
             user=self.superuser,
         )

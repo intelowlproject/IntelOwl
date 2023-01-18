@@ -87,7 +87,7 @@ def _multi_analysis_request(
 
     serialized_data = serializer.validated_data
     runtime_configurations = [
-        data.pop("runtime_configuration", {}) for data in serialized_data
+        data.get("runtime_configuration", {}) for data in serialized_data
     ]
 
     # save the arrived data plus new params into a new job object

@@ -44,8 +44,6 @@ class Connector(Plugin):
         )
 
     def before_run(self, *args, **kwargs):
-        parent_playbook = kwargs.get("parent_playbooks", "")
-        self.add_parent_playbook(parent_playbook=parent_playbook)
         logger.info(f"STARTED connector: {self.__repr__()}")
 
     def after_run(self):

@@ -226,6 +226,7 @@ class AbstractConfig:
         job_id: int,
         plugins_to_execute: typing.List[str],
         runtime_configuration: typing.Dict[str, typing.Dict] = None,
+        parent_playbook: str = "",
     ) -> typing.Tuple[typing.List[Signature], typing.List[str]]:
         # to store the celery task signatures
         task_signatures = []
@@ -261,7 +262,11 @@ class AbstractConfig:
             args = [
                 job_id,
                 config.asdict(),
-                {"runtime_configuration": runtime_params, "task_id": task_id},
+                {
+                    "runtime_configuration": runtime_params,
+                    "task_id": task_id,
+                    "parent_playbook": parent_playbook,
+                },
             ]
             # get celery queue
             queue = config.config.queue

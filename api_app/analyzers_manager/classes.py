@@ -94,8 +94,6 @@ class BaseAnalyzerMixin(Plugin):
         return result
 
     def before_run(self, *args, **kwargs):
-        parent_playbook = kwargs.get("parent_playbook", "")
-        self.add_parent_playbook(parent_playbook=parent_playbook)
         self.report.update_status(status=self.report.Status.RUNNING)
 
     def after_run(self):

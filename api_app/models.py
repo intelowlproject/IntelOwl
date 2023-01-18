@@ -272,7 +272,7 @@ class Job(models.Model):
 
     def _pipeline_configuration(
         self, runtime_configuration: typing.Dict[str, typing.Any]
-    ) -> typing.Tuple[typing.List, typing.List, typing.List]:
+    ) -> typing.Tuple[typing.List, typing.List, typing.List, typing.List]:
         from api_app.playbooks_manager.dataclasses import PlaybookConfig
 
         # case playbooks
@@ -280,6 +280,7 @@ class Job(models.Model):
             configs = []
             analyzers = []
             connectors = []
+            playbooks = self.playbooks_to_execute
             # this must be done because each analyzer on the playbook
             # could be executed with a different configuration
             for playbook in PlaybookConfig.filter(
@@ -307,7 +308,8 @@ class Job(models.Model):
             configs = [runtime_configuration]
             analyzers = [self.analyzers_to_execute]
             connectors = [self.connectors_to_execute]
-        return configs, analyzers, connectors
+            playbooks = [""]
+        return configs, analyzers, connectors, playbooks
 
     def pipeline(self, runtime_configuration: typing.Dict[str, typing.Any]):
         from api_app.analyzers_manager.dataclasses import AnalyzerConfig
@@ -317,7 +319,7 @@ class Job(models.Model):
 
         final_analyzer_signatures = []
         final_connector_signatures = []
-        for config, analyzers, connectors in zip(
+        for config, analyzers, connectors, playbook in zip(
             *self._pipeline_configuration(runtime_configuration)
         ):
             config = self._merge_runtime_configuration(config, analyzers, connectors)
@@ -326,6 +328,7 @@ class Job(models.Model):
                 job_id=self.pk,
                 plugins_to_execute=analyzers,
                 runtime_configuration=config,
+                parent_playbook=playbook,
             )
             for signature in analyzer_signatures:
                 if signature not in final_analyzer_signatures:
@@ -335,6 +338,7 @@ class Job(models.Model):
                 job_id=self.pk,
                 plugins_to_execute=connectors,
                 runtime_configuration=config,
+                parent_playbook=playbook,
             )
             for signature in connector_signatures:
                 if signature not in final_connector_signatures:

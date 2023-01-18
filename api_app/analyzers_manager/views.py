@@ -79,6 +79,8 @@ class AnalyzerActionViewSet(PluginActionViewSet):
         from intel_owl import tasks
 
         tasks.run_analyzer.apply_async(args=[report.job.id, report])
+        job = Job.objects.get(id=report.job_id)
+        job.job_cleanup()
 
 
 class AnalyzerHealthCheckAPI(PluginHealthCheckAPI):

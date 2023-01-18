@@ -1,7 +1,5 @@
 from django.test import TransactionTestCase
 
-from api_app.analyzers_manager import controller as analyzers_controller
-from api_app.analyzers_manager.serializers import AnalyzerConfigSerializer
 from api_app.playbooks_manager.serializers import CachedPlaybooksSerializer
 from api_app.playbooks_manager.views import _cache_playbook
 from api_app.serializers import ObservableAnalysisSerializer

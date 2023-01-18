@@ -54,7 +54,7 @@ def continue_job_pipeline(job_id: int):
     # execute some callbacks
     job.job_cleanup()
     # fire connectors when job finishes with success
-    if job.status != Job.Status.REPORTED_WITHOUT_FAILS:
+    if job.status != Job.Status.FAILED:
         raise ChordError(job.status)
 
 
@@ -75,10 +75,13 @@ def job_pipeline(
 def run_analyzer(
     job_id: int, config_dict: dict, report_defaults: dict, parent_playbook: str = ""
 ):
+    from api_app.models import Job
     from api_app.analyzers_manager.dataclasses import AnalyzerConfig
 
     config = AnalyzerConfig.from_dict(config_dict)
     config.run(job_id, report_defaults, parent_playbook)
+    # we could have to fix the status of the job
+    Job.objects.get(id=job_id).job_cleanup()
 
 
 @app.task(name="run_connector", soft_time_limit=500)

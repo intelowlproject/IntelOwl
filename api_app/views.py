@@ -46,7 +46,6 @@ from .serializers import (
     JobListSerializer,
     JobSerializer,
     ObservableAnalysisSerializer,
-    PlaybookAnalysisResponseSerializer,
     PluginConfigSerializer,
     TagSerializer,
     multi_result_enveloper,
@@ -64,7 +63,6 @@ def _multi_analysis_request(
         Type[PlaybookObservableAnalysisSerializer],
         Type[PlaybookFileAnalysisSerializer],
     ],
-    playbook_scan=False,
 ):
     """
     Prepare and send multiple observables for analysis
@@ -103,47 +101,13 @@ def _multi_analysis_request(
     if settings.STAGE_CI and not settings.FORCE_SCHEDULE_JOBS:
         logger.info("skipping analysis start cause we are in CI")
     else:
-        from api_app.playbooks_manager.dataclasses import PlaybookConfig
         from intel_owl import tasks
 
         for index, job in enumerate(jobs):
             job: Job
-            runtime_configurations = list(runtime_configurations[index])
-            analyzers = [job.analyzers_to_execute]
-            connectors = [job.connectors_to_execute]
-            # case playbooks
-            if not runtime_configurations and job.playbooks_to_execute:
-                runtime_configurations = []
-                analyzers = []
-                connectors = []
-                # this must be done because each analyzer on the playbook
-                # could be executed with a different configuration
-                for playbook in PlaybookConfig.filter(
-                    names=job.playbooks_to_execute
-                ).values():
-                    playbook: PlaybookConfig
-                    if not playbook.is_ready_to_use and not settings.STAGE_CI:
-                        continue
-                    runtime_configurations.append(
-                        playbook.analyzers | playbook.connectors
-                    )
-                    analyzers.append(
-                        [
-                            analyzer
-                            for analyzer in playbook.analyzers.keys()
-                            if analyzer in job.analyzers_to_execute
-                        ]
-                    )
-                    connectors.append(
-                        [
-                            connector
-                            for connector in playbook.connectors.keys()
-                            if connector in job.connectors_to_execute
-                        ]
-                    )
             # fire celery task
             tasks.job_pipeline.apply_async(
-                args=[job.pk, runtime_configurations, analyzers, connectors]
+                args=[job.pk, runtime_configurations[index]]
             )
 
     data_ = [
@@ -153,25 +117,15 @@ def _multi_analysis_request(
             "warnings": serialized_data[index]["warnings"],
             "analyzers_running": job.analyzers_to_execute,
             "connectors_running": job.connectors_to_execute,
+            "playbook_running": job.playbooks_to_execute
         }
         for index, job in enumerate(jobs)
     ]
 
-    if playbook_scan:
-        [
-            data_[index].update({"playbooks_running": job.playbooks_to_execute})
-            for index, job in enumerate(jobs)
-        ]
-        ser = PlaybookAnalysisResponseSerializer(
-            data=data_,
-            many=True,
-        )
-
-    else:
-        ser = AnalysisResponseSerializer(
-            data=data_,
-            many=True,
-        )
+    ser = AnalysisResponseSerializer(
+        data=data_,
+        many=True,
+    )
 
     ser.is_valid(raise_exception=True)
 

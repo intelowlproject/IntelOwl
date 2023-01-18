@@ -15,7 +15,7 @@ from api_app.models import Job
 User = get_user_model()
 
 
-def PollingFunction(self, function_name):
+def PollingFunction(self):
     for i in range(0, int(self.TIMEOUT_SECONDS / self.SLEEP_SECONDS)):
         time.sleep(self.SLEEP_SECONDS)
         # reload test_job object
@@ -50,9 +50,6 @@ def PollingFunction(self, function_name):
         )
         condition = analyzers_stats["failed"] > 0 or connectors_stats["failed"] > 0
         # fail immediately if any analyzer or connector failed
-        if function_name == "start_playbooks" and not running_or_pending_connectors:
-            condition = analyzers_stats["failed"] > 0
-
         if condition:
             failed_analyzers = [
                 (r.analyzer_name, r.errors)
@@ -70,8 +67,6 @@ def PollingFunction(self, function_name):
                 f"\n>>> Failed analyzers: {failed_analyzers}",
                 f"\n>>> Failed connectors: {failed_connectors}",
             )
-            if function_name != "start_playbooks":
-                self.fail()
 
         # check analyzers status
         if status not in [Job.Status.PENDING, Job.Status.RUNNING]:
@@ -87,26 +82,11 @@ def PollingFunction(self, function_name):
                     msg="all `analyzer_reports` status must be `SUCCESS`",
                 )
 
-            elif function_name == "start_playbooks":
-                # it is expected for some
-                # analyzers to fail for the time being
-                # in running playbookstes
-                self.assertEqual(
-                    status,
-                    Job.Status.REPORTED_WITH_FAILS,
-                    msg="`test_job` status must be success with failed analyzers",
-                )
-
             self.assertEqual(
                 len(self.test_job.analyzers_to_execute),
                 self.test_job.analyzer_reports.count(),
                 msg="all analyzer reports must be there",
             )
-
-            if function_name == "start_playbooks" and not running_or_pending_connectors:
-                # since there are no connectors
-                # in FREE_TO_USE_ANALYZERS
-                return True
 
             # check connectors status
             if connectors_stats["all"] > 0 and connectors_stats["running"] == 0:
@@ -120,7 +100,7 @@ def PollingFunction(self, function_name):
                     connectors_stats["success"],
                     msg="all `connector_reports` status must be `SUCCESS`.",
                 )
-                print(f"[END] -----{self.__class__.__name__}.{function_name}----")
+                print(f"[END] -----{self.__class__.__name__}----")
                 return True
     # the test should not reach here
     self.fail("test timed out")

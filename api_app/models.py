@@ -234,13 +234,14 @@ class Job(models.Model):
         # set job status
         self.update_status("killed")
 
-    def get_runtime_configuration(
+    def _merge_runtime_configuration(
         self,
         runtime_configuration: typing.Dict,
         analyzers: typing.List[str],
         connectors: typing.List[str],
     ):
-        # in case of key conflict, runtime_configuration is overwritten by the Plugin configuration
+        # in case of key conflict, runtime_configuration
+        # is overwritten by the Plugin configuration
         final_config = {}
         user = self.user
         for analyzer in analyzers:
@@ -269,11 +270,48 @@ class Job(models.Model):
         logger.debug(f"New value of runtime_configuration: {final_config}")
         return final_config
 
+    def _pipeline_configuration(self, runtime_configuration: typing.Dict[str, typing.Any]) -> typing.Tuple[typing.List, typing.List, typing.List]:
+        from api_app.playbooks_manager.dataclasses import PlaybookConfig
+
+        # case playbooks
+        if not runtime_configuration and self.playbooks_to_execute:
+            configs = []
+            analyzers = []
+            connectors = []
+            # this must be done because each analyzer on the playbook
+            # could be executed with a different configuration
+            for playbook in PlaybookConfig.filter(
+                    names=self.playbooks_to_execute
+            ).values():
+                playbook: PlaybookConfig
+                if not playbook.is_ready_to_use and not settings.STAGE_CI:
+                    continue
+                configs.append(
+                    playbook.analyzers | playbook.connectors
+                )
+                analyzers.append(
+                    [
+                        analyzer
+                        for analyzer in playbook.analyzers.keys()
+                        if analyzer in self.analyzers_to_execute
+                    ]
+                )
+                connectors.append(
+                    [
+                        connector
+                        for connector in playbook.connectors.keys()
+                        if connector in self.connectors_to_execute
+                    ]
+                )
+        else:
+            configs = [runtime_configuration]
+            analyzers = [self.analyzers_to_execute]
+            connectors = [self.connectors_to_execute]
+        return configs, analyzers, connectors
+
     def pipeline(
         self,
-        runtime_configurations: typing.List[typing.Dict],
-        list_analyzers: typing.List[typing.List[str]],
-        list_connectors: typing.List[typing.List[str]],
+        runtime_configuration: typing.Dict[str, typing.Any]
     ):
         from api_app.analyzers_manager.dataclasses import AnalyzerConfig
         from api_app.connectors_manager.dataclasses import ConnectorConfig
@@ -283,9 +321,9 @@ class Job(models.Model):
         final_analyzer_signatures = []
         final_connector_signatures = []
         for config, analyzers, connectors in zip(
-            runtime_configurations, list_analyzers, list_connectors
+            self._pipeline_configuration(runtime_configuration)
         ):
-            config = self.get_runtime_configuration(config, analyzers, connectors)
+            config = self._merge_runtime_configuration(config, analyzers, connectors)
 
             analyzer_signatures, _ = AnalyzerConfig.stack(
                 job_id=self.pk,

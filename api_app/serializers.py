@@ -47,6 +47,8 @@ __all__ = [
     "MultipleObservableAnalysisSerializer",
     "multi_result_enveloper",
     "PluginConfigSerializer",
+    "PlaybookFileAnalysisSerializer",
+    "PlaybookObservableAnalysisSerializer"
 ]
 
 
@@ -627,7 +629,6 @@ class PlaybookBaseSerializer:
     def filter_playbooks(self, attrs: Dict) -> Tuple[List]:
         # init empty list
         valid_playbook_list = []
-        selected_playbooks = []
         analyzers_to_be_run = []
         connectors_to_be_run = []
         warnings = []
@@ -778,9 +779,6 @@ class AnalysisResponseSerializer(rfs.Serializer):
     warnings = rfs.ListField(required=False)
     analyzers_running = rfs.ListField()
     connectors_running = rfs.ListField()
-
-
-class PlaybookAnalysisResponseSerializer(AnalysisResponseSerializer):
     playbooks_running = rfs.ListField()
 
 

@@ -64,22 +64,18 @@ class _AbstractAnalyzersScriptTestCase(CustomTestCase):
         self.test_job.delete()
         return super().tearDown()
 
-    def test_start_analyzers(self, *args, **kwargs):
+    def test_pipeline(self, *args, **kwargs):
         print(f"\n[START] -----{self.__class__.__name__}.test_start_analyzers----")
         print(
             f"[REPORT] Job:{self.test_job.pk}, status:'{self.test_job.status}',",
             f"analyzers:{self.test_job.analyzers_to_execute}",
             f"connectors: {self.test_job.connectors_to_execute}",
         )
-
         # execute analyzers
-        # using `apply` so it runs synchronously, will block until the task returns
-        start_analyzers(
-            self.test_job.pk,
-            self.test_job.analyzers_to_execute,
-            self.runtime_configuration,
+        self.test_job.pipeline(
+            [self.runtime_configuration], [self.test_job.analyzers_to_execute], [[]]
         )
-        poll_result = PollingFunction(self, function_name="start_analyzers")
+        poll_result = PollingFunction(self)
         return poll_result
 
 

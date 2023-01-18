@@ -318,7 +318,7 @@ class Job(models.Model):
         final_analyzer_signatures = []
         final_connector_signatures = []
         for config, analyzers, connectors in zip(
-            self._pipeline_configuration(runtime_configuration)
+            *self._pipeline_configuration(runtime_configuration)
         ):
             config = self._merge_runtime_configuration(config, analyzers, connectors)
 

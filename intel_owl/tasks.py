@@ -54,7 +54,7 @@ def continue_job_pipeline(job_id: int):
     # execute some callbacks
     job.job_cleanup()
     # fire connectors when job finishes with success
-    if job.status != Job.Status.FAILED:
+    if job.status == Job.Status.FAILED:
         raise ChordError(job.status)
 
 

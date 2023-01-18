@@ -93,8 +93,6 @@ class AnalyzerConfigTestCase(CustomTestCase):
         serializer = self.serializer_class(data=data, many=True)
         serializer.is_valid(raise_exception=True)
 
-        serialized_data = serializer.validated_data
-
         config = AnalyzerConfigSerializer.read_and_verify_config()
         enabled_analyzers = [
             i

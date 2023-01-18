@@ -274,6 +274,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         # create ``Tag`` objects from tags_labels
         tags_labels = validated_data.pop("tags_labels", None)
         validated_data.pop("warnings")
+        validated_data.pop("runtime_configuration")
         tags = [
             Tag.objects.get_or_create(
                 label=label, defaults={"color": gen_random_colorhex()}

@@ -4,6 +4,7 @@
 import logging
 import typing
 
+from celery import group
 from drf_spectacular.utils import extend_schema as add_docs
 from drf_spectacular.utils import inline_serializer
 from rest_framework import serializers as rfs
@@ -14,6 +15,7 @@ from api_app.core.views import PluginActionViewSet, PluginHealthCheckAPI
 from certego_saas.ext.views import APIView
 
 from ..models import OrganizationPluginState, PluginConfig
+from .dataclasses import ConnectorConfig
 from .models import ConnectorReport
 from .serializers import ConnectorConfigSerializer
 
@@ -68,9 +70,13 @@ class ConnectorActionViewSet(PluginActionViewSet):
         return ConnectorReport
 
     def perform_retry(self, report: ConnectorReport):
-        from intel_owl import tasks
-
-        tasks.run_connector.apply_async(args=[report.job.id, report])
+        signatures, _ = ConnectorConfig.stack(
+            job_id=report.job.id,
+            plugins_to_execute=[report.connector_name],
+            runtime_configuration=report.runtime_configuration,
+            parent_playbook=report.parent_playbook,
+        )
+        group(signatures)()
 
 
 class ConnectorHealthCheckAPI(PluginHealthCheckAPI):

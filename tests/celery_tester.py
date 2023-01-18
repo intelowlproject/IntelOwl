@@ -7,7 +7,7 @@ from intel_owl.celery import app
 task_queue = deque()
 
 
-@before_task_publish.connect(sender="start_analyzers")
+@before_task_publish.connect(sender="run_analyzer")
 def before_task_publish_handler(headers=None, body=None, **kwargs):
     """
     Used to intercept job creation requests

@@ -74,20 +74,21 @@ class CustomConfigTests(CustomAPITestCase):
         )
         content = response.json()
 
-        celery_task = task_queue.popleft()
-        msg = (response, content, celery_task)
-
         content = content["results"][0]
-        if celery_task["analyzers_to_execute"] != content["analyzers_running"]:
-            raise Exception(
-                f'analyzers_to_execute ({celery_task["analyzers_to_execute"]}) '
-                f'!= analyzers_running ({content["analyzers_running"]})'
-            )
 
-        self.assertDictEqual(
-            celery_task["runtime_configuration"],
-            {"Classic_DNS": {"query_type": "CNAME"}},
-            msg=msg,
+        analyzer_on_tasks = []
+        runtime_configs = []
+        while task_queue:
+            task = task_queue.popleft()
+            analyzer_on_tasks.append(task["config_dict"]["name"])
+            if task["report_defaults"]["runtime_configuration"]:
+                runtime_configs.append(task["report_defaults"]["runtime_configuration"])
+        self.assertCountEqual(analyzer_on_tasks, content["analyzers_running"])
+        self.assertCountEqual(
+            runtime_configs,
+            [
+                {"Classic_DNS": {"query_type": "CNAME"}},
+            ],
         )
 
     def test_with_explicit_runtime_config(self):

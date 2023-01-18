@@ -65,16 +65,14 @@ class _AbstractAnalyzersScriptTestCase(CustomTestCase):
         return super().tearDown()
 
     def test_pipeline(self, *args, **kwargs):
-        print(f"\n[START] -----{self.__class__.__name__}.test_start_analyzers----")
+        print(f"\n[START] -----{self.__class__.__name__}.test_pipeline----")
         print(
             f"[REPORT] Job:{self.test_job.pk}, status:'{self.test_job.status}',",
             f"analyzers:{self.test_job.analyzers_to_execute}",
             f"connectors: {self.test_job.connectors_to_execute}",
         )
         # execute analyzers
-        self.test_job.pipeline(
-            [self.runtime_configuration], [self.test_job.analyzers_to_execute], [[]]
-        )
+        self.test_job.pipeline(self.runtime_configuration)
         poll_result = PollingFunction(self)
         return poll_result
 

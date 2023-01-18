@@ -780,7 +780,7 @@ class AnalysisResponseSerializer(rfs.Serializer):
     warnings = rfs.ListField(required=False)
     analyzers_running = rfs.ListField()
     connectors_running = rfs.ListField()
-    playbooks_running = rfs.ListField()
+    playbooks_running = rfs.ListField(required=False)
 
 
 def multi_result_enveloper(serializer_class, many):

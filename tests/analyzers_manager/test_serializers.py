@@ -64,7 +64,6 @@ class AnalyzerConfigTestCase(CustomTestCase):
                 job_id=job.pk,
                 plugins_to_execute=job.analyzers_to_execute,
                 runtime_configuration={},
-                parent_playbook="",
             )
 
             signatures = cleaned_result[0]
@@ -119,7 +118,6 @@ class AnalyzerConfigTestCase(CustomTestCase):
             cleaned_result = AnalyzerConfig.stack(
                 plugins_to_execute=job.analyzers_to_execute,
                 runtime_configuration={},
-                parent_playbook=None,
                 job_id=job.pk,
             )
 

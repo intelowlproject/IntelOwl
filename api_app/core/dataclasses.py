@@ -226,7 +226,6 @@ class AbstractConfig:
         job_id: int,
         plugins_to_execute: typing.List[str],
         runtime_configuration: typing.Dict[str, typing.Dict] = None,
-        parent_playbook="",
     ) -> typing.Tuple[typing.List[Signature], typing.List[str]]:
         # to store the celery task signatures
         task_signatures = []
@@ -263,7 +262,6 @@ class AbstractConfig:
                 job_id,
                 config.asdict(),
                 {"runtime_configuration": runtime_params, "task_id": task_id},
-                parent_playbook,
             ]
             # get celery queue
             queue = config.config.queue
@@ -289,9 +287,7 @@ class AbstractConfig:
 
         return task_signatures, plugins_used
 
-    def run(
-        self, job_id: int, report_defaults: dict, parent_playbook: str = ""
-    ) -> AbstractReport:
+    def run(self, job_id: int, report_defaults: dict) -> AbstractReport:
         try:
             class_ = self.get_class()
         except ImportError as e:
@@ -303,7 +299,7 @@ class AbstractConfig:
                 config=self, job_id=job_id, report_defaults=report_defaults
             )
             try:
-                report = instance.start(parent_playbook=parent_playbook)
+                report = instance.start()
             except Exception as e:
                 report = self._get_report_model().get_or_create_failed(
                     job_id, self.name, report_defaults, str(e)

@@ -70,14 +70,12 @@ def job_pipeline(
 
 
 @app.task(name="run_analyzer", soft_time_limit=500)
-def run_analyzer(
-    job_id: int, config_dict: dict, report_defaults: dict, parent_playbook: str = ""
-):
+def run_analyzer(job_id: int, config_dict: dict, report_defaults: dict):
     from api_app.analyzers_manager.dataclasses import AnalyzerConfig
     from api_app.models import Job
 
     config = AnalyzerConfig.from_dict(config_dict)
-    config.run(job_id, report_defaults, parent_playbook)
+    config.run(job_id, report_defaults)
     # we could have to fix the status of the job
     Job.objects.get(id=job_id).job_cleanup()
 

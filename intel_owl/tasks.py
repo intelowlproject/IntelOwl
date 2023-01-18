@@ -75,8 +75,8 @@ def job_pipeline(
 def run_analyzer(
     job_id: int, config_dict: dict, report_defaults: dict, parent_playbook: str = ""
 ):
-    from api_app.models import Job
     from api_app.analyzers_manager.dataclasses import AnalyzerConfig
+    from api_app.models import Job
 
     config = AnalyzerConfig.from_dict(config_dict)
     config.run(job_id, report_defaults, parent_playbook)

@@ -34,7 +34,7 @@ class CheckPhish(classes.ObservableAnalyzer):
         job_id = response.json().get("jobID")
         if job_id is None:
             raise AlreadyFailedJobException(
-                "Job creation confirmation not recieved from CheckPhish."
+                "Job creation confirmation not received from CheckPhish."
             )
 
         return self.__poll_analysis_status(job_id)
@@ -58,10 +58,13 @@ class CheckPhish(classes.ObservableAnalyzer):
                 raise AnalyzerRunException(e)
 
             result = response.json()
-            status_json = result.get("status")
+            status_json = result.get("status", "")
+            error = result.get("error", False)
             if status_json is None:
-                raise AlreadyFailedJobException(f'Job "{job_id}" not found.')
-            elif status_json == "DONE":
+                raise AlreadyFailedJobException(f"Job {job_id} not found.")
+            if error:
+                raise AlreadyFailedJobException(f"Analysis error for job_id {job_id}")
+            if status_json == "DONE":
                 return result
         raise AlreadyFailedJobException(f'Job "{job_id}" status retrieval failed.')
 

@@ -270,7 +270,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": true,
-    "observable_supported": ["ip", "domain", "url"],
+    "observable_supported": ["url"],
     "config": {
       "soft_time_limit": 100,
       "queue": "long"

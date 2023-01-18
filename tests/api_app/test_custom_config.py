@@ -4,7 +4,7 @@ from copy import deepcopy
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient, override_settings
 
-from api_app.models import Job, PluginConfig
+from api_app.models import PluginConfig
 from certego_saas.apps.organization.membership import Membership
 from certego_saas.apps.organization.organization import Organization
 

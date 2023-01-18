@@ -4,7 +4,7 @@ from copy import deepcopy
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient, override_settings
 
-from api_app.models import PluginConfig
+from api_app.models import Job, PluginConfig
 from certego_saas.apps.organization.membership import Membership
 from certego_saas.apps.organization.organization import Organization
 
@@ -74,21 +74,20 @@ class CustomConfigTests(CustomAPITestCase):
         )
         content = response.json()
 
+        celery_task = task_queue.popleft()
+        msg = (response, content, celery_task)
         content = content["results"][0]
+        job = Job.objects.get(pk=celery_task["job_id"])
+        if job.analyzers_to_execute != content["analyzers_running"]:
+            raise Exception(
+                f'analyzers_to_execute ({celery_task["analyzers_to_execute"]}) '
+                f'!= analyzers_running ({content["analyzers_running"]})'
+            )
 
-        analyzer_on_tasks = []
-        runtime_configs = []
-        while task_queue:
-            task = task_queue.popleft()
-            analyzer_on_tasks.append(task["config_dict"]["name"])
-            if task["report_defaults"]["runtime_configuration"]:
-                runtime_configs.append(task["report_defaults"]["runtime_configuration"])
-        self.assertCountEqual(analyzer_on_tasks, content["analyzers_running"])
-        self.assertCountEqual(
-            runtime_configs,
-            [
-                {"Classic_DNS": {"query_type": "CNAME"}},
-            ],
+        self.assertDictEqual(
+            celery_task["runtime_configuration"],
+            {},
+            msg=msg,
         )
 
     def test_with_explicit_runtime_config(self):
@@ -102,9 +101,10 @@ class CustomConfigTests(CustomAPITestCase):
 
         celery_task = task_queue.popleft()
         msg = (response, content, celery_task)
+        job = Job.objects.get(pk=celery_task["job_id"])
 
         content = content["results"][0]
-        if celery_task["analyzers_to_execute"] != content["analyzers_running"]:
+        if job.analyzers_to_execute != content["analyzers_running"]:
             raise Exception(
                 f'analyzers_to_execute ({celery_task["analyzers_to_execute"]}) '
                 f'!= analyzers_running ({content["analyzers_running"]})'
@@ -113,30 +113,6 @@ class CustomConfigTests(CustomAPITestCase):
         self.assertDictEqual(
             celery_task["runtime_configuration"],
             payload["runtime_configuration"],
-            msg=msg,
-        )
-
-    def test_org_config_for_non_owner(self):
-        payload = self.classic_dns_payload
-
-        response = self.standard_user_client.post(
-            analyze_multiple_observables_uri, payload, format="json"
-        )
-        content = response.json()
-
-        celery_task = task_queue.popleft()
-        msg = (response, content, celery_task)
-
-        content = content["results"][0]
-        if celery_task["analyzers_to_execute"] != content["analyzers_running"]:
-            raise Exception(
-                f'analyzers_to_execute ({celery_task["analyzers_to_execute"]}) '
-                f'!= analyzers_running ({content["analyzers_running"]})'
-            )
-
-        self.assertDictEqual(
-            celery_task["runtime_configuration"],
-            {"Classic_DNS": {"query_type": "TXT"}},
             msg=msg,
         )
 

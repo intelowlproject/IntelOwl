@@ -33,6 +33,7 @@ from certego_saas.apps.organization.permissions import IsObjectOwnerOrSameOrgPer
 from certego_saas.ext.helpers import cache_action_response, parse_humanized_range
 from certego_saas.ext.mixins import SerializerActionMixin
 from certego_saas.ext.viewsets import ReadAndDeleteOnlyViewSet
+from intel_owl.celery import app as celery_app
 from intel_owl.consts import ObservableClassification
 
 from .analyzers_manager.constants import ObservableTypes
@@ -101,12 +102,16 @@ def _multi_analysis_request(
     if settings.STAGE_CI and not settings.FORCE_SCHEDULE_JOBS:
         logger.info("skipping analysis start cause we are in CI")
     else:
-        from intel_owl import tasks
-
-        for index, job in enumerate(jobs):
+        for runtime_configuration, job in zip(runtime_configurations, jobs):
             job: Job
             # fire celery task
-            tasks.job_pipeline.apply_async(args=[job.pk, runtime_configurations[index]])
+            celery_app.send_task(
+                "job_pipeline",
+                kwargs={
+                    "job_id": job.pk,
+                    "runtime_configuration": runtime_configuration,
+                },
+            )
 
     data_ = [
         {

@@ -55,7 +55,7 @@ def continue_job_pipeline(job_id: int):
     job.job_cleanup()
     # fire connectors when job finishes with success
     if job.status == Job.Status.FAILED:
-        raise ChordError(job.status)
+        raise ChordError(f"Unable to continue job because status is{job.status}")
 
 
 @app.task(name="job_pipeline", soft_time_limit=100)

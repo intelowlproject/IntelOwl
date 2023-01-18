@@ -14,7 +14,7 @@ djangorestframework-filters==1.0.0.dev2
 drf-spectacular==0.25.1
 
 uWSGI==2.0.20
-whitenoise==6.2.0
+whitenoise==6.3.0
 
 # infra
 boto3==1.24.52
@@ -28,12 +28,12 @@ flower==1.2.0
 GitPython==3.1.30
 checkdmarc==4.5.0
 darksearch==2.1.2
-dnspython==2.2.1
+dnspython==2.3.0
 dnstwist==20221213
 ppdeep>=20200505
 easygui==0.98.2
 google>=3.0.0
-google-cloud-webrisk==1.9.0
+google-cloud-webrisk==1.10.0
 intezer-sdk==1.14
 lief==0.12.2
 maxminddb==2.2.0

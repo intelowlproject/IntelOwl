@@ -11,7 +11,8 @@
       "application/zip",
       "application/java-archive",
       "application/vnd.android.package-archive",
-      "application/x-dex"
+      "application/x-dex",
+      "android_only"
     ],
     "config": {
       "soft_time_limit": 400,
@@ -261,6 +262,40 @@
     },
     "secrets": {},
     "params": {}
+  },
+  "CheckPhish": {
+    "type": "observable",
+    "python_module": "checkphish.CheckPhish",
+    "description": "[CheckPhish](https://checkphish.ai/checkphish-api/) can detect phishing and fraudulent sites",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": true,
+    "observable_supported": ["url"],
+    "config": {
+      "soft_time_limit": 100,
+      "queue": "long"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "CHECKPHISH_KEY",
+        "type": "string",
+        "required": true,
+        "default": null,
+        "description": "API Key for the analyzer"
+      }
+    },
+    "params": {
+      "polling_tries": {
+        "value": 10,
+        "type": "int",
+        "description": "How many times we poll the CheckPhish API for scan results"
+      },
+      "polling_time": {
+        "value": 0.5,
+        "type": "float",
+        "description": "IntelOwl would sleep for this time between each poll to CheckPhish APIs"
+      }
+    }
   },
   "CIRCLPassiveDNS": {
     "type": "observable",
@@ -2125,7 +2160,7 @@
     "leaks_info": false,
     "run_hash": true,
     "config": {
-      "soft_time_limit": 40,
+      "soft_time_limit": 60,
       "queue": "default"
     },
     "secrets": {
@@ -2493,7 +2528,8 @@
       "application/zip",
       "application/java-archive",
       "application/vnd.android.package-archive",
-      "application/x-dex"
+      "application/x-dex",
+      "android_only"
     ],
     "config": {
       "soft_time_limit": 120,
@@ -2802,7 +2838,7 @@
   "Signature_Info": {
     "type": "file",
     "python_module": "signature_info.SignatureInfo",
-    "description": "PE signature extractor",
+    "description": "PE signature extractor with [osslsigncode](https://github.com/mtrojnar/osslsigncode)",
     "disabled": false,
     "external_service": false,
     "leaks_info": false,
@@ -4057,7 +4093,7 @@
     "external_service": false,
     "leaks_info": false,
     "config": {
-      "soft_time_limit": 60,
+      "soft_time_limit": 120,
       "queue": "local"
     },
     "secrets": {},

@@ -2,7 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 
 # Check the documentation for the details on how to configure LDAP
-# https://intelowl.readthedocs.io/en/latest/Installation.html
+# https://intelowl.readthedocs.io/en/latest/Advanced-Usage.html#ldap
 
 import ldap
 from django_auth_ldap.config import GroupOfNamesType, LDAPSearch
@@ -16,6 +16,9 @@ AUTH_LDAP_USER_SEARCH = LDAPSearch(
     "ou=users,dc=example,dc=com",
     ldap.SCOPE_SUBTREE,
     "(uid=%(user)s)",
+    # for Windows Active Directory it could make sense to change the previous line with the next one
+    # "(sAMAccountName=%(user)s)",
+    # see also: https://github.com/intelowlproject/IntelOwl/issues/1433
 )
 # Or:
 # AUTH_LDAP_USER_DN_TEMPLATE = 'uid=%(user)s,ou=users,dc=example,dc=com'

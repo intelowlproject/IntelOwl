@@ -5,6 +5,7 @@ import logging
 from subprocess import DEVNULL, PIPE, Popen
 
 from celery.exceptions import SoftTimeLimitExceeded
+from django.conf import settings
 
 from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.exceptions import AnalyzerRunException
@@ -20,15 +21,25 @@ class SignatureInfo(FileAnalyzer):
             "no_signature": False,
             "verified": False,
             "corrupted": False,
+            "certificate_has_expired": False,
         }
         try:
-            command = ["osslsigncode", "verify", self.filepath]
+            command = [
+                f"{settings.PROJECT_LOCATION}/docker/bin/osslsigncode",
+                "verify",
+                self.filepath,
+            ]
             p = Popen(command, stdin=DEVNULL, stdout=PIPE, stderr=PIPE)
             (out, err) = p.communicate()
             output = out.decode()
 
-            if p.returncode == 1 and "MISMATCH" in output:
-                results["checksum_mismatch"] = True
+            if p.returncode == 1:
+                if "MISMATCH" in output:
+                    results["checksum_mismatch"] = True
+                # new versions (>=2.0) provide this status code
+                # when the signature is not found
+                elif "No signature found" in output:
+                    results["no_signature"] = True
             elif p.returncode != 0:
                 raise AnalyzerRunException(
                     f"osslsigncode return code is {p.returncode}. Error: {err}"
@@ -41,6 +52,8 @@ class SignatureInfo(FileAnalyzer):
                     results["verified"] = True
                 if "Corrupt PE file" in output:
                     results["corrupted"] = True
+                if "certificate has expired" in output:
+                    results["certificate_has_expired"] = True
             else:
                 raise AnalyzerRunException("osslsigncode gave no output?")
 

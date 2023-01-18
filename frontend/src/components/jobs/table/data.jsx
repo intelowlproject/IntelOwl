@@ -22,18 +22,22 @@ const process_time_mmss = (value) =>
 
 const jobTableColumns = [
   {
-    Header: () => null, // No header
+    Header: () => "ID", // No header
     id: "viewJobBtnHeader",
     accessor: "id",
-    maxWidth: 50,
+    maxWidth: 75,
     disableSortBy: true,
     Cell: ({ value: id }) => (
-      <LinkOpenViewIcon
-        id={id}
-        href={`/jobs/${id}`}
-        tooltip="View Job Report"
-      />
+      <div className="d-flex flex-column justify-content-center">
+        <p>#{id}</p>
+        <LinkOpenViewIcon
+          id={id}
+          href={`/jobs/${id}`}
+          tooltip="View Job Report"
+        />
+      </div>
     ),
+    Filter: DefaultColumnFilter,
   },
   {
     Header: "Created",
@@ -42,7 +46,7 @@ const jobTableColumns = [
     Cell: ({ value }) => (
       <DateHoverable ago value={value} format="hh:mm:ss a MMM do, yyyy" />
     ),
-    maxWidth: 125,
+    maxWidth: 100,
   },
   {
     Header: "Finished",
@@ -52,7 +56,7 @@ const jobTableColumns = [
       value && (
         <DateHoverable ago value={value} format="hh:mm:ss a MMM do, yyyy" />
       ),
-    maxWidth: 125,
+    maxWidth: 100,
   },
   {
     Header: "User",
@@ -104,6 +108,7 @@ const jobTableColumns = [
         id: "type",
         accessor: (r) => r.observable_classification || r.file_mimetype,
         disableSortBy: true,
+        maxWidth: 100,
         Filter: SelectOptionsFilter,
         selectOptions: ALL_CLASSIFICATIONS,
       },
@@ -115,6 +120,7 @@ const jobTableColumns = [
         disableSortBy: true,
         Filter: SelectOptionsFilter,
         selectOptions: TLP_CHOICES,
+        maxWidth: 100,
       },
       {
         Header: "Tags",
@@ -129,6 +135,7 @@ const jobTableColumns = [
             />
           )),
         disableSortBy: true,
+        maxWidth: 100,
         Filter: DefaultColumnFilter,
         filterValueAccessorFn: (tags) => tags.map((t) => t.label),
       },

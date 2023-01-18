@@ -456,7 +456,7 @@ class FileAnalysisSerializer(_AbstractJobCreateSerializer):
                             f"{a_name} won't be run because does not support files."
                         )
                     if not config.is_filetype_supported(
-                        serialized_data["file_mimetype"]
+                        serialized_data["file_mimetype"], serialized_data["file_name"]
                     ):
                         raise NotRunnableAnalyzer(
                             f"{a_name} won't be run because mimetype "

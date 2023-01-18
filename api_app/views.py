@@ -426,7 +426,7 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
         "retrieve": JobSerializer,
         "list": JobListSerializer,
     }
-    filter_class = JobFilter
+    filterset_class = JobFilter
     ordering_fields = [
         "received_request_time",
         "finished_analysis_time",
@@ -445,8 +445,11 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
         - jobs with TLP = AMBER or RED and
         created by a member of their organization.
         """
-        queryset = super().get_queryset()
         user = self.request.user
+        query_params = self.request.query_params
+        logger.info(f"user: {user} request the jobs with params: {query_params}")
+        queryset = super().get_queryset()
+
         if user.has_membership():
             user_query = Q(user=user) | Q(
                 user__membership__organization_id=user.membership.organization_id
@@ -457,6 +460,7 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
             Q(tlp__in=[TLP.AMBER, TLP.RED]) & (user_query)
         )
         queryset = queryset.filter(query)
+        logger.info(f"user: {user} the jobs with params: {query_params} answered")
         return queryset
 
     @add_docs(

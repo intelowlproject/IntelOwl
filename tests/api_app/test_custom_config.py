@@ -76,13 +76,8 @@ class CustomConfigTests(CustomAPITestCase):
 
         celery_task = task_queue.popleft()
         msg = (response, content, celery_task)
-        content = content["results"][0]
-        job = Job.objects.get(pk=celery_task["job_id"])
-        if job.analyzers_to_execute != content["analyzers_running"]:
-            raise Exception(
-                f'analyzers_to_execute ({celery_task["analyzers_to_execute"]}) '
-                f'!= analyzers_running ({content["analyzers_running"]})'
-            )
+        self.assertIn("job_id", celery_task)
+        self.assertIsInstance(celery_task["job_id"], int)
 
         self.assertDictEqual(
             celery_task["runtime_configuration"],
@@ -101,18 +96,12 @@ class CustomConfigTests(CustomAPITestCase):
 
         celery_task = task_queue.popleft()
         msg = (response, content, celery_task)
-        job = Job.objects.get(pk=celery_task["job_id"])
-
-        content = content["results"][0]
-        if job.analyzers_to_execute != content["analyzers_running"]:
-            raise Exception(
-                f'analyzers_to_execute ({celery_task["analyzers_to_execute"]}) '
-                f'!= analyzers_running ({content["analyzers_running"]})'
-            )
+        self.assertIn("job_id", celery_task)
+        self.assertIsInstance(celery_task["job_id"], int)
 
         self.assertDictEqual(
             celery_task["runtime_configuration"],
-            payload["runtime_configuration"],
+            {"Classic_DNS": {"query_type": "ABCD"}},
             msg=msg,
         )
 

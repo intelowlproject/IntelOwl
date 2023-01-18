@@ -68,7 +68,7 @@ class CustomConfigTests(CustomAPITestCase):
 
     def test_standard_job(self):
         payload = self.classic_dns_payload
-
+        task_queue.clear()
         response = self.client.post(
             analyze_multiple_observables_uri, payload, format="json"
         )
@@ -88,7 +88,7 @@ class CustomConfigTests(CustomAPITestCase):
     def test_with_explicit_runtime_config(self):
         payload = deepcopy(self.classic_dns_payload)
         payload["runtime_configuration"] = {"Classic_DNS": {"query_type": "ABCD"}}
-
+        task_queue.clear()
         response = self.client.post(
             analyze_multiple_observables_uri, payload, format="json"
         )

@@ -44,12 +44,13 @@ class JobTestCase(TransactionTestCase):
 
     def test_pipeline_configuration_no_playbook(self):
         job = Job.objects.create(analyzers_to_execute=["AbuseIPDB"])
-        configs, analyzers, connectors = job._pipeline_configuration(
+        configs, analyzers, connectors, playbooks = job._pipeline_configuration(
             {"AbuseIPDB": {"param1": 3}}
         )
         self.assertEqual(configs, [{"AbuseIPDB": {"param1": 3}}])
         self.assertEqual(analyzers, [["AbuseIPDB"]])
         self.assertEqual(connectors, [[]])
+        self.assertEqual(playbooks, [""])
         job.delete()
         # the PluginConfig override the runtime
 
@@ -57,11 +58,12 @@ class JobTestCase(TransactionTestCase):
         job = Job.objects.create(
             playbooks_to_execute=[self.PLAYBOOK], analyzers_to_execute=["Classic_DNS"]
         )
-        configs, analyzers, connectors = job._pipeline_configuration({})
+        configs, analyzers, connectors, playbooks = job._pipeline_configuration({})
         self.assertIsInstance(configs, list)
         self.assertEqual(1, len(configs))
         self.assertIn("Classic_DNS", configs[0])
         self.assertEqual(configs[0]["Classic_DNS"], {"query_type": "A"})
         self.assertIn("Classic_DNS", analyzers[0])
         self.assertEqual(connectors, [[]])
+        self.assertEqual(playbooks, [self.PLAYBOOK])
         job.delete()

@@ -106,9 +106,7 @@ def _multi_analysis_request(
         for index, job in enumerate(jobs):
             job: Job
             # fire celery task
-            tasks.job_pipeline.apply_async(
-                args=[job.pk, runtime_configurations[index]]
-            )
+            tasks.job_pipeline.apply_async(args=[job.pk, runtime_configurations[index]])
 
     data_ = [
         {
@@ -117,7 +115,7 @@ def _multi_analysis_request(
             "warnings": serialized_data[index]["warnings"],
             "analyzers_running": job.analyzers_to_execute,
             "connectors_running": job.connectors_to_execute,
-            "playbook_running": job.playbooks_to_execute
+            "playbook_running": job.playbooks_to_execute,
         }
         for index, job in enumerate(jobs)
     ]

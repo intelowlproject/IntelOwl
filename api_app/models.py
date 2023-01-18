@@ -270,7 +270,9 @@ class Job(models.Model):
         logger.debug(f"New value of runtime_configuration: {final_config}")
         return final_config
 
-    def _pipeline_configuration(self, runtime_configuration: typing.Dict[str, typing.Any]) -> typing.Tuple[typing.List, typing.List, typing.List]:
+    def _pipeline_configuration(
+        self, runtime_configuration: typing.Dict[str, typing.Any]
+    ) -> typing.Tuple[typing.List, typing.List, typing.List]:
         from api_app.playbooks_manager.dataclasses import PlaybookConfig
 
         # case playbooks
@@ -281,14 +283,12 @@ class Job(models.Model):
             # this must be done because each analyzer on the playbook
             # could be executed with a different configuration
             for playbook in PlaybookConfig.filter(
-                    names=self.playbooks_to_execute
+                names=self.playbooks_to_execute
             ).values():
                 playbook: PlaybookConfig
                 if not playbook.is_ready_to_use and not settings.STAGE_CI:
                     continue
-                configs.append(
-                    playbook.analyzers | playbook.connectors
-                )
+                configs.append(playbook.analyzers | playbook.connectors)
                 analyzers.append(
                     [
                         analyzer
@@ -309,10 +309,7 @@ class Job(models.Model):
             connectors = [self.connectors_to_execute]
         return configs, analyzers, connectors
 
-    def pipeline(
-        self,
-        runtime_configuration: typing.Dict[str, typing.Any]
-    ):
+    def pipeline(self, runtime_configuration: typing.Dict[str, typing.Any]):
         from api_app.analyzers_manager.dataclasses import AnalyzerConfig
         from api_app.connectors_manager.dataclasses import ConnectorConfig
         from intel_owl import tasks

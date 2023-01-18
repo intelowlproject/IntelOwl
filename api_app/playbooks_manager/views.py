@@ -16,8 +16,9 @@ from api_app.playbooks_manager.serializers import (
     PlaybookConfigSerializer,
 )
 from api_app.serializers import (
+    AnalysisResponseSerializer,
     PlaybookFileAnalysisSerializer,
-    PlaybookObservableAnalysisSerializer, AnalysisResponseSerializer,
+    PlaybookObservableAnalysisSerializer,
 )
 from certego_saas.ext.views import APIView
 

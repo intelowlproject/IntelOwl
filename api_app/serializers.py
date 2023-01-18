@@ -48,7 +48,7 @@ __all__ = [
     "multi_result_enveloper",
     "PluginConfigSerializer",
     "PlaybookFileAnalysisSerializer",
-    "PlaybookObservableAnalysisSerializer"
+    "PlaybookObservableAnalysisSerializer",
 ]
 
 

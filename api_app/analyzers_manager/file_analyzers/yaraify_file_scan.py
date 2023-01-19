@@ -88,7 +88,7 @@ class YARAifyFileScan(FileAnalyzer, YARAify):
                         if isinstance(data_results, dict) and data_results:
                             logger.info(f"found scan result for {self.md5}")
                             break
-                    except Exception as e:
+                    except requests.RequestException as e:
                         logger.warning(e, stack_info=True)
                     time.sleep(self.poll_distance)
             else:
@@ -107,7 +107,13 @@ class YARAifyFileScan(FileAnalyzer, YARAify):
             if_mock_connections(
                 patch(
                     "requests.post",
-                    return_value=MockResponse({}, 200),
+                    side_effect=[
+                        MockResponse({"query_status": "not-available"}, 200),
+                        MockResponse({"query_status": "queued"}, 200),
+                        MockResponse(
+                            {"query_status": "ok", "data": {"static_results": []}}, 200
+                        ),
+                    ],
                 )
             )
         ]

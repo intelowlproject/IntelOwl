@@ -20,7 +20,7 @@ __all__ = [
 
 logger = logging.getLogger(__name__)
 
-REGEX_OFFICE_FILES = "\.[xl|doc]\w{0,3}$"
+REGEX_OFFICE_FILES = r"\.[xl|doc]\w{0,3}$"
 
 
 @dataclasses.dataclass

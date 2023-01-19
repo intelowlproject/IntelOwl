@@ -12,6 +12,7 @@ from rest_framework.response import Response
 
 from api_app.core.views import PluginActionViewSet, PluginHealthCheckAPI
 from certego_saas.ext.views import APIView
+from intel_owl.consts import DEFAULT_QUEUE
 
 from ..models import Job, OrganizationPluginState, PluginConfig
 from .dataclasses import AnalyzerConfig
@@ -77,13 +78,22 @@ class AnalyzerActionViewSet(PluginActionViewSet):
         job.job_cleanup()
 
     def perform_retry(self, report: AnalyzerReport):
+        from intel_owl import tasks
+
         signatures, _ = AnalyzerConfig.stack(
             job_id=report.job.id,
             plugins_to_execute=[report.analyzer_name],
             runtime_configuration=report.runtime_configuration,
             parent_playbook=report.parent_playbook,
         )
-        group(signatures)()
+        runner = group(signatures) | tasks.continue_job_pipeline.signature(
+            args=[report.job.id],
+            kwargs={},
+            queue=DEFAULT_QUEUE,
+            soft_time_limit=10,
+            immutable=True,
+        )
+        runner()
 
 
 class AnalyzerHealthCheckAPI(PluginHealthCheckAPI):
@@ -99,11 +109,8 @@ class AnalyzerHealthCheckAPI(PluginHealthCheckAPI):
 
         class_: typing.Type[Plugin] = analyzer_config.get_class()
 
-        if not issubclass(class_, DockerBasedAnalyzer):
-            raise ValidationError(f"Plugin {class_.__name__} is not docker based")
-
         # docker analyzers have a common method for health check
-        if not hasattr(class_, "health_check"):
+        if not issubclass(class_, DockerBasedAnalyzer):
             raise ValidationError({"detail": "No healthcheck implemented"})
 
         return class_.health_check()

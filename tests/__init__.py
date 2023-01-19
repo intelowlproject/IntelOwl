@@ -48,9 +48,9 @@ def PollingFunction(self):
             f"\n>>> Running/Pending analyzers: {running_or_pending_analyzers}",
             f"\n>>> Running/Pending connectors: {running_or_pending_connectors}",
         )
-        condition = analyzers_stats["failed"] > 0 or connectors_stats["failed"] > 0
+        fail_condition = analyzers_stats["failed"] > 0 or connectors_stats["failed"] > 0
         # fail immediately if any analyzer or connector failed
-        if condition:
+        if fail_condition:
             failed_analyzers = [
                 (r.analyzer_name, r.errors)
                 for r in self.test_job.analyzer_reports.filter(
@@ -89,18 +89,21 @@ def PollingFunction(self):
             )
 
             # check connectors status
-            if connectors_stats["all"] > 0 and connectors_stats["running"] == 0:
-                self.assertEqual(
-                    len(self.test_job.connectors_to_execute),
-                    self.test_job.connector_reports.count(),
-                    "all connector reports must be there",
-                )
-                self.assertEqual(
-                    connectors_stats["all"],
-                    connectors_stats["success"],
-                    msg="all `connector_reports` status must be `SUCCESS`.",
-                )
-                print(f"[END] -----{self.__class__.__name__}----")
+            if connectors_stats["all"] > 0:
+                if connectors_stats["running"] == 0:
+                    self.assertEqual(
+                        len(self.test_job.connectors_to_execute),
+                        self.test_job.connector_reports.count(),
+                        "all connector reports must be there",
+                    )
+                    self.assertEqual(
+                        connectors_stats["all"],
+                        connectors_stats["success"],
+                        msg="all `connector_reports` status must be `SUCCESS`.",
+                    )
+                    print(f"[END] -----{self.__class__.__name__}----")
+                    return True
+            else:
                 return True
     # the test should not reach here
     self.fail("test timed out")

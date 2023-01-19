@@ -84,7 +84,6 @@ class ConnectorHealthCheckAPI(PluginHealthCheckAPI):
         from rest_framework.exceptions import ValidationError
 
         from api_app.connectors_manager.classes import Connector
-        from api_app.connectors_manager.dataclasses import ConnectorConfig
 
         connector_config = ConnectorConfig.get(connector_name)
         if connector_config is None:
@@ -93,8 +92,8 @@ class ConnectorHealthCheckAPI(PluginHealthCheckAPI):
         class_: typing.Type[Connector] = connector_config.get_class()
 
         try:
-            status = class_.health_check(connector_name)
+            status_ = class_.health_check(connector_name)
         except NotImplementedError:
             raise ValidationError({"detail": "No healthcheck implemented"})
 
-        return status
+        return status_

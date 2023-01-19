@@ -12,9 +12,8 @@ def before_task_publish_handler(headers=None, body=None, **kwargs):
     """
     Used to intercept job creation requests
     """
-    # body0 = args
-    # body1 = kwargs
-    task_queue.append(body[1])
+    kwargs = body[1]
+    task_queue.append(kwargs)
     info = headers if "task" in headers else body
 
     app.control.revoke(info["id"])

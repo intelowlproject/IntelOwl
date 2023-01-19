@@ -8,6 +8,7 @@ import typing
 from django.conf import settings
 
 from api_app.core.dataclasses import AbstractConfig
+from ..core.models import AbstractReport
 
 from ..models import PluginConfig
 from .constants import HashChoices, TypeChoices
@@ -24,6 +25,12 @@ REGEX_OFFICE_FILES = "\.[xl|doc]\w{0,3}$"
 
 @dataclasses.dataclass
 class AnalyzerConfig(AbstractConfig):
+    @classmethod
+    def _get_report_model(cls) -> typing.Type[AbstractReport]:
+        from api_app.analyzers_manager.models import AnalyzerReport
+
+        return AnalyzerReport
+
     def _get_type(self) -> str:
         return PluginConfig.PluginType.ANALYZER
 

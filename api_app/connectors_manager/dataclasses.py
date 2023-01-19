@@ -13,6 +13,8 @@ from .serializers import ConnectorConfigSerializer
 
 __all__ = ["ConnectorConfig"]
 
+from ..core.models import AbstractReport
+
 from ..models import PluginConfig
 
 logger = logging.getLogger(__name__)
@@ -21,6 +23,12 @@ logger = logging.getLogger(__name__)
 @dataclasses.dataclass
 class ConnectorConfig(AbstractConfig):
     maximum_tlp: str
+
+    @classmethod
+    def _get_report_model(cls) -> typing.Type[AbstractReport]:
+        from api_app.connectors_manager.models import ConnectorReport
+
+        return ConnectorReport
 
     @classmethod
     def _get_serializer_class(cls) -> typing.Type[ConnectorConfigSerializer]:

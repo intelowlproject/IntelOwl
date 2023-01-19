@@ -356,7 +356,6 @@ class Job(models.Model):
             | group(final_connector_signatures)
         )
         runner()
-        return
 
     # user methods
 
@@ -383,8 +382,7 @@ class Job(models.Model):
 @receiver(models.signals.pre_delete, sender=Job)
 def delete_file(sender, instance: Job, **kwargs):
     if instance.file:
-        if instance.file:
-            instance.file.delete()
+        instance.file.delete()
 
 
 class PluginConfig(models.Model):

@@ -44,8 +44,6 @@ class Connector(Plugin):
         )
 
     def before_run(self, *args, **kwargs):
-        parent_playbook = kwargs.get("parent_playbooks", "")
-        self.add_parent_playbook(parent_playbook=parent_playbook)
         logger.info(f"STARTED connector: {self.__repr__()}")
 
     def after_run(self):
@@ -69,10 +67,11 @@ class Connector(Plugin):
             if url and url.startswith("http"):
                 try:
                     requests.head(url, timeout=10)
-                    health_status = True
                 except requests.exceptions.ConnectionError:
                     health_status = False
                 except requests.exceptions.Timeout:
                     health_status = False
+                else:
+                    health_status = True
 
         return health_status

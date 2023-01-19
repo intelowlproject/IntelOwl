@@ -47,6 +47,8 @@ __all__ = [
     "MultipleObservableAnalysisSerializer",
     "multi_result_enveloper",
     "PluginConfigSerializer",
+    "PlaybookFileAnalysisSerializer",
+    "PlaybookObservableAnalysisSerializer",
 ]
 
 
@@ -272,6 +274,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         # create ``Tag`` objects from tags_labels
         tags_labels = validated_data.pop("tags_labels", None)
         validated_data.pop("warnings")
+        validated_data.pop("runtime_configuration")
         tags = [
             Tag.objects.get_or_create(
                 label=label, defaults={"color": gen_random_colorhex()}
@@ -627,7 +630,6 @@ class PlaybookBaseSerializer:
     def filter_playbooks(self, attrs: Dict) -> Tuple[List]:
         # init empty list
         valid_playbook_list = []
-        selected_playbooks = []
         analyzers_to_be_run = []
         connectors_to_be_run = []
         warnings = []
@@ -778,10 +780,7 @@ class AnalysisResponseSerializer(rfs.Serializer):
     warnings = rfs.ListField(required=False)
     analyzers_running = rfs.ListField()
     connectors_running = rfs.ListField()
-
-
-class PlaybookAnalysisResponseSerializer(AnalysisResponseSerializer):
-    playbooks_running = rfs.ListField()
+    playbooks_running = rfs.ListField(required=False)
 
 
 def multi_result_enveloper(serializer_class, many):

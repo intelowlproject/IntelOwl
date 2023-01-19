@@ -16,7 +16,7 @@ from api_app.playbooks_manager.serializers import (
     PlaybookConfigSerializer,
 )
 from api_app.serializers import (
-    PlaybookAnalysisResponseSerializer,
+    AnalysisResponseSerializer,
     PlaybookFileAnalysisSerializer,
     PlaybookObservableAnalysisSerializer,
 )
@@ -75,7 +75,6 @@ def _multi_analysis_request_playbooks(
         user=request.user,
         data=request.data,
         serializer_class=serializer_class,
-        playbook_scan=True,
     )
 
     return Response(
@@ -87,7 +86,7 @@ def _multi_analysis_request_playbooks(
 @add_docs(
     description="This endpoint allows to start a Job related to a file",
     request=PlaybookFileAnalysisSerializer,
-    responses={200: PlaybookAnalysisResponseSerializer},
+    responses={200: AnalysisResponseSerializer},
 )
 @api_view(["POST"])
 def analyze_multiple_files(request):
@@ -97,7 +96,7 @@ def analyze_multiple_files(request):
 @add_docs(
     description="This endpoint allows to start a Job related to an observable",
     request=PlaybookObservableAnalysisSerializer,
-    responses={200: PlaybookAnalysisResponseSerializer},
+    responses={200: AnalysisResponseSerializer},
 )
 @api_view(["POST"])
 def analyze_multiple_observables(request):

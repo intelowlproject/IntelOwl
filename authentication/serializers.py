@@ -155,7 +155,10 @@ class EmailVerificationSerializer(
             super().save()
 
         # Send msg on slack
-        if certego_apps_settings.SLACK_TOKEN and certego_apps_settings.SLACK_CHANNEL:
+        if (
+            certego_apps_settings.SLACK_TOKEN
+            and certego_apps_settings.DEFAULT_SLACK_CHANNEL
+        ):
             try:
                 userprofile = user.user_profile
                 user_admin_link = (
@@ -175,7 +178,7 @@ class EmailVerificationSerializer(
                         f"{userprofile.company_role}, )"
                         f"<{userprofile_admin_link} |admin link>)"
                     ),
-                    channel=certego_apps_settings.SLACK_CHANNEL,
+                    channel=certego_apps_settings.DEFAULT_SLACK_CHANNEL,
                 )
             except SlackApiError as exc:
                 slack.log.error(

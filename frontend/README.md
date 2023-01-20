@@ -72,11 +72,13 @@ npm start
 
 - JS app main configs are available in `package.json` and `enviroments.js`.
 
-- (required) Inject `env.js` using a symbolic link,
+- (required) Construct environment files from template.
 
 ```bash
-$/home/user/IntelOwl: ln -s docker/env.js frontend/public/env.js
+$/home/user/IntelOwl: cp docker/env_template.js frontend/public/env.js
 ```
+
+- In the `env.js` configure `RECAPTCHA_SITEKEY` with your recaptcha client site key.
 
 - (optional) Use local build of `certego-ui` package so it can also hot-reload. This is useful when you want to make changes in certego-ui and rapidly test them with IntelOwl. Refer [here](https://github.com/certego/certego-ui#use-local-build-of-certego-ui-with-hot-reload-for-faster-development) for setup instructions.
 

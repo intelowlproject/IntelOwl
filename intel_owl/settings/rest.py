@@ -3,7 +3,7 @@
 from datetime import timedelta
 
 from ._util import get_secret
-from .commons import DEBUG, PUBLIC_DEPLOYMENT, VERSION
+from .commons import DEBUG, PUBLIC_DEPLOYMENT, STAGE_CI, STAGE_LOCAL, VERSION
 from .security import WEB_CLIENT_URL
 
 REST_FRAMEWORK = {
@@ -58,11 +58,11 @@ SPECTACULAR_SETTINGS = {
     "VERSION": VERSION,
 }
 
-# drf-recaptcha (not used in IntelOwl but required by certego-saas pkg)
+# drf-recaptcha
 DRF_RECAPTCHA_SECRET_KEY = (
     str(get_secret("RECAPTCHA_SECRET_KEY_IO_PUBLIC"))
     if PUBLIC_DEPLOYMENT and not DEBUG
     else str(get_secret("RECAPTCHA_SECRET_KEY_IO_LOCAL"))
 )
-DRF_RECAPTCHA_TESTING = True
+DRF_RECAPTCHA_TESTING = STAGE_LOCAL or STAGE_CI
 DRF_RECAPTCHA_TESTING_PASS = True

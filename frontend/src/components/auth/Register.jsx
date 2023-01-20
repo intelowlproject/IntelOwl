@@ -17,7 +17,7 @@ import useTitle from "react-use/lib/useTitle";
 
 import { ContentSection, Select } from "@certego/certego-ui";
 
-import { PUBLIC_URL } from "../../constants/environment";
+import { PUBLIC_URL, RECAPTCHA_SITEKEY } from "../../constants/environment";
 import { HACKER_MEME_STRING, EMAIL_REGEX } from "../../constants";
 import ReCAPTCHAInput from "./utils/ReCAPTCHAInput";
 import { AfterRegistrationModalAlert, InviteOnlyAlert } from "./utils/utils";
@@ -422,11 +422,13 @@ export default function Register() {
                   </Col>
                 </FormGroup>
                 {/* reCAPTCHA */}
-                <FormGroup row>
-                  <ReCAPTCHAInput
-                    id="RegisterForm__recaptcha"
-                    className="m-3 mx-auto"
-                  />
+                <FormGroup className="mt-3 d-flex">
+                  {RECAPTCHA_SITEKEY && (
+                    <ReCAPTCHAInput
+                      id="RegisterForm__recaptcha"
+                      className="m-3 mx-auto"
+                    />
+                  )}
                 </FormGroup>
                 {/* Submit */}
                 <FormGroup className="mt-3 d-flex">

@@ -7,7 +7,7 @@ import { AUTH_BASE_URI } from "../../constants/api";
 export async function registerUser(body) {
   try {
     const resp = await axios.post(`${AUTH_BASE_URI}/register`, body);
-    return Promise.resolve(resp);
+    return resp;
   } catch (err) {
     addToast("Registration failed!", err.parsedMsg, "danger", true);
     return Promise.reject(err);

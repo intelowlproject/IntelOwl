@@ -52,7 +52,7 @@ class UserAdminView(AbstractUserAdmin):
             email_utils.send_email(
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 recipient_list=[user.email],
-                subject="Certego - Your account request has been declined",
+                subject="IntelOwl - Your account request has been declined",
                 template_name="authentication/emails/account-declined",
                 context={
                     "full_name": user.get_full_name(),
@@ -88,7 +88,7 @@ class UserAdminView(AbstractUserAdmin):
             email_utils.send_email(
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 recipient_list=[user.email],
-                subject="Your account has been successfully activated!",
+                subject="IntelOwl - Your account has been successfully activated!",
                 template_name="authentication/emails/account-activated",
                 context={
                     "full_name": user.get_full_name(),

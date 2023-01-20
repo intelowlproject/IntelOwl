@@ -20,7 +20,7 @@ services:
       - ../configuration/intel_owl.ini:/etc/uwsgi/sites/intel_owl.ini # uwsgi configuration file
       - ../configuration:/opt/deploy/intel_owl/configuration
       - generic_logs:/var/log/intel_owl
-      - ./env.js:/var/www/reactapp/env.js # this is needed because we have to mount the file from the server to the image BEFORE staticfiles
+      - ../frontend/public/env.js:/var/www/reactapp/env.js # this is needed because we have to mount the file from the server to the image BEFORE staticfiles
       - static_content:/opt/deploy/intel_owl/static
       - shared_files:/opt/deploy/files_required
     entrypoint:

@@ -52,6 +52,9 @@ After registration, an email is sent to the user to verify his email address. If
 Every user after the registration process will be manually vetted before allowed to use the IntelOwl platform. The registration requests would be handled in the Django Admin page by admins.
 If you have IntelOwl deployed on an AWS instance with an IAM role you can use [SES](Advanced-Usage.html#ses) service.
 
+At the moment this feature in a production environment only works if you are using SES, there aren't other providers for sending emails.
+In a development environment the emails that would be sent are write to the standard output.
+
 ### Multi Tenancy
 Thanks to the "Organization" feature, IntelOwl can be used by multiple SOCs, companies, etc...very easily.
 Right now it works very simply: only users in the same organization can see analysis of one another. An user can belong to an organization only.

@@ -34,7 +34,6 @@ class TestUserAuth(CustomOAuthTestCase):
             },
         }
         mail.outbox = []
-        return super().setUp()
 
     def tearDown(self):
         # cache clear (for throttling)
@@ -42,7 +41,6 @@ class TestUserAuth(CustomOAuthTestCase):
         # db clean
         AuthToken.objects.all().delete()
         Client.objects.all().delete()
-        return super().tearDown()
 
     def test_login_200(self):
         self.assertEqual(AuthToken.objects.count(), 0)

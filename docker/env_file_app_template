@@ -35,7 +35,7 @@ AWS_REGION=eu-central-1
 
 # Uploads
 SLACK_TOKEN=
-SLACK_CHANNEL=
+DEFAULT_SLACK_CHANNEL=
 
 # Elastic Search Configuration
 ELASTICSEARCH_ENABLED=False

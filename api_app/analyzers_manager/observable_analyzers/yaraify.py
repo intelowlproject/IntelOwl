@@ -1,8 +1,6 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-import json
-
 import requests
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
@@ -31,10 +29,8 @@ class YARAify(ObservableAnalyzer):
         else:
             data["malpedia-token"] = self.__api_key
 
-        json_data = json.dumps(data)
-
         try:
-            response = requests.post(self.url, data=json_data)
+            response = requests.post(self.url, json=data)
             response.raise_for_status()
         except requests.RequestException as e:
             raise AnalyzerRunException(e)

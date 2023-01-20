@@ -828,15 +828,18 @@ class PluginConfigSerializer(rfs.ModelSerializer):
 
         # check if owner is admin of organization
         if attrs.get("organization", None):
+            # here the owner can't be retrieved by the field
+            # because the HiddenField will always return None
+            owner = self.context["request"].user
             # check if the user is owner of the organization
             membership = Membership.objects.filter(
-                user=attrs.get("owner"),
+                user=owner,
                 organization=attrs.get("organization"),
                 is_owner=True,
             )
             if not membership.exists():
                 logger.warning(
-                    f"User {attrs.get('owner')} is not owner of "
+                    f"User {owner} is not owner of "
                     f"organization {attrs.get('organization')}."
                 )
                 raise PermissionDenied("User is not owner of the organization.")

@@ -36,7 +36,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Set up Python
-        uses: actions/setup-python@v4.4.0
+        uses: actions/setup-python@v4.5.0
         with:
           python-version: 3.9
 
@@ -136,9 +136,9 @@ jobs:
         run: |
           docker/scripts/coverage_test.sh tests.analyzers_manager.test_file_scripts
 
-      - name: "Test: Playbooks Manager (controllers, views)"
+      - name: "Test: Playbooks Manager (views)"
         run: |
-          docker/scripts/coverage_test.sh tests.playbooks_manager.test_controller tests.playbooks_manager.test_views
+          docker/scripts/coverage_test.sh tests.playbooks_manager
 
       - name: "Coverage: generate xml and transfer from docker container to host"
         run: |

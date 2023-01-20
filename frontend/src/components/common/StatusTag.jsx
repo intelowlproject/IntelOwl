@@ -12,8 +12,8 @@ export default function StatusTag(props) {
   const divClass = classnames("status-tag", `bg-${color}`, className);
 
   return (
-    <span className={divClass} title={status} {...rest}>
-      {status.toUpperCase()}
+    <span className={`text-break ${divClass}`} title={status} {...rest}>
+      {status.toUpperCase().replaceAll("_", " ")}
     </span>
   );
 }

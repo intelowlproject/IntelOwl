@@ -15,7 +15,7 @@ RUN npm install npm@latest --location=global \
     && PUBLIC_URL=/static/reactapp/ npm run build
 
 # Stage 2: Backend
-FROM python:3.9.9-buster
+FROM python:3.9.16
 
 COPY --from=frontend-build /build /var/www/reactapp
 
@@ -23,7 +23,7 @@ ENV PYTHONUNBUFFERED 1
 ENV DJANGO_SETTINGS_MODULE intel_owl.settings
 ENV PYTHONPATH /opt/deploy/intel_owl
 ENV LOG_PATH /var/log/intel_owl
-ENV ELASTICSEARCH_DSL_VERSION 7.2.0
+ENV ELASTICSEARCH_DSL_VERSION 7.2.2
 ENV watch_logs_cmd "watch -n1 tail -n10 /var/log/intel_owl/django/api_app.log"
 
 ARG REPO_DOWNLOADER_ENABLED=true
@@ -36,11 +36,10 @@ RUN mkdir -p ${LOG_PATH} \
 
 # install required packages. some notes about:o
 # python3-psycopg2 is required to use PostgresSQL with Django
-# osslsigncode is required to run the signature verification analyzer
 # apache2-utils is required to execute htpasswd
 RUN apt-get update \
     && apt-get install -y --no-install-recommends apt-utils libsasl2-dev libssl-dev netcat \
-    vim libldap2-dev python-dev libfuzzy-dev net-tools python3-psycopg2 git osslsigncode apache2-utils \
+    vim libldap2-dev python-dev libfuzzy-dev net-tools python3-psycopg2 git apache2-utils \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
     && pip3 install --no-cache-dir --upgrade pip

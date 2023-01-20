@@ -18,7 +18,7 @@ STAGE_LOCAL = STAGE == "local"
 STAGE_CI = STAGE == "ci"
 
 # Overridden in test_custom_config
-FORCE_SCHEDULE_JOBS = False
+FORCE_SCHEDULE_JOBS = True
 
 VERSION = get_secret("REACT_APP_INTELOWL_VERSION", "").replace("v", "")
 PUBLIC_DEPLOYMENT = get_secret("PUBLIC_DEPLOYMENT", "True") == "True"
@@ -28,3 +28,13 @@ PROJECT_LOCATION = "/opt/deploy/intel_owl"
 WEB_CLIENT_DOMAIN = get_secret("INTELOWL_WEB_CLIENT_DOMAIN")
 
 AWS_REGION = get_secret("AWS_REGION")
+
+BASE_CONNECTOR_PYTHON_PATH = get_secret(
+    "BASE_CONNECTOR_PYTHON_PATH", "api_app.connectors_manager.connectors"
+)
+BASE_ANALYZER_OBSERVABLE_PYTHON_PATH = get_secret(
+    "", "api_app.analyzers_manager.observable_analyzers"
+)
+BASE_ANALYZER_FILE_PYTHON_PATH = get_secret(
+    "", "api_app.analyzers_manager.file_analyzers"
+)

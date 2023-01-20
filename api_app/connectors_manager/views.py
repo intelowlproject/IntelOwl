@@ -2,7 +2,9 @@
 # See the file 'LICENSE' for copying permission.
 
 import logging
+import typing
 
+from celery import group
 from drf_spectacular.utils import extend_schema as add_docs
 from drf_spectacular.utils import inline_serializer
 from rest_framework import serializers as rfs
@@ -13,7 +15,7 @@ from api_app.core.views import PluginActionViewSet, PluginHealthCheckAPI
 from certego_saas.ext.views import APIView
 
 from ..models import OrganizationPluginState, PluginConfig
-from . import controller as connectors_controller
+from .dataclasses import ConnectorConfig
 from .models import ConnectorReport
 from .serializers import ConnectorConfigSerializer
 
@@ -68,14 +70,31 @@ class ConnectorActionViewSet(PluginActionViewSet):
         return ConnectorReport
 
     def perform_retry(self, report: ConnectorReport):
-        connectors_to_execute, runtime_configuration = super().perform_retry(report)
-        connectors_controller.start_connectors(
-            report.job.id,
-            connectors_to_execute,
-            runtime_configuration,
+        signatures, _ = ConnectorConfig.stack(
+            job_id=report.job.id,
+            plugins_to_execute=[report.connector_name],
+            runtime_configuration=report.runtime_configuration,
+            parent_playbook=report.parent_playbook,
         )
+        group(signatures)()
 
 
 class ConnectorHealthCheckAPI(PluginHealthCheckAPI):
     def perform_healthcheck(self, connector_name: str) -> bool:
-        return connectors_controller.run_healthcheck(connector_name)
+        from rest_framework.exceptions import ValidationError
+
+        from api_app.connectors_manager.classes import Connector
+        from api_app.connectors_manager.dataclasses import ConnectorConfig
+
+        connector_config = ConnectorConfig.get(connector_name)
+        if connector_config is None:
+            raise ValidationError({"detail": "Connector doesn't exist"})
+
+        class_: typing.Type[Connector] = connector_config.get_class()
+
+        try:
+            status = class_.health_check(connector_name)
+        except NotImplementedError:
+            raise ValidationError({"detail": "No healthcheck implemented"})
+
+        return status

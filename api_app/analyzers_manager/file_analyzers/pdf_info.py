@@ -29,7 +29,7 @@ class PDFInfo(FileAnalyzer):
 
     def __peepdf_analysis(self):
         success = False
-        peepdf_analysis = []
+        peepdf_analysis = {}
         try:
             pdf_parser = peepdf.PDFCore.PDFParser()
             ret, pdf = pdf_parser.parse(self.filepath, True)
@@ -37,6 +37,7 @@ class PDFInfo(FileAnalyzer):
                 peepdf_analysis["status_code"] = ret
             else:
                 stats = pdf.getStats()
+                peepdf_analysis["stats"] = []
                 for version in stats.get("Versions", []):
                     version_dict = {
                         "events": version.get("Events", {}),
@@ -47,7 +48,7 @@ class PDFInfo(FileAnalyzer):
                         "vulns": version.get("Vulns", []),
                         "objects_with_js_code": version.get("Objects with JS code", []),
                     }
-                    peepdf_analysis.append(version_dict)
+                    peepdf_analysis["stats"].append(version_dict)
 
             self.results["peepdf"] = peepdf_analysis
         except TypeError as e:

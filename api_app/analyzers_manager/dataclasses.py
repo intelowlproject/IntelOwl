@@ -8,8 +8,8 @@ import typing
 from django.conf import settings
 
 from api_app.core.dataclasses import AbstractConfig
-from ..core.models import AbstractReport
 
+from ..core.models import AbstractReport
 from ..models import PluginConfig
 from .constants import HashChoices, TypeChoices
 from .serializers import AnalyzerConfigSerializer

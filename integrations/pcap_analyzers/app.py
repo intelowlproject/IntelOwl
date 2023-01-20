@@ -63,7 +63,7 @@ def intercept_suricata_result(context, future: Future) -> None:
                     res["report"]["data"].append(fp.read())
 
     # 3. set final result after modifications
-    future._result = res
+    future._result = res  # skipcq PYL-W0212
 
     # 4 remove the log file
     shutil.rmtree(directory)

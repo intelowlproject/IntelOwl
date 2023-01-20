@@ -816,7 +816,7 @@ class PluginConfigSerializer(rfs.ModelSerializer):
         queryset=Organization.objects.all(),
         required=False,
     )
-
+    owner = rfs.HiddenField(default=rfs.CurrentUserDefault())
     value = CustomJSONField()
 
     class Meta:

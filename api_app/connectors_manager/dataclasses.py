@@ -14,7 +14,6 @@ from .serializers import ConnectorConfigSerializer
 __all__ = ["ConnectorConfig"]
 
 from ..core.models import AbstractReport
-
 from ..models import PluginConfig
 
 logger = logging.getLogger(__name__)

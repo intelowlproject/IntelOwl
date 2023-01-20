@@ -166,9 +166,11 @@ class DocInfo(FileAnalyzer):
                 for num in range(10):
                     common_pwd_to_check.append(f"{num}{num}{num}{num}")
                 # https://twitter.com/JohnLaTwC/status/1265377724522131457
-                filename_without_spaces_and_numbers = sub("[-_\d\s]", "", self.filename)
+                filename_without_spaces_and_numbers = sub(
+                    r"[-_\d\s]", "", self.filename
+                )
                 filename_without_extension = sub(
-                    "(\..+)", "", filename_without_spaces_and_numbers
+                    r"(\..+)", "", filename_without_spaces_and_numbers
                 )
                 common_pwd_to_check.append(filename_without_extension)
                 self.passwords_to_check.extend(common_pwd_to_check)

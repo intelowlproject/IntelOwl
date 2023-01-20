@@ -21,7 +21,6 @@ from rest_framework.exceptions import (
     PermissionDenied,
     ValidationError,
 )
-from rest_framework.request import Request
 from rest_framework.response import Response
 
 from api_app.serializers import (
@@ -701,20 +700,6 @@ class PluginConfigViewSet(viewsets.ModelViewSet):
         )
 
         return result.order_by("id")
-
-    def create(self, request: Request, *args, **kwargs):
-        if isinstance(request.data, QueryDict):
-            # Making QueryDict mutable to pass owner into the serializer
-            request._full_data = request.data.copy()
-        request.data["owner"] = request.user.id
-        return super().create(request, *args, **kwargs)
-
-    def update(self, request: Request, *args, **kwargs):
-        if isinstance(request.data, QueryDict):
-            # Making QueryDict mutable to pass owner into the serializer
-            request._full_data = request.data.copy()
-        request.data["owner"] = request.user.id
-        return super().update(request, *args, **kwargs)
 
 
 @add_docs(

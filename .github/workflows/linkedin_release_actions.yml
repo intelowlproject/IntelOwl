@@ -1,22 +1,19 @@
 name: GitHub Actions LinkedIn
-run-name: Testing out GitHub Actions for Linkedin posts 🚀
+run-name: GitHub Actions for Linkedin posts
 on:
   push:
     branches:
       - addLinkedinRelease
       - main
 jobs:
-  email:
+  linkedin-post:
     runs-on: ubuntu-latest
     steps:
-      - name: Send email
-        uses: dawidd6/action-send-mail@v1.3.0
-        with:
-          server_address: smtp.gmail.com
-          server_port: 465
-          username: quadmx08
-          password: "air111@tinaOK"
-          subject: Your a star ✨
-          body: just starred your mail-on-star repo!!! ${{ github.repository }}
-          to: tinaoberoi70@gmail.com
-          from: tinaoberoi70@gmail.com
+      - name: Run python script
+        run: |
+          import requests
+          url = 'https://api.linkedin.com/v2/me/'
+          headers = {'content-type': 'application/json', 'X-Restli-Protocol-Version': '2.0.0', 'Authorization': 'Bearer {{AUTH_TOKEN}}'}
+          response = requests.get(url, headers=headers)
+          print(response.status_code)
+        shell: python

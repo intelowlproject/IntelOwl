@@ -1377,6 +1377,31 @@
       }
     }
   },
+  "HaveIBeenPwned": {
+    "type": "observable",
+    "python_module": "haveibeenpwned.HaveIBeenPwned",
+    "description": "Check if an email address has been involved in a data breach",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": true,
+    "observable_supported": ["generic"],
+    "config": {
+      "soft_time_limit": 100,
+      "queue": "long",
+      "truncate_response": true,
+      "include_unverified": true,
+      "domain": null
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "HIBP_API_KEY",
+        "type": "string",
+        "required": true,
+        "default": null,
+        "description": "API Key for HaveIBeenPwned",
+      }
+    }
+  },
   "HoneyDB": {
     "type": "observable",
     "python_module": "honeydb.HoneyDB",

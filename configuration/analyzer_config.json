@@ -1399,9 +1399,21 @@
       }
     },
     "params": {
-      "truncate_response": true,
-      "include_unverified": false,
-      "domain": null
+      "truncate_response": {
+        "value": true,
+        "type": "bool",
+        "description": "Truncate response to only include most recent data breaches"
+      },
+      "include_unverified": {
+        "value": false,
+        "type": "bool",
+        "description": "Include unverified data breaches in the response"
+      },
+      "domain": {
+        "value": null,
+        "type": "str",
+        "description": "Search for data breaches specific to a domain"
+      }
     }
   },
   "HoneyDB": {

@@ -2538,6 +2538,50 @@
     "secrets": {},
     "params": {}
   },
+  "Quokka": {
+    "type": "observable",
+    "python_module": "quokka.Quokka",
+    "description": "scan an observable with Certego Threat Intelligence",
+    "disabled": true,
+    "external_service": true,
+    "leaks_info": true,
+    "observable_supported": [
+      "ip", "domain", "url", "hash"
+    ],
+    "config": {
+      "soft_time_limit": 20,
+      "queue": "default"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "QUOKKA_API_KEY",
+        "description": "API key required for authentication",
+        "required": true
+      },
+      "certificate": {
+        "env_var_key": "QUOKKA_SSL_CERTIFICATE",
+        "description": "Certificate required for ssl",
+        "required": false
+      },
+      "url": {
+        "env_var_key": "QUOKKA_URL",
+        "description": "URL of the Quokka instance you want to connect to",
+        "required": true
+      }
+    },
+    "params": {
+      "reduced": {
+        "value": true,
+        "type": "bool",
+        "description": "Reduced analysis report"
+      },
+      "public": {
+        "value": false,
+        "type": "bool",
+        "description": "Use public analysis"
+      }
+    }
+  },
   "Robtex_Forward_PDNS_Query": {
     "type": "observable",
     "python_module": "robtex.Robtex",

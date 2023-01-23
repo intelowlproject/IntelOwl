@@ -30,6 +30,20 @@ class Plugin(metaclass=ABCMeta):
     kwargs: dict
     report: AbstractReport
 
+    def __init__(
+        self,
+        config: AbstractConfig,
+        job_id: int,
+        report_defaults: dict = None,
+        **kwargs,
+    ):
+        self._config = config
+        self.job_id = job_id
+        self.report_defaults = report_defaults if report_defaults is not None else {}
+        self.kwargs = kwargs
+        # some post init processing
+        self.__post__init__()  # lgtm [py/init-calls-subclass]
+
     @cached_property
     def _job(self) -> Job:
         return Job.objects.get(pk=self.job_id)
@@ -41,7 +55,7 @@ class Plugin(metaclass=ABCMeta):
     @property
     def _params(self) -> dict:
         default_params = self._config.param_values
-        runtime_params = self.report_defaults["runtime_configuration"]
+        runtime_params = self.report_defaults.get("runtime_configuration", {})
         # overwrite default with runtime
         return {**default_params, **runtime_params}
 
@@ -172,17 +186,3 @@ class Plugin(metaclass=ABCMeta):
         # monkeypatch if in test suite
         if settings.STAGE_CI:
             self._monkeypatch()
-
-    def __init__(
-        self,
-        config: AbstractConfig,
-        job_id: int,
-        report_defaults: dict = None,
-        **kwargs,
-    ):
-        self._config = config
-        self.job_id = job_id
-        self.report_defaults = report_defaults if report_defaults is not None else {}
-        self.kwargs = kwargs
-        # some post init processing
-        self.__post__init__()  # lgtm [py/init-calls-subclass]

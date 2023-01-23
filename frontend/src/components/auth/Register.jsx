@@ -442,16 +442,6 @@ export default function Register() {
                     {formik.isSubmitting && <Spinner size="sm" />} Register
                   </Button>
                 </FormGroup>
-                <p className="text-muted">
-                  By signing up, you accept our{" "}
-                  <RRLink to="" className="link-ul-muted">
-                    Terms of Use
-                  </RRLink>
-                  , articles 3, 4, 7, 9 of the Terms of Use, and the{" "}
-                  <RRLink to="" className="link-ul-muted">
-                    Privacy and Cookie Policy
-                  </RRLink>
-                </p>
               </Form>
             )}
           </Formik>

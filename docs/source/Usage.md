@@ -46,15 +46,6 @@ Afterwards you can leverage the created tokens with the Intel Owl Client.
 ## Organizations and User management
 Starting from IntelOwl v4, a new "Organization" section is available on the GUI. This section substitute the previous permission management via Django Admin and aims to provide an easier way to manage users and visibility.
 
-### Registration
-
-After registration, an email is sent to the user to verify his email address. If necessary, there is a button on the login page to resend the verification email.
-Every user after the registration process will be manually vetted before allowed to use the IntelOwl platform. The registration requests would be handled in the Django Admin page by admins.
-If you have IntelOwl deployed on an AWS instance with an IAM role you can use [SES](Advanced-Usage.html#ses) service.
-
-At the moment this feature in a production environment only works if you are using SES, there aren't other providers for sending emails.
-In a development environment the emails that would be sent are write to the standard output.
-
 ### Multi Tenancy
 Thanks to the "Organization" feature, IntelOwl can be used by multiple SOCs, companies, etc...very easily.
 Right now it works very simply: only users in the same organization can see analysis of one another. An user can belong to an organization only.
@@ -67,7 +58,6 @@ Once you create an organization, you are the unique Administrator of that organi
 #### Accept Invites
 Once an invite has sent, the invited user has to login, go to the "Organization" section and accept the invite there. Afterwards the Administrator will be able to see the user in his "Organization" section.
 
-
 #### Plugins Params and Secrets
 From IntelOwl v4.1.0, Plugin Parameters and Secrets can be defined at the organization level, in the dedicated section.
 This allows to share configurations between users of the same org while allowing complete multi-tenancy of the application.
@@ -75,6 +65,25 @@ This allows to share configurations between users of the same org while allowing
 #### Disable Analyzers at Org level
 From IntelOwl v4.1.0, the org admin can disable specific analyzers for all the users in a specific org.
 To do that, org admins needs to go in the "Plugins" section and click the button "Enabled for organization" of the analyzer that they want to disable.
+
+### Registration
+Since IntelOwl v4.2.0 we added a Registration Page that can be used to manage Registration requests when providing IntelOwl as a Service.
+
+After an user registration, an email is sent to the user to verify their email address. If necessary, there is a button on the login page to resend the verification email.
+
+Once the user has verified their email, they would be manually vetted before being allowed to use the IntelOwl platform. The registration requests would be handled in the Django Admin page by admins.
+If you have IntelOwl deployed on an AWS instance with an IAM role you can use the [SES](/Advanced-Usage.md#ses) service.
+
+At the moment this feature in a production environment works only if you are using SES: there aren't other providers for sending emails.
+In a development environment the emails that would be sent are written to the standard output.
+
+#### Recaptcha configuration
+The Registration Page contains a Recaptcha form from Google. By default, that Recaptcha is not configured and is not shown.
+
+If your intention is to publish IntelOwl as a Service you should first remember to comply to the [AGPL License](https://github.com/intelowlproject/IntelOwl/blob/master/LICENSE), then you should configure the Recaptcha Key for your site and add that value in the `RECAPTCHA_SITEKEY` in the `docker/env_template.js` file.
+In that case, you would need to [re-build](/Installation.md#update-and-rebuild) the application to have the changes properly reflected.
+
+
 
 ## TLP Support
 

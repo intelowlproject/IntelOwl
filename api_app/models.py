@@ -63,6 +63,15 @@ class Tag(models.Model):
         return f'Tag(label="{self.label}")'
 
 
+class ObservableClassification(models.TextChoices):
+    IP = "ip"
+    URL = "url"
+    DOMAIN = "domain"
+    HASH = "hash"
+    GENERIC = "generic"
+    EMPTY = ""
+
+
 class Job(models.Model):
     class Meta:
         indexes = [
@@ -86,7 +95,9 @@ class Job(models.Model):
     is_sample = models.BooleanField(blank=False, default=False)
     md5 = models.CharField(max_length=32, blank=False)
     observable_name = models.CharField(max_length=512, blank=True)
-    observable_classification = models.CharField(max_length=12, blank=True)
+    observable_classification = models.CharField(
+        max_length=12, blank=True, choices=ObservableClassification.choices
+    )
     file_name = models.CharField(max_length=512, blank=True)
     file_mimetype = models.CharField(max_length=80, blank=True)
     status = models.CharField(

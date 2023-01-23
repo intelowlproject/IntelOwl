@@ -43,9 +43,6 @@ class ConnectorConfigTestCase(CustomTestCase):
         serializer = self.serializer_class(data=data, many=True)
         serializer.is_valid(raise_exception=True)
 
-        serialized_data = serializer.validated_data
-        [data.pop("runtime_configuration", {}) for data in serialized_data]
-
         test_jobs = serializer.save(
             user=self.superuser,
         )
@@ -71,11 +68,10 @@ class ConnectorConfigTestCase(CustomTestCase):
             print(f"attribute: {config.attribute}, value: {config.value}")
 
         for job in test_jobs:
-            cleaned_result = ConnectorConfig.stack_connectors(
+            cleaned_result = ConnectorConfig.stack(
                 job_id=job.pk,
-                connectors_to_execute=job.connectors_to_execute,
+                plugins_to_execute=job.connectors_to_execute,
                 runtime_configuration={},
-                parent_playbook="",
             )
 
             connectors_ran = cleaned_result[1]

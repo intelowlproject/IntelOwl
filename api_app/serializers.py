@@ -47,6 +47,8 @@ __all__ = [
     "MultipleObservableAnalysisSerializer",
     "multi_result_enveloper",
     "PluginConfigSerializer",
+    "PlaybookFileAnalysisSerializer",
+    "PlaybookObservableAnalysisSerializer",
 ]
 
 
@@ -272,6 +274,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         # create ``Tag`` objects from tags_labels
         tags_labels = validated_data.pop("tags_labels", None)
         validated_data.pop("warnings")
+        validated_data.pop("runtime_configuration")
         tags = [
             Tag.objects.get_or_create(
                 label=label, defaults={"color": gen_random_colorhex()}
@@ -453,7 +456,7 @@ class FileAnalysisSerializer(_AbstractJobCreateSerializer):
                             f"{a_name} won't be run because does not support files."
                         )
                     if not config.is_filetype_supported(
-                        serialized_data["file_mimetype"]
+                        serialized_data["file_mimetype"], serialized_data["file_name"]
                     ):
                         raise NotRunnableAnalyzer(
                             f"{a_name} won't be run because mimetype "
@@ -627,7 +630,6 @@ class PlaybookBaseSerializer:
     def filter_playbooks(self, attrs: Dict) -> Tuple[List]:
         # init empty list
         valid_playbook_list = []
-        selected_playbooks = []
         analyzers_to_be_run = []
         connectors_to_be_run = []
         warnings = []
@@ -778,10 +780,7 @@ class AnalysisResponseSerializer(rfs.Serializer):
     warnings = rfs.ListField(required=False)
     analyzers_running = rfs.ListField()
     connectors_running = rfs.ListField()
-
-
-class PlaybookAnalysisResponseSerializer(AnalysisResponseSerializer):
-    playbooks_running = rfs.ListField()
+    playbooks_running = rfs.ListField(required=False)
 
 
 def multi_result_enveloper(serializer_class, many):
@@ -817,7 +816,7 @@ class PluginConfigSerializer(rfs.ModelSerializer):
         queryset=Organization.objects.all(),
         required=False,
     )
-
+    owner = rfs.HiddenField(default=rfs.CurrentUserDefault())
     value = CustomJSONField()
 
     class Meta:
@@ -829,15 +828,18 @@ class PluginConfigSerializer(rfs.ModelSerializer):
 
         # check if owner is admin of organization
         if attrs.get("organization", None):
+            # here the owner can't be retrieved by the field
+            # because the HiddenField will always return None
+            owner = self.context["request"].user
             # check if the user is owner of the organization
             membership = Membership.objects.filter(
-                user=attrs.get("owner"),
+                user=owner,
                 organization=attrs.get("organization"),
                 is_owner=True,
             )
             if not membership.exists():
                 logger.warning(
-                    f"User {attrs.get('owner')} is not owner of "
+                    f"User {owner} is not owner of "
                     f"organization {attrs.get('organization')}."
                 )
                 raise PermissionDenied("User is not owner of the organization.")

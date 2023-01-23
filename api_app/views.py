@@ -21,7 +21,6 @@ from rest_framework.exceptions import (
     PermissionDenied,
     ValidationError,
 )
-from rest_framework.request import Request
 from rest_framework.response import Response
 
 from api_app.serializers import (
@@ -34,13 +33,19 @@ from certego_saas.ext.helpers import cache_action_response, parse_humanized_rang
 from certego_saas.ext.mixins import SerializerActionMixin
 from certego_saas.ext.viewsets import ReadAndDeleteOnlyViewSet
 from intel_owl.celery import app as celery_app
-from intel_owl.consts import ObservableClassification
 
-from .analyzers_manager import controller as analyzers_controller
 from .analyzers_manager.constants import ObservableTypes
 from .filters import JobFilter
 from .helpers import get_now
-from .models import TLP, Job, OrganizationPluginState, PluginConfig, Status, Tag
+from .models import (
+    TLP,
+    Job,
+    ObservableClassification,
+    OrganizationPluginState,
+    PluginConfig,
+    Status,
+    Tag,
+)
 from .serializers import (
     AnalysisResponseSerializer,
     FileAnalysisSerializer,
@@ -48,7 +53,6 @@ from .serializers import (
     JobListSerializer,
     JobSerializer,
     ObservableAnalysisSerializer,
-    PlaybookAnalysisResponseSerializer,
     PluginConfigSerializer,
     TagSerializer,
     multi_result_enveloper,
@@ -66,7 +70,6 @@ def _multi_analysis_request(
         Type[PlaybookObservableAnalysisSerializer],
         Type[PlaybookFileAnalysisSerializer],
     ],
-    playbook_scan=False,
 ):
     """
     Prepare and send multiple observables for analysis
@@ -91,7 +94,7 @@ def _multi_analysis_request(
 
     serialized_data = serializer.validated_data
     runtime_configurations = [
-        data.pop("runtime_configuration", {}) for data in serialized_data
+        data.get("runtime_configuration", {}) for data in serialized_data
     ]
 
     # save the arrived data plus new params into a new job object
@@ -105,54 +108,16 @@ def _multi_analysis_request(
     if settings.STAGE_CI and not settings.FORCE_SCHEDULE_JOBS:
         logger.info("skipping analysis start cause we are in CI")
     else:
-        # fire celery task
-        for index, job in enumerate(jobs):
-            # second critical change
-            runtime_configuration = {}
-
-            for analyzer in job.analyzers_to_execute:
-                # Appending custom config to runtime configuration
-                config = PluginConfig.get_as_dict(
-                    user,
-                    PluginConfig.PluginType.ANALYZER,
-                    PluginConfig.ConfigType.PARAMETER,
-                    plugin_name=analyzer,
-                ).get(analyzer, {})
-                if analyzer in runtime_configurations[index]:
-                    config |= runtime_configurations[index][analyzer]
-                if config:
-                    runtime_configuration[analyzer] = config
-            for connector in job.connectors_to_execute:
-                config = PluginConfig.get_as_dict(
-                    user,
-                    PluginConfig.PluginType.CONNECTOR,
-                    PluginConfig.ConfigType.PARAMETER,
-                    plugin_name=connector,
-                ).get(connector, {})
-                if connector in runtime_configurations[index]:
-                    config |= runtime_configurations[index][connector]
-                if config:
-                    runtime_configuration[connector] = config
-            logger.debug(f"New value of runtime_configuration: {runtime_configuration}")
-
-            if playbook_scan:
-                celery_app.send_task(
-                    "start_playbooks",
-                    kwargs=dict(
-                        job_id=job.pk,
-                        runtime_configuration=runtime_configuration,
-                    ),
-                )
-
-            else:
-                celery_app.send_task(
-                    "start_analyzers",
-                    kwargs=dict(
-                        job_id=job.pk,
-                        analyzers_to_execute=job.analyzers_to_execute,
-                        runtime_configuration=runtime_configuration,
-                    ),
-                )
+        for runtime_configuration, job in zip(runtime_configurations, jobs):
+            job: Job
+            # fire celery task
+            celery_app.send_task(
+                "job_pipeline",
+                kwargs={
+                    "job_id": job.pk,
+                    "runtime_configuration": runtime_configuration,
+                },
+            )
 
     data_ = [
         {
@@ -161,25 +126,15 @@ def _multi_analysis_request(
             "warnings": serialized_data[index]["warnings"],
             "analyzers_running": job.analyzers_to_execute,
             "connectors_running": job.connectors_to_execute,
+            "playbook_running": job.playbooks_to_execute,
         }
         for index, job in enumerate(jobs)
     ]
 
-    if playbook_scan:
-        [
-            data_[index].update({"playbooks_running": job.playbooks_to_execute})
-            for index, job in enumerate(jobs)
-        ]
-        ser = PlaybookAnalysisResponseSerializer(
-            data=data_,
-            many=True,
-        )
-
-    else:
-        ser = AnalysisResponseSerializer(
-            data=data_,
-            many=True,
-        )
+    ser = AnalysisResponseSerializer(
+        data=data_,
+        many=True,
+    )
 
     ser.is_valid(raise_exception=True)
 
@@ -477,7 +432,7 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
         "retrieve": JobSerializer,
         "list": JobListSerializer,
     }
-    filter_class = JobFilter
+    filterset_class = JobFilter
     ordering_fields = [
         "received_request_time",
         "finished_analysis_time",
@@ -496,8 +451,11 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
         - jobs with TLP = AMBER or RED and
         created by a member of their organization.
         """
-        queryset = super().get_queryset()
         user = self.request.user
+        query_params = self.request.query_params
+        logger.info(f"user: {user} request the jobs with params: {query_params}")
+        queryset = super().get_queryset()
+
         if user.has_membership():
             user_query = Q(user=user) | Q(
                 user__membership__organization_id=user.membership.organization_id
@@ -508,6 +466,7 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
             Q(tlp__in=[TLP.AMBER, TLP.RED]) & (user_query)
         )
         queryset = queryset.filter(query)
+        logger.info(f"user: {user} the jobs with params: {query_params} answered")
         return queryset
 
     @add_docs(
@@ -526,10 +485,7 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
         if job.status != "running":
             raise ValidationError({"detail": "Job is not running"})
         # close celery tasks and mark reports as killed
-        analyzers_controller.kill_ongoing_analysis(job)
-        # set job status
-        job.update_status("killed")
-
+        job.kill_if_ongoing()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @add_docs(
@@ -751,20 +707,6 @@ class PluginConfigViewSet(viewsets.ModelViewSet):
         )
 
         return result.order_by("id")
-
-    def create(self, request: Request, *args, **kwargs):
-        if isinstance(request.data, QueryDict):
-            # Making QueryDict mutable to pass owner into the serializer
-            request._full_data = request.data.copy()
-        request.data["owner"] = request.user.id
-        return super().create(request, *args, **kwargs)
-
-    def update(self, request: Request, *args, **kwargs):
-        if isinstance(request.data, QueryDict):
-            # Making QueryDict mutable to pass owner into the serializer
-            request._full_data = request.data.copy()
-        request.data["owner"] = request.user.id
-        return super().update(request, *args, **kwargs)
 
 
 @add_docs(

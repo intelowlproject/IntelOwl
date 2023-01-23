@@ -250,6 +250,7 @@ export default function ScanForm() {
     () =>
       playbooksGrouped[classification]
         .map((v) => ({
+          isDisabled: !v.verification.configured || v.disabled,
           value: v.name,
           label: (
             <div className="d-flex justify-content-start align-items-start flex-column">

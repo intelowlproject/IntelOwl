@@ -1387,10 +1387,7 @@
     "observable_supported": ["generic"],
     "config": {
       "soft_time_limit": 100,
-      "queue": "long",
-      "truncate_response": true,
-      "include_unverified": true,
-      "domain": null
+      "queue": "default"
     },
     "secrets": {
       "api_key_name": {
@@ -1400,6 +1397,11 @@
         "default": null,
         "description": "API Key for HaveIBeenPwned",
       }
+    },
+    "params": {
+      "truncate_response": true,
+      "include_unverified": false,
+      "domain": null
     }
   },
   "HoneyDB": {

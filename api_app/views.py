@@ -33,12 +33,19 @@ from certego_saas.ext.helpers import cache_action_response, parse_humanized_rang
 from certego_saas.ext.mixins import SerializerActionMixin
 from certego_saas.ext.viewsets import ReadAndDeleteOnlyViewSet
 from intel_owl.celery import app as celery_app
-from intel_owl.consts import ObservableClassification
 
 from .analyzers_manager.constants import ObservableTypes
 from .filters import JobFilter
 from .helpers import get_now
-from .models import TLP, Job, OrganizationPluginState, PluginConfig, Status, Tag
+from .models import (
+    TLP,
+    Job,
+    ObservableClassification,
+    OrganizationPluginState,
+    PluginConfig,
+    Status,
+    Tag,
+)
 from .serializers import (
     AnalysisResponseSerializer,
     FileAnalysisSerializer,

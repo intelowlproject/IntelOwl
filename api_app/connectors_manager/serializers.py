@@ -1,6 +1,6 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
-
+from django.conf import settings
 from django.utils.module_loading import import_string
 from rest_framework import serializers as rfs
 
@@ -23,7 +23,7 @@ class ConnectorConfigSerializer(AbstractConfigSerializer):
         return PluginConfig.PluginType.CONNECTOR
 
     def validate_python_module(self, python_module: str) -> str:
-        clspath = f"api_app.connectors_manager.connectors.{python_module}"
+        clspath = f"{settings.BASE_CONNECTOR_PYTHON_PATH}.{python_module}"
         try:
             import_string(clspath)
         except ImportError as exc:

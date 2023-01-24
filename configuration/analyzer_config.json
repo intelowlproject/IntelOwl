@@ -11,7 +11,8 @@
       "application/zip",
       "application/java-archive",
       "application/vnd.android.package-archive",
-      "application/x-dex"
+      "application/x-dex",
+      "android_only"
     ],
     "config": {
       "soft_time_limit": 400,
@@ -261,6 +262,40 @@
     },
     "secrets": {},
     "params": {}
+  },
+  "CheckPhish": {
+    "type": "observable",
+    "python_module": "checkphish.CheckPhish",
+    "description": "[CheckPhish](https://checkphish.ai/checkphish-api/) can detect phishing and fraudulent sites",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": true,
+    "observable_supported": ["url"],
+    "config": {
+      "soft_time_limit": 100,
+      "queue": "long"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "CHECKPHISH_KEY",
+        "type": "string",
+        "required": true,
+        "default": null,
+        "description": "API Key for the analyzer"
+      }
+    },
+    "params": {
+      "polling_tries": {
+        "value": 10,
+        "type": "int",
+        "description": "How many times we poll the CheckPhish API for scan results"
+      },
+      "polling_time": {
+        "value": 0.5,
+        "type": "float",
+        "description": "IntelOwl would sleep for this time between each poll to CheckPhish APIs"
+      }
+    }
   },
   "CIRCLPassiveDNS": {
     "type": "observable",
@@ -2148,7 +2183,7 @@
     "leaks_info": false,
     "run_hash": true,
     "config": {
-      "soft_time_limit": 40,
+      "soft_time_limit": 60,
       "queue": "default"
     },
     "secrets": {
@@ -2516,7 +2551,8 @@
       "application/zip",
       "application/java-archive",
       "application/vnd.android.package-archive",
-      "application/x-dex"
+      "application/x-dex",
+      "android_only"
     ],
     "config": {
       "soft_time_limit": 120,
@@ -2825,7 +2861,7 @@
   "Signature_Info": {
     "type": "file",
     "python_module": "signature_info.SignatureInfo",
-    "description": "PE signature extractor",
+    "description": "PE signature extractor with [osslsigncode](https://github.com/mtrojnar/osslsigncode)",
     "disabled": false,
     "external_service": false,
     "leaks_info": false,
@@ -4080,7 +4116,7 @@
     "external_service": false,
     "leaks_info": false,
     "config": {
-      "soft_time_limit": 60,
+      "soft_time_limit": 120,
       "queue": "local"
     },
     "secrets": {},
@@ -4385,7 +4421,7 @@
   "Yara_Scan_YARAify": {
     "type": "file",
     "python_module": "yara_scan.YaraScan",
-    "description": "Scan a file with yara rules.",
+    "description": "Scan a file with yara rules downloaded from [YARAify](https://yaraify.abuse.ch/)",
     "disabled": false,
     "external_service": false,
     "leaks_info": false,
@@ -4414,13 +4450,13 @@
   "YARAify_File_Scan": {
     "type": "file",
     "python_module": "yaraify_file_scan.YARAifyFileScan",
-    "description": "scan a file against public and non-public YARA and ClamAV signatures",
+    "description": "scan a file against public and non-public YARA and ClamAV signatures in YARAify service",
     "disabled": false,
     "external_service": true,
-    "leaks_info": false,
+    "leaks_info": true,
     "supported_filetypes": [],
     "config": {
-      "soft_time_limit": 180,
+      "soft_time_limit": 500,
       "queue": "long"
     },
     "secrets": {
@@ -4436,20 +4472,35 @@
       }
     },
     "params": {
+      "send_file": {
+        "value": true,
+        "type": "bool",
+        "description": "Defines whether the file should be sent for analysis or not (in the latter case hash only check would be done)"
+      },
       "clamav_scan": {
-        "value": 1,
-        "type": "int",
-        "description": "Defines whether to scan the file with ClamAV. Possible values: 0 or 1."
+        "value": true,
+        "type": "bool",
+        "description": "Defines whether to scan the file with ClamAV."
       },
       "unpack": {
-        "value": 0,
-        "type": "int",
-        "description": "Defines whether to unpack the file. Possible values: 0 or 1."
+        "value": false,
+        "type": "bool",
+        "description": "Defines whether to unpack the file."
       },
       "share_file": {
-        "value": 0,
-        "type": "int",
-        "description": "Defines whether the file is public and may be shared with 3rd parties. Possible values: 0 or 1."
+        "value": false,
+        "type": "bool",
+        "description": "Defines whether the file is public and may be shared with 3rd parties."
+      },
+      "skip_noisy": {
+        "value": true,
+        "type": "bool",
+        "description": "YARAify skips the file if it already has been scanned at least 10 times within the past 24 hours. It will return the latest task_id instead"
+      },
+      "skip_known": {
+        "value": false,
+        "type": "bool",
+        "description": "YARAify will not process the file if the file is already known."
       }
     }
   },
@@ -4480,6 +4531,27 @@
         "description": "Max number of results you want to display (default: 25, max: 1'000)"
       }
     }
+  },
+  "YARAify_File_Search": {
+    "type": "file",
+    "python_module": "yaraify.YARAify",
+    "description": "lookup a file hash in YARAify",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "run_hash": true,
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "MALPEDIA_TOKEN",
+        "description": "Optional key to receive results from public (TLP:WHITE) and also non-public (TLP:GREEN, TLP:AMBER and TLP:RED) YARA rules.",
+        "required": false
+      }
+    },
+    "params": {}
   },
   "YARAify_Search": {
     "type": "observable",

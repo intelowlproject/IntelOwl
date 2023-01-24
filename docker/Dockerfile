@@ -13,7 +13,7 @@ RUN npm install npm@latest --location=global \
     && PUBLIC_URL=/static/reactapp/ npm run build
 
 # Stage 2: Backend
-FROM python:3.9.16
+FROM python:3.11.1
 
 COPY --from=frontend-build /build /var/www/reactapp
 

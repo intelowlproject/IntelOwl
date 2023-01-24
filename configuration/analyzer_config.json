@@ -1395,7 +1395,7 @@
         "type": "string",
         "required": true,
         "default": null,
-        "description": "API Key for HaveIBeenPwned",
+        "description": "API Key for HaveIBeenPwned"
       }
     },
     "params": {
@@ -1410,7 +1410,7 @@
         "description": "Include unverified data breaches in the response"
       },
       "domain": {
-        "value": null,
+        "value": "",
         "type": "str",
         "description": "Search for data breaches specific to a domain"
       }

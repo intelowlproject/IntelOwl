@@ -1734,7 +1734,7 @@
   "Koodous": {
     "type": "observable", 
     "python_module": "koodous.Koodous",
-    "description": "Get information about andriod malware",
+    "description": "Get information about android malware",
     "disabled": false,
     "external_service": true,
     "leaks_info": false,

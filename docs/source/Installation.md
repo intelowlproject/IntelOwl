@@ -267,7 +267,7 @@ You may want to run `docker exec -ti intelowl_uwsgi python3 manage.py createsupe
 Then you can add other users directly from the Django Admin Interface after having logged with the superuser account.
 To manage users, organizations and their visibility please refer to this [section](/Usage.md#organizations-and-user-management)
 
-## Update and Re-build
+## Update and Rebuild
 
 ### Rebuilding the project / Creating custom docker build
 If you make some code changes and you like to rebuild the project, follow these steps:

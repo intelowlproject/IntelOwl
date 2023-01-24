@@ -19,15 +19,18 @@ This page includes details about some advanced features that Intel Owl provides 
     - [OAuth support](#google-oauth2)
     - [LDAP](#ldap)
     - [RADIUS](#radius-authentication)
-  - [Google Kubernetes Engine deployment](#google-kubernetes-engine-deployment)
   - [Queues](#queues)
     - [Multi Queue](#multi-queue)
     - [Queue Customization](#queue-customization)
     - [Queue monitoring](#queue-monitoring)
+  - [Cluster Deployments](#cluster-deployments)
+    - [Docker Swarm](#docker-swarm)
+    - [Google Kubernetes Engine deployment](#google-kubernetes-engine-deployment)
   - [AWS support](#aws-support)
     - [Secrets](#secrets)
     - [SQS](#sqs)
     - [S3](#s3)
+    - [SES](#ses)
 
 ## Optional Analyzers
 
@@ -307,13 +310,6 @@ For more details on how to configure this file, check the <a href="https://githu
 2. Once you have done that, you have to set the environment variable `RADIUS_AUTH_ENABLED` as `True` in the environment
    configuration file `env_file_app`. Finally, you can restart the application with `docker-compose up`
 
-
-## Google Kubernetes Engine deployment
-
-Refer to the following blog post for an example on how to deploy IntelOwl on Google Kubernetes Engine:
-
-[Deploying Intel-Owl on GKE](https://mostwanted002.cf/post/intel-owl-gke/) by [Mayank Malik](https://twitter.com/_mostwanted002_).
-
 ## Queues
 
 #### Multi Queue
@@ -355,9 +351,19 @@ FLOWER_PWD
 
 or change the `.htpasswd` file that is created in the `docker` directory in the `intelowl_flower` container.
 
+## Cluster deployments
+
+### Docker Swarm
+We are working on providing the configuration to execute IntelOwl in multiple machines to enable horizontally scalability via [Docker Swarm](https://docs.docker.com/engine/swarm/)
+
+### Google Kubernetes Engine deployment
+There is no official support for Kubernetes deployment but we have an active community.
+Please refer to the following blog post for an example on how to deploy IntelOwl on Google Kubernetes Engine:
+[Deploying Intel-Owl on GKE](https://mostwanted002.cf/post/intel-owl-gke/) by [Mayank Malik](https://twitter.com/_mostwanted002_).
+
 ## AWS support
 
-At the moment there's a basic support for some of the AWS services. More is coming in the future.
+At the moment there's a basic support for some of the AWS services.
 
 #### Secrets
 

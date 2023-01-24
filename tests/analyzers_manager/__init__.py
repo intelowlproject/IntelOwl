@@ -87,6 +87,10 @@ class _ObservableAnalyzersScriptsTestCase(_AbstractAnalyzersScriptTestCase):
             "max_tries": 1,
             "poll_distance": 1,
         },
+        "HaveIBeenPwned": {
+            "max_tries": 1,
+            "domain": "",
+        },
     }
 
     @classmethod

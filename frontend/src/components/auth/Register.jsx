@@ -61,7 +61,7 @@ const initialValues = JSON.parse(
   company_role: "",
   twitter_handle: "",
   discover_from: "other",
-  recaptcha: null,
+  recaptcha: "noKey",
 };
 
 const onValidate = (values) => {
@@ -107,7 +107,7 @@ const onValidate = (values) => {
         ...values,
         password: "",
         confirmPassword: "",
-        recaptcha: null,
+        recaptcha: "noKey",
       })
     );
   }
@@ -133,10 +133,11 @@ const onValidate = (values) => {
   }
 
   // recaptcha
-  if (!values.recaptcha) {
+  if (values.recaptcha === "noKey" && RECAPTCHA_SITEKEY) {
     errors.recaptcha = "Required";
   }
 
+  console.debug(errors);
   return errors;
 };
 

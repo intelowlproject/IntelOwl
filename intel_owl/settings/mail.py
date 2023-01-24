@@ -3,6 +3,7 @@ from .commons import AWS_REGION, STAGE_CI, STAGE_LOCAL
 
 DEFAULT_FROM_EMAIL = get_secret("DEFAULT_FROM_EMAIL")
 DEFAULT_EMAIL = get_secret("DEFAULT_EMAIL")
+AWS_SES = get_secret("AWS_SES", False) == "True"
 
 if STAGE_LOCAL:
     # The console backend writes the emails that would be sent to the standard output
@@ -14,8 +15,17 @@ elif STAGE_CI:
     # https://docs.djangoproject.com/en/2.1/topics/testing/tools/#topics-testing-email
     EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"
 else:
-    # Use amazon SES via django-ses
-    # see: https://github.com/django-ses/django-ses
-    EMAIL_BACKEND = "django_ses.SESBackend"
-    AWS_SES_REGION_NAME = AWS_REGION
-    AWS_SES_REGION_ENDPOINT = f"email.{AWS_SES_REGION_NAME}.amazonaws.com"
+    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+    EMAIL_HOST = get_secret("EMAIL_HOST")
+    EMAIL_HOST_USER = get_secret("EMAIL_HOST_USER")
+    EMAIL_HOST_PASSWORD = get_secret("EMAIL_HOST_PASSWORD")
+    EMAIL_PORT = get_secret("EMAIL_PORT")
+    EMAIL_USE_TLS = get_secret("EMAIL_USE_TLS", False) == "True"
+    EMAIL_USE_SSL = get_secret("EMAIL_USE_SSL", False) == "True"
+
+    if AWS_SES:
+        # Use amazon SES via django-ses
+        # see: https://github.com/django-ses/django-ses
+        EMAIL_BACKEND = "django_ses.SESBackend"
+        AWS_SES_REGION_NAME = AWS_REGION
+        AWS_SES_REGION_ENDPOINT = f"email.{AWS_SES_REGION_NAME}.amazonaws.com"

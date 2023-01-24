@@ -1702,7 +1702,7 @@
     "description": "Get information about andriod malware",
     "disabled": false,
     "external_service": true,
-    "leaks_info": true,
+    "leaks_info": false,
     "observable_supported": ["hash"], 
     "config": {
       "soft_time_limit": 100,
@@ -1714,7 +1714,7 @@
         "type": "string",
         "required": true,
         "default": null,
-        "description": "API Key for the analyzer"
+        "description": "API Key for the Koodous analyzer"
       }
     },
     "params": {}

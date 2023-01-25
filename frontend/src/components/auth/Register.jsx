@@ -1,5 +1,4 @@
 import React from "react";
-import { Link as RRLink } from "react-router-dom";
 import {
   Container,
   Row,
@@ -18,13 +17,21 @@ import useTitle from "react-use/lib/useTitle";
 import { ContentSection, Select } from "@certego/certego-ui";
 
 import { PUBLIC_URL, RECAPTCHA_SITEKEY } from "../../constants/environment";
-import { HACKER_MEME_STRING, EMAIL_REGEX } from "../../constants";
+import {
+  HACKER_MEME_STRING,
+  EMAIL_REGEX,
+  PASSWORD_REGEX,
+} from "../../constants";
 import ReCAPTCHAInput from "./utils/ReCAPTCHAInput";
 import { AfterRegistrationModalAlert, InviteOnlyAlert } from "./utils/utils";
 import { registerUser } from "./api";
 
 // constants
 const hearAboutUsChoices = [
+  {
+    label: "Other",
+    value: "other",
+  },
   {
     label: "Search Engine (Google, DuckDuckGo, etc.)",
     value: "search_engine",
@@ -41,16 +48,9 @@ const hearAboutUsChoices = [
     label: "Blog or Publication",
     value: "blog_or_publication",
   },
-  {
-    label: "Other",
-    value: "other",
-  },
 ];
 
-const REGISTRATION_FORM_STORAGE_KEY = "registrationForm";
-const initialValues = JSON.parse(
-  localStorage.getItem(REGISTRATION_FORM_STORAGE_KEY, "{}")
-) || {
+const INITIAL_VALUES = {
   first_name: "",
   last_name: "",
   email: "",
@@ -63,6 +63,13 @@ const initialValues = JSON.parse(
   discover_from: "other",
   recaptcha: "noKey",
 };
+
+const REGISTRATION_FORM_STORAGE_KEY = "registrationForm";
+const initialValues =
+  JSON.parse(localStorage.getItem(REGISTRATION_FORM_STORAGE_KEY, "{}")) ||
+  INITIAL_VALUES;
+
+console.debug(initialValues);
 
 const onValidate = (values) => {
   const errors = {};
@@ -117,6 +124,8 @@ const onValidate = (values) => {
     errors.password = "Required";
   } else if (values.password.length < 8) {
     errors.password = "Must be 8 characters or more";
+  } else if (!PASSWORD_REGEX.test(values.password)) {
+    errors.password = "Invalid password";
   }
   if (!values.confirmPassword) {
     errors.confirmPassword = "Required";
@@ -173,6 +182,13 @@ export default function Register() {
       };
       try {
         await registerUser(reqBody);
+
+        // deleted user data after successful registration
+        localStorage.removeItem(REGISTRATION_FORM_STORAGE_KEY);
+        Object.keys(INITIAL_VALUES).forEach((key) => {
+          initialValues[key] = INITIAL_VALUES[key];
+        });
+
         setShowModal(true);
       } catch (e) {
         // handled inside registerUser
@@ -230,10 +246,14 @@ export default function Register() {
                       className="form-control"
                       placeholder="Jane"
                       onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                      value={formik.values.first_name}
+                      valid={!formik.errors.first_name}
+                      invalid={
+                        formik.errors.first_name && formik.touched.first_name
+                      }
                     />
-                    {formik.errors.first_name !== "Required" ? (
-                      <div>{formik.errors.first_name}</div>
-                    ) : null}
+                    {formik.touched.first_name && formik.errors.first_name}
                   </Col>
                   <Col sm={12} md={6}>
                     <Label
@@ -248,10 +268,14 @@ export default function Register() {
                       className="form-control"
                       placeholder="Doe"
                       onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                      value={formik.values.last_name}
+                      valid={!formik.errors.last_name}
+                      invalid={
+                        formik.errors.last_name && formik.touched.last_name
+                      }
                     />
-                    {formik.errors.last_name !== "Required" ? (
-                      <div>{formik.errors.last_name}</div>
-                    ) : null}
+                    {formik.touched.last_name && formik.errors.last_name}
                   </Col>
                 </FormGroup>
                 {/* Email/Username */}
@@ -269,10 +293,12 @@ export default function Register() {
                       className="form-control"
                       placeholder="jane@example.com"
                       onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                      value={formik.values.email}
+                      valid={!formik.errors.email}
+                      invalid={formik.errors.email && formik.touched.email}
                     />
-                    {formik.errors.email !== "Required" ? (
-                      <div>{formik.errors.email}</div>
-                    ) : null}
+                    {formik.touched.email && formik.errors.email}
                   </Col>
                   <Col sm={12} md={6}>
                     <Label
@@ -288,10 +314,14 @@ export default function Register() {
                       placeholder="janedoe"
                       autoComplete="username"
                       onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                      value={formik.values.username}
+                      valid={!formik.errors.username}
+                      invalid={
+                        formik.errors.username && formik.touched.username
+                      }
                     />
-                    {formik.errors.username !== "Required" ? (
-                      <div>{formik.errors.username}</div>
-                    ) : null}
+                    {formik.touched.username && formik.errors.username}
                   </Col>
                 </FormGroup>
                 {/* Password */}
@@ -309,12 +339,14 @@ export default function Register() {
                       className="form-control"
                       placeholder="Create a strong password..."
                       autoComplete="new-password"
-                      valid={!formik.errors.password}
                       onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                      valid={!formik.errors.password}
+                      invalid={
+                        formik.errors.password && formik.touched.password
+                      }
                     />
-                    {formik.errors.password !== "Required" ? (
-                      <div>{formik.errors.password}</div>
-                    ) : null}
+                    {formik.touched.password && formik.errors.password}
                   </Col>
                   <Col sm={12} md={6}>
                     <Label
@@ -329,22 +361,41 @@ export default function Register() {
                       className="form-control"
                       placeholder="Re-enter password"
                       autoComplete="new-password"
-                      valid={!formik.errors.confirmPassword}
                       onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                      valid={!formik.errors.confirmPassword}
+                      invalid={
+                        formik.errors.confirmPassword &&
+                        formik.touched.confirmPassword
+                      }
                     />
-                    {formik.errors.confirmPassword !== "Required" ? (
-                      <div>{formik.errors.confirmPassword}</div>
-                    ) : null}
+                    {formik.touched.confirmPassword &&
+                      formik.errors.confirmPassword}
                   </Col>
                 </FormGroup>
-                <FormGroup check>
-                  <Input
-                    id="RegisterForm__showPassword"
-                    type="checkbox"
-                    defaultChecked={passwordShown}
-                    onChange={() => setPasswordShown(!passwordShown)}
-                  />
-                  <Label check>Show password</Label>
+                <FormGroup row>
+                  <Col sm={12} md={6}>
+                    <small>
+                      <ul>
+                        <li>8-16 characters</li>
+                        <li>At least 1 lowercase letter</li>
+                        <li>At least 1 uppercase letter</li>
+                        <li>At least 1 digit</li>
+                        <li>No special characters</li>
+                      </ul>
+                    </small>
+                  </Col>
+                  <Col sm={12} md={6}>
+                    <FormGroup check>
+                      <Input
+                        id="RegisterForm__showPassword"
+                        type="checkbox"
+                        defaultChecked={passwordShown}
+                        onChange={() => setPasswordShown(!passwordShown)}
+                      />
+                      <Label check>Show password</Label>
+                    </FormGroup>
+                  </Col>
                 </FormGroup>
                 <Col sm={12} md={12} className="text-center standout alert">
                   We ask you to provide the following information to better
@@ -365,10 +416,15 @@ export default function Register() {
                       className="form-control"
                       placeholder="E Corp"
                       onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                      value={formik.values.company_name}
+                      valid={!formik.errors.company_name}
+                      invalid={
+                        formik.errors.company_name &&
+                        formik.touched.company_name
+                      }
                     />
-                    {formik.errors.company_name !== "Required" ? (
-                      <div>{formik.errors.company_name}</div>
-                    ) : null}
+                    {formik.touched.company_name && formik.errors.company_name}
                   </Col>
                   <Col sm={12} md={6}>
                     <Label
@@ -383,10 +439,15 @@ export default function Register() {
                       className="form-control"
                       placeholder="Researcher"
                       onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                      value={formik.values.company_role}
+                      valid={!formik.errors.company_role}
+                      invalid={
+                        formik.errors.company_role &&
+                        formik.touched.company_role
+                      }
                     />
-                    {formik.errors.company_role !== "Required" ? (
-                      <div>{formik.errors.company_role}</div>
-                    ) : null}
+                    {formik.touched.company_role && formik.errors.company_role}
                   </Col>
                 </FormGroup>
                 <FormGroup row>
@@ -405,6 +466,12 @@ export default function Register() {
                         className="form-control"
                         placeholder="intelowl"
                         onChange={formik.handleChange}
+                        onBlur={formik.handleBlur}
+                        value={formik.values.twitter_handle}
+                        valid={
+                          !formik.errors.twitter_handle &&
+                          formik.touched.twitter_handle
+                        }
                       />
                     </InputGroup>
                   </Col>
@@ -419,6 +486,12 @@ export default function Register() {
                       name="discover_from"
                       choices={hearAboutUsChoices}
                       onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                      value={formik.values.discover_from}
+                      valid={
+                        !formik.errors.discover_from &&
+                        formik.touched.discover_from
+                      }
                     />
                   </Col>
                 </FormGroup>

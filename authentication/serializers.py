@@ -1,9 +1,11 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 import logging
+import re
 
 import rest_email_auth.serializers
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.db import DatabaseError, transaction
 from rest_framework import serializers as rfs
 from slack_sdk.errors import SlackApiError
@@ -15,6 +17,7 @@ from certego_saas.apps.user.serializers import (
 from certego_saas.ext.upload import Slack
 from certego_saas.models import User
 from certego_saas.settings import certego_apps_settings
+from intel_owl.consts import REGEX_PASSWORD
 
 from .models import UserProfile
 
@@ -107,6 +110,14 @@ class RegistrationSerializer(rest_email_auth.serializers.RegistrationSerializer)
         self._profile_serializer = UserProfileSerializer(data=profile)
         self._profile_serializer.is_valid(raise_exception=True)
         return profile
+
+    def validate_password(self, password):
+        super().validate_password(password)
+
+        if re.match(REGEX_PASSWORD, password):
+            return password
+        else:
+            raise ValidationError("Invalid password")
 
     def create(self, validated_data):
         validated_data.pop("profile", None)

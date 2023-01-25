@@ -89,7 +89,7 @@ class _ObservableAnalyzersScriptsTestCase(_AbstractAnalyzersScriptTestCase):
         },
         "HaveIBeenPwned": {
             "max_tries": 1,
-            "domain": "example@example.com"
+            "domain": "test@test.com",
         },
     }
 

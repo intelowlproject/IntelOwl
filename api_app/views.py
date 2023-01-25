@@ -21,7 +21,6 @@ from rest_framework.exceptions import (
     PermissionDenied,
     ValidationError,
 )
-from rest_framework.request import Request
 from rest_framework.response import Response
 
 from api_app.serializers import (
@@ -34,12 +33,19 @@ from certego_saas.ext.helpers import cache_action_response, parse_humanized_rang
 from certego_saas.ext.mixins import SerializerActionMixin
 from certego_saas.ext.viewsets import ReadAndDeleteOnlyViewSet
 from intel_owl.celery import app as celery_app
-from intel_owl.consts import ObservableClassification
 
 from .analyzers_manager.constants import ObservableTypes
 from .filters import JobFilter
 from .helpers import get_now
-from .models import TLP, Job, OrganizationPluginState, PluginConfig, Status, Tag
+from .models import (
+    TLP,
+    Job,
+    ObservableClassification,
+    OrganizationPluginState,
+    PluginConfig,
+    Status,
+    Tag,
+)
 from .serializers import (
     AnalysisResponseSerializer,
     FileAnalysisSerializer,
@@ -701,20 +707,6 @@ class PluginConfigViewSet(viewsets.ModelViewSet):
         )
 
         return result.order_by("id")
-
-    def create(self, request: Request, *args, **kwargs):
-        if isinstance(request.data, QueryDict):
-            # Making QueryDict mutable to pass owner into the serializer
-            request._full_data = request.data.copy()
-        request.data["owner"] = request.user.id
-        return super().create(request, *args, **kwargs)
-
-    def update(self, request: Request, *args, **kwargs):
-        if isinstance(request.data, QueryDict):
-            # Making QueryDict mutable to pass owner into the serializer
-            request._full_data = request.data.copy()
-        request.data["owner"] = request.user.id
-        return super().update(request, *args, **kwargs)
 
 
 @add_docs(

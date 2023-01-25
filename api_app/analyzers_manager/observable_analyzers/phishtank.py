@@ -18,7 +18,6 @@ class Phishtank(ObservableAnalyzer):
         self.__api_key = self._secrets["api_key_name"]
 
     def run(self):
-        result = {}
         headers = {"User-Agent": "phishtank/IntelOwl"}
         data = {
             "url": base64.b64encode(self.observable_name.encode("utf-8")),

@@ -197,10 +197,9 @@ class AbstractConfig:
     @classmethod
     def is_disabled(cls, class_name: str) -> bool:
         all_analyzer_config = cls.all()
-        for name, ac in all_analyzer_config.items():
-            if ac.python_module.endswith(f".{class_name}"):
-                if not ac.disabled:
-                    return False
+        for ac in all_analyzer_config.values():
+            if ac.python_module.endswith(f".{class_name}") and not ac.disabled:
+                return False
         return True
 
     @classmethod
@@ -286,6 +285,7 @@ class AbstractConfig:
                     queue=queue,
                     soft_time_limit=soft_time_limit,
                     task_id=task_id,
+                    immutable=True
                 )
             )
             plugins_used.append(plugin_name)

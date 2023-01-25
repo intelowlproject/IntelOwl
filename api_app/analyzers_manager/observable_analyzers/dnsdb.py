@@ -195,7 +195,7 @@ class DNSdb(classes.ObservableAnalyzer):
                 observable_to_check = "*." + observable_to_check
             elif self._query_type == "rdata-wildcard-right":
                 endpoint = "rdata/name"
-                observable_to_check += observable_to_check + ".*"
+                observable_to_check += ".*"
             else:
                 raise AnalyzerRunException(f"{self._query_type} not supported")
         else:

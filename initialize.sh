@@ -73,7 +73,7 @@ else
 fi
 
 # Check if docker-compose is installed
-if ! [ -x "$(command -v docker compose)" ] || ! [ -x "$(command -v docker-compose)"]; then
+if ! [ -x "$(command -v docker compose)" ] || ! [ -x "$(command -v docker-compose)" ]; then
   echo 'Error: docker-compose is not installed.' >&2
   # Ask if user wants to install docker-compose
   read -p "Do you want to install docker-compose? [y/n] " -n 1 -r

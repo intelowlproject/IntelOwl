@@ -71,9 +71,8 @@ else
     echo "Docker version $docker_version detected"
   fi
 fi
-
 # Check if docker-compose is installed
-if ! [ -x "$(command -v docker-compose)" ]; then
+if ! [ -x "$(find /usr | grep "docker-compose$")" ]; then
   echo 'Error: docker-compose is not installed.' >&2
   # Ask if user wants to install docker-compose
   read -p "Do you want to install docker-compose? [y/n] " -n 1 -r
@@ -92,7 +91,7 @@ if ! [ -x "$(command -v docker-compose)" ]; then
     exit 1
   fi
 else
-  IFS=',' read -ra temp <<< "$(docker-compose --version)"
+  IFS=',' read -ra temp <<< "$(docker compose version | cut -d 'v' -f3)"
   docker_compose_version=$(echo "${temp[0]}"| awk '{print $NF}')
 
   if [[ $(semantic_version_comp "$docker_compose_version" "$MINIMUM_DOCKER_COMPOSE_VERSION") == "lessThan" ]]; then
@@ -126,7 +125,7 @@ else
 fi
 
 echo "Installing python dependencies using pip..."
-pip3 install -r requirements/pre-requirements.txt
+pip3 install --user -r requirements/pre-requirements.txt
 
 echo "Looks like you're ready to go!"
 echo "Now you can start IntelOwl by running the start.py file (eg: \`python3 start.py prod up\` for production environment)"

@@ -73,7 +73,8 @@ else
 fi
 
 # Check if docker-compose is installed
-if ! [ -x "$(command -v docker compose)" ] || ! [ -x "$(command -v docker-compose)" ]; then
+docker --help | grep -q "compose"; x=$?; 
+if  [ $x -ne 0 ] && ! [ -x "$(command -v docker-compose)" ]; then
   echo 'Error: docker-compose is not installed.' >&2
   # Ask if user wants to install docker-compose
   read -p "Do you want to install docker-compose? [y/n] " -n 1 -r
@@ -92,7 +93,7 @@ if ! [ -x "$(command -v docker compose)" ] || ! [ -x "$(command -v docker-compos
     exit 1
   fi
 else
-    if  [ "$(command -v docker compose)" ]; then
+     if  [ $x -eq 0 ]; then
          docker_compose_version="$(docker compose version | cut -d 'v' -f3)"
     else
         IFS=',' read -ra temp <<< "$(docker-compose --version)"

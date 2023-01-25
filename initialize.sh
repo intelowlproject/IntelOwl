@@ -93,7 +93,7 @@ if ! [ -x "$(command -v docker compose)" ] || ! [ -x "$(command -v docker-compos
   fi
 else
     if  [ "$(command -v docker compose)" ]; then
-         docker_compose_version=$(echo "$(docker compose version | cut -d 'v' -f3)")
+         docker_compose_version="$(docker compose version | cut -d 'v' -f3)"
     else
         IFS=',' read -ra temp <<< "$(docker-compose --version)"
         docker_compose_version=$(echo "${temp[0]}"| awk '{print $NF}')

@@ -16,29 +16,16 @@ class Koodous(classes.ObservableAnalyzer):
         self.query_analysis = params.get("query_analysis", "")
 
     def run(self):
-        if self.query_analysis is None:
-            try:
-                response = requests.request(
-                    "GET",
-                    self.base_url + self.observable_name,
-                    headers={"Authorization": f"Token {self.__api_key}"},
-                    data={},
-                )
-                response.raise_for_status()
-            except requests.RequestException as e:
-                raise AnalyzerRunException(e)
-
-        if self.query_analysis is not None:
-            try:
-                response = requests.request(
-                    "GET",
-                    self.base_url + self.observable_name + "/" + self.query_analysis,
-                    headers={"Authorization": f"Token {self.__api_key}"},
-                    data={},
-                )
-                response.raise_for_status()
-            except requests.RequestException as e:
-                raise AnalyzerRunException(e)
+        try:
+            response = requests.request(
+                "GET",
+                self.base_url + self.observable_name + "/" + self.query_analysis,
+                headers={"Authorization": f"Token {self.__api_key}"},
+                data={},
+            )
+            response.raise_for_status()
+        except requests.RequestException as e:
+            raise AnalyzerRunException(e)
 
         return response.json()
 

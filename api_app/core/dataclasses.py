@@ -285,7 +285,7 @@ class AbstractConfig:
                     queue=queue,
                     soft_time_limit=soft_time_limit,
                     task_id=task_id,
-                    immutable=True
+                    immutable=True,
                 )
             )
             plugins_used.append(plugin_name)

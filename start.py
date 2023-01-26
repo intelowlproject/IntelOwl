@@ -223,22 +223,29 @@ def start():
         "docker",
     ]
     
-    #for docker compose v2
-    temp = subprocess.Popen(['docker', '--help'], stdout = subprocess.PIPE)
-    output = str(temp.communicate())
-    if "compose" in output:base_command=["docker","compose"]+base_command[1:]
 
     for compose_file in compose_files:
         base_command.append("-f")
         base_command.append(compose_file)
     # we use try/catch to mimick docker-compose's behaviour of handling CTRL+C event
     try:
-        command = base_command + [args.docker_command] + unknown
-        env = os.environ.copy()
-        env["DOCKER_BUILDKIT"] = "1"
-        if args.debug_build:
-            env["BUILDKIT_PROGRESS"] = "plain"
-        subprocess.run(command, env=env)
+         try:
+                command = base_command + [args.docker_command] + unknown
+                env = os.environ.copy()
+                env["DOCKER_BUILDKIT"] = "1"
+                if args.debug_build:
+                        env["BUILDKIT_PROGRESS"] = "plain"
+                subprocess.run(command, env=env, check=True)
+        #for docker compose v2
+        except OSError :
+                command = ["docker","compose"] + base_command[1:] + [args.docker_command] + unknown
+                env = os.environ.copy()
+                env["DOCKER_BUILDKIT"] = "1"
+                if args.debug_build:
+                        env["BUILDKIT_PROGRESS"] = "plain"
+                subprocess.run(command, env=env, check=True)
+
+
     except KeyboardInterrupt:
         print(
             "---- removing the containers, please wait... ",

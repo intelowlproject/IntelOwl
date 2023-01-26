@@ -69,7 +69,7 @@ To do that, org admins needs to go in the "Plugins" section and click the button
 ### Registration
 Since IntelOwl v4.2.0 we added a Registration Page that can be used to manage Registration requests when providing IntelOwl as a Service.
 
-After an user registration, an email is sent to the user to verify their email address. If necessary, there is a button on the login page to resend the verification email.
+After an user registration, an email is sent to the user to verify their email address. If necessary, there are buttons on the login page to resend the verification email and to reset the password.
 
 Once the user has verified their email, they would be manually vetted before being allowed to use the IntelOwl platform. The registration requests would be handled in the Django Admin page by admins.
 If you have IntelOwl deployed on an AWS instance with an IAM role you can use the [SES](/Advanced-Usage.md#ses) service.

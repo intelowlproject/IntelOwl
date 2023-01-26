@@ -50,6 +50,7 @@ REST_EMAIL_AUTH = {
     "EMAIL_SUBJECT_DUPLICATE": "IntelOwl - Registration Attempt",
     "PATH_TO_VERIFY_EMAIL_TEMPLATE": "authentication/emails/verify-email",
     "PATH_TO_DUPLICATE_EMAIL_TEMPLATE": "authentication/emails/duplicate-email",
+    "PATH_TO_RESET_EMAIL_TEMPLATE": "authentication/emails/reset-password",
 }
 
 # drf-spectacular

@@ -9,6 +9,7 @@ const Login = React.lazy(() => import("./auth/Login"));
 const Logout = React.lazy(() => import("./auth/Logout"));
 const Register = React.lazy(() => import("./auth/Register"));
 const EmailVerification = React.lazy(() => import("./auth/EmailVerification"));
+const ResetPassword = React.lazy(() => import("./auth/ResetPassword"));
 const Organization = React.lazy(() => import("./me/organization/Organization"));
 const Sessions = React.lazy(() => import("./me/sessions/Sessions"));
 const JobsTable = React.lazy(() => import("./jobs/table/JobsTable"));
@@ -49,6 +50,10 @@ const noAuthRoutesLazy = [
   {
     path: "/verify-email",
     element: <EmailVerification />,
+  },
+  {
+    path: "/reset-password",
+    element: <ResetPassword />,
   },
 ].map((r) => ({
   ...r,

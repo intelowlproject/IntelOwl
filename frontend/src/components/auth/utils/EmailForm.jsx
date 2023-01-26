@@ -5,11 +5,12 @@ import { Form, Formik } from "formik";
 
 import { EMAIL_REGEX } from "../../../constants";
 import ReCAPTCHAInput from "./ReCAPTCHAInput";
+import { RECAPTCHA_SITEKEY } from "../../../constants/environment";
 
 // constants
 const initialValues = {
   email: "",
-  recaptcha: null,
+  recaptcha: "noKey",
 };
 // methods
 const onValidate = (values) => {
@@ -19,7 +20,7 @@ const onValidate = (values) => {
   } else if (!EMAIL_REGEX.test(values.email)) {
     errors.email = "Invalid email address";
   }
-  if (!values.recaptcha) {
+  if (values.recaptcha === "noKey" && RECAPTCHA_SITEKEY) {
     errors.recaptcha = "Required";
   }
   return errors;
@@ -64,7 +65,12 @@ export default function EmailForm({ onFormSubmit, apiCallback, ...restProps }) {
           </FormGroup>
           {/* reCAPTCHA */}
           <FormGroup row>
-            <ReCAPTCHAInput className="m-3 mx-auto" formik={formik} />
+            {RECAPTCHA_SITEKEY && (
+              <ReCAPTCHAInput
+                id="RegisterForm__recaptcha"
+                className="m-3 mx-auto"
+              />
+            )}
           </FormGroup>
           {/* Submit */}
           <FormGroup className="">

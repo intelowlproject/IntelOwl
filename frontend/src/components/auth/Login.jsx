@@ -21,7 +21,10 @@ import { AUTH_BASE_URI } from "../../constants/api";
 import { PUBLIC_URL } from "../../constants/environment";
 import { useAuthStore } from "../../stores";
 
-import { ResendVerificationEmailButton } from "./utils/utils";
+import {
+  ResendVerificationEmailButton,
+  ForgotPasswordButton,
+} from "./utils/utils";
 
 // constants
 const initialValues = {
@@ -198,6 +201,7 @@ export default function Login() {
         </ContentSection>
         {/* popover buttons */}
         <Row className="d-flex flex-column align-items-end g-0">
+          <ForgotPasswordButton />
           <ResendVerificationEmailButton />
         </Row>
       </Container>

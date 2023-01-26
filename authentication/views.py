@@ -39,6 +39,20 @@ logger = logging.getLogger(__name__)
 User: AUTH_USER_MODEL = get_user_model()
 
 
+class PasswordResetRequestView(
+    rest_email_auth.views.PasswordResetRequestView, RecaptchaV2Mixin
+):
+    authentication_classes: List = []
+    permission_classes: List = []
+    throttle_classes: List = [POSTUserRateThrottle]
+
+
+class PasswordResetView(rest_email_auth.views.PasswordResetView, RecaptchaV2Mixin):
+    authentication_classes: List = []
+    permission_classes: List = []
+    throttle_classes: List = [POSTUserRateThrottle]
+
+
 class EmailVerificationView(rest_email_auth.views.EmailVerificationView):
     authentication_classes: List = []
     permission_classes: List = []
@@ -52,7 +66,7 @@ class RegistrationView(rest_email_auth.views.RegistrationView, RecaptchaV2Mixin)
     throttle_classes: List = [POSTUserRateThrottle]
     serializer_class = RegistrationSerializer
 
-    def get_serializer_class(self):
+    def get_serializer_class(self):  # skipcq: PYL-R0201
         return RegistrationSerializer
 
 

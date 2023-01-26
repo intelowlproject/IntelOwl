@@ -7,7 +7,7 @@ import { IoMail } from "react-icons/io5";
 import { PopupFormButton } from "@certego/certego-ui";
 import { useNavigate } from "react-router-dom";
 import EmailForm from "./EmailForm";
-import { resendVerificationMail } from "../api";
+import { resendVerificationMail, requestPasswordReset } from "../api";
 
 export function AfterRegistrationModalAlert(props) {
   // modal state from props
@@ -120,6 +120,48 @@ export function ResendVerificationEmailButton() {
       popOverPlacement="top-start"
       Icon={EmailIcon}
       Form={EmailFormPopoverBody}
+      size="sm"
+      outline
+      className="border-0"
+    />
+  );
+}
+
+export function PasswordIcon() {
+  return (
+    <small className="d-flex-center standout">
+      <IoMail />
+      &nbsp;
+      <span>Forgot Password ?</span>
+    </small>
+  );
+}
+
+export function PasswordFormPopoverBody(formProps) {
+  return (
+    <PopoverBody>
+      <Alert className="mb-4" color="secondary">
+        <IoMail />
+        &nbsp; We will shoot you an email with instructions to reset your
+        password.
+      </Alert>
+      <EmailForm
+        className="col-lg-6 col-sm-12"
+        apiCallback={requestPasswordReset}
+        {...formProps}
+      />
+    </PopoverBody>
+  );
+}
+
+// Popover Button for "Forgot Password?"
+export function ForgotPasswordButton() {
+  return (
+    <PopupFormButton
+      id="requestpasswordreset-iconbtn"
+      popOverPlacement="top-start"
+      Icon={PasswordIcon}
+      Form={PasswordFormPopoverBody}
       size="sm"
       outline
       className="border-0"

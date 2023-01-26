@@ -222,6 +222,12 @@ def start():
         "--project-directory",
         "docker",
     ]
+    
+    #for docker compose v2
+    temp = subprocess.Popen(['docker', '--help'], stdout = subprocess.PIPE)
+    output = str(temp.communicate())
+    if "compose" in output:base_command=["docker","compose"]+base_command[1:]
+
     for compose_file in compose_files:
         base_command.append("-f")
         base_command.append(compose_file)

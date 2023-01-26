@@ -122,15 +122,16 @@ const onValidate = (values) => {
   // password fields
   if (!values.password) {
     errors.password = "Required";
-  } else if (values.password.length < 8) {
-    errors.password = "Must be 8 characters or more";
+  } else if (values.password.length < 12) {
+    errors.password = "Must be 12 characters or more";
   } else if (!PASSWORD_REGEX.test(values.password)) {
-    errors.password = "Invalid password";
+    errors.password =
+      "The password is entirely numeric or contains special characters";
   }
   if (!values.confirmPassword) {
     errors.confirmPassword = "Required";
-  } else if (values.confirmPassword.length < 8) {
-    errors.confirmPassword = "Must be 8 characters or more";
+  } else if (values.confirmPassword.length < 12) {
+    errors.confirmPassword = "Must be 12 characters or more";
   }
   if (
     values.password.length > 0 &&
@@ -253,7 +254,9 @@ export default function Register() {
                         formik.errors.first_name && formik.touched.first_name
                       }
                     />
-                    {formik.touched.first_name && formik.errors.first_name}
+                    {formik.touched.first_name && (
+                      <small>{formik.errors.first_name}</small>
+                    )}
                   </Col>
                   <Col sm={12} md={6}>
                     <Label
@@ -275,7 +278,9 @@ export default function Register() {
                         formik.errors.last_name && formik.touched.last_name
                       }
                     />
-                    {formik.touched.last_name && formik.errors.last_name}
+                    {formik.touched.last_name && (
+                      <small>{formik.errors.last_name}</small>
+                    )}
                   </Col>
                 </FormGroup>
                 {/* Email/Username */}
@@ -298,7 +303,9 @@ export default function Register() {
                       valid={!formik.errors.email}
                       invalid={formik.errors.email && formik.touched.email}
                     />
-                    {formik.touched.email && formik.errors.email}
+                    {formik.touched.email && (
+                      <small>{formik.errors.email}</small>
+                    )}
                   </Col>
                   <Col sm={12} md={6}>
                     <Label
@@ -321,7 +328,9 @@ export default function Register() {
                         formik.errors.username && formik.touched.username
                       }
                     />
-                    {formik.touched.username && formik.errors.username}
+                    {formik.touched.username && (
+                      <small>{formik.errors.username}</small>
+                    )}
                   </Col>
                 </FormGroup>
                 {/* Password */}
@@ -346,7 +355,9 @@ export default function Register() {
                         formik.errors.password && formik.touched.password
                       }
                     />
-                    {formik.touched.password && formik.errors.password}
+                    {formik.touched.password && (
+                      <small>{formik.errors.password}</small>
+                    )}
                   </Col>
                   <Col sm={12} md={6}>
                     <Label
@@ -369,33 +380,19 @@ export default function Register() {
                         formik.touched.confirmPassword
                       }
                     />
-                    {formik.touched.confirmPassword &&
-                      formik.errors.confirmPassword}
+                    {formik.touched.confirmPassword && (
+                      <small>{formik.errors.confirmPassword}</small>
+                    )}
                   </Col>
                 </FormGroup>
-                <FormGroup row>
-                  <Col sm={12} md={6}>
-                    <small>
-                      <ul>
-                        <li>8-16 characters</li>
-                        <li>At least 1 lowercase letter</li>
-                        <li>At least 1 uppercase letter</li>
-                        <li>At least 1 digit</li>
-                        <li>No special characters</li>
-                      </ul>
-                    </small>
-                  </Col>
-                  <Col sm={12} md={6}>
-                    <FormGroup check>
-                      <Input
-                        id="RegisterForm__showPassword"
-                        type="checkbox"
-                        defaultChecked={passwordShown}
-                        onChange={() => setPasswordShown(!passwordShown)}
-                      />
-                      <Label check>Show password</Label>
-                    </FormGroup>
-                  </Col>
+                <FormGroup check>
+                  <Input
+                    id="RegisterForm__showPassword"
+                    type="checkbox"
+                    defaultChecked={passwordShown}
+                    onChange={() => setPasswordShown(!passwordShown)}
+                  />
+                  <Label check>Show password</Label>
                 </FormGroup>
                 <Col sm={12} md={12} className="text-center standout alert">
                   We ask you to provide the following information to better
@@ -424,7 +421,9 @@ export default function Register() {
                         formik.touched.company_name
                       }
                     />
-                    {formik.touched.company_name && formik.errors.company_name}
+                    {formik.touched.company_name && (
+                      <small>{formik.errors.company_name}</small>
+                    )}
                   </Col>
                   <Col sm={12} md={6}>
                     <Label
@@ -447,7 +446,9 @@ export default function Register() {
                         formik.touched.company_role
                       }
                     />
-                    {formik.touched.company_role && formik.errors.company_role}
+                    {formik.touched.company_role && (
+                      <small>{formik.errors.company_role}</small>
+                    )}
                   </Col>
                 </FormGroup>
                 <FormGroup row>

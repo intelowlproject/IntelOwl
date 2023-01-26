@@ -104,6 +104,13 @@ In the `env_file_app`, configure different variables as explained below.
 * `RECAPTCHA_SECRET_KEY_IO_LOCAL`: your recaptcha secret key internal deployment
 * `RECAPTCHA_SECRET_KEY_IO_PUBLIC`: your recaptcha secret key for public deployment
 
+* `EMAIL_HOST`: the host to use for sending email with SMTP
+* `EMAIL_HOST_USER`: username to use for the SMTP server defined in EMAIL_HOST
+* `EMAIL_HOST_PASSWORD`: password to use for the SMTP server defined in EMAIL_HOST. This setting is used in conjunction with EMAIL_HOST_USER when authenticating to the SMTP server.
+* `EMAIL_PORT`: port to use for the SMTP server defined in EMAIL_HOST.
+* `EMAIL_USE_TLS`: whether to use an explicit TLS (secure) connection when talking to the SMTP server, generally used on port 587. 
+* `EMAIL_USE_SSL`: whether to use an implicit TLS (secure) connection when talking to the SMTP server, generally used on port 465.
+
 **Optional configuration**:
 * `OLD_JOBS_RETENTION_DAYS`: Database retention for analysis results (default: 3 days). Change this if you want to keep your old analysis longer in the database.
 * `SLACK_TOKEN`: Slack token of your Slack application that will be used to send/receive notifications

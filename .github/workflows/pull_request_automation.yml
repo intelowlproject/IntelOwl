@@ -75,7 +75,6 @@ jobs:
           unzip -P infected tests/test_files.zip -d test_files
           cp docker/env_file_app_template docker/env_file_app
           cp docker/env_file_postgres_template docker/env_file_postgres
-          cp docker/env_template.js frontend/public/env.js
           chmod u+x docker/scripts/coverage_test.sh
 
       - name: Startup script requirements

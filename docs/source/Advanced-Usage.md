@@ -396,6 +396,7 @@ to allow that just set `AWS_IAM_ACCESS` to `True`. If that is not the case, you 
 
 If you like, you could use Amazon SES for sending automated emails.
 
-You have to add some credentials for AWS: if you have IntelOwl deployed on the AWS infrastructure, you can use IAM credentials:
-to allow that just set `AWS_IAM_ACCESS` to `True`. If that is not the case, you have to set both `AWS_ACESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`
+First, you need to configure the environment variable `AWS_SES` to `True` to enable it.
+Then you have to add some credentials for AWS: if you have IntelOwl deployed on the AWS infrastructure, you can use IAM credentials:
+to allow that just set `AWS_IAM_ACCESS` to `True`. If that is not the case, you have to set both `AWS_ACESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`.
 Additionally, if you are not using the default AWS region of us-east-1, you need to specify your `AWS_REGION`

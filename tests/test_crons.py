@@ -49,4 +49,5 @@ class CronTests(TestCase):
     def test_yara_updater(self):
         file_paths = yara_scan.YaraScan.yara_update_repos()
         for file_path in file_paths:
+            print(file_path)
             self.assertTrue(os.path.exists(file_path))

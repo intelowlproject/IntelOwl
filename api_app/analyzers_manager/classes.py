@@ -94,8 +94,6 @@ class BaseAnalyzerMixin(Plugin):
         return result
 
     def before_run(self, *args, **kwargs):
-        parent_playbook = kwargs.get("parent_playbook", "")
-        self.add_parent_playbook(parent_playbook=parent_playbook)
         self.report.update_status(status=self.report.Status.RUNNING)
 
     def after_run(self):
@@ -417,12 +415,13 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
 
         try:
             requests.head(cls.url, timeout=10)
-            health_status = True
         except requests.exceptions.ConnectionError:
             # status=False, so pass
             pass
         except requests.exceptions.Timeout:
             # status=False, so pass
             pass
+        else:
+            health_status = True
 
         return health_status

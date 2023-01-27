@@ -1,4 +1,4 @@
-certego-saas==0.4.1
+certego-saas==0.4.3
 # While developing for certego-saas, comment the previous line.
 # Then, add a line like the one below to your forked repo and your most recent commit
 # In this way you can test your changes directly in IntelOwl with the complete application

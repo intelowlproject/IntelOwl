@@ -58,12 +58,7 @@ class PluginActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
         report.update_status(AbstractReport.Status.KILLED)
 
     def perform_retry(self, report: AbstractReport):
-        """
-        override to run plugin with these arguments
-        """
-        plugins_to_execute = [report.name]
-        runtime_configuration = {report.name: report.runtime_configuration}
-        return plugins_to_execute, runtime_configuration
+        raise NotImplementedError()
 
     @add_docs(
         description="Kill running plugin by closing celery task and marking as killed",

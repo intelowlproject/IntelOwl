@@ -5,6 +5,7 @@ import argparse
 import os
 import re
 import subprocess
+import sys
 
 try:
     from dotenv import load_dotenv
@@ -14,7 +15,7 @@ except ImportError:
         "you must install the Python requirements."
         " See: https://intelowl.readthedocs.io/en/latest/Installation.html"
     )
-    exit(2)
+    sys.exit(2)
 
 
 load_dotenv("docker/.env")
@@ -222,6 +223,16 @@ def start():
         "--project-directory",
         "docker",
     ]
+    # for docker-compose v2
+    try:
+        subprocess.run(
+            base_command[0],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            check=True,
+        )
+    except OSError:
+        base_command = ["docker", "compose"] + base_command[1:]
     for compose_file in compose_files:
         base_command.append("-f")
         base_command.append(compose_file)
@@ -232,14 +243,14 @@ def start():
         env["DOCKER_BUILDKIT"] = "1"
         if args.debug_build:
             env["BUILDKIT_PROGRESS"] = "plain"
-        subprocess.run(command, env=env)
+        subprocess.run(command, env=env, check=True)
     except KeyboardInterrupt:
         print(
             "---- removing the containers, please wait... ",
             "(press Ctrl+C again to force) ----",
         )
         try:
-            subprocess.run(base_command + ["down"])
+            subprocess.run(base_command + ["down"], check=True)
         except KeyboardInterrupt:
             # just need to catch it
             pass

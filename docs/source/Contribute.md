@@ -366,7 +366,7 @@ $ docker exec intelowl_uwsgi python3 manage.py test
 Examples:
 
 ```bash
-$ docker exec intelowl_uwsgi python3 manage.py test tests.test_api tests.test_auth # dotted paths
+$ docker exec intelowl_uwsgi python3 manage.py test tests.api_app tests.test_crons # dotted paths
 ```
 
 ##### Run tests for a particular analyzer or class of analyzers
@@ -423,7 +423,7 @@ Run `pip install -r requirements/test-requirements.txt` to install the requireme
 ```bash
 $ black . --exclude "migrations|venv"
 $ flake8 . --show-source --statistics
-$ isort --profile black --filter-files --skip venv
+$ isort . --profile black --filter-files --skip venv
 ```
 
 if flake8 shows any errors, fix them.

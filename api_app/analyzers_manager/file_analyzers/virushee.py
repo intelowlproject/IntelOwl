@@ -89,19 +89,15 @@ class VirusheeFileUpload(FileAnalyzer):
             if_mock_connections(
                 patch(
                     "requests.Session.get",
-                    return_value=MockResponse({"message": "hash_not_found"}, 404),
+                    side_effect=[
+                        MockResponse({"message": "hash_not_found"}, 404),
+                        MockResponse({"message": "analysis_in_progress"}, 202),
+                        MockResponse({"result": "test"}, 200),
+                    ],
                 ),
                 patch(
                     "requests.Session.post",
                     return_value=MockResponse({"task": "123-456-789"}, 201),
-                ),
-                patch(
-                    "requests.Session.get",
-                    return_value=MockResponse({"message": "analysis_in_progress"}, 202),
-                ),
-                patch(
-                    "requests.Session.get",
-                    return_value=MockResponse({"result": "test"}, 200),
                 ),
             )
         ]

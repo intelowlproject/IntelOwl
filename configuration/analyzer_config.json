@@ -1752,13 +1752,7 @@
         "description": "API Key for the Koodous analyzer"
       }
     },
-    "params": {
-      "query_analysis": {
-        "value": "",
-        "type": "str",
-        "description": "Get analysis"
-      }
-    }
+    "params": {}
 },
   "Manalyze": {
     "type": "file",

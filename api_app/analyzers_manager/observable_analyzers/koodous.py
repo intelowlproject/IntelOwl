@@ -10,24 +10,40 @@ from tests.mock_utils import MockResponse, if_mock_connections, patch
 
 class Koodous(classes.ObservableAnalyzer):
     base_url: str = "https://developer.koodous.com/apks/"
+    query_analysis = "/analysis"
 
     def set_params(self, params):
         self.__api_key = self._secrets["api_key_name"]
-        self.query_analysis = params.get("query_analysis", "")
 
     def run(self):
         try:
-            response = requests.request(
+            response_first = requests.request(
                 "GET",
-                self.base_url + self.observable_name + "/" + self.query_analysis,
+                self.base_url + self.observable_name,
                 headers={"Authorization": f"Token {self.__api_key}"},
                 data={},
             )
-            response.raise_for_status()
+            response_first.raise_for_status()
         except requests.RequestException as e:
             raise AnalyzerRunException(e)
 
-        return response.json()
+        try:
+            response_second = requests.request(
+                "GET",
+                self.base_url + self.observable_name + self.query_analysis,
+                headers={"Authorization": f"Token {self.__api_key}"},
+                data={},
+            )
+            response_second.raise_for_status()
+        except requests.RequestException as e:
+            raise AnalyzerRunException(e)
+
+        response = {
+            "first_query": response_first.json(),
+            "second_query": response_second.json(),
+        }
+
+        return response
 
     @classmethod
     def _monkeypatch(cls):

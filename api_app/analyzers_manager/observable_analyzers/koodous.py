@@ -16,29 +16,24 @@ class Koodous(classes.ObservableAnalyzer):
         self.__api_key = self._secrets["api_key_name"]
 
     def get_response(self, url):
-        return requests.request(
-            "GET",
-            url,
-            headers={"Authorization": f"Token {self.__api_key}"},
-            data={},
-        )
+        return requests.get(url, headers={"Authorization": f"Token {self.__api_key}"})
 
     def run(self):
         try:
             common_url = self.base_url + self.observable_name
 
-            response_first = self.get_response(common_url)
-            response_first.raise_for_status()
+            apk_info = self.get_response(common_url)
+            apk_info.raise_for_status()
 
-            response_second = self.get_response(common_url + self.query_analysis)
-            response_second.raise_for_status()
+            apk_analysis = self.get_response(common_url + self.query_analysis)
+            apk_analysis.raise_for_status()
 
         except requests.RequestException as e:
             raise AnalyzerRunException(e)
 
         response = {
-            "first_query": response_first.json(),
-            "second_query": response_second.json(),
+            "Apk Info": apk_info.json(),
+            "Analysi Report": apk_analysis.json(),
         }
 
         return response

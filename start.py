@@ -229,11 +229,11 @@ def start():
     # we use try/catch to mimick docker-compose's behaviour of handling CTRL+C event
     try:
         env = os.environ.copy()
+        env["DOCKER_BUILDKIT"] = "1"
         # for docker-compose v2
         try:subprocess.run('docker-compose',stderr=subprocess.DEVNULL,env=env,check=True)
         except OSError:base_command= ["docker","compose"] + base_command[1:]
         command = base_command + [args.docker_command] + unknown
-        env["DOCKER_BUILDKIT"] = "1"
         if args.debug_build:
             env["BUILDKIT_PROGRESS"] = "plain"
         subprocess.run(command, env=env, check=True)

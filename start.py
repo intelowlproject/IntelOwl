@@ -223,18 +223,16 @@ def start():
         "--project-directory",
         "docker",
     ]
-    # for docker-compose v2
-    try:
-        subprocess.run('docker-compose',stderr=subprocess.DEVNULL,check=True)
-    except OSError:
-        base_command= ["docker","compose"] + base_command[1:]
     for compose_file in compose_files:
         base_command.append("-f")
         base_command.append(compose_file)
     # we use try/catch to mimick docker-compose's behaviour of handling CTRL+C event
     try:
-        command = base_command + [args.docker_command] + unknown
         env = os.environ.copy()
+        # for docker-compose v2
+        try:subprocess.run('docker-compose',stderr=subprocess.DEVNULL,env=env,check=True)
+        except OSError:base_command= ["docker","compose"] + base_command[1:]
+        command = base_command + [args.docker_command] + unknown
         env["DOCKER_BUILDKIT"] = "1"
         if args.debug_build:
             env["BUILDKIT_PROGRESS"] = "plain"

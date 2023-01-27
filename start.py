@@ -5,7 +5,6 @@ import argparse
 import os
 import re
 import subprocess
-import sys
 
 try:
     from dotenv import load_dotenv
@@ -15,7 +14,7 @@ except ImportError:
         "you must install the Python requirements."
         " See: https://intelowl.readthedocs.io/en/latest/Installation.html"
     )
-    sys.exit(2)
+    exit(2)
 
 
 load_dotenv("docker/.env")
@@ -223,28 +222,44 @@ def start():
         "--project-directory",
         "docker",
     ]
+<<<<<<< HEAD
     # for docker-compose v2
     try:subprocess.run(base_command[0],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,check=True)
     except OSError:base_command= ["docker","compose"] + base_command[1:]
         
+=======
+    
+
+>>>>>>> parent of 6c5d589 (Update start.py)
     for compose_file in compose_files:
         base_command.append("-f")
         base_command.append(compose_file)
     # we use try/catch to mimick docker-compose's behaviour of handling CTRL+C event
     try:
-        command = base_command + [args.docker_command] + unknown
-        env = os.environ.copy()
-        env["DOCKER_BUILDKIT"] = "1"
-        if args.debug_build:
-            env["BUILDKIT_PROGRESS"] = "plain"
-        subprocess.run(command, env=env, check=True)
+         try:
+                command = base_command + [args.docker_command] + unknown
+                env = os.environ.copy()
+                env["DOCKER_BUILDKIT"] = "1"
+                if args.debug_build:
+                        env["BUILDKIT_PROGRESS"] = "plain"
+                subprocess.run(command, env=env, check=True)
+        #for docker compose v2
+        except OSError :
+                command = ["docker","compose"] + base_command[1:] + [args.docker_command] + unknown
+                env = os.environ.copy()
+                env["DOCKER_BUILDKIT"] = "1"
+                if args.debug_build:
+                        env["BUILDKIT_PROGRESS"] = "plain"
+                subprocess.run(command, env=env, check=True)
+
+
     except KeyboardInterrupt:
         print(
             "---- removing the containers, please wait... ",
             "(press Ctrl+C again to force) ----",
         )
         try:
-            subprocess.run(base_command + ["down"], check=True)
+            subprocess.run(base_command + ["down"])
         except KeyboardInterrupt:
             # just need to catch it
             pass

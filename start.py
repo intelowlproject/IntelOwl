@@ -228,13 +228,13 @@ def start():
         base_command.append(compose_file)
     # we use try/catch to mimick docker-compose's behaviour of handling CTRL+C event
     try:
-        try:subprocess.run('docker-compose',stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,check=True)
-        except OSError:base_command= ["docker","compose"] + base_command[1:]
-        command = base_command + [args.docker_command] + unknown
         env = os.environ.copy()
         env["DOCKER_BUILDKIT"] = "1"
         if args.debug_build:
             env["BUILDKIT_PROGRESS"] = "plain"
+        try:subprocess.run('docker-compose',stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,check=True)
+        except OSError:base_command= ["docker","compose"] + base_command[1:]
+        command = base_command + [args.docker_command] + unknown
         subprocess.run(command, env=env, check=True)
     except KeyboardInterrupt:
         print(

@@ -223,6 +223,16 @@ def start():
         "--project-directory",
         "docker",
     ]
+    # for docker-compose v2
+    try:
+        subprocess.run(
+            base_command[0],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            check=True,
+        )
+    except OSError:
+        base_command = ["docker", "compose"] + base_command[1:]
     for compose_file in compose_files:
         base_command.append("-f")
         base_command.append(compose_file)

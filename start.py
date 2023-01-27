@@ -85,7 +85,8 @@ def start():
 
     # integrations
     parser.add_argument(
-        "--project_name", required=False, help="project name", default="intel_owl"
+        "--project_name", required=False,
+        help="project name", default="intel_owl"
     )
     parser.add_argument(
         "--version",
@@ -201,7 +202,8 @@ def start():
     if args.all_analyzers:
         compose_files.extend(list(PATH_MAPPING["all_analyzers"]))
         if is_test:
-            compose_files.extend(list(PATH_MAPPING[f"all_analyzers{test_appendix}"]))
+            compose_files.extend(
+                list(PATH_MAPPING[f"all_analyzers{test_appendix}"]))
 
     if args.mode == "prod" and args.version != CURRENT_VERSION:
         print(
@@ -222,36 +224,43 @@ def start():
         "--project-directory",
         "docker",
     ]
-<<<<<<< HEAD
-    # for docker-compose v2
-    try:subprocess.run(base_command[0],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,check=True)
-    except OSError:base_command= ["docker","compose"] + base_command[1:]
-        
-=======
-    
 
->>>>>>> parent of 6c5d589 (Update start.py)
+    # for docker-compose v2
+    try:
+        subprocess.run(
+            base_command[0],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            check=True,
+        )
+    except OSError:
+        base_command = ["docker", "compose"] + base_command[1:]
+
     for compose_file in compose_files:
         base_command.append("-f")
         base_command.append(compose_file)
     # we use try/catch to mimick docker-compose's behaviour of handling CTRL+C event
     try:
-         try:
-                command = base_command + [args.docker_command] + unknown
-                env = os.environ.copy()
-                env["DOCKER_BUILDKIT"] = "1"
-                if args.debug_build:
-                        env["BUILDKIT_PROGRESS"] = "plain"
-                subprocess.run(command, env=env, check=True)
-        #for docker compose v2
-        except OSError :
-                command = ["docker","compose"] + base_command[1:] + [args.docker_command] + unknown
-                env = os.environ.copy()
-                env["DOCKER_BUILDKIT"] = "1"
-                if args.debug_build:
-                        env["BUILDKIT_PROGRESS"] = "plain"
-                subprocess.run(command, env=env, check=True)
-
+        try:
+            command = base_command + [args.docker_command] + unknown
+            env = os.environ.copy()
+            env["DOCKER_BUILDKIT"] = "1"
+            if args.debug_build:
+                env["BUILDKIT_PROGRESS"] = "plain"
+            subprocess.run(command, env=env, check=True)
+        # for docker compose v2
+        except OSError:
+            command = (
+                ["docker", "compose"]
+                + base_command[1:]
+                + [args.docker_command]
+                + unknown
+            )
+            env = os.environ.copy()
+            env["DOCKER_BUILDKIT"] = "1"
+            if args.debug_build:
+                env["BUILDKIT_PROGRESS"] = "plain"
+            subprocess.run(command, env=env, check=True)
 
     except KeyboardInterrupt:
         print(

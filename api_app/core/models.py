@@ -1,9 +1,13 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
+import logging
+from typing import Dict
 
 from django.contrib.postgres import fields as pg_fields
 from django.db import models
 from django.utils import timezone
+
+logger = logging.getLogger(__name__)
 
 
 class Status(models.TextChoices):
@@ -57,3 +61,19 @@ class AbstractReport(models.Model):
         self.errors.append(err_msg)
         if save:
             self.save(update_fields=["errors"])
+
+    @classmethod
+    def get_or_create_failed(
+        cls, job_id: int, name: str, defaults: Dict, error: str
+    ) -> "AbstractReport":
+        logger.warning(
+            f"(job: #{job_id}, {cls.__name__}:{name}) -> set as {cls.Status.FAILED}. "
+            f"Error: {error}"
+        )
+        report, _ = cls.objects.get_or_create(
+            job_id=job_id, name=name, defaults=defaults
+        )
+        report.status = cls.Status.FAILED
+        report.errors.append(error)
+        report.save()
+        return report

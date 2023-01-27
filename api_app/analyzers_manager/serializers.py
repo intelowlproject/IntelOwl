@@ -1,6 +1,6 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
-
+from django.conf import settings
 from django.utils.module_loading import import_string
 from rest_framework import serializers as rfs
 
@@ -69,9 +69,9 @@ class AnalyzerConfigSerializer(AbstractConfigSerializer):
             self.initial_data["type"] == self.TypeChoices.FILE
             and self.initial_data.get("run_hash", False)
         ):
-            clspath = f"api_app.analyzers_manager.observable_analyzers.{python_module}"
+            clspath = f"{settings.BASE_ANALYZER_OBSERVABLE_PYTHON_PATH}.{python_module}"
         else:
-            clspath = f"api_app.analyzers_manager.file_analyzers.{python_module}"
+            clspath = f"{settings.BASE_ANALYZER_FILE_PYTHON_PATH}.{python_module}"
 
         try:
             import_string(clspath)

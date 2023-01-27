@@ -366,7 +366,7 @@ $ docker exec intelowl_uwsgi python3 manage.py test
 Examples:
 
 ```bash
-$ docker exec intelowl_uwsgi python3 manage.py test tests.test_api tests.test_auth # dotted paths
+$ docker exec intelowl_uwsgi python3 manage.py test tests.api_app tests.test_crons # dotted paths
 ```
 
 ##### Run tests for a particular analyzer or class of analyzers

@@ -19,7 +19,7 @@ import { killPlugin, retryPlugin } from "../api";
 const tableProps = {
   columns: [
     {
-      Header: () => null,
+      Header: "Actions",
       id: "actions",
       accessor: (r) => r,
       maxWidth: 60,

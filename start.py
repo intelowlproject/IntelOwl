@@ -228,7 +228,6 @@ def start():
         subprocess.run('docker-compose',stderr=subprocess.DEVNULL,check=True)
     except OSError:
         base_command= ["docker","compose"] + base_command[1:]
-
     for compose_file in compose_files:
         base_command.append("-f")
         base_command.append(compose_file)

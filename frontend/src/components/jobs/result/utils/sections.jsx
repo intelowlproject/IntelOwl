@@ -10,7 +10,7 @@ import { FaFileDownload } from "react-icons/fa";
 import {
   MdDeleteOutline,
   MdPauseCircleOutline,
-  MdOutlineRefresh
+  MdOutlineRefresh,
 } from "react-icons/md";
 
 import {
@@ -19,7 +19,7 @@ import {
   SocialShareBtn,
   IconAlert,
   IconButton,
-  addToast
+  addToast,
 } from "@certego/certego-ui";
 
 import { SaveAsPlaybookButton } from "./SaveAsPlaybooksForm";
@@ -64,12 +64,12 @@ export function JobActionsBar({ job, refetch }) {
       null,
       "spinner",
       false,
-      2000
+      2000,
     );
     const url = window.URL.createObjectURL(
       new Blob([JSON.stringify(job, null, 2)], {
-        type: "application/json"
-      })
+        type: "application/json",
+      }),
     );
     setTimeout(() => window.open(url, "rel=noopener,noreferrer"), 250);
   };
@@ -87,7 +87,7 @@ export function JobActionsBar({ job, refetch }) {
     connectors: job.connectors_requested,
     runtime_configuration: job.runtime_configuration,
     tags_labels: job.tags.map((optTag) => optTag.value.label),
-    playbooks: job.playbooks_to_execute.map((x) => x.value)
+    playbooks: job.playbooks_to_execute.map((x) => x.value),
   };
 
   return (
@@ -184,7 +184,7 @@ export function JobInfoCard({ job }) {
                 id={`overview-received_request_time__${job.id}`}
                 value={job.received_request_time}
                 format="hh:mm:ss a MMM do, yyyy"
-              />
+              />,
             ],
             [
               "End Time",
@@ -196,8 +196,8 @@ export function JobInfoCard({ job }) {
                 />
               ) : (
                 "-"
-              )
-            ]
+              ),
+            ],
           ].map(([key, value]) => (
             <ListGroupItem key={key}>
               <small className="fw-bold text-light">{key}</small>
@@ -214,7 +214,7 @@ export function JobInfoCard({ job }) {
               "Tags",
               job.tags.map((tag) => (
                 <JobTag key={tag.label} tag={tag} className="me-2" />
-              ))
+              )),
             ],
             [
               "Error(s)",
@@ -223,7 +223,7 @@ export function JobInfoCard({ job }) {
                 value={job.errors}
                 className="text-danger"
                 hidden={!job.errors.length}
-              />
+              />,
             ],
             [
               "Playbook(s)",
@@ -233,8 +233,8 @@ export function JobInfoCard({ job }) {
                   playbook={playbook}
                   className="mr-2"
                 />
-              ))
-            ]
+              )),
+            ],
           ].map(([key, value]) => (
             <ListGroupItem key={key}>
               <small className="fw-bold text-light">{key}</small>
@@ -280,13 +280,13 @@ export function JobIsRunningAlert({ job }) {
 }
 
 JobActionsBar.propTypes = {
-  job: PropTypes.object.isRequired
+  job: PropTypes.object.isRequired,
 };
 
 JobInfoCard.propTypes = {
-  job: PropTypes.object.isRequired
+  job: PropTypes.object.isRequired,
 };
 
 JobIsRunningAlert.propTypes = {
-  job: PropTypes.object.isRequired
+  job: PropTypes.object.isRequired,
 };

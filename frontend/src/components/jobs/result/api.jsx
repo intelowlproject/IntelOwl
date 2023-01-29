@@ -8,6 +8,7 @@ import { addToast, confirm } from "@certego/certego-ui";
 import { API_BASE_URI, JOB_BASE_URI } from "../../../constants/api";
 
 // constants
+
 const areYouSureConfirmDialog = (opName) =>
   confirm({
     title: (
@@ -25,14 +26,14 @@ const areYouSureConfirmDialog = (opName) =>
       </div>
     ),
     confirmColor: "secondary",
-    cancelColor: "link text-gray"
+    cancelColor: "link text-gray",
   });
 
 export async function downloadJobSample(jobId) {
   let blob;
   try {
     const resp = await axios.get(`${JOB_BASE_URI}/${jobId}/download_sample`, {
-      responseType: "blob"
+      responseType: "blob",
     });
     blob = new Blob([resp.data]);
   } catch (e) {
@@ -57,7 +58,7 @@ export async function killJob(jobId) {
         Failed. Operation: <em>kill job #{jobId}</em>
       </span>,
       e.parsedMsg,
-      "warning"
+      "warning",
     );
   }
   return success;
@@ -79,7 +80,7 @@ export async function deleteJob(jobId) {
         Failed. Operation: <em>delete job #{jobId}</em>
       </span>,
       e.parsedMsg,
-      "warning"
+      "warning",
     );
   }
   return success;
@@ -90,12 +91,12 @@ export async function saveJobAsPlaybook(values) {
   const data = {
     name: values.name,
     description: values.description,
-    job_id: values.jobId
+    job_id: values.jobId,
   };
   try {
     const response = await axios.post(
       `${API_BASE_URI}/playbook/cache_playbook`,
-      data
+      data,
     );
 
     success = response.status === 200;
@@ -105,7 +106,7 @@ export async function saveJobAsPlaybook(values) {
           Saved Job #{values.jobId} as Playbook with name {response.data.name}!
         </span>,
         null,
-        "info"
+        "info",
       );
     }
   } catch (e) {
@@ -114,7 +115,7 @@ export async function saveJobAsPlaybook(values) {
         Failed. Operation: <em>Saving Job #${values.jobId} as playbook</em>
       </span>,
       e.parsedMsg,
-      "warning"
+      "warning",
     );
   }
   return success;
@@ -122,13 +123,13 @@ export async function saveJobAsPlaybook(values) {
 
 export async function killPlugin(jobId, pluginType, pluginName) {
   const sure = await areYouSureConfirmDialog(
-    `kill ${pluginType} '${pluginName}'`
+    `kill ${pluginType} '${pluginName}'`,
   );
   if (!sure) return Promise.reject();
   let success = false;
   try {
     const response = await axios.patch(
-      `${JOB_BASE_URI}/${jobId}/${pluginType}/${pluginName}/kill`
+      `${JOB_BASE_URI}/${jobId}/${pluginType}/${pluginName}/kill`,
     );
     success = response.status === 204;
     if (success) {
@@ -137,7 +138,7 @@ export async function killPlugin(jobId, pluginType, pluginName) {
           Kill request sent for {pluginType} <em>{pluginName}</em>
         </span>,
         null,
-        "info"
+        "info",
       );
     }
   } catch (e) {
@@ -146,7 +147,7 @@ export async function killPlugin(jobId, pluginType, pluginName) {
         Failed. Operation: kill {pluginType} <em>{pluginName}</em>
       </span>,
       e.parsedMsg,
-      "warning"
+      "warning",
     );
   }
   return success;
@@ -154,13 +155,13 @@ export async function killPlugin(jobId, pluginType, pluginName) {
 
 export async function retryPlugin(jobId, pluginType, pluginName) {
   const sure = await areYouSureConfirmDialog(
-    `retry ${pluginType} '${pluginName}'`
+    `retry ${pluginType} '${pluginName}'`,
   );
   if (!sure) return Promise.reject();
   let success = false;
   try {
     const response = await axios.patch(
-      `${JOB_BASE_URI}/${jobId}/${pluginType}/${pluginName}/retry`
+      `${JOB_BASE_URI}/${jobId}/${pluginType}/${pluginName}/retry`,
     );
     success = response.status === 204;
     if (success) {
@@ -169,7 +170,7 @@ export async function retryPlugin(jobId, pluginType, pluginName) {
           Retry request sent for {pluginType} <em>{pluginName}</em>
         </span>,
         null,
-        "info"
+        "info",
       );
     }
   } catch (e) {
@@ -178,7 +179,7 @@ export async function retryPlugin(jobId, pluginType, pluginName) {
         Failed. Operation: retry {pluginType} <em>{pluginName}</em>
       </span>,
       e.parsedMsg,
-      "warning"
+      "warning",
     );
   }
   return success;

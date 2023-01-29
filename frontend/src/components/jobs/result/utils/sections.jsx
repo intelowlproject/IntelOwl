@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 /* eslint-disable react/prop-types */
 /* eslint-disable camelcase */
 import React from "react";
@@ -24,7 +25,8 @@ import {
 import { SaveAsPlaybookButton } from "./SaveAsPlaybooksForm";
 
 import { JobTag, PlaybookTag, StatusTag, TLPTag } from "../../../common";
-import { downloadJobSample, deleteJob, killJob, retryJob } from "../api";
+import { downloadJobSample, deleteJob, killJob, } from "../api";
+import { createJob } from "../../../scan/api";
 
 function DeleteIcon() {
   return <MdDeleteOutline className="text-danger" />;
@@ -75,6 +77,22 @@ export function JobActionsBar({ job, refetch }) {
     job.is_sample ? job.file_name : job.observable_name
   }) on IntelOwl`;
 
+
+  const formValues = {
+      ...job,
+      check:'force_new',
+      classification: job.observable_classification,
+      tlp: job.tlp,
+      observable_names: job.observable_name = Array(job.observable_name),
+      analyzers: job.analyzers_requested,
+      connectors: job.connectors_requested,
+      runtime_configuration: job.runtime_configuration,
+      tags_labels: job.tags.map((optTag) => optTag.value.label),
+      playbooks: job.playbooks_to_execute.map((x) => x.value),
+    };
+
+    
+
   return (
     <ContentSection className="d-inline-flex">
       {job.permissions?.delete && (
@@ -91,12 +109,7 @@ export function JobActionsBar({ job, refetch }) {
       )}
       <IconButton
         Icon={MdOutlineRefresh}
-        onClick={() => {
-          job.analyzers_to_execute.map((analyzername) => {
-            retryJob(job.id, "analyzer", analyzername).then(refetch);
-            return true;
-          });
-        }}
+        onClick={()=>{createJob(formValues).then(refetch)}}
         color="light"
         size="xs"
         title="run"

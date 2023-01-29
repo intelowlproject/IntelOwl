@@ -15,8 +15,8 @@ const useRecentScansStore = create(
               Object.entries(state.jobIdStatusMap)
                 .sort(([k1], [k2]) => k1 - k2)
                 .slice(
-                  Math.max(Object.keys(state.jobIdStatusMap).length - 9, 0)
-                )
+                  Math.max(Object.keys(state.jobIdStatusMap).length - 9, 0),
+                ),
             ),
             [id]: status,
           },
@@ -29,8 +29,8 @@ const useRecentScansStore = create(
     {
       name: LOCALSTORAGE_KEY,
       getStorage: () => localStorage,
-    }
-  )
+    },
+  ),
 );
 
 export default useRecentScansStore;

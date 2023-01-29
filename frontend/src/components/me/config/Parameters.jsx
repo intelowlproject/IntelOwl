@@ -18,7 +18,7 @@ export default function Parameters({
       <Config
         configFilter={(resp) =>
           resp.filter(
-            (item) => filterFunction(item) && item.config_type === "1"
+            (item) => filterFunction(item) && item.config_type === "1",
           )
         }
         additionalConfigData={{

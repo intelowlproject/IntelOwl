@@ -50,12 +50,12 @@ function filterEmptyData(plugins, dataName) {
     .filter(
       (pluginName) =>
         plugins[pluginName][dataName] &&
-        Object.keys(plugins[pluginName][dataName]).length > 0
+        Object.keys(plugins[pluginName][dataName]).length > 0,
     )
     .reduce(
       (filteredPlugins, key) =>
         Object.assign(filteredPlugins, { [key]: plugins[key] }),
-      {}
+      {},
     );
 }
 
@@ -110,7 +110,7 @@ export function PluginData({
         });
       }
       return pluginConfigs;
-    }
+    },
   );
 
   const refetchAll = () => {
@@ -121,7 +121,7 @@ export function PluginData({
 
   const maxPluginNameLength = Math.max(
     ...Object.keys(analyzers).map((pluginName) => pluginName.length),
-    ...Object.keys(connectors).map((pluginName) => pluginName.length)
+    ...Object.keys(connectors).map((pluginName) => pluginName.length),
   );
 
   return (
@@ -150,7 +150,7 @@ export function PluginData({
                               plugins[configuration.plugin_name]
                             )
                               attributeList = Object.keys(
-                                plugins[configuration.plugin_name][dataName]
+                                plugins[configuration.plugin_name][dataName],
                               );
                             if (
                               attributeList.length > 0 &&
@@ -207,14 +207,14 @@ export function PluginData({
                                     <option value="">
                                       {"-".repeat(
                                         Math.ceil(
-                                          (maxPluginNameLength - 11) / 2
-                                        )
+                                          (maxPluginNameLength - 11) / 2,
+                                        ),
                                       )}
                                       Select Plugin Name
                                       {"-".repeat(
                                         Math.ceil(
-                                          (maxPluginNameLength - 11) / 2
-                                        )
+                                          (maxPluginNameLength - 11) / 2,
+                                        ),
                                       )}
                                     </option>
                                     {Object.values(plugins).map(
@@ -225,7 +225,7 @@ export function PluginData({
                                         >
                                           {pluginElement.name}
                                         </option>
-                                      )
+                                      ),
                                     )}
                                   </Field>
                                 </div>
@@ -273,7 +273,7 @@ export function PluginData({
                                         if (
                                           !isValidEntry(
                                             configuration,
-                                            valueType
+                                            valueType,
                                           )
                                         )
                                           return;
@@ -293,38 +293,38 @@ export function PluginData({
                                         ) {
                                           newConfiguration.value =
                                             JSON.stringify(
-                                              newConfiguration.value
+                                              newConfiguration.value,
                                             );
                                         }
                                         if (newConfiguration.create)
                                           createPluginData(
-                                            newConfiguration
+                                            newConfiguration,
                                           ).then(() => {
                                             setFieldValue(
                                               `entry.${index}.edit`,
-                                              false
+                                              false,
                                             );
                                             setFieldValue(
                                               `entry.${index}.create`,
-                                              false
+                                              false,
                                             );
                                             refetchAll();
                                           });
                                         else
                                           updatePluginData(
                                             newConfiguration,
-                                            newConfiguration.id
+                                            newConfiguration.id,
                                           ).then(() => {
                                             setFieldValue(
                                               `entry.${index}.edit`,
-                                              false
+                                              false,
                                             );
                                             refetchAll();
                                           });
                                       } else
                                         setFieldValue(
                                           `entry.${index}.edit`,
-                                          true
+                                          true,
                                         );
                                     }}
                                   >
@@ -355,7 +355,7 @@ export function PluginData({
                                           () => {
                                             remove(index);
                                             refetchAll();
-                                          }
+                                          },
                                         );
                                     }}
                                   >

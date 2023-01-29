@@ -43,7 +43,7 @@ function InvitationForm({ onFormSubmit }) {
         formik.setSubmitting(false);
       }
     },
-    [onFormSubmit]
+    [onFormSubmit],
   );
 
   return (

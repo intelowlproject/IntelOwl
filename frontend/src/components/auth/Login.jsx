@@ -52,7 +52,7 @@ export default function Login() {
 
   // auth store
   const loginUser = useAuthStore(
-    React.useCallback((s) => s.service.loginUser, [])
+    React.useCallback((s) => s.service.loginUser, []),
   );
 
   const updateToken = useAuthStore(React.useCallback((s) => s.updateToken, []));
@@ -66,7 +66,7 @@ export default function Login() {
         // handled inside loginUser
       }
     },
-    [loginUser]
+    [loginUser],
   );
 
   const [searchParams] = useSearchParams();
@@ -106,7 +106,7 @@ export default function Login() {
                           "OAuth is not configured. " +
                             "Check documentation to set it up.",
                           "danger",
-                          true
+                          true,
                         );
                       else throw error;
                     });

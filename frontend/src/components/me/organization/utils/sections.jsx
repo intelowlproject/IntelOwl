@@ -30,8 +30,8 @@ export function OrgInfoCard() {
         organization: state.organization,
         isUserOwner: state.isUserOwner,
       }),
-      []
-    )
+      [],
+    ),
   );
 
   return (
@@ -88,8 +88,8 @@ export function MembersList() {
         refetchMembers: state.refetchMembers,
         isUserOwner: state.isUserOwner,
       }),
-      []
-    )
+      [],
+    ),
   );
 
   // state
@@ -99,7 +99,7 @@ export function MembersList() {
   const sortedMembers = React.useMemo(
     () =>
       members?.length ? [...members].sort((a, b) => a.joined - b.joined) : [],
-    [members]
+    [members],
   );
 
   // callbacks
@@ -127,7 +127,7 @@ export function MembersList() {
         setTimeout(refetchMembers, 100);
       }
     },
-    [refetchMembers]
+    [refetchMembers],
   );
   const leaveOrganizationCb = React.useCallback(async () => {
     const answer = await confirm({
@@ -257,7 +257,7 @@ export function MembersList() {
                       </Col>
                     </Row>
                   </li>
-                )
+                ),
               )}
             </ol>
           )}
@@ -276,8 +276,8 @@ export function PendingInvitationsList() {
         refetchInvs: state.refetchInvs,
         isUserOwner: state.isUserOwner,
       }),
-      []
-    )
+      [],
+    ),
   );
 
   // state

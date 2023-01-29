@@ -77,8 +77,8 @@ export default function PluginsContainer() {
         fetchAll: state.fetchAll,
         organization: state.organization,
       }),
-      []
-    )
+      [],
+    ),
   );
 
   // on component mount

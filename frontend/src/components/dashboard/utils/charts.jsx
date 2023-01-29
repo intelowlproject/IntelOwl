@@ -44,7 +44,7 @@ export const JobStatusBarChart = React.memo(() => {
           />
         )),
     }),
-    []
+    [],
   );
 
   return <AnyChartWidget {...chartProps} />;
@@ -62,7 +62,7 @@ export const JobTypeBarChart = React.memo(() => {
           <Bar stackId="jobtype" key={dataKey} dataKey={dataKey} fill={color} />
         )),
     }),
-    []
+    [],
   );
 
   return <AnyChartWidget {...chartProps} />;
@@ -79,10 +79,10 @@ export const JobObsClassificationBarChart = React.memo(() => {
         Object.entries(OBSERVABLE_CLASSIFICATION_COLOR_MAP).map(
           ([dKey, color]) => (
             <Bar stackId="joboc" key={dKey} dataKey={dKey} fill={color} />
-          )
+          ),
         ),
     }),
-    []
+    [],
   );
 
   return <AnyChartWidget {...chartProps} />;
@@ -108,7 +108,7 @@ export const JobFileMimetypeBarChart = React.memo(() => {
         ));
       },
     }),
-    []
+    [],
   );
 
   return <AnyChartWidget {...chartProps} />;
@@ -129,7 +129,7 @@ export const JobObsNamePieChart = React.memo(() => {
           fill: colors[i],
         })),
     }),
-    []
+    [],
   );
 
   return <PieChartWidget {...chartProps} />;
@@ -148,7 +148,7 @@ export const JobFileHashPieChart = React.memo(() => {
           fill: colors[i],
         })),
     }),
-    []
+    [],
   );
 
   return <PieChartWidget {...chartProps} />;

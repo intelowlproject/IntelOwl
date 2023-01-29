@@ -13,7 +13,7 @@ export default function Playbooks() {
       state.playbooks,
       state.retrievePlaybooksConfiguration,
     ],
-    []
+    [],
   );
 
   return (

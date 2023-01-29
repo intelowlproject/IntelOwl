@@ -25,14 +25,14 @@ const areYouSureConfirmDialog = (opName) =>
       </div>
     ),
     confirmColor: "secondary",
-    cancelColor: "link text-gray",
+    cancelColor: "link text-gray"
   });
 
 export async function downloadJobSample(jobId) {
   let blob;
   try {
     const resp = await axios.get(`${JOB_BASE_URI}/${jobId}/download_sample`, {
-      responseType: "blob",
+      responseType: "blob"
     });
     blob = new Blob([resp.data]);
   } catch (e) {
@@ -90,7 +90,7 @@ export async function saveJobAsPlaybook(values) {
   const data = {
     name: values.name,
     description: values.description,
-    job_id: values.jobId,
+    job_id: values.jobId
   };
   try {
     const response = await axios.post(
@@ -183,5 +183,3 @@ export async function retryPlugin(jobId, pluginType, pluginName) {
   }
   return success;
 }
-
-

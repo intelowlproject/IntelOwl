@@ -50,8 +50,8 @@ export default function PluginWrapper({
       (state) => ({
         pluginsState: state.pluginsState,
       }),
-      [],
-    ),
+      []
+    )
   );
 
   // API/ store

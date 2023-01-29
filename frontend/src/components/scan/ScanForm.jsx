@@ -155,17 +155,17 @@ export default function ScanForm() {
 
   // local state
   const [classification, setClassification] = React.useState(
-    initialValues.classification,
+    initialValues.classification
   );
 
   const [scanType, setScanType] = React.useState(
-    initialValues.analysisOptionValues,
+    initialValues.analysisOptionValues
   );
 
   const [isModalOpen, setModalOpen] = React.useState(false);
   const toggleModal = React.useCallback(
     () => setModalOpen((o) => !o),
-    [setModalOpen],
+    [setModalOpen]
   );
 
   // page title
@@ -212,9 +212,9 @@ export default function ScanForm() {
         }))
         .sort((a, b) =>
           // eslint-disable-next-line no-nested-ternary
-          a.isDisabled === b.isDisabled ? 0 : a.isDisabled ? 1 : -1,
+          a.isDisabled === b.isDisabled ? 0 : a.isDisabled ? 1 : -1
         ),
-    [analyzersGrouped, classification],
+    [analyzersGrouped, classification]
   );
   const connectorOptions = React.useMemo(
     () =>
@@ -241,9 +241,9 @@ export default function ScanForm() {
         }))
         .sort((a, b) =>
           // eslint-disable-next-line no-nested-ternary
-          a.isDisabled === b.isDisabled ? 0 : a.isDisabled ? 1 : -1,
+          a.isDisabled === b.isDisabled ? 0 : a.isDisabled ? 1 : -1
         ),
-    [connectors],
+    [connectors]
   );
 
   const playbookOptions = React.useMemo(
@@ -265,9 +265,9 @@ export default function ScanForm() {
         }))
         .sort((a, b) =>
           // eslint-disable-next-line no-nested-ternary
-          a.isDisabled === b.isDisabled ? 0 : a.isDisabled ? 1 : -1,
+          a.isDisabled === b.isDisabled ? 0 : a.isDisabled ? 1 : -1
         ),
-    [playbooksGrouped, classification],
+    [playbooksGrouped, classification]
   );
 
   // callbacks
@@ -289,13 +289,13 @@ export default function ScanForm() {
         const ObservableNamesErrors = values.observable_names.map(
           (ObservableName) => {
             const pattern = RegExp(
-              observableType2PropsMap[values.classification].pattern,
+              observableType2PropsMap[values.classification].pattern
             );
             if (!pattern.test(ObservableName)) {
               return `invalid ${values.classification}`;
             }
             return null;
-          },
+          }
         );
 
         // We check if any of the ObservableNamesErrors is not null
@@ -309,7 +309,7 @@ export default function ScanForm() {
       }
       return errors;
     },
-    [pluginsError],
+    [pluginsError]
   );
 
   const ValidatePlaybooks = React.useCallback(
@@ -331,13 +331,13 @@ export default function ScanForm() {
         const ObservableNamesErrors = values.observable_names.map(
           (ObservableName) => {
             const pattern = RegExp(
-              observableType2PropsMap[values.classification].pattern,
+              observableType2PropsMap[values.classification].pattern
             );
             if (!pattern.test(ObservableName)) {
               return `invalid ${values.classification}`;
             }
             return null;
-          },
+          }
         );
 
         // We check if any of the ObservableNamesErrors is not null
@@ -349,7 +349,7 @@ export default function ScanForm() {
 
       return errors;
     },
-    [pluginsError],
+    [pluginsError]
   );
 
   const startPlaybooks = React.useCallback(
@@ -382,7 +382,7 @@ export default function ScanForm() {
         refetchQuota();
       }
     },
-    [navigate, refetchQuota, ValidatePlaybooks],
+    [navigate, refetchQuota, ValidatePlaybooks]
   );
 
   const onSubmit = React.useCallback(
@@ -413,7 +413,7 @@ export default function ScanForm() {
         formik.setSubmitting(false);
       }
     },
-    [navigate, refetchQuota, startPlaybooks],
+    [navigate, refetchQuota, startPlaybooks]
   );
 
   return (
@@ -491,7 +491,7 @@ export default function ScanForm() {
                                           formik.errors.observable_names &&
                                             formik.errors.observable_names[
                                               index
-                                            ],
+                                            ]
                                         ) &&
                                         formik.touched.observable_names &&
                                         formik.touched.observable_names[index]
@@ -513,7 +513,7 @@ export default function ScanForm() {
                                     <BsFillTrashFill />
                                   </Button>
                                 </Row>
-                              ),
+                              )
                             )
                           : null}
                         <Row className="mb-2 mt-0 pt-0">
@@ -731,7 +731,7 @@ export default function ScanForm() {
                   <FormText>
                     {TLP_DESCRIPTION_MAP[formik.values.tlp].replace(
                       "TLP: ",
-                      "",
+                      ""
                     )}
                   </FormText>
                   <ErrorMessage component={FormFeedback} name="tlp" />

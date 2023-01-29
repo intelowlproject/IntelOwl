@@ -11,7 +11,7 @@ Wrapper for Routes which should be accessible only to a non-authenticated user
 export default function IfAuthRedirectGuard({ children }) {
   // store
   const [loading, isAuthenticated] = useAuthStore(
-    React.useCallback((s) => [s.loading, s.isAuthenticated()], []),
+    React.useCallback((s) => [s.loading, s.isAuthenticated()], [])
   );
   const next = useSearchParam("next") || "/";
 

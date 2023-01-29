@@ -60,8 +60,8 @@ export default function TagSelectInput(props) {
         state.list,
         state.create,
       ],
-      [],
-    ),
+      []
+    )
   );
 
   // side-effecs
@@ -91,7 +91,7 @@ export default function TagSelectInput(props) {
               ),
           }))
         : [],
-    [allTags, tagToEdit, setTagToEdit, onTagEditSuccess],
+    [allTags, tagToEdit, setTagToEdit, onTagEditSuccess]
   );
 
   // dropdown input handlers
@@ -139,7 +139,7 @@ function TagForm(props) {
   const { tagToEdit, onFormSuccess, ...rest } = props;
 
   const [updateTag, createTag] = useTagsStore(
-    React.useCallback((state) => [state.update, state.create], []),
+    React.useCallback((state) => [state.update, state.create], [])
   );
 
   const onFormSubmit = React.useCallback(
@@ -155,7 +155,7 @@ function TagForm(props) {
         formik.setSubmitting(false);
       }
     },
-    [tagToEdit, onFormSuccess, updateTag, createTag],
+    [tagToEdit, onFormSuccess, updateTag, createTag]
   );
 
   return (

@@ -13,7 +13,7 @@ export default function RecentScans() {
     (jobId) => {
       navigate(`/jobs/${jobId}`);
     },
-    [navigate],
+    [navigate]
   );
 
   return (

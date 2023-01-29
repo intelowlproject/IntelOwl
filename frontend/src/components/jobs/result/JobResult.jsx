@@ -28,7 +28,7 @@ export default function JobResult() {
     job === undefined || ["pending", "running"].includes(job.status);
   useInterval(
     refetch,
-    isRunning ? 5 * 1000 : null, // 5 seconds
+    isRunning ? 5 * 1000 : null // 5 seconds
   );
 
   // initial loading (spinner)
@@ -42,7 +42,7 @@ export default function JobResult() {
       // eslint-disable-next-line no-nested-ternary
       job ? (job.is_sample ? job.file_name : job.observable_name) : ""
     })`,
-    { restoreOnUnmount: true },
+    { restoreOnUnmount: true }
   );
 
   return (

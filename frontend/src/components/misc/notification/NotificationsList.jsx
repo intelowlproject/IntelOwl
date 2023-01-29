@@ -22,7 +22,7 @@ export default function NotificationsList({ notifications, refetchFn }) {
         // handled inside notificationMarkAsRead
       }
     },
-    [refetchFn],
+    [refetchFn]
   );
 
   return notifications.length > 0 ? (

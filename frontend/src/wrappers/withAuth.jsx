@@ -12,12 +12,12 @@ function withAuth(WrappedComponent) {
     const [isAuthenticated, fetchUserAccess] = useAuthStore(
       React.useCallback(
         (s) => [s.isAuthenticated(), s.service.fetchUserAccess],
-        [],
-      ),
+        []
+      )
     );
 
     const [fetchPluginsConf] = usePluginConfigurationStore(
-      React.useCallback((s) => [s.hydrate], []),
+      React.useCallback((s) => [s.hydrate], [])
     );
 
     React.useLayoutEffect(() => {

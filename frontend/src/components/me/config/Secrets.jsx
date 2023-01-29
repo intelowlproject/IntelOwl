@@ -18,7 +18,7 @@ export default function Secrets({
       <Config
         configFilter={(resp) =>
           resp.filter(
-            (item) => filterFunction(item) && item.config_type === "2",
+            (item) => filterFunction(item) && item.config_type === "2"
           )
         }
         additionalConfigData={{

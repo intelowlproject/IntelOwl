@@ -8,7 +8,7 @@ import { useAuthStore } from "../stores";
 export default function useQuotaBadge() {
   // auth store
   const [access, fetchUserAccess] = useAuthStore(
-    React.useCallback((s) => [s.access, s.service.fetchUserAccess], []),
+    React.useCallback((s) => [s.access, s.service.fetchUserAccess], [])
   );
 
   const quota = access; // alias for backwards compatibility
@@ -23,7 +23,7 @@ export default function useQuotaBadge() {
         {`Month: ${quota?.month_submissions}`}
       </Badge>
     ),
-    [quota],
+    [quota]
   );
 
   const TotalBadge = React.useCallback(
@@ -35,7 +35,7 @@ export default function useQuotaBadge() {
         {`Total: ${quota?.total_submissions}`}
       </Badge>
     ),
-    [quota],
+    [quota]
   );
 
   const QuotaInfoIcon = React.useCallback(
@@ -56,7 +56,7 @@ export default function useQuotaBadge() {
         </UncontrolledTooltip>
       </>
     ),
-    [],
+    []
   );
 
   return [{ MonthBadge, TotalBadge, QuotaInfoIcon }, fetchUserAccess, quota];

@@ -20,7 +20,7 @@ const useOrganizationStore = create((set, _get) => ({
       set({ loading: true });
       // API call
       const resp = await axios.get(
-        `${BASE_URI_ORG}?expand=members,pending_invitations`,
+        `${BASE_URI_ORG}?expand=members,pending_invitations`
       );
       // destructure response data
       const {
@@ -100,7 +100,7 @@ const useOrganizationStore = create((set, _get) => ({
     try {
       // API call
       const resp = await axios.get(
-        `${BASE_URI_ORG}?expand=members&fields=members`,
+        `${BASE_URI_ORG}?expand=members&fields=members`
       );
       const { members } = resp.data;
       // update members key
@@ -114,7 +114,7 @@ const useOrganizationStore = create((set, _get) => ({
     try {
       // API call
       const resp = await axios.get(
-        `${BASE_URI_ORG}?expand=pending_invitations&fields=pending_invitations`,
+        `${BASE_URI_ORG}?expand=pending_invitations&fields=pending_invitations`
       );
       const { pending_invitations: pendingInvitations } = resp.data;
       // update pendingInvitations key

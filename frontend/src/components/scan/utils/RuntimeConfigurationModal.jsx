@@ -26,14 +26,14 @@ export default function RuntimeConfigurationModal(props) {
           ...acc,
           [name]: analyzersJSON?.[name].params,
         }),
-        {},
+        {}
       ),
       ...formik.values.connectors.reduce(
         (acc, { value: name }) => ({
           ...acc,
           [name]: connectorsJSON?.[name].params,
         }),
-        {},
+        {}
       ),
     }),
     [
@@ -41,7 +41,7 @@ export default function RuntimeConfigurationModal(props) {
       formik.values.connectors,
       analyzersJSON,
       connectorsJSON,
-    ],
+    ]
   );
 
   const defaultNameParamsMap = React.useMemo(
@@ -54,12 +54,12 @@ export default function RuntimeConfigurationModal(props) {
               ...acc2,
               [pName]: value,
             }),
-            {},
+            {}
           ),
         }),
-        {},
+        {}
       ),
-    [combinedParamsMap],
+    [combinedParamsMap]
   );
 
   const placeholder = React.useMemo(
@@ -67,7 +67,7 @@ export default function RuntimeConfigurationModal(props) {
       ...defaultNameParamsMap,
       ...formik.values.runtime_configuration, // previous values if any
     }),
-    [defaultNameParamsMap, formik.values.runtime_configuration],
+    [defaultNameParamsMap, formik.values.runtime_configuration]
   );
 
   const saveAndCloseModal = () => {
@@ -79,7 +79,7 @@ export default function RuntimeConfigurationModal(props) {
           JSON.stringify(defaultNameParamsMap[name]) !== JSON.stringify(params)
             ? { ...acc, [name]: params }
             : acc,
-        {},
+        {}
       );
       formik.setFieldValue("runtime_configuration", runtimeCfg, false);
     }

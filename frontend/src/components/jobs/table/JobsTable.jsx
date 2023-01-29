@@ -45,7 +45,7 @@ export default function JobsTable() {
         ordering: "-received_request_time",
       },
     },
-    toPassTableProps,
+    toPassTableProps
   );
 
   useEffect(() => {

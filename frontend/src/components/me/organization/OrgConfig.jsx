@@ -29,8 +29,8 @@ export default function OrgConfig() {
         isUserOwner: state.isUserOwner,
         noOrg: state.noOrg,
       }),
-      [],
-    ),
+      []
+    )
   );
 
   // on component mount
@@ -45,7 +45,7 @@ export default function OrgConfig() {
     `IntelOwl | Organization ${
       organization?.name ? `(${organization?.name})` : ""
     } config`,
-    { restoreOnUnmount: true },
+    { restoreOnUnmount: true }
   );
 
   return (

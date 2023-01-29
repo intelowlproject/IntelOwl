@@ -31,8 +31,8 @@ export default function MyOrgPage() {
         fetchAll: state.fetchAll,
         noOrg: state.noOrg,
       }),
-      [],
-    ),
+      []
+    )
   );
 
   // on component mount
@@ -47,7 +47,7 @@ export default function MyOrgPage() {
     `IntelOwl | Organization ${
       organization?.name ? `(${organization?.name})` : ""
     } `,
-    { restoreOnUnmount: true },
+    { restoreOnUnmount: true }
   );
 
   return (

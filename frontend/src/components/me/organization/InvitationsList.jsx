@@ -26,7 +26,7 @@ export default function InvitationsList() {
     {
       url: BASE_URI_INVITATION,
     },
-    (respData) => respData.sort((a, b) => a.created_at - b.created_at),
+    (respData) => respData.sort((a, b) => a.created_at - b.created_at)
   );
 
   // page title
@@ -50,7 +50,7 @@ export default function InvitationsList() {
           break;
       }
     },
-    [refetchInvs],
+    [refetchInvs]
   );
 
   return (
@@ -127,7 +127,7 @@ export default function InvitationsList() {
                                   actionDispatch(
                                     "accept",
                                     id,
-                                    organization?.name,
+                                    organization?.name
                                   )
                                 }
                               />
@@ -140,7 +140,7 @@ export default function InvitationsList() {
                                   actionDispatch(
                                     "decline",
                                     id,
-                                    organization?.name,
+                                    organization?.name
                                   )
                                 }
                               />
@@ -149,7 +149,7 @@ export default function InvitationsList() {
                         </Col>
                       </Row>
                     </li>
-                  ),
+                  )
                 )}
               </ol>
             ) : (

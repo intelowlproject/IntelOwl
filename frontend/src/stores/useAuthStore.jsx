@@ -39,7 +39,7 @@ const useAuthStore = create((set, get) => ({
         addToast(
           "Error fetching user access information!",
           err.parsedMsg,
-          "danger",
+          "danger"
         );
       }
     },
@@ -82,7 +82,7 @@ const useAuthStore = create((set, get) => ({
         null,
         "spinner",
         true,
-        1000,
+        1000
       );
       return setTimeout(get().service.logoutUser, 500);
     },

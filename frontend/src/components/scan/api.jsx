@@ -9,7 +9,7 @@ import {
   ANALYZE_MULTIPLE_OBSERVABLE_URI,
   ASK_MULTI_ANALYSIS_AVAILABILITY_URI,
   ANALYZE_MULTIPLE_FILES_URI,
-  API_BASE_URI,
+  API_BASE_URI
 } from "../../constants/api";
 import useRecentScansStore from "../../stores/useRecentScansStore";
 
@@ -168,7 +168,7 @@ async function _askAnalysisAvailability(formValues) {
       const body = {
         analyzers: formValues.analyzers,
         playbooks: formValues.playbooks,
-        md5: md5(readFileAsync(file)),
+        md5: md5(readFileAsync(file))
       };
       promises.push(body.md5);
       if (formValues.check === "running_only") {
@@ -182,7 +182,7 @@ async function _askAnalysisAvailability(formValues) {
       const body = {
         analyzers: formValues.analyzers,
         playbooks: formValues.playbooks,
-        md5: md5(ObservableName),
+        md5: md5(ObservableName)
       };
       if (formValues.check === "running_only") {
         body.running_only = "True";
@@ -226,7 +226,7 @@ async function _analyzeObservable(formValues) {
     connectors_requested: formValues.connectors,
     tlp: formValues.tlp,
     runtime_configuration: formValues.runtime_configuration,
-    tags_labels: formValues.tags_labels,
+    tags_labels: formValues.tags_labels
   };
   return axios.post(ANALYZE_MULTIPLE_OBSERVABLE_URI, body);
 }
@@ -273,7 +273,7 @@ async function _startPlaybookObservable(formValues) {
   const body = {
     observables,
     playbooks_requested: formValues.playbooks,
-    tags_labels: formValues.tags_labels,
+    tags_labels: formValues.tags_labels
   };
 
   return axios.post(playbookURI, body);

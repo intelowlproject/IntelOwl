@@ -64,12 +64,12 @@ export function JobActionsBar({ job, refetch }) {
       null,
       "spinner",
       false,
-      2000,
+      2000
     );
     const url = window.URL.createObjectURL(
       new Blob([JSON.stringify(job, null, 2)], {
         type: "application/json",
-      }),
+      })
     );
     setTimeout(() => window.open(url, "rel=noopener,noreferrer"), 250);
   };

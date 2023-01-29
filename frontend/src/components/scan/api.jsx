@@ -35,7 +35,7 @@ export async function createPlaybookJob(formValues) {
   respData.forEach((x) => {
     if (x.playbooks_running)
       x.playbooks_running.forEach((playbook_) =>
-        playbooksRunning.add(playbook_),
+        playbooksRunning.add(playbook_)
       );
     if (x.warnings) warnings.push(...x.warnings);
   });
@@ -45,7 +45,7 @@ export async function createPlaybookJob(formValues) {
     if (
       respData.every(
         (element) =>
-          element.status === "accepted" || element.status === "running",
+          element.status === "accepted" || element.status === "running"
       )
     ) {
       const jobIds = respData.map((x) => parseInt(x.job_id, 10));
@@ -67,7 +67,7 @@ export async function createPlaybookJob(formValues) {
         </div>,
         "success",
         true,
-        10000,
+        10000
       );
       return Promise.resolve(jobIds);
     }
@@ -103,11 +103,11 @@ export async function createJob(formValues) {
     respData.forEach((x) => {
       if (x.analyzers_running)
         x.analyzers_running.forEach((analyzer) =>
-          analyzersRunning.add(analyzer),
+          analyzersRunning.add(analyzer)
         );
       if (x.connectors_running)
         x.connectors_running.forEach((connector) =>
-          connectorsRunning.add(connector),
+          connectorsRunning.add(connector)
         );
       if (x.warnings) warnings.push(...x.warnings);
     });
@@ -115,7 +115,7 @@ export async function createJob(formValues) {
     if (
       respData.every(
         (element) =>
-          element.status === "accepted" || element.status === "running",
+          element.status === "accepted" || element.status === "running"
       )
     ) {
       const jobIds = respData.map((x) => parseInt(x.job_id, 10));
@@ -143,7 +143,7 @@ export async function createJob(formValues) {
         </div>,
         "success",
         true,
-        10000,
+        10000
       );
       return Promise.resolve(jobIds);
     }
@@ -194,7 +194,7 @@ async function _askAnalysisAvailability(formValues) {
   try {
     const response = await axios.post(
       ASK_MULTI_ANALYSIS_AVAILABILITY_URI,
-      payload,
+      payload
     );
     const answer = response.data.results;
     if (answer.some((x) => x.status === "not_available")) {
@@ -207,7 +207,7 @@ async function _askAnalysisAvailability(formValues) {
     addToast(
       `Found similar scan with job ID(s) #${jobIds.join(", ")}`,
       null,
-      "info",
+      "info"
     );
     return jobIds;
   } catch (e) {
@@ -246,7 +246,7 @@ async function _analyzeFile(formValues) {
   ) {
     body.append(
       "runtime_configuration",
-      JSON.stringify(formValues.runtime_configuration),
+      JSON.stringify(formValues.runtime_configuration)
     );
   }
   return axios.post(ANALYZE_MULTIPLE_FILES_URI, body);

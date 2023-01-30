@@ -34,7 +34,7 @@ Keeping to a consistent code style throughout the project makes it easier to con
 ## How to start (Setup project and development instance)
 
 Create a personal fork of the project on Github.
-The, please create a new branch based on the **develop** branch that contains the most recent changes. This is mandatory.
+Then, please create a new branch based on the **develop** branch that contains the most recent changes. This is mandatory.
 
 `git checkout -b myfeature develop`
 

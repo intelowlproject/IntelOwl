@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 @dataclasses.dataclass
 class ConnectorConfig(AbstractConfig):
     maximum_tlp: str
+    run_on_fail: bool
 
     @classmethod
     def _get_report_model(cls) -> typing.Type[AbstractReport]:

@@ -188,7 +188,7 @@ jobs:
       - name: Lint with stylelint
         run: |
           npm run prettier:stylelint-check
-        working-directory: ./
+        working-directory: ./frontend
       - name: Test with Jest
         run: |
           npm run test

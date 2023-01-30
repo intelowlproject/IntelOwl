@@ -121,6 +121,7 @@ class AbstractConfigSerializer(rfs.Serializer):
                 default=None,
                 plugin_type=self._get_type(),
                 plugin_name=raw_instance["name"],
+                user=self.context.get("user", None)
             )
             if not secret_val and s_dict["required"]:
                 missing_secrets.append(s_key)
@@ -203,7 +204,7 @@ class AbstractConfigSerializer(rfs.Serializer):
         timeout=sys.maxsize,
         args_rewrite=lambda cls: f"{cls.__name__}-{cls._md5_config_file()}",
     )
-    def read_and_verify_config(cls) -> dict:
+    def read_and_verify_config(cls, user=None) -> dict:
         """
         Returns verified config.
         This function is memoized for the md5sum of the JSON file.
@@ -214,7 +215,7 @@ class AbstractConfigSerializer(rfs.Serializer):
         serializer_errors = {}
         for key, config in config_dict.items():
             new_config = {"name": key, **config}
-            serializer = cls(data=new_config)  # lgtm [py/call-to-non-callable]
+            serializer = cls(data=new_config, context={"user":user})  # lgtm [py/call-to-non-callable]
             if serializer.is_valid():
                 config_dict[key] = serializer.data
             else:

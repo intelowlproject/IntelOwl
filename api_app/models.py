@@ -10,6 +10,7 @@ from celery import group
 from django.conf import settings
 from django.contrib.postgres import fields as pg_fields
 from django.db import models
+from django.db.models import QuerySet
 from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.functional import cached_property
@@ -334,7 +335,7 @@ class Job(models.Model):
             *self._pipeline_configuration(runtime_configuration)
         ):
             config = self._merge_runtime_configuration(config, analyzers, connectors)
-
+            logger.info(f"Config is {config}, analyzers are {analyzers} and connectors are {connectors}")
             analyzer_signatures, _ = AnalyzerConfig.stack(
                 job_id=self.pk,
                 plugins_to_execute=analyzers,
@@ -344,6 +345,8 @@ class Job(models.Model):
             for signature in analyzer_signatures:
                 if signature not in final_analyzer_signatures:
                     final_analyzer_signatures.append(signature)
+                else:
+                    logger.warning(f"Signature {signature} is duplicate")
 
             connector_signatures, _ = ConnectorConfig.stack(
                 job_id=self.pk,
@@ -354,7 +357,10 @@ class Job(models.Model):
             for signature in connector_signatures:
                 if signature not in final_connector_signatures:
                     final_connector_signatures.append(signature)
-
+                else:
+                    logger.warning(f"Signature {signature} is duplicate")
+        logger.info(f"Analyzer signatures are {final_analyzer_signatures}")
+        logger.info(f"Connector signatures are {final_connector_signatures}")
         runner = (
             group(final_analyzer_signatures)
             | tasks.continue_job_pipeline.signature(
@@ -442,28 +448,32 @@ class PluginConfig(models.Model):
         ]
 
     @classmethod
+    def visible_for_user(cls, user: User) -> QuerySet:
+        configs = cls.objects.all()
+        if user:
+            try:
+                membership = Membership.objects.get(user=user)
+                configs.filter(
+                    organization=membership.organization
+                )
+            except Membership.DoesNotExist:
+                # If user is not a member of any organization, we don't need to do anything.
+                pass
+            configs.filter(owner=user)
+        return configs
+
+
+    @classmethod
     def get_as_dict(cls, user, entity_type, config_type=None, plugin_name=None) -> dict:
         """
         Returns custom config as dict
         """
-        custom_configs = cls.objects.none()
 
         kwargs = {}
         if config_type:
             kwargs["config_type"] = config_type
-
-        # Since, user-level custom configs should override organization-level configs,
-        # we need to get the organization-level configs, if any, first.
-        try:
-            membership = Membership.objects.get(user=user)
-            custom_configs |= cls.objects.filter(
-                organization=membership.organization, type=entity_type, **kwargs
-            )
-        except Membership.DoesNotExist:
-            # If user is not a member of any organization, we don't need to do anything.
-            pass
-
-        custom_configs |= cls.objects.filter(owner=user, type=entity_type, **kwargs)
+        custom_configs = cls.visible_for_user(user)
+        custom_configs.filter(type=entity_type, **kwargs)
         if plugin_name is not None:
             custom_configs = custom_configs.filter(plugin_name=plugin_name)
 

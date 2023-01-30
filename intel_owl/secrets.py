@@ -82,7 +82,9 @@ def get_secret(secret_name, default="", plugin_type=None, plugin_name=None, user
             query["plugin_name"] = plugin_name
         configs = PluginConfig.visible_for_user(user)
         try:
-            secret = configs.get(**query, config_type=PluginConfig.ConfigType.SECRET).value
+            secret = configs.get(
+                **query, config_type=PluginConfig.ConfigType.SECRET
+            ).value
         except PluginConfig.DoesNotExist:
             pass
     except AppRegistryNotReady:

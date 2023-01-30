@@ -335,7 +335,11 @@ class Job(models.Model):
             *self._pipeline_configuration(runtime_configuration)
         ):
             config = self._merge_runtime_configuration(config, analyzers, connectors)
-            logger.info(f"Config is {config}, analyzers are {analyzers} and connectors are {connectors}")
+            logger.info(
+                f"Config is {config},"
+                f" analyzers are {analyzers} and"
+                f" connectors are {connectors}"
+            )
             analyzer_signatures, _ = AnalyzerConfig.stack(
                 job_id=self.pk,
                 plugins_to_execute=analyzers,
@@ -453,15 +457,13 @@ class PluginConfig(models.Model):
         if user:
             try:
                 membership = Membership.objects.get(user=user)
-                configs.filter(
-                    organization=membership.organization
-                )
+                configs.filter(organization=membership.organization)
             except Membership.DoesNotExist:
-                # If user is not a member of any organization, we don't need to do anything.
+                # If user is not a member of any organization,
+                # we don't need to do anything.
                 pass
             configs.filter(owner=user)
         return configs
-
 
     @classmethod
     def get_as_dict(cls, user, entity_type, config_type=None, plugin_name=None) -> dict:

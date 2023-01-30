@@ -32,8 +32,8 @@ class Koodous(classes.ObservableAnalyzer):
             raise AnalyzerRunException(e)
 
         response = {
-            "Apk Info": apk_info.json(),
-            "Analysi Report": apk_analysis.json(),
+            "apk_info": apk_info.json(),
+            "analysis_report": apk_analysis.json(),
         }
 
         return response

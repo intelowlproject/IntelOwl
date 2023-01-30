@@ -1770,6 +1770,29 @@
     },
     "params": {}
   },
+  "Koodous": {
+    "type": "observable", 
+    "python_module": "koodous.Koodous",
+    "description": "Get information about android malware",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": ["hash"], 
+    "config": {
+      "soft_time_limit": 100,
+      "queue": "long"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "KOODOUS_KEY",
+        "type": "string",
+        "required": true,
+        "default": null,
+        "description": "API Key for the Koodous analyzer"
+      }
+    },
+    "params": {}
+},
   "Manalyze": {
     "type": "file",
     "python_module": "manalyze.Manalyze",

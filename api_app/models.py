@@ -455,6 +455,8 @@ class PluginConfig(models.Model):
     def visible_for_user(cls, user: User) -> QuerySet:
         configs = cls.objects.all()
         if user:
+            # User-level custom configs should override organization-level configs,
+            # we need to get the organization-level configs, if any, first.
             try:
                 membership = Membership.objects.get(user=user)
                 configs.filter(organization=membership.organization)

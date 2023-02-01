@@ -202,7 +202,7 @@ class AbstractConfigSerializer(rfs.Serializer):
     @classmethod
     @cache_memoize(
         timeout=sys.maxsize,
-        args_rewrite=lambda cls, user: f"{cls.__name__}-{user.username if user else ''}-{cls._md5_config_file()}",
+        args_rewrite=lambda cls, user=None: f"{cls.__name__}-{user.username if user else ''}-{cls._md5_config_file()}",
     )
     def read_and_verify_config(cls, user=None) -> dict:
         """

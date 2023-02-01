@@ -10,7 +10,7 @@ from celery import group
 from django.conf import settings
 from django.contrib.postgres import fields as pg_fields
 from django.db import models
-from django.db.models import QuerySet
+from django.db.models import QuerySet, Q
 from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.functional import cached_property
@@ -462,10 +462,10 @@ class PluginConfig(models.Model):
             except Membership.DoesNotExist:
                 # If user is not a member of any organization,
                 # we don't need to do anything.
-                pass
+                configs = configs.filter(owner=user)
             else:
-                configs = configs.filter(organization=membership.organization)
-            configs = configs.filter(owner=user)
+                configs = configs.filter(Q(organization=membership.organization) | Q(owner=user))
+
         return configs
 
     @classmethod

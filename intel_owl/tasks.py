@@ -10,6 +10,7 @@ from celery import shared_task, signals
 from api_app import crons
 from api_app.analyzers_manager.file_analyzers import yara_scan
 from api_app.analyzers_manager.observable_analyzers import maxmind, talos, tor
+from certego_saas.models import User
 from intel_owl.celery import app
 
 
@@ -106,3 +107,6 @@ def worker_ready_connect(*args, **kwargs):
 
     build_config_cache(AnalyzerConfigSerializer)
     build_config_cache(ConnectorConfigSerializer)
+    for user in User.objects.all():
+        build_config_cache(AnalyzerConfigSerializer, user)
+        build_config_cache(ConnectorConfigSerializer, user)

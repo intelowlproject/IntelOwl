@@ -8,7 +8,7 @@ import os
 import sys
 from abc import abstractmethod
 from copy import deepcopy
-from typing import List, Optional, TypedDict, Dict
+from typing import Dict, List, Optional, TypedDict
 
 from cache_memoize import cache_memoize
 from django.conf import settings
@@ -202,8 +202,9 @@ class AbstractConfigSerializer(rfs.Serializer):
     @classmethod
     @cache_memoize(
         timeout=sys.maxsize,
-        args_rewrite=lambda cls, user=None:
-        f"{cls.__name__}-{user.username if user else ''}-{cls._md5_config_file()}",
+        args_rewrite=lambda cls, user=None: f"{cls.__name__}-"
+        f"{user.username if user else ''}-"
+        f"{cls._md5_config_file()}",
     )
     def read_and_verify_config(cls, user=None) -> Dict:
         """

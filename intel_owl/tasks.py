@@ -10,6 +10,7 @@ from celery import shared_task, signals
 from api_app import crons
 from api_app.analyzers_manager.file_analyzers import yara_scan
 from api_app.analyzers_manager.observable_analyzers import maxmind, talos, tor
+from certego_saas.models import User
 from intel_owl.celery import app
 
 
@@ -89,16 +90,23 @@ def run_connector(job_id: int, config_dict: dict, report_defaults: dict):
 
 
 @shared_task()
-def build_config_cache(*args, **kwargs):
-    from api_app.analyzers_manager.serializers import AnalyzerConfigSerializer
-    from api_app.connectors_manager.serializers import ConnectorConfigSerializer
+def build_config_cache(serializer_class, user=None):
+    from api_app.core.serializers import AbstractConfigSerializer
 
     # we "greedy cache" the config at start of application
     # because it is an expensive operation
-    AnalyzerConfigSerializer.read_and_verify_config()
-    ConnectorConfigSerializer.read_and_verify_config()
+
+    serializer_class: AbstractConfigSerializer
+    serializer_class.read_and_verify_config(user)
 
 
 @signals.worker_ready.connect
 def worker_ready_connect(*args, **kwargs):
-    build_config_cache()
+    from api_app.analyzers_manager.serializers import AnalyzerConfigSerializer
+    from api_app.connectors_manager.serializers import ConnectorConfigSerializer
+
+    build_config_cache(AnalyzerConfigSerializer)
+    build_config_cache(ConnectorConfigSerializer)
+    for user in User.objects.all():
+        build_config_cache(AnalyzerConfigSerializer, user)
+        build_config_cache(ConnectorConfigSerializer, user)

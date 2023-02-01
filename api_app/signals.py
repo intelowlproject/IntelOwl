@@ -21,20 +21,20 @@ def invalidate_plugin_config(instance: PluginConfig):
         raise TypeError(f"Unable to parse plugin type {instance.type}")
 
     serializer_class.read_and_verify_config.invalidate(serializer_class)
-    build_config_cache.delay(serializer_class)
+    build_config_cache.delay(args=[serializer_class, None])
     # we are invalidating for every member of the organization
     if instance.organization:
         for member in instance.organization.members.all():
             serializer_class.read_and_verify_config.invalidate(
                 serializer_class, member.user
             )
-            build_config_cache.delay(serializer_class, member.user)
+            build_config_cache.delay(args=[serializer_class, member.user])
     else:
         # only the person that created it
         serializer_class.read_and_verify_config.invalidate(
             serializer_class, instance.owner
         )
-        build_config_cache.delay(serializer_class, instance.owner)
+        build_config_cache.delay(args=[serializer_class, instance.owner])
 
 
 @receiver(post_save, sender=PluginConfig)

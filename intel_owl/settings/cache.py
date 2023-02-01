@@ -4,3 +4,4 @@ CACHES = {
         "LOCATION": "intelowl_cache",
     }
 }
+MEDIA_ROOT = "/opt/deploy/files_required"

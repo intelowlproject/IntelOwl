@@ -1,4 +1,4 @@
-import create from "zustand";
+import { create } from "zustand";
 import axios from "axios";
 
 import { BASE_URI_ORG, ORG_PLUGIN_DISABLE_URI } from "../constants/api";

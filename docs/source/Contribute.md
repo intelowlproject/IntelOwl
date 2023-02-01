@@ -356,6 +356,8 @@ $ # which corresponds to the command: docker-compose -f docker/default.yml -f do
 
 Now that the containers are up, we can launch the test suite.
 
+#### Backend
+
 ##### Run all tests
 
 Examples:
@@ -402,6 +404,34 @@ Examples:
 Otherwise, you can use the normal Django syntax like previously shown. Example:
 ```bash
 $ docker exec intelowl_uwsgi python3 manage.py test tests.analyzers_manager.test_observable_scripts.GenericAnalyzersTestCase
+```
+
+#### Frontend
+
+
+All the frontend tests must be run from the folder `frontend`.
+
+##### Run all tests
+
+```
+npm test
+```
+
+
+##### Run a specific component tests
+
+```
+npm test -- -t <componentPath>
+// example
+npm test tests/components/auth/Login.test.jsx
+```
+
+##### Run a specific test
+
+```
+npm test -- -t '<describeString> <testString>'
+// example
+npm test -- -t "Login component User login"
 ```
 
 

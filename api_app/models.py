@@ -10,7 +10,7 @@ from celery import group
 from django.conf import settings
 from django.contrib.postgres import fields as pg_fields
 from django.db import models
-from django.db.models import QuerySet, Q
+from django.db.models import Q, QuerySet
 from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.functional import cached_property
@@ -464,7 +464,9 @@ class PluginConfig(models.Model):
                 # we don't need to do anything.
                 configs = configs.filter(owner=user)
             else:
-                configs = configs.filter(Q(organization=membership.organization) | Q(owner=user))
+                configs = configs.filter(
+                    Q(organization=membership.organization) | Q(owner=user)
+                )
 
         return configs
 

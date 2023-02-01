@@ -46,11 +46,24 @@ class Connector(Plugin, metaclass=abc.ABCMeta):
     def before_run(self, *args, **kwargs):
         logger.info(f"STARTED connector: {self.__repr__()}")
         self._config: ConnectorConfig
-        if not self._config.run_on_fail and self._job.status == self._job.Status.FAILED:
-            raise ConnectorRunException(
-                f"Job status is {self._job.Status.FAILED}, "
-                f"unable to run connector {self.__class__.__name__}"
-            )
+        if self._job.status not in [
+            self._job.Status.REPORTED_WITH_FAILS,
+            self._job.Status.REPORTED_WITHOUT_FAILS,
+        ]:
+            if (
+                self._config.run_on_failure
+                and self._job.status == self._job.Status.FAILED
+            ):
+                logger.info(
+                    f"Running connector {self.__class__.__name__} "
+                    f"even if job status is {self._job.status} because"
+                    "run on failure is set"
+                )
+            else:
+                raise ConnectorRunException(
+                    f"Job status is {self._job.status}, "
+                    f"unable to run connector {self.__class__.__name__}"
+                )
 
     def after_run(self):
         logger.info(f"FINISHED connector: {self.__repr__()}")

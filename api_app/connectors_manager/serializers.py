@@ -16,7 +16,7 @@ class ConnectorConfigSerializer(AbstractConfigSerializer):
     """
 
     maximum_tlp = rfs.ChoiceField(choices=TLP.choices)
-    run_on_fail = rfs.BooleanField(default=False)
+    run_on_failure = rfs.BooleanField(default=False)
     CONFIG_FILE_NAME = "connector_config.json"
 
     def _get_type(self):

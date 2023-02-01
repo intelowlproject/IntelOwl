@@ -169,7 +169,7 @@ After having written the new python module, you have to remember to:
 
 Example:
 
-```javascript
+```json
 "Analyzer_Name": {
     "type": "file", // or "observable"
     "python_module": "<module_name>.<class_name>",
@@ -240,11 +240,12 @@ After having written the new python module, you have to remember to:
 
 Example:
 
-```javascript
+```json
 "Connector_Name": {
     "python_module": "<module_name>.<class_name>",
     "description": "very cool connector",
     "maximum_tlp": "WHITE",
+    "run_on_failure": false,
     "config": {
       "soft_time_limit": 100,
       "queue": "default",
@@ -278,7 +279,7 @@ You may want to look at the existing [playbook_configuration.json](https://githu
 
 Example:
 
-```javascript
+```json
 "Playbook_Name": {
     "description": "very cool playbook",
     "analyzers": {

@@ -1377,6 +1377,45 @@
       }
     }
   },
+  "HaveIBeenPwned": {
+    "type": "observable",
+    "python_module": "haveibeenpwned.HaveIBeenPwned",
+    "description": "Check if an email address has been involved in a data breach",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": true,
+    "observable_supported": ["generic"],
+    "config": {
+      "soft_time_limit": 100,
+      "queue": "default"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "HIBP_API_KEY",
+        "type": "string",
+        "required": true,
+        "default": null,
+        "description": "API Key for HaveIBeenPwned"
+      }
+    },
+    "params": {
+      "truncate_response": {
+        "value": true,
+        "type": "bool",
+        "description": "Truncate response to only include most recent data breaches"
+      },
+      "include_unverified": {
+        "value": false,
+        "type": "bool",
+        "description": "Include unverified data breaches in the response"
+      },
+      "domain": {
+        "value": "",
+        "type": "str",
+        "description": "Search for data breaches specific to a domain"
+      }
+    }
+  },
   "HoneyDB": {
     "type": "observable",
     "python_module": "honeydb.HoneyDB",
@@ -1731,6 +1770,29 @@
     },
     "params": {}
   },
+  "Koodous": {
+    "type": "observable", 
+    "python_module": "koodous.Koodous",
+    "description": "Get information about android malware",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": ["hash"], 
+    "config": {
+      "soft_time_limit": 100,
+      "queue": "long"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "KOODOUS_KEY",
+        "type": "string",
+        "required": true,
+        "default": null,
+        "description": "API Key for the Koodous analyzer"
+      }
+    },
+    "params": {}
+},
   "Manalyze": {
     "type": "file",
     "python_module": "manalyze.Manalyze",

@@ -1,5 +1,5 @@
-import create from "zustand";
-import { persist } from "zustand/middleware";
+import { create } from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware";
 
 // constants
 const LOCALSTORAGE_KEY = "intelowl-recent-scans-store";
@@ -28,7 +28,7 @@ const useRecentScansStore = create(
     }),
     {
       name: LOCALSTORAGE_KEY,
-      getStorage: () => localStorage,
+      storage: createJSONStorage(() => localStorage),
     }
   )
 );

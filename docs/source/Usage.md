@@ -346,7 +346,7 @@ The following is the list of the available connectors. You can also navigate the
 
 #### Connectors customization
 
-Connectors being optional are `disabled` by default. You can enable them by changing the configuration values inside `configuration/connector_config.json`. This file is mounted as a docker volume, so you won't need to rebuild the image.
+Connectors being optional are `enabled` by default. You can disable them by changing the configuration values inside `configuration/connector_config.json`. This file is mounted as a docker volume, so you won't need to rebuild the image. 
 
 The following are all the keys that you can change without touching the source code:
 

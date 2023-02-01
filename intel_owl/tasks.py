@@ -47,19 +47,12 @@ def yara_updater():
 
 @app.task(name="continue_job_pipeline", soft_time_limit=20)
 def continue_job_pipeline(job_id: int):
-    from celery.exceptions import ChordError
 
     from api_app.models import Job
 
     job = Job.objects.get(pk=job_id)
     # execute some callbacks
     job.job_cleanup()
-    # fire connectors when job finishes with success
-    if job.status not in [
-        Job.Status.REPORTED_WITHOUT_FAILS,
-        Job.Status.REPORTED_WITH_FAILS,
-    ]:
-        raise ChordError(f"Unable to continue job because status is {job.status}")
 
 
 @app.task(name="job_pipeline", soft_time_limit=100)

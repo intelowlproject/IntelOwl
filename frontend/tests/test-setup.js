@@ -1,4 +1,4 @@
-// suppression of logs in the tests 
+// suppression of logs in the tests
 global.console = {
   ...console,
   log: jest.fn(),

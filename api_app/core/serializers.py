@@ -201,7 +201,7 @@ class AbstractConfigSerializer(rfs.Serializer):
 
     @classmethod
     @cache_memoize(
-        timeout=sys.maxsize,
+        timeout=60*60*24*365,  # 1 year
         args_rewrite=lambda cls, user=None: f"{cls.__name__}-"
         f"{user.username if user else ''}-"
         f"{cls._md5_config_file()}",

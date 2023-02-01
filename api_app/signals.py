@@ -46,6 +46,6 @@ def post_save_plugin_credential(
 
 
 @receiver(pre_delete, sender=PluginConfig)
-def pre_delete_plugin_credential(sender, instance, using, origin, *args, **kwargs):
+def pre_delete_plugin_credential(sender, instance, using, *args, **kwargs):
     if not settings.STAGE_CI:
         invalidate_plugin_config(instance)

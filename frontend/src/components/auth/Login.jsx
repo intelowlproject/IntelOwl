@@ -119,7 +119,7 @@ export default function Login() {
                 />
               </a>
               <AiOutlineInfoCircle
-                style={{ "vertical-align": "top" }}
+                style={{ verticalAlign: "top" }}
                 id="GoogleInfoTooltip"
                 cursor="pointer"
               />

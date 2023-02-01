@@ -5,7 +5,6 @@ import hashlib
 import json
 import logging
 import os
-import sys
 from abc import abstractmethod
 from copy import deepcopy
 from typing import Dict, List, Optional, TypedDict
@@ -201,7 +200,7 @@ class AbstractConfigSerializer(rfs.Serializer):
 
     @classmethod
     @cache_memoize(
-        timeout=60*60*24*365,  # 1 year
+        timeout=60 * 60 * 24 * 365,  # 1 year
         args_rewrite=lambda cls, user=None: f"{cls.__name__}-"
         f"{user.username if user else ''}-"
         f"{cls._md5_config_file()}",

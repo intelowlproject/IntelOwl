@@ -39,13 +39,13 @@ def invalidate_plugin_config(instance: PluginConfig):
 
 @receiver(post_save, sender=PluginConfig)
 def post_save_plugin_credential(
-    sender, instance: PluginConfig, created, raw, using, update_fields
+    sender, instance: PluginConfig, created, raw, using, update_fields,*args, **kwargs
 ):
     if not settings.STAGE_CI:
         invalidate_plugin_config(instance)
 
 
 @receiver(pre_delete, sender=PluginConfig)
-def pre_delete_plugin_credential(sender, instance, using, origin):
+def pre_delete_plugin_credential(sender, instance, using, origin,*args, **kwargs):
     if not settings.STAGE_CI:
         invalidate_plugin_config(instance)

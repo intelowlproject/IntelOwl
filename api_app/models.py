@@ -459,12 +459,13 @@ class PluginConfig(models.Model):
             # we need to get the organization-level configs, if any, first.
             try:
                 membership = Membership.objects.get(user=user)
-                configs.filter(organization=membership.organization)
             except Membership.DoesNotExist:
                 # If user is not a member of any organization,
                 # we don't need to do anything.
                 pass
-            configs.filter(owner=user)
+            else:
+                configs = configs.filter(organization=membership.organization)
+            configs = configs.filter(owner=user)
         return configs
 
     @classmethod
@@ -477,7 +478,7 @@ class PluginConfig(models.Model):
         if config_type:
             kwargs["config_type"] = config_type
         custom_configs = cls.visible_for_user(user)
-        custom_configs.filter(type=entity_type, **kwargs)
+        custom_configs = custom_configs.filter(type=entity_type, **kwargs)
         if plugin_name is not None:
             custom_configs = custom_configs.filter(plugin_name=plugin_name)
 

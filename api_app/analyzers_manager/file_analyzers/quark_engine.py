@@ -10,11 +10,11 @@ from api_app.exceptions import AnalyzerRunException
 
 
 class QuarkEngine(FileAnalyzer):
-    def set_params(self, params: dict):
+    @staticmethod
+    def updater():
         freshquark.download()
 
     def run(self):
-
         report = Report()
         # start analysis
         report.analysis(self.filepath, settings.QUARK_RULES_PATH)

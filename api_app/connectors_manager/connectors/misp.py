@@ -33,7 +33,7 @@ class MISP(Connector):
         self.ssl_check = params.get("ssl_check", True)
         self.self_signed_certificate = params.get("self_signed_certificate", False)
         self.debug = params.get("debug", False)
-        self.tlp = params.get("tlp", "white")
+        self.tlp = params.get("tlp", "clear")
         self.__url_name = self._secrets["url_key_name"]
         self.__api_key = self._secrets["api_key_name"]
 

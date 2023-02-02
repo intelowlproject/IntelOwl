@@ -65,7 +65,7 @@ class ApiViewTests(CustomAPITestCase):
             ],
             "analyzers_requested": ["Classic_DNS", "Robtex_IP_Query"],
             "connectors_requested": [],
-            "tlp": "WHITE",
+            "tlp": "CLEAR",
             "runtime_configuration": {},
             "tags_labels": [],
         }

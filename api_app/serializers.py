@@ -131,7 +131,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         if serialized_data.get("playbooks_requested", []):
             analyzers_requested = serialized_data.get("analyzers_to_execute", [])
 
-        tlp = serialized_data.get("tlp", TLP.WHITE).upper()
+        tlp = serialized_data.get("tlp", TLP.CLEAR).upper()
 
         # read config
         analyzer_dataclasses = AnalyzerConfig.all()
@@ -169,7 +169,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
                         f"{a_name} won't run: is disabled or unconfigured"
                     )
 
-                if tlp != TLP.WHITE and config.leaks_info:
+                if tlp != TLP.CLEAR and config.leaks_info:
                     raise NotRunnableAnalyzer(
                         f"{a_name} won't be run because it leaks info externally."
                     )
@@ -210,7 +210,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
             connectors_requested = serialized_data.get("connectors_to_execute", [])
             run_all = False
 
-        tlp = serialized_data.get("tlp", TLP.WHITE).upper()
+        tlp = serialized_data.get("tlp", TLP.CLEAR).upper()
 
         # read config
         connector_dataclasses = ConnectorConfig.all()
@@ -245,7 +245,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
                     cc.maximum_tlp
                 ):  # check if job's tlp allows running
                     # e.g. if connector_tlp is GREEN(1),
-                    # run for job_tlp WHITE(0) & GREEN(1) only
+                    # run for job_tlp CLEAR(0) & GREEN(1) only
                     raise NotRunnableConnector(
                         f"{c_name} won't run: "
                         f"job.tlp ('{tlp}') > maximum_tlp ('{cc.maximum_tlp}')"

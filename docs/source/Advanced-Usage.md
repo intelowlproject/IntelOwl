@@ -194,6 +194,7 @@ Some analyzers could require a special configuration:
 - `ClamAV`: this Docker-based analyzer using `clamd` daemon as it's scanner, communicating with `clamdscan` utility to scan files. The daemon requires 2 different configuration files: `clamd.conf`(daemon's config) and `freshclam.conf` (virus database updater's config). These files are mounted as docker volumes in `/integrations/malware_tools_analyzers/clamav` and hence, can be edited by the user as per needs, without restarting the application.
 
 - `Suricata`: you can customize the behavior of Suricata:
+
   - `/integrations/pcap_analyzers/config/suricata/rules`: here there are Suricata rules. You can change the `custom.rules` files to add your own rules at any time. Once you made this change, you need to either restart IntelOwl or (this is faster) run a new analysis with the Suricata analyzer and set the parameter `reload_rules` to `true`.
   - `/integrations/pcap_analyzers/config/suricata/etc`: here there are Suricata configuration files. Change it based on your wish. Restart IntelOwl to see the changes applied.
 
@@ -203,7 +204,7 @@ Some analyzers could require a special configuration:
 
 Organizations are a great way to share data and analysis only with the members of your team. Invite the people you work with in your organization!
 
-By default, analysis (jobs) are executed with a level of TLP that is WHITE. This means that these jobs are public and every IntelOwl user can see them.
+By default, analysis (jobs) are executed with a level of TLP that is CLEAR. This means that these jobs are public and every IntelOwl user can see them.
 Thanks to the "Organization" feature, you can restrict the people who can see the analysis that you made.
 
 How you can do that?
@@ -266,7 +267,6 @@ The first step is to create a [Google Cloud Platform](https://cloud.google.com/r
 
 After that, specify the client ID and secret as `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` environment variables.
 
-
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 While configuring Google Auth2 you can choose either to enable access to the all users with a Google Account ("External" mode) or to enable access to only the users of your organization ("Internal" mode).
@@ -306,7 +306,6 @@ For more details on how to configure this file, check the <a href="https://githu
 
 2. Once you have done that, you have to set the environment variable `RADIUS_AUTH_ENABLED` as `True` in the environment
    configuration file `env_file_app`. Finally, you can restart the application with `docker-compose up`
-
 
 ## Google Kubernetes Engine deployment
 
@@ -385,4 +384,3 @@ If you prefer to use S3 to store the samples, instead of a local storage, you ca
 First, you need to configure the environment variable `LOCAL_STORAGE` to `False` to enable it and set `AWS_STORAGE_BUCKET_NAME` to the proper AWS bucket.
 Then you have to add some credentials for AWS: if you have IntelOwl deployed on the AWS infrastructure, you can use IAM credentials:
 to allow that just set `AWS_IAM_ACCESS` to `True`. If that is not the case, you have to set both `AWS_ACESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`
-

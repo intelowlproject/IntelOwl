@@ -8,6 +8,8 @@ from ipaddress import AddressValueError, IPv4Address
 from shutil import which
 from urllib.parse import urlparse
 
+from django.conf import settings
+
 from api_app.analyzers_manager import classes
 from api_app.exceptions import AnalyzerRunException
 
@@ -16,7 +18,6 @@ logger = logging.getLogger(__name__)
 
 class DNStwist(classes.ObservableAnalyzer):
     command: str = "dnstwist"
-    dictionary_base_path: str = "/opt/deploy/dnstwist-dictionaries/"
 
     def set_params(self, params):
         self._ssdeep = params.get("ssdeep", False)
@@ -54,7 +55,7 @@ class DNStwist(classes.ObservableAnalyzer):
             args.append("--mxcheck")
         if self._tld:
             args.append("--tld")
-            args.append(self.dictionary_base_path + self._tld_dict)
+            args.append(settings.DNS_TWIST_PATH / self._tld_dict)
 
         args.append(domain)
 

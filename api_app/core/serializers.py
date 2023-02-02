@@ -151,7 +151,9 @@ class AbstractConfigSerializer(rfs.Serializer):
         """
         Returns full path to the config file.
         """
-        return os.path.join(settings.BASE_DIR, "configuration", cls.CONFIG_FILE_NAME)
+        return os.path.join(
+            settings.PROJECT_LOCATION, "configuration", cls.CONFIG_FILE_NAME
+        )
 
     @classmethod
     def _read_config(cls) -> dict:

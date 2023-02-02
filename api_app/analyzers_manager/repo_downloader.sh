@@ -60,9 +60,6 @@ rm generic_anomalies.yar general_cloaking.yar thor_inverse_matches.yar yara_mixe
 # Download rules for quark-engine analyzer
 cd /opt/deploy
 git clone https://github.com/quark-engine/quark-rules quark-rules
-# this is done to lock the version since the repo does not have tags.
-cd quark-rules
-git checkout tags/0.0.1
 # chown directories
 chown -R www-data:www-data /opt/deploy/yara /opt/deploy/quark-rules
 

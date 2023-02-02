@@ -187,6 +187,17 @@ cd ./docker/scripts
 We decided to do not leverage Django Rotation Configuration because it caused problematic concurrency issues, leading to logs that are not rotated correctly and to apps that do not log anymore.
 Logrotate configuration is more stable.
 
+### Crontab configuration (recommended for advanced deployments)
+We added few Crontab configurations that could be installed in the host machine at system level to solve some possible edge-case issues:
+* Memory leaks: Once a week it is suggested to do a full restart of the application to clean-up the memory used by the application. Practical experience suggest us to do that to solve some recurrent memory issues in Celery. This cron (`application_restart`) assumes that you have executed IntelOwl with the parameters `-all_analyzers`. If you didn't, feel free to change the cron as you wish.
+* Cluster deployments: IntelOwl is composed of crons executed by Celery that periodically update the repositories and the data downloaded from external sources and that are read by some analyzers like Yara, Tor, etc. In cluster deployments, those crons would be executed only once so they would update only a single server. To have all the servers updated at the same time, you need to install the `update_repos` cron to all the deployed servers
+
+This configuration is optional but strongly recommended for people who want to have a production grade deployment. To install it you need to run the following script in each deployed server:
+```commandline
+cd ./docker/scripts
+./install_crontab.sh
+```
+
 ### Web server configuration (optional)
 Intel Owl provides basic configuration for:
 * Nginx (`configuration/nginx/http.conf`)

@@ -10,8 +10,8 @@ import re
 import zipfile
 from re import sub
 from typing import List
-from xml.etree import ElementTree
 
+from defusedxml.ElementTree import fromstring
 from oletools import mraptor
 from oletools.msodde import process_maybe_encrypted as msodde_process_maybe_encrypted
 from oletools.olevba import VBA_Parser
@@ -60,7 +60,7 @@ class DocInfo(FileAnalyzer):
             template = zipped.read("word/_rels/document.xml.rels")
             # logic reference:
             # https://github.com/MalwareTech/FollinaExtractor/blob/main/extract_follina.py#L7
-            xml_root = ElementTree.fromstring(template)
+            xml_root = fromstring(template)
             for xml_node in xml_root.iter():
                 target = xml_node.attrib.get("Target")
                 if target:

@@ -10,7 +10,8 @@ from api_app.analyzers_manager.classes import FileAnalyzer
 
 class RTFInfo(FileAnalyzer):
     def analyze_for_follina_cve(self) -> List[str]:
-        # logic reference: https://github.com/MalwareTech/FollinaExtractor/blob/main/extract_follina.py#L23
+        # logic reference:
+        # https://github.com/MalwareTech/FollinaExtractor/blob/main/extract_follina.py#L23
         content = self.read_file_bytes().decode("utf8", errors="ignore")
         return re.findall(r"objclass (https?://.*?)}", content)
 

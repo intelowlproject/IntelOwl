@@ -5,7 +5,6 @@
 # ... that implements additional features to correctly analyze some particular files
 # original repository: https://github.com/decalage2/oletools
 # forked repository: https://github.com/mlodic/oletools
-
 import logging
 import re
 import zipfile
@@ -51,6 +50,7 @@ class DocInfo(FileAnalyzer):
             self.passwords_to_check.extend(additional_passwords_to_check)
 
     def analyze_for_follina_cve(self) -> List[str]:
+        hits = []
         if (
             self.file_mimetype
             == "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
@@ -58,15 +58,17 @@ class DocInfo(FileAnalyzer):
             # case docx
             zipped = zipfile.ZipFile(self.filepath)
             template = zipped.read("word/_rels/document.xml.rels")
-            # logic reference: https://github.com/MalwareTech/FollinaExtractor/blob/main/extract_follina.py#L7
+            # logic reference:
+            # https://github.com/MalwareTech/FollinaExtractor/blob/main/extract_follina.py#L7
             xml_root = ElementTree.fromstring(template)
             for xml_node in xml_root.iter():
                 target = xml_node.attrib.get("Target")
                 if target:
                     target = target.strip().lower()
-                    return re.findall(r"mhtml:(https?://.*?)!", target)
-        logger.info("Wrong mimetype to search for follina")
-        return []
+                    hits += re.findall(r"mhtml:(https?://.*?)!", target)
+        else:
+            logger.info("Wrong mimetype to search for follina")
+        return hits
 
     def run(self):
         results = {}

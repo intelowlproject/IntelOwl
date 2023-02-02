@@ -1,7 +1,6 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-import hashlib
 import logging
 import time
 
@@ -10,6 +9,7 @@ from requests import HTTPError
 
 from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.exceptions import AnalyzerRunException
+from api_app.helpers import calculate_sha256
 from tests.mock_utils import MagicMock, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
@@ -38,9 +38,6 @@ class MWDB_Scan(FileAnalyzer):
         self.max_tries = params.get("max_tries", 50)
         self.poll_distance = 5
 
-    def file_analysis(self, file_info):
-        return "karton" in file_info.metakeys.keys()
-
     def adjust_relations(self, base, key, recursive=True):
         new_relation = []
         for relation in base[key]:
@@ -65,7 +62,7 @@ class MWDB_Scan(FileAnalyzer):
     def run(self):
         result = {}
         binary = self.read_file_bytes()
-        query = str(hashlib.sha256(binary).hexdigest())
+        query = calculate_sha256(binary)
         self.mwdb = mwdblib.MWDB(api_key=self.__api_key)
 
         if self.upload_file:
@@ -80,9 +77,9 @@ class MWDB_Scan(FileAnalyzer):
                 )
                 time.sleep(self.poll_distance)
                 file_info = self.mwdb.query_file(file_object.data["id"])
-                if self.file_analysis(file_info):
+                if "karton" in file_info.metakeys.keys():
                     break
-            if not self.file_analysis(file_info):
+            else:
                 raise AnalyzerRunException("max retry attempts exceeded")
         else:
             try:

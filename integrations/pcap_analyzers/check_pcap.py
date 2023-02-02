@@ -77,7 +77,7 @@ class Suricata:
         # waiting for eve.json to be populated
         max_tries = 30
         polling_time = 1
-        for try_ in range(max_tries):
+        for _ in range(max_tries):
             if os.path.exists(self.eve_file):
                 break
             time.sleep(polling_time)

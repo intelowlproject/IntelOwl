@@ -181,9 +181,8 @@ class CuckooAnalysis(FileAnalyzer):
             ioc = mark.get("ioc", "")
             if ioc and ioc.startswith("http"):
                 list_potentially_malicious_urls.append(ioc)
-            if mark.get("config", {}):
-                if mark["config"].get("url", []):
-                    list_potentially_malicious_urls.extend(mark["config"]["url"])
+            urls = mark.get("config", {}).get("url", [])
+            list_potentially_malicious_urls.extend(urls)
 
         # remove duplicates
         list_potentially_malicious_urls = list(set(list_potentially_malicious_urls))

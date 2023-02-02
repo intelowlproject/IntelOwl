@@ -49,7 +49,7 @@ class OpenCTI(classes.Connector):
                 obs_type = INTELOWL_OPENCTI_TYPE_MAP[ObservableTypes.GENERIC]  # text
         elif self._job.observable_classification == ObservableTypes.IP:
             ip_version = helpers.get_ip_version(self._job.observable_name)
-            if ip_version == 4 or ip_version == 6:
+            if ip_version in [4, 6]:
                 obs_type = INTELOWL_OPENCTI_TYPE_MAP[ObservableTypes.IP][
                     f"v{ip_version}"
                 ]  # v4/v6

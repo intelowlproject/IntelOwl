@@ -857,18 +857,23 @@ class PluginConfigSerializer(rfs.ModelSerializer):
         if attrs["plugin_name"] not in config.all():
             raise ValidationError(f"{category} {attrs['plugin_name']} does not exist.")
 
-        if attrs["config_type"] == PluginConfig.ConfigType.PARAMETER:
-            if attrs["attribute"] not in config.all()[attrs["plugin_name"]].params:
-                raise ValidationError(
-                    f"{category} {attrs['plugin_name']} does not "
-                    f"have parameter {attrs['attribute']}."
-                )
-        elif attrs["config_type"] == PluginConfig.ConfigType.SECRET:
-            if attrs["attribute"] not in config.all()[attrs["plugin_name"]].secrets:
-                raise ValidationError(
-                    f"{category} {attrs['plugin_name']} does not "
-                    f"have secret {attrs['attribute']}."
-                )
+        if (
+            attrs["config_type"] == PluginConfig.ConfigType.PARAMETER
+            and attrs["attribute"] not in config.all()[attrs["plugin_name"]].params
+        ):
+            raise ValidationError(
+                f"{category} {attrs['plugin_name']} does not "
+                f"have parameter {attrs['attribute']}."
+            )
+        elif (
+            attrs["config_type"] == PluginConfig.ConfigType.SECRET
+            and attrs["attribute"] not in config.all()[attrs["plugin_name"]].secrets
+        ):
+
+            raise ValidationError(
+                f"{category} {attrs['plugin_name']} does not "
+                f"have secret {attrs['attribute']}."
+            )
         # Check if the type of value is valid for the attribute.
         expected_type = (
             type(config.all()[attrs["plugin_name"]].params[attrs["attribute"]].value)

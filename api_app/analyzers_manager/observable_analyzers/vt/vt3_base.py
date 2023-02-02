@@ -1,6 +1,6 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
-
+import abc
 import base64
 import logging
 import time
@@ -14,7 +14,7 @@ from api_app.exceptions import AnalyzerRunException
 logger = logging.getLogger(__name__)
 
 
-class VirusTotalv3AnalyzerMixin(BaseAnalyzerMixin):
+class VirusTotalv3AnalyzerMixin(BaseAnalyzerMixin, metaclass=abc.ABCMeta):
     base_url = "https://www.virustotal.com/api/v3/"
 
     def set_params(self, params):

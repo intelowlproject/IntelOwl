@@ -1,7 +1,6 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-import hashlib
 import logging
 import typing
 from typing import Optional
@@ -17,7 +16,7 @@ from django.utils.functional import cached_property
 
 from api_app.core.models import AbstractReport
 from api_app.exceptions import AlreadyFailedJobException
-from api_app.helpers import get_now
+from api_app.helpers import calculate_sha1, calculate_sha256, get_now
 from certego_saas.apps.organization.membership import Membership
 from certego_saas.apps.organization.organization import Organization
 from certego_saas.models import User
@@ -140,11 +139,11 @@ class Job(models.Model):
 
     @cached_property
     def sha256(self) -> str:
-        return hashlib.sha256(self.file.read()).hexdigest()
+        return calculate_sha256(self.file.read())
 
     @cached_property
     def sha1(self) -> str:
-        return hashlib.sha1(self.file.read()).hexdigest()
+        return calculate_sha1(self.file.read())
 
     def job_cleanup(self) -> None:
         logger.info(f"[STARTING] job_cleanup for <-- {self.__repr__()}.")

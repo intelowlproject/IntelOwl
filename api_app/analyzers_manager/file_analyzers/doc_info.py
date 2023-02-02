@@ -57,15 +57,19 @@ class DocInfo(FileAnalyzer):
         ):
             # case docx
             zipped = zipfile.ZipFile(self.filepath)
-            template = zipped.read("word/_rels/document.xml.rels")
-            # logic reference:
-            # https://github.com/MalwareTech/FollinaExtractor/blob/main/extract_follina.py#L7
-            xml_root = fromstring(template)
-            for xml_node in xml_root.iter():
-                target = xml_node.attrib.get("Target")
-                if target:
-                    target = target.strip().lower()
-                    hits += re.findall(r"mhtml:(https?://.*?)!", target)
+            try:
+                template = zipped.read("word/_rels/document.xml.rels")
+            except KeyError:
+                pass
+            else:
+                # logic reference:
+                # https://github.com/MalwareTech/FollinaExtractor/blob/main/extract_follina.py#L7
+                xml_root = fromstring(template)
+                for xml_node in xml_root.iter():
+                    target = xml_node.attrib.get("Target")
+                    if target:
+                        target = target.strip().lower()
+                        hits += re.findall(r"mhtml:(https?://.*?)!", target)
         else:
             logger.info("Wrong mimetype to search for follina")
         return hits

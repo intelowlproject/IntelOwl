@@ -1057,7 +1057,7 @@
   "File_Info": {
     "type": "file",
     "python_module": "file_info.FileInfo",
-    "description": "basic static analysis, extracts metadata and hashes",
+    "description": "basic static analysis, extracts metadata (with [Exiftools](https://exiftool.org/)) and hashes",
     "disabled": false,
     "external_service": false,
     "leaks_info": false,

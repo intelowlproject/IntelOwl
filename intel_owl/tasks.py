@@ -8,7 +8,7 @@ import typing
 from celery import shared_task, signals
 
 from api_app import crons
-from api_app.analyzers_manager.file_analyzers import yara_scan
+from api_app.analyzers_manager.file_analyzers import quark_engine, yara_scan
 from api_app.analyzers_manager.observable_analyzers import maxmind, talos, tor
 from certego_saas.models import User
 from intel_owl.celery import app
@@ -32,6 +32,11 @@ def talos_updater():
 @shared_task(soft_time_limit=60)
 def tor_updater():
     tor.Tor.updater()
+
+
+@shared_task(soft_time_limit=60)
+def quark_updater():
+    quark_engine.QuarkEngine.updater()
 
 
 @shared_task(soft_time_limit=20)

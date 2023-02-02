@@ -6,6 +6,7 @@ import logging
 import magic
 import pydeep
 import tlsh
+from django.conf import settings
 from exiftool import ExifTool
 
 from api_app.analyzers_manager.classes import FileAnalyzer
@@ -15,14 +16,13 @@ logger = logging.getLogger(__name__)
 
 
 class FileInfo(FileAnalyzer):
+    EXIF_TOOL_PATH = settings.BASE_DIR / "exiftool_download"
+
     def set_params(self, params):
         # check repo_downloader.sh file
-        exiftool_download_path = "/opt/deploy/exiftool_download"
-        with open(f"{exiftool_download_path}/exiftool_version.txt", "r") as f:
+        with open(f"{self.EXIF_TOOL_PATH}/exiftool_version.txt", "r") as f:
             version = f.read().strip()
-        self.exiftool_path = (
-            f"{exiftool_download_path}/Image-ExifTool-{version}/exiftool"
-        )
+        self.exiftool_path = f"{self.EXIF_TOOL_PATH}/Image-ExifTool-{version}/exiftool"
 
     def run(self):
         results = {}

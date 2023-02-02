@@ -176,6 +176,17 @@ In the `env_file_postgres`, configure different variables as explained below.
 
 If you prefer to use an external PostgreSQL instance, you should just remove the relative image from the `docker/default.yml` file and provide the configuration to connect to your controlled instances.
 
+### Logrotate configuration (strongly recommended)
+If you want to have your logs rotated correctly, we suggest you to add the configuration for the system Logrotate.
+To do that you can leverage the `initialize.sh` script. Otherwise, if you have skipped that part, you can manually install logrotate by launching the following script:
+```commandline
+cd ./docker/scripts
+./install_logrotate.sh
+```
+
+We decided to do not leverage Django Rotation Configuration because it caused problematic concurrency issues, leading to logs that are not rotated correctly and to apps that do not log anymore.
+Logrotate configuration is more stable.
+
 ### Web server configuration (optional)
 Intel Owl provides basic configuration for:
 * Nginx (`configuration/nginx/http.conf`)
@@ -206,7 +217,6 @@ There are 3 options to execute the web server:
     Before using it, you should configure the configuration file `docker/traefik.override.yml` by changing the email address and the hostname where the application is served. For a detailed explanation follow the official documentation: [Traefix doc](https://docs.traefik.io/user-guides/docker-compose/acme-http/).
     
     After the configuration is done, you can add the option `--traefik` while executing the [`start.py`](#run)
-
 
 ### Analyzers or connectors configuration (optional)
 

@@ -58,7 +58,7 @@ class ClassicDNSResolver(classes.ObservableAnalyzer):
                         "type": dns_resolutions.rdtype,
                     }
                     resolutions.append(element)
-            except (dns.resolver.NXDOMAIN, dns.resolver.NoAnswer):
+            except (dns.resolver.NXDOMAIN, dns.resolver.NoAnswer, dns.resolver.NoNameservers):
                 logger.warning(
                     f"No resolution for "
                     f"{self.observable_classification} {self.observable_name}"

@@ -7,7 +7,11 @@
 # forked repository: https://github.com/mlodic/oletools
 
 import logging
+import re
+import zipfile
 from re import sub
+from typing import List
+from xml.etree import ElementTree
 
 from oletools import mraptor
 from oletools.msodde import process_maybe_encrypted as msodde_process_maybe_encrypted
@@ -45,6 +49,24 @@ class DocInfo(FileAnalyzer):
         additional_passwords_to_check = params.get("additional_passwords_to_check", [])
         if isinstance(additional_passwords_to_check, list):
             self.passwords_to_check.extend(additional_passwords_to_check)
+
+    def analyze_for_follina_cve(self) -> List[str]:
+        if (
+            self.file_mimetype
+            == "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        ):
+            # case docx
+            zipped = zipfile.ZipFile(self.filepath)
+            template = zipped.read("word/_rels/document.xml.rels")
+            # logic reference: https://github.com/MalwareTech/FollinaExtractor/blob/main/extract_follina.py#L7
+            xml_root = ElementTree.fromstring(template)
+            for xml_node in xml_root.iter():
+                target = xml_node.attrib.get("Target")
+                if target:
+                    target = target.strip().lower()
+                    return re.findall(r"mhtml:(https?://.*?)!", target)
+        logger.info("Wrong mimetype to search for follina")
+        return []
 
     def run(self):
         results = {}
@@ -147,7 +169,7 @@ class DocInfo(FileAnalyzer):
             msodde_result = f"Error: {e}"
 
         results["msodde"] = msodde_result
-
+        results["follina"] = self.analyze_for_follina_cve()
         return results
 
     def manage_encrypted_doc(self):

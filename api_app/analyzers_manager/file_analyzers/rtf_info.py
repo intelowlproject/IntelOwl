@@ -1,5 +1,7 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
+import re
+from typing import List
 
 from oletools.rtfobj import RtfObjParser
 
@@ -7,6 +9,11 @@ from api_app.analyzers_manager.classes import FileAnalyzer
 
 
 class RTFInfo(FileAnalyzer):
+    def analyze_for_follina_cve(self) -> List[str]:
+        # logic reference: https://github.com/MalwareTech/FollinaExtractor/blob/main/extract_follina.py#L23
+        content = self.read_file_bytes().decode("utf8", errors="ignore")
+        return re.findall(r"objclass (https?://.*?)}", content)
+
     def run(self):
         results = {}
         rtfobj_results = {}
@@ -43,5 +50,6 @@ class RTFInfo(FileAnalyzer):
                     rtfobj_results["exploit_equation_editor"] = True
 
         results["rtfobj"] = rtfobj_results
+        results["follina"] = self.analyze_for_follina_cve()
 
         return results

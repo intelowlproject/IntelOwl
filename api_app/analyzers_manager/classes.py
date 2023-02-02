@@ -164,6 +164,7 @@ class FileAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
     file_mimetype: str
 
     def read_file_bytes(self) -> bytes:
+        self._job.file.seek(0)
         return self._job.file.read()
 
     @property

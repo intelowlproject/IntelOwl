@@ -17,7 +17,8 @@ logger = logging.getLogger(__name__)
 
 
 class DNStwist(classes.ObservableAnalyzer):
-    command: str = "dnstwist"
+    DNS_TWIST_PATH = settings.BASE_DIR / "dnstwist-dictionaries"
+    COMMAND: str = "dnstwist"
 
     def set_params(self, params):
         self._ssdeep = params.get("ssdeep", False)
@@ -26,7 +27,7 @@ class DNStwist(classes.ObservableAnalyzer):
         self._tld_dict = params.get("tld_dict", "abused_tlds.dict")
 
     def run(self):
-        if not which(self.command):
+        if not which(self.COMMAND):
             raise AnalyzerRunException("dnstwist not installed!")
 
         domain = self.observable_name
@@ -48,14 +49,14 @@ class DNStwist(classes.ObservableAnalyzer):
             "tld": self._tld,
         }
 
-        args = [self.command, "--registered", "--format", "json"]
+        args = [self.COMMAND, "--registered", "--format", "json"]
         if self._ssdeep:
             args.append("--ssdeep")
         if self._mxcheck:
             args.append("--mxcheck")
         if self._tld:
             args.append("--tld")
-            args.append(settings.DNS_TWIST_PATH / self._tld_dict)
+            args.append(self.DNS_TWIST_PATH / self._tld_dict)
 
         args.append(domain)
 

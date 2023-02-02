@@ -45,8 +45,6 @@ INSTALLED_APPS = [
     "api_app.playbooks_manager",
 ]
 
-from .analyzers import *  # lgtm [py/polluting-import]
-
 # inject from other modules
 from .auth import *  # lgtm [py/polluting-import]
 from .cache import *  # lgtm [py/polluting-import]

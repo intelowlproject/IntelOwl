@@ -6,7 +6,7 @@ import os
 from django.test import TestCase
 
 from api_app import crons
-from api_app.analyzers_manager.file_analyzers import yara_scan
+from api_app.analyzers_manager.file_analyzers import quark_engine, yara_scan
 from api_app.analyzers_manager.observable_analyzers import maxmind, talos, tor
 
 from . import get_logger
@@ -45,6 +45,10 @@ class CronTests(TestCase):
     def test_tor_updater(self, mock_get=None):
         db_file_path = tor.Tor.updater()
         self.assertTrue(os.path.exists(db_file_path))
+
+    def test_quark_updater(self):
+        quark_engine.QuarkEngine.updater()
+        self.assertTrue(os.path.exists(quark_engine.QuarkEngine.QUARK_RULES_PATH))
 
     def test_yara_updater(self):
         file_paths = yara_scan.YaraScan.yara_update_repos()

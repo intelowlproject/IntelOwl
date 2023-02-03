@@ -83,13 +83,13 @@ class AnalyzerConfig(AbstractConfig):
         if (
             "android_only" in self.supported_filetypes
             and file_mimetype == "application/zip"
+            and re.search(REGEX_OFFICE_FILES, file_name)
         ):
-            if re.search(REGEX_OFFICE_FILES, file_name):
-                logger.info(
-                    f"filtered office file name {file_name}"
-                    " because the analyzer is android only"
-                )
-                return False
+            logger.info(
+                f"filtered office file name {file_name}"
+                " because the analyzer is android only"
+            )
+            return False
         # base case: empty lists means supports all
         if not self.supported_filetypes and not self.not_supported_filetypes:
             return True

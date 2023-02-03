@@ -1,28 +1,28 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-import hashlib
 import logging
 
 import magic
 import pydeep
 import tlsh
+from django.conf import settings
 from exiftool import ExifTool
 
 from api_app.analyzers_manager.classes import FileAnalyzer
+from api_app.helpers import calculate_md5, calculate_sha1, calculate_sha256
 
 logger = logging.getLogger(__name__)
 
 
 class FileInfo(FileAnalyzer):
+    EXIF_TOOL_PATH = settings.BASE_DIR / "exiftool_download"
+
     def set_params(self, params):
         # check repo_downloader.sh file
-        exiftool_download_path = "/opt/deploy/exiftool_download"
-        with open(f"{exiftool_download_path}/exiftool_version.txt", "r") as f:
+        with open(f"{self.EXIF_TOOL_PATH}/exiftool_version.txt", "r") as f:
             version = f.read().strip()
-        self.exiftool_path = (
-            f"{exiftool_download_path}/Image-ExifTool-{version}/exiftool"
-        )
+        self.exiftool_path = f"{self.EXIF_TOOL_PATH}/Image-ExifTool-{version}/exiftool"
 
     def run(self):
         results = {}
@@ -30,9 +30,9 @@ class FileInfo(FileAnalyzer):
         results["mimetype"] = magic.from_file(self.filepath, mime=True)
 
         binary = self.read_file_bytes()
-        results["md5"] = hashlib.md5(binary).hexdigest()
-        results["sha1"] = hashlib.sha1(binary).hexdigest()
-        results["sha256"] = hashlib.sha256(binary).hexdigest()
+        results["md5"] = calculate_md5(binary)
+        results["sha1"] = calculate_sha1(binary)
+        results["sha256"] = calculate_sha256(binary)
         results["ssdeep"] = pydeep.hash_file(self.filepath).decode()
         results["tlsh"] = tlsh.hash(binary)
 

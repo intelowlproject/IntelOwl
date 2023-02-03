@@ -39,6 +39,7 @@ lief==0.12.2
 maxminddb==2.2.0
 mwdblib==4.3.0
 oletools==0.60
+defusedxml==0.7.1
 OTXv2==1.5.12
 peepdf-fork==0.4.3
 pdfid==1.1.0

@@ -6,13 +6,24 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api_app', '0012_auto_20221227_1543'),
+        ("api_app", "0012_auto_20221227_1543"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='job',
-            name='observable_classification',
-            field=models.CharField(blank=True, choices=[('ip', 'Ip'), ('url', 'Url'), ('domain', 'Domain'), ('hash', 'Hash'), ('generic', 'Generic'), ('', 'Empty')], max_length=12),
+            model_name="job",
+            name="observable_classification",
+            field=models.CharField(
+                blank=True,
+                choices=[
+                    ("ip", "Ip"),
+                    ("url", "Url"),
+                    ("domain", "Domain"),
+                    ("hash", "Hash"),
+                    ("generic", "Generic"),
+                    ("", "Empty"),
+                ],
+                max_length=12,
+            ),
         ),
     ]

@@ -1,3 +1,5 @@
+/* eslint-disable no-param-reassign */
+/* eslint-disable react/prop-types */
 /* eslint-disable camelcase */
 import React from "react";
 import PropTypes from "prop-types";
@@ -5,7 +7,11 @@ import { Button, ListGroup, ListGroupItem, Badge, Fade } from "reactstrap";
 import { useNavigate } from "react-router-dom";
 import { VscGlobe, VscFile, VscJson } from "react-icons/vsc";
 import { FaFileDownload } from "react-icons/fa";
-import { MdDeleteOutline, MdPauseCircleOutline } from "react-icons/md";
+import {
+  MdDeleteOutline,
+  MdPauseCircleOutline,
+  MdOutlineRefresh,
+} from "react-icons/md";
 
 import {
   ContentSection,
@@ -20,12 +26,26 @@ import { SaveAsPlaybookButton } from "./SaveAsPlaybooksForm";
 
 import { JobTag, PlaybookTag, StatusTag, TLPTag } from "../../../common";
 import { downloadJobSample, deleteJob, killJob } from "../api";
+import { createJob } from "../../../scan/api";
 
 function DeleteIcon() {
-  return <MdDeleteOutline className="text-danger" />;
+  return (
+    <span>
+      <MdDeleteOutline className="text-danger" /> Delete Job
+    </span>
+  );
 }
 
-export function JobActionsBar({ job }) {
+function retryJobIcon() {
+  return (
+    <span>
+      <MdOutlineRefresh className="me-1" />
+      Retry Job
+    </span>
+  );
+}
+
+export function JobActionsBar({ job, refetch }) {
   // routers
   const navigate = useNavigate();
 
@@ -70,8 +90,26 @@ export function JobActionsBar({ job }) {
     job.is_sample ? job.file_name : job.observable_name
   }) on IntelOwl`;
 
+  const formValues = {
+    ...job,
+    check: "force_new",
+    classification: job.observable_classification,
+    tlp: job.tlp,
+    observable_names: (job.observable_name = Array(job.observable_name)),
+    analyzers: job.analyzers_requested,
+    connectors: job.connectors_requested,
+    runtime_configuration: job.runtime_configuration,
+    tags_labels: job.tags.map((optTag) => optTag.value.label),
+    playbooks: job.playbooks_to_execute.map((x) => x.value),
+  };
+
+  const handleRetry = async () => {
+    const jobId = await createJob(formValues).then(refetch);
+    setTimeout(() => navigate(`/jobs/${jobId[0]}`), 504);
+  };
+
   return (
-    <ContentSection className="d-inline-flex">
+    <ContentSection className="d-inline-flex me-2">
       {job.permissions?.delete && (
         <IconButton
           id="deletejobbtn"
@@ -84,6 +122,15 @@ export function JobActionsBar({ job }) {
           titlePlacement="top"
         />
       )}
+      <IconButton
+        Icon={retryJobIcon}
+        onClick={handleRetry}
+        color="light"
+        size="xs"
+        title="Force run the same analysis"
+        titlePlacement="top"
+        className="me-2"
+      />
 
       <SaveAsPlaybookButton jobId={job.id} />
       {job?.is_sample && (

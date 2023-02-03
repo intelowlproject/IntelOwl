@@ -105,7 +105,7 @@ export function JobActionsBar({ job, refetch }) {
 
   const handleRetry = async () => {
     const jobId = await createJob(formValues).then(refetch);
-    setTimeout(() => navigate(`/jobs/${jobId[0]}`), 500);
+    setTimeout(() => navigate(`/jobs/${jobId[0]}`), 504);
   };
 
   return (

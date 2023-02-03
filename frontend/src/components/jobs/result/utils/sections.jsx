@@ -29,7 +29,20 @@ import { downloadJobSample, deleteJob, killJob } from "../api";
 import { createJob } from "../../../scan/api";
 
 function DeleteIcon() {
-  return <MdDeleteOutline className="text-danger" />;
+  return (
+    <span>
+      <MdDeleteOutline className="text-danger" /> Delete Job
+    </span>
+  );
+}
+
+function retryJobIcon() {
+  return (
+    <span>
+      <MdOutlineRefresh className="me-1" />
+      Retry Job
+    </span>
+  );
 }
 
 export function JobActionsBar({ job, refetch }) {
@@ -90,8 +103,13 @@ export function JobActionsBar({ job, refetch }) {
     playbooks: job.playbooks_to_execute.map((x) => x.value),
   };
 
+  const handleRetry = async () => {
+    const jobId = await createJob(formValues).then(refetch);
+    setTimeout(() => navigate(`/jobs/${jobId[0]}`), 500);
+  };
+
   return (
-    <ContentSection className="d-inline-flex">
+    <ContentSection className="d-inline-flex me-2">
       {job.permissions?.delete && (
         <IconButton
           id="deletejobbtn"
@@ -105,16 +123,13 @@ export function JobActionsBar({ job, refetch }) {
         />
       )}
       <IconButton
-        Icon={MdOutlineRefresh}
-        onClick={() => {
-          createJob(formValues).then(refetch);
-        }}
+        Icon={retryJobIcon}
+        onClick={handleRetry}
         color="light"
         size="xs"
-        title="run"
+        title="Force run the same analysis"
         titlePlacement="top"
-        className="border-0"
-        style={{ marginRight: 10 }}
+        className="me-2"
       />
 
       <SaveAsPlaybookButton jobId={job.id} />

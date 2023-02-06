@@ -1752,7 +1752,7 @@
   "IPApi": {
     "type": "observable",
     "python_module": "ipapi.IPApi",
-    "description": "Gives information about IPs and DNS",
+    "description": "Gives information about [IPs](https://ip-api.com/docs/api:batch) and [DNS](https://ip-api.com/docs/dns)",
     "disabled": false,
     "external_service": true,
     "leaks_info": false,

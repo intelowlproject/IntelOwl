@@ -756,27 +756,6 @@
     "secrets": {},
     "params": {}
   },
-  "Quark_Engine_APK": {
-    "type": "file",
-    "python_module": "quark_engine.QuarkEngine",
-    "description": "An Obfuscation-Neglect Android Malware Scoring System",
-    "disabled": false,
-    "external_service": false,
-    "leaks_info": false,
-    "supported_filetypes": [
-      "application/zip",
-      "application/java-archive",
-      "application/vnd.android.package-archive",
-      "application/x-dex",
-      "android_only"
-    ],
-    "config": {
-      "soft_time_limit": 120,
-      "queue": "long"
-    },
-    "secrets": {},
-    "params": {}
-  },
   "DNSDB": {
     "type": "observable",
     "python_module": "dnsdb.DNSdb",

@@ -14,9 +14,6 @@
             "Classic_DNS": {
                 "query_type": "A"
             },
-            "CloudFlare_DNS": {
-                "query_type": "A"
-            },
             "CloudFlare_Malicious_Detector": {},
             "CryptoScamDB_CheckAPI": {},
             "CyberChef": {
@@ -36,6 +33,7 @@
                 "pages": 10,
                 "proxies": {}
             },
+            "DNS0_EU_Malicious_Detector": {},
             "Doc_Info": {
                 "additional_passwords_to_check": []
             },
@@ -117,9 +115,6 @@
                 "os": "windows",
                 "profile": "",
                 "shellcode": true
-            },
-            "Quad9_DNS": {
-                "query_type": "A"
             },
             "Quad9_Malicious_Detector": {},
             "Quark_Engine_APK": {},

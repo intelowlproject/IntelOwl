@@ -68,7 +68,7 @@
     "eslint-plugin-react-hooks": "^4.5.0",
     "jest": "^27.5.1",
     "prettier": "^2.6.2",
-    "sass": "^1.56.2",
+    "sass": "^1.58.0",
     "stylelint": "^14.9.1",
     "stylelint-config-prettier": "^9.0.3",
     "stylelint-config-standard-scss": "^4.0.0"

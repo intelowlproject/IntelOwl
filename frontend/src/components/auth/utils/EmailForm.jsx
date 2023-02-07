@@ -3,25 +3,28 @@ import PropTypes from "prop-types";
 import { FormGroup, Label, Input, Button, Spinner } from "reactstrap";
 import { Form, Formik } from "formik";
 
-import { EMAIL_REGEX } from "../../../constants";
 import ReCAPTCHAInput from "./ReCAPTCHAInput";
 import { RECAPTCHA_SITEKEY } from "../../../constants/environment";
+import { RecaptchaValidator, EmailValidator } from "./validator";
 
 // constants
 const initialValues = {
   email: "",
   recaptcha: "noKey",
 };
+
 // methods
 const onValidate = (values) => {
   const errors = {};
-  if (!values.email) {
-    errors.email = "Required";
-  } else if (!EMAIL_REGEX.test(values.email)) {
-    errors.email = "Invalid email address";
+  // email
+  const emailErrors = EmailValidator(values.email);
+  if (emailErrors.email) {
+    errors.email = emailErrors.email;
   }
-  if (values.recaptcha === "noKey" && RECAPTCHA_SITEKEY) {
-    errors.recaptcha = "Required";
+  // recaptcha
+  const recaptchaErrors = RecaptchaValidator(values.recaptcha);
+  if (recaptchaErrors.recaptcha) {
+    errors.recaptcha = recaptchaErrors.recaptcha;
   }
   return errors;
 };
@@ -61,7 +64,11 @@ export default function EmailForm({ onFormSubmit, apiCallback, ...restProps }) {
               name="email"
               className="form-control form-control-sm"
               onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              valid={!formik.errors.email}
+              invalid={formik.errors.email && formik.touched.email}
             />
+            {formik.touched.email && <small>{formik.errors.email}</small>}
           </FormGroup>
           {/* reCAPTCHA */}
           <FormGroup row>

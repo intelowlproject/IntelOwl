@@ -6,10 +6,11 @@ import useTitle from "react-use/lib/useTitle";
 
 import { ContentSection } from "@certego/certego-ui";
 
-import { UUID_REGEX, PASSWORD_REGEX } from "../../constants/index";
+import { UUID_REGEX } from "../../constants/index";
 import ReCAPTCHAInput from "./utils/ReCAPTCHAInput";
 import { resetPassword } from "./api";
 import { RECAPTCHA_SITEKEY } from "../../constants/environment";
+import { PasswordValidator, RecaptchaValidator } from "./utils/validator";
 
 // constants
 const reMatcher = new RegExp(UUID_REGEX);
@@ -22,31 +23,21 @@ const onValidate = (values) => {
   const errors = {};
 
   // password fields
-  if (!values.password) {
-    errors.password = "Required";
-  } else if (values.password.length < 12) {
-    errors.password = "Must be 12 characters or more";
-  } else if (!PASSWORD_REGEX.test(values.password)) {
-    errors.password =
-      "The password is entirely numeric or contains special characters";
+  const passwordErrors = PasswordValidator(
+    values.password,
+    values.confirmPassword
+  );
+  if (passwordErrors.password) {
+    errors.password = passwordErrors.password;
   }
-  if (!values.confirmPassword) {
-    errors.confirmPassword = "Required";
-  } else if (values.confirmPassword.length < 12) {
-    errors.confirmPassword = "Must be 12 characters or more";
-  }
-  if (
-    values.password.length > 0 &&
-    values.confirmPassword.length > 0 &&
-    values.password !== values.confirmPassword
-  ) {
-    errors.password = "Passwords do not match.";
-    errors.confirmPassword = "Passwords do not match.";
+  if (passwordErrors.confirmPassword) {
+    errors.confirmPassword = passwordErrors.confirmPassword;
   }
 
   // recaptcha
-  if (values.recaptcha === "noKey" && RECAPTCHA_SITEKEY) {
-    errors.recaptcha = "Required";
+  const recaptchaErrors = RecaptchaValidator(values.recaptcha);
+  if (recaptchaErrors.recaptcha) {
+    errors.recaptcha = recaptchaErrors.recaptcha;
   }
 
   console.debug(errors);

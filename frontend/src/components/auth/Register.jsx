@@ -17,14 +17,18 @@ import useTitle from "react-use/lib/useTitle";
 import { ContentSection, Select } from "@certego/certego-ui";
 
 import { PUBLIC_URL, RECAPTCHA_SITEKEY } from "../../constants/environment";
-import {
-  HACKER_MEME_STRING,
-  EMAIL_REGEX,
-  PASSWORD_REGEX,
-} from "../../constants";
+import { HACKER_MEME_STRING } from "../../constants";
 import ReCAPTCHAInput from "./utils/ReCAPTCHAInput";
-import { AfterRegistrationModalAlert, InviteOnlyAlert } from "./utils/utils";
+import {
+  AfterRegistrationModalAlert,
+  InviteOnlyAlert,
+} from "./utils/registration-alert";
 import { registerUser } from "./api";
+import {
+  EmailValidator,
+  PasswordValidator,
+  RecaptchaValidator,
+} from "./utils/validator";
 
 // constants
 const hearAboutUsChoices = [
@@ -69,7 +73,7 @@ const initialValues =
   JSON.parse(localStorage.getItem(REGISTRATION_FORM_STORAGE_KEY, "{}")) ||
   INITIAL_VALUES;
 
-console.debug(initialValues);
+console.debug("initialValues", initialValues);
 
 const onValidate = (values) => {
   const errors = {};
@@ -91,11 +95,13 @@ const onValidate = (values) => {
   ) {
     errors.username = HACKER_MEME_STRING;
   }
-  if (!values.email) {
-    errors.email = "Required";
-  } else if (!EMAIL_REGEX.test(values.email)) {
-    errors.email = "Invalid email address";
+
+  // email
+  const emailErrors = EmailValidator(values.email);
+  if (emailErrors.email) {
+    errors.email = emailErrors.email;
   }
+
   ["company_name", "company_role"].forEach((field) => {
     if (!values[field]) {
       errors[field] = "Required";
@@ -107,47 +113,38 @@ const onValidate = (values) => {
   });
 
   // store in localStorage so user doesn't have to fill all fields again
-  if (Object.keys(errors).length === 0) {
-    localStorage.setItem(
-      REGISTRATION_FORM_STORAGE_KEY,
-      JSON.stringify({
-        ...values,
-        password: "",
-        confirmPassword: "",
-        recaptcha: "noKey",
-      })
-    );
-  }
+  localStorage.setItem(
+    REGISTRATION_FORM_STORAGE_KEY,
+    JSON.stringify({
+      ...values,
+      password: "",
+      confirmPassword: "",
+      recaptcha: "noKey",
+    })
+  );
+  Object.keys(initialValues).forEach((key) => {
+    initialValues[key] = values[key];
+  });
 
   // password fields
-  if (!values.password) {
-    errors.password = "Required";
-  } else if (values.password.length < 12) {
-    errors.password = "Must be 12 characters or more";
-  } else if (!PASSWORD_REGEX.test(values.password)) {
-    errors.password =
-      "The password is entirely numeric or contains special characters";
+  const passwordErrors = PasswordValidator(
+    values.password,
+    values.confirmPassword
+  );
+  if (passwordErrors.password) {
+    errors.password = passwordErrors.password;
   }
-  if (!values.confirmPassword) {
-    errors.confirmPassword = "Required";
-  } else if (values.confirmPassword.length < 12) {
-    errors.confirmPassword = "Must be 12 characters or more";
-  }
-  if (
-    values.password.length > 0 &&
-    values.confirmPassword.length > 0 &&
-    values.password !== values.confirmPassword
-  ) {
-    errors.password = "Passwords do not match.";
-    errors.confirmPassword = "Passwords do not match.";
+  if (passwordErrors.confirmPassword) {
+    errors.confirmPassword = passwordErrors.confirmPassword;
   }
 
   // recaptcha
-  if (values.recaptcha === "noKey" && RECAPTCHA_SITEKEY) {
-    errors.recaptcha = "Required";
+  const recaptchaErrors = RecaptchaValidator(values.recaptcha);
+  if (recaptchaErrors.recaptcha) {
+    errors.recaptcha = recaptchaErrors.recaptcha;
   }
 
-  console.debug(errors);
+  console.debug("Errors", errors);
   return errors;
 };
 
@@ -162,7 +159,7 @@ export default function Register() {
   const [showModal, setShowModal] = React.useState(false);
   const [passwordShown, setPasswordShown] = React.useState(false);
 
-  console.debug(showModal);
+  console.debug("ShowModal:", showModal);
 
   // callbacks
   const onSubmit = React.useCallback(

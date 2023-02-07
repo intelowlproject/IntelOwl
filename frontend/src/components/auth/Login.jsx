@@ -24,7 +24,7 @@ import { useAuthStore } from "../../stores";
 import {
   ResendVerificationEmailButton,
   ForgotPasswordButton,
-} from "./utils/utils";
+} from "./utils/registration-buttons";
 
 // constants
 const initialValues = {
@@ -124,7 +124,7 @@ export default function Login() {
                 />
               </a>
               <AiOutlineInfoCircle
-                style={{ "vertical-align": "top" }}
+                style={{ verticalAlign: "top" }}
                 id="GoogleInfoTooltip"
                 cursor="pointer"
               />

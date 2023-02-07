@@ -77,8 +77,7 @@ class TestUserAuth(CustomOAuthTestCase):
         )
 
     def test_register_username_taken_400(self):
-        # get current num of users
-        num_users_prev = User.objects.count()
+        self.assertEqual(User.objects.count(), 1)
 
         # In CI, recaptcha protection is disabled so we can pass any value
         body = {
@@ -105,11 +104,10 @@ class TestUserAuth(CustomOAuthTestCase):
             msg=msg,
         )
         # db assertions
-        self.assertEqual(
-            num_users_prev, User.objects.count(), msg="no new user was created"
-        )
+        self.assertEqual(User.objects.count(), 1, msg="no new user was created")
 
     def test_register_no_email_leak_201(self):
+        self.assertEqual(User.objects.count(), 1)
 
         # base check
         with self.assertRaises(
@@ -119,9 +117,7 @@ class TestUserAuth(CustomOAuthTestCase):
 
         # register new user
         self.__register_user(body=self.testregisteruser)
-
-        # get current num of users
-        num_users_prev = User.objects.count()
+        self.assertEqual(User.objects.count(), 2)
 
         # 2nd registration for same email returns 201
         # only as to not leak registered emails
@@ -136,11 +132,11 @@ class TestUserAuth(CustomOAuthTestCase):
         self.__register_user(body=body)
 
         # db assertions
-        self.assertEqual(
-            num_users_prev, User.objects.count(), msg="no new user was created"
-        )
+        self.assertEqual(User.objects.count(), 2, msg="no new user was created")
 
     def test_register_201(self):
+        self.assertEqual(User.objects.count(), 1)
+
         with self.assertRaises(
             User.DoesNotExist, msg="testregisteruser doesn't exist right now"
         ):
@@ -151,6 +147,7 @@ class TestUserAuth(CustomOAuthTestCase):
 
         # db assertions
         user = User.objects.get(username=self.testregisteruser["username"])
+        self.assertEqual(User.objects.count(), 2)
         self.assertFalse(
             user.is_active, msg="newly registered user must have is_active=False"
         )
@@ -264,6 +261,60 @@ class TestUserAuth(CustomOAuthTestCase):
         self.assertEqual(200, response.status_code, msg=msg)
         user.refresh_from_db()
         self.assertTrue(user.check_password(new_password), msg=msg)
+
+    def test_min_password_lenght_400(self):
+        self.assertEqual(User.objects.count(), 1)
+
+        # register new user with invalid password
+        body = {
+            **self.creds,
+            "email": self.testregisteruser["email"],
+            "username": "blahblah",
+            "first_name": "blahblah",
+            "last_name": "blahblah",
+            "password": "intelowl",
+            "recaptcha": "blahblah",
+        }
+
+        response = self.client.post(register_uri, body)
+        content = response.json()
+
+        # response assertions
+        self.assertEqual(400, response.status_code)
+        self.assertIn(
+            "Invalid password",
+            content["errors"]["password"],
+        )
+
+        # db assertions
+        self.assertEqual(User.objects.count(), 1, msg="no new user was created")
+
+    def test_special_characters_password_400(self):
+        self.assertEqual(User.objects.count(), 1)
+
+        # register new user with invalid password
+        body = {
+            **self.creds,
+            "email": self.testregisteruser["email"],
+            "username": "blahblah",
+            "first_name": "blahblah",
+            "last_name": "blahblah",
+            "password": "intelowlintelowl$",
+            "recaptcha": "blahblah",
+        }
+
+        response = self.client.post(register_uri, body)
+        content = response.json()
+
+        # response assertions
+        self.assertEqual(400, response.status_code)
+        self.assertIn(
+            "Invalid password",
+            content["errors"]["password"],
+        )
+
+        # db assertions
+        self.assertEqual(User.objects.count(), 1, msg="no new user was created")
 
     # utils
     def __register_user(self, body: dict):

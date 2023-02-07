@@ -169,7 +169,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
                         f"{a_name} won't run: is disabled or unconfigured"
                     )
 
-                if tlp != TLP.CLEAR and config.leaks_info:
+                if tlp in TLP.get_tlp_clear_and_white() and config.leaks_info:
                     raise NotRunnableAnalyzer(
                         f"{a_name} won't be run because it leaks info externally."
                     )

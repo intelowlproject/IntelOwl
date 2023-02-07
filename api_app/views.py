@@ -462,7 +462,7 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
             )
         else:
             user_query = Q(user=user)
-        query = Q(tlp__in=[TLP.CLEAR, TLP.GREEN]) | (
+        query = Q(tlp__in=[*TLP.get_tlp_clear_and_white(), TLP.GREEN]) | (
             Q(tlp__in=[TLP.AMBER, TLP.RED]) & (user_query)
         )
         queryset = queryset.filter(query)

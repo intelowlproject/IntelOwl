@@ -78,7 +78,7 @@ IntelOwl supports the **Traffic Light Protocol** (TLP) to facilitate sharing of 
 
 Following are the indicators available when requesting an analysis (in the order of increasing sharing restrictions):
 
-1. `CLEAR`: no restriction
+1. `CLEAR`: no restriction (`WHITE` was replaced by `CLEAR` in TLP v2.0, but `WHITE` is supported for retrocompatibility)
 2. `GREEN`: disable analyzers that could impact privacy
 3. `AMBER`: disable analyzers that could impact privacy and limit view permissions to my group
 4. `RED`: disable analyzers that could impact privacy, limit view permissions to my group and do not use any external service

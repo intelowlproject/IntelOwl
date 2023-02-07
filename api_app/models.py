@@ -39,14 +39,20 @@ class Status(models.TextChoices):
 
 
 class TLP(models.TextChoices):
+    WHITE = "WHITE"
     CLEAR = "CLEAR"
     GREEN = "GREEN"
     AMBER = "AMBER"
     RED = "RED"
 
     @classmethod
+    def get_tlp_clear_and_white(cls):
+        return (cls.WHITE, cls.CLEAR)
+
+    @classmethod
     def get_priority(cls, tlp):
         order = {
+            cls.WHITE: 0,
             cls.CLEAR: 0,
             cls.GREEN: 1,
             cls.AMBER: 2,

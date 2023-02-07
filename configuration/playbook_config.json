@@ -39,10 +39,6 @@
             "Doc_Info": {
                 "additional_passwords_to_check": []
             },
-            "Doc_Info_Experimental": {
-                "additional_passwords_to_check": [],
-                "experimental": true
-            },
             "ELF_Info": {},
             "FileScan_Search": {},
             "FileScan_Upload_File": {},

@@ -720,6 +720,42 @@
       }
     }
   },
+  "DNS0_EU": {
+    "type": "observable",
+    "python_module": "dns.dns_resolvers.dns0_eu_resolver.DNS0EUResolver",
+    "description": "Retrieve current domain resolution with DNS0.eu DoH (DNS over HTTPS)",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": ["domain", "url"],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {},
+    "params": {
+      "query_type": {
+        "value": "A",
+        "type": "str",
+        "description": "Query type against the chosen DNS resolver."
+      }
+    }
+  },
+  "DNS0_EU_Malicious_Detector": {
+    "type": "observable",
+    "python_module": "dns.dns_malicious_detectors.dns0_eu_malicious_detector.DNS0EUMaliciousDetector",
+    "description": "Check if a domain or an url is marked as malicious in DNS0.eu database ([Zero](https://www.dns0.eu/zero) service)",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": ["domain", "url"],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {},
+    "params": {}
+  },
   "DNSDB": {
     "type": "observable",
     "python_module": "dnsdb.DNSdb",

@@ -42,6 +42,10 @@ describe("Login component", () => {
     expect(passwordInputElement).toBeInTheDocument();
     const submitButtonElement = screen.getByRole("button", { name: /Login/i });
     expect(submitButtonElement).toBeInTheDocument();
+    const a = screen.getByText("Forgot Password?");
+    expect(a).toBeInTheDocument();
+    const b = screen.getByText("Need Verification Email?");
+    expect(b).toBeInTheDocument();
 
     // user populates the login form and submit
     await user.type(usernameInputElement, "test_user");

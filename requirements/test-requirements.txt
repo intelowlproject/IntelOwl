@@ -1,5 +1,5 @@
 flake8==4.0.1
-black==22.3.0
+black==23.1.0
 isort==5.10.1
 pre-commit==2.21.0
 coverage==6.5.0

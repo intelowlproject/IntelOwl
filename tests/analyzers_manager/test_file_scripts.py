@@ -85,7 +85,7 @@ class DocAnalyzersTestCase(_FileAnalyzersScriptsTestCase):
             **super().get_params(),
             "file_name": "document.doc",
             "file_mimetype": "application/msword",
-            "analyzers_to_execute": ["Doc_Info", "Doc_Info_Experimental"],
+            "analyzers_to_execute": ["Doc_Info"],
         }
 
 

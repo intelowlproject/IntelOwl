@@ -153,10 +153,7 @@ class _FileAnalyzersScriptsTestCase(_AbstractAnalyzersScriptTestCase):
             "upload_file": True,
             "max_tries": 1,
         },
-        "Doc_Info_Experimental": {
-            "additional_passwords_to_check": ["testpassword"],
-            "experimental": True,
-        },
+        "Doc_Info": {"additional_passwords_to_check": ["testpassword"]},
     }
 
     @classmethod

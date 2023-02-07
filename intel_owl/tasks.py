@@ -3,6 +3,7 @@
 
 from __future__ import absolute_import, unicode_literals
 
+import logging
 import typing
 
 from celery import shared_task, signals
@@ -12,6 +13,8 @@ from api_app.analyzers_manager.file_analyzers import quark_engine, yara_scan
 from api_app.analyzers_manager.observable_analyzers import maxmind, talos, tor
 from certego_saas.models import User
 from intel_owl.celery import app
+
+logger = logging.getLogger(__name__)
 
 
 @shared_task(soft_time_limit=10000)
@@ -103,6 +106,7 @@ def worker_ready_connect(*args, **kwargs):
     from api_app.analyzers_manager.serializers import AnalyzerConfigSerializer
     from api_app.connectors_manager.serializers import ConnectorConfigSerializer
 
+    logger.info("worker ready, generating cache")
     build_config_cache(AnalyzerConfigSerializer)
     build_config_cache(ConnectorConfigSerializer)
     for user in User.objects.all():

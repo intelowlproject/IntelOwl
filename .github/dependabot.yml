@@ -33,6 +33,8 @@ updates:
       interval: "weekly"
       day: "tuesday"
     target-branch: "develop"
+    reviewers:
+      - drosetti
 
   - package-ecosystem: "docker"
     directory: "/docker"

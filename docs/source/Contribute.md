@@ -491,3 +491,14 @@ If everything is working, before submitting your pull request, please squash you
 - Then you have to force push the final, squashed commit: `git push --force-with-lease origin`.
 
 Squashing commits can be a tricky process but once you figure it out, it's really helpful and keeps our repo concise and clean.
+
+## Debug application problems
+Keep in mind that, if any errors arise during development, you would need to check the application logs to better understand what is happening so you can easily address the problem.
+
+This is the reason why it is important to add tons of logs in the application...if they are not available in time of needs you would cry really a lot.
+
+Where are IntelOwl logs?
+With a default installation of IntelOwl, you would be able to get the application data from the following paths in your OS:
+* `/var/lib/docker/volumes/intel_owl_generic_logs/_data/django`: Django Application logs
+* `/var/lib/docker/volumes/intel_owl_generic_logs/_data/uwsgi`: Uwsgi application server logs
+* `/var/lib/docker/volumes/intel_owl_nginx_logs/_data/django`: Nginx Web Server Logs

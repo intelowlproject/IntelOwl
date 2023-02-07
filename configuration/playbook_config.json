@@ -77,6 +77,7 @@
             "HashLookupServer_Get_Observable": {
                 "hashlookup_server": ""
             },
+            "IPApi" : {},
             "MalwareBazaar_Get_File": {},
             "MalwareBazaar_Get_Observable": {},
             "MalwareBazaar_Google_Observable": {},

@@ -1749,6 +1749,32 @@
       }
     }
   },
+  "IPApi": {
+    "type": "observable",
+    "python_module": "ipapi.IPApi",
+    "description": "Gives information about [IPs](https://ip-api.com/docs/api:batch) and [DNS](https://ip-api.com/docs/dns)",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": ["ip"],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {},
+    "params": {
+      "fields" : {
+        "value" : "",
+        "type" : "str",
+        "description" : "specify the information fields"
+      },
+      "lang" : {
+        "value" : "",
+        "type" : "str",
+        "description" : "specify the response language"
+      }
+    }
+  },
   "IPInfo": {
     "type": "observable",
     "python_module": "ipinfo.IPInfo",

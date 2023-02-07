@@ -816,7 +816,7 @@
   "Doc_Info": {
     "type": "file",
     "python_module": "doc_info.DocInfo",
-    "description": "static generic document analysis (Oletools)",
+    "description": "static document analysis ([Oletools](https://github.com/decalage2/oletools)) with features to analyze XLM macros, encrypted macros and much more",
     "disabled": false,
     "external_service": false,
     "leaks_info": false,
@@ -831,6 +831,7 @@
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+      "application/onenote",
       "text/x-ms-iqy",
       "application/excel",
       "text/xml",
@@ -846,51 +847,6 @@
     },
     "secrets": {},
     "params": {
-      "additional_passwords_to_check": {
-        "value": [],
-        "type": "list",
-        "description": "List of passwords to try when decrypting the document"
-      }
-    }
-  },
-  "Doc_Info_Experimental": {
-    "type": "file",
-    "python_module": "doc_info.DocInfo",
-    "description": "static document analysis with new features to analyze XLM macros, encrypted macros and more",
-    "disabled": false,
-    "external_service": false,
-    "leaks_info": false,
-    "supported_filetypes": [
-      "application/msword",
-      "application/vnd.ms-office",
-      "application/vnd.ms-excel.addin.macroEnabled",
-      "application/x-mspublisher",
-      "application/vnd.ms-powerpoint",
-      "application/vnd.ms-excel",
-      "application/vnd.ms-excel.sheet.macroEnabled.12",
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-      "text/x-ms-iqy",
-      "application/excel",
-      "text/xml",
-      "application/xml",
-      "application/zip",
-      "application/encrypted",
-      "text/plain",
-      "test/csv"
-    ],
-    "config": {
-      "soft_time_limit": 30,
-      "queue": "local"
-    },
-    "secrets": {},
-    "params": {
-      "experimental": {
-        "value": true,
-        "type": "bool",
-        "description": ""
-      },
       "additional_passwords_to_check": {
         "value": [],
         "type": "list",
@@ -937,6 +893,7 @@
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+      "application/onenote",
       "text/x-ms-iqy",
       "application/excel",
       "text/xml",
@@ -1357,6 +1314,7 @@
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+      "application/onenote",
       "text/x-ms-iqy",
       "application/excel",
       "text/xml",
@@ -1631,6 +1589,7 @@
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+      "application/onenote",
       "text/x-ms-iqy",
       "application/excel",
       "text/xml",

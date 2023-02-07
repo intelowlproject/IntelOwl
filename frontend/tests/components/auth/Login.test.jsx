@@ -8,6 +8,7 @@ import Login from "../../../src/components/auth/Login";
 import { AUTH_BASE_URI } from "../../../src/constants/api";
 
 jest.mock("axios");
+jest.mock('../../../src/constants/environment', () => ({ RECAPTCHA_SITEKEY: "" }));
 
 describe("Login component", () => {
   // mock login request
@@ -28,7 +29,6 @@ describe("Login component", () => {
   test("User login", async () => {
     // mock user interaction: reccomanded to put this at the start of the test
     const user = userEvent.setup();
-
     render(
       <BrowserRouter>
         <Login />

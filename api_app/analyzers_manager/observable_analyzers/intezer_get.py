@@ -22,12 +22,11 @@ class IntezerGet(ObservableAnalyzer):
         self.poll_interval = 3
         # read secret and set API key
         intezer_api.set_global_api(api_key=self._secrets["api_key_name"])
+        intezer_sdk.consts.USER_AGENT = "IntelOwl"
 
     def run(self):
         result = {}
-
         try:
-            intezer_sdk.consts.USER_AGENT = "IntelOwl"
             # run analysis
             analysis = Analysis(file_hash=self.observable_name)
             analysis.send(wait=False)
@@ -36,11 +35,14 @@ class IntezerGet(ObservableAnalyzer):
                 sleep_before_first_check=True,
                 timeout=timedelta(seconds=self.timeout),
             )
-            result.update(analysis.result(), hash_found=True)
         except (intezer_errors.HashDoesNotExistError, intezer_errors.InsufficientQuota):
             result.update(hash_found=False)
         except intezer_errors.IntezerError as e:
             raise AnalyzerRunException(e)
+        except TimeoutError as e:
+            raise AnalyzerRunException(e)
+        else:
+            result.update(analysis.result(), hash_found=True)
 
         return result
 

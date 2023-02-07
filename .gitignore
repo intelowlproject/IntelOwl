@@ -1,5 +1,8 @@
+# ide
 .idea
 .vscode
+
+
 __pycache__
 test_files
 docker/env_file_app
@@ -9,8 +12,12 @@ docker/custom.override.yml
 venv/
 intel_owl_test_env/
 compose-elk.yml
+
+# docs
 docs_env/
 docs/build/
+
+
 configuration/service_account_keyfile.json
 configuration/custom_yara/*
 coverage_reports/
@@ -21,4 +28,15 @@ docker/.env.start
 .bash_history
 .cache
 .google-cookie
-frontend/public/env.js
+
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/

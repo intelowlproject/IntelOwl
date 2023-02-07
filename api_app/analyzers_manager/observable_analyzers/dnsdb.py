@@ -99,18 +99,18 @@ class DNSdb(classes.ObservableAnalyzer):
                 f"{self._rrtype} is not a valid rrtype: {_supported_rrtype}"
             )
 
-        if self._query_type:
-            if self._query_type not in _query_types:
-                raise AnalyzerRunException(
-                    f"{self._query_type} not in available query types"
-                )
+        if self._query_type and self._query_type not in _query_types:
+            raise AnalyzerRunException(
+                f"{self._query_type} not in available query types"
+            )
 
         if not isinstance(self._limit, int):
             raise AnalyzerRunException(
                 f"limit: {self._limit} ({type(self._limit)}) must be a integer"
             )
 
-    def _convert_date_type(self, date_string):
+    @staticmethod
+    def convert_date_type(date_string):
         """Convert date into timestamp
 
         :param date_string: date to be converted into timestamp
@@ -217,19 +217,19 @@ class DNSdb(classes.ObservableAnalyzer):
         """
         time_first_before = None
         if self._time_first_before:
-            time_first_before = self._convert_date_type(self._time_first_before)
+            time_first_before = self.convert_date_type(self._time_first_before)
 
         time_first_after = None
         if self._time_first_after:
-            time_first_after = self._convert_date_type(self._time_first_after)
+            time_first_after = self.convert_date_type(self._time_first_after)
 
         time_last_before = None
         if self._time_last_before:
-            time_last_before = self._convert_date_type(self._time_last_before)
+            time_last_before = self.convert_date_type(self._time_last_before)
 
         time_last_after = None
         if self._time_last_after:
-            time_last_after = self._convert_date_type(self._time_last_after)
+            time_last_after = self.convert_date_type(self._time_last_after)
 
         params = {"limit": self._limit}
         if time_first_before:

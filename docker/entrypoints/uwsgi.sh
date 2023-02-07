@@ -12,7 +12,7 @@ sleep 3
 # The customization of the parameters is not applied until the migration is done
 python manage.py makemigrations durin
 python manage.py migrate
-
+python manage.py createcachetable
 # Collect static files
 python manage.py collectstatic --noinput
 echo "------------------------------"

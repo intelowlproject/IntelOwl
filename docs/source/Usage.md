@@ -274,6 +274,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `YETI` (Your Everyday Threat Intelligence): scan an observable on a [YETI](https://github.com/yeti-platform/yeti) instance.
 * `HashLookupServer_Get_Observable`: check if a md5 or sha1 is available in the database of [known file hosted by CIRCL](https://github.com/adulau/hashlookup-server)
 * `Spyse`: Scan domains, IPs, emails and CVEs using Spyse's API. Register [here](https://spyse.com/user/registration).
+* `Koodous`: [koodous API](https://docs.koodous.com/api/) get information about android malware.
 * `FileScan_Search`: Finds reports and uploaded files by various tokens, like hash, filename, verdict, IOCs etc via [FileScan.io  API](https://www.filescan.io/api/docs).
 * `Virushee_CheckHash`: Search for a previous analysis of a file by its hash (SHA256/SHA1/MD5) on [Virushee API](https://api.virushee.com/).
 * `Anomali_Threatstream_PassiveDNS`: Return information from passive dns of Anomali. On [Anomali Threatstream](https://www.anomali.com/products/threatstream) PassiveDNS Api. 
@@ -298,6 +299,7 @@ Some analyzers require details other than just IP, URL, Domain, etc. We classifi
 * `Anomali_Threatstream_Confidence`: Give max, average and minimum confidence of maliciousness for an observable. On [Anomali Threatstream](https://www.anomali.com/products/threatstream) Confidence API.
 * `Anomali_Threatstream_Intelligence`: Search for threat intelligence information about an observable. On [Anomali Threatstream](https://www.anomali.com/products/threatstream) Intelligence API.
 * `YARAify_Generics`: lookup a YARA rule (default), ClamAV rule, imphash, TLSH, telfhash or icon_dash in [YARAify](https://yaraify.abuse.ch/)
+* `HaveIBeenPwned`: [HaveIBeenPwned](https://haveibeenpwned.com/API/v3) checks if an email address has been involved in a data breach
 
 ##### Optional analyzers
 
@@ -361,7 +363,7 @@ The following is the list of the available connectors. You can also navigate the
 
 #### Connectors customization
 
-Connectors being optional are `disabled` by default. You can enable them by changing the configuration values inside `configuration/connector_config.json`. This file is mounted as a docker volume, so you won't need to rebuild the image.
+Connectors being optional are `enabled` by default. You can disable them by changing the configuration values inside `configuration/connector_config.json`. This file is mounted as a docker volume, so you won't need to rebuild the image. 
 
 The following are all the keys that you can change without touching the source code:
 

@@ -1,5 +1,5 @@
 import axios from "axios";
-import create from "zustand";
+import { create } from "zustand";
 
 import { addToast } from "@certego/certego-ui";
 

@@ -39,14 +39,15 @@ class Command(BaseCommand):
             for secret_name in plugin["secrets"].keys():
                 secret = plugin["secrets"][secret_name]
                 if cls._get_env_var(secret["env_var_key"]):
-                    if PluginConfig.objects.get_or_create(
+                    _, created = PluginConfig.objects.get_or_create(
                         attribute=secret_name,
                         value=cls._get_env_var(secret["env_var_key"]),
                         plugin_name=plugin["name"],
                         type=plugin_type,
                         config_type=PluginConfig.ConfigType.SECRET,
                         owner=User.objects.filter(is_superuser=True).first(),
-                    )[1]:
+                    )
+                    if created:
                         print(
                             f"Migrated secret {secret['env_var_key']} "
                             f"for plugin {plugin['name']}"

@@ -6,8 +6,10 @@ from ._util import get_secret
 DEBUG = get_secret("DEBUG", False) == "True" or get_secret("DEBUG", False) is True
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = Path(__file__).parent.parent.parent
-BASE_STATIC_PATH = BASE_DIR / "static"
+BASE_DIR = Path(__file__).parent.parent.parent.parent
+PROJECT_LOCATION = BASE_DIR / "intel_owl"
+
+BASE_STATIC_PATH = PROJECT_LOCATION / "static"
 
 # test / ci
 MOCK_CONNECTIONS = get_secret("MOCK_CONNECTIONS", False) == "True"
@@ -22,7 +24,6 @@ FORCE_SCHEDULE_JOBS = True
 
 VERSION = get_secret("REACT_APP_INTELOWL_VERSION", "").replace("v", "")
 PUBLIC_DEPLOYMENT = get_secret("PUBLIC_DEPLOYMENT", "True") == "True"
-PROJECT_LOCATION = "/opt/deploy/intel_owl"
 
 # used for generating links to web client e.g. job results page
 WEB_CLIENT_DOMAIN = get_secret("INTELOWL_WEB_CLIENT_DOMAIN")

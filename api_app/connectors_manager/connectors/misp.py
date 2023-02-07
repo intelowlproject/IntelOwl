@@ -21,6 +21,13 @@ INTELOWL_MISP_TYPE_MAP = {
 }
 
 
+def create_misp_attribute(misp_type, misp_value) -> pymisp.MISPAttribute:
+    obj = pymisp.MISPAttribute()
+    obj.type = misp_type
+    obj.value = misp_value
+    return obj
+
+
 class MISP(Connector):
     def set_params(self, params):
         self.ssl_check = params.get("ssl_check", True)
@@ -46,12 +53,6 @@ class MISP(Connector):
 
         return obj
 
-    def _get_attr_obj(self, type, value) -> pymisp.MISPAttribute:
-        obj = pymisp.MISPAttribute()
-        obj.type = type
-        obj.value = value
-        return obj
-
     @property
     def _base_attr_obj(self) -> pymisp.MISPAttribute:
         if self._job.is_sample:
@@ -67,7 +68,7 @@ class MISP(Connector):
             else:
                 _type = INTELOWL_MISP_TYPE_MAP[_type]
 
-        obj = self._get_attr_obj(_type, value)
+        obj = create_misp_attribute(_type, value)
         obj.comment = f"Analyzers Executed: {', '.join(self._job.analyzers_to_execute)}"
         return obj
 
@@ -76,7 +77,7 @@ class MISP(Connector):
         obj_list = []
         if self._job.is_sample:
             # mime-type
-            obj_list.append(self._get_attr_obj("mime-type", self._job.file_mimetype))
+            obj_list.append(create_misp_attribute("mime-type", self._job.file_mimetype))
         return obj_list
 
     @property

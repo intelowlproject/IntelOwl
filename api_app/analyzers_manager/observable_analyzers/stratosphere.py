@@ -31,11 +31,10 @@ class Stratos(classes.ObservableAnalyzer):
 
         db_list = db.split("\n")
 
-        for ip_tuple in enumerate(db_list):
-            if ip_tuple[0] >= 2:
-                if ip in ip_tuple[1]:
-                    ip_rating = ((ip_tuple[1].split(","))[2]).strip()
-                    return ip_rating
+        for ip_tuple in db_list[2:]:
+            if ip in ip_tuple:
+                ip_rating = (ip_tuple.split(",")[2]).strip()
+                return ip_rating
         return ""
 
     def run(self):

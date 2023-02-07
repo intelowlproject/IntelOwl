@@ -42,7 +42,8 @@ class Quad9MaliciousDetector(classes.ObservableAnalyzer):
 
         return malicious_detector_response(self.observable_name, False)
 
-    def _quad9_dns_query(self, observable) -> bool:
+    @staticmethod
+    def _quad9_dns_query(observable) -> bool:
         """Perform a DNS query with Quad9 service, return True if Quad9 answer the
         DNS query with a non-empty response.
 
@@ -63,7 +64,8 @@ class Quad9MaliciousDetector(classes.ObservableAnalyzer):
 
         return bool(quad9_response.json().get("Answer", None))
 
-    def _google_dns_query(self, observable) -> bool:
+    @staticmethod
+    def _google_dns_query(observable) -> bool:
         """Perform a DNS query with Google service, return True if Google answer the
         DNS query.
 

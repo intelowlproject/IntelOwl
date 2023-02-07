@@ -48,7 +48,7 @@ class AnalyzerListAPI(APIView):
     )
     def get(self, request, *args, **kwargs):
         try:
-            ac = self.serializer_class.read_and_verify_config()
+            ac = self.serializer_class.read_and_verify_config(request.user)
             PluginConfig.apply(ac, request.user, PluginConfig.PluginType.ANALYZER)
             OrganizationPluginState.apply(
                 ac, request.user, PluginConfig.PluginType.ANALYZER

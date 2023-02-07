@@ -95,4 +95,10 @@ app.conf.beat_schedule = {
         "schedule": crontab(minute=0, hour=0),
         "options": {"queue": "default"},
     },
+    # quark rules updater 2 time a week
+    "quark_updater": {
+        "task": "intel_owl.tasks.quark_updater",
+        "schedule": crontab(minute=0, hour=0, day_of_week=[2, 5]),
+        "options": {"queue": "default"},
+    },
 }

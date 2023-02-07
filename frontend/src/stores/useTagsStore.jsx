@@ -1,4 +1,4 @@
-import create from "zustand";
+import { create } from "zustand";
 import axios from "axios";
 
 import { TAG_BASE_URI } from "../constants/api";

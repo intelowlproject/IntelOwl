@@ -189,7 +189,6 @@ The following is the list of the available analyzers you can run out-of-the-box.
 - `CheckDMARC`: An SPF and DMARC DNS records validator for domains.
 
 ###### External services
-<<<<<<< Updated upstream
 * `VirusTotal_v3_Get_Observable`: search an observable in the VirusTotal DB
 * `VirusTotal_v2_Get_Observable`: search an observable in the VirusTotal DB using the old API endpoints (this analyzer is disabled by default. You have to change that flag [in the config](https://github.com/intelowlproject/IntelOwl/blob/master/configuration/analyzer_config.json) to use it)
 * `HybridAnalysis_Get_Observable`: search an observable in the [HybridAnalysis](https://www.hybrid-analysis.com/) sandbox reports
@@ -275,93 +274,6 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `Anomali_Threatstream_PassiveDNS`: Return information from passive dns of Anomali. On [Anomali Threatstream](https://www.anomali.com/products/threatstream) PassiveDNS Api. 
 * `DocGuard_Get`: check if an hash was analyzed on DocGuard. [DocGuard](https://www.docguard.io)
 * `YARAify_Search`: lookup a file hash in [Abuse.ch YARAify](https://yaraify.abuse.ch/)
-=======
-
-- `VirusTotal_v3_Get_Observable`: search an observable in the VirusTotal DB
-- `VirusTotal_v2_Get_Observable`: search an observable in the VirusTotal DB using the old API endpoints (this analyzer is disabled by default. You have to change that flag [in the config](https://github.com/intelowlproject/IntelOwl/blob/master/configuration/analyzer_config.json) to use it)
-- `HybridAnalysis_Get_Observable`: search an observable in the [HybridAnalysis](https://www.hybrid-analysis.com/) sandbox reports
-- `OTXQuery`: scan an observable on [Alienvault OTX](https://otx.alienvault.com/)
-- `TalosReputation`: check an IP reputation from [Talos](https://talosintelligence.com/reputation_center/)
-- `Stratosphere_Blacklist`: Cross-reference an IP from blacklists maintained by [Stratosphere Labs](https://www.stratosphereips.org/attacker-ip-prioritization-blacklist)
-- `BitcoinAbuse` : Check a BTC address against bitcoinabuse.com, a public database of BTC addresses used by hackers and criminals.
-- `Robtex_Forward_PDNS_Query`: scan a domain against the Robtex Passive DNS DB
-- `Robtex_Reverse_PDNS_Query`: scan an IP against the Robtex Passive DNS DB
-- `Robtex_IP_Query`: get IP info from Robtex
-- `GoogleSafebrowsing`: Scan an observable against GoogleSafeBrowsing DB
-- `GoogleWebRisk`: Scan an observable against WebRisk API (Commercial version of Google Safe Browsing). Check the [docs](https://intelowl.readthedocs.io/en/develop/Advanced-Usage.html#analyzers-with-special-configuration) to enable this properly
-- `GreedyBear`: scan an IP or a domain against the [GreedyBear](https://greedybear.honeynet.org/) API (requires API key)
-- `GreyNoiseCommunity`: scan an IP against the [Community Greynoise API](https://www.greynoise.io/) (requires API key))
-- `GreyNoise`: scan an IP against the [Greynoise](https://www.greynoise.io/) API (requires API key)
-- `CIRCLPassiveDNS`: scan an observable against the CIRCL Passive DNS DB
-- `CIRCLPassiveSSL`: scan an observable against the CIRCL Passive SSL DB
-- `MaxMindGeoIP`: extract GeoIP info for an observable
-- `AbuseIPDB`: check if an ip was reported on [AbuseIPDB](https://www.abuseipdb.com/)
-- `Fortiguard`: scan an observable with the [Fortiguard URL Analyzer](https://www.fortiguard.com/webfilter)
-- `TorProject`: check if an IP is a Tor Exit Node
-- `MISP`: scan an observable on a MISP instance
-- `MISPFIRST`: scan an observable on the FIRST MISP instance
-- `DNSDB`: scan an observable against the [Passive DNS Farsight Database](https://www.farsightsecurity.com/solutions/dnsdb/) (support both v1 and v2 versions)
-- `Shodan_Search`: scan an IP against [Shodan](https://www.shodan.io/) Search API
-- `Shodan_Honeyscore`: scan an IP against [Shodan](https://www.shodan.io/) Honeyscore API
-- `HoneyDB_Get`: [HoneyDB](https://honeydb.io/) IP lookup service
-- `HoneyDB_Scan_Twitter`: scan an IP against HoneyDB.io's Twitter Threat Feed
-- `Hunter`: Scans a domain name and returns set of data about the organisation, the email address found and additional information about the people owning those email addresses.
-- `Censys_Search`: scan an IP address against [Censys](https://censys.io/) View API
-- `MalwareBazaar_Get_Observable`: Check if a particular malware hash is known to [MalwareBazaar](https://bazaar.abuse.ch/)
-- `MalwareBazaar_Google_Observable`: Check if a particular IP, domain or url is known to MalwareBazaar using google search
-- `ONYPHE`: search an observable in [ONYPHE](https://www.onyphe.io/)
-- `Threatminer_PDNS`: retrieve PDNS data from [Threatminer](https://www.threatminer.org/) API
-- `Threatminer_Reports_Tagging`: retrieve reports from Threatminer API
-- `Threatminer_Subdomains`: retrieve subdomains from Threatminer API
-- `URLhaus`: Query a domain or URL against [URLhaus](https://urlhaus.abuse.ch/) API.
-- `Google_DNS`: Retrieve current domain resolution with Google DoH (DNS over HTTPS)
-- `CloudFlare_DNS`: Retrieve current domain resolution with CloudFlare DoH (DNS over HTTPS)
-- `CloudFlare_Malicious_Detector`: Leverages CloudFlare DoH to check if a domain is related to malware
-- `Classic_DNS`: Retrieve current domain resolution with default DNS
-- `Auth0`: scan an IP against the Auth0 API
-- `Securitytrails_IP_Neighbours`: scan an IP against [Securitytrails](https://securitytrails.com/) API for neighbour IPs
-- `Securitytrails_Details`: scan a domain against Securitytrails API for general details
-- `Securitytrails_Subdomains`: scan a domain against Securitytrails API for subdomains
-- `Securitytrails_Tags`: scan a domain against Securitytrails API for tags
-- `Securitytrails_History_WHOIS`: scan a domain against Securitytrails API for historical WHOIS
-- `Securitytrails_History_DNS`: scan a domain against Securitytrails API for historical DNS
-- `Cymru_Hash_Registry_Get_Observable`: Check if a particular hash is available in the malware hash registry of [Team Cymru](https://team-cymru.com/community-services/mhr/)
-- `Tranco`: Check if a domain is in the latest [Tranco](https://tranco-list.eu/) ranking top sites list
-- `Pulsedive_Active_IOC`: Scan indicators and retrieve results from [Pulsedive's API](https://pulsedive.com/api/).
-- `CheckPhish`: [CheckPhish](https://checkphish.ai/checkphish-api/) can detect phishing and fraudulent sites.
-- `Whoisxmlapi`: Fetch WHOIS record data, of a domain name, an IP address, or an email address.
-- `WhoIs_RipeDB_Search` : Fetch whois record data of an IP address from Ripe DB using their [search API](https://github.com/RIPE-NCC/whois/wiki/WHOIS-REST-API-search) (no API key required)
-- `UrlScan_Search`: Search an IP/domain/url/hash against [URLScan](https://urlscan.io) API
-- `UrlScan_Submit_Result`: Submit & retrieve result of an URL against [URLScan](https://urlscan.io) API
-- `Mnemonic_PassiveDNS` : Look up a domain or IP using the [Mnemonic PassiveDNS public API](https://docs.mnemonic.no/display/public/API/Passive+DNS+Overview).
-- `Phishtank`: Search an url against [Phishtank](https://phishtank.org/api_info.php) API
-- `Phishstats`: Search [PhishStats API](https://phishstats.info/) to determine if an IP/URL/domain is malicious.
-- `Stalkphish`: Search [Stalkphish API](https://www.stalkphish.io/) to retrieve information about a potential phishing site (IP/URL/domain/Generic).
-- `Quad9_DNS`: Retrieve current domain resolution with Quad9 DoH (DNS over HTTPS)
-- `Quad9_Malicious_Detector`: Leverages Quad9 DoH to check if a domain is related to malware
-- `IPInfo`: Location Information about an IP
-- `Zoomeye`: [Zoomeye](https://www.zoomeye.org) Cyberspace Search Engine recording information of devices, websites, services and components etc..
-- `Triage_Search`: Search for reports of observables or upload from URL on triage cloud
-- `InQuest_IOCdb`: Indicators of Compromise Database by [InQuest Labs](https://labs.inquest.net/iocdb)
-- `InQuest_REPdb`: Search in [InQuest Lab's](https://labs.inquest.net/repdb) Reputation Database
-- `InQuest_DFI`: Deep File Inspection by [InQuest Labs](https://labs.inquest.net/dfi)
-- `XForceExchange`: scan an observable on [IBM X-Force Exchange](https://exchange.xforce.ibmcloud.com/)
-- `Renderton`: get screenshot of a web page using rendertron (puppeteer) [renderton repo](https://github.com/GoogleChrome/rendertron)
-- `SSAPINet`: get a screenshot of a web page using [screenshotapi.net](https://screenshotapi.net/) (external source); additional config options can be added to `extra_api_params` [in the config](https://github.com/intelowlproject/IntelOwl/blob/master/configuration/analyzer_config.json).
-- `FireHol_IPList`: check if an IP is in [FireHol's IPList](https://iplists.firehol.org/)
-- `ThreatFox`: search for an IOC in [ThreatFox](https://threatfox.abuse.ch/api/)'s database
-- `OpenCTI`: scan an observable on an [OpenCTI](https://github.com/OpenCTI-Platform/opencti) instance
-- `Intezer_Get`: check if an analysis related to a hash is available in [Intezer](https://analyze.intezer.com/?utm_source=IntelOwl). Register for a free community account [here](https://analyze.intezer.com/sign-in).
-- `MWDB_Get`: [mwdblib](https://mwdb.readthedocs.io/en/latest/) Retrieve malware file analysis by hash from repository maintained by CERT Polska MWDB.
-- `YETI` (Your Everyday Threat Intelligence): scan an observable on a [YETI](https://github.com/yeti-platform/yeti) instance.
-- `HashLookupServer_Get_Observable`: check if a md5 or sha1 is available in the database of [known file hosted by CIRCL](https://github.com/adulau/hashlookup-server)
-- `Spyse`: Scan domains, IPs, emails and CVEs using Spyse's API. Register [here](https://spyse.com/user/registration).
-- `FileScan_Search`: Finds reports and uploaded files by various tokens, like hash, filename, verdict, IOCs etc via [FileScan.io API](https://www.filescan.io/api/docs).
-- `Virushee_CheckHash`: Search for a previous analysis of a file by its hash (SHA256/SHA1/MD5) on [Virushee API](https://api.virushee.com/).
-- `Anomali_Threatstream_PassiveDNS`: Return information from passive dns of Anomali. On [Anomali Threatstream](https://www.anomali.com/products/threatstream) PassiveDNS Api.
-- `DocGuard_Get`: check if an hash was analyzed on DocGuard. [DocGuard](https://www.docguard.io)
-- `YARAify_Search`: lookup a file hash in [Abuse.ch YARAify](https://yaraify.abuse.ch/)
->>>>>>> Stashed changes
 
 ##### Generic analyzers (email, phone number, etc.; anything really)
 
@@ -372,7 +284,6 @@ Some analyzers require details other than just IP, URL, Domain, etc. We classifi
 - `CyberChef`: Run a query on a [CyberChef server](https://github.com/gchq/CyberChef-server) using pre-defined or custom recipes.
 
 ###### External services
-<<<<<<< Updated upstream
 * `VirusTotal_v3_Intelligence_Search`: Perform advanced queries with [VirusTotal Intelligence](https://developers.virustotal.com/reference/intelligence-search) (requires paid plan)
 * `MISP`: scan an observable on a MISP instance
 * `EmailRep`: search an email address on emailrep.io
@@ -387,22 +298,6 @@ Some analyzers require details other than just IP, URL, Domain, etc. We classifi
 * `Anomali_Threatstream_Intelligence`: Search for threat intelligence information about an observable. On [Anomali Threatstream](https://www.anomali.com/products/threatstream) Intelligence API.
 * `YARAify_Generics`: lookup a YARA rule (default), ClamAV rule, imphash, TLSH, telfhash or icon_dash in [YARAify](https://yaraify.abuse.ch/)
 * `HaveIBeenPwned`: [HaveIBeenPwned](https://haveibeenpwned.com/API/v3) checks if an email address has been involved in a data breach
-=======
-
-- `VirusTotal_v3_Intelligence_Search`: Perform advanced queries with [VirusTotal Intelligence](https://developers.virustotal.com/reference/intelligence-search) (requires paid plan)
-- `MISP`: scan an observable on a MISP instance
-- `EmailRep`: search an email address on emailrep.io
-- `WiGLE`: Maps and database of 802.11 wireless networks, with statistics, submitted by wardrivers, netstumblers, and net huggers.
-- `CRXcavator`: scans a chrome extension against crxcavator.io
-- `Darksearch_Query`: Search a keyword against darksearch.io's search API. It's possible to make complex queries using boolean logic. For example, `OSINT AND CTI OR intelowl NOT hack` is a valid observable name.
-- `Dehashed_Search`: Query any observable/keyword against https://dehashed.com's search API.
-- `CryptoScamDB_CheckAPI`: Scan a cryptocurrency address, IP address, domain or ENS name against the [CryptoScamDB](https://cryptoscamdb.org/) API.
-- `IntelX_Phonebook`: [IntelligenceX](https://intelx.io/) is a search engine and data archive. Fetches emails, urls, domains associated with an observable or a generic string.
-- `IntelX_Intelligent_Search`: [IntelligenceX](https://intelx.io/) is a search engine and data archive. Fetches emails, urls, domains associated with an observable or a generic string.
-- `Anomali_Threatstream_Confidence`: Give max, average and minimum confidence of maliciousness for an observable. On [Anomali Threatstream](https://www.anomali.com/products/threatstream) Confidence API.
-- `Anomali_Threatstream_Intelligence`: Search for threat intelligence information about an observable. On [Anomali Threatstream](https://www.anomali.com/products/threatstream) Intelligence API.
-- `YARAify_Generics`: lookup a YARA rule (default), ClamAV rule, imphash, TLSH, telfhash or icon_dash in [YARAify](https://yaraify.abuse.ch/)
->>>>>>> Stashed changes
 
 ##### Optional analyzers
 

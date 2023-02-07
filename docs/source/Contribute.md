@@ -244,12 +244,8 @@ Example:
 "Connector_Name": {
     "python_module": "<module_name>.<class_name>",
     "description": "very cool connector",
-<<<<<<< Updated upstream
-    "maximum_tlp": "WHITE",
-    "run_on_failure": false,
-=======
     "maximum_tlp": "CLEAR",
->>>>>>> Stashed changes
+    "run_on_failure": false,
     "config": {
       "soft_time_limit": 100,
       "queue": "default",
@@ -416,7 +412,6 @@ Otherwise, you can use the normal Django syntax like previously shown. Example:
 $ docker exec intelowl_uwsgi python3 manage.py test tests.analyzers_manager.test_observable_scripts.GenericAnalyzersTestCase
 ```
 
-<<<<<<< Updated upstream
 #### Frontend
 
 
@@ -446,8 +441,6 @@ npm test -- -t "Login component User login"
 ```
 
 
-=======
->>>>>>> Stashed changes
 ## Create a pull request
 
 ### Remember!!!

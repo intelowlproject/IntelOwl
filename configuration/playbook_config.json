@@ -181,7 +181,7 @@
                 "result_max": 25
             },
             "Yara": {
-                "url": [
+                "repositories": [
                   "https://github.com/bartblaze/Yara-rules",
                   "https://github.com/intezer/yara-rules",
                   "https://github.com/advanced-threat-research/Yara-Rules",

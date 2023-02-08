@@ -173,7 +173,7 @@ class YaraScan(FileAnalyzer):
         org = url_parsed.netloc
         repo = url_parsed.path.split("/")[-1].split(".")[0]
         directory = cls.get_directory(org, repo)
-        logger.info(f"About do download zip file from {url} to {directory}")
+        logger.info(f"About to download zip file from {url} to {directory}")
         response = requests.get(url, stream=True)
         try:
             response.raise_for_status()

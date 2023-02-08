@@ -4102,7 +4102,6 @@
       "url": {
         "value": [
           "https://github.com/bartblaze/Yara-rules",
-          "https://github.com/bartblaze/Yara-rules",
           "https://github.com/intezer/yara-rules",
           "https://github.com/advanced-threat-research/Yara-Rules",
           "https://github.com/stratosphereips/yara-rules",
@@ -4113,7 +4112,8 @@
           "https://github.com/mandiant/red_team_tool_countermeasures",
           "https://github.com/fboldewin/YARA-rules",
           "https://github.com/Yara-Rules/rules.git",
-          "https://github.com/Neo23x0/signature-base.git"
+          "https://github.com/Neo23x0/signature-base.git",
+          "https://yaraify-api.abuse.ch/download/yaraify-rules.zip"
         ],
         "type": "list",
         "description": ""

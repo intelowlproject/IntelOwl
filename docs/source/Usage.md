@@ -114,21 +114,21 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `Floss`: [Mandiant Floss](https://github.com/mandiant/flare-floss) Obfuscated String Solver in files
 * `Strings_Info_Classic`: strings extraction
 * `Strings_Info_ML`: strings extraction plus strings ranking based on Machine Learning. Leverages [Stringsifter](https://github.com/fireeye/stringsifter)
-* `Yara_Scan_ATM_MALWARE`: scan a file with the [ATM malware yara rules](https://github.com/fboldewin/YARA-rules)
-* `Yara_Scan_Bartblaze`: scan a file with [bartblaze yara rules](https://github.com/bartblaze/Yara-rules)
-* `Yara_Scan_Community`: scan a file with the [community yara rules](https://github.com/Yara-Rules/rules)
-* `Yara_Scan_Dail_Ioc`: scan a file with [StrangerealIntel](https://github.com/StrangerealIntel) Daily IOC yara rules
-* `Yara_Scan_Florian`: scan a file with [Neo23x0 yara rules](https://github.com/Neo23x0/signature-base)
-* `Yara_Scan_Intezer`: scan a file with [Intezer yara rules](https://github.com/intezer/yara-rules)
-* `Yara_Scan_Inquest`: scan a file with [Inquest yara rules](https://github.com/InQuest/yara-rules)
-* `Yara_Scan_McAfee`: scan a file with [McAfee yara rules](https://github.com/advanced-threat-research/Yara-Rules)
-* `Yara_Scan_Samir`: scan a file with [Samir Threat Hunting yara rules](https://github.com/sbousseaden/YaraHunts)
-* `Yara_Scan_Stratosphere`: scan a file with [Stratosphere yara rules](https://github.com/stratosphereips/yara-rules)
-* `Yara_Scan_FireEye`: scan a file with FireEye yara rules
-* `Yara_Scan_ReversingLabs`: scan a file with [ReversingLabs yara rules](https://github.com/reversinglabs/reversinglabs-yara-rules)
-* `Yara_Scan_Custom_Signatures`: scan a file with your own added signatures
-* `Yara_Scan_YARAify`: scan a file with YARAify rules [YARAify rules](https://yaraify.abuse.ch/api/#download-yara-package)
-* `Yara_Scan_Custom_Signatures`: scan a file with the Yara rules you added manually in IntelOwl in `/configuration/custom_yara`
+* `Yara`: scan a file with
+  * [ATM malware yara rules](https://github.com/fboldewin/YARA-rules)
+  * [bartblaze yara rules](https://github.com/bartblaze/Yara-rules)
+  * [community yara rules](https://github.com/Yara-Rules/rules)
+  * [StrangerealIntel](https://github.com/StrangerealIntel) 
+  * [Neo23x0 yara rules](https://github.com/Neo23x0/signature-base)
+  * [Intezer yara rules](https://github.com/intezer/yara-rules)
+  * [Inquest yara rules](https://github.com/InQuest/yara-rules)
+  * [McAfee yara rules](https://github.com/advanced-threat-research/Yara-Rules)
+  * [Samir Threat Hunting yara rules](https://github.com/sbousseaden/YaraHunts)
+  * [Stratosphere yara rules](https://github.com/stratosphereips/yara-rules)
+  * [Mandiant yara rules](https://github.com/mandiant/red_team_tool_countermeasures)
+  * [ReversingLabs yara rules](https://github.com/reversinglabs/reversinglabs-yara-rules)
+  * [YARAify rules](https://yaraify.abuse.ch/api/#download-yara-package)
+  * your own added signatures
 * `PEframe_Scan`: Perform static analysis on Portable Executable malware and malicious MS Office documents with [PeFrame](https://github.com/guelfoweb/peframe)
 * `Capa_Info`: [Capa](https://github.com/mandiant/capa) detects capabilities in executable files
 * `Capa_Info_Shellcode`: [Capa](https://github.com/mandiant/capa) detects capabilities in shellcode

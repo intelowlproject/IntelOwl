@@ -195,136 +195,28 @@
                 "query": "get_yara",
                 "result_max": 25
             },
-            "Yara_Scan_ATM_MALWARE": {
-                "directories_with_rules": [
-                    "/opt/deploy/yara/atm_malware_rules"
-                ],
-                "git_repo_main_dir": [
-                    "/opt/deploy/yara/atm_malware_rules"
-                ],
-                "recursive": true
-            },
-            "Yara_Scan_Bartblaze": {
-                "directories_with_rules": [
-                    "/opt/deploy/yara/bartblaze_rules/rules/APT",
-                    "/opt/deploy/yara/bartblaze_rules/rules/crimeware",
-                    "/opt/deploy/yara/bartblaze_rules/rules/generic",
-                    "/opt/deploy/yara/bartblaze_rules/rules/hacktools",
-                    "/opt/deploy/yara/bartblaze_rules/rules/ransomware"
-                ],
-                "git_repo_main_dir": [
-                    "/opt/deploy/yara/bartblaze_rules"
-                ]
-            },
-            "Yara_Scan_Community": {
-                "directories_with_rules": [
-                    "/opt/deploy/yara/rules/antidebug_antivm",
-                    "/opt/deploy/yara/rules/capabilities",
-                    "/opt/deploy/yara/rules/crypto",
-                    "/opt/deploy/yara/rules/cve_rules",
-                    "/opt/deploy/yara/rules/email",
-                    "/opt/deploy/yara/rules/exploit_kits",
-                    "/opt/deploy/yara/rules/maldocs",
-                    "/opt/deploy/yara/rules/malware",
-                    "/opt/deploy/yara/rules/mobile_malware",
-                    "/opt/deploy/yara/rules/packers",
-                    "/opt/deploy/yara/rules/webshells"
-                ],
-                "git_repo_main_dir": [
-                    "/opt/deploy/yara/rules"
-                ]
-            },
-            "Yara_Scan_Custom_Signatures": {
-                "directories_with_rules": [
-                    "/opt/deploy/intel_owl/configuration/custom_yara"
-                ],
-                "update": false
-            },
-            "Yara_Scan_Daily_Ioc": {
-                "directories_with_rules": [
-                    "/opt/deploy/yara/daily_ioc_rules"
-                ],
-                "git_repo_main_dir": [
-                    "/opt/deploy/yara/daily_ioc_rules"
-                ],
-                "recursive": true
-            },
-            "Yara_Scan_Florian": {
-                "directories_with_rules": [
-                    "/opt/deploy/yara/signature-base/yara"
-                ],
-                "git_repo_main_dir": [
-                    "/opt/deploy/yara/signature-base"
-                ]
-            },
-            "Yara_Scan_Inquest": {
-                "directories_with_rules": [
-                    "/opt/deploy/yara/inquest_rules"
-                ],
-                "git_repo_main_dir": [
-                    "/opt/deploy/yara/inquest_rules"
-                ],
-                "recursive": false
-            },
-            "Yara_Scan_Intezer": {
-                "directories_with_rules": [
-                    "/opt/deploy/yara/intezer_rules"
-                ]
-            },
-            "Yara_Scan_Mandiant": {
-                "directories_with_rules": [
-                    "/opt/deploy/yara/mandiant_rules/rules"
-                ],
-                "git_repo_main_dir": [
-                    "/opt/deploy/yara/mandiant_rules"
-                ],
-                "recursive": true
-            },
-            "Yara_Scan_ReversingLabs": {
-                "directories_with_rules": [
-                    "/opt/deploy/yara/reversinglabs_rules/yara"
-                ],
-                "git_repo_main_dir": [
-                    "/opt/deploy/yara/reversinglabs_rules"
-                ],
-                "recursive": true
-            },
-            "Yara_Scan_Samir": {
-                "directories_with_rules": [
-                    "/opt/deploy/yara/samir_rules"
-                ],
-                "git_repo_main_dir": [
-                    "/opt/deploy/yara/samir_rules"
-                ]
-            },
-            "Yara_Scan_Stratosphere": {
-                "directories_with_rules": [
-                    "/opt/deploy/yara/stratosphere_rules/malware",
-                    "/opt/deploy/yara/stratosphere_rules/protocols"
-                ],
-                "git_repo_main_dir": [
-                    "/opt/deploy/yara/stratosphere_rules"
-                ]
-            },
-            "Yara_Scan_Trellix": {
-                "directories_with_rules": [
-                    "/opt/deploy/yara/trellix_rules/APT",
-                    "/opt/deploy/yara/trellix_rules/RAT",
-                    "/opt/deploy/yara/trellix_rules/malware",
-                    "/opt/deploy/yara/trellix_rules/miners",
-                    "/opt/deploy/yara/trellix_rules/ransomware",
-                    "/opt/deploy/yara/trellix_rules/stealer"
-                ],
-                "git_repo_main_dir": [
-                    "/opt/deploy/yara/trellix_rules"
-                ]
-            },
-            "Yara_Scan_YARAify": {
-                "directories_with_rules": [
-                    "/opt/deploy/yara/yaraify_rules/rules"
-                ],
+            "Yara": {
                 "url": [
-                    "https://yaraify-api.abuse.ch/download/yaraify-rules.zip"
+                  "https://github.com/bartblaze/Yara-rules",
+                  "https://github.com/intezer/yara-rules",
+                  "https://github.com/advanced-threat-research/Yara-Rules",
+                  "https://github.com/stratosphereips/yara-rules",
+                  "https://github.com/reversinglabs/reversinglabs-yara-rules",
+                  "https://github.com/sbousseaden/YaraHunts",
+                  "https://github.com/InQuest/yara-rules",
+                  "https://github.com/StrangerealIntel/DailyIOC",
+                  "https://github.com/mandiant/red_team_tool_countermeasures",
+                  "https://github.com/fboldewin/YARA-rules",
+                  "https://github.com/Yara-Rules/rules.git",
+                  "https://github.com/Neo23x0/signature-base.git",
+                  "https://yaraify-api.abuse.ch/download/yaraify-rules.zip"
+                ],
+                "ignore": [
+                  "generic_anomalies.yar",
+                  "general_cloaking.yar",
+                  "thor_inverse_matches.yar",
+                  "yara_mixed_ext_vars.yar",
+                  "thor-webshells.yar"
                 ]
             }
         },

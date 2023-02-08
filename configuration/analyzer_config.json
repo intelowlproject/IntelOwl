@@ -4136,7 +4136,7 @@
   "Yara_Scan_ATM_MALWARE": {
     "type": "file",
     "python_module": "yara_scan.YaraScan",
-    "description": "scan a file with ATM Malware yara rules ([github](https://github.com/fboldewin/YARA-rules))",
+    "description": "[DEPRECATED, move to Yara] scan a file with ATM Malware yara rules ([github](https://github.com/fboldewin/YARA-rules))",
     "disabled": true,
     "external_service": false,
     "leaks_info": false,
@@ -4156,7 +4156,7 @@
   "Yara_Scan_Bartblaze": {
     "type": "file",
     "python_module": "yara_scan.YaraScan",
-    "description": "Scan a file with Bartblaze yara rules ([github](https://github.com/bartblaze/Yara-rules)).",
+    "description": "[DEPRECATED, move to Yara] Scan a file with Bartblaze yara rules ([github](https://github.com/bartblaze/Yara-rules)).",
     "disabled": true,
     "external_service": false,
     "leaks_info": false,
@@ -4176,7 +4176,7 @@
   "Yara_Scan_Community": {
     "type": "file",
     "python_module": "yara_scan.YaraScan",
-    "description": "scan a file with community yara rules ([github](https://github.com/Yara-Rules/rules.git))",
+    "description": "[DEPRECATED, move to Yara] Scan a file with community yara rules ([github](https://github.com/Yara-Rules/rules.git))",
     "disabled": true,
     "external_service": false,
     "leaks_info": false,
@@ -4196,7 +4196,7 @@
   "Yara_Scan_Custom_Signatures": {
     "type": "file",
     "python_module": "yara_scan.YaraScan",
-    "description": "scan a file with the Custom Signatures you added in IntelOwl",
+    "description": "[DEPRECATED, move to Yara] Scan a file with the Custom Signatures you added in IntelOwl",
     "disabled": true,
     "external_service": false,
     "leaks_info": false,
@@ -4211,7 +4211,7 @@
   "Yara_Scan_Daily_Ioc": {
     "type": "file",
     "python_module": "yara_scan.YaraScan",
-    "description": "scan a file with StrangerealIntel daily IOC yara rules ([github](https://github.com/StrangerealIntel/DailyIOC))",
+    "description": "[DEPRECATED, move to Yara] Scan a file with StrangerealIntel daily IOC yara rules ([github](https://github.com/StrangerealIntel/DailyIOC))",
     "disabled": true,
     "external_service": false,
     "leaks_info": false,
@@ -4231,7 +4231,7 @@
   "Yara_Scan_Florian": {
     "type": "file",
     "python_module": "yara_scan.YaraScan",
-    "description": "scan a file with Neo23x0 yara rules ([github](https://github.com/Neo23x0/signature-base.git))",
+    "description": "[DEPRECATED, move to Yara] Scan a file with Neo23x0 yara rules ([github](https://github.com/Neo23x0/signature-base.git))",
     "disabled": true,
     "external_service": false,
     "leaks_info": false,
@@ -4251,7 +4251,7 @@
   "Yara_Scan_Mandiant": {
     "type": "file",
     "python_module": "yara_scan.YaraScan",
-    "description": "scan a file with Mandiant yara rules ([github](https://github.com/mandiant/red_team_tool_countermeasures))",
+    "description": "[DEPRECATED, move to Yara] Scan a file with Mandiant yara rules ([github](https://github.com/mandiant/red_team_tool_countermeasures))",
     "disabled": true,
     "external_service": false,
     "leaks_info": false,
@@ -4271,7 +4271,7 @@
   "Yara_Scan_Inquest": {
     "type": "file",
     "python_module": "yara_scan.YaraScan",
-    "description": "scan a file with Inquest yara rules ([github](https://github.com/InQuest/yara-rules))",
+    "description": "[DEPRECATED, move to Yara] Scan a file with Inquest yara rules ([github](https://github.com/InQuest/yara-rules))",
     "disabled": true,
     "external_service": false,
     "leaks_info": false,
@@ -4291,7 +4291,7 @@
   "Yara_Scan_Intezer": {
     "type": "file",
     "python_module": "yara_scan.YaraScan",
-    "description": "Scan a file with Intezer yara rules ([github](https://github.com/intezer/yara-rules)).",
+    "description": "[DEPRECATED, move to Yara] Scan a file with Intezer yara rules ([github](https://github.com/intezer/yara-rules)).",
     "disabled": true,
     "external_service": false,
     "leaks_info": false,
@@ -4311,7 +4311,7 @@
   "Yara_Scan_ReversingLabs": {
     "type": "file",
     "python_module": "yara_scan.YaraScan",
-    "description": "scan a file with ReversingLabs yara rules ([github](https://github.com/reversinglabs/reversinglabs-yara-rules))",
+    "description": "[DEPRECATED, move to Yara] Scan a file with ReversingLabs yara rules ([github](https://github.com/reversinglabs/reversinglabs-yara-rules))",
     "disabled": true,
     "external_service": false,
     "leaks_info": false,
@@ -4331,7 +4331,7 @@
   "Yara_Scan_Samir": {
     "type": "file",
     "python_module": "yara_scan.YaraScan",
-    "description": "scan a file with Samir Threat Hunting yara rules ([github](hhttps://github.com/sbousseaden/YaraHunts))",
+    "description": "[DEPRECATED, move to Yara] Scan a file with Samir Threat Hunting yara rules ([github](hhttps://github.com/sbousseaden/YaraHunts))",
     "disabled": true,
     "external_service": false,
     "leaks_info": false,
@@ -4351,7 +4351,7 @@
   "Yara_Scan_Stratosphere": {
     "type": "file",
     "python_module": "yara_scan.YaraScan",
-    "description": "scan a file with Stratosphere yara rules ([github](https://github.com/stratosphereips/yara-rules))",
+    "description": "[DEPRECATED, move to Yara] Scan a file with Stratosphere yara rules ([github](https://github.com/stratosphereips/yara-rules))",
     "disabled": true,
     "external_service": false,
     "leaks_info": false,
@@ -4371,7 +4371,7 @@
   "Yara_Scan_Trellix": {
     "type": "file",
     "python_module": "yara_scan.YaraScan",
-    "description": "scan a file with Trellix yara rules ([github](https://github.com/advanced-threat-research/Yara-Rules))",
+    "description": "[DEPRECATED, move to Yara] Scan a file with Trellix yara rules ([github](https://github.com/advanced-threat-research/Yara-Rules))",
     "disabled": true,
     "external_service": false,
     "leaks_info": false,
@@ -4391,7 +4391,7 @@
   "Yara_Scan_YARAify": {
     "type": "file",
     "python_module": "yara_scan.YaraScan",
-    "description": "Scan a file with yara rules downloaded from [YARAify](https://yaraify.abuse.ch/)",
+    "description": "[DEPRECATED, move to Yara] Scan a file with yara rules downloaded from [YARAify](https://yaraify.abuse.ch/)",
     "disabled": true,
     "external_service": false,
     "leaks_info": false,

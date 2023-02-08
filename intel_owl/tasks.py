@@ -91,28 +91,33 @@ def run_connector(job_id: int, config_dict: dict, report_defaults: dict):
 
 
 @shared_task()
-def build_config_cache(serializer_class: str, user=None):
+def build_config_cache(plugin_type: str, user=None):
+    from api_app.analyzers_manager.serializers import AnalyzerConfigSerializer
+    from api_app.connectors_manager.serializers import ConnectorConfigSerializer
+    from api_app.models import PluginConfig
+
     # we "greedy cache" the config at start of application
     # because it is an expensive operation
-    import sys
-
-    from api_app.core.serializers import AbstractConfigSerializer
-
     # we can't have the class as parameter because we run celery not in pickle mode
-    serializer_class = getattr(sys.modules[__name__], serializer_class)
-
-    serializer_class: AbstractConfigSerializer
+    if plugin_type == PluginConfig.PluginType.ANALYZER:
+        serializer_class = AnalyzerConfigSerializer
+    elif plugin_type == PluginConfig.PluginType.CONNECTOR:
+        serializer_class = ConnectorConfigSerializer
+    else:
+        raise TypeError(f"Unable to parse plugin type {plugin_type}")
+    serializer_class.read_and_verify_config.invalidate(serializer_class, user)
     serializer_class.read_and_verify_config(user)
 
 
 @signals.worker_ready.connect
 def worker_ready_connect(*args, **kwargs):
-    from api_app.analyzers_manager.serializers import AnalyzerConfigSerializer
-    from api_app.connectors_manager.serializers import ConnectorConfigSerializer
+
+    from api_app.models import PluginConfig
 
     logger.info("worker ready, generating cache")
-    build_config_cache(AnalyzerConfigSerializer.__name__)
-    build_config_cache(ConnectorConfigSerializer.__name__)
+
+    build_config_cache(PluginConfig.PluginType.ANALYZER.value)
+    build_config_cache(PluginConfig.PluginType.CONNECTOR.value)
     for user in User.objects.all():
-        build_config_cache(AnalyzerConfigSerializer.__name__, user)
-        build_config_cache(ConnectorConfigSerializer.__name__, user)
+        build_config_cache(PluginConfig.PluginType.ANALYZER.value, user=user)
+        build_config_cache(PluginConfig.PluginType.CONNECTOR.value, user=user)

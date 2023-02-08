@@ -7,34 +7,19 @@ from django.dispatch import receiver
 
 from intel_owl.tasks import build_config_cache
 
-from .analyzers_manager.serializers import AnalyzerConfigSerializer
-from .connectors_manager.serializers import ConnectorConfigSerializer
 from .models import PluginConfig
 
 
 def invalidate_plugin_config(instance: PluginConfig):
-    if instance.type == PluginConfig.PluginType.ANALYZER:
-        serializer_class = AnalyzerConfigSerializer
-    elif instance.type == PluginConfig.PluginType.CONNECTOR:
-        serializer_class = ConnectorConfigSerializer
-    else:
-        raise TypeError(f"Unable to parse plugin type {instance.type}")
 
-    serializer_class.read_and_verify_config.invalidate(serializer_class)
-    build_config_cache.delay(serializer_class.__name__)
+    build_config_cache.delay(instance.type)
     # we are invalidating for every member of the organization
     if instance.organization:
         for member in instance.organization.members.all():
-            serializer_class.read_and_verify_config.invalidate(
-                serializer_class, member.user
-            )
-            build_config_cache.delay(serializer_class.__name__, member.user)
+            build_config_cache.delay(instance.type, user=member.user)
     else:
         # only the person that created it
-        serializer_class.read_and_verify_config.invalidate(
-            serializer_class, instance.owner
-        )
-        build_config_cache.delay(serializer_class.__name__, instance.owner)
+        build_config_cache.delay(instance.type, user=instance.owner)
 
 
 @receiver(post_save, sender=PluginConfig)

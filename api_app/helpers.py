@@ -44,6 +44,8 @@ def calculate_mimetype(file_pointer, file_name) -> str:
             mimetype = "application/vnd.android.package-archive"
         elif file_name.endswith(".dex"):
             mimetype = "application/x-dex"
+        elif file_name.endswith(".one"):
+            mimetype = "application/onenote"
 
     if not mimetype:
         buffer = file_pointer.read()

@@ -14,9 +14,6 @@
             "Classic_DNS": {
                 "query_type": "A"
             },
-            "CloudFlare_DNS": {
-                "query_type": "A"
-            },
             "CloudFlare_Malicious_Detector": {},
             "CryptoScamDB_CheckAPI": {},
             "CyberChef": {
@@ -36,12 +33,9 @@
                 "pages": 10,
                 "proxies": {}
             },
+            "DNS0_EU_Malicious_Detector": {},
             "Doc_Info": {
                 "additional_passwords_to_check": []
-            },
-            "Doc_Info_Experimental": {
-                "additional_passwords_to_check": [],
-                "experimental": true
             },
             "ELF_Info": {},
             "FileScan_Search": {},
@@ -77,6 +71,7 @@
             "HashLookupServer_Get_Observable": {
                 "hashlookup_server": ""
             },
+            "IPApi" : {},
             "MalwareBazaar_Get_File": {},
             "MalwareBazaar_Get_Observable": {},
             "MalwareBazaar_Google_Observable": {},
@@ -117,9 +112,6 @@
                 "profile": "",
                 "shellcode": true
             },
-            "Quad9_DNS": {
-                "query_type": "A"
-            },
             "Quad9_Malicious_Detector": {},
             "Quark_Engine_APK": {},
             "Rendertron": {},
@@ -141,14 +133,7 @@
                 "shellcode": true
             },
             "Stratosphere_Blacklist": {},
-            "Strings_Info_Classic": {
-                "max_number_of_strings": 300,
-                "rank_strings": false
-            },
-            "Strings_Info_ML": {
-                "max_number_of_strings": 200,
-                "rank_strings": true
-            },
+            "Strings_Info": {},
             "Suricata": {
                 "extended_logs": false,
                 "reload_rules": false

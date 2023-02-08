@@ -18,8 +18,7 @@ class EXEAnalyzersTestCase(_FileAnalyzersScriptsTestCase):
                 "ELF_Info",
                 "Signature_Info",
                 "SpeakEasy",
-                "Strings_Info_Classic",
-                "Strings_Info_ML",
+                "Strings_Info",
                 "Qiling_Windows",
                 "Qiling_Windows_Shellcode",
                 "Qiling_Linux",
@@ -73,7 +72,7 @@ class DocAnalyzersTestCase(_FileAnalyzersScriptsTestCase):
             **super().get_params(),
             "file_name": "document.doc",
             "file_mimetype": "application/msword",
-            "analyzers_to_execute": ["Doc_Info", "Doc_Info_Experimental"],
+            "analyzers_to_execute": ["Doc_Info"],
         }
 
 

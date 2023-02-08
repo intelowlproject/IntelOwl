@@ -18,7 +18,7 @@ class StringsInfo(FileAnalyzer, DockerBasedAnalyzer):
     # whereas subprocess timeout is kept as 60 * 9 = 9 minutes
 
     def set_params(self, params):
-        self.max_no_of_strings = int(params.get("max_number_of_strings", 300))
+        self.max_no_of_strings = int(params.get("max_number_of_strings", 500))
         self.max_chars_for_string = int(params.get("max_characters_for_string", 1000))
 
         # If set, this module will use Machine Learning feature

@@ -133,14 +133,7 @@
                 "shellcode": true
             },
             "Stratosphere_Blacklist": {},
-            "Strings_Info_Classic": {
-                "max_number_of_strings": 300,
-                "rank_strings": false
-            },
-            "Strings_Info_ML": {
-                "max_number_of_strings": 200,
-                "rank_strings": true
-            },
+            "Strings_Info": {},
             "Suricata": {
                 "extended_logs": false,
                 "reload_rules": false

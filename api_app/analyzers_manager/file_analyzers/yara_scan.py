@@ -195,7 +195,7 @@ class YaraScan(FileAnalyzer):
         logger.info("Starting updating yara rules")
         analyzer_config = AnalyzerConfig.all()
         urls = set()
-        for analyzer_name, ac in analyzer_config.items():
+        for ac in analyzer_config.values():
             if (
                 ac.python_module == f"{cls.__module__.split('.')[-1]}.{cls.__name__}"
                 and ac.disabled is False

@@ -92,28 +92,38 @@ def run_connector(job_id: int, config_dict: dict, report_defaults: dict):
 
 
 @shared_task()
-def build_config_cache(serializer_class, user=None):
-    from api_app.core.serializers import AbstractConfigSerializer
+def build_config_cache(plugin_type: str, user_pk: int = None):
+    from api_app.analyzers_manager.serializers import AnalyzerConfigSerializer
+    from api_app.connectors_manager.serializers import ConnectorConfigSerializer
+    from api_app.models import PluginConfig
 
     # we "greedy cache" the config at start of application
     # because it is an expensive operation
+    # we can't have the class as parameter because we run celery not in pickle mode
+    if plugin_type == PluginConfig.PluginType.ANALYZER:
+        serializer_class = AnalyzerConfigSerializer
+    elif plugin_type == PluginConfig.PluginType.CONNECTOR:
+        serializer_class = ConnectorConfigSerializer
+    else:
+        raise TypeError(f"Unable to parse plugin type {plugin_type}")
+    user = User.objects.get(pk=user_pk) if user_pk else None
 
-    serializer_class: AbstractConfigSerializer
+    serializer_class.read_and_verify_config.invalidate(serializer_class, user)
     serializer_class.read_and_verify_config(user)
 
 
 # startup
 @signals.worker_ready.connect
 def worker_ready_connect(*args, **kwargs):
-    from api_app.analyzers_manager.file_analyzers.yara_scan import YaraScan
-    from api_app.analyzers_manager.serializers import AnalyzerConfigSerializer
-    from api_app.connectors_manager.serializers import ConnectorConfigSerializer
+
+    from api_app.models import PluginConfig
 
     logger.info("worker ready, generating cache")
-    build_config_cache(AnalyzerConfigSerializer)
-    build_config_cache(ConnectorConfigSerializer)
+
+    build_config_cache(PluginConfig.PluginType.ANALYZER.value)
+    build_config_cache(PluginConfig.PluginType.CONNECTOR.value)
     for user in User.objects.all():
-        build_config_cache(AnalyzerConfigSerializer, user)
-        build_config_cache(ConnectorConfigSerializer, user)
+        build_config_cache(PluginConfig.PluginType.ANALYZER.value, user_pk=user.pk)
+        build_config_cache(PluginConfig.PluginType.CONNECTOR.value, user_pk=user.pk)
     if settings.REPO_DOWNLOADER_ENABLED:
         YaraScan.update_rules()

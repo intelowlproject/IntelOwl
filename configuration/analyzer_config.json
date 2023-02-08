@@ -4086,10 +4086,10 @@
       }
     }
   },
-  "Yara_Scan_ATM_MALWARE": {
+   "Yara": {
     "type": "file",
     "python_module": "yara_scan.YaraScan",
-    "description": "scan a file with ATM Malware yara rules ([github](https://github.com/fboldewin/YARA-rules))",
+    "description": "scan a file with Yara rules",
     "disabled": false,
     "external_service": false,
     "leaks_info": false,
@@ -4099,19 +4099,56 @@
     },
     "secrets": {},
     "params": {
-      "git_repo_main_dir": {
-        "value": ["/opt/deploy/yara/atm_malware_rules"],
+      "url": {
+        "value": [
+          "https://github.com/bartblaze/Yara-rules",
+          "https://github.com/bartblaze/Yara-rules",
+          "https://github.com/intezer/yara-rules",
+          "https://github.com/advanced-threat-research/Yara-Rules",
+          "https://github.com/stratosphereips/yara-rules",
+          "https://github.com/reversinglabs/reversinglabs-yara-rules",
+          "https://github.com/sbousseaden/YaraHunts",
+          "https://github.com/InQuest/yara-rules",
+          "https://github.com/StrangerealIntel/DailyIOC",
+          "https://github.com/mandiant/red_team_tool_countermeasures",
+          "https://github.com/fboldewin/YARA-rules",
+          "https://github.com/Yara-Rules/rules.git",
+          "https://github.com/Neo23x0/signature-base.git"
+        ],
         "type": "list",
         "description": ""
       },
-      "directories_with_rules": {
-        "value": ["/opt/deploy/yara/atm_malware_rules"],
+     "ignore": {
+        "value": [
+          "generic_anomalies.yar",
+          "general_cloaking.yar",
+          "thor_inverse_matches.yar",
+          "yara_mixed_ext_vars.yar",
+          "thor-webshells.yar"
+        ],
+       "type": "list",
+      "description": "ignore these rules"
+      }
+    }
+
+  },
+
+  "Yara_Scan_ATM_MALWARE": {
+    "type": "file",
+    "python_module": "yara_scan.YaraScan",
+    "description": "scan a file with ATM Malware yara rules ([github](https://github.com/fboldewin/YARA-rules))",
+    "disabled": true,
+    "external_service": false,
+    "leaks_info": false,
+    "config": {
+      "soft_time_limit": 60,
+      "queue": "local"
+    },
+    "secrets": {},
+    "params": {
+      "url": {
+        "value": ["https://github.com/fboldewin/YARA-rules"],
         "type": "list",
-        "description": ""
-      },
-      "recursive": {
-        "value": true,
-        "type": "bool",
         "description": ""
       }
     }
@@ -4119,8 +4156,8 @@
   "Yara_Scan_Bartblaze": {
     "type": "file",
     "python_module": "yara_scan.YaraScan",
-    "description": "Scan a file with Intezer yara rules ([github](https://github.com/bartblaze/Yara-rules)).",
-    "disabled": false,
+    "description": "Scan a file with Bartblaze yara rules ([github](https://github.com/bartblaze/Yara-rules)).",
+    "disabled": true,
     "external_service": false,
     "leaks_info": false,
     "config": {
@@ -4129,19 +4166,8 @@
     },
     "secrets": {},
     "params": {
-      "git_repo_main_dir": {
-        "value": ["/opt/deploy/yara/bartblaze_rules"],
-        "type": "list",
-        "description": ""
-      },
-      "directories_with_rules": {
-        "value": [
-          "/opt/deploy/yara/bartblaze_rules/rules/APT",
-          "/opt/deploy/yara/bartblaze_rules/rules/crimeware",
-          "/opt/deploy/yara/bartblaze_rules/rules/generic",
-          "/opt/deploy/yara/bartblaze_rules/rules/hacktools",
-          "/opt/deploy/yara/bartblaze_rules/rules/ransomware"
-        ],
+      "url": {
+        "value": ["https://github.com/bartblaze/Yara-rules"],
         "type": "list",
         "description": ""
       }
@@ -4151,7 +4177,7 @@
     "type": "file",
     "python_module": "yara_scan.YaraScan",
     "description": "scan a file with community yara rules ([github](https://github.com/Yara-Rules/rules.git))",
-    "disabled": false,
+    "disabled": true,
     "external_service": false,
     "leaks_info": false,
     "config": {
@@ -4160,33 +4186,18 @@
     },
     "secrets": {},
     "params": {
-      "git_repo_main_dir": {
-        "value": ["/opt/deploy/yara/rules"],
+      "url": {
+        "value": ["https://github.com/Yara-Rules/rules.git"],
         "type": "list",
         "description": ""
-      },
-      "directories_with_rules": {
-        "value": ["/opt/deploy/yara/rules/antidebug_antivm",
-                  "/opt/deploy/yara/rules/capabilities",
-                  "/opt/deploy/yara/rules/crypto",
-                  "/opt/deploy/yara/rules/cve_rules",
-                  "/opt/deploy/yara/rules/email",
-                  "/opt/deploy/yara/rules/exploit_kits",
-                  "/opt/deploy/yara/rules/maldocs",
-                  "/opt/deploy/yara/rules/malware",
-                  "/opt/deploy/yara/rules/mobile_malware",
-                  "/opt/deploy/yara/rules/packers",
-                  "/opt/deploy/yara/rules/webshells"],
-        "type": "list",
-        "description": ""
-      }
+        }
     }
   },
   "Yara_Scan_Custom_Signatures": {
     "type": "file",
     "python_module": "yara_scan.YaraScan",
     "description": "scan a file with the Custom Signatures you added in IntelOwl",
-    "disabled": false,
+    "disabled": true,
     "external_service": false,
     "leaks_info": false,
     "config": {
@@ -4195,23 +4206,13 @@
     },
     "secrets": {},
     "params": {
-      "directories_with_rules": {
-        "value": ["/opt/deploy/intel_owl/configuration/custom_yara"],
-        "type": "list",
-        "description": "Add your own .yar files in the directory /configuration/custom_yara to use your own rules"
-      },
-      "update": {
-        "value": false,
-        "type": "bool",
-        "description": "This is set to false because these rules are local so they don't need any update"
-      }
     }
   },
   "Yara_Scan_Daily_Ioc": {
     "type": "file",
     "python_module": "yara_scan.YaraScan",
     "description": "scan a file with StrangerealIntel daily IOC yara rules ([github](https://github.com/StrangerealIntel/DailyIOC))",
-    "disabled": false,
+    "disabled": true,
     "external_service": false,
     "leaks_info": false,
     "config": {
@@ -4220,19 +4221,9 @@
     },
     "secrets": {},
     "params": {
-      "git_repo_main_dir": {
-        "value": ["/opt/deploy/yara/daily_ioc_rules"],
+      "url": {
+        "value": ["https://github.com/StrangerealIntel/DailyIOC"],
         "type": "list",
-        "description": ""
-      },
-      "directories_with_rules": {
-        "value": ["/opt/deploy/yara/daily_ioc_rules"],
-        "type": "list",
-        "description": ""
-      },
-      "recursive": {
-        "value": true,
-        "type": "bool",
         "description": ""
       }
     }
@@ -4241,7 +4232,7 @@
     "type": "file",
     "python_module": "yara_scan.YaraScan",
     "description": "scan a file with Neo23x0 yara rules ([github](https://github.com/Neo23x0/signature-base.git))",
-    "disabled": false,
+    "disabled": true,
     "external_service": false,
     "leaks_info": false,
     "config": {
@@ -4250,13 +4241,8 @@
     },
     "secrets": {},
     "params": {
-      "git_repo_main_dir": {
-        "value": ["/opt/deploy/yara/signature-base"],
-        "type": "list",
-        "description": ""
-      },
-      "directories_with_rules": {
-        "value": ["/opt/deploy/yara/signature-base/yara"],
+      "url": {
+        "value": ["https://github.com/Neo23x0/signature-base.git"],
         "type": "list",
         "description": ""
       }
@@ -4266,7 +4252,7 @@
     "type": "file",
     "python_module": "yara_scan.YaraScan",
     "description": "scan a file with Mandiant yara rules ([github](https://github.com/mandiant/red_team_tool_countermeasures))",
-    "disabled": false,
+    "disabled": true,
     "external_service": false,
     "leaks_info": false,
     "config": {
@@ -4275,19 +4261,9 @@
     },
     "secrets": {},
     "params": {
-      "git_repo_main_dir": {
-        "value": ["/opt/deploy/yara/mandiant_rules"],
+      "url": {
+        "value": ["https://github.com/mandiant/red_team_tool_countermeasures"],
         "type": "list",
-        "description": ""
-      },
-      "directories_with_rules": {
-        "value": ["/opt/deploy/yara/mandiant_rules/rules"],
-        "type": "list",
-        "description": ""
-      },
-      "recursive": {
-        "value": true,
-        "type": "bool",
         "description": ""
       }
     }
@@ -4296,7 +4272,7 @@
     "type": "file",
     "python_module": "yara_scan.YaraScan",
     "description": "scan a file with Inquest yara rules ([github](https://github.com/InQuest/yara-rules))",
-    "disabled": false,
+    "disabled": true,
     "external_service": false,
     "leaks_info": false,
     "config": {
@@ -4305,19 +4281,9 @@
     },
     "secrets": {},
     "params": {
-      "git_repo_main_dir": {
-        "value": ["/opt/deploy/yara/inquest_rules"],
+      "url": {
+        "value": ["https://github.com/InQuest/yara-rules"],
         "type": "list",
-        "description": ""
-      },
-      "directories_with_rules": {
-        "value": ["/opt/deploy/yara/inquest_rules"],
-        "type": "list",
-        "description": ""
-      },
-      "recursive": {
-        "value": false,
-        "type": "bool",
         "description": ""
       }
     }
@@ -4326,7 +4292,7 @@
     "type": "file",
     "python_module": "yara_scan.YaraScan",
     "description": "Scan a file with Intezer yara rules ([github](https://github.com/intezer/yara-rules)).",
-    "disabled": false,
+    "disabled": true,
     "external_service": false,
     "leaks_info": false,
     "config": {
@@ -4335,8 +4301,8 @@
     },
     "secrets": {},
     "params": {
-      "directories_with_rules": {
-        "value": ["/opt/deploy/yara/intezer_rules"],
+      "url": {
+        "value": ["https://github.com/intezer/yara-rules"],
         "type": "list",
         "description": ""
       }
@@ -4346,7 +4312,7 @@
     "type": "file",
     "python_module": "yara_scan.YaraScan",
     "description": "scan a file with ReversingLabs yara rules ([github](https://github.com/reversinglabs/reversinglabs-yara-rules))",
-    "disabled": false,
+    "disabled": true,
     "external_service": false,
     "leaks_info": false,
     "config": {
@@ -4355,19 +4321,9 @@
     },
     "secrets": {},
     "params": {
-      "git_repo_main_dir": {
-        "value": ["/opt/deploy/yara/reversinglabs_rules"],
+      "url": {
+        "value": ["https://github.com/reversinglabs/reversinglabs-yara-rules"],
         "type": "list",
-        "description": ""
-      },
-      "directories_with_rules": {
-        "value": ["/opt/deploy/yara/reversinglabs_rules/yara"],
-        "type": "list",
-        "description": ""
-      },
-      "recursive": {
-        "value": true,
-        "type": "bool",
         "description": ""
       }
     }
@@ -4376,7 +4332,7 @@
     "type": "file",
     "python_module": "yara_scan.YaraScan",
     "description": "scan a file with Samir Threat Hunting yara rules ([github](hhttps://github.com/sbousseaden/YaraHunts))",
-    "disabled": false,
+    "disabled": true,
     "external_service": false,
     "leaks_info": false,
     "config": {
@@ -4385,13 +4341,8 @@
     },
     "secrets": {},
     "params": {
-      "git_repo_main_dir": {
-        "value": ["/opt/deploy/yara/samir_rules"],
-        "type": "list",
-        "description": ""
-      },
-      "directories_with_rules": {
-        "value": ["/opt/deploy/yara/samir_rules"],
+      "url": {
+        "value": ["https://github.com/sbousseaden/YaraHunts"],
         "type": "list",
         "description": ""
       }
@@ -4401,7 +4352,7 @@
     "type": "file",
     "python_module": "yara_scan.YaraScan",
     "description": "scan a file with Stratosphere yara rules ([github](https://github.com/stratosphereips/yara-rules))",
-    "disabled": false,
+    "disabled": true,
     "external_service": false,
     "leaks_info": false,
     "config": {
@@ -4410,16 +4361,8 @@
     },
     "secrets": {},
     "params": {
-      "git_repo_main_dir": {
-        "value": ["/opt/deploy/yara/stratosphere_rules"],
-        "type": "list",
-        "description": ""
-      },
-      "directories_with_rules": {
-        "value": [
-          "/opt/deploy/yara/stratosphere_rules/malware",
-          "/opt/deploy/yara/stratosphere_rules/protocols"
-        ],
+      "url": {
+        "value": ["https://github.com/stratosphereips/yara-rules"],
         "type": "list",
         "description": ""
       }
@@ -4429,7 +4372,7 @@
     "type": "file",
     "python_module": "yara_scan.YaraScan",
     "description": "scan a file with Trellix yara rules ([github](https://github.com/advanced-threat-research/Yara-Rules))",
-    "disabled": false,
+    "disabled": true,
     "external_service": false,
     "leaks_info": false,
     "config": {
@@ -4438,20 +4381,8 @@
     },
     "secrets": {},
     "params": {
-      "git_repo_main_dir": {
-        "value": ["/opt/deploy/yara/trellix_rules"],
-        "type": "list",
-        "description": ""
-      },
-      "directories_with_rules": {
-        "value": [
-          "/opt/deploy/yara/trellix_rules/APT",
-          "/opt/deploy/yara/trellix_rules/RAT",
-          "/opt/deploy/yara/trellix_rules/malware",
-          "/opt/deploy/yara/trellix_rules/miners",
-          "/opt/deploy/yara/trellix_rules/ransomware",
-          "/opt/deploy/yara/trellix_rules/stealer"
-        ],
+      "url": {
+        "value": ["https://github.com/advanced-threat-research/Yara-Rules"],
         "type": "list",
         "description": ""
       }
@@ -4461,7 +4392,7 @@
     "type": "file",
     "python_module": "yara_scan.YaraScan",
     "description": "Scan a file with yara rules downloaded from [YARAify](https://yaraify.abuse.ch/)",
-    "disabled": false,
+    "disabled": true,
     "external_service": false,
     "leaks_info": false,
     "config": {
@@ -4477,14 +4408,20 @@
         "type": "list",
         "description": ""
       },
-      "directories_with_rules": {
+      "ignore": {
         "value": [
-          "/opt/deploy/yara/yaraify_rules/rules"
+          "generic_anomalies.yar",
+          "general_cloaking.yar",
+          "thor_inverse_matches.yar",
+          "yara_mixed_ext_vars.yar",
+          "thor-webshells.yar"
         ],
         "type": "list",
-        "description": ""
+        "description": "ignore these rules"
       }
+
     }
+
   },
   "YARAify_File_Scan": {
     "type": "file",

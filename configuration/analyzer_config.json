@@ -4192,7 +4192,7 @@
     },
     "secrets": {},
     "params": {
-      "url": {
+      "repositories": {
         "value": [
           "https://github.com/bartblaze/Yara-rules",
           "https://github.com/intezer/yara-rules",
@@ -4209,7 +4209,7 @@
           "https://yaraify-api.abuse.ch/download/yaraify-rules.zip"
         ],
         "type": "list",
-        "description": ""
+        "description": "Repositories that will be constantly updated and used for match"
       },
      "ignore": {
         "value": [
@@ -4239,7 +4239,7 @@
     },
     "secrets": {},
     "params": {
-      "url": {
+      "repositories": {
         "value": ["https://github.com/fboldewin/YARA-rules"],
         "type": "list",
         "description": ""
@@ -4259,7 +4259,7 @@
     },
     "secrets": {},
     "params": {
-      "url": {
+      "repositories": {
         "value": ["https://github.com/bartblaze/Yara-rules"],
         "type": "list",
         "description": ""
@@ -4279,7 +4279,7 @@
     },
     "secrets": {},
     "params": {
-      "url": {
+      "repositories": {
         "value": ["https://github.com/Yara-Rules/rules.git"],
         "type": "list",
         "description": ""
@@ -4314,7 +4314,7 @@
     },
     "secrets": {},
     "params": {
-      "url": {
+      "repositories": {
         "value": ["https://github.com/StrangerealIntel/DailyIOC"],
         "type": "list",
         "description": ""
@@ -4334,7 +4334,7 @@
     },
     "secrets": {},
     "params": {
-      "url": {
+      "repositories": {
         "value": ["https://github.com/Neo23x0/signature-base.git"],
         "type": "list",
         "description": ""
@@ -4354,7 +4354,7 @@
     },
     "secrets": {},
     "params": {
-      "url": {
+      "repositories": {
         "value": ["https://github.com/mandiant/red_team_tool_countermeasures"],
         "type": "list",
         "description": ""
@@ -4374,7 +4374,7 @@
     },
     "secrets": {},
     "params": {
-      "url": {
+      "repositories": {
         "value": ["https://github.com/InQuest/yara-rules"],
         "type": "list",
         "description": ""
@@ -4394,7 +4394,7 @@
     },
     "secrets": {},
     "params": {
-      "url": {
+      "repositories": {
         "value": ["https://github.com/intezer/yara-rules"],
         "type": "list",
         "description": ""
@@ -4414,7 +4414,7 @@
     },
     "secrets": {},
     "params": {
-      "url": {
+      "repositories": {
         "value": ["https://github.com/reversinglabs/reversinglabs-yara-rules"],
         "type": "list",
         "description": ""
@@ -4434,7 +4434,7 @@
     },
     "secrets": {},
     "params": {
-      "url": {
+      "repositories": {
         "value": ["https://github.com/sbousseaden/YaraHunts"],
         "type": "list",
         "description": ""
@@ -4454,7 +4454,7 @@
     },
     "secrets": {},
     "params": {
-      "url": {
+      "repositories": {
         "value": ["https://github.com/stratosphereips/yara-rules"],
         "type": "list",
         "description": ""
@@ -4474,7 +4474,7 @@
     },
     "secrets": {},
     "params": {
-      "url": {
+      "repositories": {
         "value": ["https://github.com/advanced-threat-research/Yara-Rules"],
         "type": "list",
         "description": ""
@@ -4494,7 +4494,7 @@
     },
     "secrets": {},
     "params": {
-      "url": {
+      "repositories": {
         "value": [
           "https://yaraify-api.abuse.ch/download/yaraify-rules.zip"
         ],

@@ -91,11 +91,15 @@ def run_connector(job_id: int, config_dict: dict, report_defaults: dict):
 
 
 @shared_task()
-def build_config_cache(serializer_class, user=None):
-    from api_app.core.serializers import AbstractConfigSerializer
-
+def build_config_cache(serializer_class: str, user=None):
     # we "greedy cache" the config at start of application
     # because it is an expensive operation
+    import sys
+
+    from api_app.core.serializers import AbstractConfigSerializer
+
+    # we can't have the class as parameter because we run celery not in pickle mode
+    serializer_class = getattr(sys.modules[__name__], serializer_class)
 
     serializer_class: AbstractConfigSerializer
     serializer_class.read_and_verify_config(user)
@@ -107,8 +111,8 @@ def worker_ready_connect(*args, **kwargs):
     from api_app.connectors_manager.serializers import ConnectorConfigSerializer
 
     logger.info("worker ready, generating cache")
-    build_config_cache(AnalyzerConfigSerializer)
-    build_config_cache(ConnectorConfigSerializer)
+    build_config_cache(AnalyzerConfigSerializer.__name__)
+    build_config_cache(ConnectorConfigSerializer.__name__)
     for user in User.objects.all():
-        build_config_cache(AnalyzerConfigSerializer, user)
-        build_config_cache(ConnectorConfigSerializer, user)
+        build_config_cache(AnalyzerConfigSerializer.__name__, user)
+        build_config_cache(ConnectorConfigSerializer.__name__, user)

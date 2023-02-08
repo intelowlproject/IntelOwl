@@ -10,7 +10,7 @@
 
 # This script can be disabled during development using REPO_DOWNLOADER_ENABLED=true env variable
 if [ "$REPO_DOWNLOADER_ENABLED" = "false" ]; then echo "Skipping repo_downloader.sh in DEVELOPMENT mode"; exit 0;  fi
-chown -R www-data:www-data /opt/deploy/analyzers
+
 # Download rules for quark-engine analyzer
 cd ~
 freshquark

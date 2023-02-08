@@ -91,7 +91,7 @@ def run_connector(job_id: int, config_dict: dict, report_defaults: dict):
 
 
 @shared_task()
-def build_config_cache(plugin_type: str, user=None):
+def build_config_cache(plugin_type: str, user_pk: int = None):
     from api_app.analyzers_manager.serializers import AnalyzerConfigSerializer
     from api_app.connectors_manager.serializers import ConnectorConfigSerializer
     from api_app.models import PluginConfig
@@ -105,6 +105,8 @@ def build_config_cache(plugin_type: str, user=None):
         serializer_class = ConnectorConfigSerializer
     else:
         raise TypeError(f"Unable to parse plugin type {plugin_type}")
+    user = User.objects.get(pk=user_pk) if user_pk else None
+
     serializer_class.read_and_verify_config.invalidate(serializer_class, user)
     serializer_class.read_and_verify_config(user)
 
@@ -119,5 +121,5 @@ def worker_ready_connect(*args, **kwargs):
     build_config_cache(PluginConfig.PluginType.ANALYZER.value)
     build_config_cache(PluginConfig.PluginType.CONNECTOR.value)
     for user in User.objects.all():
-        build_config_cache(PluginConfig.PluginType.ANALYZER.value, user=user)
-        build_config_cache(PluginConfig.PluginType.CONNECTOR.value, user=user)
+        build_config_cache(PluginConfig.PluginType.ANALYZER.value, user=user.pk)
+        build_config_cache(PluginConfig.PluginType.CONNECTOR.value, user=user.pk)

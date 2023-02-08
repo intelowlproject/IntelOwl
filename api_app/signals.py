@@ -16,10 +16,10 @@ def invalidate_plugin_config(instance: PluginConfig):
     # we are invalidating for every member of the organization
     if instance.organization:
         for member in instance.organization.members.all():
-            build_config_cache.delay(instance.type, user=member.user)
+            build_config_cache.delay(instance.type, user=member.user.pk)
     else:
         # only the person that created it
-        build_config_cache.delay(instance.type, user=instance.owner)
+        build_config_cache.delay(instance.type, user=instance.owner.pk)
 
 
 @receiver(post_save, sender=PluginConfig)

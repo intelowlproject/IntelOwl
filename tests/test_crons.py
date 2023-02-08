@@ -3,6 +3,7 @@
 
 import os
 
+from django.conf import settings
 from django.test import TestCase
 
 from api_app import crons
@@ -51,7 +52,5 @@ class CronTests(TestCase):
         self.assertTrue(os.path.exists(quark_engine.QuarkEngine.QUARK_RULES_PATH))
 
     def test_yara_updater(self):
-        file_paths = yara_scan.YaraScan.update_rules()
-        for file_path in file_paths:
-            print(file_path)
-            self.assertTrue(os.path.exists(file_path))
+        yara_scan.YaraScan.update_rules()
+        self.assertTrue(len(os.listdir(settings.YARA_RULES_PATH)))

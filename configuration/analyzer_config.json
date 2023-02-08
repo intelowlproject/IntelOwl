@@ -890,6 +890,51 @@
       }
     }
   },
+  "Doc_Info_Experimental": {
+    "type": "file",
+    "python_module": "doc_info.DocInfo",
+    "description": "static document analysis with new features to analyze XLM macros, encrypted macros and more [DEPRECATED, move to Doc_Info]",
+    "disabled": true,
+    "external_service": false,
+    "leaks_info": false,
+    "supported_filetypes": [
+      "application/msword",
+      "application/vnd.ms-office",
+      "application/vnd.ms-excel.addin.macroEnabled",
+      "application/x-mspublisher",
+      "application/vnd.ms-powerpoint",
+      "application/vnd.ms-excel",
+      "application/vnd.ms-excel.sheet.macroEnabled.12",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+      "text/x-ms-iqy",
+      "application/excel",
+      "text/xml",
+      "application/xml",
+      "application/zip",
+      "application/encrypted",
+      "text/plain",
+      "test/csv"
+    ],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "local"
+    },
+    "secrets": {},
+    "params": {
+      "experimental": {
+        "value": true,
+        "type": "bool",
+        "description": ""
+      },
+      "additional_passwords_to_check": {
+        "value": [],
+        "type": "list",
+        "description": "List of passwords to try when decrypting the document"
+      }
+    }
+  },
   "DocGuard_Get": {
     "type": "observable",
     "python_module": "docguard_get.DocGuard_Hash",
@@ -2571,6 +2616,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
+    "leaks_info": false,
     "observable_supported": ["domain", "url"],
     "config": {
       "soft_time_limit": 30,
@@ -3068,11 +3114,37 @@
     },
     "params": {}
   },
+  "Strings_Info": {
+    "type": "file",
+    "python_module": "strings_info.StringsInfo",
+    "description": "Strings extraction. Leverages Mandiant's [Stringsifter](https://github.com/mandiant/stringsifter)",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
+    "docker_based": true,
+    "config": {
+      "soft_time_limit": 70,
+      "queue": "local"
+    },
+    "secrets": {},
+    "params": {
+      "max_number_of_strings": {
+        "value": 500,
+        "type": "int",
+        "description": ""
+      },
+      "rank_strings": {
+        "value": false,
+        "type": "bool",
+        "description": "enable ranking based on Machine Learning features"
+      }
+    }
+  },
   "Strings_Info_Classic": {
     "type": "file",
     "python_module": "strings_info.StringsInfo",
-    "description": "strings extraction",
-    "disabled": false,
+    "description": "strings extraction [DEPRECATED, move to Strings_Info]",
+    "disabled": true,
     "external_service": false,
     "leaks_info": false,
     "docker_based": true,
@@ -3097,8 +3169,8 @@
   "Strings_Info_ML": {
     "type": "file",
     "python_module": "strings_info.StringsInfo",
-    "description": "strings extraction plus strings ranking based on Machine Learning. Leverages Fireeye's Stringsifter",
-    "disabled": false,
+    "description": "strings extraction plus strings ranking based on Machine Learning. Leverages Fireeye's Stringsifter [DEPRECATED, move to Strings_Info]",
+    "disabled": true,
     "external_service": false,
     "leaks_info": false,
     "docker_based": true,

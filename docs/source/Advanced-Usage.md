@@ -53,8 +53,7 @@ table, th, td {
       <li><code>PEframe_Scan</code></li>
       <li><code>Capa_Info</code></li>
       <li><code>Floss</code></li>
-      <li><code>Strings_Info_Classic</code>,
-      <code>Strings_Info_ML</code></li>
+      <li><code>Strings_Info</code></li>
       <li><code>Manalyze</code></li>
       <li><code>ClamAV</code></li>
       <li><code>Thug_URL_Info</code>,

@@ -43,8 +43,10 @@ class CAPEsandbox(FileAnalyzer):
             raise AnalyzerRunException(e)
 
         response_json = response.json()
+        logger.debug(f"response received: {response_json}")
+        response_error = response_json.get("error", False)
 
-        if response_json.get("error") is False:
+        if not response_error:
             to_respond["result_url"] = response_json.get("url")
             task_id = response_json.get("data").get("task_ids")[0]
             result = self.__poll_for_result(task_id=task_id)
@@ -55,52 +57,62 @@ class CAPEsandbox(FileAnalyzer):
                 "File uploaded successfully without any errors."
             )
 
-        elif (
-            list(response_json.get("errors")[0].values())[0]
-            == "Not unique, as unique option set on submit or in conf/web.conf"
-        ):
+        else:
+            response_errors = response_json.get("errors", [])
+            if response_errors:
+                values = list(response_errors[0].values())
+                if (
+                    values
+                    and values[0]
+                    == "Not unique, as unique option set on submit or in conf/web.conf"
+                ):
 
-            #    The above response is only returned when a sample that has been already
-            #    uploaded once is uploaded again.
+                    #    The above response is only returned when
+                    #    a sample that has been already
+                    #    uploaded once is uploaded again.
 
-            #    If it has been then we can just check it's
-            #    report by querying the CAPESandbox API with the md5 hash of
-            #    the file.
+                    #    If it has been then we can just check it's
+                    #    report by querying the CAPESandbox API with the md5 hash of
+                    #    the file.
 
-            #    If it exists in their database and is readable by us,
-            #    the following code further fetches it's information.
-            #    response_json in this case should look somewhat like this:
+                    #    If it exists in their database and is readable by us,
+                    #    the following code further fetches it's information.
+                    #    response_json in this case should look somewhat like this:
 
-            # {
-            #    'error': True,
-            #    'error_value': 'Error adding task to database',
-            #    'errors': [{
-            #        'filename.exe':
-            #           'Not unique, as unique option set on submit or in conf/web.conf'
-            #    }]
-            # }
+                    # {
+                    #    'error': True,
+                    #    'error_value': 'Error adding task to database',
+                    #    'errors': [{
+                    #        'filename.exe':
+                    #           'Not unique, as unique option set
+                    #           on submit or in conf/web.conf'
+                    #    }]
+                    # }
 
-            logger.info(
-                f"Job: {self.job_id} -> "
-                "File uploaded is already present in the database. "
-                "Querying its information through it's md5 hash.."
-            )
+                    logger.info(
+                        f"Job: {self.job_id} -> "
+                        "File uploaded is already present in the database. "
+                        "Querying its information through it's md5 hash.."
+                    )
 
-            status_id = self.__search_by_md5()
-            gui_report_url = self.__base_url + "/submit/status/" + status_id
-            report_url = (
-                self.__base_url + "/apiv2/tasks/get/report/" + status_id + "/json"
-            )
-            to_respond["result_url"] = gui_report_url
+                    status_id = self.__search_by_md5()
+                    gui_report_url = self.__base_url + "/submit/status/" + status_id
+                    report_url = (
+                        self.__base_url
+                        + "/apiv2/tasks/get/report/"
+                        + status_id
+                        + "/json"
+                    )
+                    to_respond["result_url"] = gui_report_url
 
-            try:
-                final_request = self.__session.get(
-                    report_url,
-                )
-            except requests.RequestException as e:
-                raise AnalyzerRunException(e)
+                    try:
+                        final_request = self.__session.get(
+                            report_url,
+                        )
+                    except requests.RequestException as e:
+                        raise AnalyzerRunException(e)
 
-            to_respond["response"] = final_request.json()
+                    to_respond["response"] = final_request.json()
 
         return to_respond
 

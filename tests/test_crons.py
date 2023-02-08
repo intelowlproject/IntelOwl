@@ -51,7 +51,7 @@ class CronTests(TestCase):
         self.assertTrue(os.path.exists(quark_engine.QuarkEngine.QUARK_RULES_PATH))
 
     def test_yara_updater(self):
-        file_paths = yara_scan.YaraScan.yara_update_repos()
+        file_paths = yara_scan.YaraScan.update_rules()
         for file_path in file_paths:
             print(file_path)
             self.assertTrue(os.path.exists(file_path))

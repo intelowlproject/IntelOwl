@@ -121,5 +121,5 @@ def worker_ready_connect(*args, **kwargs):
     build_config_cache(PluginConfig.PluginType.ANALYZER.value)
     build_config_cache(PluginConfig.PluginType.CONNECTOR.value)
     for user in User.objects.all():
-        build_config_cache(PluginConfig.PluginType.ANALYZER.value, user=user.pk)
-        build_config_cache(PluginConfig.PluginType.CONNECTOR.value, user=user.pk)
+        build_config_cache(PluginConfig.PluginType.ANALYZER.value, user_pk=user.pk)
+        build_config_cache(PluginConfig.PluginType.CONNECTOR.value, user_pk=user.pk)

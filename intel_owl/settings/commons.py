@@ -8,8 +8,11 @@ DEBUG = get_secret("DEBUG", False) == "True" or get_secret("DEBUG", False) is Tr
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = Path(__file__).parent.parent.parent.parent
 PROJECT_LOCATION = BASE_DIR / "intel_owl"
-YARA_RULES_PATH = BASE_DIR / "yara"
+
 BASE_STATIC_PATH = PROJECT_LOCATION / "static"
+
+ANALYZER_CONFIGS_PATH = BASE_DIR / "analyzers"
+YARA_RULES_PATH = ANALYZER_CONFIGS_PATH / "yara"
 
 # test / ci
 MOCK_CONNECTIONS = get_secret("MOCK_CONNECTIONS", False) == "True"
@@ -32,9 +35,10 @@ BASE_CONNECTOR_PYTHON_PATH = get_secret(
     "BASE_CONNECTOR_PYTHON_PATH", "api_app.connectors_manager.connectors"
 )
 BASE_ANALYZER_OBSERVABLE_PYTHON_PATH = get_secret(
-    "", "api_app.analyzers_manager.observable_analyzers"
+    "BASE_ANALYZER_OBSERVABLE_PYTHON_PATH",
+    "api_app.analyzers_manager.observable_analyzers",
 )
 BASE_ANALYZER_FILE_PYTHON_PATH = get_secret(
-    "", "api_app.analyzers_manager.file_analyzers"
+    "BASE_ANALYZER_FILE_PYTHON_PATH", "api_app.analyzers_manager.file_analyzers"
 )
 REPO_DOWNLOADER_ENABLED = get_secret("REPO_DOWNLOADER_ENABLED", True) == "True"

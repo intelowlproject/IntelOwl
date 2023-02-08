@@ -30,7 +30,7 @@ ARG WATCHMAN=false
 RUN mkdir -p ${LOG_PATH} \
     ${LOG_PATH}/django \
     ${LOG_PATH}/uwsgi \
-    /opt/deploy/files_required /opt/deploy/yara /opt/deploy/configuration
+    /opt/deploy/files_required /opt/deploy/analyzers/yara /opt/deploy/configuration
 
 # install required packages. some notes about:o
 # python3-psycopg2 is required to use PostgresSQL with Django
@@ -60,7 +60,7 @@ RUN touch ${LOG_PATH}/django/api_app.log ${LOG_PATH}/django/api_app_errors.log \
     # this is cause stringstifer creates this directory during the build and cause celery to crash
     && rm -rf /root/.local \
     && ${PYTHONPATH}/docker/scripts/watchman_install.sh \
-    # download yara rules and quark engine rules
+    # download github stuff
     && ${PYTHONPATH}/api_app/analyzers_manager/repo_downloader.sh
 
 # quarkengine calls

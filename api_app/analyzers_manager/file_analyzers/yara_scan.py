@@ -6,6 +6,7 @@ import logging
 import zipfile
 from pathlib import PosixPath
 from typing import List, Optional, Tuple
+from urllib.parse import urlparse
 
 import requests
 import yara
@@ -16,6 +17,7 @@ from git import Repo
 from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.analyzers_manager.dataclasses import AnalyzerConfig
 from api_app.exceptions import AnalyzerRunException
+from intel_owl.settings._util import set_permissions
 
 logger = logging.getLogger(__name__)
 
@@ -140,36 +142,53 @@ class YaraScan(FileAnalyzer):
                     )
         return self.result
 
-    @staticmethod
-    def download_repository(directory: PosixPath, url: str) -> bool:
+    @classmethod
+    def download_or_update_git_repository(cls, url: str):
+        url_list = url.split("/")
+        org = url_list[-2]
+        # we are removing the .zip, .git. .whatever
+        repo = url_list[-1].split(".")[0]
+        directory = cls.get_directory(org, repo)
+
         if not directory.exists():
             logger.info(f"About to clone {url} at {directory}")
             Repo.clone_from(url, directory, depth=1)
-            return True
-        return False
+        else:
+            logger.info(f"about to pull {url} at {directory}")
+            repo = Repo(directory)
+            git = repo.git
+            git.config("--global", "--add", "safe.directory", directory)
+            o = repo.remotes.origin
+            o.pull(allow_unrelated_histories=True, rebase=True)
 
     @classmethod
-    def update_repository(cls, directory: PosixPath, url: str):
-        if url.endswith(".zip"):
-            logger.info(f"About do download zip file from {url}")
-            response = requests.get(url, stream=True)
-            try:
-                response.raise_for_status()
-            except Exception as e:
-                logger.exception(e)
-            else:
-                zipfile_ = zipfile.ZipFile(io.BytesIO(response.content))
-                zipfile_.extractall(directory)
+    def get_directory(cls, org: str, repo: str) -> PosixPath:
+        # directory name is organization_repository
+        directory_name = "_".join([org, repo]).lower()
+        return settings.YARA_RULES_PATH / directory_name
 
+    @classmethod
+    def download_or_update_zip_repository(cls, url: str):
+        url_parsed = urlparse(url)
+        org = url_parsed.netloc
+        repo = url_parsed.path.split("/")[-1].split(".")[0]
+        directory = cls.get_directory(org, repo)
+        logger.info(f"About do download zip file from {url} to {directory}")
+        response = requests.get(url, stream=True)
+        try:
+            response.raise_for_status()
+        except Exception as e:
+            logger.exception(e)
         else:
-            new = cls.download_repository(directory, url)
-            if not new:
-                logger.info(f"about to pull {url} at {directory}")
-                repo = Repo(directory)
-                git = repo.git
-                git.config("--global", "--add", "safe.directory", directory)
-                o = repo.remotes.origin
-                o.pull(allow_unrelated_histories=True, rebase=True)
+            zipfile_ = zipfile.ZipFile(io.BytesIO(response.content))
+            zipfile_.extractall(directory)
+
+    @classmethod
+    def update_repository(cls, url: str):
+        if url.endswith(".zip"):
+            cls.download_or_update_zip_repository(url)
+        else:
+            cls.download_or_update_git_repository(url)
 
     @classmethod
     def update_rules(cls):
@@ -186,12 +205,6 @@ class YaraScan(FileAnalyzer):
                 urls.update(new_urls)
         for url in urls:
             logger.info(f"Going to update {url} yara repo")
-            url_list = url.split("/")
-            # directory name is organization_repository
-            org = url_list[-2]
-            # we are removing the .zip, .git. .whatever
-            repo = url_list[-1].split(".")[0]
-            directory_name = "_".join([org, repo])
-
-            cls.update_repository(settings.YARA_RULES_PATH / directory_name, url)
+            cls.update_repository(url)
         logger.info("Finished updating yara rules")
+        set_permissions(settings.YARA_RULES_PATH)

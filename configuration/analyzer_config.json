@@ -2571,6 +2571,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
+    "leaks_info": false,
     "observable_supported": ["domain", "url"],
     "config": {
       "soft_time_limit": 30,
@@ -3091,6 +3092,58 @@
         "value": false,
         "type": "bool",
         "description": "enable ranking based on Machine Learning features"
+      }
+    }
+  },
+  "Strings_Info_Classic": {
+    "type": "file",
+    "python_module": "strings_info.StringsInfo",
+    "description": "strings extraction [DEPRECATED, move to Strings_Info]",
+    "disabled": true,
+    "external_service": false,
+    "leaks_info": false,
+    "docker_based": true,
+    "config": {
+      "soft_time_limit": 70,
+      "queue": "local"
+    },
+    "secrets": {},
+    "params": {
+      "max_number_of_strings": {
+        "value": 300,
+        "type": "int",
+        "description": ""
+      },
+      "rank_strings": {
+        "value": false,
+        "type": "bool",
+        "description": ""
+      }
+    }
+  },
+  "Strings_Info_ML": {
+    "type": "file",
+    "python_module": "strings_info.StringsInfo",
+    "description": "strings extraction plus strings ranking based on Machine Learning. Leverages Fireeye's Stringsifter [DEPRECATED, move to Strings_Info]",
+    "disabled": true,
+    "external_service": false,
+    "leaks_info": false,
+    "docker_based": true,
+    "config": {
+      "soft_time_limit": 70,
+      "queue": "local"
+    },
+    "secrets": {},
+    "params": {
+      "max_number_of_strings": {
+        "value": 200,
+        "type": "int",
+        "description": ""
+      },
+      "rank_strings": {
+        "value": true,
+        "type": "bool",
+        "description": ""
       }
     }
   },

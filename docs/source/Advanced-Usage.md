@@ -196,7 +196,7 @@ Some analyzers could require a special configuration:
   - `/integrations/pcap_analyzers/config/suricata/rules`: here there are Suricata rules. You can change the `custom.rules` files to add your own rules at any time. Once you made this change, you need to either restart IntelOwl or (this is faster) run a new analysis with the Suricata analyzer and set the parameter `reload_rules` to `true`.
   - `/integrations/pcap_analyzers/config/suricata/etc`: here there are Suricata configuration files. Change it based on your wish. Restart IntelOwl to see the changes applied.
 
-- `Yara_Scan_Custom_Signatures`: you can use this pre-defined analyzer to run your own YARA signatures, either custom or imported. Just upload the `.yar` files with the signatures in the directory `/configuration/custom_yara`. That directory is mounted as a bind volume in Docker so you do not need to do anything to see the changes in the application.
+- `Yara`: you can customize the `repositories` parameter to download and use different rules from the default that IntelOwl currently support. The rules *must* be downloaded: this means that local rules are not supported, allowing to sync the rules in every celery worker without the usage of shared volumes.  
 
 ## Organizations and data sharing
 

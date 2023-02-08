@@ -191,5 +191,5 @@ jobs:
         working-directory: ./frontend
       - name: Test with Jest
         run: |
-          npm run test --silent --coverage
+          npm run test -- --silent --coverage
         working-directory: ./frontend

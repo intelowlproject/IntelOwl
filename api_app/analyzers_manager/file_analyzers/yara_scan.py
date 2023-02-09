@@ -38,7 +38,7 @@ def export_ssh_key(function):
             ssh_key = ssh_key + "\n-----END OPENSSH PRIVATE KEY-----\n"
 
             logger.info("Writing key")
-            with open(settings.GIT_KEY_PATH, "w") as f:
+            with open(settings.GIT_KEY_PATH, "w", encoding="utf_8") as f:
                 f.write(ssh_key)
             os.chmod(settings.GIT_KEY_PATH, 0o600)
             os.environ["GIT_SSH"] = str(settings.GIT_SSH_SCRIPT_PATH)
@@ -52,6 +52,7 @@ def export_ssh_key(function):
             if ssh_key:
                 del os.environ["GIT_SSH"]
                 os.remove(settings.GIT_KEY_PATH)
+
     return wrapper
 
 

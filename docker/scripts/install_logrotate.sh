@@ -1,0 +1,1 @@
+cp logrotate/* /etc/logrotate.d

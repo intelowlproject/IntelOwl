@@ -176,6 +176,27 @@ In the `env_file_postgres`, configure different variables as explained below.
 
 If you prefer to use an external PostgreSQL instance, you should just remove the relative image from the `docker/default.yml` file and provide the configuration to connect to your controlled instances.
 
+### Logrotate configuration (strongly recommended)
+If you want to have your logs rotated correctly, we suggest you to add the configuration for the system Logrotate.
+To do that you can leverage the `initialize.sh` script. Otherwise, if you have skipped that part, you can manually install logrotate by launching the following script:
+```commandline
+cd ./docker/scripts
+./install_logrotate.sh
+```
+
+We decided to do not leverage Django Rotation Configuration because it caused problematic concurrency issues, leading to logs that are not rotated correctly and to apps that do not log anymore.
+Logrotate configuration is more stable.
+
+### Crontab configuration (recommended for advanced deployments)
+We added few Crontab configurations that could be installed in the host machine at system level to solve some possible edge-case issues:
+* Memory leaks: Once a week it is suggested to do a full restart of the application to clean-up the memory used by the application. Practical experience suggest us to do that to solve some recurrent memory issues in Celery. This cron (`application_restart`) assumes that you have executed IntelOwl with the parameters `-all_analyzers`. If you didn't, feel free to change the cron as you wish.
+
+This configuration is optional but strongly recommended for people who want to have a production grade deployment. To install it you need to run the following script in each deployed server:
+```commandline
+cd ./docker/scripts
+./install_crontab.sh
+```
+
 ### Web server configuration (optional)
 Intel Owl provides basic configuration for:
 * Nginx (`configuration/nginx/http.conf`)
@@ -206,7 +227,6 @@ There are 3 options to execute the web server:
     Before using it, you should configure the configuration file `docker/traefik.override.yml` by changing the email address and the hostname where the application is served. For a detailed explanation follow the official documentation: [Traefix doc](https://docs.traefik.io/user-guides/docker-compose/acme-http/).
     
     After the configuration is done, you can add the option `--traefik` while executing the [`start.py`](#run)
-
 
 ### Analyzers or connectors configuration (optional)
 
@@ -281,26 +301,30 @@ $ python3 start.py prod up # restart the IntelOwl application
 ```
 
 <div class="admonition warning">
+<p class="admonition-title">Note</p>
+After an upgrade, sometimes a database error in Celery Containers could happen. That could be related to new DB migrations which are not applied by the main Uwsgi Container yet. Do not worry. Wait few seconds for the Uwsgi container to start correctly, then put down the application again and restart it. The problem should be solved. If not, please feel free to open an issue on Github
+</div>
+
+<div class="admonition warning">
 <p class="admonition-title">Warning</p>
 Major versions of IntelOwl are usually incompatible from one another.
 Maintainers strive to keep the upgrade between major version easy but it's not always like that.
 Below you can find the additional process required to upgrade from each major versions.
 </div>
 
-### Updating to >=4.0.0 from a 3.x.x version
-Right now there is an [issue](https://github.com/intelowlproject/IntelOwl/issues/934) regarding the chance to provide a script for migrate the Users DB to the new IntelOwl v4 schema.
+#### Updating to >=4.0.0 from a 3.x.x version
 IntelOwl v4 introduced some major changes regarding the permission management, allowing an easier way to manage users and visibility. But that did break the previous available DB.
-So, while we find time and effort to develop this script, to migrate to the the new major version you would need to delete your DB. To do that, you would need to delete your volumes and start the application from scratch.
+So, to migrate to the new major version you would need to delete your DB. To do that, you would need to delete your volumes and start the application from scratch.
 ```commandline
 python3 start.py prod down -v
 ```
 Please be aware that, while this can be an important effort to manage, the v4 IntelOwl provides a easier way to add, invite and manage users from the application itself. See [the Organization section](./Usage.md#organizations-and-user-management).
 
 
-### Updating to >=2.0.0 from a 1.x.x version
+#### Updating to >=2.0.0 from a 1.x.x version
 Users upgrading from previous versions need to manually move `env_file_app`, `env_file_postgres` and `env_file_integrations` files under the new `docker` directory.
 
-### Updating to >v1.3.x from any prior version
+#### Updating to >v1.3.x from any prior version
 
 If you are updating to >[v1.3.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v1.3.0) from any prior version, you need to execute a helper script so that the old data present in the database doesn't break.
 

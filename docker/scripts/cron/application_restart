@@ -1,0 +1,1 @@
+0 2 * * 0  root python3 start.py test --all_analyzers down && python3 start.py test --all_analyzers up -d

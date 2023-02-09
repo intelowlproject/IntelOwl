@@ -2107,7 +2107,7 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "MAXMIND_KEY",
-        "description": "",
+        "description": "API key to access the service",
         "required": true
       }
     },

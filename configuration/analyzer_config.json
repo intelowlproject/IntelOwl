@@ -1243,9 +1243,9 @@
       "queue": "default"
     },
     "secrets": {
-      "api_key_name": {
-        "env_var_key": "GOOGLE_APPLICATION_CREDENTIALS",
-        "description": "",
+      "service_account_json": {
+        "env_var_key": "SERVICE_ACCOUNT_JSON",
+        "description": "service account file in JSON format",
         "required": true
       }
     },

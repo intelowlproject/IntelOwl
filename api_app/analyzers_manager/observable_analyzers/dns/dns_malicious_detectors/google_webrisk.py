@@ -2,17 +2,17 @@
 # See the file 'LICENSE' for copying permission.
 
 """Check if the domains is reported as malicious by WebRisk Cloud API"""
+import json
 import logging
-from os.path import exists
 
 from google.cloud.webrisk_v1.services.web_risk_service import WebRiskServiceClient
 from google.cloud.webrisk_v1.types import ThreatType
+from google.oauth2 import service_account
 
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.observable_analyzers.dns.dns_responses import (
     malicious_detector_response,
 )
-from api_app.exceptions import AnalyzerConfigurationException
 from tests.mock_utils import if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
@@ -21,16 +21,34 @@ logger = logging.getLogger(__name__)
 class WebRisk(classes.ObservableAnalyzer):
     """Check if observable analyzed is marked as malicious by Google WebRisk API"""
 
-    def run(self):
-        credentials = self._secrets["api_key_name"]
-        if not credentials or not exists(credentials):
-            raise AnalyzerConfigurationException(
-                f"{credentials} should be an existing file. "
-                "Check the docs on how to add this file to"
-                " properly execute this analyzer"
-            )
+    def set_params(self, params):
+        """
+        Get these secrets from a Service Account valid file.
+        Example:
+            {
+              "type": "service_account",
+              "project_id": "test",
+              "private_key_id": "34543543543534",
+              "private_key": "test",
+              "client_email": "test@test.iam.gserviceaccount.com",
+              "client_id": "363646436363463663634",
+              "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+              "token_uri": "https://oauth2.googleapis.com/token",
+              "auth_provider_x509_cert_url":
+               "https://www.googleapis.com/oauth2/v1/certs",
+              "client_x509_cert_url":
+               "https://www.googleapis.com/robot/v1/metadata/x509/somedomain"
+            }
+        """
+        self.service_account_json = self._secrets["service_account_json"]
 
-        web_risk_client = WebRiskServiceClient()
+    def run(self):
+        json_account_info = json.loads(self.service_account_json)
+        credentials = service_account.Credentials.from_service_account_info(
+            json_account_info
+        )
+
+        web_risk_client = WebRiskServiceClient(credentials=credentials)
         # threat types
         # MALWARE = 1
         # SOCIAL_ENGINEERING = 2

@@ -557,6 +557,9 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
             attrs["observable_classification"] = calculate_observable_classification(
                 attrs["observable_name"]
             )
+        attrs["observable_name"] = self.defanged_values_removal(
+            attrs["observable_name"]
+        )
         if attrs["observable_classification"] in [
             ObservableTypes.HASH,
             ObservableTypes.DOMAIN,
@@ -569,6 +572,15 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
         attrs = super().validate(attrs)
         logger.debug(f"after attrs: {attrs}")
         return attrs
+
+    def defanged_values_removal(self, value):
+        if "\\" in value:
+            value = value.replace("\\", "")
+        if "]" in value:
+            value = value.replace("]", "")
+        if "[" in value:
+            value = value.replace("[", "")
+        return value
 
     def filter_analyzers(self, serialized_data: Dict) -> List[str]:
         cleaned_analyzer_list = []

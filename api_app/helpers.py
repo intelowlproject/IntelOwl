@@ -75,7 +75,7 @@ def calculate_observable_classification(value: str) -> str:
         ):
             classification = ObservableTypes.URL
         elif re.match(
-            r"^([\[\\]?\.[\]\\]?)?[a-z\d-]{1,63}(([\[\\]?\.[\]\\]?)?[a-z\d-]{1,63})+$",
+            r"^([\[\\]?\.[\]\\]?)?[a-z\d-]{1,63}(([\[\\]?\.[\]\\]?)[a-z\d-]{1,63})+$",
             value,
             re.IGNORECASE,
         ):

@@ -114,23 +114,28 @@ const checkChoices = [
 const observableType2PropsMap = {
   ip: {
     placeholder: "8.8.8.8",
+    title: "invalid IP address",
     pattern:
       "((^s*((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]).){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]))s*$)|(^s*((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:)))(%.+)?s*$))",
   },
   url: {
     placeholder: "http://example.com/",
-    pattern: "(.+://).+",
+    title: "invalid URL",
+    pattern: "^.{2,20}://.+$",
   },
   domain: {
     placeholder: "scanme.org",
-    pattern: "^[-_a-zA-Z0-9]+(([[\\]?.[]\\]?)?[-_a-zA-Z0-9]+)+$",
+    title: "invalid Domain",
+    pattern: "^(\\?]?[?.?\\?]?[?[-_a-zA-Z0-9]+)+$", //eslint-disable-line
   },
   hash: {
     placeholder: "446c5fbb11b9ce058450555c1c27153c",
+    title: "invalid Hash",
     pattern: "^[a-zA-Z0-9]{4,}$",
   },
   generic: {
     placeholder: "email, phone no., city, country, registry etc.",
+    title: "invalid Generic Observable",
     pattern: ".+",
   },
 };
@@ -275,6 +280,7 @@ export default function ScanForm() {
   const onValidate = React.useCallback(
     (values) => {
       const errors = {};
+
       if (pluginsError) {
         errors.analyzers = pluginsError;
         errors.connectors = pluginsError;
@@ -285,28 +291,9 @@ export default function ScanForm() {
           errors.files = "required";
         }
       } else if (values.observable_names && values.observable_names.length) {
-        // We iterate over observable_names and test each one against the regex pattern,
-        // storing the results (or null otherwise) in ObservableNamesErrors
-        const ObservableNamesErrors = values.observable_names.map(
-          (ObservableName) => {
-            const pattern = RegExp(
-              observableType2PropsMap[values.classification].pattern
-            );
-            if (!pattern.test(ObservableName)) {
-              return `invalid ${values.classification}`;
-            }
-            return null;
-          }
-        );
-
-        // We check if any of the ObservableNamesErrors is not null
-        if (ObservableNamesErrors.some((e) => e))
-          errors.observable_names = ObservableNamesErrors;
-      } else {
-        errors.no_observables = "Atleast one observable is required";
-      }
-      if (!TLP_CHOICES.includes(values.tlp)) {
-        errors.tlp = "Invalid choice";
+        if (!TLP_CHOICES.includes(values.tlp)) {
+          errors.tlp = "Invalid choice";
+        }
       }
       return errors;
     },
@@ -323,31 +310,14 @@ export default function ScanForm() {
         return `Please select a playbook!`;
       }
       if (values.classification === "file") {
-        if (!values.files) {
+        if (!values.files || values.files.length === 0) {
           errors.files = "required";
         }
       } else if (values.observable_names && values.observable_names.length) {
-        // We iterate over observable_names and test each one against the regex pattern,
-        // storing the results (or null otherwise) in ObservableNamesErrors
-        const ObservableNamesErrors = values.observable_names.map(
-          (ObservableName) => {
-            const pattern = RegExp(
-              observableType2PropsMap[values.classification].pattern
-            );
-            if (!pattern.test(ObservableName)) {
-              return `invalid ${values.classification}`;
-            }
-            return null;
-          }
-        );
-
-        // We check if any of the ObservableNamesErrors is not null
-        if (ObservableNamesErrors.some((e) => e))
-          errors.observable_names = ObservableNamesErrors;
-      } else {
-        errors.no_observables = "Atleast one observable is required";
+        if (!TLP_CHOICES.includes(values.tlp)) {
+          errors.tlp = "Invalid choice";
+        }
       }
-
       return errors;
     },
     [pluginsError]

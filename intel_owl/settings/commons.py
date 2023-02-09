@@ -42,3 +42,4 @@ BASE_ANALYZER_FILE_PYTHON_PATH = get_secret(
     "BASE_ANALYZER_FILE_PYTHON_PATH", "api_app.analyzers_manager.file_analyzers"
 )
 REPO_DOWNLOADER_ENABLED = get_secret("REPO_DOWNLOADER_ENABLED", True) == "True"
+GIT_KEY_PATH = "/run/secrets/my_gitpython_key"

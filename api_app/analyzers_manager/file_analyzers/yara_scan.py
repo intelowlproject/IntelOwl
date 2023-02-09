@@ -43,16 +43,11 @@ def export_ssh_key(function):
             os.chmod(settings.GIT_KEY_PATH, 0o600)
             os.environ["GIT_SSH"] = str(settings.GIT_SSH_SCRIPT_PATH)
         try:
-            result = function(*args, **kwargs)
-        except Exception:
-            raise
-        else:
-            return result
+            return function(*args, **kwargs)
         finally:
             if ssh_key:
                 del os.environ["GIT_SSH"]
                 os.remove(settings.GIT_KEY_PATH)
-
     return wrapper
 
 

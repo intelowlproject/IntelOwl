@@ -69,13 +69,15 @@ def calculate_observable_classification(value: str) -> str:
         ipaddress.ip_address(value)
     except ValueError:
         if re.match(
-            r"^(?:ht|f)tps?://[a-z\d-]{1,63}(?:\.[a-z\d-]{1,63})+"
+            r"^.+://[a-z\d-]{1,63}(?:\.[a-z\d-]{1,63})+"
             r"(?:/[a-zA-Z\d-]{1,63})*(?:\.\w+)?",
             value,
         ):
             classification = ObservableTypes.URL
         elif re.match(
-            r"^(\.)?[a-z\d-]{1,63}(\.[a-z\d-]{1,63})+$", value, re.IGNORECASE
+            r"^([\[\\]?\.[\]\\]?)?[a-z\d-]{1,63}(([\[\\]?\.[\]\\]?)?[a-z\d-]{1,63})+$",
+            value,
+            re.IGNORECASE,
         ):
             classification = ObservableTypes.DOMAIN
         elif (
@@ -87,7 +89,7 @@ def calculate_observable_classification(value: str) -> str:
         else:
             classification = ObservableTypes.GENERIC
             logger.info(
-                "Couldn't detect observable classification, setting as 'generic'..."
+                f"Couldn't detect observable classification for {value}, setting as 'generic'..."
             )
     else:
         # it's a simple IP

@@ -119,11 +119,11 @@ const observableType2PropsMap = {
   },
   url: {
     placeholder: "http://example.com/",
-    pattern: "(.+://).*",
+    pattern: "(.+://).+",
   },
   domain: {
     placeholder: "scanme.org",
-    pattern: "^(www)?[.]?[-_a-zA-Z0-9]+([.][a-zA-Z0-9]+)+$",
+    pattern: "^[-_a-zA-Z0-9]+(([[\\]?.[]\\]?)?[-_a-zA-Z0-9]+)+$",
   },
   hash: {
     placeholder: "446c5fbb11b9ce058450555c1c27153c",

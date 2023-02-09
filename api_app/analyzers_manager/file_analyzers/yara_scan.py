@@ -8,7 +8,7 @@ import os
 import zipfile
 from collections import defaultdict
 from pathlib import PosixPath
-from typing import List, Optional, Tuple, Union, Dict, Set
+from typing import Dict, List, Optional, Set, Tuple, Union
 from urllib.parse import urlparse
 
 import requests
@@ -22,17 +22,49 @@ from api_app.analyzers_manager.dataclasses import AnalyzerConfig
 from api_app.exceptions import AnalyzerRunException
 from api_app.models import PluginConfig
 from certego_saas.apps.organization.membership import Membership
-from intel_owl import secrets
 from intel_owl.settings._util import set_permissions
 
 logger = logging.getLogger(__name__)
+
+
+def export_ssh_key(function):
+    def wrapper(*args, ssh_key: str = None, **kwargs):
+        if ssh_key:
+            ssh_key = ssh_key.replace("-----BEGIN OPENSSH PRIVATE KEY-----", "")
+            ssh_key = ssh_key.replace("-----END OPENSSH PRIVATE KEY-----", "")
+            ssh_key = ssh_key.strip()
+            ssh_key = ssh_key.replace(" ", "\n")
+            ssh_key = "-----BEGIN OPENSSH PRIVATE KEY-----\n" + ssh_key
+            ssh_key = ssh_key + "\n-----END OPENSSH PRIVATE KEY-----\n"
+
+            logger.info("Writing key")
+            with open(settings.GIT_KEY_PATH, "w") as f:
+                f.write(ssh_key)
+            os.chmod(settings.GIT_KEY_PATH, 0o600)
+            os.environ["GIT_SSH"] = str(settings.GIT_SSH_SCRIPT_PATH)
+        try:
+            result = function(*args, **kwargs)
+        except Exception:
+            raise
+        else:
+            return result
+        finally:
+            if ssh_key:
+                del os.environ["GIT_SSH"]
+                os.remove(settings.GIT_KEY_PATH)
+    return wrapper
 
 
 class YaraScan(FileAnalyzer):
     def set_params(self, params):
         self.ignore_rules = params.get("ignore", [])
         self.public_repositories = params.get("public_repositories", [])
-        self.private_repositories = self._secrets.get("private_repositories", [])
+        self.private_repositories = [
+            repo
+            for repo in json.loads(
+                self._secrets.get("private_repositories", "{}")
+            ).keys()
+        ]
 
     def _load_directory(
         self, rulepath: PosixPath
@@ -122,7 +154,7 @@ class YaraScan(FileAnalyzer):
             rules_compiled.append((path, buff))
         return rules_compiled
 
-    def analyze(self, url:str, private:bool=False):
+    def analyze(self, url: str, private: bool = False):
         result = []
         if private:
             # private rules are downloaded in the user directory
@@ -132,10 +164,16 @@ class YaraScan(FileAnalyzer):
                 try:
                     membership = Membership.objects.get(user=self._job.user)
                 except Membership.DoesNotExist:
-                    # user has no org, he is trying to access a repo that he does not own
-                    raise AnalyzerRunException(f"There are no rules downloaded for {url}")
+                    # user has no org,
+                    # he is trying to access a repo that he does not own
+                    raise AnalyzerRunException(
+                        f"There are no rules downloaded for {url}"
+                    )
                 else:
-                    owner = membership.organization.name
+                    owner = (
+                        f"{membership.organization.name}."
+                        f"{membership.organization.owner}"
+                    )
                     directory = self._get_directory(url, owner)
         else:
             directory = self._get_directory(url)
@@ -172,20 +210,18 @@ class YaraScan(FileAnalyzer):
         if not self.public_repositories and not self.private_repositories:
             raise AnalyzerRunException("There are no yara rules selected")
         result = []
+        logger.info(f"Checking {self.public_repositories}")
         for url in self.public_repositories:
             result += self.analyze(url)
+            logger.info(f"Checking {self.private_repositories}")
         for url in self.private_repositories:
             result += self.analyze(url, private=True)
         return result
 
     @classmethod
-    def _download_or_update_git_repository(cls, url: str, owner:str, token:str):
+    @export_ssh_key
+    def _download_or_update_git_repository(cls, url: str, owner: str):
         directory = cls._get_directory(url, owner)
-        if token:
-            with open(secrets.get_secret("GIT_KEY_PATH"), "w") as f:
-                f.write(token)
-
-            os.environ["GIT_SSH"] = "/opt/deploy/intel_owl/api_app/analyzers_manager/ssh_gitpython.sh"
 
         if not directory.exists():
             logger.info(f"About to clone {url} at {directory}")
@@ -197,25 +233,26 @@ class YaraScan(FileAnalyzer):
             git.config("--global", "--add", "safe.directory", directory)
             o = repo.remotes.origin
             o.pull(allow_unrelated_histories=True, rebase=True)
-        if token:
-            del os.environ["GIT_SSH"]
-            os.remove(secrets.get_secret("GIT_KEY_PATH"))
 
     @classmethod
-    def _get_directory(cls, url: str, owner:str=None) -> PosixPath:
+    def _get_directory(cls, url: str, owner: str = None) -> PosixPath:
         if url.endswith(".zip"):
             url_parsed = urlparse(url)
             org = url_parsed.netloc
+            # get the last path + remove .zip
             repo = url_parsed.path.split("/")[-1].split(".")[0]
         else:
             url_list = url.split("/")
-            org = url_list[-2]
+            # remove the git@github: if present
+            org = url_list[-2].split(":")[-1]
             # we are removing the .zip, .git. .whatever
             repo = url_list[-1].split(".")[0]
 
         # directory name is organization_repository
         directory_name = "_".join([org, repo]).lower()
-        path = settings.YARA_RULES_PATH / str(owner) if owner else settings.YARA_RULES_PATH
+        path = (
+            settings.YARA_RULES_PATH / str(owner) if owner else settings.YARA_RULES_PATH
+        )
         return path / directory_name
 
     @classmethod
@@ -232,12 +269,14 @@ class YaraScan(FileAnalyzer):
             zipfile_.extractall(directory)
 
     @classmethod
-    def _update_repository(cls, url: str, owner:Optional[str]=None, token:str=None):
+    def _update_repository(
+        cls, url: str, owner: Optional[str] = None, ssh_key: str = None
+    ):
         if url.endswith(".zip"):
             # private url not supported at the moment for private
             cls._download_or_update_zip_repository(url)
         else:
-            cls._download_or_update_git_repository(url, owner, token)
+            cls._download_or_update_git_repository(url, owner, ssh_key=ssh_key)
 
     @classmethod
     def update_rules(cls):
@@ -270,19 +309,27 @@ class YaraScan(FileAnalyzer):
                     config_type=PluginConfig.ConfigType.SECRET,
                     attribute="private_repositories",
                 ):
-                    owner = f"{plugin.organization.name}" if plugin.organization else plugin.owner.username
-                    for url, token in plugin.value.items():
+                    owner = (
+                        f"{plugin.organization.name}.{plugin.organization.owner}"
+                        if plugin.organization
+                        else plugin.owner.username
+                    )
+                    try:
+                        value = json.loads(plugin.value)
+                    except json.JSONDecodeError:
+                        value = plugin.value
+                    for url, ssh_key in value.items():
                         logger.info(f"Adding personal private url {url}")
-                        dict_urls[(owner, token)].add(url)
+                        dict_urls[(owner, ssh_key)].add(url)
             else:
                 logger.info(f"Skipping analyzer {analyzer_name}")
-        for owner_token, urls in dict_urls.items():
-            if owner_token:
-                owner, token = owner_token
+        for owner_ssh_key, urls in dict_urls.items():
+            if owner_ssh_key:
+                owner, ssh_key = owner_ssh_key
             else:
-                owner, token = None, None
+                owner, ssh_key = None, None
             for url in urls:
                 logger.info(f"Going to update {url} yara repo")
-                cls._update_repository(url, owner, token)
+                cls._update_repository(url, owner=owner, ssh_key=ssh_key)
         logger.info("Finished updating yara rules")
         set_permissions(settings.YARA_RULES_PATH)

@@ -48,6 +48,7 @@ def export_ssh_key(function):
             if ssh_key:
                 del os.environ["GIT_SSH"]
                 os.remove(settings.GIT_KEY_PATH)
+
     return wrapper
 
 

@@ -10,7 +10,11 @@ import { UUID_REGEX } from "../../constants/index";
 import ReCAPTCHAInput from "./utils/ReCAPTCHAInput";
 import { resetPassword } from "./api";
 import { RECAPTCHA_SITEKEY } from "../../constants/environment";
-import { PasswordValidator, RecaptchaValidator } from "./utils/validator";
+import {
+  PasswordValidator,
+  RecaptchaValidator,
+  ComparePassword,
+} from "./utils/validator";
 
 // constants
 const reMatcher = new RegExp(UUID_REGEX);
@@ -23,15 +27,23 @@ const onValidate = (values) => {
   const errors = {};
 
   // password fields
-  const passwordErrors = PasswordValidator(
-    values.password,
-    values.confirmPassword
-  );
+  const passwordErrors = PasswordValidator(values.password);
   if (passwordErrors.password) {
     errors.password = passwordErrors.password;
   }
-  if (passwordErrors.confirmPassword) {
-    errors.confirmPassword = passwordErrors.confirmPassword;
+  const confirmPasswordErrors = PasswordValidator(values.confirmPassword);
+  if (confirmPasswordErrors.password) {
+    errors.confirmPassword = confirmPasswordErrors.password;
+  }
+  const comparePasswordErrors = ComparePassword(
+    values.password,
+    values.confirmPassword
+  );
+  if (comparePasswordErrors.password) {
+    errors.password = comparePasswordErrors.password;
+  }
+  if (comparePasswordErrors.confirmPassword) {
+    errors.confirmPassword = comparePasswordErrors.confirmPassword;
   }
 
   // recaptcha

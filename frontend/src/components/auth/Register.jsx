@@ -17,7 +17,6 @@ import useTitle from "react-use/lib/useTitle";
 import { ContentSection, Select } from "@certego/certego-ui";
 
 import { PUBLIC_URL, RECAPTCHA_SITEKEY } from "../../constants/environment";
-import { HACKER_MEME_STRING } from "../../constants";
 import ReCAPTCHAInput from "./utils/ReCAPTCHAInput";
 import {
   AfterRegistrationModalAlert,
@@ -28,6 +27,10 @@ import {
   EmailValidator,
   PasswordValidator,
   RecaptchaValidator,
+  UserFieldsValidator,
+  ProfileValidator,
+  UsernameValidator,
+  ComparePassword,
 } from "./utils/validator";
 
 // constants
@@ -79,21 +82,17 @@ const onValidate = (values) => {
   const errors = {};
 
   // static text fields
-  const textFields = ["first_name", "last_name", "username"];
-  textFields.forEach((field) => {
-    if (!values[field]) {
-      errors[field] = "Required";
-    } else if (values[field].length > 15) {
-      errors[field] = "Must be 15 characters or less";
-    } else if (values[field].length < 4) {
-      errors[field] = "Must be 4 characters or more";
+  ["first_name", "last_name"].forEach((field) => {
+    const userErrors = UserFieldsValidator(field, values[field]);
+    if (userErrors[field]) {
+      errors[field] = userErrors[field];
     }
   });
-  if (
-    ["administrator", "admin", "certego", "hacker"].indexOf(values.username) !==
-    -1
-  ) {
-    errors.username = HACKER_MEME_STRING;
+
+  // username
+  const usernameErrors = UsernameValidator(values.username);
+  if (usernameErrors.username) {
+    errors.username = usernameErrors.username;
   }
 
   // email
@@ -102,13 +101,11 @@ const onValidate = (values) => {
     errors.email = emailErrors.email;
   }
 
+  // profile
   ["company_name", "company_role"].forEach((field) => {
-    if (!values[field]) {
-      errors[field] = "Required";
-    } else if (values[field].length > 30) {
-      errors[field] = "Must be 30 characters or less";
-    } else if (values[field].length < 3) {
-      errors[field] = "Must be 3 characters or more";
+    const profileErrors = ProfileValidator(field, values[field]);
+    if (profileErrors[field]) {
+      errors[field] = profileErrors[field];
     }
   });
 
@@ -127,15 +124,23 @@ const onValidate = (values) => {
   });
 
   // password fields
-  const passwordErrors = PasswordValidator(
-    values.password,
-    values.confirmPassword
-  );
+  const passwordErrors = PasswordValidator(values.password);
   if (passwordErrors.password) {
     errors.password = passwordErrors.password;
   }
-  if (passwordErrors.confirmPassword) {
-    errors.confirmPassword = passwordErrors.confirmPassword;
+  const confirmPasswordErrors = PasswordValidator(values.confirmPassword);
+  if (confirmPasswordErrors.password) {
+    errors.confirmPassword = confirmPasswordErrors.password;
+  }
+  const comparePasswordErrors = ComparePassword(
+    values.password,
+    values.confirmPassword
+  );
+  if (comparePasswordErrors.password) {
+    errors.password = comparePasswordErrors.password;
+  }
+  if (comparePasswordErrors.confirmPassword) {
+    errors.confirmPassword = comparePasswordErrors.confirmPassword;
   }
 
   // recaptcha

@@ -4192,7 +4192,7 @@
     },
     "secrets": {
       "private_repositories": {
-        "env_var_key": "YARA_PRIVATE_REPOSITORY",
+        "env_var_key": "YARA_PRIVATE_REPOSITORIES",
         "description": "Private repositories in the following format: {\"url_repository\":\"ssh key\"}. Use double quote, don't worry about whitespace.",
         "required": false,
         "type": "dict",

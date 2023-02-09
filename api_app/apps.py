@@ -4,6 +4,7 @@
 from logging import getLogger
 
 from django.apps import AppConfig
+from django.db import ProgrammingError
 
 logger = getLogger(__name__)
 
@@ -19,4 +20,7 @@ class ApiAppConfig(AppConfig):
         from authentication.views import DurinAuthenticationScheme
 
         logger.info("Cleaning cache")
-        cache.clear()
+        try:
+            cache.clear()
+        except ProgrammingError:
+            logger.info("No table to clean")

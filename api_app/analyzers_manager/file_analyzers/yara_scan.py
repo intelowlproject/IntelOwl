@@ -60,12 +60,9 @@ class YaraScan(FileAnalyzer):
     def set_params(self, params):
         self.ignore_rules = params.get("ignore", [])
         self.public_repositories = params.get("public_repositories", [])
-        self.private_repositories = [
-            repo
-            for repo in json.loads(
-                self._secrets.get("private_repositories", "{}")
-            ).keys()
-        ]
+        self.private_repositories = list(
+            json.loads(self._secrets.get("private_repositories", "{}")).keys()
+        )
 
     def _load_directory(
         self, rulepath: PosixPath

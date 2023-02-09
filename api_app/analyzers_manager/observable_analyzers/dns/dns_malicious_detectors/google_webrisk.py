@@ -44,8 +44,6 @@ class WebRisk(classes.ObservableAnalyzer):
 
     def run(self):
         json_account_info = json.loads(self.service_account_json)
-        print(self.service_account_json)
-        print(json_account_info)
         credentials = service_account.Credentials.from_service_account_info(
             json_account_info
         )

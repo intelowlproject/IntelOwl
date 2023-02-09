@@ -56,8 +56,7 @@ table, th, td {
       <li><code>PEframe_Scan</code></li>
       <li><code>Capa_Info</code></li>
       <li><code>Floss</code></li>
-      <li><code>Strings_Info_Classic</code>,
-      <code>Strings_Info_ML</code></li>
+      <li><code>Strings_Info</code></li>
       <li><code>Manalyze</code></li>
       <li><code>ClamAV</code></li>
       <li><code>Thug_URL_Info</code>,
@@ -191,8 +190,7 @@ Some analyzers could require a special configuration:
 
 - `GoogleWebRisk`: this analyzer needs a service account key with the Google Cloud credentials to work properly.
   You should follow the [official guide](https://cloud.google.com/web-risk/docs/quickstart) for creating the key.
-  Then you can copy the generated JSON key file in the directory `configuration` of the project and change its name to `service_account_keyfile.json`.
-  This is the default configuration. If you want to customize the name or the location of the file, you can change the environment variable `GOOGLE_APPLICATION_CREDENTIALS` in the `env_file_app` file.
+  Then you can populate the secret `service_account_json` for that analyzer with the JSON of the service account file.
 
 - `ClamAV`: this Docker-based analyzer using `clamd` daemon as it's scanner, communicating with `clamdscan` utility to scan files. The daemon requires 2 different configuration files: `clamd.conf`(daemon's config) and `freshclam.conf` (virus database updater's config). These files are mounted as docker volumes in `/integrations/malware_tools_analyzers/clamav` and hence, can be edited by the user as per needs, without restarting the application.
 

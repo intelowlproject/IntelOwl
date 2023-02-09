@@ -72,7 +72,6 @@ WIGLE_KEY=test
 XFORCE_KEY=test
 XFORCE_PASSWORD=test
 SSAPINET_KEY=test
-GOOGLE_APPLICATION_CREDENTIALS=/opt/deploy/intel_owl/configuration/service_account_keyfile_example.json
 MALPEDIA_KEY=test
 DEHASHED_AUTH_KEY=email@example.com:verysecureapikey
 OPENCTI_KEY=test

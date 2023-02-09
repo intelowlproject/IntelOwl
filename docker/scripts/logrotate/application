@@ -1,0 +1,11 @@
+/var/lib/docker/volumes/*_logs/_data/*/*.log {
+    daily
+    missingok
+    rotate 2
+    size 10M
+    compress
+    delaycompress
+    notifempty
+    create 0644 www-data www-data
+    copytruncate
+}

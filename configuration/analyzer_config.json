@@ -720,6 +720,42 @@
       }
     }
   },
+  "DNS0_EU": {
+    "type": "observable",
+    "python_module": "dns.dns_resolvers.dns0_eu_resolver.DNS0EUResolver",
+    "description": "Retrieve current domain resolution with DNS0.eu DoH (DNS over HTTPS)",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": ["domain", "url"],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {},
+    "params": {
+      "query_type": {
+        "value": "A",
+        "type": "str",
+        "description": "Query type against the chosen DNS resolver."
+      }
+    }
+  },
+  "DNS0_EU_Malicious_Detector": {
+    "type": "observable",
+    "python_module": "dns.dns_malicious_detectors.dns0_eu_malicious_detector.DNS0EUMaliciousDetector",
+    "description": "Check if a domain or an url is marked as malicious in DNS0.eu database ([Zero](https://www.dns0.eu/zero) service)",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": ["domain", "url"],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {},
+    "params": {}
+  },
   "DNSDB": {
     "type": "observable",
     "python_module": "dnsdb.DNSdb",
@@ -816,7 +852,7 @@
   "Doc_Info": {
     "type": "file",
     "python_module": "doc_info.DocInfo",
-    "description": "static generic document analysis (Oletools)",
+    "description": "static document analysis ([Oletools](https://github.com/decalage2/oletools)) with features to analyze XLM macros, encrypted macros and much more",
     "disabled": false,
     "external_service": false,
     "leaks_info": false,
@@ -831,6 +867,7 @@
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+      "application/onenote",
       "text/x-ms-iqy",
       "application/excel",
       "text/xml",
@@ -856,8 +893,8 @@
   "Doc_Info_Experimental": {
     "type": "file",
     "python_module": "doc_info.DocInfo",
-    "description": "static document analysis with new features to analyze XLM macros, encrypted macros and more",
-    "disabled": false,
+    "description": "static document analysis with new features to analyze XLM macros, encrypted macros and more [DEPRECATED, move to Doc_Info]",
+    "disabled": true,
     "external_service": false,
     "leaks_info": false,
     "supported_filetypes": [
@@ -937,6 +974,7 @@
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+      "application/onenote",
       "text/x-ms-iqy",
       "application/excel",
       "text/xml",
@@ -1205,9 +1243,9 @@
       "queue": "default"
     },
     "secrets": {
-      "api_key_name": {
-        "env_var_key": "GOOGLE_APPLICATION_CREDENTIALS",
-        "description": "",
+      "service_account_json": {
+        "env_var_key": "SERVICE_ACCOUNT_JSON",
+        "description": "service account file in JSON format",
         "required": true
       }
     },
@@ -1357,6 +1395,7 @@
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+      "application/onenote",
       "text/x-ms-iqy",
       "application/excel",
       "text/xml",
@@ -1631,6 +1670,7 @@
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+      "application/onenote",
       "text/x-ms-iqy",
       "application/excel",
       "text/xml",
@@ -1746,6 +1786,32 @@
         "value": "dfi_search",
         "type": "str",
         "description": ""
+      }
+    }
+  },
+  "IPApi": {
+    "type": "observable",
+    "python_module": "ipapi.IPApi",
+    "description": "Gives information about [IPs](https://ip-api.com/docs/api:batch) and [DNS](https://ip-api.com/docs/dns)",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": ["ip"],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {},
+    "params": {
+      "fields" : {
+        "value" : "",
+        "type" : "str",
+        "description" : "specify the information fields"
+      },
+      "lang" : {
+        "value" : "",
+        "type" : "str",
+        "description" : "specify the response language"
       }
     }
   },
@@ -2047,7 +2113,7 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "MAXMIND_KEY",
-        "description": "",
+        "description": "API key to access the service",
         "required": true
       }
     },
@@ -2550,6 +2616,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
+    "leaks_info": false,
     "observable_supported": ["domain", "url"],
     "config": {
       "soft_time_limit": 30,
@@ -3047,11 +3114,37 @@
     },
     "params": {}
   },
+  "Strings_Info": {
+    "type": "file",
+    "python_module": "strings_info.StringsInfo",
+    "description": "Strings extraction. Leverages Mandiant's [Stringsifter](https://github.com/mandiant/stringsifter)",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
+    "docker_based": true,
+    "config": {
+      "soft_time_limit": 70,
+      "queue": "local"
+    },
+    "secrets": {},
+    "params": {
+      "max_number_of_strings": {
+        "value": 500,
+        "type": "int",
+        "description": ""
+      },
+      "rank_strings": {
+        "value": false,
+        "type": "bool",
+        "description": "enable ranking based on Machine Learning features"
+      }
+    }
+  },
   "Strings_Info_Classic": {
     "type": "file",
     "python_module": "strings_info.StringsInfo",
-    "description": "strings extraction",
-    "disabled": false,
+    "description": "strings extraction [DEPRECATED, move to Strings_Info]",
+    "disabled": true,
     "external_service": false,
     "leaks_info": false,
     "docker_based": true,
@@ -3076,8 +3169,8 @@
   "Strings_Info_ML": {
     "type": "file",
     "python_module": "strings_info.StringsInfo",
-    "description": "strings extraction plus strings ranking based on Machine Learning. Leverages Fireeye's Stringsifter",
-    "disabled": false,
+    "description": "strings extraction plus strings ranking based on Machine Learning. Leverages Fireeye's Stringsifter [DEPRECATED, move to Strings_Info]",
+    "disabled": true,
     "external_service": false,
     "leaks_info": false,
     "docker_based": true,

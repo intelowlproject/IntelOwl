@@ -573,7 +573,8 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
         logger.debug(f"after attrs: {attrs}")
         return attrs
 
-    def defanged_values_removal(self, value):
+    @staticmethod
+    def defanged_values_removal(value):
         if "\\" in value:
             value = value.replace("\\", "")
         if "]" in value:

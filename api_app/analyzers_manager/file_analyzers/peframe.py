@@ -11,13 +11,15 @@ class PEframe(FileAnalyzer, DockerBasedAnalyzer):
     max_tries: int = 25
     # interval between http request polling
     poll_distance: int = 5
+    timeout: int = 60 * 9
+    # whereas subprocess timeout is kept as 60 * 9 = 9 minutes
 
     def run(self):
         # get binary
         binary = self.read_file_bytes()
         # make request data
         fname = str(self.filename).replace("/", "_").replace(" ", "_")
-        req_data = {"args": ["-j", f"@{fname}"]}
+        req_data = {"args": ["-j", f"@{fname}"], "timeout": self.timeout}
         req_files = {fname: binary}
 
         result = self._docker_run(req_data, req_files)

@@ -25,7 +25,7 @@ from .models import AnalyzerReport
 logger = logging.getLogger(__name__)
 
 
-class BaseAnalyzerMixin(Plugin):
+class BaseAnalyzerMixin(Plugin, metaclass=ABCMeta):
     """
     Abstract Base class for Analyzers.
     Never inherit from this branch,
@@ -164,6 +164,7 @@ class FileAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
     file_mimetype: str
 
     def read_file_bytes(self) -> bytes:
+        self._job.file.seek(0)
         return self._job.file.read()
 
     @property
@@ -278,7 +279,7 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
                 f"<-- {self.__repr__()}"
             )
             try:
-                status_code, json_data = self.__query_for_result(self.url, req_key)
+                _, json_data = self.__query_for_result(self.url, req_key)
             except (requests.RequestException, json.JSONDecodeError) as e:
                 raise AnalyzerRunException(e)
             status = json_data.get("status", None)

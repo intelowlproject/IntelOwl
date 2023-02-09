@@ -123,7 +123,7 @@ class OTX(classes.ObservableAnalyzer):
                     indicator=to_analyze_observable,
                     section=section,
                 )
-            except OTXv2.BadRequest as e:
+            except (OTXv2.BadRequest, OTXv2.RetryError) as e:
                 raise AnalyzerRunException(f"Error while requesting data to OTX: {e}")
             except OTXv2.NotFound as e:
                 logger.info(f"{to_analyze_observable} not found: {e}")

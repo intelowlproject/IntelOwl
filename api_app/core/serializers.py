@@ -1,7 +1,6 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-import hashlib
 import json
 import logging
 import os
@@ -13,6 +12,7 @@ from cache_memoize import cache_memoize
 from django.conf import settings
 from rest_framework import serializers as rfs
 
+from api_app.helpers import calculate_md5
 from intel_owl import secrets as secrets_store
 from intel_owl.consts import PARAM_DATATYPE_CHOICES
 
@@ -173,7 +173,7 @@ class AbstractConfigSerializer(rfs.Serializer):
         fpath = cls._get_config_path()
         with open(fpath, "r") as fp:
             buffer = fp.read().encode("utf-8")
-            md5hash = hashlib.md5(buffer).hexdigest()
+            md5hash = calculate_md5(buffer)
         return md5hash
 
     @classmethod

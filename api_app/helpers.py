@@ -44,6 +44,8 @@ def calculate_mimetype(file_pointer, file_name) -> str:
             mimetype = "application/vnd.android.package-archive"
         elif file_name.endswith(".dex"):
             mimetype = "application/x-dex"
+        elif file_name.endswith(".one"):
+            mimetype = "application/onenote"
 
     if not mimetype:
         buffer = file_pointer.read()
@@ -95,7 +97,15 @@ def calculate_observable_classification(value: str) -> str:
 
 
 def calculate_md5(value) -> str:
-    return hashlib.md5(value).hexdigest()
+    return hashlib.md5(value).hexdigest()  # skipcq BAN-B324
+
+
+def calculate_sha1(value) -> str:
+    return hashlib.sha1(value).hexdigest()  # skipcq BAN-B324
+
+
+def calculate_sha256(value) -> str:
+    return hashlib.sha256(value).hexdigest()  # skipcq BAN-B324
 
 
 def get_ip_version(ip_value):

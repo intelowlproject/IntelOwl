@@ -135,7 +135,9 @@ If you are an individual who likes this project and want to thank us with a litt
 
 ## About the author and maintainers
 
-Feel free to contact the main developers at any time on twitter:
+Feel free to contact the main developers at any time on Twitter:
 
 - [Matteo Lodi](https://twitter.com/matte_lodi): Author and creator
 - [Eshaan Bansal](https://twitter.com/eshaan7_): Principal maintainer
+- [Simone Berni](https://twitter.com/0ssig3no): Key Contributor and Backend Maintainer
+- [Daniele Rosetti](https://github.com/drosetti): Key Contributor and Frontend Maintainer

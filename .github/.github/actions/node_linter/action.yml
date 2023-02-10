@@ -1,0 +1,70 @@
+name: Composite action node linter
+description: Composite action node linter
+inputs:
+  working_directory:
+    description: Path to the package.json file
+    required: true
+
+
+  use_eslint:
+    description: Use eslint formatter
+    required: true
+
+  use_prettier:
+    description: Use prettier formatter
+    required: true
+
+  use_stylelint:
+    description: Use stylelint formatter
+    required: true
+
+  check_packages_licenses:
+    description: Check if npm packages have a valid license.
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Lint with prettier
+      run: |
+        if [[ ${{ inputs.use_prettier }} != 'false' ]]; then
+          npm run formatter
+        else
+          echo "Skipping prettier"
+        fi
+      working-directory: ${{ inputs.working_directory }}
+      shell: bash
+
+    - name: Lint with eslint
+      run: |
+        if [[ ${{ inputs.use_eslint }} != 'false' ]]; then
+          npm run lint-config-install
+          npm run lint
+        else
+          echo "Skipping eslint"
+        fi
+      working-directory: ${{ inputs.working_directory }}
+      shell: bash
+
+    - name: Lint with stylelint
+      run: |
+        if [[ ${{ inputs.use_stylelint }} != 'false' ]]; then
+          npm rum lint-scss-config-install
+          npm run lint-scss
+        else
+          echo "Skipping stylelint"
+        fi
+      working-directory: ${{ inputs.working_directory }}
+      shell: bash
+
+    - name: Collect packages licenses
+      run: |
+        if [[ ${{ inputs.check_packages_licenses }} != 'false' ]]; then
+          echo '{"name":"", "license":""}' > fmt.json
+          npx -y license-checker@25.0.1 --csv --production --excludePrivatePackages --customPath fmt.json | cut -d, -f2,3 | tail -n +2 > licenses.csv
+          cat licenses.csv
+        else
+          echo "Skipping license check"
+        fi
+      working-directory: ${{ inputs.working_directory }}
+      shell: bash

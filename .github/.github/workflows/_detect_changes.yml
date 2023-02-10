@@ -1,0 +1,71 @@
+name: Reusable detect changes workflow
+on:
+  workflow_call:
+    inputs:
+      backend_directories:
+        description: Backend directories separated by spaces
+        required: false
+        type: string
+        default: ''
+
+      frontend_directories:
+        description: Frontend directories separated by spaces
+        required: false
+        type: string
+        default: ''
+
+      ubuntu_version:
+        description: Ubuntu version to use
+        type: string
+        default: latest
+        required: false
+
+    outputs:
+      backend:
+        description: Number of files changed in backend
+        value: ${{ jobs.detect-changes.outputs.backend }}
+
+      frontend:
+        description: Number of files changed in frontend
+        value: ${{ jobs.detect-changes.outputs.frontend }}
+
+jobs:
+  detect-changes:
+    name: Detect changes
+    runs-on: ubuntu-${{ inputs.ubuntu_version }}
+    outputs:
+      backend: ${{steps.diff_check_backend.outputs.backend}}
+      frontend: ${{steps.diff_check_frontend.outputs.frontend}}
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        ref: ${{ github.base_ref }}
+
+    - uses: actions/checkout@v3
+      with:
+        clean: false
+    - name: Generate summary
+      if: ${{inputs.backend_directories != ''}} | ${{inputs.frontend_directories != ''}}
+      run: |
+        echo "### Detect Changes summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+
+    - name: Generate diffs for backend
+      if: ${{inputs.backend_directories != ''}}
+      id: diff_check_backend
+      run: |
+        BACKEND_CHANGES=$(git diff --compact-summary origin/${{ github.base_ref }} -- ${{ inputs.backend_directories }} | head -n -1 | wc -l)
+        echo "backend=$BACKEND_CHANGES" >> $GITHUB_OUTPUT
+        echo "Backend Changes: $BACKEND_CHANGES" >> $GITHUB_STEP_SUMMARY
+        echo "backend $BACKEND_CHANGES"
+
+
+    - name: Generate diffs for frontend
+      if: ${{inputs.frontend_directories != ''}}
+      id: diff_check_frontend
+      run: |
+        FRONTEND_CHANGES=$(git diff --compact-summary origin/${{ github.base_ref }} -- ${{ inputs.frontend_directories }} | head -n -1 | wc -l)
+        echo "frontend=$FRONTEND_CHANGES" >> $GITHUB_OUTPUT
+        echo "Frontend Changes: $FRONTEND_CHANGES" >> $GITHUB_STEP_SUMMARY
+        echo "frontend $FRONTEND_CHANGES"
+

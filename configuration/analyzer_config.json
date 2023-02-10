@@ -73,16 +73,14 @@
     "secrets": {
       "api_user_name": {
         "env_var_key": "ANOMALI_THREATSTREAM_API_USER",
-        "type": "string",
+        "type": "str",
         "required": true,
-        "default": null,
         "description": "API USER for Anomali Threatstream"
       },
       "api_key_name": {
         "env_var_key": "ANOMALI_THREATSTREAM_API_KEY",
-        "type": "string",
+        "type": "str",
         "required": true,
-        "default": null,
         "description": "API Key for Anomali Threatstream"
       }
     },
@@ -109,16 +107,14 @@
     "secrets": {
       "api_user_name": {
         "env_var_key": "ANOMALI_THREATSTREAM_API_USER",
-        "type": "string",
+        "type": "str",
         "required": true,
-        "default": null,
         "description": "API USER for Anomali Threatstream"
       },
       "api_key_name": {
         "env_var_key": "ANOMALI_THREATSTREAM_API_KEY",
-        "type": "string",
+        "type": "str",
         "required": true,
-        "default": null,
         "description": "API Key for Anomali Threatstream"
       }
     },
@@ -165,16 +161,14 @@
     "secrets": {
       "api_user_name": {
         "env_var_key": "ANOMALI_THREATSTREAM_API_USER",
-        "type": "string",
+        "type": "str",
         "required": true,
-        "default": null,
         "description": "API USER for Anomali Threatstream"
       },
       "api_key_name": {
         "env_var_key": "ANOMALI_THREATSTREAM_API_KEY",
-        "type": "string",
+        "type": "str",
         "required": true,
-        "default": null,
         "description": "API Key for Anomali Threatstream"
       }
     },
@@ -278,9 +272,8 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "CHECKPHISH_KEY",
-        "type": "string",
+        "type": "str",
         "required": true,
-        "default": null,
         "description": "API Key for the analyzer"
       }
     },
@@ -1431,9 +1424,8 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "HIBP_API_KEY",
-        "type": "string",
+        "type": "str",
         "required": true,
-        "default": null,
         "description": "API Key for HaveIBeenPwned"
       }
     },
@@ -1851,9 +1843,8 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "KOODOUS_KEY",
-        "type": "string",
+        "type": "str",
         "required": true,
-        "default": null,
         "description": "API Key for the Koodous analyzer"
       }
     },

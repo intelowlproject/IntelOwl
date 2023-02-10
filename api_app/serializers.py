@@ -875,12 +875,24 @@ class PluginConfigSerializer(rfs.ModelSerializer):
                 f"have secret {attrs['attribute']}."
             )
         # Check if the type of value is valid for the attribute.
+
         expected_type = (
-            type(config.all()[attrs["plugin_name"]].params[attrs["attribute"]].value)
+            config.all()[attrs["plugin_name"]].params[attrs["attribute"]].type
             if attrs["config_type"] == PluginConfig.ConfigType.PARAMETER
-            else str
+            else config.all()[attrs["plugin_name"]].secrets[attrs["attribute"]].type
         )
-        if not isinstance(
+        if expected_type == "str":
+            expected_type = str
+        elif expected_type == "list":
+            expected_type = list
+        elif expected_type == "dict":
+            expected_type = dict
+        elif expected_type in ["int", "float"]:
+            expected_type = int
+        elif expected_type == "bool":
+            expected_type = bool
+
+        if expected_type and not isinstance(
             attrs["value"],
             expected_type,
         ):

@@ -15,6 +15,7 @@ import { usePluginConfigurationStore } from "../../stores";
 const ANALYZER = "1";
 const CONNECTOR = "2";
 
+// eslint-disable-next-line no-unused-vars
 const PARAMETER = "1";
 const SECRET = "2";
 
@@ -100,9 +101,7 @@ export function PluginData({
             console.error(`Invalid type: ${res.type}`);
           }
           if (
-            res.config_type === SECRET ||
-            (res.config_type === PARAMETER &&
-              plugins[res.plugin_name].params[res.attribute].type === "str")
+            plugins[res.plugin_name].params[res.attribute]?.type === "str"
           ) {
             res.value = isJSON(res.value) ? JSON.parse(res.value) : res.value;
           }
@@ -163,11 +162,7 @@ export function PluginData({
                                 plugins[configuration.plugin_name][dataName][
                                   configuration.attribute
                                 ];
-                              if (
-                                type === "str" ||
-                                additionalEntryData.config_type === SECRET
-                              )
-                                placeholder = "string";
+                              if (type === "str") placeholder = "string";
                               else if (type === "int") placeholder = "1234";
                               else if (type === "float") placeholder = "12.34";
                               else if (type === "bool") placeholder = "true";
@@ -282,14 +277,10 @@ export function PluginData({
                                           ...additionalEntryData,
                                         };
                                         if (
-                                          newConfiguration.config_type ===
-                                            SECRET ||
-                                          (newConfiguration.config_type ===
-                                            PARAMETER &&
-                                            plugins[
+                                          plugins[
                                               newConfiguration.plugin_name
                                             ].params[newConfiguration.attribute]
-                                              .type === "str")
+                                              ?.type === "str"
                                         ) {
                                           newConfiguration.value =
                                             JSON.stringify(

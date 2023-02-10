@@ -30,7 +30,7 @@ ARG WATCHMAN=false
 RUN mkdir -p ${LOG_PATH} \
     ${LOG_PATH}/django \
     ${LOG_PATH}/uwsgi \
-    /opt/deploy/files_required /opt/deploy/analyzers/yara /opt/deploy/configuration
+    /opt/deploy/files_required /opt/deploy/files_required/yara /opt/deploy/configuration
 
 # install required packages. some notes about:o
 # python3-psycopg2 is required to use PostgresSQL with Django

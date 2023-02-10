@@ -50,6 +50,8 @@ class _Secret:
     env_var_key: str
     description: str
     required: bool
+    type: typing.Literal[PARAM_DATATYPE_CHOICES] = None
+    default: typing.Optional[typing.Any] = None
 
 
 @dataclasses.dataclass

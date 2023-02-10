@@ -72,6 +72,18 @@ class _SecretSerializer(rfs.Serializer):
     env_var_key = rfs.CharField(required=True, max_length=128)
     description = rfs.CharField(required=True, allow_blank=True, max_length=512)
     required = rfs.BooleanField(required=True)
+    type = rfs.ChoiceField(choices=PARAM_DATATYPE_CHOICES, required=False)
+    default = BaseField(required=False)
+
+    def validate(self, attrs):
+        if "type" in attrs and "default" in attrs:
+            default_type = type(attrs["default"]).__name__
+            expected_type = attrs["type"]
+            if default_type != expected_type:
+                raise rfs.ValidationError(
+                    f"Invalid default type. {default_type} != {expected_type}"
+                )
+        return super().validate(attrs)
 
 
 class AbstractConfigSerializer(rfs.Serializer):
@@ -117,7 +129,7 @@ class AbstractConfigSerializer(rfs.Serializer):
             # check if available in environment
             secret_val = secrets_store.get_secret(
                 s_key,
-                default=None,
+                default=s_dict.get("default", None),
                 plugin_type=self._get_type(),
                 plugin_name=raw_instance["name"],
                 user=self.context.get("user", None),

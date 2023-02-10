@@ -10,9 +10,9 @@ BASE_DIR = Path(__file__).parent.parent.parent.parent
 PROJECT_LOCATION = BASE_DIR / "intel_owl"
 
 BASE_STATIC_PATH = PROJECT_LOCATION / "static"
+MEDIA_ROOT = BASE_DIR / "files_required"
 
-ANALYZER_CONFIGS_PATH = BASE_DIR / "analyzers"
-YARA_RULES_PATH = ANALYZER_CONFIGS_PATH / "yara"
+YARA_RULES_PATH = MEDIA_ROOT / "yara"
 
 # test / ci
 MOCK_CONNECTIONS = get_secret("MOCK_CONNECTIONS", False) == "True"
@@ -42,7 +42,7 @@ BASE_ANALYZER_FILE_PYTHON_PATH = get_secret(
     "BASE_ANALYZER_FILE_PYTHON_PATH", "api_app.analyzers_manager.file_analyzers"
 )
 REPO_DOWNLOADER_ENABLED = get_secret("REPO_DOWNLOADER_ENABLED", True) == "True"
-GIT_KEY_PATH = ANALYZER_CONFIGS_PATH / "my_gitpython_key"
+GIT_KEY_PATH = MEDIA_ROOT / "my_gitpython_key"
 GIT_SSH_SCRIPT_PATH = (
     PROJECT_LOCATION / "api_app" / "analyzers_manager" / "ssh_gitpython.sh"
 )

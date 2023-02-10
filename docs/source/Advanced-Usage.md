@@ -196,7 +196,9 @@ Some analyzers could require a special configuration:
   - `/integrations/pcap_analyzers/config/suricata/rules`: here there are Suricata rules. You can change the `custom.rules` files to add your own rules at any time. Once you made this change, you need to either restart IntelOwl or (this is faster) run a new analysis with the Suricata analyzer and set the parameter `reload_rules` to `true`.
   - `/integrations/pcap_analyzers/config/suricata/etc`: here there are Suricata configuration files. Change it based on your wish. Restart IntelOwl to see the changes applied.
 
-- `Yara`: you can customize the `repositories` parameter to download and use different rules from the default that IntelOwl currently support. The rules *must* be downloaded: this means that local rules are not supported, allowing to sync the rules in every celery worker without the usage of shared volumes.  
+- `Yara`: 
+  - You can customize both the `public_repositories` parameter and `private_repositories` secret to download and use different rules from the default that IntelOwl currently support.
+  - You can add local rules inside the directory at `/opt/deploy/files_required/yara/YOUR_USERNAME/custom_rules/`. Please remember that these rules are not synced between containers: for this reason is advised to upload them on GitHub and use the `public_repositories` or `private_repositories` attributes. 
 
 ## Organizations and data sharing
 

@@ -513,7 +513,7 @@
   "ClamAV": {
     "type": "file",
     "python_module": "clamav.ClamAV",
-    "description": "scan files using ClamAV virus scanning engine",
+    "description": "scan files using [ClamAV AntiVirus Engine](https://www.clamav.net/). IntelOwl automatically keep ClamAV updated with official and [unofficial](https://github.com/rseichter/fangfrisch) open source signatures",
     "disabled": false,
     "leaks_info": false,
     "external_service": false,

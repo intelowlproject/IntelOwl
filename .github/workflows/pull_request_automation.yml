@@ -21,7 +21,7 @@ jobs:
 
 
 
-  node:
+  frontend-tests:
     needs: detect-changes
     if: ${{ needs.detect-changes.outputs.frontend > 0 }}
     uses: ./.github/workflows/_node.yml
@@ -46,7 +46,7 @@ jobs:
         ["18"]
 
 
-  python:
+  backend-tests:
      needs: detect-changes
      if: ${{ needs.detect-changes.outputs.backend > 0 }}
      uses: ./.github/workflows/_python.yml

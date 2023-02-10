@@ -25,19 +25,24 @@
     "recharts": "^2.3.2",
     "zustand": "^4.3.2"
   },
+  "config": {
+    "eslint": ".github/configurations/node_linters/eslint/.eslintrc.json",
+    "stylelint": ".github/configurations/node_linters/stylelint/.stylelintrc.json",
+    "prettier": ".github/configurations/node_linters/prettier/.prettierrc.js"
+  },
   "scripts": {
     "start": "PORT=3001 react-scripts start",
     "build": "react-scripts build",
-    "test": "jest",
-    "eject": "react-scripts eject",
-    "lint": "eslint src/ --ext .js,.jsx",
-    "lint:fix": "npm run lint -- --fix",
-    "lint-sass": "stylelint \"src/styles/*.{css,scss}\"",
-    "lint-sass:fix": "npm run lint-sass -- --fix",
-    "prettier:write": "prettier --write .",
-    "prettier:check": "prettier --check .",
-    "prettier:eslint-config-prettier": "eslint-config-prettier index.jsx",
-    "prettier:stylelint-check": "stylelint-config-prettier-check"
+    "test": "TZ=UTC jest ./tests",
+    "test-coverage": "npm test -- --coverage=true",
+    "lint-config-install": "cd ../.github/configurations/node_linters/eslint && npm i",
+    "lint": "eslint 'src/**/*.{js,jsx}' 'tests/**/*.{js,jsx}'",
+    "lint-fix": "npm run lint -- --fix",
+    "lint-scss-config-install": "cd ../.github/configurations/node_linters/stylelint && npm i",
+    "lint-scss": "stylelint --config ../.github/configurations/node_linters/stylelint/.stylelintrc.json 'src/styles/**/*.{css,scss}'",
+    "lint-scss-fix": "npm run lint-scss -- --fix",
+    "formatter": "prettier 'src/**/*.{js,jsx}' 'tests/**/*.{js,jsx}' 'src/styles/*.{css,scss}' --check",
+    "formatter-fix": "npm run formatter -- --write"
   },
   "browserslist": {
     "production": [

@@ -4,4 +4,3 @@ CACHES = {
         "LOCATION": "intelowl_cache",
     }
 }
-

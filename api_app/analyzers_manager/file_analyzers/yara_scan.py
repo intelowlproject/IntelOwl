@@ -126,7 +126,9 @@ class YaraScan(FileAnalyzer):
     def _analyze_directory(self, directory: PosixPath):
         result = []
         if not directory.exists():
-            raise AnalyzerRunException(f"There are no rules downloaded inside {directory}")
+            raise AnalyzerRunException(
+                f"There are no rules downloaded inside {directory}"
+            )
 
         logger.info(f"Getting rules inside {directory}")
         list_rules_compiled = self._get_rules(directory)
@@ -188,7 +190,9 @@ class YaraScan(FileAnalyzer):
             logger.info(f"Checking {self.private_repositories}")
         for url in self.private_repositories:
             result += self.analyze(url, private=True)
-        result += self._analyze_directory(settings.YARA_RULES_PATH / self._job.user.username / "custom_rule")
+        result += self._analyze_directory(
+            settings.YARA_RULES_PATH / self._job.user.username / "custom_rule"
+        )
         return result
 
     @classmethod
@@ -206,7 +210,9 @@ class YaraScan(FileAnalyzer):
 
                 with open(settings.GIT_KEY_PATH, "w", encoding="utf_8") as f:
                     f.write(ssh_key)
-                logger.info(f"Writing key to download {url} at {str(settings.GIT_KEY_PATH)}")
+                logger.info(
+                    f"Writing key to download {url} at {str(settings.GIT_KEY_PATH)}"
+                )
                 os.chmod(settings.GIT_KEY_PATH, 0o600)
                 os.environ["GIT_SSH"] = str(settings.GIT_SSH_SCRIPT_PATH)
             directory = cls._get_directory(url, owner)

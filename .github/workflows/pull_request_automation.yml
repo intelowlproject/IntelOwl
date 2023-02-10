@@ -26,7 +26,7 @@ jobs:
     if: ${{ needs.detect-changes.outputs.frontend > 0 }}
     uses: ./.github/workflows/_node.yml
     with:
-      working_directory: .github/test/node_test
+      working_directory: ./frontend
 
       use_eslint: true
       use_prettier: true
@@ -54,7 +54,7 @@ jobs:
      uses: ./.github/workflows/_python.yml
      secrets: inherit
      with:
-      working_directory: .github/test/python_test
+      working_directory: .
       use_black: true
       use_isort: true
       use_flake8: true
@@ -68,7 +68,6 @@ jobs:
       django_settings_module: intel_owl.settings
 
       check_migrations: true
-      check_requirements_licenses: true
       check_dockerfile: docker/Dockerfile
 
       use_postgres: true

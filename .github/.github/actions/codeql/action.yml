@@ -1,0 +1,24 @@
+name: Composite action codeql
+description: Composite action codeql
+inputs:
+  language:
+    description: Programming language to use
+    required: true
+  working_directory:
+    description: Source code directory
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v2
+      with:
+        languages: ${{ inputs.language }}
+        setup-python-dependencies: false
+        source-root: ${{ inputs.working_directory }}
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v2
+
+

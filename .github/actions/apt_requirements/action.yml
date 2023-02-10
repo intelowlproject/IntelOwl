@@ -1,0 +1,25 @@
+name: Composite action  install apt requirements
+description: Composite action install apt requirements
+inputs:
+  working_directory:
+    description: Working directory 
+    required: true
+  requirements_file:
+    description: Requirements file
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Export apt requirements
+      id: export-apt-requirements
+      run: |
+        PKG=$(cat ${{ inputs.requirements_file }})
+        echo apt_packages=$PKG | awk '{print}' ORS=' ' >> $GITHUB_OUTPUT
+      shell: bash
+
+    - name: Cache apt packages
+      id: cache-apt-packages
+      uses: awalsh128/cache-apt-pkgs-action@v1
+      with:
+        packages: ${{ steps.export-apt-requirements.outputs.apt_packages }}

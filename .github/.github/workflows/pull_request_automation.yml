@@ -1,0 +1,99 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - master
+      - main
+      - develop
+      - dev
+
+# discard previous execution if you commit to a branch that is already running
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  detect-changes:
+    uses: ./.github/workflows/_detect_changes.yml
+    with:
+      backend_directories: .github
+      frontend_directories: .github
+      ubuntu_version: latest
+
+
+
+  node:
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.frontend > 0 }}
+    uses: ./.github/workflows/_node.yml
+    with:
+      working_directory: .github/test/node_test
+
+      use_eslint: true
+      use_prettier: true
+      use_stylelint: true
+
+      run_codeql: true
+
+      custom_command: npm exec -c whoami
+
+      use_react: true
+      check_packages_licenses: true
+      use_jest: true
+
+      use_coverage: true
+      upload_coverage: true
+      max_timeout: 15
+      ubuntu_version: 22.04
+      node_versions: >-
+        ["18"]
+
+
+  python:
+     needs: detect-changes
+     if: ${{ needs.detect-changes.outputs.backend > 0 }}
+     uses: ./.github/workflows/_python.yml
+     secrets: inherit
+     with:
+      working_directory: .github/test/python_test
+      use_black: false
+      use_isort: true
+      use_flake8: true
+      use_pylint: true
+      use_bandit: false
+      use_autoflake: true
+
+      run_codeql: true
+
+      requirements_path: .github/test/python_test/requirements.txt
+      packages_path: .github/test/python_test/packages.txt
+      django_settings_module: python_test.settings
+
+      check_migrations: true
+      check_requirements_licenses: true
+      check_docs_directory:
+      check_dockerfile: Dockerfile
+
+      use_postgres: false
+      use_memcached: false
+      use_elastic_search: false
+      use_rabbitmq: true
+      use_mongo: false
+      use_celery: true
+
+      celery_app: python_test.celery
+      celery_queues: default
+
+      use_coverage: true
+      upload_coverage: true
+      tags_for_slow_tests: main
+      tags_for_manual_tests: manual
+
+      custom_command: whoami ; ls -la
+      env: >-
+        {"KEY": "VALUE"}
+      python_versions: >-
+        ["3.9"]
+      max_timeout: 15
+      ubuntu_version: 20.04

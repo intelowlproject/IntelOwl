@@ -1,0 +1,8 @@
+{
+  "rules": {
+      "indentation": 4,
+      "max-line-length": [160, {
+          "ignore": ["comments"]
+      }]
+  }
+}

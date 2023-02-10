@@ -450,7 +450,7 @@ class PluginConfig(models.Model):
         ]
 
     @classmethod
-    def visible_for_user(cls, user: User) -> QuerySet:
+    def visible_for_user(cls, user: User = None) -> QuerySet:
         from certego_saas.apps.organization.membership import Membership
 
         configs = cls.objects.all()

@@ -306,7 +306,8 @@
       "pdns_credentials": {
         "env_var_key": "CIRCL_CREDENTIALS",
         "description": "Template to use: `<user>|<pwd>`.",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {}
@@ -1242,7 +1243,8 @@
       "service_account_json": {
         "env_var_key": "SERVICE_ACCOUNT_JSON",
         "description": "service account file in JSON format",
-        "required": true
+        "required": true,
+        "type": "dict"
       }
     },
     "params": {}

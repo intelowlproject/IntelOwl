@@ -123,6 +123,7 @@ def get_logger() -> logging.Logger:
 class CustomTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
+
         try:
             cls.superuser = User.objects.get(username="test")
         except User.DoesNotExist:

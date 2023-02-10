@@ -1,0 +1,12 @@
+[run]
+# https://coverage.readthedocs.io/en/6.0.2/config.html
+branch = true
+
+[report]
+skip_empty = true
+skip_covered = true
+
+[json]
+# json report
+output = coverage.json
+pretty_print = true

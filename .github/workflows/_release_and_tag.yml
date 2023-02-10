@@ -1,0 +1,110 @@
+name: Reusable release and tag workflow
+on:
+  workflow_call:
+    inputs:
+      publish_on_pypi:
+        description: Upload on pypi public index
+        type: boolean
+        required: false
+        default: false
+
+      publish_on_test_pypi:
+        description: Upload on test pypi public index
+        type: boolean
+        required: false
+        default: false
+
+      publish_on_npm:
+        description: Upload on npm public index
+        type: boolean
+        required: false
+        default: false
+
+      publish_on_twitter:
+        description: Publish changelog on twitter
+        type: boolean
+        required: false
+        default: false
+      twitter_message:
+        description: Twitter message to append after changelog (i.e. tags)
+        type: string
+        required: false
+        default: #CyberSecurity
+
+jobs:
+  release_and_tag:
+    name: Create release and tag
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true && ( github.base_ref == 'master' || github.base_ref == 'main' )
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Check Tag
+        id: check-tag
+        run: |
+          if [[ ${{ github.event.pull_request.title }} =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "match=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create Tag and Release
+        id: create-release
+        if: steps.check-tag.outputs.match == 'true'
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.event.pull_request.title }}
+          name: Version ${{ github.event.pull_request.title }}
+          draft: false
+          generate_release_notes: true
+          prerelease: false
+          target_commitish: ${{ github.base_ref }}
+          append_body: true
+
+      - uses: actions/setup-python@v1
+        if: inputs.publish_on_pypi || inputs.publish_on_test_pypi
+        with:
+          python-version: "3.x"
+
+      - name: Install pypa/build
+        if: inputs.publish_on_pypi || inputs.publish_on_test_pypi
+        run: |
+          python -m pip install build --user
+
+      - name: Build a binary wheel and a source tarball
+        if: inputs.publish_on_pypi || inputs.publish_on_test_pypi
+        run: |
+          python -m build --sdist --wheel --outdir dist/
+
+      - name: Publish to test PyPi
+        uses: pypa/gh-action-pypi-publish@release/v1
+        if: inputs.publish_on_test_pypi
+        with:
+          user: __token__
+          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+
+      - name: Publish to PyPi
+        uses: pypa/gh-action-pypi-publish@release/v1
+        if: inputs.publish_on_pypi
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}
+
+      - uses: actions/setup-node@v3
+        if: inputs.publish_on_npm
+        with:
+          node-version: '16.x'
+          registry-url: 'https://registry.npmjs.org'
+          scope: '@certego'
+
+      - run: npm publish --access public
+        if: inputs.publish_on_npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_API_TOKEN }}
+
+      - uses: infraway/tweet-action@v1.0.1
+        if: inputs.publish_on_twitter
+        with:
+          status: published #IntelOwl ${{github.ref}}! full changelog here: ${GITHUB_SERVER_URL}/${GITHUB_ACTION_REPOSITORY}/blob/${{github.base_ref}}/.github/CHANGELOG.md ${{inputs.twitter_message}}
+          api_key: ${{ secrets.TWITTER_API_KEY }}
+          api_key_secret: ${{ secrets.TWITTER_API_KEY_SECRET }}
+          access_token: ${{ secrets.TWITTER_ACCESS_TOKEN }}
+          access_token_secret: ${{ secrets.TWITTER_ACCESS_TOKEN_SECRET }}

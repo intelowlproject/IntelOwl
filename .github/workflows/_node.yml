@@ -1,0 +1,182 @@
+name: Reusable node tests workflow
+on:
+  workflow_call:
+    inputs:
+      node_versions:
+        description: Node versions to use
+        type: string
+        required: true
+      working_directory:
+        description: Path to the package.json file
+        type: string
+        required: true
+
+      check_packages_licenses:
+        description: Check if npm packages have a valid license.
+        type: boolean
+        required: false
+        default: true
+
+      use_jest:
+        description: Use jest suite
+        default: false
+        type: boolean
+        required: false
+
+      use_react:
+        description: Use react library
+        default: false
+        type: boolean
+        required: false
+
+      use_eslint:
+        description: Use eslint formatter
+        default: true
+        type: boolean
+        required: false
+      use_prettier:
+        description: Use prettier formatter
+        default: true
+        type: boolean
+        required: false
+      use_stylelint:
+        description: Use stylelint formatter
+        default: true
+        type: boolean
+        required: false
+
+      use_coverage:
+        description: Output coverage. Require jest to be set.
+        default: false
+        type: boolean
+        required: false
+      upload_coverage:
+        description: Upload coverage report to GitHub
+        default: false
+        type: boolean
+        required: false
+
+      run_codeql:
+        description: Run codeql
+        default: false
+        type: boolean
+        required: false
+
+      custom_command:
+        description: String of custom command to run
+        type: string
+        required: false
+
+      max_timeout:
+        description: Max time that the CI can be run
+        type: number
+        required: false
+        default: 30
+
+      ubuntu_version:
+        description: Ubuntu version to use
+        type: string
+        default: latest
+        required: false
+jobs:
+  node:
+    name: Run node.js tests
+    runs-on: ubuntu-${{ inputs.ubuntu_version }}
+    timeout-minutes: ${{ inputs.max_timeout }}
+    strategy:
+      matrix:
+        node_version: ${{ fromJson(inputs.node_versions) }}
+        language: ['javascript']
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node_version }}
+          cache: 'npm'
+          cache-dependency-path: ${{ inputs.working_directory }}/package-lock.json
+
+      - name: Add dependencies
+        run: |
+          if [[ '${{ inputs.use_jest }}' != 'false' ]]; then
+            npm i -D --package-lock-only jest @testing-library/jest-dom babel-jest @babel/core @babel/preset-env
+            if [[ '${{ inputs.use_react }}' != 'false' ]]; then
+              npm i -D --package-lock-only  @testing-library/react @testing-library/jest-dom
+            fi
+          fi
+          if [[ '${{ inputs.use_eslint }}' != 'false' ]]; then
+            npm i -D --package-lock-only eslint
+          fi
+          if [[ '${{ inputs.use_prettier }}' != 'false' ]]; then
+            npm i -D --package-lock-only prettier
+          fi
+          if [[ '${{ inputs.use_stylelint }}' != 'false' ]]; then
+            npm i -D --package-lock-only stylelint
+          fi
+        working-directory: ${{ inputs.working_directory }}
+
+      - name: Install packages
+        run: npm ci
+        working-directory: ${{ inputs.working_directory }}
+
+      - name: Run linters
+        uses: ./.github/actions/node_linter
+        with:
+          working_directory: ${{ inputs.working_directory }}
+          use_eslint: ${{ inputs.use_eslint == true }}
+          use_prettier: ${{ inputs.use_prettier == true }}
+          use_stylelint: ${{ inputs.use_stylelint == true }}
+          check_packages_licenses: ${{ inputs.check_packages_licenses == true }}
+
+      - name: Check packages licenses
+        if: ${{ inputs.check_packages_licenses }}
+        id: license_check_report
+        continue-on-error: true
+        uses: pilosus/action-pip-license-checker@v0.7.1
+        with:
+          requirements: ${{ inputs.requirements_path }}
+          external: ${{ inputs.working_directory }}/licenses.csv
+          external-format: csv
+          table-headers: true
+          fail: 'StrongCopyleft,NetworkCopyleft,Error'
+          fails-only: true
+
+      - name: Run CodeQL
+        if: inputs.run_codeql
+        uses: ./.github/actions/codeql
+        with:
+          language: javascript
+          working_directory: ${{ inputs.working_directory }}
+
+      - name: Run custom command
+        if: inputs.custom_command
+        run: |
+          COMMAND='${{ inputs.custom_command }}'
+          echo "Running command: $COMMAND"
+          eval $COMMAND
+        working-directory: ${{ inputs.working_directory }}
+        shell: bash
+
+      - name: Run jest tests
+        if: ${{ inputs.use_jest }}
+        id: jest-tests
+        run: |
+          if [[ '${{ inputs.use_coverage }}' != 'false' ]]; then
+            CMD="npm test -- --silent --coverage"
+          else
+            CMD="npm test"
+          fi
+          echo "Running command: ${CMD}"
+          if [[ '${{ inputs.use_coverage }}' != 'false' ]] && [[ '${{ inputs.upload_coverage }}' != 'false' ]]; then
+            echo "Uploading jest coverage report"
+            echo "## Jest coverage report" >> $GITHUB_STEP_SUMMARY
+            echo "$($CMD | grep -Ev "^(>|$)")" > jest-coverage.txt
+            head -n -1 jest-coverage.txt | tail -n +2 >> $GITHUB_STEP_SUMMARY
+            rm jest-coverage.txt
+          else
+            $CMD
+          fi
+        working-directory: ${{ inputs.working_directory }}
+        shell: bash
+

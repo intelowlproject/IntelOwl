@@ -29,6 +29,31 @@ def mocked_mwdb_response(*args, **kwargs):
     return Response.return_value
 
 
+class MockedUploadObject:
+    def __init__(self):
+        self.data = {"id": "id_test"}
+
+    def flush(self):
+        return
+
+
+class MockedQueryObject:
+    def __init__(self):
+        self.metakeys = {"karton": "test"}
+        self.data = {"children": [], "parents": []}
+
+
+class MockedMWDB:
+    def __init__(self):
+        pass
+
+    def upload_file(self, *args, **kwargs):
+        return MockedUploadObject()
+
+    def query_file(self, *args, **kwargs):
+        return MockedQueryObject()
+
+
 class MWDB_Scan(FileAnalyzer):
     def set_params(self, params):
         self.__api_key = self._secrets["api_key_name"]
@@ -103,12 +128,6 @@ class MWDB_Scan(FileAnalyzer):
     @classmethod
     def _monkeypatch(cls):
         patches = [
-            if_mock_connections(
-                patch(
-                    "mwdblib.MWDB",
-                    side_effect=mocked_mwdb_response,
-                ),
-                patch.object(cls, "file_analysis", return_value=True),
-            )
+            if_mock_connections(patch("mwdblib.MWDB", return_value=MockedMWDB()))
         ]
         return super()._monkeypatch(patches=patches)

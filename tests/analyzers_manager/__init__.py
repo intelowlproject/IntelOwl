@@ -38,12 +38,13 @@ class _AbstractAnalyzersScriptTestCase(CustomTestCase):
             "analyzers_requested": [],
             "connectors_requested": [],
             "connectors_to_execute": list(cls.connector_configs.keys()),
+            "user": User.objects.create_superuser("test", "test@intelowl.net", "test")
         }
 
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-
+        User.objects.all().delete()
         if cls in [
             _AbstractAnalyzersScriptTestCase,
             _ObservableAnalyzersScriptsTestCase,
@@ -62,6 +63,7 @@ class _AbstractAnalyzersScriptTestCase(CustomTestCase):
 
     def tearDown(self):
         self.test_job.delete()
+        User.objects.all().delete()
         return super().tearDown()
 
     def test_pipeline(self, *args, **kwargs):

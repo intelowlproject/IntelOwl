@@ -6,6 +6,7 @@ import re
 import time
 
 import requests
+from django.conf import settings
 
 from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.exceptions import AnalyzerConfigurationException, AnalyzerRunException
@@ -36,7 +37,7 @@ class CuckooAnalysis(FileAnalyzer):
         self.max_get_tries = params.get("max_poll_tries", 20)
 
     def run(self):
-        if not self.cuckoo_url:
+        if not self.cuckoo_url and not settings.STAGE_CI:
             raise AnalyzerConfigurationException("cuckoo URL missing")
         binary = self.read_file_bytes()
         if not binary:

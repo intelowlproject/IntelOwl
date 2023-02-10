@@ -63,10 +63,12 @@ def PollingFunction(self):
                     status=AbstractReport.Status.FAILED
                 )
             ]
-            print(
+            message = (
                 f"\n>>> Failed analyzers: {failed_analyzers}",
                 f"\n>>> Failed connectors: {failed_connectors}",
             )
+            print(message)
+            self.fail(message)
 
         # check analyzers status
         if status not in [Job.Status.PENDING, Job.Status.RUNNING]:

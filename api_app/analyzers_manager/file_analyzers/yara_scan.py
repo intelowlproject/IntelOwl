@@ -124,14 +124,12 @@ class YaraScan(FileAnalyzer):
 
     def _analyze_directory(self, directory: PosixPath):
         result = []
-        if not directory.exists():
-            raise AnalyzerRunException(
-                f"There are no rules downloaded inside {directory}"
-            )
+        if not directory.exists() and not settings.STAGE_CI:
+            raise AnalyzerRunException(f"There is no directory {directory} to check")
 
         logger.info(f"Getting rules inside {directory}")
         list_rules_compiled = self._get_rules(directory)
-        if not list_rules_compiled:
+        if not list_rules_compiled and not settings.STAGE_CI:
             raise AnalyzerRunException(
                 f"There are no yara rules installed inside {directory}"
             )

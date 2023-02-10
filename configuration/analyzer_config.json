@@ -456,6 +456,7 @@
       "url_key_name": {
         "env_var_key": "CAPESANDBOX_URL",
         "description": "URL for the CapeSandbox instance. If none provided, It uses the API provided by CAPESandbox by default.",
+        "default": "https://www.capesandbox.com",
         "required": true
       }
     },
@@ -574,7 +575,8 @@
       "url_key_name": {
         "env_var_key": "CUCKOO_URL",
         "description": "",
-        "required": true
+        "required": true,
+        "default": ""
       }
     },
     "params": {
@@ -1041,6 +1043,7 @@
       "url_key_name": {
         "env_var_key": "DRAGONFLY_API_URL",
         "description": "Dragonfly instance URL. Don't change this.",
+        "default": "https://dragonfly.certego.net/",
         "required": true
       }
     }

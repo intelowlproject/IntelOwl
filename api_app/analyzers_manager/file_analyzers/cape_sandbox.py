@@ -18,9 +18,7 @@ class CAPEsandbox(FileAnalyzer):
         self.__vm_name = params.get("VM_NAME", "win7x64_8")
         self.max_tries = params.get("max_tries", 50)
         self.poll_distance = params.get("poll_distance", 30)
-        self.__base_url = self._secrets.get(
-            "url_key_name", "https://www.capesandbox.com"
-        )
+        self.__base_url = self._secrets.get("url_key_name")
         self.__session = requests.Session()
         self.__session.headers = {
             "Authorization": f"Token {self.__token}",

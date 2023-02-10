@@ -6,7 +6,7 @@ from datetime import timedelta
 import intezer_sdk.consts
 from intezer_sdk import api as intezer_api
 from intezer_sdk import errors as intezer_errors
-from intezer_sdk.analysis import Analysis
+from intezer_sdk.analysis import FileAnalysis
 
 from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.exceptions import AnalyzerRunException
@@ -50,7 +50,7 @@ class IntezerScan(FileAnalyzer):
         return result
 
     def __intezer_analysis(self, **kwargs) -> dict:
-        analysis = Analysis(
+        analysis = FileAnalysis(
             **kwargs,
             disable_dynamic_unpacking=self.disable_dynamic_unpacking,
             disable_static_unpacking=self.disable_static_unpacking,
@@ -68,9 +68,9 @@ class IntezerScan(FileAnalyzer):
     def _monkeypatch(cls):
         patches = [
             if_mock_connections(
-                patch.object(Analysis, "send", return_value=None),
-                patch.object(Analysis, "wait_for_completion", return_value=None),
-                patch.object(Analysis, "result", return_value={"test": "test"}),
+                patch.object(FileAnalysis, "send", return_value=None),
+                patch.object(FileAnalysis, "wait_for_completion", return_value=None),
+                patch.object(FileAnalysis, "result", return_value={"test": "test"}),
             )
         ]
         return super()._monkeypatch(patches=patches)

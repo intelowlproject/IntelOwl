@@ -1,4 +1,0 @@
-#!/bin/bash
-cp -rfl $GIT_DIR/../workflows $GIT_DIR/../.github/
-cp -rfl $GIT_DIR/../actions $GIT_DIR/../.github/
-cp -rfl $GIT_DIR/../configurations $GIT_DIR/../.github/

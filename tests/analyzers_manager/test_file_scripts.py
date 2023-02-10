@@ -174,3 +174,14 @@ class ELFAnalyzersTestCase(_FileAnalyzersScriptsTestCase):
             "file_mimetype": "application/x-sharedlib",
             "analyzers_to_execute": ["ELF_Info"],
         }
+
+
+class OneNoteAnalyzersTestCase(_FileAnalyzersScriptsTestCase):
+    @classmethod
+    def get_params(cls):
+        return {
+            **super().get_params(),
+            "file_name": "sample.one",
+            "file_mimetype": "application/onenote",
+            "analyzers_to_execute": ["OneNote_Info"],
+        }

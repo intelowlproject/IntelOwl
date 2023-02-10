@@ -126,6 +126,4 @@ def worker_ready_connect(*args, **kwargs):
         build_config_cache(PluginConfig.PluginType.ANALYZER.value, user_pk=user.pk)
         build_config_cache(PluginConfig.PluginType.CONNECTOR.value, user_pk=user.pk)
     if settings.REPO_DOWNLOADER_ENABLED:
-        from api_app.analyzers_manager.file_analyzers.yara_scan import YaraScan
-
         YaraScan.update_rules()

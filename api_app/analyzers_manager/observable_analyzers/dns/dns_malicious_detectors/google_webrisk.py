@@ -2,7 +2,6 @@
 # See the file 'LICENSE' for copying permission.
 
 """Check if the domains is reported as malicious by WebRisk Cloud API"""
-import json
 import logging
 
 from google.cloud.webrisk_v1.services.web_risk_service import WebRiskServiceClient

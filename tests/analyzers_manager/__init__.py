@@ -38,7 +38,7 @@ class _AbstractAnalyzersScriptTestCase(CustomTestCase):
             "analyzers_requested": [],
             "connectors_requested": [],
             "connectors_to_execute": list(cls.connector_configs.keys()),
-            "user": User.objects.create_superuser("test", "test@intelowl.net", "test")
+            "user": User.objects.create_superuser("test", "test@intelowl.net", "test"),
         }
 
     @classmethod

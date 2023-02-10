@@ -37,7 +37,6 @@ jobs:
       custom_command: npm exec -c whoami
 
       use_react: true
-      check_packages_licenses: true
       use_jest: true
 
       use_coverage: true

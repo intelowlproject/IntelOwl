@@ -1,7 +1,0 @@
-{
-  "extends": ["stylelint-config-standard-scss", "stylelint-config-prettier"],
-  "rules": {
-    "selector-no-qualifying-type": [true, { "ignore": ["class", "attribute"] }],
-    "color-function-notation": "legacy"
-  }
-}

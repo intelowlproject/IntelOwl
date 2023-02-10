@@ -198,7 +198,7 @@ Some analyzers could require a special configuration:
 
 - `Yara`: 
   - You can customize both the `public_repositories` parameter and `private_repositories` secret to download and use different rules from the default that IntelOwl currently support.
-  - You can add local rules inside the directory at `/opt/deploy/files_required/yara/YOUR_USERNAME/custom_rules/`. Please remember that these rules are not synced between containers: for this reason is advised to upload them on GitHub and use the `public_repositories` or `private_repositories` attributes. 
+  - You can add local rules inside the directory at `/opt/deploy/files_required/yara/YOUR_USERNAME/custom_rules/`. Please remember that these rules are not synced in a cluster deploy: for this reason is advised to upload them on GitHub and use the `public_repositories` or `private_repositories` attributes. 
 
 ## Organizations and data sharing
 

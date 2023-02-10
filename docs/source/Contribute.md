@@ -411,7 +411,7 @@ $ docker exec intelowl_uwsgi python3 manage.py test tests.analyzers_manager.test
 
 
 All the frontend tests must be run from the folder `frontend`.
-The tests can contain log messages, you can suppress then with the environment variable `SUPPRESS_JEST_LOG=True`.
+The tests can contain log messages. You can suppress then with the environment variable `SUPPRESS_JEST_LOG=True`.
 
 ##### Run all tests
 

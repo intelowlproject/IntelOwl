@@ -1,15 +1,4 @@
 repos:
--   repo: https://github.com/PyCQA/pylint
-    rev: 2.15.4
-    hooks:
-      - id: pylint
-        args: ["--rcfile", ".github/configurations/python_linters/.pylintrc"]
--   repo: https://github.com/pycqa/bandit
-    rev: 1.7.4
-    hooks:
-      - id: bandit
-        args: ["-c", ".github/configurations/python_linters/.bandit.yaml"]
-
 -   repo: https://github.com/pycqa/flake8
     rev: 5.0.4
     hooks:
@@ -28,9 +17,3 @@ repos:
     hooks:
       - id: black
         args: ["--config", ".github/configurations/python_linters/.black"]
-
--   repo: https://github.com/PyCQA/autoflake
-    rev: v1.7.7
-    hooks:
-    -   id: autoflake
-        args: ["-i", "--remove-all-unused-imports", "--remove-unused-variables", "--ignore-init-module-imports", "--ignore-pass-statements"]

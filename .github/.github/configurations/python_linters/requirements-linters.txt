@@ -1,8 +1,0 @@
-black==22.3.0
-isort==5.10.1
-flake8==5.0.4
-flake8-django==1.1.5
-pylint==2.14.3
-pylint-django==2.5.3
-bandit==1.7.4
-autoflake==1.7.7

@@ -28,7 +28,6 @@ describe("Login component", () => {
   test("User login", async () => {
     // mock user interaction: reccomanded to put this at the start of the test
     const user = userEvent.setup();
-
     render(
       <BrowserRouter>
         <Login />

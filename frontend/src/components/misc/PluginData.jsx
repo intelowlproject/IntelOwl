@@ -100,9 +100,7 @@ export function PluginData({
           } else {
             console.error(`Invalid type: ${res.type}`);
           }
-          if (
-            plugins[res.plugin_name].params[res.attribute]?.type === "str"
-          ) {
+          if (plugins[res.plugin_name].params[res.attribute]?.type === "str") {
             res.value = isJSON(res.value) ? JSON.parse(res.value) : res.value;
           }
           return res;
@@ -277,10 +275,9 @@ export function PluginData({
                                           ...additionalEntryData,
                                         };
                                         if (
-                                          plugins[
-                                              newConfiguration.plugin_name
-                                            ].params[newConfiguration.attribute]
-                                              ?.type === "str"
+                                          plugins[newConfiguration.plugin_name]
+                                            .params[newConfiguration.attribute]
+                                            ?.type === "str"
                                         ) {
                                           newConfiguration.value =
                                             JSON.stringify(

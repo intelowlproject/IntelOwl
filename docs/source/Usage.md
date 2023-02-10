@@ -126,7 +126,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
   * [Mandiant yara rules](https://github.com/mandiant/red_team_tool_countermeasures)
   * [ReversingLabs yara rules](https://github.com/reversinglabs/reversinglabs-yara-rules)
   * [YARAify rules](https://yaraify.abuse.ch/api/#download-yara-package)
-  * your own added signatures
+  * your own added signatures. See [Advanced-Usage](./Advanced-Usage.html#analyzers-with-special-configuration) for more details.
 * `PEframe_Scan`: Perform static analysis on Portable Executable malware and malicious MS Office documents with [PeFrame](https://github.com/guelfoweb/peframe)
 * `Capa_Info`: [Capa](https://github.com/mandiant/capa) detects capabilities in executable files
 * `Capa_Info_Shellcode`: [Capa](https://github.com/mandiant/capa) detects capabilities in shellcode

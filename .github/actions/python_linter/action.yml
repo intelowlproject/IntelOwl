@@ -1,0 +1,93 @@
+name: Composite action python linter
+description: Composite action python linter
+inputs:
+  working_directory:
+    description: Directory that must be run against the linters
+    required: true
+
+  use_black:
+    description: Use black formatter
+    required: true
+  use_isort:
+    description: Use isort formatter
+    required: true
+  use_flake8:
+    description: Use flake8 linter
+    required: true
+  use_pylint:
+    description: Use pylint linter
+    required: true
+  use_bandit:
+    description: Use bandit linter
+    required: true
+  use_autoflake:
+    description: Use autoflake
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Pylint formatter
+      run: |
+        if [[ ${{ inputs.use_pylint }} != 'false' ]]; then
+          pylint . --rcfile ${GITHUB_WORKSPACE}/.github/configurations/python_linters/.pylintrc
+        else
+            echo "Skipping pylint formatter"
+        fi
+      working-directory: ${{ inputs.working_directory }}
+      shell: bash
+
+    - name: Black formatter
+      run: |
+        if [[ ${{ inputs.use_black }} != 'false' ]]; then
+          black . --check --diff --config ${GITHUB_WORKSPACE}/.github/configurations/python_linters/.black
+        else
+            echo "Skipping black formatter"
+        fi
+      working-directory: ${{ inputs.working_directory }}
+      shell: bash
+
+    - name: Lint with flake8 (PEP8 enforcer + linter)
+      run: |
+        if [[ ${{inputs.use_flake8 }} != 'false' ]]; then
+          flake8 .  --show-source --config ${GITHUB_WORKSPACE}/.github/configurations/python_linters/.flake8
+        else
+            echo "Skipping flake8 linter"
+        fi
+      working-directory: ${{ inputs.working_directory }}
+      shell: bash
+
+    - name: isort
+      run: |
+        if [[ ${{ inputs.use_isort }} != 'false' ]]; then
+          CMD="isort . --filter-files --check-only --diff --settings-path ${GITHUB_WORKSPACE}/.github/configurations/python_linters/.isort.cfg"
+          echo "Executing $CMD"
+          $CMD
+        else
+            echo "Skipping isort linter"
+        fi
+
+      working-directory: ${{ inputs.working_directory }}
+      shell: bash
+
+
+    - name: bandit
+      run: |
+        if [[ ${{inputs.use_bandit }} != 'false' ]]; then
+          bandit . -r -c ${GITHUB_WORKSPACE}/.github/configurations/python_linters/.bandit.yaml
+        else
+            echo "Skipping bandit linter"
+        fi
+
+      working-directory: ${{ inputs.working_directory }}
+      shell: bash
+
+    - name: autoflake
+      run: |
+        if [[ ${{inputs.use_autoflake }} != 'false' ]]; then
+          autoflake -r -cd . --remove-all-unused-imports --remove-unused-variables --ignore-init-module-imports --ignore-pass-statements
+        else
+            echo "Skipping autoflake"
+        fi
+      working-directory: ${{ inputs.working_directory }}
+      shell: bash

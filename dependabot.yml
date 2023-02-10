@@ -1,0 +1,40 @@
+version: 2
+
+updates:
+  - package-ecosystem: "pip"
+    directory: "/test/python_test"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+    target-branch: "develop"
+    reviewers:
+      - x
+
+  - package-ecosystem: "npm"
+    directory: "/test/node_test"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+    target-branch: "develop"
+    reviewers:
+      - x
+
+
+  - package-ecosystem: "docker"
+    directory: "/test/python_test"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+    target-branch: "develop"
+    reviewers:
+      - x
+
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+    target-branch: "develop"
+    reviewers:
+      - x

@@ -1,0 +1,22 @@
+name: Release and publish
+
+on:
+  pull_request:
+    types:
+      - closed
+
+# discard previous execution if you commit to a branch that is already running
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+
+  release_and_tag:
+    uses: ./.github/workflows/_release_and_tag.yml
+    secrets: inherit
+    with:
+      publish_on_pypi: false
+      publish_on_test_pypi: false
+      publish_on_npm: false
+      publish_on_twitter: false

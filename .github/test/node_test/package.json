@@ -1,0 +1,46 @@
+{
+    "name": "node_test",
+    "version": "1.0.0",
+    "description": "Node Test",
+    "main": "source.js",
+    "private": true,
+    "config": {
+        "eslint": "../../configurations/node_linters/eslint/.eslintrc.json",
+        "stylelint": "../../configurations/node_linters/stylelint/.stylelintrc.json",
+        "prettier": "../../configurations/node_linters/prettier/.prettierrc.js"
+    },
+    "scripts": {
+        "lint-config-install": "cd $(dirname $npm_package_config_eslint) && npm i",
+        "lint": "eslint -c $npm_package_config_eslint '**/*.{js,jsx}'",
+        "lint-fix": "npm run lint -- --fix",
+        "lint-scss-config-install": "cd $(dirname $npm_package_config_stylelint) && npm i",
+        "lint-scss": "stylelint --config $npm_package_config_stylelint '**/*.{css,scss}'",
+        "lint-scss-fix": "npm run lint-scss -- --fix",
+        "formatter": "prettier --config $npm_package_config_prettier '**/*.{js,jsx}' '**/*.{css,scss}' --check",
+        "formatter-fix": "npm run formatter -- --write",
+        "test": "TZ=UTC jest --silent",
+        "test-coverage": "npm test -- --coverage=true",
+        "prepare": "cd ../../.. && husky install .husky"
+    },
+    "devDependencies": {
+        "eslint": "^8.20.0",
+        "husky": "^8.0.1",
+        "jest": "^29.1.1",
+        "lint-staged": "^13.0.3",
+        "prettier": "^2.7.1",
+        "stylelint": "^14.9.1"
+    },
+    "lint_staged": {
+        "*.{js,jsx}": [
+            "eslint",
+            "prettier"
+        ],
+        "*.{css,scss}": [
+            "stylelint",
+            "prettier"
+        ]
+    },
+    "dependencies": {
+        "react": "^18.2.0"
+    }
+}

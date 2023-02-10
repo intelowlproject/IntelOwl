@@ -1,0 +1,24 @@
+{
+    "env": {
+        "browser": true,
+        "commonjs": true,
+        "es2021": true,
+        "jest": true
+    },
+    "extends": [
+        "airbnb", "./eslint-config-certego",
+        "airbnb/hooks", "./eslint-config-certego-react",
+        "prettier"
+    ],
+    "parserOptions": {
+        "ecmaVersion": "latest"
+    },
+    "ignorePatterns": [
+        "node_modules/",
+        "dist/",
+        "build/",
+        ".snapshots/",
+        "*.min.js",
+        "*.config.js"
+    ]
+}

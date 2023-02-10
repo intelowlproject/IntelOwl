@@ -53,4 +53,5 @@ license terms.
 [pyelftools](https://github.com/eliben/pyelftools),
 [telfhash](https://github.com/trendmicro/telfhash),
 [Authlib](https://github.com/lepture/authlib),
-[Fangfrisch](https://github.com/rseichter/fangfrisch)
+[Fangfrisch](https://github.com/rseichter/fangfrisch),
+[pyOneNote](https://github.com/DissectMalware/pyOneNote)

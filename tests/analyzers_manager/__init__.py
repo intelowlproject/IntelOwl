@@ -43,7 +43,6 @@ class _AbstractAnalyzersScriptTestCase(CustomTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        User.objects.all().delete()
         if cls in [
             _AbstractAnalyzersScriptTestCase,
             _ObservableAnalyzersScriptsTestCase,
@@ -62,7 +61,6 @@ class _AbstractAnalyzersScriptTestCase(CustomTestCase):
 
     def tearDown(self):
         self.test_job.delete()
-        User.objects.all().delete()
         return super().tearDown()
 
     def test_pipeline(self, *args, **kwargs):

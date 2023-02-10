@@ -20,7 +20,6 @@ from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.analyzers_manager.dataclasses import AnalyzerConfig
 from api_app.exceptions import AnalyzerRunException
 from api_app.models import PluginConfig
-from certego_saas.apps.organization.membership import Membership
 from intel_owl.settings._util import set_permissions
 
 logger = logging.getLogger(__name__)
@@ -156,13 +155,15 @@ class YaraScan(FileAnalyzer):
         return result
 
     def analyze(self, url: str, private: bool = False):
+        from certego_saas.apps.organization.membership import Membership
+
         if private:
             # private rules are downloaded in the user directory
             directory = self._get_directory(url, self._job.user.username)
             # or, if are set at organization level, in the organization owner directory
             if not directory.exists():
                 try:
-                    membership = Membership.objects.get(user=self._job.user)
+                    membership = self._job.user.membership
                 except Membership.DoesNotExist:
                     # user has no org,
                     # he is trying to access a repo that he does not own

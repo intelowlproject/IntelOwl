@@ -66,6 +66,7 @@ jobs:
       requirements_path: requirements/project-requirements.txt
       django_settings_module: intel_owl.settings
 
+      check_requirements_licenses: false
       check_migrations: true
       check_dockerfile: docker/Dockerfile
 

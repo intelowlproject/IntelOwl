@@ -36,7 +36,7 @@
     "test": "TZ=UTC jest ./tests",
     "test-coverage": "npm test -- --coverage=true",
     "lint-config-install": "cd ../.github/configurations/node_linters/eslint && npm i",
-    "lint": "eslint 'src/**/*.{js,jsx}' 'tests/**/*.{js,jsx}'",
+    "lint": "eslint --config ../.github/configurations/node_linters/eslint/.eslintrc.json 'src/**/*.{js,jsx}' 'tests/**/*.{js,jsx}'",
     "lint-fix": "npm run lint -- --fix",
     "lint-scss-config-install": "cd ../.github/configurations/node_linters/stylelint && npm i",
     "lint-scss": "stylelint --config ../.github/configurations/node_linters/stylelint/.stylelintrc.json 'src/styles/**/*.{css,scss}'",

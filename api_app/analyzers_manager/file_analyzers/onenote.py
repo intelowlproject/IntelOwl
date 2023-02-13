@@ -12,9 +12,6 @@ logger = logging.getLogger(__name__)
 
 
 class OneNoteInfo(FileAnalyzer):
-    def set_params(self, params):
-        pass
-
     def run(self):
         with open(self.filepath, "rb") as file:
             results = json.loads(process_onenote_file(file, "", "", True))

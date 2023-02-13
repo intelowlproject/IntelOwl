@@ -245,7 +245,15 @@ class YaraScan(FileAnalyzer):
             org = url_parsed.netloc
             repo = url_parsed.path.split("/")[-1]
         else:
-            org, repo = url_parsed.path.split("/")[1:]
+            path_repo = url_parsed.path.split("/")
+            assert len(path_repo) >= 2
+            # 0 is ""
+            # 1 is the org
+            org = path_repo[1]
+            # 2 is the repo
+            repo = path_repo[2]
+            # we could have a 3 if there is a final slash
+
         # we are removing the .zip, .git. .whatever
         repo = repo.split(".")[0]
 

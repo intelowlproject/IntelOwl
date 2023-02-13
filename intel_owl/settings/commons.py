@@ -8,7 +8,6 @@ DEBUG = get_secret("DEBUG", False) == "True" or get_secret("DEBUG", False) is Tr
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = Path(__file__).parent.parent.parent.parent
 PROJECT_LOCATION = BASE_DIR / "intel_owl"
-YARA_RULES_PATH = BASE_DIR / "yara"
 BASE_STATIC_PATH = PROJECT_LOCATION / "static"
 MEDIA_ROOT = BASE_DIR / "files_required"
 

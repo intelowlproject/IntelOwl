@@ -32,6 +32,7 @@ class YaraScan(FileAnalyzer):
         self.private_repositories = list(
             self._secrets.get("private_repositories", {}).keys()
         )
+        self.local_rules = params.get("local_rules", False)
 
     def _load_directory(
         self, rulepath: PosixPath
@@ -189,9 +190,10 @@ class YaraScan(FileAnalyzer):
             logger.info(f"Checking {self.private_repositories}")
         for url in self.private_repositories:
             result += self.analyze(url, private=True)
-        result += self._analyze_directory(
-            settings.YARA_RULES_PATH / self._job.user.username / "custom_rule"
-        )
+        if self.local_rules:
+            result += self._analyze_directory(
+                settings.YARA_RULES_PATH / self._job.user.username / "custom_rule"
+            )
         return result
 
     @classmethod

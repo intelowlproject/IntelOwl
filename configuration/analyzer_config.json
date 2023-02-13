@@ -4215,6 +4215,11 @@
         "type": "list",
         "description": "Repositories that will be constantly updated"
       },
+      "local_rules": {
+        "value": false,
+        "type": "bool",
+        "description": "If true, use local rules present at /opt/deploy/files_required/yara/YOUR_USER/custom_rule"
+      },
      "ignore": {
         "value": [
           "generic_anomalies.yar",

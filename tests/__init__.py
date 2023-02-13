@@ -10,7 +10,7 @@ from rest_framework.test import APIClient
 
 from api_app.analyzers_manager.constants import ObservableTypes
 from api_app.core.models import AbstractReport
-from api_app.models import Job
+from api_app.models import Job, PluginConfig
 
 User = get_user_model()
 
@@ -125,8 +125,9 @@ class CustomTestCase(TestCase):
     def setUpTestData(cls):
 
         try:
-            cls.superuser = User.objects.get(username="test")
+            cls.superuser = User.objects.get(is_superuser=True)
         except User.DoesNotExist:
+            PluginConfig.objects.all().delete()
             print("creating superuser")
             cls.superuser = User.objects.create_superuser(
                 username="test", email="test@intelowl.com", password="test"

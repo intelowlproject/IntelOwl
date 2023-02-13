@@ -53,8 +53,7 @@ PyExifTool==0.5.0
 pyhashlookup==1.2.0
 pyimpfuzzy==0.5
 pymisp==2.4.144
-# this is in active development
-git+https://github.com/intelowlproject/pyOneNote@a6587d9e7992bcd9b07447a867fb1b3f95bceb0e
+pyonenote==0.0.1
 pypdns==1.5.2
 pypssl==2.2
 pysafebrowsing==0.1.1

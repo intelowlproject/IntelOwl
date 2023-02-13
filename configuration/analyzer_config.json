@@ -2178,7 +2178,7 @@
   },
   "OneNote_Info": {
     "type": "file",
-    "python_module": "onenote.OneNote_Info",
+    "python_module": "onenote.OneNoteInfo",
     "description": "Extracting information from OneNote Office docs via [PyOneNote](https://github.com/DissectMalware/pyOneNote)",
     "disabled": false,
     "external_service": false,

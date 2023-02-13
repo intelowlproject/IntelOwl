@@ -10,7 +10,7 @@ from api_app.analyzers_manager.classes import FileAnalyzer
 logger = logging.getLogger(__name__)
 
 
-class OneNote_Info(FileAnalyzer):
+class OneNoteInfo(FileAnalyzer):
     def set_params(self, params):
         pass
 

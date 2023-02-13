@@ -848,7 +848,7 @@
   "Doc_Info": {
     "type": "file",
     "python_module": "doc_info.DocInfo",
-    "description": "static document analysis ([Oletools](https://github.com/decalage2/oletools)) with features to analyze XLM macros, encrypted macros and much more",
+    "description": "static Microsoft Office document analysis ([Oletools](https://github.com/decalage2/oletools)) with features to analyze XLM macros, encrypted macros and much more",
     "disabled": false,
     "external_service": false,
     "leaks_info": false,
@@ -889,7 +889,7 @@
   "Doc_Info_Experimental": {
     "type": "file",
     "python_module": "doc_info.DocInfo",
-    "description": "static document analysis with new features to analyze XLM macros, encrypted macros and more [DEPRECATED, move to Doc_Info]",
+    "description": "static Microsoft Office document analysis with new features to analyze XLM macros, encrypted macros and more [DEPRECATED, move to Doc_Info]",
     "disabled": true,
     "external_service": false,
     "leaks_info": false,
@@ -2171,6 +2171,23 @@
         "description": "Number of retries to perform for polling analysis results."
       }
     }
+  },
+  "OneNote_Info": {
+    "type": "file",
+    "python_module": "onenote.OneNoteInfo",
+    "description": "Extracting information from OneNote Office docs via [PyOneNote](https://github.com/DissectMalware/pyOneNote)",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
+    "supported_filetypes": [
+      "application/onenote"
+    ],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "local"
+    },
+    "secrets": {},
+    "params": {}
   },
   "ONYPHE": {
     "type": "observable",
@@ -4147,7 +4164,7 @@
   "Xlm_Macro_Deobfuscator": {
     "type": "file",
     "python_module": "xlm_macro_deobfuscator.XlmMacroDeobfuscator",
-    "description": "Xlm macro deobfuscator",
+    "description": "Extracting Office XLM Macros with [XlmMacroDeobfuscator](https://github.com/DissectMalware/XLMMacroDeobfuscator)",
     "disabled": false,
     "external_service": false,
     "leaks_info": false,

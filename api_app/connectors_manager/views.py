@@ -46,7 +46,7 @@ class ConnectorListAPI(APIView):
     )
     def get(self, request, *args, **kwargs):
         try:
-            cc = self.serializer_class.read_and_verify_config()
+            cc = self.serializer_class.read_and_verify_config(request.user)
             PluginConfig.apply(cc, request.user, PluginConfig.PluginType.CONNECTOR)
             OrganizationPluginState.apply(
                 cc, request.user, PluginConfig.PluginType.CONNECTOR

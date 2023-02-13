@@ -19,7 +19,7 @@ class Command(BaseCommand):
         return os.getenv(name)
 
     @classmethod
-    def _migrate_secrets(cls, plugin_list, plugin_type, ignore_check, create_superuser):
+    def _migrate_secrets(cls, plugin_list, plugin_type, ignore_check):
         from django.contrib.auth import get_user_model
 
         if PluginConfig.objects.filter(type=plugin_type).exists() and not ignore_check:
@@ -30,11 +30,9 @@ class Command(BaseCommand):
             return
 
         User = get_user_model()
-        if not User.objects.filter(is_superuser=True).exists():
-            if create_superuser:
-                User.objects.create_superuser("test", "test@intelowl.com", "test")
-            else:
-                raise Exception("Superuser must exist for secrets migration")
+        owner = User.objects.filter(is_superuser=True).first()
+        if not owner:
+            raise Exception("Superuser must exist for secrets migration")
         for plugin in plugin_list:
             for secret_name in plugin["secrets"].keys():
                 secret = plugin["secrets"][secret_name]
@@ -45,7 +43,7 @@ class Command(BaseCommand):
                         plugin_name=plugin["name"],
                         type=plugin_type,
                         config_type=PluginConfig.ConfigType.SECRET,
-                        owner=User.objects.filter(is_superuser=True).first(),
+                        owner=owner,
                     )
                     if created:
                         print(
@@ -55,24 +53,18 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument("ignore_check", nargs="?", type=bool, default=False)
-        parser.add_argument(
-            "-c", "--create_superuser", action="store_true", default=False
-        )
 
     def handle(self, *args, **options):
         ignore_check = options["ignore_check"]
-        create_superuser = options["create_superuser"]
         self._migrate_secrets(
             AnalyzerConfigSerializer.read_and_verify_config().values(),
             PluginConfig.PluginType.ANALYZER,
             ignore_check,
-            create_superuser,
         )
         self._migrate_secrets(
             ConnectorConfigSerializer.read_and_verify_config().values(),
             PluginConfig.PluginType.CONNECTOR,
             ignore_check,
-            create_superuser,
         )
         print(
             "Migration complete. Please delete all plugin secrets "

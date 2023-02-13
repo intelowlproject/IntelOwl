@@ -85,7 +85,7 @@ class Maxmind(classes.ObservableAnalyzer):
 
             tf = tarfile.open(tar_db_path)
             directory_to_extract_files = settings.MEDIA_ROOT
-            tf.extractall(directory_to_extract_files)
+            tf.extractall(str(directory_to_extract_files))
 
             today = datetime.datetime.now().date()
             counter = 0

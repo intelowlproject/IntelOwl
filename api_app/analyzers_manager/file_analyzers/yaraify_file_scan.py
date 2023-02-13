@@ -109,7 +109,9 @@ class YARAifyFileScan(FileAnalyzer, YARAify):
                     "requests.post",
                     side_effect=[
                         MockResponse({"query_status": "not-available"}, 200),
-                        MockResponse({"query_status": "queued"}, 200),
+                        MockResponse(
+                            {"query_status": "queued", "data": {"task_id": 123}}, 200
+                        ),
                         MockResponse(
                             {"query_status": "ok", "data": {"static_results": []}}, 200
                         ),

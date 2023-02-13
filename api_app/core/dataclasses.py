@@ -14,6 +14,7 @@ from django.utils.module_loading import import_string
 from api_app.core.models import AbstractReport
 from api_app.core.serializers import AbstractConfigSerializer
 from api_app.models import Job
+from certego_saas.apps.user.models import User
 from intel_owl import secrets as secrets_store
 from intel_owl.consts import (
     DEFAULT_QUEUE,
@@ -50,6 +51,8 @@ class _Secret:
     env_var_key: str
     description: str
     required: bool
+    type: typing.Literal[PARAM_DATATYPE_CHOICES] = None
+    default: typing.Optional[typing.Any] = None
 
 
 @dataclasses.dataclass
@@ -113,7 +116,9 @@ class AbstractConfig:
     def param_values(self) -> dict:
         return {name: param.value for name, param in self.params.items()}
 
-    def read_secrets(self, secrets_filter=None) -> typing.Dict[str, str]:
+    def read_secrets(
+        self, secrets_filter=None, user: User = None
+    ) -> typing.Dict[str, str]:
         """
         Returns a dict of `secret_key: secret_value` mapping.
         filter_secrets: filter specific secrets or not (default: return all)
@@ -129,12 +134,13 @@ class AbstractConfig:
             }
         else:
             _filtered_secrets = self.secrets
-        for key_name in _filtered_secrets.keys():
+        for key_name, secret in _filtered_secrets.items():
             secrets[key_name] = secrets_store.get_secret(
                 key_name,
-                default=None,
+                default=secret.default,
                 plugin_type=self._get_type(),
                 plugin_name=self.name,
+                user=user,
             )
 
         return secrets

@@ -17,7 +17,6 @@ from django.utils.functional import cached_property
 from api_app.core.models import AbstractReport
 from api_app.exceptions import AlreadyFailedJobException
 from api_app.helpers import calculate_sha1, calculate_sha256, get_now
-from certego_saas.apps.organization.membership import Membership
 from certego_saas.apps.organization.organization import Organization
 from certego_saas.models import User
 
@@ -451,7 +450,9 @@ class PluginConfig(models.Model):
         ]
 
     @classmethod
-    def visible_for_user(cls, user: User) -> QuerySet:
+    def visible_for_user(cls, user: User = None) -> QuerySet:
+        from certego_saas.apps.organization.membership import Membership
+
         configs = cls.objects.all()
         if user:
             # User-level custom configs should override organization-level configs,

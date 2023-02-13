@@ -7,6 +7,7 @@ import logging
 import typing
 
 from celery import shared_task, signals
+from django.conf import settings
 
 from api_app import crons
 from api_app.analyzers_manager.file_analyzers import quark_engine, yara_scan
@@ -50,7 +51,7 @@ def maxmind_updater():
 
 @shared_task(soft_time_limit=60)
 def yara_updater():
-    yara_scan.YaraScan.yara_update_repos()
+    yara_scan.YaraScan.update_rules()
 
 
 @app.task(name="continue_job_pipeline", soft_time_limit=20)
@@ -111,9 +112,10 @@ def build_config_cache(plugin_type: str, user_pk: int = None):
     serializer_class.read_and_verify_config(user)
 
 
+# startup
 @signals.worker_ready.connect
 def worker_ready_connect(*args, **kwargs):
-
+    from api_app.analyzers_manager.file_analyzers.yara_scan import YaraScan
     from api_app.models import PluginConfig
 
     logger.info("worker ready, generating cache")
@@ -123,3 +125,5 @@ def worker_ready_connect(*args, **kwargs):
     for user in User.objects.all():
         build_config_cache(PluginConfig.PluginType.ANALYZER.value, user_pk=user.pk)
         build_config_cache(PluginConfig.PluginType.CONNECTOR.value, user_pk=user.pk)
+    if settings.REPO_DOWNLOADER_ENABLED:
+        YaraScan.update_rules()

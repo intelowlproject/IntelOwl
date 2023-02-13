@@ -13,7 +13,8 @@ class ConnectorAppViewsTestCase(CustomAPITestCase):
         self.assertEqual(response.status_code, 200)
         self.assertNotEqual(response.json(), {})
         self.assertDictEqual(
-            response.json(), ConnectorConfigSerializer.read_and_verify_config()
+            response.json(),
+            ConnectorConfigSerializer.read_and_verify_config(user=self.superuser),
         )
 
     def test_connector_healthcheck_200(self):

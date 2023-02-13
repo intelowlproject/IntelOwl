@@ -2,7 +2,6 @@
 # See the file 'LICENSE' for copying permission.
 
 """Check if the domains is reported as malicious by WebRisk Cloud API"""
-import json
 import logging
 
 from google.cloud.webrisk_v1.services.web_risk_service import WebRiskServiceClient
@@ -43,9 +42,8 @@ class WebRisk(classes.ObservableAnalyzer):
         self.service_account_json = self._secrets["service_account_json"]
 
     def run(self):
-        json_account_info = json.loads(self.service_account_json)
         credentials = service_account.Credentials.from_service_account_info(
-            json_account_info
+            self.service_account_json
         )
 
         web_risk_client = WebRiskServiceClient(credentials=credentials)
@@ -85,7 +83,12 @@ class WebRisk(classes.ObservableAnalyzer):
                 patch(
                     "api_app.analyzers_manager.observable_analyzers.dns."
                     "dns_malicious_detectors.google_webrisk.WebRiskServiceClient"
-                )
+                ),
+                patch.object(
+                    service_account.Credentials,
+                    "from_service_account_info",
+                    return_value={},
+                ),
             )
         ]
         return super()._monkeypatch(patches=patches)

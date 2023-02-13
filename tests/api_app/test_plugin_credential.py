@@ -3,7 +3,6 @@ from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
 
 from api_app.models import PluginConfig
-from intel_owl.secrets import get_secret
 
 from .. import CustomAPITestCase, User
 

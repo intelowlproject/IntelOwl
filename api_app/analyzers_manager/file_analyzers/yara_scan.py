@@ -237,17 +237,14 @@ class YaraScan(FileAnalyzer):
 
     @classmethod
     def _get_directory(cls, url: str, owner: str = None) -> PosixPath:
+        url_parsed = urlparse(url)
         if url.endswith(".zip"):
-            url_parsed = urlparse(url)
             org = url_parsed.netloc
-            # get the last path + remove .zip
-            repo = url_parsed.path.split("/")[-1].split(".")[0]
+            repo = url_parsed.path.split("/")[-1]
         else:
-            url_list = url.split("/")
-            # remove the git@github: if present
-            org = url_list[-2].split(":")[-1]
-            # we are removing the .zip, .git. .whatever
-            repo = url_list[-1].split(".")[0]
+            org, repo = url_parsed.path.split("/")[1:]
+        # we are removing the .zip, .git. .whatever
+        repo = repo.split(".")[0]
 
         # directory name is organization_repository
         directory_name = "_".join([org, repo]).lower()

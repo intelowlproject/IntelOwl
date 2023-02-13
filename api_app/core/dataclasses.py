@@ -139,11 +139,15 @@ class AbstractConfig:
             )
             if pcs.count() > 1 and user:
                 # I have both a secret from the org and the user, priority to the user
-                pc = pcs.get(owner=user, organization__is_null=True)
+                value = pcs.get(owner=user, organization__is_null=True).value
+            elif pcs.count() == 1:
+                value = pcs.first().value
+            elif secret.default is not None:
+                value = secret.default
             else:
-                pc = pcs.first()
+                raise Exception(f"No secret found for {key_name}")
 
-            secrets[key_name] = pc.value
+            secrets[key_name] = value
 
         return secrets
 

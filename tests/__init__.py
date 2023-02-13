@@ -133,7 +133,7 @@ class CustomTestCase(TestCase):
                 username="test", email="test@intelowl.com", password="test"
             )
         finally:
-            if not PluginConfig.objects.filter(owner=cls.superuser).count():
+            if not PluginConfig.objects.filter(owner=cls.superuser).exists():
                 call_command("migrate_secrets")
 
 

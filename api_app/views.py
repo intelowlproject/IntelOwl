@@ -697,9 +697,14 @@ class PluginConfigViewSet(viewsets.ModelViewSet):
             user=self.request.user, organization__isnull=False
         )
         if membership.exists():
-            result |= PluginConfig.objects.filter(
+            # only the owner can view the secret
+            extracted = PluginConfig.objects.filter(
                 organization=membership[0].organization,
             )
+            if not membership.is_owner:
+                for plugin in extracted:
+                    plugin.value = "redacted"
+            result |= extracted
 
         # Adding CustomConfigs for user
         result |= PluginConfig.objects.filter(

@@ -132,7 +132,9 @@ class CustomTestCase(TestCase):
             cls.superuser = User.objects.create_superuser(
                 username="test", email="test@intelowl.com", password="test"
             )
-            call_command("migrate_secrets")
+        finally:
+            if not PluginConfig.objects.filter(owner=cls.superuser).count():
+                call_command("migrate_secrets")
 
 
 class CustomAPITestCase(CustomTestCase):

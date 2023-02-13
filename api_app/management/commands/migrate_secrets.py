@@ -19,7 +19,7 @@ class Command(BaseCommand):
         value = os.getenv(name)
         try:
             return json.loads(value)
-        except json.JSONDecodeError:
+        except (json.JSONDecodeError, TypeError):
             return value
 
     @classmethod

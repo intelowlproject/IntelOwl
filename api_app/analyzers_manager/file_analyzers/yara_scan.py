@@ -26,6 +26,9 @@ logger = logging.getLogger(__name__)
 
 
 class YaraScan(FileAnalyzer):
+
+    IGNORE_DIRECTORIES = [".git", ".github"]
+
     def set_params(self, params):
         self.ignore_rules = params.get("ignore", [])
         self.public_repositories = params.get("public_repositories", [])
@@ -39,7 +42,7 @@ class YaraScan(FileAnalyzer):
     ) -> List[Tuple[PosixPath, yara.Rules]]:
         logger.info(f"Loading directory {rulepath}")
         rules = []
-        if rulepath.name == ".git":
+        if rulepath.name in self.IGNORE_DIRECTORIES:
             return rules
         for full_path in rulepath.iterdir():
             if full_path.name in self.ignore_rules:

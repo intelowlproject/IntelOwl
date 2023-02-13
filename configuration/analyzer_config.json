@@ -4198,6 +4198,8 @@
     "params": {
       "public_repositories": {
         "value": [
+          "https://github.com/elastic/protections-artifacts",
+          "https://github.com/SIFalcon/Detection/",
           "https://github.com/bartblaze/Yara-rules",
           "https://github.com/intezer/yara-rules",
           "https://github.com/advanced-threat-research/Yara-Rules",

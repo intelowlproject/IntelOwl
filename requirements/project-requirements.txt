@@ -53,7 +53,7 @@ PyExifTool==0.5.0
 pyhashlookup==1.2.0
 pyimpfuzzy==0.5
 pymisp==2.4.144
-pyonenote==0.0.1
+git+https://github.com/DissectMalware/pyOneNote@74d7b05966b9948b408a8de484e6c4e40a220de0
 pypdns==1.5.2
 pypssl==2.2
 pysafebrowsing==0.1.1

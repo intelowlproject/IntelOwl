@@ -1,9 +1,10 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
+import json
 import logging
 
-from pyOneNote.pyOneNote import process_onenote_file
+from pyOneNote.Main import process_onenote_file
 
 from api_app.analyzers_manager.classes import FileAnalyzer
 
@@ -16,5 +17,5 @@ class OneNoteInfo(FileAnalyzer):
 
     def run(self):
         with open(self.filepath, "rb") as file:
-            results = process_onenote_file(file, "", "", True)
+            results = json.loads(process_onenote_file(file, "", "", True))
         return results

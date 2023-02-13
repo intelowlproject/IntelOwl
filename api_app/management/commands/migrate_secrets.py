@@ -1,6 +1,6 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
-
+import json
 import os
 
 from django.core.management.base import BaseCommand
@@ -16,7 +16,11 @@ class Command(BaseCommand):
     # Explicit function to facilitate testing
     @staticmethod
     def _get_env_var(name):
-        return os.getenv(name)
+        value = os.getenv(name)
+        try:
+            return json.loads(value)
+        except json.JSONDecodeError:
+            return value
 
     @classmethod
     def _migrate_secrets(cls, plugin_list, plugin_type, ignore_check):

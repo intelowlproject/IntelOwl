@@ -80,11 +80,3 @@ class PluginCredentialTests(CustomAPITestCase):
             )
             .exists()
         )
-
-    def test_get_secret(self):
-        value = get_secret(
-            self.plugin_credential_plugin_credential.attribute,
-            plugin_type=self.plugin_credential_plugin_credential.type,
-            plugin_name=self.plugin_credential_plugin_credential.plugin_name,
-        )
-        self.assertEqual(value, self.plugin_credential_plugin_credential.value)

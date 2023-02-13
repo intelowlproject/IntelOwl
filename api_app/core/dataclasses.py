@@ -13,9 +13,8 @@ from django.utils.module_loading import import_string
 
 from api_app.core.models import AbstractReport
 from api_app.core.serializers import AbstractConfigSerializer
-from api_app.models import Job
+from api_app.models import Job, PluginConfig
 from certego_saas.apps.user.models import User
-from intel_owl import secrets as secrets_store
 from intel_owl.consts import (
     DEFAULT_QUEUE,
     DEFAULT_SOFT_TIME_LIMIT,
@@ -135,13 +134,16 @@ class AbstractConfig:
         else:
             _filtered_secrets = self.secrets
         for key_name, secret in _filtered_secrets.items():
-            secrets[key_name] = secrets_store.get_secret(
-                key_name,
-                default=secret.default,
-                plugin_type=self._get_type(),
-                plugin_name=self.name,
-                user=user,
+            pcs = PluginConfig.visible_for_user(user).filter(
+                attribute=key_name, type=self._get_type(), plugin_name=self.name
             )
+            if pcs.count() > 1 and user:
+                # I have both a secret from the org and the user, priority to the user
+                pc = pcs.get(owner=user, organization__is_null=True)
+            else:
+                pc = pcs.first()
+
+            secrets[key_name] = pc.value
 
         return secrets
 

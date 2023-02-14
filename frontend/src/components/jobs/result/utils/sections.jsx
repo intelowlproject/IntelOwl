@@ -106,7 +106,7 @@ export function JobActionsBar({ job, refetch }) {
 
   const handleRetry = async () => {
     addToast("Retrying the same job...", null, "spinner", false, 2000);
-    if (job.playbooks_requested > 0) {
+    if (job.playbooks_requested.length > 0) {
       console.debug("retrying Playbook");
       const jobId = await createPlaybookJob(formValues).then(refetch);
       setTimeout(() => navigate(`/jobs/${jobId[0]}`), 1000);

@@ -14,17 +14,6 @@ User = get_user_model()
 
 
 class ViewsTests(CustomAPITestCase):
-    @classmethod
-    def setUpTestData(cls):
-
-        try:
-            cls.superuser = User.objects.get(is_superuser=True)
-        except User.DoesNotExist:
-            PluginConfig.objects.all().delete()
-            cls.superuser = User.objects.create_superuser(
-                username="test", email="test@intelowl.com", password="test"
-            )
-
     def setUp(self):
         super().setUp()
         PluginConfig.objects.all().delete()
@@ -38,7 +27,7 @@ class ViewsTests(CustomAPITestCase):
         self.assertFalse(content)
 
         # if the user is owner of an org, he should get the org secret
-        secret_owner = PluginConfig(
+        pc = PluginConfig.objects.create(
             type=1,
             config_type=2,
             attribute="api_key_name",
@@ -47,7 +36,8 @@ class ViewsTests(CustomAPITestCase):
             owner=self.superuser,
             plugin_name="AbuseIPDB",
         )
-        secret_owner.save()
+        self.assertEqual(self.client.handler._force_user, org.owner)
+        self.assertEqual(pc.owner, org.owner)
         response = self.client.get("/api/plugin-config", {}, format="json")
         self.assertEqual(response.status_code, 200)
         content = response.json()
@@ -98,6 +88,8 @@ class ViewsTests(CustomAPITestCase):
         content = response.json()
         first_item = content[0]
         self.assertEqual(first_item["value"], '"redacted"')
+        secret_owner.refresh_from_db()
+        self.assertEqual(secret_owner.value, "supersecret_user_only")
 
         # third superuser secret
         secret_owner = PluginConfig(

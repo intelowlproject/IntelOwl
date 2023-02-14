@@ -27,7 +27,6 @@ from api_app.serializers import (
     PlaybookFileAnalysisSerializer,
     PlaybookObservableAnalysisSerializer,
 )
-from certego_saas.apps.organization.membership import Membership
 from certego_saas.apps.organization.permissions import IsObjectOwnerOrSameOrgPermission
 from certego_saas.ext.helpers import cache_action_response, parse_humanized_range
 from certego_saas.ext.mixins import SerializerActionMixin
@@ -689,30 +688,7 @@ class PluginConfigViewSet(viewsets.ModelViewSet):
     pagination_class = None
 
     def get_queryset(self):
-        # Initializing empty queryset
-        result = PluginConfig.objects.none()
-
-        # Adding CustomConfigs for user's organization, if any
-        membership = Membership.objects.filter(
-            user=self.request.user, organization__isnull=False
-        )
-        if membership.exists():
-            user_membership = membership[0]
-            # only the owner can view the secret
-            extracted = PluginConfig.objects.filter(
-                organization=user_membership.organization,
-            )
-            if not user_membership.is_owner:
-                extracted.update(value="redacted")
-
-            result |= extracted
-
-        # Adding CustomConfigs for user
-        result |= PluginConfig.objects.filter(
-            owner=self.request.user,
-        )
-
-        return result.order_by("id")
+        return PluginConfig.visible_for_user(self.request.user).order_by("id")
 
 
 @add_docs(

@@ -836,6 +836,14 @@ class PluginConfigSerializer(rfs.ModelSerializer):
         model = PluginConfig
         fields = rfs.ALL_FIELDS
 
+    def to_representation(self, instance):
+        if (
+            instance.organization
+            and self.context["request"].user.pk != instance.organization.owner.pk
+        ):
+            instance.value = "redacted"
+        return super().to_representation(instance)
+
     def validate(self, attrs):
         super().validate(attrs)
 

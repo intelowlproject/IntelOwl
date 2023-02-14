@@ -13,7 +13,7 @@ from django.conf import settings
 from rest_framework import serializers as rfs
 
 from api_app.helpers import calculate_md5
-from intel_owl import secrets as secrets_store
+from api_app.models import PluginConfig
 from intel_owl.consts import PARAM_DATATYPE_CHOICES
 
 logger = logging.getLogger(__name__)
@@ -127,14 +127,16 @@ class AbstractConfigSerializer(rfs.Serializer):
         missing_secrets = []
         for s_key, s_dict in secrets.items():
             # check if available in environment
-            secret_val = secrets_store.get_secret(
-                s_key,
-                default=s_dict.get("default", None),
-                plugin_type=self._get_type(),
-                plugin_name=raw_instance["name"],
-                user=self.context.get("user", None),
-            )
-            if not secret_val and s_dict["required"]:
+            if (
+                not PluginConfig.visible_for_user(self.context.get("user", None))
+                .filter(
+                    attribute=s_key,
+                    type=self._get_type(),
+                    plugin_name=raw_instance["name"],
+                )
+                .exists()
+                and s_dict["required"]
+            ):
                 missing_secrets.append(s_key)
 
         num_missing_secrets = len(missing_secrets)

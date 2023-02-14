@@ -26,7 +26,7 @@ import { SaveAsPlaybookButton } from "./SaveAsPlaybooksForm";
 
 import { JobTag, PlaybookTag, StatusTag, TLPTag } from "../../../common";
 import { downloadJobSample, deleteJob, killJob } from "../api";
-import { createJob } from "../../../scan/api";
+import { createJob, createPlaybookJob } from "../../../scan/api";
 
 function DeleteIcon() {
   return (
@@ -56,6 +56,7 @@ export function JobActionsBar({ job, refetch }) {
     addToast("Redirecting...", null, "secondary");
     setTimeout(() => navigate(-1), 250);
   };
+
   const onDownloadSampleBtnClick = async () => {
     const blob = await downloadJobSample(job.id);
     if (!blob) return;
@@ -95,17 +96,25 @@ export function JobActionsBar({ job, refetch }) {
     check: "force_new",
     classification: job.observable_classification,
     tlp: job.tlp,
-    observable_names: (job.observable_name = Array(job.observable_name)),
+    observable_names: [job.observable_name],
     analyzers: job.analyzers_requested,
     connectors: job.connectors_requested,
     runtime_configuration: job.runtime_configuration,
-    tags_labels: job.tags.map((optTag) => optTag.value.label),
-    playbooks: job.playbooks_to_execute.map((x) => x.value),
+    tags_labels: job.tags.map((optTag) => optTag.label),
+    playbooks: job.playbooks_requested,
   };
 
   const handleRetry = async () => {
-    const jobId = await createJob(formValues).then(refetch);
-    setTimeout(() => navigate(`/jobs/${jobId[0]}`), 504);
+    addToast("Retrying the same job...", null, "spinner", false, 2000);
+    if (job.playbooks_requested > 0) {
+      console.debug("retrying Playbook");
+      const jobId = await createPlaybookJob(formValues).then(refetch);
+      setTimeout(() => navigate(`/jobs/${jobId[0]}`), 1000);
+    } else {
+      console.debug("retrying Job");
+      const jobId = await createJob(formValues).then(refetch);
+      setTimeout(() => navigate(`/jobs/${jobId[0]}`), 1000);
+    }
   };
 
   return (
@@ -136,7 +145,7 @@ export function JobActionsBar({ job, refetch }) {
       {job?.is_sample && (
         <Button
           size="sm"
-          color="darker"
+          color="secondary"
           className="me-2"
           onClick={onDownloadSampleBtnClick}
         >

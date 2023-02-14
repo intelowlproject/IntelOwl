@@ -145,7 +145,7 @@ class AbstractConfig:
             elif secret.default is not None:
                 value = secret.default
             else:
-                raise Exception(f"No secret found for {key_name}")
+                value = None
 
             secrets[key_name] = value
 

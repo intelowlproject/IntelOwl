@@ -1,6 +1,53 @@
 # Changelog
 
 [**Upgrade Guide**](https://intelowl.readthedocs.io/en/latest/Installation.md#update-to-the-most-recent-version)
+## [v4.2.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v4.2.0)
+
+With this release we welcome new official maintainers of IntelOwl:
+- [Simone Berni](https://twitter.com/0ssig3no): Key Contributor and Backend Maintainer
+- [Daniele Rosetti](https://github.com/drosetti): Key Contributor and Frontend Maintainer
+
+These awesome guys will help us maintaining the project and will bring IntelOwl to the next level! 🚀
+Be ready for new awesome features!
+
+**Improved Document analysis**
+
+We added some improvements to handle recent Microsoft Office downloaders:
+* Now `Doc_Info` analyzer is able to extract URLs from samples that abuse [Follina](https://github.com/advisories/GHSA-4r9q-wqcj-x85j) vulnerability
+* Now Microsoft Office analyzers does support OneNote documents
+* We added [PyOneNote](https://github.com/DissectMalware/pyOneNote) analyzer to parse OneNote files.
+
+**Deployments:**
+
+We are preparing to add more support for production deployments. We added some [documentation](https://intelowl.readthedocs.io/en/latest/Installation.md) regarding:
+* Logrotate Configuration
+* Crontab Configuration
+
+**New/Improved Analyzers:**
+
+* Now `ClamAV` analyzer makes use of all open source un-official community rules, not only the official ones
+* `Yara` performance should be greatly improved. We also added other open source repositories plus the chance to configure a private repository of your own.
+* Added [DNS0_EU](https://docs.dns0.eu/) analyzer (DNS resolver `DNS0_EU` + detection of malicious domains `DNS0_EU_Malicious_Detector`)
+* Added [CheckPhish](https://checkphish.ai/checkphish-api/) analyzer
+* Added [HaveIBeenPwned](https://haveibeenpwned.com/API/v3) analyzer
+* Added [Koodous](https://docs.koodous.com/api/) analyzer
+* Added [IPApi](https://ip-api.com) analyzer
+
+**DEPRECATION WARNING:**
+
+We have deprecated some analyzers and disabled them. We will remove them at the next major release.
+If you want to still use their functionalities, you need to explicitly enable them again. But you should move to the new ones:
+* Deprecated `Doc_Info_Experimental`. Its functionality (XLM Macro parsing) is moved to `Doc_Info`
+* Deprecated `Strings_Info_Classic`. Please use `Strings_Info`
+* Deprecated `Strings_Info_ML`. Please use `Strings_Info` and set the parameter `rank_strings` to `True`
+* Deprecated all `Yara_Scan_<repo>` analyzers. They all went merged in the single `Yara` analyzer.
+
+**Others**
+
+- added testing suite for ReactJS Frontend
+- tons of fixes, refactors and stability contributions
+- a lot of dependencies upgrades
+
 ## [v4.1.5](https://github.com/intelowlproject/IntelOwl/releases/tag/v4.1.5)
 With this release we announce that IntelOwl Project will apply as a new Organization in the next [Google Summer of Code](https://summerofcode.withgoogle.com/)!
 

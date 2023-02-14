@@ -126,7 +126,7 @@ class YaraScan(FileAnalyzer):
             rules_compiled.append((path, buff))
         return rules_compiled
 
-    def _analyze_directory(self, directory: PosixPath) -> List[Dict[str:Any]]:
+    def _analyze_directory(self, directory: PosixPath) -> List[Dict[str, Any]]:
         result = []
         if not directory.exists() and not settings.STAGE_CI:
             self.report.errors.append(f"There is no directory {directory} to check")
@@ -158,7 +158,7 @@ class YaraScan(FileAnalyzer):
                 )
         return result
 
-    def analyze(self, url: str, private: bool = False) -> List[Dict[str:Any]]:
+    def analyze(self, url: str, private: bool = False) -> List[Dict[str, Any]]:
         from certego_saas.apps.organization.membership import Membership
 
         if private:

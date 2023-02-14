@@ -248,13 +248,16 @@ class YaraScan(FileAnalyzer):
             repo = url_parsed.path.split("/")[-1]
         else:
             path_repo = url_parsed.path.split("/")
-            assert len(path_repo) >= 2
-            # 0 is ""
-            # 1 is the org
-            org = path_repo[1]
-            # 2 is the repo
-            repo = path_repo[2]
-            # we could have a 3 if there is a final slash
+            # case git@github.com/ORG/repo.git
+            if len(path_repo) == 2:
+                org = path_repo[0].split(":")[-1]
+                repo = path_repo[1]
+            # case https://github.com/ORG/repo
+            elif len(path_repo) >= 3:
+                org = path_repo[1]
+                repo = path_repo[2]
+            else:
+                raise AnalyzerRunException(f"Unable to update url {url}: malformed")
 
         # we are removing the .zip, .git. .whatever
         repo = repo.split(".")[0]
@@ -283,6 +286,7 @@ class YaraScan(FileAnalyzer):
     def _update_repository(
         cls, url: str, owner: Optional[str] = None, ssh_key: str = None
     ):
+        logger.info(f"Starting update of {url}")
         if url.endswith(".zip"):
             # private url not supported at the moment for private
             cls._download_or_update_zip_repository(url)

@@ -91,6 +91,7 @@ SERVICE_ACCOUNT_JSON=test
 PULSEDIVE_API_KEY=test
 KOODOUS_KEY=test
 VT_INTELLIGENCE_KEY=test
+CUCKOO_API_KEY=test
 
 # connectors secrets (optional)
 CONNECTOR_MISP_KEY=test

@@ -7,7 +7,7 @@ import os
 import zipfile
 from collections import defaultdict
 from pathlib import PosixPath
-from typing import Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
 from urllib.parse import urlparse
 
 import requests
@@ -126,17 +126,19 @@ class YaraScan(FileAnalyzer):
             rules_compiled.append((path, buff))
         return rules_compiled
 
-    def _analyze_directory(self, directory: PosixPath):
+    def _analyze_directory(self, directory: PosixPath) -> List[Dict[str:Any]]:
         result = []
         if not directory.exists() and not settings.STAGE_CI:
-            raise AnalyzerRunException(f"There is no directory {directory} to check")
+            self.report.errors.append(f"There is no directory {directory} to check")
+            return result
 
         logger.info(f"Getting rules inside {directory}")
         list_rules_compiled = self._get_rules(directory)
         if not list_rules_compiled and not settings.STAGE_CI:
-            raise AnalyzerRunException(
+            self.report.errors.append(
                 f"There are no yara rules installed inside {directory}"
             )
+
         logger.info(f"There are {len(list_rules_compiled)} rules")
 
         for path, rules_compiled in list_rules_compiled:
@@ -156,7 +158,7 @@ class YaraScan(FileAnalyzer):
                 )
         return result
 
-    def analyze(self, url: str, private: bool = False):
+    def analyze(self, url: str, private: bool = False) -> List[Dict[str:Any]]:
         from certego_saas.apps.organization.membership import Membership
 
         if private:
@@ -169,9 +171,10 @@ class YaraScan(FileAnalyzer):
                 except Membership.DoesNotExist:
                     # user has no org,
                     # he is trying to access a repo that he does not own
-                    raise AnalyzerRunException(
+                    self.report.errors.append(
                         f"There are no rules downloaded for {url}"
                     )
+                    return []
                 else:
                     owner = (
                         f"{membership.organization.name}."

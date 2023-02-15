@@ -15,8 +15,8 @@ from api_app.core.models import AbstractReport
 from api_app.core.serializers import AbstractConfigSerializer
 from api_app.models import Job, PluginConfig
 from certego_saas.apps.user.models import User
+from intel_owl.celery import DEFAULT_QUEUE
 from intel_owl.consts import (
-    DEFAULT_QUEUE,
     DEFAULT_SOFT_TIME_LIMIT,
     PARAM_DATATYPE_CHOICES,
 )

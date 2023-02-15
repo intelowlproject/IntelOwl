@@ -325,7 +325,7 @@ class Job(models.Model):
         from api_app.analyzers_manager.dataclasses import AnalyzerConfig
         from api_app.connectors_manager.dataclasses import ConnectorConfig
         from intel_owl import tasks
-        from intel_owl.consts import DEFAULT_QUEUE
+        from intel_owl.celery import DEFAULT_QUEUE
 
         final_analyzer_signatures = []
         final_connector_signatures = []
@@ -448,6 +448,34 @@ class PluginConfig(models.Model):
                 fields=["type", "organization"],
             ),
         ]
+
+    @classmethod
+    def get_specific_serializer_class(cls, plugin_type: str):
+        if plugin_type == cls.PluginType.ANALYZER:
+            from api_app.analyzers_manager.serializers import AnalyzerConfigSerializer
+
+            serializer_class = AnalyzerConfigSerializer
+        elif plugin_type == cls.PluginType.CONNECTOR:
+            from api_app.connectors_manager.serializers import ConnectorConfigSerializer
+
+            serializer_class = ConnectorConfigSerializer
+        else:
+            raise TypeError(f"Unrecognized plugin type {plugin_type}")
+        return serializer_class
+
+    @classmethod
+    def get_specific_config_class(cls, plugin_type:str):
+        if plugin_type == cls.PluginType.ANALYZER:
+            from api_app.analyzers_manager.dataclasses import AnalyzerConfig
+
+            config_class = AnalyzerConfig
+        elif plugin_type == cls.PluginType.CONNECTOR:
+            from api_app.connectors_manager.dataclasses import ConnectorConfig
+
+            config_class = ConnectorConfig
+        else:
+            raise TypeError(f"Unrecognized plugin type {plugin_type}")
+        return config_class
 
     @classmethod
     def visible_for_user(cls, user: User = None) -> QuerySet:

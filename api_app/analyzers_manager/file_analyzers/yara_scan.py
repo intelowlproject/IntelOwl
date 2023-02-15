@@ -294,7 +294,7 @@ class YaraScan(FileAnalyzer):
             cls._download_or_update_git_repository(url, owner, ssh_key=ssh_key)
 
     @classmethod
-    def update_rules(cls):
+    def update(cls):
         logger.info("Starting updating yara rules")
         analyzer_config = AnalyzerConfig.all()
         dict_urls: Dict[Union[None, Tuple[str, str]], Set[str]] = defaultdict(set)

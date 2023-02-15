@@ -186,3 +186,4 @@ class Plugin(metaclass=ABCMeta):
         self.kwargs = kwargs
         # some post init processing
         self.__post__init__()  # lgtm [py/init-calls-subclass]
+

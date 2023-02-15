@@ -10,9 +10,9 @@ from rest_framework import serializers as BaseSerializer
 from rest_framework import status
 from rest_framework.response import Response
 
-from api_app.core.views import PluginActionViewSet, PluginHealthCheckAPI
+from api_app.core.views import PluginActionViewSet, PluginHealthCheckAPI, PluginUpdateAPI
 from certego_saas.ext.views import APIView
-from intel_owl.consts import DEFAULT_QUEUE
+from intel_owl.celery import DEFAULT_QUEUE
 
 from ..models import Job, OrganizationPluginState, PluginConfig
 from .dataclasses import AnalyzerConfig
@@ -114,3 +114,13 @@ class AnalyzerHealthCheckAPI(PluginHealthCheckAPI):
             raise ValidationError({"detail": "No healthcheck implemented"})
 
         return class_.health_check()
+
+
+class AnalyzerUpdateAPI(PluginUpdateAPI):
+
+    @property
+    def config_model(self):
+        return AnalyzerConfig
+
+
+

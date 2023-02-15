@@ -4,6 +4,9 @@
 import logging
 from abc import ABCMeta, abstractmethod
 
+import typing
+
+from django.conf import settings
 from drf_spectacular.utils import extend_schema as add_docs
 from drf_spectacular.utils import inline_serializer
 from rest_framework import serializers as rfs
@@ -15,6 +18,7 @@ from rest_framework.views import APIView
 
 from certego_saas.apps.organization.permissions import IsObjectOwnerOrSameOrgPermission
 from intel_owl.celery import app as celery_app
+from intel_owl.celery import DEFAULT_QUEUE
 
 from .models import AbstractReport
 
@@ -131,3 +135,37 @@ class PluginHealthCheckAPI(APIView, metaclass=ABCMeta):
         logger.info(f"get healthcheck from user {request.user}, name {name}")
         health_status = self.perform_healthcheck(name)
         return Response(data={"status": health_status}, status=status.HTTP_200_OK)
+
+
+class PluginUpdateAPI(APIView, metaclass=ABCMeta):
+    # TODO permessi
+
+
+    @property
+    @abstractmethod
+    def config_model(self):
+        raise NotImplementedError()
+
+
+    def post(self, request, name:str):
+        from api_app.core.classes import Plugin
+        from api_app.core.dataclasses import AbstractConfig
+
+        logger.info(f"update request from user {request.user}, name {name}")
+        plugin_config: AbstractConfig = self.config_model.get(name)
+        if plugin_config is None:
+            raise ValidationError({"detail": f"Plugin {name} doesn't exist"})
+
+        class_: typing.Type[Plugin] = plugin_config.get_class()
+
+        if not hasattr(class_, "update"):
+            raise ValidationError({"detail": "No update implemented"})
+        queue = plugin_config.config.queue
+        if queue not in settings.CELERY_QUEUES:
+            queue = DEFAULT_QUEUE
+        celery_app.control.broadcast('update_plugin', destination=[f"intelowl_celery_worker_{queue}"], arguments={
+            'plugin_name': name,
+            'plugin_type': plugin_config._get_type(),
+        })
+
+        return Response(data={"status": True}, status=status.HTTP_200_OK)

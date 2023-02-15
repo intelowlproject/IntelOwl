@@ -110,7 +110,8 @@ class YaraScan(FileAnalyzer):
     @cache_memoize(
         timeout=60 * 60 * 24,
         args_rewrite=lambda s, directory_path: f"{s.__class__.__name__}"
-        f"-{str(directory_path)}",
+        if isinstance(s, YaraScan)
+        else f"{s.__name__}" f"-{str(directory_path)}",
     )
     def _get_rules(
         self, directory_path: PosixPath
@@ -203,7 +204,7 @@ class YaraScan(FileAnalyzer):
     @classmethod
     def _download_or_update_git_repository(
         cls, url: str, owner: str, ssh_key: str = None
-    ):
+    ) -> PosixPath:
         try:
             if ssh_key:
                 ssh_key = ssh_key.replace("-----BEGIN OPENSSH PRIVATE KEY-----", "")
@@ -232,6 +233,7 @@ class YaraScan(FileAnalyzer):
                 git.config("--global", "--add", "safe.directory", directory)
                 o = repo.remotes.origin
                 o.pull(allow_unrelated_histories=True, rebase=True)
+            return directory
         finally:
             logger.info("Starting cleanup of git ssh key")
             if ssh_key:
@@ -269,7 +271,7 @@ class YaraScan(FileAnalyzer):
         return path / directory_name
 
     @classmethod
-    def _download_or_update_zip_repository(cls, url: str):
+    def _download_or_update_zip_repository(cls, url: str) -> PosixPath:
         directory = cls._get_directory(url)
         logger.info(f"About to download zip file from {url} to {directory}")
         response = requests.get(url, stream=True)
@@ -280,6 +282,7 @@ class YaraScan(FileAnalyzer):
         else:
             zipfile_ = zipfile.ZipFile(io.BytesIO(response.content))
             zipfile_.extractall(directory)
+        return directory
 
     @classmethod
     def _update_repository(
@@ -288,9 +291,12 @@ class YaraScan(FileAnalyzer):
         logger.info(f"Starting update of {url}")
         if url.endswith(".zip"):
             # private url not supported at the moment for private
-            cls._download_or_update_zip_repository(url)
+            directory = cls._download_or_update_zip_repository(url)
         else:
-            cls._download_or_update_git_repository(url, owner, ssh_key=ssh_key)
+            directory = cls._download_or_update_git_repository(
+                url, owner, ssh_key=ssh_key
+            )
+        cls._get_rules.invalidate(cls, directory)
 
     @classmethod
     def _update(cls):

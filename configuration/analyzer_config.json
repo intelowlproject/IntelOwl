@@ -439,7 +439,7 @@
   "CapeSandbox": {
     "type": "file",
     "python_module": "cape_sandbox.CAPEsandbox",
-    "description": "Automatic scan of suspicious files using CapeSandbox API",
+    "description": "Automatic scan of suspicious files using [CapeSandbox](https://github.com/kevoreilly/CAPEv2) API",
     "disabled": false,
     "external_service": true,
     "leaks_info": true,
@@ -465,7 +465,7 @@
       "VM_NAME": {
         "value": "",
         "type": "str",
-        "description": "The VM to be used in the analysis.",
+        "description": "The VM to be used in the analysis."
       },
       "max_tries": {
         "value": 50,

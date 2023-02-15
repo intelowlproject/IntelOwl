@@ -53,8 +53,7 @@ table, th, td {
       <li><code>PEframe_Scan</code></li>
       <li><code>Capa_Info</code></li>
       <li><code>Floss</code></li>
-      <li><code>Strings_Info_Classic</code>,
-      <code>Strings_Info_ML</code></li>
+      <li><code>Strings_Info</code></li>
       <li><code>Manalyze</code></li>
       <li><code>ClamAV</code></li>
       <li><code>Thug_URL_Info</code>,
@@ -188,16 +187,17 @@ Some analyzers could require a special configuration:
 
 - `GoogleWebRisk`: this analyzer needs a service account key with the Google Cloud credentials to work properly.
   You should follow the [official guide](https://cloud.google.com/web-risk/docs/quickstart) for creating the key.
-  Then you can copy the generated JSON key file in the directory `configuration` of the project and change its name to `service_account_keyfile.json`.
-  This is the default configuration. If you want to customize the name or the location of the file, you can change the environment variable `GOOGLE_APPLICATION_CREDENTIALS` in the `env_file_app` file.
+  Then you can populate the secret `service_account_json` for that analyzer with the JSON of the service account file.
 
-- `ClamAV`: this Docker-based analyzer using `clamd` daemon as it's scanner, communicating with `clamdscan` utility to scan files. The daemon requires 2 different configuration files: `clamd.conf`(daemon's config) and `freshclam.conf` (virus database updater's config). These files are mounted as docker volumes in `/integrations/malware_tools_analyzers/clamav` and hence, can be edited by the user as per needs, without restarting the application.
+- `ClamAV`: this Docker-based analyzer uses `clamd` daemon as its scanner and is communicating with `clamdscan` utility to scan files. The daemon requires 2 different configuration files: `clamd.conf`(daemon's config) and `freshclam.conf` (virus database updater's config). These files are mounted as docker volumes in `/integrations/malware_tools_analyzers/clamav` and hence, can be edited by the user as per needs, without restarting the application. Moreover ClamAV is integrated with unofficial open source signatures extracted with [Fangfrisch](https://github.com/rseichter/fangfrisch). The configuration file `fangfrisch.conf` is mounted in the same directory and can be customized on your wish. For instance, you should change it if you want to integrate open source signatures from [SecuriteInfo](https://www.securiteinfo.com/) 
 
 - `Suricata`: you can customize the behavior of Suricata:
   - `/integrations/pcap_analyzers/config/suricata/rules`: here there are Suricata rules. You can change the `custom.rules` files to add your own rules at any time. Once you made this change, you need to either restart IntelOwl or (this is faster) run a new analysis with the Suricata analyzer and set the parameter `reload_rules` to `true`.
   - `/integrations/pcap_analyzers/config/suricata/etc`: here there are Suricata configuration files. Change it based on your wish. Restart IntelOwl to see the changes applied.
 
-- `Yara_Scan_Custom_Signatures`: you can use this pre-defined analyzer to run your own YARA signatures, either custom or imported. Just upload the `.yar` files with the signatures in the directory `/configuration/custom_yara`. That directory is mounted as a bind volume in Docker so you do not need to do anything to see the changes in the application.
+- `Yara`: 
+  - You can customize both the `public_repositories` parameter and `private_repositories` secret to download and use different rules from the default that IntelOwl currently support.
+  - You can add local rules inside the directory at `/opt/deploy/files_required/yara/YOUR_USERNAME/custom_rules/`. Please remember that these rules are not synced in a cluster deploy: for this reason is advised to upload them on GitHub and use the `public_repositories` or `private_repositories` attributes. 
 
 ## Organizations and data sharing
 
@@ -242,7 +242,7 @@ Intel Owl provides a Kibana's "Saved Object" configuration (with example dashboa
 1. Setup [Elastic Search and Kibana](https://hub.docker.com/r/nshou/elasticsearch-kibana/) and say it is running in a docker service with name `elasticsearch` on port `9200` which is exposed to the shared docker network.
    (Alternatively, you can spin up a local Elastic Search instance, by appending `--elastic` to the `python3 start.py ...` command. Note that the local Elastic Search instance consumes large amount of memory, and hence having >=16GB is recommended.))
 2. In the `env_file_app`, we set `ELASTICSEARCH_ENABLED` to `True` and `ELASTICSEARCH_HOST` to `elasticsearch:9200`.
-3. In the `Dockerfile`, set the correct version in `ELASTICSEARCH_DSL_VERSION` [depending on the version](https://django-elasticsearch-dsl.readthedocs.io/en/latest/about.html#features) of our elasticsearch server. Default value is `7.1.4`.
+3. In the `Dockerfile`, set the correct version in `ELASTICSEARCH_DSL_VERSION` [depending on the version](https://django-elasticsearch-dsl.readthedocs.io/en/latest/about.html#features) of our elasticsearch server.
 4. Rebuild the docker images with `docker-compose build` (required only if `ELASTICSEARCH_DSL_VERSION` was changed)
 5. Now start the docker containers and execute,
 

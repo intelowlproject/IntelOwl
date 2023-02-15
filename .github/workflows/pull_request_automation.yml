@@ -2,7 +2,7 @@ name: Build & Tests
 
 on:
   pull_request:
-    branches: [master, develop, dev-v4]
+    branches: [master, develop]
     paths-ignore:
       - "**.md"
       - "docs/**"
@@ -36,7 +36,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Set up Python
-        uses: actions/setup-python@v4.4.0
+        uses: actions/setup-python@v4.5.0
         with:
           python-version: 3.9
 
@@ -136,9 +136,9 @@ jobs:
         run: |
           docker/scripts/coverage_test.sh tests.analyzers_manager.test_file_scripts
 
-      - name: "Test: Playbooks Manager (controllers, views)"
+      - name: "Test: Playbooks Manager (views)"
         run: |
-          docker/scripts/coverage_test.sh tests.playbooks_manager.test_controller tests.playbooks_manager.test_views
+          docker/scripts/coverage_test.sh tests.playbooks_manager
 
       - name: "Coverage: generate xml and transfer from docker container to host"
         run: |
@@ -189,8 +189,7 @@ jobs:
         run: |
           npm run prettier:stylelint-check
         working-directory: ./frontend
-# no tests are implemented right now
-#    - name: Test with Jest
-#      run: |
-#        npm run test
-#      working-directory: ./frontend
+      - name: Test with Jest
+        run: |
+          npm run test -- --silent --coverage
+        working-directory: ./frontend

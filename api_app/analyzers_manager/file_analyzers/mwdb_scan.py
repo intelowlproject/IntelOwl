@@ -1,7 +1,6 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-import hashlib
 import logging
 import time
 
@@ -10,6 +9,7 @@ from requests import HTTPError
 
 from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.exceptions import AnalyzerRunException
+from api_app.helpers import calculate_sha256
 from tests.mock_utils import MagicMock, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
@@ -29,6 +29,31 @@ def mocked_mwdb_response(*args, **kwargs):
     return Response.return_value
 
 
+class MockedUploadObject:
+    def __init__(self):
+        self.data = {"id": "id_test"}
+
+    def flush(self):
+        return
+
+
+class MockedQueryObject:
+    def __init__(self):
+        self.metakeys = {"karton": "test"}
+        self.data = {"children": [], "parents": []}
+
+
+class MockedMWDB:
+    def __init__(self):
+        pass
+
+    def upload_file(self, *args, **kwargs):
+        return MockedUploadObject()
+
+    def query_file(self, *args, **kwargs):
+        return MockedQueryObject()
+
+
 class MWDB_Scan(FileAnalyzer):
     def set_params(self, params):
         self.__api_key = self._secrets["api_key_name"]
@@ -37,9 +62,6 @@ class MWDB_Scan(FileAnalyzer):
         self.public = not self.private
         self.max_tries = params.get("max_tries", 50)
         self.poll_distance = 5
-
-    def file_analysis(self, file_info):
-        return "karton" in file_info.metakeys.keys()
 
     def adjust_relations(self, base, key, recursive=True):
         new_relation = []
@@ -65,7 +87,7 @@ class MWDB_Scan(FileAnalyzer):
     def run(self):
         result = {}
         binary = self.read_file_bytes()
-        query = str(hashlib.sha256(binary).hexdigest())
+        query = calculate_sha256(binary)
         self.mwdb = mwdblib.MWDB(api_key=self.__api_key)
 
         if self.upload_file:
@@ -80,9 +102,9 @@ class MWDB_Scan(FileAnalyzer):
                 )
                 time.sleep(self.poll_distance)
                 file_info = self.mwdb.query_file(file_object.data["id"])
-                if self.file_analysis(file_info):
+                if "karton" in file_info.metakeys.keys():
                     break
-            if not self.file_analysis(file_info):
+            else:
                 raise AnalyzerRunException("max retry attempts exceeded")
         else:
             try:
@@ -106,12 +128,6 @@ class MWDB_Scan(FileAnalyzer):
     @classmethod
     def _monkeypatch(cls):
         patches = [
-            if_mock_connections(
-                patch(
-                    "mwdblib.MWDB",
-                    side_effect=mocked_mwdb_response,
-                ),
-                patch.object(cls, "file_analysis", return_value=True),
-            )
+            if_mock_connections(patch("mwdblib.MWDB", return_value=MockedMWDB()))
         ]
         return super()._monkeypatch(patches=patches)

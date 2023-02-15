@@ -26,7 +26,7 @@ class ZoomEye(classes.ObservableAnalyzer):
             self.query += f" hostname:{self.observable_name}"
             self.search_type = "host"
 
-        if self.search_type == "host" or self.search_type == "web":
+        if self.search_type in ["host", "web"]:
             self.url = self.base_url + self.search_type + "/search?query="
             self.url += self.query
 

@@ -53,7 +53,7 @@ class PlaybookConfigSerializer(AbstractConfigSerializer):
         config = super()._read_config()
         cached_playbooks = CachedPlaybook.objects.all()
         cached_serialized_playbooks = serializers.serialize(
-            "json", [obj for obj in cached_playbooks]
+            "json", list(cached_playbooks)
         )
         cached_playbooks_model_json = json.loads(cached_serialized_playbooks)
         if len(cached_playbooks_model_json) == 0:

@@ -10,12 +10,12 @@ from rest_framework.test import APIClient
 
 from api_app.analyzers_manager.constants import ObservableTypes
 from api_app.core.models import AbstractReport
-from api_app.models import Job
+from api_app.models import Job, PluginConfig
 
 User = get_user_model()
 
 
-def PollingFunction(self, function_name):
+def PollingFunction(self):
     for i in range(0, int(self.TIMEOUT_SECONDS / self.SLEEP_SECONDS)):
         time.sleep(self.SLEEP_SECONDS)
         # reload test_job object
@@ -48,12 +48,9 @@ def PollingFunction(self, function_name):
             f"\n>>> Running/Pending analyzers: {running_or_pending_analyzers}",
             f"\n>>> Running/Pending connectors: {running_or_pending_connectors}",
         )
-        condition = analyzers_stats["failed"] > 0 or connectors_stats["failed"] > 0
+        fail_condition = analyzers_stats["failed"] > 0 or connectors_stats["failed"] > 0
         # fail immediately if any analyzer or connector failed
-        if function_name == "start_playbooks" and not running_or_pending_connectors:
-            condition = analyzers_stats["failed"] > 0
-
-        if condition:
+        if fail_condition:
             failed_analyzers = [
                 (r.analyzer_name, r.errors)
                 for r in self.test_job.analyzer_reports.filter(
@@ -66,12 +63,12 @@ def PollingFunction(self, function_name):
                     status=AbstractReport.Status.FAILED
                 )
             ]
-            print(
+            message = (
                 f"\n>>> Failed analyzers: {failed_analyzers}",
                 f"\n>>> Failed connectors: {failed_connectors}",
             )
-            if function_name != "start_playbooks":
-                self.fail()
+            print(message)
+            self.fail(message)
 
         # check analyzers status
         if status not in [Job.Status.PENDING, Job.Status.RUNNING]:
@@ -87,40 +84,28 @@ def PollingFunction(self, function_name):
                     msg="all `analyzer_reports` status must be `SUCCESS`",
                 )
 
-            elif function_name == "start_playbooks":
-                # it is expected for some
-                # analyzers to fail for the time being
-                # in running playbookstes
-                self.assertEqual(
-                    status,
-                    Job.Status.REPORTED_WITH_FAILS,
-                    msg="`test_job` status must be success with failed analyzers",
-                )
-
             self.assertEqual(
                 len(self.test_job.analyzers_to_execute),
                 self.test_job.analyzer_reports.count(),
                 msg="all analyzer reports must be there",
             )
 
-            if function_name == "start_playbooks" and not running_or_pending_connectors:
-                # since there are no connectors
-                # in FREE_TO_USE_ANALYZERS
-                return True
-
             # check connectors status
-            if connectors_stats["all"] > 0 and connectors_stats["running"] == 0:
-                self.assertEqual(
-                    len(self.test_job.connectors_to_execute),
-                    self.test_job.connector_reports.count(),
-                    "all connector reports must be there",
-                )
-                self.assertEqual(
-                    connectors_stats["all"],
-                    connectors_stats["success"],
-                    msg="all `connector_reports` status must be `SUCCESS`.",
-                )
-                print(f"[END] -----{self.__class__.__name__}.{function_name}----")
+            if connectors_stats["all"] > 0:
+                if connectors_stats["running"] == 0:
+                    self.assertEqual(
+                        len(self.test_job.connectors_to_execute),
+                        self.test_job.connector_reports.count(),
+                        "all connector reports must be there",
+                    )
+                    self.assertEqual(
+                        connectors_stats["all"],
+                        connectors_stats["success"],
+                        msg="all `connector_reports` status must be `SUCCESS`.",
+                    )
+                    print(f"[END] -----{self.__class__.__name__}----")
+                    return True
+            else:
                 return True
     # the test should not reach here
     self.fail("test timed out")
@@ -138,14 +123,18 @@ def get_logger() -> logging.Logger:
 class CustomTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
+
         try:
-            cls.superuser = User.objects.get(username="test")
+            cls.superuser = User.objects.get(is_superuser=True)
         except User.DoesNotExist:
+            PluginConfig.objects.all().delete()
             print("creating superuser")
             cls.superuser = User.objects.create_superuser(
                 username="test", email="test@intelowl.com", password="test"
             )
-            call_command("migrate_secrets")
+        finally:
+            if not PluginConfig.objects.filter(owner=cls.superuser).exists():
+                call_command("migrate_secrets")
 
 
 class CustomAPITestCase(CustomTestCase):

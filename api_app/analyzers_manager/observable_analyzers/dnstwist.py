@@ -8,6 +8,8 @@ from ipaddress import AddressValueError, IPv4Address
 from shutil import which
 from urllib.parse import urlparse
 
+from django.conf import settings
+
 from api_app.analyzers_manager import classes
 from api_app.exceptions import AnalyzerRunException
 
@@ -15,8 +17,8 @@ logger = logging.getLogger(__name__)
 
 
 class DNStwist(classes.ObservableAnalyzer):
-    command: str = "dnstwist"
-    dictionary_base_path: str = "/opt/deploy/dnstwist-dictionaries/"
+    DNS_TWIST_PATH = settings.BASE_DIR / "dnstwist-dictionaries"
+    COMMAND: str = "dnstwist"
 
     def set_params(self, params):
         self._ssdeep = params.get("ssdeep", False)
@@ -25,7 +27,7 @@ class DNStwist(classes.ObservableAnalyzer):
         self._tld_dict = params.get("tld_dict", "abused_tlds.dict")
 
     def run(self):
-        if not which(self.command):
+        if not which(self.COMMAND):
             raise AnalyzerRunException("dnstwist not installed!")
 
         domain = self.observable_name
@@ -47,14 +49,14 @@ class DNStwist(classes.ObservableAnalyzer):
             "tld": self._tld,
         }
 
-        args = [self.command, "--registered", "--format", "json"]
+        args = [self.COMMAND, "--registered", "--format", "json"]
         if self._ssdeep:
             args.append("--ssdeep")
         if self._mxcheck:
             args.append("--mxcheck")
         if self._tld:
             args.append("--tld")
-            args.append(self.dictionary_base_path + self._tld_dict)
+            args.append(self.DNS_TWIST_PATH / self._tld_dict)
 
         args.append(domain)
 

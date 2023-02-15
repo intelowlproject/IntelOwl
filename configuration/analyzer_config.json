@@ -11,7 +11,8 @@
       "application/zip",
       "application/java-archive",
       "application/vnd.android.package-archive",
-      "application/x-dex"
+      "application/x-dex",
+      "android_only"
     ],
     "config": {
       "soft_time_limit": 400,
@@ -72,16 +73,14 @@
     "secrets": {
       "api_user_name": {
         "env_var_key": "ANOMALI_THREATSTREAM_API_USER",
-        "type": "string",
+        "type": "str",
         "required": true,
-        "default": null,
         "description": "API USER for Anomali Threatstream"
       },
       "api_key_name": {
         "env_var_key": "ANOMALI_THREATSTREAM_API_KEY",
-        "type": "string",
+        "type": "str",
         "required": true,
-        "default": null,
         "description": "API Key for Anomali Threatstream"
       }
     },
@@ -108,16 +107,14 @@
     "secrets": {
       "api_user_name": {
         "env_var_key": "ANOMALI_THREATSTREAM_API_USER",
-        "type": "string",
+        "type": "str",
         "required": true,
-        "default": null,
         "description": "API USER for Anomali Threatstream"
       },
       "api_key_name": {
         "env_var_key": "ANOMALI_THREATSTREAM_API_KEY",
-        "type": "string",
+        "type": "str",
         "required": true,
-        "default": null,
         "description": "API Key for Anomali Threatstream"
       }
     },
@@ -164,16 +161,14 @@
     "secrets": {
       "api_user_name": {
         "env_var_key": "ANOMALI_THREATSTREAM_API_USER",
-        "type": "string",
+        "type": "str",
         "required": true,
-        "default": null,
         "description": "API USER for Anomali Threatstream"
       },
       "api_key_name": {
         "env_var_key": "ANOMALI_THREATSTREAM_API_KEY",
-        "type": "string",
+        "type": "str",
         "required": true,
-        "default": null,
         "description": "API Key for Anomali Threatstream"
       }
     },
@@ -262,6 +257,39 @@
     "secrets": {},
     "params": {}
   },
+  "CheckPhish": {
+    "type": "observable",
+    "python_module": "checkphish.CheckPhish",
+    "description": "[CheckPhish](https://checkphish.ai/checkphish-api/) can detect phishing and fraudulent sites",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": true,
+    "observable_supported": ["url"],
+    "config": {
+      "soft_time_limit": 100,
+      "queue": "long"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "CHECKPHISH_KEY",
+        "type": "str",
+        "required": true,
+        "description": "API Key for the analyzer"
+      }
+    },
+    "params": {
+      "polling_tries": {
+        "value": 10,
+        "type": "int",
+        "description": "How many times we poll the CheckPhish API for scan results"
+      },
+      "polling_time": {
+        "value": 0.5,
+        "type": "float",
+        "description": "IntelOwl would sleep for this time between each poll to CheckPhish APIs"
+      }
+    }
+  },
   "CIRCLPassiveDNS": {
     "type": "observable",
     "python_module": "circl_pdns.CIRCL_PDNS",
@@ -278,7 +306,8 @@
       "pdns_credentials": {
         "env_var_key": "CIRCL_CREDENTIALS",
         "description": "Template to use: `<user>|<pwd>`.",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {}
@@ -428,6 +457,7 @@
       "url_key_name": {
         "env_var_key": "CAPESANDBOX_URL",
         "description": "URL for the CapeSandbox instance. If none provided, It uses the API provided by CAPESandbox by default.",
+        "default": "https://www.capesandbox.com",
         "required": true
       }
     },
@@ -484,7 +514,7 @@
   "ClamAV": {
     "type": "file",
     "python_module": "clamav.ClamAV",
-    "description": "scan files using ClamAV virus scanning engine",
+    "description": "scan files using [ClamAV AntiVirus Engine](https://www.clamav.net/). IntelOwl automatically keep ClamAV updated with official and [unofficial](https://github.com/rseichter/fangfrisch) open source signatures",
     "disabled": false,
     "leaks_info": false,
     "external_service": false,
@@ -685,6 +715,42 @@
       }
     }
   },
+  "DNS0_EU": {
+    "type": "observable",
+    "python_module": "dns.dns_resolvers.dns0_eu_resolver.DNS0EUResolver",
+    "description": "Retrieve current domain resolution with DNS0.eu DoH (DNS over HTTPS)",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": ["domain", "url"],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {},
+    "params": {
+      "query_type": {
+        "value": "A",
+        "type": "str",
+        "description": "Query type against the chosen DNS resolver."
+      }
+    }
+  },
+  "DNS0_EU_Malicious_Detector": {
+    "type": "observable",
+    "python_module": "dns.dns_malicious_detectors.dns0_eu_malicious_detector.DNS0EUMaliciousDetector",
+    "description": "Check if a domain or an url is marked as malicious in DNS0.eu database ([Zero](https://www.dns0.eu/zero) service)",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": ["domain", "url"],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {},
+    "params": {}
+  },
   "DNSDB": {
     "type": "observable",
     "python_module": "dnsdb.DNSdb",
@@ -781,7 +847,7 @@
   "Doc_Info": {
     "type": "file",
     "python_module": "doc_info.DocInfo",
-    "description": "static generic document analysis (Oletools)",
+    "description": "static Microsoft Office document analysis ([Oletools](https://github.com/decalage2/oletools)) with features to analyze XLM macros, encrypted macros and much more",
     "disabled": false,
     "external_service": false,
     "leaks_info": false,
@@ -796,6 +862,7 @@
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+      "application/onenote",
       "text/x-ms-iqy",
       "application/excel",
       "text/xml",
@@ -821,8 +888,8 @@
   "Doc_Info_Experimental": {
     "type": "file",
     "python_module": "doc_info.DocInfo",
-    "description": "static document analysis with new features to analyze XLM macros, encrypted macros and more",
-    "disabled": false,
+    "description": "static Microsoft Office document analysis with new features to analyze XLM macros, encrypted macros and more [DEPRECATED, move to Doc_Info]",
+    "disabled": true,
     "external_service": false,
     "leaks_info": false,
     "supported_filetypes": [
@@ -902,6 +969,7 @@
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+      "application/onenote",
       "text/x-ms-iqy",
       "application/excel",
       "text/xml",
@@ -975,6 +1043,7 @@
       "url_key_name": {
         "env_var_key": "DRAGONFLY_API_URL",
         "description": "Dragonfly instance URL. Don't change this.",
+        "default": "https://dragonfly.certego.net/",
         "required": true
       }
     }
@@ -1022,7 +1091,7 @@
   "File_Info": {
     "type": "file",
     "python_module": "file_info.FileInfo",
-    "description": "basic static analysis, extracts metadata and hashes",
+    "description": "basic static analysis, extracts metadata (with [Exiftools](https://exiftool.org/)) and hashes",
     "disabled": false,
     "external_service": false,
     "leaks_info": false,
@@ -1170,10 +1239,11 @@
       "queue": "default"
     },
     "secrets": {
-      "api_key_name": {
-        "env_var_key": "GOOGLE_APPLICATION_CREDENTIALS",
-        "description": "",
-        "required": true
+      "service_account_json": {
+        "env_var_key": "SERVICE_ACCOUNT_JSON",
+        "description": "service account file in JSON format",
+        "required": true,
+        "type": "dict"
       }
     },
     "params": {}
@@ -1322,6 +1392,7 @@
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+      "application/onenote",
       "text/x-ms-iqy",
       "application/excel",
       "text/xml",
@@ -1339,6 +1410,44 @@
         "value": "",
         "type": "str",
         "description": "custom hashlookup-server"
+      }
+    }
+  },
+  "HaveIBeenPwned": {
+    "type": "observable",
+    "python_module": "haveibeenpwned.HaveIBeenPwned",
+    "description": "Check if an email address has been involved in a data breach",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": true,
+    "observable_supported": ["generic"],
+    "config": {
+      "soft_time_limit": 100,
+      "queue": "default"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "HIBP_API_KEY",
+        "type": "str",
+        "required": true,
+        "description": "API Key for HaveIBeenPwned"
+      }
+    },
+    "params": {
+      "truncate_response": {
+        "value": true,
+        "type": "bool",
+        "description": "Truncate response to only include most recent data breaches"
+      },
+      "include_unverified": {
+        "value": false,
+        "type": "bool",
+        "description": "Include unverified data breaches in the response"
+      },
+      "domain": {
+        "value": "",
+        "type": "str",
+        "description": "Search for data breaches specific to a domain"
       }
     }
   },
@@ -1557,6 +1666,7 @@
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+      "application/onenote",
       "text/x-ms-iqy",
       "application/excel",
       "text/xml",
@@ -1675,6 +1785,32 @@
       }
     }
   },
+  "IPApi": {
+    "type": "observable",
+    "python_module": "ipapi.IPApi",
+    "description": "Gives information about [IPs](https://ip-api.com/docs/api:batch) and [DNS](https://ip-api.com/docs/dns)",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": ["ip"],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {},
+    "params": {
+      "fields" : {
+        "value" : "",
+        "type" : "str",
+        "description" : "specify the information fields"
+      },
+      "lang" : {
+        "value" : "",
+        "type" : "str",
+        "description" : "specify the response language"
+      }
+    }
+  },
   "IPInfo": {
     "type": "observable",
     "python_module": "ipinfo.IPInfo",
@@ -1696,6 +1832,28 @@
     },
     "params": {}
   },
+  "Koodous": {
+    "type": "observable", 
+    "python_module": "koodous.Koodous",
+    "description": "Get information about android malware",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": ["hash"], 
+    "config": {
+      "soft_time_limit": 100,
+      "queue": "long"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "KOODOUS_KEY",
+        "type": "str",
+        "required": true,
+        "description": "API Key for the Koodous analyzer"
+      }
+    },
+    "params": {}
+},
   "Manalyze": {
     "type": "file",
     "python_module": "manalyze.Manalyze",
@@ -1950,7 +2108,7 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "MAXMIND_KEY",
-        "description": "",
+        "description": "API key to access the service",
         "required": true
       }
     },
@@ -2012,6 +2170,23 @@
         "description": "Number of retries to perform for polling analysis results."
       }
     }
+  },
+  "OneNote_Info": {
+    "type": "file",
+    "python_module": "onenote.OneNoteInfo",
+    "description": "Extracting information from OneNote Office docs via [PyOneNote](https://github.com/DissectMalware/pyOneNote)",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
+    "supported_filetypes": [
+      "application/onenote"
+    ],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "local"
+    },
+    "secrets": {},
+    "params": {}
   },
   "ONYPHE": {
     "type": "observable",
@@ -2125,7 +2300,7 @@
     "leaks_info": false,
     "run_hash": true,
     "config": {
-      "soft_time_limit": 40,
+      "soft_time_limit": 60,
       "queue": "default"
     },
     "secrets": {
@@ -2453,6 +2628,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
+    "leaks_info": false,
     "observable_supported": ["domain", "url"],
     "config": {
       "soft_time_limit": 30,
@@ -2493,7 +2669,8 @@
       "application/zip",
       "application/java-archive",
       "application/vnd.android.package-archive",
-      "application/x-dex"
+      "application/x-dex",
+      "android_only"
     ],
     "config": {
       "soft_time_limit": 120,
@@ -2802,7 +2979,7 @@
   "Signature_Info": {
     "type": "file",
     "python_module": "signature_info.SignatureInfo",
-    "description": "PE signature extractor",
+    "description": "PE signature extractor with [osslsigncode](https://github.com/mtrojnar/osslsigncode)",
     "disabled": false,
     "external_service": false,
     "leaks_info": false,
@@ -2949,11 +3126,37 @@
     },
     "params": {}
   },
+  "Strings_Info": {
+    "type": "file",
+    "python_module": "strings_info.StringsInfo",
+    "description": "Strings extraction. Leverages Mandiant's [Stringsifter](https://github.com/mandiant/stringsifter)",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
+    "docker_based": true,
+    "config": {
+      "soft_time_limit": 70,
+      "queue": "local"
+    },
+    "secrets": {},
+    "params": {
+      "max_number_of_strings": {
+        "value": 500,
+        "type": "int",
+        "description": ""
+      },
+      "rank_strings": {
+        "value": false,
+        "type": "bool",
+        "description": "enable ranking based on Machine Learning features"
+      }
+    }
+  },
   "Strings_Info_Classic": {
     "type": "file",
     "python_module": "strings_info.StringsInfo",
-    "description": "strings extraction",
-    "disabled": false,
+    "description": "strings extraction [DEPRECATED, move to Strings_Info]",
+    "disabled": true,
     "external_service": false,
     "leaks_info": false,
     "docker_based": true,
@@ -2978,8 +3181,8 @@
   "Strings_Info_ML": {
     "type": "file",
     "python_module": "strings_info.StringsInfo",
-    "description": "strings extraction plus strings ranking based on Machine Learning. Leverages Fireeye's Stringsifter",
-    "disabled": false,
+    "description": "strings extraction plus strings ranking based on Machine Learning. Leverages Fireeye's Stringsifter [DEPRECATED, move to Strings_Info]",
+    "disabled": true,
     "external_service": false,
     "leaks_info": false,
     "docker_based": true,
@@ -3333,7 +3536,7 @@
     "leaks_info": true,
     "observable_supported": ["url"],
     "config": {
-      "soft_time_limit": 300,
+      "soft_time_limit": 500,
       "queue": "long"
     },
     "secrets": {
@@ -3369,7 +3572,7 @@
     "external_service": true,
     "leaks_info": true,
     "config": {
-      "soft_time_limit": 300,
+      "soft_time_limit": 500,
       "queue": "long"
     },
     "secrets": {
@@ -3960,7 +4163,7 @@
   "Xlm_Macro_Deobfuscator": {
     "type": "file",
     "python_module": "xlm_macro_deobfuscator.XlmMacroDeobfuscator",
-    "description": "Xlm macro deobfuscator",
+    "description": "Extracting Office XLM Macros with [XlmMacroDeobfuscator](https://github.com/DissectMalware/XLMMacroDeobfuscator)",
     "disabled": false,
     "external_service": false,
     "leaks_info": false,
@@ -3988,11 +4191,73 @@
       }
     }
   },
+   "Yara": {
+    "type": "file",
+    "python_module": "yara_scan.YaraScan",
+    "description": "scan a file with Yara rules",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
+    "config": {
+      "soft_time_limit": 60,
+      "queue": "local"
+    },
+    "secrets": {
+      "private_repositories": {
+        "env_var_key": "YARA_PRIVATE_REPOSITORIES",
+        "description": "Private repositories in the following format: {\"username@provider:org/repository.git\":\"ssh key\"}. Use double quote, don't worry about whitespace.",
+        "required": false,
+        "type": "dict",
+        "default": {}
+      }
+    },
+    "params": {
+      "public_repositories": {
+        "value": [
+          "https://github.com/elastic/protections-artifacts",
+          "https://github.com/SIFalcon/Detection/",
+          "https://github.com/bartblaze/Yara-rules",
+          "https://github.com/intezer/yara-rules",
+          "https://github.com/advanced-threat-research/Yara-Rules",
+          "https://github.com/stratosphereips/yara-rules",
+          "https://github.com/reversinglabs/reversinglabs-yara-rules",
+          "https://github.com/sbousseaden/YaraHunts",
+          "https://github.com/InQuest/yara-rules",
+          "https://github.com/StrangerealIntel/DailyIOC",
+          "https://github.com/mandiant/red_team_tool_countermeasures",
+          "https://github.com/fboldewin/YARA-rules",
+          "https://github.com/Yara-Rules/rules.git",
+          "https://github.com/Neo23x0/signature-base.git",
+          "https://yaraify-api.abuse.ch/download/yaraify-rules.zip"
+        ],
+        "type": "list",
+        "description": "Repositories that will be constantly updated"
+      },
+      "local_rules": {
+        "value": false,
+        "type": "bool",
+        "description": "If true, use local rules present at /opt/deploy/files_required/yara/YOUR_USER/custom_rule"
+      },
+     "ignore": {
+        "value": [
+          "generic_anomalies.yar",
+          "general_cloaking.yar",
+          "thor_inverse_matches.yar",
+          "yara_mixed_ext_vars.yar",
+          "thor-webshells.yar"
+        ],
+       "type": "list",
+      "description": "ignore these rules"
+      }
+    }
+
+  },
+
   "Yara_Scan_ATM_MALWARE": {
     "type": "file",
     "python_module": "yara_scan.YaraScan",
-    "description": "scan a file with ATM Malware yara rules ([github](https://github.com/fboldewin/YARA-rules))",
-    "disabled": false,
+    "description": "[DEPRECATED, move to Yara] scan a file with ATM Malware yara rules ([github](https://github.com/fboldewin/YARA-rules))",
+    "disabled": true,
     "external_service": false,
     "leaks_info": false,
     "config": {
@@ -4001,19 +4266,9 @@
     },
     "secrets": {},
     "params": {
-      "git_repo_main_dir": {
-        "value": ["/opt/deploy/yara/atm_malware_rules"],
+      "repositories": {
+        "value": ["https://github.com/fboldewin/YARA-rules"],
         "type": "list",
-        "description": ""
-      },
-      "directories_with_rules": {
-        "value": ["/opt/deploy/yara/atm_malware_rules"],
-        "type": "list",
-        "description": ""
-      },
-      "recursive": {
-        "value": true,
-        "type": "bool",
         "description": ""
       }
     }
@@ -4021,8 +4276,8 @@
   "Yara_Scan_Bartblaze": {
     "type": "file",
     "python_module": "yara_scan.YaraScan",
-    "description": "Scan a file with Intezer yara rules ([github](https://github.com/bartblaze/Yara-rules)).",
-    "disabled": false,
+    "description": "[DEPRECATED, move to Yara] Scan a file with Bartblaze yara rules ([github](https://github.com/bartblaze/Yara-rules)).",
+    "disabled": true,
     "external_service": false,
     "leaks_info": false,
     "config": {
@@ -4031,19 +4286,8 @@
     },
     "secrets": {},
     "params": {
-      "git_repo_main_dir": {
-        "value": ["/opt/deploy/yara/bartblaze_rules"],
-        "type": "list",
-        "description": ""
-      },
-      "directories_with_rules": {
-        "value": [
-          "/opt/deploy/yara/bartblaze_rules/rules/APT",
-          "/opt/deploy/yara/bartblaze_rules/rules/crimeware",
-          "/opt/deploy/yara/bartblaze_rules/rules/generic",
-          "/opt/deploy/yara/bartblaze_rules/rules/hacktools",
-          "/opt/deploy/yara/bartblaze_rules/rules/ransomware"
-        ],
+      "repositories": {
+        "value": ["https://github.com/bartblaze/Yara-rules"],
         "type": "list",
         "description": ""
       }
@@ -4052,98 +4296,8 @@
   "Yara_Scan_Community": {
     "type": "file",
     "python_module": "yara_scan.YaraScan",
-    "description": "scan a file with community yara rules ([github](https://github.com/Yara-Rules/rules.git))",
-    "disabled": false,
-    "external_service": false,
-    "leaks_info": false,
-    "config": {
-      "soft_time_limit": 60,
-      "queue": "local"
-    },
-    "secrets": {},
-    "params": {
-      "git_repo_main_dir": {
-        "value": ["/opt/deploy/yara/rules"],
-        "type": "list",
-        "description": ""
-      },
-      "directories_with_rules": {
-        "value": ["/opt/deploy/yara/rules/antidebug_antivm",
-                  "/opt/deploy/yara/rules/capabilities",
-                  "/opt/deploy/yara/rules/crypto",
-                  "/opt/deploy/yara/rules/cve_rules",
-                  "/opt/deploy/yara/rules/email",
-                  "/opt/deploy/yara/rules/exploit_kits",
-                  "/opt/deploy/yara/rules/maldocs",
-                  "/opt/deploy/yara/rules/malware",
-                  "/opt/deploy/yara/rules/mobile_malware",
-                  "/opt/deploy/yara/rules/packers",
-                  "/opt/deploy/yara/rules/webshells"],
-        "type": "list",
-        "description": ""
-      }
-    }
-  },
-  "Yara_Scan_Custom_Signatures": {
-    "type": "file",
-    "python_module": "yara_scan.YaraScan",
-    "description": "scan a file with the Custom Signatures you added in IntelOwl",
-    "disabled": false,
-    "external_service": false,
-    "leaks_info": false,
-    "config": {
-      "soft_time_limit": 60,
-      "queue": "local"
-    },
-    "secrets": {},
-    "params": {
-      "directories_with_rules": {
-        "value": ["/opt/deploy/intel_owl/configuration/custom_yara"],
-        "type": "list",
-        "description": "Add your own .yar files in the directory /configuration/custom_yara to use your own rules"
-      },
-      "update": {
-        "value": false,
-        "type": "bool",
-        "description": "This is set to false because these rules are local so they don't need any update"
-      }
-    }
-  },
-  "Yara_Scan_Daily_Ioc": {
-    "type": "file",
-    "python_module": "yara_scan.YaraScan",
-    "description": "scan a file with StrangerealIntel daily IOC yara rules ([github](https://github.com/StrangerealIntel/DailyIOC))",
-    "disabled": false,
-    "external_service": false,
-    "leaks_info": false,
-    "config": {
-      "soft_time_limit": 60,
-      "queue": "local"
-    },
-    "secrets": {},
-    "params": {
-      "git_repo_main_dir": {
-        "value": ["/opt/deploy/yara/daily_ioc_rules"],
-        "type": "list",
-        "description": ""
-      },
-      "directories_with_rules": {
-        "value": ["/opt/deploy/yara/daily_ioc_rules"],
-        "type": "list",
-        "description": ""
-      },
-      "recursive": {
-        "value": true,
-        "type": "bool",
-        "description": ""
-      }
-    }
-  },
-  "Yara_Scan_Florian": {
-    "type": "file",
-    "python_module": "yara_scan.YaraScan",
-    "description": "scan a file with Neo23x0 yara rules ([github](https://github.com/Neo23x0/signature-base.git))",
-    "disabled": false,
+    "description": "[DEPRECATED, move to Yara] Scan a file with community yara rules ([github](https://github.com/Yara-Rules/rules.git))",
+    "disabled": true,
     "external_service": false,
     "leaks_info": false,
     "config": {
@@ -4152,13 +4306,63 @@
     },
     "secrets": {},
     "params": {
-      "git_repo_main_dir": {
-        "value": ["/opt/deploy/yara/signature-base"],
+      "repositories": {
+        "value": ["https://github.com/Yara-Rules/rules.git"],
         "type": "list",
         "description": ""
-      },
-      "directories_with_rules": {
-        "value": ["/opt/deploy/yara/signature-base/yara"],
+        }
+    }
+  },
+  "Yara_Scan_Custom_Signatures": {
+    "type": "file",
+    "python_module": "yara_scan.YaraScan",
+    "description": "[DEPRECATED, move to Yara] Scan a file with the Custom Signatures you added in IntelOwl",
+    "disabled": true,
+    "external_service": false,
+    "leaks_info": false,
+    "config": {
+      "soft_time_limit": 60,
+      "queue": "local"
+    },
+    "secrets": {},
+    "params": {
+    }
+  },
+  "Yara_Scan_Daily_Ioc": {
+    "type": "file",
+    "python_module": "yara_scan.YaraScan",
+    "description": "[DEPRECATED, move to Yara] Scan a file with StrangerealIntel daily IOC yara rules ([github](https://github.com/StrangerealIntel/DailyIOC))",
+    "disabled": true,
+    "external_service": false,
+    "leaks_info": false,
+    "config": {
+      "soft_time_limit": 60,
+      "queue": "local"
+    },
+    "secrets": {},
+    "params": {
+      "repositories": {
+        "value": ["https://github.com/StrangerealIntel/DailyIOC"],
+        "type": "list",
+        "description": ""
+      }
+    }
+  },
+  "Yara_Scan_Florian": {
+    "type": "file",
+    "python_module": "yara_scan.YaraScan",
+    "description": "[DEPRECATED, move to Yara] Scan a file with Neo23x0 yara rules ([github](https://github.com/Neo23x0/signature-base.git))",
+    "disabled": true,
+    "external_service": false,
+    "leaks_info": false,
+    "config": {
+      "soft_time_limit": 120,
+      "queue": "local"
+    },
+    "secrets": {},
+    "params": {
+      "repositories": {
+        "value": ["https://github.com/Neo23x0/signature-base.git"],
         "type": "list",
         "description": ""
       }
@@ -4167,8 +4371,8 @@
   "Yara_Scan_Mandiant": {
     "type": "file",
     "python_module": "yara_scan.YaraScan",
-    "description": "scan a file with Mandiant yara rules ([github](https://github.com/mandiant/red_team_tool_countermeasures))",
-    "disabled": false,
+    "description": "[DEPRECATED, move to Yara] Scan a file with Mandiant yara rules ([github](https://github.com/mandiant/red_team_tool_countermeasures))",
+    "disabled": true,
     "external_service": false,
     "leaks_info": false,
     "config": {
@@ -4177,19 +4381,9 @@
     },
     "secrets": {},
     "params": {
-      "git_repo_main_dir": {
-        "value": ["/opt/deploy/yara/mandiant_rules"],
+      "repositories": {
+        "value": ["https://github.com/mandiant/red_team_tool_countermeasures"],
         "type": "list",
-        "description": ""
-      },
-      "directories_with_rules": {
-        "value": ["/opt/deploy/yara/mandiant_rules/rules"],
-        "type": "list",
-        "description": ""
-      },
-      "recursive": {
-        "value": true,
-        "type": "bool",
         "description": ""
       }
     }
@@ -4197,8 +4391,8 @@
   "Yara_Scan_Inquest": {
     "type": "file",
     "python_module": "yara_scan.YaraScan",
-    "description": "scan a file with Inquest yara rules ([github](https://github.com/InQuest/yara-rules))",
-    "disabled": false,
+    "description": "[DEPRECATED, move to Yara] Scan a file with Inquest yara rules ([github](https://github.com/InQuest/yara-rules))",
+    "disabled": true,
     "external_service": false,
     "leaks_info": false,
     "config": {
@@ -4207,19 +4401,9 @@
     },
     "secrets": {},
     "params": {
-      "git_repo_main_dir": {
-        "value": ["/opt/deploy/yara/inquest_rules"],
+      "repositories": {
+        "value": ["https://github.com/InQuest/yara-rules"],
         "type": "list",
-        "description": ""
-      },
-      "directories_with_rules": {
-        "value": ["/opt/deploy/yara/inquest_rules"],
-        "type": "list",
-        "description": ""
-      },
-      "recursive": {
-        "value": false,
-        "type": "bool",
         "description": ""
       }
     }
@@ -4227,8 +4411,8 @@
   "Yara_Scan_Intezer": {
     "type": "file",
     "python_module": "yara_scan.YaraScan",
-    "description": "Scan a file with Intezer yara rules ([github](https://github.com/intezer/yara-rules)).",
-    "disabled": false,
+    "description": "[DEPRECATED, move to Yara] Scan a file with Intezer yara rules ([github](https://github.com/intezer/yara-rules)).",
+    "disabled": true,
     "external_service": false,
     "leaks_info": false,
     "config": {
@@ -4237,8 +4421,8 @@
     },
     "secrets": {},
     "params": {
-      "directories_with_rules": {
-        "value": ["/opt/deploy/yara/intezer_rules"],
+      "repositories": {
+        "value": ["https://github.com/intezer/yara-rules"],
         "type": "list",
         "description": ""
       }
@@ -4247,8 +4431,8 @@
   "Yara_Scan_ReversingLabs": {
     "type": "file",
     "python_module": "yara_scan.YaraScan",
-    "description": "scan a file with ReversingLabs yara rules ([github](https://github.com/reversinglabs/reversinglabs-yara-rules))",
-    "disabled": false,
+    "description": "[DEPRECATED, move to Yara] Scan a file with ReversingLabs yara rules ([github](https://github.com/reversinglabs/reversinglabs-yara-rules))",
+    "disabled": true,
     "external_service": false,
     "leaks_info": false,
     "config": {
@@ -4257,19 +4441,9 @@
     },
     "secrets": {},
     "params": {
-      "git_repo_main_dir": {
-        "value": ["/opt/deploy/yara/reversinglabs_rules"],
+      "repositories": {
+        "value": ["https://github.com/reversinglabs/reversinglabs-yara-rules"],
         "type": "list",
-        "description": ""
-      },
-      "directories_with_rules": {
-        "value": ["/opt/deploy/yara/reversinglabs_rules/yara"],
-        "type": "list",
-        "description": ""
-      },
-      "recursive": {
-        "value": true,
-        "type": "bool",
         "description": ""
       }
     }
@@ -4277,8 +4451,8 @@
   "Yara_Scan_Samir": {
     "type": "file",
     "python_module": "yara_scan.YaraScan",
-    "description": "scan a file with Samir Threat Hunting yara rules ([github](hhttps://github.com/sbousseaden/YaraHunts))",
-    "disabled": false,
+    "description": "[DEPRECATED, move to Yara] Scan a file with Samir Threat Hunting yara rules ([github](hhttps://github.com/sbousseaden/YaraHunts))",
+    "disabled": true,
     "external_service": false,
     "leaks_info": false,
     "config": {
@@ -4287,13 +4461,8 @@
     },
     "secrets": {},
     "params": {
-      "git_repo_main_dir": {
-        "value": ["/opt/deploy/yara/samir_rules"],
-        "type": "list",
-        "description": ""
-      },
-      "directories_with_rules": {
-        "value": ["/opt/deploy/yara/samir_rules"],
+      "repositories": {
+        "value": ["https://github.com/sbousseaden/YaraHunts"],
         "type": "list",
         "description": ""
       }
@@ -4302,8 +4471,8 @@
   "Yara_Scan_Stratosphere": {
     "type": "file",
     "python_module": "yara_scan.YaraScan",
-    "description": "scan a file with Stratosphere yara rules ([github](https://github.com/stratosphereips/yara-rules))",
-    "disabled": false,
+    "description": "[DEPRECATED, move to Yara] Scan a file with Stratosphere yara rules ([github](https://github.com/stratosphereips/yara-rules))",
+    "disabled": true,
     "external_service": false,
     "leaks_info": false,
     "config": {
@@ -4312,16 +4481,8 @@
     },
     "secrets": {},
     "params": {
-      "git_repo_main_dir": {
-        "value": ["/opt/deploy/yara/stratosphere_rules"],
-        "type": "list",
-        "description": ""
-      },
-      "directories_with_rules": {
-        "value": [
-          "/opt/deploy/yara/stratosphere_rules/malware",
-          "/opt/deploy/yara/stratosphere_rules/protocols"
-        ],
+      "repositories": {
+        "value": ["https://github.com/stratosphereips/yara-rules"],
         "type": "list",
         "description": ""
       }
@@ -4330,8 +4491,8 @@
   "Yara_Scan_Trellix": {
     "type": "file",
     "python_module": "yara_scan.YaraScan",
-    "description": "scan a file with Trellix yara rules ([github](https://github.com/advanced-threat-research/Yara-Rules))",
-    "disabled": false,
+    "description": "[DEPRECATED, move to Yara] Scan a file with Trellix yara rules ([github](https://github.com/advanced-threat-research/Yara-Rules))",
+    "disabled": true,
     "external_service": false,
     "leaks_info": false,
     "config": {
@@ -4340,20 +4501,8 @@
     },
     "secrets": {},
     "params": {
-      "git_repo_main_dir": {
-        "value": ["/opt/deploy/yara/trellix_rules"],
-        "type": "list",
-        "description": ""
-      },
-      "directories_with_rules": {
-        "value": [
-          "/opt/deploy/yara/trellix_rules/APT",
-          "/opt/deploy/yara/trellix_rules/RAT",
-          "/opt/deploy/yara/trellix_rules/malware",
-          "/opt/deploy/yara/trellix_rules/miners",
-          "/opt/deploy/yara/trellix_rules/ransomware",
-          "/opt/deploy/yara/trellix_rules/stealer"
-        ],
+      "repositories": {
+        "value": ["https://github.com/advanced-threat-research/Yara-Rules"],
         "type": "list",
         "description": ""
       }
@@ -4362,8 +4511,8 @@
   "Yara_Scan_YARAify": {
     "type": "file",
     "python_module": "yara_scan.YaraScan",
-    "description": "Scan a file with yara rules.",
-    "disabled": false,
+    "description": "[DEPRECATED, move to Yara] Scan a file with yara rules downloaded from [YARAify](https://yaraify.abuse.ch/)",
+    "disabled": true,
     "external_service": false,
     "leaks_info": false,
     "config": {
@@ -4372,32 +4521,38 @@
     },
     "secrets": {},
     "params": {
-      "url": {
+      "repositories": {
         "value": [
           "https://yaraify-api.abuse.ch/download/yaraify-rules.zip"
         ],
         "type": "list",
         "description": ""
       },
-      "directories_with_rules": {
+      "ignore": {
         "value": [
-          "/opt/deploy/yara/yaraify_rules/rules"
+          "generic_anomalies.yar",
+          "general_cloaking.yar",
+          "thor_inverse_matches.yar",
+          "yara_mixed_ext_vars.yar",
+          "thor-webshells.yar"
         ],
         "type": "list",
-        "description": ""
+        "description": "ignore these rules"
       }
+
     }
+
   },
   "YARAify_File_Scan": {
     "type": "file",
     "python_module": "yaraify_file_scan.YARAifyFileScan",
-    "description": "scan a file against public and non-public YARA and ClamAV signatures",
+    "description": "scan a file against public and non-public YARA and ClamAV signatures in YARAify service",
     "disabled": false,
     "external_service": true,
-    "leaks_info": false,
+    "leaks_info": true,
     "supported_filetypes": [],
     "config": {
-      "soft_time_limit": 180,
+      "soft_time_limit": 500,
       "queue": "long"
     },
     "secrets": {
@@ -4413,20 +4568,35 @@
       }
     },
     "params": {
+      "send_file": {
+        "value": true,
+        "type": "bool",
+        "description": "Defines whether the file should be sent for analysis or not (in the latter case hash only check would be done)"
+      },
       "clamav_scan": {
-        "value": 1,
-        "type": "int",
-        "description": "Defines whether to scan the file with ClamAV. Possible values: 0 or 1."
+        "value": true,
+        "type": "bool",
+        "description": "Defines whether to scan the file with ClamAV."
       },
       "unpack": {
-        "value": 0,
-        "type": "int",
-        "description": "Defines whether to unpack the file. Possible values: 0 or 1."
+        "value": false,
+        "type": "bool",
+        "description": "Defines whether to unpack the file."
       },
       "share_file": {
-        "value": 0,
-        "type": "int",
-        "description": "Defines whether the file is public and may be shared with 3rd parties. Possible values: 0 or 1."
+        "value": false,
+        "type": "bool",
+        "description": "Defines whether the file is public and may be shared with 3rd parties."
+      },
+      "skip_noisy": {
+        "value": true,
+        "type": "bool",
+        "description": "YARAify skips the file if it already has been scanned at least 10 times within the past 24 hours. It will return the latest task_id instead"
+      },
+      "skip_known": {
+        "value": false,
+        "type": "bool",
+        "description": "YARAify will not process the file if the file is already known."
       }
     }
   },
@@ -4457,6 +4627,27 @@
         "description": "Max number of results you want to display (default: 25, max: 1'000)"
       }
     }
+  },
+  "YARAify_File_Search": {
+    "type": "file",
+    "python_module": "yaraify.YARAify",
+    "description": "lookup a file hash in YARAify",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "run_hash": true,
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "MALPEDIA_TOKEN",
+        "description": "Optional key to receive results from public (TLP:WHITE) and also non-public (TLP:GREEN, TLP:AMBER and TLP:RED) YARA rules.",
+        "required": false
+      }
+    },
+    "params": {}
   },
   "YARAify_Search": {
     "type": "observable",

@@ -1,4 +1,4 @@
-import create from "zustand";
+import { create } from "zustand";
 import axios from "axios";
 
 import { BASE_URI_ORG, ORG_PLUGIN_DISABLE_URI } from "../constants/api";
@@ -48,7 +48,7 @@ const useOrganizationStore = create((set, _get) => ({
         noOrg: false,
       });
       if (name) {
-        const pluginsStateResp = await axios.get(ORG_PLUGIN_DISABLE_URI);
+        const pluginsStateResp = await axios.get(`${ORG_PLUGIN_DISABLE_URI}/`);
         set({
           pluginsState: pluginsStateResp.data.data,
         });

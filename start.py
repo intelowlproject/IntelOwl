@@ -5,6 +5,7 @@ import argparse
 import os
 import re
 import subprocess
+import sys
 
 try:
     from dotenv import load_dotenv
@@ -14,7 +15,7 @@ except ImportError:
         "you must install the Python requirements."
         " See: https://intelowl.readthedocs.io/en/latest/Installation.html"
     )
-    exit(2)
+    sys.exit(2)
 
 
 load_dotenv("docker/.env")
@@ -155,6 +156,12 @@ def start():
         help="This leverage the https.override.yml file that can be used "
         "to host IntelOwl with HTTPS and your own certificate",
     )
+    parser.add_argument(
+        "--use-docker-v1",
+        required=False,
+        action="store_true",
+        help="This flag avoids the script to check if it can use Docker v2 every time",
+    )
 
     args, unknown = parser.parse_known_args()
     # logic
@@ -222,6 +229,17 @@ def start():
         "--project-directory",
         "docker",
     ]
+
+    if not args.use_docker_v1:
+        # check docker version and use docker 2 if available
+        cmd = "docker --help | grep 'compose'"
+        ps = subprocess.Popen(
+            cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL
+        )
+        output = ps.communicate()[0]
+        if output:
+            base_command = ["docker", "compose"] + base_command[1:]
+
     for compose_file in compose_files:
         base_command.append("-f")
         base_command.append(compose_file)
@@ -232,14 +250,14 @@ def start():
         env["DOCKER_BUILDKIT"] = "1"
         if args.debug_build:
             env["BUILDKIT_PROGRESS"] = "plain"
-        subprocess.run(command, env=env)
+        subprocess.run(command, env=env, check=True)
     except KeyboardInterrupt:
         print(
             "---- removing the containers, please wait... ",
             "(press Ctrl+C again to force) ----",
         )
         try:
-            subprocess.run(base_command + ["down"])
+            subprocess.run(base_command + ["down"], check=True)
         except KeyboardInterrupt:
             # just need to catch it
             pass

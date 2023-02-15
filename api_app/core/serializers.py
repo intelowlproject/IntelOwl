@@ -1,20 +1,19 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-import hashlib
 import json
 import logging
 import os
-import sys
 from abc import abstractmethod
 from copy import deepcopy
-from typing import List, Optional, TypedDict
+from typing import Dict, List, Optional, TypedDict
 
 from cache_memoize import cache_memoize
 from django.conf import settings
 from rest_framework import serializers as rfs
 
-from intel_owl import secrets as secrets_store
+from api_app.helpers import calculate_md5
+from api_app.models import PluginConfig
 from intel_owl.consts import PARAM_DATATYPE_CHOICES
 
 logger = logging.getLogger(__name__)
@@ -73,6 +72,18 @@ class _SecretSerializer(rfs.Serializer):
     env_var_key = rfs.CharField(required=True, max_length=128)
     description = rfs.CharField(required=True, allow_blank=True, max_length=512)
     required = rfs.BooleanField(required=True)
+    type = rfs.ChoiceField(choices=PARAM_DATATYPE_CHOICES, required=False)
+    default = BaseField(required=False)
+
+    def validate(self, attrs):
+        if "type" in attrs and "default" in attrs:
+            default_type = type(attrs["default"]).__name__
+            expected_type = attrs["type"]
+            if default_type != expected_type:
+                raise rfs.ValidationError(
+                    f"Invalid default type. {default_type} != {expected_type}"
+                )
+        return super().validate(attrs)
 
 
 class AbstractConfigSerializer(rfs.Serializer):
@@ -116,13 +127,16 @@ class AbstractConfigSerializer(rfs.Serializer):
         missing_secrets = []
         for s_key, s_dict in secrets.items():
             # check if available in environment
-            secret_val = secrets_store.get_secret(
-                s_key,
-                default=None,
-                plugin_type=self._get_type(),
-                plugin_name=raw_instance["name"],
-            )
-            if not secret_val and s_dict["required"]:
+            if (
+                not PluginConfig.visible_for_user(self.context.get("user", None))
+                .filter(
+                    attribute=s_key,
+                    type=self._get_type(),
+                    plugin_name=raw_instance["name"],
+                )
+                .exists()
+                and s_dict["required"]
+            ):
                 missing_secrets.append(s_key)
 
         num_missing_secrets = len(missing_secrets)
@@ -151,7 +165,9 @@ class AbstractConfigSerializer(rfs.Serializer):
         """
         Returns full path to the config file.
         """
-        return os.path.join(settings.BASE_DIR, "configuration", cls.CONFIG_FILE_NAME)
+        return os.path.join(
+            settings.PROJECT_LOCATION, "configuration", cls.CONFIG_FILE_NAME
+        )
 
     @classmethod
     def _read_config(cls) -> dict:
@@ -171,7 +187,7 @@ class AbstractConfigSerializer(rfs.Serializer):
         fpath = cls._get_config_path()
         with open(fpath, "r") as fp:
             buffer = fp.read().encode("utf-8")
-            md5hash = hashlib.md5(buffer).hexdigest()
+            md5hash = calculate_md5(buffer)
         return md5hash
 
     @classmethod
@@ -200,10 +216,12 @@ class AbstractConfigSerializer(rfs.Serializer):
 
     @classmethod
     @cache_memoize(
-        timeout=sys.maxsize,
-        args_rewrite=lambda cls: f"{cls.__name__}-{cls._md5_config_file()}",
+        timeout=60 * 60 * 24 * 365,  # 1 year
+        args_rewrite=lambda cls, user=None: f"{cls.__name__}-"
+        f"{user.username if user else ''}-"
+        f"{cls._md5_config_file()}",
     )
-    def read_and_verify_config(cls) -> dict:
+    def read_and_verify_config(cls, user=None) -> Dict:
         """
         Returns verified config.
         This function is memoized for the md5sum of the JSON file.
@@ -214,7 +232,9 @@ class AbstractConfigSerializer(rfs.Serializer):
         serializer_errors = {}
         for key, config in config_dict.items():
             new_config = {"name": key, **config}
-            serializer = cls(data=new_config)  # lgtm [py/call-to-non-callable]
+            serializer = cls(
+                data=new_config, context={"user": user}
+            )  # lgtm [py/call-to-non-callable]
             if serializer.is_valid():
                 config_dict[key] = serializer.data
             else:

@@ -1,21 +1,22 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-import hashlib
 import logging
+import typing
 from typing import Optional
 
+from celery import group
 from django.conf import settings
 from django.contrib.postgres import fields as pg_fields
 from django.db import models
+from django.db.models import Q, QuerySet
 from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.functional import cached_property
 
-from api_app.core.models import Status as ReportStatus
+from api_app.core.models import AbstractReport
 from api_app.exceptions import AlreadyFailedJobException
-from api_app.helpers import get_now
-from certego_saas.apps.organization.membership import Membership
+from api_app.helpers import calculate_sha1, calculate_sha256, get_now
 from certego_saas.apps.organization.organization import Organization
 from certego_saas.models import User
 
@@ -61,6 +62,15 @@ class Tag(models.Model):
         return f'Tag(label="{self.label}")'
 
 
+class ObservableClassification(models.TextChoices):
+    IP = "ip"
+    URL = "url"
+    DOMAIN = "domain"
+    HASH = "hash"
+    GENERIC = "generic"
+    EMPTY = ""
+
+
 class Job(models.Model):
     class Meta:
         indexes = [
@@ -84,7 +94,9 @@ class Job(models.Model):
     is_sample = models.BooleanField(blank=False, default=False)
     md5 = models.CharField(max_length=32, blank=False)
     observable_name = models.CharField(max_length=512, blank=True)
-    observable_classification = models.CharField(max_length=12, blank=True)
+    observable_classification = models.CharField(
+        max_length=12, blank=True, choices=ObservableClassification.choices
+    )
     file_name = models.CharField(max_length=512, blank=True)
     file_mimetype = models.CharField(max_length=80, blank=True)
     status = models.CharField(
@@ -126,11 +138,11 @@ class Job(models.Model):
 
     @cached_property
     def sha256(self) -> str:
-        return hashlib.sha256(self.file.read()).hexdigest()
+        return calculate_sha256(self.file.read())
 
     @cached_property
     def sha1(self) -> str:
-        return hashlib.sha1(self.file.read()).hexdigest()
+        return calculate_sha1(self.file.read())
 
     def job_cleanup(self) -> None:
         logger.info(f"[STARTING] job_cleanup for <-- {self.__repr__()}.")
@@ -193,7 +205,7 @@ class Job(models.Model):
     def get_analyzer_reports_stats(self) -> dict:
         aggregators = {
             s.lower(): models.Count("status", filter=models.Q(status=s))
-            for s in ReportStatus.values
+            for s in AbstractReport.Status.values
         }
         return self.analyzer_reports.aggregate(
             all=models.Count("status"),
@@ -203,12 +215,166 @@ class Job(models.Model):
     def get_connector_reports_stats(self) -> dict:
         aggregators = {
             s.lower(): models.Count("status", filter=models.Q(status=s))
-            for s in ReportStatus.values
+            for s in AbstractReport.Status.values
         }
         return self.connector_reports.aggregate(
             all=models.Count("status"),
             **aggregators,
         )
+
+    def kill_if_ongoing(self):
+        from intel_owl.celery import app as celery_app
+
+        statuses_to_filter = [
+            AbstractReport.Status.PENDING,
+            AbstractReport.Status.RUNNING,
+        ]
+        qs = self.analyzer_reports.filter(status__in=statuses_to_filter)
+        task_ids_analyzers = list(qs.values_list("task_id", flat=True))
+        qs2 = self.connector_reports.filter(status__in=statuses_to_filter)
+
+        task_ids_connectors = list(qs2.values_list("task_id", flat=True))
+        # kill celery tasks using task ids
+        celery_app.control.revoke(
+            task_ids_analyzers + task_ids_connectors, terminate=True
+        )
+
+        # update report statuses
+        qs.update(status=self.Status.KILLED)
+        # set job status
+        self.update_status("killed")
+
+    def _merge_runtime_configuration(
+        self,
+        runtime_configuration: typing.Dict,
+        analyzers: typing.List[str],
+        connectors: typing.List[str],
+    ):
+        # in case of key conflict, runtime_configuration
+        # is overwritten by the Plugin configuration
+        final_config = {}
+        user = self.user
+        for analyzer in analyzers:
+            # Appending custom config to runtime configuration
+            config = runtime_configuration.get(analyzer, {})
+            config |= PluginConfig.get_as_dict(
+                user,
+                PluginConfig.PluginType.ANALYZER,
+                PluginConfig.ConfigType.PARAMETER,
+                plugin_name=analyzer,
+            ).get(analyzer, {})
+
+            if config:
+                final_config[analyzer] = config
+        for connector in connectors:
+            config = runtime_configuration.get(connector, {})
+            config |= PluginConfig.get_as_dict(
+                user,
+                PluginConfig.PluginType.CONNECTOR,
+                PluginConfig.ConfigType.PARAMETER,
+                plugin_name=connector,
+            ).get(connector, {})
+
+            if config:
+                final_config[connector] = config
+        logger.debug(f"New value of runtime_configuration: {final_config}")
+        return final_config
+
+    def _pipeline_configuration(
+        self, runtime_configuration: typing.Dict[str, typing.Any]
+    ) -> typing.Tuple[typing.List, typing.List, typing.List, typing.List]:
+        from api_app.playbooks_manager.dataclasses import PlaybookConfig
+
+        # case playbooks
+        if not runtime_configuration and self.playbooks_to_execute:
+            configs = []
+            analyzers = []
+            connectors = []
+            playbooks = self.playbooks_to_execute
+            # this must be done because each analyzer on the playbook
+            # could be executed with a different configuration
+            for playbook in PlaybookConfig.filter(
+                names=self.playbooks_to_execute
+            ).values():
+                playbook: PlaybookConfig
+                if not playbook.is_ready_to_use and not settings.STAGE_CI:
+                    continue
+                configs.append(playbook.analyzers | playbook.connectors)
+                analyzers.append(
+                    [
+                        analyzer
+                        for analyzer in playbook.analyzers.keys()
+                        if analyzer in self.analyzers_to_execute
+                    ]
+                )
+                connectors.append(
+                    [
+                        connector
+                        for connector in playbook.connectors.keys()
+                        if connector in self.connectors_to_execute
+                    ]
+                )
+        else:
+            configs = [runtime_configuration]
+            analyzers = [self.analyzers_to_execute]
+            connectors = [self.connectors_to_execute]
+            playbooks = [""]
+        return configs, analyzers, connectors, playbooks
+
+    def pipeline(self, runtime_configuration: typing.Dict[str, typing.Any]):
+        from api_app.analyzers_manager.dataclasses import AnalyzerConfig
+        from api_app.connectors_manager.dataclasses import ConnectorConfig
+        from intel_owl import tasks
+        from intel_owl.consts import DEFAULT_QUEUE
+
+        final_analyzer_signatures = []
+        final_connector_signatures = []
+        for config, analyzers, connectors, playbook in zip(
+            *self._pipeline_configuration(runtime_configuration)
+        ):
+            config = self._merge_runtime_configuration(config, analyzers, connectors)
+            logger.info(
+                f"Config is {config},"
+                f" analyzers are {analyzers} and"
+                f" connectors are {connectors}"
+            )
+            analyzer_signatures, _ = AnalyzerConfig.stack(
+                job_id=self.pk,
+                plugins_to_execute=analyzers,
+                runtime_configuration=config,
+                parent_playbook=playbook,
+            )
+            for signature in analyzer_signatures:
+                if signature not in final_analyzer_signatures:
+                    final_analyzer_signatures.append(signature)
+                else:
+                    logger.warning(f"Signature {signature} is duplicate")
+
+            connector_signatures, _ = ConnectorConfig.stack(
+                job_id=self.pk,
+                plugins_to_execute=connectors,
+                runtime_configuration=config,
+                parent_playbook=playbook,
+            )
+            for signature in connector_signatures:
+                if signature not in final_connector_signatures:
+                    final_connector_signatures.append(signature)
+                else:
+                    logger.warning(f"Signature {signature} is duplicate")
+        logger.info(f"Analyzer signatures are {final_analyzer_signatures}")
+        logger.info(f"Connector signatures are {final_connector_signatures}")
+        runner = (
+            group(final_analyzer_signatures)
+            | tasks.continue_job_pipeline.signature(
+                args=[self.pk],
+                kwargs={},
+                queue=DEFAULT_QUEUE,
+                soft_time_limit=10,
+                immutable=True,
+            )
+            | group(final_connector_signatures)
+        )
+        runner()
 
     # user methods
 
@@ -235,8 +401,7 @@ class Job(models.Model):
 @receiver(models.signals.pre_delete, sender=Job)
 def delete_file(sender, instance: Job, **kwargs):
     if instance.file:
-        if instance.file:
-            instance.file.delete()
+        instance.file.delete()
 
 
 class PluginConfig(models.Model):
@@ -285,28 +450,37 @@ class PluginConfig(models.Model):
         ]
 
     @classmethod
+    def visible_for_user(cls, user: User = None) -> QuerySet:
+        from certego_saas.apps.organization.membership import Membership
+
+        configs = cls.objects.all()
+        if user:
+            # User-level custom configs should override organization-level configs,
+            # we need to get the organization-level configs, if any, first.
+            try:
+                membership = Membership.objects.get(user=user)
+            except Membership.DoesNotExist:
+                # If user is not a member of any organization,
+                # we don't need to do anything.
+                configs = configs.filter(owner=user)
+            else:
+                configs = configs.filter(
+                    Q(organization=membership.organization) | Q(owner=user)
+                )
+
+        return configs
+
+    @classmethod
     def get_as_dict(cls, user, entity_type, config_type=None, plugin_name=None) -> dict:
         """
         Returns custom config as dict
         """
-        custom_configs = cls.objects.none()
 
         kwargs = {}
         if config_type:
             kwargs["config_type"] = config_type
-
-        # Since, user-level custom configs should override organization-level configs,
-        # we need to get the organization-level configs, if any, first.
-        try:
-            membership = Membership.objects.get(user=user)
-            custom_configs |= cls.objects.filter(
-                organization=membership.organization, type=entity_type, **kwargs
-            )
-        except Membership.DoesNotExist:
-            # If user is not a member of any organization, we don't need to do anything.
-            pass
-
-        custom_configs |= cls.objects.filter(owner=user, type=entity_type, **kwargs)
+        custom_configs = cls.visible_for_user(user)
+        custom_configs = custom_configs.filter(type=entity_type, **kwargs)
         if plugin_name is not None:
             custom_configs = custom_configs.filter(plugin_name=plugin_name)
 

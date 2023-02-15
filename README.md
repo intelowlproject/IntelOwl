@@ -6,7 +6,7 @@
 [![Twitter Follow](https://img.shields.io/twitter/follow/intel_owl?style=social)](https://twitter.com/intel_owl)
 [![Linkedin](https://img.shields.io/badge/LinkedIn-0077B5?style=flat&logo=linkedin&logoColor=white)](https://www.linkedin.com/company/intelowl/)
 [![Official Site](https://img.shields.io/badge/official-site-blue)](https://intelowlproject.github.io)
-[![Live Demo](https://img.shields.io/badge/live-demo-blue)](https://intelowl.honeynet.org)
+[![Live Instance](https://img.shields.io/badge/live-demo-blue)](https://intelowl.honeynet.org)
 
 [![CodeFactor](https://www.codefactor.io/repository/github/intelowlproject/intelowl/badge)](https://www.codefactor.io/repository/github/intelowlproject/intelowl)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
@@ -15,6 +15,7 @@
 [![Dependency Review](https://github.com/intelowlproject/IntelOwl/actions/workflows/dependency_review.yml/badge.svg)](https://github.com/intelowlproject/IntelOwl/actions/workflows/dependency_review.yml)
 [![Build & Tests](https://github.com/intelowlproject/IntelOwl/workflows/Build%20&%20Tests/badge.svg)](https://github.com/intelowlproject/IntelOwl/actions)
 [![codecov](https://codecov.io/gh/intelowlproject/IntelOwl/branch/master/graph/badge.svg?token=R097M4TYA6)](https://codecov.io/gh/intelowlproject/IntelOwl)
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/intelowlproject/IntelOwl/badge)](https://api.securityscorecards.dev/projects/github.com/intelowlproject/IntelOwl)
 # Intel Owl
 
 Do you want to get **threat intelligence data** about a malware, an IP or a domain? Do you want to get this kind of data from multiple sources at the same time using **a single API request**?
@@ -39,14 +40,15 @@ Intel Owl is an Open Source Intelligence, or OSINT solution to get threat intell
 We try hard to keep our documentation well written, easy to understand and always updated.
 All info about installation, usage, configuration and contribution can be found [here](https://intelowl.readthedocs.io/)
 
-### Blog posts
+### Publications
 
-To know more about the project and its growth over time, you may be interested in reading the following official blog posts:
+To know more about the project and its growth over time, you may be interested in reading the following official blog posts and/or videos:
 
+- [Youtube demo](https://youtu.be/pHnh3qTzSeM)
 - [Certego Blog: v.4.0.0 Announcement](https://www.certego.net/en/news/intel-owl-release-v4-0-0/)
-- [Honeynet: v3.0.0 Announcement](https://www.honeynet.org/2021/09/13/intel-owl-release-v3-0-0/)
+- [Honeynet Blog: v3.0.0 Announcement](https://www.honeynet.org/2021/09/13/intel-owl-release-v3-0-0/)
 - [Intel Owl on Daily Swig](https://portswigger.net/daily-swig/intel-owl-osint-tool-automates-the-intel-gathering-process-using-a-single-api)
-- [Honeynet: v1.0.0 Announcement](https://www.honeynet.org/?p=7558)
+- [Honeynet Blog: v1.0.0 Announcement](https://www.honeynet.org/?p=7558)
 - [Certego Blog: First announcement](https://www.certego.net/en/news/new-year-new-tool-intel-owl/)
 
 ### Available services or analyzers
@@ -133,7 +135,9 @@ If you are an individual who likes this project and want to thank us with a litt
 
 ## About the author and maintainers
 
-Feel free to contact the main developers at any time on twitter:
+Feel free to contact the main developers at any time on Twitter:
 
 - [Matteo Lodi](https://twitter.com/matte_lodi): Author and creator
 - [Eshaan Bansal](https://twitter.com/eshaan7_): Principal maintainer
+- [Simone Berni](https://twitter.com/0ssig3no): Key Contributor and Backend Maintainer
+- [Daniele Rosetti](https://github.com/drosetti): Key Contributor and Frontend Maintainer

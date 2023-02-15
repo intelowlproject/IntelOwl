@@ -11,6 +11,8 @@ class Qiling(FileAnalyzer, DockerBasedAnalyzer):
     max_tries: int = 15
     # interval between http request polling (in secs)
     poll_distance: int = 30
+    timeout: int = 60 * 9
+    # whereas subprocess timeout is kept as 60 * 9 = 9 minutes
 
     def set_params(self, params):
         self.args = []
@@ -29,6 +31,6 @@ class Qiling(FileAnalyzer, DockerBasedAnalyzer):
         fname = str(self.filename).replace("/", "_").replace(" ", "_")
         binary = self.read_file_bytes()
         # make request parameters
-        req_data = {"args": [f"@{fname}", *self.args]}
+        req_data = {"args": [f"@{fname}", *self.args], "timeout": self.timeout}
         req_files = {fname: binary}
         return self._docker_run(req_data, req_files)

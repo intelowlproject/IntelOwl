@@ -25,7 +25,7 @@ db_names = ["GeoLite2-Country.mmdb", "GeoLite2-City.mmdb"]
 
 class Maxmind(classes.ObservableAnalyzer):
     def set_params(self, params):
-        self.params = params
+        pass
 
     def run(self):
         maxmind_final_result = {}
@@ -33,7 +33,7 @@ class Maxmind(classes.ObservableAnalyzer):
             try:
                 db_location = _get_db_location(db)
                 if not os.path.isfile(db_location):
-                    self.updater(self.params, db)
+                    self.updater(db)
                 if not os.path.exists(db_location):
                     raise maxminddb.InvalidDatabaseError(
                         "database location does not exist"
@@ -54,7 +54,7 @@ class Maxmind(classes.ObservableAnalyzer):
         return maxmind_final_result
 
     @classmethod
-    def updater(cls, params, db):
+    def updater(cls, db):
         if not cls.enabled:
             logger.warning("No running updater for Maxmind, because it is disabled")
             return
@@ -85,7 +85,7 @@ class Maxmind(classes.ObservableAnalyzer):
 
             tf = tarfile.open(tar_db_path)
             directory_to_extract_files = settings.MEDIA_ROOT
-            tf.extractall(directory_to_extract_files)
+            tf.extractall(str(directory_to_extract_files))
 
             today = datetime.datetime.now().date()
             counter = 0

@@ -13,7 +13,8 @@ class AnalyzerAppViewsTestCase(CustomAPITestCase):
         self.assertEqual(response.status_code, 200)
         self.assertNotEqual(response.json(), {})
         self.assertDictEqual(
-            response.json(), AnalyzerConfigSerializer.read_and_verify_config()
+            response.json(),
+            AnalyzerConfigSerializer.read_and_verify_config(user=self.superuser),
         )
 
     def test_analyzer_healthcheck_200(self):

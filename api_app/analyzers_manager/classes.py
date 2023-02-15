@@ -25,7 +25,7 @@ from .models import AnalyzerReport
 logger = logging.getLogger(__name__)
 
 
-class BaseAnalyzerMixin(Plugin):
+class BaseAnalyzerMixin(Plugin, metaclass=ABCMeta):
     """
     Abstract Base class for Analyzers.
     Never inherit from this branch,
@@ -94,8 +94,6 @@ class BaseAnalyzerMixin(Plugin):
         return result
 
     def before_run(self, *args, **kwargs):
-        parent_playbook = kwargs.get("parent_playbook", "")
-        self.add_parent_playbook(parent_playbook=parent_playbook)
         self.report.update_status(status=self.report.Status.RUNNING)
 
     def after_run(self):
@@ -166,6 +164,7 @@ class FileAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
     file_mimetype: str
 
     def read_file_bytes(self) -> bytes:
+        self._job.file.seek(0)
         return self._job.file.read()
 
     @property
@@ -280,7 +279,7 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
                 f"<-- {self.__repr__()}"
             )
             try:
-                status_code, json_data = self.__query_for_result(self.url, req_key)
+                _, json_data = self.__query_for_result(self.url, req_key)
             except (requests.RequestException, json.JSONDecodeError) as e:
                 raise AnalyzerRunException(e)
             status = json_data.get("status", None)
@@ -417,12 +416,13 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
 
         try:
             requests.head(cls.url, timeout=10)
-            health_status = True
         except requests.exceptions.ConnectionError:
             # status=False, so pass
             pass
         except requests.exceptions.Timeout:
             # status=False, so pass
             pass
+        else:
+            health_status = True
 
         return health_status

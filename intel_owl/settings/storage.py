@@ -5,8 +5,7 @@ from django.core.files.storage import FileSystemStorage
 from intel_owl import secrets
 
 from ._util import get_secret
-from .cache import MEDIA_ROOT
-from .commons import BASE_STATIC_PATH
+from .commons import BASE_STATIC_PATH, MEDIA_ROOT
 
 # Static Files (CSS, JavaScript, Images)
 STATIC_URL = "/static/"

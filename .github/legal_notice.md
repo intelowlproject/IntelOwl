@@ -52,4 +52,6 @@ license terms.
 [CyberChef-server](https://github.com/gchq/CyberChef-server/blob/master/LICENSE),
 [pyelftools](https://github.com/eliben/pyelftools),
 [telfhash](https://github.com/trendmicro/telfhash),
-[Authlib](https://github.com/lepture/authlib)
+[Authlib](https://github.com/lepture/authlib),
+[Fangfrisch](https://github.com/rseichter/fangfrisch),
+[pyOneNote](https://github.com/DissectMalware/pyOneNote)

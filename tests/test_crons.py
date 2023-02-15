@@ -3,10 +3,11 @@
 
 import os
 
+from django.conf import settings
 from django.test import TestCase
 
 from api_app import crons
-from api_app.analyzers_manager.file_analyzers import yara_scan
+from api_app.analyzers_manager.file_analyzers import quark_engine, yara_scan
 from api_app.analyzers_manager.observable_analyzers import maxmind, talos, tor
 
 from . import get_logger
@@ -29,7 +30,7 @@ class CronTests(TestCase):
     @if_mock_connections(skip("not working without connection"))
     def test_maxmind_updater(self):
         for db in maxmind.db_names:
-            db_file_path = maxmind.Maxmind.updater({}, db)
+            db_file_path = maxmind.Maxmind.updater(db)
             self.assertTrue(os.path.exists(db_file_path))
 
     @if_mock_connections(
@@ -46,7 +47,10 @@ class CronTests(TestCase):
         db_file_path = tor.Tor.updater()
         self.assertTrue(os.path.exists(db_file_path))
 
+    def test_quark_updater(self):
+        quark_engine.QuarkEngine.updater()
+        self.assertTrue(os.path.exists(quark_engine.QuarkEngine.QUARK_RULES_PATH))
+
     def test_yara_updater(self):
-        file_paths = yara_scan.YaraScan.yara_update_repos()
-        for file_path in file_paths:
-            self.assertTrue(os.path.exists(file_path))
+        yara_scan.YaraScan.update_rules()
+        self.assertTrue(len(os.listdir(settings.YARA_RULES_PATH)))

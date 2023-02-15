@@ -43,10 +43,11 @@ class FireHol_IPList(classes.ObservableAnalyzer):
             db_list = db.split("\n")
 
             for ip_or_subnet in db_list:
-                if ip_or_subnet != "":
-                    if ipaddress.ip_address(ip) in ipaddress.ip_network(ip_or_subnet):
-                        result[list_name] = True
-                        break
+                if ip_or_subnet and ipaddress.ip_address(ip) in ipaddress.ip_network(
+                    ip_or_subnet
+                ):
+                    result[list_name] = True
+                    break
 
         return result
 

@@ -5,10 +5,13 @@
 # ... that implements additional features to correctly analyze some particular files
 # original repository: https://github.com/decalage2/oletools
 # forked repository: https://github.com/mlodic/oletools
-
 import logging
+import re
+import zipfile
 from re import sub
+from typing import List
 
+from defusedxml.ElementTree import fromstring
 from oletools import mraptor
 from oletools.msodde import process_maybe_encrypted as msodde_process_maybe_encrypted
 from oletools.olevba import VBA_Parser
@@ -38,7 +41,7 @@ class DocInfo(FileAnalyzer):
         # you can use pyintelowl to send additional passwords to check for
         # example:
         #             "additional_configuration": {
-        #                 "Doc_Info_Experimental": {
+        #                 "Doc_Info": {
         #                     "additional_passwords_to_check": ["testpassword"]
         #                 }
         #             },
@@ -55,8 +58,7 @@ class DocInfo(FileAnalyzer):
 
             self.manage_encrypted_doc()
 
-            if self.experimental:
-                self.experimental_analysis()
+            self.manage_xlm_macros()
 
             # go on with the normal oletools execution
             self.olevba_results["macro_found"] = self.vbaparser.detect_vba_macros()
@@ -135,6 +137,36 @@ class DocInfo(FileAnalyzer):
 
         results["olevba"] = self.olevba_results
 
+        results["msodde"] = self.analyze_msodde()
+        results["follina"] = self.analyze_for_follina_cve()
+        return results
+
+    def analyze_for_follina_cve(self) -> List[str]:
+        hits = []
+        if (
+            self.file_mimetype
+            == "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        ):
+            # case docx
+            zipped = zipfile.ZipFile(self.filepath)
+            try:
+                template = zipped.read("word/_rels/document.xml.rels")
+            except KeyError:
+                pass
+            else:
+                # logic reference:
+                # https://github.com/MalwareTech/FollinaExtractor/blob/main/extract_follina.py#L7
+                xml_root = fromstring(template)
+                for xml_node in xml_root.iter():
+                    target = xml_node.attrib.get("Target")
+                    if target:
+                        target = target.strip().lower()
+                        hits += re.findall(r"mhtml:(https?://.*?)!", target)
+        else:
+            logger.info(f"Wrong mimetype to search for follina {self.md5}")
+        return hits
+
+    def analyze_msodde(self):
         try:
             msodde_result = msodde_process_maybe_encrypted(
                 self.filepath, self.passwords_to_check
@@ -145,10 +177,7 @@ class DocInfo(FileAnalyzer):
             self.report.errors.append(error_message)
             self.report.save()
             msodde_result = f"Error: {e}"
-
-        results["msodde"] = msodde_result
-
-        return results
+        return msodde_result
 
     def manage_encrypted_doc(self):
         self.olevba_results["is_encrypted"] = False
@@ -166,9 +195,11 @@ class DocInfo(FileAnalyzer):
                 for num in range(10):
                     common_pwd_to_check.append(f"{num}{num}{num}{num}")
                 # https://twitter.com/JohnLaTwC/status/1265377724522131457
-                filename_without_spaces_and_numbers = sub("[-_\d\s]", "", self.filename)
+                filename_without_spaces_and_numbers = sub(
+                    r"[-_\d\s]", "", self.filename
+                )
                 filename_without_extension = sub(
-                    "(\..+)", "", filename_without_spaces_and_numbers
+                    r"(\..+)", "", filename_without_spaces_and_numbers
                 )
                 common_pwd_to_check.append(filename_without_extension)
                 self.passwords_to_check.extend(common_pwd_to_check)
@@ -186,10 +217,8 @@ class DocInfo(FileAnalyzer):
                         "cannot decrypt the file with the default password"
                     )
 
-    def experimental_analysis(self):
-        self.manage_xlm_macros()
-
     def manage_xlm_macros(self):
+        # this would overwrite classic XLM parsing
         self.olevba_results["xlm_macro"] = False
         # check if the file contains an XLM macro
         # and try an experimental parsing

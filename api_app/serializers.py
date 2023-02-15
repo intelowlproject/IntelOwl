@@ -47,6 +47,8 @@ __all__ = [
     "MultipleObservableAnalysisSerializer",
     "multi_result_enveloper",
     "PluginConfigSerializer",
+    "PlaybookFileAnalysisSerializer",
+    "PlaybookObservableAnalysisSerializer",
 ]
 
 
@@ -272,6 +274,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         # create ``Tag`` objects from tags_labels
         tags_labels = validated_data.pop("tags_labels", None)
         validated_data.pop("warnings")
+        validated_data.pop("runtime_configuration")
         tags = [
             Tag.objects.get_or_create(
                 label=label, defaults={"color": gen_random_colorhex()}
@@ -453,7 +456,7 @@ class FileAnalysisSerializer(_AbstractJobCreateSerializer):
                             f"{a_name} won't be run because does not support files."
                         )
                     if not config.is_filetype_supported(
-                        serialized_data["file_mimetype"]
+                        serialized_data["file_mimetype"], serialized_data["file_name"]
                     ):
                         raise NotRunnableAnalyzer(
                             f"{a_name} won't be run because mimetype "
@@ -554,6 +557,9 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
             attrs["observable_classification"] = calculate_observable_classification(
                 attrs["observable_name"]
             )
+        attrs["observable_name"] = self.defanged_values_removal(
+            attrs["observable_name"]
+        )
         if attrs["observable_classification"] in [
             ObservableTypes.HASH,
             ObservableTypes.DOMAIN,
@@ -566,6 +572,16 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
         attrs = super().validate(attrs)
         logger.debug(f"after attrs: {attrs}")
         return attrs
+
+    @staticmethod
+    def defanged_values_removal(value):
+        if "\\" in value:
+            value = value.replace("\\", "")
+        if "]" in value:
+            value = value.replace("]", "")
+        if "[" in value:
+            value = value.replace("[", "")
+        return value
 
     def filter_analyzers(self, serialized_data: Dict) -> List[str]:
         cleaned_analyzer_list = []
@@ -627,7 +643,6 @@ class PlaybookBaseSerializer:
     def filter_playbooks(self, attrs: Dict) -> Tuple[List]:
         # init empty list
         valid_playbook_list = []
-        selected_playbooks = []
         analyzers_to_be_run = []
         connectors_to_be_run = []
         warnings = []
@@ -778,10 +793,7 @@ class AnalysisResponseSerializer(rfs.Serializer):
     warnings = rfs.ListField(required=False)
     analyzers_running = rfs.ListField()
     connectors_running = rfs.ListField()
-
-
-class PlaybookAnalysisResponseSerializer(AnalysisResponseSerializer):
-    playbooks_running = rfs.ListField()
+    playbooks_running = rfs.ListField(required=False)
 
 
 def multi_result_enveloper(serializer_class, many):
@@ -817,27 +829,38 @@ class PluginConfigSerializer(rfs.ModelSerializer):
         queryset=Organization.objects.all(),
         required=False,
     )
-
+    owner = rfs.HiddenField(default=rfs.CurrentUserDefault())
     value = CustomJSONField()
 
     class Meta:
         model = PluginConfig
         fields = rfs.ALL_FIELDS
 
+    def to_representation(self, instance):
+        if (
+            instance.organization
+            and self.context["request"].user.pk != instance.organization.owner.pk
+        ):
+            instance.value = "redacted"
+        return super().to_representation(instance)
+
     def validate(self, attrs):
         super().validate(attrs)
 
         # check if owner is admin of organization
         if attrs.get("organization", None):
+            # here the owner can't be retrieved by the field
+            # because the HiddenField will always return None
+            owner = self.context["request"].user
             # check if the user is owner of the organization
             membership = Membership.objects.filter(
-                user=attrs.get("owner"),
+                user=owner,
                 organization=attrs.get("organization"),
                 is_owner=True,
             )
             if not membership.exists():
                 logger.warning(
-                    f"User {attrs.get('owner')} is not owner of "
+                    f"User {owner} is not owner of "
                     f"organization {attrs.get('organization')}."
                 )
                 raise PermissionDenied("User is not owner of the organization.")
@@ -855,25 +878,42 @@ class PluginConfigSerializer(rfs.ModelSerializer):
         if attrs["plugin_name"] not in config.all():
             raise ValidationError(f"{category} {attrs['plugin_name']} does not exist.")
 
-        if attrs["config_type"] == PluginConfig.ConfigType.PARAMETER:
-            if attrs["attribute"] not in config.all()[attrs["plugin_name"]].params:
-                raise ValidationError(
-                    f"{category} {attrs['plugin_name']} does not "
-                    f"have parameter {attrs['attribute']}."
-                )
-        elif attrs["config_type"] == PluginConfig.ConfigType.SECRET:
-            if attrs["attribute"] not in config.all()[attrs["plugin_name"]].secrets:
-                raise ValidationError(
-                    f"{category} {attrs['plugin_name']} does not "
-                    f"have secret {attrs['attribute']}."
-                )
+        if (
+            attrs["config_type"] == PluginConfig.ConfigType.PARAMETER
+            and attrs["attribute"] not in config.all()[attrs["plugin_name"]].params
+        ):
+            raise ValidationError(
+                f"{category} {attrs['plugin_name']} does not "
+                f"have parameter {attrs['attribute']}."
+            )
+        elif (
+            attrs["config_type"] == PluginConfig.ConfigType.SECRET
+            and attrs["attribute"] not in config.all()[attrs["plugin_name"]].secrets
+        ):
+
+            raise ValidationError(
+                f"{category} {attrs['plugin_name']} does not "
+                f"have secret {attrs['attribute']}."
+            )
         # Check if the type of value is valid for the attribute.
+
         expected_type = (
-            type(config.all()[attrs["plugin_name"]].params[attrs["attribute"]].value)
+            config.all()[attrs["plugin_name"]].params[attrs["attribute"]].type
             if attrs["config_type"] == PluginConfig.ConfigType.PARAMETER
-            else str
+            else config.all()[attrs["plugin_name"]].secrets[attrs["attribute"]].type
         )
-        if not isinstance(
+        if expected_type == "str":
+            expected_type = str
+        elif expected_type == "list":
+            expected_type = list
+        elif expected_type == "dict":
+            expected_type = dict
+        elif expected_type in ["int", "float"]:
+            expected_type = int
+        elif expected_type == "bool":
+            expected_type = bool
+
+        if expected_type and not isinstance(
             attrs["value"],
             expected_type,
         ):

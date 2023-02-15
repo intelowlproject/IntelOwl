@@ -32,8 +32,7 @@ class PlaybookConfig:
         keys = data.keys()
 
         signature = inspect.signature(PlaybookConfig.__init__)
-        whitelist = [parameter for parameter in signature.parameters]
-        whitelist.pop(0)
+        whitelist = list(signature.parameters)[1:]
 
         cleaned_data = {key: data[key] for key in keys if key in whitelist}
 

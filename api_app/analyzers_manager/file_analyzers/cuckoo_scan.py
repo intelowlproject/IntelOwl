@@ -28,6 +28,8 @@ class CuckooAnalysis(FileAnalyzer):
             self.session.headers["Authorization"] = f"Bearer {api_key}"
 
         self.cuckoo_url = self._secrets["url_key_name"]
+        if not self.cuckoo_url:
+            raise AnalyzerConfigurationException("cuckoo URL missing")
         self.task_id = 0
         self.result = {}
         # no. of tries requesting new scan
@@ -36,8 +38,6 @@ class CuckooAnalysis(FileAnalyzer):
         self.max_get_tries = params.get("max_poll_tries", 20)
 
     def run(self):
-        if not self.cuckoo_url:
-            raise AnalyzerConfigurationException("cuckoo URL missing")
         binary = self.read_file_bytes()
         if not binary:
             raise AnalyzerRunException("is the binary empty?!")
@@ -181,9 +181,8 @@ class CuckooAnalysis(FileAnalyzer):
             ioc = mark.get("ioc", "")
             if ioc and ioc.startswith("http"):
                 list_potentially_malicious_urls.append(ioc)
-            if mark.get("config", {}):
-                if mark["config"].get("url", []):
-                    list_potentially_malicious_urls.extend(mark["config"]["url"])
+            urls = mark.get("config", {}).get("url", [])
+            list_potentially_malicious_urls.extend(urls)
 
         # remove duplicates
         list_potentially_malicious_urls = list(set(list_potentially_malicious_urls))

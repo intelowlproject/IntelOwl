@@ -13,7 +13,7 @@ RUN npm install npm@latest --location=global \
     && PUBLIC_URL=/static/reactapp/ npm run build
 
 # Stage 2: Backend
-FROM python:3.9.9-buster
+FROM python:3.9.16
 
 COPY --from=frontend-build /build /var/www/reactapp
 
@@ -21,7 +21,7 @@ ENV PYTHONUNBUFFERED 1
 ENV DJANGO_SETTINGS_MODULE intel_owl.settings
 ENV PYTHONPATH /opt/deploy/intel_owl
 ENV LOG_PATH /var/log/intel_owl
-ENV ELASTICSEARCH_DSL_VERSION 7.2.0
+ENV ELASTICSEARCH_DSL_VERSION 7.2.2
 ENV watch_logs_cmd "watch -n1 tail -n10 /var/log/intel_owl/django/api_app.log"
 
 ARG REPO_DOWNLOADER_ENABLED=true
@@ -30,15 +30,14 @@ ARG WATCHMAN=false
 RUN mkdir -p ${LOG_PATH} \
     ${LOG_PATH}/django \
     ${LOG_PATH}/uwsgi \
-    /opt/deploy/files_required /opt/deploy/yara /opt/deploy/configuration
+    /opt/deploy/files_required /opt/deploy/files_required/yara /opt/deploy/configuration
 
 # install required packages. some notes about:o
 # python3-psycopg2 is required to use PostgresSQL with Django
-# osslsigncode is required to run the signature verification analyzer
 # apache2-utils is required to execute htpasswd
 RUN apt-get update \
     && apt-get install -y --no-install-recommends apt-utils libsasl2-dev libssl-dev netcat \
-    vim libldap2-dev python-dev libfuzzy-dev net-tools python3-psycopg2 git osslsigncode apache2-utils \
+    vim libldap2-dev python-dev libfuzzy-dev net-tools python3-psycopg2 git apache2-utils \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
     && pip3 install --no-cache-dir --upgrade pip
@@ -61,7 +60,7 @@ RUN touch ${LOG_PATH}/django/api_app.log ${LOG_PATH}/django/api_app_errors.log \
     # this is cause stringstifer creates this directory during the build and cause celery to crash
     && rm -rf /root/.local \
     && ${PYTHONPATH}/docker/scripts/watchman_install.sh \
-    # download yara rules and quark engine rules
+    # download github stuff
     && ${PYTHONPATH}/api_app/analyzers_manager/repo_downloader.sh
 
 # quarkengine calls

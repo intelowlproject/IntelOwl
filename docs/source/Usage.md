@@ -104,32 +104,31 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `File_Info`: static generic File analysis (hashes, magic and [exiftool](https://exiftool.org/))
 * `PDF_Info`: static PDF analysis ([peepdf](https://github.com/jesparza/peepdf) + [pdfid](https://github.com/mlodic/pdfid))
 * `Rtf_Info`: static RTF analysis ([Oletools](https://github.com/decalage2/oletools))
-* `Doc_Info`: static generic document analysis ([Oletools](https://github.com/decalage2/oletools))
+* `Doc_Info`: static document analysis with new features to analyze XLM macros, encrypted macros and more (combination of Oletools and XLMMacroDeobfuscator)
 * `Xlm_Macro_Deobfuscator`: [XlmMacroDeobfuscator](https://github.com/DissectMalware/XLMMacroDeobfuscator) deobfuscate xlm macros
-* `Doc_Info_Experimental`: static document analysis with new features to analyze XLM macros, encrypted macros and more (combination of Oletools and XLMMacroDeobfuscator)
 * `PE_Info`: static PE analysis with [pefile](https://github.com/mlodic/pefile)
 * `Signature_Info`: PE signature extractor with [osslsigncode](https://github.com/mtrojnar/osslsigncode)
 * `Speakeasy`: [Mandiant Speakeasy](https://github.com/mandiant/speakeasy) binary emulation
 * `SpeakEasy_Shellcode`: [Mandiant Speakeasy](https://github.com/mandiant/speakeasy) shellcode emulation
 * `Floss`: [Mandiant Floss](https://github.com/mandiant/flare-floss) Obfuscated String Solver in files
-* `Strings_Info_Classic`: strings extraction
-* `Strings_Info_ML`: strings extraction plus strings ranking based on Machine Learning. Leverages [Stringsifter](https://github.com/fireeye/stringsifter)
-* `YARAify_File_Scan`: scan a file against public and non-public YARA and ClamAV signatures
-* `Yara_Scan_ATM_MALWARE`: scan a file with the [ATM malware yara rules](https://github.com/fboldewin/YARA-rules)
-* `Yara_Scan_Bartblaze`: scan a file with [bartblaze yara rules](https://github.com/bartblaze/Yara-rules)
-* `Yara_Scan_Community`: scan a file with the [community yara rules](https://github.com/Yara-Rules/rules)
-* `Yara_Scan_Dail_Ioc`: scan a file with [StrangerealIntel](https://github.com/StrangerealIntel) Daily IOC yara rules
-* `Yara_Scan_Florian`: scan a file with [Neo23x0 yara rules](https://github.com/Neo23x0/signature-base)
-* `Yara_Scan_Intezer`: scan a file with [Intezer yara rules](https://github.com/intezer/yara-rules)
-* `Yara_Scan_Inquest`: scan a file with [Inquest yara rules](https://github.com/InQuest/yara-rules)
-* `Yara_Scan_McAfee`: scan a file with [McAfee yara rules](https://github.com/advanced-threat-research/Yara-Rules)
-* `Yara_Scan_Samir`: scan a file with [Samir Threat Hunting yara rules](https://github.com/sbousseaden/YaraHunts)
-* `Yara_Scan_Stratosphere`: scan a file with [Stratosphere yara rules](https://github.com/stratosphereips/yara-rules)
-* `Yara_Scan_FireEye`: scan a file with FireEye yara rules
-* `Yara_Scan_ReversingLabs`: scan a file with [ReversingLabs yara rules](https://github.com/reversinglabs/reversinglabs-yara-rules)
-* `Yara_Scan_Custom_Signatures`: scan a file with your own added signatures
-* `Yara_Scan_YARAify`: scan a file with YARAify rules [YARAify rules](https://yaraify.abuse.ch/api/#download-yara-package)
-* `Yara_Scan_Custom_Signatures`: scan a file with the Yara rules you added manually in IntelOwl in `/configuration/custom_yara`
+* `Strings_Info`: Strings extraction. Leverages Mandiant's [Stringsifter](https://github.com/mandiant/stringsifter)
+* `Yara`: scan a file with
+  * [ATM malware yara rules](https://github.com/fboldewin/YARA-rules)
+  * [bartblaze yara rules](https://github.com/bartblaze/Yara-rules)
+  * [community yara rules](https://github.com/Yara-Rules/rules)
+  * [StrangerealIntel](https://github.com/StrangerealIntel) 
+  * [Neo23x0 yara rules](https://github.com/Neo23x0/signature-base)
+  * [Intezer yara rules](https://github.com/intezer/yara-rules)
+  * [Inquest yara rules](https://github.com/InQuest/yara-rules)
+  * [McAfee yara rules](https://github.com/advanced-threat-research/Yara-Rules)
+  * [Samir Threat Hunting yara rules](https://github.com/sbousseaden/YaraHunts)
+  * [Stratosphere yara rules](https://github.com/stratosphereips/yara-rules)
+  * [Mandiant yara rules](https://github.com/mandiant/red_team_tool_countermeasures)
+  * [ReversingLabs yara rules](https://github.com/reversinglabs/reversinglabs-yara-rules)
+  * [YARAify rules](https://yaraify.abuse.ch/api/#download-yara-package)
+  * [SIFalcon rules](https://github.com/SIFalcon/Detection/)
+  * [Elastic rules](https://github.com/elastic/protections-artifacts)
+  * your own added signatures. See [Advanced-Usage](./Advanced-Usage.html#analyzers-with-special-configuration) for more details.
 * `PEframe_Scan`: Perform static analysis on Portable Executable malware and malicious MS Office documents with [PeFrame](https://github.com/guelfoweb/peframe)
 * `Capa_Info`: [Capa](https://github.com/mandiant/capa) detects capabilities in executable files
 * `Capa_Info_Shellcode`: [Capa](https://github.com/mandiant/capa) detects capabilities in shellcode
@@ -144,7 +143,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `Qiling_Windows`: [Qiling](https://github.com/qilingframework/qiling) qiling windows binary emulation.
 * `Suricata`: Analyze PCAPs with open IDS signatures with [Suricata engine](https://github.com/OISF/suricata)
 * `ELF_Info`: static ELF analysis with [pyelftools](https://github.com/eliben/pyelftools) and [telfhash](https://github.com/trendmicro/telfhash)
-* `ClamAV`: scan a file via the [ClamAV AntiVirus Engine](https://www.clamav.net/)
+* `ClamAV`: scan a file via the [ClamAV AntiVirus Engine](https://www.clamav.net/). IntelOwl automatically keep ClamAV updated with official and [unofficial](https://github.com/rseichter/fangfrisch) open source signatures
 
 ###### External services
 * `VirusTotal_v3_Get_File_And_Scan`: check file hash on VirusTotal. If not already available, send the sample and perform a scan
@@ -158,6 +157,8 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `MISP_Check_Hash`: check a file hash on a MISP instance
 * `MISPFIRST_Check_Hash`: check a file hash on the FIRST MISP instance
 * `MalwareBazaar_Get_File`: Check if a particular malware sample is known to [MalwareBazaar](https://bazaar.abuse.ch/)
+* `YARAify_File_Scan`: scan a file against public and non-public YARA and ClamAV signatures in [YARAify](https://yaraify.abuse.ch/) public service
+* `YARAify_File_Search`: scan an hash against [YARAify](https://yaraify.abuse.ch/) database
 * `Cymru_Hash_Registry_Get_File`: Check if a particular file is known to be malware by [Team Cymru](https://team-cymru.com/community-services/mhr/)
 * `CapeSandbox`: [CAPESandbox](https://capesandbox.com) automatically scans suspicious files using the CapeSandbox API. Analyzer works for private instances as well.
 * `UnpacMe_EXE_Unpacker`: [UnpacMe](https://www.unpac.me/) is an automated malware unpacking service
@@ -228,6 +229,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `Cymru_Hash_Registry_Get_Observable`: Check if a particular hash is available in the malware hash registry of [Team Cymru](https://team-cymru.com/community-services/mhr/)
 * `Tranco`: Check if a domain is in the latest [Tranco](https://tranco-list.eu/) ranking top sites list
 * `Pulsedive_Active_IOC`: Scan indicators and retrieve results from [Pulsedive's API](https://pulsedive.com/api/).
+* `CheckPhish`: [CheckPhish](https://checkphish.ai/checkphish-api/) can detect phishing and fraudulent sites.
 * `Whoisxmlapi`: Fetch WHOIS record data, of a domain name, an IP address, or an email address.
 * `WhoIs_RipeDB_Search` : Fetch whois record data of an IP address from Ripe DB using their [search API](https://github.com/RIPE-NCC/whois/wiki/WHOIS-REST-API-search) (no API key required)
 * `UrlScan_Search`: Search an IP/domain/url/hash against [URLScan](https://urlscan.io) API
@@ -255,11 +257,15 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `YETI` (Your Everyday Threat Intelligence): scan an observable on a [YETI](https://github.com/yeti-platform/yeti) instance.
 * `HashLookupServer_Get_Observable`: check if a md5 or sha1 is available in the database of [known file hosted by CIRCL](https://github.com/adulau/hashlookup-server)
 * `Spyse`: Scan domains, IPs, emails and CVEs using Spyse's API. Register [here](https://spyse.com/user/registration).
+* `Koodous`: [koodous API](https://docs.koodous.com/api/) get information about android malware.
 * `FileScan_Search`: Finds reports and uploaded files by various tokens, like hash, filename, verdict, IOCs etc via [FileScan.io  API](https://www.filescan.io/api/docs).
+* `IPApi`: Get information about IPs using [batch-endpoint](https://ip-api.com/docs/api:batch) and DNS using [DNS-endpoint](https://ip-api.com/docs/dns).
 * `Virushee_CheckHash`: Search for a previous analysis of a file by its hash (SHA256/SHA1/MD5) on [Virushee API](https://api.virushee.com/).
 * `Anomali_Threatstream_PassiveDNS`: Return information from passive dns of Anomali. On [Anomali Threatstream](https://www.anomali.com/products/threatstream) PassiveDNS Api. 
 * `DocGuard_Get`: check if an hash was analyzed on DocGuard. [DocGuard](https://www.docguard.io)
 * `YARAify_Search`: lookup a file hash in [Abuse.ch YARAify](https://yaraify.abuse.ch/)
+* `DNS0_EU`: Retrieve current domain resolution with DNS0.eu DoH (DNS over HTTPS)
+* `DNS0_EU_Malicious_Detector`: Check if a domain or an url is marked as malicious in DNS0.eu database ([Zero](https://www.dns0.eu/zero) service)
 
 ##### Generic analyzers (email, phone number, etc.; anything really)
 Some analyzers require details other than just IP, URL, Domain, etc. We classified them as `generic` Analyzers. Since the type of field is not known, there is a format for strings to be followed.
@@ -279,6 +285,7 @@ Some analyzers require details other than just IP, URL, Domain, etc. We classifi
 * `Anomali_Threatstream_Confidence`: Give max, average and minimum confidence of maliciousness for an observable. On [Anomali Threatstream](https://www.anomali.com/products/threatstream) Confidence API.
 * `Anomali_Threatstream_Intelligence`: Search for threat intelligence information about an observable. On [Anomali Threatstream](https://www.anomali.com/products/threatstream) Intelligence API.
 * `YARAify_Generics`: lookup a YARA rule (default), ClamAV rule, imphash, TLSH, telfhash or icon_dash in [YARAify](https://yaraify.abuse.ch/)
+* `HaveIBeenPwned`: [HaveIBeenPwned](https://haveibeenpwned.com/API/v3) checks if an email address has been involved in a data breach
 
 ##### Optional analyzers
 
@@ -342,7 +349,7 @@ The following is the list of the available connectors. You can also navigate the
 
 #### Connectors customization
 
-Connectors being optional are `disabled` by default. You can enable them by changing the configuration values inside `configuration/connector_config.json`. This file is mounted as a docker volume, so you won't need to rebuild the image.
+Connectors being optional are `enabled` by default. You can disable them by changing the configuration values inside `configuration/connector_config.json`. This file is mounted as a docker volume, so you won't need to rebuild the image. 
 
 The following are all the keys that you can change without touching the source code:
 

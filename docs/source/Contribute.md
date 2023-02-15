@@ -14,15 +14,18 @@ Intel Owl welcomes contributors from anywhere and from any kind of education or 
 
 For this reason it is important to follow some easy rules based on a simple but important concept: **Respect**.
 
+- Before asking any questions regarding how the project works, please read _through all the documentation_ and [install](https://intelowl.readthedocs.io/en/latest/Installation.html) the project on your own local machine to try it and understand how it basically works. This is a form of respect to the maintainers.
+
+- DO NOT contact the maintainers with direct messages unless it is an urgent request. We don't have much time and cannot just answer to all the questions that we receive like "Guide me please! Help me understand how the project work". There is plenty of documentation and a lot of people in the community that can help you and would benefit from your questions. Share your problems and your knowledge. Please ask your questions in open channels (Github and Slack). This is a form of respect to the maintainers and to the community.
+
 - Before starting to work on an issue, you need to get the approval of one of the maintainers. Therefore please ask to be assigned to an issue. If you do not that but you still raise a PR for that issue, your PR can be rejected. This is a form of respect for both the maintainers and the other contributors who could have already started to work on the same problem.
 
 - When you ask to be assigned to an issue, it means that you are ready to work on it. When you get assigned, take the lock and then you disappear, you are not respecting the maintainers and the other contributors who could be able to work on that. So, after having been assigned, you have a week of time to deliver your first _draft_ PR. After that time has passed without any notice, you will be unassigned.
 
-- Before asking questions regarding how the project works, please read _through all the documentation_ and [install](https://intelowl.readthedocs.io/en/latest/Installation.html) the project on your own local machine to try it and understand how it basically works. This is a form of respect to the maintainers.
-
 - Once you started working on an issue and you have some work to share and discuss with us, please raise a draft PR early with incomplete changes. This way you can continue working on the same and we can track your progress and actively review and help. This is a form of respect to you and to the maintainers.
 
 - When creating a PR, please read through the sections that you will find in the PR template and compile it appropriately. If you do not, your PR can be rejected. This is a form of respect to the maintainers.
+
 
 ## Code Style
 
@@ -31,7 +34,7 @@ Keeping to a consistent code style throughout the project makes it easier to con
 ## How to start (Setup project and development instance)
 
 Create a personal fork of the project on Github.
-The, please create a new branch based on the **develop** branch that contains the most recent changes. This is mandatory.
+Then, please create a new branch based on the **develop** branch that contains the most recent changes. This is mandatory.
 
 `git checkout -b myfeature develop`
 
@@ -166,7 +169,7 @@ After having written the new python module, you have to remember to:
 
 Example:
 
-```javascript
+```json
 "Analyzer_Name": {
     "type": "file", // or "observable"
     "python_module": "<module_name>.<class_name>",
@@ -237,11 +240,12 @@ After having written the new python module, you have to remember to:
 
 Example:
 
-```javascript
+```json
 "Connector_Name": {
     "python_module": "<module_name>.<class_name>",
     "description": "very cool connector",
     "maximum_tlp": "WHITE",
+    "run_on_failure": false,
     "config": {
       "soft_time_limit": 100,
       "queue": "default",
@@ -275,7 +279,7 @@ You may want to look at the existing [playbook_configuration.json](https://githu
 
 Example:
 
-```javascript
+```json
 "Playbook_Name": {
     "description": "very cool playbook",
     "analyzers": {
@@ -353,6 +357,8 @@ $ # which corresponds to the command: docker-compose -f docker/default.yml -f do
 
 Now that the containers are up, we can launch the test suite.
 
+#### Backend
+
 ##### Run all tests
 
 Examples:
@@ -366,7 +372,7 @@ $ docker exec intelowl_uwsgi python3 manage.py test
 Examples:
 
 ```bash
-$ docker exec intelowl_uwsgi python3 manage.py test tests.test_api tests.test_auth # dotted paths
+$ docker exec intelowl_uwsgi python3 manage.py test tests.api_app tests.test_crons # dotted paths
 ```
 
 ##### Run tests for a particular analyzer or class of analyzers
@@ -401,6 +407,35 @@ Otherwise, you can use the normal Django syntax like previously shown. Example:
 $ docker exec intelowl_uwsgi python3 manage.py test tests.analyzers_manager.test_observable_scripts.GenericAnalyzersTestCase
 ```
 
+#### Frontend
+
+
+All the frontend tests must be run from the folder `frontend`.
+The tests can contain log messages, you can suppress then with the environment variable `SUPPRESS_JEST_LOG=True`.
+
+##### Run all tests
+
+```
+npm test
+```
+
+
+##### Run a specific component tests
+
+```
+npm test -- -t <componentPath>
+// example
+npm test tests/components/auth/Login.test.jsx
+```
+
+##### Run a specific test
+
+```
+npm test -- -t '<describeString> <testString>'
+// example
+npm test -- -t "Login component User login"
+```
+
 
 ## Create a pull request
 
@@ -423,7 +458,7 @@ Run `pip install -r requirements/test-requirements.txt` to install the requireme
 ```bash
 $ black . --exclude "migrations|venv"
 $ flake8 . --show-source --statistics
-$ isort --profile black --filter-files --skip venv
+$ isort . --profile black --filter-files --skip venv
 ```
 
 if flake8 shows any errors, fix them.
@@ -438,7 +473,7 @@ $ python3 start.py ci up
 3. Here, we simulate the GitHub CI tests locally by running the following 3 tests:
 
 ```bash
-$ docker exec -ti intelowl_uwsgi unzip -P infected tests/test_files.zip
+$ docker exec -ti intelowl_uwsgi unzip -P infected tests/test_files.zip -d test_files
 $ docker exec -ti intelowl_uwsgi python manage.py test tests
 ```
 
@@ -457,3 +492,14 @@ If everything is working, before submitting your pull request, please squash you
 - Then you have to force push the final, squashed commit: `git push --force-with-lease origin`.
 
 Squashing commits can be a tricky process but once you figure it out, it's really helpful and keeps our repo concise and clean.
+
+## Debug application problems
+Keep in mind that, if any errors arise during development, you would need to check the application logs to better understand what is happening so you can easily address the problem.
+
+This is the reason why it is important to add tons of logs in the application...if they are not available in time of needs you would cry really a lot.
+
+Where are IntelOwl logs?
+With a default installation of IntelOwl, you would be able to get the application data from the following paths in your OS:
+* `/var/lib/docker/volumes/intel_owl_generic_logs/_data/django`: Django Application logs
+* `/var/lib/docker/volumes/intel_owl_generic_logs/_data/uwsgi`: Uwsgi application server logs
+* `/var/lib/docker/volumes/intel_owl_nginx_logs/_data/django`: Nginx Web Server Logs

@@ -36,7 +36,7 @@ class Plugin(metaclass=ABCMeta):
 
     @cached_property
     def _secrets(self) -> dict:
-        return self._config.read_secrets()
+        return self._config.read_secrets(user=self._job.user)
 
     @property
     def _params(self) -> dict:
@@ -112,18 +112,14 @@ class Plugin(metaclass=ABCMeta):
     def get_error_message(self, exc, is_base_err=False):
         return f" {'[Unexpected error]' if is_base_err else '[Error]'}: '{exc}'"
 
-    def add_parent_playbook(self, parent_playbook):
-        self.report.parent_playbook = parent_playbook
-
     def start(self, *args, **kwargs) -> AbstractReport:
         """
         Entrypoint function to execute the plugin.
         calls `before_run`, `run`, `after_run`
         in that order with exception handling.
         """
-        parent_playbook = kwargs.get("parent_playbook", "")
         try:
-            self.before_run(parent_playbook=parent_playbook)
+            self.before_run()
             _result = self.run()
             self.report.report = _result
         except (*self.get_exceptions_to_catch(), SoftTimeLimitExceeded) as e:

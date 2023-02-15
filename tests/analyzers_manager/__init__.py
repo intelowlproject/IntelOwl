@@ -12,7 +12,6 @@ from django.core.files import File
 from api_app.analyzers_manager.dataclasses import AnalyzerConfig
 from api_app.connectors_manager.dataclasses import ConnectorConfig
 from api_app.models import Job
-from intel_owl.tasks import start_analyzers
 from tests import PollingFunction
 
 from .. import CustomTestCase
@@ -44,7 +43,6 @@ class _AbstractAnalyzersScriptTestCase(CustomTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-
         if cls in [
             _AbstractAnalyzersScriptTestCase,
             _ObservableAnalyzersScriptsTestCase,
@@ -65,22 +63,16 @@ class _AbstractAnalyzersScriptTestCase(CustomTestCase):
         self.test_job.delete()
         return super().tearDown()
 
-    def test_start_analyzers(self, *args, **kwargs):
-        print(f"\n[START] -----{self.__class__.__name__}.test_start_analyzers----")
+    def test_pipeline(self, *args, **kwargs):
+        print(f"\n[START] -----{self.__class__.__name__}.test_pipeline----")
         print(
             f"[REPORT] Job:{self.test_job.pk}, status:'{self.test_job.status}',",
             f"analyzers:{self.test_job.analyzers_to_execute}",
             f"connectors: {self.test_job.connectors_to_execute}",
         )
-
         # execute analyzers
-        # using `apply` so it runs synchronously, will block until the task returns
-        start_analyzers(
-            self.test_job.pk,
-            self.test_job.analyzers_to_execute,
-            self.runtime_configuration,
-        )
-        poll_result = PollingFunction(self, function_name="start_analyzers")
+        self.test_job.pipeline(self.runtime_configuration)
+        poll_result = PollingFunction(self)
         return poll_result
 
 
@@ -93,6 +85,10 @@ class _ObservableAnalyzersScriptsTestCase(_AbstractAnalyzersScriptTestCase):
         "VirusTotal_v3_Get_Observable": {
             "max_tries": 1,
             "poll_distance": 1,
+        },
+        "HaveIBeenPwned": {
+            "max_tries": 1,
+            "domain": "test@test.com",
         },
     }
 
@@ -156,10 +152,7 @@ class _FileAnalyzersScriptsTestCase(_AbstractAnalyzersScriptTestCase):
             "upload_file": True,
             "max_tries": 1,
         },
-        "Doc_Info_Experimental": {
-            "additional_passwords_to_check": ["testpassword"],
-            "experimental": True,
-        },
+        "Doc_Info": {"additional_passwords_to_check": ["testpassword"]},
     }
 
     @classmethod
@@ -174,7 +167,7 @@ class _FileAnalyzersScriptsTestCase(_AbstractAnalyzersScriptTestCase):
         # get params
         params = self.get_params()
         # save job instance
-        self.test_job = Job(**params)
+        self.test_job = Job(**params, user=self.superuser)
         # overwrite if set in env var
         if len(self.analyzers_to_test):
             self.test_job.analyzers_to_execute = self.analyzers_to_test

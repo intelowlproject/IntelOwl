@@ -72,7 +72,6 @@ WIGLE_KEY=test
 XFORCE_KEY=test
 XFORCE_PASSWORD=test
 SSAPINET_KEY=test
-GOOGLE_APPLICATION_CREDENTIALS=/opt/deploy/intel_owl/configuration/service_account_keyfile_example.json
 MALPEDIA_KEY=test
 DEHASHED_AUTH_KEY=email@example.com:verysecureapikey
 OPENCTI_KEY=test
@@ -85,6 +84,14 @@ STALKPHISH_KEY=test
 GREEDYBEAR_API_KEY=test
 MALPEDIA_TOKEN=test
 YARAIFY_KEY=test
+HIBP_API_KEY=test
+DOCGUARD_KEY=test
+CHECKPHISH_KEY=test
+SERVICE_ACCOUNT_JSON=test
+PULSEDIVE_API_KEY=test
+KOODOUS_KEY=test
+VT_INTELLIGENCE_KEY=test
+CUCKOO_API_KEY=test
 
 # connectors secrets (optional)
 CONNECTOR_MISP_KEY=test
@@ -124,5 +131,3 @@ COVERAGE_PROCESS_START=.coveragerc
 # broker configuration
 BROKER_URL=amqp://guest:guest@rabbitmq:5672
 
-# Playbooks
-TEST_PLAYBOOK=FREE_TO_USE_ANALYZERS

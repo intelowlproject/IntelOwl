@@ -107,13 +107,6 @@ class BaseAnalyzerMixin(Plugin, metaclass=ABCMeta):
     def __repr__(self):
         return f"({self.analyzer_name}, job_id: #{self.job_id})"
 
-    @classmethod
-    @property
-    def enabled(cls):
-        from api_app.analyzers_manager.dataclasses import AnalyzerConfig
-
-        return not AnalyzerConfig.is_disabled(cls.__name__)
-
 
 class ObservableAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
     """

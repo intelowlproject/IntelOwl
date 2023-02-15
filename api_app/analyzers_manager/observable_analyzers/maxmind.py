@@ -55,7 +55,7 @@ class Maxmind(classes.ObservableAnalyzer):
 
     @classmethod
     def _get_api_key(cls) -> Optional[str]:
-        for analyzer_name, ac in cls.get_config_class().get_from_python_module(cls):
+        for analyzer_name, _ in cls.get_config_class().get_from_python_module(cls):
             for plugin in PluginConfig.objects.filter(
                 plugin_name=analyzer_name,
                 type=PluginConfig.PluginType.ANALYZER,

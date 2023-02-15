@@ -198,15 +198,25 @@ class Plugin(metaclass=ABCMeta):
         from intel_owl.celery import broadcast
 
         # Requires _update to be implemented. Not every analyzer have to implement it
-        plugin_name, config = next(cls.get_config_class().get_from_python_module(cls))
-        if hasattr(cls, "_update") and callable(cls._update):
-            broadcast(
-                "update_plugin",
-                queue=config.config.queue,
-                arguments={
-                    "plugin_name": plugin_name,
-                    "plugin_type": cls.get_config_class()._get_type(),
-                },
-            )
-            return True
-        return False
+        gen = cls.get_config_class().get_from_python_module(cls)
+        try:
+            plugin_name, config = next(gen)
+        except StopIteration:
+            return False
+        else:
+            if hasattr(cls, "_update") and callable(cls._update):
+                broadcast(
+                    "update_plugin",
+                    queue=config.config.queue,
+                    arguments={
+                        "plugin_name": plugin_name,
+                        "plugin_type": cls.get_config_class()._get_type(),
+                    },
+                )
+                return True
+            return False
+
+    @classmethod
+    @property
+    def enabled(cls):
+        return not cls.get_config_class().is_disabled(cls.__name__)

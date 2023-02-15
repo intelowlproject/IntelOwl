@@ -115,15 +115,7 @@
             "Quad9_Malicious_Detector": {},
             "Quark_Engine_APK": {},
             "Rendertron": {},
-            "Robtex_Forward_PDNS_Query": {
-                "robtex_analysis": "forward_pdns"
-            },
-            "Robtex_IP_Query": {
-                "robtex_analysis": "ip_query"
-            },
-            "Robtex_Reverse_PDNS_Query": {
-                "robtex_analysis": "reverse_pdns"
-            },
+            "Robtex": {},
             "Rtf_Info": {},
             "Signature_Info": {},
             "SpeakEasy": {},
@@ -140,15 +132,7 @@
             },
             "TalosReputation": {},
             "ThreatFox": {},
-            "Threatminer_PDNS": {
-                "rt_value": 2
-            },
-            "Threatminer_Reports_Tagging": {
-                "rt_value": 6
-            },
-            "Threatminer_Subdomains": {
-                "rt_value": 5
-            },
+            "Threatminer_PDNS": {},
             "Thug_HTML_Info": {
                 "dom_events": "click,mouseover",
                 "enable_awis": true,

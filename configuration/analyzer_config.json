@@ -2679,68 +2679,20 @@
     "secrets": {},
     "params": {}
   },
-  "Robtex_Forward_PDNS_Query": {
+  "Robtex": {
     "type": "observable",
     "python_module": "robtex.Robtex",
-    "description": "scan a domain against the Robtex Passive DNS DB",
+    "description": "scan a domain/IP against the Robtex Passive DNS DB",
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": ["domain", "url"],
+    "observable_supported": ["domain", "url", "ip"],
     "config": {
       "soft_time_limit": 30,
       "queue": "default"
     },
     "secrets": {},
-    "params": {
-      "robtex_analysis": {
-        "value": "forward_pdns",
-        "type": "str",
-        "description": ""
-      }
-    }
-  },
-  "Robtex_IP_Query": {
-    "type": "observable",
-    "python_module": "robtex.Robtex",
-    "description": "get IP info from Robtex",
-    "disabled": false,
-    "external_service": true,
-    "leaks_info": false,
-    "observable_supported": ["ip"],
-    "config": {
-      "soft_time_limit": 30,
-      "queue": "default"
-    },
-    "secrets": {},
-    "params": {
-      "robtex_analysis": {
-        "value": "ip_query",
-        "type": "str",
-        "description": ""
-      }
-    }
-  },
-  "Robtex_Reverse_PDNS_Query": {
-    "type": "observable",
-    "python_module": "robtex.Robtex",
-    "description": "scan an IP against the Robtex Passive DNS DB",
-    "disabled": false,
-    "external_service": true,
-    "leaks_info": false,
-    "observable_supported": ["ip"],
-    "config": {
-      "soft_time_limit": 30,
-      "queue": "default"
-    },
-    "secrets": {},
-    "params": {
-      "robtex_analysis": {
-        "value": "reverse_pdns",
-        "type": "str",
-        "description": ""
-      }
-    }
+    "params": {}
   },
   "Rtf_Info": {
     "type": "file",
@@ -2757,11 +2709,48 @@
     "secrets": {},
     "params": {}
   },
+  "Securitytrails": {
+    "type": "observable",
+    "python_module": "securitytrails.SecurityTrails",
+    "description": "scan a domain against [securitytrails API](https://securitytrails.com/)",
+    "disabled": true,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": ["domain", "ip"],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "SECURITYTRAILS_KEY",
+        "description": "",
+        "required": true
+      }
+    },
+    "params": {
+      "securitytrails_analysis": {
+        "value": "current",
+        "type": "str",
+        "description": "Analysis Type. Available options: current, history"
+      },
+      "securitytrails_current_type": {
+        "value": "details",
+        "type": "str",
+        "description": "Suboptions if you chose 'current' analysis type. Options: details,subdomains,tags"
+      },
+      "securitytrails_history_type": {
+        "value": "whois",
+        "type": "str",
+        "description": "Suboptions if you chose 'history' analysis type. Options: whois,dns"
+      }
+    }
+  },
   "Securitytrails_Details": {
     "type": "observable",
     "python_module": "securitytrails.SecurityTrails",
     "description": "scan a domain against securitytrails API for general details",
-    "disabled": false,
+    "disabled": true,
     "external_service": true,
     "leaks_info": false,
     "observable_supported": ["domain"],
@@ -2793,7 +2782,7 @@
     "type": "observable",
     "python_module": "securitytrails.SecurityTrails",
     "description": "scan a domain against securitytrails API for historical DNS",
-    "disabled": false,
+    "disabled": true,
     "external_service": true,
     "leaks_info": false,
     "observable_supported": ["domain"],
@@ -2825,7 +2814,7 @@
     "type": "observable",
     "python_module": "securitytrails.SecurityTrails",
     "description": "scan a domain against securitytrails API for historical WHOIS",
-    "disabled": false,
+    "disabled": true,
     "external_service": true,
     "leaks_info": false,
     "observable_supported": ["domain"],
@@ -2857,7 +2846,7 @@
     "type": "observable",
     "python_module": "securitytrails.SecurityTrails",
     "description": "scan an IP against securitytrails API for neighbour IPs",
-    "disabled": false,
+    "disabled": true,
     "external_service": true,
     "leaks_info": false,
     "observable_supported": ["ip"],
@@ -2878,7 +2867,7 @@
     "type": "observable",
     "python_module": "securitytrails.SecurityTrails",
     "description": "scan a domain against securitytrails API for subdomains",
-    "disabled": false,
+    "disabled": true,
     "external_service": true,
     "leaks_info": false,
     "observable_supported": ["domain"],
@@ -2910,7 +2899,7 @@
     "type": "observable",
     "python_module": "securitytrails.SecurityTrails",
     "description": "scan a domain against securitytrails API for tags",
-    "disabled": false,
+    "disabled": true,
     "external_service": true,
     "leaks_info": false,
     "observable_supported": ["domain"],
@@ -3276,11 +3265,32 @@
     "secrets": {},
     "params": {}
   },
+  "Threatminer": {
+    "type": "observable",
+    "python_module": "threatminer.Threatminer",
+    "description": "retrieve data from [Threatminer API](https://www.threatminer.org/api.php)",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": ["ip", "domain", "hash"],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {},
+    "params": {
+      "rt_value": {
+        "value": 2,
+        "type": "int",
+        "description": "Request type. Default is PassiveDNS(rt=2). See [ThreatMiner APIs](https://www.threatminer.org/api.php) for more details about how to leverage this option"
+      }
+    }
+  },
   "Threatminer_PDNS": {
     "type": "observable",
     "python_module": "threatminer.Threatminer",
     "description": "retrieve PDNS data from Threatminer API",
-    "disabled": false,
+    "disabled": true,
     "external_service": true,
     "leaks_info": false,
     "observable_supported": ["ip", "domain"],
@@ -3301,7 +3311,7 @@
     "type": "observable",
     "python_module": "threatminer.Threatminer",
     "description": "retrieve reports from Threatminer API",
-    "disabled": false,
+    "disabled": true,
     "external_service": true,
     "leaks_info": false,
     "observable_supported": ["ip", "domain"],
@@ -3322,7 +3332,7 @@
     "type": "observable",
     "python_module": "threatminer.Threatminer",
     "description": "retrieve subdomains from Threatminer API",
-    "disabled": false,
+    "disabled": true,
     "external_service": true,
     "leaks_info": false,
     "observable_supported": ["domain"],

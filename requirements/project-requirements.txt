@@ -1,5 +1,5 @@
 # django libs
-Django==3.2.17
+Django==3.2.18
 django-auth-ldap==4.1.0
 django-radius==1.5.0
 django-filter==22.1

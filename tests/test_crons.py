@@ -29,28 +29,28 @@ class CronTests(TestCase):
 
     @if_mock_connections(skip("not working without connection"))
     def test_maxmind_updater(self):
+        maxmind.Maxmind._update()
         for db in maxmind.db_names:
-            db_file_path = maxmind.Maxmind.updater(db)
-            self.assertTrue(os.path.exists(db_file_path))
+            self.assertTrue(os.path.exists(db))
 
     @if_mock_connections(
         patch("requests.get", return_value=MockResponse({}, 200, text="91.192.100.61"))
     )
     def test_talos_updater(self, mock_get=None):
-        db_file_path = talos.Talos.updater()
+        db_file_path = talos.Talos._update()
         self.assertTrue(os.path.exists(db_file_path))
 
     @if_mock_connections(
         patch("requests.get", return_value=MockResponse({}, 200, text="93.95.230.253"))
     )
     def test_tor_updater(self, mock_get=None):
-        db_file_path = tor.Tor.updater()
+        db_file_path = tor.Tor._update()
         self.assertTrue(os.path.exists(db_file_path))
 
     def test_quark_updater(self):
-        quark_engine.QuarkEngine.updater()
+        quark_engine.QuarkEngine._update()
         self.assertTrue(os.path.exists(quark_engine.QuarkEngine.QUARK_RULES_PATH))
 
     def test_yara_updater(self):
-        yara_scan.YaraScan.update()
+        yara_scan.YaraScan._update()
         self.assertTrue(len(os.listdir(settings.YARA_RULES_PATH)))

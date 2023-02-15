@@ -463,9 +463,9 @@
     },
     "params": {
       "VM_NAME": {
-        "value": "win7x64_8",
+        "value": "",
         "type": "str",
-        "description": "The VM to be used in the analysis."
+        "description": "The VM to be used in the analysis.",
       },
       "max_tries": {
         "value": 50,

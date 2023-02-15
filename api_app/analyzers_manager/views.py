@@ -10,7 +10,11 @@ from rest_framework import serializers as BaseSerializer
 from rest_framework import status
 from rest_framework.response import Response
 
-from api_app.core.views import PluginActionViewSet, PluginHealthCheckAPI, PluginUpdateAPI
+from api_app.core.views import (
+    PluginActionViewSet,
+    PluginHealthCheckAPI,
+    PluginUpdateAPI,
+)
 from certego_saas.ext.views import APIView
 from intel_owl.celery import DEFAULT_QUEUE
 
@@ -117,10 +121,6 @@ class AnalyzerHealthCheckAPI(PluginHealthCheckAPI):
 
 
 class AnalyzerUpdateAPI(PluginUpdateAPI):
-
     @property
     def config_model(self):
         return AnalyzerConfig
-
-
-

@@ -7,15 +7,15 @@ import os
 import shutil
 import tarfile
 import traceback
+from typing import Optional
 
 import maxminddb
 import requests
 from django.conf import settings
 
 from api_app.analyzers_manager import classes
-from api_app.exceptions import AnalyzerRunException
+from api_app.exceptions import AnalyzerConfigurationException, AnalyzerRunException
 from api_app.models import PluginConfig
-from intel_owl import secrets
 from tests.mock_utils import if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
@@ -33,7 +33,7 @@ class Maxmind(classes.ObservableAnalyzer):
             try:
                 db_location = _get_db_location(db)
                 if not os.path.isfile(db_location):
-                    self.updater(db)
+                    self._update_db(db, self._secrets["api_key_name"])
                 if not os.path.exists(db_location):
                     raise maxminddb.InvalidDatabaseError(
                         "database location does not exist"
@@ -54,15 +54,25 @@ class Maxmind(classes.ObservableAnalyzer):
         return maxmind_final_result
 
     @classmethod
-    def updater(cls, db):
-        if not cls.enabled:
-            logger.warning("No running updater for Maxmind, because it is disabled")
-            return
-        api_key = secrets.get_secret(
-            "api_key_name",
-            plugin_type=PluginConfig.PluginType.ANALYZER,
-            plugin_name="MaxMindGeoIP",
-        )
+    def _get_api_key(cls) -> Optional[str]:
+        for analyzer_name, ac in cls.get_config_class().get_from_python_module(cls):
+            for plugin in PluginConfig.objects.filter(
+                plugin_name=analyzer_name,
+                type=PluginConfig.PluginType.ANALYZER,
+                config_type=PluginConfig.ConfigType.SECRET,
+                attribute="api_key_name",
+            ):
+                if plugin.value:
+                    return plugin.value
+        return None
+
+    @classmethod
+    def _update_db(cls, db: str, api_key: str):
+        if not api_key:
+            return AnalyzerConfigurationException(
+                f"Unable to find api key for {cls.__name__}"
+            )
+
         db_location = _get_db_location(db)
         try:
 
@@ -127,7 +137,14 @@ class Maxmind(classes.ObservableAnalyzer):
             traceback.print_exc()
             logger.exception(str(e))
 
-        return db_location
+    @classmethod
+    def _update(cls):
+        if not cls.enabled:
+            logger.warning("No running updater for Maxmind, because it is disabled")
+            return
+        api_key = cls._get_api_key()
+        for db in db_names:
+            cls._update_db(db, api_key)
 
     @classmethod
     def _monkeypatch(cls):

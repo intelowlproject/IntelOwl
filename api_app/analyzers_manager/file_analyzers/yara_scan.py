@@ -17,7 +17,6 @@ from django.conf import settings
 from git import Repo
 
 from api_app.analyzers_manager.classes import FileAnalyzer
-from api_app.analyzers_manager.dataclasses import AnalyzerConfig
 from api_app.exceptions import AnalyzerRunException
 from api_app.models import PluginConfig
 from intel_owl.settings._util import set_permissions
@@ -107,7 +106,7 @@ class YaraScan(FileAnalyzer):
             logger.warning(f"Skipping {directory} because it is not really a directory")
         return rules
 
-    # we are caching each directory for 24 hours
+    # we are caching each directory for 1 year invalidate
     @cache_memoize(
         timeout=60 * 60 * 24,
         args_rewrite=lambda s, directory_path: f"{s.__class__.__name__}"
@@ -294,46 +293,39 @@ class YaraScan(FileAnalyzer):
             cls._download_or_update_git_repository(url, owner, ssh_key=ssh_key)
 
     @classmethod
-    def update(cls):
+    def _update(cls):
         logger.info("Starting updating yara rules")
-        analyzer_config = AnalyzerConfig.all()
         dict_urls: Dict[Union[None, Tuple[str, str]], Set[str]] = defaultdict(set)
-        for analyzer_name, ac in analyzer_config.items():
-            if (
-                ac.python_module == f"{cls.__module__.split('.')[-1]}.{cls.__name__}"
-                and ac.disabled is False
+        for analyzer_name, ac in cls.get_config_class().get_from_python_module(cls):
+            new_urls = ac.param_values.get("public_repositories", [])
+            logger.info(f"Adding configuration urls {new_urls}")
+            dict_urls[None].update(new_urls)
+
+            # we are downloading even custom signatures for each analyzer
+            for plugin in PluginConfig.objects.filter(
+                plugin_name=analyzer_name,
+                type=PluginConfig.PluginType.ANALYZER,
+                config_type=PluginConfig.ConfigType.PARAMETER,
+                attribute="public_repositories",
             ):
-                new_urls = ac.param_values.get("public_repositories", [])
-                logger.info(f"Adding configuration urls {new_urls}")
+                new_urls = plugin.value
+                logger.info(f"Adding personal public urls {new_urls}")
                 dict_urls[None].update(new_urls)
 
-                # we are downloading even custom signatures for each analyzer
-                for plugin in PluginConfig.objects.filter(
-                    plugin_name=analyzer_name,
-                    type=PluginConfig.PluginType.ANALYZER,
-                    config_type=PluginConfig.ConfigType.PARAMETER,
-                    attribute="public_repositories",
-                ):
-                    new_urls = plugin.value
-                    logger.info(f"Adding personal public urls {new_urls}")
-                    dict_urls[None].update(new_urls)
-
-                for plugin in PluginConfig.objects.filter(
-                    plugin_name=analyzer_name,
-                    type=PluginConfig.PluginType.ANALYZER,
-                    config_type=PluginConfig.ConfigType.SECRET,
-                    attribute="private_repositories",
-                ):
-                    owner = (
-                        f"{plugin.organization.name}.{plugin.organization.owner}"
-                        if plugin.organization
-                        else plugin.owner.username
-                    )
-                    for url, ssh_key in plugin.value.items():
-                        logger.info(f"Adding personal private url {url}")
-                        dict_urls[(owner, ssh_key)].add(url)
-            else:
-                logger.info(f"Skipping analyzer {analyzer_name}")
+            for plugin in PluginConfig.objects.filter(
+                plugin_name=analyzer_name,
+                type=PluginConfig.PluginType.ANALYZER,
+                config_type=PluginConfig.ConfigType.SECRET,
+                attribute="private_repositories",
+            ):
+                owner = (
+                    f"{plugin.organization.name}.{plugin.organization.owner}"
+                    if plugin.organization
+                    else plugin.owner.username
+                )
+                for url, ssh_key in plugin.value.items():
+                    logger.info(f"Adding personal private url {url}")
+                    dict_urls[(owner, ssh_key)].add(url)
         for owner_ssh_key, urls in dict_urls.items():
             if owner_ssh_key:
                 owner, ssh_key = owner_ssh_key

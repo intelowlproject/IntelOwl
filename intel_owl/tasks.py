@@ -18,20 +18,21 @@ from intel_owl.celery import app
 
 logger = logging.getLogger(__name__)
 
+
 @control_command(
-    args=[("plugin_name", str),
-          ("plugin_type", str)],
+    args=[("plugin_name", str), ("plugin_type", str)],
 )
-def update_plugin(state, plugin_name:str, plugin_type:str):
+def update_plugin(state, plugin_name: str, plugin_type: str):
 
     from api_app.core.classes import Plugin
     from api_app.models import PluginConfig
 
     config_class = PluginConfig.get_specific_config_class(plugin_type)
-    analyzer_config = config_class.get(plugin_name)
+    plugin_config = config_class.get(plugin_name)
 
-    class_: typing.Type[Plugin] = analyzer_config.get_class()
-    class_.update()
+    class_: typing.Type[Plugin] = plugin_config.get_class()
+    class_._update()
+
 
 @shared_task(soft_time_limit=10000)
 def remove_old_jobs():
@@ -45,23 +46,22 @@ def check_stuck_analysis():
 
 @shared_task(soft_time_limit=60)
 def talos_updater():
-    talos.Talos.updater()
+    talos.Talos.update()
 
 
 @shared_task(soft_time_limit=60)
 def tor_updater():
-    tor.Tor.updater()
+    tor.Tor.update()
 
 
 @shared_task(soft_time_limit=60)
 def quark_updater():
-    quark_engine.QuarkEngine.updater()
+    quark_engine.QuarkEngine.update()
 
 
 @shared_task(soft_time_limit=20)
 def maxmind_updater():
-    for db in maxmind.db_names:
-        maxmind.Maxmind.updater(db)
+    maxmind.Maxmind.update()
 
 
 @shared_task(soft_time_limit=60)

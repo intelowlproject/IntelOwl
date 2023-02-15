@@ -16,10 +16,7 @@ from api_app.core.serializers import AbstractConfigSerializer
 from api_app.models import Job, PluginConfig
 from certego_saas.apps.user.models import User
 from intel_owl.celery import DEFAULT_QUEUE
-from intel_owl.consts import (
-    DEFAULT_SOFT_TIME_LIMIT,
-    PARAM_DATATYPE_CHOICES,
-)
+from intel_owl.consts import DEFAULT_SOFT_TIME_LIMIT, PARAM_DATATYPE_CHOICES
 
 # otherwise we have a recursive import
 logger = getLogger(__name__)
@@ -70,9 +67,9 @@ class AbstractConfig:
     def _get_serializer_class(cls) -> typing.Type[AbstractConfigSerializer]:
         raise NotImplementedError()
 
-    @abstractmethod
-    def _get_type(self) -> str:
-        raise NotImplementedError()
+    @classmethod
+    def _get_type(cls) -> str:
+        return cls._get_serializer_class()._get_type()
 
     @classmethod
     @abstractmethod
@@ -191,6 +188,19 @@ class AbstractConfig:
         if config_dict is None:
             return None  # not found
         return cls.from_dict(config_dict)
+
+    @classmethod
+    def get_from_python_module(
+        cls, plugin_class, only_active: bool = True
+    ) -> typing.Generator[typing.Tuple[str, "AbstractConfig"], None, None]:
+        for analyzer_name, ac in cls.all().items():
+            if (
+                ac.python_module
+                == f"{plugin_class.__module__.split('.')[-1]}.{plugin_class.__name__}"
+            ):
+                if only_active and ac.disabled:
+                    continue
+                yield analyzer_name, ac
 
     @classmethod
     def all(cls) -> typing.Dict[str, "AbstractConfig"]:

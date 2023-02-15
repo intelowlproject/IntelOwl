@@ -464,7 +464,7 @@ class PluginConfig(models.Model):
         return serializer_class
 
     @classmethod
-    def get_specific_config_class(cls, plugin_type:str):
+    def get_specific_config_class(cls, plugin_type: str):
         if plugin_type == cls.PluginType.ANALYZER:
             from api_app.analyzers_manager.dataclasses import AnalyzerConfig
 

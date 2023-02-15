@@ -116,8 +116,9 @@ class AbstractConfigSerializer(rfs.Serializer):
             self._is_valid_flag = True
         return ret
 
+    @classmethod
     @abstractmethod
-    def _get_type(self):
+    def _get_type(cls):
         raise NotImplementedError()
 
     def get_verification(self, raw_instance: dict) -> ConfigVerificationType:

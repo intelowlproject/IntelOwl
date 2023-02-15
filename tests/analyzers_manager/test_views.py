@@ -45,6 +45,32 @@ class AnalyzerAppViewsTestCase(CustomAPITestCase):
             content["errors"], {"detail": "Analyzer doesn't exist"}, msg=msg
         )
 
+    def test_analyzer_update_200(self):
+        response = self.client.post("/api/analyzer/Yara/update")
+        content = response.json()
+        msg = (response, content)
+
+        self.assertEqual(response.status_code, 200, msg=msg)
+
+    def test_analyzer_update_400(self):
+        response = self.client.post("/api/analyzer/Xlm_Macro_Deobfuscator/update")
+        content = response.json()
+        msg = (response, content)
+
+        self.assertEqual(response.status_code, 400, msg=msg)
+        self.assertDictEqual(
+            content["errors"], {"detail": "No update implemented"}, msg=msg
+        )
+
+        response = self.client.post("/api/analyzer/Analyzer404/update")
+        content = response.json()
+        msg = (response, content)
+
+        self.assertEqual(response.status_code, 400, msg=msg)
+        self.assertDictEqual(
+            content["errors"], {"detail": "Plugin doesn't exist"}, msg=msg
+        )
+
 
 class AnalyzerActionViewSetTests(CustomAPITestCase, PluginActionViewsetTestCase):
     @property

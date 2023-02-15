@@ -2,7 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 import abc
 import logging
-from typing import Optional
+from typing import Optional, Type
 
 import requests
 
@@ -22,6 +22,10 @@ class Connector(Plugin, metaclass=abc.ABCMeta):
     Need to overrwrite `set_params(self, params: dict)`
      and `run(self)` functions.
     """
+
+    @classmethod
+    def get_config_class(cls) -> Type[ConnectorConfig]:
+        return ConnectorConfig
 
     @property
     def connector_name(self) -> str:

@@ -165,7 +165,7 @@ class PluginUpdateAPI(APIView, metaclass=ABCMeta):
         logger.info(f"update request from user {request.user}, name {name}")
         plugin_config: AbstractConfig = self.config_model.get(name)
         if plugin_config is None:
-            raise ValidationError({"detail": f"Plugin doesn't exist"})
+            raise ValidationError({"detail": "Plugin doesn't exist"})
         try:
             class_: typing.Type[Plugin] = plugin_config.get_class()
         except ImportError:

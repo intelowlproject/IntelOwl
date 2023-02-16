@@ -169,7 +169,7 @@ class PluginHealthCheckAPI(APIView, metaclass=ABCMeta):
             raise ValidationError(
                 {
                     "detail": f"{self.__class__.__name__.split('Health')[0]} "
-                    f"doesn't exist"
+                    "doesn't exist"
                 }
             )
 

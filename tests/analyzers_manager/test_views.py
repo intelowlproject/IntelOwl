@@ -84,7 +84,7 @@ class AnalyzerAppViewsTestCase(CustomAPITestCase):
 
         self.assertEqual(response.status_code, 400, msg=msg)
         self.assertDictEqual(
-            content["errors"], {"detail": "Plugin doesn't exist"}, msg=msg
+            content["errors"], {"detail": "Analyzer doesn't exist"}, msg=msg
         )
 
     def test_analyzer_update_403(self):

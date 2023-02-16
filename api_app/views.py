@@ -234,7 +234,7 @@ def _multi_analysis_availability(user, data):
     return payload
 
 
-""" REST API endpoints """
+# REST API endpoints
 
 
 @add_docs(
@@ -434,6 +434,7 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
     ordering_fields = [
         "received_request_time",
         "finished_analysis_time",
+        "process_time",
     ]
 
     def get_permissions(self):

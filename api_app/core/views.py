@@ -168,7 +168,8 @@ class PluginHealthCheckAPI(APIView, metaclass=ABCMeta):
         if plugin_config is None:
             raise ValidationError(
                 {
-                    "detail": f"{self.__class__.__name__.split('Health')[0]} doesn't exist"
+                    "detail": f"{self.__class__.__name__.split('Health')[0]} "
+                    f"doesn't exist"
                 }
             )
 
@@ -218,7 +219,8 @@ class PluginUpdateAPI(APIView, metaclass=ABCMeta):
         if plugin_config is None:
             raise ValidationError(
                 {
-                    "detail": f"{self.__class__.__name__.split('Update')[0]} doesn't exist"
+                    "detail": f"{self.__class__.__name__.split('Update')[0]} "
+                    f"doesn't exist"
                 }
             )
         try:

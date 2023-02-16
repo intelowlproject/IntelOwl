@@ -1,6 +1,6 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
-
+import dataclasses
 import io
 import logging
 import os
@@ -22,6 +22,17 @@ from api_app.models import PluginConfig
 from intel_owl.settings._util import set_permissions
 
 logger = logging.getLogger(__name__)
+
+
+@dataclasses.dataclass
+class YaraMatchMock:
+    match: str
+    strings: List = dataclasses.field(default_factory=list)
+    tags: List = dataclasses.field(default_factory=list)
+    meta: Dict = dataclasses.field(default_factory=dict)
+
+    def __str__(self):
+        return self.match
 
 
 class YaraScan(FileAnalyzer):
@@ -65,7 +76,7 @@ class YaraScan(FileAnalyzer):
                 if int(code.strip()) == 30:
                     message = f"Too many matches for {self.filename}"
                     logger.warning(message)
-                    return [{"match": message}]
+                    return [YaraMatchMock(message)]
             raise e
 
     @staticmethod
@@ -150,7 +161,7 @@ class YaraScan(FileAnalyzer):
                 result.append(
                     {
                         "match": str(match),
-                        "strings": str(match.strings[:20]) if match else "",
+                        "strings": match.strings[:20] if match else [],
                         "tags": match.tags,
                         "meta": match.meta,
                         "path": str(path),

@@ -58,7 +58,7 @@ class YaraScan(FileAnalyzer):
 
     def _validated_matches(self, rules: yara.Rules) -> List:
         try:
-            return rules.match(self.filepath)
+            return rules.match(self.filepath, externals={"filename": self.filename})
         except yara.Error as e:
             if "internal error" in str(e):
                 _, code = str(e).split(":")
@@ -68,12 +68,13 @@ class YaraScan(FileAnalyzer):
                     return [{"match": message}]
             raise e
 
-    def _compile_rule(self, file_path: PosixPath) -> Optional[yara.Rules]:
+    @staticmethod
+    def _compile_rule(file_path: PosixPath) -> Optional[yara.Rules]:
         if file_path.exists():
             try:
                 if file_path.suffix in [".yar", ".yara", ".rule"]:
                     return yara.compile(
-                        str(file_path), externals={"filename": self.filename}
+                        str(file_path),
                     )
                 elif file_path.suffix == ".yas":
                     return yara.load(str(file_path))
@@ -109,9 +110,8 @@ class YaraScan(FileAnalyzer):
     # we are caching each directory for 1 year invalidate
     @cache_memoize(
         timeout=60 * 60 * 24,
-        args_rewrite=lambda s, directory_path: f"{s.__class__.__name__}"
-        if isinstance(s, YaraScan)
-        else f"{s.__name__}" f"-{str(directory_path)}",
+        args_rewrite=lambda s, directory_path: f"{s.__class__.__name__ if isinstance(s, YaraScan) else s.__name__}"  # pylint: disable=C0301
+        f"-{str(directory_path)}",
     )
     def _get_rules(
         self, directory_path: PosixPath
@@ -225,18 +225,20 @@ class YaraScan(FileAnalyzer):
 
             if not directory.exists():
                 logger.info(f"About to clone {url} at {directory}")
-                Repo.clone_from(url, directory, depth=1)
+                repo = Repo.clone_from(url, directory, depth=1)
+                git = repo.git
+                git.config("--add", "safe.directory", directory)
             else:
                 logger.info(f"about to pull {url} at {directory}")
                 repo = Repo(directory)
                 git = repo.git
-                git.config("--global", "--add", "safe.directory", directory)
+                git.config("--add", "safe.directory", directory)
                 o = repo.remotes.origin
                 o.pull(allow_unrelated_histories=True, rebase=True)
             return directory
         finally:
-            logger.info("Starting cleanup of git ssh key")
             if ssh_key:
+                logger.info("Starting cleanup of git ssh key")
                 del os.environ["GIT_SSH"]
                 if settings.GIT_KEY_PATH.exists():
                     os.remove(settings.GIT_KEY_PATH)

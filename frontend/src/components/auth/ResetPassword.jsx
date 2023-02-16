@@ -114,11 +114,12 @@ export default function ResetPassword() {
                   <Col sm={12} md={12}>
                     <Label
                       className="form-control-label required"
-                      htmlFor="password"
+                      htmlFor="ResetPassword__password"
                     >
                       New Password
                     </Label>
                     <Input
+                      id="ResetPassword__password"
                       name="password"
                       type={passwordShown ? "text" : "password"}
                       className="form-control"
@@ -140,11 +141,12 @@ export default function ResetPassword() {
                   <Col sm={12} md={12}>
                     <Label
                       className="form-control-label required"
-                      htmlFor="confirmPassword"
+                      htmlFor="ResetPassword__confirmPassword"
                     >
                       Confirm New Password
                     </Label>
                     <Input
+                      id="ResetPassword__confirmPassword"
                       name="confirmPassword"
                       type={passwordShown ? "text" : "password"}
                       className="form-control"
@@ -165,7 +167,7 @@ export default function ResetPassword() {
                 </FormGroup>
                 <FormGroup check>
                   <Input
-                    id="RegisterForm__showPassword"
+                    id="ResetPassword__showPassword"
                     type="checkbox"
                     defaultChecked={passwordShown}
                     onChange={() => setPasswordShown(!passwordShown)}
@@ -176,7 +178,7 @@ export default function ResetPassword() {
                 <FormGroup className="mt-3 d-flex">
                   {RECAPTCHA_SITEKEY && (
                     <ReCAPTCHAInput
-                      id="RegisterForm__recaptcha"
+                      id="ResetPassword__recaptcha"
                       className="m-3 mx-auto"
                     />
                   )}

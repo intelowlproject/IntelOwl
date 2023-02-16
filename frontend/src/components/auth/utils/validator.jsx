@@ -60,7 +60,7 @@ export function ProfileValidator(field, value) {
   if (!value) {
     errors[field] = "Required";
   } else if (value.length > 30) {
-    errors[field] = "Must be 15 characters or less";
+    errors[field] = "Must be 30 characters or less";
   } else if (value.length < 3) {
     errors[field] = "Must be 3 characters or more";
   }

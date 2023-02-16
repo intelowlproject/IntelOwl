@@ -55,10 +55,11 @@ export default function EmailForm({ onFormSubmit, apiCallback, ...restProps }) {
         <Form {...restProps}>
           {/* Email field */}
           <FormGroup>
-            <Label className="required" htmlFor="email">
+            <Label className="required" htmlFor="EmailForm__email">
               Email Address
             </Label>
             <Input
+              id="EmailForm__email"
               autoFocus
               type="text"
               name="email"

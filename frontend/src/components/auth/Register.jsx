@@ -239,11 +239,12 @@ export default function Register() {
                   <Col sm={12} md={6}>
                     <Label
                       className="form-control-label required"
-                      htmlFor="first_name"
+                      htmlFor="RegisterForm__first_name"
                     >
                       First Name
                     </Label>
                     <Input
+                      id="RegisterForm__first_name"
                       name="first_name"
                       type="text"
                       className="form-control"
@@ -263,11 +264,12 @@ export default function Register() {
                   <Col sm={12} md={6}>
                     <Label
                       className="form-control-label required"
-                      htmlFor="last_name"
+                      htmlFor="RegisterForm__last_name"
                     >
                       Last Name
                     </Label>
                     <Input
+                      id="RegisterForm__last_name"
                       name="last_name"
                       type="text"
                       className="form-control"
@@ -290,11 +292,12 @@ export default function Register() {
                   <Col sm={12} md={6}>
                     <Label
                       className="form-control-label required"
-                      htmlFor="email"
+                      htmlFor="RegisterForm__email"
                     >
                       Email
                     </Label>
                     <Input
+                      id="RegisterForm__email"
                       name="email"
                       type="email"
                       className="form-control"
@@ -312,11 +315,12 @@ export default function Register() {
                   <Col sm={12} md={6}>
                     <Label
                       className="form-control-label required"
-                      htmlFor="username"
+                      htmlFor="RegisterForm__username"
                     >
                       Username
                     </Label>
                     <Input
+                      id="RegisterForm__username"
                       name="username"
                       type="text"
                       className="form-control"
@@ -340,11 +344,12 @@ export default function Register() {
                   <Col sm={12} md={6}>
                     <Label
                       className="form-control-label required"
-                      htmlFor="password"
+                      htmlFor="RegisterForm__password"
                     >
                       Password
                     </Label>
                     <Input
+                      id="RegisterForm__password"
                       name="password"
                       type={passwordShown ? "text" : "password"}
                       className="form-control"
@@ -364,11 +369,12 @@ export default function Register() {
                   <Col sm={12} md={6}>
                     <Label
                       className="form-control-label required"
-                      htmlFor="confirmPassword"
+                      htmlFor="RegisterForm__confirmPassword"
                     >
                       Confirm Password
                     </Label>
                     <Input
+                      id="RegisterForm__confirmPassword"
                       name="confirmPassword"
                       type={passwordShown ? "text" : "password"}
                       className="form-control"
@@ -405,11 +411,12 @@ export default function Register() {
                   <Col sm={12} md={6}>
                     <Label
                       className="form-control-label required"
-                      htmlFor="company_name"
+                      htmlFor="RegisterForm__company_name"
                     >
                       Company/ Organization
                     </Label>
                     <Input
+                      id="RegisterForm__company_name"
                       name="company_name"
                       type="text"
                       className="form-control"
@@ -430,11 +437,12 @@ export default function Register() {
                   <Col sm={12} md={6}>
                     <Label
                       className="form-control-label required"
-                      htmlFor="company_role"
+                      htmlFor="RegisterForm__company_role"
                     >
                       Role
                     </Label>
                     <Input
+                      id="RegisterForm__company_role"
                       name="company_role"
                       type="text"
                       className="form-control"
@@ -457,13 +465,14 @@ export default function Register() {
                   <Col sm={12} md={6}>
                     <Label
                       className="form-control-label"
-                      htmlFor="twitter_handle"
+                      htmlFor="RegisterForm__twitter_handle"
                     >
                       Twitter Handle (optional)
                     </Label>
                     <InputGroup>
                       <InputGroupText>@</InputGroupText>
                       <Input
+                        id="RegisterForm__twitter_handle"
                         name="twitter_handle"
                         type="text"
                         className="form-control"
@@ -481,11 +490,12 @@ export default function Register() {
                   <Col sm={12} md={6}>
                     <Label
                       className="form-control-label required"
-                      htmlFor="discover_from"
+                      htmlFor="RegisterForm__discover_from"
                     >
                       How did you discover IntelOwl ?
                     </Label>
                     <Select
+                      id="RegisterForm__discover_from"
                       name="discover_from"
                       choices={hearAboutUsChoices}
                       onChange={formik.handleChange}

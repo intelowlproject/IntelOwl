@@ -4,6 +4,7 @@
 import logging
 import traceback
 from abc import ABCMeta, abstractmethod
+from typing import Type
 
 from celery.exceptions import SoftTimeLimitExceeded
 from django.conf import settings
@@ -186,3 +187,36 @@ class Plugin(metaclass=ABCMeta):
         self.kwargs = kwargs
         # some post init processing
         self.__post__init__()  # lgtm [py/init-calls-subclass]
+
+    @classmethod
+    @abstractmethod
+    def get_config_class(cls) -> Type[AbstractConfig]:
+        raise NotImplementedError()
+
+    @classmethod
+    def update(cls) -> bool:
+        from intel_owl.celery import broadcast
+
+        # Requires _update to be implemented. Not every analyzer have to implement it
+        gen = cls.get_config_class().get_from_python_module(cls)
+        try:
+            plugin_name, config = next(gen)
+        except StopIteration:
+            return False
+        else:
+            if hasattr(cls, "_update") and callable(cls._update):
+                broadcast(
+                    "update_plugin",
+                    queue=config.config.queue,
+                    arguments={
+                        "plugin_name": plugin_name,
+                        "plugin_type": cls.get_config_class()._get_type(),
+                    },
+                )
+                return True
+            return False
+
+    @classmethod
+    @property
+    def enabled(cls):
+        return not cls.get_config_class().is_disabled(cls.__name__)

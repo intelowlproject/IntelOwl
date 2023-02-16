@@ -12,8 +12,8 @@ from api_app.exceptions import AnalyzerRunException
 class QuarkEngine(FileAnalyzer):
     QUARK_RULES_PATH = DIR_PATH
 
-    @staticmethod
-    def updater():
+    @classmethod
+    def _update(cls):
         # the rules are installed in config.HOME_DIR by default
         freshquark.download()
 

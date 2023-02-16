@@ -4,12 +4,14 @@
 from __future__ import absolute_import, unicode_literals
 
 import os
+from typing import Dict
 
 from celery import Celery
 from celery.schedules import crontab
 from django.conf import settings
 from kombu import Exchange, Queue
 
+DEFAULT_QUEUE = "default"
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "intel_owl.settings")
 
 app = Celery("intel_owl")
@@ -18,7 +20,7 @@ app.autodiscover_tasks()
 
 
 app.conf.update(
-    task_default_queue="default",
+    task_default_queue=DEFAULT_QUEUE,
     task_queues=[
         Queue(
             key,
@@ -102,3 +104,11 @@ app.conf.beat_schedule = {
         "options": {"queue": "default"},
     },
 }
+
+
+def broadcast(function: str, queue: str = None, arguments: Dict = None):
+    if queue:
+        if queue not in settings.CELERY_QUEUES:
+            queue = DEFAULT_QUEUE
+        queue = [f"celery@worker_{queue}"]
+    app.control.broadcast(function, destination=queue, arguments=arguments)

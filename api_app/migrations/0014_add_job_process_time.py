@@ -4,7 +4,7 @@ from django.db import migrations, models
 
 
 def calculate_process_time(apps, schema_editor):
-    Job = apps.get_model("yourappname", "Job")
+    Job = apps.get_model("api_app", "Job")
     for job in Job.objects.all():
         if job.finished_analysis_time:
             job.process_time = job.calculate_process_time()

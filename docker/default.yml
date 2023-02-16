@@ -5,14 +5,6 @@ x-no-healthcheck: &no-healthcheck
     disable: true
 
 services:
-  postgres:
-    image: library/postgres:12-alpine
-    container_name: intelowl_postgres
-    volumes:
-      - postgres_data:/var/lib/postgresql/data/
-    env_file:
-      - ./env_file_postgres
-
   uwsgi:
     image: intelowlproject/intelowl:${REACT_APP_INTELOWL_VERSION}
     container_name: intelowl_uwsgi
@@ -47,14 +39,6 @@ services:
       - "80:80"
     depends_on:
       - uwsgi
-
-  rabbitmq:
-    image: library/rabbitmq:3.9-alpine
-    container_name: intelowl_rabbitmq
-    volumes:
-      - ../configuration/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
-    logging:
-      driver: none
 
   celery_beat:
     image: intelowlproject/intelowl:${REACT_APP_INTELOWL_VERSION}

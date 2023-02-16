@@ -162,8 +162,6 @@ class PluginHealthCheckAPI(APIView, metaclass=ABCMeta):
         raise NotImplementedError()
 
     def perform_healthcheck(self, plugin_name: str) -> bool:
-        from rest_framework.exceptions import ValidationError
-
         plugin_config = self.config_model.get(plugin_name)
         if plugin_config is None:
             raise ValidationError(
@@ -211,9 +209,6 @@ class PluginUpdateAPI(APIView, metaclass=ABCMeta):
         raise NotImplementedError()
 
     def post(self, request, name: str):
-        from api_app.core.classes import Plugin
-        from api_app.core.dataclasses import AbstractConfig
-
         logger.info(f"update request from user {request.user}, name {name}")
         plugin_config: AbstractConfig = self.config_model.get(name)
         if plugin_config is None:

@@ -124,6 +124,7 @@ class Job(models.Model):
 
     received_request_time = models.DateTimeField(auto_now_add=True)
     finished_analysis_time = models.DateTimeField(blank=True, null=True)
+    process_time = models.FloatField(blank=True, null=True)
     tlp = models.CharField(max_length=8, choices=TLP.choices, default=TLP.WHITE)
     errors = pg_fields.ArrayField(
         models.CharField(max_length=900), blank=True, default=list, null=True
@@ -182,11 +183,18 @@ class Job(models.Model):
         finally:
             if not (self.status == self.Status.FAILED and self.finished_analysis_time):
                 self.finished_analysis_time = get_now()
+                self.process_time = self.calculate_process_time()
             self.status = status_to_set
-            self.save(update_fields=["status", "errors", "finished_analysis_time"])
+            self.save(
+                update_fields=[
+                    "status",
+                    "errors",
+                    "finished_analysis_time",
+                    "process_time",
+                ]
+            )
 
-    @property
-    def process_time(self) -> Optional[float]:
+    def calculate_process_time(self) -> Optional[float]:
         if not self.finished_analysis_time:
             return None
         td = self.finished_analysis_time - self.received_request_time

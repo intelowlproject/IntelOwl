@@ -435,6 +435,7 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
     ordering_fields = [
         "received_request_time",
         "finished_analysis_time",
+        "process_time",
     ]
 
     def get_permissions(self):

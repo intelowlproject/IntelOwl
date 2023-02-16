@@ -95,7 +95,6 @@ class _AbstractJobViewSerializer(rfs.ModelSerializer):
 
     user = UserSerializer()
     tags = TagSerializer(many=True, read_only=True)
-    process_time = rfs.FloatField()
 
 
 class _AbstractJobCreateSerializer(rfs.ModelSerializer):

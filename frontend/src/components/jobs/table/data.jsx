@@ -177,8 +177,6 @@ const jobTableColumns = [
         id: "process_time",
         accessor: "process_time",
         Cell: ({ value }) => <span>{process_time_mmss(value)}</span>,
-
-        disableSortBy: true,
         maxWidth: 125,
       },
       {

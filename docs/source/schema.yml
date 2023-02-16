@@ -58,38 +58,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/MultiAnalysisResponseList'
           description: ''
-  /api/playbook/analyze_multiple_files:
-    post:
-      operationId: analyze_multiple_files_create
-      description: This endpoint allows to start playbook Jobs related to multiple Files
-      tags:
-      - playbooks
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/MultipleFiles'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/MultipleFiles'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/MultipleFiles'
-        required: true
-      security:
-      - durinAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/MultiAnalysisResponsePlaybooksList'
-          description: ''
   /api/analyze_multiple_observables:
     post:
       operationId: analyze_multiple_observables_create
       description: |-
-        This endpoint allows to start playbook Jobs related to multiple observables.
+        This endpoint allows to start Jobs related to multiple observables.
                          Observable parameter must be composed like this:
                          [(<observable_classification>, <observable_name>), ...]
       tags:
@@ -114,36 +87,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MultiAnalysisResponseList'
-          description: ''
-  /api/playbook/analyze_multiple_observables:
-    post:
-      operationId: analyze_multiple_observables_create
-      description: |-
-        This endpoint allows to start Jobs related to multiple observables.
-                         Observable parameter must be composed like this:
-                         [(<observable_classification>, <observable_name>), ...]
-      tags:
-      - playbooks
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PlaybookObservableAnalysis'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/PlaybookObservableAnalysis'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/PlaybookObservableAnalysis'
-        required: true
-      security:
-      - durinAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/MultiAnalysisResponsePlaybooksList'
           description: ''
   /api/analyze_observable:
     post:
@@ -195,6 +138,27 @@ paths:
               schema:
                 $ref: '#/components/schemas/PluginHealthCheckSuccessResponse'
           description: ''
+  /api/analyzer/{name}/update:
+    post:
+      operationId: analyzer_update_create
+      description: Update plugin with latest configuration
+      parameters:
+      - in: path
+        name: name
+        schema:
+          type: string
+        required: true
+      tags:
+      - analyzer
+      security:
+      - durinAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PluginUpdateSuccessResponse'
+          description: ''
   /api/ask_analysis_availability:
     post:
       operationId: ask_analysis_availability_create
@@ -235,18 +199,9 @@ paths:
 
             This is useful to avoid repeating the same analysis multiple times.
             By default this API checks if there are existing analysis related to the md5 in
-            status "running" or "reported_without_fails" for analyzer checking.
-
-            However, for status being added in as a factor for Playbooks,
-            IntelOwl also counts "running" (only if specifically selected),
-            "reported_with_fails" or "reported_without_fails".
-
-            Also, if a playbook parameter is sent where it isn't an empty list
-            it will throws an error if the analyzers parameter list is also populated.
-
+            status "running" or "reported_without_fails"
             Also, you need to specify the analyzers needed because, otherwise, it is
             highly probable that you won't get all the results that you expect.
-
             NOTE: This API is similar to ask_analysis_availability, but it allows multiple
             md5s to be checked at the same time.
       tags:
@@ -289,11 +244,7 @@ paths:
       - durinAuth: []
       responses:
         '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/APIAccessToken'
-          description: ''
+          description: No response body
     post:
       operationId: auth_apiaccess_create
       description: |-
@@ -306,26 +257,11 @@ paths:
         .. versionadded:: 1.0.0
       tags:
       - auth
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/APIAccessToken'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/APIAccessToken'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/APIAccessToken'
       security:
       - durinAuth: []
       responses:
         '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/APIAccessToken'
-          description: ''
+          description: No response body
     delete:
       operationId: auth_apiaccess_destroy
       description: |-
@@ -342,6 +278,59 @@ paths:
       - durinAuth: []
       responses:
         '204':
+          description: No response body
+  /api/auth/google:
+    get:
+      operationId: auth_google_retrieve
+      description: This endpoint redirects to Google OAuth login.
+      tags:
+      - auth
+      security:
+      - durinAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/auth/google-callback:
+    get:
+      operationId: auth_google_callback_retrieve
+      description: |-
+        Durin's Login View.
+
+        This view will return a JSON response when valid ``username``, ``password`` and
+        (if not overwritten) ``client`` fields are POSTed to the view using
+        form data or JSON.
+
+        It uses the default serializer provided by
+        Django-Rest-Framework (``rest_framework.authtoken.serializers.AuthTokenSerializer``)
+        to validate the user credentials.
+
+        It is possible to customize LoginView behaviour by overriding the following
+        helper methods:
+      tags:
+      - auth
+      responses:
+        '200':
+          description: No response body
+    post:
+      operationId: auth_google_callback_create
+      description: |-
+        Durin's Login View.
+
+        This view will return a JSON response when valid ``username``, ``password`` and
+        (if not overwritten) ``client`` fields are POSTed to the view using
+        form data or JSON.
+
+        It uses the default serializer provided by
+        Django-Rest-Framework (``rest_framework.authtoken.serializers.AuthTokenSerializer``)
+        to validate the user credentials.
+
+        It is possible to customize LoginView behaviour by overriding the following
+        helper methods:
+      tags:
+      - auth
+      responses:
+        '200':
           description: No response body
   /api/auth/login:
     post:
@@ -509,12 +498,12 @@ paths:
           description: ''
   /api/get_playbook_configs:
     get:
-      operationId:
-      description: Get and parse the `playbook_config.json` file
+      operationId: get_playbook_configs_retrieve
+      description: Get and parse the `playbook_config.json` file,
       tags:
-        - get_playbook_configs
+      - get_playbook_configs
       security:
-        - durinAuth: []
+      - durinAuth: []
       responses:
         '200':
           content:
@@ -522,12 +511,79 @@ paths:
               schema:
                 $ref: '#/components/schemas/PlaybookConfig'
           description: ''
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetPlaybookConfigsFailedResponse'
+          description: ''
   /api/jobs:
     get:
       operationId: jobs_list
       description: "\n    REST endpoint to fetch list of jobs or retrieve/delete a\
         \ job with job ID.\n    Requires authentication.\n    "
       parameters:
+      - name: file_mimetype
+        required: false
+        in: query
+        description: file_mimetype
+        schema:
+          type: string
+      - name: file_name
+        required: false
+        in: query
+        description: file_name
+        schema:
+          type: string
+      - name: finished_analysis_time__gte
+        required: false
+        in: query
+        description: finished_analysis_time__gte
+        schema:
+          type: string
+      - name: finished_analysis_time__lte
+        required: false
+        in: query
+        description: finished_analysis_time__lte
+        schema:
+          type: string
+      - name: is_sample
+        required: false
+        in: query
+        description: is_sample
+        schema:
+          type: string
+      - name: md5
+        required: false
+        in: query
+        description: md5
+        schema:
+          type: string
+      - name: name
+        required: false
+        in: query
+        description: name
+        schema:
+          type: string
+      - name: observable_classification
+        required: false
+        in: query
+        description: observable_classification
+        schema:
+          type: string
+          enum:
+          - ip
+          - url
+          - domain
+          - hash
+          - generic
+          - ''
+      - name: observable_name
+        required: false
+        in: query
+        description: observable_name
+        schema:
+          type: string
       - name: ordering
         required: false
         in: query
@@ -546,6 +602,54 @@ paths:
         description: Number of results to return per page.
         schema:
           type: integer
+      - name: received_request_time__gte
+        required: false
+        in: query
+        description: received_request_time__gte
+        schema:
+          type: string
+      - name: received_request_time__lte
+        required: false
+        in: query
+        description: received_request_time__lte
+        schema:
+          type: string
+      - name: status
+        required: false
+        in: query
+        description: status
+        schema:
+          type: string
+          enum:
+          - pending
+          - running
+          - reported_without_fails
+          - reported_with_fails
+          - killed
+          - failed
+      - name: tags
+        required: false
+        in: query
+        description: tags
+        schema:
+          type: string
+      - name: tlp
+        required: false
+        in: query
+        description: tlp
+        schema:
+          type: string
+          enum:
+          - WHITE
+          - GREEN
+          - AMBER
+          - RED
+      - name: type
+        required: false
+        in: query
+        description: type
+        schema:
+          type: string
       tags:
       - jobs
       security:
@@ -1194,6 +1298,296 @@ paths:
               schema:
                 $ref: '#/components/schemas/Notification'
           description: ''
+  /api/playbook/analyze_multiple_files:
+    post:
+      operationId: playbook_analyze_multiple_files_create
+      description: This endpoint allows to start a Job related to a file
+      tags:
+      - playbook
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlaybookFileAnalysis'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PlaybookFileAnalysis'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PlaybookFileAnalysis'
+        required: true
+      security:
+      - durinAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalysisResponse'
+          description: ''
+  /api/playbook/analyze_multiple_observables:
+    post:
+      operationId: playbook_analyze_multiple_observables_create
+      description: This endpoint allows to start a Job related to an observable
+      tags:
+      - playbook
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlaybookObservableAnalysis'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PlaybookObservableAnalysis'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PlaybookObservableAnalysis'
+        required: true
+      security:
+      - durinAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalysisResponse'
+          description: ''
+  /api/playbook/cache_playbook:
+    post:
+      operationId: playbook_cache_playbook_create
+      tags:
+      - playbook
+      security:
+      - durinAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/plugin-config:
+    get:
+      operationId: plugin_config_list
+      description: "\n    REST endpoint to fetch list of PluginConfig or retrieve/delete\
+        \ a CustomConfig.\n    Requires authentication. Allows access to only authorized\
+        \ CustomConfigs.\n    "
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      tags:
+      - plugin-config
+      security:
+      - durinAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PluginConfig'
+          description: ''
+    post:
+      operationId: plugin_config_create
+      description: "\n    REST endpoint to fetch list of PluginConfig or retrieve/delete\
+        \ a CustomConfig.\n    Requires authentication. Allows access to only authorized\
+        \ CustomConfigs.\n    "
+      tags:
+      - plugin-config
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PluginConfig'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PluginConfig'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PluginConfig'
+        required: true
+      security:
+      - durinAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PluginConfig'
+          description: ''
+  /api/plugin-config/{id}:
+    get:
+      operationId: plugin_config_retrieve
+      description: "\n    REST endpoint to fetch list of PluginConfig or retrieve/delete\
+        \ a CustomConfig.\n    Requires authentication. Allows access to only authorized\
+        \ CustomConfigs.\n    "
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this plugin config.
+        required: true
+      tags:
+      - plugin-config
+      security:
+      - durinAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PluginConfig'
+          description: ''
+    put:
+      operationId: plugin_config_update
+      description: "\n    REST endpoint to fetch list of PluginConfig or retrieve/delete\
+        \ a CustomConfig.\n    Requires authentication. Allows access to only authorized\
+        \ CustomConfigs.\n    "
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this plugin config.
+        required: true
+      tags:
+      - plugin-config
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PluginConfig'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PluginConfig'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PluginConfig'
+        required: true
+      security:
+      - durinAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PluginConfig'
+          description: ''
+    patch:
+      operationId: plugin_config_partial_update
+      description: "\n    REST endpoint to fetch list of PluginConfig or retrieve/delete\
+        \ a CustomConfig.\n    Requires authentication. Allows access to only authorized\
+        \ CustomConfigs.\n    "
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this plugin config.
+        required: true
+      tags:
+      - plugin-config
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPluginConfig'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedPluginConfig'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPluginConfig'
+      security:
+      - durinAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PluginConfig'
+          description: ''
+    delete:
+      operationId: plugin_config_destroy
+      description: "\n    REST endpoint to fetch list of PluginConfig or retrieve/delete\
+        \ a CustomConfig.\n    Requires authentication. Allows access to only authorized\
+        \ CustomConfigs.\n    "
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this plugin config.
+        required: true
+      tags:
+      - plugin-config
+      security:
+      - durinAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/plugin-disable/:
+    get:
+      operationId: plugin_disable_retrieve
+      description: |-
+        This endpoint allows organization owners
+            and members to view plugin state.
+      tags:
+      - plugin-disable
+      security:
+      - durinAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PluginStateViewerResponse'
+          description: ''
+  /api/plugin-disable/{plugin_type}/{plugin_name}/:
+    post:
+      operationId: plugin_disable_create
+      description: This endpoint allows organization owners to toggle plugin state.
+      parameters:
+      - in: path
+        name: plugin_name
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: plugin_type
+        schema:
+          type: integer
+        required: true
+      tags:
+      - plugin-disable
+      security:
+      - durinAuth: []
+      responses:
+        '201':
+          description: No response body
+    delete:
+      operationId: plugin_disable_destroy
+      description: This endpoint allows organization owners to toggle plugin state.
+      parameters:
+      - in: path
+        name: plugin_name
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: plugin_type
+        schema:
+          type: integer
+        required: true
+      tags:
+      - plugin-disable
+      security:
+      - durinAuth: []
+      responses:
+        '201':
+          description: No response body
   /api/tags:
     get:
       operationId: tags_list
@@ -1356,41 +1750,6 @@ paths:
           description: No response body
 components:
   schemas:
-    APIAccessToken:
-      type: object
-      description: |-
-        Used in :class:`durin.views.APIAccessTokenView`.
-
-        .. versionadded:: 1.0.0
-      properties:
-        client:
-          type: string
-          readOnly: true
-        created:
-          type: string
-          format: date-time
-          readOnly: true
-        expiry:
-          type: string
-          format: date-time
-          readOnly: true
-        has_expired:
-          type: boolean
-          readOnly: true
-        expires_in_str:
-          type: string
-          readOnly: true
-        token:
-          type: string
-          readOnly: true
-          description: Token is auto-generated on save.
-      required:
-      - client
-      - created
-      - expires_in_str
-      - expiry
-      - has_expired
-      - token
     APIException:
       type: object
       properties:
@@ -1415,34 +1774,12 @@ components:
         connectors_running:
           type: array
           items: {}
-      required:
-      - analyzers_running
-      - connectors_running
-      - job_id
-      - status
-    PlaybooksAnalysisResponse:
-      type: object
-      properties:
-        job_id:
-          type: integer
-        status:
-          type: string
-        warnings:
-          type: array
-          items: {}
-        analyzers_running:
-          type: array
-          items: {}
-        connectors_running:
-          type: array
-          items: {}
         playbooks_running:
           type: array
           items: {}
       required:
       - analyzers_running
       - connectors_running
-      - playbooks_running
       - job_id
       - status
     AnalyzerConfig:
@@ -1485,6 +1822,8 @@ components:
           - error_message
           - missing_secrets
           readOnly: true
+        extends:
+          type: string
         type:
           $ref: '#/components/schemas/AnalyzerConfigTypeEnum'
         external_service:
@@ -1547,7 +1886,7 @@ components:
             maxLength: 512
         process_time:
           type: number
-          format: float
+          format: double
           readOnly: true
         start_time:
           type: string
@@ -1562,6 +1901,9 @@ components:
         type:
           type: string
           default: analyzer
+        parent_playbook:
+          type: string
+          maxLength: 128
       required:
       - name
       - process_time
@@ -1590,6 +1932,14 @@ components:
       required:
       - count
       - results
+    BlankEnum:
+      enum:
+      - ''
+    ConfigTypeEnum:
+      enum:
+      - '1'
+      - '2'
+      type: string
     ConnectorConfig:
       type: object
       description: Serializer for `connector_config.json`.
@@ -1630,8 +1980,13 @@ components:
           - error_message
           - missing_secrets
           readOnly: true
+        extends:
+          type: string
         maximum_tlp:
           $ref: '#/components/schemas/MaximumTlpEnum'
+        run_on_failure:
+          type: boolean
+          default: false
       required:
       - config
       - disabled
@@ -1660,7 +2015,7 @@ components:
             maxLength: 512
         process_time:
           type: number
-          format: float
+          format: double
           readOnly: true
         start_time:
           type: string
@@ -1675,6 +2030,9 @@ components:
         type:
           type: string
           default: connector
+        parent_playbook:
+          type: string
+          maxLength: 128
       required:
       - name
       - process_time
@@ -1711,6 +2069,11 @@ components:
         connectors_requested:
           type: array
           items: {}
+        playbooks_requested:
+          type: array
+          items:
+            type: string
+            maxLength: 128
         tags_labels:
           type: array
           items: {}
@@ -1726,6 +2089,14 @@ components:
       required:
       - error
     GetConnectorConfigsFailedResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          readOnly: true
+      required:
+      - error
+    GetPlaybookConfigsFailedResponse:
       type: object
       properties:
         error:
@@ -1776,9 +2147,6 @@ components:
           items:
             $ref: '#/components/schemas/Tag'
           readOnly: true
-        process_time:
-          type: number
-          format: double
         analyzer_reports:
           type: array
           items:
@@ -1803,8 +2171,9 @@ components:
           type: string
           maxLength: 512
         observable_classification:
-          type: string
-          maxLength: 12
+          oneOf:
+          - $ref: '#/components/schemas/ObservableClassificationEnum'
+          - $ref: '#/components/schemas/BlankEnum'
         file_name:
           type: string
           maxLength: 512
@@ -1823,82 +2192,7 @@ components:
           items:
             type: string
             maxLength: 128
-        analyzers_to_execute:
-          type: array
-          items:
-            type: string
-            maxLength: 128
-        connectors_to_execute:
-          type: array
-          items:
-            type: string
-            maxLength: 128
-        received_request_time:
-          type: string
-          format: date-time
-          readOnly: true
-        finished_analysis_time:
-          type: string
-          format: date-time
-          nullable: true
-        tlp:
-          $ref: '#/components/schemas/TlpEnum'
-        errors:
-          type: array
-          items:
-            type: string
-            maxLength: 900
-          nullable: true
-      required:
-      - analyzer_reports
-      - connector_reports
-      - id
-      - md5
-      - permissions
-      - process_time
-      - received_request_time
-      - tags
-      - user
-    JobAvailability:
-      type: object
-      description: Serializer for ask_analysis_availability
-      properties:
-        id:
-          type: integer
-          readOnly: true
-        md5:
-          type: string
-          maxLength: 128
-        analyzers:
-          type: array
-          items: {}
-        running_only:
-          type: boolean
-          default: false
-        minutes_ago:
-          type: integer
-        is_sample:
-          type: boolean
-        observable_name:
-          type: string
-          maxLength: 512
-        observable_classification:
-          type: string
-          maxLength: 12
-        file_name:
-          type: string
-          maxLength: 512
-        file_mimetype:
-          type: string
-          maxLength: 80
-        status:
-          $ref: '#/components/schemas/StatusFefEnum'
-        analyzers_requested:
-          type: array
-          items:
-            type: string
-            maxLength: 128
-        connectors_requested:
+        playbooks_requested:
           type: array
           items:
             type: string
@@ -1925,6 +2219,107 @@ components:
         finished_analysis_time:
           type: string
           format: date-time
+          nullable: true
+        process_time:
+          type: number
+          format: double
+          nullable: true
+        tlp:
+          $ref: '#/components/schemas/TlpEnum'
+        errors:
+          type: array
+          items:
+            type: string
+            maxLength: 900
+          nullable: true
+      required:
+      - analyzer_reports
+      - connector_reports
+      - id
+      - md5
+      - permissions
+      - received_request_time
+      - tags
+      - user
+    JobAvailability:
+      type: object
+      description: Serializer for ask_analysis_availability
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        md5:
+          type: string
+          maxLength: 128
+        analyzers:
+          type: array
+          items: {}
+        playbooks:
+          type: array
+          items: {}
+        running_only:
+          type: boolean
+          default: false
+        minutes_ago:
+          type: integer
+        is_sample:
+          type: boolean
+        observable_name:
+          type: string
+          maxLength: 512
+        observable_classification:
+          oneOf:
+          - $ref: '#/components/schemas/ObservableClassificationEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        file_name:
+          type: string
+          maxLength: 512
+        file_mimetype:
+          type: string
+          maxLength: 80
+        status:
+          $ref: '#/components/schemas/StatusFefEnum'
+        analyzers_requested:
+          type: array
+          items:
+            type: string
+            maxLength: 128
+        connectors_requested:
+          type: array
+          items:
+            type: string
+            maxLength: 128
+        playbooks_requested:
+          type: array
+          items:
+            type: string
+            maxLength: 128
+        analyzers_to_execute:
+          type: array
+          items:
+            type: string
+            maxLength: 128
+        connectors_to_execute:
+          type: array
+          items:
+            type: string
+            maxLength: 128
+        playbooks_to_execute:
+          type: array
+          items:
+            type: string
+            maxLength: 128
+        received_request_time:
+          type: string
+          format: date-time
+          readOnly: true
+        finished_analysis_time:
+          type: string
+          format: date-time
+          nullable: true
+        process_time:
+          type: number
+          format: double
           nullable: true
         tlp:
           $ref: '#/components/schemas/TlpEnum'
@@ -1962,9 +2357,6 @@ components:
           items:
             $ref: '#/components/schemas/Tag'
           readOnly: true
-        process_time:
-          type: number
-          format: double
         is_sample:
           type: boolean
         md5:
@@ -1974,8 +2366,9 @@ components:
           type: string
           maxLength: 512
         observable_classification:
-          type: string
-          maxLength: 12
+          oneOf:
+          - $ref: '#/components/schemas/ObservableClassificationEnum'
+          - $ref: '#/components/schemas/BlankEnum'
         file_name:
           type: string
           maxLength: 512
@@ -1994,12 +2387,22 @@ components:
           items:
             type: string
             maxLength: 128
+        playbooks_requested:
+          type: array
+          items:
+            type: string
+            maxLength: 128
         analyzers_to_execute:
           type: array
           items:
             type: string
             maxLength: 128
         connectors_to_execute:
+          type: array
+          items:
+            type: string
+            maxLength: 128
+        playbooks_to_execute:
           type: array
           items:
             type: string
@@ -2012,6 +2415,10 @@ components:
           type: string
           format: date-time
           nullable: true
+        process_time:
+          type: number
+          format: double
+          nullable: true
         tlp:
           $ref: '#/components/schemas/TlpEnum'
         errors:
@@ -2023,7 +2430,6 @@ components:
       required:
       - id
       - md5
-      - process_time
       - received_request_time
       - tags
       - user
@@ -2043,18 +2449,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/AnalysisResponse'
-      required:
-      - count
-      - results
-    MultiAnalysisResponsePlaybooksList:
-      type: object
-      properties:
-        count:
-          type: boolean
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/PlaybooksAnalysisResponse'
       required:
       - count
       - results
@@ -2161,128 +2555,14 @@ components:
       required:
       - id
       - observable_name
-    PlaybookConfigSupport:
-      type: array
-      items:
-        type: string
-      example: ["ip","url","domain","generic","hash","file"]
-    PlaybookAnalyzersSchema:
-      type: object
-      description: |-
-        To validate `analyzers` attr.
-        Used for `playbook_config.json` file.
-      properties:
-        value:
-          type: object
-      example: {"APKiD_Scan_APK_DEX_JAR":{},"BoxJS_Scan_JavaScript":{}, "Classic_DNS": {"query_type": "A"}}
-    PlaybookConnectorsSchema:
-      type: object
-      description: |-
-        To validate `connectors` attr.
-        Used for `playbook_config.json` file.
-      properties:
-        value:
-          type: object
-      example: {"MISP":{},"OpenCTI":{}, "YETI": {}}
-    PlaybookConfig:
-      type: object
-      description: Serializer for `playbook_config.json`.
-      properties:
-        name:
-          type: string
-        python_module:
-          example: ''
-          description: 'Usually empty here. Present here so that support in the future could be provided.'
-          type: string
-          maxLength: 128
-        disabled:
-          type: boolean
-        description:
-          type: string
-        config:
-          description: 'Usually empty here. Present here so that support in the future could be provided.'
-          $ref: '#/components/schemas/_Config'
-        secrets:
-          description: 'Usually empty here. Present here so that support in the future could be provided.'
-          type: object
-          additionalProperties:
-            $ref: '#/components/schemas/_Secret'
-        analyzers:
-          type: object
-          $ref: '#/components/schemas/PlaybookAnalyzersSchema'
-        connectors:
-          type: object
-          $ref: '#/components/schemas/PlaybookConnectorsSchema'
-        params:
-          description: 'Usually empty here. Present here so that support in the future could be provided.'
-          type: object
-          additionalProperties:
-            $ref: '#/components/schemas/_Param'
-        verification:
-          type: object
-          properties:
-            configured:
-              type: boolean
-            error_message:
-              type: string
-              nullable: true
-            missing_secrets:
-              type: array
-              items:
-                type: string
-          required:
-          - configured
-          - error_message
-          - missing_secrets
-          readOnly: true
-        supports:
-          description: 'The types of inputs which are supported by this Playbook.'
-          type: array
-          $ref: '#/components/schemas/PlaybookConfigSupport'
-      required:
-      - config
-      - disabled
-      - analyzers
-      - connectors
-      - name
-      - params
-      - python_module
-      - secrets
-      - type
-      - verification
-    PlaybookObservableAnalysis:
-      type: object
-      description: |-
-        ``Job`` model's serializer for Observable Analysis.
-        Used for ``create()``.
-      properties:
-        id:
-          type: integer
-          readOnly: true
-        tlp:
-          $ref: '#/components/schemas/TlpEnum'
-        observables:
-          type: array
-          items:
-            type: array
-            items: {}
-            maxItems: 2
-            minItems: 2
-        runtime_configuration:
-          type: object
-          additionalProperties: {}
-          writeOnly: true
-          default: {}
-        playbooks_requested:
-          type: array
-          items: {}
-        tags_labels:
-          type: array
-          items: {}
-      required:
-      - id
-      - observable_name
-
+    ObservableClassificationEnum:
+      enum:
+      - ip
+      - url
+      - domain
+      - hash
+      - generic
+      type: string
     ObservableSupportedEnum:
       enum:
       - ip
@@ -2339,6 +2619,32 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Notification'
+    PatchedPluginConfig:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        organization:
+          type: string
+          nullable: true
+        value:
+          type: object
+          additionalProperties: {}
+        type:
+          $ref: '#/components/schemas/Type816Enum'
+        config_type:
+          $ref: '#/components/schemas/ConfigTypeEnum'
+        attribute:
+          type: string
+          maxLength: 128
+        plugin_name:
+          type: string
+          maxLength: 128
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
     PatchedTag:
       type: object
       properties:
@@ -2351,6 +2657,175 @@ components:
         color:
           type: string
           maxLength: 7
+    PlaybookConfig:
+      type: object
+      description: Serializer for `playbook_config.json`.
+      properties:
+        name:
+          type: string
+        python_module:
+          type: string
+          default: ''
+        disabled:
+          type: boolean
+        description:
+          type: string
+        config:
+          type: object
+          additionalProperties: {}
+          default: {}
+        secrets:
+          type: object
+          additionalProperties: {}
+          default: {}
+        params:
+          type: object
+          additionalProperties: {}
+          default: {}
+        verification:
+          type: object
+          additionalProperties: {}
+          default: {}
+        extends:
+          type: string
+        analyzers:
+          type: object
+          additionalProperties:
+            type: object
+            additionalProperties: {}
+        connectors:
+          type: object
+          additionalProperties:
+            type: object
+            additionalProperties: {}
+        supports:
+          type: array
+          items:
+            $ref: '#/components/schemas/SupportsEnum'
+          default: []
+      required:
+      - analyzers
+      - connectors
+      - description
+      - disabled
+      - name
+    PlaybookFileAnalysis:
+      type: object
+      description: |-
+        ``Job`` model's serializer for File Analysis.
+        Used for ``create()``.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        user:
+          type: integer
+          nullable: true
+        tlp:
+          $ref: '#/components/schemas/TlpEnum'
+        file:
+          type: string
+          format: uri
+        file_name:
+          type: string
+        file_mimetype:
+          type: string
+        runtime_configuration:
+          type: object
+          additionalProperties: {}
+          writeOnly: true
+          default: {}
+        analyzers_requested:
+          type: array
+          items: {}
+        connectors_requested:
+          type: array
+          items: {}
+        playbooks_requested:
+          type: array
+          items:
+            type: string
+            maxLength: 128
+        tags_labels:
+          type: array
+          items: {}
+      required:
+      - file
+      - id
+    PlaybookObservableAnalysis:
+      type: object
+      description: |-
+        ``Job`` model's serializer for Observable Analysis.
+        Used for ``create()``.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        user:
+          type: integer
+          nullable: true
+        tlp:
+          $ref: '#/components/schemas/TlpEnum'
+        observable_name:
+          type: string
+        observable_classification:
+          type: string
+        runtime_configuration:
+          type: object
+          additionalProperties: {}
+          writeOnly: true
+          default: {}
+        analyzers_requested:
+          type: array
+          items: {}
+        connectors_requested:
+          type: array
+          items: {}
+        playbooks_requested:
+          type: array
+          items:
+            type: string
+            maxLength: 128
+        tags_labels:
+          type: array
+          items: {}
+      required:
+      - id
+      - observable_name
+    PluginConfig:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        organization:
+          type: string
+          nullable: true
+        value:
+          type: object
+          additionalProperties: {}
+        type:
+          $ref: '#/components/schemas/Type816Enum'
+        config_type:
+          $ref: '#/components/schemas/ConfigTypeEnum'
+        attribute:
+          type: string
+          maxLength: 128
+        plugin_name:
+          type: string
+          maxLength: 128
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - attribute
+      - config_type
+      - id
+      - plugin_name
+      - type
+      - updated_at
+      - value
     PluginHealthCheckSuccessResponse:
       type: object
       properties:
@@ -2358,6 +2833,25 @@ components:
           type: boolean
           nullable: true
       required:
+      - status
+    PluginStateViewerResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          additionalProperties: {}
+      required:
+      - data
+    PluginUpdateSuccessResponse:
+      type: object
+      properties:
+        status:
+          type: boolean
+        detail:
+          type: string
+          nullable: true
+      required:
+      - detail
       - status
     RunHashTypeEnum:
       enum:
@@ -2380,6 +2874,15 @@ components:
       - reported_with_fails
       - killed
       - failed
+      type: string
+    SupportsEnum:
+      enum:
+      - ip
+      - url
+      - domain
+      - hash
+      - generic
+      - file
       type: string
     Tag:
       type: object
@@ -2416,6 +2919,7 @@ components:
           readOnly: true
         client:
           type: string
+          description: A unique identification name for the client.
           readOnly: true
         created:
           type: string
@@ -2441,6 +2945,20 @@ components:
       - has_expired
       - id
       - is_current
+    Type1d0Enum:
+      enum:
+      - int
+      - float
+      - str
+      - bool
+      - list
+      - dict
+      type: string
+    Type816Enum:
+      enum:
+      - '1'
+      - '2'
+      type: string
     User:
       type: object
       properties:
@@ -2495,7 +3013,7 @@ components:
         value:
           type: string
         type:
-          $ref: '#/components/schemas/_ParamTypeEnum'
+          $ref: '#/components/schemas/Type1d0Enum'
         description:
           type: string
           maxLength: 512
@@ -2503,15 +3021,6 @@ components:
       - description
       - type
       - value
-    _ParamTypeEnum:
-      enum:
-      - int
-      - float
-      - str
-      - bool
-      - list
-      - dict
-      type: string
     _Secret:
       type: object
       description: |-
@@ -2526,6 +3035,10 @@ components:
           maxLength: 512
         required:
           type: boolean
+        type:
+          $ref: '#/components/schemas/Type1d0Enum'
+        default:
+          type: string
       required:
       - description
       - env_var_key

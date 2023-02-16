@@ -23,5 +23,5 @@ class Migration(migrations.Migration):
             name="process_time",
             field=models.FloatField(blank=True, null=True),
         ),
-        migrations.RunPython(calculate_process_time),
+        migrations.RunPython(calculate_process_time, migrations.RunPython.noop),
     ]

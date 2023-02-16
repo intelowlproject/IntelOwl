@@ -115,7 +115,7 @@ class PlaybookListAPI(APIView):
             200: PlaybookConfigSerializer,
             500: inline_serializer(
                 name="GetPlaybookConfigsFailedResponse",
-                fields={"error": rfs.StringRelatedField()},
+                fields={"error": rfs.CharField()},
             ),
         },
     )

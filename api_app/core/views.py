@@ -18,7 +18,10 @@ from rest_framework.views import APIView
 from certego_saas.apps.organization.permissions import IsObjectOwnerOrSameOrgPermission
 from intel_owl.celery import app as celery_app
 
+from .classes import Plugin
+from .dataclasses import AbstractConfig
 from .models import AbstractReport
+from .serializers import AbstractConfigSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -112,6 +115,32 @@ class PluginActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+class PluginListAPI(APIView, metaclass=ABCMeta):
+    @property
+    @abstractmethod
+    def serializer_class(self) -> typing.Type[AbstractConfigSerializer]:
+        raise NotImplementedError()
+
+    def get(self, request, *args, **kwargs):
+        from api_app.models import OrganizationPluginState, PluginConfig
+
+        try:
+            ac = self.serializer_class.read_and_verify_config(request.user)
+            PluginConfig.apply(ac, request.user, self.serializer_class._get_type())
+            OrganizationPluginState.apply(
+                ac, request.user, self.serializer_class._get_type()
+            )
+            return Response(ac, status=status.HTTP_200_OK)
+        except Exception as e:
+            logger.exception(
+                f"get_plugin_configs requester:{str(request.user)} error:{e}."
+            )
+            return Response(
+                {"error": "error in get_plugin_configs. Check logs."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+
 @add_docs(
     description="Health Check: if server instance associated with plugin is up or not",
     request=None,
@@ -127,9 +156,31 @@ class PluginActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
 class PluginHealthCheckAPI(APIView, metaclass=ABCMeta):
     permission_classes = [IsAuthenticated, IsAdminUser]
 
+    @property
     @abstractmethod
-    def perform_healthcheck(self, plugin_name: str) -> bool:
+    def config_model(self) -> typing.Type[AbstractConfig]:
         raise NotImplementedError()
+
+    def perform_healthcheck(self, plugin_name: str) -> bool:
+        from rest_framework.exceptions import ValidationError
+
+        plugin_config = self.config_model.get(plugin_name)
+        if plugin_config is None:
+            raise ValidationError(
+                {
+                    "detail": f"{self.__class__.__name__.split('Health')[0]} doesn't exist"
+                }
+            )
+
+        class_: typing.Type[Plugin] = plugin_config.get_class()
+        try:
+            if not hasattr(class_, "health_check") or not callable(class_.health_check):
+                raise NotImplementedError()
+            status_ = class_.health_check(plugin_name)
+        except NotImplementedError:
+            raise ValidationError({"detail": "No healthcheck implemented"})
+
+        return status_
 
     def get(self, request, name):
         logger.info(f"get healthcheck from user {request.user}, name {name}")
@@ -165,7 +216,11 @@ class PluginUpdateAPI(APIView, metaclass=ABCMeta):
         logger.info(f"update request from user {request.user}, name {name}")
         plugin_config: AbstractConfig = self.config_model.get(name)
         if plugin_config is None:
-            raise ValidationError({"detail": "Plugin doesn't exist"})
+            raise ValidationError(
+                {
+                    "detail": f"{self.__class__.__name__.split('Update')[0]} doesn't exist"
+                }
+            )
         try:
             class_: typing.Type[Plugin] = plugin_config.get_class()
         except ImportError:

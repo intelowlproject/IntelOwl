@@ -42,7 +42,7 @@ class ConnectorListAPI(PluginListAPI):
         },
     )
     def get(self, request, *args, **kwargs):
-        return super(request, *args, **kwargs)
+        return super().get(request, *args, **kwargs)
 
 
 class ConnectorActionViewSet(PluginActionViewSet):

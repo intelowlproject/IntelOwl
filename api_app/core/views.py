@@ -220,7 +220,7 @@ class PluginUpdateAPI(APIView, metaclass=ABCMeta):
             raise ValidationError(
                 {
                     "detail": f"{self.__class__.__name__.split('Update')[0]} "
-                    f"doesn't exist"
+                    "doesn't exist"
                 }
             )
         try:

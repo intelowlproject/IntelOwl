@@ -161,7 +161,7 @@ class YaraScan(FileAnalyzer):
                 result.append(
                     {
                         "match": str(match),
-                        "strings": match.strings[:20] if match else [],
+                        "strings": str(match.strings[:20]) if match else "",
                         "tags": match.tags,
                         "meta": match.meta,
                         "path": str(path),

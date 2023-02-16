@@ -129,21 +129,24 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `SpeakEasy_Shellcode`: [Mandiant Speakeasy](https://github.com/mandiant/speakeasy) shellcode emulation
 * `Floss`: [Mandiant Floss](https://github.com/mandiant/flare-floss) Obfuscated String Solver in files
 * `Strings_Info`: Strings extraction. Leverages Mandiant's [Stringsifter](https://github.com/mandiant/stringsifter)
-* `Yara_Scan_ATM_MALWARE`: scan a file with the [ATM malware yara rules](https://github.com/fboldewin/YARA-rules)
-* `Yara_Scan_Bartblaze`: scan a file with [bartblaze yara rules](https://github.com/bartblaze/Yara-rules)
-* `Yara_Scan_Community`: scan a file with the [community yara rules](https://github.com/Yara-Rules/rules)
-* `Yara_Scan_Dail_Ioc`: scan a file with [StrangerealIntel](https://github.com/StrangerealIntel) Daily IOC yara rules
-* `Yara_Scan_Florian`: scan a file with [Neo23x0 yara rules](https://github.com/Neo23x0/signature-base)
-* `Yara_Scan_Intezer`: scan a file with [Intezer yara rules](https://github.com/intezer/yara-rules)
-* `Yara_Scan_Inquest`: scan a file with [Inquest yara rules](https://github.com/InQuest/yara-rules)
-* `Yara_Scan_McAfee`: scan a file with [McAfee yara rules](https://github.com/advanced-threat-research/Yara-Rules)
-* `Yara_Scan_Samir`: scan a file with [Samir Threat Hunting yara rules](https://github.com/sbousseaden/YaraHunts)
-* `Yara_Scan_Stratosphere`: scan a file with [Stratosphere yara rules](https://github.com/stratosphereips/yara-rules)
-* `Yara_Scan_FireEye`: scan a file with FireEye yara rules
-* `Yara_Scan_ReversingLabs`: scan a file with [ReversingLabs yara rules](https://github.com/reversinglabs/reversinglabs-yara-rules)
-* `Yara_Scan_Custom_Signatures`: scan a file with your own added signatures
-* `Yara_Scan_YARAify`: scan a file with YARAify rules [YARAify rules](https://yaraify.abuse.ch/api/#download-yara-package)
-* `Yara_Scan_Custom_Signatures`: scan a file with the Yara rules you added manually in IntelOwl in `/configuration/custom_yara`
+* `Yara`: scan a file with
+  * [ATM malware yara rules](https://github.com/fboldewin/YARA-rules)
+  * [bartblaze yara rules](https://github.com/bartblaze/Yara-rules)
+  * [community yara rules](https://github.com/Yara-Rules/rules)
+  * [StrangerealIntel](https://github.com/StrangerealIntel) 
+  * [Neo23x0 yara rules](https://github.com/Neo23x0/signature-base)
+  * [Intezer yara rules](https://github.com/intezer/yara-rules)
+  * [Inquest yara rules](https://github.com/InQuest/yara-rules)
+  * [McAfee yara rules](https://github.com/advanced-threat-research/Yara-Rules)
+  * [Samir Threat Hunting yara rules](https://github.com/sbousseaden/YaraHunts)
+  * [Stratosphere yara rules](https://github.com/stratosphereips/yara-rules)
+  * [Mandiant yara rules](https://github.com/mandiant/red_team_tool_countermeasures)
+  * [ReversingLabs yara rules](https://github.com/reversinglabs/reversinglabs-yara-rules)
+  * [YARAify rules](https://yaraify.abuse.ch/api/#download-yara-package)
+  * [SIFalcon rules](https://github.com/SIFalcon/Detection/)
+  * [Elastic rules](https://github.com/elastic/protections-artifacts)
+  * [JPCERTCC Yara rules](https://github.com/JPCERTCC/jpcert-yara)
+  * your own added signatures. See [Advanced-Usage](./Advanced-Usage.html#analyzers-with-special-configuration) for more details.
 * `PEframe_Scan`: Perform static analysis on Portable Executable malware and malicious MS Office documents with [PeFrame](https://github.com/guelfoweb/peframe)
 * `Capa_Info`: [Capa](https://github.com/mandiant/capa) detects capabilities in executable files
 * `Capa_Info_Shellcode`: [Capa](https://github.com/mandiant/capa) detects capabilities in shellcode
@@ -194,15 +197,12 @@ The following is the list of the available analyzers you can run out-of-the-box.
 
 ###### External services
 * `VirusTotal_v3_Get_Observable`: search an observable in the VirusTotal DB
-* `VirusTotal_v2_Get_Observable`: search an observable in the VirusTotal DB using the old API endpoints (this analyzer is disabled by default. You have to change that flag [in the config](https://github.com/intelowlproject/IntelOwl/blob/master/configuration/analyzer_config.json) to use it)
 * `HybridAnalysis_Get_Observable`: search an observable in the [HybridAnalysis](https://www.hybrid-analysis.com/) sandbox reports
 * `OTXQuery`: scan an observable on [Alienvault OTX](https://otx.alienvault.com/)
 * `TalosReputation`: check an IP reputation from [Talos](https://talosintelligence.com/reputation_center/)
 * `Stratosphere_Blacklist`: Cross-reference an IP from blacklists maintained by [Stratosphere Labs](https://www.stratosphereips.org/attacker-ip-prioritization-blacklist)
 * `BitcoinAbuse` : Check a BTC address against bitcoinabuse.com, a public database of BTC addresses used by hackers and criminals.
-* `Robtex_Forward_PDNS_Query`: scan a domain against the Robtex Passive DNS DB
-* `Robtex_Reverse_PDNS_Query`: scan an IP against the Robtex Passive DNS DB
-* `Robtex_IP_Query`: get IP info from Robtex
+* `Robtex`: scan a domain/IP against the Robtex Passive DNS DB
 * `GoogleSafebrowsing`: Scan an observable against GoogleSafeBrowsing DB
 * `GoogleWebRisk`: Scan an observable against WebRisk API (Commercial version of Google Safe Browsing). Check the [docs](https://intelowl.readthedocs.io/en/develop/Advanced-Usage.html#analyzers-with-special-configuration) to enable this properly
 * `GreedyBear`: scan an IP or a domain against the [GreedyBear](https://greedybear.honeynet.org/) API (requires API key)
@@ -226,21 +226,14 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `MalwareBazaar_Get_Observable`: Check if a particular malware hash is known to [MalwareBazaar](https://bazaar.abuse.ch/)
 * `MalwareBazaar_Google_Observable`: Check if a particular IP, domain or url is known to MalwareBazaar using google search
 * `ONYPHE`: search an observable in [ONYPHE](https://www.onyphe.io/)
-* `Threatminer_PDNS`: retrieve PDNS data from [Threatminer](https://www.threatminer.org/) API
-* `Threatminer_Reports_Tagging`: retrieve reports from Threatminer API
-* `Threatminer_Subdomains`: retrieve subdomains from Threatminer API
+* `Threatminer`: retrieve data from [Threatminer](https://www.threatminer.org/) API
 * `URLhaus`: Query a domain or URL against [URLhaus](https://urlhaus.abuse.ch/) API.
 * `Google_DNS`: Retrieve current domain resolution with Google DoH (DNS over HTTPS)
 * `CloudFlare_DNS`: Retrieve current domain resolution with CloudFlare DoH (DNS over HTTPS)
 * `CloudFlare_Malicious_Detector`: Leverages CloudFlare DoH to check if a domain is related to malware
 * `Classic_DNS`: Retrieve current domain resolution with default DNS
 * `Auth0`: scan an IP against the Auth0 API
-* `Securitytrails_IP_Neighbours`: scan an IP against [Securitytrails](https://securitytrails.com/) API for neighbour IPs
-* `Securitytrails_Details`: scan a domain against Securitytrails API for general details
-* `Securitytrails_Subdomains`: scan a domain against Securitytrails API for subdomains
-* `Securitytrails_Tags`: scan a domain against Securitytrails API for tags
-* `Securitytrails_History_WHOIS`: scan a domain against Securitytrails API for historical WHOIS
-* `Securitytrails_History_DNS`: scan a domain against Securitytrails API for historical DNS
+* `Securitytrails`: scan an IP/Domain against [Securitytrails](https://securitytrails.com/) API
 * `Cymru_Hash_Registry_Get_Observable`: Check if a particular hash is available in the malware hash registry of [Team Cymru](https://team-cymru.com/community-services/mhr/)
 * `Tranco`: Check if a domain is in the latest [Tranco](https://tranco-list.eu/) ranking top sites list
 * `Pulsedive_Active_IOC`: Scan indicators and retrieve results from [Pulsedive's API](https://pulsedive.com/api/).

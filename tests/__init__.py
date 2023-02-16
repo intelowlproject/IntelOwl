@@ -10,7 +10,7 @@ from rest_framework.test import APIClient
 
 from api_app.analyzers_manager.constants import ObservableTypes
 from api_app.core.models import AbstractReport
-from api_app.models import Job
+from api_app.models import Job, PluginConfig
 
 User = get_user_model()
 
@@ -63,10 +63,12 @@ def PollingFunction(self):
                     status=AbstractReport.Status.FAILED
                 )
             ]
-            print(
+            message = (
                 f"\n>>> Failed analyzers: {failed_analyzers}",
                 f"\n>>> Failed connectors: {failed_connectors}",
             )
+            print(message)
+            self.fail(message)
 
         # check analyzers status
         if status not in [Job.Status.PENDING, Job.Status.RUNNING]:
@@ -121,14 +123,18 @@ def get_logger() -> logging.Logger:
 class CustomTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
+
         try:
-            cls.superuser = User.objects.get(username="test")
+            cls.superuser = User.objects.get(is_superuser=True)
         except User.DoesNotExist:
+            PluginConfig.objects.all().delete()
             print("creating superuser")
             cls.superuser = User.objects.create_superuser(
                 username="test", email="test@intelowl.com", password="test"
             )
-            call_command("migrate_secrets")
+        finally:
+            if not PluginConfig.objects.filter(owner=cls.superuser).exists():
+                call_command("migrate_secrets")
 
 
 class CustomAPITestCase(CustomTestCase):

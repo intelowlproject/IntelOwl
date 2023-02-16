@@ -13,7 +13,7 @@ from django.conf import settings
 from rest_framework import serializers as rfs
 
 from api_app.helpers import calculate_md5
-from intel_owl import secrets as secrets_store
+from api_app.models import PluginConfig
 from intel_owl.consts import PARAM_DATATYPE_CHOICES
 
 logger = logging.getLogger(__name__)
@@ -72,6 +72,18 @@ class _SecretSerializer(rfs.Serializer):
     env_var_key = rfs.CharField(required=True, max_length=128)
     description = rfs.CharField(required=True, allow_blank=True, max_length=512)
     required = rfs.BooleanField(required=True)
+    type = rfs.ChoiceField(choices=PARAM_DATATYPE_CHOICES, required=False)
+    default = BaseField(required=False)
+
+    def validate(self, attrs):
+        if "type" in attrs and "default" in attrs:
+            default_type = type(attrs["default"]).__name__
+            expected_type = attrs["type"]
+            if default_type != expected_type:
+                raise rfs.ValidationError(
+                    f"Invalid default type. {default_type} != {expected_type}"
+                )
+        return super().validate(attrs)
 
 
 class AbstractConfigSerializer(rfs.Serializer):
@@ -104,8 +116,9 @@ class AbstractConfigSerializer(rfs.Serializer):
             self._is_valid_flag = True
         return ret
 
+    @classmethod
     @abstractmethod
-    def _get_type(self):
+    def _get_type(cls):
         raise NotImplementedError()
 
     def get_verification(self, raw_instance: dict) -> ConfigVerificationType:
@@ -115,14 +128,16 @@ class AbstractConfigSerializer(rfs.Serializer):
         missing_secrets = []
         for s_key, s_dict in secrets.items():
             # check if available in environment
-            secret_val = secrets_store.get_secret(
-                s_key,
-                default=None,
-                plugin_type=self._get_type(),
-                plugin_name=raw_instance["name"],
-                user=self.context.get("user", None),
-            )
-            if not secret_val and s_dict["required"]:
+            if (
+                not PluginConfig.visible_for_user(self.context.get("user", None))
+                .filter(
+                    attribute=s_key,
+                    type=self._get_type(),
+                    plugin_name=raw_instance["name"],
+                )
+                .exists()
+                and s_dict["required"]
+            ):
                 missing_secrets.append(s_key)
 
         num_missing_secrets = len(missing_secrets)

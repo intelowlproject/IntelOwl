@@ -2,6 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 
 import logging
+import typing
 from abc import ABCMeta, abstractmethod
 
 from drf_spectacular.utils import extend_schema as add_docs
@@ -10,6 +11,7 @@ from rest_framework import serializers as rfs
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound, ValidationError
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -123,6 +125,8 @@ class PluginActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
     },
 )
 class PluginHealthCheckAPI(APIView, metaclass=ABCMeta):
+    permission_classes = [IsAuthenticated, IsAdminUser]
+
     @abstractmethod
     def perform_healthcheck(self, plugin_name: str) -> bool:
         raise NotImplementedError()
@@ -131,3 +135,44 @@ class PluginHealthCheckAPI(APIView, metaclass=ABCMeta):
         logger.info(f"get healthcheck from user {request.user}, name {name}")
         health_status = self.perform_healthcheck(name)
         return Response(data={"status": health_status}, status=status.HTTP_200_OK)
+
+
+@add_docs(
+    description="Update plugin with latest configuration",
+    request=None,
+    responses={
+        200: inline_serializer(
+            name="PluginUpdateSuccessResponse",
+            fields={
+                "status": rfs.BooleanField(allow_null=False),
+                "detail": rfs.CharField(allow_null=True),
+            },
+        ),
+    },
+)
+class PluginUpdateAPI(APIView, metaclass=ABCMeta):
+    permission_classes = [IsAuthenticated, IsAdminUser]
+
+    @property
+    @abstractmethod
+    def config_model(self):
+        raise NotImplementedError()
+
+    def post(self, request, name: str):
+        from api_app.core.classes import Plugin
+        from api_app.core.dataclasses import AbstractConfig
+
+        logger.info(f"update request from user {request.user}, name {name}")
+        plugin_config: AbstractConfig = self.config_model.get(name)
+        if plugin_config is None:
+            raise ValidationError({"detail": "Plugin doesn't exist"})
+        try:
+            class_: typing.Type[Plugin] = plugin_config.get_class()
+        except ImportError:
+            raise ValidationError({"detail": "Unable to import plugin"})
+        else:
+            success = class_.update()
+            if not success:
+                raise ValidationError({"detail": "No update implemented"})
+
+        return Response(data={"status": True}, status=status.HTTP_200_OK)

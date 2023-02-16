@@ -15,12 +15,10 @@ class CAPEsandbox(FileAnalyzer):
 
     def set_params(self, params):
         self.__token = self._secrets["api_key_name"]
-        self.__vm_name = params.get("VM_NAME", "win7x64_8")
+        self.__vm_name = params.get("VM_NAME", "")
         self.max_tries = params.get("max_tries", 50)
         self.poll_distance = params.get("poll_distance", 30)
-        self.__base_url = self._secrets.get(
-            "url_key_name", "https://www.capesandbox.com"
-        )
+        self.__base_url = self._secrets.get("url_key_name")
         self.__session = requests.Session()
         self.__session.headers = {
             "Authorization": f"Token {self.__token}",
@@ -31,6 +29,9 @@ class CAPEsandbox(FileAnalyzer):
         to_respond = {}
 
         logger.info(f"Job: {self.job_id} -> " "Starting file upload.")
+        data = {}
+        if self.__vm_name:
+            data["machine"] = self.__vm_name
 
         try:
             response = self.__session.post(
@@ -38,7 +39,7 @@ class CAPEsandbox(FileAnalyzer):
                 files={
                     "file": (self.filename, self.read_file_bytes()),
                 },
-                data={"machine": self.__vm_name},
+                data=data,
             )
             response.raise_for_status()
         except requests.RequestException as e:

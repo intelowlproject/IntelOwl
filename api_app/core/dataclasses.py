@@ -13,13 +13,10 @@ from django.utils.module_loading import import_string
 
 from api_app.core.models import AbstractReport
 from api_app.core.serializers import AbstractConfigSerializer
-from api_app.models import Job
-from intel_owl import secrets as secrets_store
-from intel_owl.consts import (
-    DEFAULT_QUEUE,
-    DEFAULT_SOFT_TIME_LIMIT,
-    PARAM_DATATYPE_CHOICES,
-)
+from api_app.models import Job, PluginConfig
+from certego_saas.apps.user.models import User
+from intel_owl.celery import DEFAULT_QUEUE
+from intel_owl.consts import DEFAULT_SOFT_TIME_LIMIT, PARAM_DATATYPE_CHOICES
 
 # otherwise we have a recursive import
 logger = getLogger(__name__)
@@ -50,6 +47,8 @@ class _Secret:
     env_var_key: str
     description: str
     required: bool
+    type: typing.Literal[PARAM_DATATYPE_CHOICES] = None
+    default: typing.Optional[typing.Any] = None
 
 
 @dataclasses.dataclass
@@ -68,9 +67,9 @@ class AbstractConfig:
     def _get_serializer_class(cls) -> typing.Type[AbstractConfigSerializer]:
         raise NotImplementedError()
 
-    @abstractmethod
-    def _get_type(self) -> str:
-        raise NotImplementedError()
+    @classmethod
+    def _get_type(cls) -> str:
+        return cls._get_serializer_class()._get_type()
 
     @classmethod
     @abstractmethod
@@ -113,7 +112,9 @@ class AbstractConfig:
     def param_values(self) -> dict:
         return {name: param.value for name, param in self.params.items()}
 
-    def read_secrets(self, secrets_filter=None) -> typing.Dict[str, str]:
+    def read_secrets(
+        self, secrets_filter=None, user: User = None
+    ) -> typing.Dict[str, str]:
         """
         Returns a dict of `secret_key: secret_value` mapping.
         filter_secrets: filter specific secrets or not (default: return all)
@@ -129,13 +130,21 @@ class AbstractConfig:
             }
         else:
             _filtered_secrets = self.secrets
-        for key_name in _filtered_secrets.keys():
-            secrets[key_name] = secrets_store.get_secret(
-                key_name,
-                default=None,
-                plugin_type=self._get_type(),
-                plugin_name=self.name,
+        for key_name, secret in _filtered_secrets.items():
+            pcs = PluginConfig.visible_for_user(user).filter(
+                attribute=key_name, type=self._get_type(), plugin_name=self.name
             )
+            if pcs.count() > 1 and user:
+                # I have both a secret from the org and the user, priority to the user
+                value = pcs.get(owner=user, organization__isnull=True).value
+            elif pcs.count() == 1:
+                value = pcs.first().value
+            elif secret.default is not None:
+                value = secret.default
+            else:
+                value = None
+
+            secrets[key_name] = value
 
         return secrets
 
@@ -179,6 +188,19 @@ class AbstractConfig:
         if config_dict is None:
             return None  # not found
         return cls.from_dict(config_dict)
+
+    @classmethod
+    def get_from_python_module(
+        cls, plugin_class, only_active: bool = True
+    ) -> typing.Generator[typing.Tuple[str, "AbstractConfig"], None, None]:
+        for analyzer_name, ac in cls.all().items():
+            if (
+                ac.python_module
+                == f"{plugin_class.__module__.split('.')[-1]}.{plugin_class.__name__}"
+            ):
+                if only_active and ac.disabled:
+                    continue
+                yield analyzer_name, ac
 
     @classmethod
     def all(cls) -> typing.Dict[str, "AbstractConfig"]:

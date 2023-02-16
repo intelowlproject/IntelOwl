@@ -35,6 +35,9 @@ license terms.
 [ReversingLabs Yara rules](https://github.com/reversinglabs/reversinglabs-yara-rules),
 [Samir Yara rules](https://github.com/sbousseaden/YaraHunts),
 [InQuest Yara rules](https://github.com/InQuest/yara-rules),
+[JPCERTCC Yara rules](https://github.com/JPCERTCC/jpcert-yara),
+[Elastic Yara Rules](https://github.com/elastic/protections-artifacts), 
+[SIFalcon Yara Rules](https://github.com/SIFalcon/Detection/),
 [APKiD](https://github.com/rednaga/APKiD/blob/master/LICENSE.COMMERCIAL),
 [Box-JS](https://github.com/CapacitorSet/box-js/blob/master/LICENSE),
 [Capa](https://github.com/fireeye/capa/blob/master/LICENSE.txt),
@@ -53,4 +56,5 @@ license terms.
 [pyelftools](https://github.com/eliben/pyelftools),
 [telfhash](https://github.com/trendmicro/telfhash),
 [Authlib](https://github.com/lepture/authlib),
-[Fangfrisch](https://github.com/rseichter/fangfrisch)
+[Fangfrisch](https://github.com/rseichter/fangfrisch),
+[pyOneNote](https://github.com/DissectMalware/pyOneNote)

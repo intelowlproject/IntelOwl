@@ -4,7 +4,12 @@
 from django.urls import include, path
 from rest_framework import routers
 
-from .views import AnalyzerActionViewSet, AnalyzerHealthCheckAPI, AnalyzerListAPI
+from .views import (
+    AnalyzerActionViewSet,
+    AnalyzerHealthCheckAPI,
+    AnalyzerListAPI,
+    AnalyzerUpdateAPI,
+)
 
 # Routers provide an easy way of automatically determining the URL conf.
 router = routers.DefaultRouter(trailing_slash=False)
@@ -18,6 +23,7 @@ urlpatterns = [
         "get_analyzer_configs", AnalyzerListAPI.as_view(), name="get_analyzer_configs"
     ),
     path("analyzer/<str:name>/healthcheck", AnalyzerHealthCheckAPI.as_view()),
+    path("analyzer/<str:name>/update", AnalyzerUpdateAPI.as_view()),
     # Viewsets
     path(r"", include(router.urls)),
 ]

@@ -23,11 +23,8 @@ class Threatminer(classes.ObservableAnalyzer):
             uri = "domain.php"
         elif self.observable_classification == self.ObservableTypes.IP:
             uri = "host.php"
-        else:
-            raise AnalyzerRunException(
-                f"not supported observable type {self.observable_classification}. "
-                "Supported are IP and Domain"
-            )
+        elif self.observable_classification == self.ObservableTypes.HASH:
+            uri = "sample.php"
 
         try:
             response = requests.get(self.base_url + uri, params=params)

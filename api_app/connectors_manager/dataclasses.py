@@ -14,7 +14,6 @@ from .serializers import ConnectorConfigSerializer
 __all__ = ["ConnectorConfig"]
 
 from ..core.models import AbstractReport
-from ..models import PluginConfig
 
 logger = logging.getLogger(__name__)
 
@@ -33,9 +32,6 @@ class ConnectorConfig(AbstractConfig):
     @classmethod
     def _get_serializer_class(cls) -> typing.Type[ConnectorConfigSerializer]:
         return ConnectorConfigSerializer
-
-    def _get_type(self) -> str:
-        return PluginConfig.PluginType.CONNECTOR
 
     def get_full_import_path(self) -> str:
         return f"{settings.BASE_CONNECTOR_PYTHON_PATH}.{self.python_module}"

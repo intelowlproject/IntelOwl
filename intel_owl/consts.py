@@ -5,6 +5,5 @@ REGEX_EMAIL = r"^[\w\.\+\-]+\@[\w]+\.[a-z]{2,3}$"
 REGEX_CVE = r"CVE-\d{4}-\d{4,7}"
 REGEX_PASSWORD = r"^[a-zA-Z0-9]{12,}$"
 
-DEFAULT_QUEUE = "default"
 DEFAULT_SOFT_TIME_LIMIT = 300
 PARAM_DATATYPE_CHOICES = ["int", "float", "str", "bool", "list", "dict"]

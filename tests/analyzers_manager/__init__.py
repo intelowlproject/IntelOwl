@@ -43,7 +43,6 @@ class _AbstractAnalyzersScriptTestCase(CustomTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-
         if cls in [
             _AbstractAnalyzersScriptTestCase,
             _ObservableAnalyzersScriptsTestCase,
@@ -168,7 +167,7 @@ class _FileAnalyzersScriptsTestCase(_AbstractAnalyzersScriptTestCase):
         # get params
         params = self.get_params()
         # save job instance
-        self.test_job = Job(**params)
+        self.test_job = Job(**params, user=self.superuser)
         # overwrite if set in env var
         if len(self.analyzers_to_test):
             self.test_job.analyzers_to_execute = self.analyzers_to_test

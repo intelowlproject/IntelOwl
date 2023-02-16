@@ -61,7 +61,8 @@ class AnalyzerConfigSerializer(AbstractConfigSerializer):
         default=[],
     )
 
-    def _get_type(self):
+    @classmethod
+    def _get_type(cls):
         return PluginConfig.PluginType.ANALYZER
 
     def validate_python_module(self, python_module: str) -> str:

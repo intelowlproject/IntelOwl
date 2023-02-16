@@ -27,7 +27,6 @@ from api_app.serializers import (
     PlaybookFileAnalysisSerializer,
     PlaybookObservableAnalysisSerializer,
 )
-from certego_saas.apps.organization.membership import Membership
 from certego_saas.apps.organization.permissions import IsObjectOwnerOrSameOrgPermission
 from certego_saas.ext.helpers import cache_action_response, parse_humanized_range
 from certego_saas.ext.mixins import SerializerActionMixin
@@ -126,7 +125,7 @@ def _multi_analysis_request(
             "warnings": serialized_data[index]["warnings"],
             "analyzers_running": job.analyzers_to_execute,
             "connectors_running": job.connectors_to_execute,
-            "playbook_running": job.playbooks_to_execute,
+            "playbooks_running": job.playbooks_to_execute,
         }
         for index, job in enumerate(jobs)
     ]
@@ -689,24 +688,7 @@ class PluginConfigViewSet(viewsets.ModelViewSet):
     pagination_class = None
 
     def get_queryset(self):
-        # Initializing empty queryset
-        result = PluginConfig.objects.none()
-
-        # Adding CustomConfigs for user's organization, if any
-        membership = Membership.objects.filter(
-            user=self.request.user, organization__isnull=False
-        )
-        if membership.exists():
-            result |= PluginConfig.objects.filter(
-                organization=membership[0].organization,
-            )
-
-        # Adding CustomConfigs for user
-        result |= PluginConfig.objects.filter(
-            owner=self.request.user,
-        )
-
-        return result.order_by("id")
+        return PluginConfig.visible_for_user(self.request.user).order_by("id")
 
 
 @add_docs(

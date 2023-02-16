@@ -1,5 +1,5 @@
 # django libs
-Django==3.2.17
+Django==3.2.18
 django-auth-ldap==4.1.0
 django-radius==1.5.0
 django-filter==22.1
@@ -45,7 +45,7 @@ defusedxml==0.7.1
 OTXv2==1.5.12
 peepdf-fork==0.4.3
 pdfid==1.1.0
-pefile==2022.5.30
+pefile==2023.2.7
 Pillow==9.4.0
 psycopg2-binary==2.9.1
 pycti==5.5.0
@@ -55,6 +55,7 @@ PyExifTool==0.5.0
 pyhashlookup==1.2.0
 pyimpfuzzy==0.5
 pymisp==2.4.144
+git+https://github.com/DissectMalware/pyOneNote@74d7b05966b9948b408a8de484e6c4e40a220de0
 pypdns==1.5.2
 pypssl==2.2
 pysafebrowsing==0.1.1

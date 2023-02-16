@@ -7,18 +7,16 @@ from celery import group
 from drf_spectacular.utils import extend_schema as add_docs
 from drf_spectacular.utils import inline_serializer
 from rest_framework import serializers as BaseSerializer
-from rest_framework import status
-from rest_framework.response import Response
 
 from api_app.core.views import (
     PluginActionViewSet,
     PluginHealthCheckAPI,
+    PluginListAPI,
     PluginUpdateAPI,
 )
-from certego_saas.ext.views import APIView
 from intel_owl.celery import DEFAULT_QUEUE
 
-from ..models import Job, OrganizationPluginState, PluginConfig
+from ..models import Job
 from .dataclasses import AnalyzerConfig
 from .models import AnalyzerReport
 from .serializers import AnalyzerConfigSerializer
@@ -30,12 +28,14 @@ __all__ = [
     "AnalyzerListAPI",
     "AnalyzerActionViewSet",
     "AnalyzerHealthCheckAPI",
+    "AnalyzerUpdateAPI",
 ]
 
 
-class AnalyzerListAPI(APIView):
-
-    serializer_class = AnalyzerConfigSerializer
+class AnalyzerListAPI(PluginListAPI):
+    @property
+    def serializer_class(self) -> typing.Type[AnalyzerConfigSerializer]:
+        return AnalyzerConfigSerializer
 
     @add_docs(
         description="""
@@ -51,21 +51,7 @@ class AnalyzerListAPI(APIView):
         },
     )
     def get(self, request, *args, **kwargs):
-        try:
-            ac = self.serializer_class.read_and_verify_config(request.user)
-            PluginConfig.apply(ac, request.user, PluginConfig.PluginType.ANALYZER)
-            OrganizationPluginState.apply(
-                ac, request.user, PluginConfig.PluginType.ANALYZER
-            )
-            return Response(ac, status=status.HTTP_200_OK)
-        except Exception as e:
-            logger.exception(
-                f"get_analyzer_configs requester:{str(request.user)} error:{e}."
-            )
-            return Response(
-                {"error": "error in get_analyzer_configs. Check logs."},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
+        return super().get(request, *args, **kwargs)
 
 
 class AnalyzerActionViewSet(PluginActionViewSet):
@@ -101,23 +87,9 @@ class AnalyzerActionViewSet(PluginActionViewSet):
 
 
 class AnalyzerHealthCheckAPI(PluginHealthCheckAPI):
-    def perform_healthcheck(self, analyzer_name: str) -> bool:
-        from rest_framework.exceptions import ValidationError
-
-        from api_app.analyzers_manager.classes import DockerBasedAnalyzer
-        from api_app.core.classes import Plugin
-
-        analyzer_config = AnalyzerConfig.get(analyzer_name)
-        if analyzer_config is None:
-            raise ValidationError({"detail": "Analyzer doesn't exist"})
-
-        class_: typing.Type[Plugin] = analyzer_config.get_class()
-
-        # docker analyzers have a common method for health check
-        if not issubclass(class_, DockerBasedAnalyzer):
-            raise ValidationError({"detail": "No healthcheck implemented"})
-
-        return class_.health_check()
+    @property
+    def config_model(self):
+        return AnalyzerConfig
 
 
 class AnalyzerUpdateAPI(PluginUpdateAPI):

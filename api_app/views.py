@@ -235,7 +235,7 @@ def _multi_analysis_availability(user, data):
     return payload
 
 
-""" REST API endpoints """
+# REST API endpoints
 
 
 @add_docs(

@@ -816,6 +816,7 @@ class PluginConfigSerializer(rfs.ModelSerializer):
             try:
                 return json.loads(value)
             except json.JSONDecodeError:
+                logger.info(f"value {value} ({type(value)}) raised ValidationError")
                 raise ValidationError("Value is not JSON-compliant.")
 
         def to_representation(self, value):
@@ -939,4 +940,5 @@ class PluginConfigSerializer(rfs.ModelSerializer):
                 f"{category} {attrs['plugin_name']} "
                 f"{self} attribute {attrs['attribute']} already exists."
             )
+        logger.info(f"validation finished for {attrs}")
         return attrs

@@ -37,7 +37,8 @@
       "api_key_name": {
         "env_var_key": "ABUSEIPDB_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {
@@ -196,7 +197,8 @@
       "api_key_name": {
         "env_var_key": "AUTH0_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {}
@@ -217,7 +219,8 @@
       "api_key_name": {
         "env_var_key": "BITCOINABUSE_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {}
@@ -328,7 +331,8 @@
       "pdns_credentials": {
         "env_var_key": "CIRCL_CREDENTIALS",
         "description": "Template to use: `<user>|<pwd>`.",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {}
@@ -452,13 +456,15 @@
       "api_key_name": {
         "env_var_key": "CAPESANDBOX_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       },
       "url_key_name": {
         "env_var_key": "CAPESANDBOX_URL",
         "description": "URL for the CapeSandbox instance. If none provided, It uses the API provided by CAPESandbox by default.",
         "default": "https://www.capesandbox.com",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {
@@ -495,12 +501,14 @@
       "api_id_name": {
         "env_var_key": "CENSYS_API_ID",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       },
       "api_secret_name": {
         "env_var_key": "CENSYS_API_SECRET",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {
@@ -571,12 +579,14 @@
       "api_key_name": {
         "env_var_key": "CUCKOO_API_KEY",
         "description": "",
-        "required": false
+        "required": false,
+        "type": "str"
       },
       "url_key_name": {
         "env_var_key": "CUCKOO_URL",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {
@@ -767,7 +777,8 @@
       "api_key_name": {
         "env_var_key": "DNSDB_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {
@@ -946,7 +957,8 @@
       "api_key_name": {
         "env_var_key": "DOCGUARD_KEY",
         "description": "",
-        "required": false
+        "required": false,
+        "type": "str"
       }
     },
     "params": {}
@@ -987,7 +999,8 @@
       "api_key_name": {
         "env_var_key": "DOCGUARD_KEY",
         "description": "",
-        "required": false
+        "required": false,
+        "type": "str"
       }
     },
     "params": {}
@@ -1038,13 +1051,15 @@
       "api_key_name": {
         "env_var_key": "DRAGONFLY_API_KEY",
         "description": "Dragonfly API key. Generate [here](https://dragonfly.certego.net/me/sessions?utm_source=intelowl).",
-        "required": true
+        "required": true,
+        "type": "str"
       },
       "url_key_name": {
         "env_var_key": "DRAGONFLY_API_URL",
         "description": "Dragonfly instance URL. Don't change this.",
         "default": "https://dragonfly.certego.net/",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     }
   },
@@ -1083,7 +1098,8 @@
       "api_key_name": {
         "env_var_key": "EMAILREP_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {}
@@ -1264,7 +1280,8 @@
       "api_key_name": {
         "env_var_key": "GSF_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {}
@@ -1287,7 +1304,8 @@
       "api_key_name": {
         "env_var_key": "GREEDYBEAR_API_KEY",
         "description": "API key required for authentication",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {
@@ -1314,7 +1332,8 @@
       "api_key_name": {
         "env_var_key": "GREYNOISE_API_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {
@@ -1337,7 +1356,8 @@
       "api_key_name": {
         "env_var_key": "GREYNOISE_API_KEY",
         "description": "",
-        "required": false
+        "required": false,
+        "type": "str"
       }
     },
     "config": {
@@ -1467,12 +1487,14 @@
       "api_key_name": {
         "env_var_key": "HONEYDB_API_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       },
       "api_id_name": {
         "env_var_key": "HONEYDB_API_ID",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {
@@ -1499,7 +1521,8 @@
       "api_key_name": {
         "env_var_key": "HUNTER_API_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {}
@@ -1520,7 +1543,8 @@
       "api_key_name": {
         "env_var_key": "HA_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {}
@@ -1541,7 +1565,8 @@
       "api_key_name": {
         "env_var_key": "HA_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {}
@@ -1562,7 +1587,8 @@
       "api_key_name": {
         "env_var_key": "INTELX_API_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {
@@ -1604,7 +1630,8 @@
       "api_key_name": {
         "env_var_key": "INTELX_API_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {
@@ -1636,7 +1663,8 @@
       "api_key_name": {
         "env_var_key": "INTEZER_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {}
@@ -1683,7 +1711,8 @@
       "api_key_name": {
         "env_var_key": "INTEZER_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {
@@ -1720,14 +1749,16 @@
       "api_key_name": {
         "env_var_key": "INQUEST_API_KEY",
         "description": "",
-        "required": false
+        "required": false,
+        "type": "str"
       }
     },
     "params": {
       "inquest_analysis": {
         "value": "iocdb_search",
         "type": "str",
-        "description": ""
+        "description": "",
+        "type": "str"
       }
     }
   },
@@ -1747,7 +1778,8 @@
       "api_key_name": {
         "env_var_key": "INQUEST_API_KEY",
         "description": "",
-        "required": false
+        "required": false,
+        "type": "str"
       }
     },
     "params": {
@@ -1774,7 +1806,8 @@
       "api_key_name": {
         "env_var_key": "INQUEST_API_KEY",
         "description": "",
-        "required": false
+        "required": false,
+        "type": "str"
       }
     },
     "params": {
@@ -1827,7 +1860,8 @@
       "api_key_name": {
         "env_var_key": "IPINFO_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {}
@@ -1886,12 +1920,14 @@
       "api_key_name": {
         "env_var_key": "MISP_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       },
       "url_key_name": {
         "env_var_key": "MISP_URL",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {
@@ -1953,15 +1989,58 @@
       "api_key_name": {
         "env_var_key": "FIRST_MISP_API",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       },
       "url_key_name": {
         "env_var_key": "FIRST_MISP_URL",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
-    "params": {}
+    "params": {
+      "ssl_check": {
+        "value": true,
+        "type": "bool",
+        "description": "Enable SSL certificate server verification. Change this if your MISP instance has not SSL enabled"
+      },
+      "self_signed_certificate": {
+        "value": false,
+        "type": "bool",
+        "description": "If ssl_check and this flag are True, the analyzer will leverage a CA_BUNDLE to authenticate against the MISP instance. IntelOwl will look for it at this path: `configuration/misp_ssl.crt`. Remember that this file should be readable by the application (`www-data` user must read this)"
+      },
+      "debug": {
+        "value": false,
+        "type": "bool",
+        "description": "Enable debug logs."
+      },
+      "from_days": {
+        "value": 90,
+        "type": "int",
+        "description": "Check only events created in the past X days. 0 for no filter"
+      },
+      "limit": {
+        "value": 50,
+        "type": "int",
+        "description": "Limit the number of results returned"
+      },
+      "filter_on_type": {
+        "value": true,
+        "type": "bool",
+        "description": "Filter the search on the type of the observable."
+      },
+      "enforce_warninglist": {
+        "value": true,
+        "type": "bool",
+        "description": "Remove any attributes from the result that would cause a hit on a warninglist entry."
+      },
+      "strict_search": {
+        "value": true,
+        "type": "bool",
+        "description": "Search strictly on the observable value (True) or search on attributes containing observable value (False)"
+      }
+    }
   },
   "MISPFIRST_Check_Hash": {
     "type": "file",
@@ -1979,12 +2058,14 @@
       "api_key_name": {
         "env_var_key": "FIRST_MISP_API",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       },
       "url_key_name": {
         "env_var_key": "FIRST_MISP_URL",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {}
@@ -2005,12 +2086,14 @@
       "api_key_name": {
         "env_var_key": "MISP_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       },
       "url_key_name": {
         "env_var_key": "MISP_URL",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {}
@@ -2043,7 +2126,8 @@
       "api_key_name": {
         "env_var_key": "MALPEDIA_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {}
@@ -2109,7 +2193,8 @@
       "api_key_name": {
         "env_var_key": "MAXMIND_KEY",
         "description": "API key to access the service",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {}
@@ -2150,7 +2235,8 @@
       "api_key_name": {
         "env_var_key": "MWDB_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {
@@ -2225,12 +2311,14 @@
       "api_key_name": {
         "env_var_key": "OPENCTI_KEY",
         "description": "API key for your OpenCTI instance",
-        "required": true
+        "required": true,
+        "type": "str"
       },
       "url_key_name": {
         "env_var_key": "OPENCTI_URL",
         "description": "URL of your OpenCTI instance",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {
@@ -2270,7 +2358,8 @@
       "api_key_name": {
         "env_var_key": "OTX_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {
@@ -2307,7 +2396,8 @@
       "api_key_name": {
         "env_var_key": "OTX_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {
@@ -2421,7 +2511,8 @@
       "api_key_name": {
         "env_var_key": "PHISHTANK_API_KEY",
         "description": "Optional API key.",
-        "required": false
+        "required": false,
+        "type": "str"
       }
     },
     "params": {}
@@ -2442,7 +2533,8 @@
       "api_key_name": {
         "env_var_key": "PULSEDIVE_API_KEY",
         "description": "Optional API key.",
-        "required": false
+        "required": false,
+        "type": "str"
       }
     },
     "params": {
@@ -2725,7 +2817,8 @@
       "api_key_name": {
         "env_var_key": "SECURITYTRAILS_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {
@@ -2762,7 +2855,8 @@
       "api_key_name": {
         "env_var_key": "SECURITYTRAILS_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {
@@ -2794,7 +2888,8 @@
       "api_key_name": {
         "env_var_key": "SECURITYTRAILS_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {
@@ -2826,7 +2921,8 @@
       "api_key_name": {
         "env_var_key": "SECURITYTRAILS_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {
@@ -2858,7 +2954,8 @@
       "api_key_name": {
         "env_var_key": "SECURITYTRAILS_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {}
@@ -2879,7 +2976,8 @@
       "api_key_name": {
         "env_var_key": "SECURITYTRAILS_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {
@@ -2905,7 +3003,8 @@
     "observable_supported": ["domain"],
     "config": {
       "soft_time_limit": 30,
-      "queue": "default"
+      "queue": "default",
+      "type": "str"
     },
     "secrets": {
       "api_key_name": {
@@ -2943,7 +3042,8 @@
       "api_key_name": {
         "env_var_key": "SHODAN_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {
@@ -3042,7 +3142,8 @@
       "api_key_name": {
         "env_var_key": "SPYSE_API_KEY",
         "description": "Spyse API token",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {}
@@ -3063,7 +3164,8 @@
       "api_key_name": {
         "env_var_key": "SSAPINET_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {
@@ -3110,7 +3212,8 @@
       "api_key_name": {
         "env_var_key": "STALKPHISH_KEY",
         "description": "API key.",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {}
@@ -3516,7 +3619,8 @@
       "api_key_name": {
         "env_var_key": "TRIAGE_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {
@@ -3553,7 +3657,8 @@
       "api_key_name": {
         "env_var_key": "TRIAGE_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {
@@ -3589,7 +3694,8 @@
       "api_key_name": {
         "env_var_key": "TRIAGE_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {
@@ -3621,7 +3727,8 @@
       "api_key_name": {
         "env_var_key": "UNPAC_ME_API_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {
@@ -3668,7 +3775,8 @@
       "api_key_name": {
         "env_var_key": "URLSCAN_API_KEY",
         "description": "API key is mandatory for submit.",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {
@@ -3700,7 +3808,8 @@
       "api_key_name": {
         "env_var_key": "URLSCAN_API_KEY",
         "description": "API key is optional for search.",
-        "required": false
+        "required": false,
+        "type": "str"
       }
     },
     "params": {
@@ -3727,7 +3836,8 @@
       "api_key_name": {
         "env_var_key": "VIRUSHEE_API_KEY",
         "description": "[virushee docs](https://api.virushee.com/#section/Authentication)",
-        "required": false
+        "required": false,
+        "type": "str"
       }
     },
     "params": {}
@@ -3747,7 +3857,8 @@
       "api_key_name": {
         "env_var_key": "VIRUSHEE_API_KEY",
         "description": "[virushee docs](https://api.virushee.com/#section/Authentication)",
-        "required": false
+        "required": false,
+        "type": "str"
       }
     },
     "params": {
@@ -3774,7 +3885,8 @@
       "api_key_name": {
         "env_var_key": "VT_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {}
@@ -3795,7 +3907,8 @@
       "api_key_name": {
         "env_var_key": "VT_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {}
@@ -3815,12 +3928,14 @@
       "api_key_name": {
         "env_var_key": "VT_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       },
       "url_key_name": {
         "env_var_key": "VT_NOTIFY_URL",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {}
@@ -3842,7 +3957,8 @@
       "api_key_name": {
         "env_var_key": "VT_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {
@@ -3915,7 +4031,8 @@
       "api_key_name": {
         "env_var_key": "VT_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {
@@ -3992,7 +4109,8 @@
       "api_key_name": {
         "env_var_key": "VT_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {
@@ -4064,7 +4182,8 @@
       "api_key_name": {
         "env_var_key": "VT_INTELLIGENCE_KEY",
         "required": true,
-        "description": "API Key for the analyzer. You need to have a premium license with VT."
+        "description": "API Key for the analyzer. You need to have a premium license with VT.",
+        "type": "str"
       }
     },
     "params": {
@@ -4091,7 +4210,8 @@
       "api_key_name": {
         "env_var_key": "WHOISXMLAPI_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {}
@@ -4127,7 +4247,8 @@
       "api_key_name": {
         "env_var_key": "WIGLE_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {
@@ -4154,12 +4275,14 @@
       "api_key_name": {
         "env_var_key": "XFORCE_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       },
       "api_password_name": {
         "env_var_key": "XFORCE_PASSWORD",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {
@@ -4552,7 +4675,6 @@
       }
 
     }
-
   },
   "YARAify_File_Scan": {
     "type": "file",
@@ -4570,12 +4692,14 @@
       "api_key_name": {
         "env_var_key": "MALPEDIA_TOKEN",
         "description": "Optional key to receive results from public (TLP:WHITE) and non-public (TLP:GREEN, TLP:AMBER and TLP:RED) YARA rules.",
-        "required": false
+        "required": false,
+        "type": "str"
       },
       "api_key_identifier": {
         "env_var_key": "YARAIFY_KEY",
         "description": "Optional identifier to associate this submission with",
-        "required": false
+        "required": false,
+        "type": "str"
       }
     },
     "params": {
@@ -4655,7 +4779,8 @@
       "api_key_name": {
         "env_var_key": "MALPEDIA_TOKEN",
         "description": "Optional key to receive results from public (TLP:WHITE) and also non-public (TLP:GREEN, TLP:AMBER and TLP:RED) YARA rules.",
-        "required": false
+        "required": false,
+        "type": "str"
       }
     },
     "params": {}
@@ -4678,7 +4803,8 @@
       "api_key_name": {
         "env_var_key": "MALPEDIA_TOKEN",
         "description": "Optional key to receive results from public (TLP:WHITE) and also non-public (TLP:GREEN, TLP:AMBER and TLP:RED) YARA rules.",
-        "required": false
+        "required": false,
+        "type": "str"
       }
     },
     "params": {}
@@ -4699,12 +4825,14 @@
       "api_key_name": {
         "env_var_key": "YETI_KEY",
         "description": "API key for your YETI instance",
-        "required": true
+        "required": true,
+        "type": "str"
       },
       "url_key_name": {
         "env_var_key": "YETI_URL",
         "description": "API URL of your YETI instance",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {
@@ -4741,7 +4869,8 @@
       "api_key_name": {
         "env_var_key": "ZOOMEYE_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {

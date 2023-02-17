@@ -249,13 +249,8 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
                         f"job.tlp ('{tlp}') > maximum_tlp ('{cc.maximum_tlp}')"
                     )
             except NotRunnableConnector as e:
-                if not self.log_runnable:
-                    # in this case, they are not warnings but
-                    # expected and wanted behavior
-                    logger.debug(e)
-                else:
-                    logger.warning(e)
-                    self.filter_warnings.append(str(e))
+                logger.warning(e)
+                self.filter_warnings.append(str(e))
             else:
                 cleaned_connectors_list.append(c_name)
 
@@ -266,7 +261,6 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         attrs["connectors_to_execute"] = self.filter_connectors(attrs)
         attrs["visualizers_to_execute"] = self.filter_visualizers(attrs)
         attrs["warnings"] = self.filter_warnings
-        self.filter_warnings = []
         return attrs
 
     def create(self, validated_data: dict) -> Job:
@@ -749,6 +743,22 @@ class PluginConfigSerializer(rfs.ModelSerializer):
     owner = rfs.HiddenField(default=rfs.CurrentUserDefault())
     value = CustomJSONField()
 
+    def validate_type(self, _type: str):
+        if _type == PluginConfig.PluginType.ANALYZER:
+            config = AnalyzerConfig
+            self.category = "Analyzer"
+        elif _type == PluginConfig.PluginType.CONNECTOR:
+            config = ConnectorConfig
+            self.category = "Connector"
+        elif _type == PluginConfig.PluginType.VISUALIZER:
+            config = VisualizerConfig
+            self.category = "Visualizer"
+        else:
+            logger.error(f"Unknown custom config type: {_type}")
+            raise ValidationError("Invalid type.")
+        self.all_configurations = config.all()
+        return _type
+
     class Meta:
         model = PluginConfig
         fields = rfs.ALL_FIELDS
@@ -761,66 +771,60 @@ class PluginConfigSerializer(rfs.ModelSerializer):
             instance.value = "redacted"
         return super().to_representation(instance)
 
+    def validate_organization(self, organization: str):
+        # here the owner can't be retrieved by the field
+        # because the HiddenField will always return None
+        owner = self.context["request"].user
+        # check if the user is owner of the organization
+        membership = Membership.objects.filter(
+            user=owner,
+            organization=organization,
+            is_owner=True,
+        )
+        if not membership.exists():
+            logger.warning(
+                f"User {owner} is not owner of " f"organization {organization}."
+            )
+            raise PermissionDenied("User is not owner of the organization.")
+        return organization
+
     def validate(self, attrs):
         super().validate(attrs)
 
-        # check if owner is admin of organization
-        if attrs.get("organization", None):
-            # here the owner can't be retrieved by the field
-            # because the HiddenField will always return None
-            owner = self.context["request"].user
-            # check if the user is owner of the organization
-            membership = Membership.objects.filter(
-                user=owner,
-                organization=attrs.get("organization"),
-                is_owner=True,
+        if attrs["plugin_name"] not in self.all_configurations:
+            raise ValidationError(
+                f"{self.category} {attrs['plugin_name']} does not exist."
             )
-            if not membership.exists():
-                logger.warning(
-                    f"User {owner} is not owner of "
-                    f"organization {attrs.get('organization')}."
-                )
-                raise PermissionDenied("User is not owner of the organization.")
-
-        if attrs["type"] == PluginConfig.PluginType.ANALYZER:
-            config = AnalyzerConfig
-            category = "Analyzer"
-        elif attrs["type"] == PluginConfig.PluginType.CONNECTOR:
-            config = ConnectorConfig
-            category = "Connector"
-        elif attrs["type"] == PluginConfig.PluginType.VISUALIZER:
-            config = VisualizerConfig
-            category = "Visualizer"
-        else:
-            logger.error(f"Unknown custom config type: {attrs['type']}")
-            raise ValidationError("Invalid type.")
-
-        if attrs["plugin_name"] not in config.all():
-            raise ValidationError(f"{category} {attrs['plugin_name']} does not exist.")
 
         if (
             attrs["config_type"] == PluginConfig.ConfigType.PARAMETER
-            and attrs["attribute"] not in config.all()[attrs["plugin_name"]].params
+            and attrs["attribute"]
+            not in self.all_configurations[attrs["plugin_name"]].params
         ):
             raise ValidationError(
-                f"{category} {attrs['plugin_name']} does not "
+                f"{self.category} {attrs['plugin_name']} does not "
                 f"have parameter {attrs['attribute']}."
             )
         elif (
             attrs["config_type"] == PluginConfig.ConfigType.SECRET
-            and attrs["attribute"] not in config.all()[attrs["plugin_name"]].secrets
+            and attrs["attribute"]
+            not in self.all_configurations[attrs["plugin_name"]].secrets
         ):
 
             raise ValidationError(
-                f"{category} {attrs['plugin_name']} does not "
+                f"{self.category} {attrs['plugin_name']} does not "
                 f"have secret {attrs['attribute']}."
             )
         # Check if the type of value is valid for the attribute.
 
         expected_type = (
-            config.all()[attrs["plugin_name"]].params[attrs["attribute"]].type
+            self.all_configurations[attrs["plugin_name"]]
+            .params[attrs["attribute"]]
+            .type
             if attrs["config_type"] == PluginConfig.ConfigType.PARAMETER
-            else config.all()[attrs["plugin_name"]].secrets[attrs["attribute"]].type
+            else self.all_configurations[attrs["plugin_name"]]
+            .secrets[attrs["attribute"]]
+            .type
         )
         if expected_type == "str":
             expected_type = str
@@ -838,7 +842,7 @@ class PluginConfigSerializer(rfs.ModelSerializer):
             expected_type,
         ):
             raise ValidationError(
-                f"{category} {attrs['plugin_name']} attribute "
+                f"{self.category} {attrs['plugin_name']} attribute "
                 f"{attrs['attribute']} has wrong type "
                 f"{type(attrs['value']).__name__}. Expected: "
                 f"{expected_type.__name__}."
@@ -857,7 +861,7 @@ class PluginConfigSerializer(rfs.ModelSerializer):
             .exists()
         ):
             raise ValidationError(
-                f"{category} {attrs['plugin_name']} "
+                f"{self.category} {attrs['plugin_name']} "
                 f"{self} attribute {attrs['attribute']} already exists."
             )
         return attrs

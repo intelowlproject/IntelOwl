@@ -167,3 +167,12 @@ section.fixed-bottom {
 .dropdown-divider {
   border-top: 3px solid rgba(0, 0, 0, 30%);
 }
+
+.horizontal-scrollable {
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.horizontal-scrollable .nav-item {
+  display: inline-block;
+}

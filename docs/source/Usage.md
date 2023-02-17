@@ -128,6 +128,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
   * [YARAify rules](https://yaraify.abuse.ch/api/#download-yara-package)
   * [SIFalcon rules](https://github.com/SIFalcon/Detection/)
   * [Elastic rules](https://github.com/elastic/protections-artifacts)
+  * [JPCERTCC Yara rules](https://github.com/JPCERTCC/jpcert-yara)
   * your own added signatures. See [Advanced-Usage](./Advanced-Usage.html#analyzers-with-special-configuration) for more details.
 * `PEframe_Scan`: Perform static analysis on Portable Executable malware and malicious MS Office documents with [PeFrame](https://github.com/guelfoweb/peframe)
 * `Capa_Info`: [Capa](https://github.com/mandiant/capa) detects capabilities in executable files
@@ -179,15 +180,12 @@ The following is the list of the available analyzers you can run out-of-the-box.
 
 ###### External services
 * `VirusTotal_v3_Get_Observable`: search an observable in the VirusTotal DB
-* `VirusTotal_v2_Get_Observable`: search an observable in the VirusTotal DB using the old API endpoints (this analyzer is disabled by default. You have to change that flag [in the config](https://github.com/intelowlproject/IntelOwl/blob/master/configuration/analyzer_config.json) to use it)
 * `HybridAnalysis_Get_Observable`: search an observable in the [HybridAnalysis](https://www.hybrid-analysis.com/) sandbox reports
 * `OTXQuery`: scan an observable on [Alienvault OTX](https://otx.alienvault.com/)
 * `TalosReputation`: check an IP reputation from [Talos](https://talosintelligence.com/reputation_center/)
 * `Stratosphere_Blacklist`: Cross-reference an IP from blacklists maintained by [Stratosphere Labs](https://www.stratosphereips.org/attacker-ip-prioritization-blacklist)
 * `BitcoinAbuse` : Check a BTC address against bitcoinabuse.com, a public database of BTC addresses used by hackers and criminals.
-* `Robtex_Forward_PDNS_Query`: scan a domain against the Robtex Passive DNS DB
-* `Robtex_Reverse_PDNS_Query`: scan an IP against the Robtex Passive DNS DB
-* `Robtex_IP_Query`: get IP info from Robtex
+* `Robtex`: scan a domain/IP against the Robtex Passive DNS DB
 * `GoogleSafebrowsing`: Scan an observable against GoogleSafeBrowsing DB
 * `GoogleWebRisk`: Scan an observable against WebRisk API (Commercial version of Google Safe Browsing). Check the [docs](https://intelowl.readthedocs.io/en/develop/Advanced-Usage.html#analyzers-with-special-configuration) to enable this properly
 * `GreedyBear`: scan an IP or a domain against the [GreedyBear](https://greedybear.honeynet.org/) API (requires API key)
@@ -211,21 +209,14 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `MalwareBazaar_Get_Observable`: Check if a particular malware hash is known to [MalwareBazaar](https://bazaar.abuse.ch/)
 * `MalwareBazaar_Google_Observable`: Check if a particular IP, domain or url is known to MalwareBazaar using google search
 * `ONYPHE`: search an observable in [ONYPHE](https://www.onyphe.io/)
-* `Threatminer_PDNS`: retrieve PDNS data from [Threatminer](https://www.threatminer.org/) API
-* `Threatminer_Reports_Tagging`: retrieve reports from Threatminer API
-* `Threatminer_Subdomains`: retrieve subdomains from Threatminer API
+* `Threatminer`: retrieve data from [Threatminer](https://www.threatminer.org/) API
 * `URLhaus`: Query a domain or URL against [URLhaus](https://urlhaus.abuse.ch/) API.
 * `Google_DNS`: Retrieve current domain resolution with Google DoH (DNS over HTTPS)
 * `CloudFlare_DNS`: Retrieve current domain resolution with CloudFlare DoH (DNS over HTTPS)
 * `CloudFlare_Malicious_Detector`: Leverages CloudFlare DoH to check if a domain is related to malware
 * `Classic_DNS`: Retrieve current domain resolution with default DNS
 * `Auth0`: scan an IP against the Auth0 API
-* `Securitytrails_IP_Neighbours`: scan an IP against [Securitytrails](https://securitytrails.com/) API for neighbour IPs
-* `Securitytrails_Details`: scan a domain against Securitytrails API for general details
-* `Securitytrails_Subdomains`: scan a domain against Securitytrails API for subdomains
-* `Securitytrails_Tags`: scan a domain against Securitytrails API for tags
-* `Securitytrails_History_WHOIS`: scan a domain against Securitytrails API for historical WHOIS
-* `Securitytrails_History_DNS`: scan a domain against Securitytrails API for historical DNS
+* `Securitytrails`: scan an IP/Domain against [Securitytrails](https://securitytrails.com/) API
 * `Cymru_Hash_Registry_Get_Observable`: Check if a particular hash is available in the malware hash registry of [Team Cymru](https://team-cymru.com/community-services/mhr/)
 * `Tranco`: Check if a domain is in the latest [Tranco](https://tranco-list.eu/) ranking top sites list
 * `Pulsedive_Active_IOC`: Scan indicators and retrieve results from [Pulsedive's API](https://pulsedive.com/api/).
@@ -305,7 +296,7 @@ The following are all the keys that you can change without touching the source c
 - `not_supported_filetypes`: can be populated as a list. If set, if you ask to analyze a file with a mimetype from the ones you specified, it won't be executed
 - `observable_supported`: can be populated as a list. If set, if you ask to analyze an observable that is not in this list, it won't be executed. Valid values are: `ip`, `domain`, `url`, `hash`, `generic`.
 - `soft_time_limit`: this is the maximum time (in seconds) of execution for an analyzer. Once reached, the task will be killed (or managed in the code by a custom Exception). Default `300`.
-- `queue`: this takes effects only when [multi-queue](Advanced-Usage.html#multi-queue) is enabled. Choose which celery worker would execute the task: `local` (ideal for tasks that leverage local applications like Yara), `long` (ideal for long tasks) or `default` (ideal for simple webAPI-based analyzers).
+- `queue`: this takes effects only when [multi-queue](Advanced-Configuration.html#multi-queue) is enabled. Choose which celery worker would execute the task: `local` (ideal for tasks that leverage local applications like Yara), `long` (ideal for long tasks) or `default` (ideal for simple webAPI-based analyzers).
 
 Sometimes, it may happen that you would like to create a new analyzer very similar to an already existing one. Maybe you would like to just change the description and the default parameters.
 An helpful way to do that without having to copy/pasting the configuration, is to leverage the key `extends`.

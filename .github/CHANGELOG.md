@@ -1,6 +1,17 @@
 # Changelog
 
 [**Upgrade Guide**](https://intelowl.readthedocs.io/en/latest/Installation.md#update-to-the-most-recent-version)
+## [v4.2.1](https://github.com/intelowlproject/IntelOwl/releases/tag/v4.2.1)
+
+* Fixed Plugin bug which caused the inability to add new secrets.
+* Fixed Yara Analyzer and added new open source rules
+* Fixed Cape Sandbox analyzer not working
+* Deprecated `ThreatMiner`, `SecurityTrails` and `Robtex` various analyzers and substituted with new versions.
+* Refactoring and features in preparation to add support for cluster deployments.
+* Added a new advanced Documentation section [Advanced Configuration](https://intelowl.readthedocs.io/en/latest/Advanced-Configuration.html)
+  * Added more support for Cloud Deployments (in particular AWS)
+* Other minor adjustments and fixes
+
 ## [v4.2.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v4.2.0)
 
 With this release we welcome new official maintainers of IntelOwl:
@@ -121,7 +132,7 @@ Looking forward for the Google Summer of Code 2023!
 - Default Plugins Parameters can be customized from the GUI and are defined at user/org level instead of globally ([docs reference](https://intelowl.readthedocs.io/en/latest/Advanced-Usage.html#customize-analyzer-execution))
 - Plugins Secrets can now be managed from the GUI and are defined at user/org level instead of globally ([docs reference](https://intelowl.readthedocs.io/en/latest/Installation.html#deprecated-environment-configuration))
 - Organization admins can enable/disable analyzers for all the org ([docs reference](https://intelowl.readthedocs.io/en/latest/Usage.html#multi-tenancy))
-- Google Oauth authentication support ([docs reference](https://intelowl.readthedocs.io/en/latest/Advanced-Usage.html#google-oauth2))
+- Google Oauth authentication support ([docs reference](https://intelowl.readthedocs.io/en/latest/Advanced-Configuration.html#google-oauth2))
 - Added support for `extends` key to simplify Analyzer configuration and customization ([docs reference](https://intelowl.readthedocs.io/en/latest/Usage.html#analyzers-customization))
 
 **Others**
@@ -255,7 +266,7 @@ If you are interested in helping the project through a donation, read [here](htt
 
 **Notes:**
 - Added helper script that checks and installs [initial requirements](https://intelowl.readthedocs.io/en/develop/Installation.html#requirements). (`initialize.sh`)
-- Added [RADIUS authentication support](https://intelowl.readthedocs.io/en/latest/Advanced-Usage.html#radius-authentication)
+- Added [RADIUS authentication support](https://intelowl.readthedocs.io/en/latest/Advanced-Configuration.html#radius-authentication)
 
 **New/Improved Analyzers:**
 - Added a new optional [Docker Analyzer](https://intelowl.readthedocs.io/en/develop/Advanced-Usage.html#optional-analyzers) running [Onionscan](https://github.com/s-rah/onionscan)
@@ -264,7 +275,7 @@ If you are interested in helping the project through a donation, read [here](htt
 - `PE_Info` analyzer now calculates [impfuzzy](https://github.com/JPCERTCC/impfuzzy) and [dashicon](https://github.com/fr0gger/SuperPeHasher) hashes too.
 
 **Other:**
-- Added option to run ElasticSearch/Kibana together with IntelOwl with option `--elastic`. Check the [doc here](https://intelowl.readthedocs.io/en/latest/Advanced-Usage.html#example-configuration)
+- Added option to run ElasticSearch/Kibana together with IntelOwl with option `--elastic`. Check the [doc here](https://intelowl.readthedocs.io/en/latest/Advanced-Configuration.html#example-configuration)
 - Security: Patched Django Critical Bug + Added Brute Force protection to the Admin page
 - Generic bug fixing and other maintenance work
 - Bump some python dependencies
@@ -617,7 +628,7 @@ Please see [docs](https://intelowl.readthedocs.io/en/stable/Advanced-Usage.html#
 
 - upgraded main Dockerfile to python 3.8
 - added support for the `generic` observable type. In this way it is possible to build analyzers that can analyze everything and not only IPs, domains, URLs or hashes
-- added [Multi-queue](https://intelowl.readthedocs.io/en/stable/Advanced-Usage.html#multi-queue) option to optimize usage of Celery queues. This is intended for advanced users.
+- added [Multi-queue](https://intelowl.readthedocs.io/en/stable/Advanced-Configuration.html#multi-queue) option to optimize usage of Celery queues. This is intended for advanced users.
 - updated GUI to new [IntelOwl-ng](https://github.com/intelowlproject/IntelOwl-ng/releases/tag/v1.7.0) version
 - upgraded [Speakeasy](https://github.com/fireeye/speakeasy), [Quark-Engine](https://github.com/quark-engine/quark-engine) and [Dnstwist](https://github.com/elceef/dnstwist) analyzers to last versions
 - moved from Travis CI to Github CI
@@ -748,7 +759,7 @@ Patch after **v1.5.0**.
 
 **Breaking Changes:**
 
-- Moved `ldap_config.py` under `configuration/` directory. If you were using LDAP before this release, please refer the [updated docs](https://intelowl.readthedocs.io/en/develop/Advanced-Usage.html#ldap).
+- Moved `ldap_config.py` under `configuration/` directory. If you were using LDAP before this release, please refer the [updated docs](https://intelowl.readthedocs.io/en/develop/Advanced-Configuration.html#ldap).
 
 **Fixes:**
 

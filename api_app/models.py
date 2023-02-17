@@ -124,6 +124,7 @@ class Job(models.Model):
 
     received_request_time = models.DateTimeField(auto_now_add=True)
     finished_analysis_time = models.DateTimeField(blank=True, null=True)
+    process_time = models.FloatField(blank=True, null=True)
     tlp = models.CharField(max_length=8, choices=TLP.choices, default=TLP.WHITE)
     errors = pg_fields.ArrayField(
         models.CharField(max_length=900), blank=True, default=list, null=True
@@ -182,11 +183,18 @@ class Job(models.Model):
         finally:
             if not (self.status == self.Status.FAILED and self.finished_analysis_time):
                 self.finished_analysis_time = get_now()
+                self.process_time = self.calculate_process_time()
             self.status = status_to_set
-            self.save(update_fields=["status", "errors", "finished_analysis_time"])
+            self.save(
+                update_fields=[
+                    "status",
+                    "errors",
+                    "finished_analysis_time",
+                    "process_time",
+                ]
+            )
 
-    @property
-    def process_time(self) -> Optional[float]:
+    def calculate_process_time(self) -> Optional[float]:
         if not self.finished_analysis_time:
             return None
         td = self.finished_analysis_time - self.received_request_time
@@ -325,7 +333,7 @@ class Job(models.Model):
         from api_app.analyzers_manager.dataclasses import AnalyzerConfig
         from api_app.connectors_manager.dataclasses import ConnectorConfig
         from intel_owl import tasks
-        from intel_owl.consts import DEFAULT_QUEUE
+        from intel_owl.celery import DEFAULT_QUEUE
 
         final_analyzer_signatures = []
         final_connector_signatures = []
@@ -448,6 +456,34 @@ class PluginConfig(models.Model):
                 fields=["type", "organization"],
             ),
         ]
+
+    @classmethod
+    def get_specific_serializer_class(cls, plugin_type: str):
+        if plugin_type == cls.PluginType.ANALYZER:
+            from api_app.analyzers_manager.serializers import AnalyzerConfigSerializer
+
+            serializer_class = AnalyzerConfigSerializer
+        elif plugin_type == cls.PluginType.CONNECTOR:
+            from api_app.connectors_manager.serializers import ConnectorConfigSerializer
+
+            serializer_class = ConnectorConfigSerializer
+        else:
+            raise TypeError(f"Unrecognized plugin type {plugin_type}")
+        return serializer_class
+
+    @classmethod
+    def get_specific_config_class(cls, plugin_type: str):
+        if plugin_type == cls.PluginType.ANALYZER:
+            from api_app.analyzers_manager.dataclasses import AnalyzerConfig
+
+            config_class = AnalyzerConfig
+        elif plugin_type == cls.PluginType.CONNECTOR:
+            from api_app.connectors_manager.dataclasses import ConnectorConfig
+
+            config_class = ConnectorConfig
+        else:
+            raise TypeError(f"Unrecognized plugin type {plugin_type}")
+        return config_class
 
     @classmethod
     def visible_for_user(cls, user: User = None) -> QuerySet:

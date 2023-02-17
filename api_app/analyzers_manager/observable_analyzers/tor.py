@@ -23,7 +23,7 @@ class Tor(classes.ObservableAnalyzer):
     def run(self):
         result = {"found": False}
         if not os.path.isfile(database_location):
-            self.updater()
+            self._update()
 
         if not os.path.exists(database_location):
             raise AnalyzerRunException(
@@ -40,7 +40,7 @@ class Tor(classes.ObservableAnalyzer):
         return result
 
     @classmethod
-    def updater(cls):
+    def _update(cls):
         if not cls.enabled:
             logger.warning("No running updater for Tor, because it is disabled")
             return

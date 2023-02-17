@@ -115,15 +115,7 @@
             "Quad9_Malicious_Detector": {},
             "Quark_Engine_APK": {},
             "Rendertron": {},
-            "Robtex_Forward_PDNS_Query": {
-                "robtex_analysis": "forward_pdns"
-            },
-            "Robtex_IP_Query": {
-                "robtex_analysis": "ip_query"
-            },
-            "Robtex_Reverse_PDNS_Query": {
-                "robtex_analysis": "reverse_pdns"
-            },
+            "Robtex": {},
             "Rtf_Info": {},
             "Signature_Info": {},
             "SpeakEasy": {},
@@ -140,15 +132,7 @@
             },
             "TalosReputation": {},
             "ThreatFox": {},
-            "Threatminer_PDNS": {
-                "rt_value": 2
-            },
-            "Threatminer_Reports_Tagging": {
-                "rt_value": 6
-            },
-            "Threatminer_Subdomains": {
-                "rt_value": 5
-            },
+            "Threatminer_PDNS": {},
             "Thug_HTML_Info": {
                 "dom_events": "click,mouseover",
                 "enable_awis": true,
@@ -182,19 +166,22 @@
             },
             "Yara": {
                 "repositories": [
-                  "https://github.com/bartblaze/Yara-rules",
-                  "https://github.com/intezer/yara-rules",
-                  "https://github.com/advanced-threat-research/Yara-Rules",
-                  "https://github.com/stratosphereips/yara-rules",
-                  "https://github.com/reversinglabs/reversinglabs-yara-rules",
-                  "https://github.com/sbousseaden/YaraHunts",
-                  "https://github.com/InQuest/yara-rules",
-                  "https://github.com/StrangerealIntel/DailyIOC",
-                  "https://github.com/mandiant/red_team_tool_countermeasures",
-                  "https://github.com/fboldewin/YARA-rules",
-                  "https://github.com/Yara-Rules/rules.git",
-                  "https://github.com/Neo23x0/signature-base.git",
-                  "https://yaraify-api.abuse.ch/download/yaraify-rules.zip"
+                    "https://github.com/elastic/protections-artifacts",
+                    "https://github.com/JPCERTCC/jpcert-yara",
+                    "https://github.com/SIFalcon/Detection/",
+                    "https://github.com/bartblaze/Yara-rules",
+                    "https://github.com/intezer/yara-rules",
+                    "https://github.com/advanced-threat-research/Yara-Rules",
+                    "https://github.com/stratosphereips/yara-rules",
+                    "https://github.com/reversinglabs/reversinglabs-yara-rules",
+                    "https://github.com/sbousseaden/YaraHunts",
+                    "https://github.com/InQuest/yara-rules",
+                    "https://github.com/StrangerealIntel/DailyIOC",
+                    "https://github.com/mandiant/red_team_tool_countermeasures",
+                    "https://github.com/fboldewin/YARA-rules",
+                    "https://github.com/Yara-Rules/rules.git",
+                    "https://github.com/Neo23x0/signature-base.git",
+                    "https://yaraify-api.abuse.ch/download/yaraify-rules.zip"
                 ],
                 "ignore": [
                   "generic_anomalies.yar",

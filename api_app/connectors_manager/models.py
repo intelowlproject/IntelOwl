@@ -14,9 +14,6 @@ class ConnectorReport(AbstractReport):
     class Meta:
         unique_together = [("name", "job")]
 
-    def __str__(self):
-        return f"ConnectorReport(job:#{self.job_id}, {self.connector_name})"
-
     @property
     def connector_name(self) -> str:
         return self.name

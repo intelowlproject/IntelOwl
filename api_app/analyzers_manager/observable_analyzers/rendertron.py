@@ -4,7 +4,7 @@
 import base64
 
 from api_app.analyzers_manager.classes import DockerBasedAnalyzer, ObservableAnalyzer
-from api_app.exceptions import AnalyzerRunException
+from api_app.analyzers_manager.exceptions import AnalyzerRunException
 
 
 class Rendertron(ObservableAnalyzer, DockerBasedAnalyzer):

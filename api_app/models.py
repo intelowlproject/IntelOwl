@@ -14,8 +14,9 @@ from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.functional import cached_property
 
+from api_app.core.dataclasses import AbstractConfig
 from api_app.core.models import AbstractReport
-from api_app.exceptions import AlreadyFailedJobException
+from api_app.core.serializers import AbstractConfigSerializer
 from api_app.helpers import calculate_sha1, calculate_sha256, get_now
 from certego_saas.apps.organization.organization import Organization
 from certego_saas.models import User
@@ -35,6 +36,12 @@ class Status(models.TextChoices):
     REPORTED_WITH_FAILS = "reported_with_fails", "reported_with_fails"
     KILLED = "killed", "killed"
     FAILED = "failed", "failed"
+
+
+class Position(models.TextChoices):
+    LEFT = "left"
+    CENTER = "center"
+    RIGHT = "right"
 
 
 class TLP(models.TextChoices):
@@ -121,7 +128,9 @@ class Job(models.Model):
     playbooks_to_execute = pg_fields.ArrayField(
         models.CharField(max_length=128), blank=True, default=list
     )
-
+    visualizers_to_execute = pg_fields.ArrayField(
+        models.CharField(max_length=128), blank=True, default=list
+    )
     received_request_time = models.DateTimeField(auto_now_add=True)
     finished_analysis_time = models.DateTimeField(blank=True, null=True)
     process_time = models.FloatField(blank=True, null=True)
@@ -151,30 +160,28 @@ class Job(models.Model):
 
         try:
             if self.status == self.Status.FAILED:
-                raise AlreadyFailedJobException()
+                logger.error(
+                    f"[REPORT] {self.__repr__()}, status: failed. "
+                    "Do not process the report"
+                )
+            else:
+                stats = self.get_analyzer_reports_stats()
 
-            stats = self.get_analyzer_reports_stats()
+                logger.info(
+                    f"[REPORT] {self.__repr__()}, status:{self.status}, reports:{stats}"
+                )
 
-            logger.info(
-                f"[REPORT] {self.__repr__()}, status:{self.status}, reports:{stats}"
-            )
-
-            if len(self.analyzers_to_execute) == stats["all"]:
-                if stats["running"] > 0 or stats["pending"] > 0:
-                    status_to_set = self.Status.RUNNING
-                elif stats["success"] == stats["all"]:
-                    status_to_set = self.Status.REPORTED_WITHOUT_FAILS
-                elif stats["failed"] == stats["all"]:
-                    status_to_set = self.Status.FAILED
-                elif stats["failed"] >= 1 or stats["killed"] >= 1:
-                    status_to_set = self.Status.REPORTED_WITH_FAILS
-                elif stats["killed"] == stats["all"]:
-                    status_to_set = self.Status.KILLED
-
-        except AlreadyFailedJobException:
-            logger.error(
-                f"[REPORT] {self.__repr__()}, status: failed. Do not process the report"
-            )
+                if len(self.analyzers_to_execute) == stats["all"]:
+                    if stats["running"] > 0 or stats["pending"] > 0:
+                        status_to_set = self.Status.RUNNING
+                    elif stats["success"] == stats["all"]:
+                        status_to_set = self.Status.REPORTED_WITHOUT_FAILS
+                    elif stats["failed"] == stats["all"]:
+                        status_to_set = self.Status.FAILED
+                    elif stats["failed"] >= 1 or stats["killed"] >= 1:
+                        status_to_set = self.Status.REPORTED_WITH_FAILS
+                    elif stats["killed"] == stats["all"]:
+                        status_to_set = self.Status.KILLED
 
         except Exception as e:
             logger.exception(f"job_id: {self.pk}, Error: {e}")
@@ -290,7 +297,7 @@ class Job(models.Model):
 
     def _pipeline_configuration(
         self, runtime_configuration: typing.Dict[str, typing.Any]
-    ) -> typing.Tuple[typing.List, typing.List, typing.List, typing.List]:
+    ) -> typing.Tuple[typing.List, typing.List, typing.List, typing.List, typing.List]:
         from api_app.playbooks_manager.dataclasses import PlaybookConfig
 
         # case playbooks
@@ -327,17 +334,20 @@ class Job(models.Model):
             analyzers = [self.analyzers_to_execute]
             connectors = [self.connectors_to_execute]
             playbooks = [""]
-        return configs, analyzers, connectors, playbooks
+        visualizers = [self.visualizers_to_execute]
+        return configs, analyzers, connectors, visualizers, playbooks
 
     def pipeline(self, runtime_configuration: typing.Dict[str, typing.Any]):
         from api_app.analyzers_manager.dataclasses import AnalyzerConfig
         from api_app.connectors_manager.dataclasses import ConnectorConfig
+        from api_app.visualizers_manager.dataclasses import VisualizerConfig
         from intel_owl import tasks
         from intel_owl.celery import DEFAULT_QUEUE
 
         final_analyzer_signatures = []
         final_connector_signatures = []
-        for config, analyzers, connectors, playbook in zip(
+        final_visualizer_signatures = []
+        for config, analyzers, connectors, visualizers, playbook in zip(
             *self._pipeline_configuration(runtime_configuration)
         ):
             config = self._merge_runtime_configuration(config, analyzers, connectors)
@@ -345,32 +355,34 @@ class Job(models.Model):
                 f"Config is {config},"
                 f" analyzers are {analyzers} and"
                 f" connectors are {connectors}"
+                f" visualizers are {visualizers}"
             )
-            analyzer_signatures, _ = AnalyzerConfig.stack(
-                job_id=self.pk,
-                plugins_to_execute=analyzers,
-                runtime_configuration=config,
-                parent_playbook=playbook,
-            )
-            for signature in analyzer_signatures:
-                if signature not in final_analyzer_signatures:
-                    final_analyzer_signatures.append(signature)
-                else:
-                    logger.warning(f"Signature {signature} is duplicate")
+            for final_signatures, config_class, plugins in zip(
+                (
+                    final_analyzer_signatures,
+                    final_connector_signatures,
+                    final_visualizer_signatures,
+                ),
+                (AnalyzerConfig, ConnectorConfig, VisualizerConfig),
+                (analyzers, connectors, visualizers),
+            ):
+                config_class: AbstractConfig
 
-            connector_signatures, _ = ConnectorConfig.stack(
-                job_id=self.pk,
-                plugins_to_execute=connectors,
-                runtime_configuration=config,
-                parent_playbook=playbook,
-            )
-            for signature in connector_signatures:
-                if signature not in final_connector_signatures:
-                    final_connector_signatures.append(signature)
-                else:
-                    logger.warning(f"Signature {signature} is duplicate")
+                new_signatures, _ = config_class.stack(
+                    job_id=self.pk,
+                    plugins_to_execute=plugins,
+                    runtime_configuration=config,
+                    parent_playbook=playbook,
+                )
+                for signature in new_signatures:
+                    if signature not in final_signatures:
+                        final_signatures.append(signature)
+                    else:
+                        logger.warning(f"Signature {signature} is duplicate")
+
         logger.info(f"Analyzer signatures are {final_analyzer_signatures}")
         logger.info(f"Connector signatures are {final_connector_signatures}")
+        logger.info(f"Visualizer signatures are {final_connector_signatures}")
         runner = (
             group(final_analyzer_signatures)
             | tasks.continue_job_pipeline.signature(
@@ -381,6 +393,7 @@ class Job(models.Model):
                 immutable=True,
             )
             | group(final_connector_signatures)
+            | group(final_visualizer_signatures)
         )
         runner()
 
@@ -416,6 +429,7 @@ class PluginConfig(models.Model):
     class PluginType(models.TextChoices):
         ANALYZER = "1", "Analyzer"
         CONNECTOR = "2", "Connector"
+        VISUALIZER = "3", "Visualizer"
 
     class ConfigType(models.TextChoices):
         PARAMETER = "1", "Parameter"
@@ -458,7 +472,9 @@ class PluginConfig(models.Model):
         ]
 
     @classmethod
-    def get_specific_serializer_class(cls, plugin_type: str):
+    def get_specific_serializer_class(
+        cls, plugin_type: str
+    ) -> typing.Type[AbstractConfigSerializer]:
         if plugin_type == cls.PluginType.ANALYZER:
             from api_app.analyzers_manager.serializers import AnalyzerConfigSerializer
 
@@ -467,12 +483,18 @@ class PluginConfig(models.Model):
             from api_app.connectors_manager.serializers import ConnectorConfigSerializer
 
             serializer_class = ConnectorConfigSerializer
+        elif plugin_type == cls.PluginType.VISUALIZER:
+            from api_app.visualizers_manager.serializers import (
+                VisualizerConfigSerializer,
+            )
+
+            serializer_class = VisualizerConfigSerializer
         else:
             raise TypeError(f"Unrecognized plugin type {plugin_type}")
         return serializer_class
 
     @classmethod
-    def get_specific_config_class(cls, plugin_type: str):
+    def get_specific_config_class(cls, plugin_type: str) -> typing.Type[AbstractConfig]:
         if plugin_type == cls.PluginType.ANALYZER:
             from api_app.analyzers_manager.dataclasses import AnalyzerConfig
 
@@ -481,6 +503,10 @@ class PluginConfig(models.Model):
             from api_app.connectors_manager.dataclasses import ConnectorConfig
 
             config_class = ConnectorConfig
+        elif plugin_type == cls.PluginType.VISUALIZER:
+            from api_app.visualizers_manager.dataclasses import VisualizerConfig
+
+            config_class = VisualizerConfig
         else:
             raise TypeError(f"Unrecognized plugin type {plugin_type}")
         return config_class

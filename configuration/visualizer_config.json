@@ -1,0 +1,11 @@
+{
+  "Yara": {
+    "disabled": false,
+    "description": "Visualize information about yara matches",
+    "python_module": "yara.Yara",
+    "analyzers": ["Yara"],
+    "connectors": [],
+    "params": {
+    }
+  }
+}

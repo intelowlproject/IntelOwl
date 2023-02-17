@@ -9,7 +9,7 @@ from intezer_sdk import errors as intezer_errors
 from intezer_sdk.analysis import FileAnalysis
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
-from api_app.exceptions import AnalyzerRunException
+from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from tests.mock_utils import if_mock_connections, patch
 
 

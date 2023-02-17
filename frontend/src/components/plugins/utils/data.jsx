@@ -169,6 +169,20 @@ const connectorTableColumns = [
     disableSortBy: true,
     maxWidth: 115,
   },
+    {
+    Header: "Enabled for organization",
+    id: "enabled_for_organization",
+    Cell: ({ row: { original } }) => (
+      <OrganizationPluginStateToggle
+        pluginName={original?.name}
+        disabled={original?.orgPluginDisabled}
+        refetch={original?.refetch}
+        type={original?.plugin_type}
+      />
+    ),
+    disableSortBy: true,
+    maxWidth: 115,
+  },
   {
     Header: "Description",
     id: "description",
@@ -221,5 +235,73 @@ const playbookTableColumns = [
     minWidth: 250,
   },
 ];
-
-export { analyzersTableColumns, connectorTableColumns, playbookTableColumns };
+const visualizerTableColumns = [
+  ...pluginTableColumns,
+      {
+    Header: "Configured",
+    id: "configured",
+    accessor: "verification.configured",
+    Cell: ({ row: { original } }) => (
+      <PluginVerificationIcon
+        pluginName={original?.name}
+        verification={original?.verification}
+      />
+    ),
+    Filter: SelectOptionsFilter,
+    selectOptions: ["true", "false"],
+    disableSortBy: true,
+    maxWidth: 115,
+  },
+    {
+    Header: "Enabled for organization",
+    id: "enabled_for_organization",
+    Cell: ({ row: { original } }) => (
+      <OrganizationPluginStateToggle
+        pluginName={original?.name}
+        disabled={original?.orgPluginDisabled}
+        refetch={original?.refetch}
+        type={original?.plugin_type}
+      />
+    ),
+    disableSortBy: true,
+    maxWidth: 115,
+  },
+  {
+    Header: "Description",
+    id: "description",
+    accessor: "description",
+    Cell: ({ value }) => <span>{markdownToHtml(value)}</span>,
+    disableSortBy: true,
+    Filter: DefaultColumnFilter,
+    minWidth: 300,
+  },
+  {
+    Header: "Analyzers required",
+    id: "analyzers_required",
+    accessor: "analyzers",
+    Cell: ({ value }) => (
+      <ul className="d-flex flex-column align-items-start">
+        {value?.sort().map((v) => (
+          <li key={v}>{v}</li>
+        ))}
+      </ul>
+    ),
+    disableSortBy: true,
+    Filter: SelectColumnFilter,
+  },
+      {
+    Header: "Connectors required",
+    id: "connectors_required",
+    accessor: "connectors",
+    Cell: ({ value }) => (
+      <ul className="d-flex flex-column align-items-start">
+        {value?.sort().map((v) => (
+          <li key={v}>{v}</li>
+        ))}
+      </ul>
+    ),
+    disableSortBy: true,
+    Filter: SelectColumnFilter,
+  },
+];
+export { analyzersTableColumns, connectorTableColumns, playbookTableColumns, visualizerTableColumns };

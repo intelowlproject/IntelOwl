@@ -162,7 +162,10 @@ const jobTableColumns = [
               {job.connectors_to_execute.length}/
               {job.connectors_requested.length} connectors
             </span>
-
+            <span>
+              {job.visualizers_to_execute.length}/all
+              visualizers
+            </span>
             <span>
               {job.playbooks_to_execute.length}/
               {job.playbooks_to_execute.length} playbooks

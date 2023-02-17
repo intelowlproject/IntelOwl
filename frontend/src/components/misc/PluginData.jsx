@@ -14,6 +14,7 @@ import { usePluginConfigurationStore } from "../../stores";
 
 const ANALYZER = "1";
 const CONNECTOR = "2";
+const VISUALIZER = "3";
 
 // eslint-disable-next-line no-unused-vars
 const PARAMETER = "1";
@@ -74,13 +75,17 @@ export function PluginData({
   const [
     analyzers,
     connectors,
+    visualizers,
     retrieveAnalyzersConfiguration,
     retrieveConnectorsConfiguration,
+    retrieveVisualizersConfiguration,
   ] = usePluginConfigurationStore((state) => [
     filterEmptyData(state.analyzersJSON, dataName),
     filterEmptyData(state.connectorsJSON, dataName),
+    filterEmptyData(state.visualizersJSON, dataName),
     state.retrieveAnalyzersConfiguration,
     state.retrieveConnectorsConfiguration,
+    state.retrieveVisualizersConfiguration,
   ]);
 
   const [respData, Loader, refetchPluginData] = useAxiosComponentLoader(
@@ -97,6 +102,8 @@ export function PluginData({
             plugins = analyzers;
           } else if (res.type === CONNECTOR) {
             plugins = connectors;
+          } else if (res.type === VISUALIZER) {
+            plugins = visualizers;
           } else {
             console.error(`Invalid type: ${res.type}`);
           }
@@ -114,11 +121,13 @@ export function PluginData({
     refetchPluginData();
     retrieveAnalyzersConfiguration();
     retrieveConnectorsConfiguration();
+    retrieveVisualizersConfiguration();
   };
 
   const maxPluginNameLength = Math.max(
     ...Object.keys(analyzers).map((pluginName) => pluginName.length),
-    ...Object.keys(connectors).map((pluginName) => pluginName.length)
+    ...Object.keys(connectors).map((pluginName) => pluginName.length),
+    ...Object.keys(visualizers).map((pluginName) => pluginName.length)
   );
 
   return (
@@ -187,6 +196,7 @@ export function PluginData({
                                     <option value="">---Select Type---</option>
                                     <option value="1">Analyzer</option>
                                     <option value="2">Connector</option>
+                                    <option value="3">Visualizer</option>
                                   </Field>
                                 </Col>
 

@@ -1,7 +1,8 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
+from pathlib import PosixPath
+
 from django.conf import settings
-from django.utils.module_loading import import_string
 from rest_framework import serializers as rfs
 
 from api_app.core.serializers import AbstractConfigSerializer
@@ -17,22 +18,19 @@ class ConnectorConfigSerializer(AbstractConfigSerializer):
 
     maximum_tlp = rfs.ChoiceField(choices=TLP.choices)
     run_on_failure = rfs.BooleanField(default=False)
-    CONFIG_FILE_NAME = "connector_config.json"
+
+    @classmethod
+    @property
+    def config_file_name(cls) -> str:
+        return "connector_config.json"
 
     @classmethod
     def _get_type(cls):
         return PluginConfig.PluginType.CONNECTOR
 
-    def validate_python_module(self, python_module: str) -> str:
-        clspath = f"{settings.BASE_CONNECTOR_PYTHON_PATH}.{python_module}"
-        try:
-            import_string(clspath)
-        except ImportError as exc:
-            raise rfs.ValidationError(
-                f"`python_module` incorrect, {clspath} couldn't be imported"
-            ) from exc
-
-        return python_module
+    @property
+    def python_path(self) -> PosixPath:
+        return settings.BASE_CONNECTOR_PYTHON_PATH
 
 
 class ConnectorReportSerializer(rfs.ModelSerializer):

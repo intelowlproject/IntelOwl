@@ -6,7 +6,7 @@ import re
 import requests
 
 from api_app.analyzers_manager import classes
-from api_app.exceptions import AnalyzerRunException
+from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from intel_owl.consts import REGEX_CVE, REGEX_EMAIL
 from tests.mock_utils import MockResponse, if_mock_connections, patch
 

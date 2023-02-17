@@ -11,7 +11,6 @@ import requests
 from django.conf import settings
 
 from api_app.core.classes import Plugin
-from api_app.exceptions import AnalyzerConfigurationException, AnalyzerRunException
 from tests.mock_utils import (
     if_mock_connections,
     mocked_docker_analyzer_get,
@@ -21,6 +20,7 @@ from tests.mock_utils import (
 
 from .constants import HashChoices, ObservableTypes, TypeChoices
 from .dataclasses import AnalyzerConfig
+from .exceptions import AnalyzerConfigurationException, AnalyzerRunException
 from .models import AnalyzerReport
 
 logger = logging.getLogger(__name__)

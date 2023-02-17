@@ -4,13 +4,14 @@ import { Col, Row, Badge, Container } from "reactstrap";
 
 import { GoBackButton, Tabs } from "@certego/certego-ui";
 
-import { AnalyzersReportTable, ConnectorsReportTable } from "./tables";
+import { AnalyzersReportTable, ConnectorsReportTable, VisualizersReportTable } from "./tables";
 import { JobInfoCard, JobIsRunningAlert, JobActionsBar } from "./sections";
 import { StatusIcon } from "../../../common";
 
 export default function JobOverview({ isRunningJob, job, refetch }) {
   let AnalyzerDenominator = job.analyzers_requested?.length || "all";
   let ConnectorDenominator = job.connectors_requested?.length || "all";
+  const VisualizerDenominator = "all";
 
   if (job.playbooks_to_execute?.length > 0) {
     AnalyzerDenominator = job.analyzers_to_execute?.length;
@@ -37,13 +38,21 @@ export default function JobOverview({ isRunningJob, job, refetch }) {
           {ConnectorDenominator}
         </Badge>
       </div>,
+      <div className="d-flex-center">
+        <strong>Visualizers Report</strong>
+        <Badge className="ms-2">
+          {job.visualizers_to_execute?.length} /&nbsp;
+          {VisualizerDenominator}
+        </Badge>
+      </div>,
     ],
-    [job, AnalyzerDenominator, ConnectorDenominator]
+    [job, AnalyzerDenominator, ConnectorDenominator, VisualizerDenominator]
   );
   const tabRenderables = React.useMemo(
     () => [
       () => <AnalyzersReportTable job={job} refetch={refetch} />,
       () => <ConnectorsReportTable job={job} refetch={refetch} />,
+      () => <VisualizersReportTable job={job} refetch={refetch} />,
     ],
     [job, refetch]
   );

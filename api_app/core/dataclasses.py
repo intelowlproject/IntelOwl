@@ -5,7 +5,6 @@ import typing
 from abc import abstractmethod
 from logging import getLogger
 
-import celery
 from celery import uuid
 from celery.canvas import Signature
 from django.conf import settings
@@ -13,7 +12,6 @@ from django.utils.module_loading import import_string
 
 from api_app.core.models import AbstractReport
 from api_app.core.serializers import AbstractConfigSerializer
-from api_app.models import Job, PluginConfig
 from certego_saas.apps.user.models import User
 from intel_owl.celery import DEFAULT_QUEUE
 from intel_owl.consts import DEFAULT_SOFT_TIME_LIMIT, PARAM_DATATYPE_CHOICES
@@ -73,11 +71,6 @@ class AbstractConfig:
 
     @classmethod
     @abstractmethod
-    def _get_task(cls) -> celery.Task:
-        raise NotImplementedError()
-
-    @classmethod
-    @abstractmethod
     def _get_report_model(cls) -> typing.Type[AbstractReport]:
         raise NotImplementedError()
 
@@ -119,6 +112,8 @@ class AbstractConfig:
         Returns a dict of `secret_key: secret_value` mapping.
         filter_secrets: filter specific secrets or not (default: return all)
         """
+        from api_app.models import PluginConfig
+
         if secrets_filter is None:
             secrets_filter = []
         secrets = {}
@@ -249,6 +244,9 @@ class AbstractConfig:
         runtime_configuration: typing.Dict[str, typing.Dict] = None,
         parent_playbook: str = "",
     ) -> typing.Tuple[typing.List[Signature], typing.List[str]]:
+        from api_app.models import Job
+        from intel_owl import tasks
+
         # to store the celery task signatures
         task_signatures = []
         plugins_used = []
@@ -257,6 +255,7 @@ class AbstractConfig:
 
         plugin_dataclasses = cls.all()
         # get job
+
         job = Job.objects.get(pk=job_id)
         # set invalid plugins as errors
         for plugin in wrong_plugins:
@@ -288,6 +287,7 @@ class AbstractConfig:
                     "task_id": task_id,
                     "parent_playbook": parent_playbook,
                 },
+                cls._get_type(),
             ]
             # get celery queue
             queue = config.config.queue
@@ -301,7 +301,7 @@ class AbstractConfig:
             soft_time_limit = config.config.soft_time_limit
             # create task signature and add to list
             task_signatures.append(
-                cls._get_task().signature(
+                tasks.run_analyzer.signature(
                     args,
                     {},
                     queue=queue,

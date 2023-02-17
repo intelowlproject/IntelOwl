@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 import requests
 
 from api_app.analyzers_manager.classes import BaseAnalyzerMixin
-from api_app.exceptions import AnalyzerRunException
+from api_app.analyzers_manager.exceptions import AnalyzerRunException
 
 logger = logging.getLogger(__name__)
 

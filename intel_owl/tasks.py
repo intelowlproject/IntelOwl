@@ -90,19 +90,14 @@ def job_pipeline(
     job.pipeline(runtime_configuration)
 
 
-@app.task(name="run_analyzer", soft_time_limit=500)
-def run_analyzer(job_id: int, config_dict: dict, report_defaults: dict):
-    from api_app.analyzers_manager.dataclasses import AnalyzerConfig
+@app.task(name="run_plugin", soft_time_limit=500)
+def run_analyzer(
+    job_id: int, config_dict: dict, report_defaults: dict, plugin_type: str
+):
+    from api_app.models import PluginConfig
 
-    config = AnalyzerConfig.from_dict(config_dict)
-    config.run(job_id, report_defaults)
-
-
-@app.task(name="run_connector", soft_time_limit=500)
-def run_connector(job_id: int, config_dict: dict, report_defaults: dict):
-    from api_app.connectors_manager.dataclasses import ConnectorConfig
-
-    config = ConnectorConfig.from_dict(config_dict)
+    config_class = PluginConfig.get_specific_config_class(plugin_type)
+    config = config_class.from_dict(config_dict)
     config.run(job_id, report_defaults)
 
 

@@ -7,7 +7,10 @@ from urllib.parse import urlparse
 import pypdns
 
 from api_app.analyzers_manager import classes
-from api_app.exceptions import AnalyzerConfigurationException, AnalyzerRunException
+from api_app.analyzers_manager.exceptions import (
+    AnalyzerConfigurationException,
+    AnalyzerRunException,
+)
 from tests.mock_utils import MockResponseNoOp, if_mock_connections, patch
 
 

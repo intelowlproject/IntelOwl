@@ -124,6 +124,7 @@ def _multi_analysis_request(
             "warnings": serialized_data[index]["warnings"],
             "analyzers_running": job.analyzers_to_execute,
             "connectors_running": job.connectors_to_execute,
+            "visualizers_running": job.visualizers_to_execute,
             "playbooks_running": job.playbooks_to_execute,
         }
         for index, job in enumerate(jobs)

@@ -7,6 +7,7 @@ import {
   API_BASE_URI,
   ANALYZERS_CONFIG_URI,
   CONNECTORS_CONFIG_URI,
+  VISUALIZERS_CONFIG_URI,
   PLAYBOOKS_CONFIG_URI,
 } from "../constants/api";
 
@@ -17,12 +18,15 @@ const usePluginConfigurationStore = create((set, get) => ({
   analyzers: [],
   connectorsJSON: {},
   connectors: [],
+  visualizersJSON: {},
+  visualizers: [],
   playbooksJSON: {},
   playbooks: [],
   hydrate: () => {
     if (!get().loading) return;
     get().retrieveAnalyzersConfiguration();
     get().retrieveConnectorsConfiguration();
+    get().retrieveVisualizersConfiguration();
     get().retrievePlaybooksConfiguration();
   },
   retrieveAnalyzersConfiguration: async () => {
@@ -45,6 +49,19 @@ const usePluginConfigurationStore = create((set, get) => ({
       set({
         connectorsJSON: resp.data,
         connectors: Object.values(resp.data),
+        loading: false,
+      });
+    } catch (e) {
+      set({ error: e, loading: false });
+    }
+  },
+  retrieveVisualizersConfiguration: async () => {
+    try {
+      set({ loading: true });
+      const resp = await axios.get(VISUALIZERS_CONFIG_URI);
+      set({
+        visualizersJSON: resp.data,
+        visualizers: Object.values(resp.data),
         loading: false,
       });
     } catch (e) {

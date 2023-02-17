@@ -42,6 +42,9 @@ class AbstractReport(models.Model):
 
         abstract = True
 
+    def __str__(self):
+        return f"{self.__class__.__name__}(job:#{self.job_id}, {self.name})"
+
     # properties
     @property
     def user(self) -> models.Model:

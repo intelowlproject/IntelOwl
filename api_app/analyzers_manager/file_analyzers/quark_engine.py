@@ -6,7 +6,7 @@ from quark.config import DIR_PATH
 from quark.report import Report
 
 from api_app.analyzers_manager.classes import FileAnalyzer
-from api_app.exceptions import AnalyzerRunException
+from api_app.analyzers_manager.exceptions import AnalyzerRunException
 
 
 class QuarkEngine(FileAnalyzer):

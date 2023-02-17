@@ -8,8 +8,8 @@ import requests
 
 from api_app.core.classes import Plugin
 
-from ..exceptions import ConnectorConfigurationException, ConnectorRunException
 from .dataclasses import ConnectorConfig
+from .exceptions import ConnectorConfigurationException, ConnectorRunException
 from .models import ConnectorReport
 
 logger = logging.getLogger(__name__)

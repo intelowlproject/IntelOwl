@@ -6,7 +6,7 @@ import requests
 from django.conf import settings
 
 from api_app.analyzers_manager.classes import DockerBasedAnalyzer, ObservableAnalyzer
-from api_app.exceptions import AnalyzerRunException
+from api_app.analyzers_manager.exceptions import AnalyzerRunException
 
 
 class CyberChef(ObservableAnalyzer, DockerBasedAnalyzer):

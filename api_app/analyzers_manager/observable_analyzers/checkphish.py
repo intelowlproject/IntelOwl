@@ -6,7 +6,7 @@ import time
 import requests
 
 from api_app.analyzers_manager import classes
-from api_app.exceptions import AlreadyFailedJobException, AnalyzerRunException
+from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from tests.mock_utils import MockResponse, if_mock_connections, patch
 
 
@@ -33,7 +33,7 @@ class CheckPhish(classes.ObservableAnalyzer):
 
         job_id = response.json().get("jobID")
         if job_id is None:
-            raise AlreadyFailedJobException(
+            raise AnalyzerRunException(
                 "Job creation confirmation not received from CheckPhish."
             )
 
@@ -61,12 +61,12 @@ class CheckPhish(classes.ObservableAnalyzer):
             status_json = result.get("status", "")
             error = result.get("error", False)
             if status_json is None:
-                raise AlreadyFailedJobException(f"Job {job_id} not found.")
+                raise AnalyzerRunException(f"Job {job_id} not found.")
             if error:
-                raise AlreadyFailedJobException(f"Analysis error for job_id {job_id}")
+                raise AnalyzerRunException(f"Analysis error for job_id {job_id}")
             if status_json == "DONE":
                 return result
-        raise AlreadyFailedJobException(f'Job "{job_id}" status retrieval failed.')
+        raise AnalyzerRunException(f'Job "{job_id}" status retrieval failed.')
 
     @classmethod
     def _monkeypatch(cls):

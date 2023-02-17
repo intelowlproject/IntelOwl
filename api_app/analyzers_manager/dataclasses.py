@@ -48,12 +48,6 @@ class AnalyzerConfig(AbstractConfig):
     def _get_serializer_class(cls) -> typing.Type[AnalyzerConfigSerializer]:
         return AnalyzerConfigSerializer
 
-    @classmethod
-    def _get_task(cls) -> typing.Callable:
-        from intel_owl import tasks
-
-        return tasks.run_analyzer
-
     # utils
     @property
     def is_type_observable(self) -> bool:

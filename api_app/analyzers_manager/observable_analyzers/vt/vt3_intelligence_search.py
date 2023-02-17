@@ -4,9 +4,9 @@
 import requests
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
-from api_app.exceptions import AnalyzerRunException
 from tests.mock_utils import MockResponse, if_mock_connections, patch
 
+from ...exceptions import AnalyzerRunException
 from .vt3_base import VirusTotalv3AnalyzerMixin
 
 

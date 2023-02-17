@@ -177,11 +177,32 @@ export function ConnectorsReportTable({ job, refetch }) {
     />
   );
 }
+export function VisualizersReportTable({ job, refetch }) {
+  if (job?.playbooks_to_execute.length > 1) {
+    return (
+      <DataTable
+        data={job?.visualizer_reports}
+        customProps={{ job, refetch }}
+        {...tablePropsPlaybooks}
+      />
+    );
+  }
 
+  return (
+    <DataTable
+      data={job?.visualizer_reports}
+      customProps={{ job, refetch }}
+      {...tableProps}
+    />
+  );
+}
 AnalyzersReportTable.propTypes = {
   job: PropTypes.object.isRequired,
 };
 
 ConnectorsReportTable.propTypes = {
+  job: PropTypes.object.isRequired,
+};
+VisualizersReportTable.propTypes = {
   job: PropTypes.object.isRequired,
 };

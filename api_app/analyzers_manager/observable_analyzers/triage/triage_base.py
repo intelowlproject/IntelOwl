@@ -6,7 +6,10 @@ import logging
 import requests
 
 from api_app.analyzers_manager.classes import BaseAnalyzerMixin
-from api_app.exceptions import AnalyzerConfigurationException, AnalyzerRunException
+from api_app.analyzers_manager.exceptions import (
+    AnalyzerConfigurationException,
+    AnalyzerRunException,
+)
 
 logger = logging.getLogger(__name__)
 

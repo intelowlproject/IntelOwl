@@ -3,9 +3,9 @@
 
 import json
 import logging
-import os
 from abc import abstractmethod
 from copy import deepcopy
+from pathlib import PosixPath
 from typing import Dict, List, Optional, TypedDict
 
 from cache_memoize import cache_memoize
@@ -13,7 +13,6 @@ from django.conf import settings
 from rest_framework import serializers as rfs
 
 from api_app.helpers import calculate_md5
-from api_app.models import PluginConfig
 from intel_owl.consts import PARAM_DATATYPE_CHOICES
 
 logger = logging.getLogger(__name__)
@@ -91,11 +90,11 @@ class AbstractConfigSerializer(rfs.Serializer):
     Abstract serializer for `analyzer_config.json` and `connector_config.json`.
     """
 
-    # constants
-    CONFIG_FILE_NAME = ""
-
-    # sentinel/ flag
-    _is_valid_flag = False
+    @classmethod
+    @property
+    @abstractmethod
+    def config_file_name(cls) -> str:
+        raise NotImplementedError()
 
     # common basic fields
     name = rfs.CharField(required=True)
@@ -110,11 +109,22 @@ class AbstractConfigSerializer(rfs.Serializer):
     verification = rfs.SerializerMethodField()
     extends = rfs.CharField(allow_blank=True, required=False)
 
-    def is_valid(self, raise_exception=False):
-        ret = super().is_valid(raise_exception=raise_exception)
-        if ret:
-            self._is_valid_flag = True
-        return ret
+    @property
+    def python_path(self) -> PosixPath:
+        raise NotImplementedError()
+
+    def validate_python_module(self, python_module: str) -> str:
+        from django.utils.module_loading import import_string
+
+        clspath = f"{self.python_path}.{python_module}"
+        try:
+            import_string(clspath)
+        except ImportError as exc:
+            raise rfs.ValidationError(
+                f"`python_module` incorrect, {clspath} couldn't be imported"
+            ) from exc
+
+        return python_module
 
     @classmethod
     @abstractmethod
@@ -122,12 +132,15 @@ class AbstractConfigSerializer(rfs.Serializer):
         raise NotImplementedError()
 
     def get_verification(self, raw_instance: dict) -> ConfigVerificationType:
+        from api_app.models import PluginConfig
+
         # raw instance because input is json and not django model object
         # get all missing secrets
         secrets = raw_instance.get("secrets", {})
         missing_secrets = []
         for s_key, s_dict in secrets.items():
             # check if available in environment
+
             if (
                 not PluginConfig.visible_for_user(self.context.get("user", None))
                 .filter(
@@ -162,13 +175,11 @@ class AbstractConfigSerializer(rfs.Serializer):
     # utility methods
 
     @classmethod
-    def _get_config_path(cls) -> str:
+    def _get_config_path(cls) -> PosixPath:
         """
         Returns full path to the config file.
         """
-        return os.path.join(
-            settings.PROJECT_LOCATION, "configuration", cls.CONFIG_FILE_NAME
-        )
+        return settings.PROJECT_LOCATION / "configuration" / cls.config_file_name
 
     @classmethod
     def _read_config(cls) -> dict:

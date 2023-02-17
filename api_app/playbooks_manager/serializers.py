@@ -24,8 +24,6 @@ class PlaybookConfigSerializer(AbstractConfigSerializer):
     Serializer for `playbook_config.json`.
     """
 
-    CONFIG_FILE_NAME = "playbook_config.json"
-
     config = rfs.DictField(default={})
     secrets = rfs.DictField(default={})
     params = rfs.DictField(default={})
@@ -44,6 +42,14 @@ class PlaybookConfigSerializer(AbstractConfigSerializer):
         required=False,
         default=[],
     )
+
+    @classmethod
+    @property
+    def config_file_name(cls) -> str:
+        return "playbook_config.json"
+
+    def validate_python_module(self, python_module: str) -> str:
+        return python_module
 
     @classmethod
     def _cached_playbooks(cls) -> dict:

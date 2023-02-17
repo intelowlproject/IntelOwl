@@ -12,6 +12,7 @@ from django.core.files import File
 from api_app.analyzers_manager.dataclasses import AnalyzerConfig
 from api_app.connectors_manager.dataclasses import ConnectorConfig
 from api_app.models import Job
+from api_app.visualizers_manager.dataclasses import VisualizerConfig
 from tests import PollingFunction
 
 from .. import CustomTestCase
@@ -25,7 +26,7 @@ class _AbstractAnalyzersScriptTestCase(CustomTestCase):
     SLEEP_SECONDS: int = 5  # 5 seconds
     analyzer_configs = AnalyzerConfig.all()
     connector_configs = ConnectorConfig.all()
-
+    visualizer_configs = VisualizerConfig.all()
     # attrs
     test_job: Job
     analyzer_configs: dict
@@ -69,6 +70,7 @@ class _AbstractAnalyzersScriptTestCase(CustomTestCase):
             f"[REPORT] Job:{self.test_job.pk}, status:'{self.test_job.status}',",
             f"analyzers:{self.test_job.analyzers_to_execute}",
             f"connectors: {self.test_job.connectors_to_execute}",
+            f"visualizers: {self.test_job.visualizers_to_execute}",
         )
         # execute analyzers
         self.test_job.pipeline(self.runtime_configuration)

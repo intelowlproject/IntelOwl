@@ -17,7 +17,7 @@ from django.conf import settings
 from git import Repo
 
 from api_app.analyzers_manager.classes import FileAnalyzer
-from api_app.exceptions import AnalyzerRunException
+from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from api_app.models import PluginConfig
 from intel_owl.settings._util import set_permissions
 
@@ -204,7 +204,7 @@ class YaraScan(FileAnalyzer):
         logger.info(f"Checking {self.public_repositories}")
         for url in self.public_repositories:
             result[url] += self.analyze(url)
-            logger.info(f"Checking {self.private_repositories}")
+        logger.info(f"Checking {self.private_repositories}")
         for url in self.private_repositories:
             result[url] += self.analyze(url, private=True)
         if self.local_rules:

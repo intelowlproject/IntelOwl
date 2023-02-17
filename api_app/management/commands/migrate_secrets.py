@@ -8,6 +8,7 @@ from django.core.management.base import BaseCommand
 from api_app.analyzers_manager.serializers import AnalyzerConfigSerializer
 from api_app.connectors_manager.serializers import ConnectorConfigSerializer
 from api_app.models import PluginConfig
+from api_app.visualizers_manager.serializers import VisualizerConfigSerializer
 
 
 class Command(BaseCommand):
@@ -68,6 +69,11 @@ class Command(BaseCommand):
         self._migrate_secrets(
             ConnectorConfigSerializer.read_and_verify_config().values(),
             PluginConfig.PluginType.CONNECTOR,
+            ignore_check,
+        )
+        self._migrate_secrets(
+            VisualizerConfigSerializer.read_and_verify_config().values(),
+            PluginConfig.PluginType.VISUALIZER,
             ignore_check,
         )
         print(

@@ -11,7 +11,7 @@ from urllib.parse import urlparse
 from django.conf import settings
 
 from api_app.analyzers_manager import classes
-from api_app.exceptions import AnalyzerRunException
+from api_app.analyzers_manager.exceptions import AnalyzerRunException
 
 logger = logging.getLogger(__name__)
 

@@ -5,7 +5,7 @@ import requests
 from django.conf import settings
 
 from api_app.connectors_manager import classes
-from api_app.exceptions import ConnectorRunException
+from api_app.connectors_manager.exceptions import ConnectorRunException
 from tests.mock_utils import MockResponse, if_mock_connections, patch
 
 

@@ -8,7 +8,7 @@ import mwdblib
 from requests import HTTPError
 
 from api_app.analyzers_manager.classes import FileAnalyzer
-from api_app.exceptions import AnalyzerRunException
+from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from api_app.helpers import calculate_sha256
 from tests.mock_utils import MagicMock, if_mock_connections, patch
 

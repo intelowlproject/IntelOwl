@@ -35,9 +35,3 @@ class ConnectorConfig(AbstractConfig):
 
     def get_full_import_path(self) -> str:
         return f"{settings.BASE_CONNECTOR_PYTHON_PATH}.{self.python_module}"
-
-    @classmethod
-    def _get_task(cls) -> typing.Callable:
-        from intel_owl import tasks
-
-        return tasks.run_connector

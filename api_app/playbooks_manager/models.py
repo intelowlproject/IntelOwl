@@ -19,5 +19,5 @@ class CachedPlaybook(models.Model):
 
     # job might not be necessary.
     job = models.ForeignKey(
-        Job, on_delete=models.SET_NULL, related_name="job", null=True, blank=True
+        Job, on_delete=models.SET_NULL, related_name="playbooks", null=True, blank=True
     )

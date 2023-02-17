@@ -7,7 +7,8 @@ def calculate_process_time(apps, schema_editor):
     Job = apps.get_model("api_app", "Job")
     for job in Job.objects.all():
         if job.finished_analysis_time:
-            job.process_time = job.calculate_process_time()
+            td = job.finished_analysis_time - job.received_request_time
+            job.process_time = round(td.total_seconds(), 2)
             job.save()
 
 

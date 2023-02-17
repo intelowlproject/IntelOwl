@@ -1,6 +1,17 @@
 # Changelog
 
 [**Upgrade Guide**](https://intelowl.readthedocs.io/en/latest/Installation.md#update-to-the-most-recent-version)
+## [v4.2.1](https://github.com/intelowlproject/IntelOwl/releases/tag/v4.2.1)
+
+* Fixed Plugin bug which caused the inability to add new secrets.
+* Fixed Yara Analyzer and added new open source rules
+* Fixed Cape Sandbox analyzer not working
+* Deprecated `ThreatMiner`, `SecurityTrails` and `Robtex` various analyzers and substituted with new versions.
+* Refactoring and features in preparation to add support for cluster deployments.
+* Added a new advanced Documentation section [Advanced Configuration](https://intelowl.readthedocs.io/en/latest/Advanced-Configuration.html)
+  * Added more support for Cloud Deployments (in particular AWS)
+* Other minor adjustments and fixes
+
 ## [v4.2.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v4.2.0)
 
 With this release we welcome new official maintainers of IntelOwl:

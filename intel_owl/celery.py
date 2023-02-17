@@ -53,7 +53,7 @@ if settings.AWS_SQS:
     # this is for AWS SQS support
     app.conf.update(
         broker_transport_options={
-            "region": "eu-central-1",
+            "region": settings.AWS_REGION,
             "polling_interval": 1,
             "visibility_timeout": 3600,
             "wait_time_seconds": 20,

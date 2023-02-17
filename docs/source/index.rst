@@ -11,6 +11,7 @@ Welcome to IntelOwl's documentation!
 
    Introduction
    Installation
+   Advanced-Configuration
    Usage
    Advanced-Usage
    Contribute

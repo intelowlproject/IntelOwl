@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: IntelOwl API specification
-  version: 4.2.0
+  version: 4.2.1
 paths:
   /api/analyze_file:
     post:

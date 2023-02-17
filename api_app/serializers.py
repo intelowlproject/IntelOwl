@@ -914,8 +914,10 @@ class PluginConfigSerializer(rfs.ModelSerializer):
             expected_type = list
         elif expected_type == "dict":
             expected_type = dict
-        elif expected_type == ["int", "float"]:
+        elif expected_type == "int":
             expected_type = int
+        elif expected_type == "float":
+            expected_type = float
         elif expected_type == "bool":
             expected_type = bool
 

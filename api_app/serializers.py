@@ -10,7 +10,6 @@ from drf_spectacular.utils import extend_schema_serializer
 from durin.serializers import UserSerializer
 from rest_framework import serializers as rfs
 from rest_framework.exceptions import PermissionDenied, ValidationError
-from rest_framework.fields import empty
 
 from certego_saas.apps.organization.membership import Membership
 
@@ -811,13 +810,20 @@ def multi_result_enveloper(serializer_class, many):
 
 class PluginConfigSerializer(rfs.ModelSerializer):
     class CustomJSONField(rfs.JSONField):
-        def run_validation(self, data=empty):
-            value = super().run_validation(data)
+        def to_internal_value(self, data):
+            if not data:
+                raise ValidationError("empty insertion")
+            logger.info(f"verifying that value {data} ({type(data)}) is JSON compliant")
             try:
-                return json.loads(value)
+                return json.loads(data)
             except json.JSONDecodeError:
-                logger.info(f"value {value} ({type(value)}) raised ValidationError")
-                raise ValidationError("Value is not JSON-compliant.")
+                # this is to accept classicstrings
+                data = f'"{data}"'
+                try:
+                    return json.loads(data)
+                except json.JSONDecodeError:
+                    logger.info(f"value {data} ({type(data)}) raised ValidationError")
+                    raise ValidationError("Value is not JSON-compliant.")
 
         def to_representation(self, value):
             return json.dumps(super().to_representation(value))
@@ -908,7 +914,7 @@ class PluginConfigSerializer(rfs.ModelSerializer):
             expected_type = list
         elif expected_type == "dict":
             expected_type = dict
-        elif expected_type in ["int", "float"]:
+        elif expected_type == ["int", "float"]:
             expected_type = int
         elif expected_type == "bool":
             expected_type = bool

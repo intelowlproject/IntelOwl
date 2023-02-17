@@ -69,6 +69,19 @@ def yara_updater():
     yara_scan.YaraScan.update()
 
 
+@shared_task(soft_time_limit=100)
+def update_notifications_with_releases():
+    from django.core import management
+
+    management.call_command(
+        "changelog_notification",
+        ".github/CHANGELOG.md",
+        "INTELOWL",
+        "--number-of-releases",
+        "1",
+    )
+
+
 @app.task(name="continue_job_pipeline", soft_time_limit=20)
 def continue_job_pipeline(job_id: int):
 

@@ -126,7 +126,7 @@ const observableType2PropsMap = {
   domain: {
     placeholder: "scanme.org",
     title: "invalid Domain",
-    pattern: "^(\\?]?[?.?\\?]?[?[-_a-zA-Z0-9]+)+$", //eslint-disable-line
+    pattern: "^(.?.?.?[-_a-zA-Z0-9]+)+$", //eslint-disable-line
   },
   hash: {
     placeholder: "446c5fbb11b9ce058450555c1c27153c",

@@ -218,7 +218,7 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "BINARYEDGE_KEY",
-        "description": "",
+        "description": "API key for the BinaryEdge",
         "required": true,
         "type": "str"
       }

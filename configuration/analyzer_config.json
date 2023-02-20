@@ -4348,6 +4348,7 @@
       "public_repositories": {
         "value": [
           "https://github.com/elastic/protections-artifacts",
+          "https://github.com/embee-research/Yara",
           "https://github.com/JPCERTCC/jpcert-yara",
           "https://github.com/SIFalcon/Detection/",
           "https://github.com/bartblaze/Yara-rules",

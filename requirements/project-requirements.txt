@@ -6,6 +6,7 @@ django-filter==22.1
 django-storages==1.13.1
 django-celery-beat==2.4.0
 django-celery-results==2.4.0
+django-iam-dbauth==0.1.4
 
 # django rest framework libs
 Authlib==1.2.0

@@ -1,5 +1,7 @@
 # Database Conf
 
+import sys
+
 from intel_owl import secrets
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
@@ -18,7 +20,7 @@ if AWS_RDS_IAM_ROLE:
             "you specified both a DB password and that you want to use"
             " IAM roles for authentication. Choose one"
         )
-        exit(3)
+        sys.exit(3)
     # SSL is mandatory for AWS RDS
     PG_SSL = True
     PG_ENGINE = "django_iam_dbauth.aws.postgresql"

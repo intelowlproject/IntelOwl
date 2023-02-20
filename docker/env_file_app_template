@@ -5,6 +5,7 @@ DB_PORT=5432
 DB_USER=user
 DB_PASSWORD=password
 DB_SSL=False
+DB_NAME=intel_owl_db
 
 # Additional Config variables
 # jobs older than this would be flushed from the database periodically. Default: 3 days
@@ -65,7 +66,6 @@ DEBUG=False
 LDAP_ENABLED=False
 DISABLE_LOGGING_TEST=False
 MOCK_CONNECTIONS=False
-DB_NAME=intel_owl_db
 HTTPS_ENABLED=not_enabled
 RADIUS_AUTH_ENABLED=False
 # broker configuration

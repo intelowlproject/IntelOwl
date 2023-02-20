@@ -9,18 +9,35 @@ PG_HOST = secrets.get_secret("DB_HOST")
 PG_PORT = secrets.get_secret("DB_PORT")
 PG_USER = secrets.get_secret("DB_USER")
 PG_PASSWORD = secrets.get_secret("DB_PASSWORD")
-PG_SSL = secrets.get_secret("POSTGRES_SSL", "True") == "True"
-
+PG_SSL = secrets.get_secret("DB_SSL", False) == "True"
+PG_ENGINE = "django.db.backends.postgresql"
+AWS_RDS_IAM_ROLE = secrets.get_secret("AWS_RDS_IAM_ROLE") == "True"
+if AWS_RDS_IAM_ROLE:
+    if PG_PASSWORD:
+        print(
+            "you specified both a DB password and that you want to use"
+            " IAM roles for authentication. Choose one"
+        )
+        exit(3)
+    # SSL is mandatory for AWS RDS
+    PG_SSL = True
+    PG_ENGINE = "django_iam_dbauth.aws.postgresql"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql",
+        "ENGINE": PG_ENGINE,
         "NAME": PG_DB,
         "HOST": PG_HOST,
         "PORT": PG_PORT,
         "USER": PG_USER,
-        "PASSWORD": PG_PASSWORD,
-        # "OPTIONS": {"sslmode": "require"} if PG_SSL else {},
+        "OPTIONS": {},
         "TIMEOUT": 180,
     },
 }
+
+if AWS_RDS_IAM_ROLE:
+    DATABASES["default"]["OPTIONS"]["use_iam_auth"] = True
+else:
+    DATABASES["default"]["PASSWORD"] = PG_PASSWORD
+if PG_SSL:
+    DATABASES["default"]["OPTIONS"]["sslmode"] = "require"

@@ -139,6 +139,7 @@ tablePropsPlaybooks.columns.push({
 });
 
 export function AnalyzersReportTable({ job, refetch }) {
+  console.debug("AnalyzersReportTable rendered");
   if (job?.playbooks_to_execute.length > 1) {
     return (
       <DataTable
@@ -159,6 +160,7 @@ export function AnalyzersReportTable({ job, refetch }) {
 }
 
 export function ConnectorsReportTable({ job, refetch }) {
+  console.debug("ConnectorsReportTable rendered");
   if (job?.playbooks_to_execute.length > 1) {
     return (
       <DataTable
@@ -178,6 +180,7 @@ export function ConnectorsReportTable({ job, refetch }) {
   );
 }
 export function VisualizersReportTable({ job, refetch }) {
+  console.debug("AnalyzersReportTable rendered");
   if (job?.playbooks_to_execute.length > 1) {
     return (
       <DataTable

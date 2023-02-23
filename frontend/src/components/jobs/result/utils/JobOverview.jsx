@@ -1,24 +1,39 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
-import { ButtonGroup, Button, Badge, Col, Row, Nav, NavItem, NavLink, Container, TabContent, TabPane } from "reactstrap";
+import {
+  ButtonGroup,
+  Button,
+  Badge,
+  Col,
+  Row,
+  Nav,
+  NavItem,
+  NavLink,
+  Container,
+  TabContent,
+  TabPane,
+} from "reactstrap";
 
 import { GoBackButton } from "@certego/certego-ui";
 
-import { AnalyzersReportTable, ConnectorsReportTable, VisualizersReportTable } from "./tables";
+import {
+  AnalyzersReportTable,
+  ConnectorsReportTable,
+  VisualizersReportTable,
+} from "./tables";
 import { JobInfoCard, JobIsRunningAlert, JobActionsBar } from "./sections";
 import { StatusIcon } from "../../../common";
 import VisualizerReport from "./visualizer";
 
 export default function JobOverview({ isRunningJob, job, refetch }) {
-
   // state
   const [UIElements, setUIElements] = useState({});
-  const [activeElement, setActiveElement] = useState("")
+  const [activeElement, setActiveElement] = useState("");
   const [isSelectedUI, setIsSelectedUI] = useState(true);
   const selectUISection = (isUI) => {
     setIsSelectedUI(isUI);
     setActiveElement(Object.keys(isUI ? UIElements : rawElements)[0]);
-  }
+  };
 
   // raw elements
   let AnalyzerDenominator = job.analyzers_requested?.length || "all";
@@ -33,69 +48,70 @@ export default function JobOverview({ isRunningJob, job, refetch }) {
       ConnectorDenominator = job.connectors_to_execute?.length;
     }
   }
-  const rawElements = React.useMemo(() => ({
-    "Analyzers Report": {
-      nav: (
-        <div className="d-flex-center">
-          <strong>Analyzers Report</strong>
-          <Badge className="ms-2">
-            {job.analyzers_to_execute?.length} /&nbsp;
-            {AnalyzerDenominator}
-          </Badge>
-        </div>
-      ),
-      report: <AnalyzersReportTable job={job} refetch={refetch} />,
-    },
-    "Connectors Report": {
-      nav: (
-        <div className="d-flex-center">
-          <strong>Connectors Report</strong>
-          <Badge className="ms-2">
-            {job.connectors_to_execute?.length} /&nbsp;
-            {ConnectorDenominator}
-          </Badge>
-        </div>
-      ),
-      report: <ConnectorsReportTable job={job} refetch={refetch} />,
-    },
-    "Visualizers Report": {
-      nav: (
-        <div className="d-flex-center">
-          <strong>Visualizers Report</strong>
-          <Badge className="ms-2">
-            {job.visualizers_to_execute?.length} /&nbsp;
-            {VisualizerDenominator}
-          </Badge>
-        </div>
-      ),
-      report: <VisualizersReportTable job={job} refetch={refetch} />,
-    }
-  }), [job, refetch, AnalyzerDenominator, ConnectorDenominator]);
+  const rawElements = React.useMemo(
+    () => ({
+      "Analyzers Report": {
+        nav: (
+          <div className="d-flex-center">
+            <strong>Analyzers Report</strong>
+            <Badge className="ms-2">
+              {job.analyzers_to_execute?.length} /&nbsp;
+              {AnalyzerDenominator}
+            </Badge>
+          </div>
+        ),
+        report: <AnalyzersReportTable job={job} refetch={refetch} />,
+      },
+      "Connectors Report": {
+        nav: (
+          <div className="d-flex-center">
+            <strong>Connectors Report</strong>
+            <Badge className="ms-2">
+              {job.connectors_to_execute?.length} /&nbsp;
+              {ConnectorDenominator}
+            </Badge>
+          </div>
+        ),
+        report: <ConnectorsReportTable job={job} refetch={refetch} />,
+      },
+      "Visualizers Report": {
+        nav: (
+          <div className="d-flex-center">
+            <strong>Visualizers Report</strong>
+            <Badge className="ms-2">
+              {job.visualizers_to_execute?.length} /&nbsp;
+              {VisualizerDenominator}
+            </Badge>
+          </div>
+        ),
+        report: <VisualizersReportTable job={job} refetch={refetch} />,
+      },
+    }),
+    [job, refetch, AnalyzerDenominator, ConnectorDenominator]
+  );
 
   // UI elements
-  // useEffect without params trigger only once (it's the same of componentDidMount)
   useEffect(() => {
     // TODO (remove the mock): load visualizers from the backend only once
     const newUIElements = {};
     // eslint-disable-next-line no-plusplus
-    for (let i = 0; i < 24; i++) {
-      const elementLabel = `Visualizer Report ${  i}`;
+    for (let i = 0; i < 1; i++) {
+      const elementLabel = `Visualizer Report ${i}`;
       newUIElements[elementLabel] = {
         nav: (
           <div className="d-flex-center">
             <strong>{elementLabel}</strong>
           </div>
         ),
-        report: <VisualizerReport />,
-      }
+        report: <VisualizerReport job={job} />,
+      };
     }
     setUIElements(newUIElements);
     // set the default to the first visualizer
     setActiveElement(Object.keys(newUIElements)[0]);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [job]);
 
-  const elementsToShow = isSelectedUI ? UIElements : rawElements
+  const elementsToShow = isSelectedUI ? UIElements : rawElements;
   return (
     <Container fluid>
       {/* bar with job id and utilities buttons */}
@@ -123,42 +139,51 @@ export default function JobOverview({ isRunningJob, job, refetch }) {
         </Row>
       )}
       <Row className="g-0 mt-3">
-        <div className='mb-2 d-inline-flex flex-row-reverse'>
+        <div className="mb-2 d-inline-flex flex-row-reverse">
           {/* UI/raw switch */}
-          <ButtonGroup className='ms-2 mb-3'>
-            <Button outline={!isSelectedUI} color={isSelectedUI ? 'primary' : 'tertiary'} onClick={() => selectUISection(true)}>
+          <ButtonGroup className="ms-2 mb-3">
+            <Button
+              outline={!isSelectedUI}
+              color={isSelectedUI ? "primary" : "tertiary"}
+              onClick={() => selectUISection(true)}
+            >
               Visualizer
             </Button>
-            <Button outline={isSelectedUI} color={!isSelectedUI ? 'primary' : 'tertiary'} onClick={() => selectUISection(false)}>
+            <Button
+              outline={isSelectedUI}
+              color={!isSelectedUI ? "primary" : "tertiary"}
+              onClick={() => selectUISection(false)}
+            >
               Raw
             </Button>
           </ButtonGroup>
-          <div className='flex-fill horizontal-scrollable'>
-            <Nav tabs className='flex-nowrap'>
-            {/* generate the nav with the UI/raw visualizers */}
-            {Object.entries(elementsToShow).map(([navTitle, componentsObject]) => (
-                <NavItem>
-                  <NavLink
-                    className={`${activeElement === navTitle ? "active": ""}`}
-                    onClick={() => setActiveElement(navTitle)}
-                  >
-                    {componentsObject.nav}
-                  </NavLink>
-                </NavItem>                
-              ))
-            }
+          <div className="flex-fill horizontal-scrollable">
+            <Nav tabs className="flex-nowrap">
+              {/* generate the nav with the UI/raw visualizers */}
+              {Object.entries(elementsToShow).map(
+                ([navTitle, componentsObject]) => (
+                  <NavItem>
+                    <NavLink
+                      className={`${
+                        activeElement === navTitle ? "active" : ""
+                      }`}
+                      onClick={() => setActiveElement(navTitle)}
+                    >
+                      {componentsObject.nav}
+                    </NavLink>
+                  </NavItem>
+                )
+              )}
             </Nav>
           </div>
         </div>
-        { /* reports section */}
+        {/* reports section */}
         <TabContent activeTab={activeElement}>
-          {
-            Object.entries(elementsToShow).map(([navTitle, componentsObject]) => (
-              <TabPane tabId={navTitle}>
-                {componentsObject.report}
-              </TabPane>
-            ))
-          }
+          {Object.entries(elementsToShow).map(
+            ([navTitle, componentsObject]) => (
+              <TabPane tabId={navTitle}>{componentsObject.report}</TabPane>
+            )
+          )}
         </TabContent>
       </Row>
     </Container>

@@ -1,65 +1,137 @@
-import React from "react";
+import React, { Fragment } from "react";
 import PropTypes from "prop-types";
 import { ContentSection } from "@certego/certego-ui";
-import {
-    Row,
-} from "reactstrap";
-import { StringVisualizerField, BooleanVisualizerField } from "./visualizerComponents";
-
+import { Row } from "reactstrap";
+import { VisualizerComponent } from "./visualizerComponents";
 
 const mockedData = [
-    {name: "evaluation", value: "malicious", type: "str", level: 0},
-    {name: "reliability", value: "B", type: "str", level: 0},
-    {name: "is_scanner", value: true, type: "bool", level: 1},
-    {name: "is_spammer", value: true, type: "bool", level: 1},
-    {name: "is_phishing", value: false, type: "bool", level: 1},
-    {name: "is_scammer", value: false, type: "bool", level: 1},
-    {name: "is_sinkhole", value: false, type: "bool", level: 1},
-    {name: "is_tor_exit_node", value: false, type: "bool", level: 1},
-    {name: "is_google_malicious", value: false, type: "bool", level: 1},
-    {name: "is_cloudflare_malicious", value: true, type: "bool", level: 1},
-    {name: "is_quad9_malicious", value: true, type: "bool", level: 1},
-    {name: "tranco_rank", value: 121233, type: "int", level: 1},
-    {name: "urls", value: ["http://test.com/1", "http://test.com/2", "http://test.com/3"], type: "list", level: 1},
-    {name: "md5s", value: ["11d5c09dfab9e17f0e3870af9c9961e8", "22d5c09dfab9e17f0e3870af9c9961e8", "33d5c09dfab9e17f0e3870af9c9961e8"], type: "int", level: 1},
-]
+  { name: "scanner", value: true, type: "bool", level: 1 },
+  { name: "spammer", value: true, type: "bool", level: 1 },
+  { name: "phishing", value: false, type: "bool", level: 1 },
+  { name: "scammer", value: false, type: "bool", level: 1 },
+  { name: "sinkhole", value: false, type: "bool", level: 1 },
+  { name: "tor exit node", value: false, type: "bool", level: 1 },
+  { name: "google malicious", value: false, type: "bool", level: 1 },
+  { name: "quad9 malicious", value: true, type: "bool", level: 1 },
+  { name: "tranco rank", value: 121233, type: "int", level: 1 },
+  {
+    name: "malware family",
+    value: "mirai",
+    type: "string",
+    level: 1,
+    additional_config: { link: "https://malpedia.caad.fkie.fraunhofer.de/" },
+  },
+  {
+    name: "kill chain phase",
+    value: "dropzone",
+    type: "string",
+    level: 1,
+    additional_config: { link: "https://attack.mitre.org/" },
+  },
+  { name: "creation date", value: "2006-07-02", type: "string", level: 3 },
+  { name: "country", value: "italy", type: "string", level: 3 },
+  {
+    name: "urls",
+    value: [
+      { value: "http://test.com/1" },
+      { value: "http://test.com/2" },
+      { value: "http://test.com/3" },
+      { value: "http://test.com/4" },
+      { value: "http://test.com/5" },
+      { value: "http://test.com/6" },
+      { value: "http://test.com/7" },
+      { value: "http://test.com/8" },
+      { value: "http://test.com/9" },
+    ],
+    type: "list",
+    level: 2,
+  },
+  {
+    name: "md5s",
+    value: [
+      { value: "11d5c09dfab9e17f0e3870af9c9961e8" },
+      { value: "22d5c09dfab9e17f0e3870af9c9961e8" },
+      { value: "33d5c09dfab9e17f0e3870af9c9961e8" },
+    ],
+    type: "list",
+    level: 2,
+  },
+  {
+    name: "general evaluation",
+    value: "malicious",
+    type: "str",
+    level: 0,
+    additional_config: { value_color: "danger" },
+  },
+  { name: "reliability", value: "B", type: "str", level: 0 },
+  { name: "active resolution", value: "dns.google.com", type: "str", level: 3 },
+  { name: "last resolution", value: "dns.google.com", type: "str", level: 3 },
+  { name: " cloudflare malicious", value: true, type: "bool", level: 2 },
+  {
+    name: "passive DNS",
+    value: [{ value: "dns.google.com" }, { value: "dns2.google.com" }],
+    type: "list",
+    level: 3,
+  },
+  { name: "another list (to hide)", value: [], type: "list", level: 3 },
+  { name: "string (to hide)", value: "", type: "str", level: 3 },
+  { name: "bool (to hide)", value: false, type: "bool", level: 3 },
+];
 
-function componentConverter(fieldType) {
-    switch(fieldType) {
-        case 'bool':
-            return BooleanVisualizerField;
-        default:
-            return StringVisualizerField;
-    };
-}
-
-function levelGenerator(data, levelValue) {
-    /* level 0 = h3. If we want to decrease the size for each level we simply increase the h value:
-    lv 1 = h4 (3+1), lv2 = h5(3+2).
-    */
-    const levelSize = `h${4 + levelValue}`;
-    return (
-        <Row horizontal className={`justify-content-around ${levelSize}`}>
-            {data.filter(field => field.level === levelValue).map(field => {
-                const Component = componentConverter(field.type);
-                return <Component key={field.name} fieldName={field.name} fieldValue={field.value} />;
-            })}
-        </Row>
-    );
+function levelGenerator(data, levelSize) {
+  // sort the element by type, in this way fields with the same type are groupped.
+  data.sort((firstField, secondField) =>
+    firstField.type > secondField.type ? 1 : -1
+  );
+  // size is calculated adding the levelSize to the tag "h". ex: levelSize = 3 => h3.
+  return (
+    <Row className={`justify-content-around align-items-center h${levelSize}`}>
+      {data.map((field) => (
+        <VisualizerComponent
+          fieldName={field.name}
+          fieldType={field.type}
+          fieldValue={field.value}
+          additionalConfig={field.additional_config}
+          hideFalseValue
+        />
+      ))}
+    </Row>
+  );
 }
 
 export default function VisualizerReport({ job }) {
-    console.debug("visualizer job")
-    console.debug(job)
-    return (
-        <ContentSection className="bg-body">
-            {levelGenerator(mockedData, 0)}
-            <hr className="border-gray flex-grow-1" />
-            {levelGenerator(mockedData, 1)}
-        </ContentSection>
-    )
+  console.debug("VisualizerReport rendered");
+  console.debug("visualizer job");
+  console.debug(job);
+
+  let levelPositionList = mockedData.map((element) => element.level);
+  levelPositionList = levelPositionList
+    .filter((element, index) => levelPositionList.indexOf(element) === index)
+    .sort();
+
+  return (
+    <ContentSection className="bg-body">
+      {levelPositionList.map((levelPosition, index) => {
+        let levelSize = index * 2 + 3;
+        if (levelSize > 6) {
+          levelSize = 6;
+        }
+        return (
+          <Fragment>
+            {levelGenerator(
+              mockedData.filter((field) => field.level === levelPosition),
+              levelSize
+            )}
+            {index + 1 !== levelPositionList.length && (
+              <hr className="border-gray flex-grow-1" />
+            )}
+          </Fragment>
+        );
+      })}
+    </ContentSection>
+  );
 }
 
 VisualizerReport.propTypes = {
-    job: PropTypes.object.isRequired,
+  job: PropTypes.object.isRequired,
 };

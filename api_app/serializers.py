@@ -5,6 +5,7 @@ import json
 import logging
 from typing import Dict, List
 
+from django.db.models import Q
 from django.http import QueryDict
 from drf_spectacular.utils import extend_schema_serializer
 from durin.serializers import UserSerializer
@@ -20,17 +21,12 @@ from certego_saas.apps.organization.permissions import IsObjectOwnerOrSameOrgPer
 
 from .analyzers_manager.constants import ObservableTypes, TypeChoices
 from .analyzers_manager.exceptions import NotRunnableAnalyzer
-from .analyzers_manager.models import AnalyzerConfig
+from .analyzers_manager.models import AnalyzerConfig, MimeTypes
 from .analyzers_manager.serializers import AnalyzerReportSerializer
 from .connectors_manager.exceptions import NotRunnableConnector
 from .connectors_manager.models import ConnectorConfig
 from .connectors_manager.serializers import ConnectorReportSerializer
-from .helpers import (
-    calculate_md5,
-    calculate_mimetype,
-    calculate_observable_classification,
-    gen_random_colorhex,
-)
+from .helpers import calculate_md5, gen_random_colorhex
 from .models import TLP, Job, PluginConfig, Tag
 from .playbooks_manager.exceptions import NotRunnablePlaybook
 from .playbooks_manager.models import PlaybookConfig
@@ -416,7 +412,12 @@ class FileAnalysisSerializer(_AbstractJobCreateSerializer):
         # calculate ``file_mimetype``
         if "file_name" not in attrs:
             attrs["file_name"] = attrs["file"].name
-        attrs["file_mimetype"] = calculate_mimetype(attrs["file"], attrs["file_name"])
+        try:
+            attrs["file_mimetype"] = MimeTypes.calculate(
+                attrs["file"], attrs["file_name"]
+            )
+        except ValueError as e:
+            raise ValidationError(e)
         # calculate ``md5``
         file_obj = attrs["file"].file
         file_obj.seek(0)
@@ -435,21 +436,22 @@ class FileAnalysisSerializer(_AbstractJobCreateSerializer):
             try:
                 # at this point we are sure that the analyzer object is present,
                 # but not its type
+                file_mimetype = serialized_data["file_mimetype"]
+
+                supported_query = Q(
+                    supported_filetypes__isnull=True,
+                    not_supported_filetypes__not__contains=file_mimetype,
+                ) | Q(supported_filetypes__contains=file_mimetype)
                 try:
-                    config: AnalyzerConfig = AnalyzerConfig.objects.get(
-                        a_name, type=TypeChoices.FILE
+                    AnalyzerConfig.objects.get(
+                        Q(name=a_name, type=TypeChoices.FILE) & supported_query
                     )
                 except AnalyzerConfig.DoesNotExist:
                     raise NotRunnableAnalyzer(
-                        f"{a_name} won't be run because does not support files."
+                        f"{a_name} won't be run because"
+                        " does not support the file mimetype."
                     )
-                if not config.is_filetype_supported(
-                    serialized_data["file_mimetype"], serialized_data["file_name"]
-                ):
-                    raise NotRunnableAnalyzer(
-                        f"{a_name} won't be run because mimetype "
-                        f"{serialized_data['file_mimetype']} is not supported."
-                    )
+
             except NotRunnableAnalyzer as e:
                 if not self.log_runnable:
                     # in this case, they are not warnings but
@@ -537,7 +539,7 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
         logger.debug(f"before attrs: {attrs}")
         # calculate ``observable_classification``
         if not attrs.get("observable_classification", None):
-            attrs["observable_classification"] = calculate_observable_classification(
+            attrs["observable_classification"] = ObservableTypes.calculate(
                 attrs["observable_name"]
             )
         attrs["observable_name"] = self.defanged_values_removal(
@@ -577,22 +579,17 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
                 # at this point we are sure that the analyzer object is present,
                 # but not its type
                 try:
-                    config: AnalyzerConfig = AnalyzerConfig.objects.get(
-                        a_name, type=TypeChoices.FILE
+                    AnalyzerConfig.objects.get(
+                        name=a_name,
+                        type=TypeChoices.FILE,
+                        observable_supported__contains=serialized_data[
+                            "observable_classification"
+                        ],
                     )
                 except AnalyzerConfig.DoesNotExist:
                     raise NotRunnableAnalyzer(
                         f"{a_name} won't be run because "
-                        "it does not support observable."
-                    )
-
-                if not config.is_observable_type_supported(
-                    serialized_data["observable_classification"]
-                ):
-                    raise NotRunnableAnalyzer(
-                        f"{a_name} won't be run because "
-                        "it does not support observable type "
-                        f"{serialized_data['observable_classification']}."
+                        "it does not support the requested observable."
                     )
             except NotRunnableAnalyzer as e:
                 if not self.log_runnable:

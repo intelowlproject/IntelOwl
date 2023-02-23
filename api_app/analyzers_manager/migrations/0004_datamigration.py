@@ -13,7 +13,7 @@ analyzers = {
             "application/java-archive",
             "application/vnd.android.package-archive",
             "application/x-dex",
-            "android_only"
+            "android"
         ],
         "config": {
             "soft_time_limit": 400,
@@ -895,7 +895,7 @@ analyzers = {
             "application/zip",
             "application/encrypted",
             "text/plain",
-            "test/csv"
+            "text/csv"
         ],
         "config": {
             "soft_time_limit": 30,
@@ -936,7 +936,7 @@ analyzers = {
             "application/zip",
             "application/encrypted",
             "text/plain",
-            "test/csv"
+            "text/csv"
         ],
         "config": {
             "soft_time_limit": 30,
@@ -1004,7 +1004,7 @@ analyzers = {
             "application/zip",
             "application/encrypted",
             "text/plain",
-            "test/csv"
+            "text/csv"
         ],
         "config": {
             "soft_time_limit": 180,
@@ -2720,7 +2720,7 @@ analyzers = {
             "application/java-archive",
             "application/vnd.android.package-archive",
             "application/x-dex",
-            "android_only"
+            "android"
         ],
         "config": {
             "soft_time_limit": 120,

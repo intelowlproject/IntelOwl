@@ -3,10 +3,9 @@
 
 import re
 from logging import getLogger
-from typing import Type
+from typing import List, Type
 
 from django.conf import settings
-from django.contrib.postgres import fields as pg_fields
 from django.core.exceptions import ValidationError
 from django.db import models
 
@@ -35,6 +34,92 @@ class AnalyzerReport(AbstractReport):
         return self.name
 
 
+class MimeTypes(models.TextChoices):
+
+    JAVASCRIPT1 = ("application/javascript",)
+    JAVASCRIPT2 = ("application/x-javascript",)
+    JAVASCRIPT3 = ("text/javascript",)
+
+    VB_SCRIPT = ("application/x-vbscript",)
+    IQY = ("text/x-ms-iqy",)
+    APK = ("application/vnd.android.package-archive",)
+    DEX = ("application/x-dex",)
+    ONE_NOTE = ("application/onenote",)
+    ANDROID = ("android",)
+    ZIP1 = ("application/zip",)
+    ZIP2 = ("multipart/x-zip",)
+    JAVA = ("application/java-archive",)
+    RTF1 = ("text/rtf",)
+    RTF2 = ("application/rtf",)
+    DOS = ("application/x-dosexec",)
+    SHARED_LIB = ("application/x-sharedlib",)
+    EXE = ("application/x-executable",)
+    ELF = ("application/x-elf",)
+    OCTET = ("application/octet-stream",)
+    PCAP = ("application/vnd.tcpdump.pcap",)
+    PDF = ("application/pdf",)
+    HTML = ("text/html",)
+    PUB = ("application/x-mspublisher",)
+    EXCEL_MACRO1 = ("application/vnd.ms-excel.addin.macroEnabled",)
+    EXCEL_MACRO2 = ("application/vnd.ms-excel.sheet.macroEnabled.12",)
+    EXCEL1 = ("application/vnd.ms-excel",)
+    EXCEL2 = ("application/excel",)
+    DOC = ("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",)
+    XML1 = ("application/xml",)
+    XML2 = ("text/xml",)
+    ENCRYPTED = ("application/encrypted",)
+    PLAIN = ("text/plain",)
+    CSV = ("text/csv",)
+    PPTX = (
+        "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    )
+    WORD1 = ("application/msword",)
+    WORD2 = ("application/vnd.openxmlformats-officedocument.wordprocessingml.document",)
+    POWERPOINT = ("application/vnd.ms-powerpoint",)
+    OFFICE = ("application/vnd.ms-office",)
+    BINARY = ("application/x-binary",)
+    MAC1 = ("application/x-macbinary",)
+    MAC2 = ("application/mac-binary",)
+    COMPRESS1 = ("application/x-zip-compressed",)
+    COMPRESS2 = ("application/x-compressed",)
+
+    @classmethod
+    def ZIP(cls) -> List["MimeTypes"]:
+        return [cls.ZIP1, cls.ZIP2]
+
+    @classmethod
+    def calculate(cls, file_pointer, file_name) -> str:
+        from magic import from_buffer as magic_from_buffer
+
+        REGEX_OFFICE_FILES = r"\.[xl|doc]\w{0,3}$"
+
+        mimetype = None
+        if file_name:
+            if file_name.endswith(".js") or file_name.endswith(".jse"):
+                mimetype = cls.JAVASCRIPT1
+            elif file_name.endswith(".vbs") or file_name.endswith(".vbe"):
+                mimetype = cls.VB_SCRIPT
+            elif file_name.endswith(".iqy"):
+                mimetype = cls.IQY
+            elif file_name.endswith(".apk"):
+                mimetype = cls.APK
+            elif file_name.endswith(".dex"):
+                mimetype = cls.DEX
+            elif file_name.endswith(".one"):
+                mimetype = cls.ONE_NOTE
+
+        if not mimetype:
+            buffer = file_pointer.read()
+            mimetype = magic_from_buffer(buffer, mime=True)
+            logger.debug(f"mimetype is {mimetype}")
+            mimetype = cls(mimetype)
+
+        if mimetype in cls.ZIP and re.search(REGEX_OFFICE_FILES, file_name):
+            return cls.ANDROID
+
+        return mimetype
+
+
 class AnalyzerConfig(AbstractConfig):
     # generic
     type = models.CharField(choices=TypeChoices.choices, null=False, max_length=50)
@@ -49,18 +134,20 @@ class AnalyzerConfig(AbstractConfig):
     )
 
     # file
-    supported_filetypes = pg_fields.ArrayField(
-        models.CharField(null=False, max_length=90), default=list, blank=True
+    supported_filetypes = ChoiceArrayField(
+        models.CharField(null=False, max_length=90, choices=MimeTypes.choices),
+        default=list,
+        blank=True,
     )
     run_hash = models.BooleanField(default=False)
     run_hash_type = models.CharField(
         blank=True, choices=HashChoices.choices, max_length=10
     )
-    not_supported_filetypes = pg_fields.ArrayField(
-        models.CharField(null=False, max_length=90), default=list, blank=True
+    not_supported_filetypes = ChoiceArrayField(
+        models.CharField(null=False, max_length=90, choices=MimeTypes.choices),
+        default=list,
+        blank=True,
     )
-
-    REGEX_OFFICE_FILES = r"\.[xl|doc]\w{0,3}$"
 
     def clean(self):
         super().clean()
@@ -69,37 +156,6 @@ class AnalyzerConfig(AbstractConfig):
     def clean_run_hash_type(self):
         if self.run_hash and not self.run_hash_type:
             raise ValidationError("run_hash_type must be populated if run_hash is True")
-
-    def is_observable_type_supported(self, observable_classification: str) -> bool:
-        return observable_classification in self.observable_supported
-
-    def is_filetype_supported(self, file_mimetype: str, file_name: str) -> bool:
-        # PCAPs are not classic files. They should not leverage the default behavior.
-        # We should execute them only if the analyzer specifically support them.
-        special_pcap_mimetype = "application/vnd.tcpdump.pcap"
-        if (
-            file_mimetype == special_pcap_mimetype
-            and special_pcap_mimetype not in self.supported_filetypes
-        ):
-            return False
-        # Android only types to filter unwanted zip files
-        if (
-            "android_only" in self.supported_filetypes
-            and file_mimetype == "application/zip"
-            and re.search(self.REGEX_OFFICE_FILES, file_name)
-        ):
-            logger.info(
-                f"filtered office file name {file_name}"
-                " because the analyzer is android only"
-            )
-            return False
-        # base case: empty lists means supports all
-        if not self.supported_filetypes and not self.not_supported_filetypes:
-            return True
-        return (
-            file_mimetype in self.supported_filetypes
-            and file_mimetype not in self.not_supported_filetypes
-        )
 
     @classmethod
     def _get_type(cls) -> str:

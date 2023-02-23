@@ -5,28 +5,29 @@ import logging
 from typing import Type
 
 from api_app.core.classes import Plugin
-from api_app.visualizers_manager.dataclasses import VisualizerConfig
 from api_app.visualizers_manager.exceptions import (
     VisualizerConfigurationException,
     VisualizerRunException,
 )
-from api_app.visualizers_manager.models import VisualizerReport
+from api_app.visualizers_manager.models import VisualizerConfig, VisualizerReport
 
 logger = logging.getLogger(__name__)
 
 
 class Visualizer(Plugin, metaclass=abc.ABCMeta):
-    @classmethod
-    def get_config_class(cls) -> Type[VisualizerConfig]:
-        return VisualizerConfig
-
     @property
     def visualizer_name(self) -> str:
         return self._config.name
 
+    @classmethod
     @property
-    def report_model(self):
+    def report_model(cls):
         return VisualizerReport
+
+    @classmethod
+    @property
+    def config_model(cls) -> Type[VisualizerConfig]:
+        return VisualizerConfig
 
     def get_exceptions_to_catch(self) -> list:
         return [
@@ -45,6 +46,3 @@ class Visualizer(Plugin, metaclass=abc.ABCMeta):
 
     def after_run(self):
         logger.info(f"FINISHED visualizer: {self.__repr__()}")
-
-    def __repr__(self):
-        return f"({self.visualizer_name}, job: #{self.job_id})"

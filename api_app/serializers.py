@@ -18,12 +18,12 @@ from certego_saas.apps.organization.membership import Membership
 from certego_saas.apps.organization.organization import Organization
 from certego_saas.apps.organization.permissions import IsObjectOwnerOrSameOrgPermission
 
-from .analyzers_manager.constants import ObservableTypes
-from .analyzers_manager.dataclasses import AnalyzerConfig
+from .analyzers_manager.constants import ObservableTypes, TypeChoices
 from .analyzers_manager.exceptions import NotRunnableAnalyzer
+from .analyzers_manager.models import AnalyzerConfig
 from .analyzers_manager.serializers import AnalyzerReportSerializer
-from .connectors_manager.dataclasses import ConnectorConfig
 from .connectors_manager.exceptions import NotRunnableConnector
+from .connectors_manager.models import ConnectorConfig
 from .connectors_manager.serializers import ConnectorReportSerializer
 from .helpers import (
     calculate_md5,
@@ -32,9 +32,9 @@ from .helpers import (
     gen_random_colorhex,
 )
 from .models import TLP, Job, PluginConfig, Tag
-from .playbooks_manager.dataclasses import PlaybookConfig
 from .playbooks_manager.exceptions import NotRunnablePlaybook
-from .visualizers_manager.dataclasses import VisualizerConfig
+from .playbooks_manager.models import PlaybookConfig
+from .visualizers_manager.models import VisualizerConfig
 from .visualizers_manager.serializers import VisualizerReportSerializer
 
 logger = logging.getLogger(__name__)
@@ -128,19 +128,26 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
 
     def filter_visualizers(self, serialized_data: Dict) -> List[str]:
         visualizers_to_execute = []
-        visualizer_dataclasses = VisualizerConfig.all()
 
-        for visualizer in visualizer_dataclasses.values():
+        for visualizer in VisualizerConfig.objects.all():
             visualizer: VisualizerConfig
-            # subset
             if (
-                visualizer.is_ready_to_use
-                # subset
-                and set(visualizer.analyzers)
-                <= set(serialized_data["analyzers_to_execute"])
-                and set(visualizer.connectors)
-                <= set(serialized_data["connectors_to_execute"])
+                visualizer.is_runnable(self.context["request"].user)
+                # subsets
+                and set(visualizer.analyzers.all().values_list("pk", flat=True))
+                <= set(
+                    AnalyzerConfig.objects.filter(
+                        name__in=serialized_data["analyzers_to_execute"]
+                    ).values_list("pk", flat=True)
+                )
+                and set(visualizer.connectors.all().values_list("pk", flat=True))
+                <= set(
+                    ConnectorConfig.objects.filter(
+                        name__in=serialized_data["analyzers_to_execute"]
+                    ).values_list("pk", flat=True)
+                )
             ):
+                logger.info(f"Going to use {visualizer.name}")
                 visualizers_to_execute.append(visualizer.name)
         return visualizers_to_execute
 
@@ -150,8 +157,9 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
 
         analyzers_requested = serialized_data.get("analyzers_requested", [])
         if not analyzers_requested:
-            analyzer_dataclasses = AnalyzerConfig.all()
-            analyzers_requested = list(analyzer_dataclasses.keys())
+            analyzers_requested = AnalyzerConfig.objects.all().values_list(
+                "name", flat=True
+            )
             serialized_data["analyzers_requested"] = analyzers_requested
             self.run_all_analyzers = True
         else:
@@ -160,23 +168,17 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
 
         for a_name in analyzers_requested:
             try:
-                config = AnalyzerConfig.get(a_name)
-
-                if not config:
+                try:
+                    config = AnalyzerConfig.objects.get(name=a_name)
+                except AnalyzerConfig.DoesNotExist:
                     if not self.run_all_analyzers:
                         raise NotRunnableAnalyzer(
                             f"{a_name} won't run: not available in configuration"
                         )
                     # don't add warning if self.run_all_analyzers
                     continue
-
-                if (
-                    not config.is_ready_to_use
-                    or "plugin_states" in self.context
-                    and self.context["plugin_states"]
-                    .filter(plugin_name=a_name, disabled=True)
-                    .exists()
-                ):
+                config: AnalyzerConfig
+                if not config.is_runnable(self.context["request"].user):
                     raise NotRunnableAnalyzer(
                         f"{a_name} won't run: is disabled or unconfigured"
                     )
@@ -213,8 +215,9 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
 
         connectors_requested = serialized_data.get("connectors_requested", [])
         if not connectors_requested:
-            connector_dataclasses = ConnectorConfig.all()
-            connectors_requested = list(connector_dataclasses.keys())
+            connectors_requested = ConnectorConfig.objects.all().values_list(
+                "name", flat=True
+            )
             serialized_data["connectors_requested"] = connectors_requested
             self.run_all_connectors = True
         else:
@@ -224,29 +227,29 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
 
         for c_name in connectors_requested:
             try:
-                cc = ConnectorConfig.get(c_name)
-
-                if not cc:
+                try:
+                    config = ConnectorConfig.objects.get(name=c_name)
+                except ConnectorConfig.DoesNotExist:
                     if not self.run_all_connectors:
                         raise NotRunnableConnector(
                             f"{c_name} won't run: not available in configuration"
                         )
                     # don't add warning if self.run_all_connectors
                     continue
-
-                if not cc.is_ready_to_use:  # check configured/disabled
+                config: ConnectorConfig
+                if not config.is_runnable(self.context["request"].user):
                     raise NotRunnableConnector(
                         f"{c_name} won't run: is disabled or unconfigured"
                     )
 
                 if TLP.get_priority(tlp) > TLP.get_priority(
-                    cc.maximum_tlp
+                    config.maximum_tlp
                 ):  # check if job's tlp allows running
                     # e.g. if connector_tlp is GREEN(1),
                     # run for job_tlp WHITE(0) & GREEN(1) only
                     raise NotRunnableConnector(
                         f"{c_name} won't run: "
-                        f"job.tlp ('{tlp}') > maximum_tlp ('{cc.maximum_tlp}')"
+                        f"job.tlp ('{tlp}') > maximum_tlp ('{config.maximum_tlp}')"
                     )
             except NotRunnableConnector as e:
                 logger.warning(e)
@@ -430,8 +433,13 @@ class FileAnalysisSerializer(_AbstractJobCreateSerializer):
         partially_filtered_analyzers = super().filter_analyzers(serialized_data)
         for a_name in partially_filtered_analyzers:
             try:
-                config = AnalyzerConfig.get(a_name)
-                if not config.is_type_file:
+                # at this point we are sure that the analyzer object is present,
+                # but not its type
+                try:
+                    config: AnalyzerConfig = AnalyzerConfig.objects.get(
+                        a_name, type=TypeChoices.FILE
+                    )
+                except AnalyzerConfig.DoesNotExist:
                     raise NotRunnableAnalyzer(
                         f"{a_name} won't be run because does not support files."
                     )
@@ -566,8 +574,13 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
 
         for a_name in partially_filtered_analyzers:
             try:
-                config: AnalyzerConfig = AnalyzerConfig.get(a_name)
-                if not config.is_type_observable:
+                # at this point we are sure that the analyzer object is present,
+                # but not its type
+                try:
+                    config: AnalyzerConfig = AnalyzerConfig.objects.get(
+                        a_name, type=TypeChoices.FILE
+                    )
+                except AnalyzerConfig.DoesNotExist:
                     raise NotRunnableAnalyzer(
                         f"{a_name} won't be run because "
                         "it does not support observable."
@@ -605,6 +618,7 @@ class PlaybookBaseSerializer:
         valid_playbook_list = []
         analyzers_requested = []
         connectors_requested = []
+        runtime_configurations = []
         # get values from serializer
         selected_playbooks = attrs.get("playbooks_requested", [])
 
@@ -612,14 +626,19 @@ class PlaybookBaseSerializer:
 
         for p_name in selected_playbooks:
             try:
-                pp = PlaybookConfig.get(p_name)
+                pp = PlaybookConfig.objects.get(name=p_name)
                 if not pp:
                     raise NotRunnablePlaybook(f"{p_name} does not exists")
                 elif not pp.is_ready_to_use:
                     raise NotRunnablePlaybook(f"{p_name} won't run: not configured")
                 else:
-                    analyzers_requested.extend(pp.analyzers)
-                    connectors_requested.extend(pp.connectors)
+                    analyzers_requested.extend(
+                        pp.analyzers.all().values_list("name", flat=True)
+                    )
+                    connectors_requested.extend(
+                        pp.connectors.all().values_list("name", flat=True)
+                    )
+                    runtime_configurations.append(pp.runtime_configuration)
                     valid_playbook_list.append(p_name)
             except NotRunnablePlaybook as e:
                 logger.warning(e)
@@ -633,6 +652,7 @@ class PlaybookBaseSerializer:
         attrs["playbooks_to_execute"] = valid_playbook_list
         attrs["analyzers_requested"] = list(set(analyzers_requested))
         attrs["connectors_requested"] = list(set(connectors_requested))
+        attrs["runtime_configuration"] = runtime_configurations
 
         return attrs
 
@@ -722,6 +742,10 @@ def multi_result_enveloper(serializer_class, many):
 
 
 class PluginConfigSerializer(rfs.ModelSerializer):
+    class Meta:
+        model = PluginConfig
+        fields = rfs.ALL_FIELDS
+
     class CustomJSONField(rfs.JSONField):
         def run_validation(self, data=empty):
             value = super().run_validation(data)
@@ -745,23 +769,18 @@ class PluginConfigSerializer(rfs.ModelSerializer):
 
     def validate_type(self, _type: str):
         if _type == PluginConfig.PluginType.ANALYZER:
-            config = AnalyzerConfig
+            self.config = AnalyzerConfig
             self.category = "Analyzer"
         elif _type == PluginConfig.PluginType.CONNECTOR:
-            config = ConnectorConfig
+            self.config = ConnectorConfig
             self.category = "Connector"
         elif _type == PluginConfig.PluginType.VISUALIZER:
-            config = VisualizerConfig
+            self.config = VisualizerConfig
             self.category = "Visualizer"
         else:
             logger.error(f"Unknown custom config type: {_type}")
             raise ValidationError("Invalid type.")
-        self.all_configurations = config.all()
         return _type
-
-    class Meta:
-        model = PluginConfig
-        fields = rfs.ALL_FIELDS
 
     def to_representation(self, instance):
         if (
@@ -790,16 +809,16 @@ class PluginConfigSerializer(rfs.ModelSerializer):
 
     def validate(self, attrs):
         super().validate(attrs)
-
-        if attrs["plugin_name"] not in self.all_configurations:
+        try:
+            config_obj = self.config.objects.get(name=attrs["plugin_name"])
+        except self.config.DoesNotExist:
             raise ValidationError(
                 f"{self.category} {attrs['plugin_name']} does not exist."
             )
 
         if (
             attrs["config_type"] == PluginConfig.ConfigType.PARAMETER
-            and attrs["attribute"]
-            not in self.all_configurations[attrs["plugin_name"]].params
+            and attrs["attribute"] not in config_obj.params
         ):
             raise ValidationError(
                 f"{self.category} {attrs['plugin_name']} does not "
@@ -807,8 +826,7 @@ class PluginConfigSerializer(rfs.ModelSerializer):
             )
         elif (
             attrs["config_type"] == PluginConfig.ConfigType.SECRET
-            and attrs["attribute"]
-            not in self.all_configurations[attrs["plugin_name"]].secrets
+            and attrs["attribute"] not in config_obj.secrets
         ):
 
             raise ValidationError(
@@ -818,13 +836,9 @@ class PluginConfigSerializer(rfs.ModelSerializer):
         # Check if the type of value is valid for the attribute.
 
         expected_type = (
-            self.all_configurations[attrs["plugin_name"]]
-            .params[attrs["attribute"]]
-            .type
+            config_obj.params[attrs["attribute"]].type
             if attrs["config_type"] == PluginConfig.ConfigType.PARAMETER
-            else self.all_configurations[attrs["plugin_name"]]
-            .secrets[attrs["attribute"]]
-            .type
+            else config_obj.secrets[attrs["attribute"]].type
         )
         if expected_type == "str":
             expected_type = str

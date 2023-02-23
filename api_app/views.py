@@ -78,16 +78,8 @@ def _multi_analysis_request(
         f"Data:{data}."
     )
 
-    plugin_states = OrganizationPluginState.objects.none()
-    if user.has_membership():
-        plugin_states = OrganizationPluginState.objects.filter(
-            organization=user.membership.organization,
-        )
-
     # serialize request data and validate
-    serializer = serializer_class(
-        data=data, many=True, context={"plugin_states": plugin_states}
-    )
+    serializer = serializer_class(data=data, many=True)
     serializer.is_valid(raise_exception=True)
 
     serialized_data = serializer.validated_data

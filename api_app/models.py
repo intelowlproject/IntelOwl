@@ -14,9 +14,7 @@ from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.functional import cached_property
 
-from api_app.core.dataclasses import AbstractConfig
-from api_app.core.models import AbstractReport
-from api_app.core.serializers import AbstractConfigSerializer
+from api_app.core.models import AbstractConfig, AbstractReport
 from api_app.helpers import calculate_sha1, calculate_sha256, get_now
 from certego_saas.apps.organization.organization import Organization
 from certego_saas.models import User
@@ -298,49 +296,53 @@ class Job(models.Model):
     def _pipeline_configuration(
         self, runtime_configuration: typing.Dict[str, typing.Any]
     ) -> typing.Tuple[typing.List, typing.List, typing.List, typing.List, typing.List]:
-        from api_app.playbooks_manager.dataclasses import PlaybookConfig
+        from api_app.playbooks_manager.models import PlaybookConfig
 
-        # case playbooks
-        if not runtime_configuration and self.playbooks_to_execute:
+        if isinstance(runtime_configuration, dict):
+            configs = [runtime_configuration]
+            analyzers = [self.analyzers_to_execute]
+            connectors = [self.connectors_to_execute]
+            playbooks = [""]
+        else:
+            # case playbooks
             configs = []
             analyzers = []
             connectors = []
             playbooks = self.playbooks_to_execute
             # this must be done because each analyzer on the playbook
             # could be executed with a different configuration
-            for playbook in PlaybookConfig.filter(
-                names=self.playbooks_to_execute
-            ).values():
+            for playbook in PlaybookConfig.objects.filter(
+                name__in=self.playbooks_to_execute
+            ):
+
                 playbook: PlaybookConfig
-                if not playbook.is_ready_to_use and not settings.STAGE_CI:
-                    continue
-                configs.append(playbook.analyzers | playbook.connectors)
+                configs.append(playbook.runtime_configuration)
                 analyzers.append(
                     [
                         analyzer
-                        for analyzer in playbook.analyzers.keys()
+                        for analyzer in playbook.analyzers.all().values_list(
+                            "name", flat=True
+                        )
                         if analyzer in self.analyzers_to_execute
                     ]
                 )
                 connectors.append(
                     [
                         connector
-                        for connector in playbook.connectors.keys()
+                        for connector in playbook.connectors.all().values_list(
+                            "name", flat=True
+                        )
                         if connector in self.connectors_to_execute
                     ]
                 )
-        else:
-            configs = [runtime_configuration]
-            analyzers = [self.analyzers_to_execute]
-            connectors = [self.connectors_to_execute]
-            playbooks = [""]
+
         visualizers = [self.visualizers_to_execute]
         return configs, analyzers, connectors, visualizers, playbooks
 
     def pipeline(self, runtime_configuration: typing.Dict[str, typing.Any]):
-        from api_app.analyzers_manager.dataclasses import AnalyzerConfig
-        from api_app.connectors_manager.dataclasses import ConnectorConfig
-        from api_app.visualizers_manager.dataclasses import VisualizerConfig
+        from api_app.analyzers_manager.models import AnalyzerConfig
+        from api_app.connectors_manager.models import ConnectorConfig
+        from api_app.visualizers_manager.models import VisualizerConfig
         from intel_owl import tasks
         from intel_owl.celery import DEFAULT_QUEUE
 
@@ -353,10 +355,11 @@ class Job(models.Model):
             config = self._merge_runtime_configuration(config, analyzers, connectors)
             logger.info(
                 f"Config is {config},"
-                f" analyzers are {analyzers} and"
-                f" connectors are {connectors}"
-                f" visualizers are {visualizers}"
+                f" analyzers are {analyzers} "
+                f" connectors are {connectors} "
+                f" visualizers are {visualizers} "
             )
+
             for final_signatures, config_class, plugins in zip(
                 (
                     final_analyzer_signatures,
@@ -366,23 +369,29 @@ class Job(models.Model):
                 (AnalyzerConfig, ConnectorConfig, VisualizerConfig),
                 (analyzers, connectors, visualizers),
             ):
-                config_class: AbstractConfig
 
-                new_signatures, _ = config_class.stack(
-                    job_id=self.pk,
-                    plugins_to_execute=plugins,
-                    runtime_configuration=config,
-                    parent_playbook=playbook,
-                )
-                for signature in new_signatures:
-                    if signature not in final_signatures:
-                        final_signatures.append(signature)
+                config_class: typing.Type[AbstractConfig]
+                for plugin in plugins:
+                    try:
+                        new_config = config_class.objects.get(name=plugin)
+                    except config_class.DoesNotExist:
+                        self.append_error(f"Config {plugin} does not exists")
                     else:
-                        logger.warning(f"Signature {signature} is duplicate")
+                        new_config: AbstractConfig
+                        signature = new_config.get_signature(
+                            self.pk,
+                            runtime_configuration.get(new_config.name, {}),
+                            playbook,
+                        )
+                        if not signature:
+                            self.append_error(f"Plugin {new_config.name} is not ready")
+                        if signature not in final_signatures:
+                            final_signatures.append(signature)
 
         logger.info(f"Analyzer signatures are {final_analyzer_signatures}")
         logger.info(f"Connector signatures are {final_connector_signatures}")
         logger.info(f"Visualizer signatures are {final_connector_signatures}")
+        self.update_status(Job.Status.RUNNING)
         runner = (
             group(final_analyzer_signatures)
             | tasks.continue_job_pipeline.signature(
@@ -472,46 +481,6 @@ class PluginConfig(models.Model):
         ]
 
     @classmethod
-    def get_specific_serializer_class(
-        cls, plugin_type: str
-    ) -> typing.Type[AbstractConfigSerializer]:
-        if plugin_type == cls.PluginType.ANALYZER:
-            from api_app.analyzers_manager.serializers import AnalyzerConfigSerializer
-
-            serializer_class = AnalyzerConfigSerializer
-        elif plugin_type == cls.PluginType.CONNECTOR:
-            from api_app.connectors_manager.serializers import ConnectorConfigSerializer
-
-            serializer_class = ConnectorConfigSerializer
-        elif plugin_type == cls.PluginType.VISUALIZER:
-            from api_app.visualizers_manager.serializers import (
-                VisualizerConfigSerializer,
-            )
-
-            serializer_class = VisualizerConfigSerializer
-        else:
-            raise TypeError(f"Unrecognized plugin type {plugin_type}")
-        return serializer_class
-
-    @classmethod
-    def get_specific_config_class(cls, plugin_type: str) -> typing.Type[AbstractConfig]:
-        if plugin_type == cls.PluginType.ANALYZER:
-            from api_app.analyzers_manager.dataclasses import AnalyzerConfig
-
-            config_class = AnalyzerConfig
-        elif plugin_type == cls.PluginType.CONNECTOR:
-            from api_app.connectors_manager.dataclasses import ConnectorConfig
-
-            config_class = ConnectorConfig
-        elif plugin_type == cls.PluginType.VISUALIZER:
-            from api_app.visualizers_manager.dataclasses import VisualizerConfig
-
-            config_class = VisualizerConfig
-        else:
-            raise TypeError(f"Unrecognized plugin type {plugin_type}")
-        return config_class
-
-    @classmethod
     def visible_for_user(cls, user: User = None) -> QuerySet:
         from certego_saas.apps.organization.membership import Membership
 
@@ -566,17 +535,6 @@ class PluginConfig(models.Model):
 
         return result
 
-    @classmethod
-    def apply(cls, initial_config, user, plugin_type):
-        custom_configs = PluginConfig.get_as_dict(user, plugin_type)
-        for plugin in initial_config.values():
-            if plugin["name"] in custom_configs:
-                for param in plugin["params"]:
-                    if param in custom_configs[plugin["name"]]:
-                        plugin["params"][param]["value"] = custom_configs[
-                            plugin["name"]
-                        ][param]
-
 
 class OrganizationPluginState(models.Model):
     type = models.CharField(choices=PluginConfig.PluginType.choices, max_length=2)
@@ -602,16 +560,3 @@ class OrganizationPluginState(models.Model):
                 fields=["organization", "type"],
             ),
         ]
-
-    @classmethod
-    def apply(cls, initial_config, user, plugin_type):
-        if not user.has_membership():
-            return
-        custom_configs = OrganizationPluginState.objects.filter(
-            organization=user.membership.organization, type=plugin_type
-        )
-        for plugin in initial_config.values():
-            if custom_configs.filter(plugin_name=plugin["name"]).exists():
-                plugin["disabled"] = custom_configs.get(
-                    plugin_name=plugin["name"]
-                ).disabled

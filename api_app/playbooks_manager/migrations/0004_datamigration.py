@@ -1,4 +1,6 @@
-{
+from django.db import migrations
+
+playbooks = {
     "FREE_TO_USE_ANALYZERS": {
         "analyzers": {
             "APKiD_Scan_APK_DEX_JAR": {},
@@ -7,7 +9,7 @@
             "Capa_Info": {},
             "Capa_Info_Shellcode": {
                 "arch": "64",
-                "shellcode": true
+                "shellcode": True
             },
             "CheckDMARC": {},
             "ClamAV": {},
@@ -24,9 +26,9 @@
             "Cymru_Hash_Registry_Get_File": {},
             "Cymru_Hash_Registry_Get_Observable": {},
             "DNStwist": {
-                "mxcheck": true,
-                "ssdeep": true,
-                "tld": true,
+                "mxcheck": True,
+                "ssdeep": True,
+                "tld": True,
                 "tld_dict": "abused_tlds.dict"
             },
             "Darksearch_Query": {
@@ -53,9 +55,9 @@
                     "static_strings": 1000
                 },
                 "rank_strings": {
-                    "decoded_strings": false,
-                    "stack_strings": false,
-                    "static_strings": false
+                    "decoded_strings": False,
+                    "stack_strings": False,
+                    "static_strings": False
                 }
             },
             "Fortiguard": {},
@@ -77,12 +79,12 @@
             "MalwareBazaar_Google_Observable": {},
             "Manalyze": {},
             "Mnemonic_PassiveDNS": {
-                "cof_format": true,
+                "cof_format": True,
                 "limit": 1000
             },
             "Onionscan": {
                 "torProxyAddress": "",
-                "verbose": true
+                "verbose": True
             },
             "PDF_Info": {},
             "PE_Info": {},
@@ -92,25 +94,25 @@
                 "arch": "x86",
                 "os": "linux",
                 "profile": "",
-                "shellcode": false
+                "shellcode": False
             },
             "Qiling_Linux_Shellcode": {
                 "arch": "x86",
                 "os": "linux",
                 "profile": "",
-                "shellcode": true
+                "shellcode": True
             },
             "Qiling_Windows": {
                 "arch": "x86",
                 "os": "windows",
                 "profile": "",
-                "shellcode": false
+                "shellcode": False
             },
             "Qiling_Windows_Shellcode": {
                 "arch": "x86",
                 "os": "windows",
                 "profile": "",
-                "shellcode": true
+                "shellcode": True
             },
             "Quad9_Malicious_Detector": {},
             "Quark_Engine_APK": {},
@@ -122,31 +124,31 @@
             "SpeakEasy_Shellcode": {
                 "arch": "x64",
                 "raw_offset": 0,
-                "shellcode": true
+                "shellcode": True
             },
             "Stratosphere_Blacklist": {},
             "Strings_Info": {},
             "Suricata": {
-                "extended_logs": false,
-                "reload_rules": false
+                "extended_logs": False,
+                "reload_rules": False
             },
             "TalosReputation": {},
             "ThreatFox": {},
             "Threatminer_PDNS": {},
             "Thug_HTML_Info": {
                 "dom_events": "click,mouseover",
-                "enable_awis": true,
-                "enable_image_processing_analysis": true,
+                "enable_awis": True,
+                "enable_image_processing_analysis": True,
                 "proxy": "",
-                "use_proxy": false,
+                "use_proxy": False,
                 "user_agent": "winxpie60"
             },
             "Thug_URL_Info": {
                 "dom_events": "click,mouseover",
-                "enable_awis": true,
-                "enable_image_processing_analysis": true,
+                "enable_awis": True,
+                "enable_image_processing_analysis": True,
                 "proxy": "",
-                "use_proxy": false,
+                "use_proxy": False,
                 "user_agent": "winxpie60"
             },
             "TorProject": {},
@@ -194,7 +196,7 @@
         },
         "connectors": {},
         "description": "A playbook containing all free to use analyzers.",
-        "disabled": false,
+        "disabled": False,
         "supports": [
             "ip",
             "url",
@@ -205,3 +207,43 @@
         ]
     }
 }
+
+
+def create_configurations(apps, schema_editor):
+    PlaybookConfig = apps.get_model("playbooks_manager", "PlaybookConfig")
+    AnalyzerConfig = apps.get_model("analyzers_manager", "AnalyzerConfig")
+    ConnectorConfig = apps.get_model("connectors_manager", "ConnectorConfig")
+
+    for playbook_name, playbook in playbooks.items():
+        analyzers = playbook.pop("analyzers")
+        connectors = playbook.pop("connectors")
+        playbook["type"] = playbook.pop("supports")
+        analyzers_to_add = AnalyzerConfig.objects.filter(name__in=analyzers.keys())
+        connectors_to_add = ConnectorConfig.objects.filter(name__in=connectors.keys())
+        playbook["runtime_configuration"] = analyzers | connectors
+        pc = PlaybookConfig(
+            name=playbook_name,
+            **playbook
+        )
+        pc.full_clean()
+        pc.save()
+        pc.analyzers.set(analyzers_to_add)
+        pc.connectors.set(connectors_to_add)
+
+def delete_configurations(apps, schema_editor):
+    PlaybookConfig = apps.get_model("playbooks_manager", "PlaybookConfig")
+    PlaybookConfig.objects.all().delete()
+
+class Migration(migrations.Migration):
+
+    dependencies = [
+        ('playbooks_manager', '0003_playbook'),
+        ('analyzers_manager', '0004_datamigration'),
+        ('connectors_manager', '0004_datamigration'),
+    ]
+
+    operations = [
+        migrations.RunPython(
+            create_configurations, delete_configurations
+        ),
+    ]

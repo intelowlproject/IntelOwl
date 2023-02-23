@@ -9,29 +9,20 @@ import typing
 from celery import shared_task, signals
 from celery.worker.control import control_command
 from django.conf import settings
+from django.utils.module_loading import import_string
 
 from api_app import crons
-from api_app.analyzers_manager.file_analyzers import quark_engine, yara_scan
-from api_app.analyzers_manager.observable_analyzers import maxmind, talos, tor
-from certego_saas.models import User
 from intel_owl.celery import app
 
 logger = logging.getLogger(__name__)
 
 
 @control_command(
-    args=[("plugin_name", str), ("plugin_type", str)],
+    args=[("plugin_path", str)],
 )
-def update_plugin(state, plugin_name: str, plugin_type: str):
-
-    from api_app.core.classes import Plugin
-    from api_app.models import PluginConfig
-
-    config_class = PluginConfig.get_specific_config_class(plugin_type)
-    plugin_config = config_class.get(plugin_name)
-
-    class_: typing.Type[Plugin] = plugin_config.get_class()
-    class_._update()
+def update_plugin(state, plugin_path):
+    plugin = import_string(plugin_path)
+    plugin._update()
 
 
 @shared_task(soft_time_limit=10000)
@@ -46,27 +37,37 @@ def check_stuck_analysis():
 
 @shared_task(soft_time_limit=60)
 def talos_updater():
-    talos.Talos.update()
+    from api_app.analyzers_manager.models import AnalyzerConfig
+
+    AnalyzerConfig.update("talos.Talos")
 
 
 @shared_task(soft_time_limit=60)
 def tor_updater():
-    tor.Tor.update()
+    from api_app.analyzers_manager.models import AnalyzerConfig
+
+    AnalyzerConfig.update("tor.Tor")
 
 
 @shared_task(soft_time_limit=60)
 def quark_updater():
-    quark_engine.QuarkEngine.update()
+    from api_app.analyzers_manager.models import AnalyzerConfig
+
+    AnalyzerConfig.update("quark_engine.QuarkEngine")
 
 
 @shared_task(soft_time_limit=20)
 def maxmind_updater():
-    maxmind.Maxmind.update()
+    from api_app.analyzers_manager.models import AnalyzerConfig
+
+    AnalyzerConfig.update("maxmind.Maxmind")
 
 
 @shared_task(soft_time_limit=60)
 def yara_updater():
-    yara_scan.YaraScan.update()
+    from api_app.analyzers_manager.models import AnalyzerConfig
+
+    AnalyzerConfig.update("yara_scan.YaraScan")
 
 
 @app.task(name="continue_job_pipeline", soft_time_limit=20)
@@ -91,42 +92,22 @@ def job_pipeline(
 
 
 @app.task(name="run_plugin", soft_time_limit=500)
-def run_analyzer(
-    job_id: int, config_dict: dict, report_defaults: dict, plugin_type: str
+def run_plugin(
+    job_id: int, plugin_path: str, plugin_config_pk: str, report_defaults: dict
 ):
-    from api_app.models import PluginConfig
+    from api_app.core.classes import Plugin
 
-    config_class = PluginConfig.get_specific_config_class(plugin_type)
-    config = config_class.from_dict(config_dict)
-    config.run(job_id, report_defaults)
-
-
-@shared_task()
-def build_config_cache(plugin_type: str, user_pk: int = None):
-    from api_app.models import PluginConfig
-
-    # we "greedy cache" the config at start of application
-    # because it is an expensive operation
-    # we can't have the class as parameter because we run celery not in pickle mode
-    serializer_class = PluginConfig.get_specific_serializer_class(plugin_type)
-    user = User.objects.get(pk=user_pk) if user_pk else None
-
-    serializer_class.read_and_verify_config.invalidate(serializer_class, user)
-    serializer_class.read_and_verify_config(user)
+    plugin: Plugin = import_string(plugin_path)
+    config_class = plugin.config_model
+    instance = config_class.objects.get(pk=plugin_config_pk)
+    instance.run(job_id, report_defaults)
 
 
 # startup
 @signals.worker_ready.connect
 def worker_ready_connect(*args, **kwargs):
-    from api_app.analyzers_manager.file_analyzers.yara_scan import YaraScan
-    from api_app.models import PluginConfig
+    from api_app.analyzers_manager.models import AnalyzerConfig
 
-    logger.info("worker ready, generating cache")
-
-    build_config_cache(PluginConfig.PluginType.ANALYZER.value)
-    build_config_cache(PluginConfig.PluginType.CONNECTOR.value)
-    for user in User.objects.all():
-        build_config_cache(PluginConfig.PluginType.ANALYZER.value, user_pk=user.pk)
-        build_config_cache(PluginConfig.PluginType.CONNECTOR.value, user_pk=user.pk)
+    logger.info("workers ready")
     if settings.REPO_DOWNLOADER_ENABLED:
-        YaraScan.update()
+        AnalyzerConfig.update("yara_scan.YaraScan")

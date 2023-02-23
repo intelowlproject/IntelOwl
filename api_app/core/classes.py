@@ -3,8 +3,8 @@
 
 import logging
 import traceback
+import typing
 from abc import ABCMeta, abstractmethod
-from typing import Type
 
 from celery.exceptions import SoftTimeLimitExceeded
 from django.conf import settings
@@ -13,8 +13,7 @@ from django.utils.functional import cached_property
 
 from api_app.models import Job
 
-from .dataclasses import AbstractConfig
-from .models import AbstractReport
+from .models import AbstractConfig, AbstractReport
 
 logger = logging.getLogger(__name__)
 
@@ -25,15 +24,19 @@ class Plugin(metaclass=ABCMeta):
     For internal use only.
     """
 
-    _config: AbstractConfig
     job_id: int
     report_defaults: dict
     kwargs: dict
     report: AbstractReport
 
     @cached_property
-    def _job(self) -> Job:
+    def _job(self) -> "Job":
+        from api_app.models import Job
+
         return Job.objects.get(pk=self.job_id)
+
+    def __repr__(self):
+        return f"({self.__class__.__name__}, job: #{self.job_id})"
 
     @cached_property
     def _secrets(self) -> dict:
@@ -41,7 +44,7 @@ class Plugin(metaclass=ABCMeta):
 
     @property
     def _params(self) -> dict:
-        default_params = self._config.param_values
+        default_params = self._config.read_params(user=self._job.user)
         runtime_params = self.report_defaults["runtime_configuration"]
         # overwrite default with runtime
         return {**default_params, **runtime_params}
@@ -75,9 +78,19 @@ class Plugin(metaclass=ABCMeta):
         """
         raise NotImplementedError()
 
+    @classmethod
     @property
     @abstractmethod
-    def report_model(self):
+    def report_model(cls) -> typing.Type[AbstractReport]:
+        """
+        Returns Model to be used for *init_report_object*
+        """
+        raise NotImplementedError()
+
+    @classmethod
+    @property
+    @abstractmethod
+    def config_model(cls) -> typing.Type[AbstractConfig]:
         """
         Returns Model to be used for *init_report_object*
         """
@@ -187,36 +200,3 @@ class Plugin(metaclass=ABCMeta):
         self.kwargs = kwargs
         # some post init processing
         self.__post__init__()  # lgtm [py/init-calls-subclass]
-
-    @classmethod
-    @abstractmethod
-    def get_config_class(cls) -> Type[AbstractConfig]:
-        raise NotImplementedError()
-
-    @classmethod
-    def update(cls) -> bool:
-        from intel_owl.celery import broadcast
-
-        # Requires _update to be implemented. Not every analyzer have to implement it
-        gen = cls.get_config_class().get_from_python_module(cls)
-        try:
-            plugin_name, config = next(gen)
-        except StopIteration:
-            return False
-        else:
-            if hasattr(cls, "_update") and callable(cls._update):
-                broadcast(
-                    "update_plugin",
-                    queue=config.config.queue,
-                    arguments={
-                        "plugin_name": plugin_name,
-                        "plugin_type": cls.get_config_class()._get_type(),
-                    },
-                )
-                return True
-            return False
-
-    @classmethod
-    @property
-    def enabled(cls):
-        return not cls.get_config_class().is_disabled(cls.__name__)

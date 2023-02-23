@@ -142,9 +142,6 @@ class Maxmind(classes.ObservableAnalyzer):
 
     @classmethod
     def _update(cls):
-        if not cls.enabled:
-            logger.warning("No running updater for Maxmind, because it is disabled")
-            return
         api_key = cls._get_api_key()
         for db in db_names:
             cls._update_db(db, api_key)

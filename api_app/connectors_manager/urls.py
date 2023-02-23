@@ -4,7 +4,7 @@
 from django.urls import include, path
 from rest_framework import routers
 
-from .views import ConnectorActionViewSet, ConnectorHealthCheckAPI, ConnectorListAPI
+from .views import ConnectorActionViewSet, ConnectorConfigAPI
 
 # Routers provide an easy way of automatically determining the URL conf.
 router = routers.DefaultRouter(trailing_slash=False)
@@ -12,14 +12,8 @@ router.register(
     r"jobs/(?P<job_id>\d+)/connector/(?P<name>\w+)",
     ConnectorActionViewSet,
 )
+router.register(r"connector", ConnectorConfigAPI, basename="connector")
 
 urlpatterns = [
-    path(
-        "get_connector_configs",
-        ConnectorListAPI.as_view(),
-        name="get_connector_configs",
-    ),
-    path("connector/<str:name>/healthcheck", ConnectorHealthCheckAPI.as_view()),
-    # Viewsets
     path(r"", include(router.urls)),
 ]

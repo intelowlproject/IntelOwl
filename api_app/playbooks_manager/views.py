@@ -5,14 +5,13 @@ import logging
 from typing import Union
 
 from drf_spectacular.utils import extend_schema as add_docs
-from drf_spectacular.utils import inline_serializer
-from rest_framework import serializers as rfs
-from rest_framework import status
+from rest_framework import status, viewsets
 from rest_framework.decorators import api_view
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 
 from api_app.playbooks_manager.serializers import (
-    CachedPlaybooksSerializer,
+    PlaybookConfigCreateSerializer,
     PlaybookConfigSerializer,
 )
 from api_app.serializers import (
@@ -20,46 +19,10 @@ from api_app.serializers import (
     PlaybookFileAnalysisSerializer,
     PlaybookObservableAnalysisSerializer,
 )
-from certego_saas.ext.views import APIView
 
 from ..views import _multi_analysis_request
 
 logger = logging.getLogger(__name__)
-
-
-__all__ = [
-    "PlaybookListAPI",
-]
-
-
-def _cache_playbook(request, serializer_class: CachedPlaybooksSerializer):
-    """
-    Cache playbook after a scan
-    """
-
-    serializer = serializer_class(data=request.data, context={"request": request})
-    serializer.is_valid(raise_exception=True)
-
-    serializer.save()
-
-    return serializer.data
-
-
-@api_view(["POST"])
-def cache_playbook_view(
-    request,
-):
-    logger.info(f"received request from {request.user}." f"Data: {request.data}.")
-
-    response = _cache_playbook(
-        request=request,
-        serializer_class=CachedPlaybooksSerializer,
-    )
-
-    return Response(
-        response,
-        status=status.HTTP_200_OK,
-    )
 
 
 def _multi_analysis_request_playbooks(
@@ -105,29 +68,18 @@ def analyze_multiple_observables(request):
     )
 
 
-class PlaybookListAPI(APIView):
-    serializer_class = PlaybookConfigSerializer
+class PlaybookConfigAPI(viewsets.ModelViewSet):
 
-    @add_docs(
-        description="Get and parse the `playbook_config.json` file,",
-        parameters=[],
-        responses={
-            200: PlaybookConfigSerializer,
-            500: inline_serializer(
-                name="GetPlaybookConfigsFailedResponse",
-                fields={"error": rfs.CharField()},
-            ),
-        },
-    )
-    def get(self, request, *args, **kwargs):
-        try:
-            pc = self.serializer_class.output_with_cached_playbooks()
-            return Response(pc, status=status.HTTP_200_OK)
-        except Exception as e:
-            logger.exception(
-                f"get_playbook_configs requester:{str(request.user)} error:{e}."
-            )
-            return Response(
-                {"error": "error in get_playbook_configs. Check logs."},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
+    permission_classes = [IsAuthenticated]
+
+    def get_serializer_class(self):
+        if self.action == "post":
+            return PlaybookConfigCreateSerializer
+        return PlaybookConfigSerializer
+
+    def get_queryset(self):
+        return PlaybookConfigSerializer.Meta.model.objects.all()
+
+    def destroy(self, request, *args, **kwargs):
+        self.permission_classes.append(IsAdminUser)
+        return super().destroy(request, *args, **kwargs)

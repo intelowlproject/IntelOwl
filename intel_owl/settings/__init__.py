@@ -24,6 +24,8 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.postgres",
+    # admin
+    "prettyjson",
     # celery, elasticsearch
     "django_celery_results",
     "django_elasticsearch_dsl",
@@ -42,6 +44,7 @@ INSTALLED_APPS = [
     "authentication",
     "api_app.analyzers_manager",
     "api_app.connectors_manager",
+    "api_app.visualizers_manager",
     "api_app.playbooks_manager",
 ]
 

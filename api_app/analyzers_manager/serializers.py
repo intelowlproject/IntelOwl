@@ -1,15 +1,12 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
-from pathlib import PosixPath
-
-from django.conf import settings
+from django.core.exceptions import ValidationError
+from django.utils.module_loading import import_string
 from rest_framework import serializers as rfs
 
 from api_app.core.serializers import AbstractConfigSerializer
-from api_app.models import PluginConfig
 
-from .constants import HashChoices, ObservableTypes, TypeChoices
-from .models import AnalyzerReport
+from .models import AnalyzerConfig, AnalyzerReport
 
 
 class AnalyzerReportSerializer(rfs.ModelSerializer):
@@ -36,45 +33,20 @@ class AnalyzerReportSerializer(rfs.ModelSerializer):
 
 
 class AnalyzerConfigSerializer(AbstractConfigSerializer):
-    """
-    Serializer for `analyzer_config.json`.
-    """
+    class Meta:
+        model = AnalyzerConfig
+        fields = rfs.ALL_FIELDS
 
-    TypeChoices = TypeChoices
-    HashChoices = HashChoices
-    ObservableTypes = ObservableTypes
+    def validate_python_path(self, python_path: str):
+        return python_path
 
-    # Required fields
-    type = rfs.ChoiceField(required=True, choices=TypeChoices.values)
-    external_service = rfs.BooleanField(required=True)
-    # Optional Fields
-    leaks_info = rfs.BooleanField(required=False, default=False)
-    docker_based = rfs.BooleanField(required=False, default=False)
-    run_hash = rfs.BooleanField(required=False, default=False)
-    run_hash_type = rfs.ChoiceField(required=False, choices=HashChoices.values)
-    supported_filetypes = rfs.ListField(required=False, default=[])
-    not_supported_filetypes = rfs.ListField(required=False, default=[])
-    observable_supported = rfs.ListField(
-        child=rfs.ChoiceField(choices=ObservableTypes.values),
-        required=False,
-        default=[],
-    )
-
-    @classmethod
-    @property
-    def config_file_name(cls) -> str:
-        return "analyzer_config.json"
-
-    @classmethod
-    def _get_type(cls):
-        return PluginConfig.PluginType.ANALYZER
-
-    @property
-    def python_path(self) -> PosixPath:
-        if self.initial_data["type"] == self.TypeChoices.OBSERVABLE or (
-            self.initial_data["type"] == self.TypeChoices.FILE
-            and self.initial_data.get("run_hash", False)
-        ):
-            return settings.BASE_ANALYZER_OBSERVABLE_PYTHON_PATH
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        try:
+            import_string(
+                f"{self.Meta.model.python_path(attrs['type'])}.{attrs['python_path']}"
+            )
+        except ImportError:
+            raise ValidationError(f"Unable to import {attrs['python_path']}")
         else:
-            return settings.BASE_ANALYZER_FILE_PYTHON_PATH
+            return attrs

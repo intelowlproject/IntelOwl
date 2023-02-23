@@ -9,10 +9,10 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.files import File
 
-from api_app.analyzers_manager.dataclasses import AnalyzerConfig
-from api_app.connectors_manager.dataclasses import ConnectorConfig
+from api_app.analyzers_manager.models import AnalyzerConfig
+from api_app.connectors_manager.models import ConnectorConfig
 from api_app.models import Job
-from api_app.visualizers_manager.dataclasses import VisualizerConfig
+from api_app.visualizers_manager.models import VisualizerConfig
 from tests import PollingFunction
 
 from .. import CustomTestCase
@@ -24,9 +24,9 @@ class _AbstractAnalyzersScriptTestCase(CustomTestCase):
     # constants
     TIMEOUT_SECONDS: int = 60 * 5  # 5 minutes
     SLEEP_SECONDS: int = 5  # 5 seconds
-    analyzer_configs = AnalyzerConfig.all()
-    connector_configs = ConnectorConfig.all()
-    visualizer_configs = VisualizerConfig.all()
+    analyzer_configs = AnalyzerConfig.objects.all()
+    connector_configs = ConnectorConfig.objects.all()
+    visualizer_configs = VisualizerConfig.objects.all()
     # attrs
     test_job: Job
     analyzer_configs: dict
@@ -38,7 +38,7 @@ class _AbstractAnalyzersScriptTestCase(CustomTestCase):
         return {
             "analyzers_requested": [],
             "connectors_requested": [],
-            "connectors_to_execute": list(cls.connector_configs.keys()),
+            "connectors_to_execute": list(cls.connector_configs.all().values_list("name", flat=True)),
         }
 
     @classmethod

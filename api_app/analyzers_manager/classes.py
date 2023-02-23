@@ -5,7 +5,7 @@ import json
 import logging
 import time
 from abc import ABCMeta
-from typing import Tuple, Type
+from typing import Tuple
 
 import requests
 from django.conf import settings
@@ -19,9 +19,8 @@ from tests.mock_utils import (
 )
 
 from .constants import HashChoices, ObservableTypes, TypeChoices
-from .dataclasses import AnalyzerConfig
 from .exceptions import AnalyzerConfigurationException, AnalyzerRunException
-from .models import AnalyzerReport
+from .models import AnalyzerConfig, AnalyzerReport
 
 logger = logging.getLogger(__name__)
 
@@ -37,17 +36,19 @@ class BaseAnalyzerMixin(Plugin, metaclass=ABCMeta):
     ObservableTypes = ObservableTypes
     TypeChoices = TypeChoices
 
-    @classmethod
-    def get_config_class(cls) -> Type[AnalyzerConfig]:
-        return AnalyzerConfig
-
     @property
     def analyzer_name(self) -> str:
         return self._config.name
 
+    @classmethod
     @property
-    def report_model(self):
+    def report_model(cls):
         return AnalyzerReport
+
+    @classmethod
+    @property
+    def config_model(cls):
+        return AnalyzerConfig
 
     def get_exceptions_to_catch(self):
         """
@@ -104,9 +105,6 @@ class BaseAnalyzerMixin(Plugin, metaclass=ABCMeta):
     def after_run(self):
         self.report.report = self._validate_result(self.report.report)
 
-    def __repr__(self):
-        return f"({self.analyzer_name}, job_id: #{self.job_id})"
-
 
 class ObservableAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
     """
@@ -120,6 +118,7 @@ class ObservableAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
     observable_classification: str
 
     def __post__init__(self):
+        self._config: AnalyzerConfig
         # check if we should run the hash instead of the binary
         if self._job.is_sample and self._config.run_hash:
             self.observable_classification = ObservableTypes.HASH

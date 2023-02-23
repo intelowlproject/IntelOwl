@@ -95,7 +95,7 @@ export async function saveJobAsPlaybook(values) {
   };
   try {
     const response = await axios.post(
-      `${API_BASE_URI}/playbook/cache_playbook`,
+      `${API_BASE_URI}/playbook`,
       data
     );
 

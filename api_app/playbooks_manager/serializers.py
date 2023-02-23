@@ -1,204 +1,63 @@
-# This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
-# See the file 'LICENSE' for copying permission.
-
-import json
-import logging
-
-from django.core import serializers
+from django.core.exceptions import ValidationError
 from rest_framework import serializers as rfs
 
-from api_app.analyzers_manager.constants import AllTypes
-from api_app.analyzers_manager.serializers import AnalyzerConfigSerializer
-from api_app.connectors_manager.serializers import ConnectorConfigSerializer
-from api_app.core.serializers import AbstractConfigSerializer
+from api_app.analyzers_manager.constants import TypeChoices
 from api_app.models import Job
-from certego_saas.apps.organization.permissions import IsObjectOwnerOrSameOrgPermission
-
-from .models import CachedPlaybook
-
-logger = logging.getLogger(__name__)
+from api_app.playbooks_manager.models import PlaybookConfig
 
 
-class PlaybookConfigSerializer(AbstractConfigSerializer):
-    """
-    Serializer for `playbook_config.json`.
-    """
+class PlaybookConfigSerializer(rfs.ModelSerializer):
+    class Meta:
+        model = PlaybookConfig
+        fields = rfs.ALL_FIELDS
 
-    config = rfs.DictField(default={})
-    secrets = rfs.DictField(default={})
-    params = rfs.DictField(default={})
-    python_module = rfs.CharField(default="")
-    # automatically populated fields
-    verification = rfs.DictField(default={})
 
-    # Required fields
-    description = rfs.CharField()
-    analyzers = rfs.DictField(child=rfs.DictField())
-    connectors = rfs.DictField(child=rfs.DictField())
+class PlaybookConfigCreateSerializer(rfs.ModelSerializer):
 
-    # Optional Fields
-    supports = rfs.ListField(
-        child=rfs.ChoiceField(choices=AllTypes.values),
-        required=False,
-        default=[],
+    job = rfs.PrimaryKeyRelatedField(
+        queryset=Job.objects.all(),
     )
 
-    @classmethod
-    @property
-    def config_file_name(cls) -> str:
-        return "playbook_config.json"
-
-    def validate_python_module(self, python_module: str) -> str:
-        return python_module
-
-    @classmethod
-    def _cached_playbooks(cls) -> dict:
-        """
-        Returns config file as `dict`.
-        """
-        config = super()._read_config()
-        cached_playbooks = CachedPlaybook.objects.all()
-        cached_serialized_playbooks = serializers.serialize(
-            "json", list(cached_playbooks)
-        )
-        cached_playbooks_model_json = json.loads(cached_serialized_playbooks)
-        if len(cached_playbooks_model_json) == 0:
-            # this is for when no playbooks are cached
-            return config
-
-        cached_playbooks_final = {}
-        for playbook in cached_playbooks_model_json:
-            cached_playbooks_final[playbook["pk"]] = playbook["fields"]
-
-        return cached_playbooks_final
-
-    @classmethod
-    def output_with_cached_playbooks(cls) -> dict:
-        original_config_dict = cls.read_and_verify_config()
-        config_dict = cls._cached_playbooks()
-        serializer_errors = {}
-        for key, config in config_dict.items():
-            new_config = {"name": key, **config}
-            serializer = cls(data=new_config)  # lgtm [py/call-to-non-callable]
-            if serializer.is_valid():
-                config_dict[key] = serializer.data
-            else:
-                serializer_errors[key] = serializer.errors
-
-        if bool(serializer_errors):
-            logger.error(f"{cls.__name__} serializer failed: {serializer_errors}")
-            raise rfs.ValidationError(serializer_errors)
-
-        config_dict = config_dict | original_config_dict
-        return config_dict
-
-
-class CachedPlaybooksSerializer(rfs.ModelSerializer):
-    job_id = rfs.IntegerField()
-    name = rfs.CharField(max_length=225)
-    description = rfs.CharField(max_length=225)
-
     class Meta:
-        model = CachedPlaybook
+        model = PlaybookConfig
         fields = (
             "name",
             "description",
-            "analyzers",
-            "connectors",
-            "supports",
-            "disabled",
-            "job_id",
         )
 
-    def validate(self, attrs: dict) -> dict:
-        # The playbook in the playbook_config.json file is given more
-        # priority if the same named one is ever added back again.
-
-        attrs = super().validate(attrs)
-        playbook_name = attrs["name"].replace(" ", "_").upper()
-        job_id = attrs.get("job_id")
-
-        job = Job.objects.get(pk=job_id)
-        request = self.context.get("request", None)
-
-        has_perm = IsObjectOwnerOrSameOrgPermission().has_object_permission(
-            request, None, job
-        )
-
-        if not has_perm:
-            # bare in mind that for the time being,
-            # we don't check for which user is querying
-            # /api/get_playbook_configs and thus no filtering
-            # like this would be done on that end.
-            raise rfs.ValidationError(
-                "User doesn't have necessary permissions for this action."
+    def validate_job(self, job: Job):
+        owner = self.context["request"].user
+        if job.user.pk != owner.pk:
+            raise ValidationError(
+                "You can create a playbook from a job that you created"
             )
+        return job
 
-        analyzers_used = job.analyzers_to_execute
-        connectors_used = job.connectors_to_execute
+    def create(self, validated_data):
+        from api_app.analyzers_manager.models import AnalyzerConfig, AnalyzerReport
+        from api_app.connectors_manager.models import ConnectorConfig
 
-        analyzers = {analyzer: {} for analyzer in analyzers_used}
-        connectors = {connector: {} for connector in connectors_used}
-
-        supports = []
-        existing_playbooks = PlaybookConfigSerializer.output_with_cached_playbooks()
-
-        existing_playbook = existing_playbooks.get(playbook_name, {})
-
-        if existing_playbook != {}:
-            raise rfs.ValidationError("Another playbook exists with that name.")
-
-        analyzer_config = AnalyzerConfigSerializer.read_and_verify_config()
-        for analyzer_ in analyzers:
-            analyzer_checked = analyzer_config.get(analyzer_)
-            if analyzer_checked is None:
-                logger.info(f"Invalid analyzer {analyzer_}")
-            type_ = analyzer_checked.get("type")
-            if type_ == "file":
-                if type_ in supports:
-                    continue
-                supports.append(type_)
-            else:
-                observable_supported = analyzer_checked.get("observable_supported")
-                for observable_type in observable_supported:
-                    if observable_type not in supports:
-                        supports.append(observable_type)
-
-        connector_config = ConnectorConfigSerializer.read_and_verify_config()
-        for connector_ in connectors:
-            connector_checked = connector_config.get(connector_)
-            if connector_checked is None:
-                logger.info(f"Invalid connector {connector_}")
-
-        attrs["analyzers"] = analyzers
-        attrs["connectors"] = connectors
-        attrs["supports"] = supports
-        attrs["name"] = playbook_name
-
-        return attrs
-
-    def create(self, validated_data: dict) -> CachedPlaybook:
-        playbook_name = validated_data.get("name")
-        analyzers = validated_data.get("analyzers")
-        connectors = validated_data.get("connectors")
-        supports = validated_data.get("supports")
-        playbook_description = validated_data.get("description")
-        job_id = validated_data.get("job_id")
-        disabled = validated_data.get("disabled")
-
-        job = Job.objects.filter(pk=job_id).first()
-
-        if job is None:
-            raise rfs.ValidationError(f"Job of {job_id} doesn't exist.")
-
-        playbook = self.Meta.model.objects.create(
-            name=playbook_name,
-            analyzers={analyzer: {} for analyzer in analyzers},
-            connectors={connector: {} for connector in connectors},
-            supports=supports,
-            description=playbook_description,
-            job=job,
-            disabled=disabled if type(disabled) == bool else False,
+        job = validated_data["job"]
+        analyzers = AnalyzerConfig.objects.filter(name__in=job.analyzers_to_execute)
+        connectors = ConnectorConfig.objects.filter(name__in=job.connectors_to_execute)
+        types_supported = list(
+            set([analyzer_config.observable_supported for analyzer_config in analyzers])
         )
+        if job.is_sample:
+            types_supported.append(TypeChoices.FILE)
+        runtime_configuration = {}
+        for report in job.analyzer_reports:
+            report: AnalyzerReport
+            runtime_configuration[report.name] = report.runtime_configuration
+        for report in job.connector_reports:
+            runtime_configuration[report.name] = report.runtime_configuration
 
-        return playbook
+        pc = PlaybookConfig.objects.create(
+            name=validated_data["name"],
+            description=validated_data["description"],
+            type=types_supported,
+            runtime_configuration=runtime_configuration,
+        )
+        pc.analyzers.set(analyzers)
+        pc.connectors.set(connectors)
+        return pc

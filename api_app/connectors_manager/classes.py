@@ -8,9 +8,8 @@ import requests
 
 from api_app.core.classes import Plugin
 
-from .dataclasses import ConnectorConfig
 from .exceptions import ConnectorConfigurationException, ConnectorRunException
-from .models import ConnectorReport
+from .models import ConnectorConfig, ConnectorReport
 
 logger = logging.getLogger(__name__)
 
@@ -23,17 +22,19 @@ class Connector(Plugin, metaclass=abc.ABCMeta):
      and `run(self)` functions.
     """
 
-    @classmethod
-    def get_config_class(cls) -> Type[ConnectorConfig]:
-        return ConnectorConfig
-
     @property
     def connector_name(self) -> str:
         return self._config.name
 
+    @classmethod
     @property
-    def report_model(self):
+    def report_model(cls) -> Type[ConnectorReport]:
         return ConnectorReport
+
+    @classmethod
+    @property
+    def config_model(cls) -> Type[ConnectorConfig]:
+        return ConnectorConfig
 
     def get_exceptions_to_catch(self) -> list:
         return [
@@ -72,17 +73,16 @@ class Connector(Plugin, metaclass=abc.ABCMeta):
     def after_run(self):
         logger.info(f"FINISHED connector: {self.__repr__()}")
 
-    def __repr__(self):
-        return f"({self.connector_name}, job: #{self.job_id})"
-
     @classmethod
     def health_check(cls, connector_name: str) -> Optional[bool]:
         """
         basic health check: if instance is up or not (timeout - 10s)
         """
         health_status, url = None, None
-        # todo this is already done by the caller, to optimize this
-        cc = ConnectorConfig.get(connector_name)
+        try:
+            cc = cls.config_model.objects.get(name=connector_name)
+        except cls.config_model.DoesNotExist:
+            raise ConnectorRunException(f"Unable to find connector {connector_name}")
         if cc is not None:
             url = cc.read_secrets(secrets_filter="url_key_name").get(
                 "url_key_name", None

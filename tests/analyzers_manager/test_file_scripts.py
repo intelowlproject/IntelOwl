@@ -18,8 +18,7 @@ class EXEAnalyzersTestCase(_FileAnalyzersScriptsTestCase):
                 "ELF_Info",
                 "Signature_Info",
                 "SpeakEasy",
-                "Strings_Info_Classic",
-                "Strings_Info_ML",
+                "Strings_Info",
                 "Qiling_Windows",
                 "Qiling_Windows_Shellcode",
                 "Qiling_Linux",
@@ -36,19 +35,7 @@ class EXEAnalyzersTestCase(_FileAnalyzersScriptsTestCase):
                 "Manalyze",
                 "MWDB_Scan",
                 "YARAify_File_Scan",
-                "Yara_Scan_ATM_MALWARE",
-                "Yara_Scan_Bartblaze",
-                "Yara_Scan_Community",
-                "Yara_Scan_Daily_Ioc",
-                "Yara_Scan_Mandiant",
-                "Yara_Scan_Florian",
-                "Yara_Scan_Inquest",
-                "Yara_Scan_Intezer",
-                "Yara_Scan_Trellix",
-                "Yara_Scan_ReversingLabs",
-                "Yara_Scan_YARAify",
-                "Yara_Scan_Samir",
-                "Yara_Scan_Stratosphere",
+                "Yara",
                 "VirusTotal_v2_Get_File",
                 "VirusTotal_v2_Scan_File",
                 "VirusTotal_v3_Get_File",
@@ -85,7 +72,7 @@ class DocAnalyzersTestCase(_FileAnalyzersScriptsTestCase):
             **super().get_params(),
             "file_name": "document.doc",
             "file_mimetype": "application/msword",
-            "analyzers_to_execute": ["Doc_Info", "Doc_Info_Experimental"],
+            "analyzers_to_execute": ["Doc_Info"],
         }
 
 
@@ -174,4 +161,15 @@ class ELFAnalyzersTestCase(_FileAnalyzersScriptsTestCase):
             "file_name": "ping.elf",
             "file_mimetype": "application/x-sharedlib",
             "analyzers_to_execute": ["ELF_Info"],
+        }
+
+
+class OneNoteAnalyzersTestCase(_FileAnalyzersScriptsTestCase):
+    @classmethod
+    def get_params(cls):
+        return {
+            **super().get_params(),
+            "file_name": "sample.one",
+            "file_mimetype": "application/onenote",
+            "analyzers_to_execute": ["OneNote_Info"],
         }

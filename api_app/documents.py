@@ -60,4 +60,5 @@ class JobDocument(Document):
             "is_sample",
             "received_request_time",
             "finished_analysis_time",
+            "process_time",
         ]

@@ -10,7 +10,6 @@ from drf_spectacular.utils import extend_schema_serializer
 from durin.serializers import UserSerializer
 from rest_framework import serializers as rfs
 from rest_framework.exceptions import PermissionDenied, ValidationError
-from rest_framework.fields import empty
 
 from certego_saas.apps.organization.membership import Membership
 
@@ -95,7 +94,6 @@ class _AbstractJobViewSerializer(rfs.ModelSerializer):
 
     user = UserSerializer()
     tags = TagSerializer(many=True, read_only=True)
-    process_time = rfs.FloatField()
 
 
 class _AbstractJobCreateSerializer(rfs.ModelSerializer):
@@ -557,6 +555,9 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
             attrs["observable_classification"] = calculate_observable_classification(
                 attrs["observable_name"]
             )
+        attrs["observable_name"] = self.defanged_values_removal(
+            attrs["observable_name"]
+        )
         if attrs["observable_classification"] in [
             ObservableTypes.HASH,
             ObservableTypes.DOMAIN,
@@ -569,6 +570,16 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
         attrs = super().validate(attrs)
         logger.debug(f"after attrs: {attrs}")
         return attrs
+
+    @staticmethod
+    def defanged_values_removal(value):
+        if "\\" in value:
+            value = value.replace("\\", "")
+        if "]" in value:
+            value = value.replace("]", "")
+        if "[" in value:
+            value = value.replace("[", "")
+        return value
 
     def filter_analyzers(self, serialized_data: Dict) -> List[str]:
         cleaned_analyzer_list = []
@@ -799,12 +810,20 @@ def multi_result_enveloper(serializer_class, many):
 
 class PluginConfigSerializer(rfs.ModelSerializer):
     class CustomJSONField(rfs.JSONField):
-        def run_validation(self, data=empty):
-            value = super().run_validation(data)
+        def to_internal_value(self, data):
+            if not data:
+                raise ValidationError("empty insertion")
+            logger.info(f"verifying that value {data} ({type(data)}) is JSON compliant")
             try:
-                return json.loads(value)
+                return json.loads(data)
             except json.JSONDecodeError:
-                raise ValidationError("Value is not JSON-compliant.")
+                # this is to accept classicstrings
+                data = f'"{data}"'
+                try:
+                    return json.loads(data)
+                except json.JSONDecodeError:
+                    logger.info(f"value {data} ({type(data)}) raised ValidationError")
+                    raise ValidationError("Value is not JSON-compliant.")
 
         def to_representation(self, value):
             return json.dumps(super().to_representation(value))
@@ -822,6 +841,14 @@ class PluginConfigSerializer(rfs.ModelSerializer):
     class Meta:
         model = PluginConfig
         fields = rfs.ALL_FIELDS
+
+    def to_representation(self, instance):
+        if (
+            instance.organization
+            and self.context["request"].user.pk != instance.organization.owner.pk
+        ):
+            instance.value = "redacted"
+        return super().to_representation(instance)
 
     def validate(self, attrs):
         super().validate(attrs)
@@ -875,12 +902,26 @@ class PluginConfigSerializer(rfs.ModelSerializer):
                 f"have secret {attrs['attribute']}."
             )
         # Check if the type of value is valid for the attribute.
+
         expected_type = (
-            type(config.all()[attrs["plugin_name"]].params[attrs["attribute"]].value)
+            config.all()[attrs["plugin_name"]].params[attrs["attribute"]].type
             if attrs["config_type"] == PluginConfig.ConfigType.PARAMETER
-            else str
+            else config.all()[attrs["plugin_name"]].secrets[attrs["attribute"]].type
         )
-        if not isinstance(
+        if expected_type == "str":
+            expected_type = str
+        elif expected_type == "list":
+            expected_type = list
+        elif expected_type == "dict":
+            expected_type = dict
+        elif expected_type == "int":
+            expected_type = int
+        elif expected_type == "float":
+            expected_type = float
+        elif expected_type == "bool":
+            expected_type = bool
+
+        if expected_type and not isinstance(
             attrs["value"],
             expected_type,
         ):
@@ -907,4 +948,5 @@ class PluginConfigSerializer(rfs.ModelSerializer):
                 f"{category} {attrs['plugin_name']} "
                 f"{self} attribute {attrs['attribute']} already exists."
             )
+        logger.info(f"validation finished for {attrs}")
         return attrs

@@ -19,7 +19,8 @@ class ConnectorConfigSerializer(AbstractConfigSerializer):
     run_on_failure = rfs.BooleanField(default=False)
     CONFIG_FILE_NAME = "connector_config.json"
 
-    def _get_type(self):
+    @classmethod
+    def _get_type(cls):
         return PluginConfig.PluginType.CONNECTOR
 
     def validate_python_module(self, python_module: str) -> str:

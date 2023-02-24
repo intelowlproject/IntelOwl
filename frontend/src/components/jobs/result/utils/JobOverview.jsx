@@ -15,7 +15,7 @@ export default function JobOverview({ isRunningJob, job, refetch }) {
   if (job.playbooks_to_execute?.length > 0) {
     AnalyzerDenominator = job.analyzers_to_execute?.length;
     if (job.connectors_to_execute?.length === 0) {
-      ConnectorDenominator = "None";
+      ConnectorDenominator = "0";
     } else {
       ConnectorDenominator = job.connectors_to_execute?.length;
     }

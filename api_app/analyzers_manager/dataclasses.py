@@ -10,7 +10,6 @@ from django.conf import settings
 from api_app.core.dataclasses import AbstractConfig
 
 from ..core.models import AbstractReport
-from ..models import PluginConfig
 from .constants import HashChoices, TypeChoices
 from .serializers import AnalyzerConfigSerializer
 
@@ -30,9 +29,6 @@ class AnalyzerConfig(AbstractConfig):
         from api_app.analyzers_manager.models import AnalyzerReport
 
         return AnalyzerReport
-
-    def _get_type(self) -> str:
-        return PluginConfig.PluginType.ANALYZER
 
     # Required fields
     type: typing.Literal["file", "observable"]

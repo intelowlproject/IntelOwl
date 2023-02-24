@@ -5,7 +5,7 @@ import json
 import logging
 import time
 from abc import ABCMeta
-from typing import Tuple
+from typing import Tuple, Type
 
 import requests
 from django.conf import settings
@@ -20,6 +20,7 @@ from tests.mock_utils import (
 )
 
 from .constants import HashChoices, ObservableTypes, TypeChoices
+from .dataclasses import AnalyzerConfig
 from .models import AnalyzerReport
 
 logger = logging.getLogger(__name__)
@@ -35,6 +36,10 @@ class BaseAnalyzerMixin(Plugin, metaclass=ABCMeta):
     HashChoices = HashChoices
     ObservableTypes = ObservableTypes
     TypeChoices = TypeChoices
+
+    @classmethod
+    def get_config_class(cls) -> Type[AnalyzerConfig]:
+        return AnalyzerConfig
 
     @property
     def analyzer_name(self) -> str:
@@ -101,13 +106,6 @@ class BaseAnalyzerMixin(Plugin, metaclass=ABCMeta):
 
     def __repr__(self):
         return f"({self.analyzer_name}, job_id: #{self.job_id})"
-
-    @classmethod
-    @property
-    def enabled(cls):
-        from api_app.analyzers_manager.dataclasses import AnalyzerConfig
-
-        return not AnalyzerConfig.is_disabled(cls.__name__)
 
 
 class ObservableAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
@@ -408,7 +406,7 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
             self.start = mock_fn(self.start)
 
     @classmethod
-    def health_check(cls) -> bool:
+    def health_check(cls, analyzer_name: str) -> bool:
         """
         basic health check: if instance is up or not (timeout - 10s)
         """

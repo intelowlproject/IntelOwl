@@ -63,7 +63,7 @@ class ApiViewTests(CustomAPITestCase):
                 ["domain", "example.com"],
                 ["ip", "8.8.2.2"],
             ],
-            "analyzers_requested": ["Classic_DNS", "Robtex_IP_Query"],
+            "analyzers_requested": ["Classic_DNS", "WhoIs_RipeDB_Search"],
             "connectors_requested": [],
             "tlp": "CLEAR",
             "runtime_configuration": {},

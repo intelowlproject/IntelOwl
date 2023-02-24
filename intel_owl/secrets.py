@@ -7,7 +7,7 @@ import os
 
 import boto3
 from botocore.exceptions import ClientError, NoCredentialsError
-from django.core.exceptions import AppRegistryNotReady
+from django.conf import settings
 
 
 class RetrieveSecretException(Exception):
@@ -15,12 +15,13 @@ class RetrieveSecretException(Exception):
 
 
 def aws_get_secret(secret_name):
-    region_name = os.environ.get("AWS_REGION", "eu-central-1")
     secret = None
 
     # Create a Secrets Manager client
     session = boto3.session.Session()
-    client = session.client(service_name="secretsmanager", region_name=region_name)
+    client = session.client(
+        service_name="secretsmanager", region_name=settings.AWS_REGION
+    )
 
     # In this sample we only handle the specific exceptions..
     # ... for the 'GetSecretValue' API. See:
@@ -64,34 +65,12 @@ def aws_get_secret(secret_name):
     return secret
 
 
-def get_secret(secret_name, default="", plugin_type=None, plugin_name=None, user=None):
+def get_secret(secret_name, default=""):
     """
     first check the secret in the environment
     then try to find the secret in AWS Secret Manager
     """
-    secret = default
-    try:
-        from api_app.models import PluginConfig
-
-        query = {
-            "attribute": secret_name,
-        }
-        if plugin_type:
-            query["type"] = plugin_type
-        if plugin_name:
-            query["plugin_name"] = plugin_name
-        configs = PluginConfig.visible_for_user(user)
-        try:
-            secret = configs.get(
-                **query, config_type=PluginConfig.ConfigType.SECRET
-            ).value
-        except PluginConfig.DoesNotExist:
-            pass
-    except AppRegistryNotReady:
-        # This is a Django env var, not analyzer var
-        pass
-    if secret == default:
-        secret = os.environ.get(secret_name, default)
+    secret = os.environ.get(secret_name, default)
     aws_secrets_enabled = os.environ.get("AWS_SECRETS", False) == "True"
     if not secret and aws_secrets_enabled:
         try:

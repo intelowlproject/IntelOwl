@@ -2,7 +2,7 @@ name: Build & Tests
 
 on:
   pull_request:
-    branches: [master, develop, dev-v4]
+    branches: [master, develop]
     paths-ignore:
       - "**.md"
       - "docs/**"
@@ -191,5 +191,5 @@ jobs:
         working-directory: ./frontend
       - name: Test with Jest
         run: |
-          npm run test
+          npm run test -- --silent --coverage
         working-directory: ./frontend

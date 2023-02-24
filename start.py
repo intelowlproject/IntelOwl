@@ -31,6 +31,8 @@ DOCKER_ANALYZERS = [
 
 PATH_MAPPING = {
     "default": "docker/default.yml",
+    "postgres": "docker/postgres.override.yml",
+    "rabbitmq": "docker/rabbitmq.override.yml",
     "test": "docker/test.override.yml",
     "ci": "docker/ci.override.yml",
     "custom": "docker/custom.override.yml",
@@ -125,6 +127,18 @@ def start():
         help="Uses the traefik.override.yml compose file",
     )
     parser.add_argument(
+        "--use-external-database",
+        required=False,
+        action="store_true",
+        help="Do not use postgres.override.yml compose file",
+    )
+    parser.add_argument(
+        "--use-external-broker",
+        required=False,
+        action="store_true",
+        help="Do not use rabbitmq.override.yml compose file",
+    )
+    parser.add_argument(
         "--flower",
         required=False,
         action="store_true",
@@ -156,6 +170,12 @@ def start():
         help="This leverage the https.override.yml file that can be used "
         "to host IntelOwl with HTTPS and your own certificate",
     )
+    parser.add_argument(
+        "--use-docker-v1",
+        required=False,
+        action="store_true",
+        help="This flag avoids the script to check if it can use Docker v2 every time",
+    )
 
     args, unknown = parser.parse_known_args()
     # logic
@@ -177,6 +197,12 @@ def start():
         return
     # default file
     compose_files = [PATH_MAPPING["default"]]
+    # PostreSQL
+    if not args.__dict__["use_external_database"]:
+        compose_files.append(PATH_MAPPING["postgres"])
+    # RabbitMQ
+    if not args.__dict__["use_external_broker"]:
+        compose_files.append(PATH_MAPPING["rabbitmq"])
     # mode
     if is_test:
         compose_files.append(PATH_MAPPING[args.mode])
@@ -223,16 +249,17 @@ def start():
         "--project-directory",
         "docker",
     ]
-    # for docker-compose v2
-    try:
-        subprocess.run(
-            base_command[0],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-            check=True,
+
+    if not args.use_docker_v1:
+        # check docker version and use docker 2 if available
+        cmd = "docker --help | grep 'compose'"
+        ps = subprocess.Popen(
+            cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL
         )
-    except OSError:
-        base_command = ["docker", "compose"] + base_command[1:]
+        output = ps.communicate()[0]
+        if output:
+            base_command = ["docker", "compose"] + base_command[1:]
+
     for compose_file in compose_files:
         base_command.append("-f")
         base_command.append(compose_file)

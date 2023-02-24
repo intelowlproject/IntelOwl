@@ -24,7 +24,7 @@
   "AbuseIPDB": {
     "type": "observable",
     "python_module": "abuseipdb.AbuseIPDB",
-    "description": "check if an ip was reported on AbuseIPDB",
+    "description": "check if an ip was reported on [AbuseIPDB](https://www.abuseipdb.com/)",
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
@@ -37,7 +37,8 @@
       "api_key_name": {
         "env_var_key": "ABUSEIPDB_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {
@@ -73,16 +74,14 @@
     "secrets": {
       "api_user_name": {
         "env_var_key": "ANOMALI_THREATSTREAM_API_USER",
-        "type": "string",
+        "type": "str",
         "required": true,
-        "default": null,
         "description": "API USER for Anomali Threatstream"
       },
       "api_key_name": {
         "env_var_key": "ANOMALI_THREATSTREAM_API_KEY",
-        "type": "string",
+        "type": "str",
         "required": true,
-        "default": null,
         "description": "API Key for Anomali Threatstream"
       }
     },
@@ -109,16 +108,14 @@
     "secrets": {
       "api_user_name": {
         "env_var_key": "ANOMALI_THREATSTREAM_API_USER",
-        "type": "string",
+        "type": "str",
         "required": true,
-        "default": null,
         "description": "API USER for Anomali Threatstream"
       },
       "api_key_name": {
         "env_var_key": "ANOMALI_THREATSTREAM_API_KEY",
-        "type": "string",
+        "type": "str",
         "required": true,
-        "default": null,
         "description": "API Key for Anomali Threatstream"
       }
     },
@@ -165,16 +162,14 @@
     "secrets": {
       "api_user_name": {
         "env_var_key": "ANOMALI_THREATSTREAM_API_USER",
-        "type": "string",
+        "type": "str",
         "required": true,
-        "default": null,
         "description": "API USER for Anomali Threatstream"
       },
       "api_key_name": {
         "env_var_key": "ANOMALI_THREATSTREAM_API_KEY",
-        "type": "string",
+        "type": "str",
         "required": true,
-        "default": null,
         "description": "API Key for Anomali Threatstream"
       }
     },
@@ -202,7 +197,30 @@
       "api_key_name": {
         "env_var_key": "AUTH0_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
+      }
+    },
+    "params": {}
+  },
+  "BinaryEdge": {
+    "type": "observable",
+    "python_module": "binaryedge.BinaryEdge",
+    "description": "Details about an Host. List of recent events for the specified host, including details of exposed ports and services and return list of subdomains known from the target domains",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": ["ip","domain"],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "BINARYEDGE_KEY",
+        "description": "API key for the BinaryEdge",
+        "required": true,
+        "type": "str"
       }
     },
     "params": {}
@@ -223,7 +241,8 @@
       "api_key_name": {
         "env_var_key": "BITCOINABUSE_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {}
@@ -278,9 +297,8 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "CHECKPHISH_KEY",
-        "type": "string",
+        "type": "str",
         "required": true,
-        "default": null,
         "description": "API Key for the analyzer"
       }
     },
@@ -313,7 +331,8 @@
       "pdns_credentials": {
         "env_var_key": "CIRCL_CREDENTIALS",
         "description": "Template to use: `<user>|<pwd>`.",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {}
@@ -334,7 +353,8 @@
       "pdns_credentials": {
         "env_var_key": "CIRCL_CREDENTIALS",
         "description": "Template to use: `<user>|<pwd>`.",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {}
@@ -396,6 +416,28 @@
     "secrets": {},
     "params": {}
   },
+  "Crowdsec": {
+    "type": "observable",
+    "python_module": "crowdsec.Crowdsec",
+    "description": "check if an IP was reported on [Crowdsec](https://www.crowdsec.net/) Smoke Dataset",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": ["ip"],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "CROWDSEC_KEY",
+        "description": "API Key to access the service",
+        "required": true,
+        "type": "str"
+      }
+    },
+    "params": {}
+  },
   "Capa_Info": {
     "type": "file",
     "python_module": "capa_info.CapaInfo",
@@ -445,7 +487,7 @@
   "CapeSandbox": {
     "type": "file",
     "python_module": "cape_sandbox.CAPEsandbox",
-    "description": "Automatic scan of suspicious files using CapeSandbox API",
+    "description": "Automatic scan of suspicious files using [CapeSandbox](https://github.com/kevoreilly/CAPEv2) API",
     "disabled": false,
     "external_service": true,
     "leaks_info": true,
@@ -458,17 +500,20 @@
       "api_key_name": {
         "env_var_key": "CAPESANDBOX_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       },
       "url_key_name": {
         "env_var_key": "CAPESANDBOX_URL",
         "description": "URL for the CapeSandbox instance. If none provided, It uses the API provided by CAPESandbox by default.",
-        "required": true
+        "default": "https://www.capesandbox.com",
+        "required": true,
+        "type": "str"
       }
     },
     "params": {
       "VM_NAME": {
-        "value": "win7x64_8",
+        "value": "",
         "type": "str",
         "description": "The VM to be used in the analysis."
       },
@@ -500,12 +545,14 @@
       "api_id_name": {
         "env_var_key": "CENSYS_API_ID",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       },
       "api_secret_name": {
         "env_var_key": "CENSYS_API_SECRET",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {
@@ -519,7 +566,7 @@
   "ClamAV": {
     "type": "file",
     "python_module": "clamav.ClamAV",
-    "description": "scan files using ClamAV virus scanning engine",
+    "description": "scan files using [ClamAV AntiVirus Engine](https://www.clamav.net/). IntelOwl automatically keep ClamAV updated with official and [unofficial](https://github.com/rseichter/fangfrisch) open source signatures",
     "disabled": false,
     "leaks_info": false,
     "external_service": false,
@@ -576,12 +623,14 @@
       "api_key_name": {
         "env_var_key": "CUCKOO_API_KEY",
         "description": "",
-        "required": false
+        "required": false,
+        "type": "str"
       },
       "url_key_name": {
         "env_var_key": "CUCKOO_URL",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {
@@ -720,6 +769,42 @@
       }
     }
   },
+  "DNS0_EU": {
+    "type": "observable",
+    "python_module": "dns.dns_resolvers.dns0_eu_resolver.DNS0EUResolver",
+    "description": "Retrieve current domain resolution with DNS0.eu DoH (DNS over HTTPS)",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": ["domain", "url"],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {},
+    "params": {
+      "query_type": {
+        "value": "A",
+        "type": "str",
+        "description": "Query type against the chosen DNS resolver."
+      }
+    }
+  },
+  "DNS0_EU_Malicious_Detector": {
+    "type": "observable",
+    "python_module": "dns.dns_malicious_detectors.dns0_eu_malicious_detector.DNS0EUMaliciousDetector",
+    "description": "Check if a domain or an url is marked as malicious in DNS0.eu database ([Zero](https://www.dns0.eu/zero) service)",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": ["domain", "url"],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {},
+    "params": {}
+  },
   "DNSDB": {
     "type": "observable",
     "python_module": "dnsdb.DNSdb",
@@ -736,7 +821,8 @@
       "api_key_name": {
         "env_var_key": "DNSDB_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {
@@ -816,7 +902,7 @@
   "Doc_Info": {
     "type": "file",
     "python_module": "doc_info.DocInfo",
-    "description": "static generic document analysis (Oletools)",
+    "description": "static Microsoft Office document analysis ([Oletools](https://github.com/decalage2/oletools)) with features to analyze XLM macros, encrypted macros and much more",
     "disabled": false,
     "external_service": false,
     "leaks_info": false,
@@ -831,6 +917,7 @@
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+      "application/onenote",
       "text/x-ms-iqy",
       "application/excel",
       "text/xml",
@@ -856,8 +943,8 @@
   "Doc_Info_Experimental": {
     "type": "file",
     "python_module": "doc_info.DocInfo",
-    "description": "static document analysis with new features to analyze XLM macros, encrypted macros and more",
-    "disabled": false,
+    "description": "static Microsoft Office document analysis with new features to analyze XLM macros, encrypted macros and more [DEPRECATED, move to Doc_Info]",
+    "disabled": true,
     "external_service": false,
     "leaks_info": false,
     "supported_filetypes": [
@@ -914,7 +1001,8 @@
       "api_key_name": {
         "env_var_key": "DOCGUARD_KEY",
         "description": "",
-        "required": false
+        "required": false,
+        "type": "str"
       }
     },
     "params": {}
@@ -937,6 +1025,7 @@
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+      "application/onenote",
       "text/x-ms-iqy",
       "application/excel",
       "text/xml",
@@ -954,7 +1043,8 @@
       "api_key_name": {
         "env_var_key": "DOCGUARD_KEY",
         "description": "",
-        "required": false
+        "required": false,
+        "type": "str"
       }
     },
     "params": {}
@@ -1005,12 +1095,15 @@
       "api_key_name": {
         "env_var_key": "DRAGONFLY_API_KEY",
         "description": "Dragonfly API key. Generate [here](https://dragonfly.certego.net/me/sessions?utm_source=intelowl).",
-        "required": true
+        "required": true,
+        "type": "str"
       },
       "url_key_name": {
         "env_var_key": "DRAGONFLY_API_URL",
         "description": "Dragonfly instance URL. Don't change this.",
-        "required": true
+        "default": "https://dragonfly.certego.net/",
+        "required": true,
+        "type": "str"
       }
     }
   },
@@ -1049,7 +1142,8 @@
       "api_key_name": {
         "env_var_key": "EMAILREP_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {}
@@ -1205,10 +1299,11 @@
       "queue": "default"
     },
     "secrets": {
-      "api_key_name": {
-        "env_var_key": "GOOGLE_APPLICATION_CREDENTIALS",
-        "description": "",
-        "required": true
+      "service_account_json": {
+        "env_var_key": "SERVICE_ACCOUNT_JSON",
+        "description": "service account file in JSON format",
+        "required": true,
+        "type": "dict"
       }
     },
     "params": {}
@@ -1229,7 +1324,8 @@
       "api_key_name": {
         "env_var_key": "GSF_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {}
@@ -1252,7 +1348,8 @@
       "api_key_name": {
         "env_var_key": "GREEDYBEAR_API_KEY",
         "description": "API key required for authentication",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {
@@ -1279,7 +1376,8 @@
       "api_key_name": {
         "env_var_key": "GREYNOISE_API_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {
@@ -1302,7 +1400,8 @@
       "api_key_name": {
         "env_var_key": "GREYNOISE_API_KEY",
         "description": "",
-        "required": false
+        "required": false,
+        "type": "str"
       }
     },
     "config": {
@@ -1357,6 +1456,7 @@
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+      "application/onenote",
       "text/x-ms-iqy",
       "application/excel",
       "text/xml",
@@ -1392,9 +1492,8 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "HIBP_API_KEY",
-        "type": "string",
+        "type": "str",
         "required": true,
-        "default": null,
         "description": "API Key for HaveIBeenPwned"
       }
     },
@@ -1432,12 +1531,14 @@
       "api_key_name": {
         "env_var_key": "HONEYDB_API_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       },
       "api_id_name": {
         "env_var_key": "HONEYDB_API_ID",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {
@@ -1464,7 +1565,8 @@
       "api_key_name": {
         "env_var_key": "HUNTER_API_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {}
@@ -1485,7 +1587,8 @@
       "api_key_name": {
         "env_var_key": "HA_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {}
@@ -1506,7 +1609,8 @@
       "api_key_name": {
         "env_var_key": "HA_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {}
@@ -1527,7 +1631,8 @@
       "api_key_name": {
         "env_var_key": "INTELX_API_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {
@@ -1569,7 +1674,8 @@
       "api_key_name": {
         "env_var_key": "INTELX_API_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {
@@ -1601,7 +1707,8 @@
       "api_key_name": {
         "env_var_key": "INTEZER_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {}
@@ -1631,6 +1738,7 @@
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+      "application/onenote",
       "text/x-ms-iqy",
       "application/excel",
       "text/xml",
@@ -1647,7 +1755,8 @@
       "api_key_name": {
         "env_var_key": "INTEZER_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {
@@ -1684,14 +1793,16 @@
       "api_key_name": {
         "env_var_key": "INQUEST_API_KEY",
         "description": "",
-        "required": false
+        "required": false,
+        "type": "str"
       }
     },
     "params": {
       "inquest_analysis": {
         "value": "iocdb_search",
         "type": "str",
-        "description": ""
+        "description": "",
+        "type": "str"
       }
     }
   },
@@ -1711,7 +1822,8 @@
       "api_key_name": {
         "env_var_key": "INQUEST_API_KEY",
         "description": "",
-        "required": false
+        "required": false,
+        "type": "str"
       }
     },
     "params": {
@@ -1738,7 +1850,8 @@
       "api_key_name": {
         "env_var_key": "INQUEST_API_KEY",
         "description": "",
-        "required": false
+        "required": false,
+        "type": "str"
       }
     },
     "params": {
@@ -1746,6 +1859,32 @@
         "value": "dfi_search",
         "type": "str",
         "description": ""
+      }
+    }
+  },
+  "IPApi": {
+    "type": "observable",
+    "python_module": "ipapi.IPApi",
+    "description": "Gives information about [IPs](https://ip-api.com/docs/api:batch) and [DNS](https://ip-api.com/docs/dns)",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": ["ip"],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {},
+    "params": {
+      "fields" : {
+        "value" : "",
+        "type" : "str",
+        "description" : "specify the information fields"
+      },
+      "lang" : {
+        "value" : "",
+        "type" : "str",
+        "description" : "specify the response language"
       }
     }
   },
@@ -1765,7 +1904,8 @@
       "api_key_name": {
         "env_var_key": "IPINFO_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {}
@@ -1785,9 +1925,8 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "KOODOUS_KEY",
-        "type": "string",
+        "type": "str",
         "required": true,
-        "default": null,
         "description": "API Key for the Koodous analyzer"
       }
     },
@@ -1825,12 +1964,14 @@
       "api_key_name": {
         "env_var_key": "MISP_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       },
       "url_key_name": {
         "env_var_key": "MISP_URL",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {
@@ -1892,15 +2033,58 @@
       "api_key_name": {
         "env_var_key": "FIRST_MISP_API",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       },
       "url_key_name": {
         "env_var_key": "FIRST_MISP_URL",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
-    "params": {}
+    "params": {
+      "ssl_check": {
+        "value": true,
+        "type": "bool",
+        "description": "Enable SSL certificate server verification. Change this if your MISP instance has not SSL enabled"
+      },
+      "self_signed_certificate": {
+        "value": false,
+        "type": "bool",
+        "description": "If ssl_check and this flag are True, the analyzer will leverage a CA_BUNDLE to authenticate against the MISP instance. IntelOwl will look for it at this path: `configuration/misp_ssl.crt`. Remember that this file should be readable by the application (`www-data` user must read this)"
+      },
+      "debug": {
+        "value": false,
+        "type": "bool",
+        "description": "Enable debug logs."
+      },
+      "from_days": {
+        "value": 90,
+        "type": "int",
+        "description": "Check only events created in the past X days. 0 for no filter"
+      },
+      "limit": {
+        "value": 50,
+        "type": "int",
+        "description": "Limit the number of results returned"
+      },
+      "filter_on_type": {
+        "value": true,
+        "type": "bool",
+        "description": "Filter the search on the type of the observable."
+      },
+      "enforce_warninglist": {
+        "value": true,
+        "type": "bool",
+        "description": "Remove any attributes from the result that would cause a hit on a warninglist entry."
+      },
+      "strict_search": {
+        "value": true,
+        "type": "bool",
+        "description": "Search strictly on the observable value (True) or search on attributes containing observable value (False)"
+      }
+    }
   },
   "MISPFIRST_Check_Hash": {
     "type": "file",
@@ -1918,12 +2102,14 @@
       "api_key_name": {
         "env_var_key": "FIRST_MISP_API",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       },
       "url_key_name": {
         "env_var_key": "FIRST_MISP_URL",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {}
@@ -1944,12 +2130,14 @@
       "api_key_name": {
         "env_var_key": "MISP_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       },
       "url_key_name": {
         "env_var_key": "MISP_URL",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {}
@@ -1982,7 +2170,8 @@
       "api_key_name": {
         "env_var_key": "MALPEDIA_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {}
@@ -2047,8 +2236,9 @@
     "secrets": {
       "api_key_name": {
         "env_var_key": "MAXMIND_KEY",
-        "description": "",
-        "required": true
+        "description": "API key to access the service",
+        "required": true,
+        "type": "str"
       }
     },
     "params": {}
@@ -2089,7 +2279,8 @@
       "api_key_name": {
         "env_var_key": "MWDB_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {
@@ -2109,6 +2300,23 @@
         "description": "Number of retries to perform for polling analysis results."
       }
     }
+  },
+  "OneNote_Info": {
+    "type": "file",
+    "python_module": "onenote.OneNoteInfo",
+    "description": "Extracting information from OneNote Office docs via [PyOneNote](https://github.com/DissectMalware/pyOneNote)",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
+    "supported_filetypes": [
+      "application/onenote"
+    ],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "local"
+    },
+    "secrets": {},
+    "params": {}
   },
   "ONYPHE": {
     "type": "observable",
@@ -2147,12 +2355,14 @@
       "api_key_name": {
         "env_var_key": "OPENCTI_KEY",
         "description": "API key for your OpenCTI instance",
-        "required": true
+        "required": true,
+        "type": "str"
       },
       "url_key_name": {
         "env_var_key": "OPENCTI_URL",
         "description": "URL of your OpenCTI instance",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {
@@ -2192,7 +2402,8 @@
       "api_key_name": {
         "env_var_key": "OTX_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {
@@ -2229,7 +2440,8 @@
       "api_key_name": {
         "env_var_key": "OTX_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {
@@ -2343,15 +2555,16 @@
       "api_key_name": {
         "env_var_key": "PHISHTANK_API_KEY",
         "description": "Optional API key.",
-        "required": false
+        "required": false,
+        "type": "str"
       }
     },
     "params": {}
   },
-  "Pulsedive_Active_IOC": {
+  "Pulsedive": {
     "type": "observable",
     "python_module": "pulsedive.Pulsedive",
-    "description": "Scan indicators and retrieve results from Pulsedive's API",
+    "description": "Scan indicators and retrieve results from [Pulsedive](https://pulsedive.com/)'s API",
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
@@ -2364,7 +2577,36 @@
       "api_key_name": {
         "env_var_key": "PULSEDIVE_API_KEY",
         "description": "Optional API key.",
-        "required": false
+        "required": false,
+        "type": "str"
+      }
+    },
+    "params": {
+      "scan_mode": {
+        "value": "basic",
+        "type": "str",
+        "description": "[basic, passive, active] By Default there is no scan of the observable. You can choose to add either active or passive scanning. See [doc](https://pulsedive.com/api/scan) for more info"
+      }
+    }
+  },
+  "Pulsedive_Active_IOC": {
+    "type": "observable",
+    "python_module": "pulsedive.Pulsedive",
+    "description": "[DEPRECATED] Scan indicators and retrieve results from Pulsedive's API",
+    "disabled": true,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": ["ip", "domain", "url", "hash"],
+    "config": {
+      "soft_time_limit": 100,
+      "queue": "default"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "PULSEDIVE_API_KEY",
+        "description": "Optional API key.",
+        "required": false,
+        "type": "str"
       }
     },
     "params": {
@@ -2550,6 +2792,7 @@
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
+    "leaks_info": false,
     "observable_supported": ["domain", "url"],
     "config": {
       "soft_time_limit": 30,
@@ -2600,68 +2843,20 @@
     "secrets": {},
     "params": {}
   },
-  "Robtex_Forward_PDNS_Query": {
+  "Robtex": {
     "type": "observable",
     "python_module": "robtex.Robtex",
-    "description": "scan a domain against the Robtex Passive DNS DB",
+    "description": "scan a domain/IP against the Robtex Passive DNS DB",
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
-    "observable_supported": ["domain", "url"],
+    "observable_supported": ["domain", "url", "ip"],
     "config": {
       "soft_time_limit": 30,
       "queue": "default"
     },
     "secrets": {},
-    "params": {
-      "robtex_analysis": {
-        "value": "forward_pdns",
-        "type": "str",
-        "description": ""
-      }
-    }
-  },
-  "Robtex_IP_Query": {
-    "type": "observable",
-    "python_module": "robtex.Robtex",
-    "description": "get IP info from Robtex",
-    "disabled": false,
-    "external_service": true,
-    "leaks_info": false,
-    "observable_supported": ["ip"],
-    "config": {
-      "soft_time_limit": 30,
-      "queue": "default"
-    },
-    "secrets": {},
-    "params": {
-      "robtex_analysis": {
-        "value": "ip_query",
-        "type": "str",
-        "description": ""
-      }
-    }
-  },
-  "Robtex_Reverse_PDNS_Query": {
-    "type": "observable",
-    "python_module": "robtex.Robtex",
-    "description": "scan an IP against the Robtex Passive DNS DB",
-    "disabled": false,
-    "external_service": true,
-    "leaks_info": false,
-    "observable_supported": ["ip"],
-    "config": {
-      "soft_time_limit": 30,
-      "queue": "default"
-    },
-    "secrets": {},
-    "params": {
-      "robtex_analysis": {
-        "value": "reverse_pdns",
-        "type": "str",
-        "description": ""
-      }
-    }
+    "params": {}
   },
   "Rtf_Info": {
     "type": "file",
@@ -2678,11 +2873,49 @@
     "secrets": {},
     "params": {}
   },
+  "Securitytrails": {
+    "type": "observable",
+    "python_module": "securitytrails.SecurityTrails",
+    "description": "scan a domain against [securitytrails API](https://securitytrails.com/)",
+    "disabled": true,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": ["domain", "ip"],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "SECURITYTRAILS_KEY",
+        "description": "",
+        "required": true,
+        "type": "str"
+      }
+    },
+    "params": {
+      "securitytrails_analysis": {
+        "value": "current",
+        "type": "str",
+        "description": "Analysis Type. Available options: current, history"
+      },
+      "securitytrails_current_type": {
+        "value": "details",
+        "type": "str",
+        "description": "Suboptions if you chose 'current' analysis type. Options: details,subdomains,tags"
+      },
+      "securitytrails_history_type": {
+        "value": "whois",
+        "type": "str",
+        "description": "Suboptions if you chose 'history' analysis type. Options: whois,dns"
+      }
+    }
+  },
   "Securitytrails_Details": {
     "type": "observable",
     "python_module": "securitytrails.SecurityTrails",
     "description": "scan a domain against securitytrails API for general details",
-    "disabled": false,
+    "disabled": true,
     "external_service": true,
     "leaks_info": false,
     "observable_supported": ["domain"],
@@ -2694,7 +2927,8 @@
       "api_key_name": {
         "env_var_key": "SECURITYTRAILS_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {
@@ -2714,7 +2948,7 @@
     "type": "observable",
     "python_module": "securitytrails.SecurityTrails",
     "description": "scan a domain against securitytrails API for historical DNS",
-    "disabled": false,
+    "disabled": true,
     "external_service": true,
     "leaks_info": false,
     "observable_supported": ["domain"],
@@ -2726,7 +2960,8 @@
       "api_key_name": {
         "env_var_key": "SECURITYTRAILS_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {
@@ -2746,7 +2981,7 @@
     "type": "observable",
     "python_module": "securitytrails.SecurityTrails",
     "description": "scan a domain against securitytrails API for historical WHOIS",
-    "disabled": false,
+    "disabled": true,
     "external_service": true,
     "leaks_info": false,
     "observable_supported": ["domain"],
@@ -2758,7 +2993,8 @@
       "api_key_name": {
         "env_var_key": "SECURITYTRAILS_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {
@@ -2778,7 +3014,7 @@
     "type": "observable",
     "python_module": "securitytrails.SecurityTrails",
     "description": "scan an IP against securitytrails API for neighbour IPs",
-    "disabled": false,
+    "disabled": true,
     "external_service": true,
     "leaks_info": false,
     "observable_supported": ["ip"],
@@ -2790,7 +3026,8 @@
       "api_key_name": {
         "env_var_key": "SECURITYTRAILS_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {}
@@ -2799,7 +3036,7 @@
     "type": "observable",
     "python_module": "securitytrails.SecurityTrails",
     "description": "scan a domain against securitytrails API for subdomains",
-    "disabled": false,
+    "disabled": true,
     "external_service": true,
     "leaks_info": false,
     "observable_supported": ["domain"],
@@ -2811,7 +3048,8 @@
       "api_key_name": {
         "env_var_key": "SECURITYTRAILS_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {
@@ -2831,13 +3069,14 @@
     "type": "observable",
     "python_module": "securitytrails.SecurityTrails",
     "description": "scan a domain against securitytrails API for tags",
-    "disabled": false,
+    "disabled": true,
     "external_service": true,
     "leaks_info": false,
     "observable_supported": ["domain"],
     "config": {
       "soft_time_limit": 30,
-      "queue": "default"
+      "queue": "default",
+      "type": "str"
     },
     "secrets": {
       "api_key_name": {
@@ -2875,7 +3114,8 @@
       "api_key_name": {
         "env_var_key": "SHODAN_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {
@@ -2974,7 +3214,8 @@
       "api_key_name": {
         "env_var_key": "SPYSE_API_KEY",
         "description": "Spyse API token",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {}
@@ -2995,7 +3236,8 @@
       "api_key_name": {
         "env_var_key": "SSAPINET_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {
@@ -3042,16 +3284,43 @@
       "api_key_name": {
         "env_var_key": "STALKPHISH_KEY",
         "description": "API key.",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {}
   },
+  "Strings_Info": {
+    "type": "file",
+    "python_module": "strings_info.StringsInfo",
+    "description": "Strings extraction. Leverages Mandiant's [Stringsifter](https://github.com/mandiant/stringsifter)",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
+    "docker_based": true,
+    "config": {
+      "soft_time_limit": 70,
+      "queue": "local"
+    },
+    "secrets": {},
+    "params": {
+      "max_number_of_strings": {
+        "value": 500,
+        "type": "int",
+        "description": ""
+      },
+      "rank_strings": {
+        "value": false,
+        "type": "bool",
+        "description": "enable ranking based on Machine Learning features"
+      }
+    }
+  },
   "Strings_Info_Classic": {
     "type": "file",
     "python_module": "strings_info.StringsInfo",
-    "description": "strings extraction",
-    "disabled": false,
+    "description": "strings extraction [DEPRECATED, move to Strings_Info]",
+    "disabled": true,
     "external_service": false,
     "leaks_info": false,
     "docker_based": true,
@@ -3076,8 +3345,8 @@
   "Strings_Info_ML": {
     "type": "file",
     "python_module": "strings_info.StringsInfo",
-    "description": "strings extraction plus strings ranking based on Machine Learning. Leverages Fireeye's Stringsifter",
-    "disabled": false,
+    "description": "strings extraction plus strings ranking based on Machine Learning. Leverages Fireeye's Stringsifter [DEPRECATED, move to Strings_Info]",
+    "disabled": true,
     "external_service": false,
     "leaks_info": false,
     "docker_based": true,
@@ -3171,11 +3440,32 @@
     "secrets": {},
     "params": {}
   },
+  "Threatminer": {
+    "type": "observable",
+    "python_module": "threatminer.Threatminer",
+    "description": "retrieve data from [Threatminer API](https://www.threatminer.org/api.php)",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": ["ip", "domain", "hash"],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {},
+    "params": {
+      "rt_value": {
+        "value": 2,
+        "type": "int",
+        "description": "Request type. Default is PassiveDNS(rt=2). See [ThreatMiner APIs](https://www.threatminer.org/api.php) for more details about how to leverage this option"
+      }
+    }
+  },
   "Threatminer_PDNS": {
     "type": "observable",
     "python_module": "threatminer.Threatminer",
     "description": "retrieve PDNS data from Threatminer API",
-    "disabled": false,
+    "disabled": true,
     "external_service": true,
     "leaks_info": false,
     "observable_supported": ["ip", "domain"],
@@ -3196,7 +3486,7 @@
     "type": "observable",
     "python_module": "threatminer.Threatminer",
     "description": "retrieve reports from Threatminer API",
-    "disabled": false,
+    "disabled": true,
     "external_service": true,
     "leaks_info": false,
     "observable_supported": ["ip", "domain"],
@@ -3217,7 +3507,7 @@
     "type": "observable",
     "python_module": "threatminer.Threatminer",
     "description": "retrieve subdomains from Threatminer API",
-    "disabled": false,
+    "disabled": true,
     "external_service": true,
     "leaks_info": false,
     "observable_supported": ["domain"],
@@ -3401,7 +3691,8 @@
       "api_key_name": {
         "env_var_key": "TRIAGE_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {
@@ -3431,14 +3722,15 @@
     "leaks_info": true,
     "observable_supported": ["url"],
     "config": {
-      "soft_time_limit": 300,
+      "soft_time_limit": 500,
       "queue": "long"
     },
     "secrets": {
       "api_key_name": {
         "env_var_key": "TRIAGE_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {
@@ -3467,14 +3759,15 @@
     "external_service": true,
     "leaks_info": true,
     "config": {
-      "soft_time_limit": 300,
+      "soft_time_limit": 500,
       "queue": "long"
     },
     "secrets": {
       "api_key_name": {
         "env_var_key": "TRIAGE_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {
@@ -3506,7 +3799,8 @@
       "api_key_name": {
         "env_var_key": "UNPAC_ME_API_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {
@@ -3553,7 +3847,8 @@
       "api_key_name": {
         "env_var_key": "URLSCAN_API_KEY",
         "description": "API key is mandatory for submit.",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {
@@ -3585,7 +3880,8 @@
       "api_key_name": {
         "env_var_key": "URLSCAN_API_KEY",
         "description": "API key is optional for search.",
-        "required": false
+        "required": false,
+        "type": "str"
       }
     },
     "params": {
@@ -3612,7 +3908,8 @@
       "api_key_name": {
         "env_var_key": "VIRUSHEE_API_KEY",
         "description": "[virushee docs](https://api.virushee.com/#section/Authentication)",
-        "required": false
+        "required": false,
+        "type": "str"
       }
     },
     "params": {}
@@ -3632,7 +3929,8 @@
       "api_key_name": {
         "env_var_key": "VIRUSHEE_API_KEY",
         "description": "[virushee docs](https://api.virushee.com/#section/Authentication)",
-        "required": false
+        "required": false,
+        "type": "str"
       }
     },
     "params": {
@@ -3659,7 +3957,8 @@
       "api_key_name": {
         "env_var_key": "VT_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {}
@@ -3680,7 +3979,8 @@
       "api_key_name": {
         "env_var_key": "VT_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {}
@@ -3700,12 +4000,14 @@
       "api_key_name": {
         "env_var_key": "VT_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       },
       "url_key_name": {
         "env_var_key": "VT_NOTIFY_URL",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {}
@@ -3727,7 +4029,8 @@
       "api_key_name": {
         "env_var_key": "VT_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {
@@ -3800,7 +4103,8 @@
       "api_key_name": {
         "env_var_key": "VT_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {
@@ -3877,7 +4181,8 @@
       "api_key_name": {
         "env_var_key": "VT_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {
@@ -3949,7 +4254,8 @@
       "api_key_name": {
         "env_var_key": "VT_INTELLIGENCE_KEY",
         "required": true,
-        "description": "API Key for the analyzer. You need to have a premium license with VT."
+        "description": "API Key for the analyzer. You need to have a premium license with VT.",
+        "type": "str"
       }
     },
     "params": {
@@ -3976,7 +4282,8 @@
       "api_key_name": {
         "env_var_key": "WHOISXMLAPI_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {}
@@ -4012,7 +4319,8 @@
       "api_key_name": {
         "env_var_key": "WIGLE_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {
@@ -4039,12 +4347,14 @@
       "api_key_name": {
         "env_var_key": "XFORCE_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       },
       "api_password_name": {
         "env_var_key": "XFORCE_PASSWORD",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {
@@ -4058,7 +4368,7 @@
   "Xlm_Macro_Deobfuscator": {
     "type": "file",
     "python_module": "xlm_macro_deobfuscator.XlmMacroDeobfuscator",
-    "description": "Xlm macro deobfuscator",
+    "description": "Extracting Office XLM Macros with [XlmMacroDeobfuscator](https://github.com/DissectMalware/XLMMacroDeobfuscator)",
     "disabled": false,
     "external_service": false,
     "leaks_info": false,
@@ -4086,11 +4396,75 @@
       }
     }
   },
+   "Yara": {
+    "type": "file",
+    "python_module": "yara_scan.YaraScan",
+    "description": "scan a file with Yara rules",
+    "disabled": false,
+    "external_service": false,
+    "leaks_info": false,
+    "config": {
+      "soft_time_limit": 120,
+      "queue": "local"
+    },
+    "secrets": {
+      "private_repositories": {
+        "env_var_key": "YARA_PRIVATE_REPOSITORIES",
+        "description": "Private repositories in the following format: {\"username@provider:org/repository.git\":\"ssh key\"}. Use double quote, don't worry about whitespace.",
+        "required": false,
+        "type": "dict",
+        "default": {}
+      }
+    },
+    "params": {
+      "public_repositories": {
+        "value": [
+          "https://github.com/elastic/protections-artifacts",
+          "https://github.com/embee-research/Yara",
+          "https://github.com/JPCERTCC/jpcert-yara",
+          "https://github.com/SIFalcon/Detection/",
+          "https://github.com/bartblaze/Yara-rules",
+          "https://github.com/intezer/yara-rules",
+          "https://github.com/advanced-threat-research/Yara-Rules",
+          "https://github.com/stratosphereips/yara-rules",
+          "https://github.com/reversinglabs/reversinglabs-yara-rules",
+          "https://github.com/sbousseaden/YaraHunts",
+          "https://github.com/InQuest/yara-rules",
+          "https://github.com/StrangerealIntel/DailyIOC",
+          "https://github.com/mandiant/red_team_tool_countermeasures",
+          "https://github.com/fboldewin/YARA-rules",
+          "https://github.com/Yara-Rules/rules.git",
+          "https://github.com/Neo23x0/signature-base.git",
+          "https://yaraify-api.abuse.ch/download/yaraify-rules.zip"
+        ],
+        "type": "list",
+        "description": "Repositories that will be constantly updated"
+      },
+      "local_rules": {
+        "value": false,
+        "type": "bool",
+        "description": "If true, use local rules present at /opt/deploy/files_required/yara/YOUR_USER/custom_rule"
+      },
+     "ignore": {
+        "value": [
+          "generic_anomalies.yar",
+          "general_cloaking.yar",
+          "thor_inverse_matches.yar",
+          "yara_mixed_ext_vars.yar",
+          "thor-webshells.yar"
+        ],
+       "type": "list",
+      "description": "ignore these rules"
+      }
+    }
+
+  },
+
   "Yara_Scan_ATM_MALWARE": {
     "type": "file",
     "python_module": "yara_scan.YaraScan",
-    "description": "scan a file with ATM Malware yara rules ([github](https://github.com/fboldewin/YARA-rules))",
-    "disabled": false,
+    "description": "[DEPRECATED, move to Yara] scan a file with ATM Malware yara rules ([github](https://github.com/fboldewin/YARA-rules))",
+    "disabled": true,
     "external_service": false,
     "leaks_info": false,
     "config": {
@@ -4099,19 +4473,9 @@
     },
     "secrets": {},
     "params": {
-      "git_repo_main_dir": {
-        "value": ["/opt/deploy/yara/atm_malware_rules"],
+      "repositories": {
+        "value": ["https://github.com/fboldewin/YARA-rules"],
         "type": "list",
-        "description": ""
-      },
-      "directories_with_rules": {
-        "value": ["/opt/deploy/yara/atm_malware_rules"],
-        "type": "list",
-        "description": ""
-      },
-      "recursive": {
-        "value": true,
-        "type": "bool",
         "description": ""
       }
     }
@@ -4119,8 +4483,8 @@
   "Yara_Scan_Bartblaze": {
     "type": "file",
     "python_module": "yara_scan.YaraScan",
-    "description": "Scan a file with Intezer yara rules ([github](https://github.com/bartblaze/Yara-rules)).",
-    "disabled": false,
+    "description": "[DEPRECATED, move to Yara] Scan a file with Bartblaze yara rules ([github](https://github.com/bartblaze/Yara-rules)).",
+    "disabled": true,
     "external_service": false,
     "leaks_info": false,
     "config": {
@@ -4129,19 +4493,8 @@
     },
     "secrets": {},
     "params": {
-      "git_repo_main_dir": {
-        "value": ["/opt/deploy/yara/bartblaze_rules"],
-        "type": "list",
-        "description": ""
-      },
-      "directories_with_rules": {
-        "value": [
-          "/opt/deploy/yara/bartblaze_rules/rules/APT",
-          "/opt/deploy/yara/bartblaze_rules/rules/crimeware",
-          "/opt/deploy/yara/bartblaze_rules/rules/generic",
-          "/opt/deploy/yara/bartblaze_rules/rules/hacktools",
-          "/opt/deploy/yara/bartblaze_rules/rules/ransomware"
-        ],
+      "repositories": {
+        "value": ["https://github.com/bartblaze/Yara-rules"],
         "type": "list",
         "description": ""
       }
@@ -4150,8 +4503,8 @@
   "Yara_Scan_Community": {
     "type": "file",
     "python_module": "yara_scan.YaraScan",
-    "description": "scan a file with community yara rules ([github](https://github.com/Yara-Rules/rules.git))",
-    "disabled": false,
+    "description": "[DEPRECATED, move to Yara] Scan a file with community yara rules ([github](https://github.com/Yara-Rules/rules.git))",
+    "disabled": true,
     "external_service": false,
     "leaks_info": false,
     "config": {
@@ -4160,33 +4513,18 @@
     },
     "secrets": {},
     "params": {
-      "git_repo_main_dir": {
-        "value": ["/opt/deploy/yara/rules"],
+      "repositories": {
+        "value": ["https://github.com/Yara-Rules/rules.git"],
         "type": "list",
         "description": ""
-      },
-      "directories_with_rules": {
-        "value": ["/opt/deploy/yara/rules/antidebug_antivm",
-                  "/opt/deploy/yara/rules/capabilities",
-                  "/opt/deploy/yara/rules/crypto",
-                  "/opt/deploy/yara/rules/cve_rules",
-                  "/opt/deploy/yara/rules/email",
-                  "/opt/deploy/yara/rules/exploit_kits",
-                  "/opt/deploy/yara/rules/maldocs",
-                  "/opt/deploy/yara/rules/malware",
-                  "/opt/deploy/yara/rules/mobile_malware",
-                  "/opt/deploy/yara/rules/packers",
-                  "/opt/deploy/yara/rules/webshells"],
-        "type": "list",
-        "description": ""
-      }
+        }
     }
   },
   "Yara_Scan_Custom_Signatures": {
     "type": "file",
     "python_module": "yara_scan.YaraScan",
-    "description": "scan a file with the Custom Signatures you added in IntelOwl",
-    "disabled": false,
+    "description": "[DEPRECATED, move to Yara] Scan a file with the Custom Signatures you added in IntelOwl",
+    "disabled": true,
     "external_service": false,
     "leaks_info": false,
     "config": {
@@ -4195,23 +4533,13 @@
     },
     "secrets": {},
     "params": {
-      "directories_with_rules": {
-        "value": ["/opt/deploy/intel_owl/configuration/custom_yara"],
-        "type": "list",
-        "description": "Add your own .yar files in the directory /configuration/custom_yara to use your own rules"
-      },
-      "update": {
-        "value": false,
-        "type": "bool",
-        "description": "This is set to false because these rules are local so they don't need any update"
-      }
     }
   },
   "Yara_Scan_Daily_Ioc": {
     "type": "file",
     "python_module": "yara_scan.YaraScan",
-    "description": "scan a file with StrangerealIntel daily IOC yara rules ([github](https://github.com/StrangerealIntel/DailyIOC))",
-    "disabled": false,
+    "description": "[DEPRECATED, move to Yara] Scan a file with StrangerealIntel daily IOC yara rules ([github](https://github.com/StrangerealIntel/DailyIOC))",
+    "disabled": true,
     "external_service": false,
     "leaks_info": false,
     "config": {
@@ -4220,19 +4548,9 @@
     },
     "secrets": {},
     "params": {
-      "git_repo_main_dir": {
-        "value": ["/opt/deploy/yara/daily_ioc_rules"],
+      "repositories": {
+        "value": ["https://github.com/StrangerealIntel/DailyIOC"],
         "type": "list",
-        "description": ""
-      },
-      "directories_with_rules": {
-        "value": ["/opt/deploy/yara/daily_ioc_rules"],
-        "type": "list",
-        "description": ""
-      },
-      "recursive": {
-        "value": true,
-        "type": "bool",
         "description": ""
       }
     }
@@ -4240,8 +4558,8 @@
   "Yara_Scan_Florian": {
     "type": "file",
     "python_module": "yara_scan.YaraScan",
-    "description": "scan a file with Neo23x0 yara rules ([github](https://github.com/Neo23x0/signature-base.git))",
-    "disabled": false,
+    "description": "[DEPRECATED, move to Yara] Scan a file with Neo23x0 yara rules ([github](https://github.com/Neo23x0/signature-base.git))",
+    "disabled": true,
     "external_service": false,
     "leaks_info": false,
     "config": {
@@ -4250,13 +4568,8 @@
     },
     "secrets": {},
     "params": {
-      "git_repo_main_dir": {
-        "value": ["/opt/deploy/yara/signature-base"],
-        "type": "list",
-        "description": ""
-      },
-      "directories_with_rules": {
-        "value": ["/opt/deploy/yara/signature-base/yara"],
+      "repositories": {
+        "value": ["https://github.com/Neo23x0/signature-base.git"],
         "type": "list",
         "description": ""
       }
@@ -4265,8 +4578,8 @@
   "Yara_Scan_Mandiant": {
     "type": "file",
     "python_module": "yara_scan.YaraScan",
-    "description": "scan a file with Mandiant yara rules ([github](https://github.com/mandiant/red_team_tool_countermeasures))",
-    "disabled": false,
+    "description": "[DEPRECATED, move to Yara] Scan a file with Mandiant yara rules ([github](https://github.com/mandiant/red_team_tool_countermeasures))",
+    "disabled": true,
     "external_service": false,
     "leaks_info": false,
     "config": {
@@ -4275,19 +4588,9 @@
     },
     "secrets": {},
     "params": {
-      "git_repo_main_dir": {
-        "value": ["/opt/deploy/yara/mandiant_rules"],
+      "repositories": {
+        "value": ["https://github.com/mandiant/red_team_tool_countermeasures"],
         "type": "list",
-        "description": ""
-      },
-      "directories_with_rules": {
-        "value": ["/opt/deploy/yara/mandiant_rules/rules"],
-        "type": "list",
-        "description": ""
-      },
-      "recursive": {
-        "value": true,
-        "type": "bool",
         "description": ""
       }
     }
@@ -4295,8 +4598,8 @@
   "Yara_Scan_Inquest": {
     "type": "file",
     "python_module": "yara_scan.YaraScan",
-    "description": "scan a file with Inquest yara rules ([github](https://github.com/InQuest/yara-rules))",
-    "disabled": false,
+    "description": "[DEPRECATED, move to Yara] Scan a file with Inquest yara rules ([github](https://github.com/InQuest/yara-rules))",
+    "disabled": true,
     "external_service": false,
     "leaks_info": false,
     "config": {
@@ -4305,19 +4608,9 @@
     },
     "secrets": {},
     "params": {
-      "git_repo_main_dir": {
-        "value": ["/opt/deploy/yara/inquest_rules"],
+      "repositories": {
+        "value": ["https://github.com/InQuest/yara-rules"],
         "type": "list",
-        "description": ""
-      },
-      "directories_with_rules": {
-        "value": ["/opt/deploy/yara/inquest_rules"],
-        "type": "list",
-        "description": ""
-      },
-      "recursive": {
-        "value": false,
-        "type": "bool",
         "description": ""
       }
     }
@@ -4325,8 +4618,8 @@
   "Yara_Scan_Intezer": {
     "type": "file",
     "python_module": "yara_scan.YaraScan",
-    "description": "Scan a file with Intezer yara rules ([github](https://github.com/intezer/yara-rules)).",
-    "disabled": false,
+    "description": "[DEPRECATED, move to Yara] Scan a file with Intezer yara rules ([github](https://github.com/intezer/yara-rules)).",
+    "disabled": true,
     "external_service": false,
     "leaks_info": false,
     "config": {
@@ -4335,8 +4628,8 @@
     },
     "secrets": {},
     "params": {
-      "directories_with_rules": {
-        "value": ["/opt/deploy/yara/intezer_rules"],
+      "repositories": {
+        "value": ["https://github.com/intezer/yara-rules"],
         "type": "list",
         "description": ""
       }
@@ -4345,8 +4638,8 @@
   "Yara_Scan_ReversingLabs": {
     "type": "file",
     "python_module": "yara_scan.YaraScan",
-    "description": "scan a file with ReversingLabs yara rules ([github](https://github.com/reversinglabs/reversinglabs-yara-rules))",
-    "disabled": false,
+    "description": "[DEPRECATED, move to Yara] Scan a file with ReversingLabs yara rules ([github](https://github.com/reversinglabs/reversinglabs-yara-rules))",
+    "disabled": true,
     "external_service": false,
     "leaks_info": false,
     "config": {
@@ -4355,19 +4648,9 @@
     },
     "secrets": {},
     "params": {
-      "git_repo_main_dir": {
-        "value": ["/opt/deploy/yara/reversinglabs_rules"],
+      "repositories": {
+        "value": ["https://github.com/reversinglabs/reversinglabs-yara-rules"],
         "type": "list",
-        "description": ""
-      },
-      "directories_with_rules": {
-        "value": ["/opt/deploy/yara/reversinglabs_rules/yara"],
-        "type": "list",
-        "description": ""
-      },
-      "recursive": {
-        "value": true,
-        "type": "bool",
         "description": ""
       }
     }
@@ -4375,8 +4658,8 @@
   "Yara_Scan_Samir": {
     "type": "file",
     "python_module": "yara_scan.YaraScan",
-    "description": "scan a file with Samir Threat Hunting yara rules ([github](hhttps://github.com/sbousseaden/YaraHunts))",
-    "disabled": false,
+    "description": "[DEPRECATED, move to Yara] Scan a file with Samir Threat Hunting yara rules ([github](hhttps://github.com/sbousseaden/YaraHunts))",
+    "disabled": true,
     "external_service": false,
     "leaks_info": false,
     "config": {
@@ -4385,13 +4668,8 @@
     },
     "secrets": {},
     "params": {
-      "git_repo_main_dir": {
-        "value": ["/opt/deploy/yara/samir_rules"],
-        "type": "list",
-        "description": ""
-      },
-      "directories_with_rules": {
-        "value": ["/opt/deploy/yara/samir_rules"],
+      "repositories": {
+        "value": ["https://github.com/sbousseaden/YaraHunts"],
         "type": "list",
         "description": ""
       }
@@ -4400,8 +4678,8 @@
   "Yara_Scan_Stratosphere": {
     "type": "file",
     "python_module": "yara_scan.YaraScan",
-    "description": "scan a file with Stratosphere yara rules ([github](https://github.com/stratosphereips/yara-rules))",
-    "disabled": false,
+    "description": "[DEPRECATED, move to Yara] Scan a file with Stratosphere yara rules ([github](https://github.com/stratosphereips/yara-rules))",
+    "disabled": true,
     "external_service": false,
     "leaks_info": false,
     "config": {
@@ -4410,16 +4688,8 @@
     },
     "secrets": {},
     "params": {
-      "git_repo_main_dir": {
-        "value": ["/opt/deploy/yara/stratosphere_rules"],
-        "type": "list",
-        "description": ""
-      },
-      "directories_with_rules": {
-        "value": [
-          "/opt/deploy/yara/stratosphere_rules/malware",
-          "/opt/deploy/yara/stratosphere_rules/protocols"
-        ],
+      "repositories": {
+        "value": ["https://github.com/stratosphereips/yara-rules"],
         "type": "list",
         "description": ""
       }
@@ -4428,8 +4698,8 @@
   "Yara_Scan_Trellix": {
     "type": "file",
     "python_module": "yara_scan.YaraScan",
-    "description": "scan a file with Trellix yara rules ([github](https://github.com/advanced-threat-research/Yara-Rules))",
-    "disabled": false,
+    "description": "[DEPRECATED, move to Yara] Scan a file with Trellix yara rules ([github](https://github.com/advanced-threat-research/Yara-Rules))",
+    "disabled": true,
     "external_service": false,
     "leaks_info": false,
     "config": {
@@ -4438,20 +4708,8 @@
     },
     "secrets": {},
     "params": {
-      "git_repo_main_dir": {
-        "value": ["/opt/deploy/yara/trellix_rules"],
-        "type": "list",
-        "description": ""
-      },
-      "directories_with_rules": {
-        "value": [
-          "/opt/deploy/yara/trellix_rules/APT",
-          "/opt/deploy/yara/trellix_rules/RAT",
-          "/opt/deploy/yara/trellix_rules/malware",
-          "/opt/deploy/yara/trellix_rules/miners",
-          "/opt/deploy/yara/trellix_rules/ransomware",
-          "/opt/deploy/yara/trellix_rules/stealer"
-        ],
+      "repositories": {
+        "value": ["https://github.com/advanced-threat-research/Yara-Rules"],
         "type": "list",
         "description": ""
       }
@@ -4460,8 +4718,8 @@
   "Yara_Scan_YARAify": {
     "type": "file",
     "python_module": "yara_scan.YaraScan",
-    "description": "Scan a file with yara rules downloaded from [YARAify](https://yaraify.abuse.ch/)",
-    "disabled": false,
+    "description": "[DEPRECATED, move to Yara] Scan a file with yara rules downloaded from [YARAify](https://yaraify.abuse.ch/)",
+    "disabled": true,
     "external_service": false,
     "leaks_info": false,
     "config": {
@@ -4470,20 +4728,25 @@
     },
     "secrets": {},
     "params": {
-      "url": {
+      "repositories": {
         "value": [
           "https://yaraify-api.abuse.ch/download/yaraify-rules.zip"
         ],
         "type": "list",
         "description": ""
       },
-      "directories_with_rules": {
+      "ignore": {
         "value": [
-          "/opt/deploy/yara/yaraify_rules/rules"
+          "generic_anomalies.yar",
+          "general_cloaking.yar",
+          "thor_inverse_matches.yar",
+          "yara_mixed_ext_vars.yar",
+          "thor-webshells.yar"
         ],
         "type": "list",
-        "description": ""
+        "description": "ignore these rules"
       }
+
     }
   },
   "YARAify_File_Scan": {
@@ -4503,11 +4766,13 @@
         "env_var_key": "MALPEDIA_TOKEN",
         "description": "Optional key to receive results from public (TLP:CLEAR) and non-public (TLP:GREEN, TLP:AMBER and TLP:RED) YARA rules.",
         "required": false
+        "type": "str"
       },
       "api_key_identifier": {
         "env_var_key": "YARAIFY_KEY",
         "description": "Optional identifier to associate this submission with",
-        "required": false
+        "required": false,
+        "type": "str"
       }
     },
     "params": {
@@ -4588,6 +4853,7 @@
         "env_var_key": "MALPEDIA_TOKEN",
         "description": "Optional key to receive results from public (TLP:CLEAR) and also non-public (TLP:GREEN, TLP:AMBER and TLP:RED) YARA rules.",
         "required": false
+        "type": "str"
       }
     },
     "params": {}
@@ -4611,6 +4877,7 @@
         "env_var_key": "MALPEDIA_TOKEN",
         "description": "Optional key to receive results from public (TLP:CLEAR) and also non-public (TLP:GREEN, TLP:AMBER and TLP:RED) YARA rules.",
         "required": false
+        "type": "str"
       }
     },
     "params": {}
@@ -4631,12 +4898,14 @@
       "api_key_name": {
         "env_var_key": "YETI_KEY",
         "description": "API key for your YETI instance",
-        "required": true
+        "required": true,
+        "type": "str"
       },
       "url_key_name": {
         "env_var_key": "YETI_URL",
         "description": "API URL of your YETI instance",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {
@@ -4673,7 +4942,8 @@
       "api_key_name": {
         "env_var_key": "ZOOMEYE_KEY",
         "description": "",
-        "required": true
+        "required": true,
+        "type": "str"
       }
     },
     "params": {

@@ -1,6 +1,64 @@
 # Changelog
 
 [**Upgrade Guide**](https://intelowl.readthedocs.io/en/latest/Installation.md#update-to-the-most-recent-version)
+## [v4.2.1](https://github.com/intelowlproject/IntelOwl/releases/tag/v4.2.1)
+
+* Fixed Plugin bug which caused the inability to add new secrets.
+* Fixed Yara Analyzer and added new open source rules
+* Fixed Cape Sandbox analyzer not working
+* Deprecated `ThreatMiner`, `SecurityTrails` and `Robtex` various analyzers and substituted with new versions.
+* Refactoring and features in preparation to add support for cluster deployments.
+* Added a new advanced Documentation section [Advanced Configuration](https://intelowl.readthedocs.io/en/latest/Advanced-Configuration.html)
+  * Added more support for Cloud Deployments (in particular AWS)
+* Other minor adjustments and fixes
+
+## [v4.2.0](https://github.com/intelowlproject/IntelOwl/releases/tag/v4.2.0)
+
+With this release we welcome new official maintainers of IntelOwl:
+- [Simone Berni](https://twitter.com/0ssig3no): Key Contributor and Backend Maintainer
+- [Daniele Rosetti](https://github.com/drosetti): Key Contributor and Frontend Maintainer
+
+These awesome guys will help us maintaining the project and will bring IntelOwl to the next level! 🚀
+Be ready for new awesome features!
+
+**Improved Document analysis**
+
+We added some improvements to handle recent Microsoft Office downloaders:
+* Now `Doc_Info` analyzer is able to extract URLs from samples that abuse [Follina](https://github.com/advisories/GHSA-4r9q-wqcj-x85j) vulnerability
+* Now Microsoft Office analyzers does support OneNote documents
+* We added [PyOneNote](https://github.com/DissectMalware/pyOneNote) analyzer to parse OneNote files.
+
+**Deployments:**
+
+We are preparing to add more support for production deployments. We added some [documentation](https://intelowl.readthedocs.io/en/latest/Installation.md) regarding:
+* Logrotate Configuration
+* Crontab Configuration
+
+**New/Improved Analyzers:**
+
+* Now `ClamAV` analyzer makes use of all open source un-official community rules, not only the official ones
+* `Yara` performance should be greatly improved. We also added other open source repositories plus the chance to configure a private repository of your own.
+* Added [DNS0_EU](https://docs.dns0.eu/) analyzer (DNS resolver `DNS0_EU` + detection of malicious domains `DNS0_EU_Malicious_Detector`)
+* Added [CheckPhish](https://checkphish.ai/checkphish-api/) analyzer
+* Added [HaveIBeenPwned](https://haveibeenpwned.com/API/v3) analyzer
+* Added [Koodous](https://docs.koodous.com/api/) analyzer
+* Added [IPApi](https://ip-api.com) analyzer
+
+**DEPRECATION WARNING:**
+
+We have deprecated some analyzers and disabled them. We will remove them at the next major release.
+If you want to still use their functionalities, you need to explicitly enable them again. But you should move to the new ones:
+* Deprecated `Doc_Info_Experimental`. Its functionality (XLM Macro parsing) is moved to `Doc_Info`
+* Deprecated `Strings_Info_Classic`. Please use `Strings_Info`
+* Deprecated `Strings_Info_ML`. Please use `Strings_Info` and set the parameter `rank_strings` to `True`
+* Deprecated all `Yara_Scan_<repo>` analyzers. They all went merged in the single `Yara` analyzer.
+
+**Others**
+
+- added testing suite for ReactJS Frontend
+- tons of fixes, refactors and stability contributions
+- a lot of dependencies upgrades
+
 ## [v4.1.5](https://github.com/intelowlproject/IntelOwl/releases/tag/v4.1.5)
 With this release we announce that IntelOwl Project will apply as a new Organization in the next [Google Summer of Code](https://summerofcode.withgoogle.com/)!
 
@@ -74,7 +132,7 @@ Looking forward for the Google Summer of Code 2023!
 - Default Plugins Parameters can be customized from the GUI and are defined at user/org level instead of globally ([docs reference](https://intelowl.readthedocs.io/en/latest/Advanced-Usage.html#customize-analyzer-execution))
 - Plugins Secrets can now be managed from the GUI and are defined at user/org level instead of globally ([docs reference](https://intelowl.readthedocs.io/en/latest/Installation.html#deprecated-environment-configuration))
 - Organization admins can enable/disable analyzers for all the org ([docs reference](https://intelowl.readthedocs.io/en/latest/Usage.html#multi-tenancy))
-- Google Oauth authentication support ([docs reference](https://intelowl.readthedocs.io/en/latest/Advanced-Usage.html#google-oauth2))
+- Google Oauth authentication support ([docs reference](https://intelowl.readthedocs.io/en/latest/Advanced-Configuration.html#google-oauth2))
 - Added support for `extends` key to simplify Analyzer configuration and customization ([docs reference](https://intelowl.readthedocs.io/en/latest/Usage.html#analyzers-customization))
 
 **Others**
@@ -208,7 +266,7 @@ If you are interested in helping the project through a donation, read [here](htt
 
 **Notes:**
 - Added helper script that checks and installs [initial requirements](https://intelowl.readthedocs.io/en/develop/Installation.html#requirements). (`initialize.sh`)
-- Added [RADIUS authentication support](https://intelowl.readthedocs.io/en/latest/Advanced-Usage.html#radius-authentication)
+- Added [RADIUS authentication support](https://intelowl.readthedocs.io/en/latest/Advanced-Configuration.html#radius-authentication)
 
 **New/Improved Analyzers:**
 - Added a new optional [Docker Analyzer](https://intelowl.readthedocs.io/en/develop/Advanced-Usage.html#optional-analyzers) running [Onionscan](https://github.com/s-rah/onionscan)
@@ -217,7 +275,7 @@ If you are interested in helping the project through a donation, read [here](htt
 - `PE_Info` analyzer now calculates [impfuzzy](https://github.com/JPCERTCC/impfuzzy) and [dashicon](https://github.com/fr0gger/SuperPeHasher) hashes too.
 
 **Other:**
-- Added option to run ElasticSearch/Kibana together with IntelOwl with option `--elastic`. Check the [doc here](https://intelowl.readthedocs.io/en/latest/Advanced-Usage.html#example-configuration)
+- Added option to run ElasticSearch/Kibana together with IntelOwl with option `--elastic`. Check the [doc here](https://intelowl.readthedocs.io/en/latest/Advanced-Configuration.html#example-configuration)
 - Security: Patched Django Critical Bug + Added Brute Force protection to the Admin page
 - Generic bug fixing and other maintenance work
 - Bump some python dependencies
@@ -570,7 +628,7 @@ Please see [docs](https://intelowl.readthedocs.io/en/stable/Advanced-Usage.html#
 
 - upgraded main Dockerfile to python 3.8
 - added support for the `generic` observable type. In this way it is possible to build analyzers that can analyze everything and not only IPs, domains, URLs or hashes
-- added [Multi-queue](https://intelowl.readthedocs.io/en/stable/Advanced-Usage.html#multi-queue) option to optimize usage of Celery queues. This is intended for advanced users.
+- added [Multi-queue](https://intelowl.readthedocs.io/en/stable/Advanced-Configuration.html#multi-queue) option to optimize usage of Celery queues. This is intended for advanced users.
 - updated GUI to new [IntelOwl-ng](https://github.com/intelowlproject/IntelOwl-ng/releases/tag/v1.7.0) version
 - upgraded [Speakeasy](https://github.com/fireeye/speakeasy), [Quark-Engine](https://github.com/quark-engine/quark-engine) and [Dnstwist](https://github.com/elceef/dnstwist) analyzers to last versions
 - moved from Travis CI to Github CI
@@ -701,7 +759,7 @@ Patch after **v1.5.0**.
 
 **Breaking Changes:**
 
-- Moved `ldap_config.py` under `configuration/` directory. If you were using LDAP before this release, please refer the [updated docs](https://intelowl.readthedocs.io/en/develop/Advanced-Usage.html#ldap).
+- Moved `ldap_config.py` under `configuration/` directory. If you were using LDAP before this release, please refer the [updated docs](https://intelowl.readthedocs.io/en/develop/Advanced-Configuration.html#ldap).
 
 **Fixes:**
 

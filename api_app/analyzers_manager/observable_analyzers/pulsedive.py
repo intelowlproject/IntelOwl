@@ -23,7 +23,7 @@ class Pulsedive(ObservableAnalyzer):
         supported_scan_values = ["basic", "passive", "active"]
         if self.scan_mode not in supported_scan_values:
             raise AnalyzerConfigurationException(
-                f"scan_mode is not a supported value."
+                "scan_mode is not a supported value."
                 f" Supported are {supported_scan_values}"
             )
         self.probe = 1 if self.scan_mode == "active" else 0  # else is "passive"

@@ -2564,7 +2564,7 @@
         "value": "basic",
         "type": "str",
         "description": "[basic, passive, active] By Default there is no scan of the observable. You can choose to add either active or passive scanning. See [doc](https://pulsedive.com/api/scan) for more info"
-      },
+      }
     }
   },
   "Pulsedive_Active_IOC": {

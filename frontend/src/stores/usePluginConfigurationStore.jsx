@@ -39,6 +39,7 @@ const usePluginConfigurationStore = create((set, get) => ({
   playbooksJSON: {},
   playbooks: [],
   hydrate: () => {
+    // this function is called to check if we need to download the data related to the plugins or not
     if (get().analyzersLoading) {
       get().retrieveAnalyzersConfiguration();
     }

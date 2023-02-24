@@ -123,25 +123,27 @@ def get_logger() -> logging.Logger:
 class CustomTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
+        try:
+            cls.user = User.objects.get(is_superuser=False)
+        except User.DoesNotExist:
+            cls.user = User.objects.create(
+                username="testUser", email="test2@intelowl.com", password="test"
+            )
 
         try:
             cls.superuser = User.objects.get(is_superuser=True)
         except User.DoesNotExist:
-            PluginConfig.objects.all().delete()
             print("creating superuser")
             cls.superuser = User.objects.create_superuser(
                 username="test", email="test@intelowl.com", password="test"
             )
-        finally:
-            if not PluginConfig.objects.filter(owner=cls.superuser).exists():
-                call_command("migrate_secrets")
 
 
 class CustomAPITestCase(CustomTestCase):
     def setUp(self):
         super(CustomAPITestCase, self).setUp()
         self.client = APIClient()
-        self.client.force_authenticate(user=self.superuser)
+        self.client.force_authenticate(user=self.user)
 
 
 class PluginActionViewsetTestCase(metaclass=ABCMeta):
@@ -179,9 +181,7 @@ class PluginActionViewsetTestCase(metaclass=ABCMeta):
         return _report
 
     def test_kill_204(self):
-        _report = self.init_report(
-            status=AbstractReport.Status.PENDING, user=self.superuser
-        )
+        _report = self.init_report(status=AbstractReport.Status.PENDING, user=self.user)
         response = self.client.patch(
             f"/api/jobs/{_report.job_id}/{self.plugin_type}/{_report.name}/kill"
         )
@@ -192,9 +192,7 @@ class PluginActionViewsetTestCase(metaclass=ABCMeta):
 
     def test_kill_400(self):
         # create a new report whose status is not "running"/"pending"
-        _report = self.init_report(
-            status=AbstractReport.Status.SUCCESS, user=self.superuser
-        )
+        _report = self.init_report(status=AbstractReport.Status.SUCCESS, user=self.user)
         response = self.client.patch(
             f"/api/jobs/{_report.job_id}/{self.plugin_type}/{_report.name}/kill"
         )
@@ -229,17 +227,17 @@ class PluginActionViewsetTestCase(metaclass=ABCMeta):
         _report = self.init_report(
             status=AbstractReport.Status.FAILED, user=self.superuser
         )
+        self.client.force_authenticate(self.superuser)
         response = self.client.patch(
             f"/api/jobs/{_report.job_id}/{self.plugin_type}/{_report.name}/retry"
         )
 
         self.assertEqual(response.status_code, 204)
+        self.client.force_authenticate(self.user)
 
     def test_retry_400(self):
         # create a new report whose status is not "FAILED"/"KILLED"
-        _report = self.init_report(
-            status=AbstractReport.Status.SUCCESS, user=self.superuser
-        )
+        _report = self.init_report(status=AbstractReport.Status.SUCCESS, user=self.user)
         response = self.client.patch(
             f"/api/jobs/{_report.job_id}/{self.plugin_type}/{_report.name}/retry"
         )

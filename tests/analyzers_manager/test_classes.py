@@ -1,0 +1,215 @@
+from pathlib import PosixPath
+
+from django.conf import settings
+from django.core.files import File
+from kombu import uuid
+
+from api_app.analyzers_manager.classes import FileAnalyzer, ObservableAnalyzer
+from api_app.analyzers_manager.models import AnalyzerConfig, MimeTypes
+from api_app.models import Job
+from tests import CustomTestCase
+
+
+class MockedObservableAnalyzer(ObservableAnalyzer):
+    def run(self) -> dict:
+        return {}
+
+
+class FileAnalyzerTestCase(CustomTestCase):
+    fixtures = [
+        "api_app/fixtures/0001_user.json",
+        "api_app/fixtures/0002_analyzer_pluginconfig.json",
+    ]
+
+    def _load(self):
+        dir = PosixPath(str(settings.BASE_ANALYZER_FILE_PYTHON_PATH).replace(".", "/"))
+        for analyzer in dir.iterdir():
+            if (
+                analyzer.is_file()
+                and analyzer.suffix == ".py"
+                and analyzer.stem != "__init__"
+            ):
+                package = f"{str(analyzer.parent).replace('/', '.')}.{analyzer.stem}"
+                __import__(package)
+
+    def _create_job(self, name, mimetype):
+        with open(f"test_files/{name}", "rb") as f:
+            Job.objects.create(
+                is_sample=True, file_name=name, file_mimetype=mimetype, file=File(f)
+            )
+
+    def _create_jobs(self):
+        self._create_job("sample.one", "application/onenote")
+        self._create_job("ping.elf", "application/x-sharedlib")
+        self._create_job("example.pcap", "application/vnd.tcpdump.pcap")
+        self._create_job("sample.apk", "application/vnd.android.package-archive")
+        self._create_job("file.jse", "application/javascript")
+        self._create_job("page.html", "text/html")
+        self._create_job("document.pdf", "application/pdf")
+        self._create_job("document.rtf", "text/rtf")
+        self._create_job("document.xls", "application/vnd.ms-excel")
+        self._create_job("document.doc", "application/msword")
+        self._create_job("file.dll", "application/x-dosexec")
+        self._create_job("file.exe", "application/x-dosexec")
+        self._create_job("shellcode.bin", "application/octet-stream")
+
+    def test_subclasses(self):
+        def handler(signum, frame):
+            raise TimeoutError("end of time")
+
+        import signal
+
+        signal.signal(signal.SIGALRM, handler)
+        self._load()
+        self._create_jobs()
+        for subclass in FileAnalyzer.__subclasses__():
+            print(f"\nTesting Analyzer {subclass.__name__}")
+            for config in AnalyzerConfig.objects.filter(
+                python_module=subclass.python_module
+            ):
+                timeout_seconds = config.soft_time_limit
+                timeout_seconds = min(timeout_seconds, 20)
+                print(f"\tTesting with config {config.name}")
+                found_one = False
+                for mimetype in MimeTypes.values:
+                    if (
+                        config.supported_filetypes
+                        and mimetype in config.supported_filetypes
+                    ):
+                        pass
+                    elif (
+                        not config.supported_filetypes
+                        and mimetype not in config.not_supported_filetypes
+                    ):
+                        pass
+                    else:
+                        continue
+                    jobs = Job.objects.filter(file_mimetype=mimetype)
+                    if jobs.exists():
+                        found_one = True
+                    for job in jobs:
+                        print(
+                            f"\t\tTesting {job.file_name} with mimetype {mimetype} for {timeout_seconds} seconds"
+                        )
+                        sub = subclass(
+                            config,
+                            job.pk,
+                            {"runtime_configuration": {}, "task_id": uuid()},
+                        )
+                        signal.alarm(timeout_seconds)
+                        try:
+                            sub.start()
+                        except TimeoutError:
+                            self.fail(
+                                f"Analyzer {subclass.__name__} with config {config.name} and mimetype "
+                                f"{mimetype} went in timeout after {timeout_seconds}"
+                            )
+                        else:
+                            signal.alarm(0)
+                if not found_one:
+                    self.fail(
+                        f"No valid job found for analyzer {subclass.__name__} with configuration {config.name}"
+                    )
+
+    def tearDown(self) -> None:
+        Job.objects.all().delete()
+
+
+class ObservableAnalyzerTestCase(CustomTestCase):
+    fixtures = [
+        "api_app/fixtures/0001_user.json",
+        "api_app/fixtures/0002_analyzer_pluginconfig.json",
+    ]
+
+    def test_post_init(self):
+        config = AnalyzerConfig.objects.first()
+        job = Job.objects.create(
+            observable_name="test.com", observable_classification="domain"
+        )
+        oa = MockedObservableAnalyzer(
+            config, job.pk, {"runtime_configuration": {}, "task_id": uuid()}
+        )
+        self.assertEqual(oa.observable_name, "test.com")
+        self.assertEqual(oa.observable_classification, "domain")
+        job.delete()
+
+    def _load(self):
+        dir = PosixPath(
+            str(settings.BASE_ANALYZER_OBSERVABLE_PYTHON_PATH).replace(".", "/")
+        )
+        for analyzer in dir.iterdir():
+            if (
+                analyzer.is_file()
+                and analyzer.suffix == ".py"
+                and analyzer.stem != "__init__"
+            ):
+                package = f"{str(analyzer.parent).replace('/', '.')}.{analyzer.stem}"
+                __import__(package)
+
+    def _create_jobs(self):
+        Job.objects.create(
+            observable_name="test.com",
+            observable_classification="domain",
+            status="reported_without_fails",
+        )
+        Job.objects.create(
+            observable_name="8.8.8.8",
+            observable_classification="ip",
+            status="reported_without_fails",
+        )
+        Job.objects.create(
+            observable_name="https://www.honeynet.org/projects/active/intel-owl/",
+            observable_classification="url",
+            status="reported_without_fails",
+        )
+        Job.objects.create(
+            observable_name="3edd95917241e9ef9bbfc805c2c5aff3",
+            observable_classification="hash",
+            status="reported_without_fails",
+            md5="3edd95917241e9ef9bbfc805c2c5aff3",
+        )
+        Job.objects.create(
+            observable_name="test@intelowl.com",
+            observable_classification="generic",
+            status="reported_without_fails",
+        )
+
+    def test_subclasses(self):
+        def handler(signum, frame):
+            raise TimeoutError("end of time")
+
+        import signal
+
+        signal.signal(signal.SIGALRM, handler)
+        self._load()
+        self._create_jobs()
+        for subclass in ObservableAnalyzer.__subclasses__():
+            print(f"\nTesting Analyzer {subclass.__name__}")
+            for config in AnalyzerConfig.objects.filter(
+                python_module=subclass.python_module
+            ):
+                timeout_seconds = config.soft_time_limit
+                timeout_seconds = min(timeout_seconds, 20)
+                print(f"\tTesting with config {config.name}")
+                for observable_supported in config.observable_supported:
+                    print(
+                        f"\t\tTesting datatype {observable_supported} for {timeout_seconds} seconds"
+                    )
+                    job = Job.objects.get(
+                        observable_classification=observable_supported
+                    )
+                    sub = subclass(
+                        config, job.pk, {"runtime_configuration": {}, "task_id": uuid()}
+                    )
+                    signal.alarm(timeout_seconds)
+                    try:
+                        sub.start()
+                    except TimeoutError:
+                        self.fail(
+                            f"Analyzer {subclass.__name__} with config {config.name} and observable {observable_supported} went in timeout after {timeout_seconds}"
+                        )
+                    else:
+                        signal.alarm(0)
+
+    def tearDown(self) -> None:
+        Job.objects.all().delete()

@@ -26,7 +26,7 @@ class Migration(migrations.Migration):
                 ('name', models.CharField(max_length=50, primary_key=True, serialize=False, unique=True)),
                 ('python_module', models.CharField(max_length=120)),
                 ('description', models.TextField()),
-                ('disabled', models.BooleanField()),
+                ('disabled', models.BooleanField(default=False)),
                 ('config', models.JSONField(default=api_app.core.models.config_default,
                                             validators=[api_app.validators.validate_config])),
                 ('secrets',

@@ -5,6 +5,7 @@ import logging
 from typing import Optional, Type
 
 import requests
+from django.conf import settings
 
 from api_app.core.classes import Plugin
 
@@ -78,23 +79,26 @@ class Connector(Plugin, metaclass=abc.ABCMeta):
         """
         basic health check: if instance is up or not (timeout - 10s)
         """
-        health_status, url = None, None
-        try:
-            cc = cls.config_model.objects.get(name=connector_name)
-        except cls.config_model.DoesNotExist:
+        ccs = cls.config_model.objects.filter(name=connector_name, disabled=False)
+        if not ccs.count():
             raise ConnectorRunException(f"Unable to find connector {connector_name}")
-        if cc is not None:
-            url = cc.read_secrets(secrets_filter="url_key_name").get(
-                "url_key_name", None
-            )
-            if url and url.startswith("http"):
-                try:
-                    requests.head(url, timeout=10)
-                except requests.exceptions.ConnectionError:
-                    health_status = False
-                except requests.exceptions.Timeout:
-                    health_status = False
-                else:
-                    health_status = True
+        for cc in ccs:
+            cc: ConnectorConfig
+            if cc.is_runnable():
+                url = cc.read_secrets().get("url_key_name", None)
+                if url and url.startswith("http"):
+                    if settings.STAGE_CI:
+                        return True
+                    try:
+                        requests.head(url, timeout=10)
+                    except requests.exceptions.ConnectionError:
+                        health_status = False
+                    except requests.exceptions.Timeout:
+                        health_status = False
+                    else:
+                        health_status = True
 
-        return health_status
+                    return health_status
+        raise ConnectorRunException(
+            f"Unable to find configured connector {connector_name}"
+        )

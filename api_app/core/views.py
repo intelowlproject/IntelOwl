@@ -12,7 +12,6 @@ from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.views import APIView
 
 from certego_saas.apps.organization.permissions import IsObjectOwnerOrSameOrgPermission
 from intel_owl.celery import app as celery_app
@@ -138,42 +137,18 @@ class AbstractConfigAPI(viewsets.ReadOnlyModelViewSet, metaclass=ABCMeta):
         url_name="healthcheck",
         permission_classes=[IsAdminUser],
     )
-    def health_check(self, pk):
-        logger.info(f"get healthcheck from user {self.request.user}, pk {pk}")
+    def health_check(self, request, pk=None):
+        logger.info(f"get healthcheck from user {request.user}, pk {pk}")
         obj: AbstractConfig = self.get_object()
         class_ = obj.python_class
         try:
             if not hasattr(class_, "health_check") or not callable(class_.health_check):
                 raise NotImplementedError()
-            health_status = class_.health_check(obj.name)
+            try:
+                health_status = class_.health_check(obj.name)
+            except Exception as e:
+                raise ValidationError({"detail": str(e)})
         except NotImplementedError:
             raise ValidationError({"detail": "No healthcheck implemented"})
         else:
             return Response(data={"status": health_status}, status=status.HTTP_200_OK)
-
-
-class PluginUpdateAPI(APIView, metaclass=ABCMeta):
-    permission_classes = [IsAuthenticated, IsAdminUser]
-
-    @property
-    @abstractmethod
-    def config_model(self):
-        raise NotImplementedError()
-
-    def post(self, request, name: str):
-        logger.info(f"update request from user {request.user}, name {name}")
-        try:
-            plugin_config = self.config_model.objects.get(name)
-        except self.config_model.DoesNotExist:
-            raise ValidationError(
-                {
-                    "detail": f"{self.__class__.__name__.split('Health')[0]} "
-                    "doesn't exist"
-                }
-            )
-        else:
-            success = plugin_config.update()
-            if not success:
-                raise ValidationError({"detail": "No update implemented"})
-
-        return Response(data={"status": True}, status=status.HTTP_200_OK)

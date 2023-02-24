@@ -21,7 +21,7 @@ class Migration(migrations.Migration):
                 ('type', models.CharField(choices=[('file', 'File'), ('observable', 'Observable')], max_length=50)),
                 ('python_module', models.CharField(max_length=120)),
                 ('description', models.TextField()),
-                ('disabled', models.BooleanField()),
+                ('disabled', models.BooleanField(default=False)),
                 ('config', models.JSONField(default=api_app.core.models.config_default, validators=[api_app.validators.validate_config])),
                 ('secrets', models.JSONField(blank=True, default=dict, validators=[api_app.validators.validate_secrets])),
                 ('params', models.JSONField(blank=True, default=dict, validators=[api_app.validators.validate_params])),

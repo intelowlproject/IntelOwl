@@ -3,8 +3,6 @@
 
 import logging
 
-from celery import group
-
 from api_app.core.views import AbstractConfigAPI, PluginActionViewSet
 
 from .models import ConnectorConfig, ConnectorReport
@@ -31,9 +29,10 @@ class ConnectorActionViewSet(PluginActionViewSet):
         return ConnectorReport
 
     def perform_retry(self, report: ConnectorReport):
-        signature = ConnectorConfig.objects.get(report.name).get_signature(
-            report.job.id,
+        config: ConnectorConfig = ConnectorConfig.objects.get(name=report.name)
+        signature = config.get_signature(
+            report.job.pk,
             report.runtime_configuration.get(report.name, {}),
             report.parent_playbook,
         )
-        group(signature)()
+        signature()

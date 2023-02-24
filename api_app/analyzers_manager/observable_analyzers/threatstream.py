@@ -12,7 +12,7 @@ class Threatstream(classes.ObservableAnalyzer):
     base_url: str = "https://api.threatstream.com/api/"
 
     def set_params(self, params):
-        self.analysis_type = params.get("threatstream_analysis")
+        self.analysis_type = params.get("threatstream_analysis", "intelligence")
         if self.analysis_type == "intelligence":
             self.limit = params.get("limit")
             self.must_active = params.get("must_active")

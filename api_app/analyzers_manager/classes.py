@@ -11,12 +11,7 @@ import requests
 from django.conf import settings
 
 from api_app.core.classes import Plugin
-from tests.mock_utils import (
-    if_mock_connections,
-    mocked_docker_analyzer_get,
-    mocked_docker_analyzer_post,
-    patch,
-)
+from tests.mock_utils import MockResponse, if_mock_connections, patch
 
 from .constants import HashChoices, ObservableTypes, TypeChoices
 from .exceptions import AnalyzerConfigurationException, AnalyzerRunException
@@ -131,7 +126,7 @@ class ObservableAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
         else:
             self.observable_name = self._job.observable_name
             self.observable_classification = self._job.observable_classification
-        return super(ObservableAnalyzer, self).__post__init__()
+        return super().__post__init__()
 
     def before_run(self, *args, **kwargs):
         super().before_run(**kwargs)
@@ -376,6 +371,14 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
             raise AssertionError
         return resp
 
+    def mocked_docker_analyzer_get(*args, **kwargs):
+        return MockResponse(
+            {"key": "test", "returncode": 0, "report": {"test": "This is a test."}}, 200
+        )
+
+    def mocked_docker_analyzer_post(*args, **kwargs):
+        return MockResponse({"key": "test", "status": "running"}, 202)
+
     def _monkeypatch(self, patches: list = None):
         """
         Here, `_monkeypatch` is an instance method and not a class method.
@@ -393,11 +396,11 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
             if_mock_connections(
                 patch(
                     "requests.get",
-                    side_effect=mocked_docker_analyzer_get,
+                    side_effect=self.mocked_docker_analyzer_get,
                 ),
                 patch(
                     "requests.post",
-                    side_effect=mocked_docker_analyzer_post,
+                    side_effect=self.mocked_docker_analyzer_post,
                 ),
             )
         )

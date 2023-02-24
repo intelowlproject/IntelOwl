@@ -14,7 +14,7 @@ class PlaybookConfig(models.Model):
         models.CharField(choices=AllTypes.choices, null=False, max_length=50)
     )
     description = models.TextField(null=False)
-    disabled = models.BooleanField(null=False)
+    disabled = models.BooleanField(null=False, default=False)
 
     analyzers = models.ManyToManyField(AnalyzerConfig, related_name="playbooks")
     connectors = models.ManyToManyField(ConnectorConfig, related_name="playbooks")

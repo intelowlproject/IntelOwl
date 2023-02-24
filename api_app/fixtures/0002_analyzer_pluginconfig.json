@@ -1,0 +1,1278 @@
+[
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 1,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "AbuseIPDB"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 2,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_user_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "Anomali_Threatstream_Confidence"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 3,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "Anomali_Threatstream_Confidence"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 4,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_user_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "Anomali_Threatstream_Intelligence"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 5,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "Anomali_Threatstream_Intelligence"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 6,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_user_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "Anomali_Threatstream_PassiveDNS"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 7,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "Anomali_Threatstream_PassiveDNS"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 8,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "Auth0"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 9,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "BitcoinAbuse"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 10,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "CheckPhish"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 11,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "pdns_credentials",
+      "value": "user|password",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "CIRCLPassiveDNS"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 12,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "pdns_credentials",
+      "value": "user|password",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "CIRCLPassiveSSL"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 13,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "CapeSandbox"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 14,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "url_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "CapeSandbox"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 15,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_id_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "Censys_Search"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 16,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_secret_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "Censys_Search"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 17,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "url_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "Cuckoo_Scan"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 18,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "Dehashed_Search"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 19,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "DNSDB"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 20,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "Dragonfly_Emulation"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 21,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "url_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "Dragonfly_Emulation"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 22,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "EmailRep"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 23,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "service_account_json",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "GoogleWebRisk"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 24,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "GoogleSafebrowsing"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 25,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "GreedyBear"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 26,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "GreyNoise"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 27,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "HaveIBeenPwned"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 28,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "HoneyDB"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 29,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_id_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "HoneyDB"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 30,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "Hunter"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 31,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "HybridAnalysis_Get_File"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 32,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "HybridAnalysis_Get_Observable"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 33,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "IntelX_Intelligent_Search"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 34,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "IntelX_Phonebook"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 35,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "Intezer_Get"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 36,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "Intezer_Scan"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 37,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "IPInfo"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 38,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "Koodous"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 39,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "MISP"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 40,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "url_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "MISP"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 41,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "MISPFIRST"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 42,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "url_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "MISPFIRST"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 43,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "MISPFIRST_Check_Hash"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 44,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "url_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "MISPFIRST_Check_Hash"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 45,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "MISP_Check_Hash"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 46,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "url_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "MISP_Check_Hash"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 47,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "Malpedia_Scan"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 48,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "MaxMindGeoIP"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 49,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "MWDB_Get"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 50,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "MWDB_Scan"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 51,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "ONYPHE"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 52,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "OpenCTI"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 53,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "url_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "OpenCTI"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 54,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "OTXQuery"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 55,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "OTX_Check_Hash"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 56,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "Securitytrails"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 57,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "Securitytrails_Details"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 58,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "Securitytrails_History_DNS"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 59,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "Securitytrails_History_WHOIS"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 60,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "Securitytrails_IP_Neighbours"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 61,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "Securitytrails_Subdomains"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 62,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "Securitytrails_Tags"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 63,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "Shodan_Honeyscore"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 64,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "Shodan_Search"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 65,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "Spyse"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 66,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "SSAPINet"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 67,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "Stalkphish"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 68,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "Triage_Search"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 69,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "Triage_Scan_URL"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 70,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "Triage_Scan"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 71,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "UnpacMe_EXE_Unpacker"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 72,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "UrlScan_Submit_Result"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 73,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "VirusTotal_v2_Get_File"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 74,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "VirusTotal_v2_Get_Observable"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 75,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "VirusTotal_v2_Scan_File"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 76,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "url_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "VirusTotal_v2_Scan_File"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 77,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "VirusTotal_v3_Get_File"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 78,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "VirusTotal_v3_Get_File_And_Scan"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 79,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "VirusTotal_v3_Get_Observable"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 80,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "VirusTotal_v3_Intelligence_Search"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 81,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "Whoisxmlapi"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 82,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "WiGLE"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 83,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "XForceExchange"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 84,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_password_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "XForceExchange"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 85,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "YETI"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 86,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "url_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "YETI"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 87,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "ZoomEye"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 88,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "1",
+      "attribute": "shellcode",
+      "value": true,
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "SpeakEasy_Shellcode"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 89,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "1",
+      "attribute": "additional_passwords_to_check",
+      "value": [
+        "testpassword", "agenzia"
+      ],
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "Doc_Info"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 90,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "1",
+      "attribute": "force_active_scan",
+      "value": true,
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "VirusTotal_v3_Get_File_And_Scan"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 91,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "1",
+      "attribute": "force_active_scan_if_old",
+      "value": false,
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "VirusTotal_v3_Get_File_And_Scan"
+    }
+  }
+]

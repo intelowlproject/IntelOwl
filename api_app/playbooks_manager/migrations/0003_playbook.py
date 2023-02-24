@@ -24,7 +24,7 @@ class Migration(migrations.Migration):
                         max_length=50), size=None),
                  ),
                 ('description', models.TextField()),
-                ('disabled', models.BooleanField()),
+                ('disabled', models.BooleanField(default=False)),
                 ('runtime_configuration', models.JSONField(blank=True, default=dict)),
                 ('analyzers', models.ManyToManyField(related_name='playbooks', to='analyzers_manager.AnalyzerConfig')),
                 ('connectors', models.ManyToManyField(related_name='playbooks', to='connectors_manager.ConnectorConfig')),

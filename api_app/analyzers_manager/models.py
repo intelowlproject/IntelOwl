@@ -36,56 +36,58 @@ class AnalyzerReport(AbstractReport):
 
 class MimeTypes(models.TextChoices):
 
-    JAVASCRIPT1 = ("application/javascript",)
-    JAVASCRIPT2 = ("application/x-javascript",)
-    JAVASCRIPT3 = ("text/javascript",)
+    JAVASCRIPT1 = "application/javascript"
+    JAVASCRIPT2 = "application/x-javascript"
+    JAVASCRIPT3 = "text/javascript"
 
-    VB_SCRIPT = ("application/x-vbscript",)
-    IQY = ("text/x-ms-iqy",)
-    APK = ("application/vnd.android.package-archive",)
-    DEX = ("application/x-dex",)
-    ONE_NOTE = ("application/onenote",)
-    ANDROID = ("android",)
-    ZIP1 = ("application/zip",)
-    ZIP2 = ("multipart/x-zip",)
-    JAVA = ("application/java-archive",)
-    RTF1 = ("text/rtf",)
-    RTF2 = ("application/rtf",)
-    DOS = ("application/x-dosexec",)
-    SHARED_LIB = ("application/x-sharedlib",)
-    EXE = ("application/x-executable",)
-    ELF = ("application/x-elf",)
-    OCTET = ("application/octet-stream",)
-    PCAP = ("application/vnd.tcpdump.pcap",)
-    PDF = ("application/pdf",)
-    HTML = ("text/html",)
-    PUB = ("application/x-mspublisher",)
-    EXCEL_MACRO1 = ("application/vnd.ms-excel.addin.macroEnabled",)
-    EXCEL_MACRO2 = ("application/vnd.ms-excel.sheet.macroEnabled.12",)
-    EXCEL1 = ("application/vnd.ms-excel",)
-    EXCEL2 = ("application/excel",)
-    DOC = ("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",)
-    XML1 = ("application/xml",)
-    XML2 = ("text/xml",)
-    ENCRYPTED = ("application/encrypted",)
-    PLAIN = ("text/plain",)
-    CSV = ("text/csv",)
-    PPTX = (
-        "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-    )
-    WORD1 = ("application/msword",)
-    WORD2 = ("application/vnd.openxmlformats-officedocument.wordprocessingml.document",)
-    POWERPOINT = ("application/vnd.ms-powerpoint",)
-    OFFICE = ("application/vnd.ms-office",)
-    BINARY = ("application/x-binary",)
-    MAC1 = ("application/x-macbinary",)
-    MAC2 = ("application/mac-binary",)
-    COMPRESS1 = ("application/x-zip-compressed",)
-    COMPRESS2 = ("application/x-compressed",)
+    VB_SCRIPT = "application/x-vbscript"
+    IQY = "text/x-ms-iqy"
+    APK = "application/vnd.android.package-archive"
+    DEX = "application/x-dex"
+    ONE_NOTE = "application/onenote"
+    ANDROID = "android"
+    ZIP1 = "application/zip"
+    ZIP2 = "multipart/x-zip"
+    JAVA = "application/java-archive"
+    RTF1 = "text/rtf"
+    RTF2 = "application/rtf"
+    DOS = "application/x-dosexec"
+    SHARED_LIB = "application/x-sharedlib"
+    EXE = "application/x-executable"
+    ELF = "application/x-elf"
+    OCTET = "application/octet-stream"
+    PCAP = "application/vnd.tcpdump.pcap"
+    PDF = "application/pdf"
+    HTML = "text/html"
+    PUB = "application/x-mspublisher"
+    EXCEL_MACRO1 = "application/vnd.ms-excel.addin.macroEnabled"
+    EXCEL_MACRO2 = "application/vnd.ms-excel.sheet.macroEnabled.12"
+    EXCEL1 = "application/vnd.ms-excel"
+    EXCEL2 = "application/excel"
+    DOC = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    XML1 = "application/xml"
+    XML2 = "text/xml"
+    ENCRYPTED = "application/encrypted"
+    PLAIN = "text/plain"
+    CSV = "text/csv"
+    PPTX = "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+    WORD1 = "application/msword"
+    WORD2 = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    POWERPOINT = "application/vnd.ms-powerpoint"
+    OFFICE = "application/vnd.ms-office"
+    BINARY = "application/x-binary"
+    MAC1 = "application/x-macbinary"
+    MAC2 = "application/mac-binary"
+    COMPRESS1 = "application/x-zip-compressed"
+    COMPRESS2 = "application/x-compressed"
 
     @classmethod
     def ZIP(cls) -> List["MimeTypes"]:
         return [cls.ZIP1, cls.ZIP2]
+
+    @classmethod
+    def WORD(cls) -> List["MimeTypes"]:
+        return [cls.WORD1, cls.WORD2]
 
     @classmethod
     def calculate(cls, file_pointer, file_name) -> str:
@@ -190,7 +192,7 @@ class AnalyzerConfig(AbstractConfig):
                             f".{analyzer_config.python_module}"
                         },
                     )
-                return True
-        else:
-            logger.error(f"Unable to update {python_module}")
-            return False
+                    return True
+
+        logger.error(f"Unable to update {python_module}")
+        return False

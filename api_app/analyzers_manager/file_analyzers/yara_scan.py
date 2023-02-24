@@ -198,9 +198,13 @@ class YaraScan(FileAnalyzer):
         return self._analyze_directory(directory)
 
     def run(self):
-        if not self.public_repositories and not self.private_repositories:
-            raise AnalyzerRunException("There are no yara rules selected")
         result = defaultdict(list)
+        if (
+            not self.public_repositories
+            and not self.private_repositories
+            and not self.local_rules
+        ):
+            self.report.errors.append("There are no yara rules selected")
         logger.info(f"Checking {self.public_repositories}")
         for url in self.public_repositories:
             result[url] += self.analyze(url)
@@ -313,16 +317,22 @@ class YaraScan(FileAnalyzer):
 
     @classmethod
     def _update(cls):
+        from api_app.analyzers_manager.models import AnalyzerConfig
+
         logger.info("Starting updating yara rules")
         dict_urls: Dict[Union[None, Tuple[str, str]], Set[str]] = defaultdict(set)
-        for analyzer_name, ac in cls.get_config_class().get_from_python_module(cls):
-            new_urls = ac.param_values.get("public_repositories", [])
+
+        for config in AnalyzerConfig.objects.filter(
+            python_module=cls.python_module, disabled=False
+        ):
+            params = config.read_params()
+            new_urls = params.get("public_repositories", [])
             logger.info(f"Adding configuration urls {new_urls}")
             dict_urls[None].update(new_urls)
 
             # we are downloading even custom signatures for each analyzer
             for plugin in PluginConfig.objects.filter(
-                plugin_name=analyzer_name,
+                plugin_name=config.name,
                 type=PluginConfig.PluginType.ANALYZER,
                 config_type=PluginConfig.ConfigType.PARAMETER,
                 attribute="public_repositories",
@@ -332,7 +342,7 @@ class YaraScan(FileAnalyzer):
                 dict_urls[None].update(new_urls)
 
             for plugin in PluginConfig.objects.filter(
-                plugin_name=analyzer_name,
+                plugin_name=config.name,
                 type=PluginConfig.PluginType.ANALYZER,
                 config_type=PluginConfig.ConfigType.SECRET,
                 attribute="private_repositories",

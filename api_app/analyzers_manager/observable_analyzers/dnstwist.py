@@ -6,14 +6,21 @@ import logging
 import subprocess
 from ipaddress import AddressValueError, IPv4Address
 from shutil import which
+from unittest.mock import patch
 from urllib.parse import urlparse
 
 from django.conf import settings
 
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
+from tests.mock_utils import if_mock_connections
 
 logger = logging.getLogger(__name__)
+
+
+class MockPopen:
+    def communicate(self):
+        return (b"{}", b"")
 
 
 class DNStwist(classes.ObservableAnalyzer):
@@ -69,8 +76,7 @@ class DNStwist(classes.ObservableAnalyzer):
         logger.warning(stderr.decode("utf-8"))
         final_report["error"] = stderr.decode("utf-8")
 
-        dns_report = stdout.decode("utf-8"), stderr
-        dns_str = dns_report[0]
+        dns_str = stdout.decode("utf-8")
 
         try:
             if dns_str:
@@ -80,3 +86,15 @@ class DNStwist(classes.ObservableAnalyzer):
             raise AnalyzerRunException(f"dns_str: {dns_str}. Error: {e}")
 
         return final_report
+
+    @classmethod
+    def _monkeypatch(cls):
+        patches = [
+            if_mock_connections(
+                patch(
+                    "subprocess.Popen",
+                    return_value=MockPopen(),
+                ),
+            )
+        ]
+        return super()._monkeypatch(patches=patches)

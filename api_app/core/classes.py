@@ -138,8 +138,12 @@ class Plugin(metaclass=ABCMeta):
             self.report.report = _result
         except (*self.get_exceptions_to_catch(), SoftTimeLimitExceeded) as e:
             self._handle_exception(e)
+            if settings.STAGE_CI:
+                raise e
         except Exception as e:
             self._handle_base_exception(e)
+            if settings.STAGE_CI:
+                raise e
         else:
             self.report.status = self.report.Status.SUCCESS
 
@@ -200,3 +204,9 @@ class Plugin(metaclass=ABCMeta):
         self.kwargs = kwargs
         # some post init processing
         self.__post__init__()  # lgtm [py/init-calls-subclass]
+
+    @classmethod
+    @property
+    def python_module(cls) -> str:
+        module = cls.__module__.split(".")[-1]
+        return f"{module}.{cls.__name__}"

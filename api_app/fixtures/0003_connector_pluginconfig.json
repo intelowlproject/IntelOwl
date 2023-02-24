@@ -1,0 +1,86 @@
+[
+  {
+    "model": "api_app.PluginConfig",
+    "pk": 1,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "2",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "MISP"
+    }
+  },
+  {
+    "model": "api_app.PluginConfig",
+    "pk": 2,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "2",
+      "config_type": "2",
+      "attribute": "url_key_name",
+      "value": "http://test.com",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "MISP"
+    }
+  },
+  {
+    "model": "api_app.PluginConfig",
+    "pk": 3,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "2",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "OpenCTI"
+    }
+  },
+  {
+    "model": "api_app.PluginConfig",
+    "pk": 4,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "2",
+      "config_type": "2",
+      "attribute": "url_key_name",
+      "value": "http://test.com",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "OpenCTI"
+    }
+  },
+  {
+    "model": "api_app.PluginConfig",
+    "pk": 5,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "2",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "YETI"
+    }
+  },
+  {
+    "model": "api_app.PluginConfig",
+    "pk": 6,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "2",
+      "config_type": "2",
+      "attribute": "url_key_name",
+      "value": "http://test.com",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "YETI"
+    }
+  }
+]

@@ -1,109 +1,114 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-from api_app.analyzers_manager.models import AnalyzerReport
-from api_app.analyzers_manager.serializers import AnalyzerConfigSerializer
-from certego_saas.apps.user.models import User
+from api_app.analyzers_manager.models import AnalyzerConfig, AnalyzerReport
 
 from .. import CustomAPITestCase, PluginActionViewsetTestCase
 
 
-class AnalyzerAppViewsTestCase(CustomAPITestCase):
-    def test_get_analyzer_config(self):
-        response = self.client.get("/api/get_analyzer_configs")
+class AnalyzerConfigAPITestCase(CustomAPITestCase):
+    fixtures = [
+        "api_app/fixtures/0001_user.json",
+        "api_app/fixtures/0002_analyzer_pluginconfig.json",
+    ]
+
+    URL = "/api/analyzer"
+
+    def test_list(self):
+        response = self.client.get(self.URL)
         self.assertEqual(response.status_code, 200)
-        self.assertNotEqual(response.json(), {})
-        self.assertDictEqual(
-            response.json(),
-            AnalyzerConfigSerializer.read_and_verify_config(user=self.superuser),
-        )
+        result = response.json()
+        self.assertIn("count", result)
+        self.assertEqual(result["count"], AnalyzerConfig.objects.all().count())
+        self.assertIn("results", result)
+        self.assertTrue(isinstance(result["results"], list))
 
-    def test_analyzer_healthcheck_200(self):
-        response = self.client.get("/api/analyzer/ClamAV/healthcheck")
-        content = response.json()
-        msg = (response, content)
+        self.client.force_authenticate(None)
+        response = self.client.get(self.URL)
+        self.assertEqual(response.status_code, 401)
+        self.client.force_authenticate(self.superuser)
+        response = self.client.get(self.URL)
+        self.assertEqual(response.status_code, 200)
 
-        self.assertEqual(response.status_code, 200, msg=msg)
+    def test_get(self):
+        analyzer = AnalyzerConfig.objects.order_by("?").first().name
+        response = self.client.get(f"{self.URL}/{analyzer}")
+        self.assertEqual(response.status_code, 200)
 
-    def test_analyzer_healthcheck_400(self):
-        # non docker based analyzer
-        response = self.client.get("/api/analyzer/MISP/healthcheck")
-        content = response.json()
-        msg = (response, content)
+        self.client.force_authenticate(None)
+        response = self.client.get(f"{self.URL}/{analyzer}")
+        self.assertEqual(response.status_code, 401)
 
-        self.assertEqual(response.status_code, 400, msg=msg)
-        self.assertDictEqual(
-            content["errors"], {"detail": "No healthcheck implemented"}, msg=msg
-        )
+        self.client.force_authenticate(self.superuser)
+        response = self.client.get(f"{self.URL}/{analyzer}")
+        self.assertEqual(response.status_code, 200)
 
-        # non-existing analyzer
-        response = self.client.get("/api/analyzer/Analyzer404/healthcheck")
-        content = response.json()
-        msg = (response, content)
+    def test_get_non_existent(self):
+        response = self.client.get(f"{self.URL}/NON_EXISTENT")
+        self.assertEqual(response.status_code, 404)
 
-        self.assertEqual(response.status_code, 400, msg=msg)
-        self.assertDictEqual(
-            content["errors"], {"detail": "Analyzer doesn't exist"}, msg=msg
-        )
+    def test_create(self):
+        response = self.client.post(self.URL)
+        self.assertEqual(response.status_code, 405)
 
-    def test_analyzer_healthcheck_403(self):
-        standard_user = User.objects.create_user(
-            username="standard_user",
-            email="standard_user@intelowl.com",
-            password="test",
-        )
-        self.client.force_authenticate(standard_user)
+    def test_update(self):
+        response = self.client.patch(self.URL)
+        self.assertEqual(response.status_code, 405)
 
-        response = self.client.post("/api/analyzer/ClamAV/update")
-        content = response.json()
-        msg = (response, content)
+    def test_delete(self):
+        response = self.client.delete(self.URL)
+        self.assertEqual(response.status_code, 405)
 
-        self.assertEqual(response.status_code, 403, msg=msg)
-        standard_user.delete()
+    def test_pull(self):
+        analyzer = "Yara"
+        response = self.client.post(f"{self.URL}/{analyzer}/pull")
+        self.assertEqual(response.status_code, 403)
 
-    def test_analyzer_update_200(self):
-        response = self.client.post("/api/analyzer/Yara/update")
-        content = response.json()
-        msg = (response, content)
+        self.client.force_authenticate(self.superuser)
 
-        self.assertEqual(response.status_code, 200, msg=msg)
+        analyzer = "Xlm_Macro_Deobfuscator"
+        response = self.client.post(f"{self.URL}/{analyzer}/pull")
+        self.assertEqual(response.status_code, 400)
+        result = response.json()
+        self.assertIn("errors", result)
+        self.assertIn("detail", result["errors"])
+        self.assertEqual(result["errors"]["detail"], "No update implemented")
 
-    def test_analyzer_update_400(self):
-        response = self.client.post("/api/analyzer/Xlm_Macro_Deobfuscator/update")
-        content = response.json()
-        msg = (response, content)
+        response = self.client.post(f"{self.URL}/{analyzer}/pull")
+        self.assertEqual(response.status_code, 200, response.json())
+        result = response.json()
+        self.assertIn("status", result)
+        self.assertTrue(result["status"])
 
-        self.assertEqual(response.status_code, 400, msg=msg)
-        self.assertDictEqual(
-            content["errors"], {"detail": "No update implemented"}, msg=msg
-        )
+    def test_health_check(self):
+        analyzer = "ClamAV"
+        response = self.client.get(f"{self.URL}/{analyzer}/health_check")
+        self.assertEqual(response.status_code, 403)
 
-        response = self.client.post("/api/analyzer/Analyzer404/update")
-        content = response.json()
-        msg = (response, content)
+        self.client.force_authenticate(self.superuser)
 
-        self.assertEqual(response.status_code, 400, msg=msg)
-        self.assertDictEqual(
-            content["errors"], {"detail": "Analyzer doesn't exist"}, msg=msg
-        )
+        analyzer = "Xlm_Macro_Deobfuscator"
+        response = self.client.get(f"{self.URL}/{analyzer}/health_check")
+        self.assertEqual(response.status_code, 400)
+        result = response.json()
+        self.assertIn("errors", result)
+        self.assertIn("detail", result["errors"])
+        self.assertEqual(result["errors"]["detail"], "No healthcheck implemented")
 
-    def test_analyzer_update_403(self):
-        standard_user = User.objects.create_user(
-            username="standard_user",
-            email="standard_user@intelowl.com",
-            password="test",
-        )
-        self.client.force_authenticate(standard_user)
-
-        response = self.client.post("/api/analyzer/Yara/update")
-        content = response.json()
-        msg = (response, content)
-
-        self.assertEqual(response.status_code, 403, msg=msg)
-        standard_user.delete()
+        analyzer = "ClamAV"
+        response = self.client.get(f"{self.URL}/{analyzer}/health_check")
+        self.assertEqual(response.status_code, 200)
+        result = response.json()
+        self.assertIn("status", result)
+        self.assertTrue(result["status"])
 
 
 class AnalyzerActionViewSetTests(CustomAPITestCase, PluginActionViewsetTestCase):
+    fixtures = [
+        "api_app/fixtures/0001_user.json",
+        "api_app/fixtures/0002_analyzer_pluginconfig.json",
+    ]
+
     @property
     def plugin_type(self):
         return "analyzer"

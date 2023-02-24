@@ -121,3 +121,6 @@ class AbstractConfigSerializer(rfs.ModelSerializer):
                     result["disabled"] = disabled
 
         return result
+
+    def to_internal_value(self, data):
+        raise NotImplementedError()

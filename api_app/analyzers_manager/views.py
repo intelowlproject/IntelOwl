@@ -46,8 +46,8 @@ class AnalyzerConfigAPI(AbstractConfigAPI):
     @action(
         detail=True, methods=["post"], url_name="pull", permission_classes=[IsAdminUser]
     )
-    def pull(self, pk):
-        logger.info(f"update request from user {self.request.user}, pk {pk}")
+    def pull(self, request, pk=None):
+        logger.info(f"update request from user {request.user}, pk {pk}")
         obj: AnalyzerConfig = self.get_object()
         success = obj.update(obj.python_path)
         if not success:

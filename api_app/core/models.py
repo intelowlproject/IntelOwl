@@ -98,7 +98,7 @@ class AbstractConfig(models.Model):
     name = models.CharField(max_length=50, null=False, unique=True, primary_key=True)
     python_module = models.CharField(null=False, max_length=120)
     description = models.TextField(null=False)
-    disabled = models.BooleanField(null=False)
+    disabled = models.BooleanField(null=False, default=False)
 
     config = models.JSONField(
         blank=False,
@@ -124,7 +124,7 @@ class AbstractConfig(models.Model):
             _ = self.python_class
         except ImportError as exc:
             raise ValidationError(
-                f"`python_module` incorrect, {self.python_module} couldn't be imported"
+                f"`python_module` incorrect, {self.python_complete_path} couldn't be imported"
             ) from exc
 
     def clean_config_queue(self):
@@ -214,7 +214,12 @@ class AbstractConfig(models.Model):
     def python_class(self) -> Type:
         return import_string(self.python_complete_path)
 
-    def _read_plugin_config(self, user: User, config_type: str):
+    def _read_plugin_config(
+        self,
+        config_type: str,
+        user: User = None,
+        set_default_value_to_null: bool = False,
+    ):
         from api_app.models import PluginConfig
 
         config = {}
@@ -239,20 +244,27 @@ class AbstractConfig(models.Model):
             elif "default" in secret_config:
                 value = secret_config["default"]
             else:
-                value = None
+                if set_default_value_to_null:
+                    value = None
+                else:
+                    continue
 
             config[key] = value
         return config
 
-    def read_secrets(self, user: User) -> Dict[str, Any]:
+    def read_secrets(self, user: User = None) -> Dict[str, Any]:
         from api_app.models import PluginConfig
 
-        return self._read_plugin_config(user, PluginConfig.ConfigType.SECRET)
+        return self._read_plugin_config(
+            PluginConfig.ConfigType.SECRET, user, set_default_value_to_null=True
+        )
 
-    def read_params(self, user: User) -> Dict[str, Any]:
+    def read_params(self, user: User = None) -> Dict[str, Any]:
         from api_app.models import PluginConfig
 
-        return self._read_plugin_config(user, PluginConfig.ConfigType.PARAMETER)
+        return self._read_plugin_config(
+            PluginConfig.ConfigType.PARAMETER, user, set_default_value_to_null=False
+        )
 
     def run(self, job_id: int, report_defaults: dict) -> AbstractReport:
         class_ = self.python_class
@@ -266,12 +278,12 @@ class AbstractConfig(models.Model):
         return report
 
     def get_signature(
-        self, job_id: str, runtime_configuration: Dict, parent_playbook: str
+        self, job_id: int, runtime_configuration: Dict, parent_playbook: str
     ):
         from api_app.models import Job
         from intel_owl import tasks
 
-        job = Job.objects.gete(pk=job_id)
+        job = Job.objects.get(pk=job_id)
         if self.is_runnable(job.user):
             # gen new task_id
             task_id = uuid()
@@ -294,3 +306,6 @@ class AbstractConfig(models.Model):
                 task_id=task_id,
                 immutable=True,
             )
+        raise Exception(
+            f"Unable to create signature, config {self.name} is not runnable"
+        )

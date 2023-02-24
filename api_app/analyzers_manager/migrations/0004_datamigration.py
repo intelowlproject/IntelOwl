@@ -4606,6 +4606,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('analyzers_manager', '0003_analyzerconfig'),
+        ('api_app', '0010_custom_config_playbooks'),
     ]
 
     operations = [

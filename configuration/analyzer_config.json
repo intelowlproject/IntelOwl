@@ -436,7 +436,7 @@
         "type": "str"
       }
     },
-    "params": {},
+    "params": {}
   },
   "Capa_Info": {
     "type": "file",

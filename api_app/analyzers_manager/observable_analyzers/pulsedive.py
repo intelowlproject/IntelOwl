@@ -19,7 +19,7 @@ class Pulsedive(ObservableAnalyzer):
     poll_distance: int = 10
 
     def set_params(self, params):
-        self.scan_mode = params.get("scan_mode", False)
+        self.scan_mode = params.get("scan_mode", "basic")
         supported_scan_values = ["basic", "passive", "active"]
         if self.scan_mode not in supported_scan_values:
             raise AnalyzerConfigurationException(

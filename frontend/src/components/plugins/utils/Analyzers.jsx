@@ -8,8 +8,8 @@ export default function Analyzers() {
 
   const stateSelector = React.useCallback(
     (state) => [
-      state.loading,
-      state.error,
+      state.analyzersLoading,
+      state.analyzersError,
       state.analyzers,
       state.retrieveAnalyzersConfiguration,
     ],

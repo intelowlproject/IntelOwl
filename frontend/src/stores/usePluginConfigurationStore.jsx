@@ -11,9 +11,25 @@ import {
   PLAYBOOKS_CONFIG_URI,
 } from "../constants/api";
 
+async function downloadAllPlugin(pluginUrl, currentPage = 1) {
+  const resp = await axios.get(pluginUrl, { params: { page: currentPage } });
+  let additionalData = [];
+  if (currentPage < resp.data.total_pages) {
+    additionalData = await downloadAllPlugin(pluginUrl, currentPage + 1);
+  }
+  return resp.data.results.concat(additionalData);
+}
+
 const usePluginConfigurationStore = create((set, get) => ({
-  loading: true,
-  error: null,
+  // loading: true,
+  analyzersLoading: true,
+  connectorsLoading: true,
+  visualizersLoading: true,
+  playbooksLoading: true,
+  analyzersError: null,
+  connectorsError: null,
+  playbooksError: null,
+  visualizersError: null,
   analyzersJSON: {},
   analyzers: [],
   connectorsJSON: {},
@@ -23,62 +39,89 @@ const usePluginConfigurationStore = create((set, get) => ({
   playbooksJSON: {},
   playbooks: [],
   hydrate: () => {
-    if (!get().loading) return;
-    get().retrieveAnalyzersConfiguration();
-    get().retrieveConnectorsConfiguration();
-    get().retrieveVisualizersConfiguration();
-    get().retrievePlaybooksConfiguration();
+    if (get().analyzersLoading) {
+      get().retrieveAnalyzersConfiguration();
+    }
+    if (get().connectorsLoading) {
+      get().retrieveConnectorsConfiguration();
+    }
+    if (get().visualizersLoading) {
+      get().retrieveVisualizersConfiguration();
+    }
+    if (get().playbooksLoading) {
+      get().retrievePlaybooksConfiguration();
+    }
   },
   retrieveAnalyzersConfiguration: async () => {
     try {
-      set({ loading: true });
-      const resp = await axios.get(ANALYZERS_CONFIG_URI);
+      set({ analyzersLoading: true });
+      console.debug(
+        "usePluginConfigurationStore - retrieveAnalyzersConfiguration: "
+      );
+      const analyzers = await downloadAllPlugin(ANALYZERS_CONFIG_URI);
+      console.debug(analyzers);
       set({
-        analyzersJSON: resp.data,
-        analyzers: Object.values(resp.data),
-        loading: false,
+        analyzersError: null,
+        analyzersJSON: analyzers,
+        analyzers: Object.values(analyzers),
+        analyzersLoading: false,
       });
     } catch (e) {
-      set({ error: e, loading: false });
+      set({ analyzersError: e, analyzersLoading: false });
     }
   },
   retrieveConnectorsConfiguration: async () => {
     try {
-      set({ loading: true });
-      const resp = await axios.get(CONNECTORS_CONFIG_URI);
+      set({ connectorsLoading: true });
+      const connectors = await downloadAllPlugin(CONNECTORS_CONFIG_URI);
+      console.debug(
+        "usePluginConfigurationStore - retrieveConnectorsConfiguration: "
+      );
+      console.debug(connectors);
       set({
-        connectorsJSON: resp.data,
-        connectors: Object.values(resp.data),
-        loading: false,
+        connectorsError: null,
+        connectorsJSON: connectors,
+        connectors: Object.values(connectors),
+        connectorsLoading: false,
       });
     } catch (e) {
-      set({ error: e, loading: false });
+      set({ connectorsError: e, connectorsLoading: false });
     }
   },
   retrieveVisualizersConfiguration: async () => {
     try {
-      set({ loading: true });
-      const resp = await axios.get(VISUALIZERS_CONFIG_URI);
+      set({ visualizersLoading: true });
+      const visualizers = await downloadAllPlugin(VISUALIZERS_CONFIG_URI);
+      console.debug(
+        "usePluginConfigurationStore - retrieveVisualizersConfiguration: "
+      );
+      console.debug(visualizers);
       set({
-        visualizersJSON: resp.data,
-        visualizers: Object.values(resp.data),
-        loading: false,
+        visualizersError: null,
+        visualizersJSON: visualizers,
+        visualizers: Object.values(visualizers),
+        visualizersLoading: false,
       });
     } catch (e) {
-      set({ error: e, loading: false });
+      set({ visualizersError: e, visualizersLoading: false });
     }
   },
   retrievePlaybooksConfiguration: async () => {
     try {
-      set({ loading: true });
-      const resp = await axios.get(PLAYBOOKS_CONFIG_URI);
+      set({ playbooksLoading: true });
+      const playbooks = await downloadAllPlugin(PLAYBOOKS_CONFIG_URI);
+      console.debug(
+        "usePluginConfigurationStore - retrievePlaybooksConfiguration: "
+      );
+      console.debug(playbooks);
       set({
-        playbooksJSON: resp.data,
-        playbooks: Object.values(resp.data),
-        loading: false,
+        playbooksError: null,
+        playbooksJSON: playbooks,
+        playbooks: Object.values(playbooks),
+        playbooksLoading: false,
       });
     } catch (e) {
-      set({ error: e, loading: false });
+      set({ playbooksError: e, playbooksLoading: false });
     }
   },
   checkPluginHealth: async (pluginType, PluginName) => {
@@ -86,6 +129,8 @@ const usePluginConfigurationStore = create((set, get) => ({
       const resp = await axios.get(
         `${API_BASE_URI}/${pluginType}/${PluginName}/healthcheck`
       );
+      console.debug("usePluginConfigurationStore - checkPluginHealth: ");
+      console.debug(resp);
       return Promise.resolve(resp.data?.status); // status is of type boolean
     } catch (e) {
       addToast("Failed!", e.parsedMsg.toString(), "danger");

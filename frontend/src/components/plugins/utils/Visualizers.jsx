@@ -8,8 +8,8 @@ export default function Visualizers() {
 
   const stateSelector = React.useCallback(
     (state) => [
-      state.loading,
-      state.error,
+      state.visualizersLoading,
+      state.visualizersError,
       state.visualizers,
       state.retrieveConnectorsConfiguration,
     ],

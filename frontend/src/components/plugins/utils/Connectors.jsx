@@ -8,8 +8,8 @@ export default function Connectors() {
 
   const stateSelector = React.useCallback(
     (state) => [
-      state.loading,
-      state.error,
+      state.connectorsLoading,
+      state.connectorsError,
       state.connectors,
       state.retrieveConnectorsConfiguration,
     ],

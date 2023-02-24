@@ -8,8 +8,8 @@ export default function Playbooks() {
 
   const stateSelector = React.useCallback(
     (state) => [
-      state.loading,
-      state.error,
+      state.playbooksLoading,
+      state.playbooksError,
       state.playbooks,
       state.retrievePlaybooksConfiguration,
     ],

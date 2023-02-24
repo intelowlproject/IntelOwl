@@ -24,7 +24,7 @@
   "AbuseIPDB": {
     "type": "observable",
     "python_module": "abuseipdb.AbuseIPDB",
-    "description": "check if an ip was reported on AbuseIPDB",
+    "description": "check if an ip was reported on [AbuseIPDB](https://www.abuseipdb.com/)",
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
@@ -415,6 +415,28 @@
     },
     "secrets": {},
     "params": {}
+  },
+  "Crowdsec": {
+    "type": "observable",
+    "python_module": "crowdsec.Crowdsec",
+    "description": "check if an IP was reported on [Crowdsec](https://www.crowdsec.net/) Smoke Dataset",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": ["ip"],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "CROWDSEC_KEY",
+        "description": "API Key to access the service",
+        "required": true,
+        "type": "str"
+      }
+    },
+    "params": {},
   },
   "Capa_Info": {
     "type": "file",

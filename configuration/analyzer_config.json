@@ -203,6 +203,28 @@
     },
     "params": {}
   },
+  "BinaryEdge": {
+    "type": "observable",
+    "python_module": "binaryedge.BinaryEdge",
+    "description": "Details about an Host. List of recent events for the specified host, including details of exposed ports and services and return list of subdomains known from the target domains",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": ["ip","domain"],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "BINARYEDGE_KEY",
+        "description": "API key for the BinaryEdge",
+        "required": true,
+        "type": "str"
+      }
+    },
+    "params": {}
+  },
   "BitcoinAbuse": {
     "type": "observable",
     "python_module": "bitcoinabuse.BitcoinAbuseAPI",

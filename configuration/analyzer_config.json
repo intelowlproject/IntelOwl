@@ -2539,11 +2539,39 @@
     },
     "params": {}
   },
+  "Pulsedive": {
+    "type": "observable",
+    "python_module": "pulsedive.Pulsedive",
+    "description": "Scan indicators and retrieve results from [Pulsedive](https://pulsedive.com/)'s API",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": ["ip", "domain", "url", "hash"],
+    "config": {
+      "soft_time_limit": 100,
+      "queue": "default"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "PULSEDIVE_API_KEY",
+        "description": "Optional API key.",
+        "required": false,
+        "type": "str"
+      }
+    },
+    "params": {
+      "scan_mode": {
+        "value": "basic",
+        "type": "str",
+        "description": "[basic, passive, active] By Default there is no scan of the observable. You can choose to add either active or passive scanning. See [doc](https://pulsedive.com/api/scan) for more info"
+      }
+    }
+  },
   "Pulsedive_Active_IOC": {
     "type": "observable",
     "python_module": "pulsedive.Pulsedive",
-    "description": "Scan indicators and retrieve results from Pulsedive's API",
-    "disabled": false,
+    "description": "[DEPRECATED] Scan indicators and retrieve results from Pulsedive's API",
+    "disabled": true,
     "external_service": true,
     "leaks_info": false,
     "observable_supported": ["ip", "domain", "url", "hash"],

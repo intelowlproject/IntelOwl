@@ -9,7 +9,7 @@ class Crowdsec(ObservableAnalyzer):
         self.__api_key = self._secrets["api_key_name"]
 
     def run(self):
-        headers = {"x-api-key": self.__api_key}
+        headers = {"x-api-key": self.__api_key, "User-Agent": "crowdsec-intelowl/v1.0.0"}
         url = f"https://cti.api.crowdsec.net/v2/smoke/{self.observable_name}"
         response = requests.get(url, headers=headers)
         response.raise_for_status()

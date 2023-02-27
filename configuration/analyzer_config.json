@@ -4765,7 +4765,7 @@
       "api_key_name": {
         "env_var_key": "MALPEDIA_TOKEN",
         "description": "Optional key to receive results from public (TLP:CLEAR) and non-public (TLP:GREEN, TLP:AMBER and TLP:RED) YARA rules.",
-        "required": false
+        "required": false,
         "type": "str"
       },
       "api_key_identifier": {
@@ -4852,7 +4852,7 @@
       "api_key_name": {
         "env_var_key": "MALPEDIA_TOKEN",
         "description": "Optional key to receive results from public (TLP:CLEAR) and also non-public (TLP:GREEN, TLP:AMBER and TLP:RED) YARA rules.",
-        "required": false
+        "required": false,
         "type": "str"
       }
     },
@@ -4876,7 +4876,7 @@
       "api_key_name": {
         "env_var_key": "MALPEDIA_TOKEN",
         "description": "Optional key to receive results from public (TLP:CLEAR) and also non-public (TLP:GREEN, TLP:AMBER and TLP:RED) YARA rules.",
-        "required": false
+        "required": false,
         "type": "str"
       }
     },

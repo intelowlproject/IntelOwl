@@ -58,7 +58,6 @@
                     "static_strings": false
                 }
             },
-            "Fortiguard": {},
             "Google_DNS": {
                 "query_type": "A"
             },
@@ -114,7 +113,6 @@
             },
             "Quad9_Malicious_Detector": {},
             "Quark_Engine_APK": {},
-            "Rendertron": {},
             "Robtex": {},
             "Rtf_Info": {},
             "Signature_Info": {},

@@ -24,8 +24,9 @@ class ConnectorConfigAPI(AbstractConfigAPI):
 class ConnectorActionViewSet(PluginActionViewSet):
     queryset = ConnectorReport.objects.all()
 
+    @classmethod
     @property
-    def report_model(self):
+    def report_model(cls):
         return ConnectorReport
 
     def perform_retry(self, report: ConnectorReport):

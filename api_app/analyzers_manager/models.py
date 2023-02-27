@@ -164,6 +164,7 @@ class AnalyzerConfig(AbstractConfig):
         return PluginConfig.PluginType.ANALYZER
 
     @classmethod
+    @property
     def report_model(cls) -> Type[AnalyzerReport]:
         return AnalyzerReport
 

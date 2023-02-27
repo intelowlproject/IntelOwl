@@ -49,7 +49,7 @@ class AnalyzerConfigAPI(AbstractConfigAPI):
     def pull(self, request, pk=None):
         logger.info(f"update request from user {request.user}, pk {pk}")
         obj: AnalyzerConfig = self.get_object()
-        success = obj.update(obj.python_path)
+        success = obj.update(obj.python_module)
         if not success:
             raise ValidationError({"detail": "No update implemented"})
 
@@ -59,8 +59,9 @@ class AnalyzerConfigAPI(AbstractConfigAPI):
 class AnalyzerActionViewSet(PluginActionViewSet):
     queryset = AnalyzerReport.objects.all()
 
+    @classmethod
     @property
-    def report_model(self):
+    def report_model(cls):
         return AnalyzerReport
 
     def perform_kill(self, report: AnalyzerReport):

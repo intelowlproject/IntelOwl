@@ -6,15 +6,11 @@ from rest_framework import routers
 
 from .views import (
     PlaybookConfigAPI,
-    analyze_multiple_files,
-    analyze_multiple_observables,
 )
 
 router = routers.DefaultRouter(trailing_slash=False)
 router.register(r"playbook", PlaybookConfigAPI, basename="playbook")
 
 urlpatterns = [
-    path("playbook/analyze_multiple_files", analyze_multiple_files),
-    path("playbook/analyze_multiple_observables", analyze_multiple_observables),
     path(r"", include(router.urls)),
 ]

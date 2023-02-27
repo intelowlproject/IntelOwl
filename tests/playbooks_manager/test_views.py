@@ -1,84 +1,105 @@
-from django.test import TransactionTestCase
-
-from api_app.playbooks_manager.serializers import CachedPlaybooksSerializer
-from api_app.playbooks_manager.views import _cache_playbook
-from api_app.serializers import ObservableAnalysisSerializer
-from tests import User
+from api_app.analyzers_manager.models import AnalyzerConfig
+from api_app.models import Job
+from api_app.playbooks_manager.models import PlaybookConfig
+from tests import CustomAPITestCase
 
 
-class PlaybookViewTestCase(TransactionTestCase):
-    # the requirement for a request object is necessary
-    # because of how certego SaaS is written. Particularly,
-    # the
-    class request:
-        data: dict
-        user: User
+class PlaybookViewTestCase(CustomAPITestCase):
 
-    playbook_name = "TEST_NEW_PLAYBOOK"
+    URL = "/api/playbook"
 
-    def setUp(self):
-        self.analyzer_serializer_class = ObservableAnalysisSerializer
-        self.superuser = User.objects.filter(username="test")
-        if not self.superuser.exists():
-            self.superuser = User.objects.create_superuser(
-                username="test", email="test@intelowl.com", password="test"
-            )
+    def test_list(self):
+        response = self.client.get(self.URL)
+        self.assertEqual(response.status_code, 200)
+        result = response.json()
+        self.assertIn("count", result)
+        self.assertEqual(result["count"], PlaybookConfig.objects.all().count())
+        self.assertIn("results", result)
+        self.assertTrue(isinstance(result["results"], list))
 
-        self.request.user = self.superuser
+        self.client.force_authenticate(None)
+        response = self.client.get(self.URL)
+        self.assertEqual(response.status_code, 401)
+        self.client.force_authenticate(self.superuser)
+        response = self.client.get(self.URL)
+        self.assertEqual(response.status_code, 200)
 
-        analyzers_used = ["Classic_DNS"]
-        data = {
-            "observables": [
-                ["url", "google.com"],
-            ],
-            "analyzers_requested": analyzers_used,
-            "connectors_requested": [],
-            "tlp": "WHITE",
-            "runtime_configuration": {},
-            "tags_labels": [],
-        }
+    def test_get(self):
+        playbook = PlaybookConfig.objects.order_by("?").first()
+        self.assertIsNotNone(playbook)
+        playbook = playbook.name
+        response = self.client.get(f"{self.URL}/{playbook}")
+        self.assertEqual(response.status_code, 200)
 
-        self.supports = ["ip", "domain", "url"]
+        self.client.force_authenticate(None)
+        response = self.client.get(f"{self.URL}/{playbook}")
+        self.assertEqual(response.status_code, 401)
 
-        serializer = self.analyzer_serializer_class(data=data, many=True)
-        serializer.is_valid(raise_exception=True)
+        self.client.force_authenticate(self.superuser)
+        response = self.client.get(f"{self.URL}/{playbook}")
+        self.assertEqual(response.status_code, 200)
 
-        self.test_jobs = serializer.save(
-            user=self.superuser,
+    def test_get_non_existent(self):
+        response = self.client.get(f"{self.URL}/NON_EXISTENT")
+        self.assertEqual(response.status_code, 404)
+
+    def test_create(self):
+        ac, _ = AnalyzerConfig.objects.get_or_create(
+            name="test",
+            python_module="yara.Yara",
+            description="test",
+            disabled=False,
+            config={"soft_time_limit": 100, "queue": "default"},
+            params={},
+            secrets={},
+            type="ip",
+            leaks_info=False,
         )
-
-        self.test_job = self.test_jobs[0]
-
-        # kill the ongoing job to not waste any resources.
-        # since a running job isn't required for this scan.
-        self.test_job.kill_if_ongoing()
-
-    def tearDown(self):
-        self.test_job.delete()
-        return super().tearDown()
-
-    def test_cache_config(self):
-        job = self.test_job
-        planned_name = "TEST_NEW_PLAYBOOK"
-        planned_description = "This is a test description"
-        data = {
-            "name": planned_name,
-            "description": planned_description,
-            "job_id": job.id,
-        }
-
-        self.request.data = data
-
-        playbook = _cache_playbook(
-            request=self.request, serializer_class=CachedPlaybooksSerializer
+        job, _ = Job.objects.get_or_create(
+            user=self.user,
+            analyzers_requested=[ac.name],
+            analyzers_to_execute=[ac.name],
         )
+        response = self.client.post(
+            self.URL,
+            data={
+                "name": "TestCreate",
+                "description": "test",
+                "job": job.pk,
+            },
+        )
+        self.assertEqual(response.status_code, 201, response.json())
+        try:
+            pc = PlaybookConfig.objects.get(name="TestCreate")
+        except PlaybookConfig.DoesNotExist as e:
+            self.fail(e)
+        else:
+            pc.delete()
+        finally:
+            ac.delete()
+            job.delete()
 
-        self.assertEqual(planned_name, playbook.get("name"))
+    def test_update(self):
+        playbook = PlaybookConfig.objects.create(
+            name="Test", type=["ip"], description="test"
+        )
+        self.assertIsNotNone(playbook)
+        response = self.client.patch(f"{self.URL}/{playbook.name}")
+        self.assertEqual(response.status_code, 403)
 
-        self.assertEqual(planned_description, playbook.get("description"))
+        self.client.force_authenticate(self.superuser)
+        response = self.client.patch(f"{self.URL}/{playbook.name}")
+        self.assertEqual(response.status_code, 200)
+        playbook.delete()
 
-        self.assertListEqual(playbook.get("supports"), self.supports)
+    def test_delete(self):
+        playbook, _ = PlaybookConfig.objects.get_or_create(
+            name="Test", type=["ip"], description="test"
+        )
+        response = self.client.delete(f"{self.URL}/{playbook.name}")
+        self.assertEqual(response.status_code, 403)
 
-        self.assertEqual(
-            playbook.get("disabled"), False
-        )  # to make sure that they are actually picked up by the frontend
+        self.client.force_authenticate(self.superuser)
+        response = self.client.delete(f"{self.URL}/{playbook.name}")
+        self.assertEqual(response.status_code, 204)
+        playbook.delete()

@@ -99,7 +99,7 @@ class AbstractConfigSerializer(rfs.ModelSerializer):
 
         for param, param_dict in result["params"].items():
             try:
-                param_dict["value"] = PluginConfig.visible_for_user(user).get(
+                pc : PluginConfig = PluginConfig.visible_for_user(user).get(
                     type=self.Meta.model._get_type(),
                     attribute=param,
                     config_type=PluginConfig.ConfigType.PARAMETER,
@@ -107,6 +107,8 @@ class AbstractConfigSerializer(rfs.ModelSerializer):
                 )
             except PluginConfig.DoesNotExist:
                 param_dict["value"] = None
+            else:
+                param_dict["value"] = pc.value
         if user.has_membership():
             try:
                 disabled = OrganizationPluginState.objects.get(

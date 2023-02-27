@@ -29,9 +29,10 @@ class PluginActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
         IsObjectOwnerOrSameOrgPermission,
     ]
 
+    @classmethod
     @property
     @abstractmethod
-    def report_model(self):
+    def report_model(cls):
         raise NotImplementedError()
 
     def get_object(self, job_id: int, name: str) -> AbstractReport:

@@ -141,8 +141,8 @@ class AbstractConfig(models.Model):
         self.clean_python_module()
         self.clean_config_queue()
 
-    @property
     @classmethod
+    @property
     def report_model(cls) -> Type[AbstractReport]:
         raise NotImplementedError()
 

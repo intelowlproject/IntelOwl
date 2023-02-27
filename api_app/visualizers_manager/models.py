@@ -38,5 +38,6 @@ class VisualizerConfig(AbstractConfig):
         return settings.BASE_VISUALIZER_PYTHON_PATH
 
     @classmethod
+    @property
     def report_model(cls) -> Type[VisualizerReport]:
         return VisualizerReport

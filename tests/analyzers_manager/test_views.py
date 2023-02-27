@@ -52,11 +52,19 @@ class AnalyzerConfigAPITestCase(CustomAPITestCase):
         self.assertEqual(response.status_code, 405)
 
     def test_update(self):
-        response = self.client.patch(self.URL)
+        analyzer = AnalyzerConfig.objects.order_by("?").first().name
+        response = self.client.patch(f"{self.URL}/{analyzer}")
+        self.assertEqual(response.status_code, 405)
+        self.client.force_authenticate(self.superuser)
+        response = self.client.patch(f"{self.URL}/{analyzer}")
         self.assertEqual(response.status_code, 405)
 
     def test_delete(self):
-        response = self.client.delete(self.URL)
+        analyzer = AnalyzerConfig.objects.order_by("?").first().name
+        response = self.client.delete(f"{self.URL}/{analyzer}")
+        self.assertEqual(response.status_code, 405)
+        self.client.force_authenticate(self.superuser)
+        response = self.client.delete(f"{self.URL}/{analyzer}")
         self.assertEqual(response.status_code, 405)
 
     def test_pull(self):
@@ -66,6 +74,12 @@ class AnalyzerConfigAPITestCase(CustomAPITestCase):
 
         self.client.force_authenticate(self.superuser)
 
+        response = self.client.post(f"{self.URL}/{analyzer}/pull")
+        self.assertEqual(response.status_code, 200, response.json())
+        result = response.json()
+        self.assertIn("status", result)
+        self.assertTrue(result["status"])
+
         analyzer = "Xlm_Macro_Deobfuscator"
         response = self.client.post(f"{self.URL}/{analyzer}/pull")
         self.assertEqual(response.status_code, 400)
@@ -74,18 +88,18 @@ class AnalyzerConfigAPITestCase(CustomAPITestCase):
         self.assertIn("detail", result["errors"])
         self.assertEqual(result["errors"]["detail"], "No update implemented")
 
-        response = self.client.post(f"{self.URL}/{analyzer}/pull")
-        self.assertEqual(response.status_code, 200, response.json())
-        result = response.json()
-        self.assertIn("status", result)
-        self.assertTrue(result["status"])
-
     def test_health_check(self):
         analyzer = "ClamAV"
         response = self.client.get(f"{self.URL}/{analyzer}/health_check")
         self.assertEqual(response.status_code, 403)
 
         self.client.force_authenticate(self.superuser)
+
+        response = self.client.get(f"{self.URL}/{analyzer}/health_check")
+        self.assertEqual(response.status_code, 200)
+        result = response.json()
+        self.assertIn("status", result)
+        self.assertTrue(result["status"])
 
         analyzer = "Xlm_Macro_Deobfuscator"
         response = self.client.get(f"{self.URL}/{analyzer}/health_check")
@@ -94,13 +108,6 @@ class AnalyzerConfigAPITestCase(CustomAPITestCase):
         self.assertIn("errors", result)
         self.assertIn("detail", result["errors"])
         self.assertEqual(result["errors"]["detail"], "No healthcheck implemented")
-
-        analyzer = "ClamAV"
-        response = self.client.get(f"{self.URL}/{analyzer}/health_check")
-        self.assertEqual(response.status_code, 200)
-        result = response.json()
-        self.assertIn("status", result)
-        self.assertTrue(result["status"])
 
 
 class AnalyzerActionViewSetTests(CustomAPITestCase, PluginActionViewsetTestCase):

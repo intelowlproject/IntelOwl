@@ -51,11 +51,19 @@ class ConnectorConfigAPITestCase(CustomAPITestCase):
         self.assertEqual(response.status_code, 405)
 
     def test_update(self):
-        response = self.client.patch(self.URL)
+        connector = ConnectorConfig.objects.order_by("?").first().name
+        response = self.client.patch(f"{self.URL}/{connector}")
+        self.assertEqual(response.status_code, 405)
+        self.client.force_authenticate(self.superuser)
+        response = self.client.patch(f"{self.URL}/{connector}")
         self.assertEqual(response.status_code, 405)
 
     def test_delete(self):
-        response = self.client.delete(self.URL)
+        connector = ConnectorConfig.objects.order_by("?").first().name
+        response = self.client.delete(f"{self.URL}/{connector}")
+        self.assertEqual(response.status_code, 405)
+        self.client.force_authenticate(self.superuser)
+        response = self.client.delete(f"{self.URL}/{connector}")
         self.assertEqual(response.status_code, 405)
 
     def test_health_check(self):

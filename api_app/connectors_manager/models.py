@@ -33,6 +33,7 @@ class ConnectorConfig(AbstractConfig):
         return PluginConfig.PluginType.CONNECTOR
 
     @classmethod
+    @property
     def report_model(cls) -> Type[ConnectorReport]:
         return ConnectorReport
 

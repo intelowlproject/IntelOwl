@@ -8,6 +8,7 @@
 * added [HuntressLab Yara rules](https://github.com/embee-research/Yara) to default Yara Rules List
 * added [BinaryEdge](https://docs.binaryedge.io/api-v2/#v2queryiptarget) analyzer
 * deprecated `Pulsedive_Active_IOC` analyzer. Please substitute it with the new `Pulsedive` analyzer.
+* Removed `Fortiguard` analyzer because endpoint does not work anymore.
 
 **Deployment Changes**
 * added support for AWS RDS authentication with IAM roles

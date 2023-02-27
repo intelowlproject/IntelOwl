@@ -124,7 +124,8 @@ class AbstractConfig(models.Model):
             _ = self.python_class
         except ImportError as exc:
             raise ValidationError(
-                f"`python_module` incorrect, {self.python_complete_path} couldn't be imported"
+                "`python_module` incorrect, "
+                f"{self.python_complete_path} couldn't be imported"
             ) from exc
 
     def clean_config_queue(self):

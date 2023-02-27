@@ -14,17 +14,11 @@ class PlaybookConfigSerializer(rfs.ModelSerializer):
 
 class PlaybookConfigCreateSerializer(rfs.ModelSerializer):
 
-    job = rfs.PrimaryKeyRelatedField(
-        queryset=Job.objects.all(), write_only=True
-    )
+    job = rfs.PrimaryKeyRelatedField(queryset=Job.objects.all(), write_only=True)
 
     class Meta:
         model = PlaybookConfig
-        fields = (
-            "name",
-            "description",
-            "job"
-        )
+        fields = ("name", "description", "job")
 
     def validate_job(self, job: Job):
         owner = self.context["request"].user
@@ -42,7 +36,13 @@ class PlaybookConfigCreateSerializer(rfs.ModelSerializer):
         analyzers = AnalyzerConfig.objects.filter(name__in=job.analyzers_to_execute)
         connectors = ConnectorConfig.objects.filter(name__in=job.connectors_to_execute)
         types_supported = list(
-            set([type_supported for analyzer_config in analyzers for type_supported in analyzer_config.observable_supported])
+            set(
+                [
+                    type_supported
+                    for analyzer_config in analyzers
+                    for type_supported in analyzer_config.observable_supported
+                ]
+            )
         )
         if job.is_sample:
             types_supported.append(TypeChoices.FILE)

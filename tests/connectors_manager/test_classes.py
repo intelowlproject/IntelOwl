@@ -117,14 +117,16 @@ class ConnectorTestCase(CustomTestCase):
         subclasses = Connector.__subclasses__()
         self.assertEqual(num_connectors, len(subclasses))
         for subclass in subclasses:
-            print(f"\nTesting Connector {subclass.__name__}")
+            print("\n" f"Testing Connector {subclass.__name__}")
             for config in ConnectorConfig.objects.filter(
                 python_module=subclass.python_module
             ):
                 timeout_seconds = config.soft_time_limit
                 timeout_seconds = min(timeout_seconds, 20)
                 print(
-                    f"\tTesting with config {config.name} for {timeout_seconds} seconds"
+                    "\t"
+                    f"Testing with config {config.name}"
+                    f" for {timeout_seconds} seconds"
                 )
                 sub = subclass(
                     config, job.pk, {"runtime_configuration": {}, "task_id": uuid()}
@@ -134,7 +136,8 @@ class ConnectorTestCase(CustomTestCase):
                     sub.start()
                 except TimeoutError:
                     self.fail(
-                        f"Connector {subclass.__name__} with config {config.name} and observable "
+                        f"Connector {subclass.__name__}"
+                        f" with config {config.name} "
                         f"went in timeout after {timeout_seconds}"
                     )
                 else:

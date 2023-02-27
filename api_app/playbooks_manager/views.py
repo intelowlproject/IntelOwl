@@ -6,7 +6,7 @@ from typing import Union
 
 from drf_spectacular.utils import extend_schema as add_docs
 from rest_framework import status, viewsets
-from rest_framework.decorators import api_view, action
+from rest_framework.decorators import action
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 
@@ -28,20 +28,18 @@ logger = logging.getLogger(__name__)
 
 class PlaybookConfigAPI(viewsets.ModelViewSet, SerializerActionMixin):
 
-    serializer_class =  PlaybookConfigSerializer
+    serializer_class = PlaybookConfigSerializer
 
-    serializer_action_classes = {
-        "create": PlaybookConfigCreateSerializer
-    }
+    serializer_action_classes = {"create": PlaybookConfigCreateSerializer}
 
     permission_classes = [IsAuthenticated]
 
     def _multi_analysis_request_playbooks(
-            self,
-            request,
-            serializer_class: Union[
-                PlaybookFileAnalysisSerializer, PlaybookObservableAnalysisSerializer
-            ],
+        self,
+        request,
+        serializer_class: Union[
+            PlaybookFileAnalysisSerializer, PlaybookObservableAnalysisSerializer
+        ],
     ):
         """
         Prepare and send multiple files/observables for running playbooks
@@ -57,15 +55,14 @@ class PlaybookConfigAPI(viewsets.ModelViewSet, SerializerActionMixin):
             status=status.HTTP_200_OK,
         )
 
-
     def check_permissions(self, request):
         if request.method in ["DELETE", "PATCH"]:
             permission = IsAdminUser()
             if not permission.has_permission(request, self):
                 self.permission_denied(
                     request,
-                    message=getattr(permission, 'message', None),
-                    code=getattr(permission, 'code', None)
+                    message=getattr(permission, "message", None),
+                    code=getattr(permission, "code", None),
                 )
         return super().check_permissions(request)
 
@@ -90,4 +87,6 @@ class PlaybookConfigAPI(viewsets.ModelViewSet, SerializerActionMixin):
     )
     @action(methods=["POST"], url_name="analyze_multiple_files", detail=False)
     def analyze_multiple_files(self, request):
-        return self._multi_analysis_request_playbooks(request, PlaybookFileAnalysisSerializer)
+        return self._multi_analysis_request_playbooks(
+            request, PlaybookFileAnalysisSerializer
+        )

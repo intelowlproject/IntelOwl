@@ -4,13 +4,12 @@ from abc import ABCMeta, abstractmethod
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.core.management import call_command
 from django.test import TestCase
 from rest_framework.test import APIClient
 
 from api_app.analyzers_manager.constants import ObservableTypes
 from api_app.core.models import AbstractReport
-from api_app.models import Job, PluginConfig
+from api_app.models import Job
 
 User = get_user_model()
 

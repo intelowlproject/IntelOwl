@@ -89,7 +89,9 @@ class FileAnalyzerTestCase(CustomTestCase):
                         found_one = True
                     for job in jobs:
                         print(
-                            f"\t\tTesting {job.file_name} with mimetype {mimetype} for {timeout_seconds} seconds"
+                            "\t\t"
+                            f"Testing {job.file_name} with mimetype {mimetype}"
+                            f" for {timeout_seconds} seconds"
                         )
                         sub = subclass(
                             config,
@@ -101,14 +103,16 @@ class FileAnalyzerTestCase(CustomTestCase):
                             sub.start()
                         except TimeoutError:
                             self.fail(
-                                f"Analyzer {subclass.__name__} with config {config.name} and mimetype "
+                                f"Analyzer {subclass.__name__} "
+                                f"with config {config.name} and mimetype "
                                 f"{mimetype} went in timeout after {timeout_seconds}"
                             )
                         else:
                             signal.alarm(0)
                 if not found_one:
                     self.fail(
-                        f"No valid job found for analyzer {subclass.__name__} with configuration {config.name}"
+                        f"No valid job found for analyzer {subclass.__name__}"
+                        f" with configuration {config.name}"
                     )
 
     def tearDown(self) -> None:
@@ -190,10 +194,12 @@ class ObservableAnalyzerTestCase(CustomTestCase):
             ):
                 timeout_seconds = config.soft_time_limit
                 timeout_seconds = min(timeout_seconds, 20)
-                print(f"\tTesting with config {config.name}")
+                print("\t" f"Testing with config {config.name}")
                 for observable_supported in config.observable_supported:
                     print(
-                        f"\t\tTesting datatype {observable_supported} for {timeout_seconds} seconds"
+                        "\t\t"
+                        f"Testing datatype {observable_supported}"
+                        f" for {timeout_seconds} seconds"
                     )
                     job = Job.objects.get(
                         observable_classification=observable_supported
@@ -206,7 +212,10 @@ class ObservableAnalyzerTestCase(CustomTestCase):
                         sub.start()
                     except TimeoutError:
                         self.fail(
-                            f"Analyzer {subclass.__name__} with config {config.name} and observable {observable_supported} went in timeout after {timeout_seconds}"
+                            f"Analyzer {subclass.__name__}"
+                            f" with config {config.name}"
+                            f" and observable {observable_supported}"
+                            f" went in timeout after {timeout_seconds}"
                         )
                     else:
                         signal.alarm(0)

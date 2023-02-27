@@ -99,7 +99,7 @@ class AbstractConfigSerializer(rfs.ModelSerializer):
 
         for param, param_dict in result["params"].items():
             try:
-                pc : PluginConfig = PluginConfig.visible_for_user(user).get(
+                pc: PluginConfig = PluginConfig.visible_for_user(user).get(
                     type=self.Meta.model._get_type(),
                     attribute=param,
                     config_type=PluginConfig.ConfigType.PARAMETER,

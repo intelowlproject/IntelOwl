@@ -1,7 +1,7 @@
 [
   {
     "model": "api_app.PluginConfig",
-    "pk": 1,
+    "pk": 151,
     "fields": {
       "updated_at": "2023-02-23T08:53:02.830Z",
       "type": "2",
@@ -15,7 +15,7 @@
   },
   {
     "model": "api_app.PluginConfig",
-    "pk": 2,
+    "pk": 152,
     "fields": {
       "updated_at": "2023-02-23T08:53:02.830Z",
       "type": "2",
@@ -29,7 +29,7 @@
   },
   {
     "model": "api_app.PluginConfig",
-    "pk": 3,
+    "pk": 153,
     "fields": {
       "updated_at": "2023-02-23T08:53:02.830Z",
       "type": "2",
@@ -43,7 +43,7 @@
   },
   {
     "model": "api_app.PluginConfig",
-    "pk": 4,
+    "pk": 154,
     "fields": {
       "updated_at": "2023-02-23T08:53:02.830Z",
       "type": "2",
@@ -57,7 +57,7 @@
   },
   {
     "model": "api_app.PluginConfig",
-    "pk": 5,
+    "pk": 155,
     "fields": {
       "updated_at": "2023-02-23T08:53:02.830Z",
       "type": "2",
@@ -71,7 +71,7 @@
   },
   {
     "model": "api_app.PluginConfig",
-    "pk": 6,
+    "pk": 156,
     "fields": {
       "updated_at": "2023-02-23T08:53:02.830Z",
       "type": "2",

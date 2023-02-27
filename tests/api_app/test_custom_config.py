@@ -9,7 +9,6 @@ from certego_saas.apps.organization.membership import Membership
 from certego_saas.apps.organization.organization import Organization
 
 from .. import CustomAPITestCase, User
-from ..celery_tester import task_queue
 
 custom_config_uri = reverse("plugin-config-list")
 analyze_multiple_observables_uri = reverse("analyze_multiple_observables")

@@ -70,4 +70,4 @@ RUN touch ${LOG_PATH}/django/api_app.log ${LOG_PATH}/django/api_app_errors.log \
 # so we have to set the home env variable to allow to reate its directory
 ENV HOME ${PYTHONPATH}
 
-HEALTHCHECK --interval=5s --timeout=2s --start-period=20s CMD nc -z localhost 8001 || exit 1
+HEALTHCHECK --interval=10s --timeout=2s --start-period=40s --retries=5 CMD nc -z localhost 8001 || exit 1

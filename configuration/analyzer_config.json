@@ -24,7 +24,7 @@
   "AbuseIPDB": {
     "type": "observable",
     "python_module": "abuseipdb.AbuseIPDB",
-    "description": "check if an ip was reported on AbuseIPDB",
+    "description": "check if an ip was reported on [AbuseIPDB](https://www.abuseipdb.com/)",
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
@@ -197,6 +197,28 @@
       "api_key_name": {
         "env_var_key": "AUTH0_KEY",
         "description": "",
+        "required": true,
+        "type": "str"
+      }
+    },
+    "params": {}
+  },
+  "BinaryEdge": {
+    "type": "observable",
+    "python_module": "binaryedge.BinaryEdge",
+    "description": "Details about an Host. List of recent events for the specified host, including details of exposed ports and services and return list of subdomains known from the target domains",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": ["ip","domain"],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "BINARYEDGE_KEY",
+        "description": "API key for the BinaryEdge",
         "required": true,
         "type": "str"
       }
@@ -392,6 +414,28 @@
       "queue": "default"
     },
     "secrets": {},
+    "params": {}
+  },
+  "Crowdsec": {
+    "type": "observable",
+    "python_module": "crowdsec.Crowdsec",
+    "description": "check if an IP was reported on [Crowdsec](https://www.crowdsec.net/) Smoke Dataset",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": ["ip"],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "CROWDSEC_KEY",
+        "description": "API Key to access the service",
+        "required": true,
+        "type": "str"
+      }
+    },
     "params": {}
   },
   "Capa_Info": {
@@ -1205,21 +1249,6 @@
         "description": ""
       }
     }
-  },
-  "Fortiguard": {
-    "type": "observable",
-    "python_module": "fortiguard.Fortiguard",
-    "description": "scan an observable with the Fortiguard URL Analyzer",
-    "disabled": false,
-    "external_service": true,
-    "leaks_info": false,
-    "observable_supported": ["domain", "url"],
-    "config": {
-      "soft_time_limit": 30,
-      "queue": "default"
-    },
-    "secrets": {},
-    "params": {}
   },
   "Google_DNS": {
     "type": "observable",
@@ -2517,11 +2546,39 @@
     },
     "params": {}
   },
+  "Pulsedive": {
+    "type": "observable",
+    "python_module": "pulsedive.Pulsedive",
+    "description": "Scan indicators and retrieve results from [Pulsedive](https://pulsedive.com/)'s API",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": ["ip", "domain", "url", "hash"],
+    "config": {
+      "soft_time_limit": 100,
+      "queue": "default"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "PULSEDIVE_API_KEY",
+        "description": "Optional API key.",
+        "required": false,
+        "type": "str"
+      }
+    },
+    "params": {
+      "scan_mode": {
+        "value": "basic",
+        "type": "str",
+        "description": "[basic, passive, active] By Default there is no scan of the observable. You can choose to add either active or passive scanning. See [doc](https://pulsedive.com/api/scan) for more info"
+      }
+    }
+  },
   "Pulsedive_Active_IOC": {
     "type": "observable",
     "python_module": "pulsedive.Pulsedive",
-    "description": "Scan indicators and retrieve results from Pulsedive's API",
-    "disabled": false,
+    "description": "[DEPRECATED] Scan indicators and retrieve results from Pulsedive's API",
+    "disabled": true,
     "external_service": true,
     "leaks_info": false,
     "observable_supported": ["ip", "domain", "url", "hash"],
@@ -2544,22 +2601,6 @@
         "description": ""
       }
     }
-  },
-  "Rendertron": {
-    "type": "observable",
-    "python_module": "rendertron.Rendertron",
-    "description": "get screenshot of a web page using rendertron (puppeteer)",
-    "disabled": false,
-    "external_service": false,
-    "leaks_info": false,
-    "docker_based": true,
-    "observable_supported": ["url"],
-    "config": {
-      "soft_time_limit": 320,
-      "queue": "local"
-    },
-    "secrets": {},
-    "params": {}
   },
   "Qiling_Windows": {
     "type": "file",
@@ -4348,6 +4389,7 @@
       "public_repositories": {
         "value": [
           "https://github.com/elastic/protections-artifacts",
+          "https://github.com/embee-research/Yara",
           "https://github.com/JPCERTCC/jpcert-yara",
           "https://github.com/SIFalcon/Detection/",
           "https://github.com/bartblaze/Yara-rules",

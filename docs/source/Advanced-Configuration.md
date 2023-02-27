@@ -131,6 +131,9 @@ Ultimately, to avoid to run RabbitMQ locally, you would need to use the option `
 
 If you like, you could use AWS RDS instead of PostgreSQL for your database. In that case, you should change the database required options accordingly: `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD` and setup your machine to access the service.
 
+If you have IntelOwl deployed on the AWS infrastructure, you can use IAM credentials to access the Postgres DB.
+To allow that just set `AWS_RDS_IAM_ROLE` to `True`. In this case `DB_PASSWORD` is not required anymore.
+
 Moreover, to avoid to run PostgreSQL locally, you would need to use the option `--use-external-database` when launching IntelOwl with the `start.py` script.
 
 #### Secrets

@@ -18,8 +18,24 @@ class JobFilter(filters.FilterSet):
     tags = filters.BaseInFilter(field_name="tags__label", lookup_expr="in")
 
     # extra
+    user = filters.CharFilter(method="filter_for_user")
+    id = filters.CharFilter(method="filter_for_id")
     type = filters.CharFilter(method="filter_for_type")
     name = filters.CharFilter(method="filter_for_name")
+
+    @staticmethod
+    def filter_for_user(queryset, value, user, *args, **kwargs):
+        return queryset.filter(user__username__icontains=user)
+
+    @staticmethod
+    def filter_for_id(queryset, value, _id, *args, **kwargs):
+        try:
+            int_id = int(_id)
+        except ValueError:
+            # this is to manage bad data as input
+            return queryset
+        else:
+            return queryset.filter(id=int_id)
 
     @staticmethod
     def filter_for_type(queryset, value, _type, *args, **kwargs):

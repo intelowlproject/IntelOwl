@@ -1,4 +1,5 @@
 import requests
+from django.conf import settings
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
 from tests.mock_utils import MockResponse, if_mock_connections, patch
@@ -9,7 +10,10 @@ class Crowdsec(ObservableAnalyzer):
         self.__api_key = self._secrets["api_key_name"]
 
     def run(self):
-        headers = {"x-api-key": self.__api_key}
+        headers = {
+            "x-api-key": self.__api_key,
+            "User-Agent": f"crowdsec-intelowl/{settings.VERSION}",
+        }
         url = f"https://cti.api.crowdsec.net/v2/smoke/{self.observable_name}"
         response = requests.get(url, headers=headers)
         response.raise_for_status()

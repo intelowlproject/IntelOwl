@@ -1,6 +1,23 @@
 # Changelog
 
 [**Upgrade Guide**](https://intelowl.readthedocs.io/en/latest/Installation.md#update-to-the-most-recent-version)
+## [v4.2.2](https://github.com/intelowlproject/IntelOwl/releases/tag/v4.2.2)
+
+**New/Improved Analyzers:**
+* added [Crowdsec](https://www.crowdsec.net/) analyzer.
+* added [HuntressLab Yara rules](https://github.com/embee-research/Yara) to default Yara Rules List
+* added [BinaryEdge](https://docs.binaryedge.io/api-v2/#v2queryiptarget) analyzer
+* deprecated `Pulsedive_Active_IOC` analyzer. Please substitute it with the new `Pulsedive` analyzer.
+
+**Deployment Changes**
+* added support for AWS RDS authentication with IAM roles
+* added UwsgiTop for debugging
+* Healthcheck is more permissive
+
+**fixes / adjust**
+* fix ID and User lookups in Jobs History table (#1552)
+* other minors
+
 ## [v4.2.1](https://github.com/intelowlproject/IntelOwl/releases/tag/v4.2.1)
 
 * Fixed Plugin bug which caused the inability to add new secrets.

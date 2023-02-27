@@ -196,7 +196,6 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `CIRCLPassiveSSL`: scan an observable against the CIRCL Passive SSL DB
 * `MaxMindGeoIP`: extract GeoIP info for an observable
 * `AbuseIPDB`: check if an ip was reported on [AbuseIPDB](https://www.abuseipdb.com/)
-* `Fortiguard`: scan an observable with the [Fortiguard URL Analyzer](https://www.fortiguard.com/webfilter)
 * `TorProject`: check if an IP is a Tor Exit Node
 * `MISP`: scan an observable on a MISP instance
 * `MISPFIRST`: scan an observable on the FIRST MISP instance

@@ -23,7 +23,6 @@ CURRENT_VERSION = os.getenv("REACT_APP_INTELOWL_VERSION", "").replace("v", "")
 
 DOCKER_ANALYZERS = [
     "tor_analyzers",
-    "rendertron",
     "malware_tools_analyzers",
     "cyberchef",
     "pcap_analyzers",

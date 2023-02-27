@@ -60,7 +60,7 @@ logger = logging.getLogger(__name__)
 
 
 def _multi_analysis_request(
-    user,
+    request,
     data: Union[QueryDict, dict],
     serializer_class: Union[
         Type[ObservableAnalysisSerializer],
@@ -74,12 +74,12 @@ def _multi_analysis_request(
     """
     logger.info(
         f"_multi_analysis_request {serializer_class} "
-        f"received request from {user}."
+        f"received request from {request.user.username}."
         f"Data:{data}."
     )
 
     # serialize request data and validate
-    serializer = serializer_class(data=data, many=True)
+    serializer = serializer_class(data=data, many=True, context={"request": request})
     serializer.is_valid(raise_exception=True)
 
     serialized_data = serializer.validated_data
@@ -89,7 +89,7 @@ def _multi_analysis_request(
 
     # save the arrived data plus new params into a new job object
     jobs = serializer.save(
-        user=user,
+        user=request.user,
     )
 
     logger.info(f"New Jobs added to queue <- {repr(jobs)}.")
@@ -320,7 +320,7 @@ def analyze_file(request):
         data["file_names"] = data.pop("file_name")[0]
     if data.get("file_mimetype", False):
         data["file_mimetypes"] = data.pop("file_mimetype")[0]
-    response = _multi_analysis_request(request.user, data, FileAnalysisSerializer)[
+    response = _multi_analysis_request(request, data, FileAnalysisSerializer)[
         "results"
     ][0]
     return Response(
@@ -349,7 +349,7 @@ def analyze_file(request):
 @api_view(["POST"])
 def analyze_multiple_files(request):
     response_dict = _multi_analysis_request(
-        request.user, request.data, FileAnalysisSerializer
+        request, request.data, FileAnalysisSerializer
     )
     return Response(
         response_dict,
@@ -374,9 +374,9 @@ def analyze_observable(request):
         raise ValidationError(
             "You need to specify the observable name and classification"
         )
-    response = _multi_analysis_request(
-        request.user, data, ObservableAnalysisSerializer
-    )["results"][0]
+    response = _multi_analysis_request(request, data, ObservableAnalysisSerializer)[
+        "results"
+    ][0]
     return Response(
         response,
         status=status.HTTP_200_OK,
@@ -400,7 +400,7 @@ def analyze_observable(request):
 @api_view(["POST"])
 def analyze_multiple_observables(request):
     response_dict = _multi_analysis_request(
-        request.user, request.data, ObservableAnalysisSerializer
+        request, request.data, ObservableAnalysisSerializer
     )
     return Response(
         response_dict,

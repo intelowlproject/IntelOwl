@@ -14,7 +14,7 @@ router = routers.DefaultRouter(trailing_slash=False)
 router.register(r"playbook", PlaybookConfigAPI, basename="playbook")
 
 urlpatterns = [
-    path(r"", include(router.urls)),
     path("playbook/analyze_multiple_files", analyze_multiple_files),
     path("playbook/analyze_multiple_observables", analyze_multiple_observables),
+    path(r"", include(router.urls)),
 ]

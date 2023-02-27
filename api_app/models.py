@@ -380,7 +380,7 @@ class Job(models.Model):
                         new_config: AbstractConfig
                         signature = new_config.get_signature(
                             self.pk,
-                            runtime_configuration.get(new_config.name, {}),
+                            config.get(new_config.name, {}),
                             playbook,
                         )
                         if not signature:

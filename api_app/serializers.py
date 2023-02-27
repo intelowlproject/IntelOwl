@@ -115,10 +115,6 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
 
     def validate(self, attrs: dict) -> dict:
         # check and validate runtime_configuration
-        runtime_conf = attrs.get("runtime_configuration", {})
-        if runtime_conf and isinstance(runtime_conf, list):
-            runtime_conf = json.loads(runtime_conf[0])
-        attrs["runtime_configuration"] = runtime_conf
         self.filter_analyzers_and_connectors(attrs)
         return attrs
 
@@ -153,8 +149,8 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
 
         analyzers_requested = serialized_data.get("analyzers_requested", [])
         if not analyzers_requested:
-            analyzers_requested = AnalyzerConfig.objects.all().values_list(
-                "name", flat=True
+            analyzers_requested = list(
+                AnalyzerConfig.objects.all().values_list("name", flat=True)
             )
             serialized_data["analyzers_requested"] = analyzers_requested
             self.run_all_analyzers = True
@@ -211,8 +207,8 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
 
         connectors_requested = serialized_data.get("connectors_requested", [])
         if not connectors_requested:
-            connectors_requested = ConnectorConfig.objects.all().values_list(
-                "name", flat=True
+            connectors_requested = list(
+                ConnectorConfig.objects.all().values_list("name", flat=True)
             )
             serialized_data["connectors_requested"] = connectors_requested
             self.run_all_connectors = True
@@ -440,8 +436,8 @@ class FileAnalysisSerializer(_AbstractJobCreateSerializer):
 
                 supported_query = Q(
                     supported_filetypes__isnull=True,
-                    not_supported_filetypes__not__contains=file_mimetype,
-                ) | Q(supported_filetypes__contains=file_mimetype)
+                    not_supported_filetypes__not__contains=[file_mimetype],
+                ) | Q(supported_filetypes__contains=[file_mimetype])
                 try:
                     AnalyzerConfig.objects.get(
                         Q(name=a_name, type=TypeChoices.FILE) & supported_query
@@ -485,13 +481,12 @@ class MultipleObservableAnalysisSerializer(rfs.ListSerializer):
         ret = []
         errors = []
 
-        for classification, name in data.get("observables", []):
+        for classification, name in data.pop("observables", []):
 
             # `deepcopy` here ensures that this code doesn't
             # break even if new fields are added in future
             item = copy.deepcopy(data)
 
-            item.pop("observables", None)
             item["observable_name"] = name
             if classification:
                 item["observable_classification"] = classification
@@ -581,9 +576,9 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
                 try:
                     AnalyzerConfig.objects.get(
                         name=a_name,
-                        type=TypeChoices.FILE,
-                        observable_supported__contains=serialized_data[
-                            "observable_classification"
+                        type=TypeChoices.OBSERVABLE,
+                        observable_supported__contains=[
+                            serialized_data["observable_classification"]
                         ],
                     )
                 except AnalyzerConfig.DoesNotExist:
@@ -626,14 +621,14 @@ class PlaybookBaseSerializer:
                 pp = PlaybookConfig.objects.get(name=p_name)
                 if not pp:
                     raise NotRunnablePlaybook(f"{p_name} does not exists")
-                elif not pp.is_ready_to_use:
-                    raise NotRunnablePlaybook(f"{p_name} won't run: not configured")
+                elif pp.disabled:
+                    raise NotRunnablePlaybook(f"{p_name} won't run: disabled")
                 else:
                     analyzers_requested.extend(
-                        pp.analyzers.all().values_list("name", flat=True)
+                        list(pp.analyzers.all().values_list("name", flat=True))
                     )
                     connectors_requested.extend(
-                        pp.connectors.all().values_list("name", flat=True)
+                        list(pp.connectors.all().values_list("name", flat=True))
                     )
                     runtime_configurations.append(pp.runtime_configuration)
                     valid_playbook_list.append(p_name)

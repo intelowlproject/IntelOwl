@@ -35,7 +35,7 @@ def _multi_analysis_request_playbooks(
     Prepare and send multiple files/observables for running playbooks
     """
     response = _multi_analysis_request(
-        user=request.user,
+        request,
         data=request.data,
         serializer_class=serializer_class,
     )

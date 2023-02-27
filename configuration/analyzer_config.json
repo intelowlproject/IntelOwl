@@ -2602,22 +2602,6 @@
       }
     }
   },
-  "Rendertron": {
-    "type": "observable",
-    "python_module": "rendertron.Rendertron",
-    "description": "get screenshot of a web page using rendertron (puppeteer)",
-    "disabled": false,
-    "external_service": false,
-    "leaks_info": false,
-    "docker_based": true,
-    "observable_supported": ["url"],
-    "config": {
-      "soft_time_limit": 320,
-      "queue": "local"
-    },
-    "secrets": {},
-    "params": {}
-  },
   "Qiling_Windows": {
     "type": "file",
     "python_module": "qiling.Qiling",

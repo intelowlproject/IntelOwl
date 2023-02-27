@@ -76,11 +76,6 @@ table, th, td {
     <td>Scans TOR .onion domains for privacy leaks and information disclosures.</td>
   </tr>
   <tr>
-    <td>Renderton</td>
-    <td><code>Renderton</code></td>
-    <td>get screenshot of a web page using rendertron (a headless chrome solution using puppeteer). Configuration variables have to be included in the `config.json`, see <a href="https://github.com/GoogleChrome/rendertron#config"> config options of renderton </a>. To use a proxy, include an argument <code>--proxy-server=YOUR_PROXY_SERVER</code> in <code>puppeteerArgs</code>.</td>
-  </tr>
-  <tr>
     <td>CyberChef</td>
     <td><code>CyberChef</code></td>
     <td>Run a transformation on a <a href="https://github.com/gchq/CyberChef-server">CyberChef server</a> using pre-defined or custom recipes(rules that describe how the input has to be transformed). Check further instructions <a href="#cyberchef">here</a></td>

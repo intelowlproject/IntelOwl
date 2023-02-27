@@ -1250,21 +1250,6 @@
       }
     }
   },
-  "Fortiguard": {
-    "type": "observable",
-    "python_module": "fortiguard.Fortiguard",
-    "description": "scan an observable with the Fortiguard URL Analyzer",
-    "disabled": false,
-    "external_service": true,
-    "leaks_info": false,
-    "observable_supported": ["domain", "url"],
-    "config": {
-      "soft_time_limit": 30,
-      "queue": "default"
-    },
-    "secrets": {},
-    "params": {}
-  },
   "Google_DNS": {
     "type": "observable",
     "python_module": "dns.dns_resolvers.google_dns_resolver.GoogleDNSResolver",

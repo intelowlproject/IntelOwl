@@ -16,8 +16,11 @@ class Crowdsec(ObservableAnalyzer):
         }
         url = f"https://cti.api.crowdsec.net/v2/smoke/{self.observable_name}"
         response = requests.get(url, headers=headers)
-        response.raise_for_status()
-        result = response.json()
+        if response.status_code == 404:
+            result = {"not_found": True}
+        else:
+            response.raise_for_status()
+            result = response.json()
         result["link"] = f"https://app.crowdsec.net/cti/{self.observable_name}"
         return result
 

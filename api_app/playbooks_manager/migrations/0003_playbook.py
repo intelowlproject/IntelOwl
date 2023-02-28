@@ -26,8 +26,8 @@ class Migration(migrations.Migration):
                 ('description', models.TextField()),
                 ('disabled', models.BooleanField(default=False)),
                 ('runtime_configuration', models.JSONField(blank=True, default=dict)),
-                ('analyzers', models.ManyToManyField(related_name='playbooks', to='analyzers_manager.AnalyzerConfig')),
-                ('connectors', models.ManyToManyField(related_name='playbooks', to='connectors_manager.ConnectorConfig')),
+                ('analyzers', models.ManyToManyField(related_name='playbooks', to='analyzers_manager.AnalyzerConfig', blank=True)),
+                ('connectors', models.ManyToManyField(related_name='playbooks', to='connectors_manager.ConnectorConfig', blank=True)),
             ],
         ),
         migrations.DeleteModel(

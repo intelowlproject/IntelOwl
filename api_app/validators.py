@@ -75,3 +75,27 @@ def validate_params(value):
         },
     }
     return _validate(value, schema)
+
+
+def validate_runtime_configuration_playbook(value):
+    schema = {
+        "type": "object",
+        "title": "RuntimeConfig",
+        "properties": {
+            "analyzers": {
+                "type": "array",
+                "items": {
+                    "type": "object"
+                }
+            },
+            "connectors": {
+                "type": "array",
+                "items": {
+                    "type": "object"
+                }
+            }
+
+        },
+        "required": ["analyzers", "connectors"]
+    }
+    return _validate(value, schema)

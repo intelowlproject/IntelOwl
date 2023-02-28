@@ -630,7 +630,7 @@ class PlaybookBaseSerializer:
                     connectors_requested.extend(
                         list(pp.connectors.all().values_list("name", flat=True))
                     )
-                    runtime_configurations.append(pp.runtime_configuration)
+                    runtime_configurations.append(pp.runtime_configuration["analyzers"] | pp.runtime_configuration["connectors"])
                     valid_playbook_list.append(p_name)
             except NotRunnablePlaybook as e:
                 logger.warning(e)

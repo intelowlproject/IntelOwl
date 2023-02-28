@@ -24,8 +24,8 @@ class VisualizerReport(AbstractReport):
 
 
 class VisualizerConfig(AbstractConfig):
-    analyzers = models.ManyToManyField(AnalyzerConfig, related_name="visualizers")
-    connectors = models.ManyToManyField(ConnectorConfig, related_name="visualizers")
+    analyzers = models.ManyToManyField(AnalyzerConfig, related_name="visualizers", blank=True)
+    connectors = models.ManyToManyField(ConnectorConfig, related_name="visualizers", blank=True)
 
     @classmethod
     def _get_type(cls) -> str:

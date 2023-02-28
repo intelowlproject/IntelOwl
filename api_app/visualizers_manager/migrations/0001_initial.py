@@ -32,8 +32,8 @@ class Migration(migrations.Migration):
                 ('secrets',
                  models.JSONField(blank=True, default=dict, validators=[api_app.validators.validate_secrets])),
                 ('params', models.JSONField(blank=True, default=dict, validators=[api_app.validators.validate_params])),
-                ('analyzers', models.ManyToManyField(related_name='visualizers', to='analyzers_manager.AnalyzerConfig')),
-                ('connectors', models.ManyToManyField(related_name='visualizers', to='connectors_manager.ConnectorConfig')),
+                ('analyzers', models.ManyToManyField(related_name='visualizers', to='analyzers_manager.AnalyzerConfig', blank=True)),
+                ('connectors', models.ManyToManyField(related_name='visualizers', to='connectors_manager.ConnectorConfig', blank=True)),
             ],
             options={
                 'abstract': False,

@@ -110,35 +110,35 @@ jobs:
 
       - name: "Test: api_app"
         run: |
-          docker/scripts/coverage_test.sh tests.api_app
+          docker exec intelowl_uwsgi coverage run manage.py test --keepdb tests.api_app
 
       - name: "Test: auth"
         run: |
-          docker/scripts/coverage_test.sh tests.auth
+          docker exec intelowl_uwsgi coverage run manage.py test --keepdb tests.auth
 
       - name: "Test: Cron"
         run: |
-          docker/scripts/coverage_test.sh tests.test_crons
+          docker exec intelowl_uwsgi coverage run manage.py test --keepdb tests.test_crons
 
-      - name: "Test: Connectors Manager (views, serializers)"
+    - name: "Test: Abstract classes"
         run: |
-          docker/scripts/coverage_test.sh tests.connectors_manager
+          docker exec intelowl_uwsgi coverage run manage.py test --keepdb tests.core
 
-      - name: "Test: Analyzers Manager (views, serializers)"
+      - name: "Test: Connectors Manager"
         run: |
-          docker/scripts/coverage_test.sh tests.analyzers_manager.test_views tests.analyzers_manager.test_serializers
+          docker exec intelowl_uwsgi coverage run manage.py test --keepdb tests.connectors_manager
 
-      - name: "Test: Analyzers Manager (observable analyzers)"
+      - name: "Test: Analyzers Manager"
         run: |
-          docker/scripts/coverage_test.sh tests.analyzers_manager.test_observable_scripts
+          docker exec intelowl_uwsgi coverage run manage.py test --keepdb tests.analyzers_manager
 
-      - name: "Test: Analyzers Manager (file analyzers)"
+      - name: "Test: Playbooks Manager"
         run: |
-          docker/scripts/coverage_test.sh tests.analyzers_manager.test_file_scripts
+          docker exec intelowl_uwsgi coverage run manage.py test --keepdb tests.playbooks_manager
 
-      - name: "Test: Playbooks Manager (views)"
+      - name: "Test: Visualizers Manager"
         run: |
-          docker/scripts/coverage_test.sh tests.playbooks_manager
+          docker exec intelowl_uwsgi coverage run manage.py test --keepdb tests.visualizers_manager
 
       - name: "Coverage: generate xml and transfer from docker container to host"
         run: |

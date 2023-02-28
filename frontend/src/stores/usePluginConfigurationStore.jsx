@@ -12,7 +12,7 @@ import {
 } from "../constants/api";
 
 async function downloadAllPlugin(pluginUrl, currentPage = 1) {
-  const resp = await axios.get(pluginUrl, { params: { page: currentPage } });
+  const resp = await axios.get(pluginUrl, { params: { page: currentPage, page_size:100 } });
   let additionalData = [];
   if (currentPage < resp.data.total_pages) {
     additionalData = await downloadAllPlugin(pluginUrl, currentPage + 1);

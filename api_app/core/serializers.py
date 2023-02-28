@@ -91,37 +91,16 @@ class AbstractConfigSerializer(rfs.ModelSerializer):
         fields = rfs.ALL_FIELDS
 
     def to_representation(self, instance: AbstractConfig):
-        from api_app.models import OrganizationPluginState, PluginConfig
-
         user = self.context["request"].user
         result = super().to_representation(instance)
         result["verification"] = instance.get_verification(user)
-
+        params_values = instance.read_params(user)
         for param, param_dict in result["params"].items():
             try:
-                pc: PluginConfig = PluginConfig.visible_for_user(user).get(
-                    type=self.Meta.model._get_type(),
-                    attribute=param,
-                    config_type=PluginConfig.ConfigType.PARAMETER,
-                    plugin_name=instance.name,
-                )
-            except PluginConfig.DoesNotExist:
+                param_dict["value"] = params_values[param]
+            except KeyError:
                 param_dict["value"] = None
-            else:
-                param_dict["value"] = pc.value
-        if user.has_membership():
-            try:
-                disabled = OrganizationPluginState.objects.get(
-                    organization=user.membership.organization,
-                    type=self.Meta.model._get_type(),
-                    plugin_name=instance.name,
-                )
-            except OrganizationPluginState.DoesNotExist:
-                pass
-            else:
-                if disabled:
-                    result["disabled"] = disabled
-
+        result["disabled"] = instance.is_runnable(user)
         return result
 
     def to_internal_value(self, data):

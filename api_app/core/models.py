@@ -8,6 +8,7 @@ from django.contrib.postgres import fields as pg_fields
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
+from django.utils.functional import cached_property
 from django.utils.module_loading import import_string
 from kombu import uuid
 
@@ -90,6 +91,8 @@ class AbstractReport(models.Model):
         return report
 
 
+# This is required as a function (and not even a lambda)
+# because the default must be a callable
 def config_default():
     return dict(queue=DEFAULT_QUEUE, soft_time_limit=60)
 
@@ -151,6 +154,7 @@ class AbstractConfig(models.Model):
         from api_app.models import PluginConfig
 
         missing_secrets = []
+        configured = True
         for secret, value in self.secrets.items():
             if (
                 not PluginConfig.visible_for_user(user)
@@ -160,26 +164,27 @@ class AbstractConfig(models.Model):
                     plugin_name=self.name,
                 )
                 .exists()
-                and value["required"]
             ):
                 missing_secrets.append(secret)
+                if value["required"]:
+                    configured = False
 
         num_missing_secrets = len(missing_secrets)
-        if num_missing_secrets:
-            configured = False
-            num_total_secrets = len(self.secrets.keys())
-            error_message = "(%s) not set; (%d of %d satisfied)" % (
-                ",".join(missing_secrets),
-                num_total_secrets - num_missing_secrets,
-                num_total_secrets,
+        num_total_secrets = len(self.secrets.keys())
+        if missing_secrets:
+            details = (
+                f"{', '.join(missing_secrets)} "
+                f"{'facultative' if configured else ''} "
+                f"secret{''if len(missing_secrets) == 1 else 's'} not set;"
+                f" ({num_total_secrets - num_missing_secrets} "
+                f"of {num_total_secrets} satisfied)"
             )
         else:
-            configured = True
-            error_message = None
+            details = "Ready to use!"
 
         return {
             "configured": configured,
-            "error_message": error_message,
+            "details": details,
             "missing_secrets": missing_secrets,
         }
 
@@ -189,7 +194,7 @@ class AbstractConfig(models.Model):
         configured = self.get_verification(user)["configured"]
         if user and user.has_membership():
             disabled_by_org = OrganizationPluginState.objects.filter(
-                organization=user.membership,
+                organization=user.membership.organization,
                 plugin_name=self.name,
                 disabled=True,
                 type=self._get_type(),
@@ -199,19 +204,19 @@ class AbstractConfig(models.Model):
 
         return configured and not disabled_by_org and not self.disabled
 
-    @property
+    @cached_property
     def queue(self):
         return self.config["queue"]
 
-    @property
+    @cached_property
     def soft_time_limit(self):
         return self.config["soft_time_limit"]
 
-    @property
+    @cached_property
     def python_complete_path(self) -> str:
         return f"{self.python_path}.{self.python_module}"
 
-    @property
+    @cached_property
     def python_class(self) -> Type:
         return import_string(self.python_complete_path)
 

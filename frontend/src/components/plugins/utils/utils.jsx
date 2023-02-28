@@ -114,13 +114,13 @@ export function PluginInfoCard({ pluginInfo }) {
               <h6 className="text-secondary">
                 Verification &nbsp;
                 <PluginVerificationIcon
-                  pluginName={pluginInfo?.name}
-                  verification={pluginInfo?.verification}
+                  pluginName={pluginInfo.name}
+                  verification={pluginInfo.verification}
                 />
               </h6>
-              {pluginInfo?.verification?.error_message && (
+              {pluginInfo.verification?.details && (
                 <div className="text-danger">
-                  {pluginInfo?.verification?.error_message}
+                  {pluginInfo.verification.details}
                 </div>
               )}
             </div>
@@ -196,7 +196,7 @@ export function PluginVerificationIcon({ pluginName, verification }) {
   const divId = `table-pluginverificationicon__${pluginName}`;
   return (
     <span id={divId}>
-      <BooleanIcon withColors truthy={verification?.configured} />
+      <BooleanIcon withColors truthy={verification.configured} />
       <UncontrolledTooltip
         target={divId}
         placement="top"
@@ -204,14 +204,12 @@ export function PluginVerificationIcon({ pluginName, verification }) {
         innerClassName={classnames(
           "text-start text-nowrap md-fit-content border border-darker",
           {
-            "bg-success text-darker": verification?.configured,
-            "bg-danger text-darker": !verification?.configured,
+            "bg-success text-darker": verification.configured,
+            "bg-danger text-darker": !verification.configured,
           }
         )}
       >
-        {verification?.configured
-          ? "Ready to use!"
-          : verification?.error_message}
+        {verification.details}
       </UncontrolledTooltip>
     </span>
   );

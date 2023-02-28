@@ -3,13 +3,12 @@ import os
 
 from django.test import tag
 from rest_framework.reverse import reverse
-from rest_framework.test import APIClient
 
 from api_app.models import OrganizationPluginState, PluginConfig
 from certego_saas.apps.organization.membership import Membership
 from certego_saas.apps.organization.organization import Organization
 
-from .. import CustomAPITestCase, User
+from .. import CustomAPITestCase
 
 plugin_state_viewer_uri = reverse("plugin_state_viewer")
 
@@ -29,16 +28,8 @@ class PluginStateTests(CustomAPITestCase):
         Organization.create("test_org", self.superuser)
         self.org = Organization.objects.get(name="test_org")
 
-        # create user
-        self.standard_user = User.objects.create_user(
-            username="standard_user",
-            email="standard_user@intelowl.com",
-            password="test",
-        )
-        self.standard_user_client = APIClient()
-        self.standard_user_client.force_authenticate(user=self.standard_user)
         Membership.objects.create(
-            user=self.standard_user,
+            user=self.user,
             organization=self.org,
         )
 
@@ -67,6 +58,7 @@ class PluginStateTests(CustomAPITestCase):
             plugin_name="CloudFlare_DNS",
             type=PluginConfig.PluginType.ANALYZER,
         ).delete()
+        self.client.force_authenticate(self.superuser)
 
     def test_enable_plugin(self):
         OrganizationPluginState.objects.create(
@@ -95,7 +87,8 @@ class PluginStateTests(CustomAPITestCase):
         ).delete()
 
     def test_disable_plugin_forbidden(self):
-        response = self.standard_user_client.post(
+        self.client.force_authenticate(self.user)
+        response = self.client.post(
             f"{plugin_state_viewer_uri}"
             f"{PluginConfig.PluginType.ANALYZER}/CloudFlare_DNS/"
         )
@@ -110,13 +103,14 @@ class PluginStateTests(CustomAPITestCase):
         )
 
     def test_enable_plugin_forbidden(self):
+        self.client.force_authenticate(self.user)
         OrganizationPluginState.objects.create(
             organization=self.org,
             plugin_name="CloudFlare_DNS",
             disabled=True,
             type=PluginConfig.PluginType.ANALYZER,
         )
-        response = self.standard_user_client.delete(
+        response = self.client.delete(
             f"{plugin_state_viewer_uri}"
             f"{PluginConfig.PluginType.ANALYZER}/CloudFlare_DNS/"
         )

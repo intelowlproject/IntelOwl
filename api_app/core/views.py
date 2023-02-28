@@ -17,7 +17,6 @@ from certego_saas.apps.organization.permissions import IsObjectOwnerOrSameOrgPer
 from intel_owl.celery import app as celery_app
 
 from .models import AbstractConfig, AbstractReport
-from .pagination import IncreasedSizeResultsSetPagination
 from .serializers import AbstractConfigSerializer
 
 logger = logging.getLogger(__name__)
@@ -116,7 +115,6 @@ class PluginActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
 class AbstractConfigAPI(viewsets.ReadOnlyModelViewSet, metaclass=ABCMeta):
     serializer_class = AbstractConfigSerializer
     permission_classes = [IsAuthenticated]
-    pagination_class = IncreasedSizeResultsSetPagination
 
     def get_queryset(self):
         return self.serializer_class.Meta.model.objects.all()

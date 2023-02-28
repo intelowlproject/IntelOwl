@@ -5,11 +5,7 @@ from api_app.visualizers_manager.models import VisualizerConfig
 from api_app.visualizers_manager.serializers import VisualizerConfigSerializer
 
 from .. import CustomTestCase
-
-
-class RequestMockup:
-    def __init__(self, user):
-        self.user = user
+from ..mock_utils import MockRequest
 
 
 class VisualizerConfigSerializerTestCase(CustomTestCase):
@@ -23,7 +19,7 @@ class VisualizerConfigSerializerTestCase(CustomTestCase):
             analyzers=[],
             connectors=[],
         )
-        vcs = VisualizerConfigSerializer(context={"request": RequestMockup(self.user)})
+        vcs = VisualizerConfigSerializer(context={"request": MockRequest(self.user)})
         result = vcs.to_representation(vc)
         self.assertIn("verification", result)
         self.assertIn("configured", result["verification"])
@@ -49,7 +45,7 @@ class VisualizerConfigSerializerTestCase(CustomTestCase):
             },
         )
 
-        vcs = ConnectorConfigSerializer(context={"request": RequestMockup(self.user)})
+        vcs = ConnectorConfigSerializer(context={"request": MockRequest(self.user)})
         result = vcs.to_representation(vc)
         self.assertIn("verification", result)
         self.assertIn("configured", result["verification"])

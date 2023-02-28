@@ -223,7 +223,7 @@ export default function ScanForm() {
               </div>
               {!v.verification.configured && (
                 <div className="small text-danger">
-                  ⚠ {v.verification.error_message}
+                  ⚠ {v.verification.details}
                 </div>
               )}
             </div>
@@ -252,7 +252,7 @@ export default function ScanForm() {
               </div>
               {!v.verification.configured && (
                 <div className="small text-danger">
-                  ⚠ {v.verification.error_message}
+                  ⚠ {v.verification.details}
                 </div>
               )}
             </div>

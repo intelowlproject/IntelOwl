@@ -5,11 +5,6 @@ from api_app.playbooks_manager.serializers import PlaybookConfigCreateSerializer
 from tests import CustomTestCase
 
 
-class RequestMockup:
-    def __init__(self, user):
-        self.user = user
-
-
 class PlaybookConfigSerializerTestCase(CustomTestCase):
     def test_create(self):
         job = Job.objects.create(user=self.superuser)

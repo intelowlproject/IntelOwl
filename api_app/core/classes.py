@@ -24,10 +24,32 @@ class Plugin(metaclass=ABCMeta):
     For internal use only.
     """
 
-    job_id: int
-    report_defaults: dict
-    kwargs: dict
-    report: AbstractReport
+    def __init__(
+        self,
+        config: AbstractConfig,
+        job_id: int,
+        report_defaults: dict = None,
+        **kwargs,
+    ):
+        self._config = config
+        self.job_id = job_id
+        self.report_defaults = report_defaults if report_defaults is not None else {}
+        self.kwargs = kwargs
+        # some post init processing
+        self.__post__init__()  # lgtm [py/init-calls-subclass]
+
+    def __post__init__(self) -> None:
+        """
+        Hook for post `__init__` processing.
+        Always call `super().__post__init__()` if overwritten in subclass.
+        """
+        # init report
+        self.report = self.init_report_object()
+        # set params
+        self.set_params(self._params)
+        # monkeypatch if in test suite
+        if settings.STAGE_CI:
+            self._monkeypatch()
 
     @cached_property
     def _job(self) -> "Job":
@@ -177,33 +199,6 @@ class Plugin(metaclass=ABCMeta):
             patches = []
         for mock_fn in patches:
             cls.start = mock_fn(cls.start)
-
-    def __post__init__(self) -> None:
-        """
-        Hook for post `__init__` processing.
-        Always call `super().__post__init__()` if overwritten in subclass.
-        """
-        # init report
-        self.report = self.init_report_object()
-        # set params
-        self.set_params(self._params)
-        # monkeypatch if in test suite
-        if settings.STAGE_CI:
-            self._monkeypatch()
-
-    def __init__(
-        self,
-        config: AbstractConfig,
-        job_id: int,
-        report_defaults: dict = None,
-        **kwargs,
-    ):
-        self._config = config
-        self.job_id = job_id
-        self.report_defaults = report_defaults if report_defaults is not None else {}
-        self.kwargs = kwargs
-        # some post init processing
-        self.__post__init__()  # lgtm [py/init-calls-subclass]
 
     @classmethod
     @property

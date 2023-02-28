@@ -20,6 +20,7 @@ import {
   IconAlert,
   IconButton,
   addToast,
+  CopyToClipboardButton,
 } from "@certego/certego-ui";
 
 import { SaveAsPlaybookButton } from "./SaveAsPlaybooksForm";
@@ -183,6 +184,9 @@ export function JobInfoCard({ job }) {
               <VscGlobe className="me-1" />
             )}
             {job.is_sample ? job.file_name : job.observable_name}
+            <CopyToClipboardButton
+              text={job.is_sample ? job.file_name : job.observable_name}
+            />
           </h3>
           <Badge className="ms-1 float-end" color="info">
             {job.is_sample

@@ -298,7 +298,7 @@ class Job(models.Model):
     ) -> typing.Tuple[typing.List, typing.List, typing.List, typing.List, typing.List]:
         from api_app.playbooks_manager.models import PlaybookConfig
 
-        if isinstance(runtime_configuration, dict):
+        if not self.playbooks_to_execute:
             configs = [runtime_configuration]
             analyzers = [self.analyzers_to_execute]
             connectors = [self.connectors_to_execute]
@@ -378,15 +378,17 @@ class Job(models.Model):
                         self.append_error(f"Config {plugin} does not exists")
                     else:
                         new_config: AbstractConfig
-                        signature = new_config.get_signature(
-                            self.pk,
-                            config.get(new_config.name, {}),
-                            playbook,
-                        )
-                        if not signature:
+                        try:
+                            signature = new_config.get_signature(
+                                self.pk,
+                                config.get(new_config.name, {}),
+                                playbook,
+                            )
+                        except RuntimeError:
                             self.append_error(f"Plugin {new_config.name} is not ready")
-                        if signature not in final_signatures:
-                            final_signatures.append(signature)
+                        else:
+                            if signature not in final_signatures:
+                                final_signatures.append(signature)
 
         logger.info(f"Analyzer signatures are {final_analyzer_signatures}")
         logger.info(f"Connector signatures are {final_connector_signatures}")

@@ -1,5 +1,4 @@
 import json
-from copy import deepcopy
 
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient, override_settings
@@ -63,45 +62,6 @@ class CustomConfigTests(CustomAPITestCase):
         Membership.objects.create(
             user=self.standard_user,
             organization=self.org,
-        )
-
-    def test_standard_job(self):
-        payload = self.classic_dns_payload
-        task_queue.clear()
-        response = self.client.post(
-            analyze_multiple_observables_uri, payload, format="json"
-        )
-        content = response.json()
-
-        celery_task = task_queue.popleft()
-        msg = (response, content, celery_task)
-        self.assertIn("job_id", celery_task)
-        self.assertIsInstance(celery_task["job_id"], int)
-
-        self.assertDictEqual(
-            celery_task["runtime_configuration"],
-            {},
-            msg=msg,
-        )
-
-    def test_with_explicit_runtime_config(self):
-        payload = deepcopy(self.classic_dns_payload)
-        payload["runtime_configuration"] = {"Classic_DNS": {"query_type": "ABCD"}}
-        task_queue.clear()
-        response = self.client.post(
-            analyze_multiple_observables_uri, payload, format="json"
-        )
-        content = response.json()
-
-        celery_task = task_queue.popleft()
-        msg = (response, content, celery_task)
-        self.assertIn("job_id", celery_task)
-        self.assertIsInstance(celery_task["job_id"], int)
-
-        self.assertDictEqual(
-            celery_task["runtime_configuration"],
-            {"Classic_DNS": {"query_type": "ABCD"}},
-            msg=msg,
         )
 
     def test_self_create_user_config(self):

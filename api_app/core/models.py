@@ -312,6 +312,6 @@ class AbstractConfig(models.Model):
                 task_id=task_id,
                 immutable=True,
             )
-        raise Exception(
+        raise RuntimeError(
             f"Unable to create signature, config {self.name} is not runnable"
         )

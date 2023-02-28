@@ -100,7 +100,7 @@ class AbstractConfigSerializer(rfs.ModelSerializer):
                 param_dict["value"] = params_values[param]
             except KeyError:
                 param_dict["value"] = None
-        result["disabled"] = instance.is_runnable(user)
+        result["disabled"] = not instance.is_runnable(user)
         return result
 
     def to_internal_value(self, data):

@@ -220,7 +220,10 @@ def create_configurations(apps, schema_editor):
         playbook["type"] = playbook.pop("supports")
         analyzers_to_add = AnalyzerConfig.objects.filter(name__in=analyzers.keys())
         connectors_to_add = ConnectorConfig.objects.filter(name__in=connectors.keys())
-        playbook["runtime_configuration"] = analyzers | connectors
+        playbook["runtime_configuration"] ={
+            "analyzers": analyzers,
+            "connectors": connectors,
+        }
         pc = PlaybookConfig(
             name=playbook_name,
             **playbook

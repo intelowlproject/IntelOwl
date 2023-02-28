@@ -83,17 +83,21 @@ def validate_runtime_configuration_playbook(value):
         "title": "RuntimeConfig",
         "properties": {
             "analyzers": {
-                "type": "array",
-                "items": {
-                    "type": "object"
-                }
+                "type": "object",
+                "patternProperties": {
+                    "^[A-Za-z_][A-Za-z0-9_]*$": {
+                        "type": "object"
+                    },
+                },
             },
             "connectors": {
-                "type": "array",
-                "items": {
-                    "type": "object"
-                }
-            }
+                "type": "object",
+                "patternProperties": {
+                    "^[A-Za-z_][A-Za-z0-9_]*$": {
+                        "type": "object"
+                    },
+                },
+            },
 
         },
         "required": ["analyzers", "connectors"]

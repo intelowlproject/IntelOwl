@@ -204,7 +204,8 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `Shodan_Honeyscore`: scan an IP against [Shodan](https://www.shodan.io/) Honeyscore API
 * `HoneyDB_Get`: [HoneyDB](https://honeydb.io/) IP lookup service
 * `HoneyDB_Scan_Twitter`: scan an IP against HoneyDB.io's Twitter Threat Feed
-* `Hunter`: Scans a domain name and returns set of data about the organisation, the email address found and additional information about the people owning those email addresses.
+* `Hunter_Lo`: Scans a domain name and returns set of data about the organisation, the email address found and additional information about the people owning those email addresses.
+* `Hunter_How`: Scans IP and domain against [Hunter_How API](https://hunter.how/search-api).
 * `Censys_Search`: scan an IP address against [Censys](https://censys.io/) View API
 * `MalwareBazaar_Get_Observable`: Check if a particular malware hash is known to [MalwareBazaar](https://bazaar.abuse.ch/)
 * `MalwareBazaar_Google_Observable`: Check if a particular IP, domain or url is known to MalwareBazaar using google search
@@ -223,6 +224,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `Pulsedive`: Scan indicators and retrieve results from [Pulsedive's API](https://pulsedive.com/api/).
 * `CheckPhish`: [CheckPhish](https://checkphish.ai/checkphish-api/) can detect phishing and fraudulent sites.
 * `Whoisxmlapi`: Fetch WHOIS record data, of a domain name, an IP address, or an email address.
+
 * `WhoIs_RipeDB_Search` : Fetch whois record data of an IP address from Ripe DB using their [search API](https://github.com/RIPE-NCC/whois/wiki/WHOIS-REST-API-search) (no API key required)
 * `UrlScan_Search`: Search an IP/domain/url/hash against [URLScan](https://urlscan.io) API
 * `UrlScan_Submit_Result`: Submit & retrieve result of an URL against [URLScan](https://urlscan.io) API

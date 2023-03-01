@@ -7,7 +7,7 @@ from api_app.analyzers_manager import classes
 from tests.mock_utils import MockResponse, if_mock_connections, patch
 
 
-class Hunter(classes.ObservableAnalyzer):
+class Hunter_Lo(classes.ObservableAnalyzer):
     base_url: str = "https://api.hunter.io/v2/domain-search?"
 
     def set_params(self, params):

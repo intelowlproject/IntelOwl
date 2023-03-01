@@ -3,6 +3,8 @@
 from django.db import migrations, models
 
 import api_app.fields
+import api_app.playbooks_manager.models
+import api_app.playbooks_manager.validators
 
 
 class Migration(migrations.Migration):
@@ -25,7 +27,7 @@ class Migration(migrations.Migration):
                  ),
                 ('description', models.TextField()),
                 ('disabled', models.BooleanField(default=False)),
-                ('runtime_configuration', models.JSONField(blank=True, default=dict)),
+                ('runtime_configuration', models.JSONField(blank=True, default=api_app.playbooks_manager.models.default_runtime, validators=[api_app.playbooks_manager.validators.validate_runtime_configuration_playbook])),
                 ('analyzers', models.ManyToManyField(related_name='playbooks', to='analyzers_manager.AnalyzerConfig', blank=True)),
                 ('connectors', models.ManyToManyField(related_name='playbooks', to='connectors_manager.ConnectorConfig', blank=True)),
             ],

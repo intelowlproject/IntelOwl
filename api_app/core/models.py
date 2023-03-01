@@ -99,7 +99,7 @@ def config_default():
 
 class AbstractConfig(models.Model):
     name = models.CharField(max_length=50, null=False, unique=True, primary_key=True)
-    python_module = models.CharField(null=False, max_length=120)
+    python_module = models.CharField(null=False, max_length=120, db_index=True)
     description = models.TextField(null=False)
     disabled = models.BooleanField(null=False, default=False)
 
@@ -113,6 +113,9 @@ class AbstractConfig(models.Model):
 
     class Meta:
         abstract = True
+        indexes = [
+            models.Index(fields=("python_module", "disabled")),
+        ]
 
     @classmethod
     def _get_type(cls) -> str:

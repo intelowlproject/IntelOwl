@@ -129,7 +129,7 @@ class Job(models.Model):
     visualizers_to_execute = pg_fields.ArrayField(
         models.CharField(max_length=128), blank=True, default=list
     )
-    received_request_time = models.DateTimeField(auto_now_add=True)
+    received_request_time = models.DateTimeField(auto_now_add=True, db_index=True)
     finished_analysis_time = models.DateTimeField(blank=True, null=True)
     process_time = models.FloatField(blank=True, null=True)
     tlp = models.CharField(max_length=8, choices=TLP.choices, default=TLP.WHITE)

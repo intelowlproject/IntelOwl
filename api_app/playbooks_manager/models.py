@@ -6,7 +6,14 @@ from api_app.analyzers_manager.constants import AllTypes
 from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.connectors_manager.models import ConnectorConfig
 from api_app.fields import ChoiceArrayField
-from api_app.validators import validate_runtime_configuration_playbook
+from api_app.playbooks_manager.validators import validate_runtime_configuration_playbook
+
+
+def default_runtime():
+    return {
+        "analyzers": {},
+        "connectors": {},
+    }
 
 
 class PlaybookConfig(models.Model):
@@ -26,7 +33,7 @@ class PlaybookConfig(models.Model):
 
     runtime_configuration = models.JSONField(
         blank=True,
-        default=dict,
+        default=default_runtime,
         null=False,
         validators=[validate_runtime_configuration_playbook],
     )

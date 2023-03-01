@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 from intel_owl.consts import PARAM_DATATYPE_CHOICES
 
 
-def _validate(value, schema):
+def validate_schema(value, schema):
     try:
         return jsonschema.validate(value, schema=schema)
     except jsonschema.exceptions.ValidationError as e:
@@ -28,7 +28,7 @@ def validate_config(value):
         "required": ["soft_time_limit", "queue"],
         "additionalProperties": False,
     }
-    return _validate(value, schema)
+    return validate_schema(value, schema)
 
 
 def validate_secrets(value):
@@ -52,7 +52,7 @@ def validate_secrets(value):
             },
         },
     }
-    return _validate(value, schema)
+    return validate_schema(value, schema)
 
 
 def validate_params(value):
@@ -71,28 +71,4 @@ def validate_params(value):
             },
         },
     }
-    return _validate(value, schema)
-
-
-def validate_runtime_configuration_playbook(value):
-    schema = {
-        "type": "object",
-        "title": "RuntimeConfig",
-        "properties": {
-            "analyzers": {
-                "type": "object",
-                "patternProperties": {
-                    "^[A-Za-z][A-Za-z0-9_]*$": {"type": "object"},
-                },
-            },
-            "connectors": {
-                "type": "object",
-                "patternProperties": {
-                    "^[A-Za-z][A-Za-z0-9_]*$": {"type": "object"},
-                },
-            },
-        },
-        "additionalProperties": False,
-        "required": ["analyzers", "connectors"],
-    }
-    return _validate(value, schema)
+    return validate_schema(value, schema)

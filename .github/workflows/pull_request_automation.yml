@@ -108,37 +108,9 @@ jobs:
         run: |
           docker exec intelowl_uwsgi pip3 install coverage
 
-      - name: "Test: api_app"
+      - name: Run test
         run: |
-          docker exec intelowl_uwsgi coverage run manage.py test --keepdb tests.api_app
-
-      - name: "Test: auth"
-        run: |
-          docker exec intelowl_uwsgi coverage run manage.py test --keepdb tests.auth
-
-      - name: "Test: Cron"
-        run: |
-          docker exec intelowl_uwsgi coverage run manage.py test --keepdb tests.test_crons
-
-    - name: "Test: Abstract classes"
-        run: |
-          docker exec intelowl_uwsgi coverage run manage.py test --keepdb tests.core
-
-      - name: "Test: Connectors Manager"
-        run: |
-          docker exec intelowl_uwsgi coverage run manage.py test --keepdb tests.connectors_manager
-
-      - name: "Test: Analyzers Manager"
-        run: |
-          docker exec intelowl_uwsgi coverage run manage.py test --keepdb tests.analyzers_manager
-
-      - name: "Test: Playbooks Manager"
-        run: |
-          docker exec intelowl_uwsgi coverage run manage.py test --keepdb tests.playbooks_manager
-
-      - name: "Test: Visualizers Manager"
-        run: |
-          docker exec intelowl_uwsgi coverage run manage.py test --keepdb tests.visualizers_manager
+          docker exec intelowl_uwsgi coverage run manage.py test --keepdb tests
 
       - name: "Coverage: generate xml and transfer from docker container to host"
         run: |

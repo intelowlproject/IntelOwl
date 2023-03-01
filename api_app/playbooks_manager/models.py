@@ -17,7 +17,16 @@ class PlaybookConfig(models.Model):
     description = models.TextField(null=False)
     disabled = models.BooleanField(null=False, default=False)
 
-    analyzers = models.ManyToManyField(AnalyzerConfig, related_name="playbooks", blank=True)
-    connectors = models.ManyToManyField(ConnectorConfig, related_name="playbooks", blank=True)
+    analyzers = models.ManyToManyField(
+        AnalyzerConfig, related_name="playbooks", blank=True
+    )
+    connectors = models.ManyToManyField(
+        ConnectorConfig, related_name="playbooks", blank=True
+    )
 
-    runtime_configuration = models.JSONField(blank=True, default=dict, null=False, validators=[validate_runtime_configuration_playbook])
+    runtime_configuration = models.JSONField(
+        blank=True,
+        default=dict,
+        null=False,
+        validators=[validate_runtime_configuration_playbook],
+    )

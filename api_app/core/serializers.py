@@ -40,18 +40,8 @@ class _ParamSerializer(rfs.Serializer):
     To validate `params` attr.
     """
 
-    value = BaseField()
     type = rfs.ChoiceField(choices=list(PARAM_DATATYPE_CHOICES.keys()))
     description = rfs.CharField(allow_blank=True, required=True, max_length=512)
-
-    def validate(self, attrs):
-        value_type = type(attrs["value"]).__name__
-        expected_type = attrs["type"]
-        if value_type != expected_type:
-            raise rfs.ValidationError(
-                f"Invalid value type. {value_type} != {expected_type}"
-            )
-        return super().validate(attrs)
 
 
 class _SecretSerializer(rfs.Serializer):

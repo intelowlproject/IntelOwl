@@ -36,7 +36,7 @@ def validate_secrets(value):
         "type": "object",
         "title": "Secret",
         "patternProperties": {
-            "^[A-Za-z_][A-Za-z0-9_]*$": {
+            "^[A-Za-z][A-Za-z0-9_]*$": {
                 "type": "object",
                 "properties": {
                     "env_var_key": {"type": "string"},
@@ -60,17 +60,14 @@ def validate_params(value):
         "type": "object",
         "title": "Param",
         "patternProperties": {
-            "^[A-Za-z_][A-Za-z0-9_]*$": {
+            "^[A-Za-z][A-Za-z0-9_]*$": {
                 "type": "object",
                 "properties": {
-                    "value": {
-                        "type": ["string", "boolean", "array", "number", "object"]
-                    },
                     "type": {"enum": list(PARAM_DATATYPE_CHOICES.keys())},
                     "description": {"type": "string"},
                 },
                 "additionalProperties": False,
-                "required": ["type", "description", "value"],
+                "required": ["type", "description"],
             },
         },
     }
@@ -85,21 +82,17 @@ def validate_runtime_configuration_playbook(value):
             "analyzers": {
                 "type": "object",
                 "patternProperties": {
-                    "^[A-Za-z_][A-Za-z0-9_]*$": {
-                        "type": "object"
-                    },
+                    "^[A-Za-z][A-Za-z0-9_]*$": {"type": "object"},
                 },
             },
             "connectors": {
                 "type": "object",
                 "patternProperties": {
-                    "^[A-Za-z_][A-Za-z0-9_]*$": {
-                        "type": "object"
-                    },
+                    "^[A-Za-z][A-Za-z0-9_]*$": {"type": "object"},
                 },
             },
-
         },
-        "required": ["analyzers", "connectors"]
+        "additionalProperties": False,
+        "required": ["analyzers", "connectors"],
     }
     return _validate(value, schema)

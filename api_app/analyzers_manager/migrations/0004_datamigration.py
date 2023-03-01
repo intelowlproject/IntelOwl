@@ -4587,6 +4587,8 @@ from django.db import migrations
 def create_configurations(apps, schema_editor):
     AnalyzerConfig = apps.get_model("analyzers_manager", "AnalyzerConfig")
     for analyzer_name, analyzer in analyzers.items():
+        for param in analyzer["params"].values():
+            param.pop("value", None)
         for secret in analyzer["secrets"].values():
             if "type" not in secret.keys():
                 secret["type"] = "str"

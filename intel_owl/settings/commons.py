@@ -30,6 +30,8 @@ PUBLIC_DEPLOYMENT = get_secret("PUBLIC_DEPLOYMENT", "True") == "True"
 # used for generating links to web client e.g. job results page
 WEB_CLIENT_DOMAIN = get_secret("INTELOWL_WEB_CLIENT_DOMAIN")
 
+AWS_REGION = get_secret("AWS_REGION")
+
 BASE_CONNECTOR_PYTHON_PATH = get_secret(
     "BASE_CONNECTOR_PYTHON_PATH", "api_app.connectors_manager.connectors"
 )

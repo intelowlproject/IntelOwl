@@ -58,7 +58,6 @@ Once you create an organization, you are the unique Administrator of that organi
 #### Accept Invites
 Once an invite has sent, the invited user has to login, go to the "Organization" section and accept the invite there. Afterwards the Administrator will be able to see the user in his "Organization" section.
 
-
 #### Plugins Params and Secrets
 From IntelOwl v4.1.0, Plugin Parameters and Secrets can be defined at the organization level, in the dedicated section.
 This allows to share configurations between users of the same org while allowing complete multi-tenancy of the application.
@@ -66,6 +65,24 @@ This allows to share configurations between users of the same org while allowing
 #### Disable Analyzers at Org level
 From IntelOwl v4.1.0, the org admin can disable specific analyzers for all the users in a specific org.
 To do that, org admins needs to go in the "Plugins" section and click the button "Enabled for organization" of the analyzer that they want to disable.
+
+### Registration
+Since IntelOwl v4.2.0 we added a Registration Page that can be used to manage Registration requests when providing IntelOwl as a Service.
+
+After an user registration, an email is sent to the user to verify their email address. If necessary, there are buttons on the login page to resend the verification email and to reset the password.
+
+Once the user has verified their email, they would be manually vetted before being allowed to use the IntelOwl platform. The registration requests would be handled in the Django Admin page by admins.
+If you have IntelOwl deployed on an AWS instance with an IAM role you can use the [SES](/Advanced-Usage.md#ses) service.
+
+In a development environment the emails that would be sent are written to the standard output.
+
+#### Recaptcha configuration
+The Registration Page contains a Recaptcha form from Google. By default, that Recaptcha is not configured and is not shown.
+
+If your intention is to publish IntelOwl as a Service you should first remember to comply to the [AGPL License](https://github.com/intelowlproject/IntelOwl/blob/master/LICENSE), then you should configure the Recaptcha Key for your site and add that value in the `RECAPTCHA_SITEKEY` in the `docker/env_template.js` file.
+In that case, you would need to [re-build](/Installation.md#update-and-rebuild) the application to have the changes properly reflected.
+
+
 
 ## TLP Support
 

@@ -1,0 +1,27 @@
+{% load static %}
+<body>
+  <!-- Header -->
+  <header>
+    <img
+      src="{{ host_uri }}/static/reactapp/logo-positive.png"
+      alt="IntelOwl: logo"
+      style="display: block; margin-left: auto; margin-right: auto; width: 50%"
+      width="100px"
+    />
+    <hr />
+  </header>
+  <!-- Main content -->
+  <main>{% block content %} {% endblock %}
+    <p style="font-style: italic">
+      Note: If you believe you received this email in error, please contact us at
+      <a href="mailto:{{ default_email }}">{{ default_email }}</a>.
+    </p>
+  </main>
+  <!-- Footer -->
+  <footer>
+    <hr />
+    Thank you,
+    <br />
+    <strong>IntelOwl ©</strong>
+  </footer>
+</body>

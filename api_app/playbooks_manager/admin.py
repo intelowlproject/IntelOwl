@@ -3,11 +3,12 @@
 
 from django.contrib import admin
 
+from api_app.core.admin import JsonViewerAdminView
 from api_app.playbooks_manager.models import PlaybookConfig
 
 
 @admin.register(PlaybookConfig)
-class PluginConfigAdminView(admin.ModelAdmin):
+class PluginConfigAdminView(JsonViewerAdminView):
     list_display = (
         "name",
         "type",

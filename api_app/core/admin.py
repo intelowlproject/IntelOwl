@@ -19,7 +19,13 @@ class AbstractReportAdminView(admin.ModelAdmin):
         return False
 
 
-class AbstractConfigAdminView(admin.ModelAdmin):
+class JsonViewerAdminView(admin.ModelAdmin):
+    formfield_overrides = {
+        JSONField: {"widget": PrettyJSONWidget(attrs={"initial": "parsed"})}
+    }
+
+
+class AbstractConfigAdminView(JsonViewerAdminView):
     list_display = (
         "name",
         "python_module",
@@ -28,7 +34,3 @@ class AbstractConfigAdminView(admin.ModelAdmin):
     )
     # allow to clone the object
     save_as = True
-    # json
-    formfield_overrides = {
-        JSONField: {"widget": PrettyJSONWidget(attrs={"initial": "parsed"})}
-    }

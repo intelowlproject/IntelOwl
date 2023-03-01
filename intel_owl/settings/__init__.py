@@ -40,12 +40,15 @@ INSTALLED_APPS = [
     "certego_saas.apps.notifications",
     "certego_saas.apps.organization",
     # intelowl apps
-    "api_app",
     "authentication",
+    "api_app",
     "api_app.analyzers_manager",
     "api_app.connectors_manager",
     "api_app.visualizers_manager",
     "api_app.playbooks_manager",
+    # auth
+    "rest_email_auth",
+    "drf_recaptcha",
 ]
 
 # inject from other modules

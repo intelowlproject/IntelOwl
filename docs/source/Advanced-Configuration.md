@@ -14,6 +14,7 @@ This page includes details about some advanced features that Intel Owl provides 
       - [Secrets](#secrets)
       - [SQS](#sqs)
       - [S3](#s3)
+      - [SES](#ses)
     - [Google Kubernetes Engine](#google-kubernetes-engine)
   - [Queues](#queues)
     - [Multi Queue](#multi-queue)
@@ -126,6 +127,15 @@ In that case, you should change the parameter `BROKER_URL` to `sqs://` and give 
 Also, you need to set the environment variable `AWS_SQS` to `True` to activate the additional required settings.
 
 Ultimately, to avoid to run RabbitMQ locally, you would need to use the option `--use-external-broker` when launching IntelOwl with the `start.py` script.
+
+#### SES
+
+If you like, you could use Amazon SES for sending automated emails.
+
+First, you need to configure the environment variable `AWS_SES` to `True` to enable it.
+Then you have to add some credentials for AWS: if you have IntelOwl deployed on the AWS infrastructure, you can use IAM credentials:
+to allow that just set `AWS_IAM_ACCESS` to `True`. If that is not the case, you have to set both `AWS_ACESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`.
+Additionally, if you are not using the default AWS region of us-east-1, you need to specify your `AWS_REGION`
 
 #### RDS
 

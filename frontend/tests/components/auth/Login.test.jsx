@@ -8,6 +8,9 @@ import Login from "../../../src/components/auth/Login";
 import { AUTH_BASE_URI } from "../../../src/constants/api";
 
 jest.mock("axios");
+jest.mock("../../../src/constants/environment", () => ({
+  RECAPTCHA_SITEKEY: "",
+}));
 
 describe("Login component", () => {
   // mock login request
@@ -28,7 +31,6 @@ describe("Login component", () => {
   test("User login", async () => {
     // mock user interaction: reccomanded to put this at the start of the test
     const user = userEvent.setup();
-
     render(
       <BrowserRouter>
         <Login />
@@ -42,6 +44,12 @@ describe("Login component", () => {
     expect(passwordInputElement).toBeInTheDocument();
     const submitButtonElement = screen.getByRole("button", { name: /Login/i });
     expect(submitButtonElement).toBeInTheDocument();
+    const forgotPassowrdElement = screen.getByText("Forgot Password?");
+    expect(forgotPassowrdElement).toBeInTheDocument();
+    const verificationEmailElement = screen.getByText(
+      "Need Verification Email?"
+    );
+    expect(verificationEmailElement).toBeInTheDocument();
 
     // user populates the login form and submit
     await user.type(usernameInputElement, "test_user");

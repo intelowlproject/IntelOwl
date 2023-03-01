@@ -29,6 +29,9 @@ PUBLIC_DEPLOYMENT = get_secret("PUBLIC_DEPLOYMENT", "True") == "True"
 
 # used for generating links to web client e.g. job results page
 WEB_CLIENT_DOMAIN = get_secret("INTELOWL_WEB_CLIENT_DOMAIN")
+
+AWS_REGION = get_secret("AWS_REGION")
+
 BASE_VISUALIZER_PYTHON_PATH = PosixPath(
     get_secret("BASE_VISUALIZER_PYTHON_PATH", "api_app.visualizers_manager.visualizers")
 )

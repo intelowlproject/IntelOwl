@@ -28,11 +28,13 @@ connectors = {
         },
         "params": {
             "ssl_check": {
+                "value": True,
                 "type": "bool",
                 "description": "Enable SSL certificate server verification. Change this if your MISP instance has not"
                                " SSL enabled."
             },
             "self_signed_certificate": {
+                "value": False,
                 "type": "bool",
                 "description": "If ssl_check and this flag are True, the analyzer will leverage a CA_BUNDLE to "
                                "authenticate against the MISP instance. IntelOwl will look for it at this path: "
@@ -40,10 +42,12 @@ connectors = {
                                "readable by the application (`www-data` user must read this)"
             },
             "debug": {
+                "value": False,
                 "type": "bool",
                 "description": "Enable debug logs."
             },
             "tlp": {
+                "value": "white",
                 "type": "str",
                 "description": "Change this as per your organization's threat sharing conventions."
             }
@@ -76,15 +80,25 @@ connectors = {
         },
         "params": {
             "ssl_verify": {
+                "value": True,
                 "type": "bool",
                 "description": "Enable SSL certificate server verification. Change this if your OpenCTI instance has "
                                "not SSL enabled."
             },
             "proxies": {
+                "value": {
+                    "http": "",
+                    "https": ""
+                },
                 "type": "dict",
                 "description": "Use these options to pass your request through a proxy server."
             },
             "tlp": {
+                "value": {
+                    "type": "white",
+                    "color": "#ffffff",
+                    "x_opencti_order": 1
+                },
                 "type": "dict",
                 "description": "Change this as per your organization's threat sharing conventions."
             }
@@ -116,6 +130,7 @@ connectors = {
         },
         "params": {
             "verify_ssl": {
+                "value": True,
                 "type": "bool",
                 "description": "Enable SSL certificate server verification. Change this if your YETI instance has not"
                                " SSL enabled."
@@ -128,6 +143,8 @@ connectors = {
 def create_configurations(apps, schema_editor):
     ConnectorConfig = apps.get_model("connectors_manager", "ConnectorConfig")
     for connector_name, connector in connectors.items():
+        for param in connector["params"].values():
+            param["default"] = param.pop("value")
         cc = ConnectorConfig(
             name=connector_name,
             **connector

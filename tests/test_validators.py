@@ -157,7 +157,9 @@ class ValidateSecretsTestCase(CustomTestCase):
 
 class ValidateParamsTestCase(CustomTestCase):
     def test_validate_params_good(self):
-        data = {"param": {"type": "str", "description": "description"}}
+        data = {
+            "param": {"type": "str", "description": "description", "default": "value"}
+        }
         try:
             validate_params(data)
         except ValidationError as e:
@@ -169,7 +171,14 @@ class ValidateParamsTestCase(CustomTestCase):
             validate_params(data)
 
     def test_validate_params_additional_property(self):
-        data = {"param": {"type": "str", "description": "description", "value": 123}}
+        data = {
+            "param": {
+                "type": "str",
+                "description": "description",
+                "default": "value",
+                "error": 123,
+            }
+        }
         with self.assertRaises(ValidationError):
             validate_params(data)
 
@@ -178,6 +187,7 @@ class ValidateParamsTestCase(CustomTestCase):
             "123param": {
                 "type": "str",
                 "description": "description",
+                "default": "value",
             }
         }
         with self.assertRaises(ValidationError):
@@ -188,16 +198,12 @@ class ValidateParamsTestCase(CustomTestCase):
             "param": {
                 "type": "string",
                 "description": "description",
+                "default": "value",
             }
         }
         with self.assertRaises(ValidationError):
             validate_params(data)
 
-        data = {
-            "param": {
-                "type": "str",
-                "description": 123,
-            }
-        }
+        data = {"param": {"type": "str", "description": 123, "default": "value"}}
         with self.assertRaises(ValidationError):
             validate_params(data)

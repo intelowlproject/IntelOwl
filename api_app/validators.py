@@ -65,9 +65,10 @@ def validate_params(value):
                 "properties": {
                     "type": {"enum": list(PARAM_DATATYPE_CHOICES.keys())},
                     "description": {"type": "string"},
+                    "default": {},
                 },
                 "additionalProperties": False,
-                "required": ["type", "description"],
+                "required": ["type", "description", "default"],
             },
         },
     }

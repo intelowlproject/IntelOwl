@@ -1,5 +1,6 @@
 from ._util import get_secret
-from .commons import AWS_REGION, STAGE_CI, STAGE_LOCAL
+from .aws import AWS_REGION
+from .commons import STAGE_CI, STAGE_LOCAL
 
 DEFAULT_FROM_EMAIL = get_secret("DEFAULT_FROM_EMAIL")
 DEFAULT_EMAIL = get_secret("DEFAULT_EMAIL")

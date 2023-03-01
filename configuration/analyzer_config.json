@@ -1537,7 +1537,7 @@
   "Hunter_How": {
     "type": "observable",
     "python_module": "hunter_how.Hunter_How",
-    "description": "[Hunter_How](https://hunter.how/search-api) provides details for a specified ip",
+    "description": "[Hunter_How](https://hunter.how/search-api) provides details for a specified ip and domain",
     "disabled": false,
     "external_service": true,
     "leaks_info": false,

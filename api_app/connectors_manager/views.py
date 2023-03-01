@@ -8,13 +8,9 @@ from celery import group
 from drf_spectacular.utils import extend_schema as add_docs
 from drf_spectacular.utils import inline_serializer
 from rest_framework import serializers as rfs
-from rest_framework import status
-from rest_framework.response import Response
 
-from api_app.core.views import PluginActionViewSet, PluginHealthCheckAPI
-from certego_saas.ext.views import APIView
+from api_app.core.views import PluginActionViewSet, PluginHealthCheckAPI, PluginListAPI
 
-from ..models import OrganizationPluginState, PluginConfig
 from .dataclasses import ConnectorConfig
 from .models import ConnectorReport
 from .serializers import ConnectorConfigSerializer
@@ -29,9 +25,10 @@ __all__ = [
 ]
 
 
-class ConnectorListAPI(APIView):
-
-    serializer_class = ConnectorConfigSerializer
+class ConnectorListAPI(PluginListAPI):
+    @property
+    def serializer_class(self) -> typing.Type[ConnectorConfigSerializer]:
+        return ConnectorConfigSerializer
 
     @add_docs(
         description="Get and parse the `connector_config.json` file",
@@ -45,21 +42,7 @@ class ConnectorListAPI(APIView):
         },
     )
     def get(self, request, *args, **kwargs):
-        try:
-            cc = self.serializer_class.read_and_verify_config(request.user)
-            PluginConfig.apply(cc, request.user, PluginConfig.PluginType.CONNECTOR)
-            OrganizationPluginState.apply(
-                cc, request.user, PluginConfig.PluginType.CONNECTOR
-            )
-            return Response(cc, status=status.HTTP_200_OK)
-        except Exception as e:
-            logger.exception(
-                f"get_connector_configs requester:{str(request.user)} error:{e}."
-            )
-            return Response(
-                {"error": "error in get_connector_configs. Check logs."},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
+        return super().get(request, *args, **kwargs)
 
 
 class ConnectorActionViewSet(PluginActionViewSet):
@@ -80,20 +63,6 @@ class ConnectorActionViewSet(PluginActionViewSet):
 
 
 class ConnectorHealthCheckAPI(PluginHealthCheckAPI):
-    def perform_healthcheck(self, connector_name: str) -> bool:
-        from rest_framework.exceptions import ValidationError
-
-        from api_app.connectors_manager.classes import Connector
-
-        connector_config = ConnectorConfig.get(connector_name)
-        if connector_config is None:
-            raise ValidationError({"detail": "Connector doesn't exist"})
-
-        class_: typing.Type[Connector] = connector_config.get_class()
-
-        try:
-            status_ = class_.health_check(connector_name)
-        except NotImplementedError:
-            raise ValidationError({"detail": "No healthcheck implemented"})
-
-        return status_
+    @property
+    def config_model(self) -> typing.Type[ConnectorConfig]:
+        return ConnectorConfig

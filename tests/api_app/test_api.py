@@ -83,7 +83,7 @@ class ApiViewTests(CustomAPITestCase):
 
     def test_ask_analysis_availability(self):
         md5 = os.environ.get("TEST_MD5", "446c5fbb11b9ce058450555c1c27153c")
-        analyzers_needed = ["Fortiguard", "CIRCLPassiveDNS"]
+        analyzers_needed = ["Classic_DNS", "CIRCLPassiveDNS"]
         data = {"md5": md5, "analyzers": analyzers_needed, "minutes_ago": 1}
         response = self.client.post(
             "/api/ask_analysis_availability", data, format="json"
@@ -187,7 +187,7 @@ class ApiViewTests(CustomAPITestCase):
 
     def test_analyze_observable__domain(self):
         analyzers_requested = [
-            "Fortiguard",
+            "Classic_DNS",
         ]
         observable_name = os.environ.get("TEST_DOMAIN", "google.com")
         md5 = hashlib.md5(observable_name.encode("utf-8")).hexdigest()
@@ -351,7 +351,7 @@ class ApiViewTests(CustomAPITestCase):
 
     def test_ask_multi_analysis_availability(self):
         md5 = os.environ.get("TEST_MD5", "446c5fbb11b9ce058450555c1c27153c")
-        analyzers_needed = ["Fortiguard", "CIRCLPassiveDNS"]
+        analyzers_needed = ["Classic_DNS", "CIRCLPassiveDNS"]
         data = [{"md5": md5, "analyzers": analyzers_needed, "minutes_ago": 1}]
         response = self.client.post(
             "/api/ask_multi_analysis_availability", data, format="json"

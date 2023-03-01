@@ -121,7 +121,7 @@ class YaraScan(FileAnalyzer):
     # we are caching each directory for 1 year invalidate
     @cache_memoize(
         timeout=60 * 60 * 24,
-        args_rewrite=lambda s, directory_path: f"{s.__class__.__name__ if isinstance(s, YaraScan) else s.__name__}"  # pylint: disable=C0301
+        args_rewrite=lambda s, directory_path: f"{s.__class__.__name__ if isinstance(s, YaraScan) else s.__name__}"  # noqa
         f"-{str(directory_path)}",
     )
     def _get_rules(
@@ -161,7 +161,7 @@ class YaraScan(FileAnalyzer):
                 result.append(
                     {
                         "match": str(match),
-                        "strings": match.strings[:20] if match else [],
+                        "strings": str(match.strings[:20]) if match else "",
                         "tags": match.tags,
                         "meta": match.meta,
                         "path": str(path),

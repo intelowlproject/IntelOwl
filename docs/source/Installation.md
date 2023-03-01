@@ -94,7 +94,7 @@ cd ..
 In the `env_file_app`, configure different variables as explained below.
 
 **REQUIRED** variables to run the image:
-* `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`: PostgreSQL configuration (The DB credentals should match the ones in the `env_file_postgres`).
+* `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`: PostgreSQL configuration (The DB credentals should match the ones in the `env_file_postgres`). If you like, you can configure the connection to an external PostgreSQL instance in the same variables. Then, to avoid to run PostgreSQL locally, please run IntelOwl with the option `--use-external-database`.
 
 **Strongly recommended** variable to set:
 * `DJANGO_SECRET`: random 50 chars key, must be unique. If you do not provide one, Intel Owl will automatically set a new secret on every run.
@@ -231,7 +231,7 @@ There are 3 options to execute the web server:
 
     Then you should call the `start.py` script with the parameter `--https` to leverage the right Docker Compose file for HTTPS.
   
-    Plus, if you use [Flower](Advanced-Usage.html#queue-customization), you should change in the `docker/flower.override.yml` the `flower_http.conf` with `flower_https.conf`.
+    Plus, if you use [Flower](Advanced-Configuration.html#queue-customization), you should change in the `docker/flower.override.yml` the `flower_http.conf` with `flower_https.conf`.
 
 - **HTTPS with Let's Encrypt**
 
@@ -258,7 +258,7 @@ You may invoke <code>$ python3 start.py --help</code> to get help and usage info
 The CLI provides the primitives to correctly build, run or stop the containers for IntelOwl. Therefore,
 <ul>
 <li>It is possible to attach every optional docker container that IntelOwl has:
-<a href="Advanced-Usage.html#multi-queue"><em>multi_queue</em></a> with <em>traefik</em> enabled while every <a href="Advanced-Usage.html#optional-analyzers">optional docker analyzer</a> is active.</li> 
+<a href="Advanced-Configuration.html#multi-queue"><em>multi_queue</em></a> with <em>traefik</em> enabled while every <a href="Advanced-Usage.html#optional-analyzers">optional docker analyzer</a> is active.</li> 
 <li>It is possible to insert an optional docker argument that the CLI will pass to <code>docker-compose</code></li>
 </ul>
 </div>

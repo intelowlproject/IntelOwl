@@ -1,6 +1,5 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
-
 import logging
 from copy import deepcopy
 from datetime import timedelta
@@ -235,7 +234,7 @@ def _multi_analysis_availability(user, data):
     return payload
 
 
-""" REST API endpoints """
+# REST API endpoints
 
 
 @add_docs(
@@ -435,6 +434,7 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
     ordering_fields = [
         "received_request_time",
         "finished_analysis_time",
+        "process_time",
     ]
 
     def get_permissions(self):
@@ -703,7 +703,7 @@ class PluginConfigViewSet(viewsets.ModelViewSet):
 @api_view(["DELETE", "POST"])
 def plugin_disabler(request, plugin_name, plugin_type):
     """
-    Disables the plugin with the given name.
+    Disables the plugin with the given name at Organization level
     """
     if not request.user.has_membership() or not request.user.membership.is_owner:
         raise PermissionDenied()

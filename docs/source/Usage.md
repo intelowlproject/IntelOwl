@@ -146,6 +146,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
   * [SIFalcon rules](https://github.com/SIFalcon/Detection/)
   * [Elastic rules](https://github.com/elastic/protections-artifacts)
   * [JPCERTCC Yara rules](https://github.com/JPCERTCC/jpcert-yara)
+  * [HuntressLab Yara rules](https://github.com/embee-research/Yara)
   * your own added signatures. See [Advanced-Usage](./Advanced-Usage.html#analyzers-with-special-configuration) for more details.
 * `PEframe_Scan`: Perform static analysis on Portable Executable malware and malicious MS Office documents with [PeFrame](https://github.com/guelfoweb/peframe)
 * `Capa_Info`: [Capa](https://github.com/mandiant/capa) detects capabilities in executable files
@@ -212,7 +213,6 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `CIRCLPassiveSSL`: scan an observable against the CIRCL Passive SSL DB
 * `MaxMindGeoIP`: extract GeoIP info for an observable
 * `AbuseIPDB`: check if an ip was reported on [AbuseIPDB](https://www.abuseipdb.com/)
-* `Fortiguard`: scan an observable with the [Fortiguard URL Analyzer](https://www.fortiguard.com/webfilter)
 * `TorProject`: check if an IP is a Tor Exit Node
 * `MISP`: scan an observable on a MISP instance
 * `MISPFIRST`: scan an observable on the FIRST MISP instance
@@ -236,7 +236,8 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `Securitytrails`: scan an IP/Domain against [Securitytrails](https://securitytrails.com/) API
 * `Cymru_Hash_Registry_Get_Observable`: Check if a particular hash is available in the malware hash registry of [Team Cymru](https://team-cymru.com/community-services/mhr/)
 * `Tranco`: Check if a domain is in the latest [Tranco](https://tranco-list.eu/) ranking top sites list
-* `Pulsedive_Active_IOC`: Scan indicators and retrieve results from [Pulsedive's API](https://pulsedive.com/api/).
+* `BinaryEdge`: Details about an Host. List of recent events for the specified host, including details of exposed ports and services using [IP query](https://docs.binaryedge.io/api-v2/#v2queryiptarget) and return list of subdomains known from the target domains using [domain query](https://docs.binaryedge.io/api-v2/#v2querydomainssubdomaintarget)
+* `Pulsedive`: Scan indicators and retrieve results from [Pulsedive's API](https://pulsedive.com/api/).
 * `CheckPhish`: [CheckPhish](https://checkphish.ai/checkphish-api/) can detect phishing and fraudulent sites.
 * `Whoisxmlapi`: Fetch WHOIS record data, of a domain name, an IP address, or an email address.
 * `WhoIs_RipeDB_Search` : Fetch whois record data of an IP address from Ripe DB using their [search API](https://github.com/RIPE-NCC/whois/wiki/WHOIS-REST-API-search) (no API key required)
@@ -255,7 +256,6 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `InQuest_REPdb`: Search in [InQuest Lab's](https://labs.inquest.net/repdb) Reputation Database
 * `InQuest_DFI`: Deep File Inspection by [InQuest Labs](https://labs.inquest.net/dfi)
 * `XForceExchange`: scan an observable on [IBM X-Force Exchange](https://exchange.xforce.ibmcloud.com/)
-* `Renderton`: get screenshot of a web page using rendertron (puppeteer) [renderton repo](https://github.com/GoogleChrome/rendertron)
 * `SSAPINet`: get a screenshot of a web page using [screenshotapi.net](https://screenshotapi.net/) (external source); additional config options can be added to `extra_api_params` [in the config](https://github.com/intelowlproject/IntelOwl/blob/master/configuration/analyzer_config.json).
 * `FireHol_IPList`: check if an IP is in [FireHol's IPList](https://iplists.firehol.org/)
 * `ThreatFox`: search for an IOC in [ThreatFox](https://threatfox.abuse.ch/api/)'s database
@@ -274,6 +274,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `YARAify_Search`: lookup a file hash in [Abuse.ch YARAify](https://yaraify.abuse.ch/)
 * `DNS0_EU`: Retrieve current domain resolution with DNS0.eu DoH (DNS over HTTPS)
 * `DNS0_EU_Malicious_Detector`: Check if a domain or an url is marked as malicious in DNS0.eu database ([Zero](https://www.dns0.eu/zero) service)
+* `Crowdsec`: check if an IP was reported on [Crowdsec](https://www.crowdsec.net/) Smoke Dataset
 
 ##### Generic analyzers (email, phone number, etc.; anything really)
 Some analyzers require details other than just IP, URL, Domain, etc. We classified them as `generic` Analyzers. Since the type of field is not known, there is a format for strings to be followed.
@@ -313,7 +314,7 @@ The following are all the keys that you can change without touching the source c
 - `not_supported_filetypes`: can be populated as a list. If set, if you ask to analyze a file with a mimetype from the ones you specified, it won't be executed
 - `observable_supported`: can be populated as a list. If set, if you ask to analyze an observable that is not in this list, it won't be executed. Valid values are: `ip`, `domain`, `url`, `hash`, `generic`.
 - `soft_time_limit`: this is the maximum time (in seconds) of execution for an analyzer. Once reached, the task will be killed (or managed in the code by a custom Exception). Default `300`.
-- `queue`: this takes effects only when [multi-queue](Advanced-Usage.html#multi-queue) is enabled. Choose which celery worker would execute the task: `local` (ideal for tasks that leverage local applications like Yara), `long` (ideal for long tasks) or `default` (ideal for simple webAPI-based analyzers).
+- `queue`: this takes effects only when [multi-queue](Advanced-Configuration.html#multi-queue) is enabled. Choose which celery worker would execute the task: `local` (ideal for tasks that leverage local applications like Yara), `long` (ideal for long tasks) or `default` (ideal for simple webAPI-based analyzers).
 
 Sometimes, it may happen that you would like to create a new analyzer very similar to an already existing one. Maybe you would like to just change the description and the default parameters.
 An helpful way to do that without having to copy/pasting the configuration, is to leverage the key `extends`.

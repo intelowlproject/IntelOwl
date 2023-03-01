@@ -148,7 +148,7 @@ class AbstractConfig:
 
         return secrets
 
-    def get_class(self) -> typing.Type:
+    def get_class(self) -> typing.Type[typing.Any]:
         """
         raises: ImportError
         """

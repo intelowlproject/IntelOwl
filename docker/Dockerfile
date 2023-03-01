@@ -57,8 +57,10 @@ COPY . $PYTHONPATH
 
 RUN touch ${LOG_PATH}/django/api_app.log ${LOG_PATH}/django/api_app_errors.log \
     && touch ${LOG_PATH}/django/celery.log ${LOG_PATH}/django/celery_errors.log \
-    && touch ${LOG_PATH}/django/django_auth_ldap.log \
+    && touch ${LOG_PATH}/django/django_auth_ldap.log ${LOG_PATH}/django/django_errors.log \
+    && touch ${LOG_PATH}/django/certego_saas.log ${LOG_PATH}/django/certego_saas_errors.log \
     && touch ${LOG_PATH}/django/authentication.log ${LOG_PATH}/django/authentication_errors.log \
+
     && chown -R www-data:www-data ${LOG_PATH} /opt/deploy/ \
     # this is cause stringstifer creates this directory during the build and cause celery to crash
     && rm -rf /root/.local \
@@ -72,4 +74,4 @@ RUN touch ${LOG_PATH}/django/api_app.log ${LOG_PATH}/django/api_app_errors.log \
 # so we have to set the home env variable to allow to reate its directory
 ENV HOME ${PYTHONPATH}
 
-HEALTHCHECK --interval=5s --timeout=2s --start-period=20s CMD nc -z localhost 8001 || exit 1
+HEALTHCHECK --interval=10s --timeout=2s --start-period=40s --retries=5 CMD nc -z localhost 8001 || exit 1

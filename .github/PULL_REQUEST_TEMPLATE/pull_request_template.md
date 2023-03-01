@@ -19,7 +19,6 @@ Please delete options that are not relevant.
 - [ ] A new plugin (analyzer, connector or playbook) was added or changed, in which case:
     - [ ] [Usage](https://github.com/intelowlproject/IntelOwl/blob/master/docs/source/Usage.md) file was updated.
     - [ ] [Advanced-Usage](./Advanced-Usage.md) was updated (in case the plugin provides additional optional configuration).
-    - [ ] Secrets were added in [env_file_app_template](https://github.com/intelowlproject/IntelOwl/blob/master/docker/env_file_app_template), [env_file_app_ci](https://github.com/certego/IntelOwl/blob/master/docker/env_file_app_ci) and in the [Installation](./Installation.md) docs, if necessary.
     - [ ] If the plugin requires mocked testing, `_monkeypatch()` was used in its class to apply the necessary decorators.
     - [ ] If a File analyzer was added, its name was explicitly defined in [test_file_scripts.py](https://github.com/intelowlproject/IntelOwl/blob/master/tests/analyzers_manager/test_file_scripts.py) (not required for Observable Analyzers).
     - [ ] If you created a new analyzer and it is free (does not require API keys), please add it in the `FREE_TO_USE_ANALYZERS` playbook in `playbook_config.json`

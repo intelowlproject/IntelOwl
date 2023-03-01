@@ -1,0 +1,10 @@
+version: "3.8"
+
+services:
+  rabbitmq:
+    image: library/rabbitmq:3.9-alpine
+    container_name: intelowl_rabbitmq
+    volumes:
+      - ../configuration/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+    logging:
+      driver: none

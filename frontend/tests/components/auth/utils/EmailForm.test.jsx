@@ -31,11 +31,5 @@ describe("EmailForm component", () => {
     await user.type(emailInputElement, "test@test.com");
     await user.click(submitButtonElement);
 
-    // await waitFor(() => {
-    //   // check request has been performed
-    //   expect(axios.post).toHaveBeenCalledWith(
-    //     mockApi, { email: "test@test.com", recaptcha: "noKey"},
-    //   );
-    // });
   });
 });

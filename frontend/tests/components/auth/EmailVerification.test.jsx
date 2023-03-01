@@ -1,9 +1,7 @@
 import React from "react";
 import "@testing-library/jest-dom";
-import { render, screen } from "@testing-library/react";
+import { render, screen, } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-// import axios from "axios";
-// import { AUTH_BASE_URI } from "../../../src/constants/api";
 import EmailVerification from "../../../src/components/auth/EmailVerification";
 
 jest.mock("axios");
@@ -19,20 +17,8 @@ describe("EmailVerification component", () => {
       </MemoryRouter>
     );
 
-    // await waitFor(() => {
-    //   // check request has been performed
-    //   expect(axios.post).toHaveBeenCalledWith(
-    //     `${AUTH_BASE_URI}/verify-email`, {key: "testkey"},
-    //   );
-    // });
-
     const element = screen.getByText("Verifying...");
     expect(element).toBeInTheDocument();
-
-    // await waitFor(() => {
-    //   // check redirect to "/login"
-    //   expect(global.location.pathname).toEqual("/login");
-    // });
   });
 
   test("Test invalid key", () => {

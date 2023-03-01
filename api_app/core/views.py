@@ -117,7 +117,7 @@ class AbstractConfigAPI(viewsets.ReadOnlyModelViewSet, metaclass=ABCMeta):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return self.serializer_class.Meta.model.objects.all()
+        return self.serializer_class.Meta.model.objects.all().order_by("name")
 
     @add_docs(
         description="Health Check: "

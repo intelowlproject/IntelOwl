@@ -537,6 +537,20 @@ class PluginConfig(models.Model):
 
         return result
 
+    def invalidate_config_verification(self):
+        if self.organization is not None:
+            for membership in self.organization.members.all():
+                self.config.get_verification.invalidate(self.config, membership.user)
+        else:
+            self.config.get_verification.invalidate(self.config, self.owner)
+
+    @cached_property
+    def config(self) -> AbstractConfig:
+        for config in AbstractConfig.__subclasses__():
+            if self.config_type == config._get_type():
+                return config.objects.get(name=self.plugin_name)
+        raise TypeError("Unable to find configuration")
+
 
 class OrganizationPluginState(models.Model):
     type = models.CharField(choices=PluginConfig.PluginType.choices, max_length=2)

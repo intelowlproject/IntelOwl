@@ -149,6 +149,8 @@ export function PluginData({
                               plugins = analyzers;
                             } else if (configuration.type === "2") {
                               plugins = connectors;
+                            } else if (configuration.type === "3") {
+                              plugins = visualizers;
                             }
 
                             if (
@@ -210,13 +212,13 @@ export function PluginData({
                                     <option value="">
                                       {"-".repeat(
                                         Math.ceil(
-                                          (maxPluginNameLength - 11) / 2
+                                          Math.max((maxPluginNameLength - 11), 0) / 2
                                         )
                                       )}
                                       Select Plugin Name
                                       {"-".repeat(
                                         Math.ceil(
-                                          (maxPluginNameLength - 11) / 2
+                                          Math.max((maxPluginNameLength - 11), 0) / 2
                                         )
                                       )}
                                     </option>

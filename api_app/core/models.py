@@ -11,6 +11,7 @@ from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.module_loading import import_string
 from kombu import uuid
+from cache_memoize import cache_memoize
 
 from api_app.validators import validate_config, validate_params, validate_secrets
 from certego_saas.apps.user.models import User
@@ -153,6 +154,10 @@ class AbstractConfig(models.Model):
     def report_model(cls) -> Type[AbstractReport]:
         raise NotImplementedError()
 
+    @cache_memoize(
+        timeout=60 * 60 * 24,
+        args_rewrite=lambda s, user=None: f"{s.__class__.__name__}-{s.name}-{user.username}"
+    )
     def get_verification(self, user: User = None):
         from api_app.models import PluginConfig
 

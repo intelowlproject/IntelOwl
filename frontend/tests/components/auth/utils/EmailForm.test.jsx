@@ -30,6 +30,5 @@ describe("EmailForm component", () => {
     // user populates the reset password form and submit
     await user.type(emailInputElement, "test@test.com");
     await user.click(submitButtonElement);
-
   });
 });

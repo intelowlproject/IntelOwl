@@ -69,3 +69,4 @@ CELERY_QUEUES = secrets.get_secret("CELERY_QUEUES", "default").split(",")
 # AWS
 AWS_SECRETS = secrets.get_secret("AWS_SECRETS", False) == "True"
 AWS_SQS = secrets.get_secret("AWS_SQS", False) == "True"
+AWS_REGION = os.environ.get("AWS_REGION", "eu-central-1")

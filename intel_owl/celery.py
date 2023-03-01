@@ -53,7 +53,7 @@ if settings.AWS_SQS:
     # this is for AWS SQS support
     app.conf.update(
         broker_transport_options={
-            "region": "eu-central-1",
+            "region": settings.AWS_REGION,
             "polling_interval": 1,
             "visibility_timeout": 3600,
             "wait_time_seconds": 20,
@@ -101,6 +101,12 @@ app.conf.beat_schedule = {
     "quark_updater": {
         "task": "intel_owl.tasks.quark_updater",
         "schedule": crontab(minute=0, hour=0, day_of_week=[2, 5]),
+        "options": {"queue": "default"},
+    },
+    # quark rules updater 2 time a week
+    "update_notifications_with_releases": {
+        "task": "intel_owl.tasks.update_notifications_with_releases",
+        "schedule": crontab(minute=0, hour=22),
         "options": {"queue": "default"},
     },
 }

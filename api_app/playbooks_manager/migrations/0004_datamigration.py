@@ -60,7 +60,6 @@ playbooks = {
                     "static_strings": False
                 }
             },
-            "Fortiguard": {},
             "Google_DNS": {
                 "query_type": "A"
             },
@@ -116,7 +115,6 @@ playbooks = {
             },
             "Quad9_Malicious_Detector": {},
             "Quark_Engine_APK": {},
-            "Rendertron": {},
             "Robtex": {},
             "Rtf_Info": {},
             "Signature_Info": {},
@@ -169,6 +167,7 @@ playbooks = {
             "Yara": {
                 "repositories": [
                     "https://github.com/elastic/protections-artifacts",
+                    "https://github.com/embee-research/Yara",
                     "https://github.com/JPCERTCC/jpcert-yara",
                     "https://github.com/SIFalcon/Detection/",
                     "https://github.com/bartblaze/Yara-rules",

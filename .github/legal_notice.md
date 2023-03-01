@@ -36,6 +36,7 @@ license terms.
 [Samir Yara rules](https://github.com/sbousseaden/YaraHunts),
 [InQuest Yara rules](https://github.com/InQuest/yara-rules),
 [JPCERTCC Yara rules](https://github.com/JPCERTCC/jpcert-yara),
+[HuntressLab Yara rules](https://github.com/embee-research/Yara),
 [Elastic Yara Rules](https://github.com/elastic/protections-artifacts), 
 [SIFalcon Yara Rules](https://github.com/SIFalcon/Detection/),
 [APKiD](https://github.com/rednaga/APKiD/blob/master/LICENSE.COMMERCIAL),
@@ -47,7 +48,6 @@ license terms.
 [Checkdmarc](https://github.com/domainaware/checkdmarc),
 [Manalyze](https://github.com/JusticeRage/Manalyze),
 [Qiling](https://github.com/qilingframework/qiling),
-[Renderton](https://github.com/GoogleChrome/rendertron/blob/main/LICENSE)
 [PyCTI](https://github.com/OpenCTI-Platform/client-python/blob/master/LICENSE),
 [PyHashlookup](https://github.com/CIRCL/PyHashlookup),
 [PyPDNS](https://github.com/CIRCL/PyPDNS),

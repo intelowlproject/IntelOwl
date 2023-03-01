@@ -7,7 +7,7 @@ import time
 import requests
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
-from api_app.analyzers_manager.exceptions import AnalyzerRunException
+from api_app.analyzers_manager.exceptions import AnalyzerConfigurationException, AnalyzerRunException
 from tests.mock_utils import MockResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
@@ -19,8 +19,14 @@ class Pulsedive(ObservableAnalyzer):
     poll_distance: int = 10
 
     def set_params(self, params):
-        active_scan = params.get("active_scan", True)
-        self.probe = 1 if active_scan else 0
+        self.scan_mode = params.get("scan_mode", "basic")
+        supported_scan_values = ["basic", "passive", "active"]
+        if self.scan_mode not in supported_scan_values:
+            raise AnalyzerConfigurationException(
+                "scan_mode is not a supported value."
+                f" Supported are {supported_scan_values}"
+            )
+        self.probe = 1 if self.scan_mode == "active" else 0  # else is "passive"
         self.__api_key = self._secrets["api_key_name"]
 
     def run(self):
@@ -44,7 +50,7 @@ class Pulsedive(ObservableAnalyzer):
         resp = requests.get(f"{self.base_url}/info.php?{params}")
 
         # handle 404 case, submit for analysis
-        if resp.status_code == 404:
+        if resp.status_code == 404 and self.scan_mode != "basic":
             # 2. submit new scan and then poll for result
             result = self.__submit_for_analysis()
         else:

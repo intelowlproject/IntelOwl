@@ -23,7 +23,7 @@ const process_time_mmss = (value) =>
 const jobTableColumns = [
   {
     Header: () => "ID", // No header
-    id: "viewJobBtnHeader",
+    id: "id",
     accessor: "id",
     maxWidth: 75,
     disableSortBy: true,

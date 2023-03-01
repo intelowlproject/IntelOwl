@@ -23,7 +23,6 @@ CURRENT_VERSION = os.getenv("REACT_APP_INTELOWL_VERSION", "").replace("v", "")
 
 DOCKER_ANALYZERS = [
     "tor_analyzers",
-    "rendertron",
     "malware_tools_analyzers",
     "cyberchef",
     "pcap_analyzers",
@@ -31,6 +30,8 @@ DOCKER_ANALYZERS = [
 
 PATH_MAPPING = {
     "default": "docker/default.yml",
+    "postgres": "docker/postgres.override.yml",
+    "rabbitmq": "docker/rabbitmq.override.yml",
     "test": "docker/test.override.yml",
     "ci": "docker/ci.override.yml",
     "custom": "docker/custom.override.yml",
@@ -125,6 +126,18 @@ def start():
         help="Uses the traefik.override.yml compose file",
     )
     parser.add_argument(
+        "--use-external-database",
+        required=False,
+        action="store_true",
+        help="Do not use postgres.override.yml compose file",
+    )
+    parser.add_argument(
+        "--use-external-broker",
+        required=False,
+        action="store_true",
+        help="Do not use rabbitmq.override.yml compose file",
+    )
+    parser.add_argument(
         "--flower",
         required=False,
         action="store_true",
@@ -183,6 +196,12 @@ def start():
         return
     # default file
     compose_files = [PATH_MAPPING["default"]]
+    # PostreSQL
+    if not args.__dict__["use_external_database"]:
+        compose_files.append(PATH_MAPPING["postgres"])
+    # RabbitMQ
+    if not args.__dict__["use_external_broker"]:
+        compose_files.append(PATH_MAPPING["rabbitmq"])
     # mode
     if is_test:
         compose_files.append(PATH_MAPPING[args.mode])

@@ -696,7 +696,7 @@ class PluginConfigViewSet(viewsets.ModelViewSet):
 @api_view(["DELETE", "POST"])
 def plugin_disabler(request, plugin_name, plugin_type):
     """
-    Disables the plugin with the given name.
+    Disables the plugin with the given name at Organization level
     """
     if not request.user.has_membership() or not request.user.membership.is_owner:
         raise PermissionDenied()

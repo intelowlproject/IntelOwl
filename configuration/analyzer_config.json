@@ -1578,9 +1578,9 @@
     
     }
   },
-  "Hunter_Lo": {
+  "Hunter_Io": {
     "type": "observable",
-    "python_module": "hunter_lo.Hunter_Lo",
+    "python_module": "hunter_io.Hunter_Io",
     "description": "Scans a domain name and returns set of data about the organisation, the email address found and additional information about the people owning those email addresses",
     "disabled": false,
     "external_service": true,

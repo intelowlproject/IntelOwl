@@ -8,7 +8,7 @@ import usePluginConfigurationStore from "../../../stores/usePluginConfigurationS
 import markdownToHtml from "../../common/markdownToHtml";
 
 // constants
-const stateSelector = (state) => [state.analyzersJSON, state.connectorsJSON];
+const stateSelector = (state) => [state.analyzersJSON, state.connectorsJSON, state.visualizersJSON];
 
 // components
 export default function RuntimeConfigurationModal(props) {
@@ -16,7 +16,7 @@ export default function RuntimeConfigurationModal(props) {
 
   const [jsonInput, setJsonInput] = React.useState({});
 
-  const [analyzersJSON, connectorsJSON] =
+  const [analyzersJSON, connectorsJSON, visualizersJSON] =
     usePluginConfigurationStore(stateSelector);
 
   const combinedParamsMap = React.useMemo(
@@ -35,12 +35,21 @@ export default function RuntimeConfigurationModal(props) {
         }),
         {}
       ),
+      ...formik.values.visualizers.reduce(
+        (acc, { value: name }) => ({
+          ...acc,
+          [name]: visualizersJSON?.[name].params,
+        }),
+        {}
+      ),
     }),
     [
       formik.values.analyzers,
       formik.values.connectors,
+      formik.values.visualizers,
       analyzersJSON,
       connectorsJSON,
+      visualizersJSON,
     ]
   );
 

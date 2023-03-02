@@ -37,7 +37,7 @@ dnstwist==20221213
 ppdeep>=20200505
 easygui==0.98.2
 google>=3.0.0
-google-cloud-webrisk==1.10.0
+google-cloud-webrisk==1.11.0
 intezer-sdk==1.16.1
 lief==0.12.2
 maxminddb==2.2.0

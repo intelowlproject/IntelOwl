@@ -118,6 +118,10 @@ export function PluginInfoCard({ pluginInfo }) {
                   verification={pluginInfo.verification}
                 />
               </h6>
+              <p className="small text-danger">
+                {!pluginInfo?.verification.configured &&
+                  pluginInfo?.verification.details}
+              </p>
             </div>
           )}
         </div>
@@ -206,9 +210,6 @@ export function PluginVerificationIcon({ pluginName, verification }) {
       >
         {verification.details}
       </UncontrolledTooltip>
-      <p className="small text-danger">
-        {!verification.configured && verification.details}
-      </p>
     </span>
   );
 }

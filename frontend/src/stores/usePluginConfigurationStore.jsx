@@ -32,13 +32,9 @@ const usePluginConfigurationStore = create((set, get) => ({
   connectorsError: null,
   playbooksError: null,
   visualizersError: null,
-  analyzersJSON: {},
   analyzers: [],
-  connectorsJSON: {},
   connectors: [],
-  visualizersJSON: {},
   visualizers: [],
-  playbooksJSON: {},
   playbooks: [],
   hydrate: () => {
     // this function is called to check if we need to download the data related to the plugins or not
@@ -65,8 +61,7 @@ const usePluginConfigurationStore = create((set, get) => ({
       console.debug(analyzers);
       set({
         analyzersError: null,
-        analyzersJSON: analyzers,
-        analyzers: Object.values(analyzers),
+        analyzers,
         analyzersLoading: false,
       });
     } catch (e) {
@@ -83,8 +78,7 @@ const usePluginConfigurationStore = create((set, get) => ({
       console.debug(connectors);
       set({
         connectorsError: null,
-        connectorsJSON: connectors,
-        connectors: Object.values(connectors),
+        connectors,
         connectorsLoading: false,
       });
     } catch (e) {
@@ -101,8 +95,7 @@ const usePluginConfigurationStore = create((set, get) => ({
       console.debug(visualizers);
       set({
         visualizersError: null,
-        visualizersJSON: visualizers,
-        visualizers: Object.values(visualizers),
+        visualizers,
         visualizersLoading: false,
       });
     } catch (e) {
@@ -124,8 +117,8 @@ const usePluginConfigurationStore = create((set, get) => ({
         );
         // eslint-disable-next-line no-param-reassign
         playbook.analyzers = {};
-        // eslint-disable-next-line no-param-reassign
         mappedAnalyzers.forEach((analyzer) => {
+          // eslint-disable-next-line no-param-reassign
           playbook.analyzers[analyzer.name] = analyzer.config;
         });
         // convert connectors
@@ -140,8 +133,8 @@ const usePluginConfigurationStore = create((set, get) => ({
         );
         // eslint-disable-next-line no-param-reassign
         playbook.connectors = {};
-        // eslint-disable-next-line no-param-reassign
         mappedConnectors.forEach((connector) => {
+          // eslint-disable-next-line no-param-reassign
           playbook.connectors[connector.name] = connector.config;
         });
         // eslint-disable-next-line no-param-reassign
@@ -153,8 +146,7 @@ const usePluginConfigurationStore = create((set, get) => ({
       console.debug(playbooks);
       set({
         playbooksError: null,
-        playbooksJSON: playbooks,
-        playbooks: Object.values(playbooks),
+        playbooks,
         playbooksLoading: false,
       });
     } catch (e) {

@@ -80,9 +80,9 @@ export function PluginData({
     retrieveConnectorsConfiguration,
     retrieveVisualizersConfiguration,
   ] = usePluginConfigurationStore((state) => [
-    filterEmptyData(state.analyzersJSON, dataName),
-    filterEmptyData(state.connectorsJSON, dataName),
-    filterEmptyData(state.visualizersJSON, dataName),
+    filterEmptyData(state.analyzers, dataName),
+    filterEmptyData(state.connectors, dataName),
+    filterEmptyData(state.visualizers, dataName),
     state.retrieveAnalyzersConfiguration,
     state.retrieveConnectorsConfiguration,
     state.retrieveVisualizersConfiguration,
@@ -212,13 +212,19 @@ export function PluginData({
                                     <option value="">
                                       {"-".repeat(
                                         Math.ceil(
-                                          Math.max((maxPluginNameLength - 11), 0) / 2
+                                          Math.max(
+                                            maxPluginNameLength - 11,
+                                            0
+                                          ) / 2
                                         )
                                       )}
                                       Select Plugin Name
                                       {"-".repeat(
                                         Math.ceil(
-                                          Math.max((maxPluginNameLength - 11), 0) / 2
+                                          Math.max(
+                                            maxPluginNameLength - 11,
+                                            0
+                                          ) / 2
                                         )
                                       )}
                                     </option>

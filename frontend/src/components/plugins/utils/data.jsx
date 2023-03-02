@@ -39,8 +39,6 @@ function SelectColumnFilter({
     const optionsSet = new Set();
     preFilteredRows.forEach((row) => {
       const value = row.values[id];
-      console.debug("SelectColumnFilter - value:");
-      console.debug(value);
       if (value) {
         const optVal = filterValueAccessorFn
           ? filterValueAccessorFn(value)

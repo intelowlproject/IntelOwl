@@ -1,5 +1,5 @@
 import React, { Suspense } from "react";
-import { useRoutes, Outlet } from "react-router-dom";
+import { useRoutes, Outlet, useLocation } from "react-router-dom";
 import PropTypes from "prop-types";
 import { ErrorBoundary } from "react-error-boundary";
 import { Row, Col } from "reactstrap";
@@ -54,6 +54,13 @@ function Layout() {
 }
 
 function AppMain() {
+  const location = useLocation();
+
+  React.useEffect(() => {
+    // Scroll top when location changes
+    window.scrollTo(0, 0);
+  }, [location]);
+
   const AuthLayout = withAuth(Layout);
   const routes = useRoutes([
     {

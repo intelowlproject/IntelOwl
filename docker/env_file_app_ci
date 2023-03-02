@@ -133,3 +133,9 @@ COVERAGE_PROCESS_START=.coveragerc
 # broker configuration
 BROKER_URL=amqp://guest:guest@rabbitmq:5672
 
+# Playbooks
+TEST_PLAYBOOK=FREE_TO_USE_ANALYZERS
+
+# drf-recaptcha
+RECAPTCHA_SECRET_KEY_IO_PUBLIC="testkey"
+RECAPTCHA_SECRET_KEY_IO_LOCAL="testkey"

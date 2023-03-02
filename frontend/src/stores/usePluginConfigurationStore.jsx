@@ -12,7 +12,9 @@ import {
 } from "../constants/api";
 
 async function downloadAllPlugin(pluginUrl, currentPage = 1) {
-  const resp = await axios.get(pluginUrl, { params: { page: currentPage, page_size:100 } });
+  const resp = await axios.get(pluginUrl, {
+    params: { page: currentPage, page_size: 100 },
+  });
   let additionalData = [];
   if (currentPage < resp.data.total_pages) {
     additionalData = await downloadAllPlugin(pluginUrl, currentPage + 1);
@@ -111,6 +113,40 @@ const usePluginConfigurationStore = create((set, get) => ({
     try {
       set({ playbooksLoading: true });
       const playbooks = await downloadAllPlugin(PLAYBOOKS_CONFIG_URI);
+      // convert data
+      playbooks.forEach((playbook) => {
+        // convert analyzers
+        const mappedAnalyzers = playbook.analyzers.map((analyzerName) =>
+          Object.fromEntries([
+            ["name", analyzerName],
+            ["config", playbook.runtime_configuration.analyzers[analyzerName]],
+          ])
+        );
+        // eslint-disable-next-line no-param-reassign
+        playbook.analyzers = {};
+        // eslint-disable-next-line no-param-reassign
+        mappedAnalyzers.forEach((analyzer) => {
+          playbook.analyzers[analyzer.name] = analyzer.config;
+        });
+        // convert connectors
+        const mappedConnectors = playbook.connectors.map((connectorName) =>
+          Object.fromEntries([
+            ["name", connectorName],
+            [
+              "config",
+              playbook.runtime_configuration.connectors[connectorName],
+            ],
+          ])
+        );
+        // eslint-disable-next-line no-param-reassign
+        playbook.connectors = {};
+        // eslint-disable-next-line no-param-reassign
+        mappedConnectors.forEach((connector) => {
+          playbook.connectors[connector.name] = connector.config;
+        });
+        // eslint-disable-next-line no-param-reassign
+        delete playbook.runtime_configuration;
+      });
       console.debug(
         "usePluginConfigurationStore - retrievePlaybooksConfiguration: "
       );

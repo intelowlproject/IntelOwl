@@ -156,7 +156,7 @@ class AbstractConfig(models.Model):
 
     @cache_memoize(
         timeout=60 * 60 * 24,
-        args_rewrite=lambda s, user=None: f"{s.__class__.__name__}-{s.name}-{user.username}"
+        args_rewrite=lambda s, user=None: f"{s.__class__.__name__}-{s.name}-{user.username if user else ''}"
     )
     def get_verification(self, user: User = None):
         from api_app.models import PluginConfig

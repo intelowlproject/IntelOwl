@@ -1347,7 +1347,7 @@
   },
     {
     "model": "api_app.pluginconfig",
-    "pk": 96,
+    "pk": 97,
     "fields": {
       "updated_at": "2023-02-23T08:53:02.830Z",
       "type": "1",

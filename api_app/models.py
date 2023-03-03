@@ -538,6 +538,7 @@ class PluginConfig(models.Model):
         return result
 
     def invalidate_config_verification(self):
+        self.config.get_verification.invalidate(self.config)
         if self.organization is not None:
             for membership in self.organization.members.all():
                 self.config.get_verification.invalidate(self.config, membership.user)

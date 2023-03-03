@@ -18,6 +18,7 @@ class BinaryEdge(classes.ObservableAnalyzer):
         self.headers = {"X-Key": self._api_key_name}
 
     def run(self):
+        results = {}
         if self.observable_classification == self.ObservableTypes.IP:
             try:
                 response_recent_ip_info = requests.get(

@@ -180,7 +180,7 @@ class FileAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
         # ...the file from AWS because it requires a path and it needs to be deleted
         self.__filepath = None
         self.file_mimetype = self._job.file_mimetype
-        return super(FileAnalyzer, self).__post__init__()
+        return super().__post__init__()
 
     def before_run(self, *args, **kwargs):
         super().before_run(**kwargs)

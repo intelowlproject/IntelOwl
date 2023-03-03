@@ -45,8 +45,6 @@ class Plugin(metaclass=ABCMeta):
         """
         # init report
         self.report = self.init_report_object()
-        # set params
-        self.set_params(self._params)
         # monkeypatch if in test suite
         if settings.STAGE_CI:
             self._monkeypatch()
@@ -71,11 +69,11 @@ class Plugin(metaclass=ABCMeta):
         # overwrite default with runtime
         return {**default_params, **runtime_params}
 
-    def set_params(self, params: dict):
-        """
-        Method which receives the parsed `config["params"]` dict.
-        This is called inside `__post__init__`.
-        """
+    def config(self):
+        for param, value in self._params.items():
+            setattr(self, param, value)
+        for secret, value in self._secrets.items():
+            setattr(self, f"_{secret}", value)
 
     @abstractmethod
     def before_run(self, *args, **kwargs):
@@ -155,6 +153,7 @@ class Plugin(metaclass=ABCMeta):
         in that order with exception handling.
         """
         try:
+            self.config()
             self.before_run()
             _result = self.run()
             self.report.report = _result

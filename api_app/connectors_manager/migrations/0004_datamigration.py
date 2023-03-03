@@ -145,6 +145,8 @@ def create_configurations(apps, schema_editor):
     for connector_name, connector in connectors.items():
         for param in connector["params"].values():
             param["default"] = param.pop("value")
+        for secret in connector.setdefault("secrets", {}).values():
+            secret.pop("env_var_key")
         cc = ConnectorConfig(
             name=connector_name,
             **connector

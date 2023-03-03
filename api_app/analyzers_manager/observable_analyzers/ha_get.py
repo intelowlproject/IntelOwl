@@ -13,12 +13,11 @@ class HybridAnalysisGet(ObservableAnalyzer):
     api_url: str = f"{base_url}/api/v2/"
     sample_url: str = f"{base_url}/sample"
 
-    def set_params(self, params):
-        self.__api_key = self._secrets["api_key_name"]
+    _api_key_name: str
 
     def run(self):
         headers = {
-            "api-key": self.__api_key,
+            "api-key": self._api_key_name,
             "user-agent": "Falcon Sandbox",
             "accept": "application/json",
         }

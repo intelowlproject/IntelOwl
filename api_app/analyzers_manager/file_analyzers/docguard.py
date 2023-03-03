@@ -13,14 +13,13 @@ logger = logging.getLogger(__name__)
 
 
 class DocGuardUpload(FileAnalyzer):
-    def set_params(self, params):
-        self.__api_key = self._secrets["api_key_name"]
-        self.base_url = "https://api.docguard.io:8443/api"
+    base_url = "https://api.docguard.io:8443/api"
+    _api_key_name: str
 
     def run(self):
         headers = {}
-        if self.__api_key:
-            headers["x-api-key"] = self.__api_key
+        if hasattr(self, "_api_key_name"):
+            headers["x-api-key"] = self._api_key_name
         else:
             warning = "No API key retrieved"
             logger.info(

@@ -16,10 +16,9 @@ logger = logging.getLogger(__name__)
 class FileScanUpload(FileAnalyzer):
     """FileScan_Upload_File analyzer"""
 
-    def set_params(self, params):
-        self.max_tries = 30
-        self.poll_distance = 10
-        self.base_url = "https://www.filescan.io/api"
+    max_tries: int = 30
+    poll_distance: int = 10
+    base_url = "https://www.filescan.io/api"
 
     def run(self):
         task_id = self.__upload_file_for_scan()

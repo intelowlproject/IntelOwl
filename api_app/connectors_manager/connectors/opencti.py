@@ -25,14 +25,12 @@ INTELOWL_OPENCTI_TYPE_MAP = {
 
 
 class OpenCTI(classes.Connector):
-    def set_params(self, params):
-        self.ssl_verify = params.get("ssl_verify", True)
-        self.tlp = params.get(
-            "tlp", {"type": "white", "color": "#FFFFFF", "x_opencti_order": 0}
-        )
-        self.proxies = params.get("proxies", {})
-        self.__url_name = self._secrets["url_key_name"]
-        self.__api_key = self._secrets["api_key_name"]
+
+    ssl_verify: bool
+    tlp: dict
+    proxies: str
+    _url_key_name: str
+    _api_key_name: str
 
     def get_observable_type(self) -> str:
         if self._job.is_sample:
@@ -111,8 +109,8 @@ class OpenCTI(classes.Connector):
     def run(self):
         # set up client
         self.opencti_instance = pycti.OpenCTIApiClient(
-            url=self.__url_name,
-            token=self.__api_key,
+            url=self._url_key_name,
+            token=self._api_key_name,
             ssl_verify=self.ssl_verify,
             proxies=self.proxies,
         )

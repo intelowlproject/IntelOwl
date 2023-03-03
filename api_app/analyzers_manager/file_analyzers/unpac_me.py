@@ -17,13 +17,17 @@ logger = logging.getLogger(__name__)
 class UnpacMe(FileAnalyzer):
     base_url: str = "https://api.unpac.me/api/v1/"
 
-    def set_params(self, params):
-        private = params.get("private", False)
-        self.private = "private" if private else "public"
-        self.__api_key = self._secrets["api_key_name"]
-        self.headers = {"Authorization": f"Key {self.__api_key}"}
-        # max no. of tries when polling for result
-        self.max_tries = params.get("max_tries", 30)
+    _api_key_name: str
+    private: bool
+    # max no. of tries when polling for result
+    max_tries: int
+
+    def config(self):
+        super().config()
+        self.private: str = "private" if self.private else "public"
+
+        self.headers = {"Authorization": f"Key {self._api_key_name}"}
+
         # interval b/w HTTP requests when polling
         self.poll_distance = 5
 

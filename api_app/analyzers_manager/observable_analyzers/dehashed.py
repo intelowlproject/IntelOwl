@@ -10,10 +10,7 @@ from requests.structures import CaseInsensitiveDict
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
 from api_app.analyzers_manager.constants import ObservableTypes
-from api_app.analyzers_manager.exceptions import (
-    AnalyzerConfigurationException,
-    AnalyzerRunException,
-)
+from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from tests.mock_utils import MockResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
@@ -26,16 +23,10 @@ class DehashedSearch(ObservableAnalyzer):
     """
 
     base_url: str = "https://api.dehashed.com/"
-
-    def set_params(self, params):
-        self.size = params.get("size", 1000)
-        self.pages = params.get("pages", 1)
-        self.operator = params.get("operator", "username")
-        self.__auth = self._secrets["api_key_name"]
-        if not self.__auth:
-            raise AnalyzerConfigurationException(
-                "No secret retrieved for `api_key_name`."
-            )
+    size: int
+    pages: int
+    operator: str
+    _api_key_name: str
 
     def run(self):
         # try to identify search operator
@@ -81,7 +72,7 @@ class DehashedSearch(ObservableAnalyzer):
 
     def __search(self, value: str) -> list:
         # the API uses basic auth so we need to base64 encode the auth payload
-        auth_b64 = base64.b64encode(self.__auth.encode()).decode()
+        auth_b64 = base64.b64encode(self._api_key_name.encode()).decode()
         # construct headers
         headers = CaseInsensitiveDict(
             {

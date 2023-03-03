@@ -10,9 +10,7 @@ from tests.mock_utils import MockResponse, if_mock_connections, patch
 
 class Threatminer(classes.ObservableAnalyzer):
     base_url = "https://api.threatminer.org/v2/"
-
-    def set_params(self, params):
-        self.rt_value = params.get("rt_value", "")
+    rt_value: str
 
     def run(self):
         params = {"q": self.observable_name}
@@ -25,6 +23,11 @@ class Threatminer(classes.ObservableAnalyzer):
             uri = "host.php"
         elif self.observable_classification == self.ObservableTypes.HASH:
             uri = "sample.php"
+        else:
+            raise AnalyzerRunException(
+                f"Unable to retrieve the uri for classification"
+                f" {self.observable_classification}"
+            )
 
         try:
             response = requests.get(self.base_url + uri, params=params)

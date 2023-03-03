@@ -12,12 +12,11 @@ vt_base = "https://www.virustotal.com/vtapi/v2/"
 
 
 class VirusTotalv2(classes.ObservableAnalyzer):
-    def set_params(self, params):
-        self.__api_key = self._secrets["api_key_name"]
+    _api_key_name: str
 
     def run(self):
         resp = vt_get_report(
-            self.__api_key, self.observable_name, self.observable_classification
+            self._api_key_name, self.observable_name, self.observable_classification
         )
 
         resp_code = resp.get("response_code", 1)

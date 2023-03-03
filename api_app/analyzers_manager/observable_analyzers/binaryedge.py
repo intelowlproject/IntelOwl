@@ -4,21 +4,18 @@
 import requests
 
 from api_app.analyzers_manager import classes
-from api_app.analyzers_manager.exceptions import (
-    AnalyzerConfigurationException,
-    AnalyzerRunException,
-)
+from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from tests.mock_utils import MockResponse, if_mock_connections, patch
 
 
 class BinaryEdge(classes.ObservableAnalyzer):
     base_url: str = "https://api.binaryedge.io/v2/query/"
 
-    def set_params(self, params):
-        self.__api_key = self._secrets["api_key_name"]
-        if not self.__api_key:
-            raise AnalyzerConfigurationException("API key is required")
-        self.headers = {"X-Key": self.__api_key}
+    _api_key_name: str
+
+    def config(self):
+        super().config()
+        self.headers = {"X-Key": self._api_key_name}
 
     def run(self):
         if self.observable_classification == self.ObservableTypes.IP:

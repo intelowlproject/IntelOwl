@@ -14,17 +14,18 @@ class Qiling(FileAnalyzer, DockerBasedAnalyzer):
     timeout: int = 60 * 9
     # whereas subprocess timeout is kept as 60 * 9 = 9 minutes
 
-    def set_params(self, params):
-        self.args = []
-        os = params.get("os", "windows")
-        arch = params.get("arch", "x86")
-        self.args.extend([os] + [arch])
-        shellcode = params.get("shellcode", False)
-        if shellcode:
+    os: str
+    arch: str
+    shellcode: bool
+    profile: str
+
+    def config(self):
+        super().config()
+        self.args = [self.os, self.arch]
+        if self.shellcode:
             self.args.append("--shellcode")
-        profile = params.get("profile", None)
-        if profile:
-            self.args.extend(["--profile"] + [profile])
+        if self.profile:
+            self.args.extend(["--profile"] + [self.profile])
 
     def run(self):
         # get the file to send

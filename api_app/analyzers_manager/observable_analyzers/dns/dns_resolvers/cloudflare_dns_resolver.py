@@ -20,8 +20,7 @@ logger = logging.getLogger(__name__)
 class CloudFlareDNSResolver(classes.ObservableAnalyzer):
     """Resolve a DNS query with CloudFlare"""
 
-    def set_params(self, params):
-        self._query_type = params.get("query_type", "A")
+    query_type: str
 
     def run(self):
         try:
@@ -32,7 +31,7 @@ class CloudFlareDNSResolver(classes.ObservableAnalyzer):
 
             params = {
                 "name": observable,
-                "type": self._query_type,
+                "type": self.query_type,
             }
             headers = {"accept": "application/dns-json"}
             response = requests.get(

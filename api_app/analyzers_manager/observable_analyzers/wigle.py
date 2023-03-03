@@ -14,11 +14,8 @@ from tests.mock_utils import MockResponse, if_mock_connections, patch
 class WiGLE(classes.ObservableAnalyzer):
     base_url: str = "https://api.wigle.net"
 
-    def set_params(self, params):
-        self.__api_key = self._secrets["api_key_name"]
-        if not self.__api_key:
-            raise AnalyzerConfigurationException("API key is required")
-        self.search_type = params.get("search_type", "WiFi Network")
+    _api_key_name: str
+    search_type: str
 
     def __prepare_args(self):
         # Sample Argument: operator=001;type=GSM
@@ -60,7 +57,7 @@ class WiGLE(classes.ObservableAnalyzer):
 
             response = requests.get(
                 self.base_url + uri,
-                headers={"Authorization": "Basic " + self.__api_key},
+                headers={"Authorization": "Basic " + self._api_key_name},
             )
             response.raise_for_status()
         except requests.RequestException as e:

@@ -27,11 +27,10 @@ class DNStwist(classes.ObservableAnalyzer):
     DNS_TWIST_PATH = settings.BASE_DIR / "dnstwist-dictionaries"
     COMMAND: str = "dnstwist"
 
-    def set_params(self, params):
-        self._ssdeep = params.get("ssdeep", False)
-        self._mxcheck = params.get("mxcheck", False)
-        self._tld = params.get("tld", False)
-        self._tld_dict = params.get("tld_dict", "abused_tlds.dict")
+    ssdeep: bool
+    mxcheck: bool
+    tld: bool
+    tld_dict: str
 
     def run(self):
         if not which(self.COMMAND):
@@ -51,19 +50,19 @@ class DNStwist(classes.ObservableAnalyzer):
                 )
 
         final_report = {
-            "ssdeep": self._ssdeep,
-            "mxcheck": self._mxcheck,
-            "tld": self._tld,
+            "ssdeep": self.ssdeep,
+            "mxcheck": self.mxcheck,
+            "tld": self.tld,
         }
 
         args = [self.COMMAND, "--registered", "--format", "json"]
-        if self._ssdeep:
+        if self.ssdeep:
             args.append("--ssdeep")
-        if self._mxcheck:
+        if self.mxcheck:
             args.append("--mxcheck")
-        if self._tld:
+        if self.tld:
             args.append("--tld")
-            args.append(self.DNS_TWIST_PATH / self._tld_dict)
+            args.append(self.DNS_TWIST_PATH / self.tld_dict)
 
         args.append(domain)
 

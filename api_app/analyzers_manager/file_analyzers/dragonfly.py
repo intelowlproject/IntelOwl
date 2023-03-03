@@ -10,19 +10,26 @@ logger = logging.getLogger(__name__)
 
 
 class DragonflyEmulation(FileAnalyzer):
-    def set_params(self, params):
-        # max no. of tries when polling for result
-        self.max_tries = 30
-        # max 5 minutes waiting
-        self.poll_distance = 10
+
+    max_tries: int = 30
+    poll_distance: int = 10
+    operating_system: str
+    profiles: list
+    root: bool
+    allow_actions: bool
+    private: bool
+
+    def config(self):
+        super().config()
         # build analysis options
-        os = params.get("operating_system", None)
         self.analysis_options = {
-            "profiles": params.get("profiles", []),
-            "os": os if os in ["WINDOWS", "LINUX"] else None,
-            "root": params.get("root", False),
-            "allow_actions": params.get("allow_actions", False),
-            "private": params.get("private", False),
+            "profiles": self.profiles,
+            "os": self.operating_system
+            if self.operating_system in ["WINDOWS", "LINUX"]
+            else None,
+            "root": self.root,
+            "allow_actions": self.allow_actions,
+            "private": self.private,
         }
         # get secrets
         api_key: str = self._secrets["api_key_name"]

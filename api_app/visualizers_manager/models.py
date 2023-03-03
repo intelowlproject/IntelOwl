@@ -8,6 +8,7 @@ from django.db import models
 from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.connectors_manager.models import ConnectorConfig
 from api_app.core.models import AbstractConfig, AbstractReport
+from api_app.visualizers_manager.exceptions import VisualizerConfigurationException
 
 
 class VisualizerReport(AbstractReport):
@@ -45,3 +46,8 @@ class VisualizerConfig(AbstractConfig):
     @property
     def report_model(cls) -> Type[VisualizerReport]:
         return VisualizerReport
+
+    @classmethod
+    @property
+    def config_exception(cls):
+        return VisualizerConfigurationException

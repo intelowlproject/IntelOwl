@@ -17,22 +17,17 @@ logger = logging.getLogger(__name__)
 class VirusTotalv3AnalyzerMixin(BaseAnalyzerMixin, metaclass=abc.ABCMeta):
     base_url = "https://www.virustotal.com/api/v3/"
 
-    def set_params(self, params):
-        # CARE!!!! VT is normally used with paid quotas!!!
-        # Do not change these values without knowing what you are doing!
-        self.max_tries = params.get("max_tries", 10)
-        self.poll_distance = params.get("poll_distance", 30)
-        self.rescan_max_tries = params.get("rescan_max_tries", 5)
-        self.rescan_poll_distance = params.get("rescan_poll_distance", 120)
-        self.include_behaviour_summary = params.get("include_behaviour_summary", False)
-        self.include_sigma_analyses = params.get("include_sigma_analyses", False)
-        self.force_active_scan = params.get("force_active_scan", False)
-        self.force_active_scan_if_old = params.get("force_active_scan_if_old", False)
-        self.days_to_say_that_a_scan_is_old = params.get(
-            "days_to_say_that_a_scan_is_old", 30
-        )
-        self.relationships_to_request = params.get("relationships_to_request", [])
-        self.relationships_elements = params.get("relationships_elements", 1)
+    max_tries: int
+    poll_distance: int
+    rescan_max_tries: int
+    rescan_poll_distance: int
+    include_behaviour_summary: bool
+    include_sigma_analyses: bool
+    force_active_scan: bool
+    force_active_scan_if_old: bool
+    days_to_say_that_a_scan_is_old: int
+    relationships_to_request: list
+    relationships_elements: int
 
     @property
     def headers(self) -> dict:

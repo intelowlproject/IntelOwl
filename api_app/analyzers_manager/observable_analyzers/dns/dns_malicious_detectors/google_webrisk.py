@@ -20,30 +20,29 @@ logger = logging.getLogger(__name__)
 class WebRisk(classes.ObservableAnalyzer):
     """Check if observable analyzed is marked as malicious by Google WebRisk API"""
 
-    def set_params(self, params):
-        """
-        Get these secrets from a Service Account valid file.
-        Example:
-            {
-              "type": "service_account",
-              "project_id": "test",
-              "private_key_id": "34543543543534",
-              "private_key": "test",
-              "client_email": "test@test.iam.gserviceaccount.com",
-              "client_id": "363646436363463663634",
-              "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-              "token_uri": "https://oauth2.googleapis.com/token",
-              "auth_provider_x509_cert_url":
-               "https://www.googleapis.com/oauth2/v1/certs",
-              "client_x509_cert_url":
-               "https://www.googleapis.com/robot/v1/metadata/x509/somedomain"
-            }
-        """
-        self.service_account_json = self._secrets["service_account_json"]
+    """
+    Get these secrets from a Service Account valid file.
+    Example:
+        {
+          "type": "service_account",
+          "project_id": "test",
+          "private_key_id": "34543543543534",
+          "private_key": "test",
+          "client_email": "test@test.iam.gserviceaccount.com",
+          "client_id": "363646436363463663634",
+          "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+          "token_uri": "https://oauth2.googleapis.com/token",
+          "auth_provider_x509_cert_url":
+           "https://www.googleapis.com/oauth2/v1/certs",
+          "client_x509_cert_url":
+           "https://www.googleapis.com/robot/v1/metadata/x509/somedomain"
+        }
+    """
+    _service_account_json: dict
 
     def run(self):
         credentials = service_account.Credentials.from_service_account_info(
-            self.service_account_json
+            self._service_account_json
         )
 
         web_risk_client = WebRiskServiceClient(credentials=credentials)

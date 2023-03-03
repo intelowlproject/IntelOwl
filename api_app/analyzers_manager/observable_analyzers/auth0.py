@@ -11,11 +11,10 @@ class Auth0(classes.ObservableAnalyzer):
     name: str = "Auth0"
     base_url: str = "https://signals.api.auth0.com/v2.0/ip"
 
-    def set_params(self, params):
-        self.__api_key = self._secrets["api_key_name"]
+    _api_key_name: str
 
     def run(self):
-        headers = {"X-Auth-Token": self.__api_key}
+        headers = {"X-Auth-Token": self._api_key_name}
         url = f"{self.base_url}/{self.observable_name}"
         response = requests.get(url, headers=headers)
         response.raise_for_status()

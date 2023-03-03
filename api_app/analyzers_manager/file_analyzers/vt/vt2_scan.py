@@ -16,26 +16,24 @@ logger = logging.getLogger(__name__)
 
 class VirusTotalv2ScanFile(classes.FileAnalyzer):
     base_url: str = "https://www.virustotal.com/vtapi/v2/"
+    poll_distance: 30
 
-    def set_params(self, params):
-        self.__api_key = self._secrets["api_key_name"]
-        # this is a config value that can be used...
-        # .. to force the waiting of the scan result anyway
-        self.wait_for_scan_anyway = params.get("wait_for_scan_anyway", False)
-        # max no. of tries when polling for result
-        self.max_tries = params.get("max_tries", 10)
-        # max 5 minutes waiting
-        self.poll_distance = 30
+    max_tries: int
+    # this is a config value that can be used...
+    # .. to force the waiting of the scan result anyway
+
+    wait_for_scan_anyway: bool
+    _api_key_name: str
+    _url_key_name: str
 
     def run(self):
         result = None
-        notify_url = self._secrets["url_key_name"]
-        resp = self.__vt_request_scan(notify_url)
+        resp = self.__vt_request_scan(self._url_key_name)
 
         # in case we didn't use the webhook to get the result of the scan,...
         # .. start a poll for the result
         # or in case we'd like to force the scan anyway from the configuration
-        if not notify_url or self.wait_for_scan_anyway:
+        if not self._url_key_name or self.wait_for_scan_anyway:
             scan_id = resp.get("scan_id", None)
             if not scan_id:
                 raise (
@@ -49,7 +47,7 @@ class VirusTotalv2ScanFile(classes.FileAnalyzer):
 
     def __vt_request_scan(self, notify_url):
         binary = self.read_file_bytes()
-        params = {"apikey": self.__api_key}
+        params = {"apikey": self._api_key_name}
         if notify_url:
             params["notify_url"] = notify_url
         files = {"file": binary}
@@ -71,7 +69,7 @@ class VirusTotalv2ScanFile(classes.FileAnalyzer):
         for chance in range(self.max_tries):
             time.sleep(self.poll_distance)
             logger.info(f"vt2 polling: #{chance + 1}. job_id: #{self.job_id}")
-            result = vt2_get.vt_get_report(self.__api_key, scan_id, "hash")
+            result = vt2_get.vt_get_report(self._api_key_name, scan_id, "hash")
             response_code = result.get("response_code", 1)
             # response code -2 means the we still have to wait
             if response_code == -2:

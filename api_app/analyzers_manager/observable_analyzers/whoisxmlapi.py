@@ -10,12 +10,11 @@ from tests.mock_utils import MockResponse, if_mock_connections, patch
 class Whoisxmlapi(classes.ObservableAnalyzer):
     url: str = "https://www.whoisxmlapi.com/whoisserver/WhoisService"
 
-    def set_params(self, params):
-        self.__api_key = self._secrets["api_key_name"]
+    _api_key_name: str
 
     def run(self):
         params = {
-            "apiKey": self.__api_key,
+            "apiKey": self._api_key_name,
             "domainName": self.observable_name,
             "outputFormat": "JSON",
         }

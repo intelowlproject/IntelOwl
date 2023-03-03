@@ -29,13 +29,12 @@ def create_misp_attribute(misp_type, misp_value) -> pymisp.MISPAttribute:
 
 
 class MISP(Connector):
-    def set_params(self, params):
-        self.ssl_check = params.get("ssl_check", True)
-        self.self_signed_certificate = params.get("self_signed_certificate", False)
-        self.debug = params.get("debug", False)
-        self.tlp = params.get("tlp", "white")
-        self.__url_name = self._secrets["url_key_name"]
-        self.__api_key = self._secrets["api_key_name"]
+    tlp: str
+    ssl_check: bool
+    self_signed_certificate: str
+    debug: bool
+    _api_key_name: str
+    _url_key_name: str
 
     @property
     def _event_obj(self) -> pymisp.MISPEvent:
@@ -100,8 +99,8 @@ class MISP(Connector):
             else self.ssl_check
         )
         misp_instance = pymisp.PyMISP(
-            url=self.__url_name,
-            key=self.__api_key,
+            url=self._url_key_name,
+            key=self._api_key_name,
             ssl=ssl_param,
             debug=self.debug,
             timeout=5,

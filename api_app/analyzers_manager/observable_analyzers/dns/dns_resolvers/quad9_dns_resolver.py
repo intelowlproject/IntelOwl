@@ -17,8 +17,7 @@ from ..dns_responses import dns_resolver_response
 class Quad9DNSResolver(classes.ObservableAnalyzer):
     """Resolve a DNS query with Quad9"""
 
-    def set_params(self, params):
-        self._query_type = params.get("query_type", "A")
+    query_type: str
 
     def run(self):
         try:
@@ -29,7 +28,7 @@ class Quad9DNSResolver(classes.ObservableAnalyzer):
 
             headers = {"Accept": "application/dns-json"}
             url = "https://dns.quad9.net:5053/dns-query"
-            params = {"name": observable, "type": self._query_type}
+            params = {"name": observable, "type": self.query_type}
 
             quad9_response = requests.get(url, headers=headers, params=params)
             quad9_response.raise_for_status()

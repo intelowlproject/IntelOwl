@@ -14,6 +14,7 @@ from api_app.analyzers_manager.constants import (
     ObservableTypes,
     TypeChoices,
 )
+from api_app.analyzers_manager.exceptions import AnalyzerConfigurationException
 from api_app.core.models import AbstractConfig, AbstractReport
 from api_app.fields import ChoiceArrayField
 from api_app.models import PluginConfig
@@ -162,6 +163,11 @@ class AnalyzerConfig(AbstractConfig):
     @classmethod
     def _get_type(cls) -> str:
         return PluginConfig.PluginType.ANALYZER
+
+    @classmethod
+    @property
+    def config_exception(cls):
+        return AnalyzerConfigurationException
 
     @classmethod
     @property

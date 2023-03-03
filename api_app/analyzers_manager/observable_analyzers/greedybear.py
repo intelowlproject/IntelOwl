@@ -4,20 +4,16 @@
 import requests
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
-from api_app.analyzers_manager.exceptions import AnalyzerConfigurationException
 from tests.mock_utils import MockResponse, if_mock_connections, patch
 
 
 class GreedyBear(ObservableAnalyzer):
-    def set_params(self, params):
-        self.__api_key = self._secrets["api_key_name"]
-        if not self.__api_key:
-            raise AnalyzerConfigurationException("API key is required")
-        self.url = params.get("url", "https://greedybear.honeynet.org")
+    _api_key_name: str
+    url: str
 
     def run(self):
         headers = {
-            "Authorization": "Token " + self.__api_key,
+            "Authorization": "Token " + self._api_key_name,
             "Accept": "application/json",
         }
         params_ = {

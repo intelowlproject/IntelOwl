@@ -12,11 +12,12 @@ class Koodous(classes.ObservableAnalyzer):
     base_url: str = "https://developer.koodous.com/apks/"
     query_analysis = "/analysis"
 
-    def set_params(self, params):
-        self.__api_key = self._secrets["api_key_name"]
+    _api_key_name: str
 
     def get_response(self, url):
-        return requests.get(url, headers={"Authorization": f"Token {self.__api_key}"})
+        return requests.get(
+            url, headers={"Authorization": f"Token {self._api_key_name}"}
+        )
 
     def run(self):
         try:

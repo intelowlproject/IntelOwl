@@ -14,25 +14,27 @@ class CAPEsandbox(FileAnalyzer):
     class ContinuePolling(Exception):
         pass
 
-    def set_params(self, params):
-        self.__token = self._secrets["api_key_name"]
-        self.__vm_name = params.get("VM_NAME", "")
-        self.max_tries = params.get("max_tries", 50)
-        self.poll_distance = params.get("poll_distance", 30)
-        self.__base_url = self._secrets.get("url_key_name")
+    _api_key_name: str
+    VM_NAME: str
+    max_tries: int
+    poll_distance: int
+    _url_key_name: str
+
+    def config(self):
+        super().config()
         self.__session = requests.Session()
         self.__session.headers = {
-            "Authorization": f"Token {self.__token}",
+            "Authorization": f"Token {self._api_key_name}",
         }
 
     def run(self):
-        api_url: str = self.__base_url + "/apiv2/tasks/create/file/"
+        api_url: str = self._url_key_name + "/apiv2/tasks/create/file/"
         to_respond = {}
 
         logger.info(f"Job: {self.job_id} -> " "Starting file upload.")
         data = {}
-        if self.__vm_name:
-            data["machine"] = self.__vm_name
+        if self.VM_NAME:
+            data["machine"] = self.VM_NAME
 
         try:
             response = self.__session.post(
@@ -100,9 +102,9 @@ class CAPEsandbox(FileAnalyzer):
                     )
 
                     status_id = self.__search_by_md5()
-                    gui_report_url = self.__base_url + "/submit/status/" + status_id
+                    gui_report_url = self._url_key_name + "/submit/status/" + status_id
                     report_url = (
-                        self.__base_url
+                        self._url_key_name
                         + "/apiv2/tasks/get/report/"
                         + status_id
                         + "/json"
@@ -121,7 +123,7 @@ class CAPEsandbox(FileAnalyzer):
         return to_respond
 
     def __search_by_md5(self) -> str:
-        db_search_url = self.__base_url + "/apiv2/tasks/search/md5/" + self.md5
+        db_search_url = self._url_key_name + "/apiv2/tasks/search/md5/" + self.md5
 
         try:
             q = self.__session.get(db_search_url)
@@ -145,7 +147,7 @@ class CAPEsandbox(FileAnalyzer):
         task_id,
     ) -> dict:
         results = None
-        status_api = self.__base_url + "/apiv2/tasks/status/" + str(task_id)
+        status_api = self._url_key_name + "/apiv2/tasks/status/" + str(task_id)
         for try_ in range(self.max_tries):
             attempt = try_ + 1
             try:
@@ -177,7 +179,7 @@ class CAPEsandbox(FileAnalyzer):
 
                 if data in ("reported", "completed"):
                     report_url = (
-                        self.__base_url
+                        self._url_key_name
                         + "/apiv2/tasks/get/report/"
                         + str(task_id)
                         + "/json"

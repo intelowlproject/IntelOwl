@@ -16,30 +16,29 @@ logger = logging.getLogger(__name__)
 class UrlScan(ObservableAnalyzer):
     base_url: str = "https://urlscan.io/api/v1"
 
-    def set_params(self, params):
-        self.analysis_type = params.get("urlscan_analysis", "search")
-        self.visibility = params.get("visibility", "private")
-        self.search_size = params.get("search_size", 100)
-        self.__api_key = self._secrets["api_key_name"]
+    urlscan_analysis: str
+    visibility: str
+    search_size: int
+    _api_key_name: str
 
     def run(self):
         result = {}
         headers = {"Content-Type": "application/json", "User-Agent": "IntelOwl/v1.x"}
-        if not self.__api_key and self.analysis_type == "search":
+        if not hasattr(self, "_api_key_name") and self.urlscan_analysis == "search":
             logger.warning(f"{self.__repr__()} -> Continuing w/o API key..")
         else:
-            headers["API-Key"] = self.__api_key
+            headers["API-Key"] = self._api_key_name
 
         self.session = requests.Session()
         self.session.headers = headers
-        if self.analysis_type == "search":
+        if self.urlscan_analysis == "search":
             result = self.__urlscan_search()
-        elif self.analysis_type == "submit_result":
+        elif self.urlscan_analysis == "submit_result":
             req_api_token = self.__urlscan_submit()
             result = self.__poll_for_result(req_api_token)
         else:
             raise AnalyzerRunException(
-                f"not supported analysis_type {self.analysis_type}."
+                f"not supported analysis_type {self.urlscan_analysis}."
                 " Supported is 'search' and 'submit_result'."
             )
         return result

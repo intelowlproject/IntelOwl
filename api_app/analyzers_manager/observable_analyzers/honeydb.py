@@ -14,9 +14,18 @@ logger = logging.getLogger(__name__)
 
 class HoneyDB(classes.ObservableAnalyzer):
     base_url = "https://honeydb.io/api"
+    # set secrets
+    _api_key_name: str
+    _api_id_name: str
+    honeydb_analysis: str
 
-    def set_params(self, params):
-        self.analysis_type = params.get("honeydb_analysis", "all")
+    def config(self):
+        super().config()
+        self.headers = {
+            "X-HoneyDb-ApiKey": self._api_key_name,
+            "X-HoneyDb-ApiId": self._api_id_name,
+        }
+        self.result = {}
         self.endpoints = [
             "scan_twitter",
             "ip_query",
@@ -24,26 +33,20 @@ class HoneyDB(classes.ObservableAnalyzer):
             "internet_scanner",
             "ip_info",
         ]
-        if self.analysis_type not in self.endpoints and self.analysis_type != "all":
+        if (
+            self.honeydb_analysis not in self.endpoints
+            and self.honeydb_analysis != "all"
+        ):
             raise AnalyzerConfigurationException(
-                f"analysis_type is not valid: {self.analysis_type}"
+                f"analysis_type is not valid: {self.honeydb_analysis}"
             )
 
-        # set secrets
-        self.__api_key = self._secrets["api_key_name"]
-        self.__api_id = self._secrets["api_id_name"]
-        self.headers = {
-            "X-HoneyDb-ApiKey": self.__api_key,
-            "X-HoneyDb-ApiId": self.__api_id,
-        }
-        self.result = {}
-
     def run(self):
-        if self.analysis_type == "all":
+        if self.honeydb_analysis == "all":
             for endpoint in self.endpoints:
                 self._request_analysis(endpoint)
         else:
-            self._request_analysis(self.analysis_type)
+            self._request_analysis(self.honeydb_analysis)
 
         return self.result
 

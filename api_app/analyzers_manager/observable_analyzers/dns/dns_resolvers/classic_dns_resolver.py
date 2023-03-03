@@ -20,8 +20,7 @@ logger = logging.getLogger(__name__)
 class ClassicDNSResolver(classes.ObservableAnalyzer):
     """Resolve a DNS query with Default resolver"""
 
-    def set_params(self, params):
-        self._query_type = params.get("query_type", "A")
+    query_type: str
 
     def run(self):
         resolutions = []
@@ -49,7 +48,7 @@ class ClassicDNSResolver(classes.ObservableAnalyzer):
                 observable = urlparse(self.observable_name).hostname
 
             try:
-                dns_resolutions = dns.resolver.query(observable, self._query_type)
+                dns_resolutions = dns.resolver.query(observable, self.query_type)
                 for resolution in dns_resolutions:
                     element = {
                         "TTL": dns_resolutions.rrset.ttl,

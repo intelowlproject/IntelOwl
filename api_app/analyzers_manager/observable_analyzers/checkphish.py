@@ -14,15 +14,15 @@ class CheckPhish(classes.ObservableAnalyzer):
     base_url: str = "https://developers.checkphish.ai/api/neo/scan"
     status_url: str = base_url + "/status"
 
-    def set_params(self, params):
-        self.polling_tries = params.get("polling_tries", 10)
-        self.polling_time = params.get("polling_time", 0.5)
-        self.__api_key = self._secrets["api_key_name"]
+    polling_tries: int
+    polling_time: float
+
+    _api_key_name: str
 
     def run(self):
         try:
             json_data = {
-                "apiKey": self.__api_key,
+                "apiKey": self._api_key_name,
                 "urlInfo": {"url": self.observable_name},
             }
 
@@ -41,7 +41,7 @@ class CheckPhish(classes.ObservableAnalyzer):
 
     def __poll_analysis_status(self, job_id):
         json_data = {
-            "apiKey": self.__api_key,
+            "apiKey": self._api_key_name,
             "jobID": job_id,  # Assumption: jobID corresponds to an actual job.
             # This is always the case when this function is called
             # in the "run" function.

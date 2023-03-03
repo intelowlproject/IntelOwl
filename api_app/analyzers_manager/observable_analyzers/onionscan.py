@@ -11,12 +11,8 @@ class Onionscan(ObservableAnalyzer, DockerBasedAnalyzer):
     max_tries: int = 60
     # interval between http request polling (in seconds)
     poll_distance: int = 10
-    verbose = True
-    tor_proxy_address = None
-
-    def set_params(self, params):
-        self.verbose = params.get("verbose", True)
-        self.tor_proxy_address = params.get("torProxyAddress", None)
+    verbose: bool
+    tor_proxy_address: str
 
     def run(self):
         # make request params

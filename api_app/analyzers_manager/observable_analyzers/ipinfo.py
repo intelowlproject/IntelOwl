@@ -11,14 +11,13 @@ from tests.mock_utils import MockResponse, if_mock_connections, patch
 class IPInfo(classes.ObservableAnalyzer):
     base_url: str = "https://ipinfo.io/"
 
-    def set_params(self, params):
-        self.__api_key = self._secrets["api_key_name"]
+    _api_key_name: str
 
     def run(self):
         try:
             response = requests.get(
                 self.base_url + self.observable_name,
-                params={"token": self.__api_key},
+                params={"token": self._api_key_name},
             )
             response.raise_for_status()
         except requests.RequestException as e:

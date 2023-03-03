@@ -68,7 +68,7 @@ class FileAnalyzerTestCase(CustomTestCase):
                 python_module=subclass.python_module
             ):
                 timeout_seconds = config.soft_time_limit
-                timeout_seconds = min(timeout_seconds, 20)
+                timeout_seconds = min(timeout_seconds, 30)
                 print(f"\tTesting with config {config.name}")
                 found_one = False
                 for mimetype in MimeTypes.values:
@@ -107,7 +107,7 @@ class FileAnalyzerTestCase(CustomTestCase):
                                 f"with config {config.name} and mimetype "
                                 f"{mimetype} went in timeout after {timeout_seconds}"
                             )
-                        else:
+                        finally:
                             signal.alarm(0)
                 if not found_one:
                     self.fail(
@@ -217,7 +217,7 @@ class ObservableAnalyzerTestCase(CustomTestCase):
                             f" and observable {observable_supported}"
                             f" went in timeout after {timeout_seconds}"
                         )
-                    else:
+                    finally:
                         signal.alarm(0)
 
     def tearDown(self) -> None:

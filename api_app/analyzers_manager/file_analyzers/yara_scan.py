@@ -39,13 +39,10 @@ class YaraScan(FileAnalyzer):
 
     IGNORE_DIRECTORIES = [".git", ".github"]
 
-    def set_params(self, params):
-        self.ignore_rules = params.get("ignore", [])
-        self.public_repositories = params.get("public_repositories", [])
-        self.private_repositories = list(
-            self._secrets.get("private_repositories", {}).keys()
-        )
-        self.local_rules = params.get("local_rules", False)
+    ignore: list
+    public_repositories: list
+    _private_repositories: dict
+    local_rules: str
 
     def _load_directory(
         self, rulepath: PosixPath
@@ -55,7 +52,7 @@ class YaraScan(FileAnalyzer):
         if rulepath.name in self.IGNORE_DIRECTORIES:
             return rules
         for full_path in rulepath.iterdir():
-            if full_path.name in self.ignore_rules:
+            if full_path.name in self.ignore:
                 logger.info(f"Skipping {full_path} because ignored")
                 continue
 
@@ -201,15 +198,15 @@ class YaraScan(FileAnalyzer):
         result = defaultdict(list)
         if (
             not self.public_repositories
-            and not self.private_repositories
+            and not self._private_repositories
             and not self.local_rules
         ):
             self.report.errors.append("There are no yara rules selected")
         logger.info(f"Checking {self.public_repositories}")
         for url in self.public_repositories:
             result[url] += self.analyze(url)
-        logger.info(f"Checking {self.private_repositories}")
-        for url in self.private_repositories:
+        logger.info(f"Checking {self._private_repositories.keys()}")
+        for url in self._private_repositories.keys():
             result[url] += self.analyze(url, private=True)
         if self.local_rules:
             path = settings.YARA_RULES_PATH / self._job.user.username / "custom_rule"

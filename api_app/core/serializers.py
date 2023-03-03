@@ -64,7 +64,6 @@ class _SecretSerializer(_TypeSerializer):
     To validate `secrets` attr.
     """
 
-    env_var_key = rfs.CharField(required=True, max_length=128)
     required = rfs.BooleanField(required=True)
 
 

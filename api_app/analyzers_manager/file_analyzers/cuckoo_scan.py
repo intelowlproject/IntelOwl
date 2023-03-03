@@ -8,37 +8,33 @@ import time
 import requests
 
 from api_app.analyzers_manager.classes import FileAnalyzer
-from api_app.analyzers_manager.exceptions import (
-    AnalyzerConfigurationException,
-    AnalyzerRunException,
-)
+from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from tests.mock_utils import MockResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
 
 class CuckooAnalysis(FileAnalyzer):
-    def set_params(self, params):
+
+    _api_key_name: str
+    _url_key_name: str
+    max_post_tries: int
+    max_poll_tries: int
+
+    def config(self):
+        super().config()
         # cuckoo installation can be with or without the api_token
         # it depends on version and configuration
         self.session = requests.Session()
-        api_key = self._secrets["api_key_name"]
-        if not api_key:
+        if not hasattr(self, "_api_key_name"):
             logger.info(
                 f"{self.__repr__()}, (md5: {self.md5}) -> Continuing w/o API key.."
             )
         else:
-            self.session.headers["Authorization"] = f"Bearer {api_key}"
+            self.session.headers["Authorization"] = f"Bearer {self._api_key_name}"
 
-        self.cuckoo_url = self._secrets["url_key_name"]
-        if not self.cuckoo_url:
-            raise AnalyzerConfigurationException("cuckoo URL missing")
         self.task_id = 0
         self.result = {}
-        # no. of tries requesting new scan
-        self.max_post_tries = params.get("max_post_tries", 5)
-        # no. of tries when polling for result
-        self.max_get_tries = params.get("max_poll_tries", 20)
 
     def run(self):
         binary = self.read_file_bytes()
@@ -64,7 +60,7 @@ class CuckooAnalysis(FileAnalyzer):
                 f"request #{chance} for file analysis of ({self.filename},{self.md5})"
             )
             response = self.session.post(
-                self.cuckoo_url + "tasks/create/file", files=files
+                self._url_key_name + "tasks/create/file", files=files
             )
             if response.status_code != 200:
                 logger.info(
@@ -95,11 +91,11 @@ class CuckooAnalysis(FileAnalyzer):
         # poll for the result
         poll_time = 15
         get_success = False
-        for chance in range(self.max_get_tries):
+        for chance in range(self.max_poll_tries):
             logger.info(
                 f"polling request #{chance + 1} for file ({self.filename},{self.md5})"
             )
-            url = self.cuckoo_url + "tasks/view/" + str(self.task_id)
+            url = self._url_key_name + "tasks/view/" + str(self.task_id)
             response = self.session.get(url)
             json_response = response.json()
             status = json_response.get("task", {}).get("status", None)
@@ -126,7 +122,7 @@ class CuckooAnalysis(FileAnalyzer):
         )
         # download the report
         response = self.session.get(
-            self.cuckoo_url + "tasks/report/" + str(self.task_id) + "/json"
+            self._url_key_name + "tasks/report/" + str(self.task_id) + "/json"
         )
         json_response = response.json()
 
@@ -235,7 +231,7 @@ class CuckooAnalysis(FileAnalyzer):
         yara = [yara_match["name"] for yara_match in file_data.get("yara", [])]
 
         result = {
-            "link": f"{self.cuckoo_url}analysis/{cuckoo_id}/summary",
+            "link": f"{self._url_key_name}analysis/{cuckoo_id}/summary",
             "signatures": list_description_signatures,
             "signatures_detailed": list_detailed_signatures,
             "suricata_alerts": suricata_alerts,

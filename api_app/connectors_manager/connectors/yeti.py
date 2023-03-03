@@ -10,10 +10,9 @@ from tests.mock_utils import MockResponse, if_mock_connections, patch
 
 
 class YETI(classes.Connector):
-    def set_params(self, params):
-        self.verify_ssl: bool = params.get("verify_ssl", True)
-        self.__url_name: str = self._secrets["url_key_name"]
-        self.__api_key: str = self._secrets["api_key_name"]
+    verify_ssl: bool
+    _url_key_name: str
+    _api_key_name: str
 
     def run(self):
         # get observable value and type
@@ -45,10 +44,10 @@ class YETI(classes.Connector):
             "tags": tags,
             "context": context,
         }
-        headers = {"Accept": "application/json", "X-Api-Key": self.__api_key}
-        if self.__url_name and self.__url_name.endswith("/"):
-            self.__url_name = self.__url_name[:-1]
-        url = f"{self.__url_name}/observable/"
+        headers = {"Accept": "application/json", "X-Api-Key": self._api_key_name}
+        if self._url_key_name and self._url_key_name.endswith("/"):
+            self._url_key_name = self._url_key_name[:-1]
+        url = f"{self._url_key_name}/observable/"
 
         # create observable with `obs_value` if it doesn't exists
         # new context, tags, source are appended with existing ones

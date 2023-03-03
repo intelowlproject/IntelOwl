@@ -11,13 +11,12 @@ from tests.mock_utils import MockResponse, if_mock_connections, patch
 class Stalkphish(classes.ObservableAnalyzer):
     base_url: str = "https://api.stalkphish.io/api/v1/"
 
-    def set_params(self, params):
-        self.__api_key = self._secrets["api_key_name"]
+    _api_key_name: str
 
     def run(self):
         headers = {
             "User-Agent": "Stalkphish/IntelOwl",
-            "Authorization": f"Token {self.__api_key}",
+            "Authorization": f"Token {self._api_key_name}",
         }
         obs_clsfn = self.observable_classification
 

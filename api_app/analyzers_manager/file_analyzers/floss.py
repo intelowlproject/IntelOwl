@@ -20,15 +20,8 @@ class Floss(FileAnalyzer, DockerBasedAnalyzer):
     # this is retrieved with bash command `getconf ARG_MAX`
     OS_MAX_ARGS: int = 2097152
 
-    def set_params(self, params):
-        self.max_no_of_strings = params.get(
-            "max_no_of_strings",
-            {"stack_strings": 1000, "static_strings": 1000, "decoded_strings": 1000},
-        )
-        self.rank_strings = params.get(
-            "rank_strings",
-            {"stack_strings": False, "static_strings": False, "decoded_strings": False},
-        )
+    max_no_of_strings: dict
+    rank_strings: dict
 
     def run(self):
         # get binary

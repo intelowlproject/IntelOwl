@@ -10,14 +10,14 @@ from tests.mock_utils import MockResponse, if_mock_connections, patch
 class AbuseIPDB(ObservableAnalyzer):
     url: str = "https://api.abuseipdb.com/api/v2/check"
 
-    def set_params(self, params):
-        self.__api_key = self._secrets["api_key_name"]
-        self.max_age = params.get("max_age", 180)
-        self.max_reports = params.get("max_reports", 200)
-        self.verbose = params.get("verbose", True)
+    verbose: bool
+    _api_key_name: str
+    max_age: int
+    max_reports: int
+    verbose: bool
 
     def run(self):
-        headers = {"Key": self.__api_key, "Accept": "application/json"}
+        headers = {"Key": self._api_key_name, "Accept": "application/json"}
         params_ = {
             "ipAddress": self.observable_name,
             "maxAgeInDays": self.max_age,

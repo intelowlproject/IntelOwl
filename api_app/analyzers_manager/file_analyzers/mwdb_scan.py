@@ -55,12 +55,14 @@ class MockedMWDB:
 
 
 class MWDB_Scan(FileAnalyzer):
-    def set_params(self, params):
-        self.__api_key = self._secrets["api_key_name"]
-        self.upload_file = params.get("upload_file", False)
-        self.private = params.get("private", True)
+    _api_key_name: str
+    upload_file: bool
+    private: bool
+    max_tries: int
+
+    def config(self):
+        super().config()
         self.public = not self.private
-        self.max_tries = params.get("max_tries", 50)
         self.poll_distance = 5
 
     def adjust_relations(self, base, key, recursive=True):
@@ -88,7 +90,7 @@ class MWDB_Scan(FileAnalyzer):
         result = {}
         binary = self.read_file_bytes()
         query = calculate_sha256(binary)
-        self.mwdb = mwdblib.MWDB(api_key=self.__api_key)
+        self.mwdb = mwdblib.MWDB(api_key=self._api_key_name)
 
         if self.upload_file:
             logger.info(f"mwdb_scan uploading sample: {self.md5}")

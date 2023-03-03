@@ -20,23 +20,22 @@ class TriageMixin(BaseAnalyzerMixin):
     private_url: str = "https://private.tria.ge/api/v0/"
     report_url: str = "https://tria.ge/"
 
-    def set_params(self, params):
-        self.endpoint = params.get("endpoint", "public")
+    endpoint: str
+    _api_key_name: str
+    report_type: str
+    max_tries: int
+
+    def config(self):
+        super().config()
         if self.endpoint == "private":
             self.base_url = self.private_url
 
-        self.__api_key = self._secrets["api_key_name"]
-        self.report_type = params.get("report_type", "overview")
         if self.report_type not in ["overview", "complete"]:
             raise AnalyzerConfigurationException(
                 "report_type must be 'overview' or 'complete' "
                 f"but it is '{self.report_type}'"
             )
-        self.max_tries = params.get("max_tries", 200)
         self.poll_distance = 3
-
-        self.analysis_type = params.get("analysis_type", "search")
-
         self.final_report = {}
         self.response = None
 
@@ -49,7 +48,7 @@ class TriageMixin(BaseAnalyzerMixin):
         if not hasattr(self, "_session"):
             session = requests.Session()
             session.headers = {
-                "Authorization": f"Bearer {self.__api_key}",
+                "Authorization": f"Bearer {self._api_key_name}",
                 "User-Agent": "IntelOwl",
             }
             self._session = session

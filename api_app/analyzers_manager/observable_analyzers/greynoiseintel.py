@@ -9,24 +9,22 @@ from tests.mock_utils import if_mock_connections, patch
 
 
 class GreyNoiseAnalyzer(classes.ObservableAnalyzer):
-    def set_params(self, params):
-        self.api_version = params.get("greynoise_api_version", "v3")
-        self.max_records_to_retrieve = int(params.get("max_records_to_retrieve", 500))
+    greynoise_api_version: str
+    max_records_to_retrieve: int
+
+    _api_key_name: str
 
     def run(self):
-        api_key = self._secrets["api_key_name"]
-        if self.api_version == "v2":
+        if self.greynoise_api_version == "v2":
             session = GreyNoise(
-                api_key=api_key, integration_name="greynoise-intelowl-v1.0"
+                api_key=self._api_key_name, integration_name="greynoise-intelowl-v1.0"
             )
             response = session.ip(self.observable_name)
             response |= session.riot(self.observable_name)
-        elif self.api_version == "v3":
+        elif self.greynoise_api_version == "v3":
             # this allows to use this service without an API key set
-            if not api_key:
-                api_key = ""
             session = GreyNoise(
-                api_key=api_key,
+                api_key=self._api_key_name,
                 integration_name="greynoise-community-intelowl-v1.0",
                 offering="Community",
             )

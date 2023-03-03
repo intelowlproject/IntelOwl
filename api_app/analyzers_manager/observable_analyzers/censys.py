@@ -11,13 +11,12 @@ from tests.mock_utils import MockResponse, if_mock_connections, patch
 class Censys(classes.ObservableAnalyzer):
     base_url = "https://www.censys.io/api/v1"
 
-    def set_params(self, params):
-        self.analysis_type = params.get("censys_analysis", "search")
-        self.__api_id = self._secrets["api_id_name"]
-        self.__api_secret = self._secrets["api_secret_name"]
+    censys_analysis: str
+    _api_id_name: str
+    _api_secret_name: str
 
     def run(self):
-        if self.analysis_type == "search":
+        if self.censys_analysis == "search":
             uri = f"/view/ipv4/{self.observable_name}"
         else:
             raise AnalyzerRunException(
@@ -26,7 +25,7 @@ class Censys(classes.ObservableAnalyzer):
             )
         try:
             response = requests.get(
-                self.base_url + uri, auth=(self.__api_id, self.__api_secret)
+                self.base_url + uri, auth=(self._api_id_name, self._api_secret_name)
             )
             response.raise_for_status()
         except requests.RequestException as e:

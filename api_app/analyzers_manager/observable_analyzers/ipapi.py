@@ -9,12 +9,16 @@ class IPApi(classes.ObservableAnalyzer):
     batch_url = "http://ip-api.com/batch"
     dns_url = "http://edns.ip-api.com/json"
 
-    def set_params(self, params):
+    fields: str
+    lang: str
+
+    def config(self):
+        super().config()
         self.IP = [
             {
                 "query": self.observable_name,
-                "fields": params.get("fields", ""),
-                "lang": params.get("lang", ""),
+                "fields": self.fields,
+                "lang": self.lang,
             }
         ]
 

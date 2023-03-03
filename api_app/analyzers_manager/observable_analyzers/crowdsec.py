@@ -6,12 +6,11 @@ from tests.mock_utils import MockResponse, if_mock_connections, patch
 
 
 class Crowdsec(ObservableAnalyzer):
-    def set_params(self, params):
-        self.__api_key = self._secrets["api_key_name"]
+    _api_key_name: str
 
     def run(self):
         headers = {
-            "x-api-key": self.__api_key,
+            "x-api-key": self._api_key_name,
             "User-Agent": f"crowdsec-intelowl/{settings.VERSION}",
         }
         url = f"https://cti.api.crowdsec.net/v2/smoke/{self.observable_name}"

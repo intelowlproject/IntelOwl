@@ -21,20 +21,22 @@ class VirusheeFileUpload(FileAnalyzer):
     poll_distance = 10
     base_url = "https://api.virushee.com"
 
-    def set_params(self, params):
-        self.__to_force_scan = params.get("force_scan", False)
+    force_scan: bool
+    _api_key_name: str
+
+    def config(self):
+        super().config()
         self.__session = requests.Session()
-        api_key = self._secrets["api_key_name"]
-        if not api_key:
+        if not hasattr(self, "_api_key_name"):
             logger.info(f"{self.__repr__()} -> Continuing w/o API key..")
         else:
-            self.__session.headers["X-API-Key"] = api_key
+            self.__session.headers["X-API-Key"] = self._api_key_name
 
     def run(self):
         binary = self.read_file_bytes()
         if not binary:
             raise AnalyzerRunException("File is empty")
-        if not self.__to_force_scan:
+        if not self.force_scan:
             hash_result = self.__check_report_for_hash()
             if hash_result:
                 return hash_result

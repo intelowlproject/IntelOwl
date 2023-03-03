@@ -15,7 +15,8 @@ from ..dns_responses import malicious_detector_response
 class GoogleSF(classes.ObservableAnalyzer):
     """Check if observable analyzed is marked as malicious for Google SafeBrowsing"""
 
-    def set_params(self, params):
+    def config(self):
+        super().config()
         # so `observable_name` is available inside `_monkeypatch` method
         # as `cls.observable_name`
         self.__class__.observable_name = self.observable_name

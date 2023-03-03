@@ -1274,5 +1274,89 @@
       "owner": 1,
       "plugin_name": "VirusTotal_v3_Get_File_And_Scan"
     }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 92,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "YARAify_Search"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 93,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "Crowdsec"
+    }
+  },
+    {
+    "model": "api_app.pluginconfig",
+    "pk": 94,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "YARAify_File_Scan"
+    }
+  },
+      {
+    "model": "api_app.pluginconfig",
+    "pk": 95,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_identifier",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "YARAify_File_Scan"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 96,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "BinaryEdge"
+    }
+  },
+    {
+    "model": "api_app.pluginconfig",
+    "pk": 96,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "1",
+      "attribute": "public_repositories",
+      "value": ["https://github.com/stratosphereips/yara-rules"],
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "Yara"
+    }
   }
 ]

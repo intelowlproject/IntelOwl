@@ -3,6 +3,7 @@
 import logging
 from typing import Any, Dict, Type
 
+from cache_memoize import cache_memoize
 from django.conf import settings
 from django.contrib.postgres import fields as pg_fields
 from django.core.exceptions import ValidationError
@@ -11,7 +12,6 @@ from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.module_loading import import_string
 from kombu import uuid
-from cache_memoize import cache_memoize
 
 from api_app.validators import validate_config, validate_params, validate_secrets
 from certego_saas.apps.user.models import User
@@ -156,7 +156,9 @@ class AbstractConfig(models.Model):
 
     @cache_memoize(
         timeout=60 * 60 * 24,
-        args_rewrite=lambda s, user=None: f"{s.__class__.__name__}-{s.name}-{user.username if user else ''}"
+        args_rewrite=lambda s, user=None: f"{s.__class__.__name__}"
+        f"-{s.name}"
+        f"-{user.username if user else ''}",
     )
     def get_verification(self, user: User = None):
         from api_app.models import PluginConfig
@@ -228,11 +230,15 @@ class AbstractConfig(models.Model):
     def python_class(self) -> Type:
         return import_string(self.python_complete_path)
 
+    @classmethod
+    @property
+    def config_exception(cls):
+        raise NotImplementedError()
+
     def _read_plugin_config(
         self,
         config_type: str,
         user: User = None,
-        set_default_value_to_null: bool = False,
     ):
         from api_app.models import PluginConfig
 
@@ -257,28 +263,26 @@ class AbstractConfig(models.Model):
                 value = pcs.first().value
             elif "default" in secret_config:
                 value = secret_config["default"]
+            elif "required" in secret_config and secret_config["required"]:
+                raise self.config_exception(
+                    f"{self.name}:"
+                    f" {PluginConfig.ConfigType(config_type).label}"
+                    f" {key} is missing"
+                )
             else:
-                if set_default_value_to_null:
-                    value = None
-                else:
-                    continue
-
+                continue
             config[key] = value
         return config
 
     def read_secrets(self, user: User = None) -> Dict[str, Any]:
         from api_app.models import PluginConfig
 
-        return self._read_plugin_config(
-            PluginConfig.ConfigType.SECRET, user, set_default_value_to_null=True
-        )
+        return self._read_plugin_config(PluginConfig.ConfigType.SECRET, user)
 
     def read_params(self, user: User = None) -> Dict[str, Any]:
         from api_app.models import PluginConfig
 
-        return self._read_plugin_config(
-            PluginConfig.ConfigType.PARAMETER, user, set_default_value_to_null=False
-        )
+        return self._read_plugin_config(PluginConfig.ConfigType.PARAMETER, user)
 
     def run(self, job_id: int, report_defaults: dict) -> AbstractReport:
         class_ = self.python_class

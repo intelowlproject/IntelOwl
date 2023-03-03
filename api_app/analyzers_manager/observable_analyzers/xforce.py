@@ -15,13 +15,12 @@ class XForce(classes.ObservableAnalyzer):
     base_url: str = "https://exchange.xforce.ibmcloud.com/api"
     web_url: str = "https://exchange.xforce.ibmcloud.com"
 
-    def set_params(self, params):
-        self.__api_key = self._secrets["api_key_name"]
-        self.__api_password = self._secrets["api_password_name"]
-        self.malware_only = params.get("malware_only", False)
+    _api_key_name: str
+    _api_password_name: str
+    malware_only: bool
 
     def run(self):
-        auth = HTTPBasicAuth(self.__api_key, self.__api_password)
+        auth = HTTPBasicAuth(self._api_key_name, self._api_password_name)
         headers = {"Accept": "application/json"}
 
         endpoints = self._get_endpoints()

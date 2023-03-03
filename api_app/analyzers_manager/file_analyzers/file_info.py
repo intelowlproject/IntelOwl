@@ -18,7 +18,8 @@ logger = logging.getLogger(__name__)
 class FileInfo(FileAnalyzer):
     EXIF_TOOL_PATH = settings.BASE_DIR / "exiftool_download"
 
-    def set_params(self, params):
+    def config(self):
+        super().config()
         # check repo_downloader.sh file
         with open(f"{self.EXIF_TOOL_PATH}/exiftool_version.txt", "r") as f:
             version = f.read().strip()

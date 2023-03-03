@@ -4,30 +4,29 @@
 import requests
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
-from api_app.analyzers_manager.exceptions import AnalyzerRunException
+from api_app.analyzers_manager.exceptions import (
+    AnalyzerConfigurationException,
+    AnalyzerRunException,
+)
 from tests.mock_utils import MockResponse, if_mock_connections, patch
 
 
 class YARAify(ObservableAnalyzer):
-    def set_params(self, params):
-        self.url: str = "https://yaraify-api.abuse.ch/api/v1/"
-        self.search_term = self.observable_name
+    url: str = "https://yaraify-api.abuse.ch/api/v1/"
 
-        self.query: str = "lookup_hash"
-
-        if self.observable_classification == self.ObservableTypes.GENERIC:
-            self.query: str = params.get("query", "get_yara")
-            self.result_max: int = params.get("result_max", 25)
-        else:
-            self.__api_key = self._secrets["api_key_name"]
+    query: str
+    result_max: int
+    _api_key_name: str
 
     def run(self):
-        data = {"search_term": self.search_term, "query": self.query}
+        data = {"search_term": self.observable_name, "query": self.query}
 
         if self.observable_classification == self.ObservableTypes.GENERIC:
             data["result_max"] = self.result_max
         else:
-            data["malpedia-token"] = self.__api_key
+            if not hasattr(self, "_api_key_name"):
+                raise AnalyzerConfigurationException("Api key is missing")
+            data["malpedia-token"] = self._api_key_name
 
         try:
             response = requests.post(self.url, json=data)

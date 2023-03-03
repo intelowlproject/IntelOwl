@@ -11,16 +11,16 @@ logger = logging.getLogger(__name__)
 
 
 class DarkSearchQuery(ObservableAnalyzer):
-    def set_params(self, params):
-        self.num_pages = params.get("pages", 5)
-        self.proxies = params.get("proxies", None)
+
+    pages: int
+    proxies: dict
 
     def run(self):
         from darksearch import Client, DarkSearchException
 
         try:
             c = Client(proxies=self.proxies)
-            responses = c.search(self.observable_name, pages=self.num_pages)
+            responses = c.search(self.observable_name, pages=self.pages)
         except DarkSearchException as exc:
             logger.error(exc)
             raise AnalyzerRunException(f"{exc.__class__.__name__}: {str(exc)}")
@@ -28,7 +28,7 @@ class DarkSearchQuery(ObservableAnalyzer):
         result = {
             "total": responses[0]["total"],
             "total_pages": responses[0]["last_page"],
-            "requested_pages": self.num_pages,
+            "requested_pages": self.pages,
             "data": [],
         }
         for resp in responses:

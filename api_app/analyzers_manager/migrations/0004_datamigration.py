@@ -456,7 +456,18 @@ analyzers = {
       "queue": "long"
     },
     "secrets": {},
-    "params": {}
+    "params": {
+      "arch": {
+        "value": "64",
+        "description": "`32` or `64`",
+        "type": "str"
+      },
+      "shellcode": {
+        "value": False,
+        "description": "if the file analyzed is a shellcode or not",
+        "type": "bool"
+      }
+    }
   },
   "Capa_Info_Shellcode": {
     "type": "file",
@@ -934,7 +945,7 @@ analyzers = {
     "secrets": {},
     "params": {
       "additional_passwords_to_check": {
-        "value": [],
+        "value": [""],
         "type": "list",
         "description": "List of passwords to try when decrypting the document"
       }
@@ -1386,7 +1397,8 @@ analyzers = {
         "env_var_key": "GREYNOISE_API_KEY",
         "description": "",
         "required": False,
-        "type": "str"
+        "type": "str",
+        "default": ""
       }
     },
     "config": {
@@ -1640,6 +1652,21 @@ analyzers = {
         "value": "",
         "type": "str",
         "description": "use this in combination with 'datefrom' to filter the query"
+      },
+      "timeout": {
+        "value": 10,
+        "type": "int",
+        "description": ""
+      },
+      "max_tries": {
+        "value": 10,
+        "type": "int",
+        "description": ""
+      },
+      "poll_distance": {
+        "value": 3,
+        "type": "int",
+        "description": ""
       }
     }
   },
@@ -1673,6 +1700,21 @@ analyzers = {
         "value": 1000,
         "type": "int",
         "description": "max number of results to retrieve"
+      },
+      "timeout": {
+        "value": 10,
+        "type": "int",
+        "description": ""
+      },
+      "max_tries": {
+        "value": 10,
+        "type": "int",
+        "description": ""
+      },
+      "poll_distance": {
+        "value": 3,
+        "type": "int",
+        "description": ""
       }
     }
   },
@@ -1696,7 +1738,13 @@ analyzers = {
         "type": "str"
       }
     },
-    "params": {}
+    "params": {
+      "soft_time_limit": {
+        "value": 100,
+        "type": "int",
+        "description": ""
+      }
+    }
   },
   "Intezer_Scan": {
     "type": "file",
@@ -1758,6 +1806,11 @@ analyzers = {
       "disable_static_unpacking": {
         "value": False,
         "type": "bool",
+        "description": ""
+      },
+      "soft_time_limit": {
+        "value": 300,
+        "type": "int",
         "description": ""
       }
     }
@@ -2573,34 +2626,6 @@ analyzers = {
       }
     }
   },
-  "Pulsedive_Active_IOC": {
-    "type": "observable",
-    "python_module": "pulsedive.Pulsedive",
-    "description": "[DEPRECATED] Scan indicators and retrieve results from Pulsedive's API",
-    "disabled": True,
-    "external_service": True,
-    "leaks_info": False,
-    "observable_supported": ["ip", "domain", "url", "hash"],
-    "config": {
-      "soft_time_limit": 100,
-      "queue": "default"
-    },
-    "secrets": {
-      "api_key_name": {
-        "env_var_key": "PULSEDIVE_API_KEY",
-        "description": "Optional API key.",
-        "required": False,
-        "type": "str"
-      }
-    },
-    "params": {
-      "active_scan": {
-        "value": True,
-        "type": "bool",
-        "description": ""
-      }
-    }
-  },
   "Qiling_Windows": {
     "type": "file",
     "python_module": "qiling.Qiling",
@@ -3149,7 +3174,23 @@ analyzers = {
       "queue": "long"
     },
     "secrets": {},
-    "params": {}
+    "params": {
+      "arch": {
+        "value": "x64",
+        "type": "str",
+        "description": "Change system architecture for the shellcode (x86 or x64)."
+      },
+      "shellcode": {
+        "value": False,
+        "type": "bool",
+        "description": "true if the file is a shellcode."
+      },
+      "raw_offset": {
+        "value": 0,
+        "type": "int",
+        "description": "Offset to start emulating."
+      }
+    }
   },
   "SpeakEasy_Shellcode": {
     "type": "file",
@@ -3297,6 +3338,11 @@ analyzers = {
         "value": False,
         "type": "bool",
         "description": "enable ranking based on Machine Learning features"
+      },
+      "max_characters_for_string": {
+        "value": 1000,
+        "type": "int",
+        "description": ""
       }
     }
   },
@@ -3323,6 +3369,11 @@ analyzers = {
         "value": False,
         "type": "bool",
         "description": ""
+      },
+      "max_characters_for_string": {
+        "value": 1000,
+        "type": "int",
+        "description": ""
       }
     }
   },
@@ -3348,6 +3399,11 @@ analyzers = {
       "rank_strings": {
         "value": True,
         "type": "bool",
+        "description": ""
+      },
+      "max_characters_for_string": {
+        "value": 1000,
+        "type": "int",
         "description": ""
       }
     }
@@ -3637,7 +3693,7 @@ analyzers = {
         "type": "bool",
         "description": "Verbose output"
       },
-      "torProxyAddress": {
+      "tor_proxy_address": {
         "value": "",
         "type": "str",
         "description": "Tor proxy address"
@@ -3694,6 +3750,11 @@ analyzers = {
         "value": "search",
         "type": "str",
         "description": "Choose whether to search for existing observable reports or upload for scanning via URL (options: `search` and `submit`)."
+      },
+      "max_tries": {
+        "value": 200,
+        "type": "int",
+        "description": ""
       }
     }
   },
@@ -3764,6 +3825,11 @@ analyzers = {
         "value": "overview",
         "type": "str",
         "description": "Determines how detailed the final report will be (options: `overview`, `complete`)."
+      },
+      "max_tries":{
+        "value": 200,
+        "type": "int",
+        "description": ""
       }
     }
   },
@@ -3845,6 +3911,11 @@ analyzers = {
         "value": "submit_result",
         "type": "str",
         "description": ""
+      },
+      "search_size": {
+        "value": 100,
+        "type": "int",
+        "description": ""
       }
     }
   },
@@ -3872,6 +3943,11 @@ analyzers = {
       "urlscan_analysis": {
         "value": "search",
         "type": "str",
+        "description": ""
+      },
+      "search_size": {
+        "value": 100,
+        "type": "int",
         "description": ""
       }
     }
@@ -3990,8 +4066,9 @@ analyzers = {
       "url_key_name": {
         "env_var_key": "VT_NOTIFY_URL",
         "description": "",
-        "required": True,
-        "type": "str"
+        "required": False,
+        "type": "str",
+        "default": ""
       }
     },
     "params": {}
@@ -4443,296 +4520,6 @@ analyzers = {
     }
 
   },
-
-  "Yara_Scan_ATM_MALWARE": {
-    "type": "file",
-    "python_module": "yara_scan.YaraScan",
-    "description": "[DEPRECATED, move to Yara] scan a file with ATM Malware yara rules ([github](https://github.com/fboldewin/YARA-rules))",
-    "disabled": True,
-    "external_service": False,
-    "leaks_info": False,
-    "config": {
-      "soft_time_limit": 60,
-      "queue": "local"
-    },
-    "secrets": {},
-    "params": {
-      "repositories": {
-        "value": ["https://github.com/fboldewin/YARA-rules"],
-        "type": "list",
-        "description": ""
-      }
-    }
-  },
-  "Yara_Scan_Bartblaze": {
-    "type": "file",
-    "python_module": "yara_scan.YaraScan",
-    "description": "[DEPRECATED, move to Yara] Scan a file with Bartblaze yara rules ([github](https://github.com/bartblaze/Yara-rules)).",
-    "disabled": True,
-    "external_service": False,
-    "leaks_info": False,
-    "config": {
-      "soft_time_limit": 60,
-      "queue": "local"
-    },
-    "secrets": {},
-    "params": {
-      "repositories": {
-        "value": ["https://github.com/bartblaze/Yara-rules"],
-        "type": "list",
-        "description": ""
-      }
-    }
-  },
-  "Yara_Scan_Community": {
-    "type": "file",
-    "python_module": "yara_scan.YaraScan",
-    "description": "[DEPRECATED, move to Yara] Scan a file with community yara rules ([github](https://github.com/Yara-Rules/rules.git))",
-    "disabled": True,
-    "external_service": False,
-    "leaks_info": False,
-    "config": {
-      "soft_time_limit": 120,
-      "queue": "local"
-    },
-    "secrets": {},
-    "params": {
-      "repositories": {
-        "value": ["https://github.com/Yara-Rules/rules.git"],
-        "type": "list",
-        "description": ""
-        }
-    }
-  },
-  "Yara_Scan_Custom_Signatures": {
-    "type": "file",
-    "python_module": "yara_scan.YaraScan",
-    "description": "[DEPRECATED, move to Yara] Scan a file with the Custom Signatures you added in IntelOwl",
-    "disabled": True,
-    "external_service": False,
-    "leaks_info": False,
-    "config": {
-      "soft_time_limit": 60,
-      "queue": "local"
-    },
-    "secrets": {},
-    "params": {
-    }
-  },
-  "Yara_Scan_Daily_Ioc": {
-    "type": "file",
-    "python_module": "yara_scan.YaraScan",
-    "description": "[DEPRECATED, move to Yara] Scan a file with StrangerealIntel daily IOC yara rules ([github](https://github.com/StrangerealIntel/DailyIOC))",
-    "disabled": True,
-    "external_service": False,
-    "leaks_info": False,
-    "config": {
-      "soft_time_limit": 60,
-      "queue": "local"
-    },
-    "secrets": {},
-    "params": {
-      "repositories": {
-        "value": ["https://github.com/StrangerealIntel/DailyIOC"],
-        "type": "list",
-        "description": ""
-      }
-    }
-  },
-  "Yara_Scan_Florian": {
-    "type": "file",
-    "python_module": "yara_scan.YaraScan",
-    "description": "[DEPRECATED, move to Yara] Scan a file with Neo23x0 yara rules ([github](https://github.com/Neo23x0/signature-base.git))",
-    "disabled": True,
-    "external_service": False,
-    "leaks_info": False,
-    "config": {
-      "soft_time_limit": 120,
-      "queue": "local"
-    },
-    "secrets": {},
-    "params": {
-      "repositories": {
-        "value": ["https://github.com/Neo23x0/signature-base.git"],
-        "type": "list",
-        "description": ""
-      }
-    }
-  },
-  "Yara_Scan_Mandiant": {
-    "type": "file",
-    "python_module": "yara_scan.YaraScan",
-    "description": "[DEPRECATED, move to Yara] Scan a file with Mandiant yara rules ([github](https://github.com/mandiant/red_team_tool_countermeasures))",
-    "disabled": True,
-    "external_service": False,
-    "leaks_info": False,
-    "config": {
-      "soft_time_limit": 60,
-      "queue": "local"
-    },
-    "secrets": {},
-    "params": {
-      "repositories": {
-        "value": ["https://github.com/mandiant/red_team_tool_countermeasures"],
-        "type": "list",
-        "description": ""
-      }
-    }
-  },
-  "Yara_Scan_Inquest": {
-    "type": "file",
-    "python_module": "yara_scan.YaraScan",
-    "description": "[DEPRECATED, move to Yara] Scan a file with Inquest yara rules ([github](https://github.com/InQuest/yara-rules))",
-    "disabled": True,
-    "external_service": False,
-    "leaks_info": False,
-    "config": {
-      "soft_time_limit": 60,
-      "queue": "local"
-    },
-    "secrets": {},
-    "params": {
-      "repositories": {
-        "value": ["https://github.com/InQuest/yara-rules"],
-        "type": "list",
-        "description": ""
-      }
-    }
-  },
-  "Yara_Scan_Intezer": {
-    "type": "file",
-    "python_module": "yara_scan.YaraScan",
-    "description": "[DEPRECATED, move to Yara] Scan a file with Intezer yara rules ([github](https://github.com/intezer/yara-rules)).",
-    "disabled": True,
-    "external_service": False,
-    "leaks_info": False,
-    "config": {
-      "soft_time_limit": 60,
-      "queue": "local"
-    },
-    "secrets": {},
-    "params": {
-      "repositories": {
-        "value": ["https://github.com/intezer/yara-rules"],
-        "type": "list",
-        "description": ""
-      }
-    }
-  },
-  "Yara_Scan_ReversingLabs": {
-    "type": "file",
-    "python_module": "yara_scan.YaraScan",
-    "description": "[DEPRECATED, move to Yara] Scan a file with ReversingLabs yara rules ([github](https://github.com/reversinglabs/reversinglabs-yara-rules))",
-    "disabled": True,
-    "external_service": False,
-    "leaks_info": False,
-    "config": {
-      "soft_time_limit": 60,
-      "queue": "local"
-    },
-    "secrets": {},
-    "params": {
-      "repositories": {
-        "value": ["https://github.com/reversinglabs/reversinglabs-yara-rules"],
-        "type": "list",
-        "description": ""
-      }
-    }
-  },
-  "Yara_Scan_Samir": {
-    "type": "file",
-    "python_module": "yara_scan.YaraScan",
-    "description": "[DEPRECATED, move to Yara] Scan a file with Samir Threat Hunting yara rules ([github](hhttps://github.com/sbousseaden/YaraHunts))",
-    "disabled": True,
-    "external_service": False,
-    "leaks_info": False,
-    "config": {
-      "soft_time_limit": 60,
-      "queue": "local"
-    },
-    "secrets": {},
-    "params": {
-      "repositories": {
-        "value": ["https://github.com/sbousseaden/YaraHunts"],
-        "type": "list",
-        "description": ""
-      }
-    }
-  },
-  "Yara_Scan_Stratosphere": {
-    "type": "file",
-    "python_module": "yara_scan.YaraScan",
-    "description": "[DEPRECATED, move to Yara] Scan a file with Stratosphere yara rules ([github](https://github.com/stratosphereips/yara-rules))",
-    "disabled": True,
-    "external_service": False,
-    "leaks_info": False,
-    "config": {
-      "soft_time_limit": 60,
-      "queue": "local"
-    },
-    "secrets": {},
-    "params": {
-      "repositories": {
-        "value": ["https://github.com/stratosphereips/yara-rules"],
-        "type": "list",
-        "description": ""
-      }
-    }
-  },
-  "Yara_Scan_Trellix": {
-    "type": "file",
-    "python_module": "yara_scan.YaraScan",
-    "description": "[DEPRECATED, move to Yara] Scan a file with Trellix yara rules ([github](https://github.com/advanced-threat-research/Yara-Rules))",
-    "disabled": True,
-    "external_service": False,
-    "leaks_info": False,
-    "config": {
-      "soft_time_limit": 60,
-      "queue": "local"
-    },
-    "secrets": {},
-    "params": {
-      "repositories": {
-        "value": ["https://github.com/advanced-threat-research/Yara-Rules"],
-        "type": "list",
-        "description": ""
-      }
-    }
-  },
-  "Yara_Scan_YARAify": {
-    "type": "file",
-    "python_module": "yara_scan.YaraScan",
-    "description": "[DEPRECATED, move to Yara] Scan a file with yara rules downloaded from [YARAify](https://yaraify.abuse.ch/)",
-    "disabled": True,
-    "external_service": False,
-    "leaks_info": False,
-    "config": {
-      "soft_time_limit": 60,
-      "queue": "local"
-    },
-    "secrets": {},
-    "params": {
-      "repositories": {
-        "value": [
-          "https://yaraify-api.abuse.ch/download/yaraify-rules.zip"
-        ],
-        "type": "list",
-        "description": ""
-      },
-      "ignore": {
-        "value": [
-          "generic_anomalies.yar",
-          "general_cloaking.yar",
-          "thor_inverse_matches.yar",
-          "yara_mixed_ext_vars.yar",
-          "thor-webshells.yar"
-        ],
-        "type": "list",
-        "description": "ignore these rules"
-      }
-
-    }
-  },
   "YARAify_File_Scan": {
     "type": "file",
     "python_module": "yaraify_file_scan.YARAifyFileScan",
@@ -4749,7 +4536,7 @@ analyzers = {
       "api_key_name": {
         "env_var_key": "MALPEDIA_TOKEN",
         "description": "Optional key to receive results from public (TLP:WHITE) and non-public (TLP:GREEN, TLP:AMBER and TLP:RED) YARA rules.",
-        "required": False,
+        "required": True,
         "type": "str"
       },
       "api_key_identifier": {
@@ -4789,6 +4576,11 @@ analyzers = {
         "value": False,
         "type": "bool",
         "description": "YARAify will not process the file if the file is already known."
+      },
+      "result_max": {
+        "value": 25,
+        "type": "int",
+        "description": "Max number of results you want to display (default: 25, max: 1'000)"
       }
     }
   },
@@ -4864,7 +4656,13 @@ analyzers = {
         "type": "str"
       }
     },
-    "params": {}
+    "params": {
+      "query": {
+        "value": "lookup_hash",
+        "type": "str",
+        "description": ""
+      }
+    }
   },
   "YETI": {
     "type": "observable",
@@ -4972,8 +4770,9 @@ def create_configurations(apps, schema_editor):
         for secret in analyzer.setdefault("secrets", {}).values():
             if "type" not in secret.keys():
                 secret["type"] = "str"
+            secret.pop("env_var_key")
         if "leaks_info" not in analyzer:
-          analyzer["leaks_info"] = False
+            analyzer["leaks_info"] = False
 
         ac = AnalyzerConfig(
             name=analyzer_name,

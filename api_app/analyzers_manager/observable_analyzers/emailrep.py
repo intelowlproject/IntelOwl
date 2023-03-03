@@ -11,8 +11,7 @@ from tests.mock_utils import MockResponse, if_mock_connections, patch
 class EmailRep(classes.ObservableAnalyzer):
     base_url: str = "https://emailrep.io/{}"
 
-    def set_params(self, params):
-        self.__api_key = self._secrets["api_key_name"]
+    _api_key_name: str
 
     def run(self):
         """
@@ -23,7 +22,7 @@ class EmailRep(classes.ObservableAnalyzer):
 
         headers = {
             "User-Agent": "IntelOwl v2",
-            "Key": self.__api_key,
+            "Key": self._api_key_name,
             "Accept": "application/json",
         }
 

@@ -16,14 +16,12 @@ from tests.mock_utils import MockResponse, if_mock_connections, patch
 class SSAPINet(classes.ObservableAnalyzer):
     base_url: str = "https://shot.screenshotapi.net/screenshot"
 
-    def set_params(self, params):
-        self.__api_key = self._secrets["api_key_name"]
-        self.use_proxy = params.get("use_proxy", False)
-        if self.use_proxy:
-            self.proxy = params.get("proxy", "")
-        self.output = params.get("output", "image")
-        # for other params provided by the API
-        self.extra_api_params = params.get("extra_api_params", {})
+    _api_key_name: str
+    use_proxy: bool
+    proxy: str
+    output: str
+    # for other params provided by the API
+    extra_api_params: dict
 
     def run(self):
         if self.use_proxy and not self.proxy:
@@ -41,7 +39,7 @@ class SSAPINet(classes.ObservableAnalyzer):
             else:
                 params = {}
             params["url"] = self.observable_name
-            params["token"] = self.__api_key
+            params["token"] = self._api_key_name
             params["output"] = self.output
 
             if self.use_proxy:

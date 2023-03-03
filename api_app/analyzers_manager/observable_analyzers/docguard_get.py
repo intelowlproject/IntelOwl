@@ -16,8 +16,7 @@ class DocGuard_Hash(classes.ObservableAnalyzer):
 
     base_url: str = "https://api.docguard.net:8443/api/FileAnalyzing/GetByHash/"
 
-    def set_params(self, params):
-        self.__api_key = self._secrets["api_key_name"]
+    _api_key_name: str
 
     @property
     def hash_type(self):
@@ -33,8 +32,8 @@ class DocGuard_Hash(classes.ObservableAnalyzer):
     def run(self):
         headers = {}
         # optional API key
-        if self.__api_key:
-            headers["x-api-key"] = self.__api_key
+        if hasattr(self, "_api_key_name"):
+            headers["x-api-key"] = self._api_key_name
         else:
             warning = "No API key retrieved"
             logger.info(

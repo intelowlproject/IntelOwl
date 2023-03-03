@@ -19,6 +19,8 @@ logger = logging.getLogger(__name__)
 
 
 class TriageSearch(ObservableAnalyzer, TriageMixin):
+    analysis_type: str
+
     def run(self):
         if self.analysis_type == "search":
             self.__triage_search()

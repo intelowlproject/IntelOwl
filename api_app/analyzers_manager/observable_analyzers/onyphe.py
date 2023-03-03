@@ -11,12 +11,11 @@ from tests.mock_utils import MockResponse, if_mock_connections, patch
 class Onyphe(classes.ObservableAnalyzer):
     base_url: str = "https://www.onyphe.io/api/v2/summary/"
 
-    def set_params(self, params):
-        self.__api_key = self._secrets["api_key_name"]
+    _api_key_name: str
 
     def run(self):
         headers = {
-            "Authorization": f"apikey {self.__api_key}",
+            "Authorization": f"apikey {self._api_key_name}",
             "Content-Type": "application/json",
         }
         obs_clsfn = self.observable_classification

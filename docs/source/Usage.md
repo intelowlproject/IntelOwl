@@ -102,6 +102,7 @@ Plugins are the core modular components of IntelOwl that can be easily added, ch
 There are 3 types of plugins:
 - [Analyzers](#analyzers)
 - [Connectors](#connectors)
+- [Visualizers](#visualizers)
 - [Playbooks](#playbooks)
 
 ### Analyzers
@@ -301,38 +302,25 @@ Some analyzers require details other than just IP, URL, Domain, etc. We classifi
 [Some analyzers are optional](Advanced-Usage.html#optional-analyzers) and need to be enabled explicitly.
 
 #### Analyzers Customization
-You can create new analyzers based on already existing modules by changing the configuration values inside `configuration/analyzer_config.json`. This file is mounted as a docker volume, so you won't need to rebuild the image.
+You can create new analyzers based on already existing modules by changing the configuration values inside `/admin/analyzers_manager/analyzerreport/`.
 
 You may want to change this configuration to add new analyzers or to change the configuration of some of them. The name of the analyzers can be changed at every moment based on your wishes.
 
 The following are all the keys that you can change without touching the source code:
-
+- `name`: Name of the analyzer
+- `description`: Description of the analyzer
+- `python_module`: Python path of the class that will be executed 
 - `disabled`: you can choose to disable certain analyzers, then they won't appear in the dropdown list and won't run if requested.
 - `leaks_info`: if set, in the case you specify via the API that a resource is sensitive, the specific analyzer won't be executed
 - `external_service`: if set, in the case you specify via the API to exclude external services, the specific analyzer won't be executed
 - `supported_filetypes`: can be populated as a list. If set, if you ask to analyze a file with a different mimetype from the ones you specified, it won't be executed
 - `not_supported_filetypes`: can be populated as a list. If set, if you ask to analyze a file with a mimetype from the ones you specified, it won't be executed
 - `observable_supported`: can be populated as a list. If set, if you ask to analyze an observable that is not in this list, it won't be executed. Valid values are: `ip`, `domain`, `url`, `hash`, `generic`.
-- `soft_time_limit`: this is the maximum time (in seconds) of execution for an analyzer. Once reached, the task will be killed (or managed in the code by a custom Exception). Default `300`.
-- `queue`: this takes effects only when [multi-queue](Advanced-Configuration.html#multi-queue) is enabled. Choose which celery worker would execute the task: `local` (ideal for tasks that leverage local applications like Yara), `long` (ideal for long tasks) or `default` (ideal for simple webAPI-based analyzers).
-
+- `config`:
+  - `soft_time_limit`: this is the maximum time (in seconds) of execution for an analyzer. Once reached, the task will be killed (or managed in the code by a custom Exception). Default `300`.
+  - `queue`: this takes effects only when [multi-queue](Advanced-Configuration.html#multi-queue) is enabled. Choose which celery worker would execute the task: `local` (ideal for tasks that leverage local applications like Yara), `long` (ideal for long tasks) or `default` (ideal for simple webAPI-based analyzers).
 Sometimes, it may happen that you would like to create a new analyzer very similar to an already existing one. Maybe you would like to just change the description and the default parameters.
-An helpful way to do that without having to copy/pasting the configuration, is to leverage the key `extends`.
-With this key you can create a new analyzer based on an already existing one and define only things that you would like to overwrite.
-Example:
-```
-  "Shodan_Search": {
-    "extends": "Shodan_Honeyscore",
-    "description": "scan an IP against Shodan Search API",
-    "params": {
-      "shodan_analysis": {
-        "value": "search",
-        "type": "str",
-        "description": ""
-      }
-    }
-  }
-```
+A helpful way to do that without having to copy/pasting the entire configuration, is to click on the analyzer that you want to copy, make the desired changes, and click the `save as new` button.
 
 <div class="admonition hint">
 <p class="admonition-title">Hint: Advanced Configuration</p>
@@ -358,19 +346,51 @@ The following is the list of the available connectors. You can also navigate the
 
 #### Connectors customization
 
-Connectors being optional are `enabled` by default. You can disable them by changing the configuration values inside `configuration/connector_config.json`. This file is mounted as a docker volume, so you won't need to rebuild the image. 
+Connectors being optional are `enabled` by default.
+You can disable them or create new connectors based on already existing modules by changing the configuration values inside `/admin/connectors_manager/connectorreport/`.
+
 
 The following are all the keys that you can change without touching the source code:
+ 
+- `name`: _same as analyzers_
+- `description`: _same as analyzers_
+- `python_module`: _same as analyzers_ 
+- `disabled`: _same as analyzers_
+- `config`:
+  - `queue`: _same as analyzers_
+  - `soft_time_limit`: _same as analyzers_
 
-- `disabled`: _similar to analyzers_
-- `soft_time_limit`: _similar to analyzers_
-- `queue`: _similar to analyzers_
 - `maximum_tlp` (default `WHITE`, choices `WHITE`, `GREEN`, `AMBER`, `RED`): specify the maximum TLP of the analysis up to which the connector is allowed to run. (e.g. if `maximum_tlp` is `GREEN`, it would run for analysis with TLPs `WHITE` and `GREEN`). To learn more about TLPs see [TLP Support](./Usage.md#tlp-support).
+- `run_on_failure` (default: `true`): if they can be run even if the job has status `reported_with_fails` 
 
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-Changing other keys can break an analyzer or connector. In that case, you should think about duplicating the configuration entry or python module with your changes.
+Changing other keys can break a connector. In that case, you should think about duplicating the configuration entry or python module with your changes.
 </div>
+
+### Visualizers
+
+Visualizers are designed to run after the analyzers and the connectors.
+The visualizer add logic after the computations, allowing to show the final result in a different way than merely the list of reports.
+
+Each visualizer must define a set of analyzers and connectors as requirement:
+in fact the visualizers can not be chosen during the scan but every single visualizer that it is configured and that has its requirements satisfied will be executed.
+
+#### Visualizers customization
+You can disable them or create new visualizers based on already existing modules by changing the configuration values inside `/admin/visualizers_manager/visualizerreport/`.
+
+The following are all the keys that you can change without touching the source code:
+ 
+- `name`: _same as analyzers_
+- `description`: _same as analyzers_
+- `python_module`: _same as analyzers_ 
+- `disabled`: _same as analyzers_
+- `config`:
+  - `queue`: _same as analyzers_
+  - `soft_time_limit`: _same as analyzers_
+- `analyzers`: List of analyzers that must be executed
+- `connectors`: List of connectors that must be executed
+
 
 ### Managing Analyzers and Connectors
 
@@ -421,7 +441,7 @@ The following is the list of the available pre-built playbooks. You can also nav
 * `FREE_TO_USE_ANALYZERS`: A playbook containing all free to use analyzers.
 
 #### Playbooks customization
-You can create new playbooks by adding a new entry in the `playbook_config.json` file.
+You can create new playbooks via django admin at `/admin/playbooks_manager/playbookconfig/`
 
 The following are all the keys that you can leverage/change without touching the source code:
 

@@ -31,6 +31,11 @@ class BaseAnalyzerMixin(Plugin, metaclass=ABCMeta):
     ObservableTypes = ObservableTypes
     TypeChoices = TypeChoices
 
+    @classmethod
+    @property
+    def config_exception(cls):
+        return AnalyzerConfigurationException
+
     @property
     def analyzer_name(self) -> str:
         return self._config.name

@@ -17,8 +17,7 @@ from ..dns_responses import dns_resolver_response
 class DNS0EUResolver(classes.ObservableAnalyzer):
     """Resolve a DNS query with DNS0.eu"""
 
-    def set_params(self, params):
-        self._query_type = params.get("query_type", "A")
+    query_type: str
 
     def run(self):
         try:
@@ -29,7 +28,7 @@ class DNS0EUResolver(classes.ObservableAnalyzer):
 
             headers = {"Accept": "application/dns-json"}
             url = "https://dns0.eu"
-            params = {"name": observable, "type": self._query_type}
+            params = {"name": observable, "type": self.query_type}
 
             response = requests.get(url, headers=headers, params=params)
             response.raise_for_status()

@@ -21,11 +21,11 @@ class OTX(classes.ObservableAnalyzer):
     Download all the data is slow with the IP addresses.
     """
 
-    def set_params(self, params):
-        self._api_key = self._secrets["api_key_name"]
-        self.verbose = params.get("verbose", False)
-        self.sections = params.get("sections", ["general"])
-        self.full_analysis = params.get("full_analysis", False)
+    verbose: bool
+    sections: list
+    full_analysis: bool
+
+    _api_key_name: str
 
     def _extract_indicator_type(self) -> "OTXv2.IndicatorTypes":
         observable_classification = self.observable_classification
@@ -94,7 +94,7 @@ class OTX(classes.ObservableAnalyzer):
         return analysis_result
 
     def run(self):
-        otx = OTXv2.OTXv2(self._api_key)
+        otx = OTXv2.OTXv2(self._api_key_name)
 
         to_analyze_observable = self.observable_name
         otx_type = self._extract_indicator_type()

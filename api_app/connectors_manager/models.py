@@ -5,6 +5,7 @@ from typing import Type
 from django.conf import settings
 from django.db import models
 
+from api_app.connectors_manager.exceptions import ConnectorConfigurationException
 from api_app.core.models import AbstractConfig, AbstractReport
 from api_app.models import TLP, PluginConfig
 
@@ -40,3 +41,8 @@ class ConnectorConfig(AbstractConfig):
     @property
     def python_path(self) -> str:
         return settings.BASE_CONNECTOR_PYTHON_PATH
+
+    @classmethod
+    @property
+    def config_exception(cls):
+        return ConnectorConfigurationException

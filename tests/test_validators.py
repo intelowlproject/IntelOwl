@@ -44,7 +44,6 @@ class ValidateSecretsTestCase(CustomTestCase):
     def validate_secrets_good(self):
         data = {
             "key": {
-                "env_var_key": "KEY",
                 "description": "description",
                 "required": True,
                 "type": "str",
@@ -59,7 +58,6 @@ class ValidateSecretsTestCase(CustomTestCase):
     def validate_secrets_bad_pattern(self):
         data = {
             "123key": {
-                "env_var_key": "KEY",
                 "description": "description",
                 "required": True,
                 "type": "str",
@@ -72,7 +70,6 @@ class ValidateSecretsTestCase(CustomTestCase):
     def validate_secrets_additional_properties(self):
         data = {
             "key": {
-                "env_var_key": "KEY",
                 "description": "description",
                 "required": True,
                 "type": "str",
@@ -86,7 +83,6 @@ class ValidateSecretsTestCase(CustomTestCase):
     def validate_secrets_missing_properties(self):
         data = {
             "key": {
-                "env_var_key": "KEY",
                 "description": "description",
                 "required": True,
                 "default": "default_value",
@@ -98,7 +94,6 @@ class ValidateSecretsTestCase(CustomTestCase):
     def validate_secrets_default_optional(self):
         data = {
             "key": {
-                "env_var_key": "KEY",
                 "description": "description",
                 "required": True,
                 "type": "str",
@@ -112,18 +107,6 @@ class ValidateSecretsTestCase(CustomTestCase):
     def validate_secrets_wrong_type(self):
         data = {
             "key": {
-                "env_var_key": 123,
-                "description": "description",
-                "required": True,
-                "type": "str",
-            }
-        }
-        with self.assertRaises(ValidationError):
-            validate_secrets(data)
-
-        data = {
-            "key": {
-                "env_var_key": "KEY",
                 "description": 123,
                 "required": True,
                 "type": "str",
@@ -134,7 +117,6 @@ class ValidateSecretsTestCase(CustomTestCase):
 
         data = {
             "key": {
-                "env_var_key": "KEY",
                 "description": "description",
                 "required": 123,
                 "type": "str",
@@ -145,7 +127,6 @@ class ValidateSecretsTestCase(CustomTestCase):
 
         data = {
             "key": {
-                "env_var_key": "KEY",
                 "description": "description",
                 "required": True,
                 "type": "string",

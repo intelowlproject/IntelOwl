@@ -14,8 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 class Phishtank(ObservableAnalyzer):
-    def set_params(self, params):
-        self.__api_key = self._secrets["api_key_name"]
+    _api_key_name: str
 
     def run(self):
         headers = {"User-Agent": "phishtank/IntelOwl"}
@@ -24,10 +23,10 @@ class Phishtank(ObservableAnalyzer):
             "format": "json",
         }
         # optional API key
-        if not self.__api_key:
+        if not hasattr(self, "_api_key_name"):
             logger.warning(f"{self.__repr__()} -> Continuing w/o API key..")
         else:
-            data["app_key"] = self.__api_key
+            data["app_key"] = self._api_key_name
         try:
             resp = requests.post(
                 "https://checkurl.phishtank.com/checkurl/", data=data, headers=headers

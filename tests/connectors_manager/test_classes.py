@@ -12,6 +12,11 @@ from tests import CustomTestCase
 
 
 class ConnectorTestCase(CustomTestCase):
+    fixtures = [
+        "api_app/fixtures/0001_user.json",
+        "api_app/fixtures/0003_connector_pluginconfig.json",
+    ]
+
     def test_health_check(self):
         class MockedConnector(Connector):
             def run(self) -> dict:
@@ -140,6 +145,6 @@ class ConnectorTestCase(CustomTestCase):
                         f" with config {config.name} "
                         f"went in timeout after {timeout_seconds}"
                     )
-                else:
+                finally:
                     signal.alarm(0)
         job.delete()

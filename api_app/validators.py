@@ -39,7 +39,6 @@ def validate_secrets(value):
             "^[A-Za-z][A-Za-z0-9_]*$": {
                 "type": "object",
                 "properties": {
-                    "env_var_key": {"type": "string"},
                     "description": {"type": "string"},
                     "required": {"type": "boolean"},
                     "type": {"enum": list(PARAM_DATATYPE_CHOICES.keys())},
@@ -48,7 +47,7 @@ def validate_secrets(value):
                     },
                 },
                 "additionalProperties": False,
-                "required": ["env_var_key", "description", "required", "type"],
+                "required": ["description", "required", "type"],
             },
         },
     }

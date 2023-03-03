@@ -16,14 +16,13 @@ class MalpediaScan(FileAnalyzer):
     base_url = "https://malpedia.caad.fkie.fraunhofer.de/api"
     url = base_url + "/scan/binary"
 
-    def set_params(self, params):
-        self.__api_key = self._secrets["api_key_name"]
+    _api_key_name: str
 
     def run(self):
         # get file
         binary = self.read_file_bytes()
         # construct req
-        headers = {"Authorization": f"APIToken {self.__api_key}"}
+        headers = {"Authorization": f"APIToken {self._api_key_name}"}
         files = {"file": binary}
 
         try:

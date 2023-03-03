@@ -21,8 +21,11 @@ class Pulsedive(ObservableAnalyzer):
     max_tries: int = 10
     poll_distance: int = 10
 
-    def set_params(self, params):
-        self.scan_mode = params.get("scan_mode", "basic")
+    scan_mode: str
+    _api_key_name: str
+
+    def config(self):
+        super().config()
         supported_scan_values = ["basic", "passive", "active"]
         if self.scan_mode not in supported_scan_values:
             raise AnalyzerConfigurationException(
@@ -30,25 +33,24 @@ class Pulsedive(ObservableAnalyzer):
                 f" Supported are {supported_scan_values}"
             )
         self.probe = 1 if self.scan_mode == "active" else 0  # else is "passive"
-        self.__api_key = self._secrets["api_key_name"]
 
     def run(self):
         result = {}
         self.default_param = ""
         # optional API key
-        if not self.__api_key:
+        if not hasattr(self, "_api_key_name"):
             warning = "No API key retrieved"
             logger.info(
                 f"{warning}. Continuing without API key..." f" <- {self.__repr__()}"
             )
             self.report.errors.append(warning)
         else:
-            self.default_param = f"&key={self.__api_key}"
+            self.default_param = f"&key={self._api_key_name}"
 
         # headers = {"Key": api_key, "Accept": "application/json"}
         # 1. query to info.php to check if the indicator is already in the database
         params = f"indicator={self.observable_name}"
-        if self.__api_key:
+        if hasattr(self, "_api_key_name"):
             params += self.default_param
         resp = requests.get(f"{self.base_url}/info.php?{params}")
 
@@ -63,9 +65,8 @@ class Pulsedive(ObservableAnalyzer):
         return result
 
     def __submit_for_analysis(self) -> dict:
-        result = {}
         params = f"value={self.observable_name}&probe={self.probe}"
-        if self.__api_key:
+        if hasattr(self, "_api_key_name"):
             params += self.default_param
         headers = {"Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"}
         resp = requests.post(
@@ -75,7 +76,7 @@ class Pulsedive(ObservableAnalyzer):
         qid = resp.json().get("qid", None)
         # 3. retrieve result using qid after waiting for 10 seconds
         params = f"qid={qid}"
-        if self.__api_key:
+        if hasattr(self, "_api_key_name"):
             params += self.default_param
         result = self.__poll_for_result(params)
         if result.get("data", None):

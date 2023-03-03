@@ -10,35 +10,33 @@ from tests.mock_utils import MockResponse, if_mock_connections, patch
 
 class SecurityTrails(classes.ObservableAnalyzer):
     base_url: str = "https://api.securitytrails.com/v1/"
-
-    def set_params(self, params):
-        self.analysis_type = params.get("securitytrails_analysis", "current")
-        self.current_type = params.get("securitytrails_current_type", "details")
-        self.history_analysis = params.get("securitytrails_history_analysis", "whois")
-        self.__api_key = self._secrets["api_key_name"]
+    securitytrails_analysis: str
+    securitytrails_current_type: str
+    securitytrails_history_analysis: str
+    _api_key_name: str
 
     def run(self):
-        headers = {"apikey": self.__api_key, "Content-Type": "application/json"}
+        headers = {"apikey": self._api_key_name, "Content-Type": "application/json"}
 
         if self.observable_classification == self.ObservableTypes.IP:
             uri = f"ips/nearby/{self.observable_name}"
         elif self.observable_classification == self.ObservableTypes.DOMAIN:
-            if self.analysis_type == "current":
-                if self.current_type == "details":
+            if self.securitytrails_analysis == "current":
+                if self.securitytrails_current_type == "details":
                     uri = f"domain/{self.observable_name}"
-                elif self.current_type == "subdomains":
+                elif self.securitytrails_current_type == "subdomains":
                     uri = f"domain/{self.observable_name}/subdomains"
-                elif self.current_type == "tags":
+                elif self.securitytrails_current_type == "tags":
                     uri = f"domain/{self.observable_name}/tags"
                 else:
                     raise AnalyzerRunException(
                         "Not supported endpoint for current analysis."
                     )
 
-            elif self.analysis_type == "history":
-                if self.history_analysis == "whois":
+            elif self.securitytrails_analysis == "history":
+                if self.securitytrails_history_analysis == "whois":
                     uri = f"history/{self.observable_name}/whois"
-                elif self.history_analysis == "dns":
+                elif self.securitytrails_history_analysis == "dns":
                     uri = f"history/{self.observable_name}/dns/a"
                 else:
                     raise AnalyzerRunException(
@@ -47,7 +45,7 @@ class SecurityTrails(classes.ObservableAnalyzer):
 
             else:
                 raise AnalyzerRunException(
-                    f"Not supported analysis type: {self.analysis_type}."
+                    f"Not supported analysis type: {self.securitytrails_analysis}."
                 )
         else:
             raise AnalyzerRunException(

@@ -13,12 +13,14 @@ from .vt3_base import VirusTotalv3AnalyzerMixin
 class VirusTotalv3Intelligence(ObservableAnalyzer, VirusTotalv3AnalyzerMixin):
     base_url = "https://www.virustotal.com/api/v3/intelligence"
 
-    def set_params(self, params):
-        self.limit = params.get("limit", 300)
+    limit: int
+    order_by: str
+
+    def config(self):
+        super().config()
         # this is a limit forced by VT service
         if self.limit > 300:
             self.limit = 300
-        self.order_by = params.get("order_by", "")
 
     def run(self):
         # ref: https://developers.virustotal.com/reference/intelligence-search

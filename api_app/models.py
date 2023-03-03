@@ -548,7 +548,7 @@ class PluginConfig(models.Model):
     @cached_property
     def config(self) -> AbstractConfig:
         for config in AbstractConfig.__subclasses__():
-            if self.config_type == config._get_type():
+            if self.type == config._get_type():
                 return config.objects.get(name=self.plugin_name)
         raise TypeError("Unable to find configuration")
 

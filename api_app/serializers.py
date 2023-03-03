@@ -838,9 +838,9 @@ class PluginConfigSerializer(rfs.ModelSerializer):
         # Check if the type of value is valid for the attribute.
 
         expected_type = (
-            config_obj.params[attrs["attribute"]].type
+            config_obj.params[attrs["attribute"]]["type"]
             if attrs["config_type"] == PluginConfig.ConfigType.PARAMETER
-            else config_obj.secrets[attrs["attribute"]].type
+            else config_obj.secrets[attrs["attribute"]]["type"]
         )
         if expected_type == "str":
             expected_type = str

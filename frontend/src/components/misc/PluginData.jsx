@@ -47,20 +47,39 @@ function isValidEntry(item, valueType) {
   return true;
 }
 
+/**
+ * Filter the plugins without a configuration: with empty params or secrets (choosen on dataName param)
+ *
+ * @param {Array.Object} plugins List of plugins
+ * @param {string} dataName name of the plugin's field with the configurations (params/secrets)
+ * @returns
+ */
 function filterEmptyData(plugins, dataName) {
-  return Object.keys(plugins)
+  return plugins
     .filter(
-      (pluginName) =>
-        plugins[pluginName][dataName] &&
-        Object.keys(plugins[pluginName][dataName]).length > 0
+      (plugin) => plugin[dataName] && Object.keys(plugin[dataName]).length > 0
     )
     .reduce(
-      (filteredPlugins, key) =>
-        Object.assign(filteredPlugins, { [key]: plugins[key] }),
+      (filteredPlugins, plugin) =>
+        Object.assign(filteredPlugins, { [plugin.name]: plugin }),
       {}
     );
 }
 
+/**
+ * Component with the plugins configurations
+ *
+ * @param {function} entryFilter function used to filter the custom config from the backend (show only configs or only secrets)
+ * @param {object} additionalEntryData contains a value used to show the values of the configuration or hide (***) in case of secrets
+ * @param {string} dataUri uri of the API with the custom configs
+ * @param {function} createPluginData function to save a new config
+ * @param {function} updatePluginData function to update an existing config
+ * @param {function} deletePluginData function to delete an existing config
+ * @param {string} dataName name of the plugin's field with the configurations (params/secrets)
+ * @param {string} valueType value used in the validation of the config
+ * @param {boolean} editable flag used to allow the user to view the config (used by the organization to hide the component to not allowed users)
+ * @returns {React.Component} editable table with the plugins configurations
+ */
 export function PluginData({
   entryFilter,
   additionalEntryData,
@@ -88,6 +107,7 @@ export function PluginData({
     state.retrieveVisualizersConfiguration,
   ]);
 
+  // download the configs
   const [respData, Loader, refetchPluginData] = useAxiosComponentLoader(
     {
       url: dataUri,
@@ -117,6 +137,7 @@ export function PluginData({
     }
   );
 
+  // download the configs and again the analyzers with the update values
   const refetchAll = () => {
     refetchPluginData();
     retrieveAnalyzersConfiguration();
@@ -124,12 +145,7 @@ export function PluginData({
     retrieveVisualizersConfiguration();
   };
 
-  const maxPluginNameLength = Math.max(
-    ...Object.keys(analyzers).map((pluginName) => pluginName.length),
-    ...Object.keys(connectors).map((pluginName) => pluginName.length),
-    ...Object.keys(visualizers).map((pluginName) => pluginName.length)
-  );
-
+  // form/"table" with the config
   return (
     <Loader
       render={() => (
@@ -187,7 +203,11 @@ export function PluginData({
                               : " disabled text-dark input-secondary ";
 
                             return (
+                              /* Row with a config: each row have five columns:
+                              plugin type selection, plugin selection, param selection, param value, buttons to edit/save/delete
+                              */
                               <Row className="py-2" key={`entry.${index + 0}`}>
+                                {/* col for the plugin type selection */}
                                 <Col className="col-2">
                                   <Field
                                     as="select"
@@ -201,7 +221,7 @@ export function PluginData({
                                     <option value="3">Visualizer</option>
                                   </Field>
                                 </Col>
-
+                                {/* col for the plugin selection */}
                                 <div className="col-auto">
                                   <Field
                                     as="select"
@@ -210,23 +230,7 @@ export function PluginData({
                                     name={`entry[${index}].plugin_name`}
                                   >
                                     <option value="">
-                                      {"-".repeat(
-                                        Math.ceil(
-                                          Math.max(
-                                            maxPluginNameLength - 11,
-                                            0
-                                          ) / 2
-                                        )
-                                      )}
-                                      Select Plugin Name
-                                      {"-".repeat(
-                                        Math.ceil(
-                                          Math.max(
-                                            maxPluginNameLength - 11,
-                                            0
-                                          ) / 2
-                                        )
-                                      )}
+                                      ---Select Plugin Name---
                                     </option>
                                     {Object.values(plugins).map(
                                       (pluginElement) => (
@@ -240,7 +244,7 @@ export function PluginData({
                                     )}
                                   </Field>
                                 </div>
-
+                                {/* col for the attribute selection */}
                                 <Col>
                                   <Field
                                     as="select"
@@ -258,7 +262,7 @@ export function PluginData({
                                     ))}
                                   </Field>
                                 </Col>
-
+                                {/* col for the attribute value */}
                                 <Col>
                                   <Field
                                     as={Input}
@@ -275,6 +279,7 @@ export function PluginData({
                                     }
                                   />
                                 </Col>
+                                {/* col with the buttons to save/delete/modify the config */}
                                 {editable ? (
                                   <Button
                                     color="primary"
@@ -372,6 +377,7 @@ export function PluginData({
                             );
                           })
                         : null}
+                      {/* Additional row with the button to add a new row/config */}
                       {editable ? (
                         <Row className="mb-2 mt-0 pt-0">
                           <Button

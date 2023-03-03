@@ -5,6 +5,8 @@ import { addToast } from "@certego/certego-ui";
 import { PLUGIN_CONFIG_URI } from "../../../constants/api";
 
 async function createCustomConfig(data) {
+  console.debug("createCustomConfig - data:");
+  console.debug(data);
   try {
     const resp = await axios.post(PLUGIN_CONFIG_URI, data);
     addToast("Data posted successfully", null, "success", true);
@@ -21,6 +23,8 @@ async function createCustomConfig(data) {
 }
 
 async function updateCustomConfig(data, id) {
+  console.debug("updateCustomConfig - data:");
+  console.debug(data);
   try {
     const resp = await axios.patch(`${PLUGIN_CONFIG_URI}/${id}`, data);
     addToast("Data updated successfully", null, "success", true);
@@ -32,6 +36,8 @@ async function updateCustomConfig(data, id) {
 }
 
 async function deleteCustomConfig(id) {
+  console.debug("deleteCustomConfig - id:");
+  console.debug(id);
   try {
     const resp = await axios.delete(`${PLUGIN_CONFIG_URI}/${id}`);
     addToast("Data deleted successfully", null, "success", true);

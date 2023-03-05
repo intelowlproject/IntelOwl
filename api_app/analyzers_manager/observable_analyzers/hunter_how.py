@@ -56,7 +56,7 @@ class Hunter_How(classes.ObservableAnalyzer):
             if_mock_connections(
                 patch(
                     "requests.get",
-                    return_value=MockResponse({}, 200),
+                    return_value=MockResponse({"list": []}, 200),
                 ),
             )
         ]

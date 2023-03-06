@@ -31,11 +31,13 @@ class AbstractConfigAdminView(JsonViewerAdminView):
     list_display = (
         "name",
         "python_module",
-        "description",
         "params_names",
         "secrets_names",
         "disabled",
 
+    )
+    search_fields = (
+        "name",
     )
     # allow to clone the object
     save_as = True

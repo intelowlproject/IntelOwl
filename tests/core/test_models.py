@@ -6,7 +6,7 @@ from django.core.exceptions import ValidationError
 
 from api_app.core.classes import Plugin
 from api_app.core.models import AbstractConfig
-from api_app.models import Job, OrganizationPluginState, PluginConfig
+from api_app.models import Job, PluginConfig
 from api_app.visualizers_manager.models import VisualizerConfig
 from certego_saas.apps.organization.membership import Membership
 from certego_saas.apps.organization.organization import Organization
@@ -235,16 +235,11 @@ class AbstractConfigTestCase(CustomTestCase):
             user=self.user,
             organization=org,
         )
+        muc: VisualizerConfig
+        muc.disabled_in_organizations.add(org)
 
-        ops = OrganizationPluginState.objects.create(
-            organization=org,
-            plugin_name="test",
-            disabled=True,
-            type=PluginConfig.PluginType.VISUALIZER,
-        )
         self.assertFalse(muc.is_runnable(self.user))
 
-        ops.delete()
         muc.delete()
         m.delete()
         org.delete()

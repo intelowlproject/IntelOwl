@@ -805,9 +805,7 @@ class PluginConfigSerializer(rfs.ModelSerializer):
             is_owner=True,
         )
         if not membership.exists():
-            logger.warning(
-                f"User {owner} is not owner of organization {organization}."
-            )
+            logger.warning(f"User {owner} is not owner of organization {organization}.")
             raise PermissionDenied("User is not owner of the organization.")
         return organization
 

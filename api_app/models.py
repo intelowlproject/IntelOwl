@@ -8,6 +8,7 @@ from typing import Optional
 from celery import group
 from django.conf import settings
 from django.contrib.postgres import fields as pg_fields
+from django.core.validators import MinLengthValidator, RegexValidator
 from django.db import models
 from django.db.models import Q, QuerySet
 from django.dispatch import receiver
@@ -69,8 +70,19 @@ class TLP(models.TextChoices):
 
 
 class Tag(models.Model):
-    label = models.CharField(max_length=50, blank=False, null=False, unique=True)
-    color = models.CharField(max_length=7, blank=False, null=False)
+    label = models.CharField(
+        max_length=50,
+        blank=False,
+        null=False,
+        unique=True,
+        validators=[MinLengthValidator(4)],
+    )
+    color = models.CharField(
+        max_length=7,
+        blank=False,
+        null=False,
+        validators=[RegexValidator(r"^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$", "Hex color")],
+    )
 
     def __str__(self):
         return f'Tag(label="{self.label}")'

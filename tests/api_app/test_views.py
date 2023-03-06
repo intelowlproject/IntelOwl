@@ -338,6 +338,15 @@ class TagViewsetTests(CustomAPITestCase):
         self.assertDictContainsSubset(data, content, msg=msg)
         self.assertEqual(Tag.objects.count(), 2)
 
+    def test_create_400(self):
+        self.assertEqual(Tag.objects.count(), 1)
+        data = {"label": "testlabel2", "color": "NOT_A_COLOR"}
+        response = self.client.post(self.tags_list_uri, data)
+        content = response.json()
+        msg = (response, content)
+
+        self.assertEqual(response.status_code, 400, msg=msg)
+
     def test_list_200(self):
         response = self.client.get(self.tags_list_uri)
         content = response.json()

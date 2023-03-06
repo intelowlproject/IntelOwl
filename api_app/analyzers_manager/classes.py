@@ -280,7 +280,7 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
             except (requests.RequestException, json.JSONDecodeError) as e:
                 raise AnalyzerRunException(e)
             status = json_data.get("status", None)
-            if status and status == "running":
+            if status and status == self._job.Status.RUNNING.value:
                 logger.info(
                     f"Poll number #{chance + 1}, "
                     f"status: 'running' <-- {self.__repr__()}"

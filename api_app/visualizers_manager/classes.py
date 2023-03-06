@@ -4,6 +4,8 @@ import abc
 import logging
 from typing import Type
 
+from django.db.models import QuerySet
+
 from api_app.core.classes import Plugin
 from api_app.visualizers_manager.exceptions import (
     VisualizerConfigurationException,
@@ -46,3 +48,21 @@ class Visualizer(Plugin, metaclass=abc.ABCMeta):
 
     def after_run(self):
         logger.info(f"FINISHED visualizer: {self.__repr__()}")
+
+    def analyzer_reports(self) -> QuerySet:
+        from api_app.analyzers_manager.models import AnalyzerReport
+
+        self._config: VisualizerConfig
+        return AnalyzerReport.objects.filter(
+            name__in=self._config.analyzers.all().values_list("name", flat=True),
+            job=self._job,
+        )
+
+    def connectors_reports(self) -> QuerySet:
+        from api_app.connectors_manager.models import ConnectorReport
+
+        self._config: VisualizerConfig
+        return ConnectorReport.objects.filter(
+            name__in=self._config.connectors.all().values_list("name", flat=True),
+            job=self._job,
+        )

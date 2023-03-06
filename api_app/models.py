@@ -35,6 +35,15 @@ class Status(models.TextChoices):
     KILLED = "killed", "killed"
     FAILED = "failed", "failed"
 
+    @classmethod
+    def final_statuses(cls) -> typing.List["Status"]:
+        return [
+            cls.REPORTED_WITHOUT_FAILS,
+            cls.REPORTED_WITH_FAILS,
+            cls.KILLED,
+            cls.FAILED,
+        ]
+
 
 class Position(models.TextChoices):
     LEFT = "left"

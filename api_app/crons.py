@@ -20,7 +20,7 @@ def check_stuck_analysis():
     we can just put this function as a cron to cleanup.
     """
     logger.info("started check_stuck_analysis")
-    running_jobs = list(Job.objects.filter(status="running"))
+    running_jobs = list(Job.objects.filter(status=Job.Status.RUNNING.value))
     logger.info(f"checking if {len(running_jobs)} jobs are stuck")
 
     now = get_now()

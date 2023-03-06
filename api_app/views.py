@@ -474,7 +474,7 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
         job = self.get_object()
 
         # check if job running
-        if job.status != "running":
+        if job.status in Job.Status.final_statuses():
             raise ValidationError({"detail": "Job is not running"})
         # close celery tasks and mark reports as killed
         job.kill_if_ongoing()

@@ -11,17 +11,27 @@ import {
 } from "reactstrap";
 import { BiUpArrow, BiDownArrow } from "react-icons/bi";
 
+import {
+  StringVisualizerSerializer,
+  BooleanVisualizerSerializer,
+  ListVisualizerSerializer,
+} from "./serializers";
+
 function BaseVisualizer({ value, color, link, className, additionalElement }) {
-  const unlinkedTitle = (
-    <p color={color} className={className}>
-      {value}
-      {additionalElement}
-    </p>
-  );
+  let coreComponent = <p className={`${color} ${className}`}>{value}</p>;
   if (link) {
-    return <a href={link}>{unlinkedTitle}</a>;
+    coreComponent = (
+      <a href={link} target="_blank" rel="noreferrer">
+        {coreComponent}
+      </a>
+    );
   }
-  return unlinkedTitle;
+  return (
+    <div className="d-flex align-items-center">
+      {coreComponent}
+      {additionalElement}
+    </div>
+  );
 }
 
 BaseVisualizer.propTypes = {
@@ -144,6 +154,9 @@ function ListVisualizerField({
   const [isListOpen, setIsListOpen] = useState(false);
   const toggleList = () => setIsListOpen(!isListOpen);
 
+  console.debug("ListVisualizerField.fieldValue");
+  console.debug(fieldValue);
+
   return (
     <Card>
       <CardTitle className="p-1 mb-0">
@@ -169,13 +182,16 @@ function ListVisualizerField({
       <Collapse isOpen={isListOpen}>
         <ListGroup flush>
           {fieldValue.map((listElement) => (
-            <ListGroupItem key={listElement.value} className="text-light">
+            <ListGroupItem
+              key={listElement.elementValue}
+              className="text-light"
+            >
               <BaseVisualizer
-                value={listElement.value}
-                color={listElement.valueColor}
-                link={listElement.valueLink}
-                className={`mb-0 ${listElement.valueClassName}`}
-                additionalElement={listElement.valueAdditionalElement}
+                value={listElement.elementValue}
+                color={listElement.elementColor}
+                link={listElement.elementLink}
+                className={`mb-0 ${listElement.elementClassName}`}
+                additionalElement={listElement.elementAdditionalElement}
               />
             </ListGroupItem>
           ))}
@@ -213,6 +229,7 @@ export function VisualizerComponent({
   fieldName,
   fieldType,
   fieldValue,
+  additionalConfig,
   hideFalseValue,
 }) {
   if (hideFalseValue === true) {
@@ -233,29 +250,62 @@ export function VisualizerComponent({
   // choose the component
   let component = null;
   switch (fieldType) {
-    case "list":
+    case "list": {
+      const { convertedValue, titleColor, titleLink, titleAdditionalElement } =
+        ListVisualizerSerializer(fieldValue, additionalConfig);
+      console.debug("VisualizerComponent - covertedValue");
+      console.debug(convertedValue);
       component = (
         <ListVisualizerField
           fieldName={fieldName}
-          fieldValue={fieldValue}
+          fieldValue={convertedValue}
           titleClassName="mb-0"
+          titleColor={titleColor}
+          titleLink={titleLink}
+          titleAdditionalElement={titleAdditionalElement}
         />
       );
       break;
-    case "bool":
+    }
+    case "bool": {
+      const { activeColor, pill, additionalElement } =
+        BooleanVisualizerSerializer(additionalConfig);
       component = (
-        <BooleanVisualizerField fieldName={fieldName} fieldValue={fieldValue} />
+        <BooleanVisualizerField
+          fieldName={fieldName}
+          fieldValue={fieldValue}
+          pill={pill}
+          activeColor={activeColor}
+          additionalElement={additionalElement}
+        />
       );
       break;
-    default:
+    }
+    default: {
+      // string
+      const {
+        titleColor,
+        titleLink,
+        titleAdditionalElement,
+        valueColor,
+        valueLink,
+        valueAdditionalElement,
+      } = StringVisualizerSerializer(additionalConfig);
       component = (
         <StringVisualizerField
           fieldName={fieldName}
           fieldValue={fieldValue}
           titleClassName="text-capitalize mb-0"
           valueClassName="small mb-0 bg-dark"
+          titleColor={titleColor}
+          titleLink={titleLink}
+          titleAdditionalElement={titleAdditionalElement}
+          valueColor={valueColor}
+          valueLink={valueLink}
+          valueAdditionalElement={valueAdditionalElement}
         />
       );
+    }
   }
   return (
     <div key={fieldName} className="col-auto">
@@ -268,9 +318,11 @@ VisualizerComponent.propTypes = {
   fieldName: PropTypes.string.isRequired,
   fieldType: PropTypes.string.isRequired,
   fieldValue: PropTypes.string.isRequired,
+  additionalConfig: PropTypes.object,
   hideFalseValue: PropTypes.bool,
 };
 
 VisualizerComponent.defaultProps = {
   hideFalseValue: false,
+  additionalConfig: {},
 };

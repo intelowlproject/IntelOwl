@@ -2,7 +2,7 @@ import React, { Fragment } from "react";
 import PropTypes from "prop-types";
 import { ContentSection } from "@certego/certego-ui";
 import { Row } from "reactstrap";
-import { VisualizerComponent } from "./visualizerComponents";
+import { VisualizerComponent } from "./components";
 
 const mockedData = [
   { name: "scanner", value: true, type: "bool", level: 1 },
@@ -10,7 +10,17 @@ const mockedData = [
   { name: "phishing", value: false, type: "bool", level: 1 },
   { name: "scammer", value: false, type: "bool", level: 1 },
   { name: "sinkhole", value: false, type: "bool", level: 1 },
-  { name: "tor exit node", value: false, type: "bool", level: 1 },
+  {
+    name: "tor exit node",
+    value: true,
+    type: "bool",
+    level: 1,
+    additional_config: {
+      pill: false,
+      icon: "urlhaus",
+      active_color: "success",
+    },
+  },
   { name: "google malicious", value: false, type: "bool", level: 1 },
   { name: "quad9 malicious", value: true, type: "bool", level: 1 },
   { name: "tranco rank", value: 121233, type: "int", level: 1 },
@@ -19,17 +29,19 @@ const mockedData = [
     value: "mirai",
     type: "string",
     level: 1,
-    additional_config: { link: "https://malpedia.caad.fkie.fraunhofer.de/" },
+    additional_config: {
+      value_link: "https://malpedia.caad.fkie.fraunhofer.de/",
+    },
   },
   {
     name: "kill chain phase",
     value: "dropzone",
     type: "string",
     level: 1,
-    additional_config: { link: "https://attack.mitre.org/" },
+    additional_config: { value_link: "https://attack.mitre.org/" },
   },
   { name: "creation date", value: "2006-07-02", type: "string", level: 3 },
-  { name: "country", value: "italy", type: "string", level: 3 },
+  { name: "country", value: "italy", type: "string", level: 0 },
   {
     name: "urls",
     value: [
@@ -49,21 +61,44 @@ const mockedData = [
   {
     name: "md5s",
     value: [
-      { value: "11d5c09dfab9e17f0e3870af9c9961e8" },
-      { value: "22d5c09dfab9e17f0e3870af9c9961e8" },
-      { value: "33d5c09dfab9e17f0e3870af9c9961e8" },
+      {
+        value: "11d5c09dfab9e17f0e3870af9c9961e8",
+        additional_config: [
+          { link: "http://google.com", icon: "google" },
+          { link: "http://virusTotal.com", icon: "virusTotal" },
+          { link: "http://ha.com", icon: "hybridAnalysis" },
+        ],
+      },
+      {
+        value: "22d5c09dfab9e17f0e3870af9c9961e8",
+        additional_config: [{ link: "http://google.com", icon: "google" }],
+      },
+      {
+        value: "33d5c09dfab9e17f0e3870af9c9961e8",
+        additional_config: [
+          { link: "http://google.com", icon: "google" },
+          { link: "http://virusTotal.com", icon: "virusTotal" },
+        ],
+      },
     ],
     type: "list",
     level: 2,
+    additional_config: { icon: "shield", link: "http://google.com" },
   },
   {
     name: "general evaluation",
     value: "malicious",
     type: "str",
     level: 0,
-    additional_config: { value_color: "danger" },
+    additional_config: { value_color: "danger", value_icon: "cloudflare" },
   },
-  { name: "reliability", value: "B", type: "str", level: 0 },
+  {
+    name: "reliability",
+    value: "B",
+    type: "str",
+    level: 0,
+    additional_config: { value_icon: "quad9" },
+  },
   { name: "active resolution", value: "dns.google.com", type: "str", level: 3 },
   { name: "last resolution", value: "dns.google.com", type: "str", level: 3 },
   { name: " cloudflare malicious", value: true, type: "bool", level: 2 },

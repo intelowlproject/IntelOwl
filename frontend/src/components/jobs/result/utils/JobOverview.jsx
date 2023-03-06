@@ -23,7 +23,7 @@ import {
 } from "./tables";
 import { JobInfoCard, JobIsRunningAlert, JobActionsBar } from "./sections";
 import { StatusIcon } from "../../../common";
-import VisualizerReport from "./visualizer";
+import VisualizerReport from "../visualizer/visualizer";
 import useJobOverviewStore from "../../../../stores/useJobOverviewStore";
 
 export default function JobOverview({ isRunningJob, job, refetch }) {

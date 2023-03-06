@@ -24,17 +24,61 @@ import {
 import { JobInfoCard, JobIsRunningAlert, JobActionsBar } from "./sections";
 import { StatusIcon } from "../../../common";
 import VisualizerReport from "./visualizer";
+import useJobOverviewStore from "../../../../stores/useJobOverviewStore";
 
 export default function JobOverview({ isRunningJob, job, refetch }) {
+  console.debug("JobOverview rendered");
+
   // state
   const [UIElements, setUIElements] = useState({});
-  const [activeElement, setActiveElement] = useState("");
-  const [isSelectedUI, setIsSelectedUI] = useState(true);
+  const [
+    isSelectedUI,
+    activeElement,
+    setIsSelectedUI,
+    setActiveElement,
+    resetJobOverview,
+  ] = useJobOverviewStore((state) => [
+    state.isSelectedUI,
+    state.activeElement,
+    state.setIsSelectedUI,
+    state.setActiveElement,
+    state.resetJobOverview,
+  ]);
   const selectUISection = (isUI) => {
     setIsSelectedUI(isUI);
     setActiveElement(Object.keys(isUI ? UIElements : rawElements)[0]);
   };
 
+  useEffect(() => {
+    // this use effect is triggered when the component is mounted to reset the previously subSection selection
+    resetJobOverview();
+  }, [resetJobOverview]);
+
+  // UI elements (note: this useEffect MUST be AFTER the reset useEffect)
+  useEffect(() => {
+    // TODO (remove the mock): load visualizers from the backend only once
+    const newUIElements = {};
+    // eslint-disable-next-line no-plusplus
+    for (let i = 0; i < 1; i++) {
+      const elementLabel = `Visualizer Report ${i}`;
+      newUIElements[elementLabel] = {
+        nav: (
+          <div className="d-flex-center">
+            <strong>{elementLabel}</strong>
+          </div>
+        ),
+        report: <VisualizerReport job={job} />,
+      };
+    }
+    setUIElements(newUIElements);
+    /* set the default to the first visualizer only in case the UI is selected.
+    In case raw data is selected don't change or during polling (long jobs) we reset the view and change the UI to the user.    
+    */
+    if (isSelectedUI) {
+      setActiveElement(Object.keys(newUIElements)[0]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [job]);
   // raw elements
   let AnalyzerDenominator = job.analyzers_requested?.length || "all";
   let ConnectorDenominator = job.connectors_requested?.length || "all";
@@ -89,27 +133,6 @@ export default function JobOverview({ isRunningJob, job, refetch }) {
     }),
     [job, refetch, AnalyzerDenominator, ConnectorDenominator]
   );
-
-  // UI elements
-  useEffect(() => {
-    // TODO (remove the mock): load visualizers from the backend only once
-    const newUIElements = {};
-    // eslint-disable-next-line no-plusplus
-    for (let i = 0; i < 1; i++) {
-      const elementLabel = `Visualizer Report ${i}`;
-      newUIElements[elementLabel] = {
-        nav: (
-          <div className="d-flex-center">
-            <strong>{elementLabel}</strong>
-          </div>
-        ),
-        report: <VisualizerReport job={job} />,
-      };
-    }
-    setUIElements(newUIElements);
-    // set the default to the first visualizer
-    setActiveElement(Object.keys(newUIElements)[0]);
-  }, [job]);
 
   const elementsToShow = isSelectedUI ? UIElements : rawElements;
   return (

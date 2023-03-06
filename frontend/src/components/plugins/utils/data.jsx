@@ -297,8 +297,8 @@ const playbookTableColumns = [
     minWidth: 250,
   },
   {
-    Header: "Analyzers required",
-    id: "analyzers_required",
+    Header: "Analyzers executed",
+    id: "analyzers_executed",
     accessor: (row) => Object.keys(row.analyzers),
     Cell: ({ value }) => (
       <ul className="d-flex flex-column align-items-start">
@@ -311,8 +311,8 @@ const playbookTableColumns = [
     Filter: SelectColumnFilter,
   },
   {
-    Header: "Connectors required",
-    id: "connectors_required",
+    Header: "Connectors executed",
+    id: "connectors_executed",
     accessor: (row) => Object.keys(row.connectors),
     Cell: ({ value }) => (
       <ul className="d-flex flex-column align-items-start">

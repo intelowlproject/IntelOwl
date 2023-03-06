@@ -2,6 +2,8 @@ from django.contrib import admin
 from django.db.models import JSONField
 from prettyjson import PrettyJSONWidget
 
+from api_app.core.models import AbstractConfig
+
 
 class AbstractReportAdminView(admin.ModelAdmin):
     list_display = (
@@ -30,7 +32,16 @@ class AbstractConfigAdminView(JsonViewerAdminView):
         "name",
         "python_module",
         "description",
+        "params_names",
+        "secrets_names",
         "disabled",
+
     )
     # allow to clone the object
     save_as = True
+
+    def params_names(self, instance:AbstractConfig):
+        return list(instance.params.keys())
+
+    def secrets_names(self, instance: AbstractConfig):
+        return list(instance.secrets.keys())

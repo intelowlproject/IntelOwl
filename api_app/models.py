@@ -264,7 +264,7 @@ class Job(models.Model):
         # update report statuses
         qs.update(status=self.Status.KILLED)
         # set job status
-        self.update_status("killed")
+        self.update_status(self.Status.KILLED)
 
     def _merge_runtime_configuration(
         self,
@@ -272,6 +272,9 @@ class Job(models.Model):
         analyzers: typing.List[str],
         connectors: typing.List[str],
     ):
+        from api_app.analyzers_manager.models import AnalyzerConfig
+        from api_app.connectors_manager.models import ConnectorConfig
+
         # in case of key conflict, runtime_configuration
         # is overwritten by the Plugin configuration
         final_config = {}
@@ -279,24 +282,16 @@ class Job(models.Model):
         for analyzer in analyzers:
             # Appending custom config to runtime configuration
             config = runtime_configuration.get(analyzer, {})
-            config |= PluginConfig.get_as_dict(
-                user,
-                PluginConfig.PluginType.ANALYZER,
-                PluginConfig.ConfigType.PARAMETER,
-                plugin_name=analyzer,
-            ).get(analyzer, {})
 
+            ac: AnalyzerConfig = AnalyzerConfig.objects.get(name=analyzer)
+            config |= ac.read_params(user)
             if config:
                 final_config[analyzer] = config
         for connector in connectors:
             config = runtime_configuration.get(connector, {})
-            config |= PluginConfig.get_as_dict(
-                user,
-                PluginConfig.PluginType.CONNECTOR,
-                PluginConfig.ConfigType.PARAMETER,
-                plugin_name=connector,
-            ).get(connector, {})
 
+            cc: ConnectorConfig = ConnectorConfig.objects.get(name=connector)
+            config |= cc.read_params(user)
             if config:
                 final_config[connector] = config
         logger.debug(f"New value of runtime_configuration: {final_config}")
@@ -511,40 +506,6 @@ class PluginConfig(models.Model):
                 )
 
         return configs
-
-    @classmethod
-    def get_as_dict(cls, user, entity_type, config_type=None, plugin_name=None) -> dict:
-        """
-        Returns custom config as dict
-        """
-
-        kwargs = {}
-        if config_type:
-            kwargs["config_type"] = config_type
-        custom_configs = cls.visible_for_user(user)
-        custom_configs = custom_configs.filter(type=entity_type, **kwargs)
-        if plugin_name is not None:
-            custom_configs = custom_configs.filter(plugin_name=plugin_name)
-
-        result = {}
-        for custom_config in custom_configs:
-            custom_config: PluginConfig
-            if custom_config.plugin_name not in result:
-                result[custom_config.plugin_name] = {}
-
-            # This `if` condition ensures that only a user-level config
-            # overrides an organization-level config.
-            if (
-                custom_config.attribute not in result[custom_config.plugin_name]
-                or custom_config.organization is None
-            ):
-                result[custom_config.plugin_name][
-                    custom_config.attribute
-                ] = custom_config.value
-
-        logger.debug(f"Final CustomConfig: {result}")
-
-        return result
 
     def invalidate_config_verification(self):
         self.config.get_verification.invalidate(self.config)

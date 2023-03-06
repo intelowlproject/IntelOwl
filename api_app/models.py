@@ -521,29 +521,3 @@ class PluginConfig(models.Model):
             if self.type == config._get_type():
                 return config.objects.get(name=self.plugin_name)
         raise TypeError("Unable to find configuration")
-
-
-class OrganizationPluginState(models.Model):
-    type = models.CharField(choices=PluginConfig.PluginType.choices, max_length=2)
-    organization = models.ForeignKey(
-        Organization,
-        on_delete=models.CASCADE,
-        related_name="+",
-    )
-    plugin_name = models.CharField(max_length=128)
-    updated_at = models.DateTimeField(auto_now=True)
-    disabled = models.BooleanField(default=False)
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=["type", "plugin_name", "organization"],
-                name="unique_enabled_plugin_entry",
-            )
-        ]
-
-        indexes = [
-            models.Index(
-                fields=["organization", "type"],
-            ),
-        ]

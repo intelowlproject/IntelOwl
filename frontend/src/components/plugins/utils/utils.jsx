@@ -19,13 +19,14 @@ import {
 } from "react-icons/md";
 
 import { IconButton, BooleanIcon } from "@certego/certego-ui";
-import { ORG_PLUGIN_DISABLE_URI } from "../../../constants/api";
 
 import { markdownToHtml, TLPTag } from "../../common";
 import {
   useOrganizationStore,
   usePluginConfigurationStore,
 } from "../../../stores";
+import {ANALYZERS_CONFIG_URI, CONNECTORS_CONFIG_URI, VISUALIZERS_CONFIG_URI} from "../../../constants/api";
+import {ANALYZER, CONNECTOR, VISUALIZER} from "../../../constants/constants";
 
 const { checkPluginHealth } = usePluginConfigurationStore.getState();
 
@@ -274,11 +275,19 @@ export function OrganizationPluginStateToggle({
   if (!organization.name) title = "You're not a part of any organization";
   else if (!isUserOwner)
     title = `You're not an owner of your organization - ${organization.name}`;
+  let baseUrl = ""
+  if (type === ANALYZER){
+      baseUrl = ANALYZERS_CONFIG_URI
+  } else if (type === CONNECTOR ){
+      baseUrl = CONNECTORS_CONFIG_URI
+  }else if (type === VISUALIZER){
+      baseUrl = VISUALIZERS_CONFIG_URI
+  }
 
   const onClick = async () => {
     if (disabled)
-      await axios.delete(`${ORG_PLUGIN_DISABLE_URI}/${type}/${pluginName}/`);
-    else await axios.post(`${ORG_PLUGIN_DISABLE_URI}/${type}/${pluginName}/`);
+      await axios.delete(`${baseUrl}/${pluginName}/organization`);
+    else await axios.post(`${baseUrl}/${pluginName}/organization`);
     fetchAllOrganizations();
     refetch();
   };

@@ -2,6 +2,7 @@ import React from "react";
 
 import { analyzersTableColumns } from "./data";
 import PluginWrapper from "./PluginWrapper";
+import {ANALYZER} from "../../../constants/constants";
 
 export default function Analyzers() {
   console.debug("Analyzers rendered!");
@@ -21,7 +22,7 @@ export default function Analyzers() {
       heading="Analyzers"
       stateSelector={stateSelector}
       columns={analyzersTableColumns}
-      type={1}
+      type={ANALYZER}
     />
   );
 }

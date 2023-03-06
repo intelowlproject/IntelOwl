@@ -14,6 +14,7 @@ from django.utils.module_loading import import_string
 from kombu import uuid
 
 from api_app.validators import validate_config, validate_params, validate_secrets
+from certego_saas.apps.organization.organization import Organization
 from certego_saas.apps.user.models import User
 from intel_owl.celery import DEFAULT_QUEUE
 
@@ -111,6 +112,9 @@ class AbstractConfig(models.Model):
     )
     secrets = models.JSONField(blank=True, default=dict, validators=[validate_secrets])
     params = models.JSONField(blank=True, default=dict, validators=[validate_params])
+    disabled_in_organizations = models.ManyToManyField(
+        Organization, related_name="%(app_label)s_%(class)s_disabled", blank=True
+    )
 
     class Meta:
         abstract = True
@@ -199,15 +203,10 @@ class AbstractConfig(models.Model):
         }
 
     def is_runnable(self, user: User = None):
-        from api_app.models import OrganizationPluginState
-
         configured = self.get_verification(user)["configured"]
         if user and user.has_membership():
-            disabled_by_org = OrganizationPluginState.objects.filter(
-                organization=user.membership.organization,
-                plugin_name=self.name,
-                disabled=True,
-                type=self._get_type(),
+            disabled_by_org = self.disabled_in_organizations.filter(
+                pk=user.membership.organization.pk
             ).exists()
         else:
             disabled_by_org = False

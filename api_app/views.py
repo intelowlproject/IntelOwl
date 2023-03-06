@@ -15,11 +15,7 @@ from drf_spectacular.utils import inline_serializer
 from rest_framework import serializers as rfs
 from rest_framework import status, viewsets
 from rest_framework.decorators import action, api_view
-from rest_framework.exceptions import (
-    MethodNotAllowed,
-    PermissionDenied,
-    ValidationError,
-)
+from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.response import Response
 
 from api_app.serializers import (
@@ -33,17 +29,10 @@ from certego_saas.ext.viewsets import ReadAndDeleteOnlyViewSet
 from intel_owl.celery import app as celery_app
 
 from .analyzers_manager.constants import ObservableTypes
+from .core.models import AbstractConfig
 from .filters import JobFilter
 from .helpers import get_now
-from .models import (
-    TLP,
-    Job,
-    ObservableClassification,
-    OrganizationPluginState,
-    PluginConfig,
-    Status,
-    Tag,
-)
+from .models import TLP, Job, ObservableClassification, PluginConfig, Status, Tag
 from .serializers import (
     AnalysisResponseSerializer,
     FileAnalysisSerializer,
@@ -685,42 +674,6 @@ class PluginConfigViewSet(viewsets.ModelViewSet):
 
 
 @add_docs(
-    description="""This endpoint allows organization owners to toggle plugin state.""",
-    responses={
-        201: inline_serializer(
-            name="PluginDisablerResponseSerializer",
-            fields={},
-        ),
-    },
-)
-@api_view(["DELETE", "POST"])
-def plugin_disabler(request, plugin_name, plugin_type):
-    """
-    Disables the plugin with the given name at Organization level
-    """
-    if not request.user.has_membership() or not request.user.membership.is_owner:
-        raise PermissionDenied()
-    if request.method == "POST":
-        disable = True
-    elif request.method == "DELETE":
-        disable = False
-    else:
-        raise MethodNotAllowed(request.method)
-
-    logger.info(
-        f"plugin_disabler: Setting disable to {disable} "
-        f"for plugin {plugin_name} of type {plugin_type}"
-    )
-    OrganizationPluginState.objects.update_or_create(
-        organization=request.user.membership.organization,
-        plugin_name=plugin_name,
-        type=plugin_type,
-        defaults={"disabled": disable},
-    )
-    return Response(status=status.HTTP_201_CREATED)
-
-
-@add_docs(
     description="""This endpoint allows organization owners
     and members to view plugin state.""",
     responses={
@@ -734,14 +687,24 @@ def plugin_disabler(request, plugin_name, plugin_type):
 )
 @api_view(["GET"])
 def plugin_state_viewer(request):
+    from api_app.analyzers_manager.models import AnalyzerConfig
+    from api_app.connectors_manager.models import ConnectorConfig
+    from api_app.visualizers_manager.models import VisualizerConfig
+
     if not request.user.has_membership():
         raise PermissionDenied()
+
     result = {"data": {}}
-    for organization_plugin_state in OrganizationPluginState.objects.filter(
-        organization=request.user.membership.organization
-    ):
-        result["data"][organization_plugin_state.plugin_name] = {
-            "disabled": organization_plugin_state.disabled,
-            "plugin_type": organization_plugin_state.type,
-        }
+
+    classes = [AnalyzerConfig, ConnectorConfig, VisualizerConfig]
+    for Class_ in classes:
+        for plugin in Class_.objects.all():
+            plugin: AbstractConfig
+            if plugin.disabled_in_organizations.filter(
+                pk=request.user.membership.organization.pk
+            ).exists():
+                result["data"][plugin.name] = {
+                    "disabled": True,
+                    "plugin_type": plugin._get_type(),
+                }
     return Response(result)

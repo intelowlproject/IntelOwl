@@ -11,14 +11,9 @@ import {
 import { MdCancel } from "react-icons/md";
 import { Button, Col, FormGroup, Input, Row } from "reactstrap";
 import { usePluginConfigurationStore } from "../../stores";
+import {ANALYZER, CONNECTOR, SECRET, VISUALIZER} from "../../constants/constants";
 
-const ANALYZER = "1";
-const CONNECTOR = "2";
-const VISUALIZER = "3";
 
-// eslint-disable-next-line no-unused-vars
-const PARAMETER = "1";
-const SECRET = "2";
 
 function isJSON(str) {
   try {

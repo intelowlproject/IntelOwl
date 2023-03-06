@@ -34,16 +34,17 @@ class AbstractConfigAdminView(JsonViewerAdminView):
         "params_names",
         "secrets_names",
         "disabled",
-
+        "disabled_in_orgs",
     )
-    search_fields = (
-        "name",
-    )
+    search_fields = ("name",)
     # allow to clone the object
     save_as = True
 
-    def params_names(self, instance:AbstractConfig):
+    def params_names(self, instance: AbstractConfig):
         return list(instance.params.keys())
 
     def secrets_names(self, instance: AbstractConfig):
         return list(instance.secrets.keys())
+
+    def disabled_in_orgs(self, instance: AbstractConfig):
+        return [org.name for org in instance.disabled_in_organizations.all()]

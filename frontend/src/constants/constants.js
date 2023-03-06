@@ -1,7 +1,10 @@
-export const ANALYZER = "1";
-export const CONNECTOR = "2";
-export const VISUALIZER = "3";
+export const pluginType = Object.freeze({
+  ANALYZER: "1",
+  CONNECTOR: "2",
+  VISUALIZER: "3",
+});
 
-// eslint-disable-next-line no-unused-vars
-export const PARAMETER = "1";
-export const SECRET = "2";
+export const configType = Object.freeze({
+  PARAMETER: "1",
+  SECRET: "2",
+});

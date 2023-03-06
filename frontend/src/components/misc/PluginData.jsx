@@ -11,9 +11,13 @@ import {
 import { MdCancel } from "react-icons/md";
 import { Button, Col, FormGroup, Input, Row } from "reactstrap";
 import { usePluginConfigurationStore } from "../../stores";
-import {ANALYZER, CONNECTOR, SECRET, VISUALIZER} from "../../constants/constants";
+import { pluginType, configType } from "../../constants/constants";
 
-
+import {
+  createCustomConfig,
+  deleteCustomConfig,
+  updateCustomConfig,
+} from "../me/config/api";
 
 function isJSON(str) {
   try {
@@ -67,9 +71,6 @@ function filterEmptyData(plugins, dataName) {
  * @param {function} entryFilter function used to filter the custom config from the backend (show only configs or only secrets)
  * @param {object} additionalEntryData contains a value used to show the values of the configuration or hide (***) in case of secrets
  * @param {string} dataUri uri of the API with the custom configs
- * @param {function} createPluginData function to save a new config
- * @param {function} updatePluginData function to update an existing config
- * @param {function} deletePluginData function to delete an existing config
  * @param {string} dataName name of the plugin's field with the configurations (params/secrets)
  * @param {string} valueType value used in the validation of the config
  * @param {boolean} editable flag used to allow the user to view the config (used by the organization to hide the component to not allowed users)
@@ -79,9 +80,6 @@ export function PluginData({
   entryFilter,
   additionalEntryData,
   dataUri,
-  createPluginData,
-  updatePluginData,
-  deletePluginData,
   dataName,
   valueType,
   editable,
@@ -113,11 +111,11 @@ export function PluginData({
         pluginConfigs = pluginConfigs.map((pluginConfig) => {
           const res = pluginConfig;
           let plugins;
-          if (res.type === ANALYZER) {
+          if (res.type === pluginType.ANALYZER) {
             plugins = analyzers;
-          } else if (res.type === CONNECTOR) {
+          } else if (res.type === pluginType.CONNECTOR) {
             plugins = connectors;
-          } else if (res.type === VISUALIZER) {
+          } else if (res.type === pluginType.VISUALIZER) {
             plugins = visualizers;
           } else {
             console.error(`Invalid type: ${res.type}`);
@@ -156,11 +154,15 @@ export function PluginData({
                             let plugins = {};
                             let attributeList = [];
                             let placeholder = "";
-                            if (configuration.type === "1") {
+                            if (configuration.type === pluginType.ANALYZER) {
                               plugins = analyzers;
-                            } else if (configuration.type === "2") {
+                            } else if (
+                              configuration.type === pluginType.CONNECTOR
+                            ) {
                               plugins = connectors;
-                            } else if (configuration.type === "3") {
+                            } else if (
+                              configuration.type === pluginType.VISUALIZER
+                            ) {
                               plugins = visualizers;
                             }
 
@@ -211,9 +213,15 @@ export function PluginData({
                                     name={`entry[${index}].type`}
                                   >
                                     <option value="">---Select Type---</option>
-                                    <option value="1">Analyzer</option>
-                                    <option value="2">Connector</option>
-                                    <option value="3">Visualizer</option>
+                                    <option value={pluginType.ANALYZER}>
+                                      Analyzer
+                                    </option>
+                                    <option value={pluginType.CONNECTOR}>
+                                      Connector
+                                    </option>
+                                    <option value={pluginType.VISUALIZER}>
+                                      Visualizer
+                                    </option>
                                   </Field>
                                 </Col>
                                 {/* col for the plugin selection */}
@@ -268,7 +276,7 @@ export function PluginData({
                                     placeholder={placeholder}
                                     value={
                                       additionalEntryData.config_type ===
-                                        SECRET && !configuration.edit
+                                        configType.SECRET && !configuration.edit
                                         ? "**********"
                                         : configuration.value
                                     }
@@ -303,7 +311,7 @@ export function PluginData({
                                             );
                                         }
                                         if (newConfiguration.create)
-                                          createPluginData(
+                                          createCustomConfig(
                                             newConfiguration
                                           ).then(() => {
                                             setFieldValue(
@@ -317,7 +325,7 @@ export function PluginData({
                                             refetchAll();
                                           });
                                         else
-                                          updatePluginData(
+                                          updateCustomConfig(
                                             newConfiguration,
                                             newConfiguration.id
                                           ).then(() => {
@@ -357,12 +365,12 @@ export function PluginData({
                                     onClick={() => {
                                       if (configuration.create) remove(index);
                                       else
-                                        deletePluginData(configuration.id).then(
-                                          () => {
-                                            remove(index);
-                                            refetchAll();
-                                          }
-                                        );
+                                        deleteCustomConfig(
+                                          configuration.id
+                                        ).then(() => {
+                                          remove(index);
+                                          refetchAll();
+                                        });
                                     }}
                                   >
                                     <BsFillTrashFill />
@@ -406,9 +414,6 @@ PluginData.propTypes = {
   entryFilter: PropTypes.func,
   additionalEntryData: PropTypes.object.isRequired,
   dataUri: PropTypes.string.isRequired,
-  createPluginData: PropTypes.func.isRequired,
-  updatePluginData: PropTypes.func.isRequired,
-  deletePluginData: PropTypes.func.isRequired,
   dataName: PropTypes.string.isRequired,
   valueType: PropTypes.string.isRequired,
   editable: PropTypes.bool.isRequired,

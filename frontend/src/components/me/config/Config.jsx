@@ -1,12 +1,7 @@
 import PropTypes from "prop-types";
 import React from "react";
 import { PluginData } from "../../misc/PluginData";
-import {
-  createCustomConfig,
-  PLUGIN_CONFIG_URI,
-  deleteCustomConfig,
-  updateCustomConfig,
-} from "./api";
+import { PLUGIN_CONFIG_URI } from "./api";
 
 /**
  * This component wrap the table with the plugins configuration.
@@ -26,9 +21,6 @@ export default function Config({
 }) {
   return (
     <PluginData
-      createPluginData={createCustomConfig}
-      updatePluginData={updateCustomConfig}
-      deletePluginData={deleteCustomConfig}
       dataName={dataName}
       valueType="json"
       dataUri={PLUGIN_CONFIG_URI}

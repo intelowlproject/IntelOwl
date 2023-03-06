@@ -3,8 +3,7 @@
 
 from rest_framework import serializers as rfs
 
-from api_app.core.serializers import AbstractConfigSerializer, BaseField
-from api_app.models import Position
+from api_app.core.serializers import AbstractConfigSerializer
 
 from .models import VisualizerConfig, VisualizerReport
 
@@ -16,13 +15,8 @@ class VisualizerConfigSerializer(AbstractConfigSerializer):
 
 
 class VisualizerReportSerializer(rfs.ModelSerializer):
-    class ReportSerializer(rfs.Serializer):
-        priority = rfs.IntegerField(min_value=1, max_value=10)
-        position = rfs.ChoiceField(choices=Position.choices)
-        value = BaseField(required=True)
 
     type = rfs.CharField(default="visualizer")
-    report = rfs.DictField(child=ReportSerializer(), allow_empty=True)
 
     class Meta:
         model = VisualizerReport

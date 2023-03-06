@@ -9,12 +9,14 @@ from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.connectors_manager.models import ConnectorConfig
 from api_app.core.models import AbstractConfig, AbstractReport
 from api_app.visualizers_manager.exceptions import VisualizerConfigurationException
+from api_app.visualizers_manager.validators import validate_report
 
 
 class VisualizerReport(AbstractReport):
     job = models.ForeignKey(
         "api_app.Job", related_name="visualizer_reports", on_delete=models.CASCADE
     )
+    report = models.JSONField(default=dict, validators=[validate_report])
 
     class Meta:
         unique_together = [("name", "job")]

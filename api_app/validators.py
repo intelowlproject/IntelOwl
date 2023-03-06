@@ -50,6 +50,7 @@ def validate_secrets(value):
                 "required": ["description", "required", "type"],
             },
         },
+        "additionalProperties": False,
     }
     return validate_schema(value, schema)
 
@@ -70,5 +71,6 @@ def validate_params(value):
                 "required": ["type", "description", "default"],
             },
         },
+        "additionalProperties": False,
     }
     return validate_schema(value, schema)

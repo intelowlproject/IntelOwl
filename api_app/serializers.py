@@ -793,6 +793,8 @@ class PluginConfigSerializer(rfs.ModelSerializer):
         return super().to_representation(instance)
 
     def validate_organization(self, organization: str):
+        if not organization:
+            return organization
         # here the owner can't be retrieved by the field
         # because the HiddenField will always return None
         owner = self.context["request"].user
@@ -804,7 +806,7 @@ class PluginConfigSerializer(rfs.ModelSerializer):
         )
         if not membership.exists():
             logger.warning(
-                f"User {owner} is not owner of " f"organization {organization}."
+                f"User {owner} is not owner of organization {organization}."
             )
             raise PermissionDenied("User is not owner of the organization.")
         return organization

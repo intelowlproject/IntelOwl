@@ -10,7 +10,7 @@ logger = getLogger(__name__)
 
 class Yara(Visualizer):
     def run(self) -> Dict:
-        yara_reports = self.analyzer_reports()
+        yara_reports = self.analyzerreports()
         yara_num_matches = sum(
             len(matches)
             for yara_report in yara_reports

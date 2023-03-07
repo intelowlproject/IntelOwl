@@ -14,17 +14,8 @@ from api_app.visualizers_manager.validators import validate_report
 
 
 class VisualizerReport(AbstractReport):
-    job = models.ForeignKey(
-        "api_app.Job", related_name="visualizer_reports", on_delete=models.CASCADE
-    )
     report = models.JSONField(default=dict, validators=[validate_report])
 
-    class Meta:
-        unique_together = [("name", "job")]
-
-    @property
-    def visualizer_name(self) -> str:
-        return self.name
 
 
 class VisualizerConfig(AbstractConfig):

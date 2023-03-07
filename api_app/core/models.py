@@ -47,11 +47,14 @@ class AbstractReport(models.Model):
 
     # If a playbook ran the process
     parent_playbook = models.CharField(max_length=128, default="", blank=True)
+    job = models.ForeignKey(
+        "api_app.Job", related_name="%(class)ss", on_delete=models.CASCADE
+    )
 
     # meta
     class Meta:
-
         abstract = True
+        unique_together = [("name", "job")]
 
     def __str__(self):
         return f"{self.__class__.__name__}(job:#{self.job_id}, {self.name})"

@@ -23,16 +23,7 @@ logger = getLogger(__name__)
 
 
 class AnalyzerReport(AbstractReport):
-    job = models.ForeignKey(
-        "api_app.Job", related_name="analyzer_reports", on_delete=models.CASCADE
-    )
-
-    class Meta:
-        unique_together = [("name", "job")]
-
-    @property
-    def analyzer_name(self) -> str:
-        return self.name
+    ...
 
 
 class MimeTypes(models.TextChoices):

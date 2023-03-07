@@ -249,7 +249,7 @@ class Job(models.Model):
             s.lower(): models.Count("status", filter=models.Q(status=s))
             for s in AbstractReport.Status.values
         }
-        return self.analyzer_reports.aggregate(
+        return self.analyzerreports.aggregate(
             all=models.Count("status"),
             **aggregators,
         )
@@ -259,7 +259,7 @@ class Job(models.Model):
             s.lower(): models.Count("status", filter=models.Q(status=s))
             for s in AbstractReport.Status.values
         }
-        return self.connector_reports.aggregate(
+        return self.connectorreports.aggregate(
             all=models.Count("status"),
             **aggregators,
         )
@@ -271,9 +271,9 @@ class Job(models.Model):
             AbstractReport.Status.PENDING,
             AbstractReport.Status.RUNNING,
         ]
-        qs = self.analyzer_reports.filter(status__in=statuses_to_filter)
+        qs = self.analyzerreports.filter(status__in=statuses_to_filter)
         task_ids_analyzers = list(qs.values_list("task_id", flat=True))
-        qs2 = self.connector_reports.filter(status__in=statuses_to_filter)
+        qs2 = self.connectorreports.filter(status__in=statuses_to_filter)
 
         task_ids_connectors = list(qs2.values_list("task_id", flat=True))
         # kill celery tasks using task ids

@@ -11,17 +11,7 @@ from api_app.models import TLP, PluginConfig
 
 
 class ConnectorReport(AbstractReport):
-    job = models.ForeignKey(
-        "api_app.Job", related_name="connector_reports", on_delete=models.CASCADE
-    )
-
-    class Meta:
-        unique_together = [("name", "job")]
-
-    @property
-    def connector_name(self) -> str:
-        return self.name
-
+    ...
 
 class ConnectorConfig(AbstractConfig):
     maximum_tlp = models.CharField(

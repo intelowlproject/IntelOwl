@@ -43,11 +43,11 @@ class PlaybookConfigCreateSerializer(rfs.ModelSerializer):
         if job.is_sample:
             types_supported.append(TypeChoices.FILE)
         runtime_configuration = {"analyzers": {}, "connectors": {}}
-        for report in job.analyzer_reports.all():
+        for report in job.analyzerreports.all():
             runtime_configuration["analyzers"][
                 report.name
             ] = report.runtime_configuration
-        for report in job.connector_reports.all():
+        for report in job.connectorreports.all():
             runtime_configuration["connectors"][
                 report.name
             ] = report.runtime_configuration

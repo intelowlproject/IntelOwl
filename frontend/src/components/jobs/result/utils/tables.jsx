@@ -143,7 +143,7 @@ export function AnalyzersReportTable({ job, refetch }) {
   if (job?.playbooks_to_execute.length > 1) {
     return (
       <DataTable
-        data={job?.analyzer_reports}
+        data={job?.analyzerreports}
         customProps={{ job, refetch }}
         {...tablePropsPlaybooks}
       />
@@ -152,7 +152,7 @@ export function AnalyzersReportTable({ job, refetch }) {
 
   return (
     <DataTable
-      data={job?.analyzer_reports}
+      data={job?.analyzerreports}
       customProps={{ job, refetch }}
       {...tableProps}
     />
@@ -164,7 +164,7 @@ export function ConnectorsReportTable({ job, refetch }) {
   if (job?.playbooks_to_execute.length > 1) {
     return (
       <DataTable
-        data={job?.connector_reports}
+        data={job?.connectorreports}
         customProps={{ job, refetch }}
         {...tablePropsPlaybooks}
       />
@@ -173,7 +173,7 @@ export function ConnectorsReportTable({ job, refetch }) {
 
   return (
     <DataTable
-      data={job?.connector_reports}
+      data={job?.connectorreports}
       customProps={{ job, refetch }}
       {...tableProps}
     />
@@ -184,7 +184,7 @@ export function VisualizersReportTable({ job, refetch }) {
   if (job?.playbooks_to_execute.length > 1) {
     return (
       <DataTable
-        data={job?.visualizer_reports}
+        data={job?.visualizerreports}
         customProps={{ job, refetch }}
         {...tablePropsPlaybooks}
       />
@@ -193,7 +193,7 @@ export function VisualizersReportTable({ job, refetch }) {
 
   return (
     <DataTable
-      data={job?.visualizer_reports}
+      data={job?.visualizerreports}
       customProps={{ job, refetch }}
       {...tableProps}
     />

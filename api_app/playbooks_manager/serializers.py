@@ -29,17 +29,13 @@ class PlaybookConfigCreateSerializer(rfs.ModelSerializer):
         return job
 
     def create(self, validated_data):
-        from api_app.analyzers_manager.models import AnalyzerConfig, AnalyzerReport
-        from api_app.connectors_manager.models import ConnectorConfig
 
         job = validated_data["job"]
-        analyzers = AnalyzerConfig.objects.filter(name__in=job.analyzers_to_execute)
-        connectors = ConnectorConfig.objects.filter(name__in=job.connectors_to_execute)
         types_supported = list(
             set(
                 [
                     type_supported
-                    for analyzer_config in analyzers
+                    for analyzer_config in job.analyzers_to_execute
                     for type_supported in analyzer_config.observable_supported
                 ]
             )
@@ -48,7 +44,6 @@ class PlaybookConfigCreateSerializer(rfs.ModelSerializer):
             types_supported.append(TypeChoices.FILE)
         runtime_configuration = {"analyzers": {}, "connectors": {}}
         for report in job.analyzer_reports.all():
-            report: AnalyzerReport
             runtime_configuration["analyzers"][
                 report.name
             ] = report.runtime_configuration
@@ -63,6 +58,6 @@ class PlaybookConfigCreateSerializer(rfs.ModelSerializer):
             type=types_supported,
             runtime_configuration=runtime_configuration,
         )
-        pc.analyzers.set(analyzers)
-        pc.connectors.set(connectors)
+        pc.analyzers.set(job.analyzers_to_execute)
+        pc.connectors.set(job.connectors_to_execute)
         return pc

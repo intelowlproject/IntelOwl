@@ -17,6 +17,9 @@ class JobAdminView(admin.ModelAdmin):
         "file_name",
         "file_mimetype",
         "received_request_time",
+        "analyzers_executed",
+        "connectors_executed",
+        "visualizers_executed",
     )
     list_display_link = (
         "id",
@@ -28,6 +31,19 @@ class JobAdminView(admin.ModelAdmin):
         "observable_name",
         "file_name",
     )
+    list_filter = (
+        "status",
+        "user",
+    )
+
+    def analyzers_executed(self, instance: Job):
+        return [analyzer.name for analyzer in instance.analyzers_to_execute.all()]
+
+    def connectors_executed(self, instance: Job):
+        return [connector.name for connector in instance.connectors_to_execute.all()]
+
+    def visualizers_executed(self, instance: Job):
+        return [visualizer.name for visualizer in instance.visualizers_to_execute.all()]
 
 
 @admin.register(Tag)

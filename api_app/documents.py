@@ -10,8 +10,19 @@ from .models import Job
 @registry.register_document
 class JobDocument(Document):
     # Object/List fields
-    analyzers_to_execute = fields.ListField(fields.KeywordField())
-    connectors_to_execute = fields.ListField(fields.KeywordField())
+    analyzers_to_execute = fields.NestedField(
+        properties={"name": fields.KeywordField()}
+    )
+    connectors_to_execute = fields.NestedField(
+        properties={"name": fields.KeywordField()}
+    )
+    visualizers_to_execute = fields.NestedField(
+        properties={"name": fields.KeywordField()}
+    )
+    playbooks_to_execute = fields.NestedField(
+        properties={"name": fields.KeywordField()}
+    )
+
     # Normal fields
     errors = fields.TextField()
     # Keyword fields to allow aggregations/vizualizations

@@ -103,10 +103,18 @@ def _multi_analysis_request(
             "status": "accepted",
             "job_id": job.pk,
             "warnings": serialized_data[index]["warnings"],
-            "analyzers_running": job.analyzers_to_execute,
-            "connectors_running": job.connectors_to_execute,
-            "visualizers_running": job.visualizers_to_execute,
-            "playbooks_running": job.playbooks_to_execute,
+            "analyzers_running": job.analyzers_to_execute.all().values_list(
+                "name", flat=True
+            ),
+            "connectors_running": job.connectors_to_execute.all().values_list(
+                "name", flat=True
+            ),
+            "visualizers_running": job.visualizers_to_execute.all().values_list(
+                "name", flat=True
+            ),
+            "playbooks_running": job.playbooks_to_execute.all().values_list(
+                "name", flat=True
+            ),
         }
         for index, job in enumerate(jobs)
     ]

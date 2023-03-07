@@ -129,27 +129,35 @@ class Job(models.Model):
         max_length=32, blank=False, choices=Status.choices, default="pending"
     )
 
-    analyzers_requested = pg_fields.ArrayField(
-        models.CharField(max_length=128), blank=True, default=list
+    analyzers_requested = models.ManyToManyField(
+        "analyzers_manager.AnalyzerConfig", related_name="requested_in_jobs", blank=True
     )
-    connectors_requested = pg_fields.ArrayField(
-        models.CharField(max_length=128), blank=True, default=list
+    connectors_requested = models.ManyToManyField(
+        "connectors_manager.ConnectorConfig",
+        related_name="requested_in_jobs",
+        blank=True,
     )
-    playbooks_requested = pg_fields.ArrayField(
-        models.CharField(max_length=128), blank=True, default=list
+    playbooks_requested = models.ManyToManyField(
+        "playbooks_manager.PlaybookConfig", related_name="requested_in_jobs", blank=True
     )
-    analyzers_to_execute = pg_fields.ArrayField(
-        models.CharField(max_length=128), blank=True, default=list
+
+    analyzers_to_execute = models.ManyToManyField(
+        "analyzers_manager.AnalyzerConfig", related_name="executed_in_jobs", blank=True
     )
-    connectors_to_execute = pg_fields.ArrayField(
-        models.CharField(max_length=128), blank=True, default=list
+    connectors_to_execute = models.ManyToManyField(
+        "connectors_manager.ConnectorConfig",
+        related_name="executed_in_jobs",
+        blank=True,
     )
-    playbooks_to_execute = pg_fields.ArrayField(
-        models.CharField(max_length=128), blank=True, default=list
+    visualizers_to_execute = models.ManyToManyField(
+        "visualizers_manager.VisualizerConfig",
+        related_name="executed_in_jobs",
+        blank=True,
     )
-    visualizers_to_execute = pg_fields.ArrayField(
-        models.CharField(max_length=128), blank=True, default=list
+    playbooks_to_execute = models.ManyToManyField(
+        "playbooks_manager.PlaybookConfig", related_name="executed_in_jobs", blank=True
     )
+
     received_request_time = models.DateTimeField(auto_now_add=True, db_index=True)
     finished_analysis_time = models.DateTimeField(blank=True, null=True)
     process_time = models.FloatField(blank=True, null=True)
@@ -190,7 +198,7 @@ class Job(models.Model):
                     f"[REPORT] {self.__repr__()}, status:{self.status}, reports:{stats}"
                 )
 
-                if len(self.analyzers_to_execute) == stats["all"]:
+                if self.analyzers_to_execute.all().count() == stats["all"]:
                     if stats["running"] > 0 or stats["pending"] > 0:
                         status_to_set = self.Status.RUNNING
                     elif stats["success"] == stats["all"]:
@@ -281,12 +289,9 @@ class Job(models.Model):
     def _merge_runtime_configuration(
         self,
         runtime_configuration: typing.Dict,
-        analyzers: typing.List[str],
-        connectors: typing.List[str],
+        analyzers: QuerySet,
+        connectors: QuerySet,
     ):
-        from api_app.analyzers_manager.models import AnalyzerConfig
-        from api_app.connectors_manager.models import ConnectorConfig
-
         # in case of key conflict, runtime_configuration
         # is overwritten by the Plugin configuration
         final_config = {}
@@ -295,15 +300,13 @@ class Job(models.Model):
             # Appending custom config to runtime configuration
             config = runtime_configuration.get(analyzer, {})
 
-            ac: AnalyzerConfig = AnalyzerConfig.objects.get(name=analyzer)
-            config |= ac.read_params(user)
+            config |= analyzer.read_params(user)
             if config:
                 final_config[analyzer] = config
         for connector in connectors:
             config = runtime_configuration.get(connector, {})
 
-            cc: ConnectorConfig = ConnectorConfig.objects.get(name=connector)
-            config |= cc.read_params(user)
+            config |= connector.read_params(user)
             if config:
                 final_config[connector] = config
         logger.debug(f"New value of runtime_configuration: {final_config}")
@@ -311,61 +314,39 @@ class Job(models.Model):
 
     def _pipeline_configuration(
         self, runtime_configuration: typing.Dict[str, typing.Any]
-    ) -> typing.Tuple[typing.List, typing.List, typing.List, typing.List, typing.List]:
-        from api_app.playbooks_manager.models import PlaybookConfig
+    ) -> typing.Tuple[typing.List, typing.List, typing.List, typing.List, range]:
 
-        if not self.playbooks_to_execute:
+        visualizers = [self.visualizers_to_execute.all()]
+        if not self.playbooks_to_execute.all().exists():
             configs = [runtime_configuration]
-            analyzers = [self.analyzers_to_execute]
-            connectors = [self.connectors_to_execute]
-            playbooks = [""]
+            analyzers = [self.analyzers_to_execute.all()]
+            connectors = [self.connectors_to_execute.all()]
         else:
             # case playbooks
             configs = []
             analyzers = []
             connectors = []
-            playbooks = self.playbooks_to_execute
             # this must be done because each analyzer on the playbook
             # could be executed with a different configuration
-            for playbook in PlaybookConfig.objects.filter(
-                name__in=self.playbooks_to_execute
-            ):
-
-                playbook: PlaybookConfig
+            for playbook in self.playbooks_to_execute.all():
                 configs.append(playbook.runtime_configuration)
                 analyzers.append(
-                    [
-                        analyzer
-                        for analyzer in playbook.analyzers.all().values_list(
-                            "name", flat=True
-                        )
-                        if analyzer in self.analyzers_to_execute
-                    ]
+                    self.analyzers_to_execute.intersection(playbook.analyzers.all())
                 )
                 connectors.append(
-                    [
-                        connector
-                        for connector in playbook.connectors.all().values_list(
-                            "name", flat=True
-                        )
-                        if connector in self.connectors_to_execute
-                    ]
+                    self.connectors_to_execute.intersection(playbook.connectors.all())
                 )
 
-        visualizers = [self.visualizers_to_execute]
-        return configs, analyzers, connectors, visualizers, playbooks
+        return configs, analyzers, connectors, visualizers, range(len(configs))
 
     def pipeline(self, runtime_configuration: typing.Dict[str, typing.Any]):
-        from api_app.analyzers_manager.models import AnalyzerConfig
-        from api_app.connectors_manager.models import ConnectorConfig
-        from api_app.visualizers_manager.models import VisualizerConfig
         from intel_owl import tasks
         from intel_owl.celery import DEFAULT_QUEUE
 
         final_analyzer_signatures = []
         final_connector_signatures = []
         final_visualizer_signatures = []
-        for config, analyzers, connectors, visualizers, playbook in zip(
+        for config, analyzers, connectors, visualizers, i in zip(
             *self._pipeline_configuration(runtime_configuration)
         ):
             config = self._merge_runtime_configuration(config, analyzers, connectors)
@@ -376,35 +357,31 @@ class Job(models.Model):
                 f" visualizers are {visualizers} "
             )
 
-            for final_signatures, config_class, plugins in zip(
+            for final_signatures, plugins in zip(
                 (
                     final_analyzer_signatures,
                     final_connector_signatures,
                     final_visualizer_signatures,
                 ),
-                (AnalyzerConfig, ConnectorConfig, VisualizerConfig),
                 (analyzers, connectors, visualizers),
             ):
-
+                try:
+                    playbook = self.playbooks_to_execute.all()[i].name
+                except IndexError:
+                    playbook = ""
                 config_class: typing.Type[AbstractConfig]
                 for plugin in plugins:
                     try:
-                        new_config = config_class.objects.get(name=plugin)
-                    except config_class.DoesNotExist:
-                        self.append_error(f"Config {plugin} does not exists")
+                        signature = plugin.get_signature(
+                            self.pk,
+                            config.get(plugin.name, {}),
+                            playbook,
+                        )
+                    except RuntimeError:
+                        self.append_error(f"Plugin {plugin.name} is not ready")
                     else:
-                        new_config: AbstractConfig
-                        try:
-                            signature = new_config.get_signature(
-                                self.pk,
-                                config.get(new_config.name, {}),
-                                playbook,
-                            )
-                        except RuntimeError:
-                            self.append_error(f"Plugin {new_config.name} is not ready")
-                        else:
-                            if signature not in final_signatures:
-                                final_signatures.append(signature)
+                        if signature not in final_signatures:
+                            final_signatures.append(signature)
 
         logger.info(f"Analyzer signatures are {final_analyzer_signatures}")
         logger.info(f"Connector signatures are {final_connector_signatures}")

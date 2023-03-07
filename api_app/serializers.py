@@ -5,7 +5,7 @@ import json
 import logging
 from typing import Dict, List
 
-from django.db.models import Q
+from django.db.models import Q, QuerySet
 from django.http import QueryDict
 from drf_spectacular.utils import extend_schema_serializer
 from durin.serializers import UserSerializer
@@ -28,7 +28,6 @@ from .connectors_manager.serializers import ConnectorReportSerializer
 from .helpers import calculate_md5, gen_random_colorhex
 from .models import TLP, Job, PluginConfig, Tag
 from .playbooks_manager.exceptions import NotRunnablePlaybook
-from .playbooks_manager.models import PlaybookConfig
 from .visualizers_manager.models import VisualizerConfig
 from .visualizers_manager.serializers import VisualizerReportSerializer
 
@@ -103,21 +102,26 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
 
     tags_labels = rfs.ListField(default=list)
     runtime_configuration = rfs.JSONField(required=False, default={}, write_only=True)
-    analyzers_requested = rfs.ListField(default=list)
-    connectors_requested = rfs.ListField(default=list)
     md5 = rfs.HiddenField(default=None)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.filter_warnings = []
         self.log_runnable = True
+        self.mtm_fields = {
+            "analyzers_requested": None,
+            "connectors_requested": None,
+            "analyzers_to_execute": None,
+            "connectors_to_execute": None,
+            "visualizers_to_execute": None,
+        }
 
     def validate(self, attrs: dict) -> dict:
         # check and validate runtime_configuration
         self.filter_analyzers_and_connectors(attrs)
         return attrs
 
-    def filter_visualizers(self, serialized_data: Dict) -> List[str]:
+    def filter_visualizers(self, serialized_data: Dict) -> List[VisualizerConfig]:
         visualizers_to_execute = []
 
         for visualizer in VisualizerConfig.objects.all():
@@ -127,63 +131,48 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
                 # subsets
                 and set(visualizer.analyzers.all().values_list("pk", flat=True))
                 <= set(
-                    AnalyzerConfig.objects.filter(
-                        name__in=serialized_data["analyzers_to_execute"]
-                    ).values_list("pk", flat=True)
+                    serialized_data["analyzers_to_execute"].values_list("pk", flat=True)
                 )
                 and set(visualizer.connectors.all().values_list("pk", flat=True))
                 <= set(
-                    ConnectorConfig.objects.filter(
-                        name__in=serialized_data["connectors_to_execute"]
-                    ).values_list("pk", flat=True)
+                    serialized_data["connectors_to_execute"].values_list(
+                        "pk", flat=True
+                    )
                 )
             ):
                 logger.info(f"Going to use {visualizer.name}")
-                visualizers_to_execute.append(visualizer.name)
+                visualizers_to_execute.append(visualizer)
         return visualizers_to_execute
 
-    def filter_analyzers(self, serialized_data: Dict) -> List[str]:
-        # init empty list
-        cleaned_analyzer_list = []
-
+    def filter_analyzers(self, serialized_data: Dict) -> List[AnalyzerConfig]:
         analyzers_requested = serialized_data.get("analyzers_requested", [])
         if not analyzers_requested:
-            analyzers_requested = list(
-                AnalyzerConfig.objects.all().values_list("name", flat=True)
-            )
+            analyzers_requested = list(AnalyzerConfig.objects.all())
             serialized_data["analyzers_requested"] = analyzers_requested
             self.run_all_analyzers = True
         else:
             self.run_all_analyzers = False
         tlp = serialized_data.get("tlp", TLP.WHITE).upper()
-
-        for a_name in analyzers_requested:
+        analyzers_executed = analyzers_requested.copy()
+        for a_config in analyzers_requested:
             try:
-                try:
-                    config = AnalyzerConfig.objects.get(name=a_name)
-                except AnalyzerConfig.DoesNotExist:
-                    if not self.run_all_analyzers:
-                        raise NotRunnableAnalyzer(
-                            f"{a_name} won't run: not available in configuration"
-                        )
-                    # don't add warning if self.run_all_analyzers
-                    continue
-                config: AnalyzerConfig
-                if not config.is_runnable(self.context["request"].user):
+                if not a_config.is_runnable(self.context["request"].user):
                     raise NotRunnableAnalyzer(
-                        f"{a_name} won't run: is disabled or unconfigured"
+                        f"{a_config.name} won't run: is disabled or unconfigured"
                     )
 
-                if tlp != TLP.WHITE and config.leaks_info:
+                if tlp != TLP.WHITE and a_config.leaks_info:
                     raise NotRunnableAnalyzer(
-                        f"{a_name} won't be run because it leaks info externally."
+                        f"{a_config.name} won't be run because "
+                        f"it leaks info externally."
                     )
-                if tlp == TLP.RED and config.external_service:
+                if tlp == TLP.RED and a_config.external_service:
                     raise NotRunnableAnalyzer(
-                        f"{a_name} won't be run because you"
+                        f"{a_config.name} won't be run because you"
                         " filtered external analyzers."
                     )
             except NotRunnableAnalyzer as e:
+                analyzers_executed.remove(a_config)
                 if not self.log_runnable:
                     # in this case, they are not warnings but
                     # expected and wanted behavior
@@ -191,64 +180,47 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
                 else:
                     logger.warning(e)
                     self.filter_warnings.append(str(e))
-            else:
-                cleaned_analyzer_list.append(a_name)
 
-        if not cleaned_analyzer_list:
+        if not analyzers_executed:
             raise ValidationError(
                 {"detail": "No Analyzers can be run after filtering."}
             )
-        return cleaned_analyzer_list
+        return analyzers_executed
 
-    def filter_connectors(self, serialized_data: Dict) -> List[str]:
-        # init empty list
-        cleaned_connectors_list = []
-
+    def filter_connectors(self, serialized_data: Dict) -> List[ConnectorConfig]:
         connectors_requested = serialized_data.get("connectors_requested", [])
         if not connectors_requested:
-            connectors_requested = list(
-                ConnectorConfig.objects.all().values_list("name", flat=True)
-            )
+            connectors_requested = list(ConnectorConfig.objects.all())
             serialized_data["connectors_requested"] = connectors_requested
             self.run_all_connectors = True
         else:
             self.run_all_connectors = False
 
         tlp = serialized_data.get("tlp", TLP.WHITE).upper()
+        connectors_executed = connectors_requested.copy()
 
-        for c_name in connectors_requested:
+        for c_config in connectors_requested:
             try:
-                try:
-                    config = ConnectorConfig.objects.get(name=c_name)
-                except ConnectorConfig.DoesNotExist:
-                    if not self.run_all_connectors:
-                        raise NotRunnableConnector(
-                            f"{c_name} won't run: not available in configuration"
-                        )
-                    # don't add warning if self.run_all_connectors
-                    continue
-                config: ConnectorConfig
-                if not config.is_runnable(self.context["request"].user):
+                if not c_config.is_runnable(self.context["request"].user):
                     raise NotRunnableConnector(
-                        f"{c_name} won't run: is disabled or unconfigured"
+                        f"{c_config.name} won't run: is disabled or unconfigured"
                     )
 
                 if TLP.get_priority(tlp) > TLP.get_priority(
-                    config.maximum_tlp
+                    c_config.maximum_tlp
                 ):  # check if job's tlp allows running
                     # e.g. if connector_tlp is GREEN(1),
                     # run for job_tlp WHITE(0) & GREEN(1) only
                     raise NotRunnableConnector(
-                        f"{c_name} won't run: "
-                        f"job.tlp ('{tlp}') > maximum_tlp ('{config.maximum_tlp}')"
+                        f"{c_config.name} won't run: "
+                        f"job.tlp ('{tlp}') > maximum_tlp ('{c_config.maximum_tlp}')"
                     )
             except NotRunnableConnector as e:
+                connectors_executed.remove(c_config)
                 logger.warning(e)
                 self.filter_warnings.append(str(e))
-            else:
-                cleaned_connectors_list.append(c_name)
 
-        return cleaned_connectors_list
+        return connectors_executed
 
     def filter_analyzers_and_connectors(self, attrs: dict) -> dict:
         attrs["analyzers_to_execute"] = self.filter_analyzers(attrs)
@@ -268,11 +240,17 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
             )[0]
             for label in tags_labels
         ]
+        for key in self.mtm_fields.keys():
+            self.mtm_fields[key] = validated_data.pop(key)
 
         job = Job.objects.create(**validated_data)
+
         if tags:
             job.tags.set(tags)
 
+        for key, value in self.mtm_fields.items():
+            mtm = getattr(job, key)
+            mtm.set(value)
         return job
 
 
@@ -422,47 +400,36 @@ class FileAnalysisSerializer(_AbstractJobCreateSerializer):
         logger.debug(f"after attrs: {attrs}")
         return attrs
 
-    def filter_analyzers(self, serialized_data: Dict) -> List[str]:
-        cleaned_analyzer_list = []
+    def filter_analyzers(self, serialized_data: Dict) -> QuerySet:
 
         # get values from serializer
         partially_filtered_analyzers = super().filter_analyzers(serialized_data)
-        for a_name in partially_filtered_analyzers:
-            try:
-                # at this point we are sure that the analyzer object is present,
-                # but not its type
-                file_mimetype = serialized_data["file_mimetype"]
+        partially_filtered_analyzers_qs = AnalyzerConfig.objects.filter(
+            pk__in=[config.pk for config in partially_filtered_analyzers]
+        )
+        file_mimetype = serialized_data["file_mimetype"]
 
-                supported_query = Q(
-                    supported_filetypes__isnull=True,
-                    not_supported_filetypes__not__contains=[file_mimetype],
-                ) | Q(supported_filetypes__contains=[file_mimetype])
-                try:
-                    AnalyzerConfig.objects.get(
-                        Q(name=a_name, type=TypeChoices.FILE) & supported_query
-                    )
-                except AnalyzerConfig.DoesNotExist:
-                    raise NotRunnableAnalyzer(
-                        f"{a_name} won't be run because"
-                        " does not support the file mimetype."
-                    )
+        supported_query = Q(
+            supported_filetypes__isnull=True,
+            not_supported_filetypes__not__contains=[file_mimetype],
+        ) | Q(supported_filetypes__contains=[file_mimetype])
 
-            except NotRunnableAnalyzer as e:
-                if not self.log_runnable:
-                    # in this case, they are not warnings but
-                    # expected and wanted behavior
-                    logger.debug(e)
-                else:
-                    logger.warning(e)
-                    self.filter_warnings.append(str(e))
-            else:
-                cleaned_analyzer_list.append(a_name)
+        analyzers_to_execute = partially_filtered_analyzers_qs.filter(
+            Q(type=TypeChoices.FILE) & supported_query
+        )
+        for analyzer in partially_filtered_analyzers_qs.exclude(
+            Q(type=TypeChoices.FILE) & supported_query
+        ):
+            self.filter_warnings.append(
+                f"{analyzer.name} won't be run because"
+                " does not support the file mimetype."
+            )
 
-        if not cleaned_analyzer_list:
+        if not analyzers_to_execute:
             raise ValidationError(
                 {"detail": "No Analyzers can be run after filtering."}
             )
-        return cleaned_analyzer_list
+        return analyzers_to_execute
 
 
 class MultipleObservableAnalysisSerializer(rfs.ListSerializer):
@@ -562,90 +529,80 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
             value = value.replace("[", "")
         return value
 
-    def filter_analyzers(self, serialized_data: Dict) -> List[str]:
-        cleaned_analyzer_list = []
+    def filter_analyzers(self, serialized_data: Dict) -> QuerySet:
 
         # get values from serializer
         partially_filtered_analyzers = super().filter_analyzers(serialized_data)
+        partially_filtered_analyzers_qs = AnalyzerConfig.objects.filter(
+            pk__in=[config.pk for config in partially_filtered_analyzers]
+        )
+        analyzers_to_execute = partially_filtered_analyzers_qs.filter(
+            type=TypeChoices.OBSERVABLE,
+            observable_supported__contains=[
+                serialized_data["observable_classification"]
+            ],
+        )
+        for analyzer in partially_filtered_analyzers_qs.exclude(
+            type=TypeChoices.OBSERVABLE,
+            observable_supported__contains=[
+                serialized_data["observable_classification"]
+            ],
+        ):
+            self.filter_warnings.append(
+                f"{analyzer.name} won't be run because "
+                "it does not support the requested observable."
+            )
 
-        for a_name in partially_filtered_analyzers:
-            try:
-                # at this point we are sure that the analyzer object is present,
-                # but not its type
-                try:
-                    AnalyzerConfig.objects.get(
-                        name=a_name,
-                        type=TypeChoices.OBSERVABLE,
-                        observable_supported__contains=[
-                            serialized_data["observable_classification"]
-                        ],
-                    )
-                except AnalyzerConfig.DoesNotExist:
-                    raise NotRunnableAnalyzer(
-                        f"{a_name} won't be run because "
-                        "it does not support the requested observable."
-                    )
-            except NotRunnableAnalyzer as e:
-                if not self.log_runnable:
-                    # in this case, they are not warnings but
-                    # expected and wanted behavior
-                    logger.debug(e)
-                else:
-                    logger.warning(e)
-                    self.filter_warnings.append(str(e))
-            else:
-                cleaned_analyzer_list.append(a_name)
-
-        if not cleaned_analyzer_list:
+        if not analyzers_to_execute:
             raise ValidationError(
                 {"detail": "No Analyzers can be run after filtering."}
             )
-        return cleaned_analyzer_list
+        return analyzers_to_execute
 
 
 class PlaybookBaseSerializer:
+    def __init__(self, *args, **kwargs):
+        self.playbook_mtm_field = {
+            "playbooks_requested": None,
+            "playbooks_to_execute": None,
+        }
+
     def filter_playbooks(self, attrs: Dict) -> Dict:
         # init empty list
-        valid_playbook_list = []
-        analyzers_requested = []
-        connectors_requested = []
+        analyzers_requested = AnalyzerConfig.objects.none()
+        connectors_requested = ConnectorConfig.objects.none()
         runtime_configurations = []
         # get values from serializer
-        selected_playbooks = attrs.get("playbooks_requested", [])
-
+        selected_playbooks = attrs.get("playbooks_requested")
+        playbooks = selected_playbooks.copy()
         # read config
 
-        for p_name in selected_playbooks:
+        for p_config in selected_playbooks:
             try:
-                pp = PlaybookConfig.objects.get(name=p_name)
-                if not pp:
-                    raise NotRunnablePlaybook(f"{p_name} does not exists")
-                elif pp.disabled:
-                    raise NotRunnablePlaybook(f"{p_name} won't run: disabled")
+                if p_config.disabled:
+                    raise NotRunnablePlaybook(f"{p_config.name} won't run: disabled")
                 else:
-                    analyzers_requested.extend(
-                        list(pp.analyzers.all().values_list("name", flat=True))
-                    )
-                    connectors_requested.extend(
-                        list(pp.connectors.all().values_list("name", flat=True))
-                    )
+                    analyzers_requested.union(p_config.analyzers.all())
+                    connectors_requested.union(p_config.connectors.all())
+
                     runtime_configurations.append(
-                        pp.runtime_configuration["analyzers"]
-                        | pp.runtime_configuration["connectors"]
+                        p_config.runtime_configuration["analyzers"]
+                        | p_config.runtime_configuration["connectors"]
                     )
-                    valid_playbook_list.append(p_name)
             except NotRunnablePlaybook as e:
+                playbooks.remove(p_config)
                 logger.warning(e)
                 self.filter_warnings.append(str(e))
 
-        if not valid_playbook_list:
+        if not playbooks:
             raise ValidationError(
                 {"detail": "No playbooks can be run after filtering."}
             )
 
-        attrs["playbooks_to_execute"] = valid_playbook_list
-        attrs["analyzers_requested"] = list(set(analyzers_requested))
-        attrs["connectors_requested"] = list(set(connectors_requested))
+        attrs["analyzers_requested"] = analyzers_requested
+        attrs["connectors_requested"] = connectors_requested
+
+        attrs["playbooks_to_execute"] = playbooks
         attrs["runtime_configuration"] = runtime_configurations
 
         return attrs
@@ -671,6 +628,11 @@ class PlaybookObservableAnalysisSerializer(
             "tags_labels",
         )
         list_serializer_class = MultipleObservableAnalysisSerializer
+
+    def __init__(self, *args, **kwargs):
+        PlaybookBaseSerializer.__init__(self, *args, **kwargs)
+        ObservableAnalysisSerializer.__init__(self, *args, **kwargs)
+        self.mtm_fields.update(self.playbook_mtm_field)
 
     def validate(self, attrs: dict) -> dict:
         attrs = self.filter_playbooks(attrs)
@@ -700,6 +662,11 @@ class PlaybookFileAnalysisSerializer(PlaybookBaseSerializer, FileAnalysisSeriali
             "tags_labels",
         )
         list_serializer_class = MultipleFileAnalysisSerializer
+
+    def __init__(self, *args, **kwargs):
+        PlaybookBaseSerializer.__init__(self, *args, **kwargs)
+        FileAnalysisSerializer.__init__(self, *args, **kwargs)
+        self.mtm_fields.update(self.playbook_mtm_field)
 
     def validate(self, attrs: dict) -> dict:
         attrs["observable_classification"] = "file"

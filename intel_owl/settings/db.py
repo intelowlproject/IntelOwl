@@ -4,6 +4,8 @@ import sys
 
 from intel_owl import secrets
 
+from .aws import AWS_REGION
+
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 PG_DB = secrets.get_secret("DB_NAME", "intel_owl_db")
@@ -39,6 +41,7 @@ DATABASES = {
 
 if AWS_RDS_IAM_ROLE:
     DATABASES["default"]["OPTIONS"]["use_iam_auth"] = True
+    DATABASES["default"]["OPTIONS"]["region_name"] = AWS_REGION
 else:
     DATABASES["default"]["PASSWORD"] = PG_PASSWORD
 if PG_SSL:

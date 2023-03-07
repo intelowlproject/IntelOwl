@@ -134,7 +134,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
                 and set(visualizer.connectors.all().values_list("pk", flat=True))
                 <= set(
                     ConnectorConfig.objects.filter(
-                        name__in=serialized_data["analyzers_to_execute"]
+                        name__in=serialized_data["connectors_to_execute"]
                     ).values_list("pk", flat=True)
                 )
             ):

@@ -1,8 +1,6 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-import os
-
 from intel_owl import secrets
 
 # AWS settings
@@ -13,4 +11,4 @@ if not AWS_IAM_ACCESS:
 
 AWS_SECRETS = secrets.get_secret("AWS_SECRETS", False) == "True"
 AWS_SQS = secrets.get_secret("AWS_SQS", False) == "True"
-AWS_REGION = os.environ.get("AWS_REGION", "eu-central-1")
+AWS_REGION = secrets.get_secret("AWS_REGION", "eu-central-1")

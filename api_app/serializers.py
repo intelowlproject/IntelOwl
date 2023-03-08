@@ -5,7 +5,7 @@ import json
 import logging
 from typing import Dict, List
 
-from django.db.models import Q, QuerySet
+from django.db.models import Q
 from django.http import QueryDict
 from drf_spectacular.utils import extend_schema_serializer
 from durin.serializers import UserSerializer
@@ -533,18 +533,11 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
             value = value.replace("[", "")
         return value
 
-    def filter_analyzers(self, serialized_data: Dict) -> QuerySet:
+    def filter_analyzers(self, serialized_data: Dict) -> List[AnalyzerConfig]:
+        analyzers_to_execute = super().filter_analyzers(serialized_data)
 
-        # get values from serializer
-        partially_filtered_analyzers = super().filter_analyzers(serialized_data)
         partially_filtered_analyzers_qs = AnalyzerConfig.objects.filter(
-            pk__in=[config.pk for config in partially_filtered_analyzers]
-        )
-        analyzers_to_execute = partially_filtered_analyzers_qs.filter(
-            type=TypeChoices.OBSERVABLE,
-            observable_supported__contains=[
-                serialized_data["observable_classification"]
-            ],
+            pk__in=[config.pk for config in analyzers_to_execute]
         )
         for analyzer in partially_filtered_analyzers_qs.exclude(
             type=TypeChoices.OBSERVABLE,
@@ -552,6 +545,7 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
                 serialized_data["observable_classification"]
             ],
         ):
+            analyzers_to_execute.remove(analyzer)
             self.filter_warnings.append(
                 f"{analyzer.name} won't be run because "
                 "it does not support the requested observable."

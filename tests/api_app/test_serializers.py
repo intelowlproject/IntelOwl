@@ -10,6 +10,7 @@ from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.connectors_manager.models import ConnectorConfig
 from api_app.serializers import (
     FileAnalysisSerializer,
+    ObservableAnalysisSerializer,
     PlaybookFileAnalysisSerializer,
     PlaybookObservableAnalysisSerializer,
     _AbstractJobCreateSerializer,
@@ -358,5 +359,65 @@ class FileJobCreateSerializerTestCase(CustomTestCase):
         analyzers = FileAnalysisSerializer.filter_analyzers(
             oass,
             {"tlp": "WHITE", "file_mimetype": "text/rtf", "analyzers_requested": [a]},
+        )
+        self.assertCountEqual(analyzers, [a])
+
+
+class ObservableJobCreateSerializerTestCase(CustomTestCase):
+    def test_filter_analyzers_type(self):
+        a = AnalyzerConfig.objects.get(name="Tranco")
+        a.observable_supported = ["domain"]
+        a.type = "file"
+        a.save()
+        oass = ObservableAnalysisSerializer(
+            data={}, context={"request": MockRequest(self.user)}
+        )
+        with self.assertRaises(ValidationError):
+            ObservableAnalysisSerializer.filter_analyzers(
+                oass,
+                {
+                    "tlp": "WHITE",
+                    "analyzers_requested": [a],
+                    "observable_classification": "domain",
+                },
+            )
+        a.type = "observable"
+        a.save()
+        analyzers = ObservableAnalysisSerializer.filter_analyzers(
+            oass,
+            {
+                "tlp": "WHITE",
+                "analyzers_requested": [a],
+                "observable_classification": "domain",
+            },
+        )
+        self.assertCountEqual(analyzers, [a])
+
+    def test_filter_analyzer_observable_supported(self):
+        a = AnalyzerConfig.objects.get(name="Tranco")
+        a.observable_supported = ["ip"]
+        a.type = "observable"
+        a.save()
+        oass = ObservableAnalysisSerializer(
+            data={}, context={"request": MockRequest(self.user)}
+        )
+        with self.assertRaises(ValidationError):
+            ObservableAnalysisSerializer.filter_analyzers(
+                oass,
+                {
+                    "tlp": "WHITE",
+                    "analyzers_requested": [a],
+                    "observable_classification": "domain",
+                },
+            )
+        a.observable_supported = ["domain"]
+        a.save()
+        analyzers = ObservableAnalysisSerializer.filter_analyzers(
+            oass,
+            {
+                "tlp": "WHITE",
+                "analyzers_requested": [a],
+                "observable_classification": "domain",
+            },
         )
         self.assertCountEqual(analyzers, [a])

@@ -17,7 +17,6 @@ class VisualizerReport(AbstractReport):
     report = models.JSONField(default=dict, validators=[validate_report])
 
 
-
 class VisualizerConfig(AbstractConfig):
     analyzers = models.ManyToManyField(
         AnalyzerConfig, related_name="visualizers", blank=True

@@ -108,7 +108,7 @@ class MimeTypes(models.TextChoices):
             logger.debug(f"mimetype is {mimetype}")
             mimetype = cls(mimetype)
 
-        if mimetype in cls.ZIP and re.search(REGEX_OFFICE_FILES, file_name):
+        if mimetype in cls.ZIP() and re.search(REGEX_OFFICE_FILES, file_name):
             return cls.ANDROID
 
         return mimetype

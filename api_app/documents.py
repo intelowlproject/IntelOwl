@@ -38,7 +38,7 @@ class JobDocument(Document):
     tags = fields.NestedField(
         properties={"label": fields.KeywordField(), "color": fields.TextField()}
     )
-    analyzer_reports = fields.NestedField(
+    analyzerreports = fields.NestedField(
         properties={
             "name": fields.KeywordField(),
             "status": fields.KeywordField(),

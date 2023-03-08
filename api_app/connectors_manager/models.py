@@ -13,6 +13,7 @@ from api_app.models import TLP, PluginConfig
 class ConnectorReport(AbstractReport):
     ...
 
+
 class ConnectorConfig(AbstractConfig):
     maximum_tlp = models.CharField(
         null=False, default=TLP.WHITE, choices=TLP.choices, max_length=50

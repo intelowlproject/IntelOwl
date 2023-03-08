@@ -273,9 +273,9 @@ class JobSerializer(_AbstractJobViewSerializer):
         model = Job
         exclude = ("file",)
 
-    analyzer_reports = AnalyzerReportSerializer(many=True, read_only=True)
-    connector_reports = ConnectorReportSerializer(many=True, read_only=True)
-    visualizer_reports = VisualizerReportSerializer(many=True, read_only=True)
+    analyzerreports = AnalyzerReportSerializer(many=True, read_only=True)
+    connectorreports = ConnectorReportSerializer(many=True, read_only=True)
+    visualizerreports = VisualizerReportSerializer(many=True, read_only=True)
 
     permissions = rfs.SerializerMethodField()
 
@@ -409,9 +409,11 @@ class FileAnalysisSerializer(_AbstractJobCreateSerializer):
         )
         file_mimetype = serialized_data["file_mimetype"]
 
-        supported_query = Q(
-            supported_filetypes__isnull=True,
-            not_supported_filetypes__not__contains=[file_mimetype],
+        supported_query = (
+            Q(
+                supported_filetypes__isnull=True,
+            )
+            & ~Q(not_supported_filetypes__contains=[file_mimetype])
         ) | Q(supported_filetypes__contains=[file_mimetype])
 
         analyzers_to_execute = partially_filtered_analyzers_qs.filter(

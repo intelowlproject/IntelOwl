@@ -147,6 +147,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
   * [Elastic rules](https://github.com/elastic/protections-artifacts)
   * [JPCERTCC Yara rules](https://github.com/JPCERTCC/jpcert-yara)
   * [HuntressLab Yara rules](https://github.com/embee-research/Yara)
+  * [elceef Yara Rules](https://github.com/elceef/yara-rulz)
   * your own added signatures. See [Advanced-Usage](./Advanced-Usage.html#analyzers-with-special-configuration) for more details.
 * `PEframe_Scan`: Perform static analysis on Portable Executable malware and malicious MS Office documents with [PeFrame](https://github.com/guelfoweb/peframe)
 * `Capa_Info`: [Capa](https://github.com/mandiant/capa) detects capabilities in executable files

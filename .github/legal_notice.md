@@ -37,6 +37,7 @@ license terms.
 [InQuest Yara rules](https://github.com/InQuest/yara-rules),
 [JPCERTCC Yara rules](https://github.com/JPCERTCC/jpcert-yara),
 [HuntressLab Yara rules](https://github.com/embee-research/Yara),
+[elceef Yara Rules](https://github.com/elceef/yara-rulz),
 [Elastic Yara Rules](https://github.com/elastic/protections-artifacts), 
 [SIFalcon Yara Rules](https://github.com/SIFalcon/Detection/),
 [APKiD](https://github.com/rednaga/APKiD/blob/master/LICENSE.COMMERCIAL),

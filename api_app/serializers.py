@@ -28,6 +28,7 @@ from .connectors_manager.serializers import ConnectorReportSerializer
 from .helpers import calculate_md5, gen_random_colorhex
 from .models import TLP, Job, PluginConfig, Tag
 from .playbooks_manager.exceptions import NotRunnablePlaybook
+from .playbooks_manager.models import PlaybookConfig
 from .visualizers_manager.models import VisualizerConfig
 from .visualizers_manager.serializers import VisualizerReportSerializer
 
@@ -66,11 +67,15 @@ class JobAvailabilitySerializer(rfs.ModelSerializer):
 
     class Meta:
         model = Job
-        fields = rfs.ALL_FIELDS
+        fields = ["md5", "analyzers", "playbooks", "running_only", "minutes_ago"]
 
     md5 = rfs.CharField(max_length=128, required=True)
-    analyzers = rfs.ListField(default=list)
-    playbooks = rfs.ListField(default=list, required=False)
+    analyzers = rfs.PrimaryKeyRelatedField(
+        queryset=AnalyzerConfig.objects.all(), many=True, required=False
+    )
+    playbooks = rfs.PrimaryKeyRelatedField(
+        queryset=PlaybookConfig.objects.all(), many=True, required=False
+    )
     running_only = rfs.BooleanField(default=False, required=False)
     minutes_ago = rfs.IntegerField(default=None, required=False)
 

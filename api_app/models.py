@@ -3,6 +3,7 @@
 
 import logging
 import typing
+from itertools import chain
 from typing import Optional
 
 from celery import group
@@ -292,29 +293,29 @@ class Job(models.Model):
         analyzers: QuerySet,
         connectors: QuerySet,
     ):
-        # in case of key conflict, runtime_configuration
-        # is overwritten by the Plugin configuration
+        logger.debug(f"Starting runtime_configuration: {runtime_configuration}")
+
         final_config = {}
         user = self.user
-        for analyzer in analyzers:
-            # Appending custom config to runtime configuration
-            config = runtime_configuration.get(analyzer, {})
-
-            config |= analyzer.read_params(user)
-            if config:
-                final_config[analyzer] = config
-        for connector in connectors:
-            config = runtime_configuration.get(connector, {})
-
-            config |= connector.read_params(user)
-            if config:
-                final_config[connector] = config
+        for plugin in list(chain(analyzers, connectors)):
+            plugin: AbstractConfig
+            # in case of key conflict, Plugin configuration
+            # is overwritten by the runtime_configuration
+            config = plugin.read_params(user)
+            config |= runtime_configuration.get(plugin.name, {})
+            final_config[plugin.name] = config
         logger.debug(f"New value of runtime_configuration: {final_config}")
         return final_config
 
     def _pipeline_configuration(
         self, runtime_configuration: typing.Dict[str, typing.Any]
-    ) -> typing.Tuple[typing.List, typing.List, typing.List, typing.List, range]:
+    ) -> typing.Tuple[
+        typing.List[QuerySet],
+        typing.List[QuerySet],
+        typing.List[QuerySet],
+        typing.List[QuerySet],
+        range,
+    ]:
 
         visualizers = [self.visualizers_to_execute.all()]
         if not self.playbooks_to_execute.all().exists():
@@ -329,7 +330,10 @@ class Job(models.Model):
             # this must be done because each analyzer on the playbook
             # could be executed with a different configuration
             for playbook in self.playbooks_to_execute.all():
-                configs.append(playbook.runtime_configuration)
+                configs.append(
+                    playbook.runtime_configuration["analyzers"]
+                    | playbook.runtime_configuration["connectors"]
+                )
                 analyzers.append(
                     self.analyzers_to_execute.intersection(playbook.analyzers.all())
                 )

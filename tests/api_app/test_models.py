@@ -1,5 +1,8 @@
-from api_app.models import Job, PluginConfig
-from certego_saas.apps.user.models import User
+from api_app.analyzers_manager.models import AnalyzerConfig
+from api_app.connectors_manager.models import ConnectorConfig
+from api_app.models import Job
+from api_app.playbooks_manager.models import PlaybookConfig
+from api_app.visualizers_manager.models import VisualizerConfig
 from tests import CustomTestCase
 
 
@@ -7,73 +10,80 @@ class JobTestCase(CustomTestCase):
     PLAYBOOK = "FREE_TO_USE_ANALYZERS"
 
     def test_merge_configurations(self):
-        user = User.objects.create_user(
-            username="user",
-            email="user@intelowl.com",
-            password="test",
-        )
         job = Job.objects.create(
-            playbooks_to_execute=[self.PLAYBOOK],
-            analyzers_to_execute=["AbuseIPDB"],
-            user=user,
+            user=self.user,
         )
+        a = AnalyzerConfig.objects.get(name="AbuseIPDB")
 
-        config = job._merge_runtime_configuration(
-            {"AbuseIPDB": {"param1": 3}}, ["AbuseIPDB"], []
-        )
-        self.assertEqual(config, {"AbuseIPDB": {"param1": 3}})
+        job.playbooks_to_execute.set([PlaybookConfig.objects.get(name=self.PLAYBOOK)])
+        job.analyzers_to_execute.set([AnalyzerConfig.objects.get(name="AbuseIPDB")])
+        config = job._merge_runtime_configuration({"AbuseIPDB": {"param1": 3}}, [a], [])
+        a.params["param1"] = {
+            "default": 122222,
+            "description": "if the file analyzed is a shellcode or not",
+            "type": "bool",
+        }
+        a.save()
+        self.assertIn("AbuseIPDB", config)
+        self.assertIn("param1", config["AbuseIPDB"])
+        self.assertEqual(config["AbuseIPDB"]["param1"], 3)
+        config = job._merge_runtime_configuration({"AbuseIPDB": {"param1": 3}}, [a], [])
 
-        pc = PluginConfig.objects.create(
-            type="1",
-            config_type="1",
-            plugin_name="AbuseIPDB",
-            attribute="param1",
-            value=122222,
-            owner=user,
-        )
-        config = job._merge_runtime_configuration(
-            {"AbuseIPDB": {"param1": 3}}, ["AbuseIPDB"], []
-        )
-
-        self.assertEqual(config, {"AbuseIPDB": {"param1": 122222}})
-
-        pc.delete()
+        self.assertIn("AbuseIPDB", config)
+        self.assertIn("param1", config["AbuseIPDB"])
+        self.assertEqual(config["AbuseIPDB"]["param1"], 3)
+        config = job._merge_runtime_configuration({}, [a], [])
+        self.assertIn("AbuseIPDB", config)
+        self.assertIn("param1", config["AbuseIPDB"])
+        self.assertEqual(config["AbuseIPDB"]["param1"], 122222)
+        del a.params["param1"]
+        a.save()
         job.delete()
-        user.delete()
 
     def test_pipeline_configuration_no_playbook(self):
-        job = Job.objects.create(analyzers_to_execute=["AbuseIPDB"])
+        job = Job.objects.create(user=self.user)
+        job.analyzers_to_execute.set([AnalyzerConfig.objects.get(name="AbuseIPDB")])
         (
             configs,
             analyzers,
             connectors,
             visualizers,
-            playbooks,
+            num_configs,
         ) = job._pipeline_configuration({"AbuseIPDB": {"param1": 3}})
         self.assertEqual(configs, [{"AbuseIPDB": {"param1": 3}}])
-        self.assertEqual(analyzers, [["AbuseIPDB"]])
-        self.assertEqual(connectors, [[]])
-        self.assertEqual(visualizers, [[]])
-        self.assertEqual(playbooks, [""])
+        self.assertEqual(
+            list(analyzers[0]), list(AnalyzerConfig.objects.filter(name="AbuseIPDB"))
+        )
+        self.assertEqual(list(connectors[0]), list(ConnectorConfig.objects.none()))
+        self.assertEqual(list(visualizers[0]), list(VisualizerConfig.objects.none()))
+        self.assertEqual(len(list(num_configs)), 1)
         job.delete()
 
     def test_pipeline_configuration_playbook(self):
+        p = PlaybookConfig.objects.get(name=self.PLAYBOOK)
+        p.runtime_configuration["analyzers"]["Classic_DNS"] = {"query_type": "AAA"}
+        p.save()
         job = Job.objects.create(
-            playbooks_to_execute=[self.PLAYBOOK], analyzers_to_execute=["Classic_DNS"]
+            user=self.user,
         )
+        job.playbooks_to_execute.set([PlaybookConfig.objects.get(name=self.PLAYBOOK)])
+        job.analyzers_to_execute.set([AnalyzerConfig.objects.get(name="Classic_DNS")])
+
         (
             configs,
             analyzers,
             connectors,
             visualizers,
-            playbooks,
+            num_configs,
         ) = job._pipeline_configuration({})
         self.assertIsInstance(configs, list)
         self.assertEqual(1, len(configs))
         self.assertIn("Classic_DNS", configs[0])
-        self.assertEqual(configs[0]["Classic_DNS"], {"query_type": "A"})
-        self.assertIn("Classic_DNS", analyzers[0])
-        self.assertEqual(connectors, [[]])
-        self.assertEqual(visualizers, [[]])
-        self.assertEqual(playbooks, [self.PLAYBOOK])
+        self.assertEqual(configs[0]["Classic_DNS"], {"query_type": "AAA"})
+        self.assertEqual(
+            list(AnalyzerConfig.objects.filter(name="Classic_DNS")), list(analyzers[0])
+        )
+        self.assertEqual(list(connectors[0]), list(ConnectorConfig.objects.none()))
+        self.assertEqual(list(visualizers[0]), list(VisualizerConfig.objects.none()))
+        self.assertEqual(len(list(num_configs)), 1)
         job.delete()

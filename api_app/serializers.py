@@ -569,7 +569,6 @@ class PlaybookBaseSerializer:
         # init empty list
         analyzers_requested = AnalyzerConfig.objects.none()
         connectors_requested = ConnectorConfig.objects.none()
-        runtime_configurations = []
         # get values from serializer
         selected_playbooks = attrs.get("playbooks_requested")
         playbooks = selected_playbooks.copy()
@@ -582,11 +581,6 @@ class PlaybookBaseSerializer:
                 else:
                     analyzers_requested.union(p_config.analyzers.all())
                     connectors_requested.union(p_config.connectors.all())
-
-                    runtime_configurations.append(
-                        p_config.runtime_configuration["analyzers"]
-                        | p_config.runtime_configuration["connectors"]
-                    )
             except NotRunnablePlaybook as e:
                 playbooks.remove(p_config)
                 logger.warning(e)
@@ -601,7 +595,6 @@ class PlaybookBaseSerializer:
         attrs["connectors_requested"] = connectors_requested
 
         attrs["playbooks_to_execute"] = playbooks
-        attrs["runtime_configuration"] = runtime_configurations
 
         return attrs
 

@@ -131,11 +131,17 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
                 # subsets
                 and set(visualizer.analyzers.all().values_list("pk", flat=True))
                 <= set(
-                    [analyzer.pk for analyzer in serialized_data["analyzers_to_execute"]]
+                    [
+                        analyzer.pk
+                        for analyzer in serialized_data["analyzers_to_execute"]
+                    ]
                 )
                 and set(visualizer.connectors.all().values_list("pk", flat=True))
                 <= set(
-                    [connector.pk for connector in serialized_data["connectors_to_execute"]]
+                    [
+                        connector.pk
+                        for connector in serialized_data["connectors_to_execute"]
+                    ]
                 )
             ):
                 logger.info(f"Going to use {visualizer.name}")
@@ -398,28 +404,26 @@ class FileAnalysisSerializer(_AbstractJobCreateSerializer):
         logger.debug(f"after attrs: {attrs}")
         return attrs
 
-    def filter_analyzers(self, serialized_data: Dict) -> QuerySet:
+    def filter_analyzers(self, serialized_data: Dict) -> List[AnalyzerConfig]:
 
         # get values from serializer
-        partially_filtered_analyzers = super().filter_analyzers(serialized_data)
+        analyzers_to_execute = super().filter_analyzers(serialized_data)
         partially_filtered_analyzers_qs = AnalyzerConfig.objects.filter(
-            pk__in=[config.pk for config in partially_filtered_analyzers]
+            pk__in=[config.pk for config in analyzers_to_execute]
         )
         file_mimetype = serialized_data["file_mimetype"]
 
         supported_query = (
             Q(
-                supported_filetypes__isnull=True,
+                supported_filetypes__len=0,
             )
             & ~Q(not_supported_filetypes__contains=[file_mimetype])
         ) | Q(supported_filetypes__contains=[file_mimetype])
 
-        analyzers_to_execute = partially_filtered_analyzers_qs.filter(
-            Q(type=TypeChoices.FILE) & supported_query
-        )
         for analyzer in partially_filtered_analyzers_qs.exclude(
             Q(type=TypeChoices.FILE) & supported_query
         ):
+            analyzers_to_execute.remove(analyzer)
             self.filter_warnings.append(
                 f"{analyzer.name} won't be run because"
                 " does not support the file mimetype."

@@ -136,8 +136,7 @@ def _multi_analysis_request(
     return response_dict
 
 
-def _multi_analysis_availability(user, data):
-    data_received = data
+def _multi_analysis_availability(user, data_received):
     logger.info(
         f"ask_analysis_availability received request from {str(user)}."
         f"Data: {list(data_received)}"
@@ -173,7 +172,7 @@ def _multi_analysis_availability(user, data):
         if not playbooks and not analyzers:
             analyzers = AnalyzerConfig.objects.all()
 
-        query = Q(md5=md5) & Q(status__in=statuses_to_check)
+        query = Q(md5=md5) & Q(status__in=statuses_to_check) & Q(user=user)
         # we want a job that has every analyzer requested
         for analyzer in analyzers:
             query &= Q(analyzers_to_execute=analyzer)

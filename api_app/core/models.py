@@ -34,7 +34,6 @@ class AbstractReport(models.Model):
     Status = Status
 
     # fields
-    name = models.CharField(max_length=128)
     status = models.CharField(max_length=50, choices=Status.choices)
     report = models.JSONField(default=dict)
     errors = pg_fields.ArrayField(
@@ -51,13 +50,18 @@ class AbstractReport(models.Model):
         "api_app.Job", related_name="%(class)ss", on_delete=models.CASCADE
     )
 
+    @classmethod
+    @property
+    def config(cls) -> "AbstractConfig":
+        raise NotImplementedError()
+
     # meta
     class Meta:
         abstract = True
-        unique_together = [("name", "job")]
+        unique_together = [("config", "job")]
 
     def __str__(self):
-        return f"{self.__class__.__name__}(job:#{self.job_id}, {self.name})"
+        return f"{self.__class__.__name__}(job:#{self.job_id}, {self.config.name})"
 
     # properties
     @property
@@ -81,14 +85,14 @@ class AbstractReport(models.Model):
 
     @classmethod
     def get_or_create_failed(
-        cls, job_id: int, name: str, defaults: Dict, error: str
+        cls, job_id: int, config: "AbstractConfig", defaults: Dict, error: str
     ) -> "AbstractReport":
         logger.warning(
-            f"(job: #{job_id}, {cls.__name__}:{name}) -> set as {cls.Status.FAILED}. "
+            f"(job: #{job_id}, {cls.__name__}:{config.name}) -> set as {cls.Status.FAILED}. "
             f"Error: {error}"
         )
         report, _ = cls.objects.get_or_create(
-            job_id=job_id, name=name, defaults=defaults
+            job_id=job_id, config=config, defaults=defaults
         )
         report.status = cls.Status.FAILED
         report.errors.append(error)
@@ -126,7 +130,7 @@ class AbstractConfig(models.Model):
         ]
 
     @classmethod
-    def _get_type(cls) -> str:
+    def _get_type(cls) -> models.TextChoices:
         raise NotImplementedError()
 
     @property
@@ -293,7 +297,7 @@ class AbstractConfig(models.Model):
             report = instance.start()
         except Exception as e:
             report = self.report_model.get_or_create_failed(
-                job_id, self.name, report_defaults, str(e)
+                job_id, self, report_defaults, str(e)
             )
         return report
 

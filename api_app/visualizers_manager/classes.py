@@ -50,19 +50,9 @@ class Visualizer(Plugin, metaclass=abc.ABCMeta):
         logger.info(f"FINISHED visualizer: {self.__repr__()}")
 
     def analyzer_reports(self) -> QuerySet:
-        from api_app.analyzers_manager.models import AnalyzerReport
-
         self._config: VisualizerConfig
-        return AnalyzerReport.objects.filter(
-            name__in=self._config.analyzers.all().values_list("name", flat=True),
-            job=self._job,
-        )
+        return self._config.analyzers.filter(reports__job=self._job)
 
     def connectors_reports(self) -> QuerySet:
-        from api_app.connectors_manager.models import ConnectorReport
-
         self._config: VisualizerConfig
-        return ConnectorReport.objects.filter(
-            name__in=self._config.connectors.all().values_list("name", flat=True),
-            job=self._job,
-        )
+        return self._config.connectors.filter(reports__job=self._job)

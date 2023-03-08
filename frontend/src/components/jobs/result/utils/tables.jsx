@@ -29,10 +29,10 @@ const tableProps = {
           {job.permissions?.plugin_actions === true &&
             ["running", "pending"].includes(plugin.status.toLowerCase()) && (
               <IconButton
-                id={`killplugin-${plugin.name}`}
+                id={`killplugin-${plugin.config}`}
                 Icon={MdPauseCircleOutline}
                 onClick={() =>
-                  killPlugin(job.id, plugin.type, plugin.name).then(refetch)
+                  killPlugin(job.id, plugin.type, plugin.config).then(refetch)
                 }
                 color="accent"
                 size="xs"
@@ -44,10 +44,10 @@ const tableProps = {
           {job.permissions?.plugin_actions === true &&
             ["failed", "killed"].includes(plugin.status.toLowerCase()) && (
               <IconButton
-                id={`retryplugin-${plugin.name}`}
+                id={`retryplugin-${plugin.config}`}
                 Icon={MdOutlineRefresh}
                 onClick={() =>
-                  retryPlugin(job.id, plugin.type, plugin.name).then(refetch)
+                  retryPlugin(job.id, plugin.type, plugin.config).then(refetch)
                 }
                 color="light"
                 size="xs"

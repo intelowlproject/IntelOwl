@@ -8,14 +8,14 @@ from api_app.core.models import AbstractConfig
 class AbstractReportAdminView(admin.ModelAdmin):
     list_display = (
         "id",
-        "name",
+        "config",
         "job",
         "status",
         "start_time",
         "end_time",
     )
     list_display_links = ("id",)
-    search_fields = ("name",)
+    search_fields = ("config",)
 
     def has_add_permission(self, request):
         return False

@@ -42,7 +42,7 @@ class PluginActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
         try:
             obj = self.report_model.objects.get(
                 job_id=job_id,
-                name=name,
+                config__name=name,
             )
             self.check_object_permissions(self.request, obj)
             return obj

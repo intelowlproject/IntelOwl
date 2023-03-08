@@ -2,7 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 from rest_framework import serializers as rfs
 
-from api_app.core.serializers import AbstractConfigSerializer
+from api_app.core.serializers import AbstractConfigSerializer, AbstractReportSerializer
 
 from .models import ConnectorConfig, ConnectorReport
 
@@ -13,24 +13,7 @@ class ConnectorConfigSerializer(AbstractConfigSerializer):
         fields = rfs.ALL_FIELDS
 
 
-class ConnectorReportSerializer(rfs.ModelSerializer):
-    """
-    ConnectorReport model's serializer.
-    """
-
-    type = rfs.CharField(default="connector")
-
+class ConnectorReportSerializer(AbstractReportSerializer):
     class Meta:
         model = ConnectorReport
-        fields = (
-            "name",
-            "status",
-            "report",
-            "errors",
-            "process_time",
-            "start_time",
-            "end_time",
-            "runtime_configuration",
-            "type",
-            "parent_playbook",
-        )
+        exclude = AbstractReportSerializer.Meta.exclude

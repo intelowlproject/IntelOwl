@@ -2,32 +2,19 @@
 # See the file 'LICENSE' for copying permission.
 from rest_framework import serializers as rfs
 
-from api_app.core.serializers import AbstractConfigSerializer
+from api_app.core.serializers import AbstractConfigSerializer, AbstractReportSerializer
 
 from .models import AnalyzerConfig, AnalyzerReport
 
 
-class AnalyzerReportSerializer(rfs.ModelSerializer):
+class AnalyzerReportSerializer(AbstractReportSerializer):
     """
     AnalyzerReport model's serializer.
     """
 
-    type = rfs.CharField(default="analyzer")
-
     class Meta:
         model = AnalyzerReport
-        fields = (
-            "name",
-            "status",
-            "report",
-            "errors",
-            "process_time",
-            "start_time",
-            "end_time",
-            "runtime_configuration",
-            "type",
-            "parent_playbook",
-        )
+        exclude = AbstractReportSerializer.Meta.exclude
 
 
 class AnalyzerConfigSerializer(AbstractConfigSerializer):

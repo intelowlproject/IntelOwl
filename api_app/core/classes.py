@@ -124,7 +124,7 @@ class Plugin(metaclass=ABCMeta):
         # update case: recurring plugin run
         _report, _ = self.report_model.objects.update_or_create(
             job_id=self.job_id,
-            name=self._config.name,
+            config=self._config,
             defaults={
                 "report": {},
                 "errors": [],

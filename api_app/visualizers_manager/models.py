@@ -14,6 +14,9 @@ from api_app.visualizers_manager.validators import validate_report
 
 
 class VisualizerReport(AbstractReport):
+    config = models.ForeignKey(
+        "VisualizerConfig", related_name="reports", null=False, on_delete=models.CASCADE
+    )
     report = models.JSONField(default=dict, validators=[validate_report])
 
 

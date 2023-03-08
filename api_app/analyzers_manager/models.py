@@ -23,7 +23,9 @@ logger = getLogger(__name__)
 
 
 class AnalyzerReport(AbstractReport):
-    ...
+    config = models.ForeignKey(
+        "AnalyzerConfig", related_name="reports", null=False, on_delete=models.CASCADE
+    )
 
 
 class MimeTypes(models.TextChoices):

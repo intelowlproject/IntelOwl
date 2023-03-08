@@ -6,7 +6,7 @@ from typing import List, Optional, TypedDict
 
 from rest_framework import serializers as rfs
 
-from api_app.core.models import AbstractConfig
+from api_app.core.models import AbstractConfig, AbstractReport
 from intel_owl.consts import PARAM_DATATYPE_CHOICES
 
 logger = logging.getLogger(__name__)
@@ -78,7 +78,6 @@ class AbstractConfigSerializer(rfs.ModelSerializer):
     config = _ConfigSerializer(required=True)
 
     class Meta:
-        model = AbstractConfig
         fields = rfs.ALL_FIELDS
 
     def to_representation(self, instance: AbstractConfig):
@@ -93,6 +92,21 @@ class AbstractConfigSerializer(rfs.ModelSerializer):
                 param_dict["value"] = None
         result["disabled"] = not instance.is_runnable(user)
         return result
+
+    def to_internal_value(self, data):
+        raise NotImplementedError()
+
+
+class AbstractReportSerializer(rfs.ModelSerializer):
+    class Meta:
+        exclude = [
+            "task_id",
+        ]
+
+    def to_representation(self, instance: AbstractReport):
+        data = super().to_representation(instance)
+        data["type"] = instance.config._get_type().label.lower()
+        return data
 
     def to_internal_value(self, data):
         raise NotImplementedError()

@@ -11,7 +11,9 @@ from api_app.models import TLP, PluginConfig
 
 
 class ConnectorReport(AbstractReport):
-    ...
+    config = models.ForeignKey(
+        "ConnectorConfig", related_name="reports", null=False, on_delete=models.CASCADE
+    )
 
 
 class ConnectorConfig(AbstractConfig):
@@ -21,7 +23,7 @@ class ConnectorConfig(AbstractConfig):
     run_on_failure = models.BooleanField(null=False, default=True)
 
     @classmethod
-    def _get_type(cls) -> str:
+    def _get_type(cls) -> models.TextChoices:
         return PluginConfig.PluginType.CONNECTOR
 
     @classmethod

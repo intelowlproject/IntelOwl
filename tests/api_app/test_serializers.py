@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 from django.conf import settings
 from django.core.files import File
 from django.http.request import MultiValueDict, QueryDict
@@ -5,12 +7,14 @@ from django.test import TransactionTestCase
 from rest_framework.exceptions import ValidationError
 
 from api_app.analyzers_manager.models import AnalyzerConfig
+from api_app.connectors_manager.models import ConnectorConfig
 from api_app.serializers import (
     ObservableAnalysisSerializer,
     PlaybookFileAnalysisSerializer,
     PlaybookObservableAnalysisSerializer,
     _AbstractJobCreateSerializer,
 )
+from api_app.visualizers_manager.models import VisualizerConfig
 from tests import CustomTestCase
 from tests.mock_utils import MockRequest
 
@@ -69,17 +73,8 @@ class PlaybookFileAnalysisSerializerTestCase(TransactionTestCase):
 
 class AbstractJobCreateSerializerTestCase(CustomTestCase):
     def test_filter_analyzers_all(self):
-        data = {
-            "observable_name": "test.com",
-            "observable_classification": "domain",
-            "analyzers_requested": [],
-            "connectors_requested": [],
-            "tlp": "WHITE",
-            "runtime_configuration": {},
-            "tags_labels": [],
-        }
         oass = ObservableAnalysisSerializer(
-            data=data, context={"request": MockRequest(self.user)}
+            data={}, context={"request": MockRequest(self.user)}
         )
         analyzers = _AbstractJobCreateSerializer.filter_analyzers(
             oass, {"tlp": "WHITE", "analyzers_requested": []}
@@ -93,17 +88,8 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
     def test_filter_analyzers_not_runnable(self):
         a = AnalyzerConfig.objects.get(name="Tranco")
         a.disabled = True
-        data = {
-            "observable_name": "test.com",
-            "observable_classification": "domain",
-            "analyzers_requested": ["Tranco", "AbuseIPDB"],
-            "connectors_requested": [],
-            "tlp": "WHITE",
-            "runtime_configuration": {},
-            "tags_labels": [],
-        }
         oass = ObservableAnalysisSerializer(
-            data=data, context={"request": MockRequest(self.user)}
+            data={}, context={"request": MockRequest(self.user)}
         )
         with self.assertRaises(ValidationError):
             _AbstractJobCreateSerializer.filter_analyzers(
@@ -118,17 +104,8 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
     def test_filter_analyzers_tlp_not_white(self):
         a = AnalyzerConfig.objects.get(name="Tranco")
         a.leaks_info = True
-        data = {
-            "observable_name": "test.com",
-            "observable_classification": "domain",
-            "analyzers_requested": ["Tranco"],
-            "connectors_requested": [],
-            "tlp": "GREEN",
-            "runtime_configuration": {},
-            "tags_labels": [],
-        }
         oass = ObservableAnalysisSerializer(
-            data=data, context={"request": MockRequest(self.user)}
+            data={}, context={"request": MockRequest(self.user)}
         )
         with self.assertRaises(ValidationError):
             _AbstractJobCreateSerializer.filter_analyzers(
@@ -145,17 +122,9 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
         a = AnalyzerConfig.objects.get(name="Tranco")
         a.leaks_info = False
         a.external_service = True
-        data = {
-            "observable_name": "test.com",
-            "observable_classification": "domain",
-            "analyzers_requested": ["Tranco"],
-            "connectors_requested": [],
-            "tlp": "RED",
-            "runtime_configuration": {},
-            "tags_labels": [],
-        }
+
         oass = ObservableAnalysisSerializer(
-            data=data, context={"request": MockRequest(self.user)}
+            data={}, context={"request": MockRequest(self.user)}
         )
         with self.assertRaises(ValidationError):
             _AbstractJobCreateSerializer.filter_analyzers(
@@ -166,3 +135,152 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
             oass, {"tlp": "RED", "analyzers_requested": [a]}
         )
         self.assertCountEqual(analyzers, [a])
+
+    def test_filter_connectors_all(self):
+
+        oass = ObservableAnalysisSerializer(
+            data={}, context={"request": MockRequest(self.user)}
+        )
+        connectors = _AbstractJobCreateSerializer.filter_connectors(
+            oass, {"tlp": "WHITE", "connectors_requested": []}
+        )
+        total = 0
+        for connector in ConnectorConfig.objects.all():
+            if connector.is_runnable(self.user):
+                total += 1
+        self.assertEqual(len(connectors), total)
+
+    def test_filter_connectors_is_runnable(self):
+        c = ConnectorConfig.objects.get(name="MISP")
+        c.maximum_tlp = "WHITE"
+
+        self.assertFalse(c.is_runnable(self.user))
+        oass = ObservableAnalysisSerializer(
+            data={}, context={"request": MockRequest(self.user)}
+        )
+        connectors = _AbstractJobCreateSerializer.filter_connectors(
+            oass, {"tlp": "WHITE", "connectors_requested": [c]}
+        )
+        self.assertEqual(0, len(connectors))
+        with patch.object(c, "is_runnable") as is_runnable:
+            is_runnable.return_value = True
+            connectors = _AbstractJobCreateSerializer.filter_connectors(
+                oass, {"tlp": "WHITE", "connectors_requested": [c]}
+            )
+            self.assertCountEqual(connectors, [c])
+
+    def test_filter_connectors_tlp(self):
+        c = ConnectorConfig.objects.get(name="MISP")
+        c.maximum_tlp = "WHITE"
+        oass = ObservableAnalysisSerializer(
+            data={}, context={"request": MockRequest(self.user)}
+        )
+        with patch.object(c, "is_runnable") as is_runnable:
+            is_runnable.return_value = True
+            connectors = _AbstractJobCreateSerializer.filter_connectors(
+                oass, {"tlp": "GREEN", "connectors_requested": [c]}
+            )
+            self.assertEqual(0, len(connectors))
+            connectors = _AbstractJobCreateSerializer.filter_connectors(
+                oass, {"tlp": "WHITE", "connectors_requested": [c]}
+            )
+            self.assertCountEqual(connectors, [c])
+
+    def test_filter_visualizers_all(self):
+        v = VisualizerConfig.objects.get(name="Yara")
+        v.analyzers.set(AnalyzerConfig.objects.none())
+        v.connectors.set(AnalyzerConfig.objects.none())
+        oass = ObservableAnalysisSerializer(
+            data={}, context={"request": MockRequest(self.user)}
+        )
+        with patch.object(VisualizerConfig.objects, "all") as all:
+            all.return_value = [v]
+            visualizers = _AbstractJobCreateSerializer.filter_visualizers(
+                oass, {"analyzers_to_execute": [], "connectors_to_execute": []}
+            )
+            self.assertCountEqual(visualizers, [v])
+
+    def test_filter_visualizers_is_runnable(self):
+        v = VisualizerConfig.objects.get(name="Yara")
+        v.analyzers.set(AnalyzerConfig.objects.none())
+        v.connectors.set(AnalyzerConfig.objects.none())
+        self.assertTrue(v.is_runnable(self.user))
+        oass = ObservableAnalysisSerializer(
+            data={}, context={"request": MockRequest(self.user)}
+        )
+        with patch.object(VisualizerConfig.objects, "all") as all:
+            all.return_value = [v]
+            visualizers = _AbstractJobCreateSerializer.filter_visualizers(
+                oass, {"analyzers_to_execute": [], "connectors_to_execute": []}
+            )
+            self.assertCountEqual(visualizers, [v])
+            with patch.object(v, "is_runnable") as is_runnable:
+                is_runnable.return_value = False
+                visualizers = _AbstractJobCreateSerializer.filter_visualizers(
+                    oass, {"analyzers_to_execute": [], "connectors_to_execute": []}
+                )
+                self.assertCountEqual(visualizers, [])
+
+    def test_filter_visualizers_analyzer_subset(self):
+        v = VisualizerConfig.objects.get(name="Yara")
+        v.analyzers.set(AnalyzerConfig.objects.none())
+        v.connectors.set(AnalyzerConfig.objects.none())
+        oass = ObservableAnalysisSerializer(
+            data={}, context={"request": MockRequest(self.user)}
+        )
+        with patch.object(VisualizerConfig.objects, "all") as all:
+            all.return_value = VisualizerConfig.objects.filter(name="Yara")
+            # equal
+            visualizers = _AbstractJobCreateSerializer.filter_visualizers(
+                oass, {"analyzers_to_execute": [], "connectors_to_execute": []}
+            )
+            self.assertCountEqual(visualizers, [v])
+
+            # bigger
+            visualizers = _AbstractJobCreateSerializer.filter_visualizers(
+                oass,
+                {
+                    "analyzers_to_execute": [AnalyzerConfig.objects.first()],
+                    "connectors_to_execute": [],
+                },
+            )
+            self.assertCountEqual(visualizers, [v])
+
+            # smaller
+            v.analyzers.set(AnalyzerConfig.objects.all())
+            visualizers = _AbstractJobCreateSerializer.filter_visualizers(
+                oass, {"analyzers_to_execute": [], "connectors_to_execute": []}
+            )
+            self.assertCountEqual(visualizers, [])
+
+    def test_filter_visualizers_connector_subset(self):
+        v = VisualizerConfig.objects.get(name="Yara")
+        v.analyzers.set(AnalyzerConfig.objects.none())
+        v.connectors.set(AnalyzerConfig.objects.none())
+        oass = ObservableAnalysisSerializer(
+            data={}, context={"request": MockRequest(self.user)}
+        )
+        with patch.object(VisualizerConfig.objects, "all") as all:
+            all.return_value = VisualizerConfig.objects.filter(name="Yara")
+            # equal
+            visualizers = _AbstractJobCreateSerializer.filter_visualizers(
+                oass, {"analyzers_to_execute": [], "connectors_to_execute": []}
+            )
+            self.assertCountEqual(visualizers, [v])
+
+            # bigger
+            visualizers = _AbstractJobCreateSerializer.filter_visualizers(
+                oass,
+                {
+                    "analyzers_to_execute": [],
+                    "connectors_to_execute": [ConnectorConfig.objects.first()],
+                },
+            )
+            self.assertCountEqual(visualizers, [v])
+
+            # smaller
+            v.connectors.set(ConnectorConfig.objects.all())
+            visualizers = _AbstractJobCreateSerializer.filter_visualizers(
+                oass, {"analyzers_to_execute": [], "connectors_to_execute": []}
+            )
+            self.assertCountEqual(visualizers, [])

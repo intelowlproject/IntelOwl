@@ -131,13 +131,11 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
                 # subsets
                 and set(visualizer.analyzers.all().values_list("pk", flat=True))
                 <= set(
-                    serialized_data["analyzers_to_execute"].values_list("pk", flat=True)
+                    [analyzer.pk for analyzer in serialized_data["analyzers_to_execute"]]
                 )
                 and set(visualizer.connectors.all().values_list("pk", flat=True))
                 <= set(
-                    serialized_data["connectors_to_execute"].values_list(
-                        "pk", flat=True
-                    )
+                    [connector.pk for connector in serialized_data["connectors_to_execute"]]
                 )
             ):
                 logger.info(f"Going to use {visualizer.name}")

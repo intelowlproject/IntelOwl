@@ -145,12 +145,11 @@ def _multi_analysis_availability(user, data):
 
     serializer = JobAvailabilitySerializer(data=data_received, many=True)
     serializer.is_valid(raise_exception=True)
-    serialized_data = serializer.validated_data
 
     response = []
     from api_app.analyzers_manager.models import AnalyzerConfig
 
-    for element in serialized_data:
+    for element in serializer.validated_data:
         playbooks, analyzers, running_only, md5, minutes_ago = (
             element["playbooks"],
             element["analyzers"],
@@ -162,19 +161,17 @@ def _multi_analysis_availability(user, data):
 
         if not running_only:
             statuses_to_check.append(Status.REPORTED_WITHOUT_FAILS)
-
+            # since with playbook
+            # it is expected behavior
+            # for analyzers to often fail
+            if playbooks:
+                statuses_to_check.append(Status.REPORTED_WITH_FAILS)
         # this means that the user is trying to
-        # check avaibility of the case where all
+        # check availability of the case where all
         # analyzers were run but no playbooks were
         # triggered.
         if not playbooks and not analyzers:
             analyzers = AnalyzerConfig.objects.all()
-        if playbooks:
-            # since with playbook
-            # it is expected behavior
-            # for analyzers to often fail
-            if not running_only:
-                statuses_to_check.append(Status.REPORTED_WITH_FAILS)
 
         query = Q(md5=md5) & Q(status__in=statuses_to_check)
         # we want a job that has every analyzer requested
@@ -183,6 +180,7 @@ def _multi_analysis_availability(user, data):
 
         for playbook in playbooks:
             query &= Q(playbooks_to_execute=playbook)
+
         if minutes_ago:
             minutes_ago_time = get_now() - timedelta(minutes=minutes_ago)
             query &= Q(received_request_time__gte=minutes_ago_time)

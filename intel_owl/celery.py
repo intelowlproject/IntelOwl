@@ -11,7 +11,6 @@ from celery.schedules import crontab
 from django.conf import settings
 from kombu import Exchange, Queue
 
-DEFAULT_QUEUE = "default"
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "intel_owl.settings")
 
 app = Celery("intel_owl")
@@ -50,6 +49,8 @@ if settings.AWS_SQS:
         BROKER_TRANSPORT_OPTIONS["secret_access_key"] = settings.AWS_SECRET_ACCESS_KEY
 else:
     BROKER_TRANSPORT_OPTIONS = {}
+
+DEFAULT_QUEUE = settings.CELERY_QUEUES[0]
 
 app.conf.update(
     task_default_queue=DEFAULT_QUEUE,

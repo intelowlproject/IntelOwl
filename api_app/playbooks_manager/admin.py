@@ -2,13 +2,14 @@
 # See the file 'LICENSE' for copying permission.
 
 from django.contrib import admin
+from import_export.admin import ExportActionMixin
 
 from api_app.core.admin import JsonViewerAdminView
 from api_app.playbooks_manager.models import PlaybookConfig
 
 
 @admin.register(PlaybookConfig)
-class PluginConfigAdminView(JsonViewerAdminView):
+class PluginConfigAdminView(ExportActionMixin, JsonViewerAdminView):
     list_display = (
         "name",
         "type",

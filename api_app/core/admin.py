@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.db.models import JSONField
+from import_export.admin import ExportActionMixin
 from prettyjson import PrettyJSONWidget
 
 from api_app.core.models import AbstractConfig
@@ -27,7 +28,7 @@ class JsonViewerAdminView(admin.ModelAdmin):
     }
 
 
-class AbstractConfigAdminView(JsonViewerAdminView):
+class AbstractConfigAdminView(ExportActionMixin, JsonViewerAdminView):
     list_display = (
         "name",
         "python_module",

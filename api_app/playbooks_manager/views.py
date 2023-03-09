@@ -15,7 +15,7 @@ from api_app.playbooks_manager.serializers import (
     PlaybookConfigSerializer,
 )
 from api_app.serializers import (
-    AnalysisResponseSerializer,
+    JobResponseSerializer,
     PlaybookFileAnalysisSerializer,
     PlaybookObservableAnalysisSerializer,
 )
@@ -72,7 +72,7 @@ class PlaybookConfigAPI(viewsets.ModelViewSet, SerializerActionMixin):
     @add_docs(
         description="This endpoint allows to start a Job related to an observable",
         request=PlaybookObservableAnalysisSerializer,
-        responses={200: AnalysisResponseSerializer},
+        responses={200: JobResponseSerializer},
     )
     @action(methods=["POST"], url_name="analyze_multiple_observables", detail=False)
     def analyze_multiple_observables(self, request):
@@ -83,7 +83,7 @@ class PlaybookConfigAPI(viewsets.ModelViewSet, SerializerActionMixin):
     @add_docs(
         description="This endpoint allows to start a Job related to a file",
         request=PlaybookFileAnalysisSerializer,
-        responses={200: AnalysisResponseSerializer},
+        responses={200: JobResponseSerializer},
     )
     @action(methods=["POST"], url_name="analyze_multiple_files", detail=False)
     def analyze_multiple_files(self, request):

@@ -34,10 +34,10 @@ from .filters import JobFilter
 from .helpers import get_now
 from .models import Job, ObservableClassification, PluginConfig, Status, Tag
 from .serializers import (
-    AnalysisResponseSerializer,
     FileAnalysisSerializer,
     JobAvailabilitySerializer,
     JobListSerializer,
+    JobResponseSerializer,
     JobSerializer,
     ObservableAnalysisSerializer,
     PluginConfigSerializer,
@@ -98,33 +98,10 @@ def _multi_analysis_request(
                 },
             )
 
-    data_ = [
-        {
-            "status": "accepted",
-            "job_id": job.pk,
-            "warnings": serialized_data[index]["warnings"],
-            "analyzers_running": job.analyzers_to_execute.all().values_list(
-                "name", flat=True
-            ),
-            "connectors_running": job.connectors_to_execute.all().values_list(
-                "name", flat=True
-            ),
-            "visualizers_running": job.visualizers_to_execute.all().values_list(
-                "name", flat=True
-            ),
-            "playbooks_running": job.playbooks_to_execute.all().values_list(
-                "name", flat=True
-            ),
-        }
-        for index, job in enumerate(jobs)
-    ]
-
-    ser = AnalysisResponseSerializer(
-        data=data_,
+    ser = JobResponseSerializer(
+        jobs,
         many=True,
     )
-
-    ser.is_valid(raise_exception=True)
 
     response_dict = {
         "count": len(ser.data),
@@ -172,7 +149,7 @@ def _multi_analysis_availability(user, data_received):
         if not playbooks and not analyzers:
             analyzers = AnalyzerConfig.objects.all()
 
-        query = Q(md5=md5) & Q(status__in=statuses_to_check) & Q(user=user)
+        query = Q(md5=md5) & Q(status__in=statuses_to_check)
         # we want a job that has every analyzer requested
         for analyzer in analyzers:
             query &= Q(analyzers_to_execute=analyzer)
@@ -185,7 +162,9 @@ def _multi_analysis_availability(user, data_received):
             query &= Q(received_request_time__gte=minutes_ago_time)
 
         try:
-            last_job_for_md5 = Job.objects.filter(query).latest("received_request_time")
+            last_job_for_md5 = (
+                Job.visible_for_user(user).filter(query).latest("received_request_time")
+            )
         except Job.DoesNotExist:
             response_dict = {"status": "not_available"}
         else:
@@ -285,7 +264,7 @@ def ask_multi_analysis_availability(request):
     description="This endpoint allows to start a Job related for a single File."
     " Retained for retro-compatibility",
     request=FileAnalysisSerializer,
-    responses={200: AnalysisResponseSerializer},
+    responses={200: JobResponseSerializer},
 )
 @api_view(["POST"])
 def analyze_file(request):
@@ -330,7 +309,7 @@ def analyze_file(request):
             "file_mimetypes": rfs.ListField(child=rfs.CharField()),
         },
     ),
-    responses={200: multi_result_enveloper(AnalysisResponseSerializer, True)},
+    responses={200: multi_result_enveloper(JobResponseSerializer, True)},
 )
 @api_view(["POST"])
 def analyze_multiple_files(request):
@@ -347,7 +326,7 @@ def analyze_multiple_files(request):
     description="This endpoint allows to start a Job related to an observable. "
     "Retained for retro-compatibility",
     request=ObservableAnalysisSerializer,
-    responses={200: AnalysisResponseSerializer},
+    responses={200: JobResponseSerializer},
 )
 @api_view(["POST"])
 def analyze_observable(request):
@@ -381,7 +360,7 @@ def analyze_observable(request):
             )
         },
     ),
-    responses={200: multi_result_enveloper(AnalysisResponseSerializer, True)},
+    responses={200: multi_result_enveloper(JobResponseSerializer, True)},
 )
 @api_view(["POST"])
 def analyze_multiple_observables(request):

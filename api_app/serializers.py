@@ -41,7 +41,7 @@ __all__ = [
     "JobSerializer",
     "FileAnalysisSerializer",
     "ObservableAnalysisSerializer",
-    "AnalysisResponseSerializer",
+    "JobResponseSerializer",
     "MultipleFileAnalysisSerializer",
     "MultipleObservableAnalysisSerializer",
     "multi_result_enveloper",
@@ -242,7 +242,6 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         # create ``Tag`` objects from tags_labels
         tags_labels = validated_data.pop("tags_labels", None)
         validated_data.pop("warnings")
-        validated_data.pop("runtime_configuration")
         tags = [
             Tag.objects.get_or_create(
                 label=label, defaults={"color": gen_random_colorhex()}
@@ -658,14 +657,37 @@ class PlaybookFileAnalysisSerializer(PlaybookBaseSerializer, FileAnalysisSeriali
         return attrs
 
 
-class AnalysisResponseSerializer(rfs.Serializer):
-    job_id = rfs.IntegerField()
-    status = rfs.CharField()
-    warnings = rfs.ListField(required=False)
-    analyzers_running = rfs.ListField()
-    connectors_running = rfs.ListField()
-    visualizers_running = rfs.ListField()
-    playbooks_running = rfs.ListField(required=False)
+class JobResponseSerializer(rfs.ModelSerializer):
+    job_id = rfs.IntegerField(source="pk")
+    analyzers_running = rfs.PrimaryKeyRelatedField(
+        read_only=True, source="analyzers_to_execute", many=True
+    )
+    connectors_running = rfs.PrimaryKeyRelatedField(
+        read_only=True, source="connectors_to_execute", many=True
+    )
+    visualizers_running = rfs.PrimaryKeyRelatedField(
+        read_only=True, source="visualizers_to_execute", many=True
+    )
+    playbooks_running = rfs.PrimaryKeyRelatedField(
+        read_only=True, source="playbooks_to_execute", many=True
+    )
+
+    class Meta:
+        model = Job
+        fields = [
+            "job_id",
+            "analyzers_running",
+            "connectors_running",
+            "visualizers_running",
+            "playbooks_running",
+            "status",
+        ]
+        extra_kwargs = {"warnings": {"read_only": True, "required": False}}
+
+    def to_representation(self, instance):
+        result = super().to_representation(instance)
+        result["status"] = "accepted"
+        return result
 
 
 def multi_result_enveloper(serializer_class, many):

@@ -16,6 +16,7 @@
 [![Build & Tests](https://github.com/intelowlproject/IntelOwl/workflows/Build%20&%20Tests/badge.svg)](https://github.com/intelowlproject/IntelOwl/actions)
 [![codecov](https://codecov.io/gh/intelowlproject/IntelOwl/branch/master/graph/badge.svg?token=R097M4TYA6)](https://codecov.io/gh/intelowlproject/IntelOwl)
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/intelowlproject/IntelOwl/badge)](https://api.securityscorecards.dev/projects/github.com/intelowlproject/IntelOwl)
+[![OpenSSF Best Practices](https://bestpractices.coreinfrastructure.org/projects/7120/badge)](https://bestpractices.coreinfrastructure.org/projects/7120)
 # Intel Owl
 
 Do you want to get **threat intelligence data** about a malware, an IP or a domain? Do you want to get this kind of data from multiple sources at the same time using **a single API request**?

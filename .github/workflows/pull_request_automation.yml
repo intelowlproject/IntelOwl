@@ -1,3 +1,4 @@
+permissions: read-all
 name: Build & Tests
 
 on:

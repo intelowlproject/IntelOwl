@@ -2,7 +2,9 @@
 
 from datetime import timedelta
 
-from .commons import VERSION
+from ._util import get_secret
+from .commons import DEBUG, PUBLIC_DEPLOYMENT, STAGE_CI, STAGE_LOCAL, VERSION
+from .security import WEB_CLIENT_URL
 
 REST_FRAMEWORK = {
     "DEFAULT_RENDERER_CLASSES": ["rest_framework.renderers.JSONRenderer"],
@@ -38,13 +40,30 @@ REST_DURIN = {
     "API_ACCESS_CLIENT_TOKEN_TTL": timedelta(days=3650),
 }
 
+# django-rest-email-auth
+REST_EMAIL_AUTH = {
+    "EMAIL_VERIFICATION_URL": WEB_CLIENT_URL + "/verify-email?key={key}",
+    "PASSWORD_RESET_URL": WEB_CLIENT_URL + "/reset-password?key={key}",
+    "REGISTRATION_SERIALIZER": "authentication.serializers.RegistrationSerializer",
+    "EMAIL_VERIFICATION_PASSWORD_REQUIRED": False,
+    "EMAIL_SUBJECT_VERIFICATION": "IntelOwl - Please Verify Your Email Address",
+    "EMAIL_SUBJECT_DUPLICATE": "IntelOwl - Registration Attempt",
+    "PATH_TO_VERIFY_EMAIL_TEMPLATE": "authentication/emails/verify-email",
+    "PATH_TO_DUPLICATE_EMAIL_TEMPLATE": "authentication/emails/duplicate-email",
+    "PATH_TO_RESET_EMAIL_TEMPLATE": "authentication/emails/reset-password",
+}
+
 # drf-spectacular
 SPECTACULAR_SETTINGS = {
     "TITLE": "IntelOwl API specification",
     "VERSION": VERSION,
 }
 
-# drf-recaptcha (not used in IntelOwl but required by certego-saas pkg)
-DRF_RECAPTCHA_SECRET_KEY = ""
-DRF_RECAPTCHA_TESTING = True
+# drf-recaptcha
+DRF_RECAPTCHA_SECRET_KEY = (
+    str(get_secret("RECAPTCHA_SECRET_KEY_IO_PUBLIC"))
+    if PUBLIC_DEPLOYMENT and not DEBUG
+    else str(get_secret("RECAPTCHA_SECRET_KEY_IO_LOCAL"))
+)
+DRF_RECAPTCHA_TESTING = STAGE_LOCAL or STAGE_CI
 DRF_RECAPTCHA_TESTING_PASS = True

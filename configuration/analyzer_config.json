@@ -1534,9 +1534,53 @@
       }
     }
   },
-  "Hunter": {
+  "Hunter_How": {
     "type": "observable",
-    "python_module": "hunter.Hunter",
+    "python_module": "hunter_how.Hunter_How",
+    "description": "[Hunter_How](https://hunter.how/search-api) provides details for a specified ip and domain",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": ["ip","domain"],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "HUNTERHOW_KEY",
+        "description": "API key for the Hunter_How",
+        "required": true,
+        "type": "str"
+      }
+    },
+    "params": {
+      "page": {
+        "value": 1,
+        "type": "int",
+        "description": "The number of displayed page."
+      },
+      "page_size": {
+        "value": 10,
+        "type": "int",
+        "description": " The number of results displayed on one page "
+      },
+      "start_time": {
+        "value": "2022-01-01",
+        "type": "str",
+        "description": "Only show results after the given date (yyyy-mm-dd)"
+      },
+      "end_time": {
+        "value": "2022-12-01",
+        "type": "str",
+        "description": "Only show results after the given date (yyyy-mm-dd)"
+      }
+    
+    }
+  },
+  "Hunter_Io": {
+    "type": "observable",
+    "python_module": "hunter_io.Hunter_Io",
     "description": "Scans a domain name and returns set of data about the organisation, the email address found and additional information about the people owning those email addresses",
     "disabled": false,
     "external_service": true,
@@ -4390,6 +4434,7 @@
         "value": [
           "https://github.com/elastic/protections-artifacts",
           "https://github.com/embee-research/Yara",
+          "https://github.com/elceef/yara-rulz",
           "https://github.com/JPCERTCC/jpcert-yara",
           "https://github.com/SIFalcon/Detection/",
           "https://github.com/bartblaze/Yara-rules",

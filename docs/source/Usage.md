@@ -58,7 +58,6 @@ Once you create an organization, you are the unique Administrator of that organi
 #### Accept Invites
 Once an invite has sent, the invited user has to login, go to the "Organization" section and accept the invite there. Afterwards the Administrator will be able to see the user in his "Organization" section.
 
-
 #### Plugins Params and Secrets
 From IntelOwl v4.1.0, Plugin Parameters and Secrets can be defined at the organization level, in the dedicated section.
 This allows to share configurations between users of the same org while allowing complete multi-tenancy of the application.
@@ -66,6 +65,24 @@ This allows to share configurations between users of the same org while allowing
 #### Disable Analyzers at Org level
 From IntelOwl v4.1.0, the org admin can disable specific analyzers for all the users in a specific org.
 To do that, org admins needs to go in the "Plugins" section and click the button "Enabled for organization" of the analyzer that they want to disable.
+
+### Registration
+Since IntelOwl v4.2.0 we added a Registration Page that can be used to manage Registration requests when providing IntelOwl as a Service.
+
+After an user registration, an email is sent to the user to verify their email address. If necessary, there are buttons on the login page to resend the verification email and to reset the password.
+
+Once the user has verified their email, they would be manually vetted before being allowed to use the IntelOwl platform. The registration requests would be handled in the Django Admin page by admins.
+If you have IntelOwl deployed on an AWS instance with an IAM role you can use the [SES](/Advanced-Usage.md#ses) service.
+
+In a development environment the emails that would be sent are written to the standard output.
+
+#### Recaptcha configuration
+The Registration Page contains a Recaptcha form from Google. By default, that Recaptcha is not configured and is not shown.
+
+If your intention is to publish IntelOwl as a Service you should first remember to comply to the [AGPL License](https://github.com/intelowlproject/IntelOwl/blob/master/LICENSE), then you should configure the Recaptcha Key for your site and add that value in the `RECAPTCHA_SITEKEY` in the `docker/env_template.js` file.
+In that case, you would need to [re-build](/Installation.md#update-and-rebuild) the application to have the changes properly reflected.
+
+
 
 ## TLP Support
 
@@ -130,6 +147,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
   * [Elastic rules](https://github.com/elastic/protections-artifacts)
   * [JPCERTCC Yara rules](https://github.com/JPCERTCC/jpcert-yara)
   * [HuntressLab Yara rules](https://github.com/embee-research/Yara)
+  * [elceef Yara Rules](https://github.com/elceef/yara-rulz)
   * your own added signatures. See [Advanced-Usage](./Advanced-Usage.html#analyzers-with-special-configuration) for more details.
 * `PEframe_Scan`: Perform static analysis on Portable Executable malware and malicious MS Office documents with [PeFrame](https://github.com/guelfoweb/peframe)
 * `Capa_Info`: [Capa](https://github.com/mandiant/capa) detects capabilities in executable files
@@ -204,7 +222,8 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `Shodan_Honeyscore`: scan an IP against [Shodan](https://www.shodan.io/) Honeyscore API
 * `HoneyDB_Get`: [HoneyDB](https://honeydb.io/) IP lookup service
 * `HoneyDB_Scan_Twitter`: scan an IP against HoneyDB.io's Twitter Threat Feed
-* `Hunter`: Scans a domain name and returns set of data about the organisation, the email address found and additional information about the people owning those email addresses.
+* `Hunter_Io`: Scans a domain name and returns set of data about the organisation, the email address found and additional information about the people owning those email addresses.
+* `Hunter_How`: Scans IP and domain against [Hunter_How API](https://hunter.how/search-api).
 * `Censys_Search`: scan an IP address against [Censys](https://censys.io/) View API
 * `MalwareBazaar_Get_Observable`: Check if a particular malware hash is known to [MalwareBazaar](https://bazaar.abuse.ch/)
 * `MalwareBazaar_Google_Observable`: Check if a particular IP, domain or url is known to MalwareBazaar using google search

@@ -42,7 +42,6 @@ from .serializers import (
     ObservableAnalysisSerializer,
     PluginConfigSerializer,
     TagSerializer,
-    multi_result_enveloper,
 )
 
 logger = logging.getLogger(__name__)
@@ -232,24 +231,7 @@ def ask_analysis_availability(request):
     highly probable that you won't get all the results that you expect.
     NOTE: This API is similar to ask_analysis_availability, but it allows multiple
     md5s to be checked at the same time.""",
-    request=multi_result_enveloper(JobAvailabilitySerializer, many=True),
-    responses={
-        200: inline_serializer(
-            name="AskAnalysisAvailabilitySuccessResponseList",
-            fields={
-                "count": rfs.IntegerField(),
-                "results": inline_serializer(
-                    name="AskAnalysisAvailabilitySuccessResponse",
-                    fields={
-                        "status": rfs.StringRelatedField(),
-                        "job_id": rfs.StringRelatedField(),
-                        "analyzers_to_execute": OpenApiTypes.OBJECT,
-                    },
-                    many=True,
-                ),
-            },
-        ),
-    },
+    responses={200: JobAvailabilitySerializer(many=True)},
 )
 @api_view(["POST"])
 def ask_multi_analysis_availability(request):
@@ -264,7 +246,7 @@ def ask_multi_analysis_availability(request):
     description="This endpoint allows to start a Job related for a single File."
     " Retained for retro-compatibility",
     request=FileAnalysisSerializer,
-    responses={200: JobResponseSerializer},
+    responses={200: JobResponseSerializer(many=True)},
 )
 @api_view(["POST"])
 def analyze_file(request):
@@ -309,7 +291,7 @@ def analyze_file(request):
             "file_mimetypes": rfs.ListField(child=rfs.CharField()),
         },
     ),
-    responses={200: multi_result_enveloper(JobResponseSerializer, True)},
+    responses={200: JobResponseSerializer},
 )
 @api_view(["POST"])
 def analyze_multiple_files(request):
@@ -360,7 +342,7 @@ def analyze_observable(request):
             )
         },
     ),
-    responses={200: multi_result_enveloper(JobResponseSerializer, True)},
+    responses={200: JobResponseSerializer},
 )
 @api_view(["POST"])
 def analyze_multiple_observables(request):

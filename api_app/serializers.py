@@ -7,7 +7,6 @@ from typing import Dict, List
 
 from django.db.models import Q
 from django.http import QueryDict
-from drf_spectacular.utils import extend_schema_serializer
 from durin.serializers import UserSerializer
 from rest_framework import serializers as rfs
 from rest_framework.exceptions import PermissionDenied, ValidationError
@@ -44,7 +43,6 @@ __all__ = [
     "JobResponseSerializer",
     "MultipleFileAnalysisSerializer",
     "MultipleObservableAnalysisSerializer",
-    "multi_result_enveloper",
     "PluginConfigSerializer",
     "PlaybookFileAnalysisSerializer",
     "PlaybookObservableAnalysisSerializer",
@@ -58,37 +56,6 @@ class TagSerializer(rfs.ModelSerializer):
     class Meta:
         model = Tag
         fields = rfs.ALL_FIELDS
-
-
-class JobAvailabilitySerializer(rfs.ModelSerializer):
-    """
-    Serializer for ask_analysis_availability
-    """
-
-    class Meta:
-        model = Job
-        fields = ["md5", "analyzers", "playbooks", "running_only", "minutes_ago"]
-
-    md5 = rfs.CharField(max_length=128, required=True)
-    analyzers = rfs.PrimaryKeyRelatedField(
-        queryset=AnalyzerConfig.objects.all(), many=True, required=False
-    )
-    playbooks = rfs.PrimaryKeyRelatedField(
-        queryset=PlaybookConfig.objects.all(), many=True, required=False
-    )
-    running_only = rfs.BooleanField(default=False, required=False)
-    minutes_ago = rfs.IntegerField(default=None, required=False)
-
-    def validate(self, attrs):
-        attrs = super().validate(attrs)
-        playbooks = attrs.get("playbooks", [])
-        analyzers = attrs.get("analyzers", [])
-
-        if len(playbooks) != 0 and len(analyzers) != 0:
-            raise rfs.ValidationError(
-                "Either only send the 'playbooks' parameter or the 'analyzers' one."
-            )
-        return attrs
 
 
 class _AbstractJobViewSerializer(rfs.ModelSerializer):
@@ -242,6 +209,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         # create ``Tag`` objects from tags_labels
         tags_labels = validated_data.pop("tags_labels", None)
         validated_data.pop("warnings")
+        validated_data.pop("runtime_configuration")
         tags = [
             Tag.objects.get_or_create(
                 label=label, defaults={"color": gen_random_colorhex()}
@@ -657,6 +625,12 @@ class PlaybookFileAnalysisSerializer(PlaybookBaseSerializer, FileAnalysisSeriali
         return attrs
 
 
+class JobEnvelopeSerializer(rfs.ListSerializer):
+    def to_representation(self, data):
+        results = super().to_representation(data)
+        return {"results": results, "count": len(results)}
+
+
 class JobResponseSerializer(rfs.ModelSerializer):
     job_id = rfs.IntegerField(source="pk")
     analyzers_running = rfs.PrimaryKeyRelatedField(
@@ -671,6 +645,7 @@ class JobResponseSerializer(rfs.ModelSerializer):
     playbooks_running = rfs.PrimaryKeyRelatedField(
         read_only=True, source="playbooks_to_execute", many=True
     )
+    list_serializer_class = JobEnvelopeSerializer
 
     class Meta:
         model = Job
@@ -690,18 +665,37 @@ class JobResponseSerializer(rfs.ModelSerializer):
         return result
 
 
-def multi_result_enveloper(serializer_class, many):
-    component_name = (
-        f'Multi{serializer_class.__name__.replace("Serializer", "")}'
-        f'{"List" if many else ""}'
+class JobAvailabilitySerializer(rfs.ModelSerializer):
+    """
+    Serializer for ask_analysis_availability
+    """
+
+    class Meta:
+        model = Job
+        fields = ["md5", "analyzers", "playbooks", "running_only", "minutes_ago"]
+
+    md5 = rfs.CharField(max_length=128, required=True)
+    analyzers = rfs.PrimaryKeyRelatedField(
+        queryset=AnalyzerConfig.objects.all(), many=True, required=False
     )
+    playbooks = rfs.PrimaryKeyRelatedField(
+        queryset=PlaybookConfig.objects.all(), many=True, required=False
+    )
+    running_only = rfs.BooleanField(default=False, required=False)
+    minutes_ago = rfs.IntegerField(default=None, required=False)
 
-    @extend_schema_serializer(many=False, component_name=component_name)
-    class EnvelopeSerializer(rfs.Serializer):
-        count = rfs.BooleanField()  # No. of items in the results list
-        results = serializer_class(many=many)
+    list_serializer_class = JobEnvelopeSerializer
 
-    return EnvelopeSerializer
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        playbooks = attrs.get("playbooks", [])
+        analyzers = attrs.get("analyzers", [])
+
+        if len(playbooks) != 0 and len(analyzers) != 0:
+            raise rfs.ValidationError(
+                "Either only send the 'playbooks' parameter or the 'analyzers' one."
+            )
+        return attrs
 
 
 class PluginConfigSerializer(rfs.ModelSerializer):

@@ -88,7 +88,8 @@ class AbstractReport(models.Model):
         cls, job_id: int, config: "AbstractConfig", defaults: Dict, error: str
     ) -> "AbstractReport":
         logger.warning(
-            f"(job: #{job_id}, {cls.__name__}:{config.name}) -> set as {cls.Status.FAILED}. "
+            f"(job: #{job_id}, {cls.__name__}:{config.name}) -> "
+            f"set as {cls.Status.FAILED}. "
             f"Error: {error}"
         )
         report, _ = cls.objects.get_or_create(

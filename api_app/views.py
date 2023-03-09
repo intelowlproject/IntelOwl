@@ -32,7 +32,7 @@ from .analyzers_manager.constants import ObservableTypes
 from .core.models import AbstractConfig
 from .filters import JobFilter
 from .helpers import get_now
-from .models import Job, ObservableClassification, PluginConfig, Status, Tag
+from .models import TLP, Job, ObservableClassification, PluginConfig, Status, Tag
 from .serializers import (
     FileAnalysisSerializer,
     JobAvailabilitySerializer,
@@ -362,6 +362,9 @@ def analyze_multiple_observables(request):
     """
 )
 class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
+    queryset = (
+        Job.objects.prefetch_related("tags").order_by("-received_request_time").all()
+    )
     serializer_class = JobSerializer
     serializer_action_classes = {
         "retrieve": JobSerializer,
@@ -381,15 +384,29 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
         return permissions
 
     def get_queryset(self):
+        """
+        User has access to:
+        - jobs with TLP = WHITE or GREEN
+        - jobs with TLP = AMBER or RED and
+        created by a member of their organization.
+        """
         user = self.request.user
-        logger.info(
-            f"user: {user} request the jobs with params: {self.request.query_params}"
+        query_params = self.request.query_params
+        logger.info(f"user: {user} request the jobs with params: {query_params}")
+        queryset = super().get_queryset()
+
+        if user.has_membership():
+            user_query = Q(user=user) | Q(
+                user__membership__organization_id=user.membership.organization_id
+            )
+        else:
+            user_query = Q(user=user)
+        query = Q(tlp__in=[TLP.WHITE, TLP.GREEN]) | (
+            Q(tlp__in=[TLP.AMBER, TLP.RED]) & (user_query)
         )
-        return (
-            Job.visible_for_user(user)
-            .prefetch_related("tags")
-            .order_by("-received_request_time")
-        )
+        queryset = queryset.filter(query)
+        logger.info(f"user: {user} the jobs with params: {query_params} answered")
+        return queryset
 
     @add_docs(
         description="Kill running job by closing celery tasks and marking as killed",

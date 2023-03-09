@@ -45,7 +45,12 @@ class AbstractReport(models.Model):
     task_id = models.UUIDField()  # tracks celery task id
 
     # If a playbook ran the process
-    parent_playbook = models.CharField(max_length=128, default="", blank=True)
+    parent_playbook = models.ForeignKey(
+        "playbooks_manager.PlaybookConfig",
+        related_name="%(class)ss",
+        null=True,
+        on_delete=models.SET_NULL,
+    )
     job = models.ForeignKey(
         "api_app.Job", related_name="%(class)ss", on_delete=models.CASCADE
     )
@@ -82,23 +87,6 @@ class AbstractReport(models.Model):
         self.errors.append(err_msg)
         if save:
             self.save(update_fields=["errors"])
-
-    @classmethod
-    def get_or_create_failed(
-        cls, job_id: int, config: "AbstractConfig", defaults: Dict, error: str
-    ) -> "AbstractReport":
-        logger.warning(
-            f"(job: #{job_id}, {cls.__name__}:{config.name}) -> "
-            f"set as {cls.Status.FAILED}. "
-            f"Error: {error}"
-        )
-        report, _ = cls.objects.get_or_create(
-            job_id=job_id, config=config, defaults=defaults
-        )
-        report.status = cls.Status.FAILED
-        report.errors.append(error)
-        report.save()
-        return report
 
 
 # This is required as a function (and not even a lambda)
@@ -291,19 +279,8 @@ class AbstractConfig(models.Model):
 
         return self._read_plugin_config(PluginConfig.ConfigType.PARAMETER, user)
 
-    def run(self, job_id: int, report_defaults: dict) -> AbstractReport:
-        class_ = self.python_class
-        instance = class_(config=self, job_id=job_id, report_defaults=report_defaults)
-        try:
-            report = instance.start()
-        except Exception as e:
-            report = self.report_model.get_or_create_failed(
-                job_id, self, report_defaults, str(e)
-            )
-        return report
-
     def get_signature(
-        self, job_id: int, runtime_configuration: Dict, parent_playbook: str
+        self, job_id: int, runtime_configuration: Dict, parent_playbook_pk: int = None
     ):
         from api_app.models import Job
         from intel_owl import tasks
@@ -316,11 +293,9 @@ class AbstractConfig(models.Model):
                 job_id,
                 self.python_complete_path,
                 self.pk,
-                {
-                    "runtime_configuration": runtime_configuration,
-                    "task_id": task_id,
-                    "parent_playbook": parent_playbook,
-                },
+                runtime_configuration,
+                task_id,
+                parent_playbook_pk,
             ]
 
             return tasks.run_plugin.signature(

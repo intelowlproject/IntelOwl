@@ -254,7 +254,7 @@ class AbstractConfigTestCase(CustomTestCase):
             config={"soft_time_limit": 100, "queue": "default"},
         )
         with self.assertRaises(Exception):
-            muc.get_signature(job.pk, {}, "")
+            muc.get_signature(job.pk, {}, None)
 
         muc.delete()
         job.delete()
@@ -268,7 +268,7 @@ class AbstractConfigTestCase(CustomTestCase):
             disabled=False,
             config={"soft_time_limit": 100, "queue": "default"},
         )
-        signature = muc.get_signature(job.pk, {}, "")
+        signature = muc.get_signature(job.pk, {}, None)
         self.assertIsInstance(signature, Signature)
         muc.delete()
         job.delete()

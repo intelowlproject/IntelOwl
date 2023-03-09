@@ -98,10 +98,21 @@ class AbstractConfigSerializer(rfs.ModelSerializer):
 
 
 class AbstractReportSerializer(rfs.ModelSerializer):
+
+    name = rfs.PrimaryKeyRelatedField(read_only=True, source="config")
+
     class Meta:
-        exclude = [
-            "task_id",
-        ]
+        fields = (
+            "name",
+            "process_time",
+            "report",
+            "runtime_configuration",
+            "status",
+            "parent_playbook",
+            "errors",
+            "start_time",
+            "end_time",
+        )
 
     def to_representation(self, instance: AbstractReport):
         data = super().to_representation(instance)

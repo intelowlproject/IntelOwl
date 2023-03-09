@@ -5,7 +5,7 @@ import logging
 
 from api_app.core.views import AbstractConfigAPI, PluginActionViewSet
 
-from .models import ConnectorConfig, ConnectorReport
+from .models import ConnectorReport
 from .serializers import ConnectorConfigSerializer
 
 logger = logging.getLogger(__name__)
@@ -30,10 +30,9 @@ class ConnectorActionViewSet(PluginActionViewSet):
         return ConnectorReport
 
     def perform_retry(self, report: ConnectorReport):
-        config: ConnectorConfig = ConnectorConfig.objects.get(name=report.name)
-        signature = config.get_signature(
+        signature = report.config.get_signature(
             report.job.pk,
-            report.runtime_configuration.get(report.name, {}),
-            report.parent_playbook,
+            report.runtime_configuration.get(report.config.name, {}),
+            report.parent_playbook.pk if report.parent_playbook else None,
         )
         signature()

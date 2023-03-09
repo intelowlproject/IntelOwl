@@ -16,4 +16,4 @@ class ConnectorConfigSerializer(AbstractConfigSerializer):
 class ConnectorReportSerializer(AbstractReportSerializer):
     class Meta:
         model = ConnectorReport
-        exclude = AbstractReportSerializer.Meta.exclude
+        fields = AbstractReportSerializer.Meta.fields

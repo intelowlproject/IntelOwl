@@ -14,7 +14,7 @@ class AnalyzerReportSerializer(AbstractReportSerializer):
 
     class Meta:
         model = AnalyzerReport
-        exclude = AbstractReportSerializer.Meta.exclude
+        fields = AbstractReportSerializer.Meta.fields
 
 
 class AnalyzerConfigSerializer(AbstractConfigSerializer):

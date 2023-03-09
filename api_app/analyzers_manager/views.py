@@ -73,10 +73,10 @@ class AnalyzerActionViewSet(PluginActionViewSet):
     def perform_retry(self, report: AnalyzerReport):
         from intel_owl import tasks
 
-        signature = AnalyzerConfig.objects.get(name=report.name).get_signature(
+        signature = report.config.get_signature(
             report.job.id,
-            report.runtime_configuration.get(report.name, {}),
-            report.parent_playbook,
+            report.runtime_configuration.get(report.config.name, {}),
+            report.parent_playbook.pk if report.parent_playbook else None,
         )
 
         runner = signature | tasks.continue_job_pipeline.signature(

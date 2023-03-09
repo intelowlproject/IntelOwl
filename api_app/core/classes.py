@@ -28,12 +28,23 @@ class Plugin(metaclass=ABCMeta):
         self,
         config: AbstractConfig,
         job_id: int,
-        report_defaults: dict = None,
+        runtime_configuration: dict,
+        task_id: int,
+        parent_playbook_pk: int = None,
         **kwargs,
     ):
+        from api_app.playbooks_manager.models import PlaybookConfig
+
         self._config = config
         self.job_id = job_id
-        self.report_defaults = report_defaults if report_defaults is not None else {}
+        self.runtime_configuration = runtime_configuration
+        self.task_id = task_id
+
+        self.parent_playbook = (
+            None
+            if parent_playbook_pk is None
+            else PlaybookConfig.objects.get(pk=parent_playbook_pk)
+        )
         self.kwargs = kwargs
         # some post init processing
         self.__post__init__()  # lgtm [py/init-calls-subclass]
@@ -65,9 +76,8 @@ class Plugin(metaclass=ABCMeta):
     @property
     def _params(self) -> dict:
         default_params = self._config.read_params(user=self._job.user)
-        runtime_params = self.report_defaults["runtime_configuration"]
         # overwrite default with runtime
-        return {**default_params, **runtime_params}
+        return {**default_params, **self.runtime_configuration}
 
     def config(self):
         for param, value in self._params.items():
@@ -131,7 +141,9 @@ class Plugin(metaclass=ABCMeta):
                 "status": AbstractReport.Status.PENDING,
                 "start_time": timezone.now(),
                 "end_time": timezone.now(),
-                **self.report_defaults,
+                "task_id": self.task_id,
+                "parent_playbook": self.parent_playbook,
+                "runtime_configuration": self.runtime_configuration,
             },
         )
         return _report
@@ -152,8 +164,8 @@ class Plugin(metaclass=ABCMeta):
         calls `before_run`, `run`, `after_run`
         in that order with exception handling.
         """
+        self.config()
         try:
-            self.config()
             self.before_run()
             _result = self.run()
             self.report.report = _result
@@ -167,13 +179,11 @@ class Plugin(metaclass=ABCMeta):
                 raise e
         else:
             self.report.status = self.report.Status.SUCCESS
-
-        # add end time of process
-        self.report.end_time = timezone.now()
-
-        self.after_run()
-        self.report.save()
-
+        finally:
+            # add end time of process
+            self.report.end_time = timezone.now()
+            self.after_run()
+            self.report.save()
         return self.report
 
     def _handle_exception(self, exc) -> None:

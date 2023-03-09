@@ -370,9 +370,9 @@ class Job(models.Model):
                 (analyzers, connectors, visualizers),
             ):
                 try:
-                    playbook = self.playbooks_to_execute.all()[i].name
+                    playbook = self.playbooks_to_execute.all()[i].pk
                 except IndexError:
-                    playbook = ""
+                    playbook = None
                 config_class: typing.Type[AbstractConfig]
                 for plugin in plugins:
                     try:

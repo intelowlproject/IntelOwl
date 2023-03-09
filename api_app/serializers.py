@@ -270,7 +270,7 @@ class JobListSerializer(_AbstractJobViewSerializer):
 
     class Meta:
         model = Job
-        exclude = ("file",)
+        exclude = ("file", "file_name", "errors")
 
 
 class JobSerializer(_AbstractJobViewSerializer):
@@ -564,12 +564,6 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
 
 
 class PlaybookBaseSerializer:
-    def __init__(self, *args, **kwargs):
-        self.playbook_mtm_field = {
-            "playbooks_requested": None,
-            "playbooks_to_execute": None,
-        }
-
     def filter_playbooks(self, attrs: Dict) -> Dict:
         # init empty list
         analyzers_requested = AnalyzerConfig.objects.none()
@@ -620,15 +614,10 @@ class PlaybookObservableAnalysisSerializer(
             "runtime_configuration",
             "analyzers_requested",
             "connectors_requested",
-            "playbooks_requested",
+            "playbook_requested",
             "tags_labels",
         )
         list_serializer_class = MultipleObservableAnalysisSerializer
-
-    def __init__(self, *args, **kwargs):
-        PlaybookBaseSerializer.__init__(self, *args, **kwargs)
-        ObservableAnalysisSerializer.__init__(self, *args, **kwargs)
-        self.mtm_fields.update(self.playbook_mtm_field)
 
     def validate(self, attrs: dict) -> dict:
         attrs = self.filter_playbooks(attrs)
@@ -654,15 +643,10 @@ class PlaybookFileAnalysisSerializer(PlaybookBaseSerializer, FileAnalysisSeriali
             "runtime_configuration",
             "analyzers_requested",
             "connectors_requested",
-            "playbooks_requested",
+            "playbook_requested",
             "tags_labels",
         )
         list_serializer_class = MultipleFileAnalysisSerializer
-
-    def __init__(self, *args, **kwargs):
-        PlaybookBaseSerializer.__init__(self, *args, **kwargs)
-        FileAnalysisSerializer.__init__(self, *args, **kwargs)
-        self.mtm_fields.update(self.playbook_mtm_field)
 
     def validate(self, attrs: dict) -> dict:
         attrs["observable_classification"] = "file"

@@ -405,6 +405,25 @@ class Job(models.Model):
         )
         runner()
 
+    @classmethod
+    def visible_for_user(cls, user: User):
+        """
+        User has access to:
+        - jobs with TLP = WHITE or GREEN
+        - jobs with TLP = AMBER or RED and
+        created by a member of their organization.
+        """
+        if user.has_membership():
+            user_query = Q(user=user) | Q(
+                user__membership__organization_id=user.membership.organization_id
+            )
+        else:
+            user_query = Q(user=user)
+        query = Q(tlp__in=[TLP.WHITE, TLP.GREEN]) | (
+            Q(tlp__in=[TLP.AMBER, TLP.RED]) & (user_query)
+        )
+        return cls.objects.all().filter(query)
+
     # user methods
 
     @classmethod

@@ -384,29 +384,15 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
         return permissions
 
     def get_queryset(self):
-        """
-        User has access to:
-        - jobs with TLP = WHITE or GREEN
-        - jobs with TLP = AMBER or RED and
-        created by a member of their organization.
-        """
         user = self.request.user
-        query_params = self.request.query_params
-        logger.info(f"user: {user} request the jobs with params: {query_params}")
-        queryset = super().get_queryset()
-
-        if user.has_membership():
-            user_query = Q(user=user) | Q(
-                user__membership__organization_id=user.membership.organization_id
-            )
-        else:
-            user_query = Q(user=user)
-        query = Q(tlp__in=[TLP.WHITE, TLP.GREEN]) | (
-            Q(tlp__in=[TLP.AMBER, TLP.RED]) & (user_query)
+        logger.info(
+            f"user: {user} request the jobs with params: {self.request.query_params}"
         )
-        queryset = queryset.filter(query)
-        logger.info(f"user: {user} the jobs with params: {query_params} answered")
-        return queryset
+        return (
+            Job.visible_for_user(user)
+            .prefetch_related("tags")
+            .order_by("-received_request_time")
+        )
 
     @add_docs(
         description="Kill running job by closing celery tasks and marking as killed",

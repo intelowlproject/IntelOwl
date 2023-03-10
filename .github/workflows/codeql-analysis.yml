@@ -39,10 +39,11 @@ jobs:
       uses: actions/setup-python@v4.5.0
       with:
         python-version: '3.9'
+
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y --no-install-recommends apt-utils libsasl2-dev libssl-dev libldap2-dev python-dev-is-python3 libfuzzy-dev net-tools git exiftool
+adjus        sudo apt-get install -y --no-install-recommends apt-utils libsasl2-dev libssl-dev libldap2-dev python-dev libfuzzy-dev net-tools git
         python -m pip install --upgrade pip
         if [ -f requirements/project-requirements.txt ];
         then pip install -r requirements/project-requirements.txt;

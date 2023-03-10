@@ -14,7 +14,7 @@ import {
   TabPane,
 } from "reactstrap";
 
-import { GoBackButton } from "@certego/certego-ui";
+import { GoBackButton, Loader } from "@certego/certego-ui";
 
 import {
   AnalyzersReportTable,
@@ -134,82 +134,90 @@ export default function JobOverview({ isRunningJob, job, refetch }) {
     [job, refetch, AnalyzerDenominator, ConnectorDenominator]
   );
 
+  console.debug(`JobOverview - isSelectedUI: ${isSelectedUI}`);
+  console.debug(`JobOverview - activeElement: ${activeElement}`);
+
   const elementsToShow = isSelectedUI ? UIElements : rawElements;
   return (
-    <Container fluid>
-      {/* bar with job id and utilities buttons */}
-      <Row className="g-0 d-flex-between-end">
-        <Col>
-          <GoBackButton onlyIcon color="gray" />
-          <h2>
-            <span className="me-2 text-secondary">Job #{job.id}</span>
-            <StatusIcon status={job.status} className="small" />
-          </h2>
-        </Col>
-        <Col className="d-flex justify-content-end">
-          <JobActionsBar job={job} />
-        </Col>
-      </Row>
-      {/* job metadata card */}
-      <Row className="g-0">
-        <Col>
-          <JobInfoCard job={job} />
-        </Col>
-      </Row>
-      {isRunningJob && (
-        <Row>
-          <JobIsRunningAlert job={job} />
-        </Row>
-      )}
-      <Row className="g-0 mt-3">
-        <div className="mb-2 d-inline-flex flex-row-reverse">
-          {/* UI/raw switch */}
-          <ButtonGroup className="ms-2 mb-3">
-            <Button
-              outline={!isSelectedUI}
-              color={isSelectedUI ? "primary" : "tertiary"}
-              onClick={() => selectUISection(true)}
-            >
-              Visualizer
-            </Button>
-            <Button
-              outline={isSelectedUI}
-              color={!isSelectedUI ? "primary" : "tertiary"}
-              onClick={() => selectUISection(false)}
-            >
-              Raw
-            </Button>
-          </ButtonGroup>
-          <div className="flex-fill horizontal-scrollable">
-            <Nav tabs className="flex-nowrap">
-              {/* generate the nav with the UI/raw visualizers */}
+    <Loader
+      loading={UIElements === {}}
+      render={() => (
+        <Container fluid>
+          {/* bar with job id and utilities buttons */}
+          <Row className="g-0 d-flex-between-end">
+            <Col>
+              <GoBackButton onlyIcon color="gray" />
+              <h2>
+                <span className="me-2 text-secondary">Job #{job.id}</span>
+                <StatusIcon status={job.status} className="small" />
+              </h2>
+            </Col>
+            <Col className="d-flex justify-content-end">
+              <JobActionsBar job={job} />
+            </Col>
+          </Row>
+          {/* job metadata card */}
+          <Row className="g-0">
+            <Col>
+              <JobInfoCard job={job} />
+            </Col>
+          </Row>
+          {isRunningJob && (
+            <Row>
+              <JobIsRunningAlert job={job} />
+            </Row>
+          )}
+          <Row className="g-0 mt-3">
+            <div className="mb-2 d-inline-flex flex-row-reverse">
+              {/* UI/raw switch */}
+              <ButtonGroup className="ms-2 mb-3">
+                <Button
+                  outline={!isSelectedUI}
+                  color={isSelectedUI ? "primary" : "tertiary"}
+                  onClick={() => selectUISection(true)}
+                >
+                  Visualizer
+                </Button>
+                <Button
+                  outline={isSelectedUI}
+                  color={!isSelectedUI ? "primary" : "tertiary"}
+                  onClick={() => selectUISection(false)}
+                >
+                  Raw
+                </Button>
+              </ButtonGroup>
+              <div className="flex-fill horizontal-scrollable">
+                <Nav tabs className="flex-nowrap">
+                  {/* generate the nav with the UI/raw visualizers */}
+                  {Object.entries(elementsToShow).map(
+                    ([navTitle, componentsObject]) => (
+                      <NavItem>
+                        <NavLink
+                          className={`${
+                            activeElement === navTitle ? "active" : ""
+                          }`}
+                          onClick={() => setActiveElement(navTitle)}
+                        >
+                          {componentsObject.nav}
+                        </NavLink>
+                      </NavItem>
+                    )
+                  )}
+                </Nav>
+              </div>
+            </div>
+            {/* reports section */}
+            <TabContent activeTab={activeElement}>
               {Object.entries(elementsToShow).map(
                 ([navTitle, componentsObject]) => (
-                  <NavItem>
-                    <NavLink
-                      className={`${
-                        activeElement === navTitle ? "active" : ""
-                      }`}
-                      onClick={() => setActiveElement(navTitle)}
-                    >
-                      {componentsObject.nav}
-                    </NavLink>
-                  </NavItem>
+                  <TabPane tabId={navTitle}>{componentsObject.report}</TabPane>
                 )
               )}
-            </Nav>
-          </div>
-        </div>
-        {/* reports section */}
-        <TabContent activeTab={activeElement}>
-          {Object.entries(elementsToShow).map(
-            ([navTitle, componentsObject]) => (
-              <TabPane tabId={navTitle}>{componentsObject.report}</TabPane>
-            )
-          )}
-        </TabContent>
-      </Row>
-    </Container>
+            </TabContent>
+          </Row>
+        </Container>
+      )}
+    />
   );
 }
 

@@ -200,13 +200,6 @@ export default function ScanForm() {
     playbooksGrouped,
   ] = usePluginConfigurationStore(stateSelector);
 
-  console.debug(`analyzersLoading: ${analyzersLoading}`);
-  console.debug(`connectorsLoading: ${connectorsLoading}`);
-  console.debug(`playbooksLoading: ${playbooksLoading}`);
-  console.debug(`analyzersError: ${analyzersError}`);
-  console.debug(`connectorsError: ${connectorsError}`);
-  console.debug(`playbooksError: ${playbooksError}`);
-
   const analyzersOptions = React.useMemo(
     () =>
       analyzersGrouped[classification]

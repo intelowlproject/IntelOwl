@@ -188,13 +188,12 @@ After having written the new python module, you have to remember to:
          3. *default: default value of the parameter
    7. *Type: `observable` or `file`
    8. *Docker based: if the analyzer run through a docker instance
-   9. *External service: if the analyzer send data to an external provider
-   10. *Leaks info: if the analyzer provide sensible data to the provider
-   11. ~Observable supported: required if `type` is `observable`
-   12. ~Supported filetypes: required if `type` is `file` and `not supported filetypes` is empty
-   13. Run hash: if the analyzer supports hash as inputs
-   14. ~Run hash type: required if `run hash` is `True`
-   15. ~Not supported filetypes: required if `type` is `file` and `supported filetypes` is empty
+   9. *Maximum tlp: maximum tlp to allow the run on the connector
+   10. ~Observable supported: required if `type` is `observable`
+   11. ~Supported filetypes: required if `type` is `file` and `not supported filetypes` is empty
+   12. Run hash: if the analyzer supports hash as inputs
+   13. ~Run hash type: required if `run hash` is `True`
+   14. ~Not supported filetypes: required if `type` is `file` and `supported filetypes` is empty
 
 4. To allow other people to use your configuration, that is now stored in your local database, you have to export it and create a datamigration
    1. objects = `docker exec -ti intelowl_uwsgi  python3 manage.py dumpdata analyzers_manager.AnalyzerConfig --pks "<your analyzer name>"`

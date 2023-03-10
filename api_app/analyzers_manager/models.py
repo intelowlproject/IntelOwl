@@ -17,7 +17,7 @@ from api_app.analyzers_manager.constants import (
 from api_app.analyzers_manager.exceptions import AnalyzerConfigurationException
 from api_app.core.models import AbstractConfig, AbstractReport
 from api_app.fields import ChoiceArrayField
-from api_app.models import PluginConfig
+from api_app.models import TLP, PluginConfig
 
 logger = getLogger(__name__)
 
@@ -120,8 +120,9 @@ class AnalyzerConfig(AbstractConfig):
     # generic
     type = models.CharField(choices=TypeChoices.choices, null=False, max_length=50)
     docker_based = models.BooleanField(null=False, default=False)
-    external_service = models.BooleanField(null=False, default=True)
-    leaks_info = models.BooleanField(null=False)
+    maximum_tlp = models.CharField(
+        null=False, default=TLP.RED, choices=TLP.choices, max_length=50
+    )
     # obs
     observable_supported = ChoiceArrayField(
         models.CharField(null=False, choices=ObservableTypes.choices, max_length=30),

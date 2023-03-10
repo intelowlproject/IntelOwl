@@ -16,6 +16,5 @@ class AnalyzerConfigAdminView(AbstractConfigAdminView):
     list_display = AbstractConfigAdminView.list_display + (
         "type",
         "docker_based",
-        "external_service",
-        "leaks_info",
+        "maximum_tlp",
     )

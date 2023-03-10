@@ -1,8 +1,8 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-"""Quad9 DNS resolutions"""
-
+import logging
+from ipaddress import AddressValueError, IPv4Address
 from urllib.parse import urlparse
 
 import requests
@@ -13,19 +13,31 @@ from tests.mock_utils import MockResponse, if_mock_connections, patch
 
 from ..dns_responses import dns_resolver_response
 
+logger = logging.getLogger(__name__)
+
 
 class DNS0EUResolver(classes.ObservableAnalyzer):
     """Resolve a DNS query with DNS0.eu"""
+
+    class NotADomain(Exception):
+        pass
 
     def set_params(self, params):
         self._query_type = params.get("query_type", "A")
 
     def run(self):
+        observable = self.observable_name
+        resolutions = None
         try:
-            observable = self.observable_name
             # for URLs we are checking the relative domain
-            if self.observable_classification == "url":
+            if self.observable_classification == self.ObservableTypes.URL:
                 observable = urlparse(self.observable_name).hostname
+                try:
+                    IPv4Address(observable)
+                except AddressValueError:
+                    pass
+                else:
+                    raise self.NotADomain()
 
             headers = {"Accept": "application/dns-json"}
             url = "https://dns0.eu"
@@ -38,6 +50,8 @@ class DNS0EUResolver(classes.ObservableAnalyzer):
             raise AnalyzerRunException(
                 "an error occurred during the connection to DNS0"
             )
+        except self.NotADomain:
+            logger.info(f"not analyzing {observable} because not a domain")
 
         return dns_resolver_response(self.observable_name, resolutions)
 

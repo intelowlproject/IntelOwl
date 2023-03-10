@@ -18,7 +18,6 @@ INSTALLED_APPS = [
     "django.contrib.postgres",
     # admin
     "prettyjson",
-    "import_export",
     # celery, elasticsearch
     "django_celery_results",
     "django_elasticsearch_dsl",

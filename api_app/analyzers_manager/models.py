@@ -145,13 +145,46 @@ class AnalyzerConfig(AbstractConfig):
         blank=True,
     )
 
-    def clean(self):
-        super().clean()
-        self.clean_run_hash_type()
+    def clean_observable_supported(self):
+        if self.type == TypeChoices.OBSERVABLE and not self.observable_supported:
+            raise ValidationError(
+                "You have to specify at least one type of observable supported"
+            )
+        if self.type != TypeChoices.OBSERVABLE and self.observable_supported:
+            raise ValidationError(
+                "You can't specify an observable type if you do not support observable"
+            )
+
+    def clean_filetypes(self):
+        if self.type == TypeChoices.FILE:
+            if self.supported_filetypes and self.not_supported_filetypes:
+                raise ValidationError(
+                    "Please specify only one between "
+                    "supported_filetypes and not_supported_filetypes"
+                )
+        else:
+            if self.supported_filetypes or self.not_supported_filetypes:
+                raise ValidationError(
+                    "You can't specify supported_filetypes or "
+                    "not_supported_filetypes if you do not support files"
+                )
 
     def clean_run_hash_type(self):
         if self.run_hash and not self.run_hash_type:
             raise ValidationError("run_hash_type must be populated if run_hash is True")
+
+    def clean_leaks_info(self):
+        if not self.external_service and self.leaks_info:
+            raise ValidationError(
+                "You can't leak info if it is not an external service"
+            )
+
+    def clean(self):
+        super().clean()
+        self.clean_run_hash_type()
+        self.clean_observable_supported()
+        self.clean_filetypes()
+        self.clean_leaks_info()
 
     @classmethod
     def _get_type(cls) -> str:

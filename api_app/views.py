@@ -32,7 +32,7 @@ from .analyzers_manager.constants import ObservableTypes
 from .core.models import AbstractConfig
 from .filters import JobFilter
 from .helpers import get_now
-from .models import TLP, Job, ObservableClassification, PluginConfig, Status, Tag
+from .models import Job, ObservableClassification, PluginConfig, Status, Tag
 from .serializers import (
     FileAnalysisSerializer,
     JobAvailabilitySerializer,

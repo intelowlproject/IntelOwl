@@ -8,38 +8,42 @@ MINIMUM_PYTHON_VERSION=3.6
 
 # Function to compare 2 semver version
 semantic_version_comp () {
-    if [[ $1 == $2 ]]
-    then
+    if [[ $1 == $2 ]]; then
         echo "equalTo"
         return
     fi
+
+    # Remove "v" prefix if present
+    ver1=$(echo $1 | sed 's/^v//')
+    ver2=$(echo $2 | sed 's/^v//')
+
+    # Convert version numbers to arrays
     local IFS=.
-    local i ver1=($1) ver2=($2)
-    # fill empty fields in ver1 with zeros
-    for ((i=${#ver1[@]}; i<${#ver2[@]}; i++))
-    do
+    local i ver1=($ver1) ver2=($ver2)
+
+    # Fill empty fields in ver1 with zeros
+    for ((i=${#ver1[@]}; i<${#ver2[@]}; i++)); do
         ver1[i]=0
     done
-    for ((i=0; i<${#ver1[@]}; i++))
-    do
-        if [[ -z ${ver2[i]} ]]
-        then
-            # fill empty fields in ver2 with zeros
+
+    # Compare version numbers
+    for ((i=0; i<${#ver1[@]}; i++)); do
+        if [[ -z ${ver2[i]} ]]; then
+            # Fill empty fields in ver2 with zeros
             ver2[i]=0
         fi
-        if ((10#${ver1[i]} > 10#${ver2[i]}))
-        then
+        if ((10#${ver1[i]} > 10#${ver2[i]})); then
             echo "greaterThan"
             return
         fi
-        if ((10#${ver1[i]} < 10#${ver2[i]}))
-        then
+        if ((10#${ver1[i]} < 10#${ver2[i]})); then
             echo "lessThan"
             return
         fi
     done
+
+    # If we reach this point, the versions are equal
     echo "equalTo"
-    return
 }
 
 echo "This script will check (and possibly guide you through) the installation of dependencies for IntelOwl!"

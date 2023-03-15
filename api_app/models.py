@@ -13,6 +13,7 @@ from django.core.validators import MinLengthValidator, RegexValidator
 from django.db import models
 from django.db.models import Q, QuerySet
 from django.dispatch import receiver
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.functional import cached_property
 
@@ -181,6 +182,13 @@ class Job(models.Model):
     @cached_property
     def sha1(self) -> str:
         return calculate_sha1(self.file.read())
+
+    def get_absolute_url(self):
+        return reverse("jobs-detail", args=[self.pk])
+
+    @property
+    def url(self):
+        return settings.WEB_CLIENT_URL + f"/{self.get_absolute_url()}"
 
     def job_cleanup(self) -> None:
         logger.info(f"[STARTING] job_cleanup for <-- {self.__repr__()}.")

@@ -43,7 +43,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y --no-install-recommends apt-utils libsasl2-dev libssl-dev libldap2-dev python-dev libfuzzy-dev net-tools git
+        sudo apt-get install -y --no-install-recommends apt-utils libsasl2-dev libssl-dev libldap2-dev python-dev-is-python3 libfuzzy-dev net-tools git
         python -m pip install --upgrade pip
         if [ -f requirements/project-requirements.txt ];
         then pip install -r requirements/project-requirements.txt;

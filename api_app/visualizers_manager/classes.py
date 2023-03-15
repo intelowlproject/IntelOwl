@@ -53,6 +53,6 @@ class Visualizer(Plugin, metaclass=abc.ABCMeta):
         self._config: VisualizerConfig
         return self._config.analyzers.filter(reports__job=self._job)
 
-    def connectors_reports(self) -> QuerySet:
+    def connector_reports(self) -> QuerySet:
         self._config: VisualizerConfig
         return self._config.connectors.filter(reports__job=self._job)

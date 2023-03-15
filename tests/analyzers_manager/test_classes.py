@@ -39,19 +39,39 @@ class FileAnalyzerTestCase(CustomTestCase):
             )
 
     def _create_jobs(self):
-        self._create_job("sample.one", "application/onenote")
-        self._create_job("ping.elf", "application/x-sharedlib")
-        self._create_job("example.pcap", "application/vnd.tcpdump.pcap")
-        self._create_job("sample.apk", "application/vnd.android.package-archive")
-        self._create_job("file.jse", "application/javascript")
-        self._create_job("page.html", "text/html")
-        self._create_job("document.pdf", "application/pdf")
-        self._create_job("document.rtf", "text/rtf")
-        self._create_job("document.xls", "application/vnd.ms-excel")
-        self._create_job("document.doc", "application/msword")
-        self._create_job("file.dll", "application/x-dosexec")
-        self._create_job("file.exe", "application/x-dosexec")
-        self._create_job("shellcode.bin", "application/octet-stream")
+        for sample_name, mimetype in zip(
+            [
+                "sample.one",
+                "ping.elf",
+                "example.pcap",
+                "sample.apk",
+                "file.jse",
+                "page.html",
+                "document.pdf",
+                "document.rtf",
+                "document.xls",
+                "document.doc",
+                "file.dll",
+                "file.exe",
+                "shellcode.bin",
+            ],
+            [
+                "application/onenote",
+                "application/x-sharedlib",
+                "application/vnd.tcpdump.pcap",
+                "application/vnd.android.package-archive",
+                "application/javascript",
+                "text/html",
+                "application/pdf",
+                "text/rtf",
+                "application/vnd.ms-excel",
+                "application/msword",
+                "application/x-dosexec",
+                "application/x-dosexec",
+                "application/octet-stream",
+            ],
+        ):
+            self._create_job(sample_name, mimetype)
 
     def test_subclasses(self):
         def handler(signum, frame):
@@ -93,10 +113,9 @@ class FileAnalyzerTestCase(CustomTestCase):
                             f"Testing {job.file_name} with mimetype {mimetype}"
                             f" for {timeout_seconds} seconds"
                         )
+                        _uuid = uuid()
                         sub = subclass(
-                            config,
-                            job.pk,
-                            {"runtime_configuration": {}, "task_id": uuid()},
+                            config, job.pk, runtime_configuration={}, task_id=_uuid
                         )
                         signal.alarm(timeout_seconds)
                         try:

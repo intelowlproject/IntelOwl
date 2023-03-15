@@ -822,23 +822,8 @@ class PluginConfigSerializer(rfs.ModelSerializer):
             if attrs["config_type"] == PluginConfig.ConfigType.PARAMETER
             else config_obj.secrets[attrs["attribute"]]["type"]
         )
-        if expected_type == "str":
-            expected_type = str
-        elif expected_type == "list":
-            expected_type = list
-        elif expected_type == "dict":
-            expected_type = dict
-        elif expected_type == "int":
-            expected_type = int
-        elif expected_type == "float":
-            expected_type = float
-        elif expected_type == "bool":
-            expected_type = bool
-
-        if expected_type and not isinstance(
-            attrs["value"],
-            expected_type,
-        ):
+        value_type = type(attrs["value"]).__name__
+        if value_type != expected_type:
             raise ValidationError(
                 f"{self.category} {attrs['plugin_name']} attribute "
                 f"{attrs['attribute']} has wrong type "

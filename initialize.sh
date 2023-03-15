@@ -47,6 +47,8 @@ semantic_version_comp () {
 }
 
 echo "This script will check (and possibly guide you through) the installation of dependencies for IntelOwl!"
+echo "CARE! This script is delivered AS IS and could not work correctly in every possible environment. In the case you face any error, you should just follow the official documentation and do all the required operation manually."
+
 # Check if docker is installed
 if ! [ -x "$(command -v docker)" ]; then
   echo 'Error: docker is not installed.' >&2

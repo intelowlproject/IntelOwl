@@ -46,6 +46,7 @@ class YaraScan(FileAnalyzer):
             self._secrets.get("private_repositories", {}).keys()
         )
         self.local_rules = params.get("local_rules", False)
+        self.missing_paths = 0
 
     def _load_directory(
         self, rulepath: PosixPath
@@ -141,6 +142,7 @@ class YaraScan(FileAnalyzer):
         result = []
         if not directory.exists() and not settings.STAGE_CI:
             self.report.errors.append(f"There is no directory {directory} to check")
+            self.missing_paths += 1
             return result
 
         logger.info(f"Getting rules inside {directory}")
@@ -202,14 +204,20 @@ class YaraScan(FileAnalyzer):
             raise AnalyzerRunException("There are no yara rules selected")
         result = defaultdict(list)
         logger.info(f"Checking {self.public_repositories}")
+        number_of_selected_lists = 0
         for url in self.public_repositories:
             result[url] += self.analyze(url)
             logger.info(f"Checking {self.private_repositories}")
+            number_of_selected_lists += 1
         for url in self.private_repositories:
             result[url] += self.analyze(url, private=True)
+            number_of_selected_lists += 1
         if self.local_rules:
             path = settings.YARA_RULES_PATH / self._job.user.username / "custom_rule"
             result[path] += self._analyze_directory(path)
+            number_of_selected_lists += 1
+        if self.missing_paths == number_of_selected_lists:
+            raise AnalyzerRunException("there was no directory all the selected lists")
         return result
 
     @classmethod

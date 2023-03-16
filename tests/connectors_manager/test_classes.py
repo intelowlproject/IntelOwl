@@ -84,14 +84,10 @@ class ConnectorTestCase(CustomTestCase):
             run_on_failure=False,
         )
         with self.assertRaises(ConnectorRunException):
-            MockedConnector(
-                cc, job.pk, {"runtime_configuration": {}, "task_id": uuid()}
-            ).before_run()
+            MockedConnector(cc, job.pk, {}, uuid()).before_run()
         cc.run_on_failure = True
         cc.save()
-        MockedConnector(
-            cc, job.pk, {"runtime_configuration": {}, "task_id": uuid()}
-        ).before_run()
+        MockedConnector(cc, job.pk, {}, uuid()).before_run()
         cc.delete()
         job.delete()
 
@@ -133,9 +129,7 @@ class ConnectorTestCase(CustomTestCase):
                     f"Testing with config {config.name}"
                     f" for {timeout_seconds} seconds"
                 )
-                sub = subclass(
-                    config, job.pk, {"runtime_configuration": {}, "task_id": uuid()}
-                )
+                sub = subclass(config, job.pk, {}, uuid())
                 signal.alarm(timeout_seconds)
                 try:
                     sub.start()

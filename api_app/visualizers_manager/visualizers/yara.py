@@ -1,15 +1,15 @@
 from logging import getLogger
-from typing import Dict
+from typing import Dict, List
 
-from api_app.analyzers_manager.models import AnalyzerReport
-from api_app.models import Job, Position
+from api_app.analyzers_manager.models import AnalyzerConfig, AnalyzerReport
+from api_app.models import Job
 from api_app.visualizers_manager.classes import Visualizer
 
 logger = getLogger(__name__)
 
 
 class Yara(Visualizer):
-    def run(self) -> Dict:
+    def run(self) -> List[Dict]:
         yara_reports = self.analyzer_reports()
         yara_num_matches = sum(
             len(matches)
@@ -23,32 +23,44 @@ class Yara(Visualizer):
             for match in matches
             if match.get("match", None)
         ]
-        result = {
-            "analyzer": {
-                "priority": 1,
-                "position": Position.CENTER,
-                "value": self.__class__.__name__,
-            },
-            "num_matches": {
-                "priority": 1,
-                "position": Position.RIGHT,
-                "value": yara_num_matches,
-            },
-            "signatures": {
-                "priority": 2,
-                "position": Position.LEFT,
-                "value": signatures,
-            },
-        }
+        result = [
+            self.Level(
+                level=1,
+                elements=[
+                    self.Title(
+                        self.Base(
+                            "Analyzer",
+                            color=self.Color.DARK,
+                        ),
+                        self.Base(self.__class__.__name__),
+                    )
+                ],
+            ),
+            self.Level(
+                level=2,
+                elements=[
+                    self.Title(
+                        self.Base("N# Matches", color=self.Color.DARK),
+                        self.Base(yara_num_matches),
+                    ),
+                    self.List(
+                        name=signatures,
+                        value=[self.Base(value) for value in signatures],
+                    ),
+                ],
+            ),
+        ]
         logger.debug(result)
-        return result
+        final_result = [report.to_dict() for report in result]
+        print(final_result)
+        return final_result
 
     @classmethod
     def _monkeypatch(cls):
         from kombu import uuid
 
         AnalyzerReport.objects.create(
-            name="Yara",
+            config=AnalyzerConfig.objects.get(name="Yara"),
             job=Job.objects.first(),
             status=AnalyzerReport.Status.SUCCESS,
             report={

@@ -28,14 +28,6 @@ class VisualizerConfig(AbstractConfig):
         ConnectorConfig, related_name="visualizers", blank=True
     )
 
-    def clean_both_analyzer_and_connectors_empty(self):
-        if not self.analyzers.all().exists() and not self.connectors.all().exists():
-            raise ValidationError("Both analyzer and connectors can't be empty")
-
-    def clean(self):
-        super().clean()
-        self.clean_both_analyzer_and_connectors_empty()
-
     @classmethod
     def _get_type(cls) -> str:
         from api_app.models import PluginConfig

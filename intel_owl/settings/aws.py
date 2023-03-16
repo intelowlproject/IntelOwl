@@ -5,6 +5,8 @@ import sys
 
 from intel_owl import secrets
 
+from .aqueue import CELERY_QUEUES
+
 # AWS settings
 AWS_IAM_ACCESS = secrets.get_secret("AWS_IAM_ACCESS", False) == "True"
 if not AWS_IAM_ACCESS:
@@ -22,3 +24,5 @@ if AWS_SQS:
         print("you must specify the USER NUMBER")
         sys.exit(4)
     BROKER_URL = "sqs://"
+    # Only Fifo queues are supported
+    CELERY_QUEUES = [f"{q}.fifo" for q in CELERY_QUEUES]

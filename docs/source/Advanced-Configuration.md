@@ -126,6 +126,7 @@ Then you need to configure permission access to the chosen S3 bucket.
 
 If you like, you could use AWS SQS instead of Rabbit-MQ to manage your queues.
 In that case, you should create new SQS queues in AWS called `intelowl-<environment>-<queue_name>` and give your instances on AWS the proper permissions to access it.
+Only FIFO queues are supported.
 
 Also, you need to set the environment variable `AWS_SQS` to `True` and populate the `AWS_USER_NUMBER`. This is required to connect in the right way to the selected SQS queues.
 

@@ -203,16 +203,17 @@ class YaraScan(FileAnalyzer):
         if not self.public_repositories and not self.private_repositories:
             raise AnalyzerRunException("There are no yara rules selected")
         result = defaultdict(list)
-        logger.info(f"Checking {self.public_repositories}")
         number_of_selected_lists = 0
         for url in self.public_repositories:
+            logger.info(f"Checking public repo {url}")
             result[url] += self.analyze(url)
-            logger.info(f"Checking {self.private_repositories}")
             number_of_selected_lists += 1
         for url in self.private_repositories:
+            logger.info(f"Checking private repo {url}")
             result[url] += self.analyze(url, private=True)
             number_of_selected_lists += 1
         if self.local_rules:
+            logger.info(f"Checking local repo {self.local_rules}")
             path = settings.YARA_RULES_PATH / self._job.user.username / "custom_rule"
             result[path] += self._analyze_directory(path)
             number_of_selected_lists += 1

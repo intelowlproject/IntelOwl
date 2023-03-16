@@ -205,6 +205,10 @@ class Plugin(metaclass=ABCMeta):
             return False
         else:
             if hasattr(cls, "_update") and callable(cls._update):
+                logger.info(
+                    f"about to send broadcast to queue {config.config.queue}"
+                    f" for plugin {plugin_name}"
+                )
                 broadcast(
                     "update_plugin",
                     queue=config.config.queue,
@@ -212,6 +216,10 @@ class Plugin(metaclass=ABCMeta):
                         "plugin_name": plugin_name,
                         "plugin_type": cls.get_config_class()._get_type(),
                     },
+                )
+                logger.info(
+                    f"sent broadcast to queue {config.config.queue}"
+                    f" for plugin {plugin_name}"
                 )
                 return True
             return False

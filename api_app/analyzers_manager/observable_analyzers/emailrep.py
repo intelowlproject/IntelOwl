@@ -22,7 +22,7 @@ class EmailRep(classes.ObservableAnalyzer):
         """
 
         headers = {
-            "User-Agent": "IntelOwl v2",
+            "User-Agent": "IntelOwl",
             "Key": self.__api_key,
             "Accept": "application/json",
         }

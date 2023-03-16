@@ -241,19 +241,20 @@ class YaraScan(FileAnalyzer):
                 os.chmod(settings.GIT_KEY_PATH, 0o600)
                 os.environ["GIT_SSH"] = str(settings.GIT_SSH_SCRIPT_PATH)
             directory = cls._get_directory(url, owner)
+            logger.info(f"checking {directory=} for {url=} and {owner=}")
 
-            if not directory.exists():
-                logger.info(f"About to clone {url} at {directory}")
-                repo = Repo.clone_from(url, directory, depth=1)
-                git = repo.git
-                git.config("--add", "safe.directory", directory)
-            else:
-                logger.info(f"about to pull {url} at {directory}")
+            if directory.exists():
+                logger.info(f"About to pull {url} at {directory}")
                 repo = Repo(directory)
                 git = repo.git
                 git.config("--add", "safe.directory", directory)
                 o = repo.remotes.origin
                 o.pull(allow_unrelated_histories=True, rebase=True)
+            else:
+                logger.info(f"About to clone {url} at {directory}")
+                repo = Repo.clone_from(url, directory, depth=1)
+                git = repo.git
+                git.config("--add", "safe.directory", directory)
             return directory
         finally:
             if ssh_key:

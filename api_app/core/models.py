@@ -137,6 +137,8 @@ class AbstractConfig(models.Model):
 
     def clean_config_queue(self):
         queue = self.config["queue"]
+        if settings.AWS_SQS and not queue.endswith(".fifo"):
+            queue += ".fifo"
         if queue not in settings.CELERY_QUEUES:
             logger.warning(
                 f"Analyzer {self.name} has a wrong queue."

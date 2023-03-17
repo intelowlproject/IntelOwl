@@ -209,24 +209,28 @@ class AnalyzerConfig(AbstractConfig):
             return settings.BASE_ANALYZER_OBSERVABLE_PYTHON_PATH
 
     @classmethod
-    def update(cls, python_module: str):
+    def update(cls, python_module):
+        from intel_owl import tasks
         from intel_owl.celery import broadcast
 
-        analyzer_configs = AnalyzerConfig.objects.filter(python_module=python_module)
+        analyzer_configs = cls.objects.filter(python_module=python_module)
         for analyzer_config in analyzer_configs:
             analyzer_config: AnalyzerConfig
             if analyzer_config.is_runnable():
                 class_ = analyzer_config.python_class
                 if hasattr(class_, "_update") and callable(class_._update):
+                    if settings.AWS_SQS:
+                        func = tasks.update_plugin_sqs
+                    else:
+                        func = tasks.update_plugin
+
                     broadcast(
-                        "update_plugin",
+                        func,
                         queue=analyzer_config.queue,
                         arguments={
-                            "plugin_path": f"{analyzer_config.python_path}"
-                            f".{analyzer_config.python_module}"
+                            "plugin_path": f"{analyzer_config.python_path}.{analyzer_config.python_module}"
                         },
                     )
-                    return True
 
         logger.error(f"Unable to update {python_module}")
         return False

@@ -10,8 +10,10 @@ from celery import Celery
 from celery.schedules import crontab
 from django.conf import settings
 from kombu import Exchange, Queue
+from kombu.common import Broadcast
 
 DEFAULT_QUEUE = "default"
+BROADCAST_QUEUE = "broadcast"
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "intel_owl.settings")
 
 app = Celery("intel_owl")
@@ -28,7 +30,7 @@ app.conf.update(
             routing_key=key,
         )
         for key in settings.CELERY_QUEUES
-    ],
+    ] +[Broadcast(name=BROADCAST_QUEUE, queue=BROADCAST_QUEUE, routing_key=BROADCAST_QUEUE, unique=False, auto_delete=False)],
     task_time_limit=1800,
     broker_url=settings.BROKER_URL,
     result_backend=settings.RESULT_BACKEND,
@@ -112,9 +114,12 @@ app.conf.beat_schedule = {
 }
 
 
-def broadcast(function: str, queue: str = None, arguments: Dict = None):
-    if queue:
-        if queue not in settings.CELERY_QUEUES:
-            queue = DEFAULT_QUEUE
-        queue = [f"celery@worker_{queue}"]
-    app.control.broadcast(function, destination=queue, arguments=arguments)
+def broadcast(function, queue: str = None, arguments: Dict = None):
+    if settings.AWS_SQS:
+        function.apply_async(kwargs=arguments, queue=settings.BROADCAST_QUEUE)
+    else:
+        if queue:
+            if queue not in settings.CELERY_QUEUES:
+                queue = DEFAULT_QUEUE
+            queue = [f"celery@worker_{queue}"]
+        app.control.broadcast(function.__name__, destination=queue, arguments=arguments)

@@ -25,6 +25,9 @@ def update_plugin(state, plugin_path):
     plugin = import_string(plugin_path)
     plugin._update()
 
+@shared_task(soft_time_limit=10000)
+def update_plugin_sqs(plugin_path):
+    update_plugin(None, plugin_path)
 
 @shared_task(soft_time_limit=10000)
 def remove_old_jobs():

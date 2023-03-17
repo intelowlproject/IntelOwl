@@ -303,12 +303,12 @@ function convertToElement(element) {
   ex: titleAdditionalElements is available only for the TitleVisualizer, the other Visualizer will ignore this fields:
   It will be unpacked to "undefined" and the React component will ignore the param even if we pass it.
   */
-  // eslint-disable-next-line prefer-const
   let {
     values,
     additionalElements,
     titleAdditionalElements,
     valueAdditionalElements,
+    // eslint-disable-next-line prefer-const
     ...otherFields
   } = element;
   values = converListElement(values);

@@ -112,7 +112,10 @@ const usePluginConfigurationStore = create((set, get) => ({
         const mappedAnalyzers = playbook.analyzers.map((analyzerName) =>
           Object.fromEntries([
             ["name", analyzerName],
-            ["config", playbook.runtime_configuration.analyzers[analyzerName]],
+            [
+              "config",
+              playbook.runtime_configuration.analyzers[analyzerName] || {},
+            ],
           ])
         );
         // eslint-disable-next-line no-param-reassign
@@ -127,7 +130,7 @@ const usePluginConfigurationStore = create((set, get) => ({
             ["name", connectorName],
             [
               "config",
-              playbook.runtime_configuration.connectors[connectorName],
+              playbook.runtime_configuration.connectors[connectorName] || {},
             ],
           ])
         );

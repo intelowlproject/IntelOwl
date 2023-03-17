@@ -12,7 +12,6 @@ from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 
 from api_app.core.views import AbstractConfigAPI, PluginActionViewSet
-from intel_owl.celery import DEFAULT_QUEUE
 
 from ..models import Job
 from .models import AnalyzerConfig, AnalyzerReport
@@ -78,11 +77,10 @@ class AnalyzerActionViewSet(PluginActionViewSet):
             report.runtime_configuration.get(report.config.name, {}),
             report.parent_playbook.pk if report.parent_playbook else None,
         )
-
         runner = signature | tasks.continue_job_pipeline.signature(
             args=[report.job.id],
             kwargs={},
-            queue=DEFAULT_QUEUE,
+            queue=report.config.queue,
             soft_time_limit=10,
             immutable=True,
         )

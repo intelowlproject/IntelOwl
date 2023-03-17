@@ -43,6 +43,7 @@ class YaraScan(FileAnalyzer):
     public_repositories: list
     _private_repositories: dict
     local_rules: str
+    missing_paths: int = 0
 
     def _load_directory(
         self, rulepath: PosixPath
@@ -138,6 +139,7 @@ class YaraScan(FileAnalyzer):
         result = []
         if not directory.exists() and not settings.STAGE_CI:
             self.report.errors.append(f"There is no directory {directory} to check")
+            self.missing_paths += 1
             return result
 
         logger.info(f"Getting rules inside {directory}")
@@ -196,21 +198,32 @@ class YaraScan(FileAnalyzer):
 
     def run(self):
         result = defaultdict(list)
+        selected_repositories = len(self.public_repositories) + len(
+            self._private_repositories.keys()
+        )
         if (
             not self.public_repositories
             and not self._private_repositories
             and not self.local_rules
         ):
             self.report.errors.append("There are no yara rules selected")
-        logger.info(f"Checking {self.public_repositories}")
         for url in self.public_repositories:
+            logger.info(f"Checking public repo {url}")
             result[url] += self.analyze(url)
-        logger.info(f"Checking {self._private_repositories.keys()}")
         for url in self._private_repositories.keys():
+            logger.info(f"Checking private repo {url}")
             result[url] += self.analyze(url, private=True)
         if self.local_rules:
-            path = settings.YARA_RULES_PATH / self._job.user.username / "custom_rule"
+            logger.info(f"Checking local repo {self.local_rules}")
+            path: PosixPath = (
+                settings.YARA_RULES_PATH / self._job.user.username / "custom_rule"
+            )
+            selected_repositories += len(list(path.iterdir()))
             result[path] += self._analyze_directory(path)
+        if self.missing_paths >= selected_repositories:
+            raise AnalyzerRunException(
+                "There are no yara rules selected with a repository"
+            )
         return result
 
     @classmethod
@@ -234,19 +247,20 @@ class YaraScan(FileAnalyzer):
                 os.chmod(settings.GIT_KEY_PATH, 0o600)
                 os.environ["GIT_SSH"] = str(settings.GIT_SSH_SCRIPT_PATH)
             directory = cls._get_directory(url, owner)
+            logger.info(f"checking {directory=} for {url=} and {owner=}")
 
-            if not directory.exists():
-                logger.info(f"About to clone {url} at {directory}")
-                repo = Repo.clone_from(url, directory, depth=1)
-                git = repo.git
-                git.config("--add", "safe.directory", directory)
-            else:
-                logger.info(f"about to pull {url} at {directory}")
+            if directory.exists():
+                logger.info(f"About to pull {url} at {directory}")
                 repo = Repo(directory)
                 git = repo.git
                 git.config("--add", "safe.directory", directory)
                 o = repo.remotes.origin
                 o.pull(allow_unrelated_histories=True, rebase=True)
+            else:
+                logger.info(f"About to clone {url} at {directory}")
+                repo = Repo.clone_from(url, directory, depth=1)
+                git = repo.git
+                git.config("--add", "safe.directory", directory)
             return directory
         finally:
             if ssh_key:
@@ -314,10 +328,10 @@ class YaraScan(FileAnalyzer):
 
     @classmethod
     def _update(cls):
-        from api_app.analyzers_manager.models import AnalyzerConfig
-
         logger.info("Starting updating yara rules")
         dict_urls: Dict[Union[None, Tuple[str, str]], Set[str]] = defaultdict(set)
+
+        from api_app.analyzers_manager.models import AnalyzerConfig
 
         for config in AnalyzerConfig.objects.filter(
             python_module=cls.python_module, disabled=False

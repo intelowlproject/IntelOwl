@@ -226,6 +226,7 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
     url: str
     max_tries: int
     poll_distance: int
+    key_not_found_max_retries: int = 10
 
     @staticmethod
     def __raise_in_case_bad_request(name, resp, params_to_check=None) -> bool:
@@ -266,6 +267,38 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
         resp = requests.get(f"{url}?key={key}", headers=headers)
         return resp.status_code, resp.json()
 
+    def __polling(self, req_key: str, chance: int, re_poll_try: int = 0):
+        try:
+            status_code, json_data = self.__query_for_result(self.url, req_key)
+        except (requests.RequestException, json.JSONDecodeError) as e:
+            raise AnalyzerRunException(e)
+        if status_code == 404:
+            # This happens when they key does not exist.
+            # This is possible in case IntelOwl is deployed as a Swarm.
+            # The previous POST request that created the analysis ...
+            # ...could have been sent to a different container in another machine.
+            # so we need to try again and find the server with the key
+            logger.info(
+                f"Polling again because received a 404."
+                f" Try #{chance + 1}. Re-Poll try {re_poll_try}. Starting the query..."
+                f"<-- {self.__repr__()}"
+            )
+            if self.key_not_found_max_retries == re_poll_try:
+                raise AnalyzerRunException(
+                    f"not found key {req_key} in any server after maximum retries"
+                )
+            return self.__polling(req_key, chance, re_poll_try=re_poll_try + 1)
+        else:
+            status = json_data.get("status", None)
+            if status and status == self._job.Status.RUNNING.value:
+                logger.info(
+                    f"Poll number #{chance + 1}, "
+                    f"status: 'running' <-- {self.__repr__()}"
+                )
+            else:
+                return True, json_data
+        return False, json_data
+
     def __poll_for_result(self, req_key: str) -> dict:
         got_result = False
         json_data = {}
@@ -275,18 +308,8 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
                 f"Result Polling. Try #{chance + 1}. Starting the query..."
                 f"<-- {self.__repr__()}"
             )
-            try:
-                _, json_data = self.__query_for_result(self.url, req_key)
-            except (requests.RequestException, json.JSONDecodeError) as e:
-                raise AnalyzerRunException(e)
-            status = json_data.get("status", None)
-            if status and status == self._job.Status.RUNNING.value:
-                logger.info(
-                    f"Poll number #{chance + 1}, "
-                    f"status: 'running' <-- {self.__repr__()}"
-                )
-            else:
-                got_result = True
+            got_result, json_data = self.__polling(req_key, chance)
+            if got_result:
                 break
 
         if not got_result:

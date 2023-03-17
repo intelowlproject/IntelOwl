@@ -5,11 +5,11 @@ import { Row } from "reactstrap";
 
 import { visualizerValidator } from "./validators";
 
-import { BooleanVisualizerField } from "./elements/bool";
-import { BaseVisualizerField } from "./elements/base";
-import { ListVisualizerField } from "./elements/list";
-import { IconVisualizerField } from "./elements/icon";
-import { TitleVisualizerField } from "./elements/title";
+import { BooleanVisualizer } from "./elements/bool";
+import { BaseVisualizer } from "./elements/base";
+import { ListVisualizer } from "./elements/list";
+import { IconVisualizer } from "./elements/icon";
+import { TitleVisualizer } from "./elements/title";
 
 import { VisualizerComponentType } from "./elements/const";
 
@@ -285,146 +285,77 @@ const mockedData = [
   },
 ];
 
+/**
+ * Convert the validated data into a VisualizerElement.
+ * This is a recursive function: It's called by the component to convert the inner components.
+ *
+ * @param {object} element data used to generate the component
+ * @returns {React.Component} component to visualize
+ */
 function convertToElement(element) {
-  // switch(element.type) {
-  //   case VisualizerComponentType.BOOL: {
-  //     return <BooleanVisualizerField
-  //       name={element.name}
-  //       value={element.value}
-  //       pill={element.pill}
-  //       link={element.link}
-  //       className={element.className}
-  //       activeColor={element.activeColor}
-  //       additionalElements={element.additionalElements?.map(additionalElement => convertToElement(additionalElement))}
-  //       hideIfEmpty={element.hideIfEmpty}
-  //       disableIfEmpty={element.disableIfEmpty}
-  //     />
-  //   }
-  //   case VisualizerComponentType.ICON: {
-  //     return <IconVisualizerField
-  //       name={element.name}
-  //       icon={element.icon}
-  //       color={element.color}
-  //       link={element.link}
-  //       className={element.className}
-  //       additionalElements={element.additionalElements?.map(additionalElement => convertToElement(additionalElement))}
-  //       hideIfEmpty={element.hideIfEmpty}
-  //       disableIfEmpty={element.disableIfEmpty}
-  //     />
-  //   }
-  //   case VisualizerComponentType.LIST: {
-  //     return <ListVisualizerField
-  //       name={element.name}
-  //       values={element.values.map(additionalElement => convertToElement(additionalElement))}
-  //       color={element.color}
-  //       link={element.link}
-  //       className={element.className}
-  //       additionalElements={element.additionalElements?.map(additionalElement => convertToElement(additionalElement))}
-  //       startOpen={element.startOpen}
-  //       hideIfEmpty={element.hideIfEmpty}
-  //       disableIfEmpty={element.disableIfEmpty}
-  //     />
-  //   }
-  //   case VisualizerComponentType.TITLE: {
-  //     return <TitleVisualizerField
-  //       title={element.title}
-  //       value={element.value}
-  //       titleColor={element.titleColor}
-  //       titleLink={element.titleLink}
-  //       titleClassName={element.titleClassName}
-  //       titleAdditionalElements={element.titleAdditionalElements?.map(additionalElement => convertToElement(additionalElement))}
-  //       valueColor={element.valueColor}
-  //       valueLink={element.valueLink}
-  //       valueClassName={element.valueClassName}
-  //       valueAdditionalElements={element.valueAdditionalElements?.map(additionalElement => convertToElement(additionalElement))}
-  //       hideIfEmpty={element.hideIfEmpty}
-  //       disableIfEmpty={element.disableIfEmpty}
-  //     />
-  //   }
-  //   default: {
-  //     return <BaseVisualizerField
-  //       value={element.value}
-  //       color={element.color}
-  //       link={element.link}
-  //       className={element.className}
-  //       additionalElements={element.additionalElements?.map(additionalElement => convertToElement(additionalElement))}
-  //       hideIfEmpty={element.hideIfEmpty}
-  //       disableIfEmpty={element.disableIfEmpty}
-  //     />
-  //   }
-  // }
+  // this is a function used to convert the list of data to a list of elements.
+  const converListElement = (listElement) =>
+    listElement?.map((additionalElement) =>
+      convertToElement(additionalElement)
+    );
+
+  /* even if the Visualizers components have different fields this is not a problem:
+  ex: titleAdditionalElements is available only for the TitleVisualizer, the other Visualizer will ignore this fields:
+  It will be unpacked to "undefined" and the React component will ignore the param even if we pass it.
+  */
+  // eslint-disable-next-line prefer-const
+  let {
+    values,
+    additionalElements,
+    titleAdditionalElements,
+    valueAdditionalElements,
+    ...otherFields
+  } = element;
+  values = converListElement(values);
+  additionalElements = converListElement(additionalElements);
+  titleAdditionalElements = converListElement(titleAdditionalElements);
+  valueAdditionalElements = converListElement(valueAdditionalElements);
+
   switch (element.type) {
     case VisualizerComponentType.BOOL: {
-      // eslint-disable-next-line prefer-const
-      let { additionalElements, ...otherFields } = element;
-      additionalElements = additionalElements?.map((additionalElement) =>
-        convertToElement(additionalElement)
-      );
       return (
-        <BooleanVisualizerField
-          {...otherFields}
+        <BooleanVisualizer
           additionalElements={additionalElements}
+          {...otherFields}
         />
       );
     }
     case VisualizerComponentType.ICON: {
-      // eslint-disable-next-line prefer-const
-      let { additionalElements, ...otherFields } = element;
-      additionalElements = additionalElements?.map((additionalElement) =>
-        convertToElement(additionalElement)
-      );
       return (
-        <IconVisualizerField
-          {...otherFields}
+        <IconVisualizer
           additionalElements={additionalElements}
+          {...otherFields}
         />
       );
     }
     case VisualizerComponentType.LIST: {
-      // eslint-disable-next-line prefer-const
-      let { values, additionalElements, ...otherFields } = element;
-      values = element.values.map((additionalElement) =>
-        convertToElement(additionalElement)
-      );
-      additionalElements = additionalElements?.map((additionalElement) =>
-        convertToElement(additionalElement)
-      );
       return (
-        <ListVisualizerField
-          {...otherFields}
+        <ListVisualizer
           values={values}
           additionalElements={additionalElements}
+          {...otherFields}
         />
       );
     }
     case VisualizerComponentType.TITLE: {
-      // eslint-disable-next-line prefer-const
-      let { titleAdditionalElements, valueAdditionalElements, ...otherFields } =
-        element;
-      titleAdditionalElements = element.titleAdditionalElements?.map(
-        (additionalElement) => convertToElement(additionalElement)
-      );
-      valueAdditionalElements = valueAdditionalElements?.map(
-        (additionalElement) => convertToElement(additionalElement)
-      );
       return (
-        <TitleVisualizerField
-          {...otherFields}
+        <TitleVisualizer
           titleAdditionalElements={titleAdditionalElements}
           valueAdditionalElements={valueAdditionalElements}
+          {...otherFields}
         />
       );
     }
     default: {
-      // eslint-disable-next-line prefer-const
-      let { additionalElements, ...otherFields } = element;
-      additionalElements = element.additionalElements?.map(
-        (additionalElement) => convertToElement(additionalElement)
-      );
       return (
-        <BaseVisualizerField
-          {...otherFields}
+        <BaseVisualizer
           additionalElements={additionalElements}
+          {...otherFields}
         />
       );
     }
@@ -466,8 +397,8 @@ export default function VisualizerReport({ job }) {
     }
     return (
       <Fragment>
-        {/* eslint-disable-next-line react/no-array-index-key */}
         <Row
+          /* eslint-disable-next-line react/no-array-index-key */
           key={levelIndex}
           className={`justify-content-around align-items-center h${levelSize}`}
         >

@@ -110,32 +110,27 @@ We have support for several AWS services.
 
 You can customize the AWS Region location of you services by changing the environment variable `AWS_REGION`. Default is `eu-central-1`
 
+You have to add some credentials for AWS: if you have IntelOwl deployed on the AWS infrastructure, you can use IAM credentials:
+to allow that just set `AWS_IAM_ACCESS` to `True`. If that is not the case, you have to set both `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`
+
 #### S3
 
 If you prefer to use S3 to store the analyzed samples, instead of the local storage, you can do it.
 
-First, you need to configure the environment variable `LOCAL_STORAGE` to `False` to enable it and set `AWS_STORAGE_BUCKET_NAME` to the proper AWS bucket.
+First, you need to configure the environment variable `LOCAL_STORAGE` to `False` to enable it and set `AWS_STORAGE_BUCKET_NAME` to the AWS bucket you want to use.
 
-Then you have to add some credentials for AWS: if you have IntelOwl deployed on the AWS infrastructure, you can use IAM credentials:
-to allow that just set `AWS_IAM_ACCESS` to `True`. If that is not the case, you have to set both `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`
+Then you need to configure permission access to the chosen S3 bucket.
+
 
 #### SQS
 
 If you like, you could use AWS SQS instead of Rabbit-MQ to manage your queues.
-In that case, you should change the parameter `BROKER_URL` to `sqs://` and give your instances on AWS the proper permissions to access it.
+In that case, you should create new SQS queues in AWS called `intelowl-<environment>-<queue_name>` and give your instances on AWS the proper permissions to access it.
+Only FIFO queues are supported.
 
-Also, you need to set the environment variable `AWS_SQS` to `True` to activate the additional required settings.
+Also, you need to set the environment variable `AWS_SQS` to `True` and populate the `AWS_USER_NUMBER`. This is required to connect in the right way to the selected SQS queues.
 
 Ultimately, to avoid to run RabbitMQ locally, you would need to use the option `--use-external-broker` when launching IntelOwl with the `start.py` script.
-
-#### SES
-
-If you like, you could use Amazon SES for sending automated emails.
-
-First, you need to configure the environment variable `AWS_SES` to `True` to enable it.
-Then you have to add some credentials for AWS: if you have IntelOwl deployed on the AWS infrastructure, you can use IAM credentials:
-to allow that just set `AWS_IAM_ACCESS` to `True`. If that is not the case, you have to set both `AWS_ACESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`.
-Additionally, if you are not using the default AWS region of us-east-1, you need to specify your `AWS_REGION`
 
 #### RDS
 
@@ -145,6 +140,12 @@ If you have IntelOwl deployed on the AWS infrastructure, you can use IAM credent
 To allow that just set `AWS_RDS_IAM_ROLE` to `True`. In this case `DB_PASSWORD` is not required anymore.
 
 Moreover, to avoid to run PostgreSQL locally, you would need to use the option `--use-external-database` when launching IntelOwl with the `start.py` script.
+
+#### SES
+
+If you like, you could use Amazon SES for sending automated emails (password resets / registration requests, etc).
+
+You need to configure the environment variable `AWS_SES` to `True` to enable it.
 
 #### Secrets
 

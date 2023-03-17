@@ -1,10 +1,10 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-import { BaseVisualizerField } from "./base";
+import { BaseVisualizer } from "./base";
 import { getIcon } from "../icons";
 
-export function IconVisualizerField({
+export function IconVisualizer({
   icon,
   color,
   link,
@@ -22,7 +22,7 @@ export function IconVisualizerField({
   }
   return (
     <div key={icon} className="col-auto">
-      <BaseVisualizerField
+      <BaseVisualizer
         value={getIcon(icon)}
         color={color}
         link={link}
@@ -33,7 +33,7 @@ export function IconVisualizerField({
   );
 }
 
-IconVisualizerField.propTypes = {
+IconVisualizer.propTypes = {
   icon: PropTypes.string.isRequired,
   color: PropTypes.string,
   link: PropTypes.string,
@@ -43,7 +43,7 @@ IconVisualizerField.propTypes = {
   disableIfEmpty: PropTypes.bool,
 };
 
-IconVisualizerField.defaultProps = {
+IconVisualizer.defaultProps = {
   color: "",
   link: "",
   className: "",

@@ -12,7 +12,6 @@ from django.conf import settings
 from django.utils.module_loading import import_string
 
 from api_app import crons
-from api_app.playbooks_manager.models import PlaybookConfig
 from intel_owl.celery import app
 
 logger = logging.getLogger(__name__)
@@ -25,9 +24,7 @@ def update_plugin(state, plugin_path):
     plugin = import_string(plugin_path)
     plugin._update()
 
-@shared_task(soft_time_limit=10000)
-def update_plugin_sqs(plugin_path):
-    update_plugin(None, plugin_path)
+
 
 @shared_task(soft_time_limit=10000)
 def remove_old_jobs():
@@ -110,13 +107,24 @@ def job_pipeline(
 
 @app.task(name="run_plugin", soft_time_limit=500)
 def run_plugin(
-    job_id: int, plugin_path: str, plugin_config_pk: str, runtime_configuration: dict, task_id:int, parent_playbook_pk:int=None
+    job_id: int,
+    plugin_path: str,
+    plugin_config_pk: str,
+    runtime_configuration: dict,
+    task_id: int,
+    parent_playbook_pk: int = None,
 ):
     from api_app.core.classes import Plugin
 
     plugin_class: typing.Type[Plugin] = import_string(plugin_path)
     config = plugin_class.config_model.objects.get(pk=plugin_config_pk)
-    plugin = plugin_class(config=config, job_id=job_id, runtime_configuration=runtime_configuration, task_id=task_id, parent_playbook_pk=parent_playbook_pk)
+    plugin = plugin_class(
+        config=config,
+        job_id=job_id,
+        runtime_configuration=runtime_configuration,
+        task_id=task_id,
+        parent_playbook_pk=parent_playbook_pk,
+    )
     plugin.start()
 
 

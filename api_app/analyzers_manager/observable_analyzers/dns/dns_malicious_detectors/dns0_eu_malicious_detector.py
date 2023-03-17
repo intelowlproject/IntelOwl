@@ -3,6 +3,8 @@
 
 """Check if the domains is reported as malicious in DNS0.eu database"""
 
+import logging
+from ipaddress import AddressValueError, IPv4Address
 from urllib.parse import urlparse
 
 import requests
@@ -13,15 +15,26 @@ from tests.mock_utils import MockResponse, if_mock_connections, patch
 
 from ..dns_responses import malicious_detector_response
 
+logger = logging.getLogger(__name__)
+
 
 class DNS0EUMaliciousDetector(classes.ObservableAnalyzer):
+    class NotADomain(Exception):
+        pass
+
     def run(self):
+        observable = self.observable_name
+        is_malicious = False
         try:
-            is_malicious = False
-            observable = self.observable_name
             # for URLs we are checking the relative domain
             if self.observable_classification == self.ObservableTypes.URL:
                 observable = urlparse(self.observable_name).hostname
+                try:
+                    IPv4Address(observable)
+                except AddressValueError:
+                    pass
+                else:
+                    raise self.NotADomain()
 
             params = {
                 "name": observable,
@@ -45,6 +58,8 @@ class DNS0EUMaliciousDetector(classes.ObservableAnalyzer):
 
         except requests.exceptions.RequestException:
             raise AnalyzerRunException("Connection to DNS0 failed")
+        except self.NotADomain:
+            logger.info(f"not analyzing {observable} because not a domain")
 
         return malicious_detector_response(self.observable_name, is_malicious)
 

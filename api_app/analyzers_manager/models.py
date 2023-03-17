@@ -219,11 +219,7 @@ class AnalyzerConfig(AbstractConfig):
             if analyzer_config.is_runnable():
                 class_ = analyzer_config.python_class
                 if hasattr(class_, "_update") and callable(class_._update):
-                    if settings.AWS_SQS:
-                        func = tasks.update_plugin_sqs
-                    else:
-                        func = tasks.update_plugin
-
+                    func = tasks.update_plugin
                     broadcast(
                         func,
                         queue=analyzer_config.queue,

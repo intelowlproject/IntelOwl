@@ -3,6 +3,8 @@
 
 # flake8: noqa
 
+# this is better to be run after commons.py
+
 import os
 
 from intel_owl import secrets

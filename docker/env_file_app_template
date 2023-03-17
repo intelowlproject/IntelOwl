@@ -41,15 +41,16 @@ AWS_SECRET_ACCESS_KEY=
 ## secrets, broker and region
 AWS_SECRETS=False
 AWS_SQS=False
+AWS_USER_NUMBER=
 AWS_REGION=eu-central-1
+# IAM ROLE for RDS
+AWS_RDS_IAM_ROLE=False
 ## to use for sending mail with SES
 AWS_SES=False
 
 # Uploads
 SLACK_TOKEN=
 DEFAULT_SLACK_CHANNEL=
-# IAM ROLE for RDS
-AWS_RDS_IAM_ROLE=False
 
 # Elastic Search Configuration
 ELASTICSEARCH_ENABLED=False

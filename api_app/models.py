@@ -21,6 +21,7 @@ from api_app.core.models import AbstractConfig, AbstractReport
 from api_app.helpers import calculate_sha1, calculate_sha256, get_now
 from certego_saas.apps.organization.organization import Organization
 from certego_saas.models import User
+from intel_owl.celery import get_real_queue_name
 
 logger = logging.getLogger(__name__)
 
@@ -404,7 +405,7 @@ class Job(models.Model):
             | tasks.continue_job_pipeline.signature(
                 args=[self.pk],
                 kwargs={},
-                queue=DEFAULT_QUEUE,
+                queue=get_real_queue_name(DEFAULT_QUEUE),
                 soft_time_limit=10,
                 immutable=True,
             )

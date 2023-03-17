@@ -148,6 +148,7 @@ The following is the list of the available analyzers you can run out-of-the-box.
   * [Elastic rules](https://github.com/elastic/protections-artifacts)
   * [JPCERTCC Yara rules](https://github.com/JPCERTCC/jpcert-yara)
   * [HuntressLab Yara rules](https://github.com/embee-research/Yara)
+  * [elceef Yara Rules](https://github.com/elceef/yara-rulz)
   * your own added signatures. See [Advanced-Usage](./Advanced-Usage.html#analyzers-with-special-configuration) for more details.
 * `PEframe_Scan`: Perform static analysis on Portable Executable malware and malicious MS Office documents with [PeFrame](https://github.com/guelfoweb/peframe)
 * `Capa_Info`: [Capa](https://github.com/mandiant/capa) detects capabilities in executable files
@@ -222,7 +223,8 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `Shodan_Honeyscore`: scan an IP against [Shodan](https://www.shodan.io/) Honeyscore API
 * `HoneyDB_Get`: [HoneyDB](https://honeydb.io/) IP lookup service
 * `HoneyDB_Scan_Twitter`: scan an IP against HoneyDB.io's Twitter Threat Feed
-* `Hunter`: Scans a domain name and returns set of data about the organisation, the email address found and additional information about the people owning those email addresses.
+* `Hunter_Io`: Scans a domain name and returns set of data about the organisation, the email address found and additional information about the people owning those email addresses.
+* `Hunter_How`: Scans IP and domain against [Hunter_How API](https://hunter.how/search-api).
 * `Censys_Search`: scan an IP address against [Censys](https://censys.io/) View API
 * `MalwareBazaar_Get_Observable`: Check if a particular malware hash is known to [MalwareBazaar](https://bazaar.abuse.ch/)
 * `MalwareBazaar_Google_Observable`: Check if a particular IP, domain or url is known to MalwareBazaar using google search
@@ -284,7 +286,7 @@ Some analyzers require details other than just IP, URL, Domain, etc. We classifi
 ###### External services
 * `VirusTotal_v3_Intelligence_Search`: Perform advanced queries with [VirusTotal Intelligence](https://developers.virustotal.com/reference/intelligence-search) (requires paid plan)
 * `MISP`: scan an observable on a MISP instance
-* `EmailRep`: search an email address on emailrep.io
+* `EmailRep`: search an email address on [emailrep.io](https://emailrep.io)
 * `WiGLE`: Maps and database of 802.11 wireless networks, with statistics, submitted by wardrivers, netstumblers, and net huggers.
 * `CRXcavator`: scans a chrome extension against crxcavator.io
 * `Darksearch_Query`: Search a keyword against darksearch.io's search API. It's possible to make complex queries using boolean logic. For example, `OSINT AND CTI OR intelowl NOT hack` is a valid observable name.

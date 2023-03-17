@@ -10,14 +10,15 @@ import {
   AiFillWarning,
   AiFillFire,
 } from "react-icons/ai";
-import { BsShieldFillCheck } from "react-icons/bs";
+import { BsFillInfoSquareFill, BsShieldFillCheck } from "react-icons/bs";
 import { FaBiohazard } from "react-icons/fa";
 import { SiVirustotal } from "react-icons/si";
 import { RiAliensFill } from "react-icons/ri";
 
 import { PUBLIC_URL } from "../../../../constants/environment";
 
-export const iconMapping = Object.freeze({
+const generalIcons = Object.freeze({
+  info: <BsFillInfoSquareFill />,
   like: <AiFillLike />,
   dislike: <AiFillDislike />,
   heart: <AiFillHeart />,
@@ -43,6 +44,16 @@ export const iconMapping = Object.freeze({
         <SiVirustotal />
       </div>
     </IconContext.Provider>
+  ),
+  quokka: (
+    <img
+      className="px-1"
+      title="Quokka"
+      src={`${PUBLIC_URL}/icons/quokka-icon.png`}
+      alt="Quokka"
+      width="30px"
+      height="24px"
+    />
   ),
   hybridAnalysis: (
     <img
@@ -95,3 +106,11 @@ export const iconMapping = Object.freeze({
     />
   ),
 });
+
+export function getIcon(iconCode) {
+  const selectedIcon = generalIcons[iconCode];
+  if (!selectedIcon) {
+    return <span className={`fi fi-${iconCode}`} />;
+  }
+  return selectedIcon;
+}

@@ -20,7 +20,15 @@ class Command(BaseCommand):
 
 
     def handle(self, *args, **options):
-        analyzer_config = AnalyzerConfig.objects.get(name=options["config_name"])
+        try:
+            analyzer_config = AnalyzerConfig.objects.get(name=options["config_name"])
+        except AnalyzerConfig.DoesNotExist:
+            self.stdout.write(
+                self.style.WARNING(
+                    f"Configuration {options['config_name']} does not exists"
+                )
+            )
+            return
         if analyzer_config.is_runnable():
             class_ = analyzer_config.python_class
             if hasattr(class_, "_update") and callable(class_._update):
@@ -33,13 +41,19 @@ class Command(BaseCommand):
                 class_._update()
                 self.stdout.write(
                     self.style.SUCCESS(
-                        f"Finish update of {analyzer_config.name}"
+                        f"Finished update of {analyzer_config.name}"
+                    )
+                )
+            else:
+                self.stdout.write(
+                    self.style.WARNING(
+                        f"Configuration {analyzer_config.name} does not implement _update method"
                     )
                 )
         else:
             self.stdout.write(
                 self.style.WARNING(
-                    f"Configuration {options['config_name']} does not exist"
+                    f"Configuration {analyzer_config.name} is not runnable"
                 )
             )
 

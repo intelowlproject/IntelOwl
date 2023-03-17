@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-export function BaseVisualizerField({
+export function BaseVisualizer({
   value,
   color,
   link,
@@ -41,7 +41,7 @@ export function BaseVisualizerField({
   );
 }
 
-BaseVisualizerField.propTypes = {
+BaseVisualizer.propTypes = {
   value: PropTypes.string.isRequired,
   color: PropTypes.string,
   link: PropTypes.string,
@@ -51,7 +51,7 @@ BaseVisualizerField.propTypes = {
   disableIfEmpty: PropTypes.bool,
 };
 
-BaseVisualizerField.defaultProps = {
+BaseVisualizer.defaultProps = {
   color: "",
   link: "",
   className: "",

@@ -1,9 +1,9 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-import { BaseVisualizerField } from "./base";
+import { BaseVisualizer } from "./base";
 
-export function TitleVisualizerField({
+export function TitleVisualizer({
   title,
   value,
   titleColor,
@@ -28,7 +28,7 @@ export function TitleVisualizerField({
     <div key={`${title}__${value}`} className="col-auto">
       <div className={`d-flex flex-column align-items-center ${isDisabled}`}>
         <div className="mb-1">
-          <BaseVisualizerField
+          <BaseVisualizer
             value={title}
             color={titleColor}
             link={titleLink}
@@ -37,7 +37,7 @@ export function TitleVisualizerField({
           />
         </div>
         <div className="p-1 d-inline-flex">
-          <BaseVisualizerField
+          <BaseVisualizer
             value={value}
             color={valueColor}
             link={valueLink}
@@ -50,7 +50,7 @@ export function TitleVisualizerField({
   );
 }
 
-TitleVisualizerField.propTypes = {
+TitleVisualizer.propTypes = {
   title: PropTypes.string.isRequired,
   value: PropTypes.string.isRequired,
   titleColor: PropTypes.string,
@@ -65,7 +65,7 @@ TitleVisualizerField.propTypes = {
   disableIfEmpty: PropTypes.bool,
 };
 
-TitleVisualizerField.defaultProps = {
+TitleVisualizer.defaultProps = {
   titleColor: "",
   titleLink: "",
   titleClassName: "text-capitalize",

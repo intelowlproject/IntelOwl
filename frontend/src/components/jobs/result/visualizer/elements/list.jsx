@@ -14,9 +14,9 @@ import {
   IoIosArrowDropdownCircle,
 } from "react-icons/io";
 
-import { BaseVisualizerField } from "./base";
+import { BaseVisualizer } from "./base";
 
-export function ListVisualizerField({
+export function ListVisualizer({
   name,
   values,
   color,
@@ -29,9 +29,6 @@ export function ListVisualizerField({
 }) {
   const [isListOpen, setIsListOpen] = useState(startOpen);
   const toggleList = () => setIsListOpen(!isListOpen);
-
-  console.debug("ListVisualizerField.fieldValue");
-  console.debug(values);
 
   if (hideIfEmpty && values.length === 0) {
     return null;
@@ -57,7 +54,7 @@ export function ListVisualizerField({
               ) : (
                 <IoIosArrowDropdownCircle className="mx-1" />
               )}
-              <BaseVisualizerField
+              <BaseVisualizer
                 value={name}
                 link={link}
                 className={className}
@@ -80,7 +77,7 @@ export function ListVisualizerField({
   );
 }
 
-ListVisualizerField.propTypes = {
+ListVisualizer.propTypes = {
   name: PropTypes.string.isRequired,
   values: PropTypes.arrayOf(PropTypes.object).isRequired,
   color: PropTypes.string,
@@ -92,7 +89,7 @@ ListVisualizerField.propTypes = {
   disableIfEmpty: PropTypes.bool,
 };
 
-ListVisualizerField.defaultProps = {
+ListVisualizer.defaultProps = {
   color: "",
   link: "",
   className: "",

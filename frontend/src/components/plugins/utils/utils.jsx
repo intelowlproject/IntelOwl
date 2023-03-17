@@ -35,6 +35,7 @@ import { pluginType } from "../../../constants/constants";
 const { checkPluginHealth } = usePluginConfigurationStore.getState();
 
 export function PluginInfoCard({ pluginInfo }) {
+  console.debug(pluginInfo);
   return (
     <Card className="flat border-dark h-100 w-100">
       <CardHeader className="d-flex align-items-center bg-body p-2 h5">
@@ -135,7 +136,7 @@ export function PluginInfoCard({ pluginInfo }) {
             <h6 className="text-secondary">Analyzers &nbsp;</h6>
             <ul>
               {Object.entries(pluginInfo?.analyzers).map(([key, value]) => (
-                <li key={`plugininfocard-analyzer__${pluginInfo?.name}-${key}`}>
+                <li key={`plugininfocard-analyzer__${pluginInfo.name}-${key}`}>
                   <span>{key}</span>
                   {Object.keys(pluginInfo?.analyzers[key]).length !== 0 && (
                     <ul>
@@ -177,17 +178,18 @@ export function PluginInfoCard({ pluginInfo }) {
 }
 
 export function PluginInfoPopoverIcon({ pluginInfo }) {
+  const noSpaceName = pluginInfo.name.replaceAll(" ", "_");
   return (
     <div>
       <MdInfo
-        id={`table-infoicon__${pluginInfo.name}`}
+        id={`table-infoicon__${noSpaceName}`}
         className="text-info"
         fontSize="20"
       />
       <UncontrolledPopover
         trigger="hover"
         delay={{ show: 0, hide: 500 }}
-        target={`table-infoicon__${pluginInfo.name}`}
+        target={`table-infoicon__${noSpaceName}`}
         popperClassName="p-0 w-33"
       >
         <PluginInfoCard pluginInfo={pluginInfo} />

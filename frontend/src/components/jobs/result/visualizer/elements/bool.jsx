@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 
 import { Badge } from "reactstrap";
 
-export function BooleanVisualizerField({
+export function BooleanVisualizer({
   name,
   value,
   pill,
@@ -49,7 +49,7 @@ export function BooleanVisualizerField({
   );
 }
 
-BooleanVisualizerField.propTypes = {
+BooleanVisualizer.propTypes = {
   name: PropTypes.string.isRequired,
   value: PropTypes.bool.isRequired,
   pill: PropTypes.bool,
@@ -61,7 +61,7 @@ BooleanVisualizerField.propTypes = {
   disableIfEmpty: PropTypes.bool,
 };
 
-BooleanVisualizerField.defaultProps = {
+BooleanVisualizer.defaultProps = {
   pill: true,
   link: "",
   className: "",

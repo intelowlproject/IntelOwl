@@ -316,6 +316,29 @@ function convertToElement(element) {
   titleAdditionalElements = converListElement(titleAdditionalElements);
   valueAdditionalElements = converListElement(valueAdditionalElements);
 
+  // this is a function used to convert the list of data to a list of elements.
+  const converListElement = (listElement) =>
+    listElement?.map((additionalElement) =>
+      convertToElement(additionalElement)
+    );
+
+  /* even if the Visualizers components have different fields this is not a problem:
+  ex: titleAdditionalElements is available only for the TitleVisualizer, the other Visualizer will ignore this fields:
+  It will be unpacked to "undefined" and the React component will ignore the param even if we pass it.
+  */
+  let {
+    values,
+    additionalElements,
+    titleAdditionalElements,
+    valueAdditionalElements,
+    // eslint-disable-next-line prefer-const
+    ...otherFields
+  } = element;
+  values = converListElement(values);
+  additionalElements = converListElement(additionalElements);
+  titleAdditionalElements = converListElement(titleAdditionalElements);
+  valueAdditionalElements = converListElement(valueAdditionalElements);
+
   switch (element.type) {
     case VisualizerComponentType.BOOL: {
       return (

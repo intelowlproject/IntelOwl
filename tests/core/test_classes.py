@@ -33,18 +33,14 @@ class PluginTestCase(CustomTestCase):
     def test_abstract(self):
 
         with self.assertRaises(TypeError):
-            Plugin(self.cc, self.job.pk, {})
+            Plugin(self.cc, self.job.pk, {})  # noqa
 
     def test_start_no_errors(self):
         # I can't implement the Plugin class directly because of django installed_apps
         with patch.multiple(Connector, __abstractmethods__=set()):
             with patch.object(Connector, "run") as run:
                 run.return_value = {}
-                plugin = Connector(
-                    self.cc,
-                    self.job.pk,
-                    {"runtime_configuration": {}, "task_id": uuid()},
-                )
+                plugin = Connector(self.cc, self.job.pk, {}, uuid())
                 try:
                     plugin.start()
                 except Exception as e:
@@ -58,11 +54,7 @@ class PluginTestCase(CustomTestCase):
 
         with patch.multiple(Connector, __abstractmethods__=set()):
             with patch.multiple(Connector, run=raise_error):
-                plugin = Connector(
-                    self.cc,
-                    self.job.pk,
-                    {"runtime_configuration": {}, "task_id": uuid()},
-                )
+                plugin = Connector(self.cc, self.job.pk, {}, uuid())
                 with self.assertRaises(TypeError):
                     plugin.start()
                 self.assertEqual(plugin.report.status, plugin.report.Status.FAILED)

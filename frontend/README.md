@@ -70,7 +70,7 @@ npm start
 
 - Now you can access the auto-reloading frontend on `http://localhost:3000`. It acts as proxy for API requests to original app web server.
 
-- JS app main configs are available in `package.json` and `enviroments.js`.
+- JS app main configs are available in `package.json`.
 
 - (optional) Use local build of `certego-ui` package so it can also hot-reload. This is useful when you want to make changes in certego-ui and rapidly test them with IntelOwl. Refer [here](https://github.com/certego/certego-ui#use-local-build-of-certego-ui-with-hot-reload-for-faster-development) for setup instructions.
 

@@ -56,6 +56,9 @@ class PDFInfo(FileAnalyzer):
             # TypeError: slice indices must be integers or None or
             # have an __index__ method
             self.results["peepdf"]["error"] = str(e)
+        except UnboundLocalError as e:
+            logger.info(e, stack_info=True)
+            self.results["peepdf"]["error"] = str(e)
         except Exception as e:
             logger.exception(e)
             self.results["peepdf"]["error"] = str(e)

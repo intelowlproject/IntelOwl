@@ -6,6 +6,8 @@ django-filter==22.1
 django-storages==1.13.1
 django-celery-beat==2.4.0
 django-celery-results==2.4.0
+git+https://github.com/cdriehuys/django-rest-email-auth.git@django-bump#egg=django-rest-email-auth
+django-ses == 3.3.0
 django-iam-dbauth==0.1.4
 
 # django rest framework libs
@@ -16,11 +18,11 @@ drf-spectacular==0.25.1
 
 uWSGI==2.0.20
 uwsgitop==0.11
-whitenoise==6.3.0
+whitenoise==6.4.0
 
 # infra
-boto3==1.24.52
-celery==5.2.7
+boto3==1.26.88
+celery[sqs]==5.2.7
 dataclasses==0.6
 # https://github.com/advisories/GHSA-q4qm-xhf9-4p8f
 # unpatched CVE: noproblem, we just use this for debugging purposes
@@ -35,8 +37,8 @@ dnstwist==20221213
 ppdeep>=20200505
 easygui==0.98.2
 google>=3.0.0
-google-cloud-webrisk==1.10.0
-intezer-sdk==1.15.1
+google-cloud-webrisk==1.11.0
+intezer-sdk==1.16.1
 lief==0.12.2
 maxminddb==2.2.0
 mwdblib==4.3.0
@@ -61,7 +63,7 @@ pypssl==2.2
 pysafebrowsing==0.1.1
 PySocks==1.7.1
 py-tlsh==4.7.2
-quark-engine==22.12.1
+quark-engine==23.2.1
 requests==2.28.1
 speakeasy-emulator==1.5.9
 telfhash==0.9.8

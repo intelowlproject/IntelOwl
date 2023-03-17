@@ -46,6 +46,7 @@ class YaraScan(FileAnalyzer):
             self._secrets.get("private_repositories", {}).keys()
         )
         self.local_rules = params.get("local_rules", False)
+        self.missing_paths = 0
 
     def _load_directory(
         self, rulepath: PosixPath
@@ -141,6 +142,7 @@ class YaraScan(FileAnalyzer):
         result = []
         if not directory.exists() and not settings.STAGE_CI:
             self.report.errors.append(f"There is no directory {directory} to check")
+            self.missing_paths += 1
             return result
 
         logger.info(f"Getting rules inside {directory}")
@@ -201,15 +203,22 @@ class YaraScan(FileAnalyzer):
         if not self.public_repositories and not self.private_repositories:
             raise AnalyzerRunException("There are no yara rules selected")
         result = defaultdict(list)
-        logger.info(f"Checking {self.public_repositories}")
+        number_of_selected_lists = 0
         for url in self.public_repositories:
+            logger.info(f"Checking public repo {url}")
             result[url] += self.analyze(url)
-            logger.info(f"Checking {self.private_repositories}")
+            number_of_selected_lists += 1
         for url in self.private_repositories:
+            logger.info(f"Checking private repo {url}")
             result[url] += self.analyze(url, private=True)
+            number_of_selected_lists += 1
         if self.local_rules:
+            logger.info(f"Checking local repo {self.local_rules}")
             path = settings.YARA_RULES_PATH / self._job.user.username / "custom_rule"
             result[path] += self._analyze_directory(path)
+            number_of_selected_lists += 1
+        if self.missing_paths == number_of_selected_lists:
+            raise AnalyzerRunException("there was no directory all the selected lists")
         return result
 
     @classmethod
@@ -233,19 +242,20 @@ class YaraScan(FileAnalyzer):
                 os.chmod(settings.GIT_KEY_PATH, 0o600)
                 os.environ["GIT_SSH"] = str(settings.GIT_SSH_SCRIPT_PATH)
             directory = cls._get_directory(url, owner)
+            logger.info(f"checking {directory=} for {url=} and {owner=}")
 
-            if not directory.exists():
-                logger.info(f"About to clone {url} at {directory}")
-                repo = Repo.clone_from(url, directory, depth=1)
-                git = repo.git
-                git.config("--add", "safe.directory", directory)
-            else:
-                logger.info(f"about to pull {url} at {directory}")
+            if directory.exists():
+                logger.info(f"About to pull {url} at {directory}")
                 repo = Repo(directory)
                 git = repo.git
                 git.config("--add", "safe.directory", directory)
                 o = repo.remotes.origin
                 o.pull(allow_unrelated_histories=True, rebase=True)
+            else:
+                logger.info(f"About to clone {url} at {directory}")
+                repo = Repo.clone_from(url, directory, depth=1)
+                git = repo.git
+                git.config("--add", "safe.directory", directory)
             return directory
         finally:
             if ssh_key:

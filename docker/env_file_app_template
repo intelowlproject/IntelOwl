@@ -12,12 +12,24 @@ DB_NAME=intel_owl_db
 OLD_JOBS_RETENTION_DAYS=3
 # used for generating links to web client e.g. job results page; Default: localhost
 INTELOWL_WEB_CLIENT_DOMAIN=localhost
+# used for automated correspondence from the site manager
+DEFAULT_FROM_EMAIL=
+# used for correspondence with users
+DEFAULT_EMAIL=
 # Storage
 LOCAL_STORAGE=True
 
 # OAuth2
 GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=
+
+# SMTP backend
+EMAIL_HOST= 
+EMAIL_HOST_USER= 
+EMAIL_HOST_PASSWORD= 
+EMAIL_PORT=
+EMAIL_USE_TLS=False
+EMAIL_USE_SSL=False
 
 # AWS
 ## S3 storage
@@ -29,9 +41,16 @@ AWS_SECRET_ACCESS_KEY=
 ## secrets, broker and region
 AWS_SECRETS=False
 AWS_SQS=False
+AWS_USER_NUMBER=
 AWS_REGION=eu-central-1
 # IAM ROLE for RDS
 AWS_RDS_IAM_ROLE=False
+## to use for sending mail with SES
+AWS_SES=False
+
+# Uploads
+SLACK_TOKEN=
+DEFAULT_SLACK_CHANNEL=
 
 # Elastic Search Configuration
 ELASTICSEARCH_ENABLED=False
@@ -55,6 +74,8 @@ DISABLE_LOGGING_TEST=False
 MOCK_CONNECTIONS=False
 HTTPS_ENABLED=not_enabled
 RADIUS_AUTH_ENABLED=False
+# True for public deployment, False for internal deployment
+PUBLIC_DEPLOYMENT=False
 # broker configuration
 BROKER_URL=amqp://guest:guest@rabbitmq:5672
 BROKER_URL_API=http://guest:guest@rabbitmq:15672/api/
@@ -63,3 +84,9 @@ RABBITMQ_DEFAULT_PASS=guest
 FLOWER_USER=flower
 FLOWER_PWD=flower
 
+
+# drf-recaptcha
+## localhost, internal deployments
+RECAPTCHA_SECRET_KEY_IO_LOCAL=""
+## public deployment
+RECAPTCHA_SECRET_KEY_IO_PUBLIC=""

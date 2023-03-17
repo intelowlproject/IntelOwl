@@ -2,6 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 
 from api_app.analyzers_manager.classes import DockerBasedAnalyzer, FileAnalyzer
+from api_app.exceptions import AnalyzerRunException
 
 
 class Qiling(FileAnalyzer, DockerBasedAnalyzer):
@@ -33,4 +34,9 @@ class Qiling(FileAnalyzer, DockerBasedAnalyzer):
         # make request parameters
         req_data = {"args": [f"@{fname}", *self.args], "timeout": self.timeout}
         req_files = {fname: binary}
-        return self._docker_run(req_data, req_files)
+        report = self._docker_run(req_data, req_files)
+        if report.get("setup_error"):
+            raise AnalyzerRunException(report["setup_error"])
+        if report.get("execution_error"):
+            raise AnalyzerRunException(report["execution_error"])
+        return report

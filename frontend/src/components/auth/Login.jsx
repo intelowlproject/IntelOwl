@@ -21,6 +21,11 @@ import { AUTH_BASE_URI } from "../../constants/api";
 import { PUBLIC_URL } from "../../constants/environment";
 import { useAuthStore } from "../../stores";
 
+import {
+  ResendVerificationEmailButton,
+  ForgotPasswordButton,
+} from "./utils/registration-buttons";
+
 // constants
 const initialValues = {
   username: "",
@@ -179,10 +184,6 @@ export default function Login() {
                   />
                   <Label check>Show password</Label>
                 </FormGroup>
-                <div className="text-muted mb-3">
-                  Don&apos;t have an account? Contact the administrator for
-                  access.
-                </div>
                 {/* Submit */}
                 <FormGroup className="d-flex-center">
                   <Button
@@ -198,6 +199,11 @@ export default function Login() {
             )}
           </Formik>
         </ContentSection>
+        {/* popover buttons */}
+        <Row className="d-flex flex-column align-items-end g-0">
+          <ForgotPasswordButton />
+          <ResendVerificationEmailButton />
+        </Row>
       </Container>
     </ContentSection>
   );

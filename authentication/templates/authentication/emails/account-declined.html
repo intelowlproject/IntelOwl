@@ -1,0 +1,13 @@
+{% extends "./base.html" %} {% block content %}
+<div>
+  Hello, {{ full_name }}!
+
+  <p>
+    We regret to inform you that your account request (<strong
+      >@{{ username }}</strong
+    >) on {{ host_name }} has been declined. You can sign up again with a
+    business email address and not a personal one to increase your chances of
+    getting access.
+  </p>
+</div>
+{% endblock %}

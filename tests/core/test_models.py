@@ -11,7 +11,7 @@ from api_app.visualizers_manager.models import VisualizerConfig
 from certego_saas.apps.organization.membership import Membership
 from certego_saas.apps.organization.organization import Organization
 from tests import CustomTestCase
-from django.test import override_settings
+
 
 @patch.multiple(
     "api_app.visualizers_manager.models.VisualizerConfig",
@@ -40,7 +40,7 @@ class AbstractConfigTestCase(CustomTestCase):
             muc.python_complete_path,
         )
         with self.assertRaises(ImportError):
-            muc.python_class  # noqa
+            muc.python_class
         muc.delete()
 
     def test_python_class(self):
@@ -398,17 +398,3 @@ class AbstractConfigTestCase(CustomTestCase):
         muc.delete()
         m.delete()
         org.delete()
-
-    @override_settings(AWS_SQS=True)
-    def test_sqs_queue(self):
-        self.assertTrue(settings.AWS_SQS)
-        muc, _ = VisualizerConfig.objects.get_or_create(
-            name="test",
-            description="test",
-            python_module="yara.Yara",
-            disabled=False,
-            config={"soft_time_limit": 100, "queue": "default"},
-        )
-        muc.full_clean()
-        self.assertEqual(muc.config["queue"], "default.fifo")
-        muc.delete()

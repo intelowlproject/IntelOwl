@@ -466,8 +466,8 @@ export default function VisualizerReport({ job }) {
     }
     return (
       <Fragment>
-        {/* eslint-disable-next-line react/no-array-index-key */}
         <Row
+          /* eslint-disable-next-line react/no-array-index-key */
           key={levelIndex}
           className={`justify-content-around align-items-center h${levelSize}`}
         >

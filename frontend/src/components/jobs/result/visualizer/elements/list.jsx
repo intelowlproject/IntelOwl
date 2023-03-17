@@ -43,7 +43,7 @@ export function ListVisualizerField({
 
   return (
     <div key={name} className="col-auto">
-      <Card className={isDisabled && "visualizer-element-disabled"}>
+      <Card className={isDisabled ? "visualizer-element-disabled" : ""}>
         <CardTitle className="p-1 mb-0">
           <Button
             className="p-0 w-100"

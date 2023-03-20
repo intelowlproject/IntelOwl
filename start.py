@@ -121,7 +121,7 @@ def start():
         help="Uses the multiqueue.override.yml compose file",
     )
     parser.add_argument(
-        "--nds",
+        "--nfs",
         required=False,
         action="store_true",
         help="Uses the nfs.override.yml compose file",

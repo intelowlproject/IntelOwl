@@ -40,7 +40,6 @@ class VisuablizableBase(VisualizableObject):
         color: Color = Color.TRANSPARENT,
         link: str = "",
         classname: str = "",
-        elements: List[str] = None,
         hide_if_empty: bool = False,
         disable_if_empty: bool = True,
     ):
@@ -49,7 +48,6 @@ class VisuablizableBase(VisualizableObject):
         self.color = color
         self.link = link
         self.classname = classname
-        self.elements = elements
 
     @property
     def type(self) -> str:
@@ -108,8 +106,9 @@ class VisualizableBool(VisuablizableBase):
 
 
 class VisualizableIcon(VisuablizableBase):
-    def __init__(self, value: str, color: Color = Color.DARK, *args, **kwargs):
+    def __init__(self, name:str, value: str, color: Color = Color.DARK, *args, **kwargs):
         super().__init__(*args, value=value, color=color, **kwargs)
+        self.name = name
         self.value = value
 
     @property

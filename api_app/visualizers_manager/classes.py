@@ -77,7 +77,7 @@ class VisualizableTitle(VisualizableObject):
         for attr in ["title", "value"]:
             obj: VisualizableBase = res.pop(attr)
             for key, value in obj.to_dict().items():
-                if key in ["type", "hide_if_empty", "disable_if_empty"]:
+                if key not in ["title", "value", "color", "link", "classname"]:
                     continue
                 if key == "value":
                     final_res[attr] = value

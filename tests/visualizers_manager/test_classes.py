@@ -7,6 +7,8 @@ from api_app.analyzers_manager.models import AnalyzerConfig, AnalyzerReport
 from api_app.models import Job
 from api_app.visualizers_manager.classes import (
     VisualizableBase,
+    VisualizableBool,
+    VisualizableIcon,
     VisualizableObject,
     VisualizableTitle,
     Visualizer,
@@ -56,6 +58,23 @@ class VisualizableBaseTestCase(CustomTestCase):
         self.assertEqual(vo.to_dict(), expected_result)
 
 
+class VisualizableBoolTestCase(CustomTestCase):
+    def test_to_dict(self):
+        vo = VisualizableBool(name="test", value=True)
+        expected_result = {
+            "type": "bool",
+            "name": "test",
+            "value": True,
+            "pill": True,
+            "link": "",
+            "classname": "",
+            "color": "danger",
+            "hide_if_empty": False,
+            "disable_if_empty": True,
+        }
+        self.assertEqual(vo.to_dict(), expected_result)
+
+
 class VisualizableTitleTestCase(CustomTestCase):
     def test_to_dict(self):
 
@@ -82,7 +101,15 @@ class VisualizableTitleTestCase(CustomTestCase):
             "hide_if_empty": False,
             "disable_if_empty": True,
         }
+        self.assertEqual(vo.to_dict(), expected_result)
 
+        value = VisualizableIcon(
+            name="test_name",
+            value="test_value",
+            link="http://test_value",
+            color=Color.DANGER,
+        )
+        vo = VisualizableTitle(title, value)
         self.assertEqual(vo.to_dict(), expected_result)
 
 

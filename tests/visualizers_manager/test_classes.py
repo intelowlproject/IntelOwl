@@ -5,20 +5,95 @@ from kombu import uuid
 
 from api_app.analyzers_manager.models import AnalyzerConfig, AnalyzerReport
 from api_app.models import Job
-from api_app.visualizers_manager.classes import Visualizer
+from api_app.visualizers_manager.classes import (
+    VisualizableBase,
+    VisualizableObject,
+    VisualizableTitle,
+    Visualizer,
+)
+from api_app.visualizers_manager.enums import Color
 from api_app.visualizers_manager.models import VisualizerConfig
 from tests import CustomTestCase
 
 
-class MockUpVisualizer(Visualizer):
-    def run(self) -> dict:
-        return {}
+class VisualizableObjectTestCase(CustomTestCase):
+    class MockUpVisualizableObject(VisualizableObject):
+        @property
+        def type(self):
+            return "test"
+
+    def test_to_dict(self):
+        vo = self.MockUpVisualizableObject(True, False)
+        result = vo.to_dict()
+
+        expected_result = {
+            "hide_if_empty": True,
+            "disable_if_empty": False,
+            "type": "test",
+        }
+        self.assertEqual(expected_result, result)
+
+
+class VisualizableBaseTestCase(CustomTestCase):
+    def test_to_dict(self):
+        vo = VisualizableBase(
+            "test",
+            color=Color.DARK,
+            link="https://test.com",
+            classname="test",
+            hide_if_empty=True,
+            disable_if_empty=True,
+        )
+        expected_result = {
+            "hide_if_empty": True,
+            "disable_if_empty": True,
+            "type": "base",
+            "value": "test",
+            "color": "dark",
+            "link": "https://test.com",
+            "classname": "test",
+        }
+        self.assertEqual(vo.to_dict(), expected_result)
+
+
+class VisualizableTitleTestCase(CustomTestCase):
+    def test_to_dict(self):
+
+        title = VisualizableBase(
+            value="test_title", color=Color.DARK, link="http://test_title"
+        )
+
+        value = VisualizableBase(
+            value="test_value", color=Color.DANGER, link="http://test_value"
+        )
+
+        vo = VisualizableTitle(title, value)
+
+        expected_result = {
+            "type": "title",
+            "title": "test_title",
+            "value": "test_value",
+            "title_color": "dark",
+            "title_link": "http://test_title",
+            "title_classname": "",
+            "value_color": "danger",
+            "value_link": "http://test_value",
+            "value_classname": "",
+            "hide_if_empty": False,
+            "disable_if_empty": True,
+        }
+
+        self.assertEqual(vo.to_dict(), expected_result)
 
 
 class VisualizerTestCase(CustomTestCase):
     fixtures = [
         "api_app/fixtures/0001_user.json",
     ]
+
+    class MockUpVisualizer(Visualizer):
+        def run(self) -> dict:
+            return {}
 
     def test_analyzer_reports(self):
         ac = AnalyzerConfig.objects.first()
@@ -32,7 +107,7 @@ class VisualizerTestCase(CustomTestCase):
         )
         vc.analyzers.set([ac])
         ar = AnalyzerReport.objects.create(config=ac, job=job, task_id=uuid())
-        v = MockUpVisualizer(vc, job.pk, {}, uuid())
+        v = self.MockUpVisualizer(vc, job.pk, {}, uuid())
         self.assertEqual(list(v.analyzer_reports()), [ar])
         ar.delete()
         job.delete()

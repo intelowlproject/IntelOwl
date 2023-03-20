@@ -33,7 +33,7 @@ class VisualizableObject:
         return result
 
 
-class VisuablizableBase(VisualizableObject):
+class VisualizableBase(VisualizableObject):
     def __init__(
         self,
         value: Any,
@@ -62,8 +62,8 @@ class VisuablizableBase(VisualizableObject):
 class VisualizableTitle(VisualizableObject):
     def __init__(
         self,
-        title: VisuablizableBase,
-        value: VisuablizableBase,
+        title: VisualizableBase,
+        value: VisualizableBase,
         hide_if_empty: bool = False,
         disable_if_empty: bool = True,
     ):
@@ -73,20 +73,24 @@ class VisualizableTitle(VisualizableObject):
 
     def to_dict(self) -> Dict:
         res = super().to_dict()
+        final_res = res.copy()
         for attr in ["title", "value"]:
-            obj: VisuablizableBase = res.pop(attr)
+            obj: VisualizableBase = res.pop(attr)
             for key, value in obj.to_dict().items():
                 if key in ["type", "hide_if_empty", "disable_if_empty"]:
                     continue
-                res[f"{attr}_{key}"] = value
-        return res
+                if key == "value":
+                    final_res[attr] = value
+                else:
+                    final_res[f"{attr}_{key}"] = value
+        return final_res
 
     @property
     def type(self) -> str:
         return "title"
 
 
-class VisualizableBool(VisuablizableBase):
+class VisualizableBool(VisualizableBase):
     def __init__(
         self,
         name: str,
@@ -105,8 +109,10 @@ class VisualizableBool(VisuablizableBase):
         return "bool"
 
 
-class VisualizableIcon(VisuablizableBase):
-    def __init__(self, name:str, value: str, color: Color = Color.DARK, *args, **kwargs):
+class VisualizableIcon(VisualizableBase):
+    def __init__(
+        self, name: str, value: str, color: Color = Color.DARK, *args, **kwargs
+    ):
         super().__init__(*args, value=value, color=color, **kwargs)
         self.name = name
         self.value = value
@@ -116,7 +122,7 @@ class VisualizableIcon(VisuablizableBase):
         return "icon"
 
 
-class VisualizableVerticalList(VisuablizableBase):
+class VisualizableVerticalList(VisualizableBase):
     def __init__(
         self,
         name: str,
@@ -139,6 +145,7 @@ class VisualizableVerticalList(VisuablizableBase):
         result["values"] = [val.to_dict() for val in values]
         return result
 
+
 class VisualizableHorizontalList(VisualizableObject):
     def __init__(
         self,
@@ -159,6 +166,7 @@ class VisualizableHorizontalList(VisualizableObject):
         result["values"] = [val.to_dict() for val in values]
         return result
 
+
 class VisualizableLevel:
     def __init__(self, level: int, elements: List[VisualizableObject]):
         self.level = level
@@ -173,7 +181,7 @@ class VisualizableLevel:
 
 class Visualizer(Plugin, metaclass=abc.ABCMeta):
     Color = Color
-    Base = VisuablizableBase
+    Base = VisualizableBase
     Title = VisualizableTitle
     Bool = VisualizableBool
     Icon = VisualizableIcon

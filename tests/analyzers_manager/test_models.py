@@ -32,6 +32,7 @@ class AnalyzerConfigTestCase(CustomTestCase):
 
     def test_update(self):
         from intel_owl import tasks
+
         result = tasks.update("yara_scan.YaraScan2")
         self.assertFalse(result)
 

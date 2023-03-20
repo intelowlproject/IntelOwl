@@ -139,14 +139,15 @@ class VisualizableVerticalList(VisuablizableBase):
         result["values"] = [val.to_dict() for val in values]
         return result
 
-class VisualizableHorizontalList(VisuablizableBase):
+class VisualizableHorizontalList(VisualizableObject):
     def __init__(
         self,
         value: List[VisualizableObject],
         *args,
         **kwargs,
     ):
-        super().__init__(value=value, *args, **kwargs)
+        super().__init__(*args, **kwargs)
+        self.value = value
 
     @property
     def type(self) -> str:

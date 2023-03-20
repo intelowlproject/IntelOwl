@@ -174,7 +174,6 @@ class AnalyzerConfig(AbstractConfig):
         if self.run_hash and not self.run_hash_type:
             raise ValidationError("run_hash_type must be populated if run_hash is True")
 
-
     def clean(self):
         super().clean()
         self.clean_run_hash_type()
@@ -201,27 +200,3 @@ class AnalyzerConfig(AbstractConfig):
             return settings.BASE_ANALYZER_FILE_PYTHON_PATH
         else:
             return settings.BASE_ANALYZER_OBSERVABLE_PYTHON_PATH
-
-    @classmethod
-    def update(cls, python_module):
-        from intel_owl import tasks
-        from intel_owl.celery import broadcast
-
-        analyzer_configs = cls.objects.filter(python_module=python_module)
-        for analyzer_config in analyzer_configs:
-            analyzer_config: AnalyzerConfig
-            if analyzer_config.is_runnable():
-                class_ = analyzer_config.python_class
-                if hasattr(class_, "_update") and callable(class_._update):
-                    func = tasks.update_plugin
-                    broadcast(
-                        func,
-                        queue=analyzer_config.queue,
-                        arguments={
-                            "plugin_path": analyzer_config.python_complete_path
-                        },
-                    )
-                    return True
-        else:
-            logger.error(f"Unable to update {python_module}")
-            return False

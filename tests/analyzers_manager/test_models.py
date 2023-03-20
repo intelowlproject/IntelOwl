@@ -31,8 +31,8 @@ class AnalyzerConfigTestCase(CustomTestCase):
         ac.delete()
 
     def test_update(self):
-
-        result = AnalyzerConfig.update("yara_scan.YaraScan2")
+        from intel_owl import tasks
+        result = tasks.update("yara_scan.YaraScan2")
         self.assertFalse(result)
 
         ac = AnalyzerConfig(
@@ -46,7 +46,7 @@ class AnalyzerConfigTestCase(CustomTestCase):
             type="file",
             leaks_info=True,
         )
-        result = AnalyzerConfig.update("xlm_macro_deobfuscator.XlmMacroDeobfuscator")
+        result = tasks.update("xlm_macro_deobfuscator.XlmMacroDeobfuscator")
         self.assertFalse(result)
         ac.delete()
 
@@ -62,6 +62,6 @@ class AnalyzerConfigTestCase(CustomTestCase):
             leaks_info=True,
         )
         with patch("intel_owl.celery.broadcast"):
-            result = AnalyzerConfig.update("yara_scan.YaraScan")
+            result = tasks.update("yara_scan.YaraScan")
         self.assertTrue(result)
         ac.delete()

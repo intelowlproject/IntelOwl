@@ -116,7 +116,7 @@ class VisualizableIcon(VisuablizableBase):
         return "icon"
 
 
-class VisualizableList(VisuablizableBase):
+class VisualizableVerticalList(VisuablizableBase):
     def __init__(
         self,
         name: str,
@@ -131,7 +131,7 @@ class VisualizableList(VisuablizableBase):
 
     @property
     def type(self) -> str:
-        return "list"
+        return "vertical_list"
 
     def to_dict(self) -> Dict:
         result = super().to_dict()
@@ -139,6 +139,24 @@ class VisualizableList(VisuablizableBase):
         result["values"] = [val.to_dict() for val in values]
         return result
 
+class VisualizableHorizontalList(VisuablizableBase):
+    def __init__(
+        self,
+        value: List[VisualizableObject],
+        *args,
+        **kwargs,
+    ):
+        super().__init__(value=value, *args, **kwargs)
+
+    @property
+    def type(self) -> str:
+        return "horizontal_list"
+
+    def to_dict(self) -> Dict:
+        result = super().to_dict()
+        values: List[VisualizableObject] = result.pop("value")
+        result["values"] = [val.to_dict() for val in values]
+        return result
 
 class VisualizableLevel:
     def __init__(self, level: int, elements: List[VisualizableObject]):
@@ -158,7 +176,7 @@ class Visualizer(Plugin, metaclass=abc.ABCMeta):
     Title = VisualizableTitle
     Bool = VisualizableBool
     Icon = VisualizableIcon
-    List = VisualizableList
+    List = VisualizableVerticalList
     Level = VisualizableLevel
 
     @property

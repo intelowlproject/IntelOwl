@@ -142,7 +142,7 @@ def worker_ready_connect(*args, sender: Consumer = None, **kwargs):
     from intel_owl.celery import DEFAULT_QUEUE
 
     logger.error(f"worker {sender.hostname} ready")
-    if sender.hostname == f"celery@worker_{DEFAULT_QUEUE.split('.'[0])}":
+    if sender.hostname == f"celery@worker_{DEFAULT_QUEUE.split('.')[0]}":
         logger.error("Generating cache")
         build_config_cache(PluginConfig.PluginType.ANALYZER.value)
         build_config_cache(PluginConfig.PluginType.CONNECTOR.value)

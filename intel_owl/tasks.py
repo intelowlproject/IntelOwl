@@ -13,7 +13,7 @@ from django.conf import settings
 from django.utils.module_loading import import_string
 
 from api_app import crons
-from intel_owl.celery import DEFAULT_QUEUE, app
+from intel_owl.celery import app
 
 logger = logging.getLogger(__name__)
 
@@ -37,11 +37,13 @@ def check_stuck_analysis():
 
 
 @shared_task(soft_time_limit=60)
-def update(python_module: str):
+def update(python_module: str, queue: str = None):
     from api_app.analyzers_manager.models import AnalyzerConfig
     from intel_owl.celery import broadcast
 
     analyzer_configs = AnalyzerConfig.objects.filter(python_module=python_module)
+    if queue:
+        analyzer_configs = analyzer_configs.filter(config__queue=queue)
     for analyzer_config in analyzer_configs:
         analyzer_config: AnalyzerConfig
         if analyzer_config.is_runnable():
@@ -122,14 +124,14 @@ def run_plugin(
 @signals.worker_ready.connect
 def worker_ready_connect(sender: Consumer = None, *args, **kwargs):
     logger.info(f"worker {sender.hostname} ready")
-    if sender.hostname == f"celery@worker_{DEFAULT_QUEUE}":
-        logger.info("Updating repositories")
-        if settings.REPO_DOWNLOADER_ENABLED:
-            for python_module in [
-                "maxmind.Maxmind",
-                "talos.Talos",
-                "tor.Tor",
-                "yara_scan.YaraScan",
-                "quark_engine.QuarkEngine",
-            ]:
-                update(python_module)
+    queue = sender.hostname.split("_", maxsplit=1)[1]
+    logger.info(f"Updating repositories inside {queue}")
+    if settings.REPO_DOWNLOADER_ENABLED:
+        for python_module in [
+            "maxmind.Maxmind",
+            "talos.Talos",
+            "tor.Tor",
+            "yara_scan.YaraScan",
+            "quark_engine.QuarkEngine",
+        ]:
+            update(python_module, queue=queue)

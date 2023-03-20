@@ -149,11 +149,6 @@ class AbstractConfig(models.Model):
         self.clean_python_module()
         self.clean_config_queue()
 
-    @classmethod
-    @property
-    def report_model(cls) -> Type[AbstractReport]:
-        raise NotImplementedError()
-
     @cache_memoize(
         timeout=60 * 60 * 24,
         args_rewrite=lambda s, user=None: f"{s.__class__.__name__}"

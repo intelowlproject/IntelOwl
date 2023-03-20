@@ -3,7 +3,7 @@
 
 import re
 from logging import getLogger
-from typing import List, Type
+from typing import List
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -188,11 +188,6 @@ class AnalyzerConfig(AbstractConfig):
     @property
     def config_exception(cls):
         return AnalyzerConfigurationException
-
-    @classmethod
-    @property
-    def report_model(cls) -> Type[AnalyzerReport]:
-        return AnalyzerReport
 
     @property
     def python_base_path(self) -> str:

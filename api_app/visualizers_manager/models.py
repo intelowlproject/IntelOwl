@@ -1,6 +1,5 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
-from typing import Type
 
 from django.conf import settings
 from django.db import models
@@ -36,11 +35,6 @@ class VisualizerConfig(AbstractConfig):
     @property
     def python_base_path(self) -> str:
         return settings.BASE_VISUALIZER_PYTHON_PATH
-
-    @classmethod
-    @property
-    def report_model(cls) -> Type[VisualizerReport]:
-        return VisualizerReport
 
     @classmethod
     @property

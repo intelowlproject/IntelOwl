@@ -1,6 +1,5 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
-from typing import Type
 
 from django.conf import settings
 from django.db import models
@@ -25,11 +24,6 @@ class ConnectorConfig(AbstractConfig):
     @classmethod
     def _get_type(cls) -> models.TextChoices:
         return PluginConfig.PluginType.CONNECTOR
-
-    @classmethod
-    @property
-    def report_model(cls) -> Type[ConnectorReport]:
-        return ConnectorReport
 
     @property
     def python_base_path(self) -> str:

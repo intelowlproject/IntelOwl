@@ -196,7 +196,7 @@ class Plugin(metaclass=ABCMeta):
     @classmethod
     def update(cls) -> bool:
         from intel_owl.celery import broadcast
-
+        from intel_owl.tasks import update_plugin
         # Requires _update to be implemented. Not every analyzer have to implement it
         gen = cls.get_config_class().get_from_python_module(cls)
         try:
@@ -205,22 +205,28 @@ class Plugin(metaclass=ABCMeta):
             return False
         else:
             if hasattr(cls, "_update") and callable(cls._update):
-                logger.info(
-                    f"about to send broadcast to queue {config.config.queue}"
-                    f" for plugin {plugin_name}"
-                )
-                broadcast(
-                    "update_plugin",
-                    queue=config.config.queue,
-                    arguments={
-                        "plugin_name": plugin_name,
-                        "plugin_type": cls.get_config_class()._get_type(),
-                    },
-                )
-                logger.info(
-                    f"sent broadcast to queue {config.config.queue}"
-                    f" for plugin {plugin_name}"
-                )
+                if settings.NFS:
+                    logger.info(f"Starting direct update of plugin {plugin_name}")
+                    update_plugin(None, plugin_name, cls.get_config_class()._get_type())
+                    logger.info(f"Ended direct update of plugin {plugin_name}")
+                else:
+                    logger.info(
+                        f"about to send broadcast to queue {config.config.queue}"
+                        f" for plugin {plugin_name}"
+                    )
+
+                    broadcast(
+                        update_plugin.__name__,
+                        queue=config.config.queue,
+                        arguments={
+                            "plugin_name": plugin_name,
+                            "plugin_type": cls.get_config_class()._get_type(),
+                        },
+                    )
+                    logger.info(
+                        f"sent broadcast to queue {config.config.queue}"
+                        f" for plugin {plugin_name}"
+                    )
                 return True
             return False
 

@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  uwsgi:
+    volumes:
+      - type: volume
+        source: media_root
+        target: /opt/deploy/intel_owl/files_required
+        volume:
+          nocopy: true
+    environment:
+      - NFS=True
+    ports:
+      - "514:514"
+      - "514:514/udp"
+
+  celery_worker_default:
+    volumes:
+      - type: volume
+        source: media_root
+        target: /opt/deploy/intel_owl/files_required
+        volume:
+          nocopy: true
+    environment:
+      - NFS=True
+    ports:
+      - "514:514"
+      - "514:514/udp"
+
+
+volumes:
+  media_root:
+    driver_opts:
+      type: "nfs"
+      o: "addr=${NFS_IP_ADDRESS},nolock,soft,rw"
+      device: "//${NFS_IP_ADDRESS}/media_root"

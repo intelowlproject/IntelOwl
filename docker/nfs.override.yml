@@ -16,7 +16,7 @@ services:
       - "2049:2049"
       - "2049:2049/udp"
 
-  celer_beat:
+  celery_beat:
     volumes:
       - nfs_files:/opt/deploy/files_required
     environment:

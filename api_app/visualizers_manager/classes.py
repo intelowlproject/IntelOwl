@@ -177,7 +177,8 @@ class Visualizer(Plugin, metaclass=abc.ABCMeta):
     Title = VisualizableTitle
     Bool = VisualizableBool
     Icon = VisualizableIcon
-    List = VisualizableVerticalList
+    VList = VisualizableVerticalList
+    HList = VisualizableHorizontalList
     Level = VisualizableLevel
 
     @property

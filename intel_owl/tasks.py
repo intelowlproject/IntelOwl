@@ -136,7 +136,7 @@ def build_config_cache(plugin_type: str, user_pk: int = None):
 
 # startup
 @signals.worker_ready.connect
-def worker_ready_connect(sender: Consumer=None, *args, **kwargs):
+def worker_ready_connect(sender: Consumer = None, *args, **kwargs):
     from api_app.analyzers_manager.file_analyzers.yara_scan import YaraScan
     from api_app.models import PluginConfig
     from intel_owl.celery import DEFAULT_QUEUE

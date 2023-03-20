@@ -197,6 +197,7 @@ class Plugin(metaclass=ABCMeta):
     def update(cls) -> bool:
         from intel_owl.celery import broadcast
         from intel_owl.tasks import update_plugin
+
         # Requires _update to be implemented. Not every analyzer have to implement it
         gen = cls.get_config_class().get_from_python_module(cls)
         try:

@@ -133,32 +133,37 @@ app.conf.beat_schedule = {
     },
     # Executes only on Wed because on Tue it's updated
     "maxmind_updater": {
-        "task": "intel_owl.tasks.maxmind_updater",
+        "task": "intel_owl.tasks.update",
         "schedule": crontab(minute=0, hour=1, day_of_week=3),
+        "args": ["maxmind.Maxmind"],
         "options": {"queue": get_real_queue_name(DEFAULT_QUEUE)},
     },
     # execute every 6 hours
     "talos_updater": {
-        "task": "intel_owl.tasks.talos_updater",
+        "task": "intel_owl.tasks.update",
         "schedule": crontab(minute=5, hour="*/6"),
+        "args": ["talos.Talos"],
         "options": {"queue": get_real_queue_name(DEFAULT_QUEUE)},
     },
     # execute every 10 minutes
     "tor_updater": {
-        "task": "intel_owl.tasks.tor_updater",
+        "task": "intel_owl.tasks.update",
         "schedule": crontab(minute="*/10"),
+        "args": ["tor.Tor"],
         "options": {"queue": get_real_queue_name(DEFAULT_QUEUE)},
     },
     # yara repo updater 1 time a day
     "yara_updater": {
-        "task": "intel_owl.tasks.yara_updater",
+        "task": "intel_owl.tasks.update",
         "schedule": crontab(minute=0, hour=0),
+        "args": ["yara_scan.YaraScan"],
         "options": {"queue": get_real_queue_name(DEFAULT_QUEUE)},
     },
     # quark rules updater 2 time a week
     "quark_updater": {
-        "task": "intel_owl.tasks.quark_updater",
+        "task": "intel_owl.tasks.update",
         "schedule": crontab(minute=0, hour=0, day_of_week=[2, 5]),
+        "args": ["quark_engine.QuarkEngine"],
         "options": {"queue": get_real_queue_name(DEFAULT_QUEUE)},
     },
     # notification

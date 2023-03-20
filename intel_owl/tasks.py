@@ -35,40 +35,12 @@ def remove_old_jobs():
 def check_stuck_analysis():
     crons.check_stuck_analysis()
 
-
 @shared_task(soft_time_limit=60)
-def talos_updater():
+def update(python_module:str):
     from api_app.analyzers_manager.models import AnalyzerConfig
 
-    AnalyzerConfig.update("talos.Talos")
+    AnalyzerConfig.update(python_module)
 
-
-@shared_task(soft_time_limit=60)
-def tor_updater():
-    from api_app.analyzers_manager.models import AnalyzerConfig
-
-    AnalyzerConfig.update("tor.Tor")
-
-
-@shared_task(soft_time_limit=60)
-def quark_updater():
-    from api_app.analyzers_manager.models import AnalyzerConfig
-
-    AnalyzerConfig.update("quark_engine.QuarkEngine")
-
-
-@shared_task(soft_time_limit=20)
-def maxmind_updater():
-    from api_app.analyzers_manager.models import AnalyzerConfig
-
-    AnalyzerConfig.update("maxmind.Maxmind")
-
-
-@shared_task(soft_time_limit=60)
-def yara_updater():
-    from api_app.analyzers_manager.models import AnalyzerConfig
-
-    AnalyzerConfig.update("yara_scan.YaraScan")
 
 
 @shared_task(soft_time_limit=100)

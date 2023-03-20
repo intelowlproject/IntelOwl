@@ -34,7 +34,7 @@ class VisualizerConfig(AbstractConfig):
         return PluginConfig.PluginType.VISUALIZER
 
     @property
-    def python_path(self) -> str:
+    def python_base_path(self) -> str:
         return settings.BASE_VISUALIZER_PYTHON_PATH
 
     @classmethod

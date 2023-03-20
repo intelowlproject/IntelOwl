@@ -32,7 +32,7 @@ class ConnectorConfig(AbstractConfig):
         return ConnectorReport
 
     @property
-    def python_path(self) -> str:
+    def python_base_path(self) -> str:
         return settings.BASE_CONNECTOR_PYTHON_PATH
 
     @classmethod

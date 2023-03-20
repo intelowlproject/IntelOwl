@@ -174,18 +174,12 @@ class AnalyzerConfig(AbstractConfig):
         if self.run_hash and not self.run_hash_type:
             raise ValidationError("run_hash_type must be populated if run_hash is True")
 
-    def clean_leaks_info(self):
-        if not self.external_service and self.leaks_info:
-            raise ValidationError(
-                "You can't leak info if it is not an external service"
-            )
 
     def clean(self):
         super().clean()
         self.clean_run_hash_type()
         self.clean_observable_supported()
         self.clean_filetypes()
-        self.clean_leaks_info()
 
     @classmethod
     def _get_type(cls) -> str:
@@ -202,7 +196,7 @@ class AnalyzerConfig(AbstractConfig):
         return AnalyzerReport
 
     @property
-    def python_path(self) -> str:
+    def python_base_path(self) -> str:
         if self.type == TypeChoices.FILE:
             return settings.BASE_ANALYZER_FILE_PYTHON_PATH
         else:
@@ -224,9 +218,10 @@ class AnalyzerConfig(AbstractConfig):
                         func,
                         queue=analyzer_config.queue,
                         arguments={
-                            "plugin_path": f"{analyzer_config.python_path}.{analyzer_config.python_module}"
+                            "plugin_path": analyzer_config.python_complete_path
                         },
                     )
-
-        logger.error(f"Unable to update {python_module}")
-        return False
+                    return True
+        else:
+            logger.error(f"Unable to update {python_module}")
+            return False

@@ -123,7 +123,7 @@ class AbstractConfig(models.Model):
         raise NotImplementedError()
 
     @property
-    def python_path(self) -> str:
+    def python_base_path(self) -> str:
         raise NotImplementedError()
 
     def clean_python_module(self):
@@ -223,7 +223,7 @@ class AbstractConfig(models.Model):
 
     @cached_property
     def python_complete_path(self) -> str:
-        return f"{self.python_path}.{self.python_module}"
+        return f"{self.python_base_path}.{self.python_module}"
 
     @cached_property
     def python_class(self) -> Type:

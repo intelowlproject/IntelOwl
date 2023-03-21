@@ -2,6 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 import logging
 import typing
+import uuid
 
 from celery import group
 from drf_spectacular.utils import extend_schema as add_docs
@@ -82,6 +83,7 @@ class AnalyzerActionViewSet(PluginActionViewSet):
             queue=DEFAULT_QUEUE,
             soft_time_limit=10,
             immutable=True,
+            MessageGroupId=str(uuid.uuid4()),
         )
         runner()
 

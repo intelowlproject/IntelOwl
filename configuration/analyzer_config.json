@@ -1129,7 +1129,7 @@
   "EmailRep": {
     "type": "observable",
     "python_module": "emailrep.EmailRep",
-    "description": "Get email reputation from emailrep.io",
+    "description": "Get email reputation from [emailrep.io](https://emailrep.io)",
     "disabled": false,
     "external_service": true,
     "leaks_info": false,

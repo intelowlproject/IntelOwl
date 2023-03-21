@@ -126,6 +126,7 @@ Then you need to configure permission access to the chosen S3 bucket.
 
 If you like, you could use AWS SQS instead of Rabbit-MQ to manage your queues.
 In that case, you should create new SQS queues in AWS called `intelowl-<environment>-<queue_name>` and give your instances on AWS the proper permissions to access it.
+Only FIFO queues are supported.
 
 Also, you need to set the environment variable `AWS_SQS` to `True` and populate the `AWS_USER_NUMBER`. This is required to connect in the right way to the selected SQS queues.
 
@@ -155,6 +156,13 @@ Instead of adding the variables to the environment file, you should just add the
 Obviously, you should have created and managed the permissions in AWS in advance and accordingly to your infrastructure requirements.
 
 Also, you need to set the environment variable `AWS_SECRETS` to `True` to enable this mode.
+
+#### NFS
+
+You can use a `Network File System` for the shared_files that are downloaded runtime by IntelOwl (for example Yara rules).
+
+To use this feature, you would need to add the address of the remote file system inside the `.env` file,
+and you would need to use the option `--nfs` when launching IntelOwl with the `start.py` script.
 
 ### Google Kubernetes Engine
 

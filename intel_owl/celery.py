@@ -106,49 +106,49 @@ app.conf.beat_schedule = {
     "remove_old_jobs": {
         "task": "intel_owl.tasks.remove_old_jobs",
         "schedule": crontab(minute=10, hour=2),
-        "options": {"queue": "default"},
+        "options": {"queue": DEFAULT_QUEUE},
     },
     # execute sometimes to cleanup stuck analysis
     "check_stuck_analysis": {
         "task": "intel_owl.tasks.check_stuck_analysis",
         "schedule": crontab(minute="*/5"),
-        "options": {"queue": "default"},
+        "options": {"queue": DEFAULT_QUEUE},
     },
     # Executes only on Wed because on Tue it's updated
     "maxmind_updater": {
         "task": "intel_owl.tasks.maxmind_updater",
         "schedule": crontab(minute=0, hour=1, day_of_week=3),
-        "options": {"queue": "default"},
+        "options": {"queue": DEFAULT_QUEUE},
     },
     # execute every 6 hours
     "talos_updater": {
         "task": "intel_owl.tasks.talos_updater",
         "schedule": crontab(minute=5, hour="*/6"),
-        "options": {"queue": "default"},
+        "options": {"queue": DEFAULT_QUEUE},
     },
     # execute every 10 minutes
     "tor_updater": {
         "task": "intel_owl.tasks.tor_updater",
         "schedule": crontab(minute="*/10"),
-        "options": {"queue": "default"},
+        "options": {"queue": DEFAULT_QUEUE},
     },
     # yara repo updater 1 time a day
     "yara_updater": {
         "task": "intel_owl.tasks.yara_updater",
         "schedule": crontab(minute=0, hour=0),
-        "options": {"queue": "default"},
+        "options": {"queue": DEFAULT_QUEUE},
     },
     # quark rules updater 2 time a week
     "quark_updater": {
         "task": "intel_owl.tasks.quark_updater",
         "schedule": crontab(minute=0, hour=0, day_of_week=[2, 5]),
-        "options": {"queue": "default"},
+        "options": {"queue": DEFAULT_QUEUE},
     },
     # quark rules updater 2 time a week
     "update_notifications_with_releases": {
         "task": "intel_owl.tasks.update_notifications_with_releases",
         "schedule": crontab(minute=0, hour=22),
-        "options": {"queue": "default"},
+        "options": {"queue": DEFAULT_QUEUE},
     },
 }
 

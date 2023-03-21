@@ -1,4 +1,5 @@
 # certego_saas
+from ._util import get_secret
 from .security import WEB_CLIENT_URL
 
 HOST_URI = WEB_CLIENT_URL
@@ -8,3 +9,5 @@ CERTEGO_SAAS = {
     "HOST_URI": HOST_URI,
     "HOST_NAME": HOST_NAME,
 }
+DEFAULT_SLACK_CHANNEL = get_secret("DEFAULT_SLACK_CHANNEL")
+SLACK_TOKEN = get_secret("SLACK_TOKEN")

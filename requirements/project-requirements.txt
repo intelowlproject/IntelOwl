@@ -69,7 +69,6 @@ telfhash==0.9.8
 yara-python==4.2.0
 pydragonfly==0.1.0
 greynoise==2.0.0
-apkid==2.1.4
 XLMMacroDeobfuscator[secure]==0.2.3
 # this is required because XLMMacroDeobfuscator does not pin xlrd2 and pyxlsb2 packages
 pyxlsb2==0.0.8

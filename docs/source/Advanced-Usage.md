@@ -39,6 +39,7 @@ table, th, td {
       <li><code>Floss</code></li>
       <li><code>Strings_Info</code></li>
       <li><code>ClamAV</code></li>
+      <li><code>APKiD</code></li>
       <li><code>Thug_URL_Info</code>,
       <code>Thug_HTML_Info</code></li>
       <li><code>BoxJS_Scan_JavaScript</code></li>
@@ -55,6 +56,7 @@ table, th, td {
       <li>FLOSS automatically deobfuscate strings from malware binaries</li>
       <li>String_Info_Classic extracts human-readable strings where as ML version of it ranks them</li>
       <li>ClamAV antivirus engine scans files for trojans, viruses, malwares using a multi-threaded daemon</li>
+      <li>APKiD identifies many compilers, packers, obfuscators, and other weird stuff from an APK or DEX file.</li>
       <li>Thug performs hybrid dynamic/static analysis on a URL or HTML page.</li>
       <li>Box-JS is a tool for studying JavaScript malware</li>
       <li>Qiling is a tool for emulating the execution of a binary file or a shellcode.

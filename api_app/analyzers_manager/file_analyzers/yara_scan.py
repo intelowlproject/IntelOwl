@@ -267,7 +267,7 @@ class YaraScan(FileAnalyzer):
                         type=PluginConfig.PluginType.ANALYZER,
                         config_type=PluginConfig.ConfigType.SECRET,
                         attribute="private_repositories",
-                        user=self._job.user,
+                        owner=self._job.user,
                     )
                 except PluginConfig.DoesNotExist:
                     if self._job.user.has_membership():

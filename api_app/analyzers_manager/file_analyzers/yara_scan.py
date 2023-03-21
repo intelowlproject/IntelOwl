@@ -229,10 +229,6 @@ class YaraStorage:
                 return
         self.repos.append(new_repo)
 
-    def compile(self):
-        for repo in self.repos:
-            repo.compile("intel_owl_compiled.yas")
-
     def analyze(self, file_path: str, filename: str) -> Dict:
         result = {}
         for repo in self.repos:

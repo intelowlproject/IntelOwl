@@ -313,6 +313,7 @@ class AbstractConfig:
                     soft_time_limit=soft_time_limit,
                     task_id=task_id,
                     immutable=True,
+                    MessageGroupId=str(task_id),
                 )
             )
             plugins_used.append(plugin_name)

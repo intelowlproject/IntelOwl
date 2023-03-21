@@ -262,7 +262,7 @@ class YaraScan(FileAnalyzer):
         for url in self.repositories:
             if url in self.private_repositories.keys():
                 try:
-                    owner = PluginConfig.objects.get(
+                    PluginConfig.objects.get(
                         plugin_name=self.analyzer_name,
                         type=PluginConfig.PluginType.ANALYZER,
                         config_type=PluginConfig.ConfigType.SECRET,
@@ -278,7 +278,7 @@ class YaraScan(FileAnalyzer):
                     else:
                         raise AnalyzerRunException(f"Unable to find repository {url}")
                 else:
-                    owner = owner.username
+                    owner = self._job.user.username
                 key = self.private_repositories[url]
             else:
                 owner = None

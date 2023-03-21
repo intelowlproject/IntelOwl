@@ -35,13 +35,42 @@ class YaraMatchMock:
         return self.match
 
 
+class YaraStorage:
+    class YaraRepo:
+        def __init__(self, url: str, owner: str = None, key: str = None):
+            self.url = url
+            self.owner = owner
+            self.key = key
+
+        def __repr__(self):
+            return f"{self.owner + ': ' if self.owner else ''}{self.url}"
+
+    def __init__(self):
+        self.repos: List = []
+
+    def add_repo(self, url: str, owner: str = None, key: str = None):
+        new_repo = self.YaraRepo(url, owner, key)
+        for i, repo in enumerate(self.repos):
+            if repo.url == url:
+                if owner:
+                    if not repo.owner:
+                        self.repos[i] = new_repo
+                    else:
+                        self.repos.append(new_repo)
+                return
+        self.repos.append(new_repo)
+
+    def __repr__(self):
+        return self.repos
+
+
 class YaraScan(FileAnalyzer):
 
     IGNORE_DIRECTORIES = [".git", ".github"]
 
     def set_params(self, params):
         self.ignore_rules = params.get("ignore", [])
-        self.public_repositories = params.get("public_repositories", [])
+        self.repositories = params.get("repositories", [])
         self.private_repositories = list(
             self._secrets.get("private_repositories", {}).keys()
         )
@@ -200,16 +229,13 @@ class YaraScan(FileAnalyzer):
         return self._analyze_directory(directory)
 
     def run(self):
-        if not self.public_repositories and not self.private_repositories:
+        if not self.repositories:
             raise AnalyzerRunException("There are no yara rules selected")
         result = defaultdict(list)
         number_of_selected_lists = 0
-        for url in self.public_repositories:
-            logger.info(f"Checking public repo {url}")
-            result[url] += self.analyze(url)
-            number_of_selected_lists += 1
-        for url in self.private_repositories:
-            logger.info(f"Checking private repo {url}")
+        for url in self.repositories:
+            private = True if url in self.private_repositories else False
+            logger.info(f"Checking repo {url}, {private=}")
             result[url] += self.analyze(url, private=True)
             number_of_selected_lists += 1
         if self.local_rules:
@@ -322,25 +348,9 @@ class YaraScan(FileAnalyzer):
         cls._get_rules.invalidate(cls, directory)
 
     @classmethod
-    def _update(cls):
-        logger.info("Starting updating yara rules")
-        dict_urls: Dict[Union[None, Tuple[str, str]], Set[str]] = defaultdict(set)
+    def _create_storage(cls):
+        storage = YaraStorage()
         for analyzer_name, ac in cls.get_config_class().get_from_python_module(cls):
-            new_urls = ac.param_values.get("public_repositories", [])
-            logger.info(f"Adding configuration urls {new_urls}")
-            dict_urls[None].update(new_urls)
-
-            # we are downloading even custom signatures for each analyzer
-            for plugin in PluginConfig.objects.filter(
-                plugin_name=analyzer_name,
-                type=PluginConfig.PluginType.ANALYZER,
-                config_type=PluginConfig.ConfigType.PARAMETER,
-                attribute="public_repositories",
-            ):
-                new_urls = plugin.value
-                logger.info(f"Adding personal public urls {new_urls}")
-                dict_urls[None].update(new_urls)
-
             for plugin in PluginConfig.objects.filter(
                 plugin_name=analyzer_name,
                 type=PluginConfig.PluginType.ANALYZER,
@@ -354,14 +364,33 @@ class YaraScan(FileAnalyzer):
                 )
                 for url, ssh_key in plugin.value.items():
                     logger.info(f"Adding personal private url {url}")
-                    dict_urls[(owner, ssh_key)].add(url)
-        for owner_ssh_key, urls in dict_urls.items():
-            if owner_ssh_key:
-                owner, ssh_key = owner_ssh_key
-            else:
-                owner, ssh_key = None, None
-            for url in urls:
-                logger.info(f"Going to update {url} yara repo")
-                cls._update_repository(url, owner=owner, ssh_key=ssh_key)
+                    storage.add_repo(url, owner, ssh_key)
+
+            new_urls = ac.param_values.get("repositories", [])
+            logger.info(f"Adding configuration urls {new_urls}")
+            for url in new_urls:
+                storage.add_repo(url)
+
+            # we are downloading even custom signatures for each analyzer
+            for plugin in PluginConfig.objects.filter(
+                plugin_name=analyzer_name,
+                type=PluginConfig.PluginType.ANALYZER,
+                config_type=PluginConfig.ConfigType.PARAMETER,
+                attribute="repositories",
+            ):
+                new_urls = plugin.value
+                logger.info(f"Adding personal urls {new_urls}")
+                for url in new_urls:
+                    storage.add_repo(url)
+        return storage
+
+    @classmethod
+    def _update(cls):
+        logger.info("Starting updating yara rules")
+        storage = cls._create_storage()
+        for repo in storage.repos:
+            repo: YaraStorage.YaraRepo
+            logger.info(f"Going to update {repo.url} yara repo")
+            cls._update_repository(repo.url, owner=repo.owner, ssh_key=repo.key)
         logger.info("Finished updating yara rules")
         set_permissions(settings.YARA_RULES_PATH)

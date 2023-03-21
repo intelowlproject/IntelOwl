@@ -4430,7 +4430,7 @@
       }
     },
     "params": {
-      "public_repositories": {
+      "repositories": {
         "value": [
           "https://github.com/elastic/protections-artifacts",
           "https://github.com/embee-research/Yara",

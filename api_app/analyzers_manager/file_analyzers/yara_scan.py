@@ -50,7 +50,9 @@ class YaraStorage:
             self._directory = directory
 
         def __repr__(self):
-            return f"{self.owner + ': ' if self.owner else ''}{self.url}"
+            return (
+                f"{self.owner + ': ' if self.owner else ''}{self.url}@{self.directory}"
+            )
 
         @property
         def directory(self) -> PosixPath:
@@ -133,6 +135,7 @@ class YaraStorage:
                 )
 
                 if self.directory.exists():
+                    # this is to allow a clean pull
                     self.result_file_name.unlink(missing_ok=True)
 
                     logger.info(f"About to pull {self.url} at {self.directory}")
@@ -169,6 +172,7 @@ class YaraStorage:
             return self._rules
 
         def compile(self) -> yara.Rules:
+            logger.info(f"Starting compile for {self}")
             rules = self.directory.rglob("*")
             valid_rules_path = []
             for rule in rules:
@@ -179,13 +183,16 @@ class YaraStorage:
                         continue
                     else:
                         valid_rules_path.append(str(rule))
+            logger.info(f"Compiling {len(valid_rules_path)} rules for {self}")
             rule = yara.compile(
                 filepaths={str(path): str(path) for path in valid_rules_path}
             )
             compiled_rules = rule.save(str(self.result_file_name))
+            logger.info(f"Rules {self} saved on file")
             return compiled_rules
 
         def analyze(self, file_path: str, filename: str) -> List[Dict]:
+            logger.info(f"{self} starting analysis of {filename}")
             matches = []
             try:
                 matches = self.rules.match(file_path, externals={"filename": filename})

@@ -254,8 +254,6 @@ class YaraStorage:
 
 class YaraScan(FileAnalyzer):
 
-    IGNORE_DIRECTORIES = [".git", ".github"]
-
     def set_params(self, params):
         self.ignore_rules = params.get("ignore", [])
         self.repositories = params.get("repositories", [])

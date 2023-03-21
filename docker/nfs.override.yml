@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  uwsgi:
+    volumes:
+      - nfs_files:/opt/deploy/files_required
+    environment:
+      - NFS=True
+
+  celery_worker_default:
+    volumes:
+      - nfs_files:/opt/deploy/files_required
+    environment:
+      - NFS=True
+    ports:
+      - "2049:2049"
+      - "2049:2049/udp"
+
+  celery_beat:
+    volumes:
+      - nfs_files:/opt/deploy/files_required
+    environment:
+      - NFS=True
+
+
+
+volumes:
+  nfs_files:
+    driver: "local"
+    driver_opts:
+      type: "nfs"
+      o: "addr=${NFS_ADDRESS},nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2"
+      device: ":/"

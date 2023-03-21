@@ -157,6 +157,13 @@ Obviously, you should have created and managed the permissions in AWS in advance
 
 Also, you need to set the environment variable `AWS_SECRETS` to `True` to enable this mode.
 
+#### NFS
+
+You can use a `Network File System` for the shared_files that are downloaded runtime by IntelOwl (for example Yara rules).
+
+To use this feature, you would need to add the address of the remote file system inside the `.env` file,
+and you would need to use the option `--nfs` when launching IntelOwl with the `start.py` script.
+
 ### Google Kubernetes Engine
 
 Right now there is no official support for Kubernetes deployments.

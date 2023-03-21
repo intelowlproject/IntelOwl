@@ -34,198 +34,191 @@ class YaraMatchMock:
         return self.match
 
 
-class YaraStorage:
-    class YaraRepo:
-        def __init__(
-            self,
-            url: str,
-            owner: str = None,
-            key: str = None,
-            directory: PosixPath = None,
-        ):
-            self.url = url
-            self.owner = owner
-            self.key = key
-            self._rules: Optional[yara.Rules] = None
-            self._directory = directory
+class YaraRepo:
+    def __init__(
+        self,
+        url: str,
+        owner: str = None,
+        key: str = None,
+        directory: PosixPath = None,
+    ):
+        self.url = url
+        self.owner = owner
+        self.key = key
+        self._rules: Optional[yara.Rules] = None
+        self._directory = directory
 
-        def __repr__(self):
-            return (
-                f"{self.owner + ': ' if self.owner else ''}{self.url}@{self.directory}"
-            )
+    def __repr__(self):
+        return f"{self.owner + ': ' if self.owner else ''}{self.url}@{self.directory}"
 
-        @property
-        def directory(self) -> PosixPath:
-            if not self._directory:
-                url_parsed = urlparse(self.url)
-                if self.url.endswith(".zip"):
-                    org = url_parsed.netloc
-                    repo = url_parsed.path.split("/")[-1]
-                else:
-                    path_repo = url_parsed.path.split("/")
-                    # case git@github.com/ORG/repo.git
-                    if len(path_repo) == 2:
-                        org = path_repo[0].split(":")[-1]
-                        repo = path_repo[1]
-                    # case https://github.com/ORG/repo
-                    elif len(path_repo) >= 3:
-                        org = path_repo[1]
-                        repo = path_repo[2]
-                    else:
-                        raise AnalyzerRunException(
-                            f"Unable to update url {self.url}: malformed"
-                        )
-
-                # we are removing the .zip, .git. .whatever
-                repo = repo.split(".")[0]
-
-                # directory name is organization_repository
-                directory_name = "_".join([org, repo]).lower()
-                path = (
-                    settings.YARA_RULES_PATH / str(self.owner)
-                    if self.owner
-                    else settings.YARA_RULES_PATH
-                )
-                self._directory = path / directory_name
-            return self._directory
-
-        def update(self):
-            logger.info(f"Starting update of {self.url}")
+    @property
+    def directory(self) -> PosixPath:
+        if not self._directory:
+            url_parsed = urlparse(self.url)
             if self.url.endswith(".zip"):
-                # private url not supported at the moment for private
-                self._update_zip()
+                org = url_parsed.netloc
+                repo = url_parsed.path.split("/")[-1]
             else:
-                self._update_git()
+                path_repo = url_parsed.path.split("/")
+                # case git@github.com/ORG/repo.git
+                if len(path_repo) == 2:
+                    org = path_repo[0].split(":")[-1]
+                    repo = path_repo[1]
+                # case https://github.com/ORG/repo
+                elif len(path_repo) >= 3:
+                    org = path_repo[1]
+                    repo = path_repo[2]
+                else:
+                    raise AnalyzerRunException(
+                        f"Unable to update url {self.url}: malformed"
+                    )
 
-        def _update_zip(self):
-            logger.info(
-                f"About to download zip file from {self.url} to {self.directory}"
+            # we are removing the .zip, .git. .whatever
+            repo = repo.split(".")[0]
+
+            # directory name is organization_repository
+            directory_name = "_".join([org, repo]).lower()
+            path = (
+                settings.YARA_RULES_PATH / str(self.owner)
+                if self.owner
+                else settings.YARA_RULES_PATH
             )
-            response = requests.get(self.url, stream=True)
-            try:
-                response.raise_for_status()
-            except Exception as e:
-                logger.exception(e)
-            else:
-                zipfile_ = zipfile.ZipFile(io.BytesIO(response.content))
-                zipfile_.extractall(self.directory)
+            self._directory = path / directory_name
+        return self._directory
 
-        def _update_git(self):
-            try:
-                if self.key:
-                    ssh_key = self.key.replace(
-                        "-----BEGIN OPENSSH PRIVATE KEY-----", ""
-                    )
-                    ssh_key = ssh_key.replace("-----END OPENSSH PRIVATE KEY-----", "")
-                    ssh_key = ssh_key.strip()
-                    ssh_key = ssh_key.replace(" ", "\n")
-                    ssh_key = "-----BEGIN OPENSSH PRIVATE KEY-----\n" + ssh_key
-                    ssh_key = ssh_key + "\n-----END OPENSSH PRIVATE KEY-----\n"
+    def update(self):
+        logger.info(f"Starting update of {self.url}")
+        if self.url.endswith(".zip"):
+            # private url not supported at the moment for private
+            self._update_zip()
+        else:
+            self._update_git()
 
-                    with open(settings.GIT_KEY_PATH, "w", encoding="utf_8") as f:
-                        f.write(ssh_key)
-                    logger.info(
-                        f"Writing key to download {self.url} "
-                        f"at {str(settings.GIT_KEY_PATH)}"
-                    )
-                    os.chmod(settings.GIT_KEY_PATH, 0o600)
-                    os.environ["GIT_SSH"] = str(settings.GIT_SSH_SCRIPT_PATH)
+    def _update_zip(self):
+        logger.info(f"About to download zip file from {self.url} to {self.directory}")
+        response = requests.get(self.url, stream=True)
+        try:
+            response.raise_for_status()
+        except Exception as e:
+            logger.exception(e)
+        else:
+            zipfile_ = zipfile.ZipFile(io.BytesIO(response.content))
+            zipfile_.extractall(self.directory)
+
+    def _update_git(self):
+        try:
+            if self.key:
+                ssh_key = self.key.replace("-----BEGIN OPENSSH PRIVATE KEY-----", "")
+                ssh_key = ssh_key.replace("-----END OPENSSH PRIVATE KEY-----", "")
+                ssh_key = ssh_key.strip()
+                ssh_key = ssh_key.replace(" ", "\n")
+                ssh_key = "-----BEGIN OPENSSH PRIVATE KEY-----\n" + ssh_key
+                ssh_key = ssh_key + "\n-----END OPENSSH PRIVATE KEY-----\n"
+
+                with open(settings.GIT_KEY_PATH, "w", encoding="utf_8") as f:
+                    f.write(ssh_key)
                 logger.info(
-                    f"checking {self.directory=} for {self.url=} and {self.owner=}"
+                    f"Writing key to download {self.url} "
+                    f"at {str(settings.GIT_KEY_PATH)}"
                 )
+                os.chmod(settings.GIT_KEY_PATH, 0o600)
+                os.environ["GIT_SSH"] = str(settings.GIT_SSH_SCRIPT_PATH)
+            logger.info(f"checking {self.directory=} for {self.url=} and {self.owner=}")
 
-                if self.directory.exists():
-                    # this is to allow a clean pull
-                    self.result_file_name.unlink(missing_ok=True)
+            if self.directory.exists():
+                # this is to allow a clean pull
+                self.result_file_name.unlink(missing_ok=True)
 
-                    logger.info(f"About to pull {self.url} at {self.directory}")
-                    repo = Repo(self.directory)
-                    git = repo.git
-                    git.config("--add", "safe.directory", self.directory)
-                    o = repo.remotes.origin
-                    o.pull(allow_unrelated_histories=True, rebase=True)
+                logger.info(f"About to pull {self.url} at {self.directory}")
+                repo = Repo(self.directory)
+                git = repo.git
+                git.config("--add", "safe.directory", self.directory)
+                o = repo.remotes.origin
+                o.pull(allow_unrelated_histories=True, rebase=True)
+            else:
+                logger.info(f"About to clone {self.url} at {self.directory}")
+                repo = Repo.clone_from(self.url, self.directory, depth=1)
+                git = repo.git
+                git.config("--add", "safe.directory", self.directory)
+        finally:
+            if self.key:
+                logger.info("Starting cleanup of git ssh key")
+                del os.environ["GIT_SSH"]
+                if settings.GIT_KEY_PATH.exists():
+                    os.remove(settings.GIT_KEY_PATH)
+
+    @cached_property
+    def result_file_name(self) -> PosixPath:
+        return self.directory.parent / "intel_owl_compiled.yas"
+
+    @cached_property
+    def rules(self):
+        if not self._rules:
+            if not self.directory.exists():
+                self.update()
+            if self.result_file_name.exists():
+                self._rules = yara.load(str(self.result_file_name))
+            else:
+                self._rules = self.compile()
+        return self._rules
+
+    def compile(self) -> yara.Rules:
+        logger.info(f"Starting compile for {self}")
+        rules = self.directory.rglob("*")
+        valid_rules_path = []
+        for rule in rules:
+            if rule.suffix in [".yara", ".yar", ".rule"]:
+                try:
+                    yara.compile(str(rule))
+                except yara.SyntaxError:
+                    continue
                 else:
-                    logger.info(f"About to clone {self.url} at {self.directory}")
-                    repo = Repo.clone_from(self.url, self.directory, depth=1)
-                    git = repo.git
-                    git.config("--add", "safe.directory", self.directory)
-            finally:
-                if self.key:
-                    logger.info("Starting cleanup of git ssh key")
-                    del os.environ["GIT_SSH"]
-                    if settings.GIT_KEY_PATH.exists():
-                        os.remove(settings.GIT_KEY_PATH)
+                    valid_rules_path.append(str(rule))
+        logger.info(f"Compiling {len(valid_rules_path)} rules for {self}")
+        rule = yara.compile(
+            filepaths={str(path): str(path) for path in valid_rules_path}
+        )
+        compiled_rules = rule.save(str(self.result_file_name))
+        logger.info(f"Rules {self} saved on file")
+        return compiled_rules
 
-        @cached_property
-        def result_file_name(self) -> PosixPath:
-            return self.directory.parent / "intel_owl_compiled.yas"
-
-        @cached_property
-        def rules(self):
-            if not self._rules:
-                if not self.directory.exists():
-                    self.update()
-                if self.result_file_name.exists():
-                    self._rules = yara.load(str(self.result_file_name))
-                else:
-                    self._rules = self.compile()
-            return self._rules
-
-        def compile(self) -> yara.Rules:
-            logger.info(f"Starting compile for {self}")
-            rules = self.directory.rglob("*")
-            valid_rules_path = []
-            for rule in rules:
-                if rule.suffix in [".yara", ".yar", ".rule"]:
-                    try:
-                        yara.compile(str(rule))
-                    except yara.SyntaxError:
-                        continue
-                    else:
-                        valid_rules_path.append(str(rule))
-            logger.info(f"Compiling {len(valid_rules_path)} rules for {self}")
-            rule = yara.compile(
-                filepaths={str(path): str(path) for path in valid_rules_path}
+    def analyze(self, file_path: str, filename: str) -> List[Dict]:
+        logger.info(f"{self} starting analysis of {filename}")
+        matches = []
+        try:
+            matches = self.rules.match(file_path, externals={"filename": filename})
+        except yara.Error as e:
+            if "internal error" in str(e):
+                _, code = str(e).split(":")
+                if int(code.strip()) == 30:
+                    message = f"Too many matches for {filename}"
+                    logger.warning(message)
+                    matches = [YaraMatchMock(message)]
+            else:
+                raise e
+        result = []
+        for match in matches:
+            # limited to 20 strings reasons because it could be a very long list
+            result.append(
+                {
+                    "match": str(match),
+                    "strings": str(match.strings[:20]) if match else "",
+                    "tags": match.tags,
+                    "meta": match.meta,
+                    "path": match.namespace,
+                }
             )
-            compiled_rules = rule.save(str(self.result_file_name))
-            logger.info(f"Rules {self} saved on file")
-            return compiled_rules
+        return result
 
-        def analyze(self, file_path: str, filename: str) -> List[Dict]:
-            logger.info(f"{self} starting analysis of {filename}")
-            matches = []
-            try:
-                matches = self.rules.match(file_path, externals={"filename": filename})
-            except yara.Error as e:
-                if "internal error" in str(e):
-                    _, code = str(e).split(":")
-                    if int(code.strip()) == 30:
-                        message = f"Too many matches for {filename}"
-                        logger.warning(message)
-                        matches = [YaraMatchMock(message)]
-                else:
-                    raise e
-            result = []
-            for match in matches:
-                # limited to 20 strings reasons because it could be a very long list
-                result.append(
-                    {
-                        "match": str(match),
-                        "strings": str(match.strings[:20]) if match else "",
-                        "tags": match.tags,
-                        "meta": match.meta,
-                        "path": match.namespace,
-                    }
-                )
-            return result
 
+class YaraStorage:
     def __init__(self):
-        self.repos: List = []
+        self.repos: List[YaraRepo] = []
 
     def add_repo(
         self, url: str, owner: str = None, key: str = None, directory: PosixPath = None
     ):
-        new_repo = self.YaraRepo(url, owner, key, directory)
+        new_repo = YaraRepo(url, owner, key, directory)
         for i, repo in enumerate(self.repos):
             if repo.url == url:
                 if owner:
@@ -253,7 +246,6 @@ class YaraStorage:
 
 
 class YaraScan(FileAnalyzer):
-
     def set_params(self, params):
         self.ignore_rules = params.get("ignore", [])
         self.repositories = params.get("repositories", [])
@@ -345,7 +337,6 @@ class YaraScan(FileAnalyzer):
         storage = cls._create_storage()
         logger.info(f"Urls are {storage}")
         for repo in storage.repos:
-            repo: YaraStorage.YaraRepo
             logger.info(f"Going to update {repo.url} yara repo")
             repo.update()
             repo.compile()

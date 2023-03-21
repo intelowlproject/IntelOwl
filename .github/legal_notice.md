@@ -47,7 +47,6 @@ license terms.
 [IntelX](https://intelx.io/terms-of-service),
 [Speakeasy](https://github.com/fireeye/speakeasy),
 [Checkdmarc](https://github.com/domainaware/checkdmarc),
-[Manalyze](https://github.com/JusticeRage/Manalyze),
 [Qiling](https://github.com/qilingframework/qiling),
 [PyCTI](https://github.com/OpenCTI-Platform/client-python/blob/master/LICENSE),
 [PyHashlookup](https://github.com/CIRCL/PyHashlookup),

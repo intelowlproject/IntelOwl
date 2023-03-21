@@ -1,6 +1,10 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
+# CARE! There is a python apkid package but that conflicts
+# with currently installed yara-python version
+# Because of this, it is better to handle this separately with his own environment
+
 from api_app.analyzers_manager.classes import DockerBasedAnalyzer, FileAnalyzer
 
 

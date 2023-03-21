@@ -138,7 +138,7 @@ class APKAnalyzersTestCase(_FileAnalyzersScriptsTestCase):
             **super().get_params(),
             "file_name": "sample.apk",
             "file_mimetype": "application/vnd.android.package-archive",
-            "analyzers_to_execute": ["APKiD_Scan_APK_DEX_JAR", "Quark_Engine_APK"],
+            "analyzers_to_execute": ["APKiD", "Quark_Engine"],
         }
 
 

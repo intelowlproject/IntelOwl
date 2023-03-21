@@ -19,10 +19,7 @@ class FileInfo(FileAnalyzer):
     EXIF_TOOL_PATH = settings.BASE_DIR / "exiftool_download"
 
     def set_params(self, params):
-        # check repo_downloader.sh file
-        with open(f"{self.EXIF_TOOL_PATH}/exiftool_version.txt", "r") as f:
-            version = f.read().strip()
-        self.exiftool_path = f"{self.EXIF_TOOL_PATH}/Image-ExifTool-{version}/exiftool"
+        pass
 
     def run(self):
         results = {}
@@ -37,7 +34,11 @@ class FileInfo(FileAnalyzer):
         results["tlsh"] = tlsh.hash(binary)
 
         try:
-            with ExifTool(self.exiftool_path) as et:
+            # check repo_downloader.sh file
+            with open(f"{self.EXIF_TOOL_PATH}/exiftool_version.txt", "r") as f:
+                version = f.read().strip()
+            exiftool_path = f"{self.EXIF_TOOL_PATH}/Image-ExifTool-{version}/exiftool"
+            with ExifTool(exiftool_path) as et:
                 exif_report = et.execute_json(self.filepath)
                 if exif_report:
                     exif_single_report = exif_report[0]

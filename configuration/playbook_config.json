@@ -1,7 +1,7 @@
 {
     "FREE_TO_USE_ANALYZERS": {
         "analyzers": {
-            "APKiD_Scan_APK_DEX_JAR": {},
+            "APKiD": {},
             "BoxJS_Scan_JavaScript": {},
             "CRXcavator": {},
             "Capa_Info": {},
@@ -46,18 +46,7 @@
                     "firehol_level1.netset"
                 ]
             },
-            "Floss": {
-                "max_no_of_strings": {
-                    "decoded_strings": 1000,
-                    "stack_strings": 1000,
-                    "static_strings": 1000
-                },
-                "rank_strings": {
-                    "decoded_strings": false,
-                    "stack_strings": false,
-                    "static_strings": false
-                }
-            },
+            "Floss": {},
             "Google_DNS": {
                 "query_type": "A"
             },
@@ -74,7 +63,6 @@
             "MalwareBazaar_Get_File": {},
             "MalwareBazaar_Get_Observable": {},
             "MalwareBazaar_Google_Observable": {},
-            "Manalyze": {},
             "Mnemonic_PassiveDNS": {
                 "cof_format": true,
                 "limit": 1000
@@ -112,7 +100,7 @@
                 "shellcode": true
             },
             "Quad9_Malicious_Detector": {},
-            "Quark_Engine_APK": {},
+            "Quark_Engine": {},
             "Robtex": {},
             "Rtf_Info": {},
             "Signature_Info": {},

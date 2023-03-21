@@ -1,8 +1,8 @@
 {
-  "APKiD_Scan_APK_DEX_JAR": {
+  "APKiD": {
     "type": "file",
     "python_module": "apkid.APKiD",
-    "description": "APKiD identifies many compilers, packers, obfuscators, and other weird stuff from an APK or DEX file.",
+    "description": "[APKiD](https://github.com/rednaga/APKiD) identifies many compilers, packers, obfuscators, and other weird stuff from an APK or DEX file.",
     "disabled": false,
     "external_service": false,
     "leaks_info": false,
@@ -1960,22 +1960,6 @@
       }
     },
     "params": {}
-},
-  "Manalyze": {
-    "type": "file",
-    "python_module": "manalyze.Manalyze",
-    "description": "A static analyzer for PE files",
-    "disabled": false,
-    "external_service": false,
-    "leaks_info": false,
-    "docker_based": true,
-    "supported_filetypes": ["application/x-dosexec"],
-    "config": {
-      "soft_time_limit": 180,
-      "queue": "local"
-    },
-    "secrets": {},
-    "params": {}
   },
   "MISP": {
     "type": "observable",
@@ -2835,7 +2819,7 @@
     "secrets": {},
     "params": {}
   },
-  "Quark_Engine_APK": {
+  "Quark_Engine": {
     "type": "file",
     "python_module": "quark_engine.QuarkEngine",
     "description": "An Obfuscation-Neglect Android Malware Scoring System",

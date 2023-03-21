@@ -30,7 +30,7 @@ class CapaInfo(FileAnalyzer, DockerBasedAnalyzer):
         binary = self.read_file_bytes()
         # make request data
         fname = str(self.filename).replace("/", "_").replace(" ", "_")
-        args = [f"@{fname}", "-j", *self.args]
+        args = [f"@{fname}", *self.args]
         req_data = {"args": args, "timeout": self.timeout}
         req_files = {fname: binary}
 

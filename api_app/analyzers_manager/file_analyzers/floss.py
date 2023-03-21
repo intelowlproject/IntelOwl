@@ -23,11 +23,21 @@ class Floss(FileAnalyzer, DockerBasedAnalyzer):
     def set_params(self, params):
         self.max_no_of_strings = params.get(
             "max_no_of_strings",
-            {"stack_strings": 1000, "static_strings": 1000, "decoded_strings": 1000},
+            {
+                "stack_strings": 1000,
+                "static_strings": 1000,
+                "decoded_strings": 1000,
+                "tight_strings": 1000,
+            },
         )
         self.rank_strings = params.get(
             "rank_strings",
-            {"stack_strings": False, "static_strings": False, "decoded_strings": False},
+            {
+                "stack_strings": False,
+                "static_strings": False,
+                "decoded_strings": False,
+                "tight_strings": False,
+            },
         )
 
     def run(self):
@@ -35,12 +45,8 @@ class Floss(FileAnalyzer, DockerBasedAnalyzer):
         binary = self.read_file_bytes()
         # make request data
         fname = str(self.filename).replace("/", "_").replace(" ", "_")
-        args = [f"@{fname}", f"--output-json=/tmp/{fname}.json"]
-        req_data = {
-            "args": args,
-            "timeout": self.timeout,
-            "callback_context": {"read_result_from": fname},
-        }
+        args = [f"@{fname}"]
+        req_data = {"args": args, "timeout": self.timeout}
         req_files = {fname: binary}
         result = self._docker_run(req_data, req_files)
         result["exceeded_max_number_of_strings"] = {}

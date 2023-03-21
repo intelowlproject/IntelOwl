@@ -18,9 +18,6 @@ logger = logging.getLogger(__name__)
 class FileInfo(FileAnalyzer):
     EXIF_TOOL_PATH = settings.BASE_DIR / "exiftool_download"
 
-    def set_params(self, params):
-        pass
-
     def run(self):
         results = {}
         results["magic"] = magic.from_file(self.filepath)

@@ -131,15 +131,11 @@ class YaraRepo:
 
                 logger.info(f"About to pull {self.url} at {self.directory}")
                 repo = Repo(self.directory)
-                git = repo.git
-                git.config("--add", "safe.directory", self.directory)
                 o = repo.remotes.origin
                 o.pull(allow_unrelated_histories=True, rebase=True)
             else:
                 logger.info(f"About to clone {self.url} at {self.directory}")
-                repo = Repo.clone_from(self.url, self.directory, depth=1)
-                git = repo.git
-                git.config("--add", "safe.directory", self.directory)
+                Repo.clone_from(self.url, self.directory, depth=1)
         finally:
             if self.key:
                 logger.info("Starting cleanup of git ssh key")

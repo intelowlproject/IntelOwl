@@ -137,11 +137,17 @@ def build_config_cache(plugin_type: str, user_pk: int = None):
 # startup
 @signals.worker_ready.connect
 def worker_ready_connect(*args, sender: Consumer = None, **kwargs):
+    import git
+
     from api_app.analyzers_manager.file_analyzers.yara_scan import YaraScan
     from api_app.models import PluginConfig
     from intel_owl.celery import DEFAULT_QUEUE
 
     logger.error(f"worker {sender.hostname} ready")
+
+    cmd = git.cmd.Git(None)
+    cmd.config("--add", "--global", "safe.directory", "*")
+
     if sender.hostname == f"celery@worker_{DEFAULT_QUEUE.split('.')[0]}":
         logger.error("Generating cache")
         build_config_cache(PluginConfig.PluginType.ANALYZER.value)

@@ -73,7 +73,7 @@ class Maxmind(classes.ObservableAnalyzer):
     @classmethod
     def _update_db(cls, db: str, api_key: str):
         if not api_key:
-            return AnalyzerConfigurationException(
+            raise AnalyzerConfigurationException(
                 f"Unable to find api key for {cls.__name__}"
             )
 

@@ -3,6 +3,7 @@
 
 from __future__ import absolute_import, unicode_literals
 
+import datetime
 import logging
 import typing
 
@@ -10,9 +11,11 @@ from celery import shared_task, signals
 from celery.worker.consumer import Consumer
 from celery.worker.control import control_command
 from django.conf import settings
+from django.db.models import Q
 from django.utils.module_loading import import_string
+from django.utils.timezone import now
 
-from api_app import crons
+from intel_owl import secrets
 from intel_owl.celery import app
 
 logger = logging.getLogger(__name__)
@@ -28,12 +31,62 @@ def update_plugin(state, plugin_path):
 
 @shared_task(soft_time_limit=10000)
 def remove_old_jobs():
-    crons.remove_old_jobs()
+    """
+    this is to remove old jobs to avoid to fill the database.
+    Retention can be modified.
+    """
+    from api_app.models import Job
+
+    logger.info("started remove_old_jobs")
+
+    retention_days = int(secrets.get_secret("OLD_JOBS_RETENTION_DAYS", 3))
+    date_to_check = now() - datetime.timedelta(days=retention_days)
+    old_jobs = Job.objects.filter(finished_analysis_time__lt=date_to_check)
+    num_jobs_to_delete = len(old_jobs)
+    logger.info(f"found {num_jobs_to_delete} old jobs to delete")
+    old_jobs.delete()
+
+    logger.info("finished remove_old_jobs")
+    return num_jobs_to_delete
 
 
 @shared_task(soft_time_limit=120)
-def check_stuck_analysis():
-    crons.check_stuck_analysis()
+def check_stuck_analysis(minutes_ago: int = 25, check_pending: bool = False):
+    """
+    In case the analysis is stuck for whatever reason,
+    we should force the status "failed"
+    to avoid special exceptions,
+    we can just put this function as a cron to cleanup.
+    """
+    from api_app.models import Job
+
+    logger.info("started check_stuck_analysis")
+    query = Q(status=Job.Status.RUNNING.value)
+    if check_pending:
+        query |= Q(status=Job.Status.PENDING.value)
+    difference = now() - datetime.timedelta(minutes=minutes_ago)
+    running_jobs = list(
+        Job.objects.filter(query).filter(received_request_time__lte=difference)
+    )
+    logger.info(f"checking if {len(running_jobs)} jobs are stuck")
+
+    jobs_id_stuck = []
+    for running_job in running_jobs:
+        logger.error(
+            f"found stuck analysis, job_id:{running_job.id}."
+            f"Setting the job to status to {Job.Status.FAILED.value}'"
+        )
+        jobs_id_stuck.append(running_job.id)
+        running_job.status = Job.Status.FAILED.value
+        running_job.finished_analysis_time = now()
+        running_job.process_time = running_job.calculate_process_time()
+        running_job.save(
+            update_fields=["status", "finished_analysis_time", "process_time"]
+        )
+
+    logger.info("finished check_stuck_analysis")
+
+    return jobs_id_stuck
 
 
 @shared_task(soft_time_limit=60)

@@ -145,7 +145,7 @@ class YaraRepo:
 
     @cached_property
     def result_file_name(self) -> PosixPath:
-        return self.directory.parent / "intel_owl_compiled.yas"
+        return self.directory / "intel_owl_compiled.yas"
 
     @cached_property
     def rules(self):

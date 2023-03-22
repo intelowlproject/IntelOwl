@@ -205,6 +205,7 @@ class YaraRepo:
                     "tags": match.tags,
                     "meta": match.meta,
                     "path": match.namespace,
+                    "url": self.url
                 }
             )
         return result

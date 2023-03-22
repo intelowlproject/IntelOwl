@@ -264,8 +264,8 @@ class YaraScan(FileAnalyzer):
                 except PluginConfig.DoesNotExist:
                     if self._job.user.has_membership():
                         owner = (
-                            f"{self._job.user.organization.name}"
-                            f".{self._job.user.organization.owner}"
+                            f"{self._job.user.membership.organization.name}"
+                            f".{self._job.user.membership.organization.owner}"
                         )
                     else:
                         raise AnalyzerRunException(f"Unable to find repository {url}")

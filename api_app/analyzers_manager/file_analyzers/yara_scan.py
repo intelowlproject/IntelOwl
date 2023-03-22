@@ -185,6 +185,9 @@ class YaraRepo:
     def analyze(self, file_path: str, filename: str) -> List[Dict]:
         logger.info(f"{self} starting analysis of {filename}")
         matches = []
+        rules = self.rules
+        if rules is None:
+            return []
         try:
             matches = self.rules.match(file_path, externals={"filename": filename})
         except yara.Error as e:

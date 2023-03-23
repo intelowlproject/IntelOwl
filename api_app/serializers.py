@@ -579,6 +579,9 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
             value = value.replace("]", "")
         if "[" in value:
             value = value.replace("[", "")
+        # this is a trick done by spammers
+        if "\n" in value:
+            value = value.replace("\n", "")
         return value
 
     def filter_analyzers(self, serialized_data: Dict) -> List[str]:

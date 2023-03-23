@@ -70,6 +70,8 @@ class _AbstractAnalyzersScriptTestCase(CustomTestCase):
             f"analyzers:{self.test_job.analyzers_to_execute}",
             f"connectors: {self.test_job.connectors_to_execute}",
         )
+        # momentarily overwriting this to just test analyzers only
+        self.test_job.connectors_to_execute = []
         # execute analyzers
         self.test_job.pipeline(self.runtime_configuration)
         poll_result = PollingFunction(self)

@@ -65,16 +65,17 @@ class ClassicDNSResolver(classes.ObservableAnalyzer):
                 dns.resolver.NoNameservers,
             ):
                 logger.warning(
-                    f"No resolution for "
+                    "No resolution for "
                     f"{self.observable_classification} {self.observable_name}"
                 )
             except dns.resolver.LifetimeTimeout as e:
                 logger.warning(
-                    f"No resolution for "
+                    "No resolution for "
                     f"{self.observable_classification} {self.observable_name}."
                     f"Reason {e}",
                     stack_info=True,
                 )
+                self.report.errors.append(str(e))
                 timeout = True
 
         return dns_resolver_response(self.observable_name, resolutions, timeout)

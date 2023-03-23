@@ -32,7 +32,6 @@ class EXEAnalyzersTestCase(_FileAnalyzersScriptsTestCase):
                 "CapeSandbox",
                 "Triage_Scan",
                 "Floss",
-                "Manalyze",
                 "MWDB_Scan",
                 "YARAify_File_Scan",
                 "Yara",

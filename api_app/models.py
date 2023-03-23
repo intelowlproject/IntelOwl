@@ -184,6 +184,7 @@ class Job(models.Model):
             if not (self.status == self.Status.FAILED and self.finished_analysis_time):
                 self.finished_analysis_time = get_now()
                 self.process_time = self.calculate_process_time()
+            logger.info(f"{self.__repr__()} setting status to {status_to_set}")
             self.status = status_to_set
             self.save(
                 update_fields=[

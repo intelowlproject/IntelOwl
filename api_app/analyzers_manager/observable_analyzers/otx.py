@@ -14,6 +14,14 @@ from tests.mock_utils import MockResponse, if_mock_connections, patch
 logger = logging.getLogger(__name__)
 
 
+class TimeoutError(Exception):
+    def __init__(self, value=None):
+        self.value = value or "TimeoutError"
+
+    def __str__(self):
+        return repr(self.value)
+
+
 class OTX(classes.ObservableAnalyzer):
     """This class use an OTX API to download data about an observable.
     Observable's data are divided into sections:
@@ -21,11 +29,36 @@ class OTX(classes.ObservableAnalyzer):
     Download all the data is slow with the IP addresses.
     """
 
+    # This is to add "timeout" feature without having to do a fork
+    # Once this PR is merged: https://github.com/AlienVault-OTX/OTX-Python-SDK/pull/66
+    # we can remove this and use the upstream
+    class OTXv2Extended(OTXv2.OTXv2):
+        def __init__(self, timeout=None, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            self.timeout = timeout
+
+        def get(self, url, **kwargs):
+            try:
+                response = self.session().get(
+                    self.create_url(url, **kwargs),
+                    headers=self.headers,
+                    proxies=self.proxies,
+                    verify=self.verify,
+                    cert=self.cert,
+                    timeout=self.timeout,
+                )
+                return self.handle_response_errors(response).json()
+            except OTXv2.requests.exceptions.RetryError:
+                raise OTXv2.RetryError()
+            except OTXv2.requests.exceptions.Timeout:
+                raise TimeoutError()
+
     def set_params(self, params):
         self._api_key = self._secrets["api_key_name"]
         self.verbose = params.get("verbose", False)
         self.sections = params.get("sections", ["general"])
         self.full_analysis = params.get("full_analysis", False)
+        self.timeout = params.get("timeout", 30)
 
     def _extract_indicator_type(self) -> "OTXv2.IndicatorTypes":
         observable_classification = self.observable_classification
@@ -94,7 +127,9 @@ class OTX(classes.ObservableAnalyzer):
         return analysis_result
 
     def run(self):
-        otx = OTXv2.OTXv2(self._api_key)
+        otx = self.OTXv2Extended(
+            timeout=self.timeout, api_key=self._api_key, user_agent="IntelOwl"
+        )
 
         to_analyze_observable = self.observable_name
         otx_type = self._extract_indicator_type()
@@ -123,7 +158,7 @@ class OTX(classes.ObservableAnalyzer):
                     indicator=to_analyze_observable,
                     section=section,
                 )
-            except (OTXv2.BadRequest, OTXv2.RetryError) as e:
+            except (OTXv2.BadRequest, OTXv2.RetryError, TimeoutError) as e:
                 raise AnalyzerRunException(f"Error while requesting data to OTX: {e}")
             except OTXv2.NotFound as e:
                 logger.info(f"{to_analyze_observable} not found: {e}")

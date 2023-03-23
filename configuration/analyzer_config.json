@@ -2408,7 +2408,7 @@
     "leaks_info": false,
     "observable_supported": ["ip", "domain", "url", "hash"],
     "config": {
-      "soft_time_limit": 60,
+      "soft_time_limit": 90,
       "queue": "default"
     },
     "secrets": {
@@ -2428,12 +2428,17 @@
       "sections": {
         "value": ["general"],
         "type": "list",
-        "description": "Data are divided into sections, list of sections to download"
+        "description": "Sections to download. Options: [general, reputation, geo, malware, url_list, passive_dns, analysis"
       },
       "full_analysis": {
         "value": false,
         "type": "bool",
         "description": "download all the available sections for the observable type"
+      },
+      "timeout": {
+        "value": 30,
+        "type": "int",
+        "description": "Timeout of the request"
       }
     }
   },

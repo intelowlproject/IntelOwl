@@ -55,7 +55,7 @@ class YaraRepo:
     def directory(self) -> PosixPath:
         if not self._directory:
             url_parsed = urlparse(self.url)
-            if self.url.endswith(".zip"):
+            if self.is_zip():
                 org = url_parsed.netloc
                 repo = url_parsed.path.split("/")[-1]
             else:
@@ -88,7 +88,7 @@ class YaraRepo:
 
     def update(self):
         logger.info(f"Starting update of {self.url}")
-        if self.url.endswith(".zip"):
+        if self.is_zip():
             # private url not supported at the moment for private
             self._update_zip()
         else:
@@ -147,6 +147,13 @@ class YaraRepo:
     def result_file_name(self) -> PosixPath:
         return self.directory / "intel_owl_compiled.yas"
 
+    def is_zip(self):
+        return self.url.endswith(".zip")
+
+    @cached_property
+    def head_branch(self) -> str:
+        return Repo(self.directory).head.ref.name
+
     @cached_property
     def rules(self):
         if not self._rules:
@@ -158,11 +165,25 @@ class YaraRepo:
                 self._rules = self.compile()
         return self._rules
 
+    def rule_url(self, namespace: str) -> Optional[str]:
+        if self.is_zip():
+            return None
+        namespace = PosixPath(namespace)
+        if namespace.is_relative_to(self.directory):
+            relative_part = PosixPath(str(namespace).replace(str(self.directory), ""))
+            url = self.url[:-4] if self.url.endswith(".git") else self.url
+            return f"{url}/blob/{self.head_branch}{relative_part}"
+        else:
+            logger.error(f"Unable to calculate url from {namespace}")
+        return None
+
     def compile(self) -> yara.Rules:
         logger.info(f"Starting compile for {self}")
         rules = self.directory.rglob("*")
         valid_rules_path = []
         for rule in rules:
+            if rule.name.endswith("index"):
+                continue
             if rule.suffix in [".yara", ".yar", ".rule"]:
                 try:
                     yara.compile(str(rule))
@@ -171,10 +192,10 @@ class YaraRepo:
                 else:
                     valid_rules_path.append(str(rule))
         logger.info(f"Compiling {len(valid_rules_path)} rules for {self}")
-        rule = yara.compile(
+        compiled_rules = yara.compile(
             filepaths={str(path): str(path) for path in valid_rules_path}
         )
-        compiled_rules = rule.save(str(self.result_file_name))
+        compiled_rules.save(str(self.result_file_name))
         logger.info(f"Rules {self} saved on file")
         return compiled_rules
 
@@ -205,7 +226,8 @@ class YaraRepo:
                     "tags": match.tags,
                     "meta": match.meta,
                     "path": match.namespace,
-                    "url": self.url
+                    "url": self.url,
+                    "rule_url": self.rule_url(match.namespace),
                 }
             )
         return result

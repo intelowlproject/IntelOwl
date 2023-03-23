@@ -14,14 +14,6 @@ from tests.mock_utils import MockResponse, if_mock_connections, patch
 logger = logging.getLogger(__name__)
 
 
-class TimeoutError(Exception):
-    def __init__(self, value=None):
-        self.value = value or "TimeoutError"
-
-    def __str__(self):
-        return repr(self.value)
-
-
 class OTX(classes.ObservableAnalyzer):
     """This class use an OTX API to download data about an observable.
     Observable's data are divided into sections:
@@ -33,7 +25,7 @@ class OTX(classes.ObservableAnalyzer):
     # Once this PR is merged: https://github.com/AlienVault-OTX/OTX-Python-SDK/pull/66
     # we can remove this and use the upstream
     class OTXv2Extended(OTXv2.OTXv2):
-        def __init__(self, timeout=None, *args, **kwargs):
+        def __init__(self, *args, timeout=None, **kwargs):
             super().__init__(*args, **kwargs)
             self.timeout = timeout
 
@@ -48,10 +40,11 @@ class OTX(classes.ObservableAnalyzer):
                     timeout=self.timeout,
                 )
                 return self.handle_response_errors(response).json()
-            except OTXv2.requests.exceptions.RetryError:
-                raise OTXv2.RetryError()
-            except OTXv2.requests.exceptions.Timeout:
-                raise TimeoutError()
+            except (
+                OTXv2.requests.exceptions.RetryError,
+                OTXv2.requests.exceptions.Timeout,
+            ) as e:
+                raise OTXv2.RetryError(e)
 
     def set_params(self, params):
         self._api_key = self._secrets["api_key_name"]
@@ -158,7 +151,7 @@ class OTX(classes.ObservableAnalyzer):
                     indicator=to_analyze_observable,
                     section=section,
                 )
-            except (OTXv2.BadRequest, OTXv2.RetryError, TimeoutError) as e:
+            except (OTXv2.BadRequest, OTXv2.RetryError) as e:
                 raise AnalyzerRunException(f"Error while requesting data to OTX: {e}")
             except OTXv2.NotFound as e:
                 logger.info(f"{to_analyze_observable} not found: {e}")

@@ -38,7 +38,7 @@ class Command(BaseCommand):
                 self.stdout.write(
                     self.style.WARNING(
                         f"Configuration {analyzer_config.name} "
-                        f"does not implement _update method"
+                        "does not implement _update method"
                     )
                 )
         else:

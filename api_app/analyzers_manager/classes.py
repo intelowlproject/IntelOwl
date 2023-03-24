@@ -280,7 +280,7 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
             # ...could have been sent to a different container in another machine.
             # so we need to try again and find the server with the key
             logger.info(
-                f"Polling again because received a 404."
+                "Polling again because received a 404."
                 f" Try #{chance + 1}. Re-Poll try {re_poll_try}. Starting the query..."
                 f"<-- {self.__repr__()}"
             )

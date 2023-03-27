@@ -42,7 +42,7 @@ class VisualizableBase(VisualizableObject):
         classname: str = "",
         hide_if_empty: bool = False,
         disable_if_empty: bool = True,
-        icon: str = None,
+        icon: str = "",
     ):
         super().__init__(hide_if_empty, disable_if_empty)
         self.value = value

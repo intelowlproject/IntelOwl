@@ -13,5 +13,5 @@ class Color(enum.Enum):
     WHITE = "white"
     TRANSPARENT = ""
 
-    def __str__(self):
+    def __repr__(self):
         return self.value

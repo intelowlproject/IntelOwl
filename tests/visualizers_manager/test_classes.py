@@ -8,7 +8,6 @@ from api_app.models import Job
 from api_app.visualizers_manager.classes import (
     VisualizableBase,
     VisualizableBool,
-    VisualizableIcon,
     VisualizableObject,
     VisualizableTitle,
     Visualizer,
@@ -90,22 +89,27 @@ class VisualizableTitleTestCase(CustomTestCase):
 
         expected_result = {
             "type": "title",
-            "title": "test_title",
-            "value": "test_value",
-            "title_color": "dark",
-            "title_link": "http://test_title",
-            "title_classname": "",
-            "value_color": "danger",
-            "value_link": "http://test_value",
-            "value_classname": "",
+            "title": {
+                "type": "base",
+                "value": "test_title",
+                "color": "dark",
+                "link": "http://test_title",
+                "classname": "",
+            },
+            "value": {
+                "value": "test_value",
+                "color": "danger",
+                "link": "http://test_value",
+                "classname": ""
+            },
             "hide_if_empty": False,
             "disable_if_empty": True,
         }
         self.assertEqual(vo.to_dict(), expected_result)
 
-        value = VisualizableIcon(
+        value = VisualizableBool(
             name="test_name",
-            value="test_value",
+            value="test_value",  # noqa
             link="http://test_value",
             color=Color.DANGER,
         )

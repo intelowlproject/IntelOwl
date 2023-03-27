@@ -42,21 +42,23 @@ class VisualizableBase(VisualizableObject):
         classname: str = "",
         hide_if_empty: bool = False,
         disable_if_empty: bool = True,
+        icon: str = None,
     ):
         super().__init__(hide_if_empty, disable_if_empty)
         self.value = value
         self.color = color
         self.link = link
         self.classname = classname
+        self.icon = icon
 
     @property
     def type(self) -> str:
         return "base"
 
     def to_dict(self) -> Dict:
-        result = super().to_dict()
-        result["color"] = str(result["color"])
-        return result
+        if not self.value:
+            return {}
+        return super().to_dict()
 
 
 class VisualizableTitle(VisualizableObject):
@@ -70,20 +72,6 @@ class VisualizableTitle(VisualizableObject):
         super().__init__(hide_if_empty, disable_if_empty)
         self.title = title
         self.value = value
-
-    def to_dict(self) -> Dict:
-        res = super().to_dict()
-        final_res = res.copy()
-        for attr in ["title", "value"]:
-            obj: VisualizableBase = res.pop(attr)
-            for key, value in obj.to_dict().items():
-                if key not in ["title", "value", "color", "link", "classname"]:
-                    continue
-                if key == "value":
-                    final_res[attr] = value
-                else:
-                    final_res[f"{attr}_{key}"] = value
-        return final_res
 
     @property
     def type(self) -> str:
@@ -108,18 +96,11 @@ class VisualizableBool(VisualizableBase):
     def type(self) -> str:
         return "bool"
 
-
-class VisualizableIcon(VisualizableBase):
-    def __init__(
-        self, name: str, value: str, color: Color = Color.DARK, *args, **kwargs
-    ):
-        super().__init__(*args, value=value, color=color, **kwargs)
-        self.name = name
-        self.value = value
-
-    @property
-    def type(self) -> str:
-        return "icon"
+    def to_dict(self) -> Dict:
+        result = super().to_dict()
+        # bool does not support icon at the moment
+        result.pop("icon", None)
+        return result
 
 
 class VisualizableVerticalList(VisualizableBase):
@@ -184,7 +165,6 @@ class Visualizer(Plugin, metaclass=abc.ABCMeta):
     Base = VisualizableBase
     Title = VisualizableTitle
     Bool = VisualizableBool
-    Icon = VisualizableIcon
     VList = VisualizableVerticalList
     HList = VisualizableHorizontalList
     Level = VisualizableLevel

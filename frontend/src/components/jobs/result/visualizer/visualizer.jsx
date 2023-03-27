@@ -1,287 +1,271 @@
-import React, { Fragment } from "react";
+import React from "react";
 import PropTypes from "prop-types";
 import { ContentSection } from "@certego/certego-ui";
-import { Row } from "reactstrap";
 
 import { visualizerValidator } from "./validators";
 
 import { BooleanVisualizer } from "./elements/bool";
 import { BaseVisualizer } from "./elements/base";
-import { ListVisualizer } from "./elements/list";
-import { IconVisualizer } from "./elements/icon";
+import { VerticalListVisualizer } from "./elements/verticalList";
 import { TitleVisualizer } from "./elements/title";
 
 import { VisualizerComponentType } from "./elements/const";
+import { getIcon } from "./icons";
 
-// test data (list of levels)
+import { HorizontalListVisualizer } from "./elements/horizontalList";
+
 const mockedData = [
+  // disable level
   {
     level: 3,
-    elements: [
-      {
-        type: "title",
-        title: "disable title",
-        value: "",
-        disable_if_empty: true,
-      },
-      {
-        type: "bool",
-        name: "disable bool",
-        value: false,
-        pill: true,
-        disable_if_empty: true,
-      },
-      {
-        type: "base",
-        name: "disable base",
-        value: "",
-        disable_if_empty: true,
-      },
-      {
-        type: "icon",
-        name: "disable icon",
-        value: "",
-        disable_if_empty: true,
-      },
-      {
-        type: "list",
-        name: "disable list",
-        values: [],
-        disable_if_empty: true,
-      },
-    ],
+    elements: {
+      type: "horizontal_list",
+      values: [
+        {
+          type: "title",
+          title: "disable title",
+          value: {},
+          disable_if_empty: true,
+        },
+        {
+          type: "bool",
+          name: "disable bool",
+          value: false,
+          pill: true,
+          disable_if_empty: true,
+        },
+        {
+          type: "base",
+          name: "disable base",
+          value: "",
+          disable_if_empty: true,
+        },
+        {
+          type: "base",
+          name: "disable icon",
+          icon: "",
+          disable_if_empty: true,
+        },
+        {
+          type: "vertical_list",
+          name: "disable list",
+          values: [],
+          disable_if_empty: true,
+        },
+      ],
+    },
   },
+  // base level
   {
     level: 0,
-    elements: [
-      {
-        type: "title",
-        title: "title-title",
-        value: "title-value",
-      },
-      {
-        type: "bool",
-        name: "base bool",
-        value: true,
-      },
-      {
-        type: "base",
-        value: "base base",
-      },
-      {
-        type: "icon",
-        value: "gb",
-        link: "https://otx.alienvault.com/",
-      },
-      {
-        type: "list",
-        name: "base list (2)",
-        values: [
-          { type: "base", value: "first elem" },
-          { type: "base", value: "second elem" },
-        ],
-      },
-    ],
+    elements: {
+      type: "horizontal_list",
+      values: [
+        {
+          type: "title",
+          title: {
+            type: "base",
+            value: "base title",
+          },
+          value: {
+            type: "base",
+            value: "base value",
+            color: "dark",
+          },
+        },
+        {
+          type: "bool",
+          name: "base bool",
+          value: true,
+        },
+        {
+          type: "base",
+          value: "base base",
+          color: "dark",
+        },
+        {
+          type: "base",
+          value: "icon label",
+          icon: "quokka",
+          link: "https://otx.alienvault.com/",
+          color: "dark",
+        },
+        {
+          type: "vertical_list",
+          name: "base list (2)",
+          values: [
+            { type: "base", value: "VLIST - first elem" },
+            { type: "base", value: "VLIST - second elem" },
+          ],
+        },
+      ],
+    },
   },
   // advanced (test all fields)
   {
     level: 1,
-    elements: [
-      {
-        type: "title",
-        title: "advanced title-title",
-        value: "advanced title-value",
-        title_color: "danger",
-        title_link: "http://google.com",
-        title_elements: [
-          {
+    elements: {
+      type: "horizontal_list",
+      values: [
+        {
+          type: "title",
+          title: {
             type: "base",
-            value: "10",
-            color: "primary",
-            elements: [{ type: "base", value: "second lv" }],
+            value: "advanced title title",
           },
-          { type: "icon", value: "otx" },
-          { type: "title", title: "title", value: "value" },
-          { type: "bool", name: "bool", value: true, color: "success" },
-          {
-            type: "list",
-            name: "list (1)",
-            values: [{ type: "base", value: "item" }],
-          },
-        ],
-        title_classname: "border",
-        value_color: "success",
-        value_link: "http://apple.com",
-        value_classname: "border",
-        value_elements: [
-          {
+          value: {
             type: "base",
-            value: "10",
-            color: "primary",
-            elements: [{ type: "base", value: "second lv" }],
+            icon: "malware",
+            color: "danger",
+            value: "advanced title value",
           },
-          { type: "icon", value: "otx" },
-          { type: "title", title: "title", value: "value" },
-          { type: "bool", name: "bool", value: true, color: "success" },
-          {
-            type: "list",
-            name: "list (1)",
-            values: [{ type: "base", value: "item" }],
-          },
-        ],
-      },
-      {
-        type: "bool",
-        name: "advanced bool",
-        value: true,
-        pill: false,
-        link: "https://google.com",
-        classname: "border",
-        color: "success",
-        elements: [
-          {
+          hide_if_empty: true,
+          disable_if_empty: true,
+        },
+        {
+          type: "title",
+          title: {
             type: "base",
-            value: "10",
-            color: "primary",
-            elements: [{ type: "base", value: "second lv" }],
+            value: "advanced title2 title",
+            icon: "otx",
+            link: "https://otx.alienvault.com/",
           },
-          { type: "icon", value: "otx" },
-          { type: "title", title: "title", value: "value" },
-          { type: "bool", name: "bool", value: true },
-          {
-            type: "list",
-            name: "list (1)",
-            values: [{ type: "base", value: "item" }],
-          },
-        ],
-      },
-      {
-        type: "base",
-        value: "advanced base",
-        color: "danger",
-        link: "http://google.com",
-        classname: "border",
-        elements: [
-          {
+          value: {
             type: "base",
-            value: "10",
-            color: "primary",
-            elements: [{ type: "base", value: "second lv" }],
+            value: "advanced title2 value",
+            color: "dark",
           },
-          { type: "icon", value: "otx" },
-          { type: "title", title: "title", value: "value" },
-          { type: "bool", name: "bool", value: true, color: "success" },
-          {
-            type: "list",
-            name: "list (1)",
-            values: [{ type: "base", value: "item" }],
-          },
-        ],
-      },
-      {
-        type: "icon",
-        value: "otx",
-        color: "success",
-        link: "https://otx.alienvault.com/",
-        classname: "border",
-        elements: [
-          {
-            type: "base",
-            value: "10",
-            color: "primary",
-            elements: [{ type: "base", value: "second lv" }],
-          },
-          { type: "icon", value: "otx" },
-          { type: "title", title: "title", value: "value" },
-          { type: "bool", name: "bool", value: true, color: "success" },
-          {
-            type: "list",
-            name: "list (1)",
-            values: [{ type: "base", value: "item" }],
-          },
-        ],
-      },
-      {
-        type: "list",
-        name: "advanced list",
-        values: [
-          { type: "base", value: "1st" },
-          { type: "bool", name: "2nd", value: true },
-          { type: "title", title: "3rd", value: "val" },
-          { type: "icon", value: "otx" },
-          {
-            type: "list",
-            name: "5th",
-            values: [
-              { type: "base", value: "5.1th" },
-              { type: "base", value: "5.2th" },
-            ],
-          },
-        ],
-        color: "warning",
-        link: "https://google.com",
-        classname: "border",
-        open: true,
-        elements: [
-          {
-            type: "base",
-            value: "10",
-            color: "primary",
-            elements: [{ type: "base", value: "second lv" }],
-          },
-          { type: "icon", value: "otx" },
-          { type: "title", title: "title", value: "value" },
-          { type: "bool", name: "bool", value: true, color: "success" },
-          {
-            type: "list",
-            name: "list (1)",
-            values: [{ type: "base", value: "item" }],
-          },
-        ],
-      },
-    ],
+          hide_if_empty: true,
+          disable_if_empty: true,
+        },
+        {
+          type: "bool",
+          name: "advanced bool",
+          value: true,
+          pill: false,
+          link: "http://google.com",
+          color: "success",
+          hide_if_empty: true,
+          disable_if_empty: true,
+        },
+        {
+          type: "base",
+          value: "advanced base",
+          link: "http://google.com",
+          color: "warning",
+          hide_if_empty: true,
+          disable_if_empty: true,
+        },
+        {
+          type: "base",
+          value: "advanced icon",
+          icon: "google",
+          link: "http://google.com",
+          color: "success",
+          hide_if_empty: true,
+          disable_if_empty: true,
+        },
+        {
+          type: "vertical_list",
+          name: "advanced list (1)",
+          icon: "otx",
+          color: "primary",
+          link: "https://otx.alienvault.com/",
+          values: [{ type: "base", value: "advanced list - 1st item" }],
+          open: true,
+          hide_if_empty: true,
+          disable_if_empty: true,
+        },
+        {
+          type: "vertical_list",
+          name: "advanced list2 (3)",
+          link: "",
+          values: [
+            {
+              type: "horizontal_list",
+              values: [
+                { type: "base", value: "first" },
+                {
+                  type: "base",
+                  icon: "otx",
+                  link: "https://otx.alienvault.com/",
+                },
+                {
+                  type: "base",
+                  icon: "virusTotal",
+                  link: "https://www.virustotal.com/gui/home/search",
+                },
+                { type: "base", icon: "hybridAnalysis" },
+              ],
+            },
+            {
+              type: "horizontal_list",
+              values: [{ type: "base", value: "second" }],
+            },
+            {
+              type: "horizontal_list",
+              values: [
+                { type: "base", value: "third" },
+                { type: "base", icon: "otx" },
+                { type: "base", icon: "hybridAnalysis" },
+              ],
+            },
+          ],
+          open: true,
+          hide_if_empty: true,
+          disable_if_empty: true,
+        },
+      ],
+    },
   },
-  // hide row
+  // hide level
   {
     level: 2,
-    elements: [
-      {
-        type: "title",
-        title: "hide title",
-        value: "",
-        hide_if_empty: true,
-        disable_if_empty: true,
-      },
-      {
-        type: "bool",
-        name: "hide bool",
-        value: false,
-        pill: true,
-        hide_if_empty: true,
-        disable_if_empty: true,
-      },
-      {
-        type: "base",
-        name: "hide base",
-        value: "",
-        hide_if_empty: true,
-        disable_if_empty: true,
-      },
-      {
-        type: "icon",
-        name: "hide icon",
-        value: "",
-        hide_if_empty: true,
-        disable_if_empty: true,
-      },
-      {
-        type: "list",
-        name: "hide list",
-        values: [],
-        hide_if_empty: true,
-        disable_if_empty: true,
-      },
-    ],
+    elements: {
+      type: "horizontal_list",
+      values: [
+        {
+          type: "title",
+          title: {
+            type: "base",
+            value: "",
+          },
+          value: {},
+          hide_if_empty: true,
+          disable_if_empty: true,
+        },
+        {
+          type: "bool",
+          name: "hide bool",
+          value: false,
+          pill: true,
+          hide_if_empty: true,
+          disable_if_empty: true,
+        },
+        {
+          type: "base",
+          name: "hide base",
+          value: "",
+          hide_if_empty: true,
+          disable_if_empty: true,
+        },
+        {
+          type: "base",
+          name: "hide icon",
+          value: "",
+          icon: "",
+          hide_if_empty: true,
+          disable_if_empty: true,
+        },
+        {
+          type: "vertical_list",
+          name: "hide list",
+          values: [],
+          hide_if_empty: true,
+          disable_if_empty: true,
+        },
+      ],
+    },
   },
 ];
 
@@ -292,83 +276,83 @@ const mockedData = [
  * @param {object} element data used to generate the component
  * @returns {React.Component} component to visualize
  */
-function convertToElement(element) {
-  // this is a function used to convert the list of data to a list of elements.
-  const converListElement = (listElement) =>
-    listElement?.map((additionalElement) =>
-      convertToElement(additionalElement)
-    );
-
-  /* even if the Visualizers components have different fields this is not a problem:
-  ex: titleAdditionalElements is available only for the TitleVisualizer, the other Visualizer will ignore this fields:
-  It will be unpacked to "undefined" and the React component will ignore the param even if we pass it.
-  */
-  let {
-    values,
-    additionalElements,
-    titleAdditionalElements,
-    valueAdditionalElements,
-    // eslint-disable-next-line prefer-const
-    ...otherFields
-  } = element;
-  values = converListElement(values);
-  additionalElements = converListElement(additionalElements);
-  titleAdditionalElements = converListElement(titleAdditionalElements);
-  valueAdditionalElements = converListElement(valueAdditionalElements);
-
+export function convertToElement(element) {
   switch (element.type) {
     case VisualizerComponentType.BOOL: {
       return (
         <BooleanVisualizer
-          additionalElements={additionalElements}
-          {...otherFields}
+          name={element.name}
+          value={element.value}
+          pill={element.pill}
+          link={element.link}
+          className={element.className}
+          activeColor={element.activeColor}
+          hideIfEmpty={element.hideIfEmpty}
+          disableIfEmpty={element.disableIfEmpty}
         />
       );
     }
-    case VisualizerComponentType.ICON: {
+    case VisualizerComponentType.HLIST: {
       return (
-        <IconVisualizer
-          additionalElements={additionalElements}
-          {...otherFields}
+        <HorizontalListVisualizer
+          values={element.values?.map((additionalElement) =>
+            convertToElement(additionalElement)
+          )}
         />
       );
     }
-    case VisualizerComponentType.LIST: {
+    case VisualizerComponentType.VLIST: {
       return (
-        <ListVisualizer
-          values={values}
-          additionalElements={additionalElements}
-          {...otherFields}
+        <VerticalListVisualizer
+          name={element.name}
+          values={element.values?.map((additionalElement) =>
+            convertToElement(additionalElement)
+          )}
+          icon={getIcon(element.icon)}
+          color={element.color}
+          link={element.link}
+          className={element.className}
+          startOpen={element.startOpen}
+          hideIfEmpty={element.hideIfEmpty}
+          disableIfEmpty={element.disableIfEmpty}
         />
       );
     }
     case VisualizerComponentType.TITLE: {
       return (
         <TitleVisualizer
-          titleAdditionalElements={titleAdditionalElements}
-          valueAdditionalElements={valueAdditionalElements}
-          {...otherFields}
+          title={convertToElement(element.title)}
+          value={convertToElement(element.value)}
+          hideIfEmpty={element.hideIfEmpty}
+          disableIfEmpty={element.disableIfEmpty}
         />
       );
     }
     default: {
       return (
         <BaseVisualizer
-          additionalElements={additionalElements}
-          {...otherFields}
+          value={element.value}
+          icon={getIcon(element.icon)}
+          color={element.color}
+          link={element.link}
+          className={element.className}
+          hideIfEmpty={element.hideIfEmpty}
+          disableIfEmpty={element.disableIfEmpty}
         />
       );
     }
   }
 }
 
-export default function VisualizerReport({ job }) {
-  console.debug("VisualizerReport rendered");
-  console.debug("visualizer job");
-  console.debug(job);
+export default function VisualizerReport({ visualizerReport }) {
+  console.debug("VisualizerReport - visualizerReport");
+  console.debug(visualizerReport);
 
+  console.debug("mockedData");
+  console.debug(mockedData);
   // validate data
-  const validatedData = mockedData.map((fieldElement) =>
+  const validatedData = visualizerReport.report.map((fieldElement) =>
+    // const validatedData = mockedData.map((fieldElement) =>
     visualizerValidator(fieldElement)
   );
   validatedData.sort(
@@ -380,7 +364,7 @@ export default function VisualizerReport({ job }) {
 
   // convert data to elements
   const elementData = validatedData.map((level) =>
-    level.elements.map((element) => convertToElement(element))
+    convertToElement(level.elements)
   );
 
   console.debug("VisualizerReport - elementData");
@@ -392,22 +376,13 @@ export default function VisualizerReport({ job }) {
     if (levelSize > 6) {
       levelSize = 6;
     }
-    if (levelData.filter((e) => e).length === 0) {
-      return null;
-    }
     return (
-      <Fragment>
-        <Row
-          /* eslint-disable-next-line react/no-array-index-key */
-          key={levelIndex}
-          className={`justify-content-around align-items-center h${levelSize}`}
-        >
-          {levelData}
-        </Row>
+      <div className={`h${levelSize}`}>
+        {levelData}
         {levelIndex + 1 !== validatedData.length && (
           <hr className="border-gray flex-grow-1" />
         )}
-      </Fragment>
+      </div>
     );
   });
 
@@ -427,5 +402,5 @@ export default function VisualizerReport({ job }) {
 }
 
 VisualizerReport.propTypes = {
-  job: PropTypes.object.isRequired,
+  visualizerReport: PropTypes.object.isRequired,
 };

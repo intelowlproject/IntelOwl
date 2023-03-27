@@ -1,7 +1,7 @@
 export const VisualizerComponentType = Object.freeze({
   BASE: "base",
   BOOL: "bool",
-  ICON: "icon",
-  LIST: "list",
+  VLIST: "vertical_list",
+  HLIST: "horizontal_list",
   TITLE: "title",
 });

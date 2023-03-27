@@ -56,20 +56,34 @@ export default function JobOverview({ isRunningJob, job, refetch }) {
 
   // UI elements (note: this useEffect MUST be AFTER the reset useEffect)
   useEffect(() => {
-    // TODO (remove the mock): load visualizers from the backend only once
-    const newUIElements = {};
-    // eslint-disable-next-line no-plusplus
-    for (let i = 0; i < 1; i++) {
-      const elementLabel = `Visualizer Report ${i}`;
-      newUIElements[elementLabel] = {
-        nav: (
-          <div className="d-flex-center">
-            <strong>{elementLabel}</strong>
-          </div>
-        ),
-        report: <VisualizerReport job={job} />,
-      };
-    }
+    console.debug("JobOverview - useEffect:");
+    console.debug(job);
+
+    // TODO: remove this mock
+    // const newUIElements = [{
+    //   nav: (
+    //     <div className="d-flex-center">
+    //       <strong>Test visualizer</strong>
+    //     </div>
+    //   ),
+    //   report: <VisualizerReport data={null} />
+    // }]
+
+    const newUIElements = job.visualizerreports.map((visualizer) => ({
+      nav: (
+        <div className="d-flex-center">
+          <strong>{visualizer.name}</strong>
+        </div>
+      ),
+      report: (
+        <VisualizerReport
+          visualizerReport={job.visualizerreports.find(
+            (report) => report.name === visualizer.name
+          )}
+        />
+      ),
+    }));
+
     setUIElements(newUIElements);
     /* set the default to the first visualizer only in case the UI is selected.
     In case raw data is selected don't change or during polling (long jobs) we reset the view and change the UI to the user.    
@@ -79,6 +93,7 @@ export default function JobOverview({ isRunningJob, job, refetch }) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [job]);
+
   // raw elements
   let AnalyzerDenominator = job.analyzers_requested?.length || "all";
   let ConnectorDenominator = job.connectors_requested?.length || "all";
@@ -187,7 +202,7 @@ export default function JobOverview({ isRunningJob, job, refetch }) {
                 </Button>
               </ButtonGroup>
               <div className="flex-fill horizontal-scrollable">
-                <Nav tabs className="flex-nowrap">
+                <Nav tabs className="flex-nowrap h-100">
                   {/* generate the nav with the UI/raw visualizers */}
                   {Object.entries(elementsToShow).map(
                     ([navTitle, componentsObject]) => (

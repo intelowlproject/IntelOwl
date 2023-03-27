@@ -108,9 +108,13 @@ const generalIcons = Object.freeze({
 });
 
 export function getIcon(iconCode) {
+  // this is need because in case of empty string we avoid to create a span without an icon (it takes space in the UI)
+  if (!iconCode) {
+    return null;
+  }
   const selectedIcon = generalIcons[iconCode];
   if (!selectedIcon) {
-    return <span className={`fi fi-${iconCode}`} />;
+    return <span className={` mx-1 fi fi-${iconCode}`} />;
   }
   return selectedIcon;
 }

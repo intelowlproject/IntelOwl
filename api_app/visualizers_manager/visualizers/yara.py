@@ -29,28 +29,32 @@ class Yara(Visualizer):
         result = [
             self.Level(
                 level=1,
-                elements=[
-                    self.Title(
-                        self.Base(
-                            "Analyzer",
-                            color=self.Color.DARK,
-                        ),
-                        self.Base(self.__class__.__name__),
-                    )
-                ],
+                horizontal_list=self.HList(
+                    value=[
+                        self.Title(
+                            self.Base(
+                                "Analyzer",
+                                color=self.Color.DARK,
+                            ),
+                            self.Base(self.__class__.__name__),
+                        )
+                    ]
+                ),
             ),
             self.Level(
                 level=2,
-                elements=[
-                    self.Title(
-                        self.Base("N# Matches", color=self.Color.DARK),
-                        self.Base(yara_num_matches),
-                    ),
-                    self.List(
-                        name=signatures,
-                        value=[self.Base(value) for value in signatures],
-                    ),
-                ],
+                horizontal_list=self.HList(
+                    value=[
+                        self.Title(
+                            self.Base("N# Matches", color=self.Color.DARK),
+                            self.Base(yara_num_matches),
+                        ),
+                        self.VList(
+                            name=signatures,
+                            value=[self.Base(value) for value in signatures],
+                        ),
+                    ]
+                ),
             ),
         ]
         logger.debug(result)

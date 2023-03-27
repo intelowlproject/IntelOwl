@@ -20,8 +20,8 @@ function parseComponentType(value) {
       VisualizerComponentType.BASE,
       VisualizerComponentType.TITLE,
       VisualizerComponentType.BOOL,
-      VisualizerComponentType.ICON,
-      VisualizerComponentType.LIST,
+      VisualizerComponentType.VLIST,
+      VisualizerComponentType.HLIST,
     ].includes(value)
   ) {
     return value;
@@ -74,65 +74,34 @@ function parseElementFields(rawElement) {
       validatedFields.link = rawElement.link;
       validatedFields.className = rawElement.classname;
       validatedFields.activeColor = parseColor(rawElement.color, "danger");
-      validatedFields.additionalElements = parseElementList(
-        rawElement?.elements
-      );
       break;
     }
-    case VisualizerComponentType.ICON: {
-      validatedFields.name = rawElement.name;
-      validatedFields.icon = rawElement.value;
-      validatedFields.color = `bg-${parseColor(rawElement.color, "dark")}`;
-      validatedFields.link = rawElement.link;
-      validatedFields.className = rawElement.classname;
-      validatedFields.additionalElements = parseElementList(
-        rawElement?.elements
-      );
+    case VisualizerComponentType.HLIST: {
+      validatedFields.values = parseElementList(rawElement.values);
       break;
     }
-    case VisualizerComponentType.LIST: {
+    case VisualizerComponentType.VLIST: {
       validatedFields.name = rawElement.name;
-      validatedFields.values = rawElement.values?.map((valueElement) =>
-        parseElementFields(valueElement)
-      );
+      validatedFields.values = parseElementList(rawElement.values);
+      validatedFields.icon = rawElement.icon;
       validatedFields.color = parseColor(rawElement.color);
       validatedFields.link = rawElement.link;
       validatedFields.className = rawElement.classname;
-      validatedFields.additionalElements = parseElementList(
-        rawElement?.elements
-      );
       validatedFields.startOpen = parseBool(rawElement.open);
       break;
     }
     case VisualizerComponentType.TITLE: {
-      validatedFields.title = rawElement.title;
-      validatedFields.value = rawElement.value;
-      validatedFields.titleColor = `bg-${parseColor(rawElement.title_color)}`;
-      validatedFields.titleLink = rawElement.title_link;
-      validatedFields.titleClassName = rawElement.title_classname;
-      validatedFields.titleAdditionalElements = parseElementList(
-        rawElement?.title_elements
-      );
-      validatedFields.valueColor = `bg-${parseColor(
-        rawElement.value_color,
-        "dark"
-      )}`;
-      validatedFields.valueLink = rawElement.value_link;
-      validatedFields.valueClassName = rawElement.value_classname;
-      validatedFields.valueAdditionalElements = parseElementList(
-        rawElement?.value_elements
-      );
+      validatedFields.title = parseElementFields(rawElement.title);
+      validatedFields.value = parseElementFields(rawElement.value);
       break;
     }
     // base case
     default: {
       validatedFields.value = rawElement.value;
+      validatedFields.icon = rawElement.icon;
       validatedFields.color = `bg-${parseColor(rawElement.color)}`;
       validatedFields.link = rawElement.link;
       validatedFields.className = rawElement.classname;
-      validatedFields.additionalElements = parseElementList(
-        rawElement?.elements
-      );
       break;
     }
   }
@@ -142,6 +111,6 @@ function parseElementFields(rawElement) {
 // validate the visualizer rows
 export function visualizerValidator(levelRawData) {
   const level = parseFloat(levelRawData.level);
-  const elements = parseElementList(levelRawData.elements);
+  const elements = parseElementFields(levelRawData.elements);
   return { level, elements };
 }

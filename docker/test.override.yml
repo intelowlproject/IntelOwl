@@ -33,8 +33,3 @@ services:
     image: intelowlproject/intelowl:test
     volumes:
       - ../:/opt/deploy/intel_owl
-
-  celery_worker_default2:
-    image: intelowlproject/intelowl:test
-    volumes:
-      - ../:/opt/deploy/intel_owl

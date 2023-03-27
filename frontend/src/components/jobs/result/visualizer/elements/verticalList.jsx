@@ -16,13 +16,13 @@ import {
 
 import { BaseVisualizer } from "./base";
 
-export function ListVisualizer({
+export function VerticalListVisualizer({
   name,
+  icon,
   values,
   color,
   link,
   className,
-  additionalElements,
   startOpen,
   hideIfEmpty,
   disableIfEmpty,
@@ -56,9 +56,9 @@ export function ListVisualizer({
               )}
               <BaseVisualizer
                 value={name}
+                icon={icon}
                 link={link}
                 className={className}
-                additionalElements={additionalElements}
               />
             </div>
           </Button>
@@ -77,23 +77,23 @@ export function ListVisualizer({
   );
 }
 
-ListVisualizer.propTypes = {
+VerticalListVisualizer.propTypes = {
   name: PropTypes.string.isRequired,
-  values: PropTypes.arrayOf(PropTypes.object).isRequired,
+  values: PropTypes.arrayOf(PropTypes.element).isRequired,
+  icon: PropTypes.string,
   color: PropTypes.string,
   link: PropTypes.string,
   className: PropTypes.string,
-  additionalElements: PropTypes.arrayOf(PropTypes.object),
   startOpen: PropTypes.bool,
   hideIfEmpty: PropTypes.bool,
   disableIfEmpty: PropTypes.bool,
 };
 
-ListVisualizer.defaultProps = {
+VerticalListVisualizer.defaultProps = {
+  icon: "",
   color: "",
   link: "",
   className: "",
-  additionalElements: null,
   startOpen: false,
   hideIfEmpty: false,
   disableIfEmpty: false,

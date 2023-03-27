@@ -10,7 +10,6 @@ export function BooleanVisualizer({
   link,
   className,
   activeColor,
-  additionalElements,
   hideIfEmpty,
   disableIfEmpty,
 }) {
@@ -36,14 +35,7 @@ export function BooleanVisualizer({
         color={value === true ? activeColor : "gray"}
         className={`${isDisabled} ${className}`}
       >
-        <div className="d-flex align-items-center">
-          {coreComponent}
-          {additionalElements && (
-            <div className="mx-1 d-flex align-items-center">
-              {additionalElements}
-            </div>
-          )}
-        </div>
+        <div className="d-flex align-items-center">{coreComponent}</div>
       </Badge>
     </div>
   );
@@ -56,7 +48,6 @@ BooleanVisualizer.propTypes = {
   link: PropTypes.string,
   className: PropTypes.string,
   activeColor: PropTypes.string,
-  additionalElements: PropTypes.arrayOf(PropTypes.object),
   hideIfEmpty: PropTypes.bool,
   disableIfEmpty: PropTypes.bool,
 };
@@ -66,7 +57,6 @@ BooleanVisualizer.defaultProps = {
   link: "",
   className: "",
   activeColor: "danger",
-  additionalElements: null,
   hideIfEmpty: false,
   disableIfEmpty: false,
 };

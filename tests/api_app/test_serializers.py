@@ -3,9 +3,6 @@
 
 from unittest.mock import patch
 
-from django.conf import settings
-from django.core.files import File
-from django.http.request import MultiValueDict, QueryDict
 from rest_framework.exceptions import ValidationError
 
 from api_app.analyzers_manager.models import AnalyzerConfig
@@ -21,66 +18,6 @@ from tests import CustomTestCase
 from tests.mock_utils import MockRequest
 
 
-# class PlaybookObservableAnalysisSerializerTestCase(CustomTestCase):
-#     PLAYBOOK = "FREE_TO_USE_ANALYZERS"
-#
-#     IP = "1.1.1.1"
-#
-#     def test_save(self):
-#
-#         data = {
-#             "observables": [["ip", self.IP]],
-#             "playbooks_requested": [self.PLAYBOOK],
-#         }
-#         playbook = PlaybookConfig.objects.filter(pk=self.PLAYBOOK).first()
-#         self.assertIsNotNone(playbook)
-#         serializer = PlaybookObservableAnalysisSerializer(
-#             data=data, many=True, context={"request": MockRequest(self.user)}
-#         )
-#         try:
-#             serializer.is_valid(raise_exception=True)
-#         except ValidationError as e:
-#             self.fail(e)
-#
-#         jobs = serializer.save()
-#         self.assertEqual(1, len(jobs))
-#         job = jobs[0]
-#         self.assertEqual(list(job.playbooks_to_execute.all()), [playbook])
-#
-#
-# class PlaybookFileAnalysisSerializerTestCase(CustomTestCase):
-#     FILE = "file.exe"
-#     PLAYBOOK = "FREE_TO_USE_ANALYZERS"
-#
-#     def _read_file_save_job(self, filename: str):
-#         test_file = f"{settings.PROJECT_LOCATION}/test_files/{filename}"
-#         self.f = open(test_file, "rb")
-#         return File(self.f)
-#
-#     def test_save(self):
-#         playbook = PlaybookConfig.objects.filter(pk=self.PLAYBOOK).first()
-#         self.assertIsNotNone(playbook)
-#
-#         file = self._read_file_save_job(filename=self.FILE)
-#
-#         data = {
-#             "files": [file],
-#             "file_names": [self.FILE],
-#             "playbooks_requested": [self.PLAYBOOK],
-#         }
-#         qdict = QueryDict("", mutable=True)
-#         qdict.update(MultiValueDict(data))
-#
-#         serializer = PlaybookFileAnalysisSerializer(
-#             data=qdict, many=True, context={"request": MockRequest(self.user)}
-#         )
-#         serializer.is_valid(raise_exception=True)
-#         jobs = serializer.save()
-#         self.assertEqual(1, len(jobs))
-#         job = jobs[0]
-#         self.assertEqual(list(job.playbooks_to_execute.all()), [playbook])
-
-
 class AbstractJobCreateSerializerTestCase(CustomTestCase):
     def setUp(self) -> None:
         self.ajcs = _AbstractJobCreateSerializer(
@@ -89,10 +26,29 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
         self.ajcs.all_analyzers = False
         self.ajcs.all_connectors = False
 
+    def test_validate_playbook_and_analyzers(self):
+        a = AnalyzerConfig.objects.get(name="Tranco")
+        with self.assertRaises(ValidationError):
+            self.ajcs.validate(
+                {
+                    "playbook_requested": [PlaybookConfig.objects.first()],
+                    "analyzers_requested": [a],
+                    "tlp": "WHITE",
+                }
+            )
+
+    def test_validate_playbook_disabled(self):
+        p = PlaybookConfig.objects.first()
+        p.disabled = True
+        p.save()
+        with self.assertRaises(ValidationError):
+            self.ajcs.validate({"playbook_requested": p, "tlp": "WHITE"})
+        p.disabled = False
+        p.save()
+        self.ajcs.validate({"playbook_requested": p, "tlp": "WHITE"})
+
     def test_validate_analyzers_requested(self):
-        analyzers = _AbstractJobCreateSerializer.filter_analyzers_requested(
-            self.ajcs, []
-        )
+        analyzers = self.ajcs.filter_analyzers_requested([])
         self.assertEqual(len(analyzers), AnalyzerConfig.objects.all().count())
         self.assertTrue(self.ajcs.all_analyzers)
 
@@ -100,12 +56,12 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
         a = AnalyzerConfig.objects.get(name="Tranco")
         a.disabled = True
         with self.assertRaises(ValidationError):
-            _AbstractJobCreateSerializer.set_analyzers_to_execute(
-                self.ajcs, [a], {"tlp": "WHITE", "analyzers_requested": [a]}
+            self.ajcs.set_analyzers_to_execute(
+                [a], {"tlp": "WHITE", "analyzers_requested": [a]}
             )
         a.disabled = False
-        analyzers = _AbstractJobCreateSerializer.set_analyzers_to_execute(
-            self.ajcs, [a], {"tlp": "WHITE", "analyzers_requested": [a]}
+        analyzers = self.ajcs.set_analyzers_to_execute(
+            [a], {"tlp": "WHITE", "analyzers_requested": [a]}
         )
         self.assertCountEqual(analyzers, [a])
 
@@ -114,20 +70,20 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
         a.maximum_tlp = "WHITE"
         self.ajcs.all_analyzers = False
         with self.assertRaises(ValidationError):
-            _AbstractJobCreateSerializer.set_analyzers_to_execute(
-                self.ajcs, [a], {"tlp": "GREEN", "analyzers_requested": [a]}
+            self.ajcs.set_analyzers_to_execute(
+                [a], {"tlp": "GREEN", "analyzers_requested": [a]}
             )
 
         a.maximum_tlp = "GREEN"
-        analyzers = _AbstractJobCreateSerializer.set_analyzers_to_execute(
-            self.ajcs, [a], {"tlp": "GREEN", "analyzers_requested": [a]}
+        analyzers = self.ajcs.set_analyzers_to_execute(
+            [a], {"tlp": "GREEN", "analyzers_requested": [a]}
         )
         self.assertCountEqual(analyzers, [a])
 
     def test_filter_connectors_all(self):
 
-        connectors = _AbstractJobCreateSerializer.set_connectors_to_execute(
-            self.ajcs, [], {"tlp": "WHITE", "connectors_requested": []}
+        connectors = self.ajcs.set_connectors_to_execute(
+            [], {"tlp": "WHITE", "connectors_requested": []}
         )
         total = 0
         for connector in ConnectorConfig.objects.all():

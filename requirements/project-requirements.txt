@@ -1,26 +1,29 @@
 # django libs
-Django==3.2.18
+Django==4.1.7
 django-auth-ldap==4.1.0
 django-radius==1.5.0
 django-filter==22.1
 django-storages==1.13.1
-django-celery-beat==2.4.0
-django-celery-results==2.4.0
+django-celery-beat==2.5.0
+django-celery-results==2.5.0
+django-ses == 3.3.0
 django-iam-dbauth==0.1.4
+# if this is merged https://github.com/cdriehuys/django-rest-email-auth/pull/104 we can use the upstream
+git+https://github.com/intelowlproject/django-rest-email-auth.git@2dcca23aa8f7e6fc9995650e2e200643a812f7d9#egg=django-rest-email-auth
 
 # django rest framework libs
 Authlib==1.2.0
 djangorestframework==3.14.0
 djangorestframework-filters==1.0.0.dev2
-drf-spectacular==0.25.1
+drf-spectacular==0.26.1
 
 uWSGI==2.0.20
 uwsgitop==0.11
-whitenoise==6.3.0
+whitenoise==6.4.0
 
 # infra
-boto3==1.24.52
-celery==5.2.7
+boto3==1.26.88
+celery[sqs]==5.2.7
 dataclasses==0.6
 # https://github.com/advisories/GHSA-q4qm-xhf9-4p8f
 # unpatched CVE: noproblem, we just use this for debugging purposes
@@ -35,8 +38,8 @@ dnstwist==20221213
 ppdeep>=20200505
 easygui==0.98.2
 google>=3.0.0
-google-cloud-webrisk==1.10.0
-intezer-sdk==1.15.1
+google-cloud-webrisk==1.11.0
+intezer-sdk==1.16.1
 lief==0.12.2
 maxminddb==2.2.0
 mwdblib==4.3.0
@@ -61,8 +64,7 @@ pypssl==2.2
 pysafebrowsing==0.1.1
 PySocks==1.7.1
 py-tlsh==4.7.2
-quark-engine==22.12.1
-requests==2.28.1
+quark-engine==23.2.1
 speakeasy-emulator==1.5.9
 telfhash==0.9.8
 yara-python==4.2.0

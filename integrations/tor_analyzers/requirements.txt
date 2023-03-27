@@ -1,2 +1,2 @@
-Flask-Shell2HTTP~=1.9.1
-gunicorn~=20.1.0
+Flask-Shell2HTTP-fork==1.9.2
+gunicorn==20.1.0

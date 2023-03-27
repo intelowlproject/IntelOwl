@@ -5,15 +5,14 @@ import io
 import logging
 import os
 import zipfile
-from collections import defaultdict
 from pathlib import PosixPath
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from typing import Dict, List, Optional
 from urllib.parse import urlparse
 
 import requests
 import yara
-from cache_memoize import cache_memoize
 from django.conf import settings
+from django.utils.functional import cached_property
 from git import Repo
 
 from api_app.analyzers_manager.classes import FileAnalyzer
@@ -35,190 +34,81 @@ class YaraMatchMock:
         return self.match
 
 
-class YaraScan(FileAnalyzer):
+class YaraRepo:
+    def __init__(
+        self,
+        url: str,
+        owner: str = None,
+        key: str = None,
+        directory: PosixPath = None,
+    ):
+        self.url = url
+        self.owner = owner
+        self.key = key
+        self._rules: Optional[yara.Rules] = None
+        self._directory = directory
 
-    IGNORE_DIRECTORIES = [".git", ".github"]
+    def __repr__(self):
+        return f"{self.owner + ': ' if self.owner else ''}{self.url}@{self.directory}"
 
-    def set_params(self, params):
-        self.ignore_rules = params.get("ignore", [])
-        self.public_repositories = params.get("public_repositories", [])
-        self.private_repositories = list(
-            self._secrets.get("private_repositories", {}).keys()
-        )
-        self.local_rules = params.get("local_rules", False)
-
-    def _load_directory(
-        self, rulepath: PosixPath
-    ) -> List[Tuple[PosixPath, yara.Rules]]:
-        logger.info(f"Loading directory {rulepath}")
-        rules = []
-        if rulepath.name in self.IGNORE_DIRECTORIES:
-            return rules
-        for full_path in rulepath.iterdir():
-            if full_path.name in self.ignore_rules:
-                logger.info(f"Skipping {full_path} because ignored")
-                continue
-
-            if full_path.is_file():
-                rule = self._compile_rule(full_path)
-                if rule:
-                    rules.append((full_path, rule))
+    @property
+    def directory(self) -> PosixPath:
+        if not self._directory:
+            url_parsed = urlparse(self.url)
+            if self.is_zip():
+                org = url_parsed.netloc
+                repo = url_parsed.path.split("/")[-1]
             else:
-                rules += self._load_directory(full_path)
-        return rules
-
-    def _validated_matches(self, rules: yara.Rules) -> List:
-        try:
-            return rules.match(self.filepath, externals={"filename": self.filename})
-        except yara.Error as e:
-            if "internal error" in str(e):
-                _, code = str(e).split(":")
-                if int(code.strip()) == 30:
-                    message = f"Too many matches for {self.filename}"
-                    logger.warning(message)
-                    return [YaraMatchMock(message)]
-            raise e
-
-    @staticmethod
-    def _compile_rule(file_path: PosixPath) -> Optional[yara.Rules]:
-        if file_path.exists():
-            try:
-                if file_path.suffix in [".yar", ".yara", ".rule"]:
-                    return yara.compile(
-                        str(file_path),
+                path_repo = url_parsed.path.split("/")
+                # case git@github.com/ORG/repo.git
+                if len(path_repo) == 2:
+                    org = path_repo[0].split(":")[-1]
+                    repo = path_repo[1]
+                # case https://github.com/ORG/repo
+                elif len(path_repo) >= 3:
+                    org = path_repo[1]
+                    repo = path_repo[2]
+                else:
+                    raise AnalyzerRunException(
+                        f"Unable to update url {self.url}: malformed"
                     )
-                elif file_path.suffix == ".yas":
-                    return yara.load(str(file_path))
-                else:
-                    logger.info(f"Unable to compile {file_path}")
-            except yara.SyntaxError as e:
-                logger.warning(f"Rule {file_path} has a syntax error {e}")
 
-        return None
+            # we are removing the .zip, .git. .whatever
+            repo = repo.split(".")[0]
 
-    def _compile_rules(
-        self, directory: PosixPath
-    ) -> List[Tuple[PosixPath, yara.Rules]]:
-        # you should add an "index.yar" or "index.yas" file
-        # and select only the rules you would like to run
-        rules = []
-        if directory.is_dir():
-            index = directory / "index.yas"
-            compiled_rule = self._compile_rule(index)
-            if compiled_rule:
-                rules.append((index, compiled_rule))
-            else:
-                index = directory / "index.yar"
-                compiled_rule = self._compile_rule(index)
-                if compiled_rule:
-                    rules.append((index, compiled_rule))
-                else:
-                    rules += self._load_directory(directory)
-        else:
-            logger.warning(f"Skipping {directory} because it is not really a directory")
-        return rules
-
-    # we are caching each directory for 1 year invalidate
-    @cache_memoize(
-        timeout=60 * 60 * 24,
-        args_rewrite=lambda s, directory_path: f"{s.__class__.__name__ if isinstance(s, YaraScan) else s.__name__}"  # noqa
-        f"-{str(directory_path)}",
-    )
-    def _get_rules(
-        self, directory_path: PosixPath
-    ) -> List[Tuple[PosixPath, io.BytesIO]]:
-        ruleset = self._compile_rules(directory_path)
-        rules_compiled = []
-        for path, rules in ruleset:
-            logger.info(f"Saving file {path}")
-            buff = io.BytesIO()
-            rules.save(file=buff)
-            buff.seek(0)
-            rules_compiled.append((path, buff))
-        return rules_compiled
-
-    def _analyze_directory(self, directory: PosixPath) -> List[Dict[str, Any]]:
-        result = []
-        if not directory.exists() and not settings.STAGE_CI:
-            self.report.errors.append(f"There is no directory {directory} to check")
-            return result
-
-        logger.info(f"Getting rules inside {directory}")
-        list_rules_compiled = self._get_rules(directory)
-        if not list_rules_compiled and not settings.STAGE_CI:
-            self.report.errors.append(
-                f"There are no yara rules installed inside {directory}"
+            # directory name is organization_repository
+            directory_name = "_".join([org, repo]).lower()
+            path = (
+                settings.YARA_RULES_PATH / str(self.owner)
+                if self.owner
+                else settings.YARA_RULES_PATH
             )
+            self._directory = path / directory_name
+        return self._directory
 
-        logger.info(f"There are {len(list_rules_compiled)} rules")
-
-        for path, rules_compiled in list_rules_compiled:
-            rule = yara.load(file=rules_compiled)
-
-            matches = self._validated_matches(rule)
-            for match in matches:
-                # limited to 20 strings reasons because it could be a very long list
-                result.append(
-                    {
-                        "match": str(match),
-                        "strings": str(match.strings[:20]) if match else "",
-                        "tags": match.tags,
-                        "meta": match.meta,
-                        "path": str(path),
-                    }
-                )
-        return result
-
-    def analyze(self, url: str, private: bool = False) -> List[Dict[str, Any]]:
-        from certego_saas.apps.organization.membership import Membership
-
-        if private:
-            # private rules are downloaded in the user directory
-            directory = self._get_directory(url, self._job.user.username)
-            # or, if are set at organization level, in the organization owner directory
-            if not directory.exists():
-                try:
-                    membership = self._job.user.membership
-                except Membership.DoesNotExist:
-                    # user has no org,
-                    # he is trying to access a repo that he does not own
-                    self.report.errors.append(
-                        f"There are no rules downloaded for {url}"
-                    )
-                    return []
-                else:
-                    owner = (
-                        f"{membership.organization.name}."
-                        f"{membership.organization.owner}"
-                    )
-                    directory = self._get_directory(url, owner)
+    def update(self):
+        logger.info(f"Starting update of {self.url}")
+        if self.is_zip():
+            # private url not supported at the moment for private
+            self._update_zip()
         else:
-            directory = self._get_directory(url)
+            self._update_git()
 
-        return self._analyze_directory(directory)
-
-    def run(self):
-        if not self.public_repositories and not self.private_repositories:
-            raise AnalyzerRunException("There are no yara rules selected")
-        result = defaultdict(list)
-        logger.info(f"Checking {self.public_repositories}")
-        for url in self.public_repositories:
-            result[url] += self.analyze(url)
-            logger.info(f"Checking {self.private_repositories}")
-        for url in self.private_repositories:
-            result[url] += self.analyze(url, private=True)
-        if self.local_rules:
-            path = settings.YARA_RULES_PATH / self._job.user.username / "custom_rule"
-            result[path] += self._analyze_directory(path)
-        return result
-
-    @classmethod
-    def _download_or_update_git_repository(
-        cls, url: str, owner: str, ssh_key: str = None
-    ) -> PosixPath:
+    def _update_zip(self):
+        logger.info(f"About to download zip file from {self.url} to {self.directory}")
+        response = requests.get(self.url, stream=True)
         try:
-            if ssh_key:
-                ssh_key = ssh_key.replace("-----BEGIN OPENSSH PRIVATE KEY-----", "")
+            response.raise_for_status()
+        except Exception as e:
+            logger.exception(e)
+        else:
+            zipfile_ = zipfile.ZipFile(io.BytesIO(response.content))
+            zipfile_.extractall(self.directory)
+
+    def _update_git(self):
+        try:
+            if self.key:
+                ssh_key = self.key.replace("-----BEGIN OPENSSH PRIVATE KEY-----", "")
                 ssh_key = ssh_key.replace("-----END OPENSSH PRIVATE KEY-----", "")
                 ssh_key = ssh_key.strip()
                 ssh_key = ssh_key.replace(" ", "\n")
@@ -228,109 +118,204 @@ class YaraScan(FileAnalyzer):
                 with open(settings.GIT_KEY_PATH, "w", encoding="utf_8") as f:
                     f.write(ssh_key)
                 logger.info(
-                    f"Writing key to download {url} at {str(settings.GIT_KEY_PATH)}"
+                    f"Writing key to download {self.url} "
+                    f"at {str(settings.GIT_KEY_PATH)}"
                 )
                 os.chmod(settings.GIT_KEY_PATH, 0o600)
                 os.environ["GIT_SSH"] = str(settings.GIT_SSH_SCRIPT_PATH)
-            directory = cls._get_directory(url, owner)
+            logger.info(f"checking {self.directory=} for {self.url=} and {self.owner=}")
 
-            if not directory.exists():
-                logger.info(f"About to clone {url} at {directory}")
-                repo = Repo.clone_from(url, directory, depth=1)
-                git = repo.git
-                git.config("--add", "safe.directory", directory)
-            else:
-                logger.info(f"about to pull {url} at {directory}")
-                repo = Repo(directory)
-                git = repo.git
-                git.config("--add", "safe.directory", directory)
+            if self.directory.exists():
+                # this is to allow a clean pull
+                self.result_file_name.unlink(missing_ok=True)
+
+                logger.info(f"About to pull {self.url} at {self.directory}")
+                repo = Repo(self.directory)
                 o = repo.remotes.origin
                 o.pull(allow_unrelated_histories=True, rebase=True)
-            return directory
+            else:
+                logger.info(f"About to clone {self.url} at {self.directory}")
+                Repo.clone_from(self.url, self.directory, depth=1)
         finally:
-            if ssh_key:
+            if self.key:
                 logger.info("Starting cleanup of git ssh key")
                 del os.environ["GIT_SSH"]
                 if settings.GIT_KEY_PATH.exists():
                     os.remove(settings.GIT_KEY_PATH)
 
-    @classmethod
-    def _get_directory(cls, url: str, owner: str = None) -> PosixPath:
-        url_parsed = urlparse(url)
-        if url.endswith(".zip"):
-            org = url_parsed.netloc
-            repo = url_parsed.path.split("/")[-1]
-        else:
-            path_repo = url_parsed.path.split("/")
-            # case git@github.com/ORG/repo.git
-            if len(path_repo) == 2:
-                org = path_repo[0].split(":")[-1]
-                repo = path_repo[1]
-            # case https://github.com/ORG/repo
-            elif len(path_repo) >= 3:
-                org = path_repo[1]
-                repo = path_repo[2]
+    @cached_property
+    def result_file_name(self) -> PosixPath:
+        return self.directory / "intel_owl_compiled.yas"
+
+    def is_zip(self):
+        return self.url.endswith(".zip")
+
+    @cached_property
+    def head_branch(self) -> str:
+        return Repo(self.directory).head.ref.name
+
+    @cached_property
+    def rules(self):
+        if not self._rules:
+            if not self.directory.exists():
+                self.update()
+            if self.result_file_name.exists():
+                self._rules = yara.load(str(self.result_file_name))
             else:
-                raise AnalyzerRunException(f"Unable to update url {url}: malformed")
+                self._rules = self.compile()
+        return self._rules
 
-        # we are removing the .zip, .git. .whatever
-        repo = repo.split(".")[0]
+    def rule_url(self, namespace: str) -> Optional[str]:
+        if self.is_zip():
+            return None
+        namespace = PosixPath(namespace)
+        if namespace.is_relative_to(self.directory):
+            relative_part = PosixPath(str(namespace).replace(str(self.directory), ""))
+            url = self.url[:-4] if self.url.endswith(".git") else self.url
+            return f"{url}/blob/{self.head_branch}{relative_part}"
+        else:
+            logger.error(f"Unable to calculate url from {namespace}")
+        return None
 
-        # directory name is organization_repository
-        directory_name = "_".join([org, repo]).lower()
-        path = (
-            settings.YARA_RULES_PATH / str(owner) if owner else settings.YARA_RULES_PATH
+    def compile(self) -> yara.Rules:
+        logger.info(f"Starting compile for {self}")
+        rules = self.directory.rglob("*")
+        valid_rules_path = []
+        for rule in rules:
+            if rule.name.endswith("index"):
+                continue
+            if rule.suffix in [".yara", ".yar", ".rule"]:
+                try:
+                    yara.compile(str(rule))
+                except yara.SyntaxError:
+                    continue
+                else:
+                    valid_rules_path.append(str(rule))
+        logger.info(f"Compiling {len(valid_rules_path)} rules for {self}")
+        compiled_rules = yara.compile(
+            filepaths={str(path): str(path) for path in valid_rules_path}
         )
-        return path / directory_name
+        compiled_rules.save(str(self.result_file_name))
+        logger.info(f"Rules {self} saved on file")
+        return compiled_rules
 
-    @classmethod
-    def _download_or_update_zip_repository(cls, url: str) -> PosixPath:
-        directory = cls._get_directory(url)
-        logger.info(f"About to download zip file from {url} to {directory}")
-        response = requests.get(url, stream=True)
+    def analyze(self, file_path: str, filename: str) -> List[Dict]:
+        logger.info(f"{self} starting analysis of {filename}")
+        matches = []
+        rules = self.rules
+        if rules is None:
+            return []
         try:
-            response.raise_for_status()
-        except Exception as e:
-            logger.exception(e)
-        else:
-            zipfile_ = zipfile.ZipFile(io.BytesIO(response.content))
-            zipfile_.extractall(directory)
-        return directory
-
-    @classmethod
-    def _update_repository(
-        cls, url: str, owner: Optional[str] = None, ssh_key: str = None
-    ):
-        logger.info(f"Starting update of {url}")
-        if url.endswith(".zip"):
-            # private url not supported at the moment for private
-            directory = cls._download_or_update_zip_repository(url)
-        else:
-            directory = cls._download_or_update_git_repository(
-                url, owner, ssh_key=ssh_key
+            matches = self.rules.match(file_path, externals={"filename": filename})
+        except yara.Error as e:
+            if "internal error" in str(e):
+                _, code = str(e).split(":")
+                if int(code.strip()) == 30:
+                    message = f"Too many matches for {filename}"
+                    logger.warning(message)
+                    matches = [YaraMatchMock(message)]
+            else:
+                raise e
+        result = []
+        for match in matches:
+            # limited to 20 strings reasons because it could be a very long list
+            result.append(
+                {
+                    "match": str(match),
+                    "strings": str(match.strings[:20]) if match else "",
+                    "tags": match.tags,
+                    "meta": match.meta,
+                    "path": match.namespace,
+                    "url": self.url,
+                    "rule_url": self.rule_url(match.namespace),
+                }
             )
-        cls._get_rules.invalidate(cls, directory)
+        return result
+
+
+class YaraStorage:
+    def __init__(self):
+        self.repos: List[YaraRepo] = []
+
+    def add_repo(
+        self, url: str, owner: str = None, key: str = None, directory: PosixPath = None
+    ):
+        new_repo = YaraRepo(url, owner, key, directory)
+        for i, repo in enumerate(self.repos):
+            if repo.url == url:
+                if owner:
+                    if not repo.owner:
+                        self.repos[i] = new_repo
+                    else:
+                        self.repos.append(new_repo)
+                return
+        self.repos.append(new_repo)
+
+    def analyze(self, file_path: str, filename: str) -> Dict:
+        result = {}
+        for repo in self.repos:
+            result[str(repo.directory.name)] = repo.analyze(file_path, filename)
+            # free some memory
+            repo._rules = None
+        return result
+
+    def __repr__(self):
+        return self.repos.__repr__()
+
+
+class YaraScan(FileAnalyzer):
+    def set_params(self, params):
+        self.ignore_rules = params.get("ignore", [])
+        self.repositories = params.get("repositories", [])
+        self.private_repositories = self._secrets.get("private_repositories", {})
+        self.local_rules = params.get("local_rules", False)
+
+    def run(self):
+        if not self.repositories:
+            raise AnalyzerRunException("There are no yara rules selected")
+        storage = YaraStorage()
+        for url in self.repositories:
+            if url in self.private_repositories.keys():
+                try:
+                    PluginConfig.objects.get(
+                        plugin_name=self.analyzer_name,
+                        type=PluginConfig.PluginType.ANALYZER,
+                        config_type=PluginConfig.ConfigType.SECRET,
+                        attribute="private_repositories",
+                        owner=self._job.user,
+                    )
+                except PluginConfig.DoesNotExist:
+                    if self._job.user.has_membership():
+                        owner = (
+                            f"{self._job.user.membership.organization.name}"
+                            f".{self._job.user.membership.organization.owner}"
+                        )
+                    else:
+                        raise AnalyzerRunException(f"Unable to find repository {url}")
+                else:
+                    owner = self._job.user.username
+                key = self.private_repositories[url]
+            else:
+                owner = None
+                key = None
+            storage.add_repo(url, owner, key)
+        if self.local_rules:
+            path: PosixPath = (
+                settings.YARA_RULES_PATH / self._job.user.username / "custom_rule"
+            )
+            if path.exists():
+                storage.add_repo(
+                    "",
+                    directory=settings.YARA_RULES_PATH
+                    / self._job.user.username
+                    / "custom_rule",
+                )
+        return storage.analyze(self.filepath, self.filename)
 
     @classmethod
-    def _update(cls):
-        logger.info("Starting updating yara rules")
-        dict_urls: Dict[Union[None, Tuple[str, str]], Set[str]] = defaultdict(set)
+    def _create_storage(cls):
+        storage = YaraStorage()
         for analyzer_name, ac in cls.get_config_class().get_from_python_module(cls):
-            new_urls = ac.param_values.get("public_repositories", [])
-            logger.info(f"Adding configuration urls {new_urls}")
-            dict_urls[None].update(new_urls)
-
-            # we are downloading even custom signatures for each analyzer
-            for plugin in PluginConfig.objects.filter(
-                plugin_name=analyzer_name,
-                type=PluginConfig.PluginType.ANALYZER,
-                config_type=PluginConfig.ConfigType.PARAMETER,
-                attribute="public_repositories",
-            ):
-                new_urls = plugin.value
-                logger.info(f"Adding personal public urls {new_urls}")
-                dict_urls[None].update(new_urls)
-
             for plugin in PluginConfig.objects.filter(
                 plugin_name=analyzer_name,
                 type=PluginConfig.PluginType.ANALYZER,
@@ -344,14 +329,34 @@ class YaraScan(FileAnalyzer):
                 )
                 for url, ssh_key in plugin.value.items():
                     logger.info(f"Adding personal private url {url}")
-                    dict_urls[(owner, ssh_key)].add(url)
-        for owner_ssh_key, urls in dict_urls.items():
-            if owner_ssh_key:
-                owner, ssh_key = owner_ssh_key
-            else:
-                owner, ssh_key = None, None
-            for url in urls:
-                logger.info(f"Going to update {url} yara repo")
-                cls._update_repository(url, owner=owner, ssh_key=ssh_key)
+                    storage.add_repo(url, owner, ssh_key)
+
+            new_urls = ac.param_values.get("repositories", [])
+            logger.info(f"Adding configuration urls {new_urls}")
+            for url in new_urls:
+                storage.add_repo(url)
+
+            # we are downloading even custom signatures for each analyzer
+            for plugin in PluginConfig.objects.filter(
+                plugin_name=analyzer_name,
+                type=PluginConfig.PluginType.ANALYZER,
+                config_type=PluginConfig.ConfigType.PARAMETER,
+                attribute="repositories",
+            ):
+                new_urls = plugin.value
+                logger.info(f"Adding personal urls {new_urls}")
+                for url in new_urls:
+                    storage.add_repo(url)
+        return storage
+
+    @classmethod
+    def _update(cls):
+        logger.info("Starting updating yara rules")
+        storage = cls._create_storage()
+        logger.info(f"Urls are {storage}")
+        for repo in storage.repos:
+            logger.info(f"Going to update {repo.url} yara repo")
+            repo.update()
+            repo.compile()
         logger.info("Finished updating yara rules")
         set_permissions(settings.YARA_RULES_PATH)

@@ -3,6 +3,7 @@
 
 """Check if the domains is reported as malicious in Quad9 database"""
 
+import logging
 from urllib.parse import urlparse
 
 import requests
@@ -12,6 +13,8 @@ from api_app.exceptions import AnalyzerRunException
 from tests.mock_utils import MockResponse, if_mock_connections, patch
 
 from ..dns_responses import malicious_detector_response
+
+logger = logging.getLogger(__name__)
 
 
 class Quad9MaliciousDetector(classes.ObservableAnalyzer):
@@ -24,13 +27,16 @@ class Quad9MaliciousDetector(classes.ObservableAnalyzer):
     we can guess that the domain was in the Quad9 blacklist.
     """
 
+    class Quad9503StatusCode(Exception):
+        pass
+
     def run(self):
         observable = self.observable_name
         # for URLs we are checking the relative domain
         if self.observable_classification == self.ObservableTypes.URL:
             observable = urlparse(self.observable_name).hostname
 
-        quad9_answer = self._quad9_dns_query(observable)
+        quad9_answer, timeout = self._quad9_dns_query(observable)
         # if Quad9 has not an answer the site could be malicious
         if not quad9_answer:
             # Google dns request
@@ -40,10 +46,9 @@ class Quad9MaliciousDetector(classes.ObservableAnalyzer):
             if google_answer:
                 return malicious_detector_response(self.observable_name, True)
 
-        return malicious_detector_response(self.observable_name, False)
+        return malicious_detector_response(self.observable_name, False, timeout)
 
-    @staticmethod
-    def _quad9_dns_query(observable) -> bool:
+    def _quad9_dns_query(self, observable) -> (bool, bool):
         """Perform a DNS query with Quad9 service, return True if Quad9 answer the
         DNS query with a non-empty response.
 
@@ -52,17 +57,31 @@ class Quad9MaliciousDetector(classes.ObservableAnalyzer):
         :return: True in case of answer for the DNS query else False.
         :rtype: bool
         """
+        answer_found = False
+        timeout = False
         try:
             headers = {"Accept": "application/dns-json"}
             url = "https://dns.quad9.net:5053/dns-query"
             params = {"name": observable}
 
             quad9_response = requests.get(url, headers=headers, params=params)
+            if quad9_response.status_code == 503:
+                raise self.Quad9503StatusCode(
+                    "503 status code! "
+                    "It may be normal for this service to"
+                    " happen from time to time"
+                )
             quad9_response.raise_for_status()
         except requests.RequestException as e:
             raise AnalyzerRunException(e)
+        except self.Quad9503StatusCode as e:
+            logger.warning(e)
+            self.report.errors.append(str(e))
+            timeout = True
+        else:
+            answer_found = bool(quad9_response.json().get("Answer", None))
 
-        return bool(quad9_response.json().get("Answer", None))
+        return answer_found, timeout
 
     @staticmethod
     def _google_dns_query(observable) -> bool:

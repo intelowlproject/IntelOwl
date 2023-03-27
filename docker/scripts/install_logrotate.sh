@@ -1,1 +1,1 @@
-cp logrotate/* /etc/logrotate.d
+sudo cp -r logrotate /etc/logrotate.d

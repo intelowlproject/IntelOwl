@@ -1,8 +1,8 @@
 {
-  "APKiD_Scan_APK_DEX_JAR": {
+  "APKiD": {
     "type": "file",
     "python_module": "apkid.APKiD",
-    "description": "APKiD identifies many compilers, packers, obfuscators, and other weird stuff from an APK or DEX file.",
+    "description": "[APKiD](https://github.com/rednaga/APKiD) identifies many compilers, packers, obfuscators, and other weird stuff from an APK or DEX file.",
     "disabled": false,
     "external_service": false,
     "leaks_info": false,
@@ -1129,7 +1129,7 @@
   "EmailRep": {
     "type": "observable",
     "python_module": "emailrep.EmailRep",
-    "description": "Get email reputation from emailrep.io",
+    "description": "Get email reputation from [emailrep.io](https://emailrep.io)",
     "disabled": false,
     "external_service": true,
     "leaks_info": false,
@@ -1534,9 +1534,53 @@
       }
     }
   },
-  "Hunter": {
+  "Hunter_How": {
     "type": "observable",
-    "python_module": "hunter.Hunter",
+    "python_module": "hunter_how.Hunter_How",
+    "description": "[Hunter_How](https://hunter.how/search-api) provides details for a specified ip and domain",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "observable_supported": ["ip","domain"],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "default"
+    },
+    "secrets": {
+      "api_key_name": {
+        "env_var_key": "HUNTERHOW_KEY",
+        "description": "API key for the Hunter_How",
+        "required": true,
+        "type": "str"
+      }
+    },
+    "params": {
+      "page": {
+        "value": 1,
+        "type": "int",
+        "description": "The number of displayed page."
+      },
+      "page_size": {
+        "value": 10,
+        "type": "int",
+        "description": " The number of results displayed on one page "
+      },
+      "start_time": {
+        "value": "2022-01-01",
+        "type": "str",
+        "description": "Only show results after the given date (yyyy-mm-dd)"
+      },
+      "end_time": {
+        "value": "2022-12-01",
+        "type": "str",
+        "description": "Only show results after the given date (yyyy-mm-dd)"
+      }
+    
+    }
+  },
+  "Hunter_Io": {
+    "type": "observable",
+    "python_module": "hunter_io.Hunter_Io",
     "description": "Scans a domain name and returns set of data about the organisation, the email address found and additional information about the people owning those email addresses",
     "disabled": false,
     "external_service": true,
@@ -1915,22 +1959,6 @@
         "description": "API Key for the Koodous analyzer"
       }
     },
-    "params": {}
-},
-  "Manalyze": {
-    "type": "file",
-    "python_module": "manalyze.Manalyze",
-    "description": "A static analyzer for PE files",
-    "disabled": false,
-    "external_service": false,
-    "leaks_info": false,
-    "docker_based": true,
-    "supported_filetypes": ["application/x-dosexec"],
-    "config": {
-      "soft_time_limit": 180,
-      "queue": "local"
-    },
-    "secrets": {},
     "params": {}
   },
   "MISP": {
@@ -2380,7 +2408,7 @@
     "leaks_info": false,
     "observable_supported": ["ip", "domain", "url", "hash"],
     "config": {
-      "soft_time_limit": 60,
+      "soft_time_limit": 90,
       "queue": "default"
     },
     "secrets": {
@@ -2400,12 +2428,17 @@
       "sections": {
         "value": ["general"],
         "type": "list",
-        "description": "Data are divided into sections, list of sections to download"
+        "description": "Sections to download. Options: [general, reputation, geo, malware, url_list, passive_dns, analysis"
       },
       "full_analysis": {
         "value": false,
         "type": "bool",
         "description": "download all the available sections for the observable type"
+      },
+      "timeout": {
+        "value": 30,
+        "type": "int",
+        "description": "Timeout of the request"
       }
     }
   },
@@ -2791,7 +2824,7 @@
     "secrets": {},
     "params": {}
   },
-  "Quark_Engine_APK": {
+  "Quark_Engine": {
     "type": "file",
     "python_module": "quark_engine.QuarkEngine",
     "description": "An Obfuscation-Neglect Android Malware Scoring System",
@@ -4386,10 +4419,11 @@
       }
     },
     "params": {
-      "public_repositories": {
+      "repositories": {
         "value": [
           "https://github.com/elastic/protections-artifacts",
           "https://github.com/embee-research/Yara",
+          "https://github.com/elceef/yara-rulz",
           "https://github.com/JPCERTCC/jpcert-yara",
           "https://github.com/SIFalcon/Detection/",
           "https://github.com/bartblaze/Yara-rules",

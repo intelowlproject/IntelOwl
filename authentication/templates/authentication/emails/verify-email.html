@@ -1,0 +1,34 @@
+{% load static %}
+<body>
+  <!-- Main content -->
+  <main>
+    <div>
+      Hello!
+    
+      <p>
+        Please click the link below to verify your email address.
+      </p>
+    
+      <div style="border: 1px solid black; padding: 4px">
+        <a href="{{ verification_url }}" target="_blank">{{ verification_url }}</a>
+      </div>
+    
+      <p>or, you may also copy and paste directly into your browser's URL bar.</p>
+    
+      <pre style="background-color: #eeeeee">{{ verification_url }}</pre>
+    
+      <p>
+        <em>Note: This URL is valid only for the next 24 hours.</em>
+      </p>
+    
+    </div>
+  </main>
+  <!-- Footer -->
+  <footer>
+    <hr />
+    Thank you,
+    <br />
+    <strong>IntelOwl ©</strong>
+  </footer>
+</body>
+

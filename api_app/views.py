@@ -1,6 +1,7 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 import logging
+import uuid
 from copy import deepcopy
 from datetime import timedelta
 from typing import Type, Union
@@ -115,6 +116,7 @@ def _multi_analysis_request(
                     "job_id": job.pk,
                     "runtime_configuration": runtime_configuration,
                 },
+                MessageGroupId=str(uuid.uuid4()),
             )
 
     data_ = [

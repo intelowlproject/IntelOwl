@@ -21,8 +21,6 @@ services:
     env_file:
       - env_file_app
       - .env
-    depends_on:
-      - postgres
 
   nginx:
     image: intelowlproject/intelowl_nginx:${REACT_APP_INTELOWL_VERSION}
@@ -53,8 +51,6 @@ services:
     env_file:
       - env_file_app
     depends_on:
-      - rabbitmq
-      - postgres
       - uwsgi
     <<: *no-healthcheck
 
@@ -78,8 +74,6 @@ services:
     env_file:
       - env_file_app
     depends_on:
-      - rabbitmq
-      - postgres
       - uwsgi
     <<: *no-healthcheck
 

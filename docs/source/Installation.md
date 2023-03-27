@@ -100,8 +100,28 @@ In the `env_file_app`, configure different variables as explained below.
 * `DJANGO_SECRET`: random 50 chars key, must be unique. If you do not provide one, Intel Owl will automatically set a new secret on every run.
 * `INTELOWL_WEB_CLIENT_DOMAIN` (example: `localhost`/`mywebsite.com`): the web domain of your instance, this is used for generating links to analysis results.
 
-**Optional configuration**:
+Optional configuration:
 * `OLD_JOBS_RETENTION_DAYS`: Database retention for analysis results (default: 3 days). Change this if you want to keep your old analysis longer in the database.
+
+#### Other optional configuration to enable specific services / features
+
+Configuration required to enable integration with Slack:
+* `SLACK_TOKEN`: Slack token of your Slack application that will be used to send/receive notifications
+* `DEFAULT_SLACK_CHANNEL`: ID of the Slack channel you want to post the message to
+
+Configuration required to enable Re-Captcha in the Login and the Registration Page:
+* `RECAPTCHA_SECRET_KEY_IO_LOCAL`: your recaptcha secret key internal deployment
+* `RECAPTCHA_SECRET_KEY_IO_PUBLIC`: your recaptcha secret key for public deployment
+
+Configuration required to have InteOwl sending Emails (registration requests, mail verification, password reset/change, etc)
+* `DEFAULT_FROM_EMAIL`: email address used for automated correspondence from the site manager
+* `DEFAULT_EMAIL`: email address used for correspondence with users
+* `EMAIL_HOST`: the host to use for sending email with SMTP
+* `EMAIL_HOST_USER`: username to use for the SMTP server defined in EMAIL_HOST
+* `EMAIL_HOST_PASSWORD`: password to use for the SMTP server defined in EMAIL_HOST. This setting is used in conjunction with EMAIL_HOST_USER when authenticating to the SMTP server.
+* `EMAIL_PORT`: port to use for the SMTP server defined in EMAIL_HOST.
+* `EMAIL_USE_TLS`: whether to use an explicit TLS (secure) connection when talking to the SMTP server, generally used on port 587. 
+* `EMAIL_USE_SSL`: whether to use an implicit TLS (secure) connection when talking to the SMTP server, generally used on port 465.
 
 ### Deprecated environment configuration
 The following variables are related to the specific services integrated in IntelOwl.
@@ -281,7 +301,7 @@ You may want to run `docker exec -ti intelowl_uwsgi python3 manage.py createsupe
 Then you can add other users directly from the Django Admin Interface after having logged with the superuser account.
 To manage users, organizations and their visibility please refer to this [section](/Usage.md#organizations-and-user-management)
 
-## Update and Re-build
+## Update and Rebuild
 
 ### Rebuilding the project / Creating custom docker build
 If you make some code changes and you like to rebuild the project, follow these steps:

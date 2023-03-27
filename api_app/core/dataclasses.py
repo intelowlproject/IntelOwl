@@ -34,6 +34,11 @@ class _Config:
     queue: str = DEFAULT_QUEUE
     soft_time_limit: int = DEFAULT_SOFT_TIME_LIMIT
 
+    def __post_init__(self):
+        if settings.AWS_SQS:
+            if not self.queue.endswith(".fifo"):
+                self.queue += ".fifo"
+
 
 @dataclasses.dataclass
 class _Param:
@@ -308,6 +313,7 @@ class AbstractConfig:
                     soft_time_limit=soft_time_limit,
                     task_id=task_id,
                     immutable=True,
+                    MessageGroupId=str(task_id),
                 )
             )
             plugins_used.append(plugin_name)

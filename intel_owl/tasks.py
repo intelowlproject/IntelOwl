@@ -7,6 +7,7 @@ import logging
 import typing
 
 from celery import shared_task, signals
+from celery.worker.consumer import Consumer
 from celery.worker.control import control_command
 from django.conf import settings
 
@@ -135,16 +136,25 @@ def build_config_cache(plugin_type: str, user_pk: int = None):
 
 # startup
 @signals.worker_ready.connect
-def worker_ready_connect(*args, **kwargs):
+def worker_ready_connect(*args, sender: Consumer = None, **kwargs):
+    import git
+
     from api_app.analyzers_manager.file_analyzers.yara_scan import YaraScan
     from api_app.models import PluginConfig
+    from intel_owl.celery import DEFAULT_QUEUE
 
-    logger.info("worker ready, generating cache")
+    logger.error(f"worker {sender.hostname} ready")
 
-    build_config_cache(PluginConfig.PluginType.ANALYZER.value)
-    build_config_cache(PluginConfig.PluginType.CONNECTOR.value)
-    for user in User.objects.all():
-        build_config_cache(PluginConfig.PluginType.ANALYZER.value, user_pk=user.pk)
-        build_config_cache(PluginConfig.PluginType.CONNECTOR.value, user_pk=user.pk)
-    if settings.REPO_DOWNLOADER_ENABLED:
-        YaraScan.update()
+    cmd = git.cmd.Git(None)
+    cmd.config("--add", "--global", "safe.directory", "*")
+
+    if sender.hostname == f"celery@worker_{DEFAULT_QUEUE.split('.')[0]}":
+        logger.error("Generating cache")
+        build_config_cache(PluginConfig.PluginType.ANALYZER.value)
+        build_config_cache(PluginConfig.PluginType.CONNECTOR.value)
+        for user in User.objects.all():
+            build_config_cache(PluginConfig.PluginType.ANALYZER.value, user_pk=user.pk)
+            build_config_cache(PluginConfig.PluginType.CONNECTOR.value, user_pk=user.pk)
+
+        if settings.REPO_DOWNLOADER_ENABLED:
+            YaraScan._update()

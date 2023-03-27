@@ -14,7 +14,7 @@ STATICFILES_DIRS = [
     ("reactapp", "/var/www/reactapp"),
 ]
 
-
+NFS = get_secret("NFS", "False") == "True"
 LOCAL_STORAGE = get_secret("LOCAL_STORAGE", "True") == "True"
 # Storage settings
 if LOCAL_STORAGE:

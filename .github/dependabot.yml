@@ -14,9 +14,8 @@ updates:
       - dependency-name: "boto3"
         update-types: ["version-update:semver-minor"]
 
-  # the requirements are the same among all the integrations for now so one of them is enough
   - package-ecosystem: "pip"
-    directory: "/integrations/malware_tools_analyzers"
+    directory: "/integrations/malware_tools_analyzers/requirements"
     schedule:
       interval: "weekly"
       day: "tuesday"
@@ -26,6 +25,30 @@ updates:
       # this does not work for security updates
       - dependency-name: "*"
         update-types: ["version-update:semver-patch"]
+
+  - package-ecosystem: "pip"
+    directory: "/integrations/tor_analyzers"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+    target-branch: "dependabot-validation"
+    ignore:
+      # ignore all patch updates since we are using ~=
+      # this does not work for security updates
+      - dependency-name: "*"
+        update-types: [ "version-update:semver-patch" ]
+
+  - package-ecosystem: "pip"
+    directory: "/integrations/pcap_analyzers"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+    target-branch: "dependabot-validation"
+    ignore:
+      # ignore all patch updates since we are using ~=
+      # this does not work for security updates
+      - dependency-name: "*"
+        update-types: [ "version-update:semver-patch" ]
 
   - package-ecosystem: "npm"
     directory: "/frontend"

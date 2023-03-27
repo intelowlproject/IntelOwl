@@ -124,6 +124,7 @@ class VisualizableVerticalList(VisualizableBase):
         result = super().to_dict()
         values: List[VisualizableObject] = result.pop("value")
         result["values"] = [val.to_dict() for val in values]
+        result["justify_content"] = any(isinstance(x, VisualizableHorizontalList) for x in self.value)
         return result
 
 

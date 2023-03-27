@@ -48,7 +48,7 @@ class CustomConfigTests(CustomAPITestCase):
             "observables": [["ip", "8.8.8.8"]],
             "analyzers_requested": ["Classic_DNS"],
             "connectors_requested": [],
-            "tlp": "WHITE",
+            "tlp": "CLEAR",
             "runtime_configuration": {},
             "tags_labels": [],
         }

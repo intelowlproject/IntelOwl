@@ -65,7 +65,7 @@ class ApiViewTests(CustomAPITestCase):
             ],
             "analyzers_requested": ["Classic_DNS", "WhoIs_RipeDB_Search"],
             "connectors_requested": [],
-            "tlp": "WHITE",
+            "tlp": "CLEAR",
             "runtime_configuration": {},
             "tags_labels": [],
         }
@@ -402,3 +402,22 @@ class ApiViewTests(CustomAPITestCase):
             )
             self.assertEqual(self.file_md5, job.md5, msg=msg)
             self.assertEqual(file_mimetypes[index], job.file_mimetype, msg=msg)
+
+    def test_tlp_clear_and_white(self):
+        data = self.analyze_observable_ip_data.copy()  # tlp = "CLEAR" by default
+        response = self.client.post("/api/analyze_observable", data, format="json")
+        contents = response.json()
+        msg = (response.status_code, contents)
+        self.assertEqual(response.status_code, 200, msg=msg)
+        job_id = int(contents["job_id"])
+        job = models.Job.objects.get(pk=job_id)
+        self.assertEqual(job.tlp, "CLEAR", msg=msg)
+
+        data["tlp"] = "WHITE"
+        response = self.client.post("/api/analyze_observable", data, format="json")
+        contents = response.json()
+        msg = (response.status_code, contents)
+        self.assertEqual(response.status_code, 200, msg=msg)
+        job_id = int(contents["job_id"])
+        job = models.Job.objects.get(pk=job_id)
+        self.assertEqual(job.tlp, "WHITE", msg=msg)

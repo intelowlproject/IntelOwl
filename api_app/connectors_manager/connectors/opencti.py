@@ -28,7 +28,7 @@ class OpenCTI(classes.Connector):
     def set_params(self, params):
         self.ssl_verify = params.get("ssl_verify", True)
         self.tlp = params.get(
-            "tlp", {"type": "white", "color": "#FFFFFF", "x_opencti_order": 0}
+            "tlp", {"type": "clear", "color": "#FFFFFF", "x_opencti_order": 0}
         )
         self.proxies = params.get("proxies", {})
         self.__url_name = self._secrets["url_key_name"]

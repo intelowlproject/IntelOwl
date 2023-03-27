@@ -448,7 +448,7 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
     def get_queryset(self):
         """
         User has access to:
-        - jobs with TLP = WHITE or GREEN
+        - jobs with TLP = CLEAR or GREEN
         - jobs with TLP = AMBER or RED and
         created by a member of their organization.
         """
@@ -463,7 +463,7 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
             )
         else:
             user_query = Q(user=user)
-        query = Q(tlp__in=[TLP.WHITE, TLP.GREEN]) | (
+        query = Q(tlp__in=[*TLP.get_tlp_clear_and_white(), TLP.GREEN]) | (
             Q(tlp__in=[TLP.AMBER, TLP.RED]) & (user_query)
         )
         queryset = queryset.filter(query)

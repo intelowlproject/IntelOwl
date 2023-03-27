@@ -27,7 +27,7 @@ class ConnectorConfigTestCase(CustomTestCase):
             ],
             "analyzers_requested": analyzers_used,
             "connectors_requested": connectors_used,
-            "tlp": "WHITE",
+            "tlp": "CLEAR",
             "runtime_configuration": {},
             "tags_labels": [],
         }

@@ -39,14 +39,20 @@ class Status(models.TextChoices):
 
 class TLP(models.TextChoices):
     WHITE = "WHITE"
+    CLEAR = "CLEAR"
     GREEN = "GREEN"
     AMBER = "AMBER"
     RED = "RED"
 
     @classmethod
+    def get_tlp_clear_and_white(cls):
+        return (cls.WHITE, cls.CLEAR)
+
+    @classmethod
     def get_priority(cls, tlp):
         order = {
             cls.WHITE: 0,
+            cls.CLEAR: 0,
             cls.GREEN: 1,
             cls.AMBER: 2,
             cls.RED: 3,
@@ -125,7 +131,7 @@ class Job(models.Model):
     received_request_time = models.DateTimeField(auto_now_add=True)
     finished_analysis_time = models.DateTimeField(blank=True, null=True)
     process_time = models.FloatField(blank=True, null=True)
-    tlp = models.CharField(max_length=8, choices=TLP.choices, default=TLP.WHITE)
+    tlp = models.CharField(max_length=8, choices=TLP.choices, default=TLP.CLEAR)
     errors = pg_fields.ArrayField(
         models.CharField(max_length=900), blank=True, default=list, null=True
     )

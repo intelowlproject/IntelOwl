@@ -33,7 +33,7 @@ class PlaybookViewTestCase(TransactionTestCase):
             ],
             "analyzers_requested": analyzers_used,
             "connectors_requested": [],
-            "tlp": "WHITE",
+            "tlp": "CLEAR",
             "runtime_configuration": {},
             "tags_labels": [],
         }

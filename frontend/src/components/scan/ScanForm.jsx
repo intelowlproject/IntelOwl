@@ -147,7 +147,7 @@ const initialValues = {
   analyzers: [],
   connectors: [],
   playbooks: [],
-  tlp: "WHITE",
+  tlp: "CLEAR",
   runtime_configuration: {},
   tags: [],
   check: "check_all",

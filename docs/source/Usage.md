@@ -44,25 +44,31 @@ Afterwards you can leverage the created tokens with the Intel Owl Client.
 </div>
 
 ## Organizations and User management
+
 Starting from IntelOwl v4, a new "Organization" section is available on the GUI. This section substitute the previous permission management via Django Admin and aims to provide an easier way to manage users and visibility.
 
 ### Multi Tenancy
+
 Thanks to the "Organization" feature, IntelOwl can be used by multiple SOCs, companies, etc...very easily.
 Right now it works very simply: only users in the same organization can see analysis of one another. An user can belong to an organization only.
 
 #### Manage organizations
+
 You can create a new organization by going to the "Organization" section, available under the Dropdown menu you cand find under the username.
 
 Once you create an organization, you are the unique Administrator of that organization. So you are the only one who can delete the organization, remove users and send invitations to other users.
 
 #### Accept Invites
+
 Once an invite has sent, the invited user has to login, go to the "Organization" section and accept the invite there. Afterwards the Administrator will be able to see the user in his "Organization" section.
 
 #### Plugins Params and Secrets
+
 From IntelOwl v4.1.0, Plugin Parameters and Secrets can be defined at the organization level, in the dedicated section.
 This allows to share configurations between users of the same org while allowing complete multi-tenancy of the application.
 
 #### Disable Analyzers at Org level
+
 From IntelOwl v4.1.0, the org admin can disable specific analyzers for all the users in a specific org.
 To do that, org admins needs to go in the "Plugins" section and click the button "Enabled for organization" of the analyzer that they want to disable.
 
@@ -90,7 +96,7 @@ IntelOwl supports the **Traffic Light Protocol** (TLP) to facilitate sharing of 
 
 Following are the indicators available when requesting an analysis (in the order of increasing sharing restrictions):
 
-1. `WHITE`: no restriction
+1. `CLEAR`: no restriction (`WHITE` was replaced by `CLEAR` in TLP v2.0, but `WHITE` is supported for retrocompatibility)
 2. `GREEN`: disable analyzers that could impact privacy
 3. `AMBER`: disable analyzers that could impact privacy and limit view permissions to my group
 4. `RED`: disable analyzers that could impact privacy, limit view permissions to my group and do not use any external service
@@ -98,8 +104,10 @@ Following are the indicators available when requesting an analysis (in the order
 These indicators when used with `maximum_tlp` (option available in connectors), give you the control of what information is shared to the external platforms.
 
 ## Plugins
+
 Plugins are the core modular components of IntelOwl that can be easily added, changed and customized.
 There are 3 types of plugins:
+
 - [Analyzers](#analyzers)
 - [Connectors](#connectors)
 - [Playbooks](#playbooks)
@@ -165,36 +173,39 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `ClamAV`: scan a file via the [ClamAV AntiVirus Engine](https://www.clamav.net/). IntelOwl automatically keep ClamAV updated with official and [unofficial](https://github.com/rseichter/fangfrisch) open source signatures
 
 ###### External services
-* `VirusTotal_v3_Get_File_And_Scan`: check file hash on VirusTotal. If not already available, send the sample and perform a scan
-* `VirusTotal_v3_Get_File`: check only the file hash on VirusTotal (this analyzer is disabled by default to avoid multiple unwanted queries. You have to change that flag [in the config](https://github.com/intelowlproject/IntelOwl/blob/master/configuration/analyzer_config.json) to use it)
-* `VirusTotal_v2_Get_File`: check file hash on VirusTotal using old API endpoints (this analyzer is disabled by default. You have to change that flag [in the config](https://github.com/intelowlproject/IntelOwl/blob/master/configuration/analyzer_config.json) to use it)
-* `VirusTotal_v2_Scan_File`: scan a file on VirusTotal using old API endpoints (this analyzer is disabled by default. You have to change that flag [in the config](https://github.com/intelowlproject/IntelOwl/blob/master/configuration/analyzer_config.json) to use it)
-* `Intezer_Scan`: scan a file on [Intezer](https://analyze.intezer.com/?utm_source=IntelOwl). Register for a free community account [here](https://analyze.intezer.com/sign-in?utm_source=IntelOwl)
-* `Cuckoo_Scan`: scan a file on Cuckoo (this analyzer is disabled by default. You have to change that flag [in the config](https://github.com/intelowlproject/IntelOwl/blob/master/configuration/analyzer_config.json) to use it)
-* `HybridAnalysis_Get_File`: check file hash on [HybridAnalysis](https://www.hybrid-analysis.com/) sandbox reports
-* `OTX_Check_Hash`: check file hash on [Alienvault OTX](https://otx.alienvault.com/)
-* `MISP_Check_Hash`: check a file hash on a MISP instance
-* `MISPFIRST_Check_Hash`: check a file hash on the FIRST MISP instance
-* `MalwareBazaar_Get_File`: Check if a particular malware sample is known to [MalwareBazaar](https://bazaar.abuse.ch/)
-* `YARAify_File_Scan`: scan a file against public and non-public YARA and ClamAV signatures in [YARAify](https://yaraify.abuse.ch/) public service
-* `YARAify_File_Search`: scan an hash against [YARAify](https://yaraify.abuse.ch/) database
-* `Cymru_Hash_Registry_Get_File`: Check if a particular file is known to be malware by [Team Cymru](https://team-cymru.com/community-services/mhr/)
-* `CapeSandbox`: [CAPESandbox](https://capesandbox.com) automatically scans suspicious files using the CapeSandbox API. Analyzer works for private instances as well.
-* `UnpacMe_EXE_Unpacker`: [UnpacMe](https://www.unpac.me/) is an automated malware unpacking service
-* `Triage_Scan`: leverage [Triage](https://tria.ge) sandbox environment to scan various files
-* `MWDB_Scan`: [mwdblib](https://mwdb.readthedocs.io/en/latest/) Retrieve malware file analysis from repository maintained by CERT Polska MWDB.
-* `Malpedia_Scan`: scan a binary or a zip file (pwd:infected) against all the yara rules available in [Malpedia](https://malpedia.caad.fkie.fraunhofer.de/)
-* `HashLookupServer_Get_File`: check if a md5 or sha1 is available in the database of [known file hosted by CIRCL](https://github.com/adulau/hashlookup-server)
-* `FileScan_Upload_File`: Upload your file to extract IoCs from executable files, documents and scripts via [FileScan.io API](https://www.filescan.io/api/docs).
-* `Dragonfly_Emulation`: Emulate malware against [Dragonfly](https://dragonfly.certego.net?utm_source=intelowl) sandbox by [Certego S.R.L](https://certego.net?utm_source=intelowl).
-* `Virushee_Upload_File`: Check file hash and upload file sample for analysis on [Virushee API](https://api.virushee.com/).
-* `DocGuard_Upload_File`: Analyze office files in seconds. [DocGuard](https://www.docguard.io).
+
+- `VirusTotal_v3_Get_File_And_Scan`: check file hash on VirusTotal. If not already available, send the sample and perform a scan
+- `VirusTotal_v3_Get_File`: check only the file hash on VirusTotal (this analyzer is disabled by default to avoid multiple unwanted queries. You have to change that flag [in the config](https://github.com/intelowlproject/IntelOwl/blob/master/configuration/analyzer_config.json) to use it)
+- `VirusTotal_v2_Get_File`: check file hash on VirusTotal using old API endpoints (this analyzer is disabled by default. You have to change that flag [in the config](https://github.com/intelowlproject/IntelOwl/blob/master/configuration/analyzer_config.json) to use it)
+- `VirusTotal_v2_Scan_File`: scan a file on VirusTotal using old API endpoints (this analyzer is disabled by default. You have to change that flag [in the config](https://github.com/intelowlproject/IntelOwl/blob/master/configuration/analyzer_config.json) to use it)
+- `Intezer_Scan`: scan a file on [Intezer](https://analyze.intezer.com/?utm_source=IntelOwl). Register for a free community account [here](https://analyze.intezer.com/sign-in?utm_source=IntelOwl)
+- `Cuckoo_Scan`: scan a file on Cuckoo (this analyzer is disabled by default. You have to change that flag [in the config](https://github.com/intelowlproject/IntelOwl/blob/master/configuration/analyzer_config.json) to use it)
+- `HybridAnalysis_Get_File`: check file hash on [HybridAnalysis](https://www.hybrid-analysis.com/) sandbox reports
+- `OTX_Check_Hash`: check file hash on [Alienvault OTX](https://otx.alienvault.com/)
+- `MISP_Check_Hash`: check a file hash on a MISP instance
+- `MISPFIRST_Check_Hash`: check a file hash on the FIRST MISP instance
+- `MalwareBazaar_Get_File`: Check if a particular malware sample is known to [MalwareBazaar](https://bazaar.abuse.ch/)
+- `YARAify_File_Scan`: scan a file against public and non-public YARA and ClamAV signatures in [YARAify](https://yaraify.abuse.ch/) public service
+- `YARAify_File_Search`: scan an hash against [YARAify](https://yaraify.abuse.ch/) database
+- `Cymru_Hash_Registry_Get_File`: Check if a particular file is known to be malware by [Team Cymru](https://team-cymru.com/community-services/mhr/)
+- `CapeSandbox`: [CAPESandbox](https://capesandbox.com) automatically scans suspicious files using the CapeSandbox API. Analyzer works for private instances as well.
+- `UnpacMe_EXE_Unpacker`: [UnpacMe](https://www.unpac.me/) is an automated malware unpacking service
+- `Triage_Scan`: leverage [Triage](https://tria.ge) sandbox environment to scan various files
+- `MWDB_Scan`: [mwdblib](https://mwdb.readthedocs.io/en/latest/) Retrieve malware file analysis from repository maintained by CERT Polska MWDB.
+- `Malpedia_Scan`: scan a binary or a zip file (pwd:infected) against all the yara rules available in [Malpedia](https://malpedia.caad.fkie.fraunhofer.de/)
+- `HashLookupServer_Get_File`: check if a md5 or sha1 is available in the database of [known file hosted by CIRCL](https://github.com/adulau/hashlookup-server)
+- `FileScan_Upload_File`: Upload your file to extract IoCs from executable files, documents and scripts via [FileScan.io API](https://www.filescan.io/api/docs).
+- `Dragonfly_Emulation`: Emulate malware against [Dragonfly](https://dragonfly.certego.net?utm_source=intelowl) sandbox by [Certego S.R.L](https://certego.net?utm_source=intelowl).
+- `Virushee_Upload_File`: Check file hash and upload file sample for analysis on [Virushee API](https://api.virushee.com/).
+- `DocGuard_Upload_File`: Analyze office files in seconds. [DocGuard](https://www.docguard.io).
 
 ##### Observable analyzers (ip, domain, url, hash)
+
 ###### Internal tools
-* `DNStwist`: Scan a url/domain to find potentially malicious permutations via dns fuzzing. [dnstwist repo](https://github.com/elceef/dnstwist)
-* `Thug_URL_Info`: Perform hybrid dynamic/static analysis on a URL using [Thug low-interaction honeyclient](https://thug-honeyclient.readthedocs.io/)
-* `CheckDMARC`: An SPF and DMARC DNS records validator for domains.
+
+- `DNStwist`: Scan a url/domain to find potentially malicious permutations via dns fuzzing. [dnstwist repo](https://github.com/elceef/dnstwist)
+- `Thug_URL_Info`: Perform hybrid dynamic/static analysis on a URL using [Thug low-interaction honeyclient](https://thug-honeyclient.readthedocs.io/)
+- `CheckDMARC`: An SPF and DMARC DNS records validator for domains.
 
 ###### External services
 * `VirusTotal_v3_Get_Observable`: search an observable in the VirusTotal DB
@@ -278,9 +289,13 @@ The following is the list of the available analyzers you can run out-of-the-box.
 * `Crowdsec`: check if an IP was reported on [Crowdsec](https://www.crowdsec.net/) Smoke Dataset
 
 ##### Generic analyzers (email, phone number, etc.; anything really)
+
 Some analyzers require details other than just IP, URL, Domain, etc. We classified them as `generic` Analyzers. Since the type of field is not known, there is a format for strings to be followed.
+
 ###### Internal tools
-* `CyberChef`: Run a query on a [CyberChef server](https://github.com/gchq/CyberChef-server) using pre-defined or custom recipes.
+
+- `CyberChef`: Run a query on a [CyberChef server](https://github.com/gchq/CyberChef-server) using pre-defined or custom recipes.
+
 ###### External services
 * `VirusTotal_v3_Intelligence_Search`: Perform advanced queries with [VirusTotal Intelligence](https://developers.virustotal.com/reference/intelligence-search) (requires paid plan)
 * `MISP`: scan an observable on a MISP instance
@@ -302,6 +317,7 @@ Some analyzers require details other than just IP, URL, Domain, etc. We classifi
 [Some analyzers are optional](Advanced-Usage.html#optional-analyzers) and need to be enabled explicitly.
 
 #### Analyzers Customization
+
 You can create new analyzers based on already existing modules by changing the configuration values inside `configuration/analyzer_config.json`. This file is mounted as a docker volume, so you won't need to rebuild the image.
 
 You may want to change this configuration to add new analyzers or to change the configuration of some of them. The name of the analyzers can be changed at every moment based on your wishes.
@@ -321,6 +337,7 @@ Sometimes, it may happen that you would like to create a new analyzer very simil
 An helpful way to do that without having to copy/pasting the configuration, is to leverage the key `extends`.
 With this key you can create a new analyzer based on an already existing one and define only things that you would like to overwrite.
 Example:
+
 ```
   "Shodan_Search": {
     "extends": "Shodan_Honeyscore",
@@ -353,9 +370,9 @@ The following is the list of the available connectors. You can also navigate the
 
 ##### List of pre-built Connectors
 
-* `MISP`: automatically creates an event on your MISP instance, linking the successful analysis on IntelOwl.
-* `OpenCTI`: automatically creates an observable and a linked report on your OpenCTI instance, linking the the successful analysis on IntelOwl.
-* `YETI`: YETI = Your Everyday Threat Intelligence. find or create observable on YETI, linking the successful analysis on IntelOwl.
+- `MISP`: automatically creates an event on your MISP instance, linking the successful analysis on IntelOwl.
+- `OpenCTI`: automatically creates an observable and a linked report on your OpenCTI instance, linking the the successful analysis on IntelOwl.
+- `YETI`: YETI = Your Everyday Threat Intelligence. find or create observable on YETI, linking the successful analysis on IntelOwl.
 
 #### Connectors customization
 
@@ -366,7 +383,7 @@ The following are all the keys that you can change without touching the source c
 - `disabled`: _similar to analyzers_
 - `soft_time_limit`: _similar to analyzers_
 - `queue`: _similar to analyzers_
-- `maximum_tlp` (default `WHITE`, choices `WHITE`, `GREEN`, `AMBER`, `RED`): specify the maximum TLP of the analysis up to which the connector is allowed to run. (e.g. if `maximum_tlp` is `GREEN`, it would run for analysis with TLPs `WHITE` and `GREEN`). To learn more about TLPs see [TLP Support](./Usage.md#tlp-support).
+- `maximum_tlp` (default `CLEAR`, choices `CLEAR`, `GREEN`, `AMBER`, `RED`): specify the maximum TLP of the analysis up to which the connector is allowed to run. (e.g. if `maximum_tlp` is `GREEN`, it would run for analysis with TLPs `CLEAR` and `GREEN`). To learn more about TLPs see [TLP Support](./Usage.md#tlp-support).
 
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
@@ -413,15 +430,18 @@ If you want to avoid to re-select/re-configure a particular combination of analy
 This is a feature introduced since IntelOwl v4.1.0! Please provide feedback about it!
 
 #### Playbooks List
+
 The following is the list of the available pre-built playbooks. You can also navigate the same list via the
 
 - Graphical Interface: once your application is up and running, go to the "Plugins" section
 - [pyintelowl](https://github.com/intelowlproject/pyintelowl): `$ pyintelowl get-playbook-config`
 
 ##### List of pre-built playbooks
-* `FREE_TO_USE_ANALYZERS`: A playbook containing all free to use analyzers.
+
+- `FREE_TO_USE_ANALYZERS`: A playbook containing all free to use analyzers.
 
 #### Playbooks customization
+
 You can create new playbooks by adding a new entry in the `playbook_config.json` file.
 
 The following are all the keys that you can leverage/change without touching the source code:

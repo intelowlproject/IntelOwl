@@ -163,12 +163,12 @@ class VisualizableHorizontalList(VisualizableListMixin, VisualizableObject):
 class VisualizableLevel:
     def __init__(self, level: int, horizontal_list: VisualizableHorizontalList):
         self.level = level
-        self.elements = horizontal_list
+        self.hl = horizontal_list
 
     def to_dict(self):
         return {
             "level": self.level,
-            "elements": [elem.to_dict() for elem in self.elements],
+            "elements": self.hl.to_dict(),
         }
 
 

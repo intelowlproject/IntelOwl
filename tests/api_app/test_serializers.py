@@ -14,8 +14,6 @@ from api_app.playbooks_manager.models import PlaybookConfig
 from api_app.serializers import (
     FileAnalysisSerializer,
     ObservableAnalysisSerializer,
-    PlaybookFileAnalysisSerializer,
-    PlaybookObservableAnalysisSerializer,
     _AbstractJobCreateSerializer,
 )
 from api_app.visualizers_manager.models import VisualizerConfig

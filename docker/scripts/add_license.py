@@ -14,7 +14,7 @@ if __name__ == "__main__":
     if len(sys.argv) > 3:
         print("Too many argument")
         exit()
-    if len(sys.argv) == 2 and sys.argv[2] != "run":
+    if len(sys.argv) == 3 and sys.argv[2] != "run":
         print("Argument must be `run` or empty")
     base_path = sys.argv[1]
     base_path = PosixPath(base_path)
@@ -30,8 +30,10 @@ if __name__ == "__main__":
         with open(file, "r+") as f:
             lines = f.readlines()
             if not (lines[0].strip() != header0.strip() and lines[1].strip() != header1.strip()):
-                print("\tAdding header")
+                print("\tSkipping")
                 continue
+            else:
+                print("\tAdding header")
         if len(sys.argv) == 3 and sys.argv[2] == "run":
             with open(file, "w") as f:
                 print("\tWritten")

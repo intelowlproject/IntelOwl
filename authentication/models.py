@@ -1,3 +1,6 @@
+# This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
+# See the file 'LICENSE' for copying permission.
+
 from django.conf import settings
 from django.core.validators import MinLengthValidator
 from django.db import models

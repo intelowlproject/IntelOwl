@@ -200,7 +200,7 @@ async function _askAnalysisAvailability(formValues) {
     if (answer.count === 0) {
       return 0;
     }
-    const jobIds = answer.results.map((x) => x.pk);
+    const jobIds = answer.results.map((x) => x.job_id);
     jobIds.forEach((jobId) => {
       appendToRecentScans(jobId, "secondary");
     });

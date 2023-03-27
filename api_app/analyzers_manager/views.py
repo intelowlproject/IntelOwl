@@ -74,8 +74,6 @@ class AnalyzerActionViewSet(PluginActionViewSet):
 
         signature = report.config.get_signature(
             report.job.id,
-            report.runtime_configuration.get(report.config.name, {}),
-            report.parent_playbook.pk if report.parent_playbook else None,
         )
         runner = signature | tasks.continue_job_pipeline.signature(
             args=[report.job.id],

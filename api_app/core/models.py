@@ -13,20 +13,13 @@ from django.utils.functional import cached_property
 from django.utils.module_loading import import_string
 from kombu import uuid
 
+from api_app.core.choices import Status
 from api_app.validators import validate_config, validate_params, validate_secrets
 from certego_saas.apps.organization.organization import Organization
 from certego_saas.apps.user.models import User
 from intel_owl.celery import DEFAULT_QUEUE, get_real_queue_name
 
 logger = logging.getLogger(__name__)
-
-
-class Status(models.TextChoices):
-    FAILED = "FAILED"
-    PENDING = "PENDING"
-    RUNNING = "RUNNING"
-    SUCCESS = "SUCCESS"
-    KILLED = "KILLED"
 
 
 class AbstractReport(models.Model):
@@ -39,18 +32,10 @@ class AbstractReport(models.Model):
     errors = pg_fields.ArrayField(
         models.CharField(max_length=512), default=list, blank=True
     )
-    runtime_configuration = models.JSONField(default=dict, null=True, blank=True)
     start_time = models.DateTimeField(default=timezone.now)
     end_time = models.DateTimeField(default=timezone.now)
     task_id = models.UUIDField()  # tracks celery task id
 
-    # If a playbook ran the process
-    parent_playbook = models.ForeignKey(
-        "playbooks_manager.PlaybookConfig",
-        related_name="%(class)ss",
-        null=True,
-        on_delete=models.SET_NULL,
-    )
     job = models.ForeignKey(
         "api_app.Job", related_name="%(class)ss", on_delete=models.CASCADE
     )
@@ -206,7 +191,10 @@ class AbstractConfig(models.Model):
 
     @cached_property
     def queue(self):
-        return get_real_queue_name(self.config["queue"])
+        queue = self.config["queue"]
+        if queue not in settings.CELERY_QUEUES:
+            queue = DEFAULT_QUEUE
+        return get_real_queue_name(queue)
 
     @cached_property
     def routing_key(self):
@@ -278,23 +266,18 @@ class AbstractConfig(models.Model):
 
         return self._read_plugin_config(PluginConfig.ConfigType.PARAMETER, user)
 
-    def get_signature(
-        self, job_id: int, runtime_configuration: Dict, parent_playbook_pk: int = None
-    ):
-        from api_app.models import Job
+    def get_signature(self, job: "Job"):
         from intel_owl import tasks
 
-        job = Job.objects.get(pk=job_id)
         if self.is_runnable(job.user):
             # gen new task_id
             task_id = uuid()
             args = [
-                job_id,
+                job.pk,
                 self.python_complete_path,
                 self.pk,
-                runtime_configuration,
+                job.get_config_runtime_configuration(self),
                 task_id,
-                parent_playbook_pk,
             ]
 
             return tasks.run_plugin.signature(

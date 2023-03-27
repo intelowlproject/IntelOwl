@@ -1,3 +1,6 @@
+# This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
+# See the file 'LICENSE' for copying permission.
+
 from pathlib import PosixPath
 
 from django.conf import settings
@@ -210,11 +213,11 @@ class VisualizerTestCase(CustomTestCase):
         "api_app/fixtures/0001_user.json",
     ]
 
-    class MockUpVisualizer(Visualizer):
-        def run(self) -> dict:
-            return {}
-
     def test_analyzer_reports(self):
+        class MockUpVisualizer(Visualizer):
+            def run(self) -> dict:
+                return {}
+
         ac = AnalyzerConfig.objects.first()
         job = Job.objects.create(
             observable_name="test.com",
@@ -226,7 +229,7 @@ class VisualizerTestCase(CustomTestCase):
         )
         vc.analyzers.set([ac])
         ar = AnalyzerReport.objects.create(config=ac, job=job, task_id=uuid())
-        v = self.MockUpVisualizer(vc, job.pk, {}, uuid())
+        v = MockUpVisualizer(vc, job.pk, {}, uuid())
         self.assertEqual(list(v.analyzer_reports()), [ar])
         ar.delete()
         job.delete()
@@ -258,7 +261,7 @@ class VisualizerTestCase(CustomTestCase):
                 )
                 __import__(package)
                 num_visualizers += 1
-        subclasses = Visualizer.__subclasses__()
+        subclasses = Visualizer.all_subclasses()
         self.assertEqual(num_visualizers, len(subclasses))
         for subclass in subclasses:
             print("\n" f"Testing Visualizer {subclass.__name__}")

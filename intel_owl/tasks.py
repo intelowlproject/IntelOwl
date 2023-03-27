@@ -142,12 +142,11 @@ def continue_job_pipeline(job_id: int):
 @app.task(name="job_pipeline", soft_time_limit=100)
 def job_pipeline(
     job_id: int,
-    runtime_configuration: typing.Dict[str, typing.Any],
 ):
     from api_app.models import Job
 
     job = Job.objects.get(pk=job_id)
-    job.pipeline(runtime_configuration)
+    job.execute()
 
 
 @app.task(name="run_plugin", soft_time_limit=500)
@@ -157,7 +156,6 @@ def run_plugin(
     plugin_config_pk: str,
     runtime_configuration: dict,
     task_id: int,
-    parent_playbook_pk: int = None,
 ):
     from api_app.core.classes import Plugin
 
@@ -168,7 +166,6 @@ def run_plugin(
         job_id=job_id,
         runtime_configuration=runtime_configuration,
         task_id=task_id,
-        parent_playbook_pk=parent_playbook_pk,
     )
     plugin.start()
 

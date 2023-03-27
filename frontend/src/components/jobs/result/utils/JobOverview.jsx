@@ -84,12 +84,12 @@ export default function JobOverview({ isRunningJob, job, refetch }) {
   let ConnectorDenominator = job.connectors_requested?.length || "all";
   const VisualizerDenominator = "all";
 
-  if (job.playbooks_to_execute?.length > 0) {
-    AnalyzerDenominator = job.analyzers_to_execute?.length;
+  if (job.playbook_to_execute) {
+    AnalyzerDenominator = job.analyzers_to_execute.length;
     if (job.connectors_to_execute?.length === 0) {
       ConnectorDenominator = "0";
     } else {
-      ConnectorDenominator = job.connectors_to_execute?.length;
+      ConnectorDenominator = job.connectors_to_execute.length;
     }
   }
   const rawElements = React.useMemo(

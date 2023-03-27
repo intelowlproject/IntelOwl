@@ -1,3 +1,6 @@
+# This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
+# See the file 'LICENSE' for copying permission.
+
 from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 

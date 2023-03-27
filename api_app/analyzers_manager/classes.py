@@ -100,7 +100,7 @@ class BaseAnalyzerMixin(Plugin, metaclass=ABCMeta):
         return result
 
     def before_run(self, *args, **kwargs):
-        self.report.update_status(status=self.report.Status.RUNNING)
+        self.report.update_status(status=self.report.Status.RUNNING.value)
 
     def after_run(self):
         self.report.report = self._validate_result(self.report.report)

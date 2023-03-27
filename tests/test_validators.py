@@ -1,3 +1,6 @@
+# This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
+# See the file 'LICENSE' for copying permission.
+
 from django.core.exceptions import ValidationError
 
 from api_app.validators import validate_config, validate_params, validate_secrets

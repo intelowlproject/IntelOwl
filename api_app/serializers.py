@@ -1,12 +1,15 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
+
 import copy
+import datetime
 import json
 import logging
 from typing import Dict, List, Union
 
 from django.db.models import Q
 from django.http import QueryDict
+from django.utils.timezone import now
 from durin.serializers import UserSerializer
 from rest_framework import serializers as rfs
 from rest_framework.exceptions import PermissionDenied, ValidationError
@@ -16,15 +19,17 @@ from certego_saas.apps.organization.membership import Membership
 # from django.contrib.auth import get_user_model
 from certego_saas.apps.organization.organization import Organization
 from certego_saas.apps.organization.permissions import IsObjectOwnerOrSameOrgPermission
+from intel_owl.celery import DEFAULT_QUEUE
 
 from .analyzers_manager.constants import ObservableTypes, TypeChoices
 from .analyzers_manager.models import AnalyzerConfig, MimeTypes
 from .analyzers_manager.serializers import AnalyzerReportSerializer
+from .choices import TLP
 from .connectors_manager.exceptions import NotRunnableConnector
 from .connectors_manager.models import ConnectorConfig
 from .connectors_manager.serializers import ConnectorReportSerializer
 from .helpers import calculate_md5, gen_random_colorhex
-from .models import TLP, Job, PluginConfig, Tag
+from .models import Job, PluginConfig, Tag
 from .playbooks_manager.exceptions import NotRunnablePlaybook
 from .playbooks_manager.models import PlaybookConfig
 from .visualizers_manager.models import VisualizerConfig
@@ -43,8 +48,6 @@ __all__ = [
     "MultipleFileAnalysisSerializer",
     "MultipleObservableAnalysisSerializer",
     "PluginConfigSerializer",
-    "PlaybookFileAnalysisSerializer",
-    "PlaybookObservableAnalysisSerializer",
 ]
 
 
@@ -90,6 +93,21 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
 
     def validate(self, attrs: dict) -> dict:
         attrs = super().validate(attrs)
+        if playbook := attrs.get("playbook_requested", None):
+            if attrs.get("analyzers_requested", []) or attrs.get(
+                "connectors_requested", []
+            ):
+                raise ValidationError(
+                    "You can't specify a playbook and plugins together"
+                )
+            if playbook.disabled:
+                raise ValidationError(
+                    {"detail": "No playbooks can be run after filtering."}
+                )
+            attrs["playbook_to_execute"] = playbook
+            attrs["analyzers_requested"] = list(playbook.analyzers.all())
+            attrs["connectors_requested"] = list(playbook.connectors.all())
+
         attrs["analyzers_requested"] = self.filter_analyzers_requested(
             attrs["analyzers_requested"]
         )
@@ -106,6 +124,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
             attrs["analyzers_to_execute"], attrs["connectors_to_execute"]
         )
         attrs["warnings"] = self.filter_warnings
+
         return attrs
 
     def set_visualizers_to_execute(
@@ -201,9 +220,13 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
 
     def create(self, validated_data: dict) -> Job:
         # create ``Tag`` objects from tags_labels
+        print("DIOCANE")
+        print("DIOCANE")
+        print("DIOCANE")
         tags_labels = validated_data.pop("tags_labels", None)
         validated_data.pop("warnings")
         validated_data.pop("runtime_configuration")
+        send_task = validated_data.pop("send_task", False)
         tags = [
             Tag.objects.get_or_create(
                 label=label, defaults={"color": gen_random_colorhex()}
@@ -221,6 +244,12 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         for key, value in self.mtm_fields.items():
             mtm = getattr(job, key)
             mtm.set(value)
+        if send_task:
+            from intel_owl.tasks import job_pipeline
+
+            logger.info("Sending task")
+            job_pipeline.apply_async(args=[job.pk], routing_key=DEFAULT_QUEUE)
+
         return job
 
 
@@ -322,6 +351,21 @@ class MultipleFileAnalysisSerializer(rfs.ListSerializer):
         return ret
 
 
+class MultiplePlaybooksMultipleFileAnalysisSerializer(MultipleFileAnalysisSerializer):
+    playbooks_requested = rfs.PrimaryKeyRelatedField(
+        queryset=PlaybookConfig.objects.all(), many=True
+    )
+
+    def to_internal_value(self, data):
+        ret = []
+        for playbook in data.pop("playbooks_requested", [None]):
+            item = copy.deepcopy(data)
+            item["playbook_requested"] = playbook
+            results = super().to_internal_value(item)
+            ret.extend(results)
+        return ret
+
+
 class FileAnalysisSerializer(_AbstractJobCreateSerializer):
     """
     ``Job`` model's serializer for File Analysis.
@@ -346,9 +390,21 @@ class FileAnalysisSerializer(_AbstractJobCreateSerializer):
             "runtime_configuration",
             "analyzers_requested",
             "connectors_requested",
+            "playbook_requested",
             "tags_labels",
         )
-        list_serializer_class = MultipleFileAnalysisSerializer
+
+    @classmethod
+    def many_init(cls, *args, **kwargs):
+        # Instantiate the child serializer.
+        data = kwargs["data"]
+        kwargs["child"] = cls()
+        if "playbooks_requested" in data:
+            list_serializer_class = MultiplePlaybooksMultipleFileAnalysisSerializer
+        else:
+            list_serializer_class = MultipleFileAnalysisSerializer
+        # Instantiate the parent list serializer.
+        return list_serializer_class(*args, **kwargs)
 
     def validate(self, attrs: dict) -> dict:
         logger.debug(f"before attrs: {attrs}")
@@ -410,15 +466,13 @@ class MultipleObservableAnalysisSerializer(rfs.ListSerializer):
     Used for ``create()``.
     """
 
+    observables = rfs.ListField(required=True)
+
     def update(self, instance, validated_data):
         raise NotImplementedError("This serializer does not support update().")
 
-    observables = rfs.ListField(required=True)
-
     def to_internal_value(self, data):
         ret = []
-        errors = []
-
         for classification, name in data.pop("observables", []):
 
             # `deepcopy` here ensures that this code doesn't
@@ -428,17 +482,26 @@ class MultipleObservableAnalysisSerializer(rfs.ListSerializer):
             item["observable_name"] = name
             if classification:
                 item["observable_classification"] = classification
-            try:
-                validated = self.child.run_validation(item)
-            except ValidationError as exc:
-                errors.append(exc.detail)
-            else:
-                ret.append(validated)
-                errors.append({})
+            child_result = self.child.run_validation(item)
+            ret.append(child_result)
 
-        if any(errors):
-            raise ValidationError(errors)
+        return ret
 
+
+class MultiplePlaybooksMultipleObservableAnalysisSerializer(
+    MultipleObservableAnalysisSerializer
+):
+    playbooks_requested = rfs.PrimaryKeyRelatedField(
+        queryset=PlaybookConfig.objects.all(), many=True
+    )
+
+    def to_internal_value(self, data):
+        ret = []
+        for playbook in data.pop("playbooks_requested", [None]):
+            item = copy.deepcopy(data)
+            item["playbook_requested"] = playbook
+            results = super().to_internal_value(item)
+            ret.extend(results)
         return ret
 
 
@@ -464,9 +527,23 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
             "runtime_configuration",
             "analyzers_requested",
             "connectors_requested",
+            "playbook_requested",
             "tags_labels",
         )
-        list_serializer_class = MultipleObservableAnalysisSerializer
+
+    @classmethod
+    def many_init(cls, *args, **kwargs):
+        # Instantiate the child serializer.
+        data = kwargs["data"]
+        kwargs["child"] = cls()
+        if "playbooks_requested" in data:
+            list_serializer_class = (
+                MultiplePlaybooksMultipleObservableAnalysisSerializer
+            )
+        else:
+            list_serializer_class = MultipleObservableAnalysisSerializer
+        # Instantiate the parent list serializer.
+        return list_serializer_class(*args, **kwargs)
 
     def validate(self, attrs: dict) -> dict:
         logger.debug(f"before attrs: {attrs}")
@@ -529,120 +606,11 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
         return super().set_analyzers_to_execute(analyzers_to_execute, serialized_data)
 
 
-class PlaybookBaseSerializer:
-    playbooks_requested = rfs.PrimaryKeyRelatedField(
-        queryset=PlaybookConfig.objects.all(), many=True
-    )
-
-    def __init__(self, *args, **kwargs):
-        self.playbook_mtm_field = {
-            "playbooks_requested": None,
-            "playbooks_to_execute": None,
-        }
-
-    def filter_playbooks(self, attrs: Dict) -> Dict:
-        # init empty list
-        analyzers_requested = AnalyzerConfig.objects.none()
-        connectors_requested = ConnectorConfig.objects.none()
-        # get values from serializer
-        selected_playbooks = attrs.get("playbooks_requested")
-        playbooks = selected_playbooks.copy()
-        # read config
-
-        for p_config in selected_playbooks:
-            try:
-                if p_config.disabled:
-                    raise NotRunnablePlaybook(f"{p_config.name} won't run: disabled")
-                else:
-                    analyzers_requested.union(p_config.analyzers.all())
-                    connectors_requested.union(p_config.connectors.all())
-            except NotRunnablePlaybook as e:
-                playbooks.remove(p_config)
-                logger.warning(e)
-                self.filter_warnings.append(str(e))
-
-        if not playbooks:
-            raise ValidationError(
-                {"detail": "No playbooks can be run after filtering."}
-            )
-
-        attrs["analyzers_requested"] = list(analyzers_requested)
-        attrs["connectors_requested"] = list(connectors_requested)
-        attrs["playbooks_to_execute"] = list(playbooks)
-
-        return attrs
-
-
-class PlaybookObservableAnalysisSerializer(
-    PlaybookBaseSerializer, ObservableAnalysisSerializer
-):
-    class Meta:
-        model = Job
-        fields = (
-            "id",
-            "user",
-            "is_sample",
-            "md5",
-            "tlp",
-            "observable_name",
-            "observable_classification",
-            "runtime_configuration",
-            "analyzers_requested",
-            "connectors_requested",
-            "playbooks_requested",
-            "tags_labels",
-        )
-        list_serializer_class = MultipleObservableAnalysisSerializer
-
-    def __init__(self, *args, **kwargs):
-        PlaybookBaseSerializer.__init__(self, *args, **kwargs)
-        ObservableAnalysisSerializer.__init__(self, *args, **kwargs)
-        self.mtm_fields.update(self.playbook_mtm_field)
-
-    def validate(self, attrs: dict) -> dict:
-        attrs = self.filter_playbooks(attrs)
-        # this is needed because we do not want to have warning on missmatch plugins
-        attrs = super().validate(attrs)
-
-        return attrs
-
-
-class PlaybookFileAnalysisSerializer(PlaybookBaseSerializer, FileAnalysisSerializer):
-    class Meta:
-        model = Job
-        fields = (
-            "id",
-            "user",
-            "is_sample",
-            "md5",
-            "tlp",
-            "file",
-            "file_name",
-            "file_mimetype",
-            "runtime_configuration",
-            "analyzers_requested",
-            "connectors_requested",
-            "playbooks_requested",
-            "tags_labels",
-        )
-        list_serializer_class = MultipleFileAnalysisSerializer
-
-    def __init__(self, *args, **kwargs):
-        PlaybookBaseSerializer.__init__(self, *args, **kwargs)
-        FileAnalysisSerializer.__init__(self, *args, **kwargs)
-        self.mtm_fields.update(self.playbook_mtm_field)
-
-    def validate(self, attrs: dict) -> dict:
-        attrs["observable_classification"] = "file"
-        attrs = super().filter_playbooks(attrs)
-        # this is needed because we do not want to have warning on missmatch plugins
-        self.log_runnable = False
-        attrs = super().validate(attrs)
-
-        return attrs
-
-
 class JobEnvelopeSerializer(rfs.ListSerializer):
+    @property
+    def data(self):
+        return super(rfs.ListSerializer, self).data
+
     def to_representation(self, data):
         results = super().to_representation(data)
         return {"results": results, "count": len(results)}
@@ -659,10 +627,9 @@ class JobResponseSerializer(rfs.ModelSerializer):
     visualizers_running = rfs.PrimaryKeyRelatedField(
         read_only=True, source="visualizers_to_execute", many=True
     )
-    playbooks_running = rfs.PrimaryKeyRelatedField(
-        read_only=True, source="playbooks_to_execute", many=True
+    playbook_running = rfs.PrimaryKeyRelatedField(
+        read_only=True, source="playbook_to_execute"
     )
-    list_serializer_class = JobEnvelopeSerializer
 
     class Meta:
         model = Job
@@ -671,10 +638,11 @@ class JobResponseSerializer(rfs.ModelSerializer):
             "analyzers_running",
             "connectors_running",
             "visualizers_running",
-            "playbooks_running",
+            "playbook_running",
             "status",
         ]
         extra_kwargs = {"warnings": {"read_only": True, "required": False}}
+        list_serializer_class = JobEnvelopeSerializer
 
     def to_representation(self, instance):
         result = super().to_representation(instance)
@@ -689,30 +657,66 @@ class JobAvailabilitySerializer(rfs.ModelSerializer):
 
     class Meta:
         model = Job
-        fields = ["md5", "analyzers", "playbooks", "running_only", "minutes_ago"]
+        fields = ["md5", "analyzers", "playbook", "running_only", "minutes_ago"]
 
     md5 = rfs.CharField(max_length=128, required=True)
     analyzers = rfs.PrimaryKeyRelatedField(
         queryset=AnalyzerConfig.objects.all(), many=True, required=False
     )
-    playbooks = rfs.PrimaryKeyRelatedField(
-        queryset=PlaybookConfig.objects.all(), many=True, required=False
+    playbook = rfs.PrimaryKeyRelatedField(
+        queryset=PlaybookConfig.objects.all(), required=False
     )
     running_only = rfs.BooleanField(default=False, required=False)
     minutes_ago = rfs.IntegerField(default=None, required=False)
 
-    list_serializer_class = JobEnvelopeSerializer
-
     def validate(self, attrs):
         attrs = super().validate(attrs)
-        playbooks = attrs.get("playbooks", [])
+        playbook = attrs.get("playbook", None)
         analyzers = attrs.get("analyzers", [])
 
-        if len(playbooks) != 0 and len(analyzers) != 0:
+        if playbook is not None and len(analyzers) != 0:
             raise rfs.ValidationError(
-                "Either only send the 'playbooks' parameter or the 'analyzers' one."
+                "Either only send the 'playbook' parameter or the 'analyzers' one."
             )
         return attrs
+
+    def create(self, validated_data):
+
+        statuses_to_check = [Job.Status.RUNNING]
+
+        if not validated_data["running_only"]:
+            statuses_to_check.append(Job.Status.REPORTED_WITHOUT_FAILS)
+            # since with playbook
+            # it is expected behavior
+            # for analyzers to often fail
+            if validated_data.get("playbook", None):
+                statuses_to_check.append(Job.Status.REPORTED_WITH_FAILS)
+        # this means that the user is trying to
+        # check availability of the case where all
+        # analyzers were run but no playbooks were
+        # triggered.
+        query = Q(md5=validated_data["md5"]) & Q(status__in=statuses_to_check)
+        if validated_data.get("playbook", None):
+            query &= Q(playbook_requested=validated_data["playbook"])
+        else:
+            analyzers = validated_data.get("analyzers", [])
+            if not analyzers:
+                analyzers = AnalyzerConfig.objects.all()
+            query &= Q(analyzers_requested__in=analyzers)
+        # we want a job that has every analyzer requested
+        if validated_data.get("minutes_ago", None):
+            minutes_ago_time = now() - datetime.timedelta(
+                minutes=validated_data["minutes_ago"]
+            )
+            query &= Q(received_request_time__gte=minutes_ago_time)
+
+        last_job_for_md5 = (
+            Job.visible_for_user(self.context["request"].user)
+            .filter(query)
+            .only("pk")
+            .latest("received_request_time")
+        )
+        return last_job_for_md5
 
 
 class PluginConfigSerializer(rfs.ModelSerializer):

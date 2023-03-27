@@ -32,7 +32,5 @@ class ConnectorActionViewSet(PluginActionViewSet):
     def perform_retry(self, report: ConnectorReport):
         signature = report.config.get_signature(
             report.job.pk,
-            report.runtime_configuration.get(report.config.name, {}),
-            report.parent_playbook.pk if report.parent_playbook else None,
         )
         signature()

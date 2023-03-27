@@ -3,7 +3,6 @@
 
 import logging
 import typing
-from itertools import chain
 from typing import Optional
 
 from celery import group
@@ -17,11 +16,14 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.functional import cached_property
 
+from api_app.choices import TLP, ObservableClassification, Status
 from api_app.core.models import AbstractConfig, AbstractReport
 from api_app.helpers import calculate_sha1, calculate_sha256, get_now
+from api_app.validators import validate_runtime_configuration
 from certego_saas.apps.organization.organization import Organization
 from certego_saas.models import User
-from intel_owl.celery import get_real_queue_name
+from intel_owl import tasks
+from intel_owl.celery import DEFAULT_QUEUE, get_real_queue_name
 
 logger = logging.getLogger(__name__)
 
@@ -31,45 +33,12 @@ def file_directory_path(instance, filename):
     return f"job_{now}_{filename}"
 
 
-class Status(models.TextChoices):
-    PENDING = "pending", "pending"
-    RUNNING = "running", "running"
-    REPORTED_WITHOUT_FAILS = "reported_without_fails", "reported_without_fails"
-    REPORTED_WITH_FAILS = "reported_with_fails", "reported_with_fails"
-    KILLED = "killed", "killed"
-    FAILED = "failed", "failed"
-
-    @classmethod
-    def final_statuses(cls) -> typing.List["Status"]:
-        return [
-            cls.REPORTED_WITHOUT_FAILS,
-            cls.REPORTED_WITH_FAILS,
-            cls.KILLED,
-            cls.FAILED,
-        ]
-
-
-class Position(models.TextChoices):
-    LEFT = "left"
-    CENTER = "center"
-    RIGHT = "right"
-
-
-class TLP(models.TextChoices):
-    WHITE = "WHITE"
-    GREEN = "GREEN"
-    AMBER = "AMBER"
-    RED = "RED"
-
-    @classmethod
-    def get_priority(cls, tlp):
-        order = {
-            cls.WHITE: 0,
-            cls.GREEN: 1,
-            cls.AMBER: 2,
-            cls.RED: 3,
-        }
-        return order.get(tlp, None)
+def default_runtime():
+    return {
+        "analyzers": {},
+        "connectors": {},
+        "visualizers": {},
+    }
 
 
 class Tag(models.Model):
@@ -89,15 +58,6 @@ class Tag(models.Model):
 
     def __str__(self):
         return f'Tag(label="{self.label}")'
-
-
-class ObservableClassification(models.TextChoices):
-    IP = "ip"
-    URL = "url"
-    DOMAIN = "domain"
-    HASH = "hash"
-    GENERIC = "generic"
-    EMPTY = ""
 
 
 class Job(models.Model):
@@ -140,8 +100,11 @@ class Job(models.Model):
         related_name="requested_in_jobs",
         blank=True,
     )
-    playbooks_requested = models.ManyToManyField(
-        "playbooks_manager.PlaybookConfig", related_name="requested_in_jobs", blank=True
+    playbook_requested = models.ForeignKey(
+        "playbooks_manager.PlaybookConfig",
+        related_name="requested_in_jobs",
+        null=True,
+        on_delete=models.SET_NULL,
     )
 
     analyzers_to_execute = models.ManyToManyField(
@@ -157,10 +120,18 @@ class Job(models.Model):
         related_name="executed_in_jobs",
         blank=True,
     )
-    playbooks_to_execute = models.ManyToManyField(
-        "playbooks_manager.PlaybookConfig", related_name="executed_in_jobs", blank=True
+    playbook_to_execute = models.ForeignKey(
+        "playbooks_manager.PlaybookConfig",
+        related_name="executed_in_jobs",
+        null=True,
+        on_delete=models.SET_NULL,
     )
-
+    runtime_configuration = models.JSONField(
+        blank=False,
+        default=default_runtime,
+        null=False,
+        validators=[validate_runtime_configuration],
+    )
     received_request_time = models.DateTimeField(auto_now_add=True, db_index=True)
     finished_analysis_time = models.DateTimeField(blank=True, null=True)
     process_time = models.FloatField(blank=True, null=True)
@@ -296,112 +267,25 @@ class Job(models.Model):
         # set job status
         self.update_status(self.Status.KILLED)
 
-    def _merge_runtime_configuration(
-        self,
-        runtime_configuration: typing.Dict,
-        analyzers: QuerySet,
-        connectors: QuerySet,
-    ):
-        logger.debug(f"Starting runtime_configuration: {runtime_configuration}")
-
-        final_config = {}
-        user = self.user
-        for plugin in list(chain(analyzers, connectors)):
-            plugin: AbstractConfig
-            # in case of key conflict, Plugin configuration
-            # is overwritten by the runtime_configuration
-            config = plugin.read_params(user)
-            config |= runtime_configuration.get(plugin.name, {})
-            final_config[plugin.name] = config
-        logger.debug(f"New value of runtime_configuration: {final_config}")
-        return final_config
-
-    def _pipeline_configuration(
-        self, runtime_configuration: typing.Dict[str, typing.Any]
-    ) -> typing.Tuple[
-        typing.List[QuerySet],
-        typing.List[QuerySet],
-        typing.List[QuerySet],
-        typing.List[QuerySet],
-        range,
-    ]:
-
-        visualizers = [self.visualizers_to_execute.all()]
-        if not self.playbooks_to_execute.all().exists():
-            configs = [runtime_configuration]
-            analyzers = [self.analyzers_to_execute.all()]
-            connectors = [self.connectors_to_execute.all()]
-        else:
-            # case playbooks
-            configs = []
-            analyzers = []
-            connectors = []
-            # this must be done because each analyzer on the playbook
-            # could be executed with a different configuration
-            for playbook in self.playbooks_to_execute.all():
-                configs.append(
-                    playbook.runtime_configuration["analyzers"]
-                    | playbook.runtime_configuration["connectors"]
-                )
-                analyzers.append(
-                    self.analyzers_to_execute.intersection(playbook.analyzers.all())
-                )
-                connectors.append(
-                    self.connectors_to_execute.intersection(playbook.connectors.all())
-                )
-
-        return configs, analyzers, connectors, visualizers, range(len(configs))
-
-    def pipeline(self, runtime_configuration: typing.Dict[str, typing.Any]):
-        from intel_owl import tasks
-        from intel_owl.celery import DEFAULT_QUEUE
-
-        final_analyzer_signatures = []
-        final_connector_signatures = []
-        final_visualizer_signatures = []
-        for config, analyzers, connectors, visualizers, i in zip(
-            *self._pipeline_configuration(runtime_configuration)
-        ):
-            config = self._merge_runtime_configuration(config, analyzers, connectors)
-            logger.info(
-                f"Config is {config},"
-                f" analyzers are {analyzers} "
-                f" connectors are {connectors} "
-                f" visualizers are {visualizers} "
-            )
-
-            for final_signatures, plugins in zip(
-                (
-                    final_analyzer_signatures,
-                    final_connector_signatures,
-                    final_visualizer_signatures,
-                ),
-                (analyzers, connectors, visualizers),
-            ):
-                try:
-                    playbook = self.playbooks_to_execute.all()[i].pk
-                except IndexError:
-                    playbook = None
-                config_class: typing.Type[AbstractConfig]
-                for plugin in plugins:
-                    try:
-                        signature = plugin.get_signature(
-                            self.pk,
-                            config.get(plugin.name, {}),
-                            playbook,
-                        )
-                    except RuntimeError:
-                        self.append_error(f"Plugin {plugin.name} is not ready")
-                    else:
-                        if signature not in final_signatures:
-                            final_signatures.append(signature)
-
-        logger.info(f"Analyzer signatures are {final_analyzer_signatures}")
-        logger.info(f"Connector signatures are {final_connector_signatures}")
-        logger.info(f"Visualizer signatures are {final_connector_signatures}")
+    def execute(self):
         self.update_status(Job.Status.RUNNING)
+        analyzers_signatures = [
+            plugin.get_signature(self) for plugin in self.analyzers_to_execute.all()
+        ]
+        logger.info(f"Analyzer signatures are {analyzers_signatures}")
+
+        connectors_signatures = [
+            plugin.get_signature(self) for plugin in self.connectors_to_execute.all()
+        ]
+        logger.info(f"Connector signatures are {connectors_signatures}")
+
+        visualizers_signatures = [
+            plugin.get_signature(self) for plugin in self.visualizers_to_execute.all()
+        ]
+        logger.info(f"Visualizer signatures are {visualizers_signatures}")
+
         runner = (
-            group(final_analyzer_signatures)
+            group(analyzers_signatures)
             | tasks.continue_job_pipeline.signature(
                 args=[self.pk],
                 kwargs={},
@@ -409,10 +293,37 @@ class Job(models.Model):
                 soft_time_limit=10,
                 immutable=True,
             )
-            | group(final_connector_signatures)
-            | group(final_visualizer_signatures)
+            | group(connectors_signatures)
+            | group(visualizers_signatures)
         )
         runner()
+
+    def get_config_runtime_configuration(self, config: AbstractConfig) -> typing.Dict:
+        from api_app.analyzers_manager.models import AnalyzerConfig
+        from api_app.connectors_manager.models import ConnectorConfig
+        from api_app.visualizers_manager.models import VisualizerConfig
+
+        if isinstance(config, AnalyzerConfig):
+            key = "analyzers"
+            try:
+                self.analyzers_to_execute.get(name=config.name)
+            except AnalyzerConfig.DoesNotExist:
+                raise TypeError(f"Config {config.name} is not inside job")
+        elif isinstance(config, ConnectorConfig):
+            key = "connectors"
+            try:
+                self.connectors_to_execute.get(name=config.name)
+            except ConnectorConfig.DoesNotExist:
+                raise TypeError(f"Config {config.name} is not inside job")
+        elif isinstance(config, VisualizerConfig):
+            key = "visualizers"
+            try:
+                self.visualizers_to_execute.get(name=config.name)
+            except VisualizerConfig.DoesNotExist:
+                raise TypeError(f"Config {config.name} is not inside job")
+        else:
+            raise TypeError(f"Config {type(config)} is not supported")
+        return self.runtime_configuration[key].get(config.name, {})
 
     @classmethod
     def visible_for_user(cls, user: User):

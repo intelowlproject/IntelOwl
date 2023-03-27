@@ -152,11 +152,7 @@ const jobTableColumns = [
           <div className="d-flex flex-column justify-content-center">
             <span>
               {job.analyzers_to_execute.length}/
-              {job.analyzers_requested.length ||
-                (job.playbooks_to_execute.length > 0
-                  ? job.analyzers_to_execute.length
-                  : "all")}{" "}
-              analyzers
+              {job.analyzers_requested.length} connectors
             </span>
             <span>
               {job.connectors_to_execute.length}/
@@ -165,10 +161,6 @@ const jobTableColumns = [
             <span>
               {job.visualizers_to_execute.length}/all
               visualizers
-            </span>
-            <span>
-              {job.playbooks_to_execute.length}/
-              {job.playbooks_to_execute.length} playbooks
             </span>
           </div>
         ),

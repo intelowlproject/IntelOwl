@@ -30,24 +30,24 @@ class Plugin(metaclass=ABCMeta):
         job_id: int,
         runtime_configuration: dict,
         task_id: int,
-        parent_playbook_pk: int = None,
         **kwargs,
     ):
-        from api_app.playbooks_manager.models import PlaybookConfig
 
         self._config = config
         self.job_id = job_id
         self.runtime_configuration = runtime_configuration
         self.task_id = task_id
 
-        self.parent_playbook = (
-            None
-            if parent_playbook_pk is None
-            else PlaybookConfig.objects.get(pk=parent_playbook_pk)
-        )
         self.kwargs = kwargs
         # some post init processing
         self.__post__init__()  # lgtm [py/init-calls-subclass]
+
+    @classmethod
+    def all_subclasses(cls):
+        classes = cls.__subclasses__()
+        return [
+            class_ for class_ in classes if not class_.__name__.startswith("MockUp")
+        ]
 
     def __post__init__(self) -> None:
         """
@@ -138,12 +138,10 @@ class Plugin(metaclass=ABCMeta):
             defaults={
                 "report": {},
                 "errors": [],
-                "status": AbstractReport.Status.PENDING,
+                "status": AbstractReport.Status.PENDING.value,
                 "start_time": timezone.now(),
                 "end_time": timezone.now(),
                 "task_id": self.task_id,
-                "parent_playbook": self.parent_playbook,
-                "runtime_configuration": self.runtime_configuration,
             },
         )
         return _report
@@ -178,7 +176,7 @@ class Plugin(metaclass=ABCMeta):
             if settings.STAGE_CI:
                 raise e
         else:
-            self.report.status = self.report.Status.SUCCESS
+            self.report.status = self.report.Status.SUCCESS.value
         finally:
             # add end time of process
             self.report.end_time = timezone.now()

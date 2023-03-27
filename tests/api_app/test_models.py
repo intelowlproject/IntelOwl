@@ -1,3 +1,6 @@
+# This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
+# See the file 'LICENSE' for copying permission.
+
 from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.connectors_manager.models import ConnectorConfig
 from api_app.models import Job
@@ -15,7 +18,7 @@ class JobTestCase(CustomTestCase):
         )
         a = AnalyzerConfig.objects.get(name="AbuseIPDB")
 
-        job.playbooks_to_execute.set([PlaybookConfig.objects.get(name=self.PLAYBOOK)])
+        job.playbook_to_execute = PlaybookConfig.objects.get(name=self.PLAYBOOK)
         job.analyzers_to_execute.set([AnalyzerConfig.objects.get(name="AbuseIPDB")])
         config = job._merge_runtime_configuration({"AbuseIPDB": {"param1": 3}}, [a], [])
         a.params["param1"] = {

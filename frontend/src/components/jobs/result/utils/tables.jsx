@@ -124,23 +124,10 @@ const tableProps = {
 
 const tablePropsPlaybooks = JSON.parse(JSON.stringify(tableProps));
 
-tablePropsPlaybooks.columns.push({
-  Header: "Playbook",
-  id: "playbook",
-  accessor: "parent_playbook",
-  Cell: ({ value }) => {
-    if (value != null) {
-      return <span>{value}</span>;
-    }
-    return <span />;
-  },
-  Filter: DefaultColumnFilter,
-  maxWidth: 300,
-});
 
 export function AnalyzersReportTable({ job, refetch }) {
   console.debug("AnalyzersReportTable rendered");
-  if (job?.playbooks_to_execute.length > 1) {
+  if (job?.playbook_to_execute) {
     return (
       <DataTable
         data={job?.analyzerreports}
@@ -161,7 +148,7 @@ export function AnalyzersReportTable({ job, refetch }) {
 
 export function ConnectorsReportTable({ job, refetch }) {
   console.debug("ConnectorsReportTable rendered");
-  if (job?.playbooks_to_execute.length > 1) {
+  if (job?.playbook_to_execute) {
     return (
       <DataTable
         data={job?.connectorreports}
@@ -181,7 +168,7 @@ export function ConnectorsReportTable({ job, refetch }) {
 }
 export function VisualizersReportTable({ job, refetch }) {
   console.debug("AnalyzersReportTable rendered");
-  if (job?.playbooks_to_execute.length > 1) {
+  if (job?.playbook_to_execute) {
     return (
       <DataTable
         data={job?.visualizerreports}

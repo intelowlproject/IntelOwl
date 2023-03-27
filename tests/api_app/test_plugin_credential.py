@@ -1,3 +1,6 @@
+# This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
+# See the file 'LICENSE' for copying permission.
+
 from django.test import tag
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient

@@ -1,6 +1,9 @@
+# This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
+# See the file 'LICENSE' for copying permission.
+
 from django.core.exceptions import ValidationError
 
-from api_app.playbooks_manager.validators import validate_runtime_configuration_playbook
+from api_app.validators import validate_runtime_configuration
 from tests import CustomTestCase
 
 
@@ -11,7 +14,7 @@ class ValidateRuntimeConfigurationPlaybookTestCase(CustomTestCase):
             "connectors": {},
         }
         try:
-            validate_runtime_configuration_playbook(data)
+            validate_runtime_configuration(data)
         except ValidationError as e:
             self.fail(e)
 
@@ -22,12 +25,12 @@ class ValidateRuntimeConfigurationPlaybookTestCase(CustomTestCase):
             "another_key": {},
         }
         with self.assertRaises(ValidationError):
-            validate_runtime_configuration_playbook(data)
+            validate_runtime_configuration(data)
 
     def test_validate_runtime_wrong_missing_property(self):
         data = {"analyzers": {"analyzer": {"param": 123, "param2": "value"}}}
         with self.assertRaises(ValidationError):
-            validate_runtime_configuration_playbook(data)
+            validate_runtime_configuration(data)
 
     def test_validate_runtime_wrong_typ(self):
         data = {
@@ -35,11 +38,11 @@ class ValidateRuntimeConfigurationPlaybookTestCase(CustomTestCase):
             "connectors": {},
         }
         with self.assertRaises(ValidationError):
-            validate_runtime_configuration_playbook(data)
+            validate_runtime_configuration(data)
 
         data = {
             "analyzers": {"analyzer": [{"param": 123, "param2": "value"}]},
             "connectors": {},
         }
         with self.assertRaises(ValidationError):
-            validate_runtime_configuration_playbook(data)
+            validate_runtime_configuration(data)

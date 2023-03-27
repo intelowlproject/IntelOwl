@@ -1,3 +1,6 @@
+# This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
+# See the file 'LICENSE' for copying permission.
+
 from unittest.mock import patch
 
 from celery.canvas import Signature
@@ -254,7 +257,7 @@ class AbstractConfigTestCase(CustomTestCase):
             config={"soft_time_limit": 100, "queue": "default"},
         )
         with self.assertRaises(Exception):
-            muc.get_signature(job.pk, {}, None)
+            muc.get_signature(job.pk)
 
         muc.delete()
         job.delete()
@@ -268,7 +271,7 @@ class AbstractConfigTestCase(CustomTestCase):
             disabled=False,
             config={"soft_time_limit": 100, "queue": "default"},
         )
-        signature = muc.get_signature(job.pk, {}, None)
+        signature = muc.get_signature(job.pk)
         self.assertIsInstance(signature, Signature)
         muc.delete()
         job.delete()

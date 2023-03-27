@@ -1,3 +1,6 @@
+# This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
+# See the file 'LICENSE' for copying permission.
+
 from django.db import migrations
 
 playbooks = {
@@ -223,6 +226,7 @@ def create_configurations(apps, schema_editor):
         playbook["runtime_configuration"] ={
             "analyzers": analyzers,
             "connectors": connectors,
+            "visualizers": {},
         }
         pc = PlaybookConfig(
             name=playbook_name,

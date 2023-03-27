@@ -2,7 +2,6 @@
 # See the file 'LICENSE' for copying permission.
 
 import logging
-from typing import Union
 
 from drf_spectacular.utils import extend_schema as add_docs
 from rest_framework import status, viewsets
@@ -15,13 +14,12 @@ from api_app.playbooks_manager.serializers import (
     PlaybookConfigSerializer,
 )
 from api_app.serializers import (
+    FileAnalysisSerializer,
     JobResponseSerializer,
-    PlaybookFileAnalysisSerializer,
-    PlaybookObservableAnalysisSerializer,
+    ObservableAnalysisSerializer,
 )
 from certego_saas.ext.mixins import SerializerActionMixin
 
-from ..views import _multi_analysis_request
 
 logger = logging.getLogger(__name__)
 
@@ -34,59 +32,50 @@ class PlaybookConfigAPI(viewsets.ModelViewSet, SerializerActionMixin):
 
     permission_classes = [IsAuthenticated]
 
-    def _multi_analysis_request_playbooks(
-        self,
-        request,
-        serializer_class: Union[
-            PlaybookFileAnalysisSerializer, PlaybookObservableAnalysisSerializer
-        ],
-    ):
-        """
-        Prepare and send multiple files/observables for running playbooks
-        """
-        response = _multi_analysis_request(
-            request,
-            data=request.data,
-            serializer_class=serializer_class,
-        )
-
-        return Response(
-            response,
-            status=status.HTTP_200_OK,
-        )
-
     def check_permissions(self, request):
         if request.method in ["DELETE", "PATCH"]:
             permission = IsAdminUser()
             if not permission.has_permission(request, self):
                 self.permission_denied(
-                    request,
+            request,
                     message=getattr(permission, "message", None),
                     code=getattr(permission, "code", None),
-                )
+        )
         return super().check_permissions(request)
 
     def get_queryset(self):
-        return PlaybookConfigSerializer.Meta.model.objects.all()
+        return self.serializer_class.Meta.model.objects.order_by("name").all()
 
     @add_docs(
         description="This endpoint allows to start a Job related to an observable",
-        request=PlaybookObservableAnalysisSerializer,
+        request=ObservableAnalysisSerializer,
         responses={200: JobResponseSerializer},
     )
     @action(methods=["POST"], url_name="analyze_multiple_observables", detail=False)
     def analyze_multiple_observables(self, request):
-        return self._multi_analysis_request_playbooks(
-            request, PlaybookObservableAnalysisSerializer
+        oas = ObservableAnalysisSerializer(
+            data=request.data, many=True, context={"request": request}
+        )
+        oas.is_valid(raise_exception=True)
+        jobs = oas.save(send_task=True)
+        return Response(
+            JobResponseSerializer(jobs, many=True).data,
+            status=status.HTTP_200_OK,
         )
 
     @add_docs(
         description="This endpoint allows to start a Job related to a file",
-        request=PlaybookFileAnalysisSerializer,
+        request=FileAnalysisSerializer,
         responses={200: JobResponseSerializer},
     )
     @action(methods=["POST"], url_name="analyze_multiple_files", detail=False)
     def analyze_multiple_files(self, request):
-        return self._multi_analysis_request_playbooks(
-            request, PlaybookFileAnalysisSerializer
+        oas = FileAnalysisSerializer(
+            data=request.data, many=True, context={"request": request}
+        )
+        oas.is_valid(raise_exception=True)
+        jobs = oas.save(send_task=True)
+        return Response(
+            JobResponseSerializer(jobs, many=True).data,
+            status=status.HTTP_200_OK,
         )

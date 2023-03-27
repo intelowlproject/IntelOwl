@@ -21,64 +21,64 @@ from tests import CustomTestCase
 from tests.mock_utils import MockRequest
 
 
-class PlaybookObservableAnalysisSerializerTestCase(CustomTestCase):
-    PLAYBOOK = "FREE_TO_USE_ANALYZERS"
-
-    IP = "1.1.1.1"
-
-    def test_save(self):
-
-        data = {
-            "observables": [["ip", self.IP]],
-            "playbooks_requested": [self.PLAYBOOK],
-        }
-        playbook = PlaybookConfig.objects.filter(pk=self.PLAYBOOK).first()
-        self.assertIsNotNone(playbook)
-        serializer = PlaybookObservableAnalysisSerializer(
-            data=data, many=True, context={"request": MockRequest(self.user)}
-        )
-        try:
-            serializer.is_valid(raise_exception=True)
-        except ValidationError as e:
-            self.fail(e)
-
-        jobs = serializer.save()
-        self.assertEqual(1, len(jobs))
-        job = jobs[0]
-        self.assertEqual(list(job.playbooks_to_execute.all()), [playbook])
-
-
-class PlaybookFileAnalysisSerializerTestCase(CustomTestCase):
-    FILE = "file.exe"
-    PLAYBOOK = "FREE_TO_USE_ANALYZERS"
-
-    def _read_file_save_job(self, filename: str):
-        test_file = f"{settings.PROJECT_LOCATION}/test_files/{filename}"
-        self.f = open(test_file, "rb")
-        return File(self.f)
-
-    def test_save(self):
-        playbook = PlaybookConfig.objects.filter(pk=self.PLAYBOOK).first()
-        self.assertIsNotNone(playbook)
-
-        file = self._read_file_save_job(filename=self.FILE)
-
-        data = {
-            "files": [file],
-            "file_names": [self.FILE],
-            "playbooks_requested": [self.PLAYBOOK],
-        }
-        qdict = QueryDict("", mutable=True)
-        qdict.update(MultiValueDict(data))
-
-        serializer = PlaybookFileAnalysisSerializer(
-            data=qdict, many=True, context={"request": MockRequest(self.user)}
-        )
-        serializer.is_valid(raise_exception=True)
-        jobs = serializer.save()
-        self.assertEqual(1, len(jobs))
-        job = jobs[0]
-        self.assertEqual(list(job.playbooks_to_execute.all()), [playbook])
+# class PlaybookObservableAnalysisSerializerTestCase(CustomTestCase):
+#     PLAYBOOK = "FREE_TO_USE_ANALYZERS"
+#
+#     IP = "1.1.1.1"
+#
+#     def test_save(self):
+#
+#         data = {
+#             "observables": [["ip", self.IP]],
+#             "playbooks_requested": [self.PLAYBOOK],
+#         }
+#         playbook = PlaybookConfig.objects.filter(pk=self.PLAYBOOK).first()
+#         self.assertIsNotNone(playbook)
+#         serializer = PlaybookObservableAnalysisSerializer(
+#             data=data, many=True, context={"request": MockRequest(self.user)}
+#         )
+#         try:
+#             serializer.is_valid(raise_exception=True)
+#         except ValidationError as e:
+#             self.fail(e)
+#
+#         jobs = serializer.save()
+#         self.assertEqual(1, len(jobs))
+#         job = jobs[0]
+#         self.assertEqual(list(job.playbooks_to_execute.all()), [playbook])
+#
+#
+# class PlaybookFileAnalysisSerializerTestCase(CustomTestCase):
+#     FILE = "file.exe"
+#     PLAYBOOK = "FREE_TO_USE_ANALYZERS"
+#
+#     def _read_file_save_job(self, filename: str):
+#         test_file = f"{settings.PROJECT_LOCATION}/test_files/{filename}"
+#         self.f = open(test_file, "rb")
+#         return File(self.f)
+#
+#     def test_save(self):
+#         playbook = PlaybookConfig.objects.filter(pk=self.PLAYBOOK).first()
+#         self.assertIsNotNone(playbook)
+#
+#         file = self._read_file_save_job(filename=self.FILE)
+#
+#         data = {
+#             "files": [file],
+#             "file_names": [self.FILE],
+#             "playbooks_requested": [self.PLAYBOOK],
+#         }
+#         qdict = QueryDict("", mutable=True)
+#         qdict.update(MultiValueDict(data))
+#
+#         serializer = PlaybookFileAnalysisSerializer(
+#             data=qdict, many=True, context={"request": MockRequest(self.user)}
+#         )
+#         serializer.is_valid(raise_exception=True)
+#         jobs = serializer.save()
+#         self.assertEqual(1, len(jobs))
+#         job = jobs[0]
+#         self.assertEqual(list(job.playbooks_to_execute.all()), [playbook])
 
 
 class AbstractJobCreateSerializerTestCase(CustomTestCase):

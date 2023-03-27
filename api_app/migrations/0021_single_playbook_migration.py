@@ -18,8 +18,6 @@ def migrate_playbooks(apps, schema_editor):
             job.playbook_to_execute = p
             job.save()
             starter_job = Job.objects.get(pk=start_pk)
-            print(starter_job.analyzerreports.all().count())
-            print(starter_job.analyzerreports.filter(parent_playbook=p).count())
             starter_job.analyzerreports.filter(parent_playbook=p).update(job=job)
             starter_job.connectorreports.filter(parent_playbook=p).update(job=job)
             starter_job.visualizerreports.filter(parent_playbook=p).update(job=job)

@@ -220,9 +220,6 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
 
     def create(self, validated_data: dict) -> Job:
         # create ``Tag`` objects from tags_labels
-        print("DIOCANE")
-        print("DIOCANE")
-        print("DIOCANE")
         tags_labels = validated_data.pop("tags_labels", None)
         validated_data.pop("warnings")
         validated_data.pop("runtime_configuration")

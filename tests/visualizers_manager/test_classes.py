@@ -8,8 +8,10 @@ from api_app.models import Job
 from api_app.visualizers_manager.classes import (
     VisualizableBase,
     VisualizableBool,
+    VisualizableHorizontalList,
     VisualizableObject,
     VisualizableTitle,
+    VisualizableVerticalList,
     Visualizer,
 )
 from api_app.visualizers_manager.enums import Color
@@ -53,6 +55,7 @@ class VisualizableBaseTestCase(CustomTestCase):
             "color": "dark",
             "link": "https://test.com",
             "classname": "test",
+            "icon": "",
         }
         self.assertEqual(vo.to_dict(), expected_result)
 
@@ -89,32 +92,102 @@ class VisualizableTitleTestCase(CustomTestCase):
 
         expected_result = {
             "type": "title",
-            "title": {
-                "type": "base",
-                "value": "test_title",
-                "color": "dark",
-                "link": "http://test_title",
-                "classname": "",
-            },
-            "value": {
-                "value": "test_value",
-                "color": "danger",
-                "link": "http://test_value",
-                "classname": ""
-            },
+            "title": title.to_dict(),
+            "value": value.to_dict(),
             "hide_if_empty": False,
             "disable_if_empty": True,
         }
         self.assertEqual(vo.to_dict(), expected_result)
 
-        value = VisualizableBool(
-            name="test_name",
-            value="test_value",  # noqa
-            link="http://test_value",
-            color=Color.DANGER,
+
+class VisualizableVerticalListTestCase(CustomTestCase):
+    def test_to_dict(self):
+        value = VisualizableBase(
+            value="test_value", color=Color.DANGER, link="http://test_value"
         )
-        vo = VisualizableTitle(title, value)
-        self.assertEqual(vo.to_dict(), expected_result)
+        vvl = VisualizableVerticalList(name="test", value=[value])
+        expected_result = {
+            "type": "vertical_list",
+            "name": "test",
+            "icon": "",
+            "link": "",
+            "classname": "",
+            "color": "",
+            "open": False,
+            "hide_if_empty": False,
+            "disable_if_empty": True,
+            "values": [value.to_dict()],
+        }
+        self.assertEqual(vvl.to_dict(), expected_result)
+
+    def test_to_dict_values_null(self):
+        value = VisualizableBase(value="", color=Color.DANGER, link="http://test_value")
+        vvl = VisualizableVerticalList(name="test", value=[value])
+        expected_result = {
+            "type": "vertical_list",
+            "name": "test",
+            "icon": "",
+            "link": "",
+            "color": "",
+            "classname": "",
+            "hide_if_empty": False,
+            "disable_if_empty": True,
+            "open": False,
+            "values": [],
+        }
+        self.assertEqual(vvl.to_dict(), expected_result)
+
+    def test_to_dict_values_empty(self):
+
+        vvl = VisualizableVerticalList(name="test", value=[])
+        expected_result = {
+            "type": "vertical_list",
+            "name": "test",
+            "icon": "",
+            "link": "",
+            "color": "",
+            "classname": "",
+            "hide_if_empty": False,
+            "disable_if_empty": True,
+            "open": False,
+            "values": [],
+        }
+        self.assertEqual(vvl.to_dict(), expected_result)
+
+
+class VisualizableHorizontalListTestCase(CustomTestCase):
+    def test_to_dict(self):
+        value = VisualizableBase(
+            value="test_value", color=Color.DANGER, link="http://test_value"
+        )
+        vvl = VisualizableHorizontalList(value=[value])
+        expected_result = {
+            "type": "horizontal_list",
+            "hide_if_empty": False,
+            "disable_if_empty": True,
+            "values": [value.to_dict()],
+        }
+        self.assertEqual(vvl.to_dict(), expected_result)
+
+    def test_to_dict_values_null(self):
+        vvl = VisualizableHorizontalList(value=[])
+        expected_result = {
+            "type": "horizontal_list",
+            "hide_if_empty": False,
+            "disable_if_empty": True,
+            "values": [],
+        }
+        self.assertEqual(vvl.to_dict(), expected_result)
+
+    def test_to_dict_values_empty(self):
+        vvl = VisualizableHorizontalList(value=[])
+        expected_result = {
+            "type": "horizontal_list",
+            "hide_if_empty": False,
+            "disable_if_empty": True,
+            "values": [],
+        }
+        self.assertEqual(vvl.to_dict(), expected_result)
 
 
 class VisualizerTestCase(CustomTestCase):

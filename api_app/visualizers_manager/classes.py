@@ -29,6 +29,10 @@ class VisualizableObject:
 
     def to_dict(self) -> Dict:
         result = vars(self)
+        for key, value in result.items():
+            if isinstance(value, VisualizableObject):
+                result[key] = value.to_dict()
+
         result["type"] = self.type
         return result
 
@@ -36,7 +40,7 @@ class VisualizableObject:
 class VisualizableBase(VisualizableObject):
     def __init__(
         self,
-        value: Any,
+        value: Any = "",
         color: Color = Color.TRANSPARENT,
         link: str = "",
         classname: str = "",
@@ -55,10 +59,16 @@ class VisualizableBase(VisualizableObject):
     def type(self) -> str:
         return "base"
 
+    def __bool__(self):
+        return bool(self.value) or bool(self.icon)
+
     def to_dict(self) -> Dict:
-        if not self.value:
+        if not self:
             return {}
-        return super().to_dict()
+
+        result = super().to_dict()
+        result["color"] = str(result["color"])
+        return result
 
 
 class VisualizableTitle(VisualizableObject):
@@ -103,7 +113,18 @@ class VisualizableBool(VisualizableBase):
         return result
 
 
-class VisualizableVerticalList(VisualizableBase):
+class VisualizableListMixin:
+    def to_dict(self) -> Dict:
+        result = super().to_dict()  # noqa
+        values: List[VisualizableObject] = result.pop("value", [])
+        if all(not x for x in values):
+            result["values"] = []
+        else:
+            result["values"] = [val.to_dict() for val in values]
+        return result
+
+
+class VisualizableVerticalList(VisualizableListMixin, VisualizableBase):
     def __init__(
         self,
         name: str,
@@ -116,19 +137,15 @@ class VisualizableVerticalList(VisualizableBase):
         self.name = name
         self.open = open
 
+    def __bool__(self):
+        return True
+
     @property
     def type(self) -> str:
         return "vertical_list"
 
-    def to_dict(self) -> Dict:
-        result = super().to_dict()
-        values: List[VisualizableObject] = result.pop("value")
-        result["values"] = [val.to_dict() for val in values]
-        result["justify_content"] = any(isinstance(x, VisualizableHorizontalList) for x in self.value)
-        return result
 
-
-class VisualizableHorizontalList(VisualizableObject):
+class VisualizableHorizontalList(VisualizableListMixin, VisualizableObject):
     def __init__(
         self,
         value: List[VisualizableObject],
@@ -142,23 +159,14 @@ class VisualizableHorizontalList(VisualizableObject):
     def type(self) -> str:
         return "horizontal_list"
 
-    def to_dict(self) -> Dict:
-        result = super().to_dict()
-        values: List[VisualizableObject] = result.pop("value")
-        result["values"] = [val.to_dict() for val in values]
-        return result
-
 
 class VisualizableLevel:
-    def __init__(self, level: int, elements: List[VisualizableObject]):
+    def __init__(self, level: int, horizontal_list: VisualizableHorizontalList):
         self.level = level
-        self.elements = elements
+        self.elements = horizontal_list
 
     def to_dict(self):
-        return {
-            "level": self.level,
-            "elements": [element.to_dict() for element in self.elements],
-        }
+        return vars(self)
 
 
 class Visualizer(Plugin, metaclass=abc.ABCMeta):

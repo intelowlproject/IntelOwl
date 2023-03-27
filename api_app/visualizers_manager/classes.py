@@ -166,7 +166,10 @@ class VisualizableLevel:
         self.elements = horizontal_list
 
     def to_dict(self):
-        return vars(self)
+        return {
+            "level": self.level,
+            "elements": [elem.to_dict() for elem in self.elements],
+        }
 
 
 class Visualizer(Plugin, metaclass=abc.ABCMeta):

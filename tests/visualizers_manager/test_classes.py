@@ -125,7 +125,9 @@ class VisualizableVerticalListTestCase(CustomTestCase):
         self.assertEqual(vvl.to_dict(), expected_result)
 
     def test_to_dict_values_null(self):
-        value = VisualizableBase(value="", color=VisualizableColor.DANGER, link="http://test_value")
+        value = VisualizableBase(
+            value="", color=VisualizableColor.DANGER, link="http://test_value"
+        )
         vvl = VisualizableVerticalList(name="test", value=[value])
         expected_result = {
             "type": "vertical_list",
@@ -200,12 +202,13 @@ class VisualizableLevelTestCase(CustomTestCase):
             value="test_value", color=VisualizableColor.DANGER, link="http://test_value"
         )
         vvl = VisualizableHorizontalList(value=[value])
-        vl = VisualizableLevel(level=0, horizontal_list=vvl)
+        vl = VisualizableLevel()
+        vl.add_level(level=0, horizontal_list=vvl)
         expected_result = {
             "level": 0,
             "elements": vvl.to_dict(),
         }
-        self.assertEqual(vl.to_dict(), expected_result)
+        self.assertEqual(vl.to_dict()[0], expected_result)
 
 
 class VisualizerTestCase(CustomTestCase):

@@ -31,9 +31,6 @@ class DNS(Visualizer):
             "GoogleSafebrowsing",
         ]
 
-    def config(self):
-        super(DNS, self).config()
-
     def run(self) -> List[Dict]:
         analyzer_report_list = self.analyzer_reports().filter(
             config__name__in=self.first_level_analyzers + self.second_level_analyzers
@@ -67,20 +64,17 @@ class DNS(Visualizer):
                         value=analyzer_report.report["malicious"],
                     )
                 )
-
-        result = [
-            self.Level(
-                level=1,
-                horizontal_list=self.HList(value=first_level_elements),
-            ),
-            self.Level(
-                level=2,
-                horizontal_list=self.HList(value=second_level_elements),
-            ),
-        ]
-        final_result = [report.to_dict() for report in result]
-        logger.debug(f"{final_result=}")
-        return final_result
+        levels = self.Level()
+        levels.add_level(
+            level=1,
+            horizontal_list=self.HList(value=first_level_elements),
+        )
+        levels.add_level(
+            level=2,
+            horizontal_list=self.HList(value=second_level_elements),
+        )
+        logger.debug(f"{levels=}")
+        return levels.to_dict()
 
     @classmethod
     def _monkeypatch(cls):

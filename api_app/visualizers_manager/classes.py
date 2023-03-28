@@ -163,15 +163,14 @@ class VisualizableHorizontalList(VisualizableListMixin, VisualizableObject):
 
 
 class VisualizableLevel:
-    def __init__(self, level: int, horizontal_list: VisualizableHorizontalList):
-        self.level = level
-        self.hl = horizontal_list
+    def __init__(self):
+        self.levels = {}
 
-    def to_dict(self):
-        return {
-            "level": self.level,
-            "elements": self.hl.to_dict(),
-        }
+    def add_level(self, level: int, horizontal_list: VisualizableHorizontalList):
+        self.levels[level] = horizontal_list
+
+    def to_dict(self) -> List[Dict]:
+        return [{"level": level, "elements": hl} for level, hl in self.levels.items()]
 
 
 class Visualizer(Plugin, metaclass=abc.ABCMeta):
@@ -216,9 +215,7 @@ class Visualizer(Plugin, metaclass=abc.ABCMeta):
         logger.info(f"STARTED visualizer: {self.__repr__()}")
 
     def after_run(self):
-        if not isinstance(self.report.report, list) and not all(
-            isinstance(x, VisualizableLevel) for x in self.report.report
-        ):
+        if not isinstance(self.report.report, list):
             raise VisualizerRunException("Report has not correct type")
         logger.info(f"FINISHED visualizer: {self.__repr__()}")
 

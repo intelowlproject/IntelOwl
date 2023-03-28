@@ -26,40 +26,38 @@ class Yara(Visualizer):
             for match in matches
             if match.get("match", None)
         ]
-        result = [
-            self.Level(
-                level=1,
-                horizontal_list=self.HList(
-                    value=[
-                        self.Title(
-                            self.Base(
-                                "Analyzer",
-                                color=self.Color.DARK,
-                            ),
-                            self.Base(self.__class__.__name__),
-                        )
-                    ]
-                ),
-            ),
-            self.Level(
-                level=2,
-                horizontal_list=self.HList(
-                    value=[
-                        self.Title(
-                            self.Base("N# Matches", color=self.Color.DARK),
-                            self.Base(yara_num_matches),
+        levels = self.Level()
+        levels.add_level(
+            level=1,
+            horizontal_list=self.HList(
+                value=[
+                    self.Title(
+                        self.Base(
+                            "Analyzer",
+                            color=self.Color.DARK,
                         ),
-                        self.VList(
-                            name=signatures,
-                            value=[self.Base(value) for value in signatures],
-                        ),
-                    ]
-                ),
+                        self.Base(self.__class__.__name__),
+                    )
+                ]
             ),
-        ]
-        logger.debug(result)
-        final_result = [report.to_dict() for report in result]
-        return final_result
+        )
+        levels.add_level(
+            level=2,
+            horizontal_list=self.HList(
+                value=[
+                    self.Title(
+                        self.Base("N# Matches", color=self.Color.DARK),
+                        self.Base(yara_num_matches),
+                    ),
+                    self.VList(
+                        name=signatures,
+                        value=[self.Base(value) for value in signatures],
+                    ),
+                ]
+            ),
+        )
+        logger.debug(levels)
+        return levels.to_dict()
 
     @classmethod
     def _monkeypatch(cls):

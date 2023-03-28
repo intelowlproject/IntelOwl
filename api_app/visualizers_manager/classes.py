@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Type
 from django.db.models import QuerySet
 
 from api_app.core.classes import Plugin
-from api_app.visualizers_manager.enums import Color
+from api_app.visualizers_manager.enums import VisualizableColor, VisualizableIcon
 from api_app.visualizers_manager.exceptions import (
     VisualizerConfigurationException,
     VisualizerRunException,
@@ -41,12 +41,12 @@ class VisualizableBase(VisualizableObject):
     def __init__(
         self,
         value: Any = "",
-        color: Color = Color.TRANSPARENT,
+        color: VisualizableColor = VisualizableColor.TRANSPARENT,
         link: str = "",
         classname: str = "",
         hide_if_empty: bool = False,
         disable_if_empty: bool = True,
-        icon: str = "",
+        icon: VisualizableIcon = VisualizableIcon.EMPTY,
     ):
         super().__init__(hide_if_empty, disable_if_empty)
         self.value = value
@@ -67,7 +67,8 @@ class VisualizableBase(VisualizableObject):
             return {}
 
         result = super().to_dict()
-        result["color"] = str(result["color"])
+        for enum_key in ["color", "icon"]:
+            result[enum_key] = str(result[enum_key])
         return result
 
 
@@ -95,7 +96,7 @@ class VisualizableBool(VisualizableBase):
         value: bool,
         *args,
         pill: bool = True,
-        color: Color = Color.DANGER,
+        color: VisualizableColor = VisualizableColor.DANGER,
         **kwargs,
     ):
         super().__init__(*args, color=color, value=value, **kwargs)
@@ -173,12 +174,15 @@ class VisualizableLevel:
 
 
 class Visualizer(Plugin, metaclass=abc.ABCMeta):
-    Color = Color
+    Color = VisualizableColor
+    Icon = VisualizableIcon
+
     Base = VisualizableBase
     Title = VisualizableTitle
     Bool = VisualizableBool
     VList = VisualizableVerticalList
     HList = VisualizableHorizontalList
+
     Level = VisualizableLevel
 
     @property

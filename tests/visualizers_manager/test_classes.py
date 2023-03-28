@@ -18,7 +18,7 @@ from api_app.visualizers_manager.classes import (
     VisualizableVerticalList,
     Visualizer,
 )
-from api_app.visualizers_manager.enums import Color
+from api_app.visualizers_manager.enums import VisualizableColor
 from api_app.visualizers_manager.models import VisualizerConfig
 from tests import CustomTestCase
 
@@ -45,7 +45,7 @@ class VisualizableBaseTestCase(CustomTestCase):
     def test_to_dict(self):
         vo = VisualizableBase(
             "test",
-            color=Color.DARK,
+            color=VisualizableColor.DARK,
             link="https://test.com",
             classname="test",
             hide_if_empty=True,
@@ -85,11 +85,11 @@ class VisualizableTitleTestCase(CustomTestCase):
     def test_to_dict(self):
 
         title = VisualizableBase(
-            value="test_title", color=Color.DARK, link="http://test_title"
+            value="test_title", color=VisualizableColor.DARK, link="http://test_title"
         )
 
         value = VisualizableBase(
-            value="test_value", color=Color.DANGER, link="http://test_value"
+            value="test_value", color=VisualizableColor.DANGER, link="http://test_value"
         )
 
         vo = VisualizableTitle(title, value)
@@ -107,7 +107,7 @@ class VisualizableTitleTestCase(CustomTestCase):
 class VisualizableVerticalListTestCase(CustomTestCase):
     def test_to_dict(self):
         value = VisualizableBase(
-            value="test_value", color=Color.DANGER, link="http://test_value"
+            value="test_value", color=VisualizableColor.DANGER, link="http://test_value"
         )
         vvl = VisualizableVerticalList(name="test", value=[value])
         expected_result = {
@@ -125,7 +125,7 @@ class VisualizableVerticalListTestCase(CustomTestCase):
         self.assertEqual(vvl.to_dict(), expected_result)
 
     def test_to_dict_values_null(self):
-        value = VisualizableBase(value="", color=Color.DANGER, link="http://test_value")
+        value = VisualizableBase(value="", color=VisualizableColor.DANGER, link="http://test_value")
         vvl = VisualizableVerticalList(name="test", value=[value])
         expected_result = {
             "type": "vertical_list",
@@ -162,7 +162,7 @@ class VisualizableVerticalListTestCase(CustomTestCase):
 class VisualizableHorizontalListTestCase(CustomTestCase):
     def test_to_dict(self):
         value = VisualizableBase(
-            value="test_value", color=Color.DANGER, link="http://test_value"
+            value="test_value", color=VisualizableColor.DANGER, link="http://test_value"
         )
         vvl = VisualizableHorizontalList(value=[value])
         expected_result = {
@@ -197,7 +197,7 @@ class VisualizableHorizontalListTestCase(CustomTestCase):
 class VisualizableLevelTestCase(CustomTestCase):
     def test_to_dict(self):
         value = VisualizableBase(
-            value="test_value", color=Color.DANGER, link="http://test_value"
+            value="test_value", color=VisualizableColor.DANGER, link="http://test_value"
         )
         vvl = VisualizableHorizontalList(value=[value])
         vl = VisualizableLevel(level=0, horizontal_list=vvl)

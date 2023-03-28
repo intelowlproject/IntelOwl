@@ -4,7 +4,7 @@
 import enum
 
 
-class Color(enum.Enum):
+class VisualizableColor(enum.Enum):
     PRIMARY = "primary"
     SECONDARY = "secondary"
     TERTIARY = "tertiary"
@@ -18,3 +18,26 @@ class Color(enum.Enum):
 
     def __str__(self):
         return self.value
+
+
+class VisualizableIcon(enum.Enum):
+    INFO = "info"
+    LIKE = "like"
+    DISLIKE = "dislike"
+    HEART = "heart"
+    MALWARE = "malware"
+    WARNING = "warning"
+    SHIELD = "shield"
+    FIRE = "fire"
+    OTX = "otx"
+    GITHUB = "github"
+    VIRUSTotal = "virusTotal"
+    TWITTER = "twitter"
+    QUOKKA = "quokka"
+    HYBRIDAnalysis = "hybridAnalysis"
+    URLHAUS = "urlhaus"
+    GOOGLE = "google"
+    CLOUDFLARE = "cloudflare"
+    QUAD_9 = "quad9"
+
+    EMPTY = ""

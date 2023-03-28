@@ -59,7 +59,6 @@ class Yara(Visualizer):
         ]
         logger.debug(result)
         final_result = [report.to_dict() for report in result]
-        print(final_result)
         return final_result
 
     @classmethod

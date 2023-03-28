@@ -164,13 +164,18 @@ class VisualizableHorizontalList(VisualizableListMixin, VisualizableObject):
 
 class VisualizableLevel:
     def __init__(self):
-        self.levels = {}
+        self._levels = {}
 
     def add_level(self, level: int, horizontal_list: VisualizableHorizontalList):
-        self.levels[level] = horizontal_list
+        self._levels[level] = horizontal_list
 
     def to_dict(self) -> List[Dict]:
-        return [{"level": level, "elements": hl} for level, hl in self.levels.items()]
+        return [{"level": level, "elements": hl} for level, hl in self._levels.items()]
+
+    def update_level(self, level: int, *elements):
+        if level not in self._levels:
+            raise KeyError(f"Level {level} was not defined")
+        self._levels[level].value.extend(list(elements))
 
 
 class Visualizer(Plugin, metaclass=abc.ABCMeta):

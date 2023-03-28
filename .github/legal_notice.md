@@ -35,6 +35,7 @@ license terms.
 [ReversingLabs Yara rules](https://github.com/reversinglabs/reversinglabs-yara-rules),
 [Samir Yara rules](https://github.com/sbousseaden/YaraHunts),
 [InQuest Yara rules](https://github.com/InQuest/yara-rules),
+[dr4k0nia Yara rules](https://github.com/dr4k0nia/yara-rules),
 [JPCERTCC Yara rules](https://github.com/JPCERTCC/jpcert-yara),
 [HuntressLab Yara rules](https://github.com/embee-research/Yara),
 [elceef Yara Rules](https://github.com/elceef/yara-rulz),

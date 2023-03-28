@@ -1,7 +1,10 @@
+from unittest.mock import patch
+
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
 
 from api_app.connectors_manager.classes import Connector
+from tests.mock_utils import if_mock_connections
 
 
 class Slack(Connector):
@@ -34,3 +37,22 @@ class Slack(Connector):
             text=f"{self.title}\n{self.body}", channel=self._channel, mrkdwn=True
         )
         return {}
+
+    @classmethod
+    def _monkeypatch(cls):
+        class MockClient:
+            def __init__(self, *args, **kwargs):
+                ...
+
+            def chat_postMessage(self, *args, **kwargs):
+                ...
+
+        patches = [
+            if_mock_connections(
+                patch(
+                    "slack_sdk.WebClient",
+                    side_effect=MockClient,
+                )
+            )
+        ]
+        return super()._monkeypatch(patches=patches)

@@ -45,6 +45,10 @@ class AbstractReport(models.Model):
     def config(cls) -> "AbstractConfig":
         raise NotImplementedError()
 
+    @property
+    def runtime_configuration(self):
+        return self.job.get_config_runtime_configuration(self.config)
+
     # meta
     class Meta:
         abstract = True

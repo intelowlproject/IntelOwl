@@ -115,6 +115,9 @@ class AbstractReportSerializer(rfs.ModelSerializer):
     def to_representation(self, instance: AbstractReport):
         data = super().to_representation(instance)
         data["type"] = instance.config._get_type().label.lower()
+        data["runtime_configuration"] = instance.job.get_config_runtime_configuration(
+            instance.config
+        )
         return data
 
     def to_internal_value(self, data):

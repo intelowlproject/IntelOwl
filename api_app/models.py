@@ -143,9 +143,11 @@ class Job(models.Model):
     tags = models.ManyToManyField(Tag, related_name="jobs", blank=True)
 
     def __str__(self):
-        if self.is_sample:
-            return f'Job(#{self.pk}, "{self.file_name}")'
-        return f'Job(#{self.pk}, "{self.observable_name}")'
+        return f'{self.__class__.__name__}(#{self.pk}, "{self.analyzed_object_name}")'
+
+    @property
+    def analyzed_object_name(self):
+        return self.file_name if self.is_sample else self.observable_name
 
     @cached_property
     def sha256(self) -> str:
@@ -160,24 +162,21 @@ class Job(models.Model):
 
     @property
     def url(self):
-        return settings.WEB_CLIENT_URL + f"/{self.get_absolute_url()}"
+        return settings.WEB_CLIENT_URL + self.get_absolute_url()
 
     def job_cleanup(self) -> None:
-        logger.info(f"[STARTING] job_cleanup for <-- {self.__repr__()}.")
+        logger.info(f"[STARTING] job_cleanup for <-- {self}.")
         status_to_set = self.Status.RUNNING
 
         try:
             if self.status == self.Status.FAILED:
                 logger.error(
-                    f"[REPORT] {self.__repr__()}, status: failed. "
-                    "Do not process the report"
+                    f"[REPORT] {self}, status: failed. " "Do not process the report"
                 )
             else:
                 stats = self.get_analyzer_reports_stats()
 
-                logger.info(
-                    f"[REPORT] {self.__repr__()}, status:{self.status}, reports:{stats}"
-                )
+                logger.info(f"[REPORT] {self}, status:{self.status}, reports:{stats}")
 
                 if self.analyzers_to_execute.all().count() == stats["all"]:
                     if stats["running"] > 0 or stats["pending"] > 0:

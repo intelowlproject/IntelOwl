@@ -4,6 +4,7 @@
 from django.contrib import admin
 
 from api_app.core.admin import AbstractConfigAdminView, AbstractReportAdminView
+from api_app.visualizers_manager.forms import VisualizerConfigAdminForm
 from api_app.visualizers_manager.models import VisualizerConfig, VisualizerReport
 
 
@@ -18,6 +19,7 @@ class VisualizerConfigAdminView(AbstractConfigAdminView):
         "get_analyzers",
         "get_connectors",
     )
+    form = VisualizerConfigAdminForm
 
     def _get_plugins(self, qs):
         return [elem.name for elem in qs]

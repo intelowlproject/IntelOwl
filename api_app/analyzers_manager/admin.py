@@ -2,6 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 from django.contrib import admin
 
+from api_app.analyzers_manager.forms import AnalyzerConfigAdminForm
 from api_app.analyzers_manager.models import AnalyzerConfig, AnalyzerReport
 from api_app.core.admin import AbstractConfigAdminView, AbstractReportAdminView
 
@@ -18,3 +19,4 @@ class AnalyzerConfigAdminView(AbstractConfigAdminView):
         "docker_based",
         "maximum_tlp",
     )
+    form = AnalyzerConfigAdminForm

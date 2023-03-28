@@ -2,7 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 
 from api_app.analyzers_manager.classes import DockerBasedAnalyzer, FileAnalyzer
-from api_app.exceptions import AnalyzerRunException
+from api_app.analyzers_manager.exceptions import AnalyzerRunException
 
 
 class Qiling(FileAnalyzer, DockerBasedAnalyzer):

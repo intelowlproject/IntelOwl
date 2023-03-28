@@ -3,6 +3,7 @@
 
 from django.contrib import admin
 
+from api_app.connectors_manager.forms import ConnectorConfigAdminForm
 from api_app.connectors_manager.models import ConnectorConfig, ConnectorReport
 from api_app.core.admin import AbstractConfigAdminView, AbstractReportAdminView
 
@@ -18,3 +19,4 @@ class ConnectorConfigAdminView(AbstractConfigAdminView):
         "maximum_tlp",
         "run_on_failure",
     )
+    form = ConnectorConfigAdminForm

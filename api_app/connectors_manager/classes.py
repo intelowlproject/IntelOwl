@@ -23,6 +23,11 @@ class Connector(Plugin, metaclass=abc.ABCMeta):
      and `run(self)` functions.
     """
 
+    @classmethod
+    @property
+    def python_base_path(cls):
+        return settings.BASE_CONNECTOR_PYTHON_PATH
+
     @property
     def connector_name(self) -> str:
         return self._config.name

@@ -5,6 +5,7 @@ import logging
 import traceback
 import typing
 from abc import ABCMeta, abstractmethod
+from pathlib import PosixPath
 
 from celery.exceptions import SoftTimeLimitExceeded
 from django.conf import settings
@@ -43,11 +44,25 @@ class Plugin(metaclass=ABCMeta):
         self.__post__init__()  # lgtm [py/init-calls-subclass]
 
     @classmethod
+    @property
+    @abstractmethod
+    def python_base_path(cls) -> PosixPath:
+        ...
+
+    @classmethod
     def all_subclasses(cls):
+        dir = PosixPath(str(cls.python_base_path).replace(".", "/"))
+        for plugin in dir.rglob("*.py"):
+            if plugin.stem == "__init__":
+                continue
+
+            package = f"{str(plugin.parent).replace('/', '.')}.{plugin.stem}"
+            __import__(package)
         classes = cls.__subclasses__()
-        return [
-            class_ for class_ in classes if not class_.__name__.startswith("MockUp")
-        ]
+        return sorted(
+            [class_ for class_ in classes if not class_.__name__.startswith("MockUp")],
+            key=lambda x: x.__name__,
+        )
 
     def __post__init__(self) -> None:
         """

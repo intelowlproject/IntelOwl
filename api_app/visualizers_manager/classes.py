@@ -4,6 +4,7 @@ import abc
 import logging
 from typing import Any, Dict, List, Type, Union
 
+from django.conf import settings
 from django.db.models import QuerySet
 
 from api_app.core.classes import Plugin
@@ -170,7 +171,10 @@ class VisualizableLevel:
         self._levels[level] = horizontal_list
 
     def to_dict(self) -> List[Dict]:
-        return [{"level": level, "elements": hl.to_dict()} for level, hl in self._levels.items()]
+        return [
+            {"level": level, "elements": hl.to_dict()}
+            for level, hl in self._levels.items()
+        ]
 
     def update_level(self, level: int, *elements):
         if level not in self._levels:
@@ -189,6 +193,11 @@ class Visualizer(Plugin, metaclass=abc.ABCMeta):
     HList = VisualizableHorizontalList
 
     Level = VisualizableLevel
+
+    @classmethod
+    @property
+    def python_base_path(cls):
+        return settings.BASE_VISUALIZER_PYTHON_PATH
 
     @property
     def visualizer_name(self) -> str:

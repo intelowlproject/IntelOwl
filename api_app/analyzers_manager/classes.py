@@ -117,6 +117,11 @@ class ObservableAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
     observable_name: str
     observable_classification: str
 
+    @classmethod
+    @property
+    def python_base_path(cls):
+        return settings.BASE_ANALYZER_OBSERVABLE_PYTHON_PATH
+
     def __post__init__(self):
         self._config: AnalyzerConfig
         # check if we should run the hash instead of the binary
@@ -159,6 +164,11 @@ class FileAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
     md5: str
     filename: str
     file_mimetype: str
+
+    @classmethod
+    @property
+    def python_base_path(cls):
+        return settings.BASE_ANALYZER_FILE_PYTHON_PATH
 
     def read_file_bytes(self) -> bytes:
         self._job.file.seek(0)

@@ -9,8 +9,35 @@ logger = getLogger(__name__)
 
 
 class DNS(Visualizer):
+    @classmethod
+    @property
+    def first_level_analyzers(cls) -> List[str]:
+        return [
+            "Classic_DNS",
+            "CloudFlare_DNS",
+            "Google_DNS",
+            "DNS0_EU",
+            "Quad9_DNS",
+        ]
+
+    @classmethod
+    @property
+    def second_level_analyzers(cls) -> List[str]:
+        return [
+            "DNS0_EU_Malicious_Detector",
+            "CloudFlare_Malicious_Detector",
+            "Quad9_Malicious_Detector",
+            "GoogleWebRisk",
+            "GoogleSafebrowsing",
+        ]
+
+    def config(self):
+        super(DNS, self).config()
+
     def run(self) -> List[Dict]:
-        analyzer_report_list = self.analyzer_reports()
+        analyzer_report_list = self.analyzer_reports().filter(
+            config__name__in=self.first_level_analyzers + self.second_level_analyzers
+        )
         logger.debug(f"analyzer_reports: {analyzer_report_list}")
 
         first_level_elements = []
@@ -21,13 +48,7 @@ class DNS(Visualizer):
             printable_analyzer_name = analyzer_name.replace("_", " ")
             logger.debug(f"{analyzer_name=}")
 
-            if analyzer_name in [
-                "Classic_DNS",
-                "CloudFlare_DNS",
-                "Google_DNS",
-                "DNS0_EU",
-                "Quad9_DNS",
-            ]:
+            if analyzer_name in self.first_level_analyzers:
                 first_level_elements.append(
                     self.VList(
                         name=f"{printable_analyzer_name} "
@@ -39,13 +60,7 @@ class DNS(Visualizer):
                         open=True,
                     )
                 )
-            if analyzer_name in [
-                "DNS0_EU_Malicious_Detector",
-                "CloudFlare_Malicious_Detector",
-                "Quad9_Malicious_Detector",
-                "GoogleWebRisk",
-                "GoogleSafebrowsing",
-            ]:
+            if analyzer_name in self.second_level_analyzers:
                 second_level_elements.append(
                     self.Bool(
                         name=printable_analyzer_name,
@@ -72,151 +87,43 @@ class DNS(Visualizer):
         from kombu import uuid
 
         # malicious detector services (1st level)
-        AnalyzerReport.objects.create(
-            config=AnalyzerConfig.objects.get(name="DNS0_EU_Malicious_Detector"),
-            job=Job.objects.first(),
-            status=AnalyzerReport.Status.SUCCESS,
-            report={"observable": "dns.google.com", "malicious": False},
-            runtime_configuration={},
-            task_id=uuid(),
-        )
-        AnalyzerReport.objects.create(
-            config=AnalyzerConfig.objects.get(name="CloudFlare_Malicious_Detector"),
-            job=Job.objects.first(),
-            status=AnalyzerReport.Status.SUCCESS,
-            report={"observable": "dns.google.com", "malicious": False},
-            runtime_configuration={},
-            task_id=uuid(),
-        )
-        AnalyzerReport.objects.create(
-            config=AnalyzerConfig.objects.get(name="Quad9_Malicious_Detector"),
-            job=Job.objects.first(),
-            status=AnalyzerReport.Status.SUCCESS,
-            report={"observable": "dns.google.com", "malicious": False},
-            runtime_configuration={},
-            task_id=uuid(),
-        )
+
+        for analyzer in cls.first_level_analyzers:
+            AnalyzerReport.objects.create(
+                config=AnalyzerConfig.objects.get(name=analyzer),
+                job=Job.objects.first(),
+                status=AnalyzerReport.Status.SUCCESS,
+                report={"observable": "dns.google.com", "malicious": False},
+                runtime_configuration={},
+                task_id=uuid(),
+            )
+
         # classic DNS resolution (2nd level)
-        AnalyzerReport.objects.create(
-            config=AnalyzerConfig.objects.get(name="Classic_DNS"),
-            job=Job.objects.first(),
-            status=AnalyzerReport.Status.SUCCESS,
-            report={
-                "observable": "dns.google.com",
-                "resolutions": [
-                    {
-                        "TTL": 456,
-                        "data": "8.8.8.8",
-                        "name": "dns.google.com",
-                        "type": 1,
-                    },
-                    {
-                        "TTL": 456,
-                        "data": "8.8.4.4",
-                        "name": "dns.google.com",
-                        "type": 1,
-                    },
-                ],
-            },
-            runtime_configuration={"query_type": "A"},
-            task_id=uuid(),
-        )
-        AnalyzerReport.objects.create(
-            config=AnalyzerConfig.objects.get(name="CloudFlare_DNS"),
-            job=Job.objects.first(),
-            status=AnalyzerReport.Status.SUCCESS,
-            report={
-                "observable": "dns.google.com",
-                "resolutions": [
-                    {
-                        "TTL": 456,
-                        "data": "8.8.8.8",
-                        "name": "dns.google.com",
-                        "type": 1,
-                    },
-                    {
-                        "TTL": 456,
-                        "data": "8.8.4.4",
-                        "name": "dns.google.com",
-                        "type": 1,
-                    },
-                ],
-            },
-            runtime_configuration={"query_type": "A"},
-            task_id=uuid(),
-        )
-        AnalyzerReport.objects.create(
-            config=AnalyzerConfig.objects.get(name="Google_DNS"),
-            job=Job.objects.first(),
-            status=AnalyzerReport.Status.SUCCESS,
-            report={
-                "observable": "dns.google.com",
-                "resolutions": [
-                    {
-                        "TTL": 456,
-                        "data": "8.8.8.8",
-                        "name": "dns.google.com",
-                        "type": 1,
-                    },
-                    {
-                        "TTL": 456,
-                        "data": "8.8.4.4",
-                        "name": "dns.google.com",
-                        "type": 1,
-                    },
-                ],
-            },
-            runtime_configuration={"query_type": "A"},
-            task_id=uuid(),
-        )
-        AnalyzerReport.objects.create(
-            config=AnalyzerConfig.objects.get(name="DNS0_EU"),
-            job=Job.objects.first(),
-            status=AnalyzerReport.Status.SUCCESS,
-            report={
-                "observable": "dns.google.com",
-                "resolutions": [
-                    {
-                        "TTL": 456,
-                        "data": "8.8.8.8",
-                        "name": "dns.google.com",
-                        "type": 1,
-                    },
-                    {
-                        "TTL": 456,
-                        "data": "8.8.4.4",
-                        "name": "dns.google.com",
-                        "type": 1,
-                    },
-                ],
-            },
-            runtime_configuration={"query_type": "A"},
-            task_id=uuid(),
-        )
-        AnalyzerReport.objects.create(
-            config=AnalyzerConfig.objects.get(name="Quad9_DNS"),
-            job=Job.objects.first(),
-            status=AnalyzerReport.Status.SUCCESS,
-            report={
-                "observable": "dns.google.com",
-                "resolutions": [
-                    {
-                        "TTL": 456,
-                        "data": "8.8.8.8",
-                        "name": "dns.google.com",
-                        "type": 1,
-                    },
-                    {
-                        "TTL": 456,
-                        "data": "8.8.4.4",
-                        "name": "dns.google.com",
-                        "type": 1,
-                    },
-                ],
-            },
-            runtime_configuration={"query_type": "A"},
-            task_id=uuid(),
-        )
+        for analyzer in cls.second_level_analyzers:
+            AnalyzerReport.objects.create(
+                config=AnalyzerConfig.objects.get(name=analyzer),
+                job=Job.objects.first(),
+                status=AnalyzerReport.Status.SUCCESS,
+                report={
+                    "observable": "dns.google.com",
+                    "resolutions": [
+                        {
+                            "TTL": 456,
+                            "data": "8.8.8.8",
+                            "name": "dns.google.com",
+                            "type": 1,
+                        },
+                        {
+                            "TTL": 456,
+                            "data": "8.8.4.4",
+                            "name": "dns.google.com",
+                            "type": 1,
+                        },
+                    ],
+                },
+                runtime_configuration={"query_type": "A"},
+                task_id=uuid(),
+            )
 
         patches = []
         return super()._monkeypatch(patches=patches)

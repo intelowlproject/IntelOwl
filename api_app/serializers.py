@@ -30,7 +30,6 @@ from .connectors_manager.models import ConnectorConfig
 from .connectors_manager.serializers import ConnectorReportSerializer
 from .helpers import calculate_md5, gen_random_colorhex
 from .models import Job, PluginConfig, Tag
-from .playbooks_manager.exceptions import NotRunnablePlaybook
 from .playbooks_manager.models import PlaybookConfig
 from .visualizers_manager.models import VisualizerConfig
 from .visualizers_manager.serializers import VisualizerReportSerializer

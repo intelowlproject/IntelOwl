@@ -20,7 +20,6 @@ from api_app.serializers import (
 )
 from certego_saas.ext.mixins import SerializerActionMixin
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -37,10 +36,10 @@ class PlaybookConfigAPI(viewsets.ModelViewSet, SerializerActionMixin):
             permission = IsAdminUser()
             if not permission.has_permission(request, self):
                 self.permission_denied(
-            request,
+                    request,
                     message=getattr(permission, "message", None),
                     code=getattr(permission, "code", None),
-        )
+                )
         return super().check_permissions(request)
 
     def get_queryset(self):

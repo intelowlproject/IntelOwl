@@ -88,7 +88,7 @@ def ask_analysis_availability(request):
     NOTE: This API is similar to ask_analysis_availability, but it allows multiple
     md5s to be checked at the same time.""",
     responses={200: JobAvailabilitySerializer(many=True)},
-    )
+)
 @api_view(["POST"])
 def ask_multi_analysis_availability(request):
     serializer = JobAvailabilitySerializer(
@@ -449,7 +449,7 @@ class TagViewSet(viewsets.ModelViewSet):
     REST endpoint to fetch list of PluginConfig or retrieve/delete a CustomConfig.
     Requires authentication. Allows access to only authorized CustomConfigs.
     """
-                    )
+)
 class PluginConfigViewSet(viewsets.ModelViewSet):
     queryset = PluginConfig.objects.filter(
         config_type=PluginConfig.ConfigType.PARAMETER
@@ -470,9 +470,9 @@ class PluginConfigViewSet(viewsets.ModelViewSet):
             fields={
                 "data": rfs.JSONField(),
             },
-                ),
+        ),
     },
-                    )
+)
 @api_view(["GET"])
 def plugin_state_viewer(request):
     from api_app.analyzers_manager.models import AnalyzerConfig
@@ -494,5 +494,5 @@ def plugin_state_viewer(request):
                 result["data"][plugin.name] = {
                     "disabled": True,
                     "plugin_type": plugin._get_type(),
-            }
+                }
     return Response(result)

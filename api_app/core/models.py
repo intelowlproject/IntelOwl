@@ -266,9 +266,11 @@ class AbstractConfig(models.Model):
 
         return self._read_plugin_config(PluginConfig.ConfigType.PARAMETER, user)
 
-    def get_signature(self, job: "Job"):
+    def get_signature(self, job):
+        from api_app.models import Job
         from intel_owl import tasks
 
+        job: Job
         if self.is_runnable(job.user):
             # gen new task_id
             task_id = uuid()

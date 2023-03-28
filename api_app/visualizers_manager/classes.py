@@ -170,7 +170,7 @@ class VisualizableLevel:
         self._levels[level] = horizontal_list
 
     def to_dict(self) -> List[Dict]:
-        return [{"level": level, "elements": hl} for level, hl in self._levels.items()]
+        return [{"level": level, "elements": hl.to_dict()} for level, hl in self._levels.items()]
 
     def update_level(self, level: int, *elements):
         if level not in self._levels:

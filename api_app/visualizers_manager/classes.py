@@ -2,7 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 import abc
 import logging
-from typing import Any, Dict, List, Type
+from typing import Any, Dict, List, Type, Union
 
 from django.db.models import QuerySet
 
@@ -46,7 +46,8 @@ class VisualizableBase(VisualizableObject):
         classname: str = "",
         hide_if_empty: bool = False,
         disable_if_empty: bool = True,
-        icon: VisualizableIcon = VisualizableIcon.EMPTY,
+        # you can use an element of the enum or an iso3166 alpha2 code (for flags)
+        icon: Union[VisualizableIcon, str] = VisualizableIcon.EMPTY,
     ):
         super().__init__(hide_if_empty, disable_if_empty)
         self.value = value
@@ -68,7 +69,7 @@ class VisualizableBase(VisualizableObject):
 
         result = super().to_dict()
         for enum_key in ["color", "icon"]:
-            result[enum_key] = str(result[enum_key])
+            result[enum_key] = str(result[enum_key]).lower()
         return result
 
 

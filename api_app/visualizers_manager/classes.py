@@ -69,7 +69,7 @@ class VisualizableBase(VisualizableObject):
 
         result = super().to_dict()
         for enum_key in ["color", "icon"]:
-            result[enum_key] = str(result[enum_key]).lower()
+            result[enum_key] = str(result[enum_key].value).lower()
         return result
 
 

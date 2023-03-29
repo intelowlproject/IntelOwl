@@ -23,7 +23,6 @@ class ClassicDNSResolver(classes.ObservableAnalyzer):
     query_type: str
 
     def run(self):
-
         resolutions = []
         if self.observable_classification == self.ObservableTypes.IP:
             try:

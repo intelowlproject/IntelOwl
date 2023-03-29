@@ -19,7 +19,8 @@ export default function JobResult() {
   // local state
   const [initialLoading, setInitialLoading] = React.useState(true);
   const [isRunning, setIsRunning] = React.useState(false);
-  const [canNotify, setCanNotify] = React.useState(false);
+  const [notified, setNotified] = React.useState(false);
+  const [toNotify, setToNotify] = React.useState(false);
 
   // from props
   const params = useParams();
@@ -30,18 +31,13 @@ export default function JobResult() {
     url: `${JOB_BASE_URI}/${jobId}`,
   });
 
-  const refetchWithNotification = () => {
-    setCanNotify(true);
-    refetch();
-  };
-
   // HTTP polling only in case the job is running
   useInterval(
-    refetchWithNotification,
+    refetch,
     isRunning ? 5 * 1000 : null // 5 seconds
   );
 
-  // every time the job data are downloaded we check fi it terminated or not
+  // every time the job data are downloaded we check if it terminated or not
   React.useEffect(
     () =>
       setIsRunning(
@@ -50,11 +46,10 @@ export default function JobResult() {
     [job]
   );
 
-  /* notify the user when the job ends and we did at least one refetch call:
-  in this way we avoid to annoy the user with the notifications in case he open terminated job or run jobs that terminated 
-  before he change page.
+  /* notify the user when the job ends, he left the web page and we didn't notified the user before.
+  The last part is important or we will notify the user every time he leave the pages. 
   */
-  if (canNotify && !isRunning) {
+  if (toNotify && !notified && !isRunning) {
     generateJobNotification(job.observable_name, job.id);
   }
 
@@ -63,9 +58,18 @@ export default function JobResult() {
     if (!loading) setInitialLoading(false);
   }, [loading]);
 
-  // add a focus listener: when the browser tab get the focus we remove the notification favicon
+  /* add a focus listener:
+  when gain focus set it has been notified and reset the favicon
+  when lost focus (blur) we set we can notify the user
+  */
   React.useEffect(() => {
-    window.addEventListener("focus", () => setNotificationFavicon(false));
+    window.addEventListener("focus", () => {
+      setNotificationFavicon(false);
+      setNotified(true);
+      setToNotify(false);
+    });
+    window.addEventListener("blur", () => setToNotify(true));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // page title

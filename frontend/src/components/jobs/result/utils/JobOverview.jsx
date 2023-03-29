@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import PropTypes from "prop-types";
 import {
   ButtonGroup,
@@ -26,73 +26,10 @@ import { StatusIcon } from "../../../common";
 import VisualizerReport from "../visualizer/visualizer";
 import useJobOverviewStore from "../../../../stores/useJobOverviewStore";
 
+const NO_VISUALIZER_UI_ELEMENT = "no visualizer";
+
 export default function JobOverview({ isRunningJob, job, refetch }) {
   console.debug("JobOverview rendered");
-
-  // state
-  const [UIElements, setUIElements] = useState({});
-  const [
-    isSelectedUI,
-    activeElement,
-    setIsSelectedUI,
-    setActiveElement,
-    resetJobOverview,
-  ] = useJobOverviewStore((state) => [
-    state.isSelectedUI,
-    state.activeElement,
-    state.setIsSelectedUI,
-    state.setActiveElement,
-    state.resetJobOverview,
-  ]);
-  const selectUISection = (isUI) => {
-    setIsSelectedUI(isUI);
-    setActiveElement(Object.keys(isUI ? UIElements : rawElements)[0]);
-  };
-
-  useEffect(() => {
-    // this use effect is triggered when the component is mounted to reset the previously subSection selection
-    resetJobOverview();
-  }, [resetJobOverview]);
-
-  // UI elements (note: this useEffect MUST be AFTER the reset useEffect)
-  useEffect(() => {
-    console.debug("JobOverview - useEffect:");
-    console.debug(job);
-
-    // TODO: remove this mock
-    // const newUIElements = [{
-    //   nav: (
-    //     <div className="d-flex-center">
-    //       <strong>Test visualizer</strong>
-    //     </div>
-    //   ),
-    //   report: <VisualizerReport data={null} />
-    // }]
-
-    const newUIElements = job.visualizerreports.map((visualizer) => ({
-      nav: (
-        <div className="d-flex-center">
-          <strong>{visualizer.name}</strong>
-        </div>
-      ),
-      report: (
-        <VisualizerReport
-          visualizerReport={job.visualizerreports.find(
-            (report) => report.name === visualizer.name
-          )}
-        />
-      ),
-    }));
-
-    setUIElements(newUIElements);
-    /* set the default to the first visualizer only in case the UI is selected.
-    In case raw data is selected don't change or during polling (long jobs) we reset the view and change the UI to the user.    
-    */
-    if (isSelectedUI) {
-      setActiveElement(Object.keys(newUIElements)[0]);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [job]);
 
   // raw elements
   let AnalyzerDenominator = job.analyzers_requested?.length || "all";
@@ -149,6 +86,96 @@ export default function JobOverview({ isRunningJob, job, refetch }) {
     [job, refetch, AnalyzerDenominator, ConnectorDenominator]
   );
 
+  // state
+  const [UIElements, setUIElements] = useState({});
+  const [
+    isSelectedUI,
+    activeElement,
+    setIsSelectedUI,
+    setActiveElement,
+    resetJobOverview,
+  ] = useJobOverviewStore((state) => [
+    state.isSelectedUI,
+    state.activeElement,
+    state.setIsSelectedUI,
+    state.setActiveElement,
+    state.resetJobOverview,
+  ]);
+  const selectUISection = useCallback(
+    (isUI) => {
+      setIsSelectedUI(isUI);
+      setActiveElement(Object.keys(isUI ? UIElements : rawElements)[0]);
+    },
+    [UIElements, rawElements, setActiveElement, setIsSelectedUI]
+  );
+
+  // NOTE: use effect order is important! Reset MUST BE defined before the other!
+  useEffect(() => {
+    console.debug("JobOverview - reset UI/raw data selection");
+    // this use effect is triggered when the component is mounted to reset the previously subSection selection
+    resetJobOverview();
+  }, [resetJobOverview]);
+
+  useEffect(() => {
+    console.debug("JobOverview - create/update visualizer components");
+    console.debug(job);
+
+    // generate UI elements
+    const newUIElements = {};
+    job.visualizers_to_execute.forEach((visualizerLabel) => {
+      newUIElements[visualizerLabel] = {
+        nav: (
+          <div className="d-flex-center">
+            <strong>{visualizerLabel}</strong>
+          </div>
+        ),
+        report: (
+          <Loader
+            loading={
+              !job.visualizerreports.find(
+                (report) => report.name === visualizerLabel
+              )
+            }
+            render={() => (
+              <VisualizerReport
+                visualizerReport={job.visualizerreports.find(
+                  (report) => report.name === visualizerLabel
+                )}
+              />
+            )}
+          />
+        ),
+      };
+    });
+
+    // in case there are no visualizers add a "no data" visualizer
+    if (Object.keys(newUIElements).length === 0) {
+      newUIElements[NO_VISUALIZER_UI_ELEMENT] = {
+        nav: null,
+        report: <p className="text-center">No visualizers available.</p>,
+      };
+    }
+
+    setUIElements(newUIElements);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [job]);
+
+  useEffect(() => {
+    console.debug("JobOverview - check to set default visualizer");
+    /* set the default to the first visualizer only in case no section is selected.
+    In case a section is selected and job data are refreshed (thanks to the polling) do NOT change the section the user is watching
+    */
+    if (activeElement === "") {
+      const firstVisualizer = Object.keys(UIElements)[0];
+      if (firstVisualizer === NO_VISUALIZER_UI_ELEMENT) {
+        selectUISection(false);
+      } else {
+        console.debug(`set default visualizer to: ${firstVisualizer}`);
+        setActiveElement(firstVisualizer);
+      }
+    }
+  }, [UIElements, activeElement, selectUISection, setActiveElement]);
+
   console.debug(`JobOverview - isSelectedUI: ${isSelectedUI}`);
   console.debug(`JobOverview - activeElement: ${activeElement}`);
 
@@ -203,20 +230,21 @@ export default function JobOverview({ isRunningJob, job, refetch }) {
               </ButtonGroup>
               <div className="flex-fill horizontal-scrollable">
                 <Nav tabs className="flex-nowrap h-100">
-                  {/* generate the nav with the UI/raw visualizers */}
+                  {/* generate the nav with the UI/raw visualizers avoid to generate the navbar item for the "no visualizer element" */}
                   {Object.entries(elementsToShow).map(
-                    ([navTitle, componentsObject]) => (
-                      <NavItem>
-                        <NavLink
-                          className={`${
-                            activeElement === navTitle ? "active" : ""
-                          }`}
-                          onClick={() => setActiveElement(navTitle)}
-                        >
-                          {componentsObject.nav}
-                        </NavLink>
-                      </NavItem>
-                    )
+                    ([navTitle, componentsObject]) =>
+                      navTitle !== NO_VISUALIZER_UI_ELEMENT && (
+                        <NavItem>
+                          <NavLink
+                            className={`${
+                              activeElement === navTitle ? "active" : ""
+                            }`}
+                            onClick={() => setActiveElement(navTitle)}
+                          >
+                            {componentsObject.nav}
+                          </NavLink>
+                        </NavItem>
+                      )
                   )}
                 </Nav>
               </div>

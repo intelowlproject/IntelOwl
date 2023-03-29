@@ -156,7 +156,7 @@ class YaraRepo:
 
     @cached_property
     def head_branch(self) -> str:
-        return Repo(self.directory).head.ref.name
+        return git.Repo(self.directory).head.ref.name
 
     @cached_property
     def rules(self):

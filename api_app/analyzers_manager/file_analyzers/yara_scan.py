@@ -9,11 +9,11 @@ from pathlib import PosixPath
 from typing import Dict, List, Optional
 from urllib.parse import urlparse
 
+import git
 import requests
 import yara
 from django.conf import settings
 from django.utils.functional import cached_property
-from git import Repo
 
 from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.exceptions import AnalyzerRunException
@@ -130,12 +130,16 @@ class YaraRepo:
                 self.result_file_name.unlink(missing_ok=True)
 
                 logger.info(f"About to pull {self.url} at {self.directory}")
-                repo = Repo(self.directory)
+                repo = git.Repo(self.directory)
                 o = repo.remotes.origin
-                o.pull(allow_unrelated_histories=True, rebase=True)
+                try:
+                    o.pull(allow_unrelated_histories=True, rebase=True)
+                except git.exc.GitCommandError as e:
+                    logger.exception(e)
+                    return
             else:
                 logger.info(f"About to clone {self.url} at {self.directory}")
-                Repo.clone_from(self.url, self.directory, depth=1)
+                git.Repo.clone_from(self.url, self.directory, depth=1)
         finally:
             if self.key:
                 logger.info("Starting cleanup of git ssh key")

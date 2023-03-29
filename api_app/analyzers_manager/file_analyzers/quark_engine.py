@@ -1,7 +1,6 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-from quark import freshquark
 from quark.config import DIR_PATH
 from quark.report import Report
 
@@ -14,6 +13,7 @@ class QuarkEngine(FileAnalyzer):
 
     @classmethod
     def _update(cls):
+        from quark import freshquark
         # the rules are installed in config.HOME_DIR by default
         freshquark.download()
 

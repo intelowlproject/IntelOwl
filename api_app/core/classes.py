@@ -225,5 +225,7 @@ class Plugin(metaclass=ABCMeta):
     @classmethod
     @property
     def python_module(cls) -> str:
-        module = cls.__module__.split(".")[-1]
-        return f"{module}.{cls.__name__}"
+        valid_module = cls.__module__.replace(str(cls.python_base_path), "")
+        # remove the starting dot
+        valid_module = valid_module[1:]
+        return f"{valid_module}.{cls.__name__}"

@@ -21,9 +21,6 @@ def update_dns_visualizer(apps, schema_editor):
     VisualizerConfig = apps.get_model("visualizers_manager", "VisualizerConfig")
     AnalyzerConfig = apps.get_model("analyzers_manager", "AnalyzerConfig")
     analyzers = AnalyzerConfig.objects.filter(name__in=analyzers_list)
-    print(f"{analyzers_list=}")
-    print(f"all analyzers: {AnalyzerConfig.objects.all()}")
-    print(f"filtered analyzers: {analyzers}")
     vc = VisualizerConfig.objects.get(name="DNS")
     vc.analyzers.set(analyzers)
 

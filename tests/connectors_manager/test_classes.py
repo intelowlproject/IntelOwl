@@ -136,11 +136,11 @@ class ConnectorTestCase(CustomTestCase):
                 signal.alarm(timeout_seconds)
                 try:
                     sub.start()
-                except TimeoutError:
+                except Exception as e:
                     self.fail(
                         f"Connector {subclass.__name__}"
                         f" with config {config.name} "
-                        f"went in timeout after {timeout_seconds}"
+                        f"failed {e}"
                     )
                 finally:
                     signal.alarm(0)

@@ -231,7 +231,7 @@
       "type": "1",
       "config_type": "2",
       "attribute": "url_key_name",
-      "value": "test",
+      "value": "https://test",
       "organization": null,
       "owner": 1,
       "plugin_name": "Cuckoo_Scan"
@@ -287,7 +287,7 @@
       "type": "1",
       "config_type": "2",
       "attribute": "url_key_name",
-      "value": "test",
+      "value": "https://test",
       "organization": null,
       "owner": 1,
       "plugin_name": "Dragonfly_Emulation"
@@ -416,7 +416,7 @@
       "value": "test",
       "organization": null,
       "owner": 1,
-      "plugin_name": "Hunter"
+      "plugin_name": "Hunter_How"
     }
   },
   {
@@ -553,7 +553,7 @@
       "type": "1",
       "config_type": "2",
       "attribute": "url_key_name",
-      "value": "test",
+      "value": "https://test",
       "organization": null,
       "owner": 1,
       "plugin_name": "MISP"
@@ -581,7 +581,7 @@
       "type": "1",
       "config_type": "2",
       "attribute": "url_key_name",
-      "value": "test",
+      "value": "https://test",
       "organization": null,
       "owner": 1,
       "plugin_name": "MISPFIRST"
@@ -609,7 +609,7 @@
       "type": "1",
       "config_type": "2",
       "attribute": "url_key_name",
-      "value": "test",
+      "value": "https://test",
       "organization": null,
       "owner": 1,
       "plugin_name": "MISPFIRST_Check_Hash"
@@ -637,7 +637,7 @@
       "type": "1",
       "config_type": "2",
       "attribute": "url_key_name",
-      "value": "test",
+      "value": "https://test",
       "organization": null,
       "owner": 1,
       "plugin_name": "MISP_Check_Hash"
@@ -735,7 +735,7 @@
       "type": "1",
       "config_type": "2",
       "attribute": "url_key_name",
-      "value": "test",
+      "value": "https://test",
       "organization": null,
       "owner": 1,
       "plugin_name": "OpenCTI"
@@ -1057,7 +1057,7 @@
       "type": "1",
       "config_type": "2",
       "attribute": "url_key_name",
-      "value": "test",
+      "value": "https://test",
       "organization": null,
       "owner": 1,
       "plugin_name": "VirusTotal_v2_Scan_File"
@@ -1197,7 +1197,7 @@
       "type": "1",
       "config_type": "2",
       "attribute": "url_key_name",
-      "value": "test",
+      "value": "https://test",
       "organization": null,
       "owner": 1,
       "plugin_name": "YETI"
@@ -1357,6 +1357,20 @@
       "organization": null,
       "owner": 1,
       "plugin_name": "Yara"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 30,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key_name",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "Hunter_Io"
     }
   }
 ]

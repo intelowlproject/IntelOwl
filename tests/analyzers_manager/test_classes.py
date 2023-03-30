@@ -123,11 +123,11 @@ class FileAnalyzerTestCase(CustomTestCase):
                         signal.alarm(timeout_seconds)
                         try:
                             sub.start()
-                        except TimeoutError:
+                        except Exception as e:
                             self.fail(
                                 f"Analyzer {subclass.__name__} "
                                 f"with config {config.name} and mimetype "
-                                f"{mimetype} went in timeout after {timeout_seconds}"
+                                f"{mimetype} failed {e}"
                             )
                         finally:
                             signal.alarm(0)

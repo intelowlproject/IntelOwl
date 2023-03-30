@@ -326,6 +326,22 @@ After an upgrade, sometimes a database error in Celery Containers could happen. 
 </div>
 
 <div class="admonition warning">
+<p class="admonition-title">Note</p>
+After having upgraded IntelOwl, in case the application does not start and you get an error like this:
+
+```commandline
+PermissionError: [Errno 13] Permission denied: '/var/log/intel_owl/django/authentication.log
+```
+
+just run this:
+```commandline
+sudo chown -R www-data:www-data /var/lib/docker/volumes/intel_owl_generic_logs/_data/django
+```
+
+and restart IntelOwl. It should solve the permissions problem.
+</div>
+
+<div class="admonition warning">
 <p class="admonition-title">Warning</p>
 Major versions of IntelOwl are usually incompatible from one another.
 Maintainers strive to keep the upgrade between major version easy but it's not always like that.

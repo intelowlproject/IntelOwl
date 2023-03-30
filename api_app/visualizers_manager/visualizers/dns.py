@@ -1,7 +1,39 @@
 from logging import getLogger
 from typing import Dict, List
 
+# ignore flake line too long in imports
 from api_app.analyzers_manager.models import AnalyzerConfig, AnalyzerReport
+from api_app.analyzers_manager.observable_analyzers.dns.dns_malicious_detectors.cloudflare_malicious_detector import (  # noqa: E501
+    CloudFlareMaliciousDetector,
+)
+from api_app.analyzers_manager.observable_analyzers.dns.dns_malicious_detectors.dns0_eu_malicious_detector import (  # noqa: E501
+    DNS0EUMaliciousDetector,
+)
+from api_app.analyzers_manager.observable_analyzers.dns.dns_malicious_detectors.google_webrisk import (  # noqa: E501
+    WebRisk,
+)
+from api_app.analyzers_manager.observable_analyzers.dns.dns_malicious_detectors.googlesf import (  # noqa: E501
+    GoogleSF,
+)
+from api_app.analyzers_manager.observable_analyzers.dns.dns_malicious_detectors.quad9_malicious_detector import (  # noqa: E501
+    Quad9MaliciousDetector,
+)
+from api_app.analyzers_manager.observable_analyzers.dns.dns_resolvers.classic_dns_resolver import (  # noqa: E501
+    ClassicDNSResolver,
+)
+from api_app.analyzers_manager.observable_analyzers.dns.dns_resolvers.cloudflare_dns_resolver import (  # noqa: E501
+    CloudFlareDNSResolver,
+)
+from api_app.analyzers_manager.observable_analyzers.dns.dns_resolvers.dns0_eu_resolver import (  # noqa: E501
+    DNS0EUResolver,
+)
+from api_app.analyzers_manager.observable_analyzers.dns.dns_resolvers.google_dns_resolver import (  # noqa: E501
+    GoogleDNSResolver,
+)
+from api_app.analyzers_manager.observable_analyzers.dns.dns_resolvers.quad9_dns_resolver import (  # noqa: E501
+    Quad9DNSResolver,
+)
+from api_app.choices import ObservableClassification
 from api_app.models import Job
 from api_app.visualizers_manager.classes import Visualizer
 
@@ -13,57 +45,64 @@ class DNS(Visualizer):
     @property
     def first_level_analyzers(cls) -> List[str]:
         return [
-            "Classic_DNS",
-            "CloudFlare_DNS",
-            "Google_DNS",
-            "DNS0_EU",
-            "Quad9_DNS",
+            cls.__generate_classpath(ClassicDNSResolver),
+            cls.__generate_classpath(CloudFlareDNSResolver),
+            cls.__generate_classpath(GoogleDNSResolver),
+            cls.__generate_classpath(DNS0EUResolver),
+            cls.__generate_classpath(Quad9DNSResolver),
         ]
 
     @classmethod
     @property
     def second_level_analyzers(cls) -> List[str]:
         return [
-            "DNS0_EU_Malicious_Detector",
-            "CloudFlare_Malicious_Detector",
-            "Quad9_Malicious_Detector",
-            "GoogleWebRisk",
-            "GoogleSafebrowsing",
+            cls.__generate_classpath(CloudFlareMaliciousDetector),
+            cls.__generate_classpath(GoogleSF),
+            cls.__generate_classpath(WebRisk),
+            cls.__generate_classpath(DNS0EUMaliciousDetector),
+            cls.__generate_classpath(Quad9MaliciousDetector),
         ]
 
     def run(self) -> List[Dict]:
-        analyzer_report_list = self.analyzer_reports().filter(
-            config__name__in=self.first_level_analyzers + self.second_level_analyzers
-        )
-        logger.debug(f"analyzer_reports: {analyzer_report_list}")
+        required_analyzer_list = self._config.analyzers.all()
+        logger.debug(f"{required_analyzer_list=}")
 
         first_level_elements = []
         second_level_elements = []
 
-        for analyzer_report in analyzer_report_list:
-            analyzer_name = analyzer_report.config.name
-            printable_analyzer_name = analyzer_name.replace("_", " ")
-            logger.debug(f"{analyzer_name=}")
-
-            if analyzer_name in self.first_level_analyzers:
+        for required_analyzer in required_analyzer_list:
+            printable_analyzer_name = required_analyzer.name.replace("_", " ")
+            analyzer_report = self.analyzer_reports().get(
+                config__name=required_analyzer.name
+            )
+            logger.debug(f"{printable_analyzer_name=}")
+            logger.debug(f"{required_analyzer.python_complete_path=}")
+            logger.debug(f"{analyzer_report=}")
+            if "dns.dns_resolvers" in required_analyzer.python_complete_path:
                 first_level_elements.append(
                     self.VList(
                         name=f"{printable_analyzer_name} "
                         f"({len(analyzer_report.report['resolutions'])})",
                         value=[
-                            self.Base(dns_resolution["data"])
+                            self.Base(
+                                value=dns_resolution["data"]
+                                if self._job.observable_classification
+                                == ObservableClassification.DOMAIN
+                                else dns_resolution
+                            )
                             for dns_resolution in analyzer_report.report["resolutions"]
                         ],
                         open=True,
                     )
                 )
-            if analyzer_name in self.second_level_analyzers:
+            else:
                 second_level_elements.append(
                     self.Bool(
                         name=printable_analyzer_name,
                         value=analyzer_report.report["malicious"],
                     )
                 )
+
         levels = self.Level()
         levels.add_level(
             level=1,
@@ -73,8 +112,12 @@ class DNS(Visualizer):
             level=2,
             horizontal_list=self.HList(value=second_level_elements),
         )
-        logger.debug(f"{levels=}")
+        logger.debug(f"levels: {levels.to_dict()}")
         return levels.to_dict()
+
+    @classmethod
+    def __generate_classpath(cls, class_):
+        return f"{class_.__module__}.{class_.__name__}"
 
     @classmethod
     def _monkeypatch(cls):

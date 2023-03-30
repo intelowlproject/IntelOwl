@@ -181,7 +181,6 @@ class Plugin(metaclass=ABCMeta):
         try:
             self.before_run()
             _result = self.run()
-            print(_result)
             self.report.report = _result
         except (*self.get_exceptions_to_catch(), SoftTimeLimitExceeded) as e:
             self._handle_exception(e)

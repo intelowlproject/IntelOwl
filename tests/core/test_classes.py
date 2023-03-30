@@ -5,7 +5,9 @@ from unittest.mock import patch
 
 from kombu import uuid
 
-from api_app.analyzers_manager.observable_analyzers.dns.dns_resolvers.classic_dns_resolver import ClassicDNSResolver
+from api_app.analyzers_manager.observable_analyzers.dns.dns_resolvers.classic_dns_resolver import (
+    ClassicDNSResolver,
+)
 from api_app.connectors_manager.classes import Connector
 from api_app.connectors_manager.models import ConnectorConfig
 from api_app.core.classes import Plugin
@@ -67,4 +69,7 @@ class PluginTestCase(CustomTestCase):
 
     def test_python_path(self):
         class_ = ClassicDNSResolver
-        self.assertEqual(class_.python_module, "dns.dns_resolvers.classic_dns_resolver.ClassicDNSResolver")
+        self.assertEqual(
+            class_.python_module,
+            "dns.dns_resolvers.classic_dns_resolver.ClassicDNSResolver",
+        )

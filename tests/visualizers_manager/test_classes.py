@@ -122,6 +122,8 @@ class VisualizableVerticalListTestCase(CustomTestCase):
             "disable_if_empty": True,
             "values": [value.to_dict()],
         }
+        self.assertEqual(vvl.to_dict()["values"], vvl.to_dict()["values"])
+        self.assertNotEqual(0, len(vvl.to_dict()["values"]))
         self.assertEqual(vvl.to_dict(), expected_result)
 
     def test_to_dict_values_null(self):

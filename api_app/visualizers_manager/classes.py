@@ -2,6 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 import abc
 import logging
+from enum import Enum
 from typing import Any, Dict, List, Type, Union
 
 from django.conf import settings
@@ -24,12 +25,22 @@ class VisualizableObject:
         self.disable_if_empty = disable_if_empty
 
     @property
+    def attributes(self) -> List[str]:
+        return ["hide_if_empty", "disable_if_empty"]
+
+    @property
     @abc.abstractmethod
     def type(self):
         raise NotImplementedError()
 
+    def __bool__(self):
+        return True
+
     def to_dict(self) -> Dict:
-        result = vars(self)
+        if not self:
+            return {}
+
+        result = {attr: getattr(self, attr) for attr in self.attributes}
         for key, value in result.items():
             if isinstance(value, VisualizableObject):
                 result[key] = value.to_dict()
@@ -58,6 +69,10 @@ class VisualizableBase(VisualizableObject):
         self.icon = icon
 
     @property
+    def attributes(self) -> List[str]:
+        return super().attributes + ["value", "color", "link", "classname", "icon"]
+
+    @property
     def type(self) -> str:
         return "base"
 
@@ -65,12 +80,12 @@ class VisualizableBase(VisualizableObject):
         return bool(self.value) or bool(self.icon)
 
     def to_dict(self) -> Dict:
-        if not self:
-            return {}
-
         result = super().to_dict()
         for enum_key in ["color", "icon"]:
-            result[enum_key] = str(result[enum_key].value).lower()
+            if isinstance(result[enum_key], Enum):
+                result[enum_key] = str(result[enum_key].value)
+            result[enum_key] = result[enum_key].lower()
+
         return result
 
 
@@ -104,6 +119,10 @@ class VisualizableBool(VisualizableBase):
         super().__init__(*args, color=color, value=value, **kwargs)
         self.name = name
         self.pill = pill
+
+    @property
+    def attributes(self) -> List[str]:
+        return super().attributes + ["name", "pill"]
 
     @property
     def type(self) -> str:
@@ -140,6 +159,10 @@ class VisualizableVerticalList(VisualizableListMixin, VisualizableBase):
         self.name = name
         self.open = open
 
+    @property
+    def attributes(self) -> List[str]:
+        return super().attributes + ["name", "open"]
+
     def __bool__(self):
         return True
 
@@ -157,6 +180,10 @@ class VisualizableHorizontalList(VisualizableListMixin, VisualizableObject):
     ):
         super().__init__(*args, **kwargs)
         self.value = value
+
+    @property
+    def attributes(self) -> List[str]:
+        return super().attributes + ["value"]
 
     @property
     def type(self) -> str:

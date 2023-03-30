@@ -7,16 +7,17 @@ from api_app.analyzers_manager.exceptions import AnalyzerRunException
 
 
 class QuarkEngine(FileAnalyzer):
-
     @classmethod
     def _update(cls):
         from quark import freshquark
+
         # the rules are installed in config.HOME_DIR by default
         freshquark.download()
 
     def run(self):
         from quark.config import DIR_PATH
         from quark.report import Report
+
         report = Report()
         # start analysis
         report.analysis(self.filepath, DIR_PATH)

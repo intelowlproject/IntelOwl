@@ -14,6 +14,7 @@ class FileScanSearch(ObservableAnalyzer):
     """FileScan_Search analyzer"""
 
     base_url: str = "https://www.filescan.io/api/reports/search"
+    _api_key: str
 
     def run(self):
         """Runs the FileScan_Search analyzer"""
@@ -23,7 +24,7 @@ class FileScanSearch(ObservableAnalyzer):
         endpoint = "?query={input}"
         url = f"{self.base_url}/{endpoint.format(input=observable_name_base64)}"
         try:
-            response = requests.get(url)
+            response = requests.get(url, headers={"X-Api-Key": self._api_key})
             response.raise_for_status()
         except requests.RequestException as error:
             raise AnalyzerRunException(error)

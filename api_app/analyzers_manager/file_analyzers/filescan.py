@@ -19,6 +19,7 @@ class FileScanUpload(FileAnalyzer):
     max_tries: int = 30
     poll_distance: int = 10
     base_url = "https://www.filescan.io/api"
+    _api_key: str
 
     def run(self):
         task_id = self.__upload_file_for_scan()
@@ -31,7 +32,9 @@ class FileScanUpload(FileAnalyzer):
             raise AnalyzerRunException("File is empty")
         try:
             response = requests.post(
-                self.base_url + "/scan/file", files={"file": (self.filename, binary)}
+                self.base_url + "/scan/file",
+                files={"file": (self.filename, binary)},
+                headers={"X-Api-Key": self._api_key},
             )
             response.raise_for_status()
         except requests.RequestException as e:
@@ -57,7 +60,9 @@ class FileScanUpload(FileAnalyzer):
 
         for chance in range(self.max_tries):
             logger.info(f"[POLLING] {obj_repr} -> #{chance + 1}/{self.max_tries}")
-            response = requests.get(url, params=params)
+            response = requests.get(
+                url, params=params, headers={"X-Api-Key": self._api_key}
+            )
             report = response.json()
             if report["allFinished"]:
                 break

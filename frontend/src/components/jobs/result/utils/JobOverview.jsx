@@ -162,10 +162,10 @@ export default function JobOverview({ isRunningJob, job, refetch }) {
 
   useEffect(() => {
     console.debug("JobOverview - check to set default visualizer");
-    /* set the default to the first visualizer only in case no section is selected.
+    /* set the default to the first visualizer only in case no section is selected and UI elements have been downloaded.
     In case a section is selected and job data are refreshed (thanks to the polling) do NOT change the section the user is watching
     */
-    if (activeElement === "") {
+    if (activeElement === "" && Object.keys(UIElements).length !== 0) {
       const firstVisualizer = Object.keys(UIElements)[0];
       if (firstVisualizer === NO_VISUALIZER_UI_ELEMENT) {
         selectUISection(false);
@@ -174,7 +174,8 @@ export default function JobOverview({ isRunningJob, job, refetch }) {
         setActiveElement(firstVisualizer);
       }
     }
-  }, [UIElements, activeElement, selectUISection, setActiveElement]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [UIElements]);
 
   console.debug(`JobOverview - isSelectedUI: ${isSelectedUI}`);
   console.debug(`JobOverview - activeElement: ${activeElement}`);

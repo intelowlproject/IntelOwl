@@ -9,11 +9,6 @@ visualizers = {
         "description": "Visualize information about DNS resolvers "
         "and DNS malicious detectors",
         "python_module": "dns.DNS",
-        # "analyzers": [
-        #     "Classic_DNS", "CloudFlare_DNS", "DNS0_EU", "Google_DNS", "Quad9_DNS",
-        #     "CloudFlare_Malicious_Detector", "DNS0_EU_Malicious_Detector",
-        #     "GoogleSafebrowsing", "GoogleWebRisk", "Quad9_Malicious_Detector",
-        # ],
         "analyzers": [
             "Classic_DNS",
         ],

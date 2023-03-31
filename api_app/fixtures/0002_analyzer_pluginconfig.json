@@ -1361,7 +1361,7 @@
   },
   {
     "model": "api_app.pluginconfig",
-    "pk": 30,
+    "pk": 98,
     "fields": {
       "updated_at": "2023-02-23T08:53:02.830Z",
       "type": "1",
@@ -1371,6 +1371,34 @@
       "organization": null,
       "owner": 1,
       "plugin_name": "Hunter_Io"
+    }
+  },
+    {
+    "model": "api_app.pluginconfig",
+    "pk": 99,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "FileScan_Upload_File"
+    }
+  },
+    {
+    "model": "api_app.pluginconfig",
+    "pk": 100,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "FileScan_Search"
     }
   }
 ]

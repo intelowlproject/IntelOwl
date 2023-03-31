@@ -37,6 +37,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('playbooks_manager', '0004_datamigration'),
+        ('api_app', '0023_runtime_config'),
     ]
 
     operations = [

@@ -7,11 +7,19 @@ visualizers = {
     "DNS": {
         "disabled": False,
         "description": "Visualize information about DNS resolvers "
-        "and DNS malicious detectors",
+                       "and DNS malicious detectors",
         "python_module": "dns.DNS",
         "analyzers": [
             "Classic_DNS",
-        ],
+            "CloudFlare_DNS",
+            "DNS0_EU",
+            "Google_DNS",
+            "Quad9_DNS",
+            "CloudFlare_Malicious_Detector",
+            "DNS0_EU_Malicious_Detector",
+            "GoogleSafebrowsing",
+            "GoogleWebRisk",
+            "Quad9_Malicious_Detector", ],
         "connectors": [],
         "params": {},
         "secrets": {},
@@ -35,6 +43,11 @@ def create_configurations(apps, schema_editor):
         vc.connectors.set(connectors)
 
 
+def reverse_dns_visualizer(apps, schema_editor):
+    VisualizerConfig = apps.get_model("visualizers_manager", "VisualizerConfig")
+    VisualizerConfig.objects.get(name="DNS").delete()
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -42,5 +55,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(create_configurations),
+        migrations.RunPython(create_configurations, reverse_dns_visualizer),
     ]

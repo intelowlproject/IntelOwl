@@ -9,7 +9,6 @@ from requests import HTTPError
 
 from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
-from api_app.helpers import calculate_sha256
 from tests.mock_utils import MagicMock, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
@@ -39,7 +38,7 @@ class MockedUploadObject:
 
 class MockedQueryObject:
     def __init__(self):
-        self.metakeys = {"karton": "test"}
+        self.attributes = {"karton": "test"}
         self.data = {"children": [], "parents": []}
 
 
@@ -89,7 +88,7 @@ class MWDB_Scan(FileAnalyzer):
     def run(self):
         result = {}
         binary = self.read_file_bytes()
-        query = calculate_sha256(binary)
+        query = self._job.sha256
         self.mwdb = mwdblib.MWDB(api_key=self._api_key_name)
 
         if self.upload_file:
@@ -102,10 +101,10 @@ class MWDB_Scan(FileAnalyzer):
                 logger.info(
                     f"mwdb_scan sample: {self.md5} polling for result try #{_try + 1}"
                 )
-                time.sleep(self.poll_distance)
                 file_info = self.mwdb.query_file(file_object.data["id"])
-                if "karton" in file_info.metakeys.keys():
+                if "karton" in file_info.attributes.keys():
                     break
+                time.sleep(self.poll_distance)
             else:
                 raise AnalyzerRunException("max retry attempts exceeded")
         else:

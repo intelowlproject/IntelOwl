@@ -51,7 +51,6 @@ class IntelX(ObservableAnalyzer):
     def _poll_for_results(self, search_id):
         json_data = {}
         for chance in range(self.max_tries):
-            time.sleep(self.poll_distance)
             logger.info(
                 f"Result Polling. Try #{chance + 1}. Starting the query..."
                 f"<-- {self.__repr__()}"
@@ -68,6 +67,7 @@ class IntelX(ObservableAnalyzer):
                 if r.status_code == 200:
                     json_data = r.json()
                     break
+            time.sleep(self.poll_distance)
 
         if not json_data:
             raise AnalyzerRunException(

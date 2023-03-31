@@ -13,7 +13,7 @@ from api_app.models import Job
 from intel_owl.tasks import check_stuck_analysis, remove_old_jobs
 
 from . import CustomTestCase, get_logger
-from .mock_utils import MockResponse, if_mock_connections, patch, skip
+from .mock_utils import MockUpResponse, if_mock_connections, patch, skip
 
 logger = get_logger()
 
@@ -64,14 +64,18 @@ class CronTests(CustomTestCase):
             self.assertTrue(os.path.exists(db))
 
     @if_mock_connections(
-        patch("requests.get", return_value=MockResponse({}, 200, text="91.192.100.61"))
+        patch(
+            "requests.get", return_value=MockUpResponse({}, 200, text="91.192.100.61")
+        )
     )
     def test_talos_updater(self, mock_get=None):
         db_file_path = talos.Talos._update()
         self.assertTrue(os.path.exists(db_file_path))
 
     @if_mock_connections(
-        patch("requests.get", return_value=MockResponse({}, 200, text="93.95.230.253"))
+        patch(
+            "requests.get", return_value=MockUpResponse({}, 200, text="93.95.230.253")
+        )
     )
     def test_tor_updater(self, mock_get=None):
         db_file_path = tor.Tor._update()

@@ -9,7 +9,7 @@ import requests
 
 from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
-from tests.mock_utils import MockResponse, if_mock_connections, patch
+from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
@@ -92,14 +92,14 @@ class VirusheeFileUpload(FileAnalyzer):
                 patch(
                     "requests.Session.get",
                     side_effect=[
-                        MockResponse({"message": "hash_not_found"}, 404),
-                        MockResponse({"message": "analysis_in_progress"}, 202),
-                        MockResponse({"result": "test"}, 200),
+                        MockUpResponse({"message": "hash_not_found"}, 404),
+                        MockUpResponse({"message": "analysis_in_progress"}, 202),
+                        MockUpResponse({"result": "test"}, 200),
                     ],
                 ),
                 patch(
                     "requests.Session.post",
-                    return_value=MockResponse({"task": "123-456-789"}, 201),
+                    return_value=MockUpResponse({"task": "123-456-789"}, 201),
                 ),
             )
         ]

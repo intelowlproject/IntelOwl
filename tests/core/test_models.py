@@ -28,7 +28,7 @@ class AbstractConfigTestCase(CustomTestCase):
 
     @patch.multiple(
         "api_app.visualizers_manager.models.VisualizerConfig",
-        python_path=settings.BASE_ANALYZER_OBSERVABLE_PYTHON_PATH,
+        python_base_path=settings.BASE_ANALYZER_OBSERVABLE_PYTHON_PATH,
     )
     def test_python_class_wrong(self):
         muc, _ = VisualizerConfig.objects.get_or_create(
@@ -256,8 +256,10 @@ class AbstractConfigTestCase(CustomTestCase):
             disabled=True,
             config={"soft_time_limit": 100, "queue": "default"},
         )
+        job.visualizers_to_execute.set([muc])
+
         with self.assertRaises(Exception):
-            muc.get_signature(job.pk)
+            muc.get_signature(job)
 
         muc.delete()
         job.delete()
@@ -271,7 +273,8 @@ class AbstractConfigTestCase(CustomTestCase):
             disabled=False,
             config={"soft_time_limit": 100, "queue": "default"},
         )
-        signature = muc.get_signature(job.pk)
+        job.visualizers_to_execute.set([muc])
+        signature = muc.get_signature(job)
         self.assertIsInstance(signature, Signature)
         muc.delete()
         job.delete()

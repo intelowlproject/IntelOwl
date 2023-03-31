@@ -68,6 +68,7 @@ class PluginTestCase(CustomTestCase):
         from api_app.analyzers_manager.observable_analyzers.dns.dns_resolvers.classic_dns_resolver import (  # noqa
             ClassicDNSResolver,
         )
+
         class_ = ClassicDNSResolver
         self.assertEqual(
             class_.python_module,

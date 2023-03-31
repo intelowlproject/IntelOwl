@@ -15,13 +15,13 @@ from api_app.serializers import (
 )
 from api_app.visualizers_manager.models import VisualizerConfig
 from tests import CustomTestCase
-from tests.mock_utils import MockRequest
+from tests.mock_utils import MockUpRequest
 
 
 class AbstractJobCreateSerializerTestCase(CustomTestCase):
     def setUp(self) -> None:
         self.ajcs = _AbstractJobCreateSerializer(
-            data={}, context={"request": MockRequest(self.user)}
+            data={}, context={"request": MockUpRequest(self.user)}
         )
         self.ajcs.all_analyzers = False
         self.ajcs.all_connectors = False
@@ -206,7 +206,7 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
 class FileJobCreateSerializerTestCase(CustomTestCase):
     def setUp(self) -> None:
         self.fas = FileAnalysisSerializer(
-            data={}, context={"request": MockRequest(self.user)}
+            data={}, context={"request": MockUpRequest(self.user)}
         )
         self.fas.all_analyzers = False
         self.fas.all_connectors = False
@@ -290,7 +290,7 @@ class FileJobCreateSerializerTestCase(CustomTestCase):
 class ObservableJobCreateSerializerTestCase(CustomTestCase):
     def setUp(self) -> None:
         self.oass = ObservableAnalysisSerializer(
-            data={}, context={"request": MockRequest(self.user)}
+            data={}, context={"request": MockUpRequest(self.user)}
         )
         self.oass.all_analyzers = False
         self.oass.all_connectors = False

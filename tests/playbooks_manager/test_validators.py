@@ -12,6 +12,7 @@ class ValidateRuntimeConfigurationPlaybookTestCase(CustomTestCase):
         data = {
             "analyzers": {"analyzer": {"param": 123, "param2": "value"}},
             "connectors": {},
+            "visualizers": {},
         }
         try:
             validate_runtime_configuration(data)
@@ -22,6 +23,7 @@ class ValidateRuntimeConfigurationPlaybookTestCase(CustomTestCase):
         data = {
             "analyzers": {"analyzer": {"param": 123, "param2": "value"}},
             "connectors": {},
+            "visualizers": {},
             "another_key": {},
         }
         with self.assertRaises(ValidationError):
@@ -36,6 +38,7 @@ class ValidateRuntimeConfigurationPlaybookTestCase(CustomTestCase):
         data = {
             "analyzers": [{"analyzer": {"param": 123, "param2": "value"}}],
             "connectors": {},
+            "visualizers": {},
         }
         with self.assertRaises(ValidationError):
             validate_runtime_configuration(data)
@@ -43,6 +46,7 @@ class ValidateRuntimeConfigurationPlaybookTestCase(CustomTestCase):
         data = {
             "analyzers": {"analyzer": [{"param": 123, "param2": "value"}]},
             "connectors": {},
+            "visualizers": {},
         }
         with self.assertRaises(ValidationError):
             validate_runtime_configuration(data)

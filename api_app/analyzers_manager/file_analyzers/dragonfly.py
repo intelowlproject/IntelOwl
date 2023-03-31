@@ -7,7 +7,7 @@ from pydragonfly import Dragonfly, DragonflyException
 
 from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
-from tests.mock_utils import MockResponse, if_mock_connections, patch
+from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
@@ -89,11 +89,11 @@ class DragonflyEmulation(FileAnalyzer):
                 patch(
                     "requests.Session.request",
                     side_effect=[
-                        MockResponse(
+                        MockUpResponse(
                             {"id": 1, "malware_type": "PE"}, 201
                         ),  # __upload; sample ID
-                        MockResponse({"id": 1}, 201),  # __upload; analysis ID
-                        MockResponse(
+                        MockUpResponse({"id": 1}, 201),  # __upload; analysis ID
+                        MockUpResponse(
                             {
                                 "id": 1,
                                 "created_at": "2022-01-17T12:07:55.446274Z",
@@ -126,7 +126,7 @@ class DragonflyEmulation(FileAnalyzer):
                             },
                             200,
                         ),  # __poll_and_fetch_result; Analysis.retrieve
-                        MockResponse(
+                        MockUpResponse(
                             [{"id": 1, "rule": "testrule", "weight": 0, "matches": []}],
                             200,
                         ),  # __poll_and_fetch_result; Report.matched_rules

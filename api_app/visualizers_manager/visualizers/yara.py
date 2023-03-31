@@ -88,7 +88,6 @@ class Yara(Visualizer):
                     }
                 ]
             },
-            runtime_configuration={},
             task_id=uuid(),
         )
         patches = []

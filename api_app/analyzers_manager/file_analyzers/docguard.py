@@ -7,7 +7,7 @@ import requests
 
 from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
-from tests.mock_utils import MockResponse, if_mock_connections, patch
+from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
@@ -48,11 +48,11 @@ class DocGuardUpload(FileAnalyzer):
             if_mock_connections(
                 patch(
                     "requests.get",
-                    return_value=MockResponse({}, 200),
+                    return_value=MockUpResponse({}, 200),
                 ),
                 patch(
                     "requests.post",
-                    return_value=MockResponse({}, 200),
+                    return_value=MockUpResponse({}, 200),
                 ),
             )
         ]

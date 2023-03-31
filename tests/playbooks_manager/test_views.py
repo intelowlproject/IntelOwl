@@ -59,9 +59,9 @@ class PlaybookViewTestCase(CustomAPITestCase):
         )
         job, _ = Job.objects.get_or_create(
             user=self.user,
-            analyzers_requested=[ac.name],
-            analyzers_to_execute=[ac.name],
         )
+        job.analyzers_requested.set([ac.name])
+        job.analyzers_to_execute.set([ac.name])
         response = self.client.post(
             self.URL,
             data={

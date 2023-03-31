@@ -5,7 +5,7 @@ import requests
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
-from tests.mock_utils import MockResponse, if_mock_connections, patch
+from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
 class HybridAnalysisGet(ObservableAnalyzer):
@@ -66,7 +66,7 @@ class HybridAnalysisGet(ObservableAnalyzer):
             if_mock_connections(
                 patch(
                     "requests.post",
-                    return_value=MockResponse(
+                    return_value=MockUpResponse(
                         [
                             {
                                 "job_id": "1",

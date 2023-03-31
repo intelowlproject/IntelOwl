@@ -12,7 +12,7 @@ from api_app.analyzers_manager.exceptions import (
     AnalyzerConfigurationException,
     AnalyzerRunException,
 )
-from tests.mock_utils import MockResponse, if_mock_connections, patch
+from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
@@ -134,11 +134,11 @@ class IntelX(ObservableAnalyzer):
             if_mock_connections(
                 patch(
                     "requests.Session.post",
-                    return_value=MockResponse({"id": 1}, 200),
+                    return_value=MockUpResponse({"id": 1}, 200),
                 ),
                 patch(
                     "requests.Session.get",
-                    return_value=MockResponse({"selectors": []}, 200),
+                    return_value=MockUpResponse({"selectors": []}, 200),
                 ),
             )
         ]

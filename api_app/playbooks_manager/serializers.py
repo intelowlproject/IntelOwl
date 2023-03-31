@@ -38,7 +38,7 @@ class PlaybookConfigCreateSerializer(rfs.ModelSerializer):
             set(
                 [
                     type_supported
-                    for analyzer_config in job.analyzers_to_execute
+                    for analyzer_config in job.analyzers_to_execute.all()
                     for type_supported in analyzer_config.observable_supported
                 ]
             )
@@ -61,6 +61,6 @@ class PlaybookConfigCreateSerializer(rfs.ModelSerializer):
             type=types_supported,
             runtime_configuration=runtime_configuration,
         )
-        pc.analyzers.set(job.analyzers_to_execute)
-        pc.connectors.set(job.connectors_to_execute)
+        pc.analyzers.set(list(job.analyzers_to_execute.all()))
+        pc.connectors.set(list(job.connectors_to_execute.all()))
         return pc

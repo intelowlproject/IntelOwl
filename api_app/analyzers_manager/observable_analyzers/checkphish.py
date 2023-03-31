@@ -7,7 +7,7 @@ import requests
 
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
-from tests.mock_utils import MockResponse, if_mock_connections, patch
+from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
 class CheckPhish(classes.ObservableAnalyzer):
@@ -75,8 +75,8 @@ class CheckPhish(classes.ObservableAnalyzer):
                 patch(
                     "requests.post",
                     side_effect=[
-                        MockResponse({"jobID": "sample job ID"}, 200),
-                        MockResponse({"status": "DONE"}, 200),
+                        MockUpResponse({"jobID": "sample job ID"}, 200),
+                        MockUpResponse({"status": "DONE"}, 200),
                     ],
                 ),
             ),

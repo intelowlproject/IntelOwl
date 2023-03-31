@@ -9,7 +9,7 @@ import requests
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from api_app.analyzers_manager.observable_analyzers.vt import vt2_get
-from tests.mock_utils import MockResponse, if_mock_connections, patch
+from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
@@ -90,13 +90,13 @@ class VirusTotalv2ScanFile(classes.FileAnalyzer):
             if_mock_connections(
                 patch(
                     "requests.get",
-                    return_value=MockResponse(
+                    return_value=MockUpResponse(
                         {"data": {"attributes": {"status": "completed"}}}, 200
                     ),
                 ),
                 patch(
                     "requests.post",
-                    return_value=MockResponse(
+                    return_value=MockUpResponse(
                         {"scan_id": "scan_id_test", "data": {"id": "id_test"}}, 200
                     ),
                 ),

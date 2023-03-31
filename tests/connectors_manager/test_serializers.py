@@ -4,7 +4,7 @@ from api_app.connectors_manager.models import ConnectorConfig
 from api_app.connectors_manager.serializers import ConnectorConfigSerializer
 
 from .. import CustomTestCase
-from ..mock_utils import MockRequest
+from ..mock_utils import MockUpRequest
 
 
 class ConnectorConfigSerializerTestCase(CustomTestCase):
@@ -19,7 +19,7 @@ class ConnectorConfigSerializerTestCase(CustomTestCase):
             secrets={},
             maximum_tlp="WHITE",
         )
-        ccs = ConnectorConfigSerializer(context={"request": MockRequest(self.user)})
+        ccs = ConnectorConfigSerializer(context={"request": MockUpRequest(self.user)})
         result = ccs.to_representation(cc)
         self.assertIn("verification", result)
         self.assertIn("configured", result["verification"])
@@ -45,7 +45,7 @@ class ConnectorConfigSerializerTestCase(CustomTestCase):
             maximum_tlp="WHITE",
         )
 
-        ccs = ConnectorConfigSerializer(context={"request": MockRequest(self.user)})
+        ccs = ConnectorConfigSerializer(context={"request": MockUpRequest(self.user)})
         result = ccs.to_representation(cc)
         self.assertIn("verification", result)
         self.assertIn("configured", result["verification"])

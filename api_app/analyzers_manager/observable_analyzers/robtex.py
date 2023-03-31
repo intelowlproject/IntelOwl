@@ -8,7 +8,7 @@ import requests
 
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
-from tests.mock_utils import MockResponse, if_mock_connections, patch
+from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
 class Robtex(classes.ObservableAnalyzer):
@@ -55,7 +55,7 @@ class Robtex(classes.ObservableAnalyzer):
             if_mock_connections(
                 patch(
                     "requests.get",
-                    return_value=MockResponse(
+                    return_value=MockUpResponse(
                         {}, 200, text='{"test1":"test1"}\r\n{"test2":"test2"}'
                     ),
                 ),

@@ -120,7 +120,9 @@ class ConnectorConfigAPITestCase(CustomAPITestCase):
         result = response.json()
         self.assertIn("errors", result)
         self.assertIn("detail", result["errors"])
-        self.assertEqual(result["errors"]["detail"], f"Plugin {connector} already disabled")
+        self.assertEqual(
+            result["errors"]["detail"], f"Plugin {connector} already disabled"
+        )
         an.disabled_in_organizations.set([])
         m.delete()
         org.delete()
@@ -158,7 +160,9 @@ class ConnectorConfigAPITestCase(CustomAPITestCase):
         result = response.json()
         self.assertIn("errors", result)
         self.assertIn("detail", result["errors"])
-        self.assertEqual(result["errors"]["detail"], f"Plugin {connector} already enabled")
+        self.assertEqual(
+            result["errors"]["detail"], f"Plugin {connector} already enabled"
+        )
 
         an.disabled_in_organizations.add(org)
         response = self.client.delete(f"{self.URL}/{connector}/organization")

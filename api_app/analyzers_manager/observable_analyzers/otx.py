@@ -9,7 +9,7 @@ import OTXv2
 
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
-from tests.mock_utils import MockResponse, if_mock_connections, patch
+from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
@@ -157,7 +157,7 @@ class OTX(classes.ObservableAnalyzer):
     def _monkeypatch(cls):
         patches = [
             if_mock_connections(
-                patch("requests.Session.get", return_value=MockResponse({}, 200))
+                patch("requests.Session.get", return_value=MockUpResponse({}, 200))
             )
         ]
         return super()._monkeypatch(patches=patches)

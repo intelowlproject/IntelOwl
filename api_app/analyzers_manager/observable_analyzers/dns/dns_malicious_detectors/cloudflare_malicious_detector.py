@@ -9,7 +9,7 @@ import requests
 
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
-from tests.mock_utils import MockResponse, if_mock_connections, patch
+from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 from ..dns_responses import malicious_detector_response
 
@@ -58,7 +58,7 @@ class CloudFlareMaliciousDetector(classes.ObservableAnalyzer):
             if_mock_connections(
                 patch(
                     "requests.get",
-                    return_value=MockResponse({"Answer": [{"data": "0.0.0.0"}]}, 200),
+                    return_value=MockUpResponse({"Answer": [{"data": "0.0.0.0"}]}, 200),
                 ),
             )
         ]

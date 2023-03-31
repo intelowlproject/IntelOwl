@@ -102,6 +102,10 @@ class VisualizableTitle(VisualizableObject):
         self.value = value
 
     @property
+    def attributes(self) -> List[str]:
+        return super().attributes + ["title", "value"]
+
+    @property
     def type(self) -> str:
         return "title"
 
@@ -139,10 +143,10 @@ class VisualizableListMixin:
     def to_dict(self) -> Dict:
         result = super().to_dict()  # noqa
         values: List[VisualizableObject] = result.pop("value", [])
-        if all(not x for x in values):
-            result["values"] = []
-        else:
+        if any(x for x in values):
             result["values"] = [val.to_dict() for val in values]
+        else:
+            result["values"] = []
         return result
 
 

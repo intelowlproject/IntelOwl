@@ -9,7 +9,7 @@ from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from api_app.analyzers_manager.observable_analyzers.triage.triage_base import (
     TriageMixin,
 )
-from tests.mock_utils import MockResponse, if_mock_connections, patch
+from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
@@ -44,13 +44,13 @@ class TriageScanFile(FileAnalyzer, TriageMixin):
             if_mock_connections(
                 patch(
                     "requests.Session.get",
-                    return_value=MockResponse(
+                    return_value=MockUpResponse(
                         {"tasks": {"task_1": {}, "task_2": {}}}, 200
                     ),
                 ),
                 patch(
                     "requests.Session.post",
-                    return_value=MockResponse(
+                    return_value=MockUpResponse(
                         {"id": "sample_id", "status": "pending"}, 200
                     ),
                 ),

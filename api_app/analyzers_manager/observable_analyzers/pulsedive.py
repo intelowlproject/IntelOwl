@@ -11,7 +11,7 @@ from api_app.analyzers_manager.exceptions import (
     AnalyzerConfigurationException,
     AnalyzerRunException,
 )
-from tests.mock_utils import MockResponse, if_mock_connections, patch
+from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
@@ -116,15 +116,17 @@ class Pulsedive(ObservableAnalyzer):
                 patch(
                     "requests.get",
                     side_effect=[
-                        MockResponse(
+                        MockUpResponse(
                             {}, 404
                         ),  # 404 so `__submit_for_analysis` is called
-                        MockResponse({"status": "done", "data": {"test": "test"}}, 200),
+                        MockUpResponse(
+                            {"status": "done", "data": {"test": "test"}}, 200
+                        ),
                     ],
                 ),
                 patch(
                     "requests.post",
-                    side_effect=lambda *args, **kwargs: MockResponse({"qid": 1}, 200),
+                    side_effect=lambda *args, **kwargs: MockUpResponse({"qid": 1}, 200),
                 ),
             )
         ]

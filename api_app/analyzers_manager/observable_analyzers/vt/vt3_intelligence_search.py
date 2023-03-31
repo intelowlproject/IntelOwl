@@ -4,7 +4,7 @@
 import requests
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
-from tests.mock_utils import MockResponse, if_mock_connections, patch
+from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 from ...exceptions import AnalyzerRunException
 from .vt3_base import VirusTotalv3AnalyzerMixin
@@ -46,7 +46,7 @@ class VirusTotalv3Intelligence(ObservableAnalyzer, VirusTotalv3AnalyzerMixin):
             if_mock_connections(
                 patch(
                     "requests.get",
-                    return_value=MockResponse({}, 200),
+                    return_value=MockUpResponse({}, 200),
                 ),
             )
         ]

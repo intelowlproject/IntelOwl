@@ -11,7 +11,7 @@ import requests
 from django.conf import settings
 
 from api_app.core.classes import Plugin
-from tests.mock_utils import MockResponse, if_mock_connections, patch
+from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 from .constants import HashChoices, ObservableTypes, TypeChoices
 from .exceptions import AnalyzerConfigurationException, AnalyzerRunException
@@ -417,12 +417,12 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
         return resp
 
     def mocked_docker_analyzer_get(*args, **kwargs):
-        return MockResponse(
+        return MockUpResponse(
             {"key": "test", "returncode": 0, "report": {"test": "This is a test."}}, 200
         )
 
     def mocked_docker_analyzer_post(*args, **kwargs):
-        return MockResponse({"key": "test", "status": "running"}, 202)
+        return MockUpResponse({"key": "test", "status": "running"}, 202)
 
     def _monkeypatch(self, patches: list = None):
         """

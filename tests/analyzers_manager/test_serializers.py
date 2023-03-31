@@ -4,7 +4,7 @@ from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.analyzers_manager.serializers import AnalyzerConfigSerializer
 
 from .. import CustomTestCase
-from ..mock_utils import MockRequest
+from ..mock_utils import MockUpRequest
 
 
 class AnalyzerConfigSerializerTestCase(CustomTestCase):
@@ -19,7 +19,7 @@ class AnalyzerConfigSerializerTestCase(CustomTestCase):
             secrets={},
             type="file",
         )
-        acs = AnalyzerConfigSerializer(context={"request": MockRequest(self.user)})
+        acs = AnalyzerConfigSerializer(context={"request": MockUpRequest(self.user)})
         result = acs.to_representation(ac)
         self.assertIn("verification", result)
         self.assertIn("configured", result["verification"])
@@ -45,7 +45,7 @@ class AnalyzerConfigSerializerTestCase(CustomTestCase):
             },
             type="file",
         )
-        acs = AnalyzerConfigSerializer(context={"request": MockRequest(self.user)})
+        acs = AnalyzerConfigSerializer(context={"request": MockUpRequest(self.user)})
         result = acs.to_representation(ac)
         self.assertIn("verification", result)
         self.assertIn("configured", result["verification"])

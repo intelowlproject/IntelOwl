@@ -15,7 +15,7 @@ from api_app.analyzers_manager.exceptions import (
     AnalyzerConfigurationException,
     AnalyzerRunException,
 )
-from tests.mock_utils import MockResponse, if_mock_connections, patch
+from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
@@ -109,7 +109,7 @@ class FireHol_IPList(classes.ObservableAnalyzer):
             if_mock_connections(
                 patch(
                     "requests.get",
-                    return_value=MockResponse(
+                    return_value=MockUpResponse(
                         json_data={},
                         status_code=200,
                         text="""0.0.0.0/8\n

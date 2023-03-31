@@ -10,7 +10,7 @@ from api_app.analyzers_manager.exceptions import (
     AnalyzerConfigurationException,
     AnalyzerRunException,
 )
-from tests.mock_utils import MockResponse, if_mock_connections, patch
+from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
 class SSAPINet(classes.ObservableAnalyzer):
@@ -64,7 +64,7 @@ class SSAPINet(classes.ObservableAnalyzer):
             if_mock_connections(
                 patch(
                     "requests.get",
-                    return_value=MockResponse({}, 200, content=b"hello world"),
+                    return_value=MockUpResponse({}, 200, content=b"hello world"),
                 ),
             )
         ]

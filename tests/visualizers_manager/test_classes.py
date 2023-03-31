@@ -216,6 +216,8 @@ class VisualizableLevelTestCase(CustomTestCase):
 class VisualizerTestCase(CustomTestCase):
     fixtures = [
         "api_app/fixtures/0001_user.json",
+        "api_app/fixtures/0002_analyzer_pluginconfig.json",
+        "api_app/fixtures/0003_connector_pluginconfig.json",
     ]
 
     def test_analyzer_reports(self):
@@ -291,10 +293,6 @@ class VisualizerTestCase(CustomTestCase):
                         f"failed {e}"
                     )
                 finally:
-                    from api_app.analyzers_manager.models import AnalyzerConfig
-                    from api_app.connectors_manager.models import ConnectorConfig
-
                     signal.alarm(0)
-                    AnalyzerConfig.objects.all().delete()
-                    ConnectorConfig.objects.all().delete()
+
         job.delete()

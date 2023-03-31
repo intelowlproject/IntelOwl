@@ -11,7 +11,7 @@ from django.conf import settings
 
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
-from tests.mock_utils import MockResponse, if_mock_connections, patch
+from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
@@ -72,7 +72,7 @@ class Tor(classes.ObservableAnalyzer):
             if_mock_connections(
                 patch(
                     "requests.get",
-                    return_value=MockResponse(
+                    return_value=MockUpResponse(
                         {},
                         200,
                         content=b"""ExitNode D2A4BEE6754A9711EB0FAC47F3059BE6FC0D72C7

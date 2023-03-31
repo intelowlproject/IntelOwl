@@ -13,13 +13,13 @@ from unittest.mock import MagicMock, patch  # noqa: F401
 from django.conf import settings
 
 
-class MockRequest:
+class MockUpRequest:
     def __init__(self, user):
         self.user = user
 
 
 # class for mocking responses
-class MockResponse:
+class MockUpResponse:
     @dataclass()
     class Request:
         def __init__(self):

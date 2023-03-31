@@ -8,7 +8,7 @@ import requests
 
 from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
-from tests.mock_utils import MockResponse, if_mock_connections, patch
+from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
@@ -76,11 +76,11 @@ class FileScanUpload(FileAnalyzer):
             if_mock_connections(
                 patch(
                     "requests.get",
-                    return_value=MockResponse({"allFinished": True}, 200),
+                    return_value=MockUpResponse({"allFinished": True}, 200),
                 ),
                 patch(
                     "requests.post",
-                    return_value=MockResponse({"flow_id": 1}, 200),
+                    return_value=MockUpResponse({"flow_id": 1}, 200),
                 ),
             )
         ]

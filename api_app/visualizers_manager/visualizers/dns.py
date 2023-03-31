@@ -44,23 +44,23 @@ class DNS(Visualizer):
     @classmethod
     @property
     def first_level_analyzers(cls) -> List[str]:
-        return [
-            cls.__generate_classpath(ClassicDNSResolver),
-            cls.__generate_classpath(CloudFlareDNSResolver),
-            cls.__generate_classpath(GoogleDNSResolver),
-            cls.__generate_classpath(DNS0EUResolver),
-            cls.__generate_classpath(Quad9DNSResolver),
+        return [  # noqa
+            ClassicDNSResolver.python_module,
+            CloudFlareDNSResolver.python_module,
+            GoogleDNSResolver.python_module,
+            DNS0EUResolver.python_module,
+            Quad9DNSResolver.python_module,
         ]
 
     @classmethod
     @property
     def second_level_analyzers(cls) -> List[str]:
-        return [
-            cls.__generate_classpath(CloudFlareMaliciousDetector),
-            cls.__generate_classpath(GoogleSF),
-            cls.__generate_classpath(WebRisk),
-            cls.__generate_classpath(DNS0EUMaliciousDetector),
-            cls.__generate_classpath(Quad9MaliciousDetector),
+        return [  # noqa
+            CloudFlareMaliciousDetector.python_module,
+            GoogleSF.python_module,
+            WebRisk.python_module,
+            DNS0EUMaliciousDetector.python_module,
+            Quad9MaliciousDetector.python_module,
         ]
 
     def run(self) -> List[Dict]:
@@ -116,29 +116,14 @@ class DNS(Visualizer):
         return levels.to_dict()
 
     @classmethod
-    def __generate_classpath(cls, class_):
-        return f"{class_.__module__}.{class_.__name__}"
-
-    @classmethod
     def _monkeypatch(cls):
         from kombu import uuid
 
         # malicious detector services (1st level)
 
-        for analyzer in cls.first_level_analyzers:
+        for python_module in cls.first_level_analyzers:
             AnalyzerReport.objects.create(
-                config=AnalyzerConfig.objects.get(name=analyzer),
-                job=Job.objects.first(),
-                status=AnalyzerReport.Status.SUCCESS,
-                report={"observable": "dns.google.com", "malicious": False},
-                runtime_configuration={},
-                task_id=uuid(),
-            )
-
-        # classic DNS resolution (2nd level)
-        for analyzer in cls.second_level_analyzers:
-            AnalyzerReport.objects.create(
-                config=AnalyzerConfig.objects.get(name=analyzer),
+                config=AnalyzerConfig.objects.get(python_module=python_module),
                 job=Job.objects.first(),
                 status=AnalyzerReport.Status.SUCCESS,
                 report={
@@ -158,7 +143,16 @@ class DNS(Visualizer):
                         },
                     ],
                 },
-                runtime_configuration={"query_type": "A"},
+                task_id=uuid(),
+            )
+
+        # classic DNS resolution (2nd level)
+        for python_module in cls.second_level_analyzers:
+            AnalyzerReport.objects.create(
+                config=AnalyzerConfig.objects.get(python_module=python_module),
+                job=Job.objects.first(),
+                status=AnalyzerReport.Status.SUCCESS,
+                report={"observable": "dns.google.com", "malicious": False},
                 task_id=uuid(),
             )
 

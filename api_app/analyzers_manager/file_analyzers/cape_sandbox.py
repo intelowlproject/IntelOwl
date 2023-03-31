@@ -8,7 +8,7 @@ import requests
 
 from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
-from tests.mock_utils import MockResponse, if_mock_connections, patch
+from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
@@ -231,13 +231,13 @@ class CAPEsandbox(FileAnalyzer):
             if_mock_connections(
                 patch(
                     "requests.Session.get",
-                    return_value=MockResponse(
+                    return_value=MockUpResponse(
                         {"error": False, "data": "completed"}, 200
                     ),
                 ),
                 patch(
                     "requests.Session.post",
-                    return_value=MockResponse(
+                    return_value=MockUpResponse(
                         {
                             "error": False,
                             "data": {

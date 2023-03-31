@@ -9,7 +9,7 @@ import requests
 
 from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
-from tests.mock_utils import MockResponse, if_mock_connections, patch
+from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
@@ -268,11 +268,11 @@ class CuckooAnalysis(FileAnalyzer):
             if_mock_connections(
                 patch(
                     "requests.Session.get",
-                    return_value=MockResponse({"task": {"status": "reported"}}, 200),
+                    return_value=MockUpResponse({"task": {"status": "reported"}}, 200),
                 ),
                 patch(
                     "requests.Session.post",
-                    return_value=MockResponse({}, 200),
+                    return_value=MockUpResponse({}, 200),
                 ),
             )
         ]

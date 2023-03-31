@@ -19,6 +19,11 @@ class VisualizableColor(enum.Enum):
     def __str__(self):
         return self.value
 
+    def __bool__(self):
+        if self is self.TRANSPARENT:
+            return False
+        return True
+
 
 class VisualizableIcon(enum.Enum):
     INFO = "info"
@@ -41,3 +46,8 @@ class VisualizableIcon(enum.Enum):
     QUAD_9 = "quad9"
 
     EMPTY = ""
+
+    def __bool__(self):
+        if self is self.EMPTY:
+            return False
+        return True

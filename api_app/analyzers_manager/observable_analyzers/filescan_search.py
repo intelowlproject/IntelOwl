@@ -7,7 +7,7 @@ import requests
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
-from tests.mock_utils import MockResponse, if_mock_connections, patch
+from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
 class FileScanSearch(ObservableAnalyzer):
@@ -36,7 +36,7 @@ class FileScanSearch(ObservableAnalyzer):
             if_mock_connections(
                 patch(
                     "requests.get",
-                    return_value=MockResponse(
+                    return_value=MockUpResponse(
                         {
                             "items": [],
                             "count": 0,

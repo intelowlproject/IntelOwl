@@ -5,7 +5,7 @@ from api_app.visualizers_manager.models import VisualizerConfig
 from api_app.visualizers_manager.serializers import VisualizerConfigSerializer
 
 from .. import CustomTestCase
-from ..mock_utils import MockRequest
+from ..mock_utils import MockUpRequest
 
 
 class VisualizerConfigSerializerTestCase(CustomTestCase):
@@ -16,10 +16,8 @@ class VisualizerConfigSerializerTestCase(CustomTestCase):
             description="test",
             disabled=False,
             config={"soft_time_limit": 100, "queue": "default"},
-            analyzers=[],
-            connectors=[],
         )
-        vcs = VisualizerConfigSerializer(context={"request": MockRequest(self.user)})
+        vcs = VisualizerConfigSerializer(context={"request": MockUpRequest(self.user)})
         result = vcs.to_representation(vc)
         self.assertIn("verification", result)
         self.assertIn("configured", result["verification"])
@@ -33,8 +31,6 @@ class VisualizerConfigSerializerTestCase(CustomTestCase):
             description="test",
             disabled=False,
             config={"soft_time_limit": 100, "queue": "default"},
-            analyzers=[],
-            connectors=[],
             secrets={
                 "test": {
                     "env_var_key": "TEST_NOT_PRESENT_KEY",
@@ -45,7 +41,7 @@ class VisualizerConfigSerializerTestCase(CustomTestCase):
             },
         )
 
-        vcs = ConnectorConfigSerializer(context={"request": MockRequest(self.user)})
+        vcs = ConnectorConfigSerializer(context={"request": MockUpRequest(self.user)})
         result = vcs.to_representation(vc)
         self.assertIn("verification", result)
         self.assertIn("configured", result["verification"])

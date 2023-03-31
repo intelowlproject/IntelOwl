@@ -11,7 +11,7 @@ from requests.structures import CaseInsensitiveDict
 from api_app.analyzers_manager.classes import ObservableAnalyzer
 from api_app.analyzers_manager.constants import ObservableTypes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
-from tests.mock_utils import MockResponse, if_mock_connections, patch
+from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
@@ -109,7 +109,7 @@ class DehashedSearch(ObservableAnalyzer):
             if_mock_connections(
                 patch(
                     "requests.get",
-                    return_value=MockResponse({"entries": [{"id": "test"}]}, 200),
+                    return_value=MockUpResponse({"entries": [{"id": "test"}]}, 200),
                 )
             )
         ]

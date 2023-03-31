@@ -65,7 +65,7 @@ class VisualizerConfigAPITestCase(CustomAPITestCase):
         self.assertEqual(response.status_code, 405)
 
     def test_organization_disable(self):
-        visualizer = "Yeti"
+        visualizer = "Yara"
         org, _ = Organization.objects.get_or_create(name="test")
         response = self.client.post(f"{self.URL}/{visualizer}/organization")
         # permission denied
@@ -101,13 +101,15 @@ class VisualizerConfigAPITestCase(CustomAPITestCase):
         result = response.json()
         self.assertIn("errors", result)
         self.assertIn("detail", result["errors"])
-        self.assertEqual(result["errors"]["detail"], "Plugin Yeti already disabled")
+        self.assertEqual(
+            result["errors"]["detail"], f"Plugin {visualizer} already disabled"
+        )
         an.disabled_in_organizations.set([])
         m.delete()
         org.delete()
 
     def test_organization_enable(self):
-        visualizer = "Yeti"
+        visualizer = "Yara"
         org, _ = Organization.objects.get_or_create(name="test")
         response = self.client.delete(f"{self.URL}/{visualizer}/organization")
         # permission denied
@@ -139,7 +141,9 @@ class VisualizerConfigAPITestCase(CustomAPITestCase):
         result = response.json()
         self.assertIn("errors", result)
         self.assertIn("detail", result["errors"])
-        self.assertEqual(result["errors"]["detail"], "Plugin Yeti already enabled")
+        self.assertEqual(
+            result["errors"]["detail"], f"Plugin {visualizer} already enabled"
+        )
 
         an.disabled_in_organizations.add(org)
         response = self.client.delete(f"{self.URL}/{visualizer}/organization")

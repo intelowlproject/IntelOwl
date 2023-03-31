@@ -8,7 +8,7 @@ import requests
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
-from tests.mock_utils import MockResponse, if_mock_connections, patch
+from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
@@ -97,9 +97,9 @@ class UrlScan(ObservableAnalyzer):
             if_mock_connections(
                 patch(
                     "requests.Session.post",
-                    return_value=MockResponse({"api": "test"}, 200),
+                    return_value=MockUpResponse({"api": "test"}, 200),
                 ),
-                patch("requests.Session.get", return_value=MockResponse({}, 200)),
+                patch("requests.Session.get", return_value=MockUpResponse({}, 200)),
             )
         ]
         return super()._monkeypatch(patches=patches)

@@ -6,7 +6,7 @@ from django.conf import settings
 
 from api_app.connectors_manager import classes
 from api_app.connectors_manager.exceptions import ConnectorRunException
-from tests.mock_utils import MockResponse, if_mock_connections, patch
+from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
 class YETI(classes.Connector):
@@ -31,7 +31,11 @@ class YETI(classes.Connector):
             "date": str(self._job.finished_analysis_time),
             "description": "IntelOwl's analysis report for Job: "
             f"{self.job_id} | {obs_value} | {obs_type}",
-            "analyzers executed": ', '.join(list(self._job.analyzers_to_execute.all().values_list('name', flat=True))),
+            "analyzers executed": ", ".join(
+                list(
+                    self._job.analyzers_to_execute.all().values_list("name", flat=True)
+                )
+            ),
         }
 
         # get job tags
@@ -70,7 +74,7 @@ class YETI(classes.Connector):
             if_mock_connections(
                 patch(
                     "requests.post",
-                    return_value=MockResponse({}, 200),
+                    return_value=MockUpResponse({}, 200),
                 )
             )
         ]

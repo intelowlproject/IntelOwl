@@ -56,7 +56,6 @@ class PlaybookViewTestCase(CustomAPITestCase):
             params={},
             secrets={},
             type="ip",
-            leaks_info=False,
         )
         job, _ = Job.objects.get_or_create(
             user=self.user,

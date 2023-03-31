@@ -307,19 +307,19 @@ class Job(models.Model):
             try:
                 self.analyzers_to_execute.get(name=config.name)
             except AnalyzerConfig.DoesNotExist:
-                raise TypeError(f"Config {config.name} is not inside job")
+                raise TypeError(f"Analyzer {config.name} is not configured inside job {self.pk}")
         elif isinstance(config, ConnectorConfig):
             key = "connectors"
             try:
                 self.connectors_to_execute.get(name=config.name)
             except ConnectorConfig.DoesNotExist:
-                raise TypeError(f"Config {config.name} is not inside job")
+                raise TypeError(f"Connector {config.name} is not configured inside job {self.pk}")
         elif isinstance(config, VisualizerConfig):
             key = "visualizers"
             try:
                 self.visualizers_to_execute.get(name=config.name)
             except VisualizerConfig.DoesNotExist:
-                raise TypeError(f"Config {config.name} is not inside job")
+                raise TypeError(f"Visualizer {config.name} is not configured inside job {self.pk}")
         else:
             raise TypeError(f"Config {type(config)} is not supported")
         return self.runtime_configuration[key].get(config.name, {})

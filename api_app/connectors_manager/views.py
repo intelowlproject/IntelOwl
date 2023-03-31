@@ -31,6 +31,6 @@ class ConnectorActionViewSet(PluginActionViewSet):
 
     def perform_retry(self, report: ConnectorReport):
         signature = report.config.get_signature(
-            report.job.pk,
+            report.job,
         )
         signature()

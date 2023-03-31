@@ -20,7 +20,6 @@ class AnalyzerConfigTestCase(CustomTestCase):
             params={},
             disabled=False,
             type="file",
-            leaks_info=True,
             run_hash=True,
         )
         with self.assertRaises(ValidationError) as e:
@@ -48,7 +47,6 @@ class AnalyzerConfigTestCase(CustomTestCase):
             params={},
             disabled=False,
             type="file",
-            leaks_info=True,
         )
         result = tasks.update("xlm_macro_deobfuscator.XlmMacroDeobfuscator")
         self.assertFalse(result)
@@ -63,7 +61,6 @@ class AnalyzerConfigTestCase(CustomTestCase):
             params={},
             disabled=False,
             type="file",
-            leaks_info=True,
         )
         with patch("intel_owl.celery.broadcast"):
             result = tasks.update("yara_scan.YaraScan")

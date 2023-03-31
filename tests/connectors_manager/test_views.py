@@ -1,7 +1,8 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
-
+from api_app.analyzers_manager.constants import ObservableTypes
 from api_app.connectors_manager.models import ConnectorConfig, ConnectorReport
+from api_app.models import Job
 from certego_saas.apps.organization.membership import Membership
 from certego_saas.apps.organization.organization import Organization
 
@@ -177,6 +178,21 @@ class ConnectorActionViewSetTests(CustomAPITestCase, PluginActionViewsetTestCase
     def plugin_type(self):
         return "connector"
 
-    @property
-    def report_model(self):
-        return ConnectorReport
+    def init_report(self, status: str, user) -> ConnectorReport:
+        config = ConnectorConfig.objects.get(name="MISP")
+        _job = Job.objects.create(
+            user=user,
+            status=Job.Status.RUNNING,
+            observable_name="8.8.8.8",
+            observable_classification=ObservableTypes.IP,
+        )
+        _job.connectors_to_execute.set([config])
+        _report, _ = ConnectorReport.objects.get_or_create(
+            **{
+                "job_id": _job.id,
+                "status": status,
+                "config": config,
+                "task_id": "4b77bdd6-d05b-442b-92e8-d53de5d7c1a9",
+            }
+        )
+        return _report

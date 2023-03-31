@@ -73,7 +73,7 @@ class AnalyzerActionViewSet(PluginActionViewSet):
         from intel_owl import tasks
 
         signature = report.config.get_signature(
-            report.job.id,
+            report.job,
         )
         runner = signature | tasks.continue_job_pipeline.signature(
             args=[report.job.id],

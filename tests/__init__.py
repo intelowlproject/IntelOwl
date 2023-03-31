@@ -57,35 +57,15 @@ class PluginActionViewsetTestCase(metaclass=ABCMeta):
         """
         raise NotImplementedError()
 
-    @property
     @abstractmethod
-    def report_model(self):
-        """
-        Returns model to be used for *init_report*
-        """
-        raise NotImplementedError()
+    def init_report(self, status):
+        ...
 
-    def init_report(self, status: str, user: User) -> AbstractReport:
-        _job = Job.objects.create(
-            user=user,
-            status=Job.Status.RUNNING,
-            observable_name="8.8.8.8",
-            observable_classification=ObservableTypes.IP,
-        )
-        _report, _ = self.report_model.objects.get_or_create(
-            **{
-                "job_id": _job.id,
-                "status": status,
-                "name": "MISP",  # analyzer and connector both exists for this name
-                "task_id": "4b77bdd6-d05b-442b-92e8-d53de5d7c1a9",
-            }
-        )
-        return _report
 
     def test_kill_204(self):
         _report = self.init_report(status=AbstractReport.Status.PENDING, user=self.user)
         response = self.client.patch(
-            f"/api/jobs/{_report.job_id}/{self.plugin_type}/{_report.name}/kill"
+            f"/api/jobs/{_report.job_id}/{self.plugin_type}/{_report.config.name}/kill"
         )
         _report.refresh_from_db()
 
@@ -96,7 +76,7 @@ class PluginActionViewsetTestCase(metaclass=ABCMeta):
         # create a new report whose status is not "running"/"pending"
         _report = self.init_report(status=AbstractReport.Status.SUCCESS, user=self.user)
         response = self.client.patch(
-            f"/api/jobs/{_report.job_id}/{self.plugin_type}/{_report.name}/kill"
+            f"/api/jobs/{_report.job_id}/{self.plugin_type}/{_report.config.name}/kill"
         )
         content = response.json()
         msg = (response, content)
@@ -112,7 +92,7 @@ class PluginActionViewsetTestCase(metaclass=ABCMeta):
         # create a new report which does not belong to user
         _report = self.init_report(status=AbstractReport.Status.PENDING, user=None)
         response = self.client.patch(
-            f"/api/jobs/{_report.job_id}/{self.plugin_type}/{_report.name}/kill"
+            f"/api/jobs/{_report.job_id}/{self.plugin_type}/{_report.config.name}/kill"
         )
 
         self.assertEqual(response.status_code, 403)
@@ -131,7 +111,7 @@ class PluginActionViewsetTestCase(metaclass=ABCMeta):
         )
         self.client.force_authenticate(self.superuser)
         response = self.client.patch(
-            f"/api/jobs/{_report.job_id}/{self.plugin_type}/{_report.name}/retry"
+            f"/api/jobs/{_report.job_id}/{self.plugin_type}/{_report.config.name}/retry"
         )
 
         self.assertEqual(response.status_code, 204)
@@ -141,7 +121,7 @@ class PluginActionViewsetTestCase(metaclass=ABCMeta):
         # create a new report whose status is not "FAILED"/"KILLED"
         _report = self.init_report(status=AbstractReport.Status.SUCCESS, user=self.user)
         response = self.client.patch(
-            f"/api/jobs/{_report.job_id}/{self.plugin_type}/{_report.name}/retry"
+            f"/api/jobs/{_report.job_id}/{self.plugin_type}/{_report.config.name}/retry"
         )
         content = response.json()
         msg = (response, content)
@@ -157,7 +137,7 @@ class PluginActionViewsetTestCase(metaclass=ABCMeta):
         # create a new report which does not belong to user
         _report = self.init_report(status=AbstractReport.Status.FAILED, user=None)
         response = self.client.patch(
-            f"/api/jobs/{_report.job_id}/{self.plugin_type}/{_report.name}/retry"
+            f"/api/jobs/{_report.job_id}/{self.plugin_type}/{_report.config.name}/retry"
         )
 
         self.assertEqual(response.status_code, 403)

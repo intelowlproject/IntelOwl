@@ -18,7 +18,6 @@ class AnalyzerConfigSerializerTestCase(CustomTestCase):
             params={},
             secrets={},
             type="file",
-            leaks_info=False,
         )
         acs = AnalyzerConfigSerializer(context={"request": MockRequest(self.user)})
         result = acs.to_representation(ac)
@@ -45,7 +44,6 @@ class AnalyzerConfigSerializerTestCase(CustomTestCase):
                 }
             },
             type="file",
-            leaks_info=False,
         )
         acs = AnalyzerConfigSerializer(context={"request": MockRequest(self.user)})
         result = acs.to_representation(ac)

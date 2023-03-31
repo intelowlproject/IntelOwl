@@ -182,7 +182,7 @@ class AnalyzerConfig(AbstractConfig):
         self.clean_filetypes()
 
     @classmethod
-    def _get_type(cls) -> str:
+    def _get_type(cls) -> models.TextChoices:
         return PluginConfig.PluginType.ANALYZER
 
     @classmethod

@@ -832,8 +832,8 @@ class PluginConfigSerializer(rfs.ModelSerializer):
             raise ValidationError(
                 f"{self.category} {attrs['plugin_name']} attribute "
                 f"{attrs['attribute']} has wrong type "
-                f"{type(attrs['value']).__name__}. Expected: "
-                f"{expected_type.__name__}."
+                f"{value_type}. Expected: "
+                f"{expected_type}."
             )
 
         inclusion_params = attrs.copy()

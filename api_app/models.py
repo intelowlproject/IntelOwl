@@ -8,6 +8,7 @@ from typing import Optional
 from celery import group
 from django.conf import settings
 from django.contrib.postgres import fields as pg_fields
+from django.core.exceptions import ValidationError
 from django.core.validators import MinLengthValidator, RegexValidator
 from django.db import models
 from django.db.models import Q, QuerySet
@@ -448,7 +449,24 @@ class PluginConfig(models.Model):
 
     @cached_property
     def config(self) -> AbstractConfig:
+        return self.config_class.objects.get(name=self.plugin_name)
+
+    @cached_property
+    def config_class(self) -> typing.Type[AbstractConfig]:
+
         for config in AbstractConfig.__subclasses__():
-            if self.type == config._get_type():
-                return config.objects.get(name=self.plugin_name)
-        raise TypeError("Unable to find configuration")
+            if self.type == config._get_type().value:
+                return config
+        raise TypeError(f"Unable to find configuration for type {self.type}")
+
+    def clean_plugin_name(self):
+        try:
+            self.config  # noqa
+        except TypeError as e:
+            raise ValidationError(str(e))
+        except AbstractConfig.DoesNotExist:
+            raise ValidationError(f"Unable to find configuration with name {self.plugin_name}")
+
+
+    def clean(self) -> None:
+        self.clean_plugin_name()

@@ -25,7 +25,7 @@ class PluginConfigViewSetTestCase(CustomAPITestCase):
         PluginConfig.objects.all().delete()
 
     def test_plugins_config_viewset(self):
-        org = Organization.create("test_org", self.superuser)
+        org = Organization.create("test_org", self.user)
 
         response = self.client.get(self.URL, {}, format="json")
         self.assertEqual(response.status_code, 200)
@@ -33,16 +33,17 @@ class PluginConfigViewSetTestCase(CustomAPITestCase):
         self.assertFalse(content)
 
         # if the user is owner of an org, he should get the org secret
-        pc = PluginConfig.objects.create(
-            type=1,
-            config_type=2,
+        pc = PluginConfig(
+            type="1",
+            config_type="2",
             attribute="api_key_name",
             value="supersecret",
             organization=org,
-            owner=self.superuser,
+            owner=self.user,
             plugin_name="AbuseIPDB",
         )
-        self.assertEqual(self.client.handler._force_user, org.owner)
+        pc.clean()
+        pc.save()
         self.assertEqual(pc.owner, org.owner)
         response = self.client.get(self.URL, {}, format="json")
         self.assertEqual(response.status_code, 200)
@@ -52,12 +53,12 @@ class PluginConfigViewSetTestCase(CustomAPITestCase):
 
         # second personal item
         secret_owner = PluginConfig(
-            type=1,
-            config_type=2,
+            type="1",
+            config_type="2",
             attribute="api_key_name",
             value="supersecret_user_only",
             organization=None,
-            owner=self.superuser,
+            owner=self.user,
             plugin_name="AbuseIPDB",
         )
         secret_owner.save()
@@ -95,8 +96,8 @@ class PluginConfigViewSetTestCase(CustomAPITestCase):
 
         # third superuser secret
         secret_owner = PluginConfig(
-            type=1,
-            config_type=2,
+            type="1",
+            config_type="2",
             attribute="api_key_name",
             value="supersecret_low_privilege",
             organization=None,
@@ -112,8 +113,8 @@ class PluginConfigViewSetTestCase(CustomAPITestCase):
 
         # if there are 2 secrets for different services, the user should get them both
         secret_owner = PluginConfig(
-            type=1,
-            config_type=2,
+            type="1",
+            config_type="2",
             attribute="api_key_name",
             value="supersecret_low_privilege_third",
             organization=None,

@@ -6,9 +6,7 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from rest_framework.test import APIClient
 
-from api_app.analyzers_manager.constants import ObservableTypes
 from api_app.core.models import AbstractReport
-from api_app.models import Job
 
 User = get_user_model()
 
@@ -60,7 +58,6 @@ class PluginActionViewsetTestCase(metaclass=ABCMeta):
     @abstractmethod
     def init_report(self, status):
         ...
-
 
     def test_kill_204(self):
         _report = self.init_report(status=AbstractReport.Status.PENDING, user=self.user)

@@ -3,11 +3,10 @@
 
 from django.test import tag
 from rest_framework.reverse import reverse
-from rest_framework.test import APIClient
 
 from api_app.models import PluginConfig
 
-from .. import CustomAPITestCase, User
+from .. import CustomAPITestCase
 
 custom_config_uri = reverse("plugin-config-list")
 

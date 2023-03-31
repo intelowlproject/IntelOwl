@@ -113,7 +113,6 @@ class BaseAnalyzerMixin(Plugin, metaclass=ABCMeta):
         return False
 
 
-
 class ObservableAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
     """
     Abstract class for Observable Analyzers.

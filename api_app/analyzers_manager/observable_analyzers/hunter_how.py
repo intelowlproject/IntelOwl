@@ -6,10 +6,7 @@ import base64
 import requests
 
 from api_app.analyzers_manager import classes
-from api_app.analyzers_manager.exceptions import (
-    AnalyzerConfigurationException,
-    AnalyzerRunException,
-)
+from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from tests.mock_utils import MockResponse, if_mock_connections, patch
 
 
@@ -17,9 +14,9 @@ class Hunter_How(classes.ObservableAnalyzer):
     base_url: str = "https://api.hunter.how/search"
     _api_key_name: str
     page: int
-    page_size:int
-    start_time:str
-    end_time:str
+    page_size: int
+    start_time: str
+    end_time: str
 
     def config(self):
         super().config()

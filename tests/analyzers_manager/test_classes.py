@@ -227,7 +227,7 @@ class ObservableAnalyzerTestCase(CustomTestCase):
                         observable_classification=observable_supported
                     )
                     sub = subclass(
-                        config, job.pk, runtime_configuration= {}, task_id= uuid()
+                        config, job.pk, runtime_configuration={}, task_id=uuid()
                     )
                     signal.alarm(timeout_seconds)
                     try:

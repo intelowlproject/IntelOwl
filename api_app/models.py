@@ -308,19 +308,25 @@ class Job(models.Model):
             try:
                 self.analyzers_to_execute.get(name=config.name)
             except AnalyzerConfig.DoesNotExist:
-                raise TypeError(f"Analyzer {config.name} is not configured inside job {self.pk}")
+                raise TypeError(
+                    f"Analyzer {config.name} is not configured inside job {self.pk}"
+                )
         elif isinstance(config, ConnectorConfig):
             key = "connectors"
             try:
                 self.connectors_to_execute.get(name=config.name)
             except ConnectorConfig.DoesNotExist:
-                raise TypeError(f"Connector {config.name} is not configured inside job {self.pk}")
+                raise TypeError(
+                    f"Connector {config.name} is not configured inside job {self.pk}"
+                )
         elif isinstance(config, VisualizerConfig):
             key = "visualizers"
             try:
                 self.visualizers_to_execute.get(name=config.name)
             except VisualizerConfig.DoesNotExist:
-                raise TypeError(f"Visualizer {config.name} is not configured inside job {self.pk}")
+                raise TypeError(
+                    f"Visualizer {config.name} is not configured inside job {self.pk}"
+                )
         else:
             raise TypeError(f"Config {type(config)} is not supported")
         return self.runtime_configuration[key].get(config.name, {})
@@ -465,8 +471,9 @@ class PluginConfig(models.Model):
         except TypeError as e:
             raise ValidationError(str(e))
         except AbstractConfig.DoesNotExist:
-            raise ValidationError(f"Unable to find configuration with name {self.plugin_name}")
-
+            raise ValidationError(
+                f"Unable to find configuration with name {self.plugin_name}"
+            )
 
     def clean(self) -> None:
         self.clean_plugin_name()

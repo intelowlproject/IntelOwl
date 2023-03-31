@@ -2,7 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 
 """Check if the domains is reported as malicious for GoogleSafeBrowsing"""
-from typing import List, Dict
+from typing import Dict, List
 
 import pysafebrowsing
 
@@ -12,19 +12,22 @@ from tests.mock_utils import if_mock_connections, patch
 
 from ..dns_responses import malicious_detector_response
 
+
 class MockUpSafeBrowsing:
     def __init__(self, *args, **kwargs):
         ...
 
     def lookup_urls(self, urls: List[str]) -> Dict:
         return {
-                        url: {
-                            "malicious": True,
-                            "cache": "test",
-                            "threats": "test",
-                            "platforms": "test",
-                        } for url in urls
-                    }
+            url: {
+                "malicious": True,
+                "cache": "test",
+                "threats": "test",
+                "platforms": "test",
+            }
+            for url in urls
+        }
+
 
 class GoogleSF(classes.ObservableAnalyzer):
     """Check if observable analyzed is marked as malicious for Google SafeBrowsing"""
@@ -54,10 +57,7 @@ class GoogleSF(classes.ObservableAnalyzer):
     def _monkeypatch(cls):
         patches = [
             if_mock_connections(
-                patch(
-                    "pysafebrowsing.SafeBrowsing",
-                    return_value=MockUpSafeBrowsing()
-                ),
+                patch("pysafebrowsing.SafeBrowsing", return_value=MockUpSafeBrowsing()),
             )
         ]
         return super()._monkeypatch(patches=patches)

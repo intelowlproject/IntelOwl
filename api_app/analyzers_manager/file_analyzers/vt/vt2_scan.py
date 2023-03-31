@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 class VirusTotalv2ScanFile(classes.FileAnalyzer):
     base_url: str = "https://www.virustotal.com/vtapi/v2/"
-    poll_distance:int
+    poll_distance: int
 
     max_tries: int
     # this is a config value that can be used...

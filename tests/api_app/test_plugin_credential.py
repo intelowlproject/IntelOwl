@@ -40,23 +40,20 @@ class PluginCredentialTests(CustomAPITestCase):
             "config_type": PluginConfig.ConfigType.SECRET,
         }
 
-        # create user
-        self.standard_user = User.objects.create_user(
-            username="standard_user",
-            email="standard_user@intelowl.com",
-            password="test",
-        )
-        self.standard_user_client = APIClient()
-        self.standard_user_client.force_authenticate(user=self.standard_user)
-
     def test_read_credential_superuser(self):
         response = self.client.get(custom_config_uri)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.data), 1)
+        data = response.json()
+        self.assertEqual(len(data), 0, data)
 
-        self.assertEqual(response.data[0]["plugin_name"], "GoogleWebRisk")
-        self.assertEqual(response.data[0]["attribute"], "api_key_name")
-        self.assertEqual(response.data[0]["type"], PluginConfig.PluginType.ANALYZER)
+        self.client.force_authenticate(self.superuser)
+        response = self.client.get(custom_config_uri)
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(len(data), 1, data)
+        self.assertEqual(data[0]["plugin_name"], "GoogleWebRisk")
+        self.assertEqual(data[0]["attribute"], "api_key_name")
+        self.assertEqual(data[0]["type"], PluginConfig.PluginType.ANALYZER)
 
     def test_create_credential_superuser(self):
         response = self.client.post(
@@ -67,7 +64,6 @@ class PluginCredentialTests(CustomAPITestCase):
             },
             format="json",
         )
-        print(response.data)
         self.assertEqual(response.status_code, 201)
 
         self.assertEqual(response.data["plugin_name"], "GoogleSafebrowsing")

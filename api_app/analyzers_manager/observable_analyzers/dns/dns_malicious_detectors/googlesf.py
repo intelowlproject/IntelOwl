@@ -4,7 +4,7 @@
 """Check if the domains is reported as malicious for GoogleSafeBrowsing"""
 from typing import List, Dict
 
-from pysafebrowsing import SafeBrowsing
+import pysafebrowsing
 
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
@@ -32,7 +32,7 @@ class GoogleSF(classes.ObservableAnalyzer):
     _api_key_name: str
 
     def run(self):
-        sb_instance = SafeBrowsing(self._api_key_name)
+        sb_instance = pysafebrowsing.SafeBrowsing(self._api_key_name)
         response = sb_instance.lookup_urls([self.observable_name])
         if self.observable_name in response and isinstance(
             response[self.observable_name], dict

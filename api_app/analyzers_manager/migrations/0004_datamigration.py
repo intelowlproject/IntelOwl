@@ -3874,7 +3874,12 @@ analyzers = {
                 "value": 200,
                 "type": "int",
                 "description": ""
-            }
+            },
+            "poll_distance": {
+                "description": "Distance in seconds between each request",
+                "type": "int",
+                "default": 30
+            },
         }
     },
     "Triage_Scan_URL": {
@@ -3914,7 +3919,17 @@ analyzers = {
                 "type": "str",
                 "description": "Choose whether to search for existing observable reports or upload for scanning via "
                 "URL (options: `search` and `submit`)."
-            }
+            },
+            "max_tries": {
+                "value": 200,
+                "type": "int",
+                "description": ""
+            },
+            "poll_distance": {
+                "description": "Distance in seconds between each request",
+                "type": "int",
+                "default": 30
+            },
         }
     },
     "Triage_Scan": {

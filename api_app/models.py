@@ -105,6 +105,7 @@ class Job(models.Model):
         "playbooks_manager.PlaybookConfig",
         related_name="requested_in_jobs",
         null=True,
+        blank=True,
         on_delete=models.SET_NULL,
     )
 
@@ -125,6 +126,7 @@ class Job(models.Model):
         "playbooks_manager.PlaybookConfig",
         related_name="executed_in_jobs",
         null=True,
+        blank=True,
         on_delete=models.SET_NULL,
     )
     runtime_configuration = models.JSONField(

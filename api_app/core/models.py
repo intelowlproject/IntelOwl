@@ -39,6 +39,11 @@ class AbstractReport(models.Model):
     job = models.ForeignKey(
         "api_app.Job", related_name="%(class)ss", on_delete=models.CASCADE
     )
+    # meta
+
+    class Meta:
+        abstract = True
+        unique_together = [("config", "job")]
 
     @classmethod
     @property
@@ -48,11 +53,6 @@ class AbstractReport(models.Model):
     @property
     def runtime_configuration(self):
         return self.job.get_config_runtime_configuration(self.config)
-
-    # meta
-    class Meta:
-        abstract = True
-        unique_together = [("config", "job")]
 
     def __str__(self):
         return f"{self.__class__.__name__}(job:#{self.job_id}, {self.config.name})"
@@ -175,7 +175,6 @@ class AbstractConfig(models.Model):
             )
         else:
             details = "Ready to use!"
-
         return {
             "configured": configured,
             "details": details,
@@ -190,7 +189,7 @@ class AbstractConfig(models.Model):
             ).exists()
         else:
             disabled_by_org = False
-
+        logger.debug(f"{configured=}, {disabled_by_org=}, {self.disabled=}")
         return configured and not disabled_by_org and not self.disabled
 
     @cached_property

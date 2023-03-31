@@ -71,7 +71,7 @@ class MISP(Connector):
         analyzers_names = self._job.analyzers_to_execute.all().values_list(
             "name", flat=True
         )
-        obj.comment = f"Analyzers Executed:" f" {', '.join(analyzers_names)}"
+        obj.comment = "Analyzers Executed:" f" {', '.join(analyzers_names)}"
         return obj
 
     @property

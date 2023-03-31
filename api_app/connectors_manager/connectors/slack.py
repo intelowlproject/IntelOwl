@@ -27,7 +27,7 @@ class Slack(Connector):
     @property
     def body(self) -> str:
         return (
-            f"Analysis executed "
+            "Analysis executed "
             f"{f'by <@{self.slack_username}> ' if self.slack_username else ''}"
             f"for <{self._job.url}|{self._job.analyzed_object_name}>"
         )

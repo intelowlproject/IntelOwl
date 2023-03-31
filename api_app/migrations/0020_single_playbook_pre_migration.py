@@ -16,13 +16,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='job',
             name='playbook_requested',
-            field=models.ForeignKey("playbooks_manager.PlaybookConfig", null=True, on_delete=models.SET_NULL,
+            field=models.ForeignKey("playbooks_manager.PlaybookConfig", null=True, blank=True, on_delete=models.SET_NULL,
                                     related_name="requested_in_jobs_new")
         ),
         migrations.AddField(
             model_name='job',
             name='playbook_to_execute',
-            field=models.ForeignKey("playbooks_manager.PlaybookConfig",null=True, on_delete=models.SET_NULL,
+            field=models.ForeignKey("playbooks_manager.PlaybookConfig",null=True, blank=True, on_delete=models.SET_NULL,
                                     related_name="executed_in_jobs_new")
         )
 

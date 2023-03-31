@@ -27,7 +27,7 @@ if __name__ == "__main__":
         if file.stem == "__init__":
             print("\tSkipping")
             continue
-        with open(file, "r+") as f:
+        with open(file, "r+", encoding="utf_8") as f:
             lines = f.readlines()
             if not (lines[0].strip() != header0.strip() and lines[1].strip() != header1.strip()):
                 print("\tSkipping")
@@ -35,7 +35,7 @@ if __name__ == "__main__":
             else:
                 print("\tAdding header")
         if len(sys.argv) == 3 and sys.argv[2] == "run":
-            with open(file, "w") as f:
+            with open(file, "w", encoding="utf_8") as f:
                 print("\tWritten")
                 f.writelines([header0,"\n", header1, "\n", "\n"] + lines)
 

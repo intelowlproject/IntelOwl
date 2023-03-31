@@ -27,14 +27,18 @@ class CustomTestCase(TestCase):
             cls.user = User.objects.get(is_superuser=False)
         except User.DoesNotExist:
             cls.user = User.objects.create(
-                username="testUser", email="test2@intelowl.com", password="test"
+                username="user", email="test2@intelowl.com", password="test"
             )
 
         try:
-            cls.superuser = User.objects.get(is_superuser=True)
+            cls.superuser = User.objects.get(
+                is_superuser=True, username="superuser@intelowl.org"
+            )
         except User.DoesNotExist:
             cls.superuser = User.objects.create_superuser(
-                username="test", email="test@intelowl.com", password="test"
+                username="superuser@intelowl.org",
+                email="test@intelowl.com",
+                password="test",
             )
 
 
@@ -55,7 +59,7 @@ class PluginActionViewsetTestCase(metaclass=ABCMeta):
         raise NotImplementedError()
 
     @abstractmethod
-    def init_report(self, status):
+    def init_report(self, status, user):
         ...
 
     def test_kill_204(self):

@@ -129,9 +129,7 @@ app.conf.beat_schedule = {
     "check_stuck_analysis": {
         "task": "intel_owl.tasks.check_stuck_analysis",
         "schedule": crontab(minute="*/5"),
-        "kwargs": {
-            "check_pending": True
-        },
+        "kwargs": {"check_pending": True},
         "options": {"queue": get_real_queue_name(DEFAULT_QUEUE)},
     },
     # Executes only on Wed because on Tue it's updated

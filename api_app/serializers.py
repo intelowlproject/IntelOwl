@@ -445,7 +445,7 @@ class FileAnalysisSerializer(_AbstractJobCreateSerializer):
             analyzers_to_execute.remove(analyzer)
             message = (
                 f"{analyzer.name} won't be run "
-                f"because does not support the file mimetype."
+                "because does not support the file mimetype."
             )
             if self.all_analyzers:
                 logger.debug(message)
@@ -596,7 +596,7 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
             analyzers_to_execute.remove(analyzer)
             message = (
                 f"{analyzer.name} won't be run because"
-                f" it does not support the requested observable."
+                " it does not support the requested observable."
             )
             if self.all_analyzers:
                 logger.debug(message)

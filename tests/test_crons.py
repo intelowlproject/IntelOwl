@@ -82,8 +82,10 @@ class CronTests(CustomTestCase):
         self.assertTrue(os.path.exists(db_file_path))
 
     def test_quark_updater(self):
+        from quark.config import DIR_PATH
+
         quark_engine.QuarkEngine._update()
-        self.assertTrue(os.path.exists(quark_engine.QuarkEngine.QUARK_RULES_PATH))
+        self.assertTrue(os.path.exists(DIR_PATH))
 
     def test_yara_updater(self):
         yara_scan.YaraScan._update()

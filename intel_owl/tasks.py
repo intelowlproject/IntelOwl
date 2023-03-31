@@ -42,7 +42,7 @@ def remove_old_jobs():
     retention_days = int(secrets.get_secret("OLD_JOBS_RETENTION_DAYS", 3))
     date_to_check = now() - datetime.timedelta(days=retention_days)
     old_jobs = Job.objects.filter(finished_analysis_time__lt=date_to_check)
-    num_jobs_to_delete = len(old_jobs)
+    num_jobs_to_delete = old_jobs.count()
     logger.info(f"found {num_jobs_to_delete} old jobs to delete")
     old_jobs.delete()
 
@@ -65,10 +65,10 @@ def check_stuck_analysis(minutes_ago: int = 25, check_pending: bool = False):
     if check_pending:
         query |= Q(status=Job.Status.PENDING.value)
     difference = now() - datetime.timedelta(minutes=minutes_ago)
-    running_jobs = list(
-        Job.objects.filter(query).filter(received_request_time__lte=difference)
+    running_jobs = Job.objects.filter(query).filter(
+        received_request_time__lte=difference
     )
-    logger.info(f"checking if {len(running_jobs)} jobs are stuck")
+    logger.info(f"checking if {running_jobs.count()} jobs are stuck")
 
     jobs_id_stuck = []
     for running_job in running_jobs:

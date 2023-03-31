@@ -119,7 +119,7 @@ def analyze_file(request):
     fas.is_valid(raise_exception=True)
     job = fas.save(send_task=True)
     return Response(
-        JobResponseSerializer([job], many=True).data,
+        JobResponseSerializer(job).data,
         status=status.HTTP_200_OK,
     )
 
@@ -167,7 +167,7 @@ def analyze_observable(request):
     oas.is_valid(raise_exception=True)
     job = oas.save(send_task=True)
     return Response(
-        JobResponseSerializer([job], many=True).data,
+        JobResponseSerializer(job).data,
         status=status.HTTP_200_OK,
     )
 

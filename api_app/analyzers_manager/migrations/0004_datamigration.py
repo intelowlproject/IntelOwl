@@ -601,6 +601,9 @@ analyzers = {
             "soft_time_limit": 70,
             "queue": "local"
         },
+        "not_supported_filetypes":[
+          "application/vnd.tcpdump.pcap"
+        ],
         "secrets": {},
         "params": {}
     },
@@ -618,7 +621,10 @@ analyzers = {
             "queue": "default"
         },
         "secrets": {},
-        "params": {}
+        "params": {},
+        "not_supported_filetypes":[
+          "application/vnd.tcpdump.pcap"
+        ],
     },
     "CRXcavator": {
         "type": "observable",
@@ -720,6 +726,9 @@ analyzers = {
             "soft_time_limit": 50,
             "queue": "default"
         },
+        "not_supported_filetypes":[
+          "application/vnd.tcpdump.pcap"
+        ],
         "secrets": {},
         "params": {}
     },
@@ -1205,7 +1214,10 @@ analyzers = {
             "queue": "local"
         },
         "secrets": {},
-        "params": {}
+        "params": {},
+        "not_supported_filetypes":[
+          "application/vnd.tcpdump.pcap"
+        ],
     },
     "FireHol_IPList": {
         "type": "observable",
@@ -1498,7 +1510,8 @@ analyzers = {
             "text/xml",
             "application/xml",
             "application/zip",
-            "application/encrypted"
+            "application/encrypted",
+            "application/vnd.tcpdump.pcap",
         ],
         "config": {
             "soft_time_limit": 40,
@@ -2325,7 +2338,10 @@ analyzers = {
             "queue": "default"
         },
         "secrets": {},
-        "params": {}
+        "params": {},
+        "not_supported_filetypes":[
+          "application/vnd.tcpdump.pcap"
+        ],
     },
     "MalwareBazaar_Get_Observable": {
         "type": "observable",
@@ -3453,7 +3469,10 @@ analyzers = {
                 "type": "int",
                 "description": ""
             }
-        }
+        },
+        "not_supported_filetypes":[
+          "application/vnd.tcpdump.pcap"
+        ],
     },
     "Strings_Info_Classic": {
         "type": "file",
@@ -4138,7 +4157,10 @@ analyzers = {
                 "type": "bool",
                 "description": "If True, always upload file for analysis skipping the hash check."
             }
-        }
+        },
+        "not_supported_filetypes":[
+          "application/vnd.tcpdump.pcap"
+        ],
     },
     "VirusTotal_v2_Get_File": {
         "type": "file",
@@ -4678,7 +4700,10 @@ analyzers = {
                 "type": "list",
                 "description": "ignore these rules"
             }
-        }
+        },
+        "not_supported_filetypes":[
+          "application/vnd.tcpdump.pcap"
+        ],
 
     },
     "YARAify_File_Scan": {
@@ -4793,7 +4818,10 @@ analyzers = {
                 "type": "str"
             }
         },
-        "params": {}
+        "params": {},
+        "not_supported_filetypes":[
+          "application/vnd.tcpdump.pcap"
+        ],
     },
     "YARAify_Search": {
         "type": "observable",

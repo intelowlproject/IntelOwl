@@ -339,7 +339,6 @@ class MultipleFileAnalysisSerializer(rfs.ListSerializer):
                 errors.append(exc.detail)
             else:
                 ret.append(validated)
-                errors.append({})
 
         if any(errors):
             raise ValidationError(errors)
@@ -469,6 +468,7 @@ class MultipleObservableAnalysisSerializer(rfs.ListSerializer):
 
     def to_internal_value(self, data):
         ret = []
+        errors = []
         for classification, name in data.pop("observables", []):
 
             # `deepcopy` here ensures that this code doesn't
@@ -478,9 +478,14 @@ class MultipleObservableAnalysisSerializer(rfs.ListSerializer):
             item["observable_name"] = name
             if classification:
                 item["observable_classification"] = classification
-            child_result = self.child.run_validation(item)
-            ret.append(child_result)
-
+            try:
+                validated = self.child.run_validation(item)
+            except ValidationError as exc:
+                errors.append(exc.detail)
+            else:
+                ret.append(validated)
+        if any(errors):
+            raise ValidationError(errors)
         return ret
 
 

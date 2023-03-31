@@ -27,6 +27,7 @@ class ApiViewTests(CustomAPITestCase):
                 "File_Info",
                 "PE_Info",
             ],
+            "connectors_requested": [],
             "file_name": "file.exe",
             "file_mimetype": "application/x-dosexec",
         }
@@ -36,6 +37,9 @@ class ApiViewTests(CustomAPITestCase):
             "analyzers_requested": [
                 "File_Info",
                 "PE_Info",
+            ],
+            "connectors_requested":[
+
             ],
             "file_mimetypes": [
                 "application/x-dosexec",
@@ -55,6 +59,7 @@ class ApiViewTests(CustomAPITestCase):
         self.analyze_observable_ip_data = {
             "observable_name": self.observable_name,
             "analyzers_requested": ["AbuseIPDB", "Stratosphere_Blacklist"],
+            "connectors_requested": [],
             "observable_classification": "ip",
         }
         self.mixed_observable_data = {
@@ -121,9 +126,8 @@ class ApiViewTests(CustomAPITestCase):
         self.assertEqual(file_name, job.file_name)
         self.assertEqual(file_mimetype, job.file_mimetype)
         self.assertEqual(md5, job.md5)
-        self.assertListEqual(analyzers_requested, job.analyzers_requested)
         # there is only Suricata right now
-        self.assertListEqual(["Suricata"], job.analyzers_to_execute)
+        self.assertCountEqual(["Suricata"], list(job.analyzers_to_execute.all().values_list("name",flat=True)))
 
     def test_analyze_file__corrupted_sample(self):
         analyzers_requested = [
@@ -149,7 +153,7 @@ class ApiViewTests(CustomAPITestCase):
         self.assertEqual(file_name, job.file_name)
         self.assertEqual(file_mimetype, job.file_mimetype)
         self.assertEqual(md5, job.md5)
-        self.assertListEqual(analyzers_requested, job.analyzers_requested)
+        self.assertCountEqual(analyzers_requested, list(job.analyzers_requested.all().values_list("name",flat=True)))
 
     def test_analyze_file__exe(self):
         data = self.analyze_file_data.copy()
@@ -162,8 +166,8 @@ class ApiViewTests(CustomAPITestCase):
         self.assertEqual(response.status_code, 200, msg=msg)
         self.assertEqual(data["file_name"], job.file_name, msg=msg)
         self.assertEqual(data["file_mimetype"], job.file_mimetype, msg=msg)
-        self.assertListEqual(
-            data["analyzers_requested"], job.analyzers_requested, msg=msg
+        self.assertCountEqual(
+            data["analyzers_requested"], list(job.analyzers_requested.all().values_list("name",flat=True)), msg=msg
         )
         self.assertEqual(self.file_md5, job.md5, msg=msg)
 
@@ -179,8 +183,8 @@ class ApiViewTests(CustomAPITestCase):
         job_id = int(content["job_id"])
         job = models.Job.objects.get(pk=job_id)
         self.assertEqual(data["file_name"], job.file_name, msg=msg)
-        self.assertListEqual(
-            data["analyzers_requested"], job.analyzers_requested, msg=msg
+        self.assertCountEqual(
+            data["analyzers_requested"], list(job.analyzers_requested.all().values_list("name",flat=True)), msg=msg
         )
         self.assertEqual(file_mimetype, job.file_mimetype, msg=msg)
         self.assertEqual(self.file_md5, job.md5, msg=msg)
@@ -195,6 +199,7 @@ class ApiViewTests(CustomAPITestCase):
         data = {
             "observable_name": observable_name,
             "analyzers_requested": analyzers_requested,
+            "connectors_requested": [],
             "observable_classification": observable_classification,
             "tags_labels": ["test1", "test2"],
         }
@@ -209,8 +214,8 @@ class ApiViewTests(CustomAPITestCase):
         self.assertEqual(observable_name, job.observable_name)
         self.assertEqual(observable_classification, job.observable_classification)
         self.assertEqual(md5, job.md5)
-        self.assertListEqual(analyzers_requested, job.analyzers_requested)
-        self.assertListEqual(
+        self.assertCountEqual(analyzers_requested, list(job.analyzers_requested.all().values_list("name",flat=True)))
+        self.assertCountEqual(
             data["tags_labels"], list(job.tags.values_list("label", flat=True))
         )
 
@@ -225,8 +230,8 @@ class ApiViewTests(CustomAPITestCase):
         job_id = int(content["job_id"])
         job = models.Job.objects.get(pk=job_id)
         self.assertEqual(data["observable_name"], job.observable_name, msg=msg)
-        self.assertListEqual(
-            data["analyzers_requested"], job.analyzers_requested, msg=msg
+        self.assertCountEqual(
+            data["analyzers_requested"], list(job.analyzers_requested.all().values_list("name",flat=True)), msg=msg
         )
         self.assertEqual(
             data["observable_classification"], job.observable_classification, msg=msg
@@ -247,8 +252,8 @@ class ApiViewTests(CustomAPITestCase):
         job_id = int(content["job_id"])
         job = models.Job.objects.get(pk=job_id)
         self.assertEqual(data["observable_name"], job.observable_name, msg=msg)
-        self.assertListEqual(
-            data["analyzers_requested"], job.analyzers_requested, msg=msg
+        self.assertCountEqual(
+            data["analyzers_requested"], list(job.analyzers_requested.all().values_list("name",flat=True)), msg=msg
         )
         self.assertEqual(
             observable_classification, job.observable_classification, msg=msg
@@ -270,11 +275,11 @@ class ApiViewTests(CustomAPITestCase):
         job_id = int(content["job_id"])
         job = models.Job.objects.get(pk=job_id)
         self.assertEqual(data["observables"][0][1], job.observable_name, msg=msg)
-        self.assertListEqual(
-            data["analyzers_requested"], job.analyzers_requested, msg=msg
+        self.assertCountEqual(
+            data["analyzers_requested"], list(job.analyzers_requested.all().values_list("name",flat=True)), msg=msg
         )
-        self.assertListEqual(
-            data["analyzers_requested"], job.analyzers_to_execute, msg=msg
+        self.assertCountEqual(
+            data["analyzers_requested"], list(job.analyzers_to_execute.all().values_list("name",flat=True)), msg=msg
         )
 
         content = contents["results"][1]
@@ -282,8 +287,8 @@ class ApiViewTests(CustomAPITestCase):
         job_id = int(content["job_id"])
         job = models.Job.objects.get(pk=job_id)
         self.assertEqual(data["observables"][1][1], job.observable_name, msg=msg)
-        self.assertListEqual(
-            [data["analyzers_requested"][0]], job.analyzers_to_execute, msg=msg
+        self.assertCountEqual(
+            [data["analyzers_requested"][0]], list(job.analyzers_to_execute.all().values_list("name",flat=True)), msg=msg
         )
 
     def test_download_sample_200(self):
@@ -374,8 +379,8 @@ class ApiViewTests(CustomAPITestCase):
             self.assertEqual(
                 self.analyze_multiple_files_filenames[index], job.file_name, msg=msg
             )
-            self.assertListEqual(
-                data["analyzers_requested"], job.analyzers_requested, msg=msg
+            self.assertCountEqual(
+                data["analyzers_requested"], list(job.analyzers_requested.all().values_list("name",flat=True)), msg=msg
             )
             self.assertEqual(self.file_md5, job.md5, msg=msg)
             self.assertEqual(data["file_mimetypes"][index], job.file_mimetype, msg=msg)
@@ -397,8 +402,8 @@ class ApiViewTests(CustomAPITestCase):
             self.assertEqual(
                 self.analyze_multiple_files_filenames[index], job.file_name, msg=msg
             )
-            self.assertListEqual(
-                data["analyzers_requested"], job.analyzers_requested, msg=msg
+            self.assertCountEqual(
+                data["analyzers_requested"], list(job.analyzers_requested.all().values_list("name",flat=True)), msg=msg
             )
             self.assertEqual(self.file_md5, job.md5, msg=msg)
             self.assertEqual(file_mimetypes[index], job.file_mimetype, msg=msg)

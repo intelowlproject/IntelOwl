@@ -105,6 +105,14 @@ class BaseAnalyzerMixin(Plugin, metaclass=ABCMeta):
     def after_run(self):
         self.report.report = self._validate_result(self.report.report)
 
+    @classmethod
+    def update(cls) -> bool:
+        if hasattr(cls, "_update") and callable(cls._update):
+            cls._update()
+            return True
+        return False
+
+
 
 class ObservableAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
     """
@@ -450,16 +458,10 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
         """
         basic health check: if instance is up or not (timeout - 10s)
         """
-        health_status = False
-
         try:
             requests.head(cls.url, timeout=10)
-        except requests.exceptions.ConnectionError:
-            # status=False, so pass
-            pass
-        except requests.exceptions.Timeout:
-            # status=False, so pass
-            pass
+        except requests.exceptions.RequestException:
+            health_status = False
         else:
             health_status = True
 

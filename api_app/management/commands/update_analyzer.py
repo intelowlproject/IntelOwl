@@ -30,11 +30,10 @@ class Command(BaseCommand):
             return
         if analyzer_config.is_runnable():
             class_ = analyzer_config.python_class
-            if hasattr(class_, "_update") and callable(class_._update):
-                self.stdout.write(
-                    self.style.SUCCESS(f"Starting update of {analyzer_config.name}")
-                )
-                class_._update()
+            self.stdout.write(
+                self.style.SUCCESS(f"Starting update of {analyzer_config.name}")
+            )
+            if class_.update():
                 self.stdout.write(
                     self.style.SUCCESS(f"Finished update of {analyzer_config.name}")
                 )

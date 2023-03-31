@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 )
 def update_plugin(state, plugin_path):
     plugin = import_string(plugin_path)
-    plugin._update()
+    plugin.update()
 
 
 @shared_task(soft_time_limit=10000)

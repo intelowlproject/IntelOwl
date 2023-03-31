@@ -48,7 +48,7 @@ class AnalyzerConfigAPI(AbstractConfigAPI):
     def pull(self, request, pk=None):
         logger.info(f"update request from user {request.user}, pk {pk}")
         obj: AnalyzerConfig = self.get_object()
-        success = obj.update(obj.python_module)
+        success = obj.python_class.update()
         if not success:
             raise ValidationError({"detail": "No update implemented"})
 

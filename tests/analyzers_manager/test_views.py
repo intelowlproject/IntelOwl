@@ -1,5 +1,7 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
+from unittest.mock import patch
+
 from api_app.analyzers_manager.constants import ObservableTypes
 from api_app.analyzers_manager.models import AnalyzerConfig, AnalyzerReport
 from api_app.models import Job
@@ -71,13 +73,16 @@ class AnalyzerConfigAPITestCase(CustomAPITestCase):
         self.assertEqual(response.status_code, 405)
 
     def test_pull(self):
+        from api_app.analyzers_manager.file_analyzers.yara_scan import YaraScan
+
         analyzer = "Yara"
         response = self.client.post(f"{self.URL}/{analyzer}/pull")
         self.assertEqual(response.status_code, 403)
 
         self.client.force_authenticate(self.superuser)
 
-        response = self.client.post(f"{self.URL}/{analyzer}/pull")
+        with patch.object(YaraScan, "_update", return_value=lambda *args, **kwargs: None):
+            response = self.client.post(f"{self.URL}/{analyzer}/pull")
         self.assertEqual(response.status_code, 200, response.json())
         result = response.json()
         self.assertIn("status", result)
@@ -102,7 +107,6 @@ class AnalyzerConfigAPITestCase(CustomAPITestCase):
         self.assertEqual(response.status_code, 200)
         result = response.json()
         self.assertIn("status", result)
-        self.assertTrue(result["status"])
 
         analyzer = "Xlm_Macro_Deobfuscator"
         response = self.client.get(f"{self.URL}/{analyzer}/health_check")

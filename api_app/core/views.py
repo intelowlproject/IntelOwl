@@ -135,7 +135,7 @@ class AbstractConfigAPI(viewsets.ReadOnlyModelViewSet, metaclass=ABCMeta):
     @action(
         methods=["get"],
         detail=True,
-        url_path="healthcheck",
+        url_path="health_check",
         permission_classes=[IsAdminUser],
     )
     def health_check(self, request, pk=None):

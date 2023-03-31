@@ -22,7 +22,6 @@ class UrlScan(ObservableAnalyzer):
     _api_key_name: str
 
     def run(self):
-        result = {}
         headers = {"Content-Type": "application/json", "User-Agent": "IntelOwl/v1.x"}
         if not hasattr(self, "_api_key_name") and self.urlscan_analysis == "search":
             logger.warning(f"{self.__repr__()} -> Continuing w/o API key..")
@@ -76,7 +75,6 @@ class UrlScan(ObservableAnalyzer):
         return result
 
     def __urlscan_search(self):
-        result = {}
         params = {
             "q": f'{self.observable_classification}:"{self.observable_name}"',
             "size": self.search_size,
@@ -86,9 +84,11 @@ class UrlScan(ObservableAnalyzer):
         try:
             resp = self.session.get(self.base_url + "/search/", params=params)
             resp.raise_for_status()
-            result = resp.json()
+
         except requests.RequestException as e:
             raise AnalyzerRunException(e)
+        else:
+            result = resp.json()
         return result
 
     @classmethod

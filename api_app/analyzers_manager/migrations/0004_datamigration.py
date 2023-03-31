@@ -4464,6 +4464,11 @@ analyzers = {
                 "value": 300,
                 "type": "int",
                 "description": "max number of results to retrieve"
+            },
+            "order_by": {
+                "type": "str",
+                "description": "More information in VT [docs](https://developers.virustotal.com/reference/intelligence-search) ",
+                "default": ""
             }
         }
     },

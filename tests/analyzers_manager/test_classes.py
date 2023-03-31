@@ -153,7 +153,7 @@ class ObservableAnalyzerTestCase(CustomTestCase):
             observable_name="test.com", observable_classification="domain"
         )
         oa = MockedObservableAnalyzer(
-            config, job.pk, {"runtime_configuration": {}, "task_id": uuid()}
+            config, job.pk, runtime_configuration={}, task_id=uuid()
         )
         self.assertEqual(oa.observable_name, "test.com")
         self.assertEqual(oa.observable_classification, "domain")
@@ -227,7 +227,7 @@ class ObservableAnalyzerTestCase(CustomTestCase):
                         observable_classification=observable_supported
                     )
                     sub = subclass(
-                        config, job.pk, {"runtime_configuration": {}, "task_id": uuid()}
+                        config, job.pk, runtime_configuration= {}, task_id= uuid()
                     )
                     signal.alarm(timeout_seconds)
                     try:

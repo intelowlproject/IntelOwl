@@ -67,7 +67,6 @@ class VirusTotalv2ScanFile(classes.FileAnalyzer):
 
     def __vt_poll_for_result(self, scan_id):
         for chance in range(self.max_tries):
-            time.sleep(self.poll_distance)
             logger.info(f"vt2 polling: #{chance + 1}. job_id: #{self.job_id}")
             result = vt2_get.vt_get_report(self._api_key_name, scan_id, "hash")
             response_code = result.get("response_code", 1)
@@ -79,7 +78,7 @@ class VirusTotalv2ScanFile(classes.FileAnalyzer):
                     f"vt2 polling result retrievd correctly for job_id #{self.job_id}"
                 )
                 return result
-
+            time.sleep(self.poll_distance)
         logger.info(
             f"max VT polls tried without getting any result. job_id #{self.job_id}"
         )

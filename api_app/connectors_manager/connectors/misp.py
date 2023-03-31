@@ -142,7 +142,7 @@ class MISP(Connector):
 
 
 # Mocks
-class MockMISPElement:
+class MockUpMISPElement:
     """
     Mock element(event/attribute) for testing
     """
@@ -159,11 +159,11 @@ class MockPyMISP:
     def __init__(self, *args, **kwargs) -> None:
         pass
 
-    def add_event(self, *args, **kwargs) -> MockMISPElement:
-        return MockMISPElement()
+    def add_event(self, *args, **kwargs) -> MockUpMISPElement:
+        return MockUpMISPElement()
 
-    def add_attribute(self, *args, **kwargs) -> MockMISPElement:
-        return MockMISPElement()
+    def add_attribute(self, *args, **kwargs) -> MockUpMISPElement:
+        return MockUpMISPElement()
 
     def get_event(self, event_id) -> dict:
         return {"Event": {"id": event_id}}

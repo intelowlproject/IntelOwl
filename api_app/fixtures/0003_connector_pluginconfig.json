@@ -82,5 +82,33 @@
       "owner": 1,
       "plugin_name": "YETI"
     }
+  },
+    {
+    "model": "api_app.PluginConfig",
+    "pk": 157,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "2",
+      "config_type": "2",
+      "attribute": "token",
+      "value": "my_token",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "Slack"
+    }
+  },
+      {
+    "model": "api_app.PluginConfig",
+    "pk": 158,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "2",
+      "config_type": "2",
+      "attribute": "channel",
+      "value": "my_channel",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "Slack"
+    }
   }
 ]

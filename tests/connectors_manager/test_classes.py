@@ -21,12 +21,12 @@ class ConnectorTestCase(CustomTestCase):
     ]
 
     def test_health_check(self):
-        class MockedConnector(Connector):
+        class MockUpConnector(Connector):
             def run(self) -> dict:
                 return {}
 
         with self.assertRaises(ConnectorRunException):
-            MockedConnector.health_check("test")
+            MockUpConnector.health_check("test")
 
         cc = ConnectorConfig.objects.create(
             name="test",
@@ -38,7 +38,7 @@ class ConnectorTestCase(CustomTestCase):
             maximum_tlp="WHITE",
         )
         with self.assertRaises(ConnectorRunException):
-            MockedConnector.health_check("test")
+            MockUpConnector.health_check("test")
         cc.disabled = False
         cc.secrets = {
             "url_key_name": {
@@ -50,7 +50,7 @@ class ConnectorTestCase(CustomTestCase):
         }
         cc.save()
         with self.assertRaises(ConnectorRunException):
-            MockedConnector.health_check("test")
+            MockUpConnector.health_check("test")
         pc = PluginConfig.objects.create(
             type="2",
             config_type="2",
@@ -61,13 +61,13 @@ class ConnectorTestCase(CustomTestCase):
             plugin_name="test",
         )
         with patch("requests.head"):
-            result = MockedConnector.health_check("test")
+            result = MockUpConnector.health_check("test")
         self.assertTrue(result)
         cc.delete()
         pc.delete()
 
     def test_before_run(self):
-        class MockedConnector(Connector):
+        class MockUpConnector(Connector):
             def run(self) -> dict:
                 return {}
 
@@ -87,10 +87,10 @@ class ConnectorTestCase(CustomTestCase):
             run_on_failure=False,
         )
         with self.assertRaises(ConnectorRunException):
-            MockedConnector(cc, job.pk, {}, uuid()).before_run()
+            MockUpConnector(cc, job.pk, {}, uuid()).before_run()
         cc.run_on_failure = True
         cc.save()
-        MockedConnector(cc, job.pk, {}, uuid()).before_run()
+        MockUpConnector(cc, job.pk, {}, uuid()).before_run()
         cc.delete()
         job.delete()
 
@@ -118,8 +118,8 @@ class ConnectorTestCase(CustomTestCase):
                 package = f"{str(connector.parent).replace('/', '.')}.{connector.stem}"
                 __import__(package)
                 num_connectors += 1
-        subclasses = Connector.__subclasses__()
-        self.assertEqual(num_connectors, len(subclasses))
+        subclasses = Connector.all_subclasses()
+        self.assertEqual(num_connectors, len(subclasses), subclasses)
         for subclass in subclasses:
             print("\n" f"Testing Connector {subclass.__name__}")
             for config in ConnectorConfig.objects.filter(

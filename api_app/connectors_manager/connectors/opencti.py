@@ -142,7 +142,7 @@ class OpenCTI(classes.Connector):
             description=(
                 f"This is IntelOwl's analysis report for Job: {self.job_id}."
                 # comma separate analyzers executed
-                f" Analyzers Executed: {', '.join(self._job.analyzers_to_execute)}"
+                f" Analyzers Executed: {', '.join(list(self._job.analyzers_to_execute.all().values_list('name', flat=True)))}"
             ),
             published=self._job.received_request_time.strftime("%Y-%m-%dT%H:%M:%SZ"),
             report_types=["internal-report"],

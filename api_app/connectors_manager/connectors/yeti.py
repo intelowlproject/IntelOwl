@@ -31,7 +31,7 @@ class YETI(classes.Connector):
             "date": str(self._job.finished_analysis_time),
             "description": "IntelOwl's analysis report for Job: "
             f"{self.job_id} | {obs_value} | {obs_type}",
-            "analyzers executed": ", ".join(self._job.analyzers_to_execute),
+            "analyzers executed": ', '.join(list(self._job.analyzers_to_execute.all().values_list('name', flat=True))),
         }
 
         # get job tags

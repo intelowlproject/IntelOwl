@@ -1,6 +1,6 @@
 from unittest.mock import patch
 
-from slack_sdk import WebClient
+import slack_sdk
 from slack_sdk.errors import SlackApiError
 
 from api_app.connectors_manager.classes import Connector
@@ -18,7 +18,7 @@ class Slack(Connector):
 
     def config(self):
         super().config()
-        self.client = WebClient(token=self._token)
+        self.client = slack_sdk.WebClient(token=self._token)
 
     @property
     def title(self) -> str:

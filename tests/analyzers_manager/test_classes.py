@@ -13,7 +13,7 @@ from api_app.models import Job
 from tests import CustomTestCase
 
 
-class MockedObservableAnalyzer(ObservableAnalyzer):
+class MockUpObservableAnalyzer(ObservableAnalyzer):
     def run(self) -> dict:
         return {}
 
@@ -152,7 +152,7 @@ class ObservableAnalyzerTestCase(CustomTestCase):
         job = Job.objects.create(
             observable_name="test.com", observable_classification="domain"
         )
-        oa = MockedObservableAnalyzer(
+        oa = MockUpObservableAnalyzer(
             config, job.pk, runtime_configuration={}, task_id=uuid()
         )
         self.assertEqual(oa.observable_name, "test.com")

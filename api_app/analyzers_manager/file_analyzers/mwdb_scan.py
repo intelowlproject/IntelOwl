@@ -28,7 +28,7 @@ def mocked_mwdb_response(*args, **kwargs):
     return Response.return_value
 
 
-class MockedUploadObject:
+class MockUpUploadObject:
     def __init__(self):
         self.data = {"id": "id_test"}
 
@@ -36,21 +36,21 @@ class MockedUploadObject:
         return
 
 
-class MockedQueryObject:
+class MockUpQueryObject:
     def __init__(self):
         self.attributes = {"karton": "test"}
         self.data = {"children": [], "parents": []}
 
 
-class MockedMWDB:
+class MockUpMWDB:
     def __init__(self):
         pass
 
     def upload_file(self, *args, **kwargs):
-        return MockedUploadObject()
+        return MockUpUploadObject()
 
     def query_file(self, *args, **kwargs):
-        return MockedQueryObject()
+        return MockUpQueryObject()
 
 
 class MWDB_Scan(FileAnalyzer):
@@ -129,6 +129,6 @@ class MWDB_Scan(FileAnalyzer):
     @classmethod
     def _monkeypatch(cls):
         patches = [
-            if_mock_connections(patch("mwdblib.MWDB", return_value=MockedMWDB()))
+            if_mock_connections(patch("mwdblib.MWDB", return_value=MockUpMWDB()))
         ]
         return super()._monkeypatch(patches=patches)

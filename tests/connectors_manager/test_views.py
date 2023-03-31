@@ -84,7 +84,7 @@ class ConnectorConfigAPITestCase(CustomAPITestCase):
         self.assertTrue(result["status"])
 
     def test_organization_disable(self):
-        connector = "Yeti"
+        connector = "Slack"
         org, _ = Organization.objects.get_or_create(name="test")
         response = self.client.post(f"{self.URL}/{connector}/organization")
         # permission denied
@@ -120,13 +120,13 @@ class ConnectorConfigAPITestCase(CustomAPITestCase):
         result = response.json()
         self.assertIn("errors", result)
         self.assertIn("detail", result["errors"])
-        self.assertEqual(result["errors"]["detail"], "Plugin Yeti already disabled")
+        self.assertEqual(result["errors"]["detail"], f"Plugin {connector} already disabled")
         an.disabled_in_organizations.set([])
         m.delete()
         org.delete()
 
     def test_organization_enable(self):
-        connector = "Yeti"
+        connector = "Slack"
         org, _ = Organization.objects.get_or_create(name="test")
         response = self.client.delete(f"{self.URL}/{connector}/organization")
         # permission denied
@@ -158,7 +158,7 @@ class ConnectorConfigAPITestCase(CustomAPITestCase):
         result = response.json()
         self.assertIn("errors", result)
         self.assertIn("detail", result["errors"])
-        self.assertEqual(result["errors"]["detail"], "Plugin Yeti already enabled")
+        self.assertEqual(result["errors"]["detail"], f"Plugin {connector} already enabled")
 
         an.disabled_in_organizations.add(org)
         response = self.client.delete(f"{self.URL}/{connector}/organization")
@@ -182,7 +182,7 @@ class ConnectorActionViewSetTests(CustomAPITestCase, PluginActionViewsetTestCase
         config = ConnectorConfig.objects.get(name="MISP")
         _job = Job.objects.create(
             user=user,
-            status=Job.Status.RUNNING,
+            status=Job.Status.REPORTED_WITHOUT_FAILS,
             observable_name="8.8.8.8",
             observable_classification=ObservableTypes.IP,
         )

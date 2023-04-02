@@ -112,6 +112,7 @@
             },
             "Stratosphere_Blacklist": {},
             "Strings_Info": {},
+            "Sublime_EML": {},
             "Suricata": {
                 "extended_logs": false,
                 "reload_rules": false

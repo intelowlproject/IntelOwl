@@ -71,21 +71,24 @@ class ObservableClassification(models.TextChoices):
     EMPTY = ""
 
 class Comment(models.Model):
-    class Meta:
-        ordering = ["-created_at"]
-
     # make the user null if the user is deleted
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
+        related_name="comments",
     )
+
+    class Meta:
+        ordering = ["created_at"]
+
     job = models.ForeignKey(
         "Job",
         on_delete=models.CASCADE,
         null=True,
         blank=True,
+        related_name="comments",
     )
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)

@@ -425,7 +425,8 @@ def analyze_multiple_observables(request):
 
 @add_docs(
     description="""
-    REST endpoint to fetch list of job comments or retrieve/delete a job comment with job comment ID.
+    REST endpoint to fetch list of job comments or
+    retrieve/delete a job comment with job comment ID.
     Requires authentication.
     """
 )

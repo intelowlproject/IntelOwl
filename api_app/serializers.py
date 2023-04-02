@@ -313,7 +313,10 @@ class CommentCreateSerializer(rfs.ModelSerializer):
             if not job.user.memberships.filter(organization=user.organization).exists():
                 raise ValidationError(
                     {
-                        "detail": "You can only comment on jobs created by your organization."
+                        "detail": (
+                            "You can only comment on "
+                            "jobs created by your organization."
+                        )
                     }
                 )
 

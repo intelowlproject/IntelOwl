@@ -1,7 +1,8 @@
 from django.test import TransactionTestCase
 
-from api_app.models import Job, Comment
+from api_app.models import Comment, Job
 from certego_saas.models import User
+
 
 class TestComments(TransactionTestCase):
     def test_making_comments(self):

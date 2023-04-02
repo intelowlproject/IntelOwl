@@ -6,6 +6,7 @@ from rest_framework import routers
 
 from .views import (
     JobViewSet,
+    CommentViewSet,
     PluginConfigViewSet,
     TagViewSet,
     analyze_file,
@@ -22,6 +23,7 @@ from .views import (
 router = routers.DefaultRouter(trailing_slash=False)
 router.register(r"tags", TagViewSet, basename="tags")
 router.register(r"jobs", JobViewSet, basename="jobs")
+router.register(r"comments", CommentViewSet, basename="comments")
 router.register(r"plugin-config", PluginConfigViewSet, basename="plugin-config")
 
 # These come after /api/..

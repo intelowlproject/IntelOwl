@@ -6,6 +6,7 @@ import logging
 from typing import Dict, List, Tuple
 
 from django.http import QueryDict
+from django.db.models import Count, Q
 from drf_spectacular.utils import extend_schema_serializer
 from durin.serializers import UserSerializer
 from rest_framework import serializers as rfs
@@ -29,7 +30,7 @@ from .helpers import (
     calculate_observable_classification,
     gen_random_colorhex,
 )
-from .models import TLP, Job, PluginConfig, Tag
+from .models import TLP, Job, Comment, PluginConfig, Tag
 from .playbooks_manager.dataclasses import PlaybookConfig
 
 logger = logging.getLogger(__name__)
@@ -285,6 +286,76 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
             job.tags.set(tags)
 
         return job
+
+class CommentCreateSerializer(rfs.ModelSerializer):
+    """
+    Used for ``create()``
+    """
+
+    class Meta:
+        model = Comment
+        fields = ("id", "content", "user", "job_id")
+
+    user = UserSerializer(read_only=True)
+    job_id = rfs.PrimaryKeyRelatedField(queryset=Job.objects.all(), write_only=True, source='job')
+
+    user = UserSerializer(read_only=True)
+
+    def validate(self, attrs: dict) -> dict:
+        attrs = super().validate(attrs)
+
+        user = self.context["request"].user
+        job = attrs.get("job")
+
+        if job.user.has_membership():
+            # user can only comment on jobs
+            # created by members of his organization
+            if not job.user.memberships.filter(organization=user.organization).exists():
+                raise ValidationError(
+                    {"detail": "You can only comment on jobs created by your organization."}
+                )
+
+        if job.user != user:
+            # or user can only comment on jobs
+            # created by himself, if he has no membership
+            raise ValidationError(
+                {"detail": "You can only comment on jobs created by yourself."}
+            )
+        return attrs
+
+    def create(self, validated_data: dict) -> Comment:
+        validated_data["user"] = self.context["request"].user
+        return super().create(validated_data)
+
+class CommentListSerializer(rfs.ModelSerializer):
+    """
+    Used for ``list()``.
+    """
+
+    class Meta:
+        model = Comment
+        fields = ("id", "content", "created_at", "username", "current_user")
+
+    username = rfs.SerializerMethodField()
+    current_user = rfs.SerializerMethodField()
+
+    def get_username(self, obj: Comment) -> str:
+        return obj.user.username
+
+    def get_current_user(self, obj: Comment) -> bool:
+        return obj.user == self.context["request"].user
+
+
+class CommentSerializer(rfs.ModelSerializer):
+    """
+    Used for ``retrieve()``
+    """
+
+    class Meta:
+        model = Comment
+        fields = ("id", "content", "created_at", "user",)
+
+    user = UserSerializer(read_only=True)
 
 
 class JobListSerializer(_AbstractJobViewSerializer):

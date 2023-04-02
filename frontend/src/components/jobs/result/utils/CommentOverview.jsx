@@ -79,7 +79,7 @@ export default function CommentOverview({ comments, jobId, refetchComments }) {
               <Form onSubmit={handleSubmit}>
                 <FormGroup>
                   <Field
-                    as="textarea" // Use the Field component and set 'as' prop to "textarea"
+                    as="textarea"
                     name="content"
                     style={{ width: "100%" }}
                   />

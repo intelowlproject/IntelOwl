@@ -439,9 +439,8 @@ class CommentViewSet(ReadAndDeleteOnlyViewSet, CreateModelMixin, SerializerActio
         "create": CommentCreateSerializer,
     }
 
-    # write a permission class to check if
-    # the user is the owner of the job or if the user is a member of the same org
-
+    # check if the user is the owner of the 
+    # job or if the user is a member of the same org
     class IsCommentObjectOwnerOrSameOrgPermission(BasePermission):
         def has_object_permission(self, request, view, obj):
             if request.user.has_membership():
@@ -476,10 +475,8 @@ class CommentViewSet(ReadAndDeleteOnlyViewSet, CreateModelMixin, SerializerActio
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        # Get the jobId from the request's query parameters
         job_id = self.request.query_params.get("jobId", None)
 
-        # If the jobId is not provided, raise a ValidationError
         if job_id is None:
             raise ValidationError({"detail": "jobId is required as a query parameter."})
 

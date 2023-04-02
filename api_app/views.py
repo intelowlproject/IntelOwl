@@ -439,7 +439,7 @@ class CommentViewSet(ReadAndDeleteOnlyViewSet, CreateModelMixin, SerializerActio
         "create": CommentCreateSerializer,
     }
 
-    # check if the user is the owner of the 
+    # check if the user is the owner of the
     # job or if the user is a member of the same org
     class IsCommentObjectOwnerOrSameOrgPermission(BasePermission):
         def has_object_permission(self, request, view, obj):

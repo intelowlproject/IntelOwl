@@ -3662,6 +3662,23 @@
       }
     }
   },
+  "Sublime_EML": {
+    "type": "file",
+    "python_module": "sublime_eml.SublimeEML",
+    "description": "scan a binary or a zip file (pwd:infected) against all the yara rules available in Malpedia",
+    "disabled": false,
+    "external_service": true,
+    "leaks_info": false,
+    "supported_filetypes": [
+      "text/plain"
+    ],
+    "config": {
+      "soft_time_limit": 30,
+      "queue": "long"
+    },
+    "secrets": {},
+    "params": {}
+  },
   "Tranco": {
     "type": "observable",
     "python_module": "tranco.Tranco",

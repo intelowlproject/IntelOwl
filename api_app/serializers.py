@@ -6,15 +6,12 @@ import logging
 from typing import Dict, List, Tuple
 
 from django.http import QueryDict
-from django.db.models import Count, Q
 from drf_spectacular.utils import extend_schema_serializer
 from durin.serializers import UserSerializer
 from rest_framework import serializers as rfs
 from rest_framework.exceptions import PermissionDenied, ValidationError
 
 from certego_saas.apps.organization.membership import Membership
-
-# from django.contrib.auth import get_user_model
 from certego_saas.apps.organization.organization import Organization
 from certego_saas.apps.organization.permissions import IsObjectOwnerOrSameOrgPermission
 
@@ -30,7 +27,7 @@ from .helpers import (
     calculate_observable_classification,
     gen_random_colorhex,
 )
-from .models import TLP, Job, Comment, PluginConfig, Tag
+from .models import TLP, Comment, Job, PluginConfig, Tag
 from .playbooks_manager.dataclasses import PlaybookConfig
 
 logger = logging.getLogger(__name__)
@@ -287,6 +284,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
 
         return job
 
+
 class CommentCreateSerializer(rfs.ModelSerializer):
     """
     Used for ``create()``
@@ -297,7 +295,9 @@ class CommentCreateSerializer(rfs.ModelSerializer):
         fields = ("id", "content", "user", "job_id")
 
     user = UserSerializer(read_only=True)
-    job_id = rfs.PrimaryKeyRelatedField(queryset=Job.objects.all(), write_only=True, source='job')
+    job_id = rfs.PrimaryKeyRelatedField(
+        queryset=Job.objects.all(), write_only=True, source="job"
+    )
 
     user = UserSerializer(read_only=True)
 
@@ -312,7 +312,9 @@ class CommentCreateSerializer(rfs.ModelSerializer):
             # created by members of his organization
             if not job.user.memberships.filter(organization=user.organization).exists():
                 raise ValidationError(
-                    {"detail": "You can only comment on jobs created by your organization."}
+                    {
+                        "detail": "You can only comment on jobs created by your organization."
+                    }
                 )
 
         if job.user != user:
@@ -326,6 +328,7 @@ class CommentCreateSerializer(rfs.ModelSerializer):
     def create(self, validated_data: dict) -> Comment:
         validated_data["user"] = self.context["request"].user
         return super().create(validated_data)
+
 
 class CommentListSerializer(rfs.ModelSerializer):
     """
@@ -353,7 +356,12 @@ class CommentSerializer(rfs.ModelSerializer):
 
     class Meta:
         model = Comment
-        fields = ("id", "content", "created_at", "user",)
+        fields = (
+            "id",
+            "content",
+            "created_at",
+            "user",
+        )
 
     user = UserSerializer(read_only=True)
 

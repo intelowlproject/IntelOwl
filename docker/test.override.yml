@@ -8,7 +8,7 @@ services:
       args:
         REPO_DOWNLOADER_ENABLED: ${REPO_DOWNLOADER_ENABLED}
         WATCHMAN: "true"
-    image: intelowlproject/intelowl:test
+    image: intelowlproject/intelowl
     volumes:
       - ../:/opt/deploy/intel_owl
     environment:
@@ -25,11 +25,11 @@ services:
       - ../configuration/nginx/django_server.conf:/etc/nginx/conf.d/default.conf
 
   celery_beat:
-    image: intelowlproject/intelowl:test
+    image: intelowlproject/intelowl
     volumes:
       - ../:/opt/deploy/intel_owl
 
   celery_worker_default:
-    image: intelowlproject/intelowl:test
+    image: intelowlproject/intelowl
     volumes:
       - ../:/opt/deploy/intel_owl

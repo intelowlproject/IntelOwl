@@ -21,8 +21,8 @@ from rest_framework.exceptions import (
     PermissionDenied,
     ValidationError,
 )
-from rest_framework.mixins import ListModelMixin, CreateModelMixin, UpdateModelMixin, DestroyModelMixin
-from rest_framework.permissions import BasePermission, IsAuthenticated
+from rest_framework.mixins import CreateModelMixin
+from rest_framework.permissions import BasePermission
 from rest_framework.response import Response
 
 from api_app.serializers import (
@@ -40,8 +40,8 @@ from .filters import JobFilter
 from .helpers import get_now
 from .models import (
     TLP,
-    Job,
     Comment,
+    Job,
     ObservableClassification,
     OrganizationPluginState,
     PluginConfig,
@@ -50,13 +50,13 @@ from .models import (
 )
 from .serializers import (
     AnalysisResponseSerializer,
+    CommentCreateSerializer,
+    CommentListSerializer,
+    CommentSerializer,
     FileAnalysisSerializer,
     JobAvailabilitySerializer,
     JobListSerializer,
     JobSerializer,
-    CommentSerializer,
-    CommentListSerializer,
-    CommentCreateSerializer,
     ObservableAnalysisSerializer,
     PluginConfigSerializer,
     TagSerializer,
@@ -422,6 +422,7 @@ def analyze_multiple_observables(request):
         status=status.HTTP_200_OK,
     )
 
+
 @add_docs(
     description="""
     REST endpoint to fetch list of job comments or retrieve/delete a job comment with job comment ID.
@@ -437,15 +438,18 @@ class CommentViewSet(ReadAndDeleteOnlyViewSet, CreateModelMixin, SerializerActio
         "create": CommentCreateSerializer,
     }
 
-    # write a permission class to check if 
+    # write a permission class to check if
     # the user is the owner of the job or if the user is a member of the same org
 
     class IsCommentObjectOwnerOrSameOrgPermission(BasePermission):
         def has_object_permission(self, request, view, obj):
             if request.user.has_membership():
-                if request.user.membership.organization == obj.job.user.membership.organization:
+                if (
+                    request.user.membership.organization
+                    == obj.job.user.membership.organization
+                ):
                     return True
-            
+
             if request.user == obj.job:
                 return True
             return False
@@ -468,11 +472,11 @@ class CommentViewSet(ReadAndDeleteOnlyViewSet, CreateModelMixin, SerializerActio
             permissions.append(self.IsCommentObjectOwnerOrSameOrgPermission())
 
         return permissions
-    
+
     def get_queryset(self):
         queryset = super().get_queryset()
         # Get the jobId from the request's query parameters
-        job_id = self.request.query_params.get('jobId', None)
+        job_id = self.request.query_params.get("jobId", None)
 
         # If the jobId is not provided, raise a ValidationError
         if job_id is None:
@@ -480,19 +484,22 @@ class CommentViewSet(ReadAndDeleteOnlyViewSet, CreateModelMixin, SerializerActio
 
         job = Job.objects.get(id=job_id)
 
-        # check if the user is the owner of the job 
+        # check if the user is the owner of the job
         # or if the user is a member of the same org
         if self.request.user.has_membership():
-            if job.user.membership.organization == self.request.user.membership.organization:
+            if (
+                job.user.membership.organization
+                == self.request.user.membership.organization
+            ):
                 return queryset.filter(job__id=job_id)
-        
+
         elif self.request.user == job.user:
             return queryset.filter(job__id=job_id)
 
         raise ValidationError(
             {"detail": "You are not authorized to view the comment of this jobId!"}
         )
-    
+
 
 @add_docs(
     description="""

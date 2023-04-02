@@ -70,6 +70,7 @@ class ObservableClassification(models.TextChoices):
     GENERIC = "generic"
     EMPTY = ""
 
+
 class Comment(models.Model):
     # make the user null if the user is deleted
     user = models.ForeignKey(

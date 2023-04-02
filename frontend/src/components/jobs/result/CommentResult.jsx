@@ -29,22 +29,19 @@ export default function CommentResult() {
   }, [loading, comments]);
 
   // page title
-  useTitle(
-    `IntelOwl | Comments (#${jobId})`,
-    { restoreOnUnmount: true }
-  );
+  useTitle(`IntelOwl | Comments (#${jobId})`, { restoreOnUnmount: true });
 
   return (
     <Loader
       loading={initialLoading}
       error={error}
-      render={() =>
+      render={() => (
         <CommentOverview
-        comments={comments}
-        jobId={jobId}
-        refetchComments={refetch}
-      />
-      }
+          comments={comments}
+          jobId={jobId}
+          refetchComments={refetch}
+        />
+      )}
     />
   );
 }

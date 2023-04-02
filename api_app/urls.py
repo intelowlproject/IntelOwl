@@ -5,8 +5,8 @@ from django.urls import include, path
 from rest_framework import routers
 
 from .views import (
-    JobViewSet,
     CommentViewSet,
+    JobViewSet,
     PluginConfigViewSet,
     TagViewSet,
     analyze_file,

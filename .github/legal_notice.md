@@ -59,3 +59,4 @@ license terms.
 [Authlib](https://github.com/lepture/authlib),
 [Fangfrisch](https://github.com/rseichter/fangfrisch),
 [pyOneNote](https://github.com/DissectMalware/pyOneNote)
+[Sublime Rules](https://github.com/sublime-security/sublime-rules/blob/main/LICENSE)

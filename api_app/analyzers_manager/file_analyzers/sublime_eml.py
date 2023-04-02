@@ -9,10 +9,9 @@ from api_app.exceptions import AnalyzerRunException
 class SublimeEML(FileAnalyzer):
     def run(self):
         client = sublime.Sublime()
-        # client._BASE_URL = "http://localhost:8000"
         raw_message_eml = sublime.util.load_eml(self.filepath)
         rules, queries = sublime.util.load_yml_path(
-            "/opt/deploy/sublime_eml_download/detection-rules"
+            "/opt/deploy/sublime_eml/detection-rules"
         )
 
         try:

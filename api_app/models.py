@@ -77,7 +77,7 @@ class Comment(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name="comments",
+        related_name="comment",
     )
 
     class Meta:
@@ -88,7 +88,7 @@ class Comment(models.Model):
         on_delete=models.CASCADE,
         null=True,
         blank=True,
-        related_name="comments",
+        related_name="comment",
     )
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)

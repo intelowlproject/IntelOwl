@@ -3665,7 +3665,7 @@
   "Sublime_EML": {
     "type": "file",
     "python_module": "sublime_eml.SublimeEML",
-    "description": "scan a binary or a zip file (pwd:infected) against all the yara rules available in Malpedia",
+    "description": "Scans an EML file using community rules.",
     "disabled": false,
     "external_service": true,
     "leaks_info": false,

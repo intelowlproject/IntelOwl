@@ -32,3 +32,8 @@ gzip -dc "Image-ExifTool-$version.tar.gz" | tar -xf -
 cd "Image-ExifTool-$version"
 chown -R www-data:www-data /opt/deploy/exiftool_download
 
+# Download rules for Sublime EML Analyzer
+cd /opt/deploy
+mkdir sublime_eml
+cd sublime_eml
+svn export https://github.com/sublime-security/sublime-rules/trunk/detection-rules detection-rules

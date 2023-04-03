@@ -170,6 +170,7 @@ class AbstractConfigTestCase(CustomTestCase):
         result = muc.get_verification()
         self.assertEqual(result["configured"], True)
         self.assertCountEqual(result["missing_secrets"], [])
+        pc.delete()
         muc.delete()
 
     def test_get_verification_secret_present_not_user(self):
@@ -200,6 +201,7 @@ class AbstractConfigTestCase(CustomTestCase):
         result = muc.get_verification(self.user)
         self.assertEqual(result["configured"], False)
         self.assertCountEqual(result["missing_secrets"], ["test"])
+        pc.delete()
         muc.delete()
 
     def test_is_runnable(self):

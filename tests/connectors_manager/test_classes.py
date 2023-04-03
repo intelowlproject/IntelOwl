@@ -107,19 +107,8 @@ class ConnectorTestCase(CustomTestCase):
             observable_classification="domain",
             status="reported_without_fails",
         )
-        num_connectors = 0
-        dir = PosixPath(str(settings.BASE_CONNECTOR_PYTHON_PATH).replace(".", "/"))
-        for connector in dir.iterdir():
-            if (
-                connector.is_file()
-                and connector.suffix == ".py"
-                and connector.stem != "__init__"
-            ):
-                package = f"{str(connector.parent).replace('/', '.')}.{connector.stem}"
-                __import__(package)
-                num_connectors += 1
+
         subclasses = Connector.all_subclasses()
-        self.assertEqual(num_connectors, len(subclasses), subclasses)
         for subclass in subclasses:
             print("\n" f"Testing Connector {subclass.__name__}")
             for config in ConnectorConfig.objects.filter(

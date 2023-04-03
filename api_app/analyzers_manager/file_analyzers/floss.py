@@ -40,7 +40,7 @@ class Floss(FileAnalyzer, DockerBasedAnalyzer):
         # we are changing the endpoint of _docker_run to stringsifter
         self.url = self.ranking_url
 
-        for key in self.max_no_of_strings.keys():
+        for key in self.max_no_of_strings:
             if self.rank_strings[key]:
                 strings = json_dumps(result["strings"][key])
                 # 4 is the number of arguments that we are already passing

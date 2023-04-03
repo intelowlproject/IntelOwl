@@ -229,7 +229,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
             )[0]
             for label in tags_labels
         ]
-        for key in self.mtm_fields.keys():
+        for key in self.mtm_fields:
             self.mtm_fields[key] = validated_data.pop(key)
 
         job = Job.objects.create(**validated_data)

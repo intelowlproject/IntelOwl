@@ -416,11 +416,13 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
             raise AssertionError
         return resp
 
+    @staticmethod
     def mocked_docker_analyzer_get(*args, **kwargs):
         return MockUpResponse(
             {"key": "test", "returncode": 0, "report": {"test": "This is a test."}}, 200
         )
 
+    @staticmethod
     def mocked_docker_analyzer_post(*args, **kwargs):
         return MockUpResponse({"key": "test", "status": "running"}, 202)
 

@@ -51,8 +51,8 @@ class Plugin(metaclass=ABCMeta):
 
     @classmethod
     def all_subclasses(cls):
-        dir = PosixPath(str(cls.python_base_path).replace(".", "/"))
-        for plugin in dir.rglob("*.py"):
+        posix_dir = PosixPath(str(cls.python_base_path).replace(".", "/"))
+        for plugin in posix_dir.rglob("*.py"):
             if plugin.stem == "__init__":
                 continue
 
@@ -77,8 +77,6 @@ class Plugin(metaclass=ABCMeta):
 
     @cached_property
     def _job(self) -> "Job":
-        from api_app.models import Job
-
         return Job.objects.get(pk=self.job_id)
 
     def __repr__(self):

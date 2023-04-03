@@ -125,8 +125,8 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
         v = VisualizerConfig.objects.get(name="Yara")
         v.analyzers.set(AnalyzerConfig.objects.none())
         v.connectors.set(AnalyzerConfig.objects.none())
-        with patch.object(VisualizerConfig.objects, "all") as all:
-            all.return_value = [v]
+        with patch.object(VisualizerConfig.objects, "all") as all_objects:
+            all_objects.return_value = [v]
             visualizers = _AbstractJobCreateSerializer.set_visualizers_to_execute(
                 self.ajcs, [], []
             )
@@ -137,8 +137,8 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
         v.analyzers.set(AnalyzerConfig.objects.none())
         v.connectors.set(AnalyzerConfig.objects.none())
         self.assertTrue(v.is_runnable(self.user))
-        with patch.object(VisualizerConfig.objects, "all") as all:
-            all.return_value = [v]
+        with patch.object(VisualizerConfig.objects, "all") as all_objects:
+            all_objects.return_value = [v]
             visualizers = _AbstractJobCreateSerializer.set_visualizers_to_execute(
                 self.ajcs, [], []
             )
@@ -154,8 +154,8 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
         v = VisualizerConfig.objects.get(name="Yara")
         v.analyzers.set(AnalyzerConfig.objects.none())
         v.connectors.set(AnalyzerConfig.objects.none())
-        with patch.object(VisualizerConfig.objects, "all") as all:
-            all.return_value = VisualizerConfig.objects.filter(name="Yara")
+        with patch.object(VisualizerConfig.objects, "all") as all_objects:
+            all_objects.return_value = VisualizerConfig.objects.filter(name="Yara")
             # equal
             visualizers = _AbstractJobCreateSerializer.set_visualizers_to_execute(
                 self.ajcs, [], []

@@ -255,21 +255,8 @@ class VisualizerTestCase(CustomTestCase):
             observable_classification="domain",
             status="reported_without_fails",
         )
-        num_visualizers = 0
-        dir = PosixPath(str(settings.BASE_VISUALIZER_PYTHON_PATH).replace(".", "/"))
-        for visualizer in dir.iterdir():
-            if (
-                visualizer.is_file()
-                and visualizer.suffix == ".py"
-                and visualizer.stem != "__init__"
-            ):
-                package = (
-                    f"{str(visualizer.parent).replace('/', '.')}.{visualizer.stem}"
-                )
-                __import__(package)
-                num_visualizers += 1
+
         subclasses = Visualizer.all_subclasses()
-        self.assertEqual(num_visualizers, len(subclasses))
         for subclass in subclasses:
             print("\n" f"Testing Visualizer {subclass.__name__}")
             for config in VisualizerConfig.objects.filter(

@@ -24,16 +24,6 @@ class FileAnalyzerTestCase(CustomTestCase):
         "api_app/fixtures/0002_analyzer_pluginconfig.json",
     ]
 
-    def _load(self):
-        dir = PosixPath(str(settings.BASE_ANALYZER_FILE_PYTHON_PATH).replace(".", "/"))
-        for analyzer in dir.iterdir():
-            if (
-                analyzer.is_file()
-                and analyzer.suffix == ".py"
-                and analyzer.stem != "__init__"
-            ):
-                package = f"{str(analyzer.parent).replace('/', '.')}.{analyzer.stem}"
-                __import__(package)
 
     def _create_job(self, name, mimetype):
         with open(f"test_files/{name}", "rb") as f:
@@ -83,9 +73,8 @@ class FileAnalyzerTestCase(CustomTestCase):
         import signal
 
         signal.signal(signal.SIGALRM, handler)
-        self._load()
         self._create_jobs()
-        for subclass in FileAnalyzer.__subclasses__():
+        for subclass in FileAnalyzer.all_subclasses():
             print(f"\nTesting Analyzer {subclass.__name__}")
             for config in AnalyzerConfig.objects.filter(
                 python_module=subclass.python_module
@@ -159,18 +148,6 @@ class ObservableAnalyzerTestCase(CustomTestCase):
         self.assertEqual(oa.observable_classification, "domain")
         job.delete()
 
-    def _load(self):
-        dir = PosixPath(
-            str(settings.BASE_ANALYZER_OBSERVABLE_PYTHON_PATH).replace(".", "/")
-        )
-        for analyzer in dir.iterdir():
-            if (
-                analyzer.is_file()
-                and analyzer.suffix == ".py"
-                and analyzer.stem != "__init__"
-            ):
-                package = f"{str(analyzer.parent).replace('/', '.')}.{analyzer.stem}"
-                __import__(package)
 
     def _create_jobs(self):
         Job.objects.create(
@@ -207,9 +184,8 @@ class ObservableAnalyzerTestCase(CustomTestCase):
         import signal
 
         signal.signal(signal.SIGALRM, handler)
-        self._load()
         self._create_jobs()
-        for subclass in ObservableAnalyzer.__subclasses__():
+        for subclass in ObservableAnalyzer.all_subclasses():
             print(f"\nTesting Analyzer {subclass.__name__}")
             for config in AnalyzerConfig.objects.filter(
                 python_module=subclass.python_module

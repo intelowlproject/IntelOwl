@@ -19,6 +19,7 @@ def backwards_migrate(apps, schema_editor):
     for report in AnalyzerReport.objects.all():
         report.name = report.config.name
         report.save()
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -43,6 +44,11 @@ class Migration(migrations.Migration):
         migrations.AlterUniqueTogether(
             name='analyzerreport',
             unique_together={('config', 'job')},
+        ),
+        migrations.AlterField(
+            model_name="analyzerreport",
+            name="name",
+            field=models.CharField(max_length=50, primary_key=True, serialize=False, null=True),
         ),
         migrations.RemoveField(
             model_name='analyzerreport',

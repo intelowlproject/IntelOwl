@@ -47,7 +47,11 @@ class Migration(migrations.Migration):
             name='visualizerreport',
             unique_together={('config', 'job')},
         ),
-
+        migrations.AlterField(
+            model_name="visualizerreport",
+            name="name",
+            field=models.CharField(max_length=50, primary_key=True, serialize=False, null=True),
+        ),
         migrations.RemoveField(
             model_name='visualizerreport',
             name='name',

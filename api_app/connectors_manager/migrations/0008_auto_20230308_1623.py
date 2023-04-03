@@ -46,6 +46,11 @@ class Migration(migrations.Migration):
             name='connectorreport',
             unique_together={('config', 'job')},
         ),
+        migrations.AlterField(
+            model_name="connectorreport",
+            name="name",
+            field=models.CharField(max_length=50, primary_key=True, serialize=False, null=True),
+        ),
         migrations.RemoveField(
             model_name='connectorreport',
             name='name',

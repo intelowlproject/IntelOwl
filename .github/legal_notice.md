@@ -1,11 +1,12 @@
 ## Legal notice
 
 You as a user of this project must review, accept and comply with the license
-terms of each downloaded/installed package listed below. By proceeding with the
+terms of each downloaded/installed package/tool/media listed below. By proceeding with the
 installation, you are accepting the license terms of each package, and
 acknowledging that your use of each package will be subject to its respective
 license terms.
 
+#### Github Repos
 [osslsigncode](https://github.com/develar/osslsigncode),
 [PyExifTool](https://github.com/sylikc/pyexiftool),
 [Exiftool package](https://exiftool.org/#license),
@@ -59,3 +60,8 @@ license terms.
 [Authlib](https://github.com/lepture/authlib),
 [Fangfrisch](https://github.com/rseichter/fangfrisch),
 [pyOneNote](https://github.com/DissectMalware/pyOneNote)
+
+#### Media
+[notification.mp3](https://notificationsounds.com/message-tones/relax-message-tone)
+
+

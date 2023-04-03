@@ -95,7 +95,6 @@ export default function VisualizerReport({ visualizerReport }) {
 
   // validate data
   const validatedData = visualizerReport.report.map((fieldElement) =>
-    // const validatedData = mockedData.map((fieldElement) =>
     visualizerValidator(fieldElement)
   );
   validatedData.sort(

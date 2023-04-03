@@ -10,7 +10,11 @@ import {
   AiFillWarning,
   AiFillFire,
 } from "react-icons/ai";
-import { BsFillInfoSquareFill, BsShieldFillCheck } from "react-icons/bs";
+import {
+  BsFillInfoSquareFill,
+  BsShieldFillCheck,
+  BsTwitter,
+} from "react-icons/bs";
 import { FaBiohazard } from "react-icons/fa";
 import { SiVirustotal } from "react-icons/si";
 import { RiAliensFill } from "react-icons/ri";
@@ -30,9 +34,7 @@ const generalIcons = Object.freeze({
   virusTotal: (
     // eslint-disable-next-line react/jsx-no-constructed-context-values
     <IconContext.Provider value={{ color: "blue" }}>
-      <div>
-        <SiVirustotal />
-      </div>
+      <SiVirustotal />
     </IconContext.Provider>
   ),
   otx: <RiAliensFill />,
@@ -40,9 +42,7 @@ const generalIcons = Object.freeze({
   twitter: (
     // eslint-disable-next-line react/jsx-no-constructed-context-values
     <IconContext.Provider value={{ color: "#3399ff" }}>
-      <div>
-        <SiVirustotal />
-      </div>
+      <BsTwitter />
     </IconContext.Provider>
   ),
   quokka: (

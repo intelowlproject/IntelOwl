@@ -4,10 +4,7 @@
 import requests
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
-from api_app.analyzers_manager.exceptions import (
-    AnalyzerConfigurationException,
-    AnalyzerRunException,
-)
+from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
@@ -23,9 +20,8 @@ class YARAify(ObservableAnalyzer):
 
         if self.observable_classification == self.ObservableTypes.GENERIC:
             data["result_max"] = self.result_max
-        else:
-            if not hasattr(self, "_api_key_name"):
-                raise AnalyzerConfigurationException("Api key is missing")
+
+        if self._api_key_name:
             data["malpedia-token"] = self._api_key_name
 
         try:

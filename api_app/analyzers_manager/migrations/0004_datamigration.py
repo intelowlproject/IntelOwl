@@ -6,7 +6,7 @@ analyzers = {
         "type": "file",
         "python_module": "apkid.APKiD",
         "description": "APKiD identifies many compilers, packers, obfuscators, and other weird stuff from an APK or "
-                       "DEX file.",
+        "DEX file.",
         "disabled": False,
         "external_service": False,
         "leaks_info": False,
@@ -16,14 +16,11 @@ analyzers = {
             "application/java-archive",
             "application/vnd.android.package-archive",
             "application/x-dex",
-            "android"
+            "android",
         ],
-        "config": {
-            "soft_time_limit": 400,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 400, "queue": "default"},
         "secrets": {},
-        "params": {}
+        "params": {},
     },
     "AbuseIPDB": {
         "type": "observable",
@@ -33,37 +30,34 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["ip"],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 30, "queue": "default"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "ABUSEIPDB_KEY",
                 "description": "",
                 "required": True,
-                "type": "str"
+                "type": "str",
             }
         },
         "params": {
             "max_age": {
                 "value": 180,
                 "type": "int",
-                "description": "How many days back you want to check for reports. Default 180"
+                "description": "How many days back you want to check for reports. Default 180",
             },
             "max_reports": {
                 "value": 200,
                 "type": "int",
-                "description": "How many reports you want to save. Default 200"
+                "description": "How many reports you want to save. Default 200",
             },
             "verbose": {
                 "value": True,
                 "type": "bool",
                 "description": "Reports are included in this response if you enable this flag. Omitting the verbose "
-                               "flag will exclude reports and the country name field. If you want to keep your response payloads "
-                               "light, this is recommended"
-            }
-        }
+                "flag will exclude reports and the country name field. If you want to keep your response payloads "
+                "light, this is recommended",
+            },
+        },
     },
     "Anomali_Threatstream_Confidence": {
         "type": "observable",
@@ -74,31 +68,28 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["ip", "domain", "url", "hash", "generic"],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 30, "queue": "default"},
         "secrets": {
             "api_user_name": {
                 "env_var_key": "ANOMALI_THREATSTREAM_API_USER",
                 "type": "str",
                 "required": True,
-                "description": "API USER for Anomali Threatstream"
+                "description": "API USER for Anomali Threatstream",
             },
             "api_key_name": {
                 "env_var_key": "ANOMALI_THREATSTREAM_API_KEY",
                 "type": "str",
                 "required": True,
-                "description": "API Key for Anomali Threatstream"
-            }
+                "description": "API Key for Anomali Threatstream",
+            },
         },
         "params": {
             "threatstream_analysis": {
                 "value": "confidence",
                 "type": "str",
-                "description": "API in threatstream called is Confidence one"
+                "description": "API in threatstream called is Confidence one",
             }
-        }
+        },
     },
     "Anomali_Threatstream_Intelligence": {
         "type": "observable",
@@ -108,53 +99,50 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["ip", "domain", "url", "hash", "generic"],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 30, "queue": "default"},
         "secrets": {
             "api_user_name": {
                 "env_var_key": "ANOMALI_THREATSTREAM_API_USER",
                 "type": "str",
                 "required": True,
-                "description": "API USER for Anomali Threatstream"
+                "description": "API USER for Anomali Threatstream",
             },
             "api_key_name": {
                 "env_var_key": "ANOMALI_THREATSTREAM_API_KEY",
                 "type": "str",
                 "required": True,
-                "description": "API Key for Anomali Threatstream"
-            }
+                "description": "API Key for Anomali Threatstream",
+            },
         },
         "params": {
             "threatstream_analysis": {
                 "value": "intelligence",
                 "type": "str",
-                "description": "API in threatstream called is Intelligence one"
+                "description": "API in threatstream called is Intelligence one",
             },
             "limit": {
                 "value": "100",
                 "type": "str",
-                "description": "Number of maximal entries returned"
+                "description": "Number of maximal entries returned",
             },
             "must_active": {
                 "value": False,
                 "type": "bool",
-                "description": "Only return active entries"
+                "description": "Only return active entries",
             },
             "minimal_confidence": {
                 "value": "0",
                 "type": "str",
-                "description": "Minimal Confidence filter"
+                "description": "Minimal Confidence filter",
             },
             "modified_after": {
                 "value": "1900-10-02T20:44:35",
                 "type": "str",
                 "description": "Filter on entries modified after a specific date. Date must be specified in this "
-                               "format: YYYYMMDDThhmmss where T denotes the start of the value for time, in UTC time. For example, "
-                "2014-10-02T20:44:35."
-            }
-        }
+                "format: YYYYMMDDThhmmss where T denotes the start of the value for time, in UTC time. For example, "
+                "2014-10-02T20:44:35.",
+            },
+        },
     },
     "Anomali_Threatstream_PassiveDNS": {
         "type": "observable",
@@ -164,31 +152,28 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["ip", "domain"],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 30, "queue": "default"},
         "secrets": {
             "api_user_name": {
                 "env_var_key": "ANOMALI_THREATSTREAM_API_USER",
                 "type": "str",
                 "required": True,
-                "description": "API USER for Anomali Threatstream"
+                "description": "API USER for Anomali Threatstream",
             },
             "api_key_name": {
                 "env_var_key": "ANOMALI_THREATSTREAM_API_KEY",
                 "type": "str",
                 "required": True,
-                "description": "API Key for Anomali Threatstream"
-            }
+                "description": "API Key for Anomali Threatstream",
+            },
         },
         "params": {
             "threatstream_analysis": {
                 "value": "passive_dns",
                 "type": "str",
-                "description": "API in threatstream called is passive_dns one"
+                "description": "API in threatstream called is passive_dns one",
             }
-        }
+        },
     },
     "Auth0": {
         "type": "observable",
@@ -198,42 +183,36 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["ip"],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 30, "queue": "default"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "AUTH0_KEY",
                 "description": "",
                 "required": True,
-                "type": "str"
+                "type": "str",
             }
         },
-        "params": {}
+        "params": {},
     },
     "BinaryEdge": {
         "type": "observable",
         "python_module": "binaryedge.BinaryEdge",
         "description": "Details about an Host. List of recent events for the specified host, including details of "
-                       "exposed ports and services and return list of subdomains known from the target domains",
+        "exposed ports and services and return list of subdomains known from the target domains",
         "disabled": False,
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["ip", "domain"],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 30, "queue": "default"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "BINARYEDGE_KEY",
                 "description": "API key for the BinaryEdge",
                 "required": True,
-                "type": "str"
+                "type": "str",
             }
         },
-        "params": {}
+        "params": {},
     },
     "BitcoinAbuse": {
         "type": "observable",
@@ -244,19 +223,16 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["hash"],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 30, "queue": "default"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "BITCOINABUSE_KEY",
                 "description": "",
                 "required": True,
-                "type": "str"
+                "type": "str",
             }
         },
-        "params": {}
+        "params": {},
     },
     "BoxJS_Scan_JavaScript": {
         "type": "file",
@@ -269,14 +245,11 @@ analyzers = {
         "supported_filetypes": [
             "application/x-javascript",
             "application/javascript",
-            "text/javascript"
+            "text/javascript",
         ],
-        "config": {
-            "soft_time_limit": 400,
-            "queue": "local"
-        },
+        "config": {"soft_time_limit": 400, "queue": "local"},
         "secrets": {},
-        "params": {}
+        "params": {},
     },
     "CheckDMARC": {
         "type": "observable",
@@ -286,12 +259,9 @@ analyzers = {
         "external_service": False,
         "leaks_info": False,
         "observable_supported": ["domain"],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 30, "queue": "default"},
         "secrets": {},
-        "params": {}
+        "params": {},
     },
     "CheckPhish": {
         "type": "observable",
@@ -301,30 +271,27 @@ analyzers = {
         "external_service": True,
         "leaks_info": True,
         "observable_supported": ["url"],
-        "config": {
-            "soft_time_limit": 100,
-            "queue": "long"
-        },
+        "config": {"soft_time_limit": 100, "queue": "long"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "CHECKPHISH_KEY",
                 "type": "str",
                 "required": True,
-                "description": "API Key for the analyzer"
+                "description": "API Key for the analyzer",
             }
         },
         "params": {
             "polling_tries": {
                 "value": 10,
                 "type": "int",
-                "description": "How many times we poll the CheckPhish API for scan results"
+                "description": "How many times we poll the CheckPhish API for scan results",
             },
             "polling_time": {
                 "value": 0.5,
                 "type": "float",
-                "description": "IntelOwl would sleep for this time between each poll to CheckPhish APIs"
-            }
-        }
+                "description": "IntelOwl would sleep for this time between each poll to CheckPhish APIs",
+            },
+        },
     },
     "CIRCLPassiveDNS": {
         "type": "observable",
@@ -334,19 +301,16 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["domain", "url"],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 30, "queue": "default"},
         "secrets": {
             "pdns_credentials": {
                 "env_var_key": "CIRCL_CREDENTIALS",
                 "description": "Template to use: `<user>|<pwd>`.",
                 "required": True,
-                "type": "str"
+                "type": "str",
             }
         },
-        "params": {}
+        "params": {},
     },
     "CIRCLPassiveSSL": {
         "type": "observable",
@@ -356,19 +320,16 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["ip"],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 30, "queue": "default"},
         "secrets": {
             "pdns_credentials": {
                 "env_var_key": "CIRCL_CREDENTIALS",
                 "description": "Template to use: `<user>|<pwd>`.",
                 "required": True,
-                "type": "str"
+                "type": "str",
             }
         },
-        "params": {}
+        "params": {},
     },
     "Classic_DNS": {
         "type": "observable",
@@ -378,18 +339,15 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["ip", "domain", "url"],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 30, "queue": "default"},
         "secrets": {},
         "params": {
             "query_type": {
                 "value": "A",
                 "type": "str",
-                "description": "Query type against the chosen DNS resolver."
+                "description": "Query type against the chosen DNS resolver.",
             }
-        }
+        },
     },
     "CloudFlare_DNS": {
         "type": "observable",
@@ -399,18 +357,9 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["domain", "url"],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 30, "queue": "default"},
         "secrets": {},
-        "params": {
-            "query_type": {
-                "value": "A",
-                "type": "str",
-                "description": ""
-            }
-        }
+        "params": {"query_type": {"value": "A", "type": "str", "description": ""}},
     },
     "CloudFlare_Malicious_Detector": {
         "type": "observable",
@@ -420,12 +369,9 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["domain", "url"],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 30, "queue": "default"},
         "secrets": {},
-        "params": {}
+        "params": {},
     },
     "Crowdsec": {
         "type": "observable",
@@ -435,19 +381,16 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["ip"],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 30, "queue": "default"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "CROWDSEC_KEY",
                 "description": "API Key to access the service",
                 "required": True,
-                "type": "str"
+                "type": "str",
             }
         },
-        "params": {}
+        "params": {},
     },
     "Capa_Info": {
         "type": "file",
@@ -460,25 +403,18 @@ analyzers = {
             "application/x-dosexec",
             "application/x-sharedlib",
             "application/x-executable",
-            "application/x-elf"
+            "application/x-elf",
         ],
-        "config": {
-            "soft_time_limit": 500,
-            "queue": "long"
-        },
+        "config": {"soft_time_limit": 500, "queue": "long"},
         "secrets": {},
         "params": {
-            "arch": {
-                "value": "64",
-                "description": "`32` or `64`",
-                "type": "str"
-            },
+            "arch": {"value": "64", "description": "`32` or `64`", "type": "str"},
             "shellcode": {
                 "value": False,
                 "description": "if the file analyzed is a shellcode or not",
-                "type": "bool"
-            }
-        }
+                "type": "bool",
+            },
+        },
     },
     "Capa_Info_Shellcode": {
         "type": "file",
@@ -488,23 +424,20 @@ analyzers = {
         "external_service": False,
         "leaks_info": False,
         "supported_filetypes": ["application/octet-stream"],
-        "config": {
-            "soft_time_limit": 500,
-            "queue": "long"
-        },
+        "config": {"soft_time_limit": 500, "queue": "long"},
         "secrets": {},
         "params": {
             "arch": {
                 "value": "64",
                 "type": "str",
-                "description": "Change system architecture for the shellcode (32 or 64)."
+                "description": "Change system architecture for the shellcode (32 or 64).",
             },
             "shellcode": {
                 "value": True,
                 "type": "bool",
-                "description": "true if the file is a shellcode."
-            }
-        }
+                "description": "true if the file is a shellcode.",
+            },
+        },
     },
     "CapeSandbox": {
         "type": "file",
@@ -515,16 +448,13 @@ analyzers = {
         "external_service": True,
         "leaks_info": True,
         "docker_based": False,
-        "config": {
-            "soft_time_limit": 1000,
-            "queue": "long"
-        },
+        "config": {"soft_time_limit": 1000, "queue": "long"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "CAPESANDBOX_KEY",
                 "description": "",
                 "required": True,
-                "type": "str"
+                "type": "str",
             },
             "url_key_name": {
                 "env_var_key": "CAPESANDBOX_URL",
@@ -532,26 +462,26 @@ analyzers = {
                 "CAPESandbox by default.",
                 "default": "https://www.capesandbox.com",
                 "required": True,
-                "type": "str"
-            }
+                "type": "str",
+            },
         },
         "params": {
             "VM_NAME": {
                 "value": "",
                 "type": "str",
-                "description": "The VM to be used in the analysis."
+                "description": "The VM to be used in the analysis.",
             },
             "max_tries": {
                 "value": 50,
                 "type": "int",
-                "description": "Number of max tries while trying to poll the CAPESandbox API."
+                "description": "Number of max tries while trying to poll the CAPESandbox API.",
             },
             "poll_distance": {
                 "value": 30,
                 "type": "int",
-                "description": "Seconds to wait before moving on to the next poll attempt."
-            }
-        }
+                "description": "Seconds to wait before moving on to the next poll attempt.",
+            },
+        },
     },
     "Censys_Search": {
         "type": "observable",
@@ -561,31 +491,24 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["ip"],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 30, "queue": "default"},
         "secrets": {
             "api_id_name": {
                 "env_var_key": "CENSYS_API_ID",
                 "description": "",
                 "required": True,
-                "type": "str"
+                "type": "str",
             },
             "api_secret_name": {
                 "env_var_key": "CENSYS_API_SECRET",
                 "description": "",
                 "required": True,
-                "type": "str"
-            }
+                "type": "str",
+            },
         },
         "params": {
-            "censys_analysis": {
-                "value": "search",
-                "type": "str",
-                "description": ""
-            }
-        }
+            "censys_analysis": {"value": "search", "type": "str", "description": ""}
+        },
     },
     "ClamAV": {
         "type": "file",
@@ -597,15 +520,10 @@ analyzers = {
         "leaks_info": False,
         "external_service": False,
         "docker_based": True,
-        "config": {
-            "soft_time_limit": 70,
-            "queue": "local"
-        },
-        "not_supported_filetypes":[
-          "application/vnd.tcpdump.pcap"
-        ],
+        "config": {"soft_time_limit": 70, "queue": "local"},
+        "not_supported_filetypes": ["application/vnd.tcpdump.pcap"],
         "secrets": {},
-        "params": {}
+        "params": {},
     },
     "CryptoScamDB_CheckAPI": {
         "type": "observable",
@@ -616,15 +534,10 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["ip", "domain", "generic"],
-        "config": {
-            "soft_time_limit": 300,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 300, "queue": "default"},
         "secrets": {},
         "params": {},
-        "not_supported_filetypes":[
-          "application/vnd.tcpdump.pcap"
-        ],
+        "not_supported_filetypes": ["application/vnd.tcpdump.pcap"],
     },
     "CRXcavator": {
         "type": "observable",
@@ -636,12 +549,9 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["generic"],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 30, "queue": "default"},
         "secrets": {},
-        "params": {}
+        "params": {},
     },
     "Cuckoo_Scan": {
         "type": "file",
@@ -650,36 +560,25 @@ analyzers = {
         "disabled": False,
         "external_service": False,
         "leaks_info": False,
-        "config": {
-            "soft_time_limit": 500,
-            "queue": "long"
-        },
+        "config": {"soft_time_limit": 500, "queue": "long"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "CUCKOO_API_KEY",
                 "description": "",
                 "required": False,
-                "type": "str"
+                "type": "str",
             },
             "url_key_name": {
                 "env_var_key": "CUCKOO_URL",
                 "description": "",
                 "required": True,
-                "type": "str"
-            }
+                "type": "str",
+            },
         },
         "params": {
-            "max_post_tries": {
-                "value": 5,
-                "type": "int",
-                "description": ""
-            },
-            "max_poll_tries": {
-                "value": 20,
-                "type": "int",
-                "description": ""
-            }
-        }
+            "max_post_tries": {"value": 5, "type": "int", "description": ""},
+            "max_poll_tries": {"value": 20, "type": "int", "description": ""},
+        },
     },
     "CyberChef": {
         "type": "observable",
@@ -688,31 +587,28 @@ analyzers = {
         "disabled": False,
         "observable_supported": ["generic"],
         "external_service": False,
-        "config": {
-            "soft_time_limit": 50,
-            "queue": "local"
-        },
+        "config": {"soft_time_limit": 50, "queue": "local"},
         "secrets": {},
         "params": {
             "recipe_name": {
                 "value": "to decimal",
                 "type": "str",
-                "description": "Name of pre-defined recipe to use."
+                "description": "Name of pre-defined recipe to use.",
             },
             "recipe_code": {
                 "value": [],
                 "type": "list",
                 "description": "Custom recipe to use (instead of a predefined one). [Here]("
                 "https://github.com/mattnotmax/cyberchef-recipes) are some sample recipes. NOTE: This is only read if "
-                "recipe_name is blank"
+                "recipe_name is blank",
             },
             "output_type": {
                 "value": "",
                 "type": "str",
                 "description": "Output type of the recipe. Leave blank to use default. Available output types are "
-                "listed [here](https://github.com/gchq/CyberChef/wiki/Adding-a-new-operation#data-types)"
-            }
-        }
+                "listed [here](https://github.com/gchq/CyberChef/wiki/Adding-a-new-operation#data-types)",
+            },
+        },
     },
     "Cymru_Hash_Registry_Get_File": {
         "type": "file",
@@ -722,15 +618,10 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "run_hash": True,
-        "config": {
-            "soft_time_limit": 50,
-            "queue": "default"
-        },
-        "not_supported_filetypes":[
-          "application/vnd.tcpdump.pcap"
-        ],
+        "config": {"soft_time_limit": 50, "queue": "default"},
+        "not_supported_filetypes": ["application/vnd.tcpdump.pcap"],
         "secrets": {},
-        "params": {}
+        "params": {},
     },
     "Cymru_Hash_Registry_Get_Observable": {
         "type": "observable",
@@ -740,12 +631,9 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["hash"],
-        "config": {
-            "soft_time_limit": 50,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 50, "queue": "default"},
         "secrets": {},
-        "params": {}
+        "params": {},
     },
     "Darksearch_Query": {
         "type": "observable",
@@ -755,23 +643,12 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["ip", "url", "domain", "hash", "generic"],
-        "config": {
-            "soft_time_limit": 50,
-            "queue": "long"
-        },
+        "config": {"soft_time_limit": 50, "queue": "long"},
         "secrets": {},
         "params": {
-            "pages": {
-                "value": 10,
-                "type": "int",
-                "description": ""
-            },
-            "proxies": {
-                "value": {},
-                "type": "dict",
-                "description": ""
-            }
-        }
+            "pages": {"value": 10, "type": "int", "description": ""},
+            "proxies": {"value": {}, "type": "dict", "description": ""},
+        },
     },
     "Dehashed_Search": {
         "type": "observable",
@@ -782,35 +659,32 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["ip", "url", "domain", "hash", "generic"],
-        "config": {
-            "soft_time_limit": 300,
-            "queue": "long"
-        },
+        "config": {"soft_time_limit": 300, "queue": "long"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "DEHASHED_AUTH_KEY",
                 "description": "Combination of your dehashed account's email and API key. Format: `email:api-key`.",
-                "required": True
+                "required": True,
             }
         },
         "params": {
             "size": {
                 "value": 100,
                 "type": "int",
-                "description": "Number of records fetched. Recommend change to a large value."
+                "description": "Number of records fetched. Recommend change to a large value.",
             },
             "pages": {
                 "value": 1,
                 "type": "int",
-                "description": "Number of pages fetched. Recommend to keep at 1 only to save on credits."
+                "description": "Number of pages fetched. Recommend to keep at 1 only to save on credits.",
             },
             "operator": {
                 "value": "username",
                 "type": "str",
                 "description": "Search Operator to use among (id, email, ip_address, username, password, "
-                "hashed_password, hash_type, name, vin, address, phone, database_name). Default: username"
-            }
-        }
+                "hashed_password, hash_type, name, vin, address, phone, database_name). Default: username",
+            },
+        },
     },
     "DNS0_EU": {
         "type": "observable",
@@ -820,18 +694,15 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["domain", "url"],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 30, "queue": "default"},
         "secrets": {},
         "params": {
             "query_type": {
                 "value": "A",
                 "type": "str",
-                "description": "Query type against the chosen DNS resolver."
+                "description": "Query type against the chosen DNS resolver.",
             }
-        }
+        },
     },
     "DNS0_EU_Malicious_Detector": {
         "type": "observable",
@@ -842,12 +713,9 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["domain", "url"],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 30, "queue": "default"},
         "secrets": {},
-        "params": {}
+        "params": {},
     },
     "DNSDB": {
         "type": "observable",
@@ -858,56 +726,49 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["domain", "url", "ip"],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 30, "queue": "default"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "DNSDB_KEY",
                 "description": "",
                 "required": True,
-                "type": "str"
+                "type": "str",
             }
         },
         "params": {
             "server": {
                 "value": "api.dnsdb.info",
                 "type": "str",
-                "description": "DNSDB server."
+                "description": "DNSDB server.",
             },
             "api_version": {
                 "value": 2,
                 "type": "int",
-                "description": "API version of DNSDB (options: `1` and `2`)."
+                "description": "API version of DNSDB (options: `1` and `2`).",
             },
-            "rrtype": {
-                "value": "",
-                "type": "str",
-                "description": "DNS query type."
-            },
+            "rrtype": {"value": "", "type": "str", "description": "DNS query type."},
             "limit": {
                 "value": 10000,
                 "type": "int",
-                "description": "Maximum number of results to retrieve."
+                "description": "Maximum number of results to retrieve.",
             },
             "time": {
                 "value": {
                     "first_before": "",
                     "first_after": "",
                     "last_before": "",
-                    "last_after": ""
+                    "last_after": "",
                 },
                 "type": "dict",
-                "description": "Time range"
+                "description": "Time range",
             },
             "query_type": {
                 "value": "domain",
                 "type": "str",
                 "description": "Query type. Options: domain (default), rrname-wildcard-left, rrname-wildcard-right, "
-                "names, rdata-wildcard-left, rdata-wildcard-right"
-            }
-        }
+                "names, rdata-wildcard-left, rdata-wildcard-right",
+            },
+        },
     },
     "DNStwist": {
         "type": "observable",
@@ -917,34 +778,31 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["domain", "url"],
-        "config": {
-            "soft_time_limit": 300,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 300, "queue": "default"},
         "secrets": {},
         "params": {
             "tld": {
                 "value": True,
                 "type": "bool",
-                "description": "Check for domains with different TLDs by supplying a dictionary file."
+                "description": "Check for domains with different TLDs by supplying a dictionary file.",
             },
             "tld_dict": {
                 "value": "abused_tlds.dict",
                 "type": "str",
-                "description": "Dictionary to use with `tld` argument (`common_tlds.dict/abused_tlds.dict`)."
+                "description": "Dictionary to use with `tld` argument (`common_tlds.dict/abused_tlds.dict`).",
             },
             "mxcheck": {
                 "value": True,
                 "type": "bool",
-                "description": "Find suspicious mail servers and flag them with SPYING-MX string."
+                "description": "Find suspicious mail servers and flag them with SPYING-MX string.",
             },
             "ssdeep": {
                 "value": True,
                 "type": "bool",
                 "description": "Enable fuzzy hashing - compare HTML content of original domain with a potentially "
-                "malicious one and determine similarity."
-            }
-        }
+                "malicious one and determine similarity.",
+            },
+        },
     },
     "Doc_Info": {
         "type": "file",
@@ -973,20 +831,17 @@ analyzers = {
             "application/zip",
             "application/encrypted",
             "text/plain",
-            "text/csv"
+            "text/csv",
         ],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "local"
-        },
+        "config": {"soft_time_limit": 30, "queue": "local"},
         "secrets": {},
         "params": {
             "additional_passwords_to_check": {
                 "value": [""],
                 "type": "list",
-                "description": "List of passwords to try when decrypting the document"
+                "description": "List of passwords to try when decrypting the document",
             }
-        }
+        },
     },
     "Doc_Info_Experimental": {
         "type": "file",
@@ -1014,25 +869,18 @@ analyzers = {
             "application/zip",
             "application/encrypted",
             "text/plain",
-            "text/csv"
+            "text/csv",
         ],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "local"
-        },
+        "config": {"soft_time_limit": 30, "queue": "local"},
         "secrets": {},
         "params": {
-            "experimental": {
-                "value": True,
-                "type": "bool",
-                "description": ""
-            },
+            "experimental": {"value": True, "type": "bool", "description": ""},
             "additional_passwords_to_check": {
                 "value": [],
                 "type": "list",
-                "description": "List of passwords to try when decrypting the document"
-            }
-        }
+                "description": "List of passwords to try when decrypting the document",
+            },
+        },
     },
     "DocGuard_Get": {
         "type": "observable",
@@ -1042,19 +890,16 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["hash"],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 30, "queue": "default"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "DOCGUARD_KEY",
                 "description": "",
                 "required": False,
-                "type": "str"
+                "type": "str",
             }
         },
-        "params": {}
+        "params": {},
     },
     "DocGuard_Upload_File": {
         "type": "file",
@@ -1083,66 +928,57 @@ analyzers = {
             "application/zip",
             "application/encrypted",
             "text/plain",
-            "text/csv"
+            "text/csv",
         ],
-        "config": {
-            "soft_time_limit": 180,
-            "queue": "long"
-        },
+        "config": {"soft_time_limit": 180, "queue": "long"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "DOCGUARD_KEY",
                 "description": "",
                 "required": False,
-                "type": "str"
+                "type": "str",
             }
         },
-        "params": {}
+        "params": {},
     },
     "Dragonfly_Emulation": {
         "type": "file",
         "python_module": "dragonfly.DragonflyEmulation",
         "description": "Emulate malware against [Dragonfly](https://dragonfly.certego.net/?utm_source=intelowl) "
         "sandbox by [Certego S.R.L](https://certego.net).",
-        "supported_filetypes": [
-            "application/x-dosexec",
-            "application/octet-stream"
-        ],
+        "supported_filetypes": ["application/x-dosexec", "application/octet-stream"],
         "disabled": False,
         "external_service": True,
         "leaks_info": False,
-        "config": {
-            "soft_time_limit": 400,
-            "queue": "long"
-        },
+        "config": {"soft_time_limit": 400, "queue": "long"},
         "params": {
             "profiles": {
                 "value": [1, 2],
                 "type": "list",
                 "description": "List of profile indices for emulators. Refer to [profiles list]("
-                "https://dragonfly.certego.net/dashboard/profiles?utm_source=intelowl)."
+                "https://dragonfly.certego.net/dashboard/profiles?utm_source=intelowl).",
             },
             "operating_system": {
                 "value": "",
                 "type": "str",
-                "description": "Enum: `WINDOW`|`LINUX`| or leave blank string for automatic detection"
+                "description": "Enum: `WINDOW`|`LINUX`| or leave blank string for automatic detection",
             },
             "root": {
                 "value": False,
                 "type": "bool",
-                "description": "If `true`, emulate with root permissions"
+                "description": "If `true`, emulate with root permissions",
             },
             "allow_actions": {
                 "value": False,
                 "type": "bool",
-                "description": "If `true`, run actions when a rule matches"
+                "description": "If `true`, run actions when a rule matches",
             },
             "private": {
                 "value": False,
                 "type": "bool",
                 "description": "If `true`, mark the analysis as private so it's accessible to you and members within "
-                "your organization only"
-            }
+                "your organization only",
+            },
         },
         "secrets": {
             "api_key_name": {
@@ -1150,16 +986,16 @@ analyzers = {
                 "description": "Dragonfly API key. Generate [here]("
                 "https://dragonfly.certego.net/me/sessions?utm_source=intelowl).",
                 "required": True,
-                "type": "str"
+                "type": "str",
             },
             "url_key_name": {
                 "env_var_key": "DRAGONFLY_API_URL",
                 "description": "Dragonfly instance URL. Don't change this.",
                 "default": "https://dragonfly.certego.net/",
                 "required": True,
-                "type": "str"
-            }
-        }
+                "type": "str",
+            },
+        },
     },
     "ELF_Info": {
         "type": "file",
@@ -1171,14 +1007,11 @@ analyzers = {
         "supported_filetypes": [
             "application/x-sharedlib",
             "application/x-elf",
-            "application/x-executable"
+            "application/x-executable",
         ],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "local"
-        },
+        "config": {"soft_time_limit": 30, "queue": "local"},
         "secrets": {},
-        "params": {}
+        "params": {},
     },
     "EmailRep": {
         "type": "observable",
@@ -1188,19 +1021,16 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["generic"],
-        "config": {
-            "soft_time_limit": 50,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 50, "queue": "default"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "EMAILREP_KEY",
                 "description": "",
                 "required": True,
-                "type": "str"
+                "type": "str",
             }
         },
-        "params": {}
+        "params": {},
     },
     "File_Info": {
         "type": "file",
@@ -1209,15 +1039,10 @@ analyzers = {
         "disabled": False,
         "external_service": False,
         "leaks_info": False,
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "local"
-        },
+        "config": {"soft_time_limit": 30, "queue": "local"},
         "secrets": {},
         "params": {},
-        "not_supported_filetypes":[
-          "application/vnd.tcpdump.pcap"
-        ],
+        "not_supported_filetypes": ["application/vnd.tcpdump.pcap"],
     },
     "FireHol_IPList": {
         "type": "observable",
@@ -1228,18 +1053,15 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["ip"],
-        "config": {
-            "soft_time_limit": 180,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 180, "queue": "default"},
         "secrets": {},
         "params": {
             "list_names": {
                 "value": ["firehol_level1.netset"],
                 "type": "list",
-                "description": "A list of firehol list names."
+                "description": "A list of firehol list names.",
             }
-        }
+        },
     },
     "FileScan_Upload_File": {
         "type": "file",
@@ -1249,12 +1071,9 @@ analyzers = {
         "disabled": False,
         "external_service": True,
         "leaks_info": False,
-        "config": {
-            "soft_time_limit": 180,
-            "queue": "long"
-        },
+        "config": {"soft_time_limit": 180, "queue": "long"},
         "secrets": {},
-        "params": {}
+        "params": {},
     },
     "FileScan_Search": {
         "type": "observable",
@@ -1265,12 +1084,9 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["url", "domain", "ip", "generic", "hash"],
-        "config": {
-            "soft_time_limit": 60,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 60, "queue": "default"},
         "secrets": {},
-        "params": {}
+        "params": {},
     },
     "Floss": {
         "type": "file",
@@ -1280,35 +1096,29 @@ analyzers = {
         "external_service": False,
         "leaks_info": False,
         "docker_based": True,
-        "supported_filetypes": [
-            "application/x-dosexec",
-            "application/octet-stream"
-        ],
-        "config": {
-            "soft_time_limit": 500,
-            "queue": "local"
-        },
+        "supported_filetypes": ["application/x-dosexec", "application/octet-stream"],
+        "config": {"soft_time_limit": 500, "queue": "local"},
         "secrets": {},
         "params": {
             "max_no_of_strings": {
                 "value": {
                     "stack_strings": 1000,
                     "static_strings": 1000,
-                    "decoded_strings": 1000
+                    "decoded_strings": 1000,
                 },
                 "type": "dict",
-                "description": ""
+                "description": "",
             },
             "rank_strings": {
                 "value": {
                     "stack_strings": False,
                     "static_strings": False,
-                    "decoded_strings": False
+                    "decoded_strings": False,
                 },
                 "type": "dict",
-                "description": ""
-            }
-        }
+                "description": "",
+            },
+        },
     },
     "Google_DNS": {
         "type": "observable",
@@ -1318,18 +1128,15 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["domain", "url"],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 30, "queue": "default"},
         "secrets": {},
         "params": {
             "query_type": {
                 "value": "A",
                 "type": "str",
-                "description": "Query type against the chosen DNS resolver."
+                "description": "Query type against the chosen DNS resolver.",
             }
-        }
+        },
     },
     "GoogleWebRisk": {
         "type": "observable",
@@ -1339,19 +1146,16 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["ip", "domain", "url"],
-        "config": {
-            "soft_time_limit": 20,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 20, "queue": "default"},
         "secrets": {
             "service_account_json": {
                 "env_var_key": "SERVICE_ACCOUNT_JSON",
                 "description": "service account file in JSON format",
                 "required": True,
-                "type": "dict"
+                "type": "dict",
             }
         },
-        "params": {}
+        "params": {},
     },
     "GoogleSafebrowsing": {
         "type": "observable",
@@ -1361,19 +1165,16 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["ip", "domain", "url"],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 30, "queue": "default"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "GSF_KEY",
                 "description": "",
                 "required": True,
-                "type": "str"
+                "type": "str",
             }
         },
-        "params": {}
+        "params": {},
     },
     "GreedyBear": {
         "type": "observable",
@@ -1383,28 +1184,23 @@ analyzers = {
         "disabled": False,
         "external_service": True,
         "leaks_info": False,
-        "observable_supported": [
-            "ip", "domain"
-        ],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "default"
-        },
+        "observable_supported": ["ip", "domain"],
+        "config": {"soft_time_limit": 30, "queue": "default"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "GREEDYBEAR_API_KEY",
                 "description": "API key required for authentication",
                 "required": True,
-                "type": "str"
+                "type": "str",
             }
         },
         "params": {
             "url": {
                 "value": "https://greedybear.honeynet.org",
                 "type": "str",
-                "description": "URL of the GreedyBear instance you want to connect to"
+                "description": "URL of the GreedyBear instance you want to connect to",
             }
-        }
+        },
     },
     "GreyNoise": {
         "type": "observable",
@@ -1414,25 +1210,22 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["ip"],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 30, "queue": "default"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "GREYNOISE_API_KEY",
                 "description": "",
                 "required": True,
-                "type": "str"
+                "type": "str",
             }
         },
         "params": {
             "greynoise_api_version": {
                 "value": "v2",
                 "type": "str",
-                "description": "[GreyNoise Enterprise API](https://docs.greynoise.io/docs/using-the-greynoise-api)"
+                "description": "[GreyNoise Enterprise API](https://docs.greynoise.io/docs/using-the-greynoise-api)",
             }
-        }
+        },
     },
     "GreyNoiseCommunity": {
         "type": "observable",
@@ -1448,21 +1241,18 @@ analyzers = {
                 "description": "",
                 "required": False,
                 "type": "str",
-                "default": ""
+                "default": "",
             }
         },
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 30, "queue": "default"},
         "params": {
             "greynoise_api_version": {
                 "value": "v3",
                 "type": "str",
                 "description": "[GreyNoise Community API]("
-              "https://docs.greynoise.io/docs/using-the-greynoise-community-api)"
+                "https://docs.greynoise.io/docs/using-the-greynoise-community-api)",
             }
-        }
+        },
     },
     "HashLookupServer_Get_Observable": {
         "type": "observable",
@@ -1472,18 +1262,15 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["hash"],
-        "config": {
-            "soft_time_limit": 20,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 20, "queue": "default"},
         "secrets": {},
         "params": {
             "hashlookup_server": {
                 "value": "",
                 "type": "str",
-                "description": "custom hashlookup-server"
+                "description": "custom hashlookup-server",
             }
-        }
+        },
     },
     "HashLookupServer_Get_File": {
         "type": "file",
@@ -1513,18 +1300,15 @@ analyzers = {
             "application/encrypted",
             "application/vnd.tcpdump.pcap",
         ],
-        "config": {
-            "soft_time_limit": 40,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 40, "queue": "default"},
         "secrets": {},
         "params": {
             "hashlookup_server": {
                 "value": "",
                 "type": "str",
-                "description": "custom hashlookup-server"
+                "description": "custom hashlookup-server",
             }
-        }
+        },
     },
     "HaveIBeenPwned": {
         "type": "observable",
@@ -1534,35 +1318,32 @@ analyzers = {
         "external_service": True,
         "leaks_info": True,
         "observable_supported": ["generic"],
-        "config": {
-            "soft_time_limit": 100,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 100, "queue": "default"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "HIBP_API_KEY",
                 "type": "str",
                 "required": True,
-                "description": "API Key for HaveIBeenPwned"
+                "description": "API Key for HaveIBeenPwned",
             }
         },
         "params": {
             "truncate_response": {
                 "value": True,
                 "type": "bool",
-                "description": "Truncate response to only include most recent data breaches"
+                "description": "Truncate response to only include most recent data breaches",
             },
             "include_unverified": {
                 "value": False,
                 "type": "bool",
-                "description": "Include unverified data breaches in the response"
+                "description": "Include unverified data breaches in the response",
             },
             "domain": {
                 "value": "",
                 "type": "str",
-                "description": "Search for data breaches specific to a domain"
-            }
-        }
+                "description": "Search for data breaches specific to a domain",
+            },
+        },
     },
     "HoneyDB": {
         "type": "observable",
@@ -1572,32 +1353,29 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["ip"],
-        "config": {
-            "soft_time_limit": 200,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 200, "queue": "default"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "HONEYDB_API_KEY",
                 "description": "",
                 "required": True,
-                "type": "str"
+                "type": "str",
             },
             "api_id_name": {
                 "env_var_key": "HONEYDB_API_ID",
                 "description": "",
                 "required": True,
-                "type": "str"
-            }
+                "type": "str",
+            },
         },
         "params": {
             "honeydb_analysis": {
                 "value": "all",
                 "type": "str",
                 "description": "Choose which endpoint to query from the HoneyDB service (options are: `all`, "
-                "`scan_twitter`, `ip_query`, `ip_history`, `internet_scanner`, `ip_info`)"
+                "`scan_twitter`, `ip_query`, `ip_history`, `internet_scanner`, `ip_info`)",
             }
-        }
+        },
     },
     "Hunter_How": {
         "type": "observable",
@@ -1607,41 +1385,37 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["ip", "domain"],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 30, "queue": "default"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "HUNTERHOW_KEY",
                 "description": "API key for the Hunter_How",
                 "required": True,
-                "type": "str"
+                "type": "str",
             }
         },
         "params": {
             "page": {
                 "value": 1,
                 "type": "int",
-                "description": "The number of displayed page."
+                "description": "The number of displayed page.",
             },
             "page_size": {
                 "value": 10,
                 "type": "int",
-                "description": " The number of results displayed on one page "
+                "description": " The number of results displayed on one page ",
             },
             "start_time": {
                 "value": "2022-01-01",
                 "type": "str",
-                "description": "Only show results after the given date (yyyy-mm-dd)"
+                "description": "Only show results after the given date (yyyy-mm-dd)",
             },
             "end_time": {
                 "value": "2022-12-01",
                 "type": "str",
-                "description": "Only show results after the given date (yyyy-mm-dd)"
-            }
-
-        }
+                "description": "Only show results after the given date (yyyy-mm-dd)",
+            },
+        },
     },
     "Hunter_Io": {
         "type": "observable",
@@ -1652,19 +1426,16 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["domain"],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 30, "queue": "default"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "HUNTER_API_KEY",
                 "description": "",
                 "required": True,
-                "type": "str"
+                "type": "str",
             }
         },
-        "params": {}
+        "params": {},
     },
     "HybridAnalysis_Get_File": {
         "type": "file",
@@ -1674,19 +1445,16 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "run_hash": True,
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 30, "queue": "default"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "HA_KEY",
                 "description": "",
                 "required": True,
-                "type": "str"
+                "type": "str",
             }
         },
-        "params": {}
+        "params": {},
     },
     "HybridAnalysis_Get_Observable": {
         "type": "observable",
@@ -1696,19 +1464,16 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["ip", "domain", "url", "hash"],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 30, "queue": "default"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "HA_KEY",
                 "description": "",
                 "required": True,
-                "type": "str"
+                "type": "str",
             }
         },
-        "params": {}
+        "params": {},
     },
     "IntelX_Intelligent_Search": {
         "type": "observable",
@@ -1718,55 +1483,40 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["ip", "url", "domain", "hash", "generic"],
-        "config": {
-            "soft_time_limit": 45,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 45, "queue": "default"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "INTELX_API_KEY",
                 "description": "",
                 "required": True,
-                "type": "str"
+                "type": "str",
             }
         },
         "params": {
             "query_type": {
                 "value": "intelligent",
                 "type": "str",
-                "description": "Query Type. Choose between 'playbook' and 'intelligent'"
+                "description": "Query Type. Choose between 'playbook' and 'intelligent'",
             },
             "rows_limit": {
                 "value": 1000,
                 "type": "int",
-                "description": "max number of results to retrieve"
+                "description": "max number of results to retrieve",
             },
             "datefrom": {
                 "value": "",
                 "type": "str",
-                "description": "use this in combination with 'dateto' to filter the query"
+                "description": "use this in combination with 'dateto' to filter the query",
             },
             "dateto": {
                 "value": "",
                 "type": "str",
-                "description": "use this in combination with 'datefrom' to filter the query"
+                "description": "use this in combination with 'datefrom' to filter the query",
             },
-            "timeout": {
-                "value": 10,
-                "type": "int",
-                "description": ""
-            },
-            "max_tries": {
-                "value": 10,
-                "type": "int",
-                "description": ""
-            },
-            "poll_distance": {
-                "value": 3,
-                "type": "int",
-                "description": ""
-            }
-        }
+            "timeout": {"value": 10, "type": "int", "description": ""},
+            "max_tries": {"value": 10, "type": "int", "description": ""},
+            "poll_distance": {"value": 3, "type": "int", "description": ""},
+        },
     },
     "IntelX_Phonebook": {
         "type": "observable",
@@ -1776,45 +1526,30 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["ip", "url", "domain", "hash", "generic"],
-        "config": {
-            "soft_time_limit": 45,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 45, "queue": "default"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "INTELX_API_KEY",
                 "description": "",
                 "required": True,
-                "type": "str"
+                "type": "str",
             }
         },
         "params": {
             "query_type": {
                 "value": "phonebook",
                 "type": "str",
-                "description": "Query Type. Choose between 'playbook' and 'intelligent'"
+                "description": "Query Type. Choose between 'playbook' and 'intelligent'",
             },
             "rows_limit": {
                 "value": 1000,
                 "type": "int",
-                "description": "max number of results to retrieve"
+                "description": "max number of results to retrieve",
             },
-            "timeout": {
-                "value": 10,
-                "type": "int",
-                "description": ""
-            },
-            "max_tries": {
-                "value": 10,
-                "type": "int",
-                "description": ""
-            },
-            "poll_distance": {
-                "value": 3,
-                "type": "int",
-                "description": ""
-            }
-        }
+            "timeout": {"value": 10, "type": "int", "description": ""},
+            "max_tries": {"value": 10, "type": "int", "description": ""},
+            "poll_distance": {"value": 3, "type": "int", "description": ""},
+        },
     },
     "Intezer_Get": {
         "type": "observable",
@@ -1825,25 +1560,16 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["hash"],
-        "config": {
-            "soft_time_limit": 100,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 100, "queue": "default"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "INTEZER_KEY",
                 "description": "",
                 "required": True,
-                "type": "str"
+                "type": "str",
             }
         },
-        "params": {
-            "soft_time_limit": {
-                "value": 100,
-                "type": "int",
-                "description": ""
-            }
-        }
+        "params": {"soft_time_limit": {"value": 100, "type": "int", "description": ""}},
     },
     "Intezer_Scan": {
         "type": "file",
@@ -1878,18 +1604,15 @@ analyzers = {
             "application/xml",
             "application/encrypted",
             "text/plain",
-            "text/csv"
+            "text/csv",
         ],
-        "config": {
-            "soft_time_limit": 300,
-            "queue": "long"
-        },
+        "config": {"soft_time_limit": 300, "queue": "long"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "INTEZER_KEY",
                 "description": "",
                 "required": True,
-                "type": "str"
+                "type": "str",
             }
         },
         "params": {
@@ -1897,24 +1620,20 @@ analyzers = {
                 "value": True,
                 "type": "bool",
                 "description": "Uploads the analyzed file to Intezer in case an analysis of that file is not "
-                "available in that platform."
+                "available in that platform.",
             },
             "disable_dynamic_unpacking": {
                 "value": False,
                 "type": "bool",
-                "description": ""
+                "description": "",
             },
             "disable_static_unpacking": {
                 "value": False,
                 "type": "bool",
-                "description": ""
+                "description": "",
             },
-            "soft_time_limit": {
-                "value": 300,
-                "type": "int",
-                "description": ""
-            }
-        }
+            "soft_time_limit": {"value": 300, "type": "int", "description": ""},
+        },
     },
     "InQuest_IOCdb": {
         "type": "observable",
@@ -1924,25 +1643,22 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["ip", "url", "domain", "hash", "generic"],
-        "config": {
-            "soft_time_limit": 300,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 300, "queue": "default"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "INQUEST_API_KEY",
                 "description": "",
                 "required": False,
-                "type": "str"
+                "type": "str",
             }
         },
         "params": {
             "inquest_analysis": {
                 "value": "iocdb_search",
                 "description": "",
-                "type": "str"
+                "type": "str",
             }
-        }
+        },
     },
     "InQuest_REPdb": {
         "type": "observable",
@@ -1952,25 +1668,22 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["ip", "url", "domain", "hash", "generic"],
-        "config": {
-            "soft_time_limit": 300,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 300, "queue": "default"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "INQUEST_API_KEY",
                 "description": "",
                 "required": False,
-                "type": "str"
+                "type": "str",
             }
         },
         "params": {
             "inquest_analysis": {
                 "value": "repdb_search",
                 "type": "str",
-                "description": ""
+                "description": "",
             }
-        }
+        },
     },
     "InQuest_DFI": {
         "type": "observable",
@@ -1980,25 +1693,22 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["ip", "url", "domain", "hash", "generic"],
-        "config": {
-            "soft_time_limit": 300,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 300, "queue": "default"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "INQUEST_API_KEY",
                 "description": "",
                 "required": False,
-                "type": "str"
+                "type": "str",
             }
         },
         "params": {
             "inquest_analysis": {
                 "value": "dfi_search",
                 "type": "str",
-                "description": ""
+                "description": "",
             }
-        }
+        },
     },
     "IPApi": {
         "type": "observable",
@@ -2009,23 +1719,20 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["ip"],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 30, "queue": "default"},
         "secrets": {},
         "params": {
             "fields": {
                 "value": "",
                 "type": "str",
-                "description": "specify the information fields"
+                "description": "specify the information fields",
             },
             "lang": {
                 "value": "",
                 "type": "str",
-                "description": "specify the response language"
-            }
-        }
+                "description": "specify the response language",
+            },
+        },
     },
     "IPInfo": {
         "type": "observable",
@@ -2035,19 +1742,16 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["ip"],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 30, "queue": "default"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "IPINFO_KEY",
                 "description": "",
                 "required": True,
-                "type": "str"
+                "type": "str",
             }
         },
-        "params": {}
+        "params": {},
     },
     "Koodous": {
         "type": "observable",
@@ -2057,19 +1761,16 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["hash"],
-        "config": {
-            "soft_time_limit": 100,
-            "queue": "long"
-        },
+        "config": {"soft_time_limit": 100, "queue": "long"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "KOODOUS_KEY",
                 "type": "str",
                 "required": True,
-                "description": "API Key for the Koodous analyzer"
+                "description": "API Key for the Koodous analyzer",
             }
         },
-        "params": {}
+        "params": {},
     },
     "Manalyze": {
         "type": "file",
@@ -2080,12 +1781,9 @@ analyzers = {
         "leaks_info": False,
         "docker_based": True,
         "supported_filetypes": ["application/x-dosexec"],
-        "config": {
-            "soft_time_limit": 180,
-            "queue": "local"
-        },
+        "config": {"soft_time_limit": 180, "queue": "local"},
         "secrets": {},
-        "params": {}
+        "params": {},
     },
     "MISP": {
         "type": "observable",
@@ -2095,30 +1793,27 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["ip", "domain", "url", "hash", "generic"],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 30, "queue": "default"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "MISP_KEY",
                 "description": "",
                 "required": True,
-                "type": "str"
+                "type": "str",
             },
             "url_key_name": {
                 "env_var_key": "MISP_URL",
                 "description": "",
                 "required": True,
-                "type": "str"
-            }
+                "type": "str",
+            },
         },
         "params": {
             "ssl_check": {
                 "value": True,
                 "type": "bool",
                 "description": "Enable SSL certificate server verification. Change this if your MISP instance has not "
-                "SSL enabled"
+                "SSL enabled",
             },
             "self_signed_certificate": {
                 "value": False,
@@ -2126,40 +1821,40 @@ analyzers = {
                 "description": "If ssl_check and this flag are True, the analyzer will leverage a CA_BUNDLE to "
                 "authenticate against the MISP instance. IntelOwl will look for it at this path: "
                 "`configuration/misp_ssl.crt`. Remember that this file should be readable by the application ("
-                "`www-data` user must read this)"
+                "`www-data` user must read this)",
             },
             "debug": {
                 "value": False,
                 "type": "bool",
-                "description": "Enable debug logs."
+                "description": "Enable debug logs.",
             },
             "from_days": {
                 "value": 90,
                 "type": "int",
-                "description": "Check only events created in the past X days. 0 for no filter"
+                "description": "Check only events created in the past X days. 0 for no filter",
             },
             "limit": {
                 "value": 50,
                 "type": "int",
-                "description": "Limit the number of results returned"
+                "description": "Limit the number of results returned",
             },
             "filter_on_type": {
                 "value": True,
                 "type": "bool",
-                "description": "Filter the search on the type of the observable."
+                "description": "Filter the search on the type of the observable.",
             },
             "enforce_warninglist": {
                 "value": True,
                 "type": "bool",
-                "description": "Remove any attributes from the result that would cause a hit on a warninglist entry."
+                "description": "Remove any attributes from the result that would cause a hit on a warninglist entry.",
             },
             "strict_search": {
                 "value": True,
                 "type": "bool",
                 "description": "Search strictly on the observable value (True) or search on attributes containing "
-                "observable value (False)"
-            }
-        }
+                "observable value (False)",
+            },
+        },
     },
     "MISPFIRST": {
         "type": "observable",
@@ -2169,30 +1864,27 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["ip", "domain", "url", "hash"],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 30, "queue": "default"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "FIRST_MISP_API",
                 "description": "",
                 "required": True,
-                "type": "str"
+                "type": "str",
             },
             "url_key_name": {
                 "env_var_key": "FIRST_MISP_URL",
                 "description": "",
                 "required": True,
-                "type": "str"
-            }
+                "type": "str",
+            },
         },
         "params": {
             "ssl_check": {
                 "value": True,
                 "type": "bool",
                 "description": "Enable SSL certificate server verification. Change this if your MISP instance has not "
-                "SSL enabled"
+                "SSL enabled",
             },
             "self_signed_certificate": {
                 "value": False,
@@ -2200,40 +1892,40 @@ analyzers = {
                 "description": "If ssl_check and this flag are True, the analyzer will leverage a CA_BUNDLE to "
                 "authenticate against the MISP instance. IntelOwl will look for it at this path: "
                 "`configuration/misp_ssl.crt`. Remember that this file should be readable by the application ("
-                "`www-data` user must read this)"
+                "`www-data` user must read this)",
             },
             "debug": {
                 "value": False,
                 "type": "bool",
-                "description": "Enable debug logs."
+                "description": "Enable debug logs.",
             },
             "from_days": {
                 "value": 90,
                 "type": "int",
-                "description": "Check only events created in the past X days. 0 for no filter"
+                "description": "Check only events created in the past X days. 0 for no filter",
             },
             "limit": {
                 "value": 50,
                 "type": "int",
-                "description": "Limit the number of results returned"
+                "description": "Limit the number of results returned",
             },
             "filter_on_type": {
                 "value": True,
                 "type": "bool",
-                "description": "Filter the search on the type of the observable."
+                "description": "Filter the search on the type of the observable.",
             },
             "enforce_warninglist": {
                 "value": True,
                 "type": "bool",
-                "description": "Remove any attributes from the result that would cause a hit on a warninglist entry."
+                "description": "Remove any attributes from the result that would cause a hit on a warninglist entry.",
             },
             "strict_search": {
                 "value": True,
                 "type": "bool",
                 "description": "Search strictly on the observable value (True) or search on attributes containing "
-                "observable value (False)"
-            }
-        }
+                "observable value (False)",
+            },
+        },
     },
     "MISPFIRST_Check_Hash": {
         "type": "file",
@@ -2243,25 +1935,22 @@ analyzers = {
         "external_service": False,
         "leaks_info": False,
         "run_hash": True,
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 30, "queue": "default"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "FIRST_MISP_API",
                 "description": "",
                 "required": True,
-                "type": "str"
+                "type": "str",
             },
             "url_key_name": {
                 "env_var_key": "FIRST_MISP_URL",
                 "description": "",
                 "required": True,
-                "type": "str"
-            }
+                "type": "str",
+            },
         },
-        "params": {}
+        "params": {},
     },
     "MISP_Check_Hash": {
         "type": "file",
@@ -2271,25 +1960,22 @@ analyzers = {
         "external_service": False,
         "leaks_info": False,
         "run_hash": True,
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 30, "queue": "default"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "MISP_KEY",
                 "description": "",
                 "required": True,
-                "type": "str"
+                "type": "str",
             },
             "url_key_name": {
                 "env_var_key": "MISP_URL",
                 "description": "",
                 "required": True,
-                "type": "str"
-            }
+                "type": "str",
+            },
         },
-        "params": {}
+        "params": {},
     },
     "Malpedia_Scan": {
         "type": "file",
@@ -2309,21 +1995,18 @@ analyzers = {
             "application/zip",
             "application/x-zip-compressed",
             "application/x-compressed",
-            "multipart/x-zip"
+            "multipart/x-zip",
         ],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "long"
-        },
+        "config": {"soft_time_limit": 30, "queue": "long"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "MALPEDIA_KEY",
                 "description": "",
                 "required": True,
-                "type": "str"
+                "type": "str",
             }
         },
-        "params": {}
+        "params": {},
     },
     "MalwareBazaar_Get_File": {
         "type": "file",
@@ -2333,15 +2016,10 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "run_hash": True,
-        "config": {
-            "soft_time_limit": 50,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 50, "queue": "default"},
         "secrets": {},
         "params": {},
-        "not_supported_filetypes":[
-          "application/vnd.tcpdump.pcap"
-        ],
+        "not_supported_filetypes": ["application/vnd.tcpdump.pcap"],
     },
     "MalwareBazaar_Get_Observable": {
         "type": "observable",
@@ -2351,12 +2029,9 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["hash"],
-        "config": {
-            "soft_time_limit": 50,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 50, "queue": "default"},
         "secrets": {},
-        "params": {}
+        "params": {},
     },
     "MalwareBazaar_Google_Observable": {
         "type": "observable",
@@ -2366,12 +2041,9 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["ip", "domain", "url"],
-        "config": {
-            "soft_time_limit": 100,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 100, "queue": "default"},
         "secrets": {},
-        "params": {}
+        "params": {},
     },
     "MaxMindGeoIP": {
         "type": "observable",
@@ -2381,19 +2053,16 @@ analyzers = {
         "external_service": False,
         "leaks_info": False,
         "observable_supported": ["ip"],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 30, "queue": "default"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "MAXMIND_KEY",
                 "description": "API key to access the service",
                 "required": True,
-                "type": "str"
+                "type": "str",
             }
         },
-        "params": {}
+        "params": {},
     },
     "MWDB_Get": {
         "type": "observable",
@@ -2403,18 +2072,15 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["hash"],
-        "config": {
-            "soft_time_limit": 20,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 20, "queue": "default"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "MWDB_KEY",
                 "description": "",
-                "required": True
+                "required": True,
             }
         },
-        "params": {}
+        "params": {},
     },
     "MWDB_Scan": {
         "type": "file",
@@ -2423,35 +2089,28 @@ analyzers = {
         "disabled": False,
         "external_service": True,
         "leaks_info": True,
-        "config": {
-            "soft_time_limit": 400,
-            "queue": "long"
-        },
+        "config": {"soft_time_limit": 400, "queue": "long"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "MWDB_KEY",
                 "description": "",
                 "required": True,
-                "type": "str"
+                "type": "str",
             }
         },
         "params": {
             "upload_file": {
                 "value": True,
                 "type": "bool",
-                "description": "Uploads the file to repository."
+                "description": "Uploads the file to repository.",
             },
-            "private": {
-                "value": False,
-                "type": "bool",
-                "description": ""
-            },
+            "private": {"value": False, "type": "bool", "description": ""},
             "max_tries": {
                 "value": 50,
                 "type": "int",
-                "description": "Number of retries to perform for polling analysis results."
-            }
-        }
+                "description": "Number of retries to perform for polling analysis results.",
+            },
+        },
     },
     "OneNote_Info": {
         "type": "file",
@@ -2461,15 +2120,10 @@ analyzers = {
         "disabled": False,
         "external_service": False,
         "leaks_info": False,
-        "supported_filetypes": [
-            "application/onenote"
-        ],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "local"
-        },
+        "supported_filetypes": ["application/onenote"],
+        "config": {"soft_time_limit": 30, "queue": "local"},
         "secrets": {},
-        "params": {}
+        "params": {},
     },
     "ONYPHE": {
         "type": "observable",
@@ -2479,18 +2133,15 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["ip", "domain", "url"],
-        "config": {
-            "soft_time_limit": 50,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 50, "queue": "default"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "ONYPHE_KEY",
                 "description": "",
-                "required": True
+                "required": True,
             }
         },
-        "params": {}
+        "params": {},
     },
     "OpenCTI": {
         "type": "observable",
@@ -2500,45 +2151,39 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["ip", "domain", "url", "hash"],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 30, "queue": "default"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "OPENCTI_KEY",
                 "description": "API key for your OpenCTI instance",
                 "required": True,
-                "type": "str"
+                "type": "str",
             },
             "url_key_name": {
                 "env_var_key": "OPENCTI_URL",
                 "description": "URL of your OpenCTI instance",
                 "required": True,
-                "type": "str"
-            }
+                "type": "str",
+            },
         },
         "params": {
             "ssl_verify": {
                 "value": True,
                 "type": "bool",
                 "description": "Enable SSL certificate server verification. Change this if your OpenCTI instance has "
-                "not SSL enabled."
+                "not SSL enabled.",
             },
             "proxies": {
-                "value": {
-                    "http": "",
-                    "https": ""
-                },
+                "value": {"http": "", "https": ""},
                 "type": "dict",
-                "description": "Use these options to pass your request through a proxy server."
+                "description": "Use these options to pass your request through a proxy server.",
             },
             "exact_search": {
                 "value": False,
                 "type": "bool",
-                "description": "Use this if you want exact matches only for the observables returned."
-            }
-        }
+                "description": "Use this if you want exact matches only for the observables returned.",
+            },
+        },
     },
     "OTXQuery": {
         "type": "observable",
@@ -2548,35 +2193,28 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["ip", "domain", "url", "hash"],
-        "config": {
-            "soft_time_limit": 60,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 60, "queue": "default"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "OTX_KEY",
                 "description": "",
                 "required": True,
-                "type": "str"
+                "type": "str",
             }
         },
         "params": {
-            "verbose": {
-                "value": False,
-                "type": "bool",
-                "description": ""
-            },
+            "verbose": {"value": False, "type": "bool", "description": ""},
             "sections": {
                 "value": ["general"],
                 "type": "list",
-                "description": "Data are divided into sections, list of sections to download"
+                "description": "Data are divided into sections, list of sections to download",
             },
             "full_analysis": {
                 "value": False,
                 "type": "bool",
-                "description": "download all the available sections for the observable type"
-            }
-        }
+                "description": "download all the available sections for the observable type",
+            },
+        },
     },
     "OTX_Check_Hash": {
         "type": "file",
@@ -2586,25 +2224,16 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "run_hash": True,
-        "config": {
-            "soft_time_limit": 60,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 60, "queue": "default"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "OTX_KEY",
                 "description": "",
                 "required": True,
-                "type": "str"
+                "type": "str",
             }
         },
-        "params": {
-            "verbose": {
-                "value": False,
-                "type": "bool",
-                "description": ""
-            }
-        }
+        "params": {"verbose": {"value": False, "type": "bool", "description": ""}},
     },
     "Mnemonic_PassiveDNS": {
         "type": "observable",
@@ -2615,24 +2244,21 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["domain", "ip"],
-        "config": {
-            "soft_time_limit": 60,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 60, "queue": "default"},
         "secrets": {},
         "params": {
             "cof_format": {
                 "value": True,
                 "type": "bool",
                 "description": "Return result in the PassiveDNS [Common Output Format]("
- "https://datatracker.ietf.org/doc/draft-dulaunoy-dnsop-passive-dns-cof/)."
+                "https://datatracker.ietf.org/doc/draft-dulaunoy-dnsop-passive-dns-cof/).",
             },
             "limit": {
                 "value": 1000,
                 "type": "int",
-                "description": "Number of records to fetch."
-            }
-        }
+                "description": "Number of records to fetch.",
+            },
+        },
     },
     "PDF_Info": {
         "type": "file",
@@ -2642,12 +2268,9 @@ analyzers = {
         "external_service": False,
         "leaks_info": False,
         "supported_filetypes": ["application/pdf"],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "local"
-        },
+        "config": {"soft_time_limit": 30, "queue": "local"},
         "secrets": {},
-        "params": {}
+        "params": {},
     },
     "PE_Info": {
         "type": "file",
@@ -2657,12 +2280,9 @@ analyzers = {
         "external_service": False,
         "leaks_info": False,
         "supported_filetypes": ["application/x-dosexec"],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "local"
-        },
+        "config": {"soft_time_limit": 30, "queue": "local"},
         "secrets": {},
-        "params": {}
+        "params": {},
     },
     "PEframe_Scan": {
         "type": "file",
@@ -2673,12 +2293,9 @@ analyzers = {
         "leaks_info": False,
         "docker_based": True,
         "supported_filetypes": ["application/x-dosexec"],
-        "config": {
-            "soft_time_limit": 500,
-            "queue": "local"
-        },
+        "config": {"soft_time_limit": 500, "queue": "local"},
         "secrets": {},
-        "params": {}
+        "params": {},
     },
     "Phishstats": {
         "type": "observable",
@@ -2688,12 +2305,9 @@ analyzers = {
         "external_service": True,
         "leaks_info": True,
         "observable_supported": ["ip", "url", "domain", "generic"],
-        "config": {
-            "soft_time_limit": 100,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 100, "queue": "default"},
         "secrets": {},
-        "params": {}
+        "params": {},
     },
     "Phishtank": {
         "type": "observable",
@@ -2703,19 +2317,16 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["url"],
-        "config": {
-            "soft_time_limit": 100,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 100, "queue": "default"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "PHISHTANK_API_KEY",
                 "description": "Optional API key.",
                 "required": False,
-                "type": "str"
+                "type": "str",
             }
         },
-        "params": {}
+        "params": {},
     },
     "Pulsedive": {
         "type": "observable",
@@ -2725,16 +2336,13 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["ip", "domain", "url", "hash"],
-        "config": {
-            "soft_time_limit": 100,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 100, "queue": "default"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "PULSEDIVE_API_KEY",
                 "description": "Optional API key.",
                 "required": False,
-                "type": "str"
+                "type": "str",
             }
         },
         "params": {
@@ -2743,9 +2351,9 @@ analyzers = {
                 "type": "str",
                 "description": "[basic, passive, active] By Default there is no scan of the observable. You can "
                 "choose to add either active or passive scanning. See [doc](https://pulsedive.com/api/scan) for more "
-                "info"
+                "info",
             }
-        }
+        },
     },
     "Qiling_Windows": {
         "type": "file",
@@ -2756,33 +2364,30 @@ analyzers = {
         "leaks_info": False,
         "docker_based": True,
         "supported_filetypes": ["application/x-dosexec"],
-        "config": {
-            "soft_time_limit": 120,
-            "queue": "long"
-        },
+        "config": {"soft_time_limit": 120, "queue": "long"},
         "secrets": {},
         "params": {
             "os": {
                 "value": "windows",
                 "type": "str",
-                "description": "Change operating system for the emulation."
+                "description": "Change operating system for the emulation.",
             },
             "arch": {
                 "value": "x86",
                 "type": "str",
-                "description": "Change system architecture for the emulation."
+                "description": "Change system architecture for the emulation.",
             },
             "profile": {
                 "value": "",
                 "type": "str",
-                "description": "Add a Qiling [profile](https://docs.qiling.io/en/latest/profile/)."
+                "description": "Add a Qiling [profile](https://docs.qiling.io/en/latest/profile/).",
             },
             "shellcode": {
                 "value": False,
                 "type": "bool",
-                "description": "true if the file is a shellcode."
-            }
-        }
+                "description": "true if the file is a shellcode.",
+            },
+        },
     },
     "Qiling_Windows_Shellcode": {
         "type": "file",
@@ -2793,33 +2398,30 @@ analyzers = {
         "leaks_info": False,
         "docker_based": True,
         "supported_filetypes": ["application/octet-stream"],
-        "config": {
-            "soft_time_limit": 120,
-            "queue": "long"
-        },
+        "config": {"soft_time_limit": 120, "queue": "long"},
         "secrets": {},
         "params": {
             "os": {
                 "value": "windows",
                 "type": "str",
-                "description": "Change operating system for the emulation."
+                "description": "Change operating system for the emulation.",
             },
             "arch": {
                 "value": "x86",
                 "type": "str",
-                "description": "Change system architecture for the emulation."
+                "description": "Change system architecture for the emulation.",
             },
             "profile": {
                 "value": "",
                 "type": "str",
-                "description": "Add a Qiling [profile](https://docs.qiling.io/en/latest/profile/)."
+                "description": "Add a Qiling [profile](https://docs.qiling.io/en/latest/profile/).",
             },
             "shellcode": {
                 "value": True,
                 "type": "bool",
-                "description": "true if the file is a shellcode."
-            }
-        }
+                "description": "true if the file is a shellcode.",
+            },
+        },
     },
     "Qiling_Linux": {
         "type": "file",
@@ -2832,35 +2434,32 @@ analyzers = {
         "supported_filetypes": [
             "application/x-sharedlib",
             "application/x-executable",
-            "application/x-elf"
+            "application/x-elf",
         ],
-        "config": {
-            "soft_time_limit": 120,
-            "queue": "long"
-        },
+        "config": {"soft_time_limit": 120, "queue": "long"},
         "secrets": {},
         "params": {
             "os": {
                 "value": "linux",
                 "type": "str",
-                "description": "Change operating system for the emulation."
+                "description": "Change operating system for the emulation.",
             },
             "arch": {
                 "value": "x86",
                 "type": "str",
-                "description": "Change system architecture for the emulation."
+                "description": "Change system architecture for the emulation.",
             },
             "profile": {
                 "value": "",
                 "type": "str",
-                "description": "Add a Qiling [profile](https://docs.qiling.io/en/latest/profile/)."
+                "description": "Add a Qiling [profile](https://docs.qiling.io/en/latest/profile/).",
             },
             "shellcode": {
                 "value": False,
                 "type": "bool",
-                "description": "true if the file is a shellcode."
-            }
-        }
+                "description": "true if the file is a shellcode.",
+            },
+        },
     },
     "Qiling_Linux_Shellcode": {
         "type": "file",
@@ -2871,33 +2470,30 @@ analyzers = {
         "leaks_info": False,
         "docker_based": True,
         "supported_filetypes": ["application/octet-stream"],
-        "config": {
-            "soft_time_limit": 120,
-            "queue": "long"
-        },
+        "config": {"soft_time_limit": 120, "queue": "long"},
         "secrets": {},
         "params": {
             "os": {
                 "value": "linux",
                 "type": "str",
-                "description": "Change operating system for the emulation "
+                "description": "Change operating system for the emulation ",
             },
             "arch": {
                 "value": "x86",
                 "type": "str",
-                "description": "Change system architecture for the emulation."
+                "description": "Change system architecture for the emulation.",
             },
             "profile": {
                 "value": "",
                 "type": "str",
-                "description": "Add a Qiling [profile](https://docs.qiling.io/en/latest/profile/)."
+                "description": "Add a Qiling [profile](https://docs.qiling.io/en/latest/profile/).",
             },
             "shellcode": {
                 "value": True,
                 "type": "bool",
-                "description": "true if the file is a shellcode."
-            }
-        }
+                "description": "true if the file is a shellcode.",
+            },
+        },
     },
     "Quad9_DNS": {
         "type": "observable",
@@ -2907,18 +2503,15 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["domain", "url"],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 30, "queue": "default"},
         "secrets": {},
         "params": {
             "query_type": {
                 "value": "A",
                 "type": "str",
-                "description": "Query type against the chosen DNS resolver."
+                "description": "Query type against the chosen DNS resolver.",
             }
-        }
+        },
     },
     "Quad9_Malicious_Detector": {
         "type": "observable",
@@ -2928,12 +2521,9 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["domain", "url"],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 30, "queue": "default"},
         "secrets": {},
-        "params": {}
+        "params": {},
     },
     "Quark_Engine_APK": {
         "type": "file",
@@ -2947,14 +2537,11 @@ analyzers = {
             "application/java-archive",
             "application/vnd.android.package-archive",
             "application/x-dex",
-            "android"
+            "android",
         ],
-        "config": {
-            "soft_time_limit": 120,
-            "queue": "long"
-        },
+        "config": {"soft_time_limit": 120, "queue": "long"},
         "secrets": {},
-        "params": {}
+        "params": {},
     },
     "Robtex": {
         "type": "observable",
@@ -2964,12 +2551,9 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["domain", "url", "ip"],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 30, "queue": "default"},
         "secrets": {},
-        "params": {}
+        "params": {},
     },
     "Rtf_Info": {
         "type": "file",
@@ -2979,12 +2563,9 @@ analyzers = {
         "external_service": False,
         "leaks_info": False,
         "supported_filetypes": ["text/rtf", "application/rtf"],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "local"
-        },
+        "config": {"soft_time_limit": 30, "queue": "local"},
         "secrets": {},
-        "params": {}
+        "params": {},
     },
     "Securitytrails": {
         "type": "observable",
@@ -2994,35 +2575,32 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["domain", "ip"],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 30, "queue": "default"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "SECURITYTRAILS_KEY",
                 "description": "",
                 "required": True,
-                "type": "str"
+                "type": "str",
             }
         },
         "params": {
             "securitytrails_analysis": {
                 "value": "current",
                 "type": "str",
-                "description": "Analysis Type. Available options: current, history"
+                "description": "Analysis Type. Available options: current, history",
             },
             "securitytrails_current_type": {
                 "value": "details",
                 "type": "str",
-                "description": "Suboptions if you chose 'current' analysis type. Options: details,subdomains,tags"
+                "description": "Suboptions if you chose 'current' analysis type. Options: details,subdomains,tags",
             },
             "securitytrails_history_type": {
                 "value": "whois",
                 "type": "str",
-                "description": "Suboptions if you chose 'history' analysis type. Options: whois,dns"
-            }
-        }
+                "description": "Suboptions if you chose 'history' analysis type. Options: whois,dns",
+            },
+        },
     },
     "Securitytrails_Details": {
         "type": "observable",
@@ -3032,30 +2610,27 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["domain"],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 30, "queue": "default"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "SECURITYTRAILS_KEY",
                 "description": "",
                 "required": True,
-                "type": "str"
+                "type": "str",
             }
         },
         "params": {
             "securitytrails_analysis": {
                 "value": "current",
                 "type": "str",
-                "description": ""
+                "description": "",
             },
             "securitytrails_current_type": {
                 "value": "details",
                 "type": "str",
-                "description": ""
-            }
-        }
+                "description": "",
+            },
+        },
     },
     "Securitytrails_History_DNS": {
         "type": "observable",
@@ -3065,30 +2640,27 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["domain"],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 30, "queue": "default"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "SECURITYTRAILS_KEY",
                 "description": "",
                 "required": True,
-                "type": "str"
+                "type": "str",
             }
         },
         "params": {
             "securitytrails_analysis": {
                 "value": "history",
                 "type": "str",
-                "description": ""
+                "description": "",
             },
             "securitytrails_history_analysis": {
                 "value": "dns",
                 "type": "str",
-                "description": ""
-            }
-        }
+                "description": "",
+            },
+        },
     },
     "Securitytrails_History_WHOIS": {
         "type": "observable",
@@ -3098,30 +2670,27 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["domain"],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 30, "queue": "default"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "SECURITYTRAILS_KEY",
                 "description": "",
                 "required": True,
-                "type": "str"
+                "type": "str",
             }
         },
         "params": {
             "securitytrails_analysis": {
                 "value": "history",
                 "type": "str",
-                "description": ""
+                "description": "",
             },
             "securitytrails_history_analysis": {
                 "value": "whois",
                 "type": "str",
-                "description": ""
-            }
-        }
+                "description": "",
+            },
+        },
     },
     "Securitytrails_IP_Neighbours": {
         "type": "observable",
@@ -3131,19 +2700,16 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["ip"],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 30, "queue": "default"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "SECURITYTRAILS_KEY",
                 "description": "",
                 "required": True,
-                "type": "str"
+                "type": "str",
             }
         },
-        "params": {}
+        "params": {},
     },
     "Securitytrails_Subdomains": {
         "type": "observable",
@@ -3153,30 +2719,27 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["domain"],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 30, "queue": "default"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "SECURITYTRAILS_KEY",
                 "description": "",
                 "required": True,
-                "type": "str"
+                "type": "str",
             }
         },
         "params": {
             "securitytrails_analysis": {
                 "value": "current",
                 "type": "str",
-                "description": ""
+                "description": "",
             },
             "securitytrails_current_type": {
                 "value": "subdomains",
                 "type": "str",
-                "description": ""
-            }
-        }
+                "description": "",
+            },
+        },
     },
     "Securitytrails_Tags": {
         "type": "observable",
@@ -3186,30 +2749,27 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["domain"],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 30, "queue": "default"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "SECURITYTRAILS_KEY",
                 "description": "",
                 "required": True,
-                "type": "str"
+                "type": "str",
             }
         },
         "params": {
             "securitytrails_analysis": {
                 "value": "current",
                 "type": "str",
-                "description": ""
+                "description": "",
             },
             "securitytrails_current_type": {
                 "value": "tags",
                 "type": "str",
-                "description": ""
-            }
-        }
+                "description": "",
+            },
+        },
     },
     "Shodan_Honeyscore": {
         "type": "observable",
@@ -3219,25 +2779,18 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["ip"],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 30, "queue": "default"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "SHODAN_KEY",
                 "description": "",
                 "required": True,
-                "type": "str"
+                "type": "str",
             }
         },
         "params": {
-            "shodan_analysis": {
-                "value": "honeyscore",
-                "type": "str",
-                "description": ""
-            }
-        }
+            "shodan_analysis": {"value": "honeyscore", "type": "str", "description": ""}
+        },
     },
     "Shodan_Search": {
         "type": "observable",
@@ -3247,25 +2800,18 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["ip"],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 30, "queue": "default"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "SHODAN_KEY",
                 "description": "",
                 "required": True,
-                "type": "str"
+                "type": "str",
             }
         },
         "params": {
-            "shodan_analysis": {
-                "value": "search",
-                "type": "str",
-                "description": ""
-            }
-        }
+            "shodan_analysis": {"value": "search", "type": "str", "description": ""}
+        },
     },
     "Signature_Info": {
         "type": "file",
@@ -3275,12 +2821,9 @@ analyzers = {
         "external_service": False,
         "leaks_info": False,
         "supported_filetypes": ["application/x-dosexec"],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "local"
-        },
+        "config": {"soft_time_limit": 30, "queue": "local"},
         "secrets": {},
-        "params": {}
+        "params": {},
     },
     "SpeakEasy": {
         "type": "file",
@@ -3290,28 +2833,25 @@ analyzers = {
         "external_service": False,
         "leaks_info": False,
         "supported_filetypes": ["application/x-dosexec"],
-        "config": {
-            "soft_time_limit": 120,
-            "queue": "long"
-        },
+        "config": {"soft_time_limit": 120, "queue": "long"},
         "secrets": {},
         "params": {
             "arch": {
                 "value": "x64",
                 "type": "str",
-                "description": "Change system architecture for the shellcode (x86 or x64)."
+                "description": "Change system architecture for the shellcode (x86 or x64).",
             },
             "shellcode": {
                 "value": False,
                 "type": "bool",
-                "description": "true if the file is a shellcode."
+                "description": "true if the file is a shellcode.",
             },
             "raw_offset": {
                 "value": 0,
                 "type": "int",
-                "description": "Offset to start emulating."
-            }
-        }
+                "description": "Offset to start emulating.",
+            },
+        },
     },
     "SpeakEasy_Shellcode": {
         "type": "file",
@@ -3321,28 +2861,25 @@ analyzers = {
         "external_service": False,
         "leaks_info": False,
         "supported_filetypes": ["application/octet-stream"],
-        "config": {
-            "soft_time_limit": 120,
-            "queue": "long"
-        },
+        "config": {"soft_time_limit": 120, "queue": "long"},
         "secrets": {},
         "params": {
             "arch": {
                 "value": "x64",
                 "type": "str",
-                "description": "Change system architecture for the shellcode (x86 or x64)."
+                "description": "Change system architecture for the shellcode (x86 or x64).",
             },
             "shellcode": {
                 "value": True,
                 "type": "bool",
-                "description": "true if the file is a shellcode."
+                "description": "true if the file is a shellcode.",
             },
             "raw_offset": {
                 "value": 0,
                 "type": "int",
-                "description": "Offset to start emulating."
-            }
-        }
+                "description": "Offset to start emulating.",
+            },
+        },
     },
     "Spyse": {
         "type": "observable",
@@ -3353,19 +2890,16 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["ip", "domain", "generic"],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 30, "queue": "default"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "SPYSE_API_KEY",
                 "description": "Spyse API token",
                 "required": True,
-                "type": "str"
+                "type": "str",
             }
         },
-        "params": {}
+        "params": {},
     },
     "SSAPINet": {
         "type": "observable",
@@ -3376,46 +2910,43 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["url"],
-        "config": {
-            "soft_time_limit": 300,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 300, "queue": "default"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "SSAPINET_KEY",
                 "description": "",
                 "required": True,
-                "type": "str"
+                "type": "str",
             }
         },
         "params": {
             "use_proxy": {
                 "value": False,
                 "type": "bool",
-                "description": "Use the `use_proxy` and `proxy` options to pass your request through a proxy server."
+                "description": "Use the `use_proxy` and `proxy` options to pass your request through a proxy server.",
             },
             "proxy": {
                 "value": "",
                 "type": "str",
-                "description": "Use the `use_proxy` and `proxy` options to pass your request through a proxy server."
+                "description": "Use the `use_proxy` and `proxy` options to pass your request through a proxy server.",
             },
             "output": {
                 "value": "image",
                 "type": "str",
                 "description": "Specify output type (options: `image` i.e. raw base64 encoded image, `json` i.e. "
-                "containing link)"
+                "containing link)",
             },
             "extra_api_params": {
                 "value": {
                     "full_page": True,
                     "fresh": False,
                     "lazy_load": False,
-                    "destroy_screenshot": False
+                    "destroy_screenshot": False,
                 },
                 "type": "dict",
-                "description": "Refer to their docs](https://screenshotapi.net/documentation)."
-            }
-        }
+                "description": "Refer to their docs](https://screenshotapi.net/documentation).",
+            },
+        },
     },
     "Stalkphish": {
         "type": "observable",
@@ -3425,19 +2956,16 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["url", "ip", "domain", "generic"],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 30, "queue": "default"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "STALKPHISH_KEY",
                 "description": "API key.",
                 "required": True,
-                "type": "str"
+                "type": "str",
             }
         },
-        "params": {}
+        "params": {},
     },
     "Strings_Info": {
         "type": "file",
@@ -3448,31 +2976,22 @@ analyzers = {
         "external_service": False,
         "leaks_info": False,
         "docker_based": True,
-        "config": {
-            "soft_time_limit": 70,
-            "queue": "local"
-        },
+        "config": {"soft_time_limit": 70, "queue": "local"},
         "secrets": {},
         "params": {
-            "max_number_of_strings": {
-                "value": 500,
-                "type": "int",
-                "description": ""
-            },
+            "max_number_of_strings": {"value": 500, "type": "int", "description": ""},
             "rank_strings": {
                 "value": False,
                 "type": "bool",
-                "description": "enable ranking based on Machine Learning features"
+                "description": "enable ranking based on Machine Learning features",
             },
             "max_characters_for_string": {
                 "value": 1000,
                 "type": "int",
-                "description": ""
-            }
+                "description": "",
+            },
         },
-        "not_supported_filetypes":[
-          "application/vnd.tcpdump.pcap"
-        ],
+        "not_supported_filetypes": ["application/vnd.tcpdump.pcap"],
     },
     "Strings_Info_Classic": {
         "type": "file",
@@ -3482,28 +3001,17 @@ analyzers = {
         "external_service": False,
         "leaks_info": False,
         "docker_based": True,
-        "config": {
-            "soft_time_limit": 70,
-            "queue": "local"
-        },
+        "config": {"soft_time_limit": 70, "queue": "local"},
         "secrets": {},
         "params": {
-            "max_number_of_strings": {
-                "value": 300,
-                "type": "int",
-                "description": ""
-            },
-            "rank_strings": {
-                "value": False,
-                "type": "bool",
-                "description": ""
-            },
+            "max_number_of_strings": {"value": 300, "type": "int", "description": ""},
+            "rank_strings": {"value": False, "type": "bool", "description": ""},
             "max_characters_for_string": {
                 "value": 1000,
                 "type": "int",
-                "description": ""
-            }
-        }
+                "description": "",
+            },
+        },
     },
     "Strings_Info_ML": {
         "type": "file",
@@ -3514,28 +3022,17 @@ analyzers = {
         "external_service": False,
         "leaks_info": False,
         "docker_based": True,
-        "config": {
-            "soft_time_limit": 70,
-            "queue": "local"
-        },
+        "config": {"soft_time_limit": 70, "queue": "local"},
         "secrets": {},
         "params": {
-            "max_number_of_strings": {
-                "value": 200,
-                "type": "int",
-                "description": ""
-            },
-            "rank_strings": {
-                "value": True,
-                "type": "bool",
-                "description": ""
-            },
+            "max_number_of_strings": {"value": 200, "type": "int", "description": ""},
+            "rank_strings": {"value": True, "type": "bool", "description": ""},
             "max_characters_for_string": {
                 "value": 1000,
                 "type": "int",
-                "description": ""
-            }
-        }
+                "description": "",
+            },
+        },
     },
     "Stratosphere_Blacklist": {
         "type": "observable",
@@ -3545,12 +3042,9 @@ analyzers = {
         "external_service": False,
         "leaks_info": False,
         "observable_supported": ["ip"],
-        "config": {
-            "soft_time_limit": 120,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 120, "queue": "default"},
         "secrets": {},
-        "params": {}
+        "params": {},
     },
     "Suricata": {
         "type": "file",
@@ -3561,24 +3055,21 @@ analyzers = {
         "leaks_info": False,
         "docker_based": True,
         "supported_filetypes": ["application/vnd.tcpdump.pcap"],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "local"
-        },
+        "config": {"soft_time_limit": 30, "queue": "local"},
         "secrets": {},
         "params": {
             "reload_rules": {
                 "value": False,
                 "type": "bool",
                 "description": "Set this to true to force the reload of Rules. Useful in case you just added new "
-                "custom rules and want to test them. By default the Rules are updated only once a day at UTC 00:00"
+                "custom rules and want to test them. By default the Rules are updated only once a day at UTC 00:00",
             },
             "extended_logs": {
                 "value": False,
                 "type": "bool",
-                "description": "Set this to true to get all the raw logs generated by Suricata"
-            }
-        }
+                "description": "Set this to true to get all the raw logs generated by Suricata",
+            },
+        },
     },
     "TalosReputation": {
         "type": "observable",
@@ -3588,12 +3079,9 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["ip"],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 30, "queue": "default"},
         "secrets": {},
-        "params": {}
+        "params": {},
     },
     "ThreatFox": {
         "type": "observable",
@@ -3603,12 +3091,9 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["ip", "url", "domain", "hash", "generic"],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 30, "queue": "default"},
         "secrets": {},
-        "params": {}
+        "params": {},
     },
     "Threatminer": {
         "type": "observable",
@@ -3618,19 +3103,16 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["ip", "domain", "hash"],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 30, "queue": "default"},
         "secrets": {},
         "params": {
             "rt_value": {
                 "value": 2,
                 "type": "int",
                 "description": "Request type. Default is PassiveDNS(rt=2). See [ThreatMiner APIs]("
-                "https://www.threatminer.org/api.php) for more details about how to leverage this option"
+                "https://www.threatminer.org/api.php) for more details about how to leverage this option",
             }
-        }
+        },
     },
     "Threatminer_PDNS": {
         "type": "observable",
@@ -3640,18 +3122,9 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["ip", "domain"],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 30, "queue": "default"},
         "secrets": {},
-        "params": {
-            "rt_value": {
-                "value": 2,
-                "type": "int",
-                "description": ""
-            }
-        }
+        "params": {"rt_value": {"value": 2, "type": "int", "description": ""}},
     },
     "Threatminer_Reports_Tagging": {
         "type": "observable",
@@ -3661,18 +3134,9 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["ip", "domain"],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 30, "queue": "default"},
         "secrets": {},
-        "params": {
-            "rt_value": {
-                "value": 6,
-                "type": "int",
-                "description": ""
-            }
-        }
+        "params": {"rt_value": {"value": 6, "type": "int", "description": ""}},
     },
     "Threatminer_Subdomains": {
         "type": "observable",
@@ -3682,18 +3146,9 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["domain"],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 30, "queue": "default"},
         "secrets": {},
-        "params": {
-            "rt_value": {
-                "value": 5,
-                "type": "int",
-                "description": ""
-            }
-        }
+        "params": {"rt_value": {"value": 5, "type": "int", "description": ""}},
     },
     "Thug_HTML_Info": {
         "type": "file",
@@ -3705,45 +3160,34 @@ analyzers = {
         "leaks_info": False,
         "docker_based": True,
         "supported_filetypes": ["text/html"],
-        "config": {
-            "soft_time_limit": 600,
-            "queue": "long"
-        },
+        "config": {"soft_time_limit": 600, "queue": "long"},
         "secrets": {},
         "params": {
             "dom_events": {
                 "value": "click,mouseover",
                 "type": "str",
                 "description": "See [Thug docs: dom events handling]("
-                "https://buffer.github.io/thug/doc/usage.html#dom-events-handling)."
+                "https://buffer.github.io/thug/doc/usage.html#dom-events-handling).",
             },
-            "use_proxy": {
-                "value": False,
-                "type": "bool",
-                "description": "option `-p`"
-            },
-            "proxy": {
-                "value": "",
-                "type": "str",
-                "description": "option `-p`"
-            },
+            "use_proxy": {"value": False, "type": "bool", "description": "option `-p`"},
+            "proxy": {"value": "", "type": "str", "description": "option `-p`"},
             "enable_image_processing_analysis": {
                 "value": True,
                 "type": "bool",
-                "description": "option `-a`"
+                "description": "option `-a`",
             },
             "enable_awis": {
                 "value": True,
                 "type": "bool",
-                "description": "option `-E`"
+                "description": "option `-E`",
             },
             "user_agent": {
                 "value": "winxpie60",
                 "type": "str",
                 "description": "See [Thug docs: browser personality]("
-                "https://buffer.github.io/thug/doc/usage.html#browser-personality)."
-            }
-        }
+                "https://buffer.github.io/thug/doc/usage.html#browser-personality).",
+            },
+        },
     },
     "Thug_URL_Info": {
         "type": "observable",
@@ -3754,45 +3198,34 @@ analyzers = {
         "leaks_info": False,
         "docker_based": True,
         "observable_supported": ["domain", "url"],
-        "config": {
-            "soft_time_limit": 600,
-            "queue": "local"
-        },
+        "config": {"soft_time_limit": 600, "queue": "local"},
         "secrets": {},
         "params": {
             "dom_events": {
                 "value": "click,mouseover",
                 "type": "str",
                 "description": "See [Thug docs: dom events handling]("
-                "https://buffer.github.io/thug/doc/usage.html#dom-events-handling)."
+                "https://buffer.github.io/thug/doc/usage.html#dom-events-handling).",
             },
-            "use_proxy": {
-                "value": False,
-                "type": "bool",
-                "description": "option `-p`"
-            },
-            "proxy": {
-                "value": "",
-                "type": "str",
-                "description": "option `-p`"
-            },
+            "use_proxy": {"value": False, "type": "bool", "description": "option `-p`"},
+            "proxy": {"value": "", "type": "str", "description": "option `-p`"},
             "enable_image_processing_analysis": {
                 "value": True,
                 "type": "bool",
-                "description": "option `-a`"
+                "description": "option `-a`",
             },
             "enable_awis": {
                 "value": True,
                 "type": "bool",
-                "description": "option `-E`"
+                "description": "option `-E`",
             },
             "user_agent": {
                 "value": "winxpie60",
                 "type": "str",
                 "description": "See [Thug docs: browser personality]("
-                "https://buffer.github.io/thug/doc/usage.html#browser-personality)."
-            }
-        }
+                "https://buffer.github.io/thug/doc/usage.html#browser-personality).",
+            },
+        },
     },
     "TorProject": {
         "type": "observable",
@@ -3802,12 +3235,9 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["ip"],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 30, "queue": "default"},
         "secrets": {},
-        "params": {}
+        "params": {},
     },
     "Onionscan": {
         "type": "observable",
@@ -3818,23 +3248,16 @@ analyzers = {
         "leaks_info": False,
         "docker_based": True,
         "observable_supported": ["domain"],
-        "config": {
-            "soft_time_limit": 720,
-            "queue": "long"
-        },
+        "config": {"soft_time_limit": 720, "queue": "long"},
         "secrets": {},
         "params": {
-            "verbose": {
-                "value": True,
-                "type": "bool",
-                "description": "Verbose output"
-            },
+            "verbose": {"value": True, "type": "bool", "description": "Verbose output"},
             "tor_proxy_address": {
                 "value": "",
                 "type": "str",
-                "description": "Tor proxy address"
-            }
-        }
+                "description": "Tor proxy address",
+            },
+        },
     },
     "Tranco": {
         "type": "observable",
@@ -3844,12 +3267,9 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["domain", "url"],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 30, "queue": "default"},
         "secrets": {},
-        "params": {}
+        "params": {},
     },
     "Triage_Search": {
         "type": "observable",
@@ -3859,16 +3279,13 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["hash", "url"],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 30, "queue": "default"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "TRIAGE_KEY",
                 "description": "",
                 "required": True,
-                "type": "str"
+                "type": "str",
             }
         },
         "params": {
@@ -3876,30 +3293,26 @@ analyzers = {
                 "value": "public",
                 "type": "str",
                 "description": "Choose whether to query on the public or the private endpoint of triage (options: "
-                "`private`, `public`)."
+                "`private`, `public`).",
             },
             "report_type": {
                 "value": "overview",
                 "type": "str",
-                "description": "Determines how detailed the final report will be (options: `overview`, `complete`)."
+                "description": "Determines how detailed the final report will be (options: `overview`, `complete`).",
             },
             "analysis_type": {
                 "value": "search",
                 "type": "str",
                 "description": "Choose whether to search for existing observable reports or upload for scanning via "
-                "URL (options: `search` and `submit`)."
+                "URL (options: `search` and `submit`).",
             },
-            "max_tries": {
-                "value": 200,
-                "type": "int",
-                "description": ""
-            },
+            "max_tries": {"value": 200, "type": "int", "description": ""},
             "poll_distance": {
                 "description": "Distance in seconds between each request",
                 "type": "int",
-                "default": 30
+                "default": 30,
             },
-        }
+        },
     },
     "Triage_Scan_URL": {
         "type": "observable",
@@ -3909,16 +3322,13 @@ analyzers = {
         "external_service": True,
         "leaks_info": True,
         "observable_supported": ["url"],
-        "config": {
-            "soft_time_limit": 500,
-            "queue": "long"
-        },
+        "config": {"soft_time_limit": 500, "queue": "long"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "TRIAGE_KEY",
                 "description": "",
                 "required": True,
-                "type": "str"
+                "type": "str",
             }
         },
         "params": {
@@ -3926,30 +3336,26 @@ analyzers = {
                 "value": "public",
                 "type": "str",
                 "description": "Choose whether to query on the public or the private endpoint of triage (options: "
-                "`private`, `public`)."
+                "`private`, `public`).",
             },
             "report_type": {
                 "value": "overview",
                 "type": "str",
-                "description": "Determines how detailed the final report will be (options: `overview`, `complete`)."
+                "description": "Determines how detailed the final report will be (options: `overview`, `complete`).",
             },
             "analysis_type": {
                 "value": "submit",
                 "type": "str",
                 "description": "Choose whether to search for existing observable reports or upload for scanning via "
-                "URL (options: `search` and `submit`)."
+                "URL (options: `search` and `submit`).",
             },
-            "max_tries": {
-                "value": 200,
-                "type": "int",
-                "description": ""
-            },
+            "max_tries": {"value": 200, "type": "int", "description": ""},
             "poll_distance": {
                 "description": "Distance in seconds between each request",
                 "type": "int",
-                "default": 30
+                "default": 30,
             },
-        }
+        },
     },
     "Triage_Scan": {
         "type": "file",
@@ -3958,16 +3364,13 @@ analyzers = {
         "disabled": False,
         "external_service": True,
         "leaks_info": True,
-        "config": {
-            "soft_time_limit": 500,
-            "queue": "long"
-        },
+        "config": {"soft_time_limit": 500, "queue": "long"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "TRIAGE_KEY",
                 "description": "",
                 "required": True,
-                "type": "str"
+                "type": "str",
             }
         },
         "params": {
@@ -3975,19 +3378,15 @@ analyzers = {
                 "value": "public",
                 "type": "str",
                 "description": "Choose whether to query on the public or the private endpoint of triage (options: "
-                "`private`, `public`)."
+                "`private`, `public`).",
             },
             "report_type": {
                 "value": "overview",
                 "type": "str",
-                "description": "Determines how detailed the final report will be (options: `overview`, `complete`)."
+                "description": "Determines how detailed the final report will be (options: `overview`, `complete`).",
             },
-            "max_tries": {
-                "value": 200,
-                "type": "int",
-                "description": ""
-            }
-        }
+            "max_tries": {"value": 200, "type": "int", "description": ""},
+        },
     },
     "UnpacMe_EXE_Unpacker": {
         "type": "file",
@@ -3997,30 +3396,19 @@ analyzers = {
         "external_service": True,
         "leaks_info": True,
         "supported_filetypes": ["application/x-dosexec"],
-        "config": {
-            "soft_time_limit": 400,
-            "queue": "long"
-        },
+        "config": {"soft_time_limit": 400, "queue": "long"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "UNPAC_ME_API_KEY",
                 "description": "",
                 "required": True,
-                "type": "str"
+                "type": "str",
             }
         },
         "params": {
-            "private": {
-                "value": False,
-                "type": "bool",
-                "description": ""
-            },
-            "max_tries": {
-                "value": 30,
-                "type": "int",
-                "description": ""
-            }
-        }
+            "private": {"value": False, "type": "bool", "description": ""},
+            "max_tries": {"value": 30, "type": "int", "description": ""},
+        },
     },
     "URLhaus": {
         "type": "observable",
@@ -4030,12 +3418,9 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["domain", "url", "ip"],
-        "config": {
-            "soft_time_limit": 50,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 50, "queue": "default"},
         "secrets": {},
-        "params": {}
+        "params": {},
     },
     "UrlScan_Submit_Result": {
         "type": "observable",
@@ -4045,35 +3430,24 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["url"],
-        "config": {
-            "soft_time_limit": 100,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 100, "queue": "default"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "URLSCAN_API_KEY",
                 "description": "API key is mandatory for submit.",
                 "required": True,
-                "type": "str"
+                "type": "str",
             }
         },
         "params": {
-            "visibility": {
-                "value": "private",
-                "type": "str",
-                "description": ""
-            },
+            "visibility": {"value": "private", "type": "str", "description": ""},
             "urlscan_analysis": {
                 "value": "submit_result",
                 "type": "str",
-                "description": ""
+                "description": "",
             },
-            "search_size": {
-                "value": 100,
-                "type": "int",
-                "description": ""
-            }
-        }
+            "search_size": {"value": 100, "type": "int", "description": ""},
+        },
     },
     "UrlScan_Search": {
         "type": "observable",
@@ -4083,30 +3457,19 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["ip", "domain", "url", "hash"],
-        "config": {
-            "soft_time_limit": 100,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 100, "queue": "default"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "URLSCAN_API_KEY",
                 "description": "API key is optional for search.",
                 "required": False,
-                "type": "str"
+                "type": "str",
             }
         },
         "params": {
-            "urlscan_analysis": {
-                "value": "search",
-                "type": "str",
-                "description": ""
-            },
-            "search_size": {
-                "value": 100,
-                "type": "int",
-                "description": ""
-            }
-        }
+            "urlscan_analysis": {"value": "search", "type": "str", "description": ""},
+            "search_size": {"value": 100, "type": "int", "description": ""},
+        },
     },
     "Virushee_CheckHash": {
         "type": "observable",
@@ -4117,19 +3480,16 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["hash"],
-        "config": {
-            "soft_time_limit": 60,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 60, "queue": "default"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "VIRUSHEE_API_KEY",
                 "description": "[virushee docs](https://api.virushee.com/#section/Authentication)",
                 "required": False,
-                "type": "str"
+                "type": "str",
             }
         },
-        "params": {}
+        "params": {},
     },
     "Virushee_Upload_File": {
         "type": "file",
@@ -4139,28 +3499,23 @@ analyzers = {
         "disabled": False,
         "external_service": True,
         "leaks_info": True,
-        "config": {
-            "soft_time_limit": 300,
-            "queue": "long"
-        },
+        "config": {"soft_time_limit": 300, "queue": "long"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "VIRUSHEE_API_KEY",
                 "description": "[virushee docs](https://api.virushee.com/#section/Authentication)",
                 "required": False,
-                "type": "str"
+                "type": "str",
             }
         },
         "params": {
             "force_scan": {
                 "value": False,
                 "type": "bool",
-                "description": "If True, always upload file for analysis skipping the hash check."
+                "description": "If True, always upload file for analysis skipping the hash check.",
             }
         },
-        "not_supported_filetypes":[
-          "application/vnd.tcpdump.pcap"
-        ],
+        "not_supported_filetypes": ["application/vnd.tcpdump.pcap"],
     },
     "VirusTotal_v2_Get_File": {
         "type": "file",
@@ -4170,19 +3525,16 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "run_hash": True,
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 30, "queue": "default"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "VT_KEY",
                 "description": "",
                 "required": True,
-                "type": "str"
+                "type": "str",
             }
         },
-        "params": {}
+        "params": {},
     },
     "VirusTotal_v2_Get_Observable": {
         "type": "observable",
@@ -4192,19 +3544,16 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["ip", "domain", "url", "hash"],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 30, "queue": "default"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "VT_KEY",
                 "description": "",
                 "required": True,
-                "type": "str"
+                "type": "str",
             }
         },
-        "params": {}
+        "params": {},
     },
     "VirusTotal_v2_Scan_File": {
         "type": "file",
@@ -4213,42 +3562,39 @@ analyzers = {
         "disabled": True,
         "external_service": True,
         "leaks_info": True,
-        "config": {
-            "soft_time_limit": 400,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 400, "queue": "default"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "VT_KEY",
                 "description": "",
                 "required": True,
-                "type": "str"
+                "type": "str",
             },
             "url_key_name": {
                 "env_var_key": "VT_NOTIFY_URL",
                 "description": "",
                 "required": False,
                 "type": "str",
-                "default": ""
-            }
+                "default": "",
+            },
         },
         "params": {
             "wait_for_scan_anyway": {
                 "description": "If you want to wait for the scan to complete before return the result",
                 "type": "bool",
-                "default": True
+                "default": True,
             },
             "max_tries": {
                 "description": "Max number of retries",
                 "type": "int",
-                "default": 10
+                "default": 10,
             },
-          "poll_distance": {
+            "poll_distance": {
                 "description": "Distance in seconds between each request",
                 "type": "int",
-                "default": 30
+                "default": 30,
             },
-        }
+        },
     },
     "VirusTotal_v3_Get_File": {
         "type": "file",
@@ -4259,70 +3605,67 @@ analyzers = {
         "leaks_info": False,
         "run_hash": True,
         "run_hash_type": "sha256",
-        "config": {
-            "soft_time_limit": 800,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 800, "queue": "default"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "VT_KEY",
                 "description": "",
                 "required": True,
-                "type": "str"
+                "type": "str",
             }
         },
         "params": {
             "max_tries": {
                 "value": 10,
                 "type": "int",
-                "description": "How many times we poll the VT API for scan results"
+                "description": "How many times we poll the VT API for scan results",
             },
             "poll_distance": {
                 "value": 30,
                 "type": "int",
-                "description": "IntelOwl would sleep for this time between each poll to VT APIs"
+                "description": "IntelOwl would sleep for this time between each poll to VT APIs",
             },
             "force_active_scan_if_old": {
                 "value": False,
                 "type": "bool",
-                "description": "If the sample is old, it would be rescanned. This will cost additional quota."
+                "description": "If the sample is old, it would be rescanned. This will cost additional quota.",
             },
             "rescan_max_tries": {
                 "value": 5,
                 "type": "int",
-                "description": "How many times we poll the VT API for RE-scan results (samples already available to VT)"
+                "description": "How many times we poll the VT API for RE-scan results (samples already available to VT)",
             },
             "rescan_poll_distance": {
                 "value": 120,
                 "type": "int",
-                "description": "IntelOwl would sleep for this time between each poll to VT APIs after having started a RE-scan"
+                "description": "IntelOwl would sleep for this time between each poll to VT APIs after having started a RE-scan",
             },
             "days_to_say_that_a_scan_is_old": {
                 "value": 30,
                 "type": "int",
-                "description": "How many days are required to consider a scan old to force rescan"
+                "description": "How many days are required to consider a scan old to force rescan",
             },
             "include_behaviour_summary": {
                 "value": False,
                 "type": "bool",
-                "description": "Include a summary of behavioral analysis reports alongside default scan report. This will cost additional quota."
+                "description": "Include a summary of behavioral analysis reports alongside default scan report. This will cost additional quota.",
             },
             "include_sigma_analyses": {
                 "value": False,
                 "type": "bool",
-                "description": "Include sigma analysis report alongside default scan report. This will cost additional quota."
+                "description": "Include sigma analysis report alongside default scan report. This will cost additional quota.",
             },
             "relationships_to_request": {
                 "value": [],
                 "type": "list",
-                "description": "Include a list of relationships to request if available. Full list [here](https://developers.virustotal.com/reference/metadata). This will cost additional quota."
+                "description": "Include a list of relationships to request if available. Full list [here](https://developers.virustotal.com/reference/metadata). This will cost additional quota.",
             },
             "relationships_elements": {
                 "value": 1,
                 "type": "int",
-                "description": "Number of elements to retrieve for each relationships"
-            }
-        }
+                "description": "Number of elements to retrieve for each relationships",
+            },
+        },
     },
     "VirusTotal_v3_Get_File_And_Scan": {
         "type": "file",
@@ -4333,75 +3676,72 @@ analyzers = {
         "leaks_info": True,
         "run_hash": True,
         "run_hash_type": "sha256",
-        "config": {
-            "soft_time_limit": 800,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 800, "queue": "default"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "VT_KEY",
                 "description": "",
                 "required": True,
-                "type": "str"
+                "type": "str",
             }
         },
         "params": {
             "max_tries": {
                 "value": 10,
                 "type": "int",
-                "description": "How many times we poll the VT API for scan results"
+                "description": "How many times we poll the VT API for scan results",
             },
             "poll_distance": {
                 "value": 30,
                 "type": "int",
-                "description": "IntelOwl would sleep for this time between each poll to VT APIs"
+                "description": "IntelOwl would sleep for this time between each poll to VT APIs",
             },
             "force_active_scan": {
                 "value": True,
                 "type": "bool",
-                "description": "If the sample is not already in VT, send the sample and perform a scan"
+                "description": "If the sample is not already in VT, send the sample and perform a scan",
             },
             "force_active_scan_if_old": {
                 "value": True,
                 "type": "bool",
-                "description": "If the sample is old, it would be rescanned. This will cost additional quota."
+                "description": "If the sample is old, it would be rescanned. This will cost additional quota.",
             },
             "rescan_max_tries": {
                 "value": 5,
                 "type": "int",
-                "description": "How many times we poll the VT API for RE-scan results (samples already available to VT)"
+                "description": "How many times we poll the VT API for RE-scan results (samples already available to VT)",
             },
             "rescan_poll_distance": {
                 "value": 120,
                 "type": "int",
-                "description": "IntelOwl would sleep for this time between each poll to VT APIs after having started a RE-scan"
+                "description": "IntelOwl would sleep for this time between each poll to VT APIs after having started a RE-scan",
             },
             "days_to_say_that_a_scan_is_old": {
                 "value": 30,
                 "type": "int",
-                "description": "How many days are required to consider a scan old to force rescan"
+                "description": "How many days are required to consider a scan old to force rescan",
             },
             "include_behaviour_summary": {
                 "value": True,
                 "type": "bool",
-                "description": "Include a summary of behavioral analysis reports alongside default scan report. This will cost additional quota."
+                "description": "Include a summary of behavioral analysis reports alongside default scan report. This will cost additional quota.",
             },
             "include_sigma_analyses": {
                 "value": True,
                 "type": "bool",
-                "description": "Include sigma analysis report alongside default scan report. This will cost additional quota."
+                "description": "Include sigma analysis report alongside default scan report. This will cost additional quota.",
             },
             "relationships_to_request": {
                 "value": [],
                 "type": "list",
-                "description": "Include a list of relationships to request if available. This will cost additional quota."
+                "description": "Include a list of relationships to request if available. This will cost additional quota.",
             },
             "relationships_elements": {
                 "value": 1,
                 "type": "int",
-                "description": "Number of elements to retrieve for each relationships"
-            }
-        }
+                "description": "Number of elements to retrieve for each relationships",
+            },
+        },
     },
     "VirusTotal_v3_Get_Observable": {
         "type": "observable",
@@ -4411,70 +3751,67 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["ip", "domain", "url", "hash"],
-        "config": {
-            "soft_time_limit": 800,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 800, "queue": "default"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "VT_KEY",
                 "description": "",
                 "required": True,
-                "type": "str"
+                "type": "str",
             }
         },
         "params": {
             "max_tries": {
                 "value": 10,
                 "type": "int",
-                "description": "How many times we poll the VT API for scan results"
+                "description": "How many times we poll the VT API for scan results",
             },
             "poll_distance": {
                 "value": 30,
                 "type": "int",
-                "description": "IntelOwl would sleep for this time between each poll to VT APIs"
+                "description": "IntelOwl would sleep for this time between each poll to VT APIs",
             },
             "force_active_scan_if_old": {
                 "value": False,
                 "type": "bool",
-                "description": "If you submitted an hash and the sample is old, it would be rescanned. This will cost additional quota."
+                "description": "If you submitted an hash and the sample is old, it would be rescanned. This will cost additional quota.",
             },
             "rescan_max_tries": {
                 "value": 5,
                 "type": "int",
-                "description": "How many times we poll the VT API for RE-scan results (samples already available to VT)"
+                "description": "How many times we poll the VT API for RE-scan results (samples already available to VT)",
             },
             "rescan_poll_distance": {
                 "value": 120,
                 "type": "int",
-                "description": "IntelOwl would sleep for this time between each poll to VT APIs after having started a RE-scan"
+                "description": "IntelOwl would sleep for this time between each poll to VT APIs after having started a RE-scan",
             },
             "days_to_say_that_a_scan_is_old": {
                 "value": 30,
                 "type": "int",
-                "description": "How many days are required to consider a scan old to force rescan"
+                "description": "How many days are required to consider a scan old to force rescan",
             },
             "include_behaviour_summary": {
                 "value": False,
                 "type": "bool",
-                "description": "If you submitted an hash, include a summary of behavioral analysis reports alongside default scan report. This will cost additional quota."
+                "description": "If you submitted an hash, include a summary of behavioral analysis reports alongside default scan report. This will cost additional quota.",
             },
             "include_sigma_analyses": {
                 "value": False,
                 "type": "bool",
-                "description": "If you submitted an hash, include sigma analysis report alongside default scan report. This will cost additional quota."
+                "description": "If you submitted an hash, include sigma analysis report alongside default scan report. This will cost additional quota.",
             },
             "relationships_to_request": {
                 "value": [],
                 "type": "list",
-                "description": "Include a list of relationships to request if available. This will cost additional quota."
+                "description": "Include a list of relationships to request if available. This will cost additional quota.",
             },
             "relationships_elements": {
                 "value": 1,
                 "type": "int",
-                "description": "Number of elements to retrieve for each relationships"
-            }
-        }
+                "description": "Number of elements to retrieve for each relationships",
+            },
+        },
     },
     "VirusTotal_v3_Intelligence_Search": {
         "type": "observable",
@@ -4484,30 +3821,27 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["generic"],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 30, "queue": "default"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "VT_INTELLIGENCE_KEY",
                 "required": True,
                 "description": "API Key for the analyzer. You need to have a premium license with VT.",
-                "type": "str"
+                "type": "str",
             }
         },
         "params": {
             "limit": {
                 "value": 300,
                 "type": "int",
-                "description": "max number of results to retrieve"
+                "description": "max number of results to retrieve",
             },
             "order_by": {
                 "type": "str",
                 "description": "More information in VT [docs](https://developers.virustotal.com/reference/intelligence-search) ",
-                "default": ""
-            }
-        }
+                "default": "",
+            },
+        },
     },
     "Whoisxmlapi": {
         "type": "observable",
@@ -4517,19 +3851,16 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["ip", "domain"],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 30, "queue": "default"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "WHOISXMLAPI_KEY",
                 "description": "",
                 "required": True,
-                "type": "str"
+                "type": "str",
             }
         },
-        "params": {}
+        "params": {},
     },
     "WhoIs_RipeDB_Search": {
         "type": "observable",
@@ -4539,12 +3870,9 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["ip"],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 30, "queue": "default"},
         "secrets": {},
-        "params": {}
+        "params": {},
     },
     "WiGLE": {
         "type": "observable",
@@ -4554,25 +3882,22 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["generic"],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 30, "queue": "default"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "WIGLE_KEY",
                 "description": "",
                 "required": True,
-                "type": "str"
+                "type": "str",
             }
         },
         "params": {
             "search_type": {
                 "value": "WiFi Network",
                 "type": "str",
-                "description": "Corresponds to different routes mentioned in [docs](https://api.wigle.net/swagger#/v3_ALPHA). (options: `WiFi Network`, `CDMA Network`, `Bluetooth Network`, `GSM/LTE/WCDMA Network`)."
+                "description": "Corresponds to different routes mentioned in [docs](https://api.wigle.net/swagger#/v3_ALPHA). (options: `WiFi Network`, `CDMA Network`, `Bluetooth Network`, `GSM/LTE/WCDMA Network`).",
             }
-        }
+        },
     },
     "XForceExchange": {
         "type": "observable",
@@ -4582,31 +3907,28 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["ip", "hash", "domain", "url"],
-        "config": {
-            "soft_time_limit": 60,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 60, "queue": "default"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "XFORCE_KEY",
                 "description": "",
                 "required": True,
-                "type": "str"
+                "type": "str",
             },
             "api_password_name": {
                 "env_var_key": "XFORCE_PASSWORD",
                 "description": "",
                 "required": True,
-                "type": "str"
-            }
+                "type": "str",
+            },
         },
         "params": {
             "malware_only": {
                 "value": False,
                 "type": "bool",
-                "description": "Performs lookup only against 'malware' endpoints to save some quota"
+                "description": "Performs lookup only against 'malware' endpoints to save some quota",
             }
-        }
+        },
     },
     "Xlm_Macro_Deobfuscator": {
         "type": "file",
@@ -4624,20 +3946,17 @@ analyzers = {
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             "application/zip",
             "application/xml",
-            "application/encrypted"
+            "application/encrypted",
         ],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "local"
-        },
+        "config": {"soft_time_limit": 30, "queue": "local"},
         "secrets": {},
         "params": {
             "passwords_to_check": {
                 "value": ["agenzia", "inps", "coronavirus"],
                 "type": "list",
-                "description": ""
+                "description": "",
             }
-        }
+        },
     },
     "Yara": {
         "type": "file",
@@ -4646,17 +3965,14 @@ analyzers = {
         "disabled": False,
         "external_service": False,
         "leaks_info": False,
-        "config": {
-            "soft_time_limit": 120,
-            "queue": "local"
-        },
+        "config": {"soft_time_limit": 120, "queue": "local"},
         "secrets": {
             "private_repositories": {
                 "env_var_key": "YARA_PRIVATE_REPOSITORIES",
-                "description": "Private repositories in the following format: {\"username@provider:org/repository.git\":\"ssh key\"}. Use double quote, don't worry about whitespace.",
+                "description": 'Private repositories in the following format: {"username@provider:org/repository.git":"ssh key"}. Use double quote, don\'t worry about whitespace.',
                 "required": False,
                 "type": "dict",
-                "default": {}
+                "default": {},
             }
         },
         "params": {
@@ -4679,15 +3995,15 @@ analyzers = {
                     "https://github.com/fboldewin/YARA-rules",
                     "https://github.com/Yara-Rules/rules.git",
                     "https://github.com/Neo23x0/signature-base.git",
-                    "https://yaraify-api.abuse.ch/download/yaraify-rules.zip"
+                    "https://yaraify-api.abuse.ch/download/yaraify-rules.zip",
                 ],
                 "type": "list",
-                "description": "Repositories that will be constantly updated"
+                "description": "Repositories that will be constantly updated",
             },
             "local_rules": {
                 "value": False,
                 "type": "bool",
-                "description": "If True, use local rules present at /opt/deploy/files_required/yara/YOUR_USER/custom_rule"
+                "description": "If True, use local rules present at /opt/deploy/files_required/yara/YOUR_USER/custom_rule",
             },
             "ignore": {
                 "value": [
@@ -4695,16 +4011,13 @@ analyzers = {
                     "general_cloaking.yar",
                     "thor_inverse_matches.yar",
                     "yara_mixed_ext_vars.yar",
-                    "thor-webshells.yar"
+                    "thor-webshells.yar",
                 ],
                 "type": "list",
-                "description": "ignore these rules"
-            }
+                "description": "ignore these rules",
+            },
         },
-        "not_supported_filetypes":[
-          "application/vnd.tcpdump.pcap"
-        ],
-
+        "not_supported_filetypes": ["application/vnd.tcpdump.pcap"],
     },
     "YARAify_File_Scan": {
         "type": "file",
@@ -4714,61 +4027,58 @@ analyzers = {
         "external_service": True,
         "leaks_info": True,
         "supported_filetypes": [],
-        "config": {
-            "soft_time_limit": 500,
-            "queue": "long"
-        },
+        "config": {"soft_time_limit": 500, "queue": "long"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "MALPEDIA_TOKEN",
                 "description": "Optional key to receive results from public (TLP:WHITE) and non-public (TLP:GREEN, TLP:AMBER and TLP:RED) YARA rules.",
                 "required": True,
-                "type": "str"
+                "type": "str",
             },
             "api_key_identifier": {
                 "env_var_key": "YARAIFY_KEY",
                 "description": "Optional identifier to associate this submission with",
                 "required": False,
-                "type": "str"
-            }
+                "type": "str",
+            },
         },
         "params": {
             "send_file": {
                 "value": True,
                 "type": "bool",
-                "description": "Defines whether the file should be sent for analysis or not (in the latter case hash only check would be done)"
+                "description": "Defines whether the file should be sent for analysis or not (in the latter case hash only check would be done)",
             },
             "clamav_scan": {
                 "value": True,
                 "type": "bool",
-                "description": "Defines whether to scan the file with ClamAV."
+                "description": "Defines whether to scan the file with ClamAV.",
             },
             "unpack": {
                 "value": False,
                 "type": "bool",
-                "description": "Defines whether to unpack the file."
+                "description": "Defines whether to unpack the file.",
             },
             "share_file": {
                 "value": False,
                 "type": "bool",
-                "description": "Defines whether the file is public and may be shared with 3rd parties."
+                "description": "Defines whether the file is public and may be shared with 3rd parties.",
             },
             "skip_noisy": {
                 "value": True,
                 "type": "bool",
-                "description": "YARAify skips the file if it already has been scanned at least 10 times within the past 24 hours. It will return the latest task_id instead"
+                "description": "YARAify skips the file if it already has been scanned at least 10 times within the past 24 hours. It will return the latest task_id instead",
             },
             "skip_known": {
                 "value": False,
                 "type": "bool",
-                "description": "YARAify will not process the file if the file is already known."
+                "description": "YARAify will not process the file if the file is already known.",
             },
             "result_max": {
                 "value": 25,
                 "type": "int",
-                "description": "Max number of results you want to display (default: 25, max: 1'000)"
-            }
-        }
+                "description": "Max number of results you want to display (default: 25, max: 1'000)",
+            },
+        },
     },
     "YARAify_Generics": {
         "type": "observable",
@@ -4777,26 +4087,21 @@ analyzers = {
         "disabled": False,
         "external_service": True,
         "leaks_info": False,
-        "observable_supported": [
-            "generic"
-        ],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "default"
-        },
+        "observable_supported": ["generic"],
+        "config": {"soft_time_limit": 30, "queue": "default"},
         "secrets": {},
         "params": {
             "query": {
                 "value": "get_yara",
                 "type": "str",
-                "description": "using: 'get_yara' for YARA rule (default), 'get_clamav' for ClamAV signature, 'get_imphash' for imphash, 'get_tlsh' for TLSH, 'get_telfhash' for telfhash or 'get_dhash_icon' for icon_dash"
+                "description": "using: 'get_yara' for YARA rule (default), 'get_clamav' for ClamAV signature, 'get_imphash' for imphash, 'get_tlsh' for TLSH, 'get_telfhash' for telfhash or 'get_dhash_icon' for icon_dash",
             },
             "result_max": {
                 "value": 25,
                 "type": "int",
-                "description": "Max number of results you want to display (default: 25, max: 1'000)"
-            }
-        }
+                "description": "Max number of results you want to display (default: 25, max: 1'000)",
+            },
+        },
     },
     "YARAify_File_Search": {
         "type": "file",
@@ -4806,22 +4111,28 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "run_hash": True,
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 30, "queue": "default"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "MALPEDIA_TOKEN",
                 "description": "Optional key to receive results from public (TLP:WHITE) and also non-public (TLP:GREEN, TLP:AMBER and TLP:RED) YARA rules.",
                 "required": False,
-                "type": "str"
+                "type": "str",
             }
         },
-        "params": {},
-        "not_supported_filetypes":[
-          "application/vnd.tcpdump.pcap"
-        ],
+        "params": {
+            "query": {
+                "value": "lookup_hash",
+                "type": "str",
+                "description": "unique option available for files: lookup_hash",
+            },
+            "result_max": {
+                "value": 25,
+                "type": "int",
+                "description": "Max number of results you want to display (default: 25, max: 1'000)",
+            },
+        },
+        "not_supported_filetypes": ["application/vnd.tcpdump.pcap"],
     },
     "YARAify_Search": {
         "type": "observable",
@@ -4830,28 +4141,28 @@ analyzers = {
         "disabled": False,
         "external_service": True,
         "leaks_info": False,
-        "observable_supported": [
-            "hash"
-        ],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "default"
-        },
+        "observable_supported": ["hash"],
+        "config": {"soft_time_limit": 30, "queue": "default"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "MALPEDIA_TOKEN",
                 "description": "Optional key to receive results from public (TLP:WHITE) and also non-public (TLP:GREEN, TLP:AMBER and TLP:RED) YARA rules.",
                 "required": False,
-                "type": "str"
+                "type": "str",
             }
         },
         "params": {
             "query": {
                 "value": "lookup_hash",
                 "type": "str",
-                "description": ""
-            }
-        }
+                "description": "unique option available for files: lookup_hash",
+            },
+            "result_max": {
+                "value": 25,
+                "type": "int",
+                "description": "Max number of results you want to display (default: 25, max: 1'000)",
+            },
+        },
     },
     "YETI": {
         "type": "observable",
@@ -4861,41 +4172,38 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["ip", "domain", "url", "hash", "generic"],
-        "config": {
-            "soft_time_limit": 30,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 30, "queue": "default"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "YETI_KEY",
                 "description": "API key for your YETI instance",
                 "required": True,
-                "type": "str"
+                "type": "str",
             },
             "url_key_name": {
                 "env_var_key": "YETI_URL",
                 "description": "API URL of your YETI instance",
                 "required": True,
-                "type": "str"
-            }
+                "type": "str",
+            },
         },
         "params": {
             "verify_ssl": {
                 "value": True,
                 "type": "bool",
-                "description": "Enable SSL certificate server verification. Change this if your YETI instance has not SSL enabled."
+                "description": "Enable SSL certificate server verification. Change this if your YETI instance has not SSL enabled.",
             },
             "regex": {
                 "value": False,
                 "type": "bool",
-                "description": "Use this if you are searching for observables using a regex."
+                "description": "Use this if you are searching for observables using a regex.",
             },
             "results_count": {
                 "value": 50,
                 "type": "int",
-                "description": "Use this to limit the maximum number of results obtained from a search."
-            }
-        }
+                "description": "Use this to limit the maximum number of results obtained from a search.",
+            },
+        },
     },
     "ZoomEye": {
         "type": "observable",
@@ -4905,46 +4213,39 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["ip", "domain"],
-        "config": {
-            "soft_time_limit": 60,
-            "queue": "default"
-        },
+        "config": {"soft_time_limit": 60, "queue": "default"},
         "secrets": {
             "api_key_name": {
                 "env_var_key": "ZOOMEYE_KEY",
                 "description": "",
                 "required": True,
-                "type": "str"
+                "type": "str",
             }
         },
         "params": {
             "search_type": {
                 "value": "host",
                 "type": "str",
-                "description": "Choose among `host`, `web`, `both` (both is only available to ZoomEye VIP users)."
+                "description": "Choose among `host`, `web`, `both` (both is only available to ZoomEye VIP users).",
             },
             "query": {
                 "value": "",
                 "type": "str",
-                "description": "Follow according to docs, but omit `ip`, `hostname`. Eg: `city:beijing port:21`."
+                "description": "Follow according to docs, but omit `ip`, `hostname`. Eg: `city:beijing port:21`.",
             },
-            "page": {
-                "value": 1,
-                "type": "int",
-                "description": "Page number to fetch."
-            },
+            "page": {"value": 1, "type": "int", "description": "Page number to fetch."},
             "facets": {
                 "value": "",
                 "type": "str",
-                "description": "A comma-separated list of properties to get summary information on query. Eg: `facets:app,os`."
+                "description": "A comma-separated list of properties to get summary information on query. Eg: `facets:app,os`.",
             },
             "history": {
                 "value": True,
                 "type": "bool",
-                "description": "To query the history data."
-            }
-        }
-    }
+                "description": "To query the history data.",
+            },
+        },
+    },
 }
 
 from django.db import migrations
@@ -4964,10 +4265,7 @@ def create_configurations(apps, schema_editor):
         if "leaks_info" not in analyzer:
             analyzer["leaks_info"] = False
 
-        ac = AnalyzerConfig(
-            name=analyzer_name,
-            **analyzer
-        )
+        ac = AnalyzerConfig(name=analyzer_name, **analyzer)
         ac.full_clean()
         ac.save()
 
@@ -4980,12 +4278,10 @@ def delete_configurations(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('analyzers_manager', '0003_analyzerconfig'),
-        ('api_app', '0010_custom_config_playbooks'),
+        ("analyzers_manager", "0003_analyzerconfig"),
+        ("api_app", "0010_custom_config_playbooks"),
     ]
 
     operations = [
-        migrations.RunPython(
-            create_configurations, delete_configurations
-        ),
+        migrations.RunPython(create_configurations, delete_configurations),
     ]

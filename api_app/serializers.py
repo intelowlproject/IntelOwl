@@ -233,12 +233,12 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         for key in self.mtm_fields:
             self.mtm_fields[key] = validated_data.pop(key)
 
-        job = Job(**validated_data)
+        job = Job(user=self.context["request"].user, **validated_data)
         try:
             job.full_clean()
         except django.core.exceptions.ValidationError as e:
             raise ValidationError(str(e))
-
+        job.save()
         if tags:
             job.tags.set(tags)
 

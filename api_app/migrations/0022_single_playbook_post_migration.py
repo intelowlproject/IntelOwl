@@ -25,11 +25,11 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='job',
             name='playbook_requested',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='requested_in_jobs', to='playbooks_manager.playbookconfig'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='requested_in_jobs', to='playbooks_manager.playbookconfig'),
         ),
         migrations.AlterField(
             model_name='job',
             name='playbook_to_execute',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='executed_in_jobs', to='playbooks_manager.playbookconfig'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='executed_in_jobs', to='playbooks_manager.playbookconfig'),
         ),
     ]

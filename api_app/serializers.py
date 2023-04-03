@@ -684,9 +684,9 @@ class JobAvailabilitySerializer(rfs.ModelSerializer):
                 "Playbook or analyzers must be set"
             )
 
-        if playbooks is not None and len(analyzers) != 0:
+        if len(playbooks)!= 0 and len(analyzers) != 0:
             raise rfs.ValidationError(
-                "Either only send the 'playbook' parameter or the 'analyzers' one."
+                "Either only send the 'playbooks' parameter or the 'analyzers' one."
             )
         return attrs
 

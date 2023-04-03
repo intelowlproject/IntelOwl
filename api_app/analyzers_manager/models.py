@@ -194,6 +194,8 @@ class AnalyzerConfig(AbstractConfig):
     @property
     def python_base_path(self) -> str:
         if self.type == TypeChoices.FILE:
+            if self.run_hash:
+                return settings.BASE_ANALYZER_OBSERVABLE_PYTHON_PATH
             return settings.BASE_ANALYZER_FILE_PYTHON_PATH
         else:
             return settings.BASE_ANALYZER_OBSERVABLE_PYTHON_PATH

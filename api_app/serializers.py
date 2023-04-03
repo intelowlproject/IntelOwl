@@ -663,24 +663,28 @@ class JobAvailabilitySerializer(rfs.ModelSerializer):
 
     class Meta:
         model = Job
-        fields = ["md5", "analyzers", "playbook", "running_only", "minutes_ago"]
+        fields = ["md5", "analyzers", "playbooks", "running_only", "minutes_ago"]
 
     md5 = rfs.CharField(max_length=128, required=True)
     analyzers = rfs.PrimaryKeyRelatedField(
         queryset=AnalyzerConfig.objects.all(), many=True, required=False
     )
-    playbook = rfs.PrimaryKeyRelatedField(
-        queryset=PlaybookConfig.objects.all(), required=False
+    playbooks = rfs.PrimaryKeyRelatedField(
+        queryset=PlaybookConfig.objects.all(), required=False, many=True
     )
     running_only = rfs.BooleanField(default=False, required=False)
     minutes_ago = rfs.IntegerField(default=None, required=False)
 
     def validate(self, attrs):
         attrs = super().validate(attrs)
-        playbook = attrs.get("playbook", None)
+        playbooks = attrs.get("playbooks", [])
         analyzers = attrs.get("analyzers", [])
+        if not analyzers and not playbooks:
+            raise rfs.ValidationError(
+                "Playbook or analyzers must be set"
+            )
 
-        if playbook is not None and len(analyzers) != 0:
+        if playbooks is not None and len(analyzers) != 0:
             raise rfs.ValidationError(
                 "Either only send the 'playbook' parameter or the 'analyzers' one."
             )
@@ -695,15 +699,15 @@ class JobAvailabilitySerializer(rfs.ModelSerializer):
             # since with playbook
             # it is expected behavior
             # for analyzers to often fail
-            if validated_data.get("playbook", None):
+            if validated_data.get("playbooks", []):
                 statuses_to_check.append(Job.Status.REPORTED_WITH_FAILS)
         # this means that the user is trying to
         # check availability of the case where all
         # analyzers were run but no playbooks were
         # triggered.
         query = Q(md5=validated_data["md5"]) & Q(status__in=statuses_to_check)
-        if validated_data.get("playbook", None):
-            query &= Q(playbook_requested=validated_data["playbook"])
+        if validated_data.get("playbooks", []):
+            query &= Q(playbook_requested__in=validated_data["playbooks"])
         else:
             analyzers = validated_data.get("analyzers", [])
             if not analyzers:

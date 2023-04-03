@@ -22,13 +22,8 @@ class FileAnalyzerTestCase(CustomTestCase):
         "api_app/fixtures/0002_analyzer_pluginconfig.json",
     ]
 
-    def _create_job(self, name, mimetype):
-        with open(f"test_files/{name}", "rb") as f:
-            Job.objects.create(
-                is_sample=True, file_name=name, file_mimetype=mimetype, file=File(f)
-            )
-
-    def _create_jobs(self):
+    @staticmethod
+    def _create_jobs():
         for sample_name, mimetype in zip(
             [
                 "sample.one",
@@ -61,7 +56,10 @@ class FileAnalyzerTestCase(CustomTestCase):
                 "application/octet-stream",
             ],
         ):
-            self._create_job(sample_name, mimetype)
+            with open(f"test_files/{sample_name}", "rb") as f:
+                Job.objects.create(
+                    is_sample=True, file_name=sample_name, file_mimetype=mimetype, file=File(f)
+                )
 
     def test_subclasses(self):
         def handler(signum, frame):
@@ -145,7 +143,8 @@ class ObservableAnalyzerTestCase(CustomTestCase):
         self.assertEqual(oa.observable_classification, "domain")
         job.delete()
 
-    def _create_jobs(self):
+    @staticmethod
+    def _create_jobs():
         Job.objects.create(
             observable_name="test.com",
             observable_classification="domain",

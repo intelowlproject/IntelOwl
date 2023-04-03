@@ -155,7 +155,7 @@ class AbstractConfig(models.Model):
                 not PluginConfig.visible_for_user(user)
                 .filter(
                     attribute=secret,
-                    type=self.type,
+                    type=self.plugin_type,
                     plugin_name=self.name,
                 )
                 .exists()

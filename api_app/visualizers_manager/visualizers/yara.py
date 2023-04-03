@@ -50,7 +50,7 @@ class Yara(Visualizer):
                     self.Base(value=yara_num_matches),
                 ),
                 self.VList(
-                    name=signatures,
+                    name="Signatures",
                     value=[self.Base(value=value) for value in signatures],
                 ),
             ]

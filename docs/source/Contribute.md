@@ -338,6 +338,13 @@ Examples:
 $ docker exec intelowl_uwsgi python3 manage.py test
 ```
 
+##### Run tests for a particular plugin
+
+To test a plugin in real environment, i.e. without mocked data, we suggest that you use the GUI of IntelOwl directly.
+Meaning that you have your plugin configured, you have selected a correct observable/file to analyze,
+and the final report shown in the GUI of IntelOwl is exactly what you wanted. 
+
+
 ##### Run tests available in a particular file
 
 Examples:

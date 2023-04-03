@@ -299,8 +299,6 @@ class CommentCreateSerializer(rfs.ModelSerializer):
         queryset=Job.objects.all(), write_only=True, source="job"
     )
 
-    user = UserSerializer(read_only=True)
-
     def validate(self, attrs: dict) -> dict:
         attrs = super().validate(attrs)
 

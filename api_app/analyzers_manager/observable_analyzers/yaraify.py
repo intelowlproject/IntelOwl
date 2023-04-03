@@ -21,7 +21,7 @@ class YARAify(ObservableAnalyzer):
         if self.observable_classification == self.ObservableTypes.GENERIC:
             data["result_max"] = self.result_max
 
-        if self._api_key_name:
+        if getattr(self, "_api_key_name", None):
             data["malpedia-token"] = self._api_key_name
 
         try:

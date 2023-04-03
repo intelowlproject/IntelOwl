@@ -493,6 +493,6 @@ def plugin_state_viewer(request):
             ).exists():
                 result["data"][plugin.name] = {
                     "disabled": True,
-                    "plugin_type": plugin.type(),
+                    "plugin_type": plugin.plugin_type,
                 }
     return Response(result)

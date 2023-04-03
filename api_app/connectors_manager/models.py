@@ -24,7 +24,7 @@ class ConnectorConfig(AbstractConfig):
 
     @classmethod
     @property
-    def type(cls) -> models.TextChoices:
+    def plugin_type(cls) -> models.TextChoices:
         return PluginConfig.PluginType.CONNECTOR
 
     @property

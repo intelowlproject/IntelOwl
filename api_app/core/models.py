@@ -109,7 +109,7 @@ class AbstractConfig(models.Model):
 
     @classmethod
     @property
-    def type(cls) -> models.TextChoices:
+    def plugin_type(cls) -> models.TextChoices:
         raise NotImplementedError()
 
     @property

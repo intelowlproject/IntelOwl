@@ -28,7 +28,7 @@ class VisualizerConfig(AbstractConfig):
 
     @classmethod
     @property
-    def type(cls) -> str:
+    def plugin_type(cls) -> str:
         from api_app.models import PluginConfig
 
         return PluginConfig.PluginType.VISUALIZER

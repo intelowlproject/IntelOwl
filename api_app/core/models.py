@@ -238,7 +238,7 @@ class AbstractConfig(models.Model):
         for key, secret_config in attr.items():
             pcs = PluginConfig.visible_for_user(user).filter(
                 attribute=key,
-                type=self.type,
+                type=self.plugin_type,
                 plugin_name=self.name,
                 config_type=config_type,
             )

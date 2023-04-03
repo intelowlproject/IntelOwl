@@ -14,9 +14,6 @@ from ..dns_responses import malicious_detector_response
 
 
 class MockUpSafeBrowsing:
-    def __init__(self, *args, **kwargs):
-        ...
-
     def lookup_urls(self, urls: List[str]) -> Dict:
         return {
             url: {

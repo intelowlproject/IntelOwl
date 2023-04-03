@@ -40,7 +40,7 @@ urlpatterns = [
     ),
     # router viewsets
     path("", include(router.urls)),
-    # Plugins (analyzers_manager, connectors_manager, playbooks_manager)
+    # Plugins
     path("", include("api_app.analyzers_manager.urls")),
     path("", include("api_app.connectors_manager.urls")),
     path("", include("api_app.visualizers_manager.urls")),

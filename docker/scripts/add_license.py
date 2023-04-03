@@ -10,10 +10,10 @@ from pathlib import PosixPath
 if __name__ == "__main__":
     if len(sys.argv) == 1:
         print("First argument is the base directory to check")
-        exit()
+        sys.exit(1)
     if len(sys.argv) > 3:
         print("Too many argument")
-        exit()
+        sys.exit(1)
     if len(sys.argv) == 3 and sys.argv[2] != "run":
         print("Argument must be `run` or empty")
     base_path = sys.argv[1]

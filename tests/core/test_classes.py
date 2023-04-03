@@ -40,29 +40,31 @@ class PluginTestCase(CustomTestCase):
 
     def test_start_no_errors(self):
         # I can't implement the Plugin class directly because of django installed_apps
-        with patch.multiple(Connector, __abstractmethods__=set()):
-            with patch.object(Connector, "run") as run:
-                run.return_value = {}
-                plugin = Connector(self.cc, self.job.pk, {}, uuid())
-                try:
-                    plugin.start()
-                except Exception as e:
-                    self.fail(e)
-                else:
-                    self.assertEqual(plugin.report.status, plugin.report.Status.SUCCESS)
+        with patch.multiple(Connector, __abstractmethods__=set()), patch.object(
+            Connector, "run"
+        ) as run:
+            run.return_value = {}
+            plugin = Connector(self.cc, self.job.pk, {}, uuid())
+            try:
+                plugin.start()
+            except Exception as e:
+                self.fail(e)
+            else:
+                self.assertEqual(plugin.report.status, plugin.report.Status.SUCCESS)
 
     def test_start_errors(self):
         def raise_error(self):
             raise TypeError("Test")
 
-        with patch.multiple(Connector, __abstractmethods__=set()):
-            with patch.multiple(Connector, run=raise_error):
-                plugin = Connector(self.cc, self.job.pk, {}, uuid())
-                with self.assertRaises(TypeError):
-                    plugin.start()
-                self.assertEqual(plugin.report.status, plugin.report.Status.FAILED)
-                self.assertEqual(1, len(plugin.report.errors))
-                self.assertEqual("Test", plugin.report.errors[0])
+        with patch.multiple(Connector, __abstractmethods__=set()), patch.multiple(
+            Connector, run=raise_error
+        ):
+            plugin = Connector(self.cc, self.job.pk, {}, uuid())
+            with self.assertRaises(TypeError):
+                plugin.start()
+            self.assertEqual(plugin.report.status, plugin.report.Status.FAILED)
+            self.assertEqual(1, len(plugin.report.errors))
+            self.assertEqual("Test", plugin.report.errors[0])
 
     def test_python_path(self):
         from api_app.analyzers_manager.observable_analyzers.dns.dns_resolvers.classic_dns_resolver import (  # noqa

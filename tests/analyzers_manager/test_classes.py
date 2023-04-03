@@ -1,9 +1,7 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-from pathlib import PosixPath
 
-from django.conf import settings
 from django.core.files import File
 from kombu import uuid
 
@@ -23,7 +21,6 @@ class FileAnalyzerTestCase(CustomTestCase):
         "api_app/fixtures/0001_user.json",
         "api_app/fixtures/0002_analyzer_pluginconfig.json",
     ]
-
 
     def _create_job(self, name, mimetype):
         with open(f"test_files/{name}", "rb") as f:
@@ -147,7 +144,6 @@ class ObservableAnalyzerTestCase(CustomTestCase):
         self.assertEqual(oa.observable_name, "test.com")
         self.assertEqual(oa.observable_classification, "domain")
         job.delete()
-
 
     def _create_jobs(self):
         Job.objects.create(

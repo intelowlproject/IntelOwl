@@ -111,9 +111,8 @@ def update(python_module: str, queue: str = None):
                         arguments={"plugin_path": analyzer_config.python_complete_path},
                     )
                 return True
-    else:
-        logger.error(f"Unable to update {python_module}")
-        return False
+    logger.error(f"Unable to update {python_module}")
+    return False
 
 
 @shared_task(soft_time_limit=100)
@@ -172,7 +171,7 @@ def run_plugin(
 
 # startup
 @signals.worker_ready.connect
-def worker_ready_connect(sender: Consumer = None, *args, **kwargs):
+def worker_ready_connect(*args, sender: Consumer = None, **kwargs):
     logger.info(f"worker {sender.hostname} ready")
     queue = sender.hostname.split("_", maxsplit=1)[1]
     logger.info(f"Updating repositories inside {queue}")

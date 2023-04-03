@@ -1,10 +1,8 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-from pathlib import PosixPath
 from unittest.mock import patch
 
-from django.conf import settings
 from kombu import uuid
 
 from api_app.connectors_manager.classes import Connector

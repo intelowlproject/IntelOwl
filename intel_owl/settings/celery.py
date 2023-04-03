@@ -14,7 +14,6 @@ RESULT_BACKEND = "django-db"
 CELERY_QUEUES = get_secret("CELERY_QUEUES", "default").split(",")
 BROADCAST_QUEUE = "long"
 
-if AWS_SQS:
-    if not AWS_USER_NUMBER:
-        print("you must specify the USER NUMBER")
-        sys.exit(4)
+if AWS_SQS and not AWS_USER_NUMBER:
+    print("you must specify the USER NUMBER")
+    sys.exit(4)

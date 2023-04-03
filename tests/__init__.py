@@ -60,7 +60,7 @@ class PluginActionViewsetTestCase(metaclass=ABCMeta):
 
     @abstractmethod
     def init_report(self, status, user):
-        ...
+        raise NotImplementedError()
 
     def test_kill_204(self):
         _report = self.init_report(status=AbstractReport.Status.PENDING, user=self.user)

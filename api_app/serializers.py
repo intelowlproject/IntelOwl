@@ -680,11 +680,8 @@ class JobAvailabilitySerializer(rfs.ModelSerializer):
         playbooks = attrs.get("playbooks", [])
         analyzers = attrs.get("analyzers", [])
         if not analyzers and not playbooks:
-            raise rfs.ValidationError(
-                "Playbook or analyzers must be set"
-            )
-
-        if len(playbooks)!= 0 and len(analyzers) != 0:
+            attrs["analyzers"] = list(AnalyzerConfig.objects.all())
+        elif len(playbooks)!= 0 and len(analyzers) != 0:
             raise rfs.ValidationError(
                 "Either only send the 'playbooks' parameter or the 'analyzers' one."
             )
@@ -710,9 +707,8 @@ class JobAvailabilitySerializer(rfs.ModelSerializer):
             query &= Q(playbook_requested__in=validated_data["playbooks"])
         else:
             analyzers = validated_data.get("analyzers", [])
-            if not analyzers:
-                analyzers = AnalyzerConfig.objects.all()
-            query &= Q(analyzers_requested__in=analyzers)
+            for analyzer in analyzers:
+                query &= Q(analyzers_requested__in=[analyzer])
         # we want a job that has every analyzer requested
         if validated_data.get("minutes_ago", None):
             minutes_ago_time = now() - datetime.timedelta(

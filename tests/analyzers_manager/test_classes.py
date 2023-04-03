@@ -58,7 +58,10 @@ class FileAnalyzerTestCase(CustomTestCase):
         ):
             with open(f"test_files/{sample_name}", "rb") as f:
                 Job.objects.create(
-                    is_sample=True, file_name=sample_name, file_mimetype=mimetype, file=File(f)
+                    is_sample=True,
+                    file_name=sample_name,
+                    file_mimetype=mimetype,
+                    file=File(f),
                 )
 
     def test_subclasses(self):

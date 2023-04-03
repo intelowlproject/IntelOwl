@@ -156,7 +156,7 @@ class VisualizableVerticalList(VisualizableListMixin, VisualizableBase):
         name: str,
         value: List[VisualizableObject],
         *args,
-        open: bool = False,
+        open: bool = False,  # noqa
         **kwargs,
     ):
         super().__init__(value=value, *args, **kwargs)

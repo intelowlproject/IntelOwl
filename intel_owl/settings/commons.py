@@ -3,7 +3,7 @@
 
 from pathlib import Path, PosixPath
 
-from ._util import get_secret
+from ._util import get_secret, set_permissions
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = get_secret("DEBUG", False) == "True" or get_secret("DEBUG", False) is True
@@ -13,7 +13,7 @@ BASE_DIR = Path(__file__).parent.parent.parent.parent
 PROJECT_LOCATION = BASE_DIR / "intel_owl"
 BASE_STATIC_PATH = PROJECT_LOCATION / "static"
 MEDIA_ROOT = BASE_DIR / "files_required"
-
+set_permissions(MEDIA_ROOT)
 YARA_RULES_PATH = MEDIA_ROOT / "yara"
 
 # test / ci

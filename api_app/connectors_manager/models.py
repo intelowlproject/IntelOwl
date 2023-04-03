@@ -23,7 +23,8 @@ class ConnectorConfig(AbstractConfig):
     run_on_failure = models.BooleanField(null=False, default=True)
 
     @classmethod
-    def _get_type(cls) -> models.TextChoices:
+    @property
+    def type(cls) -> models.TextChoices:
         return PluginConfig.PluginType.CONNECTOR
 
     @property

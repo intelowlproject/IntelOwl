@@ -101,7 +101,7 @@ def update(python_module: str, queue: str = None):
         analyzer_config: AnalyzerConfig
         if analyzer_config.is_runnable():
             class_ = analyzer_config.python_class
-            if hasattr(class_, "_update") and callable(class_._update):
+            if hasattr(class_, "_update") and callable(class_._update):  # noqa
                 if settings.NFS:
                     update_plugin(None, analyzer_config.python_complete_path)
                 else:

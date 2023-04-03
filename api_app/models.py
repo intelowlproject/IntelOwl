@@ -463,7 +463,7 @@ class PluginConfig(models.Model):
     def config_class(self) -> typing.Type[AbstractConfig]:
 
         for config in AbstractConfig.__subclasses__():
-            if self.type == config._get_type().value:
+            if self.type == config.type().value:
                 return config
         raise TypeError(f"Unable to find configuration for type {self.type}")
 

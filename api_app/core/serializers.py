@@ -114,7 +114,7 @@ class AbstractReportSerializer(rfs.ModelSerializer):
 
     def to_representation(self, instance: AbstractReport):
         data = super().to_representation(instance)
-        data["type"] = instance.config._get_type().label.lower()
+        data["type"] = instance.config.type.label.lower()
         data["runtime_configuration"] = instance.runtime_configuration
         return data
 

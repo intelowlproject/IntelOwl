@@ -108,7 +108,8 @@ class AbstractConfig(models.Model):
         ]
 
     @classmethod
-    def _get_type(cls) -> models.TextChoices:
+    @property
+    def type(cls) -> models.TextChoices:
         raise NotImplementedError()
 
     @property
@@ -154,7 +155,7 @@ class AbstractConfig(models.Model):
                 not PluginConfig.visible_for_user(user)
                 .filter(
                     attribute=secret,
-                    type=self._get_type(),
+                    type=self.type,
                     plugin_name=self.name,
                 )
                 .exists()
@@ -237,7 +238,7 @@ class AbstractConfig(models.Model):
         for key, secret_config in attr.items():
             pcs = PluginConfig.visible_for_user(user).filter(
                 attribute=key,
-                type=self._get_type(),
+                type=self.type,
                 plugin_name=self.name,
                 config_type=config_type,
             )

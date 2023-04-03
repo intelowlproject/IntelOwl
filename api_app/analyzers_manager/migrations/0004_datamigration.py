@@ -4032,9 +4032,8 @@ analyzers = {
             "api_key_name": {
                 "env_var_key": "MALPEDIA_TOKEN",
                 "description": "Optional key to receive results from public (TLP:WHITE) and non-public (TLP:GREEN, TLP:AMBER and TLP:RED) YARA rules.",
-                "required": False,
+                "required": True,
                 "type": "str",
-                "default": "",
             },
             "api_key_identifier": {
                 "env_var_key": "YARAIFY_KEY",
@@ -4119,7 +4118,6 @@ analyzers = {
                 "description": "Optional key to receive results from public (TLP:WHITE) and also non-public (TLP:GREEN, TLP:AMBER and TLP:RED) YARA rules.",
                 "required": False,
                 "type": "str",
-                "default": "",
             }
         },
         "params": {
@@ -4151,7 +4149,6 @@ analyzers = {
                 "description": "Optional key to receive results from public (TLP:WHITE) and also non-public (TLP:GREEN, TLP:AMBER and TLP:RED) YARA rules.",
                 "required": False,
                 "type": "str",
-                "default": "",
             }
         },
         "params": {

@@ -34,6 +34,11 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(default=None, on_delete=django.db.models.deletion.CASCADE, related_name='reports', to='visualizers_manager.visualizerconfig'),
             preserve_default=False,
         ),
+        migrations.AlterField(
+            model_name="visualizerreport",
+            name="name",
+            field=models.CharField(max_length=128, null=True),
+        ),
         migrations.RunPython(
             migrate, backwards_migrate
         ),
@@ -47,11 +52,7 @@ class Migration(migrations.Migration):
             name='visualizerreport',
             unique_together={('config', 'job')},
         ),
-        migrations.AlterField(
-            model_name="visualizerreport",
-            name="name",
-            field=models.CharField(max_length=50, primary_key=True, serialize=False, null=True),
-        ),
+
         migrations.RemoveField(
             model_name='visualizerreport',
             name='name',

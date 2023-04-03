@@ -33,6 +33,11 @@ class Migration(migrations.Migration):
             name='config',
             field=models.ForeignKey(default=None, on_delete=django.db.models.deletion.CASCADE, related_name='reports', to='connectors_manager.connectorconfig'),
         ),
+        migrations.AlterField(
+            model_name="connectorreport",
+            name="name",
+            field=models.CharField(max_length=128, null=True),
+        ),
         migrations.RunPython(
             migrate, backwards_migrate
         ),
@@ -46,11 +51,7 @@ class Migration(migrations.Migration):
             name='connectorreport',
             unique_together={('config', 'job')},
         ),
-        migrations.AlterField(
-            model_name="connectorreport",
-            name="name",
-            field=models.CharField(max_length=50, primary_key=True, serialize=False, null=True),
-        ),
+
         migrations.RemoveField(
             model_name='connectorreport',
             name='name',

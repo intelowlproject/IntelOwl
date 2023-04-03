@@ -33,6 +33,11 @@ class Migration(migrations.Migration):
             name='config',
             field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='reports', to='analyzers_manager.analyzerconfig'),
         ),
+        migrations.AlterField(
+            model_name="analyzerreport",
+            name="name",
+            field=models.CharField(max_length=128, null=True),
+        ),
         migrations.RunPython(
             migrate, backwards_migrate
         ),
@@ -44,11 +49,6 @@ class Migration(migrations.Migration):
         migrations.AlterUniqueTogether(
             name='analyzerreport',
             unique_together={('config', 'job')},
-        ),
-        migrations.AlterField(
-            model_name="analyzerreport",
-            name="name",
-            field=models.CharField(max_length=50, primary_key=True, serialize=False, null=True),
         ),
         migrations.RemoveField(
             model_name='analyzerreport',

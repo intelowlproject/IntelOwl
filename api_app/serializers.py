@@ -307,6 +307,9 @@ class CommentCreateSerializer(rfs.ModelSerializer):
         user = self.context["request"].user
         job = attrs.get("job")
 
+        # the assumption here is that
+        # in intelowl, either a user has a membership
+        # or he is a normal user, and both operate a bit differently.
         if job.user.has_membership():
             # user can only comment on jobs
             # created by members of his organization
@@ -320,7 +323,7 @@ class CommentCreateSerializer(rfs.ModelSerializer):
                     }
                 )
 
-        if job.user != user:
+        elif job.user != user:
             # or user can only comment on jobs
             # created by himself, if he has no membership
             raise ValidationError(

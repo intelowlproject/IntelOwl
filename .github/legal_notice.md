@@ -62,6 +62,16 @@ license terms.
 [pyOneNote](https://github.com/DissectMalware/pyOneNote)
 
 #### Media
-[notification.mp3](https://notificationsounds.com/message-tones/relax-message-tone)
+[notification.mp3](https://notificationsounds.com/message-tones/relax-message-tone),
+[country flags](https://www.npmjs.com/package/flag-icons),
+[VT,OTX,Github and Twitter icons](https://react-icons.github.io/react-icons/),
+[Hybrid Analysis flag](https://github.com/PayloadSecurity),
+[Google icon](https://www.google.com),
+[Cloudflare icon](https://www.cloudflare.com/),
+[Quad9 icon](https://icon-icons.com/pt/icone/quad9-logo/170815),
+[URLhaus icon](https://urlhaus.abuse.ch/favicon.ico),
+
+
+
 
 

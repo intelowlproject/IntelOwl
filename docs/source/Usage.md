@@ -10,6 +10,7 @@ This page includes the most important things to know and understand when using I
   - [Analyzers](#analyzers)
   - [Connectors](#connectors)
   - [Managing Analyzers and Connectors](#managing-analyzers-and-connectors)
+  - [Visualizers](#visualizers)
   - [Playbooks](#playbooks)
 
 ## Client
@@ -83,14 +84,13 @@ If your intention is to publish IntelOwl as a Service you should first remember 
 In that case, you would need to [re-build](/Installation.md#update-and-rebuild) the application to have the changes properly reflected.
 
 
-
 ## TLP Support
 
 IntelOwl supports the **Traffic Light Protocol** (TLP) to facilitate sharing of job analysis results.
 
 Following are the indicators available when requesting an analysis (in the order of increasing sharing restrictions):
 
-1. `WHITE`: no restriction
+1. `CLEAR` (or `WHITE`): no restriction
 2. `GREEN`: disable analyzers that could impact privacy
 3. `AMBER`: disable analyzers that could impact privacy and limit view permissions to my group
 4. `RED`: disable analyzers that could impact privacy, limit view permissions to my group and do not use any external service
@@ -304,7 +304,7 @@ Some analyzers require details other than just IP, URL, Domain, etc. We classifi
 [Some analyzers are optional](Advanced-Usage.html#optional-analyzers) and need to be enabled explicitly.
 
 #### Analyzers Customization
-You can create new analyzers based on already existing modules by changing the configuration values inside `/admin/analyzers_manager/analyzerreport/`.
+You can create new analyzers based on already existing modules by changing the configuration values inside the Django Admin interface at: `/admin/analyzers_manager/analyzerreport/`.
 
 You may want to change this configuration to add new analyzers or to change the configuration of some of them. The name of the analyzers can be changed at every moment based on your wishes.
 
@@ -349,7 +349,7 @@ The following is the list of the available connectors. You can also navigate the
 #### Connectors customization
 
 Connectors being optional are `enabled` by default.
-You can disable them or create new connectors based on already existing modules by changing the configuration values inside `/admin/connectors_manager/connectorreport/`.
+You can disable them or create new connectors based on already existing modules by changing the configuration values inside the Django Admin interface at: `/admin/connectors_manager/connectorreport/`.
 
 
 The following are all the keys that you can change without touching the source code:
@@ -369,30 +369,6 @@ The following are all the keys that you can change without touching the source c
 <p class="admonition-title">Warning</p>
 Changing other keys can break a connector. In that case, you should think about duplicating the configuration entry or python module with your changes.
 </div>
-
-### Visualizers
-
-Visualizers are designed to run after the analyzers and the connectors.
-The visualizer add logic after the computations, allowing to show the final result in a different way than merely the list of reports.
-
-Each visualizer must define a set of analyzers and connectors as requirement:
-in fact the visualizers can not be chosen during the scan but every single visualizer that it is configured and that has its requirements satisfied will be executed.
-
-#### Visualizers customization
-You can disable them or create new visualizers based on already existing modules by changing the configuration values inside `/admin/visualizers_manager/visualizerreport/`.
-
-The following are all the keys that you can change without touching the source code:
- 
-- `name`: _same as analyzers_
-- `description`: _same as analyzers_
-- `python_module`: _same as analyzers_ 
-- `disabled`: _same as analyzers_
-- `config`:
-  - `queue`: _same as analyzers_
-  - `soft_time_limit`: _same as analyzers_
-- `analyzers`: List of analyzers that must be executed
-- `connectors`: List of connectors that must be executed
-
 
 ### Managing Analyzers and Connectors
 
@@ -425,6 +401,29 @@ All plugins i.e. analyzers and connectors have `kill` and `retry` actions. In ad
   - CLI: `$ pyintelowl analyzer-healthcheck <analyzer_name>` and `$ pyintelowl connector-healthcheck <connector_name>`
   - API: `GET /api/analyzer/{analyzer_name}/healthcheck` and `GET /api /connector/{connector_name}/healthcheck`
 
+### Visualizers
+
+Visualizers are designed to run after the analyzers and the connectors.
+The visualizer adds logic after the computations, allowing to show the final result in a different way than merely the list of reports.
+
+Each visualizer must define a set of analyzers and connectors as requirement:
+in fact the visualizers can not be chosen at the time of Job creation (once you click into the `Scan` button) but every single visualizer that it is configured and that has its requirements satisfied will be automatically selected and executed.
+
+#### Visualizers customization
+You can either disable or create new visualizers based on already existing modules by changing the configuration values inside the Django Admin interface: `/admin/visualizers_manager/visualizerreport/`.
+
+The following are all the keys that you can change without touching the source code:
+ 
+- `name`: _same as analyzers_
+- `description`: _same as analyzers_
+- `python_module`: _same as analyzers_ 
+- `disabled`: _same as analyzers_
+- `config`:
+  - `queue`: _same as analyzers_
+  - `soft_time_limit`: _same as analyzers_
+- `analyzers`: List of analyzers that must be executed
+- `connectors`: List of connectors that must be executed
+
 ### Playbooks
 
 Playbooks are designed to be easy to share sequence of running Analyzers/Connectors on a particular kind of observable.
@@ -443,7 +442,7 @@ The following is the list of the available pre-built playbooks. You can also nav
 * `FREE_TO_USE_ANALYZERS`: A playbook containing all free to use analyzers.
 
 #### Playbooks customization
-You can create new playbooks via django admin at `/admin/playbooks_manager/playbookconfig/`
+You can create new playbooks via the Django Admin interface at `/admin/playbooks_manager/playbookconfig/`
 
 The following are all the keys that you can leverage/change without touching the source code:
 

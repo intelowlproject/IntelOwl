@@ -26,7 +26,7 @@ class TLP(models.TextChoices):
             cls.AMBER: 2,
             cls.RED: 3,
         }
-        return order.get(tlp, None)
+        return order[tlp]
 
 
 class Status(models.TextChoices):

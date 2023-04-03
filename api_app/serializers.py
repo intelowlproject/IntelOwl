@@ -7,6 +7,7 @@ import json
 import logging
 from typing import Dict, List, Union
 
+import django.core.exceptions
 from django.db.models import Q
 from django.http import QueryDict
 from django.utils.timezone import now
@@ -232,7 +233,11 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         for key in self.mtm_fields:
             self.mtm_fields[key] = validated_data.pop(key)
 
-        job = Job.objects.create(**validated_data)
+        job = Job(**validated_data)
+        try:
+            job.full_clean()
+        except django.core.exceptions.ValidationError as e:
+            raise ValidationError(str(e))
 
         if tags:
             job.tags.set(tags)

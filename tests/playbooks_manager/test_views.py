@@ -55,10 +55,16 @@ class PlaybookViewTestCase(CustomAPITestCase):
             config={"soft_time_limit": 100, "queue": "default"},
             params={},
             secrets={},
-            type="ip",
+            type="observable",
+            observable_supported=["ip"],
         )
         job, _ = Job.objects.get_or_create(
             user=self.user,
+            runtime_configuration={
+                "analyzers": {"test": {"abc": 3}},
+                "connectors": {},
+                "visualizers": {},
+            },
         )
         job.analyzers_requested.set([ac.name])
         job.analyzers_to_execute.set([ac.name])
@@ -76,6 +82,14 @@ class PlaybookViewTestCase(CustomAPITestCase):
         except PlaybookConfig.DoesNotExist as e:
             self.fail(e)
         else:
+            self.assertEqual(
+                pc.runtime_configuration,
+                {
+                    "analyzers": {"test": {"abc": 3}},
+                    "connectors": {},
+                    "visualizers": {},
+                },
+            )
             pc.delete()
         finally:
             ac.delete()

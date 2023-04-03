@@ -122,7 +122,7 @@ class DNS(Visualizer):
         # malicious detector services (1st level)
 
         for python_module in cls.first_level_analyzers:
-            AnalyzerReport.objects.create(
+            report = AnalyzerReport(
                 config=AnalyzerConfig.objects.get(python_module=python_module),
                 job=Job.objects.first(),
                 status=AnalyzerReport.Status.SUCCESS,
@@ -145,16 +145,20 @@ class DNS(Visualizer):
                 },
                 task_id=uuid(),
             )
+            report.full_clean()
+            report.save()
 
         # classic DNS resolution (2nd level)
         for python_module in cls.second_level_analyzers:
-            AnalyzerReport.objects.create(
+            report = AnalyzerReport(
                 config=AnalyzerConfig.objects.get(python_module=python_module),
                 job=Job.objects.first(),
                 status=AnalyzerReport.Status.SUCCESS,
                 report={"observable": "dns.google.com", "malicious": False},
                 task_id=uuid(),
             )
+            report.full_clean()
+            report.save()
 
         patches = []
         return super()._monkeypatch(patches=patches)

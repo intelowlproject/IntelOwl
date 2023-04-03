@@ -21,7 +21,7 @@ class VisualizerConfigAdminView(AbstractConfigAdminView):
     )
     form = VisualizerConfigAdminForm
 
-    def _get_plugins(self, qs):
+    def _get_plugins(self, qs):  # noqa
         return [elem.name for elem in qs]
 
     def get_analyzers(self, obj: VisualizerConfig):

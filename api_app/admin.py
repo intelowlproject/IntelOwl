@@ -36,13 +36,13 @@ class JobAdminView(admin.ModelAdmin):
         "user",
     )
 
-    def analyzers_executed(self, instance: Job):
+    def analyzers_executed(self, instance: Job):  # noqa
         return [analyzer.name for analyzer in instance.analyzers_to_execute.all()]
 
-    def connectors_executed(self, instance: Job):
+    def connectors_executed(self, instance: Job):  # noqa
         return [connector.name for connector in instance.connectors_to_execute.all()]
 
-    def visualizers_executed(self, instance: Job):
+    def visualizers_executed(self, instance: Job):  # noqa
         return [visualizer.name for visualizer in instance.visualizers_to_execute.all()]
 
 

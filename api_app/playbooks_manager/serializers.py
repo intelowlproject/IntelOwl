@@ -1,6 +1,6 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
-
+import django.core.exceptions
 from django.core.exceptions import ValidationError
 from rest_framework import serializers as rfs
 
@@ -45,22 +45,18 @@ class PlaybookConfigCreateSerializer(rfs.ModelSerializer):
         )
         if job.is_sample:
             types_supported.append(TypeChoices.FILE)
-        runtime_configuration = {"analyzers": {}, "connectors": {}}
-        for report in job.analyzerreports.all():
-            runtime_configuration["analyzers"][
-                report.name
-            ] = report.runtime_configuration
-        for report in job.connectorreports.all():
-            runtime_configuration["connectors"][
-                report.name
-            ] = report.runtime_configuration
 
-        pc = PlaybookConfig.objects.create(
+        pc = PlaybookConfig(
             name=validated_data["name"],
             description=validated_data["description"],
             type=types_supported,
-            runtime_configuration=runtime_configuration,
+            runtime_configuration=job.runtime_configuration,
         )
+        try:
+            pc.full_clean()
+        except django.core.exceptions.ValidationError as e:
+            raise ValidationError(e)
+        pc.save()
         pc.analyzers.set(list(job.analyzers_to_execute.all()))
         pc.connectors.set(list(job.connectors_to_execute.all()))
         return pc

@@ -27,34 +27,38 @@ class Yara(Visualizer):
             if match.get("match", None)
         ]
         levels = self.Level()
-        levels.add_level(
-            level=1,
-            horizontal_list=self.HList(
+        h1 = self.HList(
                 value=[
                     self.Title(
                         self.Base(
-                            "Analyzer",
+                            value="Analyzer",
                             color=self.Color.DARK,
                         ),
-                        self.Base(self.__class__.__name__),
+                        self.Base(value=self.__class__.__name__),
                     )
                 ]
-            ),
+            )
+        logger.debug(h1.to_dict())
+        levels.add_level(
+            level=1,
+            horizontal_list=h1
         )
+        h2=self.HList(
+            value=[
+                self.Title(
+                    self.Base(value="N# Matches", color=self.Color.DARK),
+                    self.Base(value=yara_num_matches),
+                ),
+                self.VList(
+                    name=signatures,
+                    value=[self.Base(value=value) for value in signatures],
+                ),
+            ]
+        )
+        logger.debug(h2.to_dict())
         levels.add_level(
             level=2,
-            horizontal_list=self.HList(
-                value=[
-                    self.Title(
-                        self.Base("N# Matches", color=self.Color.DARK),
-                        self.Base(yara_num_matches),
-                    ),
-                    self.VList(
-                        name=signatures,
-                        value=[self.Base(value) for value in signatures],
-                    ),
-                ]
-            ),
+            horizontal_list=h2
         )
         logger.debug(levels)
         return levels.to_dict()

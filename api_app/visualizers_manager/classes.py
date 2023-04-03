@@ -81,10 +81,11 @@ class VisualizableBase(VisualizableObject):
 
     def to_dict(self) -> Dict:
         result = super().to_dict()
-        for enum_key in ["color", "icon"]:
-            if isinstance(result[enum_key], Enum):
-                result[enum_key] = str(result[enum_key].value)
-            result[enum_key] = result[enum_key].lower()
+        if result:
+            for enum_key in ["color", "icon"]:
+                if isinstance(result[enum_key], Enum):
+                    result[enum_key] = str(result[enum_key].value)
+                result[enum_key] = result[enum_key].lower()
 
         return result
 

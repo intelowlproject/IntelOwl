@@ -16,7 +16,7 @@ from django.utils.module_loading import import_string
 from django.utils.timezone import now
 
 from intel_owl import secrets
-from intel_owl.celery import app, get_real_queue_name, DEFAULT_QUEUE
+from intel_owl.celery import DEFAULT_QUEUE, app, get_real_queue_name
 
 logger = logging.getLogger(__name__)
 

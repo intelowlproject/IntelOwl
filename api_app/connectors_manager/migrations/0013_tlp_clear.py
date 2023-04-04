@@ -5,9 +5,6 @@
 
 from django.db import migrations, models
 
-import api_app.core.models
-import api_app.validators
-
 
 class Migration(migrations.Migration):
 

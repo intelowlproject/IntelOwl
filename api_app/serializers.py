@@ -79,7 +79,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
     md5 = rfs.HiddenField(default=None)
     tlp = rfs.ChoiceField(choices=TLP.values + ["WHITE"], default=TLP.CLEAR)
 
-    def validate_tlp(self, tlp:str):
+    def validate_tlp(self, tlp: str):
         if tlp == "WHITE":
             return "CLEAR"
         return tlp

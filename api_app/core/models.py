@@ -293,7 +293,7 @@ class AbstractConfig(models.Model):
                 soft_time_limit=self.soft_time_limit,
                 task_id=task_id,
                 immutable=True,
-                MessageGroupId=str(task_id)
+                MessageGroupId=str(task_id),
             )
         raise RuntimeError(
             f"Unable to create signature, config {self.name} is not runnable"

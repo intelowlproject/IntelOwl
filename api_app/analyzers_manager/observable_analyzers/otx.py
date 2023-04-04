@@ -14,6 +14,35 @@ from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 logger = logging.getLogger(__name__)
 
 
+class OTXv2Extended(OTXv2.OTXv2):
+    """
+    This is to add "timeout" feature without having to do a fork
+    Once this PR is merged: https://github.com/AlienVault-OTX/OTX-Python-SDK/pull/66
+    we can remove this and use the upstream
+    """
+
+    def __init__(self, *args, timeout=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.timeout = timeout
+
+    def get(self, url, **kwargs):
+        try:
+            response = self.session().get(
+                self.create_url(url, **kwargs),
+                headers=self.headers,
+                proxies=self.proxies,
+                verify=self.verify,
+                cert=self.cert,
+                timeout=self.timeout,
+            )
+            return self.handle_response_errors(response).json()
+        except (
+            OTXv2.requests.exceptions.RetryError,
+            OTXv2.requests.exceptions.Timeout,
+        ) as e:
+            raise OTXv2.RetryError(e)
+
+
 class OTX(classes.ObservableAnalyzer):
     """This class use an OTX API to download data about an observable.
     Observable's data are divided into sections:
@@ -27,31 +56,6 @@ class OTX(classes.ObservableAnalyzer):
     timeout: int
 
     _api_key_name: str
-    # This is to add "timeout" feature without having to do a fork
-    # Once this PR is merged: https://github.com/AlienVault-OTX/OTX-Python-SDK/pull/66
-    # we can remove this and use the upstream
-    class OTXv2Extended(OTXv2.OTXv2):
-        def __init__(self, *args, timeout=None, **kwargs):
-            super().__init__(*args, **kwargs)
-            self.timeout = timeout
-
-        def get(self, url, **kwargs):
-            try:
-                response = self.session().get(
-                    self.create_url(url, **kwargs),
-                    headers=self.headers,
-                    proxies=self.proxies,
-                    verify=self.verify,
-                    cert=self.cert,
-                    timeout=self.timeout,
-                )
-                return self.handle_response_errors(response).json()
-            except (
-                OTXv2.requests.exceptions.RetryError,
-                OTXv2.requests.exceptions.Timeout,
-            ) as e:
-                raise OTXv2.RetryError(e)
-
 
     def _extract_indicator_type(self) -> "OTXv2.IndicatorTypes":
         observable_classification = self.observable_classification

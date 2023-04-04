@@ -324,6 +324,11 @@ class YaraScan(FileAnalyzer):
         for config in AnalyzerConfig.objects.filter(
             python_module=cls.python_module, disabled=False
         ):
+            new_urls = config.params["repositories"]["default"]
+            logger.info(f"Adding default configuration urls {new_urls}")
+            for url in new_urls:
+                storage.add_repo(url)
+
             for plugin in PluginConfig.objects.filter(
                 plugin_name=config.name,
                 type=PluginConfig.PluginType.ANALYZER,
@@ -338,11 +343,6 @@ class YaraScan(FileAnalyzer):
                 for url, ssh_key in plugin.value.items():
                     logger.info(f"Adding personal private url {url}")
                     storage.add_repo(url, owner, ssh_key)
-
-            new_urls = config.params.get("repositories", [])
-            logger.info(f"Adding configuration urls {new_urls}")
-            for url in new_urls:
-                storage.add_repo(url)
 
             # we are downloading even custom signatures for each analyzer
             for plugin in PluginConfig.objects.filter(

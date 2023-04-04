@@ -281,7 +281,6 @@ class JobViewsetTests(CustomAPITestCase):
         msg = (resp, content)
 
         self.assertEqual(resp.status_code, 200, msg)
-        print(content)
         for field in content["values"]:
             self.assertIn(
                 field,

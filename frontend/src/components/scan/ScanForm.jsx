@@ -726,7 +726,8 @@ export default function ScanForm() {
                           fade={false}
                           innerClassName="p-2 border border-info text-start text-nowrap md-fit-content"
                         >
-                          Max age (in minutes) for the similar analysis.
+                          Max age (in minutes) for the similar analysis. The
+                          default value is 1 week.
                         </UncontrolledTooltip>
                       </div>
                     </div>

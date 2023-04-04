@@ -31,9 +31,7 @@ const tableProps = {
               <IconButton
                 id={`killplugin-${plugin.id}`}
                 Icon={MdPauseCircleOutline}
-                onClick={() =>
-                  killPlugin(job.id, plugin).then(refetch)
-                }
+                onClick={() => killPlugin(job.id, plugin).then(refetch)}
                 color="accent"
                 size="xs"
                 title={`Kill ${plugin.type} run`}
@@ -46,9 +44,7 @@ const tableProps = {
               <IconButton
                 id={`retryplugin-${plugin.id}`}
                 Icon={MdOutlineRefresh}
-                onClick={() =>
-                  retryPlugin(job.id, plugin).then(refetch)
-                }
+                onClick={() => retryPlugin(job.id, plugin).then(refetch)}
                 color="light"
                 size="xs"
                 title={`Retry ${plugin.type} run`}
@@ -123,7 +119,6 @@ const tableProps = {
 };
 
 const tablePropsPlaybooks = JSON.parse(JSON.stringify(tableProps));
-
 
 export function AnalyzersReportTable({ job, refetch }) {
   console.debug("AnalyzersReportTable rendered");

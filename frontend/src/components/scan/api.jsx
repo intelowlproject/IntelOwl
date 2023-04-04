@@ -33,8 +33,7 @@ export async function createPlaybookJob(formValues) {
   const respData = resp.data.results;
 
   respData.forEach((x) => {
-    if (x.playbook_running)
-        playbooksRunning.add(x.playbook_running);
+    if (x.playbook_running) playbooksRunning.add(x.playbook_running);
     if (x.warnings) warnings.push(...x.warnings);
   });
 

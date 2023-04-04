@@ -94,10 +94,7 @@ export async function saveJobAsPlaybook(values) {
     job_id: values.jobId,
   };
   try {
-    const response = await axios.post(
-      `${API_BASE_URI}/playbook`,
-      data
-    );
+    const response = await axios.post(`${API_BASE_URI}/playbook`, data);
 
     success = response.status === 200;
     if (success) {

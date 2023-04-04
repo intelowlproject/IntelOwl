@@ -269,12 +269,11 @@ export function JobInfoCard({ job }) {
             ],
             [
               "Playbook",
-                <PlaybookTag
-                  key={job.playbook_to_execute}
-                  playbook={job.playbook_to_execute}
-                  className="mr-2"
-                />
-              ,
+              <PlaybookTag
+                key={job.playbook_to_execute}
+                playbook={job.playbook_to_execute}
+                className="mr-2"
+              />,
             ],
           ].map(([key, value]) => (
             <ListGroupItem key={key}>

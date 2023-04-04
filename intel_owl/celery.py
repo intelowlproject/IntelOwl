@@ -133,6 +133,7 @@ app.conf.beat_schedule = {
     "check_stuck_analysis": {
         "task": "intel_owl.tasks.check_stuck_analysis",
         "schedule": crontab(minute="*/5"),
+        "kwargs": {"check_pending": True},
         "options": {
             "queue": get_real_queue_name(DEFAULT_QUEUE),
             "MessageGroupId": str(uuid.uuid4()),
@@ -142,6 +143,7 @@ app.conf.beat_schedule = {
     "maxmind_updater": {
         "task": "intel_owl.tasks.update",
         "schedule": crontab(minute=0, hour=1, day_of_week=3),
+        "args": ["maxmind.Maxmind"],
         "options": {
             "queue": get_real_queue_name(DEFAULT_QUEUE),
             "MessageGroupId": str(uuid.uuid4()),
@@ -151,6 +153,7 @@ app.conf.beat_schedule = {
     "talos_updater": {
         "task": "intel_owl.tasks.update",
         "schedule": crontab(minute=5, hour="*/6"),
+        "args": ["talos.Talos"],
         "options": {
             "queue": get_real_queue_name(DEFAULT_QUEUE),
             "MessageGroupId": str(uuid.uuid4()),
@@ -160,6 +163,7 @@ app.conf.beat_schedule = {
     "tor_updater": {
         "task": "intel_owl.tasks.update",
         "schedule": crontab(minute="*/10"),
+        "args": ["tor.Tor"],
         "options": {
             "queue": get_real_queue_name(DEFAULT_QUEUE),
             "MessageGroupId": str(uuid.uuid4()),
@@ -169,6 +173,7 @@ app.conf.beat_schedule = {
     "yara_updater": {
         "task": "intel_owl.tasks.update",
         "schedule": crontab(minute=0, hour=0),
+        "args": ["yara_scan.YaraScan"],
         "options": {
             "queue": get_real_queue_name(DEFAULT_QUEUE),
             "MessageGroupId": str(uuid.uuid4()),
@@ -178,6 +183,7 @@ app.conf.beat_schedule = {
     "quark_updater": {
         "task": "intel_owl.tasks.update",
         "schedule": crontab(minute=0, hour=0, day_of_week=[2, 5]),
+        "args": ["quark_engine.QuarkEngine"],
         "options": {
             "queue": get_real_queue_name(DEFAULT_QUEUE),
             "MessageGroupId": str(uuid.uuid4()),

@@ -103,6 +103,7 @@ class AbstractReportSerializer(rfs.ModelSerializer):
 
     class Meta:
         fields = (
+            "id",
             "name",
             "process_time",
             "report",

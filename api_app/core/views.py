@@ -34,7 +34,7 @@ class PluginActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
     def report_model(cls):
         raise NotImplementedError()
 
-    def get_object(self, job_id: int, name: str) -> AbstractReport:
+    def get_object(self, job_id: int, report_id: int) -> AbstractReport:
         """
         overrides drf's get_object
         get plugin report object by name and job_id
@@ -42,7 +42,7 @@ class PluginActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
         try:
             obj = self.report_model.objects.get(
                 job_id=job_id,
-                config__name=name,
+                pk=report_id,
             )
             self.check_object_permissions(self.request, obj)
             return obj
@@ -70,12 +70,12 @@ class PluginActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
         },
     )
     @action(detail=False, methods=["patch"])
-    def kill(self, request, job_id, name):
+    def kill(self, request, job_id, report_id):
         logger.info(
-            f"kill request from user {request.user} for job_id {job_id}, name {name}"
+            f"kill request from user {request.user} for job_id {job_id}, pk {report_id}"
         )
         # get report object or raise 404
-        report = self.get_object(job_id, name)
+        report = self.get_object(job_id, report_id)
         if report.status not in [
             AbstractReport.Status.RUNNING,
             AbstractReport.Status.PENDING,
@@ -93,12 +93,12 @@ class PluginActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
         },
     )
     @action(detail=False, methods=["patch"])
-    def retry(self, request, job_id, name):
+    def retry(self, request, job_id, report_id):
         logger.info(
-            f"retry request from user {request.user} for job_id {job_id}, name {name}"
+            f"retry request from user {request.user} for job_id {job_id}, report_id {report_id}"
         )
         # get report object or raise 404
-        report = self.get_object(job_id, name)
+        report = self.get_object(job_id, report_id)
         if report.status not in [
             AbstractReport.Status.FAILED,
             AbstractReport.Status.KILLED,

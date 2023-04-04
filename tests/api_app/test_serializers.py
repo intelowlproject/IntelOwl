@@ -3,12 +3,11 @@
 
 from unittest.mock import patch
 
-from django.contrib.auth.models import get_user_model
 from rest_framework.exceptions import ValidationError
 
 from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.connectors_manager.models import ConnectorConfig
-from api_app.models import Job
+from api_app.models import Job, User
 from api_app.playbooks_manager.models import PlaybookConfig
 from api_app.serializers import (
     CommentSerializer,
@@ -19,8 +18,6 @@ from api_app.serializers import (
 from api_app.visualizers_manager.models import VisualizerConfig
 from tests import CustomTestCase
 from tests.mock_utils import MockUpRequest
-
-User = get_user_model()
 
 
 class AbstractJobCreateSerializerTestCase(CustomTestCase):
@@ -377,9 +374,10 @@ class CommentSerializerTestCase(CustomTestCase):
         )
 
     def test_create(self):
+        self.assertEqual(223, self.job.id)
         self.assertTrue(self.cs.is_valid())
         self.cs.save()
-        self.assertTrue(self.cs.Meta.Model.objects.filter(content="test").exists())
+        self.assertTrue(self.cs.Meta.model.objects.filter(content="test").exists())
 
     def test_create_with_invalid_job_id(self):
         self.cs.initial_data["job_id"] = 100000

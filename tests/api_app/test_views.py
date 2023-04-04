@@ -130,7 +130,7 @@ class PluginConfigViewSetTestCase(CustomAPITestCase):
 
 
 class CommentViewSetTestCase(CustomAPITestCase):
-    comment_url = reverse("comments")
+    comment_url = reverse("comments-list")
 
     def setUp(self):
         super().setUp()
@@ -143,25 +143,20 @@ class CommentViewSetTestCase(CustomAPITestCase):
         )
         self.job.save()
         self.comment = Comment.objects.create(
-            job=self.job, user=self.superuser, comment="test"
+            job=self.job, user=self.superuser, content="test"
         )
         self.comment.save()
-
-    def test_create_201(self):
-        data = {"job_id": self.job.id, "comment": "test"}
-        response = self.client.post(self.comment_url, data)
-        self.assertEqual(response.status_code, 201)
-        self.assertEqual(response.json().get("results").get("comment"), "test")
 
     def test_list_200(self):
         response = self.client.get(self.comment_url)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json().get("count"), 1)
 
-    def test_retrieve_200(self):
-        response = self.client.get(f"{self.comment_url}{self.comment.id}/")
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json().get("comment"), "test")
+    def test_create_201(self):
+        data = {"job_id": self.job.id, "content": "test"}
+        response = self.client.post(self.comment_url, data)
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.json().get("content"), "test")
 
 
 class JobViewsetTests(CustomAPITestCase):

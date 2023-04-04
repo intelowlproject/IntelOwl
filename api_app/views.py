@@ -216,7 +216,6 @@ class CommentViewSet(ReadAndDeleteOnlyViewSet, CreateModelMixin, SerializerActio
     serializer_class = CommentSerializer
     serializer_action_classes = {
         "list": CommentListSerializer,
-        "retrieve": CommentSerializer,
         "create": CommentSerializer,
     }
 

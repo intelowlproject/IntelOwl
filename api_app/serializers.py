@@ -278,7 +278,7 @@ class CommentListSerializer(rfs.ModelSerializer):
 
 class CommentSerializer(rfs.ModelSerializer):
     """
-    Used for ``retrieve()``
+    Used for ``create()``
     """
 
     class Meta:

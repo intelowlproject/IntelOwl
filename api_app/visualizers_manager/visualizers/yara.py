@@ -67,7 +67,7 @@ class Yara(Visualizer):
     def _monkeypatch(cls):
         from kombu import uuid
 
-        AnalyzerReport.objects.create(
+        report = AnalyzerReport(
             config=AnalyzerConfig.objects.get(name="Yara"),
             job=Job.objects.first(),
             status=AnalyzerReport.Status.SUCCESS,
@@ -94,5 +94,7 @@ class Yara(Visualizer):
             },
             task_id=uuid(),
         )
+        report.full_clean()
+        report.save()
         patches = []
         return super()._monkeypatch(patches=patches)

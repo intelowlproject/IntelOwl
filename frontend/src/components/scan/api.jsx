@@ -160,7 +160,11 @@ export async function createJob(formValues) {
 }
 
 async function _askAnalysisAvailability(formValues) {
+  console.debug("_askAnalysisAvailability - formValues");
+  console.debug(formValues);
+
   const payload = [];
+  const minutesAgo = formValues.hoursAgo * 60;
 
   if (formValues.classification === "file") {
     const promises = [];
@@ -169,8 +173,10 @@ async function _askAnalysisAvailability(formValues) {
         analyzers: formValues.analyzers,
         playbooks: formValues.playbooks,
         md5: md5(readFileAsync(file)),
-        minutes_ago: formValues.minutesAgo,
       };
+      if (minutesAgo) {
+        body.minutes_ago = minutesAgo;
+      }
       promises.push(body.md5);
       if (formValues.check === "running_only") {
         body.running_only = "True";
@@ -184,8 +190,10 @@ async function _askAnalysisAvailability(formValues) {
         analyzers: formValues.analyzers,
         playbooks: formValues.playbooks,
         md5: md5(ObservableName),
-        minutes_ago: formValues.minutesAgo,
       };
+      if (minutesAgo) {
+        body.minutes_ago = minutesAgo;
+      }
       if (formValues.check === "running_only") {
         body.running_only = "True";
       }

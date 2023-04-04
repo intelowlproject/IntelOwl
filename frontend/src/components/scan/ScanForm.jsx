@@ -97,7 +97,6 @@ const stateSelector = (state) => [
   groupPlaybooks(state.playbooks),
 ];
 
-const DEFAULT_MINUTES_AGO = 60 * 60 * 24 * 7; // one week
 const checkChoices = [
   {
     value: "running_only",
@@ -149,7 +148,7 @@ const initialValues = {
   tags: [],
   check: "check_all",
   analysisOptionValues: "Analyzers/Connectors",
-  minutesAgo: DEFAULT_MINUTES_AGO,
+  hoursAgo: 24,
 };
 
 // Component
@@ -688,7 +687,7 @@ export default function ScanForm() {
               </FormGroup>
 
               <FormGroup row className="mt-2">
-                <Label sm={3}>Job run configuration</Label>
+                <Label sm={3}>Scan configuration</Label>
                 <Col sm={9}>
                   <FormGroup check key="checkchoice__check_all">
                     <Field
@@ -708,27 +707,34 @@ export default function ScanForm() {
                         Do not execute if a similar analysis is currently
                         running or reported without fails
                       </Label>
-                      <div className="col-2">
-                        <Field
-                          className="h-50"
-                          as={Input}
-                          id="checkchoice__check_all__minutes_ago"
-                          type="number"
-                          name="minutesAgo"
-                          onChange={formik.handleChange}
-                        />
-                      </div>
-                      <div className="col-2 mx-1">
-                        <MdInfoOutline id="minutes-ago-info-icon" />
-                        <UncontrolledTooltip
-                          target="minutes-ago-info-icon"
-                          placement="right"
-                          fade={false}
-                          innerClassName="p-2 border border-info text-start text-nowrap md-fit-content"
-                        >
-                          Max age (in minutes) for the similar analysis. The
-                          default value is 1 week.
-                        </UncontrolledTooltip>
+                      <div className="col-4 d-flex align-items-center">
+                        H:
+                        <div className="col-4 mx-1">
+                          <Field
+                            as={Input}
+                            id="checkchoice__check_all__minutes_ago"
+                            type="number"
+                            name="hoursAgo"
+                            onChange={formik.handleChange}
+                          />
+                        </div>
+                        <div className="col-2">
+                          <MdInfoOutline id="minutes-ago-info-icon" />
+                          <UncontrolledTooltip
+                            target="minutes-ago-info-icon"
+                            placement="right"
+                            fade={false}
+                            innerClassName="p-2 border border-info text-start text-nowrap md-fit-content"
+                          >
+                            <span>
+                              Max age (in hours) for the similar analysis.
+                              <br />
+                              The default value is 24 hours (1 day).
+                              <br />
+                              Empty value takes all the previous analysis.
+                            </span>
+                          </UncontrolledTooltip>
+                        </div>
                       </div>
                     </div>
                   </FormGroup>

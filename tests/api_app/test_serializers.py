@@ -5,6 +5,9 @@ from unittest.mock import patch
 
 from rest_framework.exceptions import ValidationError
 
+from api_app.serializers import CommentSerializer
+from api_app.models import Job
+
 from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.connectors_manager.models import ConnectorConfig
 from api_app.playbooks_manager.models import PlaybookConfig
@@ -16,6 +19,10 @@ from api_app.serializers import (
 from api_app.visualizers_manager.models import VisualizerConfig
 from tests import CustomTestCase
 from tests.mock_utils import MockUpRequest
+
+from django.contrib.auth.models import get_user_model
+
+User = get_user_model()
 
 
 class AbstractJobCreateSerializerTestCase(CustomTestCase):
@@ -353,5 +360,34 @@ class ObservableJobCreateSerializerTestCase(CustomTestCase):
 
 
 class CommentSerializerTestCase(CustomTestCase):
-    # TODO please add tests here
-    ...
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="test", email="test@test.com", password="test"
+        )
+        self.user.save()
+
+        self.job = Job.objects.create(
+            observable_name="test.com", 
+            observable_classification="domain",
+            user=self.user,
+        )
+        self.job.save()
+
+        self.cs = CommentSerializer(
+            data={
+                "content": "test",
+                "job_id": self.job.id
+            }, 
+            context={"request": MockUpRequest(self.user)}
+        )
+    
+    def test_create(self):
+        self.assertTrue(self.cs.is_valid())
+        self.cs.save()
+        self.assertTrue(self.cs.Meta.Model.objects.filter(content="test").exists())
+
+    def test_create_with_invalid_job_id(self):
+        self.cs.initial_data["job_id"] = 100000
+        self.assertFalse(self.cs.is_valid())
+        self.assertRaises(ValidationError, self.cs.save)
+    

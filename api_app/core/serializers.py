@@ -111,12 +111,12 @@ class AbstractReportSerializer(rfs.ModelSerializer):
             "errors",
             "start_time",
             "end_time",
+            "runtime_configuration",
         )
 
     def to_representation(self, instance: AbstractReport):
         data = super().to_representation(instance)
         data["type"] = instance.config.plugin_type.label.lower()
-        data["runtime_configuration"] = instance.runtime_configuration
         return data
 
     def to_internal_value(self, data):

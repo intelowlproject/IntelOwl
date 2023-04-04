@@ -49,7 +49,7 @@ class ClassicDNSResolver(classes.ObservableAnalyzer):
                 observable = urlparse(self.observable_name).hostname
 
             try:
-                dns_resolutions = dns.resolver.resolve(observable, self._query_type)
+                dns_resolutions = dns.resolver.resolve(observable, self.query_type)
                 for resolution in dns_resolutions:
                     element = {
                         "TTL": dns_resolutions.rrset.ttl,

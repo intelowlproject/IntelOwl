@@ -65,7 +65,7 @@ class PluginActionViewsetTestCase(metaclass=ABCMeta):
     def test_kill_204(self):
         _report = self.init_report(status=AbstractReport.Status.PENDING, user=self.user)
         response = self.client.patch(
-            f"/api/jobs/{_report.job_id}/{self.plugin_type}/{_report.config.name}/kill"
+            f"/api/jobs/{_report.job_id}/{self.plugin_type}/{_report.pk}/kill"
         )
         _report.refresh_from_db()
 
@@ -76,7 +76,7 @@ class PluginActionViewsetTestCase(metaclass=ABCMeta):
         # create a new report whose status is not "running"/"pending"
         _report = self.init_report(status=AbstractReport.Status.SUCCESS, user=self.user)
         response = self.client.patch(
-            f"/api/jobs/{_report.job_id}/{self.plugin_type}/{_report.config.name}/kill"
+            f"/api/jobs/{_report.job_id}/{self.plugin_type}/{_report.pk}/kill"
         )
         content = response.json()
         msg = (response, content)
@@ -92,7 +92,7 @@ class PluginActionViewsetTestCase(metaclass=ABCMeta):
         # create a new report which does not belong to user
         _report = self.init_report(status=AbstractReport.Status.PENDING, user=None)
         response = self.client.patch(
-            f"/api/jobs/{_report.job_id}/{self.plugin_type}/{_report.config.name}/kill"
+            f"/api/jobs/{_report.job_id}/{self.plugin_type}/{_report.pk}/kill"
         )
 
         self.assertEqual(response.status_code, 403)
@@ -111,7 +111,7 @@ class PluginActionViewsetTestCase(metaclass=ABCMeta):
         )
         self.client.force_authenticate(self.superuser)
         response = self.client.patch(
-            f"/api/jobs/{_report.job_id}/{self.plugin_type}/{_report.config.name}/retry"
+            f"/api/jobs/{_report.job_id}/{self.plugin_type}/{_report.pk}/retry"
         )
 
         self.assertEqual(response.status_code, 204)
@@ -121,7 +121,7 @@ class PluginActionViewsetTestCase(metaclass=ABCMeta):
         # create a new report whose status is not "FAILED"/"KILLED"
         _report = self.init_report(status=AbstractReport.Status.SUCCESS, user=self.user)
         response = self.client.patch(
-            f"/api/jobs/{_report.job_id}/{self.plugin_type}/{_report.config.name}/retry"
+            f"/api/jobs/{_report.job_id}/{self.plugin_type}/{_report.pk}/retry"
         )
         content = response.json()
         msg = (response, content)
@@ -137,7 +137,7 @@ class PluginActionViewsetTestCase(metaclass=ABCMeta):
         # create a new report which does not belong to user
         _report = self.init_report(status=AbstractReport.Status.FAILED, user=None)
         response = self.client.patch(
-            f"/api/jobs/{_report.job_id}/{self.plugin_type}/{_report.config.name}/retry"
+            f"/api/jobs/{_report.job_id}/{self.plugin_type}/{_report.pk}/retry"
         )
 
         self.assertEqual(response.status_code, 403)

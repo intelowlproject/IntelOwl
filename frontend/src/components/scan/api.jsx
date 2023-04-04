@@ -169,6 +169,7 @@ async function _askAnalysisAvailability(formValues) {
         analyzers: formValues.analyzers,
         playbooks: formValues.playbooks,
         md5: md5(readFileAsync(file)),
+        minutes_ago: formValues.minutesAgo,
       };
       promises.push(body.md5);
       if (formValues.check === "running_only") {
@@ -183,6 +184,7 @@ async function _askAnalysisAvailability(formValues) {
         analyzers: formValues.analyzers,
         playbooks: formValues.playbooks,
         md5: md5(ObservableName),
+        minutes_ago: formValues.minutesAgo,
       };
       if (formValues.check === "running_only") {
         body.running_only = "True";
@@ -191,6 +193,8 @@ async function _askAnalysisAvailability(formValues) {
     });
   }
 
+  console.debug("_askAnalysisAvailability - payload");
+  console.debug(payload);
   try {
     const response = await axios.post(
       ASK_MULTI_ANALYSIS_AVAILABILITY_URI,

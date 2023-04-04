@@ -7,22 +7,25 @@ import pymisp
 from django.conf import settings
 
 from api_app.analyzers_manager import classes
-from api_app.exceptions import AnalyzerConfigurationException, AnalyzerRunException
+from api_app.analyzers_manager.exceptions import (
+    AnalyzerConfigurationException,
+    AnalyzerRunException,
+)
 from tests.mock_utils import MockResponseNoOp, if_mock_connections, patch
 
 
 class MISP(classes.ObservableAnalyzer):
-    def set_params(self, params):
-        self.ssl_check = params.get("ssl_check", True)
-        self.self_signed_certificate = params.get("self_signed_certificate", False)
-        self.debug = params.get("debug", False)
-        self.from_days = params.get("from_days", 90)
-        self.limit = params.get("limit", 50)
-        self.enforce_warninglist = params.get("enforce_warninglist", True)
-        self.filter_on_type = params.get("filter_on_type", True)
-        self.__url_name = self._secrets["url_key_name"]
-        self.__api_key = self._secrets["api_key_name"]
-        self.strict_search = params.get("strict_search", True)
+    _api_key_name: str
+    _url_key_name: str
+
+    ssl_check: bool
+    self_signed_certificate: bool
+    debug: bool
+    from_days: int
+    limit: int
+    enforce_warninglist: bool
+    filter_on_type: bool
+    strict_search: bool
 
     def run(self):
         # this allows self-signed certificates to be used
@@ -32,8 +35,8 @@ class MISP(classes.ObservableAnalyzer):
             else self.ssl_check
         )
         misp_instance = pymisp.PyMISP(
-            url=self.__url_name,
-            key=self.__api_key,
+            url=self._url_key_name,
+            key=self._api_key_name,
             ssl=ssl_param,
             debug=self.debug,
             timeout=5,
@@ -82,7 +85,7 @@ class MISP(classes.ObservableAnalyzer):
             if errors:
                 raise AnalyzerRunException(errors)
 
-        return {"result_search": result_search, "instance_url": self.__url_name}
+        return {"result_search": result_search, "instance_url": self._url_key_name}
 
     @classmethod
     def _monkeypatch(cls):

@@ -76,7 +76,6 @@ jobs:
           unzip -P infected tests/test_files.zip -d test_files
           cp docker/env_file_app_template docker/env_file_app
           cp docker/env_file_postgres_template docker/env_file_postgres
-          chmod u+x docker/scripts/coverage_test.sh
 
       - name: Startup script requirements
         run: |
@@ -109,37 +108,9 @@ jobs:
         run: |
           docker exec intelowl_uwsgi pip3 install coverage
 
-      - name: "Test: api_app"
+      - name: Run test
         run: |
-          docker/scripts/coverage_test.sh tests.api_app
-
-      - name: "Test: auth"
-        run: |
-          docker/scripts/coverage_test.sh tests.auth
-
-      - name: "Test: Cron"
-        run: |
-          docker/scripts/coverage_test.sh tests.test_crons
-
-      - name: "Test: Connectors Manager (views, serializers)"
-        run: |
-          docker/scripts/coverage_test.sh tests.connectors_manager
-
-      - name: "Test: Analyzers Manager (views, serializers)"
-        run: |
-          docker/scripts/coverage_test.sh tests.analyzers_manager.test_views tests.analyzers_manager.test_serializers
-
-      - name: "Test: Analyzers Manager (observable analyzers)"
-        run: |
-          docker/scripts/coverage_test.sh tests.analyzers_manager.test_observable_scripts
-
-      - name: "Test: Analyzers Manager (file analyzers)"
-        run: |
-          docker/scripts/coverage_test.sh tests.analyzers_manager.test_file_scripts
-
-      - name: "Test: Playbooks Manager (views)"
-        run: |
-          docker/scripts/coverage_test.sh tests.playbooks_manager
+          docker exec intelowl_uwsgi coverage run manage.py test --keepdb tests
 
       - name: "Coverage: generate xml and transfer from docker container to host"
         run: |

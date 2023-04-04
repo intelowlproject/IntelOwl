@@ -1,6 +1,11 @@
 version: "3.8"
 
 services:
+
+  uwsgi:
+    depends_on:
+      - postgres
+
   postgres:
     image: library/postgres:12-alpine
     container_name: intelowl_postgres

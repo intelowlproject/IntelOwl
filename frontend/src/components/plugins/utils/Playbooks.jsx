@@ -8,8 +8,8 @@ export default function Playbooks() {
 
   const stateSelector = React.useCallback(
     (state) => [
-      state.loading,
-      state.error,
+      state.playbooksLoading,
+      state.playbooksError,
       state.playbooks,
       state.retrievePlaybooksConfiguration,
     ],
@@ -19,6 +19,7 @@ export default function Playbooks() {
   return (
     <PluginWrapper
       heading="Playbooks"
+      description="Playbooks are designed to be easy to share sequence of running Analyzers/Connectors on a particular kind of observable."
       stateSelector={stateSelector}
       columns={playbookTableColumns}
     />

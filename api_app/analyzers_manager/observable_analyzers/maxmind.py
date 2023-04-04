@@ -14,7 +14,10 @@ import requests
 from django.conf import settings
 
 from api_app.analyzers_manager import classes
-from api_app.exceptions import AnalyzerConfigurationException, AnalyzerRunException
+from api_app.analyzers_manager.exceptions import (
+    AnalyzerConfigurationException,
+    AnalyzerRunException,
+)
 from api_app.models import PluginConfig
 from tests.mock_utils import if_mock_connections, patch
 
@@ -24,9 +27,6 @@ db_names = ["GeoLite2-Country.mmdb", "GeoLite2-City.mmdb"]
 
 
 class Maxmind(classes.ObservableAnalyzer):
-    def set_params(self, params):
-        pass
-
     def run(self):
         maxmind_final_result = {}
         for db in db_names:
@@ -55,9 +55,13 @@ class Maxmind(classes.ObservableAnalyzer):
 
     @classmethod
     def _get_api_key(cls) -> Optional[str]:
-        for analyzer_name, _ in cls.get_config_class().get_from_python_module(cls):
+        from api_app.analyzers_manager.models import AnalyzerConfig
+
+        for config in AnalyzerConfig.objects.filter(
+            python_module=cls.python_module, disabled=False
+        ):
             for plugin in PluginConfig.objects.filter(
-                plugin_name=analyzer_name,
+                plugin_name=config.name,
                 type=PluginConfig.PluginType.ANALYZER,
                 config_type=PluginConfig.ConfigType.SECRET,
                 attribute="api_key_name",
@@ -69,7 +73,7 @@ class Maxmind(classes.ObservableAnalyzer):
     @classmethod
     def _update_db(cls, db: str, api_key: str):
         if not api_key:
-            return AnalyzerConfigurationException(
+            raise AnalyzerConfigurationException(
                 f"Unable to find api key for {cls.__name__}"
             )
 
@@ -139,9 +143,6 @@ class Maxmind(classes.ObservableAnalyzer):
 
     @classmethod
     def _update(cls):
-        if not cls.enabled:
-            logger.warning("No running updater for Maxmind, because it is disabled")
-            return
         api_key = cls._get_api_key()
         for db in db_names:
             cls._update_db(db, api_key)

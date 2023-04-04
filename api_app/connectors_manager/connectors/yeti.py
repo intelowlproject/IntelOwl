@@ -5,15 +5,14 @@ import requests
 from django.conf import settings
 
 from api_app.connectors_manager import classes
-from api_app.exceptions import ConnectorRunException
-from tests.mock_utils import MockResponse, if_mock_connections, patch
+from api_app.connectors_manager.exceptions import ConnectorRunException
+from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
 class YETI(classes.Connector):
-    def set_params(self, params):
-        self.verify_ssl: bool = params.get("verify_ssl", True)
-        self.__url_name: str = self._secrets["url_key_name"]
-        self.__api_key: str = self._secrets["api_key_name"]
+    verify_ssl: bool
+    _url_key_name: str
+    _api_key_name: str
 
     def run(self):
         # get observable value and type
@@ -32,7 +31,11 @@ class YETI(classes.Connector):
             "date": str(self._job.finished_analysis_time),
             "description": "IntelOwl's analysis report for Job: "
             f"{self.job_id} | {obs_value} | {obs_type}",
-            "analyzers executed": ", ".join(self._job.analyzers_to_execute),
+            "analyzers executed": ", ".join(
+                list(
+                    self._job.analyzers_to_execute.all().values_list("name", flat=True)
+                )
+            ),
         }
 
         # get job tags
@@ -45,10 +48,10 @@ class YETI(classes.Connector):
             "tags": tags,
             "context": context,
         }
-        headers = {"Accept": "application/json", "X-Api-Key": self.__api_key}
-        if self.__url_name and self.__url_name.endswith("/"):
-            self.__url_name = self.__url_name[:-1]
-        url = f"{self.__url_name}/observable/"
+        headers = {"Accept": "application/json", "X-Api-Key": self._api_key_name}
+        if self._url_key_name and self._url_key_name.endswith("/"):
+            self._url_key_name = self._url_key_name[:-1]
+        url = f"{self._url_key_name}/observable/"
 
         # create observable with `obs_value` if it doesn't exists
         # new context, tags, source are appended with existing ones
@@ -71,7 +74,7 @@ class YETI(classes.Connector):
             if_mock_connections(
                 patch(
                     "requests.post",
-                    return_value=MockResponse({}, 200),
+                    return_value=MockUpResponse({}, 200),
                 )
             )
         ]

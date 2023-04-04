@@ -1,19 +1,12 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-import json
 import logging
-import os
-from abc import abstractmethod
-from copy import deepcopy
-from typing import Dict, List, Optional, TypedDict
+from typing import List, Optional, TypedDict
 
-from cache_memoize import cache_memoize
-from django.conf import settings
 from rest_framework import serializers as rfs
 
-from api_app.helpers import calculate_md5
-from api_app.models import PluginConfig
+from api_app.core.models import AbstractConfig, AbstractReport
 from intel_owl.consts import PARAM_DATATYPE_CHOICES
 
 logger = logging.getLogger(__name__)
@@ -36,47 +29,19 @@ class BaseField(rfs.Field):
 class _ConfigSerializer(rfs.Serializer):
     """
     To validate `config` attr.
-    Used for `analyzer_config.json` and `connector_config.json` files.
     """
 
     queue = rfs.CharField(required=True)
     soft_time_limit = rfs.IntegerField(required=True)
 
 
-class _ParamSerializer(rfs.Serializer):
-    """
-    To validate `params` attr.
-    Used for `analyzer_config.json` and `connector_config.json` files.
-    """
-
-    value = BaseField()
-    type = rfs.ChoiceField(choices=PARAM_DATATYPE_CHOICES)
+class _TypeSerializer(rfs.Serializer):
+    type = rfs.ChoiceField(choices=list(PARAM_DATATYPE_CHOICES.keys()))
     description = rfs.CharField(allow_blank=True, required=True, max_length=512)
-
-    def validate(self, attrs):
-        value_type = type(attrs["value"]).__name__
-        expected_type = attrs["type"]
-        if value_type != expected_type:
-            raise rfs.ValidationError(
-                f"Invalid value type. {value_type} != {expected_type}"
-            )
-        return super().validate(attrs)
-
-
-class _SecretSerializer(rfs.Serializer):
-    """
-    To validate `secrets` attr.
-    Used for `analyzer_config.json` and `connector_config.json` files.
-    """
-
-    env_var_key = rfs.CharField(required=True, max_length=128)
-    description = rfs.CharField(required=True, allow_blank=True, max_length=512)
-    required = rfs.BooleanField(required=True)
-    type = rfs.ChoiceField(choices=PARAM_DATATYPE_CHOICES, required=False)
     default = BaseField(required=False)
 
     def validate(self, attrs):
-        if "type" in attrs and "default" in attrs:
+        if "default" in attrs:
             default_type = type(attrs["default"]).__name__
             expected_type = attrs["type"]
             if default_type != expected_type:
@@ -86,163 +51,73 @@ class _SecretSerializer(rfs.Serializer):
         return super().validate(attrs)
 
 
-class AbstractConfigSerializer(rfs.Serializer):
+class _ParamSerializer(_TypeSerializer):
     """
-    Abstract serializer for `analyzer_config.json` and `connector_config.json`.
+    To validate `params` attr.
     """
 
-    # constants
-    CONFIG_FILE_NAME = ""
+    default = BaseField(required=True)
 
-    # sentinel/ flag
-    _is_valid_flag = False
 
-    # common basic fields
-    name = rfs.CharField(required=True)
-    python_module = rfs.CharField(required=True, max_length=128)
-    disabled = rfs.BooleanField(required=True)
-    description = rfs.CharField(allow_blank=True, required=False)
-    # common custom fields
-    config = _ConfigSerializer()
-    secrets = rfs.DictField(child=_SecretSerializer())
-    params = rfs.DictField(child=_ParamSerializer())
-    # automatically populated fields
-    verification = rfs.SerializerMethodField()
-    extends = rfs.CharField(allow_blank=True, required=False)
+class _SecretSerializer(_TypeSerializer):
+    """
+    To validate `secrets` attr.
+    """
 
-    def is_valid(self, raise_exception=False):
-        ret = super().is_valid(raise_exception=raise_exception)
-        if ret:
-            self._is_valid_flag = True
-        return ret
+    required = rfs.BooleanField(required=True)
 
-    @classmethod
-    @abstractmethod
-    def _get_type(cls):
-        raise NotImplementedError()
 
-    def get_verification(self, raw_instance: dict) -> ConfigVerificationType:
-        # raw instance because input is json and not django model object
-        # get all missing secrets
-        secrets = raw_instance.get("secrets", {})
-        missing_secrets = []
-        for s_key, s_dict in secrets.items():
-            # check if available in environment
-            if (
-                not PluginConfig.visible_for_user(self.context.get("user", None))
-                .filter(
-                    attribute=s_key,
-                    type=self._get_type(),
-                    plugin_name=raw_instance["name"],
-                )
-                .exists()
-                and s_dict["required"]
-            ):
-                missing_secrets.append(s_key)
+class AbstractConfigSerializer(rfs.ModelSerializer):
 
-        num_missing_secrets = len(missing_secrets)
-        if num_missing_secrets:
-            configured = False
-            num_total_secrets = len(secrets.keys())
-            error_message = "(%s) not set; (%d of %d satisfied)" % (
-                ",".join(missing_secrets),
-                num_total_secrets - num_missing_secrets,
-                num_total_secrets,
-            )
-        else:
-            configured = True
-            error_message = None
+    secrets = rfs.DictField(
+        child=_SecretSerializer(required=True), required=False, allow_empty=True
+    )
+    params = rfs.DictField(
+        child=_ParamSerializer(required=True), required=False, allow_empty=True
+    )
+    config = _ConfigSerializer(required=True)
 
-        return {
-            "configured": configured,
-            "error_message": error_message,
-            "missing_secrets": missing_secrets,
-        }
+    class Meta:
+        fields = rfs.ALL_FIELDS
 
-    # utility methods
-
-    @classmethod
-    def _get_config_path(cls) -> str:
-        """
-        Returns full path to the config file.
-        """
-        return os.path.join(
-            settings.PROJECT_LOCATION, "configuration", cls.CONFIG_FILE_NAME
-        )
-
-    @classmethod
-    def _read_config(cls) -> dict:
-        """
-        Returns config file as `dict`.
-        """
-        config_path = cls._get_config_path()
-        with open(config_path) as f:
-            config_dict = json.load(f)
-        return config_dict
-
-    @classmethod
-    def _md5_config_file(cls) -> str:
-        """
-        Returns md5sum of config file.
-        """
-        fpath = cls._get_config_path()
-        with open(fpath, "r") as fp:
-            buffer = fp.read().encode("utf-8")
-            md5hash = calculate_md5(buffer)
-        return md5hash
-
-    @classmethod
-    def _complete_config(
-        cls, config_dict: dict, plugin_name: str, visited: set
-    ) -> dict:
-        """
-        Completes config by parsing extends configs
-        """
-        if plugin_name in visited:
-            raise RuntimeError(f"Circular dependency detected in {cls} config")
-        visited.add(plugin_name)
-        result = config_dict[plugin_name]
-        if plugin_name not in config_dict:
-            raise RuntimeError(
-                f"Plugin {plugin_name} not found in {cls} config "
-                "but referenced in extends"
-            )
-        if "extends" in config_dict[plugin_name]:
-            parent_plugin = config_dict[plugin_name]["extends"]
-            result = deepcopy(cls._complete_config(config_dict, parent_plugin, visited))
-            for key in config_dict[plugin_name]:
-                if key != "extends":
-                    result[key] = config_dict[plugin_name][key]
+    def to_representation(self, instance: AbstractConfig):
+        user = self.context["request"].user
+        result = super().to_representation(instance)
+        result["verification"] = instance.get_verification(user)
+        params_values = instance.read_params(user)
+        for param, param_dict in result["params"].items():
+            try:
+                param_dict["value"] = params_values[param]
+            except KeyError:
+                param_dict["value"] = None
+        result["disabled"] = not instance.is_runnable(user)
         return result
 
-    @classmethod
-    @cache_memoize(
-        timeout=60 * 60 * 24 * 365,  # 1 year
-        args_rewrite=lambda cls, user=None: f"{cls.__name__}-"
-        f"{user.username if user else ''}-"
-        f"{cls._md5_config_file()}",
-    )
-    def read_and_verify_config(cls, user=None) -> Dict:
-        """
-        Returns verified config.
-        This function is memoized for the md5sum of the JSON file.
-        """
-        config_dict = cls._read_config()
-        for plugin in config_dict:
-            config_dict[plugin] = cls._complete_config(config_dict, plugin, set())
-        serializer_errors = {}
-        for key, config in config_dict.items():
-            new_config = {"name": key, **config}
-            serializer = cls(
-                data=new_config, context={"user": user}
-            )  # lgtm [py/call-to-non-callable]
-            if serializer.is_valid():
-                config_dict[key] = serializer.data
-            else:
-                serializer_errors[key] = serializer.errors
+    def to_internal_value(self, data):
+        raise NotImplementedError()
 
-        if bool(serializer_errors):
-            logger.error(f"{cls.__name__} serializer failed: {serializer_errors}")
-            raise rfs.ValidationError(serializer_errors)
 
-        return config_dict
+class AbstractReportSerializer(rfs.ModelSerializer):
+
+    name = rfs.PrimaryKeyRelatedField(read_only=True, source="config")
+
+    class Meta:
+        fields = (
+            "id",
+            "name",
+            "process_time",
+            "report",
+            "status",
+            "errors",
+            "start_time",
+            "end_time",
+            "runtime_configuration",
+        )
+
+    def to_representation(self, instance: AbstractReport):
+        data = super().to_representation(instance)
+        data["type"] = instance.config.plugin_type.label.lower()
+        return data
+
+    def to_internal_value(self, data):
+        raise NotImplementedError()

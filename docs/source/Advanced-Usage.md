@@ -169,6 +169,7 @@ Some analyzers could require a special configuration:
 - `ClamAV`: this Docker-based analyzer uses `clamd` daemon as its scanner and is communicating with `clamdscan` utility to scan files. The daemon requires 2 different configuration files: `clamd.conf`(daemon's config) and `freshclam.conf` (virus database updater's config). These files are mounted as docker volumes in `/integrations/malware_tools_analyzers/clamav` and hence, can be edited by the user as per needs, without restarting the application. Moreover ClamAV is integrated with unofficial open source signatures extracted with [Fangfrisch](https://github.com/rseichter/fangfrisch). The configuration file `fangfrisch.conf` is mounted in the same directory and can be customized on your wish. For instance, you should change it if you want to integrate open source signatures from [SecuriteInfo](https://www.securiteinfo.com/) 
 
 - `Suricata`: you can customize the behavior of Suricata:
+
   - `/integrations/pcap_analyzers/config/suricata/rules`: here there are Suricata rules. You can change the `custom.rules` files to add your own rules at any time. Once you made this change, you need to either restart IntelOwl or (this is faster) run a new analysis with the Suricata analyzer and set the parameter `reload_rules` to `true`.
   - `/integrations/pcap_analyzers/config/suricata/etc`: here there are Suricata configuration files. Change it based on your wish. Restart IntelOwl to see the changes applied.
 
@@ -181,7 +182,7 @@ Some analyzers could require a special configuration:
 
 Organizations are a great way to share data and analysis only with the members of your team. Invite the people you work with in your organization!
 
-By default, analysis (jobs) are executed with a level of TLP that is WHITE. This means that these jobs are public and every IntelOwl user can see them.
+By default, analysis (jobs) are executed with a level of TLP that is CLEAR. This means that these jobs are public and every IntelOwl user can see them.
 Thanks to the "Organization" feature, you can restrict the people who can see the analysis that you made.
 
 How you can do that?

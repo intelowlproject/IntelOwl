@@ -1,20 +1,27 @@
+# This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
+# See the file 'LICENSE' for copying permission.
+
 import requests
 
 from api_app.analyzers_manager import classes
-from api_app.exceptions import AnalyzerRunException
-from tests.mock_utils import MockResponse, if_mock_connections, patch
+from api_app.analyzers_manager.exceptions import AnalyzerRunException
+from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
 class IPApi(classes.ObservableAnalyzer):
     batch_url = "http://ip-api.com/batch"
     dns_url = "http://edns.ip-api.com/json"
 
-    def set_params(self, params):
+    fields: str
+    lang: str
+
+    def config(self):
+        super().config()
         self.IP = [
             {
                 "query": self.observable_name,
-                "fields": params.get("fields", ""),
-                "lang": params.get("lang", ""),
+                "fields": self.fields,
+                "lang": self.lang,
             }
         ]
 
@@ -39,7 +46,7 @@ class IPApi(classes.ObservableAnalyzer):
             if_mock_connections(
                 patch(
                     "requests.get",
-                    return_value=MockResponse({}, 200),
+                    return_value=MockUpResponse({}, 200),
                 ),
             )
         ]

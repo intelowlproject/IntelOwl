@@ -1,5 +1,6 @@
 // lib
 @import "@certego/certego-ui/src/styles/root";
+@import "/node_modules/flag-icons/css/flag-icons.min.css";
 
 // App.jsx
 * {
@@ -77,6 +78,10 @@ section.fixed-bottom {
   width: 500px;
   min-width: 175px;
   min-height: 50px;
+}
+
+.horizontal-scrollable .nav-item {
+  display: inline-block;
 }
 
 .notifications-popover {
@@ -166,4 +171,18 @@ section.fixed-bottom {
 
 .dropdown-divider {
   border-top: 3px solid rgba(0, 0, 0, 30%);
+}
+
+.horizontal-scrollable {
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.list-group-item {
+  color: white;
+}
+
+// class added to the components for the UI in the job report to disable in case of empty value
+.visualizer-element-disabled {
+  opacity: 0.3;
 }

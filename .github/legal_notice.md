@@ -1,11 +1,12 @@
 ## Legal notice
 
 You as a user of this project must review, accept and comply with the license
-terms of each downloaded/installed package listed below. By proceeding with the
+terms of each downloaded/installed package/tool/media listed below. By proceeding with the
 installation, you are accepting the license terms of each package, and
 acknowledging that your use of each package will be subject to its respective
 license terms.
 
+#### Github Repos
 [osslsigncode](https://github.com/develar/osslsigncode),
 [PyExifTool](https://github.com/sylikc/pyexiftool),
 [Exiftool package](https://exiftool.org/#license),
@@ -35,6 +36,7 @@ license terms.
 [ReversingLabs Yara rules](https://github.com/reversinglabs/reversinglabs-yara-rules),
 [Samir Yara rules](https://github.com/sbousseaden/YaraHunts),
 [InQuest Yara rules](https://github.com/InQuest/yara-rules),
+[dr4k0nia Yara rules](https://github.com/dr4k0nia/yara-rules),
 [JPCERTCC Yara rules](https://github.com/JPCERTCC/jpcert-yara),
 [HuntressLab Yara rules](https://github.com/embee-research/Yara),
 [elceef Yara Rules](https://github.com/elceef/yara-rulz),
@@ -58,3 +60,18 @@ license terms.
 [Authlib](https://github.com/lepture/authlib),
 [Fangfrisch](https://github.com/rseichter/fangfrisch),
 [pyOneNote](https://github.com/DissectMalware/pyOneNote)
+
+#### Media
+[notification.mp3](https://notificationsounds.com/message-tones/relax-message-tone),
+[country flags](https://www.npmjs.com/package/flag-icons),
+[VT,OTX,Github and Twitter icons](https://react-icons.github.io/react-icons/),
+[Hybrid Analysis flag](https://github.com/PayloadSecurity),
+[Google icon](https://www.google.com),
+[Cloudflare icon](https://www.cloudflare.com/),
+[Quad9 icon](https://icon-icons.com/pt/icone/quad9-logo/170815),
+[URLhaus icon](https://urlhaus.abuse.ch/favicon.ico),
+
+
+
+
+

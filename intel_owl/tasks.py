@@ -3,6 +3,7 @@
 
 from __future__ import absolute_import, unicode_literals
 
+import datetime
 import logging
 import typing
 
@@ -10,64 +11,108 @@ from celery import shared_task, signals
 from celery.worker.consumer import Consumer
 from celery.worker.control import control_command
 from django.conf import settings
+from django.db.models import Q
+from django.utils.module_loading import import_string
+from django.utils.timezone import now
 
-from api_app import crons
-from api_app.analyzers_manager.file_analyzers import quark_engine, yara_scan
-from api_app.analyzers_manager.observable_analyzers import maxmind, talos, tor
-from certego_saas.models import User
-from intel_owl.celery import app
+from intel_owl import secrets
+from intel_owl.celery import DEFAULT_QUEUE, app, get_real_queue_name
 
 logger = logging.getLogger(__name__)
 
 
 @control_command(
-    args=[("plugin_name", str), ("plugin_type", str)],
+    args=[("plugin_path", str)],
 )
-def update_plugin(state, plugin_name: str, plugin_type: str):
-
-    from api_app.core.classes import Plugin
-    from api_app.models import PluginConfig
-
-    config_class = PluginConfig.get_specific_config_class(plugin_type)
-    plugin_config = config_class.get(plugin_name)
-
-    class_: typing.Type[Plugin] = plugin_config.get_class()
-    class_._update()
+def update_plugin(state, plugin_path):
+    plugin = import_string(plugin_path)
+    plugin.update()
 
 
 @shared_task(soft_time_limit=10000)
 def remove_old_jobs():
-    crons.remove_old_jobs()
+    """
+    this is to remove old jobs to avoid to fill the database.
+    Retention can be modified.
+    """
+    from api_app.models import Job
+
+    logger.info("started remove_old_jobs")
+
+    retention_days = int(secrets.get_secret("OLD_JOBS_RETENTION_DAYS", 3))
+    date_to_check = now() - datetime.timedelta(days=retention_days)
+    old_jobs = Job.objects.filter(finished_analysis_time__lt=date_to_check)
+    num_jobs_to_delete = old_jobs.count()
+    logger.info(f"found {num_jobs_to_delete} old jobs to delete")
+    old_jobs.delete()
+
+    logger.info("finished remove_old_jobs")
+    return num_jobs_to_delete
 
 
 @shared_task(soft_time_limit=120)
-def check_stuck_analysis():
-    crons.check_stuck_analysis()
+def check_stuck_analysis(minutes_ago: int = 25, check_pending: bool = False):
+    """
+    In case the analysis is stuck for whatever reason,
+    we should force the status "failed"
+    to avoid special exceptions,
+    we can just put this function as a cron to cleanup.
+    """
+    from api_app.models import Job
+
+    logger.info("started check_stuck_analysis")
+    query = Q(status=Job.Status.RUNNING.value)
+    if check_pending:
+        query |= Q(status=Job.Status.PENDING.value)
+    difference = now() - datetime.timedelta(minutes=minutes_ago)
+    running_jobs = Job.objects.filter(query).filter(
+        received_request_time__lte=difference
+    )
+    logger.info(f"checking if {running_jobs.count()} jobs are stuck")
+
+    jobs_id_stuck = []
+    for running_job in running_jobs:
+        logger.error(
+            f"found stuck analysis, job_id:{running_job.id}."
+            f"Setting the job to status to {Job.Status.FAILED.value}'"
+        )
+        jobs_id_stuck.append(running_job.id)
+        running_job.status = Job.Status.FAILED.value
+        running_job.finished_analysis_time = now()
+        running_job.process_time = running_job.calculate_process_time()
+        running_job.save(
+            update_fields=["status", "finished_analysis_time", "process_time"]
+        )
+
+    logger.info("finished check_stuck_analysis")
+
+    return jobs_id_stuck
 
 
 @shared_task(soft_time_limit=60)
-def talos_updater():
-    talos.Talos.update()
+def update(python_module: str, queue: str = None):
+    from api_app.analyzers_manager.models import AnalyzerConfig
+    from intel_owl.celery import broadcast
 
-
-@shared_task(soft_time_limit=60)
-def tor_updater():
-    tor.Tor.update()
-
-
-@shared_task(soft_time_limit=60)
-def quark_updater():
-    quark_engine.QuarkEngine.update()
-
-
-@shared_task(soft_time_limit=20)
-def maxmind_updater():
-    maxmind.Maxmind.update()
-
-
-@shared_task(soft_time_limit=60)
-def yara_updater():
-    yara_scan.YaraScan.update()
+    analyzer_configs = AnalyzerConfig.objects.filter(python_module=python_module)
+    if queue:
+        analyzer_configs = analyzer_configs.filter(config__queue=queue)
+    for analyzer_config in analyzer_configs:
+        analyzer_config: AnalyzerConfig
+        if analyzer_config.is_runnable():
+            class_ = analyzer_config.python_class
+            if hasattr(class_, "_update") and callable(class_._update):  # noqa
+                if settings.NFS:
+                    update_plugin(None, analyzer_config.python_complete_path)
+                else:
+                    broadcast(
+                        update_plugin,
+                        queue=analyzer_config.queue,
+                        arguments={"plugin_path": analyzer_config.python_complete_path},
+                    )
+                return True
+    logger.error(f"Unable to update {python_module}")
+    return False
 
 
 @shared_task(soft_time_limit=100)
@@ -96,42 +141,32 @@ def continue_job_pipeline(job_id: int):
 @app.task(name="job_pipeline", soft_time_limit=100)
 def job_pipeline(
     job_id: int,
-    runtime_configuration: typing.Dict[str, typing.Any],
 ):
     from api_app.models import Job
 
     job = Job.objects.get(pk=job_id)
-    job.pipeline(runtime_configuration)
+    job.execute()
 
 
-@app.task(name="run_analyzer", soft_time_limit=500)
-def run_analyzer(job_id: int, config_dict: dict, report_defaults: dict):
-    from api_app.analyzers_manager.dataclasses import AnalyzerConfig
+@app.task(name="run_plugin", soft_time_limit=500)
+def run_plugin(
+    job_id: int,
+    plugin_path: str,
+    plugin_config_pk: str,
+    runtime_configuration: dict,
+    task_id: int,
+):
+    from api_app.core.classes import Plugin
 
-    config = AnalyzerConfig.from_dict(config_dict)
-    config.run(job_id, report_defaults)
-
-
-@app.task(name="run_connector", soft_time_limit=500)
-def run_connector(job_id: int, config_dict: dict, report_defaults: dict):
-    from api_app.connectors_manager.dataclasses import ConnectorConfig
-
-    config = ConnectorConfig.from_dict(config_dict)
-    config.run(job_id, report_defaults)
-
-
-@shared_task()
-def build_config_cache(plugin_type: str, user_pk: int = None):
-    from api_app.models import PluginConfig
-
-    # we "greedy cache" the config at start of application
-    # because it is an expensive operation
-    # we can't have the class as parameter because we run celery not in pickle mode
-    serializer_class = PluginConfig.get_specific_serializer_class(plugin_type)
-    user = User.objects.get(pk=user_pk) if user_pk else None
-
-    serializer_class.read_and_verify_config.invalidate(serializer_class, user)
-    serializer_class.read_and_verify_config(user)
+    plugin_class: typing.Type[Plugin] = import_string(plugin_path)
+    config = plugin_class.config_model.objects.get(pk=plugin_config_pk)
+    plugin = plugin_class(
+        config=config,
+        job_id=job_id,
+        runtime_configuration=runtime_configuration,
+        task_id=task_id,
+    )
+    plugin.start()
 
 
 # startup
@@ -139,22 +174,17 @@ def build_config_cache(plugin_type: str, user_pk: int = None):
 def worker_ready_connect(*args, sender: Consumer = None, **kwargs):
     import git
 
-    from api_app.analyzers_manager.file_analyzers.yara_scan import YaraScan
-    from api_app.models import PluginConfig
-    from intel_owl.celery import DEFAULT_QUEUE
-
-    logger.error(f"worker {sender.hostname} ready")
-
+    logger.info(f"worker {sender.hostname} ready")
+    queue = sender.hostname.split("_", maxsplit=1)[1]
+    logger.info(f"Updating repositories inside {queue}")
     cmd = git.cmd.Git(None)
     cmd.config("--add", "--global", "safe.directory", "*")
-
-    if sender.hostname == f"celery@worker_{DEFAULT_QUEUE.split('.')[0]}":
-        logger.error("Generating cache")
-        build_config_cache(PluginConfig.PluginType.ANALYZER.value)
-        build_config_cache(PluginConfig.PluginType.CONNECTOR.value)
-        for user in User.objects.all():
-            build_config_cache(PluginConfig.PluginType.ANALYZER.value, user_pk=user.pk)
-            build_config_cache(PluginConfig.PluginType.CONNECTOR.value, user_pk=user.pk)
-
-        if settings.REPO_DOWNLOADER_ENABLED:
-            YaraScan._update()
+    if settings.REPO_DOWNLOADER_ENABLED and queue == get_real_queue_name(DEFAULT_QUEUE):
+        for python_module in [
+            "maxmind.Maxmind",
+            "talos.Talos",
+            "tor.Tor",
+            "yara_scan.YaraScan",
+            "quark_engine.QuarkEngine",
+        ]:
+            update(python_module, queue=queue)

@@ -8,8 +8,8 @@ from urllib.parse import urlparse
 import requests
 
 from api_app.analyzers_manager import classes
-from api_app.exceptions import AnalyzerRunException
-from tests.mock_utils import MockResponse, if_mock_connections, patch
+from api_app.analyzers_manager.exceptions import AnalyzerRunException
+from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 from ..dns_responses import dns_resolver_response
 
@@ -22,8 +22,7 @@ class DNS0EUResolver(classes.ObservableAnalyzer):
     class NotADomain(Exception):
         pass
 
-    def set_params(self, params):
-        self._query_type = params.get("query_type", "A")
+    query_type: str
 
     def run(self):
         observable = self.observable_name
@@ -41,7 +40,7 @@ class DNS0EUResolver(classes.ObservableAnalyzer):
 
             headers = {"Accept": "application/dns-json"}
             url = "https://dns0.eu"
-            params = {"name": observable, "type": self._query_type}
+            params = {"name": observable, "type": self.query_type}
 
             response = requests.get(url, headers=headers, params=params)
             response.raise_for_status()
@@ -61,7 +60,7 @@ class DNS0EUResolver(classes.ObservableAnalyzer):
             if_mock_connections(
                 patch(
                     "requests.get",
-                    return_value=MockResponse({"Answer": ["test1", "test2"]}, 200),
+                    return_value=MockUpResponse({"Answer": ["test1", "test2"]}, 200),
                 ),
             )
         ]

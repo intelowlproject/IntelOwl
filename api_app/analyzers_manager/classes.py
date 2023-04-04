@@ -5,23 +5,17 @@ import json
 import logging
 import time
 from abc import ABCMeta
-from typing import Tuple, Type
+from typing import Tuple
 
 import requests
 from django.conf import settings
 
 from api_app.core.classes import Plugin
-from api_app.exceptions import AnalyzerConfigurationException, AnalyzerRunException
-from tests.mock_utils import (
-    if_mock_connections,
-    mocked_docker_analyzer_get,
-    mocked_docker_analyzer_post,
-    patch,
-)
+from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 from .constants import HashChoices, ObservableTypes, TypeChoices
-from .dataclasses import AnalyzerConfig
-from .models import AnalyzerReport
+from .exceptions import AnalyzerConfigurationException, AnalyzerRunException
+from .models import AnalyzerConfig, AnalyzerReport
 
 logger = logging.getLogger(__name__)
 
@@ -38,16 +32,23 @@ class BaseAnalyzerMixin(Plugin, metaclass=ABCMeta):
     TypeChoices = TypeChoices
 
     @classmethod
-    def get_config_class(cls) -> Type[AnalyzerConfig]:
-        return AnalyzerConfig
+    @property
+    def config_exception(cls):
+        return AnalyzerConfigurationException
 
     @property
     def analyzer_name(self) -> str:
         return self._config.name
 
+    @classmethod
     @property
-    def report_model(self):
+    def report_model(cls):
         return AnalyzerReport
+
+    @classmethod
+    @property
+    def config_model(cls):
+        return AnalyzerConfig
 
     def get_exceptions_to_catch(self):
         """
@@ -99,13 +100,17 @@ class BaseAnalyzerMixin(Plugin, metaclass=ABCMeta):
         return result
 
     def before_run(self, *args, **kwargs):
-        self.report.update_status(status=self.report.Status.RUNNING)
+        self.report.update_status(status=self.report.Status.RUNNING.value)
 
     def after_run(self):
         self.report.report = self._validate_result(self.report.report)
 
-    def __repr__(self):
-        return f"({self.analyzer_name}, job_id: #{self.job_id})"
+    @classmethod
+    def update(cls) -> bool:
+        if hasattr(cls, "_update") and callable(cls._update):
+            cls._update()
+            return True
+        return False
 
 
 class ObservableAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
@@ -119,7 +124,13 @@ class ObservableAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
     observable_name: str
     observable_classification: str
 
+    @classmethod
+    @property
+    def python_base_path(cls):
+        return settings.BASE_ANALYZER_OBSERVABLE_PYTHON_PATH
+
     def __post__init__(self):
+        self._config: AnalyzerConfig
         # check if we should run the hash instead of the binary
         if self._job.is_sample and self._config.run_hash:
             self.observable_classification = ObservableTypes.HASH
@@ -132,7 +143,7 @@ class ObservableAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
         else:
             self.observable_name = self._job.observable_name
             self.observable_classification = self._job.observable_classification
-        return super(ObservableAnalyzer, self).__post__init__()
+        return super().__post__init__()
 
     def before_run(self, *args, **kwargs):
         super().before_run(**kwargs)
@@ -161,6 +172,11 @@ class FileAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
     filename: str
     file_mimetype: str
 
+    @classmethod
+    @property
+    def python_base_path(cls):
+        return settings.BASE_ANALYZER_FILE_PYTHON_PATH
+
     def read_file_bytes(self) -> bytes:
         self._job.file.seek(0)
         return self._job.file.read()
@@ -181,7 +197,7 @@ class FileAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
         # ...the file from AWS because it requires a path and it needs to be deleted
         self.__filepath = None
         self.file_mimetype = self._job.file_mimetype
-        return super(FileAnalyzer, self).__post__init__()
+        return super().__post__init__()
 
     def before_run(self, *args, **kwargs):
         super().before_run(**kwargs)
@@ -291,7 +307,7 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
             return self.__polling(req_key, chance, re_poll_try=re_poll_try + 1)
         else:
             status = json_data.get("status", None)
-            if status and status == "running":
+            if status and status == self._job.Status.RUNNING.value:
                 logger.info(
                     f"Poll number #{chance + 1}, "
                     f"status: 'running' <-- {self.__repr__()}"
@@ -400,6 +416,16 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
             raise AssertionError
         return resp
 
+    @staticmethod
+    def mocked_docker_analyzer_get(*args, **kwargs):
+        return MockUpResponse(
+            {"key": "test", "returncode": 0, "report": {"test": "This is a test."}}, 200
+        )
+
+    @staticmethod
+    def mocked_docker_analyzer_post(*args, **kwargs):
+        return MockUpResponse({"key": "test", "status": "running"}, 202)
+
     def _monkeypatch(self, patches: list = None):
         """
         Here, `_monkeypatch` is an instance method and not a class method.
@@ -417,11 +443,11 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
             if_mock_connections(
                 patch(
                     "requests.get",
-                    side_effect=mocked_docker_analyzer_get,
+                    side_effect=self.mocked_docker_analyzer_get,
                 ),
                 patch(
                     "requests.post",
-                    side_effect=mocked_docker_analyzer_post,
+                    side_effect=self.mocked_docker_analyzer_post,
                 ),
             )
         )
@@ -433,16 +459,10 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
         """
         basic health check: if instance is up or not (timeout - 10s)
         """
-        health_status = False
-
         try:
             requests.head(cls.url, timeout=10)
-        except requests.exceptions.ConnectionError:
-            # status=False, so pass
-            pass
-        except requests.exceptions.Timeout:
-            # status=False, so pass
-            pass
+        except requests.exceptions.RequestException:
+            health_status = False
         else:
             health_status = True
 

@@ -38,6 +38,7 @@ function TableBodyComponent({ page }) {
 
 export default function PluginWrapper({
   heading,
+  description,
   stateSelector,
   columns,
   type,
@@ -80,16 +81,19 @@ export default function PluginWrapper({
             {heading}&nbsp;
             <small className="text-muted">{dataList?.length} total</small>
           </h1>
-          <span className="text-muted">
-            Note: Hover over a configured icon to view configuration status and
-            errors if any.
-          </span>
+          <span className="text-muted">{description}</span>
         </Col>
       </Row>
       {/* Actions */}
       <Row className="bg-dark d-flex-between-center">
         <Col>
           <TableHintIcon />
+        </Col>
+        <Col>
+          <span className="text-muted">
+            Note: Hover over a configured icon to view configuration status and
+            errors if any.
+          </span>
         </Col>
         <Col className="pt-1 d-flex align-items-start justify-content-end">
           <ButtonSelect
@@ -133,6 +137,7 @@ TableBodyComponent.propTypes = {
 
 PluginWrapper.propTypes = {
   heading: PropTypes.string.isRequired,
+  description: PropTypes.string.isRequired,
   stateSelector: PropTypes.func.isRequired,
   columns: PropTypes.array.isRequired,
   type: PropTypes.number.isRequired,

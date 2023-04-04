@@ -9,14 +9,14 @@ from pathlib import PosixPath
 from typing import Dict, List, Optional
 from urllib.parse import urlparse
 
+import git
 import requests
 import yara
 from django.conf import settings
 from django.utils.functional import cached_property
-from git import Repo
 
 from api_app.analyzers_manager.classes import FileAnalyzer
-from api_app.exceptions import AnalyzerRunException
+from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from api_app.models import PluginConfig
 from intel_owl.settings._util import set_permissions
 
@@ -130,12 +130,16 @@ class YaraRepo:
                 self.result_file_name.unlink(missing_ok=True)
 
                 logger.info(f"About to pull {self.url} at {self.directory}")
-                repo = Repo(self.directory)
+                repo = git.Repo(self.directory)
                 o = repo.remotes.origin
-                o.pull(allow_unrelated_histories=True, rebase=True)
+                try:
+                    o.pull(allow_unrelated_histories=True, rebase=True)
+                except git.exc.GitCommandError as e:
+                    logger.exception(e)
+                    return
             else:
                 logger.info(f"About to clone {self.url} at {self.directory}")
-                Repo.clone_from(self.url, self.directory, depth=1)
+                git.Repo.clone_from(self.url, self.directory, depth=1)
         finally:
             if self.key:
                 logger.info("Starting cleanup of git ssh key")
@@ -152,7 +156,7 @@ class YaraRepo:
 
     @cached_property
     def head_branch(self) -> str:
-        return Repo(self.directory).head.ref.name
+        return git.Repo(self.directory).head.ref.name
 
     @cached_property
     def rules(self):
@@ -264,18 +268,18 @@ class YaraStorage:
 
 
 class YaraScan(FileAnalyzer):
-    def set_params(self, params):
-        self.ignore_rules = params.get("ignore", [])
-        self.repositories = params.get("repositories", [])
-        self.private_repositories = self._secrets.get("private_repositories", {})
-        self.local_rules = params.get("local_rules", False)
+
+    ignore: list
+    repositories: list
+    _private_repositories: dict
+    local_rules: str
 
     def run(self):
         if not self.repositories:
             raise AnalyzerRunException("There are no yara rules selected")
         storage = YaraStorage()
         for url in self.repositories:
-            if url in self.private_repositories.keys():
+            if url in self._private_repositories:
                 try:
                     PluginConfig.objects.get(
                         plugin_name=self.analyzer_name,
@@ -294,7 +298,7 @@ class YaraScan(FileAnalyzer):
                         raise AnalyzerRunException(f"Unable to find repository {url}")
                 else:
                     owner = self._job.user.username
-                key = self.private_repositories[url]
+                key = self._private_repositories[url]
             else:
                 owner = None
                 key = None
@@ -314,10 +318,19 @@ class YaraScan(FileAnalyzer):
 
     @classmethod
     def _create_storage(cls):
+        from api_app.analyzers_manager.models import AnalyzerConfig
+
         storage = YaraStorage()
-        for analyzer_name, ac in cls.get_config_class().get_from_python_module(cls):
+        for config in AnalyzerConfig.objects.filter(
+            python_module=cls.python_module, disabled=False
+        ):
+            new_urls = config.params["repositories"]["default"]
+            logger.info(f"Adding default configuration urls {new_urls}")
+            for url in new_urls:
+                storage.add_repo(url)
+
             for plugin in PluginConfig.objects.filter(
-                plugin_name=analyzer_name,
+                plugin_name=config.name,
                 type=PluginConfig.PluginType.ANALYZER,
                 config_type=PluginConfig.ConfigType.SECRET,
                 attribute="private_repositories",
@@ -331,14 +344,9 @@ class YaraScan(FileAnalyzer):
                     logger.info(f"Adding personal private url {url}")
                     storage.add_repo(url, owner, ssh_key)
 
-            new_urls = ac.param_values.get("repositories", [])
-            logger.info(f"Adding configuration urls {new_urls}")
-            for url in new_urls:
-                storage.add_repo(url)
-
             # we are downloading even custom signatures for each analyzer
             for plugin in PluginConfig.objects.filter(
-                plugin_name=analyzer_name,
+                plugin_name=config.name,
                 type=PluginConfig.PluginType.ANALYZER,
                 config_type=PluginConfig.ConfigType.PARAMETER,
                 attribute="repositories",

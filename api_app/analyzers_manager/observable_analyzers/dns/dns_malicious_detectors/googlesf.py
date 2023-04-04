@@ -2,28 +2,37 @@
 # See the file 'LICENSE' for copying permission.
 
 """Check if the domains is reported as malicious for GoogleSafeBrowsing"""
+from typing import Dict, List
 
-from pysafebrowsing import SafeBrowsing
+import pysafebrowsing
 
 from api_app.analyzers_manager import classes
-from api_app.exceptions import AnalyzerRunException
+from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from tests.mock_utils import if_mock_connections, patch
 
 from ..dns_responses import malicious_detector_response
 
 
+class MockUpSafeBrowsing:
+    def lookup_urls(self, urls: List[str]) -> Dict:
+        return {
+            url: {
+                "malicious": True,
+                "cache": "test",
+                "threats": "test",
+                "platforms": "test",
+            }
+            for url in urls
+        }
+
+
 class GoogleSF(classes.ObservableAnalyzer):
     """Check if observable analyzed is marked as malicious for Google SafeBrowsing"""
 
-    def set_params(self, params):
-        # so `observable_name` is available inside `_monkeypatch` method
-        # as `cls.observable_name`
-        self.__class__.observable_name = self.observable_name
+    _api_key_name: str
 
     def run(self):
-        api_key = self._secrets["api_key_name"]
-
-        sb_instance = SafeBrowsing(api_key)
+        sb_instance = pysafebrowsing.SafeBrowsing(self._api_key_name)
         response = sb_instance.lookup_urls([self.observable_name])
         if self.observable_name in response and isinstance(
             response[self.observable_name], dict
@@ -45,18 +54,7 @@ class GoogleSF(classes.ObservableAnalyzer):
     def _monkeypatch(cls):
         patches = [
             if_mock_connections(
-                patch.object(
-                    SafeBrowsing,
-                    "lookup_urls",
-                    return_value={
-                        cls.observable_name: {
-                            "malicious": True,
-                            "cache": "test",
-                            "threats": "test",
-                            "platforms": "test",
-                        }
-                    },
-                ),
+                patch("pysafebrowsing.SafeBrowsing", return_value=MockUpSafeBrowsing()),
             )
         ]
         return super()._monkeypatch(patches=patches)

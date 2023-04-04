@@ -2,7 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
-from tests.mock_utils import MockResponse, if_mock_connections, patch
+from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 from .vt3_base import VirusTotalv3AnalyzerMixin
 
@@ -24,7 +24,7 @@ class VirusTotalv3(ObservableAnalyzer, VirusTotalv3AnalyzerMixin):
                     "requests.get",
                     side_effect=[
                         # for _vt_get_report
-                        MockResponse(
+                        MockUpResponse(
                             {
                                 "data": {
                                     "attributes": {
@@ -38,7 +38,7 @@ class VirusTotalv3(ObservableAnalyzer, VirusTotalv3AnalyzerMixin):
                             200,
                         ),
                         # for _vt_scan_file
-                        MockResponse(
+                        MockUpResponse(
                             {
                                 "data": {
                                     "attributes": {
@@ -49,15 +49,15 @@ class VirusTotalv3(ObservableAnalyzer, VirusTotalv3AnalyzerMixin):
                             200,
                         ),
                         # for /behaviour_summary
-                        MockResponse({}, 200),
+                        MockUpResponse({}, 200),
                         # for /sigma_analyses
-                        MockResponse({}, 200),
+                        MockUpResponse({}, 200),
                     ],
                 ),
                 patch(
                     "requests.post",
                     # for _vt_scan_file
-                    return_value=MockResponse(
+                    return_value=MockUpResponse(
                         {"scan_id": "scan_id_test", "data": {"id": "id_test"}}, 200
                     ),
                 ),

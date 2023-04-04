@@ -17,13 +17,11 @@ class StringsInfo(FileAnalyzer, DockerBasedAnalyzer):
     timeout: int = 60 * 9
     # whereas subprocess timeout is kept as 60 * 9 = 9 minutes
 
-    def set_params(self, params):
-        self.max_no_of_strings = int(params.get("max_number_of_strings", 500))
-        self.max_chars_for_string = int(params.get("max_characters_for_string", 1000))
-
-        # If set, this module will use Machine Learning feature
-        # CARE!! ranked_strings could be cpu/ram intensive and very slow
-        self.rank_strings = params.get("rank_strings", False)
+    max_number_of_strings: int
+    max_characters_for_string: int
+    # If set, this module will use Machine Learning feature
+    # CARE!! ranked_strings could be cpu/ram intensive and very slow
+    rank_strings: int
 
     def run(self):
         # get binary
@@ -37,21 +35,21 @@ class StringsInfo(FileAnalyzer, DockerBasedAnalyzer):
         }
         req_files = {fname: binary}
         result = self._docker_run(req_data, req_files)
-        exceed_max_strings = len(result) > self.max_no_of_strings
+        exceed_max_strings = len(result) > self.max_number_of_strings
         if exceed_max_strings:
-            result = list(result[: self.max_no_of_strings])
+            result = list(result[: self.max_number_of_strings])
         if self.rank_strings:
             args = [
                 "rank_strings",
                 "--limit",
-                str(self.max_no_of_strings),
+                str(self.max_number_of_strings),
                 "--strings",
                 json_dumps(result),
             ]
             req_data = {"args": args, "timeout": self.timeout}
             result = self._docker_run(req_data)
         result = {
-            "data": [row[: self.max_chars_for_string] for row in result],
+            "data": [row[: self.max_characters_for_string] for row in result],
             "exceeded_max_number_of_strings": exceed_max_strings,
         }
         return result

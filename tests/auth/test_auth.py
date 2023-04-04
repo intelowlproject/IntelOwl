@@ -1,3 +1,6 @@
+# This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
+# See the file 'LICENSE' for copying permission.
+
 from django.contrib.auth import get_user_model
 from django.core import mail
 from django.core.cache import cache

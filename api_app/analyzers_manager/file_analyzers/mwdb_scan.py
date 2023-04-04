@@ -8,8 +8,7 @@ import mwdblib
 from requests import HTTPError
 
 from api_app.analyzers_manager.classes import FileAnalyzer
-from api_app.exceptions import AnalyzerRunException
-from api_app.helpers import calculate_sha256
+from api_app.analyzers_manager.exceptions import AnalyzerRunException
 from tests.mock_utils import MagicMock, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
@@ -29,7 +28,7 @@ def mocked_mwdb_response(*args, **kwargs):
     return Response.return_value
 
 
-class MockedUploadObject:
+class MockUpUploadObject:
     def __init__(self):
         self.data = {"id": "id_test"}
 
@@ -37,30 +36,32 @@ class MockedUploadObject:
         return
 
 
-class MockedQueryObject:
+class MockUpQueryObject:
     def __init__(self):
-        self.metakeys = {"karton": "test"}
+        self.attributes = {"karton": "test"}
         self.data = {"children": [], "parents": []}
 
 
-class MockedMWDB:
+class MockUpMWDB:
     def __init__(self):
         pass
 
     def upload_file(self, *args, **kwargs):
-        return MockedUploadObject()
+        return MockUpUploadObject()
 
     def query_file(self, *args, **kwargs):
-        return MockedQueryObject()
+        return MockUpQueryObject()
 
 
 class MWDB_Scan(FileAnalyzer):
-    def set_params(self, params):
-        self.__api_key = self._secrets["api_key_name"]
-        self.upload_file = params.get("upload_file", False)
-        self.private = params.get("private", True)
+    _api_key_name: str
+    upload_file: bool
+    private: bool
+    max_tries: int
+
+    def config(self):
+        super().config()
         self.public = not self.private
-        self.max_tries = params.get("max_tries", 50)
         self.poll_distance = 5
 
     def adjust_relations(self, base, key, recursive=True):
@@ -87,8 +88,8 @@ class MWDB_Scan(FileAnalyzer):
     def run(self):
         result = {}
         binary = self.read_file_bytes()
-        query = calculate_sha256(binary)
-        self.mwdb = mwdblib.MWDB(api_key=self.__api_key)
+        query = self._job.sha256
+        self.mwdb = mwdblib.MWDB(api_key=self._api_key_name)
 
         if self.upload_file:
             logger.info(f"mwdb_scan uploading sample: {self.md5}")
@@ -100,10 +101,10 @@ class MWDB_Scan(FileAnalyzer):
                 logger.info(
                     f"mwdb_scan sample: {self.md5} polling for result try #{_try + 1}"
                 )
-                time.sleep(self.poll_distance)
                 file_info = self.mwdb.query_file(file_object.data["id"])
-                if "karton" in file_info.metakeys.keys():
+                if "karton" in file_info.attributes.keys():
                     break
+                time.sleep(self.poll_distance)
             else:
                 raise AnalyzerRunException("max retry attempts exceeded")
         else:
@@ -128,6 +129,6 @@ class MWDB_Scan(FileAnalyzer):
     @classmethod
     def _monkeypatch(cls):
         patches = [
-            if_mock_connections(patch("mwdblib.MWDB", return_value=MockedMWDB()))
+            if_mock_connections(patch("mwdblib.MWDB", return_value=MockUpMWDB()))
         ]
         return super()._monkeypatch(patches=patches)

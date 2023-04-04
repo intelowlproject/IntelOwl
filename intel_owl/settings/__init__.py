@@ -16,6 +16,8 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.postgres",
+    # admin
+    "prettyjson",
     # celery, elasticsearch
     "django_celery_results",
     "django_elasticsearch_dsl",
@@ -34,19 +36,22 @@ INSTALLED_APPS = [
     "api_app",
     "api_app.analyzers_manager",
     "api_app.connectors_manager",
+    "api_app.visualizers_manager",
     "api_app.playbooks_manager",
     # auth
     "rest_email_auth",
     "drf_recaptcha",
 ]
 
-# inject from other modules
-from .aqueue import *  # lgtm [py/polluting-import]
+
+from .auth import *  # lgtm [py/polluting-import]
 from .aws import *  # lgtm [py/polluting-import]
 from .cache import *  # lgtm [py/polluting-import]
+
+# inject from other modules
+from .celery import *  # lgtm [py/polluting-import]
 from .certego import *  # lgtm [py/polluting-import]
 from .commons import *  # lgtm [py/polluting-import]
-from .dauth import *  # lgtm [py/polluting-import]
 from .db import *  # lgtm [py/polluting-import]
 from .django import *  # lgtm [py/polluting-import]
 from .elasticsearch import *  # lgtm [py/polluting-import]

@@ -12,13 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 class XlmMacroDeobfuscator(FileAnalyzer):
-    def set_params(self, params):
-        self.passwords_to_check = [""]
-        additional_passwords_to_check = params.get("passwords_to_check", [])
-        if isinstance(additional_passwords_to_check, list):
-            self.passwords_to_check.extend(additional_passwords_to_check)
-        elif isinstance(additional_passwords_to_check, str):
-            self.passwords_to_check.append(additional_passwords_to_check)
+    passwords_to_check: list
 
     def run(self):
         results = {}

@@ -8,7 +8,7 @@ import usePluginConfigurationStore from "../../../stores/usePluginConfigurationS
 import markdownToHtml from "../../common/markdownToHtml";
 
 // constants
-const stateSelector = (state) => [state.analyzersJSON, state.connectorsJSON];
+const stateSelector = (state) => [state.analyzers, state.connectors];
 
 // components
 export default function RuntimeConfigurationModal(props) {
@@ -16,32 +16,39 @@ export default function RuntimeConfigurationModal(props) {
 
   const [jsonInput, setJsonInput] = React.useState({});
 
-  const [analyzersJSON, connectorsJSON] =
-    usePluginConfigurationStore(stateSelector);
+  const [analyzers, connectors] = usePluginConfigurationStore(stateSelector);
 
+  console.debug("RuntimeConfigurationModal - formik:");
+  console.debug(formik);
+
+  // For each selected plugin we want to show the config (we need to extract it from the data previously downloaded).
   const combinedParamsMap = React.useMemo(
     () => ({
+      // for each selected analyzer we extract the config and append it to the other configs
       ...formik.values.analyzers.reduce(
-        (acc, { value: name }) => ({
-          ...acc,
-          [name]: analyzersJSON?.[name].params,
+        // { value: analyzerName } extract the "value" field from the formik values and allow to use it as analyzerName
+        (configurationsToDisplay, { value: analyzerName }) => ({
+          // in this way we add to the new object the previous object
+          ...configurationsToDisplay,
+          // find the config of the selected analyzer and add it
+          [analyzerName]: analyzers.find(
+            (analyzer) => analyzer.name === analyzerName
+          )?.params,
         }),
         {}
       ),
+      // same for the connectors
       ...formik.values.connectors.reduce(
-        (acc, { value: name }) => ({
-          ...acc,
-          [name]: connectorsJSON?.[name].params,
+        (configurationsToDisplay, { value: connectorName }) => ({
+          ...configurationsToDisplay,
+          [connectorName]: connectors.find(
+            (connector) => connector.name === connectorName
+          )?.params,
         }),
         {}
       ),
     }),
-    [
-      formik.values.analyzers,
-      formik.values.connectors,
-      analyzersJSON,
-      connectorsJSON,
-    ]
+    [formik.values.analyzers, formik.values.connectors, analyzers, connectors]
   );
 
   const defaultNameParamsMap = React.useMemo(

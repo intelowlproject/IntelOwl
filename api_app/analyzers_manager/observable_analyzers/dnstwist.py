@@ -6,25 +6,31 @@ import logging
 import subprocess
 from ipaddress import AddressValueError, IPv4Address
 from shutil import which
+from unittest.mock import patch
 from urllib.parse import urlparse
 
 from django.conf import settings
 
 from api_app.analyzers_manager import classes
-from api_app.exceptions import AnalyzerRunException
+from api_app.analyzers_manager.exceptions import AnalyzerRunException
+from tests.mock_utils import if_mock_connections
 
 logger = logging.getLogger(__name__)
+
+
+class MockPopen:
+    def communicate(self):
+        return (b"{}", b"")
 
 
 class DNStwist(classes.ObservableAnalyzer):
     DNS_TWIST_PATH = settings.BASE_DIR / "dnstwist-dictionaries"
     COMMAND: str = "dnstwist"
 
-    def set_params(self, params):
-        self._ssdeep = params.get("ssdeep", False)
-        self._mxcheck = params.get("mxcheck", False)
-        self._tld = params.get("tld", False)
-        self._tld_dict = params.get("tld_dict", "abused_tlds.dict")
+    ssdeep: bool
+    mxcheck: bool
+    tld: bool
+    tld_dict: str
 
     def run(self):
         if not which(self.COMMAND):
@@ -44,19 +50,19 @@ class DNStwist(classes.ObservableAnalyzer):
                 )
 
         final_report = {
-            "ssdeep": self._ssdeep,
-            "mxcheck": self._mxcheck,
-            "tld": self._tld,
+            "ssdeep": self.ssdeep,
+            "mxcheck": self.mxcheck,
+            "tld": self.tld,
         }
 
         args = [self.COMMAND, "--registered", "--format", "json"]
-        if self._ssdeep:
+        if self.ssdeep:
             args.append("--ssdeep")
-        if self._mxcheck:
+        if self.mxcheck:
             args.append("--mxcheck")
-        if self._tld:
+        if self.tld:
             args.append("--tld")
-            args.append(self.DNS_TWIST_PATH / self._tld_dict)
+            args.append(self.DNS_TWIST_PATH / self.tld_dict)
 
         args.append(domain)
 
@@ -69,8 +75,7 @@ class DNStwist(classes.ObservableAnalyzer):
         logger.warning(stderr.decode("utf-8"))
         final_report["error"] = stderr.decode("utf-8")
 
-        dns_report = stdout.decode("utf-8"), stderr
-        dns_str = dns_report[0]
+        dns_str = stdout.decode("utf-8")
 
         try:
             if dns_str:
@@ -80,3 +85,15 @@ class DNStwist(classes.ObservableAnalyzer):
             raise AnalyzerRunException(f"dns_str: {dns_str}. Error: {e}")
 
         return final_report
+
+    @classmethod
+    def _monkeypatch(cls):
+        patches = [
+            if_mock_connections(
+                patch(
+                    "subprocess.Popen",
+                    return_value=MockPopen(),
+                ),
+            )
+        ]
+        return super()._monkeypatch(patches=patches)

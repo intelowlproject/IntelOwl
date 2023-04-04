@@ -1,0 +1,37 @@
+[  {
+            "model": "certego_saas_user.user",
+            "pk": 1,
+            "fields": {
+                      "password": "",
+                      "last_login": null,
+                      "is_superuser": true,
+                      "username": "superuser@intelowl.org",
+                      "first_name": "",
+                      "last_name": "",
+                      "email": "",
+                      "is_staff": true,
+                      "is_active": true,
+                      "date_joined": "2023-02-23T08:53:02.830Z",
+                      "groups": [],
+                      "user_permissions": []
+            }
+  },
+  {
+          "model": "certego_saas_user.user",
+          "pk": 2,
+          "fields": {
+                    "password": "",
+                    "last_login": null,
+                    "is_superuser": false,
+                    "username": "user",
+                    "first_name": "",
+                    "last_name": "",
+                    "email": "",
+                    "is_staff": false,
+                    "is_active": true,
+                    "date_joined": "2023-02-23T08:53:02.830Z",
+                    "groups": [],
+                    "user_permissions": []
+          }
+  }
+]

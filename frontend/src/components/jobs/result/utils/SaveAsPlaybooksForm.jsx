@@ -127,7 +127,7 @@ SaveAsPlaybookForm.propTypes = {
 };
 
 SaveAsPlaybookButton.propTypes = {
-  jobId: PropTypes.func.isRequired,
+  jobId: PropTypes.number.isRequired,
 };
 
 export default SaveAsPlaybookButton;

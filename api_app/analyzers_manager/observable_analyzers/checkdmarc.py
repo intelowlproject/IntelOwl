@@ -6,7 +6,7 @@ import subprocess
 from shutil import which
 
 from api_app.analyzers_manager import classes
-from api_app.exceptions import AnalyzerRunException
+from api_app.analyzers_manager.exceptions import AnalyzerRunException
 
 
 class CheckDMARC(classes.ObservableAnalyzer):

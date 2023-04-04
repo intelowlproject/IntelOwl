@@ -13,8 +13,13 @@ from unittest.mock import MagicMock, patch  # noqa: F401
 from django.conf import settings
 
 
+class MockUpRequest:
+    def __init__(self, user):
+        self.user = user
+
+
 # class for mocking responses
-class MockResponse:
+class MockUpResponse:
     @dataclass()
     class Request:
         def __init__(self):
@@ -58,13 +63,3 @@ def if_mock_connections(*decorators):
         return f
 
     return apply_all if settings.MOCK_CONNECTIONS else lambda x: x
-
-
-def mocked_docker_analyzer_get(*args, **kwargs):
-    return MockResponse(
-        {"key": "test", "returncode": 0, "report": {"test": "This is a test."}}, 200
-    )
-
-
-def mocked_docker_analyzer_post(*args, **kwargs):
-    return MockResponse({"key": "test", "status": "running"}, 202)

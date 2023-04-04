@@ -165,55 +165,47 @@ You may want to look at a few existing examples to start to build a new one, suc
 After having written the new python module, you have to remember to:
 
 1. Put the module in the `file_analyzers` or `observable_analyzers` directory based on what it can analyze
-2. Add a new entry in the [analyzer configuration](https://github.com/intelowlproject/IntelOwl/blob/master/configuration/analyzer_config.json) following alphabetical order:
+2. Remember to use `_monkeypatch()` in its class to create automated tests for the new analyzer. This is a trick to have tests in the same class of its analyzer.
+3. Create the configuration inside django admin in `Analyzers_manager/AnalyzerConfigs` (* = mandatory, ~ = mandatory on conditions)
+   1. *Name: specific name of the configuration
+   2. *Python module: <module_name>.<class_name>
+   3. *Description: description of the configuration
+   4. *Config:
+      1. *Queue: celery queue that will be used
+      2. *Soft_time_limit: maximum time for the task execution
+   5. *Secrets: 
+      1. YouSecretKey:
+         1. *type: data type, `string`, `list`, `dict`, `integer`, `boolean`, `float`
+         2. *description: description of the secret
+         3. *required: `true` or `false`, meaning that is required to allow the run of the analyzer
+         4. default: default value of the secret
+      2. YourSecretKey2:
+         1. ...
+   6. *Params:
+      1. YourParam:
+         1. *type: data type, `string`, `list`, `dict`, `integer`, `boolean`, `float`
+         2. *description: description of the secret
+         3. *default: default value of the parameter
+   7. *Type: `observable` or `file`
+   8. *Docker based: if the analyzer run through a docker instance
+   9. *Maximum tlp: maximum tlp to allow the run on the connector
+   10. ~Observable supported: required if `type` is `observable`
+   11. ~Supported filetypes: required if `type` is `file` and `not supported filetypes` is empty
+   12. Run hash: if the analyzer supports hash as inputs
+   13. ~Run hash type: required if `run hash` is `True`
+   14. ~Not supported filetypes: required if `type` is `file` and `supported filetypes` is empty
 
-Example:
+4. To allow other people to use your configuration, that is now stored in your local database, you have to export it and create a datamigration
+   1. objects = `docker exec -ti intelowl_uwsgi  python3 manage.py dumpdata analyzers_manager.AnalyzerConfig --pks "<your analyzer name>"`
+   2. Create a new migration file inside `/analyzers_manager/migrations/`
+      1. You can take the `migrate` and `reverse_migrate` functions from `/playbooks_manager/migrations/0005_static_analysis`, both
+      2. Remember to correctly set the `dependencies`
+      3. Remember to correctly se the `objects`
 
-```json
-"Analyzer_Name": {
-    "type": "file", // or "observable"
-    "python_module": "<module_name>.<class_name>",
-    "description": "very cool analyzer",
-    "disabled": false,
-    "external_service": true,
-    "leaks_info": true,
-    "run_hash": true, // required only for file analyzer
-    "observable_supported": ["ip", "domain", "url", "hash", "generic"], // required only for observable analyzer
-    "supported_filetypes": ["application/javascript"], // required only for file analyzer
-    "config": {
-      "soft_time_limit": 100,
-      "queue": "long",
-    },
-    "secrets": {
-      "api_key_name": {
-        "env_var_key": "ANALYZER_SPECIAL_KEY",
-        "type": "string",
-        "required": true,
-        "default": null,
-        "description": "API Key for the analyzer",
-      }
-    }
-},
-```
-
-The `config` can be used in case the new analyzer uses specific configuration arguments and `secrets` can be used to declare any secrets the analyzer requires in order to run (Example: API Key, URL, etc.).
-In that way you can create more than one analyzer for a specific python module, each one based on different configurations.
-MISP and Yara Analyzers are a good example of this use case: for instance, you can use different analyzers for different MISP instances.
-
-  <div class="admonition note">
-  <p class="admonition-title">Note</p>
-  Please see <a href="Usage.html#analyzers-customization">Analyzers customization section</a> to get the explanation of the other available keys.
-  </div>
-
-3. Remember to use `_monkeypatch()` in its class to create automated tests for the new analyzer. This is a trick to have tests in the same class of its analyzer.
-
-4. If a File analyzer was added, define its name in [test_file_scripts.py](https://github.com/intelowlproject/IntelOwl/blob/master/tests/analyzers_manager/test_file_scripts.py) (not required for Observable Analyzers).
-
+    
 5. Add the new analyzer in the lists in the docs: [Usage](./Usage.md). Also, if the analyzer provides additional optional configuration, add the available options here: [Advanced-Usage](./Advanced-Usage.html#analyzers-with-special-configuration)
 
-6. Ultimately, add the required secrets in the files `docker/env_file_app_template`, `docker/env_file_app_ci` and in the `docs/Installation.md`.
-
-7. In the Pull Request remember to provide some real world examples (screenshots and raw JSON results) of some successful executions of the analyzer to let us understand how it would work.
+6. In the Pull Request remember to provide some real world examples (screenshots and raw JSON results) of some successful executions of the analyzer to let us understand how it would work.
 
 ### Integrating a docker based analyzer
 
@@ -236,71 +228,50 @@ You may want to look at a few existing examples to start to build a new one:
 After having written the new python module, you have to remember to:
 
 1. Put the module in the `connectors` directory
-2. Add a new entry in the [connector_config.json](https://github.com/intelowlproject/IntelOwl/blob/master/configuration/connector_config.json) following alphabetical order:
+2. Remember to use `_monkeypatch()` in its class to create automated tests for the new connector. This is a trick to have tests in the same class of its connector.
+3. Create the configuration inside django admin in `Connectors_manager/ConnectorConfigs` (* = mandatory, ~ = mandatory on conditions)
+   1. *Name: specific name of the configuration
+   2. *Python module: <module_name>.<class_name>
+   3. *Description: description of the configuration
+   4. *Config:
+      1. *Queue: celery queue that will be used
+      2. *Soft_time_limit: maximum time for the task execution
+   5. *Secrets: 
+      1. YouSecretKey:
+         1. *type: data type, `string`, `list`, `dict`, `integer`, `boolean`, `float`
+         2. *description: description of the secret
+         3. *required: `true` or `false`, meaning that is required to allow the run of the analyzer
+         4. default: default value of the secret
+      2. YourSecretKey2:
+         1. ...
+   6. *Params:
+      1. YourParam:
+         1. *type: data type, `string`, `list`, `dict`, `integer`, `boolean`, `float`
+         2. *description: description of the secret
+         3. *default: default value of the parameter
+   7. *Maximum tlp: maximum tlp to allow the run on the connector
+   8. *Run on failure: if the connector should be run even if the job fails
 
-Example:
-
-```json
-"Connector_Name": {
-    "python_module": "<module_name>.<class_name>",
-    "description": "very cool connector",
-    "maximum_tlp": "CLEAR",
-    "run_on_failure": false,
-    "config": {
-      "soft_time_limit": 100,
-      "queue": "default",
-    }
-    "secrets": {
-         "env_var_key": "CONNECTOR_SPECIAL_KEY",
-         "type": "string",
-         "required": true,
-         "default": null,
-         "description": "API Key for the connector",
-    }
-},
-```
-
-Remember to set at least:
-
-- `python_module`: name of the task that the connector must launch
-- `description`: little description of the connector
-- `maximum_tlp`: maximum TLP of the analysis up to which the connector is allowed to run.
-
-Similar to analyzers, the `config` can be used in case the new connector uses specific configuration arguments and `secrets` can be used to declare any secrets the connector requires in order to run (Example: API Key).
-
-Please see [Connectors customization section](./Usage.md#connectors-customization) to get the explanation of the other available keys.
-
-3. Add the new connector in the lists in the docs: [Usage](./Usage.md). Also, if the connector provides additional optional configuration, add the available options here: [Advanced-Usage](./Advanced-Usage.md)
-4. Follow steps 4-5 of [How to add a new analyzer](./Contribute.md#how-to-add-a-new-analyzer)
+4. To allow other people to use your configuration, that is now stored in your local database, you have to export it and create a datamigration
+   1. objects = `docker exec -ti intelowl_uwsgi  python3 manage.py dumpdata connectors_manager.ConnectorConfig --pks "<your connector name>"`
+   2. Create a new migration file inside `/connectors_manager/migrations/`
+      1. You can take the `migrate` and `reverse_migrate` functions from `/playbooks_manager/migrations/0005_static_analysis`, both
+      2. Remember to correctly set the `dependencies`
+      3. Remember to correctly se the `objects`
 
 ## How to add a new Playbook
-
-You may want to look at the existing [playbook_configuration.json](https://github.com/intelowlproject/IntelOwl/blob/master/configuration/playbooks_config.json) file. To set up a new Playbook, Add a new entry to the configuraions file in alphabetical order:
-
-Example:
-
-```json
-"Playbook_Name": {
-    "description": "very cool playbook",
-    "analyzers": {
-            "AbuseIPDB": {},
-            "Shodan": {
-                "include_honeyscore": true
-            },
-            "FireHol_IPList": {}
-    },
-    "connectors": {
-            "MISP": {
-                "ssl_check": true
-            },
-            "OpenCTI": {
-                "ssl_verify": true
-            }
-    }
-},
-```
-
-Here, The parameters for the analyzers and connectors to be used go in as an entry in the dictionary value.
+1. Create the configuration inside django admin in `Playbooks_manager/PlaybookConfigs` (* = mandatory, ~ = mandatory on conditions)
+   1. *Name: specific name of the configuration
+   2. *Description: description of the configuration
+   3. *Type: list of types that are supported by the playbook
+   4. *Analyzers: List of analyzers that will be run
+   5. *Connectors: List of connectors that will be run
+2. To allow other people to use your configuration, that is now stored in your local database, you have to export it and create a datamigration
+   1. objects = `docker exec -ti intelowl_uwsgi  python3 manage.py dumpdata playbooks_manager.PlaybookConfig --pks "<your playbook name>"`
+   2. Create a new migration file inside `/playbooks_manager/migrations/`
+      1. You can take the `migrate` and `reverse_migrate` functions from `/playbooks_manager/migrations/0005_static_analysis`, both
+      2. Remember to correctly set the `dependencies`
+      3. Remember to correctly se the `objects`
 
 ## Modifying functionalities of the Certego packages
 
@@ -370,46 +341,19 @@ Examples:
 $ docker exec intelowl_uwsgi python3 manage.py test
 ```
 
+##### Run tests for a particular plugin
+
+To test a plugin in real environment, i.e. without mocked data, we suggest that you use the GUI of IntelOwl directly.
+Meaning that you have your plugin configured, you have selected a correct observable/file to analyze,
+and the final report shown in the GUI of IntelOwl is exactly what you wanted. 
+
+
 ##### Run tests available in a particular file
 
 Examples:
 
 ```bash
 $ docker exec intelowl_uwsgi python3 manage.py test tests.api_app tests.test_crons # dotted paths
-```
-
-##### Run tests for a particular analyzer or class of analyzers
-
-You can leverage an helper script. Syntax:
-
-```bash
-$ docker/scripts/test_analyzers.sh <analyzer_class> <comma_separated_analyzer_names>
-```
-
-Examples:
-
-- Observable analyzers tests:
-
-  ```bash
-  $ docker/scripts/test_analyzers.sh ip Shodan_Honeyscore,Darksearch_Query # run only the specified analyzers
-  $ docker/scripts/test_analyzers.sh domain # run all domain analyzers
-  ```
-
-  supports: `ip`, `domain`, `url`, `hash`, `generic`.
-
-- File analyzers tests:
-
-  ```bash
-  $ docker/scripts/test_analyzers.sh exe File_Info,PE_Info # run only the specified analyzers
-  $ docker/scripts/test_analyzers.sh pdf # run all PDF analyzers
-  ```
-
-  supports: `exe`, `dll`, `doc`, `excel`, `rtf`, `html`, `pdf`, `js`, `apk`.
-
-Otherwise, you can use the normal Django syntax like previously shown. Example:
-
-```bash
-$ docker exec intelowl_uwsgi python3 manage.py test tests.analyzers_manager.test_observable_scripts.GenericAnalyzersTestCase
 ```
 
 #### Frontend

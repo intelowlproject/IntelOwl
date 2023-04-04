@@ -75,11 +75,11 @@ const groupPlaybooks = (playbooksList) => {
 
   playbooksList.forEach((obj) => {
     // filter on basis of type
-    if (obj.supports.includes("file")) {
+    if (obj.type.includes("file")) {
       grouped.file.push(obj);
     }
 
-    obj.supports.forEach((clsfn) => {
+    obj.type.forEach((clsfn) => {
       if (clsfn !== "file") {
         grouped[clsfn].push(obj);
       }
@@ -89,8 +89,12 @@ const groupPlaybooks = (playbooksList) => {
 };
 
 const stateSelector = (state) => [
-  state.loading,
-  state.error,
+  state.analyzersLoading,
+  state.connectorsLoading,
+  state.playbooksLoading,
+  state.analyzersError,
+  state.connectorsError,
+  state.playbooksError,
   groupAnalyzers(state.analyzers),
   state.connectors,
   groupPlaybooks(state.playbooks),
@@ -185,8 +189,12 @@ export default function ScanForm() {
 
   // API/ store
   const [
-    pluginsLoading,
-    pluginsError,
+    analyzersLoading,
+    connectorsLoading,
+    playbooksLoading,
+    analyzersError,
+    connectorsError,
+    playbooksError,
     analyzersGrouped,
     connectors,
     playbooksGrouped,
@@ -208,7 +216,7 @@ export default function ScanForm() {
               </div>
               {!v.verification.configured && (
                 <div className="small text-danger">
-                  ⚠ {v.verification.error_message}
+                  ⚠ {v.verification.details}
                 </div>
               )}
             </div>
@@ -237,7 +245,7 @@ export default function ScanForm() {
               </div>
               {!v.verification.configured && (
                 <div className="small text-danger">
-                  ⚠ {v.verification.error_message}
+                  ⚠ {v.verification.details}
                 </div>
               )}
             </div>
@@ -281,9 +289,11 @@ export default function ScanForm() {
     (values) => {
       const errors = {};
 
-      if (pluginsError) {
-        errors.analyzers = pluginsError;
-        errors.connectors = pluginsError;
+      if (analyzersError) {
+        errors.analyzers = analyzersError;
+      }
+      if (connectorsError) {
+        errors.connectors = connectorsError;
       }
 
       if (values.classification === "file") {
@@ -297,14 +307,14 @@ export default function ScanForm() {
       }
       return errors;
     },
-    [pluginsError]
+    [analyzersError, connectorsError]
   );
 
   const ValidatePlaybooks = React.useCallback(
     (values) => {
       const errors = {};
-      if (pluginsError) {
-        errors.playbooks = pluginsError;
+      if (playbooksError) {
+        errors.playbooks = playbooksError;
       }
       if (values.playbooks.length === 0) {
         return `Please select a playbook!`;
@@ -320,7 +330,7 @@ export default function ScanForm() {
       }
       return errors;
     },
-    [pluginsError]
+    [playbooksError]
   );
 
   const startPlaybooks = React.useCallback(
@@ -552,8 +562,8 @@ export default function ScanForm() {
                     </Label>
                     <Col sm={9}>
                       <Loader
-                        loading={pluginsLoading}
-                        error={pluginsError}
+                        loading={analyzersLoading}
+                        error={analyzersError}
                         render={() => (
                           <>
                             <MultiSelectDropdownInput
@@ -577,7 +587,7 @@ export default function ScanForm() {
                       Select Connectors
                     </Label>
                     <Col sm={9}>
-                      {!(pluginsLoading || pluginsError) && (
+                      {!(connectorsLoading || connectorsError) && (
                         <>
                           <MultiSelectDropdownInput
                             options={connectorOptions}
@@ -633,7 +643,7 @@ export default function ScanForm() {
                   <Label sm={3} htmlFor="playbooks">
                     Select Playbooks
                   </Label>
-                  {!(pluginsLoading || pluginsError) && (
+                  {!(playbooksLoading || playbooksError) && (
                     <Col sm={9}>
                       <MultiSelectDropdownInput
                         options={playbookOptions}

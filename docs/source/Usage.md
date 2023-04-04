@@ -10,6 +10,7 @@ This page includes the most important things to know and understand when using I
   - [Analyzers](#analyzers)
   - [Connectors](#connectors)
   - [Managing Analyzers and Connectors](#managing-analyzers-and-connectors)
+  - [Visualizers](#visualizers)
   - [Playbooks](#playbooks)
 
 ## Client
@@ -89,7 +90,6 @@ If your intention is to publish IntelOwl as a Service you should first remember 
 In that case, you would need to [re-build](/Installation.md#update-and-rebuild) the application to have the changes properly reflected.
 
 
-
 ## TLP Support
 
 IntelOwl supports the **Traffic Light Protocol** (TLP) to facilitate sharing of job analysis results.
@@ -110,6 +110,7 @@ There are 3 types of plugins:
 
 - [Analyzers](#analyzers)
 - [Connectors](#connectors)
+- [Visualizers](#visualizers)
 - [Playbooks](#playbooks)
 
 ### Analyzers
@@ -324,34 +325,20 @@ You can create new analyzers based on already existing modules by changing the c
 You may want to change this configuration to add new analyzers or to change the configuration of some of them. The name of the analyzers can be changed at every moment based on your wishes.
 
 The following are all the keys that you can change without touching the source code:
-
+- `name`: Name of the analyzer
+- `description`: Description of the analyzer
+- `python_module`: Python path of the class that will be executed 
 - `disabled`: you can choose to disable certain analyzers, then they won't appear in the dropdown list and won't run if requested.
 - `leaks_info`: if set, in the case you specify via the API that a resource is sensitive, the specific analyzer won't be executed
 - `external_service`: if set, in the case you specify via the API to exclude external services, the specific analyzer won't be executed
 - `supported_filetypes`: can be populated as a list. If set, if you ask to analyze a file with a different mimetype from the ones you specified, it won't be executed
 - `not_supported_filetypes`: can be populated as a list. If set, if you ask to analyze a file with a mimetype from the ones you specified, it won't be executed
 - `observable_supported`: can be populated as a list. If set, if you ask to analyze an observable that is not in this list, it won't be executed. Valid values are: `ip`, `domain`, `url`, `hash`, `generic`.
-- `soft_time_limit`: this is the maximum time (in seconds) of execution for an analyzer. Once reached, the task will be killed (or managed in the code by a custom Exception). Default `300`.
-- `queue`: this takes effects only when [multi-queue](Advanced-Configuration.html#multi-queue) is enabled. Choose which celery worker would execute the task: `local` (ideal for tasks that leverage local applications like Yara), `long` (ideal for long tasks) or `default` (ideal for simple webAPI-based analyzers).
-
+- `config`:
+  - `soft_time_limit`: this is the maximum time (in seconds) of execution for an analyzer. Once reached, the task will be killed (or managed in the code by a custom Exception). Default `300`.
+  - `queue`: this takes effects only when [multi-queue](Advanced-Configuration.html#multi-queue) is enabled. Choose which celery worker would execute the task: `local` (ideal for tasks that leverage local applications like Yara), `long` (ideal for long tasks) or `default` (ideal for simple webAPI-based analyzers).
 Sometimes, it may happen that you would like to create a new analyzer very similar to an already existing one. Maybe you would like to just change the description and the default parameters.
-An helpful way to do that without having to copy/pasting the configuration, is to leverage the key `extends`.
-With this key you can create a new analyzer based on an already existing one and define only things that you would like to overwrite.
-Example:
-
-```
-  "Shodan_Search": {
-    "extends": "Shodan_Honeyscore",
-    "description": "scan an IP against Shodan Search API",
-    "params": {
-      "shodan_analysis": {
-        "value": "search",
-        "type": "str",
-        "description": ""
-      }
-    }
-  }
-```
+A helpful way to do that without having to copy/pasting the entire configuration, is to click on the analyzer that you want to copy, make the desired changes, and click the `save as new` button.
 
 <div class="admonition hint">
 <p class="admonition-title">Hint: Advanced Configuration</p>
@@ -377,18 +364,26 @@ The following is the list of the available connectors. You can also navigate the
 
 #### Connectors customization
 
-Connectors being optional are `enabled` by default. You can disable them by changing the configuration values inside `configuration/connector_config.json`. This file is mounted as a docker volume, so you won't need to rebuild the image. 
+Connectors being optional are `enabled` by default.
+You can disable them or create new connectors based on already existing modules by changing the configuration values inside the Django Admin interface at: `/admin/connectors_manager/connectorreport/`.
+
 
 The following are all the keys that you can change without touching the source code:
+ 
+- `name`: _same as analyzers_
+- `description`: _same as analyzers_
+- `python_module`: _same as analyzers_ 
+- `disabled`: _same as analyzers_
+- `config`:
+  - `queue`: _same as analyzers_
+  - `soft_time_limit`: _same as analyzers_
 
-- `disabled`: _similar to analyzers_
-- `soft_time_limit`: _similar to analyzers_
-- `queue`: _similar to analyzers_
-- `maximum_tlp` (default `CLEAR`, choices `CLEAR`, `GREEN`, `AMBER`, `RED`): specify the maximum TLP of the analysis up to which the connector is allowed to run. (e.g. if `maximum_tlp` is `GREEN`, it would run for analysis with TLPs `CLEAR` and `GREEN`). To learn more about TLPs see [TLP Support](./Usage.md#tlp-support).
+- `maximum_tlp` (default `CLEAR`, choices `CLEAR`, `GREEN`, `AMBER`, `RED`): specify the maximum TLP of the analysis up to which the connector is allowed to run. (e.g. if `maximum_tlp` is `GREEN`, it would run for analysis with TLPs `WHITE` and `GREEN`). To learn more about TLPs see [TLP Support](./Usage.md#tlp-support).
+- `run_on_failure` (default: `true`): if they can be run even if the job has status `reported_with_fails` 
 
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-Changing other keys can break an analyzer or connector. In that case, you should think about duplicating the configuration entry or python module with your changes.
+Changing other keys can break a connector. In that case, you should think about duplicating the configuration entry or python module with your changes.
 </div>
 
 ### Managing Analyzers and Connectors
@@ -422,6 +417,29 @@ All plugins i.e. analyzers and connectors have `kill` and `retry` actions. In ad
   - CLI: `$ pyintelowl analyzer-healthcheck <analyzer_name>` and `$ pyintelowl connector-healthcheck <connector_name>`
   - API: `GET /api/analyzer/{analyzer_name}/healthcheck` and `GET /api /connector/{connector_name}/healthcheck`
 
+### Visualizers
+
+Visualizers are designed to run after the analyzers and the connectors.
+The visualizer adds logic after the computations, allowing to show the final result in a different way than merely the list of reports.
+
+Each visualizer must define a set of analyzers and connectors as requirement:
+in fact the visualizers can not be chosen at the time of Job creation (once you click into the `Scan` button) but every single visualizer that it is configured and that has its requirements satisfied will be automatically selected and executed.
+
+#### Visualizers customization
+You can either disable or create new visualizers based on already existing modules by changing the configuration values inside the Django Admin interface: `/admin/visualizers_manager/visualizerreport/`.
+
+The following are all the keys that you can change without touching the source code:
+ 
+- `name`: _same as analyzers_
+- `description`: _same as analyzers_
+- `python_module`: _same as analyzers_ 
+- `disabled`: _same as analyzers_
+- `config`:
+  - `queue`: _same as analyzers_
+  - `soft_time_limit`: _same as analyzers_
+- `analyzers`: List of analyzers that must be executed
+- `connectors`: List of connectors that must be executed
+
 ### Playbooks
 
 Playbooks are designed to be easy to share sequence of running Analyzers/Connectors on a particular kind of observable.
@@ -443,7 +461,7 @@ The following is the list of the available pre-built playbooks. You can also nav
 
 #### Playbooks customization
 
-You can create new playbooks by adding a new entry in the `playbook_config.json` file.
+You can create new playbooks via the Django Admin interface at `/admin/playbooks_manager/playbookconfig/`
 
 The following are all the keys that you can leverage/change without touching the source code:
 

@@ -1,17 +1,19 @@
+# This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
+# See the file 'LICENSE' for copying permission.
+
 import requests
 from django.conf import settings
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
-from tests.mock_utils import MockResponse, if_mock_connections, patch
+from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
 class Crowdsec(ObservableAnalyzer):
-    def set_params(self, params):
-        self.__api_key = self._secrets["api_key_name"]
+    _api_key_name: str
 
     def run(self):
         headers = {
-            "x-api-key": self.__api_key,
+            "x-api-key": self._api_key_name,
             "User-Agent": f"crowdsec-intelowl/{settings.VERSION}",
         }
         url = f"https://cti.api.crowdsec.net/v2/smoke/{self.observable_name}"
@@ -30,7 +32,7 @@ class Crowdsec(ObservableAnalyzer):
             if_mock_connections(
                 patch(
                     "requests.get",
-                    return_value=MockResponse(
+                    return_value=MockUpResponse(
                         {
                             "behaviors": [
                                 {

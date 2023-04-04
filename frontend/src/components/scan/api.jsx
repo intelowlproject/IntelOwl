@@ -33,10 +33,7 @@ export async function createPlaybookJob(formValues) {
   const respData = resp.data.results;
 
   respData.forEach((x) => {
-    if (x.playbooks_running)
-      x.playbooks_running.forEach((playbook_) =>
-        playbooksRunning.add(playbook_)
-      );
+    if (x.playbook_running) playbooksRunning.add(x.playbook_running);
     if (x.warnings) warnings.push(...x.warnings);
   });
 
@@ -196,11 +193,11 @@ async function _askAnalysisAvailability(formValues) {
       ASK_MULTI_ANALYSIS_AVAILABILITY_URI,
       payload
     );
-    const answer = response.data.results;
-    if (answer.some((x) => x.status === "not_available")) {
+    const answer = response.data;
+    if (answer.count === 0) {
       return 0;
     }
-    const jobIds = answer.map((x) => x.job_id);
+    const jobIds = answer.results.map((x) => x.job_id);
     jobIds.forEach((jobId) => {
       appendToRecentScans(jobId, "secondary");
     });

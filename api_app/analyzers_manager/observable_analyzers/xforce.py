@@ -7,21 +7,20 @@ import requests
 from requests.auth import HTTPBasicAuth
 
 from api_app.analyzers_manager import classes
-from api_app.exceptions import AnalyzerRunException
-from tests.mock_utils import MockResponse, if_mock_connections, patch
+from api_app.analyzers_manager.exceptions import AnalyzerRunException
+from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
 class XForce(classes.ObservableAnalyzer):
     base_url: str = "https://exchange.xforce.ibmcloud.com/api"
     web_url: str = "https://exchange.xforce.ibmcloud.com"
 
-    def set_params(self, params):
-        self.__api_key = self._secrets["api_key_name"]
-        self.__api_password = self._secrets["api_password_name"]
-        self.malware_only = params.get("malware_only", False)
+    _api_key_name: str
+    _api_password_name: str
+    malware_only: bool
 
     def run(self):
-        auth = HTTPBasicAuth(self.__api_key, self.__api_password)
+        auth = HTTPBasicAuth(self._api_key_name, self._api_password_name)
         headers = {"Accept": "application/json"}
 
         endpoints = self._get_endpoints()
@@ -85,7 +84,7 @@ class XForce(classes.ObservableAnalyzer):
             if_mock_connections(
                 patch(
                     "requests.get",
-                    return_value=MockResponse({}, 200),
+                    return_value=MockUpResponse({}, 200),
                 ),
             )
         ]

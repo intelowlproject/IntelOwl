@@ -4,19 +4,20 @@
 import requests
 
 from api_app.analyzers_manager import classes
-from api_app.exceptions import AnalyzerRunException
-from tests.mock_utils import MockResponse, if_mock_connections, patch
+from api_app.analyzers_manager.exceptions import AnalyzerRunException
+from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
 class Koodous(classes.ObservableAnalyzer):
     base_url: str = "https://developer.koodous.com/apks/"
     query_analysis = "/analysis"
 
-    def set_params(self, params):
-        self.__api_key = self._secrets["api_key_name"]
+    _api_key_name: str
 
     def get_response(self, url):
-        return requests.get(url, headers={"Authorization": f"Token {self.__api_key}"})
+        return requests.get(
+            url, headers={"Authorization": f"Token {self._api_key_name}"}
+        )
 
     def run(self):
         try:
@@ -45,7 +46,7 @@ class Koodous(classes.ObservableAnalyzer):
             if_mock_connections(
                 patch(
                     "requests.get",
-                    return_value=MockResponse({}, 200),
+                    return_value=MockUpResponse({}, 200),
                 ),
             )
         ]

@@ -4,15 +4,14 @@
 import requests
 
 from api_app.analyzers_manager import classes
-from api_app.exceptions import AnalyzerRunException
-from tests.mock_utils import MockResponse, if_mock_connections, patch
+from api_app.analyzers_manager.exceptions import AnalyzerRunException
+from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
 class EmailRep(classes.ObservableAnalyzer):
     base_url: str = "https://emailrep.io/{}"
 
-    def set_params(self, params):
-        self.__api_key = self._secrets["api_key_name"]
+    _api_key_name: str
 
     def run(self):
         """
@@ -23,7 +22,7 @@ class EmailRep(classes.ObservableAnalyzer):
 
         headers = {
             "User-Agent": "IntelOwl",
-            "Key": self.__api_key,
+            "Key": self._api_key_name,
             "Accept": "application/json",
         }
 
@@ -49,7 +48,7 @@ class EmailRep(classes.ObservableAnalyzer):
             if_mock_connections(
                 patch(
                     "requests.get",
-                    return_value=MockResponse({}, 200),
+                    return_value=MockUpResponse({}, 200),
                 ),
             )
         ]

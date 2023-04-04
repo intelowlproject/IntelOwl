@@ -8,8 +8,8 @@ import requests
 from django.conf import settings
 
 from api_app.analyzers_manager import classes
-from api_app.exceptions import AnalyzerRunException
-from tests.mock_utils import MockResponse, if_mock_connections, patch
+from api_app.analyzers_manager.exceptions import AnalyzerRunException
+from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
@@ -39,9 +39,6 @@ class Talos(classes.ObservableAnalyzer):
 
     @classmethod
     def _update(cls):
-        if not cls.enabled:
-            logger.warning("No running updater for Talos, because it is disabled")
-            return
         try:
             logger.info("starting download of db from talos")
             url = "https://snort.org/downloads/ip-block-list"
@@ -67,7 +64,7 @@ class Talos(classes.ObservableAnalyzer):
             if_mock_connections(
                 patch(
                     "requests.get",
-                    return_value=MockResponse({}, 200, content=b"91.192.100.61"),
+                    return_value=MockUpResponse({}, 200, content=b"91.192.100.61"),
                 ),
             )
         ]

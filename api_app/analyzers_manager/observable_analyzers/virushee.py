@@ -4,20 +4,18 @@
 import requests
 
 from api_app.analyzers_manager.classes import ObservableAnalyzer
-from api_app.exceptions import AnalyzerRunException
-from tests.mock_utils import MockResponse, if_mock_connections, patch
+from api_app.analyzers_manager.exceptions import AnalyzerRunException
+from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 
 class VirusheeCheckHash(ObservableAnalyzer):
     base_url: str = "https://api.virushee.com/file/hash/{input}"
-
-    def set_params(self, params):
-        self.__session = requests.Session()
-        api_key = self._secrets["api_key_name"]
-        if api_key:
-            self.__session.headers["X-API-Key"] = api_key
+    _api_key_name: str
 
     def run(self):
+        self.__session = requests.Session()
+        if hasattr(self, "_api_key_name"):
+            self.__session.headers["X-API-Key"] = self._api_key_name
         url = self.base_url.format(input=self.observable_name)
 
         try:
@@ -34,7 +32,7 @@ class VirusheeCheckHash(ObservableAnalyzer):
             if_mock_connections(
                 patch(
                     "requests.Session.get",
-                    return_value=MockResponse({"success": True}, 200),
+                    return_value=MockUpResponse({"success": True}, 200),
                 ),
             )
         ]

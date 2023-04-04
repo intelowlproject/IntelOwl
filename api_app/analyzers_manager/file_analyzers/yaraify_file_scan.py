@@ -8,28 +8,37 @@ import time
 import requests
 
 from api_app.analyzers_manager.classes import FileAnalyzer
+from api_app.analyzers_manager.exceptions import (
+    AnalyzerConfigurationException,
+    AnalyzerRunException,
+)
 from api_app.analyzers_manager.observable_analyzers.yaraify import YARAify
-from api_app.exceptions import AnalyzerRunException
-from tests.mock_utils import MockResponse, if_mock_connections, patch
+from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 logger = logging.getLogger(__name__)
 
 
 class YARAifyFileScan(FileAnalyzer, YARAify):
-    def set_params(self, params):
-        YARAify.set_params(self, params)
-        self.search_term = self.md5
-        self.__api_key_identifier = self._secrets["api_key_identifier"]
 
-        self.send_file: bool = params.get("send_file", True)
-        self.clamav_scan: bool = params.get("clamav_scan", True)
-        self.unpack: bool = params.get("unpack", False)
-        self.share_file: bool = params.get("share_file", False)
-        self.skip_noisy: bool = params.get("skip_noisy", True)
-        self.skip_known: bool = params.get("skip_known", False)
+    _api_key_identifier: str
+    send_file: bool
+    clamav_scan: bool
+    unpack: bool
+    share_file: bool
+    skip_noisy: bool
+    skip_known: bool
+
+    def config(self):
+        self.query = "lookup_hash"
+        YARAify.config(self)
+        self.search_term = self.md5
 
         self.max_tries = 200
         self.poll_distance = 3
+        if self.send_file and not hasattr(self, "_api_key_identifier"):
+            raise AnalyzerConfigurationException(
+                "Unable to send file without having api_key_identifier set"
+            )
 
     def run(self):
         name_to_send = self.filename if self.filename else self.md5
@@ -46,7 +55,7 @@ class YARAifyFileScan(FileAnalyzer, YARAify):
         result = hash_scan
         if self.send_file:
             data = {
-                "identifier": self.__api_key_identifier,
+                "identifier": self._api_key_identifier,
                 # the server wants either 0 or 1
                 # https://yaraify.abuse.ch/api/#file-scan
                 "clamav_scan": int(self.clamav_scan),
@@ -108,11 +117,11 @@ class YARAifyFileScan(FileAnalyzer, YARAify):
                 patch(
                     "requests.post",
                     side_effect=[
-                        MockResponse({"query_status": "not-available"}, 200),
-                        MockResponse(
+                        MockUpResponse({"query_status": "not-available"}, 200),
+                        MockUpResponse(
                             {"query_status": "queued", "data": {"task_id": 123}}, 200
                         ),
-                        MockResponse(
+                        MockUpResponse(
                             {"query_status": "ok", "data": {"static_results": []}}, 200
                         ),
                     ],

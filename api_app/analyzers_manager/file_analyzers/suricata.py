@@ -14,9 +14,11 @@ class Suricata(FileAnalyzer, DockerBasedAnalyzer):
     # timeout limit
     timeout: int = 200
 
-    def set_params(self, params):
-        self.reload_rules = params.get("reload_rules", False)
-        self.extended_logs = params.get("extended_logs", False)
+    reload_rules: bool
+    extended_logs: bool
+
+    def config(self):
+        super().config()
         self.signatures = {}
 
     def run(self):

@@ -123,69 +123,6 @@ Configuration required to have InteOwl sending Emails (registration requests, ma
 * `EMAIL_USE_TLS`: whether to use an explicit TLS (secure) connection when talking to the SMTP server, generally used on port 587. 
 * `EMAIL_USE_SSL`: whether to use an implicit TLS (secure) connection when talking to the SMTP server, generally used on port 465.
 
-### Deprecated environment configuration
-The following variables are related to the specific services integrated in IntelOwl.
-They are deprecated and will be removed in the future: the new way to configure plugin secrets is to use the `Plugin Secrets` page in the GUI.
-This change not only promotes a better user experience and overall security, but allows to configure these secrets at either user or org level instead of globally.
-
-If you had previously specified any variables in the environment, IntelOwl will migrate those variables for you once you update the software to the v4.1.0 and restart the containers.
-(Under the hood IntelOwl runs `docker exec -ti intelowl_uwsgi python3 manage.py migrate_secrets`). Then you can remove those secrets from the env file.
-
-```text
-**Optional** variables needed to enable specific analyzers:
-* `ABUSEIPDB_KEY`: AbuseIPDB API key
-* `AUTH0_KEY`: Auth0 API Key
-* `SECURITYTRAILS_KEY`: Securitytrails API Key
-* `SHODAN_KEY`: Shodan API key
-* `HUNTER_API_KEY`: Hunter.io API key
-* `GSF_KEY`: Google Safe Browsing API key
-* `OTX_KEY`: Alienvault OTX API key
-* `CIRCL_CREDENTIALS`: CIRCL PDNS credentials in the format: `user|pass`
-* `VT_KEY`: VirusTotal API key
-* `HA_KEY`: HybridAnalysis API key
-* `INTEZER_KEY`: Intezer API key
-* `INQUEST_API_KEY`: InQuest API key
-* `FIRST_MISP_API`: FIRST MISP API key
-* `FIRST_MISP_URL`: FIRST MISP URL
-* `MISP_KEY`: your own MISP instance key
-* `MISP_URL`: your own MISP instance URL
-* `DNSDB_KEY`: DNSDB API key
-* `CUCKOO_URL`: your cuckoo instance URL
-* `HONEYDB_API_ID` & `HONEYDB_API_KEY`: HoneyDB API credentials
-* `CENSYS_API_ID` & `CENSYS_API_SECRET`: Censys credentials
-* `ONYPHE_KEY`: Onyphe.io's API Key 
-* `GREYNOISE_API_KEY`: GreyNoise API ([docs](https://docs.greynoise.io))
-* `INTELX_API_KEY`: IntelligenceX API ([docs](https://intelx.io/product))
-* `UNPAC_ME_API_KEY`: UnpacMe API ([docs](https://api.unpac.me/))
-* `IPINFO_KEY`: ipinfo API key
-* `ZOOMEYE_KEY`: ZoomEye API Key([docs](https://www.zoomeye.org/doc))
-* `TRIAGE_KEY`: tria.ge API key([docs](https://tria.ge/docs/))
-* `WIGLE_KEY`: WiGLE API Key([docs](https://api.wigle.net/))
-* `XFORCE_KEY` & `XFORCE_PASSWORD`: IBM X-Force Exchange API ([docs](https://api.xforce.ibmcloud.com/doc/))
-* `MWDB_KEY`: API key for [MWDB](https://mwdb.cert.pl/)
-* `SSAPINET_KEY`: screenshotapi.net ([docs](https://screenshotapi.net/documentation))
-* `MALPEDIA_KEY`: MALPEDIA API KEY ([docs](https://malpedia.caad.fkie.fraunhofer.de/usage/api))
-* `OPENCTI_KEY`: your own OpenCTI instance key
-* `OPENCTI_URL`: your own OpenCTI instance URL
-* `YETI_KEY`: your own YETI instance key
-* `YETI_URL`: your own YETI instance URL
-* `SPYSE_API_KEY`: [Spyse](https://spyse.com/) API key. Register here: https://spyse.com/user/registration"
-* `DRAGONFLY_API_KEY`: Dragonfly API key. Register [here](https://dragonfly.certego.net/register?utm_source=intelowl).
-* `VIRUSHEE_API_KEY`: Virushee API key. ([docs](https://api.virushee.com/))
-* `STALKPHISH_KEY`: Stalkphish.io API key. [Register here](https://www.stalkphish.io/accounts/register/).
-* `GREEDYBEAR_API_KEY`: GreedyBear API key
-* `MALPEDIA_TOKEN`: your own Malpedia token
-* `YARAIFY_KEY`: YARAify identifier ([docs](https://yaraify.abuse.ch/api/#identifiers))
-
-**Optional** variables needed to work with specific connectors:
-* `CONNECTOR_MISP_KEY`: your own MISP instance key to use with `MISP` connector
-* `CONNECTOR_MISP_URL`: your own MISP instance URL to use with `MISP` connector
-* `CONNECTOR_OPENCTI_KEY`: your own OpenCTI instance key to use with `OpenCTI` connector
-* `CONNECTOR_OPENCTI_URL`: your own OpenCTI instance URL to use with `OpenCTI` connector
-* `CONNECTOR_YETI_KEY`: your own YETI instance key to use with `YETI` connector
-* `CONNECTOR_YETI_URL`: your own YETI instance API URL to use with `YETI` connector
-
-```
 ### Database configuration (required)
 In the `env_file_postgres`, configure different variables as explained below.
 
@@ -248,9 +185,9 @@ There are 3 options to execute the web server:
     
     After the configuration is done, you can add the option `--traefik` while executing the [`start.py`](#run)
 
-### Analyzers or connectors configuration (optional)
+### Plugin configuration (optional)
 
-Refer to [Analyzers customization](Usage.html#analyzers-customization) and [Connectors customization](Usage.html#connectors-customization).
+Refer to [Analyzers customization](Usage.html#analyzers-customization), [Connectors customization](Usage.html#connectors-customization), [Visualizers customization](Usage.html#visualizers-customization).
 
 
 ## Run
@@ -354,7 +291,7 @@ So, to migrate to the new major version you would need to delete your DB. To do 
 ```commandline
 python3 start.py prod down -v
 ```
-Please be aware that, while this can be an important effort to manage, the v4 IntelOwl provides a easier way to add, invite and manage users from the application itself. See [the Organization section](./Usage.md#organizations-and-user-management).
+Please be aware that, while this can be an important effort to manage, the v4 IntelOwl provides an easier way to add, invite and manage users from the application itself. See [the Organization section](./Usage.md#organizations-and-user-management).
 
 
 #### Updating to >=2.0.0 from a 1.x.x version

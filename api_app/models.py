@@ -8,17 +8,23 @@ from typing import Optional
 from celery import group
 from django.conf import settings
 from django.contrib.postgres import fields as pg_fields
+from django.core.exceptions import ValidationError
+from django.core.validators import MinLengthValidator, RegexValidator
 from django.db import models
 from django.db.models import Q, QuerySet
 from django.dispatch import receiver
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.functional import cached_property
 
-from api_app.core.models import AbstractReport
-from api_app.exceptions import AlreadyFailedJobException
+from api_app.choices import TLP, ObservableClassification, Status
+from api_app.core.models import AbstractConfig, AbstractReport
 from api_app.helpers import calculate_sha1, calculate_sha256, get_now
+from api_app.validators import validate_runtime_configuration
 from certego_saas.apps.organization.organization import Organization
 from certego_saas.models import User
+from intel_owl import tasks
+from intel_owl.celery import DEFAULT_QUEUE, get_real_queue_name
 
 logger = logging.getLogger(__name__)
 
@@ -28,53 +34,31 @@ def file_directory_path(instance, filename):
     return f"job_{now}_{filename}"
 
 
-class Status(models.TextChoices):
-    PENDING = "pending", "pending"
-    RUNNING = "running", "running"
-    REPORTED_WITHOUT_FAILS = "reported_without_fails", "reported_without_fails"
-    REPORTED_WITH_FAILS = "reported_with_fails", "reported_with_fails"
-    KILLED = "killed", "killed"
-    FAILED = "failed", "failed"
-
-
-class TLP(models.TextChoices):
-    WHITE = "WHITE"
-    CLEAR = "CLEAR"
-    GREEN = "GREEN"
-    AMBER = "AMBER"
-    RED = "RED"
-
-    @classmethod
-    def get_tlp_clear_and_white(cls):
-        return (cls.WHITE, cls.CLEAR)
-
-    @classmethod
-    def get_priority(cls, tlp):
-        order = {
-            cls.WHITE: 0,
-            cls.CLEAR: 0,
-            cls.GREEN: 1,
-            cls.AMBER: 2,
-            cls.RED: 3,
-        }
-        return order.get(tlp, None)
+def default_runtime():
+    return {
+        "analyzers": {},
+        "connectors": {},
+        "visualizers": {},
+    }
 
 
 class Tag(models.Model):
-    label = models.CharField(max_length=50, blank=False, null=False, unique=True)
-    color = models.CharField(max_length=7, blank=False, null=False)
+    label = models.CharField(
+        max_length=50,
+        blank=False,
+        null=False,
+        unique=True,
+        validators=[MinLengthValidator(4)],
+    )
+    color = models.CharField(
+        max_length=7,
+        blank=False,
+        null=False,
+        validators=[RegexValidator(r"^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$", "Hex color")],
+    )
 
     def __str__(self):
         return f'Tag(label="{self.label}")'
-
-
-class ObservableClassification(models.TextChoices):
-    IP = "ip"
-    URL = "url"
-    DOMAIN = "domain"
-    HASH = "hash"
-    GENERIC = "generic"
-    EMPTY = ""
 
 
 class Job(models.Model):
@@ -109,26 +93,49 @@ class Job(models.Model):
         max_length=32, blank=False, choices=Status.choices, default="pending"
     )
 
-    analyzers_requested = pg_fields.ArrayField(
-        models.CharField(max_length=128), blank=True, default=list
+    analyzers_requested = models.ManyToManyField(
+        "analyzers_manager.AnalyzerConfig", related_name="requested_in_jobs", blank=True
     )
-    connectors_requested = pg_fields.ArrayField(
-        models.CharField(max_length=128), blank=True, default=list
+    connectors_requested = models.ManyToManyField(
+        "connectors_manager.ConnectorConfig",
+        related_name="requested_in_jobs",
+        blank=True,
     )
-    playbooks_requested = pg_fields.ArrayField(
-        models.CharField(max_length=128), blank=True, default=list
-    )
-    analyzers_to_execute = pg_fields.ArrayField(
-        models.CharField(max_length=128), blank=True, default=list
-    )
-    connectors_to_execute = pg_fields.ArrayField(
-        models.CharField(max_length=128), blank=True, default=list
-    )
-    playbooks_to_execute = pg_fields.ArrayField(
-        models.CharField(max_length=128), blank=True, default=list
+    playbook_requested = models.ForeignKey(
+        "playbooks_manager.PlaybookConfig",
+        related_name="requested_in_jobs",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
     )
 
-    received_request_time = models.DateTimeField(auto_now_add=True)
+    analyzers_to_execute = models.ManyToManyField(
+        "analyzers_manager.AnalyzerConfig", related_name="executed_in_jobs", blank=True
+    )
+    connectors_to_execute = models.ManyToManyField(
+        "connectors_manager.ConnectorConfig",
+        related_name="executed_in_jobs",
+        blank=True,
+    )
+    visualizers_to_execute = models.ManyToManyField(
+        "visualizers_manager.VisualizerConfig",
+        related_name="executed_in_jobs",
+        blank=True,
+    )
+    playbook_to_execute = models.ForeignKey(
+        "playbooks_manager.PlaybookConfig",
+        related_name="executed_in_jobs",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+    )
+    runtime_configuration = models.JSONField(
+        blank=False,
+        default=default_runtime,
+        null=False,
+        validators=[validate_runtime_configuration],
+    )
+    received_request_time = models.DateTimeField(auto_now_add=True, db_index=True)
     finished_analysis_time = models.DateTimeField(blank=True, null=True)
     process_time = models.FloatField(blank=True, null=True)
     tlp = models.CharField(max_length=8, choices=TLP.choices, default=TLP.CLEAR)
@@ -139,9 +146,11 @@ class Job(models.Model):
     tags = models.ManyToManyField(Tag, related_name="jobs", blank=True)
 
     def __str__(self):
-        if self.is_sample:
-            return f'Job(#{self.pk}, "{self.file_name}")'
-        return f'Job(#{self.pk}, "{self.observable_name}")'
+        return f'{self.__class__.__name__}(#{self.pk}, "{self.analyzed_object_name}")'
+
+    @property
+    def analyzed_object_name(self):
+        return self.file_name if self.is_sample else self.observable_name
 
     @cached_property
     def sha256(self) -> str:
@@ -151,36 +160,38 @@ class Job(models.Model):
     def sha1(self) -> str:
         return calculate_sha1(self.file.read())
 
+    def get_absolute_url(self):
+        return reverse("jobs-detail", args=[self.pk])
+
+    @property
+    def url(self):
+        return settings.WEB_CLIENT_URL + self.get_absolute_url()
+
     def job_cleanup(self) -> None:
-        logger.info(f"[STARTING] job_cleanup for <-- {self.__repr__()}.")
+        logger.info(f"[STARTING] job_cleanup for <-- {self}.")
         status_to_set = self.Status.RUNNING
 
         try:
             if self.status == self.Status.FAILED:
-                raise AlreadyFailedJobException()
+                logger.error(
+                    f"[REPORT] {self}, status: failed. " "Do not process the report"
+                )
+            else:
+                stats = self.get_analyzer_reports_stats()
 
-            stats = self.get_analyzer_reports_stats()
+                logger.info(f"[REPORT] {self}, status:{self.status}, reports:{stats}")
 
-            logger.info(
-                f"[REPORT] {self.__repr__()}, status:{self.status}, reports:{stats}"
-            )
-
-            if len(self.analyzers_to_execute) == stats["all"]:
-                if stats["running"] > 0 or stats["pending"] > 0:
-                    status_to_set = self.Status.RUNNING
-                elif stats["success"] == stats["all"]:
-                    status_to_set = self.Status.REPORTED_WITHOUT_FAILS
-                elif stats["failed"] == stats["all"]:
-                    status_to_set = self.Status.FAILED
-                elif stats["failed"] >= 1 or stats["killed"] >= 1:
-                    status_to_set = self.Status.REPORTED_WITH_FAILS
-                elif stats["killed"] == stats["all"]:
-                    status_to_set = self.Status.KILLED
-
-        except AlreadyFailedJobException:
-            logger.error(
-                f"[REPORT] {self.__repr__()}, status: failed. Do not process the report"
-            )
+                if self.analyzers_to_execute.all().count() == stats["all"]:
+                    if stats["running"] > 0 or stats["pending"] > 0:
+                        status_to_set = self.Status.RUNNING
+                    elif stats["success"] == stats["all"]:
+                        status_to_set = self.Status.REPORTED_WITHOUT_FAILS
+                    elif stats["failed"] == stats["all"]:
+                        status_to_set = self.Status.FAILED
+                    elif stats["failed"] >= 1 or stats["killed"] >= 1:
+                        status_to_set = self.Status.REPORTED_WITH_FAILS
+                    elif stats["killed"] == stats["all"]:
+                        status_to_set = self.Status.KILLED
 
         except Exception as e:
             logger.exception(f"job_id: {self.pk}, Error: {e}")
@@ -222,7 +233,7 @@ class Job(models.Model):
             s.lower(): models.Count("status", filter=models.Q(status=s))
             for s in AbstractReport.Status.values
         }
-        return self.analyzer_reports.aggregate(
+        return self.analyzerreports.aggregate(
             all=models.Count("status"),
             **aggregators,
         )
@@ -232,7 +243,7 @@ class Job(models.Model):
             s.lower(): models.Count("status", filter=models.Q(status=s))
             for s in AbstractReport.Status.values
         }
-        return self.connector_reports.aggregate(
+        return self.connectorreports.aggregate(
             all=models.Count("status"),
             **aggregators,
         )
@@ -244,9 +255,9 @@ class Job(models.Model):
             AbstractReport.Status.PENDING,
             AbstractReport.Status.RUNNING,
         ]
-        qs = self.analyzer_reports.filter(status__in=statuses_to_filter)
+        qs = self.analyzerreports.filter(status__in=statuses_to_filter)
         task_ids_analyzers = list(qs.values_list("task_id", flat=True))
-        qs2 = self.connector_reports.filter(status__in=statuses_to_filter)
+        qs2 = self.connectorreports.filter(status__in=statuses_to_filter)
 
         task_ids_connectors = list(qs2.values_list("task_id", flat=True))
         # kill celery tasks using task ids
@@ -257,139 +268,90 @@ class Job(models.Model):
         # update report statuses
         qs.update(status=self.Status.KILLED)
         # set job status
-        self.update_status("killed")
+        self.update_status(self.Status.KILLED)
 
-    def _merge_runtime_configuration(
-        self,
-        runtime_configuration: typing.Dict,
-        analyzers: typing.List[str],
-        connectors: typing.List[str],
-    ):
-        # in case of key conflict, runtime_configuration
-        # is overwritten by the Plugin configuration
-        final_config = {}
-        user = self.user
-        for analyzer in analyzers:
-            # Appending custom config to runtime configuration
-            config = runtime_configuration.get(analyzer, {})
-            config |= PluginConfig.get_as_dict(
-                user,
-                PluginConfig.PluginType.ANALYZER,
-                PluginConfig.ConfigType.PARAMETER,
-                plugin_name=analyzer,
-            ).get(analyzer, {})
+    def execute(self):
+        self.update_status(Job.Status.RUNNING)
+        analyzers_signatures = [
+            plugin.get_signature(self) for plugin in self.analyzers_to_execute.all()
+        ]
+        logger.info(f"Analyzer signatures are {analyzers_signatures}")
 
-            if config:
-                final_config[analyzer] = config
-        for connector in connectors:
-            config = runtime_configuration.get(connector, {})
-            config |= PluginConfig.get_as_dict(
-                user,
-                PluginConfig.PluginType.CONNECTOR,
-                PluginConfig.ConfigType.PARAMETER,
-                plugin_name=connector,
-            ).get(connector, {})
+        connectors_signatures = [
+            plugin.get_signature(self) for plugin in self.connectors_to_execute.all()
+        ]
+        logger.info(f"Connector signatures are {connectors_signatures}")
 
-            if config:
-                final_config[connector] = config
-        logger.debug(f"New value of runtime_configuration: {final_config}")
-        return final_config
+        visualizers_signatures = [
+            plugin.get_signature(self) for plugin in self.visualizers_to_execute.all()
+        ]
+        logger.info(f"Visualizer signatures are {visualizers_signatures}")
 
-    def _pipeline_configuration(
-        self, runtime_configuration: typing.Dict[str, typing.Any]
-    ) -> typing.Tuple[typing.List, typing.List, typing.List, typing.List]:
-        from api_app.playbooks_manager.dataclasses import PlaybookConfig
-
-        # case playbooks
-        if not runtime_configuration and self.playbooks_to_execute:
-            configs = []
-            analyzers = []
-            connectors = []
-            playbooks = self.playbooks_to_execute
-            # this must be done because each analyzer on the playbook
-            # could be executed with a different configuration
-            for playbook in PlaybookConfig.filter(
-                names=self.playbooks_to_execute
-            ).values():
-                playbook: PlaybookConfig
-                if not playbook.is_ready_to_use and not settings.STAGE_CI:
-                    continue
-                configs.append(playbook.analyzers | playbook.connectors)
-                analyzers.append(
-                    [
-                        analyzer
-                        for analyzer in playbook.analyzers.keys()
-                        if analyzer in self.analyzers_to_execute
-                    ]
-                )
-                connectors.append(
-                    [
-                        connector
-                        for connector in playbook.connectors.keys()
-                        if connector in self.connectors_to_execute
-                    ]
-                )
-        else:
-            configs = [runtime_configuration]
-            analyzers = [self.analyzers_to_execute]
-            connectors = [self.connectors_to_execute]
-            playbooks = [""]
-        return configs, analyzers, connectors, playbooks
-
-    def pipeline(self, runtime_configuration: typing.Dict[str, typing.Any]):
-        from api_app.analyzers_manager.dataclasses import AnalyzerConfig
-        from api_app.connectors_manager.dataclasses import ConnectorConfig
-        from intel_owl import tasks
-        from intel_owl.celery import DEFAULT_QUEUE
-
-        final_analyzer_signatures = []
-        final_connector_signatures = []
-        for config, analyzers, connectors, playbook in zip(
-            *self._pipeline_configuration(runtime_configuration)
-        ):
-            config = self._merge_runtime_configuration(config, analyzers, connectors)
-            logger.info(
-                f"Config is {config},"
-                f" analyzers are {analyzers} and"
-                f" connectors are {connectors}"
-            )
-            analyzer_signatures, _ = AnalyzerConfig.stack(
-                job_id=self.pk,
-                plugins_to_execute=analyzers,
-                runtime_configuration=config,
-                parent_playbook=playbook,
-            )
-            for signature in analyzer_signatures:
-                if signature not in final_analyzer_signatures:
-                    final_analyzer_signatures.append(signature)
-                else:
-                    logger.warning(f"Signature {signature} is duplicate")
-
-            connector_signatures, _ = ConnectorConfig.stack(
-                job_id=self.pk,
-                plugins_to_execute=connectors,
-                runtime_configuration=config,
-                parent_playbook=playbook,
-            )
-            for signature in connector_signatures:
-                if signature not in final_connector_signatures:
-                    final_connector_signatures.append(signature)
-                else:
-                    logger.warning(f"Signature {signature} is duplicate")
-        logger.info(f"Analyzer signatures are {final_analyzer_signatures}")
-        logger.info(f"Connector signatures are {final_connector_signatures}")
         runner = (
-            group(final_analyzer_signatures)
+            group(analyzers_signatures)
             | tasks.continue_job_pipeline.signature(
                 args=[self.pk],
                 kwargs={},
-                queue=DEFAULT_QUEUE,
+                queue=get_real_queue_name(DEFAULT_QUEUE),
                 soft_time_limit=10,
                 immutable=True,
             )
-            | group(final_connector_signatures)
+            | group(connectors_signatures)
+            | group(visualizers_signatures)
         )
         runner()
+
+    def get_config_runtime_configuration(self, config: AbstractConfig) -> typing.Dict:
+        from api_app.analyzers_manager.models import AnalyzerConfig
+        from api_app.connectors_manager.models import ConnectorConfig
+        from api_app.visualizers_manager.models import VisualizerConfig
+
+        if isinstance(config, AnalyzerConfig):
+            key = "analyzers"
+            try:
+                self.analyzers_to_execute.get(name=config.name)
+            except AnalyzerConfig.DoesNotExist:
+                raise TypeError(
+                    f"Analyzer {config.name} is not configured inside job {self.pk}"
+                )
+        elif isinstance(config, ConnectorConfig):
+            key = "connectors"
+            try:
+                self.connectors_to_execute.get(name=config.name)
+            except ConnectorConfig.DoesNotExist:
+                raise TypeError(
+                    f"Connector {config.name} is not configured inside job {self.pk}"
+                )
+        elif isinstance(config, VisualizerConfig):
+            key = "visualizers"
+            try:
+                self.visualizers_to_execute.get(name=config.name)
+            except VisualizerConfig.DoesNotExist:
+                raise TypeError(
+                    f"Visualizer {config.name} is not configured inside job {self.pk}"
+                )
+        else:
+            raise TypeError(f"Config {type(config)} is not supported")
+        return self.runtime_configuration[key].get(config.name, {})
+
+    @classmethod
+    def visible_for_user(cls, user: User):
+        """
+        User has access to:
+        - jobs with TLP = CLEAR or GREEN
+        - jobs with TLP = AMBER or RED and
+        created by a member of their organization.
+        """
+        if user.has_membership():
+            user_query = Q(user=user) | Q(
+                user__membership__organization_id=user.membership.organization_id
+            )
+        else:
+            user_query = Q(user=user)
+        query = Q(tlp__in=[TLP.CLEAR, TLP.GREEN]) | (
+            Q(tlp__in=[TLP.AMBER, TLP.RED]) & (user_query)
+        )
+        return cls.objects.all().filter(query)
 
     # user methods
 
@@ -423,6 +385,7 @@ class PluginConfig(models.Model):
     class PluginType(models.TextChoices):
         ANALYZER = "1", "Analyzer"
         CONNECTOR = "2", "Connector"
+        VISUALIZER = "3", "Visualizer"
 
     class ConfigType(models.TextChoices):
         PARAMETER = "1", "Parameter"
@@ -465,34 +428,6 @@ class PluginConfig(models.Model):
         ]
 
     @classmethod
-    def get_specific_serializer_class(cls, plugin_type: str):
-        if plugin_type == cls.PluginType.ANALYZER:
-            from api_app.analyzers_manager.serializers import AnalyzerConfigSerializer
-
-            serializer_class = AnalyzerConfigSerializer
-        elif plugin_type == cls.PluginType.CONNECTOR:
-            from api_app.connectors_manager.serializers import ConnectorConfigSerializer
-
-            serializer_class = ConnectorConfigSerializer
-        else:
-            raise TypeError(f"Unrecognized plugin type {plugin_type}")
-        return serializer_class
-
-    @classmethod
-    def get_specific_config_class(cls, plugin_type: str):
-        if plugin_type == cls.PluginType.ANALYZER:
-            from api_app.analyzers_manager.dataclasses import AnalyzerConfig
-
-            config_class = AnalyzerConfig
-        elif plugin_type == cls.PluginType.CONNECTOR:
-            from api_app.connectors_manager.dataclasses import ConnectorConfig
-
-            config_class = ConnectorConfig
-        else:
-            raise TypeError(f"Unrecognized plugin type {plugin_type}")
-        return config_class
-
-    @classmethod
     def visible_for_user(cls, user: User = None) -> QuerySet:
         from certego_saas.apps.organization.membership import Membership
 
@@ -513,86 +448,35 @@ class PluginConfig(models.Model):
 
         return configs
 
-    @classmethod
-    def get_as_dict(cls, user, entity_type, config_type=None, plugin_name=None) -> dict:
-        """
-        Returns custom config as dict
-        """
+    def invalidate_config_verification(self):
+        self.config.get_verification.invalidate(self.config)
+        if self.organization is not None:
+            for membership in self.organization.members.all():
+                self.config.get_verification.invalidate(self.config, membership.user)
+        else:
+            self.config.get_verification.invalidate(self.config, self.owner)
 
-        kwargs = {}
-        if config_type:
-            kwargs["config_type"] = config_type
-        custom_configs = cls.visible_for_user(user)
-        custom_configs = custom_configs.filter(type=entity_type, **kwargs)
-        if plugin_name is not None:
-            custom_configs = custom_configs.filter(plugin_name=plugin_name)
+    @cached_property
+    def config(self) -> AbstractConfig:
+        return self.config_class.objects.get(name=self.plugin_name)
 
-        result = {}
-        for custom_config in custom_configs:
-            custom_config: PluginConfig
-            if custom_config.plugin_name not in result:
-                result[custom_config.plugin_name] = {}
+    @cached_property
+    def config_class(self) -> typing.Type[AbstractConfig]:
 
-            # This `if` condition ensures that only a user-level config
-            # overrides an organization-level config.
-            if (
-                custom_config.attribute not in result[custom_config.plugin_name]
-                or custom_config.organization is None
-            ):
-                result[custom_config.plugin_name][
-                    custom_config.attribute
-                ] = custom_config.value
+        for config in AbstractConfig.__subclasses__():
+            if self.type == config.plugin_type.value:
+                return config
+        raise TypeError(f"Unable to find configuration for type {self.type}")
 
-        logger.debug(f"Final CustomConfig: {result}")
-
-        return result
-
-    @classmethod
-    def apply(cls, initial_config, user, plugin_type):
-        custom_configs = PluginConfig.get_as_dict(user, plugin_type)
-        for plugin in initial_config.values():
-            if plugin["name"] in custom_configs:
-                for param in plugin["params"]:
-                    if param in custom_configs[plugin["name"]]:
-                        plugin["params"][param]["value"] = custom_configs[
-                            plugin["name"]
-                        ][param]
-
-
-class OrganizationPluginState(models.Model):
-    type = models.CharField(choices=PluginConfig.PluginType.choices, max_length=2)
-    organization = models.ForeignKey(
-        Organization,
-        on_delete=models.CASCADE,
-        related_name="+",
-    )
-    plugin_name = models.CharField(max_length=128)
-    updated_at = models.DateTimeField(auto_now=True)
-    disabled = models.BooleanField(default=False)
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=["type", "plugin_name", "organization"],
-                name="unique_enabled_plugin_entry",
+    def clean_plugin_name(self):
+        try:
+            self.config  # noqa
+        except TypeError as e:
+            raise ValidationError(str(e))
+        except AbstractConfig.DoesNotExist:
+            raise ValidationError(
+                f"Unable to find configuration with name {self.plugin_name}"
             )
-        ]
 
-        indexes = [
-            models.Index(
-                fields=["organization", "type"],
-            ),
-        ]
-
-    @classmethod
-    def apply(cls, initial_config, user, plugin_type):
-        if not user.has_membership():
-            return
-        custom_configs = OrganizationPluginState.objects.filter(
-            organization=user.membership.organization, type=plugin_type
-        )
-        for plugin in initial_config.values():
-            if custom_configs.filter(plugin_name=plugin["name"]).exists():
-                plugin["disabled"] = custom_configs.get(
-                    plugin_name=plugin["name"]
-                ).disabled
+    def clean(self) -> None:
+        self.clean_plugin_name()

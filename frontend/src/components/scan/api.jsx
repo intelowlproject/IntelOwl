@@ -94,9 +94,7 @@ export async function createComment(formValues) {
 
 export async function deleteComment(commentId) {
   try {
-    const resp = await axios.delete(
-      `${COMMENT_BASE_URI}/${commentId}`
-    );
+    const resp = await axios.delete(`${COMMENT_BASE_URI}/${commentId}`);
 
     return Promise.resolve(resp);
   } catch (e) {

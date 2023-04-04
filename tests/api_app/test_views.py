@@ -8,7 +8,7 @@ from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
 
 from api_app.analyzers_manager.constants import ObservableTypes
-from api_app.models import Job, PluginConfig, Tag, Comment
+from api_app.models import Comment, Job, PluginConfig, Tag
 from certego_saas.apps.organization.membership import Membership
 from certego_saas.apps.organization.organization import Organization
 
@@ -146,13 +146,12 @@ class CommentViewSetTestCase(CustomAPITestCase):
             job=self.job, user=self.superuser, comment="test"
         )
         self.comment.save()
-    
+
     def test_create_201(self):
         data = {"job_id": self.job.id, "comment": "test"}
         response = self.client.post(self.comment_url, data)
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.json().get("results").get("comment"), "test")
-        
 
     def test_list_200(self):
         response = self.client.get(self.comment_url)
@@ -163,6 +162,7 @@ class CommentViewSetTestCase(CustomAPITestCase):
         response = self.client.get(f"{self.comment_url}{self.comment.id}/")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json().get("comment"), "test")
+
 
 class JobViewsetTests(CustomAPITestCase):
     jobs_list_uri = reverse("jobs-list")

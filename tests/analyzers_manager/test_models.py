@@ -26,7 +26,9 @@ class AnalyzerConfigTestCase(CustomTestCase):
             ac.clean_python_module()
         self.assertEqual(1, len(e.exception.messages))
         self.assertEqual(
-            "`python_module` incorrect, api_app.analyzers_manager.observable_analyzers.yara_scan.YaraScan couldn't be imported",
+            "`python_module` incorrect, "
+            "api_app.analyzers_manager.observable_analyzers.yara_scan.YaraScan"
+            " couldn't be imported",
             e.exception.messages[0],
         )
 

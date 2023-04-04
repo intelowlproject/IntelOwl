@@ -41,6 +41,9 @@ class Slack(Connector):
     @classmethod
     def _monkeypatch(cls):
         class MockClient:
+            def __init__(self, *args, **kwargs):
+                ...
+
             def chat_postMessage(self, *args, **kwargs):
                 ...
 

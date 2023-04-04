@@ -99,7 +99,7 @@ class PluginActionViewsetTestCase(metaclass=ABCMeta):
 
     def test_kill_404(self):
         response = self.client.patch(
-            f"/api/jobs/999/{self.plugin_type}/PLUGIN_404/kill"
+            f"/api/jobs/999/{self.plugin_type}/999/kill"
         )
 
         self.assertEqual(response.status_code, 404)
@@ -144,7 +144,7 @@ class PluginActionViewsetTestCase(metaclass=ABCMeta):
 
     def test_retry_404(self):
         response = self.client.patch(
-            f"/api/jobs/999/{self.plugin_type}/PLUGIN_404/retry"
+            f"/api/jobs/999/{self.plugin_type}/999/retry"
         )
 
         self.assertEqual(response.status_code, 404)

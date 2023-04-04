@@ -10,7 +10,29 @@ from tests import CustomTestCase
 
 
 class AnalyzerConfigTestCase(CustomTestCase):
-    def test_clean(self):
+
+    def test_clean_python_module_hash(self):
+        ac = AnalyzerConfig(
+            name="test",
+            python_module="yara_scan.YaraScan",
+            description="test",
+            config={"soft_time_limit": 10, "queue": "default"},
+            secrets={},
+            params={},
+            disabled=False,
+            type="file",
+            run_hash=True,
+
+        )
+        with self.assertRaises(ValidationError) as e:
+            ac.clean_python_module()
+        self.assertEqual(1, len(e.exception.messages))
+        self.assertEqual(
+            "`python_module` incorrect, api_app.analyzers_manager.observable_analyzers.yara_scan.YaraScan couldn't be imported",
+            e.exception.messages[0],
+        )
+
+    def test_clean_run_hash_type(self):
         ac = AnalyzerConfig(
             name="test",
             python_module="yara_scan.YaraScan",
@@ -23,12 +45,11 @@ class AnalyzerConfigTestCase(CustomTestCase):
             run_hash=True,
         )
         with self.assertRaises(ValidationError) as e:
-            ac.full_clean()
-        self.assertIn("__all__", e.exception.message_dict)
-        self.assertEqual(1, len(e.exception.message_dict["__all__"]))
+            ac.clean_run_hash_type()
+        self.assertEqual(1, len(e.exception.messages))
         self.assertEqual(
             "run_hash_type must be populated if run_hash is True",
-            e.exception.message_dict["__all__"][0],
+            e.exception.messages[0],
         )
         ac.delete()
 

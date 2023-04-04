@@ -9,7 +9,7 @@ from .views import ConnectorActionViewSet, ConnectorConfigAPI
 # Routers provide an easy way of automatically determining the URL conf.
 router = routers.DefaultRouter(trailing_slash=False)
 router.register(
-    r"jobs/(?P<job_id>\d+)/connector/(?P<name>\w+)",
+    r"jobs/(?P<job_id>\d+)/connector/(?P<report_id>\w+)",
     ConnectorActionViewSet,
 )
 router.register(r"connector", ConnectorConfigAPI, basename="connector")

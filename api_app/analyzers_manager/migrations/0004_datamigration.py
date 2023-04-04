@@ -3976,7 +3976,7 @@ analyzers = {
             }
         },
         "params": {
-            "public_repositories": {
+            "repositories": {
                 "value": [
                     "https://github.com/dr4k0nia/yara-rules",
                     "https://github.com/elastic/protections-artifacts",

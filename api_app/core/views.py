@@ -44,10 +44,11 @@ class PluginActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
                 job_id=job_id,
                 pk=report_id,
             )
-            self.check_object_permissions(self.request, obj)
-            return obj
         except self.report_model.DoesNotExist:
             raise NotFound()
+        else:
+            self.check_object_permissions(self.request, obj)
+            return obj
 
     def perform_kill(self, report: AbstractReport):
         """

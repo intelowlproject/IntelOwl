@@ -124,7 +124,7 @@ class OTX(classes.ObservableAnalyzer):
         return analysis_result
 
     def run(self):
-        otx = self.OTXv2Extended(
+        otx = OTXv2Extended(
             timeout=self.timeout, api_key=self._api_key_name, user_agent="IntelOwl"
         )
 

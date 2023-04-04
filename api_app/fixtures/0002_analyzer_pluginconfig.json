@@ -1352,7 +1352,7 @@
       "updated_at": "2023-02-23T08:53:02.830Z",
       "type": "1",
       "config_type": "1",
-      "attribute": "public_repositories",
+      "attribute": "repositories",
       "value": ["https://github.com/stratosphereips/yara-rules"],
       "organization": null,
       "owner": 1,

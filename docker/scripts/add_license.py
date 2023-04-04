@@ -1,11 +1,15 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-header0 = "# This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl"
-header1 = "# See the file 'LICENSE' for copying permission."
-
 import sys
 from pathlib import PosixPath
+
+header0 = (
+    "# This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl"
+)
+header1 = "# See the file 'LICENSE' for copying permission."
+
+
 # arguments: BASE_DIR [run]
 if __name__ == "__main__":
     if len(sys.argv) == 1:
@@ -29,7 +33,10 @@ if __name__ == "__main__":
             continue
         with open(file, "r+", encoding="utf_8") as f:
             lines = f.readlines()
-            if not (lines[0].strip() != header0.strip() and lines[1].strip() != header1.strip()):
+            if not (
+                lines[0].strip() != header0.strip()
+                and lines[1].strip() != header1.strip()
+            ):
                 print("\tSkipping")
                 continue
             else:
@@ -37,6 +44,4 @@ if __name__ == "__main__":
         if len(sys.argv) == 3 and sys.argv[2] == "run":
             with open(file, "w", encoding="utf_8") as f:
                 print("\tWritten")
-                f.writelines([header0,"\n", header1, "\n", "\n"] + lines)
-
-
+                f.writelines([header0, "\n", header1, "\n", "\n"] + lines)

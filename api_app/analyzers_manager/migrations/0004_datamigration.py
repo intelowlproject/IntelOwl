@@ -2,11 +2,11 @@
 # See the file 'LICENSE' for copying permission.
 
 analyzers = {
-    "APKiD_Scan_APK_DEX_JAR": {
+    "APKiD": {
         "type": "file",
         "python_module": "apkid.APKiD",
-        "description": "APKiD identifies many compilers, packers, obfuscators, and other weird stuff from an APK or "
-        "DEX file.",
+        "description": "[APKiD](https://github.com/rednaga/APKiD) identifies many compilers, packers, obfuscators, "
+                       "and other weird stuff from an APK or DEX file.",
         "disabled": False,
         "external_service": False,
         "leaks_info": False,
@@ -1772,19 +1772,6 @@ analyzers = {
         },
         "params": {},
     },
-    "Manalyze": {
-        "type": "file",
-        "python_module": "manalyze.Manalyze",
-        "description": "A static analyzer for PE files",
-        "disabled": False,
-        "external_service": False,
-        "leaks_info": False,
-        "docker_based": True,
-        "supported_filetypes": ["application/x-dosexec"],
-        "config": {"soft_time_limit": 180, "queue": "local"},
-        "secrets": {},
-        "params": {},
-    },
     "MISP": {
         "type": "observable",
         "python_module": "misp.MISP",
@@ -2193,28 +2180,41 @@ analyzers = {
         "external_service": True,
         "leaks_info": False,
         "observable_supported": ["ip", "domain", "url", "hash"],
-        "config": {"soft_time_limit": 60, "queue": "default"},
+        "config": {
+            "soft_time_limit": 90,
+            "queue": "default"
+        },
         "secrets": {
             "api_key_name": {
                 "env_var_key": "OTX_KEY",
                 "description": "",
                 "required": True,
-                "type": "str",
+                "type": "str"
             }
         },
         "params": {
-            "verbose": {"value": False, "type": "bool", "description": ""},
+            "verbose": {
+                "value": False,
+                "type": "bool",
+                "description": ""
+            },
             "sections": {
                 "value": ["general"],
                 "type": "list",
-                "description": "Data are divided into sections, list of sections to download",
+                "description": "Sections to download. Options: [general, reputation, geo, malware, url_list, "
+                               "passive_dns, analysis"
             },
             "full_analysis": {
                 "value": False,
                 "type": "bool",
-                "description": "download all the available sections for the observable type",
+                "description": "download all the available sections for the observable type"
             },
-        },
+            "timeout": {
+                "value": 30,
+                "type": "int",
+                "description": "Timeout of the request"
+            }
+        }
     },
     "OTX_Check_Hash": {
         "type": "file",
@@ -2525,7 +2525,7 @@ analyzers = {
         "secrets": {},
         "params": {},
     },
-    "Quark_Engine_APK": {
+    "Quark_Engine": {
         "type": "file",
         "python_module": "quark_engine.QuarkEngine",
         "description": "An Obfuscation-Neglect Android Malware Scoring System",
@@ -3978,6 +3978,7 @@ analyzers = {
         "params": {
             "public_repositories": {
                 "value": [
+                    "https://github.com/dr4k0nia/yara-rules",
                     "https://github.com/elastic/protections-artifacts",
                     "https://github.com/embee-research/Yara",
                     "https://github.com/elceef/yara-rulz",
@@ -4031,7 +4032,7 @@ analyzers = {
         "secrets": {
             "api_key_name": {
                 "env_var_key": "MALPEDIA_TOKEN",
-                "description": "Optional key to receive results from public (TLP:WHITE) and non-public (TLP:GREEN, TLP:AMBER and TLP:RED) YARA rules.",
+                "description": "Optional key to receive results from public (TLP:CLEAR) and non-public (TLP:GREEN, TLP:AMBER and TLP:RED) YARA rules.",
                 "required": True,
                 "type": "str",
             },
@@ -4115,7 +4116,7 @@ analyzers = {
         "secrets": {
             "api_key_name": {
                 "env_var_key": "MALPEDIA_TOKEN",
-                "description": "Optional key to receive results from public (TLP:WHITE) and also non-public (TLP:GREEN, TLP:AMBER and TLP:RED) YARA rules.",
+                "description": "Optional key to receive results from public (TLP:CLEAR) and also non-public (TLP:GREEN, TLP:AMBER and TLP:RED) YARA rules.",
                 "required": False,
                 "type": "str",
             }
@@ -4146,7 +4147,7 @@ analyzers = {
         "secrets": {
             "api_key_name": {
                 "env_var_key": "MALPEDIA_TOKEN",
-                "description": "Optional key to receive results from public (TLP:WHITE) and also non-public (TLP:GREEN, TLP:AMBER and TLP:RED) YARA rules.",
+                "description": "Optional key to receive results from public (TLP:CLEAR) and also non-public (TLP:GREEN, TLP:AMBER and TLP:RED) YARA rules.",
                 "required": False,
                 "type": "str",
             }

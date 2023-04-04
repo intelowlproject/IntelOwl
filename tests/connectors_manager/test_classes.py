@@ -33,7 +33,7 @@ class ConnectorTestCase(CustomTestCase):
             disabled=True,
             config={"soft_time_limit": 100, "queue": "default"},
             params={},
-            maximum_tlp="WHITE",
+            maximum_tlp="CLEAR",
         )
         with self.assertRaises(ConnectorRunException):
             MockUpConnector.health_check("test")
@@ -81,7 +81,7 @@ class ConnectorTestCase(CustomTestCase):
             disabled=True,
             config={"soft_time_limit": 100, "queue": "default"},
             params={},
-            maximum_tlp="WHITE",
+            maximum_tlp="CLEAR",
             run_on_failure=False,
         )
         with self.assertRaises(ConnectorRunException):

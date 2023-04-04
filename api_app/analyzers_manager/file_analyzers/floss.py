@@ -28,12 +28,8 @@ class Floss(FileAnalyzer, DockerBasedAnalyzer):
         binary = self.read_file_bytes()
         # make request data
         fname = str(self.filename).replace("/", "_").replace(" ", "_")
-        args = [f"@{fname}", f"--output-json=/tmp/{fname}.json"]
-        req_data = {
-            "args": args,
-            "timeout": self.timeout,
-            "callback_context": {"read_result_from": fname},
-        }
+        args = [f"@{fname}"]
+        req_data = {"args": args, "timeout": self.timeout}
         req_files = {fname: binary}
         result = self._docker_run(req_data, req_files)
         result["exceeded_max_number_of_strings"] = {}

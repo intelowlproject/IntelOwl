@@ -99,22 +99,29 @@ In the `env_file_app`, configure different variables as explained below.
 **Strongly recommended** variable to set:
 * `DJANGO_SECRET`: random 50 chars key, must be unique. If you do not provide one, Intel Owl will automatically set a new secret on every run.
 * `INTELOWL_WEB_CLIENT_DOMAIN` (example: `localhost`/`mywebsite.com`): the web domain of your instance, this is used for generating links to analysis results.
-* `DEFAULT_FROM_EMAIL`: email address used for automated correspondence from the site manager
-* `DEFAULT_EMAIL`: email address used for correspondence with users
+
+Optional configuration:
+* `OLD_JOBS_RETENTION_DAYS`: Database retention for analysis results (default: 3 days). Change this if you want to keep your old analysis longer in the database.
+
+#### Other optional configuration to enable specific services / features
+
+Configuration required to enable integration with Slack:
+* `SLACK_TOKEN`: Slack token of your Slack application that will be used to send/receive notifications
+* `DEFAULT_SLACK_CHANNEL`: ID of the Slack channel you want to post the message to
+
+Configuration required to enable Re-Captcha in the Login and the Registration Page:
 * `RECAPTCHA_SECRET_KEY_IO_LOCAL`: your recaptcha secret key internal deployment
 * `RECAPTCHA_SECRET_KEY_IO_PUBLIC`: your recaptcha secret key for public deployment
 
+Configuration required to have InteOwl sending Emails (registration requests, mail verification, password reset/change, etc)
+* `DEFAULT_FROM_EMAIL`: email address used for automated correspondence from the site manager
+* `DEFAULT_EMAIL`: email address used for correspondence with users
 * `EMAIL_HOST`: the host to use for sending email with SMTP
 * `EMAIL_HOST_USER`: username to use for the SMTP server defined in EMAIL_HOST
 * `EMAIL_HOST_PASSWORD`: password to use for the SMTP server defined in EMAIL_HOST. This setting is used in conjunction with EMAIL_HOST_USER when authenticating to the SMTP server.
 * `EMAIL_PORT`: port to use for the SMTP server defined in EMAIL_HOST.
 * `EMAIL_USE_TLS`: whether to use an explicit TLS (secure) connection when talking to the SMTP server, generally used on port 587. 
 * `EMAIL_USE_SSL`: whether to use an implicit TLS (secure) connection when talking to the SMTP server, generally used on port 465.
-
-**Optional configuration**:
-* `OLD_JOBS_RETENTION_DAYS`: Database retention for analysis results (default: 3 days). Change this if you want to keep your old analysis longer in the database.
-* `SLACK_TOKEN`: Slack token of your Slack application that will be used to send/receive notifications
-* `DEFAULT_SLACK_CHANNEL`: ID of the Slack channel you want to post the message to
 
 ### Database configuration (required)
 In the `env_file_postgres`, configure different variables as explained below.
@@ -253,6 +260,22 @@ $ python3 start.py prod up # restart the IntelOwl application
 <div class="admonition warning">
 <p class="admonition-title">Note</p>
 After an upgrade, sometimes a database error in Celery Containers could happen. That could be related to new DB migrations which are not applied by the main Uwsgi Container yet. Do not worry. Wait few seconds for the Uwsgi container to start correctly, then put down the application again and restart it. The problem should be solved. If not, please feel free to open an issue on Github
+</div>
+
+<div class="admonition warning">
+<p class="admonition-title">Note</p>
+After having upgraded IntelOwl, in case the application does not start and you get an error like this:
+
+```commandline
+PermissionError: [Errno 13] Permission denied: '/var/log/intel_owl/django/authentication.log
+```
+
+just run this:
+```commandline
+sudo chown -R www-data:www-data /var/lib/docker/volumes/intel_owl_generic_logs/_data/django
+```
+
+and restart IntelOwl. It should solve the permissions problem.
 </div>
 
 <div class="admonition warning">

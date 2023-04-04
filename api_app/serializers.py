@@ -77,7 +77,12 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
     tags_labels = rfs.ListField(default=list)
     runtime_configuration = rfs.JSONField(required=False, default={}, write_only=True)
     md5 = rfs.HiddenField(default=None)
-    tlp = rfs.ChoiceField(choices=TLP.values, default=TLP.WHITE)
+    tlp = rfs.ChoiceField(choices=TLP.values + ["WHITE"], default=TLP.CLEAR)
+
+    def validate_tlp(self, tlp:str):
+        if tlp == "WHITE":
+            return "CLEAR"
+        return tlp
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -188,7 +193,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
                     plugin_config.maximum_tlp
                 ):  # check if job's tlp allows running
                     # e.g. if connector_tlp is GREEN(1),
-                    # run for job_tlp WHITE(0) & GREEN(1) only
+                    # run for job_tlp CLEAR(0) & GREEN(1) only
                     raise NotRunnableConnector(
                         f"{plugin_config.name} won't run: "
                         f"job.tlp ('{tlp}') >"
@@ -582,6 +587,9 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
             value = value.replace("]", "")
         if "[" in value:
             value = value.replace("[", "")
+        # this is a trick done by spammers
+        if "\n" in value:
+            value = value.replace("\n", "")
         return value
 
     def set_analyzers_to_execute(

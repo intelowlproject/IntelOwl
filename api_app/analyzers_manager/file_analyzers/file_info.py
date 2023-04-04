@@ -38,7 +38,13 @@ class FileInfo(FileAnalyzer):
         results["tlsh"] = tlsh.hash(binary)
 
         try:
-            with ExifTool(self.exiftool_path) as et:
+            # check repo_downloader.sh file
+            with open(
+                f"{self.EXIF_TOOL_PATH}/exiftool_version.txt", "r", encoding="utf-8"
+            ) as f:
+                version = f.read().strip()
+            exiftool_path = f"{self.EXIF_TOOL_PATH}/Image-ExifTool-{version}/exiftool"
+            with ExifTool(exiftool_path) as et:
                 exif_report = et.execute_json(self.filepath)
                 if exif_report:
                     exif_single_report = exif_report[0]

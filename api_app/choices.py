@@ -13,7 +13,7 @@ class Position(models.TextChoices):
 
 
 class TLP(models.TextChoices):
-    WHITE = "WHITE"
+    CLEAR = "CLEAR"
     GREEN = "GREEN"
     AMBER = "AMBER"
     RED = "RED"
@@ -21,7 +21,7 @@ class TLP(models.TextChoices):
     @classmethod
     def get_priority(cls, tlp):
         order = {
-            cls.WHITE: 0,
+            cls.CLEAR: 0,
             cls.GREEN: 1,
             cls.AMBER: 2,
             cls.RED: 3,

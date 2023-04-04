@@ -42,6 +42,7 @@ PATH_MAPPING = {
     "test_flower": "docker/test.flower.override.yml",
     "elastic": "docker/elasticsearch.override.yml",
     "https": "docker/https.override.yml",
+    "nfs": "docker/nfs.override.yml",
 }
 # to fix the box-js folder name
 PATH_MAPPING.update(
@@ -118,6 +119,12 @@ def start():
         required=False,
         action="store_true",
         help="Uses the multiqueue.override.yml compose file",
+    )
+    parser.add_argument(
+        "--nfs",
+        required=False,
+        action="store_true",
+        help="Uses the nfs.override.yml compose file",
     )
     parser.add_argument(
         "--traefik",
@@ -205,12 +212,16 @@ def start():
     # mode
     if is_test:
         compose_files.append(PATH_MAPPING[args.mode])
-    if args.__dict__["elastic"]:
-        compose_files.append(PATH_MAPPING["elastic"])
-    if args.__dict__["https"]:
-        compose_files.append(PATH_MAPPING["https"])
     # upgrades
-    for key in ["traefik", "multi_queue", "custom", "flower"]:
+    for key in [
+        "elastic",
+        "https",
+        "nfs",
+        "traefik",
+        "multi_queue",
+        "custom",
+        "flower",
+    ]:
         if args.__dict__[key]:
             compose_files.append(PATH_MAPPING[key])
     # additional compose files for tests

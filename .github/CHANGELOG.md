@@ -1,6 +1,37 @@
 # Changelog
 
 [**Upgrade Guide**](https://intelowl.readthedocs.io/en/latest/Installation.md#update-to-the-most-recent-version)
+
+## [v4.2.3](https://github.com/intelowlproject/IntelOwl/releases/tag/v4.2.3)
+
+**New features**
+* Registration Page. Now you can configure your SMTP server (or AWS SES) to manage registration requests via email (user verification, password reset/change). This allows IntelOwl to be better suited for public deployments as a SaaS service.
+
+**New/Improved Analyzers:**
+* Refactored `Yara` analyzer again to avoid memory leaks and improve performance intensively
+* [Crowdsec](https://www.crowdsec.net/) analyzer no longer fails if the IP address is not found
+* Added new [Hunter_How](https://hunter.how/search-api) analyzer
+* We refactored the `malware_tools_analyzers` container that contains a lot of malware analysis tools. Thanks to that we have fixed `Qiling` and `Capa_Info` analyzer and we have updated all the other ones available (`Floss`, `APKid`, `Thug`, etc) 
+
+**fixes / adjust / minor changes**
+* fixes to support for AWS Services (IAM authentication, AWS regions, AWS SQS)
+* Added support for NFS storage
+* minor fixes to a lot of different analyzers: `PDF_Info`, `Classic_DNS`, `Quad9`, `MWdb`, `OTX_Query`, etc
+* fixes to `initialize.sh`
+* now Observable name is copy pastable in the Job Result Page
+* a lot of dependencies upgrade (like Django from v3.2 to v4.1)
+
+**CARE!!!** After having upgraded IntelOwl, in case the application does not start and you get an error like this:
+```commandline
+PermissionError: [Errno 13] Permission denied: '/var/log/intel_owl/django/authentication.log
+```
+just run this:
+```commandline
+sudo chown -R www-data:www-data /var/lib/docker/volumes/intel_owl_generic_logs/_data/django
+```
+and restart IntelOwl. It should solve the permissions problem.
+
+
 ## [v4.2.2](https://github.com/intelowlproject/IntelOwl/releases/tag/v4.2.2)
 
 **New/Improved Analyzers:**

@@ -38,6 +38,8 @@ DATABASES = {
         "USER": PG_USER,
         "OPTIONS": {},
         "TIMEOUT": 180,
+        "CONN_MAX_AGE": 3600,
+        "CONN_HEALTH_CHECKS": True,
     },
 }
 

@@ -24,7 +24,7 @@ def backwards_migrate(apps, schema_editor):
         elif config.maximum_tlp == "AMBER":
             config.external_service = True
             config.leaks_info = False
-        elif config.maximum_tlp in ["GREEN", "WHITE"]:
+        elif config.maximum_tlp in ["GREEN", "CLEAR"]:
             config.leaks_info = True
             config.external_service = True
         config.save()
@@ -40,7 +40,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='analyzerconfig',
             name='maximum_tlp',
-            field=models.CharField(choices=[('WHITE', 'White'), ('GREEN', 'Green'), ('AMBER', 'Amber'), ('RED', 'Red')], default='RED', max_length=50)
+            field=models.CharField(choices=[('CLEAR', 'Clear'), ('GREEN', 'Green'), ('AMBER', 'Amber'), ('RED', 'Red')], default='RED', max_length=50)
         ),
         migrations.AlterField(
             model_name="analyzerconfig",

@@ -30,7 +30,7 @@ class Migration(migrations.Migration):
                  models.JSONField(blank=True, default=dict, validators=[api_app.validators.validate_secrets])),
                 ('params',
                  models.JSONField(blank=True, default=dict, validators=[api_app.validators.validate_params])),
-                ('maximum_tlp', models.CharField(choices=[('WHITE', 'White'), ('GREEN', 'Green'), ('AMBER', 'Amber'), ('RED', 'Red')], default='WHITE', max_length=50)),
+                ('maximum_tlp', models.CharField(choices=[('CLEAR', 'Clear'), ('GREEN', 'Green'), ('AMBER', 'Amber'), ('RED', 'Red')], default='CLEAR', max_length=50)),
                 ('run_on_failure', models.BooleanField(default=True)),
             ],
             options={

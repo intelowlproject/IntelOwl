@@ -10,7 +10,7 @@ connectors = {
         "description": "Automatically creates an event on your MISP instance, linking the successful analysis on "
                        "IntelOwl",
         "python_module": "misp.MISP",
-        "maximum_tlp": "WHITE",
+        "maximum_tlp": "CLEAR",
         "config": {
             "soft_time_limit": 30,
             "queue": "default"
@@ -50,7 +50,7 @@ connectors = {
                 "description": "Enable debug logs."
             },
             "tlp": {
-                "value": "white",
+                "value": "clear",
                 "type": "str",
                 "description": "Change this as per your organization's threat sharing conventions."
             }
@@ -62,7 +62,7 @@ connectors = {
         "description": "Automatically creates an observable and a linked report on your OpenCTI instance, linking the "
                        "successful analysis on IntelOwl",
         "python_module": "opencti.OpenCTI",
-        "maximum_tlp": "WHITE",
+        "maximum_tlp": "CLEAR",
         "config": {
             "soft_time_limit": 30,
             "queue": "default"
@@ -112,7 +112,7 @@ connectors = {
         "run_on_failure": True,
         "description": "find or create observable on YETI, linking the successful analysis on IntelOwl.",
         "python_module": "yeti.YETI",
-        "maximum_tlp": "WHITE",
+        "maximum_tlp": "CLEAR",
         "config": {
             "soft_time_limit": 30,
             "queue": "default"

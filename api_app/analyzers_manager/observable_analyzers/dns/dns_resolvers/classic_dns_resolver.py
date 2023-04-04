@@ -24,6 +24,7 @@ class ClassicDNSResolver(classes.ObservableAnalyzer):
 
     def run(self):
         resolutions = []
+        timeout = False
         if self.observable_classification == self.ObservableTypes.IP:
             try:
                 ipaddress.ip_address(self.observable_name)
@@ -48,7 +49,7 @@ class ClassicDNSResolver(classes.ObservableAnalyzer):
                 observable = urlparse(self.observable_name).hostname
 
             try:
-                dns_resolutions = dns.resolver.query(observable, self.query_type)
+                dns_resolutions = dns.resolver.resolve(observable, self._query_type)
                 for resolution in dns_resolutions:
                     element = {
                         "TTL": dns_resolutions.rrset.ttl,
@@ -63,12 +64,20 @@ class ClassicDNSResolver(classes.ObservableAnalyzer):
                 dns.resolver.NoNameservers,
             ):
                 logger.warning(
-                    f"No resolution for "
+                    "No resolution for "
                     f"{self.observable_classification} {self.observable_name}"
                 )
-                resolutions = []
+            except dns.resolver.LifetimeTimeout as e:
+                logger.warning(
+                    "No resolution for "
+                    f"{self.observable_classification} {self.observable_name}."
+                    f"Reason {e}",
+                    stack_info=True,
+                )
+                self.report.errors.append(str(e))
+                timeout = True
 
-        return dns_resolver_response(self.observable_name, resolutions)
+        return dns_resolver_response(self.observable_name, resolutions, timeout)
 
     @classmethod
     def _monkeypatch(cls):

@@ -24,8 +24,34 @@ class OTX(classes.ObservableAnalyzer):
     verbose: bool
     sections: list
     full_analysis: bool
+    timeout: int
 
     _api_key_name: str
+    # This is to add "timeout" feature without having to do a fork
+    # Once this PR is merged: https://github.com/AlienVault-OTX/OTX-Python-SDK/pull/66
+    # we can remove this and use the upstream
+    class OTXv2Extended(OTXv2.OTXv2):
+        def __init__(self, *args, timeout=None, **kwargs):
+            super().__init__(*args, **kwargs)
+            self.timeout = timeout
+
+        def get(self, url, **kwargs):
+            try:
+                response = self.session().get(
+                    self.create_url(url, **kwargs),
+                    headers=self.headers,
+                    proxies=self.proxies,
+                    verify=self.verify,
+                    cert=self.cert,
+                    timeout=self.timeout,
+                )
+                return self.handle_response_errors(response).json()
+            except (
+                OTXv2.requests.exceptions.RetryError,
+                OTXv2.requests.exceptions.Timeout,
+            ) as e:
+                raise OTXv2.RetryError(e)
+
 
     def _extract_indicator_type(self) -> "OTXv2.IndicatorTypes":
         observable_classification = self.observable_classification
@@ -94,7 +120,9 @@ class OTX(classes.ObservableAnalyzer):
         return analysis_result
 
     def run(self):
-        otx = OTXv2.OTXv2(self._api_key_name)
+        otx = self.OTXv2Extended(
+            timeout=self.timeout, api_key=self._api_key_name, user_agent="IntelOwl"
+        )
 
         to_analyze_observable = self.observable_name
         otx_type = self._extract_indicator_type()

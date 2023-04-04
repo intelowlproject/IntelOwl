@@ -44,14 +44,14 @@ INSTALLED_APPS = [
 ]
 
 
-from .auth import *  # lgtm [py/polluting-import]
 
 # inject from other modules
+from .celery import *  # lgtm [py/polluting-import]
 from .aws import *  # lgtm [py/polluting-import]
 from .cache import *  # lgtm [py/polluting-import]
-from .celery import *  # lgtm [py/polluting-import]
 from .certego import *  # lgtm [py/polluting-import]
 from .commons import *  # lgtm [py/polluting-import]
+from .auth import *  # lgtm [py/polluting-import]
 from .db import *  # lgtm [py/polluting-import]
 from .django import *  # lgtm [py/polluting-import]
 from .elasticsearch import *  # lgtm [py/polluting-import]

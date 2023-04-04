@@ -6,7 +6,7 @@ from django.db import migrations
 playbooks = {
     "FREE_TO_USE_ANALYZERS": {
         "analyzers": {
-            "APKiD_Scan_APK_DEX_JAR": {},
+            "APKiD": {},
             "BoxJS_Scan_JavaScript": {},
             "CRXcavator": {},
             "Capa_Info": {},
@@ -79,7 +79,6 @@ playbooks = {
             "MalwareBazaar_Get_File": {},
             "MalwareBazaar_Get_Observable": {},
             "MalwareBazaar_Google_Observable": {},
-            "Manalyze": {},
             "Mnemonic_PassiveDNS": {
                 "cof_format": True,
                 "limit": 1000
@@ -117,7 +116,7 @@ playbooks = {
                 "shellcode": True
             },
             "Quad9_Malicious_Detector": {},
-            "Quark_Engine_APK": {},
+            "Quark_Engine": {},
             "Robtex": {},
             "Rtf_Info": {},
             "Signature_Info": {},
@@ -184,6 +183,7 @@ playbooks = {
                     "https://github.com/StrangerealIntel/DailyIOC",
                     "https://github.com/mandiant/red_team_tool_countermeasures",
                     "https://github.com/fboldewin/YARA-rules",
+                    "https://github.com/dr4k0nia/yara-rules",
                     "https://github.com/Yara-Rules/rules.git",
                     "https://github.com/Neo23x0/signature-base.git",
                     "https://yaraify-api.abuse.ch/download/yaraify-rules.zip"

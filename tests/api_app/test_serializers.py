@@ -33,7 +33,7 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
                 {
                     "playbook_requested": [PlaybookConfig.objects.first()],
                     "analyzers_requested": [a],
-                    "tlp": "WHITE",
+                    "tlp": "CLEAR",
                 }
             )
 
@@ -42,10 +42,10 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
         p.disabled = True
         p.save()
         with self.assertRaises(ValidationError):
-            self.ajcs.validate({"playbook_requested": p, "tlp": "WHITE"})
+            self.ajcs.validate({"playbook_requested": p, "tlp": "CLEAR"})
         p.disabled = False
         p.save()
-        self.ajcs.validate({"playbook_requested": p, "tlp": "WHITE"})
+        self.ajcs.validate({"playbook_requested": p, "tlp": "CLEAR"})
 
     def test_validate_analyzers_requested(self):
         analyzers = self.ajcs.filter_analyzers_requested([])
@@ -57,17 +57,17 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
         a.disabled = True
         with self.assertRaises(ValidationError):
             self.ajcs.set_analyzers_to_execute(
-                [a], {"tlp": "WHITE", "analyzers_requested": [a]}
+                [a], {"tlp": "CLEAR", "analyzers_requested": [a]}
             )
         a.disabled = False
         analyzers = self.ajcs.set_analyzers_to_execute(
-            [a], {"tlp": "WHITE", "analyzers_requested": [a]}
+            [a], {"tlp": "CLEAR", "analyzers_requested": [a]}
         )
         self.assertCountEqual(analyzers, [a])
 
     def test_filter_analyzers_maximum_tlp(self):
         a = AnalyzerConfig.objects.get(name="Tranco")
-        a.maximum_tlp = "WHITE"
+        a.maximum_tlp = "CLEAR"
         self.ajcs.all_analyzers = False
         with self.assertRaises(ValidationError):
             self.ajcs.set_analyzers_to_execute(
@@ -83,7 +83,7 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
     def test_filter_connectors_all(self):
 
         connectors = self.ajcs.set_connectors_to_execute(
-            [], {"tlp": "WHITE", "connectors_requested": []}
+            [], {"tlp": "CLEAR", "connectors_requested": []}
         )
         total = 0
         for connector in ConnectorConfig.objects.all():
@@ -93,23 +93,23 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
 
     def test_filter_connectors_is_runnable(self):
         c = ConnectorConfig.objects.get(name="MISP")
-        c.maximum_tlp = "WHITE"
+        c.maximum_tlp = "CLEAR"
 
         self.assertFalse(c.is_runnable(self.user))
         connectors = _AbstractJobCreateSerializer.set_connectors_to_execute(
-            self.ajcs, [c], {"tlp": "WHITE", "connectors_requested": [c]}
+            self.ajcs, [c], {"tlp": "CLEAR", "connectors_requested": [c]}
         )
         self.assertEqual(0, len(connectors))
         with patch.object(c, "is_runnable") as is_runnable:
             is_runnable.return_value = True
             connectors = _AbstractJobCreateSerializer.set_connectors_to_execute(
-                self.ajcs, [c], {"tlp": "WHITE", "connectors_requested": [c]}
+                self.ajcs, [c], {"tlp": "CLEAR", "connectors_requested": [c]}
             )
             self.assertCountEqual(connectors, [c])
 
     def test_filter_connectors_tlp(self):
         c = ConnectorConfig.objects.get(name="MISP")
-        c.maximum_tlp = "WHITE"
+        c.maximum_tlp = "CLEAR"
         with patch.object(c, "is_runnable") as is_runnable:
             is_runnable.return_value = True
             connectors = _AbstractJobCreateSerializer.set_connectors_to_execute(
@@ -117,7 +117,7 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
             )
             self.assertEqual(0, len(connectors))
             connectors = _AbstractJobCreateSerializer.set_connectors_to_execute(
-                self.ajcs, [c], {"tlp": "WHITE", "connectors_requested": [c]}
+                self.ajcs, [c], {"tlp": "CLEAR", "connectors_requested": [c]}
             )
             self.assertCountEqual(connectors, [c])
 
@@ -221,7 +221,7 @@ class FileJobCreateSerializerTestCase(CustomTestCase):
                 self.fas,
                 [a],
                 {
-                    "tlp": "WHITE",
+                    "tlp": "CLEAR",
                     "file_mimetype": "text/html",
                     "analyzers_requested": [a],
                 },
@@ -236,7 +236,7 @@ class FileJobCreateSerializerTestCase(CustomTestCase):
         analyzers = FileAnalysisSerializer.set_analyzers_to_execute(
             self.fas,
             [a],
-            {"tlp": "WHITE", "file_mimetype": "text/html", "analyzers_requested": [a]},
+            {"tlp": "CLEAR", "file_mimetype": "text/html", "analyzers_requested": [a]},
         )
         self.assertCountEqual(analyzers, [a])
 
@@ -251,7 +251,7 @@ class FileJobCreateSerializerTestCase(CustomTestCase):
                 self.fas,
                 [a],
                 {
-                    "tlp": "WHITE",
+                    "tlp": "CLEAR",
                     "file_mimetype": "text/html",
                     "analyzers_requested": [a],
                 },
@@ -260,7 +260,7 @@ class FileJobCreateSerializerTestCase(CustomTestCase):
         analyzers = FileAnalysisSerializer.set_analyzers_to_execute(
             self.fas,
             [a],
-            {"tlp": "WHITE", "file_mimetype": "text/rtf", "analyzers_requested": [a]},
+            {"tlp": "CLEAR", "file_mimetype": "text/rtf", "analyzers_requested": [a]},
         )
         self.assertCountEqual(analyzers, [a])
 
@@ -273,7 +273,7 @@ class FileJobCreateSerializerTestCase(CustomTestCase):
                 self.fas,
                 [a],
                 {
-                    "tlp": "WHITE",
+                    "tlp": "CLEAR",
                     "file_mimetype": "text/html",
                     "analyzers_requested": [a],
                 },
@@ -282,7 +282,7 @@ class FileJobCreateSerializerTestCase(CustomTestCase):
         analyzers = FileAnalysisSerializer.set_analyzers_to_execute(
             self.fas,
             [a],
-            {"tlp": "WHITE", "file_mimetype": "text/rtf", "analyzers_requested": [a]},
+            {"tlp": "CLEAR", "file_mimetype": "text/rtf", "analyzers_requested": [a]},
         )
         self.assertCountEqual(analyzers, [a])
 
@@ -305,7 +305,7 @@ class ObservableJobCreateSerializerTestCase(CustomTestCase):
                 self.oass,
                 [a],
                 {
-                    "tlp": "WHITE",
+                    "tlp": "CLEAR",
                     "analyzers_requested": [a],
                     "observable_classification": "domain",
                 },
@@ -316,7 +316,7 @@ class ObservableJobCreateSerializerTestCase(CustomTestCase):
             self.oass,
             [a],
             {
-                "tlp": "WHITE",
+                "tlp": "CLEAR",
                 "analyzers_requested": [a],
                 "observable_classification": "domain",
             },
@@ -333,7 +333,7 @@ class ObservableJobCreateSerializerTestCase(CustomTestCase):
                 self.oass,
                 [a],
                 {
-                    "tlp": "WHITE",
+                    "tlp": "CLEAR",
                     "analyzers_requested": [a],
                     "observable_classification": "domain",
                 },
@@ -344,7 +344,7 @@ class ObservableJobCreateSerializerTestCase(CustomTestCase):
             self.oass,
             [a],
             {
-                "tlp": "WHITE",
+                "tlp": "CLEAR",
                 "analyzers_requested": [a],
                 "observable_classification": "domain",
             },

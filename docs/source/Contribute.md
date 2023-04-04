@@ -2,11 +2,11 @@
 
 Intel Owl was designed to ease the addition of new analyzers, connectors and playbooks. With a simple python script you can integrate your own engine or integrate an external service in a short time.
 
-* Wish to contribute to the Python client ? See [pyintelowl](https://github.com/intelowlproject/pyintelowl).
+- Wish to contribute to the Python client ? See [pyintelowl](https://github.com/intelowlproject/pyintelowl).
 
-* Wish to contribute to the GO client ? See [go-intelowl](https://github.com/intelowlproject/go-intelowl).
+- Wish to contribute to the GO client ? See [go-intelowl](https://github.com/intelowlproject/go-intelowl).
 
-* Wish to contribute to the official IntelOwl Site ? See [intelowlproject.github.io](https://github.com/intelowlproject/intelowlproject.github.io).
+- Wish to contribute to the official IntelOwl Site ? See [intelowlproject.github.io](https://github.com/intelowlproject/intelowlproject.github.io).
 
 ## Rules
 
@@ -157,7 +157,7 @@ npm start
 
 You may want to look at a few existing examples to start to build a new one, such as:
 
-- [shodan.py](https://github.com/intelowlproject/IntelOwl/blob/develop/api_app/analyzers_manager/observable_analyzers/shodan.py), if you are creating an observable analyzer 
+- [shodan.py](https://github.com/intelowlproject/IntelOwl/blob/develop/api_app/analyzers_manager/observable_analyzers/shodan.py), if you are creating an observable analyzer
 - [malpedia_scan.py](https://github.com/intelowlproject/IntelOwl/blob/develop/api_app/analyzers_manager/file_analyzers/malpedia_scan.py), if you are creating a file analyzer
 - [peframe.py](https://github.com/intelowlproject/IntelOwl/blob/develop/api_app/analyzers_manager/file_analyzers/peframe.py), if you are creating a [docker based analyzer](#integrating-a-docker-based-analyzer)
 - **Please note:** If the new analyzer that you are adding is free for the user to use, please add it in the `FREE_TO_USE_ANALYZERS` playbook in `playbook_config.json`.
@@ -292,6 +292,7 @@ Follow these guides to understand how to start to contribute to them while devel
 IntelOwl makes use of the django testing framework and the `unittest` library for unit testing of the API endpoints and End-to-End testing of the analyzers and connectors.
 
 ### Configuration
+
 - In the encrypted folder `tests/test_files.zip` (password: "infected") there are some real malware samples that you can use for testing purposes.
 
 <div class="admonition danger">
@@ -302,20 +303,22 @@ Please remember that these are dangerous malware! They come encrypted and locked
 </div>
 
 - With the following environment variables you can customize your tests:
-    * `DISABLE_LOGGING_TEST` -> disable logging to get a clear output
-    * `MOCK_CONNECTIONS` -> mock connections to external API to test the analyzers without a real connection or a valid API key
+
+  - `DISABLE_LOGGING_TEST` -> disable logging to get a clear output
+  - `MOCK_CONNECTIONS` -> mock connections to external API to test the analyzers without a real connection or a valid API key
 
 - If you prefer to use custom inputs for tests, you can change the following environment variables in the environment file based on the data you would like to test:
-    * `TEST_JOB_ID`
-    * `TEST_MD5`
-    * `TEST_URL`
-    * `TEST_IP`
-    * `TEST_DOMAIN`
+  - `TEST_JOB_ID`
+  - `TEST_MD5`
+  - `TEST_URL`
+  - `TEST_IP`
+  - `TEST_DOMAIN`
 
 ### Setup containers
 
-The point here is to launch the code in your environment and not the last official image in Docker Hub. 
+The point here is to launch the code in your environment and not the last official image in Docker Hub.
 For this, use the `test` or the `ci` option when launching the containers with the `start.py` script.
+
 - Use the `test` option to _actually_ execute tests that simulate a real world environment without mocking connections.
 - Use the `ci` option to execute tests in a CI environment where connections are mocked.
 

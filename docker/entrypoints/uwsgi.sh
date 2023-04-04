@@ -29,5 +29,5 @@ then
     python manage.py runserver 0.0.0.0:8001
 else
     $CHANGELOG_NOTIFICATION_COMMAND
-    /usr/local/bin/uwsgi --ini /etc/uwsgi/sites/intel_owl.ini
+    /usr/local/bin/uwsgi --ini /etc/uwsgi/sites/intel_owl.ini --stats 127.0.0.1:1717 --stats-http
 fi

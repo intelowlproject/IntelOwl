@@ -138,7 +138,7 @@ class Job(models.Model):
     received_request_time = models.DateTimeField(auto_now_add=True, db_index=True)
     finished_analysis_time = models.DateTimeField(blank=True, null=True)
     process_time = models.FloatField(blank=True, null=True)
-    tlp = models.CharField(max_length=8, choices=TLP.choices, default=TLP.WHITE)
+    tlp = models.CharField(max_length=8, choices=TLP.choices, default=TLP.CLEAR)
     errors = pg_fields.ArrayField(
         models.CharField(max_length=900), blank=True, default=list, null=True
     )
@@ -201,6 +201,7 @@ class Job(models.Model):
             if not (self.status == self.Status.FAILED and self.finished_analysis_time):
                 self.finished_analysis_time = get_now()
                 self.process_time = self.calculate_process_time()
+            logger.info(f"{self.__repr__()} setting status to {status_to_set}")
             self.status = status_to_set
             self.save(
                 update_fields=[
@@ -337,7 +338,7 @@ class Job(models.Model):
     def visible_for_user(cls, user: User):
         """
         User has access to:
-        - jobs with TLP = WHITE or GREEN
+        - jobs with TLP = CLEAR or GREEN
         - jobs with TLP = AMBER or RED and
         created by a member of their organization.
         """
@@ -347,7 +348,7 @@ class Job(models.Model):
             )
         else:
             user_query = Q(user=user)
-        query = Q(tlp__in=[TLP.WHITE, TLP.GREEN]) | (
+        query = Q(tlp__in=[TLP.CLEAR, TLP.GREEN]) | (
             Q(tlp__in=[TLP.AMBER, TLP.RED]) & (user_query)
         )
         return cls.objects.all().filter(query)

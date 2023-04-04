@@ -17,7 +17,7 @@ class ConnectorConfigSerializerTestCase(CustomTestCase):
             config={"soft_time_limit": 100, "queue": "default"},
             params={},
             secrets={},
-            maximum_tlp="WHITE",
+            maximum_tlp="CLEAR",
         )
         ccs = ConnectorConfigSerializer(context={"request": MockUpRequest(self.user)})
         result = ccs.to_representation(cc)
@@ -42,7 +42,7 @@ class ConnectorConfigSerializerTestCase(CustomTestCase):
                     "required": True,
                 }
             },
-            maximum_tlp="WHITE",
+            maximum_tlp="CLEAR",
         )
 
         ccs = ConnectorConfigSerializer(context={"request": MockUpRequest(self.user)})

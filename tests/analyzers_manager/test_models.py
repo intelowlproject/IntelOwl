@@ -10,7 +10,6 @@ from tests import CustomTestCase
 
 
 class AnalyzerConfigTestCase(CustomTestCase):
-
     def test_clean_python_module_hash(self):
         ac = AnalyzerConfig(
             name="test",
@@ -22,7 +21,6 @@ class AnalyzerConfigTestCase(CustomTestCase):
             disabled=False,
             type="file",
             run_hash=True,
-
         )
         with self.assertRaises(ValidationError) as e:
             ac.clean_python_module()

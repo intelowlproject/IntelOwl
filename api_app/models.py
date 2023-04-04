@@ -61,7 +61,6 @@ class Tag(models.Model):
         return f'Tag(label="{self.label}")'
 
 
-
 class Comment(models.Model):
     # make the user null if the user is deleted
     user = models.ForeignKey(
@@ -80,7 +79,7 @@ class Comment(models.Model):
         on_delete=models.CASCADE,
         null=True,
         blank=True,
-        related_name="comment",
+        related_name="comments",
     )
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)

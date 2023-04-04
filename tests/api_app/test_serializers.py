@@ -350,3 +350,8 @@ class ObservableJobCreateSerializerTestCase(CustomTestCase):
             },
         )
         self.assertCountEqual(analyzers, [a])
+
+
+class CommentSerializerTestCase(CustomTestCase):
+    # TODO please add tests here
+    ...

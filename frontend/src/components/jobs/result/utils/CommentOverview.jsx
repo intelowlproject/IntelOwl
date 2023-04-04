@@ -48,7 +48,7 @@ export default function CommentOverview({ comments, jobId, refetchComments }) {
 
   // handle delete comment
   const handleDeleteComment = (commentId) => {
-    deleteComment(commentId, jobId);
+    deleteComment(commentId);
     // reload comments after 1.5 seconds (to give time to the backend to process the request)
     setTimeout(() => {
       // refetch comments and update the state

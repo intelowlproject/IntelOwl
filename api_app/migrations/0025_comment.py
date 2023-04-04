@@ -32,7 +32,7 @@ class Migration(migrations.Migration):
                     "job",
                     models.ForeignKey(
                         blank=True,
-                        related_name="comment",
+                        related_name="comments",
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,
                         to="api_app.job",

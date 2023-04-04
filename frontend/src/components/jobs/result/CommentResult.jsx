@@ -20,7 +20,7 @@ export default function CommentResult() {
 
   // API
   const [{ data: comments, loading, error }, refetch] = useAxios({
-    url: `${COMMENT_BASE_URI}?jobId=${jobId}`,
+    url: `${COMMENT_BASE_URI}?job_id=${jobId}`,
   });
 
   // initial loading (spinner)

@@ -129,6 +129,11 @@ class PluginConfigViewSetTestCase(CustomAPITestCase):
         self.assertEqual(third_item["value"], '"supersecret_low_privilege_third"')
 
 
+class CommentViewSetTestCase(CustomAPITestCase):
+    # TODO please add tests here
+    ...
+
+
 class JobViewsetTests(CustomAPITestCase):
     jobs_list_uri = reverse("jobs-list")
     agg_status_uri = reverse("jobs-aggregate-status")

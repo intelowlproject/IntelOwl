@@ -28,7 +28,7 @@ from .connectors_manager.exceptions import NotRunnableConnector
 from .connectors_manager.models import ConnectorConfig
 from .connectors_manager.serializers import ConnectorReportSerializer
 from .helpers import calculate_md5, gen_random_colorhex
-from .models import Job, PluginConfig, Tag
+from .models import Comment, Job, PluginConfig, Tag
 from .playbooks_manager.models import PlaybookConfig
 from .visualizers_manager.models import VisualizerConfig
 from .visualizers_manager.serializers import VisualizerReportSerializer
@@ -257,55 +257,6 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         return job
 
 
-class CommentCreateSerializer(rfs.ModelSerializer):
-    """
-    Used for ``create()``
-    """
-
-    class Meta:
-        model = Comment
-        fields = ("id", "content", "user", "job_id")
-
-    user = UserSerializer(read_only=True)
-    job_id = rfs.PrimaryKeyRelatedField(
-        queryset=Job.objects.all(), write_only=True, source="job"
-    )
-
-    def validate(self, attrs: dict) -> dict:
-        attrs = super().validate(attrs)
-
-        user = self.context["request"].user
-        job = attrs.get("job")
-
-        # the assumption here is that
-        # in intelowl, either a user has a membership
-        # or he is a normal user, and both operate a bit differently.
-        if job.user.has_membership():
-            # user can only comment on jobs
-            # created by members of his organization
-            if not job.user.membership.filter(organization=user.organization).exists():
-                raise ValidationError(
-                    {
-                        "detail": (
-                            "You can only comment on "
-                            "jobs created by your organization."
-                        )
-                    }
-                )
-
-        elif job.user != user:
-            # or user can only comment on jobs
-            # created by himself, if he has no membership
-            raise ValidationError(
-                {"detail": "You can only comment on jobs created by yourself."}
-            )
-        return attrs
-
-    def create(self, validated_data: dict) -> Comment:
-        validated_data["user"] = self.context["request"].user
-        return super().create(validated_data)
-
-
 class CommentListSerializer(rfs.ModelSerializer):
     """
     Used for ``list()``.
@@ -332,14 +283,29 @@ class CommentSerializer(rfs.ModelSerializer):
 
     class Meta:
         model = Comment
-        fields = (
-            "id",
-            "content",
-            "created_at",
-            "user",
-        )
+        fields = ("id", "content", "created_at", "user", "job_id")
 
     user = UserSerializer(read_only=True)
+    job_id = rfs.PrimaryKeyRelatedField(
+        queryset=Job.objects.all(), write_only=True, source="job"
+    )
+
+    def validate(self, attrs: dict) -> dict:
+        attrs = super().validate(attrs)
+
+        user = self.context["request"].user
+        job = attrs.get("job")
+        try:
+            Job.visible_for_user(user).get(pk=job.pk)
+        except Job.DoesNotExist:
+            raise ValidationError(
+                {"detail": f"You have no permission to comment on job {job.pk}"}
+            )
+        return attrs
+
+    def create(self, validated_data: dict) -> Comment:
+        validated_data["user"] = self.context["request"].user
+        return super().create(validated_data)
 
 
 class JobListSerializer(_AbstractJobViewSerializer):

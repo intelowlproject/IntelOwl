@@ -18,7 +18,7 @@ class ConnectorReport(AbstractReport):
 
 class ConnectorConfig(AbstractConfig):
     maximum_tlp = models.CharField(
-        null=False, default=TLP.WHITE, choices=TLP.choices, max_length=50
+        null=False, default=TLP.CLEAR, choices=TLP.choices, max_length=50
     )
     run_on_failure = models.BooleanField(null=False, default=True)
 

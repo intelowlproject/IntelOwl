@@ -10,8 +10,8 @@ from tests.mock_utils import MockUpRequest
 
 
 class PlaybookConfigSerializerTestCase(CustomTestCase):
-    def test_create(self):
-        job = Job.objects.create(user=self.superuser)
+    def test_create_wrong_user(self):
+        job = Job.objects.create(user=self.superuser, is_sample=True)
 
         pccs = PlaybookConfigCreateSerializer(
             data={"job": job.pk, "name": "test", "description": "test"},

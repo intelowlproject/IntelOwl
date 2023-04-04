@@ -1,6 +1,6 @@
 import React from "react";
 import { BsFillTrashFill, BsFillPlusCircleFill } from "react-icons/bs";
-import { MdEdit } from "react-icons/md";
+import { MdEdit, MdInfoOutline } from "react-icons/md";
 import {
   FormFeedback,
   FormGroup,
@@ -12,6 +12,7 @@ import {
   Input,
   Spinner,
   Button,
+  UncontrolledTooltip,
 } from "reactstrap";
 import { useNavigate } from "react-router-dom";
 import { ErrorMessage, Field, Form, Formik, FieldArray } from "formik";
@@ -102,11 +103,6 @@ const stateSelector = (state) => [
 
 const checkChoices = [
   {
-    value: "check_all",
-    label:
-      "Do not execute if a similar analysis is currently running or reported without fails",
-  },
-  {
     value: "running_only",
     label: "Do not execute if a similar analysis is currently running",
   },
@@ -156,6 +152,7 @@ const initialValues = {
   tags: [],
   check: "check_all",
   analysisOptionValues: "Analyzers/Connectors",
+  hoursAgo: 24,
 };
 
 // Component
@@ -654,26 +651,6 @@ export default function ScanForm() {
                   )}
                 </FormGroup>
               )}
-              <FormGroup row className="mt-2">
-                <Label sm={3}>Extra configuration</Label>
-                <Col sm={9}>
-                  {checkChoices.map((ch) => (
-                    <FormGroup check key={`checkchoice__${ch.value}`}>
-                      <Field
-                        as={Input}
-                        id={`checkchoice__${ch.value}`}
-                        type="radio"
-                        name="check"
-                        value={ch.value}
-                        onChange={formik.handleChange}
-                      />
-                      <Label check for={`checkchoice__${ch.value}`}>
-                        {ch.label}
-                      </Label>
-                    </FormGroup>
-                  ))}
-                </Col>
-              </FormGroup>
 
               <hr />
               <FormGroup row>
@@ -716,6 +693,76 @@ export default function ScanForm() {
                     )}
                   </FormText>
                   <ErrorMessage component={FormFeedback} name="tlp" />
+                </Col>
+              </FormGroup>
+
+              <FormGroup row className="mt-2">
+                <Label sm={3}>Scan configuration</Label>
+                <Col sm={9}>
+                  <FormGroup check key="checkchoice__check_all">
+                    <Field
+                      as={Input}
+                      id="checkchoice__check_all"
+                      type="radio"
+                      name="check"
+                      value="check_all"
+                      onChange={formik.handleChange}
+                    />
+                    <div className="d-flex align-items-center">
+                      <Label
+                        check
+                        for="checkchoice__check_all"
+                        className="col-8"
+                      >
+                        Do not execute if a similar analysis is currently
+                        running or reported without fails
+                      </Label>
+                      <div className="col-4 d-flex align-items-center">
+                        H:
+                        <div className="col-4 mx-1">
+                          <Field
+                            as={Input}
+                            id="checkchoice__check_all__minutes_ago"
+                            type="number"
+                            name="hoursAgo"
+                            onChange={formik.handleChange}
+                          />
+                        </div>
+                        <div className="col-2">
+                          <MdInfoOutline id="minutes-ago-info-icon" />
+                          <UncontrolledTooltip
+                            target="minutes-ago-info-icon"
+                            placement="right"
+                            fade={false}
+                            innerClassName="p-2 border border-info text-start text-nowrap md-fit-content"
+                          >
+                            <span>
+                              Max age (in hours) for the similar analysis.
+                              <br />
+                              The default value is 24 hours (1 day).
+                              <br />
+                              Empty value takes all the previous analysis.
+                            </span>
+                          </UncontrolledTooltip>
+                        </div>
+                      </div>
+                    </div>
+                  </FormGroup>
+                  {checkChoices.map((ch) => (
+                    <FormGroup check key={`checkchoice__${ch.value}`}>
+                      <Field
+                        as={Input}
+                        id={`checkchoice__${ch.value}`}
+                        type="radio"
+                        name="check"
+                        value={ch.value}
+                        onChange={formik.handleChange}
+                      />
+                      <Label check for={`checkchoice__${ch.value}`}>
+                        {ch.label}
+                      </Label>
+                    </FormGroup>
+                  ))}
                 </Col>
               </FormGroup>
 

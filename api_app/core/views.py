@@ -72,7 +72,8 @@ class PluginActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
     @action(detail=False, methods=["patch"])
     def kill(self, request, job_id, report_id):
         logger.info(
-            f"kill request from user {request.user} for job_id {job_id}, pk {report_id}"
+            f"kill request from user {request.user}"
+            f" for job_id {job_id}, pk {report_id}"
         )
         # get report object or raise 404
         report = self.get_object(job_id, report_id)
@@ -95,7 +96,8 @@ class PluginActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
     @action(detail=False, methods=["patch"])
     def retry(self, request, job_id, report_id):
         logger.info(
-            f"retry request from user {request.user} for job_id {job_id}, report_id {report_id}"
+            f"retry request from user {request.user}"
+            f" for job_id {job_id}, report_id {report_id}"
         )
         # get report object or raise 404
         report = self.get_object(job_id, report_id)

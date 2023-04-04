@@ -28,22 +28,19 @@ class Yara(Visualizer):
         ]
         levels = self.Level()
         h1 = self.HList(
-                value=[
-                    self.Title(
-                        self.Base(
-                            value="Analyzer",
-                            color=self.Color.DARK,
-                        ),
-                        self.Base(value=self.__class__.__name__),
-                    )
-                ]
-            )
-        logger.debug(h1.to_dict())
-        levels.add_level(
-            level=1,
-            horizontal_list=h1
+            value=[
+                self.Title(
+                    self.Base(
+                        value="Analyzer",
+                        color=self.Color.DARK,
+                    ),
+                    self.Base(value=self.__class__.__name__),
+                )
+            ]
         )
-        h2=self.HList(
+        logger.debug(h1.to_dict())
+        levels.add_level(level=1, horizontal_list=h1)
+        h2 = self.HList(
             value=[
                 self.Title(
                     self.Base(value="N# Matches", color=self.Color.DARK),
@@ -56,10 +53,7 @@ class Yara(Visualizer):
             ]
         )
         logger.debug(h2.to_dict())
-        levels.add_level(
-            level=2,
-            horizontal_list=h2
-        )
+        levels.add_level(level=2, horizontal_list=h2)
         logger.debug(levels)
         return levels.to_dict()
 

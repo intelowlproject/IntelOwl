@@ -681,7 +681,7 @@ class JobAvailabilitySerializer(rfs.ModelSerializer):
         analyzers = attrs.get("analyzers", [])
         if not analyzers and not playbooks:
             attrs["analyzers"] = list(AnalyzerConfig.objects.all())
-        elif len(playbooks)!= 0 and len(analyzers) != 0:
+        elif len(playbooks) != 0 and len(analyzers) != 0:
             raise rfs.ValidationError(
                 "Either only send the 'playbooks' parameter or the 'analyzers' one."
             )

@@ -202,7 +202,7 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
             except NotRunnableConnector as e:
                 plugins_to_execute.remove(plugin_config)
                 if add_warning:
-                    logger.warning(e)
+                    logger.info(e)
                     self.filter_warnings.append(str(e))
                 else:
                     logger.debug(e)
@@ -461,7 +461,7 @@ class FileAnalysisSerializer(_AbstractJobCreateSerializer):
             if self.all_analyzers:
                 logger.debug(message)
             else:
-                logger.warning(message)
+                logger.info(message)
                 self.filter_warnings.append(message)
         return super().set_analyzers_to_execute(analyzers_to_execute, serialized_data)
 
@@ -616,7 +616,7 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
             if self.all_analyzers:
                 logger.debug(message)
             else:
-                logger.warning(message)
+                logger.info(message)
                 self.filter_warnings.append(message)
 
         return super().set_analyzers_to_execute(analyzers_to_execute, serialized_data)

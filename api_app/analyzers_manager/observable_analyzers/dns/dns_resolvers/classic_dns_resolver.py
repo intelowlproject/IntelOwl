@@ -34,7 +34,7 @@ class ClassicDNSResolver(classes.ObservableAnalyzer):
                 if hostname:
                     resolutions.append(hostname)
             except (socket.gaierror, socket.herror):
-                logger.warning(f"No resolution for ip {self.observable_name}")
+                logger.info(f"No resolution for ip {self.observable_name}")
                 self.report.errors.append(
                     f"No resolution for ip {self.observable_name}"
                 )
@@ -63,7 +63,7 @@ class ClassicDNSResolver(classes.ObservableAnalyzer):
                 dns.resolver.NoAnswer,
                 dns.resolver.NoNameservers,
             ):
-                logger.warning(
+                logger.info(
                     "No resolution for "
                     f"{self.observable_classification} {self.observable_name}"
                 )

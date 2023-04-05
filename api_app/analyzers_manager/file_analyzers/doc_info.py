@@ -163,7 +163,14 @@ class DocInfo(FileAnalyzer):
             )
         except Exception as e:
             error_message = f"job_id {self.job_id} msodde parser failed. Error: {e}"
-            logger.warning(error_message, stack_info=True)
+            # This may happen for text/plain samples types
+            # and should not be treated as an engine error
+            if "Could not determine delimiter" in str(e) or self.filename.endswith(
+                ".exe"
+            ):
+                logger.info(error_message, stack_info=True)
+            else:
+                logger.warning(error_message, stack_info=True)
             self.report.errors.append(error_message)
             self.report.save()
             msodde_result = f"Error: {e}"

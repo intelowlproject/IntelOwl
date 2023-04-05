@@ -75,7 +75,7 @@ class Quad9MaliciousDetector(classes.ObservableAnalyzer):
         except requests.RequestException as e:
             raise AnalyzerRunException(e)
         except self.Quad9503StatusCode as e:
-            logger.warning(e)
+            logger.info(e)
             self.report.errors.append(str(e))
             timeout = True
         else:

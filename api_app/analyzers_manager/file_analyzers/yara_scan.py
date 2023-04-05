@@ -162,7 +162,10 @@ class YaraRepo:
 
     @cached_property
     def compiled_paths(self) -> List[PosixPath]:
-        return [path / self.compiled_file_name for path in self.first_level_directories + [self.directory]]
+        return [
+            path / self.compiled_file_name
+            for path in self.first_level_directories + [self.directory]
+        ]
 
     def is_zip(self):
         return self.url.endswith(".zip")
@@ -218,7 +221,9 @@ class YaraRepo:
                         continue
                     else:
                         valid_rules_path.append(str(rule))
-            logger.info(f"Compiling {len(valid_rules_path)} rules for {self} at {directory}")
+            logger.info(
+                f"Compiling {len(valid_rules_path)} rules for {self} at {directory}"
+            )
             compiled_rule = yara.compile(
                 filepaths={str(path): str(path) for path in valid_rules_path}
             )

@@ -30,7 +30,6 @@ from .core.models import AbstractConfig
 from .filters import JobFilter
 from .models import Comment, Job, PluginConfig, Tag
 from .serializers import (
-    CommentListSerializer,
     CommentSerializer,
     FileAnalysisSerializer,
     JobAvailabilitySerializer,

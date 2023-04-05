@@ -46,6 +46,7 @@ __all__ = [
     "MultipleFileAnalysisSerializer",
     "MultipleObservableAnalysisSerializer",
     "PluginConfigSerializer",
+    "CommentSerializer",
 ]
 
 

@@ -525,6 +525,7 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
 
     observable_name = rfs.CharField(required=True)
     observable_classification = rfs.CharField(required=False)
+    is_sample = rfs.HiddenField(write_only=True, default=False)
 
     class Meta:
         model = Job

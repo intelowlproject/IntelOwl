@@ -226,8 +226,6 @@ class YaraRepo:
         logger.info(f"{self} starting analysis of {filename}")
         result = []
 
-        if len(self.rules) == 0:
-            return []
         for rule in self.rules:
             try:
                 matches = rule.match(file_path, externals={"filename": filename})

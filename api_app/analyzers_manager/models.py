@@ -73,6 +73,7 @@ class MimeTypes(models.TextChoices):
     BINARY = "application/x-binary"
     MAC1 = "application/x-macbinary"
     MAC2 = "application/mac-binary"
+    MAC3 = "application/x-mach-binary"
     COMPRESS1 = "application/x-zip-compressed"
     COMPRESS2 = "application/x-compressed"
 

@@ -269,14 +269,23 @@ class Visualizer(Plugin, metaclass=abc.ABCMeta):
         from api_app.analyzers_manager.models import AnalyzerReport
 
         self._config: VisualizerConfig
-        return AnalyzerReport.objects.filter(
-            config__in=self._config.analyzers.all(), job=self._job
+        configs = self._config.analyzers.all()
+        queryset = AnalyzerReport.objects.filter(
+            job=self._job
         )
+        if configs:
+            queryset.filter(config__in=configs)
+        return queryset
 
     def connector_reports(self) -> QuerySet:
         from api_app.connectors_manager.models import ConnectorReport
 
         self._config: VisualizerConfig
-        return ConnectorReport.objects.filter(
-            config__in=self._config.connectors.all(), job=self._job
+        configs = self._config.connectors.all()
+
+        queryset = ConnectorReport.objects.filter(
+            job=self._job
         )
+        if configs:
+            queryset.filter(config__in=configs)
+        return queryset

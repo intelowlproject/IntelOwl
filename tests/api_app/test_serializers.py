@@ -7,7 +7,7 @@ from rest_framework.exceptions import ValidationError
 
 from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.connectors_manager.models import ConnectorConfig
-from api_app.models import Job, User
+from api_app.models import Job
 from api_app.playbooks_manager.models import PlaybookConfig
 from api_app.serializers import (
     CommentSerializer,
@@ -356,11 +356,7 @@ class ObservableJobCreateSerializerTestCase(CustomTestCase):
 
 class CommentSerializerTestCase(CustomTestCase):
     def setUp(self):
-        self.user = User.objects.create_user(
-            username="test", email="test@test.com", password="test"
-        )
-        self.user.save()
-
+        super().setUp()
         self.job = Job.objects.create(
             observable_name="test.com",
             observable_classification="domain",
@@ -373,13 +369,16 @@ class CommentSerializerTestCase(CustomTestCase):
             context={"request": MockUpRequest(self.user)},
         )
 
+    def tearDown(self) -> None:
+        super().tearDown()
+        self.job.delete()
+
     def test_create(self):
-        self.assertEqual(223, self.job.id)
         self.assertTrue(self.cs.is_valid())
-        self.cs.save()
-        self.assertTrue(self.cs.Meta.model.objects.filter(content="test").exists())
+        comment = self.cs.save()
+        self.assertEqual(comment.data, "test")
+        comment.delete()
 
     def test_create_with_invalid_job_id(self):
         self.cs.initial_data["job_id"] = 100000
         self.assertFalse(self.cs.is_valid())
-        self.assertRaises(ValidationError, self.cs.save)

@@ -35,12 +35,7 @@ export default function CommentResult() {
     <Loader
       loading={initialLoading}
       error={error}
-      render={() => (
-        <CommentOverview
-          job={job}
-          refetchComments={refetch}
-        />
-      )}
+      render={() => <CommentOverview job={job} refetchComments={refetch} />}
     />
   );
 }

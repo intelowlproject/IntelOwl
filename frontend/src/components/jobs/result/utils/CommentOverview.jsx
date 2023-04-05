@@ -18,6 +18,8 @@ import { Formik, Field } from "formik";
 
 import { createComment, deleteComment } from "../../../scan/api";
 
+import { useAuthStore } from "../../../../stores";
+
 function formatDate(dateString) {
   const date = new Date(dateString);
   const options = {
@@ -32,6 +34,12 @@ function formatDate(dateString) {
 }
 
 export default function CommentOverview({ comments, jobId, refetchComments }) {
+  console.debug("CommentOverview - comments");
+  console.debug(comments);
+
+  const [user] = useAuthStore((state) => [state.user]);
+  console.debug(user);
+
   // handle submit of form
   const onSubmit = (values) => {
     const formValues = {
@@ -111,7 +119,7 @@ export default function CommentOverview({ comments, jobId, refetchComments }) {
                 </CardHeader>
                 <CardBody>
                   <p>{comment.content}</p>
-                  {comment.current_user && (
+                  {user.username === comment.user.username && (
                     <div className="d-flex justify-content-end">
                       <Button
                         onClick={() => handleDeleteComment(comment.id)}

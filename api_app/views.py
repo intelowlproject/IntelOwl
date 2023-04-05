@@ -12,8 +12,9 @@ from rest_framework import serializers as rfs
 from rest_framework import status, viewsets
 from rest_framework.decorators import action, api_view
 from rest_framework.exceptions import PermissionDenied, ValidationError
-from rest_framework.mixins import CreateModelMixin
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.viewsets import ModelViewSet
 
 from certego_saas.apps.organization.permissions import (
     IsObjectOwnerOrSameOrgPermission,
@@ -212,12 +213,9 @@ def analyze_multiple_observables(request):
     Requires authentication.
     """
 )
-class CommentViewSet(ReadAndDeleteOnlyViewSet, CreateModelMixin, SerializerActionMixin):
+class CommentViewSet(ModelViewSet):
     serializer_class = CommentSerializer
-    serializer_action_classes = {
-        "list": CommentListSerializer,
-        "create": CommentSerializer,
-    }
+    permission_classes = [IsAuthenticated]
 
     def get_permissions(self):
         permissions = super().get_permissions()

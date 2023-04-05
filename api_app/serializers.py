@@ -285,6 +285,7 @@ class CommentSerializer(rfs.ModelSerializer):
         model = Comment
         fields = ("id", "content", "created_at", "user", "job_id")
 
+    list_serializer_class = CommentListSerializer
     user = UserSerializer(read_only=True)
     job_id = rfs.PrimaryKeyRelatedField(
         queryset=Job.objects.all(), write_only=True, source="job"

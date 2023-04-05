@@ -270,9 +270,7 @@ class Visualizer(Plugin, metaclass=abc.ABCMeta):
 
         self._config: VisualizerConfig
         configs = self._config.analyzers.all()
-        queryset = AnalyzerReport.objects.filter(
-            job=self._job
-        )
+        queryset = AnalyzerReport.objects.filter(job=self._job)
         if configs:
             queryset.filter(config__in=configs)
         return queryset
@@ -283,9 +281,7 @@ class Visualizer(Plugin, metaclass=abc.ABCMeta):
         self._config: VisualizerConfig
         configs = self._config.connectors.all()
 
-        queryset = ConnectorReport.objects.filter(
-            job=self._job
-        )
+        queryset = ConnectorReport.objects.filter(job=self._job)
         if configs:
             queryset.filter(config__in=configs)
         return queryset

@@ -4,7 +4,7 @@ import useTitle from "react-use/lib/useTitle";
 import { useParams } from "react-router-dom";
 import { Loader } from "@certego/certego-ui";
 
-import { COMMENT_BASE_URI } from "../../../constants/api";
+import { JOB_BASE_URI } from "../../../constants/api";
 
 import { CommentOverview } from "./utils";
 
@@ -19,14 +19,14 @@ export default function CommentResult() {
   const jobId = params.id;
 
   // API
-  const [{ data: comments, loading, error }, refetch] = useAxios({
-    url: `${COMMENT_BASE_URI}?job_id=${jobId}`,
+  const [{ data: job, loading, error }, refetch] = useAxios({
+    url: `${JOB_BASE_URI}/${jobId}`,
   });
 
   // initial loading (spinner)
   React.useEffect(() => {
     if (!loading) setInitialLoading(false);
-  }, [loading, comments]);
+  }, [loading, job]);
 
   // page title
   useTitle(`IntelOwl | Comments (#${jobId})`, { restoreOnUnmount: true });
@@ -37,8 +37,7 @@ export default function CommentResult() {
       error={error}
       render={() => (
         <CommentOverview
-          comments={comments}
-          jobId={jobId}
+          job={job}
           refetchComments={refetch}
         />
       )}

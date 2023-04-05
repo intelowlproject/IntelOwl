@@ -213,6 +213,7 @@ def analyze_multiple_observables(request):
     """
 )
 class CommentViewSet(ModelViewSet):
+    queryset = Comment.objects.all()
     serializer_class = CommentSerializer
     permission_classes = [IsAuthenticated]
 
@@ -229,24 +230,9 @@ class CommentViewSet(ModelViewSet):
         return permissions
 
     def get_queryset(self):
-
-        jobs = Job.visible_for_user(self.request.user)
-        if job_id := self.request.query_params.get("job_id", None):
-            jobs = jobs.filter(id=job_id)
-        comments = jobs.values_list("comments__pk", flat=True)
-        return Comment.objects.filter(pk__in=comments)
-
-    def list(self, request, *args, job_id: int = None, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
-        if job_id is not None:
-            queryset = queryset.filter(job__id=job_id)
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
-
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
+        queryset = super().get_queryset()
+        jobs = Job.visible_for_user(self.request.user).values_list("pk", flat=True)
+        return queryset.filter(job__id__in=jobs)
 
 
 @add_docs(

@@ -258,25 +258,6 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         return job
 
 
-class CommentListSerializer(rfs.ModelSerializer):
-    """
-    Used for ``list()``.
-    """
-
-    class Meta:
-        model = Comment
-        fields = ("id", "content", "created_at", "username", "current_user")
-
-    username = rfs.SerializerMethodField()
-    current_user = rfs.SerializerMethodField()
-
-    def get_username(self, obj: Comment) -> str:
-        return obj.user.username
-
-    def get_current_user(self, obj: Comment) -> bool:
-        return obj.user == self.context["request"].user
-
-
 class CommentSerializer(rfs.ModelSerializer):
     """
     Used for ``create()``
@@ -286,7 +267,6 @@ class CommentSerializer(rfs.ModelSerializer):
         model = Comment
         fields = ("id", "content", "created_at", "user", "job_id")
 
-    list_serializer_class = CommentListSerializer
     user = UserSerializer(read_only=True)
     job_id = rfs.PrimaryKeyRelatedField(
         queryset=Job.objects.all(), write_only=True, source="job"
@@ -332,6 +312,7 @@ class JobSerializer(_AbstractJobViewSerializer):
     analyzerreports = AnalyzerReportSerializer(many=True, read_only=True)
     connectorreports = ConnectorReportSerializer(many=True, read_only=True)
     visualizerreports = VisualizerReportSerializer(many=True, read_only=True)
+    comments = CommentSerializer(many=True, read_only=True)
 
     permissions = rfs.SerializerMethodField()
 

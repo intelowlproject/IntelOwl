@@ -33,9 +33,9 @@ function formatDate(dateString) {
   return date.toLocaleString("en-US", options);
 }
 
-export default function CommentOverview({ comments, jobId, refetchComments }) {
+export default function CommentOverview({ job, refetchComments }) {
   console.debug("CommentOverview - comments");
-  console.debug(comments);
+  console.debug(job.comments);
 
   const [user] = useAuthStore((state) => [state.user]);
   console.debug(user);
@@ -44,7 +44,7 @@ export default function CommentOverview({ comments, jobId, refetchComments }) {
   const onSubmit = (values) => {
     const formValues = {
       content: values.content,
-      job_id: jobId,
+      job_id: job.id,
     };
     createComment(formValues);
     // reload comments after 1.5 seconds (to give time to the backend to process the request)
@@ -73,7 +73,7 @@ export default function CommentOverview({ comments, jobId, refetchComments }) {
 
         <Col xs="auto">
           <div className="d-flex-center">
-            <strong>Comments: {comments.count}</strong>
+            <strong>Comments: {job.comments.count}</strong>
           </div>
         </Col>
       </Row>
@@ -109,7 +109,7 @@ export default function CommentOverview({ comments, jobId, refetchComments }) {
             className="d-flex flex-column justify-content-center"
             style={{ maxHeight: "500px", overflowY: "scroll" }}
           >
-            {comments.results.map((comment) => (
+            {job.comments.map((comment) => (
               <Card key={comment.id} className="mb-3">
                 <CardHeader>
                   <strong>{comment.user.username}</strong>
@@ -140,7 +140,6 @@ export default function CommentOverview({ comments, jobId, refetchComments }) {
 }
 
 CommentOverview.propTypes = {
-  comments: PropTypes.object.isRequired,
-  jobId: PropTypes.number.isRequired,
+  job: PropTypes.object.isRequired,
   refetchComments: PropTypes.func.isRequired,
 };

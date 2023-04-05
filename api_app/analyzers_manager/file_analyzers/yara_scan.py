@@ -22,6 +22,9 @@ from intel_owl.settings._util import set_permissions
 
 logger = logging.getLogger(__name__)
 
+MAX_YARA_STRINGS = 20
+yara.set_config(max_strings_per_rule=MAX_YARA_STRINGS)
+
 
 @dataclasses.dataclass
 class YaraMatchMock:
@@ -233,7 +236,7 @@ class YaraRepo:
         return compiled_rules
 
     def analyze(self, file_path: str, filename: str) -> List[Dict]:
-        logger.info(f"{self} starting analysis of {filename}")
+        logger.info(f"{self} starting analysis of {filename} for file path {file_path}")
         result = []
 
         for rule in self.rules:
@@ -289,7 +292,7 @@ class YaraStorage:
         for repo in self.repos:
             result[str(repo.directory.name)] = repo.analyze(file_path, filename)
             # free some memory
-            repo._rules = None
+            repo._rules = []
         return result
 
     def __repr__(self):

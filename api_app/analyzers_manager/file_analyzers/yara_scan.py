@@ -209,7 +209,7 @@ class YaraRepo:
                 rules = directory.glob("*")
             valid_rules_path = []
             for rule in rules:
-                if rule.name.endswith("index"):
+                if rule.stem.endswith("index") or rule.stem.startswith("index"):
                     continue
                 if rule.suffix in [".yara", ".yar", ".rule"]:
                     try:

@@ -127,8 +127,8 @@ class YaraRepo:
 
             if self.directory.exists():
                 # this is to allow a clean pull
-                for directory in self.first_level_directories:
-                    (directory/self.compiled_file_name).unlink(missing_ok=True)
+                for compiled_file in self.compiled_paths:
+                    compiled_file.unlink(missing_ok=True)
 
                 logger.info(f"About to pull {self.url} at {self.directory}")
                 repo = git.Repo(self.directory)
@@ -162,7 +162,7 @@ class YaraRepo:
 
     @cached_property
     def compiled_paths(self) -> List[PosixPath]:
-        return [path / self.compiled_file_name for path in self.first_level_directories]
+        return [path / self.compiled_file_name for path in self.first_level_directories + [self.directory]]
 
     def is_zip(self):
         return self.url.endswith(".zip")
@@ -201,7 +201,12 @@ class YaraRepo:
         compiled_rules = []
 
         for directory in self.first_level_directories:
-            rules = directory.rglob("*")
+            if directory != self.directory:
+                # recursive
+                rules = directory.rglob("*")
+            else:
+                # not recursive
+                rules = directory.glob("*")
             valid_rules_path = []
             for rule in rules:
                 if rule.name.endswith("index"):

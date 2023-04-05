@@ -45,7 +45,7 @@ class YaraRepo:
         self.url = url
         self.owner = owner
         self.key = key
-        self._rules: Optional[yara.Rules] = None
+        self._rules: List[yara.Rules] = []
         self._directory = directory
 
     def __repr__(self):

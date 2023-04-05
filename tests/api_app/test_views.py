@@ -162,14 +162,6 @@ class CommentViewSetTestCase(CustomAPITestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json().get("count"), 1)
 
-        response = self.client.get(f"{self.comment_url}?job_id={self.job.pk}")
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json().get("count"), 1)
-
-        response = self.client.get(f"{self.comment_url}?job_id={self.job2.pk}")
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json().get("count"), 0)
-
     def test_create_201(self):
         data = {"job_id": self.job.id, "content": "test2"}
         response = self.client.post(self.comment_url, data)

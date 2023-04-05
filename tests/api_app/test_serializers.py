@@ -376,7 +376,7 @@ class CommentSerializerTestCase(CustomTestCase):
     def test_create(self):
         self.assertTrue(self.cs.is_valid())
         comment = self.cs.save()
-        self.assertEqual(comment.data, "test")
+        self.assertEqual(comment.content, "test")
         comment.delete()
 
     def test_create_with_invalid_job_id(self):

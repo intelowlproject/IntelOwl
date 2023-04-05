@@ -217,7 +217,7 @@ class YaraRepo:
             compiled_rule = yara.compile(
                 filepaths={str(path): str(path) for path in valid_rules_path}
             )
-            compiled_rule.save(directory / self.compiled_file_name)
+            compiled_rule.save(str(directory / self.compiled_file_name))
             compiled_rules.append(compiled_rule)
             logger.info(f"Rules {self} saved on file")
         return compiled_rules

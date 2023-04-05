@@ -225,9 +225,8 @@ class CommentViewSet(ReadAndDeleteOnlyViewSet, CreateModelMixin, SerializerActio
         # only the owner of the comment can update or delete the comment
         if self.action in ["destroy", "update", "partial_update"]:
             permissions.append(IsObjectOwnerPermission())
-
         # the owner and anyone in the org can read the comment
-        if self.action in ["read"]:
+        if self.action in ["retrieve"]:
             permissions.append(IsObjectOwnerOrSameOrgPermission())
 
         return permissions

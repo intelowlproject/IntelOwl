@@ -137,26 +137,59 @@ class CommentViewSetTestCase(CustomAPITestCase):
         self.job = Job.objects.create(
             user=self.superuser,
             is_sample=False,
-            observable_name=os.environ.get("TEST_IP"),
-            md5=os.environ.get("TEST_MD5"),
+            observable_name="8.8.8.8",
             observable_classification=ObservableTypes.IP,
         )
-        self.job.save()
+        self.job2 = Job.objects.create(
+            user=self.superuser,
+            is_sample=False,
+            observable_name="8.8.8.8",
+            observable_classification=ObservableTypes.IP,
+        )
         self.comment = Comment.objects.create(
             job=self.job, user=self.superuser, content="test"
         )
         self.comment.save()
+
+    def tearDown(self) -> None:
+        super().tearDown()
+        self.job.delete()
+        self.job2.delete()
+        self.comment.delete()
 
     def test_list_200(self):
         response = self.client.get(self.comment_url)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json().get("count"), 1)
 
+        response = self.client.get(f"{self.comment_url}?job_id={self.job.pk}")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json().get("count"), 1)
+
+        response = self.client.get(f"{self.comment_url}?job_id={self.job2.pk}")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json().get("count"), 0)
+
     def test_create_201(self):
-        data = {"job_id": self.job.id, "content": "test"}
+        data = {"job_id": self.job.id, "content": "test2"}
         response = self.client.post(self.comment_url, data)
         self.assertEqual(response.status_code, 201)
-        self.assertEqual(response.json().get("content"), "test")
+        self.assertEqual(response.json().get("content"), "test2")
+
+    def test_delete(self):
+        response = self.client.delete(f"{self.comment_url}/{self.comment.pk}")
+        self.assertEqual(response.status_code, 403)
+        self.client.force_authenticate(self.superuser)
+        response = self.client.delete(f"{self.comment_url}/{self.comment.pk}")
+        self.assertEqual(response.status_code, 204)
+        self.assertEqual(0, Comment.objects.all().count())
+
+    def test_get(self):
+        response = self.client.get(f"{self.comment_url}/{self.comment.pk}")
+        self.assertEqual(response.status_code, 403)
+        self.client.force_authenticate(self.superuser)
+        response = self.client.get(f"{self.comment_url}/{self.comment.pk}")
+        self.assertEqual(response.status_code, 200)
 
 
 class JobViewsetTests(CustomAPITestCase):

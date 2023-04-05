@@ -77,8 +77,6 @@ class Comment(models.Model):
     job = models.ForeignKey(
         "Job",
         on_delete=models.CASCADE,
-        null=True,
-        blank=True,
         related_name="comments",
     )
     content = models.TextField()

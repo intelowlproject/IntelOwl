@@ -112,7 +112,7 @@ export default function CommentOverview({ comments, jobId, refetchComments }) {
             {comments.results.map((comment) => (
               <Card key={comment.id} className="mb-3">
                 <CardHeader>
-                  <strong>{comment.username}</strong>
+                  <strong>{comment.user.username}</strong>
                   <span className="ms-2 text-secondary">
                     {formatDate(comment.created_at)}
                   </span>

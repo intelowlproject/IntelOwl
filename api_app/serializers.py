@@ -380,6 +380,7 @@ class FileAnalysisSerializer(_AbstractJobCreateSerializer):
     file = rfs.FileField(required=True)
     file_name = rfs.CharField(required=False)
     file_mimetype = rfs.CharField(required=False)
+    is_sample = rfs.HiddenField(write_only=True, default=True)
 
     class Meta:
         model = Job

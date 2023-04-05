@@ -200,7 +200,7 @@ class YaraRepo:
         logger.info(f"Starting compile for {self}")
         compiled_rules = []
 
-        for directory in self.first_level_directories:
+        for directory in self.first_level_directories + [self.directory]:
             if directory != self.directory:
                 # recursive
                 rules = directory.rglob("*")
@@ -218,7 +218,7 @@ class YaraRepo:
                         continue
                     else:
                         valid_rules_path.append(str(rule))
-            logger.info(f"Compiling {len(valid_rules_path)} rules for {self}")
+            logger.info(f"Compiling {len(valid_rules_path)} rules for {self} at {directory}")
             compiled_rule = yara.compile(
                 filepaths={str(path): str(path) for path in valid_rules_path}
             )

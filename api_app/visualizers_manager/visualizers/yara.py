@@ -66,23 +66,23 @@ class Yara(Visualizer):
             job=Job.objects.first(),
             status=AnalyzerReport.Status.SUCCESS,
             report={
-                "https://github.com/InQuest/yara-rules": [
+                "inquest_yara-rules": [
                     {
+                        "url": "https://github.com/InQuest/yara-rules",
                         "meta": {
                             "URL": "https://github.com/InQuest/yara-rules",
                             "Author": "InQuest Labs",
-                            "Description": "Discover embedded PE files, "
-                            "without relying on easily stripped/modified "
+                            "Description": "Discover embedded PE files,"
+                            " without relying on easily stripped/modified "
                             "header strings.",
                         },
                         "path": "/opt/deploy/files_required/"
                         "yara/inquest_yara-rules/PE.rule",
                         "tags": [],
                         "match": "PE_File",
-                        "strings": "[(0, '$mz', b'MZ'), "
-                        "(280654, '$mz', b'MZ'), "
-                        "(288035, '$mz', b'MZ'), "
-                        "(291117, '$mz', b'MZ')]",
+                        "strings": "[(0, '$mz', b'MZ')]",
+                        "rule_url": "https://github.com/InQuest/"
+                        "yara-rules/blob/master/PE.rule",
                     }
                 ]
             },

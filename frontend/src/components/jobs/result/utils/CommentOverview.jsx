@@ -38,7 +38,6 @@ export default function CommentOverview({ job, refetchComments }) {
   console.debug(job.comments);
 
   const [user] = useAuthStore((state) => [state.user]);
-  console.debug(user);
 
   // handle submit of form
   const onSubmit = (values) => {
@@ -64,21 +63,26 @@ export default function CommentOverview({ job, refetchComments }) {
     }, 1500);
   };
 
+  job.comments.sort(
+    (first, second) => new Date(second.created_at) - new Date(first.created_at)
+  );
+
   return (
-    <Container fluid>
-      <Row className="g-0 d-flex-between-end">
+    <Container fluid className="d-flex flex-column">
+      <Row className="g-0 d-flex-between-end flex-no-shrink">
         <Col xs="auto">
           <GoBackButton onlyIcon color="gray" />
         </Col>
 
         <Col xs="auto">
           <div className="d-flex-center">
-            <strong>Comments: {job.comments.count}</strong>
+            <strong>Comments: {job.comments.length}</strong>
           </div>
         </Col>
       </Row>
 
-      <Row className="g-0">
+      {/* write a comment */}
+      <Row className="g-0 flex-no-shrink">
         <Col className="d-flex flex-column justify-content-center">
           <strong>Create Comment</strong>
 
@@ -103,38 +107,32 @@ export default function CommentOverview({ job, refetchComments }) {
         </Col>
       </Row>
 
-      <Row className="g-0 pt-3">
-        <Col>
-          <div
-            className="d-flex flex-column justify-content-center"
-            style={{ maxHeight: "500px", overflowY: "scroll" }}
-          >
-            {job.comments.map((comment) => (
-              <Card key={comment.id} className="mb-3">
-                <CardHeader>
-                  <strong>{comment.user.username}</strong>
-                  <span className="ms-2 text-secondary">
-                    {formatDate(comment.created_at)}
-                  </span>
-                </CardHeader>
-                <CardBody>
-                  <p>{comment.content}</p>
-                  {user.username === comment.user.username && (
-                    <div className="d-flex justify-content-end">
-                      <Button
-                        onClick={() => handleDeleteComment(comment.id)}
-                        color="danger"
-                      >
-                        Delete
-                      </Button>
-                    </div>
-                  )}
-                </CardBody>
-              </Card>
-            ))}
-          </div>
-        </Col>
-      </Row>
+      {/* comments section */}
+      <div className="mt-3" style={{ overflowY: "scroll", height: "60vh" }}>
+        {job.comments.map((comment) => (
+          <Card key={comment.id} className="mb-3 d-flex">
+            <CardHeader>
+              <strong>{comment.user.username}</strong>
+              <span className="ms-2 text-secondary">
+                {formatDate(comment.created_at)}
+              </span>
+            </CardHeader>
+            <CardBody>
+              <p>{comment.content}</p>
+              {user.username === comment.user.username && (
+                <div className="d-flex justify-content-end">
+                  <Button
+                    onClick={() => handleDeleteComment(comment.id)}
+                    color="danger"
+                  >
+                    Delete
+                  </Button>
+                </div>
+              )}
+            </CardBody>
+          </Card>
+        ))}
+      </div>
     </Container>
   );
 }

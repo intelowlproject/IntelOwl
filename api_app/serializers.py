@@ -759,113 +759,19 @@ class PluginConfigSerializer(rfs.ModelSerializer):
         def to_representation(self, value):
             return json.dumps(super().to_representation(value))
 
-    # certego_saas does not expose organization.id to frontend
-    organization = rfs.SlugRelatedField(
-        allow_null=True,
-        slug_field="name",
-        queryset=Organization.objects.all(),
-        required=False,
-    )
+
     owner = rfs.HiddenField(default=rfs.CurrentUserDefault())
     value = CustomJSONField()
-
-    def validate_type(self, _type: str):
-        if _type == PluginConfig.PluginType.ANALYZER:
-            self.config = AnalyzerConfig
-            self.category = "Analyzer"
-        elif _type == PluginConfig.PluginType.CONNECTOR:
-            self.config = ConnectorConfig
-            self.category = "Connector"
-        elif _type == PluginConfig.PluginType.VISUALIZER:
-            self.config = VisualizerConfig
-            self.category = "Visualizer"
-        else:
-            logger.error(f"Unknown custom config type: {_type}")
-            raise ValidationError("Invalid type.")
-        return _type
 
     def to_representation(self, instance):
         if (
             instance.organization
-            and self.context["request"].user.pk != instance.organization.owner.pk
+            and self.context["request"].user.pk != instance.owner.pk
         ):
             instance.value = "redacted"
         return super().to_representation(instance)
 
-    def validate_organization(self, organization: str):
-        if not organization:
-            return organization
-        # here the owner can't be retrieved by the field
-        # because the HiddenField will always return None
-        owner = self.context["request"].user
-        # check if the user is owner of the organization
-        membership = Membership.objects.filter(
-            user=owner,
-            organization=organization,
-            is_owner=True,
-        )
-        if not membership.exists():
-            logger.warning(f"User {owner} is not owner of organization {organization}.")
-            raise PermissionDenied("User is not owner of the organization.")
-        return organization
-
     def validate(self, attrs):
-        super().validate(attrs)
-        try:
-            config_obj = self.config.objects.get(name=attrs["plugin_name"])
-        except self.config.DoesNotExist:
-            raise ValidationError(
-                f"{self.category} {attrs['plugin_name']} does not exist."
-            )
-
-        if (
-            attrs["config_type"] == PluginConfig.ConfigType.PARAMETER
-            and attrs["attribute"] not in config_obj.params
-        ):
-            raise ValidationError(
-                f"{self.category} {attrs['plugin_name']} does not "
-                f"have parameter {attrs['attribute']}."
-            )
-        elif (
-            attrs["config_type"] == PluginConfig.ConfigType.SECRET
-            and attrs["attribute"] not in config_obj.secrets
-        ):
-
-            raise ValidationError(
-                f"{self.category} {attrs['plugin_name']} does not "
-                f"have secret {attrs['attribute']}."
-            )
-        # Check if the type of value is valid for the attribute.
-
-        expected_type = (
-            config_obj.params[attrs["attribute"]]["type"]
-            if attrs["config_type"] == PluginConfig.ConfigType.PARAMETER
-            else config_obj.secrets[attrs["attribute"]]["type"]
-        )
-        value_type = type(attrs["value"]).__name__
-        if value_type != expected_type:
-            raise ValidationError(
-                f"{self.category} {attrs['plugin_name']} attribute "
-                f"{attrs['attribute']} has wrong type "
-                f"{value_type}. Expected: "
-                f"{expected_type}."
-            )
-
-        inclusion_params = attrs.copy()
-        exclusion_params = {}
-        inclusion_params.pop("value")
-        if "organization" not in inclusion_params:
-            inclusion_params["organization__isnull"] = True
-        if self.instance is not None:
-            exclusion_params["id"] = self.instance.id
-        if (
-            PluginConfig.objects.filter(**inclusion_params)
-            .exclude(**exclusion_params)
-            .exists()
-        ):
-            raise ValidationError(
-                f"{self.category} {attrs['plugin_name']} "
-                f"{self} attribute {attrs['attribute']} already exists."
-            )
-        logger.info(f"validation finished for {attrs}")
+        if type(attrs["value"]).__name__ != attrs["parameter"].type:
+            raise ValidationError(f"Value has type {type(attrs['value'].__name__)} instead of {attrs['parameter'].type}")
         return attrs

@@ -82,21 +82,9 @@ class Plugin(metaclass=ABCMeta):
     def __repr__(self):
         return f"({self.__class__.__name__}, job: #{self.job_id})"
 
-    @cached_property
-    def _secrets(self) -> dict:
-        return self._config.read_secrets(user=self._job.user)
-
-    @cached_property
-    def _params(self) -> dict:
-        default_params = self._config.read_params(user=self._job.user)
-        # overwrite default with runtime
-        return {**default_params, **self.runtime_configuration}
-
     def config(self):
-        for param, value in self._params.items():
+        for param, value in self._config.read_params(self._job).items():
             setattr(self, param, value)
-        for secret, value in self._secrets.items():
-            setattr(self, f"_{secret}", value)
 
     @abstractmethod
     def before_run(self, *args, **kwargs):

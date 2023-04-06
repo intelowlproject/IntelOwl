@@ -18,7 +18,7 @@ from django.utils import timezone
 from django.utils.functional import cached_property
 
 from api_app.choices import TLP, ObservableClassification, Status
-from api_app.core.models import AbstractConfig, AbstractReport
+from api_app.core.models import AbstractConfig, AbstractReport, Parameter
 from api_app.helpers import calculate_sha1, calculate_sha256, get_now
 from api_app.validators import validate_runtime_configuration
 from certego_saas.apps.organization.organization import Organization
@@ -382,50 +382,19 @@ def delete_file(sender, instance: Job, **kwargs):
 
 
 class PluginConfig(models.Model):
-    class PluginType(models.TextChoices):
-        ANALYZER = "1", "Analyzer"
-        CONNECTOR = "2", "Connector"
-        VISUALIZER = "3", "Visualizer"
-
-    class ConfigType(models.TextChoices):
-        PARAMETER = "1", "Parameter"
-        SECRET = "2", "Secret"
-
-    type = models.CharField(choices=PluginType.choices, max_length=2)
-    config_type = models.CharField(choices=ConfigType.choices, max_length=2)
-    attribute = models.CharField(max_length=128)
     value = models.JSONField(blank=False)
-    organization = models.ForeignKey(
-        Organization,
-        on_delete=models.CASCADE,
-        blank=True,
-        null=True,
-        related_name="custom_configs",
-    )
+    allowed_on_organization = models.BooleanField(default=False)
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="custom_configs",
+        null=True # null means default value
     )
-    plugin_name = models.CharField(max_length=128)
+    parameter = models.ForeignKey(Parameter, on_delete=models.CASCADE, null=False, related_name="values")
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=["type", "attribute", "organization", "owner", "plugin_name"],
-                name="unique_custom_config_entry",
-            )
-        ]
-
-        indexes = [
-            models.Index(
-                fields=["owner", "type"],
-            ),
-            models.Index(
-                fields=["type", "organization"],
-            ),
-        ]
+        unique_together = ["owner", "allowed_on_organization", "parameter"]
 
     @classmethod
     def visible_for_user(cls, user: User = None) -> QuerySet:
@@ -440,43 +409,12 @@ class PluginConfig(models.Model):
             except Membership.DoesNotExist:
                 # If user is not a member of any organization,
                 # we don't need to do anything.
-                configs = configs.filter(owner=user)
+                configs = configs.filter(Q(owner=user) | Q(owner__isnull=True))
             else:
                 configs = configs.filter(
-                    Q(organization=membership.organization) | Q(owner=user)
+                    Q(organization=membership.organization) | Q(owner=user) | Q(owner__isnull=True)
                 )
+        else:
+            configs = configs.filter(owner__isnull=True)
 
         return configs
-
-    def invalidate_config_verification(self):
-        self.config.get_verification.invalidate(self.config)
-        if self.organization is not None:
-            for membership in self.organization.members.all():
-                self.config.get_verification.invalidate(self.config, membership.user)
-        else:
-            self.config.get_verification.invalidate(self.config, self.owner)
-
-    @cached_property
-    def config(self) -> AbstractConfig:
-        return self.config_class.objects.get(name=self.plugin_name)
-
-    @cached_property
-    def config_class(self) -> typing.Type[AbstractConfig]:
-
-        for config in AbstractConfig.__subclasses__():
-            if self.type == config.plugin_type.value:
-                return config
-        raise TypeError(f"Unable to find configuration for type {self.type}")
-
-    def clean_plugin_name(self):
-        try:
-            self.config  # noqa
-        except TypeError as e:
-            raise ValidationError(str(e))
-        except AbstractConfig.DoesNotExist:
-            raise ValidationError(
-                f"Unable to find configuration with name {self.plugin_name}"
-            )
-
-    def clean(self) -> None:
-        self.clean_plugin_name()

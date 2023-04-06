@@ -109,15 +109,6 @@ If you are interested in participating in the next Google Summer of Code, check 
 
 ### 🥉 BRONZE
 
-#### LimaCharlie
-<a href="https://limacharlie.io/?utm_source=intelowl&utm_medium=banner"> <img style="border: 0.2px solid black" width=194 height=38 src="docs/static/limacharlie_logo.png" alt="LimaCharlie logo"> </a>
-
-[LimaCharlie](https://limacharlie.io/?utm_source=intelowl&utm_medium=banner) gives security teams full control over how they manage their security infrastructure. Get full visibility into your coverage, build what you want, control your data, get the security capabilities you need, for however long you need them, and pay only for what you use.
-
-Read everything about this partnership [in the LimaCharlie's blog](https://limacharlie.io/blog/limacharlie-sponsors-intel-owl/?utm_source=intelowl&utm_medium=banner).
-
-
-
 #### Docker
 
 <a href="https://www.docker.com"> <img style="border: 0.2px solid black" width=120 height=31 src="docs/static/docker_logo.png" alt="Docker logo"> </a>
@@ -125,6 +116,7 @@ Read everything about this partnership [in the LimaCharlie's blog](https://limac
 In 2021 IntelOwl joined the official [Docker Open Source Program](https://www.docker.com/blog/expanded-support-for-open-source-software-projects/). This allows IntelOwl developers to easily manage Docker images and focus on writing the code. You may find the official IntelOwl Docker images [here](https://hub.docker.com/search?q=intelowlproject).
 
 ### Other collaborations
+ * [LimaCharlie](https://limacharlie.io/blog/limacharlie-sponsors-intel-owl/?utm_source=intelowl&utm_medium=banner)
  * [Tines](https://www.tines.com/blog/announcing-our-sponsorship-of-intel-owl?utm_source=oss&utm_medium=sponsorship&utm_campaign=intelowl)
 
 

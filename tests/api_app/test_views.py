@@ -8,7 +8,7 @@ from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
 
 from api_app.analyzers_manager.constants import ObservableTypes
-from api_app.models import Job, PluginConfig, Tag
+from api_app.models import Comment, Job, PluginConfig, Tag
 from certego_saas.apps.organization.membership import Membership
 from certego_saas.apps.organization.organization import Organization
 
@@ -127,6 +127,61 @@ class PluginConfigViewSetTestCase(CustomAPITestCase):
         content = response.json()
         third_item = content[2]
         self.assertEqual(third_item["value"], '"supersecret_low_privilege_third"')
+
+
+class CommentViewSetTestCase(CustomAPITestCase):
+    comment_url = reverse("comments-list")
+
+    def setUp(self):
+        super().setUp()
+        self.job = Job.objects.create(
+            user=self.superuser,
+            is_sample=False,
+            observable_name="8.8.8.8",
+            observable_classification=ObservableTypes.IP,
+        )
+        self.job2 = Job.objects.create(
+            user=self.superuser,
+            is_sample=False,
+            observable_name="8.8.8.8",
+            observable_classification=ObservableTypes.IP,
+        )
+        self.comment = Comment.objects.create(
+            job=self.job, user=self.superuser, content="test"
+        )
+        self.comment.save()
+
+    def tearDown(self) -> None:
+        super().tearDown()
+        self.job.delete()
+        self.job2.delete()
+        self.comment.delete()
+
+    def test_list_200(self):
+        response = self.client.get(self.comment_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json().get("count"), 1)
+
+    def test_create_201(self):
+        data = {"job_id": self.job.id, "content": "test2"}
+        response = self.client.post(self.comment_url, data)
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.json().get("content"), "test2")
+
+    def test_delete(self):
+        response = self.client.delete(f"{self.comment_url}/{self.comment.pk}")
+        self.assertEqual(response.status_code, 403)
+        self.client.force_authenticate(self.superuser)
+        response = self.client.delete(f"{self.comment_url}/{self.comment.pk}")
+        self.assertEqual(response.status_code, 204)
+        self.assertEqual(0, Comment.objects.all().count())
+
+    def test_get(self):
+        response = self.client.get(f"{self.comment_url}/{self.comment.pk}")
+        self.assertEqual(response.status_code, 403)
+        self.client.force_authenticate(self.superuser)
+        response = self.client.get(f"{self.comment_url}/{self.comment.pk}")
+        self.assertEqual(response.status_code, 200)
 
 
 class JobViewsetTests(CustomAPITestCase):

@@ -11,6 +11,7 @@ import {
   MdDeleteOutline,
   MdPauseCircleOutline,
   MdOutlineRefresh,
+  MdComment,
 } from "react-icons/md";
 
 import {
@@ -33,6 +34,15 @@ function DeleteIcon() {
   return (
     <span>
       <MdDeleteOutline className="text-danger" /> Delete Job
+    </span>
+  );
+}
+
+function CommentIcon() {
+  return (
+    <span>
+      <MdComment className="me-1" />
+      Comments
     </span>
   );
 }
@@ -120,6 +130,16 @@ export function JobActionsBar({ job, refetch }) {
 
   return (
     <ContentSection className="d-inline-flex me-2">
+      <IconButton
+        id="commentbtn"
+        Icon={CommentIcon}
+        size="sm"
+        color="darker"
+        className="me-2"
+        onClick={() => navigate(`/jobs/${job.id}/comments`)}
+        title="Comments"
+        titlePlacement="top"
+      />
       {job.permissions?.delete && (
         <IconButton
           id="deletejobbtn"

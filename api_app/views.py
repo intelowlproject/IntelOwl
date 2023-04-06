@@ -12,9 +12,14 @@ from rest_framework import serializers as rfs
 from rest_framework import status, viewsets
 from rest_framework.decorators import action, api_view
 from rest_framework.exceptions import PermissionDenied, ValidationError
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.viewsets import ModelViewSet
 
-from certego_saas.apps.organization.permissions import IsObjectOwnerOrSameOrgPermission
+from certego_saas.apps.organization.permissions import (
+    IsObjectOwnerOrSameOrgPermission,
+    IsObjectOwnerPermission,
+)
 from certego_saas.ext.helpers import cache_action_response, parse_humanized_range
 from certego_saas.ext.mixins import SerializerActionMixin
 from certego_saas.ext.viewsets import ReadAndDeleteOnlyViewSet
@@ -23,8 +28,9 @@ from .analyzers_manager.constants import ObservableTypes
 from .choices import ObservableClassification
 from .core.models import AbstractConfig
 from .filters import JobFilter
-from .models import Job, PluginConfig, Tag
+from .models import Comment, Job, PluginConfig, Tag
 from .serializers import (
+    CommentSerializer,
     FileAnalysisSerializer,
     JobAvailabilitySerializer,
     JobListSerializer,
@@ -197,6 +203,36 @@ def analyze_multiple_observables(request):
         JobResponseSerializer(jobs, many=True).data,
         status=status.HTTP_200_OK,
     )
+
+
+@add_docs(
+    description="""
+    REST endpoint to fetch list of job comments or
+    retrieve/delete a job comment with job comment ID.
+    Requires authentication.
+    """
+)
+class CommentViewSet(ModelViewSet):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_permissions(self):
+        permissions = super().get_permissions()
+
+        # only the owner of the comment can update or delete the comment
+        if self.action in ["destroy", "update", "partial_update"]:
+            permissions.append(IsObjectOwnerPermission())
+        # the owner and anyone in the org can read the comment
+        if self.action in ["retrieve"]:
+            permissions.append(IsObjectOwnerOrSameOrgPermission())
+
+        return permissions
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        jobs = Job.visible_for_user(self.request.user).values_list("pk", flat=True)
+        return queryset.filter(job__id__in=jobs)
 
 
 @add_docs(

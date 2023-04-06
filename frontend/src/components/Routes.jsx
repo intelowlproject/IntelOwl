@@ -14,6 +14,7 @@ const Organization = React.lazy(() => import("./me/organization/Organization"));
 const Sessions = React.lazy(() => import("./me/sessions/Sessions"));
 const JobsTable = React.lazy(() => import("./jobs/table/JobsTable"));
 const JobResult = React.lazy(() => import("./jobs/result/JobResult"));
+const CommentResult = React.lazy(() => import("./jobs/result/CommentResult"));
 const PluginsContainer = React.lazy(() => import("./plugins/PluginsContainer"));
 const Dashboard = React.lazy(() => import("./dashboard/Dashboard"));
 const ScanForm = React.lazy(() => import("./scan/ScanForm"));
@@ -116,6 +117,14 @@ const authRoutesLazy = [
     element: (
       <Suspense fallback={<FallBackLoading />}>
         <JobResult />
+      </Suspense>
+    ),
+  },
+  {
+    path: "/jobs/:id/comments",
+    element: (
+      <Suspense fallback={<FallBackLoading />}>
+        <CommentResult />
       </Suspense>
     ),
   },

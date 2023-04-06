@@ -7,8 +7,10 @@ from rest_framework.exceptions import ValidationError
 
 from api_app.analyzers_manager.models import AnalyzerConfig
 from api_app.connectors_manager.models import ConnectorConfig
+from api_app.models import Job
 from api_app.playbooks_manager.models import PlaybookConfig
 from api_app.serializers import (
+    CommentSerializer,
     FileAnalysisSerializer,
     ObservableAnalysisSerializer,
     _AbstractJobCreateSerializer,
@@ -350,3 +352,33 @@ class ObservableJobCreateSerializerTestCase(CustomTestCase):
             },
         )
         self.assertCountEqual(analyzers, [a])
+
+
+class CommentSerializerTestCase(CustomTestCase):
+    def setUp(self):
+        super().setUp()
+        self.job = Job.objects.create(
+            observable_name="test.com",
+            observable_classification="domain",
+            user=self.user,
+        )
+        self.job.save()
+
+        self.cs = CommentSerializer(
+            data={"content": "test", "job_id": self.job.id},
+            context={"request": MockUpRequest(self.user)},
+        )
+
+    def tearDown(self) -> None:
+        super().tearDown()
+        self.job.delete()
+
+    def test_create(self):
+        self.assertTrue(self.cs.is_valid())
+        comment = self.cs.save()
+        self.assertEqual(comment.content, "test")
+        comment.delete()
+
+    def test_create_with_invalid_job_id(self):
+        self.cs.initial_data["job_id"] = 100000
+        self.assertFalse(self.cs.is_valid())

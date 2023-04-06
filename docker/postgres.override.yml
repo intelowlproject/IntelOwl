@@ -13,6 +13,3 @@ services:
       - postgres_data:/var/lib/postgresql/data/
     env_file:
       - ./env_file_postgres
-  uwsgi:
-    depends_on:
-      - postgres

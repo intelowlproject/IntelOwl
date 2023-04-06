@@ -31,6 +31,8 @@ class AnalyzerReport(AbstractReport):
 
 class MimeTypes(models.TextChoices):
 
+    WSCRIPT = "application/w-script-file"
+
     JAVASCRIPT1 = "application/javascript"
     JAVASCRIPT2 = "application/x-javascript"
     JAVASCRIPT3 = "text/javascript"

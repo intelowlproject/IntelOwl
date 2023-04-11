@@ -1400,5 +1400,47 @@
       "owner": 1,
       "plugin_name": "FileScan_Search"
     }
+  },
+      {
+    "model": "api_app.pluginconfig",
+    "pk": 101,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "api_key",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "SublimeSecurity"
+    }
+  },
+      {
+    "model": "api_app.pluginconfig",
+    "pk": 102,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "message_source_id",
+      "value": "test",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "SublimeSecurity"
+    }
+  },
+      {
+    "model": "api_app.pluginconfig",
+    "pk": 103,
+    "fields": {
+      "updated_at": "2023-02-23T08:53:02.830Z",
+      "type": "1",
+      "config_type": "2",
+      "attribute": "url",
+      "value": "http://test.com",
+      "organization": null,
+      "owner": 1,
+      "plugin_name": "SublimeSecurity"
+    }
   }
 ]

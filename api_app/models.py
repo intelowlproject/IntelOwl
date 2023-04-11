@@ -1,6 +1,6 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
-
+import base64
 import logging
 import typing
 from typing import Optional
@@ -182,6 +182,10 @@ class Job(models.Model):
     @cached_property
     def sha1(self) -> str:
         return calculate_sha1(self.file.read())
+
+    @cached_property
+    def b64(self) -> str:
+        return base64.b64encode(self.file.read()).decode("utf-8")
 
     def get_absolute_url(self):
         return reverse("jobs-detail", args=[self.pk])

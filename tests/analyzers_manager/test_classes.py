@@ -22,8 +22,7 @@ class FileAnalyzerTestCase(CustomTestCase):
         "api_app/fixtures/0002_analyzer_pluginconfig.json",
     ]
 
-    @staticmethod
-    def _create_jobs():
+    def _create_jobs(self):
         for sample_name, mimetype in zip(
             [
                 "sample.one",
@@ -39,6 +38,7 @@ class FileAnalyzerTestCase(CustomTestCase):
                 "file.dll",
                 "file.exe",
                 "shellcode.bin",
+                "Sublime-Standard-Test-String.eml",
             ],
             [
                 "application/onenote",
@@ -54,6 +54,7 @@ class FileAnalyzerTestCase(CustomTestCase):
                 "application/x-dosexec",
                 "application/x-dosexec",
                 "application/octet-stream",
+                "message/rfc822",
             ],
         ):
             with open(f"test_files/{sample_name}", "rb") as f:
@@ -62,6 +63,7 @@ class FileAnalyzerTestCase(CustomTestCase):
                     file_name=sample_name,
                     file_mimetype=mimetype,
                     file=File(f),
+                    user=self.superuser,
                 )
 
     def test_subclasses(self):

@@ -10,7 +10,9 @@ class AnalyzerConfigAdminForm(ModelForm):
         widget=forms.Select,
         choices=[
             (class_.python_module, class_.__name__)
-            for class_ in ObservableAnalyzer.all_subclasses()
-            + FileAnalyzer.all_subclasses()
+            for class_ in sorted(
+                ObservableAnalyzer.all_subclasses() + FileAnalyzer.all_subclasses(),
+                key=lambda x: x.__name__,
+            )
         ],
     )

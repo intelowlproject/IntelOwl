@@ -78,6 +78,8 @@ class MimeTypes(models.TextChoices):
     MAC3 = "application/x-mach-binary"
     COMPRESS1 = "application/x-zip-compressed"
     COMPRESS2 = "application/x-compressed"
+    OUTLOOK = "application/vnd.ms-outlook"
+    EML = "message/rfc822"
 
     @classmethod
     def ZIP(cls) -> List["MimeTypes"]:

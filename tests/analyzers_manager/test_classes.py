@@ -63,7 +63,7 @@ class FileAnalyzerTestCase(CustomTestCase):
                     file_name=sample_name,
                     file_mimetype=mimetype,
                     file=File(f),
-                    user=self.superuser
+                    user=self.superuser,
                 )
 
     def test_subclasses(self):

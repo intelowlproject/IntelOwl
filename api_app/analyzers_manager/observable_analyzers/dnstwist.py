@@ -27,10 +27,13 @@ class DNStwist(classes.ObservableAnalyzer):
     DNS_TWIST_PATH = settings.BASE_DIR / "dnstwist-dictionaries"
     COMMAND: str = "dnstwist"
 
-    ssdeep: bool
-    mxcheck: bool
-    tld: bool
     tld_dict: str
+    language_dict: str
+    fuzzy_hash: str
+    fuzzy_hash_url: str
+    mxcheck: bool
+    user_agent: str
+    nameservers: str
 
     def run(self):
         if not which(self.COMMAND):
@@ -49,20 +52,27 @@ class DNStwist(classes.ObservableAnalyzer):
                     "URL with an IP address instead of a domain cannot be analyzed"
                 )
 
-        final_report = {
-            "ssdeep": self.ssdeep,
-            "mxcheck": self.mxcheck,
-            "tld": self.tld,
-        }
-
         args = [self.COMMAND, "--registered", "--format", "json"]
-        if self.ssdeep:
-            args.append("--ssdeep")
+        if self.fuzzy_hash:
+            args.append("--lsh")
+            args.append(self.fuzzy_hash)
+            if self.fuzzy_hash_url:
+                args.append("--lsh-url")
+                args.append(self.fuzzy_hash_url)
         if self.mxcheck:
             args.append("--mxcheck")
-        if self.tld:
+        if self.tld_dict:
             args.append("--tld")
             args.append(self.DNS_TWIST_PATH / self.tld_dict)
+        if self.language_dict:
+            args.append("--dictionary")
+            args.append(self.DNS_TWIST_PATH / self.language_dict)
+        if self.nameservers:
+            args.append("--nameservers")
+            args.append(self.nameservers)
+        if self.user_agent:
+            args.append("--useragent")
+            args.append(self.user_agent)
 
         args.append(domain)
 
@@ -73,6 +83,7 @@ class DNStwist(classes.ObservableAnalyzer):
         )
         stdout, stderr = process.communicate()
         logger.warning(stderr.decode("utf-8"))
+        final_report = dict()
         final_report["error"] = stderr.decode("utf-8")
 
         dns_str = stdout.decode("utf-8")

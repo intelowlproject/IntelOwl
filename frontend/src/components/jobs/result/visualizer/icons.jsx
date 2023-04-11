@@ -17,7 +17,7 @@ import {
 } from "react-icons/bs";
 import { FaBiohazard } from "react-icons/fa";
 import { SiVirustotal } from "react-icons/si";
-import { RiAliensFill } from "react-icons/ri";
+import { RiAlarmWarningFill, RiAliensFill } from "react-icons/ri";
 
 import { PUBLIC_URL } from "../../../../constants/environment";
 
@@ -30,6 +30,7 @@ const generalIcons = Object.freeze({
   warning: <AiFillWarning />,
   shield: <BsShieldFillCheck />,
   fire: <AiFillFire />,
+  alarm: <RiAlarmWarningFill />,
   // external services
   virusTotal: (
     // eslint-disable-next-line react/jsx-no-constructed-context-values

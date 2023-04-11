@@ -22,8 +22,7 @@ class FileAnalyzerTestCase(CustomTestCase):
         "api_app/fixtures/0002_analyzer_pluginconfig.json",
     ]
 
-    @staticmethod
-    def _create_jobs():
+    def _create_jobs(self):
         for sample_name, mimetype in zip(
             [
                 "sample.one",
@@ -64,6 +63,7 @@ class FileAnalyzerTestCase(CustomTestCase):
                     file_name=sample_name,
                     file_mimetype=mimetype,
                     file=File(f),
+                    user=self.superuser
                 )
 
     def test_subclasses(self):

@@ -39,6 +39,7 @@ class FileAnalyzerTestCase(CustomTestCase):
                 "file.dll",
                 "file.exe",
                 "shellcode.bin",
+                "Sublime-Standard-Test-String.eml"
             ],
             [
                 "application/onenote",
@@ -54,6 +55,7 @@ class FileAnalyzerTestCase(CustomTestCase):
                 "application/x-dosexec",
                 "application/x-dosexec",
                 "application/octet-stream",
+                "message/rfc822"
             ],
         ):
             with open(f"test_files/{sample_name}", "rb") as f:

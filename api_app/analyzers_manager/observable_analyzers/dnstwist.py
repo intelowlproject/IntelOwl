@@ -68,7 +68,7 @@ class DNStwist(classes.ObservableAnalyzer):
             if_mock_connections(
                 patch(
                     "dnstwist.run",
-                    return_value=MockUpResponse({}, 200),
+                    return_value=dict(),
                 ),
             )
         ]

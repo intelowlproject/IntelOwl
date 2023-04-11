@@ -83,7 +83,7 @@ class Migration(migrations.Migration):
     dependencies = [
         (
             "analyzers_manager",
-            "0016_alter_analyzerconfig_not_supported_filetypes_and_more",
+            "0018_sublime_security",
         ),
     ]
 

@@ -4,7 +4,7 @@
 import jsonschema
 from django.core.exceptions import ValidationError
 
-from intel_owl.consts import PARAM_DATATYPE_CHOICES
+from api_app.core.choices import ParamTypes
 
 
 def validate_schema(value, schema):
@@ -44,7 +44,7 @@ def validate_secrets(value):
                 "properties": {
                     "description": {"type": "string"},
                     "required": {"type": "boolean"},
-                    "type": {"enum": list(PARAM_DATATYPE_CHOICES.keys())},
+                    "type": {"enum": ParamTypes.values},
                     "default": {
                         "type": ["string", "boolean", "array", "number", "object"]
                     },
@@ -66,7 +66,7 @@ def validate_params(value):
             "^[A-Za-z][A-Za-z0-9_]*$": {
                 "type": "object",
                 "properties": {
-                    "type": {"enum": list(PARAM_DATATYPE_CHOICES.keys())},
+                    "type": {"enum": ParamTypes.values},
                     "description": {"type": "string"},
                     "default": {},
                 },

@@ -9,7 +9,7 @@ from tests.mock_utils import if_mock_connections
 
 class Slack(Connector):
     _channel: str
-    slack_username: str = None
+    slack_username: str
     _token: str
 
     def get_exceptions_to_catch(self) -> list:

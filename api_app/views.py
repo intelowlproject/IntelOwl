@@ -451,14 +451,12 @@ class TagViewSet(viewsets.ModelViewSet):
     """
 )
 class PluginConfigViewSet(viewsets.ModelViewSet):
-    queryset = PluginConfig.objects.filter(
-        config_type=PluginConfig.ConfigType.PARAMETER
-    ).order_by("id")
+
     serializer_class = PluginConfigSerializer
     pagination_class = None
 
     def get_queryset(self):
-        return PluginConfig.visible_for_user(self.request.user).order_by("id")
+        return PluginConfig.visible_for_user(self.request.user).filter().order_by("id")
 
 
 @add_docs(

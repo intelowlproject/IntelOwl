@@ -10,11 +10,3 @@ REGEX_PASSWORD = r"^[a-zA-Z0-9]{12,}$"
 
 DEFAULT_SOFT_TIME_LIMIT = 300
 
-PARAM_DATATYPE_CHOICES = {
-    "int": int,
-    "float": int,
-    "str": str,
-    "bool": bool,
-    "list": list,
-    "dict": dict,
-}

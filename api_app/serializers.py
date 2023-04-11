@@ -759,19 +759,38 @@ class PluginConfigSerializer(rfs.ModelSerializer):
         def to_representation(self, value):
             return json.dumps(super().to_representation(value))
 
-
+    type = rfs.ChoiceField(choices=["1", "2", "3"], write_only=True)
+    config_type = rfs.ChoiceField(choices=["1", "3"], write_only=True)
+    attribute = rfs.CharField(write_only=True)
+    plugin_name = rfs.CharField(write_only=True)
     owner = rfs.HiddenField(default=rfs.CurrentUserDefault())
     value = CustomJSONField()
 
     def to_representation(self, instance):
         if (
-            instance.organization
+            instance.for_organization
             and self.context["request"].user.pk != instance.owner.pk
         ):
             instance.value = "redacted"
         return super().to_representation(instance)
 
     def validate(self, attrs):
-        if type(attrs["value"]).__name__ != attrs["parameter"].type:
-            raise ValidationError(f"Value has type {type(attrs['value'].__name__)} instead of {attrs['parameter'].type}")
+        # retro compatibility
+        _type = attrs.pop("type")
+        _plugin_name = attrs.pop("plugin_name")
+        _attribute = attrs.pop("attribute")
+        if _type == "1":
+            class_ = AnalyzerConfig
+        elif _type == "2":
+            class_ = ConnectorConfig
+        elif _type == "3":
+            class_ = VisualizerConfig
+        else:
+            raise RuntimeError("Not configured")
+        parameter = class_.objects.get(name=_plugin_name).parameters.get(parameter__name=_attribute).parameter
+        if type(attrs["value"]).__name__ != parameter.type:
+            raise ValidationError(f"Value has type {type(attrs['value'].__name__)} instead of {parameter.type}")
+        attrs["parameter"] = parameter
         return attrs
+
+

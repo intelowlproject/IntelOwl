@@ -13,8 +13,8 @@ from django.utils.functional import cached_property
 from django.utils.module_loading import import_string
 from kombu import uuid
 
-from api_app.core.choices import Status
-from api_app.validators import validate_config, validate_params, validate_secrets
+from api_app.core.choices import Status, ParamTypes
+from api_app.validators import validate_config
 from certego_saas.apps.organization.organization import Organization
 from certego_saas.apps.user.models import User
 from intel_owl.celery import DEFAULT_QUEUE, get_real_queue_name
@@ -84,10 +84,13 @@ def config_default():
     return dict(queue=DEFAULT_QUEUE, soft_time_limit=60)
 
 class Parameter(models.Model):
-    name = models.CharField(null=False, blank=False, max_length=30)
-    type = models.CharField(choices=[], max_length=10, null=False, blank=False) # todo choices
-    description = models.TextField(null=False, blank=True)
+    name = models.CharField(null=False, blank=False, max_length=50)
+    type = models.CharField(choices=ParamTypes.choices, max_length=10, null=False, blank=False)
+    description = models.TextField(blank=True, default="")
     is_secret = models.BooleanField(null=False)
+
+    class Meta:
+        unique_together = [("name", "type", "is_secret")]
 
     def values_for_user(self, user:User=None) -> QuerySet:
         from api_app.models import PluginConfig
@@ -109,15 +112,19 @@ class Parameter(models.Model):
             except PluginConfig.DoesNotExist:
                 if user.has_membership():
                     try:
-                        return qs.get(allowed_on_organization=True, owner__membership__organization=user.membership.organization)
+                        return qs.get(for_organization=True, owner=user.membership.organization.owner)
                     except PluginConfig.DoesNotExist:
-                        return qs.get(owner__isnull=True)
+                        ...
+                print(self.name)
+                return qs.get(owner__isnull=True)
 
 
 class ParameterConfig(models.Model):
     parameter = models.ForeignKey(Parameter, on_delete=models.CASCADE)
-    required = models.BooleanField()
+    required = models.BooleanField(null=False)
 
+    class Meta:
+        unique_together = [("parameter", "required")]
 
 
 class AbstractConfig(models.Model):
@@ -131,7 +138,7 @@ class AbstractConfig(models.Model):
         default=config_default,
         validators=[validate_config],
     )
-    params = models.ManyToManyField(ParameterConfig, related_name="configurations")
+    parameters = models.ManyToManyField(ParameterConfig, related_name="%(app_label)s_%(class)s_configurations")
     disabled_in_organizations = models.ManyToManyField(
         Organization, related_name="%(app_label)s_%(class)s_disabled", blank=True
     )
@@ -144,7 +151,9 @@ class AbstractConfig(models.Model):
 
     @classmethod
     @property
-    def plugin_type(cls) -> models.TextChoices:
+    def plugin_type(cls) -> str:
+        # retro compatibility
+        
         raise NotImplementedError()
 
     @property
@@ -175,8 +184,12 @@ class AbstractConfig(models.Model):
         self.clean_config_queue()
 
     @property
+    def secrets(self):
+        return self.parameters.filter(param__is_secret=True)
+
+    @property
     def required_parameters(self) -> QuerySet:
-        return self.params.filter(required=True)
+        return self.parameters.filter(required=True)
 
     def get_verification(self, user: User = None):
         total_required = 0
@@ -248,7 +261,7 @@ class AbstractConfig(models.Model):
         # 1 - Runtime config
         # 2 - Value inside the db
         result = {}
-        for param in self.params.all():
+        for param in self.parameters.all():
             param: ParameterConfig
             param: Parameter = param.parameter
 

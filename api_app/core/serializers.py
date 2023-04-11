@@ -2,29 +2,13 @@
 # See the file 'LICENSE' for copying permission.
 
 import logging
-from typing import List, Optional, TypedDict
+from typing import List
 
 from rest_framework import serializers as rfs
 
-from api_app.core.models import AbstractConfig, AbstractReport
-from intel_owl.consts import PARAM_DATATYPE_CHOICES
+from api_app.core.models import AbstractConfig, AbstractReport, Parameter, ParameterConfig
 
 logger = logging.getLogger(__name__)
-
-
-class ConfigVerificationType(TypedDict):
-    configured: bool
-    error_message: Optional[str]
-    missing_secrets: List[str]
-
-
-class BaseField(rfs.Field):
-    def to_representation(self, value):
-        return value
-
-    def to_internal_value(self, data):
-        return data
-
 
 class _ConfigSerializer(rfs.Serializer):
     """
@@ -34,62 +18,58 @@ class _ConfigSerializer(rfs.Serializer):
     queue = rfs.CharField(required=True)
     soft_time_limit = rfs.IntegerField(required=True)
 
+class ParamListSerializer(rfs.ListSerializer):
 
-class _TypeSerializer(rfs.Serializer):
-    type = rfs.ChoiceField(choices=list(PARAM_DATATYPE_CHOICES.keys()))
-    description = rfs.CharField(allow_blank=True, required=True, max_length=512)
-    default = BaseField(required=False)
+    def to_representation(self, data):
+        result = super().to_representation(data)
+        return {
+            elem.pop("name"): elem for elem in result
+        }
 
-    def validate(self, attrs):
-        if "default" in attrs:
-            default_type = type(attrs["default"]).__name__
-            expected_type = attrs["type"]
-            if default_type != expected_type:
-                raise rfs.ValidationError(
-                    f"Invalid default type. {default_type} != {expected_type}"
-                )
-        return super().validate(attrs)
+class ParamSerializer(rfs.ModelSerializer):
+    class Meta:
+        model = Parameter
+        fields = rfs.ALL_FIELDS
 
+    description = rfs.CharField(write_only=True)
 
-class _ParamSerializer(_TypeSerializer):
-    """
-    To validate `params` attr.
-    """
+    def to_representation(self, instance: Parameter):
+        result = super().to_representation(instance)
+        result["value"] = instance.get_first_value(self.context["request"].user).value
+        return result
 
-    default = BaseField(required=True)
+class ParamConfigSerializer(rfs.ModelSerializer):
+    class Meta:
+        model = ParameterConfig
+        fields = rfs.ALL_FIELDS
+    list_serializer_class = ParamListSerializer
+    parameter = ParamSerializer(read_only=True)
 
-
-class _SecretSerializer(_TypeSerializer):
-    """
-    To validate `secrets` attr.
-    """
-
-    required = rfs.BooleanField(required=True)
-
+    def to_representation(self, instance: ParameterConfig):
+        result = super().to_representation(instance)
+        result = result["parameter"]
+        return result
 
 class AbstractConfigSerializer(rfs.ModelSerializer):
 
-    secrets = rfs.DictField(
-        child=_SecretSerializer(required=True), required=False, allow_empty=True
-    )
-    params = rfs.DictField(
-        child=_ParamSerializer(required=True), required=False, allow_empty=True
-    )
     config = _ConfigSerializer(required=True)
+    params = ParamConfigSerializer(read_only=True, many=True, source="parameters")
+    secrets = ParamConfigSerializer(read_only=True, many=True, source="parameters")
+    parameters = ParamConfigSerializer(write_only=True, many=True)
 
     class Meta:
         fields = rfs.ALL_FIELDS
+
+    def validate_params(self, params:List[Parameter]):
+        return [param for param in params if not param.is_secret]
+
+    def validate_secrets(self, secrets: List[Parameter]):
+        return [secret for secret in secrets if secret.is_secret]
 
     def to_representation(self, instance: AbstractConfig):
         user = self.context["request"].user
         result = super().to_representation(instance)
         result["verification"] = instance.get_verification(user)
-        params_values = instance.read_params(user)
-        for param, param_dict in result["params"].items():
-            try:
-                param_dict["value"] = params_values[param]
-            except KeyError:
-                param_dict["value"] = None
         result["disabled"] = not instance.is_runnable(user)
         return result
 
@@ -114,9 +94,10 @@ class AbstractReportSerializer(rfs.ModelSerializer):
             "runtime_configuration",
         )
 
+
     def to_representation(self, instance: AbstractReport):
         data = super().to_representation(instance)
-        data["type"] = instance.config.plugin_type.label.lower()
+        data["type"] = instance.__class__.__name__.replace("Report", "").lower()
         return data
 
     def to_internal_value(self, data):

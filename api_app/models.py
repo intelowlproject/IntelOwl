@@ -382,19 +382,20 @@ def delete_file(sender, instance: Job, **kwargs):
 
 
 class PluginConfig(models.Model):
-    value = models.JSONField(blank=False)
-    allowed_on_organization = models.BooleanField(default=False)
+    value = models.JSONField(blank=True, null=True)
+    for_organization = models.BooleanField(default=False)
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="custom_configs",
-        null=True # null means default value
+        null=True,
+        blank=True
     )
     parameter = models.ForeignKey(Parameter, on_delete=models.CASCADE, null=False, related_name="values")
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        unique_together = ["owner", "allowed_on_organization", "parameter"]
+        unique_together = ["owner", "for_organization", "parameter"]
 
     @classmethod
     def visible_for_user(cls, user: User = None) -> QuerySet:
@@ -412,9 +413,24 @@ class PluginConfig(models.Model):
                 configs = configs.filter(Q(owner=user) | Q(owner__isnull=True))
             else:
                 configs = configs.filter(
-                    Q(organization=membership.organization) | Q(owner=user) | Q(owner__isnull=True)
+                    (Q(for_organization=True) & Q(owner=membership.organization.owner)) | Q(owner=user) | Q(owner__isnull=True)
                 )
         else:
             configs = configs.filter(owner__isnull=True)
 
         return configs
+
+    def clean_for_organization(self):
+        if self.for_organization and (self.owner.has_membership() and self.owner.membership.organization.owner != self.owner):
+            raise ValidationError("Only organization owner can create configuration at the org level")
+
+    def clean(self):
+        super().clean()
+        self.clean_for_organization()
+
+    @property
+    def attribute(self):
+        return self.parameter.name
+
+    def is_secret(self):
+        return self.parameter.is_secret

@@ -184,8 +184,8 @@ class AnalyzerConfig(AbstractConfig):
 
     @classmethod
     @property
-    def plugin_type(cls) -> models.TextChoices:
-        return PluginConfig.PluginType.ANALYZER
+    def plugin_type(cls) -> str:
+        return "1"
 
     @classmethod
     @property

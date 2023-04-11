@@ -4,7 +4,9 @@
 from django.db import migrations
 from django.db.models.fields.related_descriptors import ManyToManyDescriptor
 
-objects = [{"model": "connectors_manager.connectorconfig", "pk": "Slack", "fields": {"python_module": "slack.Slack", "description": "Send the analysis link to a slack channel", "disabled": False, "config": {"queue": "default", "soft_time_limit": 60}, "secrets": {"token": {"type": "str", "required": True, "description": "Slack token for authentication"}, "channel": {"type": "str", "required": True, "description": "Slack channel to send messages"}}, "params": {"slack_username": {"type": "str", "default": None, "description": "Slack username to tag on the message"}}, "maximum_tlp": "RED", "run_on_failure": True, "disabled_in_organizations": []}}]
+objects = [{"model": "connectors_manager.connectorconfig",
+            "pk": "Slack", "fields": {"python_module": "slack.Slack",
+"description": "Send the analysis link to a slack channel", "disabled": False, "config": {"queue": "default", "soft_time_limit": 60}, "secrets": {"token": {"type": "str", "required": True, "description": "Slack token for authentication"}, "channel": {"type": "str", "required": True, "description": "Slack channel to send messages"}}, "params": {"slack_username": {"type": "str", "default": None, "description": "Slack username to tag on the message"}}, "maximum_tlp": "RED", "run_on_failure": True, "disabled_in_organizations": []}}]
 
 
 def migrate(apps, schema_editor):

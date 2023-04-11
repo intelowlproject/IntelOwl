@@ -172,7 +172,6 @@ def run_plugin(
 # startup
 @signals.worker_ready.connect
 def worker_ready_connect(*args, sender: Consumer = None, **kwargs):
-    import git
 
     logger.info(f"worker {sender.hostname} ready")
     queue = sender.hostname.split("_", maxsplit=1)[1]

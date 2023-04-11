@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Container, Col, Row } from "reactstrap";
+import { Container, Col } from "reactstrap";
 import useTitle from "react-use/lib/useTitle";
 
 import {
@@ -73,9 +73,9 @@ export default function PluginWrapper({
   useTitle(`IntelOwl | ${heading}`, { restoreOnUnmount: true });
 
   return (
-    <Container fluid>
+    <Container fluid className="px-0">
       {/* Heading */}
-      <Row className="d-flex-start-center mb-2">
+      <div className="d-flex-start-center mb-2">
         <Col className="ps-0">
           <h1>
             {heading}&nbsp;
@@ -83,19 +83,17 @@ export default function PluginWrapper({
           </h1>
           <span className="text-muted">{description}</span>
         </Col>
-      </Row>
+      </div>
       {/* Actions */}
-      <Row className="bg-dark d-flex-between-center">
-        <Col>
+      <div className="bg-dark d-flex-between-center">
+        <div className="ps-3 d-flex">
           <TableHintIcon />
-        </Col>
-        <Col>
-          <span className="text-muted">
+          <span className="ps-2 text-muted">
             Note: Hover over a configured icon to view configuration status and
             errors if any.
           </span>
-        </Col>
-        <Col className="pt-1 d-flex align-items-start justify-content-end">
+        </div>
+        <div className="pt-1 pe-3 d-flex align-items-start justify-content-end">
           <ButtonSelect
             choices={["Table", "Cards"]}
             value={viewType}
@@ -107,10 +105,10 @@ export default function PluginWrapper({
             }}
           />
           <SyncButton onClick={refetch} className="ms-2" />
-        </Col>
-      </Row>
+        </div>
+      </div>
       {/* Table/Card View */}
-      <Row>
+      <div>
         <Loader
           loading={loading}
           error={error}
@@ -126,7 +124,7 @@ export default function PluginWrapper({
             />
           )}
         />
-      </Row>
+      </div>
     </Container>
   );
 }

@@ -9,8 +9,6 @@ django-celery-beat==2.5.0
 django-celery-results==2.5.0
 django-ses == 3.3.0
 django-iam-dbauth==0.1.4
-# if this is merged https://github.com/cdriehuys/django-rest-email-auth/pull/104 we can use the upstream
-git+https://github.com/intelowlproject/django-rest-email-auth.git@2dcca23aa8f7e6fc9995650e2e200643a812f7d9#egg=django-rest-email-auth
 django-prettyjson==0.4.1
 jsonschema==4.17.3
 # django rest framework libs
@@ -18,6 +16,7 @@ Authlib==1.2.0
 djangorestframework==3.14.0
 djangorestframework-filters==1.0.0.dev2
 drf-spectacular==0.26.1
+django-rest-email-auth==4.0.0
 
 uWSGI==2.0.20
 uwsgitop==0.11
@@ -36,7 +35,7 @@ GitPython==3.1.30
 checkdmarc==4.5.0
 darksearch==2.1.2
 dnspython==2.3.0
-dnstwist[extra]==20230402
+dnstwist[full]==20230402
 google>=3.0.0
 google-cloud-webrisk==1.11.0
 intezer-sdk==1.16.1

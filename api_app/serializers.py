@@ -5,6 +5,7 @@ import copy
 import datetime
 import json
 import logging
+import uuid
 from typing import Dict, List, Union
 
 import django.core.exceptions
@@ -253,7 +254,11 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
             from intel_owl.tasks import job_pipeline
 
             logger.info("Sending task")
-            job_pipeline.apply_async(args=[job.pk], routing_key=DEFAULT_QUEUE)
+            job_pipeline.apply_async(
+                args=[job.pk],
+                routing_key=DEFAULT_QUEUE,
+                MessageGroupId=str(uuid.uuid4()),
+            )
 
         return job
 

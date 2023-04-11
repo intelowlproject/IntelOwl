@@ -34,6 +34,7 @@ class VisualizableIcon(enum.Enum):
     WARNING = "warning"
     SHIELD = "shield"
     FIRE = "fire"
+    ALARM = "alarm"
     OTX = "otx"
     GITHUB = "github"
     VIRUSTotal = "virusTotal"

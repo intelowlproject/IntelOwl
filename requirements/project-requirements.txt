@@ -41,13 +41,13 @@ google-cloud-webrisk==1.11.0
 intezer-sdk==1.16.1
 lief==0.12.2
 maxminddb==2.2.0
-mwdblib==4.3.0
+mwdblib==4.4.0
 oletools==0.60
 OTXv2==1.5.12
 peepdf-fork==0.4.3
 pdfid==1.1.0
 pefile==2023.2.7
-Pillow==9.4.0
+Pillow==9.5.0
 pycti==5.5.0
 pydeep==0.4
 pyelftools==0.29

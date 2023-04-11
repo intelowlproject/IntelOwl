@@ -12,7 +12,7 @@ from django.conf import settings
 
 from api_app.analyzers_manager import classes
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
-from tests.mock_utils import MockUpResponse, if_mock_connections
+from tests.mock_utils import if_mock_connections
 
 logger = logging.getLogger(__name__)
 
@@ -68,7 +68,7 @@ class DNStwist(classes.ObservableAnalyzer):
             if_mock_connections(
                 patch(
                     "dnstwist.run",
-                    return_value=dict(),
+                    return_value={},
                 ),
             )
         ]

@@ -273,9 +273,9 @@ After having written the new python module, you have to remember to:
       3. Remember to correctly se the `objects`
 
 
-## How to modify a plugin
+## How to modify/delete a plugin
 
-If the changes that you have to make should stay local, you can just change the configuration inside `Django admin`.
+If the changes that you have to make should stay local, you can just change the configuration inside the `Django admin` page.
 
 But if, instead, you want your changes to be usable by every IntelOwl user, you have to create a new migration.  
 
@@ -283,9 +283,8 @@ To do so, you can use `analyzers_manager/migrations/0019_dnstwist_params.py` as 
 1. You have to create a new migration file
 2. Add as dependency the previous last migration of the package
 3. You have to create a forward and a reverse function
-4. You have to make the proper changes of the configuration inside these functions
-5. You have to validate the instance calling `.full_clean()`
-6. You have to save the instance calling `.save()`
+4. You have to make the proper changes of the configuration inside these functions (change parameters, secrets, or even delete the configuration)
+   1. If changes are made, you have to validate the instance calling `.full_clean()` and then you can save the instance with `.save()`
 
 
 ## Modifying functionalities of the Certego packages

@@ -22,6 +22,11 @@ class Sublime(FileAnalyzer):
     api_port = 8000
     gui_port = 3000
 
+    def config(self):
+        super().config()
+        if self._url.endswith("/"):
+            self._url = self._url[:-1]
+
     def run(self) -> Dict:
         self.headers["Authorization"] = f"Bearer {self._api_key}"
         session = requests.Session()
@@ -37,6 +42,7 @@ class Sublime(FileAnalyzer):
                 "run_active_detection_rules": True,
                 "run_all_detection_rules": False,
             },
+            timeout=50,
         )
         try:
             result.raise_for_status()
@@ -44,9 +50,11 @@ class Sublime(FileAnalyzer):
             raise AnalyzerRunException(result.content)
         else:
             result_analysis = result.json()
+            logger.info(f"Result is {result_analysis}")
             result_message = session.get(
                 f"{self._url}:{self.api_port}{self.retrieve_message_endpoint}/"
-                f"{result_analysis['message_id']}"
+                f"{result_analysis['message_id']}",
+                timeout=20,
             )
             try:
                 result_message.raise_for_status()
@@ -55,6 +63,7 @@ class Sublime(FileAnalyzer):
                 raise AnalyzerRunException(result_message.content)
             else:
                 canonical_id = result_message.json()["canonical_id"]
+                logger.info(f"Gui id is {canonical_id}")
                 return {
                     "flagged_rules": [
                         {

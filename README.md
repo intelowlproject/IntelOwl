@@ -33,6 +33,7 @@ Intel Owl is an Open Source Intelligence, or OSINT solution to get threat intell
 - Intel Owl is composed of:
   - **analyzers** that can be run to either retrieve data from external sources (like VirusTotal or AbuseIPDB) or to generate intel from internally available tools (like Yara or Oletools)
   - **connectors** that can be run to export data to external platforms (like MISP or OpenCTI)
+  - **visualizers** that can be run to create custom visualizations of analyzers results
   - **playbooks** that are meant to make analysis easily repeatable
 - API REST written in Django and Python 3.9.
 - Built-in frontend client written in ReactJS, with **[certego-ui](https://github.com/certego/certego-ui)**: provides features such as dashboard, visualizations of analysis data, easy to use forms for requesting new analysis, etc.

@@ -260,6 +260,41 @@ After having written the new python module, you have to remember to:
 
 ## How to add a new Visualizer
 
+### Configuration
+1. Put the module in the `visualizers` directory
+2. Remember to use `_monkeypatch()` in its class to create automated tests for the new visualizer. This is a trick to have tests in the same class of its connector.
+3. Create the configuration inside django admin in `Visualizers_manager/VisualizerConfigs` (* = mandatory, ~ = mandatory on conditions)
+   1. *Name: specific name of the configuration
+   2. *Python module: <module_name>.<class_name>
+   3. *Description: description of the configuration
+   4. *Config:
+      1. *Queue: celery queue that will be used
+      2. *Soft_time_limit: maximum time for the task execution
+   5. *Secrets: 
+      1. YouSecretKey:
+         1. *type: data type, `string`, `list`, `dict`, `integer`, `boolean`, `float`
+         2. *description: description of the secret
+         3. *required: `true` or `false`, meaning that is required to allow the run of the analyzer
+         4. default: default value of the secret
+      2. YourSecretKey2:
+         1. ...
+   6. *Params:
+      1. YourParam:
+         1. *type: data type, `string`, `list`, `dict`, `integer`, `boolean`, `float`
+         2. *description: description of the secret
+         3. *default: default value of the parameter
+   7. *Analyzers: List of analyzers that **must** have run to execute the visualizer
+   8. *Connectors: List of connectors that **must** have run to execute the visualizer
+
+4. To allow other people to use your configuration, that is now stored in your local database, you have to export it and create a datamigration
+   1. objects = `docker exec -ti intelowl_uwsgi  python3 manage.py dumpdata visualizers_manager.VisualizerConfig --pks "<your visualizer name>"`
+   2. Create a new migration file inside `/visualizers_manager/migrations/`
+      1. You can take the `migrate` and `reverse_migrate` functions from `/playbooks_manager/migrations/0005_static_analysis`, both
+      2. Remember to correctly set the `dependencies`
+      3. Remember to correctly set the `objects`
+
+### Python class
+
 The visualizers python code could be not immediate, so a small digression on _how_ it works is necessary.
 Visualizers have as goal to create a data structure inside the `Report` that the frontend is able to parse and correctly _visualize_ on the page.
 To do so, some utility classes have been made:
@@ -271,8 +306,7 @@ To do so, some utility classes have been made:
 - `VisualizableTitle`: The representation of a tuple, composed of a title and a value
 - `VisualizableBase`: The representation of a base string. Can have a link attached to it and even an icon. The background color can be changed.
 
-Inside a `Visualizer` you can retrieve the reports of both the analyzers and connectors 
-that have been specified inside configuration of the Visualizer itself.
+Inside a `Visualizer` you can retrieve the reports of the analyzers and connectors  that have been specified inside configuration of the Visualizer itself using `.analyzer_reports()` and `.connector_reports()`.
 At this point, you can compose these values as you wish wrapping them with the `Visualizable` classes mentioned before.
 
 You may want to look at a few existing examples to start to build a new one:

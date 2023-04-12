@@ -2,8 +2,6 @@
 # See the file 'LICENSE' for copying permission.
 
 from django.db import migrations
-from django.db.models.fields.related_descriptors import ManyToManyDescriptor
-
 
 
 def migrate(apps, schema_editor):

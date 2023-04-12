@@ -125,6 +125,9 @@ class VisualizableBool(VisualizableBase):
         self.name = name
         self.pill = pill
 
+    def __bool__(self):
+        return bool(self.name)
+
     @property
     def attributes(self) -> List[str]:
         return super().attributes + ["name", "pill"]

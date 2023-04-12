@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React from "react";
 import PropTypes from "prop-types";
 import { ContentSection } from "@certego/certego-ui";
@@ -19,9 +20,10 @@ import { HorizontalListVisualizer } from "./elements/horizontalList";
  * This is a recursive function: It's called by the component to convert the inner components.
  *
  * @param {object} element data used to generate the component
+ * @param {bool} standAloneBase flag used to set the capitalize in the base components only in case is not used for VList or Title elements
  * @returns {React.Component} component to visualize
  */
-export function convertToElement(element) {
+function convertToElement(element, standAloneBase = true) {
   switch (element.type) {
     case VisualizerComponentType.BOOL: {
       return (
@@ -51,7 +53,7 @@ export function convertToElement(element) {
         <VerticalListVisualizer
           name={element.name}
           values={element.values?.map((additionalElement) =>
-            convertToElement(additionalElement)
+            convertToElement(additionalElement, false)
           )}
           icon={getIcon(element.icon)}
           color={element.color}
@@ -67,7 +69,7 @@ export function convertToElement(element) {
       return (
         <TitleVisualizer
           title={convertToElement(element.title)}
-          value={convertToElement(element.value)}
+          value={convertToElement(element.value, false)}
           hideIfEmpty={element.hideIfEmpty}
           disableIfEmpty={element.disableIfEmpty}
         />
@@ -80,7 +82,9 @@ export function convertToElement(element) {
           icon={getIcon(element.icon)}
           color={element.color}
           link={element.link}
-          className={element.className}
+          className={`${standAloneBase ? "text-capitalize" : ""} ${
+            element.className
+          }`}
           hideIfEmpty={element.hideIfEmpty}
           disableIfEmpty={element.disableIfEmpty}
         />

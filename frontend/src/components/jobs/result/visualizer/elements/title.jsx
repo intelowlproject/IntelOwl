@@ -12,7 +12,7 @@ export function TitleVisualizer({ title, value, hideIfEmpty, disableIfEmpty }) {
   return (
     <div key={`${title}__${value}`} className="col-auto">
       <div className={`d-flex flex-column align-items-center ${isDisabled}`}>
-        <div className="mb-1">{title}</div>
+        <div className="text-capitalize mb-1">{title}</div>
         <div className="p-1 d-inline-flex">{value}</div>
       </div>
     </div>

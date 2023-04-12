@@ -196,12 +196,11 @@ After having written the new python module, you have to remember to:
    14. ~Not supported filetypes: required if `type` is `file` and `supported filetypes` is empty
 
 4. To allow other people to use your configuration, that is now stored in your local database, you have to export it and create a datamigration
-   1. objects = `docker exec -ti intelowl_uwsgi  python3 manage.py dumpdata analyzers_manager.AnalyzerConfig --pks "<your analyzer name>"`
+   1. objects = `docker exec -ti intelowl_uwsgi python3 manage.py dumpdata analyzers_manager.AnalyzerConfig --pks "<your analyzer name>"`
    2. Create a new migration file inside `/analyzers_manager/migrations/`
       1. You can take the `migrate` and `reverse_migrate` functions from `/playbooks_manager/migrations/0005_static_analysis`, both
       2. Remember to correctly set the `dependencies`
       3. Remember to correctly se the `objects`
-
     
 5. Add the new analyzer in the lists in the docs: [Usage](./Usage.md). Also, if the analyzer provides additional optional configuration, add the available options here: [Advanced-Usage](./Advanced-Usage.html#analyzers-with-special-configuration)
 

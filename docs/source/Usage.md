@@ -478,7 +478,8 @@ The following are all the keys that you can leverage/change without touching the
 - `connectors`: list of connectors to execute
 - `disabled`: _similar to analyzers_
 - `description`: _similar to analyzers_
-- `supports`: list of observable types or files supported
+- `type`: list of observable types or files supported
+- `runtime_configuration`: runtime configuration for each type of plugin
 
 Another chance to create a new playbook is to leverage the "Save as Playbook" button that you can find on the top right of the Job Result Page.
 In this way, after you have done an analysis, you can save the configuration of analyzers/connectors for re-use with a single click.

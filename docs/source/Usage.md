@@ -427,6 +427,12 @@ The visualizer adds logic after the computations, allowing to show the final res
 Each visualizer must define a set of analyzers and connectors as requirement:
 in fact the visualizers can not be chosen at the time of Job creation (once you click into the `Scan` button) but every single visualizer that it is configured and that has its requirements satisfied will be automatically selected and executed.
 
+##### List of pre-built Visualizers
+
+- `DNS`: displays the aggregation of every DNS analyzer report
+- `Yara`: displays the aggregation of every matched rule by the `Yara` Analyzer
+
+
 #### Visualizers customization
 You can either disable or create new visualizers based on already existing modules by changing the configuration values inside the Django Admin interface: `/admin/visualizers_manager/visualizerreport/`.
 

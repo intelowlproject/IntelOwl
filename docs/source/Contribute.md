@@ -258,6 +258,29 @@ After having written the new python module, you have to remember to:
       2. Remember to correctly set the `dependencies`
       3. Remember to correctly se the `objects`
 
+## How to add a new Visualizer
+
+The visualizers python code could be not immediate, so a small digression on _how_ it works is necessary.
+Visualizers have as goal to create a data structure inside the `Report` that the frontend is able to parse and correctly _visualize_ on the page.
+To do so, some utility classes have been made:
+
+- `VisualizableLevel`: Each **level** corresponds to a line in the final frontend visualizations. Every level is made of a `VisualizableHorizontaList` 
+- `VisualizableHorizontaList`: An horizontal list of visualizable elements that will be displayed as they are
+- `VisualizableVerticalList`: A vertical list made of a name, a title, and the list of elements.
+- `VisualizableBool`: The representation of a boolean value
+- `VisualizableTitle`: The representation of a tuple, composed of a title and a value
+- `VisualizableBase`: The representation of a base string. Can have a link attached to it and even an icon. The background color can be changed.
+
+Inside a `Visualizer` you can retrieve the information about the ports of both
+the analyzers and connectors that are required by the configuration of the Visualizer itself.
+At this point, you can compose these values as you wish wrapping them with the `Visualizable` classes mentioned before.
+
+You may want to look at a few existing examples to start to build a new one:
+
+- [dns.py](https://github.com/intelowlproject/IntelOwl/blob/master/api_app/visualizers_manager/visualizers/dns.py)
+- [yara.py](https://github.com/intelowlproject/IntelOwl/blob/master/api_app/visualizers_manager/visualizers/yara.py)
+
+
 ## How to add a new Playbook
 1. Create the configuration inside django admin in `Playbooks_manager/PlaybookConfigs` (* = mandatory, ~ = mandatory on conditions)
    1. *Name: specific name of the configuration

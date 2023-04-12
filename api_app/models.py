@@ -24,7 +24,7 @@ from api_app.validators import validate_runtime_configuration
 from certego_saas.apps.organization.organization import Organization
 from certego_saas.models import User
 from intel_owl import tasks
-from intel_owl.celery import DEFAULT_QUEUE, get_real_queue_name
+from intel_owl.celery import DEFAULT_QUEUE, get_queue_name
 
 logger = logging.getLogger(__name__)
 
@@ -319,7 +319,7 @@ class Job(models.Model):
             | tasks.continue_job_pipeline.signature(
                 args=[self.pk],
                 kwargs={},
-                queue=get_real_queue_name(DEFAULT_QUEUE),
+                queue=get_queue_name(DEFAULT_QUEUE),
                 soft_time_limit=10,
                 immutable=True,
             )

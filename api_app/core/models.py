@@ -17,7 +17,7 @@ from api_app.core.choices import Status
 from api_app.validators import validate_config, validate_params, validate_secrets
 from certego_saas.apps.organization.organization import Organization
 from certego_saas.apps.user.models import User
-from intel_owl.celery import DEFAULT_QUEUE, get_real_queue_name
+from intel_owl.celery import DEFAULT_QUEUE, get_queue_name
 
 logger = logging.getLogger(__name__)
 
@@ -198,7 +198,7 @@ class AbstractConfig(models.Model):
         queue = self.config["queue"]
         if queue not in settings.CELERY_QUEUES:
             queue = DEFAULT_QUEUE
-        return get_real_queue_name(queue)
+        return get_queue_name(queue)
 
     @cached_property
     def routing_key(self):

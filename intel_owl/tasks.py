@@ -16,7 +16,7 @@ from django.utils.module_loading import import_string
 from django.utils.timezone import now
 
 from intel_owl import secrets
-from intel_owl.celery import DEFAULT_QUEUE, app, get_real_queue_name
+from intel_owl.celery import DEFAULT_QUEUE, app, get_queue_name
 
 logger = logging.getLogger(__name__)
 
@@ -176,7 +176,7 @@ def worker_ready_connect(*args, sender: Consumer = None, **kwargs):
     logger.info(f"worker {sender.hostname} ready")
     queue = sender.hostname.split("_", maxsplit=1)[1]
     logger.info(f"Updating repositories inside {queue}")
-    if settings.REPO_DOWNLOADER_ENABLED and queue == get_real_queue_name(DEFAULT_QUEUE):
+    if settings.REPO_DOWNLOADER_ENABLED and queue == get_queue_name(DEFAULT_QUEUE):
         for python_module in [
             "maxmind.Maxmind",
             "talos.Talos",

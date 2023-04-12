@@ -200,7 +200,7 @@ After having written the new python module, you have to remember to:
    2. Create a new migration file inside `/analyzers_manager/migrations/`
       1. You can take the `migrate` and `reverse_migrate` functions from `/playbooks_manager/migrations/0005_static_analysis`, both
       2. Remember to correctly set the `dependencies`
-      3. Remember to correctly se the `objects`
+      3. Remember to correctly set the `objects`
     
 5. Add the new analyzer in the lists in the docs: [Usage](./Usage.md). Also, if the analyzer provides additional optional configuration, add the available options here: [Advanced-Usage](./Advanced-Usage.html#analyzers-with-special-configuration)
 
@@ -256,7 +256,7 @@ After having written the new python module, you have to remember to:
    2. Create a new migration file inside `/connectors_manager/migrations/`
       1. You can take the `migrate` and `reverse_migrate` functions from `/playbooks_manager/migrations/0005_static_analysis`, both
       2. Remember to correctly set the `dependencies`
-      3. Remember to correctly se the `objects`
+      3. Remember to correctly set the `objects`
 
 ## How to add a new Visualizer
 
@@ -293,7 +293,7 @@ You may want to look at a few existing examples to start to build a new one:
    2. Create a new migration file inside `/playbooks_manager/migrations/`
       1. You can take the `migrate` and `reverse_migrate` functions from `/playbooks_manager/migrations/0005_static_analysis`, both
       2. Remember to correctly set the `dependencies`
-      3. Remember to correctly se the `objects`
+      3. Remember to correctly set the `objects`
 
 
 ## How to modify/delete a plugin

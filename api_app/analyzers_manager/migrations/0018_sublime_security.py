@@ -3,7 +3,7 @@
 from django.db import migrations
 from django.db.models.fields.related_descriptors import ManyToManyDescriptor
 
-objects = [{"model": "analyzers_manager.analyzerconfig", "pk": "SublimeSecurity", "fields": {"python_module": "sublime.Sublime", "description": "Analyze email with sublime security", "disabled": False, "config": {"queue": "default", "soft_time_limit": 60}, "secrets": {"url": {"type": "str", "required": True, "description": ""}, "api_key": {"type": "str", "required": True, "description": ""}, "message_source_id": {"type": "str", "required": True, "description": ""}}, "params": {}, "type": "file", "docker_based": False, "maximum_tlp": "RED", "observable_supported": "[]", "supported_filetypes": "[\"message/rfc822\"]", "run_hash": False, "run_hash_type": "", "not_supported_filetypes": "[]", "disabled_in_organizations": []}}]
+objects = [{"model": "analyzers_manager.analyzerconfig", "pk": "SublimeSecurity", "fields": {"python_module": "sublime.Sublime", "description": "Analyze email with sublime security", "disabled": False, "config": {"queue": "default", "soft_time_limit": 60}, "secrets": {"url": {"type": "str", "required": True, "description": ""}, "api_key": {"type": "str", "required": True, "description": ""}, "message_source_id": {"type": "str", "required": True, "description": ""}}, "params": {}, "type": "file", "docker_based": False, "maximum_tlp": "RED", "observable_supported": "[]", "supported_filetypes": "[\"message/rfc822\", \"application/vnd.ms-outlook\"]", "run_hash": False, "run_hash_type": "", "not_supported_filetypes": "[]", "disabled_in_organizations": []}}]
 
 
 def migrate(apps, schema_editor):

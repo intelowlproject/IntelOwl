@@ -6,6 +6,7 @@ import requests
 
 from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
+from api_app.analyzers_manager.models import MimeTypes
 from tests.mock_utils import MockUpResponse, if_mock_connections
 
 logger = getLogger(__name__)
@@ -27,6 +28,22 @@ class Sublime(FileAnalyzer):
         if self._url.endswith("/"):
             self._url = self._url[:-1]
 
+    @property
+    def raw_message(self) -> str:
+        if self.file_mimetype == MimeTypes.OUTLOOK.value:
+            import base64
+            import subprocess
+            import tempfile
+
+            with tempfile.NamedTemporaryFile() as file:
+                command = ["msgconvert", file.name, "--outfile", "-"]
+                file.seek(0)
+                file.write(self.read_file_bytes())
+                file.seek(0)
+                proc = subprocess.run(command, check=True, stdout=subprocess.PIPE)
+                return base64.b64encode(proc.stdout.strip()).decode("utf-8")
+        return self._job.b64
+
     def run(self) -> Dict:
         self.headers["Authorization"] = f"Bearer {self._api_key}"
         session = requests.Session()
@@ -35,7 +52,7 @@ class Sublime(FileAnalyzer):
             f"{self._url}:{self.api_port}{self.live_flow_endpoint}",
             json={
                 "create_mailbox": True,
-                "raw_message": self._job.b64,
+                "raw_message": self.raw_message,
                 "message_source_id": self._message_source_id,
                 "mailbox_email_address": self._job.user.email,
                 "labels": [self._job.user.username],

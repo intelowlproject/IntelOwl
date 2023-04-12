@@ -271,8 +271,8 @@ To do so, some utility classes have been made:
 - `VisualizableTitle`: The representation of a tuple, composed of a title and a value
 - `VisualizableBase`: The representation of a base string. Can have a link attached to it and even an icon. The background color can be changed.
 
-Inside a `Visualizer` you can retrieve the information about the ports of both
-the analyzers and connectors that are required by the configuration of the Visualizer itself.
+Inside a `Visualizer` you can retrieve the reports of both the analyzers and connectors 
+that have been specified inside configuration of the Visualizer itself.
 At this point, you can compose these values as you wish wrapping them with the `Visualizable` classes mentioned before.
 
 You may want to look at a few existing examples to start to build a new one:

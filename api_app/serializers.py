@@ -314,9 +314,15 @@ class JobSerializer(_AbstractJobViewSerializer):
         model = Job
         exclude = ("file",)
 
-    analyzerreports = AnalyzerReportSerializer(many=True, read_only=True)
-    connectorreports = ConnectorReportSerializer(many=True, read_only=True)
-    visualizerreports = VisualizerReportSerializer(many=True, read_only=True)
+    analyzer_reports = AnalyzerReportSerializer(
+        many=True, read_only=True, source="analyzerreports"
+    )
+    connector_reports = ConnectorReportSerializer(
+        many=True, read_only=True, source="connectorreports"
+    )
+    visualizer_reports = VisualizerReportSerializer(
+        many=True, read_only=True, source="visualizerreports"
+    )
     comments = CommentSerializer(many=True, read_only=True)
 
     permissions = rfs.SerializerMethodField()

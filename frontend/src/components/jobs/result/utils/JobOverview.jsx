@@ -132,13 +132,13 @@ export default function JobOverview({ isRunningJob, job, refetch }) {
         report: (
           <Loader
             loading={
-              !job.visualizerreports.find(
+              !job.visualizer_reports.find(
                 (report) => report.name === visualizerLabel
               )
             }
             render={() => (
               <VisualizerReport
-                visualizerReport={job.visualizerreports.find(
+                visualizerReport={job.visualizer_reports.find(
                   (report) => report.name === visualizerLabel
                 )}
               />

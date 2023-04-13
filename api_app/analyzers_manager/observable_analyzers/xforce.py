@@ -18,6 +18,7 @@ class XForce(classes.ObservableAnalyzer):
     _api_key_name: str
     _api_password_name: str
     malware_only: bool
+    timeout: int = 5
 
     def run(self):
         auth = HTTPBasicAuth(self._api_key_name, self._api_password_name)
@@ -32,7 +33,9 @@ class XForce(classes.ObservableAnalyzer):
                 else:
                     observable_to_check = self.observable_name
                 url = f"{self.base_url}/{endpoint}/{observable_to_check}"
-                response = requests.get(url, auth=auth, headers=headers)
+                response = requests.get(
+                    url, auth=auth, headers=headers, timeout=self.timeout
+                )
                 if response.status_code == 404:
                     result["found"] = False
                 else:

@@ -68,5 +68,9 @@ DRF_RECAPTCHA_SECRET_KEY = (
     if PUBLIC_DEPLOYMENT and not DEBUG
     else str(get_secret("RECAPTCHA_SECRET_KEY_IO_LOCAL"))
 )
+# this is necessary to avoid to have the related Django app to yell
+# and to have this populated also for people who upgraded from previous versions
+if not DRF_RECAPTCHA_SECRET_KEY:
+    DRF_RECAPTCHA_SECRET_KEY = "fake"
 DRF_RECAPTCHA_TESTING = STAGE_LOCAL or STAGE_CI
 DRF_RECAPTCHA_TESTING_PASS = True

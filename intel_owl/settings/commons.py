@@ -3,7 +3,7 @@
 
 from pathlib import Path, PosixPath
 
-from ._util import get_secret, set_permissions
+from ._util import get_secret
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = get_secret("DEBUG", False) == "True" or get_secret("DEBUG", False) is True

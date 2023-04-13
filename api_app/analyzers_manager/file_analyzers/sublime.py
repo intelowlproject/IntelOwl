@@ -1,8 +1,12 @@
+import base64
+import email
+from email.message import Message
 from logging import getLogger
 from typing import Dict
 from unittest.mock import patch
 
 import requests
+from django.utils.functional import cached_property
 
 from api_app.analyzers_manager.classes import FileAnalyzer
 from api_app.analyzers_manager.exceptions import AnalyzerRunException
@@ -16,7 +20,7 @@ class Sublime(FileAnalyzer):
     _api_key: str
     _message_source_id: str
     _url: str
-
+    analyze_internal_eml_on_pec: bool
     headers = {"accept": "application/json", "content-type": "application/json"}
     live_flow_endpoint = "/v1/live-flow/raw-messages/analyze"
     retrieve_message_endpoint = "/v0/messages"
@@ -28,10 +32,48 @@ class Sublime(FileAnalyzer):
         if self._url.endswith("/"):
             self._url = self._url[:-1]
 
+    @cached_property
+    def email(self) -> Message:
+        return email.message_from_bytes(self.read_file_bytes())
+
+    def is_pec(self) -> bool:
+        found_eml, found_signature, found_xml = False, False, False
+        for attachment in self.email.get_payload():
+            attachment: Message
+            content_type = attachment.get_content_type()
+            filename = attachment.get_filename()
+            logger.debug(f"{content_type=} {filename=} ")
+            if content_type == MimeTypes.MIXED.value:
+                for internal_attachment in attachment.get_payload():
+                    internal_attachment: Message
+                    internal_attachment_content = internal_attachment.get_content_type()
+                    internal_attachment_name = internal_attachment.get_filename()
+                    logger.debug(
+                        f"{internal_attachment_name=} {internal_attachment_content=} "
+                    )
+                    if (
+                        internal_attachment_content == MimeTypes.EML.value
+                        and internal_attachment_name == "postacert.eml"
+                    ):
+                        self._real_email = attachment.get_payload(0).as_bytes()
+                        found_eml = True
+                    elif (
+                        internal_attachment_content
+                        in [MimeTypes.XML1.value, MimeTypes.XML2.value]
+                        and internal_attachment_name == "daticert.xml"
+                    ):
+                        found_xml = True
+            elif (
+                content_type in [MimeTypes.PKCS7.value, MimeTypes.XPKCS7.value]
+                and filename == "smime.p7s"
+            ):
+                found_signature = True
+        logger.debug(f"{found_xml=} {found_eml=} {found_signature=}")
+        return found_eml and found_signature and found_xml
+
     @property
     def raw_message(self) -> str:
         if self.file_mimetype == MimeTypes.OUTLOOK.value:
-            import base64
             import subprocess
             import tempfile
 
@@ -44,15 +86,12 @@ class Sublime(FileAnalyzer):
                 return base64.b64encode(proc.stdout.strip()).decode("utf-8")
         return self._job.b64
 
-    def run(self) -> Dict:
-        self.headers["Authorization"] = f"Bearer {self._api_key}"
-        session = requests.Session()
-        session.headers = self.headers
+    def _analysis(self, session: requests.Session, content: str):
         result = session.post(
             f"{self._url}:{self.api_port}{self.live_flow_endpoint}",
             json={
                 "create_mailbox": True,
-                "raw_message": self.raw_message,
+                "raw_message": content,
                 "message_source_id": self._message_source_id,
                 "mailbox_email_address": self._job.user.email,
                 "labels": [self._job.user.username],
@@ -102,6 +141,19 @@ class Sublime(FileAnalyzer):
                     ],
                     "gui_url": f"{self._url}:{self.gui_port}/messages/{canonical_id}",
                 }
+
+    def run(self) -> Dict:
+        self.headers["Authorization"] = f"Bearer {self._api_key}"
+        session = requests.Session()
+        session.headers = self.headers
+        report = self._analysis(session, self.raw_message)
+        if self.analyze_internal_eml_on_pec and self.is_pec():
+            logger.info("Email is a pec")
+            report_pec = self._analysis(
+                session, base64.b64encode(self._real_email).decode("utf-8")
+            )
+            report["pec"] = report_pec
+        return report
 
     @classmethod
     def _monkeypatch(cls):

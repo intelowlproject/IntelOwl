@@ -8,7 +8,7 @@ def migrate(apps, schema_editor):
     AnalyzerConfig = apps.get_model("analyzers_manager", "AnalyzerConfig")
     for config in AnalyzerConfig.objects.filter(python_module="xforce.XForce"):
         config.params["timeout"] = {
-            "value": 5,
+            "default": 5,
             "type": "int",
             "description": "Request timeout",
         }
@@ -21,7 +21,7 @@ def reverse_migrate(apps, schema_editor):
     for config in AnalyzerConfig.objects.filter(python_module="xforce.XForce"):
         config.params = {
             "malware_only": {
-                "value": False,
+                "default": False,
                 "type": "bool",
                 "description": "Performs lookup only against 'malware' endpoints to save some quota",
             }

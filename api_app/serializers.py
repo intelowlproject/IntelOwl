@@ -15,6 +15,7 @@ from django.utils.timezone import now
 from durin.serializers import UserSerializer
 from rest_framework import serializers as rfs
 from rest_framework.exceptions import PermissionDenied, ValidationError
+from rest_framework.fields import empty
 
 from certego_saas.apps.organization.membership import Membership
 from certego_saas.apps.organization.organization import Organization
@@ -662,7 +663,11 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
 class JobEnvelopeSerializer(rfs.ListSerializer):
     @property
     def data(self):
+        # this is to return a dict instead of a list
         return super(rfs.ListSerializer, self).data
+
+    def to_internal_value(self, data):
+        super().to_internal_value(data)
 
     def to_representation(self, data):
         results = super().to_representation(data)
@@ -670,6 +675,9 @@ class JobEnvelopeSerializer(rfs.ListSerializer):
 
 
 class JobResponseSerializer(rfs.ModelSerializer):
+    STATUS_ACCEPTED = "accepted"
+    STATUS_NOT_AVAILABLE = "not_available"
+
     job_id = rfs.IntegerField(source="pk")
     analyzers_running = rfs.PrimaryKeyRelatedField(
         read_only=True, source="analyzers_to_execute", many=True
@@ -692,15 +700,19 @@ class JobResponseSerializer(rfs.ModelSerializer):
             "connectors_running",
             "visualizers_running",
             "playbook_running",
-            "status",
         ]
         extra_kwargs = {"warnings": {"read_only": True, "required": False}}
         list_serializer_class = JobEnvelopeSerializer
 
     def to_representation(self, instance):
         result = super().to_representation(instance)
-        result["status"] = "accepted"
+        result["status"] = self.STATUS_ACCEPTED
         return result
+
+    def get_initial(self):
+        initial = super().get_initial()
+        initial.setdefault("status", self.STATUS_NOT_AVAILABLE)
+        return initial
 
 
 class JobAvailabilitySerializer(rfs.ModelSerializer):

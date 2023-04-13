@@ -12,6 +12,7 @@ from api_app.playbooks_manager.models import PlaybookConfig
 from api_app.serializers import (
     CommentSerializer,
     FileAnalysisSerializer,
+    JobResponseSerializer,
     ObservableAnalysisSerializer,
     _AbstractJobCreateSerializer,
 )
@@ -382,3 +383,39 @@ class CommentSerializerTestCase(CustomTestCase):
     def test_create_with_invalid_job_id(self):
         self.cs.initial_data["job_id"] = 100000
         self.assertFalse(self.cs.is_valid())
+
+
+class JobResponseSerializerTestCase(CustomTestCase):
+    def test_null(self):
+        result = JobResponseSerializer(None).data
+        self.assertEqual(result, {"status": "not_available", "job_id": None})
+
+    def test_job(self):
+        job = Job.objects.create(
+            observable_name="test.com", observable_classification="domain"
+        )
+        result = JobResponseSerializer(job).data
+        self.assertIn("status", result)
+        self.assertEqual(result["status"], "accepted")
+        self.assertIn("job_id", result)
+        self.assertEqual(result["job_id"], job.id)
+        job.delete()
+
+    def test_many(self):
+        job1 = Job.objects.create(
+            observable_name="test.com", observable_classification="domain"
+        )
+        job2 = Job.objects.create(
+            observable_name="test2.com", observable_classification="domain"
+        )
+        result = JobResponseSerializer([job1, job2], many=True).data
+        self.assertIn("count", result)
+        self.assertEqual(result["count"], 2)
+        self.assertIn("results", result)
+        self.assertEqual(len(result["results"]), 2)
+        self.assertIn("status", result["results"][0])
+        self.assertEqual(result["results"][0]["status"], "accepted")
+        self.assertIn("job_id", result["results"][0])
+        self.assertEqual(result["results"][0]["job_id"], job1.id)
+        job1.delete()
+        job2.delete()

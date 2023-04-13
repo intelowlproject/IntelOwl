@@ -75,11 +75,11 @@ def ask_analysis_availability(request):
     try:
         job = serializer.save()
     except Job.DoesNotExist:
-        result = []
+        result = None
     else:
-        result = [job]
+        result = job
     return Response(
-        JobResponseSerializer(result, many=True).data,
+        JobResponseSerializer(result).data,
         status=status.HTTP_200_OK,
     )
 

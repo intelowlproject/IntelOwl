@@ -118,7 +118,8 @@ class Sublime(FileAnalyzer):
                 self.report.errors.append(result_message.content)
                 raise AnalyzerRunException(result_message.content)
             else:
-                canonical_id = result_message.json()["canonical_id"]
+                result_message = result_message.json()
+                canonical_id = result_message["canonical_id"]
                 logger.info(f"Gui id is {canonical_id}")
                 return {
                     "flagged_rules": [
@@ -140,6 +141,10 @@ class Sublime(FileAnalyzer):
                         for rule in result_analysis["flagged_rules"]
                     ],
                     "gui_url": f"{self._url}:{self.gui_port}/messages/{canonical_id}",
+                    **{
+                        key: result_message[key]
+                        for key in ["subject", "sender", "recipients", "created_at"]
+                    },
                 }
 
     def run(self) -> Dict:

@@ -8,20 +8,20 @@ def migrate(apps, schema_editor):
     AnalyzerConfig = apps.get_model("analyzers_manager", "AnalyzerConfig")
     for config in AnalyzerConfig.objects.filter(python_module="otx.OTX", type="file"):
         config.params = {
-            "verbose": {"value": False, "type": "bool", "description": ""},
+            "verbose": {"default": False, "type": "bool", "description": ""},
             "sections": {
-                "value": ["general"],
+                "default": ["general"],
                 "type": "list",
                 "description": "Sections to download. Options: [general, reputation, geo, malware, url_list, "
                 "passive_dns, analysis",
             },
             "full_analysis": {
-                "value": False,
+                "default": False,
                 "type": "bool",
                 "description": "download all the available sections for the observable type",
             },
             "timeout": {
-                "value": 30,
+                "default": 30,
                 "type": "int",
                 "description": "Timeout of the request",
             },
@@ -34,7 +34,7 @@ def reverse_migrate(apps, schema_editor):
     AnalyzerConfig = apps.get_model("analyzers_manager", "AnalyzerConfig")
     for config in AnalyzerConfig.objects.filter(python_module="otx.OTX", type="file"):
         config.params = {
-            "verbose": {"value": False, "type": "bool", "description": ""},
+            "verbose": {"default": False, "type": "bool", "description": ""},
         }
         config.full_clean()
         config.save()

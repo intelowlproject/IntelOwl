@@ -452,6 +452,16 @@ class PluginConfig(models.Model):
             models.Index(
                 fields=["type", "organization"],
             ),
+            models.Index(
+                fields=[
+                    "organization",
+                    "owner",
+                    "attribute",
+                    "type",
+                    "plugin_name",
+                    "config_type",
+                ]
+            ),
         ]
 
     @classmethod

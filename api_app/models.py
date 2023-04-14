@@ -194,6 +194,44 @@ class Job(models.Model):
     def url(self):
         return settings.WEB_CLIENT_URL + self.get_absolute_url()
 
+    def retry(self):
+        self.update_status(Job.Status.RUNNING)
+        failed_analyzer_reports = self.analyzerreports.filter(
+            status=AbstractReport.Status.FAILED.value
+        ).values_list("pk", flat=True)
+        analyzers_signatures = [
+            plugin.get_signature(self)
+            for plugin in self.analyzers_to_execute.filter(
+                pk__in=failed_analyzer_reports
+            )
+        ]
+        logger.info(f"Analyzer signatures are {analyzers_signatures}")
+        failed_connectors_reports = self.connectorreports.filter(
+            status=AbstractReport.Status.FAILED.value
+        ).values_list("pk", flat=True)
+
+        connectors_signatures = [
+            plugin.get_signature(self)
+            for plugin in self.connectors_to_execute.filter(
+                pk__in=failed_connectors_reports
+            )
+        ]
+        logger.info(f"Connector signatures are {connectors_signatures}")
+        failed_visualizers_reports = self.visualizerreports.filter(
+            status=AbstractReport.Status.FAILED.value
+        ).values_list("pk", flat=True)
+
+        visualizers_signatures = [
+            plugin.get_signature(self)
+            for plugin in self.visualizers_to_execute.filter(
+                pk__in=failed_visualizers_reports
+            )
+        ]
+        logger.info(f"Visualizer signatures are {visualizers_signatures}")
+        return self._execute_signatures(
+            analyzers_signatures, connectors_signatures, visualizers_signatures
+        )
+
     def job_cleanup(self) -> None:
         logger.info(f"[STARTING] job_cleanup for <-- {self}.")
         status_to_set = self.Status.RUNNING
@@ -313,7 +351,16 @@ class Job(models.Model):
             plugin.get_signature(self) for plugin in self.visualizers_to_execute.all()
         ]
         logger.info(f"Visualizer signatures are {visualizers_signatures}")
+        return self._execute_signatures(
+            analyzers_signatures, connectors_signatures, visualizers_signatures
+        )
 
+    def _execute_signatures(
+        self,
+        analyzers_signatures: typing.List,
+        connectors_signatures: typing.List,
+        visualizers_signatures: typing.List,
+    ):
         runner = (
             group(analyzers_signatures)
             | tasks.continue_job_pipeline.signature(
@@ -451,6 +498,16 @@ class PluginConfig(models.Model):
             ),
             models.Index(
                 fields=["type", "organization"],
+            ),
+            models.Index(
+                fields=[
+                    "organization",
+                    "owner",
+                    "attribute",
+                    "type",
+                    "plugin_name",
+                    "config_type",
+                ]
             ),
         ]
 

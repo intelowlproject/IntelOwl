@@ -38,7 +38,10 @@ class Sublime(FileAnalyzer):
 
     def is_pec(self) -> bool:
         found_eml, found_signature, found_xml = False, False, False
-        for attachment in self.email.get_payload():
+        payload = self.email.get_payload()
+        if isinstance(payload, str):
+            return False
+        for attachment in payload:
             attachment: Message
             content_type = attachment.get_content_type()
             filename = attachment.get_filename()
@@ -120,7 +123,7 @@ class Sublime(FileAnalyzer):
             else:
                 result_message = result_message.json()
                 canonical_id = result_message["canonical_id"]
-                logger.info(f"Gui id is {canonical_id}")
+                logger.info(f"{result_message=}")
                 return {
                     "flagged_rules": [
                         {
@@ -152,7 +155,11 @@ class Sublime(FileAnalyzer):
         session = requests.Session()
         session.headers = self.headers
         report = self._analysis(session, self.raw_message)
-        if self.analyze_internal_eml_on_pec and self.is_pec():
+        if (
+            self.analyze_internal_eml_on_pec
+            and self.file_mimetype == MimeTypes.EML.value
+            and self.is_pec()
+        ):
             logger.info("Email is a pec")
             report_pec = self._analysis(
                 session, base64.b64encode(self._real_email).decode("utf-8")
@@ -167,7 +174,16 @@ class Sublime(FileAnalyzer):
             if_mock_connections(
                 patch(
                     "requests.Session.get",
-                    return_value=MockUpResponse({"canonical_id": "test"}, 200),
+                    return_value=MockUpResponse(
+                        {
+                            "canonical_id": "test",
+                            "subject": "test",
+                            "recipients": ["test"],
+                            "created_at": "test",
+                            "sender": "test",
+                        },
+                        200,
+                    ),
                 ),
                 patch(
                     "requests.Session.post",

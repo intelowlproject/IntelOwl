@@ -274,6 +274,14 @@ class JobViewSet(ReadAndDeleteOnlyViewSet, SerializerActionMixin):
             .order_by("-received_request_time")
         )
 
+    @action(detail=True, methods=["patch"])
+    def retry(self, request, pk=None):
+        job = self.get_object()
+        if job.status not in Job.Status.final_statuses():
+            raise ValidationError({"detail": "Job is running"})
+        job.execute()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
     @add_docs(
         description="Kill running job by closing celery tasks and marking as killed",
         request=None,

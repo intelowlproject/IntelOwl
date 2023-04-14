@@ -29,7 +29,7 @@ from .connectors_manager.exceptions import NotRunnableConnector
 from .connectors_manager.models import ConnectorConfig
 from .connectors_manager.serializers import ConnectorReportSerializer
 from .helpers import calculate_md5, gen_random_colorhex
-from .models import Comment, Job, PluginConfig, Tag
+from .models import Comment, Job, PluginConfig, Tag, default_runtime
 from .playbooks_manager.models import PlaybookConfig
 from .visualizers_manager.models import VisualizerConfig
 from .visualizers_manager.serializers import VisualizerReportSerializer
@@ -75,13 +75,26 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
     """
 
     tags_labels = rfs.ListField(default=list)
-    runtime_configuration = rfs.JSONField(required=False, default={}, write_only=True)
+    runtime_configuration = rfs.JSONField(
+        required=False, default=default_runtime, write_only=True
+    )
     md5 = rfs.HiddenField(default=None)
     tlp = rfs.ChoiceField(choices=TLP.values + ["WHITE"], default=TLP.CLEAR)
 
+    def validate_runtime_configuration(self, runtime_config: Dict):
+        from api_app.validators import validate_runtime_configuration
+
+        if not runtime_config:
+            runtime_config = default_runtime()
+        try:
+            validate_runtime_configuration(runtime_config)
+        except django.core.exceptions.ValidationError as e:
+            raise ValidationError(str(e))
+        return runtime_config
+
     def validate_tlp(self, tlp: str):
         if tlp == "WHITE":
-            return "CLEAR"
+            return TLP.CLEAR.value
         return tlp
 
     def __init__(self, *args, **kwargs):
@@ -227,7 +240,6 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         # create ``Tag`` objects from tags_labels
         tags_labels = validated_data.pop("tags_labels", None)
         validated_data.pop("warnings")
-        validated_data.pop("runtime_configuration")
         send_task = validated_data.pop("send_task", False)
         tags = [
             Tag.objects.get_or_create(

@@ -32,8 +32,8 @@ export default function JobOverview({ isRunningJob, job, refetch }) {
   console.debug("JobOverview rendered");
 
   // raw elements
-  let AnalyzerDenominator = job.analyzers_requested?.length || "all";
-  let ConnectorDenominator = job.connectors_requested?.length || "all";
+  let AnalyzerDenominator = job.analyzers_to_execute?.length || "all";
+  let ConnectorDenominator = job.connectors_to_execute?.length || "all";
   const VisualizerDenominator = "all";
 
   if (job.playbook_to_execute) {

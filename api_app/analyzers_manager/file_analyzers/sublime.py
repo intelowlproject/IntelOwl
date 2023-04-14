@@ -38,7 +38,10 @@ class Sublime(FileAnalyzer):
 
     def is_pec(self) -> bool:
         found_eml, found_signature, found_xml = False, False, False
-        for attachment in self.email.get_payload():
+        payload = self.email.get_payload()
+        if isinstance(payload, str):
+            return False
+        for attachment in payload:
             attachment: Message
             content_type = attachment.get_content_type()
             filename = attachment.get_filename()

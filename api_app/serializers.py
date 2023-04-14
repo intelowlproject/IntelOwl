@@ -314,7 +314,7 @@ class JobListSerializer(_AbstractJobViewSerializer):
 
     class Meta:
         model = Job
-        exclude = ("file", "file_name", "errors")
+        exclude = ("file", "errors")
 
 
 class JobSerializer(_AbstractJobViewSerializer):

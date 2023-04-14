@@ -205,6 +205,22 @@ class AbstractJobCreateSerializerTestCase(CustomTestCase):
             )
             self.assertCountEqual(visualizers, [])
 
+    def test_runtime_configuration_empty(self):
+        self.ajcs.validate_runtime_configuration({})
+
+    def test_runtime_configuration_wrong(self):
+        with self.assertRaises(ValidationError):
+            self.ajcs.validate_runtime_configuration({"tranco": {"key": "value"}})
+
+    def test_runtime_configuration_valid(self):
+        self.ajcs.validate_runtime_configuration(
+            {
+                "analyzers": {"tranco": {"key": "value"}},
+                "connectors": {},
+                "visualizers": {},
+            }
+        )
+
 
 class FileJobCreateSerializerTestCase(CustomTestCase):
     def setUp(self) -> None:

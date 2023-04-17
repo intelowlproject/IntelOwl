@@ -3,6 +3,7 @@
 import base64
 import logging
 import typing
+import uuid
 from typing import Optional
 
 from celery import group
@@ -369,6 +370,7 @@ class Job(models.Model):
                 queue=get_queue_name(DEFAULT_QUEUE),
                 soft_time_limit=10,
                 immutable=True,
+                MessageGroupId=str(uuid.uuid4()),
             )
             | group(connectors_signatures)
             | group(visualizers_signatures)

@@ -3,6 +3,7 @@
 
 from __future__ import absolute_import, unicode_literals
 
+import logging
 import os
 import uuid
 from typing import Dict
@@ -15,6 +16,7 @@ from kombu.common import Broadcast
 
 from intel_owl.settings import STAGE_PRODUCTION, STAGE_STAGING
 
+logger = logging.getLogger(__name__)
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "intel_owl.settings")
 
 app = Celery("intel_owl")
@@ -43,10 +45,10 @@ if settings.AWS_SQS:
             f".amazonaws.com/{settings.AWS_USER_NUMBER}/"
             f"{get_queue_url(queue)}"
         }
-        for queue in settings.CELERY_QUEUES + [settings.BROADCAST_QUEUE]
+        for queue in settings.CELERY_QUEUES
     }
     # in this way they are printed in the Docker logs
-    print(f"predefined queues active: {PREDEFINED_QUEUES}")
+    logger.info(f"predefined queues active: {PREDEFINED_QUEUES}")
 
     BROKER_TRANSPORT_OPTIONS = {
         "region": settings.AWS_REGION,
@@ -65,17 +67,15 @@ else:
     BROKER_TRANSPORT_OPTIONS = {}
 
 DEFAULT_QUEUE = settings.CELERY_QUEUES[0]
-
-app.conf.update(
-    task_default_queue=get_queue_name(DEFAULT_QUEUE),
-    task_queues=[
-        Queue(
-            get_queue_name(key),
-            routing_key=key,
-        )
-        for key in settings.CELERY_QUEUES
-    ]
-    + [
+task_queues = [
+    Queue(
+        get_queue_name(key),
+        routing_key=key,
+    )
+    for key in settings.CELERY_QUEUES
+]
+if not settings.AWS_SQS:
+    task_queues.append(
         Broadcast(
             name=settings.BROADCAST_QUEUE,
             queue=get_queue_name(settings.BROADCAST_QUEUE),
@@ -83,7 +83,10 @@ app.conf.update(
             unique=False,
             auto_delete=False,
         )
-    ],
+    )
+app.conf.update(
+    task_default_queue=get_queue_name(DEFAULT_QUEUE),
+    task_queues=task_queues,
     task_time_limit=1800,
     broker_url=settings.BROKER_URL,
     result_backend=settings.RESULT_BACKEND,

@@ -185,3 +185,13 @@ def worker_ready_connect(*args, sender: Consumer = None, **kwargs):
             "quark_engine.QuarkEngine",
         ]:
             update(python_module, queue=queue)
+
+
+# set logger
+@signals.setup_logging.connect
+def config_loggers(*args, **kwags):
+    from logging.config import dictConfig
+
+    from django.conf import settings
+
+    dictConfig(settings.LOGGING)

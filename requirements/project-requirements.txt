@@ -39,7 +39,7 @@ dnstwist[full]==20230402
 google>=3.0.0
 google-cloud-webrisk==1.11.0
 intezer-sdk==1.16.1
-lief==0.12.2
+lief==0.13.0
 maxminddb==2.2.0
 mwdblib==4.4.0
 oletools==0.60

@@ -140,7 +140,7 @@ class AbstractConfig(models.Model):
         self.clean_config_queue()
 
     @cache_memoize(
-        timeout=60 * 60 * 24,
+        timeout=60 * 60 * 24 * 7,
         args_rewrite=lambda s, user=None: f"{s.__class__.__name__}"
         f"-{s.name}"
         f"-{user.username if user else ''}",
@@ -260,11 +260,23 @@ class AbstractConfig(models.Model):
             config[key] = value
         return config
 
+    @cache_memoize(
+        timeout=60 * 60 * 24 * 7,
+        args_rewrite=lambda s, user=None: f"{s.__class__.__name__}"
+        f"-{s.name}"
+        f"-{user.username if user else ''}",
+    )
     def read_secrets(self, user: User = None) -> Dict[str, Any]:
         from api_app.models import PluginConfig
 
         return self._read_plugin_config(PluginConfig.ConfigType.SECRET, user)
 
+    @cache_memoize(
+        timeout=60 * 60 * 24 * 7,
+        args_rewrite=lambda s, user=None: f"{s.__class__.__name__}"
+        f"-{s.name}"
+        f"-{user.username if user else ''}",
+    )
     def read_params(self, user: User = None) -> Dict[str, Any]:
         from api_app.models import PluginConfig
 

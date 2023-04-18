@@ -15,6 +15,7 @@ from rest_framework.response import Response
 from api_app.core.views import AbstractConfigAPI, PluginActionViewSet
 
 from ..models import Job
+from .filters import AnalyzerConfigFilter
 from .models import AnalyzerConfig, AnalyzerReport
 from .serializers import AnalyzerConfigSerializer
 
@@ -29,6 +30,7 @@ __all__ = [
 
 class AnalyzerConfigAPI(AbstractConfigAPI):
     serializer_class = AnalyzerConfigSerializer
+    filterset_class = AnalyzerConfigFilter
 
     @add_docs(
         description="Update plugin with latest configuration",

@@ -2,6 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 import logging
 from typing import Any, Dict, Type, List
+from cache_memoize import cache_memoize
 
 from django.conf import settings
 from django.contrib.postgres import fields as pg_fields
@@ -17,7 +18,7 @@ from api_app.core.choices import Status, ParamTypes
 from api_app.validators import validate_config
 from certego_saas.apps.organization.organization import Organization
 from certego_saas.apps.user.models import User
-from intel_owl.celery import DEFAULT_QUEUE, get_real_queue_name
+from intel_owl.celery import DEFAULT_QUEUE, get_queue_name
 
 logger = logging.getLogger(__name__)
 
@@ -153,7 +154,7 @@ class AbstractConfig(models.Model):
     @property
     def plugin_type(cls) -> str:
         # retro compatibility
-        
+
         raise NotImplementedError()
 
     @property
@@ -191,6 +192,12 @@ class AbstractConfig(models.Model):
     def required_parameters(self) -> QuerySet:
         return self.parameters.filter(required=True)
 
+    @cache_memoize(
+        timeout=60 * 60 * 24 * 7,
+        args_rewrite=lambda s, user=None: f"{s.__class__.__name__}"
+        f"-{s.name}"
+        f"-{user.username if user else ''}",
+    )
     def get_verification(self, user: User = None):
         total_required = 0
         total_missing = 0
@@ -233,7 +240,7 @@ class AbstractConfig(models.Model):
         queue = self.config["queue"]
         if queue not in settings.CELERY_QUEUES:
             queue = DEFAULT_QUEUE
-        return get_real_queue_name(queue)
+        return get_queue_name(queue)
 
     @cached_property
     def routing_key(self):
@@ -270,6 +277,27 @@ class AbstractConfig(models.Model):
             else:
                 result[param.name] = param.get_first_value(job.user).value
         return result
+
+    @cache_memoize(
+        timeout=60 * 60 * 24 * 7,
+        args_rewrite=lambda s, user=None: f"{s.__class__.__name__}"
+        f"-{s.name}"
+        f"-{user.username if user else ''}",
+    )
+    def read_secrets(self, user: User = None) -> Dict[str, Any]:
+        from api_app.models import PluginConfig
+
+        return self._read_plugin_config(PluginConfig.ConfigType.SECRET, user)
+    @cache_memoize(
+        timeout=60 * 60 * 24 * 7,
+        args_rewrite=lambda s, user=None: f"{s.__class__.__name__}"
+        f"-{s.name}"
+        f"-{user.username if user else ''}",
+    )
+    def read_params(self, user: User = None) -> Dict[str, Any]:
+        from api_app.models import PluginConfig
+
+        return self._read_plugin_config(PluginConfig.ConfigType.PARAMETER, user)
 
     def get_signature(self, job):
         from api_app.models import Job

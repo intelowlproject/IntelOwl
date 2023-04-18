@@ -10,6 +10,7 @@ import {
   ASK_MULTI_ANALYSIS_AVAILABILITY_URI,
   ANALYZE_MULTIPLE_FILES_URI,
   API_BASE_URI,
+  COMMENT_BASE_URI,
 } from "../../constants/api";
 import useRecentScansStore from "../../stores/useRecentScansStore";
 
@@ -72,6 +73,30 @@ export async function createPlaybookJob(formValues) {
     addToast("Failed!", respData?.message, "danger");
     const error = new Error(`job status ${respData.status}`);
     return Promise.reject(error);
+  } catch (e) {
+    console.error(e);
+    addToast("Failed!", e.parsedMsg, "danger");
+    return Promise.reject(e);
+  }
+}
+
+export async function createComment(formValues) {
+  try {
+    const resp = await axios.post(`${COMMENT_BASE_URI}`, formValues);
+
+    return Promise.resolve(resp);
+  } catch (e) {
+    console.error(e);
+    addToast("Failed!", e.parsedMsg, "danger");
+    return Promise.reject(e);
+  }
+}
+
+export async function deleteComment(commentId) {
+  try {
+    const resp = await axios.delete(`${COMMENT_BASE_URI}/${commentId}`);
+
+    return Promise.resolve(resp);
   } catch (e) {
     console.error(e);
     addToast("Failed!", e.parsedMsg, "danger");

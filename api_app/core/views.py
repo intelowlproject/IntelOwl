@@ -118,9 +118,10 @@ class PluginActionViewSet(viewsets.GenericViewSet, metaclass=ABCMeta):
 class AbstractConfigAPI(viewsets.ReadOnlyModelViewSet, metaclass=ABCMeta):
     serializer_class = AbstractConfigSerializer
     permission_classes = [IsAuthenticated]
+    ordering = ["name"]
 
     def get_queryset(self):
-        return self.serializer_class.Meta.model.objects.all().order_by("name")
+        return self.serializer_class.Meta.model.objects.all()
 
     @add_docs(
         description="Health Check: "

@@ -238,7 +238,6 @@ class YaraRepo:
     def analyze(self, file_path: str, filename: str) -> List[Dict]:
         logger.info(f"{self} starting analysis of {filename} for file path {file_path}")
         result = []
-
         for rule in self.rules:
             try:
                 matches = rule.match(file_path, externals={"filename": filename})
@@ -289,11 +288,18 @@ class YaraStorage:
 
     def analyze(self, file_path: str, filename: str) -> Dict:
         result = {}
+        errors = []
         for repo in self.repos:
-            result[str(repo.directory.name)] = repo.analyze(file_path, filename)
-            # free some memory
-            repo._rules = []
-        return result
+            try:
+                result[str(repo.directory.name)] = repo.analyze(file_path, filename)
+                # free some memory
+                repo._rules = []
+            except Exception as e:
+                logger.warning(
+                    f"{filename} rules analysis failed: {e}", stack_info=True
+                )
+                errors.append(str(e))
+        return result, errors
 
     def __repr__(self):
         return self.repos.__repr__()
@@ -346,7 +352,11 @@ class YaraScan(FileAnalyzer):
                     / self._job.user.username
                     / "custom_rule",
                 )
-        return storage.analyze(self.filepath, self.filename)
+        report, errors = storage.analyze(self.filepath, self.filename)
+        if errors:
+            self.report.errors.extend(errors)
+            self.report.save()
+        return report
 
     @classmethod
     def _create_storage(cls):

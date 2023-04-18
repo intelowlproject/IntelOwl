@@ -1,5 +1,6 @@
 # django libs
 Django==4.1.7
+psycopg2-binary==2.9.6
 django-auth-ldap==4.2.0
 django-radius==1.5.0
 django-filter==23.1
@@ -8,8 +9,6 @@ django-celery-beat==2.5.0
 django-celery-results==2.5.0
 django-ses == 3.3.0
 django-iam-dbauth==0.1.4
-# if this is merged https://github.com/cdriehuys/django-rest-email-auth/pull/104 we can use the upstream
-git+https://github.com/intelowlproject/django-rest-email-auth.git@2dcca23aa8f7e6fc9995650e2e200643a812f7d9#egg=django-rest-email-auth
 django-prettyjson==0.4.1
 jsonschema==4.17.3
 # django rest framework libs
@@ -17,6 +16,7 @@ Authlib==1.2.0
 djangorestframework==3.14.0
 djangorestframework-filters==1.0.0.dev2
 drf-spectacular==0.26.1
+django-rest-email-auth==4.0.0
 
 uWSGI==2.0.20
 uwsgitop==0.11
@@ -35,23 +35,19 @@ GitPython==3.1.30
 checkdmarc==4.5.0
 darksearch==2.1.2
 dnspython==2.3.0
-dnstwist==20221213
-ppdeep>=20200505
-easygui==0.98.2
+dnstwist[full]==20230402
 google>=3.0.0
 google-cloud-webrisk==1.11.0
 intezer-sdk==1.16.1
 lief==0.12.2
 maxminddb==2.2.0
-mwdblib==4.3.0
+mwdblib==4.4.0
 oletools==0.60
-defusedxml==0.7.1
 OTXv2==1.5.12
 peepdf-fork==0.4.3
 pdfid==1.1.0
 pefile==2023.2.7
-Pillow==9.4.0
-psycopg2-binary==2.9.1
+Pillow==9.5.0
 pycti==5.5.0
 pydeep==0.4
 pyelftools==0.29
@@ -72,6 +68,7 @@ yara-python==4.3.0
 pydragonfly==0.1.0
 greynoise==2.0.0
 XLMMacroDeobfuscator[secure]==0.2.3
-# this is required because XLMMacroDeobfuscator does not pin xlrd2 and pyxlsb2 packages
+# this is required because XLMMacroDeobfuscator does not pin the following packages
 pyxlsb2==0.0.8
 xlrd2==1.3.4
+defusedxml==0.7.1

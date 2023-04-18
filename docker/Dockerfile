@@ -42,6 +42,11 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/* \
     && pip3 install --no-cache-dir --upgrade pip
 
+# perl not interactive
+ENV PERL_MM_USE_DEFAULT 1
+# msgconvert
+RUN cpan -T Email::Outlook::Message
+
 COPY requirements/project-requirements.txt $PYTHONPATH/project-requirements.txt
 COPY requirements/certego-requirements.txt $PYTHONPATH/certego-requirements.txt
 WORKDIR $PYTHONPATH

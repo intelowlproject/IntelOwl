@@ -14,7 +14,13 @@ const TOKEN_STORAGE_KEY = "INTELOWL_AUTH_TOKEN";
 const useAuthStore = create((set, get) => ({
   loading: false,
   token: localStorage.getItem(TOKEN_STORAGE_KEY) || null,
-  user: { full_name: "", first_name: "", last_name: "", email: "" },
+  user: {
+    username: "",
+    full_name: "",
+    first_name: "",
+    last_name: "",
+    email: "",
+  },
   access: null,
   isAuthenticated: () => !!get().token,
   updateToken: (newValue) => {

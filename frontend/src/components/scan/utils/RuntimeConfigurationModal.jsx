@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React from "react";
 import PropTypes from "prop-types";
 import { Modal, ModalHeader, ModalBody, Button } from "reactstrap";
@@ -21,7 +22,7 @@ export default function RuntimeConfigurationModal(props) {
   console.debug("RuntimeConfigurationModal - formik:");
   console.debug(formik);
 
-  // For each selected plugin we want to show the config (we need to extract it from the data previously downloaded).
+  // Extract selected plugin params (with description and type used by the side section)
   const combinedParamsMap = React.useMemo(
     () => ({
       // for each selected analyzer we extract the config and append it to the other configs
@@ -51,15 +52,20 @@ export default function RuntimeConfigurationModal(props) {
     [formik.values.analyzers, formik.values.connectors, analyzers, connectors]
   );
 
+  console.debug("RuntimeConfigurationModal - combinedParamsMap:");
+  console.debug(combinedParamsMap);
+
+  // Iterate each plugin and for each param extract the value
   const defaultNameParamsMap = React.useMemo(
     () =>
       Object.entries(combinedParamsMap).reduce(
-        (acc, [name, params]) => ({
-          ...acc,
-          [name]: Object.entries(params).reduce(
-            (acc2, [pName, { value }]) => ({
-              ...acc2,
-              [pName]: value,
+        (generalConfig, [pluginName, pluginParams]) => ({
+          ...generalConfig,
+          // For each param (dict) extract the value of the "value" key
+          [pluginName]: Object.entries(pluginParams).reduce(
+            (singlePluginConfig, [paramName, { value: paramValue }]) => ({
+              ...singlePluginConfig,
+              [paramName]: paramValue,
             }),
             {}
           ),
@@ -69,13 +75,43 @@ export default function RuntimeConfigurationModal(props) {
     [combinedParamsMap]
   );
 
-  const placeholder = React.useMemo(
-    () => ({
+  console.debug("RuntimeConfigurationModal - defaultNameParamsMap:");
+  console.debug(defaultNameParamsMap);
+
+  /* this is the dict shown when the modal is open: load the default params and the previous saved config
+    (in case the user update the config, save and close and reopen the modal)
+
+    IMPORTANT: We want to group the plugins in the categories (analyzers, etc...), it is more difficult to handle it in every variable
+    so we use it only when shown to the user (UI), we need to rembeber in case we edite the params more than once we need to 
+    load the data from the structure with the categories.
+  */
+  const editableConfig = React.useMemo(() => {
+    const config = {
       ...defaultNameParamsMap,
-      ...formik.values.runtime_configuration, // previous values if any
-    }),
-    [defaultNameParamsMap, formik.values.runtime_configuration]
-  );
+      ...(formik.values.runtime_configuration.analyzers || {}), // previous values of analyzers (groupped by the previous editing) if present
+      ...(formik.values.runtime_configuration.connectors || {}), // previous values of connectors (groupped by the previous editing) if present
+    };
+    const analyzerNames = analyzers.map((analyzer) => analyzer.name);
+    const connectorNames = connectors.map((connector) => connector.name);
+    const result = { analyzers: {}, connectors: {} };
+    Object.entries(config).forEach(([configPluginName, configPluginParams]) => {
+      if (analyzerNames.includes(configPluginName)) {
+        result.analyzers[configPluginName] = configPluginParams;
+      } else if (connectorNames.includes(configPluginName)) {
+        result.analyzers[configPluginName] = configPluginParams;
+      }
+    });
+    return result;
+  }, [
+    analyzers,
+    connectors,
+    defaultNameParamsMap,
+    formik.values.runtime_configuration.analyzers,
+    formik.values.runtime_configuration.connectors,
+  ]);
+
+  console.debug("RuntimeConfigurationModal - editableConfig:");
+  console.debug(editableConfig);
 
   const saveAndCloseModal = () => {
     // we only want to save configuration against plugins whose params dict is not empty or was modified
@@ -116,7 +152,7 @@ export default function RuntimeConfigurationModal(props) {
           </small>
           <CustomJsonInput
             id="edit_runtime_configuration-modal"
-            placeholder={placeholder}
+            placeholder={editableConfig}
             onChange={setJsonInput}
             height="500px"
             width="450px"
@@ -141,6 +177,7 @@ export default function RuntimeConfigurationModal(props) {
             </Button>
           </div>
         </ContentSection>
+        {/* lateral menu with the type and description of each param */}
         <ContentSection className="ms-2 bg-darker">
           {Object.entries(combinedParamsMap).map(([name, params]) => (
             <div key={`editruntimeconf__${name}`}>

@@ -53,7 +53,7 @@ class OTX(classes.ObservableAnalyzer):
     verbose: bool
     sections: list
     full_analysis: bool
-    timeout: int
+    timeout: int = 30
 
     _api_key_name: str
 

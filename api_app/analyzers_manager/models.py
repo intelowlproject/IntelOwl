@@ -31,10 +31,10 @@ class AnalyzerReport(AbstractReport):
 
 class MimeTypes(models.TextChoices):
 
+    WSCRIPT = "application/w-script-file"
     JAVASCRIPT1 = "application/javascript"
     JAVASCRIPT2 = "application/x-javascript"
     JAVASCRIPT3 = "text/javascript"
-
     VB_SCRIPT = "application/x-vbscript"
     IQY = "text/x-ms-iqy"
     APK = "application/vnd.android.package-archive"
@@ -76,6 +76,11 @@ class MimeTypes(models.TextChoices):
     MAC3 = "application/x-mach-binary"
     COMPRESS1 = "application/x-zip-compressed"
     COMPRESS2 = "application/x-compressed"
+    OUTLOOK = "application/vnd.ms-outlook"
+    EML = "message/rfc822"
+    PKCS7 = "application/pkcs7-signature"
+    XPKCS7 = "application/x-pkcs7-signature"
+    MIXED = "multipart/mixed"
 
     @classmethod
     def ZIP(cls) -> List["MimeTypes"]:

@@ -23,7 +23,7 @@ class VirusTotalv3AnalyzerMixin(BaseAnalyzerMixin, metaclass=abc.ABCMeta):
     rescan_poll_distance: int
     include_behaviour_summary: bool
     include_sigma_analyses: bool
-    force_active_scan: bool
+    force_active_scan: bool = False
     force_active_scan_if_old: bool
     days_to_say_that_a_scan_is_old: int
     relationships_to_request: list

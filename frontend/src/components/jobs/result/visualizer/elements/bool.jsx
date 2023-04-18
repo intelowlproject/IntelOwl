@@ -33,7 +33,7 @@ export function BooleanVisualizer({
       <Badge
         pill={pill}
         color={value === true ? activeColor : "gray"}
-        className={`${isDisabled} ${className}`}
+        className={`text-capitalize ${isDisabled} ${className}`}
       >
         <div className="d-flex align-items-center">{coreComponent}</div>
       </Badge>

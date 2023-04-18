@@ -1,8 +1,9 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
-
+import base64
 import logging
 import typing
+import uuid
 from typing import Optional
 
 from celery import group
@@ -24,7 +25,7 @@ from api_app.validators import validate_runtime_configuration
 from certego_saas.apps.organization.organization import Organization
 from certego_saas.models import User
 from intel_owl import tasks
-from intel_owl.celery import DEFAULT_QUEUE, get_real_queue_name
+from intel_owl.celery import DEFAULT_QUEUE, get_queue_name
 
 logger = logging.getLogger(__name__)
 
@@ -59,6 +60,29 @@ class Tag(models.Model):
 
     def __str__(self):
         return f'Tag(label="{self.label}")'
+
+
+class Comment(models.Model):
+    # make the user null if the user is deleted
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="comment",
+    )
+
+    class Meta:
+        ordering = ["created_at"]
+
+    job = models.ForeignKey(
+        "Job",
+        on_delete=models.CASCADE,
+        related_name="comments",
+    )
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
 
 class Job(models.Model):
@@ -160,12 +184,54 @@ class Job(models.Model):
     def sha1(self) -> str:
         return calculate_sha1(self.file.read())
 
+    @cached_property
+    def b64(self) -> str:
+        return base64.b64encode(self.file.read()).decode("utf-8")
+
     def get_absolute_url(self):
         return reverse("jobs-detail", args=[self.pk])
 
     @property
     def url(self):
         return settings.WEB_CLIENT_URL + self.get_absolute_url()
+
+    def retry(self):
+        self.update_status(Job.Status.RUNNING)
+        failed_analyzer_reports = self.analyzerreports.filter(
+            status=AbstractReport.Status.FAILED.value
+        ).values_list("pk", flat=True)
+        analyzers_signatures = [
+            plugin.get_signature(self)
+            for plugin in self.analyzers_to_execute.filter(
+                pk__in=failed_analyzer_reports
+            )
+        ]
+        logger.info(f"Analyzer signatures are {analyzers_signatures}")
+        failed_connectors_reports = self.connectorreports.filter(
+            status=AbstractReport.Status.FAILED.value
+        ).values_list("pk", flat=True)
+
+        connectors_signatures = [
+            plugin.get_signature(self)
+            for plugin in self.connectors_to_execute.filter(
+                pk__in=failed_connectors_reports
+            )
+        ]
+        logger.info(f"Connector signatures are {connectors_signatures}")
+        failed_visualizers_reports = self.visualizerreports.filter(
+            status=AbstractReport.Status.FAILED.value
+        ).values_list("pk", flat=True)
+
+        visualizers_signatures = [
+            plugin.get_signature(self)
+            for plugin in self.visualizers_to_execute.filter(
+                pk__in=failed_visualizers_reports
+            )
+        ]
+        logger.info(f"Visualizer signatures are {visualizers_signatures}")
+        return self._execute_signatures(
+            analyzers_signatures, connectors_signatures, visualizers_signatures
+        )
 
     def job_cleanup(self) -> None:
         logger.info(f"[STARTING] job_cleanup for <-- {self}.")
@@ -286,15 +352,25 @@ class Job(models.Model):
             plugin.get_signature(self) for plugin in self.visualizers_to_execute.all()
         ]
         logger.info(f"Visualizer signatures are {visualizers_signatures}")
+        return self._execute_signatures(
+            analyzers_signatures, connectors_signatures, visualizers_signatures
+        )
 
+    def _execute_signatures(
+        self,
+        analyzers_signatures: typing.List,
+        connectors_signatures: typing.List,
+        visualizers_signatures: typing.List,
+    ):
         runner = (
             group(analyzers_signatures)
             | tasks.continue_job_pipeline.signature(
                 args=[self.pk],
                 kwargs={},
-                queue=get_real_queue_name(DEFAULT_QUEUE),
+                queue=get_queue_name(DEFAULT_QUEUE),
                 soft_time_limit=10,
                 immutable=True,
+                MessageGroupId=str(uuid.uuid4()),
             )
             | group(connectors_signatures)
             | group(visualizers_signatures)
@@ -419,6 +495,14 @@ class PluginConfig(models.Model):
             configs = configs.filter(owner__isnull=True)
 
         return configs
+
+    def invalidate_method(self, function):
+        function.invalidate(self.config)
+        if self.for_organization:
+            for membership in self.owner.memership.organization.members.all():
+                function.invalidate(self.config, membership.user)
+        else:
+            function.invalidate(self.config, self.owner)
 
     def clean_for_organization(self):
         if self.for_organization and (self.owner.has_membership() and self.owner.membership.organization.owner != self.owner):

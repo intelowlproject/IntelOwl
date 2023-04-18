@@ -58,7 +58,7 @@ export function VerticalListVisualizer({
                 value={name}
                 icon={icon}
                 link={link}
-                className={className}
+                className={`text-capitalize ${className}`}
               />
             </div>
           </Button>

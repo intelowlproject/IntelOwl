@@ -125,6 +125,9 @@ class VisualizableBool(VisualizableBase):
         self.name = name
         self.pill = pill
 
+    def __bool__(self):
+        return bool(self.name)
+
     @property
     def attributes(self) -> List[str]:
         return super().attributes + ["name", "pill"]
@@ -262,7 +265,9 @@ class Visualizer(Plugin, metaclass=abc.ABCMeta):
 
     def after_run(self):
         if not isinstance(self.report.report, list):
-            raise VisualizerRunException("Report has not correct type")
+            raise VisualizerRunException(
+                f"Report has not correct type: {type(self.report.report)}"
+            )
         logger.info(f"FINISHED visualizer: {self.__repr__()}")
 
     def analyzer_reports(self) -> QuerySet:

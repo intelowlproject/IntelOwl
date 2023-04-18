@@ -5,6 +5,7 @@ import copy
 import datetime
 import json
 import logging
+import uuid
 from typing import Dict, List, Union
 
 import django.core.exceptions
@@ -16,8 +17,6 @@ from rest_framework import serializers as rfs
 from rest_framework.exceptions import PermissionDenied, ValidationError
 
 from certego_saas.apps.organization.membership import Membership
-
-# from django.contrib.auth import get_user_model
 from certego_saas.apps.organization.organization import Organization
 from certego_saas.apps.organization.permissions import IsObjectOwnerOrSameOrgPermission
 from intel_owl.celery import DEFAULT_QUEUE
@@ -30,7 +29,7 @@ from .connectors_manager.exceptions import NotRunnableConnector
 from .connectors_manager.models import ConnectorConfig
 from .connectors_manager.serializers import ConnectorReportSerializer
 from .helpers import calculate_md5, gen_random_colorhex
-from .models import Job, PluginConfig, Tag
+from .models import Comment, Job, PluginConfig, Tag, default_runtime
 from .playbooks_manager.models import PlaybookConfig
 from .visualizers_manager.models import VisualizerConfig
 from .visualizers_manager.serializers import VisualizerReportSerializer
@@ -48,6 +47,7 @@ __all__ = [
     "MultipleFileAnalysisSerializer",
     "MultipleObservableAnalysisSerializer",
     "PluginConfigSerializer",
+    "CommentSerializer",
 ]
 
 
@@ -75,13 +75,26 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
     """
 
     tags_labels = rfs.ListField(default=list)
-    runtime_configuration = rfs.JSONField(required=False, default={}, write_only=True)
+    runtime_configuration = rfs.JSONField(
+        required=False, default=default_runtime, write_only=True
+    )
     md5 = rfs.HiddenField(default=None)
     tlp = rfs.ChoiceField(choices=TLP.values + ["WHITE"], default=TLP.CLEAR)
 
+    def validate_runtime_configuration(self, runtime_config: Dict):
+        from api_app.validators import validate_runtime_configuration
+
+        if not runtime_config:
+            runtime_config = default_runtime()
+        try:
+            validate_runtime_configuration(runtime_config)
+        except django.core.exceptions.ValidationError as e:
+            raise ValidationError(str(e))
+        return runtime_config
+
     def validate_tlp(self, tlp: str):
         if tlp == "WHITE":
-            return "CLEAR"
+            return TLP.CLEAR.value
         return tlp
 
     def __init__(self, *args, **kwargs):
@@ -227,7 +240,6 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
         # create ``Tag`` objects from tags_labels
         tags_labels = validated_data.pop("tags_labels", None)
         validated_data.pop("warnings")
-        validated_data.pop("runtime_configuration")
         send_task = validated_data.pop("send_task", False)
         tags = [
             Tag.objects.get_or_create(
@@ -254,9 +266,45 @@ class _AbstractJobCreateSerializer(rfs.ModelSerializer):
             from intel_owl.tasks import job_pipeline
 
             logger.info("Sending task")
-            job_pipeline.apply_async(args=[job.pk], routing_key=DEFAULT_QUEUE)
+            job_pipeline.apply_async(
+                args=[job.pk],
+                routing_key=DEFAULT_QUEUE,
+                MessageGroupId=str(uuid.uuid4()),
+            )
 
         return job
+
+
+class CommentSerializer(rfs.ModelSerializer):
+    """
+    Used for ``create()``
+    """
+
+    class Meta:
+        model = Comment
+        fields = ("id", "content", "created_at", "user", "job_id")
+
+    user = UserSerializer(read_only=True)
+    job_id = rfs.PrimaryKeyRelatedField(
+        queryset=Job.objects.all(), write_only=True, source="job"
+    )
+
+    def validate(self, attrs: dict) -> dict:
+        attrs = super().validate(attrs)
+
+        user = self.context["request"].user
+        job = attrs.get("job")
+        try:
+            Job.visible_for_user(user).get(pk=job.pk)
+        except Job.DoesNotExist:
+            raise ValidationError(
+                {"detail": f"You have no permission to comment on job {job.pk}"}
+            )
+        return attrs
+
+    def create(self, validated_data: dict) -> Comment:
+        validated_data["user"] = self.context["request"].user
+        return super().create(validated_data)
 
 
 class JobListSerializer(_AbstractJobViewSerializer):
@@ -266,7 +314,7 @@ class JobListSerializer(_AbstractJobViewSerializer):
 
     class Meta:
         model = Job
-        exclude = ("file", "file_name", "errors")
+        exclude = ("file", "errors")
 
 
 class JobSerializer(_AbstractJobViewSerializer):
@@ -278,9 +326,16 @@ class JobSerializer(_AbstractJobViewSerializer):
         model = Job
         exclude = ("file",)
 
-    analyzerreports = AnalyzerReportSerializer(many=True, read_only=True)
-    connectorreports = ConnectorReportSerializer(many=True, read_only=True)
-    visualizerreports = VisualizerReportSerializer(many=True, read_only=True)
+    analyzer_reports = AnalyzerReportSerializer(
+        many=True, read_only=True, source="analyzerreports"
+    )
+    connector_reports = ConnectorReportSerializer(
+        many=True, read_only=True, source="connectorreports"
+    )
+    visualizer_reports = VisualizerReportSerializer(
+        many=True, read_only=True, source="visualizerreports"
+    )
+    comments = CommentSerializer(many=True, read_only=True)
 
     permissions = rfs.SerializerMethodField()
 
@@ -625,7 +680,11 @@ class ObservableAnalysisSerializer(_AbstractJobCreateSerializer):
 class JobEnvelopeSerializer(rfs.ListSerializer):
     @property
     def data(self):
+        # this is to return a dict instead of a list
         return super(rfs.ListSerializer, self).data
+
+    def to_internal_value(self, data):
+        super().to_internal_value(data)
 
     def to_representation(self, data):
         results = super().to_representation(data)
@@ -633,6 +692,9 @@ class JobEnvelopeSerializer(rfs.ListSerializer):
 
 
 class JobResponseSerializer(rfs.ModelSerializer):
+    STATUS_ACCEPTED = "accepted"
+    STATUS_NOT_AVAILABLE = "not_available"
+
     job_id = rfs.IntegerField(source="pk")
     analyzers_running = rfs.PrimaryKeyRelatedField(
         read_only=True, source="analyzers_to_execute", many=True
@@ -655,15 +717,19 @@ class JobResponseSerializer(rfs.ModelSerializer):
             "connectors_running",
             "visualizers_running",
             "playbook_running",
-            "status",
         ]
         extra_kwargs = {"warnings": {"read_only": True, "required": False}}
         list_serializer_class = JobEnvelopeSerializer
 
     def to_representation(self, instance):
         result = super().to_representation(instance)
-        result["status"] = "accepted"
+        result["status"] = self.STATUS_ACCEPTED
         return result
+
+    def get_initial(self):
+        initial = super().get_initial()
+        initial.setdefault("status", self.STATUS_NOT_AVAILABLE)
+        return initial
 
 
 class JobAvailabilitySerializer(rfs.ModelSerializer):
@@ -738,7 +804,7 @@ class JobAvailabilitySerializer(rfs.ModelSerializer):
 class PluginConfigSerializer(rfs.ModelSerializer):
     class Meta:
         model = PluginConfig
-        fields = rfs.ALL_FIELDS
+        fields = ("attribute", "config_type")
 
     class CustomJSONField(rfs.JSONField):
         def to_internal_value(self, data):

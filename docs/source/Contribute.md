@@ -196,12 +196,11 @@ After having written the new python module, you have to remember to:
    14. ~Not supported filetypes: required if `type` is `file` and `supported filetypes` is empty
 
 4. To allow other people to use your configuration, that is now stored in your local database, you have to export it and create a datamigration
-   1. objects = `docker exec -ti intelowl_uwsgi  python3 manage.py dumpdata analyzers_manager.AnalyzerConfig --pks "<your analyzer name>"`
+   1. objects = `docker exec -ti intelowl_uwsgi python3 manage.py dumpdata analyzers_manager.AnalyzerConfig --pks "<your analyzer name>"`
    2. Create a new migration file inside `/analyzers_manager/migrations/`
       1. You can take the `migrate` and `reverse_migrate` functions from `/playbooks_manager/migrations/0005_static_analysis`, both
       2. Remember to correctly set the `dependencies`
-      3. Remember to correctly se the `objects`
-
+      3. Remember to correctly set the `objects`
     
 5. Add the new analyzer in the lists in the docs: [Usage](./Usage.md). Also, if the analyzer provides additional optional configuration, add the available options here: [Advanced-Usage](./Advanced-Usage.html#analyzers-with-special-configuration)
 
@@ -257,7 +256,64 @@ After having written the new python module, you have to remember to:
    2. Create a new migration file inside `/connectors_manager/migrations/`
       1. You can take the `migrate` and `reverse_migrate` functions from `/playbooks_manager/migrations/0005_static_analysis`, both
       2. Remember to correctly set the `dependencies`
-      3. Remember to correctly se the `objects`
+      3. Remember to correctly set the `objects`
+
+## How to add a new Visualizer
+
+### Configuration
+1. Put the module in the `visualizers` directory
+2. Remember to use `_monkeypatch()` in its class to create automated tests for the new visualizer. This is a trick to have tests in the same class of its connector.
+3. Create the configuration inside django admin in `Visualizers_manager/VisualizerConfigs` (* = mandatory, ~ = mandatory on conditions)
+   1. *Name: specific name of the configuration
+   2. *Python module: <module_name>.<class_name>
+   3. *Description: description of the configuration
+   4. *Config:
+      1. *Queue: celery queue that will be used
+      2. *Soft_time_limit: maximum time for the task execution
+   5. *Secrets: 
+      1. YouSecretKey:
+         1. *type: data type, `string`, `list`, `dict`, `integer`, `boolean`, `float`
+         2. *description: description of the secret
+         3. *required: `true` or `false`, meaning that is required to allow the run of the analyzer
+         4. default: default value of the secret
+      2. YourSecretKey2:
+         1. ...
+   6. *Params:
+      1. YourParam:
+         1. *type: data type, `string`, `list`, `dict`, `integer`, `boolean`, `float`
+         2. *description: description of the secret
+         3. *default: default value of the parameter
+   7. *Analyzers: List of analyzers that **must** have run to execute the visualizer
+   8. *Connectors: List of connectors that **must** have run to execute the visualizer
+
+4. To allow other people to use your configuration, that is now stored in your local database, you have to export it and create a datamigration
+   1. objects = `docker exec -ti intelowl_uwsgi  python3 manage.py dumpdata visualizers_manager.VisualizerConfig --pks "<your visualizer name>"`
+   2. Create a new migration file inside `/visualizers_manager/migrations/`
+      1. You can take the `migrate` and `reverse_migrate` functions from `/playbooks_manager/migrations/0005_static_analysis`, both
+      2. Remember to correctly set the `dependencies`
+      3. Remember to correctly set the `objects`
+
+### Python class
+
+The visualizers python code could be not immediate, so a small digression on _how_ it works is necessary.
+Visualizers have as goal to create a data structure inside the `Report` that the frontend is able to parse and correctly _visualize_ on the page.
+To do so, some utility classes have been made:
+
+- `VisualizableLevel`: Each **level** corresponds to a line in the final frontend visualizations. Every level is made of a `VisualizableHorizontaList` 
+- `VisualizableHorizontaList`: An horizontal list of visualizable elements that will be displayed as they are
+- `VisualizableVerticalList`: A vertical list made of a name, a title, and the list of elements.
+- `VisualizableBool`: The representation of a boolean value
+- `VisualizableTitle`: The representation of a tuple, composed of a title and a value
+- `VisualizableBase`: The representation of a base string. Can have a link attached to it and even an icon. The background color can be changed.
+
+Inside a `Visualizer` you can retrieve the reports of the analyzers and connectors  that have been specified inside configuration of the Visualizer itself using `.analyzer_reports()` and `.connector_reports()`.
+At this point, you can compose these values as you wish wrapping them with the `Visualizable` classes mentioned before.
+
+You may want to look at a few existing examples to start to build a new one:
+
+- [dns.py](https://github.com/intelowlproject/IntelOwl/blob/master/api_app/visualizers_manager/visualizers/dns.py)
+- [yara.py](https://github.com/intelowlproject/IntelOwl/blob/master/api_app/visualizers_manager/visualizers/yara.py)
+
 
 ## How to add a new Playbook
 1. Create the configuration inside django admin in `Playbooks_manager/PlaybookConfigs` (* = mandatory, ~ = mandatory on conditions)
@@ -271,7 +327,22 @@ After having written the new python module, you have to remember to:
    2. Create a new migration file inside `/playbooks_manager/migrations/`
       1. You can take the `migrate` and `reverse_migrate` functions from `/playbooks_manager/migrations/0005_static_analysis`, both
       2. Remember to correctly set the `dependencies`
-      3. Remember to correctly se the `objects`
+      3. Remember to correctly set the `objects`
+
+
+## How to modify/delete a plugin
+
+If the changes that you have to make should stay local, you can just change the configuration inside the `Django admin` page.
+
+But if, instead, you want your changes to be usable by every IntelOwl user, you have to create a new migration.  
+
+To do so, you can use `analyzers_manager/migrations/0019_dnstwist_params.py` as an example:
+1. You have to create a new migration file
+2. Add as dependency the previous last migration of the package
+3. You have to create a forward and a reverse function
+4. You have to make the proper changes of the configuration inside these functions (change parameters, secrets, or even delete the configuration)
+   1. If changes are made, you have to validate the instance calling `.full_clean()` and then you can save the instance with `.save()`
+
 
 ## Modifying functionalities of the Certego packages
 

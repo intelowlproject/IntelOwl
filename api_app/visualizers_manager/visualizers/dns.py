@@ -64,21 +64,16 @@ class DNS(Visualizer):
         ]
 
     def run(self) -> List[Dict]:
-        required_analyzer_list = self._config.analyzers.all()
-        logger.debug(f"{required_analyzer_list=}")
 
         first_level_elements = []
         second_level_elements = []
 
-        for required_analyzer in required_analyzer_list:
-            printable_analyzer_name = required_analyzer.name.replace("_", " ")
-            analyzer_report = self.analyzer_reports().get(
-                config__name=required_analyzer.name
-            )
+        for analyzer_report in self.analyzer_reports():
+            printable_analyzer_name = analyzer_report.config.name.replace("_", " ")
             logger.debug(f"{printable_analyzer_name=}")
-            logger.debug(f"{required_analyzer.python_complete_path=}")
+            logger.debug(f"{analyzer_report.config.python_complete_path=}")
             logger.debug(f"{analyzer_report=}")
-            if "dns.dns_resolvers" in required_analyzer.python_complete_path:
+            if "dns.dns_resolvers" in analyzer_report.config.python_complete_path:
                 first_level_elements.append(
                     self.VList(
                         name=f"{printable_analyzer_name} "

@@ -453,11 +453,11 @@ export default function ScanForm() {
                         formik.values.observable_names.length > 0
                           ? formik.values.observable_names.map(
                               (name, index) => (
-                                <Row
-                                  className="py-2"
+                                <div
+                                  className="py-2 d-flex"
                                   key={`observable_names.${index + 0}`}
                                 >
-                                  <Col sm={11}>
+                                  <Col sm={11} className="pe-3">
                                     <Field
                                       as={Input}
                                       type="text"
@@ -490,7 +490,7 @@ export default function ScanForm() {
                                   >
                                     <BsFillTrashFill />
                                   </Button>
-                                </Row>
+                                </div>
                               )
                             )
                           : null}

@@ -12,7 +12,6 @@ sleep 3
 # The customization of the parameters is not applied until the migration is done
 python manage.py makemigrations durin
 python manage.py makemigrations rest_email_auth
-python manage.py makemigrations certego_saas.apps.notifications
 python manage.py migrate
 python manage.py createcachetable
 # Collect static files

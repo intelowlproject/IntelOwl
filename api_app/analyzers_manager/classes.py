@@ -340,7 +340,9 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
             f"parameter when executing start.py."
         )
 
-    def _docker_run(self, req_data: dict, req_files: dict = None) -> dict:
+    def _docker_run(
+        self, req_data: dict, req_files: dict = None, analyzer_name: str = None
+    ) -> dict:
         """
         Helper function that takes of care of requesting new analysis,
         reading response, polling for result and exception handling for a
@@ -349,6 +351,7 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
         Args:
             req_data (Dict): Dict of request JSON.
             req_files (Dict, optional): Dict of files to send. Defaults to None.
+            analyzer_name: optional, could be used for edge cases
 
         Raises:
             AnalyzerConfigurationException: In case docker service is not running
@@ -381,7 +384,8 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
         err = final_resp.get("error", None)
         report = final_resp.get("report", None)
 
-        if not report:
+        # APKiD provides empty result in case it does not support the binary type
+        if not report and (analyzer_name != "APKiD"):
             raise AnalyzerRunException(f"Report is empty. Reason: {err}")
 
         if isinstance(report, dict):

@@ -6,20 +6,20 @@ from django.db import migrations, models
 
 import api_app.fields
 
-def create_config(configs, type:str, Parameter,ParameterConfig, PluginConfig):
+def create_config(configs, type:str, Parameter,PluginConfig):
     for config in configs:
         for param_name, param_values in config.params.items():
-            param = Parameter(name=param_name, type=param_values["type"], description=param_values["description"], is_secret=False)
+            param = Parameter(analyzer_config=config, name=param_name, type=param_values["type"], description=param_values["description"], is_secret=False, required=param_values.get("required", False))
             try:
                 param.full_clean()
             except ValidationError:
-                param = Parameter.objects.get(name=param_name, type=param_values["type"], is_secret=False)
+                Parameter.objects.get(name=param_name, type=param_values["type"], is_secret=False)
             else:
                 param.save()
 
-            param_config, _ = ParameterConfig.objects.get_or_create(parameter=param,
-                                                             required=param_values.get("required", False))
             if "default" in param_values:
+                if param_values["default"] is None and param_values["type"] == "str":
+                    param_values["default"] = ""
                 PluginConfig.objects.get_or_create(
                     owner=None,
                     value=param_values["default"],
@@ -28,19 +28,17 @@ def create_config(configs, type:str, Parameter,ParameterConfig, PluginConfig):
                     type=type,
                     config_type="1"
                 )
-            config.parameters.add(param_config)
         for secret_name, secret_values in config.secrets.items():
-            secret = Parameter(name=secret_name, type=secret_values["type"],
-                                                       description=secret_values["description"], is_secret=True)
+            secret = Parameter(analyzer_config=config, name=secret_name, type=secret_values["type"],
+                                                       description=secret_values["description"], is_secret=True, required=secret_values["required"])
             try:
                 secret.full_clean()
             except ValidationError:
-                secret = Parameter.objects.get(name=secret_name, type=secret_values["type"],
+                Parameter.objects.get(name=secret_name, type=secret_values["type"],
                                               is_secret=True)
             else:
                 secret.save()
 
-            param_config, _ = ParameterConfig.objects.get_or_create(parameter=secret, required=secret_values["required"])
             if "default" in secret_values:
                 PluginConfig.objects.get_or_create(
                     owner=None,
@@ -50,7 +48,6 @@ def create_config(configs, type:str, Parameter,ParameterConfig, PluginConfig):
                     type=type,
                     config_type="2"
                 )
-            config.parameters.add(param_config)
         config.save()
 
 
@@ -68,8 +65,8 @@ def reverse_migrate(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('analyzers_manager', '0015_alter_analyzerconfig_disabled_in_organizations_and_more'),
-        ('api_app', '0025_parameter'),
+        ('analyzers_manager', '0022_otx_check_hash_timeout'),
+        ('api_app', '0027_parameter'),
     ]
 
     operations = [

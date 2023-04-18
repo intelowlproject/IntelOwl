@@ -35,7 +35,7 @@ def reverse_migrate_plugin_config(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api_app', '0025_parameter'),
+        ('api_app', '0027_parameter'),
         ('analyzers_manager', '0016_params'),
         ('connectors_manager', '0015_params'),
         ('visualizers_manager', '0013_params'),

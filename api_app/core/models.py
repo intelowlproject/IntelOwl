@@ -9,6 +9,7 @@ from django.contrib.postgres import fields as pg_fields
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import QuerySet
+from django.db.models.manager import RelatedManager
 from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.module_loading import import_string
@@ -89,9 +90,25 @@ class Parameter(models.Model):
     type = models.CharField(choices=ParamTypes.choices, max_length=10, null=False, blank=False)
     description = models.TextField(blank=True, default="")
     is_secret = models.BooleanField(null=False)
+    required = models.BooleanField(null=False)
+    analyzer_config = models.ForeignKey(AnalyzerConfig, related_name="parameters", on_delete=models.CASCADE, null=True, blank=True)
+    connector_config = models.ForeignKey(ConnectorConfig, related_name="parameters", on_delete=models.CASCADE)
+    visualizer_config = models.ForeignKey(VisualizerConfig, related_name="parameters", on_delete=models.CASCADE)
+
+    def clean_config(self):
+        if bool(self.analyzer_config) + bool(self.connector_config) + bool(self.visualizer_config):
+            raise ValidationError("You cant have the same parameter on more than one configuration at the time")
+
+    def clean(self) -> None:
+        super().clean()
+        self.clean_config()
 
     class Meta:
-        unique_together = [("name", "type", "is_secret")]
+        unique_together = [("name", "analyzer_config", "connector_config", "visualizer_config")]
+
+    @cached_property
+    def config(self):
+        return self.analyzer_config or self.connector_config or self.visualizer_config
 
     def values_for_user(self, user:User=None) -> QuerySet:
         from api_app.models import PluginConfig
@@ -116,19 +133,13 @@ class Parameter(models.Model):
                         return qs.get(for_organization=True, owner=user.membership.organization.owner)
                     except PluginConfig.DoesNotExist:
                         ...
-                print(self.name)
                 return qs.get(owner__isnull=True)
 
 
-class ParameterConfig(models.Model):
-    parameter = models.ForeignKey(Parameter, on_delete=models.CASCADE)
-    required = models.BooleanField(null=False)
-
-    class Meta:
-        unique_together = [("parameter", "required")]
-
-
 class AbstractConfig(models.Model):
+
+    parameters: RelatedManager
+
     name = models.CharField(max_length=50, null=False, unique=True, primary_key=True)
     python_module = models.CharField(null=False, max_length=120, db_index=True)
     description = models.TextField(null=False)
@@ -139,7 +150,6 @@ class AbstractConfig(models.Model):
         default=config_default,
         validators=[validate_config],
     )
-    parameters = models.ManyToManyField(ParameterConfig, related_name="%(app_label)s_%(class)s_configurations")
     disabled_in_organizations = models.ManyToManyField(
         Organization, related_name="%(app_label)s_%(class)s_disabled", blank=True
     )
@@ -203,11 +213,11 @@ class AbstractConfig(models.Model):
         total_missing = 0
         parameter_required_missing: List[str] = []
         for param in self.required_parameters:
-            param : ParameterConfig
+            param : Parameter
             total_required += 1
-            if not param.parameter.values_for_user(user).exists():
+            if not param.values_for_user(user).exists():
                 total_missing += 1
-                parameter_required_missing.append(param.parameter.name)
+                parameter_required_missing.append(param.name)
 
         if total_missing:
             details = (
@@ -269,8 +279,7 @@ class AbstractConfig(models.Model):
         # 2 - Value inside the db
         result = {}
         for param in self.parameters.all():
-            param: ParameterConfig
-            param: Parameter = param.parameter
+            param: Parameter
 
             if param.name in job.get_config_runtime_configuration(self):
                 result[param.name] = job.get_config_runtime_configuration(self)[param.name]
@@ -278,26 +287,6 @@ class AbstractConfig(models.Model):
                 result[param.name] = param.get_first_value(job.user).value
         return result
 
-    @cache_memoize(
-        timeout=60 * 60 * 24 * 7,
-        args_rewrite=lambda s, user=None: f"{s.__class__.__name__}"
-        f"-{s.name}"
-        f"-{user.username if user else ''}",
-    )
-    def read_secrets(self, user: User = None) -> Dict[str, Any]:
-        from api_app.models import PluginConfig
-
-        return self._read_plugin_config(PluginConfig.ConfigType.SECRET, user)
-    @cache_memoize(
-        timeout=60 * 60 * 24 * 7,
-        args_rewrite=lambda s, user=None: f"{s.__class__.__name__}"
-        f"-{s.name}"
-        f"-{user.username if user else ''}",
-    )
-    def read_params(self, user: User = None) -> Dict[str, Any]:
-        from api_app.models import PluginConfig
-
-        return self._read_plugin_config(PluginConfig.ConfigType.PARAMETER, user)
 
     def get_signature(self, job):
         from api_app.models import Job

@@ -12,7 +12,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api_app', '0024_tlp'),
+        ('api_app', '0026_plugin_config'),
         ('analyzers_manager', '0015_alter_analyzerconfig_disabled_in_organizations_and_more'),
         ('connectors_manager', '0014_alter_connectorconfig_disabled_in_organizations_and_more'),
         ('visualizers_manager', '0012_alter_visualizerconfig_disabled_in_organizations_and_more'),
@@ -45,33 +45,39 @@ class Migration(migrations.Migration):
                 (
                     "is_secret", models.BooleanField(
                     )
-                )
-            ],
-            options={"unique_together": {("name", "type", "is_secret")}},
-        ),
-        migrations.CreateModel(
-            name="ParameterConfig",
-            fields=[
-                (
-                    "id",
-                    models.BigAutoField(
-                        auto_created=True,
-                        primary_key=True,
-                        serialize=False,
-                        verbose_name="ID",
-                    ),
-                ),
-
-                (
-                    "parameter", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="api_app.parameter")
                 ),
                 (
                     "required", models.BooleanField(
                     )
+                ),
+                (
+                    "analyzer_config",models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="parameters",
+                        to="analyzers_manager.analyzerconfig",
+                        null=True, blank=True
+                    ),
+                ),
+                (
+                    "connector_config", models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="parameters",
+                        to="connectors_manager.connectorconfig",
+                        null=True, blank=True
+                    ),
+                ),
+                (
+                    "visualizer_config", models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="parameters",
+                        to="visualizers_manager.visualizerconfig",
+                        null=True, blank=True
+                    ),
                 )
             ],
-            options={"unique_together": {("parameter", "required")}},
+            options={"unique_together": {("name", "analyzer_config", "connector_config", "visualizer_config")}},
         ),
+
         migrations.AlterField(
             model_name="pluginconfig",
             name="owner",

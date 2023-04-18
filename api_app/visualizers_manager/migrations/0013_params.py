@@ -69,7 +69,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('visualizers_manager', '0012_alter_visualizerconfig_disabled_in_organizations_and_more'),
-        ('api_app', '0025_parameter'),
+        ('api_app', '0027_parameter'),
     ]
 
     operations = [

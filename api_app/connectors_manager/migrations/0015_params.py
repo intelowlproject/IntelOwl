@@ -6,18 +6,17 @@ from django.db import migrations, models
 
 import api_app.fields
 
-def create_config(configs, type:str, Parameter,ParameterConfig, PluginConfig):
+def create_config(configs, type:str, Parameter,PluginConfig):
     for config in configs:
         for param_name, param_values in config.params.items():
-            param = Parameter(name=param_name, type=param_values["type"], description=param_values["description"], is_secret=False)
+            param = Parameter(connector_config=config, name=param_name, type=param_values["type"], description=param_values["description"], is_secret=False, required=param_values.get("required", False))
             try:
                 param.full_clean()
             except ValidationError:
-                param = Parameter.objects.get(name=param_name, type=param_values["type"], is_secret=False)
+                Parameter.objects.get(name=param_name, type=param_values["type"], is_secret=False)
             else:
                 param.save()
 
-            param_config, _ = ParameterConfig.objects.get_or_create(parameter=param, required=param_values.get("required", False))
             if "default" in param_values:
                 if param_values["default"] is None and param_values["type"] == "str":
                     param_values["default"] = ""
@@ -29,19 +28,17 @@ def create_config(configs, type:str, Parameter,ParameterConfig, PluginConfig):
                     type=type,
                     config_type="1"
                 )
-            config.parameters.add(param_config)
         for secret_name, secret_values in config.secrets.items():
-            secret = Parameter(name=secret_name, type=secret_values["type"],
-                                                       description=secret_values["description"], is_secret=True)
+            secret = Parameter(connector_config=config, name=secret_name, type=secret_values["type"],
+                                                       description=secret_values["description"], is_secret=True, required=secret_values["required"])
             try:
                 secret.full_clean()
             except ValidationError:
-                secret = Parameter.objects.get(name=secret_name, type=secret_values["type"],
+                Parameter.objects.get(name=secret_name, type=secret_values["type"],
                                               is_secret=True)
             else:
                 secret.save()
 
-            param_config, _ = ParameterConfig.objects.get_or_create(parameter=secret, required=secret_values["required"])
             if "default" in secret_values:
                 PluginConfig.objects.get_or_create(
                     owner=None,
@@ -51,16 +48,14 @@ def create_config(configs, type:str, Parameter,ParameterConfig, PluginConfig):
                     type=type,
                     config_type="2"
                 )
-            config.parameters.add(param_config)
         config.save()
 
 
 def migrate(apps, schema_editor):
     ConnectorConfig = apps.get_model("connectors_manager", "ConnectorConfig")
     Parameter = apps.get_model("api_app", "Parameter")
-    ParameterConfig = apps.get_model("api_app", "ParameterConfig")
     PluginConfig = apps.get_model("api_app", "PluginConfig")
-    create_config(list(ConnectorConfig.objects.all()), "2", Parameter, ParameterConfig, PluginConfig)
+    create_config(list(ConnectorConfig.objects.all()), "2", Parameter, PluginConfig)
 
 def reverse_migrate(apps, schema_editor):
     ...
@@ -70,17 +65,10 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('connectors_manager', '0014_alter_connectorconfig_disabled_in_organizations_and_more'),
-        ('api_app', '0025_parameter'),
+        ('api_app', '0027_parameter'),
     ]
 
     operations = [
-        migrations.AddField(
-            model_name="connectorconfig",
-            name="parameters",
-            field=models.ManyToManyField(related_name='%(app_label)s_%(class)s_configurations',
-                                         to='api_app.parameterconfig'),
-
-        ),
         migrations.RunPython(
             migrate, reverse_migrate
         ),

@@ -496,14 +496,6 @@ class PluginConfig(models.Model):
 
         return configs
 
-    def invalidate_method(self, function):
-        function.invalidate(self.config)
-        if self.for_organization:
-            for membership in self.owner.memership.organization.members.all():
-                function.invalidate(self.config, membership.user)
-        else:
-            function.invalidate(self.config, self.owner)
-
     def clean_for_organization(self):
         if self.for_organization and (self.owner.has_membership() and self.owner.membership.organization.owner != self.owner):
             raise ValidationError("Only organization owner can create configuration at the org level")

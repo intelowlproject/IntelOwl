@@ -28,12 +28,16 @@ def pre_delete_abstract_config(sender, instance: AbstractConfig, using, **kwargs
 def pre_save_abstract_config(sender, instance: AbstractConfig, using, **kwargs):
     from certego_saas.apps.user.models import User
 
-    previous = instance.__class__.objects.get(pk=instance.pk)
-    instance.read_params.invalidate(instance)
-    instance.read_secrets.invalidate(instance)
-    if previous.params != instance.params:
-        for user in User.objects.all():
-            instance.read_params.invalidate(instance, user)
-    if previous.secrets != instance.secrets:
-        for user in User.objects.all():
-            instance.read_secrets.invalidate(instance, user)
+    try:
+        previous = instance.__class__.objects.get(pk=instance.pk)
+    except instance.DoesNotExist:
+        pass
+    else:
+        instance.read_params.invalidate(instance)
+        instance.read_secrets.invalidate(instance)
+        if previous.params != instance.params:
+            for user in User.objects.all():
+                instance.read_params.invalidate(instance, user)
+        if previous.secrets != instance.secrets:
+            for user in User.objects.all():
+                instance.read_secrets.invalidate(instance, user)

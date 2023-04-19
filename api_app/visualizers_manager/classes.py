@@ -85,7 +85,8 @@ class VisualizableBase(VisualizableObject):
             for enum_key in ["color", "icon"]:
                 if isinstance(result[enum_key], Enum):
                     result[enum_key] = str(result[enum_key].value)
-                result[enum_key] = result[enum_key].lower()
+                else:  # some icon codes are in camelcase
+                    result[enum_key] = result[enum_key].lower()
 
         return result
 
@@ -161,22 +162,27 @@ class VisualizableVerticalList(VisualizableListMixin, VisualizableBase):
         value: List[VisualizableObject],
         *args,
         open: bool = False,  # noqa
+        filter_elements: bool = True,
+        add_count_in_title: bool = True,
         **kwargs,
     ):
-        super().__init__(value=value, *args, **kwargs)
+        elements_number = len(value)
+        elements_max_number = 3
+        filtered_element_list = value
+        if filter_elements:
+            filtered_element_list = filtered_element_list[:elements_max_number]
+            exceeding_elements_number = elements_number - elements_max_number
+            if exceeding_elements_number > 0:
+                filtered_element_list.append(
+                    VisualizableBase(
+                        f"{exceeding_elements_number} more elements: consult raw data"
+                    )
+                )
+        super().__init__(value=filtered_element_list, *args, **kwargs)
         self.name = name
+        if add_count_in_title:
+            self.name = f"{self.name} ({elements_number})"
         self.open = open
-
-    @property
-    def attributes(self) -> List[str]:
-        return super().attributes + ["name", "open"]
-
-    def __bool__(self):
-        return True
-
-    @property
-    def type(self) -> str:
-        return "vertical_list"
 
 
 class VisualizableHorizontalList(VisualizableListMixin, VisualizableObject):

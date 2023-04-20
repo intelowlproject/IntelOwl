@@ -30,12 +30,10 @@ export function BaseVisualizer({
     );
   }
   return (
-    <div key={value} className="col-auto">
-      <div
-        className={`small d-flex align-items-center ${isDisabled} ${className} ${color}`}
-      >
-        {coreComponent}
-      </div>
+    <div
+      className={`small d-flex align-items-center ${isDisabled} ${className} ${color}`}
+    >
+      {coreComponent}
     </div>
   );
 }

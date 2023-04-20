@@ -162,16 +162,15 @@ class VisualizableVerticalList(VisualizableListMixin, VisualizableBase):
         value: List[VisualizableObject],
         *args,
         open: bool = False,  # noqa
-        filter_elements: bool = True,
+        max_element_number: int = -1,
         add_count_in_title: bool = True,
         **kwargs,
     ):
         elements_number = len(value)
-        elements_max_number = 3
         filtered_element_list = value
-        if filter_elements:
-            filtered_element_list = filtered_element_list[:elements_max_number]
-            exceeding_elements_number = elements_number - elements_max_number
+        if max_element_number > 0:
+            filtered_element_list = filtered_element_list[:max_element_number]
+            exceeding_elements_number = elements_number - max_element_number
             if exceeding_elements_number > 0:
                 filtered_element_list.append(
                     VisualizableBase(

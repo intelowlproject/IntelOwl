@@ -29,15 +29,13 @@ export function BooleanVisualizer({
     );
   }
   return (
-    <div key={`${name}__${value}`} className="col-auto">
-      <Badge
-        pill={pill}
-        color={value === true ? activeColor : "gray"}
-        className={`text-capitalize ${isDisabled} ${className}`}
-      >
-        <div className="d-flex align-items-center">{coreComponent}</div>
-      </Badge>
-    </div>
+    <Badge
+      pill={pill}
+      color={value === true ? activeColor : "gray"}
+      className={`${isDisabled} ${className}`}
+    >
+      <div className="d-flex align-items-center">{coreComponent}</div>
+    </Badge>
   );
 }
 

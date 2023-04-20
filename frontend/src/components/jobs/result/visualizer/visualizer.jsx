@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React from "react";
 import PropTypes from "prop-types";
 import { ContentSection } from "@certego/certego-ui";
@@ -20,13 +19,14 @@ import { HorizontalListVisualizer } from "./elements/horizontalList";
  * This is a recursive function: It's called by the component to convert the inner components.
  *
  * @param {object} element data used to generate the component
- * @param {bool} standAloneBase flag used to set the capitalize in the base components only in case is not used for VList or Title elements
- * @returns {React.Component} component to visualize
+ * @param {boolean} isChild set to true in case an element is use into another (Ex: base is used in Title title and Title value)
+ * @returns {Object} component to visualize
  */
-function convertToElement(element, standAloneBase = true) {
+export function convertToElement(element, isChild = false) {
+  let visualizerElement;
   switch (element.type) {
     case VisualizerComponentType.BOOL: {
-      return (
+      visualizerElement = (
         <BooleanVisualizer
           name={element.name}
           value={element.value}
@@ -38,22 +38,30 @@ function convertToElement(element, standAloneBase = true) {
           disableIfEmpty={element.disableIfEmpty}
         />
       );
+      break;
     }
     case VisualizerComponentType.HLIST: {
-      return (
+      /* This is a special case and it's the opposit of the others:
+      We WANT to force the spaces between chidren (because are different componets)
+      and we DON'T WANT to add the space for this specific component (because is a wrapper) 
+      */
+      // eslint-disable-next-line no-param-reassign
+      isChild = true;
+      visualizerElement = (
         <HorizontalListVisualizer
           values={element.values?.map((additionalElement) =>
             convertToElement(additionalElement)
           )}
         />
       );
+      break;
     }
     case VisualizerComponentType.VLIST: {
-      return (
+      visualizerElement = (
         <VerticalListVisualizer
           name={element.name}
           values={element.values?.map((additionalElement) =>
-            convertToElement(additionalElement, false)
+            convertToElement(additionalElement, true)
           )}
           icon={getIcon(element.icon)}
           color={element.color}
@@ -64,33 +72,40 @@ function convertToElement(element, standAloneBase = true) {
           disableIfEmpty={element.disableIfEmpty}
         />
       );
+      break;
     }
     case VisualizerComponentType.TITLE: {
-      return (
+      visualizerElement = (
         <TitleVisualizer
-          title={convertToElement(element.title)}
-          value={convertToElement(element.value, false)}
+          title={convertToElement(element.title, true)}
+          value={convertToElement(element.value, true)}
           hideIfEmpty={element.hideIfEmpty}
           disableIfEmpty={element.disableIfEmpty}
         />
       );
+      break;
     }
     default: {
-      return (
+      visualizerElement = (
         <BaseVisualizer
           value={element.value}
           icon={getIcon(element.icon)}
           color={element.color}
           link={element.link}
-          className={`${standAloneBase ? "text-capitalize" : ""} ${
-            element.className
-          }`}
+          className={element.className}
           hideIfEmpty={element.hideIfEmpty}
           disableIfEmpty={element.disableIfEmpty}
         />
       );
+      break;
     }
   }
+  return (
+    // child component are wrapped into other component: they don't have mb, we don't want to create space inside a component.
+    <div className={`col-auto ${isChild ? "" : "mb-1"}`}>
+      {visualizerElement}
+    </div>
+  );
 }
 
 export default function VisualizerReport({ visualizerReport }) {
@@ -126,7 +141,7 @@ export default function VisualizerReport({ visualizerReport }) {
       <div className={`h${levelSize}`}>
         {levelData}
         {levelIndex + 1 !== validatedData.length && (
-          <hr className="border-gray flex-grow-1" />
+          <hr className="border-gray flex-grow-1 my-2" />
         )}
       </div>
     );

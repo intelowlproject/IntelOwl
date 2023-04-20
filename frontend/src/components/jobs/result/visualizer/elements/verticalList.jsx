@@ -39,41 +39,42 @@ export function VerticalListVisualizer({
   }
 
   return (
-    <div key={name} className="col-auto">
-      <Card className={isDisabled ? "visualizer-element-disabled" : ""}>
-        <CardTitle className="p-1 mb-0">
-          <Button
-            className="p-0 w-100"
-            onClick={toggleList}
-            color={color}
-            disabled={isDisabled}
-          >
-            <div className="d-flex align-items-center">
-              {isListOpen ? (
-                <IoIosArrowDropupCircle className="mx-1" />
-              ) : (
-                <IoIosArrowDropdownCircle className="mx-1" />
-              )}
-              <BaseVisualizer
-                value={name}
-                icon={icon}
-                link={link}
-                className={`text-capitalize ${className}`}
-              />
-            </div>
-          </Button>
-        </CardTitle>
-        <Collapse isOpen={isListOpen}>
-          <ListGroup flush>
-            {values.map((listElement) => (
-              <ListGroupItem key={listElement.value}>
-                {listElement}
-              </ListGroupItem>
-            ))}
-          </ListGroup>
-        </Collapse>
-      </Card>
-    </div>
+    <Card className={isDisabled ? "visualizer-element-disabled" : ""}>
+      <CardTitle className="p-1 mb-0">
+        <Button
+          className="p-0 w-100"
+          onClick={toggleList}
+          color={color}
+          disabled={isDisabled}
+        >
+          <div className="d-flex align-items-center">
+            {isListOpen ? (
+              <IoIosArrowDropupCircle className="mx-1" />
+            ) : (
+              <IoIosArrowDropdownCircle className="mx-1" />
+            )}
+            <BaseVisualizer
+              value={name}
+              icon={icon}
+              link={link}
+              className={className}
+            />
+          </div>
+        </Button>
+      </CardTitle>
+      <Collapse isOpen={isListOpen}>
+        <ListGroup flush>
+          {values.map((listElement, index) => (
+            <ListGroupItem
+              key={listElement.value}
+              className={index === values.length - 1 ? "rounded-bottom" : ""}
+            >
+              {listElement}
+            </ListGroupItem>
+          ))}
+        </ListGroup>
+      </Collapse>
+    </Card>
   );
 }
 

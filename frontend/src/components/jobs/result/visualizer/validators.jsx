@@ -70,7 +70,6 @@ function parseElementFields(rawElement) {
     case VisualizerComponentType.BOOL: {
       validatedFields.name = rawElement.name;
       validatedFields.value = parseBool(rawElement.value);
-      validatedFields.pill = parseBool(rawElement.pill, true);
       validatedFields.link = rawElement.link;
       validatedFields.className = rawElement.classname;
       validatedFields.activeColor = parseColor(rawElement.color, "danger");

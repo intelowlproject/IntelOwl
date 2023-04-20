@@ -118,20 +118,18 @@ class VisualizableBool(VisualizableBase):
         name: str,
         value: bool,
         *args,
-        pill: bool = True,
         color: VisualizableColor = VisualizableColor.DANGER,
         **kwargs,
     ):
         super().__init__(*args, color=color, value=value, **kwargs)
         self.name = name
-        self.pill = pill
 
     def __bool__(self):
         return bool(self.name)
 
     @property
     def attributes(self) -> List[str]:
-        return super().attributes + ["name", "pill"]
+        return super().attributes + ["name"]
 
     @property
     def type(self) -> str:

@@ -30,7 +30,6 @@ export function convertToElement(element, isChild = false) {
         <BooleanVisualizer
           name={element.name}
           value={element.value}
-          pill={element.pill}
           link={element.link}
           className={element.className}
           activeColor={element.activeColor}

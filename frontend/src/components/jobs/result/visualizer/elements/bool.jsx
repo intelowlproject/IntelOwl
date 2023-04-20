@@ -6,7 +6,6 @@ import { Badge } from "reactstrap";
 export function BooleanVisualizer({
   name,
   value,
-  pill,
   link,
   className,
   activeColor,
@@ -30,7 +29,7 @@ export function BooleanVisualizer({
   }
   return (
     <Badge
-      pill={pill}
+      pill
       color={value === true ? activeColor : "gray"}
       className={`${isDisabled} ${className}`}
     >
@@ -42,7 +41,6 @@ export function BooleanVisualizer({
 BooleanVisualizer.propTypes = {
   name: PropTypes.string.isRequired,
   value: PropTypes.bool.isRequired,
-  pill: PropTypes.bool,
   link: PropTypes.string,
   className: PropTypes.string,
   activeColor: PropTypes.string,
@@ -51,7 +49,6 @@ BooleanVisualizer.propTypes = {
 };
 
 BooleanVisualizer.defaultProps = {
-  pill: true,
   link: "",
   className: "",
   activeColor: "danger",

@@ -69,7 +69,6 @@ class VisualizableBoolTestCase(CustomTestCase):
             "type": "bool",
             "name": "test",
             "value": True,
-            "pill": True,
             "link": "",
             "classname": "",
             "color": "danger",

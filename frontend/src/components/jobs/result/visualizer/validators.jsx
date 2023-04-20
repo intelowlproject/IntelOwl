@@ -97,6 +97,8 @@ function parseElementFields(rawElement) {
       validatedFields.icon = rawElement.icon;
       validatedFields.color = `bg-${parseColor(rawElement.color)}`;
       validatedFields.link = rawElement.link;
+      validatedFields.bold = parseBool(rawElement.bold);
+      validatedFields.italic = parseBool(rawElement.italic);
       validatedFields.className = rawElement.classname;
       break;
     }

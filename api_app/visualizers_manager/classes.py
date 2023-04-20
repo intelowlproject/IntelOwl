@@ -55,22 +55,34 @@ class VisualizableBase(VisualizableObject):
         value: Any = "",
         color: VisualizableColor = VisualizableColor.TRANSPARENT,
         link: str = "",
+        # you can use an element of the enum or an iso3166 alpha2 code (for flags)
+        icon: Union[VisualizableIcon, str] = VisualizableIcon.EMPTY,
+        bold: bool = False,
+        italic: bool = False,
         classname: str = "",
         hide_if_empty: bool = False,
         disable_if_empty: bool = True,
-        # you can use an element of the enum or an iso3166 alpha2 code (for flags)
-        icon: Union[VisualizableIcon, str] = VisualizableIcon.EMPTY,
     ):
         super().__init__(hide_if_empty, disable_if_empty)
         self.value = value
         self.color = color
         self.link = link
-        self.classname = classname
         self.icon = icon
+        self.bold = bold
+        self.italic = italic
+        self.classname = classname
 
     @property
     def attributes(self) -> List[str]:
-        return super().attributes + ["value", "color", "link", "classname", "icon"]
+        return super().attributes + [
+            "value",
+            "color",
+            "link",
+            "classname",
+            "icon",
+            "bold",
+            "italic",
+        ]
 
     @property
     def type(self) -> str:

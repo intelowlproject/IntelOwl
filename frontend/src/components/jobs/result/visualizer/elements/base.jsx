@@ -6,6 +6,8 @@ export function BaseVisualizer({
   icon,
   color,
   link,
+  bold,
+  italic,
   className,
   hideIfEmpty,
   disableIfEmpty,
@@ -18,7 +20,11 @@ export function BaseVisualizer({
     isDisabled = "visualizer-element-disabled";
   }
   let coreComponent = (
-    <p className={`mb-0 ${color}`}>
+    <p
+      className={`mb-0 ${color} ${bold ? "fw-bold" : ""} ${
+        italic ? "fst-italic" : ""
+      }`}
+    >
       {value} {icon}
     </p>
   );
@@ -43,6 +49,8 @@ BaseVisualizer.propTypes = {
   icon: PropTypes.string,
   color: PropTypes.string,
   link: PropTypes.string,
+  bold: PropTypes.bool,
+  italic: PropTypes.bool,
   className: PropTypes.string,
   hideIfEmpty: PropTypes.bool,
   disableIfEmpty: PropTypes.bool,
@@ -52,6 +60,8 @@ BaseVisualizer.defaultProps = {
   icon: "",
   color: "",
   link: "",
+  bold: false,
+  italic: false,
   className: "",
   hideIfEmpty: false,
   disableIfEmpty: false,

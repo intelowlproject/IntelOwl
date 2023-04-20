@@ -80,11 +80,8 @@ function parseElementFields(rawElement) {
       break;
     }
     case VisualizerComponentType.VLIST: {
-      validatedFields.name = rawElement.name;
+      validatedFields.name = parseElementFields(rawElement.name);
       validatedFields.values = parseElementList(rawElement.values);
-      validatedFields.icon = rawElement.icon;
-      validatedFields.color = parseColor(rawElement.color);
-      validatedFields.link = rawElement.link;
       validatedFields.className = rawElement.classname;
       validatedFields.startOpen = parseBool(rawElement.open);
       break;

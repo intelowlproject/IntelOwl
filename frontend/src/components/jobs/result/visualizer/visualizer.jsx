@@ -58,13 +58,10 @@ export function convertToElement(element, isChild = false) {
     case VisualizerComponentType.VLIST: {
       visualizerElement = (
         <VerticalListVisualizer
-          name={element.name}
+          name={convertToElement(element.name, true)}
           values={element.values?.map((additionalElement) =>
             convertToElement(additionalElement, true)
           )}
-          icon={getIcon(element.icon)}
-          color={element.color}
-          link={element.link}
           className={element.className}
           startOpen={element.startOpen}
           hideIfEmpty={element.hideIfEmpty}

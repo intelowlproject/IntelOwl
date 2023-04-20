@@ -156,13 +156,13 @@ class VisualizableListMixin:
 class VisualizableVerticalList(VisualizableListMixin, VisualizableBase):
     def __init__(
         self,
-        name: str,
+        name: VisualizableBase,
         value: List[VisualizableObject],
-        *args,
         open: bool = False,  # noqa
         max_element_number: int = -1,
         add_count_in_title: bool = True,
-        **kwargs,
+        hide_if_empty: bool = False,
+        disable_if_empty: bool = True,
     ):
         elements_number = len(value)
         filtered_element_list = value
@@ -175,10 +175,14 @@ class VisualizableVerticalList(VisualizableListMixin, VisualizableBase):
                         f"{exceeding_elements_number} more elements: consult raw data"
                     )
                 )
-        super().__init__(value=filtered_element_list, *args, **kwargs)
+        super().__init__(
+            value=filtered_element_list,
+            hide_if_empty=hide_if_empty,
+            disable_if_empty=disable_if_empty,
+        )
         self.name = name
         if add_count_in_title:
-            self.name = f"{self.name} ({elements_number})"
+            self.name.value = f"{self.name.value} ({elements_number})"
         self.open = open
 
 

@@ -14,14 +14,9 @@ import {
   IoIosArrowDropdownCircle,
 } from "react-icons/io";
 
-import { BaseVisualizer } from "./base";
-
 export function VerticalListVisualizer({
   name,
-  icon,
   values,
-  color,
-  link,
   className,
   startOpen,
   hideIfEmpty,
@@ -39,12 +34,16 @@ export function VerticalListVisualizer({
   }
 
   return (
-    <Card className={isDisabled ? "visualizer-element-disabled" : ""}>
+    <Card
+      className={`${className} ${
+        isDisabled ? "visualizer-element-disabled" : ""
+      }`}
+    >
       <CardTitle className="p-1 mb-0">
         <Button
           className="p-0 w-100"
           onClick={toggleList}
-          color={color}
+          color={name.props.color.replace("bg-", "")}
           disabled={isDisabled}
         >
           <div className="d-flex align-items-center">
@@ -53,12 +52,7 @@ export function VerticalListVisualizer({
             ) : (
               <IoIosArrowDropdownCircle className="mx-1" />
             )}
-            <BaseVisualizer
-              value={name}
-              icon={icon}
-              link={link}
-              className={className}
-            />
+            {name}
           </div>
         </Button>
       </CardTitle>
@@ -81,9 +75,6 @@ export function VerticalListVisualizer({
 VerticalListVisualizer.propTypes = {
   name: PropTypes.string.isRequired,
   values: PropTypes.arrayOf(PropTypes.element).isRequired,
-  icon: PropTypes.string,
-  color: PropTypes.string,
-  link: PropTypes.string,
   className: PropTypes.string,
   startOpen: PropTypes.bool,
   hideIfEmpty: PropTypes.bool,
@@ -91,9 +82,6 @@ VerticalListVisualizer.propTypes = {
 };
 
 VerticalListVisualizer.defaultProps = {
-  icon: "",
-  color: "",
-  link: "",
   className: "",
   startOpen: false,
   hideIfEmpty: false,

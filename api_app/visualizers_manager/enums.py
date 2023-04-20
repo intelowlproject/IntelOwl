@@ -52,3 +52,17 @@ class VisualizableIcon(enum.Enum):
         if self is self.EMPTY:
             return False
         return True
+
+
+class VisualizableAlignment(enum.Enum):
+    START = "start"
+    CENTER = "center"
+    END = "end"
+    BETWEEN = "between"
+    AROUND = "around"
+
+    def __str__(self):
+        return self.value
+
+    def __bool__(self):
+        return True

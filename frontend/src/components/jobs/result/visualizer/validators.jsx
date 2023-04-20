@@ -49,6 +49,13 @@ function parseColor(color, defaultColor) {
   return defaultColor;
 }
 
+function parseAlignment(alignment) {
+  if (["start", "center", "end", "between", "around"].includes(alignment)) {
+    return alignment;
+  }
+  return "around";
+}
+
 // parse list of Elements
 function parseElementList(rawElementList) {
   return rawElementList?.map((additionalElementrawData) =>
@@ -77,6 +84,7 @@ function parseElementFields(rawElement) {
     }
     case VisualizerComponentType.HLIST: {
       validatedFields.values = parseElementList(rawElement.values);
+      validatedFields.alignment = parseAlignment(rawElement.alignment);
       break;
     }
     case VisualizerComponentType.VLIST: {

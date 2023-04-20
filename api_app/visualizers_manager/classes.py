@@ -9,7 +9,11 @@ from django.conf import settings
 from django.db.models import QuerySet
 
 from api_app.core.classes import Plugin
-from api_app.visualizers_manager.enums import VisualizableColor, VisualizableIcon
+from api_app.visualizers_manager.enums import (
+    VisualizableAlignment,
+    VisualizableColor,
+    VisualizableIcon,
+)
 from api_app.visualizers_manager.exceptions import (
     VisualizerConfigurationException,
     VisualizerRunException,
@@ -202,19 +206,26 @@ class VisualizableHorizontalList(VisualizableListMixin, VisualizableObject):
     def __init__(
         self,
         value: List[VisualizableObject],
+        alignment: VisualizableAlignment = VisualizableAlignment.AROUND,
         *args,
         **kwargs,
     ):
         super().__init__(*args, **kwargs)
         self.value = value
+        self.alignment = alignment
 
     @property
     def attributes(self) -> List[str]:
-        return super().attributes + ["value"]
+        return super().attributes + ["value", "alignment"]
 
     @property
     def type(self) -> str:
         return "horizontal_list"
+
+    def to_dict(self) -> Dict:
+        result = super().to_dict()
+        result["alignment"] = self.alignment.value
+        return result
 
 
 class VisualizableLevel:
@@ -239,6 +250,7 @@ class VisualizableLevel:
 class Visualizer(Plugin, metaclass=abc.ABCMeta):
     Color = VisualizableColor
     Icon = VisualizableIcon
+    Alignment = VisualizableAlignment
 
     Base = VisualizableBase
     Title = VisualizableTitle

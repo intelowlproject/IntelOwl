@@ -51,6 +51,7 @@ export function convertToElement(element, isChild = false) {
           values={element.values?.map((additionalElement) =>
             convertToElement(additionalElement)
           )}
+          alignment={element.alignment}
         />
       );
       break;

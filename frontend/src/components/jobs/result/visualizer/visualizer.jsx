@@ -99,12 +99,13 @@ export function convertToElement(element, isChild = false) {
       break;
     }
   }
-  return (
-    // child component are wrapped into other component: they don't have mb, we don't want to create space inside a component.
-    <div className={`col-auto ${isChild ? "" : "mb-1"}`}>
-      {visualizerElement}
-    </div>
-  );
+  /* we want to use this div as wrapper for the components, the children are part of the component.
+  For this reason they aren't wrapped
+  */
+  if (!isChild) {
+    return <div className="col-auto mb-1">{visualizerElement}</div>;
+  }
+  return visualizerElement;
 }
 
 export default function VisualizerReport({ visualizerReport }) {

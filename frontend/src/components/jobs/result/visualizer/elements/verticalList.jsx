@@ -61,7 +61,9 @@ export function VerticalListVisualizer({
           {values.map((listElement, index) => (
             <ListGroupItem
               key={listElement.value}
-              className={index === values.length - 1 ? "rounded-bottom" : ""}
+              className={`${
+                index === values.length - 1 ? "rounded-bottom" : ""
+              } ${listElement.props.color}`}
             >
               {listElement}
             </ListGroupItem>

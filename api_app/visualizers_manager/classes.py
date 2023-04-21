@@ -188,11 +188,7 @@ class VisualizableVerticalList(VisualizableListMixin, VisualizableObject):
             self.value = self.value[:max_element_number]
             exceeding_elements_number = elements_number - max_element_number
             if exceeding_elements_number > 0:
-                self.value.append(
-                    VisualizableBase(
-                        f"{exceeding_elements_number} more elements: consult raw data"
-                    )
-                )
+                self.value.append(VisualizableBase(value="...", bold=True))
         super().__init__(
             hide_if_empty=hide_if_empty,
             disable_if_empty=disable_if_empty,

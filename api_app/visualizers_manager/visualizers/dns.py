@@ -76,8 +76,10 @@ class DNS(Visualizer):
             if "dns.dns_resolvers" in analyzer_report.config.python_complete_path:
                 first_level_elements.append(
                     self.VList(
-                        name=f"{printable_analyzer_name} "
-                        f"({len(analyzer_report.report['resolutions'])})",
+                        name=self.Base(
+                            value=f"{printable_analyzer_name} "
+                            f"({len(analyzer_report.report['resolutions'])})"
+                        ),
                         value=[
                             self.Base(
                                 value=dns_resolution["data"]

@@ -153,8 +153,10 @@ class VisualizableBool(VisualizableBase):
 
     def to_dict(self) -> Dict:
         result = super().to_dict()
-        # bool does not support icon at the moment
+        # bool does not support icon, bold and italic at the moment
         result.pop("icon", None)
+        result.pop("bold", None)
+        result.pop("italic", None)
         return result
 
 
@@ -169,7 +171,7 @@ class VisualizableListMixin:
         return result
 
 
-class VisualizableVerticalList(VisualizableListMixin, VisualizableBase):
+class VisualizableVerticalList(VisualizableListMixin, VisualizableObject):
     def __init__(
         self,
         name: VisualizableBase,
@@ -181,18 +183,17 @@ class VisualizableVerticalList(VisualizableListMixin, VisualizableBase):
         disable_if_empty: bool = True,
     ):
         elements_number = len(value)
-        filtered_element_list = value
+        self.value = value
         if max_element_number > 0:
-            filtered_element_list = filtered_element_list[:max_element_number]
+            self.value = self.value[:max_element_number]
             exceeding_elements_number = elements_number - max_element_number
             if exceeding_elements_number > 0:
-                filtered_element_list.append(
+                self.value.append(
                     VisualizableBase(
                         f"{exceeding_elements_number} more elements: consult raw data"
                     )
                 )
         super().__init__(
-            value=filtered_element_list,
             hide_if_empty=hide_if_empty,
             disable_if_empty=disable_if_empty,
         )
@@ -201,13 +202,25 @@ class VisualizableVerticalList(VisualizableListMixin, VisualizableBase):
             self.name.value = f"{self.name.value} ({elements_number})"
         self.open = open
 
+    @property
+    def attributes(self) -> List[str]:
+        return super().attributes + ["name", "open", "value"]
+
+    @property
+    def type(self) -> str:
+        return "vertical_list"
+
+    def to_dict(self) -> Dict:
+        result = super().to_dict()
+        return result
+
 
 class VisualizableHorizontalList(VisualizableListMixin, VisualizableObject):
     def __init__(
         self,
+        *args,
         value: List[VisualizableObject],
         alignment: VisualizableAlignment = VisualizableAlignment.AROUND,
-        *args,
         **kwargs,
     ):
         super().__init__(*args, **kwargs)

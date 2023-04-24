@@ -9,16 +9,8 @@ export function BaseVisualizer({
   bold,
   italic,
   className,
-  hideIfEmpty,
-  disableIfEmpty,
+  disable,
 }) {
-  if (hideIfEmpty && !value && !icon) {
-    return null;
-  }
-  let isDisabled = "";
-  if (disableIfEmpty && !value && !icon) {
-    isDisabled = "visualizer-element-disabled";
-  }
   let coreComponent = (
     <p
       className={`mb-0 ${color} ${bold ? "fw-bold" : ""} ${
@@ -37,7 +29,9 @@ export function BaseVisualizer({
   }
   return (
     <div
-      className={`small d-flex align-items-center ${isDisabled} ${className} ${color}`}
+      className={`small d-flex align-items-center ${
+        disable ? "visualizer-element-disabled" : ""
+      } ${className} ${color}`}
     >
       {coreComponent}
     </div>
@@ -52,8 +46,7 @@ BaseVisualizer.propTypes = {
   bold: PropTypes.bool,
   italic: PropTypes.bool,
   className: PropTypes.string,
-  hideIfEmpty: PropTypes.bool,
-  disableIfEmpty: PropTypes.bool,
+  disable: PropTypes.bool,
 };
 
 BaseVisualizer.defaultProps = {
@@ -63,6 +56,5 @@ BaseVisualizer.defaultProps = {
   bold: false,
   italic: false,
   className: "",
-  hideIfEmpty: false,
-  disableIfEmpty: false,
+  disable: false,
 };

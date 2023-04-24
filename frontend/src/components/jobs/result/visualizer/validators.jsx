@@ -66,11 +66,10 @@ function parseElementList(rawElementList) {
 // parse a single element
 function parseElementFields(rawElement) {
   const type = parseComponentType(rawElement.type);
-  const hideIfEmpty = parseBool(rawElement.hide_if_empty, false);
-  const disableIfEmpty = parseBool(rawElement.disable_if_empty, true);
+  const disable = parseBool(rawElement.disable, true);
 
   // common fields
-  const validatedFields = { type, hideIfEmpty, disableIfEmpty };
+  const validatedFields = { type, disable };
 
   // validation for the elements
   switch (type) {

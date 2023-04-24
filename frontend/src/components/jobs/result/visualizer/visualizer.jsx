@@ -33,8 +33,7 @@ export function convertToElement(element, isChild = false) {
           link={element.link}
           className={element.className}
           activeColor={element.activeColor}
-          hideIfEmpty={element.hideIfEmpty}
-          disableIfEmpty={element.disableIfEmpty}
+          disable={element.disable}
         />
       );
       break;
@@ -65,8 +64,7 @@ export function convertToElement(element, isChild = false) {
           )}
           className={element.className}
           startOpen={element.startOpen}
-          hideIfEmpty={element.hideIfEmpty}
-          disableIfEmpty={element.disableIfEmpty}
+          disable={element.disable}
         />
       );
       break;
@@ -76,8 +74,7 @@ export function convertToElement(element, isChild = false) {
         <TitleVisualizer
           title={convertToElement(element.title, true)}
           value={convertToElement(element.value, true)}
-          hideIfEmpty={element.hideIfEmpty}
-          disableIfEmpty={element.disableIfEmpty}
+          disable={element.disable}
         />
       );
       break;
@@ -92,8 +89,7 @@ export function convertToElement(element, isChild = false) {
           bold={element.bold}
           italic={element.italic}
           className={element.className}
-          hideIfEmpty={element.hideIfEmpty}
-          disableIfEmpty={element.disableIfEmpty}
+          disable={element.disable}
         />
       );
       break;

@@ -19,32 +19,21 @@ export function VerticalListVisualizer({
   values,
   className,
   startOpen,
-  hideIfEmpty,
-  disableIfEmpty,
+  disable,
 }) {
   const [isListOpen, setIsListOpen] = useState(startOpen);
   const toggleList = () => setIsListOpen(!isListOpen);
 
-  if (hideIfEmpty && values.length === 0) {
-    return null;
-  }
-  let isDisabled = false;
-  if (disableIfEmpty && values.length === 0) {
-    isDisabled = true;
-  }
-
   return (
     <Card
-      className={`${className} ${
-        isDisabled ? "visualizer-element-disabled" : ""
-      }`}
+      className={`${className} ${disable ? "visualizer-element-disabled" : ""}`}
     >
       <CardTitle className="p-1 mb-0">
         <Button
           className="p-0 w-100"
           onClick={toggleList}
           color={name.props.color.replace("bg-", "")}
-          disabled={isDisabled}
+          disabled={disable}
         >
           <div className="d-flex align-items-center">
             {isListOpen ? (
@@ -79,13 +68,11 @@ VerticalListVisualizer.propTypes = {
   values: PropTypes.arrayOf(PropTypes.element).isRequired,
   className: PropTypes.string,
   startOpen: PropTypes.bool,
-  hideIfEmpty: PropTypes.bool,
-  disableIfEmpty: PropTypes.bool,
+  disable: PropTypes.bool,
 };
 
 VerticalListVisualizer.defaultProps = {
   className: "",
   startOpen: false,
-  hideIfEmpty: false,
-  disableIfEmpty: false,
+  disable: false,
 };

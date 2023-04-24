@@ -28,12 +28,11 @@ class VisualizableObjectTestCase(CustomTestCase):
             return "test"
 
     def test_to_dict(self):
-        vo = self.MockUpVisualizableObject(True, False)
+        vo = self.MockUpVisualizableObject(False)
         result = vo.to_dict()
 
         expected_result = {
-            "hide_if_empty": True,
-            "disable_if_empty": False,
+            "disable": False,
             "type": "test",
         }
         self.assertEqual(expected_result, result)
@@ -46,16 +45,46 @@ class VisualizableBaseTestCase(CustomTestCase):
             color=VisualizableColor.DARK,
             link="https://test.com",
             classname="test",
-            hide_if_empty=True,
-            disable_if_empty=True,
+            disable=True,
         )
         expected_result = {
-            "hide_if_empty": True,
-            "disable_if_empty": True,
+            "disable": True,
             "bold": False,
             "italic": False,
             "type": "base",
             "value": "test",
+            "color": "dark",
+            "link": "https://test.com",
+            "classname": "test",
+            "icon": "",
+        }
+        self.assertEqual(vo.to_dict(), expected_result)
+
+    def test_empty(self):
+        vo = VisualizableBase(
+            "",
+            color=VisualizableColor.DARK,
+            link="https://test.com",
+            classname="test",
+            disable=False,
+        )
+        expected_result = {}
+        self.assertEqual(vo.to_dict(), expected_result)
+
+    def test_disable(self):
+        vo = VisualizableBase(
+            "",
+            color=VisualizableColor.DARK,
+            link="https://test.com",
+            classname="test",
+            disable=True,
+        )
+        expected_result = {
+            "disable": True,
+            "bold": False,
+            "italic": False,
+            "type": "base",
+            "value": "",
             "color": "dark",
             "link": "https://test.com",
             "classname": "test",
@@ -74,8 +103,7 @@ class VisualizableBoolTestCase(CustomTestCase):
             "link": "",
             "classname": "",
             "color": "danger",
-            "hide_if_empty": False,
-            "disable_if_empty": True,
+            "disable": True,
         }
         self.assertEqual(vo.to_dict(), expected_result)
 
@@ -97,8 +125,7 @@ class VisualizableTitleTestCase(CustomTestCase):
             "type": "title",
             "title": title.to_dict(),
             "value": value.to_dict(),
-            "hide_if_empty": False,
-            "disable_if_empty": True,
+            "disable": True,
         }
         self.assertEqual(vo.to_dict(), expected_result)
 
@@ -114,8 +141,7 @@ class VisualizableVerticalListTestCase(CustomTestCase):
             "type": "vertical_list",
             "name": name.to_dict(),
             "open": False,
-            "hide_if_empty": False,
-            "disable_if_empty": True,
+            "disable": True,
             "values": [value.to_dict()],
         }
         self.assertEqual(vvl.to_dict()["values"], vvl.to_dict()["values"])
@@ -131,8 +157,7 @@ class VisualizableVerticalListTestCase(CustomTestCase):
         expected_result = {
             "type": "vertical_list",
             "name": name.to_dict(),
-            "hide_if_empty": False,
-            "disable_if_empty": True,
+            "disable": True,
             "open": False,
             "values": [],
         }
@@ -145,8 +170,7 @@ class VisualizableVerticalListTestCase(CustomTestCase):
         expected_result = {
             "type": "vertical_list",
             "name": name.to_dict(),
-            "hide_if_empty": False,
-            "disable_if_empty": True,
+            "disable": True,
             "open": False,
             "values": [],
         }
@@ -162,8 +186,7 @@ class VisualizableHorizontalListTestCase(CustomTestCase):
         expected_result = {
             "type": "horizontal_list",
             "alignment": "around",
-            "hide_if_empty": False,
-            "disable_if_empty": True,
+            "disable": True,
             "values": [value.to_dict()],
         }
         self.assertEqual(vvl.to_dict(), expected_result)
@@ -173,8 +196,7 @@ class VisualizableHorizontalListTestCase(CustomTestCase):
         expected_result = {
             "type": "horizontal_list",
             "alignment": "around",
-            "hide_if_empty": False,
-            "disable_if_empty": True,
+            "disable": True,
             "values": [],
         }
         self.assertEqual(vvl.to_dict(), expected_result)
@@ -184,8 +206,7 @@ class VisualizableHorizontalListTestCase(CustomTestCase):
         expected_result = {
             "type": "horizontal_list",
             "alignment": "around",
-            "hide_if_empty": False,
-            "disable_if_empty": True,
+            "disable": True,
             "values": [],
         }
         self.assertEqual(vvl.to_dict(), expected_result)

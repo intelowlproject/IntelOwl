@@ -24,13 +24,12 @@ logger = logging.getLogger(__name__)
 
 
 class VisualizableObject:
-    def __init__(self, hide_if_empty: bool = False, disable_if_empty: bool = True):
-        self.hide_if_empty = hide_if_empty
-        self.disable_if_empty = disable_if_empty
+    def __init__(self, disable: bool = True):
+        self.disable = disable
 
     @property
     def attributes(self) -> List[str]:
-        return ["hide_if_empty", "disable_if_empty"]
+        return ["disable"]
 
     @property
     @abc.abstractmethod
@@ -41,13 +40,15 @@ class VisualizableObject:
         return True
 
     def to_dict(self) -> Dict:
-        if not self:
+        if not self and not self.disable:
             return {}
 
         result = {attr: getattr(self, attr) for attr in self.attributes}
         for key, value in result.items():
             if isinstance(value, VisualizableObject):
                 result[key] = value.to_dict()
+            elif isinstance(value, Enum):
+                result[key] = value.value.lower()
 
         result["type"] = self.type
         return result
@@ -64,10 +65,9 @@ class VisualizableBase(VisualizableObject):
         bold: bool = False,
         italic: bool = False,
         classname: str = "",
-        hide_if_empty: bool = False,
-        disable_if_empty: bool = True,
+        disable: bool = True,
     ):
-        super().__init__(hide_if_empty, disable_if_empty)
+        super().__init__(disable)
         self.value = value
         self.color = color
         self.link = link
@@ -95,27 +95,15 @@ class VisualizableBase(VisualizableObject):
     def __bool__(self):
         return bool(self.value) or bool(self.icon)
 
-    def to_dict(self) -> Dict:
-        result = super().to_dict()
-        if result:
-            for enum_key in ["color", "icon"]:
-                if isinstance(result[enum_key], Enum):
-                    result[enum_key] = str(result[enum_key].value)
-                else:  # some icon codes are in camelcase
-                    result[enum_key] = result[enum_key].lower()
-
-        return result
-
 
 class VisualizableTitle(VisualizableObject):
     def __init__(
         self,
         title: VisualizableBase,
         value: VisualizableBase,
-        hide_if_empty: bool = False,
-        disable_if_empty: bool = True,
+        disable: bool = True,
     ):
-        super().__init__(hide_if_empty, disable_if_empty)
+        super().__init__(disable)
         self.title = title
         self.value = value
 
@@ -177,25 +165,19 @@ class VisualizableVerticalList(VisualizableListMixin, VisualizableObject):
         name: VisualizableBase,
         value: List[VisualizableObject],
         open: bool = False,  # noqa
-        max_element_number: int = -1,
+        max_elements_number: int = -1,
         add_count_in_title: bool = True,
-        hide_if_empty: bool = False,
-        disable_if_empty: bool = True,
+        disable: bool = True,
     ):
-        elements_number = len(value)
-        self.value = value
-        if max_element_number > 0:
-            self.value = self.value[:max_element_number]
-            exceeding_elements_number = elements_number - max_element_number
-            if exceeding_elements_number > 0:
-                self.value.append(VisualizableBase(value="...", bold=True))
         super().__init__(
-            hide_if_empty=hide_if_empty,
-            disable_if_empty=disable_if_empty,
+            disable=disable,
         )
-        self.name = name
         if add_count_in_title:
-            self.name.value = f"{self.name.value} ({elements_number})"
+            name.value += f" ({len(value)})"
+        self.value = value
+        self.max_elements_number = max_elements_number
+        self.name = name
+        self.add_count_in_title = add_count_in_title
         self.open = open
 
     @property
@@ -206,8 +188,19 @@ class VisualizableVerticalList(VisualizableListMixin, VisualizableObject):
     def type(self) -> str:
         return "vertical_list"
 
+    @property
+    def more_elements_object(self) -> VisualizableBase:
+        return VisualizableBase(value="...", bold=True)
+
     def to_dict(self) -> Dict:
         result = super().to_dict()
+        if self.max_elements_number > 0:
+            current_elements_number = len(result["values"])
+            result["values"] = result["values"][: self.max_elements_number]
+            # if there are some elements that i'm not displaying
+            if current_elements_number - self.max_elements_number > 0:
+                result["values"].append(self.more_elements_object)
+
         return result
 
 
@@ -230,11 +223,6 @@ class VisualizableHorizontalList(VisualizableListMixin, VisualizableObject):
     @property
     def type(self) -> str:
         return "horizontal_list"
-
-    def to_dict(self) -> Dict:
-        result = super().to_dict()
-        result["alignment"] = self.alignment.value
-        return result
 
 
 class VisualizableLevel:

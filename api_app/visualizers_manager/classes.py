@@ -48,7 +48,7 @@ class VisualizableObject:
             if isinstance(value, VisualizableObject):
                 result[key] = value.to_dict()
             elif isinstance(value, Enum):
-                result[key] = value.value.lower()
+                result[key] = value.value
 
         result["type"] = self.type
         return result
@@ -199,7 +199,7 @@ class VisualizableVerticalList(VisualizableListMixin, VisualizableObject):
             result["values"] = result["values"][: self.max_elements_number]
             # if there are some elements that i'm not displaying
             if current_elements_number - self.max_elements_number > 0:
-                result["values"].append(self.more_elements_object)
+                result["values"].append(self.more_elements_object.to_dict())
 
         return result
 

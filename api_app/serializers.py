@@ -804,7 +804,7 @@ class JobAvailabilitySerializer(rfs.ModelSerializer):
 class PluginConfigSerializer(rfs.ModelSerializer):
     class Meta:
         model = PluginConfig
-        fields = ("attribute", "config_type", "owner")
+        fields = ("attribute", "config_type", "owner", "organization", "value")
 
     class CustomJSONField(rfs.JSONField):
         def to_internal_value(self, data):

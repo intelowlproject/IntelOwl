@@ -10,13 +10,8 @@ def create_config(configs, type:str, Parameter,PluginConfig):
     for config in configs:
         for param_name, param_values in config.params.items():
             param = Parameter(connector_config=config, name=param_name, type=param_values["type"], description=param_values["description"], is_secret=False, required=param_values.get("required", False))
-            try:
-                param.full_clean()
-            except ValidationError:
-                Parameter.objects.get(name=param_name, type=param_values["type"], is_secret=False)
-            else:
-                param.save()
-
+            param.full_clean()
+            param.save()
             if "default" in param_values:
                 if param_values["default"] is None and param_values["type"] == "str":
                     param_values["default"] = ""
@@ -31,13 +26,8 @@ def create_config(configs, type:str, Parameter,PluginConfig):
         for secret_name, secret_values in config.secrets.items():
             secret = Parameter(connector_config=config, name=secret_name, type=secret_values["type"],
                                                        description=secret_values["description"], is_secret=True, required=secret_values["required"])
-            try:
-                secret.full_clean()
-            except ValidationError:
-                Parameter.objects.get(name=secret_name, type=secret_values["type"],
-                                              is_secret=True)
-            else:
-                secret.save()
+            secret.full_clean()
+            secret.save()
 
             if "default" in secret_values:
                 PluginConfig.objects.get_or_create(
@@ -48,7 +38,6 @@ def create_config(configs, type:str, Parameter,PluginConfig):
                     type=type,
                     config_type="2"
                 )
-        config.save()
 
 
 def migrate(apps, schema_editor):

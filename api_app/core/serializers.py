@@ -2,11 +2,14 @@
 # See the file 'LICENSE' for copying permission.
 
 import logging
+from collections import defaultdict
 from typing import List
 
+from django.db.models import Subquery, Exists, OuterRef
 from rest_framework import serializers as rfs
+from rest_framework.fields import empty
 
-from api_app.core.models import AbstractConfig, AbstractReport, Parameter, ParameterConfig
+from api_app.core.models import AbstractConfig, AbstractReport, Parameter
 
 logger = logging.getLogger(__name__)
 
@@ -20,6 +23,11 @@ class _ConfigSerializer(rfs.Serializer):
 
 class ParamListSerializer(rfs.ListSerializer):
 
+    @property
+    def data(self):
+        # this is to return a dict instead of a list
+        return super(rfs.ListSerializer, self).data
+
     def to_representation(self, data):
         result = super().to_representation(data)
         return {
@@ -29,36 +37,95 @@ class ParamListSerializer(rfs.ListSerializer):
 class ParamSerializer(rfs.ModelSerializer):
     class Meta:
         model = Parameter
-        fields = rfs.ALL_FIELDS
+        fields = [
+            "value",
+            "name",
+            "type",
+        ]
+        list_serializer_class = ParamListSerializer
 
-    description = rfs.CharField(write_only=True)
+    value = rfs.SerializerMethodField(read_only=True)
 
-    def to_representation(self, instance: Parameter):
-        result = super().to_representation(instance)
-        result["value"] = instance.get_first_value(self.context["request"].user).value
-        return result
+    def get_value(self, instance: Parameter):
+        return instance.get_first_value(self.context["request"].user).value
 
-class ParamConfigSerializer(rfs.ModelSerializer):
-    class Meta:
-        model = ParameterConfig
-        fields = rfs.ALL_FIELDS
-    list_serializer_class = ParamListSerializer
-    parameter = ParamSerializer(read_only=True)
 
-    def to_representation(self, instance: ParameterConfig):
-        result = super().to_representation(instance)
-        result = result["parameter"]
+
+
+
+
+class AbstractListConfigSerializer(rfs.ListSerializer):
+
+    analyzers = rfs.PrimaryKeyRelatedField(read_only=True)
+    def to_representation(self, data):
+        from api_app.models import PluginConfig
+        from api_app.analyzers_manager.models import AnalyzerConfig
+        analyzers = AnalyzerConfig.objects.filter(pk__in=[analyzer.pk for analyzer in data])
+        user = self.context["request"].user
+        enabled_analyzers = analyzers.filter(disabled=False)
+        if user and user.has_membership():
+            enabled_analyzers = enabled_analyzers.exclude(disabled_in_organizations=user.membership.organization.pk)
+
+        # get the values for that configurations
+        configurations = PluginConfig.visible_for_user(user).filter(
+            parameter__analyzer_config__pk__in=analyzers)
+
+        # ????
+        subquery = Exists(configurations.filter(parameter=OuterRef('pk')))
+        subquery_owner = Subquery(configurations.filter(parameter=OuterRef('pk'), owner=user))
+        # subquery_default = Subquery(configurations.filter(parameter=OuterRef('pk'), parameter__is_secret=False).filter(owner__isnull=True))
+        # subquery_org = Subquery(configurations.filter(parameter=OuterRef('pk'), parameter__is_secret=False).filter(for_organization=True, owner=user.membership.organization.owner))
+        # annotate if the params are configured or not with the subquery
+        params = Parameter.objects.filter(analyzer_config__pk__in=analyzers).annotate(configured=subquery, value_owner=subquery_owner.values_list("name")[0])#, value_default=subquery_default, value_org=subquery_org)
+
+        parsed = defaultdict(dict)
+        for parameter in params:
+            parsed[parameter.analyzer_config][parameter] = (parameter.configured, parameter.required)
+        result = []
+
+        for config in parsed:
+            analyzer_representation = self.child.to_representation(config)
+            analyzer_representation["params"] = {}
+            total_parameter = len(parsed[config].keys())
+            parameter_required_not_configured = []
+            for param in parsed[config]:
+                configured, required = parsed[config][param]
+                if required and not configured:
+                    parameter_required_not_configured.append(param.name)
+                if not param.is_secret:
+                    analyzer_representation["params"][param.name] = param.value_owner or param.value_organization or param.value_default
+            if not parameter_required_not_configured:
+                configured = True
+                details = "Ready to use!"
+            else:
+                details = (
+                    f"{', '.join(parameter_required_not_configured)} "
+                    f"secret{'' if len(parameter_required_not_configured) == 1 else 's'} not set;"
+                    f" ({total_parameter - len(parameter_required_not_configured)} "
+                    f"of {total_parameter} satisfied)"
+                )
+                configured = False
+            if config in enabled_analyzers:
+                disabled = False
+            else:
+                disabled = True
+            # analyzer_representation["params"][param.name] = param.value
+            analyzer_representation["disabled"] = disabled
+            analyzer_representation["verification"] = {"configured": configured, "details": details, "missing_secrets": parameter_required_not_configured}
+            result.append(analyzer_representation)
         return result
 
 class AbstractConfigSerializer(rfs.ModelSerializer):
 
     config = _ConfigSerializer(required=True)
-    params = ParamConfigSerializer(read_only=True, many=True, source="parameters")
-    secrets = ParamConfigSerializer(read_only=True, many=True, source="parameters")
-    parameters = ParamConfigSerializer(write_only=True, many=True)
+    # params = ParamSerializer(read_only=True, many=True, source="options")
+    parameters = ParamSerializer(write_only=True, many=True)
 
     class Meta:
-        fields = rfs.ALL_FIELDS
+        exclude = [
+            "disabled_in_organizations"
+        ]
+
 
     def validate_params(self, params:List[Parameter]):
         return [param for param in params if not param.is_secret]
@@ -66,15 +133,11 @@ class AbstractConfigSerializer(rfs.ModelSerializer):
     def validate_secrets(self, secrets: List[Parameter]):
         return [secret for secret in secrets if secret.is_secret]
 
-    def to_representation(self, instance: AbstractConfig):
-        user = self.context["request"].user
-        result = super().to_representation(instance)
-        result["verification"] = instance.get_verification(user)
-        result["disabled"] = not instance.is_runnable(user)
-        return result
 
     def to_internal_value(self, data):
         raise NotImplementedError()
+
+
 
 
 class AbstractReportSerializer(rfs.ModelSerializer):

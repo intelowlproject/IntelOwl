@@ -3,7 +3,7 @@
 
 from rest_framework import serializers as rfs
 
-from api_app.core.serializers import AbstractConfigSerializer, AbstractReportSerializer
+from api_app.core.serializers import AbstractConfigSerializer, AbstractReportSerializer, AbstractListConfigSerializer
 
 from .models import AnalyzerConfig, AnalyzerReport
 
@@ -21,4 +21,5 @@ class AnalyzerReportSerializer(AbstractReportSerializer):
 class AnalyzerConfigSerializer(AbstractConfigSerializer):
     class Meta:
         model = AnalyzerConfig
-        fields = rfs.ALL_FIELDS
+        exclude = ["disabled_in_organizations"]
+        list_serializer_class = AbstractListConfigSerializer

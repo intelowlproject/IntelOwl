@@ -12,7 +12,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api_app', '0026_plugin_config'),
+        ('api_app', '0026_pluginconfig_api_app_plu_organiz_0867bd_idx'),
         ('analyzers_manager', '0015_alter_analyzerconfig_disabled_in_organizations_and_more'),
         ('connectors_manager', '0014_alter_connectorconfig_disabled_in_organizations_and_more'),
         ('visualizers_manager', '0012_alter_visualizerconfig_disabled_in_organizations_and_more'),

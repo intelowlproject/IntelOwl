@@ -510,3 +510,27 @@ class PluginConfig(models.Model):
 
     def is_secret(self):
         return self.parameter.is_secret
+
+    @property
+    def plugin_name(self):
+        return self.config.name
+
+    @property
+    def config(self):
+        return self.parameter.config
+
+    @property
+    def type(self):
+        # TODO retrocompatibility
+        return self.config.plugin_type
+
+    @property
+    def organization(self):
+        if self.for_organization:
+            return self.owner.membership.organization.name
+        return None
+
+    @property
+    def config_type(self):
+        # TODO retrocompatibility
+        return "2" if self.is_secret() else "1"

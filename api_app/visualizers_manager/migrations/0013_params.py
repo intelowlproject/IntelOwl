@@ -6,41 +6,28 @@ from django.db import migrations, models
 
 import api_app.fields
 
-def create_config(configs, type:str, Parameter,ParameterConfig, PluginConfig):
+def create_config(configs, type:str, Parameter,PluginConfig):
     for config in configs:
         for param_name, param_values in config.params.items():
-            param = Parameter(name=param_name, type=param_values["type"], description=param_values["description"], is_secret=False)
-            try:
-                param.full_clean()
-            except ValidationError:
-                param = Parameter.objects.get(name=param_name, type=param_values["type"], is_secret=False)
-            else:
-                param.save()
-
-            param_config, _ = ParameterConfig.objects.get_or_create(parameter=param,
-                                                             required=param_values.get("required", False))
+            param = Parameter(visualizer_config=config, name=param_name, type=param_values["type"], description=param_values["description"], is_secret=False, required=param_values.get("required", False))
+            param.full_clean()
+            param.save()
             if "default" in param_values:
+                if param_values["default"] is None and param_values["type"] == "str":
+                    param_values["default"] = ""
                 PluginConfig.objects.get_or_create(
                     owner=None,
                     value=param_values["default"],
                     plugin_name=config.name,
                     attribute=param_name,
                     type=type,
-                    config_type="1"
-                )
-            config.parameters.add(param_config)
+                    config_type="1")
         for secret_name, secret_values in config.secrets.items():
-            secret = Parameter(name=secret_name, type=secret_values["type"],
-                                                       description=secret_values["description"], is_secret=True)
-            try:
-                secret.full_clean()
-            except ValidationError:
-                secret = Parameter.objects.get(name=secret_name, type=secret_values["type"],
-                                              is_secret=True)
-            else:
-                secret.save()
+            secret = Parameter(visualizer_config=config, name=secret_name, type=secret_values["type"],
+                                                       description=secret_values["description"], is_secret=True, required=secret_values["required"])
+            secret.full_clean()
+            secret.save()
 
-            param_config, _ = ParameterConfig.objects.get_or_create(parameter=secret, required=secret_values["required"])
             if "default" in secret_values:
                 PluginConfig.objects.get_or_create(
                     owner=None,
@@ -50,16 +37,13 @@ def create_config(configs, type:str, Parameter,ParameterConfig, PluginConfig):
                     type=type,
                     config_type="2"
                 )
-            config.parameters.add(param_config)
-        config.save()
 
 
 def migrate(apps, schema_editor):
     VisualizerConfig = apps.get_model("visualizers_manager", "VisualizerConfig")
     Parameter = apps.get_model("api_app", "Parameter")
-    ParameterConfig = apps.get_model("api_app", "ParameterConfig")
     PluginConfig = apps.get_model("api_app", "PluginConfig")
-    create_config(list(VisualizerConfig.objects.all()), "3", Parameter, ParameterConfig, PluginConfig)
+    create_config(list(VisualizerConfig.objects.all()), "3", Parameter, PluginConfig)
 
 def reverse_migrate(apps, schema_editor):
     ...
@@ -73,13 +57,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AddField(
-            model_name="visualizerconfig",
-            name="parameters",
-            field=models.ManyToManyField(related_name='%(app_label)s_%(class)s_configurations',
-                                         to='api_app.parameterconfig'),
 
-        ),
         migrations.RunPython(
             migrate, reverse_migrate
         ),

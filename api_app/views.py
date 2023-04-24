@@ -29,6 +29,7 @@ from .choices import ObservableClassification
 from .core.models import AbstractConfig
 from .filters import JobFilter
 from .models import Comment, Job, PluginConfig, Tag
+from .permissions import IsObjectRealOwnerPermission
 from .serializers import (
     CommentSerializer,
     FileAnalysisSerializer,
@@ -500,7 +501,16 @@ class PluginConfigViewSet(viewsets.ModelViewSet):
     pagination_class = None
 
     def get_queryset(self):
-        return PluginConfig.visible_for_user(self.request.user).filter().order_by("id")
+        # the .exclude is to remove the default values
+        return PluginConfig.visible_for_user(self.request.user).exclude(owner__isnull=True).order_by("id")
+
+    def get_permissions(self):
+        permissions = super().get_permissions()
+        if self.request.method in ["PATCH", "DELETE"]:
+            permissions.append(IsObjectRealOwnerPermission())
+        elif self.request.method == "PUT":
+            raise PermissionDenied()
+        return permissions
 
 
 @add_docs(

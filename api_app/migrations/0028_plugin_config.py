@@ -22,7 +22,7 @@ def migrate_plugin_config(apps, schema_editor):
         else:
             raise RuntimeError("Not configured")
         params = class_.objects.get(name=plugin_config.plugin_name).parameters
-        plugin_config.parameter = params.get(parameter__name=plugin_config.attribute).parameter
+        plugin_config.parameter = params.get(name=plugin_config.attribute)
         plugin_config.full_clean()
         plugin_config.save()
 
@@ -36,7 +36,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('api_app', '0027_parameter'),
-        ('analyzers_manager', '0016_params'),
+        ('analyzers_manager', '0023_params'),
         ('connectors_manager', '0015_params'),
         ('visualizers_manager', '0013_params'),
     ]

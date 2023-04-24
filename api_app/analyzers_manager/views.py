@@ -32,6 +32,9 @@ class AnalyzerConfigAPI(AbstractConfigAPI):
     serializer_class = AnalyzerConfigSerializer
     filterset_class = AnalyzerConfigFilter
 
+    # def get_queryset(self):
+    #     return super().get_queryset().prefetch_related("parameters")
+
     @add_docs(
         description="Update plugin with latest configuration",
         request=None,
@@ -74,7 +77,6 @@ class AnalyzerActionViewSet(PluginActionViewSet):
 
     def perform_retry(self, report: AnalyzerReport):
         from intel_owl import tasks
-
         signature = report.config.get_signature(
             report.job,
         )

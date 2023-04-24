@@ -8,8 +8,7 @@ from django.conf import settings
 from django.contrib.postgres import fields as pg_fields
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.db.models import QuerySet
-from django.db.models.manager import RelatedManager
+from django.db.models import QuerySet, Manager
 from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.module_loading import import_string
@@ -91,12 +90,12 @@ class Parameter(models.Model):
     description = models.TextField(blank=True, default="")
     is_secret = models.BooleanField(null=False)
     required = models.BooleanField(null=False)
-    analyzer_config = models.ForeignKey(AnalyzerConfig, related_name="parameters", on_delete=models.CASCADE, null=True, blank=True)
-    connector_config = models.ForeignKey(ConnectorConfig, related_name="parameters", on_delete=models.CASCADE)
-    visualizer_config = models.ForeignKey(VisualizerConfig, related_name="parameters", on_delete=models.CASCADE)
+    analyzer_config = models.ForeignKey("analyzers_manager.AnalyzerConfig", related_name="parameters", on_delete=models.CASCADE, null=True, blank=True)
+    connector_config = models.ForeignKey("connectors_manager.ConnectorConfig", related_name="parameters", on_delete=models.CASCADE, null=True, blank=True)
+    visualizer_config = models.ForeignKey("visualizers_manager.VisualizerConfig", related_name="parameters", on_delete=models.CASCADE, null=True, blank=True)
 
     def clean_config(self):
-        if bool(self.analyzer_config) + bool(self.connector_config) + bool(self.visualizer_config):
+        if bool(self.analyzer_config) + bool(self.connector_config) + bool(self.visualizer_config) > 1:
             raise ValidationError("You cant have the same parameter on more than one configuration at the time")
 
     def clean(self) -> None:
@@ -138,7 +137,7 @@ class Parameter(models.Model):
 
 class AbstractConfig(models.Model):
 
-    parameters: RelatedManager
+    parameters: Manager
 
     name = models.CharField(max_length=50, null=False, unique=True, primary_key=True)
     python_module = models.CharField(null=False, max_length=120, db_index=True)
@@ -195,8 +194,12 @@ class AbstractConfig(models.Model):
         self.clean_config_queue()
 
     @property
+    def options(self):
+        return self.parameters.filter(is_secret=False)
+
+    @property
     def secrets(self):
-        return self.parameters.filter(param__is_secret=True)
+        return self.parameters.filter(is_secret=True)
 
     @property
     def required_parameters(self) -> QuerySet:

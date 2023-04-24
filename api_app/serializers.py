@@ -6,7 +6,7 @@ import datetime
 import json
 import logging
 import uuid
-from typing import Dict, List, Union
+from typing import Dict, List, Union, Any
 
 import django.core.exceptions
 from django.db.models import Q
@@ -28,6 +28,7 @@ from .choices import TLP
 from .connectors_manager.exceptions import NotRunnableConnector
 from .connectors_manager.models import ConnectorConfig
 from .connectors_manager.serializers import ConnectorReportSerializer
+from .core.models import Parameter
 from .helpers import calculate_md5, gen_random_colorhex
 from .models import Comment, Job, PluginConfig, Tag, default_runtime
 from .playbooks_manager.models import PlaybookConfig
@@ -804,9 +805,9 @@ class JobAvailabilitySerializer(rfs.ModelSerializer):
 class PluginConfigSerializer(rfs.ModelSerializer):
     class Meta:
         model = PluginConfig
-        fields = ("attribute", "config_type")
+        fields = ("attribute", "config_type", "type", "plugin_name", "value", "owner", "organization", "id")
 
-    class CustomJSONField(rfs.JSONField):
+    class CustomValueField(rfs.JSONField):
         def to_internal_value(self, data):
             if not data:
                 raise ValidationError("empty insertion")
@@ -814,7 +815,7 @@ class PluginConfigSerializer(rfs.ModelSerializer):
             try:
                 return json.loads(data)
             except json.JSONDecodeError:
-                # this is to accept classicstrings
+                # this is to accept literal strings
                 data = f'"{data}"'
                 try:
                     return json.loads(data)
@@ -822,27 +823,44 @@ class PluginConfigSerializer(rfs.ModelSerializer):
                     logger.info(f"value {data} ({type(data)}) raised ValidationError")
                     raise ValidationError("Value is not JSON-compliant.")
 
+        def get_attribute(self, instance: PluginConfig):
+            if (
+                instance.is_secret()
+                and instance.for_organization
+                and self.context["request"].user.pk != instance.owner.pk
+            ):
+                return "redacted"
+            return super().get_attribute(instance)
+
         def to_representation(self, value):
-            return json.dumps(super().to_representation(value))
+            result = super().to_representation(value)
+            return json.dumps(result)
 
-    type = rfs.ChoiceField(choices=["1", "2", "3"], write_only=True)
-    config_type = rfs.ChoiceField(choices=["1", "3"], write_only=True)
-    attribute = rfs.CharField(write_only=True)
-    plugin_name = rfs.CharField(write_only=True)
+    type = rfs.ChoiceField(choices=["1", "2", "3"]) # retrocompatibility
+    config_type = rfs.ChoiceField(choices=["1", "3"]) # retrocompatibility
+    attribute = rfs.CharField()
+    plugin_name = rfs.CharField()
     owner = rfs.HiddenField(default=rfs.CurrentUserDefault())
-    value = CustomJSONField()
 
-    def to_representation(self, instance):
-        if (
-            instance.for_organization
-            and self.context["request"].user.pk != instance.owner.pk
-        ):
-            instance.value = "redacted"
-        return super().to_representation(instance)
+    organization = rfs.PrimaryKeyRelatedField(queryset=Organization.objects.all(), required=False, allow_null=True)
+    value = CustomValueField()
+
+    def validate_value_type(self, value:Any, parameter: Parameter):
+        if type(value).__name__ != parameter.type:
+            raise ValidationError(f"Value has type {type(value).__name__} instead of {parameter.type}")
 
     def validate(self, attrs):
+        if self.partial:
+            # we are in an update
+            return attrs
+        if "organization" in attrs and attrs["organization"] and (attrs.pop("organization").owner != attrs["owner"]):
+            attrs["for_organization"] = True
+            raise ValidationError("You are not owner of the organization")
+
+        _value = attrs["value"]
         # retro compatibility
         _type = attrs.pop("type")
+        _config_type = attrs.pop("config_type")
         _plugin_name = attrs.pop("plugin_name")
         _attribute = attrs.pop("attribute")
         if _type == "1":
@@ -853,10 +871,12 @@ class PluginConfigSerializer(rfs.ModelSerializer):
             class_ = VisualizerConfig
         else:
             raise RuntimeError("Not configured")
-        parameter = class_.objects.get(name=_plugin_name).parameters.get(parameter__name=_attribute).parameter
-        if type(attrs["value"]).__name__ != parameter.type:
-            raise ValidationError(f"Value has type {type(attrs['value'].__name__)} instead of {parameter.type}")
+        parameter = class_.objects.get(name=_plugin_name).parameters.get(name=_attribute, is_secret=True if _config_type =="2" else False)
+        self.validate_value_type(_value, parameter)
         attrs["parameter"] = parameter
         return attrs
 
+    def update(self, instance, validated_data):
+        self.validate_value_type(validated_data["value"], instance.parameter)
+        return super().update(instance, validated_data)
 

@@ -41,6 +41,8 @@ INSTALLED_APPS = [
     # auth
     "rest_email_auth",
     "drf_recaptcha",
+    # performance debugging
+    "silk"
 ]
 
 

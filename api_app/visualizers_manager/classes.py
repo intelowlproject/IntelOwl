@@ -207,12 +207,10 @@ class VisualizableVerticalList(VisualizableListMixin, VisualizableObject):
 class VisualizableHorizontalList(VisualizableListMixin, VisualizableObject):
     def __init__(
         self,
-        *args,
         value: List[VisualizableObject],
         alignment: VisualizableAlignment = VisualizableAlignment.AROUND,
-        **kwargs,
     ):
-        super().__init__(*args, **kwargs)
+        super().__init__(disable=False)
         self.value = value
         self.alignment = alignment
 
@@ -223,6 +221,13 @@ class VisualizableHorizontalList(VisualizableListMixin, VisualizableObject):
     @property
     def type(self) -> str:
         return "horizontal_list"
+
+    def to_dict(self) -> Dict:
+        result = super().to_dict()
+        # IMPORTANT: this specific component don't decide if the children are disabled
+        # it's a structured component (like VList) but the children aren't part of its
+        result.pop("disable", None)
+        return result
 
 
 class VisualizableLevel:

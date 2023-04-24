@@ -12,7 +12,8 @@ export function BooleanVisualizer({
   disable,
 }) {
   let coreComponent = <p className="mb-0">{name}</p>;
-  if (link) {
+  // link added only in case is available and the component is not disabled, or it will be clickable
+  if (link && !disable) {
     coreComponent = (
       <a href={link} target="_blank" rel="noreferrer">
         {coreComponent}
@@ -23,7 +24,7 @@ export function BooleanVisualizer({
     <Badge
       pill
       color={value === true ? activeColor : "gray"}
-      className={`${disable ? "visualizer-element-disabled" : ""} ${className}`}
+      className={`${disable ? "opacity-25" : ""} ${className}`}
     >
       <div className="d-flex align-items-center">{coreComponent}</div>
     </Badge>

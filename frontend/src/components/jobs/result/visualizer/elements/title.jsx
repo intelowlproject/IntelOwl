@@ -5,7 +5,7 @@ export function TitleVisualizer({ title, value, disable }) {
   return (
     <div
       className={`d-flex flex-column align-items-center ${
-        disable ? "visualizer-element-disabled" : ""
+        disable ? "opacity-50" : ""
       }`}
     >
       <div className="mb-1 text-capitalize">{title}</div>

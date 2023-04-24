@@ -1,10 +1,7 @@
 import { VisualizerComponentType } from "./elements/const";
 
 // common visualizer field components properties
-function parseBool(value, defaultValue = false) {
-  if (value === undefined) {
-    return defaultValue;
-  }
+function parseBool(value) {
   if (typeof value === "object") {
     if (Array.isArray(value)) {
       return value.length !== 0;
@@ -65,14 +62,18 @@ function parseElementList(rawElementList) {
 
 // parse a single element
 function parseElementFields(rawElement) {
-  const type = parseComponentType(rawElement.type);
-  const disable = parseBool(rawElement.disable, true);
-
-  // common fields
-  const validatedFields = { type, disable };
+  // every component has the "type" field
+  const validatedFields = { type: parseComponentType(rawElement.type) };
+  /* We need to check if this field is in the data: the horizontal list doesn't have it.
+  It's IMPORTANT to avoid to pass it or it will works on their children and by default undefined is parsed as false.
+  So it doesn't allow to disable the children. 
+  */
+  if (rawElement.disable !== undefined) {
+    validatedFields.disable = parseBool(rawElement.disable);
+  }
 
   // validation for the elements
-  switch (type) {
+  switch (validatedFields.type) {
     case VisualizerComponentType.BOOL: {
       validatedFields.name = rawElement.name;
       validatedFields.value = parseBool(rawElement.value);

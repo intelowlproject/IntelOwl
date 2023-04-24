@@ -20,7 +20,8 @@ export function BaseVisualizer({
       {value} {icon}
     </p>
   );
-  if (link) {
+  // link added only in case is available and the component is not disabled, or it will be clickable
+  if (link && !disable) {
     coreComponent = (
       <a href={link} target="_blank" rel="noreferrer">
         {coreComponent}
@@ -30,7 +31,7 @@ export function BaseVisualizer({
   return (
     <div
       className={`small d-flex align-items-center ${
-        disable ? "visualizer-element-disabled" : ""
+        disable ? "opacity-25" : ""
       } ${className} ${color}`}
     >
       {coreComponent}

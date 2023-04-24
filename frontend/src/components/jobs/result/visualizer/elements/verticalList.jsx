@@ -25,9 +25,7 @@ export function VerticalListVisualizer({
   const toggleList = () => setIsListOpen(!isListOpen);
 
   return (
-    <Card
-      className={`${className} ${disable ? "visualizer-element-disabled" : ""}`}
-    >
+    <Card className={`${className} ${disable ? "opacity-50" : ""}`}>
       <CardTitle className="p-1 mb-0">
         <Button
           className="p-0 w-100"

@@ -70,7 +70,7 @@
     "eslint-plugin-react-hooks": "^4.5.0",
     "jest": "^29.4.1",
     "jest-environment-jsdom": "^29.5.0",
-    "prettier": "^2.8.4",
+    "prettier": "^2.8.8",
     "sass": "^1.61.0",
     "stylelint": "^14.9.1",
     "stylelint-config-prettier": "^9.0.3",

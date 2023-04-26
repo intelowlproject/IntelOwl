@@ -186,7 +186,7 @@ class VisualizableHorizontalListTestCase(CustomTestCase):
         expected_result = {
             "type": "horizontal_list",
             "alignment": "around",
-            "disable": True,
+            "disable": False,
             "values": [value.to_dict()],
         }
         self.assertEqual(vvl.to_dict(), expected_result)
@@ -196,7 +196,7 @@ class VisualizableHorizontalListTestCase(CustomTestCase):
         expected_result = {
             "type": "horizontal_list",
             "alignment": "around",
-            "disable": True,
+            "disable": False,
             "values": [],
         }
         self.assertEqual(vvl.to_dict(), expected_result)
@@ -206,7 +206,7 @@ class VisualizableHorizontalListTestCase(CustomTestCase):
         expected_result = {
             "type": "horizontal_list",
             "alignment": "around",
-            "disable": True,
+            "disable": False,
             "values": [],
         }
         self.assertEqual(vvl.to_dict(), expected_result)

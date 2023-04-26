@@ -38,11 +38,11 @@ function DeleteIcon() {
   );
 }
 
-function CommentIcon() {
+function CommentIcon({ commentNumber }) {
   return (
     <span>
       <MdComment className="me-1" />
-      Comments
+      Comments ({commentNumber})
     </span>
   );
 }
@@ -128,11 +128,12 @@ export function JobActionsBar({ job, refetch }) {
     }
   };
 
+  const commentIcon = () => <CommentIcon commentNumber={job.comments.length} />;
   return (
     <ContentSection className="d-inline-flex me-2">
       <IconButton
         id="commentbtn"
-        Icon={CommentIcon}
+        Icon={commentIcon}
         size="sm"
         color="darker"
         className="me-2"

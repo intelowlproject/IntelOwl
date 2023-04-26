@@ -1,10 +1,7 @@
 import { VisualizerComponentType } from "./elements/const";
 
 // common visualizer field components properties
-function parseBool(value, defaultValue = false) {
-  if (value === undefined) {
-    return defaultValue;
-  }
+function parseBool(value) {
   if (typeof value === "object") {
     if (Array.isArray(value)) {
       return value.length !== 0;
@@ -49,6 +46,13 @@ function parseColor(color, defaultColor) {
   return defaultColor;
 }
 
+function parseAlignment(alignment) {
+  if (["start", "center", "end", "between", "around"].includes(alignment)) {
+    return alignment;
+  }
+  return "around";
+}
+
 // parse list of Elements
 function parseElementList(rawElementList) {
   return rawElementList?.map((additionalElementrawData) =>
@@ -58,19 +62,18 @@ function parseElementList(rawElementList) {
 
 // parse a single element
 function parseElementFields(rawElement) {
-  const type = parseComponentType(rawElement.type);
-  const hideIfEmpty = parseBool(rawElement.hide_if_empty, false);
-  const disableIfEmpty = parseBool(rawElement.disable_if_empty, true);
-
-  // common fields
-  const validatedFields = { type, hideIfEmpty, disableIfEmpty };
+  // every component has the "type" field
+  const validatedFields = { type: parseComponentType(rawElement.type) };
+  // HList doesn't have this field, don't pass it even if it wouldn't be used
+  if (rawElement.disable !== undefined) {
+    validatedFields.disable = parseBool(rawElement.disable);
+  }
 
   // validation for the elements
-  switch (type) {
+  switch (validatedFields.type) {
     case VisualizerComponentType.BOOL: {
       validatedFields.name = rawElement.name;
       validatedFields.value = parseBool(rawElement.value);
-      validatedFields.pill = parseBool(rawElement.pill, true);
       validatedFields.link = rawElement.link;
       validatedFields.className = rawElement.classname;
       validatedFields.activeColor = parseColor(rawElement.color, "danger");
@@ -78,14 +81,12 @@ function parseElementFields(rawElement) {
     }
     case VisualizerComponentType.HLIST: {
       validatedFields.values = parseElementList(rawElement.values);
+      validatedFields.alignment = parseAlignment(rawElement.alignment);
       break;
     }
     case VisualizerComponentType.VLIST: {
-      validatedFields.name = rawElement.name;
+      validatedFields.name = parseElementFields(rawElement.name);
       validatedFields.values = parseElementList(rawElement.values);
-      validatedFields.icon = rawElement.icon;
-      validatedFields.color = parseColor(rawElement.color);
-      validatedFields.link = rawElement.link;
       validatedFields.className = rawElement.classname;
       validatedFields.startOpen = parseBool(rawElement.open);
       break;
@@ -101,6 +102,8 @@ function parseElementFields(rawElement) {
       validatedFields.icon = rawElement.icon;
       validatedFields.color = `bg-${parseColor(rawElement.color)}`;
       validatedFields.link = rawElement.link;
+      validatedFields.bold = parseBool(rawElement.bold);
+      validatedFields.italic = parseBool(rawElement.italic);
       validatedFields.className = rawElement.classname;
       break;
     }

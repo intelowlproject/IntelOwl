@@ -1,20 +1,15 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-export function TitleVisualizer({ title, value, hideIfEmpty, disableIfEmpty }) {
-  if (hideIfEmpty && !value) {
-    return null;
-  }
-  let isDisabled = "";
-  if (disableIfEmpty && !value) {
-    isDisabled = "visualizer-element-disabled";
-  }
+export function TitleVisualizer({ title, value, disable }) {
   return (
-    <div key={`${title}__${value}`} className="col-auto">
-      <div className={`d-flex flex-column align-items-center ${isDisabled}`}>
-        <div className="text-capitalize mb-1">{title}</div>
-        <div className="p-1 d-inline-flex">{value}</div>
-      </div>
+    <div
+      className={`d-flex flex-column align-items-center ${
+        disable ? "opacity-50" : ""
+      }`}
+    >
+      <div className="mb-1 text-capitalize">{title}</div>
+      <div className="p-1 d-inline-flex">{value}</div>
     </div>
   );
 }
@@ -22,11 +17,9 @@ export function TitleVisualizer({ title, value, hideIfEmpty, disableIfEmpty }) {
 TitleVisualizer.propTypes = {
   title: PropTypes.element.isRequired,
   value: PropTypes.element.isRequired,
-  hideIfEmpty: PropTypes.bool,
-  disableIfEmpty: PropTypes.bool,
+  disable: PropTypes.bool,
 };
 
 TitleVisualizer.defaultProps = {
-  hideIfEmpty: false,
-  disableIfEmpty: false,
+  disable: false,
 };

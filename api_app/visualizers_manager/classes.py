@@ -9,7 +9,11 @@ from django.conf import settings
 from django.db.models import QuerySet
 
 from api_app.core.classes import Plugin
-from api_app.visualizers_manager.enums import VisualizableColor, VisualizableIcon
+from api_app.visualizers_manager.enums import (
+    VisualizableAlignment,
+    VisualizableColor,
+    VisualizableIcon,
+)
 from api_app.visualizers_manager.exceptions import (
     VisualizerConfigurationException,
     VisualizerRunException,
@@ -20,13 +24,12 @@ logger = logging.getLogger(__name__)
 
 
 class VisualizableObject:
-    def __init__(self, hide_if_empty: bool = False, disable_if_empty: bool = True):
-        self.hide_if_empty = hide_if_empty
-        self.disable_if_empty = disable_if_empty
+    def __init__(self, disable: bool = True):
+        self.disable = disable
 
     @property
     def attributes(self) -> List[str]:
-        return ["hide_if_empty", "disable_if_empty"]
+        return ["disable"]
 
     @property
     @abc.abstractmethod
@@ -37,13 +40,15 @@ class VisualizableObject:
         return True
 
     def to_dict(self) -> Dict:
-        if not self:
+        if not self and not self.disable:
             return {}
 
         result = {attr: getattr(self, attr) for attr in self.attributes}
         for key, value in result.items():
             if isinstance(value, VisualizableObject):
                 result[key] = value.to_dict()
+            elif isinstance(value, Enum):
+                result[key] = value.value
 
         result["type"] = self.type
         return result
@@ -55,22 +60,33 @@ class VisualizableBase(VisualizableObject):
         value: Any = "",
         color: VisualizableColor = VisualizableColor.TRANSPARENT,
         link: str = "",
-        classname: str = "",
-        hide_if_empty: bool = False,
-        disable_if_empty: bool = True,
         # you can use an element of the enum or an iso3166 alpha2 code (for flags)
         icon: Union[VisualizableIcon, str] = VisualizableIcon.EMPTY,
+        bold: bool = False,
+        italic: bool = False,
+        classname: str = "",
+        disable: bool = True,
     ):
-        super().__init__(hide_if_empty, disable_if_empty)
+        super().__init__(disable)
         self.value = value
         self.color = color
         self.link = link
-        self.classname = classname
         self.icon = icon
+        self.bold = bold
+        self.italic = italic
+        self.classname = classname
 
     @property
     def attributes(self) -> List[str]:
-        return super().attributes + ["value", "color", "link", "classname", "icon"]
+        return super().attributes + [
+            "value",
+            "color",
+            "link",
+            "classname",
+            "icon",
+            "bold",
+            "italic",
+        ]
 
     @property
     def type(self) -> str:
@@ -79,29 +95,24 @@ class VisualizableBase(VisualizableObject):
     def __bool__(self):
         return bool(self.value) or bool(self.icon)
 
-    def to_dict(self) -> Dict:
-        result = super().to_dict()
-        if result:
-            for enum_key in ["color", "icon"]:
-                if isinstance(result[enum_key], Enum):
-                    result[enum_key] = str(result[enum_key].value)
-                else:  # some icon codes are in camelcase
-                    result[enum_key] = result[enum_key].lower()
-
-        return result
-
 
 class VisualizableTitle(VisualizableObject):
     def __init__(
         self,
         title: VisualizableBase,
         value: VisualizableBase,
-        hide_if_empty: bool = False,
-        disable_if_empty: bool = True,
+        disable: bool = True,
     ):
-        super().__init__(hide_if_empty, disable_if_empty)
+        super().__init__(disable)
         self.title = title
         self.value = value
+        if self.disable != self.title.disable or self.disable != self.value.disable:
+            logger.warning(
+                "Each part of the title should be disabled. "
+                f"Forcing all to disable={self.disable}"
+            )
+            self.title.disable = self.disable
+            self.value.disable = self.disable
 
     @property
     def attributes(self) -> List[str]:
@@ -118,20 +129,18 @@ class VisualizableBool(VisualizableBase):
         name: str,
         value: bool,
         *args,
-        pill: bool = True,
         color: VisualizableColor = VisualizableColor.DANGER,
         **kwargs,
     ):
         super().__init__(*args, color=color, value=value, **kwargs)
         self.name = name
-        self.pill = pill
 
     def __bool__(self):
         return bool(self.name)
 
     @property
     def attributes(self) -> List[str]:
-        return super().attributes + ["name", "pill"]
+        return super().attributes + ["name"]
 
     @property
     def type(self) -> str:
@@ -139,8 +148,10 @@ class VisualizableBool(VisualizableBase):
 
     def to_dict(self) -> Dict:
         result = super().to_dict()
-        # bool does not support icon at the moment
+        # bool does not support icon, bold and italic at the moment
         result.pop("icon", None)
+        result.pop("bold", None)
+        result.pop("italic", None)
         return result
 
 
@@ -155,53 +166,72 @@ class VisualizableListMixin:
         return result
 
 
-class VisualizableVerticalList(VisualizableListMixin, VisualizableBase):
+class VisualizableVerticalList(VisualizableListMixin, VisualizableObject):
     def __init__(
         self,
-        name: str,
+        name: VisualizableBase,
         value: List[VisualizableObject],
-        *args,
         open: bool = False,  # noqa
-        filter_elements: bool = True,
+        max_elements_number: int = -1,
         add_count_in_title: bool = True,
-        **kwargs,
+        disable: bool = True,
     ):
-        elements_number = len(value)
-        elements_max_number = 3
-        filtered_element_list = value
-        if filter_elements:
-            filtered_element_list = filtered_element_list[:elements_max_number]
-            exceeding_elements_number = elements_number - elements_max_number
-            if exceeding_elements_number > 0:
-                filtered_element_list.append(
-                    VisualizableBase(
-                        f"{exceeding_elements_number} more elements: consult raw data"
-                    )
-                )
-        super().__init__(value=filtered_element_list, *args, **kwargs)
-        self.name = name
+        super().__init__(
+            disable=disable,
+        )
         if add_count_in_title:
-            self.name = f"{self.name} ({elements_number})"
+            name.value += f" ({len(value)})"
+        self.value = value
+        self.max_elements_number = max_elements_number
+        self.name = name
+        self.add_count_in_title = add_count_in_title
         self.open = open
+
+    @property
+    def attributes(self) -> List[str]:
+        return super().attributes + ["name", "open", "value"]
+
+    @property
+    def type(self) -> str:
+        return "vertical_list"
+
+    @property
+    def more_elements_object(self) -> VisualizableBase:
+        return VisualizableBase(value="...", bold=True)
+
+    def to_dict(self) -> Dict:
+        result = super().to_dict()
+        if self and self.max_elements_number > 0:
+            current_elements_number = len(result["values"])
+            result["values"] = result["values"][: self.max_elements_number]
+            # if there are some elements that i'm not displaying
+            if current_elements_number - self.max_elements_number > 0:
+                result["values"].append(self.more_elements_object.to_dict())
+
+        return result
 
 
 class VisualizableHorizontalList(VisualizableListMixin, VisualizableObject):
     def __init__(
         self,
         value: List[VisualizableObject],
-        *args,
-        **kwargs,
+        alignment: VisualizableAlignment = VisualizableAlignment.AROUND,
     ):
-        super().__init__(*args, **kwargs)
+        super().__init__(disable=False)
         self.value = value
+        self.alignment = alignment
 
     @property
     def attributes(self) -> List[str]:
-        return super().attributes + ["value"]
+        return super().attributes + ["value", "alignment"]
 
     @property
     def type(self) -> str:
         return "horizontal_list"
+
+    def to_dict(self) -> Dict:
+        result = super().to_dict()
+        return result
 
 
 class VisualizableLevel:
@@ -226,6 +256,7 @@ class VisualizableLevel:
 class Visualizer(Plugin, metaclass=abc.ABCMeta):
     Color = VisualizableColor
     Icon = VisualizableIcon
+    Alignment = VisualizableAlignment
 
     Base = VisualizableBase
     Title = VisualizableTitle

@@ -6,23 +6,22 @@ export function BaseVisualizer({
   icon,
   color,
   link,
+  bold,
+  italic,
   className,
-  hideIfEmpty,
-  disableIfEmpty,
+  disable,
 }) {
-  if (hideIfEmpty && !value && !icon) {
-    return null;
-  }
-  let isDisabled = "";
-  if (disableIfEmpty && !value && !icon) {
-    isDisabled = "visualizer-element-disabled";
-  }
   let coreComponent = (
-    <p className={`mb-0 ${color}`}>
+    <p
+      className={`mb-0 ${color} ${bold ? "fw-bold" : ""} ${
+        italic ? "fst-italic" : ""
+      }`}
+    >
       {value} {icon}
     </p>
   );
-  if (link) {
+  // link added only in case is available and the component is not disabled, or it will be clickable
+  if (link && !disable) {
     coreComponent = (
       <a href={link} target="_blank" rel="noreferrer">
         {coreComponent}
@@ -30,12 +29,12 @@ export function BaseVisualizer({
     );
   }
   return (
-    <div key={value} className="col-auto">
-      <div
-        className={`small d-flex align-items-center ${isDisabled} ${className} ${color}`}
-      >
-        {coreComponent}
-      </div>
+    <div
+      className={`small d-flex align-items-center ${
+        disable ? "opacity-25" : ""
+      } ${className} ${color}`}
+    >
+      {coreComponent}
     </div>
   );
 }
@@ -45,16 +44,18 @@ BaseVisualizer.propTypes = {
   icon: PropTypes.string,
   color: PropTypes.string,
   link: PropTypes.string,
+  bold: PropTypes.bool,
+  italic: PropTypes.bool,
   className: PropTypes.string,
-  hideIfEmpty: PropTypes.bool,
-  disableIfEmpty: PropTypes.bool,
+  disable: PropTypes.bool,
 };
 
 BaseVisualizer.defaultProps = {
   icon: "",
   color: "",
   link: "",
+  bold: false,
+  italic: false,
   className: "",
-  hideIfEmpty: false,
-  disableIfEmpty: false,
+  disable: false,
 };

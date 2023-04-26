@@ -57,30 +57,34 @@ class ParamSerializer(rfs.ModelSerializer):
 class AbstractListConfigSerializer(rfs.ListSerializer):
 
     analyzers = rfs.PrimaryKeyRelatedField(read_only=True)
+
     def to_representation(self, data):
         from api_app.models import PluginConfig
         from api_app.analyzers_manager.models import AnalyzerConfig
-        analyzers = AnalyzerConfig.objects.filter(pk__in=[analyzer.pk for analyzer in data])
+        plugins = AnalyzerConfig.objects.filter(pk__in=[analyzer.pk for analyzer in data])
         user = self.context["request"].user
-        enabled_analyzers = analyzers.filter(disabled=False)
+        enabled_plugins = plugins.filter(disabled=False)
         if user and user.has_membership():
-            enabled_analyzers = enabled_analyzers.exclude(disabled_in_organizations=user.membership.organization.pk)
+            enabled_plugins = enabled_plugins.exclude(disabled_in_organizations=user.membership.organization.pk)
 
         # get the values for that configurations
         configurations = PluginConfig.visible_for_user(user).filter(
-            parameter__analyzer_config__pk__in=analyzers)
+            parameter__analyzer_config__pk__in=plugins)
 
         # ????
-        subquery = Exists(configurations.filter(parameter=OuterRef('pk')))
-        subquery_owner = Subquery(configurations.filter(parameter=OuterRef('pk'), owner=user))
-        # subquery_default = Subquery(configurations.filter(parameter=OuterRef('pk'), parameter__is_secret=False).filter(owner__isnull=True))
-        # subquery_org = Subquery(configurations.filter(parameter=OuterRef('pk'), parameter__is_secret=False).filter(for_organization=True, owner=user.membership.organization.owner))
+        subquery_owner = Subquery(configurations.filter(parameter=OuterRef('pk'), owner=user, for_organization=False).values("value")[:1])
+        subquery_default = Subquery(configurations.filter(parameter=OuterRef('pk')).filter(owner__isnull=True).values("value")[:1])
+        if user.has_membership():
+            subquery_org = Subquery(configurations.filter(parameter=OuterRef('pk')).filter(for_organization=True, owner=user.membership.organization.owner).values("value")[:1])
+        else:
+            from django.db.models import Value
+            subquery_org = Value(False)
         # annotate if the params are configured or not with the subquery
-        params = Parameter.objects.filter(analyzer_config__pk__in=analyzers).annotate(configured=subquery, value_owner=subquery_owner.values_list("name")[0])#, value_default=subquery_default, value_org=subquery_org)
+        params = Parameter.objects.filter(analyzer_config__pk__in=plugins).annotate(value_owner=subquery_owner, value_default=subquery_default, value_organization=subquery_org)#.annotate(configured=)
 
         parsed = defaultdict(dict)
         for parameter in params:
-            parsed[parameter.analyzer_config][parameter] = (parameter.configured, parameter.required)
+            parsed[parameter.analyzer_config][parameter] = (parameter.value_owner or parameter.value_organization or parameter.value_default, parameter.required)
         result = []
 
         for config in parsed:
@@ -105,7 +109,7 @@ class AbstractListConfigSerializer(rfs.ListSerializer):
                     f"of {total_parameter} satisfied)"
                 )
                 configured = False
-            if config in enabled_analyzers:
+            if config in enabled_plugins:
                 disabled = False
             else:
                 disabled = True

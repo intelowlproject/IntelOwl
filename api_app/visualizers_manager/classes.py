@@ -200,7 +200,7 @@ class VisualizableVerticalList(VisualizableListMixin, VisualizableObject):
 
     def to_dict(self) -> Dict:
         result = super().to_dict()
-        if self.max_elements_number > 0:
+        if self and self.max_elements_number > 0:
             current_elements_number = len(result["values"])
             result["values"] = result["values"][: self.max_elements_number]
             # if there are some elements that i'm not displaying
@@ -230,9 +230,6 @@ class VisualizableHorizontalList(VisualizableListMixin, VisualizableObject):
 
     def to_dict(self) -> Dict:
         result = super().to_dict()
-        # IMPORTANT: this specific component don't decide if the children are disabled
-        # it's a structured component (like VList) but the children aren't part of its
-        result.pop("disable", None)
         return result
 
 

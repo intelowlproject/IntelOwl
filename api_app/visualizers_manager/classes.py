@@ -108,7 +108,8 @@ class VisualizableTitle(VisualizableObject):
         self.value = value
         if self.disable != self.title.disable or self.disable != self.value.disable:
             logger.warning(
-                f"Each part of the title should be disabled. Forcing all to disable={self.disable}"
+                f"Each part of the title should be disabled. "
+                f"Forcing all to disable={self.disable}"
             )
             self.title.disable = self.disable
             self.value.disable = self.disable

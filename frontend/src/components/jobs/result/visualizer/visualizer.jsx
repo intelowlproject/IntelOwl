@@ -45,21 +45,9 @@ export function convertToElement(element, isChild = false) {
       */
       // eslint-disable-next-line no-param-reassign
       isChild = true;
-      /* IMPORTANT!!!
-        In some cases we could have a hierarchy like this: Vlist -> list of HLists -> list of components
-        In this case we need to pass the disable value from VList to the components, we need to used the HList to pass the value
-        this is the only reason why hlist could have a disable value.       
-      */
-      let hlistElements = element.values;
-      if (element.disable !== undefined) {
-        hlistElements = hlistElements.map((additionalElement) => ({
-          ...additionalElement,
-          disable: element.disable,
-        }));
-      }
       visualizerElement = (
         <HorizontalListVisualizer
-          values={hlistElements.map((additionalElement) =>
+          values={element.values.map((additionalElement) =>
             convertToElement(additionalElement)
           )}
           alignment={element.alignment}
@@ -68,20 +56,12 @@ export function convertToElement(element, isChild = false) {
       break;
     }
     case VisualizerComponentType.VLIST: {
-      // the parent decide if the children are disabled or not
-      // eslint-disable-next-line no-param-reassign
-      element.name.disable = element.disable;
       visualizerElement = (
         <VerticalListVisualizer
           name={convertToElement(element.name, true)}
-          values={element.values
-            ?.map((additionalElement) => ({
-              ...additionalElement,
-              disable: element.disable,
-            }))
-            .map((additionalElement) =>
-              convertToElement(additionalElement, true)
-            )}
+          values={element.values.map((additionalElement) =>
+            convertToElement(additionalElement, true)
+          )}
           className={element.className}
           startOpen={element.startOpen}
           disable={element.disable}
@@ -90,11 +70,6 @@ export function convertToElement(element, isChild = false) {
       break;
     }
     case VisualizerComponentType.TITLE: {
-      // the parent decide if the children are disabled or not
-      // eslint-disable-next-line no-param-reassign
-      element.title.disable = element.disable;
-      // eslint-disable-next-line no-param-reassign
-      element.value.disable = element.disable;
       visualizerElement = (
         <TitleVisualizer
           title={convertToElement(element.title, true)}

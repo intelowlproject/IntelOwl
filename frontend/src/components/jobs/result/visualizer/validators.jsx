@@ -64,10 +64,7 @@ function parseElementList(rawElementList) {
 function parseElementFields(rawElement) {
   // every component has the "type" field
   const validatedFields = { type: parseComponentType(rawElement.type) };
-  /* We need to check if this field is in the data: the horizontal list doesn't have it.
-  It's IMPORTANT to avoid to pass it or it will works on their children and by default undefined is parsed as false.
-  So it doesn't allow to disable the children. 
-  */
+  // HList doesn't have this field, don't pass it even if it wouldn't be used
   if (rawElement.disable !== undefined) {
     validatedFields.disable = parseBool(rawElement.disable);
   }

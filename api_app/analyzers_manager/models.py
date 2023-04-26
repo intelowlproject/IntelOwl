@@ -18,7 +18,6 @@ from api_app.analyzers_manager.exceptions import AnalyzerConfigurationException
 from api_app.choices import TLP
 from api_app.core.models import AbstractConfig, AbstractReport
 from api_app.fields import ChoiceArrayField
-from api_app.models import PluginConfig
 
 logger = getLogger(__name__)
 

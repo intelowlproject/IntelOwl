@@ -11,6 +11,7 @@ from api_app.models import PluginConfig
 
 logger = getLogger(__name__)
 
+
 class IsObjectRealOwnerPermission(BasePermission):
     def has_object_permission(self, request, view, obj):
         if obj_owner := getattr(obj, "owner", None):

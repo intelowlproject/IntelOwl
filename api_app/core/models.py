@@ -1,20 +1,20 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 import logging
-from typing import Any, Dict, Type, List
-from cache_memoize import cache_memoize
+from typing import Any, Dict, List, Type
 
+from cache_memoize import cache_memoize
 from django.conf import settings
 from django.contrib.postgres import fields as pg_fields
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.db.models import QuerySet, Manager
+from django.db.models import Manager, QuerySet
 from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.module_loading import import_string
 from kombu import uuid
 
-from api_app.core.choices import Status, ParamTypes
+from api_app.core.choices import ParamTypes, Status
 from api_app.validators import validate_config
 from certego_saas.apps.organization.organization import Organization
 from certego_saas.apps.user.models import User
@@ -84,36 +84,67 @@ class AbstractReport(models.Model):
 def config_default():
     return dict(queue=DEFAULT_QUEUE, soft_time_limit=60)
 
+
 class Parameter(models.Model):
     name = models.CharField(null=False, blank=False, max_length=50)
-    type = models.CharField(choices=ParamTypes.choices, max_length=10, null=False, blank=False)
+    type = models.CharField(
+        choices=ParamTypes.choices, max_length=10, null=False, blank=False
+    )
     description = models.TextField(blank=True, default="")
     is_secret = models.BooleanField(null=False)
     required = models.BooleanField(null=False)
-    analyzer_config = models.ForeignKey("analyzers_manager.AnalyzerConfig", related_name="parameters", on_delete=models.CASCADE, null=True, blank=True)
-    connector_config = models.ForeignKey("connectors_manager.ConnectorConfig", related_name="parameters", on_delete=models.CASCADE, null=True, blank=True)
-    visualizer_config = models.ForeignKey("visualizers_manager.VisualizerConfig", related_name="parameters", on_delete=models.CASCADE, null=True, blank=True)
+    analyzer_config = models.ForeignKey(
+        "analyzers_manager.AnalyzerConfig",
+        related_name="parameters",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
+    connector_config = models.ForeignKey(
+        "connectors_manager.ConnectorConfig",
+        related_name="parameters",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
+    visualizer_config = models.ForeignKey(
+        "visualizers_manager.VisualizerConfig",
+        related_name="parameters",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
 
     def clean_config(self):
-        if bool(self.analyzer_config) + bool(self.connector_config) + bool(self.visualizer_config) > 1:
-            raise ValidationError("You cant have the same parameter on more than one configuration at the time")
+        if (
+            bool(self.analyzer_config)
+            + bool(self.connector_config)
+            + bool(self.visualizer_config)
+            > 1
+        ):
+            raise ValidationError(
+                "You cant have the same parameter on more than one configuration at the time"
+            )
 
     def clean(self) -> None:
         super().clean()
         self.clean_config()
 
     class Meta:
-        unique_together = [("name", "analyzer_config", "connector_config", "visualizer_config")]
+        unique_together = [
+            ("name", "analyzer_config", "connector_config", "visualizer_config")
+        ]
 
     @cached_property
     def config(self):
         return self.analyzer_config or self.connector_config or self.visualizer_config
 
-    def values_for_user(self, user:User=None) -> QuerySet:
+    def values_for_user(self, user: User = None) -> QuerySet:
         from api_app.models import PluginConfig
+
         return PluginConfig.visible_for_user(user).filter(parameter=self)
 
-    def get_first_value(self, user:User=None) -> "PluginConfig":
+    def get_first_value(self, user: User = None) -> "PluginConfig":
         from api_app.models import PluginConfig
 
         # priority
@@ -129,7 +160,10 @@ class Parameter(models.Model):
             except PluginConfig.DoesNotExist:
                 if user.has_membership():
                     try:
-                        return qs.get(for_organization=True, owner=user.membership.organization.owner)
+                        return qs.get(
+                            for_organization=True,
+                            owner=user.membership.organization.owner,
+                        )
                     except PluginConfig.DoesNotExist:
                         ...
                 return qs.get(owner__isnull=True)
@@ -163,7 +197,8 @@ class AbstractConfig(models.Model):
     @property
     def snake_case_name(cls) -> str:
         import re
-        return re.sub(r'(?<!^)(?=[A-Z])', '_', cls.__name__).lower()
+
+        return re.sub(r"(?<!^)(?=[A-Z])", "_", cls.__name__).lower()
 
     @classmethod
     @property
@@ -222,7 +257,7 @@ class AbstractConfig(models.Model):
         total_missing = 0
         parameter_required_missing: List[str] = []
         for param in self.required_parameters:
-            param : Parameter
+            param: Parameter
             total_required += 1
             if not param.values_for_user(user).exists():
                 total_missing += 1
@@ -244,6 +279,14 @@ class AbstractConfig(models.Model):
         }
 
     def is_runnable(self, user: User = None):
+        configured = False
+        for param in self.required_parameters:
+            param: Parameter
+            if not param.values_for_user(user).exists()
+
+
+
+
         configured = self.get_verification(user)["configured"]
         if user and user.has_membership():
             disabled_by_org = self.disabled_in_organizations.filter(
@@ -282,7 +325,7 @@ class AbstractConfig(models.Model):
     def config_exception(cls):
         raise NotImplementedError()
 
-    def read_params(self, job:"Job") -> Dict[str, Any]:
+    def read_params(self, job: "Job") -> Dict[str, Any]:
         # priority
         # 1 - Runtime config
         # 2 - Value inside the db
@@ -291,11 +334,12 @@ class AbstractConfig(models.Model):
             param: Parameter
 
             if param.name in job.get_config_runtime_configuration(self):
-                result[param.name] = job.get_config_runtime_configuration(self)[param.name]
+                result[param.name] = job.get_config_runtime_configuration(self)[
+                    param.name
+                ]
             else:
                 result[param.name] = param.get_first_value(job.user).value
         return result
-
 
     def get_signature(self, job):
         from api_app.models import Job

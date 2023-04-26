@@ -5,6 +5,7 @@
 import django
 from django.db import migrations, models
 
+
 def migrate_plugin_config(apps, schema_editor):
     PluginConfig = apps.get_model("api_app", "PluginConfig")
     AnalyzerConfig = apps.get_model("analyzers_manager", "AnalyzerConfig")

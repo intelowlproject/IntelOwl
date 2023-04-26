@@ -361,11 +361,14 @@ class YaraScan(FileAnalyzer):
     @classmethod
     def _create_storage(cls):
         from api_app.analyzers_manager.models import AnalyzerConfig
+
         storage = YaraStorage()
         for config in AnalyzerConfig.objects.filter(
             python_module=cls.python_module, disabled=False
         ):
-            for plugin in config.parameters.get(name="private_repositories").values_for_user():
+            for plugin in config.parameters.get(
+                name="private_repositories"
+            ).values_for_user():
                 owner = (
                     f"{plugin.organization.name}.{plugin.organization.owner}"
                     if plugin.organization

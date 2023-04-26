@@ -22,7 +22,6 @@ from api_app.choices import TLP, ObservableClassification, Status
 from api_app.core.models import AbstractConfig, AbstractReport, Parameter
 from api_app.helpers import calculate_sha1, calculate_sha256, get_now
 from api_app.validators import validate_runtime_configuration
-from certego_saas.apps.organization.organization import Organization
 from certego_saas.models import User
 from intel_owl import tasks
 from intel_owl.celery import DEFAULT_QUEUE, get_queue_name
@@ -465,9 +464,11 @@ class PluginConfig(models.Model):
         on_delete=models.CASCADE,
         related_name="custom_configs",
         null=True,
-        blank=True
+        blank=True,
     )
-    parameter = models.ForeignKey(Parameter, on_delete=models.CASCADE, null=False, related_name="values")
+    parameter = models.ForeignKey(
+        Parameter, on_delete=models.CASCADE, null=False, related_name="values"
+    )
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
@@ -489,7 +490,9 @@ class PluginConfig(models.Model):
                 configs = configs.filter(Q(owner=user) | Q(owner__isnull=True))
             else:
                 configs = configs.filter(
-                    (Q(for_organization=True) & Q(owner=membership.organization.owner)) | Q(owner=user) | Q(owner__isnull=True)
+                    (Q(for_organization=True) & Q(owner=membership.organization.owner))
+                    | Q(owner=user)
+                    | Q(owner__isnull=True)
                 )
         else:
             configs = configs.filter(owner__isnull=True)
@@ -497,8 +500,13 @@ class PluginConfig(models.Model):
         return configs
 
     def clean_for_organization(self):
-        if self.for_organization and (self.owner.has_membership() and self.owner.membership.organization.owner != self.owner):
-            raise ValidationError("Only organization owner can create configuration at the org level")
+        if self.for_organization and (
+            self.owner.has_membership()
+            and self.owner.membership.organization.owner != self.owner
+        ):
+            raise ValidationError(
+                "Only organization owner can create configuration at the org level"
+            )
 
     def clean(self):
         super().clean()

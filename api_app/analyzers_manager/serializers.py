@@ -1,9 +1,12 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-from rest_framework import serializers as rfs
 
-from api_app.core.serializers import AbstractConfigSerializer, AbstractReportSerializer, AbstractListConfigSerializer
+from api_app.core.serializers import (
+    AbstractConfigSerializer,
+    AbstractListConfigSerializer,
+    AbstractReportSerializer,
+)
 
 from .models import AnalyzerConfig, AnalyzerReport
 

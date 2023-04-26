@@ -3,7 +3,11 @@
 
 from rest_framework import serializers as rfs
 
-from api_app.core.serializers import AbstractConfigSerializer, AbstractReportSerializer, AbstractListConfigSerializer
+from api_app.core.serializers import (
+    AbstractConfigSerializer,
+    AbstractListConfigSerializer,
+    AbstractReportSerializer,
+)
 
 from .models import VisualizerConfig, VisualizerReport
 

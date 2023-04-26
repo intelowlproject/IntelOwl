@@ -502,7 +502,11 @@ class PluginConfigViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         # the .exclude is to remove the default values
-        return PluginConfig.visible_for_user(self.request.user).exclude(owner__isnull=True).order_by("id")
+        return (
+            PluginConfig.visible_for_user(self.request.user)
+            .exclude(owner__isnull=True)
+            .order_by("id")
+        )
 
     def get_permissions(self):
         permissions = super().get_permissions()

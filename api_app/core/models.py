@@ -161,6 +161,12 @@ class AbstractConfig(models.Model):
 
     @classmethod
     @property
+    def snake_case_name(cls) -> str:
+        import re
+        return re.sub(r'(?<!^)(?=[A-Z])', '_', cls.__name__).lower()
+
+    @classmethod
+    @property
     def plugin_type(cls) -> str:
         # retro compatibility
 

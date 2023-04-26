@@ -56,12 +56,11 @@ class ParamSerializer(rfs.ModelSerializer):
 
 class AbstractListConfigSerializer(rfs.ListSerializer):
 
-    analyzers = rfs.PrimaryKeyRelatedField(read_only=True)
+    plugins = rfs.PrimaryKeyRelatedField(read_only=True)
 
     def to_representation(self, data):
         from api_app.models import PluginConfig
-        from api_app.analyzers_manager.models import AnalyzerConfig
-        plugins = AnalyzerConfig.objects.filter(pk__in=[analyzer.pk for analyzer in data])
+        plugins = self.child.Meta.model.objects.filter(pk__in=[plugin.pk for plugin in data])
         user = self.context["request"].user
         enabled_plugins = plugins.filter(disabled=False)
         if user and user.has_membership():
@@ -69,8 +68,7 @@ class AbstractListConfigSerializer(rfs.ListSerializer):
 
         # get the values for that configurations
         configurations = PluginConfig.visible_for_user(user).filter(
-            parameter__analyzer_config__pk__in=plugins)
-
+            **{f"parameter__{self.child.Meta.model.snake_case_name}__pk__in" : plugins})
         # ????
         subquery_owner = Subquery(configurations.filter(parameter=OuterRef('pk'), owner=user, for_organization=False).values("value")[:1])
         subquery_default = Subquery(configurations.filter(parameter=OuterRef('pk')).filter(owner__isnull=True).values("value")[:1])
@@ -80,11 +78,13 @@ class AbstractListConfigSerializer(rfs.ListSerializer):
             from django.db.models import Value
             subquery_org = Value(False)
         # annotate if the params are configured or not with the subquery
-        params = Parameter.objects.filter(analyzer_config__pk__in=plugins).annotate(value_owner=subquery_owner, value_default=subquery_default, value_organization=subquery_org)#.annotate(configured=)
+        params = Parameter.objects.filter(**{f"{self.child.Meta.model.snake_case_name}__pk__in": plugins}).annotate(value_owner=subquery_owner, value_default=subquery_default, value_organization=subquery_org)#.annotate(configured=)
 
-        parsed = defaultdict(dict)
+        parsed = {}
+        for plugin in plugins:
+            parsed[plugin] = {}
         for parameter in params:
-            parsed[parameter.analyzer_config][parameter] = (parameter.value_owner or parameter.value_organization or parameter.value_default, parameter.required)
+            parsed[getattr(parameter, self.child.Meta.model.snake_case_name)][parameter] = (parameter.value_owner or parameter.value_organization or parameter.value_default, parameter.required)
         result = []
 
         for config in parsed:

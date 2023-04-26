@@ -106,6 +106,12 @@ class VisualizableTitle(VisualizableObject):
         super().__init__(disable)
         self.title = title
         self.value = value
+        if self.disable != self.title.disable or self.disable != self.value.disable:
+            logger.warning(
+                f"Each part of the title should be disabled. Forcing all to disable={self.disable}"
+            )
+            self.title.disable = self.disable
+            self.value.disable = self.disable
 
     @property
     def attributes(self) -> List[str]:

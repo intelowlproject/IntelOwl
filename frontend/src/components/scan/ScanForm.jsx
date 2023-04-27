@@ -376,6 +376,12 @@ export default function ScanForm() {
         analyzers: values.analyzers.map((x) => x.value),
         connectors: values.connectors.map((x) => x.value),
       };
+      if (Object.keys(formValues.runtime_configuration).length) {
+        formValues.runtime_configuration.visualizers = {};
+      }
+
+      console.debug("ScanFrom - onSubmit - formValues");
+      console.debug(formValues);
 
       try {
         const jobIds = await createJob(formValues);

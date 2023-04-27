@@ -376,7 +376,7 @@ export default function ScanForm() {
         analyzers: values.analyzers.map((x) => x.value),
         connectors: values.connectors.map((x) => x.value),
       };
-      /*We have 2 cases:
+      /* We have 2 cases:
        1) use default config -> we need the runtime_configuration field has value {}
        2) custom config -> we need to add visualizers because it's required from the backend
 

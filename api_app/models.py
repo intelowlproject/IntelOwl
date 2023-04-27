@@ -473,6 +473,20 @@ class PluginConfig(models.Model):
 
     class Meta:
         unique_together = ["owner", "for_organization", "parameter"]
+        indexes = [
+            models.Index(fields=["owner", "for_organization", "parameter"]),
+            models.Index(
+                fields=[
+                    "owner",
+                    "for_organization",
+                ]
+            ),
+            models.Index(
+                fields=[
+                    "owner",
+                ]
+            ),
+        ]
 
     @classmethod
     def visible_for_user(cls, user: User = None) -> QuerySet:

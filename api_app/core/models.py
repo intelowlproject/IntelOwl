@@ -1,9 +1,8 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 import logging
-from typing import Any, Dict, List, Type
+from typing import Any, Dict, Type
 
-from cache_memoize import cache_memoize
 from django.conf import settings
 from django.contrib.postgres import fields as pg_fields
 from django.core.exceptions import ValidationError
@@ -123,7 +122,8 @@ class Parameter(models.Model):
             > 1
         ):
             raise ValidationError(
-                "You cant have the same parameter on more than one configuration at the time"
+                "You can't have the same parameter on more than one"
+                " configuration at the time"
             )
 
     def clean(self) -> None:
@@ -133,6 +133,11 @@ class Parameter(models.Model):
     class Meta:
         unique_together = [
             ("name", "analyzer_config", "connector_config", "visualizer_config")
+        ]
+        indexes = [
+            models.Index(fields=["analyzer_config", "is_secret"]),
+            models.Index(fields=["connector_config", "is_secret"]),
+            models.Index(fields=["visualizer_config", "is_secret"]),
         ]
 
     @cached_property
@@ -144,7 +149,7 @@ class Parameter(models.Model):
 
         return PluginConfig.visible_for_user(user).filter(parameter=self)
 
-    def get_first_value(self, user: User = None) -> "PluginConfig":
+    def get_first_value(self, user: User = None):
         from api_app.models import PluginConfig
 
         # priority
@@ -246,15 +251,14 @@ class AbstractConfig(models.Model):
     def required_parameters(self) -> QuerySet:
         return self.parameters.filter(required=True)
 
-
-    def _is_configured(self, user:User=None) -> bool:
+    def _is_configured(self, user: User = None) -> bool:
         for param in self.required_parameters:
             param: Parameter
             if not param.values_for_user(user).exists():
                 return False
         return True
 
-    def _is_disabled_in_org(self, user:User=None):
+    def _is_disabled_in_org(self, user: User = None):
         if user and user.has_membership():
             return self.disabled_in_organizations.filter(
                 pk=user.membership.organization.pk
@@ -263,7 +267,7 @@ class AbstractConfig(models.Model):
 
     def is_runnable(self, user: User = None):
         configured = self._is_configured(user)
-        disabled_in_org= self._is_disabled_in_org(user)
+        disabled_in_org = self._is_disabled_in_org(user)
         logger.debug(f"{configured=}, {disabled_in_org=}, {self.disabled=}")
         return configured and not disabled_in_org and not self.disabled
 
@@ -295,7 +299,7 @@ class AbstractConfig(models.Model):
     def config_exception(cls):
         raise NotImplementedError()
 
-    def read_params(self, job: "Job") -> Dict[Parameter, Any]:
+    def read_params(self, job) -> Dict[Parameter, Any]:
         # priority
         # 1 - Runtime config
         # 2 - Value inside the db
@@ -303,9 +307,7 @@ class AbstractConfig(models.Model):
         for param in self.parameters.all():
             param: Parameter
             if param.name in job.get_config_runtime_configuration(self):
-                result[param] = job.get_config_runtime_configuration(self)[
-                    param.name
-                ]
+                result[param] = job.get_config_runtime_configuration(self)[param.name]
             else:
                 result[param] = param.get_first_value(job.user).value
         return result

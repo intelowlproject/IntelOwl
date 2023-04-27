@@ -14,9 +14,8 @@ from django.http import QueryDict
 from django.utils.timezone import now
 from durin.serializers import UserSerializer
 from rest_framework import serializers as rfs
-from rest_framework.exceptions import PermissionDenied, ValidationError
+from rest_framework.exceptions import ValidationError
 
-from certego_saas.apps.organization.membership import Membership
 from certego_saas.apps.organization.organization import Organization
 from certego_saas.apps.organization.permissions import IsObjectOwnerOrSameOrgPermission
 from intel_owl.celery import DEFAULT_QUEUE

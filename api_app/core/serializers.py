@@ -2,6 +2,7 @@
 # See the file 'LICENSE' for copying permission.
 
 import logging
+from collections import defaultdict
 from typing import List
 
 from django.db.models import OuterRef, Subquery
@@ -35,17 +36,15 @@ class ParamListSerializer(rfs.ListSerializer):
 class ParamSerializer(rfs.ModelSerializer):
     class Meta:
         model = Parameter
-        fields = [
-            "value",
-            "name",
-            "type",
-        ]
+        fields = ["value", "name", "type", "description"]
         list_serializer_class = ParamListSerializer
 
     value = rfs.SerializerMethodField(read_only=True)
 
     def get_value(self, instance: Parameter):
-        return instance.get_first_value(self.context["request"].user).value
+        if "value" not in self.context:
+            return instance.get_first_value(self.context["request"].user).value
+        return self.context["value"]
 
 
 class AbstractListConfigSerializer(rfs.ListSerializer):
@@ -60,108 +59,108 @@ class AbstractListConfigSerializer(rfs.ListSerializer):
         )
         user = self.context["request"].user
         enabled_plugins = plugins.filter(disabled=False)
-        if user and user.has_membership():
-            enabled_plugins = enabled_plugins.exclude(
-                disabled_in_organizations=user.membership.organization.pk
-            )
 
         # get the values for that configurations
         configurations = PluginConfig.visible_for_user(user).filter(
             **{f"parameter__{self.child.Meta.model.snake_case_name}__pk__in": plugins}
         )
-        # ????
+        # value for owner
         subquery_owner = Subquery(
             configurations.filter(
                 parameter=OuterRef("pk"), owner=user, for_organization=False
             ).values("value")[:1]
         )
+        # value for default
         subquery_default = Subquery(
             configurations.filter(parameter=OuterRef("pk"))
             .filter(owner__isnull=True)
             .values("value")[:1]
         )
-        if user.has_membership():
+        # value for org
+        if user and user.has_membership():
             subquery_org = Subquery(
                 configurations.filter(parameter=OuterRef("pk"))
                 .filter(for_organization=True, owner=user.membership.organization.owner)
                 .values("value")[:1]
+            )
+            enabled_plugins = enabled_plugins.exclude(
+                disabled_in_organizations=user.membership.organization.pk
             )
         else:
             from django.db.models import Value
 
             subquery_org = Value(False)
         # annotate if the params are configured or not with the subquery
-        params = Parameter.objects.filter(
-            **{f"{self.child.Meta.model.snake_case_name}__pk__in": plugins}
-        ).annotate(
-            value_owner=subquery_owner,
-            value_default=subquery_default,
-            value_organization=subquery_org,
-        )
-
-        parsed = {}
-        for plugin in plugins:
-            parsed[plugin] = {}
-        for parameter in params:
-            parsed[getattr(parameter, self.child.Meta.model.snake_case_name)][
-                parameter
-            ] = (
-                bool(
-                    parameter.value_owner
-                    or parameter.value_organization
-                    or parameter.value_default
-                ),
-                parameter.required,
+        params = (
+            Parameter.objects.filter(
+                **{f"{self.child.Meta.model.snake_case_name}__pk__in": plugins}
             )
-        result = []
+            .prefetch_related(self.child.Meta.model.snake_case_name)
+            .filter(is_secret=False)
+            .annotate(
+                value_owner=subquery_owner,
+                value_default=subquery_default,
+                value_organization=subquery_org,
+            )
+        )
+        parsed = defaultdict(list)
+        # populate the result for every plugin (even the ones without parameters)
+        # parsed[plugin]= [parameter1]
+        for parameter in params:
+            parsed[getattr(parameter, self.child.Meta.model.snake_case_name)].append(
+                parameter
+            )
 
-        for config in parsed:
-            analyzer_representation = self.child.to_representation(config)
-            analyzer_representation["params"] = {}
-            total_parameter = len(parsed[config].keys())
+        result = []
+        # we can finally construct our result
+        for plugin in plugins:
+            plugin_representation = self.child.to_representation(plugin)
+            plugin_representation["params"] = {}
+            total_parameter = len(parsed[plugin])
             parameter_required_not_configured = []
-            for param in parsed[config]:
-                configured, required = parsed[config][param]
-                if required and not configured:
+            for param in parsed[plugin]:
+                value = (
+                    param.value_owner or param.value_organization or param.value_default
+                )
+                if param.required and not bool(value):
                     parameter_required_not_configured.append(param.name)
-                if not param.is_secret:
-                    param_value = param.value_owner or param.value_organization or param.value_default
-                    param: Parameter
-                    analyzer_representation["params"][param.name] = {
-                        "value": param_value,
-                        "type": param.type,
-                        "description": param.description
-                    }
+                param_representation = ParamSerializer(
+                    param, context={"value": value}
+                ).data
+                param_representation.pop("name")
+                plugin_representation["params"][param.name] = param_representation
             if not parameter_required_not_configured:
                 configured = True
                 details = "Ready to use!"
             else:
                 details = (
                     f"{', '.join(parameter_required_not_configured)} "
-                    f"secret{'' if len(parameter_required_not_configured) == 1 else 's'} not set;"
+                    f"secret"
+                    f"{'' if len(parameter_required_not_configured) == 1 else 's'}"
+                    f" not set;"
                     f" ({total_parameter - len(parameter_required_not_configured)} "
                     f"of {total_parameter} satisfied)"
                 )
                 configured = False
-            if config in enabled_plugins:
+            if plugin in enabled_plugins:
                 disabled = False
             else:
                 disabled = True
-            # analyzer_representation["params"][param.name] = param.value
-            analyzer_representation["disabled"] = disabled
-            analyzer_representation["verification"] = {
+            # plugin_representation["params"][param.name] = param.value
+            plugin_representation["disabled"] = disabled
+            plugin_representation["verification"] = {
                 "configured": configured,
                 "details": details,
                 "missing_secrets": parameter_required_not_configured,
             }
-            result.append(analyzer_representation)
+            result.append(plugin_representation)
+
         return result
 
 
 class AbstractConfigSerializer(rfs.ModelSerializer):
 
     config = _ConfigSerializer(required=True)
-    # params = ParamSerializer(read_only=True, many=True, source="options")
     parameters = ParamSerializer(write_only=True, many=True)
 
     class Meta:

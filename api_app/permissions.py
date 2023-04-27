@@ -3,11 +3,7 @@
 
 from logging import getLogger
 
-from django.db.models.signals import post_save, pre_delete
-from django.dispatch import receiver
 from rest_framework.permissions import BasePermission
-
-from api_app.models import PluginConfig
 
 logger = getLogger(__name__)
 

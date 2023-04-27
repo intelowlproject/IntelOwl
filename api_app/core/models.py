@@ -246,56 +246,26 @@ class AbstractConfig(models.Model):
     def required_parameters(self) -> QuerySet:
         return self.parameters.filter(required=True)
 
-    @cache_memoize(
-        timeout=60 * 60 * 24 * 7,
-        args_rewrite=lambda s, user=None: f"{s.__class__.__name__}"
-        f"-{s.name}"
-        f"-{user.username if user else ''}",
-    )
-    def get_verification(self, user: User = None):
-        total_required = 0
-        total_missing = 0
-        parameter_required_missing: List[str] = []
+
+    def _is_configured(self, user:User=None) -> bool:
         for param in self.required_parameters:
             param: Parameter
-            total_required += 1
             if not param.values_for_user(user).exists():
-                total_missing += 1
-                parameter_required_missing.append(param.name)
+                return False
+        return True
 
-        if total_missing:
-            details = (
-                f"{', '.join(parameter_required_missing)} "
-                f"secret{''if len(parameter_required_missing) == 1 else 's'} not set;"
-                f" ({total_required - total_missing} "
-                f"of {total_required} satisfied)"
-            )
-        else:
-            details = "Ready to use!"
-        return {
-            "configured": not total_missing,
-            "details": details,
-            "missing_secrets": parameter_required_missing,
-        }
-
-    def is_runnable(self, user: User = None):
-        configured = False
-        for param in self.required_parameters:
-            param: Parameter
-            if not param.values_for_user(user).exists()
-
-
-
-
-        configured = self.get_verification(user)["configured"]
+    def _is_disabled_in_org(self, user:User=None):
         if user and user.has_membership():
-            disabled_by_org = self.disabled_in_organizations.filter(
+            return self.disabled_in_organizations.filter(
                 pk=user.membership.organization.pk
             ).exists()
-        else:
-            disabled_by_org = False
-        logger.debug(f"{configured=}, {disabled_by_org=}, {self.disabled=}")
-        return configured and not disabled_by_org and not self.disabled
+        return False
+
+    def is_runnable(self, user: User = None):
+        configured = self._is_configured(user)
+        disabled_in_org= self._is_disabled_in_org(user)
+        logger.debug(f"{configured=}, {disabled_in_org=}, {self.disabled=}")
+        return configured and not disabled_in_org and not self.disabled
 
     @cached_property
     def queue(self):
@@ -325,20 +295,19 @@ class AbstractConfig(models.Model):
     def config_exception(cls):
         raise NotImplementedError()
 
-    def read_params(self, job: "Job") -> Dict[str, Any]:
+    def read_params(self, job: "Job") -> Dict[Parameter, Any]:
         # priority
         # 1 - Runtime config
         # 2 - Value inside the db
         result = {}
         for param in self.parameters.all():
             param: Parameter
-
             if param.name in job.get_config_runtime_configuration(self):
-                result[param.name] = job.get_config_runtime_configuration(self)[
+                result[param] = job.get_config_runtime_configuration(self)[
                     param.name
                 ]
             else:
-                result[param.name] = param.get_first_value(job.user).value
+                result[param] = param.get_first_value(job.user).value
         return result
 
     def get_signature(self, job):

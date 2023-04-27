@@ -125,11 +125,13 @@ class AbstractListConfigSerializer(rfs.ListSerializer):
                 if required and not configured:
                     parameter_required_not_configured.append(param.name)
                 if not param.is_secret:
-                    analyzer_representation["params"][param.name] = (
-                        param.value_owner
-                        or param.value_organization
-                        or param.value_default
-                    )
+                    param_value = param.value_owner or param.value_organization or param.value_default
+                    param: Parameter
+                    analyzer_representation["params"][param.name] = {
+                        "value": param_value,
+                        "type": param.type,
+                        "description": param.description
+                    }
             if not parameter_required_not_configured:
                 configured = True
                 details = "Ready to use!"

@@ -98,7 +98,7 @@ export default function RuntimeConfigurationModal(props) {
       if (analyzerNames.includes(configPluginName)) {
         result.analyzers[configPluginName] = configPluginParams;
       } else if (connectorNames.includes(configPluginName)) {
-        result.analyzers[configPluginName] = configPluginParams;
+        result.connectors[configPluginName] = configPluginParams;
       }
     });
     return result;

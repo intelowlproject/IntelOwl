@@ -84,7 +84,8 @@ class Plugin(metaclass=ABCMeta):
 
     def config(self):
         for param, value in self._config.read_params(self._job).items():
-            setattr(self, param, value)
+            attribute_name = f"_{param.name}" if not param.is_secret else param.name
+            setattr(self, attribute_name, value)
 
     @abstractmethod
     def before_run(self, *args, **kwargs):

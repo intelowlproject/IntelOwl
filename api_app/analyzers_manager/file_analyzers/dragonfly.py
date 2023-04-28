@@ -21,6 +21,8 @@ class DragonflyEmulation(FileAnalyzer):
     root: bool
     allow_actions: bool
     private: bool
+    _url_key_name: str
+    _api_key_name: str
 
     def config(self):
         super().config()
@@ -35,12 +37,10 @@ class DragonflyEmulation(FileAnalyzer):
             "private": self.private,
         }
         # get secrets
-        api_key: str = self._secrets["api_key_name"]
-        api_url: str = self._secrets["url_key_name"]
         # init Dragonfly client instance
-        self.df = Dragonfly(api_key=api_key)
-        if api_url:
-            self.df._server_url = api_url
+        self.df = Dragonfly(api_key=self._api_key_name)
+        if self._url_key_name:
+            self.df._server_url = self._url_key_name
 
     def run(self):
         try:

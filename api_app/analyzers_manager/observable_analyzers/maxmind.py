@@ -27,13 +27,16 @@ db_names = ["GeoLite2-Country.mmdb", "GeoLite2-City.mmdb"]
 
 
 class Maxmind(classes.ObservableAnalyzer):
+
+    _api_key_name: str
+
     def run(self):
         maxmind_final_result = {}
         for db in db_names:
             try:
                 db_location = _get_db_location(db)
                 if not os.path.isfile(db_location):
-                    self._update_db(db, self._secrets["api_key_name"])
+                    self._update_db(db, self._api_key_name)
                 if not os.path.exists(db_location):
                     raise maxminddb.InvalidDatabaseError(
                         "database location does not exist"

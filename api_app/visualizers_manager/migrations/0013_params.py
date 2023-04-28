@@ -43,7 +43,41 @@ def migrate(apps, schema_editor):
     create_config(list(VisualizerConfig.objects.all()), "3", Parameter, PluginConfig)
 
 def reverse_migrate(apps, schema_editor):
-    ...
+    VisualizerConfig = apps.get_model("visualizers_manager", "VisualizerConfig")
+    PluginConfig = apps.get_model("api_app", "PluginConfig")
+    for config in VisualizerConfig.objects.all():
+        config.params = {}
+        config.secrets = {}
+
+        for parameter in config.parameters.all():
+            if parameter.is_secret:
+                config.secrets[parameter.name] = {
+                    "description": parameter.description,
+                    "required": parameter.required,
+                    "type": parameter.type
+                }
+                try:
+                    value = PluginConfig.objects.get(plugin_name=config.name, attribute=parameter.name, config_type="2",
+                                                     owner__isnull=True, organization=None, type="3")
+                except PluginConfig.DoesNotExist:
+                    ...
+                else:
+                    config.secrets[parameter.name]["default"] = value.value
+                    value.delete()
+
+            else:
+                value = PluginConfig.objects.get(plugin_name=config.name, attribute=parameter.name, config_type="1", owner__isnull=True, organization=None, type="3")
+                config.params[parameter.name] = {
+                    "default": value.value,
+                    "type": parameter.type,
+                    "description": parameter.description
+                }
+                value.delete()
+            config.full_clean()
+            config.save()
+
+
+
 
 
 class Migration(migrations.Migration):

@@ -1,8 +1,6 @@
 # This file is a part of IntelOwl https://github.com/intelowlproject/IntelOwl
 # See the file 'LICENSE' for copying permission.
 
-"""This module contains functions and classes to inspect celery workers"""
-
 from django.core.management import BaseCommand
 
 from api_app.analyzers_manager.models import AnalyzerConfig

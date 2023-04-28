@@ -173,34 +173,26 @@ After having written the new python module, you have to remember to:
    4. *Config:
       1. *Queue: celery queue that will be used
       2. *Soft_time_limit: maximum time for the task execution
-   5. *Secrets: 
-      1. YouSecretKey:
-         1. *type: data type, `string`, `list`, `dict`, `integer`, `boolean`, `float`
-         2. *description: description of the secret
-         3. *required: `true` or `false`, meaning that is required to allow the run of the analyzer
-         4. default: default value of the secret
-      2. YourSecretKey2:
-         1. ...
-   6. *Params:
-      1. YourParam:
-         1. *type: data type, `string`, `list`, `dict`, `integer`, `boolean`, `float`
-         2. *description: description of the secret
-         3. *default: default value of the parameter
-   7. *Type: `observable` or `file`
-   8. *Docker based: if the analyzer run through a docker instance
-   9. *Maximum tlp: maximum tlp to allow the run on the connector
-   10. ~Observable supported: required if `type` is `observable`
-   11. ~Supported filetypes: required if `type` is `file` and `not supported filetypes` is empty
-   12. Run hash: if the analyzer supports hash as inputs
-   13. ~Run hash type: required if `run hash` is `True`
-   14. ~Not supported filetypes: required if `type` is `file` and `supported filetypes` is empty
+   5. *Parameters (at the bottom of the page)
+      1. *name
+      2. *type: data type, `string`, `list`, `dict`, `integer`, `boolean`, `float`
+      3. *description
+      4. *required: `true` or `false`, meaning that a value is necessary to allow the run of the analyzer
+      5. default:  default value provided for the parameter
+   6. *Type: `observable` or `file`
+   7. *Docker based: if the analyzer run through a docker instance
+   8. *Maximum tlp: maximum tlp to allow the run on the connector
+   9. ~Observable supported: required if `type` is `observable`
+   10. ~Supported filetypes: required if `type` is `file` and `not supported filetypes` is empty
+   11. Run hash: if the analyzer supports hash as inputs
+   12. ~Run hash type: required if `run hash` is `True`
+   13. ~Not supported filetypes: required if `type` is `file` and `supported filetypes` is empty
 
 4. To allow other people to use your configuration, that is now stored in your local database, you have to export it and create a datamigration
-   1. objects = `docker exec -ti intelowl_uwsgi python3 manage.py dumpdata analyzers_manager.AnalyzerConfig --pks "<your analyzer name>"`
-   2. Create a new migration file inside `/analyzers_manager/migrations/`
-      1. You can take the `migrate` and `reverse_migrate` functions from `/playbooks_manager/migrations/0005_static_analysis`, both
-      2. Remember to correctly set the `dependencies`
-      3. Remember to correctly set the `objects`
+   1. You can use the django management command `dumpdata` to automatically create the migration file for your new analyzer. The script will create the following models:
+      1. AnalyzerConfig
+      2. Parameter
+      3. PluginConfig
     
 5. Add the new analyzer in the lists in the docs: [Usage](./Usage.md). Also, if the analyzer provides additional optional configuration, add the available options here: [Advanced-Usage](./Advanced-Usage.html#analyzers-with-special-configuration)
 
@@ -235,28 +227,21 @@ After having written the new python module, you have to remember to:
    4. *Config:
       1. *Queue: celery queue that will be used
       2. *Soft_time_limit: maximum time for the task execution
-   5. *Secrets: 
-      1. YouSecretKey:
-         1. *type: data type, `string`, `list`, `dict`, `integer`, `boolean`, `float`
-         2. *description: description of the secret
-         3. *required: `true` or `false`, meaning that is required to allow the run of the analyzer
-         4. default: default value of the secret
-      2. YourSecretKey2:
-         1. ...
-   6. *Params:
-      1. YourParam:
-         1. *type: data type, `string`, `list`, `dict`, `integer`, `boolean`, `float`
-         2. *description: description of the secret
-         3. *default: default value of the parameter
+   5. *Parameters (at the bottom of the page)
+      1. *name
+      2. *type: data type, `string`, `list`, `dict`, `integer`, `boolean`, `float`
+      3. *description
+      4. *required: `true` or `false`, meaning that a value is necessary to allow the run of the analyzer
+      5. default:  default value provided for the parameter
    7. *Maximum tlp: maximum tlp to allow the run on the connector
    8. *Run on failure: if the connector should be run even if the job fails
 
 4. To allow other people to use your configuration, that is now stored in your local database, you have to export it and create a datamigration
-   1. objects = `docker exec -ti intelowl_uwsgi  python3 manage.py dumpdata connectors_manager.ConnectorConfig --pks "<your connector name>"`
-   2. Create a new migration file inside `/connectors_manager/migrations/`
-      1. You can take the `migrate` and `reverse_migrate` functions from `/playbooks_manager/migrations/0005_static_analysis`, both
-      2. Remember to correctly set the `dependencies`
-      3. Remember to correctly set the `objects`
+   1. You can use the django management command `dumpdata` to automatically create the migration file for your new analyzer. The script will create the following models:
+      1. ConnectorConfig
+      2. Parameter
+      3. PluginConfig
+
 
 ## How to add a new Visualizer
 
@@ -270,28 +255,21 @@ After having written the new python module, you have to remember to:
    4. *Config:
       1. *Queue: celery queue that will be used
       2. *Soft_time_limit: maximum time for the task execution
-   5. *Secrets: 
-      1. YouSecretKey:
-         1. *type: data type, `string`, `list`, `dict`, `integer`, `boolean`, `float`
-         2. *description: description of the secret
-         3. *required: `true` or `false`, meaning that is required to allow the run of the analyzer
-         4. default: default value of the secret
-      2. YourSecretKey2:
-         1. ...
-   6. *Params:
-      1. YourParam:
-         1. *type: data type, `string`, `list`, `dict`, `integer`, `boolean`, `float`
-         2. *description: description of the secret
-         3. *default: default value of the parameter
-   7. *Analyzers: List of analyzers that **must** have run to execute the visualizer
-   8. *Connectors: List of connectors that **must** have run to execute the visualizer
+   5. *Parameters (at the bottom of the page)
+      1. *name
+      2. *type: data type, `string`, `list`, `dict`, `integer`, `boolean`, `float`
+      3. *description
+      4. *required: `true` or `false`, meaning that a value is necessary to allow the run of the analyzer
+      5. default:  default value provided for the parameter
+   6. *Analyzers: List of analyzers that **must** have run to execute the visualizer
+   7. *Connectors: List of connectors that **must** have run to execute the visualizer
 
 4. To allow other people to use your configuration, that is now stored in your local database, you have to export it and create a datamigration
-   1. objects = `docker exec -ti intelowl_uwsgi  python3 manage.py dumpdata visualizers_manager.VisualizerConfig --pks "<your visualizer name>"`
-   2. Create a new migration file inside `/visualizers_manager/migrations/`
-      1. You can take the `migrate` and `reverse_migrate` functions from `/playbooks_manager/migrations/0005_static_analysis`, both
-      2. Remember to correctly set the `dependencies`
-      3. Remember to correctly set the `objects`
+   1. You can use the django management command `dumpdata` to automatically create the migration file for your new analyzer. The script will create the following models:
+      1. VisualizerConfig
+      2. Parameter
+      3. PluginConfig
+
 
 ### Python class
 

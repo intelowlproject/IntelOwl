@@ -33,7 +33,13 @@ class ParamListSerializer(rfs.ListSerializer):
         return {elem.pop("name"): elem for elem in result}
 
 
-class ParamSerializer(rfs.ModelSerializer):
+class ParameterCompleteSerializer(rfs.ModelSerializer):
+    class Meta:
+        model = Parameter
+        fields = rfs.ALL_FIELDS
+
+
+class ParameterSerializer(rfs.ModelSerializer):
     class Meta:
         model = Parameter
         fields = ["value", "name", "type", "description"]
@@ -124,7 +130,7 @@ class AbstractListConfigSerializer(rfs.ListSerializer):
                 )
                 if param.required and not bool(value):
                     parameter_required_not_configured.append(param.name)
-                param_representation = ParamSerializer(
+                param_representation = ParameterSerializer(
                     param, context={"value": value}
                 ).data
                 param_representation.pop("name")
@@ -161,7 +167,7 @@ class AbstractListConfigSerializer(rfs.ListSerializer):
 class AbstractConfigSerializer(rfs.ModelSerializer):
 
     config = _ConfigSerializer(required=True)
-    parameters = ParamSerializer(write_only=True, many=True)
+    parameters = ParameterSerializer(write_only=True, many=True)
 
     class Meta:
         exclude = ["disabled_in_organizations"]

@@ -801,6 +801,12 @@ class JobAvailabilitySerializer(rfs.ModelSerializer):
         return last_job_for_md5
 
 
+class PluginConfigCompleteSerializer(rfs.ModelSerializer):
+    class Meta:
+        model = PluginConfig
+        fields = rfs.ALL_FIELDS
+
+
 class PluginConfigSerializer(rfs.ModelSerializer):
     class Meta:
         model = PluginConfig

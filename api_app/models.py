@@ -522,8 +522,20 @@ class PluginConfig(models.Model):
                 "Only organization owner can create configuration at the org level"
             )
 
+    def clean_value(self):
+        from django.forms.fields import JSONString
+
+        if isinstance(self.value, JSONString):
+            self.value = str(self.value)
+        if type(self.value).__name__ != self.parameter.type:
+            raise ValidationError(
+                f"Type {type(self.value).__name__} is wrong:"
+                f" should be {self.parameter.type}"
+            )
+
     def clean(self):
         super().clean()
+        self.clean_value()
         self.clean_for_organization()
 
     @property

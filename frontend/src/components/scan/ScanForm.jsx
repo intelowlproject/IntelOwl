@@ -376,6 +376,18 @@ export default function ScanForm() {
         analyzers: values.analyzers.map((x) => x.value),
         connectors: values.connectors.map((x) => x.value),
       };
+      /* We have 2 cases:
+       1) use default config -> we need the runtime_configuration field has value {}
+       2) custom config -> we need to add visualizers because it's required from the backend
+
+      Note: we don't put visualizers in the editor because it could be very verbose
+      */
+      if (Object.keys(formValues.runtime_configuration).length) {
+        formValues.runtime_configuration.visualizers = {};
+      }
+
+      console.debug("ScanFrom - onSubmit - formValues");
+      console.debug(formValues);
 
       try {
         const jobIds = await createJob(formValues);

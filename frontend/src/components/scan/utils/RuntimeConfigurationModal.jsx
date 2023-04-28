@@ -118,12 +118,14 @@ export default function RuntimeConfigurationModal(props) {
     if (jsonInput?.jsObject) {
       const runtimeCfg = Object.entries(jsonInput.jsObject).reduce(
         (acc, [name, params]) =>
-          Object.keys(params).length > 0 &&
+          // we cannot exclude empty dict or it could erase "connectors: {}" and generate an error
           JSON.stringify(defaultNameParamsMap[name]) !== JSON.stringify(params)
             ? { ...acc, [name]: params }
             : acc,
         {}
       );
+      console.debug("RuntimeConfigurationModal - saved runtimeCfg:");
+      console.debug(runtimeCfg);
       formik.setFieldValue("runtime_configuration", runtimeCfg, false);
     }
     toggle();

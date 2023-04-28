@@ -6,22 +6,14 @@ import { Badge } from "reactstrap";
 export function BooleanVisualizer({
   name,
   value,
-  pill,
   link,
   className,
   activeColor,
-  hideIfEmpty,
-  disableIfEmpty,
+  disable,
 }) {
-  if (hideIfEmpty && !value) {
-    return null;
-  }
-  let isDisabled = "";
-  if (disableIfEmpty && !value) {
-    isDisabled = "visualizer-element-disabled";
-  }
   let coreComponent = <p className="mb-0">{name}</p>;
-  if (link) {
+  // link added only in case is available and the component is not disabled, or it will be clickable
+  if (link && !disable) {
     coreComponent = (
       <a href={link} target="_blank" rel="noreferrer">
         {coreComponent}
@@ -29,34 +21,28 @@ export function BooleanVisualizer({
     );
   }
   return (
-    <div key={`${name}__${value}`} className="col-auto">
-      <Badge
-        pill={pill}
-        color={value === true ? activeColor : "gray"}
-        className={`text-capitalize ${isDisabled} ${className}`}
-      >
-        <div className="d-flex align-items-center">{coreComponent}</div>
-      </Badge>
-    </div>
+    <Badge
+      pill
+      color={value === true ? activeColor : "gray"}
+      className={`${disable ? "opacity-25" : ""} ${className}`}
+    >
+      <div className="d-flex align-items-center">{coreComponent}</div>
+    </Badge>
   );
 }
 
 BooleanVisualizer.propTypes = {
   name: PropTypes.string.isRequired,
   value: PropTypes.bool.isRequired,
-  pill: PropTypes.bool,
   link: PropTypes.string,
   className: PropTypes.string,
   activeColor: PropTypes.string,
-  hideIfEmpty: PropTypes.bool,
-  disableIfEmpty: PropTypes.bool,
+  disable: PropTypes.bool,
 };
 
 BooleanVisualizer.defaultProps = {
-  pill: true,
   link: "",
   className: "",
   activeColor: "danger",
-  hideIfEmpty: false,
-  disableIfEmpty: false,
+  disable: false,
 };

@@ -34,4 +34,9 @@ class APKiD(FileAnalyzer, DockerBasedAnalyzer):
         }
         req_files = {fname: binary}
 
-        return self._docker_run(req_data, req_files)
+        report = self._docker_run(req_data, req_files, analyzer_name=self.analyzer_name)
+        if not report:
+            # APKiD provides empty result in case it does not support the binary type
+            self.report.errors.append("APKiD does not support the file")
+            return {}
+        return report

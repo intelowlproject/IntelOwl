@@ -11,15 +11,35 @@ import {
   PLAYBOOKS_CONFIG_URI,
 } from "../constants/api";
 
-async function downloadAllPlugin(pluginUrl, currentPage = 1) {
+async function downloadAllPlugin(pluginUrl) {
+  const pageSize = 20;
+  let pluginList = [];
+  // we need to request the first chunk to know how many chunks are available
   const resp = await axios.get(pluginUrl, {
-    params: { page: currentPage, page_size: 100 },
+    params: { page: 1, page_size: pageSize },
   });
-  let additionalData = [];
-  if (currentPage < resp.data.total_pages) {
-    additionalData = await downloadAllPlugin(pluginUrl, currentPage + 1);
+  pluginList = pluginList.concat(resp.data.results);
+
+  // in case there are others chunks, download all of them concurrently
+  if (resp.data.total_pages > 1) {
+    const additionalRequests = [];
+    for (
+      let addtionalPageIndex = 2;
+      addtionalPageIndex <= resp.data.total_pages;
+      addtionalPageIndex += 1
+    ) {
+      additionalRequests.push(
+        axios.get(pluginUrl, {
+          params: { page: addtionalPageIndex, page_size: pageSize },
+        })
+      );
+    }
+    const multipleResponses = await Promise.all(additionalRequests);
+    multipleResponses.forEach((response) => {
+      pluginList = pluginList.concat(response.data.results);
+    });
   }
-  return resp.data.results.concat(additionalData);
+  return pluginList;
 }
 
 const usePluginConfigurationStore = create((set, get) => ({

@@ -53,20 +53,26 @@ jobs:
             --header 'Content-Type: application/json' \
             --header 'X-Restli-Protocol-Version: 2.0.0' \
             --data-raw '{
-              "author": "urn:li:person:<your-person-urn>",
-              "lifecycleState": "PUBLISHED",
-              "specificContent": {
+                "author": "urn:li:person:<your-person-urn>",
+                "lifecycleState": "PUBLISHED",
+                "specificContent": {
                   "com.linkedin.ugc.ShareContent": {
-                      "shareCommentary": {
-                          "text": "'"$message"'"
-                      },
-                      "shareMediaCategory": "NONE"
+                    "shareCommentary": {
+                      "text": "'"$message"'"
+                    },
+                    "shareMediaCategory": "ARTICLE",
+                    "media": [
+                      {
+                        "status": "READY",
+                        "originalUrl": "https://github.com/intelowlproject/IntelOwl/releases/tag/${{github.ref_name}}"
+                      }
+                    ]
                   }
-              },
-              "visibility": {
+                },
+                "visibility": {
                   "com.linkedin.ugc.MemberNetworkVisibility": "PUBLIC"
-              }
-            }')
+                }
+              }')
           status=$(echo "$response" | awk '/^HTTP/{print $2}')
             if [[ "$status" =~ ^[45][0-9]{2}$ ]]; then
               echo "Post to LinkedIn failed with status $status:"

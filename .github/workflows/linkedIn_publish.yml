@@ -1,0 +1,82 @@
+name: publish-to-LinkedIn
+
+on:
+  release:
+    types: [released]
+
+env:
+  CLIENT_ID: ${{ secrets.LINKEDIN_CLIENT_ID }}
+  CLIENT_SECRET: ${{ secrets.LINKEDIN_CLIENT_SECRET }}
+
+jobs:
+  post_to_linkedin:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install requests module
+        run: pip install requests
+
+      - name: Get access token
+        id: get_access_token
+        run: |
+          response=$(curl --request POST --url 'https://www.linkedin.com/oauth/v2/accessToken' \
+            --header 'Content-Type: application/x-www-form-urlencoded' \
+            --data-urlencode 'grant_type=client_credentials' \
+            --data-urlencode "client_id=$CLIENT_ID" \
+            --data-urlencode "client_secret=$CLIENT_SECRET" \
+            -w "%{http_code}\n")
+            if echo "$response" | grep -qE '^2[0-9]{2}$'; then
+              echo "::set-output name=access_token::$(echo $response | jq -r '.access_token')"
+            else
+              echo "Failed to generate access token: $response"
+              exit 1
+            fi
+
+
+      - name: Post to LinkedIn
+        id: post_to_linkedin
+        env:
+          ACCESS_TOKEN: ${{ steps.get_access_token.outputs.access_token }}
+        run: |
+          message="published #IntelOwl ${{github.ref_name}}!\nfull changelog: https://github.com/intelowlproject/IntelOwl/releases/tag/${{github.ref_name}} \n#ThreatIntelligence #CyberSecurity #OpenSource #osint #dfir Certego"
+
+          response=$(curl -i --request POST --url 'https://api.linkedin.com/v2/ugcPosts' \
+            --header "Authorization: Bearer $ACCESS_TOKEN" \
+            --header 'Content-Type: application/json' \
+            --header 'X-Restli-Protocol-Version: 2.0.0' \
+            --data-raw '{
+              "author": "urn:li:person:<your-person-urn>",
+              "lifecycleState": "PUBLISHED",
+              "specificContent": {
+                  "com.linkedin.ugc.ShareContent": {
+                      "shareCommentary": {
+                          "text": "'"$message"'"
+                      },
+                      "shareMediaCategory": "NONE"
+                  }
+              },
+              "visibility": {
+                  "com.linkedin.ugc.MemberNetworkVisibility": "PUBLIC"
+              }
+            }')
+          status=$(echo "$response" | awk '/^HTTP/{print $2}')
+            if [[ "$status" =~ ^[45][0-9]{2}$ ]]; then
+              echo "Post to LinkedIn failed with status $status:"
+              echo "$response"
+              exit 1
+            fi
+            post_url=$(echo "$response" | grep '^Location:' | sed 's/^Location: //')
+            echo "::set-output name=post_url::$(echo "$post_url" | tr -d '\r\n')"
+          
+      - name: Show post link
+        if: ${{ success() }}
+        run: |
+          echo "LinkedIn post: https://www.linkedin.com/posts/$(echo ${{ steps.post_to_linkedin.outputs.post_url }} | sed 's/urn:li:activity://')"

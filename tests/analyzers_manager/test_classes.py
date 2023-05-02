@@ -100,6 +100,7 @@ class FileAnalyzerTestCase(CustomTestCase):
                     if jobs.exists():
                         found_one = True
                     for job in jobs:
+                        job.analyzers_to_execute.set([config])
                         print(
                             "\t\t"
                             f"Testing {job.file_name} with mimetype {mimetype}"

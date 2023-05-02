@@ -125,6 +125,10 @@ class AbstractListConfigSerializer(rfs.ListSerializer):
             total_parameter = len(parsed[plugin])
             parameter_required_not_configured = []
             for param in parsed[plugin]:
+                # the priority order is
+                # 1 owner
+                # 2 organization
+                # 3 default
                 value = (
                     param.value_owner or param.value_organization or param.value_default
                 )

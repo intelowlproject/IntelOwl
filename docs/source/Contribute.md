@@ -189,7 +189,7 @@ After having written the new python module, you have to remember to:
    13. ~Not supported filetypes: required if `type` is `file` and `supported filetypes` is empty
 
 4. To allow other people to use your configuration, that is now stored in your local database, you have to export it and create a datamigration
-   1. You can use the django management command `dumpdata` to automatically create the migration file for your new analyzer. The script will create the following models:
+   1. You can use the django management command `dumpplugin` to automatically create the migration file for your new analyzer. The script will create the following models:
       1. AnalyzerConfig
       2. Parameter
       3. PluginConfig
@@ -237,7 +237,7 @@ After having written the new python module, you have to remember to:
    8. *Run on failure: if the connector should be run even if the job fails
 
 4. To allow other people to use your configuration, that is now stored in your local database, you have to export it and create a datamigration
-   1. You can use the django management command `dumpdata` to automatically create the migration file for your new analyzer. The script will create the following models:
+   1. You can use the django management command `dumpplugin` to automatically create the migration file for your new analyzer. The script will create the following models:
       1. ConnectorConfig
       2. Parameter
       3. PluginConfig
@@ -265,7 +265,7 @@ After having written the new python module, you have to remember to:
    7. *Connectors: List of connectors that **must** have run to execute the visualizer
 
 4. To allow other people to use your configuration, that is now stored in your local database, you have to export it and create a datamigration
-   1. You can use the django management command `dumpdata` to automatically create the migration file for your new analyzer. The script will create the following models:
+   1. You can use the django management command `dumpplugin` to automatically create the migration file for your new analyzer. The script will create the following models:
       1. VisualizerConfig
       2. Parameter
       3. PluginConfig

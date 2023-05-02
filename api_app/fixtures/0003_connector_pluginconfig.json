@@ -1,114 +1,90 @@
 [
   {
-    "model": "api_app.PluginConfig",
-    "pk": 151,
+    "model": "api_app.pluginconfig",
+    "pk": 412,
     "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "2",
-      "config_type": "2",
-      "attribute": "api_key_name",
       "value": "test",
-      "organization": null,
+      "for_organization": false,
       "owner": 1,
-      "plugin_name": "MISP"
+      "parameter": 402,
+      "updated_at": "2023-05-02T08:26:09.707Z"
     }
   },
   {
-    "model": "api_app.PluginConfig",
-    "pk": 152,
+    "model": "api_app.pluginconfig",
+    "pk": 413,
     "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "2",
-      "config_type": "2",
-      "attribute": "url_key_name",
-      "value": "http://test.com",
-      "organization": null,
+      "value": "https://test.com",
+      "for_organization": false,
       "owner": 1,
-      "plugin_name": "MISP"
+      "parameter": 403,
+      "updated_at": "2023-05-02T08:26:09.715Z"
     }
   },
   {
-    "model": "api_app.PluginConfig",
-    "pk": 153,
+    "model": "api_app.pluginconfig",
+    "pk": 414,
     "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "2",
-      "config_type": "2",
-      "attribute": "api_key_name",
       "value": "test",
-      "organization": null,
+      "for_organization": false,
       "owner": 1,
-      "plugin_name": "OpenCTI"
+      "parameter": 407,
+      "updated_at": "2023-05-02T08:26:09.722Z"
     }
   },
   {
-    "model": "api_app.PluginConfig",
-    "pk": 154,
+    "model": "api_app.pluginconfig",
+    "pk": 415,
     "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "2",
-      "config_type": "2",
-      "attribute": "url_key_name",
-      "value": "http://test.com",
-      "organization": null,
+      "value": "https://test.com",
+      "for_organization": false,
       "owner": 1,
-      "plugin_name": "OpenCTI"
+      "parameter": 408,
+      "updated_at": "2023-05-02T08:26:09.729Z"
     }
   },
   {
-    "model": "api_app.PluginConfig",
-    "pk": 155,
+    "model": "api_app.pluginconfig",
+    "pk": 416,
     "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "2",
-      "config_type": "2",
-      "attribute": "api_key_name",
       "value": "test",
-      "organization": null,
+      "for_organization": false,
       "owner": 1,
-      "plugin_name": "YETI"
+      "parameter": 410,
+      "updated_at": "2023-05-02T08:26:09.736Z"
     }
   },
   {
-    "model": "api_app.PluginConfig",
-    "pk": 156,
+    "model": "api_app.pluginconfig",
+    "pk": 417,
     "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "2",
-      "config_type": "2",
-      "attribute": "url_key_name",
-      "value": "http://test.com",
-      "organization": null,
+      "value": "https://test.com",
+      "for_organization": false,
       "owner": 1,
-      "plugin_name": "YETI"
+      "parameter": 411,
+      "updated_at": "2023-05-02T08:26:09.743Z"
     }
   },
-    {
-    "model": "api_app.PluginConfig",
-    "pk": 157,
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 418,
     "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "2",
-      "config_type": "2",
-      "attribute": "token",
-      "value": "my_token",
-      "organization": null,
+      "value": "test",
+      "for_organization": false,
       "owner": 1,
-      "plugin_name": "Slack"
+      "parameter": 413,
+      "updated_at": "2023-05-02T08:26:09.750Z"
     }
   },
-      {
-    "model": "api_app.PluginConfig",
-    "pk": 158,
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 419,
     "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "2",
-      "config_type": "2",
-      "attribute": "channel",
-      "value": "my_channel",
-      "organization": null,
+      "value": "test",
+      "for_organization": false,
       "owner": 1,
-      "plugin_name": "Slack"
+      "parameter": 414,
+      "updated_at": "2023-05-02T08:26:09.758Z"
     }
   }
 ]

@@ -149,7 +149,7 @@ class Parameter(models.Model):
 
         return PluginConfig.visible_for_user(user).filter(parameter=self)
 
-    def get_first_value(self, user: User = None):
+    def get_first_value(self, user: User):
         from api_app.models import PluginConfig
 
         # priority
@@ -157,21 +157,21 @@ class Parameter(models.Model):
         # 2 - Organization
         # 3 - Default
         qs = self.values_for_user(user)
-        if not user:
-            return qs.get(owner__isnull=True)
-        else:
+        try:
+            return qs.get(owner=user)
+        except PluginConfig.DoesNotExist:
+            if user.has_membership():
+                try:
+                    return qs.get(
+                        for_organization=True,
+                        owner=user.membership.organization.owner,
+                    )
+                except PluginConfig.DoesNotExist:
+                    ...
             try:
-                return qs.get(owner=user)
-            except PluginConfig.DoesNotExist:
-                if user.has_membership():
-                    try:
-                        return qs.get(
-                            for_organization=True,
-                            owner=user.membership.organization.owner,
-                        )
-                    except PluginConfig.DoesNotExist:
-                        ...
                 return qs.get(owner__isnull=True)
+            except PluginConfig.DoesNotExist:
+                raise RuntimeError(f"Unable to find a valid value for parameter {self.name} for configuration {self.config.name}")
 
 
 class AbstractConfig(models.Model):

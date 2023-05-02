@@ -1,1446 +1,1289 @@
 [
   {
     "model": "api_app.pluginconfig",
-    "pk": 1,
-    "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_name",
-      "value": "test",
-      "organization": null,
-      "owner": 1,
-      "plugin_name": "AbuseIPDB"
-    }
-  },
-  {
-    "model": "api_app.pluginconfig",
-    "pk": 2,
-    "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_user_name",
-      "value": "test",
-      "organization": null,
-      "owner": 1,
-      "plugin_name": "Anomali_Threatstream_Confidence"
-    }
-  },
-  {
-    "model": "api_app.pluginconfig",
-    "pk": 3,
-    "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_name",
-      "value": "test",
-      "organization": null,
-      "owner": 1,
-      "plugin_name": "Anomali_Threatstream_Confidence"
-    }
-  },
-  {
-    "model": "api_app.pluginconfig",
-    "pk": 4,
-    "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_user_name",
-      "value": "test",
-      "organization": null,
-      "owner": 1,
-      "plugin_name": "Anomali_Threatstream_Intelligence"
-    }
-  },
-  {
-    "model": "api_app.pluginconfig",
-    "pk": 5,
-    "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_name",
-      "value": "test",
-      "organization": null,
-      "owner": 1,
-      "plugin_name": "Anomali_Threatstream_Intelligence"
-    }
-  },
-  {
-    "model": "api_app.pluginconfig",
-    "pk": 6,
-    "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_user_name",
-      "value": "test",
-      "organization": null,
-      "owner": 1,
-      "plugin_name": "Anomali_Threatstream_PassiveDNS"
-    }
-  },
-  {
-    "model": "api_app.pluginconfig",
-    "pk": 7,
-    "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_name",
-      "value": "test",
-      "organization": null,
-      "owner": 1,
-      "plugin_name": "Anomali_Threatstream_PassiveDNS"
-    }
-  },
-  {
-    "model": "api_app.pluginconfig",
-    "pk": 8,
-    "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_name",
-      "value": "test",
-      "organization": null,
-      "owner": 1,
-      "plugin_name": "Auth0"
-    }
-  },
-  {
-    "model": "api_app.pluginconfig",
-    "pk": 9,
-    "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_name",
-      "value": "test",
-      "organization": null,
-      "owner": 1,
-      "plugin_name": "BitcoinAbuse"
-    }
-  },
-  {
-    "model": "api_app.pluginconfig",
-    "pk": 10,
-    "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_name",
-      "value": "test",
-      "organization": null,
-      "owner": 1,
-      "plugin_name": "CheckPhish"
-    }
-  },
-  {
-    "model": "api_app.pluginconfig",
-    "pk": 11,
-    "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "pdns_credentials",
-      "value": "user|password",
-      "organization": null,
-      "owner": 1,
-      "plugin_name": "CIRCLPassiveDNS"
-    }
-  },
-  {
-    "model": "api_app.pluginconfig",
-    "pk": 12,
-    "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "pdns_credentials",
-      "value": "user|password",
-      "organization": null,
-      "owner": 1,
-      "plugin_name": "CIRCLPassiveSSL"
-    }
-  },
-  {
-    "model": "api_app.pluginconfig",
-    "pk": 13,
-    "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_name",
-      "value": "test",
-      "organization": null,
-      "owner": 1,
-      "plugin_name": "CapeSandbox"
-    }
-  },
-  {
-    "model": "api_app.pluginconfig",
-    "pk": 14,
-    "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "url_key_name",
-      "value": "test",
-      "organization": null,
-      "owner": 1,
-      "plugin_name": "CapeSandbox"
-    }
-  },
-  {
-    "model": "api_app.pluginconfig",
-    "pk": 15,
-    "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_id_name",
-      "value": "test",
-      "organization": null,
-      "owner": 1,
-      "plugin_name": "Censys_Search"
-    }
-  },
-  {
-    "model": "api_app.pluginconfig",
-    "pk": 16,
-    "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_secret_name",
-      "value": "test",
-      "organization": null,
-      "owner": 1,
-      "plugin_name": "Censys_Search"
-    }
-  },
-  {
-    "model": "api_app.pluginconfig",
-    "pk": 17,
-    "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "url_key_name",
-      "value": "https://test",
-      "organization": null,
-      "owner": 1,
-      "plugin_name": "Cuckoo_Scan"
-    }
-  },
-  {
-    "model": "api_app.pluginconfig",
-    "pk": 18,
-    "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_name",
-      "value": "test",
-      "organization": null,
-      "owner": 1,
-      "plugin_name": "Dehashed_Search"
-    }
-  },
-  {
-    "model": "api_app.pluginconfig",
-    "pk": 19,
-    "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_name",
-      "value": "test",
-      "organization": null,
-      "owner": 1,
-      "plugin_name": "DNSDB"
-    }
-  },
-  {
-    "model": "api_app.pluginconfig",
-    "pk": 20,
-    "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_name",
-      "value": "test",
-      "organization": null,
-      "owner": 1,
-      "plugin_name": "Dragonfly_Emulation"
-    }
-  },
-  {
-    "model": "api_app.pluginconfig",
-    "pk": 21,
-    "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "url_key_name",
-      "value": "https://test",
-      "organization": null,
-      "owner": 1,
-      "plugin_name": "Dragonfly_Emulation"
-    }
-  },
-  {
-    "model": "api_app.pluginconfig",
     "pk": 22,
     "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_name",
-      "value": "test",
-      "organization": null,
-      "owner": 1,
-      "plugin_name": "EmailRep"
-    }
-  },
-  {
-    "model": "api_app.pluginconfig",
-    "pk": 23,
-    "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "service_account_json",
-      "value": "test",
-      "organization": null,
-      "owner": 1,
-      "plugin_name": "GoogleWebRisk"
-    }
-  },
-  {
-    "model": "api_app.pluginconfig",
-    "pk": 24,
-    "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_name",
-      "value": "test",
-      "organization": null,
-      "owner": 1,
-      "plugin_name": "GoogleSafebrowsing"
-    }
-  },
-  {
-    "model": "api_app.pluginconfig",
-    "pk": 25,
-    "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_name",
-      "value": "test",
-      "organization": null,
-      "owner": 1,
-      "plugin_name": "GreedyBear"
-    }
-  },
-  {
-    "model": "api_app.pluginconfig",
-    "pk": 26,
-    "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_name",
-      "value": "test",
-      "organization": null,
-      "owner": 1,
-      "plugin_name": "GreyNoise"
-    }
-  },
-  {
-    "model": "api_app.pluginconfig",
-    "pk": 27,
-    "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_name",
-      "value": "test",
-      "organization": null,
-      "owner": 1,
-      "plugin_name": "HaveIBeenPwned"
-    }
-  },
-  {
-    "model": "api_app.pluginconfig",
-    "pk": 28,
-    "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_name",
-      "value": "test",
-      "organization": null,
-      "owner": 1,
-      "plugin_name": "HoneyDB"
-    }
-  },
-  {
-    "model": "api_app.pluginconfig",
-    "pk": 29,
-    "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_id_name",
-      "value": "test",
-      "organization": null,
-      "owner": 1,
-      "plugin_name": "HoneyDB"
-    }
-  },
-  {
-    "model": "api_app.pluginconfig",
-    "pk": 30,
-    "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_name",
-      "value": "test",
-      "organization": null,
-      "owner": 1,
-      "plugin_name": "Hunter_How"
-    }
-  },
-  {
-    "model": "api_app.pluginconfig",
-    "pk": 31,
-    "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_name",
-      "value": "test",
-      "organization": null,
-      "owner": 1,
-      "plugin_name": "HybridAnalysis_Get_File"
-    }
-  },
-  {
-    "model": "api_app.pluginconfig",
-    "pk": 32,
-    "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_name",
-      "value": "test",
-      "organization": null,
-      "owner": 1,
-      "plugin_name": "HybridAnalysis_Get_Observable"
-    }
-  },
-  {
-    "model": "api_app.pluginconfig",
-    "pk": 33,
-    "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_name",
-      "value": "test",
-      "organization": null,
-      "owner": 1,
-      "plugin_name": "IntelX_Intelligent_Search"
-    }
-  },
-  {
-    "model": "api_app.pluginconfig",
-    "pk": 34,
-    "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_name",
-      "value": "test",
-      "organization": null,
-      "owner": 1,
-      "plugin_name": "IntelX_Phonebook"
-    }
-  },
-  {
-    "model": "api_app.pluginconfig",
-    "pk": 35,
-    "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_name",
-      "value": "test",
-      "organization": null,
-      "owner": 1,
-      "plugin_name": "Intezer_Get"
-    }
-  },
-  {
-    "model": "api_app.pluginconfig",
-    "pk": 36,
-    "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_name",
-      "value": "test",
-      "organization": null,
-      "owner": 1,
-      "plugin_name": "Intezer_Scan"
-    }
-  },
-  {
-    "model": "api_app.pluginconfig",
-    "pk": 37,
-    "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_name",
-      "value": "test",
-      "organization": null,
-      "owner": 1,
-      "plugin_name": "IPInfo"
-    }
-  },
-  {
-    "model": "api_app.pluginconfig",
-    "pk": 38,
-    "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_name",
-      "value": "test",
-      "organization": null,
-      "owner": 1,
-      "plugin_name": "Koodous"
-    }
-  },
-  {
-    "model": "api_app.pluginconfig",
-    "pk": 39,
-    "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_name",
-      "value": "test",
-      "organization": null,
-      "owner": 1,
-      "plugin_name": "MISP"
-    }
-  },
-  {
-    "model": "api_app.pluginconfig",
-    "pk": 40,
-    "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "url_key_name",
-      "value": "https://test",
-      "organization": null,
-      "owner": 1,
-      "plugin_name": "MISP"
-    }
-  },
-  {
-    "model": "api_app.pluginconfig",
-    "pk": 41,
-    "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_name",
-      "value": "test",
-      "organization": null,
-      "owner": 1,
-      "plugin_name": "MISPFIRST"
-    }
-  },
-  {
-    "model": "api_app.pluginconfig",
-    "pk": 42,
-    "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "url_key_name",
-      "value": "https://test",
-      "organization": null,
-      "owner": 1,
-      "plugin_name": "MISPFIRST"
-    }
-  },
-  {
-    "model": "api_app.pluginconfig",
-    "pk": 43,
-    "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_name",
-      "value": "test",
-      "organization": null,
-      "owner": 1,
-      "plugin_name": "MISPFIRST_Check_Hash"
-    }
-  },
-  {
-    "model": "api_app.pluginconfig",
-    "pk": 44,
-    "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "url_key_name",
-      "value": "https://test",
-      "organization": null,
-      "owner": 1,
-      "plugin_name": "MISPFIRST_Check_Hash"
-    }
-  },
-  {
-    "model": "api_app.pluginconfig",
-    "pk": 45,
-    "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_name",
-      "value": "test",
-      "organization": null,
-      "owner": 1,
-      "plugin_name": "MISP_Check_Hash"
-    }
-  },
-  {
-    "model": "api_app.pluginconfig",
-    "pk": 46,
-    "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "url_key_name",
-      "value": "https://test",
-      "organization": null,
-      "owner": 1,
-      "plugin_name": "MISP_Check_Hash"
-    }
-  },
-  {
-    "model": "api_app.pluginconfig",
-    "pk": 47,
-    "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_name",
-      "value": "test",
-      "organization": null,
-      "owner": 1,
-      "plugin_name": "Malpedia_Scan"
-    }
-  },
-  {
-    "model": "api_app.pluginconfig",
-    "pk": 48,
-    "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_name",
-      "value": "test",
-      "organization": null,
-      "owner": 1,
-      "plugin_name": "MaxMindGeoIP"
-    }
-  },
-  {
-    "model": "api_app.pluginconfig",
-    "pk": 49,
-    "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_name",
-      "value": "test",
-      "organization": null,
-      "owner": 1,
-      "plugin_name": "MWDB_Get"
-    }
-  },
-  {
-    "model": "api_app.pluginconfig",
-    "pk": 50,
-    "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_name",
-      "value": "test",
-      "organization": null,
-      "owner": 1,
-      "plugin_name": "MWDB_Scan"
+      "value": "https://www.capesandbox.com",
+      "for_organization": false,
+      "owner": null,
+      "parameter": 39,
+      "updated_at": "2023-05-02T08:23:50.148Z"
     }
   },
   {
     "model": "api_app.pluginconfig",
     "pk": 51,
     "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_name",
-      "value": "test",
-      "organization": null,
-      "owner": 1,
-      "plugin_name": "ONYPHE"
-    }
-  },
-  {
-    "model": "api_app.pluginconfig",
-    "pk": 52,
-    "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_name",
-      "value": "test",
-      "organization": null,
-      "owner": 1,
-      "plugin_name": "OpenCTI"
-    }
-  },
-  {
-    "model": "api_app.pluginconfig",
-    "pk": 53,
-    "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "url_key_name",
-      "value": "https://test",
-      "organization": null,
-      "owner": 1,
-      "plugin_name": "OpenCTI"
-    }
-  },
-  {
-    "model": "api_app.pluginconfig",
-    "pk": 54,
-    "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_name",
-      "value": "test",
-      "organization": null,
-      "owner": 1,
-      "plugin_name": "OTXQuery"
-    }
-  },
-  {
-    "model": "api_app.pluginconfig",
-    "pk": 55,
-    "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_name",
-      "value": "test",
-      "organization": null,
-      "owner": 1,
-      "plugin_name": "OTX_Check_Hash"
-    }
-  },
-  {
-    "model": "api_app.pluginconfig",
-    "pk": 56,
-    "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_name",
-      "value": "test",
-      "organization": null,
-      "owner": 1,
-      "plugin_name": "Securitytrails"
-    }
-  },
-  {
-    "model": "api_app.pluginconfig",
-    "pk": 57,
-    "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_name",
-      "value": "test",
-      "organization": null,
-      "owner": 1,
-      "plugin_name": "Securitytrails_Details"
+      "value": "https://dragonfly.certego.net/",
+      "for_organization": false,
+      "owner": null,
+      "parameter": 79,
+      "updated_at": "2023-05-02T08:23:50.261Z"
     }
   },
   {
     "model": "api_app.pluginconfig",
     "pk": 58,
     "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_name",
-      "value": "test",
-      "organization": null,
-      "owner": 1,
-      "plugin_name": "Securitytrails_History_DNS"
+      "value": "",
+      "for_organization": false,
+      "owner": null,
+      "parameter": 89,
+      "updated_at": "2023-05-02T08:23:50.310Z"
     }
   },
   {
     "model": "api_app.pluginconfig",
-    "pk": 59,
+    "pk": 214,
     "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_name",
-      "value": "test",
-      "organization": null,
-      "owner": 1,
-      "plugin_name": "Securitytrails_History_WHOIS"
+      "value": "",
+      "for_organization": false,
+      "owner": null,
+      "parameter": 300,
+      "updated_at": "2023-05-02T08:23:51.064Z"
     }
   },
   {
     "model": "api_app.pluginconfig",
-    "pk": 60,
+    "pk": 233,
     "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_name",
-      "value": "test",
-      "organization": null,
-      "owner": 1,
-      "plugin_name": "Securitytrails_IP_Neighbours"
+      "value": {},
+      "for_organization": false,
+      "owner": null,
+      "parameter": 323,
+      "updated_at": "2023-05-02T08:23:51.150Z"
     }
   },
   {
     "model": "api_app.pluginconfig",
-    "pk": 61,
+    "pk": 300,
     "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_name",
       "value": "test",
-      "organization": null,
+      "for_organization": false,
       "owner": 1,
-      "plugin_name": "Securitytrails_Subdomains"
+      "parameter": 1,
+      "updated_at": "2023-05-02T08:26:08.922Z"
     }
   },
   {
     "model": "api_app.pluginconfig",
-    "pk": 62,
+    "pk": 301,
     "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_name",
-      "value": "test",
-      "organization": null,
+      "value": "https://test.com",
+      "for_organization": false,
       "owner": 1,
-      "plugin_name": "Securitytrails_Tags"
+      "parameter": 2,
+      "updated_at": "2023-05-02T08:26:08.929Z"
     }
   },
   {
     "model": "api_app.pluginconfig",
-    "pk": 63,
+    "pk": 302,
     "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_name",
       "value": "test",
-      "organization": null,
+      "for_organization": false,
       "owner": 1,
-      "plugin_name": "Shodan_Honeyscore"
+      "parameter": 6,
+      "updated_at": "2023-05-02T08:26:08.933Z"
     }
   },
   {
     "model": "api_app.pluginconfig",
-    "pk": 64,
+    "pk": 303,
     "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_name",
       "value": "test",
-      "organization": null,
+      "for_organization": false,
       "owner": 1,
-      "plugin_name": "Shodan_Search"
+      "parameter": 8,
+      "updated_at": "2023-05-02T08:26:08.937Z"
     }
   },
   {
     "model": "api_app.pluginconfig",
-    "pk": 65,
+    "pk": 304,
     "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_name",
       "value": "test",
-      "organization": null,
+      "for_organization": false,
       "owner": 1,
-      "plugin_name": "Spyse"
+      "parameter": 9,
+      "updated_at": "2023-05-02T08:26:08.941Z"
     }
   },
   {
     "model": "api_app.pluginconfig",
-    "pk": 66,
+    "pk": 305,
     "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_name",
       "value": "test",
-      "organization": null,
+      "for_organization": false,
       "owner": 1,
-      "plugin_name": "SSAPINet"
+      "parameter": 15,
+      "updated_at": "2023-05-02T08:26:08.945Z"
     }
   },
   {
     "model": "api_app.pluginconfig",
-    "pk": 67,
+    "pk": 306,
     "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_name",
       "value": "test",
-      "organization": null,
+      "for_organization": false,
       "owner": 1,
-      "plugin_name": "Stalkphish"
+      "parameter": 16,
+      "updated_at": "2023-05-02T08:26:08.953Z"
     }
   },
   {
     "model": "api_app.pluginconfig",
-    "pk": 68,
+    "pk": 307,
     "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_name",
       "value": "test",
-      "organization": null,
+      "for_organization": false,
       "owner": 1,
-      "plugin_name": "Triage_Search"
+      "parameter": 18,
+      "updated_at": "2023-05-02T08:26:08.961Z"
     }
   },
   {
     "model": "api_app.pluginconfig",
-    "pk": 69,
+    "pk": 308,
     "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_name",
       "value": "test",
-      "organization": null,
+      "for_organization": false,
       "owner": 1,
-      "plugin_name": "Triage_Scan_URL"
+      "parameter": 19,
+      "updated_at": "2023-05-02T08:26:08.969Z"
     }
   },
   {
     "model": "api_app.pluginconfig",
-    "pk": 70,
+    "pk": 309,
     "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_name",
       "value": "test",
-      "organization": null,
+      "for_organization": false,
       "owner": 1,
-      "plugin_name": "Triage_Scan"
+      "parameter": 20,
+      "updated_at": "2023-05-02T08:26:08.976Z"
     }
   },
   {
     "model": "api_app.pluginconfig",
-    "pk": 71,
+    "pk": 310,
     "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_name",
       "value": "test",
-      "organization": null,
+      "for_organization": false,
       "owner": 1,
-      "plugin_name": "UnpacMe_EXE_Unpacker"
+      "parameter": 21,
+      "updated_at": "2023-05-02T08:26:08.983Z"
     }
   },
   {
     "model": "api_app.pluginconfig",
-    "pk": 72,
+    "pk": 311,
     "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_name",
       "value": "test",
-      "organization": null,
+      "for_organization": false,
       "owner": 1,
-      "plugin_name": "UrlScan_Submit_Result"
+      "parameter": 22,
+      "updated_at": "2023-05-02T08:26:08.990Z"
     }
   },
   {
     "model": "api_app.pluginconfig",
-    "pk": 73,
+    "pk": 312,
     "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_name",
       "value": "test",
-      "organization": null,
+      "for_organization": false,
       "owner": 1,
-      "plugin_name": "VirusTotal_v2_Get_File"
+      "parameter": 25,
+      "updated_at": "2023-05-02T08:26:08.998Z"
     }
   },
   {
     "model": "api_app.pluginconfig",
-    "pk": 74,
+    "pk": 313,
     "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_name",
       "value": "test",
-      "organization": null,
+      "for_organization": false,
       "owner": 1,
-      "plugin_name": "VirusTotal_v2_Get_Observable"
+      "parameter": 26,
+      "updated_at": "2023-05-02T08:26:09.005Z"
     }
   },
   {
     "model": "api_app.pluginconfig",
-    "pk": 75,
+    "pk": 314,
     "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_name",
       "value": "test",
-      "organization": null,
+      "for_organization": false,
       "owner": 1,
-      "plugin_name": "VirusTotal_v2_Scan_File"
+      "parameter": 27,
+      "updated_at": "2023-05-02T08:26:09.012Z"
     }
   },
   {
     "model": "api_app.pluginconfig",
-    "pk": 76,
+    "pk": 315,
     "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "url_key_name",
-      "value": "https://test",
-      "organization": null,
+      "value": "test",
+      "for_organization": false,
       "owner": 1,
-      "plugin_name": "VirusTotal_v2_Scan_File"
+      "parameter": 30,
+      "updated_at": "2023-05-02T08:26:09.019Z"
     }
   },
   {
     "model": "api_app.pluginconfig",
-    "pk": 77,
+    "pk": 316,
     "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_name",
       "value": "test",
-      "organization": null,
+      "for_organization": false,
       "owner": 1,
-      "plugin_name": "VirusTotal_v3_Get_File"
+      "parameter": 38,
+      "updated_at": "2023-05-02T08:26:09.026Z"
     }
   },
   {
     "model": "api_app.pluginconfig",
-    "pk": 78,
+    "pk": 317,
     "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_name",
-      "value": "test",
-      "organization": null,
+      "value": "https://test.com",
+      "for_organization": false,
       "owner": 1,
-      "plugin_name": "VirusTotal_v3_Get_File_And_Scan"
+      "parameter": 39,
+      "updated_at": "2023-05-02T08:26:09.034Z"
     }
   },
   {
     "model": "api_app.pluginconfig",
-    "pk": 79,
+    "pk": 318,
     "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_name",
       "value": "test",
-      "organization": null,
+      "for_organization": false,
       "owner": 1,
-      "plugin_name": "VirusTotal_v3_Get_Observable"
+      "parameter": 41,
+      "updated_at": "2023-05-02T08:26:09.041Z"
     }
   },
   {
     "model": "api_app.pluginconfig",
-    "pk": 80,
+    "pk": 319,
     "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_name",
       "value": "test",
-      "organization": null,
+      "for_organization": false,
       "owner": 1,
-      "plugin_name": "VirusTotal_v3_Intelligence_Search"
+      "parameter": 42,
+      "updated_at": "2023-05-02T08:26:09.048Z"
     }
   },
   {
     "model": "api_app.pluginconfig",
-    "pk": 81,
+    "pk": 320,
     "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_name",
       "value": "test",
-      "organization": null,
+      "for_organization": false,
       "owner": 1,
-      "plugin_name": "Whoisxmlapi"
+      "parameter": 45,
+      "updated_at": "2023-05-02T08:26:09.056Z"
     }
   },
   {
     "model": "api_app.pluginconfig",
-    "pk": 82,
+    "pk": 321,
     "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_name",
-      "value": "test",
-      "organization": null,
+      "value": "https://test.com",
+      "for_organization": false,
       "owner": 1,
-      "plugin_name": "WiGLE"
+      "parameter": 46,
+      "updated_at": "2023-05-02T08:26:09.063Z"
     }
   },
   {
     "model": "api_app.pluginconfig",
-    "pk": 83,
+    "pk": 322,
     "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_name",
       "value": "test",
-      "organization": null,
+      "for_organization": false,
       "owner": 1,
-      "plugin_name": "XForceExchange"
+      "parameter": 56,
+      "updated_at": "2023-05-02T08:26:09.071Z"
     }
   },
   {
     "model": "api_app.pluginconfig",
-    "pk": 84,
+    "pk": 323,
     "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_password_name",
       "value": "test",
-      "organization": null,
+      "for_organization": false,
       "owner": 1,
-      "plugin_name": "XForceExchange"
+      "parameter": 64,
+      "updated_at": "2023-05-02T08:26:09.078Z"
     }
   },
   {
     "model": "api_app.pluginconfig",
-    "pk": 85,
+    "pk": 324,
     "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_name",
       "value": "test",
-      "organization": null,
+      "for_organization": false,
       "owner": 1,
-      "plugin_name": "YETI"
+      "parameter": 66,
+      "updated_at": "2023-05-02T08:26:09.085Z"
     }
   },
   {
     "model": "api_app.pluginconfig",
-    "pk": 86,
+    "pk": 325,
     "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "url_key_name",
-      "value": "https://test",
-      "organization": null,
+      "value": "test",
+      "for_organization": false,
       "owner": 1,
-      "plugin_name": "YETI"
+      "parameter": 67,
+      "updated_at": "2023-05-02T08:26:09.092Z"
     }
   },
   {
     "model": "api_app.pluginconfig",
-    "pk": 87,
+    "pk": 326,
     "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_name",
       "value": "test",
-      "organization": null,
+      "for_organization": false,
       "owner": 1,
-      "plugin_name": "ZoomEye"
+      "parameter": 70,
+      "updated_at": "2023-05-02T08:26:09.099Z"
     }
   },
   {
     "model": "api_app.pluginconfig",
-    "pk": 88,
+    "pk": 327,
     "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "1",
-      "attribute": "shellcode",
-      "value": true,
-      "organization": null,
+      "value": "test",
+      "for_organization": false,
       "owner": 1,
-      "plugin_name": "SpeakEasy_Shellcode"
+      "parameter": 71,
+      "updated_at": "2023-05-02T08:26:09.106Z"
     }
   },
   {
     "model": "api_app.pluginconfig",
-    "pk": 89,
+    "pk": 328,
     "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "1",
-      "attribute": "additional_passwords_to_check",
-      "value": [
-        "testpassword", "agenzia"
-      ],
-      "organization": null,
+      "value": "test",
+      "for_organization": false,
       "owner": 1,
-      "plugin_name": "Doc_Info"
+      "parameter": 78,
+      "updated_at": "2023-05-02T08:26:09.113Z"
     }
   },
   {
     "model": "api_app.pluginconfig",
-    "pk": 90,
+    "pk": 329,
     "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "1",
-      "attribute": "force_active_scan",
-      "value": true,
-      "organization": null,
+      "value": "https://test.com",
+      "for_organization": false,
       "owner": 1,
-      "plugin_name": "VirusTotal_v3_Get_File_And_Scan"
+      "parameter": 79,
+      "updated_at": "2023-05-02T08:26:09.120Z"
     }
   },
   {
     "model": "api_app.pluginconfig",
-    "pk": 91,
+    "pk": 330,
     "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "1",
-      "attribute": "force_active_scan_if_old",
-      "value": false,
-      "organization": null,
+      "value": "test",
+      "for_organization": false,
       "owner": 1,
-      "plugin_name": "VirusTotal_v3_Get_File_And_Scan"
+      "parameter": 80,
+      "updated_at": "2023-05-02T08:26:09.129Z"
     }
   },
   {
     "model": "api_app.pluginconfig",
-    "pk": 92,
+    "pk": 331,
     "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_name",
       "value": "test",
-      "organization": null,
+      "for_organization": false,
       "owner": 1,
-      "plugin_name": "YARAify_Search"
+      "parameter": 85,
+      "updated_at": "2023-05-02T08:26:09.139Z"
     }
   },
   {
     "model": "api_app.pluginconfig",
-    "pk": 93,
+    "pk": 332,
     "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_name",
       "value": "test",
-      "organization": null,
+      "for_organization": false,
       "owner": 1,
-      "plugin_name": "Crowdsec"
-    }
-  },
-    {
-    "model": "api_app.pluginconfig",
-    "pk": 94,
-    "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_name",
-      "value": "test",
-      "organization": null,
-      "owner": 1,
-      "plugin_name": "YARAify_File_Scan"
-    }
-  },
-      {
-    "model": "api_app.pluginconfig",
-    "pk": 95,
-    "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_identifier",
-      "value": "test",
-      "organization": null,
-      "owner": 1,
-      "plugin_name": "YARAify_File_Scan"
+      "parameter": 87,
+      "updated_at": "2023-05-02T08:26:09.149Z"
     }
   },
   {
     "model": "api_app.pluginconfig",
-    "pk": 96,
+    "pk": 333,
     "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_name",
       "value": "test",
-      "organization": null,
+      "for_organization": false,
       "owner": 1,
-      "plugin_name": "BinaryEdge"
-    }
-  },
-    {
-    "model": "api_app.pluginconfig",
-    "pk": 97,
-    "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "1",
-      "attribute": "repositories",
-      "value": ["https://github.com/stratosphereips/yara-rules"],
-      "organization": null,
-      "owner": 1,
-      "plugin_name": "Yara"
+      "parameter": 89,
+      "updated_at": "2023-05-02T08:26:09.159Z"
     }
   },
   {
     "model": "api_app.pluginconfig",
-    "pk": 98,
+    "pk": 334,
     "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key_name",
       "value": "test",
-      "organization": null,
+      "for_organization": false,
       "owner": 1,
-      "plugin_name": "Hunter_Io"
+      "parameter": 92,
+      "updated_at": "2023-05-02T08:26:09.167Z"
     }
   },
-    {
+  {
     "model": "api_app.pluginconfig",
-    "pk": 99,
+    "pk": 335,
     "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key",
       "value": "test",
-      "organization": null,
+      "for_organization": false,
       "owner": 1,
-      "plugin_name": "FileScan_Upload_File"
+      "parameter": 96,
+      "updated_at": "2023-05-02T08:26:09.174Z"
     }
   },
-    {
+  {
     "model": "api_app.pluginconfig",
-    "pk": 100,
+    "pk": 336,
     "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key",
       "value": "test",
-      "organization": null,
+      "for_organization": false,
       "owner": 1,
-      "plugin_name": "FileScan_Search"
+      "parameter": 98,
+      "updated_at": "2023-05-02T08:26:09.181Z"
     }
   },
-      {
+  {
     "model": "api_app.pluginconfig",
-    "pk": 101,
+    "pk": 337,
     "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "api_key",
       "value": "test",
-      "organization": null,
+      "for_organization": false,
       "owner": 1,
-      "plugin_name": "SublimeSecurity"
+      "parameter": 99,
+      "updated_at": "2023-05-02T08:26:09.188Z"
     }
   },
-      {
+  {
     "model": "api_app.pluginconfig",
-    "pk": 102,
+    "pk": 338,
     "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "message_source_id",
       "value": "test",
-      "organization": null,
+      "for_organization": false,
       "owner": 1,
-      "plugin_name": "SublimeSecurity"
+      "parameter": 104,
+      "updated_at": "2023-05-02T08:26:09.194Z"
     }
   },
-      {
+  {
     "model": "api_app.pluginconfig",
-    "pk": 103,
+    "pk": 339,
     "fields": {
-      "updated_at": "2023-02-23T08:53:02.830Z",
-      "type": "1",
-      "config_type": "2",
-      "attribute": "url",
-      "value": "http://test.com",
-      "organization": null,
+      "value": "test",
+      "for_organization": false,
       "owner": 1,
-      "plugin_name": "SublimeSecurity"
+      "parameter": 105,
+      "updated_at": "2023-05-02T08:26:09.200Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 340,
+    "fields": {
+      "value": "test",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 106,
+      "updated_at": "2023-05-02T08:26:09.206Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 341,
+    "fields": {
+      "value": "test",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 107,
+      "updated_at": "2023-05-02T08:26:09.213Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 342,
+    "fields": {
+      "value": "test",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 115,
+      "updated_at": "2023-05-02T08:26:09.220Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 343,
+    "fields": {
+      "value": "test",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 121,
+      "updated_at": "2023-05-02T08:26:09.226Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 344,
+    "fields": {
+      "value": "test",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 123,
+      "updated_at": "2023-05-02T08:26:09.234Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 345,
+    "fields": {
+      "value": "test",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 128,
+      "updated_at": "2023-05-02T08:26:09.241Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 346,
+    "fields": {
+      "value": "test",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 130,
+      "updated_at": "2023-05-02T08:26:09.248Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 347,
+    "fields": {
+      "value": "test",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 132,
+      "updated_at": "2023-05-02T08:26:09.254Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 348,
+    "fields": {
+      "value": "test",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 135,
+      "updated_at": "2023-05-02T08:26:09.260Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 349,
+    "fields": {
+      "value": "test",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 136,
+      "updated_at": "2023-05-02T08:26:09.266Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 350,
+    "fields": {
+      "value": "test",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 145,
+      "updated_at": "2023-05-02T08:26:09.273Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 351,
+    "fields": {
+      "value": "https://test.com",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 146,
+      "updated_at": "2023-05-02T08:26:09.281Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 352,
+    "fields": {
+      "value": "test",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 155,
+      "updated_at": "2023-05-02T08:26:09.288Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 353,
+    "fields": {
+      "value": "https://test.com",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 156,
+      "updated_at": "2023-05-02T08:26:09.294Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 354,
+    "fields": {
+      "value": "test",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 157,
+      "updated_at": "2023-05-02T08:26:09.301Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 355,
+    "fields": {
+      "value": "https://test.com",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 158,
+      "updated_at": "2023-05-02T08:26:09.309Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 356,
+    "fields": {
+      "value": "test",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 159,
+      "updated_at": "2023-05-02T08:26:09.316Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 357,
+    "fields": {
+      "value": "test",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 160,
+      "updated_at": "2023-05-02T08:26:09.322Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 358,
+    "fields": {
+      "value": "test",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 161,
+      "updated_at": "2023-05-02T08:26:09.329Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 359,
+    "fields": {
+      "value": "test",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 165,
+      "updated_at": "2023-05-02T08:26:09.337Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 360,
+    "fields": {
+      "value": "test",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 166,
+      "updated_at": "2023-05-02T08:26:09.344Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 361,
+    "fields": {
+      "value": "test",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 170,
+      "updated_at": "2023-05-02T08:26:09.351Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 362,
+    "fields": {
+      "value": "https://test.com",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 171,
+      "updated_at": "2023-05-02T08:26:09.358Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 363,
+    "fields": {
+      "value": "test",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 176,
+      "updated_at": "2023-05-02T08:26:09.366Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 364,
+    "fields": {
+      "value": "test",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 179,
+      "updated_at": "2023-05-02T08:26:09.373Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 365,
+    "fields": {
+      "value": "test",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 181,
+      "updated_at": "2023-05-02T08:26:09.381Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 366,
+    "fields": {
+      "value": "test",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 202,
+      "updated_at": "2023-05-02T08:26:09.388Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 367,
+    "fields": {
+      "value": "test",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 205,
+      "updated_at": "2023-05-02T08:26:09.396Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 368,
+    "fields": {
+      "value": "test",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 208,
+      "updated_at": "2023-05-02T08:26:09.403Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 369,
+    "fields": {
+      "value": "test",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 211,
+      "updated_at": "2023-05-02T08:26:09.409Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 370,
+    "fields": {
+      "value": "test",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 212,
+      "updated_at": "2023-05-02T08:26:09.416Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 371,
+    "fields": {
+      "value": "test",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 215,
+      "updated_at": "2023-05-02T08:26:09.422Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 372,
+    "fields": {
+      "value": "test",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 218,
+      "updated_at": "2023-05-02T08:26:09.430Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 373,
+    "fields": {
+      "value": "test",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 220,
+      "updated_at": "2023-05-02T08:26:09.436Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 374,
+    "fields": {
+      "value": "test",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 222,
+      "updated_at": "2023-05-02T08:26:09.442Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 375,
+    "fields": {
+      "value": "test",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 229,
+      "updated_at": "2023-05-02T08:26:09.450Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 376,
+    "fields": {
+      "value": "test",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 234,
+      "updated_at": "2023-05-02T08:26:09.457Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 377,
+    "fields": {
+      "value": "test",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 235,
+      "updated_at": "2023-05-02T08:26:09.463Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 378,
+    "fields": {
+      "value": "test",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 270,
+      "updated_at": "2023-05-02T08:26:09.470Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 379,
+    "fields": {
+      "value": "test",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 276,
+      "updated_at": "2023-05-02T08:26:09.478Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 380,
+    "fields": {
+      "value": "test",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 280,
+      "updated_at": "2023-05-02T08:26:09.486Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 381,
+    "fields": {
+      "value": "test",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 283,
+      "updated_at": "2023-05-02T08:26:09.495Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 382,
+    "fields": {
+      "value": "test",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 287,
+      "updated_at": "2023-05-02T08:26:09.503Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 383,
+    "fields": {
+      "value": "test",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 290,
+      "updated_at": "2023-05-02T08:26:09.509Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 384,
+    "fields": {
+      "value": "test",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 291,
+      "updated_at": "2023-05-02T08:26:09.515Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 385,
+    "fields": {
+      "value": "test",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 293,
+      "updated_at": "2023-05-02T08:26:09.522Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 386,
+    "fields": {
+      "value": "test",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 294,
+      "updated_at": "2023-05-02T08:26:09.528Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 387,
+    "fields": {
+      "value": "test",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 295,
+      "updated_at": "2023-05-02T08:26:09.535Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 388,
+    "fields": {
+      "value": "test",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 299,
+      "updated_at": "2023-05-02T08:26:09.542Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 389,
+    "fields": {
+      "value": "https://test.com",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 300,
+      "updated_at": "2023-05-02T08:26:09.549Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 390,
+    "fields": {
+      "value": "test",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 312,
+      "updated_at": "2023-05-02T08:26:09.557Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 391,
+    "fields": {
+      "value": "test",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 315,
+      "updated_at": "2023-05-02T08:26:09.564Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 392,
+    "fields": {
+      "value": "test",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 316,
+      "updated_at": "2023-05-02T08:26:09.571Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 393,
+    "fields": {
+      "value": "test",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 318,
+      "updated_at": "2023-05-02T08:26:09.578Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 394,
+    "fields": {
+      "value": "test",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 323,
+      "updated_at": "2023-05-02T08:26:09.585Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 395,
+    "fields": {
+      "value": "test",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 326,
+      "updated_at": "2023-05-02T08:26:09.591Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 396,
+    "fields": {
+      "value": "test",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 327,
+      "updated_at": "2023-05-02T08:26:09.599Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 397,
+    "fields": {
+      "value": "test",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 335,
+      "updated_at": "2023-05-02T08:26:09.605Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 398,
+    "fields": {
+      "value": "test",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 336,
+      "updated_at": "2023-05-02T08:26:09.611Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 399,
+    "fields": {
+      "value": "test",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 341,
+      "updated_at": "2023-05-02T08:26:09.618Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 400,
+    "fields": {
+      "value": "test",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 344,
+      "updated_at": "2023-05-02T08:26:09.624Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 401,
+    "fields": {
+      "value": "test",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 348,
+      "updated_at": "2023-05-02T08:26:09.631Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 402,
+    "fields": {
+      "value": "https://test.com",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 349,
+      "updated_at": "2023-05-02T08:26:09.639Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 403,
+    "fields": {
+      "value": "test",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 355,
+      "updated_at": "2023-05-02T08:26:09.645Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 404,
+    "fields": {
+      "value": "test",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 367,
+      "updated_at": "2023-05-02T08:26:09.652Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 405,
+    "fields": {
+      "value": "test",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 379,
+      "updated_at": "2023-05-02T08:26:09.660Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 406,
+    "fields": {
+      "value": "test",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 380,
+      "updated_at": "2023-05-02T08:26:09.667Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 407,
+    "fields": {
+      "value": "test",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 381,
+      "updated_at": "2023-05-02T08:26:09.674Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 408,
+    "fields": {
+      "value": "https://test.com",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 390,
+      "updated_at": "2023-05-02T08:26:09.681Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 409,
+    "fields": {
+      "value": "test",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 391,
+      "updated_at": "2023-05-02T08:26:09.688Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 410,
+    "fields": {
+      "value": "test",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 392,
+      "updated_at": "2023-05-02T08:26:09.694Z"
+    }
+  },
+  {
+    "model": "api_app.pluginconfig",
+    "pk": 411,
+    "fields": {
+      "value": "test",
+      "for_organization": false,
+      "owner": 1,
+      "parameter": 397,
+      "updated_at": "2023-05-02T08:26:09.700Z"
     }
   }
 ]

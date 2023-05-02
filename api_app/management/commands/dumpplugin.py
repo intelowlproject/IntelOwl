@@ -143,7 +143,9 @@ values = {2}
         )
 
     def _save_file(self, name_file, content, app):
-        with open("api_app" / PosixPath(app) / "migrations" / name_file, "w") as f:
+        with open(
+            "api_app" / PosixPath(app) / "migrations" / name_file, "w", encoding="utf-8"
+        ) as f:
             f.write(content)
 
     def handle(self, *args, **options):

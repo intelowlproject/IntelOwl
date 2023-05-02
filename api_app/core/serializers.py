@@ -145,9 +145,9 @@ class AbstractListConfigSerializer(rfs.ListSerializer):
             else:
                 details = (
                     f"{', '.join(parameter_required_not_configured)} "
-                    f"secret"
+                    "secret"
                     f"{'' if len(parameter_required_not_configured) == 1 else 's'}"
-                    f" not set;"
+                    " not set;"
                     f" ({total_parameter - len(parameter_required_not_configured)} "
                     f"of {total_parameter} satisfied)"
                 )

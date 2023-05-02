@@ -114,6 +114,16 @@ class Parameter(models.Model):
         blank=True,
     )
 
+    class Meta:
+        unique_together = [
+            ("name", "analyzer_config", "connector_config", "visualizer_config")
+        ]
+        indexes = [
+            models.Index(fields=["analyzer_config", "is_secret"]),
+            models.Index(fields=["connector_config", "is_secret"]),
+            models.Index(fields=["visualizer_config", "is_secret"]),
+        ]
+
     def clean_config(self):
         if (
             bool(self.analyzer_config)
@@ -129,16 +139,6 @@ class Parameter(models.Model):
     def clean(self) -> None:
         super().clean()
         self.clean_config()
-
-    class Meta:
-        unique_together = [
-            ("name", "analyzer_config", "connector_config", "visualizer_config")
-        ]
-        indexes = [
-            models.Index(fields=["analyzer_config", "is_secret"]),
-            models.Index(fields=["connector_config", "is_secret"]),
-            models.Index(fields=["visualizer_config", "is_secret"]),
-        ]
 
     @cached_property
     def config(self):

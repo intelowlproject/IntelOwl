@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     "rest_email_auth",
     "drf_recaptcha",
     # performance debugging
-    "silk"
+    "silk",
 ]
 
 

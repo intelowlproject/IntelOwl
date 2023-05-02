@@ -15,7 +15,7 @@ class VisualizerReport(AbstractReport):
     config = models.ForeignKey(
         "VisualizerConfig", related_name="reports", null=False, on_delete=models.CASCADE
     )
-    report = models.JSONField(default=dict, validators=[validate_report])
+    report = models.JSONField(default=list, validators=[validate_report])
 
 
 class VisualizerConfig(AbstractConfig):

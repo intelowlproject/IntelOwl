@@ -171,7 +171,10 @@ class Parameter(models.Model):
             try:
                 return qs.get(owner__isnull=True)
             except PluginConfig.DoesNotExist:
-                raise RuntimeError(f"Unable to find a valid value for parameter {self.name} for configuration {self.config.name}")
+                raise RuntimeError(
+                    "Unable to find a valid value for parameter"
+                    f" {self.name} for configuration {self.config.name}"
+                )
 
 
 class AbstractConfig(models.Model):

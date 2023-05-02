@@ -7,8 +7,10 @@ from celery.canvas import Signature
 from django.conf import settings
 from django.core.exceptions import ValidationError
 
+from api_app.analyzers_manager.models import AnalyzerConfig
+from api_app.connectors_manager.models import ConnectorConfig
 from api_app.core.classes import Plugin
-from api_app.core.models import AbstractConfig
+from api_app.core.models import AbstractConfig, Parameter
 from api_app.models import Job, PluginConfig
 from api_app.visualizers_manager.models import VisualizerConfig
 from certego_saas.apps.organization.membership import Membership
@@ -85,7 +87,7 @@ class AbstractConfigTestCase(CustomTestCase):
         muc.full_clean()
         self.assertEqual(muc.queue, "default")
 
-    def test_get_verification_no_secrets(self):
+    def test_is_configured_no_secrets(self):
         muc, _ = VisualizerConfig.objects.get_or_create(
             name="test",
             description="test",
@@ -93,13 +95,11 @@ class AbstractConfigTestCase(CustomTestCase):
             disabled=False,
             config={"soft_time_limit": 100, "queue": "default"},
         )
-        result = muc.get_verification()
-        self.assertEqual(result["configured"], True)
-        self.assertIn("details", result)
-        self.assertCountEqual(result["missing_secrets"], [])
+        result = muc._is_configured()
+        self.assertTrue(result)
         muc.delete()
 
-    def test_get_verification_secret_not_present(self):
+    def test_is_configured_secret_not_present(self):
         muc, _ = VisualizerConfig.objects.get_or_create(
             name="test",
             description="test",
@@ -115,13 +115,19 @@ class AbstractConfigTestCase(CustomTestCase):
                 }
             },
         )
-        result = muc.get_verification()
-        self.assertEqual(result["configured"], False)
-        self.assertIn("details", result)
-        self.assertCountEqual(result["missing_secrets"], ["test"])
+        param = Parameter.objects.create(
+            visualizer_config=muc,
+            name="test",
+            type="str",
+            is_secret=True,
+            required=True,
+        )
+        result = muc._is_configured()
+        self.assertFalse(result)
+        param.delete()
         muc.delete()
 
-    def test_get_verification_secret_not_present_not_required(self):
+    def test_is_configured_secret_not_present_not_required(self):
         muc, _ = VisualizerConfig.objects.get_or_create(
             name="test",
             description="test",
@@ -137,12 +143,20 @@ class AbstractConfigTestCase(CustomTestCase):
                 }
             },
         )
-        result = muc.get_verification()
-        self.assertEqual(result["configured"], True)
-        self.assertCountEqual(result["missing_secrets"], ["test"])
-        muc.delete()
+        param = Parameter.objects.create(
+            visualizer_config=muc,
+            name="test",
+            type="str",
+            is_secret=True,
+            required=False,
+        )
 
-    def test_get_verification_secret_present(self):
+        result = muc._is_configured()
+        param.delete()
+        muc.delete()
+        self.assertFalse(result)
+
+    def test_is_configured_secret_present(self):
         muc, _ = VisualizerConfig.objects.get_or_create(
             name="test",
             description="test",
@@ -158,18 +172,20 @@ class AbstractConfigTestCase(CustomTestCase):
                 }
             },
         )
+        param = Parameter.objects.create(
+            visualizer_config=muc,
+            name="test",
+            type="str",
+            is_secret=True,
+            required=True,
+        )
+
         pc, _ = PluginConfig.objects.get_or_create(
-            attribute="test",
-            owner=self.user,
-            organization=None,
-            value="test",
-            plugin_name="test",
-            type="3",
-            config_type="2",
+            owner=self.user, for_organization=False, parameter=param, value="test"
         )
         result = muc.get_verification()
-        self.assertEqual(result["configured"], True)
-        self.assertCountEqual(result["missing_secrets"], [])
+        self.assertTrue(result)
+        param.delete()
         pc.delete()
         muc.delete()
 
@@ -189,18 +205,19 @@ class AbstractConfigTestCase(CustomTestCase):
                 }
             },
         )
+        param = Parameter.objects.create(
+            visualizer_config=muc,
+            name="test",
+            type="str",
+            is_secret=True,
+            required=True,
+        )
         pc, _ = PluginConfig.objects.get_or_create(
-            attribute="test",
-            owner=self.superuser,
-            organization=None,
-            value="test",
-            plugin_name="test",
-            type="3",
-            config_type="2",
+            owner=self.superuser, for_organization=False, value="test", parameter=param
         )
         result = muc.get_verification(self.user)
-        self.assertEqual(result["configured"], False)
-        self.assertCountEqual(result["missing_secrets"], ["test"])
+        self.assertFalse(result)
+        param.delete()
         pc.delete()
         muc.delete()
 
@@ -281,128 +298,110 @@ class AbstractConfigTestCase(CustomTestCase):
         muc.delete()
         job.delete()
 
-    def test_read_plugin_config_only_user(self):
-        muc, _ = VisualizerConfig.objects.get_or_create(
+
+class ParameterTestCase(CustomTestCase):
+    def test_clean(self):
+        ac, _ = AnalyzerConfig.objects.get_or_create(
             name="test",
             description="test",
             python_module="yara.Yara",
             disabled=False,
             config={"soft_time_limit": 100, "queue": "default"},
-            secrets={
-                "test": {
-                    "env_var_key": "TEST_NOT_PRESENT_KEY",
-                    "type": "str",
-                    "description": "env_var_key",
-                    "required": True,
-                }
-            },
         )
-        pc, _ = PluginConfig.objects.get_or_create(
-            attribute="test",
-            owner=self.user,
-            organization=None,
-            value="test",
-            plugin_name="test",
-            type="3",
-            config_type="2",
-        )
-        config = muc.read_secrets(self.user)
-        self.assertIn("test", config.keys())
-        self.assertEqual(1, len(config.keys()))
-        self.assertEqual("test", config["test"])
-        muc.delete()
-        pc.delete()
-
-    def test_read_plugin_config_only_org(self):
-        muc, _ = VisualizerConfig.objects.get_or_create(
+        cc, _ = ConnectorConfig.objects.get_or_create(
             name="test",
             description="test",
             python_module="yara.Yara",
             disabled=False,
             config={"soft_time_limit": 100, "queue": "default"},
-            secrets={
-                "test": {
-                    "env_var_key": "TEST_NOT_PRESENT_KEY",
-                    "type": "str",
-                    "description": "env_var_key",
-                    "required": True,
-                }
-            },
         )
-        org = Organization.objects.create(name="test_org")
-
-        m = Membership.objects.create(
-            user=self.user,
-            organization=org,
-        )
-
-        pc, _ = PluginConfig.objects.get_or_create(
-            attribute="test",
-            owner=self.user,
-            organization=org,
-            value="testOrg",
-            plugin_name="test",
-            type="3",
-            config_type="2",
-        )
-        config = muc.read_secrets(self.user)
-        self.assertIn("test", config.keys())
-        self.assertEqual(1, len(config.keys()))
-        self.assertEqual("testOrg", config["test"])
-        pc.delete()
-        muc.delete()
-        m.delete()
-        org.delete()
-
-    def test_read_plugin_config_user_and_org(self):
-        muc, _ = VisualizerConfig.objects.get_or_create(
+        vc, _ = VisualizerConfig.objects.get_or_create(
             name="test",
             description="test",
             python_module="yara.Yara",
             disabled=False,
             config={"soft_time_limit": 100, "queue": "default"},
-            secrets={
-                "test": {
-                    "env_var_key": "TEST_NOT_PRESENT_KEY",
-                    "type": "str",
-                    "description": "env_var_key",
-                    "required": True,
-                }
-            },
         )
-        org = Organization.objects.create(name="test_org")
+        par = Parameter(
+            name="test",
+            analyzer_config=ac,
+            connector_config=cc,
+            visualizer_config=vc,
+            is_secret=False,
+            required=False,
+            type="str",
+        )
+        with self.assertRaises(ValidationError):
+            par.full_clean()
 
-        m = Membership.objects.create(
-            user=self.user,
-            organization=org,
+        par = Parameter(
+            name="test",
+            analyzer_config=ac,
+            connector_config=cc,
+            is_secret=False,
+            required=False,
+            type="str",
         )
+        with self.assertRaises(ValidationError):
+            par.full_clean()
 
-        pc, _ = PluginConfig.objects.get_or_create(
-            attribute="test",
-            owner=self.user,
-            organization=org,
-            value="testOrg",
-            plugin_name="test",
-            type="3",
-            config_type="2",
+        par = Parameter(
+            name="test",
+            analyzer_config=ac,
+            visualizer_config=cc,
+            is_secret=False,
+            required=False,
+            type="str",
         )
-        pc2, _ = PluginConfig.objects.get_or_create(
-            attribute="test",
-            owner=self.user,
-            organization=None,
-            value="testUser",
-            plugin_name="test",
-            type="3",
-            config_type="2",
-        )
+        with self.assertRaises(ValidationError):
+            par.full_clean()
 
-        config = muc.read_secrets(self.user)
-        self.assertIn("test", config.keys())
-        self.assertEqual(1, len(config.keys()))
-        # user > org
-        self.assertEqual("testUser", config["test"])
-        pc.delete()
+        par = Parameter(
+            name="test",
+            visualizer_config=ac,
+            connector_config=cc,
+            is_secret=False,
+            required=False,
+            type="str",
+        )
+        with self.assertRaises(ValidationError):
+            par.full_clean()
+
+        par = Parameter(
+            name="test",
+            connector_config=cc,
+            is_secret=False,
+            required=False,
+            type="str",
+        )
+        par.full_clean()
+
+    def test_get_first_value(self):
+        par = Parameter(
+            name="test",
+            analyzer_config=AnalyzerConfig.objects.first(),
+            is_secret=False,
+            required=False,
+            type="str",
+        )
+        with self.assertRaises(RuntimeError):
+            par.get_first_value(self.user)
+
+        pc1 = PluginConfig.objects.create(
+            value="testdefault", owner=None, for_organization=False, parameter=par
+        )
+        self.assertEqual("testdefault", par.get_first_value(self.user))
+
+        pc2 = PluginConfig.objects.create(
+            value="testorg", owner=self.superuser, for_organization=True, parameter=par
+        )
+        self.assertEqual("testorg", par.get_first_value(self.user))
+
+        pc3 = PluginConfig.objects.create(
+            value="testdefault", owner=self.user, for_organization=True, parameter=par
+        )
+        self.assertEqual("testdefault", par.get_first_value(self.user))
+
+        pc1.delete()
         pc2.delete()
-        muc.delete()
-        m.delete()
-        org.delete()
+        pc3.delete()

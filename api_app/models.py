@@ -22,6 +22,7 @@ from api_app.choices import TLP, ObservableClassification, Status
 from api_app.core.models import AbstractConfig, AbstractReport, Parameter
 from api_app.helpers import calculate_sha1, calculate_sha256, get_now
 from api_app.validators import validate_runtime_configuration
+from certego_saas.apps.organization.organization import Organization
 from certego_saas.models import User
 from intel_owl import tasks
 from intel_owl.celery import DEFAULT_QUEUE, get_queue_name
@@ -487,6 +488,12 @@ class PluginConfig(models.Model):
                 ]
             ),
         ]
+
+    @property
+    def organization(self) -> Optional[Organization]:
+        if not self.for_organization:
+            return None
+        return self.owner.membership.organization
 
     @classmethod
     def visible_for_user(cls, user: User = None) -> QuerySet:

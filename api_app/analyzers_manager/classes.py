@@ -11,6 +11,7 @@ import requests
 from django.conf import settings
 
 from api_app.core.classes import Plugin
+from certego_saas.apps.user.models import User
 from tests.mock_utils import MockUpResponse, if_mock_connections, patch
 
 from .constants import HashChoices, ObservableTypes, TypeChoices
@@ -459,7 +460,7 @@ class DockerBasedAnalyzer(BaseAnalyzerMixin, metaclass=ABCMeta):
             self.start = mock_fn(self.start)
 
     @classmethod
-    def health_check(cls, analyzer_name: str) -> bool:
+    def health_check(cls, analyzer_name: str, user: User) -> bool:
         """
         basic health check: if instance is up or not (timeout - 10s)
         """

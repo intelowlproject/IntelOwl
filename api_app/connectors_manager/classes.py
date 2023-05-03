@@ -8,7 +8,9 @@ import requests
 from django.conf import settings
 
 from api_app.core.classes import Plugin
+from certego_saas.apps.user.models import User
 
+from ..core.models import Parameter
 from .exceptions import ConnectorConfigurationException, ConnectorRunException
 from .models import ConnectorConfig, ConnectorReport
 
@@ -80,7 +82,7 @@ class Connector(Plugin, metaclass=abc.ABCMeta):
         logger.info(f"FINISHED connector: {self.__repr__()}")
 
     @classmethod
-    def health_check(cls, connector_name: str) -> Optional[bool]:
+    def health_check(cls, connector_name: str, user: User) -> Optional[bool]:
         """
         basic health check: if instance is up or not (timeout - 10s)
         """
@@ -89,21 +91,27 @@ class Connector(Plugin, metaclass=abc.ABCMeta):
             raise ConnectorRunException(f"Unable to find connector {connector_name}")
         for cc in ccs:
             cc: ConnectorConfig
-            if cc.is_runnable():
-                url = cc.read_secrets().get("url_key_name", None)
-                if url and url.startswith("http"):
-                    if settings.STAGE_CI:
-                        return True
+            if cc.is_runnable(user):
+                param: Parameter = cc.parameters.filter(name__startswith="url").first()
+                if param:
                     try:
-                        requests.head(url, timeout=10)
-                    except requests.exceptions.ConnectionError:
-                        health_status = False
-                    except requests.exceptions.Timeout:
-                        health_status = False
+                        url = param.get_first_value(user)
+                    except RuntimeError:
+                        break
                     else:
-                        health_status = True
+                        if url.startswith("http"):
+                            if settings.STAGE_CI:
+                                return True
+                            try:
+                                requests.head(url, timeout=10)
+                            except requests.exceptions.ConnectionError:
+                                health_status = False
+                            except requests.exceptions.Timeout:
+                                health_status = False
+                            else:
+                                health_status = True
 
-                    return health_status
+                            return health_status
         raise ConnectorRunException(
             f"Unable to find configured connector {connector_name}"
         )

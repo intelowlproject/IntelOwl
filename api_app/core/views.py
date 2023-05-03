@@ -150,7 +150,7 @@ class AbstractConfigAPI(viewsets.ReadOnlyModelViewSet, metaclass=ABCMeta):
             if not hasattr(class_, "health_check") or not callable(class_.health_check):
                 raise NotImplementedError()
             try:
-                health_status = class_.health_check(obj.name)
+                health_status = class_.health_check(obj.name, request.user)
             except Exception as e:
                 raise ValidationError({"detail": str(e)})
         except NotImplementedError:

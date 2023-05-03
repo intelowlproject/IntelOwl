@@ -276,6 +276,7 @@ class VisualizerTestCase(CustomTestCase):
             for config in VisualizerConfig.objects.filter(
                 python_module=subclass.python_module
             ):
+                job.visualizers_to_execute.set([config])
                 timeout_seconds = config.soft_time_limit
                 timeout_seconds = min(timeout_seconds, 20)
                 print(

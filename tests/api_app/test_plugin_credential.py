@@ -15,28 +15,26 @@ custom_config_uri = reverse("plugin-config-list")
 class PluginCredentialTests(CustomAPITestCase):
     def setUp(self):
         super().setUp()
-        PluginConfig.objects.filter(
-            config_type=PluginConfig.ConfigType.SECRET
-        ).all().delete()
+        PluginConfig.objects.filter(config_type="2").all().delete()
         (
             self.plugin_credential_plugin_credential,
             _,
         ) = PluginConfig.objects.get_or_create(
             **{
-                "type": PluginConfig.PluginType.ANALYZER,
+                "type": "1",
                 "plugin_name": "GoogleWebRisk",
                 "attribute": "api_key_name",
                 "value": "test",
-                "config_type": PluginConfig.ConfigType.SECRET,
+                "config_type": "2",
                 "owner": self.superuser,
             }
         )
 
         self.google_safe_browsing_payload = {
-            "type": PluginConfig.PluginType.ANALYZER,
+            "type": "1",
             "plugin_name": "GoogleSafebrowsing",
             "attribute": "api_key_name",
-            "config_type": PluginConfig.ConfigType.SECRET,
+            "config_type": "2",
         }
 
     def test_read_credential_superuser(self):
@@ -52,7 +50,7 @@ class PluginCredentialTests(CustomAPITestCase):
         self.assertEqual(len(data), 1, data)
         self.assertEqual(data[0]["plugin_name"], "GoogleWebRisk")
         self.assertEqual(data[0]["attribute"], "api_key_name")
-        self.assertEqual(data[0]["type"], PluginConfig.PluginType.ANALYZER)
+        self.assertEqual(data[0]["type"], "1")
 
     def test_create_credential_superuser(self):
         response = self.client.post(
@@ -67,10 +65,10 @@ class PluginCredentialTests(CustomAPITestCase):
 
         self.assertEqual(response.data["plugin_name"], "GoogleSafebrowsing")
         self.assertEqual(response.data["attribute"], "api_key_name")
-        self.assertEqual(response.data["type"], PluginConfig.PluginType.ANALYZER)
+        self.assertEqual(response.data["type"], "1")
 
         self.assertTrue(
-            PluginConfig.objects.filter(config_type=PluginConfig.ConfigType.SECRET)
+            PluginConfig.objects.filter(config_type="2")
             .filter(
                 **self.google_safe_browsing_payload,
                 value="test",

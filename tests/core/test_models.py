@@ -134,14 +134,6 @@ class AbstractConfigTestCase(CustomTestCase):
             python_module="yara.Yara",
             disabled=False,
             config={"soft_time_limit": 100, "queue": "default"},
-            secrets={
-                "test": {
-                    "env_var_key": "TEST_NOT_PRESENT_KEY",
-                    "type": "str",
-                    "description": "env_var_key",
-                    "required": False,
-                }
-            },
         )
         param = Parameter.objects.create(
             visualizer_config=muc,
@@ -163,14 +155,6 @@ class AbstractConfigTestCase(CustomTestCase):
             python_module="yara.Yara",
             disabled=False,
             config={"soft_time_limit": 100, "queue": "default"},
-            secrets={
-                "test": {
-                    "env_var_key": "TEST_NOT_PRESENT_KEY",
-                    "type": "str",
-                    "description": "env_var_key",
-                    "required": True,
-                }
-            },
         )
         param = Parameter.objects.create(
             visualizer_config=muc,
@@ -183,27 +167,19 @@ class AbstractConfigTestCase(CustomTestCase):
         pc, _ = PluginConfig.objects.get_or_create(
             owner=self.user, for_organization=False, parameter=param, value="test"
         )
-        result = muc.get_verification()
+        result = muc._is_configured()
         self.assertTrue(result)
         param.delete()
         pc.delete()
         muc.delete()
 
-    def test_get_verification_secret_present_not_user(self):
+    def test_is_configured__secret_present_not_user(self):
         muc, _ = VisualizerConfig.objects.get_or_create(
             name="test",
             description="test",
             python_module="yara.Yara",
             disabled=False,
             config={"soft_time_limit": 100, "queue": "default"},
-            secrets={
-                "test": {
-                    "env_var_key": "TEST_NOT_PRESENT_KEY",
-                    "type": "str",
-                    "description": "env_var_key",
-                    "required": True,
-                }
-            },
         )
         param = Parameter.objects.create(
             visualizer_config=muc,
@@ -215,7 +191,7 @@ class AbstractConfigTestCase(CustomTestCase):
         pc, _ = PluginConfig.objects.get_or_create(
             owner=self.superuser, for_organization=False, value="test", parameter=param
         )
-        result = muc.get_verification(self.user)
+        result = muc._is_configured(self.user)
         self.assertFalse(result)
         param.delete()
         pc.delete()
@@ -348,7 +324,7 @@ class ParameterTestCase(CustomTestCase):
         par = Parameter(
             name="test",
             analyzer_config=ac,
-            visualizer_config=cc,
+            visualizer_config=vc,
             is_secret=False,
             required=False,
             type="str",
@@ -358,7 +334,7 @@ class ParameterTestCase(CustomTestCase):
 
         par = Parameter(
             name="test",
-            visualizer_config=ac,
+            visualizer_config=vc,
             connector_config=cc,
             is_secret=False,
             required=False,
@@ -384,6 +360,8 @@ class ParameterTestCase(CustomTestCase):
             required=False,
             type="str",
         )
+        par.full_clean()
+        par.save()
         with self.assertRaises(RuntimeError):
             par.get_first_value(self.user)
 

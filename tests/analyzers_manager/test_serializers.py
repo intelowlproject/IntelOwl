@@ -15,8 +15,6 @@ class AnalyzerConfigSerializerTestCase(CustomTestCase):
             description="test",
             disabled=False,
             config={"soft_time_limit": 100, "queue": "default"},
-            params={},
-            secrets={},
             type="file",
         )
         acs = AnalyzerConfigSerializer(context={"request": MockUpRequest(self.user)})
@@ -34,7 +32,6 @@ class AnalyzerConfigSerializerTestCase(CustomTestCase):
             description="test",
             disabled=False,
             config={"soft_time_limit": 100, "queue": "default"},
-            params={},
             secrets={
                 "test": {
                     "env_var_key": "TEST_NOT_PRESENT_KEY",

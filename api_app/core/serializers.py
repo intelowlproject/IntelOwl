@@ -3,7 +3,6 @@
 
 import logging
 from collections import defaultdict
-from typing import List
 
 from django.db.models import OuterRef, Subquery
 from rest_framework import serializers as rfs
@@ -102,7 +101,6 @@ class AbstractListConfigSerializer(rfs.ListSerializer):
                 **{f"{self.child.Meta.model.snake_case_name}__pk__in": plugins}
             )
             .prefetch_related(self.child.Meta.model.snake_case_name)
-            .filter(is_secret=False)
             .annotate(
                 value_owner=subquery_owner,
                 value_default=subquery_default,
@@ -175,12 +173,6 @@ class AbstractConfigSerializer(rfs.ModelSerializer):
 
     class Meta:
         exclude = ["disabled_in_organizations"]
-
-    def validate_params(self, params: List[Parameter]):
-        return [param for param in params if not param.is_secret]
-
-    def validate_secrets(self, secrets: List[Parameter]):
-        return [secret for secret in secrets if secret.is_secret]
 
     def to_internal_value(self, data):
         raise NotImplementedError()

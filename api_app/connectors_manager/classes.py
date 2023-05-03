@@ -97,7 +97,7 @@ class Connector(Plugin, metaclass=abc.ABCMeta):
                     try:
                         plugin_config = param.get_first_value(user)
                     except RuntimeError:
-                        break
+                        return False
                     else:
                         url = plugin_config.value
                         if url.startswith("http"):

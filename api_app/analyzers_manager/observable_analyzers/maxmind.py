@@ -18,6 +18,7 @@ from api_app.analyzers_manager.exceptions import (
     AnalyzerConfigurationException,
     AnalyzerRunException,
 )
+from api_app.core.models import Parameter
 from api_app.models import PluginConfig
 from tests.mock_utils import if_mock_connections, patch
 
@@ -64,10 +65,9 @@ class Maxmind(classes.ObservableAnalyzer):
             python_module=cls.python_module, disabled=False
         ):
             for plugin in PluginConfig.objects.filter(
-                plugin_name=config.name,
-                type=PluginConfig.PluginType.ANALYZER,
-                config_type=PluginConfig.ConfigType.SECRET,
-                attribute="api_key_name",
+                param=Parameter.objects.get(
+                    analyzer_config=config, name="api_key_name", is_secret=True
+                ),
             ):
                 if plugin.value:
                     return plugin.value

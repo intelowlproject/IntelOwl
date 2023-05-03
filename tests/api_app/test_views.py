@@ -54,7 +54,7 @@ class PluginConfigViewSetTestCase(CustomAPITestCase):
         self.assertEqual(response.status_code, 200)
         content = response.json()
         first_item = content[0]
-        self.assertEqual(first_item["value"], '"supersecret"')
+        self.assertEqual(first_item["value"], "supersecret")
 
         # second personal item
         secret_owner = PluginConfig(
@@ -68,7 +68,7 @@ class PluginConfigViewSetTestCase(CustomAPITestCase):
         self.assertEqual(response.status_code, 200)
         content = response.json()
         second_item = content[1]
-        self.assertEqual(second_item["value"], '"supersecret_user_only"')
+        self.assertEqual(second_item["value"], "supersecret_user_only")
 
         # if a standard user who does not belong to any org tries to get a secret,
         # they should not find anything
@@ -92,7 +92,7 @@ class PluginConfigViewSetTestCase(CustomAPITestCase):
         self.assertEqual(response.status_code, 200)
         content = response.json()
         first_item = content[0]
-        self.assertEqual(first_item["value"], '"redacted"')
+        self.assertEqual(first_item["value"], "redacted")
         secret_owner.refresh_from_db()
         self.assertEqual(secret_owner.value, "supersecret_user_only")
 
@@ -108,7 +108,7 @@ class PluginConfigViewSetTestCase(CustomAPITestCase):
         self.assertEqual(response.status_code, 200)
         content = response.json()
         second_item = content[1]
-        self.assertEqual(second_item["value"], '"supersecret_low_privilege"')
+        self.assertEqual(second_item["value"], "supersecret_low_privilege")
         param2 = Parameter.objects.create(
             is_secret=True,
             name="api_key_name",
@@ -127,7 +127,7 @@ class PluginConfigViewSetTestCase(CustomAPITestCase):
         self.assertEqual(response.status_code, 200)
         content = response.json()
         third_item = content[2]
-        self.assertEqual(third_item["value"], '"supersecret_low_privilege_third"')
+        self.assertEqual(third_item["value"], "supersecret_low_privilege_third")
         param2.delete()
         param.delete()
 

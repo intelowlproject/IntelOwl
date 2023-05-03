@@ -201,7 +201,7 @@
     "model": "api_app.pluginconfig",
     "pk": 313,
     "fields": {
-      "value": "test",
+      "value": "user|pwd",
       "for_organization": false,
       "owner": 1,
       "parameter": 26,

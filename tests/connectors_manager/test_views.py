@@ -72,7 +72,9 @@ class ConnectorConfigAPITestCase(CustomAPITestCase):
     def test_health_check(self):
         connector: ConnectorConfig = ConnectorConfig.objects.get(name="YETI")
         self.assertTrue(connector.is_runnable())
-        self.assertIsNotNone(connector.read_secrets().get("url_key_name", None))
+        self.assertIsNotNone(
+            connector.parameters.get(name="url_key_name").get_first_value().value
+        )
         response = self.client.get(f"{self.URL}/{connector.name}/health_check")
         self.assertEqual(response.status_code, 403)
 

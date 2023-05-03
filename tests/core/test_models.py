@@ -95,7 +95,7 @@ class AbstractConfigTestCase(CustomTestCase):
             disabled=False,
             config={"soft_time_limit": 100, "queue": "default"},
         )
-        result = muc._is_configured()
+        result = muc._is_configured(self.user)
         self.assertTrue(result)
         muc.delete()
 
@@ -106,14 +106,6 @@ class AbstractConfigTestCase(CustomTestCase):
             python_module="yara.Yara",
             disabled=False,
             config={"soft_time_limit": 100, "queue": "default"},
-            secrets={
-                "test": {
-                    "env_var_key": "TEST_NOT_PRESENT_KEY",
-                    "type": "str",
-                    "description": "env_var_key",
-                    "required": True,
-                }
-            },
         )
         param = Parameter.objects.create(
             visualizer_config=muc,
@@ -122,7 +114,7 @@ class AbstractConfigTestCase(CustomTestCase):
             is_secret=True,
             required=True,
         )
-        result = muc._is_configured()
+        result = muc._is_configured(self.user)
         self.assertFalse(result)
         param.delete()
         muc.delete()
@@ -143,10 +135,10 @@ class AbstractConfigTestCase(CustomTestCase):
             required=False,
         )
 
-        result = muc._is_configured()
+        result = muc._is_configured(self.user)
         param.delete()
         muc.delete()
-        self.assertFalse(result)
+        self.assertTrue(result)
 
     def test_is_configured_secret_present(self):
         muc, _ = VisualizerConfig.objects.get_or_create(
@@ -167,7 +159,7 @@ class AbstractConfigTestCase(CustomTestCase):
         pc, _ = PluginConfig.objects.get_or_create(
             owner=self.user, for_organization=False, parameter=param, value="test"
         )
-        result = muc._is_configured()
+        result = muc._is_configured(self.user)
         self.assertTrue(result)
         param.delete()
         pc.delete()
@@ -205,7 +197,7 @@ class AbstractConfigTestCase(CustomTestCase):
             disabled=False,
             config={"soft_time_limit": 100, "queue": "default"},
         )
-        self.assertTrue(muc.is_runnable())
+        self.assertTrue(muc.is_runnable(self.user))
         muc.delete()
 
     def test_is_runnable_disabled(self):
@@ -216,7 +208,7 @@ class AbstractConfigTestCase(CustomTestCase):
             disabled=True,
             config={"soft_time_limit": 100, "queue": "default"},
         )
-        self.assertFalse(muc.is_runnable())
+        self.assertFalse(muc.is_runnable(self.user))
         muc.delete()
 
     def test_is_runnable_disabled_by_org(self):
@@ -368,18 +360,28 @@ class ParameterTestCase(CustomTestCase):
         pc1 = PluginConfig.objects.create(
             value="testdefault", owner=None, for_organization=False, parameter=par
         )
-        self.assertEqual("testdefault", par.get_first_value(self.user))
+        self.assertEqual("testdefault", par.get_first_value(self.user).value)
 
         pc2 = PluginConfig.objects.create(
             value="testorg", owner=self.superuser, for_organization=True, parameter=par
         )
-        self.assertEqual("testorg", par.get_first_value(self.user))
+
+        org = Organization.objects.create(name="test_org")
+        m1 = Membership.objects.create(
+            user=self.superuser, organization=org, is_owner=True
+        )
+        m2 = Membership.objects.create(
+            user=self.user,
+            organization=org,
+        )
+        self.assertEqual("testorg", par.get_first_value(self.user).value)
 
         pc3 = PluginConfig.objects.create(
-            value="testdefault", owner=self.user, for_organization=True, parameter=par
+            value="testowner", owner=self.user, for_organization=True, parameter=par
         )
-        self.assertEqual("testdefault", par.get_first_value(self.user))
-
+        self.assertEqual("testowner", par.get_first_value(self.user).value)
+        m1.delete()
+        m2.delete()
         pc1.delete()
         pc2.delete()
         pc3.delete()

@@ -121,7 +121,6 @@ class PluginConfigViewSetTestCase(CustomAPITestCase):
             for_organization=False,
             owner=self.standard_user,
             parameter=param2,
-            plugin_name="Auth0",
         )
         secret_owner.save()
         response = self.standard_user_client.get(self.URL, {}, format="json")

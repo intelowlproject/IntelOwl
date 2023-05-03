@@ -113,6 +113,7 @@ class PluginConfigViewSetTestCase(CustomAPITestCase):
             is_secret=True,
             name="api_key_name",
             analyzer_config=AnalyzerConfig.objects.get(name="Auth0"),
+            required=True,
         )
         # if there are 2 secrets for different services, the user should get them both
         secret_owner = PluginConfig(

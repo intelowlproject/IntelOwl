@@ -41,7 +41,6 @@ class PluginConfigViewSetTestCase(CustomAPITestCase):
         )
         # if the user is owner of an org, he should get the org secret
         pc = PluginConfig(
-            attribute="api_key_name",
             value="supersecret",
             for_organization=True,
             owner=self.user,
@@ -58,7 +57,6 @@ class PluginConfigViewSetTestCase(CustomAPITestCase):
 
         # second personal item
         secret_owner = PluginConfig(
-            attribute="api_key_name",
             value="supersecret_user_only",
             for_organization=False,
             owner=self.user,

@@ -848,10 +848,12 @@ class PluginConfigSerializer(rfs.ModelSerializer):
 
         def to_representation(self, value):
             result = super().to_representation(value)
-            return json.dumps(result)
+            if isinstance(result, (list, dict)):
+                return json.dumps(result)
+            return result
 
     type = rfs.ChoiceField(choices=["1", "2", "3"])  # retrocompatibility
-    config_type = rfs.ChoiceField(choices=["1", "3"])  # retrocompatibility
+    config_type = rfs.ChoiceField(choices=["1", "2"])  # retrocompatibility
     attribute = rfs.CharField()
     plugin_name = rfs.CharField()
     owner = rfs.HiddenField(default=rfs.CurrentUserDefault())

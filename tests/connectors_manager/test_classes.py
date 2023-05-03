@@ -25,7 +25,7 @@ class ConnectorTestCase(CustomTestCase):
                 return {}
 
         with self.assertRaises(ConnectorRunException):
-            MockUpConnector.health_check("test")
+            MockUpConnector.health_check("test", self.user)
 
         cc = ConnectorConfig.objects.create(
             name="test",
@@ -36,7 +36,7 @@ class ConnectorTestCase(CustomTestCase):
             maximum_tlp="CLEAR",
         )
         with self.assertRaises(ConnectorRunException):
-            MockUpConnector.health_check("test")
+            MockUpConnector.health_check("test", self.user)
         cc.disabled = False
         param = Parameter.objects.create(
             connector_config=cc,
@@ -47,14 +47,14 @@ class ConnectorTestCase(CustomTestCase):
         )
         cc.save()
         with self.assertRaises(ConnectorRunException):
-            MockUpConnector.health_check("test")
+            MockUpConnector.health_check("test", self.user)
         pc = PluginConfig.objects.create(
             value="https://intelowl.com",
             owner=self.user,
             parameter=param,
         )
         with patch("requests.head"):
-            result = MockUpConnector.health_check("test")
+            result = MockUpConnector.health_check("test", self.user)
         self.assertTrue(result)
         cc.delete()
         param.delete()

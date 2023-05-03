@@ -558,7 +558,7 @@ class PluginConfig(models.Model):
         # TODO retrocompatibility
         return self.config.plugin_type
 
-    @property
+    @cached_property
     def organization(self):
         if self.for_organization:
             return self.owner.membership.organization.name

@@ -41,15 +41,8 @@ class ParameterCompleteSerializer(rfs.ModelSerializer):
 class ParameterSerializer(rfs.ModelSerializer):
     class Meta:
         model = Parameter
-        fields = ["value", "name", "type", "description"]
+        fields = ["name", "type", "description", "required"]
         list_serializer_class = ParamListSerializer
-
-    value = rfs.SerializerMethodField(read_only=True)
-
-    def get_value(self, instance: Parameter):
-        if "value" not in self.context:
-            return instance.get_first_value(self.context["request"].user).value
-        return self.context["value"]
 
 
 class AbstractListConfigSerializer(rfs.ListSerializer):
@@ -120,6 +113,7 @@ class AbstractListConfigSerializer(rfs.ListSerializer):
         for plugin in plugins:
             plugin_representation = self.child.to_representation(plugin)
             plugin_representation["params"] = {}
+            plugin_representation["secrets"] = {}
             total_parameter = len(parsed[plugin])
             parameter_required_not_configured = []
             for param in parsed[plugin]:
@@ -132,11 +126,15 @@ class AbstractListConfigSerializer(rfs.ListSerializer):
                 )
                 if param.required and not bool(value):
                     parameter_required_not_configured.append(param.name)
-                param_representation = ParameterSerializer(
-                    param, context={"value": value}
-                ).data
+                param_representation = ParameterSerializer(param).data
+                if param.is_secret and value == param.value_organization:
+                    value = "redacted"
+                param_representation["value"] = value
                 param_representation.pop("name")
-                plugin_representation["params"][param.name] = param_representation
+                if param.is_secret:
+                    plugin_representation["secrets"][param.name] = param_representation
+                else:
+                    plugin_representation["params"][param.name] = param_representation
             if not parameter_required_not_configured:
                 configured = True
                 details = "Ready to use!"

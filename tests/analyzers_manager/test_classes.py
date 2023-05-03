@@ -203,6 +203,7 @@ class ObservableAnalyzerTestCase(CustomTestCase):
                     job = Job.objects.get(
                         observable_classification=observable_supported
                     )
+                    job.analyzers_to_execute.set([config])
                     sub = subclass(
                         config, job.pk, runtime_configuration={}, task_id=uuid()
                     )

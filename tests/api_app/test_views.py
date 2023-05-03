@@ -38,6 +38,7 @@ class PluginConfigViewSetTestCase(CustomAPITestCase):
             name="api_key_name",
             analyzer_config=AnalyzerConfig.objects.get(name="AbuseIPDB"),
             required=True,
+            type="str",
         )
         # if the user is owner of an org, he should get the org secret
         pc = PluginConfig(

@@ -268,6 +268,7 @@ class VisualizerTestCase(CustomTestCase):
             observable_name="test.com",
             observable_classification="domain",
             status="reported_without_fails",
+            user=self.superuser,
         )
 
         subclasses = Visualizer.all_subclasses()

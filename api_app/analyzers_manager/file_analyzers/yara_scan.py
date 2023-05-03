@@ -371,9 +371,11 @@ class YaraScan(FileAnalyzer):
             for plugin in config.parameters.get(
                 name="private_repositories"
             ).values_for_user():
+                if not plugin.value:
+                    continue
                 owner = (
                     f"{plugin.organization.name}.{plugin.organization.owner}"
-                    if plugin.organization
+                    if plugin.for_organization
                     else plugin.owner.username
                 )
                 for url, ssh_key in plugin.value.items():

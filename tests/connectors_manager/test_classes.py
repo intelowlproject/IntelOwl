@@ -99,6 +99,7 @@ class ConnectorTestCase(CustomTestCase):
             observable_name="test.com",
             observable_classification="domain",
             status="reported_without_fails",
+            user=self.superuser,
         )
 
         subclasses = Connector.all_subclasses()

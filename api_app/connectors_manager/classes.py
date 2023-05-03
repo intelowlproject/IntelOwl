@@ -95,10 +95,11 @@ class Connector(Plugin, metaclass=abc.ABCMeta):
                 param: Parameter = cc.parameters.filter(name__startswith="url").first()
                 if param:
                     try:
-                        url = param.get_first_value(user)
+                        plugin_config = param.get_first_value(user)
                     except RuntimeError:
                         break
                     else:
+                        url = plugin_config.value
                         if url.startswith("http"):
                             if settings.STAGE_CI:
                                 return True

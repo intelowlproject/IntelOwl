@@ -149,30 +149,34 @@ class ObservableAnalyzerTestCase(CustomTestCase):
         self.assertEqual(oa.observable_classification, "domain")
         job.delete()
 
-    @staticmethod
-    def _create_jobs():
+    def _create_jobs(self):
         Job.objects.create(
+            user=self.superuser,
             observable_name="test.com",
             observable_classification="domain",
             status="reported_without_fails",
         )
         Job.objects.create(
+            user=self.superuser,
             observable_name="8.8.8.8",
             observable_classification="ip",
             status="reported_without_fails",
         )
         Job.objects.create(
+            user=self.superuser,
             observable_name="https://www.honeynet.org/projects/active/intel-owl/",
             observable_classification="url",
             status="reported_without_fails",
         )
         Job.objects.create(
+            user=self.superuser,
             observable_name="3edd95917241e9ef9bbfc805c2c5aff3",
             observable_classification="hash",
             status="reported_without_fails",
             md5="3edd95917241e9ef9bbfc805c2c5aff3",
         )
         Job.objects.create(
+            user=self.superuser,
             observable_name="test@intelowl.com",
             observable_classification="generic",
             status="reported_without_fails",

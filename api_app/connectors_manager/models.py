@@ -14,6 +14,9 @@ class ConnectorReport(AbstractReport):
         "ConnectorConfig", related_name="reports", null=False, on_delete=models.CASCADE
     )
 
+    class Meta:
+        unique_together = [("config", "job")]
+
 
 class ConnectorConfig(AbstractConfig):
     maximum_tlp = models.CharField(

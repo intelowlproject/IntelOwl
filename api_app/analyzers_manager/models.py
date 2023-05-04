@@ -27,6 +27,9 @@ class AnalyzerReport(AbstractReport):
         "AnalyzerConfig", related_name="reports", null=False, on_delete=models.CASCADE
     )
 
+    class Meta:
+        unique_together = [("config", "job")]
+
 
 class MimeTypes(models.TextChoices):
 

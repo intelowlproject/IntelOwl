@@ -100,17 +100,17 @@ class DNS(Visualizer):
                     )
                 )
 
-        levels = self.Level()
-        levels.add_level(
+        page = self.Page()
+        page.add_level(
             level=1,
             horizontal_list=self.HList(value=first_level_elements),
         )
-        levels.add_level(
+        page.add_level(
             level=2,
             horizontal_list=self.HList(value=second_level_elements),
         )
-        logger.debug(f"levels: {levels.to_dict()}")
-        return levels.to_dict()
+        logger.debug(f"levels: {page.to_dict()}")
+        return [page.to_dict()]
 
     @classmethod
     def _monkeypatch(cls):

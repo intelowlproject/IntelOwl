@@ -277,7 +277,7 @@ The visualizers python code could be not immediate, so a small digression on _ho
 Visualizers have as goal to create a data structure inside the `Report` that the frontend is able to parse and correctly _visualize_ on the page.
 To do so, some utility classes have been made:
 
-- `VisualizableLevel`: Each **level** corresponds to a line in the final frontend visualizations. Every level is made of a `VisualizableHorizontaList` 
+- `VisualizablePage`: A single page of the final report, made of different **levels**. Each level corresponds to a line in the final frontend visualizations. Every level is made of a `VisualizableHorizontaList` 
 - `VisualizableHorizontaList`: An horizontal list of visualizable elements that will be displayed as they are
 - `VisualizableVerticalList`: A vertical list made of a name, a title, and the list of elements.
 - `VisualizableBool`: The representation of a boolean value

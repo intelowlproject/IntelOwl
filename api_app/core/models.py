@@ -43,7 +43,6 @@ class AbstractReport(models.Model):
 
     class Meta:
         abstract = True
-        unique_together = [("config", "job")]
 
     @classmethod
     @property

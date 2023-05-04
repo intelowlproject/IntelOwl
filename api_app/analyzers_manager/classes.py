@@ -101,9 +101,8 @@ class BaseAnalyzerMixin(Plugin, metaclass=ABCMeta):
             result = 9223372036854775807
         return result
 
-    def after_run(self):
-        self.report.report = self._validate_result(self.report.report)
-        super().after_run()
+    def after_run_success(self, content):
+        return super().after_run_success(self._validate_result(self.report.report))
 
     @classmethod
     def update(cls) -> bool:

@@ -114,10 +114,10 @@ class AbstractListConfigSerializer(rfs.ListSerializer):
             )
         logger.debug(
             ", ".join(
-                list(
+                [
                     f"plugin {key} has {len(values)} parameters"
                     for key, values in parsed.items()
-                )
+                ]
             )
         )
         result = []

@@ -67,11 +67,6 @@ class AbstractReport(models.Model):
         secs = (self.end_time - self.start_time).total_seconds()
         return round(secs, 2)
 
-    def update_status(self, status: str, save=True):
-        self.status = status
-        if save:
-            self.save(update_fields=["status"])
-
     def append_error(self, err_msg: str, save=True):
         self.errors.append(err_msg)
         if save:

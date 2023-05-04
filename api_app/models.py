@@ -288,6 +288,11 @@ class Job(models.Model):
         if save:
             self.save(update_fields=["errors"])
 
+    def update_status(self, status: str, save=True):
+        self.status = status
+        if save:
+            self.save(update_fields=["status"])
+
     def get_analyzer_reports_stats(self) -> dict:
         aggregators = {
             s.lower(): models.Count("status", filter=models.Q(status=s))

@@ -152,7 +152,7 @@ class Parameter(models.Model):
     def get_first_value(self, user: User):
         from api_app.models import PluginConfig
 
-        # priority
+        # priority for value retrieved
         # 1 - Owner
         # 2 - Organization
         # 3 - Default

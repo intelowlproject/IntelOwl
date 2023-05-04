@@ -896,7 +896,7 @@ class PluginConfigSerializer(rfs.ModelSerializer):
         else:
             raise RuntimeError("Not configured")
         parameter = class_.objects.get(name=_plugin_name).parameters.get(
-            name=_attribute, is_secret=True if _config_type == "2" else False
+            name=_attribute, is_secret=_config_type == "2"
         )
         self.validate_value_type(_value, parameter)
         attrs["parameter"] = parameter

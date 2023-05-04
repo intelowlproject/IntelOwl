@@ -3,7 +3,7 @@
 from django.db import migrations
 
 
-def create_config(configs, type:str, Parameter,PluginConfig):
+def create_config(configs, _type:str, Parameter, PluginConfig):
     for config in configs:
         for param_name, param_values in config.params.items():
             param = Parameter(connector_config=config, name=param_name, type=param_values["type"], description=param_values["description"], is_secret=False, required=param_values.get("required", False))
@@ -17,7 +17,7 @@ def create_config(configs, type:str, Parameter,PluginConfig):
                     value=param_values["default"],
                     plugin_name=config.name,
                     attribute=param_name,
-                    type=type,
+                    type=_type,
                     config_type="1"
                 )
         for secret_name, secret_values in config.secrets.items():
@@ -32,7 +32,7 @@ def create_config(configs, type:str, Parameter,PluginConfig):
                     value=secret_values["default"],
                     plugin_name=config.name,
                     attribute=secret_name,
-                    type=type,
+                    type=_type,
                     config_type="2"
                 )
 

@@ -152,7 +152,6 @@ class AbstractListConfigSerializer(rfs.ListSerializer):
                 disabled = False
             else:
                 disabled = True
-            # plugin_representation["params"][param.name] = param.value
             plugin_representation["disabled"] = disabled
             plugin_representation["verification"] = {
                 "configured": configured,
